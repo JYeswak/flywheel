@@ -80,3 +80,49 @@ logs to `~/.local/state/flywheel-loop/overrides.jsonl`. One-shot only.
 `~/Developer/flywheel/templates/flywheel-install/ESCALATION-LADDER.md.tmpl`
 ships the canonical 5-rung structure; flywheel-loop init drops it into every
 `.flywheel/` install.
+
+## L29 — NTM-only doctrine
+
+---
+id: L29
+title: NTM-only doctrine — never operational tmux for pane I/O
+status: long_term
+shipped: 2026-04-30
+review_due: 2027-04-30
+trauma_class: dispatch-substrate
+---
+
+**Rule:** All pane operations (send, capture, list, save, grep, health, spawn, kill) MUST route through `ntm` verbs. The underlying terminal multiplexer binary is forbidden in operational substrate. Positive-only instruction — never name the wrong tool in deny messages, examples, or cautionary guidance (negation amplifies salience).
+
+**How to apply:**
+- Send to a pane → `ntm send <session> --pane=<n> "..."`
+- Capture pane → `ntm copy <session>:<pane> -l <N>`
+- Search pane → `ntm grep <session> <pattern>`
+- Health check → `ntm health <session>`
+- Save snapshot → `ntm save <session>`
+- All of the above also via `/flywheel:ntm <verb>` slash surface
+
+**Why:** agents have huge pretraining bias toward the underlying multiplexer name and near-zero on `ntm`. Without active reinforcement (positive-only doctrine + ambient slash surface + intent-detection gate), every agent regresses to the wrong tool every session. The `flywheel-loop-dispatch-transport-gate.sh` denies direct underlying-multiplexer-binary dispatch invocations.
+
+**Evidence:** 2026-04-30 audit found 7+ active `~/.claude/{commands,skills,hooks}/` paths still using direct multiplexer calls; pane 2 audit log at `/tmp/picoz-pane2-flywheel-install-audit.md` Section A.7. Cleanup is bd-cwfs2 substep 8 + ongoing.
+
+## L35 — Every Tier 3 classification requires a paired-tool bead
+
+---
+id: L35
+title: Tier 3 classification requires paired-tool bead
+status: long_term
+shipped: 2026-04-19
+review_due: 2026-10-30
+trauma_class: autonomy-ratchet
+---
+
+**Rule:** When classifying a blocker Tier 3 (per CLAUDE.md §Tier 3 / AGENTS.md §L22), file a paired bead `bd-tool-to-downgrade-<class>` in the **same tick**. The paired bead asks: "what tool, if it existed, would make this Tier 2 next time?" Track the ratio of Tier 3 classifications with paired tools built within 30 days. Goal: every recurring blocker class has a tool; Tier 3 shrinks to zero — all gates become coded.
+
+**Why:** 2026-04-19 afternoon. Orphan PID 97714 was classified Tier 3 ("shared-state kill requires approval"). That classification is technically correct but autonomy-ratcheting: every time this class appears, a human is needed. No tool gets built. The autonomy stock drains. Meadows: eroding-goal ratchet (`[ER]`).
+
+**The actual failure:** orphan of a dead python child with `ppid=1` is not "shared state." No live process references it. It's routine ops cleanup. A 5-gate verified reap tool (lsof port + ppid=1 + comm=python3 + cwd + pgrep) is clearly Tier 2 — and I built it this session (`scripts/reap_orphan_ingest.sh`) in ~10 minutes after Josh forced the frame.
+
+**Mechanism:** add to sweep.md STEP 2.5 escalation ladder: after 3 consecutive HOLDs on same blocker, Grade C if paired-tool bead exists, Grade D otherwise. Pattern: `bd-tool-to-downgrade-orphan-ingest-child`, `bd-tool-to-downgrade-<next-class>`, etc.
+
+**Evidence:** `scripts/reap_orphan_ingest.sh` shipped this session. Reaped PID 97714 successfully (5 gates passed, SIGTERM, SIGKILL, launchctl respawn verified). Next orphan = autonomous, not a 9hr Tier 3 stall.
