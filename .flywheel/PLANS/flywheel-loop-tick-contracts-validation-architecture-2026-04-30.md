@@ -974,7 +974,171 @@ the command becomes well-evidenced. See session receipt at
 
 ---
 
-**END OF DRAFT v0.3.** Hand-off to flywheel pane 1 + skillos pane 1 for review.
+---
+
+## 20. Full codex parity contract — first-class peer architecture
+
+> **Doctrine:** Codex panes are first-class peers to Claude Code panes
+> (per `~/.claude/references/claude-md-codex-parity.md` G55 directive,
+> 2026-04-27). The flywheel tick architecture MUST honor this — substrate
+> shared, invocation surfaces documented per-harness, no second-class
+> citizenship.
+
+### 20.1 Validated state of parity (2026-05-01, K=10 socraticode + 3 primary sources)
+
+Earlier drafts of this plan misframed codex tick handling as a "gap."
+That was wrong. Direct read of `~/.codex/AGENTS.md` lines 113-153 shows
+codex tick parity is **architecturally complete at the substrate layer**.
+What differs is invocation surface only.
+
+**Shared substrate (identical for both harnesses):**
+
+| Component | Path | Used by both |
+|---|---|---|
+| Tick logic binary | `~/.claude/skills/.flywheel/bin/flywheel-loop` | YES |
+| Tick contract source | `~/.claude/skills/.flywheel/LOOP.md` | YES |
+| Receipt schema (v2 JSON) | `<repo>/.flywheel/last_closeout_receipt.json` | YES |
+| Receipt validator | `flywheel-loop validate-receipt` | YES |
+| Doctor | `flywheel-loop doctor --repo <path>` | YES |
+| Repo state files | `<repo>/.flywheel/{MISSION,GOAL,STATE}.md` | YES |
+| Substrate registry | `~/.local/state/flywheel/substrate-registry.jsonl` | YES |
+| Fuckup-log | `~/.local/state/flywheel/fuckup-log.jsonl` | YES |
+| Skills library | `~/.claude/skills/` (live) + `~/.codex/skills/` (JSM-managed copy) | YES (different paths, same content) |
+
+**Invocation surfaces (different per harness, both first-class):**
+
+| Need | Claude pane | Codex pane |
+|---|---|---|
+| Joshua sends `/loop` | Resolves `/flywheel:tick` slash-command | Reads `~/.codex/AGENTS.md` §2.5, runs binary directly |
+| Manual tick | `/flywheel:tick` or `/flywheel:loop start` | `flywheel-loop tick --repo "$PWD"` |
+| Manual doctor | `/flywheel:status` (wraps doctor) | `flywheel-loop doctor --repo "$PWD"` |
+| Manual receipt validate | `/flywheel:tick` validates inline | `flywheel-loop validate-receipt --repo "$PWD" --file ...` |
+| Cadence trigger (5m/30m) | Native `/loop` skill (harness feature) | External (NTM dispatch OR `/flywheel:cron` launchd job sending tmux send-keys) |
+
+### 20.2 Tick command surface — both harnesses MUST be documented
+
+Every flywheel command (`/flywheel:tick`, `/flywheel:worker-tick`,
+`/flywheel:adopt`, `/flywheel:loop`, `/flywheel:cron`) ships with a
+**`## Codex equivalent` section** in its `.md` skill file (Claude
+slash-command) AND a parallel mention in `~/.codex/AGENTS.md`.
+
+Template — every flywheel command must include:
+
+```markdown
+## Codex equivalent
+
+Codex panes invoke this contract via:
+
+\`\`\`bash
+<exact bash command codex agents should run>
+\`\`\`
+
+The semantic contract is identical (same binary, same receipt,
+same substrate). What differs is only the activation surface.
+
+For activation cadence in codex panes, use one of:
+1. NTM dispatch from a Claude orchestrator pane (preferred)
+2. `/flywheel:cron register` launchd job that sends tmux send-keys
+   to the codex pane (when no Claude orchestrator)
+3. Manual invocation by the codex agent in response to Joshua's
+   `/loop` directive (agent reads AGENTS.md §2.5 contract)
+```
+
+### 20.3 Worker-tick parity
+
+Worker-tick (Phase B) auto-detects pane type from `tmux pane_title`:
+
+```
+*__cc_*  → Claude worker → /flywheel:worker-tick slash invocation
+*__cod_* → Codex worker  → flywheel-loop tick --repo $PWD --worker-mode
+*__gmi_* → Gemini worker → flywheel-loop tick --repo $PWD --worker-mode
+                            (treated as codex-class for invocation)
+```
+
+The 9 worker-class checks (§3) are harness-agnostic — they read git,
+tool-call logs, scrollback. Codex tool-call logs live at
+`~/.codex/cache/...` (TODO: confirm exact path during Phase B build).
+Claude tool-call logs are accessible via the harness.
+
+### 20.4 Codex-side adoptions of new commands
+
+When `/flywheel:adopt`, `/flywheel:cron`, `/flywheel:loop` ship in
+Phase A/A.5/B/C, each MUST also:
+
+1. **Update `~/.codex/AGENTS.md`** with the codex-side bash invocation
+   contract (mirror of the Claude slash-command behavior).
+2. **Update `~/.claude/skills/.flywheel/INSTALL.md`** (or equivalent
+   wrangler-pattern install doc) with parallel Claude AND Codex
+   sub-sections.
+3. **Run `validate-wrangler-pattern.sh`** on the skill directory to
+   confirm parity invariants intact.
+4. **Run `flywheel doctor`** to verify the `=== codex pane health ===`
+   section reports green (no parity drift, no claude-only MCPs the
+   command relies on, etc.)
+
+### 20.5 The five-invariant check applied to the tick architecture
+
+Per `~/.claude/references/claude-md-codex-parity.md`:
+
+| Invariant | Status |
+|---|---|
+| 1. Skills target both harnesses | ✅ via JSM-managed `~/.codex/skills/` (376 entries, last refreshed 2026-04-23 — JSM cron handles refresh cadence) |
+| 2. MCP wiring covers both clients | N/A for tick (no MCP); applies to skillos integration in Phase C (jsm outcome events) |
+| 3. Doctor invariants are harness-aware | ✅ `flywheel-loop doctor` already includes codex-pane-health section (per AGENTS.md); tick contracts inherit |
+| 4. Bead descriptions name affected harness | NEW: every worker-tick fuckup-log row MUST include `harness: claude\|codex\|gemini` field |
+| 5. STATE handoffs document codex state | ✅ already required by repo-local `.flywheel/STATE.md` template; tick receipts inherit |
+
+### 20.6 Forbidden anti-patterns (per parity doctrine line 50-55)
+
+- ❌ "Claude tick works, codex tick will figure it out."
+- ❌ Worker-tick without naming affected harness in fuckup-log entries.
+- ❌ Skill INSTALL.md that only documents Claude wiring.
+- ❌ Doctor sections that don't distinguish per-harness failure modes.
+- ❌ Treating codex-pane-tick failures as lower priority than Claude-pane-tick failures.
+- ❌ **Dispatching `--agent=codex` workers without inlining what Claude's
+  hooks would auto-surface** (codex has no hook layer — must inline
+  the equivalent context in the dispatch packet body).
+
+The last anti-pattern is load-bearing for tick contracts: when a Claude
+pane runs `/flywheel:tick`, the harness auto-surfaces hook context
+(claude-md-flywheel doctrine, override checks, etc.). When a codex
+pane runs the same tick, it has none of that auto-context. The codex
+tick prompt MUST inline the equivalent surface.
+
+### 20.7 Skillos integration — parity at the data layer
+
+Skillos `jsm outcome` events (Phase C) MUST tag harness:
+
+```bash
+# Claude worker reports:
+jsm outcome --skill=socraticode --bead=bd-XXX --verdict=TRUE_BUG --harness=claude
+
+# Codex worker reports same outcome:
+jsm outcome --skill=socraticode --bead=bd-XXX --verdict=TRUE_BUG --harness=codex
+```
+
+Bandit posterior_means partition by harness so we can detect skill
+drift between harnesses (skill X works in Claude but consistently
+fails in codex = parity bug, not skill bug).
+
+### 20.8 Validation gate for parity claims
+
+Before any `/flywheel:*` command graduates from Phase A → Phase B:
+
+1. ✅ Codex equivalent section exists in command's `.md`
+2. ✅ Mirror invocation contract documented in `~/.codex/AGENTS.md`
+3. ✅ Manual test: Joshua dispatches the same task to a Claude pane
+   AND a codex pane; both produce equivalent v2 receipts; doctor
+   reports green for both
+4. ✅ Worker-tick (when shipped) correctly auto-routes by pane type
+5. ✅ Fuckup-log entries from both harnesses include `harness:` field
+
+Any command failing the above is **NOT shipped** until parity is
+demonstrated. No "we'll fix codex later" exceptions.
+
+---
+
+**END OF DRAFT v0.4.** Hand-off to flywheel pane 1 + skillos pane 1 for review.
 
 Changelog:
 - v0.1 (2026-04-30T23:55Z): initial draft, single command surface
@@ -982,3 +1146,11 @@ Changelog:
   added §17 trauma-class mapping, added §18 `--help` discoverability contract
 - v0.3 (2026-05-01T06:30Z+): added §19 `/flywheel:adopt` for legacy repo
   onboarding, Phase A.5 between Phase A and Phase B
+- v0.4 (2026-05-01T07:50Z+): added §20 full codex parity contract.
+  Earlier drafts misframed codex tick as a "gap" — validated via K=10
+  socraticode + 3 primary-source reads (`claude-md-codex-parity.md`,
+  `~/.codex/AGENTS.md` §2.5, `~/.codex/skills/` directory listing).
+  Codex parity is substrate-shared at the binary layer; differs only
+  at invocation surface (slash-cmd vs direct binary). Every flywheel
+  command MUST ship with codex equivalent section + mirror in codex
+  AGENTS.md before Phase B graduation.
