@@ -172,3 +172,177 @@ Save findings to /tmp/<step>-research-survey.md.
 **Cost citation:** four months of project history accreted scattered scripts/configs/hooks/CLIs because each new task started from scratch instead of surveying. Tonight Josh re-stated the mission explicitly. This rule is the mechanical enforcement of the mission.
 
 **Companion rules:** L46 (picoz-local — Axiom 9 commit-message socraticode trailer for substrate-critical commits) is the commit-time check. L50 (this — canonical) is the dispatch-time check. Both layers needed: dispatch-time prevents re-derivation; commit-time prevents merging without evidence.
+
+
+## L51 — DISPATCH-FILE-RESERVATIONS-MANDATORY (every multi-file worker dispatch reserves files via agent-mail before edits)
+
+---
+id: L51
+title: Dispatch file reservations mandatory
+status: long_term
+shipped: 2026-04-30
+review_due: 2026-10-30
+trauma_class: concurrent-worker-drift
+---
+
+**Rule:** Every NTM dispatch that asks a worker to edit 1+ files MUST include an agent-mail file reservation step in its pre-flight section. Worker reserves files BEFORE first edit, releases on completion (DONE) or release-on-blocked (BLOCKED). Dispatch packets that name file paths but lack a reservation step are non-compliant per L51.
+
+**Why:** Concurrent workers across multiple panes of a single NTM session, OR across multiple NTM sessions sharing a working tree, race on the same files. The picoz-specific `PICOZ_WORKER_FILES` pathspec hook (per local AGENTS.md and bd-rqrsr) catches one shape of this — accidental cross-attribution at commit time. But it doesn't prevent the underlying race; two workers can edit the same function in parallel and the second commit wins silently. Agent-mail file reservations make the lock explicit and pane-attributable BEFORE edits begin.
+
+**Mechanism:**
+- Skill: `agent-mail` is already installed; verbs include `reserve-files`, `release`, `renew_file_reservations`, `force_release_file_reservation`
+- Pre-flight in dispatch packet: `mcp__mcp-agent-mail__macro_file_reservation_cycle` with declared file paths
+- Worker callbacks must include `files_reserved=<comma-list>` and `files_released=<comma-list>`
+- Orchestrator releases held reservations on dispatch timeout (default 60min) via `force_release_file_reservation` per agent-mail SETUP
+
+**Forbidden orchestrator outputs:** dispatch packets that list `PICOZ_WORKER_FILES=...` without a paired `mcp__mcp-agent-mail__reserve_files` step. Pathspec discipline catches collisions at commit; reservation prevents collisions at edit. Both layers needed.
+
+**Override:** `JOSHUA_OVERRIDE='<reason>'` permits one ledger-less dispatch (rare; reserved for trivial single-file orchestrator-pane work where reservation overhead exceeds work).
+
+**Cost citation:** ~3 incidents over the last 60 days where worker-A and worker-B both edited the same file region; second commit silently overwrote first; bug surfaced 2-3 days later when the missing logic was needed in production. The pathspec hook flagged the cross-attribution but the *content drift* was already merged.
+
+**Companion rules:** L50 (socraticode-mandatory) is dispatch-time substrate awareness; L51 (this) is dispatch-time concurrency safety. Both required for every multi-file dispatch.
+
+
+## L52 — ISSUES-TO-BEADS-OR-EXPLICIT-NO-BEAD-RECEIPT (no observed gap is absorbed silently)
+
+---
+id: L52
+title: Every observed issue becomes a bead or carries an explicit no_bead_reason receipt
+status: long_term
+shipped: 2026-04-30
+review_due: 2026-10-30
+trauma_class: silent-finding-loss
+---
+
+**Rule:** Every gap, finding, trauma, or unexpected behavior observed during a worker dispatch MUST become one of:
+1. A new bead filed in the originating repo's bead DB (or the repo most relevant to the gap), with the bead ID reported in the worker callback
+2. An update to an existing bead (referenced by ID in callback)
+3. An EXPLICIT `no_bead_reason` field in the callback explaining why this finding is not bead-worthy (e.g. "transient flake, retried clean", "worker-private scratch issue, fixed in same dispatch")
+
+Worker callbacks lacking ALL of bead_ids_filed / bead_ids_updated / no_bead_reason are non-compliant per L52. Orchestrator treats missing field as DRIFT and re-dispatches asking for the missing receipt.
+
+**Why:** picoz Phase A CLI audit (2026-04-19) discovered that pane 4 reported `findings=N beads_filed=0` — observed real defects, didn't bead them, called it done. Without an explicit no_bead_reason, the orchestrator can't distinguish "no findings" from "findings absorbed silently." Silent-finding-loss is the failure mode where every dispatch produces signal but only a fraction makes it into the trackable substrate.
+
+**Mechanism:**
+- Pre-flight in dispatch packet: instructions naming the bead DB path (`<repo>/.beads/`) and the `br create` command shape
+- Pre-flight: workers MUST use `scripts/br_create_safe.sh` (or local equivalent) per L47-class enforcement, never raw `br create`
+- Callback contract: every DONE/BLOCKED includes one of:
+  - `beads_filed=bd-XXX,bd-YYY,...`
+  - `beads_updated=bd-XXX:status_change,...`
+  - `no_bead_reason=<short-text>` (explicit choice, not absence)
+
+**Forbidden worker callback outputs:** any DONE/BLOCKED missing all three fields. Re-dispatch on detection.
+
+**Override:** None. Silent finding loss has no acceptable footprint — even the "trivial" finding gets a single-line no_bead_reason. JOSHUA_OVERRIDE does NOT bypass L52 because the cost of a forgotten finding compounds.
+
+**Cost citation:** Phase A CLI audit (2026-04-19) found 7 launch-relevant defects pane 4 had observed but not beaded. Required orchestrator to manually re-derive findings from worker scrollback and file beads after the fact. ~30 min recovery cost per missed finding. L52 makes the cost zero by mechanically requiring the callback field.
+
+**Companion rules:** L47 (substrate-owner discipline; canonical-substrate claims require enforcement) — L52 enforces the bead-creation substrate across every dispatch, not just commit-time.
+
+
+## L53 — FUCKUPS-REPORTED-IN-CALLBACK (every blocker / trauma / gap surfaces as a fuckup-log row)
+
+---
+id: L53
+title: Fuckups reported in every dispatch callback
+status: long_term
+shipped: 2026-04-30
+review_due: 2026-10-30
+trauma_class: trauma-amnesia
+---
+
+**Rule:** Every BLOCKED callback AND every DONE callback that hit a trauma along the way MUST log a fuckup-log row via `flywheel-loop fuckup log` BEFORE sending the callback. The callback then references the fuckup-log row IDs (or the JSONL line numbers, or the trauma_class names) so the orchestrator can correlate the callback with the durable record.
+
+DONE callbacks for clean dispatches MAY skip fuckup logging (no trauma → nothing to log). BLOCKED callbacks MUST always log at least one fuckup row describing the blocker.
+
+**Why:** Without enforcement, traumas survive only in pane scrollback and then evaporate at /clear time or session end. The fuckup-log substrate (shipped 2026-04-30 via ac02fb6 + f8efbec) only compounds value if every dispatch contributes rows. Trauma-amnesia is the failure mode where the same blocker surprises the next worker on the next session because nobody persisted it.
+
+**Mechanism:**
+- Pre-flight in dispatch packet: instructions to call `~/.claude/skills/.flywheel/bin/flywheel-loop fuckup log --class=<trauma> --severity=<sev> --what-happened=<text>` on every blocker
+- Callback contract: BLOCKED requires `fuckups_logged=<class1>,<class2>,...`; DONE may include `fuckups_logged=` if any traumas were observed (empty is valid for clean DONE)
+- Auto-emission complement: even if the worker forgets, hook-blocks/overrides auto-harvest catches volume signals (per L50 doctrine — both manual and automatic)
+
+**Forbidden worker callback outputs:** BLOCKED missing `fuckups_logged=` field; DONE that hit a documented trauma without `fuckups_logged=`.
+
+**Override:** None for BLOCKED. JOSHUA_OVERRIDE does not bypass L53 because escalation without a durable trauma record is exactly the substrate-amnesia mode this rule prevents.
+
+**Cost citation:** br DB wedge recurred multiple times today (2026-04-30) before being captured as a fuckup row. The first 2 wedges left no record other than scrollback; only the third triggered the manual fuckup log entry. With L53 in place, every wedge would have been recorded immediately, and triage would have surfaced "br-db-wedge fired 3 times this session" before the human noticed.
+
+**Companion rules:** L48 (substrate-exhaustion) requires probe ledger before escalating to Josh — the probe ledger and the fuckup-log row are different artifacts (ledger = "what I tried", fuckup-log = "what failed"). Both required, not redundant.
+
+
+## L54 — SKILL-DEEP-DIVE-ON-BLOCKERS (workers climb the skill tree before declaring a wall)
+
+---
+id: L54
+title: Skill deep-dive on blockers before BLOCKED callback
+status: long_term
+shipped: 2026-04-30
+review_due: 2026-10-30
+trauma_class: skill-substrate-bypass
+---
+
+**Rule:** Before any worker sends a BLOCKED callback, they MUST climb the skill tree:
+1. List skills relevant to the trauma class (`ls ~/.claude/skills/ | grep -i <relevant-keyword>`)
+2. Read SKILL.md + any "Recovery" / "Common failures" section in 2-3 most-relevant skills
+3. Attempt the recovery path documented in those skills, record outcomes
+4. Only after rungs 1-3 produce no resolution may BLOCKED be sent
+
+BLOCKED callbacks must include `skills_consulted=<name1>,<name2>,...` listing every skill whose recovery path was actually executed (not just listed). Empty `skills_consulted=` on a BLOCKED callback is non-compliant — even for trauma classes that have no obvious skill, the worker MUST report the search attempted (e.g. `skills_consulted=NONE_FOUND grep_terms_used=br-db-wedge,beads-corrupt,sqlite-recovery`).
+
+**Why:** We have ~280 skills in `~/.claude/skills/`. Most workers blocked today never consulted a single one before escalating. Skill substrate bypass is the failure mode where 4 months of accreted reusable knowledge sits unread because workers default to "ask the orchestrator" or "ask Josh" before reading the arsenal.
+
+**Mechanism:**
+- Pre-flight in dispatch packet: explicit list of "skills likely relevant to this dispatch" (orchestrator does the initial mapping; worker still verifies and consults)
+- Callback contract: BLOCKED requires `skills_consulted=<list-or-NONE_FOUND>`. DONE may include the field if skills helped but it's optional for clean DONE.
+- Escalation chain (per L48 + L54): substrate probe → self-heal tool → **skill recovery section (L54)** → cross-repo precedent → only then human
+
+**Forbidden worker callback outputs:** BLOCKED missing `skills_consulted=` field; BLOCKED with empty list and no `NONE_FOUND` justification with grep_terms_used.
+
+**When no skill exists for the trauma:** This is the L55 trigger — escalate to skillos session for new skill authoring (see L55 below).
+
+**Cost citation:** alpsinsurance idle 2026-04-30 hours waited at "Railway token Q1/Q2 for Josh" — both `infisical-rotation-ops` and `railway-api` skills exist with recovery sections covering the exact wall (project-token generation + browserless OTP). Worker never read either. L54 makes that read mandatory.
+
+**Companion rules:** L48 (substrate-exhaustion-before-escalation) is the broader 5-rung ladder; L54 is the specific "rung 3" enforcement. Without L54, agents declared L48 satisfied while skipping the skill rung.
+
+
+## L55 — SKILLOS-ESCALATION-FOR-MISSING-SKILLS (when no skill exists for a trauma class, route to skillos)
+
+---
+id: L55
+title: Missing-skill escalation routes to skillos session
+status: long_term
+shipped: 2026-04-30
+review_due: 2026-10-30
+trauma_class: skill-arsenal-gap
+---
+
+**Rule:** When L54 deep-dive returns `skills_consulted=NONE_FOUND` for a recurring trauma class (3+ fuckup-log occurrences within 7 days), the trauma is escalated to the **skillos NTM session** as a candidate skill. Escalation mechanism:
+1. Worker logs the fuckup with `should_become=skill`
+2. Doctor's `fuckup_triage` section flags 3+ `NONE_FOUND` rows of same class as candidate for skillos
+3. Orchestrator (or doctor itself, future) sends a draft-skill packet to skillos via `ntm send skillos --pane=1` with the trauma class, evidence sample, and proposed skill name
+4. skillos session handles authoring, review, and publication into `~/.claude/skills/<name>/` per its own MISSION/GOAL/STATE
+5. Once published, the next worker hitting the same trauma finds the skill via L50 socraticode survey → loop closes
+
+**Why:** The skill arsenal only compounds if missing skills are systematically authored, not ad-hoc patched. Authoring inside consumer sessions (picoz orchestrator pauses to write a skill mid-trade-decision) pollutes the skill with consumer context. Authoring in skillos keeps skills universal-first per skillos MISSION.md.
+
+**Mechanism:**
+- Trigger: `flywheel-loop doctor` `fuckup_triage` candidate with `should_become=skill` AND frequency ≥3-in-7d
+- Routing: `ntm send skillos --pane=1` with structured packet:
+  ```
+  CANDIDATE_SKILL trauma_class=<class> frequency=<count> evidence=<3-row-sample> proposed_name=<kebab-case-suggestion> originating_session=<which-session-hit-this>
+  ```
+- skillos consumes via its own tick loop; worker dispatches don't block waiting for skill authoring (asynchronous)
+- New skill ships when ready; L50 socraticode survey makes it discoverable on next dispatch
+
+**Forbidden orchestrator outputs:** sending CANDIDATE_SKILL packets to any session other than skillos. The dedicated session is the only authorized author of new skills (other sessions consume, never write to `~/.claude/skills/`).
+
+**Override:** `JOSHUA_OVERRIDE='<reason>'` permits direct authoring in a non-skillos session for emergencies (e.g. mid-incident response, can't wait for skillos cycle). Logged; reviewed at next petal-9 close.
+
+**Cost citation:** ~280 existing skills accreted ad-hoc across 4 months — many duplicate each other, none have provenance, none were authored against a shared quality bar. L55 prevents the next 280 from accreting the same way.
+
+**Companion rules:** L54 (skill deep-dive on blockers) detects the gap. L55 (this) closes it. skillos MISSION.md (`~/Developer/skillos/.flywheel/MISSION.md`) defines the receiving substrate.
+
+**Receiving substrate state (2026-04-30):** skillos session exists in NTM (`skillos`), repo bootstrapped at `~/Developer/skillos/`, MISSION.md drafted (status=draft awaiting Josh review). L55 enforcement active once MISSION.md locks AND `flywheel-loop init --repo /Users/josh/Developer/skillos` succeeds. Until then, CANDIDATE_SKILL packets queue at `~/.local/state/flywheel/skillos-pending-candidates.jsonl` for skillos to drain on first tick.
+
