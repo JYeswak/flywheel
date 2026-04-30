@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-04-30T21:41:19Z",
+  "description": "Static trauma_class recommendation table for flywheel-loop doctor fuckup_triage.",
+  "default": {
+    "pattern": "<unknown>",
+    "match": "fallback",
+    "should_become": "bead",
+    "recommended_action": "File bead with evidence_sample for human triage; class not yet in heuristic table"
+  },
+  "heuristics": [
+    {
+      "pattern": "repeat-gate-deny-*",
+      "match": "prefix",
+      "should_become": "tool-patch",
+      "recommended_action": "Audit gate `{gate}` for false-positive class; check if forbidden tokens leak from quoted args; review most recent denials in evidence_sample"
+    },
+    {
+      "pattern": "agent-fighting-gate",
+      "match": "exact",
+      "should_become": "canonical-L-rule",
+      "recommended_action": "5+ retries of identical command suggest agents not reading deny reasons; candidate L-rule: 'on hook deny, agent must change command shape, never retry verbatim'"
+    },
+    {
+      "pattern": "override-*",
+      "match": "prefix",
+      "should_become": "bead",
+      "recommended_action": "Override means gate shape was wrong OR substrate had a real gap; file bead to redesign gate or close substrate gap"
+    },
+    {
+      "pattern": "phantom-substrate",
+      "match": "exact",
+      "should_become": "canonical-L-rule",
+      "recommended_action": "Doctrine-named substrate failed liveness probe; review L48-class probe-before-trust requirement"
+    },
+    {
+      "pattern": "br-db-wedge",
+      "match": "exact",
+      "should_become": "tool-patch",
+      "recommended_action": "bead_db_repair.sh recovery path losing data; audit Gate 8 rebuild logic"
+    }
+  ]
+}
