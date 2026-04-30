@@ -826,9 +826,159 @@ auto-generated ones via `/flywheel:newcmd`) fail the gate.
 
 ---
 
-**END OF DRAFT v0.2.** Hand-off to flywheel pane 1 + skillos pane 1 for review.
+---
+
+## 19. `/flywheel:adopt` — legacy repo onboarding (Phase A.5)
+
+`/flywheel:init` handles greenfield bootstrap (assumes mission docs
+exist, just renders the template). **`/flywheel:adopt` handles legacy
+adoption** — bringing an existing repo up to current ZestStream
+agentic standards in one bounded operation.
+
+### Why the split
+
+| Dimension | `/flywheel:init` | `/flywheel:adopt` |
+|---|---|---|
+| Mission source | Required input | Detected if exists; survives absence |
+| `.flywheel/` directory | Creates from scratch | Reconciles with existing state |
+| Canonical AGENTS.md sync | NO | YES — frozen snapshot from `~/Developer/flywheel/AGENTS.md` |
+| INCIDENTS.md scaffolding | NO | YES — creates if absent (per L56 ladder) |
+| Substrate-registry entry | NO | YES — registers as `kind: managed_repo` |
+| Beads DB health | Untouched | YES — runs `bead_db_repair.sh` if WAL wedged |
+| Pre-commit guards | NO | YES — agent-mail + pathspec + config-rationale |
+| Skill catalog scan | NO | YES — `jsm scan` for stack-relevant skills |
+| Tick contract | NO | Optional via `--start-loop` |
+| Standards audit | NO | Optional via `--first-run-audit` |
+| Idempotent re-run | YES (skip) | YES (reconcile drift) |
+
+### Command surface
+
+```
+/flywheel:adopt --help
+/flywheel:adopt <repo-path>                    # interactive default
+/flywheel:adopt <repo-path> --json             # machine-readable
+/flywheel:adopt <repo-path> --dry-run          # delta report only
+/flywheel:adopt <repo-path> --first-run-audit  # also dispatch UBS+codebase-audit
+/flywheel:adopt <repo-path> --start-loop       # also activate /flywheel:loop
+/flywheel:adopt <repo-path> --reconcile        # explicit drift-resolution mode
+```
+
+### 11-step contract
+
+```
+STEP 0 — PRE-FLIGHT (read-only, ~30s)
+  Resolve canonical path (no symlinks per Axiom 12).
+  Detect existing flywheel state (.flywheel/, MISSION/GOAL/STATE,
+    loop.json, AGENTS-CANONICAL.md, INCIDENTS.md, substrate-registry entry).
+  Detect health concerns (beads WAL wedged, pre-commit guards, uncommitted).
+  Output delta report: "N ready, M missing, K drifted".
+
+STEP 1 — CONFIRM (interactive default; auto-yes with --json)
+  Show delta report.
+  Ask: "Adopt this repo with current standards? (y/N)"
+  Display estimated changes count + files touched.
+
+STEP 2 — RUN /flywheel:init IF NEW (~10s)
+  If .flywheel/ doesn't exist: invoke /flywheel:init with auto-detected
+    mission source (CLAUDE.md → AGENTS.md → MISSION.md fallback).
+  If .flywheel/ exists at older template: invoke /flywheel:init --reconcile.
+
+STEP 3 — SYNC CANONICAL DOCTRINE (~5s)
+  Copy ~/Developer/flywheel/AGENTS.md → <repo>/.flywheel/AGENTS-CANONICAL.md.
+  Set frontmatter: canonical_source_sha, canonical_synced_at.
+  Frozen-snapshot pattern (drift detected by /flywheel:doctor).
+
+STEP 4 — SCAFFOLD INCIDENTS.md IF MISSING (~5s)
+  Write template per L56 schema (trauma_class headers, evidence linkage
+    requirements). Don't seed entries — INCIDENTS accretes from real events.
+
+STEP 5 — REPAIR BEADS DB IF WEDGED (~30s)
+  Detect *.wedged files in .beads/.
+  Run repo's bead_db_repair script (or canonical fallback).
+  Verify with `br stats`.
+
+STEP 6 — INSTALL PRE-COMMIT GUARDS (~10s)
+  mcp__mcp-agent-mail__install_precommit_guard.
+  Install pathspec gate (PICOZ_WORKER_FILES env-check).
+  Install config-rationale-gate if config/*.toml present.
+
+STEP 7 — REGISTER SUBSTRATE (~5s)
+  Append entry to ~/.local/state/flywheel/substrate-registry.jsonl
+    kind: managed_repo, lifecycle_state: adopted_phase0.
+  Closes the L48 install-contract trauma class.
+
+STEP 8 — SKILL CATALOG SCAN (~30s)
+  Run `jsm scan` on the repo path.
+  Output: "your stack would benefit from skills X, Y, Z".
+  Surface as suggestion only (no auto-install).
+
+STEP 9 — FIRST-RUN AUDIT (optional, ~60s)
+  If --first-run-audit: dispatch UBS sweep + codebase-audit.
+  Files findings as beads automatically (Tier-2 autonomy per CLAUDE.md).
+  Skip in default mode (worker-tick will surface gaps over time).
+
+STEP 10 — OPTIONAL LOOP START (~10s)
+  If --start-loop: invoke /flywheel:loop start.
+  Default: leave as explicit operator action.
+
+STEP 11 — RECEIPT (~1s)
+  Write <repo>/.flywheel/install-log.jsonl entry:
+    {ts, action: "adopt", findings, fixed, registered, audited,
+     orchestrator_session: <where adopt ran>}.
+  Print summary: "Adopted <repo>. Tier: <tier>. Run /flywheel:loop start
+    to activate pulse."
+```
+
+### Why this is a sellable deliverable
+
+`/flywheel:adopt /path/to/client-repo` is the consulting on-ramp.
+Run it on a client's existing codebase, instantly their repo has:
+- substrate-registry entry (governance)
+- INCIDENTS.md scaffolding (learning loop)
+- agent-mail guards (multi-agent coordination)
+- skill catalog suggestions (productivity)
+- beads health (work tracking)
+- frozen doctrine snapshot (alignment to ZestStream standards)
+
+That's the productized version of "bring a repo up to senior-dev
+agentic standards." Skillos's MISSION calls this the moat — `/flywheel:adopt`
+is how the moat reaches a new repo.
+
+### Doctrine ladder honored at install
+
+L56 stages mapped to adopt steps:
+- Stage 0 substrate health: STEP 5 bead-db repair
+- Stage 1 events ready: STEP 4 INCIDENTS.md scaffolded (empty, ready)
+- Stage 4 distribution: STEP 3 AGENTS-CANONICAL frozen snapshot
+- Stage 5 enforcement: STEP 6 pre-commit guards + STEP 7 registry
+
+Adopting a repo means: this repo can NOW participate in the doctrine
+ladder. Without adoption, no ladder rung is functional.
+
+### Build phase
+
+**Phase A.5** — between Phase A (`/flywheel:loop`) and Phase B
+(`/flywheel:worker-tick`). Estimated 60min build. Gate: Phase A clean
+for 4h.
+
+Rollout: skillos doesn't need adopt (greenfield, used `/flywheel:init`).
+**alpsinsurance is the first adoption target.** picoz second, vrtx third.
+
+### Manual playbook (this session, before command ships)
+
+The 11-step sequence can be run by hand on alpsinsurance tonight.
+That's the validation playbook — once we've run it manually once,
+the command becomes well-evidenced. See session receipt at
+`~/.flywheel/manual-runs/alpsinsurance-adopt-2026-04-30.md`
+(if performed).
+
+---
+
+**END OF DRAFT v0.3.** Hand-off to flywheel pane 1 + skillos pane 1 for review.
 
 Changelog:
 - v0.1 (2026-04-30T23:55Z): initial draft, single command surface
 - v0.2 (2026-04-30T23:59Z+): split `/flywheel:cron` vs `/flywheel:loop`,
   added §17 trauma-class mapping, added §18 `--help` discoverability contract
+- v0.3 (2026-05-01T06:30Z+): added §19 `/flywheel:adopt` for legacy repo
+  onboarding, Phase A.5 between Phase A and Phase B
