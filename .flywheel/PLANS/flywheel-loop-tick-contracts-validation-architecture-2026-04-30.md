@@ -1138,7 +1138,193 @@ demonstrated. No "we'll fix codex later" exceptions.
 
 ---
 
-**END OF DRAFT v0.4.** Hand-off to flywheel pane 1 + skillos pane 1 for review.
+---
+
+## 21. Canonical L-rules: UBS-on-mission-critical + profile-on-slow
+
+These two have abundant CASS evidence and meet L56 promotion threshold.
+Both should land as canonical L-rules in `~/Developer/flywheel/AGENTS.md`
+during the next flywheel deep-audit (twice-daily doctrine session).
+
+### 21.1 Proposed L57 — UBS-AUDIT-ON-MISSION-CRITICAL-SURFACE
+
+```yaml
+id: L57
+title: UBS audit on every new mission-critical surface; gaps become beads
+status: long_term
+shipped: 2026-05-01 (proposed)
+review_due: 2026-11-01
+trauma_class: untested-mission-critical-surface
+```
+
+**Rule:** Every change to a mission-critical surface MUST trigger a
+`/ubs` (Untested Behavior Sweep) audit within the same dispatch
+window. UBS findings become beads automatically (Tier-2 autonomous
+per CLAUDE.md). Ship-then-audit is acceptable; ship-without-audit-
+ever is not.
+
+**Mission-critical surface definition:**
+- Money path (trade execution, fee math, sizing, P&L)
+- Safety stack (DCG, SLB, kill_switch, trauma guards)
+- Authentication / authorization paths
+- Migration / schema changes
+- Halt-on-breach consumers
+- Decision-ledger writers
+- Anything labeled tier-3 in CLAUDE.md autonomy matrix
+
+**Trigger thresholds:**
+- New file in money-path / safety stack: UBS within 1-2hr (per CASS
+  `feedback_rehearsal_surfaces_false_green_in_own_fixes.md` 2026-04-19)
+- Modified function in mission-critical surface: UBS within 24hr
+- Schema migration: UBS before merge (block merge until clean)
+
+**Evidence (CASS):**
+- 2026-04-18 UBS marathon: 14 audits, ~3 bugs/audit extraction rate,
+  found 2 CRITICAL_GAPs in kill_switches + paper_trader
+  (`project_ubs_audit_marathon_2026_04_18.md`)
+- 2026-04-19 self-audit catch: shipped 3 S0 preflight wires, UBS-audited
+  THOSE 3 files within 1-2hr → 7 false-green findings, 4 directly
+  undermined the wires
+  (`feedback_rehearsal_surfaces_false_green_in_own_fixes.md`)
+- Session-60 trauma class ($881 loss) was UBS-detectable pre-ship
+  (`feedback_session_60_invariant_clean_everywhere_checked.md`)
+- 14+ events across CASS justify canonization
+
+**Worker-tick check (Phase B):**
+
+```
+Check: ubs_audit_run_on_mission_critical
+SOFT mode: log warn if commit touches money-path/safety-stack and
+           no UBS audit in last 24hr (grep tool-call log for Skill(ubs))
+WARN mode: 3+ events in 7d
+HALT mode: 6+ events in 7d (block commit until UBS run)
+```
+
+**Failure → fuckup_log class:** `worker_skipped_ubs_on_critical_surface`
+
+### 21.2 Proposed L58 — PROFILE-BEFORE-PERF-FIX
+
+```yaml
+id: L58
+title: Profile before any perf fix; never optimize without measurement
+status: long_term
+shipped: 2026-05-01 (proposed)
+review_due: 2026-11-01
+trauma_class: optimize-wrong-layer
+```
+
+**Rule:** When ANY performance issue surfaces (slow query, slow
+endpoint, slow worker tick, high CPU, high memory), the FIRST action
+MUST be running `/profiling-software-performance` to identify the
+bottleneck. Optimization without profile = optimizing the wrong
+layer.
+
+When a perf fix doesn't yield expected gains AND the bottleneck is
+upstream of code (config, infrastructure, OS), invoke
+`/extreme-software-optimization` for cross-layer analysis.
+
+**Triggers:**
+- p50 latency above target → profile first
+- p95 latency above target → profile first
+- CPU >80% sustained → profile first
+- Memory >threshold → profile first
+- "feels slow" without numbers → profile first to GET numbers
+
+**Anti-patterns (per CASS):**
+- Optimize parallel before profile (bd-3r0e1, bd-ob70k 2026-04-19,
+  shipped 19/19 tests green but optimized WRONG LAYER twice before
+  profile revealed 2.92GB WAL was the bottleneck)
+- TTL cache fixes for cross-request workloads
+- Standalone profiles vs profiles under load
+
+**Evidence (CASS):**
+- 2026-04-19 /health perf marathon: 21570→1272ms (17×) achieved ONLY
+  after profiling found WAL bottleneck. Earlier code optimizations
+  (parallel + TTL cache) targeted wrong layer and shipped clean tests
+  but zero perf gain
+  (`project_session_2026_04_19_late_evening_health_perf_marathon.md`)
+- 2026-04-19 60-tick stall: orphan PID 97714 burning CPU. Identified
+  via profile, fixed via warmup_freshness_cache short-circuit
+  (`project_session_2026_04_19_60_tick_stall_to_cpu_burn_fix.md`)
+- 3+ events justify canonization
+
+**Worker-tick check (Phase B):**
+
+```
+Check: profile_run_before_perf_commit
+SOFT mode: log warn if commit message contains "perf|optimize|speed"
+           and no profiling-software-performance skill invocation in
+           recent tool-call log
+WARN mode: 3+ events in 7d
+HALT mode: 6+ events in 7d (block perf commits without profile)
+```
+
+**Failure → fuckup_log class:** `worker_optimized_without_profile`
+
+### 21.3 Why these are top-tier doctrine
+
+Both rules encode the asymmetry your CLAUDE.md `Three Reasoning Spaces`
+articulates: **code-space mistakes are ~25× more expensive than
+plan-space**. UBS and profiling are the cheapest ways to find code-
+space mistakes BEFORE shipping (UBS) or the cheapest way to find
+optimize-the-wrong-layer mistakes AFTER shipping (profile).
+
+Skipping either = paying 25× cost for a hypothetical 1× speedup. The
+math justifies HALT-mode enforcement after evidence accumulates.
+
+### 21.4 Skillos integration — these become bandit signals
+
+When workers run UBS or profiling skills, `jsm outcome` events feed
+skillos bandit (Phase C). Successful UBS audit (≥1 TRUE_BUG found) =
+`success=1`. Empty UBS audit on critical surface (false-clean) =
+manual review required, `success=0` only if manual review confirms.
+
+This makes "do the UBS audits work?" a measurable quantity. Skillos
+will eventually surface "UBS skill drift" if extraction rate drops
+below historical baseline (currently ~3 bugs/audit per 2026-04-18
+marathon).
+
+### 21.5 Doctrine-level operator workflow change
+
+Once L57+L58 ratify in flywheel deep-audit, the canonical dispatch
+template (`flywheel:_shared:dispatch-template`) MUST include:
+
+```markdown
+## Required follow-up audits (per L57 + L58)
+
+If this work touches mission-critical surface:
+- [ ] Run /ubs within 24hr after ship; file beads from findings
+If this work involves perf optimization:
+- [ ] Run /profiling-software-performance BEFORE writing fix code
+- [ ] Re-profile AFTER fix to confirm bottleneck moved
+If both: do both. Skip = trauma class violation.
+```
+
+### 21.6 Build sequence integration
+
+Phase A (loop, in flight) — no change needed
+Phase A.5 (adopt) — add UBS+profile checks to first-run-audit step
+Phase B (worker-tick) — ship checks #4 + #5: UBS-on-critical, profile-before-perf
+Phase C (skillos integration) — `jsm outcome` for UBS extraction rate + profile delta
+Phase D (graduation) — SOFT→WARN→HALT per L56 ladder based on accumulated trauma
+
+### 21.7 What needs to happen tonight (NONE — defer to deep-audit)
+
+L57 + L58 don't ratify tonight. They go through L56 promotion ladder:
+1. Stage 3: flywheel deep-audit (twice daily) reads accumulated CASS
+   evidence and votes on promotion
+2. If promoted: file flywheel bead "ratify L57 in AGENTS.md"
+3. Worker implements: append rules with full schema
+4. flywheel-loop init redistributes to all repos as
+   AGENTS-CANONICAL.md update
+
+Tonight's work: this section §21 documents the proposal so flywheel
+deep-audit has the synthesis ready. No code changes, no AGENTS.md
+edits to canonical doctrine.
+
+---
+
+**END OF DRAFT v0.5.** Hand-off to flywheel pane 1 + skillos pane 1 for review.
 
 Changelog:
 - v0.1 (2026-04-30T23:55Z): initial draft, single command surface
@@ -1147,10 +1333,9 @@ Changelog:
 - v0.3 (2026-05-01T06:30Z+): added §19 `/flywheel:adopt` for legacy repo
   onboarding, Phase A.5 between Phase A and Phase B
 - v0.4 (2026-05-01T07:50Z+): added §20 full codex parity contract.
-  Earlier drafts misframed codex tick as a "gap" — validated via K=10
-  socraticode + 3 primary-source reads (`claude-md-codex-parity.md`,
-  `~/.codex/AGENTS.md` §2.5, `~/.codex/skills/` directory listing).
-  Codex parity is substrate-shared at the binary layer; differs only
-  at invocation surface (slash-cmd vs direct binary). Every flywheel
-  command MUST ship with codex equivalent section + mirror in codex
-  AGENTS.md before Phase B graduation.
+- v0.5 (2026-05-01T08:15Z+): added §21 proposing L57 (UBS on mission-
+  critical surface) + L58 (profile before perf fix) as canonical
+  L-rules. Both have abundant CASS evidence (UBS marathon 2026-04-18
+  14 audits, /health 17× perf 2026-04-19 only via profile-first).
+  Defer ratification to flywheel deep-audit per L56 ladder; tonight
+  documents proposal so deep-audit has synthesis ready.
