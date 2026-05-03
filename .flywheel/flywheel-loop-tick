@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+export HOME="/Users/josh"
+export PATH="/opt/homebrew/Cellar/util-linux/2.41.3_1/bin:/Users/josh/.cargo/bin:/Users/josh/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+
+REPO="/Users/josh/Developer/flywheel"
+SESSION="flywheel"
+TARGET_PANE="1"
+STATE_DIR="$REPO/.flywheel/runtime/flywheel-loop"
+PROMPT_DIR="$REPO/.flywheel/prompts"
+LOG="$REPO/.flywheel/dispatch-log.jsonl"
+LOCK="$STATE_DIR/loop.lock"
+NTM="/Users/josh/.local/bin/ntm"
+
+ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+
+mkdir -p "$STATE_DIR" "$PROMPT_DIR" "$(dirname "$LOG")"
+
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"$LOCK"
+  if ! flock -n 9; then
+    exit 0
+  fi
+else
+  if ! mkdir "$LOCK.d" 2>/dev/null; then
+    exit 0
+  fi
+  trap 'rmdir "$LOCK.d" 2>/dev/null || true' EXIT
+fi
+
+run_id="$(date -u +%Y%m%dT%H%M%SZ)"
+prompt_file="$PROMPT_DIR/flywheel-tick-$run_id.md"
+
+find "$PROMPT_DIR" -name 'flywheel-tick-*.md' -mtime +7 -delete 2>/dev/null || true
+ls -1t "$PROMPT_DIR"/flywheel-tick-*.md 2>/dev/null | tail -n +201 | xargs rm -f 2>/dev/null || true
+
+{
+  printf 'PHASE: FLYWHEEL_LOOP_DRIVER\n'
+  printf 'Repo: %s\n' "$REPO"
+  printf 'Session: %s pane %s\n' "$SESSION" "$TARGET_PANE"
+  printf 'Driver: ai.zeststream.flywheel-flywheel-loop\n'
+  printf 'Run: %s\n\n' "$run_id"
+  printf '## HEALTH prelude\n'
+  printf 'Run one bounded `/flywheel:tick` for this repo. Read AGENTS.md first, then execute the normal flywheel tick path for `%s`.\n\n' "$REPO"
+  printf 'Callback discipline remains the repo default: worker callbacks go through `/Users/josh/.local/bin/ntm send` with `--no-cass-check`.\n'
+} >"$prompt_file"
+
+send_output=""
+status="failed"
+if send_output="$("$NTM" send "$SESSION" --pane="$TARGET_PANE" --file "$prompt_file" --no-cass-check --json 2>&1)"; then
+  status="sent"
+fi
+
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "ntm_dispatch_sent" \
+  --arg task_id "flywheel_loop_driver_$run_id" \
+  --arg repo "$REPO" \
+  --arg session "$SESSION" \
+  --arg pane "$TARGET_PANE" \
+  --arg prompt_file "$prompt_file" \
+  --arg status "$status" \
+  --arg send_output "$send_output" \
+  '{ts:$ts,event:$event,task_id:$task_id,repo:$repo,session:$session,pane:($pane|tonumber),prompt_file:$prompt_file,dispatch_status:$status,ntm_send_output:$send_output}' >>"$LOG"
+
+[[ "$status" == "sent" ]]
