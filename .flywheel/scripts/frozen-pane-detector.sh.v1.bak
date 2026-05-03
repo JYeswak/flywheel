@@ -1,0 +1,559 @@
+#!/usr/bin/env bash
+# Detect and optionally recover panes whose robot state says THINKING/GENERATING
+# but whose recent robot-tail scrollback has not grown across tick windows.
+set -euo pipefail
+
+VERSION="2026-05-03.1"
+CLASS="frozen-codex-spinner-misclassified-as-thinking"
+NTM_BIN="${FROZEN_PANE_NTM_BIN:-/Users/josh/.local/bin/ntm}"
+FLYWHEEL_LOOP_BIN="${FROZEN_PANE_FLYWHEEL_LOOP_BIN:-/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop}"
+REPO_ROOT="${FROZEN_PANE_REPO_ROOT:-/Users/josh/Developer/flywheel}"
+STATE_DIR="${FROZEN_PANE_STATE_DIR:-$HOME/.local/state/flywheel-loop}"
+CACHE_DIR="${FROZEN_PANE_CACHE_DIR:-$STATE_DIR}"
+STRIKE_FILE="${FROZEN_PANE_STRIKE_FILE:-$STATE_DIR/frozen-strike-counter.jsonl}"
+LINES=20
+THRESHOLD_SECONDS=300
+MIN_DELTA_BYTES=100
+JSON_OUT=0
+AUTO_RECOVER=0
+DRY_RUN=0
+EXPLAIN=0
+SESSION=""
+MODE="detect"
+SKIP_FUCKUP_LOG="${FROZEN_PANE_SKIP_FUCKUP_LOG:-0}"
+AUTO_DISPATCH="${FROZEN_PANE_AUTO_DISPATCH:-1}"
+RESPAWN_SLEEP="${FROZEN_PANE_RESPAWN_SLEEP:-8}"
+RELAUNCH_SLEEP="${FROZEN_PANE_RELAUNCH_SLEEP:-6}"
+CODEX_CMD="${FROZEN_PANE_CODEX_CMD:-codex --dangerously-bypass-approvals-and-sandbox}"
+CC_CMD="${FROZEN_PANE_CC_CMD:-cc}"
+NOW_EPOCH="${FROZEN_PANE_NOW_EPOCH:-}"
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  frozen-pane-detector.sh --session=<session> [--json]
+  frozen-pane-detector.sh --session=<session> --auto-recover [--dry-run] [--json]
+  frozen-pane-detector.sh --doctor [--json]
+  frozen-pane-detector.sh --health [--json]
+  frozen-pane-detector.sh --info [--json]
+  frozen-pane-detector.sh --schema
+  frozen-pane-detector.sh --examples
+
+Options:
+  --threshold-seconds N   Thinking/generating age threshold. Default: 300.
+  --min-delta-bytes N     Minimum scrollback byte growth to avoid frozen. Default: 100.
+  --lines N               robot-tail line count. Default: 20.
+  --cache-dir PATH        Override scrollback cache directory.
+  --strike-file PATH      Override strike-counter JSONL.
+  --dry-run               Plan recovery/research actions without mutating panes/beads/logs.
+  --explain               Include rationale in human output.
+USAGE
+}
+
+die() {
+  printf 'ERROR: %s\n' "$*" >&2
+  exit 2
+}
+
+json_string() {
+  jq -Rn --arg v "$1" '$v'
+}
+
+now_epoch() {
+  if [[ -n "$NOW_EPOCH" ]]; then
+    printf '%s\n' "$NOW_EPOCH"
+  else
+    date -u +%s
+  fi
+}
+
+now_iso() {
+  date -u -r "$(now_epoch)" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ
+}
+
+iso_to_epoch() {
+  local value="$1"
+  local normalized
+  [[ -n "$value" && "$value" != "null" ]] || return 1
+  normalized="$value"
+  if [[ "$normalized" == *.*Z ]]; then
+    normalized="${normalized%%.*}Z"
+  fi
+  date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$normalized" +%s 2>/dev/null \
+    || date -u -d "$normalized" +%s 2>/dev/null
+}
+
+sanitize_name() {
+  printf '%s' "$1" | tr -c 'A-Za-z0-9_.-' '_'
+}
+
+cache_path_for() {
+  local session="$1" pane="$2"
+  printf '%s/scrollback_cache_%s_%s.txt\n' "$CACHE_DIR" "$(sanitize_name "$session")" "$(sanitize_name "$pane")"
+}
+
+doctor_json() {
+  local now deps_json ok=1
+  now="$(now_iso)"
+  deps_json="$(
+    jq -nc \
+      --arg ntm "$NTM_BIN" \
+      --arg jq_path "$(command -v jq 2>/dev/null || true)" \
+      --arg date_path "$(command -v date 2>/dev/null || true)" \
+      --arg br_path "$(command -v br 2>/dev/null || true)" \
+      --arg flywheel_loop "$FLYWHEEL_LOOP_BIN" \
+      '[
+        {name:"ntm", path:$ntm, ok:($ntm != "" and ($ntm | test("^/") | not or true))},
+        {name:"jq", path:$jq_path, ok:($jq_path != "")},
+        {name:"date", path:$date_path, ok:($date_path != "")},
+        {name:"br", path:$br_path, ok:($br_path != "")},
+        {name:"flywheel-loop", path:$flywheel_loop, ok:($flywheel_loop != "")}
+      ]'
+  )"
+  command -v jq >/dev/null 2>&1 || ok=0
+  command -v date >/dev/null 2>&1 || ok=0
+  [[ -x "$NTM_BIN" ]] || ok=0
+  [[ -x "$FLYWHEEL_LOOP_BIN" ]] || ok=0
+  mkdir -p "$CACHE_DIR" "$(dirname "$STRIKE_FILE")" 2>/dev/null || ok=0
+  [[ -w "$CACHE_DIR" ]] || ok=0
+  [[ -w "$(dirname "$STRIKE_FILE")" ]] || ok=0
+  jq -nc \
+    --arg ts "$now" \
+    --arg version "$VERSION" \
+    --argjson ok "$ok" \
+    --arg state_dir "$STATE_DIR" \
+    --arg cache_dir "$CACHE_DIR" \
+    --arg strike_file "$STRIKE_FILE" \
+    --argjson deps "$deps_json" \
+    '{success:($ok == 1), mode:"doctor", checked_at:$ts, version:$version,
+      paths:{state_dir:$state_dir, cache_dir:$cache_dir, strike_file:$strike_file},
+      deps:$deps}'
+}
+
+info_json() {
+  jq -nc \
+    --arg version "$VERSION" \
+    --arg ntm "$NTM_BIN" \
+    --arg loop "$FLYWHEEL_LOOP_BIN" \
+    --arg repo "$REPO_ROOT" \
+    --arg state "$STATE_DIR" \
+    --arg cache "$CACHE_DIR" \
+    --arg strikes "$STRIKE_FILE" \
+    --arg class "$CLASS" \
+    '{success:true, mode:"info", version:$version, ntm_bin:$ntm,
+      flywheel_loop_bin:$loop, repo_root:$repo, state_dir:$state,
+      cache_dir:$cache, strike_counter:$strikes, trauma_class:$class,
+      defaults:{threshold_seconds:300, min_delta_bytes:100, lines:20}}'
+}
+
+schema_json() {
+  cat <<'JSON'
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "frozen-pane-detector output",
+  "type": "object",
+  "required": ["success", "session", "checked_at", "panes", "frozen_panes_detected"],
+  "properties": {
+    "success": {"type": "boolean"},
+    "session": {"type": "string"},
+    "checked_at": {"type": "string"},
+    "mode": {"type": "string", "enum": ["detect", "auto-recover", "doctor", "health", "info"]},
+    "panes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["session", "pane", "agent_type", "state", "status"],
+        "properties": {
+          "session": {"type": "string"},
+          "pane": {"type": "integer"},
+          "agent_type": {"type": "string"},
+          "state": {"type": "string"},
+          "state_since": {"type": ["string", "null"]},
+          "age_seconds": {"type": ["integer", "null"]},
+          "current_bytes": {"type": ["integer", "null"]},
+          "prior_bytes": {"type": ["integer", "null"]},
+          "delta_bytes": {"type": ["integer", "null"]},
+          "cache_path": {"type": ["string", "null"]},
+          "status": {"type": "string"}
+        }
+      }
+    },
+    "frozen_panes_detected": {"type": "integer"},
+    "frozen_panes_respawned": {"type": "integer"},
+    "frozen_panes_relaunched": {"type": "integer"},
+    "frozen_research_bead_filed": {"type": ["string", "null"]},
+    "frozen_strike_count_7d": {"type": "integer"}
+  }
+}
+JSON
+}
+
+examples() {
+  cat <<'TEXT'
+Examples:
+  frozen-pane-detector.sh --session=flywheel --json
+  frozen-pane-detector.sh --session=skillos --auto-recover --dry-run --json
+  frozen-pane-detector.sh --doctor --json
+TEXT
+}
+
+tail_to_file() {
+  local session="$1" pane="$2" out_file="$3"
+  local tail_json
+  tail_json="$("$NTM_BIN" --robot-tail="$session" --panes="$pane" --lines="$LINES" 2>/dev/null)" || return 1
+  printf '%s\n' "$tail_json" | jq -r --arg p "$pane" '.panes[$p].lines[]?' >"$out_file" 2>/dev/null
+  [[ -s "$out_file" ]]
+}
+
+count_strikes_since() {
+  local window_days="$1" cutoff
+  mkdir -p "$(dirname "$STRIKE_FILE")"
+  touch "$STRIKE_FILE"
+  cutoff=$(( $(now_epoch) - (window_days * 86400) ))
+  jq -s --arg prefix "frozen-codex-spinner-" --argjson cutoff "$cutoff" '
+    [.[]? | select((.class // "") | startswith($prefix))
+     | select(((.ts // "") | fromdateiso8601? // 0) >= $cutoff)] | length
+  ' "$STRIKE_FILE" 2>/dev/null || printf '0\n'
+}
+
+first_strike_since() {
+  local window_days="$1" cutoff
+  cutoff=$(( $(now_epoch) - (window_days * 86400) ))
+  jq -sr --arg prefix "frozen-codex-spinner-" --argjson cutoff "$cutoff" '
+    [.[]? | select((.class // "") | startswith($prefix))
+     | select(((.ts // "") | fromdateiso8601? // 0) >= $cutoff)]
+    | sort_by(.ts) | .[0].ts // null
+  ' "$STRIKE_FILE" 2>/dev/null || printf 'null\n'
+}
+
+append_strike() {
+  local session="$1" pane="$2" agent_type="$3" snapshot="$4"
+  mkdir -p "$(dirname "$STRIKE_FILE")"
+  jq -nc \
+    --arg ts "$(now_iso)" \
+    --arg class "$CLASS" \
+    --arg session "$session" \
+    --argjson pane "$pane" \
+    --arg agent_type "$agent_type" \
+    --arg snapshot "$snapshot" \
+    --arg source "frozen-pane-detector.sh" \
+    '{ts:$ts, class:$class, session:$session, pane:$pane,
+      agent_type:$agent_type, snapshot_path:$snapshot, source:$source}' >>"$STRIKE_FILE"
+}
+
+log_fuckup() {
+  local session="$1" pane="$2" snapshot="$3" age="$4" delta="$5"
+  [[ "$SKIP_FUCKUP_LOG" == "1" ]] && return 0
+  [[ "$DRY_RUN" == "1" ]] && return 0
+  "$FLYWHEEL_LOOP_BIN" fuckup log \
+    --class "$CLASS" \
+    --severity high \
+    --what-happened "Pane ${session}:${pane} reported THINKING/GENERATING for ${age}s while robot-tail byte delta was ${delta}B; auto-recovery triggered." \
+    --what-attempted "frozen-pane-detector.sh --auto-recover" \
+    --rule-violated "tick.md Step 3a" \
+    --evidence "$snapshot" \
+    --should-become tool-patch \
+    --session "$session" \
+    --pane "$pane" \
+    --json >/dev/null 2>&1 || true
+}
+
+existing_open_bead_by_title_prefix() {
+  local prefix="$1"
+  (cd "$REPO_ROOT" && br list --format json 2>/dev/null) \
+    | jq -r --arg prefix "$prefix" '.issues[]? | select(.status != "closed") | select(.title | startswith($prefix)) | .id' \
+    | head -1
+}
+
+create_research_bead_if_needed() {
+  local count7="$1" first_seen="$2"
+  local title existing created
+  title="[research] root-cause Codex CLI hang state — ${count7}+ strikes"
+  if [[ "$count7" -lt 3 ]]; then
+    printf 'null\n'
+    return 0
+  fi
+  existing="$(existing_open_bead_by_title_prefix "[research] root-cause Codex CLI hang state" || true)"
+  if [[ -n "$existing" ]]; then
+    printf '%s\n' "$existing"
+    return 0
+  fi
+  if [[ "$DRY_RUN" == "1" ]]; then
+    printf 'planned-research-bead\n'
+    return 0
+  fi
+  created="$(
+    cd "$REPO_ROOT" && br create \
+      --priority 1 \
+      --type research \
+      --title "$title" \
+      --description "Investigate via socraticode + Jeff issue search + repro matrix. Strike count ${count7} since ${first_seen}. See fuckup-log class ${CLASS}. Validate whether Codex CLI, ntm robot-state parsing, or terminal scrollback stalls are the root cause. Callback with evidence and proposed upstream/local fixes." \
+      --json
+  )"
+  printf '%s\n' "$created" | jq -r '.id // empty'
+}
+
+create_skill_update_bead_if_needed() {
+  local count30="$1"
+  local title existing
+  title="[skill] update flywheel-end-to-end for frozen pane 5+ strike recovery"
+  if [[ "$count30" -lt 5 ]]; then
+    printf 'null\n'
+    return 0
+  fi
+  existing="$(existing_open_bead_by_title_prefix "$title" || true)"
+  if [[ -n "$existing" ]]; then
+    printf '%s\n' "$existing"
+    return 0
+  fi
+  if [[ "$DRY_RUN" == "1" ]]; then
+    printf 'planned-skill-update-bead\n'
+    return 0
+  fi
+  (cd "$REPO_ROOT" && br create \
+    --priority 1 \
+    --type task \
+    --title "$title" \
+    --description "Frozen Codex spinner recovery crossed ${count30} strikes in 30d. Update ~/.claude/skills/flywheel-end-to-end with the permanent detector/recovery path and callback evidence requirements." \
+    --json) | jq -r '.id // empty'
+}
+
+dispatch_research_bead() {
+  local session="$1" bead="$2" recovered_panes_csv="$3"
+  local activity pane prompt
+  [[ "$AUTO_DISPATCH" == "1" ]] || return 0
+  [[ "$DRY_RUN" == "1" ]] && return 0
+  [[ -n "$bead" && "$bead" != "null" && "$bead" != planned-* ]] || return 0
+  activity="$("$NTM_BIN" --robot-activity="$session" --activity-type=codex 2>/dev/null || printf '{}')"
+  pane="$(printf '%s\n' "$activity" | jq -r --arg recovered ",$recovered_panes_csv," '
+    .agents[]?
+    | select((.agent_type // "") == "codex")
+    | select((.state // "" | ascii_upcase) == "WAITING")
+    | (.pane_idx // .pane)
+    | tostring
+    | select(($recovered | contains("," + . + ",")) | not)
+  ' | head -1)"
+  [[ -n "$pane" && "$pane" != "null" ]] || return 0
+  prompt="Dispatch: research bead ${bead}. Read \`cd /Users/josh/Developer/flywheel && br show ${bead}\`. Investigate root-cause for frozen Codex CLI spinner state using socraticode + Jeff issue search + repro matrix. Output to /tmp/${bead}_frozen_pane_research.md. Callback to flywheel pane 1 with: Callback: task_id=${bead}_frozen_pane_research status=done output=/tmp/${bead}_frozen_pane_research.md bead=${bead}"
+  "$NTM_BIN" send "$session" --pane="$pane" --no-cass-check "$prompt" >/dev/null 2>&1 || true
+}
+
+recover_pane() {
+  local session="$1" pane="$2" agent_type="$3" age="$4" delta="$5" current_file="$6"
+  local ts snapshot relaunch_cmd respawned=0 relaunched=0
+  ts="$(date -u -r "$(now_epoch)" +%Y%m%dT%H%M%SZ 2>/dev/null || date -u +%Y%m%dT%H%M%SZ)"
+  snapshot="/tmp/frozen-pane-${session}-${pane}-${ts}.txt"
+  if [[ "$DRY_RUN" == "1" ]]; then
+    jq -nc --arg snapshot "$snapshot" '{respawned:false,relaunched:false,dry_run:true,snapshot:$snapshot}'
+    return 0
+  fi
+  cp "$current_file" "$snapshot"
+  log_fuckup "$session" "$pane" "$snapshot" "$age" "$delta"
+  "$NTM_BIN" --robot-restart-pane="$session" --panes="$pane" --hard-kill >/dev/null 2>&1 && respawned=1
+  sleep "$RESPAWN_SLEEP"
+  case "$agent_type" in
+    codex|cod) relaunch_cmd="$CODEX_CMD" ;;
+    claude|cc) relaunch_cmd="$CC_CMD" ;;
+    *) relaunch_cmd="$CODEX_CMD" ;;
+  esac
+  if [[ "$respawned" == "1" ]]; then
+    "$NTM_BIN" send "$session" --pane="$pane" --no-cass-check "$relaunch_cmd" >/dev/null 2>&1 && relaunched=1
+    sleep "$RELAUNCH_SLEEP"
+    "$NTM_BIN" send "$session" --pane="$pane" --no-cass-check "You were auto-recovered from a frozen pane state. Run inbox/bead resume checks, then continue the last assigned work if safe. Snapshot: ${snapshot}" >/dev/null 2>&1 || true
+  fi
+  append_strike "$session" "$pane" "$agent_type" "$snapshot"
+  jq -nc --arg snapshot "$snapshot" --argjson respawned "$respawned" --argjson relaunched "$relaunched" \
+    '{respawned:($respawned == 1), relaunched:($relaunched == 1), dry_run:false, snapshot:$snapshot}'
+}
+
+detect() {
+  local session="$1"
+  local tmpdir activity now records_file recovery_file frozen_file recovered_csv=""
+  local frozen_count respawned_count relaunched_count count7 count30 first_seen research_bead skill_bead
+  tmpdir="$(mktemp -d "${TMPDIR:-/tmp}/frozen-pane-detector.XXXXXX")"
+  trap 'rm -rf "$tmpdir"' RETURN
+  records_file="$tmpdir/records.jsonl"
+  recovery_file="$tmpdir/recovery.jsonl"
+  frozen_file="$tmpdir/frozen_panes.txt"
+  : >"$records_file"
+  : >"$recovery_file"
+  : >"$frozen_file"
+  mkdir -p "$CACHE_DIR" "$(dirname "$STRIKE_FILE")"
+  now="$(now_epoch)"
+  activity="$("$NTM_BIN" --robot-activity="$session" --activity-type=codex,claude 2>/dev/null)" || {
+    jq -nc --arg session "$session" --arg ts "$(now_iso)" '{success:false, session:$session, checked_at:$ts, error:"robot_activity_failed", panes:[], frozen_panes_detected:0}'
+    return 3
+  }
+  printf '%s\n' "$activity" | jq -c '.agents[]? | select(((.state // "") | ascii_upcase) == "THINKING" or ((.state // "") | ascii_upcase) == "GENERATING")' |
+  while IFS= read -r agent; do
+    local pane agent_type state state_since state_epoch age cache prior_bytes current_bytes delta status reason current_file cache_exists
+    pane="$(printf '%s\n' "$agent" | jq -r '(.pane_idx // .pane) | tostring')"
+    [[ -n "$pane" && "$pane" != "null" ]] || continue
+    agent_type="$(printf '%s\n' "$agent" | jq -r '.agent_type // "unknown"')"
+    state="$(printf '%s\n' "$agent" | jq -r '.state // "UNKNOWN"')"
+    state_since="$(printf '%s\n' "$agent" | jq -r '.state_since // empty')"
+    state_epoch="$(iso_to_epoch "$state_since" || true)"
+    if [[ -n "$state_epoch" ]]; then
+      age=$(( now - state_epoch ))
+    else
+      age=0
+    fi
+    cache="$(cache_path_for "$session" "$pane")"
+    current_file="$tmpdir/current_${pane}.txt"
+    cache_exists=0
+    [[ -f "$cache" ]] && cache_exists=1
+    if ! tail_to_file "$session" "$pane" "$current_file"; then
+      jq -nc --arg session "$session" --argjson pane "$pane" --arg agent_type "$agent_type" --arg state "$state" --arg state_since "$state_since" \
+        '{session:$session,pane:$pane,agent_type:$agent_type,state:$state,state_since:$state_since,age_seconds:null,current_bytes:null,prior_bytes:null,delta_bytes:null,cache_path:null,status:"tail_error"}' >>"$records_file"
+      continue
+    fi
+    current_bytes="$(wc -c <"$current_file" | tr -d ' ')"
+    if [[ "$cache_exists" == "1" ]]; then
+      prior_bytes="$(wc -c <"$cache" | tr -d ' ')"
+      delta=$(( current_bytes - prior_bytes ))
+    else
+      prior_bytes=0
+      delta=$current_bytes
+    fi
+    if [[ "$DRY_RUN" != "1" ]]; then
+      cp "$current_file" "$cache"
+    fi
+    status="not_frozen"
+    reason="moving_or_young"
+    if [[ "$cache_exists" == "0" ]]; then
+      reason="no_prior_cache"
+    elif [[ "$age" -gt "$THRESHOLD_SECONDS" && "$delta" -lt "$MIN_DELTA_BYTES" ]]; then
+      status="frozen"
+      reason="age_gt_threshold_and_delta_lt_min"
+      printf '%s\n' "$pane" >>"$frozen_file"
+    fi
+    jq -nc \
+      --arg session "$session" --argjson pane "$pane" --arg agent_type "$agent_type" \
+      --arg state "$state" --arg state_since "$state_since" --argjson age "$age" \
+      --argjson current_bytes "$current_bytes" --argjson prior_bytes "$prior_bytes" \
+      --argjson delta "$delta" --arg cache "$cache" --arg status "$status" --arg reason "$reason" \
+      '{session:$session,pane:$pane,agent_type:$agent_type,state:$state,state_since:$state_since,
+        age_seconds:$age,current_bytes:$current_bytes,prior_bytes:$prior_bytes,delta_bytes:$delta,
+        cache_path:$cache,status:$status,reason:$reason}' >>"$records_file"
+    if [[ "$status" == "frozen" && "$AUTO_RECOVER" == "1" ]]; then
+      local recovery
+      recovery="$(recover_pane "$session" "$pane" "$agent_type" "$age" "$delta" "$current_file")"
+      printf '%s\n' "$recovery" >>"$recovery_file"
+    fi
+  done
+
+  frozen_count="$(jq -s '[.[] | select(.status == "frozen")] | length' "$records_file")"
+  if [[ "$AUTO_RECOVER" == "1" && "$frozen_count" -gt 0 ]]; then
+    recovered_csv="$(paste -sd, "$frozen_file" 2>/dev/null || true)"
+  fi
+  respawned_count="$(jq -s '[.[] | select(.respawned == true)] | length' "$recovery_file")"
+  relaunched_count="$(jq -s '[.[] | select(.relaunched == true)] | length' "$recovery_file")"
+  if [[ "$AUTO_RECOVER" == "1" && "$DRY_RUN" == "1" ]]; then
+    respawned_count=0
+    relaunched_count=0
+  fi
+  count7="$(count_strikes_since 7)"
+  count30="$(count_strikes_since 30)"
+  first_seen="$(first_strike_since 7)"
+  research_bead="null"
+  skill_bead="null"
+  if [[ "$AUTO_RECOVER" == "1" ]]; then
+    research_bead="$(create_research_bead_if_needed "$count7" "$first_seen")"
+    skill_bead="$(create_skill_update_bead_if_needed "$count30")"
+    dispatch_research_bead "$session" "$research_bead" "$recovered_csv"
+  fi
+  jq -s \
+    --arg session "$session" \
+    --arg ts "$(now_iso)" \
+    --arg mode "$([[ "$AUTO_RECOVER" == "1" ]] && printf 'auto-recover' || printf 'detect')" \
+    --argjson frozen "$frozen_count" \
+    --argjson respawned "$respawned_count" \
+    --argjson relaunched "$relaunched_count" \
+    --arg research "$research_bead" \
+    --arg skill "$skill_bead" \
+    --argjson count7 "$count7" \
+    --argjson count30 "$count30" \
+    --argjson dry_run "$DRY_RUN" \
+    --argjson explain "$EXPLAIN" \
+    --slurpfile recoveries "$recovery_file" \
+    '{success:true, session:$session, checked_at:$ts, mode:$mode, dry_run:($dry_run == 1),
+      explain:($explain == 1),
+      panes:.,
+      frozen_panes_detected:$frozen,
+      frozen_panes_respawned:$respawned,
+      frozen_panes_relaunched:$relaunched,
+      recoveries:$recoveries[0],
+      frozen_research_bead_filed:($research | if . == "null" then null else . end),
+      frozen_skill_update_bead_filed:($skill | if . == "null" then null else . end),
+      frozen_strike_count_7d:$count7,
+      frozen_strike_count_30d:$count30}' "$records_file"
+}
+
+emit_human_from_json() {
+  local payload="$1"
+  printf '%s\n' "$payload" | jq -r '
+    if .mode == "doctor" or .mode == "info" then
+      .
+    else
+      "frozen-pane-detector session=\(.session) frozen=\(.frozen_panes_detected) respawned=\(.frozen_panes_respawned // 0) relaunched=\(.frozen_panes_relaunched // 0) strikes7=\(.frozen_strike_count_7d // 0)"
+    end
+  '
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --session) SESSION="${2:?--session needs value}"; shift 2 ;;
+    --session=*) SESSION="${1#--session=}"; shift ;;
+    --json) JSON_OUT=1; shift ;;
+    --auto-recover) AUTO_RECOVER=1; shift ;;
+    --dry-run) DRY_RUN=1; shift ;;
+    --explain) EXPLAIN=1; shift ;;
+    --doctor) MODE="doctor"; shift ;;
+    --health) MODE="health"; shift ;;
+    --info) MODE="info"; shift ;;
+    --schema) MODE="schema"; shift ;;
+    --examples) MODE="examples"; shift ;;
+    --threshold-seconds) THRESHOLD_SECONDS="${2:?--threshold-seconds needs value}"; shift 2 ;;
+    --threshold-seconds=*) THRESHOLD_SECONDS="${1#--threshold-seconds=}"; shift ;;
+    --min-delta-bytes) MIN_DELTA_BYTES="${2:?--min-delta-bytes needs value}"; shift 2 ;;
+    --min-delta-bytes=*) MIN_DELTA_BYTES="${1#--min-delta-bytes=}"; shift ;;
+    --lines) LINES="${2:?--lines needs value}"; shift 2 ;;
+    --lines=*) LINES="${1#--lines=}"; shift ;;
+    --cache-dir) CACHE_DIR="${2:?--cache-dir needs value}"; shift 2 ;;
+    --cache-dir=*) CACHE_DIR="${1#--cache-dir=}"; shift ;;
+    --strike-file) STRIKE_FILE="${2:?--strike-file needs value}"; shift 2 ;;
+    --strike-file=*) STRIKE_FILE="${1#--strike-file=}"; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) die "unknown argument: $1" ;;
+  esac
+done
+
+case "$MODE" in
+  doctor|health)
+    payload="$(doctor_json)"
+    ;;
+  info)
+    payload="$(info_json)"
+    ;;
+  schema)
+    schema_json
+    exit 0
+    ;;
+  examples)
+    examples
+    exit 0
+    ;;
+  detect)
+    [[ -n "$SESSION" ]] || die "--session required"
+    payload="$(detect "$SESSION")"
+    ;;
+  *)
+    die "unknown mode: $MODE"
+    ;;
+esac
+
+if [[ "$JSON_OUT" == "1" || "$MODE" == "doctor" || "$MODE" == "health" || "$MODE" == "info" ]]; then
+  printf '%s\n' "$payload"
+else
+  emit_human_from_json "$payload"
+fi
