@@ -45,7 +45,7 @@ assert_jq "$TMP/install-dry-run.json" '.dry_run == true and .disabled_by_default
 env_base "$SCRIPT" install --apply --json >"$TMP/install-apply.json"
 assert_jq "$TMP/install-apply.json" '.applied == true and .disabled_by_default == true' "install apply writes disabled LaunchAgent"
 if plutil -extract Disabled raw "$TMP/ai.zeststream.frozen-pane-detector-fleet.plist" | grep -Eq '^(1|true)$' \
-  && plutil -extract StartInterval raw "$TMP/ai.zeststream.frozen-pane-detector-fleet.plist" | grep -qx '120' \
+  && plutil -extract StartInterval raw "$TMP/ai.zeststream.frozen-pane-detector-fleet.plist" | grep -qx '30' \
   && plutil -extract StandardOutPath raw "$TMP/ai.zeststream.frozen-pane-detector-fleet.plist" | grep -qx "$TMP/logs/out.log" \
   && plutil -extract StandardErrorPath raw "$TMP/ai.zeststream.frozen-pane-detector-fleet.plist" | grep -qx "$TMP/logs/err.log"; then
   pass "plist cadence stdout stderr disabled"
@@ -54,7 +54,7 @@ else
 fi
 
 env_base "$SCRIPT" --doctor --json >"$TMP/doctor-installed.json"
-assert_jq "$TMP/doctor-installed.json" '.status == "PASS" and .daemon_installed == true and .disabled_by_default == true and .cadence_seconds == 120' "doctor validates installed daemon contract"
+assert_jq "$TMP/doctor-installed.json" '.status == "PASS" and .daemon_installed == true and .disabled_by_default == true and .cadence_seconds == 30' "doctor validates installed daemon contract"
 
 touch "$TMP/STOP-fleet"
 env_base "$SCRIPT" cycle --json >"$TMP/cycle-stop.json"
@@ -76,8 +76,9 @@ assert_jq "$TMP/cycle-degraded.json" '.decision == "degraded_truth" and .degrade
 cat >"$TMP/healthy.json" <<'JSON'
 {"schema_version":"frozen-pane-detector.v2","success":true,"session":"all","source_health":{"status":"healthy"},"l60_signals_present":{"no_silent_darkness":true}}
 JSON
+recent_ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 for idx in 1 2 3 4; do
-  jq -nc --arg ts "2026-05-04T04:0${idx}:00Z" --arg session all --arg pane 1 '{ts:$ts,session:$session,pane:$pane,recovery_applied:true}' >>"$TMP/state/events.jsonl"
+  jq -nc --arg ts "$recent_ts" --arg session all --arg pane 1 '{ts:$ts,session:$session,pane:$pane,recovery_applied:true}' >>"$TMP/state/events.jsonl"
 done
 FROZEN_FLEET_DETECTOR_FIXTURE="$TMP/healthy.json" env_base "$SCRIPT" cycle --pane 1 --json >"$TMP/cycle-budget.json"
 assert_jq "$TMP/cycle-budget.json" '.decision == "budget_exhausted" and .budget.ok == false and .recovery_applied == false' "global and per-pane budgets block recovery storms"

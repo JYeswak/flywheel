@@ -3,7 +3,7 @@
 # robot activity reports long-running THINKING/GENERATING.
 set -euo pipefail
 
-VERSION="2026-05-03.2"
+VERSION="2026-05-04.1"
 SCHEMA_VERSION="frozen-pane-detector.v2"
 CLASS="frozen-codex-spinner-misclassified-as-thinking"
 TEMPLATE_STUB_CLASS="template-stub-prompt"
@@ -21,8 +21,8 @@ METRICS_FILE="${FROZEN_PANE_METRICS_FILE:-$STATE_DIR/frozen-pane-metrics.jsonl}"
 CONTROL_SESSION="${FROZEN_PANE_CONTROL_SESSION:-flywheel}"
 STOP_FILE="${FROZEN_PANE_STOP_FILE:-$STATE_DIR/frozen-pane-recovery.STOP}"
 LINES=20
-THRESHOLD_SECONDS=300
-QUEUED_THRESHOLD_SECONDS="${FROZEN_PANE_QUEUED_THRESHOLD_SECONDS:-120}"
+THRESHOLD_SECONDS="${FROZEN_PANE_THRESHOLD_SECONDS:-90}"
+QUEUED_THRESHOLD_SECONDS="${FROZEN_PANE_QUEUED_THRESHOLD_SECONDS:-60}"
 QUEUED_TIMER_DRIFT_SECONDS="${FROZEN_PANE_QUEUED_TIMER_DRIFT_SECONDS:-60}"
 MIN_DELTA_BYTES=100
 SAMPLE_INTERVAL_SECONDS="${FROZEN_PANE_SAMPLE_INTERVAL_SECONDS:-1}"
@@ -74,8 +74,8 @@ Usage:
   frozen-pane-detector.sh --examples
 
 Options:
-  --threshold-seconds N      Thinking/generating age threshold. Default: 300.
-  --queued-threshold-seconds N Waiting+queued prompt threshold. Default: 120.
+  --threshold-seconds N      Thinking/generating age threshold. Default: 90.
+  --queued-threshold-seconds N Waiting+queued prompt threshold. Default: 60.
   --queued-timer-drift-seconds N Working timer drift threshold. Default: 60.
   --min-delta-bytes N        Minimum live scrollback byte growth to avoid frozen. Default: 100.
   --sample-interval-seconds N Delay between live scrollback samples. Default: 1.
@@ -229,14 +229,19 @@ doctor_json() {
     --arg recovery_ledger "$RECOVERY_LEDGER" \
     --arg metrics_file "$METRICS_FILE" \
     --arg control_session "$CONTROL_SESSION" \
+    --argjson threshold "$THRESHOLD_SECONDS" \
+    --argjson queued_threshold "$QUEUED_THRESHOLD_SECONDS" \
+    --argjson queued_timer_drift "$QUEUED_TIMER_DRIFT_SECONDS" \
+    --argjson respawn_suppression "$RESPAWN_SUPPRESSION_SECONDS" \
     --argjson deps "$deps_json" \
     '{schema_version:$schema_version, success:($ok == 1), mode:"doctor", checked_at:$ts, version:$version,
       source_health:{status:(if $ok == 1 then "healthy" else "unhealthy" end), degraded_recovery_allowed:false},
       paths:{state_dir:$state_dir, cache_dir:$cache_dir, strike_file:$strike_file, lease_dir:$lease_dir,
         recovery_ledger:$recovery_ledger, metrics_file:$metrics_file},
       recovery_policy:{control_session:$control_session, lease_ttl_seconds:600, cooldown_seconds:1800,
-        respawn_suppression_seconds:120, queued_threshold_seconds:120,
-        queued_timer_drift_seconds:60, queued_recovery:"ntm_send_empty_enter",
+        threshold_seconds:$threshold, respawn_suppression_seconds:$respawn_suppression,
+        queued_threshold_seconds:$queued_threshold,
+        queued_timer_drift_seconds:$queued_timer_drift, queued_recovery:"ntm_send_empty_enter",
         idempotency:"sample_hash_or_explicit_key",
         cross_session_default:"deny"},
       deps:$deps}'
@@ -258,16 +263,27 @@ info_json() {
     --arg class "$CLASS" \
     --arg template_class "$TEMPLATE_STUB_CLASS" \
     --arg queued_class "$QUEUED_CLASS" \
+    --argjson threshold "$THRESHOLD_SECONDS" \
+    --argjson queued_threshold "$QUEUED_THRESHOLD_SECONDS" \
+    --argjson queued_timer_drift "$QUEUED_TIMER_DRIFT_SECONDS" \
+    --argjson min_delta "$MIN_DELTA_BYTES" \
+    --argjson lines "$LINES" \
+    --argjson lease_ttl "$LEASE_TTL_SECONDS" \
+    --argjson cooldown "$COOLDOWN_SECONDS" \
+    --argjson respawn_suppression "$RESPAWN_SUPPRESSION_SECONDS" \
+    --argjson sample_interval "$SAMPLE_INTERVAL_SECONDS" \
+    --argjson ntm_timeout "$NTM_TIMEOUT_SECONDS" \
     '{schema_version:$schema_version, success:true, mode:"info", version:$version, ntm_bin:$ntm,
       flywheel_loop_bin:$loop, repo_root:$repo, state_dir:$state,
       cache_dir:$cache, strike_counter:$strikes, lease_dir:$leases, recovery_ledger:$ledger,
       metrics_file:$metrics, trauma_class:$class,
       related_trauma_classes:{template_stub:$template_class, queued_not_submitted:$queued_class},
       detection_signals:["live_delta_frozen","state_since_missing","state_since_untrusted_no_delta","template_stub_prompt","queued_not_submitted"],
-      defaults:{threshold_seconds:300, queued_threshold_seconds:120,
-        queued_timer_drift_seconds:60, min_delta_bytes:100, lines:20, lease_ttl_seconds:600,
-        cooldown_seconds:1800, respawn_suppression_seconds:120, sample_interval_seconds:1,
-        ntm_timeout_seconds:8}}'
+      defaults:{threshold_seconds:$threshold, queued_threshold_seconds:$queued_threshold,
+        queued_timer_drift_seconds:$queued_timer_drift, min_delta_bytes:$min_delta, lines:$lines,
+        lease_ttl_seconds:$lease_ttl, cooldown_seconds:$cooldown,
+        respawn_suppression_seconds:$respawn_suppression, sample_interval_seconds:$sample_interval,
+        ntm_timeout_seconds:$ntm_timeout}}'
 }
 
 schema_json() {

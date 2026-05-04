@@ -4,7 +4,7 @@
 # healthy live-truth gates.
 set -euo pipefail
 
-VERSION="2026-05-04.1"
+VERSION="2026-05-04.2"
 SCHEMA_VERSION="frozen-pane-detector-fleet.v1"
 LABEL="${FROZEN_FLEET_LABEL:-ai.zeststream.frozen-pane-detector-fleet}"
 REPO_ROOT="${FROZEN_FLEET_REPO_ROOT:-/Users/josh/Developer/flywheel}"
@@ -20,7 +20,7 @@ STOP_FILE="${FROZEN_FLEET_STOP_FILE:-$HOME/.flywheel/STOP-frozen-pane-detector-f
 GLOBAL_STOP_FILE="${FROZEN_FLEET_GLOBAL_STOP_FILE:-$HOME/.flywheel/STOP-ALL}"
 STDOUT_PATH="${FROZEN_FLEET_STDOUT_PATH:-$HOME/.local/logs/frozen-pane-detector-fleet.out.log}"
 STDERR_PATH="${FROZEN_FLEET_STDERR_PATH:-$HOME/.local/logs/frozen-pane-detector-fleet.err.log}"
-CADENCE_SECONDS="${FROZEN_FLEET_CADENCE_SECONDS:-120}"
+CADENCE_SECONDS="${FROZEN_FLEET_CADENCE_SECONDS:-30}"
 GLOBAL_BUDGET_PER_HOUR="${FROZEN_FLEET_GLOBAL_BUDGET_PER_HOUR:-4}"
 PER_PANE_BUDGET_PER_HOUR="${FROZEN_FLEET_PER_PANE_BUDGET_PER_HOUR:-1}"
 MODE="doctor"
