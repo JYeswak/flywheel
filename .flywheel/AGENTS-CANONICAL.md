@@ -2391,6 +2391,60 @@ ticks on cross-session drift it didn't own (L92 violation in doctor logic, fixed
 **Cross-references:** L51 (file reservations), L86 (cross-session-callback-receiver-must-be-live),
 L91 (dispatch-delivery-four-state-receipt), L92 (audit-findings-route-by-data).
 
+## L98 — ARCHITECTURE-HEALTH-MEASURED-NOT-INDIVIDUALS
+
+---
+id: L98
+title: Architecture health measured not individuals
+status: long_term
+shipped: 2026-05-04
+review_due: 2026-11-04
+trauma_class: agent-shaming-vs-system-improvement
+---
+
+Fleet performance reports MUST measure system-level architecture health:
+reliability, faithfulness, leverage, reuse, coordination, and drift-authoring
+trends joined to known-worker manifests. Individual agent names may appear only
+as tuple-bound identity pointers needed to aggregate the fleet; rankings,
+leaderboards, and performance-review language are forbidden. Findings route to
+doctrine, skill, probe, or dispatch-template changes, never to individual-agent
+action items.
+
+**Why:** The 2026-05-04 mission lock frames flywheel as the command center for a
+company outgrowing its founder. Surveillance theater and agent-shaming destroy
+that system goal: they move attention from architecture changes to named-agent
+judgment. Donella #2, #3, and #6: encode the system goal, measure the actual
+goal, and make information flows trigger structural learning. Canonical anchor:
+`~/.claude/projects/-Users-josh-Developer-flywheel/memory/project_self_sustaining_company_paradigm_2026_05_04.md`.
+
+**How to apply:**
+- `.flywheel/scripts/architecture-health-rollup.sh` writes 24h, 7d, 30d, and
+  90d JSON to `~/.flywheel/fleet-perf/`.
+- Every rollup metric has trend, cohort, and counterfactual context; missing
+  pairings increment `architecture_health_metric_unpaired_count`.
+- Agent-shaming artifacts increment `agent_shaming_report_detected` and are
+  non-compliant with the report policy.
+- `/flywheel:status` surfaces only the compact architecture-health line.
+- `/flywheel:weeklyreflection` must emit `learning_loop_closed=yes|no` and at
+  least one architectural change or explicit no-change-warranted rationale.
+- `founder_dispose_pct` trending down quarterly is paradigm-success; flat or
+  rising trend is paradigm-failure until paired with a structural change.
+
+**Forbidden outputs:**
+- Leaderboards of best or worst agents without architecture context.
+- Vanity throughput counts without leverage-tier weighting.
+- Surveillance metrics that drive no doctrine, skill, or probe change in 30d.
+- Goodhart-prone single metrics without a paired quality probe.
+- Dashboards demanding daily founder attention for operational state.
+- Performance reviews of named agents.
+- One-shot dashboards without trend, cohort, and counterfactual.
+
+**Cross-references:** L61 (ecosystem wire-in), L71
+(validate-and-redispatch), L85 (idle-state-class-canonical), L91
+(dispatch-delivery-receipt), L97 (orch-dispatches-only-to-known-workers), L99
+(worker-recovery-slo-180s), L100 (identity primary key is tuple), and the
+self-sustaining-company paradigm memory path above.
+
 ## L99 — WORKER-RECOVERY-SLO-180S
 
 ---
@@ -2420,3 +2474,54 @@ Frozen or failed workers MUST be detected and respawned within 180 seconds. This
 - Threshold tuning that violates per-pane budget caps or creates recovery storms.
 
 **Cross-references:** L85 (idle-state-class), L87 (stale-error-auto-ping), L91 (dispatch-delivery-receipt), L95 (worker-stall-recovery), L98 (architecture-health-measured-not-individuals, pending).
+
+## L100 — IDENTITY-PRIMARY-KEY-IS-SESSION-PANE-PROJECT
+
+---
+id: L100
+title: Identity primary key is session pane project
+status: long_term
+shipped: 2026-05-04
+review_due: 2026-11-04
+trauma_class: agent-mail-identity-name-churn
+---
+
+Agent Mail identity substrate MUST key durable ownership by
+`(session, pane, fleet_mail_project_key)`. `identity_name` is only the current
+pointer attached to that tuple. Rotating the name may update the pointer, token
+path, predecessor chain, and rotation reason, but it MUST NOT create a new
+logical identity owner.
+
+**Why:** CoralRaven's 2026-05-04 gap report showed six independent triggers
+rotating names while the actual owner stayed stable: name-policy enforcement,
+resolver-MCP generated names, compaction continuity, missing-token recovery,
+path canonicalization, and Agent Mail strict-mode preallocation. Counting the
+name as the identity created churn, orphan-token residue, cross-session false
+halts, and agent-shaming narratives. Donella #5 and #6: change the rule and
+surface the right stock/flow metrics.
+
+**How to apply:**
+- Registry rows carry `identity_primary_key` and `identity_primary_key_text`
+  derived from session, pane, and fleet mail project.
+- Rotations preserve `predecessor_identity_chain[]`; allowed
+  `rotation_reason` values are `agent-mail-name-policy`,
+  `resolver-mcp-generated-identity`, `compaction-continuity`,
+  `missing-token-recovery`, `path-canonicalization`, and
+  `strict-mode-preallocation`.
+- Rotation transactions clean predecessor token residue immediately or surface
+  `orphan_tokens_unswept_count`.
+- `flywheel-loop doctor --json` exposes `identity_rotation_count_24h`,
+  `orphan_tokens_unswept_count`, and `identity_chain_max_length`.
+- High churn is an architecture-health signal, never an individual agent score.
+
+**Forbidden outputs:**
+- Treating an adjective+noun mailbox name as the durable primary key.
+- Minting a new logical identity owner for a known session/pane/project tuple.
+- Reporting identity churn as agent failure rather than substrate churn.
+- Sending raw Agent Mail tokens through cross-orch coordination while repairing
+  tuple drift.
+
+**Cross-references:** L58 (secret material never in pane text), L76
+(AgentMail identity canonical), L92 (audit findings route by data), L96
+(doctrine three-surface diff), L98 (architecture-health frame), and memory
+`feedback_identity_stability_session_pane_project_primary_key.md`.
