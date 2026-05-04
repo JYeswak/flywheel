@@ -156,6 +156,8 @@ fi
 
 STATUS="$(jq -r '.status // "unknown"' <<<"$DOCTOR_JSON")"
 ROOT_DRIFT="$(jq -r '.canonical_root_drift.drift // false' <<<"$DOCTOR_JSON")"
+DOCTRINE_3_SURFACE_DIVERGENT_COUNT="$(jq -r '.doctrine_3_surface_divergent_count // .doctrine_3_surface_divergence.doctrine_3_surface_divergent_count // 0' <<<"$DOCTOR_JSON")"
+FLEET_L_RULE_LAG_COUNT="$(jq -r '.fleet_repo_l_rule_lag_count // .fleet_l_rule_lag.fleet_repo_l_rule_lag_count // 0' <<<"$DOCTOR_JSON")"
 PUNTED_COUNT="$(jq -r '.ticks_punted_count // .l70_chain_state.ticks_punted_count // 0' <<<"$DOCTOR_JSON")"
 STORAGE_STATUS="$(jq -r '.storage.status // "ok"' <<<"$DOCTOR_JSON")"
 STORAGE_FREE_PCT="$(jq -r '.storage.disk_free_pct // 100' <<<"$DOCTOR_JSON")"
@@ -193,7 +195,7 @@ MONOLITHIC_FILE_DEBT_TRIGGER=0
 if [ "${OVERSIZED_FILES_COUNT:-0}" -gt 3 ]; then
   MONOLITHIC_FILE_DEBT_TRIGGER=1
 fi
-if [ "$STATUS" != "fail" ] && [ "$ROOT_DRIFT" != "true" ] && [ "${PUNTED_COUNT:-0}" -le 0 ] && [ "${PEER_ORCH_IDLE_ON_BLOCKER_COUNT:-0}" -le 0 ] && [ "$STORAGE_TRIGGER" -eq 0 ] && [ "$HEADLESS_BROWSER_TRIGGER" -eq 0 ] && [ "$AGENTMAIL_IDENTITY_TRIGGER" -eq 0 ] && [ "$DAILY_REPORT_TRIGGER" -eq 0 ] && [ "${REPO_LOCAL_CLIS_BELOW:-0}" -le 0 ] && [ "$MONOLITHIC_FILE_DEBT_TRIGGER" -eq 0 ]; then
+if [ "$STATUS" != "fail" ] && [ "$ROOT_DRIFT" != "true" ] && [ "${DOCTRINE_3_SURFACE_DIVERGENT_COUNT:-0}" -le 0 ] && [ "${FLEET_L_RULE_LAG_COUNT:-0}" -le 0 ] && [ "${PUNTED_COUNT:-0}" -le 0 ] && [ "${PEER_ORCH_IDLE_ON_BLOCKER_COUNT:-0}" -le 0 ] && [ "$STORAGE_TRIGGER" -eq 0 ] && [ "$HEADLESS_BROWSER_TRIGGER" -eq 0 ] && [ "$AGENTMAIL_IDENTITY_TRIGGER" -eq 0 ] && [ "$DAILY_REPORT_TRIGGER" -eq 0 ] && [ "${REPO_LOCAL_CLIS_BELOW:-0}" -le 0 ] && [ "$MONOLITHIC_FILE_DEBT_TRIGGER" -eq 0 ]; then
   jq -nc --arg reason "doctor_status=$STATUS" '{action:"noop",reason:$reason}'
   exit 0
 fi
@@ -229,6 +231,22 @@ if [ "$ROOT_DRIFT" = "true" ]; then
     'canonical_root_drift|root.*AGENTS|AGENTS.*root|doctrine.*root.*drift|root.*doctrine.*drift' \
     "[auto-doctor:root_drift] canonical_root_drift=$ROOT_DRIFT_STATUS" \
     "Auto-created by doctor-signal-bead-promotion.sh. Doctor reports canonical_root_drift=$ROOT_DRIFT_STATUS missing_rules=${ROOT_DRIFT_MISSING:-none}. Root AGENTS.md must carry the canonical flywheel doctrine block; see flywheel-ft04."
+fi
+
+if [ "${DOCTRINE_3_SURFACE_DIVERGENT_COUNT:-0}" -gt 0 ]; then
+  handle_symptom \
+    "doctrine_3_surface" \
+    'doctrine.*3-surface|3-surface.*doctrine|doctrine_3_surface_divergent_count|AGENTS-CANONICAL.*template|L-rule.*surface' \
+    "[auto-doctor:doctrine_3_surface] divergent_count=$DOCTRINE_3_SURFACE_DIVERGENT_COUNT" \
+    "Auto-created by doctor-signal-bead-promotion.sh. Doctor reports doctrine_3_surface_divergent_count=$DOCTRINE_3_SURFACE_DIVERGENT_COUNT. L96 requires every L-rule to land on AGENTS.md, .flywheel/AGENTS-CANONICAL.md, and templates/flywheel-install/AGENTS.md in one coherent doctrine diff."
+fi
+
+if [ "${FLEET_L_RULE_LAG_COUNT:-0}" -gt 0 ]; then
+  handle_symptom \
+    "fleet_l_rule_lag" \
+    'fleet.*L-rule.*lag|fleet_repo_l_rule_lag_count|repo.*doctrine.*lag|root.*AGENTS.*lag' \
+    "[auto-doctor:fleet_l_rule_lag] lagging_repos=$FLEET_L_RULE_LAG_COUNT" \
+    "Auto-created by doctor-signal-bead-promotion.sh. Doctor reports fleet_repo_l_rule_lag_count=$FLEET_L_RULE_LAG_COUNT. Fleet repos must pull canonical doctrine before dispatch so stale L-rules do not govern worker packets."
 fi
 
 if [ "${PUNTED_COUNT:-0}" -gt 0 ]; then

@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+PROBE="$ROOT/.flywheel/scripts/doctrine-3-surface-divergence-probe.sh"
+TMP="$(mktemp -d "${TMPDIR:-/tmp}/doctrine-3-surface-test.XXXXXX")"
+trap 'rm -rf "$TMP"' EXIT
+
+pass_count=0
+fail_count=0
+
+pass() { printf 'PASS %s\n' "$1"; pass_count=$((pass_count + 1)); }
+fail() { printf 'FAIL %s\n' "$1"; fail_count=$((fail_count + 1)); }
+
+make_surface() {
+  local path="$1"
+  shift
+  mkdir -p "$(dirname "$path")"
+  {
+    printf '# Doctrine\n\n'
+    for rule in "$@"; do
+      printf '## %s — fixture\n\n---\nid: %s\n---\n\nbody\n\n' "$rule" "$rule"
+    done
+  } >"$path"
+}
+
+repo="$TMP/repo"
+mkdir -p "$repo/.flywheel" "$repo/templates/flywheel-install"
+
+make_surface "$repo/AGENTS.md" L93 L94 L95
+make_surface "$repo/.flywheel/AGENTS-CANONICAL.md" L93 L94 L95 L96
+make_surface "$repo/templates/flywheel-install/AGENTS.md" L93 L94
+
+set +e
+out="$("$PROBE" --repo "$repo" --json)"
+rc=$?
+set -e
+
+if [[ "$rc" -eq 1 ]]; then
+  pass "drift exits non-zero"
+else
+  fail "drift exits non-zero"
+fi
+
+if jq -e '.doctrine_3_surface_divergent_count == 2 and (.missing_in_agents_md == ["L96"]) and (.missing_in_template == ["L95","L96"]) and (.missing_in_canonical == [])' <<<"$out" >/dev/null; then
+  pass "drift payload lists per-surface missing rules"
+else
+  fail "drift payload lists per-surface missing rules"
+  jq . <<<"$out" || true
+fi
+
+make_surface "$repo/AGENTS.md" L93 L94 L95 L96
+make_surface "$repo/.flywheel/AGENTS-CANONICAL.md" L93 L94 L95 L96
+make_surface "$repo/templates/flywheel-install/AGENTS.md" L93 L94 L95 L96
+
+out="$("$PROBE" --repo "$repo" --json)"
+if jq -e '.status == "pass" and .doctrine_3_surface_divergent_count == 0 and .exit_code == 0' <<<"$out" >/dev/null; then
+  pass "coherent surfaces pass"
+else
+  fail "coherent surfaces pass"
+  jq . <<<"$out" || true
+fi
+
+printf '\nSummary: %s passed, %s failed\n' "$pass_count" "$fail_count"
+[[ "$fail_count" -eq 0 ]]
