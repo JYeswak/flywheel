@@ -909,6 +909,22 @@ jq -nc \
   --argjson result "$CANONICAL_PULL_RESULT" \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
+# L102 — META-RULE-CACHE-MUST-REFRESH-ON-TICK
+# Sync canonical META-RULE bundle into <repo>/.flywheel/META-RULE-CACHE.md
+# Sister orchs running this same tick driver inherit by construction.
+META_RULE_SYNC="/Users/josh/.flywheel/canonical-meta-rules/sync.sh"
+if [[ -x "$META_RULE_SYNC" ]]; then
+  META_RULE_SYNC_OUT="$("$META_RULE_SYNC" --apply --json 2>&1 || printf '{"status":"fail","error":"sync_failed"}')"
+  if ! jq -e . >/dev/null 2>&1 <<<"$META_RULE_SYNC_OUT"; then
+    META_RULE_SYNC_OUT="$(jq -nc --arg raw "$META_RULE_SYNC_OUT" '{status:"fail",error:"invalid_json",raw:$raw}')"
+  fi
+  jq -nc \
+    --arg ts "$(ts)" \
+    --arg event "meta_rule_cache_sync" \
+    --argjson result "$META_RULE_SYNC_OUT" \
+    '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+fi
+
 CODEX_WATCHTOWER_RESULT="$(codex_watchtower_probe 2>&1 || printf '{"action":"error"}')"
 CODEX_WATCHTOWER_RESULT="$(first_json_or_raw "$CODEX_WATCHTOWER_RESULT")"
 jq -nc \
