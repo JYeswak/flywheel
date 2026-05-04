@@ -1,0 +1,179 @@
+# Flywheel canonical paths
+# Format: name<TAB>path<TAB>owner_bead<TAB>notes
+validation_receipt_schema_v1	.flywheel/validation-schema/v1/schema.json	flywheel-bc7c	Canonical validation receipt schema for validate-and-redispatch B01.
+validation_receipt_parser_v1	.flywheel/validation-schema/v1/parse.sh	flywheel-bc7c	Read-only parser for validation receipt fixtures and callback receipts.
+validation_receipt_fixtures_v1	.flywheel/validation-schema/v1/fixtures	flywheel-bc7c	Pass/fail fixture corpus for validation receipt v1.
+dispatch_template_validation_block	/Users/josh/.claude/commands/flywheel/_shared/dispatch-template.md	flywheel-scwo	Shared worker dispatch template with required VALIDATION BLOCK.
+dispatch_template_audit_v1	.flywheel/validation-schema/v1/dispatch-template-audit.sh	flywheel-scwo	Read-only audit for dispatch validation-block requirements.
+dispatch_template_fixtures_v1	.flywheel/validation-schema/v1/fixtures/dispatch-template	flywheel-scwo	Valid/invalid dispatch packet fixtures for B02.
+validate_tick_driver	.flywheel/flywheel-loop-tick	flywheel-hf58	Tick driver with VALIDATE phase before INTEGRATE.
+tick_receipt_schema_v1	.flywheel/validation-schema/v1/tick-receipt.schema.json	flywheel-hf58	Tick receipt schema including validation_summary fields.
+validate_tick_phase_tests	tests/validate-tick-phase.sh	flywheel-hf58	Fixture-backed tests for VALIDATE phase routing.
+l70_ticks_punted_probe	.flywheel/scripts/ticks-punted-probe.sh	flywheel-zdva	Doctor-backed L70 probe for same-tick chain punts without chain_blocked_reason.
+worker_callback_delivery_verifier	.flywheel/scripts/verify-callback-delivery.sh	flywheel-f589	Worker-side ntm callback send wrapper that verifies delivery before clean DONE.
+worker_callback_delivery_tests	tests/verify-callback-delivery.sh	flywheel-f589	Fixture-backed tests for success, queued-not-submitted, FTS5 send failure, and pane-disappeared modes.
+four_lens_close_validator	.flywheel/scripts/validate-callback-before-close.sh	flywheel-8q68	Four-lens bead-close gate that blocks unsafe closeout and creates/reuses repo-local rework beads with --apply.
+four_lens_close_validator_template	templates/flywheel-install/validate-callback-before-close.sh.tmpl	flywheel-8q68	Install-template source for fleet-wide validator propagation.
+four_lens_close_validator_fleet_sync	.flywheel/scripts/sync-four-lens-validator.sh	flywheel-8q68	Audit/apply helper that installs the close validator into active flywheel repos from the canonical template.
+four_lens_close_validator_tests	tests/validate-callback-before-close.sh	flywheel-8q68	Fixture-backed tests for safe close, BLOCK_CLOSE, dry-run rework planning, apply-mode rework bead creation, and canonical help/info/examples/version surface.
+four_lens_close_validator_sync_tests	tests/sync-four-lens-validator.sh	flywheel-8q68	Fixture-backed tests for fleet sync dry-run, apply, audit, and executable validator proof.
+fleet_conductor_cli	/Users/josh/.claude/skills/.flywheel/bin/flywheel-conductor	flywheel-kwyy	Canonical fleet-conductor CLI with MVP readiness gate consuming four-lens output and recording Joshua-time-saved metrics.
+fleet_conductor_slash_command	/Users/josh/.claude/commands/flywheel/fleet-conductor.md	flywheel-kwyy	/flywheel:fleet-conductor slash wrapper for the canonical conductor CLI.
+fleet_conductor_joshua_time_saved	/Users/josh/.local/state/flywheel/conductor/joshua-time-saved.jsonl	flywheel-kwyy	Deduped metric ledger for MVP gate failures not surfaced to Joshua.
+fleet_conductor_mvp_gate_tests	tests/fleet-conductor-mvp-gate.sh	flywheel-kwyy	Fixture-backed tests for 4/4 pass, gate fail rework, metric dedupe, pre-bar surfacing, and canonical CLI smoke.
+validation_fix_bead_helper	.flywheel/scripts/validation-fix-bead.py	flywheel-8xrn	Dry-run/apply helper for repo-local fix beads from failed validation receipts.
+validation_fix_bead_tests	tests/validation-fix-bead.sh	flywheel-8xrn	Fixture-backed tests for dry-run payloads, duplicate detection, idempotency, no_bead_reason, and repo-local proof.
+closed_bead_artifact_scanner	.flywheel/scripts/closed-bead-artifact-scan.py	flywheel-i8b6	Dry-run/apply scanner for closed bead artifact refs, reopen candidates, validation receipts, and audit rows.
+closed_bead_artifact_scanner_tests	tests/closed-bead-artifact-scan.sh	flywheel-i8b6	Fixture-backed tests for missing files, command smoke failure, non-executable files, invalid schemas, ambiguous prose, valid artifacts, and apply idempotency.
+agent_context_parity_probe	.flywheel/scripts/agent-context-parity-probe.py	flywheel-u2dr	Read-only L69 parity probe that separates agent_context from orchestrator_shell_context and validates callback content.
+agent_context_parity_tests	tests/agent-context-parity-probe.sh	flywheel-u2dr	Fixture-backed tests for Codex ntm-send callback validation, Claude Bash-context validation, context drift, runtime timeout, and L65 identity proof.
+l71_validate_redispatch_discipline	AGENTS.md	flywheel-dw5w	Canonical L71 doctrine for validate-and-redispatch discipline after B12 rollout proof.
+orchestrator_validation_discipline_skill	/Users/josh/.claude/skills/orchestrator-validation-discipline/SKILL.md	flywheel-dw5w	Skill for validating callbacks, closed bead shipped claims, redispatch outcomes, and evidence wire-in.
+validate_redispatch_discipline_memory	/Users/josh/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_validate_redispatch_foundational_discipline.md	flywheel-dw5w	Memory note binding callback validation, callback delivery, work-hunt, and three-question audit feedback into L71.
+doctrine_memory_wire_tests	tests/doctrine-memory-wire.sh	flywheel-dw5w	Regression checks for L71, README, memory, skill, canonical paths, and shared primitive-name drift.
+doctrine_memory_wire_readme_compat	README	flywheel-dw5w.1	Extensionless README compatibility artifact for B10_AG3 path evidence; canonical operator docs remain README.md.
+doctrine_memory_wire_drift_check_compat	AGENTS/README/memory/skill	flywheel-dw5w.2	Compatibility artifact for B10_AG7 parsed path evidence; executable drift check remains tests/doctrine-memory-wire.sh.
+validation_learn_router	/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop	flywheel-kscr	flywheel-loop validation-learn routes validation receipts into /flywheel:learn/fuckup-log exactly once.
+validation_learn_ledger	.flywheel/validation-learn-ledger.jsonl	flywheel-kscr	Repo-local dedupe ledger for validation receipt learn routing; created on first --apply route.
+validation_learn_tests	tests/validation-learn-routing.sh	flywheel-kscr	Fixture-backed tests for failed validation dedupe, positive ignore routing, promote ladder routing, and skill-extension routing.
+validation_learn_incidents_compat	INCIDENTS	flywheel-kscr.1	Extensionless INCIDENTS compatibility artifact for B09_AG4 path evidence; canonical incident ledger remains INCIDENTS.md.
+validation_e2e_smoke	.flywheel/scripts/validation-e2e-smoke.sh	flywheel-yasl	Final validate-and-redispatch smoke harness that emits validation-e2e/v1 receipts across callback, doctor, tick, learn, L70, parity, rollout, and surface-ledger gates.
+validation_e2e_tests	tests/validation-e2e.sh	flywheel-yasl	Wrapper test for the B12 final smoke harness and staged rollout receipt.
+orch_capture_parity_probe	.flywheel/scripts/orch-capture-parity-probe.py	flywheel-erkx	Read-only B13 probe comparing orchestrator topology to canonical Joshua-input capture rows.
+orch_capture_parity_tests	tests/orch-capture-parity-probe.sh	flywheel-erkx	Fixture-backed tests for Claude/Codex capture parity, stale capture, non-participating runtimes, duplicate capture, and doctor strict failure.
+three_q_surface_registry_schema	.flywheel/three-q-surface-registry/v1/schema.json	flywheel-m5kg	Canonical B14 schema for surface rows that answer validated/documented/surfaced.
+three_q_surface_registry	.flywheel/three-q-surface-registry/v1/registry.json	flywheel-m5kg	Seed registry covering Lane A flywheel surface categories with Q1/Q2/Q3 evidence refs.
+three_q_surface_audit_runner	.flywheel/scripts/three-q-surface-audit.py	flywheel-m5kg	Read-only B14 audit runner with strict mode, doctor JSON, filters, and validation receipt output.
+three_q_surface_audit_tests	tests/three-q-surface-audit.sh	flywheel-m5kg	Fixture-backed tests for complete, partial, stale, missing-artifact, runtime-specific, doctor, and learn-routing paths.
+l72_storage_discipline	AGENTS.md	flywheel-2zsj	Canonical L72 doctrine for system-wide storage headroom gates.
+storage_policy	.flywheel/STORAGE.md	flywheel-2zsj	Storage thresholds, growth gates, history, and dry-run prune posture.
+storage_probe	.flywheel/scripts/storage-probe.sh	flywheel-2zsj	Fast JSON doctor probe for disk, Developer, local-state, stale backup, qdrant, and tmp dispatch metrics.
+storage_prune	.flywheel/scripts/storage-prune.sh	flywheel-2zsj	Dry-run-first manual prune helper for stale .beads.bak dirs and tmp dispatch artifacts older than seven days.
+storage_probe_tests	tests/storage-probe.sh	flywheel-2zsj	Fixture-backed tests for healthy, low-free, high-bak-count, notify, doctor promotion, daily ingest abort, and prune dry-run.
+storage_history	/Users/josh/.local/state/flywheel/storage-history.jsonl	flywheel-2zsj	Append-only storage trend ledger retained by storage-probe for 90 days.
+storage_override_schema_v1	.flywheel/validation-schema/v1/storage-override.schema.json	flywheel-vso8	Schema for Joshua-disposed storage headroom override receipts.
+storage_override_doctrine_flywheel_agents	.flywheel/AGENTS.md	flywheel-vso8.2	Repo-local .flywheel doctrine artifact carrying L79 storage-override receipt rules for artifact scanners.
+storage_override_doctor	/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop	flywheel-vso8	Doctor support for storage_override_active_count, storage_override_expiring_in_min, --storage-min-free-pct, and FLYWHEEL_STORAGE_MIN_FREE_PCT.
+storage_override_tests	tests/storage-override.sh	flywheel-vso8	Fixture-backed tests for valid, expired, wrong-target, recovered, CLI flag, and env override cases.
+storage_override_receipts	/Users/josh/.local/state/flywheel/storage-overrides	flywheel-vso8	Fleet-local receipt directory for storage-override/v1 JSON and STORAGE-CLEARED event log rows.
+jeff_issue_rubric	.flywheel/scripts/jeff-issue-rubric.py	flywheel-3p1j	Deterministic 7-axis quality gate for Jeff issue drafts before posting.
+jeff_issue_rubric_docs	.flywheel/jeff-issue-rubric/v1/README.md	flywheel-3p1j	Axis definitions, thresholds, commands, and doctor signal contract.
+jeff_issue_rubric_fixtures	.flywheel/jeff-issue-rubric/v1/fixtures	flywheel-3p1j	High-quality, low-quality, ambiguous, and anti-pattern draft fixtures.
+jeff_issue_rubric_tests	tests/jeff-issue-rubric.sh	flywheel-3p1j	Fixture-backed tests for scoring, receipt writing, doctor counts, and strict failure.
+l73_headless_browser_orphan_leak	AGENTS.md	flywheel-3ck3	Canonical L73 doctrine for headless agent-browser orphan leak handling.
+headless_browser_probe	.flywheel/scripts/headless-browser-probe.sh	flywheel-3ck3	JSON doctor probe for agent-browser-chrome process count, age, memory, locks, and thresholds.
+headless_browser_reap	.flywheel/scripts/headless-browser-reap.sh	flywheel-3ck3	Dry-run-first reaper for stale or over-count agent-browser-chrome processes; applied runs append receipts.
+headless_browser_reap_history	/Users/josh/.local/state/flywheel/headless-browser-reaps.jsonl	flywheel-3ck3	Append-only receipt ledger for applied headless browser reaps.
+headless_browser_probe_tests	tests/headless-browser-probe.sh	flywheel-3ck3	Fixture-backed tests for zero, under-threshold, over-threshold, age-threshold, primary-profile exclusion, dry-run reap, and doctor promotion.
+l76_agentmail_identity_canonical	AGENTS.md	flywheel-g9mi	Canonical L76 doctrine for durable Agent Mail session:pane identity resolution.
+agent_mail_identity_registry_schema	.flywheel/validation-schema/v1/agent-mail-identity-registry.schema.json	flywheel-g9mi	Schema for session:pane identity rows, token refs, predecessor identity, rotation reason, and status.
+agent_mail_identity_resolver	/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop	flywheel-g9mi	flywheel-loop identity resolver, migration, and doctor command surface.
+agent_mail_identity_sessions	/Users/josh/.local/state/flywheel/agent-mail/sessions	flywheel-g9mi	Durable session:pane Agent Mail identity registry.
+agent_mail_identity_tokens	/Users/josh/.local/state/flywheel/agent-mail/tokens	flywheel-g9mi	Canonical mode-600 token vault for Agent Mail identities.
+agent_mail_identity_tests	tests/agent-mail-identity-registry.sh	flywheel-g9mi	Fixture-backed tests for migration, resolve, register, rotation, doctor drift, orphan detection, and promotion.
+agentmail_registration_broadcast	.flywheel/scripts/agentmail-registration-broadcast.sh	flywheel-2uin	Token-safe cross-orch registration request broadcaster for live needs_registration rows.
+agentmail_registration_broadcast_tests	tests/agentmail-registration-broadcast.sh	flywheel-2uin	Fixture-backed tests for live send, dead-session skip, deferral handling, and 60-minute dedupe.
+agent_mail_fd_doctor	.flywheel/scripts/agent-mail-fd-doctor.sh	flywheel-ntaf	Agent Mail file-descriptor doctor with child PID, numeric FD, max FD, lock FD, plist maxfiles, and service resource-limit checks.
+agent_mail_restart_helper	.flywheel/scripts/agent-mail-restart.sh	flywheel-ntaf	Dry-run-first launchctl bootout/bootstrap/kickstart helper for Agent Mail restart and child PID verification.
+agent_mail_fd_doctor_tests	tests/agent-mail-fd-doctor.sh	flywheel-ntaf	Fixture-backed tests for service resource limits, lock FD warnings, total FD failures, and flywheel-loop doctor wiring.
+codex_watchtower_daily	~/.local/bin/codex-watchtower-daily.sh	flywheel-ezyf	Daily openai/codex issues/releases ingest that feeds tick Step 4t and durable high-relevance ledgers.
+codex_cli_tracker_skill	~/.claude/skills/codex-cli-tracker	flywheel-ezyf	Skill substrate for Codex pinned-version constraints, upstream issue map, recovery patterns, and upstream comment candidates.
+codex_watchtower_tests	tests/codex-watchtower.sh	flywheel-ezyf	Validation harness for Codex watchtower skill refs, daily ingest, launchd schedule, incident evidence, and tick Step 4t wiring.
+flywheel_refresh_source_cli	~/.claude/skills/.flywheel/bin/flywheel-refresh-source	flywheel-pfpd	Canonical CLI surface for skill source refresh, doctor, repair, validation, audit, schemas, and dry-run mutation discipline.
+flywheel_refresh_source_readme	~/.claude/skills/.flywheel/bin/flywheel-refresh-source.README.md	flywheel-pfpd	Operator docs for flywheel-refresh-source command surface, side effects, error modes, and validation.
+flywheel_refresh_source_canonical_tests	tests/flywheel-refresh-source-canonical-cli.sh	flywheel-pfpd	Fixture-backed canonical CLI smoke for help read-only behavior, self-documentation, dry-run mutation shape, and checker pass.
+flywheel_doctrine_sync_cli	~/.claude/skills/.flywheel/bin/flywheel-doctrine-sync	flywheel-ynys	Canonical CLI surface for doctrine propagation doctor, repair, validation, audit, schema, completion, and dry-run mutation discipline.
+flywheel_doctrine_sync_readme	~/.claude/skills/.flywheel/bin/flywheel-doctrine-sync.README.md	flywheel-ynys	Operator docs for doctrine-sync command surface, doctor invariant, side effects, launchd integration, and validation.
+flywheel_doctrine_sync_canonical_tests	tests/flywheel-doctrine-sync-canonical-cli.sh	flywheel-ynys	Fixture-backed canonical CLI smoke for doctrine-sync self-documentation, health watch, dry-run contracts, and checker pass.
+flywheel_verdict_cli	~/.claude/skills/.flywheel/bin/flywheel-verdict	flywheel-6flh	Canonical CLI surface for Joshua verdict capture with doctor, health, repair, validation, audit, schema, completion, health watch, and dry-run mutation discipline.
+flywheel_verdict_readme	~/.claude/skills/.flywheel/bin/flywheel-verdict.README.md	flywheel-6flh	Operator docs for flywheel-verdict command surface, side effects, error modes, canonical JSON contracts, and validation.
+flywheel_verdict_canonical_tests	tests/flywheel-verdict-canonical-cli.sh	flywheel-6flh	Fixture-backed canonical CLI smoke for self-documentation, health watch, repair dry-run, verdict alias preservation, and checker pass.
+daily_report_command	/Users/josh/.claude/commands/flywheel/daily-report.md	flywheel-o7dq	Slash command contract for generating repo-local daily flywheel reports.
+daily_report_config	.flywheel/daily-report-config.json	flywheel-iqqa	Per-repo opt-in config for daily_report doctor applicability; default false outside the flywheel repo.
+daily_report_generator	.flywheel/scripts/daily-report.sh	flywheel-o7dq	Repo-local wrapper that writes .flywheel/reports/daily-YYYY-MM-DD.md.
+daily_report_enabled_runner	.flywheel/scripts/daily-report-enabled-repos.sh	flywheel-iqqa	Launchd runner that generates reports for repos with daily-report-config enabled=true plus the flywheel repo default.
+daily_report_launchd	~/Library/LaunchAgents/ai.zeststream.flywheel-daily-report.plist	flywheel-iqqa	Daily 06:15 LaunchAgent for the enabled-repo daily-report runner.
+daily_report_reports_dir	.flywheel/reports	flywheel-o7dq	Per-repo daily narrative report directory.
+daily_report_tests	tests/daily-report.sh	flywheel-o7dq	Fixture-backed tests for zero-bead, all-stuck, normal-day, doctor, notify, and auto-promotion paths.
+jeff_corpus_v1_manifest	.flywheel/jeff-corpus/v1/manifest.json	flywheel-15dg	Frozen Jeff corpus v1 baseline manifest with per-repo SHA, chunk count, repo size, and content hashes.
+jeff_corpus_diff_watcher	.flywheel/scripts/jeff-corpus-diff-watcher.sh	flywheel-15dg	Daily 03:00Z SHA watcher that writes deterministic pending-reindex rows.
+jeff_corpus_delta_reindex	.flywheel/scripts/jeff-corpus-delta-reindex.sh	flywheel-15dg	Diff-only delta indexer for changed files into jeff-corpus-v2 rows.
+jeff_corpus_compactor	.flywheel/scripts/jeff-corpus-compact.sh	flywheel-15dg	Sunday 04:00Z compactor that merges baseline plus delta and retires old state to cold storage.
+jeff_corpus_doctor	.flywheel/scripts/jeff-corpus-doctor.sh	flywheel-15dg	Doctor probe exposing jeff_corpus_v1_total_mb and jeff_corpus_storage_health.
+jeff_corpus_accretive_tests	tests/jeff-corpus-accretive.sh	flywheel-15dg	Fixture-backed tests for manifest, watcher, delta-only indexing, compaction, and RED storage enforcement.
+jeff_corpus_doctor_scoping_tests	tests/jeff-corpus-doctor-scoping.sh	flywheel-gswz	Fixture-backed tests for owner, non-owner, missing .flywheel, and canonical declaration applicability.
+jeff_intel_state_dir	~/.local/state/jeff-intel	flywheel-9nhx	Canonical state directory for Jeff repo inventory, verified indexing progress, and derived learning artifacts.
+jeff_intel_readme	~/.local/state/jeff-intel/README.md	flywheel-9nhx	Operator documentation for Jeff corpus state files, resume behavior, learning artifacts, and validation commands.
+jeff_intel_learnings_dir	~/.local/state/jeff-intel/learnings	flywheel-9nhx	Per-query Jeff corpus learning artifacts with findings, flywheel gaps, and recommended bead or memory actions.
+jeff_corpus_library_ingestion_tests	tests/jeff-corpus-library-ingestion.sh	flywheel-9nhx	Smoke test for 177 verified repos, persistent progress state, learning artifacts, derived beads, canonical paths, and doctor indexed-count signal.
+jeff_intel_network_helper	.flywheel/scripts/jeff-intel-network.sh	flywheel-1lpv.2	Canonical Jeff intel operator helper with doctor, health, repair, validate, pull, x-poll, audit, why, schema, examples, and dry-run mutation discipline.
+jeff_intel_slash_command	/Users/josh/.claude/commands/flywheel/jeff-intel.md	flywheel-1lpv.2	/flywheel:jeff-intel slash wrapper for the canonical Jeff intel network helper.
+jeff_intel_network_tests	tests/jeff-intel-network.sh	flywheel-1lpv.2	Fixture-backed tests for canonical CLI surface, shellcheck, docs/tick naming agreement, doctor, repair, audit, and why.
+jeff_intel_scheduled_runner	.flywheel/scripts/jeff-intel-scheduled-runner.sh	flywheel-1lpv.1	Launchd runner for daily Jeff ingest and hourly @doodlestein X poll receipts.
+jeff_intel_schedule_tests	tests/jeff-intel-schedule.sh	flywheel-1lpv.1	Fixture-backed tests for Jeff intel launchd labels, plists, source cadences, receipt paths, and docs.
+jeff_intel_daily_launchd	~/Library/LaunchAgents/ai.zeststream.flywheel-daily-jeff-ingest.plist	flywheel-1lpv.1	Daily 06:05 LaunchAgent for GitHub/git, website/RSS, X, JSM, and mirror ingest.
+jeff_intel_x_launchd	~/Library/LaunchAgents/ai.zeststream.flywheel-jeff-x-poll.plist	flywheel-1lpv.1	Hourly LaunchAgent for @doodlestein X timeline capture.
+dicklesworthstone_sources_regenerator	.flywheel/scripts/regenerate-dicklesworthstone-sources.sh	flywheel-152b.1	Idempotent gh-backed regeneration of dicklesworthstone-stack data/sources.txt with backups, JSON summary, branch fidelity, archived exclusion, and preserved doctrine/X sections.
+dicklesworthstone_sources_regenerator_tests	tests/regenerate-dicklesworthstone-sources.sh	flywheel-152b.1	Fixture-backed tests for main/master branch selection, archived repo exclusion, manual-edit clobber warning, backups, dry-run, and idempotent apply.
+closed_bead_quality_mining	.flywheel/scripts/bead-quality-mining.sh	flywheel-7yic	Closed-bead acceptance-gate miner that creates parented audit-gap beads and emits doctor JSON.
+closed_bead_quality_mining_tests	tests/bead-quality-mining.sh	flywheel-7yic	Fixture-backed tests for full evidence, missing artifacts, missing doctor signals, skipped tests, and idempotent reruns.
+closed_bead_quality_mining_doctor	/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop	flywheel-7yic	Doctor support for closed_bead_audit_pending_count, closed_bead_audit_gap_count, and audit_gap_top_classes.
+worker_did_didnt_gaps_contract	/Users/josh/.claude/commands/flywheel/worker-tick.md	flywheel-7yic	Worker callback contract requiring did/didnt/gaps with fix or audit-gap bead IDs before callback.
+learn_bead_quality_mining	/Users/josh/.claude/commands/flywheel/learn.md	flywheel-7yic	/flywheel:learn --bead-quality-mining entry point and review routing contract.
+session_topology_conformance_probe	.flywheel/scripts/topology-gap-probe.sh	flywheel-se3h.1	Read-only session-topology.jsonl schema/latest-wins/bootstrap conformance probe hardening flywheel-31p.
+session_topology_conformance_tests	tests/session-topology-ledger.sh	flywheel-se3h.1	Fixture-backed tests for live topology existence, latest-wins jq, repeated rows, required field errors, bootstrap sessions, and flywheel-31p documentation.
+file_length_probe	.flywheel/scripts/file-length-probe.sh	flywheel-useh	Canonical file-length threshold probe for bash, Python, Rust, and doctrine Markdown.
+file_length_probe_tests	tests/file-length-probe.sh	flywheel-useh	Fixture-backed tests for bash-over, python-over, rust-over, allowed override, doctrine Markdown override, and auto-promotion.
+file_length_doctrine_l83	AGENTS.md	flywheel-useh	Canonical L83 fleet-wide file-length discipline and doctor/promotion contract.
+canonical_cli_file_length_rule	/Users/josh/.claude/skills/canonical-cli-scoping/SKILL.md	flywheel-useh	File-length thresholds and canonical-cli-scoping-allow-large receipt rule.
+flywheel_readme_cli	/Users/josh/.claude/skills/.flywheel/bin/flywheel-readme	flywheel-qnc	Canonical CLI for cross-pane README draft, submit, reject, Joshua-reject signoff transport, review, pass, doctor, health, repair, validate, audit, why, schemas, and observability.
+flywheel_readme_tests	tests/flywheel-readme.sh	flywheel-qnc	Fixture-backed smoke tests for canonical CLI scoping, review lifecycle commands, dry-run mutations, live transport success/failure legs, queue forms, validation, provenance, and trace.
+fleet_onboarding_cli	.flywheel/scripts/flywheel-onboard.sh	flywheel-vhl5	Canonical /flywheel:onboard 5-tier fleet member contract probe with doctor, health, repair, validate, audit, why, schema, examples, and dry-run stamp/sync/upgrade planning.
+fleet_onboarding_slash_command	/Users/josh/.claude/commands/flywheel/onboard.md	flywheel-vhl5	Slash command wrapper for the canonical fleet onboarding probe.
+state_md_miner	.flywheel/scripts/state-md-miner.sh	flywheel-b6zk	Fleet STATE.md opportunity miner for /flywheel:learn --mine-state with dry-run, apply, doctor, schema, 5/day/repo cap, and bead/no-bead decisions.
+state_md_miner_tests	tests/state-md-miner.sh	flywheel-b6zk	Fixture-backed tests for unresolved, stale, pattern, existing-bead, auto-bead cap, decision ledger, latest digest, and doctor signal.
+state_md_miner_launchd	/Users/josh/Library/LaunchAgents/ai.zeststream.flywheel-state-md-miner.plist	flywheel-b6zk	Daily 06:00 LaunchAgent for applying STATE.md mining with max 5 auto-created beads per repo per day.
+l75_orch_blocker_coordination	AGENTS.md	flywheel-vc3e	Canonical L75 doctrine for peer orchestrator flywheel-class blocker coordination with flywheel:1.
+peer_orch_blocker_watch	.flywheel/scripts/peer-orch-blocker-watch.sh	flywheel-vc3e	L75 ledger watcher for stale flywheel-class blockers and peer_orch_blocker_age_seconds doctor signal.
+peer_orch_blocker_watch_tests	tests/peer-orch-blocker-watch.sh	flywheel-vc3e	Fixture-backed tests for stale blocker detection, flywheel ack clearing, legacy inference, malformed row handling, and schema output.
+flywheel_autoloop_cli	/Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop	flywheel-wv5c	Canonical CLI surface for autoloop help, doctor, health, repair, validation, audit, health watch, and no-arg supervisor regression.
+flywheel_autoloop_readme	/Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop.README.md	flywheel-wv5c	Operator docs for autoloop command surface, side effects, error modes, and canonical validation command.
+flywheel_autoloop_canonical_tests	tests/flywheel-autoloop-canonical-cli.sh	flywheel-wv5c	Fixture-backed canonical CLI smoke for help read-only behavior, doctor/health JSON, health watch, no-arg supervisor preservation, and canonical checker pass.
+toolset_parity_cli	/Users/josh/.local/bin/flywheel-toolset-parity	flywheel-q03g	Canonical CLI surface for Claude/Codex toolset parity matrix over dcg, br, ntm, cm, and jsm.
+toolset_parity_readme	/Users/josh/.local/bin/flywheel-toolset-parity.README.md	flywheel-q03g	Operator docs for toolset parity command surface, runtime probing, output files, and exit codes.
+toolset_parity_tests	tests/flywheel-toolset-parity.sh	flywheel-q03g	Fixture-backed tests for local Claude matrix, Codex callback matrix, runtime-unresponsive timeout, and canonical CLI scoping.
+codex_hook_parity_probe	.flywheel/scripts/codex-hook-parity-probe.py	flywheel-sx1e	Claude/Codex DCG hook parity probe and Codex hooks.json sync helper with 60-second hook-change parity window.
+codex_hook_parity_tests	tests/codex-hook-parity-probe.sh	flywheel-sx1e	Fixture-backed tests for Codex PreToolUse support detection, dcg hook rendering/apply, 60-second parity lag failure, and upstream issue draft fallback.
+locked_worker_identity_preallocator	.flywheel/scripts/agent-mail-pre-allocate-worker-identities.sh	flywheel-et7t	Topology-driven Agent Mail identity pre-allocation for stable worker session:pane rows across reboot.
+locked_worker_identity_tests	tests/locked-worker-identities.sh	flywheel-et7t	Fixture-backed tests for missing-pane minting, idempotent existing panes, topology shrink archival, and cross-session reboot stability.
+locked_worker_identity_launchd	/Users/josh/Library/LaunchAgents/ai.zeststream.flywheel-agent-mail-preallocate.plist	flywheel-et7t	RunAtLoad LaunchAgent that refreshes worker identity preallocation after Mac boot.
+identity_primary_key_doctrine	AGENTS.md	identity-stability-substrate-fix	Canonical L100 doctrine: Agent Mail identity primary key is (session,pane,fleet_mail_project_key), not identity_name.
+identity_history_cli	.flywheel/scripts/identity-history.sh	identity-stability-substrate-fix	Query current and predecessor Agent Mail identity chain by stable session/pane tuple.
+agentmail_identity_registry_schema	.flywheel/validation-schema/v1/agent-mail-identity-registry.schema.json	identity-stability-substrate-fix	Schema for tuple primary key, predecessor chain, and canonical rotation_reason enum.
+agentmail_identity_doctor	/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop	identity-stability-substrate-fix	Doctor fields identity_rotation_count_24h, orphan_tokens_unswept_count, and identity_chain_max_length.
+idle_state_probe	.flywheel/scripts/idle-state-probe.sh	flywheel-viux	Canonical WAITING-worker pane classifier for dispatching, cooldown, light_queue, saturated, disabled_class, and not_waiting states.
+idle_state_probe_config_schema	.flywheel/validation-schema/v1/idle-state-config.schema.json	flywheel-viux	Per-repo idle-state class enablement and threshold schema.
+idle_state_probe_tests	tests/idle-state-probe.sh	flywheel-viux	Fixture-backed tests for all idle-state classes, pane-not-waiting, disabled config, class filtering, and doctor fail threshold.
+idle_state_watcher	/tmp/idle-pane-auto-dispatch.sh	flywheel-viux	Thin watcher that consumes idle_state_class dispatching rows and performs br update plus ntm send.
+idle_state_doctor	/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop	flywheel-viux	Doctor support for idle_state_class, idle_state_summary, idle_dispatching_over_threshold_count, and config load fields.
+l86_cross_session_callback_receiver_liveness	AGENTS.md	flywheel-b8zm	Canonical L86 doctrine requiring remote orchestrator and callback receiver liveness before cross-session worker dispatch.
+cross_session_callback_closure_no_bead_receipt	.flywheel/validation-receipts/no-bead-cross-session-callback-closure-skillos-20260504T0400Z.json	flywheel-b8zm	No-bead receipt for skillos-e2n/xxf/s7v requesting skillos orchestrator closure instead of duplicate flywheel beads.
+scope_boundary_memory_infra_deployment	/Users/josh/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_orchestrator_scope_boundary.md	flywheel-b8zm	Memory clarification: infrastructure-deployment can pick work, but remote worker dispatch requires live callback receiver proof.
+flywheel_learn_slash_command	/Users/josh/.claude/commands/flywheel/learn.md	flywheel-kscr.2	Canonical /flywheel:learn slash-command contract; closes B09_AG6 path evidence for review of unrouted validation events.
+tick_receipt_learn_surface	/Users/josh/.claude/commands/flywheel/learn.md	flywheel-hf58.1	Canonical /flywheel:learn slash-command contract consumed by tick validation summaries and B05_AG7 learn/doctor receipt surfacing.
+doctor_validation_status_surface	/Users/josh/.claude/commands/flywheel/status.md	flywheel-zgo3.1	Canonical /flywheel:status slash-command contract consuming stable doctor validation JSON fields for B04_AG9.
+closed_bead_audit_doctrine_flywheel_agents	.flywheel/AGENTS.md	flywheel-g1sn	Repo-local doctrine index entry for L80 closed-bead audit mining, satisfying scanners that require .flywheel/AGENTS.md evidence.
+bead_ag_format_validator	.flywheel/scripts/bead-ag-format.py	flywheel-2k4m	Canonical acceptance-gate format validator for deterministic AG<N> parsing, nested-gate rejection, and non-testable AG warnings.
+bead_ag_create_wrapper	.flywheel/scripts/br-create-validated.sh	flywheel-2k4m	Validated br create wrapper that blocks malformed acceptance gates before bead creation.
+bead_ag_format_docs	/Users/josh/.claude/skills/beads-workflow/references/BEAD-ANATOMY.md	flywheel-2k4m	Bead anatomy reference canonizing single-line AG<N> acceptance gate format with examples.
+publishability_bar_doctrine	.flywheel/PUBLISHABILITY-BAR.md	flywheel-wcq5	Canonical three-judges publishability rubric and threshold contract.
+publishability_bar_audit_template	.flywheel/PUBLISHABILITY-AUDIT.md	flywheel-wcq5	Repo-local publishability audit template consumed by the doctor probe.
+publishability_bar_probe	.flywheel/scripts/publishability-bar.sh	flywheel-wcq5	Deterministic publishability-bar/v1 doctor JSON probe with score thresholds.
+publishability_bar_tests	tests/publishability-bar.sh	flywheel-wcq5	Fixture-backed tests for pass, warn, fail, schema, and flywheel-loop doctor wiring.
+publishability_three_judges_prompt	/Users/josh/.claude/skills/.flywheel/prompts/three-judges-rubric.md	flywheel-wcq5	Prompt template for Jeff, Donella, and Joshua publishability audits.
+publishability_plan_audit_gate	/Users/josh/.claude/commands/flywheel/plan.md	flywheel-wcq5	/flywheel:plan Phase 3 requirement for new repo and major feature publishability audit.
+zeststream_voice_public_repo_doctrine	AGENTS.md	flywheel-06zn	Canonical L89 public repo ZestStream voice gate doctrine.
+zeststream_voice_prepublish_hook	.flywheel/scripts/zeststream-public-prepublish-hook.sh	flywheel-06zn	Public-remote pre-publish gate consuming publishability brand voice fields.
+zeststream_voice_prepublish_tests	tests/zeststream-public-prepublish-hook.sh	flywheel-06zn	Fixture-backed tests for public pass, public fail, and non-public skip.
+jeff_pattern_citation_probe	.flywheel/scripts/jeff-pattern-citation-probe.sh	flywheel-jhcd	Validator and doctor-equivalent probe for uncited Jeff-originated doctrine, skill, and plan imports.
+jeff_pattern_citation_tests	tests/jeff-pattern-citation-probe.sh	flywheel-jhcd	Fixture-backed tests for valid, vague, and missing-file-line Jeff import citations.

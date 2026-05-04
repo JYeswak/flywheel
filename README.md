@@ -748,12 +748,33 @@ bash /Users/josh/Developer/flywheel/tests/locked-worker-identities.sh
 
 Registry rows live in
 `~/.local/state/flywheel/agent-mail/sessions/<session>:<pane>.json`; token files
-live in `~/.local/state/flywheel/agent-mail/tokens/` with mode 600. The doctor
-field reports `identity_registry_drift`, `identity_token_orphan`,
-`worker_identity_registered_count`, and `agentmail_orphan_session_rows_count`.
-Worker dispatches and callbacks should include
-`identity_name=<registry-identity-name>`. Cross-orch handshakes should include
-`identity_resolved=<identity_name>` and must not carry raw Agent Mail tokens.
+live in `~/.local/state/flywheel/agent-mail/tokens/` with mode 600. The durable
+identity key is `(session, pane, fleet_mail_project_key)`; `identity_name` is
+only the current mailbox pointer. Rotation rows preserve
+`predecessor_identity_chain[]` and one of the canonical rotation reasons:
+`agent-mail-name-policy`, `resolver-mcp-generated-identity`,
+`compaction-continuity`, `missing-token-recovery`, `path-canonicalization`, or
+`strict-mode-preallocation`.
+
+The doctor field reports `identity_registry_drift`, `identity_token_orphan`,
+`orphan_tokens_unswept_count`, `identity_rotation_count_24h`,
+`identity_chain_max_length`, `worker_identity_registered_count`, and
+`agentmail_orphan_session_rows_count`. Worker dispatches and callbacks should
+include `identity_name=<registry-identity-name>` and, when available,
+`identity_primary_key=session:pane:project`. Cross-orch handshakes should
+include `identity_resolved=<identity_name>` and must not carry raw Agent Mail
+tokens.
+
+Identity history for churn diagnosis:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/identity-history.sh \
+  --session flywheel \
+  --pane 2 \
+  --json
+
+/Users/josh/Developer/flywheel/.flywheel/scripts/identity-history.sh doctor --json
+```
 
 Registration broadcast uses:
 
