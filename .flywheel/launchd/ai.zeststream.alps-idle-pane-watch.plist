@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.zeststream.alps-idle-pane-watch</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/josh/Developer/flywheel/.flywheel/scripts/idle-pane-auto-dispatch.sh</string>
+    <string>--session=alpsinsurance</string>
+    <string>--apply</string>
+    <string>--json</string>
+  </array>
+  <key>StartInterval</key>
+  <integer>60</integer>
+  <key>StandardOutPath</key>
+  <string>/Users/josh/.local/state/flywheel/idle-pane-watch.alpsinsurance.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/josh/.local/state/flywheel/idle-pane-watch.alpsinsurance.err</string>
+</dict>
+</plist>
