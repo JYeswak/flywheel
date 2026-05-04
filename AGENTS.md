@@ -2266,6 +2266,13 @@ If a reversible workaround passes copy-test, apply the workaround through the re
 
 **How to apply:** any dispatch, callback, or draft containing `jeff issue`, `file upstream`, `Jeff-worthy`, or `escalate to Jeff` must link a preceding `*-workarounds-research-*` task or receipt from the last 24 hours. A mechanical validator may treat the receipt as eligible only when this predicate passes: `jq -e '(.socraticode_queries >= 2 and .socraticode_k_per_query >= 10) and (.workarounds_ranked >= 5) and (.top_workarounds_copy_tested >= 2) and ((.jeff_issue_warranted == false) or (.all_workarounds_failed == true or .foundational_no_workaround == true))'`. Doctor should expose `jeff_issue_pending_without_workaround_research_count`, target `0`, and the issue-filing hook should block when no qualifying workaround-research callback exists.
 
+**2026-05-04 beads_rust dep-add note:** skillos hit `br dep add`
+`OpenRead root page 184`, then `root page 121` after fresh JSONL rebuild. L93
+prevented a duplicate upstream issue: the exact edge failed on installed
+`br 0.1.20`, but passed on disposable `br 0.2.4`; direct SQL + flush + rebuild
+also passed as a reversible fallback. Receipt:
+`/tmp/beads-rust-dep-add-corruption-jeff-issue-output.md`.
+
 **Cross-references:** L48 (substrate exhaustion before escalation), L63 (Jeff intel network), L64 (Jeff as mentor), L66 (outbound Jeff issue phased gate), L71 (validate-and-redispatch), L78 (Jeff corpus accretive ingestion), `feedback_jeff_issue_chain.md`, `feedback_jeff_issue_requires_full_workaround_research_first.md`, `reference_jeff_substrate_inventory.md`, `reference_upstream_issues.md`, and the `jeff-issue-chain` skill.
 
 ## L94 — SHARED-SQLITE-WRITES-MUST-SERIALIZE
@@ -2286,6 +2293,12 @@ Required write receipt fields are `db_path`, `db_fingerprint`, `operation_class`
 **Why:** 2026-05-04 produced a same-day SQLite writer family: v2a1 substrate REINDEX/repair moved live Beads state through b-tree/WAL failure modes, skillos beads-import rebuild did not rewrite malformed pages, and skillos source-refresh hit a parallel state DB lock. Each incident looked local, but the common system failure was unsynchronized writes against shared SQLite state.
 
 **How to apply:** add a pre-dispatch/pre-hook probe equivalent to `pre-dispatch-state-db-lock-check.sh --db <path> --operation <class> --json`; doctor should expose `sqlite_concurrent_writer_risk_count`, `sqlite_write_lock_conflict_count`, and `.sqlite_write_locks.top_conflicts`. A valid receipt should satisfy `jq -e '.lock_acquired == true and .competing_writer_count == 0 and .post_integrity_state != "worse"'` before mutating work is called safe.
+
+**Boundary note:** L94 covers shared-writer concurrency. A single-writer
+`br dep add` failure immediately after JSONL rebuild is the adjacent
+version-drift/write-path class; apply L93 first, then prefer `br 0.2.4+` or a
+validated direct-SQL/flush/rebuild fallback over filing a duplicate upstream
+issue.
 
 **Cross-references:** L51 (file reservations), L56 (promotion ladder), L60 (doctor signal contract), L71 (validate-and-redispatch), L72 (storage and repo-local state discipline), L90 (live capture before pane action), `feedback_shared_sqlite_writes_must_serialize.md`, and the 2026-05-04 SQLite trauma rows in `~/.local/state/flywheel/fuckup-log.jsonl`.
 
