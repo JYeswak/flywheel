@@ -306,6 +306,7 @@ Common current scripts:
 | `frozen-pane-detector-fleet.sh` | Disabled-by-default launchd wrapper for fleet-wide frozen-pane observation with STOP/FATAL and recovery-budget gates. |
 | `recovery-slo-probe.sh` | L99 recovery SLO probe exposing 24h p50/p95 latency, breach count, and green/yellow/red status. |
 | `architecture-health-rollup.sh` | L98 architecture-health rollup that writes 24h/7d/30d/90d fleet-perf JSON with trend, cohort, counterfactual, and anti-agent-shaming checks. |
+| `fleet-conformance-probe.sh` | L103 fleet conformance observatory: one bounded score per session plus red-session `CONFORMANCE-DRIFT` packet planning. |
 | `no-silent-darkness-probe.sh` | L60 five-signal health check. |
 | `leverage-ceiling-probe.sh` | Meadows leverage constraint probe. |
 | `gap-hunt-probe.sh` | Gap discovery and ledger support. |
