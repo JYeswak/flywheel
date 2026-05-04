@@ -1,0 +1,227 @@
+{
+  "slug": "validator-v2-three-outcome-and-stock-backpressure-2026-05-04",
+  "topic": "validator-v2-three-outcome-and-bead-stock-backpressure",
+  "started_at": "2026-05-04T13:30:00Z",
+  "current_phase": "ready",
+  "phase_started_at": "2026-05-04T17:14:00Z",
+  "phase_2_completed_at": "2026-05-04T16:20:00Z",
+  "phase_3_completed_at": "2026-05-04T16:48:00Z",
+  "phase_3_convergence": {
+    "streak": 2,
+    "all_lenses_zero_critical": true,
+    "composite_band": "8.1-8.2/10"
+  },
+  "phase_4_completed_at": "2026-05-04T17:18:00Z",
+  "phase_4_summary": {
+    "total_beads": 28,
+    "cycles": 0,
+    "audit_findings_covered": "49/49",
+    "cap_split": {
+      "plan_a": {
+        "scope": "validator-v2 core",
+        "beads": 6,
+        "blocking_for": [
+          "plan_b",
+          "plan_c"
+        ]
+      },
+      "plan_b": {
+        "scope": "sniff-rubric + turnover",
+        "beads": 11,
+        "depends_on": "plan_a"
+      },
+      "plan_c": {
+        "scope": "onboarding skill",
+        "beads": 11,
+        "depends_on": [
+          "plan_a",
+          "plan_b"
+        ]
+      }
+    },
+    "true_conflicts": 1,
+    "conflict_resolution": "ownership_split: flywheel-v2b3 owns generic registry; onboard-ob-e2 owns Codex pane safety instance",
+    "final_dag": ".flywheel/plans/validator-v2-three-outcome-and-stock-backpressure-2026-05-04/04-BEADS-DAG.md"
+  },
+  "rounds_in_current_phase": 1,
+  "convergence_streak": 1,
+  "convergence_change_pct_history": [
+    {
+      "round": 2,
+      "change_pct": 30.3,
+      "reason": "sniff-rubric integrated as new load-bearing input \u2014 healthy non-convergence"
+    },
+    {
+      "round": 3,
+      "change_pct": 4.1,
+      "convergence": true,
+      "reason": "no new inputs; refinement converged below 5% threshold"
+    }
+  ],
+  "in_flight_dispatches": [],
+  "completed_dispatches": [
+    {
+      "task_id": "validator-v2-lane-a",
+      "pane": 2,
+      "callback_at": "2026-05-04T15:25Z",
+      "self_grade": "8/8/8/7",
+      "lines": 162
+    },
+    {
+      "task_id": "validator-v2-lane-b",
+      "pane": 3,
+      "callback_at": "2026-05-04T15:30Z",
+      "self_grade": "8/8/9/8",
+      "lines": 148
+    },
+    {
+      "task_id": "validator-v2-lane-c",
+      "pane": 4,
+      "callback_at": "2026-05-04T15:36Z",
+      "self_grade": "9/9/9/9",
+      "lines": 169
+    },
+    {
+      "task_id": "validator-v2-phase2-refine",
+      "pane": 2,
+      "callback_at": "2026-05-04T16:00Z",
+      "self_grade": "8/9/9/8",
+      "lines": 697,
+      "phase": "refine_round_1"
+    },
+    {
+      "task_id": "validator-v2-phase2-refine-r2",
+      "pane": 2,
+      "callback_at": "2026-05-04T16:12Z",
+      "self_grade": "7/9/8/9/9",
+      "lines": 370,
+      "phase": "refine_round_2",
+      "change_pct_vs_r1": 30.3,
+      "convergence": false
+    },
+    {
+      "task_id": "sniff-test-grading-rubric",
+      "pane": 3,
+      "callback_at": "2026-05-04T15:55Z",
+      "self_grade": "9/9/9/8/8",
+      "lines": 313,
+      "integration_path": "merged_into_phase2_r2_section_4"
+    },
+    {
+      "task_id": "validator-v2-phase2-refine-r3",
+      "pane": 2,
+      "callback_at": "2026-05-04T16:20Z",
+      "self_grade": "9/9/8/9/9",
+      "lines": 109,
+      "phase": "refine_round_3",
+      "change_pct_vs_r2": 4.1,
+      "convergence": true
+    },
+    {
+      "task_id": "bead-turnover-diagnostic",
+      "pane": 4,
+      "callback_at": "2026-05-04T16:14Z",
+      "self_grade": "9/9/8/9/9",
+      "lines": 599,
+      "failure_modes": 10,
+      "quick_wins": 10,
+      "feeds_into": "phase4_decompose_extra_beads"
+    },
+    {
+      "task_id": "ntm-session-onboarding-skill",
+      "pane": 3,
+      "callback_at": "2026-05-04T16:14Z",
+      "self_grade": "9/9/8/9/8/9",
+      "lines": 570,
+      "bead_count": 12,
+      "feeds_into": "either_validator-v2_phase4_OR_independent_skill_chain"
+    }
+  ],
+  "in_flight_audit_dispatches": [
+    {
+      "task_id": "validator-v2-phase3-audit-security",
+      "pane": 3,
+      "started_at": "2026-05-04T16:18Z"
+    },
+    {
+      "task_id": "validator-v2-phase3-audit-idempotency",
+      "pane": 4,
+      "started_at": "2026-05-04T16:19Z"
+    },
+    {
+      "task_id": "validator-v2-phase3-audit-three-judges",
+      "pane": 2,
+      "started_at": "2026-05-04T16:21Z"
+    }
+  ],
+  "joshua_decision_pending": false,
+  "joshua_decision_at": null,
+  "audit_findings_count": 0,
+  "beads_created": [],
+  "abort_reason": null,
+  "decision_log": [
+    {
+      "ts": "2026-05-04T13:35:00Z",
+      "decision": "wait_for_full_3pane_capacity",
+      "rationale": "B2 watchdog landed freeing pane 3 cohort; full Phase 1 fanout is data-supported per /flywheel:plan v2 spec",
+      "applied": true
+    },
+    {
+      "ts": "2026-05-04T13:50:00Z",
+      "decision": "dispatched_phase_1_three_lanes",
+      "rationale": "capacity confirmed [2,3,4] live",
+      "applied": true
+    },
+    {
+      "ts": "2026-05-04T13:50:00Z",
+      "decision": "scope_through_audit",
+      "rationale": "validator-v2 is high-risk + load-bearing; Phase 1-3 mandatory; Phase 4 will need Joshua-disposes pause anyway per skill spec",
+      "applied": true
+    },
+    {
+      "ts": "2026-05-04T16:00:00Z",
+      "decision": "dispatched_phase2_r2_with_sniff_integration",
+      "rationale": "round 1 produced strong synthesis (697 lines 8/9/9/8); sniff-rubric callback (313 lines 9/9/9/8/8) was load-bearing input for Section 4; integration in r2 better than waiting for r3",
+      "applied": true
+    },
+    {
+      "ts": "2026-05-04T16:12:00Z",
+      "decision": "queue_r3_pending_pane_idle",
+      "rationale": "r2 change_pct=30.3% (>5% threshold) due to sniff-integration not churn; r3 will be true convergence test against r2; all 3 panes currently busy so r3 queued; round-cap=6 per skill spec, currently at 2/6",
+      "applied": true
+    },
+    {
+      "ts": "2026-05-04T16:20:00Z",
+      "decision": "phase2_converged_advance_to_phase3",
+      "rationale": "r3 change_pct=4.1% (<5% threshold), self-grade 9/9/8/9/9, 109-line refinement; convergence_streak=1; per skill spec advancing to Phase 3 audit; all 3 audit lens packets already pre-staged + dispatched in parallel",
+      "applied": true
+    },
+    {
+      "ts": "2026-05-04T16:48:00Z",
+      "decision": "phase3_converged_auto_advance_to_phase4",
+      "rationale": "all 3 lenses (security/idempotency/three-judges) zero-critical r1+r2; composite 8.1-8.2/10 stable; lens-spread <0.1; per feedback_audit_findings_are_data_decided_not_joshua_gated.md AUTO-ADVANCE (no Joshua pause); 49 findings auto-routed to severity-mapped phase4 beads",
+      "applied": true
+    },
+    {
+      "ts": "2026-05-04T17:18:00Z",
+      "decision": "phase4_decompose_complete_28_beads_3plan_split",
+      "rationale": "merge synthesis grade 9/10/9/9/8 (10/10 cap-split honesty); 28 beads exceeds 15-cap, split into Plan A (core) \u2192 Plan B (sniff+turnover) \u2192 Plan C (onboarding); 49/49 audit findings covered; 0 cycles; 1 true conflict resolved via ownership-split; auto-advance to Phase 5 polish",
+      "applied": true
+    },
+    {
+      "ts": "2026-05-04T17:38:00Z",
+      "decision": "phase5_polish_converged_pipeline_READY",
+      "rationale": "all 3 sub-DAGs polished + converged (core 3.8%, onboarding 3.8%, sniff-turnover r2 3.9%); final-verification v2 8/8 checklist + 9.0/10 three-judges; recommended_action=READY per data-decided rule; pending Joshua approval for real br create per skill spec",
+      "applied": true
+    }
+  ],
+  "phase_5_completed_at": "2026-05-04T17:38:00Z",
+  "pipeline_complete_at": "2026-05-04T17:38:00Z",
+  "ready_signal": {
+    "checklist": "8/8",
+    "three_judges_composite": "9.0/10",
+    "recommended_action": "READY",
+    "verifier_self_grade": "9/9/9/9",
+    "next": "joshua_approval_for_real_br_create_plan_A_first_wave"
+  }
+}
