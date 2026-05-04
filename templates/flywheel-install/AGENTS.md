@@ -2473,7 +2473,7 @@ Frozen or failed workers MUST be detected and respawned within 180 seconds. This
 - Agent-level recovery scoring; this is an architecture-level SLO only per L98.
 - Threshold tuning that violates per-pane budget caps or creates recovery storms.
 
-**Cross-references:** L85 (idle-state-class), L87 (stale-error-auto-ping), L91 (dispatch-delivery-receipt), L95 (worker-stall-recovery), L98 (architecture-health-measured-not-individuals, pending).
+**Cross-references:** L85 (idle-state-class), L87 (stale-error-auto-ping), L91 (dispatch-delivery-receipt), L95 (worker-stall-recovery), L98 (architecture-health-measured-not-individuals).
 
 ## L100 — IDENTITY-PRIMARY-KEY-IS-SESSION-PANE-PROJECT
 
