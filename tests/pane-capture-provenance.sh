@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-WATCHER="${IDLE_PANE_AUTO_DISPATCH:-/tmp/idle-pane-auto-dispatch.sh}"
+WATCHER="${IDLE_PANE_AUTO_DISPATCH:-$ROOT/.flywheel/scripts/idle-pane-auto-dispatch.sh}"
 DISPATCH_MD="${DISPATCH_MD:-/Users/josh/.claude/commands/flywheel/dispatch.md}"
 
 tmp="$(mktemp -d "${TMPDIR:-/tmp}/pane-capture-provenance.XXXXXX")"
