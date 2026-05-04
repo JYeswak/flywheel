@@ -1,0 +1,39 @@
+# bv (beads viewer) local config and caches
+.bv/
+
+# Beads backup and failed-repair snapshots
+/.beads.bak.*/
+/.beads.failed.*/
+
+# Flywheel generated doctrine/state backups
+/.flywheel/AGENTS-CANONICAL.md.bak.*
+/.flywheel/MISSION.md.bak.*
+/.flywheel/GOAL.md.bak.*
+/.flywheel/STATE.md.bak.*
+/.flywheel/.STATE.md.preview.*
+/.flywheel/*.md.preview.*
+/.flywheel/.reconcile-*.diff
+/.flywheel/scripts/*.bak.*
+/.flywheel/validation-schema/v1/*.bak.*
+
+# Root/template generated backups
+/AGENTS.md.bak.*
+/templates/flywheel-install/*.bak.*
+/templates/flywheel-install/tests/*.bak.*
+
+# Runtime caches and scratch state
+__pycache__/
+*.pyc
+.pytest_cache/
+/.cass/
+/.claude/scheduled_tasks.lock
+/.claude/get-shit-done
+/.continue-here.md
+
+# SQLite runtime state and sidecars
+*.db-wal
+*.db-shm
+*-wal
+*-shm
+/state.db
+/storage.sqlite3
