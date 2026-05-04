@@ -1,0 +1,58 @@
+{
+  "schema_version": "validation-receipt/v1",
+  "dispatch_id": "dispatch-fixture-runtime-unresponsive",
+  "callback_ref": {
+    "transport": "ntm",
+    "session": "flywheel",
+    "pane": 4,
+    "kind": "TIMEOUT",
+    "received_at": "2026-05-03T23:31:00Z",
+    "raw_ref": "dispatch-log://fixture/runtime-unresponsive"
+  },
+  "status": "unknown",
+  "failure_classes": ["runtime_unresponsive"],
+  "evidence": [
+    {"type": "dispatch_log", "ref": "dispatch-log://fixture/runtime-unresponsive"},
+    {"type": "command", "ref": "ntm send flywheel --pane=4 <probe>"},
+    {"type": "transcript_hash", "ref": "sha256:3333333333333333333333333333333333333333333333333333333333333333"}
+  ],
+  "artifact_checks": [
+    {
+      "artifact_id": "callback-artifact",
+      "path": "/tmp/synthetic-runtime-timeout.md",
+      "status": "unknown",
+      "evidence_ref": "dispatch-log://fixture/runtime-unresponsive"
+    }
+  ],
+  "runtime_context": {
+    "agent_context": {
+      "status": "unresponsive",
+      "probe_ref": "ntm-agent-callback://flywheel/4/timeout"
+    },
+    "orchestrator_shell_context": {
+      "status": "responsive",
+      "probe_ref": "shell://fixture-runtime-unresponsive",
+      "resolved_tools": ["ntm"]
+    },
+    "timeout": true,
+    "timeout_seconds": 90,
+    "context_drift": false
+  },
+  "bead_actions": [
+    {
+      "action": "updated",
+      "bead_id": "flywheel-bc7c",
+      "reason": "runtime timeout requires retry or blocked routing"
+    }
+  ],
+  "learn_route": {
+    "route": "review",
+    "reason": "runtime timeout requires human-orchestrator review",
+    "dedupe_key": "fixture-runtime-unresponsive"
+  },
+  "chain_blocker": {
+    "next_phase": "VALIDATE",
+    "capacity_available": false,
+    "chain_blocked_reason": "runtime_unresponsive"
+  }
+}

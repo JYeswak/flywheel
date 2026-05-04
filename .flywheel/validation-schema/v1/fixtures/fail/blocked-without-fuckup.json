@@ -1,0 +1,32 @@
+{
+  "schema_version": "validation-receipt/v1",
+  "dispatch_id": "dispatch-fixture-blocked-without-fuckup",
+  "callback_ref": {
+    "transport": "ntm",
+    "session": "flywheel",
+    "pane": 3,
+    "kind": "BLOCKED",
+    "received_at": "2026-05-03T23:34:00Z",
+    "raw_ref": "dispatch-log://fixture/blocked-without-fuckup"
+  },
+  "status": "fail",
+  "failure_classes": ["blocked_without_fuckup_log"],
+  "evidence": [
+    {"type": "dispatch_log", "ref": "dispatch-log://fixture/blocked-without-fuckup"}
+  ],
+  "artifact_checks": [
+    {"artifact_id": "blocked-evidence", "path": "/tmp/synthetic-blocked.md", "status": "unknown"}
+  ],
+  "runtime_context": {
+    "agent_context": {"status": "responsive", "probe_ref": "fixture://agent-blocked"},
+    "orchestrator_shell_context": {"status": "responsive", "probe_ref": "fixture://shell-blocked"},
+    "timeout": false,
+    "timeout_seconds": 0,
+    "context_drift": false
+  },
+  "bead_actions": [
+    {"action": "updated", "bead_id": "flywheel-bc7c", "reason": "blocked fixture lacks fuckup evidence"}
+  ],
+  "learn_route": {"route": "review", "reason": "blocked callback must surface trauma"},
+  "chain_blocker": {"next_phase": "VALIDATE", "capacity_available": false, "chain_blocked_reason": "blocked_without_fuckup_log"}
+}

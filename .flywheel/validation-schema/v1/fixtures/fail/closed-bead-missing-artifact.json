@@ -1,0 +1,38 @@
+{
+  "schema_version": "validation-receipt/v1",
+  "dispatch_id": "dispatch-fixture-closed-bead-missing-artifact",
+  "callback_ref": {
+    "transport": "ntm",
+    "session": "flywheel",
+    "pane": 3,
+    "kind": "DONE",
+    "received_at": "2026-05-03T23:37:00Z",
+    "raw_ref": "dispatch-log://fixture/closed-bead-missing-artifact"
+  },
+  "status": "pass",
+  "failure_classes": [],
+  "evidence": [
+    {"type": "bead_id", "ref": "flywheel-synthetic-closed"},
+    {"type": "path", "ref": "/tmp/synthetic-closed-bead-artifact.md"}
+  ],
+  "artifact_checks": [
+    {
+      "artifact_id": "closed-bead-claimed-artifact",
+      "path": "/tmp/synthetic-closed-bead-artifact.md",
+      "status": "missing",
+      "expected": "closed bead claimed this artifact exists"
+    }
+  ],
+  "runtime_context": {
+    "agent_context": {"status": "responsive", "probe_ref": "fixture://agent-closed-bead-missing"},
+    "orchestrator_shell_context": {"status": "responsive", "probe_ref": "fixture://shell-closed-bead-missing"},
+    "timeout": false,
+    "timeout_seconds": 0,
+    "context_drift": false
+  },
+  "bead_actions": [
+    {"action": "reopen_candidate", "bead_id": "flywheel-synthetic-closed", "reason": "claimed artifact missing"}
+  ],
+  "learn_route": {"route": "review", "reason": "closed bead artifact missing"},
+  "chain_blocker": {"next_phase": null, "capacity_available": false, "chain_blocked_reason": null}
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/auth-marker/v1/schema.json",
+  "title": "Auth Marker v1",
+  "description": "Canonical auth-marker for first authenticated action in flywheel-managed agents. Extends validation-receipt/v1 family. Sandbox-only ratification 2026-05-04T00:14Z by flywheel:1 RubyCreek (per Joshua delegation 'work with pane 1 of flywheel not me'). Production semantics require separate ratification.",
+  "type": "object",
+  "required": ["schema_version", "service", "env", "auth_method", "auth_proof", "verification_command", "issued_at", "expires_at", "issuer"],
+  "properties": {
+    "schema_version": {"const": "auth-marker/v1"},
+    "service": {"type": "string", "description": "Target service identifier (e.g. hubspot, stripe, agent-mail, infisical)"},
+    "env": {"enum": ["sandbox"], "description": "v1 is sandbox-only. Prod requires separate ratification."},
+    "auth_method": {"enum": ["infisical-load", "agent-mail-handshake", "env-var-fingerprint", "signed-receipt"]},
+    "auth_proof": {
+      "type": "object",
+      "description": "Method-specific proof. Verification_command must consume this.",
+      "additionalProperties": true
+    },
+    "verification_command": {"type": "string", "description": "Idempotent shell command. Exit 0 = marker valid. Must NOT mutate."},
+    "verification_exit_0_required": {"const": true},
+    "issued_at": {"type": "string", "format": "date-time"},
+    "expires_at": {"type": "string", "format": "date-time", "description": "Sandbox max 24h from issued_at"},
+    "issuer": {"type": "string", "description": "Actor identifier (orch session:pane or fleet-mail identity)"},
+    "rollback_guard": {"type": "string", "description": "Command to undo any mutation gated by this marker. Required for first-apply gating."},
+    "signature": {"type": "string", "description": "Optional HMAC over canonical JSON form"}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/identity-registration-deferral/v1/schema.json",
+  "title": "Identity Registration Deferral v1",
+  "description": "Joshua-disposed bounded deferral receipt for Agent Mail identity rows that cannot register until their NTM session is live. The receipt changes doctor treatment for named session:pane rows until expiry; it does not mint identities or disable the registry.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "issued_at",
+    "expires_at",
+    "issuer",
+    "rotation_reason",
+    "deferred_rows",
+    "rollback_guard"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "identity-registration-deferral/v1"
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "issuer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rotation_reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "deferred_rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "session",
+          "pane",
+          "fleet_mail_project_key",
+          "live_state",
+          "auto_register_when_live",
+          "tracking_bead"
+        ],
+        "properties": {
+          "session": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pane": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "fleet_mail_project_key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "live_state": {
+            "type": "string",
+            "minLength": 1
+          },
+          "auto_register_when_live": {
+            "type": "boolean"
+          },
+          "tracking_bead": {
+            "type": "string",
+            "pattern": "^flywheel-[A-Za-z0-9._-]+$"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "applies_to": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "doctor_treatment_recommendation": {
+      "type": "string"
+    },
+    "rollback_guard": {
+      "type": "string",
+      "minLength": 1
+    },
+    "signature": {
+      "type": "string"
+    },
+    "signature_valid": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/flywheel/idle-state-config.schema.json",
+  "title": "Idle state probe config",
+  "type": "object",
+  "required": ["schema_version", "enabled", "classes_active", "thresholds"],
+  "properties": {
+    "schema_version": {
+      "const": "idle-state-config/v1"
+    },
+    "enabled": {
+      "type": "boolean"
+    },
+    "classes_active": {
+      "type": "array",
+      "items": {
+        "enum": ["dispatching", "cooldown", "light_queue", "saturated"]
+      },
+      "uniqueItems": true
+    },
+    "thresholds": {
+      "type": "object",
+      "required": [
+        "dispatching_fail_seconds",
+        "pane_cooldown_seconds",
+        "bead_dedupe_seconds",
+        "light_queue_ready_count"
+      ],
+      "properties": {
+        "dispatching_fail_seconds": {
+          "type": "integer",
+          "minimum": 60
+        },
+        "pane_cooldown_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "bead_dedupe_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "light_queue_ready_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "peer_orch_escalation": {
+      "enum": ["xpane_to_flywheel_1", "none"]
+    }
+  },
+  "additionalProperties": false
+}

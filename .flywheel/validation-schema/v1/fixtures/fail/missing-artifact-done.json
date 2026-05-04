@@ -1,0 +1,36 @@
+{
+  "schema_version": "validation-receipt/v1",
+  "dispatch_id": "dispatch-fixture-missing-artifact",
+  "callback_ref": {
+    "transport": "ntm",
+    "session": "flywheel",
+    "pane": 3,
+    "kind": "DONE",
+    "received_at": "2026-05-03T23:33:00Z",
+    "raw_ref": "dispatch-log://fixture/missing-artifact"
+  },
+  "status": "pass",
+  "failure_classes": [],
+  "evidence": [
+    {"type": "path", "ref": "/tmp/synthetic-missing-artifact.md"}
+  ],
+  "artifact_checks": [
+    {
+      "artifact_id": "claimed-evidence",
+      "path": "/tmp/synthetic-missing-artifact.md",
+      "status": "missing"
+    }
+  ],
+  "runtime_context": {
+    "agent_context": {"status": "responsive", "probe_ref": "fixture://agent-missing-artifact"},
+    "orchestrator_shell_context": {"status": "responsive", "probe_ref": "fixture://shell-missing-artifact"},
+    "timeout": false,
+    "timeout_seconds": 0,
+    "context_drift": false
+  },
+  "bead_actions": [
+    {"action": "none", "reason": "synthetic bad fixture"}
+  ],
+  "learn_route": {"route": "ignore", "reason": "bad fixture"},
+  "chain_blocker": {"next_phase": null, "capacity_available": false, "chain_blocked_reason": null}
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/storage-override/v1/schema.json",
+  "title": "Storage Override v1",
+  "description": "Joshua-disposed bounded override receipt for temporary storage minimum headroom changes. Sibling of auth-marker/v1: a receipt changes a gate threshold for a named scope until expiry or STORAGE-CLEARED, without disabling storage discipline.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "issued_at",
+    "expires_at",
+    "issuer",
+    "scope",
+    "applies_to",
+    "rotation_reason",
+    "auto_clear_signal",
+    "rollback_guard"
+  ],
+  "anyOf": [
+    {
+      "required": [
+        "min_free_gb_override"
+      ]
+    },
+    {
+      "required": [
+        "min_free_pct_override"
+      ]
+    }
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "storage-override/v1"
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "issuer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable scope such as fleet, repo, or session group."
+    },
+    "min_free_pct_override": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Deprecated compatibility threshold. Prefer min_free_gb_override."
+    },
+    "min_free_gb_override": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Preferred storage free-space threshold override in GiB."
+    },
+    "applies_to": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Repo basenames, absolute repo paths, or '*' / 'all'."
+    },
+    "rotation_reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "auto_clear_signal": {
+      "type": "string",
+      "const": "STORAGE-CLEARED"
+    },
+    "rollback_guard": {
+      "type": "string",
+      "minLength": 1
+    },
+    "signature": {
+      "type": "string"
+    },
+    "signature_valid": {
+      "type": "boolean",
+      "description": "Optional local validation result when a signature is present."
+    }
+  },
+  "additionalProperties": true
+}

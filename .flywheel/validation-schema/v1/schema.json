@@ -1,0 +1,228 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/validation-receipt/v1/schema.json",
+  "title": "Flywheel validation receipt v1",
+  "description": "Canonical receipt for validating worker callbacks before summary, integration, bead closeout, or learning-loop routing.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "dispatch_id",
+    "callback_ref",
+    "status",
+    "failure_classes",
+    "evidence",
+    "artifact_checks",
+    "runtime_context",
+    "bead_actions",
+    "learn_route",
+    "chain_blocker"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "validation-receipt/v1"
+    },
+    "dispatch_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "callback_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transport", "session", "pane", "kind", "received_at"],
+      "properties": {
+        "transport": {
+          "enum": ["ntm", "agent_mail", "manual_fixture"]
+        },
+        "session": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pane": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "kind": {
+          "enum": ["DONE", "BLOCKED", "TIMEOUT", "UNKNOWN"]
+        },
+        "received_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "raw_ref": {
+          "type": "string"
+        }
+      }
+    },
+    "status": {
+      "enum": ["pass", "fail", "unknown"]
+    },
+    "failure_classes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/evidence_ref"
+      }
+    },
+    "artifact_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["artifact_id", "path", "status"],
+        "properties": {
+          "artifact_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": ["exists", "missing", "unknown"]
+          },
+          "evidence_ref": {
+            "type": "string"
+          },
+          "expected": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "runtime_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["agent_context", "orchestrator_shell_context", "timeout", "context_drift"],
+      "properties": {
+        "agent_context": {
+          "$ref": "#/$defs/runtime_probe"
+        },
+        "orchestrator_shell_context": {
+          "$ref": "#/$defs/runtime_probe"
+        },
+        "timeout": {
+          "type": "boolean"
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "context_drift": {
+          "type": "boolean"
+        }
+      }
+    },
+    "bead_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["action"],
+        "properties": {
+          "action": {
+            "enum": ["filed", "updated", "no_bead_reason", "reopen_candidate", "none"]
+          },
+          "bead_id": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "evidence_ref": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "learn_route": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["route", "reason"],
+      "properties": {
+        "route": {
+          "enum": ["ignore", "review", "promote", "skill_extend"]
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "dedupe_key": {
+          "type": "string"
+        }
+      }
+    },
+    "chain_blocker": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["next_phase", "capacity_available", "chain_blocked_reason"],
+      "properties": {
+        "next_phase": {
+          "type": ["string", "null"]
+        },
+        "capacity_available": {
+          "type": "boolean"
+        },
+        "chain_blocked_reason": {
+          "type": ["string", "null"]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "runtime_probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "probe_ref"],
+      "properties": {
+        "status": {
+          "enum": ["responsive", "unresponsive", "unknown"]
+        },
+        "probe_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resolved_tools": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "evidence_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "ref"],
+      "properties": {
+        "type": {
+          "enum": [
+            "path",
+            "command",
+            "dispatch_log",
+            "bead_id",
+            "commit_sha",
+            "transcript_hash",
+            "joshua_confirmation_hash",
+            "fuckup_log"
+          ]
+        },
+        "ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

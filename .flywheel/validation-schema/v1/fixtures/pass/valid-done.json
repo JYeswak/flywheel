@@ -1,0 +1,62 @@
+{
+  "schema_version": "validation-receipt/v1",
+  "dispatch_id": "dispatch-fixture-valid-done",
+  "callback_ref": {
+    "transport": "ntm",
+    "session": "flywheel",
+    "pane": 3,
+    "kind": "DONE",
+    "received_at": "2026-05-03T23:30:00Z",
+    "raw_ref": "dispatch-log://fixture/valid-done"
+  },
+  "status": "pass",
+  "failure_classes": [],
+  "evidence": [
+    {"type": "path", "ref": ".flywheel/validation-schema/v1/schema.json"},
+    {"type": "command", "ref": "bash .flywheel/validation-schema/v1/parse.sh fixtures/pass/valid-done.json"},
+    {"type": "dispatch_log", "ref": "dispatch-log://fixture/valid-done"},
+    {"type": "bead_id", "ref": "flywheel-bc7c"},
+    {"type": "commit_sha", "ref": "0000000000000000000000000000000000000000"},
+    {"type": "transcript_hash", "ref": "sha256:1111111111111111111111111111111111111111111111111111111111111111"},
+    {"type": "joshua_confirmation_hash", "ref": "sha256:2222222222222222222222222222222222222222222222222222222222222222"}
+  ],
+  "artifact_checks": [
+    {
+      "artifact_id": "schema",
+      "path": ".flywheel/validation-schema/v1/schema.json",
+      "status": "exists",
+      "evidence_ref": "path:.flywheel/validation-schema/v1/schema.json"
+    }
+  ],
+  "runtime_context": {
+    "agent_context": {
+      "status": "responsive",
+      "probe_ref": "ntm-agent-callback://flywheel/3/fixture-valid-done",
+      "resolved_tools": ["ntm", "br"]
+    },
+    "orchestrator_shell_context": {
+      "status": "responsive",
+      "probe_ref": "shell://fixture-valid-done",
+      "resolved_tools": ["ntm", "br"]
+    },
+    "timeout": false,
+    "timeout_seconds": 0,
+    "context_drift": false
+  },
+  "bead_actions": [
+    {
+      "action": "no_bead_reason",
+      "reason": "clean validation receipt; no gap observed"
+    }
+  ],
+  "learn_route": {
+    "route": "ignore",
+    "reason": "positive validation receipt only",
+    "dedupe_key": "fixture-valid-done"
+  },
+  "chain_blocker": {
+    "next_phase": null,
+    "capacity_available": false,
+    "chain_blocked_reason": null
+  }
+}

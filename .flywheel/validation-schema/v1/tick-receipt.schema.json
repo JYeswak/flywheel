@@ -1,0 +1,299 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/tick-receipt/v1/schema.json",
+  "title": "Flywheel tick receipt v1",
+  "description": "Canonical shape for flywheel-loop tick driver receipts, including the VALIDATE phase summary required before INTEGRATE.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "task_id",
+    "phase",
+    "phase_reason",
+    "tick_class",
+    "dispatch_status",
+    "validation_summary"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "phase": {
+      "enum": ["INIT", "RESEARCH", "PLAN", "BEADS", "DISPATCH", "VALIDATE", "INTEGRATE", "LEARN"]
+    },
+    "phase_reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tick_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "dispatch_status": {
+      "enum": ["sent", "dry_run", "failed", "blocked_frozen_detector"]
+    },
+    "callback_validation": {
+      "type": "object"
+    },
+    "validation_summary": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "action",
+        "status",
+        "callbacks_unvalidated_count",
+        "pending_callback_count",
+        "unknown_count",
+        "failed_count",
+        "passed_count",
+        "integration_allowed"
+      ],
+      "properties": {
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task_id": {
+          "type": ["string", "null"]
+        },
+        "status": {
+          "enum": ["pass", "fail", "unknown", "none"]
+        },
+        "receipt_path": {
+          "type": ["string", "null"]
+        },
+        "failure_classes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "summary_allowed": {
+          "type": "boolean"
+        },
+        "integration_allowed": {
+          "type": "boolean"
+        },
+        "remediation_required": {
+          "type": "boolean"
+        },
+        "remediation_present": {
+          "type": "boolean"
+        },
+        "callbacks_unvalidated_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pending_callback_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unknown_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "failed_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "passed_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "next_phase": {
+          "type": ["string", "null"]
+        },
+        "chain_blocked_reason": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "value_gap": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "value_gap_dimension_scanned": {
+      "type": ["string", "null"]
+    },
+    "value_gap_finding": {
+      "type": ["string", "null"]
+    },
+    "bead_filed_id": {
+      "type": ["string", "null"]
+    },
+    "jeff_status": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "jeff_fixes": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "jeff_status_stale_open_count": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "jeff_tracked_issue_count": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "jeff_fixes_status": {
+      "type": ["string", "null"]
+    },
+    "agent_mail_fd": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "agent_mail_fd_status": {
+      "type": ["string", "null"]
+    },
+    "agent_mail_fd_total_fds": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "agent_mail_fd_lock_fd_count": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "agent_mail_fd_exit_code": {
+      "type": ["integer", "null"]
+    },
+    "agent_mail_fd_warnings": {
+      "type": "array"
+    },
+    "mobile_eats_receipt": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "mobile_eats_receipt_status": {
+      "type": ["string", "null"]
+    },
+    "mobile_eats_last_run_ts": {
+      "type": ["string", "null"]
+    },
+    "mobile_eats_latest_tick_decision": {
+      "type": ["string", "null"]
+    },
+    "mobile_eats_closed_beads_since": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "mobile_eats_bridge_warnings": {
+      "type": "array"
+    },
+    "skillos_loop": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "daily_jeff_ingest": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "daily_jeff_ingest_status": {
+      "type": ["string", "null"]
+    },
+    "daily_jeff_ingest_sources_file": {
+      "type": ["string", "null"]
+    },
+    "daily_jeff_ingest_deps_missing": {
+      "type": "array"
+    },
+    "daily_jeff_ingest_warnings": {
+      "type": "array"
+    },
+    "fleet_onboard": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "fleet_onboard_status": {
+      "type": ["string", "null"]
+    },
+    "fleet_onboard_checked_repos": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "fleet_onboard_limping_repos": {
+      "type": "array"
+    },
+    "fleet_onboard_missing_repos": {
+      "type": "array"
+    },
+    "fleet_onboard_warnings": {
+      "type": "array"
+    },
+    "frozen_detector_self_test": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "frozen_detector": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "frozen_detector_dispatch_block_reason": {
+      "type": ["string", "null"]
+    },
+    "frozen_detector_source_health_status": {
+      "type": ["string", "null"]
+    },
+    "frozen_detector_frozen_panes_detected": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "frozen_detector_unknown_panes_detected": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "frozen_detector_stale_template_prompt_count": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "frozen_detector_queued_not_submitted_count": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "frozen_detector_respawn_suppressed_count": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "frozen_detector_recovery_suppressed_count": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "frozen_detector_l60_signals_present": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "boolean"
+      }
+    },
+    "frozen_detector_l60_signal_present_count": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "frozen_detector_l60_signal_expected_count": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "frozen_detector_l60_signal_missing": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "frozen_detector_l60_all_present": {
+      "type": "boolean"
+    },
+    "frozen_detector_soft_violations": {
+      "type": "array"
+    },
+    "frozen_detector_l60_signal_decrement_count": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "frozen_detector_durable_receipts": {
+      "type": "array"
+    },
+    "frozen_pane_source_health_status": {
+      "type": ["string", "null"]
+    }
+  }
+}

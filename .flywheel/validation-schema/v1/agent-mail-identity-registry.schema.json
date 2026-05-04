@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/agent-mail-identity-registry/v2/schema.json",
+  "title": "Flywheel Agent Mail identity registry row v2",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "session",
+    "pane",
+    "role",
+    "identity_name",
+    "token_path",
+    "registered_ts",
+    "last_used_ts",
+    "fleet_mail_project_key",
+    "status"
+  ],
+  "properties": {
+    "schema_version": {"const": "agent-mail-identity-registry/v2"},
+    "session": {"type": "string", "minLength": 1},
+    "pane": {"type": "integer", "minimum": 0},
+    "role": {"enum": ["orch", "worker", "callback", "archived"]},
+    "identity_name": {"type": ["string", "null"]},
+    "token_path": {"type": ["string", "null"]},
+    "token_sha256": {"type": ["string", "null"]},
+    "registered_ts": {"type": "string"},
+    "last_used_ts": {"type": "string"},
+    "fleet_mail_project_key": {"type": ["string", "null"]},
+    "predecessor_identity": {"type": ["string", "null"]},
+    "rotation_reason": {"type": ["string", "null"]},
+    "status": {"enum": ["active", "needs_registration", "needs_token", "inactive"]},
+    "identity_resolved": {"type": "boolean"},
+    "agent_mail_ready": {"type": "boolean"},
+    "archived_ts": {"type": "string"},
+    "archival_reason": {"type": "string"}
+  }
+}
