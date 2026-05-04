@@ -1,0 +1,25 @@
+{
+  "slug": "fleet-conductor-2026-05-04",
+  "topic": "fleet-conductor-accretive-observability-and-intervention",
+  "started_at": "2026-05-04T04:15:00Z",
+  "current_phase": "research",
+  "phase_started_at": "2026-05-04T04:15:00Z",
+  "rounds_in_current_phase": 0,
+  "convergence_streak": 0,
+  "in_flight_dispatches": [],
+  "queued_dispatches": [
+    {"task_id": "fleet-conductor-lane-a", "lane": "A", "packet": "/tmp/dispatch_fleet-conductor-lane-a-problem-space.md", "waiting_for": "next WAITING+live codex pane"},
+    {"task_id": "fleet-conductor-lane-b", "lane": "B", "packet": "/tmp/dispatch_fleet-conductor-lane-b-ecosystem-audit.md", "waiting_for": "next WAITING+live codex pane"},
+    {"task_id": "fleet-conductor-lane-c", "lane": "C", "packet": "/tmp/dispatch_fleet-conductor-lane-c-implementation-design.md", "waiting_for": "next WAITING+live codex pane"}
+  ],
+  "joshua_decision_pending": false,
+  "joshua_decision_at": null,
+  "audit_findings_count": 0,
+  "beads_created": [],
+  "abort_reason": null,
+  "hard_dependency": "orchestrator-workforce-supervision-2026-05-04 (Phase 4 DECOMPOSE must ship before THIS Phase 4 can run)",
+  "preflight_overrides": {
+    "doctor_drift_detected": "active session work; same override as parent workforce-supervision plan",
+    "capacity_sequential_mode": "all 3 panes THINKING; lanes will dispatch via waiter as panes free"
+  }
+}
