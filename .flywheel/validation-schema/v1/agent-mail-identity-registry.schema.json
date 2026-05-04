@@ -21,6 +21,16 @@
     "session": {"type": "string", "minLength": 1},
     "pane": {"type": "integer", "minimum": 0},
     "role": {"enum": ["orch", "worker", "callback", "archived"]},
+    "identity_primary_key": {
+      "type": "object",
+      "required": ["session", "pane", "fleet_mail_project_key"],
+      "properties": {
+        "session": {"type": "string", "minLength": 1},
+        "pane": {"type": "integer", "minimum": 0},
+        "fleet_mail_project_key": {"type": ["string", "null"]}
+      }
+    },
+    "identity_primary_key_text": {"type": "string"},
     "identity_name": {"type": ["string", "null"]},
     "token_path": {"type": ["string", "null"]},
     "token_sha256": {"type": ["string", "null"]},
@@ -28,7 +38,23 @@
     "last_used_ts": {"type": "string"},
     "fleet_mail_project_key": {"type": ["string", "null"]},
     "predecessor_identity": {"type": ["string", "null"]},
-    "rotation_reason": {"type": ["string", "null"]},
+    "predecessor_identity_chain": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "rotation_reason": {
+      "type": ["string", "null"],
+      "enum": [
+        null,
+        "agent-mail-name-policy",
+        "resolver-mcp-generated-identity",
+        "compaction-continuity",
+        "missing-token-recovery",
+        "path-canonicalization",
+        "strict-mode-preallocation"
+      ]
+    },
+    "rotation_reason_detail": {"type": ["string", "null"]},
     "status": {"enum": ["active", "needs_registration", "needs_token", "inactive"]},
     "identity_resolved": {"type": "boolean"},
     "agent_mail_ready": {"type": "boolean"},

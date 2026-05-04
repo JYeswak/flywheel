@@ -54,10 +54,33 @@ rotated="$TMP/rotated.token"
 printf '%s\n' 'rotated-token' >"$rotated"
 chmod 600 "$rotated"
 "$LOOP" identity --session skillos --pane 1 --register --identity BrightLake --token-path "$rotated" --project-key /Users/josh/Developer/skillos --predecessor-identity FoggyBear --rotation-reason compaction --json >"$TMP/rotate.json"
-assert_jq "$TMP/rotate.json" '.predecessor_identity == "FoggyBear" and .rotation_reason == "compaction" and .status == "active"' "rotation_records_predecessor"
+assert_jq "$TMP/rotate.json" '.predecessor_identity == "FoggyBear" and .rotation_reason == "compaction-continuity" and (.predecessor_identity_chain | index("FoggyBear")) and .identity_primary_key.session == "skillos" and .identity_primary_key.pane == 1 and .identity_primary_key.fleet_mail_project_key == "/Users/josh/Developer/skillos" and .status == "active"' "rotation_records_tuple_predecessor_chain"
+
+trigger_index=0
+for trigger in agent-mail-name-policy resolver-mcp-generated-identity compaction-continuity missing-token-recovery path-canonicalization strict-mode-preallocation; do
+  trigger_index=$((trigger_index + 1))
+  trigger_token="$TMP/trigger-$trigger.token"
+  printf '%s\n' "trigger-token-$trigger" >"$trigger_token"
+  chmod 600 "$trigger_token"
+  "$LOOP" identity \
+    --session trigger-suite \
+    --pane "$trigger_index" \
+    --register \
+    --identity "Trigger$trigger_index" \
+    --token-path "$trigger_token" \
+    --project-key /tmp/trigger-project \
+    --predecessor-identity "Prior$trigger_index" \
+    --rotation-reason "$trigger" \
+    --role worker \
+    --json >"$TMP/trigger-$trigger.json"
+  assert_jq "$TMP/trigger-$trigger.json" ".rotation_reason == \"$trigger\" and .identity_primary_key_text == (\"trigger-suite:\" + (.pane | tostring) + \":/tmp/trigger-project\")" "rotation_trigger_$trigger"
+done
+
+"$LOOP" identity --sweep-orphan-tokens --dry-run --json >"$TMP/sweep.json"
+assert_jq "$TMP/sweep.json" '.schema_version == "agent-mail-orphan-token-sweep/v1" and .dry_run == true and .orphan_tokens_seen_count >= 0' "orphan_sweep_dry_run_reports"
 
 "$LOOP" identity --doctor --json >"$TMP/doctor.json"
-assert_jq "$TMP/doctor.json" '.schema_version == "agent-mail-identity-registry-doctor/v1" and .total_registered >= 3 and .drift_count >= 1 and .orphan_token_count >= 0 and (.signals[0].name == "agentmail_identity_drift")' "doctor_reports_drift_and_orphans"
+assert_jq "$TMP/doctor.json" '.schema_version == "agent-mail-identity-registry-doctor/v1" and .total_registered >= 3 and .drift_count >= 1 and .orphan_token_count >= 0 and .orphan_tokens_unswept_count >= 0 and .identity_rotation_count_24h >= 6 and .identity_chain_max_length >= 1 and (.signals[]?.name | select(. == "orphan_tokens_unswept_count"))' "doctor_reports_drift_orphans_and_churn"
 
 fake_br="$TMP/br"
 printf '%s\n' \
