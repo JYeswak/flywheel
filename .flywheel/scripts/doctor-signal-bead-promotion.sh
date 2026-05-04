@@ -175,10 +175,13 @@ if [ "$HEADLESS_BROWSER_STATUS" = "fail" ] || [ "${HEADLESS_BROWSER_COUNT:-0}" -
 fi
 IDENTITY_REGISTRY_DRIFT="$(jq -r '.identity_registry.drift_count // .identity_registry.identity_registry_drift // .identity_registry_drift // 0' <<<"$DOCTOR_JSON")"
 IDENTITY_TOKEN_ORPHAN="$(jq -r '.identity_registry.orphan_token_count // .identity_registry.identity_token_orphan // .identity_token_orphan // 0' <<<"$DOCTOR_JSON")"
+ORPHAN_TOKENS_UNSWEPT="$(jq -r '.identity_registry.orphan_tokens_unswept_count // .orphan_tokens_unswept_count // 0' <<<"$DOCTOR_JSON")"
+IDENTITY_ROTATION_COUNT_24H="$(jq -r '.identity_registry.identity_rotation_count_24h // .identity_rotation_count_24h // 0' <<<"$DOCTOR_JSON")"
+IDENTITY_CHAIN_MAX_LENGTH="$(jq -r '.identity_registry.identity_chain_max_length // .identity_chain_max_length // 0' <<<"$DOCTOR_JSON")"
 AGENTMAIL_PENDING_REGISTRATION_BROADCASTS="$(jq -r '.agentmail_pending_registration_broadcasts_count // empty' <<<"$DOCTOR_JSON")"
 [ -n "$AGENTMAIL_PENDING_REGISTRATION_BROADCASTS" ] || AGENTMAIL_PENDING_REGISTRATION_BROADCASTS="$IDENTITY_REGISTRY_DRIFT"
 AGENTMAIL_IDENTITY_TRIGGER=0
-if [ "${AGENTMAIL_PENDING_REGISTRATION_BROADCASTS:-0}" -gt 0 ] || [ "${IDENTITY_TOKEN_ORPHAN:-0}" -gt 0 ]; then
+if [ "${AGENTMAIL_PENDING_REGISTRATION_BROADCASTS:-0}" -gt 0 ] || [ "${IDENTITY_TOKEN_ORPHAN:-0}" -gt 0 ] || [ "${ORPHAN_TOKENS_UNSWEPT:-0}" -gt 0 ] || [ "${IDENTITY_CHAIN_MAX_LENGTH:-0}" -gt 3 ]; then
   AGENTMAIL_IDENTITY_TRIGGER=1
 fi
 DAILY_REPORT_STATUS="$(jq -r '.daily_report.status // "pass"' <<<"$DOCTOR_JSON")"
@@ -285,8 +288,8 @@ if [ "$AGENTMAIL_IDENTITY_TRIGGER" -eq 1 ]; then
   handle_symptom \
     "agentmail_identity" \
     'agentmail.identity|agent-mail.*identity|identity_registry|identity.*drift|identity.*orphan' \
-    "[auto-doctor:agentmail_identity] pending_registration_broadcasts=$AGENTMAIL_PENDING_REGISTRATION_BROADCASTS identity_token_orphan=$IDENTITY_TOKEN_ORPHAN" \
-    "Auto-created by doctor-signal-bead-promotion.sh. Doctor reports agentmail_pending_registration_broadcasts_count=$AGENTMAIL_PENDING_REGISTRATION_BROADCASTS identity_registry_drift=$IDENTITY_REGISTRY_DRIFT identity_token_orphan=$IDENTITY_TOKEN_ORPHAN. Agent Mail identities must resolve through flywheel-loop identity and durable session:pane registry; see flywheel-g9mi and flywheel-2uin."
+    "[auto-doctor:agentmail_identity] pending_registration_broadcasts=$AGENTMAIL_PENDING_REGISTRATION_BROADCASTS identity_token_orphan=$IDENTITY_TOKEN_ORPHAN orphan_tokens_unswept_count=$ORPHAN_TOKENS_UNSWEPT identity_chain_max_length=$IDENTITY_CHAIN_MAX_LENGTH" \
+    "Auto-created by doctor-signal-bead-promotion.sh. Doctor reports agentmail_pending_registration_broadcasts_count=$AGENTMAIL_PENDING_REGISTRATION_BROADCASTS identity_registry_drift=$IDENTITY_REGISTRY_DRIFT identity_token_orphan=$IDENTITY_TOKEN_ORPHAN orphan_tokens_unswept_count=$ORPHAN_TOKENS_UNSWEPT identity_rotation_count_24h=$IDENTITY_ROTATION_COUNT_24H identity_chain_max_length=$IDENTITY_CHAIN_MAX_LENGTH. Agent Mail identities must resolve through flywheel-loop identity and durable (session,pane,project) primary key; identity_name is only the current pointer. See flywheel-g9mi, flywheel-2uin, and L100."
 fi
 
 if [ "$DAILY_REPORT_TRIGGER" -eq 1 ]; then
@@ -349,6 +352,9 @@ jq -nc \
   --argjson headless_browser_oldest "${HEADLESS_BROWSER_OLDEST:-0}" \
   --argjson identity_registry_drift "${IDENTITY_REGISTRY_DRIFT:-0}" \
   --argjson identity_token_orphan "${IDENTITY_TOKEN_ORPHAN:-0}" \
+  --argjson orphan_tokens_unswept_count "${ORPHAN_TOKENS_UNSWEPT:-0}" \
+  --argjson identity_rotation_count_24h "${IDENTITY_ROTATION_COUNT_24H:-0}" \
+  --argjson identity_chain_max_length "${IDENTITY_CHAIN_MAX_LENGTH:-0}" \
   --argjson agentmail_pending_registration_broadcasts "${AGENTMAIL_PENDING_REGISTRATION_BROADCASTS:-0}" \
   --arg daily_report_status "$DAILY_REPORT_STATUS" \
   --argjson daily_report_age_hours "${DAILY_REPORT_AGE:-0}" \
@@ -360,6 +366,6 @@ jq -nc \
   '{
     action:"promoted",
     doctor_status:$doctor_status,
-    symptoms:{leakage:$leakage, drift:$drift, root_drift:$root_drift, ticks_punted_count:$punted_count, peer_orch_blocker:{peer_orch_idle_on_blocker_count:$peer_orch_idle_on_blocker_count,peer_orch_blocker_age_seconds:$peer_orch_blocker_age_seconds}, storage:{status:$storage_status,disk_free_pct:$storage_free_pct,stale_baks_count:$storage_stale_baks}, agent_browser_leak:{status:$headless_browser_status,headless_agent_browser_count:$headless_browser_count,oldest_age_minutes:$headless_browser_oldest}, agentmail_identity:{identity_registry_drift:$identity_registry_drift,identity_token_orphan:$identity_token_orphan,agentmail_pending_registration_broadcasts_count:$agentmail_pending_registration_broadcasts}, daily_report:{status:$daily_report_status,daily_report_age_hours:$daily_report_age_hours}, monolithic_file_debt:{oversized_files_count:$oversized_files_count}, db:$db},
+    symptoms:{leakage:$leakage, drift:$drift, root_drift:$root_drift, ticks_punted_count:$punted_count, peer_orch_blocker:{peer_orch_idle_on_blocker_count:$peer_orch_idle_on_blocker_count,peer_orch_blocker_age_seconds:$peer_orch_blocker_age_seconds}, storage:{status:$storage_status,disk_free_pct:$storage_free_pct,stale_baks_count:$storage_stale_baks}, agent_browser_leak:{status:$headless_browser_status,headless_agent_browser_count:$headless_browser_count,oldest_age_minutes:$headless_browser_oldest}, agentmail_identity:{identity_registry_drift:$identity_registry_drift,identity_token_orphan:$identity_token_orphan,orphan_tokens_unswept_count:$orphan_tokens_unswept_count,identity_rotation_count_24h:$identity_rotation_count_24h,identity_chain_max_length:$identity_chain_max_length,agentmail_pending_registration_broadcasts_count:$agentmail_pending_registration_broadcasts}, daily_report:{status:$daily_report_status,daily_report_age_hours:$daily_report_age_hours}, monolithic_file_debt:{oversized_files_count:$oversized_files_count}, db:$db},
     actions:$actions
   }'
