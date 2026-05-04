@@ -220,6 +220,37 @@ assert_jq "$TMP/queued-detect.json" 'any(.panes[]; .verdict == "QUEUED_NOT_SUBMI
 assert_jq "$TMP/queued-detect.json" 'any(.recoveries[]; .recovery_kind == "queued_bare_enter" and .would_send_empty_enter == true and (.planned_actions | index("send_empty_enter")))' "queued auto-recovery is bare Enter in dry-run"
 assert_jq "$TMP/queued-detect.json" 'any(.soft_violations[]; .class == "codex_queued_not_submitted")' "queued detector emits SOFT violation"
 
+timer_fake_ntm="$TMP/fake-timer-ntm"
+timer_state_since="$(date -u -r "$((NOW_EPOCH - 10))" '+%Y-%m-%dT%H:%M:%SZ' 2>/dev/null || date -u '+%Y-%m-%dT%H:%M:%SZ')"
+cat >"$timer_fake_ntm" <<SH
+#!/usr/bin/env bash
+set -euo pipefail
+case "\${1:-}" in
+  --robot-activity=*)
+    printf '{"agents":[{"pane":"4","pane_idx":4,"agent_type":"codex","state":"THINKING","state_since":"$timer_state_since","velocity":0,"detected_patterns":[]}]}\n'
+    ;;
+  --robot-tail=*)
+    printf '{"panes":{"4":{"lines":["• Waiting for background terminal (13m 21s)","  still waiting"]}}}\n'
+    ;;
+  *)
+    printf '{}\n'
+    ;;
+esac
+SH
+chmod +x "$timer_fake_ntm"
+
+FROZEN_PANE_NTM_BIN="$timer_fake_ntm" \
+FROZEN_PANE_STATE_DIR="$TMP/timer-state" \
+FROZEN_PANE_CACHE_DIR="$TMP/timer-cache" \
+FROZEN_PANE_SAMPLE_DIR="$TMP/timer-samples" \
+FROZEN_PANE_RECOVERY_LEDGER="$TMP/timer-ledger.jsonl" \
+FROZEN_PANE_STRIKE_FILE="$TMP/timer-strikes.jsonl" \
+FROZEN_PANE_METRICS_FILE="$TMP/timer-metrics.jsonl" \
+FROZEN_PANE_NOW_EPOCH="$NOW_EPOCH" \
+  "$SCRIPT" --session flywheel --json --sample-interval-seconds 0 --threshold-seconds 90 >"$TMP/timer-detect.json"
+assert_jq "$TMP/timer-detect.json" '.frozen_panes_detected == 1 and .panes[0].verdict == "FROZEN" and .panes[0].reason == "timer-text-identical-2-samples"' "identical timer text bypasses age threshold"
+assert_jq "$TMP/timer-detect.json" '.panes[0].timer_text == "13m 21s" and .panes[0].timer_text_identical == true and .panes[0].age_seconds < 90' "timer fast path records timer evidence"
+
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"
   exit 1

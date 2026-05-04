@@ -3,7 +3,7 @@
 # robot activity reports long-running THINKING/GENERATING.
 set -euo pipefail
 
-VERSION="2026-05-04.1"
+VERSION="2026-05-04.2"
 SCHEMA_VERSION="frozen-pane-detector.v2"
 CLASS="frozen-codex-spinner-misclassified-as-thinking"
 TEMPLATE_STUB_CLASS="template-stub-prompt"
@@ -352,6 +352,11 @@ working_timer_seconds() {
     s) printf '%s\n' "$value" ;;
     *) printf '0\n' ;;
   esac
+}
+
+timer_text_value() {
+  local file="$1"
+  grep -Eo '[0-9]+m[[:space:]]+[0-9]+s' "$file" 2>/dev/null | tail -1 | tr -s ' ' || true
 }
 
 examples() {
@@ -1001,6 +1006,7 @@ detect() {
     local pane agent_type state state_since state_epoch age cache prior_bytes first_bytes second_bytes live_delta cache_delta status verdict reason
     local first_file second_file cache_exists sample_started sample_finished source_health recovery_allowed recovery_suppressed_reason recovery
     local sample_pair_dir sample_key recent_respawn_count detected_patterns has_codex_chevron has_waiting_background queued_prompt queued_timer queued_timer_drift state_upper
+    local first_timer_text second_timer_text timer_text_identical
     pane="$(printf '%s\n' "$agent" | jq -r '(.pane_idx // .pane) | tostring')"
     [[ -n "$pane" && "$pane" != "null" ]] || continue
     agent_type="$(printf '%s\n' "$agent" | jq -r '.agent_type // "unknown"')"
@@ -1080,6 +1086,12 @@ detect() {
     recovery_suppressed_reason="not_frozen"
     queued_prompt=0
     queued_timer="$(working_timer_seconds "$second_file")"
+    first_timer_text="$(timer_text_value "$first_file")"
+    second_timer_text="$(timer_text_value "$second_file")"
+    timer_text_identical=false
+    if [[ ("$state_upper" == "THINKING" || "$state_upper" == "GENERATING") && -n "$first_timer_text" && "$first_timer_text" == "$second_timer_text" ]]; then
+      timer_text_identical=true
+    fi
     queued_timer_drift=0
     queued_prompt_present "$second_file" && queued_prompt=1
     if [[ "$queued_timer" =~ ^[0-9]+$ ]]; then
@@ -1098,6 +1110,13 @@ detect() {
       reason="template_stub_prompt_detected"
       recovery_allowed=false
       recovery_suppressed_reason="template_stub_prompt_not_recovered"
+    elif [[ "$timer_text_identical" == "true" && "$live_delta" -lt "$MIN_DELTA_BYTES" ]]; then
+      status="frozen"
+      verdict="FROZEN"
+      reason="timer-text-identical-2-samples"
+      recovery_allowed=true
+      recovery_suppressed_reason=""
+      printf '%s\n' "$pane" >>"$frozen_file"
     elif [[ "$age" == "null" ]]; then
       status="unknown"
       verdict="UNKNOWN"
@@ -1146,6 +1165,9 @@ detect() {
 	      --argjson queued_prompt "$queued_prompt" \
 	      --argjson queued_timer "$queued_timer" \
 	      --argjson queued_timer_drift "$queued_timer_drift" \
+	      --arg first_timer_text "$first_timer_text" \
+	      --arg second_timer_text "$second_timer_text" \
+	      --argjson timer_text_identical "$timer_text_identical" \
 	      --argjson recovery_allowed "$recovery_allowed" --arg recovery_suppressed_reason "$recovery_suppressed_reason" \
 	      '{session:$session,pane:($pane | tonumber? // $pane),agent_type:$agent_type,state:$state,
         state_since:$state_since,detected_patterns:$detected_patterns,age_seconds:$age,current_bytes:$current_bytes,
@@ -1158,6 +1180,9 @@ detect() {
 		        recovery_allowed:$recovery_allowed,recovery_suppressed_reason:(if $recovery_suppressed_reason == "" then null else $recovery_suppressed_reason end),
 		        queued_prompt_present:($queued_prompt == 1),working_timer_seconds:$queued_timer,
 		        queued_timer_drift_seconds:$queued_timer_drift,
+		        timer_text:(if $second_timer_text == "" then null else $second_timer_text end),
+		        first_timer_text:(if $first_timer_text == "" then null else $first_timer_text end),
+		        timer_text_identical:$timer_text_identical,
 		        l60_signal_contribution:(if $verdict == "FROZEN" then "silent_darkness_detected"
 		          elif $verdict == "QUEUED_NOT_SUBMITTED" then "silent_darkness_detected"
 		          elif $verdict == "RESPAWN_SUPPRESSED" then "respawn_suppressed"
