@@ -1,0 +1,21 @@
+{
+  "schema_version": "halt-contract/v1",
+  "severity": "green",
+  "tier": "repo",
+  "mathematically_local": true,
+  "blocked_actions": [],
+  "permitted_actions": [
+    "beads.update",
+    "beads.create",
+    "beads.close",
+    "docs.plan",
+    "tests.no_beads",
+    "corpus.ingest",
+    "host.disk_migrate",
+    "cleanup.dry_run"
+  ],
+  "repair_actions": [],
+  "owner": "repo_orch",
+  "expires_at": "2026-05-05T00:00:00Z",
+  "reason": "ordinary tick; all catalogued dispatch classes may proceed"
+}

@@ -1,0 +1,92 @@
+# {{repo_name}} Mission
+
+schema_version: {{schema_version}}
+doc_type: mission
+status: {{status}}
+repo: {{repo}}
+repo_realpath: {{repo_realpath}}
+installed_from: {{installed_from}}
+template_version: "0.1.0"
+template_hash: {{template_hash}}
+rendered_at: {{rendered_at}}
+rendered_by: {{rendered_by}}
+lock_hash: {{lock_hash}}
+locked_at: {{locked_at}}
+locked_by: {{locked_by}}
+source_path: {{source_path}}
+source_sha256: {{source_sha256}}
+source_section: {{source_section}}
+provenance_note: {{provenance_note}}
+
+## 1. Why Now
+
+{{why_now}}
+
+Source evidence:
+{{mission_source}}
+
+## 2. Mission Anchor
+
+{{mission_anchor}}
+
+## 3. Success Metrics
+
+{{success_metrics}}
+
+## 4. Client / Stakeholders
+
+{{client_stakeholders}}
+
+## 5. Frontend Stack
+
+{{frontend_stack}}
+
+## 6. Backend Stack
+
+{{backend_stack}}
+
+## 7. Middleware
+
+{{middleware_requirements}}
+
+## 8. Auth Model
+
+{{auth_model}}
+
+## 9. Data Model And Governance
+
+{{data_model_governance}}
+
+## 10. Infrastructure And Deployment
+
+{{infrastructure_deployment}}
+
+## 11. Flywheel Loop Policy
+
+{{flywheel_loop_policy}}
+
+## 12. Doctrine Compliance
+
+{{doctrine_compliance}}
+
+### Repo-Local CLI Floor
+
+Any executable committed under `bin/` is operator substrate and must satisfy
+`~/.claude/skills/canonical-cli-scoping/SKILL.md`. Validate each repo-local CLI
+with:
+
+```bash
+bash ~/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh ./bin/<name>
+```
+
+`flywheel-loop doctor --repo {{repo}} --json` exposes
+`repo_local_clis_below_canonical_floor`; strict doctor fails when any executable
+under `bin/` is below the canonical floor.
+
+## 13. Stakeholder And Escalation Map
+
+{{stakeholder_escalation_map}}
+
+## 14. Confirm And Lock Receipt
+
+{{lock_receipt}}

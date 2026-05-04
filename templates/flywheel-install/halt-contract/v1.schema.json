@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/halt-contract/v1.schema.json",
+  "title": "halt-contract/v1",
+  "description": "Scoped halt/continue contract for flywheel doctor and tick routing. A non-green signal must name both blocked work and permitted work, unless no safe work exists and no_safe_work_reason explains why.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "severity",
+    "tier",
+    "mathematically_local",
+    "blocked_actions",
+    "permitted_actions",
+    "repair_actions",
+    "owner",
+    "expires_at",
+    "reason"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "halt-contract/v1"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["green", "yellow", "red"]
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["host", "repo", "fleet"]
+    },
+    "mathematically_local": {
+      "type": "boolean"
+    },
+    "blocked_actions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/action_class"
+      }
+    },
+    "permitted_actions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/action_class"
+      }
+    },
+    "repair_actions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/action_class"
+      }
+    },
+    "owner": {
+      "type": "string",
+      "enum": ["repo_orch", "host_orch", "joshua"]
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "no_safe_work_reason": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "severity": {
+            "enum": ["yellow", "red"]
+          }
+        },
+        "required": ["severity"]
+      },
+      "then": {
+        "properties": {
+          "blocked_actions": {
+            "minItems": 1
+          }
+        },
+        "anyOf": [
+          {
+            "properties": {
+              "permitted_actions": {
+                "minItems": 1
+              }
+            }
+          },
+          {
+            "required": ["no_safe_work_reason"],
+            "properties": {
+              "permitted_actions": {
+                "maxItems": 0
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "$defs": {
+    "action_class": {
+      "type": "string",
+      "pattern": "^[a-z]+(\\.[a-z_]+)+$"
+    }
+  }
+}

@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel-install-template-v0.1.0.schema.json",
+  "title": "Flywheel install templates v0.1.0",
+  "type": "object",
+  "required": [
+    "template_version",
+    "frontmatter_required_keys",
+    "templates",
+    "loop_json_required_keys"
+  ],
+  "properties": {
+    "template_version": {
+      "const": "0.1.0"
+    },
+    "frontmatter_required_keys": {
+      "type": "array",
+      "items": { "type": "string" },
+      "const": [
+        "schema_version",
+        "doc_type",
+        "status",
+        "repo",
+        "repo_realpath",
+        "installed_from",
+        "template_version",
+        "template_hash",
+        "rendered_at",
+        "rendered_by",
+        "lock_hash",
+        "locked_at",
+        "locked_by",
+        "source_path",
+        "source_sha256",
+        "source_section",
+        "provenance_note"
+      ]
+    },
+    "templates": {
+      "type": "object",
+      "required": ["MISSION.md.tmpl", "GOAL.md.tmpl", "STATE.md.tmpl", "loop.json.tmpl"],
+      "properties": {
+        "MISSION.md.tmpl": {
+          "type": "object",
+          "required": ["doc_type", "required_sections"],
+          "properties": {
+            "doc_type": { "const": "mission" },
+            "required_sections": {
+              "const": [
+                "1. Why Now",
+                "2. Mission Anchor",
+                "3. Success Metrics",
+                "4. Client / Stakeholders",
+                "5. Frontend Stack",
+                "6. Backend Stack",
+                "7. Middleware",
+                "8. Auth Model",
+                "9. Data Model And Governance",
+                "10. Infrastructure And Deployment",
+                "11. Flywheel Loop Policy",
+                "12. Doctrine Compliance",
+                "13. Stakeholder And Escalation Map",
+                "14. Confirm And Lock Receipt"
+              ]
+            }
+          }
+        },
+        "GOAL.md.tmpl": {
+          "type": "object",
+          "required": ["doc_type", "required_sections"],
+          "properties": {
+            "doc_type": { "const": "goal" },
+            "required_sections": {
+              "const": [
+                "Current Goal",
+                "Measured Acceptance Criteria",
+                "Validation Commands",
+                "Current Blockers",
+                "Safe Next Action",
+                "Out Of Scope",
+                "Lock Receipt"
+              ]
+            }
+          }
+        },
+        "STATE.md.tmpl": {
+          "type": "object",
+          "required": ["doc_type", "required_sections"],
+          "properties": {
+            "doc_type": { "const": "state" },
+            "required_sections": {
+              "const": [
+                "Mission Anchor",
+                "Success Definition",
+                "Resume Context",
+                "Active Work In Flight",
+                "Confirmed Failure Modes",
+                "Current Decisions",
+                "Next Actions",
+                "Key Files",
+                "Lock Receipt"
+              ]
+            }
+          }
+        },
+        "loop.json.tmpl": {
+          "type": "object",
+          "required": ["required_keys"],
+          "properties": {
+            "required_keys": {
+              "const": [
+                "schema_version",
+                "repo",
+                "repo_realpath",
+                "git_root",
+                "created_at",
+                "installed_from",
+                "template_version",
+                "template_hash",
+                "docs",
+                "doctor_strict_command",
+                "source_mutation_allowed_when"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "loop_json_required_keys": {
+      "type": "array",
+      "items": { "type": "string" },
+      "const": [
+        "schema_version",
+        "repo",
+        "repo_realpath",
+        "git_root",
+        "created_at",
+        "installed_from",
+        "template_version",
+        "template_hash",
+        "docs",
+        "doctor_strict_command",
+        "source_mutation_allowed_when"
+      ]
+    }
+  }
+}

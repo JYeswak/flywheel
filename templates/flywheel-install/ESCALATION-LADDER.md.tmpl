@@ -1,0 +1,96 @@
+---
+schema_version: {{schema_version}}
+doc_type: escalation_ladder
+status: {{status}}
+repo: {{repo}}
+template_version: "0.1.0"
+template_hash: {{template_hash}}
+rendered_at: {{rendered_at}}
+rendered_by: {{rendered_by}}
+lock_hash: {{lock_hash}}
+locked_at: {{locked_at}}
+locked_by: {{locked_by}}
+---
+# {{repo_name}} Escalation Ladder
+
+The orchestrator MUST climb every rung below before pinging Josh.
+Asking a human is rung 5. Anything that lands at the human without a
+probe ledger gets denied at the escalation gate.
+
+## Rung 1 — Substrate Probe (machine-readable credentials/state)
+
+For credential-shaped walls:
+- `infisical secrets --path=/<service> --env=<env>` — alternate token may already exist
+- `infisical secrets list --recursive | grep -i <service>` — check every path
+- `cat ~/.config/<tool>/config*` and `op item list` if 1Password CLI present
+- `gh secret list` and `gh secret list --org` — repo + org GH secrets
+- For Cloudflare-stored secrets: `cf-secret list` (if available in PATH)
+
+For substrate-corruption walls (DB locked, malformed row, FTS5 error):
+- Look for `scripts/<thing>_repair.sh` or `scripts/repair_<thing>.sh` first
+- `br doctor` / `br sync --rebuild` for beads DB
+- `flywheel-loop doctor --strict` for canonical install drift
+
+For service/process walls:
+- `launchctl list | grep <service>` then `launchctl bootout` + bootstrap
+- `ntm activity <session>` not `tmux capture-pane`
+
+## Rung 2 — Self-Heal Tool (named in repo or skill arsenal)
+
+If a probe finds the gap, run the self-heal tool. Examples:
+- `scripts/bead_db_repair.sh` — Tier 2, idempotent, 5-gate (L35)
+- `scripts/restart_ingest.sh` — clean orphan + bootstrap
+- Skill `infisical-rotation-ops` — credential rotation playbook
+- Skill `railway-api` — railway login --browserless OTP relay
+- Skill `<service>-ops` — service-specific recovery
+
+Self-heal tools are autonomous-ship. No human needed unless they fail.
+
+## Rung 3 — Skill Recovery Section
+
+Every relevant `*-ops` / `*-api` / `*-secrets` skill has a "Recovery"
+or "Common failures" section. Read it. The skill encodes prior trauma.
+
+`ls ~/.claude/skills/` and grep for the service name.
+
+## Rung 4 — Cross-Repo Precedent Search
+
+The same wall has likely been hit in another repo:
+- `mcp__socraticode__codebase_search` across `~/Developer/*` for the
+  exact error string (use canonical paths — symlinks create empty
+  collections, see picoz CLAUDE.md)
+- `grep -r "<error string>" ~/.claude/projects/*/memory/` — CASS may
+  already have the recovery
+- `grep -r "<error string>" ~/Developer/*/CHANGELOG.md`
+
+## Rung 5 — Ask Josh (with probe ledger)
+
+Only allowed when rungs 1-4 produced no resolution. The escalation
+gate requires a JSONL probe ledger at `/tmp/escalation-probe-<bead>.jsonl`
+with one row per rung attempted:
+
+```jsonl
+{"ts":"...","rung":1,"probe":"infisical secrets --path=/railway","result":"empty","exit":0}
+{"ts":"...","rung":2,"probe":"scripts/bead_db_repair.sh","result":"db_clean","exit":0}
+{"ts":"...","rung":3,"probe":"skill:railway-api recovery section read","result":"no_match","exit":0}
+{"ts":"...","rung":4,"probe":"socraticode_search 'Unauthorized variableUpsert'","result":"no_hit","exit":0}
+```
+
+Without the ledger, the gate denies the escalation and instructs the
+orchestrator to climb the rungs first.
+
+## Override
+
+`JOSHUA_OVERRIDE='<reason>'` allows one escalation without a ledger and
+logs to `~/.local/state/flywheel-loop/overrides.jsonl`. Override is
+one-shot; never re-arms a daemon or removes the gate.
+
+## Trauma Reference
+
+This ladder exists because of the 2026-04-30 alpsinsurance idle:
+orchestrator hit a Railway token-scope wall, framed it as "2-minute
+dashboard operation from your laptop", and went into 30-minute heartbeat
+instead of probing infisical/cf-secret/skills for alternate paths or
+running the parallel `bead_db_repair.sh` to clear the second blocker.
+The substrate had answers; the orchestrator stopped at "ask Josh" too
+early.

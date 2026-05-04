@@ -1,0 +1,22 @@
+{
+  "schema_version": "halt-contract/v1",
+  "severity": "yellow",
+  "tier": "host",
+  "mathematically_local": false,
+  "blocked_actions": [
+    "corpus.ingest",
+    "host.disk_mutate"
+  ],
+  "permitted_actions": [
+    "beads.update",
+    "docs.plan",
+    "cleanup.dry_run"
+  ],
+  "repair_actions": [
+    "storage.report",
+    "storage.prune_dry_run"
+  ],
+  "owner": "host_orch",
+  "expires_at": "2026-05-04T20:55:00Z",
+  "reason": "skillos disk_free_pct=7.6; block growth and mutation, keep safe work moving"
+}
