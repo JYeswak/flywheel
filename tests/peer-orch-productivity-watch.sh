@@ -108,8 +108,9 @@ printf '%s\n' "$*" >>"$NTM_LOG"
 exit 0
 SH
 chmod +x "$TMP/ntm"
-NTM_LOG="$TMP/ntm.log" "$SCRIPT" "${base_args[@]}" --apply --json --ntm "$TMP/ntm" >"$TMP/apply.json"
+NTM_LOG="$TMP/ntm.log" "$SCRIPT" "${base_args[@]}" --apply --no-notify --json --ntm "$TMP/ntm" >"$TMP/apply.json"
 assert_jq "$TMP/apply.json" '(.actual_actions | map(.type) | index("xpane_productivity_escalation"))' "apply sends productivity escalation"
+assert_jq "$TMP/apply.json" '(.actual_actions | map(.type) | index("josh_notify_true_blocker"))' "apply records true blocker notify action"
 grep -q 'skillos' "$TMP/ntm.log" && pass "fake ntm received skillos send" || fail "fake ntm received skillos send"
 assert_jq "$TMP/state/productivity.jsonl" 'select(.event == "productivity_escalation_sent" and .session == "skillos")' "apply writes cross-orch ledger row"
 

@@ -360,9 +360,10 @@ def apply_actions(rows, args, checked_at):
             title = f"TRUE Josh-blocker: {row['session']}"
             body = f"{row['session']} needs Joshua action; see productivity escalation ledger."
             notify_ok = False
-            if subprocess.call(["bash", "-lc", f"command -v notify >/dev/null && notify {json.dumps(title)} {json.dumps(body)}"], stderr=subprocess.DEVNULL) == 0:
-                notify_ok = True
-            subprocess.call(["osascript", "-e", f'display notification {json.dumps(body)} with title {json.dumps(title)}'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if not args.no_notify:
+                if subprocess.call(["bash", "-lc", f"command -v notify >/dev/null && notify {json.dumps(title)} {json.dumps(body)}"], stderr=subprocess.DEVNULL) == 0:
+                    notify_ok = True
+                subprocess.call(["osascript", "-e", f'display notification {json.dumps(body)} with title {json.dumps(title)}'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             action = {"type": "josh_notify_true_blocker", "session": row["session"], "notify_ok": notify_ok}
             append_jsonl(Path(args.ledger), {"ts": checked_at, "event": "true_josh_blocker_notify", **action, "state": state})
             actions.append(action)
@@ -504,6 +505,7 @@ def parse_args():
     p.add_argument("--json", action="store_true")
     p.add_argument("--dry-run", action="store_true", default=True)
     p.add_argument("--apply", action="store_true")
+    p.add_argument("--no-notify", action="store_true", default=os.environ.get("FLYWHEEL_PRODUCTIVITY_NO_NOTIFY", "0") == "1")
     p.add_argument("--fleet", action="store_true")
     p.add_argument("--session")
     p.add_argument("--loops-dir", default=os.environ.get("FLYWHEEL_PRODUCTIVITY_LOOPS_DIR", str(DEFAULT_LOOPS_DIR)))
