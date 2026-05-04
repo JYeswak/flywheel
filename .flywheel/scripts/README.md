@@ -15,6 +15,7 @@ surfaces.
 | `frozen-pane-detector-fleet.sh` | Disabled-by-default LaunchAgent installer and doctor wrapper for fleet frozen-pane observation; honors STOP/FATAL files, recovery budgets, and degraded-truth no-recovery gates. |
 | `daily-report.sh` | Generates `.flywheel/reports/daily-YYYY-MM-DD.md` from Beads, memory, dispatch, fuckup, doctor, Jeff-intel, incidents, and cross-orch state. |
 | `agentmail-registration-broadcast.sh` | Sends token-safe registration request packets to live `needs_registration` orchestrator panes and exposes `agentmail_pending_registration_broadcasts_count`. |
+| `fleet-observatory-aggregate.sh` | L106 strategic dashboard backend: reads doctor once, aggregates 8 fleet measurement spines into `fleet_overall_health_score`, and renders `/flywheel:fleet-observatory`. |
 
 Run script-specific `--help`, `--info`, `--schema`, and `--examples` where
 available before wiring a script into doctor or slash-command surfaces.
