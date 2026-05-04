@@ -15,6 +15,8 @@ LAST="$STATE_DIR/last_run.json"
 NTM="${NTM:-/Users/josh/.local/bin/ntm}"
 DRY_RUN="${FLYWHEEL_LOOP_TICK_DRY_RUN:-0}"
 FROZEN_DETECTOR_OVERRIDE="${FLYWHEEL_TICK_FROZEN_DETECTOR_OVERRIDE:-0}"
+CANONICAL_SOURCE="${FLYWHEEL_CANONICAL_DOCTRINE_SOURCE:-/Users/josh/Developer/flywheel/.flywheel/AGENTS-CANONICAL.md}"
+CANONICAL_PULL_MAX_AGE_SECONDS="${FLYWHEEL_CANONICAL_PULL_MAX_AGE_SECONDS:-300}"
 
 ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 
@@ -27,6 +29,78 @@ json_or_raw() {
   else
     jq -nc --arg raw "$raw" '{action:"error",raw:$raw}'
   fi
+}
+
+first_json_or_raw() {
+  local raw="${1:-}"
+  if jq -e . >/dev/null 2>&1 <<<"$raw"; then
+    jq -c -s '.[0]' <<<"$raw"
+  else
+    jq -nc --arg raw "$raw" '{action:"error",raw:$raw}'
+  fi
+}
+
+canonical_pull_before_dispatch() {
+  local target="$REPO/.flywheel/AGENTS-CANONICAL.md" target_dir now target_mtime freshness status action warning tmp backup
+  now="$(date -u +%s)"
+  target_dir="$(dirname "$target")"
+  status="pass"
+  action="checked"
+  warning=""
+
+  if [[ ! -f "$CANONICAL_SOURCE" ]]; then
+    jq -nc --arg source "$CANONICAL_SOURCE" '{
+      schema_version:"canonical-doctrine-pull/v1",
+      status:"fail",
+      action:"source_missing",
+      canonical_pull_freshness_seconds:null,
+      source:$source,
+      warnings:["canonical_source_missing"]
+    }'
+    return 0
+  fi
+
+  mkdir -p "$target_dir"
+  if [[ "$CANONICAL_SOURCE" != "$target" ]] && ! cmp -s "$CANONICAL_SOURCE" "$target" 2>/dev/null; then
+    tmp="$(mktemp "$target_dir/.AGENTS-CANONICAL.md.XXXXXX")"
+    cp "$CANONICAL_SOURCE" "$tmp"
+    if [[ -f "$target" ]]; then
+      backup="$target.bak.$(date -u +%Y%m%dT%H%M%SZ)"
+      cp "$target" "$backup"
+    else
+      backup=""
+    fi
+    mv "$tmp" "$target"
+    action="copied"
+  elif [[ "$CANONICAL_SOURCE" == "$target" ]]; then
+    action="source_is_target"
+  fi
+
+  target_mtime="$(stat -f '%m' "$target" 2>/dev/null || printf '0')"
+  freshness=$((now - target_mtime))
+  if [[ "$freshness" -gt "$CANONICAL_PULL_MAX_AGE_SECONDS" ]]; then
+    status="fail"
+    warning="canonical_pull_stale"
+  fi
+
+  jq -nc \
+    --arg status "$status" \
+    --arg action "$action" \
+    --arg source "$CANONICAL_SOURCE" \
+    --arg target "$target" \
+    --arg warning "$warning" \
+    --argjson canonical_pull_freshness_seconds "$freshness" \
+    --argjson max_age_seconds "$CANONICAL_PULL_MAX_AGE_SECONDS" \
+    '{
+      schema_version:"canonical-doctrine-pull/v1",
+      status:$status,
+      action:$action,
+      source:$source,
+      target:$target,
+      canonical_pull_freshness_seconds:$canonical_pull_freshness_seconds,
+      max_age_seconds:$max_age_seconds,
+      warnings:(if $warning == "" then [] else [$warning] end)
+    }'
 }
 
 codex_watchtower_probe() {
@@ -738,9 +812,7 @@ jq -nc \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 DOCTOR_PROMOTION_RESULT="$(bash "$REPO/.flywheel/scripts/doctor-signal-bead-promotion.sh" "$REPO" 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$DOCTOR_PROMOTION_RESULT"; then
-  DOCTOR_PROMOTION_RESULT="$(jq -nc --arg raw "$DOCTOR_PROMOTION_RESULT" '{action:"error",raw:$raw}')"
-fi
+DOCTOR_PROMOTION_RESULT="$(first_json_or_raw "$DOCTOR_PROMOTION_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "doctor_signal_promotion" \
@@ -748,9 +820,7 @@ jq -nc \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 DOCTRINE_LADDER_RESULT="$(bash "$REPO/.flywheel/scripts/doctrine-ladder-promote.sh" "$REPO" 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$DOCTRINE_LADDER_RESULT"; then
-  DOCTRINE_LADDER_RESULT="$(jq -nc --arg raw "$DOCTRINE_LADDER_RESULT" '{action:"error",raw:$raw}')"
-fi
+DOCTRINE_LADDER_RESULT="$(first_json_or_raw "$DOCTRINE_LADDER_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "doctrine_ladder_promote" \
@@ -758,9 +828,7 @@ jq -nc \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 JEFF_WATCHER_RESULT="$(bash "$REPO/.flywheel/scripts/jeff-issue-response-poll.sh" "$REPO" 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$JEFF_WATCHER_RESULT"; then
-  JEFF_WATCHER_RESULT="$(jq -nc --arg raw "$JEFF_WATCHER_RESULT" '{action:"error",raw:$raw}')"
-fi
+JEFF_WATCHER_RESULT="$(first_json_or_raw "$JEFF_WATCHER_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "jeff_response_watch" \
@@ -768,9 +836,7 @@ jq -nc \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 JEFF_STATUS_RESULT="$(jeff_status_probe 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$JEFF_STATUS_RESULT"; then
-  JEFF_STATUS_RESULT="$(jq -nc --arg raw "$JEFF_STATUS_RESULT" '{action:"error",raw:$raw}')"
-fi
+JEFF_STATUS_RESULT="$(first_json_or_raw "$JEFF_STATUS_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "jeff_status_probe" \
@@ -778,9 +844,7 @@ jq -nc \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 JEFF_FIXES_RESULT="$(jeff_fixes_pull_probe 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$JEFF_FIXES_RESULT"; then
-  JEFF_FIXES_RESULT="$(jq -nc --arg raw "$JEFF_FIXES_RESULT" '{action:"error",raw:$raw}')"
-fi
+JEFF_FIXES_RESULT="$(first_json_or_raw "$JEFF_FIXES_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "jeff_fixes_pull_probe" \
@@ -788,9 +852,7 @@ jq -nc \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 AGENT_MAIL_FD_RESULT="$(agent_mail_fd_probe 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$AGENT_MAIL_FD_RESULT"; then
-  AGENT_MAIL_FD_RESULT="$(jq -nc --arg raw "$AGENT_MAIL_FD_RESULT" '{action:"error",raw:$raw}')"
-fi
+AGENT_MAIL_FD_RESULT="$(first_json_or_raw "$AGENT_MAIL_FD_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "agent_mail_fd_doctor" \
@@ -798,9 +860,7 @@ jq -nc \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 MOBILE_EATS_RESULT="$(mobile_eats_probe 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$MOBILE_EATS_RESULT"; then
-  MOBILE_EATS_RESULT="$(jq -nc --arg raw "$MOBILE_EATS_RESULT" '{action:"error",raw:$raw}')"
-fi
+MOBILE_EATS_RESULT="$(first_json_or_raw "$MOBILE_EATS_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "mobile_eats_receipt_bridge" \
@@ -808,9 +868,7 @@ jq -nc \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 SKILLOS_LOOP_RESULT="$(skillos_loop_probe 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$SKILLOS_LOOP_RESULT"; then
-  SKILLOS_LOOP_RESULT="$(jq -nc --arg raw "$SKILLOS_LOOP_RESULT" '{action:"error",raw:$raw}')"
-fi
+SKILLOS_LOOP_RESULT="$(first_json_or_raw "$SKILLOS_LOOP_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "skillos_loop_receipt" \
@@ -818,9 +876,7 @@ jq -nc \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 DAILY_JEFF_RESULT="$(daily_jeff_probe 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$DAILY_JEFF_RESULT"; then
-  DAILY_JEFF_RESULT="$(jq -nc --arg raw "$DAILY_JEFF_RESULT" '{action:"error",raw:$raw}')"
-fi
+DAILY_JEFF_RESULT="$(first_json_or_raw "$DAILY_JEFF_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "daily_jeff_ingest_doctor" \
@@ -828,9 +884,7 @@ jq -nc \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 JEFF_BINARY_VERSION_RESULT="$(jeff_binary_version_probe 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$JEFF_BINARY_VERSION_RESULT"; then
-  JEFF_BINARY_VERSION_RESULT="$(jq -nc --arg raw "$JEFF_BINARY_VERSION_RESULT" '{action:"error",raw:$raw}')"
-fi
+JEFF_BINARY_VERSION_RESULT="$(first_json_or_raw "$JEFF_BINARY_VERSION_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "jeff_binary_version_watchtower" \
@@ -838,19 +892,25 @@ jq -nc \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 FLEET_ONBOARD_RESULT="$(fleet_onboard_probe 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$FLEET_ONBOARD_RESULT"; then
-  FLEET_ONBOARD_RESULT="$(jq -nc --arg raw "$FLEET_ONBOARD_RESULT" '{action:"error",raw:$raw}')"
-fi
+FLEET_ONBOARD_RESULT="$(first_json_or_raw "$FLEET_ONBOARD_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "fleet_onboard_doctor" \
   --argjson result "$FLEET_ONBOARD_RESULT" \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
-CODEX_WATCHTOWER_RESULT="$(codex_watchtower_probe 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$CODEX_WATCHTOWER_RESULT"; then
-  CODEX_WATCHTOWER_RESULT="$(jq -nc --arg raw "$CODEX_WATCHTOWER_RESULT" '{action:"error",raw:$raw}')"
+CANONICAL_PULL_RESULT="$(canonical_pull_before_dispatch 2>&1 || printf '{"status":"fail","action":"error","warnings":["canonical_pull_failed"]}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$CANONICAL_PULL_RESULT"; then
+  CANONICAL_PULL_RESULT="$(jq -nc --arg raw "$CANONICAL_PULL_RESULT" '{schema_version:"canonical-doctrine-pull/v1",status:"fail",action:"invalid_json",canonical_pull_freshness_seconds:null,warnings:["canonical_pull_invalid_json"],raw:$raw}')"
 fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "canonical_doctrine_pull" \
+  --argjson result "$CANONICAL_PULL_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+CODEX_WATCHTOWER_RESULT="$(codex_watchtower_probe 2>&1 || printf '{"action":"error"}')"
+CODEX_WATCHTOWER_RESULT="$(first_json_or_raw "$CODEX_WATCHTOWER_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "codex_watchtower_probe" \
@@ -879,9 +939,7 @@ jq -nc \
   '{ts:$ts,event:$event,result:($result | fromjson? // {success:false,raw:$result}),summary:($summary | fromjson? // {success:false,source_health_status:"invalid"}),dispatch_block_reason:$block_reason,override:($override == "true")}' >>"$LOG"
 
 INBOX_RESULT="$(SESSION="$SESSION" ORCH_PANE="$TARGET_PANE" bash "$REPO/.flywheel/scripts/inbox-check-tick-step.sh" 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$INBOX_RESULT"; then
-  INBOX_RESULT="$(jq -nc --arg raw "$INBOX_RESULT" '{action:"error",raw:$raw}')"
-fi
+INBOX_RESULT="$(first_json_or_raw "$INBOX_RESULT")"
 INBOX_IDENTITY="$(jq -r '.identity // "unknown"' <<<"$INBOX_RESULT" 2>/dev/null || printf 'unknown')"
 jq -nc \
   --arg ts "$(ts)" \
@@ -890,9 +948,7 @@ jq -nc \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 DISPATCH_CAPACITY_RESULT="$(dispatch_capacity_snapshot 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$DISPATCH_CAPACITY_RESULT"; then
-  DISPATCH_CAPACITY_RESULT="$(jq -nc --arg raw "$DISPATCH_CAPACITY_RESULT" '{action:"error",raw:$raw}')"
-fi
+DISPATCH_CAPACITY_RESULT="$(first_json_or_raw "$DISPATCH_CAPACITY_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "dispatch_capacity_gate" \
@@ -900,9 +956,7 @@ jq -nc \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 CALLBACK_VALIDATION_RESULT="$(callback_validation_reaper_gate 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$CALLBACK_VALIDATION_RESULT"; then
-  CALLBACK_VALIDATION_RESULT="$(jq -nc --arg raw "$CALLBACK_VALIDATION_RESULT" '{action:"error",raw:$raw}')"
-fi
+CALLBACK_VALIDATION_RESULT="$(first_json_or_raw "$CALLBACK_VALIDATION_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "callback_validation_reaper_gate" \
@@ -910,9 +964,7 @@ jq -nc \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 AUTO_FIX_BEAD_RESULT="$(validation_fix_bead_plan 2>&1 || printf '{"action":"error"}')"
-if ! jq -e . >/dev/null 2>&1 <<<"$AUTO_FIX_BEAD_RESULT"; then
-  AUTO_FIX_BEAD_RESULT="$(jq -nc --arg raw "$AUTO_FIX_BEAD_RESULT" '{action:"error",raw:$raw}')"
-fi
+AUTO_FIX_BEAD_RESULT="$(first_json_or_raw "$AUTO_FIX_BEAD_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "validation_fix_bead_plan" \
@@ -997,6 +1049,8 @@ ls -1t "$PROMPT_DIR"/flywheel-tick-*.md 2>/dev/null | tail -n +201 | xargs rm -f
   printf '%s\n\n' "$JEFF_BINARY_VERSION_RESULT"
   printf '## Fleet onboarding pre-tick\n'
   printf '%s\n\n' "$FLEET_ONBOARD_RESULT"
+  printf '## Canonical doctrine pull pre-tick\n'
+  printf '%s\n\n' "$CANONICAL_PULL_RESULT"
   printf '## Codex watchtower pre-tick\n'
   printf '%s\n\n' "$CODEX_WATCHTOWER_RESULT"
   printf '## Frozen detector v2 pre-tick\n'
@@ -1031,7 +1085,13 @@ ls -1t "$PROMPT_DIR"/flywheel-tick-*.md 2>/dev/null | tail -n +201 | xargs rm -f
 
 send_output=""
 status="failed"
-if [[ "$FROZEN_DETECTOR_BLOCK_REASON" != "none" ]]; then
+CANONICAL_PULL_STATUS="$(jq -r '.status // "fail"' <<<"$CANONICAL_PULL_RESULT" 2>/dev/null || printf fail)"
+CANONICAL_PULL_FRESHNESS_SECONDS="$(jq -r '.canonical_pull_freshness_seconds // 999999999' <<<"$CANONICAL_PULL_RESULT" 2>/dev/null || printf 999999999)"
+
+if [[ "$CANONICAL_PULL_STATUS" != "pass" || "$CANONICAL_PULL_FRESHNESS_SECONDS" -gt "$CANONICAL_PULL_MAX_AGE_SECONDS" ]]; then
+  status="blocked_canonical_pull"
+  send_output="blocked_by_canonical_pull status=$CANONICAL_PULL_STATUS freshness_seconds=$CANONICAL_PULL_FRESHNESS_SECONDS"
+elif [[ "$FROZEN_DETECTOR_BLOCK_REASON" != "none" ]]; then
   status="blocked_frozen_detector"
   send_output="blocked_by_frozen_detector reason=$FROZEN_DETECTOR_BLOCK_REASON"
 elif [[ "$DRY_RUN" == "1" ]]; then
@@ -1065,6 +1125,7 @@ jq -nc \
   --argjson jeff_binary_version "$JEFF_BINARY_VERSION_RESULT" \
   --argjson fleet_onboard "$FLEET_ONBOARD_RESULT" \
   --argjson codex_watchtower "$CODEX_WATCHTOWER_RESULT" \
+  --argjson canonical_pull "$CANONICAL_PULL_RESULT" \
   --argjson frozen_detector "$FROZEN_DETECTOR_SUMMARY" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --argjson value_gap "$VALUE_GAP_RESULT" \
@@ -1077,6 +1138,8 @@ jq -nc \
     mobile_eats_receipt:$mobile_eats,skillos_loop:$skillos_loop,daily_jeff_ingest:$daily_jeff,
     jeff_binary_version:$jeff_binary_version,
     fleet_onboard:$fleet_onboard,codex_watchtower:$codex_watchtower,
+    canonical_doctrine_pull:$canonical_pull,
+    canonical_pull_freshness_seconds:($canonical_pull.canonical_pull_freshness_seconds // null),
     frozen_detector:$frozen_detector,
     frozen_detector_dispatch_block_reason:$frozen_detector_block_reason,
     frozen_detector_source_health_status:($frozen_detector.source_health_status // null),
@@ -1145,6 +1208,7 @@ jq -nc \
   --argjson jeff_binary_version "$JEFF_BINARY_VERSION_RESULT" \
   --argjson fleet_onboard "$FLEET_ONBOARD_RESULT" \
   --argjson codex_watchtower "$CODEX_WATCHTOWER_RESULT" \
+  --argjson canonical_pull "$CANONICAL_PULL_RESULT" \
   --argjson frozen_detector "$FROZEN_DETECTOR_SUMMARY" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --argjson value_gap "$VALUE_GAP_RESULT" \
@@ -1157,6 +1221,8 @@ jq -nc \
     mobile_eats_receipt:$mobile_eats,skillos_loop:$skillos_loop,daily_jeff_ingest:$daily_jeff,
     jeff_binary_version:$jeff_binary_version,
     fleet_onboard:$fleet_onboard,codex_watchtower:$codex_watchtower,
+    canonical_doctrine_pull:$canonical_pull,
+    canonical_pull_freshness_seconds:($canonical_pull.canonical_pull_freshness_seconds // null),
     frozen_detector:$frozen_detector,
     frozen_detector_dispatch_block_reason:$frozen_detector_block_reason,
     frozen_detector_source_health_status:($frozen_detector.source_health_status // null),
@@ -1202,4 +1268,4 @@ jq -nc \
     jeff_fixes_status:($jeff_fixes.status // null)
   }' >"$LAST"
 
-[[ "$status" == "sent" || "$status" == "dry_run" || "$status" == "blocked_frozen_detector" ]]
+[[ "$status" == "sent" || "$status" == "dry_run" || "$status" == "blocked_frozen_detector" || "$status" == "blocked_canonical_pull" ]]
