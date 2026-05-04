@@ -371,28 +371,31 @@ def multi_frame_alive(activity):
     return False
 
 
-def load_broadcast_classifier(args, session):
+def load_broadcast_report(args):
     if args.broadcast_classifier:
         payload = load_json(args.broadcast_classifier, {})
-        if isinstance(payload, dict):
-            if "sessions" in payload and isinstance(payload["sessions"], dict):
-                return payload["sessions"].get(session, {})
-            if payload.get("session") == session:
-                return payload
-            if session in payload:
-                return payload[session]
-        if isinstance(payload, list):
-            for row in payload:
-                if isinstance(row, dict) and row.get("session") == session:
-                    return row
-        return {}
+        return payload if isinstance(payload, (dict, list)) else {}
     script = Path(args.broadcast_script)
     if not script.exists():
         return {}
-    report = run_json([str(script), "--doctor", "--json"], {}, timeout=args.broadcast_timeout)
-    for row in report.get("results") or []:
-        if isinstance(row, dict) and row.get("session") == session:
-            return row
+    return run_json([str(script), "--doctor", "--json"], {}, timeout=args.broadcast_timeout)
+
+
+def classifier_for_session(payload, session):
+    if isinstance(payload, dict):
+        if "sessions" in payload and isinstance(payload["sessions"], dict):
+            return payload["sessions"].get(session, {})
+        if payload.get("session") == session:
+            return payload
+        if session in payload:
+            return payload[session]
+        for row in payload.get("results") or []:
+            if isinstance(row, dict) and row.get("session") == session:
+                return row
+    if isinstance(payload, list):
+        for row in payload:
+            if isinstance(row, dict) and row.get("session") == session:
+                return row
     return {}
 
 
@@ -433,7 +436,7 @@ def build_session_row(item, args, shared):
     orch_pane = intish(topo.get("orchestrator_pane") or loop.get("orchestrator_pane") or 1, 1)
     rows = registry_rows(args.agent_mail_dir, session)
     activity = activity_json(session, args)
-    classifier = load_broadcast_classifier(args, session)
+    classifier = classifier_for_session(shared["broadcast_report"], session)
     axes = [
         token_axis(rows, args, shared["now_epoch"]),
         packet_axis(shared["coord_rows"], session, shared["now_epoch"]),
@@ -512,6 +515,7 @@ def make_report(args):
         "peer_rows": load_jsonl(args.peer_blocker_log),
         "productivity_rows": load_jsonl(args.productivity_log),
         "topology_rows": load_jsonl(args.topology),
+        "broadcast_report": load_broadcast_report(args),
     }
     rows = [build_session_row(item, args, shared) for item in sessions]
     actions = planned_actions(rows)
