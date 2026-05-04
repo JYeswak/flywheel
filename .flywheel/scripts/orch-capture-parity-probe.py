@@ -1,0 +1,362 @@
+#!/usr/bin/env python3
+"""Read-only Joshua-input capture parity probe for orchestrator runtimes."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+from collections import defaultdict
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any
+
+
+SCHEMA_VERSION = "orch-capture-parity/v1"
+APPROVED_REMEDIATION_TRACKS = [
+    {
+        "track": "primary_agent_mail_cross_orch_route",
+        "owner_bead": "flywheel-xap2",
+        "mutates": False,
+        "note": "Capture Joshua-originated cross-orch input as canonical josh-request rows through the durable coordination channel.",
+    },
+    {
+        "track": "secondary_ntm_send_wrapper_capture",
+        "owner_bead": "flywheel-xap2",
+        "mutates": False,
+        "note": "Wrap dispatch sends so prompt_hash/source_session/source_pane are captured before pane delivery.",
+    },
+    {
+        "track": "tertiary_pane_tail_poller",
+        "owner_bead": "flywheel-xap2",
+        "mutates": False,
+        "fragility_note": "Only acceptable with explicit fragility note; pane scrollback alone is not capture proof.",
+    },
+]
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc).replace(microsecond=0)
+
+
+def parse_ts(value: Any) -> datetime | None:
+    if not value:
+        return None
+    text = str(value)
+    try:
+        if text.endswith("Z"):
+            text = text[:-1] + "+00:00"
+        parsed = datetime.fromisoformat(text)
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        return parsed.astimezone(timezone.utc)
+    except Exception:
+        return None
+
+
+def ts_text(value: datetime | None) -> str | None:
+    if value is None:
+        return None
+    return value.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def read_jsonl(path: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    if not path.exists():
+        return rows
+    for line in path.read_text(errors="replace").splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(row, dict):
+            rows.append(row)
+    return rows
+
+
+def latest_topology_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    latest: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        session = str(row.get("session") or "").strip()
+        if not session:
+            continue
+        previous = latest.get(session)
+        row_ts = parse_ts(row.get("effective_at") or row.get("ts"))
+        prev_ts = parse_ts(previous.get("effective_at") or previous.get("ts")) if previous else None
+        if previous is None or (row_ts or datetime.min.replace(tzinfo=timezone.utc)) >= (prev_ts or datetime.min.replace(tzinfo=timezone.utc)):
+            latest[session] = row
+    return [latest[key] for key in sorted(latest)]
+
+
+def runtime_for(row: dict[str, Any]) -> str:
+    return str(row.get("orchestrator_kind") or row.get("runtime") or row.get("kind") or "unknown")
+
+
+def pane_for(row: dict[str, Any]) -> int | None:
+    pane = row.get("orchestrator_pane")
+    try:
+        return int(pane)
+    except Exception:
+        return None
+
+
+def explicit_non_participating(row: dict[str, Any]) -> bool:
+    value = row.get("capture_participation", row.get("orch_capture_participation"))
+    if isinstance(value, bool):
+        return value is False
+    return str(value or "").lower() in {"non_participating", "none", "disabled", "false"}
+
+
+def capture_rows_by_session(rows: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in rows:
+        session = str(row.get("source_session") or row.get("session") or "").strip()
+        if session:
+            grouped[session].append(row)
+    for session_rows in grouped.values():
+        session_rows.sort(key=lambda item: parse_ts(item.get("captured_at") or item.get("ts")) or datetime.min.replace(tzinfo=timezone.utc))
+    return grouped
+
+
+def coord_ts_by_session(rows: list[dict[str, Any]]) -> dict[str, datetime]:
+    by_session: dict[str, datetime] = {}
+    keys = ("source_session", "session", "target_session", "origin_session", "sender")
+    for row in rows:
+        ts = parse_ts(row.get("ts") or row.get("created_at") or row.get("effective_at"))
+        if ts is None:
+            continue
+        sessions = set()
+        for key in keys:
+            value = row.get(key)
+            if not value:
+                continue
+            text = str(value)
+            sessions.add(text.split(":", 1)[0])
+        for session in sessions:
+            if session and (session not in by_session or ts > by_session[session]):
+                by_session[session] = ts
+    return by_session
+
+
+def duplicate_groups(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in rows:
+        key = row.get("prompt_hash") or row.get("source_message_id")
+        if key:
+            grouped[str(key)].append(row)
+    duplicates = []
+    for key, items in grouped.items():
+        if len(items) > 1:
+            duplicates.append({"dedupe_key": key, "count": len(items), "ids": [item.get("id") for item in items]})
+    return duplicates
+
+
+def has_agent_context_evidence(row: dict[str, Any]) -> bool:
+    refs = row.get("capture_evidence_refs") or row.get("evidence_refs") or []
+    if isinstance(refs, str):
+        refs = [refs]
+    for ref in refs:
+        text = json.dumps(ref, sort_keys=True) if isinstance(ref, dict) else str(ref)
+        lowered = text.lower()
+        if "agent_context" in lowered or "agent-context" in lowered or "callback" in lowered:
+            return True
+    return False
+
+
+def has_pane_scrollback_only(row: dict[str, Any]) -> bool:
+    values = [row.get("capture_path"), row.get("capture_proof"), row.get("capture_source")]
+    refs = row.get("capture_evidence_refs") or row.get("evidence_refs") or []
+    if isinstance(refs, list):
+        values.extend(refs)
+    elif refs:
+        values.append(refs)
+    text = " ".join(json.dumps(value, sort_keys=True) if isinstance(value, dict) else str(value) for value in values if value)
+    lowered = text.lower()
+    return "pane_scrollback" in lowered or "scrollback" in lowered or "tmux capture" in lowered
+
+
+def latest_capture_ts(rows: list[dict[str, Any]]) -> datetime | None:
+    values = [parse_ts(row.get("captured_at") or row.get("ts")) for row in rows]
+    values = [value for value in values if value is not None]
+    return max(values) if values else None
+
+
+def evidence_for_capture(path: Path, rows: list[dict[str, Any]]) -> list[str]:
+    refs = []
+    for row in rows[-3:]:
+        row_id = row.get("id") or row.get("source_message_id") or row.get("prompt_hash")
+        if row_id:
+            refs.append(f"{path}#{row_id}")
+    return refs
+
+
+def classify_row(
+    topo: dict[str, Any],
+    *,
+    request_path: Path,
+    capture_rows: list[dict[str, Any]],
+    coord_seen_ts: datetime | None,
+    stale_cutoff: datetime,
+) -> dict[str, Any]:
+    session = str(topo.get("session"))
+    runtime = runtime_for(topo)
+    pane = pane_for(topo)
+    capture_ts = latest_capture_ts(capture_rows)
+    duplicate_rows = duplicate_groups(capture_rows)
+    last_seen = max([ts for ts in [capture_ts, coord_seen_ts] if ts is not None], default=None)
+    evidence_refs: list[str] = []
+    capture_path: str | None = None
+    state = "captured"
+    gap_reason: str | None = None
+
+    if explicit_non_participating(topo):
+        state = "non_participating"
+        gap_reason = str(topo.get("capture_non_participation_reason") or "explicit_non_participating")
+        capture_path = None
+        evidence_refs = [str(topo.get("capture_evidence_ref") or "topology:capture_participation=non_participating")]
+    elif duplicate_rows:
+        state = "capture_gap"
+        gap_reason = "duplicate_capture_rows"
+        capture_path = str(request_path)
+        evidence_refs = evidence_for_capture(request_path, capture_rows)
+    elif capture_rows:
+        state = "captured"
+        capture_path = str(request_path)
+        evidence_refs = evidence_for_capture(request_path, capture_rows)
+        if capture_ts is not None and capture_ts < stale_cutoff:
+            state = "stale_capture"
+            gap_reason = "stale_capture_row"
+    elif runtime == "codex" and has_agent_context_evidence(topo):
+        state = "captured"
+        capture_path = str(topo.get("capture_path") or "agent_context_callback")
+        evidence_refs = [str(ref) for ref in (topo.get("capture_evidence_refs") or topo.get("evidence_refs") or [])]
+        capture_ts = parse_ts(topo.get("capture_ts") or topo.get("effective_at") or topo.get("ts"))
+    else:
+        state = "capture_gap"
+        capture_path = str(topo.get("capture_path") or "") or None
+        if has_pane_scrollback_only(topo):
+            gap_reason = "pane_scrollback_not_canonical_capture"
+        else:
+            gap_reason = "missing_canonical_capture"
+        evidence_refs = [f"{request_path}:no row for source_session={session}"]
+
+    return {
+        "session": session,
+        "pane": pane,
+        "runtime": runtime,
+        "participation_state": state,
+        "capture_path": capture_path,
+        "last_capture_ts": ts_text(capture_ts),
+        "last_josh_input_seen_ts": ts_text(last_seen),
+        "gap_reason": gap_reason,
+        "evidence_refs": evidence_refs,
+        "duplicate_capture_groups": duplicate_rows,
+        "remediation_options": APPROVED_REMEDIATION_TRACKS if state in {"capture_gap", "stale_capture"} else [],
+    }
+
+
+def schema_payload() -> dict[str, Any]:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "row_required_fields": [
+            "session",
+            "pane",
+            "runtime",
+            "participation_state",
+            "capture_path",
+            "last_capture_ts",
+            "last_josh_input_seen_ts",
+            "gap_reason",
+            "evidence_refs",
+        ],
+        "participation_state_enum": ["captured", "capture_gap", "stale_capture", "non_participating"],
+        "gap_reason_examples": [
+            "missing_canonical_capture",
+            "pane_scrollback_not_canonical_capture",
+            "stale_capture_row",
+            "duplicate_capture_rows",
+        ],
+    }
+
+
+def examples_payload() -> dict[str, Any]:
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "examples": [
+            "orch-capture-parity-probe.py --json",
+            "orch-capture-parity-probe.py --topology fixtures/topology.jsonl --josh-requests fixtures/josh-requests.jsonl --doctor --json",
+            "orch-capture-parity-probe.py --schema --json",
+        ],
+        "xap2_boundary": "This probe defines the rule/signal contract; flywheel-xap2 owns capture mechanism implementation.",
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(prog="orch-capture-parity-probe")
+    parser.add_argument("--topology", default=os.environ.get("FLYWHEEL_SESSION_TOPOLOGY", "~/.local/state/flywheel/session-topology.jsonl"))
+    parser.add_argument("--josh-requests", default=os.environ.get("FLYWHEEL_JOSH_REQUESTS_LOG", "~/.local/state/flywheel/josh-requests.jsonl"))
+    parser.add_argument("--coordination-log", default=os.environ.get("FLYWHEEL_CROSS_ORCH_COORDINATION_LOG", "~/.local/state/flywheel/cross-orch-coordination.jsonl"))
+    parser.add_argument("--stale-hours", type=float, default=float(os.environ.get("FLYWHEEL_ORCH_CAPTURE_STALE_HOURS", "24")))
+    parser.add_argument("--now")
+    parser.add_argument("--doctor", action="store_true")
+    parser.add_argument("--strict", action="store_true")
+    parser.add_argument("--schema", action="store_true")
+    parser.add_argument("--examples", action="store_true")
+    parser.add_argument("--json", action="store_true")
+    args = parser.parse_args()
+
+    if args.schema:
+        print(json.dumps(schema_payload(), sort_keys=True, separators=(",", ":") if args.json else None))
+        return 0
+    if args.examples:
+        print(json.dumps(examples_payload(), sort_keys=True, separators=(",", ":") if args.json else None))
+        return 0
+
+    topology_path = Path(os.path.expanduser(args.topology)).resolve()
+    request_path = Path(os.path.expanduser(args.josh_requests)).resolve()
+    coord_path = Path(os.path.expanduser(args.coordination_log)).resolve()
+    now = parse_ts(args.now) if args.now else utc_now()
+    assert now is not None
+    stale_cutoff = now - timedelta(hours=args.stale_hours)
+
+    topology_rows = latest_topology_rows(read_jsonl(topology_path))
+    requests_by_session = capture_rows_by_session(read_jsonl(request_path))
+    coord_seen = coord_ts_by_session(read_jsonl(coord_path))
+    rows = [
+        classify_row(
+            topo,
+            request_path=request_path,
+            capture_rows=requests_by_session.get(str(topo.get("session")), []),
+            coord_seen_ts=coord_seen.get(str(topo.get("session"))),
+            stale_cutoff=stale_cutoff,
+        )
+        for topo in topology_rows
+    ]
+    gap_rows = [row for row in rows if row["participation_state"] in {"capture_gap", "stale_capture"}]
+    payload = {
+        "schema_version": SCHEMA_VERSION,
+        "generated_at": ts_text(now),
+        "topology_path": str(topology_path),
+        "josh_requests_path": str(request_path),
+        "coordination_log_path": str(coord_path),
+        "checked_orchestrators_count": len(rows),
+        "orchs_with_capture_gap_count": len(gap_rows),
+        "rows": rows,
+        "status": "warn" if gap_rows else "pass",
+        "threshold": ">=1",
+        "gate_behavior": "warn normally; fail under --strict or hard L71 rollout",
+        "duplicate_capture_policy": "prompt_hash or source_message_id is the dedupe key; repeated prompts must link to the existing row, not create duplicates",
+        "approved_remediation_tracks": APPROVED_REMEDIATION_TRACKS,
+        "xap2_integration": "flywheel-erkx defines the rule/signal contract; flywheel-xap2 or children implement mechanism choice",
+        "doctor": args.doctor,
+    }
+    print(json.dumps(payload, sort_keys=True, separators=(",", ":") if args.json else None))
+    if args.strict and gap_rows:
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
