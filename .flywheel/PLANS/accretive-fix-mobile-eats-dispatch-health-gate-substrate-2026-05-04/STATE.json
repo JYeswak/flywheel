@@ -1,0 +1,21 @@
+{
+  "slug": "accretive-fix-mobile-eats-dispatch-health-gate-substrate-2026-05-04",
+  "topic": "accretive-fix-mobile-eats-dispatch-health-gate-substrate",
+  "started_at": "2026-05-04T05:50:00Z",
+  "current_phase": "research",
+  "phase_started_at": "2026-05-04T05:50:00Z",
+  "rounds_in_current_phase": 0,
+  "convergence_streak": 0,
+  "in_flight_dispatches": [],
+  "queued_dispatches": [],
+  "joshua_decision_pending": false,
+  "joshua_decision_at": null,
+  "audit_findings_count": 0,
+  "beads_created": [],
+  "abort_reason": null,
+  "trigger": "ESCALATE_capsule_2026-05-04T05:50Z",
+  "source_capsule_path": "/Users/josh/Developer/flywheel/.flywheel/plans/accretive-fix-mobile-eats-dispatch-health-gate-substrate-2026-05-04/00-INTENT.md",
+  "preflight_overrides": {
+    "capacity_likely_sequential": "compaction context tight; sequential lane dispatch acceptable per /flywheel:plan precedent"
+  }
+}
