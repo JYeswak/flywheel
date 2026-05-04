@@ -1,0 +1,16 @@
+{
+  "plan_dir": "ntm-local-upstream-reconcile-2026-05-02",
+  "phase": "REFINE-r2",
+  "ship_ready": true,
+  "model_chosen": "B",
+  "phases_completed": [
+    "INTENT",
+    "RESEARCH",
+    "REFINE-r1",
+    "REFINE-r2",
+    "AUDIT"
+  ],
+  "blocking_decisions": [],
+  "next_action": "joshua_reviews_/tmp/ntm_runbook_63commit_review.md_then_runs_04-RUNBOOK.sh",
+  "live_state_note": "Prompt said 5 ahead / 3 behind; read-only git preflight observed main ahead 63 and behind 521. /tmp/ntm_runbook_63commit_review.md classifies all 63 local commits: 43 keep-classified commits, 20 upstream-duplicate drops, 0 needs Joshua. 04-RUNBOOK.sh now uses the full keep set with a Joshua confirm gate before cherry-pick."
+}
