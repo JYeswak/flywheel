@@ -9,6 +9,7 @@ Template-backed source files for portable `flywheel-loop init`.
 - `validate-callback-before-close.sh.tmpl` installs the four-lens close validator into `.flywheel/scripts/`.
 - `render.sh` is the only renderer in this directory. It is bash-only, takes one template path, reads `key=value` substitutions from stdin, preserves multiline values, allows empty values, and fails if any `{{marker}}` remains.
 - `schema.json` documents the required frontmatter keys, template set, and `loop.json` keys for this template version.
+- Idle watcher launchd plists live in `.flywheel/launchd/` in the flywheel repo and are activated through `/flywheel:loop watcher ...` so repo-local loops can prove a driver, not just an active marker.
 
 ## Hashes
 
