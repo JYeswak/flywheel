@@ -1,0 +1,35 @@
+{
+  "slug": "accretive-fix-storage-low-headroom-2026-05-04",
+  "topic": "accretive-fix-storage-low-headroom-skillos",
+  "started_at": "2026-05-04T06:05:00Z",
+  "current_phase": "phase_a_band_aid_active",
+  "phase_started_at": "2026-05-04T06:05:00Z",
+  "rounds_in_current_phase": 0,
+  "convergence_streak": 0,
+  "in_flight_dispatches": [],
+  "queued_dispatches": [],
+  "joshua_decision_pending": true,
+  "audit_findings_count": 0,
+  "beads_created": [],
+  "abort_reason": null,
+  "trigger": "ESCALATE_capsule_2026-05-04T06:05Z_skillos",
+  "source_capsule_summary": "skillos-e2n storage_low_headroom; disk_free_pct=9.92<10.0; local prune planned_count=0",
+  "host_disk_at_capsule": "926Gi total / 811Gi used / 92Gi free / 90% capacity on /System/Volumes/Data",
+  "preflight_overrides": {
+    "host_tier_blocker_acknowledged": "skillos local prune mathematically cannot fix host-wide storage; this is a fleet-tier substrate problem",
+    "second_capsule_today": "first was mobile-eats dispatch-health-gate-substrate; capsule schema v1 should add tier/mathematically_local fields per this pattern"
+  },
+  "receipts_issued": [
+    {
+      "kind": "threshold_override",
+      "path": "receipts/skillos-threshold-override-2026-05-04T0855Z.json",
+      "issued_at": "2026-05-04T08:55:00Z",
+      "expires_at": "2026-05-04T20:55:00Z",
+      "scope": "skillos-only",
+      "override_pct": 8.0
+    }
+  ],
+  "phase_a_status": "override_issued_awaiting_orbstack_decision",
+  "orbstack_consumer_gb": 195,
+  "joshua_decision_question": "Green-light orbctl prune on 195GB OrbStack consumer (non-destructive sparse-image compact)?"
+}

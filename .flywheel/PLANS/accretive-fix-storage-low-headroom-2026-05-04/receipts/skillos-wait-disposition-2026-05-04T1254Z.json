@@ -1,0 +1,33 @@
+{
+  "schema_version": "v1",
+  "receipt_type": "wait_disposition",
+  "timestamp": "2026-05-04T12:54:53Z",
+  "issued_by": "flywheel-orch/RubyCastle",
+  "to": "skillos-orch",
+  "scope": "host_volume",
+  "blocker_status": "active_breach_recurrence",
+  "current_state": {
+    "disk_free_pct": 7.68,
+    "disk_free_gb": 71.18,
+    "override_threshold_pct": 8.0,
+    "absolute_floor_gb": 70,
+    "headroom_to_floor_gb": 1.18
+  },
+  "owner_action_in_progress": {
+    "type": "reclaim_pending_human_execution",
+    "size_gb": 22,
+    "target": "/Users/josh/zesttube-archive-20260425/.artifacts/langgraph-checkpoints",
+    "blocked_by": "DCG rm-rf-root-home gate (correct safety behavior)",
+    "human_command_required": "rm -rf ~/zesttube-archive-20260425/.artifacts/langgraph-checkpoints",
+    "rationale": "9-day-old LangGraph state, post-migration obsolete (per Joshua's earlier surfacing of zesttube-archive as deletion candidate)",
+    "expected_outcome": "disk_free_pct 7.68 -> ~10.4, disk_free_gb 71 -> ~93"
+  },
+  "skillos_disposition": {
+    "stop_local_retry": true,
+    "fail_closed_on_storage": true,
+    "next_check": "after Joshua confirms manual rm completed OR 30min, whichever first",
+    "no_orch_retry_needed": true,
+    "rationale": "host-tier classification active; local retry mathematically cannot resolve; do not duplicate local prune attempts"
+  },
+  "additional_context": "OrbStack 195GB still pending Joshua decision (much higher impact). .npm 3.7GB, .cargo 4.2GB regenerable secondary candidates if 22GB reclaim insufficient."
+}

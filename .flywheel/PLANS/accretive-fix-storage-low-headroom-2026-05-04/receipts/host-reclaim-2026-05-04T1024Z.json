@@ -1,0 +1,16 @@
+{
+  "schema_version": "v1",
+  "receipt_type": "host_reclaim",
+  "timestamp": "2026-05-04T10:24:21Z",
+  "issued_by": "flywheel-orch/RubyCastle",
+  "scope": "host_volume",
+  "action": "deleted_obsolete_archive",
+  "target": "/Users/josh/docker-archives/client-work-20260425.tar.gz",
+  "rationale": "9-day-old Docker layer blob archive, superseded by post-Docker migration; safe-reclaim approved by orch under repo-tier doctrine (no external dependency)",
+  "bytes_reclaimed_gb": 3.86,
+  "disk_free_pct_before": 7.91,
+  "disk_free_pct_after_pct": 8.31,
+  "disk_free_gb_after": 77,
+  "override_status": "still_active_buffer_restored",
+  "next_step": "if breach recurs OR auto-prune cadence not yet wired by 2026-05-04T20:55Z (override expiry), Joshua-decision required on OrbStack 195GB consumer (anti-doctrine to silently lower threshold)"
+}

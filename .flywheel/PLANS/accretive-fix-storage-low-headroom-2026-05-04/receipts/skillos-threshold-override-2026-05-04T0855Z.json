@@ -1,0 +1,50 @@
+{
+  "schema_version": "v1",
+  "receipt_kind": "threshold_override",
+  "issued_by": "rubycastle@flywheel",
+  "issued_at": "2026-05-04T08:55:00Z",
+  "issued_to": "skillos-orch",
+  "owning_bead": "skillos-e2n",
+  "blocker_id": "storage_low_headroom",
+  "scope": {
+    "repos": ["skillos"],
+    "fleet_wide": false
+  },
+  "override": {
+    "field": "disk_free_pct_threshold",
+    "original_value_pct": 10.0,
+    "override_value_pct": 8.0,
+    "absolute_floor_gb": 70
+  },
+  "rationale": "Host-tier blocker. 195GB OrbStack identified as primary consumer. Awaiting Joshua green-light on `orbctl prune` (non-destructive). Override unblocks skillos for current capsule cycle. Real fix tracked in flywheel-r65r (Phase A reclaim wave) + flywheel-2rv0 (plan tracking).",
+  "issued_for_capsules": [
+    "ESCALATE 2026-05-04T05:50Z (1st)",
+    "ESCALATE 2026-05-04T07:00Z (2nd, OVERDUE)",
+    "ESCALATE 2026-05-04T08:22Z (OVERDUE storage reclaim)",
+    "ESCALATE 2026-05-04T08:51Z (SECOND OVERDUE)"
+  ],
+  "expiry": {
+    "iso": "2026-05-04T20:55:00Z",
+    "duration_hours": 12,
+    "auto_revert_to": 10.0
+  },
+  "constraints": {
+    "auto_revert_if_disk_free_pct_below": 5.0,
+    "max_extension_count": 1,
+    "if_extended_must_have_orbstack_prune_evidence": true
+  },
+  "host_at_issue_time": {
+    "data_volume_used_gb": 816,
+    "data_volume_free_gb": 87,
+    "data_volume_total_gb": 926,
+    "data_volume_capacity_pct": 91,
+    "skillos_disk_free_pct": 9.12,
+    "skillos_disk_free_gb": 84.52
+  },
+  "next_actions_owner_flywheel_orch": [
+    "Surface OrbStack data + recommendation to Joshua (DONE — awaiting decision)",
+    "On Joshua green-light: run orbctl prune, measure free, issue reclaim_receipt + revert override",
+    "If Joshua declines OrbStack: surface alternative reclaim categories (zesttube-archive 22G + .bundle 820M + docker-archives 3.8G = ~26G low-risk)"
+  ],
+  "skillos_resume_authorization": "Doctor-gated dispatch may proceed at 8% threshold for next 12 hours under this override. Local fail-closed contract continues for non-storage gates."
+}
