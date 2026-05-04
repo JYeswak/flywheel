@@ -308,6 +308,7 @@ Common current scripts:
 | `architecture-health-rollup.sh` | L98 architecture-health rollup that writes 24h/7d/30d/90d fleet-perf JSON with trend, cohort, counterfactual, and anti-agent-shaming checks. |
 | `fleet-conformance-probe.sh` | L103 fleet conformance observatory: one bounded score per session plus red-session `CONFORMANCE-DRIFT` packet planning. |
 | `fleet-process-gap-detector.sh` | L105 process-gap detector: recurring fuckup classes, sticky doctor errors, doctrine drift, stale promotions, audit gaps, identity drift, and watcher holes into top-3 fix-bead routes. |
+| `shared-surface-reservation-check.sh` | L107 append-only cross-pane reservation checker for shared surfaces before `git add`; doctor counts `coordination_collision_count_24h`. |
 | `no-silent-darkness-probe.sh` | L60 five-signal health check. |
 | `leverage-ceiling-probe.sh` | Meadows leverage constraint probe. |
 | `gap-hunt-probe.sh` | Gap discovery and ledger support. |
@@ -806,6 +807,28 @@ bash /Users/josh/Developer/flywheel/tests/fleet-comms-health-probe.sh
 `--apply` sends `COMMS_HEALTH_PING` packets to silent sessions and logs
 `false_positive_classifier` mismatches. It only notifies Joshua for token
 expiry beyond the recovery window.
+
+Shared-surface commits use an append-only pane reservation ledger:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/shared-surface-reservation-check.sh \
+  --reserve AGENTS.md --pane=3 --task-id=<task> --json
+/Users/josh/Developer/flywheel/.flywheel/scripts/shared-surface-reservation-check.sh \
+  --check AGENTS.md --pane=3 --json
+/Users/josh/Developer/flywheel/.flywheel/scripts/shared-surface-reservation-check.sh \
+  --release AGENTS.md --pane=3 --task-id=<task> --json
+
+~/.claude/skills/.flywheel/bin/flywheel-loop doctor \
+  --repo /Users/josh/Developer/flywheel \
+  --json \
+  | jq '.coordination_collision_count_24h, .shared_surface_reservation'
+
+bash /Users/josh/Developer/flywheel/tests/shared-surface-reservation-check.sh
+```
+
+The ledger lives at `~/.local/state/flywheel/file-reservations.jsonl`.
+Collisions log `coordination-collision-detected` to the fuckup log and block
+staging until the holder releases or coordinates.
 
 Jeff issue drafts must pass the 7-axis rubric before posting:
 
