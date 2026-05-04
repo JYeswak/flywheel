@@ -223,6 +223,7 @@ for session in sessions:
     age = watcher_last_dispatch_age(session, repo, meta["log"])
     stale = stale_dispatches(repo)
     covered = bool(watcher_active and loaded)
+    uncovered_ready = ready if not covered else 0
     rows.append({
         "session": session,
         "repo": repo,
@@ -231,7 +232,8 @@ for session in sessions:
         "watcher_active": watcher_active,
         "launchctl_loaded": loaded,
         "covered": covered,
-        "idle_workers_with_ready_beads": ready,
+        "idle_workers_ready_beads_observed": ready,
+        "idle_workers_with_ready_beads": uncovered_ready,
         "last_dispatch_age_seconds": age,
         "stale_dispatches_count": stale,
         "loop_state_path": str(loops_dir / f"{session}.json"),
