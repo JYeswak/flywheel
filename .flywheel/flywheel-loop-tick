@@ -925,6 +925,33 @@ if [[ -x "$META_RULE_SYNC" ]]; then
     '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 fi
 
+if [[ -x "$META_RULE_SYNC" ]]; then
+  META_RULE_THREE_SURFACE_OUT="$("$META_RULE_SYNC" --check-three-surface --target "$REPO" --json 2>&1 || true)"
+  if ! jq -e . >/dev/null 2>&1 <<<"$META_RULE_THREE_SURFACE_OUT"; then
+    META_RULE_THREE_SURFACE_OUT="$(jq -nc --arg raw "$META_RULE_THREE_SURFACE_OUT" '{schema_version:"canonical-meta-rules.three-surface.v1",status:"fail",drift_count:1,missing_rules_count:1,warnings:[{code:"invalid_json",raw:$raw}]}')"
+  fi
+else
+  META_RULE_THREE_SURFACE_OUT="$(jq -nc --arg path "$META_RULE_SYNC" '{schema_version:"canonical-meta-rules.three-surface.v1",status:"fail",drift_count:1,missing_rules_count:1,warnings:[{code:"sync_missing",path:$path}]}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "meta_rule_three_surface" \
+  --argjson result "$META_RULE_THREE_SURFACE_OUT" \
+  '{ts:$ts,event:$event,result:{status:$result.status,drift_count:($result.drift_count // 0),missing_rules_count:($result.missing_rules_count // 0),details:$result}}' >>"$LOG"
+
+META_RULE_THREE_SURFACE_DRIFT="$(jq -r '.drift_count // 0' <<<"$META_RULE_THREE_SURFACE_OUT" 2>/dev/null || printf 0)"
+if [[ "${META_RULE_THREE_SURFACE_DRIFT:-0}" -gt 0 ]]; then
+  "$HOME/.claude/skills/.flywheel/bin/flywheel-loop" fuckup log \
+    --class three-surface-drift-detected \
+    --severity medium \
+    --what-happened "meta-rule three-surface drift detected: repo=$REPO drift_count=$META_RULE_THREE_SURFACE_DRIFT" \
+    --what-attempted "sync.sh --check-three-surface --target $REPO" \
+    --rule-violated "L108 META-RULE cache is cache, not convergence gate" \
+    --evidence "$META_RULE_THREE_SURFACE_OUT" \
+    --should-become bead \
+    --json >/dev/null 2>&1 || true
+fi
+
 CODEX_WATCHTOWER_RESULT="$(codex_watchtower_probe 2>&1 || printf '{"action":"error"}')"
 CODEX_WATCHTOWER_RESULT="$(first_json_or_raw "$CODEX_WATCHTOWER_RESULT")"
 jq -nc \
@@ -1142,6 +1169,7 @@ jq -nc \
   --argjson fleet_onboard "$FLEET_ONBOARD_RESULT" \
   --argjson codex_watchtower "$CODEX_WATCHTOWER_RESULT" \
   --argjson canonical_pull "$CANONICAL_PULL_RESULT" \
+  --argjson meta_rule_three_surface "$META_RULE_THREE_SURFACE_OUT" \
   --argjson frozen_detector "$FROZEN_DETECTOR_SUMMARY" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --argjson value_gap "$VALUE_GAP_RESULT" \
@@ -1156,6 +1184,10 @@ jq -nc \
     fleet_onboard:$fleet_onboard,codex_watchtower:$codex_watchtower,
     canonical_doctrine_pull:$canonical_pull,
     canonical_pull_freshness_seconds:($canonical_pull.canonical_pull_freshness_seconds // null),
+    meta_rule_three_surface:$meta_rule_three_surface,
+    meta_rule_three_surface_status:($meta_rule_three_surface.status // null),
+    meta_rule_three_surface_drift_count:($meta_rule_three_surface.drift_count // 0),
+    meta_rule_three_surface_missing_rules_count:($meta_rule_three_surface.missing_rules_count // 0),
     frozen_detector:$frozen_detector,
     frozen_detector_dispatch_block_reason:$frozen_detector_block_reason,
     frozen_detector_source_health_status:($frozen_detector.source_health_status // null),
@@ -1225,6 +1257,7 @@ jq -nc \
   --argjson fleet_onboard "$FLEET_ONBOARD_RESULT" \
   --argjson codex_watchtower "$CODEX_WATCHTOWER_RESULT" \
   --argjson canonical_pull "$CANONICAL_PULL_RESULT" \
+  --argjson meta_rule_three_surface "$META_RULE_THREE_SURFACE_OUT" \
   --argjson frozen_detector "$FROZEN_DETECTOR_SUMMARY" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --argjson value_gap "$VALUE_GAP_RESULT" \
@@ -1239,6 +1272,10 @@ jq -nc \
     fleet_onboard:$fleet_onboard,codex_watchtower:$codex_watchtower,
     canonical_doctrine_pull:$canonical_pull,
     canonical_pull_freshness_seconds:($canonical_pull.canonical_pull_freshness_seconds // null),
+    meta_rule_three_surface:$meta_rule_three_surface,
+    meta_rule_three_surface_status:($meta_rule_three_surface.status // null),
+    meta_rule_three_surface_drift_count:($meta_rule_three_surface.drift_count // 0),
+    meta_rule_three_surface_missing_rules_count:($meta_rule_three_surface.missing_rules_count // 0),
     frozen_detector:$frozen_detector,
     frozen_detector_dispatch_block_reason:$frozen_detector_block_reason,
     frozen_detector_source_health_status:($frozen_detector.source_health_status // null),

@@ -6,6 +6,7 @@ CONTRACT_VERSION="2026-05-03.1"
 SCHEMA_PATH="${FLYWHEEL_ONBOARD_SCHEMA:-/tmp/fleet-onboarding-DESIGN/contract-schema.json}"
 FLEET_ROSTER="${FLYWHEEL_FLEET_ROSTER:-$HOME/.local/state/flywheel/fleet-roster.json}"
 FLYWHEEL_LOOP="${FLYWHEEL_LOOP_BIN:-$HOME/.claude/skills/.flywheel/bin/flywheel-loop}"
+META_RULE_SYNC="${FLYWHEEL_META_RULE_SYNC:-$HOME/.flywheel/canonical-meta-rules/sync.sh}"
 DOCTOR_TIMEOUT_SECONDS="${FLYWHEEL_ONBOARD_DOCTOR_TIMEOUT_SECONDS:-90}"
 
 usage() {
@@ -317,7 +318,7 @@ fi
 
 export VERSION CONTRACT_VERSION REPO_ABS JSON_OUT DRY_RUN EXPLAIN ACTION
 export IDEMPOTENCY_KEY SCOPE FLEET_ROSTER FLYWHEEL_LOOP SCHEMA_PATH COMMAND
-export DOCTOR_TIMEOUT_SECONDS
+export DOCTOR_TIMEOUT_SECONDS META_RULE_SYNC
 python3 <<'PY'
 import json
 import os
@@ -337,6 +338,7 @@ ACTION = os.environ.get("ACTION", "")
 IDEMPOTENCY_KEY = os.environ.get("IDEMPOTENCY_KEY") or None
 FLEET_ROSTER = Path(os.environ["FLEET_ROSTER"])
 FLYWHEEL_LOOP = Path(os.environ["FLYWHEEL_LOOP"])
+META_RULE_SYNC = Path(os.environ["META_RULE_SYNC"])
 COMMAND = os.environ.get("COMMAND", "doctor")
 DOCTOR_TIMEOUT_SECONDS = int(os.environ.get("DOCTOR_TIMEOUT_SECONDS") or "90")
 HOME = Path.home()
@@ -445,7 +447,91 @@ def run_doctor():
     return proc.returncode, payload, err
 
 
+def run_meta_rule_three_surface(mode: str):
+    if not META_RULE_SYNC.exists():
+        return 127, {
+            "schema_version": "canonical-meta-rules.three-surface.v1",
+            "status": "fail",
+            "target": str(REPO),
+            "drift_count": 1,
+            "missing_rules_count": 1,
+            "warnings": [{"code": "meta_rule_sync_missing", "path": str(META_RULE_SYNC)}],
+        }, f"missing meta-rule sync: {META_RULE_SYNC}"
+    flag = "--apply-three-surface" if mode == "apply" else "--check-three-surface"
+    try:
+        proc = subprocess.run(
+            [str(META_RULE_SYNC), flag, "--target", str(REPO), "--json"],
+            text=True,
+            capture_output=True,
+            timeout=30,
+        )
+    except Exception as exc:
+        return 70, {
+            "schema_version": "canonical-meta-rules.three-surface.v1",
+            "status": "fail",
+            "target": str(REPO),
+            "drift_count": 1,
+            "missing_rules_count": 1,
+            "warnings": [{"code": "meta_rule_sync_exception", "message": f"{type(exc).__name__}: {exc}"}],
+        }, str(exc)
+    try:
+        payload = json.loads(proc.stdout)
+        if not isinstance(payload, dict):
+            payload = {}
+    except Exception:
+        payload = {
+            "schema_version": "canonical-meta-rules.three-surface.v1",
+            "status": "fail",
+            "target": str(REPO),
+            "drift_count": 1,
+            "missing_rules_count": 1,
+            "warnings": [{"code": "meta_rule_sync_invalid_json", "raw": proc.stdout[:1000]}],
+        }
+    return proc.returncode, payload, proc.stderr.strip()
+
+
+def append_state_meta_rule_receipt(apply_status: str, missing_pre: int, missing_post: int, apply_result: dict):
+    state_path = REPO / ".flywheel/STATE.md"
+    state_path.parent.mkdir(parents=True, exist_ok=True)
+    block = [
+        "",
+        f"## Onboard Meta-Rule Three-Surface Receipt - {now_iso()}",
+        "",
+        f"- meta_rule_three_surface_apply: {apply_status}",
+        f"- missing_count_pre: {missing_pre}",
+        f"- missing_count_post: {missing_post}",
+        f"- sync_status: {apply_result.get('status', 'unknown')}",
+        f"- updated_surfaces: {','.join(apply_result.get('updated_surfaces') or []) or 'none'}",
+        "",
+    ]
+    with state_path.open("a", encoding="utf-8") as handle:
+        handle.write("\n".join(block))
+
+
 doctor_rc, doctor, doctor_err = run_doctor()
+meta_rule_three_surface_rc, meta_rule_three_surface_check, meta_rule_three_surface_err = run_meta_rule_three_surface("check")
+meta_rule_missing_pre = int(meta_rule_three_surface_check.get("missing_rules_count") or meta_rule_three_surface_check.get("drift_count") or 0)
+meta_rule_three_surface_apply = None
+meta_rule_apply_status = "skipped"
+meta_rule_missing_post = meta_rule_missing_pre
+actual_actions = []
+
+if meta_rule_missing_pre > 0 and ACTION and not DRY_RUN:
+    apply_rc, apply_payload, apply_err = run_meta_rule_three_surface("apply")
+    meta_rule_three_surface_apply = apply_payload
+    meta_rule_missing_post = int(apply_payload.get("missing_rules_count") or apply_payload.get("post_drift_count") or 0)
+    meta_rule_apply_status = "ok" if apply_rc == 0 and meta_rule_missing_post == 0 else "fail"
+    append_state_meta_rule_receipt(meta_rule_apply_status, meta_rule_missing_pre, meta_rule_missing_post, apply_payload)
+    actual_actions.append({
+        "id": "meta-rule-three-surface-apply",
+        "kind": "sync",
+        "target": str(REPO),
+        "status": meta_rule_apply_status,
+        "exit_code": apply_rc,
+        "stderr": apply_err,
+        "missing_count_pre": meta_rule_missing_pre,
+        "missing_count_post": meta_rule_missing_post,
+    })
 topology = latest_topology(PROJECT)
 
 required_files = []
@@ -556,6 +642,7 @@ canonical_state = str(doctor.get("canonical_doctrine_state") or "")
 health_required = [
     check("mission_lock_fresh", "pass" if mission_state in ("fresh", "ok") else "warn", f"mission_lock_state={mission_state or 'unknown'}"),
     check("doctor_reachable", "pass" if doctor else "warn", f"doctor_status={doctor_status} rc={doctor_rc} {doctor_err}".strip()),
+    check("meta_rule_three_surface", "pass" if meta_rule_missing_pre == 0 else "warn", f"status={meta_rule_three_surface_check.get('status', 'unknown')} missing_count={meta_rule_missing_pre}", str(META_RULE_SYNC)),
 ]
 if docs_state and docs_state != "ready":
     health_required.append(check("repo_docs_state", "warn", f"repo_docs_state={docs_state}"))
@@ -605,6 +692,8 @@ if not incidents.exists():
     planned_actions.append({"id": "sync-incidents", "kind": "sync", "target": str(incidents), "mode": "planned", "reason": "would distribute selected canonical INCIDENTS in sync phase"})
 if not CANONICAL_RECEIPT.exists() and not control_plane_exemption:
     planned_actions.append({"id": "repair-canonical-receipt", "kind": "sync", "target": str(CANONICAL_RECEIPT), "mode": "planned", "reason": "would add receipt mirror/consumer in sync phase"})
+if meta_rule_missing_pre > 0 and not (ACTION and not DRY_RUN):
+    planned_actions.append({"id": "apply-meta-rule-three-surface", "kind": "sync", "target": str(REPO), "mode": "planned", "reason": "onboard action would backfill missing canonical L-rules into the three doctrine surfaces"})
 
 blocked_by = []
 if ACTION and not DRY_RUN:
@@ -649,11 +738,20 @@ payload = {
     },
     "topology": topology,
     "planned_actions": planned_actions if DRY_RUN or ACTION else [],
-    "actual_actions": [],
+    "actual_actions": actual_actions,
     "would_write": [a["target"] for a in planned_actions if a["kind"] == "write"] if DRY_RUN else [],
     "would_call_external": [],
     "blocked_by": blocked_by,
     "audit_ids": [],
+    "meta_rule_three_surface": {
+        "check_exit_code": meta_rule_three_surface_rc,
+        "check": meta_rule_three_surface_check,
+        "check_error": meta_rule_three_surface_err or None,
+        "apply": meta_rule_three_surface_apply,
+        "apply_status": meta_rule_apply_status,
+        "missing_count_pre": meta_rule_missing_pre,
+        "missing_count_post": meta_rule_missing_post,
+    },
 }
 if EXPLAIN:
     payload["explanation"] = [
