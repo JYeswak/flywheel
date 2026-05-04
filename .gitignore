@@ -15,6 +15,7 @@
 /.flywheel/.reconcile-*.diff
 /.flywheel/scripts/*.bak.*
 /.flywheel/validation-schema/v1/*.bak.*
+/.flywheel/PLANS/**/*.bak.*
 
 # Root/template generated backups
 /AGENTS.md.bak.*
