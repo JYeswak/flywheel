@@ -334,6 +334,7 @@ Common current scripts:
 | `headless-browser-reap.sh` | Dry-run-first reaper for stale or over-count agent browser processes. |
 | `flywheel-loop identity` | Resolves durable Agent Mail identity by session:pane and reports identity registry drift in doctor JSON. |
 | `agentmail-registration-broadcast.sh` | Token-safe broadcaster for live Agent Mail `needs_registration` rows; doctor exposes `agentmail_pending_registration_broadcasts_count`. |
+| `fleet-comms-health-probe.sh` | L104 fleet comms observatory: scores token freshness, cross-orch packet age, unread escalations, pending productivity escalations, identity liveness, and multi-frame liveness classifier agreement. |
 
 Run script-specific `--help`, `--info`, `--schema`, and `--examples` where
 available before wiring a script into a loop, doctor, or slash command.
@@ -790,6 +791,20 @@ bash /Users/josh/Developer/flywheel/tests/agentmail-registration-broadcast.sh
 The broadcaster sends only coordination packets to live orchestrator panes,
 dedupes each session:pane for 60 minutes, and honors active deferral receipts
 for dead sessions.
+
+Fleet comms health uses:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/fleet-comms-health-probe.sh \
+  --fleet \
+  --json
+
+bash /Users/josh/Developer/flywheel/tests/fleet-comms-health-probe.sh
+```
+
+`--apply` sends `COMMS_HEALTH_PING` packets to silent sessions and logs
+`false_positive_classifier` mismatches. It only notifies Joshua for token
+expiry beyond the recovery window.
 
 Jeff issue drafts must pass the 7-axis rubric before posting:
 
