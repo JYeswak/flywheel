@@ -91,6 +91,7 @@ binary surface lives in `~/.claude/skills/.flywheel/bin/`.
 | Surface | Location | Purpose |
 |---|---|---|
 | Flywheel binaries | `~/.claude/skills/.flywheel/bin/` | `flywheel-loop`, `flywheel-autoloop`, `flywheel`, doctors, dashboards, sync, verdict, and source-monitor tools. |
+| Canonical meta-rule sync | `~/.flywheel/canonical-meta-rules/sync.sh` | Refreshes `META-RULE-CACHE.md` and checks/applies three-surface doctrine convergence. |
 | Slash commands | `~/.claude/commands/flywheel/` | Operator commands such as `/flywheel:tick`, `/flywheel:dispatch`, `/flywheel:status`, and `/flywheel:init`. |
 | Skills | `~/.claude/skills/` and `~/.codex/skills/` | Reusable operating patterns. Use before inventing workflow. |
 | Fleet state | `~/.local/state/flywheel/` | Session topology, dispatch support files, fleet mail tokens, fuckup log, and runtime ledgers. |
@@ -115,6 +116,7 @@ names a wrapper.
 | `~/.claude/skills/.flywheel/bin/flywheel-loop validate-receipt --repo PATH --file FILE --json` | Validate a v2 closeout receipt. |
 | `~/.claude/skills/.flywheel/bin/flywheel-loop fleet --root /Users/josh/Developer --json` | Scan flywheel-installed repos. |
 | `~/.claude/skills/.flywheel/bin/flywheel-loop fuckup log/list/triage/harvest` | Capture and promote recurring failure signals. |
+| `~/.flywheel/canonical-meta-rules/sync.sh --check-three-surface --target PATH --json` | Verify AGENTS.md, `.flywheel/AGENTS-CANONICAL.md`, and template doctrine convergence. |
 | `~/.claude/skills/.flywheel/bin/flywheel-loop state-mine --json` | Mine fleet `STATE.md` files for latent unresolved, stale, recurring, pattern, and orphaned opportunities. |
 | `~/.claude/skills/.flywheel/bin/flywheel-readme` | Cross-pane README review CLI with draft/submit/review/reject/pass/signoff plus L61 dual-channel submit/reject transport, canonical doctor/health/repair, validate/audit/why, schemas, and observability. |
 | `.flywheel/scripts/daily-report.sh --repo PATH --json` | Generate `.flywheel/reports/daily-YYYY-MM-DD.md` and feed the `daily_report_age_hours` doctor signal. |
