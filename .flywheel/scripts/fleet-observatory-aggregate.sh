@@ -225,7 +225,9 @@ def render(payload: dict, no_emoji: bool = False) -> str:
     }
     for item in payload["spines"]:
         label = labels[item["name"]]
-        text = f"{label:<16}{icon(item['status'], no_emoji)} {item['summary']}"
+        text = f"{label:<16} {icon(item['status'], no_emoji)} {item['summary']}"
+        if len(text) > 39:
+            text = text[:38] + "…"
         lines.append(f"║ {text:<39}║")
     lines.extend([
         "╚═══════════════════════════════════════════╝",
