@@ -1,0 +1,38 @@
+{
+  "slug": "orchestrator-workforce-supervision-2026-05-04",
+  "topic": "orchestrator-workforce-supervision-deep-redesign",
+  "started_at": "2026-05-04T03:38:00Z",
+  "current_phase": "audit_reviewed",
+  "phase_started_at": "2026-05-04T04:00:00Z",
+  "rounds_in_current_phase": 1,
+  "convergence_streak": 0,
+  "in_flight_dispatches": [
+    {
+      "task_id": "workforce-refine-r1",
+      "pane": 2,
+      "started": "2026-05-04T04:00:00Z",
+      "packet": "/tmp/dispatch_workforce-refine-r1.md"
+    }
+  ],
+  "queued_dispatches": [],
+  "phase1_artifacts": {
+    "lane_a": ".flywheel/plans/orchestrator-workforce-supervision-2026-05-04/01-RESEARCH-A.md",
+    "lane_a_lines": 210,
+    "lane_b": ".flywheel/plans/orchestrator-workforce-supervision-2026-05-04/01-RESEARCH-B.md",
+    "lane_b_lines": 141,
+    "lane_c": ".flywheel/plans/orchestrator-workforce-supervision-2026-05-04/01-RESEARCH-C.md",
+    "lane_c_lines": 430,
+    "total_lines": 781,
+    "all_lanes_ladder_passed": true
+  },
+  "joshua_decision_pending": false,
+  "joshua_decision_at": "2026-05-04T04:30:00Z",
+  "audit_findings_count": 22,
+  "beads_created": [],
+  "abort_reason": null,
+  "preflight_overrides": {
+    "doctor_drift_detected": "active session work; 244 dirty files are this session's orchestration artifacts, not real drift",
+    "capacity_sequential_mode": "Phase 1 ran sequential due to capacity; Phase 2 onward is single-pane per round so no override needed"
+  },
+  "joshua_decision": "APPROVED \u2014 Meadows-friendly Phase 4 DECOMPOSE: all 22 findings absorb as bead amendments"
+}
