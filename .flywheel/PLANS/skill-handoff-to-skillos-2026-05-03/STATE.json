@@ -1,0 +1,31 @@
+{
+  "slug": "skill-handoff-to-skillos-2026-05-03",
+  "topic": "skill-handoff-to-skillos — codify the canonical pattern for handing off newly-created skills from any flywheel-managed session to skillos",
+  "started_at": "2026-05-03T18:50:00Z",
+  "current_phase": "ready_polish_deferred",
+  "phase_started_at": "2026-05-03T19:05:00Z",
+  "rounds_in_current_phase": 0,
+  "convergence_streak": 2,
+  "in_flight_dispatches": [],
+  "joshua_decision_pending": false,
+  "joshua_decision_at": "2026-05-03T18:55:00Z",
+  "joshua_decision_note": "Approved Option C (self-author plan-space). Phase 5 polish DEFERRED to worker dispatch after current ready queue drains.",
+  "audit_findings_count": 4,
+  "audit_findings_mitigated": 4,
+  "beads_created": ["flywheel-hrxp", "flywheel-g343", "flywheel-jrvh", "flywheel-8bie", "flywheel-m3ni", "flywheel-4dpj", "flywheel-w307", "flywheel-7ra1"],
+  "beads_dependencies_added": 14,
+  "beads_dep_cycles": 0,
+  "abort_reason": null,
+  "execution_mode": "self_author_plan_space",
+  "phases_complete": ["research", "refine", "audit", "decompose"],
+  "phases_pending": ["polish"],
+  "polish_dispatch_when": "after current 4 in-progress + 14 ready beads drained",
+  "phase_artifacts": {
+    "intent": "00-INTENT.md",
+    "research": "01-RESEARCH-COMBINED.md",
+    "refine": "00-PLAN.md",
+    "audit": "03-AUDIT-FINDINGS.md",
+    "decompose": "04-BEADS-DAG.md",
+    "polish": "PENDING — 05-POLISH-r1.md when worker dispatched"
+  }
+}
