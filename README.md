@@ -305,6 +305,7 @@ Common current scripts:
 | `frozen-pane-detector.sh` | Frozen-pane detection input. |
 | `frozen-pane-detector-fleet.sh` | Disabled-by-default launchd wrapper for fleet-wide frozen-pane observation with STOP/FATAL and recovery-budget gates. |
 | `recovery-slo-probe.sh` | L99 recovery SLO probe exposing 24h p50/p95 latency, breach count, and green/yellow/red status. |
+| `architecture-health-rollup.sh` | L98 architecture-health rollup that writes 24h/7d/30d/90d fleet-perf JSON with trend, cohort, counterfactual, and anti-agent-shaming checks. |
 | `no-silent-darkness-probe.sh` | L60 five-signal health check. |
 | `leverage-ceiling-probe.sh` | Meadows leverage constraint probe. |
 | `gap-hunt-probe.sh` | Gap discovery and ledger support. |
@@ -335,6 +336,25 @@ Common current scripts:
 
 Run script-specific `--help`, `--info`, `--schema`, and `--examples` where
 available before wiring a script into a loop, doctor, or slash command.
+
+Architecture-health rollups are generated with:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/architecture-health-rollup.sh \
+  --period all \
+  --write \
+  --json
+
+jq '.fleet_metrics,.candidate_l_rules,.candidate_probe_additions' \
+  /Users/josh/.flywheel/fleet-perf/7d.json
+
+bash /Users/josh/Developer/flywheel/tests/architecture-health-rollup.sh
+```
+
+Rollups measure system architecture health, not individual agent performance.
+They expose `architecture_health_metric_unpaired_count` and
+`agent_shaming_report_detected`; any threshold crossing routes to doctrine,
+skills, or probes.
 
 Codex upstream surveillance is a first-class tick input. The daily ingest lives
 at `~/.local/bin/codex-watchtower-daily.sh`, the skill substrate lives at
