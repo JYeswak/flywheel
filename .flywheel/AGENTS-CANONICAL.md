@@ -748,10 +748,6 @@ applied to a different latent-signal source.
 - `~/Developer/flywheel/.flywheel/scripts/jeff-intel-network.sh` (canonical-cli-scoping)
   pulls all 5 sources daily; auto-clones any missing Jeff repos to `~/Developer/<repo>`;
   auto-indexes each clone via `mcp__socraticode__codebase_index`
-- `/flywheel:jeff-intel` is the operator wrapper for doctor/health/repair,
-  validation, audit, and dry-run pull/x-poll actions; `daily-jeff-ingest.sh`
-  and `jeff-intel-scheduled-runner.sh` remain implementation helpers behind
-  that canonical surface.
 - Cadences: hourly X-poll, daily everything else
 - Active launchd labels:
   `ai.zeststream.flywheel-daily-jeff-ingest` for daily GitHub/git,
@@ -820,10 +816,6 @@ deeper study would surface.
   everywhere that we use inconsistently, file P3 bead `adopt-jeff-pattern-<name>`
   with file:line citations. Once adopted, cite in AGENTS.md L-rule as
   'Source: Jeff <repo>:<file>:<line> + ZestStream adaptation'.
-- Import contract: run `.flywheel/scripts/jeff-pattern-citation-probe.sh --json`
-  before landing doctrine, skills, or plan artifacts that import mentor-corpus
-  patterns. The probe exposes `jeff_pattern_uncited_count`; nonzero means the
-  artifact is not ready until each import claim has the required Source line.
 
 **Forbidden outputs:**
 - Calling jeff-intel-network 'complete' without Layer 2 daily-snapshot active
@@ -832,15 +824,12 @@ deeper study would surface.
 - Writing a new L-rule without first searching the daily-snapshot stream and
   pattern catalog for Jeff's existing convention
 - Citing Jeff's pattern as 'inspired by' without specific file:line evidence
-- Ignoring `jeff_pattern_uncited_count > 0` after a doctrine, skill, or plan
-  artifact imports mentor-corpus patterns
 
 **Evidence:** Joshua directive 2026-05-03 ~10:10Z;
 bead `flywheel-jeff-philosophy-study` (filed this turn);
 `feedback_meadows_jeff_mentors` memory entry; Jeff-originated patterns we
 inherited (fuckup-log, L-rule numbering, doctor surface, 7-axis rubric);
-sibling rules L11, L60, L61, L62, L63; bead `flywheel-jhcd`; probe
-`.flywheel/scripts/jeff-pattern-citation-probe.sh`.
+sibling rules L11, L60, L61, L62, L63.
 
 **Companion rules:** L63 (substrate dependency — provides clones for mining);
 L62 (latent-signal mining paradigm applied to Jeff's work); L61 (ecosystem
