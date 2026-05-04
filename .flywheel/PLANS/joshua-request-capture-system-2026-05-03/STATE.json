@@ -1,0 +1,39 @@
+{
+  "slug": "joshua-request-capture-system-2026-05-03",
+  "topic": "joshua-request-capture-system — canonical Josh-request schema + auto-capture + cross-session propagation",
+  "started_at": "2026-05-03T21:05:00Z",
+  "current_phase": "ready_polish_deferred",
+  "phase_started_at": "2026-05-03T21:25:00Z",
+  "rounds_in_current_phase": 0,
+  "convergence_streak": 2,
+  "in_flight_dispatches": [],
+  "joshua_decision_pending": false,
+  "joshua_decision_at": "2026-05-03T21:10:00Z",
+  "joshua_decision_note": "Joshua's verbal trigger ('we need the josh request thing properly planned through /flywheel:plan and locked into our flywheel as a whole across all sessions not a one-time fix') IS the approval. Auto-approving Phase 3 → Phase 4.",
+  "audit_findings_count": 5,
+  "audit_findings_mitigated": 5,
+  "beads_created": ["flywheel-wroj","flywheel-l6j2","flywheel-2ps2","flywheel-v9a8","flywheel-iaak","flywheel-j9fq","flywheel-a6ax","flywheel-9wqw","flywheel-3tzo","flywheel-sur0","flywheel-7elw","flywheel-flmn","flywheel-cg9w","flywheel-iyex","flywheel-ofwh"],
+  "beads_dependencies_added": 17,
+  "beads_dep_cycles": 0,
+  "abort_reason": null,
+  "execution_mode": "self_author_plan_space",
+  "phases_complete": ["research", "refine", "audit", "decompose"],
+  "phases_pending": ["polish"],
+  "polish_dispatch_when": "after current ready queue drains + 1 idle codex pane",
+  "phase_artifacts": {
+    "intent": "00-INTENT.md",
+    "research": "01-RESEARCH-COMBINED.md",
+    "refine": "00-PLAN.md",
+    "audit": "03-AUDIT-FINDINGS.md",
+    "decompose": "04-BEADS-DAG.md",
+    "polish": "PENDING"
+  },
+  "skillos_orch_response": {
+    "ts": "2026-05-03T20:55Z",
+    "foggybear_unretired": true,
+    "run_30m_loop_patched": true,
+    "new_runner_pid": 93980,
+    "their_learn_rows": ["agent-mail-identity-retired-after-reboot", "loop-driver-active-but-prompt-shell-executed"],
+    "convergent_doctrine_observed": "skillos independently named same trauma classes flywheel filed (6krl + 7jp3)"
+  }
+}
