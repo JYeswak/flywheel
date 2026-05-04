@@ -461,6 +461,7 @@ append_class_strike() {
 
 append_recovery_ledger() {
   local event="$1" session="$2" pane="$3" reason="$4" lease_key="$5" snapshot="$6" idempotency_key="${7:-}" re_probe="${8:-null}"
+  local detection_latency="${9:-null}" recovery_latency="${10:-null}" total_latency="${11:-null}"
   ensure_state_paths
   jq -nc \
     --arg ts "$(now_iso)" \
@@ -472,9 +473,16 @@ append_recovery_ledger() {
     --arg snapshot "$snapshot" \
     --arg idempotency_key "$idempotency_key" \
     --argjson re_probe "$re_probe" \
+    --argjson detection_latency "$detection_latency" \
+    --argjson recovery_latency "$recovery_latency" \
+    --argjson total_latency "$total_latency" \
     '{ts:$ts, event:$event, session:$session, pane:($pane | tonumber? // $pane),
       reason:$reason, lease_key:$lease_key, idempotency_key:$idempotency_key,
-      snapshot:$snapshot, re_probe:$re_probe, source:"frozen-pane-detector.sh"}' >>"$RECOVERY_LEDGER"
+      snapshot:$snapshot, re_probe:$re_probe,
+      detection_latency_seconds:$detection_latency,
+      recovery_latency_seconds:$recovery_latency,
+      total_recovery_latency_seconds:$total_latency,
+      source:"frozen-pane-detector.sh"}' >>"$RECOVERY_LEDGER"
 }
 
 emit_metrics_line() {
@@ -706,7 +714,7 @@ re_probe_after_relaunch() {
 recover_pane() {
   local session="$1" pane="$2" agent_type="$3" age="$4" delta="$5" current_file="$6"
   local ts snapshot relaunch_cmd respawned=0 relaunched=0 precheck lease lease_key lease_allowed reason
-  local content_hash idempotency_key re_probe
+  local content_hash idempotency_key re_probe recovery_start_epoch recovery_end_epoch recovery_latency detection_latency total_latency
   ts="$(date -u -r "$(now_epoch)" +%Y%m%dT%H%M%SZ 2>/dev/null || date -u +%Y%m%dT%H%M%SZ)"
   snapshot="/tmp/frozen-pane-${session}-${pane}-${ts}.txt"
   content_hash="$(sha256_file "$current_file")"
@@ -729,6 +737,7 @@ recover_pane() {
         explain:(if $explain == 1 then "dry-run only; no pane mutation, no ledger write" else null end)}'
     return 0
   fi
+  recovery_start_epoch="$(now_epoch)"
   lease="$(acquire_recovery_lease "$session" "$pane")"
   lease_allowed="$(printf '%s\n' "$lease" | jq -r '.allowed')"
   lease_key="$(printf '%s\n' "$lease" | jq -r '.lease_key // empty')"
@@ -755,8 +764,15 @@ recover_pane() {
     "$NTM_BIN" send "$session" --pane="$pane" --no-cass-check "You were auto-recovered from a frozen pane state. Run inbox/bead resume checks, then continue the last assigned work if safe. Snapshot: ${snapshot}" >/dev/null 2>&1 || true
   fi
   re_probe="$(re_probe_after_relaunch "$session" "$pane" "$ts")"
+  recovery_end_epoch="$(now_epoch)"
+  recovery_latency=$(( recovery_end_epoch - recovery_start_epoch ))
+  detection_latency=0
+  if [[ "$age" =~ ^[0-9]+$ && "$THRESHOLD_SECONDS" =~ ^[0-9]+$ && "$age" -gt "$THRESHOLD_SECONDS" ]]; then
+    detection_latency=$(( age - THRESHOLD_SECONDS ))
+  fi
+  total_latency=$(( detection_latency + recovery_latency ))
   append_strike "$session" "$pane" "$agent_type" "$snapshot"
-  append_recovery_ledger "recovery" "$session" "$pane" "frozen_live_delta" "$lease_key" "$snapshot" "$idempotency_key" "$re_probe"
+  append_recovery_ledger "recovery" "$session" "$pane" "frozen_live_delta" "$lease_key" "$snapshot" "$idempotency_key" "$re_probe" "$detection_latency" "$recovery_latency" "$total_latency"
   release_recovery_lease "$session" "$pane" "$lease_key"
   jq -nc \
     --arg snapshot "$snapshot" \
