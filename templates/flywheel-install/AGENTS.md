@@ -1,3 +1,31 @@
+## L58 — SECRET-MATERIAL-NEVER-IN-PANE-TEXT
+
+---
+id: L58
+title: Secret material never in pane-visible text
+status: long_term
+shipped: 2026-05-02
+review_due: 2026-11-02
+trauma_class: secret-leak
+---
+
+Secret material MUST never be placed in visible pane commands, dispatch packets,
+callbacks, reports, copied transcript evidence, or doctrine examples. This
+includes Agent Mail registration tokens, Infisical secret values, API keys,
+bearer tokens, private keys, password-like values, and any token-shaped fragment
+long enough to authenticate.
+
+Use MCP-native token fields, vault-backed helpers,
+`~/.flywheel/bin/infisical-safe`, or reviewed non-visible sinks; redact before
+pane capture. Raw `infisical secrets list`, `infisical secrets get`,
+`infisical run`, and `infisical export` are forbidden in pane-visible command
+paths. `flywheel-loop doctor --json` must expose `secret_leak_count_1h`,
+`secret_leak_oldest_age_seconds`, and `.secret_leaks[]`, and fresh
+`secret-leak` rows auto-pause the loop.
+
+**Guard surfaces:** DCG raw-command blocks, `infisical-safe` output-shape
+guards, doctor auto-pause, and class-only cross-repo trauma aggregation.
+
 ## L90 — PANE-ACTION-PLAN-REQUIRES-LIVE-CAPTURE
 
 ---
