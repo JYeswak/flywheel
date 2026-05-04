@@ -1,0 +1,12 @@
+{
+  "fixture": "2026-05-03-ntm116-ask",
+  "session": "flywheel",
+  "pane": 1,
+  "idle_worker_count": 1,
+  "ready_bead_count": 1,
+  "prior_wave_points_one_way": true,
+  "action_in_doctrine": true,
+  "pagerank_pick": "ntm_116_adversarial_validate_2026_05_03",
+  "suggested_action": "dispatch adversarial validation of ntm#116 and file only if all falsification checks pass",
+  "draft_text": "Pane 3 found a possible ntm#116 robot PID gap. Should I ask Joshua whether to file it, or should I design an adversarial validation first?"
+}

@@ -1,0 +1,29 @@
+{
+  "schema_version": "flywheel-beads-db-incident/v1",
+  "fixture": "incident-2026-05-04/flywheel-beads-db",
+  "session": "flywheel",
+  "repo": "/Users/josh/Developer/flywheel",
+  "observed_at": "2026-05-04T06:05:00Z",
+  "signals": [
+    {
+      "code": "sqlite_integrity_warning",
+      "message": "sqlite.integrity_check: page 1975 is never used",
+      "integrity_class": "warning"
+    },
+    {
+      "code": "export_hashes_unique_constraint",
+      "message": "UNIQUE constraint failed: export_hashes.issue_id",
+      "operation": "br update"
+    }
+  ],
+  "observed_operation_matrix": {
+    "br_close": "working",
+    "br_update": "failed",
+    "br_create": "unknown",
+    "br_show": "working_with_stale_bypass"
+  },
+  "legacy_outcome": {
+    "orchestrator_declared_db_unusable": true,
+    "halted_dispatch": true
+  }
+}

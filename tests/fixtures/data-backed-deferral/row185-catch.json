@@ -1,0 +1,14 @@
+{
+  "fixture": "2026-05-02-fuckup-log-row-185",
+  "session": "flywheel",
+  "pane": 1,
+  "idle_worker_count": 2,
+  "ready_bead_count": 5,
+  "data_convergence_pct": 1.0,
+  "recommended_yes_count": 5,
+  "recommended_no_count": 0,
+  "action_in_doctrine": true,
+  "pagerank_pick": "dispatch-audit-lanes",
+  "suggested_action": "declare the five decisions data-ratified and dispatch the next audit/refine lanes",
+  "draft_text": "Phase 2 REFINE r1 surfaced 5 Joshua-disposes and every lane recommends yes.\nWant me to approve all five and proceed?"
+}

@@ -1,0 +1,1 @@
+DONE task-fts5 evidence=/tmp/task-fts5.md callback_delivery_verified=pending query='unbalanced " quote'

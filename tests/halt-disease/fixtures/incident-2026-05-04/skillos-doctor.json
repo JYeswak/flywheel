@@ -1,0 +1,33 @@
+{
+  "schema_version": "flywheel-loop-doctor/v1",
+  "fixture": "incident-2026-05-04/skillos-doctor",
+  "session": "skillos",
+  "repo": "/Users/josh/Developer/skillos",
+  "observed_at": "2026-05-04T06:05:00Z",
+  "status": "fail",
+  "action": "repair_storage_headroom",
+  "storage": {
+    "status": "fail",
+    "disk_free_pct": 9.92,
+    "threshold_pct": 10.0,
+    "disk_free_gb": 92,
+    "tier": "CRITICAL",
+    "errors": [
+      {
+        "code": "storage_low_headroom",
+        "message": "disk_free_pct=9.92 below threshold_pct=10.0"
+      }
+    ]
+  },
+  "local_repair": {
+    "repo_prune_planned_count": 0,
+    "repo_prune_actions_count": 0,
+    "mathematically_local": false
+  },
+  "evidence_path": "/Users/josh/Developer/flywheel/.flywheel/plans/accretive-fix-storage-low-headroom-2026-05-04/00-INTENT.md",
+  "legacy_outcome": {
+    "escalated_to_flywheel_orch": true,
+    "safe_local_work_remaining": false,
+    "halted_dispatch": true
+  }
+}

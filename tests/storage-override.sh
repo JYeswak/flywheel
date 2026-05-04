@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+BIN="${FLYWHEEL_LOOP_BIN:-$HOME/.claude/skills/.flywheel/bin/flywheel-loop}"
+SCHEMA="$ROOT/.flywheel/validation-schema/v1/storage-override.schema.json"
+TMP="$(mktemp -d "${TMPDIR:-/tmp}/storage-override-test.XXXXXX")"
+trap 'rm -rf "$TMP"' EXIT
+
+pass_count=0
+fail_count=0
+
+pass() { printf 'PASS %s\n' "$1"; pass_count=$((pass_count + 1)); }
+fail() { printf 'FAIL %s\n' "$1"; fail_count=$((fail_count + 1)); }
+
+fixture() {
+  local path="$1" pct="$2"
+  jq -nc \
+    --argjson pct "$pct" \
+    '{
+      disk_total_gb:926,
+      disk_free_gb:(926 * $pct / 100),
+      disk_free_pct:$pct,
+      developer_dir_gb:328,
+      local_state_gb:2.1,
+      stale_baks_count:0,
+      stale_baks_size_mb:0,
+      qdrant_volumes_size_mb:217,
+      tmp_dispatch_artifacts_count:0
+    }' >"$path"
+}
+
+make_repo() {
+  local name="$1" repo
+  repo="$TMP/$name"
+  mkdir -p "$repo/.flywheel/reports" "$repo/.beads"
+  git -C "$repo" init -q >/dev/null 2>&1
+  printf '# Mission\n\nstatus: ready\n' >"$repo/.flywheel/MISSION.md"
+  printf '# Goal\n\nstatus: ready\n' >"$repo/.flywheel/GOAL.md"
+  printf '# State\n\nstatus: ready\n' >"$repo/.flywheel/STATE.md"
+  jq -nc --arg repo "$repo" '{repo:$repo,active:true}' >"$repo/.flywheel/loop.json"
+  printf '# Daily\n' >"$repo/.flywheel/reports/daily-2026-05-04.md"
+  printf '%s\n' "$repo"
+}
+
+write_receipt() {
+  local dir="$1" name="$2" issued="$3" expires="$4" min_free="$5" applies="$6"
+  mkdir -p "$dir"
+  jq -nc \
+    --arg issued "$issued" \
+    --arg expires "$expires" \
+    --arg min_free "$min_free" \
+    --argjson applies "$applies" \
+    '{
+      schema_version:"storage-override/v1",
+      issued_at:$issued,
+      expires_at:$expires,
+      issuer:"Joshua",
+      scope:"fleet",
+      min_free_pct_override:($min_free | tonumber),
+      applies_to:$applies,
+      rotation_reason:"fixture storage headroom override",
+      auto_clear_signal:"STORAGE-CLEARED",
+      rollback_guard:{requires_event:"STORAGE-CLEARED"}
+    }' >"$dir/$name.json"
+}
+
+run_doctor() {
+  local repo="$1" fixture_file="$2" overrides="$3" out="$4"
+  FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
+    FLYWHEEL_STORAGE_PROBE_FIXTURE="$fixture_file" \
+    FLYWHEEL_STORAGE_OVERRIDES_DIR="$overrides" \
+    FLYWHEEL_STORAGE_OVERRIDE_EVENTS="$overrides/events.jsonl" \
+    FLYWHEEL_STORAGE_OVERRIDE_NOW="2026-05-04T02:20:00Z" \
+    "$BIN" doctor --repo "$repo" --json >"$out" 2>"$out.err" || true
+}
+
+assert_jq() {
+  local file="$1" filter="$2" label="$3"
+  if jq -e "$filter" "$file" >/dev/null; then
+    pass "$label"
+  else
+    fail "$label"
+    jq . "$file" || true
+    [[ -f "$file.err" ]] && cat "$file.err" || true
+  fi
+}
+
+bash -n "$BIN" && pass "flywheel_loop_syntax" || fail "flywheel_loop_syntax"
+jq -e '.["$id"] and .required and (.properties.schema_version.const == "storage-override/v1")' "$SCHEMA" >/dev/null \
+  && pass "schema_declares_storage_override_v1" || fail "schema_declares_storage_override_v1"
+
+low="$TMP/low.json"
+above="$TMP/above.json"
+fixture "$low" 9.2
+fixture "$above" 42
+
+repo="$(make_repo storage-override-repo)"
+valid="$TMP/valid-overrides"
+write_receipt "$valid" valid "2026-05-04T02:10:00Z" "2026-05-04T03:18:00Z" 8 "[\"$repo\",\"storage-override-repo\"]"
+run_doctor "$repo" "$low" "$valid" "$TMP/valid-low.out"
+assert_jq "$TMP/valid-low.out" '.storage_override_active_count == 1 and .storage_override.effective_min_free_pct == 8 and .storage.status != "fail" and (.storage.errors | map(.code) | index("storage_low_headroom") | not)' "valid_receipt_lowers_low_storage_gate"
+assert_jq "$TMP/valid-low.out" '.storage_override.auto_clear_signal == "STORAGE-CLEARED" and .storage_override.rows[0].auto_clear_signal == "STORAGE-CLEARED"' "doctor_exposes_auto_clear_signal"
+
+expired="$TMP/expired-overrides"
+write_receipt "$expired" expired "2026-05-04T01:00:00Z" "2026-05-04T02:00:00Z" 8 "[\"$repo\"]"
+run_doctor "$repo" "$low" "$expired" "$TMP/expired-low.out"
+assert_jq "$TMP/expired-low.out" '.storage_override_active_count == 0 and .storage.status == "fail" and any(.storage.errors[]?; .code == "storage_low_headroom")' "expired_receipt_fails_closed"
+
+wrong_target="$TMP/wrong-target-overrides"
+write_receipt "$wrong_target" wrong "2026-05-04T02:10:00Z" "2026-05-04T03:18:00Z" 8 "[\"other-repo\"]"
+run_doctor "$repo" "$low" "$wrong_target" "$TMP/wrong-target.out"
+assert_jq "$TMP/wrong-target.out" '.storage_override_active_count == 0 and .storage.status == "fail" and any(.storage.errors[]?; .code == "storage_low_headroom")' "missing_applies_to_fails_closed"
+
+clear="$TMP/clear-overrides"
+write_receipt "$clear" clear "2026-05-04T02:10:00Z" "2026-05-04T03:18:00Z" 8 "[\"*\"]"
+run_doctor "$repo" "$above" "$clear" "$TMP/clear.out"
+assert_jq "$TMP/clear.out" '.storage_override_active_count == 0 and .storage.status == "ok" and .storage_override.effective_min_free_pct == 10' "receipt_above_threshold_auto_reverts"
+if grep -q '"STORAGE-CLEARED"' "$clear/events.jsonl"; then
+  pass "storage_cleared_event_written"
+else
+  fail "storage_cleared_event_written"
+fi
+
+cli_overrides="$TMP/no-overrides"
+mkdir -p "$cli_overrides"
+FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
+  FLYWHEEL_STORAGE_PROBE_FIXTURE="$low" \
+  FLYWHEEL_STORAGE_OVERRIDES_DIR="$cli_overrides" \
+  "$BIN" doctor --repo "$repo" --storage-min-free-pct 8 --json >"$TMP/cli.out" 2>"$TMP/cli.out.err" || true
+assert_jq "$TMP/cli.out" '.storage_override_active_count == 0 and .storage_override.effective_min_free_pct == 8 and .storage.status != "fail"' "cli_flag_storage_min_free_pct"
+
+env_overrides="$TMP/env-overrides"
+mkdir -p "$env_overrides"
+FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
+  FLYWHEEL_STORAGE_PROBE_FIXTURE="$low" \
+  FLYWHEEL_STORAGE_OVERRIDES_DIR="$env_overrides" \
+  FLYWHEEL_STORAGE_MIN_FREE_PCT=8 \
+  "$BIN" doctor --repo "$repo" --json >"$TMP/env.out" 2>"$TMP/env.out.err" || true
+assert_jq "$TMP/env.out" '.storage_override_active_count == 0 and .storage_override.effective_min_free_pct == 8 and .storage.status != "fail"' "env_var_storage_min_free_pct"
+
+printf '\nSummary: %s passed, %s failed\n' "$pass_count" "$fail_count"
+[[ "$fail_count" -eq 0 ]]
