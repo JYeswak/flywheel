@@ -2,20 +2,922 @@
 set -euo pipefail
 
 export HOME="/Users/josh"
-export PATH="/opt/homebrew/Cellar/util-linux/2.41.3_1/bin:/Users/josh/.cargo/bin:/Users/josh/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+export PATH="/Users/josh/.local/bin:/Users/josh/.cargo/bin:/opt/homebrew/Cellar/util-linux/2.41.3_1/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 
-REPO="/Users/josh/Developer/flywheel"
-SESSION="flywheel"
-TARGET_PANE="1"
-STATE_DIR="$REPO/.flywheel/runtime/flywheel-loop"
-PROMPT_DIR="$REPO/.flywheel/prompts"
-LOG="$REPO/.flywheel/dispatch-log.jsonl"
+REPO="${REPO:-/Users/josh/Developer/flywheel}"
+SESSION="${SESSION:-flywheel}"
+TARGET_PANE="${TARGET_PANE:-1}"
+STATE_DIR="${STATE_DIR:-$REPO/.flywheel/runtime/flywheel-loop}"
+PROMPT_DIR="${PROMPT_DIR:-$REPO/.flywheel/prompts}"
+LOG="${LOG:-$REPO/.flywheel/dispatch-log.jsonl}"
 LOCK="$STATE_DIR/loop.lock"
-NTM="/Users/josh/.local/bin/ntm"
+LAST="$STATE_DIR/last_run.json"
+NTM="${NTM:-/Users/josh/.local/bin/ntm}"
+DRY_RUN="${FLYWHEEL_LOOP_TICK_DRY_RUN:-0}"
+FROZEN_DETECTOR_OVERRIDE="${FLYWHEEL_TICK_FROZEN_DETECTOR_OVERRIDE:-0}"
 
 ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 
 mkdir -p "$STATE_DIR" "$PROMPT_DIR" "$(dirname "$LOG")"
+
+json_or_raw() {
+  local raw="${1:-}"
+  if jq -e . >/dev/null 2>&1 <<<"$raw"; then
+    printf '%s\n' "$raw"
+  else
+    jq -nc --arg raw "$raw" '{action:"error",raw:$raw}'
+  fi
+}
+
+codex_watchtower_probe() {
+  local summary doctor frozen high_count strike_count candidate promotion_result desc create_out existing
+  summary="$("$HOME/.local/bin/codex-watchtower-daily.sh" --summary --json 2>&1 || printf '{"status":"UNKNOWN_UNHEALTHY","warnings":["summary_probe_failed"]}')"
+  summary="$(json_or_raw "$summary")"
+  doctor="$("$HOME/.claude/skills/codex-cli-tracker/scripts/codex-tracker-probe.sh" --doctor --json 2>&1 || printf '{"success":false,"warnings":["tracker_doctor_failed"]}')"
+  doctor="$(json_or_raw "$doctor")"
+  frozen="$("$REPO/.flywheel/scripts/frozen-pane-detector.sh" --session=all --json 2>&1 || printf '{"success":false,"warnings":["frozen_pane_probe_failed"]}')"
+  frozen="$(json_or_raw "$frozen")"
+  high_count="$(jq '(.codex_relevant_issues // []) | length' <<<"$summary" 2>/dev/null || printf '0')"
+  strike_count="$(jq '[.. | objects | (.strike_count_7d? // .strikes_7d? // .strike_count? // empty)] | map(select(type == "number")) | max // 0' <<<"$frozen" 2>/dev/null || printf '0')"
+  candidate=false
+  promotion_result="$(jq -nc '{action:"skipped",reason:"threshold_not_met"}')"
+  if [[ "$high_count" =~ ^[0-9]+$ && "$strike_count" =~ ^[0-9]+$ && "$high_count" -gt 0 && "$strike_count" -ge 3 ]]; then
+    candidate=true
+    if [[ "$DRY_RUN" == "1" ]]; then
+      promotion_result="$(jq -nc '{action:"skipped",reason:"dry_run"}')"
+    else
+      existing="$(cd "$REPO" && br list --json 2>/dev/null | jq '[.[]? | select((.title // "") == "[codex-watchtower] upstream high-relevance Codex issue strike triage")] | length' 2>/dev/null || printf '0')"
+      if [[ "$existing" =~ ^[0-9]+$ && "$existing" -gt 0 ]]; then
+        promotion_result="$(jq -nc '{action:"skipped",reason:"existing_bead"}')"
+      elif command -v br >/dev/null 2>&1; then
+        desc="$(printf 'Auto-filed by /flywheel:tick Step 4t codex-watchtower-probe.\n\nTrigger: HIGH-relevance Codex upstream issue count >0 and frozen-pane strike count >=3.\nParent: flywheel-ezyf.\nAcceptance gates:\n- Re-run codex-watchtower-daily.sh --summary --json and record relevant issue IDs.\n- Re-run frozen-pane-detector.sh --session=all --json and record strike count.\n- Decide whether to append an upstream candidate row to codex-cli-tracker/references/UPSTREAM-COMMENTS.md.\n- Close with no public post unless Joshua approved upstream coordination.\n')"
+        if create_out="$(cd "$REPO" && br create "[codex-watchtower] upstream high-relevance Codex issue strike triage" --priority P1 --type task --parent flywheel-ezyf --description "$desc" --json 2>&1)"; then
+          promotion_result="$(json_or_raw "$create_out")"
+        else
+          promotion_result="$(jq -nc --arg raw "$create_out" '{action:"error",raw:$raw}')"
+        fi
+      else
+        promotion_result="$(jq -nc '{action:"error",reason:"br_missing"}')"
+      fi
+    fi
+  fi
+  jq -nc \
+    --arg action "checked" \
+    --argjson summary "$summary" \
+    --argjson doctor "$doctor" \
+    --argjson frozen_pane "$frozen" \
+    --argjson high_count "$high_count" \
+    --argjson frozen_strike_count "$strike_count" \
+    --argjson auto_bead_candidate "$candidate" \
+    --argjson promotion "$promotion_result" \
+    '{action:$action, summary:$summary, doctor:$doctor, frozen_pane:$frozen_pane, high_relevance_count:$high_count, frozen_strike_count:$frozen_strike_count, auto_bead_candidate:$auto_bead_candidate, promotion:$promotion}'
+}
+
+frozen_detector_probe() {
+  local output exit_code
+  set +e
+  output="$("$REPO/.flywheel/scripts/frozen-pane-detector.sh" --session=all --json 2>&1)"
+  exit_code=$?
+  set -e
+  if jq -e . >/dev/null 2>&1 <<<"$output"; then
+    jq -c --argjson exit_code "$exit_code" 'if type == "object" then . + {probe_exit_code:$exit_code} else . end' <<<"$output"
+  else
+    jq -nc --arg raw "$output" --argjson exit_code "$exit_code" '{success:false,status:"error",source_health:{status:"unhealthy"},probe_exit_code:$exit_code,warnings:["invalid_frozen_detector_json"],raw:$raw}'
+  fi
+}
+
+sanitize_frozen_detector_json() {
+  local raw="${1:-}" trimmed
+  if jq -c . >/dev/null 2>&1 <<<"$raw"; then
+    jq -c . <<<"$raw"
+    return 0
+  fi
+  trimmed="${raw%?}"
+  if [[ "$raw" == *'}' ]] && jq -c . >/dev/null 2>&1 <<<"$trimmed"; then
+    jq -c . <<<"$trimmed"
+    return 0
+  fi
+  jq -nc --arg raw "$raw" '{success:false,status:"error",source_health:{status:"unhealthy"},warnings:["invalid_frozen_detector_json"],raw:$raw}'
+}
+
+frozen_detector_summary() {
+  local summary detector_source="${1:-${FROZEN_DETECTOR_RESULT:-{}}}"
+  summary="$(python3 -c '
+import json, sys
+try:
+    raw = sys.stdin.read()
+    data = None
+    candidates = [raw, raw.rstrip()]
+    trimmed = raw.rstrip()
+    for _ in range(4):
+        if trimmed.endswith("}"):
+            trimmed = trimmed[:-1]
+            candidates.append(trimmed)
+    for candidate in candidates:
+        try:
+            data = json.loads(candidate)
+            break
+        except Exception:
+            pass
+    if data is None:
+        raise ValueError("invalid detector json")
+    d = data.get("frozen_pane", data) if isinstance(data, dict) else {}
+    signals = d.get("l60_signals_present") or {}
+    keys = ["no_silent_darkness", "live_truth_delta", "unknown_separated", "recovery_budget", "recovery_lease"]
+    missing = [k for k in keys if signals.get(k) is not True]
+    print(json.dumps({
+        "schema_version": d.get("schema_version"),
+        "success": d.get("success", False),
+        "source_health_status": (d.get("source_health") or {}).get("status"),
+        "frozen_panes_detected": d.get("frozen_panes_detected", 0),
+        "unknown_panes_detected": d.get("unknown_panes_detected", 0),
+        "stale_template_prompt_count": d.get("template_stub_prompt_count", 0),
+        "queued_not_submitted_count": d.get("queued_not_submitted_count", 0),
+        "respawn_suppressed_count": d.get("respawn_suppressed_count", 0),
+        "recovery_suppressed_count": d.get("recovery_suppressed_count", 0),
+        "frozen_panes_respawned": d.get("frozen_panes_respawned", 0),
+        "frozen_panes_relaunched": d.get("frozen_panes_relaunched", 0),
+        "silent_dark_minutes": d.get("silent_dark_minutes", 0),
+        "blackout_detection_latency_p95": d.get("blackout_detection_latency_p95", 0),
+        "false_recovery_count": d.get("false_recovery_count", 0),
+        "unknown_auto_recovery_count": d.get("unknown_auto_recovery_count", 0),
+        "l60_signals_present": signals,
+        "l60_signal_expected_count": len(keys),
+        "l60_signal_present_count": len([k for k in keys if signals.get(k) is True]),
+        "l60_signal_missing": missing,
+        "l60_all_present": len(missing) == 0,
+        "soft_violations": d.get("soft_violations") or [],
+        "durable_receipts": d.get("durable_receipts") or [],
+    }, separators=(",", ":")))
+except Exception:
+    sys.exit(1)
+' <<<"$detector_source")" || summary=""
+  if jq -e . >/dev/null 2>&1 <<<"$summary"; then
+    printf '%s\n' "$summary"
+  else
+    jq -nc '{success:false,source_health_status:"invalid",frozen_panes_detected:0,unknown_panes_detected:1,stale_template_prompt_count:0,queued_not_submitted_count:0,respawn_suppressed_count:0,recovery_suppressed_count:0,l60_signals_present:{},l60_signal_expected_count:5,l60_signal_present_count:0,l60_signal_missing:["no_silent_darkness","live_truth_delta","unknown_separated","recovery_budget","recovery_lease"],l60_all_present:false,soft_violations:[],durable_receipts:[]}'
+  fi
+}
+
+frozen_detector_block_reason() {
+  local summary="${1:-}" override="${FROZEN_DETECTOR_OVERRIDE:-0}"
+  if [[ "$override" == "1" || "$override" == "true" ]]; then
+    printf 'none\n'
+    return 0
+  fi
+  jq -r '
+    if (.success != true) then "frozen_detector_unhealthy"
+    elif ((.source_health_status // "") != "healthy") then "frozen_detector_source_unhealthy"
+    elif ((.frozen_panes_detected // 0) > 0) then "frozen_panes_detected"
+    elif ((.unknown_panes_detected // 0) > 0) then "unknown_panes_detected"
+    elif (.l60_all_present != true) then "l60_signals_missing"
+    else "none" end
+  ' <<<"$summary" 2>/dev/null || printf 'frozen_detector_invalid\n'
+}
+
+frozen_detector_summary_from_codex() {
+  jq -c '
+    (.frozen_pane // {}) as $d |
+    ($d.l60_signals_present // {}) as $signals |
+    ["no_silent_darkness","live_truth_delta","unknown_separated","recovery_budget","recovery_lease"] as $keys |
+    [$keys[] | select(($signals[.] // false) != true)] as $missing |
+    {
+      schema_version:($d.schema_version // null),
+      success:($d.success // false),
+      source_health_status:($d.source_health.status // null),
+      frozen_panes_detected:($d.frozen_panes_detected // 0),
+      unknown_panes_detected:($d.unknown_panes_detected // 0),
+      stale_template_prompt_count:($d.template_stub_prompt_count // 0),
+      queued_not_submitted_count:($d.queued_not_submitted_count // 0),
+      respawn_suppressed_count:($d.respawn_suppressed_count // 0),
+      recovery_suppressed_count:($d.recovery_suppressed_count // 0),
+      frozen_panes_respawned:($d.frozen_panes_respawned // 0),
+      frozen_panes_relaunched:($d.frozen_panes_relaunched // 0),
+      silent_dark_minutes:($d.silent_dark_minutes // 0),
+      blackout_detection_latency_p95:($d.blackout_detection_latency_p95 // 0),
+      false_recovery_count:($d.false_recovery_count // 0),
+      unknown_auto_recovery_count:($d.unknown_auto_recovery_count // 0),
+      l60_signals_present:$signals,
+      l60_signal_expected_count:($keys | length),
+      l60_signal_present_count:([$keys[] | select(($signals[.] // false) == true)] | length),
+      l60_signal_missing:$missing,
+      l60_all_present:($missing | length == 0),
+      soft_violations:($d.soft_violations // []),
+      durable_receipts:($d.durable_receipts // [])
+    }' <<<"${1:-{}}" 2>/dev/null
+}
+
+value_gap_probe() {
+  local args
+  args=("--repo" "$REPO" "--json" "--parent" "flywheel-1rmp")
+  if [[ "$DRY_RUN" == "1" ]]; then
+    args+=("--dry-run")
+  else
+    args+=("--apply" "--idempotency-key" "${1:-tick}")
+  fi
+  "$REPO/.flywheel/scripts/value-gap-probe.sh" "${args[@]}" 2>&1 || printf '{"success":false,"mode":"run","warnings":["value_gap_probe_failed"]}'
+}
+
+run_probe_json() {
+  local output exit_code
+  set +e
+  output="$("$@" 2>&1)"
+  exit_code=$?
+  set -e
+  if jq -e . >/dev/null 2>&1 <<<"$output"; then
+    jq -c --argjson exit_code "$exit_code" 'if type == "object" then . + {probe_exit_code:$exit_code} else . end' <<<"$output"
+  else
+    jq -nc --arg raw "$output" --argjson exit_code "$exit_code" '{success:false,status:"error",probe_exit_code:$exit_code,warnings:["invalid_probe_json"],raw:$raw}'
+  fi
+}
+
+jeff_status_probe() {
+  run_probe_json "$REPO/.flywheel/scripts/jeff-issues-status-probe.sh" doctor --json
+}
+
+jeff_fixes_pull_probe() {
+  run_probe_json "$REPO/.flywheel/scripts/jeff-fixes-pull-probe.sh" doctor --json
+}
+
+agent_mail_fd_probe() {
+  run_probe_json "$REPO/.flywheel/scripts/agent-mail-fd-doctor.sh" --doctor --json
+}
+
+mobile_eats_probe() {
+  run_probe_json "$REPO/.flywheel/scripts/mobile-eats-receipt-bridge.sh" --doctor --json
+}
+
+skillos_loop_probe() {
+  local receipt="$HOME/.local/state/flywheel-loop/last_tick_skillos.json"
+  if [[ ! -f "$receipt" ]]; then
+    jq -nc --arg receipt "$receipt" '{status:"missing",receipt:$receipt,warnings:["skillos_last_tick_missing"]}'
+    return 0
+  fi
+  jq -c --arg receipt "$receipt" '{status:"ok",receipt:$receipt,ts:(.ts // null),task_id:(.task_id // null),decision:(.decision // null),warnings:(.warnings // [])}' "$receipt" 2>/dev/null \
+    || jq -nc --arg receipt "$receipt" '{status:"degraded",receipt:$receipt,warnings:["skillos_last_tick_invalid_json"]}'
+}
+
+daily_jeff_probe() {
+  local result
+  result="$(run_probe_json "$REPO/.flywheel/scripts/jeff-intel-network.sh" doctor --json)"
+  jq -c '. + {
+    status:(if (.success == true) then "ok" else "degraded" end),
+    deps_missing:([(.deps // [])[]? | select((.ok // false) == false) | .name]),
+    sources_file:(.paths.sources_file // .sources_file // null),
+    warnings:(.warnings // [])
+  }' <<<"$result"
+}
+
+jeff_binary_version_probe() {
+  if [[ "$DRY_RUN" == "1" ]]; then
+    run_probe_json "$REPO/.flywheel/scripts/jeff-binary-version-watchtower.sh" --dry-run --json
+  else
+    run_probe_json "$REPO/.flywheel/scripts/jeff-binary-version-watchtower.sh" --apply --json
+  fi
+}
+
+fleet_onboard_probe() {
+  local roster tmp repo output exit_code
+  roster="${FLYWHEEL_FLEET_ROSTER:-$HOME/.local/state/flywheel/fleet-roster.json}"
+  tmp="$(mktemp "${TMPDIR:-/tmp}/fleet-onboard.XXXXXX")"
+  if [[ -f "$roster" ]]; then
+    jq -r '
+      if type == "array" then .[]? | (.repo // .path // empty)
+      elif (.repos? | type == "array") then .repos[]? | (.repo // .path // empty)
+      else empty end
+    ' "$roster" 2>/dev/null | sort -u | while IFS= read -r repo; do
+      [[ -n "$repo" ]] || continue
+      set +e
+      output="$("$REPO/.flywheel/scripts/flywheel-onboard.sh" --repo "$repo" --dry-run --doctor --json 2>&1)"
+      exit_code=$?
+      set -e
+      if jq -e . >/dev/null 2>&1 <<<"$output"; then
+        jq -c --argjson exit_code "$exit_code" '. + {probe_exit_code:$exit_code}' <<<"$output" >>"$tmp"
+      else
+        jq -nc --arg repo "$repo" --arg raw "$output" --argjson exit_code "$exit_code" '{repo:$repo,status:"UNKNOWN",success:false,probe_exit_code:$exit_code,warnings:["invalid_onboard_json"],raw:$raw}' >>"$tmp"
+      fi
+    done
+  fi
+  jq -s --arg roster "$roster" '{
+    action:"checked",
+    roster:$roster,
+    checked_repos:length,
+    rows:.,
+    status:(if length == 0 then "UNKNOWN" elif any(.[]; (.status // "") != "HEALTHY") then "PARTIAL" else "HEALTHY" end),
+    limping_repos:[.[] | select((.status // "") == "LIMPING") | (.repo // .project // "unknown")],
+    missing_repos:[.[] | select((.status // "") == "MISSING") | (.repo // .project // "unknown")],
+    warnings:([.[] | .warnings[]?] + if length == 0 then ["fleet_roster_empty_or_missing"] else [] end)
+  }' "$tmp"
+  rm -f "$tmp"
+}
+
+valid_phase() {
+  case "${1:-}" in
+    INIT|RESEARCH|PLAN|BEADS|DISPATCH|VALIDATE|INTEGRATE|LEARN) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+tick_class_for_phase() {
+  case "${1:-}" in
+    INIT|VALIDATE) printf 'validation\n' ;;
+    RESEARCH|PLAN) printf 'architecture_decision\n' ;;
+    BEADS|LEARN) printf 'planning\n' ;;
+    DISPATCH|INTEGRATE) printf 'dispatch_reap\n' ;;
+    *) printf 'planning\n' ;;
+  esac
+}
+
+emit_phase() {
+  local phase="$1" reason="$2"
+  printf '%s\n' "$reason" >"$STATE_DIR/phase_reason.txt"
+  printf '%s\n' "$phase"
+}
+
+first_existing_dir() {
+  local path
+  for path in "$@"; do
+    [[ -d "$path" ]] && { printf '%s\n' "$path"; return 0; }
+  done
+  return 1
+}
+
+dir_has_files() {
+  local dir="${1:-}"
+  [[ -n "$dir" && -d "$dir" ]] || return 1
+  find "$dir" -maxdepth 3 -type f 2>/dev/null | head -1 | grep -q .
+}
+
+latest_mtime() {
+  local dir="${1:-}" pattern="${2:-*}"
+  [[ -n "$dir" && -d "$dir" ]] || { printf '0\n'; return 0; }
+  find "$dir" -type f -name "$pattern" -exec stat -f '%m' {} + 2>/dev/null | sort -nr | head -n 1 | grep -E '^[0-9]+$' || printf '0\n'
+}
+
+jsonl_open_bead_count() {
+  local issues="$REPO/.beads/issues.jsonl"
+  [[ -f "$issues" ]] || { printf '0\n'; return 0; }
+  jq -s '[.[]? | select((.status // "open") != "closed")] | length' "$issues" 2>/dev/null || printf '0\n'
+}
+
+jsonl_total_bead_count() {
+  local issues="$REPO/.beads/issues.jsonl"
+  [[ -f "$issues" ]] || { printf '0\n'; return 0; }
+  jq -s 'length' "$issues" 2>/dev/null || wc -l <"$issues" | tr -d ' '
+}
+
+br_ready_count() {
+  local out
+  command -v br >/dev/null 2>&1 || return 1
+  out="$(cd "$REPO" && br ready --json 2>/dev/null)" || return 1
+  jq 'if type=="array" then length else (.issues // [] | length) end' 2>/dev/null <<<"$out" || return 1
+}
+
+capacity_available() {
+  jq -e '(.panes // []) | any((.gate.verdict // "") | test("^(ready|idle|available|ok)$"; "i"))' >/dev/null 2>&1 <<<"${1:-{}}"
+}
+
+unprocessed_fuckup_count() {
+  local log="${FLYWHEEL_FUCKUP_LOG:-$HOME/.local/state/flywheel/fuckup-log.jsonl}"
+  [[ -f "$log" ]] || { printf '0\n'; return 0; }
+  jq -s '[.[]? | select((.processed_at // .promoted_at // .resolved_at // "") == "")] | length' "$log" 2>/dev/null || printf '0\n'
+}
+
+latest_callback_next_phase() {
+  local last_task_id tail_file latest_callback next_phase
+  [[ -f "$LAST" ]] || return 1
+  last_task_id="$(jq -r '.task_id // empty' "$LAST" 2>/dev/null || true)"
+  [[ -n "$last_task_id" ]] || return 1
+  command -v "$NTM" >/dev/null 2>&1 || return 1
+  tail_file="$STATE_DIR/pane-${TARGET_PANE}-tail.txt"
+  "$NTM" copy "$SESSION:$TARGET_PANE" -l 320 --output "$tail_file" --quiet 2>/dev/null || true
+  latest_callback="$(
+    grep -E "Callback: task_id=${last_task_id}[[:space:]]" "$tail_file" 2>/dev/null \
+      | tail -n 1 \
+      || true
+  )"
+  [[ -n "$latest_callback" ]] || return 1
+  next_phase="$(sed -n 's/.*next_phase=\([A-Z_]*\).*/\1/p' <<<"$latest_callback")"
+  valid_phase "$next_phase" || return 1
+  printf '%s\n' "callback_next_phase:${next_phase}" >"$STATE_DIR/phase_reason.txt"
+  printf '%s\n' "$next_phase"
+}
+
+detect_phase() {
+  local fw="$REPO/.flywheel" phase ready_count open_jsonl total_beads plans_dir research_dir docs_dir
+  local latest_research_mtime latest_plan_mtime in_flight
+
+  PHASE_REASON="default"
+
+  if [[ -f "$fw/next_tick_override.json" ]]; then
+    phase="$(jq -r '.phase // .next_phase // empty' "$fw/next_tick_override.json" 2>/dev/null || true)"
+    if valid_phase "$phase"; then
+      emit_phase "$phase" "next_tick_override"
+      return 0
+    fi
+  fi
+
+  phase="$(latest_callback_next_phase || true)"
+  if valid_phase "$phase"; then
+    printf '%s\n' "$phase"
+    return 0
+  fi
+
+  for f in MISSION.md GOAL.md STATE.md; do
+    [[ -f "$fw/$f" ]] || { emit_phase "INIT" "missing_flywheel_doc:$f"; return 0; }
+    grep -qE '^status:[[:space:]]*(locked|ready)' "$fw/$f" || { emit_phase "INIT" "unlocked_flywheel_doc:$f"; return 0; }
+  done
+
+  if [[ -f "$LOG" ]]; then
+    in_flight="$(jq -s '[.[]? | select((((.callback_status // "") | test("^(dispatched|pending|overdue|partial)$")) or (((.event // "") | test("ntm_dispatch_sent|tick_dispatch|dispatch_sent")) and (.callback_received_at // null) == null and ((.dispatch_status // "") != "dry_run"))))] | length' "$LOG" 2>/dev/null || echo 0)"
+    if [[ "${in_flight:-0}" -gt 0 ]]; then
+      validated_integration_phase
+      return 0
+    fi
+  fi
+
+  if ready_count="$(br_ready_count)"; then
+    if [[ "${ready_count:-0}" -gt 0 ]]; then
+      emit_phase "DISPATCH" "br_ready:${ready_count}"
+      return 0
+    fi
+  else
+    PHASE_REASON="br_unavailable_jsonl_fallback"
+  fi
+
+  open_jsonl="$(jsonl_open_bead_count)"
+  if [[ "${open_jsonl:-0}" -gt 0 ]]; then
+    emit_phase "DISPATCH" "jsonl_open_beads:${open_jsonl}"
+    return 0
+  fi
+
+  plans_dir="$(first_existing_dir "$fw/plans" "$fw/PLANS" || true)"
+  research_dir="$(first_existing_dir "$fw/research" "$fw/RESEARCH" || true)"
+  docs_dir="$(first_existing_dir "$REPO/docs" "$REPO/doc" || true)"
+  latest_research_mtime="$(latest_mtime "$research_dir" '*.md')"
+  latest_plan_mtime="$(latest_mtime "$plans_dir" '*.md')"
+  if [[ "${latest_research_mtime:-0}" -gt "${latest_plan_mtime:-0}" ]]; then
+    emit_phase "PLAN" "research_newer_than_plan"
+    return 0
+  fi
+
+  total_beads="$(jsonl_total_bead_count)"
+  if [[ "${total_beads:-0}" -eq 0 ]] && { dir_has_files "$plans_dir" || dir_has_files "$docs_dir"; }; then
+    emit_phase "BEADS" "plan_or_docs_without_beads"
+    return 0
+  fi
+
+  if [[ "${open_jsonl:-0}" -eq 0 && "${total_beads:-0}" -gt 0 ]] && dir_has_files "$plans_dir"; then
+    emit_phase "BEADS" "all_closed_with_plan"
+    return 0
+  fi
+
+  if { dir_has_files "$research_dir" || dir_has_files "$docs_dir"; } && ! dir_has_files "$plans_dir"; then
+    emit_phase "PLAN" "research_or_docs_without_plan"
+    return 0
+  fi
+
+  if [[ "$PHASE_REASON" == "br_unavailable_jsonl_fallback" ]]; then
+    emit_phase "LEARN" "br_unavailable_no_jsonl_state"
+    return 0
+  fi
+
+  emit_phase "RESEARCH" "greenfield_or_stale_context"
+}
+
+dispatch_capacity_snapshot() {
+  local panes="${DISPATCH_CAPACITY_PANES:-2 3 4}" pane gate_output gate_exit gate_json tmp
+  tmp="$(mktemp "${TMPDIR:-/tmp}/dispatch-capacity.XXXXXX")"
+
+  for pane in $panes; do
+    set +e
+    gate_output="$(bash "$REPO/.flywheel/scripts/dispatch-capacity-gate.sh" "$SESSION" "$pane" 2>&1)"
+    gate_exit=$?
+    set -e
+
+    if jq -e . >/dev/null 2>&1 <<<"$gate_output"; then
+      gate_json="$gate_output"
+    else
+      gate_json="$(jq -nc --arg raw "$gate_output" '{verdict:"error",reason:"invalid_gate_json",raw:$raw}')"
+    fi
+
+    jq -nc \
+      --arg pane "$pane" \
+      --argjson exit_code "$gate_exit" \
+      --argjson gate "$gate_json" \
+      '{pane:($pane|tonumber? // $pane),exit_code:$exit_code,gate:$gate}' >>"$tmp"
+  done
+
+  jq -s --arg session "$SESSION" '{session:$session,panes:.}' "$tmp"
+  rm -f "$tmp"
+}
+
+l70_chain_decision_json() {
+  local phase="$1" reason="$2" capacity_json="$3" source="none" from_phase="" to_phase="" chain_required=false chained=false blocked_reason=""
+  case "$reason" in
+    callback_next_phase:*)
+      source="worker_callback"
+      to_phase="${reason#callback_next_phase:}"
+      chain_required=true
+      chained=true
+      ;;
+    plan_or_docs_without_beads|all_closed_with_plan)
+      source="dispatch_no_ready_plan_artifacts"
+      from_phase="DISPATCH"
+      to_phase="BEADS"
+      chain_required=true
+      chained=true
+      ;;
+    in_flight_dispatch)
+      if [[ "$(unprocessed_fuckup_count)" -gt 0 ]]; then
+        source="integrate_unprocessed_fuckups"
+        from_phase="INTEGRATE"
+        to_phase="LEARN"
+        chain_required=true
+        if [[ "$phase" == "LEARN" ]]; then
+          chained=true
+        elif capacity_available "$capacity_json"; then
+          blocked_reason=""
+        else
+          blocked_reason="capacity_exhausted"
+        fi
+      fi
+      ;;
+  esac
+  jq -nc \
+    --arg source "$source" \
+    --arg from_phase "$from_phase" \
+    --arg to_phase "$to_phase" \
+    --arg selected_phase "$phase" \
+    --arg phase_reason "$reason" \
+    --arg chain_blocked_reason "$blocked_reason" \
+    --argjson chain_required "$chain_required" \
+    --argjson chained "$chained" \
+    '{source:$source,from_phase:(if $from_phase=="" then null else $from_phase end),to_phase:(if $to_phase=="" then null else $to_phase end),selected_phase:$selected_phase,phase_reason:$phase_reason,chain_required:$chain_required,chained:$chained,chain_blocked_reason:(if $chain_blocked_reason=="" then null else $chain_blocked_reason end)}'
+}
+
+callback_validation_reaper_gate() {
+  local last_task_id tail_file latest_callback task_description validation_output validation_exit validation_json
+  if [[ ! -f "$LAST" ]]; then
+    jq -nc '{action:"skipped",reason:"missing_last_run"}'
+    return 0
+  fi
+  last_task_id="$(jq -r '.task_id // empty' "$LAST" 2>/dev/null || true)"
+  if [[ -z "$last_task_id" ]]; then
+    jq -nc '{action:"skipped",reason:"missing_task_id"}'
+    return 0
+  fi
+  command -v "$NTM" >/dev/null 2>&1 || {
+    jq -nc '{action:"skipped",reason:"ntm_unavailable"}'
+    return 0
+  }
+  tail_file="$STATE_DIR/pane-${TARGET_PANE}-validation-tail.txt"
+  "$NTM" copy "$SESSION:$TARGET_PANE" -l 360 --output "$tail_file" --quiet 2>/dev/null || true
+  latest_callback="$(
+    grep -E "(Callback: task_id=${last_task_id}[[:space:]]|DONE .*${last_task_id}|BLOCKED .*${last_task_id}|TIMEOUT .*${last_task_id})" "$tail_file" 2>/dev/null \
+      | tail -n 1 \
+      || true
+  )"
+  if [[ -z "$latest_callback" ]]; then
+    jq -nc --arg task_id "$last_task_id" '{action:"skipped",reason:"callback_not_found",task_id:$task_id}'
+    return 0
+  fi
+  task_description="$(dispatch_task_description "$last_task_id")"
+  set +e
+  validation_output="$("$HOME/.claude/skills/.flywheel/bin/flywheel-loop" validate-callback \
+    --repo "$REPO" \
+    --dispatch-id "$last_task_id" \
+    --task-description "$task_description" \
+    --callback-ref "$latest_callback" \
+    --write-receipt \
+    --json 2>&1)"
+  validation_exit=$?
+  set -e
+  if jq -e . >/dev/null 2>&1 <<<"$validation_output"; then
+    validation_json="$validation_output"
+  else
+    validation_json="$(jq -nc --arg raw "$validation_output" '{status:"fail",failure_classes:["validator_output_invalid"],raw:$raw}')"
+  fi
+  jq -nc \
+    --arg task_id "$last_task_id" \
+    --arg callback_sha256 "$(printf '%s' "$latest_callback" | shasum -a 256 | awk '{print $1}')" \
+    --argjson validation_exit "$validation_exit" \
+    --argjson result "$validation_json" \
+    '{action:"validated",task_id:$task_id,callback_sha256:$callback_sha256,validator_exit:$validation_exit,result:$result}'
+}
+
+dispatch_task_description() {
+  local task_id="$1" row task_file summary
+  [[ -f "$LOG" ]] || return 0
+  row="$(jq -c --arg id "$task_id" 'select((.task_id // "") == $id)' "$LOG" 2>/dev/null | tail -n 1 || true)"
+  [[ -n "$row" ]] || return 0
+  summary="$(jq -r '.task_summary // .bead_title // .title // empty' <<<"$row" 2>/dev/null || true)"
+  task_file="$(jq -r '.task_file // empty' <<<"$row" 2>/dev/null || true)"
+  [[ -n "$summary" && "$summary" != "null" ]] && printf '%s\n' "$summary"
+  if [[ -n "$task_file" && "$task_file" != "null" && -f "$task_file" ]]; then
+    head -c 40000 "$task_file" 2>/dev/null || true
+  fi
+}
+
+callback_validation_status() {
+  local value
+  value="$(jq -r '.result.status // "none"' <<<"${CALLBACK_VALIDATION_RESULT:-{}}" 2>/dev/null | tail -n 1 || true)"
+  [[ -n "$value" && "$value" != "null" ]] && printf '%s\n' "$value" || printf 'none\n'
+}
+
+callback_validation_task_id() {
+  local value
+  value="$(jq -r '.task_id // "unknown"' <<<"${CALLBACK_VALIDATION_RESULT:-{}}" 2>/dev/null | tail -n 1 || true)"
+  [[ -n "$value" && "$value" != "null" ]] && printf '%s\n' "$value" || printf 'unknown\n'
+}
+
+callback_validation_summary() {
+  local summary
+  summary="$(jq -c '
+    def result: (.result // {});
+    def receipt: (result.validation_receipt // {});
+    def chain: (receipt.chain_blocker // {});
+    {
+      action:(.action // "missing"),
+      task_id:(.task_id // null),
+      status:(result.status // "none"),
+      validator_exit:(.validator_exit // null),
+      receipt_path:(result.receipt_path // null),
+      failure_classes:(result.failure_classes // []),
+      orch_callback_missing_l61_fields:(if ((result.failure_classes // []) | index("orch_callback_missing_l61_fields")) then 1 else 0 end),
+      summary_allowed:(result.summary_allowed // false),
+      integration_allowed:(result.integration_allowed // false),
+      remediation_required:(result.remediation_required // false),
+      remediation_present:(result.remediation_present // false),
+      callbacks_unvalidated_count:(if (.action == "skipped" and .reason == "callback_not_found") then 1 else 0 end),
+      pending_callback_count:(if (.action == "skipped" and .reason == "callback_not_found") then 1 else 0 end),
+      unknown_count:(if (result.status == "unknown") then 1 else 0 end),
+      failed_count:(if (result.status == "fail") then 1 else 0 end),
+      passed_count:(if (result.status == "pass") then 1 else 0 end),
+      next_phase:(chain.next_phase // null),
+      chain_blocked_reason:(chain.chain_blocked_reason // null)
+    }' <<<"${CALLBACK_VALIDATION_RESULT:-{}}" 2>/dev/null | tail -n 1 || true)"
+  if jq -e . >/dev/null 2>&1 <<<"$summary"; then
+    printf '%s\n' "$summary"
+  else
+    jq -nc '{action:"missing",status:"none",callbacks_unvalidated_count:0,pending_callback_count:0,unknown_count:0,failed_count:0,passed_count:0,integration_allowed:false}'
+  fi
+}
+
+validation_fix_bead_plan() {
+  local status task_id receipt_path helper output exit_code
+  status="$(callback_validation_status)"
+  task_id="$(callback_validation_task_id)"
+  receipt_path="$(jq -r '.result.receipt_path // empty' <<<"${CALLBACK_VALIDATION_RESULT:-{}}" 2>/dev/null | tail -n 1 || true)"
+  helper="$REPO/.flywheel/scripts/validation-fix-bead.py"
+  if [[ "$status" == "pass" || "$status" == "none" ]]; then
+    jq -nc --arg status "$status" '{action:"skipped",reason:"validation_not_failed",validation_status:$status}'
+    return 0
+  fi
+  if [[ -z "$receipt_path" || "$receipt_path" == "null" ]]; then
+    jq -nc --arg status "$status" '{action:"skipped",reason:"missing_receipt_path",validation_status:$status}'
+    return 0
+  fi
+  if [[ ! -x "$helper" ]]; then
+    jq -nc --arg helper "$helper" '{action:"skipped",reason:"helper_missing",helper:$helper}'
+    return 0
+  fi
+  set +e
+  if [[ "$status" == "unknown" ]]; then
+    output="$("$helper" --repo "$REPO" --receipt "$receipt_path" --parent "$task_id" --dry-run --no-bead-reason "runtime validation unknown; explicit review required before integration" --json 2>&1)"
+  else
+    output="$("$helper" --repo "$REPO" --receipt "$receipt_path" --parent "$task_id" --dry-run --json 2>&1)"
+  fi
+  exit_code=$?
+  set -e
+  if jq -e . >/dev/null 2>&1 <<<"$output"; then
+    jq -nc --argjson exit_code "$exit_code" --argjson result "$output" '{action:"planned",helper_exit:$exit_code,result:$result}'
+  else
+    jq -nc --argjson exit_code "$exit_code" --arg raw "$output" '{action:"error",helper_exit:$exit_code,raw:$raw}'
+  fi
+}
+
+validated_integration_phase() {
+  local status task_id remediation_present
+  status="$(callback_validation_status)"
+  task_id="$(callback_validation_task_id)"
+  remediation_present="$(jq -r '.result.remediation_present // false' <<<"${CALLBACK_VALIDATION_RESULT:-{}}" 2>/dev/null || printf false)"
+  case "$status" in
+    pass)
+      emit_phase "INTEGRATE" "callback_validation_pass:${task_id}"
+      return 0 ;;
+    fail)
+      if [[ "$remediation_present" == "true" ]]; then
+        emit_phase "VALIDATE" "callback_validation_fail_remediated:${task_id}"
+      else
+        emit_phase "VALIDATE" "callback_validation_fail_unremediated:${task_id}"
+      fi
+      return 0 ;;
+    unknown)
+      emit_phase "VALIDATE" "callback_validation_unknown:${task_id}"
+      return 0 ;;
+    *)
+      if [[ "$(jq -r '.action // empty' <<<"${CALLBACK_VALIDATION_RESULT:-{}}" 2>/dev/null | tail -n 1)" == "skipped" \
+        && "$(jq -r '.reason // empty' <<<"${CALLBACK_VALIDATION_RESULT:-{}}" 2>/dev/null | tail -n 1)" == "callback_not_found" ]]; then
+        emit_phase "VALIDATE" "callback_pending_unvalidated:${task_id}"
+        return 0
+      fi
+      emit_phase "VALIDATE" "callback_validation_missing:${task_id}"
+      return 0 ;;
+  esac
+}
+
+JOSH_REQUESTS_RESULT="$(bash "$REPO/.flywheel/scripts/josh-request-tick-promote.sh" --json 2>&1 || printf '{"action":"error","unread":0,"highest_priority":null,"ids":[],"error":"josh_request_tick_promote_failed"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$JOSH_REQUESTS_RESULT"; then
+  JOSH_REQUESTS_RESULT="$(jq -nc --arg raw "$JOSH_REQUESTS_RESULT" '{action:"error",unread:0,highest_priority:null,ids:[],raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "josh_request_promote" \
+  --argjson result "$JOSH_REQUESTS_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+DOCTOR_PROMOTION_RESULT="$(bash "$REPO/.flywheel/scripts/doctor-signal-bead-promotion.sh" "$REPO" 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$DOCTOR_PROMOTION_RESULT"; then
+  DOCTOR_PROMOTION_RESULT="$(jq -nc --arg raw "$DOCTOR_PROMOTION_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "doctor_signal_promotion" \
+  --argjson result "$DOCTOR_PROMOTION_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+DOCTRINE_LADDER_RESULT="$(bash "$REPO/.flywheel/scripts/doctrine-ladder-promote.sh" "$REPO" 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$DOCTRINE_LADDER_RESULT"; then
+  DOCTRINE_LADDER_RESULT="$(jq -nc --arg raw "$DOCTRINE_LADDER_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "doctrine_ladder_promote" \
+  --argjson result "$DOCTRINE_LADDER_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+JEFF_WATCHER_RESULT="$(bash "$REPO/.flywheel/scripts/jeff-issue-response-poll.sh" "$REPO" 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$JEFF_WATCHER_RESULT"; then
+  JEFF_WATCHER_RESULT="$(jq -nc --arg raw "$JEFF_WATCHER_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "jeff_response_watch" \
+  --argjson result "$JEFF_WATCHER_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+JEFF_STATUS_RESULT="$(jeff_status_probe 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$JEFF_STATUS_RESULT"; then
+  JEFF_STATUS_RESULT="$(jq -nc --arg raw "$JEFF_STATUS_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "jeff_status_probe" \
+  --argjson result "$JEFF_STATUS_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+JEFF_FIXES_RESULT="$(jeff_fixes_pull_probe 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$JEFF_FIXES_RESULT"; then
+  JEFF_FIXES_RESULT="$(jq -nc --arg raw "$JEFF_FIXES_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "jeff_fixes_pull_probe" \
+  --argjson result "$JEFF_FIXES_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+AGENT_MAIL_FD_RESULT="$(agent_mail_fd_probe 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$AGENT_MAIL_FD_RESULT"; then
+  AGENT_MAIL_FD_RESULT="$(jq -nc --arg raw "$AGENT_MAIL_FD_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "agent_mail_fd_doctor" \
+  --argjson result "$AGENT_MAIL_FD_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+MOBILE_EATS_RESULT="$(mobile_eats_probe 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$MOBILE_EATS_RESULT"; then
+  MOBILE_EATS_RESULT="$(jq -nc --arg raw "$MOBILE_EATS_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "mobile_eats_receipt_bridge" \
+  --argjson result "$MOBILE_EATS_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+SKILLOS_LOOP_RESULT="$(skillos_loop_probe 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$SKILLOS_LOOP_RESULT"; then
+  SKILLOS_LOOP_RESULT="$(jq -nc --arg raw "$SKILLOS_LOOP_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "skillos_loop_receipt" \
+  --argjson result "$SKILLOS_LOOP_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+DAILY_JEFF_RESULT="$(daily_jeff_probe 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$DAILY_JEFF_RESULT"; then
+  DAILY_JEFF_RESULT="$(jq -nc --arg raw "$DAILY_JEFF_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "daily_jeff_ingest_doctor" \
+  --argjson result "$DAILY_JEFF_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+JEFF_BINARY_VERSION_RESULT="$(jeff_binary_version_probe 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$JEFF_BINARY_VERSION_RESULT"; then
+  JEFF_BINARY_VERSION_RESULT="$(jq -nc --arg raw "$JEFF_BINARY_VERSION_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "jeff_binary_version_watchtower" \
+  --argjson result "$JEFF_BINARY_VERSION_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+FLEET_ONBOARD_RESULT="$(fleet_onboard_probe 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$FLEET_ONBOARD_RESULT"; then
+  FLEET_ONBOARD_RESULT="$(jq -nc --arg raw "$FLEET_ONBOARD_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "fleet_onboard_doctor" \
+  --argjson result "$FLEET_ONBOARD_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+CODEX_WATCHTOWER_RESULT="$(codex_watchtower_probe 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$CODEX_WATCHTOWER_RESULT"; then
+  CODEX_WATCHTOWER_RESULT="$(jq -nc --arg raw "$CODEX_WATCHTOWER_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "codex_watchtower_probe" \
+  --argjson result "$CODEX_WATCHTOWER_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+FROZEN_DETECTOR_RESULT="$(jq -c '.frozen_pane // empty' <<<"$CODEX_WATCHTOWER_RESULT" 2>/dev/null || true)"
+if [[ -z "$FROZEN_DETECTOR_RESULT" ]]; then
+  FROZEN_DETECTOR_RESULT="$(frozen_detector_probe 2>&1 || printf '{"success":false,"source_health":{"status":"unhealthy"},"warnings":["frozen_detector_probe_failed"]}')"
+fi
+FROZEN_DETECTOR_RESULT="$(sanitize_frozen_detector_json "$FROZEN_DETECTOR_RESULT")"
+FROZEN_DETECTOR_SUMMARY="$(frozen_detector_summary "$CODEX_WATCHTOWER_RESULT")"
+if [[ "$(jq -r '.source_health_status // "invalid"' <<<"$FROZEN_DETECTOR_SUMMARY" 2>/dev/null || printf invalid)" == "invalid" ]]; then
+  FROZEN_DETECTOR_SUMMARY="$(frozen_detector_summary_from_codex "$CODEX_WATCHTOWER_RESULT" || frozen_detector_summary)"
+fi
+FROZEN_DETECTOR_RESULT="$(jq -c . <<<"$FROZEN_DETECTOR_RESULT" 2>/dev/null || jq -nc --arg raw "$FROZEN_DETECTOR_RESULT" '{success:false,warnings:["invalid_frozen_detector_json"],raw:$raw}')"
+FROZEN_DETECTOR_SUMMARY="$(jq -c . <<<"$FROZEN_DETECTOR_SUMMARY" 2>/dev/null || jq -nc '{success:false,source_health_status:"invalid",frozen_panes_detected:0,unknown_panes_detected:1,stale_template_prompt_count:0,queued_not_submitted_count:0,respawn_suppressed_count:0,recovery_suppressed_count:0,l60_signals_present:{},l60_signal_expected_count:5,l60_signal_present_count:0,l60_signal_missing:["no_silent_darkness","live_truth_delta","unknown_separated","recovery_budget","recovery_lease"],l60_all_present:false,soft_violations:[],durable_receipts:[]}' )"
+FROZEN_DETECTOR_BLOCK_REASON="$(frozen_detector_block_reason "$FROZEN_DETECTOR_SUMMARY")"
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "frozen_detector_v2" \
+  --arg result "$FROZEN_DETECTOR_RESULT" \
+  --arg summary "$FROZEN_DETECTOR_SUMMARY" \
+  --arg block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
+  --arg override "$([[ "$FROZEN_DETECTOR_OVERRIDE" == "1" || "$FROZEN_DETECTOR_OVERRIDE" == "true" ]] && printf true || printf false)" \
+  '{ts:$ts,event:$event,result:($result | fromjson? // {success:false,raw:$result}),summary:($summary | fromjson? // {success:false,source_health_status:"invalid"}),dispatch_block_reason:$block_reason,override:($override == "true")}' >>"$LOG"
+
+INBOX_RESULT="$(SESSION="$SESSION" ORCH_PANE="$TARGET_PANE" bash "$REPO/.flywheel/scripts/inbox-check-tick-step.sh" 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$INBOX_RESULT"; then
+  INBOX_RESULT="$(jq -nc --arg raw "$INBOX_RESULT" '{action:"error",raw:$raw}')"
+fi
+INBOX_IDENTITY="$(jq -r '.identity // "unknown"' <<<"$INBOX_RESULT" 2>/dev/null || printf 'unknown')"
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "inbox_check" \
+  --argjson result "$INBOX_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+DISPATCH_CAPACITY_RESULT="$(dispatch_capacity_snapshot 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$DISPATCH_CAPACITY_RESULT"; then
+  DISPATCH_CAPACITY_RESULT="$(jq -nc --arg raw "$DISPATCH_CAPACITY_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "dispatch_capacity_gate" \
+  --argjson result "$DISPATCH_CAPACITY_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+CALLBACK_VALIDATION_RESULT="$(callback_validation_reaper_gate 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$CALLBACK_VALIDATION_RESULT"; then
+  CALLBACK_VALIDATION_RESULT="$(jq -nc --arg raw "$CALLBACK_VALIDATION_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "callback_validation_reaper_gate" \
+  --argjson result "$CALLBACK_VALIDATION_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+AUTO_FIX_BEAD_RESULT="$(validation_fix_bead_plan 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$AUTO_FIX_BEAD_RESULT"; then
+  AUTO_FIX_BEAD_RESULT="$(jq -nc --arg raw "$AUTO_FIX_BEAD_RESULT" '{action:"error",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "validation_fix_bead_plan" \
+  --argjson result "$AUTO_FIX_BEAD_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 if command -v flock >/dev/null 2>&1; then
   exec 9>"$LOCK"
@@ -30,38 +932,274 @@ else
 fi
 
 run_id="$(date -u +%Y%m%dT%H%M%SZ)"
+task_id="flywheel_loop_$run_id"
+PHASE="$(detect_phase)"
+PHASE_REASON="$(cat "$STATE_DIR/phase_reason.txt" 2>/dev/null || printf 'unknown')"
+TICK_CLASS="$(tick_class_for_phase "$PHASE")"
+L70_CHAIN_DECISION="$(l70_chain_decision_json "$PHASE" "$PHASE_REASON" "$DISPATCH_CAPACITY_RESULT")"
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "l70_chain_decision" \
+  --arg task_id "$task_id" \
+  --arg repo "$REPO" \
+  --argjson decision "$L70_CHAIN_DECISION" \
+  '{ts:$ts,event:$event,task_id:$task_id,repo:$repo} + $decision' >>"$LOG"
+
+VALUE_GAP_RESULT="$(value_gap_probe "$task_id" 2>&1 || printf '{"action":"error"}')"
+if ! jq -e . >/dev/null 2>&1 <<<"$VALUE_GAP_RESULT"; then
+  VALUE_GAP_RESULT="$(jq -nc --arg raw "$VALUE_GAP_RESULT" '{success:false,mode:"run",raw:$raw}')"
+fi
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "value_gap_probe" \
+  --arg task_id "$task_id" \
+  --arg repo "$REPO" \
+  --argjson result "$VALUE_GAP_RESULT" \
+  '{ts:$ts,event:$event,task_id:$task_id,repo:$repo,result:$result}' >>"$LOG"
 prompt_file="$PROMPT_DIR/flywheel-tick-$run_id.md"
 
 find "$PROMPT_DIR" -name 'flywheel-tick-*.md' -mtime +7 -delete 2>/dev/null || true
 ls -1t "$PROMPT_DIR"/flywheel-tick-*.md 2>/dev/null | tail -n +201 | xargs rm -f 2>/dev/null || true
 
 {
-  printf 'PHASE: FLYWHEEL_LOOP_DRIVER\n'
+  printf 'PHASE: %s\n' "$PHASE"
   printf 'Repo: %s\n' "$REPO"
   printf 'Session: %s pane %s\n' "$SESSION" "$TARGET_PANE"
   printf 'Driver: ai.zeststream.flywheel-flywheel-loop\n'
+  printf 'Task: %s\n' "$task_id"
   printf 'Run: %s\n\n' "$run_id"
+  printf '## Driver phase selection\n'
+  printf 'Selected phase: %s\n' "$PHASE"
+  printf 'Tick class: %s\n' "$TICK_CLASS"
+  printf 'Reason: %s\n\n' "$PHASE_REASON"
+  printf '## Joshua Requests pre-tick\n'
+  jq -c '{action,unread,highest_priority,ids}' <<<"$JOSH_REQUESTS_RESULT"
+  printf '\n\n'
+  printf '## Doctor signal pre-tick\n'
+  printf '%s\n\n' "$DOCTOR_PROMOTION_RESULT"
+  printf '## Doctrine ladder pre-tick\n'
+  printf '%s\n\n' "$DOCTRINE_LADDER_RESULT"
+  printf '## Jeff response pre-tick\n'
+  printf '%s\n\n' "$JEFF_WATCHER_RESULT"
+  printf '## Jeff status pre-tick\n'
+  printf '%s\n\n' "$JEFF_STATUS_RESULT"
+  printf '## Jeff fixes pre-tick\n'
+  printf '%s\n\n' "$JEFF_FIXES_RESULT"
+  printf '## Agent Mail FD pre-tick\n'
+  printf '%s\n\n' "$AGENT_MAIL_FD_RESULT"
+  printf '## Mobile-eats receipt pre-tick\n'
+  printf '%s\n\n' "$MOBILE_EATS_RESULT"
+  printf '## Skillos loop receipt pre-tick\n'
+  printf '%s\n\n' "$SKILLOS_LOOP_RESULT"
+  printf '## Daily Jeff ingest pre-tick\n'
+  printf '%s\n\n' "$DAILY_JEFF_RESULT"
+  printf '## Jeff binary version pre-tick\n'
+  printf '%s\n\n' "$JEFF_BINARY_VERSION_RESULT"
+  printf '## Fleet onboarding pre-tick\n'
+  printf '%s\n\n' "$FLEET_ONBOARD_RESULT"
+  printf '## Codex watchtower pre-tick\n'
+  printf '%s\n\n' "$CODEX_WATCHTOWER_RESULT"
+  printf '## Frozen detector v2 pre-tick\n'
+  printf '%s\n\n' "$FROZEN_DETECTOR_SUMMARY"
+  printf '## Value gap pre-tick\n'
+  printf '%s\n\n' "$VALUE_GAP_RESULT"
+  printf '## Inbox pre-tick (%s)\n' "$INBOX_IDENTITY"
+  printf '%s\n\n' "$INBOX_RESULT"
+  printf '## Dispatch capacity pre-tick\n'
+  printf '%s\n\n' "$DISPATCH_CAPACITY_RESULT"
+  printf '## L70 chain decision\n'
+  printf '%s\n\n' "$L70_CHAIN_DECISION"
+  printf '## Callback validation pre-tick\n'
+  printf '%s\n\n' "$CALLBACK_VALIDATION_RESULT"
+  printf '## Validation fix bead pre-tick\n'
+  printf '%s\n\n' "$AUTO_FIX_BEAD_RESULT"
+  printf '## Validation summary pre-tick\n'
+  callback_validation_summary
+  printf '\n\n'
   printf '## HEALTH prelude\n'
-  printf 'Run one bounded `/flywheel:tick` for this repo. Read AGENTS.md first, then execute the normal flywheel tick path for `%s`.\n\n' "$REPO"
+  printf 'Run one bounded `/flywheel:tick` for this repo, constrained to the driver-selected phase `%s`. Read AGENTS.md first, then execute the normal flywheel tick path for `%s`.\n\n' "$PHASE" "$REPO"
+  printf 'Phase guardrails: previous callback `next_phase` is authoritative when present. Do not fall back to RESEARCH when `br` is unavailable and `.beads/issues.jsonl` or plans provide enough state. JSONL open beads mean DISPATCH; all-closed beads with plans mean BEADS.\n\n'
+  printf 'VALIDATE phase guardrail: DISPATCH callback reap flows to VALIDATE before INTEGRATE. If callback validation is pending, fail, or unknown, remain in VALIDATE and record remediation state. Only status=pass may proceed to INTEGRATE.\n\n'
+  printf 'Frozen detector v2 guardrail: no dispatch into FROZEN, UNKNOWN, unhealthy source, or incomplete L60 5-signal state unless FLYWHEEL_TICK_FROZEN_DETECTOR_OVERRIDE=1 is set. Current block reason: %s.\n\n' "$FROZEN_DETECTOR_BLOCK_REASON"
+  printf 'Callback validation guardrail: if Callback validation pre-tick reports status=fail or status=unknown, do not summarize or integrate the callback as DONE until bead, reopen-candidate, or no-bead remediation routing is recorded.\n\n'
+  printf 'chain_if_capacity: if this tick names a concrete next_phase and dispatch capacity remains, run that next phase in this same orchestrator turn. If capacity or safety gates block chaining, callback with chain_blocked_reason=<concrete cause>. Missing chain and missing blocker increments ticks_punted_count.\n\n'
   printf 'Callback discipline remains the repo default: worker callbacks go through `/Users/josh/.local/bin/ntm send` with `--no-cass-check`.\n'
+  printf '\n## Callback envelope\n'
+  printf 'Send exactly one line when complete:\n'
+  printf '`Callback: task_id=%s phase=%s tick_class=%s status=<done|warn|blocked> repo=%s receipt=<path or none> next_phase=<INIT|RESEARCH|PLAN|BEADS|DISPATCH|VALIDATE|INTEGRATE|LEARN|none> chain_blocked_reason=<reason|none> findings=<N>`\n' "$task_id" "$PHASE" "$TICK_CLASS" "$REPO"
 } >"$prompt_file"
 
 send_output=""
 status="failed"
-if send_output="$("$NTM" send "$SESSION" --pane="$TARGET_PANE" --file "$prompt_file" --no-cass-check --json 2>&1)"; then
+if [[ "$FROZEN_DETECTOR_BLOCK_REASON" != "none" ]]; then
+  status="blocked_frozen_detector"
+  send_output="blocked_by_frozen_detector reason=$FROZEN_DETECTOR_BLOCK_REASON"
+elif [[ "$DRY_RUN" == "1" ]]; then
+  status="dry_run"
+  send_output="dry_run prompt_file=$prompt_file"
+elif send_output="$("$NTM" send "$SESSION" --pane="$TARGET_PANE" --file "$prompt_file" --no-cass-check --json 2>&1)"; then
   status="sent"
 fi
 
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "ntm_dispatch_sent" \
-  --arg task_id "flywheel_loop_driver_$run_id" \
+  --arg task_id "$task_id" \
   --arg repo "$REPO" \
   --arg session "$SESSION" \
   --arg pane "$TARGET_PANE" \
   --arg prompt_file "$prompt_file" \
   --arg status "$status" \
+  --arg phase "$PHASE" \
+  --arg phase_reason "$PHASE_REASON" \
+  --arg tick_class "$TICK_CLASS" \
+  --argjson validation_summary "$(callback_validation_summary)" \
+  --argjson validation_fix_bead "$AUTO_FIX_BEAD_RESULT" \
+  --argjson l70_chain "$L70_CHAIN_DECISION" \
+  --argjson jeff_status "$JEFF_STATUS_RESULT" \
+  --argjson jeff_fixes "$JEFF_FIXES_RESULT" \
+  --argjson agent_mail_fd "$AGENT_MAIL_FD_RESULT" \
+  --argjson mobile_eats "$MOBILE_EATS_RESULT" \
+  --argjson skillos_loop "$SKILLOS_LOOP_RESULT" \
+  --argjson daily_jeff "$DAILY_JEFF_RESULT" \
+  --argjson jeff_binary_version "$JEFF_BINARY_VERSION_RESULT" \
+  --argjson fleet_onboard "$FLEET_ONBOARD_RESULT" \
+  --argjson codex_watchtower "$CODEX_WATCHTOWER_RESULT" \
+  --argjson frozen_detector "$FROZEN_DETECTOR_SUMMARY" \
+  --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
+  --argjson value_gap "$VALUE_GAP_RESULT" \
   --arg send_output "$send_output" \
-  '{ts:$ts,event:$event,task_id:$task_id,repo:$repo,session:$session,pane:($pane|tonumber),prompt_file:$prompt_file,dispatch_status:$status,ntm_send_output:$send_output}' >>"$LOG"
+  '{
+    ts:$ts,event:$event,task_id:$task_id,repo:$repo,session:$session,pane:($pane|tonumber),
+    prompt_file:$prompt_file,phase:$phase,phase_reason:$phase_reason,tick_class:$tick_class,
+    validation_summary:$validation_summary,validation_fix_bead:$validation_fix_bead,l70_chain:$l70_chain,
+    jeff_status:$jeff_status,jeff_fixes:$jeff_fixes,agent_mail_fd:$agent_mail_fd,
+    mobile_eats_receipt:$mobile_eats,skillos_loop:$skillos_loop,daily_jeff_ingest:$daily_jeff,
+    jeff_binary_version:$jeff_binary_version,
+    fleet_onboard:$fleet_onboard,codex_watchtower:$codex_watchtower,
+    frozen_detector:$frozen_detector,
+    frozen_detector_dispatch_block_reason:$frozen_detector_block_reason,
+    frozen_detector_source_health_status:($frozen_detector.source_health_status // null),
+    frozen_detector_frozen_panes_detected:($frozen_detector.frozen_panes_detected // 0),
+    frozen_detector_unknown_panes_detected:($frozen_detector.unknown_panes_detected // 0),
+    frozen_detector_stale_template_prompt_count:($frozen_detector.stale_template_prompt_count // 0),
+    frozen_detector_queued_not_submitted_count:($frozen_detector.queued_not_submitted_count // 0),
+    frozen_detector_respawn_suppressed_count:($frozen_detector.respawn_suppressed_count // 0),
+    frozen_detector_recovery_suppressed_count:($frozen_detector.recovery_suppressed_count // 0),
+    frozen_detector_l60_signals_present:($frozen_detector.l60_signals_present // {}),
+    frozen_detector_l60_signal_present_count:($frozen_detector.l60_signal_present_count // 0),
+    frozen_detector_l60_signal_expected_count:($frozen_detector.l60_signal_expected_count // 5),
+    frozen_detector_l60_signal_missing:($frozen_detector.l60_signal_missing // []),
+    frozen_detector_l60_all_present:($frozen_detector.l60_all_present // false),
+    frozen_detector_soft_violations:($frozen_detector.soft_violations // []),
+    frozen_detector_durable_receipts:($frozen_detector.durable_receipts // []),
+    value_gap:$value_gap,value_gap_dimension_scanned:($value_gap.value_gap_dimension_scanned // null),
+    value_gap_finding:($value_gap.value_gap_finding // null),bead_filed_id:($value_gap.bead_filed_id // null),
+    agent_mail_fd_status:($agent_mail_fd.status // null),agent_mail_fd_total_fds:($agent_mail_fd.total_fds // null),
+    agent_mail_fd_lock_fd_count:($agent_mail_fd.lock_fd_count // null),
+    agent_mail_fd_exit_code:($agent_mail_fd.exit_code // $agent_mail_fd.probe_exit_code // null),
+    agent_mail_fd_warnings:($agent_mail_fd.warnings // []),
+    mobile_eats_receipt_status:($mobile_eats.status // null),
+    mobile_eats_last_run_ts:($mobile_eats.mobile_eats.last_run_ts // null),
+    mobile_eats_latest_tick_decision:($mobile_eats.mobile_eats.latest_tick_decision // null),
+    mobile_eats_closed_beads_since:($mobile_eats.mobile_eats.closed_beads_since // null),
+    mobile_eats_bridge_warnings:($mobile_eats.warnings // []),
+    daily_jeff_ingest_status:($daily_jeff.status // null),
+    daily_jeff_ingest_sources_file:($daily_jeff.sources_file // null),
+    daily_jeff_ingest_deps_missing:($daily_jeff.deps_missing // []),
+    daily_jeff_ingest_warnings:($daily_jeff.warnings // []),
+    jeff_binary_version_status:($jeff_binary_version.status // null),
+    jeff_binary_version_stale_count:($jeff_binary_version.stale_count // 0),
+    jeff_binary_version_highest_priority:($jeff_binary_version.highest_priority // null),
+    jeff_binary_version_stale_tools:([$jeff_binary_version.stale[]? | .name]),
+    fleet_onboard_status:($fleet_onboard.status // null),
+    fleet_onboard_checked_repos:($fleet_onboard.checked_repos // null),
+    fleet_onboard_limping_repos:($fleet_onboard.limping_repos // []),
+    fleet_onboard_missing_repos:($fleet_onboard.missing_repos // []),
+    fleet_onboard_warnings:($fleet_onboard.warnings // []),
+    jeff_status_stale_open_count:($jeff_status.stale_open_count // null),
+    jeff_tracked_issue_count:($jeff_status.tracked_count // null),
+    jeff_fixes_status:($jeff_fixes.status // null),
+    dispatch_status:$status,ntm_send_output:$send_output
+  }' >>"$LOG"
 
-[[ "$status" == "sent" ]]
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg run_id "$run_id" \
+  --arg task_id "$task_id" \
+  --arg phase "$PHASE" \
+  --arg phase_reason "$PHASE_REASON" \
+  --arg tick_class "$TICK_CLASS" \
+  --arg prompt_file "$prompt_file" \
+  --arg status "$status" \
+  --argjson callback_validation "$CALLBACK_VALIDATION_RESULT" \
+  --argjson validation_summary "$(callback_validation_summary)" \
+  --argjson validation_fix_bead "$AUTO_FIX_BEAD_RESULT" \
+  --argjson l70_chain "$L70_CHAIN_DECISION" \
+  --argjson jeff_status "$JEFF_STATUS_RESULT" \
+  --argjson jeff_fixes "$JEFF_FIXES_RESULT" \
+  --argjson agent_mail_fd "$AGENT_MAIL_FD_RESULT" \
+  --argjson mobile_eats "$MOBILE_EATS_RESULT" \
+  --argjson skillos_loop "$SKILLOS_LOOP_RESULT" \
+  --argjson daily_jeff "$DAILY_JEFF_RESULT" \
+  --argjson jeff_binary_version "$JEFF_BINARY_VERSION_RESULT" \
+  --argjson fleet_onboard "$FLEET_ONBOARD_RESULT" \
+  --argjson codex_watchtower "$CODEX_WATCHTOWER_RESULT" \
+  --argjson frozen_detector "$FROZEN_DETECTOR_SUMMARY" \
+  --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
+  --argjson value_gap "$VALUE_GAP_RESULT" \
+  '{
+    ts:$ts,run_id:$run_id,task_id:$task_id,phase:$phase,phase_reason:$phase_reason,
+    tick_class:$tick_class,prompt_file:$prompt_file,dispatch_status:$status,
+    callback_validation:$callback_validation,validation_summary:$validation_summary,
+    validation_fix_bead:$validation_fix_bead,l70_chain:$l70_chain,
+    jeff_status:$jeff_status,jeff_fixes:$jeff_fixes,agent_mail_fd:$agent_mail_fd,
+    mobile_eats_receipt:$mobile_eats,skillos_loop:$skillos_loop,daily_jeff_ingest:$daily_jeff,
+    jeff_binary_version:$jeff_binary_version,
+    fleet_onboard:$fleet_onboard,codex_watchtower:$codex_watchtower,
+    frozen_detector:$frozen_detector,
+    frozen_detector_dispatch_block_reason:$frozen_detector_block_reason,
+    frozen_detector_source_health_status:($frozen_detector.source_health_status // null),
+    frozen_detector_frozen_panes_detected:($frozen_detector.frozen_panes_detected // 0),
+    frozen_detector_unknown_panes_detected:($frozen_detector.unknown_panes_detected // 0),
+    frozen_detector_stale_template_prompt_count:($frozen_detector.stale_template_prompt_count // 0),
+    frozen_detector_queued_not_submitted_count:($frozen_detector.queued_not_submitted_count // 0),
+    frozen_detector_respawn_suppressed_count:($frozen_detector.respawn_suppressed_count // 0),
+    frozen_detector_recovery_suppressed_count:($frozen_detector.recovery_suppressed_count // 0),
+    frozen_detector_l60_signals_present:($frozen_detector.l60_signals_present // {}),
+    frozen_detector_l60_signal_present_count:($frozen_detector.l60_signal_present_count // 0),
+    frozen_detector_l60_signal_expected_count:($frozen_detector.l60_signal_expected_count // 5),
+    frozen_detector_l60_signal_missing:($frozen_detector.l60_signal_missing // []),
+    frozen_detector_l60_all_present:($frozen_detector.l60_all_present // false),
+    frozen_detector_soft_violations:($frozen_detector.soft_violations // []),
+    frozen_detector_durable_receipts:($frozen_detector.durable_receipts // []),
+    value_gap:$value_gap,value_gap_dimension_scanned:($value_gap.value_gap_dimension_scanned // null),
+    value_gap_finding:($value_gap.value_gap_finding // null),bead_filed_id:($value_gap.bead_filed_id // null),
+    agent_mail_fd_status:($agent_mail_fd.status // null),agent_mail_fd_total_fds:($agent_mail_fd.total_fds // null),
+    agent_mail_fd_lock_fd_count:($agent_mail_fd.lock_fd_count // null),
+    agent_mail_fd_exit_code:($agent_mail_fd.exit_code // $agent_mail_fd.probe_exit_code // null),
+    agent_mail_fd_warnings:($agent_mail_fd.warnings // []),
+    mobile_eats_receipt_status:($mobile_eats.status // null),
+    mobile_eats_last_run_ts:($mobile_eats.mobile_eats.last_run_ts // null),
+    mobile_eats_latest_tick_decision:($mobile_eats.mobile_eats.latest_tick_decision // null),
+    mobile_eats_closed_beads_since:($mobile_eats.mobile_eats.closed_beads_since // null),
+    mobile_eats_bridge_warnings:($mobile_eats.warnings // []),
+    daily_jeff_ingest_status:($daily_jeff.status // null),
+    daily_jeff_ingest_sources_file:($daily_jeff.sources_file // null),
+    daily_jeff_ingest_deps_missing:($daily_jeff.deps_missing // []),
+    daily_jeff_ingest_warnings:($daily_jeff.warnings // []),
+    jeff_binary_version_status:($jeff_binary_version.status // null),
+    jeff_binary_version_stale_count:($jeff_binary_version.stale_count // 0),
+    jeff_binary_version_highest_priority:($jeff_binary_version.highest_priority // null),
+    jeff_binary_version_stale_tools:([$jeff_binary_version.stale[]? | .name]),
+    fleet_onboard_status:($fleet_onboard.status // null),
+    fleet_onboard_checked_repos:($fleet_onboard.checked_repos // null),
+    fleet_onboard_limping_repos:($fleet_onboard.limping_repos // []),
+    fleet_onboard_missing_repos:($fleet_onboard.missing_repos // []),
+    fleet_onboard_warnings:($fleet_onboard.warnings // []),
+    jeff_status_stale_open_count:($jeff_status.stale_open_count // null),
+    jeff_tracked_issue_count:($jeff_status.tracked_count // null),
+    jeff_fixes_status:($jeff_fixes.status // null)
+  }' >"$LAST"
+
+[[ "$status" == "sent" || "$status" == "dry_run" || "$status" == "blocked_frozen_detector" ]]
