@@ -1,0 +1,93 @@
+{
+  "slug": "recovery-system-2026-05-01",
+  "topic": "I think we need to use ntm's commands to save all of our sessions and have a recovery process that we run nightly - we need to ensure that if we reboot our system - it all comes back up like it is now",
+  "started_at": "2026-05-01T22:30:00Z",
+  "current_phase": "audit_reviewed_pending_joshua",
+  "phase_started_at": "2026-05-01T22:57:06Z",
+  "rounds_in_current_phase": 1,
+  "convergence_streak": 2,
+  "in_flight_dispatches": [],
+  "joshua_decision_pending": true,
+  "joshua_decision_at": "2026-05-02T01:14:57Z",
+  "audit_findings_count": 54,
+  "beads_created": [],
+  "abort_reason": null,
+  "history": [
+    {
+      "phase": "research",
+      "rounds": 1,
+      "lanes": [
+        "A",
+        "B",
+        "C"
+      ],
+      "ladder_passed": [
+        "yes",
+        "yes",
+        "no-with-caveat"
+      ],
+      "completed_at": "2026-05-01T22:43:00Z"
+    },
+    {
+      "phase": "refine",
+      "round": 1,
+      "lane": "D-synthesis",
+      "lines": 867,
+      "disagreements": 9,
+      "gaps_caught": 7,
+      "joshua_decisions": 12,
+      "ladder_passed": "yes",
+      "completed_at": "2026-05-01T22:54:40Z"
+    },
+    {
+      "phase": "refine",
+      "round": 2,
+      "pct_delta": 3.8,
+      "steady_state": true,
+      "disagreements_reopened": 0,
+      "ladder_passed": "yes",
+      "completed_at": "2026-05-01T23:01:57Z"
+    },
+    {
+      "phase": "audit",
+      "round": 1,
+      "lens": "crosscutting",
+      "concerns": 20,
+      "criticals": 5,
+      "new_beads": 3,
+      "readiness": "red",
+      "ladder_passed": "yes",
+      "completed_at": "2026-05-02T01:07:26Z"
+    },
+    {
+      "phase": "audit",
+      "round": 1,
+      "lens": "security",
+      "threats": 18,
+      "criticals": 3,
+      "doctrine_violations": 0,
+      "ladder_passed": "yes",
+      "completed_at": "2026-05-02T01:07:26Z"
+    },
+    {
+      "phase": "audit",
+      "round": 1,
+      "lens": "idempotency",
+      "concerns": 16,
+      "criticals": 4,
+      "races": 7,
+      "ladder_passed": "yes",
+      "completed_at": "2026-05-02T01:07:26Z"
+    },
+    {
+      "phase": "audit_synthesis",
+      "round": 1,
+      "decisions": 13,
+      "criticals_dedup": 11,
+      "readiness": "red",
+      "recommendation": "C",
+      "ladder_passed": "yes",
+      "completed_at": "2026-05-02T01:14:57Z"
+    }
+  ]
+}
