@@ -98,11 +98,11 @@ def probe_live(ntm, session, pane):
         )
     except Exception as exc:
         return {"live": False, "reason": "ntm_probe_error", "detail": str(exc)}
-    if proc.returncode != 0:
-        return {"live": False, "reason": "session_not_running"}
     try:
         payload = json.loads(proc.stdout)
     except json.JSONDecodeError:
+        if proc.returncode != 0:
+            return {"live": False, "reason": "session_not_running"}
         return {"live": False, "reason": "ntm_health_invalid_json"}
     agents = payload.get("agents")
     if not isinstance(agents, list):
@@ -199,6 +199,9 @@ def main(argv):
     parser.add_argument("--ntm", default=os.environ.get("NTM_BIN", "/Users/josh/.local/bin/ntm"))
     parser.add_argument("--window-seconds", type=int, default=3600)
     parser.add_argument("--now")
+    parser.add_argument("--session")
+    parser.add_argument("--pane", type=int)
+    parser.add_argument("--no-raw-tokens", action="store_true")
     parser.add_argument("--doctor", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--json", action="store_true")
@@ -210,6 +213,10 @@ def main(argv):
     now = now_utc(args.now)
     deferrals = iter_deferrals(Path(args.deferral_dir), now)
     rows = [r for r in iter_session_rows(session_dir) if r.get("status") == "needs_registration"]
+    if args.session:
+        rows = [r for r in rows if r.get("session") == args.session]
+    if args.pane is not None:
+        rows = [r for r in rows if int(r.get("pane", -1)) == args.pane]
     results = []
     pending = 0
     sent = 0
@@ -289,6 +296,9 @@ def main(argv):
         "dead_count": dead,
         "deferred_dead_count": deferred,
         "window_seconds": args.window_seconds,
+        "session_filter": args.session,
+        "pane_filter": args.pane,
+        "no_raw_tokens": bool(args.no_raw_tokens),
         "coordination_log": str(coord_log),
         "results": results,
         "errors": errors,

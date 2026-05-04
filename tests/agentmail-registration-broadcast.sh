@@ -54,6 +54,7 @@ write_row() {
 }
 
 write_row live 1 /tmp/live-project
+write_row mixed 2 /tmp/mixed-project
 write_row dead 1 /tmp/dead-project
 write_row deferred 1 /tmp/deferred-project
 
@@ -73,6 +74,10 @@ if [[ "${1:-}" == "health" ]]; then
     live)
       printf '{"session":"live","agents":[{"pane":1,"status":"ok","process_status":"running"}]}\n'
       exit 0
+      ;;
+    mixed)
+      printf '{"session":"mixed","overall_status":"error","agents":[{"pane":1,"status":"error","process_status":"exited"},{"pane":2,"status":"ok","process_status":"running"}]}\n'
+      exit 1
       ;;
     deferred|dead)
       exit 1
@@ -115,8 +120,8 @@ zsh -n "$SCRIPT" && pass "broadcast_script_syntax" || fail "broadcast_script_syn
 zsh -n "$LOOP" && pass "flywheel_loop_syntax" || fail "flywheel_loop_syntax"
 
 "$SCRIPT" "${broadcast_args[@]}" >"$TMP/first.json"
-assert_jq "$TMP/first.json" '.sent_count == 1 and .dead_count == 2 and .deferred_dead_count == 1 and (.results[] | select(.session=="live").action) == "sent"' "live_row_broadcasts_once"
-test "$(jq -s 'length' "$SEND_LOG")" = "1" && pass "ntm_send_called_once" || fail "ntm_send_called_once"
+assert_jq "$TMP/first.json" '.sent_count == 2 and .dead_count == 2 and .deferred_dead_count == 1 and (.results[] | select(.session=="live").action) == "sent" and (.results[] | select(.session=="mixed").action) == "sent"' "live_rows_broadcast_once"
+test "$(jq -s 'length' "$SEND_LOG")" = "2" && pass "ntm_send_called_once_per_live_row" || fail "ntm_send_called_once_per_live_row"
 if ! grep -q 'token=' "$TMP"/agentmail-registration-live-*.txt 2>/dev/null; then
   pass "request_omits_raw_token_shape"
 else
@@ -124,15 +129,20 @@ else
 fi
 
 "$SCRIPT" "${broadcast_args[@]}" >"$TMP/second.json"
-assert_jq "$TMP/second.json" '.sent_count == 0 and .deduped_count == 1 and (.results[] | select(.session=="live").action) == "deduped_recent_send"' "repeat_within_window_dedupes"
-test "$(jq -s 'length' "$SEND_LOG")" = "1" && pass "dedupe_suppresses_second_send" || fail "dedupe_suppresses_second_send"
+assert_jq "$TMP/second.json" '.sent_count == 0 and .deduped_count == 2 and (.results[] | select(.session=="live").action) == "deduped_recent_send" and (.results[] | select(.session=="mixed").action) == "deduped_recent_send"' "repeat_within_window_dedupes"
+test "$(jq -s 'length' "$SEND_LOG")" = "2" && pass "dedupe_suppresses_second_send" || fail "dedupe_suppresses_second_send"
 
 "$SCRIPT" "${broadcast_args[@]}" --doctor >"$TMP/doctor.json"
 assert_jq "$TMP/doctor.json" '.status == "pass" and .agentmail_pending_registration_broadcasts_count == 0 and .deferred_dead_count == 1' "doctor_passes_when_only_dead_deferred_or_deduped"
 
 rm -f "$COORD" "$SEND_LOG"
+"$SCRIPT" "${broadcast_args[@]}" --session mixed --pane 2 --no-raw-tokens >"$TMP/scoped.json"
+assert_jq "$TMP/scoped.json" '.sent_count == 1 and .rows_checked == 1 and .session_filter == "mixed" and .pane_filter == 2 and .no_raw_tokens == true and (.results[] | select(.session=="mixed").action) == "sent"' "scoped_broadcast_sends_target_only"
+test "$(jq -s 'length' "$SEND_LOG")" = "1" && pass "scoped_broadcast_ntm_send_once" || fail "scoped_broadcast_ntm_send_once"
+
+rm -f "$COORD" "$SEND_LOG"
 "$SCRIPT" "${broadcast_args[@]}" --dry-run >"$TMP/dry.json"
-assert_jq "$TMP/dry.json" '.sent_count == 0 and .agentmail_pending_registration_broadcasts_count == 1 and (.results[] | select(.session=="dead").action) == "dead_session" and (.results[] | select(.session=="deferred").action) == "deferred_dead_session"' "dry_run_counts_live_unsent_but_skips_dead_deferred"
+assert_jq "$TMP/dry.json" '.sent_count == 0 and .agentmail_pending_registration_broadcasts_count == 2 and (.results[] | select(.session=="dead").action) == "dead_session" and (.results[] | select(.session=="deferred").action) == "deferred_dead_session"' "dry_run_counts_live_unsent_but_skips_dead_deferred"
 
 FLYWHEEL_AGENT_MAIL_STATE_DIR="$STATE" "$LOOP" doctor --repo "$ROOT" --json >"$TMP/loop-doctor.json" || true
 assert_jq "$TMP/loop-doctor.json" '.agentmail_pending_registration_broadcasts_count >= 0 and (.agentmail_registration_broadcast.signals[]?.name == "agentmail_pending_registration_broadcasts_count")' "flywheel_loop_doctor_exposes_broadcast_signal"
