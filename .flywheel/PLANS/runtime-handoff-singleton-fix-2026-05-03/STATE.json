@@ -1,0 +1,25 @@
+{
+  "slug": "runtime-handoff-singleton-fix-2026-05-03",
+  "topic": "runtime-handoff-singleton-fix — FM-8 from bead-isolation-fix-2026-04-30",
+  "started_at": "2026-05-03T21:34:02Z",
+  "current_phase": "research",
+  "phase_started_at": "2026-05-03T21:36:53Z",
+  "rounds_in_current_phase": 0,
+  "convergence_streak": 0,
+  "in_flight_dispatches": [
+    {
+      "task_id": "runtime-handoff-lane-c",
+      "pane": 2,
+      "started": "2026-05-03T21:38:56Z"
+    }
+  ],
+  "joshua_decision_pending": false,
+  "joshua_decision_at": null,
+  "audit_findings_count": 0,
+  "beads_created": [],
+  "abort_reason": null,
+  "lanes_complete": [
+    "A",
+    "B"
+  ]
+}
