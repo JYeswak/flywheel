@@ -1,0 +1,33 @@
+{
+  "version": "1",
+  "profile_name": "vrtx",
+  "domain": "client-workflow-delivery",
+  "allowlist_paths": [".flywheel/"],
+  "blocklist_paths": [
+    "workflows/",
+    "n8n-workflows/",
+    "workers/",
+    "data/",
+    "fixtures/",
+    "deliverables/",
+    "docs/SIGNED-SCOPE-EMAIL-2026-04-22.md",
+    "audits/",
+    "_msgs/",
+    ".secrets/",
+    "src/",
+    "apps/"
+  ],
+  "blocklist_reason_default": "client-deliverable-not-substrate",
+  "domain_collision_terms": [
+    "doctor",
+    "ledger",
+    "worker",
+    "dispatch",
+    "tick",
+    "router",
+    "workflow",
+    "credential"
+  ],
+  "requires_word_boundary": true,
+  "rationale": "VRTX audit defaults to repo-local flywheel substrate; signed scope, workflow deliverables, and credential surfaces stay out of profile scope."
+}

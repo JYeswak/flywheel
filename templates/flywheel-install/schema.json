@@ -153,6 +153,7 @@
         "fixtures",
         "modes",
         "scopes",
+        "scope_allowlist_profile",
         "blocking_when_values",
         "grade_storage_default",
         "latest_summary_default"
@@ -167,7 +168,8 @@
           "const": [
             "polish-gate/v1/manifest.schema.json",
             "polish-gate/v1/grade-receipt.schema.json",
-            "polish-gate/v1/latest-summary.schema.json"
+            "polish-gate/v1/latest-summary.schema.json",
+            "polish-gate/v1/scope-allowlist.schema.json"
           ]
         },
         "fixtures": {
@@ -188,6 +190,40 @@
           "type": "array",
           "items": { "type": "string" },
           "const": ["new", "touched", "repo_local_flywheel", "all_declared"]
+        },
+        "scope_allowlist_profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "key",
+            "default",
+            "schema",
+            "fixture_dir",
+            "profiles",
+            "malformed_fixture"
+          ],
+          "properties": {
+            "key": {
+              "const": "scope_allowlist_profile"
+            },
+            "default": {
+              "const": "default"
+            },
+            "schema": {
+              "const": "polish-gate/v1/scope-allowlist.schema.json"
+            },
+            "fixture_dir": {
+              "const": "polish-gate/fixtures/scope-allowlist"
+            },
+            "profiles": {
+              "type": "array",
+              "items": { "type": "string" },
+              "const": ["alps", "skillos", "swarm-daemon", "mobile-eats", "vrtx", "default"]
+            },
+            "malformed_fixture": {
+              "const": "malformed-no-allowlist.json"
+            }
+          }
         },
         "blocking_when_values": {
           "type": "array",

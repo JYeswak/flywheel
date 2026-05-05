@@ -1,0 +1,29 @@
+{
+  "version": "1",
+  "profile_name": "default",
+  "domain": "default-flywheel-install",
+  "allowlist_paths": [".flywheel/"],
+  "blocklist_paths": [
+    "src/",
+    "app/",
+    "apps/",
+    "backend/",
+    "frontend/",
+    "docs/domain/",
+    ".beads/",
+    "node_modules/",
+    "dist/",
+    "build/"
+  ],
+  "blocklist_reason_default": "root-domain-not-substrate",
+  "domain_collision_terms": [
+    "doctor",
+    "ledger",
+    "worker",
+    "dispatch",
+    "tick",
+    "router"
+  ],
+  "requires_word_boundary": true,
+  "rationale": "New flywheel-installed repos start fail-closed with repo-local .flywheel substrate only."
+}

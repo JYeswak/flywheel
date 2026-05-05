@@ -1,0 +1,18 @@
+{
+  "version": "1",
+  "profile_name": "swarm-daemon",
+  "domain": "yuzu-canon-source",
+  "allowlist_paths": ["**/*"],
+  "blocklist_paths": [],
+  "blocklist_reason_default": "not-applicable-full-repo-profile",
+  "domain_collision_terms": [
+    "worker",
+    "dispatch",
+    "tick",
+    "doctor",
+    "router",
+    "audit"
+  ],
+  "requires_word_boundary": false,
+  "rationale": "swarm-daemon is the Yuzu canon/source repo; the full source, docs, tests, and CLI surface are the calibration target."
+}

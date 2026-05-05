@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/polish-gate/v1/scope-allowlist.schema.json",
+  "title": "Polish gate scope allowlist profile v1",
+  "description": "Repo profile contract for fail-closed polish-gate surface discovery.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "profile_name",
+    "domain",
+    "allowlist_paths",
+    "blocklist_paths",
+    "blocklist_reason_default",
+    "domain_collision_terms",
+    "requires_word_boundary"
+  ],
+  "properties": {
+    "version": {
+      "const": "1"
+    },
+    "profile_name": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]*$"
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "allowlist_paths": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/relative_glob"
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "blocklist_paths": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/relative_glob"
+      },
+      "uniqueItems": true
+    },
+    "blocklist_reason_default": {
+      "type": "string",
+      "minLength": 1
+    },
+    "domain_collision_terms": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "requires_word_boundary": {
+      "type": "boolean"
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "relative_glob": {
+      "type": "string",
+      "minLength": 1,
+      "not": {
+        "pattern": "^/"
+      }
+    }
+  }
+}

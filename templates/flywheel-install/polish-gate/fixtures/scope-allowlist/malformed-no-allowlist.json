@@ -1,0 +1,10 @@
+{
+  "version": "1",
+  "profile_name": "malformed-no-allowlist",
+  "domain": "fixture-invalid",
+  "blocklist_paths": ["src/"],
+  "blocklist_reason_default": "missing-allowlist-negative-fixture",
+  "domain_collision_terms": ["doctor"],
+  "requires_word_boundary": true,
+  "rationale": "Invalid fixture: intentionally omits allowlist_paths so validators prove fail-closed behavior."
+}
