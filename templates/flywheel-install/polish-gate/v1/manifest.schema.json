@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/polish-gate/v1/manifest.schema.json",
+  "title": "Polish gate manifest v1",
+  "description": "Repo-local polish-gate mode and storage contract for flywheel-installed repositories.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "mode",
+    "scope",
+    "legacy_bootstrap_policy",
+    "blocking_when",
+    "grade_storage",
+    "latest_summary"
+  ],
+  "properties": {
+    "version": {
+      "const": "1"
+    },
+    "mode": {
+      "enum": ["bootstrap", "audit_only", "blocking"]
+    },
+    "scope": {
+      "enum": ["new", "touched", "repo_local_flywheel", "all_declared"]
+    },
+    "legacy_bootstrap_policy": {
+      "enum": ["warn_until_touched", "block_immediately"]
+    },
+    "blocking_when": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "new_surface",
+          "touched_required_surface",
+          "malformed_gate",
+          "expired_waiver"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "grade_storage": {
+      "type": "string",
+      "minLength": 1,
+      "default": ".flywheel/polish-gate/grades.jsonl"
+    },
+    "latest_summary": {
+      "type": "string",
+      "minLength": 1,
+      "default": ".flywheel/polish-gate/latest.json"
+    }
+  }
+}

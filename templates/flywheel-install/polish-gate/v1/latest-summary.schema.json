@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/polish-gate/v1/latest-summary.schema.json",
+  "title": "Polish gate latest summary v1",
+  "description": "Current polish-gate aggregate state written to .flywheel/polish-gate/latest.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "last_run_ts",
+    "mode",
+    "surfaces_graded",
+    "surfaces_passed",
+    "surfaces_failed",
+    "pending_waivers",
+    "composite_avg",
+    "min_composite",
+    "min_composite_surface"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "polish-gate/latest-summary/v1"
+    },
+    "last_run_ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mode": {
+      "enum": ["bootstrap", "audit_only", "blocking"]
+    },
+    "surfaces_graded": {
+      "$ref": "#/$defs/count"
+    },
+    "surfaces_passed": {
+      "$ref": "#/$defs/count"
+    },
+    "surfaces_failed": {
+      "$ref": "#/$defs/count"
+    },
+    "pending_waivers": {
+      "$ref": "#/$defs/count"
+    },
+    "composite_avg": {
+      "$ref": "#/$defs/grade"
+    },
+    "min_composite": {
+      "$ref": "#/$defs/grade"
+    },
+    "min_composite_surface": {
+      "type": "string",
+      "minLength": 1
+    },
+    "audit_summary_path": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "grade": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    }
+  }
+}

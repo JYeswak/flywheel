@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/polish-gate/v1/grade-receipt.schema.json",
+  "title": "Polish gate grade receipt v1",
+  "description": "Append-only JSONL row written to .flywheel/polish-gate/grades.jsonl.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "ts",
+    "surface_path",
+    "surface_name",
+    "mode",
+    "skills",
+    "composite",
+    "verdict",
+    "evidence_paths",
+    "grader",
+    "mission_anchor_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "polish-gate/grade-receipt/v1"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "surface_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^/].*"
+    },
+    "surface_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "enum": ["bootstrap", "audit_only", "blocking"]
+    },
+    "skills": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ubs", "simplify", "extreme-opt", "readme", "canonical-cli"],
+      "properties": {
+        "ubs": { "$ref": "#/$defs/grade" },
+        "simplify": { "$ref": "#/$defs/grade" },
+        "extreme-opt": { "$ref": "#/$defs/grade" },
+        "readme": { "$ref": "#/$defs/grade" },
+        "canonical-cli": { "$ref": "#/$defs/grade" }
+      }
+    },
+    "composite": {
+      "$ref": "#/$defs/grade"
+    },
+    "verdict": {
+      "enum": ["PASS", "FAIL", "NOT_APPLICABLE", "WAIVED", "AUDIT_ONLY"]
+    },
+    "evidence_paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "grader": {
+      "type": "string",
+      "minLength": 1
+    },
+    "waiver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reason", "expires_at", "approver"],
+      "properties": {
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approver": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "mission_anchor_hash": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "grade": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    }
+  }
+}

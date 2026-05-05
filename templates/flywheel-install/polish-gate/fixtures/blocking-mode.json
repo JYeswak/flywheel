@@ -1,0 +1,14 @@
+{
+  "version": "1",
+  "mode": "blocking",
+  "scope": "repo_local_flywheel",
+  "legacy_bootstrap_policy": "block_immediately",
+  "blocking_when": [
+    "new_surface",
+    "touched_required_surface",
+    "malformed_gate",
+    "expired_waiver"
+  ],
+  "grade_storage": ".flywheel/polish-gate/grades.jsonl",
+  "latest_summary": ".flywheel/polish-gate/latest.json"
+}

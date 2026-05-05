@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "mode": "audit_only",
+  "scope": "all_declared",
+  "legacy_bootstrap_policy": "warn_until_touched",
+  "blocking_when": ["malformed_gate", "expired_waiver"],
+  "grade_storage": ".flywheel/polish-gate/grades.jsonl",
+  "latest_summary": ".flywheel/polish-gate/latest.json"
+}

@@ -7,7 +7,8 @@
     "template_version",
     "frontmatter_required_keys",
     "templates",
-    "loop_json_required_keys"
+    "loop_json_required_keys",
+    "polish_gate"
   ],
   "properties": {
     "template_version": {
@@ -142,6 +143,69 @@
         "doctor_strict_command",
         "source_mutation_allowed_when"
       ]
+    },
+    "polish_gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "schemas",
+        "fixtures",
+        "modes",
+        "scopes",
+        "blocking_when_values",
+        "grade_storage_default",
+        "latest_summary_default"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "polish-gate-template/v1"
+        },
+        "schemas": {
+          "type": "array",
+          "items": { "type": "string" },
+          "const": [
+            "polish-gate/v1/manifest.schema.json",
+            "polish-gate/v1/grade-receipt.schema.json",
+            "polish-gate/v1/latest-summary.schema.json"
+          ]
+        },
+        "fixtures": {
+          "type": "array",
+          "items": { "type": "string" },
+          "const": [
+            "polish-gate/fixtures/bootstrap-mode.json",
+            "polish-gate/fixtures/audit-only-mode.json",
+            "polish-gate/fixtures/blocking-mode.json"
+          ]
+        },
+        "modes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "const": ["bootstrap", "audit_only", "blocking"]
+        },
+        "scopes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "const": ["new", "touched", "repo_local_flywheel", "all_declared"]
+        },
+        "blocking_when_values": {
+          "type": "array",
+          "items": { "type": "string" },
+          "const": [
+            "new_surface",
+            "touched_required_surface",
+            "malformed_gate",
+            "expired_waiver"
+          ]
+        },
+        "grade_storage_default": {
+          "const": ".flywheel/polish-gate/grades.jsonl"
+        },
+        "latest_summary_default": {
+          "const": ".flywheel/polish-gate/latest.json"
+        }
+      }
     }
   }
 }

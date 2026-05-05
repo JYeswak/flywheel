@@ -11,6 +11,10 @@ Template-backed source files for portable `flywheel-loop init`.
 - `schema.json` documents the required frontmatter keys, template set, and `loop.json` keys for this template version.
 - Idle watcher launchd plists live in `.flywheel/launchd/` in the flywheel repo and are activated through `/flywheel:loop watcher ...` so repo-local loops can prove a driver, not just an active marker.
 
+## Polish Gate
+
+Polish Gate is the Phase 2 quality gate for flywheel-installed repos: it starts in `bootstrap`, can run as `audit_only`, and becomes `blocking` once required surfaces are reconciled. The manifest schema is `polish-gate/v1/manifest.schema.json`; grade JSONL rows use `polish-gate/v1/grade-receipt.schema.json`; the current aggregate uses `polish-gate/v1/latest-summary.schema.json`; mode examples live under `polish-gate/fixtures/`; the implementation plan remains the Phase 2 P2-01 through P2-04 polish-gate plan.
+
 ## Hashes
 
 Run this after template edits and update the table in the same patch:
@@ -29,3 +33,5 @@ shasum -a 256 templates/flywheel-install/*.tmpl
 | `validate-callback-before-close.sh.tmpl` | `87ec6f9fbc04ce87bb7fffc7379b8140a293efe37816ee62f7f9b43a2d239c97` |
 
 Rendered files should carry the hash of the specific template used in `template_hash`.
+
+Part of the Yuzu Method framework by ZestStream.
