@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/polish-gate/v1/discovery-output.schema.json",
+  "title": "Polish gate discovery output v1",
+  "description": "Machine-readable surface inventory emitted by discover-surfaces.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "ts",
+    "repo_path",
+    "scope_mode",
+    "manifest_path",
+    "surfaces",
+    "scope_excluded",
+    "totals"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "polish-gate/discovery-output/v1"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope_mode": {
+      "enum": ["new", "touched", "repo_local_flywheel", "all_declared"]
+    },
+    "manifest_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "surfaces": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/surface"
+      }
+    },
+    "scope_excluded": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/excluded"
+      }
+    },
+    "totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["in_scope", "excluded", "by_category"],
+      "properties": {
+        "in_scope": {
+          "$ref": "#/$defs/count"
+        },
+        "excluded": {
+          "$ref": "#/$defs/count"
+        },
+        "by_category": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/count"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "relative_path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[^/].*|^\\.flywheel/.*"
+    },
+    "surface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "name",
+        "category",
+        "in_scope",
+        "scope_reason",
+        "skill_lanes_applicable"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/relative_path"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "category": {
+          "enum": ["cli-script", "schema", "readme", "test-fixture", "doctrine-doc"]
+        },
+        "in_scope": {
+          "const": true
+        },
+        "scope_reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "skill_lanes_applicable": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": ["ubs", "simplify", "extreme-opt", "readme", "canonical-cli"]
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "excluded": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "reason"],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/relative_path"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}
