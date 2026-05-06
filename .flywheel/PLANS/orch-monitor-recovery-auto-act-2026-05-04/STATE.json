@@ -1,0 +1,33 @@
+{
+  "slug": "orch-monitor-recovery-auto-act-2026-05-04",
+  "topic": "orchestrator-monitor-recovery-fleet-supervision-failure",
+  "started_at": "2026-05-04T22:05:00Z",
+  "current_phase": "research",
+  "phase_started_at": "2026-05-04T22:05:00Z",
+  "rounds_in_current_phase": 0,
+  "convergence_streak": 0,
+  "in_flight_dispatches": [
+    {
+      "task_id": "orchmon-lane-a-2026-05-04",
+      "pane": 2,
+      "started": "2026-05-04T21:37:47Z"
+    },
+    {
+      "task_id": "orchmon-lane-b-2026-05-04",
+      "pane": 3,
+      "started": "2026-05-04T21:37:47Z"
+    },
+    {
+      "task_id": "orchmon-lane-c-2026-05-04",
+      "pane": 4,
+      "started": "queued_pane_4_busy"
+    }
+  ],
+  "joshua_decision_pending": false,
+  "joshua_decision_at": null,
+  "audit_findings_count": 0,
+  "beads_created": [],
+  "abort_reason": null,
+  "through": "research",
+  "p0_reason": "joshua_flagged_orch_monitoring_failure_skillos_frozen_13min_alps_blocker_uncommunicated"
+}

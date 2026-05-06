@@ -1,0 +1,131 @@
+{
+  "schema_version": 3,
+  "slug": "orch-heartbeat-no-idle-projects-2026-05-06",
+  "topic": "/flywheel:plan orch-heartbeat-cron-no-idle-projects --through=audit",
+  "started_at": "2026-05-06T10:31:35Z",
+  "phase_started_at": "2026-05-06T11:54:00Z",
+  "current_phase": "polish",
+  "rounds_in_current_phase": 0,
+  "polish_round": 1,
+  "convergence_streak": 0,
+  "in_flight_dispatches": [],
+  "joshua_decision_pending": false,
+  "joshua_decision_at": null,
+  "audit_disposition": "auto_advance",
+  "audit_blocker_class": null,
+  "audit_blocker_classes": [],
+  "audit_blocker_reason": null,
+  "audit_findings_count": 9,
+  "audit_findings_by_severity": {
+    "critical": 0,
+    "high": 3,
+    "medium": 4,
+    "low": 2
+  },
+  "beads_created": [
+    "flywheel-orch-heartbeat-candidate-schemas-2026-05-06",
+    "flywheel-orch-heartbeat-readonly-composer-2026-05-06",
+    "flywheel-orch-heartbeat-idle-idempotency-gate-2026-05-06",
+    "flywheel-orch-heartbeat-delivery-verifier-2026-05-06",
+    "flywheel-orch-heartbeat-tick-driver-doctor-2026-05-06",
+    "flywheel-orch-heartbeat-morning-report-projection-2026-05-06",
+    "flywheel-orch-heartbeat-session-config-allowlist-2026-05-06",
+    "flywheel-orch-heartbeat-cross-session-refusal-tests-2026-05-06",
+    "flywheel-orch-heartbeat-manager-state-integration-2026-05-06"
+  ],
+  "abort_reason": null,
+  "quality_bar_passed": true,
+  "quality_bar_evidence": [
+    {
+      "artifact": "00-INTENT.md",
+      "role": "phase0-intent",
+      "status": "complete"
+    },
+    {
+      "artifact": "01-RESEARCH-A-problem-space.md",
+      "role": "phase1-problem-space",
+      "status": "complete"
+    },
+    {
+      "artifact": "01-RESEARCH-B-ecosystem-audit.md",
+      "role": "phase1-source-a-skills",
+      "status": "complete"
+    },
+    {
+      "artifact": "01-RESEARCH-C-implementation-design.md",
+      "role": "phase1-implementation-design",
+      "status": "complete"
+    },
+    {
+      "artifact": "02-REFINE-r2.md",
+      "role": "phase2-convergence",
+      "status": "converged",
+      "diff_pct": 3.8
+    },
+    {
+      "artifact": "03-AUDIT-FINDINGS.md",
+      "role": "phase3-audit",
+      "status": "auto_advance"
+    }
+  ],
+  "plan_space_only": true,
+  "through_phase": "audit",
+  "phase1_lanes_complete": 3,
+  "phase2_rounds": 2,
+  "phase2_final_diff_pct": 3.8,
+  "phase3_rounds": 1,
+  "phase3_lenses": [
+    "idempotency",
+    "founder_bottleneck",
+    "cross_session_authorization"
+  ],
+  "phase4_task_id": "plan-orch-heartbeat-phase4-decompose-2026-05-06",
+  "phase4_status": "decomposed",
+  "phase4_wave_counts": {
+    "A": 3,
+    "B": 1,
+    "C": 4,
+    "D": 1
+  },
+  "phase4_critical_path_min": 245,
+  "phase4_sibling_shape": "capacity-halt-detector-and-auto-continue-2026-05-06 Phase 4 7-bead DAG",
+  "phase4_audit_findings_addressed": 9,
+  "bead_dag_preview_count": 9,
+  "phase5_status": "polish_r1_event_driven_reconverged",
+  "phase5_net_bead_delta": {
+    "from": 9,
+    "to": 6,
+    "kept": 1,
+    "collapsed": 3,
+    "transformed": 5,
+    "new": 1
+  },
+  "polish_input_findings": [
+    {
+      "source": "mobile-eats:1",
+      "row": 150,
+      "class": "orch-bash-prompt-state-change-trigger",
+      "summary": "state-transition substrate makes event-driven prompt injection feasible"
+    },
+    {
+      "source": "flywheel:1 dispatch preflight",
+      "queries": 5,
+      "results": 50,
+      "summary": "K=50 substrate survey found JSONL streams, robot activity, idle classifier, delivery receipts, JSONL close truth, idle auto-dispatch, watcher-isomorphic probe, and sibling four-input shape already present"
+    },
+    {
+      "source": "CloudyMill independent Socraticode verification",
+      "queries": 10,
+      "indexed_chunks_observed": 945,
+      "summary": "K=10 verified Phase 4 DAG, L85/L91 doctrine, worker-stall four-input probe shape, capacity-halt evidence-not-ack pattern, and JSONL fallback close truth"
+    }
+  ],
+  "cross_orch_finding_absorbed": {
+    "from": "mobile-eats:1",
+    "row": 150,
+    "class": "orch-bash-prompt-state-change-trigger"
+  },
+  "primary_empirical_input": "/tmp/overnight-velocity-report/SUMMARY.md",
+  "socraticode_queries": 10,
+  "indexed_chunks_observed": 945
+}
