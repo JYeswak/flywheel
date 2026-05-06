@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://zeststream.ai/flywheel/schemas/recovery-ledger.v1.json",
+  "title": "Flywheel recovery ledger row",
+  "description": "Canonical append-only JSONL row for recovery primitive attempts.",
+  "type": "object",
+  "required": [
+    "ts",
+    "actor",
+    "target_session",
+    "target_pane",
+    "pane_role",
+    "trauma_class",
+    "signal_text",
+    "decision_reason",
+    "budget_state",
+    "transport",
+    "post_check",
+    "failure_class",
+    "primitive_invoked"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor": {
+      "type": "string",
+      "enum": ["watchdog", "manual_orch", "manual_joshua"]
+    },
+    "target_session": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_pane": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "pane_role": {
+      "type": "string",
+      "enum": [
+        "worker_pane",
+        "orchestrator_pane",
+        "human_pane",
+        "callback_pane",
+        "unknown"
+      ]
+    },
+    "trauma_class": {
+      "type": "string",
+      "minLength": 1
+    },
+    "signal_text": {
+      "type": "string"
+    },
+    "decision_reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "budget_state": {
+      "type": "object",
+      "required": [
+        "per_pane_count_window",
+        "fleet_count_window",
+        "authorized"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "per_pane_count_window": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fleet_count_window": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "authorized": {
+          "type": "boolean"
+        }
+      }
+    },
+    "transport": {
+      "type": "object",
+      "required": ["rc", "duration_ms", "send_command"],
+      "additionalProperties": true,
+      "properties": {
+        "rc": {
+          "type": "integer"
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "send_command": {
+          "type": "string"
+        }
+      }
+    },
+    "post_check": {
+      "type": "object",
+      "required": ["verdict", "evidence"],
+      "additionalProperties": true,
+      "properties": {
+        "verdict": {
+          "type": "string",
+          "enum": ["success", "failure", "inconclusive"]
+        },
+        "evidence": {
+          "type": "string"
+        }
+      }
+    },
+    "failure_class": {
+      "type": ["string", "null"]
+    },
+    "primitive_invoked": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}
