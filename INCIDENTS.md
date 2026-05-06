@@ -1916,3 +1916,1291 @@ Evidence:
 - Regression test: `.flywheel/tests/test-phase2-bead-inventory-parity.sh`.
 - State rows: `.beads/issues.jsonl` append-only close receipts tagged
   `closure_reconciliation_via=p2-12-f4`.
+
+## backup-proliferation flywheel-lock-pattern triage (from skillos audit) (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: TRIAGE
+
+Class: `backup-proliferation-flywheel-lock-pattern`
+
+Event Count: 1 skillos Phase 3 cross-orch routing candidate, confirmed with
+fleet sample
+
+Severity: medium
+
+Cost: In-tree backup sidecars now form a searchable, indexable stock of stale
+operational doctrine and state. Flywheel alone has 176 backup-class files using
+the broad pattern, 270,417,920 bytes aggregate. The six-repo sample has 642
+backup-class files, 580,915,200 bytes aggregate.
+
+Root Cause: Lock-family, doctrine-sync, and recovery flows correctly preserve
+preimages before mutation but write those backups into the working tree with no
+retention, no off-tree archive, and no doctor consumer. The rule prevents local
+loss while creating fleet-wide stale substrate.
+
+Forever-Rule: Backup-before-mutation flows for operational docs must be bounded
+and observable. Core `.flywheel/{MISSION,GOAL,STATE}.md`, root `AGENTS.md`,
+`.flywheel/AGENTS-CANONICAL.md`, and bead recovery sidecars must surface in
+doctor JSON and route to a remediation bead before they become repo-visible
+archive stock.
+
+Fix Applied/Status: Triage only. Scope sample and remediation plan were written
+under `/tmp`; follow-up bead `wire-backup-proliferation-prevention` was filed
+to wire detector, doctor fields, tests, off-tree archive policy, and producer
+prevention. No backup files or peer repo files were mutated by this triage.
+
+Flywheel-lock correlation:
+- Core lock-family docs account for 108 of 176 flywheel backup files:
+  `MISSION.md` 45, `STATE.md` 29, `GOAL.md` 20,
+  `AGENTS-CANONICAL.md` 14.
+- Root `AGENTS.md` doctrine-sync sidecars raise the operational-doc count to
+  117 of 176.
+- Bead DB recovery sidecars raise operational substrate backup pressure to
+  161 of 176.
+
+Shared root with agents-doubling: true. The earlier
+`flywheel-from-skillos-audit-725d` triage found root/snapshot AGENTS full-copy
+duplication plus `AGENTS.md.bak.*` sidecars. Backup proliferation is the
+broader stock-and-flow pattern behind that symptom and lock-family sidecars.
+The prevention work should share fixtures and suffix parsing with
+`wire-agents-md-doubling-prevention` instead of becoming an unrelated sibling.
+
+Donella read: #6 information flows and #5 rules. The next intervention should
+make backup stock visible in doctor JSON, then change the backup rule from
+unbounded in-tree sidecars to bounded rollback plus off-tree archive.
+
+Evidence:
+- Bead: `flywheel-from-skillos-audit-5ffa`.
+- Follow-up bead: `wire-backup-proliferation-prevention`.
+- Source report: `/tmp/phase3-audit-skillos-report-20260506T015536Z.md`.
+- Scope sample: `/tmp/backup-proliferation-flywheel-sample-2026-05-06.md`.
+- Plan: `/tmp/backup-proliferation-remediation-plan-2026-05-06.md`.
+
+## Umbrella-discovered 35 advisory beads triaged (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: TRIAGE
+
+Class: `umbrella-memory-rule-bead-priority-drift`
+
+Event Count: 35 umbrella auto-filed advisory beads
+
+Severity: medium
+
+Cost: `memory-rule-gate-parity-detector.sh --auto-bead` correctly filed repair beads for 35 UNWIRED META-RULE memory files, but generic priority assignment made the backlog look flat. Without leverage sorting, the next session could spend scarce worker time on low-leverage recipe or rename work while identity, recovery, and fleet-productivity loops stayed unwired.
+
+Root Cause: The detector measured structural parity but did not rank the resulting work by Donella leverage or identify rules that should be retired/reclassified instead of wired.
+
+Forever-Rule: Umbrella auto-filed repair beads get a Donella triage pass before dispatch. Wave 3a is capped at eight P0 active high-leverage goals/self-organization/rules beads; Wave 3b carries active medium-leverage rules/information-flow beads; Wave 3c carries defer or retire candidates. Priority changes are append-only `priority_update` rows, never historical row mutation.
+
+Fix Applied/Status: `flywheel-umbrella-triage` wrote discovery, triage, and wave-plan artifacts; appended 35 priority_update rows; filed 4 retire/reclass candidate beads; and preserved `.beads/issues.jsonl` append-only prefix bytes.
+
+Distribution: Wave 3a=8, Wave 3b=15, Wave 3c=12, retire_candidates=4.
+
+Donella read: #5 rules plus #4 self-organization. The backlog stock now has a routing rule and a self-organizing retire lane instead of being drained by FIFO or generic detector priority.
+
+Evidence:
+- Discovery: `/tmp/umbrella-bead-discovery-2026-05-06.txt`.
+- Triage: `/tmp/umbrella-bead-triage-2026-05-06.md`.
+- Wave plan: `/tmp/umbrella-bead-wave-plan-2026-05-06.md`.
+- State rows: `.beads/issues.jsonl` append-only rows with `triage_via=flywheel-umbrella-triage-2026-05-06`.
+
+## P2-12 f5: aggregate schema-validation test (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: UPDATE
+
+Class: `polish-gate-aggregate-schema-validation`
+
+Event Count: 1 Phase 2 audit LOW finding
+
+Severity: low
+
+Cost: `test_polish_gate_schemas.sh` validated the original P2-01-era core
+schemas, while later v1 schemas were only covered by their surface-specific
+tests. A malformed newer schema could therefore escape the aggregate schema
+gate until the matching feature test happened to run.
+
+Root Cause: Schema inventory parity was wired in P2-12 f2, but aggregate
+schema compilation still loaded only `manifest`, `grade-receipt`, and
+`latest-summary`. The manifest knew about all 9 v1 schemas; the aggregate
+validator did not consume that manifest truth set.
+
+Forever-Rule: The polish-gate aggregate schema test must compile every
+manifest-declared and on-disk `polish-gate/v1/*.schema.json` file as JSON
+Schema 2020-12 in one command. Inventory parity proves the set; aggregate
+validation proves the set is executable schema.
+
+Fix Applied/Status: `templates/flywheel-install/tests/test_polish_gate_schemas.sh`
+now checks all 9 manifest-declared v1 schemas for parseability, draft 2020-12
+declaration, and `Draft202012Validator.check_schema` validity. Standalone
+test `templates/flywheel-install/tests/test_polish_gate_aggregate_schemas.sh`
+runs the same aggregate contract directly. All template tests pass.
+
+P2-12 wave status: 5/5 follow-ups complete. f1 wired doctor JSON fields, f2
+closed schema inventory parity, f3 hardened malformed manifest errors, f4
+reconciled Phase 2 closure receipts, and f5 moved schema drift detection
+upstream into the aggregate test.
+
+Donella read: #5 rules. The rule is now executable at the aggregate boundary
+instead of relying on each downstream surface test to discover its own schema
+drift.
+
+Evidence:
+- Bead: `flywheel-p2-12-f5`.
+- Extended test: `templates/flywheel-install/tests/test_polish_gate_schemas.sh`.
+- Standalone aggregate test:
+  `templates/flywheel-install/tests/test_polish_gate_aggregate_schemas.sh`.
+- Parity sibling:
+  `templates/flywheel-install/tests/test_polish_gate_schema_inventory_parity.sh`.
+- L112: `OK_p2_12_f5_aggregate_schema_test`.
+
+## Wave 3a P0 wired: watchdog-auto-respawn-not-notify-only (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: WIRE
+
+Class: `watchdog-auto-respawn-not-notify-only`
+
+Event Count: 1 memory-rule structural translation
+
+Severity: high
+
+Cost: A notify-only watchdog turns Joshua into a faster bottleneck. The system
+detects a truly dead worker pane, wakes the founder, and waits for manual
+respawn even though the recovery primitive already exists.
+
+Root Cause: The prior watchdog shape treated notification as the primary
+response path instead of a fallback after bounded self-recovery attempts.
+
+Forever-Rule: Worker-scope watchdogs auto-respawn truly-dead worker panes first.
+The per-pane budget is 3 attempts/hour. Only after the budget is exhausted, or
+when a protected orchestrator/human/callback pane is classified dead, may the
+watchdog use the existing Pushover + mac-alert notify primitive.
+
+Fix Applied/Status: `.flywheel/scripts/worker-auto-respawn-watchdog.sh` scans
+latest session topology, performs 3 live captures over a 16-second window,
+enforces worker-scope only, appends attempt rows to
+`~/.local/state/flywheel/auto-respawn-attempts.jsonl`, invokes `/flywheel:respawn`
+through the flywheel orchestrator, and falls back to the existing `notify`
+primitive after 3 attempts/hour. Installer
+`.flywheel/scripts/worker-auto-respawn-watchdog-install.sh` registers the
+watchdog in the launchd `gui/<uid>` domain at 60-second cadence.
+
+Donella read: #4 self-organization. The system now recovers a dead worker
+without founder intervention. Jeff's CONDITIONAL counter-thesis is preserved
+as the 3-failure fallback, not the primary path.
+
+Anti-pattern prevented: founder-bottleneck via notify-only watchdog.
+
+Test coverage: 7 acceptance cases shipped: all-alive no action, dead worker at
+attempt 0 respawns, dead worker at attempt 2 respawns and reaches budget,
+dead worker at attempt 3 notifies only, recoverable freeze does nothing,
+orchestrator dead is refused and notifies only, and missing topology exits 3.
+
+Evidence:
+- Bead: `flywheel-wire-watchdog-auto-respawn-not-notify-o-a1d67342`.
+- Watchdog: `.flywheel/scripts/worker-auto-respawn-watchdog.sh`.
+- Installer: `.flywheel/scripts/worker-auto-respawn-watchdog-install.sh`.
+- Test: `.flywheel/tests/test_worker_auto_respawn_watchdog.sh`.
+- Fixtures: `.flywheel/tests/fixtures/auto-respawn-watchdog/`.
+- Live dry-run smoke: `/tmp/warw-smoke.json`.
+
+## Wave 3a P0 wired: flywheel-owns-continuous-productivity-no-downtime-unless-josh-blocker (2026-05-06)
+
+- Memory rule → structural detector + launchd wire translation. Source: `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_flywheel_owns_continuous_productivity_no_downtime_unless_josh_blocker.md`
+- Donella #3 Goals leverage class — productivity invariant is the goal-level rule
+- Anti-pattern prevented: founder-bottleneck via "session is quiet" Joshua-notify
+- 4-class Joshua-notify allowlist enforced: destructive, paradigm, phi, security, substrate-corrupt — NEVER for "session is quiet"
+- Artifacts shipped:
+  - `.flywheel/scripts/continuous-productivity-detector.sh` (294 lines, canonical CLI 5-verb)
+  - `.flywheel/scripts/continuous-productivity-detector-install.sh` (120 lines)
+  - `.flywheel/tests/test_continuous_productivity_detector.sh` (5/5 cases pass)
+  - `~/Library/LaunchAgents/ai.zeststream.continuous-productivity-detector.plist` (GUI domain)
+- Live smoke: PASS. Tests: 5/5.
+- Bead `flywheel-wire-flywheel-owns-continuous-productiv-5ad20901` worker callback was BLOCKED on file reservations (FrostyBasin + CloudyGorge held INCIDENTS.md + .beads/issues.jsonl); orch wrote this closure on pane 3's behalf per scoped-commit recipe.
+- Worker self_grade=B (artifacts shipped, closure path blocked at reservation layer).
+
+## Wave 3a P0 follow-up wired: codex model-at-capacity-halt detector subclass + auto-continue recovery (2026-05-06)
+
+Empirical gap proof: pane 4 halted at a Codex upstream capacity message,
+`selected model is at capacity. please try a different model.`, with a chevron
+prompt and no progress delta. Joshua validated the recovery primitive on
+2026-05-06: send `continue`; capacity refreshes within seconds and preserves
+the in-flight prompt.
+
+Shipped shape:
+- Subclass `model_at_capacity_halt` added to `codex-template-stuck-detector`.
+- Recovery routed to `auto_continue`, not respawn, because respawn loses worker
+  context for a reversible upstream-capacity halt.
+- `worker-auto-respawn-watchdog` now sends bounded auto-continue before any
+  truly-dead respawn branch.
+- Budget: 5 auto-continue attempts per pane per hour, then existing
+  notify-fallback.
+- Sibling shape: closed bead
+  `flywheel-wire-watchdog-auto-respawn-not-notify-o-a1d67342`.
+
+Evidence:
+- Bead: `flywheel-codex-model-at-capacity-halt-class-2026-05-06`.
+- Detector: `.flywheel/scripts/codex-template-stuck-detector.sh`.
+- Watchdog: `.flywheel/scripts/worker-auto-respawn-watchdog.sh`.
+- Tests: `.flywheel/tests/test_codex_template_stuck_detector.sh`,
+  `.flywheel/tests/test_worker_auto_respawn_watchdog.sh`.
+- Fixtures: `.flywheel/tests/fixtures/capacity-halt-validation/`.
+- Live dry-run smoke: `/tmp/capacity-watchdog-live-smoke.json`.
+
+## Wave 3a P0 wired: use-ntm-not-raw-tmux structural gate (2026-05-06)
+
+Memory rule: `use-ntm-not-raw-tmux`.
+
+Leverage class: Donella #5 Rules. Pane/session transport safety is now enforced
+at the Bash PreToolUse boundary, not left as prose doctrine.
+
+Root cause: L29 documented NTM-only doctrine, and the existing dispatch
+transport gate blocked one high-risk send path, but general operational raw
+tmux verbs still had no structural gate. That left `tmux ls`,
+`tmux capture-pane`, and non-dispatch `tmux send-keys` able to bypass NTM
+health, robot-tail, and send semantics.
+
+Forever-Rule: Orchestrator-facing Bash commands MUST use `ntm` verbs for
+pane/session operations. Raw tmux operational verbs are blocked with canonical
+alternatives; textual mentions, `tmuxinator`, `$TMUX` checks, and `ntm` commands
+remain allowed.
+
+Fix Applied/Status: `~/.claude/hooks/flywheel-orch-use-ntm-not-raw-tmux-gate.sh`
+ships as a read-only PreToolUse Bash gate and is wired into
+`~/.claude/settings.json`. The detector scans unquoted shell code, strips
+comments/string-literal mentions, recursively inspects `bash -c` command
+payloads, and blocks raw operational verbs with `ntm` alternatives.
+
+Test coverage: 8 dispatch cases plus 2 live-smoke shapes. Required cases cover
+blocking `tmux ls`, `tmux capture-pane`, and `tmux send-keys`, while allowing
+`tmuxinator`, comments-only mentions, quoted string mentions, `ntm` commands,
+and `$TMUX` env checks. Live smoke covers `bash -c "echo tmux ls"` blocking and
+`bash -c "ntm list"` allowing.
+
+Evidence:
+- Bead: `flywheel-wire-use-ntm-not-raw-tmux-8d2252c2`.
+- Hook: `~/.claude/hooks/flywheel-orch-use-ntm-not-raw-tmux-gate.sh`.
+- Settings: `~/.claude/settings.json`.
+- Test: `.flywheel/tests/test_use_ntm_not_raw_tmux_gate.sh`.
+- Fixtures: `.flywheel/tests/fixtures/use-ntm-not-raw-tmux/`.
+
+## P0 regression fix: capacity-halt classifier not wired + plists not installed (2026-05-06)
+
+Memory rule: `feedback_regression_test_must_exercise_production_close_path`.
+
+Root cause: the prior close declared `model_at_capacity_halt` in metadata and
+fixture hints, but production `classify_text()` still routed capacity-halted
+live panes through the generic alive/post-callback paths. Empirical live
+detector output showed the literal line `Selected model is at capacity. Please
+try a different model.` while returning a non-capacity subclass. The recovery
+watcher also had no installed `worker-auto-respawn-watchdog` LaunchAgent, and
+the flywheel session lacked its per-session stuck-detector LaunchAgent.
+
+Forever-Rule: specialized model/provider halt classifiers MUST execute before
+generic `hash_stable=false` alive and post-callback reminder handling. Regression
+tests must exercise literal live scrollback strings, not `subclass_hint` or
+metadata-only fixtures. A recovery subclass is not shipped until its launchd
+owner is installed and visible in `launchctl list`.
+
+Fix Applied/Status: `codex-template-stuck-detector.sh` now classifies capacity
+halts from the production text path before generic liveness. The rule also uses
+the significant evidence tail so a live capacity line displaced by background
+terminal/reminder lines still wins over post-callback. Installed
+`~/Library/LaunchAgents/ai.zeststream.worker-auto-respawn-watchdog.plist` and
+`~/Library/LaunchAgents/ai.zeststream.flywheel-codex-stuck-detector.plist`;
+both are registered, loaded under `gui/501`, and present in `launchctl list`.
+
+Test coverage: `.flywheel/tests/test_codex_template_stuck_detector.sh` covers
+literal capacity strings, alternate "try a different model" text, reminder
+template overlap, significant-tail displacement, and a non-capacity chevron
+negative. `.flywheel/tests/test_capacity_halt_live_detect.sh` is the standalone
+live-pattern fixture gate using `.flywheel/tests/fixtures/capacity-halt-live/`
+with raw `t0.txt` and `t1.txt`.
+
+Evidence:
+- Bead: `flywheel-fix-capacity-halt-classifier-not-wired-2026-05-06`.
+- Detector: `.flywheel/scripts/codex-template-stuck-detector.sh`.
+- Tests: `.flywheel/tests/test_codex_template_stuck_detector.sh`,
+  `.flywheel/tests/test_capacity_halt_live_detect.sh`.
+- Fixture: `.flywheel/tests/fixtures/capacity-halt-live/`.
+- Installers: `.flywheel/scripts/worker-auto-respawn-watchdog-install.sh`,
+  `.flywheel/scripts/flywheel-codex-stuck-detector-install.sh`.
+- Installed plists:
+  `~/Library/LaunchAgents/ai.zeststream.worker-auto-respawn-watchdog.plist`,
+  `~/Library/LaunchAgents/ai.zeststream.flywheel-codex-stuck-detector.plist`.
+- Install receipts: `/tmp/worker-auto-respawn-watchdog-install.json`,
+  `/tmp/flywheel-codex-stuck-detector-install.json`.
+- Launchd fire log: `~/.local/state/flywheel/codex-stuck-detector.flywheel.log`.
+- L112: `OK_capacity_halt_classifier_fix`.
+
+## Plan-arc landed: capacity-halt-detector-and-auto-continue-recovery (2026-05-06)
+
+- Pane 3 plan-arc through Phase 3 audit complete; Phase 4/5 (decompose + polish) remain as separate dispatches.
+- 3 Phase 1 research lanes (problem-space + ecosystem-audit + implementation-design)
+- 3 Phase 2 refine rounds, final round 0% diff (deeply converged)
+- 1 Phase 3 audit round, auto-advance disposition (0 critical, 0 high, 6 medium, 3 low)
+- 7-bead DAG preview ready for Phase 4 dispatch
+- Worker BLOCKED on file reservations (CloudyAnchor + CyanCreek holding INCIDENTS+JSONL); orch closed on its behalf per scoped-commit-by-pathspec recipe
+- Plan path: `.flywheel/plans/capacity-halt-detector-and-auto-continue-2026-05-06/`
+- Donella #4 Self-organization (system recovers without founder) + #5 Rules (subclass routing) + #6 Information Flows (synth-and-inject layer)
+
+## Plan-arc Phase 4 decomposed: capacity-halt 7-bead DAG filed (2026-05-06)
+
+- Pane 3 closed Phase 4 decompose work (DAG MD + STATE.json) but BLOCKED on JSONL append/INCIDENTS/closure due to CyanCreek + CloudyAnchor file reservations until 13:01:36Z. Orch filed 7 beads on its behalf per scoped-commit-by-pathspec recipe.
+- Wave A (P0, parallel): production-path-reconcile (#1, depends pane-4-fix) + auto-continue-primitive (#2, depends #1)
+- Wave B (P0, sequential): success-measurement (#3, depends #2)
+- Wave C (P1, parallel after #3): cross-session-authorization (#4) + burst-budget (#5) + doctor-ledger (#6)
+- Wave D (P1, final): driver-coverage (#7, depends #4 + #5 + #6) — L57 loop-driver doctrine compliance
+- All 9 audit findings (6 medium + 3 low) addressed across the 7 beads
+- Reconcile node #1 explicit against pane 4's CLOSED capacity-halt classifier regression fix
+- Plan path: `.flywheel/plans/capacity-halt-detector-and-auto-continue-2026-05-06/04-BEADS-DAG.md`
+- STATE.json: current_phase=decompose, beads_created=7, phase4_filed_by=flywheel-orch-on-behalf-of-pane3
+
+## Wave 3a P0 wired: agentmail-identity-canonical structural gate (2026-05-06)
+
+Memory rule: `feedback_agentmail_identity_canonical.md` plus
+`feedback_identity_stability_session_pane_project_primary_key.md`.
+
+Leverage class: Donella #5 Rules. The identity layer now has a structural
+validator and advisory PostToolUse hook instead of relying on agents remembering
+not to mint identities ad hoc.
+
+Root cause: AgentMail identity stability existed as memory/doctrine, while
+Claude and worker flows could still call register/mint paths or register a
+session without proving `fleet_mail_identity`. That let identity names become
+the accidental primary key and made reboot/compaction churn look like agent
+failure instead of substrate drift.
+
+Forever-Rule: `(session, pane, fleet_mail_project_key)` is the durable identity
+key. `identity_name` is a current pointer, not a primary key. Topology-declared
+fleet identities must resolve to vault tokens, token files without active
+topology ownership are drift, and rotation/mutation signals are append-only
+ledger events. Identity warnings must cite registry proof, not raw tokens.
+
+Fix Applied/Status: added
+`.flywheel/scripts/agentmail-identity-canonical-validator.sh` with canonical CLI
+surface, strict exit-code enforcement for fixtures, and read-only live advisory
+smoke. Added advisory PostToolUse hook
+`~/.claude/hooks/flywheel-orch-agentmail-identity-canonical-gate.sh` and wired
+it additively into `~/.claude/settings.json`.
+
+Test coverage: six golden cases shipped:
+canonical state, missing vault token, orphan token, non-append-only mutation
+row, duplicate identity across sessions, and `--apply` read-only/no-mutation
+verification.
+
+Evidence:
+- Bead: `flywheel-wire-agentmail-identity-canonical-2683be9e`.
+- Validator: `.flywheel/scripts/agentmail-identity-canonical-validator.sh`.
+- Hook: `~/.claude/hooks/flywheel-orch-agentmail-identity-canonical-gate.sh`.
+- Settings: `~/.claude/settings.json`.
+- Test: `.flywheel/tests/test_agentmail_identity_canonical_gate.sh`.
+- Fixtures: `.flywheel/tests/fixtures/agentmail-identity-canonical/`.
+- Live smoke: `/tmp/aicv-smoke.json`.
+- L112: `OK_wire_agentmail_identity_canonical`.
+
+## Phase 4 Bead #1 closed: capacity-halt production-path-reconcile + lease primitive (2026-05-06)
+
+Bead: `flywheel-capacity-halt-production-path-reconcile-2026-05-06`.
+
+Leverage class: Donella #5 Rules. The capacity-halt recovery path now has a
+per-pane/digest lease rule before the `continue` transport mutation, preventing
+duplicate watcher ticks from firing the same recovery on the same stable screen.
+
+Root cause: pane 4 correctly wired the production `model_at_capacity_halt`
+classifier and LaunchAgents, but Phase 3 audit finding M1 remained open:
+duplicate watchers/ticks could send repeated `continue` for the same stable
+capacity-halt scrollback.
+
+Forever-Rule: `model_at_capacity_halt` auto-continue is gated by an append-only
+lease keyed by `(session, pane, scrollback_digest)`. A duplicate acquire inside
+the 90-second TTL refuses before transport send. Release is append-only and
+records `success|failure|skipped`; historical acquire rows are never mutated.
+
+Fix Applied/Status: added
+`.flywheel/scripts/capacity-halt-lease-primitive.sh` and integrated it
+additively into `.flywheel/scripts/worker-auto-respawn-watchdog.sh` immediately
+before the `auto_continue` send path. The classifier live fixture still returns
+`subclass=model_at_capacity_halt` and `recommended_recovery=auto_continue`.
+
+Test coverage: lease primitive coverage is 18/18; watchdog regression coverage
+is 34/34 including a duplicate-lease refusal case that proves no `continue` or
+respawn is sent while the lease is held; capacity live fixture coverage is 6/6.
+
+Reconcile verdict: PASS. Pane 4's shipped fix holds end-to-end, the required
+LaunchAgents are visible in `launchctl list`, and audit finding M1 is closed by
+the lease primitive.
+
+Evidence:
+- Reconcile report:
+  `.flywheel/plans/capacity-halt-detector-and-auto-continue-2026-05-06/RECONCILE-pane4-fix.md`.
+- Lease primitive: `.flywheel/scripts/capacity-halt-lease-primitive.sh`.
+- Watchdog: `.flywheel/scripts/worker-auto-respawn-watchdog.sh`.
+- Tests: `.flywheel/tests/test_capacity_halt_lease_primitive.sh`,
+  `.flywheel/tests/test_worker_auto_respawn_watchdog.sh`,
+  `.flywheel/tests/test_capacity_halt_live_detect.sh`.
+- L112: `OK_capacity_halt_phase4_bead1_reconcile`.
+
+## Plan-arc opened: orch-heartbeat-cron-no-idle-projects (2026-05-06)
+
+Plan-space-only arc through Phase 3 audit for an orchestrator heartbeat loop
+that converts existing telemetry into idle-safe next-action packets, so
+allowlisted projects do not sit idle when the substrate already knows work,
+recovery debt, validation debt, or peer blockers exist.
+
+Primary empirical input: `/tmp/overnight-velocity-report/SUMMARY.md`.
+
+Empirical trigger:
+- Report window: `2026-05-05T22:00:00Z` to `2026-05-06T10:27:28Z`.
+- Fleet bead activity: flywheel created=0, closed=1, updated=0; skillos,
+  alpsinsurance, and mobile-eats all created=0, closed=0, updated=0.
+- Cross-orch ledger rows: 33.
+- Fuckup-log rows: 330, including 262 post-callback-reminder recovery rows.
+- Codex stuck-detector rows: 441, including 171 `unknown_stable` and 9 `alive`
+  subclass rows.
+
+Donella read: Meadows #6 Information Flows is the primary leverage point. The
+system has observation stock but lacks a delivery loop that turns evidence into
+orchestrator action when the orchestrator is idle. Meadows #5 Rules applies to
+idempotency and authorization; #4 Self-organization applies to the adapter
+surface that lets new ledgers become future action sources.
+
+Plan status:
+- Phase 1 complete: problem-space, ecosystem-audit, and implementation-design
+  research lanes.
+- Phase 2 complete: 2 refinement rounds; final conceptual diff 3.8%.
+- Phase 3 audit complete: 3 lenses, disposition `auto_advance`, findings
+  critical=0, high=3, medium=4, low=2.
+- First-ship boundary: flywheel-local, target `flywheel:1` only, read existing
+  ledgers, write heartbeat-owned receipts only, no peer prompt injection.
+- Bead DAG preview: 9 implementation beads, with Phase 3 audit IDs mapped into
+  acceptance criteria.
+
+Evidence:
+- Plan path:
+  `.flywheel/plans/orch-heartbeat-no-idle-projects-2026-05-06/`.
+- Intent: `00-INTENT.md`.
+- Research: `01-RESEARCH-A-problem-space.md`,
+  `01-RESEARCH-B-ecosystem-audit.md`,
+  `01-RESEARCH-C-implementation-design.md`.
+- Refine: `02-REFINE-r1.md`, `02-REFINE-r2.md`, `00-PLAN.md`.
+- Audit: `03-AUDIT-r1.md`, `03-AUDIT-FINDINGS.md`.
+- State: `STATE.json`, `current_phase=decompose`,
+  `audit_disposition=auto_advance`.
+
+## Phase 4 Bead #2 closed: capacity-halt auto-continue canonical primitive (2026-05-06)
+
+Bead: `flywheel-capacity-halt-auto-continue-primitive-2026-05-06`.
+
+Leverage class: Donella #5 Rules. The capacity-halt `continue` mutation is now
+a bounded primitive instead of watchdog-local transport code: acquire the
+per-pane/digest lease, send `continue` with `y\n` confirmation, release the
+lease with outcome, and exit distinctly for duplicate lease, malformed input,
+transport failure, or transport timeout.
+
+Root cause: Bead #1 closed duplicate-tick risk inside the watchdog, but the
+auto-continue invocation still lived inline. That left other watchers without a
+canonical reusable primitive and left audit finding M2 open for transport hangs.
+
+Forever-Rule: any watcher recovering `model_at_capacity_halt` calls
+`.flywheel/scripts/capacity-halt-auto-continue-primitive.sh --apply --json`
+rather than hand-rolling `ntm send`. Dry-run is read-only; apply is the only
+mutation gate; default transport timeout is 8 seconds.
+
+Fix Applied/Status: added the primitive and updated
+`.flywheel/scripts/worker-auto-respawn-watchdog.sh` to call it. Lease
+integration is verified for fresh acquire/release, held-lease skip, transport
+failure release, and timeout release. Timeout records
+`release.requested_result=timeout`; the read-only Bead #1 lease vocabulary
+falls back to a `failure` release row so no lease remains active.
+
+Test coverage: new primitive coverage is 6/6 cases; watchdog regression remains
+34/34; lease primitive regression remains 18/18.
+
+Audit verdict: PASS. M1 remains closed by the lease rule, and M2 is closed by
+the canonical 8-second bounded transport primitive.
+
+Evidence:
+- Primitive: `.flywheel/scripts/capacity-halt-auto-continue-primitive.sh`.
+- Watchdog integration: `.flywheel/scripts/worker-auto-respawn-watchdog.sh`.
+- Tests: `.flywheel/tests/test_capacity_halt_auto_continue_primitive.sh`,
+  `.flywheel/tests/test_worker_auto_respawn_watchdog.sh`,
+  `.flywheel/tests/test_capacity_halt_lease_primitive.sh`.
+- L112: `OK_capacity_halt_phase4_bead2_primitive`.
+
+## Trauma class registered: orch-trust-trap-agentmail-as-completion-signal (2026-05-06)
+
+- Reported by mobile-eats:1 via NTM cross-session send (handoff_id `finding-orch-trust-trap-agentmail-2026-05-06`)
+- Severity: medium. Cross-project applicability confirmed: mobile-eats, flywheel, skillos.
+- Class summary: orchestrators that depend on agentmail callbacks as the completion signal stall when workers skip the callback envelope. Worker completes (filesystem evidence + NTM pane WAITING transition) but callback envelope never lands. Orch waits passively, burning wall-clock + human attention.
+- 3-strike status: NOT 1st instance — class is already 6+ strike. Prior memory rules: `feedback_callback_first_dispatch`, `feedback_orchestrator_validates_callbacks`, `feedback_worker_verify_callback_delivered`, `feedback_callback_pane_registry`, `feedback_lost_callback_artifact_reconstruction`.
+- Sibling pattern shipped today: capacity-halt-success-measurement (Phase 4 Bead #3 of capacity-halt DAG) — same trauma class at watcher layer (success measured by post-send recapture, NOT transport-ack).
+- Mobile-eats:1 framing canonical: "completion-by-evidence, not completion-by-trust. Filesystem state (1) > NTM pane state (2) > agentmail callback envelope (3). (3) is nice-to-have, never a gate."
+- Three recommendations routed:
+  1. ACCEPTED — `/flywheel:dispatch` skill encodes completion-by-evidence verification protocol (T+0, T+expected, T+1.5×expected, T+2×expected checkpoints). Sibling-shape with capacity-halt success-measurement bead.
+  2. DEFERRED — ScheduleWakeup constraint relaxation requires substrate-harness change; flagged for Joshua review (class 1 new-substrate, mission-lock dispose).
+  3. ACCEPTED — worker-side callback failure auto-detection + fuckup class `worker-completion-no-callback` (severity LOW, bead/worker/dispatch-time fields).
+- ACK delivered: cross-orch ledger row appended; mobile-eats:1 notified.
+
+## Wave 3a P0 wired: identity-stability-session-pane-project-tuple structural gate (2026-05-06)
+
+Memory rule: `feedback_identity_stability_session_pane_project_primary_key.md`.
+
+Leverage class: Donella #4 Self-organization. The identity substrate now has a
+mechanical validator for the stable owner tuple instead of relying on agents to
+remember that mailbox names are only pointers.
+
+Root cause: six independent rotation triggers can churn Agent Mail names while
+the owner stays fixed: `agent-mail-name-policy`, `resolver-MCP`,
+`compaction`, `missing-token`, `path-canon`, and `strict-mode`. Treating the
+name as the durable key creates false new owners, orphan-token residue, and
+broken callback/dispatch joins.
+
+Forever-Rule: `(session, pane, fleet_mail_project_key)` is the durable primary
+key. `identity_name` and `agent_name` are current pointers only. A rotation must
+preserve a queryable predecessor chain, and dispatch/callback text that cites a
+name as proof should include `identity_primary_key=session:pane:project` or a
+registry-resolution field.
+
+Fix Applied/Status: added read-only tuple validator
+`.flywheel/scripts/identity-stability-tuple-validator.sh` and advisory
+PostToolUse hook `~/.claude/hooks/flywheel-orch-identity-stability-tuple-gate.sh`.
+The hook is wired additively in `~/.claude/settings.json` as a sibling to
+`flywheel-orch-agentmail-identity-canonical-gate.sh`.
+
+Test coverage: `.flywheel/tests/test_identity_stability_tuple_gate.sh` passes
+7/7 counted cases. Coverage includes stable tuple, stable rotation with
+predecessor, missing predecessor, duplicate current pointer, orphan token,
+malformed tuple input, and hardcoded `agent_name` warning; the hook also has an
+allow smoke for tuple-backed proof.
+
+Evidence:
+- Bead: `flywheel-wire-identity-stability-session-pane-pr-1851e8b4`.
+- Validator: `.flywheel/scripts/identity-stability-tuple-validator.sh`.
+- Hook: `~/.claude/hooks/flywheel-orch-identity-stability-tuple-gate.sh`.
+- Settings: `~/.claude/settings.json`.
+- Tests: `.flywheel/tests/test_identity_stability_tuple_gate.sh`.
+- Fixtures: `.flywheel/tests/fixtures/identity-stability-tuple/`.
+- Live smoke: `/tmp/istv-smoke.json`.
+
+## Wave 3a P0 wired: flywheel-owns-orch-pane-recovery advisory gate (2026-05-06)
+
+Memory rule: `feedback_flywheel_owns_orch_pane_recovery.md`.
+
+Leverage class: Donella #4 Self-organization. Peer orchestrator recovery is
+now protected by an advisory PostToolUse feedback loop before the old
+"orchestrator panes are untouchable" reflex can reach Joshua.
+
+Root cause: L115 and `.flywheel/scripts/peer-orch-respawn-permit.sh` already
+encoded the correct permit path, but there was no orchestrator-side advisory
+gate for output that refused peer-orch recovery without first citing the permit
+gate, or output that proposed respawning `flywheel:1` itself.
+
+Forever-Rule: peer orchestrator panes are recovery-eligible through
+`.flywheel/scripts/peer-orch-respawn-permit.sh`; only `flywheel:1` recovering
+its own `flywheel:1` pane is refused and routed to calling-in-sick recovery.
+
+Fix Applied/Status: added advisory hook
+`~/.claude/hooks/flywheel-orch-flywheel-owns-orch-pane-recovery-gate.sh` and
+wired it additively into `~/.claude/settings.json` beside the existing
+`flywheel-orch-*` PostToolUse gates. Existing L115, the permit gate script,
+the permit test, and `/flywheel:respawn` Step 0 were left read-only.
+
+Test coverage: `.flywheel/tests/test_flywheel_owns_orch_pane_recovery_gate.sh`
+passes 7/7 cases. Coverage includes peer-orch respawn refusal without permit,
+peer respawn after permit, explicit permit script proof, forbidden
+`flywheel:1` self-respawn, calling-in-sick exception, unrelated empty output,
+and malformed JSON silent exit.
+
+Sibling-shape: matches the advisory hook pattern used by
+`flywheel-orch-watchdog-auto-respawn-not-notify-only-gate.sh`,
+`flywheel-orch-orchestrator-must-finish-p0-gate.sh`,
+`flywheel-orch-use-ntm-not-raw-tmux-gate.sh`,
+`flywheel-orch-agentmail-identity-canonical-gate.sh`, and
+`flywheel-orch-identity-stability-tuple-gate.sh`.
+
+Evidence:
+- Bead: `flywheel-wire-flywheel-owns-orch-pane-recovery-1f097583`.
+- Hook: `~/.claude/hooks/flywheel-orch-flywheel-owns-orch-pane-recovery-gate.sh`.
+- Settings: `~/.claude/settings.json`.
+- Test: `.flywheel/tests/test_flywheel_owns_orch_pane_recovery_gate.sh`.
+- Canonical permit gate reference:
+  `.flywheel/scripts/peer-orch-respawn-permit.sh`.
+- Live smoke: `/tmp/forpr-live-smoke.json`.
+
+## Phase 4 Bead #3 closed: capacity-halt success-measurement (post-send recapture, not transport-ack) (2026-05-06)
+
+Bead: `flywheel-capacity-halt-success-measurement-2026-05-06`.
+
+Leverage class: Donella #5 Rules plus #6 Information Flows. Capacity-halt
+recovery success is no longer inferred from transport acknowledgement. The
+rule is now completion-by-evidence: post-send recapture must prove output
+delta, capacity text disappearance, or robot activity transition/velocity.
+
+Root cause: Bead #2 bounded the `continue` transport, but send ack still
+risked becoming the success signal. The same trust trap appeared in
+mobile-eats:1 as trauma class
+`orch-trust-trap-agentmail-as-completion-signal`: completion by callback
+envelope is not evidence of completion. The watcher layer had the same class in
+miniature: transport ack is not evidence of recovery.
+
+Expanded empirical gap: alps:2 proved the detector could classify
+`model_at_capacity_halt` and recommend `auto_continue` while
+`recovery_attempted=none`. The detector auto-recover dispatch table now wires
+that subclass to `.flywheel/scripts/capacity-halt-auto-continue-primitive.sh`,
+sibling to the existing `buffer_stuck` Enter retry and
+`post_callback_reminder` escape/reprompt recovery branches.
+
+Forever-Rule: a capacity-halt recovery attempt has three separately reported
+states: `attempted`, `sent`, and `recovered`. `attempted` means the watcher
+decided to invoke recovery, `sent` means the transport ack or timeout path was
+reached, and `recovered` means the success-measurement primitive returned
+`verdict=success`.
+
+Fix Applied/Status: added read-only
+`.flywheel/scripts/capacity-halt-success-measurement.sh`, integrated it into
+the auto-continue primitive before lease release outcome is chosen, added the
+three watchdog counters/ledger fields, and wired
+`.flywheel/scripts/codex-template-stuck-detector.sh` auto-recover for
+`model_at_capacity_halt`.
+
+Test coverage: success-measurement coverage is 7/7 cases; auto-continue
+primitive regression remains 6/6; worker watchdog regression remains 34/34;
+codex-template-stuck-detector regression is 23/23 including the new
+capacity-halt primitive invocation assertion.
+
+Audit verdict: PASS. M5 is closed by post-send evidence, L1 is closed by lease
+release using measured recovery outcome, and L3 is closed by
+attempted/sent/recovered separation. The mobile-eats:1 Rec 1 pattern is now
+implemented at the watcher-recovery layer.
+
+Evidence:
+- Success measurement: `.flywheel/scripts/capacity-halt-success-measurement.sh`.
+- Auto-continue primitive: `.flywheel/scripts/capacity-halt-auto-continue-primitive.sh`.
+- Watchdog counters: `.flywheel/scripts/worker-auto-respawn-watchdog.sh`.
+- Detector dispatch table: `.flywheel/scripts/codex-template-stuck-detector.sh`.
+- Tests: `.flywheel/tests/test_capacity_halt_success_measurement.sh`,
+  `.flywheel/tests/test_capacity_halt_auto_continue_primitive.sh`,
+  `.flywheel/tests/test_worker_auto_respawn_watchdog.sh`,
+  `tests/codex-template-stuck-detector.sh`.
+- Cross-reference: `orch-trust-trap-agentmail-as-completion-signal`.
+- L112: `OK_capacity_halt_phase4_bead3_success_measurement`.
+
+## Plan-arc Phase 4 decomposed: orch-heartbeat 9-bead DAG filed (2026-05-06)
+
+Bead: `flywheel-orch-heartbeat-phase4-decompose-2026-05-06`.
+
+Leverage class: Donella #6 Information Flows plus #5 Rules and #4
+Self-organization. The orch-heartbeat plan arc now has an implementation-ready
+9-bead DAG with explicit dependencies, wave sizing, acceptance surfaces, and a
+deferred manager-state integration boundary. This keeps the next phase inside
+the existing substrate instead of spawning a new scheduler path.
+
+Sibling shape: capacity-halt Phase 4. That earlier decomposition moved from
+audit findings into a staged bead DAG and then closed Wave A/B work through
+small, testable slices. Orch-heartbeat uses the same shape: schema and
+read-only composition first, idempotent decision and delivery verification
+next, then observability/config/refusal coverage, and only then manager-state
+projection.
+
+Scope: plan-space only. No code-space files were intentionally mutated. The
+new plan artifact is
+`.flywheel/plans/orch-heartbeat-no-idle-projects-2026-05-06/04-BEADS-DAG.md`,
+and `STATE.json` now records `current_phase=decompose`, `phase4_status=decomposed`,
+`beads_created=9`, four wave counts, `phase4_critical_path_min=245`, and
+`phase4_audit_findings_addressed=9`.
+
+Findings routed: the Phase 3 audit's 9 findings are mapped across the 9 beads:
+candidate schemas, read-only composer, idle/idempotency gate, delivery
+verifier, tick-driver doctor, morning-report projection, session allowlist,
+cross-session refusal tests, and manager-state integration. The DAG explicitly
+anchors to the existing 23 orch-substrate scripts and 30 ledger surfaces rather
+than authoring a parallel heartbeat substrate.
+
+Evidence:
+- Plan DAG: `.flywheel/plans/orch-heartbeat-no-idle-projects-2026-05-06/04-BEADS-DAG.md`.
+- State: `.flywheel/plans/orch-heartbeat-no-idle-projects-2026-05-06/STATE.json`.
+- Bead substrate: `.beads/issues.jsonl` append-only fallback rows for 9 open beads plus the Phase 4 close row.
+- L112: `OK_orch_heartbeat_phase4_decompose`.
+
+## Phase 4 Bead #4 closed: capacity-halt cross-session authorization + protected-pane refusal (2026-05-06)
+
+Bead: `flywheel-capacity-halt-cross-session-authorization-2026-05-06`.
+
+Fix Applied/Status: added read-only
+`.flywheel/scripts/capacity-halt-pane-authorization.sh` and wired
+`.flywheel/scripts/capacity-halt-auto-continue-primitive.sh` to require a
+topology authorization decision before lease acquire or `ntm send`.
+
+Routing rule: latest `session-topology.jsonl` row by `effective_at` maps each
+target pane to a role. `worker_pane` is authorized; four protected target
+contexts (local orchestrator, peer orchestrator, human, callback) refuse with
+`protected_refusal`; unknown panes refuse with `unknown_pane`; stale topology
+refuses with `topology_stale`.
+
+Ledger schema: capacity-halt attempt rows now carry `pane_role`,
+`authorization_outcome`, and `topology_source_ts` alongside the existing
+attempted/sent/recovered fields.
+
+Audit verdict: PASS. M3 is closed by topology-aware authorization before
+auto-continue, M4 is closed by protected-pane refusal before send/lease, and L2
+is closed by the three new audit fields.
+
+Evidence:
+- Authorization primitive: `.flywheel/scripts/capacity-halt-pane-authorization.sh`.
+- Auto-continue integration: `.flywheel/scripts/capacity-halt-auto-continue-primitive.sh`.
+- Watchdog ledger integration: `.flywheel/scripts/worker-auto-respawn-watchdog.sh`.
+- Tests: `.flywheel/tests/test_capacity_halt_pane_authorization.sh`,
+  `.flywheel/tests/test_capacity_halt_auto_continue_primitive.sh`,
+  `.flywheel/tests/test_worker_auto_respawn_watchdog.sh`.
+- L112: `OK_capacity_halt_phase4_bead4_authorization`.
+
+## P0 regression fix: capacity-halt primitive send-without-submit (CASS-check ate auto-yes) (2026-05-06)
+
+Bead: `flywheel-fix-capacity-halt-primitive-no-cass-check-2026-05-06`.
+
+Mechanism: the capacity-halt primitive called `ntm send <session>
+--pane=<N> continue` with `input="y\n"` but without `--no-cass-check`. The
+default CASS similar-work prompt consumed that auto-yes, so `ntm send` returned
+success while the target Codex pane only had queued `continue` text and no
+submitted Enter.
+
+Joshua-observed evidence: alpsinsurance:2 showed the literal `continue` text in
+the pane buffer after the detector-to-primitive recovery fired, but Joshua had
+to press Enter manually before Codex consumed it.
+
+Fix Applied/Status: `.flywheel/scripts/capacity-halt-auto-continue-primitive.sh`
+now passes `--no-cass-check` between `--pane=<N>` and the message body. The
+existing `input="y\n"` remains in place for non-CASS prompts, but routine
+autonomous sends no longer spend that input on the CASS check.
+
+Scope note: all capacity-halt auto-recovery events earlier today, including
+alps:2, alps:4, flywheel:2, and sibling panes, may have reported
+acknowledgement success while silently failing to submit the recovery prompt.
+
+Cross-reference: fuckup class
+`capacity-halt-primitive-send-without-submit`.
+
+Live re-test plan for the next natural capacity-halt event:
+1. Wait for a real pane to show model-at-capacity halt.
+2. Capture pre-send digest with `--robot-tail`.
+3. Observe primitive fire and capture post-send digest.
+4. Confirm `continue` submitted by digest change within 10 seconds and capacity
+   text disappearance.
+
+Evidence:
+- Primitive: `.flywheel/scripts/capacity-halt-auto-continue-primitive.sh`.
+- Test: `.flywheel/tests/test_capacity_halt_auto_continue_primitive.sh`.
+- Adjacent integration expectation:
+  `.flywheel/tests/test_capacity_halt_pane_authorization.sh`.
+- Regression cases: `no_cass_check_flag_present` and
+  `argv_order_matches_ntm_send_shape`.
+- L112: `OK_capacity_halt_no_cass_check_fix`.
+
+## 2026-05-06T11:48Z — Wave 3a P0 wired: calling-in-sick-policy advisory gate
+
+**Bead:** flywheel-wire-calling-in-sick-policy-flywheel-ow-a04ca90e (P0, Wave 3a) — closed by orch-on-behalf-of-CloudyMill (pane 2 blocked on shared_append_reservation_conflict; canonical scoped-commit-by-pathspec recipe applied per `feedback_canonical_recipe_scoped_commit_by_pathspec.md`)
+
+**What landed (worker CloudyMill):**
+- `~/.claude/hooks/flywheel-orch-calling-in-sick-policy-gate.sh` (64 lines, advisory PostToolUse)
+- `.flywheel/tests/test_calling_in_sick_policy_gate.sh` (79 lines, 8/8 cases pass)
+- `~/.claude/settings.json` updated with new PostToolUse entry (sibling shape with 6 prior flywheel-orch-* gates)
+
+**Patterns covered:**
+1. `worker-failure-escalated-to-joshua-instead-of-detector`
+2. `orch-failure-escalated-to-joshua-instead-of-flywheel1`
+3. `flywheel1-self-failure-not-broadcast-to-peer-orchs`
+
+**Donella leverage:** #4 Self-organization. Escalation ladder: detector → flywheel:1 → peer-mesh → Joshua. Last unstarted Wave 3a P0; sibling-shape with today's 6 prior structural gates (agentmail-identity-canonical, donella-trace, identity-stability-tuple, no-punt-output, p0-finish-first, use-ntm-not-raw-tmux) plus this morning's wire-flywheel-owns-orch-pane-recovery (closed pane 4, 11:31Z).
+
+**Closeout pattern:** Worker did 4/6 (hook + test + settings + report), blocked on INCIDENTS+JSONL append by reservations 5872/5873/5882/5883 held by CrimsonGlen+MistySparrow. Worker emitted BLOCKED callback with files_released=5862,5863,5864 + partial validation. Orch executed canonical scoped-commit-by-pathspec recipe (append-only safe scope) to ship final 2 deliverables. Wave 3a P0 sweep COMPLETE.
+
+## Plan-arc Phase 5 r1 polish: orch-heartbeat reconverged on event-driven paradigm (mobile-eats:1 cross-orch finding) (2026-05-06)
+
+Bead: `flywheel-orch-heartbeat-phase5-polish-event-driven-2026-05-06`.
+
+Cross-orch input absorbed: mobile-eats:1 row 150,
+class `orch-bash-prompt-state-change-trigger`. The finding inverted the
+Phase 4 cron-pulled heartbeat model: with timestamped state-transition
+substrate already present, orchestrators can regenerate prompts on state
+change instead of burning context on empty cadence ticks.
+
+Substrate survey: flywheel:1 dispatch preflight ran K=50 Socraticode over the
+orch substrate and found the event-driven path roughly 80 percent present:
+JSONL streams, `ntm --robot-activity`, idle-state classification, L91 delivery
+receipts, JSONL fallback close truth, idle auto-dispatch, watcher-isomorphic
+probe shape, and the four-input sibling pattern from `worker-stall-alert-probe`.
+CloudyMill independently verified with K=10 against the canonical repo path and
+observed 945 indexed chunks.
+
+Plan delta: Phase 4's nine-bead cron-heartbeat DAG reconverged to a six-bead
+event-driven preview. Existing dispositions are KEEP=1, COLLAPSE=3,
+TRANSFORM=5, plus one new subscriber primitive. Wave A is reshaped so the
+load-bearing foundation is `orch-state-change-bash-prompt-subscriber.sh`
+conceptually: event schemas/cursors plus a subscriber primitive over five
+JSONLs, robot activity, topology/policy, and pane-tail delivery evidence.
+Fallback polling remains a recovery mode and must be visible in doctor/report
+fields.
+
+Donella read: Meadows #6 Information Flows. Cron-pull asks whether information
+changed after a timer fires; event-subscribe moves truthful state to the
+orchestrator when the state transition is appended. Meadows #5 Rules remains
+the gate for allowlists, idempotency, cursor replay, and protected-pane refusal.
+
+Sibling-shape: capacity-halt Phase 4 success-measurement proved the same
+evidence-not-trust pattern at the worker recovery layer: success is measured by
+post-send recapture and state transition, not by transport acknowledgement. The
+orch-heartbeat subscriber applies the same rule to orchestration itself:
+evidence triggers work; acknowledgement alone is not work.
+
+Evidence:
+- Polish artifact:
+  `.flywheel/plans/orch-heartbeat-no-idle-projects-2026-05-06/05-POLISH-r1.md`.
+- DAG preview:
+  `.flywheel/plans/orch-heartbeat-no-idle-projects-2026-05-06/05-POLISH-r1-DAG-preview.md`.
+- State:
+  `.flywheel/plans/orch-heartbeat-no-idle-projects-2026-05-06/STATE.json`.
+- Net delta: 9 -> 6.
+
+
+## Phase 4 Bead #5 closed: capacity-halt burst-budget + fleet cap + fallback signal (2026-05-06)
+
+Bead: `flywheel-capacity-halt-burst-budget-2026-05-06`.
+
+What landed:
+- New read-only budget primitive: `.flywheel/scripts/capacity-halt-burst-budget.sh`.
+- Auto-continue now checks budget after worker-pane authorization and before lease acquisition.
+- Budget exhaustion exits auto-continue rc=8 with `attempted=false`, `sent=false`, `recovered=false`, writes fallback row class `capacity-halt-budget-exhausted`, and invokes `/Users/josh/.local/bin/notify`.
+- Watchdog capacity-halt attempt rows now include `per_pane_count_window`, `fleet_count_window`, and `budget_outcome`.
+- Pane 4's shipped `--no-cass-check` transport fix remains preserved in the auto-continue send argv.
+
+Default limits:
+- Per pane: 3 auto-continue attempts in 600 seconds.
+- Fleet: 5 auto-continue attempts in 60 seconds.
+
+Evidence:
+- Budget primitive: `.flywheel/scripts/capacity-halt-burst-budget.sh` (129 lines).
+- Auto primitive: `.flywheel/scripts/capacity-halt-auto-continue-primitive.sh` (additive +30 lines from bead #4 baseline).
+- Watchdog: `.flywheel/scripts/worker-auto-respawn-watchdog.sh` (additive +15 lines from bead #4 baseline).
+- Tests: `.flywheel/tests/test_capacity_halt_burst_budget.sh` (9/9 cases), `.flywheel/tests/test_capacity_halt_auto_continue_primitive.sh` (8/8 cases), `.flywheel/tests/test_capacity_halt_pane_authorization.sh` (8/8 cases), `.flywheel/tests/test_worker_auto_respawn_watchdog.sh` (34/34 assertions).
+- L112: `OK_capacity_halt_phase4_bead5_burst_budget`.
+
+## META-RULE 2026-05-06: autonomous ntm send paths MUST include --no-cass-check + canonical argv order
+
+Trauma class: `autonomous-send-cass-prompt-consumes-submit`.
+
+Mechanism: any unattended `ntm send` can trip the duplicate-work CASS prompt.
+If `--no-cass-check` is missing, the payload may never submit. If the flag is
+placed after the payload, argv parsing can treat it as message content instead
+of transport policy. Canonical order is `ntm send <session> --pane=<pane>
+--no-cass-check <payload>`.
+
+Fix shape:
+- Expected callsites fixed: `.flywheel/scripts/codex-template-stuck-detector.sh`, `.flywheel/scripts/worker-auto-respawn-watchdog.sh`, `.flywheel/scripts/fleet-comms-health-probe.sh`, `.flywheel/scripts/flywheel-resume`.
+- Extra sibling callsites fixed: `.flywheel/scripts/peer-orch-productivity-watch.sh`, `.flywheel/scripts/recovery-escape-then-reprompt.sh` (two sends), `.flywheel/scripts/continuous-productivity-detector-install.sh`, `.flywheel/scripts/idle-pane-auto-dispatch.sh`, `.flywheel/scripts/test-loop-driver-doctor.sh`.
+- Regression assertions added near each primitive or nearest owning test, including runtime fake-ntm assertions where the test already exercises the send path.
+
+Audit cadence: after every autonomous-send bead and before capacity-halt,
+watchdog, fleet-comms, productivity-watch, resume, or recovery primitive
+closeout, run a callsite scan for `ntm send` and verify `--no-cass-check`
+appears before payload-bearing arguments.
+
+Cross-refs:
+- Parent bead: `flywheel-fix-capacity-halt-primitive-no-cass-check-2026-05-06`.
+- Audit bead: `flywheel-audit-ntm-send-no-cass-check-autonomous-callsites-2026-05-06`.
+- Research survey: `/tmp/audit-ntm-send-no-cass-check-research-survey.md`.
+- L112 verifier: `OK_audit_no_cass_check_callsites`.
+
+L-rule proposal: promote this to canonical doctrine if another autonomous
+transport path ships without `--no-cass-check`, or if any autonomous send
+regression recurs after this audit.
+
+## Plan-arc opened: mission-lock paradigm extension absorbing 2 cross-orch findings (mobile-eats:1 row 151 + alps:1 row 152) (2026-05-06)
+
+Two independent peer orchestrators surfaced the same upstream mission-lock
+trauma class within minutes:
+
+- mobile-eats:1 row 151:
+  `mission-lock-undersells-design-system-substrate`.
+- alps:1 row 152:
+  `mission-lock-must-elicit-negative-invariants`.
+
+Disposition: this is 3-strike-equivalent urgency even without waiting for a
+third independent project. The findings describe the same failure from two
+angles: mission-lock declared readiness without proving lock-time substrate and
+without eliciting the negative invariants that make the substrate safe to build
+against.
+
+Phase 1 Lane A is closed:
+
+- Intent:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/00-INTENT.md`.
+- Problem-space inventory:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/01-RESEARCH-A-problem-space-inventory.md`.
+- State:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json`.
+
+Lanes B and C remain queued for sibling dispatch:
+
+- Lane B: ecosystem audit across existing skills, memory rules, and related
+  doctrine.
+- Lane C: implementation design for the mission-lock template extension,
+  scaffold validator, and lock-time audit gate.
+
+Donella read: Meadows #5 Rules plus #6 Information Flows. The rule surface is
+the semantics of "mission locked" and "ready to build"; the missing information
+flow is a substrate/invariant audit visible before feature dispatch.
+
+Evidence:
+- Cross-orch ledger: `~/.local/state/flywheel/cross-orch-coordination.jsonl`
+  row fields `151` and `152`.
+- L112: `OK_mission_lock_paradigm_phase1_lane_a`.
+
+## Plan-arc Phase 1 Lane B closed: ecosystem audit of mission-lock-relevant doctrine (2026-05-06)
+
+Bead: `flywheel-plan-mission-lock-paradigm-extension-lane-b-2026-05-06`.
+Plan artifact:
+`.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/01-RESEARCH-B-ecosystem-audit.md`.
+
+Lane B audited the existing mission-lock-relevant ecosystem before Lane C
+designs any extension. It confirmed rows 151 and 152 were absorbed from the
+cross-orch coordination ledger and mapped them to the six Lane A gap classes:
+`data-lifecycle`, `negative-invariants`, `trap-class-cross-refs`,
+`skill-arsenal-by-surface`, `substrate-artifacts`, and
+`failure-mode-audit`.
+
+Counts:
+- Skills audited: 15 total; 7 ADOPT, 7 EXTEND, 1 AVOID.
+- L-rules referenced: 16.
+- Memory rules referenced: 11.
+- INCIDENTS entries referenced: 8.
+
+Coverage matrix summary:
+
+| Gap class | Existing coverage | Remaining Lane C pressure |
+|---|---|---|
+| `data-lifecycle` | Real-service/no-mocks skills, alps real-or-nothing memory, two-truth evidence doctrine. | Add required source, freshness, error/empty state, deletion/archive, and fallback-prohibition questions. |
+| `negative-invariants` | Security invariant extraction, no-mocks/no-fallback memory, L52/L56 routing. | Add required per-surface "must never happen" section with owner and validator. |
+| `trap-class-cross-refs` | Skill-library-load-bearing memory, L55 skillos route, known no-mocks/runtime-fallback sibling. | Add a cross-ref table linking selected skills to forbidden substitutes and adjacent trap classes. |
+| `skill-arsenal-by-surface` | 15 skills mapped across mission, data, scaffold, auth, security, E2E, visual QA, audit, and ops. | Mission-lock output must list selected skills per product surface with ADOPT/EXTEND/AVOID. |
+| `substrate-artifacts` | SaaS scaffold, demo foundation, CLI scoping, publishability, identity, and web QA substrate. | Add scaffold validator inventory for tokens, primitives, auth, data, CI gates, identity, SEO, density, and demo surfaces. |
+| `failure-mode-audit` | Audit-prep, security-posture, callback validation, two-truth, and publishability incidents. | Add lock-time failure-mode matrix for false readiness, hidden fallback, missing substrate, unowned identity, and unvalidated demo. |
+
+Disposition: Lane B found enough substrate to avoid greenfield design. Lane C
+should extend `/flywheel:mission-lock` and its validator narrowly around the
+six gap classes, then land command/template/doctrine propagation per L96.
+
+L112: `OK_mission_lock_paradigm_phase1_lane_b`.
+
+## Plan-arc Phase 1 Lane C closed: implementation design for mission-lock paradigm extension (2026-05-06)
+
+Bead: `flywheel-plan-mission-lock-paradigm-extension-lane-c-2026-05-06`.
+Plan artifact:
+`.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/01-RESEARCH-C-implementation-design.md`.
+
+Lane C designed the implementation path for extending `/flywheel:mission-lock`
+without mutating the command or skill files in Phase 1. It absorbed Lane A's six
+gap classes, Lane B's ADOPT/EXTEND/AVOID ecosystem audit, mobile-eats row 151,
+alps row 152, and Joshua's five quoted constraints.
+
+Six mission-lock template sections proposed:
+
+| Section | Purpose |
+|---|---|
+| Negative invariants | Capture per-surface "must never ship" rules such as no fallback data and no launch-path mocks. |
+| Trap-class cross-references | Link sibling lies such as runtime fallback, mocked E2E, and transport-ack-as-success. |
+| Skill-arsenal-by-surface mapping | Bind relevant skills to frontend, backend, auth, data, infra, security, observability, agent workflow, and domain surfaces. |
+| Data-lifecycle invariants | Lock source of truth, empty/error state, forbidden fallback, freshness, retention, archive, and delete rules. |
+| Failure-mode audit per substrate | Require default lie, proof signal, refusal condition, and repair route for every adopted substrate. |
+| Substrate scaffolding requirement | Make row 151's 10 substrate artifacts visible before ready-to-build. |
+
+Two scripts proposed:
+
+- `.flywheel/scripts/mission-lock-scaffold-validator.sh`: init/lock-time
+  validator with 10 artifact probes and JSON fields `status`,
+  `missing_artifacts[]`, `present_artifacts[]`, and `blocked_lock`.
+- `.flywheel/scripts/mission-lock-readiness-doctor.sh`: backfill/readiness
+  doctor for existing locked repos with JSON fields `completeness_pct`,
+  `missing_sections[]`, and `suggested_amendments[]`.
+
+Preliminary implementation DAG:
+
+- Wave A foundation: mission-lock template extension and receipt schemas.
+- Wave B integration: scaffold validator plus init/mission-lock wiring.
+- Wave C polish: readiness doctor plus doctor/status signal wiring.
+- Wave D propagation: audit-only backfill reports for mobile-eats and alps,
+  then propagation polish.
+
+Phase 1 RESEARCH is complete. Lanes A, B, and C are closed; the plan arc is
+ready for Phase 2 REFINE.
+
+Donella read: Meadows #6 Information Flows makes missing substrate and
+invariants visible before workers build; #5 Rules changes the semantics of
+"locked" from document existence to readiness evidence; #4 Self-Organization
+adds validators and doctors so repos can audit themselves; #2 Paradigms shifts
+mission-lock from destination document to operational substrate contract.
+
+Evidence:
+- Intent:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/00-INTENT.md`.
+- Lane A:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/01-RESEARCH-A-problem-space-inventory.md`.
+- Lane B:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/01-RESEARCH-B-ecosystem-audit.md`.
+- Lane C:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/01-RESEARCH-C-implementation-design.md`.
+- L112: `OK_mission_lock_paradigm_phase1_lane_c`.
+
+## P0 wired: codex_queued_not_submitted classifier + bare-Enter primitive (Joshua-observed silent darkness gap) (2026-05-06)
+
+Bead:
+`flywheel-wire-codex-queued-not-submitted-classifier-and-recovery-2026-05-06`.
+
+The detector previously had no first-class classifier for a Codex pane showing
+Working/background state plus a queued chevron prompt. The observed alps:4
+buffer was:
+
+```text
+• Working (1m 40s • esc to interrupt) · 1 background terminal running
+› Run /review on my current changes
+  gpt-5.5 xhigh · ~/Developer/alpsinsurance
+```
+
+That is an Enter-class recovery, not a respawn-class recovery. Joshua's
+constraint was: "i don't want to respawn an agent that has hit capacity when a
+simple enter will do - that kills all of their context and current state".
+
+Shipped:
+- `codex-template-stuck-detector.sh` now classifies
+  `codex_queued_not_submitted` from `codex_chevron_prompt` +
+  queued-prompt-text + Codex Working/background state.
+- `codex-queued-not-submitted-bare-enter-primitive.sh` sends bare Enter through
+  `ntm send <session> --pane=N --no-cass-check ""`.
+- The primitive reuses the capacity-halt authorization, lease,
+  success-measurement, and burst-budget primitives without mutating them.
+- `--auto-recover` now routes the new subclass to bare Enter, not
+  capacity-halt auto-continue and not respawn.
+
+Cross-refs:
+- META-RULE memory:
+  `feedback_enter_press_not_respawn_class.md`.
+- Doctrine sibling: L91 dispatch-delivery-is-a-four-state-receipt.
+- Sibling arc:
+  `flywheel-codex-model-at-capacity-halt-class-2026-05-06`.
+
+Evidence:
+- Test:
+  `.flywheel/tests/test_codex_queued_not_submitted_classifier_and_recovery.sh`
+  passed 11/11 cases, including the live alps string match.
+- Primitive line ceiling:
+  `.flywheel/scripts/codex-queued-not-submitted-bare-enter-primitive.sh`
+  is 180 lines.
+- L112:
+  `OK_codex_queued_not_submitted_wired`.
+
+## 2026-05-06T13:02Z — Wire enter-press-not-respawn-class advisory gate (META-RULE 12:18Z parity closure)
+
+**Bead:** flywheel-wire-enter-press-not-respawn-class-14670890 (P0, auto-filed by memory-rule-gate-parity-detector) — closed by orch-on-behalf-of-MagentaPond (pane 3 BLOCKED on append_reservation_conflict; canonical scoped-commit-by-pathspec recipe applied per `feedback_canonical_recipe_scoped_commit_by_pathspec.md`)
+
+**What landed (worker MagentaPond/WindyCastle on pane 3):**
+- `~/.claude/hooks/flywheel-orch-enter-press-not-respawn-class-gate.sh` (89 lines, advisory PostToolUse)
+- `.flywheel/tests/test_enter_press_not_respawn_class_gate.sh` (87 lines, 10/10 cases pass)
+- `~/.claude/settings.json` updated with new PostToolUse entry (sibling shape with 8 prior flywheel-orch-* gates)
+
+**Patterns covered:**
+1. `respawn-proposed-without-trauma-class-citation` — orch proposing respawn without citing oom/crashed/#12645/pane-gone
+2. `respawn-proposed-with-queued-prompt-visible` — respawn proposed when queued chevron + codex Working visible (Enter-class recovery applies)
+3. `respawn-proposed-with-capacity-halt-text` — respawn proposed when capacity-halt prompt visible (auto-continue applies)
+
+**Donella leverage:** #5 Rules. Parity-closure for META-RULE memory file `feedback_enter_press_not_respawn_class.md` (codified 12:18Z after Joshua corrected: "i don't want to respawn an agent that has hit capacity when a simple enter will do - that kills all of their context and current state"). Sibling-shape with 8 prior structural gates shipped today + the just-closed Joshua-silent-darkness gap (codex_queued_not_submitted classifier+primitive at 12:33Z).
+
+**Self-validating:** today's empirical 12:46Z pane 3 respawn timing miss (corrected by Joshua 12:46Z) AND the just-now pane 4 bare-Enter recovery (12:55Z, cleared 31m56s queued state with ZERO context loss) both validate the META-RULE the gate enforces.
+
+**Closeout pattern:** Worker did 6/8 (hook + test + settings + report + tests passed + docs). Blocked on INCIDENTS.md + JSONL append by WindyCastle reservations (released_count=5 per UPDATE). Worker emitted BLOCKED callback. Orch executed canonical scoped-commit-by-pathspec recipe (append-only safe scope) to ship final 2 deliverables.
+
+## Plan-arc Phase 2 r1 refine: substrate-quality-gate triple synthesis (Findings 1+2+3) (2026-05-06)
+
+Bead:
+`flywheel-plan-mission-lock-paradigm-extension-phase2-refine-r1-2026-05-06`.
+
+Phase 2 r1 refined the mission-lock paradigm plan arc into one triple gate
+instead of three unrelated fixes:
+
+1. Mission-lock gate: rows 151/152 require substrate scaffolding, negative
+   invariants, data lifecycle, trap-class cross-references, skill-by-surface
+   mapping, and failure-mode audit before `ready_to_build=true`.
+2. Dispatch-author gate: row 153 requires load-bearing classification, skill
+   suite injection, `load_bearing` bead/dispatch metadata, and gsd-planner
+   classifier wiring before workers start.
+3. Close-validator gate: row 149/L91 requires completion-by-evidence plus
+   `load_bearing_skills_applied` receipts before DONE is accepted.
+
+Artifact:
+`.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/02-REFINE-r1.md`.
+
+State:
+`.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json` now has
+`current_phase=refine`, `refine_round=1`, `convergence_streak=0`,
+`phase1_research_complete=true`, and
+`cross_orch_findings_absorbed=[151,152,153]`.
+
+Counts:
+- Mission-lock amendments: 6.
+- Dispatch-author amendments: 5.
+- Close-handler amendments: 5.
+- Scripts proposed: 2 (`mission-lock-scaffold-validator.sh` and
+  `mission-lock-readiness-doctor.sh`).
+- Open questions for Phase 3 audit: 12.
+
+Orthogonality:
+this plan arc is not the orch-heartbeat plan arc. Orch-heartbeat answers when
+an orchestrator should regenerate prompts after state changes. This plan answers
+whether mission-lock, dispatch, and closeout have enough substrate-quality
+evidence to proceed.
+
+Evidence:
+- Refine artifact:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/02-REFINE-r1.md`.
+- Phase 1 inputs:
+  Lane A/B/C research artifacts in the same plan directory.
+- L112:
+  `OK_mission_lock_paradigm_phase2_r1`.
+
+## Patch /flywheel:respawn skill: extended post-respawn boot wait window 5-8s -> 15-20s + stale-scrollback verification protocol (2026-05-06)
+
+Bead:
+`flywheel-patch-flywheel-respawn-boot-wait-window-2026-05-06`.
+
+Empirical observation:
+at 2026-05-06T12:46Z, pane 3 had been respawned around 12:45Z. I probed at
+roughly 8 seconds and saw robot-activity `ERROR` with an `exception` pattern,
+then prematurely treated the respawn as failed. Joshua corrected the
+classification: "pane 3 was respawned its ready for dsipatch - you have to wait
+a little longer".
+
+Root cause:
+Codex needed about 15-20 seconds to fully settle after relaunch. The
+robot-activity `ERROR` classification was poisoned by stale scrollback from the
+pre-respawn pane, not by a currently failing agent. Stale patterns such as
+`exception`, `api_error`, and `failed_text` can briefly survive alongside a
+fresh Codex chevron prompt.
+
+Patch:
+`/Users/josh/.claude/commands/flywheel/respawn.md` Step 5 now waits 15-20
+seconds after agent relaunch and requires a direct
+`ntm --robot-tail=<session> --panes=<pane> --lines=10` buffer probe before
+classifying the respawn state. A compatibility skill path at
+`~/.claude/skills/flywheel/respawn/SKILL.md` points at the canonical command
+document so existing skill-path probes resolve the same content.
+
+Forever-rule:
+post-respawn robot-activity `ERROR` with `codex_chevron_prompt` in
+`detected_patterns` is not sufficient evidence of failed respawn during the
+boot window. Wait 15-20 seconds minimum, verify expected agent type, and use a
+fresh buffer probe as the canonical truth source before taking another recovery
+action.
+
+Cross-refs:
+- Memory:
+  `feedback_orchestrator_is_the_killer_not_codex.md`.
+- L67 truth-source-must-be-live-not-cached.
+- L91 dispatch-delivery-is-a-four-state-receipt.
+
+Evidence:
+- Test:
+  `.flywheel/tests/test_flywheel_respawn_boot_wait_window.sh` passed 9/9 grep
+  assertions.
+- L112:
+  `OK_flywheel_respawn_boot_wait_window_patched`.
+
+## 2026-05-06T13:11Z — Two-blocker-ticks-escalator regression recurring: orch-on-behalf close rows missed (cf3a fix incomplete)
+
+**Bead:** flywheel-escalator-regression-recurring-2026-05-06 (P1) — closed by orch-on-behalf-of-MagentaPond (pane 3 BLOCKED on append-reservation-conflict; canonical scoped-commit-by-pathspec recipe applied per `feedback_canonical_recipe_scoped_commit_by_pathspec.md`)
+
+**What landed (worker MagentaPond on pane 3):**
+- `.flywheel/scripts/two-blocker-ticks-escalator.sh` (345 lines, additive close-row detection extended to all `closed_by` shapes)
+- `.flywheel/tests/test_two_blocker_ticks_escalator_close_row_shapes.sh` (104 lines, 22 total cases pass: 6 close-shapes + 13 escalator + 3 JSONL-fallback)
+- `/tmp/escalator-regression-recurring-rca-2026-05-06.md` (118 lines RCA report)
+
+**Live replay against today's JSONL: ZERO false-positives.** The 2 escalations from 12:43Z (escalate-8eaf3683 + escalate-8b336af1) and the 13:04Z auto-close case all correctly read as completed work post-patch.
+
+**Root cause confirmed:** The cf3a fix only matched worker-self-close shape (`closed_by="<WorkerName>"`). It missed:
+- Orch-on-behalf close: `closed_by="flywheel-orch-on-behalf-of-<WorkerName>"` (today's CloudyMill 11:48Z + flywheel-owns-orch-pane-recovery 11:31Z)
+- Orch direct close: `closed_by="flywheel-orch"` (the 13:04Z auto-close path)
+
+**Fix:** Extended close-row detection to recognize `closed_by` matching `<WorkerName>` substring OR `flywheel-orch` prefix. Additive only — cf3a baseline preserved.
+
+**Donella read:** #5 Rules + #6 Information Flows. The escalator now reads ALL valid completion signals on the JSONL truth surface, not just one shape. Per memory rule `feedback_regression_test_must_exercise_production_close_path.md` — regression test now uses today's actual JSONL rows as fixtures, not just synthetic ones.
+
+**Closeout pattern:** Worker did 6/8 (script + test + RCA + tests passed + live-replay green + 22-case coverage). Blocked on INCIDENTS.md + JSONL append by RainyMarsh+CloudyMill+PearlBeacon reservations (coordination_message_id=272 sent). Orch executed canonical scoped-commit-by-pathspec recipe (append-only safe scope) to ship final 2 deliverables.
+
+## Cross-reference: codex#21241 vs shipped freeze subclasses (2026-05-06)
+
+Date: 2026-05-06
+
+Class: `codex-cli-stucks-on-every-prompt-cross-ref`
+
+Bead: `flywheel-codex-21241-stuck-on-every-prompt-cross-ref-2026-05-06` (P1, docs-only).
+
+Co-ownership: skillos:1 second cross-orch co-own delivery (sibling to
+`oom_killed_pane`, commit `ebf44878`, shipped 25min wall earlier today).
+
+Mission anchor: `80a15c4368187483a6ba91a904248e10266233fb4d14f301b277f9a6c1a12d0a`.
+
+Upstream report: <https://github.com/openai/codex/issues/21241> — vladon,
+codex-cli 0.128.0, gpt-5.5, Linux WSL2 + Windows Terminal. Body is the bare
+claim "codex-cli stucks on every prompt" plus an opaque thread id
+(`019df9e4-80ce-7831-8ff9-d87e8ffe2a4b`); no scrollback, no two-frame capture,
+no Working/Killed/capacity/queued evidence.
+
+Coverage verdict: **partial — `input_deaf` primary, `buffer_stuck` secondary,
+`unknown_stable` catch-all.** Triaged shape-only against eight shipped subclasses
+(`alive`, `buffer_stuck`, `post_completion`, `input_deaf`,
+`post_callback_reminder_template_with_stale_spinner`,
+`model_at_capacity_halt`, `codex_queued_not_submitted`, `oom_killed_pane`)
+plus `unknown_stable` fallback. Signature is shape-isomorphic with the
+documented `#12645` family (kitty-keyboard + tmux Enter drop on Codex CLI
+WSL/Linux, INCIDENTS.md L185-225 `frozen-codex-spinner-misclassified-as-thinking`):
+WSL2 + Windows Terminal is the same OS family, "stucks on every prompt" is the
+canonical phenomenology of TUI keyboard-protocol Enter drop, and codex-cli
+0.128.0 sits three minor versions past the 0.125.0 #12645 baseline.
+
+Forever-Rule: when an upstream Codex stuck report is evidence-thin (title
+only, no scrollback), the shipped detector handles it via `input_deaf` /
+`buffer_stuck` recovery routing and the `unknown_stable` snapshot collector.
+Do NOT author a speculative subclass without a fixture — that violates
+canonical-cli-scoping (no executable code without evidence) and axiom 9
+(Socraticode-First). The detector's `write_unknown_snapshot` +
+`fuckup_row` path (`codex-template-stuck-detector.sh` lines 581-601, 753-769)
+is the canonical evidence collector for the next subclass authoring cycle.
+
+Fix Applied/Status: no executable change — docs-only triage. No follow-up
+bead filed (no uncovered pattern asserted).
+
+Donella read: #5 Rules + #6 Information Flows. Existing rules
+(subclass-gated recovery, no auto-respawn for `input_deaf`, `unknown_stable`
+snapshot path) already fence the #21241 shape. The information loop
+`unknown_stable` → snapshot → fuckup-log → manual review → new fixture →
+new subclass is wired and is the correct path if a #21241 reproducer
+surfaces scrollback later.
+
+Evidence:
+- Triage doc: `state/codex-21241-cross-reference-2026-05-06.md` (full
+  per-subclass coverage matrix with verbatim regex citations).
+- Detector source: `.flywheel/scripts/codex-template-stuck-detector.sh`
+  (`codex-stuck-detector.v1.2.0`).
+- Sibling INCIDENTS entry: `Codex CLI 0.125.0 kitty-keyboard+tmux Enter drop
+  (#12645)` (L185-225) — same family, recovery `Ctrl-C-relaunch through
+  frozen-pane-detector v2`.
+- Sibling co-own delivery: `oom_killed_pane` shipped commit `ebf44878`
+  (bead `flywheel-codex-oom-killed-subclass-2026-05-06`).
+- Cross-orch coordination: rows 147 (skillos→flywheel),
+  155+156+157+callback (flywheel↔skillos).
+
