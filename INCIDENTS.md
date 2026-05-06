@@ -719,3 +719,45 @@ Evidence:
 - Probe script: `.flywheel/scripts/verify-watcher-launchd-active.sh`.
 - Verified command: `launchctl print gui/$(id -u)/ai.zeststream.codex-stuck-detector-watchdog`.
 - Counterexample observed: `launchctl print user/$(id -u)/ai.zeststream.codex-stuck-detector-watchdog` returned nonzero on this host.
+
+## Wired data-decides-not-meatpuppet as pre-output gate (2026-05-05)
+
+Date: 2026-05-05
+
+Promotion Action: NEW
+
+Class: `data-decides-not-meatpuppet`
+
+Event Count: recurring same-day advisory drift
+
+Severity: high
+
+Cost: Orchestrator output was still able to ask Joshua to choose among options
+when the data already named the next action, workers were available, and ready
+beads existed. Post-hoc counters saw the punt only after Joshua had already
+seen it.
+
+Root Cause: The data-decides rule lived as advisory memory and downstream
+ledger checks, not as a pre-output rule. That put the information flow after
+the human-visible failure.
+
+Forever-Rule: Data-decides-not-meatpuppet must run as a Stop hook before
+orchestrator output is accepted. If proposed text matches punt language while
+worker capacity and ready beads exist, the hook forces re-authoring as a
+dispatch/action instead of asking Joshua.
+
+Fix Applied/Status: `flywheel-wire-data-decides-not-meatpup-bd33` added
+`.flywheel/scripts/orch-no-punt-output-gate.sh`, a Stop hook wrapper at
+`~/.claude/hooks/flywheel-orch-no-punt-output-gate.sh`, additive
+`~/.claude/settings.json` registration, a v1 decision schema, fixture tests, and
+an append-only gate ledger.
+
+Evidence:
+- Gate: `.flywheel/scripts/orch-no-punt-output-gate.sh`.
+- Hook: `~/.claude/hooks/flywheel-orch-no-punt-output-gate.sh`.
+- Schema: `.flywheel/validation-schema/v1/orch-no-punt-decision.schema.json`.
+- Test: `.flywheel/tests/test-orch-no-punt-output-gate.sh`.
+- Sibling precedents: `~/.claude/hooks/flywheel-loop-dispatch-transport-gate.sh`,
+  `~/.claude/commands/flywheel/_shared/mission-anchor-dispatch-preflight.sh`,
+  and `templates/flywheel-install/validate-callback-before-close.sh.tmpl`.
+- Donella read: #5 rules plus #6 information flow upstream of Joshua eyeballs.
