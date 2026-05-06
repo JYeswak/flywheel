@@ -1,0 +1,8 @@
+{
+  "version": "1",
+  "mode": "audit_only",
+  "scope": "repo_local_flywheel",
+  "legacy_bootstrap_policy": "warn_until_touched",
+  "blocking_when": ["malformed_gate"],
+  "grade_storage": ".flywheel/polish-gate/grades.jsonl"
+}

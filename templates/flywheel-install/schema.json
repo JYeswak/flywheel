@@ -10,6 +10,19 @@
     "loop_json_required_keys",
     "polish_gate"
   ],
+  "polish_gate": {
+    "schemas": [
+      "polish-gate/v1/manifest.schema.json",
+      "polish-gate/v1/grade-receipt.schema.json",
+      "polish-gate/v1/latest-summary.schema.json",
+      "polish-gate/v1/grade-run-result.schema.json",
+      "polish-gate/v1/close-validation-result.schema.json",
+      "polish-gate/v1/discovery-output.schema.json",
+      "polish-gate/v1/reconcile-output.schema.json",
+      "polish-gate/v1/scope-allowlist.schema.json",
+      "polish-gate/v1/replay-output.schema.json"
+    ]
+  },
   "properties": {
     "template_version": {
       "const": "0.1.0"
@@ -59,6 +72,7 @@
                 "9. Data Model And Governance",
                 "10. Infrastructure And Deployment",
                 "11. Flywheel Loop Policy",
+                "Polish Gate",
                 "12. Doctrine Compliance",
                 "13. Stakeholder And Escalation Map",
                 "14. Confirm And Lock Receipt"
@@ -93,6 +107,7 @@
               "const": [
                 "Mission Anchor",
                 "Success Definition",
+                "Polish Gate runtime",
                 "Resume Context",
                 "Active Work In Flight",
                 "Confirmed Failure Modes",
@@ -120,7 +135,25 @@
                 "template_hash",
                 "docs",
                 "doctor_strict_command",
-                "source_mutation_allowed_when"
+                "source_mutation_allowed_when",
+                "polish_gate",
+                "dispatch_mode",
+                "driver",
+                "driver_status",
+                "driver_writeback_schema",
+                "plist",
+                "plist_label",
+                "tick_script",
+                "last_tick",
+                "last_tick_source",
+                "last_run_id",
+                "last_run_status",
+                "last_run_exit_code",
+                "last_run_ledger",
+                "last_run_ledger_line",
+                "last_run_duration_ms",
+                "writeback_updated_at",
+                "driver_contract"
               ]
             }
           }
@@ -141,7 +174,25 @@
         "template_hash",
         "docs",
         "doctor_strict_command",
-        "source_mutation_allowed_when"
+        "source_mutation_allowed_when",
+        "polish_gate",
+        "dispatch_mode",
+        "driver",
+        "driver_status",
+        "driver_writeback_schema",
+        "plist",
+        "plist_label",
+        "tick_script",
+        "last_tick",
+        "last_tick_source",
+        "last_run_id",
+        "last_run_status",
+        "last_run_exit_code",
+        "last_run_ledger",
+        "last_run_ledger_line",
+        "last_run_duration_ms",
+        "writeback_updated_at",
+        "driver_contract"
       ]
     },
     "polish_gate": {
@@ -150,13 +201,19 @@
       "required": [
         "schema_version",
         "schemas",
+        "run_grader_path",
+        "ledger_replay_adapter_path",
+        "close_validator_lens_required",
         "fixtures",
         "modes",
         "scopes",
         "scope_allowlist_profile",
         "blocking_when_values",
         "grade_storage_default",
-        "latest_summary_default"
+        "latest_summary_default",
+        "mission_fields",
+        "state_runtime_fields",
+        "loop_json_object_default"
       ],
       "properties": {
         "schema_version": {
@@ -169,8 +226,22 @@
             "polish-gate/v1/manifest.schema.json",
             "polish-gate/v1/grade-receipt.schema.json",
             "polish-gate/v1/latest-summary.schema.json",
-            "polish-gate/v1/scope-allowlist.schema.json"
+            "polish-gate/v1/grade-run-result.schema.json",
+            "polish-gate/v1/close-validation-result.schema.json",
+            "polish-gate/v1/discovery-output.schema.json",
+            "polish-gate/v1/reconcile-output.schema.json",
+            "polish-gate/v1/scope-allowlist.schema.json",
+            "polish-gate/v1/replay-output.schema.json"
           ]
+        },
+        "run_grader_path": {
+          "const": "polish-gate/run-grader.py"
+        },
+        "ledger_replay_adapter_path": {
+          "const": "polish-gate/replay-to-ledger.py"
+        },
+        "close_validator_lens_required": {
+          "const": true
         },
         "fixtures": {
           "type": "array",
@@ -240,6 +311,47 @@
         },
         "latest_summary_default": {
           "const": ".flywheel/polish-gate/latest.json"
+        },
+        "mission_fields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "const": [
+            "polish_gate_mode",
+            "polish_gate_scope",
+            "polish_gate_legacy_policy",
+            "polish_gate_grade_storage",
+            "polish_gate_latest_summary"
+          ]
+        },
+        "state_runtime_fields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "const": [
+            "polish_gate_mode_active",
+            "polish_gate_last_run_ts",
+            "polish_gate_surfaces_graded_count",
+            "polish_gate_surfaces_passed_count",
+            "polish_gate_surfaces_failed_count",
+            "polish_gate_pending_waivers",
+            "polish_gate_min_composite",
+            "polish_gate_min_composite_surface"
+          ]
+        },
+        "loop_json_object_default": {
+          "const": {
+            "version": "1",
+            "mode": "bootstrap",
+            "scope": "repo_local_flywheel",
+            "legacy_bootstrap_policy": "warn_until_touched",
+            "blocking_when": [
+              "new_surface",
+              "touched_required_surface",
+              "malformed_gate",
+              "expired_waiver"
+            ],
+            "grade_storage": ".flywheel/polish-gate/grades.jsonl",
+            "latest_summary": ".flywheel/polish-gate/latest.json"
+          }
         }
       }
     }

@@ -4,15 +4,19 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import TypeAlias
 
 MODES = ("bootstrap", "audit_only", "blocking")
 SCOPES = ("new", "touched", "repo_local_flywheel", "all_declared")
+LEGACY_BOOTSTRAP_POLICIES = ("warn_until_touched", "block_immediately")
+BLOCKING_WHEN = ("new_surface", "touched_required_surface", "malformed_gate", "expired_waiver")
 SKILL_LANES = ["ubs", "simplify", "extreme-opt", "readme", "canonical-cli"]
 SCHEMA_VERSION = "polish-gate/discovery-output/v1"
+EX_MANIFEST = 2
+EX_MANIFEST_READ = 3
 DEFAULT_MANIFEST = {
     "version": "1",
     "mode": "bootstrap",
@@ -22,6 +26,8 @@ DEFAULT_MANIFEST = {
     "grade_storage": ".flywheel/polish-gate/grades.jsonl",
     "latest_summary": ".flywheel/polish-gate/latest.json",
 }
+REQUIRED_MANIFEST_FIELDS = tuple(DEFAULT_MANIFEST)
+ALLOWED_MANIFEST_FIELDS = set(REQUIRED_MANIFEST_FIELDS)
 SKIP_DIRS = {
     ".git",
     ".beads",
@@ -69,7 +75,7 @@ OPERATOR_WORDS = (
     "audit",
 )
 DOMAIN_SUFFIXES = {".py", ".sh", ".rs", ".ts", ".tsx", ".js", ".md", ".toml", ".json"}
-Category: TypeAlias = str
+Category = str
 
 
 @dataclass(frozen=True)
@@ -77,6 +83,12 @@ class Candidate:
     path: str
     name: str
     category: Category | None
+
+
+class DiscoveryError(RuntimeError):
+    def __init__(self, exit_code: int, message: str) -> None:
+        super().__init__(message)
+        self.exit_code = exit_code
 
 
 def iso_now() -> str:
@@ -87,17 +99,134 @@ def repo_relative(repo: Path, path: Path) -> str:
     return path.relative_to(repo).as_posix()
 
 
+def manifest_error(path: Path, detail: str, action: str) -> DiscoveryError:
+    return DiscoveryError(EX_MANIFEST, f"manifest error in {path}: {detail}. Suggested action: {action}")
+
+
+def manifest_read_error(path: Path, detail: str) -> DiscoveryError:
+    return DiscoveryError(
+        EX_MANIFEST_READ,
+        f"manifest read error in {path}: {detail}. Suggested action: verify the path exists and permissions allow reading.",
+    )
+
+
+def validate_manifest_shape(manifest: dict[str, object], manifest_path: Path) -> None:
+    missing = [field for field in REQUIRED_MANIFEST_FIELDS if field not in manifest]
+    if missing:
+        raise manifest_error(
+            manifest_path,
+            f"missing required field(s): {', '.join(missing)}",
+            "regenerate the polish-gate manifest from the template or add the missing field(s).",
+        )
+
+    extra = sorted(set(manifest) - ALLOWED_MANIFEST_FIELDS)
+    if extra:
+        raise manifest_error(
+            manifest_path,
+            f"unsupported field(s): {', '.join(extra)}",
+            "remove unsupported keys or update the manifest schema before using them.",
+        )
+
+    if manifest["version"] != "1":
+        raise manifest_error(manifest_path, "version must be \"1\"", "regenerate the manifest with the current template.")
+
+    mode = manifest["mode"]
+    if mode not in MODES:
+        raise manifest_error(
+            manifest_path,
+            f"unsupported mode: {mode!r}",
+            f"use one of: {', '.join(MODES)}.",
+        )
+
+    scope = manifest["scope"]
+    if scope not in SCOPES:
+        raise manifest_error(
+            manifest_path,
+            f"unsupported scope: {scope!r}",
+            f"use one of: {', '.join(SCOPES)}.",
+        )
+
+    legacy_policy = manifest["legacy_bootstrap_policy"]
+    if legacy_policy not in LEGACY_BOOTSTRAP_POLICIES:
+        raise manifest_error(
+            manifest_path,
+            f"unsupported legacy_bootstrap_policy: {legacy_policy!r}",
+            f"use one of: {', '.join(LEGACY_BOOTSTRAP_POLICIES)}.",
+        )
+
+    blocking_when = manifest["blocking_when"]
+    if not isinstance(blocking_when, list):
+        raise manifest_error(
+            manifest_path,
+            "blocking_when must be an array",
+            "replace blocking_when with an array of polish-gate blocking reasons.",
+        )
+    invalid_blockers = [item for item in blocking_when if item not in BLOCKING_WHEN]
+    if invalid_blockers:
+        raise manifest_error(
+            manifest_path,
+            f"unsupported blocking_when value(s): {', '.join(repr(item) for item in invalid_blockers)}",
+            f"use only: {', '.join(BLOCKING_WHEN)}.",
+        )
+    seen_blockers: list[object] = []
+    has_duplicate_blockers = False
+    for item in blocking_when:
+        if item in seen_blockers:
+            has_duplicate_blockers = True
+            break
+        seen_blockers.append(item)
+    if has_duplicate_blockers:
+        raise manifest_error(
+            manifest_path,
+            "blocking_when values must be unique",
+            "deduplicate the blocking_when array.",
+        )
+
+    for field in ("grade_storage", "latest_summary"):
+        value = manifest[field]
+        if not isinstance(value, str) or not value:
+            raise manifest_error(
+                manifest_path,
+                f"{field} must be a non-empty string",
+                f"set {field} to a repo-local polish-gate path.",
+            )
+
+
 def load_manifest(repo: Path, manifest_arg: str) -> tuple[dict[str, object], Path]:
     manifest_path = Path(manifest_arg)
     if not manifest_path.is_absolute():
         manifest_path = repo / manifest_path
     manifest = dict(DEFAULT_MANIFEST)
-    if manifest_path.exists():
-        with manifest_path.open(encoding="utf-8") as handle:
-            data = json.load(handle)
+    try:
+        manifest_exists = manifest_path.exists()
+    except OSError as exc:
+        raise manifest_read_error(manifest_path, str(exc)) from exc
+    if manifest_exists:
+        try:
+            with manifest_path.open(encoding="utf-8") as handle:
+                data = json.load(handle)
+        except json.JSONDecodeError as exc:
+            raise manifest_error(
+                manifest_path,
+                f"malformed JSON ({exc.msg} at line {exc.lineno} column {exc.colno})",
+                "fix the JSON syntax or regenerate the manifest from the polish-gate template.",
+            ) from exc
+        except UnicodeDecodeError as exc:
+            raise manifest_error(
+                manifest_path,
+                f"invalid UTF-8 ({exc.reason} at byte {exc.start})",
+                "rewrite the manifest as UTF-8 JSON or regenerate it from the polish-gate template.",
+            ) from exc
+        except OSError as exc:
+            raise manifest_read_error(manifest_path, str(exc)) from exc
         if not isinstance(data, dict):
-            raise SystemExit(f"manifest must be a JSON object: {manifest_path}")
-        manifest.update(data)
+            raise manifest_error(
+                manifest_path,
+                "JSON document must be an object",
+                "replace the manifest with a JSON object matching polish-gate/v1/manifest.schema.json.",
+            )
+        manifest = data
+    validate_manifest_shape(manifest, manifest_path)
     return manifest, manifest_path
 
 
@@ -289,7 +418,8 @@ def parse_args() -> argparse.Namespace:
 
 exit codes:
   0 success
-  2 usage or manifest error""",
+  2 usage, malformed manifest, or unsupported manifest value
+  3 manifest read error""",
     )
     parser.add_argument("--repo", default=".", help="target repo path (default: current directory)")
     parser.add_argument(
@@ -308,28 +438,31 @@ exit codes:
 
 def main() -> int:
     args = parse_args()
-    if args.schema:
-        print(json.dumps(output_schema(), indent=2, sort_keys=True))
+    try:
+        if args.schema:
+            print(json.dumps(output_schema(), indent=2, sort_keys=True))
+            return 0
+
+        repo = Path(args.repo).expanduser().resolve()
+        if not repo.is_dir():
+            raise DiscoveryError(EX_MANIFEST, f"--repo is not a directory: {repo}")
+        manifest, manifest_path = load_manifest(repo, args.manifest)
+        if args.mode:
+            manifest["mode"] = args.mode
+        if args.scope:
+            manifest["scope"] = args.scope
+        validate_manifest_shape(manifest, manifest_path)
+        scope = str(manifest["scope"])
+
+        result = discover(repo, manifest_path, scope)
+        if args.explain and not args.json:
+            print_explain(result)
+        else:
+            print(json.dumps(result, indent=2, sort_keys=True))
         return 0
-
-    repo = Path(args.repo).expanduser().resolve()
-    if not repo.is_dir():
-        raise SystemExit(f"--repo is not a directory: {repo}")
-    manifest, manifest_path = load_manifest(repo, args.manifest)
-    if args.mode:
-        manifest["mode"] = args.mode
-    if args.scope:
-        manifest["scope"] = args.scope
-    scope = str(manifest.get("scope", DEFAULT_MANIFEST["scope"]))
-    if scope not in SCOPES:
-        raise SystemExit(f"unsupported manifest scope: {scope}")
-
-    result = discover(repo, manifest_path, scope)
-    if args.explain and not args.json:
-        print_explain(result)
-    else:
-        print(json.dumps(result, indent=2, sort_keys=True))
-    return 0
+    except DiscoveryError as exc:
+        print(f"ERROR: {exc}", file=sys.stderr)
+        return exc.exit_code
 
 
 if __name__ == "__main__":

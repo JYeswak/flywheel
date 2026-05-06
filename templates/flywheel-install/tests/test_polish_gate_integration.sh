@@ -345,7 +345,7 @@ python3 "$repo/.flywheel/polish-gate/discover-surfaces.py" \
 bad_discovery_rc=$?
 set -e
 [[ "$bad_discovery_rc" -ne 0 ]] || fail "discovery accepted unsupported scope fixture"
-grep -q 'unsupported manifest scope: unsupported_scope' "$tmp/bad-scope-discovery.err" \
+grep -Eq "unsupported (manifest )?scope: '?unsupported_scope'?" "$tmp/bad-scope-discovery.err" \
   || fail "discovery did not report unsupported scope malformation"
 pass bad_fixture_detection_roundtrip
 

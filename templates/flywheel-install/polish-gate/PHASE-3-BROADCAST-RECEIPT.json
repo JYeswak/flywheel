@@ -1,0 +1,98 @@
+{
+  "schema_version": "phase3-fleet-broadcast-receipt.v1",
+  "broadcast_ts": "2026-05-06T01:53:15Z",
+  "broadcast_id": "phase3-fleet-broadcast-2026-05-06",
+  "dispatcher_pane": "flywheel:3",
+  "dispatcher_orch": "codex",
+  "dispatcher_script": "/tmp/phase3-fleet-broadcast-capsules-2026-05-05/fire-broadcast.sh",
+  "dispatcher_invocation": "PHASE2_QUORUM_STATE=/tmp/phase3-fleet-broadcast-quorum-2026-05-06.json PHASE3_BROADCAST_ID=phase3-fleet-broadcast-2026-05-06 bash /tmp/phase3-fleet-broadcast-capsules-2026-05-05/fire-broadcast.sh --apply",
+  "preflight": {
+    "capsules_checked": 5,
+    "capsule_schema_consistent": true,
+    "dispatcher_syntax_ok": true,
+    "dispatcher_dry_run_probe": "temp-ledger preflight; no live ledger mutation",
+    "dispatcher_native_dry_run_flag": false,
+    "ledger_writable": true,
+    "phase2_quorum_source": "/tmp/phase3-fleet-broadcast-quorum-2026-05-06.json",
+    "phase2_green_light": "templates/flywheel-install/polish-gate/v1/phase-2-audit-verdict.json"
+  },
+  "coordination_log": "/Users/josh/.local/state/flywheel/cross-orch-coordination.jsonl",
+  "coordination_rows": {
+    "capsule_rows": [
+      117,
+      118,
+      119,
+      120,
+      121
+    ],
+    "summary_row": 122,
+    "dispatch_state_rows": [
+      123,
+      124,
+      125,
+      126,
+      127
+    ]
+  },
+  "artifacts": {
+    "apply_stdout": "/tmp/phase3-fleet-broadcast-apply-2026-05-06.out",
+    "apply_counts": "/tmp/phase3-fleet-broadcast-apply-2026-05-06.counts",
+    "dispatch_state": "/tmp/phase3-fleet-broadcast-dispatch-state-2026-05-06.jsonl"
+  },
+  "peer_repos": [
+    {
+      "name": "alps",
+      "capsule_path": "/tmp/phase3-fleet-broadcast-capsules-2026-05-05/alps.json",
+      "dispatch_status": "sent",
+      "ack_state": "ack_pending",
+      "owner": "alpsinsurance:1",
+      "to_session": "alpsinsurance",
+      "to_pane": 1,
+      "delivery_transport": "ntm_send"
+    },
+    {
+      "name": "skillos",
+      "capsule_path": "/tmp/phase3-fleet-broadcast-capsules-2026-05-05/skillos.json",
+      "dispatch_status": "sent",
+      "ack_state": "ack_pending",
+      "owner": "skillos:1",
+      "to_session": "skillos",
+      "to_pane": 1,
+      "delivery_transport": "ntm_send"
+    },
+    {
+      "name": "swarm-daemon",
+      "capsule_path": "/tmp/phase3-fleet-broadcast-capsules-2026-05-05/swarm-daemon.json",
+      "dispatch_status": "sent",
+      "ack_state": "ack_pending",
+      "owner": "flywheel:1",
+      "to_session": "flywheel",
+      "to_pane": 1,
+      "delivery_transport": "ntm_send"
+    },
+    {
+      "name": "mobile-eats",
+      "capsule_path": "/tmp/phase3-fleet-broadcast-capsules-2026-05-05/mobile-eats.json",
+      "dispatch_status": "sent",
+      "ack_state": "ack_pending",
+      "owner": "mobile-eats:1",
+      "to_session": "mobile-eats",
+      "to_pane": 1,
+      "delivery_transport": "ntm_send"
+    },
+    {
+      "name": "vrtx",
+      "capsule_path": "/tmp/phase3-fleet-broadcast-capsules-2026-05-05/vrtx.json",
+      "dispatch_status": "sent",
+      "ack_state": "ack_pending",
+      "owner": "vrtx:1",
+      "to_session": "vrtx",
+      "to_pane": 1,
+      "delivery_transport": "ntm_send"
+    }
+  ],
+  "total_dispatched": 5,
+  "total_acked": 0,
+  "total_failed": 0,
+  "phase_3_status": "broadcast_complete"
+}

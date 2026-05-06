@@ -29,6 +29,31 @@ for path in schema_paths:
     Draft202012Validator.check_schema(schema)
     schemas[path.name] = schema
 
+with (root / "schema.json").open(encoding="utf-8") as handle:
+    template_schema = json.load(handle)
+
+declared_schemas = sorted(template_schema["polish_gate"]["schemas"])
+schema_const_schemas = sorted(
+    template_schema["properties"]["polish_gate"]["properties"]["schemas"]["const"]
+)
+if declared_schemas != schema_const_schemas:
+    raise AssertionError(
+        "top-level polish_gate.schemas does not match schema const: "
+        f"top_level={declared_schemas} schema_const={schema_const_schemas}"
+    )
+disk_schemas = sorted(
+    str(path.relative_to(root))
+    for path in schema_dir.glob("*.schema.json")
+)
+missing_from_manifest = sorted(set(disk_schemas) - set(declared_schemas))
+missing_on_disk = sorted(set(declared_schemas) - set(disk_schemas))
+if missing_from_manifest or missing_on_disk:
+    raise AssertionError(
+        "polish-gate schema inventory drift: "
+        f"missing_from_manifest={missing_from_manifest} "
+        f"missing_on_disk={missing_on_disk}"
+    )
+
 manifest_validator = Draft202012Validator(
     schemas["manifest.schema.json"],
     format_checker=Draft202012Validator.FORMAT_CHECKER,

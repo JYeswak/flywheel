@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SCRIPT="$ROOT/polish-gate/discover-surfaces.py"
 SHIM="$ROOT/polish-gate/discover-surfaces.sh"
 SCHEMA="$ROOT/polish-gate/v1/discovery-output.schema.json"
+MALFORMED_MANIFEST_FIXTURES="$ROOT/tests/fixtures/malformed-manifest"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/polish-gate-discovery.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -38,6 +39,53 @@ write_manifest() {
   }' >"$path"
 }
 
+assert_no_traceback() {
+  local file="$1" label="$2"
+  if rg -q 'Traceback|json\.decoder|PermissionError|UnicodeDecodeError|File ".*discover-surfaces\.py"' "$file"; then
+    fail "$label"
+    sed -n '1,80p' "$file" >&2
+  else
+    pass "$label"
+  fi
+}
+
+assert_manifest_error() {
+  local manifest_path="$1" expected_rc="$2" label="$3"
+  local bad_repo="$TMP/$label-repo"
+  local out="$TMP/$label.out"
+  local err="$TMP/$label.err"
+  mkdir -p "$bad_repo"
+
+  set +e
+  python3 "$SCRIPT" --repo "$bad_repo" --manifest "$manifest_path" --json >"$out" 2>"$err"
+  local rc=$?
+  set -e
+
+  if [[ "$rc" -eq "$expected_rc" ]]; then
+    pass "${label}_exit_code"
+  else
+    fail "${label}_exit_code"
+    printf 'expected rc=%s actual rc=%s\n' "$expected_rc" "$rc" >&2
+    sed -n '1,80p' "$err" >&2
+  fi
+
+  if [[ ! -s "$out" ]]; then
+    pass "${label}_no_stdout"
+  else
+    fail "${label}_no_stdout"
+    sed -n '1,80p' "$out" >&2
+  fi
+
+  if rg -Fq 'ERROR: ' "$err" && rg -Fq 'manifest' "$err" && rg -Fq 'Suggested action:' "$err" && rg -Fq -- "$(basename "$manifest_path")" "$err"; then
+    pass "${label}_stderr_clear"
+  else
+    fail "${label}_stderr_clear"
+    sed -n '1,80p' "$err" >&2
+  fi
+
+  assert_no_traceback "$err" "${label}_no_traceback"
+}
+
 repo="$TMP/alps-fixture"
 manifest="$repo/.flywheel/polish-gate/manifest.json"
 mkdir -p \
@@ -57,6 +105,16 @@ chmod +x "$repo/.flywheel/wire-or-explain-ledger/writer.py" "$repo/.flywheel/scr
 bash -n "$SHIM" && pass shim_syntax || fail shim_syntax
 python3 -m py_compile "$SCRIPT" && pass python_syntax || fail python_syntax
 python3 "$SCRIPT" --help | rg -q -- '--scope' && pass help_scope_flag || fail help_scope_flag
+
+assert_manifest_error "$MALFORMED_MANIFEST_FIXTURES/truncated.json" 2 truncated_manifest
+assert_manifest_error "$MALFORMED_MANIFEST_FIXTURES/invalid-utf8.json" 2 invalid_utf8_manifest
+assert_manifest_error "$MALFORMED_MANIFEST_FIXTURES/missing-required-field.json" 2 missing_required_manifest
+assert_manifest_error "$MALFORMED_MANIFEST_FIXTURES/wrong-shape.json" 2 wrong_shape_manifest
+permission_denied_manifest="$TMP/permission-denied-manifest.json"
+cp "$MALFORMED_MANIFEST_FIXTURES/permission-denied/manifest.json" "$permission_denied_manifest"
+chmod 000 "$permission_denied_manifest"
+assert_manifest_error "$permission_denied_manifest" 3 permission_denied_manifest
+chmod 600 "$permission_denied_manifest" || true
 
 schema_out="$TMP/schema.json"
 python3 "$SCRIPT" --schema >"$schema_out"

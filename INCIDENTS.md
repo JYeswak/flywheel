@@ -2,6 +2,148 @@
 
 Promoted trauma classes from `~/.local/state/flywheel/fuckup-log.jsonl`.
 
+## Wired canonical-cli-at-dispatch as pre-dispatch validator (2026-05-05)
+
+Date: 2026-05-05
+
+Promotion Action: NEW
+
+Class: `canonical-cli-at-dispatch`
+
+Event Count: 1 structural gate promotion
+
+Severity: high
+
+Cost: The canonical CLI dispatch rule already existed as a forever-rule under
+`cli-spec-without-canonical-cli-scoping-gate`, but it still depended on the
+orchestrator remembering to paste the acceptance criteria into each CLI
+dispatch. Under dispatch pressure that advisory rule can decay, letting a new
+script, flag, or subcommand reach workers without `--info|--help|--examples`,
+`--json`, stable exit codes, and an explicit
+`canonical-cli-scoping` skill citation.
+
+Root Cause: `/flywheel:dispatch` had mission-anchor and two-truth pre-send
+validators, but no sibling structural gate for canonical CLI acceptance. The
+stock at risk was CLI-surface drift; the missing flow was pre-send packet
+validation before Joshua-visible or worker-visible dispatch.
+
+Forever-Rule: Any dispatch packet that introduces a CLI surface must pass the
+canonical CLI precheck before send. If the packet mentions a repo script path,
+CLI/command/flag/subcommand surface, or proposed `--info|--help|--examples` /
+`--json` shape, it must include all four acceptance elements: self-documenting
+flags, JSON output, stable exit-code semantics, and an explicit
+`canonical-cli-scoping` skill citation. Missing elements refuse dispatch with
+`dispatch_packet_missing_canonical_cli_acceptance`; malformed packets fail open
+with a ledgered warning.
+
+Fix Applied/Status: `flywheel-wire-canonical-cli-at-dispatc-cdcb` added
+`.flywheel/scripts/dispatch-canonical-cli-validator.sh`, wrapper
+`~/.claude/commands/flywheel/_shared/dispatch-canonical-cli-precheck.sh`,
+`.flywheel/validation-schema/v1/dispatch-canonical-cli-decision.schema.json`,
+and `.flywheel/tests/test-dispatch-canonical-cli-validator.sh`. The dispatch
+command now has additive Step 3b between wrapping and send.
+
+Recurrence Prevention: This is Donella #5 rules as a sibling pre-dispatch
+validator, plus #6 information flow through the append-only ledger
+`~/.local/state/flywheel/dispatch-canonical-cli-validator-ledger.jsonl`.
+
+Evidence:
+- Bead: `flywheel-wire-canonical-cli-at-dispatc-cdcb`.
+- Prior incident: `cli-spec-without-canonical-cli-scoping-gate`.
+- Skill: `~/.claude/skills/canonical-cli-scoping/SKILL.md`.
+- Validator: `.flywheel/scripts/dispatch-canonical-cli-validator.sh`.
+- Wrapper: `~/.claude/commands/flywheel/_shared/dispatch-canonical-cli-precheck.sh`.
+- Schema: `.flywheel/validation-schema/v1/dispatch-canonical-cli-decision.schema.json`.
+- Test: `.flywheel/tests/test-dispatch-canonical-cli-validator.sh`.
+
+## Wired dispatch-delivery-validation as post-send gate (2026-05-05)
+
+Date: 2026-05-05
+
+Class: `dispatch-delivery-validation-gap`
+
+Event Count: 1 structural gate promotion
+
+Severity: high
+
+Cost: `ntm send` success is a transport acknowledgement, not proof that a
+worker pane visibly received the dispatch. Without a post-send structural gate,
+the orchestrator can log a task as in-flight while the prompt is missing,
+queued, or only reflected in a side substrate. This repeats the CASS FTS5
+false-positive precedent where dispatch intent existed but delivery evidence
+was not a pane-visible receipt.
+
+Root Cause: `/flywheel:dispatch` had a transport gate before send and callback
+validation at close, but no sibling post-send gate between them. The control
+loop trusted the act of sending instead of observing the target pane buffer for
+the specific `task_id`.
+
+Fix Applied/Status: Added
+`.flywheel/scripts/dispatch-delivery-verify.sh`,
+`~/.claude/commands/flywheel/_shared/dispatch-delivery-postcheck.sh`,
+`.flywheel/validation-schema/v1/dispatch-delivery-verify.schema.json`, and
+`.flywheel/tests/test-dispatch-delivery-verify.sh`. The dispatch command now
+has additive Step 5b after `ntm send` and before dispatch-log in-flight
+logging. Verification polls `ntm --robot-tail`, requires the `task_id` in the
+target pane buffer, appends
+`~/.local/state/flywheel/dispatch-delivery-verify-ledger.jsonl`, and fails
+closed on timeout, pane unhealthy, capture failure, or invalid capture JSON.
+
+Recurrence Prevention: Dispatch delivery now follows the same sibling shape as
+transport-gate and close-validator: pre-send transport rule, post-send pane
+visibility proof, then close-time callback validation. Donella leverage point
+#6 (information flows) is moved upstream of Joshua eyeballs by making prompt
+visibility a machine-readable receipt rather than a human inference.
+
+Evidence:
+- Bead: `flywheel-wire-dispatch-delivery-valida-f29a`
+- Verifier: `.flywheel/scripts/dispatch-delivery-verify.sh`
+- Test: `.flywheel/tests/test-dispatch-delivery-verify.sh`
+- Schema: `.flywheel/validation-schema/v1/dispatch-delivery-verify.schema.json`
+- Dispatch wrapper: `~/.claude/commands/flywheel/_shared/dispatch-delivery-postcheck.sh`
+- Dispatch surface: `~/.claude/commands/flywheel/dispatch.md` Step 5b
+
+## br-db wedge repair — JSONL-fallback eliminated on close (2026-05-05)
+
+Date: 2026-05-05
+
+Class: `br-db-wedge`
+
+Event Count: recurring during Phase 2 EXECUTION cycle
+
+Severity: high
+
+Symptoms: Every close paid the `bead_db_writes=2_jsonl_fallback_br_db_malformed`
+tax. Recent affected beads included `flywheel-2h3vs` and `flywheel-p2-11`.
+
+Root Cause: The live `.beads/beads.db` had page-class B-tree corruption on
+pages 3364-3372 plus index count mismatches. The live WAL was also zero bytes,
+so `br` reported WAL rebuild errors until sidecars were moved aside. JSONL
+fallback rows preserved work, but some fallback rows used string priorities
+like `"p0"` and one close fallback appended a duplicate id row, so direct import
+required temporary normalization rather than editing `.beads/issues.jsonl`.
+
+Fix Applied/Status: Rebuilt `.beads/beads.db` from the current JSONL truth via
+a temporary normalized import, ran `VACUUM` and `REINDEX`, marked metadata to
+the current raw JSONL hash, and moved stale WAL/SHM sidecars aside with
+timestamped forensic names. Probe and test landed at
+`.flywheel/scripts/verify-br-db-close-path-active.sh` and
+`.flywheel/tests/test-br-db-close-path.sh`. Task bead: `flywheel-e8lft`.
+
+Recurrence Prevention: `verify-br-db-close-path-active.sh` performs a DB-only
+create-close-show round trip with `--no-auto-flush` and confirms JSONL hash and
+logical issue count are unchanged. The test covers integrity, quick check,
+schema introspection, round trip, logical JSONL/DB count parity, and recovery
+dry-run idempotency. Doctor/fuckup-log should route future `br-db-wedge` rows
+to this probe before allowing JSONL fallback to become permanent substrate.
+
+Evidence:
+- Diagnosis: `/tmp/br-db-wedge-diagnosis-2026-05-05.md`
+- Family snapshot: `/tmp/br-db-wedge-family-snapshot-2026-05-05/`
+- Probe: `.flywheel/scripts/verify-br-db-close-path-active.sh`
+- Test: `.flywheel/tests/test-br-db-close-path.sh`
+- Bead: `flywheel-e8lft`
+
 ## corpus-dispatches-must-include-consumability-gate
 
 Date: 2026-05-04
@@ -720,6 +862,43 @@ Evidence:
 - Verified command: `launchctl print gui/$(id -u)/ai.zeststream.codex-stuck-detector-watchdog`.
 - Counterexample observed: `launchctl print user/$(id -u)/ai.zeststream.codex-stuck-detector-watchdog` returned nonzero on this host.
 
+## Advisory-vs-structural gap audit (2026-05-05)
+
+Date: 2026-05-05
+
+Promotion Action: NEW
+
+Class: `advisory-rule-decay-under-load`
+
+Event Count: 1 socraticode-backed audit
+
+Severity: high
+
+Cost: Substrate-transport gates ship reliably because they are pre-action,
+hook-backed, test-backed, and ledgered. Orchestrator behavioral rules too often
+ship as memory or skill prose and then decay under cognitive load.
+
+Forever-Rule: Every memory rule that begins with `META-RULE` must have a wired
+structural gate, or a bead that explicitly tracks the missing gate. If the gate
+is not universal, mark it PARTIAL and name the missing adoption surface.
+
+Fix Applied/Status: Audit-only inventory shipped. No gate wiring was performed.
+UNWIRED rows are linked to existing gap beads; PARTIAL rows name the missing
+adoption surface.
+
+Evidence:
+- Audit MD: `/tmp/advisory-rules-gap-audit-2026-05-05.md`.
+- Audit JSON: `/tmp/advisory-rules-gap-audit-2026-05-05.json`.
+- Existing gap beads: `flywheel-orch-no-punt-gate-e69d`,
+  `flywheel-wire-data-decides-not-meatpup-bd33`,
+  `flywheel-wire-donella-first-no-stop-to-36d7`,
+  `flywheel-wire-two-truth-sources-before-f814`,
+  `flywheel-wire-dispatch-delivery-valida-f29a`,
+  `flywheel-wire-two-blocker-ticks-escala-bee8`,
+  `flywheel-wire-low-bead-threshold-work--2ae1`,
+  `flywheel-wire-canonical-cli-at-dispatc-cdcb`,
+  `flywheel-wire-publishability-bar-three-97f7`.
+
 ## Wired data-decides-not-meatpuppet as pre-output gate (2026-05-05)
 
 Date: 2026-05-05
@@ -761,3 +940,979 @@ Evidence:
   `~/.claude/commands/flywheel/_shared/mission-anchor-dispatch-preflight.sh`,
   and `templates/flywheel-install/validate-callback-before-close.sh.tmpl`.
 - Donella read: #5 rules plus #6 information flow upstream of Joshua eyeballs.
+
+## Wired donella-first-no-stop-to-ask as Stop hook gate (2026-05-05)
+
+Date: 2026-05-05
+
+Promotion Action: NEW
+
+Class: `donella-first-no-stop-to-ask`
+
+Event Count: recurring same-day advisory drift
+
+Severity: high
+
+Cost: Orchestrator output could still ask Joshua to dispose of a decision or
+propose substrate action without first showing the system boundary, stock,
+flow, feedback loop, leverage point, intervention, and measurement read that
+justifies the ask. That left a paradigm-class rule as prose instead of a
+pre-output constraint.
+
+Root Cause: `feedback_donella_first_no_stop_to_ask` was advisory memory. It
+could be remembered during calm planning and skipped under dispatch pressure
+because no Stop hook checked the assistant output before Joshua saw it.
+
+Forever-Rule: Donella-first-no-stop-to-ask must run as a Stop hook before
+orchestrator output is accepted. If proposed text contains a Joshua-disposes
+pattern or a substrate-action proposal, it must include a same-response Donella
+trace with at least five of: boundary, stock, flow, loop, leverage,
+intervention, measurement. True blocker classes remain allowed.
+
+Fix Applied/Status: `flywheel-wire-donella-first-no-stop-to-36d7` added
+`.flywheel/scripts/orch-donella-trace-gate.sh`, a Stop hook wrapper at
+`~/.claude/hooks/flywheel-orch-donella-trace-gate.sh`, additive
+`~/.claude/settings.json` registration after the no-punt hook, a v1 decision
+schema, an eight-case fixture test, and an append-only gate ledger.
+
+Evidence:
+- Gate: `.flywheel/scripts/orch-donella-trace-gate.sh`.
+- Hook: `~/.claude/hooks/flywheel-orch-donella-trace-gate.sh`.
+- Schema: `.flywheel/validation-schema/v1/orch-donella-trace-decision.schema.json`.
+- Test: `.flywheel/tests/test-orch-donella-trace-gate.sh`.
+- Sibling precedent: `.flywheel/scripts/orch-no-punt-output-gate.sh` and
+  `~/.claude/hooks/flywheel-loop-dispatch-transport-gate.sh`.
+- Donella read: #2 paradigm class, implemented as a #5 rules gate with #6
+  information flow before Joshua-visible output.
+
+## Wired two-truth-sources-before-decide as pre-dispatch validator (2026-05-05)
+
+Date: 2026-05-05
+
+Promotion Action: NEW
+
+Class: `two-truth-sources-before-decide`
+
+Event Count: sibling same-day dispatch capacity drift
+
+Severity: high
+
+Cost: Dispatch capacity could still depend on a single pane truth source even
+when live robot-activity and live tail evidence disagreed. That made stale
+captures, reminder templates, or source-specific parser errors capable of
+greenlighting a worker send before the contradiction was visible.
+
+Root Cause: The mission-anchor preflight and robot-activity capacity check were
+structural, but the second source remained an operator habit instead of a
+pre-send validator. Donella #6 information flow was present in analysis but not
+wired before `ntm send`.
+
+Forever-Rule: Dispatch must fail closed unless at least two live truth sources
+agree that the target pane is ready. A single source, stale provenance, reminder
+template, parser disagreement, or probe failure aborts before wrapped packet
+generation or send.
+
+Fix Applied/Status: `flywheel-wire-two-truth-sources-before-f814` added
+`.flywheel/scripts/two-truth-sources-validator.sh`, the shared pre-send wrapper
+at `~/.claude/commands/flywheel/_shared/dispatch-pre-send-validator.sh`,
+additive Step 1b in `/Users/josh/.claude/commands/flywheel/dispatch.md`, a v1
+decision schema, fixture tests, and an append-only validator ledger.
+
+Evidence:
+- Gate: `.flywheel/scripts/two-truth-sources-validator.sh`.
+- Wrapper: `~/.claude/commands/flywheel/_shared/dispatch-pre-send-validator.sh`.
+- Dispatch skill: `~/.claude/commands/flywheel/dispatch.md` Step 1b.
+- Schema: `.flywheel/validation-schema/v1/two-truth-sources-decision.schema.json`.
+- Test: `.flywheel/tests/test-two-truth-sources-validator.sh`.
+- Ledger: `~/.local/state/flywheel/two-truth-sources-validator-ledger.jsonl`.
+- Survey: `/tmp/wire-two-truth-sources-gate-research-survey.md`.
+- Donella read: #6 information flows before dispatch, sibling to
+  mission-anchor-preflight.
+
+## br-db wedge recurrence root-cause + mitigation (2026-05-05)
+
+Date: 2026-05-05
+
+Promotion Action: NEW
+
+Class: `br-db wedge recurrence`
+
+Event Count: recurring Beads SQLite corruption after same-day recovery attempts
+
+Severity: high
+
+Cost: `br close` and related Beads mutations kept falling back to JSONL truth
+line writes. The live DB looked superficially clean to `br sync --status`
+(`dirty_count=0`) while direct SQLite integrity showed hard freelist
+corruption, allowing workers to keep rediscovering the same wedge at closeout.
+
+Root Cause: The active flywheel Beads runtime is still `br 0.1.20` while
+current upstream/package surfaces are `beads_rust 0.2.4` / GitHub `v0.2.4+`,
+and the repo is under high concurrent worker write pressure. After repeated
+JSONL rebuilds, the live DB recurred with `Freelist: freelist leaf count too
+big on page 765` and `page 766`; active WAL was only 32 bytes, so the damage is
+in the main DB freelist rather than a recoverable large WAL backlog.
+
+Forever-Rule: Beads DB health must be measured by `PRAGMA integrity_check`, not
+by `br sync --status`. When integrity is not `ok`, DB-backed create/close/update
+paths are RED; workers may continue read-only diagnosis and JSONL-truth
+closeout, but live DB rebuild or binary upgrade requires an explicit recovery
+window.
+
+Fix Applied/Status: `br-db-wedge-recurrent-rca` shipped a monitor at
+`.flywheel/scripts/br-db-corruption-monitor.sh`, a regression test at
+`tests/br-db-corruption-monitor.sh`, and doctor integration in
+`~/.claude/skills/.flywheel/bin/flywheel-loop` so every doctor invocation
+appends `~/.local/state/flywheel/br-db-corruption-monitor-ledger.jsonl` and
+exposes `.beads_db_health.br_db_corruption_monitor`. Chosen mitigation is
+`workaround_1_jsonl_truth_line_plus_monitor`; upgrade to `beads_rust 0.2.4`
+and serialized mutation locks both passed disposable copy-tests but were not
+applied to the live repo in this dispatch.
+
+Evidence:
+- RCA: `/tmp/br-db-wedge-recurrent-rca-2026-05-05.md`.
+- Jeff draft, not filed: `/tmp/jeff-issue-beads-rust-freelist-corruption-2026-05-05.md`.
+- Monitor: `.flywheel/scripts/br-db-corruption-monitor.sh`.
+- Test: `tests/br-db-corruption-monitor.sh`.
+- Live integrity: `Freelist: freelist leaf count too big on page 765` and
+  `Freelist: freelist leaf count too big on page 766`.
+- Workaround copy-tests:
+  `/tmp/br-db-jsonl-truth-test-2026-05-05.0OFMDw/receipt.json`,
+  `/tmp/br024-clean-copy-test-2026-05-05.otGvXv/receipt.json`, and
+  `/tmp/br-db-fcntl-copy-test-2026-05-05.pgDf2q/receipt.json`.
+
+## Wired validate-and-redispatch as post-callback structural validator (2026-05-05)
+
+Date: 2026-05-05
+
+Promotion Action: NEW
+
+Class: `validate-and-redispatch-callback-gate`
+
+Event Count: foundational L71 gap, sibling same-day structural gate rollout
+
+Severity: high
+
+Cost: Orchestrator summaries could still treat worker DONE callbacks as truth
+before rerunning the dispatch L112 verify command. A worker could report
+`l112_observed=OK...` while the actual repo-local command failed or emitted a
+different token, leaving the trust loop downstream of Joshua-visible summary.
+
+Root Cause: Validate-and-redispatch lived as L71 doctrine and close-handler
+habit, but no post-callback wrapper ran before summary. The information flow
+arrived after the orchestrator had already accepted the callback claim.
+
+Forever-Rule: Every worker DONE callback must be treated as a claim until
+`callback-receipt-validator.sh` reruns the dispatch `## L112 verify` command.
+L112 verify failures and `l112_observed` mismatches fail closed and open a fix
+bead; malformed callbacks fail open only as `unverifiable`.
+
+Fix Applied/Status: `flywheel-wire-validate-and-redispatch--f094` added
+`.flywheel/scripts/callback-receipt-validator.sh`,
+`.flywheel/scripts/callback-fix-bead-opener.sh`, shared wrapper
+`~/.claude/commands/flywheel/_shared/callback-receipt-validator-wrapper.sh`,
+additive Step 0 in `close-handler.md`, a v1 decision schema, fixture tests,
+and an append-only validator ledger.
+
+Evidence:
+- Validator: `.flywheel/scripts/callback-receipt-validator.sh`.
+- Fix-bead opener: `.flywheel/scripts/callback-fix-bead-opener.sh`.
+- Wrapper: `~/.claude/commands/flywheel/_shared/callback-receipt-validator-wrapper.sh`.
+- Close handler: `~/.claude/commands/flywheel/_shared/close-handler.md` Step 0.
+- Schema: `.flywheel/validation-schema/v1/callback-receipt-decision.schema.json`.
+- Test: `.flywheel/tests/test-callback-receipt-validator.sh`.
+- Ledger: `~/.local/state/flywheel/callback-receipt-validator-ledger.jsonl`.
+- Survey: `/tmp/wire-validate-and-redispatch-gate-research-survey.md`.
+- Donella read: #5 rules plus #6 information flow before orchestrator summary,
+  sibling to close-validator and no-punt gates.
+
+## Wired orchestrator-validates-callbacks as post-callback artifact validator (2026-05-05)
+
+Date: 2026-05-05
+
+Promotion Action: NEW
+
+Class: `orchestrator-validates-callbacks-artifact-gate`
+
+Event Count: foundational acceptance-artifact gap, sibling to
+validate-and-redispatch
+
+Severity: high
+
+Cost: Orchestrator closeout could rerun L112 and still miss whether the
+dispatch's declared acceptance artifacts actually existed in the expected
+paths and shapes. That let a DONE callback claim completion while required
+scripts, schemas, wrappers, tests, or incident entries were absent,
+subthreshold, non-executable, or malformed.
+
+Root Cause: L112 validated a worker-declared command result, while the
+dispatch packet's `## Required artifacts` section remained prose. The
+orchestrator lacked a structural information flow from dispatch contract to
+artifact filesystem truth before summary.
+
+Forever-Rule: Every worker DONE callback must pass an artifact-fulfillment gate
+before summary. The gate reads the dispatch `## Required artifacts` section,
+checks each declared path for existence, minimum byte threshold, and shape, and
+cross-checks callback `evidence=` paths against that list. Missing,
+subthreshold, malformed, or evidence-mismatched artifacts fail closed and open
+a fix bead. Malformed dispatch artifact sections fail open only with
+`unverifiable_artifact_check=true`.
+
+Fix Applied/Status: `flywheel-wire-orchestrator-validates-c-3a51` added
+`.flywheel/scripts/orchestrator-callback-artifact-validator.sh`,
+`.flywheel/scripts/orchestrator-callback-artifact-fix-bead.sh`, shared wrapper
+`~/.claude/commands/flywheel/_shared/orch-callback-artifact-wrapper.sh`,
+additive Step 0a in `close-handler.md`, a v1 decision schema, fixture tests,
+and an append-only validator ledger.
+
+Evidence:
+- Validator: `.flywheel/scripts/orchestrator-callback-artifact-validator.sh`.
+- Fix-bead opener: `.flywheel/scripts/orchestrator-callback-artifact-fix-bead.sh`.
+- Wrapper: `~/.claude/commands/flywheel/_shared/orch-callback-artifact-wrapper.sh`.
+- Close handler: `~/.claude/commands/flywheel/_shared/close-handler.md` Step 0a.
+- Schema: `.flywheel/validation-schema/v1/orchestrator-callback-artifact-decision.schema.json`.
+- Test: `.flywheel/tests/test-orchestrator-callback-artifact-validator.sh`.
+- Ledger: `~/.local/state/flywheel/orchestrator-callback-artifact-validator-ledger.jsonl`.
+- Dispatch: `/tmp/dispatch_wire-orchestrator-validates-callbacks.md`.
+- Donella read: #5 rules plus #6 information flow before orchestrator summary,
+  complementary to validate-and-redispatch and dispatch-delivery verification.
+
+## Wired memory-rule-gate-parity as umbrella drift detector (2026-05-05)
+
+Date: 2026-05-05
+
+Promotion Action: NEW
+
+Class: `memory-rule-gate-parity`
+
+Event Count: umbrella advisory-to-structural detector
+
+Severity: high
+
+Cost: META-RULE memory files were being added faster than structural gates could
+be wired by hand. Without an upstream detector, each new rule could silently
+fall back to prose until Joshua noticed the same advisory drift again.
+
+Root Cause: The system had many memory-rule inflows but no doctor stock that
+measured whether a META-RULE had script, hook/settings, test, and INCIDENTS
+evidence. Advisory rules could therefore look learned while remaining
+non-operational.
+
+Forever-Rule: Every `feedback_*.md` memory file marked `META-RULE` must have
+structural gate parity. `memory-rule-gate-parity-detector.sh` classifies each
+rule as WIRED, PARTIAL, or UNWIRED; doctor exposes `.memory_rule_gate_parity`;
+YELLOW/RED signals route repair work, and RED with `--auto-bead` files one
+idempotent `wire-<rule>-as-structural-gate` repair bead per unwired rule.
+
+Fix Applied/Status: `flywheel-wire-memory-rule-gate-parity-27d5` added
+`.flywheel/scripts/memory-rule-gate-parity-detector.sh`, doctor scope
+`memory-rule-gate-parity`, a top-level doctor field, a v1 decision schema,
+fixture tests, and an append-only ledger at
+`~/.local/state/flywheel/memory-rule-gate-parity-ledger.jsonl`.
+
+Donella read: #5 rules converts the reminder into an executable constraint;
+#2 paradigm shifts META-RULEs from "remember this" notes into substrate that
+must prove its own operating gate.
+
+Evidence:
+- Detector: `.flywheel/scripts/memory-rule-gate-parity-detector.sh`.
+- Test: `.flywheel/tests/test-memory-rule-gate-parity-detector.sh`.
+- Schema: `.flywheel/validation-schema/v1/memory-rule-gate-parity-decision.schema.json`.
+- Doctor integration: `~/.claude/skills/.flywheel/bin/flywheel-loop`.
+- Live smoke: `/tmp/memory-rule-gate-parity-live-smoke.json`.
+
+## Detector silent exit-2 regression on live panes — fixed (2026-05-05)
+
+Date: 2026-05-05
+
+Promotion Action: NEW
+
+Class: `detector_silent_exit2`
+
+Event Count: 3+ live watcher-prove regressions observed 2026-05-05
+
+Severity: P0
+
+Cost: Live Codex panes matching the post-callback reminder template plus stale
+background spinner signature exited detector recovery silently instead of
+recovering. Joshua manually respawned panes repeatedly while the golden replay
+test stayed green.
+
+Root Cause: The live detector path used `ntm copy` in clipboard mode and read
+the confirmation text as pane text. It also returned `{}` for live
+`fixture_payload`, so the auto-recovery branch treated live panes as fixture
+captures and skipped `recovery-escape-then-reprompt.sh`. The shared classifier
+also missed the live `esc…` truncated spinner and `Run /review on my current
+changes` reminder shapes.
+
+Forever-Rule: Frozen-pane detectors must prove fixture/live parity at the
+capture boundary. A golden artifact replay is insufficient unless a live-path
+synthetic test drives the same classifier and recovery primitive used by the
+watcher.
+
+Fix Applied/Status: `flywheel-detector-silent-exit2-166f` patched
+`.flywheel/scripts/codex-template-stuck-detector.sh` to read actual pane text
+via `ntm copy --output`, preserve `fixture_payload=None` for live captures,
+classify truncated post-callback spinner shapes, emit JSON on rc=2
+`unknown_stable`, return rc=3 for probe failures, and invoke the 3-stage
+recovery primitive for live post-callback subclass matches. Added
+`.flywheel/tests/test-detector-live-pane-regression.sh` and extended
+`.flywheel/tests/test-detector-pattern-bank-replay.sh` with real 2026-05-05
+live snapshots.
+
+Donella read: #5 rules and #6 information flows. The structural gap was a
+test rule that validated fixture replay but not live capture parity; the fix
+changes the rule and wires the missing information flow before watcher close.
+
+Evidence:
+- RCA: `/tmp/detector-silent-exit2-rca-2026-05-05.md`.
+- Detector: `.flywheel/scripts/codex-template-stuck-detector.sh`.
+- Pattern replay: `.flywheel/tests/test-detector-pattern-bank-replay.sh`.
+- Live regression: `.flywheel/tests/test-detector-live-pane-regression.sh`.
+- Recovery primitive regression: `.flywheel/tests/test-recovery-escape-then-reprompt.sh`.
+- Live snapshots:
+  `/tmp/flywheel-pane2-snapshot.20260505T235808Z.json`,
+  `/tmp/flywheel-pane3-snapshot.20260505T205900Z.json`.
+
+## Wired publishability-bar-three-judges as close-time structural gate (advisory default) (2026-05-05)
+
+Date: 2026-05-05
+
+Promotion Action: NEW
+
+Class: `publishability-bar-three-judges-close-gate`
+
+Event Count: 1 structural gate promotion
+
+Severity: high
+
+Cost: `feedback_publishability_bar_three_judges.md` set the goal that every
+flywheel-touched repo should pass the Jeff/Donella/Joshua fork-and-star bar,
+but that bar only fired inside `/flywheel:plan` Phase 3 audits. Bead closeout
+could therefore ship a changed flywheel surface without a close-time
+publishability receipt, leaving quality debt to be found by later polish rounds.
+
+Root Cause: The three-judges bar was a goal and audit pattern, not a close-path
+rule. The close handler validated callback shape, artifact existence, and L112
+reruns, but did not measure whether the repo still cleared the seven-facet
+publishability bar before closing the bead.
+
+Forever-Rule: Every flywheel close attempt must run the three-judges
+publishability precheck. Default mode is advisory during stamp-in-flywheel-first
+rollout; strict mode is opt-in via `.flywheel/three-judges-mode=strict`.
+Advisory REFUSE records a ledger row and opens idempotent rework beads without
+blocking close. Strict REFUSE blocks close until the failed facets have repair
+evidence.
+
+Fix Applied/Status: `flywheel-wire-publishability-bar-three-97f7` added
+`.flywheel/scripts/three-judges-publishability-validator.sh`,
+`.flywheel/scripts/three-judges-rework-bead-opener.sh`,
+`~/.claude/commands/flywheel/_shared/three-judges-publishability-precheck.sh`,
+`.flywheel/validation-schema/v1/three-judges-publishability-decision.schema.json`,
+`.flywheel/tests/test-three-judges-publishability-validator.sh`, and additive
+Step 0b in `~/.claude/commands/flywheel/_shared/close-handler.md`.
+
+Donella read: #3 goals makes the close path optimize for first-look public
+trust, not just task completion. #5 rules turns that goal into an executable
+constraint with advisory rollout and strict opt-in.
+
+Evidence:
+- Validator: `.flywheel/scripts/three-judges-publishability-validator.sh`.
+- Rework opener: `.flywheel/scripts/three-judges-rework-bead-opener.sh`.
+- Wrapper: `~/.claude/commands/flywheel/_shared/three-judges-publishability-precheck.sh`.
+- Schema: `.flywheel/validation-schema/v1/three-judges-publishability-decision.schema.json`.
+- Test: `.flywheel/tests/test-three-judges-publishability-validator.sh`.
+- Live smoke: `/tmp/three-judges-publishability-live-smoke.json`.
+
+## Detector classifier hash-stable gap fixed (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: FIX
+
+Class: `detector-classifier-hash-stable-gap`
+
+Event Count: 7+ post-callback freezes in same operating window
+
+Severity: P0
+
+Cost: Post-callback frozen panes with visible Codex reminder prompts and stale
+spinners were missed when pane hashes differed by a cosmetic spinner tick. The
+detector classified those panes as `alive`, delaying recovery and allowing
+workers to remain frozen after callbacks.
+
+Root Cause: `classify_text()` made `hash_stable=true` a prerequisite for every
+subclass by returning `alive` before specialized classifier branches could run.
+That rule was correct for generic stable-buffer classes, but wrong for
+post-callback reminder + stale-spinner evidence. Current Codex reminder prompts
+also included `Summarize recent commits`, `Find and fix a bug in @filename`, and
+`Write tests for @filename`, which were absent from the reminder bank.
+
+Forever-Rule: Specialized post-callback recovery classifiers run on their own
+signal first. `hash_stable` remains a generic stability gate, not a global
+subclass prerequisite. Cosmetic spinner hash drift must not suppress
+`post_callback_reminder_template_with_stale_spinner` when reminder prompt and
+spinner age evidence are present.
+
+Fix Applied/Status: `flywheel-detector-classifier-hash-stable-gap-d9a5`
+patched `.flywheel/scripts/codex-template-stuck-detector.sh` so the
+post-callback signal is evaluated before the `hash_stable=false` alive branch.
+The stale-spinner matcher now covers both `Waiting for background terminal (...)`
+and `Working (...)`, applies the `>90s` threshold, and includes current Codex
+reminder prompt templates. Added
+`.flywheel/tests/test-detector-classifier-hash-stable-regression.sh` and updated
+`.flywheel/tests/test-detector-pattern-bank-replay.sh` to replay current
+2026-05-06 live snapshots when available.
+
+Donella read: #5 rules and #6 information flows. The detector rule now routes
+the strongest recovery signal before generic hash-stability information can
+mask it.
+
+Evidence:
+- RCA: `/tmp/detector-classifier-hash-stable-rca-2026-05-06.md`.
+- Detector: `.flywheel/scripts/codex-template-stuck-detector.sh`.
+- Regression: `.flywheel/tests/test-detector-classifier-hash-stable-regression.sh`.
+- Pattern replay: `.flywheel/tests/test-detector-pattern-bank-replay.sh`.
+- Live regression: `.flywheel/tests/test-detector-live-pane-regression.sh`.
+- Live snapshots:
+  `/tmp/flywheel-pane2-snapshot.20260506T001424Z.json`,
+  `/tmp/flywheel-pane2-snapshot.20260506T002515Z.json`,
+  `/tmp/flywheel-pane2-snapshot.20260506T011611Z.json`,
+  `/tmp/mobile-eats-pane2-snapshot.20260506T011620Z.json`.
+
+## Wired low-bead-threshold-work-hunt as doctor signal (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: NEW
+
+Class: `low-bead-threshold-work-hunt`
+
+Event Count: advisory memory promoted to structural doctor stock
+
+Severity: high
+
+Cost: `feedback_low_bead_threshold_work_hunt.md` required flywheel:1 to hunt
+MISSION, environment, and skills work when ready beads fall below 10, or notify
+Joshua only for a true blocker. As advisory memory, the queue could become
+light without producing a machine-visible work-hunt bead.
+
+Root Cause: Ready-bead stock was visible in local Beads state, but no doctor
+field consumed the JSONL truth source and no idempotent repair bead was opened
+when the stock went RED.
+
+Forever-Rule: `low-bead-threshold-detector.sh` reads `.beads/issues.jsonl`,
+reduces to latest rows by id, counts ready open/unblocked/unclaimed beads and
+assigned `in_progress` beads, and emits GREEN/YELLOW/RED. RED with
+`--auto-bead` opens one idempotent `hunt-work-MISSION-env-skills` P0 bead that
+names `.flywheel/MISSION.md`, `.flywheel/GOAL.md`, `.flywheel/STATE.md`,
+environment signals, `~/.claude/skills/`, and `~/.codex/skills/`.
+
+Fix Applied/Status: `flywheel-wire-low-bead-threshold-work--2ae1` added
+`.flywheel/scripts/low-bead-threshold-detector.sh`, doctor scope
+`low-bead-threshold`, top-level doctor field `.low_bead_threshold`, a v1
+decision schema, fixture tests, and an append-only ledger at
+`~/.local/state/flywheel/low-bead-threshold-detector-ledger.jsonl`.
+
+Donella read: #4 self-organization is the leverage point. The detector turns a
+low work stock into autonomous work generation instead of a silent idle state.
+
+Evidence:
+- Detector: `.flywheel/scripts/low-bead-threshold-detector.sh`.
+- Test: `.flywheel/tests/test-low-bead-threshold-detector.sh`.
+- Schema: `.flywheel/validation-schema/v1/low-bead-threshold-decision.schema.json`.
+- Doctor: `~/.claude/skills/.flywheel/bin/flywheel-loop doctor --scope low-bead-threshold --json`.
+- Live smoke: `/tmp/low-bead-threshold-live-smoke.json`.
+
+## Watchdog cross-session scope extended (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: NEW
+
+Class: `watchdog-cross-session-scope-gap`
+
+Event Count: 1 live scope gap
+
+Severity: high
+
+Cost: `mobile-eats:2` was frozen behind a stale Codex prompt while the stuck
+detector launchd surface only had flywheel-oriented coverage. Sister sessions
+had idle-pane-watch sibling shape, but no per-session stuck-detector labels.
+
+Root Cause: The information flow stopped at the flywheel session. The detector
+could classify stale worker panes, but launchd did not schedule GUI-domain
+per-session probes for `mobile-eats`, `skillos`, `alpsinsurance`, and `vrtx`.
+
+Forever-Rule: Every live NTM worker-pane session in the current topology set
+must have GUI-domain stuck-detector launchd coverage or an explicit
+no-coverage receipt. Fixed fleet scope uses sibling per-session plists; probes
+must validate `gui/$(id -u)/<label>`, not `user/<uid>`.
+
+Fix Applied/Status: Added four per-session stuck-detector plists for
+`mobile-eats`, `skillos`, `alps`, and `vrtx`; the `alps` launchd label maps to
+the `alpsinsurance` NTM session. The installer now installs and reloads all
+five labels idempotently. The verifier and test assert GUI-domain load,
+session-scoped detector arguments, recent per-session launchd fire evidence,
+and no duplicate target plists.
+
+Donella read: #6 information flows and #5 rules. The fix gives each sister
+session its own detector signal path instead of relying on a flywheel-only
+information channel.
+
+Evidence:
+- Bead: `flywheel-watchdog-cross-session-scope-gap-6036`.
+- Options memo: `/tmp/watchdog-cross-session-scope-2026-05-06.md`.
+- Plists:
+  `.flywheel/launchd/ai.zeststream.mobile-eats-codex-stuck-detector.plist`,
+  `.flywheel/launchd/ai.zeststream.skillos-codex-stuck-detector.plist`,
+  `.flywheel/launchd/ai.zeststream.alps-codex-stuck-detector.plist`,
+  `.flywheel/launchd/ai.zeststream.vrtx-codex-stuck-detector.plist`.
+- Installer: `.flywheel/scripts/install-stuck-detector-watchdog.sh`.
+- Verifier: `.flywheel/scripts/verify-watcher-launchd-active.sh`.
+- Test: `.flywheel/tests/test-watcher-launchd-active.sh`.
+
+## Wired two-blocker-ticks-escalate as auto-escalator (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: NEW
+
+Class: `two-blocker-ticks-escalate`
+
+Event Count: advisory memory promoted to structural doctor signal
+
+Severity: high
+
+Cost: `feedback_two_blocker_ticks_escalate_to_flywheel_plan.md` said a blocker
+surviving two consecutive ticks must escalate to flywheel:1 for `/flywheel:plan`
+work. As an advisory, the orchestrator could still sit on repeated overdue
+callbacks without a fleet-mail capsule, a P0 repair bead, or a doctor-visible
+RED stock.
+
+Root Cause: `.flywheel/dispatch-log.jsonl` carried callback deadlines, but no
+stateful detector measured whether the same open callback stayed overdue across
+ticks. Cross-orch coordination and bead filing therefore depended on manual
+operator notice.
+
+Forever-Rule: `two-blocker-ticks-escalator.sh` reads current absolute
+`callback_expected_by` rows from `.flywheel/dispatch-log.jsonl`, tracks
+per-bead consecutive overdue ticks in
+`~/.local/state/flywheel/two-blocker-ticks-state.json`, emits
+GREEN/YELLOW/RED, and appends every decision to
+`~/.local/state/flywheel/two-blocker-ticks-escalator-ledger.jsonl`. RED with
+`--auto-escalate` appends one idempotent `blocker_escalation` fleet-mail
+capsule to `~/.local/state/flywheel/cross-orch-coordination.jsonl` and one
+idempotent `escalate-blocker-<bead-id>-via-flywheel-plan` P0 bead via JSONL
+fallback. The detector does not auto-trigger `/flywheel:plan`.
+
+Fix Applied/Status: `flywheel-wire-two-blocker-ticks-escala-bee8` added
+`.flywheel/scripts/two-blocker-ticks-escalator.sh`, doctor scope
+`two-blocker-ticks`, top-level doctor field `.two_blocker_ticks`, a v1 decision
+schema, fixture tests, atomic state writes, and append-only coordination/bead
+outputs.
+
+Donella read: #4 self-organization and #6 information flows. The fix turns a
+stuck callback stock into an autonomous escalation path instead of an
+orchestrator memory burden.
+
+Evidence:
+- Detector: `.flywheel/scripts/two-blocker-ticks-escalator.sh`.
+- Test: `.flywheel/tests/test-two-blocker-ticks-escalator.sh`.
+- Schema: `.flywheel/validation-schema/v1/two-blocker-ticks-decision.schema.json`.
+- Doctor: `~/.claude/skills/.flywheel/bin/flywheel-loop doctor --scope two-blocker-ticks --json`.
+- Live smoke: `signal=RED blocked_count=4 max_consecutive_tick_count=2`;
+  second run reused existing escalation beads/capsules idempotently.
+
+## Phase 3 fleet broadcast fired (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: BROADCAST
+
+Class: `phase3-polish-gate-fleet-broadcast`
+
+Event Count: 5 peer repositories targeted
+
+Severity: medium
+
+Cost: The polish-gate template had passed Phase 2 audit in flywheel, but without
+a fleet broadcast the gate would remain local knowledge. Peer repos would keep
+deciding publishability without the new five-skill measured surface contract.
+
+Root Cause: The information flow from flywheel's proven template to sister
+orchestrators was intentionally staged behind the Phase 2 green-light. Phase 3
+needed a durable cross-orch capsule broadcast rather than another local README
+or advisory memory.
+
+Forever-Rule: Phase-gated template propagation uses a single coordination
+surface. Peer repos receive advisory capsules with explicit allowlists,
+blocklists, callback contracts, and owner routes; each peer orchestrator decides
+adoption pace inside its local mission.
+
+Fix Applied/Status: Fired the pre-staged Phase 3 dispatcher with
+`PHASE2_QUORUM_STATE=/tmp/phase3-fleet-broadcast-quorum-2026-05-06.json` and
+`PHASE3_BROADCAST_ID=phase3-fleet-broadcast-2026-05-06`. The dispatcher
+appended five capsule rows plus one summary row to
+`~/.local/state/flywheel/cross-orch-coordination.jsonl`; follow-up
+dispatch-state rows recorded `kind=phase3_broadcast` and NTM delivery status
+for all five owner routes. READY flag moved to COMPLETE and receipt JSON landed.
+
+Targets:
+- `alps` -> `alpsinsurance:1` (`audit-only`, `.flywheel/` only)
+- `mobile-eats` -> `mobile-eats:1` (`audit-only`)
+- `skillos` -> `skillos:1` (`audit-only`)
+- `swarm-daemon` -> `flywheel:1` (`full-grade`)
+- `vrtx` -> `vrtx:1` (`audit-only`)
+
+Donella read: #6 information flows. The fix makes polish-gate propagation an
+ecosystem-wide signal in the cross-orch ledger, while #5 rules preserve per-repo
+scope boundaries through allowlists and callback contracts.
+
+Evidence:
+- Capsule directory: `/tmp/phase3-fleet-broadcast-capsules-2026-05-05/`.
+- Dispatcher stdout: `/tmp/phase3-fleet-broadcast-apply-2026-05-06.out`.
+- Dispatch-state rows: `/tmp/phase3-fleet-broadcast-dispatch-state-2026-05-06.jsonl`.
+- Receipt: `templates/flywheel-install/polish-gate/PHASE-3-BROADCAST-RECEIPT.json`.
+- Complete flag: `templates/flywheel-install/polish-gate/PHASE-3-BROADCAST-COMPLETE.flag`.
+- Coordination rows:
+  `~/.local/state/flywheel/cross-orch-coordination.jsonl#L117-L127`.
+
+## Detector classifier fix INCOMPLETE - live-pane code path bypassed classifier signal (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: UPDATE
+
+Class: `detector-classifier-live-path-bypass`
+
+Event Count: 1 production live-probe regression after fixture tests passed
+
+Severity: high
+
+Cost: A real frozen Codex worker pane at 2026-05-06T01:50Z returned
+`subclass=alive`, `recommended_recovery=none`, and `recovery_attempted=none`,
+so the watcher would leave a recoverable frozen pane in service despite the
+prior hash-stable fixture suite passing.
+
+Root Cause: The fixture-path tests did not exercise the exact production
+`--session --pane` capture shape for `Implement {feature}` with a drifting stale
+spinner. The live path did call the same classifier, but `Implement {feature}`
+was only in `PLACEHOLDER_RE`, not the post-callback reminder bank. When the live
+spinner timer changed between samples, `hash_stable=false` and `classify_text`
+fell through to the generic `alive` branch before the stale-spinner subclass
+could fire.
+
+Forever-Rule: Detector regressions must exercise the production capture path,
+not only convenient fixture replay. Any post-callback reminder template added to
+the generic placeholder bank must either be deliberately excluded with a test or
+included in the stale-spinner reminder bank with a live `--session --pane`
+regression.
+
+Fix Applied/Status: `flywheel-detector-classifier-fix-incomplete-be72` patched
+`.flywheel/scripts/codex-template-stuck-detector.sh` so `Implement {feature}` is
+recognized by the post-callback stale-spinner classifier. Added
+`.flywheel/tests/test-detector-live-probe-regression.sh`, which drives the
+detector through `--session flywheel --pane 2` using a synthetic live NTM copy
+provider with spinner hash drift and asserts `subclass != alive` plus staged
+recovery. Updated
+`.flywheel/tests/test-detector-classifier-hash-stable-regression.sh` with both
+fixture and `--session --pane` hash-drift cases for the same template.
+
+Donella read: #5 rules and #6 information flows. The test rule now routes the
+same signal path production uses into regression coverage instead of validating
+only the lower-friction fixture flow.
+
+Evidence:
+- Bead: `flywheel-detector-classifier-fix-incomplete-be72`.
+- RCA: `/tmp/detector-classifier-fix-incomplete-rca-2026-05-06.md`.
+- Detector: `.flywheel/scripts/codex-template-stuck-detector.sh`.
+- Live-probe regression:
+  `.flywheel/tests/test-detector-live-probe-regression.sh`.
+- Updated regression:
+  `.flywheel/tests/test-detector-classifier-hash-stable-regression.sh`.
+- Trace logs:
+  `/tmp/detector-trace-live-path.log`,
+  `/tmp/detector-trace-fixture-path.log`.
+
+## Two-blocker-ticks-escalator JSONL-fallback regression (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: UPDATE
+
+Class: `two-blocker-ticks-jsonl-fallback-regression`
+
+Event Count: 1 production close-path regression after fixture tests passed
+
+Severity: high
+
+Cost: The first production run of `two-blocker-ticks-escalator.sh` filed four
+false-positive P0 escalation beads for work that had already completed through
+the JSONL fallback close path: `flywheel-escalate-6b11a41b`,
+`flywheel-escalate-9beb9b99`, `flywheel-escalate-c3532d8f`, and
+`flywheel-escalate-b962b284`.
+
+Root Cause: The escalator treated `dispatch-log.callback_received_at` as the
+only close signal. During the br-db wedge, real close receipts were appended to
+`.beads/issues.jsonl` with `status=closed`, while the corresponding dispatch
+rows kept `callback_received_at:null`. Fixture tests covered dispatch-log
+callbacks but not the production JSONL fallback close path.
+
+Forever-Rule: Any detector or validator that decides whether a dispatch is done
+must test both close paths: dispatch-log callback receipts and
+`.beads/issues.jsonl` latest-row `status=closed`. JSONL issue truth is a
+load-bearing close source while br-db fallback is active.
+
+Fix Applied/Status: `flywheel-two-blocker-ticks-jsonl-fallback-aware-cf3a`
+patched `.flywheel/scripts/two-blocker-ticks-escalator.sh` to build a latest-row
+issue index, match closed issue rows by id, explicit task fields, normalized
+title, or escalation title, and treat those matches as callback-equivalent. The
+four false-positive escalation beads were closed with explicit
+`original_blocker_task_id` fields. Added
+`.flywheel/tests/test-two-blocker-ticks-jsonl-fallback-regression.sh` and
+extended the existing escalator test with JSONL fallback and mixed-close cases.
+
+Donella read: #5 rules and #6 information flows. The rule now points the
+detector at the durable production truth line, not only the adjacent dispatch
+log.
+
+Evidence:
+- Bead: `flywheel-two-blocker-ticks-jsonl-fallback-aware-cf3a`.
+- RCA: `/tmp/two-blocker-ticks-jsonl-fallback-rca-2026-05-06.md`.
+- Detector: `.flywheel/scripts/two-blocker-ticks-escalator.sh`.
+- Existing test: `.flywheel/tests/test-two-blocker-ticks-escalator.sh`.
+- Regression: `.flywheel/tests/test-two-blocker-ticks-jsonl-fallback-regression.sh`.
+- Memory:
+  `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_regression_test_must_exercise_production_close_path.md`.
+
+## P2-12 f2: polish-gate schema inventory parity wired (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: UPDATE
+
+Class: `polish-gate-schema-inventory-drift`
+
+Event Count: 1 Phase 2 audit finding
+
+Severity: high
+
+Cost: `templates/flywheel-install/schema.json` declared 7 polish-gate v1
+schemas while 9 schema files were shipped on disk. Template consumers could
+miss `discovery-output.schema.json` and `reconcile-output.schema.json` unless
+they manually inspected the v1 directory.
+
+Root Cause: Schema files were added by follow-on polish-gate beads, but the
+template manifest had no bidirectional inventory parity test tying the declared
+schema list to the on-disk `v1/*.schema.json` truth source.
+
+Forever-Rule: The polish-gate template manifest must be inventory-complete.
+Every `polish-gate/v1/*.schema.json` file must be declared in
+`polish_gate.schemas`, and every declared schema must exist on disk.
+
+Fix Applied/Status: `flywheel-p2-12-f2` added the missing discovery and
+reconcile schema entries to `templates/flywheel-install/schema.json`, extended
+`test_polish_gate_schemas.sh` with bidirectional parity assertions, and added
+`test_polish_gate_schema_inventory_parity.sh` as a single-purpose regression
+gate. The discovery doc records the 9-file on-disk truth set.
+
+Donella read: #5 rules. The manifest is now a mechanically enforced contract
+with on-disk reality instead of a manually maintained inventory.
+
+Evidence:
+- Discovery:
+  `.flywheel/PLANS/phase2-flywheel-install-polish-gate-2026-05-05/P2-12-F2-SCHEMA-INVENTORY-DISCOVERY.md`.
+- Manifest: `templates/flywheel-install/schema.json`.
+- Existing test: `templates/flywheel-install/tests/test_polish_gate_schemas.sh`.
+- Regression:
+  `templates/flywheel-install/tests/test_polish_gate_schema_inventory_parity.sh`.
+
+## Wired polish_gate doctor JSON fields (P2-12 f1) (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: UPDATE
+
+Class: `polish-gate-doctor-information-flow`
+
+Event Count: 1 Phase 2 audit finding
+
+Severity: high
+
+Cost: P2-07 shipped polish-gate runner and receipt substrate, but
+`flywheel-loop doctor --json` had no `.polish_gate` field. Operators could not
+see mode, receipt counts, failures, waivers, or schema state without manually
+probing producer files.
+
+Root Cause: The polish-gate producers wrote `manifest.json`, `grades.jsonl`,
+and `latest.json`, but the doctor surface was never wired as the consumer. The
+information flow stopped at local artifacts.
+
+Forever-Rule: Any polish-gate installed repo must expose a stable
+`.polish_gate` doctor object with `mode`, `summary_path`, `receipt_count`,
+`failures_count`, `waiver_count`, `schema_status`, and `signal`. Missing
+substrate is RED, malformed substrate is RED, receipts without an aggregate are
+YELLOW, and probe errors fail open as GRAY instead of crashing doctor JSON.
+
+Fix Applied/Status: `flywheel-p2-12-f1` added the additive
+`polish_gate_doctor_json` doctor helper, top-level `.polish_gate` injection,
+`doctor --scope polish-gate`, the v1 doctor-field schema, and
+`.flywheel/tests/test-doctor-polish-gate-fields.sh` covering GREEN, YELLOW,
+RED missing substrate, RED invalid schema, and stable JSON shape. The shape
+matches the sibling doctor scopes for low-bead-threshold,
+memory-rule-gate-parity, and two-blocker-ticks.
+
+Donella read: #6 information flows and #5 rules. Polish-gate quality state now
+flows into the operational doctor surface instead of remaining hidden in
+producer artifacts.
+
+Evidence:
+- Bead: `flywheel-p2-12-f1`.
+- Doctor helper: `~/.claude/skills/.flywheel/bin/flywheel-loop`.
+- Test: `.flywheel/tests/test-doctor-polish-gate-fields.sh`.
+- Schema: `.flywheel/validation-schema/v1/doctor-polish-gate-fields.schema.json`.
+
+## P2-12 f3: discovery script malformed-manifest error handling hardened (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: UPDATE
+
+Class: `polish-gate-discovery-malformed-manifest`
+
+Event Count: 1 Phase 2 audit finding
+
+Severity: high
+
+Cost: A malformed polish-gate manifest could crash discovery with a Python
+traceback and exit code 1. Operators lost the stable CLI contract needed to
+distinguish malformed JSON, schema-like manifest errors, and filesystem read
+failures.
+
+Root Cause: `discover-surfaces.py` loaded manifest JSON directly and used
+`SystemExit` for some manifest shape errors, so parse/read failures bypassed
+the CLI error contract.
+
+Forever-Rule: Polish-gate discovery must convert manifest parse, encoding,
+shape, and read failures into explicit operator-facing stderr with stable
+nonzero exit codes and no traceback.
+
+Fix Applied/Status: `flywheel-p2-12-f3` added discovery-local
+`DiscoveryError` handling, manifest shape validation, code 2 for malformed or
+unsupported manifest values, code 3 for manifest read/OSError failures, and
+fixture coverage for truncated JSON, invalid UTF-8, missing required fields,
+wrong top-level shape, and permission-denied reads.
+
+Donella read: #5 rules and #6 information flows. The discovery CLI now gives
+operators a deterministic rule surface instead of leaking implementation
+tracebacks into the dispatch path.
+
+Evidence:
+- Bead: `flywheel-p2-12-f3`.
+- Discovery script:
+  `templates/flywheel-install/polish-gate/discover-surfaces.py`.
+- Regression test:
+  `templates/flywheel-install/tests/test_polish_gate_discovery.sh`.
+- Fixtures:
+  `templates/flywheel-install/tests/fixtures/malformed-manifest/`.
+
+## AGENTS.md doubling fleet-wide pattern triage (from skillos audit) (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: TRIAGE
+
+Class: `agents-md-doubling-fleet-wide`
+
+Event Count: 1 skillos Phase 3 audit cross-orch routing candidate plus 6-repo
+flywheel sample
+
+Severity: high
+
+Cost: Full canonical doctrine and timestamped `AGENTS.md.bak.*` sidecars are
+being copied into peer repo working trees. That inflates grep/Socraticode
+results, creates local-vs-canonical split-brain risk, and turns every doctrine
+sync into more in-tree historical debris.
+
+Root Cause: `flywheel-doctrine-sync` compares peer root `AGENTS.md` and
+`.flywheel/AGENTS-CANONICAL.md` against flywheel canonical `AGENTS.md`, then
+backs up drifted files in place before copying the full canonical file into both
+surfaces. `flywheel-loop init` also copies the canonical doctrine snapshot, and
+the current fleet-propagator fixture models the same root/snapshot copy shape.
+
+Forever-Rule: Peer repos should have one full canonical snapshot and one thin
+local root `AGENTS.md` pointer plus repo-specific rules. Any exact peer
+root/snapshot clone, or recurring in-tree `AGENTS.md.bak.*` sprawl, must surface
+as a doctor signal and route to a remediation bead instead of being found by a
+later polish audit.
+
+Fix Applied/Status: Triage only. Scope sample and remediation plan were written
+under `/tmp`; follow-up bead `wire-agents-md-doubling-prevention` was filed to
+wire the detector, doctor fields, tests, and prevention changes. No
+`AGENTS.md` files or peer repo files were mutated by this triage.
+
+Scope sample:
+- `/tmp/agents-doubling-flywheel-sample-2026-05-06.md`.
+- Direct flywheel `AGENTS.md*` count: 12.
+- Six-repo sample total: 109 `AGENTS.md*` matches.
+- Repos with more than one match: 5 of 6.
+- Exact current peer root/snapshot clones observed: `mobile-eats`, `vrtx`.
+
+Remediation plan:
+- `/tmp/agents-doubling-remediation-plan-2026-05-06.md`.
+
+Donella read: #6 information flows and #5 rules. The next intervention should
+make doubling visible in doctor JSON, then change the sync rule so the doubling
+and backup-sprawl stock stops refilling.
+
+Evidence:
+- Bead: `flywheel-from-skillos-audit-725d`.
+- Follow-up bead: `wire-agents-md-doubling-prevention`.
+- Source report: `/tmp/phase3-audit-skillos-report-20260506T015536Z.md`.
+- Scope sample: `/tmp/agents-doubling-flywheel-sample-2026-05-06.md`.
+- Plan: `/tmp/agents-doubling-remediation-plan-2026-05-06.md`.
+
+## P2-12 f4: Phase 2 bead closure receipts reconciled (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: UPDATE
+
+Class: `phase2-bead-closure-receipt-drift`
+
+Event Count: 2 Phase 2 audit drift findings
+
+Severity: medium
+
+Cost: Phase 2 had shipped artifacts and passing tests, but the bead inventory
+was not fully machine-auditable. P2-07 closure truth lived under the canonical
+follow-up bead `flywheel-p2-12-f1` without a discoverable `flywheel-p2-07`
+compatibility receipt, and P2-11 had stale dispatch context despite its JSONL
+fallback close row and live ledger adapter evidence.
+
+Root Cause: Phase 2 closure state was spread across dispatch callbacks, JSONL
+fallback close rows, and canonical follow-up beads. Readers relying on stable
+Phase-step ids could miss the closure receipt even though the implementation
+truth was present.
+
+Forever-Rule: Phase audit inventories must be reconciled with append-only
+latest-row receipts. If a Phase step uses a canonical follow-up bead id, append
+a compatibility closure receipt that names the Phase step id and aliases the
+canonical bead; never rewrite historical JSONL rows to repair audit shape.
+
+Fix Applied/Status: `flywheel-p2-12-f4` appended reconciliation rows for
+`flywheel-p2-07`, `flywheel-p2-12-f1`, `flywheel-p2-11`, and its own closeout;
+added `.flywheel/tests/test-phase2-bead-inventory-parity.sh`; and wrote
+`/tmp/p2-12-f4-bead-inventory-audit-2026-05-06.md`.
+
+Donella read: #5 rules and #6 information flows. The bead inventory now has a
+stable machine-readable rule for Phase closure truth rather than requiring
+operators to infer state from stale dispatch context.
+
+Evidence:
+- Bead: `flywheel-p2-12-f4`.
+- Audit: `/tmp/p2-12-f4-bead-inventory-audit-2026-05-06.md`.
+- Regression test: `.flywheel/tests/test-phase2-bead-inventory-parity.sh`.
+- State rows: `.beads/issues.jsonl` append-only close receipts tagged
+  `closure_reconciliation_via=p2-12-f4`.
