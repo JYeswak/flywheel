@@ -3209,3 +3209,13 @@ Evidence:
 
 Shipped append-safe-write.sh primitive + test + pilot INCIDENTS callsite doc-only migration. Phase 1 of migration plan. Uses primitive to append THIS entry (dogfooding). Reversible: git-revert + dispatch-template doc revert (2026-05-06).
 
+
+## Orch no-punt output gate Phase 1 shipped (2026-05-06)
+
+Shipped orch-no-punt-output-gate.sh + 17-case test + Claude Code Stop hook (warn-mode). Reversible: git-revert + settings.json hook removal. Phase 1 of migration plan; Phase 2 promotes to refuse-mode after 24h (2026-05-06)
+
+Evidence:
+- Script: `.flywheel/scripts/orch-no-punt-output-gate.sh`.
+- Test: `.flywheel/tests/test_orch_no_punt_output_gate.sh`.
+- Hook: `~/.claude/settings.json hooks.Stop`.
+- Bead: `flywheel-ship-orch-no-punt-output-gate-2026-05-06`.
