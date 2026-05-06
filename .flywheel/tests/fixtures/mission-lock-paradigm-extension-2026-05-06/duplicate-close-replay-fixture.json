@@ -1,0 +1,58 @@
+{
+  "schema_version": "mission-lock-golden-fixture/v1",
+  "fixture_id": "duplicate-close-replay-fixture",
+  "finding_id": "IDEM-003",
+  "mode": "close_validator",
+  "description": "Duplicate close receipt reconciles to prior append-only truth.",
+  "expected": {
+    "verdict": "duplicate_reconciled",
+    "codes": ["duplicate_close_reconciled"]
+  },
+  "close_ledger_rows": [
+    {
+      "event": "close",
+      "ref_id": "wave4-duplicate-close-fixture",
+      "close_identity_key": "close-key-duplicate-fixture"
+    }
+  ],
+  "close_receipt": {
+    "status": "DONE",
+    "ref_id": "wave4-duplicate-close-fixture",
+    "task_id": "wave4-duplicate-close-fixture",
+    "close_identity_key": "close-key-duplicate-fixture",
+    "dedupe_policy": "latest-row-by-ref_id-event",
+    "previous_close_row": ".beads/issues.jsonl#L1",
+    "skill_receipts": [
+      {
+        "schema_version": "skill-receipt/v1",
+        "receipt_identity_key": "skill-receipt:duplicate-close",
+        "skill": "testing-golden-artifacts",
+        "resolved_to": "testing-golden-artifacts",
+        "source": "local-skill-root",
+        "path": "/Users/josh/.codex/skills/testing-golden-artifacts/SKILL.md",
+        "sha": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "version": "2026-05-06",
+        "freshness_status": "fresh",
+        "route_allowed": true,
+        "checked_at": "2026-05-06T16:00:00Z",
+        "action_taken": "applied",
+        "policy_version": "close-validator-receipt-contract/v1",
+        "credential_touch": false,
+        "secret_value_allowed": false,
+        "safe_wrapper": "n/a"
+      }
+    ],
+    "l112": {
+      "command": "bash fixture-l112",
+      "observed": "OK_wave4_fixture",
+      "expected": "OK_wave4_fixture",
+      "timeout_sec": 5400
+    },
+    "evidence": [
+      {
+        "type": "path",
+        "value": ".flywheel/scripts/golden-fixture-replay-runner.sh"
+      }
+    ]
+  }
+}

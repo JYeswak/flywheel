@@ -1,0 +1,24 @@
+{
+  "schema_version": "mission-lock-golden-fixture/v1",
+  "fixture_id": "cross-cutting-coverage-fixture",
+  "finding_id": "CSR-006",
+  "mode": "dispatch_author",
+  "description": "Dispatch packet omits required observability, Agent Mail, cost, and search overlays.",
+  "expected": {
+    "verdict": "fail",
+    "codes": ["required_overlay_missing"]
+  },
+  "dispatch_packet_lines": [
+    "Task ID: wave4-cross-cutting-coverage-fixture",
+    "To: flywheel:4 codex",
+    "dispatch_class_merge_order: security > idempotency > cross-cutting",
+    "strictest_invariant_wins=true",
+    "collision_policy=resolved",
+    "exact:get_skill > local:SKILL.md-readable > semantic:socraticode > external:npx-skills-find-installable-only > fallback:rg-filesystem",
+    "canonical-cli-scoping readme-writing de-slopify simplify socraticode",
+    "secret_values_allowed=false",
+    "route_receipt_schema_version skill_routing skill_receipts[] receipt_identity_key skill source action_taken policy_version evidence alias_of not_applicable_reason idempotency_key replay_detection_hash transaction_boundary receipt_completeness",
+    "prompt_budget_policy: names-plus-one-line-why excerpt-cap",
+    "selected_skill_count: 5"
+  ]
+}

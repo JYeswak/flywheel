@@ -1,0 +1,50 @@
+{
+  "schema_version": "mission-lock-golden-fixture/v1",
+  "fixture_id": "stale-skill-route-fixture",
+  "finding_id": "CSR-001",
+  "mode": "close_validator",
+  "description": "Close receipt references a stale skill route and must fail.",
+  "expected": {
+    "verdict": "fail",
+    "codes": ["stale_or_blocked_skill_route"]
+  },
+  "close_receipt": {
+    "status": "DONE",
+    "ref_id": "wave4-stale-skill-route-fixture",
+    "task_id": "wave4-stale-skill-route-fixture",
+    "close_identity_key": "close-key-stale-skill-fixture",
+    "dedupe_policy": "latest-row-by_ref_id-event",
+    "skill_receipts": [
+      {
+        "schema_version": "skill-receipt/v1",
+        "receipt_identity_key": "skill-receipt:stale-route",
+        "skill": "renamed-or-removed-skill",
+        "resolved_to": "renamed-or-removed-skill",
+        "source": "stale-dispatch-packet",
+        "path": "/Users/josh/.codex/skills/renamed-or-removed-skill/SKILL.md",
+        "sha": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "version": "2026-04-01",
+        "freshness_status": "stale",
+        "route_allowed": false,
+        "checked_at": "2026-05-06T16:00:00Z",
+        "action_taken": "blocked",
+        "policy_version": "close-validator-receipt-contract/v1",
+        "credential_touch": false,
+        "secret_value_allowed": false,
+        "safe_wrapper": "n/a"
+      }
+    ],
+    "l112": {
+      "command": "bash fixture-l112",
+      "observed": "OK_wave4_fixture",
+      "expected": "OK_wave4_fixture",
+      "timeout_sec": 5400
+    },
+    "evidence": [
+      {
+        "type": "path",
+        "value": ".flywheel/tests/fixtures/mission-lock-paradigm-extension-2026-05-06/stale-skill-route-fixture.json"
+      }
+    ]
+  }
+}

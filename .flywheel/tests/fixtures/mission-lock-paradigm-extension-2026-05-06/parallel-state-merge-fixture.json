@@ -1,0 +1,29 @@
+{
+  "schema_version": "mission-lock-golden-fixture/v1",
+  "fixture_id": "parallel-state-merge-fixture",
+  "finding_id": "IDEM-005",
+  "mode": "plan_state_merge",
+  "description": "Two independent lens rows append without dropping either lens.",
+  "expected": {
+    "verdict": "pass",
+    "lenses": ["security-negative-invariants", "cross-cutting-skill-routing"]
+  },
+  "lens_rows": [
+    {
+      "lens": "security-negative-invariants",
+      "audit_disposition": "auto_advance",
+      "findings_by_severity": {
+        "high": 1,
+        "medium": 4
+      }
+    },
+    {
+      "lens": "cross-cutting-skill-routing",
+      "audit_disposition": "auto_advance",
+      "findings_by_severity": {
+        "high": 2,
+        "medium": 3
+      }
+    }
+  ]
+}

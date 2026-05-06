@@ -1,0 +1,20 @@
+{
+  "schema_version": "mission-lock-golden-fixture/v1",
+  "fixture_id": "false-positive-self-test-fixture",
+  "finding_id": "CSR-004",
+  "mode": "false_positive_self_test",
+  "description": "Dispatch identity pretest passes, but claimed skill consultation has no route match.",
+  "expected": {
+    "verdict": "fail",
+    "codes": ["false_positive_skill_claim"]
+  },
+  "claimed_skill": "nonexistent-stale-skill",
+  "route_matches": [],
+  "dispatch_packet_lines": [
+    "# DISPATCH: false positive self-test fixture",
+    "Task ID: wave4-false-positive-self-test-fixture",
+    "To: flywheel:4 codex",
+    "idempotency_key: sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "Skill: nonexistent-stale-skill"
+  ]
+}

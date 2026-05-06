@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/flywheel/polish-preflight-receipt.schema.json",
+  "title": "Polish Preflight Quality Gate Receipt",
+  "type": "object",
+  "required": [
+    "gate_status",
+    "plan_slug",
+    "gates_run",
+    "first_fire_reason",
+    "composite_health_score",
+    "all_audit_findings_closed",
+    "ts",
+    "gate_version"
+  ],
+  "properties": {
+    "gate_status": {
+      "type": "string",
+      "enum": ["PASS", "FAIL", "PENDING"]
+    },
+    "plan_slug": {
+      "type": "string",
+      "minLength": 1
+    },
+    "gates_run": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "type": "object",
+        "required": ["name", "status", "evidence_path", "latency_ms"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": ["PASS", "FAIL", "PENDING"]
+          },
+          "evidence_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "latency_ms": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "first_fire_reason": {
+      "type": ["string", "null"]
+    },
+    "composite_health_score": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "all_audit_findings_closed": {
+      "type": "boolean"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate_version": {
+      "const": "v1"
+    }
+  },
+  "additionalProperties": true
+}
