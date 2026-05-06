@@ -1,0 +1,7 @@
+> Read /tmp/dispatch.md and execute it as /flywheel:worker-tick parity.
+
+Working (12m 41s · esc to interrupt)
+Killed
+[Process completed]
+
+joshua@studio flywheel %

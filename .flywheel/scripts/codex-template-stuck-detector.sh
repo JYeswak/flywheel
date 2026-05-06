@@ -2,7 +2,7 @@
 # canonical-cli-scoping-allow-large: mk303 needs one portable detector CLI with live ntm sampling, fixture tests, doctor/repair, and recovery gates.
 set -euo pipefail
 
-VERSION="codex-stuck-detector.v1.1.0"
+VERSION="codex-stuck-detector.v1.2.0"
 SCHEMA_VERSION="codex-stuck-detector.v1"
 CONTRACT_SCHEMA_VERSION="substrate-loop-contract.v1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -14,6 +14,9 @@ FUCKUP_LOG="${CODEX_STUCK_DETECTOR_FUCKUP_LOG:-$HOME/.local/state/flywheel/fucku
 TOPOLOGY_LEDGER="${CODEX_STUCK_DETECTOR_TOPOLOGY:-$HOME/.local/state/flywheel/session-topology.jsonl}"
 JSONL_APPEND_LIB="${CODEX_STUCK_DETECTOR_JSONL_APPEND_LIB:-${FLYWHEEL_JSONL_APPEND_LIB:-$HOME/.local/share/flywheel-watchers/lib/jsonl-append.sh}}"
 NTM_BIN="${CODEX_STUCK_DETECTOR_NTM_BIN:-$HOME/.local/bin/ntm}"
+CAPACITY_AUTO_CONTINUE="${CODEX_STUCK_DETECTOR_CAPACITY_AUTO_CONTINUE:-$REPO_ROOT/.flywheel/scripts/capacity-halt-auto-continue-primitive.sh}"
+QUEUED_BARE_ENTER="${CODEX_STUCK_DETECTOR_QUEUED_BARE_ENTER:-$REPO_ROOT/.flywheel/scripts/codex-queued-not-submitted-bare-enter-primitive.sh}"
+OOM_KILLED_RESPAWN="${CODEX_STUCK_DETECTOR_OOM_KILLED_RESPAWN:-$NTM_BIN}"
 
 MODE="detect"
 JSON_OUT=0
@@ -68,6 +71,12 @@ emit() {
     printf '%s\n' "$text"
   fi
   return "$rc"
+}
+
+emit_error() {
+  local rc="$1" code="$2" reason="$3" payload
+  payload="$(jq -nc --arg schema "codex-stuck-detector.error.v1" --arg version "$VERSION" --arg code "$code" --arg reason "$reason" '{schema_version:$schema,version:$version,status:"fail",success:false,code:$code,reason:$reason}')"
+  emit "$payload" "ERR: $reason" "$rc"
 }
 
 append_validated() {
@@ -132,7 +141,7 @@ info_json() {
     --arg ntm "$NTM_BIN" \
     --argjson window "$WINDOW_SEC" \
     --argjson lines "$LINES" \
-    '{name:$name,version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,substrate_loop_contract_ledger:$contract_ledger,fuckup_log:$fuckup_log,topology_ledger:$topology,ntm_bin:$ntm,defaults:{dry_run:true,window_sec:$window,lines:$lines,auto_recover_requires_apply:true},subclasses:["alive","buffer_stuck","post_completion","input_deaf","post_callback_reminder_template_with_stale_spinner","unknown_stable"],safe_recovery_policy:{buffer_stuck:"enter_newline_only",input_deaf:"respawn_escalation_only",post_completion:"respawn_escalation_only",post_callback_reminder_template_with_stale_spinner:"escape_then_reprompt_or_respawn",auto_respawn:"subclass-gated"},exit_codes:{"0":"ok or alive/no stuck panes","1":"stuck class detected or doctor threshold failed","2":"usage error","3":"append primitive unavailable or append failed"}}'
+    '{name:$name,version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,substrate_loop_contract_ledger:$contract_ledger,fuckup_log:$fuckup_log,topology_ledger:$topology,ntm_bin:$ntm,defaults:{dry_run:true,window_sec:$window,lines:$lines,auto_recover_requires_apply:true},subclasses:["alive","buffer_stuck","post_completion","input_deaf","post_callback_reminder_template_with_stale_spinner","model_at_capacity_halt","codex_queued_not_submitted","oom_killed_pane","unknown_stable"],safe_recovery_policy:{buffer_stuck:"enter_newline_only",input_deaf:"respawn_escalation_only",post_completion:"respawn_escalation_only",post_callback_reminder_template_with_stale_spinner:"escape_then_reprompt_or_respawn",model_at_capacity_halt:"auto_continue",codex_queued_not_submitted:"bare_enter",oom_killed_pane:"respawn",auto_respawn:"subclass-gated"},exit_codes:{"0":"ok or alive/no stuck panes","1":"stuck class detected or doctor threshold failed","2":"usage error","3":"append primitive unavailable or append failed"}}'
 }
 
 examples_text() {
@@ -148,9 +157,9 @@ EOF
 quickstart_text() {
   cat <<'EOF'
 1. Run with --session and --pane to take two ntm copies separated by the window.
-2. Stable hash plus a known Codex template/Working signal is required before stuck classification.
+2. Stable hash gates generic template/Working classes; post-callback reminder + stale spinner can classify through cosmetic hash drift.
 3. Add --apply to write the audit ledger.
-4. Add --auto-recover --apply only when buffer_stuck should receive one Enter newline retry.
+4. Add --auto-recover --apply for buffer_stuck Enter retry, model_at_capacity_halt auto_continue, or codex_queued_not_submitted bare_enter.
 5. input_deaf and post_completion never auto-respawn; route them to /flywheel:respawn.
 EOF
 }
@@ -195,13 +204,14 @@ EOF
 
 detector_py() {
   local py_mode="$1" contract_action="${2:-not_requested}"
-  python3 - "$py_mode" "$REPO_ROOT" "$LEDGER" "$CONTRACT_LEDGER" "$FUCKUP_LOG" "$TOPOLOGY_LEDGER" "$NTM_BIN" "$SESSION_NAME" "$PANE" "$FIXTURE" "$FIXTURE_DIR" "$WINDOW_SEC" "$LINES" "$APPLY" "$DRY_RUN" "$AUTO_RECOVER" "$WORKER_PANES_FROM_TOPOLOGY" "$VERSION" "$SCHEMA_VERSION" "$contract_action" "$VALIDATE_TARGET" "$WHY_ID" <<'PY'
+  python3 - "$py_mode" "$REPO_ROOT" "$LEDGER" "$CONTRACT_LEDGER" "$FUCKUP_LOG" "$TOPOLOGY_LEDGER" "$NTM_BIN" "$CAPACITY_AUTO_CONTINUE" "$QUEUED_BARE_ENTER" "$SESSION_NAME" "$PANE" "$FIXTURE" "$FIXTURE_DIR" "$WINDOW_SEC" "$LINES" "$APPLY" "$DRY_RUN" "$AUTO_RECOVER" "$WORKER_PANES_FROM_TOPOLOGY" "$VERSION" "$SCHEMA_VERSION" "$contract_action" "$VALIDATE_TARGET" "$WHY_ID" "$OOM_KILLED_RESPAWN" <<'PY'
 import hashlib
 import json
 import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from collections import Counter, defaultdict
 from datetime import datetime, timezone, timedelta
@@ -215,6 +225,8 @@ from pathlib import Path
     fuckup_log_raw,
     topology_raw,
     ntm_bin,
+    capacity_auto_continue_raw,
+    queued_bare_enter_raw,
     session_name,
     pane_raw,
     fixture_raw,
@@ -230,6 +242,7 @@ from pathlib import Path
     contract_action,
     validate_target,
     why_id,
+    oom_killed_respawn_raw,
 ) = sys.argv[1:]
 
 repo = Path(repo_raw)
@@ -237,6 +250,9 @@ ledger = Path(ledger_raw)
 contract_ledger = Path(contract_ledger_raw)
 fuckup_log = Path(fuckup_log_raw)
 topology = Path(topology_raw)
+capacity_auto_continue = Path(capacity_auto_continue_raw)
+queued_bare_enter = Path(queued_bare_enter_raw)
+oom_killed_respawn = Path(oom_killed_respawn_raw) if oom_killed_respawn_raw else None
 fixture = Path(fixture_raw) if fixture_raw else None
 fixture_dir = Path(fixture_dir_raw) if fixture_dir_raw else None
 window_sec = int(float(window_raw))
@@ -248,18 +264,31 @@ worker_panes_from_topology = worker_panes_raw == "1"
 now = os.environ.get("CODEX_STUCK_DETECTOR_NOW") or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 PLACEHOLDER_RE = re.compile(r"(?:^|\s)(?:›\s*)?(Implement \{feature\}|Run /review|Use /skills)(?:\s|$)")
+CAPACITY_HALT_RE = re.compile(r"(selected model is at capacity|please try a different model)", re.I)
+CHEVRON_PROMPT_RE = re.compile(r"^\s*›(?:\s|$)", re.M)
+QUEUED_PROMPT_RE = re.compile(r"^\s*›[ \t]+(.{1,200})\s*$", re.M)
 BACKGROUND_SPINNER_RE = re.compile(
-    r"Waiting for background terminal \((?:(\d+)h\s*)?(?:(\d+)m\s*)?(\d+)s\s*[·•]\s*esc to interrupt\)",
+    r"(?:Waiting for background terminal|Working)\s*\((?:(\d+)h\s*)?(?:(\d+)m\s*)?(\d+)s\s*[·•]\s*esc(?:\s+to\s+interrupt|…|\.\.\.)?",
     re.I,
 )
 REMINDER_PROMPT_RE = re.compile(
-    r"^›\s*(Explain this codebase|Use /skills to list available skills|Use /init to create an AGENTS\.md file|Run /review on my changes)\s*$",
+    r"^›\s*(Implement \{feature\}|Explain this codebase|Summarize recent commits|Find and fix a bug in @filename|Write tests for @filename|Use /skills to list available skills|Use /init to create an AGENTS\.md file|Run /review on my (?:current )?changes)\s*$",
     re.M,
 )
 POST_CALLBACK_DONE_RE = re.compile(r"(^•\s*Done\.|Done\..*implemented and closed|^Changed:)", re.M)
 WORKING_RE = re.compile(r"Working \((?:(\d+)h)?\s*(?:(\d+)m)?\s*(?:(\d+)s)?", re.I)
 POST_CALLBACK_SUBCLASS = "post_callback_reminder_template_with_stale_spinner"
+CAPACITY_HALT_SUBCLASS = "model_at_capacity_halt"
+QUEUED_NOT_SUBMITTED_SUBCLASS = "codex_queued_not_submitted"
+OOM_KILLED_SUBCLASS = "oom_killed_pane"
+# OOM/cgroup-killed signature: kernel/process death markers that show in tmux pane after codex CLI is OOM-killed.
+# Matches: "Killed", "killed: 9", "out of memory", "Out of memory: Killed process", "oom-kill",
+# bash exit message "[Process completed]", or "[exited]" markers.
+OOM_KILLED_RE = re.compile(
+    r"(\bKilled\b|killed:\s*9|[Oo]ut of memory|oom[-_]kill|cgroup.*oom|\[Process completed\]|\[exited\]|process\s+killed)",
+)
 POST_CALLBACK_SIGNAL = "stale_background_spinner_with_reminder_template"
+STATIC_REMINDER_PROMPTS = {"Implement {feature}", "Explain this codebase", "Summarize recent commits", "Find and fix a bug in @filename", "Write tests for @filename", "Use /skills to list available skills", "Use /init to create an AGENTS.md file"}
 
 def sha(text):
     return hashlib.sha256(text.encode("utf-8", errors="replace")).hexdigest()
@@ -272,11 +301,32 @@ def parse_ts(value):
     except ValueError:
         return None
 
+class ProbeFailure(RuntimeError):
+    pass
+
 def read_json(path):
     try:
         return json.loads(Path(path).read_text(encoding="utf-8"))
     except Exception as exc:
         return {"error": f"{type(exc).__name__}: {exc}"}
+
+def read_fixture(path):
+    path = Path(path)
+    if path.is_dir():
+        t0_path = path / "t0.txt"
+        t1_path = path / "t1.txt"
+        payload = {
+            "schema_version": "codex-stuck-detector.fixture.v1",
+            "session": session_name or "fixture",
+            "pane": int(pane_raw) if str(pane_raw).isdigit() else (pane_raw or 1),
+            "t0": t0_path.read_text(encoding="utf-8", errors="replace") if t0_path.exists() else "",
+            "t1": t1_path.read_text(encoding="utf-8", errors="replace") if t1_path.exists() else "",
+        }
+        after_retry = path / "after_retry.txt"
+        if after_retry.exists():
+            payload["after_retry"] = after_retry.read_text(encoding="utf-8", errors="replace")
+        return payload
+    return read_json(path)
 
 def fixture_text_for_pane(payload, pane_hint):
     if not isinstance(payload, dict):
@@ -334,7 +384,7 @@ def latest_topology_rows():
 def topology_targets():
     targets = []
     if fixture:
-        fx = read_json(fixture)
+        fx = read_fixture(fixture)
         pane_hint = fx.get("pane") or pane_raw
         if not pane_hint and isinstance(fx.get("panes"), dict) and len(fx["panes"]) == 1:
             pane_hint = next(iter(fx["panes"].keys()))
@@ -368,18 +418,36 @@ def topology_targets():
     return [(session_name, str(pane_raw), None)]
 
 def ntm_copy(session, pane):
-    cmd = [ntm_bin, "copy", f"{session}:{pane}", "-l", str(lines)]
-    proc = subprocess.run(cmd, text=True, capture_output=True)
-    if proc.returncode == 0 and proc.stdout:
-        return proc.stdout
-    fallback = subprocess.run([ntm_bin, f"--robot-tail={session}", f"--panes={pane}", f"--lines={lines}"], text=True, capture_output=True)
-    if fallback.returncode == 0 and fallback.stdout:
+    safe_session = re.sub(r"[^A-Za-z0-9_.-]+", "-", str(session))
+    safe_pane = re.sub(r"[^A-Za-z0-9_.-]+", "-", str(pane))
+    copy_path = Path(tempfile.gettempdir()) / f"codex-stuck-detector-copy-{os.getpid()}-{safe_session}-{safe_pane}.txt"
+    try:
+        proc = subprocess.run(
+            [ntm_bin, "copy", f"{session}:{pane}", "-l", str(lines), "--output", str(copy_path), "--quiet"],
+            text=True,
+            capture_output=True,
+        )
+        if proc.returncode == 0 and copy_path.exists():
+            text = copy_path.read_text(encoding="utf-8", errors="replace")
+            if text.strip():
+                return text
+        fallback = subprocess.run([ntm_bin, f"--robot-tail={session}", f"--panes={pane}", f"--lines={lines}"], text=True, capture_output=True)
+        if fallback.returncode == 0 and fallback.stdout:
+            try:
+                payload = json.loads(fallback.stdout)
+                text = "\n".join(payload.get("panes", {}).get(str(pane), {}).get("lines", []))
+                if text.strip():
+                    return text
+            except Exception:
+                if fallback.stdout.strip():
+                    return fallback.stdout
+        detail = (proc.stderr or proc.stdout or "").strip() or (fallback.stderr or fallback.stdout or "").strip()
+        raise ProbeFailure(f"ntm copy failed for {session}:{pane}: {detail[-500:]}")
+    finally:
         try:
-            payload = json.loads(fallback.stdout)
-            return "\n".join(payload.get("panes", {}).get(str(pane), {}).get("lines", []))
-        except Exception:
-            return fallback.stdout
-    return ""
+            copy_path.unlink()
+        except FileNotFoundError:
+            pass
 
 def capture_pair(session, pane, fixture_payload=None):
     if fixture_payload is not None:
@@ -391,7 +459,7 @@ def capture_pair(session, pane, fixture_payload=None):
     t0 = ntm_copy(session, pane)
     time.sleep(window_sec)
     t1 = ntm_copy(session, pane)
-    return t0, t1, "", {}
+    return t0, t1, "", None
 
 def working_seconds(text):
     best = 0
@@ -419,8 +487,26 @@ def has_reminder_prompt(text):
 def has_stale_spinner_reminder(text):
     tail30 = "\n".join(text.splitlines()[-30:])
     return has_reminder_prompt(text) and (
-        stale_background_spinner_seconds(text) >= 60 or POST_CALLBACK_DONE_RE.search(tail30) is not None
+        stale_background_spinner_seconds(text) > 90 or POST_CALLBACK_DONE_RE.search(tail30) is not None
     )
+
+def queued_prompt_text(text):
+    matches = [match.group(1).strip() for match in QUEUED_PROMPT_RE.finditer(text)]
+    if not matches:
+        return ""
+    candidate = matches[-1]
+    return "" if candidate in STATIC_REMINDER_PROMPTS or CAPACITY_HALT_RE.search(candidate) else candidate
+
+def has_queued_not_submitted_prompt(text):
+    tail40 = "\n".join(text.splitlines()[-40:])
+    return not (POST_CALLBACK_DONE_RE.search(tail40) or has_capacity_halt_prompt(text)) and bool(queued_prompt_text(text)) and (working_seconds(text) >= 60 or BACKGROUND_SPINNER_RE.search(text) is not None)
+
+def evidence_signal_lines(text):
+    return [
+        line
+        for line in text.splitlines()
+        if PLACEHOLDER_RE.search(line) or CAPACITY_HALT_RE.search(line) or QUEUED_PROMPT_RE.search(line) or REMINDER_PROMPT_RE.search(line) or BACKGROUND_SPINNER_RE.search(line) or "Working (" in line
+    ]
 
 def buffer_signal(text):
     if has_stale_spinner_reminder(text):
@@ -432,28 +518,53 @@ def buffer_signal(text):
         return f"Working>{secs}s"
     return "none"
 
+def has_oom_killed_signature(text):
+    # No chevron prompt + no capacity halt + OOM/dead-process marker in tail.
+    if CHEVRON_PROMPT_RE.search(text):
+        return False
+    if CAPACITY_HALT_RE.search(text):
+        return False
+    tail = "\n".join(text.splitlines()[-50:])
+    return OOM_KILLED_RE.search(tail) is not None
+
+def has_capacity_halt_prompt(text):
+    tail = "\n".join(text.splitlines()[-50:] + evidence_signal_lines(text)[-8:])
+    return CAPACITY_HALT_RE.search(tail) is not None and CHEVRON_PROMPT_RE.search(tail) is not None
+
 def classify_text(session, pane, t0, t1, fixture_payload):
+    fixture_payload = fixture_payload or {}
     stable = sha(t0) == sha(t1)
     signal = buffer_signal(t1)
     hint = str(fixture_payload.get("subclass_hint") or "")
-    if not stable:
-        return "alive", stable, signal, "none", False
-    if hint in {"input_deaf", "post_completion", "buffer_stuck", POST_CALLBACK_SUBCLASS}:
+    if hint in {"input_deaf", "post_completion", "buffer_stuck", POST_CALLBACK_SUBCLASS, CAPACITY_HALT_SUBCLASS, QUEUED_NOT_SUBMITTED_SUBCLASS, OOM_KILLED_SUBCLASS}:
         subclass = hint
+    elif has_oom_killed_signature(t1):
+        subclass = OOM_KILLED_SUBCLASS
+    elif has_capacity_halt_prompt(t1):
+        subclass = CAPACITY_HALT_SUBCLASS
+    elif has_queued_not_submitted_prompt(t1):
+        subclass = QUEUED_NOT_SUBMITTED_SUBCLASS
     elif signal == POST_CALLBACK_SIGNAL:
         subclass = POST_CALLBACK_SUBCLASS
+    elif not stable:
+        return "alive", stable, signal, "none", False
     elif working_seconds(t1) >= 600:
         subclass = "post_completion"
     elif PLACEHOLDER_RE.search(t1):
         subclass = "buffer_stuck"
+    elif CHEVRON_PROMPT_RE.search(t1) and not queued_prompt_text(t1) and signal == "none":
+        return "alive", stable, signal, "none", False
     else:
         subclass = "unknown_stable"
-    stuck = subclass in {"buffer_stuck", "post_completion", "input_deaf", POST_CALLBACK_SUBCLASS}
+    stuck = subclass in {"buffer_stuck", "post_completion", "input_deaf", POST_CALLBACK_SUBCLASS, CAPACITY_HALT_SUBCLASS, QUEUED_NOT_SUBMITTED_SUBCLASS, OOM_KILLED_SUBCLASS}
     recovery = {
         "buffer_stuck": "enter_newline_then_respawn_if_still_stuck",
         "input_deaf": "/flywheel:respawn_after_peer_orch_recovery_gate",
         "post_completion": "/flywheel:respawn_after_snapshot",
         POST_CALLBACK_SUBCLASS: "escape_then_reprompt_or_respawn",
+        CAPACITY_HALT_SUBCLASS: "auto_continue",
+        QUEUED_NOT_SUBMITTED_SUBCLASS: "bare_enter",
+        OOM_KILLED_SUBCLASS: "respawn",
         "unknown_stable": "recapture_then_manual_review",
         "alive": "none",
     }.get(subclass, "manual_review")
@@ -464,7 +575,7 @@ def send_enter_retry(session, pane, fixture_payload):
         return bool(fixture_payload.get("send_ack", True)), "fixture"
     if not apply or dry_run:
         return False, "preview"
-    proc = subprocess.run([ntm_bin, "send", session, f"--pane={pane}", "\n"], text=True, capture_output=True)
+    proc = subprocess.run([ntm_bin, "send", session, f"--pane={pane}", "--no-cass-check", "\n"], text=True, capture_output=True)
     return proc.returncode == 0 and "Sent" in (proc.stdout + proc.stderr), (proc.stdout + proc.stderr)[-200:]
 
 def write_unknown_snapshot(session, pane, t0, t1):
@@ -509,16 +620,65 @@ def run_recovery_primitive(session, pane):
     payload["returncode"] = proc.returncode
     return payload
 
+def run_capacity_auto_continue(session, pane, digest):
+    if not capacity_auto_continue.exists():
+        return {"recovered": False, "sent": False, "returncode": 3, "error": "capacity_auto_continue_primitive_missing"}
+    env = os.environ.copy()
+    env["CAPACITY_HALT_AUTO_CONTINUE_NTM_BIN"] = str(ntm_bin)
+    proc = subprocess.run(
+        [str(capacity_auto_continue), "--session", str(session), "--pane", str(pane), "--digest", digest, "--apply", "--json"],
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+    try:
+        payload = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        payload = {"recovered": False, "sent": False, "error": (proc.stderr or proc.stdout)[-500:]}
+    payload["returncode"] = proc.returncode
+    return payload
+
+def run_queued_bare_enter(session, pane, digest):
+    if not queued_bare_enter.exists():
+        return {"recovered": False, "sent": False, "returncode": 3, "error": "queued_bare_enter_primitive_missing"}
+    env = os.environ.copy(); env["CODEX_QUEUED_BARE_ENTER_NTM_BIN"] = str(ntm_bin)
+    proc = subprocess.run([str(queued_bare_enter), "--session", str(session), "--pane", str(pane), "--digest", digest, "--apply", "--json"], text=True, capture_output=True, env=env)
+    try:
+        payload = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        payload = {"recovered": False, "sent": False, "error": (proc.stderr or proc.stdout)[-500:]}
+    payload["returncode"] = proc.returncode; return payload
+
+def run_oom_killed_respawn(session, pane, digest):
+    # Recovery for oom_killed_pane: codex process is gone, respawn the pane.
+    # Mock-friendly: in fixture/dry-run mode, we never invoke ntm.
+    # Live: ntm respawn <session> --panes=<N> --force
+    if oom_killed_respawn is None or not oom_killed_respawn.exists():
+        return {"recovered": False, "sent": False, "returncode": 3, "error": "oom_killed_respawn_primitive_missing"}
+    env = os.environ.copy()
+    env["CODEX_OOM_KILLED_RESPAWN_NTM_BIN"] = str(ntm_bin)
+    proc = subprocess.run(
+        [str(oom_killed_respawn), "respawn", str(session), f"--panes={pane}", "--force"],
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+    payload = {
+        "recovered": proc.returncode == 0,
+        "sent": proc.returncode == 0,
+        "returncode": proc.returncode,
+        "digest": digest,
+        "stdout_tail": (proc.stdout or "")[-300:],
+        "stderr_tail": (proc.stderr or "")[-300:],
+    }
+    return payload
+
 def detect_one(session, pane, fixture_payload=None):
     t0, t1, after_retry, fixture_payload = capture_pair(session, pane, fixture_payload)
     subclass, stable, signal, recommended, stuck = classify_text(session, pane, t0, t1, fixture_payload)
     hash_t0 = sha(t0)
     hash_t1 = sha(t1)
-    evidence_lines = [
-        line
-        for line in t1.splitlines()
-        if PLACEHOLDER_RE.search(line) or REMINDER_PROMPT_RE.search(line) or BACKGROUND_SPINNER_RE.search(line) or "Working (" in line
-    ][-8:]
+    evidence_lines = evidence_signal_lines(t1)[-8:]
     recovery_attempted = "none"
     recovery_succeeded = None
     send_ack = None
@@ -548,7 +708,30 @@ def detect_one(session, pane, fixture_payload=None):
             recovery_succeeded = bool(recovery_payload.get("recovery_succeeded"))
         else:
             recovery_succeeded = False
-    auto_recover_eligible = auto_recover or subclass == POST_CALLBACK_SUBCLASS
+    elif auto_recover and subclass == CAPACITY_HALT_SUBCLASS:
+        recovery_attempted = "capacity_halt_auto_continue"
+        if apply and not dry_run:
+            recovery_payload = run_capacity_auto_continue(session, pane, hash_t1)
+            recovery_succeeded = bool(recovery_payload.get("recovered")) or recovery_payload.get("returncode") == 0
+        else:
+            recovery_succeeded = False
+    elif auto_recover and subclass == QUEUED_NOT_SUBMITTED_SUBCLASS:
+        recovery_attempted = "bare_enter"
+        if apply and not dry_run:
+            recovery_payload = run_queued_bare_enter(session, pane, hash_t1)
+            recovery_succeeded = bool(recovery_payload.get("recovered")) or recovery_payload.get("returncode") == 0
+        else:
+            recovery_succeeded = False
+    elif auto_recover and subclass == OOM_KILLED_SUBCLASS:
+        recovery_attempted = "ntm_respawn"
+        if apply and not dry_run and fixture_payload is None:
+            recovery_payload = run_oom_killed_respawn(session, pane, hash_t1)
+            recovery_succeeded = bool(recovery_payload.get("recovered")) or recovery_payload.get("returncode") == 0
+        else:
+            # Fixture/dry-run: do NOT invoke ntm. Mock-only success contract for tests.
+            recovery_payload = {"recovered": False, "sent": False, "returncode": None, "mocked": True, "digest": hash_t1}
+            recovery_succeeded = False
+    auto_recover_eligible = auto_recover or subclass in {POST_CALLBACK_SUBCLASS, CAPACITY_HALT_SUBCLASS, QUEUED_NOT_SUBMITTED_SUBCLASS, OOM_KILLED_SUBCLASS}
     ledger_row = {
         "schema_version": "codex-stuck-detector.ledger.v1",
         "version": version,
@@ -572,14 +755,16 @@ def detect_one(session, pane, fixture_payload=None):
         fuckup_row = {
             "schema_version": "flywheel-fuckup-log.v1",
             "ts": now,
-            "class": "detector-pattern-bank-gap",
-            "severity": "medium",
-            "what_happened": f"codex stuck detector classified {session}:{pane} as unknown_stable",
+            "class": "detector_silent_exit2",
+            "severity": "high",
+            "what_happened": f"codex stuck detector classified {session}:{pane} as unknown_stable; detector emitted JSON and rc=2 instead of silently passing",
             "session": session,
             "pane": int(pane) if str(pane).isdigit() else pane,
-            "bead": "flywheel-2h3vs",
+            "bead": "flywheel-detector-silent-exit2-166f",
+            "parent_bead": "flywheel-2h3vs",
+            "legacy_class": "detector-pattern-bank-gap",
             "pane_capture_path": pane_capture_path,
-            "recommended_recovery": "file_pattern_bank_bead_with_golden_artifact",
+            "recommended_recovery": "fix_live_capture_or_add_pattern_bank_fixture",
             "evidence_lines": evidence_lines,
         }
     if apply and auto_recover and subclass in {"input_deaf", "post_completion"} and stuck:
@@ -626,18 +811,54 @@ def detect_payload():
     ledger_rows = []
     fuckup_rows = []
     for session, pane, fx in targets:
-        row = detect_one(session, pane, fx)
+        try:
+            row = detect_one(session, pane, fx)
+        except ProbeFailure as exc:
+            row = {
+                "schema_version": "codex-stuck-detector.detect.v1",
+                "version": version,
+                "status": "probe_failure",
+                "session": session,
+                "pane": int(pane) if str(pane).isdigit() else pane,
+                "subclass": "probe_failure",
+                "hash_t0": "",
+                "hash_t1": "",
+                "hash_stable": False,
+                "window_sec": window_sec,
+                "buffer_signal": "probe_failure",
+                "evidence_lines": [],
+                "recommended_recovery": "retry_probe_or_check_ntm_copy",
+                "recovery_attempted": "none",
+                "recovery_succeeded": None,
+                "recovery_payload": None,
+                "post_retry_hash": None,
+                "auto_recover": False,
+                "apply": apply,
+                "dry_run": not apply or dry_run,
+                "error": str(exc),
+            }
         rows.append(row)
         if apply:
-            ledger_rows.append(row["ledger_row"])
+            ledger_row = row.get("ledger_row")
+            if ledger_row:
+                ledger_rows.append(ledger_row)
         if row.get("fuckup_row"):
             fuckup_rows.append(row["fuckup_row"])
     stuck_rows = [r for r in rows if r.get("status") == "stuck"]
-    return {
+    unknown_rows = [r for r in rows if r.get("subclass") == "unknown_stable"]
+    probe_failures = [r for r in rows if r.get("status") == "probe_failure"]
+    status = "ok"
+    if probe_failures:
+        status = "probe_failure"
+    elif stuck_rows:
+        status = "stuck"
+    elif unknown_rows:
+        status = "unknown_stable"
+    payload = {
         "schema_version": "codex-stuck-detector.detect.v1",
         "version": version,
-        "status": "stuck" if stuck_rows else "ok",
-        "success": True,
+        "status": status,
+        "success": not probe_failures,
         "ts": now,
         "mode": "detect",
         "apply": apply,
@@ -645,16 +866,24 @@ def detect_payload():
         "auto_recover": auto_recover,
         "targets_checked": len(targets),
         "stuck_count": len(stuck_rows),
+        "unknown_stable_count": len(unknown_rows),
+        "probe_failure_count": len(probe_failures),
         "panes": rows,
         "ledger_path": str(ledger),
         "fuckup_log": str(fuckup_log),
         "ledger_rows": ledger_rows,
         "fuckup_rows": fuckup_rows,
     }
+    if len(rows) == 1:
+        row = rows[0]
+        for key in ("session", "pane", "subclass", "buffer_signal", "recommended_recovery", "recovery_attempted", "recovery_succeeded"):
+            payload[key] = row.get(key)
+    return payload
 
 def doctor_payload():
     rows = read_jsonl(ledger)
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+    doctor_now = parse_ts(now) or datetime.now(timezone.utc)
+    cutoff = doctor_now - timedelta(hours=24)
     last_fired_ts = None
     ts_values = [row.get("ts") for row in rows if parse_ts(row.get("ts"))]
     if ts_values:
@@ -662,7 +891,7 @@ def doctor_payload():
     recent = []
     for row in rows:
         dt = parse_ts(row.get("ts"))
-        if dt and dt >= cutoff and row.get("subclass") in {"buffer_stuck", "input_deaf", "post_completion", POST_CALLBACK_SUBCLASS}:
+        if dt and dt >= cutoff and row.get("subclass") in {"buffer_stuck", "input_deaf", "post_completion", POST_CALLBACK_SUBCLASS, CAPACITY_HALT_SUBCLASS, QUEUED_NOT_SUBMITTED_SUBCLASS, OOM_KILLED_SUBCLASS}:
             recent.append(row)
     count = len(recent)
     subclass_top = None
@@ -705,7 +934,7 @@ def doctor_payload():
 
 def validate_payload():
     if validate_target == "fixture":
-        fx = read_json(fixture) if fixture else {}
+        fx = read_fixture(fixture) if fixture else {}
         missing = [k for k in ("session", "pane", "t0", "t1") if k not in fx]
         return {"schema_version": "codex-stuck-detector.validate.v1", "status": "ok" if not missing else "fail", "target": "fixture", "missing": missing}
     invalid = 0
@@ -742,7 +971,10 @@ def why_payload():
         "post_completion": "Stable two-frame hash plus Working timer >=10m. Detector snapshots and routes to /flywheel:respawn; no auto-respawn.",
         "input_deaf": "Placeholder remains stable after ntm send reports success. Redispatch cannot fix it; route to /flywheel:respawn.",
         POST_CALLBACK_SUBCLASS: "Stable hash plus stale background terminal spinner and Codex reminder template at chevron. Recovery is Escape, reprompt, then bounded respawn escalation.",
-        "auto_recover": "--auto-recover sends Enter for buffer_stuck; post-callback reminder templates are subclass-gated to escape_then_reprompt_or_respawn.",
+        CAPACITY_HALT_SUBCLASS: "Stable two-frame hash plus chevron prompt and model-capacity text. Recovery is bounded capacity-halt-auto-continue-primitive.sh, not respawn.",
+        QUEUED_NOT_SUBMITTED_SUBCLASS: "Working/background state plus a queued chevron prompt with user text. Recovery is bare Enter through codex-queued-not-submitted-bare-enter-primitive.sh.",
+        OOM_KILLED_SUBCLASS: "Stable two-frame hash plus no chevron prompt and OS-killed marker (Killed / out of memory / [Process completed]). Codex CLI was OOM/cgroup-killed; process is gone. Recovery is ntm respawn (not Enter, not auto_continue) — the codex process must be restarted.",
+        "auto_recover": "--auto-recover sends Enter for buffer_stuck, calls capacity-halt-auto-continue-primitive.sh for model_at_capacity_halt, sends bare Enter for codex_queued_not_submitted, and invokes ntm respawn for oom_killed_pane; post-callback reminder templates are subclass-gated to escape_then_reprompt_or_respawn.",
     }
     return {"schema_version": "codex-stuck-detector.why.v1", "id": why_id, "reason": reasons.get(why_id, "unknown id"), "known_ids": sorted(reasons)}
 
@@ -783,15 +1015,33 @@ append_rows_from_payload() {
 }
 
 detect_command() {
-  local payload stripped rc=0
-  payload="$(detector_py detect)"
+  local payload stripped rc=0 py_err append_err
+  py_err="$(mktemp "${TMPDIR:-/tmp}/codex-stuck-detector-py.XXXXXX")"
+  if ! payload="$(detector_py detect 2>"$py_err")"; then
+    local reason
+    reason="$(cat "$py_err" 2>/dev/null || true)"
+    rm -f "$py_err"
+    emit_error 3 "probe_failure" "${reason:-detector probe failed}"
+    return $?
+  fi
+  rm -f "$py_err"
   if [[ "$APPLY" -eq 1 ]]; then
-    append_rows_from_payload "$payload"
-    payload="$(jq -c '. + {ledger_append_status:"appended"}' <<<"$payload")"
+    if append_err="$(append_rows_from_payload "$payload" 2>&1)"; then
+      payload="$(jq -c '. + {ledger_append_status:"appended"}' <<<"$payload")"
+    else
+      payload="$(jq -c --arg err "$append_err" '. + {ledger_append_status:"failed",ledger_append_error:$err}' <<<"$payload")"
+      stripped="$(jq -c 'del(.ledger_rows,.fuckup_rows,.panes[].ledger_row,.panes[].fuckup_row)' <<<"$payload")"
+      emit "$stripped" "$(jq -r '"status=\(.status) ledger_append_status=failed targets_checked=\(.targets_checked)"' <<<"$stripped")" 3
+      return $?
+    fi
   fi
   stripped="$(jq -c 'del(.ledger_rows,.fuckup_rows,.panes[].ledger_row,.panes[].fuckup_row)' <<<"$payload")"
-  if jq -e '.status == "stuck"' >/dev/null <<<"$stripped"; then
+  if jq -e '.status == "probe_failure"' >/dev/null <<<"$stripped"; then
+    rc=3
+  elif jq -e '.status == "stuck"' >/dev/null <<<"$stripped"; then
     rc=1
+  elif jq -e '.status == "unknown_stable"' >/dev/null <<<"$stripped"; then
+    rc=2
   fi
   emit "$stripped" "$(jq -r '"status=\(.status) stuck_count=\(.stuck_count) targets_checked=\(.targets_checked)"' <<<"$stripped")" "$rc"
 }
@@ -845,6 +1095,10 @@ health_command() {
   doctor_command
 }
 
+for arg in "$@"; do
+  [[ "$arg" == "--json" ]] && JSON_OUT=1
+done
+
 while [[ "$#" -gt 0 ]]; do
   case "$1" in
     --doctor|doctor) MODE="doctor"; shift ;;
@@ -886,9 +1140,8 @@ while [[ "$#" -gt 0 ]]; do
     --interval|-i) WATCH_INTERVAL="${2:?--interval requires N}"; shift 2 ;;
     --interval=*) WATCH_INTERVAL="${1#*=}"; shift ;;
     *)
-      echo "ERR: unknown argument: $1" >&2
-      usage >&2
-      exit 2 ;;
+      emit_error 2 "unknown_argument" "unknown argument: $1"
+      exit $? ;;
   esac
 done
 
@@ -907,6 +1160,6 @@ case "$MODE" in
   completion) completion ;;
   help) usage ;;
   *)
-    echo "ERR: unknown mode: $MODE" >&2
-    exit 2 ;;
+    emit_error 2 "unknown_mode" "unknown mode: $MODE"
+    exit $? ;;
 esac
