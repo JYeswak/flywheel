@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/skillos-template-handshake/v1/ack.schema.json",
+  "title": "Flywheel skillos template handshake ack v1",
+  "description": "Ack row for skillos-produced skill-template injection responses.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "idempotency_key",
+    "state",
+    "producer_version_provided",
+    "templates",
+    "acked_at",
+    "acker_orch"
+  ],
+  "properties": {
+    "schema_version": { "const": "skillos-template-handshake-ack/v1" },
+    "type": { "const": "skillos_template_handshake_ack" },
+    "idempotency_key": {
+      "type": "string",
+      "pattern": "^(sha256:[0-9a-f]{64}|[A-Za-z0-9][A-Za-z0-9._:-]{5,159})$"
+    },
+    "state": {
+      "type": "string",
+      "enum": ["success", "stale", "unavailable", "duplicate"]
+    },
+    "producer_version_provided": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/+-]{1,127}$"
+    },
+    "templates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["skill", "template_class", "template_version"],
+        "properties": {
+          "skill": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/+-]{1,127}$"
+          },
+          "template_class": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_.-]{1,80}$"
+          },
+          "template_version": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._:/+-]{1,127}$"
+          },
+          "template_ref": { "type": "string", "minLength": 1 },
+          "template_sha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "content": { "type": "string" }
+        }
+      }
+    },
+    "degraded_fallback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reason", "safe_to_continue", "fallback_state"],
+      "properties": {
+        "reason": { "type": "string", "minLength": 1 },
+        "safe_to_continue": { "type": "boolean" },
+        "fallback_state": {
+          "type": "string",
+          "enum": ["stale", "unavailable", "duplicate"]
+        },
+        "retry_after_seconds": { "type": "integer", "minimum": 0 },
+        "fallback_template_class": { "type": "string" }
+      }
+    },
+    "acked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "acker_orch": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{1,127}$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "state": { "const": "success" } },
+        "required": ["state"]
+      },
+      "then": {
+        "properties": { "templates": { "minItems": 1 } }
+      },
+      "else": {
+        "required": ["degraded_fallback"],
+        "properties": { "templates": { "maxItems": 0 } }
+      }
+    }
+  ]
+}

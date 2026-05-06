@@ -1,0 +1,236 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://zeststream.ai/flywheel/schemas/mission-lock-output.v1.json",
+  "title": "Flywheel mission-lock output v1",
+  "description": "Canonical mission-lock output envelope used by dispatch authoring, close validation, and Wave 3 scaffold readiness gates.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "mission_anchor_rev",
+    "lock_hash",
+    "locked_at",
+    "status",
+    "mission_license",
+    "negative_invariants",
+    "cross_cutting_concerns_addressed",
+    "mission_anchor_text",
+    "provenance",
+    "surface_principal_metadata",
+    "skill_surface_map",
+    "failure_mode_matrix",
+    "receipt_identity_envelope"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "mission-lock-output/v1"
+    },
+    "mission_anchor_rev": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "lock_hash": {
+      "type": "string",
+      "pattern": "^(sha256:)?[0-9a-fA-F]{64}$"
+    },
+    "locked_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": ["locked", "needs_owner_review", "drafted"]
+    },
+    "mission_anchor_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mission_license": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "vendors_approved",
+        "platforms_approved",
+        "tier_per_vendor",
+        "budget_envelope_usd_monthly",
+        "tos_accepted_at",
+        "secrets_provisioned_at_lock_time",
+        "auto_rotate_allowed"
+      ],
+      "properties": {
+        "vendors_approved": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "platforms_approved": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "tier_per_vendor": {
+          "type": "object",
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        },
+        "budget_envelope_usd_monthly": {
+          "type": "number",
+          "minimum": 0
+        },
+        "tos_accepted_at": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["vendor", "ts"],
+            "properties": {
+              "vendor": { "type": "string", "minLength": 1 },
+              "ts": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "secrets_provisioned_at_lock_time": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "auto_rotate_allowed": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "secret_vendor_map": {
+          "type": "object",
+          "additionalProperties": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "negative_invariants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["id", "surface", "forbidden_action", "enforcement"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "surface": { "type": "string", "minLength": 1 },
+          "forbidden_action": { "type": "string", "minLength": 1 },
+          "enforcement": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "cross_cutting_concerns_addressed": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["concern", "status", "evidence"],
+        "properties": {
+          "concern": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["addressed", "not_applicable", "deferred_with_bead"] },
+          "evidence": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "surface_principal_metadata": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "surface",
+          "secret_source_of_truth",
+          "principal_type",
+          "allowed_operations",
+          "forbidden_principals",
+          "service_role_policy"
+        ],
+        "properties": {
+          "surface": { "type": "string", "minLength": 1 },
+          "secret_source_of_truth": { "type": "string", "minLength": 1 },
+          "principal_type": { "type": "string", "minLength": 1 },
+          "allowed_operations": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "forbidden_principals": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "service_role_policy": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "skill_surface_map": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["surface", "skill", "decision", "source"],
+        "properties": {
+          "surface": { "type": "string", "minLength": 1 },
+          "skill": { "type": "string", "minLength": 1 },
+          "decision": { "enum": ["ADOPT", "EXTEND", "AVOID"] },
+          "source": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "failure_mode_matrix": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["failure_mode", "risk", "guard", "evidence"],
+        "properties": {
+          "failure_mode": { "type": "string", "minLength": 1 },
+          "risk": { "type": "string", "minLength": 1 },
+          "guard": { "type": "string", "minLength": 1 },
+          "evidence": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "receipt_identity_envelope": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "idempotency_key",
+        "replay_detection_hash",
+        "transaction_boundary",
+        "receipt_completeness"
+      ],
+      "properties": {
+        "idempotency_key": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "replay_detection_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "transaction_boundary": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["begin", "commit", "abort"],
+          "properties": {
+            "begin": { "type": "boolean" },
+            "commit": { "type": "boolean" },
+            "abort": { "type": "boolean" }
+          }
+        },
+        "receipt_completeness": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["created_by", "last_modified_by"],
+      "properties": {
+        "created_by": { "type": "string", "minLength": 1 },
+        "last_modified_by": { "type": "string", "minLength": 1 },
+        "source": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/dispatch-receipt/v1/dispatch-receipt.schema.json",
+  "title": "Flywheel dispatch receipt v1",
+  "description": "Additive receipt envelope for idempotent dispatch, skill routing, close, and mission-lock readiness decisions.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "idempotency_key",
+    "replay_detection_hash",
+    "transaction_boundary",
+    "receipt_completeness"
+  ],
+  "properties": {
+    "schema_version": { "const": "dispatch-receipt/v1" },
+    "receipt_type": {
+      "type": "string",
+      "enum": [
+        "dispatch_author",
+        "skill_routing",
+        "skill_receipt",
+        "close_receipt",
+        "mission_lock_readiness",
+        "replay_guard"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["not_seen", "in_flight", "already_completed", "completed", "aborted"]
+    },
+    "idempotency_key": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "replay_detection_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "dispatch_identity_key": { "type": "string" },
+    "source_bead_hash": { "type": "string" },
+    "packet_hash": { "type": "string" },
+    "target_session_pane": { "type": "string" },
+    "send_attempt": { "type": "integer", "minimum": 0 },
+    "delivery_receipt_id": { "type": ["string", "null"] },
+    "previous_dispatch_log_row": { "type": ["string", "integer", "null"] },
+    "dispatch_log_identity_key": { "type": "string" },
+    "bead_identity_hash": { "type": "string" },
+    "labels_hash": { "type": "string" },
+    "touched_files_hash": { "type": "string" },
+    "mission_surfaces_hash": { "type": "string" },
+    "skill_catalog_snapshot_hash": { "type": "string" },
+    "alias_registry_version": { "type": "string" },
+    "socraticode_query_set_hash": { "type": "string" },
+    "route_policy": { "type": "string" },
+    "skill_receipts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "schema_version",
+          "receipt_identity_key",
+          "skill",
+          "source",
+          "action_taken",
+          "policy_version"
+        ],
+        "properties": {
+          "schema_version": { "type": "string" },
+          "receipt_identity_key": { "type": "string" },
+          "skill": { "type": "string" },
+          "source": { "type": "string" },
+          "source_version": { "type": "string" },
+          "action_taken": {
+            "enum": ["applied", "alias", "skipped", "not_applicable"]
+          },
+          "evidence": { "type": ["string", "array", "object", "null"] },
+          "alias_of": { "type": ["string", "null"] },
+          "not_applicable_reason": { "type": ["string", "null"] },
+          "policy_version": { "type": "string" }
+        }
+      }
+    },
+    "minimal_mode": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "skill_floor_mode": { "type": "string" },
+        "collapsed_skip_reason": { "type": ["string", "null"] },
+        "universal_skill_tokens_covered": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "domain_skill_selected": { "type": ["string", "null"] },
+        "minimal_mode_policy_version": { "type": "string" }
+      }
+    },
+    "close_identity_key": { "type": "string" },
+    "close_path_source": { "type": "string" },
+    "previous_close_row": { "type": ["string", "integer", "null"] },
+    "closure_reconciliation_via": { "type": ["string", "null"] },
+    "dedupe_policy": {
+      "type": "string",
+      "enum": ["latest-row-by-ref_id-event", "identity-key-first"]
+    },
+    "l112_command_hash": { "type": "string" },
+    "l112_observed_at": { "type": ["string", "null"], "format": "date-time" },
+    "state_observed_sha": { "type": "string" },
+    "state_written_sha": { "type": "string" },
+    "audit_lens_identity_key": { "type": "string" },
+    "preserved_lenses": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "mission_lock_hash": { "type": "string" },
+    "required_sections_hash": { "type": "string" },
+    "validator_schema_version": { "type": "string" },
+    "prior_receipt_ref": { "type": ["string", "null"] },
+    "repair_idempotency_key": { "type": ["string", "null"] },
+    "transaction_boundary": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["begin", "commit", "abort"],
+      "properties": {
+        "begin": { "type": "boolean" },
+        "commit": { "type": "boolean" },
+        "abort": { "type": "boolean" },
+        "begin_marker": { "type": ["string", "null"] },
+        "commit_marker": { "type": ["string", "null"] },
+        "abort_marker": { "type": ["string", "null"] }
+      }
+    },
+    "receipt_completeness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["IDEM-001", "IDEM-002", "IDEM-003", "IDEM-004", "IDEM-005", "IDEM-006"],
+      "properties": {
+        "IDEM-001": { "type": "boolean" },
+        "IDEM-002": { "type": "boolean" },
+        "IDEM-003": { "type": "boolean" },
+        "IDEM-004": { "type": "boolean" },
+        "IDEM-005": { "type": "boolean" },
+        "IDEM-006": { "type": "boolean" }
+      }
+    }
+  }
+}
