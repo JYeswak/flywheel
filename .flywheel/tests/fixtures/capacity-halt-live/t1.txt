@@ -1,0 +1,7 @@
+> Read /tmp/dispatch.md and execute it as /flywheel:worker-tick parity.
+
+⚠ Selected model is at capacity. Please try a different model.
+
+›
+
+  gpt-5.5 xhigh · ~/Developer/flywheel

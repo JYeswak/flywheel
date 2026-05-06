@@ -1,0 +1,135 @@
+{
+  "schema_version": 3,
+  "slug": "capacity-halt-detector-and-auto-continue-2026-05-06",
+  "topic": "capacity-halt-detector-and-auto-continue-recovery",
+  "task_id": "plan-capacity-halt-detector-and-auto-continue-2026-05-06",
+  "bead": "flywheel-codex-model-at-capacity-halt-class-2026-05-06",
+  "started_at": "2026-05-06T10:23:00Z",
+  "updated_at": "2026-05-06T10:49:00Z",
+  "current_phase": "decompose",
+  "phase_started_at": "2026-05-06T10:49:00Z",
+  "through": "audit",
+  "scope": "plan-space-only-no-code-mutations",
+  "phase1": {
+    "lanes_complete": 3,
+    "files": [
+      "01-RESEARCH-A-problem-space.md",
+      "01-RESEARCH-B-ecosystem-audit.md",
+      "01-RESEARCH-C-implementation-design.md"
+    ]
+  },
+  "phase2": {
+    "rounds": 3,
+    "convergence_rule": "two consecutive rounds below 5 percent line diff",
+    "diff_pct_r1_to_r2": 0.0,
+    "diff_pct_r2_to_r3": 0.0,
+    "final_plan": "00-PLAN.md"
+  },
+  "phase3": {
+    "rounds": 1,
+    "audit_disposition": "auto_advance",
+    "critical": 0,
+    "high": 0,
+    "medium": 6,
+    "low": 3,
+    "findings": "03-AUDIT-FINDINGS.md",
+    "true_blocker_classes": []
+  },
+  "socraticode_queries": 10,
+  "indexed_chunks_observed": 100,
+  "skills_consulted": [
+    "planning-workflow",
+    "research-triad",
+    "codebase-archaeology",
+    "jeff-convergence-audit",
+    "donella-meadows-systems-thinking",
+    "codex-cli-tracker",
+    "loop-enforcement",
+    "accretive-cron-orchestration",
+    "observability-platform",
+    "socraticode"
+  ],
+  "evidence": {
+    "fuckup_log_rows": [
+      1544,
+      1575,
+      1579,
+      1619,
+      1620
+    ],
+    "plan_path": ".flywheel/plans/capacity-halt-detector-and-auto-continue-2026-05-06"
+  },
+  "bead_dag_preview_count": 7,
+  "phase4": {
+    "task_id": "plan-capacity-halt-phase4-decompose-2026-05-06",
+    "status": "blocked_before_bead_db_append",
+    "dag": "04-BEADS-DAG.md",
+    "mermaid_no_cycles": true,
+    "critical_path_wall_min": 190,
+    "waves": {
+      "A": [
+        "flywheel-capacity-halt-production-path-reconcile-2026-05-06",
+        "flywheel-capacity-halt-auto-continue-primitive-2026-05-06"
+      ],
+      "B": [
+        "flywheel-capacity-halt-success-measurement-2026-05-06"
+      ],
+      "C": [
+        "flywheel-capacity-halt-cross-session-authorization-2026-05-06",
+        "flywheel-capacity-halt-burst-budget-2026-05-06",
+        "flywheel-capacity-halt-doctor-ledger-2026-05-06"
+      ],
+      "D": [
+        "flywheel-capacity-halt-driver-coverage-2026-05-06"
+      ]
+    },
+    "beads_planned": [
+      "flywheel-capacity-halt-production-path-reconcile-2026-05-06",
+      "flywheel-capacity-halt-auto-continue-primitive-2026-05-06",
+      "flywheel-capacity-halt-success-measurement-2026-05-06",
+      "flywheel-capacity-halt-cross-session-authorization-2026-05-06",
+      "flywheel-capacity-halt-burst-budget-2026-05-06",
+      "flywheel-capacity-halt-doctor-ledger-2026-05-06",
+      "flywheel-capacity-halt-driver-coverage-2026-05-06"
+    ],
+    "beads_created": [],
+    "blocked_by": [
+      {
+        "path": "INCIDENTS.md",
+        "holder": "CyanCreek",
+        "expires_ts": "2026-05-06T13:01:36Z"
+      },
+      {
+        "path": ".beads/issues.jsonl",
+        "holder": "CyanCreek",
+        "expires_ts": "2026-05-06T13:01:36Z"
+      }
+    ]
+  },
+  "beads_created": [
+    "flywheel-capacity-halt-production-path-reconcile-2026-05-06",
+    "flywheel-capacity-halt-auto-continue-primitive-2026-05-06",
+    "flywheel-capacity-halt-success-measurement-2026-05-06",
+    "flywheel-capacity-halt-cross-session-authorization-2026-05-06",
+    "flywheel-capacity-halt-burst-budget-2026-05-06",
+    "flywheel-capacity-halt-doctor-ledger-2026-05-06",
+    "flywheel-capacity-halt-driver-coverage-2026-05-06"
+  ],
+  "incidents_md_appended": false,
+  "jsonl_closure_appended": false,
+  "closeout_status": "blocked_on_active_file_reservations_phase4",
+  "blocked_receipts": [
+    {
+      "path": "INCIDENTS.md",
+      "blocked_by": "CyanCreek until 2026-05-06T13:01:36Z"
+    },
+    {
+      "path": ".beads/issues.jsonl",
+      "blocked_by": "CyanCreek until 2026-05-06T13:01:36Z"
+    }
+  ],
+  "abort_reason": null,
+  "joshua_decision_pending": false,
+  "phase4_filed_by": "flywheel-orch-on-behalf-of-pane3",
+  "phase4_filed_at": "2026-05-06T10:51:34Z"
+}

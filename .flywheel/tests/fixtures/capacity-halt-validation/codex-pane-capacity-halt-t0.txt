@@ -1,0 +1,7 @@
+> Read /tmp/dispatch_wire-orch-finish-p0-before-filing-more.md and execute it as /flywheel:worker-tick parity.
+
+selected model is at capacity. please try a different model.
+
+›
+
+  gpt-5.5 xhigh · ~/Developer/flywheel
