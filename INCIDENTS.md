@@ -3219,3 +3219,19 @@ Evidence:
 - Test: `.flywheel/tests/test_orch_no_punt_output_gate.sh`.
 - Hook: `~/.claude/settings.json hooks.Stop`.
 - Bead: `flywheel-ship-orch-no-punt-output-gate-2026-05-06`.
+
+## Jeff clone symlink converter Phase 1 shipped (2026-05-06)
+
+Shipped jeff-clone-symlink-converter.sh + 10-case test + 5 pair conversions Phase 1 (5/144 safe candidates). Backups at ~/.local/state/flywheel/jeff-clone-backups/<name>-<ts>.tar.gz with byte-count receipts. Reversible per pair: backup restore + symlink removal. Phase 2 (139 remaining) follows after pilot validates 24h (2026-05-06).
+
+Pilot pairs converted:
+- `automatic_cpp_code_analysis_with_gpt`: `/Users/josh/.local/state/flywheel/jeff-clone-backups/automatic_cpp_code_analysis_with_gpt-20260506T183513Z.receipt.json`
+- `paxos_vs_raft`: `/Users/josh/.local/state/flywheel/jeff-clone-backups/paxos_vs_raft-20260506T183514Z.receipt.json`
+- `interactive_reversible_cellular_automata`: `/Users/josh/.local/state/flywheel/jeff-clone-backups/interactive_reversible_cellular_automata-20260506T183515Z.receipt.json`
+- `gemini-api-updater-doc`: `/Users/josh/.local/state/flywheel/jeff-clone-backups/gemini-api-updater-doc-20260506T183516Z.receipt.json`
+- `hessian_free_email_chain`: `/Users/josh/.local/state/flywheel/jeff-clone-backups/hessian_free_email_chain-20260506T183517Z.receipt.json`
+
+Validation:
+- Reversibility drill: `/tmp/jeff-clone-reversibility-2026-05-06.json`.
+- Live receipt JSONL: `/tmp/jeff-clone-phase1-receipts-2026-05-06.jsonl`.
+- Bead: `flywheel-ship-jeff-clone-symlinks-phase-1-2026-05-06`.
