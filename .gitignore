@@ -5,6 +5,18 @@
 /.beads.bak.*/
 /.beads.failed.*/
 
+# .beads/ RCA evidence (br-db corruption mitigation snapshots; never commit)
+.beads/beads.db.bak.*
+.beads/beads.db-shm.bak.*
+.beads/beads.db-wal.bak.*
+.beads/beads.db.aside.*
+.beads/beads.db-shm.aside.*
+.beads/beads.db-wal.aside.*
+.beads/beads.db*.malformed-*
+.beads/beads.db*.corrupt-*.aside.*
+.beads/beads.db*.malformed.*
+.beads/beads.db*.corrupt-*.bak.*
+.beads/issues.jsonl.bak.*
 # Flywheel generated doctrine/state backups
 /.flywheel/AGENTS-CANONICAL.md.bak.*
 /.flywheel/MISSION.md.bak.*
