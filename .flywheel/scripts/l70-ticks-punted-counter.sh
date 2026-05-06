@@ -13,6 +13,9 @@ DISPATCH_LOG="${L70_TICKS_PUNTED_DISPATCH_LOG:-$REPO_ROOT/.flywheel/dispatch-log
 JSONL_APPEND_LIB="${FLYWHEEL_JSONL_APPEND_LIB:-$HOME/.local/share/flywheel-watchers/lib/jsonl-append.sh}"
 NTM_BIN="${L70_TICKS_PUNTED_NTM_BIN:-$HOME/.local/bin/ntm}"
 BR_BIN="${L70_TICKS_PUNTED_BR_BIN:-br}"
+RECENCY_CLASSIFIER_BIN="${RECENCY_CLASSIFIER_BIN:-$REPO_ROOT/.flywheel/scripts/recency-weighted-two-truth-classifier.sh}"
+RECENCY_CLASSIFIER_DIVERGENCE_LOG="${RECENCY_CLASSIFIER_DIVERGENCE_LOG:-$HOME/.local/state/flywheel/classifier-divergence-log.jsonl}"
+APPEND_SAFE_WRITE="${APPEND_SAFE_WRITE:-$REPO_ROOT/.flywheel/scripts/append-safe-write.sh}"
 SESSION="${SESSION:-flywheel}"
 TICK_ID=""
 MODE="classify"
@@ -77,6 +80,32 @@ append_validated() {
   # shellcheck source=/dev/null
   source "$JSONL_APPEND_LIB"
   fw_jsonl_append_validated "$path" "$row"
+}
+
+append_classifier_divergence() {
+  local row="$1" key="$2"
+  mkdir -p "$(dirname "$RECENCY_CLASSIFIER_DIVERGENCE_LOG")" 2>/dev/null || return 0
+  if [[ -x "$APPEND_SAFE_WRITE" ]]; then
+    printf '%s\n' "$row" | "$APPEND_SAFE_WRITE" --target "$RECENCY_CLASSIFIER_DIVERGENCE_LOG" --idempotency-key "$key" --json >/dev/null 2>&1 || true
+  else
+    printf '%s\n' "$row" >>"$RECENCY_CLASSIFIER_DIVERGENCE_LOG" 2>/dev/null || true
+  fi
+}
+
+warn_on_classifier_divergence() {
+  local activity_json="$1" source="$2" row pane old out new key
+  [[ "${RECENCY_CLASSIFIER_DISABLE:-0}" == "1" ]] && return 0
+  [[ -x "$RECENCY_CLASSIFIER_BIN" ]] || return 0
+  jq -c '[.agents[]?, .panes[]?, .workers[]?, .rows[]?] | .[] | select(type == "object")' <<<"$activity_json" 2>/dev/null | while IFS= read -r row; do
+    pane="$(jq -r '.pane_idx // .pane // empty' <<<"$row" 2>/dev/null || true)"
+    old="$(jq -r '(.state // .robot_state // .activity_state // "UNKNOWN") | tostring | ascii_upcase' <<<"$row" 2>/dev/null || true)"
+    [[ -n "$pane" ]] || continue
+    out="$(RECENCY_CLASSIFIER_ACTIVITY_JSON="$activity_json" bash "$RECENCY_CLASSIFIER_BIN" --session "$SESSION" --pane "$pane" --json 2>/dev/null || true)"
+    new="$(jq -r '.verdict // empty' <<<"$out" 2>/dev/null || true)"
+    [[ -n "$new" && "$new" != "UNKNOWN" && "$new" != "$old" ]] || continue
+    key="$source:$SESSION:$pane:$old:$new"
+    append_classifier_divergence "$(jq -cn --arg ts "$(now_iso)" --arg source "$source" --arg session "$SESSION" --arg pane "$pane" --arg old "$old" --arg new "$new" --argjson classifier "$out" '{ts:$ts,source:$source,session:$session,pane:($pane|tonumber? // $pane),old_verdict:$old,new_verdict:$new,mode:"warn",used_verdict:"old",classifier:$classifier}')" "$key"
+  done
 }
 
 read_json_file_or_empty() {
@@ -205,6 +234,7 @@ classification_json() {
   local tick="$1" ts robot ready rows activity ready_counts signal
   ts="$(now_iso)"
   robot="$(robot_activity_json)"
+  warn_on_classifier_divergence "$robot" "l70-ticks-punted-counter.sh"
   ready="$(ready_queue_json)"
   rows="$(dispatch_rows_json "$tick")"
   activity="$(activity_counts_json "$robot")"

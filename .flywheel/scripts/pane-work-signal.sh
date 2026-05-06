@@ -30,11 +30,37 @@ set -euo pipefail
 
 STATE_DIR="${FLYWHEEL_STATE_DIR:-$HOME/.local/state/flywheel}"
 JSONL="$STATE_DIR/pane-work-signal.jsonl"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+RECENCY_CLASSIFIER_BIN="${RECENCY_CLASSIFIER_BIN:-$ROOT/.flywheel/scripts/recency-weighted-two-truth-classifier.sh}"
+RECENCY_CLASSIFIER_DIVERGENCE_LOG="${RECENCY_CLASSIFIER_DIVERGENCE_LOG:-$HOME/.local/state/flywheel/classifier-divergence-log.jsonl}"
+APPEND_SAFE_WRITE="${APPEND_SAFE_WRITE:-$ROOT/.flywheel/scripts/append-safe-write.sh}"
 mkdir -p "$STATE_DIR"
 
 usage() {
     sed -n '2,/^$/p' "$0" | head -40
     exit 2
+}
+
+append_classifier_divergence() {
+    local row="$1" key="$2"
+    mkdir -p "$(dirname "$RECENCY_CLASSIFIER_DIVERGENCE_LOG")" 2>/dev/null || return 0
+    if [ -x "$APPEND_SAFE_WRITE" ]; then
+        printf '%s\n' "$row" | "$APPEND_SAFE_WRITE" --target "$RECENCY_CLASSIFIER_DIVERGENCE_LOG" --idempotency-key "$key" --json >/dev/null 2>&1 || true
+    else
+        printf '%s\n' "$row" >>"$RECENCY_CLASSIFIER_DIVERGENCE_LOG" 2>/dev/null || true
+    fi
+}
+
+warn_on_classifier_divergence() {
+    local activity_json="$1" old="$2" out new key row
+    [ "${RECENCY_CLASSIFIER_DISABLE:-0}" = "1" ] && return 0
+    [ -x "$RECENCY_CLASSIFIER_BIN" ] || return 0
+    out="$(RECENCY_CLASSIFIER_ACTIVITY_JSON="$activity_json" bash "$RECENCY_CLASSIFIER_BIN" --session "$SESSION" --pane "$PANE" --json 2>/dev/null || true)"
+    new="$(jq -r '.verdict // empty' <<<"$out" 2>/dev/null || true)"
+    [ -n "$new" ] && [ "$new" != "UNKNOWN" ] && [ "$new" != "$old" ] || return 0
+    key="pane-work-signal:$SESSION:$PANE:$old:$new"
+    row="$(jq -cn --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg source "pane-work-signal.sh" --arg session "$SESSION" --arg pane "$PANE" --arg old "$old" --arg new "$new" --argjson classifier "$out" '{ts:$ts,source:$source,session:$session,pane:($pane|tonumber? // $pane),old_verdict:$old,new_verdict:$new,mode:"warn",used_verdict:"old",classifier:$classifier}')"
+    append_classifier_divergence "$row" "$key"
 }
 
 [[ $# -lt 1 ]] && usage
@@ -79,6 +105,7 @@ case "$MODE" in
         NTM_ACTIVITY=$(echo "$AGENT" | jq -r '.state // "unknown"')
         NTM_STAGE=$(echo "$AGENT" | jq -r '.state // "unknown"')
         NTM_IDLE_S=$(echo "$AGENT" | jq -r '.idle_seconds // -1')
+        warn_on_classifier_divergence "$ACTIVITY" "$NTM_ACTIVITY"
 
         ROW=$(jq -nc \
             --arg ts "$TS" --arg session "$SESSION" --argjson pane "$PANE" \

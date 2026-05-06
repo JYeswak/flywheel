@@ -165,6 +165,66 @@ def warn(message: str) -> None:
     warnings.append(message)
 
 
+def append_classifier_divergence(row: dict) -> None:
+    log_path = STATE_DIR / "classifier-divergence-log.jsonl"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    payload = json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n"
+    append_safe = REPO_ROOT / ".flywheel/scripts/append-safe-write.sh"
+    if append_safe.exists() and os.access(append_safe, os.X_OK):
+        key = f"{row.get('source')}:{row.get('session')}:{row.get('pane')}:{row.get('old_verdict')}:{row.get('new_verdict')}"
+        try:
+            subprocess.run(
+                [str(append_safe), "--target", str(log_path), "--idempotency-key", key, "--json"],
+                input=payload,
+                text=True,
+                capture_output=True,
+                timeout=5,
+                check=False,
+            )
+            return
+        except Exception:
+            pass
+    with log_path.open("a", encoding="utf-8") as handle:
+        handle.write(payload)
+
+
+def warn_on_classifier_divergence(session: str, pane: str, old_state: object, activity_payload: dict, source: str) -> None:
+    if os.environ.get("RECENCY_CLASSIFIER_DISABLE") == "1":
+        return
+    classifier = REPO_ROOT / ".flywheel/scripts/recency-weighted-two-truth-classifier.sh"
+    if not classifier.exists():
+        return
+    old = str(old_state or "UNKNOWN").upper()
+    env = os.environ.copy()
+    env["RECENCY_CLASSIFIER_ACTIVITY_JSON"] = json.dumps(activity_payload)
+    try:
+        result = subprocess.run(
+            ["bash", str(classifier), "--session", session, "--pane", str(pane), "--json"],
+            text=True,
+            capture_output=True,
+            timeout=8,
+            check=False,
+            env=env,
+        )
+        out = json.loads(result.stdout)
+    except Exception:
+        return
+    new = str(out.get("verdict") or "")
+    if not new or new == "UNKNOWN" or new == old:
+        return
+    append_classifier_divergence({
+        "ts": now_iso(),
+        "source": source,
+        "session": session,
+        "pane": int(pane) if str(pane).isdigit() else pane,
+        "old_verdict": old,
+        "new_verdict": new,
+        "mode": "warn",
+        "used_verdict": "old",
+        "classifier": out,
+    })
+
+
 def read_text(path: Path, limit: int = 2_000_000) -> str:
     try:
         with path.open("rb") as fh:
@@ -678,6 +738,7 @@ def signal_pane_state(marker: dict, interval_seconds: int) -> dict:
         if not panes and orch and pane == orch:
             continue
         considered += 1
+        warn_on_classifier_divergence(session, pane, agent.get("state"), payload, "gap-hunt-probe.sh")
         since = parse_iso_epoch(agent.get("state_since"))
         if since is not None and now - since <= interval_seconds:
             recent.append(f"pane={pane} state={agent.get('state')} age_sec={int(now - since)}")

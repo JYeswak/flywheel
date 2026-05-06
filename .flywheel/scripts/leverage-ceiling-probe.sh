@@ -5,6 +5,10 @@ VERSION="leverage-ceiling-probe.v1"
 SCRIPT_VERSION="2026-05-03.1"
 LEDGER="${LEVERAGE_CEILING_LEDGER:-$HOME/.local/state/flywheel/leverage-ceiling.jsonl}"
 NTM_BIN="${LEVERAGE_CEILING_NTM_BIN:-/Users/josh/.local/bin/ntm}"
+SCRIPT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+RECENCY_CLASSIFIER_BIN="${RECENCY_CLASSIFIER_BIN:-$SCRIPT_ROOT/.flywheel/scripts/recency-weighted-two-truth-classifier.sh}"
+RECENCY_CLASSIFIER_DIVERGENCE_LOG="${RECENCY_CLASSIFIER_DIVERGENCE_LOG:-$HOME/.local/state/flywheel/classifier-divergence-log.jsonl}"
+APPEND_SAFE_WRITE="${APPEND_SAFE_WRITE:-$SCRIPT_ROOT/.flywheel/scripts/append-safe-write.sh}"
 TARGET_ACCOUNTS="${LEVERAGE_CEILING_TARGET_ACCOUNTS:-2}"
 SESSION_LIST="${LEVERAGE_CEILING_SESSIONS:-flywheel mobile-eats skillos picoz alps alpsinsurance}"
 ACTIVITY_TYPE="${LEVERAGE_CEILING_ACTIVITY_TYPE:-codex,claude}"
@@ -142,6 +146,32 @@ warn() {
   jq -Rn --arg v "$message" '$v' >>"$WARNINGS_FILE" 2>/dev/null || true
 }
 
+append_classifier_divergence() {
+  local row="$1" key="$2"
+  mkdir -p "$(dirname "$RECENCY_CLASSIFIER_DIVERGENCE_LOG")" 2>/dev/null || return 0
+  if [ -x "$APPEND_SAFE_WRITE" ]; then
+    printf '%s\n' "$row" | "$APPEND_SAFE_WRITE" --target "$RECENCY_CLASSIFIER_DIVERGENCE_LOG" --idempotency-key "$key" --json >/dev/null 2>&1 || true
+  else
+    printf '%s\n' "$row" >>"$RECENCY_CLASSIFIER_DIVERGENCE_LOG" 2>/dev/null || true
+  fi
+}
+
+warn_on_classifier_divergence() {
+  local session="$1" activity_json="$2" source="$3" row pane old out new key
+  [ "${RECENCY_CLASSIFIER_DISABLE:-0}" = "1" ] && return 0
+  [ -x "$RECENCY_CLASSIFIER_BIN" ] || return 0
+  jq -c '.agents[]?' <<<"$activity_json" 2>/dev/null | while IFS= read -r row; do
+    pane="$(jq -r '.pane_idx // .pane // empty' <<<"$row" 2>/dev/null || true)"
+    old="$(jq -r '(.state // "UNKNOWN") | tostring | ascii_upcase' <<<"$row" 2>/dev/null || true)"
+    [ -n "$pane" ] || continue
+    out="$(RECENCY_CLASSIFIER_ACTIVITY_JSON="$activity_json" bash "$RECENCY_CLASSIFIER_BIN" --session "$session" --pane "$pane" --json 2>/dev/null || true)"
+    new="$(jq -r '.verdict // empty' <<<"$out" 2>/dev/null || true)"
+    [ -n "$new" ] && [ "$new" != "UNKNOWN" ] && [ "$new" != "$old" ] || continue
+    key="$source:$session:$pane:$old:$new"
+    append_classifier_divergence "$(jq -cn --arg ts "$(now_iso)" --arg source "$source" --arg session "$session" --arg pane "$pane" --arg old "$old" --arg new "$new" --argjson classifier "$out" '{ts:$ts,source:$source,session:$session,pane:($pane|tonumber? // $pane),old_verdict:$old,new_verdict:$new,mode:"warn",used_verdict:"old",classifier:$classifier}')" "$key"
+  done
+}
+
 env_pct() {
   local name
   for name in "$@"; do
@@ -252,6 +282,7 @@ collect_workers() {
     status=$?
     out_file="$TMP_ROOT/robot-${session}.json"
     if [ "$status" -eq 0 ] && jq -e . "$out_file" >/dev/null 2>&1; then
+      warn_on_classifier_divergence "$session" "$(cat "$out_file")" "leverage-ceiling-probe.sh"
       jq -c --arg session "$session" '.agents[]? | {
         session:$session,
         pane:(.pane_idx // .pane),
