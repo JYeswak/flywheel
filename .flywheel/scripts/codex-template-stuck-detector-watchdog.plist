@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.zeststream.codex-template-stuck-detector-watchdog</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/josh/Developer/flywheel/.flywheel/scripts/codex-template-stuck-detector.sh</string>
+    <string>--session</string>
+    <string>all</string>
+    <string>--worker-panes-from-topology</string>
+    <string>--apply</string>
+    <string>--json</string>
+  </array>
+  <key>StartInterval</key>
+  <integer>60</integer>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>/Users/josh/.local/logs/codex-template-stuck-detector-watchdog.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/josh/.local/logs/codex-template-stuck-detector-watchdog.err.log</string>
+</dict>
+</plist>
