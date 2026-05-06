@@ -1,0 +1,32 @@
+[
+  {
+    "schema_name": "flywheel.wire-or-explain.v1",
+    "schema_version": "wire-or-explain-ledger/v1",
+    "identity_key": "fm6-cross-repo-pending-expired",
+    "timestamp": "2026-05-05T00:06:00Z",
+    "session_id": "flywheel",
+    "event_type": "fault_fixture",
+    "actor": "fixture",
+    "target": "fm6-cross-repo-pending-expired",
+    "payload": {"dependency_count": 5, "ship_cost": 13, "downstream_cost": 21, "expires_at": "2026-05-05T01:00:00Z"},
+    "metadata": {"fixture": true, "fault_mode": "FM6", "cross_repo_pending": true},
+    "state": "unwired",
+    "producer": "fault-injection",
+    "owner": "flywheel:1",
+    "consumer": "peer-orch",
+    "blocking_scope": "fleet",
+    "owning_orch": "flywheel:pane-1",
+    "ship_repo": "__ROOT__",
+    "ship_actor": "StormyBay",
+    "artifact_class": "finding",
+    "subject": "FM6_CROSS_REPO_PENDING_EXPIRED",
+    "predicate": "cross_repo_pending_expired",
+    "auto_fire_trigger": "on_tick",
+    "drain_receipt_shape": "cross_repo_expiry_receipt",
+    "verification_probe": "bash tests/wire-or-explain-close-gate-fault-injection.sh",
+    "tick_status_consequence": "fleet-owned expired cross-repo pending row hard-fails close",
+    "stock": "wire-or-explain",
+    "inflow": "fault_fixture",
+    "action_ledger": "fixture://wire-or-explain/fault-injection/fm-6"
+  }
+]

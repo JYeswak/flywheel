@@ -1,0 +1,5 @@
+{
+  "name": "allow_env",
+  "command": "if [ -n \"$TMUX\" ]; then",
+  "expected": "allow"
+}

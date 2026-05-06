@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/polish-gate/v1/close-validation-result.schema.json",
+  "title": "Polish gate close validation result v1",
+  "description": "Close validator result with brand, sniff, Jeff, public, and polish-gate lenses.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "ts",
+    "repo_path",
+    "mode",
+    "touched_surfaces",
+    "callback_envelope",
+    "polish_gate_verdict",
+    "polish_gate_lens_passed",
+    "four_lens_results",
+    "composite_verdict",
+    "exit_code"
+  ],
+  "properties": {
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "enum": ["bootstrap", "audit_only", "blocking"]
+    },
+    "touched_surfaces": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "callback_envelope": {
+      "type": "object"
+    },
+    "polish_gate_verdict": {
+      "enum": ["PASS", "NOT_APPLICABLE", "WAIVED", "AUDIT_ONLY"]
+    },
+    "polish_gate_lens_passed": {
+      "type": "boolean"
+    },
+    "four_lens_results": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["brand", "sniff", "jeff", "public"],
+      "properties": {
+        "brand": { "$ref": "#/$defs/lens_result" },
+        "sniff": { "$ref": "#/$defs/lens_result" },
+        "jeff": { "$ref": "#/$defs/lens_result" },
+        "public": { "$ref": "#/$defs/lens_result" }
+      }
+    },
+    "composite_verdict": {
+      "enum": ["PASS", "FAIL", "WAIVED"]
+    },
+    "exit_code": {
+      "enum": [0, 1, 2, 3, 4]
+    }
+  },
+  "$defs": {
+    "lens_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "reason"],
+      "properties": {
+        "status": {
+          "enum": ["pass", "fail"]
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

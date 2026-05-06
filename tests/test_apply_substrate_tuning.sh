@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+# test_apply_substrate_tuning.sh — fixture for .flywheel/scripts/apply-substrate-tuning.sh
+# Bead: flywheel-3099j
+# Cases:
+#   1. dry-run does NOT mutate config files
+#   2. apply writes receipt + backups + mutates configs
+#   3. revert restores prior bytes (sha256 match)
+#   4. version-incompat refuses (simulated by overriding probes)
+
+set -euo pipefail
+
+REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+SCRIPT="$REPO/.flywheel/scripts/apply-substrate-tuning.sh"
+
+[[ -x "$SCRIPT" ]] || { echo "FAIL: $SCRIPT not executable"; exit 1; }
+
+TMP="$(mktemp -d -t apply-substrate-tuning-test.XXXXXX)"
+trap 'rm -rf "$TMP"' EXIT
+
+WEZ="$TMP/wezterm.lua"
+TMX="$TMP/tmux.conf"
+LEDGER="$TMP/ledger.jsonl"
+
+cat > "$WEZ" <<'LUA'
+local wezterm = require 'wezterm'
+local config = wezterm.config_builder()
+config.font_size = 13.0
+config.scrollback_lines = 50000
+return config
+LUA
+
+cat > "$TMX" <<'TMUX'
+set-option -g history-limit 50000
+set -s escape-time 0
+TMUX
+
+WEZ_SHA0=$(shasum -a 256 "$WEZ" | awk '{print $1}')
+TMX_SHA0=$(shasum -a 256 "$TMX" | awk '{print $1}')
+
+export SUBSTRATE_TUNING_WEZTERM="$WEZ"
+export SUBSTRATE_TUNING_TMUX="$TMX"
+export SUBSTRATE_TUNING_LEDGER="$LEDGER"
+export SUBSTRATE_TUNING_NOW="2026-05-05T06:00:00Z"
+
+PASS=0
+FAIL=0
+note() { printf '%s\n' "$1"; }
+ok()   { PASS=$((PASS+1)); note "PASS: $1"; }
+bad()  { FAIL=$((FAIL+1)); note "FAIL: $1"; }
+
+# ---------- Case 1: dry-run does NOT mutate ----------
+"$SCRIPT" --dry-run --json >/dev/null 2>&1
+WEZ_SHA1=$(shasum -a 256 "$WEZ" | awk '{print $1}')
+TMX_SHA1=$(shasum -a 256 "$TMX" | awk '{print $1}')
+if [[ "$WEZ_SHA0" == "$WEZ_SHA1" && "$TMX_SHA0" == "$TMX_SHA1" ]]; then
+  ok "case1: dry-run does NOT mutate configs"
+else
+  bad "case1: dry-run mutated configs (sha mismatch)"
+fi
+
+# Ledger should have a dry-run row
+if jq -e 'select(.action=="dry-run")' "$LEDGER" >/dev/null 2>&1; then
+  ok "case1: dry-run wrote ledger row"
+else
+  bad "case1: dry-run did not write ledger row"
+fi
+
+# ---------- Case 2: apply mutates + backups + receipt ----------
+"$SCRIPT" --apply --json >/dev/null 2>&1
+WEZ_SHA2=$(shasum -a 256 "$WEZ" | awk '{print $1}')
+TMX_SHA2=$(shasum -a 256 "$TMX" | awk '{print $1}')
+if [[ "$WEZ_SHA2" != "$WEZ_SHA0" && "$TMX_SHA2" != "$TMX_SHA0" ]]; then
+  ok "case2: apply mutated both configs"
+else
+  bad "case2: apply did NOT mutate (wez=$WEZ_SHA0->$WEZ_SHA2 tmux=$TMX_SHA0->$TMX_SHA2)"
+fi
+
+WEZ_BAK=$(ls -1t "${WEZ}".bak.substrate-tuning.* 2>/dev/null | head -n1 || true)
+TMX_BAK=$(ls -1t "${TMX}".bak.substrate-tuning.* 2>/dev/null | head -n1 || true)
+if [[ -f "$WEZ_BAK" && -f "$TMX_BAK" ]]; then
+  ok "case2: apply created backups"
+else
+  bad "case2: apply did not create backups (wez=$WEZ_BAK tmux=$TMX_BAK)"
+fi
+
+if grep -qF -e "BEGIN apply-substrate-tuning" "$WEZ" && grep -qF -e "BEGIN apply-substrate-tuning" "$TMX"; then
+  ok "case2: target blocks injected"
+else
+  bad "case2: target blocks missing"
+fi
+
+if jq -e 'select(.action=="apply" and .outcome=="ok")' "$LEDGER" >/dev/null 2>&1; then
+  ok "case2: apply receipt written"
+else
+  bad "case2: apply receipt missing"
+fi
+
+# Idempotency: second apply should not double-inject
+"$SCRIPT" --apply --json >/dev/null 2>&1
+WEZ_SHA2B=$(shasum -a 256 "$WEZ" | awk '{print $1}')
+COUNT=$(grep -cF -e "BEGIN apply-substrate-tuning" "$WEZ")
+if [[ "$COUNT" == "1" ]]; then
+  ok "case2b: re-apply is idempotent (no double inject)"
+else
+  bad "case2b: re-apply double-injected ($COUNT blocks)"
+fi
+
+# ---------- Case 3: revert restores prior bytes ----------
+"$SCRIPT" --revert --json >/dev/null 2>&1
+WEZ_SHA3=$(shasum -a 256 "$WEZ" | awk '{print $1}')
+TMX_SHA3=$(shasum -a 256 "$TMX" | awk '{print $1}')
+if [[ "$WEZ_SHA3" == "$WEZ_SHA0" && "$TMX_SHA3" == "$TMX_SHA0" ]]; then
+  ok "case3: revert restores byte-exact original"
+else
+  bad "case3: revert mismatch (wez orig=$WEZ_SHA0 now=$WEZ_SHA3, tmux orig=$TMX_SHA0 now=$TMX_SHA3)"
+fi
+
+if jq -e 'select(.action=="revert" and .outcome=="ok")' "$LEDGER" >/dev/null 2>&1; then
+  ok "case3: revert receipt written"
+else
+  bad "case3: revert receipt missing"
+fi
+
+# ---------- Case 4: version-incompat refuses ----------
+# Force version probes to fail by shadowing wezterm with a stub.
+STUB="$TMP/stub"
+mkdir -p "$STUB"
+cat > "$STUB/wezterm" <<'EOS'
+#!/usr/bin/env bash
+echo "wezterm 20220101-000000-deadbeef"
+EOS
+chmod +x "$STUB/wezterm"
+PATH_BACKUP="$PATH"
+export PATH="$STUB:$PATH"
+WEZ_SHA_PRE=$(shasum -a 256 "$WEZ" | awk '{print $1}')
+RC=0
+"$SCRIPT" --apply --json >/dev/null 2>&1 || RC=$?
+WEZ_SHA_POST=$(shasum -a 256 "$WEZ" | awk '{print $1}')
+export PATH="$PATH_BACKUP"
+if [[ "$RC" -ne 0 && "$WEZ_SHA_PRE" == "$WEZ_SHA_POST" ]]; then
+  ok "case4: version-incompat refuses (rc=$RC, no mutation)"
+else
+  bad "case4: version-incompat did NOT refuse (rc=$RC, sha_pre=$WEZ_SHA_PRE sha_post=$WEZ_SHA_POST)"
+fi
+
+# ---------- Case 5: doctor JSON shape ----------
+DOCTOR=$("$SCRIPT" --doctor --json 2>/dev/null)
+if jq -e '.scope=="doctor" and has("ram_gb") and has("drift")' >/dev/null 2>&1 <<<"$DOCTOR"; then
+  ok "case5: doctor returns valid JSON shape"
+else
+  bad "case5: doctor JSON shape invalid: $DOCTOR"
+fi
+
+# ---------- Case 6: validate ledger ----------
+VAL=$("$SCRIPT" validate --json 2>/dev/null)
+if jq -e '.valid >= 1 and .invalid == 0' >/dev/null 2>&1 <<<"$VAL"; then
+  ok "case6: validate reports clean ledger"
+else
+  bad "case6: validate failed: $VAL"
+fi
+
+echo ""
+echo "RESULTS: $PASS passed, $FAIL failed"
+[[ "$FAIL" -eq 0 ]] || exit 1

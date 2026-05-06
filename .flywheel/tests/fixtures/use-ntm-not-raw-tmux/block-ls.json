@@ -1,0 +1,6 @@
+{
+  "name": "block_ls",
+  "command": "tmux ls",
+  "expected": "block",
+  "suggestion": "ntm list"
+}

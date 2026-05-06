@@ -1,0 +1,32 @@
+[
+  {
+    "schema_name": "flywheel.wire-or-explain.v1",
+    "schema_version": "wire-or-explain-ledger/v1",
+    "identity_key": "fm2-false-positive-wired-artifact",
+    "timestamp": "2026-05-05T00:02:00Z",
+    "session_id": "flywheel",
+    "event_type": "fault_fixture",
+    "actor": "fixture",
+    "target": "fm2-false-positive-wired-artifact",
+    "payload": {"dependency_count": 2, "ship_cost": 5, "downstream_cost": 8},
+    "metadata": {"fixture": true, "fault_mode": "FM2", "manual_resolution": "override_with_evidence"},
+    "state": "questionably_wired",
+    "producer": "fault-injection",
+    "owner": "flywheel:1",
+    "consumer": "doctor",
+    "blocking_scope": "tick",
+    "owning_orch": "flywheel:pane-1",
+    "ship_repo": "__ROOT__",
+    "ship_actor": "StormyBay",
+    "artifact_class": "finding",
+    "subject": "FM2_FALSE_POSITIVE_WIRED_ARTIFACT",
+    "predicate": "manual_resolution_with_evidence_required",
+    "auto_fire_trigger": "on_tick",
+    "drain_receipt_shape": "override_receipt",
+    "verification_probe": "bash tests/wire-or-explain-close-gate-fault-injection.sh",
+    "tick_status_consequence": "false positive can close only through bounded override evidence",
+    "stock": "wire-or-explain",
+    "inflow": "fault_fixture",
+    "action_ledger": "fixture://wire-or-explain/fault-injection/fm-2"
+  }
+]

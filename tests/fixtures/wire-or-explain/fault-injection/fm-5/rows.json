@@ -1,0 +1,32 @@
+[
+  {
+    "schema_name": "flywheel.wire-or-explain.v1",
+    "schema_version": "wire-or-explain-ledger/v1",
+    "identity_key": "fm5-bootstrap-recursion",
+    "timestamp": "2026-05-05T00:05:00Z",
+    "session_id": "flywheel",
+    "event_type": "fault_fixture",
+    "actor": "fixture",
+    "target": "fm5-bootstrap-recursion",
+    "payload": {"dependency_count": 2, "ship_cost": 7, "downstream_cost": 10, "bootstrap_self_test": true},
+    "metadata": {"fixture": true, "fault_mode": "FM5", "requires_bootstrap_proof": true},
+    "state": "unwired",
+    "producer": "fault-injection",
+    "owner": "flywheel:1",
+    "consumer": "doctor",
+    "blocking_scope": "tick",
+    "owning_orch": "flywheel:pane-1",
+    "ship_repo": "__ROOT__",
+    "ship_actor": "StormyBay",
+    "artifact_class": "finding",
+    "subject": "FM5_BOOTSTRAP_RECURSION",
+    "predicate": "bootstrap_self_test_row_blocks_without_proof",
+    "auto_fire_trigger": "on_tick",
+    "drain_receipt_shape": "bootstrap_override_receipt",
+    "verification_probe": "bash tests/wire-or-explain-close-gate-fault-injection.sh",
+    "tick_status_consequence": "bootstrap recursion closes only with one-shot proof",
+    "stock": "wire-or-explain",
+    "inflow": "fault_fixture",
+    "action_ledger": "fixture://wire-or-explain/fault-injection/fm-5"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "schema_name": "flywheel.wire-or-explain.v1",
+    "schema_version": "wire-or-explain-ledger/v1",
+    "identity_key": "fm7-stale-consumer-superseded",
+    "timestamp": "2026-05-05T00:07:00Z",
+    "session_id": "flywheel",
+    "event_type": "fault_fixture",
+    "actor": "fixture",
+    "target": "fm7-stale-consumer-superseded",
+    "payload": {"dependency_count": 2, "ship_cost": 6, "downstream_cost": 9, "superseded_by": "new-consumer"},
+    "metadata": {"fixture": true, "fault_mode": "FM7", "consumer_removed": true},
+    "state": "questionably_wired",
+    "producer": "fault-injection",
+    "owner": "flywheel:1",
+    "consumer": "removed-consumer",
+    "blocking_scope": "tick",
+    "owning_orch": "flywheel:pane-1",
+    "ship_repo": "__ROOT__",
+    "ship_actor": "StormyBay",
+    "artifact_class": "finding",
+    "subject": "FM7_STALE_CONSUMER_SUPERSEDED",
+    "predicate": "stale_consumer_superseded",
+    "auto_fire_trigger": "on_tick",
+    "drain_receipt_shape": "stale_consumer_receipt",
+    "verification_probe": "bash tests/wire-or-explain-close-gate-fault-injection.sh",
+    "tick_status_consequence": "stale wiring must be superseded after consumer removal",
+    "stock": "wire-or-explain",
+    "inflow": "fault_fixture",
+    "action_ledger": "fixture://wire-or-explain/fault-injection/fm-7"
+  }
+]

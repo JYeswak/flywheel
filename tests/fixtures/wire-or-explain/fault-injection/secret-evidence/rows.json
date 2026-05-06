@@ -1,0 +1,37 @@
+[
+  {
+    "schema_name": "flywheel.wire-or-explain.v1",
+    "schema_version": "wire-or-explain-ledger/v1",
+    "identity_key": "secret-evidence-scrubbed",
+    "timestamp": "2026-05-05T00:12:00Z",
+    "session_id": "flywheel",
+    "event_type": "fault_fixture",
+    "actor": "fixture",
+    "target": "secret-evidence-scrubbed",
+    "payload": {
+      "dependency_count": 1,
+      "ship_cost": 5,
+      "downstream_cost": 9,
+      "raw_evidence": "sk_live_FAKE_DO_NOT_USE_1234567890"
+    },
+    "metadata": {"fixture": true, "secret_scrub_fixture": true},
+    "state": "unwired",
+    "producer": "fault-injection",
+    "owner": "flywheel:1",
+    "consumer": "doctor",
+    "blocking_scope": "tick",
+    "owning_orch": "flywheel:pane-1",
+    "ship_repo": "__ROOT__",
+    "ship_actor": "StormyBay",
+    "artifact_class": "finding",
+    "subject": "SECRET_EVIDENCE_ROW",
+    "predicate": "secret_evidence_payload_omitted_from_gate_output",
+    "auto_fire_trigger": "on_tick",
+    "drain_receipt_shape": "secret_scrub_receipt",
+    "verification_probe": "bash tests/wire-or-explain-close-gate-fault-injection.sh",
+    "tick_status_consequence": "secret-like raw evidence must not appear in close-gate output",
+    "stock": "wire-or-explain",
+    "inflow": "fault_fixture",
+    "action_ledger": "fixture://wire-or-explain/fault-injection/secret-evidence"
+  }
+]

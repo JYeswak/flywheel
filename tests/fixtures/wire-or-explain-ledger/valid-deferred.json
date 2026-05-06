@@ -1,0 +1,42 @@
+{
+  "schema_name": "flywheel.wire-or-explain.v1",
+  "schema_version": "wire-or-explain-ledger/v1",
+  "identity_key": "fixture-deferred",
+  "timestamp": "2026-05-05T00:01:00Z",
+  "session_id": "fixture-session",
+  "event_type": "artifact_observed",
+  "actor": "fixture-worker",
+  "target": "flywheel-4m2a",
+  "payload": {
+    "artifact_path": "/tmp/deferred-artifact.md"
+  },
+  "metadata": {
+    "fixture": true
+  },
+  "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "checksum": "2222222222222222222222222222222222222222222222222222222222222222",
+  "sequence_num": 1,
+  "state": "deferred",
+  "producer": "worker",
+  "owner": "pane-1-orchestrator",
+  "consumer": "NONE",
+  "blocking_scope": "future_tick",
+  "owning_orch": "flywheel:pane-1",
+  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_actor": "AmberElk",
+  "artifact_class": "finding",
+  "subject": "deferred-ledger-row",
+  "predicate": "awaits_explicit_consumer",
+  "branch_ref": null,
+  "git_ref": null,
+  "reset_intent_hash": null,
+  "deferral_owner": "pane-1-orchestrator",
+  "deferral_until": "2026-05-06T00:00:00Z",
+  "auto_fire_trigger": "when_consumer_exists",
+  "drain_receipt_shape": "deferral_receipt",
+  "verification_probe": "jq -e .schema_name .flywheel/validation-schema/v1/wire-or-explain-ledger.schema.json",
+  "tick_status_consequence": "tick must keep W0-F03 open until deferral drains",
+  "stock": "wire-or-explain",
+  "inflow": "artifact_observed",
+  "action_ledger": "~/.local/state/flywheel/wire-or-explain-ledger.jsonl"
+}

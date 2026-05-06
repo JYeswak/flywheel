@@ -1,0 +1,42 @@
+{
+  "schema_name": "flywheel.wire-or-explain.v1",
+  "schema_version": "wire-or-explain-ledger/v1",
+  "identity_key": "fixture-questionably-wired",
+  "timestamp": "2026-05-05T00:03:00Z",
+  "session_id": "fixture-session",
+  "event_type": "weak_wire_observed",
+  "actor": "fixture-worker",
+  "target": "flywheel-4m2a",
+  "payload": {
+    "reason": "consumer exists but verification probe is indirect"
+  },
+  "metadata": {
+    "fixture": true
+  },
+  "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "checksum": "4444444444444444444444444444444444444444444444444444444444444444",
+  "sequence_num": 1,
+  "state": "questionably_wired",
+  "producer": "worker",
+  "owner": "orchestrator",
+  "consumer": "orchestrator",
+  "blocking_scope": "tick",
+  "owning_orch": "flywheel:pane-1",
+  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_actor": "AmberElk",
+  "artifact_class": "finding",
+  "subject": "weak-wire",
+  "predicate": "needs_stronger_probe",
+  "branch_ref": null,
+  "git_ref": null,
+  "reset_intent_hash": null,
+  "deferral_owner": null,
+  "deferral_until": null,
+  "auto_fire_trigger": "on_review",
+  "drain_receipt_shape": "probe_upgrade_receipt",
+  "verification_probe": "bash tests/wire-or-explain-ledger.sh",
+  "tick_status_consequence": "tick may proceed only with explicit owner",
+  "stock": "wire-or-explain",
+  "inflow": "weak_wire_observed",
+  "action_ledger": "~/.local/state/flywheel/wire-or-explain-ledger.jsonl"
+}

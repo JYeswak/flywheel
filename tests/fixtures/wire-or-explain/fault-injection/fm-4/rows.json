@@ -1,0 +1,32 @@
+[
+  {
+    "schema_name": "flywheel.wire-or-explain.v1",
+    "schema_version": "wire-or-explain-ledger/v1",
+    "identity_key": "fm4-gate-latency-p95",
+    "timestamp": "2026-05-05T00:04:00Z",
+    "session_id": "flywheel",
+    "event_type": "fault_fixture",
+    "actor": "fixture",
+    "target": "fm4-gate-latency-p95",
+    "payload": {"dependency_count": 1, "ship_cost": 4, "downstream_cost": 7, "p95_ms": 2400},
+    "metadata": {"fixture": true, "fault_mode": "FM4", "latency_budget_ms": 1000},
+    "state": "unwired",
+    "producer": "fault-injection",
+    "owner": "flywheel:1",
+    "consumer": "doctor",
+    "blocking_scope": "tick",
+    "owning_orch": "flywheel:pane-1",
+    "ship_repo": "__ROOT__",
+    "ship_actor": "StormyBay",
+    "artifact_class": "finding",
+    "subject": "FM4_GATE_LATENCY_P95",
+    "predicate": "gate_p95_latency_exceeded",
+    "auto_fire_trigger": "on_tick",
+    "drain_receipt_shape": "latency_receipt",
+    "verification_probe": "bash tests/wire-or-explain-close-gate-fault-injection.sh",
+    "tick_status_consequence": "latency warning must surface before enforce rollout",
+    "stock": "wire-or-explain",
+    "inflow": "fault_fixture",
+    "action_ledger": "fixture://wire-or-explain/fault-injection/fm-4"
+  }
+]

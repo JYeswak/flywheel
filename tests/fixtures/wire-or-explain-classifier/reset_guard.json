@@ -1,0 +1,15 @@
+{
+  "ship_event_id": "fixture-reset-guard",
+  "timestamp": "2026-05-05T00:00:05Z",
+  "session_id": "flywheel",
+  "event_type": "reset_guard",
+  "actor": "codex",
+  "target": ".flywheel/reset-guards/flywheel-333j.json",
+  "changed_paths": [".flywheel/reset-guards/flywheel-333j.json"],
+  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_actor": "codex",
+  "git_ref": "975eca",
+  "reset_intent": "protect orphan worker commits before reset",
+  "orphan_commits": ["bbb222", "aaa111", "ccc333"],
+  "action_ledger_pointer": ".flywheel/dispatch-log.jsonl#L15"
+}

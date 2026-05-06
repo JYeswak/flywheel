@@ -1,0 +1,17 @@
+{
+  "ship_event_id": "fixture-skill-candidate",
+  "timestamp": "2026-05-05T00:00:07Z",
+  "session_id": "flywheel",
+  "event_type": "fuckup",
+  "actor": "codex",
+  "target": "~/.local/state/flywheel/fuckup-log.jsonl#L777",
+  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_actor": "codex",
+  "git_ref": "753ace",
+  "skill_candidate": true,
+  "finding": {
+    "class": "missing-skill-relay",
+    "summary": "skill-shaped finding should become a skill"
+  },
+  "action_ledger_pointer": "~/.local/state/flywheel/fuckup-log.jsonl#L777"
+}

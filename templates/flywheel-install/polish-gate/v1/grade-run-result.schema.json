@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/polish-gate/v1/grade-run-result.schema.json",
+  "title": "Polish gate grade run result v1",
+  "description": "Machine-readable run result emitted by polish-gate/run-grader.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ts",
+    "repo_path",
+    "mode",
+    "surfaces_graded",
+    "surfaces_passed",
+    "surfaces_failed",
+    "surfaces_skipped",
+    "composite_avg",
+    "min_composite",
+    "min_composite_surface",
+    "pending_waivers",
+    "receipts_written",
+    "latest_summary_path",
+    "errors",
+    "exit_code"
+  ],
+  "properties": {
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "enum": ["bootstrap", "audit_only", "blocking"]
+    },
+    "surfaces_graded": {
+      "$ref": "#/$defs/count"
+    },
+    "surfaces_passed": {
+      "$ref": "#/$defs/count"
+    },
+    "surfaces_failed": {
+      "$ref": "#/$defs/count"
+    },
+    "surfaces_skipped": {
+      "$ref": "#/$defs/count"
+    },
+    "composite_avg": {
+      "$ref": "#/$defs/grade"
+    },
+    "min_composite": {
+      "$ref": "#/$defs/grade"
+    },
+    "min_composite_surface": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pending_waivers": {
+      "$ref": "#/$defs/count"
+    },
+    "receipts_written": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "latest_summary_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "exit_code": {
+      "enum": [0, 1, 2, 3, 4]
+    }
+  },
+  "$defs": {
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "grade": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "name": "allow_comment",
+  "command": "# tmux capture-pane is the bad pattern",
+  "expected": "allow"
+}

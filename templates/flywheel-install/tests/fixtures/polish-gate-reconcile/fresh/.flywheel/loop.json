@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "repo": "/tmp/fresh",
+  "repo_realpath": "/tmp/fresh",
+  "git_root": "/tmp/fresh",
+  "created_at": "2026-05-05T00:00:00Z",
+  "installed_from": "/Users/josh/Developer/flywheel/templates/flywheel-install",
+  "template_version": "0.1.0",
+  "template_hash": "fixture",
+  "polish_gate": {
+    "version": "1",
+    "mode": "bootstrap",
+    "scope": "repo_local_flywheel",
+    "legacy_bootstrap_policy": "warn_until_touched",
+    "blocking_when": [
+      "new_surface",
+      "touched_required_surface",
+      "malformed_gate",
+      "expired_waiver"
+    ],
+    "grade_storage": ".flywheel/polish-gate/grades.jsonl",
+    "latest_summary": ".flywheel/polish-gate/latest.json"
+  }
+}

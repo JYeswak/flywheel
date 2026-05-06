@@ -1,0 +1,5 @@
+{
+  "name": "allow_string",
+  "command": "echo \"see tmux docs\"",
+  "expected": "allow"
+}

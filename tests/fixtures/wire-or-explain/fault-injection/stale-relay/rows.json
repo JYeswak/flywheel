@@ -1,0 +1,32 @@
+[
+  {
+    "schema_name": "flywheel.wire-or-explain.v1",
+    "schema_version": "wire-or-explain-ledger/v1",
+    "identity_key": "relay-stale-overdue-skill-candidate",
+    "timestamp": "2026-05-04T00:00:00Z",
+    "session_id": "flywheel",
+    "event_type": "fault_fixture",
+    "actor": "fixture",
+    "target": "relay-stale-overdue-skill-candidate",
+    "payload": {"dependency_count": 1, "ship_cost": 4, "downstream_cost": 10},
+    "metadata": {"fixture": true, "relay_fault": "stale", "expires_at": "2026-05-04T12:00:00Z"},
+    "state": "unwired",
+    "producer": "fault-injection",
+    "owner": "skillos",
+    "consumer": "skillos",
+    "blocking_scope": "skill_triage",
+    "owning_orch": "flywheel:pane-1",
+    "ship_repo": "__ROOT__",
+    "ship_actor": "StormyBay",
+    "artifact_class": "skill_candidate",
+    "subject": "RELAY_STALE_OVERDUE_SKILL_CANDIDATE",
+    "predicate": "stale_skillos_relay",
+    "auto_fire_trigger": "on_tick",
+    "drain_receipt_shape": "skillos_relay_overdue_receipt",
+    "verification_probe": "bash tests/wire-or-explain-close-gate-fault-injection.sh",
+    "tick_status_consequence": "stale relay must surface as overdue action",
+    "stock": "wire-or-explain",
+    "inflow": "fault_fixture",
+    "action_ledger": "fixture://wire-or-explain/fault-injection/stale-relay"
+  }
+]

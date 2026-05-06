@@ -1,0 +1,5 @@
+{
+  "name": "allow_bash_c_ntm_live_smoke",
+  "command": "bash -c \"ntm list\"",
+  "expected": "allow"
+}

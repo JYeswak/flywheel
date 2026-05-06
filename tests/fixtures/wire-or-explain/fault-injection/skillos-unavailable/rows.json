@@ -1,0 +1,32 @@
+[
+  {
+    "schema_name": "flywheel.wire-or-explain.v1",
+    "schema_version": "wire-or-explain-ledger/v1",
+    "identity_key": "relay-skillos-unavailable",
+    "timestamp": "2026-05-05T00:10:00Z",
+    "session_id": "flywheel",
+    "event_type": "fault_fixture",
+    "actor": "fixture",
+    "target": "relay-skillos-unavailable",
+    "payload": {"dependency_count": 2, "ship_cost": 7, "downstream_cost": 12},
+    "metadata": {"fixture": true, "relay_fault": "skillos_unavailable", "deferred": true},
+    "state": "unwired",
+    "producer": "fault-injection",
+    "owner": "skillos",
+    "consumer": "skillos",
+    "blocking_scope": "skill_triage",
+    "owning_orch": "flywheel:pane-1",
+    "ship_repo": "__ROOT__",
+    "ship_actor": "StormyBay",
+    "artifact_class": "skill_candidate",
+    "subject": "RELAY_SKILLOS_UNAVAILABLE",
+    "predicate": "skillos_unavailable",
+    "auto_fire_trigger": "on_tick",
+    "drain_receipt_shape": "skillos_unavailable_receipt",
+    "verification_probe": "bash tests/wire-or-explain-close-gate-fault-injection.sh",
+    "tick_status_consequence": "skillos unavailable cannot silently pass in enforce mode",
+    "stock": "wire-or-explain",
+    "inflow": "fault_fixture",
+    "action_ledger": "fixture://wire-or-explain/fault-injection/skillos-unavailable"
+  }
+]

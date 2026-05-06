@@ -1,0 +1,17 @@
+{
+  "ship_event_id": "fixture-no-wire-required",
+  "timestamp": "2026-05-05T00:00:08Z",
+  "session_id": "flywheel",
+  "event_type": "proof",
+  "actor": "codex",
+  "target": "/tmp/worker-private-note.md",
+  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_actor": "codex",
+  "git_ref": "642bdf",
+  "wire_required": false,
+  "predicate": "no durable consumer needed",
+  "action_ledger_pointer": ".flywheel/dispatch-log.jsonl#L17",
+  "evidence": {
+    "reason": "worker-private scratch proof; no durable stock"
+  }
+}

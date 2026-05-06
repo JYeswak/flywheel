@@ -1,0 +1,194 @@
+#!/usr/bin/env bash
+#
+# flywheel-resume — one-command fleet recovery after wezterm/system reboot.
+#
+# Usage:
+#   flywheel-resume               # show plan, do nothing (dry-run default)
+#   flywheel-resume --apply       # actually do it
+#   flywheel-resume --status      # what's up vs down
+#   flywheel-resume --help
+#
+# What it does (in --apply mode):
+#   1. Verifies tmux server is alive (or starts a fresh one if reboot blew it away)
+#   2. For each session in topology: ensures tmux session exists, creates panes if missing
+#   3. For each agent pane: launches the right CLI (claude/codex) with the canonical flag
+#      using `ntm send --no-cass-check` so autonomous launches bypass duplicate-work prompts
+#   4. For pane 1 of flywheel session: prints the resume context (handoffs to read)
+#   5. Verifies via ntm activity that all agents reach WAITING/THINKING
+#   6. Logs the resume event to ~/.local/state/flywheel/resume-log.jsonl
+
+set -euo pipefail
+
+# Unset TMUX so we can talk to the tmux server from inside a tmux pane.
+# Otherwise tmux refuses certain commands "to avoid nested sessions".
+unset TMUX TMUX_PANE
+
+VERSION="0.1.0"
+RESUME_LOG="$HOME/.local/state/flywheel/resume-log.jsonl"
+TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+NTM=/Users/josh/.local/bin/ntm
+TMUX=/opt/homebrew/bin/tmux
+
+# Sessions + repo paths + topology (claude pane = orchestrator, codex panes = workers)
+# Format: session|repo_path|orchestrator_pane|orchestrator_kind|worker_panes_csv
+declare -a TOPO=(
+  "flywheel|/Users/josh/Developer/flywheel|1|claude|2,3,4"
+  "skillos|/Users/josh/Developer/skillos|1|codex|2"
+  "mobile-eats|/Users/josh/Developer/mobile-eats|1|codex|2"
+  "alpsinsurance|/Users/josh/Developer/alpsinsurance|1|claude|2,3,4"
+  "vrtx|/Users/josh/Developer/vrtx|1|claude|2,3,4"
+  "clutterfreespaces|/Users/josh/Developer/clutterfreespaces|0|shell|"
+)
+
+APPLY=0
+STATUS_ONLY=0
+SKIP_AGENT_LAUNCH=0
+
+for arg in "$@"; do
+  case "$arg" in
+    --apply) APPLY=1 ;;
+    --status) STATUS_ONLY=1 ;;
+    --skip-agents) SKIP_AGENT_LAUNCH=1 ;;
+    --help|-h)
+      sed -n '2,12p' "$0" | sed 's/^# \?//'
+      exit 0
+      ;;
+    --version) echo "flywheel-resume $VERSION"; exit 0 ;;
+    *) echo "ERR: unknown arg: $arg" >&2; exit 2 ;;
+  esac
+done
+
+log_row() {
+  local row="$1"
+  mkdir -p "$(dirname "$RESUME_LOG")"
+  printf '%s\n' "$row" >> "$RESUME_LOG"
+}
+
+say() { printf '%s %s\n' "[flywheel-resume]" "$*"; }
+
+# --- Phase 0: pre-flight
+say "version=$VERSION ts=$TS apply=$APPLY"
+say "wezterm: $(wezterm --version 2>&1 | head -1)"
+say "tmux: $(tmux -V 2>&1)"
+
+# --- Phase 1: tmux server
+EXISTING_SESSIONS="$("$TMUX" list-sessions -F '#{session_name}' 2>/dev/null | tr '\n' ' ' || true)"
+if [ -n "${EXISTING_SESSIONS// /}" ]; then
+  TMUX_ALIVE=1
+  say "tmux server: ALIVE (sessions: $EXISTING_SESSIONS)"
+else
+  TMUX_ALIVE=0
+  say "tmux server: DOWN (will create fresh sessions)"
+fi
+
+# --- Phase 2: per-session reconciliation
+launch_cmd_for() {
+  case "$1" in
+    claude) printf '%s' 'claude --dangerously-skip-permissions' ;;
+    codex)  printf '%s' 'codex --dangerously-bypass-approvals-and-sandbox' ;;
+    shell)  printf '%s' '' ;;
+    *)      printf '%s' '' ;;
+  esac
+}
+
+ensure_session() {
+  local session="$1" repo="$2"
+  if "$TMUX" has-session -t "$session" 2>/dev/null; then
+    say "session $session: exists"
+    return 0
+  fi
+  if [ "$APPLY" = "1" ]; then
+    say "session $session: creating (tmux new-session -d -s $session -c $repo)"
+    "$TMUX" new-session -d -s "$session" -c "$repo"
+  else
+    say "session $session: WOULD create (tmux new-session -d -s $session -c $repo)"
+  fi
+}
+
+ensure_panes() {
+  local session="$1" needed="$2"
+  # needed is comma-separated list of pane indices that should exist
+  local existing
+  existing=$("$TMUX" list-panes -t "$session" -F '#{pane_index}' 2>/dev/null | sort -n | tr '\n' ',' || echo "")
+  IFS=',' read -ra need_arr <<< "$needed"
+  for idx in "${need_arr[@]}"; do
+    [ -z "$idx" ] && continue
+    if [[ ",$existing," == *",$idx,"* ]]; then
+      say "  pane $session:$idx exists"
+    else
+      if [ "$APPLY" = "1" ]; then
+        say "  pane $session:$idx creating (tmux split-window)"
+        "$TMUX" split-window -t "$session" -h
+      else
+        say "  pane $session:$idx WOULD create (tmux split-window -t $session -h)"
+      fi
+    fi
+  done
+}
+
+launch_agent() {
+  local session="$1" pane="$2" kind="$3"
+  local cmd
+  cmd="$(launch_cmd_for "$kind")"
+  [ -z "$cmd" ] && { say "  $session:$pane shell — no agent to launch"; return 0; }
+  if [ "$SKIP_AGENT_LAUNCH" = "1" ]; then
+    say "  $session:$pane $kind — skipped (--skip-agents)"
+    return 0
+  fi
+  if [ "$APPLY" = "1" ]; then
+    say "  $session:$pane launching $kind"
+    "$NTM" send "$session" --pane="$pane" --no-cass-check "$cmd" 2>&1 | tail -1 || true
+    sleep 6
+  else
+    say "  $session:$pane WOULD launch ($cmd)"
+  fi
+}
+
+if [ "$STATUS_ONLY" != "1" ]; then
+  for entry in "${TOPO[@]}"; do
+    IFS='|' read -r session repo orch_pane orch_kind worker_csv <<< "$entry"
+    [ ! -d "$repo" ] && { say "session $session: SKIP (repo $repo missing)"; continue; }
+    ensure_session "$session" "$repo"
+    needed="$orch_pane"
+    [ -n "$worker_csv" ] && needed="$needed,$worker_csv"
+    ensure_panes "$session" "$needed"
+    # launch agents
+    launch_agent "$session" "$orch_pane" "$orch_kind"
+    if [ -n "$worker_csv" ]; then
+      IFS=',' read -ra workers <<< "$worker_csv"
+      for w in "${workers[@]}"; do launch_agent "$session" "$w" "codex"; done
+    fi
+  done
+fi
+
+# --- Phase 3: status report
+say "=== final state ==="
+for entry in "${TOPO[@]}"; do
+  IFS='|' read -r session _ _ _ _ <<< "$entry"
+  if "$TMUX" has-session -t "$session" 2>/dev/null; then
+    "$NTM" activity "$session" 2>&1 | sed 's/^/  /'
+  else
+    say "  $session: DOWN"
+  fi
+done
+
+# --- Phase 4: log it
+if [ "$APPLY" = "1" ] && [ "$STATUS_ONLY" != "1" ]; then
+  ROW=$(jq -nc --arg ts "$TS" --arg ver "$VERSION" --arg tmux "$TMUX_ALIVE" \
+    '{ts:$ts,event:"resume",version:$ver,tmux_alive_pre:$tmux,topo_count:6}')
+  log_row "$ROW"
+  say "logged to $RESUME_LOG"
+fi
+
+# --- Phase 5: handoffs to read
+say "=== HANDOFFS TO READ (in your new claude pane 1 of flywheel) ==="
+say "  1. /Users/josh/Developer/flywheel/.flywheel/handoffs/2026-05-05T0511Z-eod.md"
+say "  2. /Users/josh/.local/state/flywheel/wezterm-restart-recovery-20260505T052539Z/README.md"
+say "  3. /Users/josh/Developer/skillos/.flywheel/recovery/skillos-pane1-reboot-20260505T053445Z.md"
+say "  4. /Users/josh/Developer/mobile-eats/.flywheel/handoffs/20260505T053247Z-mobile-eats-31g-reboot-recovery.md"
+say "  5. /Users/josh/Developer/alpsinsurance/.flywheel/handoffs/2026-05-05T0815-reboot.md"
+
+if [ "$APPLY" != "1" ] && [ "$STATUS_ONLY" != "1" ]; then
+  say ""
+  say "DRY-RUN — no changes made. Re-run with --apply to actually launch agents."
+fi

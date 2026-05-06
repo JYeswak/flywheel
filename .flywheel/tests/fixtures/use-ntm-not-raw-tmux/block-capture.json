@@ -1,0 +1,6 @@
+{
+  "name": "block_capture",
+  "command": "tmux capture-pane -p -t flywheel:0.2",
+  "expected": "block",
+  "suggestion": "ntm --robot-tail"
+}

@@ -1,0 +1,12 @@
+audit_ts=2026-05-05T23:50:38Z
+bead=flywheel-p2-12
+audit_disposition=auto_advance
+phase_3_broadcast_green_light=true
+composite_score=9.01
+lens_disagreement_max=1
+findings_critical=0
+findings_high=3
+findings_medium=1
+findings_low=1
+followup_beads=flywheel-p2-12-f1,flywheel-p2-12-f2,flywheel-p2-12-f3,flywheel-p2-12-f4,flywheel-p2-12-f5
+owner=flywheel:1

@@ -1,0 +1,17 @@
+{
+  "ship_event_id": "fixture-l-rule",
+  "timestamp": "2026-05-05T00:00:01Z",
+  "session_id": "flywheel",
+  "event_type": "commit",
+  "actor": "codex",
+  "target": "AGENTS.md",
+  "changed_paths": ["AGENTS.md", "templates/flywheel-install/AGENTS.md"],
+  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_actor": "codex",
+  "git_ref": "def456",
+  "action_ledger_pointer": ".flywheel/dispatch-log.jsonl#L11",
+  "evidence": {
+    "l_rule": "L110",
+    "stock": "unwired-artifacts"
+  }
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "schema_name": "flywheel.wire-or-explain.v1",
+    "schema_version": "wire-or-explain-ledger/v1",
+    "identity_key": "relay-missing-skill-candidate",
+    "timestamp": "2026-05-05T00:08:00Z",
+    "session_id": "flywheel",
+    "event_type": "fault_fixture",
+    "actor": "fixture",
+    "target": "relay-missing-skill-candidate",
+    "payload": {"dependency_count": 1, "ship_cost": 3, "downstream_cost": 8},
+    "metadata": {"fixture": true, "relay_fault": "missing"},
+    "state": "unwired",
+    "producer": "fault-injection",
+    "owner": "skillos",
+    "consumer": "NONE",
+    "blocking_scope": "skill_triage",
+    "owning_orch": "flywheel:pane-1",
+    "ship_repo": "__ROOT__",
+    "ship_actor": "StormyBay",
+    "artifact_class": "skill_candidate",
+    "subject": "RELAY_MISSING_SKILL_CANDIDATE",
+    "predicate": "missing_skillos_relay",
+    "auto_fire_trigger": "on_tick",
+    "drain_receipt_shape": "skillos_relay_receipt",
+    "verification_probe": "bash tests/wire-or-explain-close-gate-fault-injection.sh",
+    "tick_status_consequence": "missing relay remains unresolved and routes to skillos",
+    "stock": "wire-or-explain",
+    "inflow": "fault_fixture",
+    "action_ledger": "fixture://wire-or-explain/fault-injection/missing-relay"
+  }
+]

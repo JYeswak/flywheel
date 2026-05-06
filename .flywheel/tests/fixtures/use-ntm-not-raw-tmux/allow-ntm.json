@@ -1,0 +1,5 @@
+{
+  "name": "allow_ntm",
+  "command": "ntm --robot-tail=flywheel",
+  "expected": "allow"
+}

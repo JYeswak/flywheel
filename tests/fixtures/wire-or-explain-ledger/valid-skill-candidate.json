@@ -1,0 +1,43 @@
+{
+  "schema_name": "flywheel.wire-or-explain.v1",
+  "schema_version": "wire-or-explain-ledger/v1",
+  "identity_key": "fixture-skill-candidate",
+  "timestamp": "2026-05-05T00:06:00Z",
+  "session_id": "fixture-session",
+  "event_type": "feedback_fuckup_finding",
+  "actor": "fixture-worker",
+  "target": "flywheel-4m2a",
+  "payload": {
+    "candidate_skill": "wire-or-explain-ledger",
+    "finding_class": "feedback/fuckup"
+  },
+  "metadata": {
+    "fixture": true
+  },
+  "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "checksum": "7777777777777777777777777777777777777777777777777777777777777777",
+  "sequence_num": 1,
+  "state": "unwired",
+  "producer": "worker",
+  "owner": "skillos",
+  "consumer": "skillos",
+  "blocking_scope": "skill_triage",
+  "owning_orch": "flywheel:pane-1",
+  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_actor": "AmberElk",
+  "artifact_class": "skill_candidate",
+  "subject": "feedback-fuckup-finding",
+  "predicate": "should_become_skill_candidate",
+  "branch_ref": null,
+  "git_ref": null,
+  "reset_intent_hash": null,
+  "deferral_owner": null,
+  "deferral_until": null,
+  "auto_fire_trigger": "on_skill_triage",
+  "drain_receipt_shape": "skill_candidate_receipt",
+  "verification_probe": "bash tests/wire-or-explain-ledger.sh",
+  "tick_status_consequence": "tick routes candidate to skillos without blocking W0-F03",
+  "stock": "wire-or-explain",
+  "inflow": "feedback_fuckup_finding",
+  "action_ledger": "~/.local/state/flywheel/wire-or-explain-ledger.jsonl"
+}

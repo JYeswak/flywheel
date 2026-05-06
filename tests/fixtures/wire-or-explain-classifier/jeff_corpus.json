@@ -1,0 +1,14 @@
+{
+  "ship_event_id": "fixture-jeff-corpus",
+  "timestamp": "2026-05-05T00:00:06Z",
+  "session_id": "flywheel",
+  "event_type": "jeff_corpus_consumer",
+  "actor": "codex",
+  "target": ".flywheel/jeff-corpus/consumer-path.json",
+  "changed_paths": [".flywheel/jeff-corpus/consumer-path.json"],
+  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_actor": "codex",
+  "git_ref": "864dbf",
+  "jeff_corpus_consumer_path": "socraticode://jeff-corpus",
+  "action_ledger_pointer": ".flywheel/dispatch-log.jsonl#L16"
+}

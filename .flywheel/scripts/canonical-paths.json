@@ -1,0 +1,37 @@
+{
+  "schema_version": "flywheel-canonical-paths.v1",
+  "repo_local": {
+    "mission": ".flywheel/MISSION.md",
+    "goal": ".flywheel/GOAL.md",
+    "state": ".flywheel/STATE.md",
+    "reboot_recovery": ".flywheel/reboot-recovery/<iso-utc>/",
+    "reboot_recovery_latest": ".flywheel/reboot-recovery/LATEST",
+    "handoffs": ".flywheel/handoffs/",
+    "dispatch_log": ".flywheel/dispatch-log.jsonl",
+    "ledgers": [
+      ".flywheel/lock-log.jsonl",
+      ".flywheel/last_closeout_receipt.json",
+      ".flywheel/validation-receipts/"
+    ],
+    "scripts": ".flywheel/scripts/",
+    "templates": "templates/flywheel-install/"
+  },
+  "host_local": {
+    "shutdown_recovery": "~/.local/state/flywheel/shutdown-recovery/<iso-utc>/",
+    "shutdown_recovery_sentinel": "~/.local/state/flywheel/shutdown-recovery/RESUME_PENDING",
+    "session_topology": "~/.local/state/flywheel/session-topology.jsonl",
+    "cross_orch_coordination": "~/.local/state/flywheel/cross-orch-coordination.jsonl",
+    "loop_markers": "~/.flywheel/loops/<session>.json",
+    "tick_driver_ledger": "~/.local/state/flywheel/tick-driver.jsonl",
+    "fuckup_log": "~/.local/state/flywheel/fuckup-log.jsonl",
+    "agent_mail_registry": "~/.local/state/flywheel/agent-mail/"
+  },
+  "doctrine": {
+    "canonical_rule_surface": [
+      "AGENTS.md",
+      ".flywheel/AGENTS-CANONICAL.md",
+      "templates/flywheel-install/AGENTS.md"
+    ],
+    "recovery_path_mandate": "Every flywheel-managed repo stamps reboot recovery at .flywheel/reboot-recovery/<iso-utc>/ with LATEST symlink."
+  }
+}

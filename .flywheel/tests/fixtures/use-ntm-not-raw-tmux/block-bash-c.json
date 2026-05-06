@@ -1,0 +1,6 @@
+{
+  "name": "block_bash_c_live_smoke",
+  "command": "bash -c \"echo tmux ls\"",
+  "expected": "block",
+  "suggestion": "ntm list"
+}

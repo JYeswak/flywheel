@@ -1,0 +1,42 @@
+{
+  "schema_name": "flywheel.wire-or-explain.v1",
+  "schema_version": "wire-or-explain-ledger/v1",
+  "identity_key": "fixture-bypassed",
+  "timestamp": "2026-05-05T00:05:00Z",
+  "session_id": "fixture-session",
+  "event_type": "guard_bypass_observed",
+  "actor": "fixture-worker",
+  "target": "flywheel-4m2a",
+  "payload": {
+    "reason": "test fixture records bypass class without real bypass"
+  },
+  "metadata": {
+    "fixture": true
+  },
+  "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "checksum": "6666666666666666666666666666666666666666666666666666666666666666",
+  "sequence_num": 1,
+  "state": "bypassed",
+  "producer": "worker",
+  "owner": "orchestrator",
+  "consumer": "orchestrator",
+  "blocking_scope": "tick",
+  "owning_orch": "flywheel:pane-1",
+  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_actor": "AmberElk",
+  "artifact_class": "finding",
+  "subject": "bypass-class-fixture",
+  "predicate": "requires_review",
+  "branch_ref": null,
+  "git_ref": null,
+  "reset_intent_hash": null,
+  "deferral_owner": null,
+  "deferral_until": null,
+  "auto_fire_trigger": "on_guard_review",
+  "drain_receipt_shape": "bypass_review_receipt",
+  "verification_probe": "bash tests/wire-or-explain-ledger.sh",
+  "tick_status_consequence": "tick must flag bypass review",
+  "stock": "wire-or-explain",
+  "inflow": "guard_bypass_observed",
+  "action_ledger": "~/.local/state/flywheel/wire-or-explain-ledger.jsonl"
+}

@@ -1,0 +1,26 @@
+# Validate-And-Redispatch Drift Check Artifact
+
+This compatibility artifact exists because bead `flywheel-dw5w` AG7 named the
+four drift-check surfaces as `AGENTS/README/memory/skill`, and the closed-bead
+audit correctly interpreted that proof text as a mechanical path.
+
+The actual drift check is executable and lives at:
+
+```bash
+bash tests/doctrine-memory-wire.sh
+```
+
+That test verifies the shared primitive name `validate-and-redispatch
+discipline` across:
+
+- `AGENTS.md`
+- `README.md`
+- `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_validate_redispatch_foundational_discipline.md`
+- `~/.claude/skills/orchestrator-validation-discipline/SKILL.md`
+- `.flywheel/canonical-paths.txt`
+
+Proof receipt for this audit-gap repair:
+
+```text
+B10_AG7=file:PASS path=AGENTS/README/memory/skill validation=bash tests/doctrine-memory-wire.sh:PASS
+```

@@ -1,0 +1,32 @@
+[
+  {
+    "schema_name": "flywheel.wire-or-explain.v1",
+    "schema_version": "wire-or-explain-ledger/v1",
+    "identity_key": "fm1-slow-consumer-timeout",
+    "timestamp": "2026-05-05T00:01:00Z",
+    "session_id": "flywheel",
+    "event_type": "fault_fixture",
+    "actor": "fixture",
+    "target": "fm1-slow-consumer-timeout",
+    "payload": {"dependency_count": 4, "ship_cost": 8, "downstream_cost": 12, "timeout_ms": 5000},
+    "metadata": {"fixture": true, "fault_mode": "FM1", "expected_signal": "scan_timeout_or_budget_exhaustion"},
+    "state": "unwired",
+    "producer": "fault-injection",
+    "owner": "flywheel:1",
+    "consumer": "doctor",
+    "blocking_scope": "tick",
+    "owning_orch": "flywheel:pane-1",
+    "ship_repo": "__ROOT__",
+    "ship_actor": "StormyBay",
+    "artifact_class": "finding",
+    "subject": "FM1_SLOW_CONSUMER_DISCOVERY",
+    "predicate": "scan_timeout_budget_exceeded",
+    "auto_fire_trigger": "on_tick",
+    "drain_receipt_shape": "fault_injection_receipt",
+    "verification_probe": "bash tests/wire-or-explain-close-gate-fault-injection.sh",
+    "tick_status_consequence": "slow consumer discovery blocks close until budget is surfaced",
+    "stock": "wire-or-explain",
+    "inflow": "fault_fixture",
+    "action_ledger": "fixture://wire-or-explain/fault-injection/fm-1"
+  }
+]

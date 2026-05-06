@@ -1,0 +1,43 @@
+{
+  "schema_name": "flywheel.wire-or-explain.v1",
+  "schema_version": "wire-or-explain-ledger/v1",
+  "identity_key": "fixture-worker-branch",
+  "timestamp": "2026-05-05T00:07:00Z",
+  "session_id": "fixture-session",
+  "event_type": "worker_branch_artifact",
+  "actor": "fixture-worker",
+  "target": "flywheel-4m2a",
+  "payload": {
+    "artifact_path": ".flywheel/scripts/wire-or-explain-ledger-writer.sh",
+    "evidence_output_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "metadata": {
+    "fixture": true
+  },
+  "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "checksum": "8888888888888888888888888888888888888888888888888888888888888888",
+  "sequence_num": 1,
+  "state": "wired",
+  "producer": "worker",
+  "owner": "orchestrator",
+  "consumer": "orchestrator",
+  "blocking_scope": "tick",
+  "owning_orch": "flywheel:pane-1",
+  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_actor": "AmberElk",
+  "artifact_class": "worker_branch",
+  "subject": "worker-branch",
+  "predicate": "has_reset_intent",
+  "branch_ref": "worker/wire-or-explain-W0-F03",
+  "git_ref": "abc1234",
+  "reset_intent_hash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "deferral_owner": null,
+  "deferral_until": null,
+  "auto_fire_trigger": "on_branch_merge",
+  "drain_receipt_shape": "worker_branch_receipt",
+  "verification_probe": "bash tests/wire-or-explain-ledger.sh",
+  "tick_status_consequence": "tick may merge only after reset-intent probe passes",
+  "stock": "wire-or-explain",
+  "inflow": "worker_branch_artifact",
+  "action_ledger": "~/.local/state/flywheel/wire-or-explain-ledger.jsonl"
+}

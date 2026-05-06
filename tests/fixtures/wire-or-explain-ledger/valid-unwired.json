@@ -1,0 +1,42 @@
+{
+  "schema_name": "flywheel.wire-or-explain.v1",
+  "schema_version": "wire-or-explain-ledger/v1",
+  "identity_key": "fixture-unwired",
+  "timestamp": "2026-05-05T00:02:00Z",
+  "session_id": "fixture-session",
+  "event_type": "gap_observed",
+  "actor": "fixture-worker",
+  "target": "flywheel-4m2a",
+  "payload": {
+    "gap": "artifact has no current consumer"
+  },
+  "metadata": {
+    "fixture": true
+  },
+  "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "checksum": "3333333333333333333333333333333333333333333333333333333333333333",
+  "sequence_num": 1,
+  "state": "unwired",
+  "producer": "worker",
+  "owner": "orchestrator",
+  "consumer": "orchestrator",
+  "blocking_scope": "tick",
+  "owning_orch": "flywheel:pane-1",
+  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_actor": "AmberElk",
+  "artifact_class": "finding",
+  "subject": "unwired-artifact",
+  "predicate": "requires_consumer_or_deferral",
+  "branch_ref": null,
+  "git_ref": null,
+  "reset_intent_hash": null,
+  "deferral_owner": null,
+  "deferral_until": null,
+  "auto_fire_trigger": "none",
+  "drain_receipt_shape": "consumer_receipt",
+  "verification_probe": "bash tests/wire-or-explain-ledger.sh",
+  "tick_status_consequence": "tick must not close parent bead",
+  "stock": "wire-or-explain",
+  "inflow": "gap_observed",
+  "action_ledger": "~/.local/state/flywheel/wire-or-explain-ledger.jsonl"
+}

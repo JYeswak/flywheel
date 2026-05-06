@@ -1,0 +1,9 @@
+{"ship_event_id":"evt-wired-script","artifact_class":"script","producer":{"path":".flywheel/scripts/consumer.sh"},"consumer":{"id":"tick-driver:flywheel-loop-tick","kind":"tick_handler"},"verification_probe":{"kind":"runnable","consumer_id":"tick-driver:flywheel-loop-tick","command":["/usr/bin/true"],"path":".flywheel/scripts/tick-driver.sh","independent_consumer_proof":true}}
+{"ship_event_id":"evt-readme-only","artifact_class":"script","producer":{"path":".flywheel/scripts/readme-only.sh"},"consumer":{"kind":"readme","path":"README.md:42"},"consumer_evidence":{"kind":"readme_reference","path":"README.md:42"}}
+{"ship_event_id":"evt-deferred-future","artifact_class":"script","producer":{"path":".flywheel/scripts/future.sh"},"consumer":"NONE","deferral_owner":"flywheel:1","deferral_until":"2026-06-01T00:00:00Z"}
+{"ship_event_id":"evt-deferred-expired","artifact_class":"script","producer":{"path":".flywheel/scripts/expired.sh"},"consumer":"NONE","deferral_owner":"flywheel:1","deferral_until":"2026-04-01T00:00:00Z"}
+{"ship_event_id":"evt-not-required","artifact_class":"no_wire_required","producer":{"path":".flywheel/docs/note.md"},"state":"not_required"}
+{"ship_event_id":"evt-bypassed","artifact_class":"script","producer":{"path":".flywheel/scripts/bypassed.sh"},"state":"bypassed","bypass_reason":"bootstrap seed","bypass_owner":"flywheel:1"}
+{"ship_event_id":"evt-circular","artifact_class":"script","producer":{"path":".flywheel/scripts/self.sh"},"consumer":{"id":"self-proof"},"verification_probe":{"kind":"runnable","command":["/usr/bin/true"],"path":".flywheel/scripts/self.sh"}}
+{"ship_event_id":"evt-skill-relay","artifact_class":"skill_candidate","producer":{"path":".flywheel/fuckup-log/skill.md"},"subject":{"id":"skill-gap-1"}}
+{"ship_event_id":"evt-skill-missing","artifact_class":"skill_candidate","producer":{"path":".flywheel/fuckup-log/missing.md"},"subject":{"id":"skill-gap-2"}}

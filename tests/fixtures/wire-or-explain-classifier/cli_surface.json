@@ -1,0 +1,17 @@
+{
+  "ship_event_id": "fixture-cli-surface",
+  "timestamp": "2026-05-05T00:00:03Z",
+  "session_id": "flywheel",
+  "event_type": "commit",
+  "surface_kind": "doctor",
+  "actor": "codex",
+  "target": ".flywheel/scripts/status-doctor-probe.sh",
+  "changed_paths": [".flywheel/scripts/status-doctor-probe.sh"],
+  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_actor": "codex",
+  "git_ref": "135abc",
+  "action_ledger_pointer": ".flywheel/dispatch-log.jsonl#L13",
+  "evidence": {
+    "commands": ["doctor", "health", "repair"]
+  }
+}

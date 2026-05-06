@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/polish-gate/v1/phase-2-audit-verdict.json",
+  "schema_version": "polish-gate/phase-2-audit-verdict/v1",
+  "audit_ts": "2026-05-05T23:50:38Z",
+  "auditor_pane": "flywheel:2",
+  "auditor_orch": "codex",
+  "phase_2_beads_audited": [
+    "flywheel-4h6c8",
+    "flywheel-3uaa5",
+    "flywheel-3g6xh",
+    "flywheel-31bhc",
+    "flywheel-9xuom",
+    "flywheel-1oruh",
+    "flywheel-p2-12-f1",
+    "flywheel-3jq6y",
+    "flywheel-5jq48",
+    "flywheel-ok0yd",
+    "flywheel-p2-11"
+  ],
+  "surface_grades": [
+    {"surface": "P2-01 schemas", "ubs": 9.1, "simplify": 9.2, "extreme-opt": 9.2, "readme": 9.0, "canonical-cli": 8.8, "composite": 9.06, "below_bar": true},
+    {"surface": "P2-02 discovery", "ubs": 8.6, "simplify": 9.1, "extreme-opt": 9.0, "readme": 9.1, "canonical-cli": 9.2, "composite": 9.0, "below_bar": true},
+    {"surface": "P2-03 runner/receipts", "ubs": 9.2, "simplify": 9.1, "extreme-opt": 9.1, "readme": 9.0, "canonical-cli": 9.1, "composite": 9.1, "below_bar": false},
+    {"surface": "P2-04 docs", "ubs": 9.1, "simplify": 9.2, "extreme-opt": 9.1, "readme": 9.3, "canonical-cli": 9.2, "composite": 9.18, "below_bar": false},
+    {"surface": "P2-05 templates", "ubs": 9.1, "simplify": 9.1, "extreme-opt": 9.1, "readme": 9.2, "canonical-cli": 9.1, "composite": 9.12, "below_bar": false},
+    {"surface": "P2-06 tests", "ubs": 9.1, "simplify": 9.1, "extreme-opt": 9.1, "readme": 9.0, "canonical-cli": 9.2, "composite": 9.1, "below_bar": false},
+    {"surface": "P2-07 doctor fields", "ubs": 7.6, "simplify": 8.0, "extreme-opt": 7.7, "readme": 8.0, "canonical-cli": 7.4, "composite": 7.74, "below_bar": true},
+    {"surface": "P2-08 close validator", "ubs": 9.1, "simplify": 9.0, "extreme-opt": 9.0, "readme": 9.1, "canonical-cli": 9.2, "composite": 9.08, "below_bar": false},
+    {"surface": "P2-09 reconcile", "ubs": 9.2, "simplify": 9.2, "extreme-opt": 9.2, "readme": 9.2, "canonical-cli": 9.2, "composite": 9.2, "below_bar": false},
+    {"surface": "P2-10 scope allowlist", "ubs": 9.3, "simplify": 9.3, "extreme-opt": 9.3, "readme": 9.3, "canonical-cli": 9.3, "composite": 9.3, "below_bar": false},
+    {"surface": "P2-11 ledger replay", "ubs": 9.2, "simplify": 9.2, "extreme-opt": 9.2, "readme": 9.2, "canonical-cli": 9.3, "composite": 9.22, "below_bar": false}
+  ],
+  "three_judges_verdicts": [
+    {"surface": "P2-01 schemas", "jeff": 8.8, "donella": 9.2, "joshua": 9.0, "pass": false, "notes": "schema inventory drift"},
+    {"surface": "P2-02 discovery", "jeff": 8.7, "donella": 9.0, "joshua": 9.0, "pass": false, "notes": "malformed manifest traceback"},
+    {"surface": "P2-03 runner/receipts", "jeff": 9.1, "donella": 9.0, "joshua": 9.0, "pass": true},
+    {"surface": "P2-04 docs", "jeff": 9.1, "donella": 9.2, "joshua": 9.1, "pass": true},
+    {"surface": "P2-05 templates", "jeff": 9.0, "donella": 9.1, "joshua": 9.0, "pass": true},
+    {"surface": "P2-06 tests", "jeff": 9.2, "donella": 9.1, "joshua": 9.0, "pass": true},
+    {"surface": "P2-07 doctor fields", "jeff": 7.4, "donella": 7.8, "joshua": 8.0, "pass": false, "notes": "doctor feedback loop missing"},
+    {"surface": "P2-08 close validator", "jeff": 9.2, "donella": 9.1, "joshua": 9.0, "pass": true},
+    {"surface": "P2-09 reconcile", "jeff": 9.2, "donella": 9.2, "joshua": 9.1, "pass": true},
+    {"surface": "P2-10 scope allowlist", "jeff": 9.3, "donella": 9.4, "joshua": 9.2, "pass": true},
+    {"surface": "P2-11 ledger replay", "jeff": 9.1, "donella": 9.3, "joshua": 9.1, "pass": true}
+  ],
+  "seven_facet_results": [
+    {"surface": "P2-01 schemas", "score": 6, "pass": false, "failed_facets": ["F2"]},
+    {"surface": "P2-02 discovery", "score": 6, "pass": false, "failed_facets": ["F6"]},
+    {"surface": "P2-03 runner/receipts", "score": 7, "pass": true, "failed_facets": []},
+    {"surface": "P2-04 docs", "score": 7, "pass": true, "failed_facets": []},
+    {"surface": "P2-05 templates", "score": 7, "pass": true, "failed_facets": []},
+    {"surface": "P2-06 tests", "score": 7, "pass": true, "failed_facets": []},
+    {"surface": "P2-07 doctor fields", "score": 5, "pass": false, "failed_facets": ["F3", "F7"]},
+    {"surface": "P2-08 close validator", "score": 7, "pass": true, "failed_facets": []},
+    {"surface": "P2-09 reconcile", "score": 7, "pass": true, "failed_facets": []},
+    {"surface": "P2-10 scope allowlist", "score": 7, "pass": true, "failed_facets": []},
+    {"surface": "P2-11 ledger replay", "score": 7, "pass": true, "failed_facets": []}
+  ],
+  "findings": [
+    {"id": "F-HIGH-001", "severity": "high", "summary": "Phase 2 P2-07 doctor surface is absent from flywheel-loop doctor JSON.", "bead_id": "flywheel-p2-12-f1", "root_class": "doctor-feedback-loop-missing"},
+    {"id": "F-HIGH-002", "severity": "high", "summary": "Template schema inventory omits discovery-output and reconcile-output schemas.", "bead_id": "flywheel-p2-12-f2", "root_class": "schema-inventory-drift"},
+    {"id": "F-HIGH-003", "severity": "high", "summary": "discover-surfaces.py tracebacks on malformed JSON manifests.", "bead_id": "flywheel-p2-12-f3", "root_class": "operator-error-shape"},
+    {"id": "F-MED-001", "severity": "medium", "summary": "Phase 2 closure inventory is not fully machine-auditable.", "bead_id": "flywheel-p2-12-f4", "root_class": "bead-receipt-drift"},
+    {"id": "F-LOW-001", "severity": "low", "summary": "Aggregate schema test does not enumerate every v1 schema.", "bead_id": "flywheel-p2-12-f5", "root_class": "aggregate-test-coverage"}
+  ],
+  "composite_score": 9.01,
+  "lens_disagreement_max": 1,
+  "audit_disposition": "auto_advance",
+  "phase_3_broadcast_green_light": true,
+  "counts": {
+    "surfaces_audited": 11,
+    "findings_critical": 0,
+    "findings_high": 3,
+    "findings_medium": 1,
+    "findings_low": 1,
+    "followup_beads_filed": 5,
+    "three_judges_pass_count": "8/11",
+    "seven_facet_pass_count": "8/11",
+    "socraticode_queries": 12,
+    "indexed_chunks_observed": 905
+  },
+  "evidence": {
+    "audit_doc": "templates/flywheel-install/polish-gate/PHASE-2-AUDIT.md",
+    "tests": "schemas, discovery, runner, close-validator, scope-allowlist, reconcile, ledger-replay, integration, render all passed",
+    "doctor_probe": "flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json | jq '.polish_gate // {missing:true}' returned {\"missing\":true}",
+    "ubs_probe": "ubs reported 0 critical, 9 warning, 44 info across 3 Python surfaces"
+  },
+  "json_schema": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "required": [
+      "audit_ts",
+      "auditor_pane",
+      "auditor_orch",
+      "phase_2_beads_audited",
+      "surface_grades",
+      "three_judges_verdicts",
+      "seven_facet_results",
+      "findings",
+      "composite_score",
+      "lens_disagreement_max",
+      "audit_disposition",
+      "phase_3_broadcast_green_light",
+      "json_schema"
+    ],
+    "properties": {
+      "audit_ts": {"type": "string"},
+      "auditor_pane": {"type": "string"},
+      "auditor_orch": {"type": "string"},
+      "phase_2_beads_audited": {"type": "array", "minItems": 11},
+      "surface_grades": {"type": "array", "minItems": 11},
+      "three_judges_verdicts": {"type": "array", "minItems": 11},
+      "seven_facet_results": {"type": "array", "minItems": 11},
+      "findings": {"type": "array"},
+      "composite_score": {"type": "number", "minimum": 0, "maximum": 10},
+      "lens_disagreement_max": {"type": "integer", "minimum": 0, "maximum": 10},
+      "audit_disposition": {"enum": ["auto_advance", "blocker_class_1", "blocker_class_2", "blocker_class_3", "blocker_class_4", "blocker_class_5", "blocker_class_6", "re_audit"]},
+      "phase_3_broadcast_green_light": {"type": "boolean"},
+      "json_schema": {"type": "object"}
+    }
+  }
+}

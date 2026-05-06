@@ -1,0 +1,5 @@
+{
+  "name": "allow_tmuxinator",
+  "command": "tmuxinator start zeststream",
+  "expected": "allow"
+}

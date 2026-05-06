@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/polish-gate/v1/reconcile-output.schema.json",
+  "title": "Polish gate reconcile output v1",
+  "description": "Result envelope for reconciling existing flywheel-installed repos to the polish-gate contract.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ts",
+    "repo_path",
+    "action",
+    "prior_state",
+    "target_state",
+    "already_reconciled",
+    "files_modified",
+    "mode_applied",
+    "manifest_validates",
+    "errors",
+    "diff"
+  ],
+  "properties": {
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action": {
+      "enum": ["detect", "dry-run", "apply", "rollback"]
+    },
+    "prior_state": {
+      "enum": ["no_polish_gate", "partial_polish_gate", "reconciled", "malformed"]
+    },
+    "target_state": {
+      "type": ["string", "null"],
+      "enum": ["reconciled", "rolled_back", null]
+    },
+    "already_reconciled": {
+      "type": "boolean"
+    },
+    "files_modified": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "backup_path"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "backup_path": {
+            "type": ["string", "null"]
+          }
+        }
+      }
+    },
+    "mode_applied": {
+      "type": ["string", "null"],
+      "enum": ["bootstrap", "audit_only", "blocking", null]
+    },
+    "manifest_validates": {
+      "type": "boolean"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "diff": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

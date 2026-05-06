@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fleet shutdown recovery manifest",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "shutdown_started_at",
+    "shutdown_completed_at",
+    "trigger_reason",
+    "host",
+    "sessions",
+    "dispatches_in_flight",
+    "beads_in_progress",
+    "agent_mail_identities",
+    "launchd_flywheel_daemons",
+    "ledgers_at_shutdown",
+    "expected_resume_steps"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "fleet-shutdown-recovery.v1"
+    },
+    "cycle_id": {
+      "type": "string"
+    },
+    "repo": {
+      "type": "string"
+    },
+    "recovery_dir": {
+      "type": "string"
+    },
+    "shutdown_started_at": {
+      "type": "string"
+    },
+    "shutdown_completed_at": {
+      "type": ["string", "null"]
+    },
+    "shutdown_clean": {
+      "type": "boolean"
+    },
+    "last_resume_completed_at": {
+      "type": ["string", "null"]
+    },
+    "trigger_reason": {
+      "type": "string"
+    },
+    "host": {
+      "type": "object",
+      "required": [
+        "wezterm_version",
+        "tmux_version",
+        "wezterm_gui_pid",
+        "wezterm_gui_uptime_sec",
+        "rss_mb_at_shutdown"
+      ],
+      "properties": {
+        "wezterm_version": {"type": "string"},
+        "tmux_version": {"type": "string"},
+        "wezterm_gui_pid": {"type": "integer"},
+        "wezterm_gui_uptime_sec": {"type": "integer"},
+        "rss_mb_at_shutdown": {"type": "integer"}
+      }
+    },
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "panes"],
+        "properties": {
+          "name": {"type": "string"},
+          "topology_effective_at": {"type": ["string", "null"]},
+          "panes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "pane",
+                "agent_kind",
+                "pid_pre_shutdown",
+                "tmux_tty",
+                "scrollback_path",
+                "last_dispatch_task_id",
+                "in_flight_bead"
+              ],
+              "properties": {
+                "pane": {"type": "integer"},
+                "agent_kind": {"enum": ["claude", "codex", "shell"]},
+                "pid_pre_shutdown": {"type": "integer"},
+                "tmux_tty": {"type": "string"},
+                "scrollback_path": {"type": "string"},
+                "last_dispatch_task_id": {"type": ["string", "null"]},
+                "in_flight_bead": {"type": ["string", "null"]}
+              }
+            }
+          }
+        }
+      }
+    },
+    "dispatches_in_flight": {"type": "array"},
+    "beads_in_progress": {"type": "array"},
+    "agent_mail_identities": {"type": "array"},
+    "launchd_flywheel_daemons": {"type": "array"},
+    "ledgers_at_shutdown": {
+      "type": "object",
+      "required": [
+        "codex_stuck_detector_count_today",
+        "tick_driver_jsonl_lines",
+        "dispatch_log_tail_path"
+      ],
+      "properties": {
+        "codex_stuck_detector_count_today": {"type": "integer"},
+        "tick_driver_jsonl_lines": {"type": "integer"},
+        "dispatch_log_tail_path": {"type": "string"}
+      }
+    },
+    "expected_resume_steps": {"type": "array"}
+  }
+}

@@ -1,0 +1,32 @@
+[
+  {
+    "schema_name": "flywheel.wire-or-explain.v1",
+    "schema_version": "wire-or-explain-ledger/v1",
+    "identity_key": "fm3-collector-missed-ship-event",
+    "timestamp": "2026-05-05T00:03:00Z",
+    "session_id": "flywheel",
+    "event_type": "fault_fixture",
+    "actor": "fixture",
+    "target": "fm3-collector-missed-ship-event",
+    "payload": {"dependency_count": 3, "ship_cost": 9, "downstream_cost": 11, "ship_event_unclassified_count_24h": 1},
+    "metadata": {"fixture": true, "fault_mode": "FM3", "collector_state": "missed_unwired_artifact"},
+    "state": "unwired",
+    "producer": "fault-injection",
+    "owner": "flywheel:1",
+    "consumer": "doctor",
+    "blocking_scope": "tick",
+    "owning_orch": "flywheel:pane-1",
+    "ship_repo": "__ROOT__",
+    "ship_actor": "StormyBay",
+    "artifact_class": "finding",
+    "subject": "FM3_COLLECTOR_MISSED_SHIP_EVENT",
+    "predicate": "ship_event_unclassified_count_24h",
+    "auto_fire_trigger": "on_tick",
+    "drain_receipt_shape": "collector_gap_receipt",
+    "verification_probe": "bash tests/wire-or-explain-close-gate-fault-injection.sh",
+    "tick_status_consequence": "collector miss blocks until unclassified ship event is triaged",
+    "stock": "wire-or-explain",
+    "inflow": "fault_fixture",
+    "action_ledger": "fixture://wire-or-explain/fault-injection/fm-3"
+  }
+]

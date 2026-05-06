@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/polish-gate/v1/replay-output.schema.json",
+  "title": "Polish gate replay output v1",
+  "description": "Machine-readable summary emitted by polish-gate/replay-to-ledger.py.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ts",
+    "source_path",
+    "target_path",
+    "action",
+    "rows_loaded",
+    "rows_translated",
+    "rows_skipped",
+    "chain_verify_pre",
+    "chain_verify_post",
+    "errors",
+    "exit_code",
+    "translations"
+  ],
+  "properties": {
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action": {
+      "enum": ["dry-run", "apply", "apply-to-live"]
+    },
+    "rows_loaded": {
+      "$ref": "#/$defs/count"
+    },
+    "rows_translated": {
+      "$ref": "#/$defs/count"
+    },
+    "rows_skipped": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema-fail", "dup", "pre-from-ts"],
+      "properties": {
+        "schema-fail": { "$ref": "#/$defs/count" },
+        "dup": { "$ref": "#/$defs/count" },
+        "pre-from-ts": { "$ref": "#/$defs/count" }
+      }
+    },
+    "chain_verify_pre": {
+      "$ref": "#/$defs/chain_status"
+    },
+    "chain_verify_post": {
+      "$ref": "#/$defs/chain_status"
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "exit_code": {
+      "enum": [0, 1, 2, 3, 4]
+    },
+    "translations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["identity_key", "source_line", "surface_path", "verdict", "sequence_num", "action"],
+        "properties": {
+          "identity_key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source_line": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "surface_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "verdict": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sequence_num": {
+            "type": ["integer", "null"],
+            "minimum": 1
+          },
+          "action": {
+            "enum": ["translated", "duplicate"]
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "chain_status": {
+      "enum": ["PASS", "FAIL", "N/A"]
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "block_send_keys",
+  "command": "tmux send-keys -t mobile-eats:0.1 \"echo hi\" Enter",
+  "expected": "block",
+  "suggestion": "ntm send"
+}
