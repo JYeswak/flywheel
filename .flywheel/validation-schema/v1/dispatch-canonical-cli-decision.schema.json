@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/v1/dispatch-canonical-cli-decision.schema.json",
+  "title": "Canonical CLI Dispatch Precheck Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "ts",
+    "decision",
+    "introduces_cli",
+    "missing_elements",
+    "reason",
+    "ledger_appended"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "dispatch-canonical-cli-decision/v1"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "decision": {
+      "enum": ["allow", "refuse"]
+    },
+    "introduces_cli": {
+      "type": "boolean"
+    },
+    "missing_elements": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "info_help_examples",
+          "json",
+          "exit_codes",
+          "canonical_cli_skill"
+        ]
+      }
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ledger_appended": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "decision": {
+            "const": "refuse"
+          }
+        },
+        "required": ["decision"]
+      },
+      "then": {
+        "properties": {
+          "introduces_cli": {
+            "const": true
+          },
+          "missing_elements": {
+            "minItems": 1
+          },
+          "reason": {
+            "const": "dispatch_packet_missing_canonical_cli_acceptance"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "axes": [
+    {
+      "axis": "bug_reality",
+      "evidence": [
+        "repro",
+        "version"
+      ],
+      "findings": [
+        "draft lacks enough reproducible bug proof"
+      ],
+      "level": "low",
+      "passed": false,
+      "score": 0,
+      "suggestions": [
+        "Add observed, expected, repro, version, and cost citation."
+      ],
+      "threshold": "high"
+    },
+    {
+      "axis": "dedup",
+      "evidence": [
+        "gh issue list",
+        "no duplicate"
+      ],
+      "findings": [
+        "duplicate-search command and result present"
+      ],
+      "level": "high",
+      "passed": true,
+      "score": 2,
+      "suggestions": [],
+      "threshold": "high"
+    },
+    {
+      "axis": "source_trace",
+      "evidence": [],
+      "findings": [
+        "insufficient source trace"
+      ],
+      "level": "low",
+      "passed": false,
+      "score": 0,
+      "suggestions": [
+        "Cite upstream file:line locations for the failing primitive."
+      ],
+      "threshold": "high"
+    },
+    {
+      "axis": "signal_not_prescription",
+      "evidence": [
+        "prescriptive_terms=1"
+      ],
+      "findings": [
+        "contains 1 prescriptive terms without clear non-prescriptive boundary"
+      ],
+      "level": "low",
+      "passed": false,
+      "score": 0,
+      "suggestions": [
+        "Rewrite as observed contract gap plus expected behavior; remove implementation instructions."
+      ],
+      "threshold": "high"
+    },
+    {
+      "axis": "tone_match",
+      "evidence": [
+        "words=436",
+        "sections=7",
+        "tracking"
+      ],
+      "findings": [
+        "direct, structured, tracked, and low-hedge"
+      ],
+      "level": "high",
+      "passed": true,
+      "score": 2,
+      "suggestions": [],
+      "threshold": "high"
+    },
+    {
+      "axis": "jeff_thank_test_hostile",
+      "evidence": [],
+      "findings": [
+        "no generic thanks, demand, vendor, or hostile wording"
+      ],
+      "level": "high",
+      "passed": true,
+      "score": 2,
+      "suggestions": [],
+      "threshold": "high"
+    },
+    {
+      "axis": "no_derail",
+      "evidence": [
+        "missing_out_of_scope"
+      ],
+      "findings": [
+        "missing_out_of_scope"
+      ],
+      "level": "medium",
+      "passed": false,
+      "score": 1,
+      "suggestions": [
+        "Remove derail risks and add explicit out-of-scope plus tracking bead."
+      ],
+      "threshold": "high"
+    }
+  ],
+  "axes_count": 7,
+  "checked_at": "2026-05-04T01:05:08Z",
+  "decision": "withdraw",
+  "draft_path": "/tmp/jeff-issue-headless-browser-teardown-contract.md",
+  "draft_sha256": "518f4d43221a8f6788a8fd1262ed24cad7f31e736ef4937f978963853c7194ee",
+  "hard_fail_axes": [
+    "bug_reality",
+    "source_trace",
+    "signal_not_prescription",
+    "no_derail"
+  ],
+  "high_axes_count": 3,
+  "schema_version": "jeff-issue-rubric/v1",
+  "status": "fail",
+  "suggested_revisions": [
+    {
+      "axis": "bug_reality",
+      "suggestions": [
+        "Add observed, expected, repro, version, and cost citation."
+      ]
+    },
+    {
+      "axis": "source_trace",
+      "suggestions": [
+        "Cite upstream file:line locations for the failing primitive."
+      ]
+    },
+    {
+      "axis": "signal_not_prescription",
+      "suggestions": [
+        "Rewrite as observed contract gap plus expected behavior; remove implementation instructions."
+      ]
+    },
+    {
+      "axis": "no_derail",
+      "suggestions": [
+        "Remove derail risks and add explicit out-of-scope plus tracking bead."
+      ]
+    }
+  ],
+  "threshold": "high"
+}

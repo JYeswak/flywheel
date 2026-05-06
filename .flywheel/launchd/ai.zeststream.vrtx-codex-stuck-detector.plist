@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.zeststream.vrtx-codex-stuck-detector</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>set -euo pipefail; topo="${TMPDIR:-/tmp}/codex-stuck-detector-vrtx-topology.jsonl"; jq -c 'select(.session=="vrtx")' "$HOME/.local/state/flywheel/session-topology.jsonl" | jq -s -c 'group_by(.session) | map(max_by(.effective_at))[]' > "$topo"; jq -nc --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg session "vrtx" --arg label "ai.zeststream.vrtx-codex-stuck-detector" '{schema_version:"codex-stuck-detector.launchd-fire.v1",event:"launchd_fire",ts:$ts,session:$session,label:$label}'; CODEX_STUCK_DETECTOR_TOPOLOGY="$topo" exec /Users/josh/Developer/flywheel/.flywheel/scripts/codex-template-stuck-detector.sh --session vrtx --worker-panes-from-topology --apply --auto-recover --json</string>
+  </array>
+  <key>StartInterval</key>
+  <integer>60</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/josh/.local/state/flywheel/codex-stuck-detector.vrtx.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/josh/.local/state/flywheel/codex-stuck-detector.vrtx.err</string>
+</dict>
+</plist>

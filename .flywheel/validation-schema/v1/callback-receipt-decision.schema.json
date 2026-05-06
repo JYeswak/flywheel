@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/callback-receipt-decision/v1/callback-receipt-decision.schema.json",
+  "title": "Callback receipt validation decision v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "version",
+    "ts",
+    "repo_path",
+    "callback",
+    "dispatch_file",
+    "l112_verify_command",
+    "expected_l112",
+    "actual_l112",
+    "verify_result",
+    "decision",
+    "reason",
+    "exit_code",
+    "fix_bead_id",
+    "ledger_path"
+  ],
+  "properties": {
+    "schema_version": { "const": "callback-receipt-decision/v1" },
+    "version": { "type": "string", "minLength": 1 },
+    "ts": { "type": "string", "format": "date-time" },
+    "repo_path": { "type": "string", "minLength": 1 },
+    "callback": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["ok", "task_id", "bead", "evidence", "l112_observed", "raw"],
+      "properties": {
+        "ok": { "type": "boolean" },
+        "task_id": { "type": "string" },
+        "bead": { "type": "string" },
+        "evidence": { "type": "string" },
+        "l112_observed": { "type": "string" },
+        "raw": { "type": "string" }
+      }
+    },
+    "dispatch_file": { "type": "string" },
+    "l112_verify_command": { "type": ["string", "null"] },
+    "expected_l112": { "type": ["string", "null"] },
+    "actual_l112": { "type": ["string", "null"] },
+    "verify_result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["exit_code", "stdout", "stderr"],
+      "properties": {
+        "exit_code": { "type": ["integer", "null"] },
+        "stdout": { "type": "string" },
+        "stderr": { "type": "string" }
+      }
+    },
+    "decision": { "enum": ["PASS", "REFUSE", "UNVERIFIABLE"] },
+    "reason": {
+      "enum": [
+        "pass",
+        "callback_malformed",
+        "dispatch_file_missing",
+        "l112_verify_missing",
+        "l112_verify_failed",
+        "l112_output_mismatch"
+      ]
+    },
+    "exit_code": { "enum": [0, 1, 2] },
+    "fix_bead_id": { "type": ["string", "null"] },
+    "ledger_path": { "type": "string", "minLength": 1 }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "schema_version": "jeff-issue-rubric/v1",
+  "threshold": "high",
+  "decision_policy": {
+    "7_high": "auto_post",
+    "6_high": "revise",
+    "0_to_5_high": "withdraw"
+  },
+  "axes": [
+    {
+      "id": "bug_reality",
+      "title": "Bug reality",
+      "high": "Observed behavior, expected behavior, minimal repro, version/commit, and real cost are all present.",
+      "medium": "The draft has a real symptom but misses one or two proof elements.",
+      "low": "The draft reads like speculation or feature desire without a reproducible bug."
+    },
+    {
+      "id": "dedup",
+      "title": "Duplicate search",
+      "high": "The draft records a targeted `gh issue list` duplicate search and states no visible duplicate.",
+      "medium": "Duplicate search is mentioned but lacks command/search terms or result.",
+      "low": "No duplicate-search evidence is present."
+    },
+    {
+      "id": "source_trace",
+      "title": "Source trace",
+      "high": "The draft cites concrete upstream file:line locations and version/commit context.",
+      "medium": "Some source citations exist but do not fully trace the failing contract.",
+      "low": "No concrete file:line source trace."
+    },
+    {
+      "id": "signal_not_prescription",
+      "title": "Signal, not prescription",
+      "high": "The draft describes the contract gap and expected behavior without telling Jeff how to implement it.",
+      "medium": "The draft includes useful prior art or sketch language but clearly marks it non-prescriptive.",
+      "low": "The draft prescribes implementation, patch shape, migration code, or asks Jeff to adopt our design."
+    },
+    {
+      "id": "tone_match",
+      "title": "Tone match",
+      "high": "Direct, evidence-led, concise, and Joshua-flavored without robotic hedging or generic praise.",
+      "medium": "Mostly direct, but has mild hedging, excess preamble, or weak tracking continuity.",
+      "low": "Robotic, apologetic, vague, inflated, or missing tracking continuity."
+    },
+    {
+      "id": "jeff_thank_test_hostile",
+      "title": "Jeff thank-test hostile check",
+      "high": "No generic thanks, no vendor/customer framing, no sarcasm at Jeff, no demands, and no hostile wording.",
+      "medium": "Harmless but noisy thanks or soft pressure appears once.",
+      "low": "Hostile, entitled, deadline-pressure, or generic praise/noise dominates."
+    },
+    {
+      "id": "no_derail",
+      "title": "No derail",
+      "high": "No secrets, no PR/patch submission, no broad feature request, explicit out-of-scope boundaries, and flywheel tracking bead present.",
+      "medium": "Boundaries are present but one derail risk remains.",
+      "low": "The draft risks derailing Jeff's workflow with secrets, PR language, broad features, or no tracking."
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/flywheel/two-blocker-ticks-decision.schema.json",
+  "title": "Two Blocker Ticks Escalator Decision",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "audit_ts",
+    "repo",
+    "dispatch_log",
+    "state_path",
+    "ledger_path",
+    "coordination_log",
+    "issues_path",
+    "status",
+    "signal",
+    "threshold",
+    "blocked_beads",
+    "blocked_count",
+    "max_consecutive_tick_count",
+    "auto_escalate_requested",
+    "auto_escalations_filed",
+    "capsules_dispatched",
+    "warnings",
+    "errors"
+  ],
+  "properties": {
+    "schema_version": { "const": "two-blocker-ticks/v1" },
+    "audit_ts": { "type": "string", "format": "date-time" },
+    "repo": { "type": "string" },
+    "dispatch_log": { "type": "string" },
+    "state_path": { "type": "string" },
+    "ledger_path": { "type": "string" },
+    "coordination_log": { "type": "string" },
+    "issues_path": { "type": "string" },
+    "status": { "enum": ["pass", "warn", "fail", "gray"] },
+    "signal": { "enum": ["GREEN", "YELLOW", "RED", "GRAY"] },
+    "threshold": { "type": "integer", "minimum": 1 },
+    "blocked_count": { "type": "integer", "minimum": 0 },
+    "max_consecutive_tick_count": { "type": "integer", "minimum": 0 },
+    "auto_escalate_requested": { "type": "boolean" },
+    "auto_escalations_filed": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "auto_escalations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["blocked_bead_id", "escalation_bead_id", "action", "capsule_action", "dedupe_key"],
+        "properties": {
+          "blocked_bead_id": { "type": "string" },
+          "escalation_bead_id": { "type": "string" },
+          "action": { "type": "string" },
+          "capsule_action": { "type": "string" },
+          "dedupe_key": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "capsules_dispatched": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tick_key": { "type": "string" },
+    "blocked_beads": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["bead_id", "consecutive_tick_count", "callback_expected_by", "escalated"],
+        "properties": {
+          "bead_id": { "type": "string" },
+          "task_id": { "type": ["string", "null"] },
+          "consecutive_tick_count": { "type": "integer", "minimum": 1 },
+          "callback_expected_by": { "type": "string", "format": "date-time" },
+          "dispatch_ts": { "type": ["string", "null"] },
+          "target": { "type": ["string", "null"] },
+          "escalated": { "type": "boolean" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "errors": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": true
+}

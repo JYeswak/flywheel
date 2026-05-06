@@ -1,0 +1,29 @@
+# Flywheel INCIDENTS Compatibility Artifact
+
+Canonical incident history lives in `INCIDENTS.md`.
+
+This extensionless `INCIDENTS` file exists because bead `flywheel-kscr` AG4
+named the L56 ladder surface as `INCIDENTS`, and the closed-bead audit correctly
+flagged that literal path as missing.
+
+## Validation Learn Routing
+
+The executable validation-learn proof remains:
+
+```bash
+bash tests/validation-learn-routing.sh
+```
+
+That test verifies recurring validation failure classes enter the L56 ladder via
+fuckup-log first, then INCIDENTS, then canonical L-rule promotion. It includes:
+
+```text
+B09_AG4=command:PASS validation=bash tests/validation-learn-routing.sh
+```
+
+Canonical references:
+
+- `INCIDENTS.md`: promoted recurring failure classes with evidence.
+- `AGENTS.md` L56: fuckup-log -> INCIDENTS -> canonical L-rule ladder.
+- `tests/validation-learn-routing.sh`: fixture-backed B09 proof.
+- `/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop validation-learn`.

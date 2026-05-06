@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/low-bead-threshold-decision.schema.json",
+  "title": "Low bead threshold decision v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "audit_ts",
+    "repo",
+    "issues_path",
+    "status",
+    "signal",
+    "ready_count",
+    "in_progress_count",
+    "threshold",
+    "auto_bead_filed",
+    "hunt_bead_id",
+    "ledger_appended",
+    "exit_code"
+  ],
+  "properties": {
+    "schema_version": { "const": "low-bead-threshold/v1" },
+    "audit_ts": { "type": "string", "format": "date-time" },
+    "repo": { "type": "string", "minLength": 1 },
+    "issues_path": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["pass", "warn", "fail", "gray"] },
+    "signal": { "enum": ["GREEN", "YELLOW", "RED", "GRAY"] },
+    "issues_count": { "type": "integer", "minimum": 0 },
+    "ready_count": { "type": "integer", "minimum": 0 },
+    "in_progress_count": { "type": "integer", "minimum": 0 },
+    "threshold": { "type": "integer", "minimum": 1 },
+    "yellow_floor": { "type": "integer", "minimum": 1 },
+    "auto_bead_requested": { "type": "boolean" },
+    "auto_bead_filed": { "type": "boolean" },
+    "hunt_bead_id": { "type": ["string", "null"] },
+    "auto_bead_action": {
+      "enum": ["skipped", "jsonl_fallback", "reused", "append_failed"]
+    },
+    "hunt_bead_suggestion": {
+      "type": ["object", "null"],
+      "properties": {
+        "title": { "const": "hunt-work-MISSION-env-skills" },
+        "priority": { "const": 0 },
+        "reason": { "type": "string" }
+      }
+    },
+    "ledger_appended": { "type": "string", "minLength": 1 },
+    "warnings": { "type": "array", "items": { "type": "string" } },
+    "errors": { "type": "array", "items": { "type": "string" } },
+    "exit_code": { "type": "integer", "minimum": 0 }
+  }
+}

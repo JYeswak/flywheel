@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/doctor-polish-gate-fields.schema.json",
+  "title": "flywheel-loop doctor polish_gate fields",
+  "description": "Stable seven-field polish_gate object emitted by flywheel-loop doctor JSON.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "mode",
+    "summary_path",
+    "receipt_count",
+    "failures_count",
+    "waiver_count",
+    "schema_status",
+    "signal"
+  ],
+  "properties": {
+    "mode": {
+      "type": "string",
+      "enum": ["bootstrap", "audit_only", "blocking"]
+    },
+    "summary_path": {
+      "type": "string"
+    },
+    "receipt_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "failures_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "waiver_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "schema_status": {
+      "type": "string",
+      "enum": ["valid", "missing", "invalid", "error"]
+    },
+    "signal": {
+      "type": "string",
+      "enum": ["GREEN", "YELLOW", "RED", "GRAY"]
+    }
+  }
+}

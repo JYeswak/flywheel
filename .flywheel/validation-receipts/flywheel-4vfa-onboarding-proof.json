@@ -1,0 +1,74 @@
+{
+  "schema_version": "flywheel.flagship_onboarding_proof.v1",
+  "bead": "flywheel-4vfa",
+  "task_id": "666fdda7",
+  "flagship_anchor": "flywheel-6kew",
+  "machine_discoverable_for": "flywheel-6kew",
+  "status": "pass",
+  "proof_scope": "timed fixture onboarding; not a live loop-driver proof",
+  "start_iso": "2026-05-04T10:42:04Z",
+  "end_iso": "2026-05-04T10:43:36Z",
+  "elapsed_seconds": 92,
+  "elapsed_minutes": 1.53,
+  "under_30min": true,
+  "proof_dir": "/tmp/flywheel-4vfa-onboarding-proof-20260504T104204Z",
+  "fixture_repo": "/tmp/flywheel-4vfa-onboarding-proof-20260504T104204Z/fixture/client-demo",
+  "commands": [
+    "git init -q",
+    "flywheel-loop init --repo <fixture> --mission-source README.md --goal-source README.md --state-source README.md --json",
+    "flywheel-onboard.sh --repo <fixture> --dry-run --doctor --json",
+    "flywheel-onboard.sh --repo <fixture> --stamp --dry-run --json --explain --idempotency-key flywheel-4vfa-demo",
+    "flywheel-onboard.sh validate --repo <fixture> --json"
+  ],
+  "client_doctrine_path": [
+    "AGENTS.md",
+    "README.md",
+    ".flywheel/MISSION.md",
+    ".flywheel/GOAL.md",
+    ".flywheel/STATE.md"
+  ],
+  "artifacts": {
+    "init": "/tmp/flywheel-4vfa-onboarding-proof-20260504T104204Z/init.json",
+    "onboard_doctor_dry_run": "/tmp/flywheel-4vfa-onboarding-proof-20260504T104204Z/onboard-doctor-dry-run.json",
+    "stamp_dry_run": "/tmp/flywheel-4vfa-onboarding-proof-20260504T104204Z/stamp-dry-run.json",
+    "validate_schema": "/tmp/flywheel-4vfa-onboarding-proof-20260504T104204Z/validate-schema.json"
+  },
+  "onboarding_doctor": {
+    "success": true,
+    "status": "LIMPING",
+    "tier_summary": {
+      "tier1_files": "fail",
+      "tier2_loop_driver": "fail",
+      "tier3_session_topology": "fail",
+      "tier4_health_probes": "pass",
+      "tier5_fleet_stamp": "pass"
+    },
+    "planned_actions": [
+      {
+        "id": "stamp-fleet-member",
+        "kind": "write",
+        "mode": "planned",
+        "reason": "would write in Joshua-approved stamp phase",
+        "target": "/private/tmp/flywheel-4vfa-onboarding-proof-20260504T104204Z/fixture/client-demo/.flywheel/fleet-member.json"
+      },
+      {
+        "id": "sync-incidents",
+        "kind": "sync",
+        "mode": "planned",
+        "reason": "would distribute selected canonical INCIDENTS in sync phase",
+        "target": "/private/tmp/flywheel-4vfa-onboarding-proof-20260504T104204Z/fixture/client-demo/INCIDENTS.md"
+      },
+      {
+        "id": "repair-canonical-receipt",
+        "kind": "sync",
+        "mode": "planned",
+        "reason": "would add receipt mirror/consumer in sync phase",
+        "target": "/Users/josh/.local/state/flywheel-loop/last_tick_client-demo.json"
+      }
+    ],
+    "would_write": [
+      "/private/tmp/flywheel-4vfa-onboarding-proof-20260504T104204Z/fixture/client-demo/.flywheel/fleet-member.json"
+    ],
+    "blocked_by": []
+  }
+}

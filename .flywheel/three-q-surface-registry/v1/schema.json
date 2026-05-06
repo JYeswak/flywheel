@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/three-q-surface-registry/v1/schema.json",
+  "title": "Flywheel three-Q surface registry v1",
+  "description": "Registry of flywheel surfaces and their validated/documented/surfaced evidence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "surfaces"],
+  "properties": {
+    "schema_version": {"const": "three-q-surface-registry/v1"},
+    "surfaces": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/surface"}
+    }
+  },
+  "$defs": {
+    "q_state": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["state", "evidence_refs"],
+      "properties": {
+        "state": {"enum": ["pass", "fail", "unknown"]},
+        "evidence_refs": {
+          "type": "array",
+          "items": {"type": ["string", "object"]}
+        },
+        "runtime_evidence": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {"type": ["string", "object"]}
+          }
+        },
+        "probe": {"type": "string"}
+      }
+    },
+    "surface": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "surface_id",
+        "category",
+        "owner",
+        "repo",
+        "runtime_scope",
+        "q1_validated",
+        "q2_documented",
+        "q3_surfaced",
+        "evidence_refs",
+        "last_checked_ts",
+        "status",
+        "gap_reason"
+      ],
+      "properties": {
+        "surface_id": {"type": "string", "minLength": 1},
+        "category": {"type": "string", "minLength": 1},
+        "owner": {"type": "string", "minLength": 1},
+        "owner_bead": {"type": "string"},
+        "repo": {"type": "string", "minLength": 1},
+        "runtime_scope": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1
+        },
+        "required": {"type": "boolean"},
+        "automated_probe": {"type": "string"},
+        "manual_or_external_reason": {"type": ["string", "null"]},
+        "q1_validated": {"$ref": "#/$defs/q_state"},
+        "q2_documented": {"$ref": "#/$defs/q_state"},
+        "q3_surfaced": {"$ref": "#/$defs/q_state"},
+        "evidence_refs": {
+          "type": "array",
+          "items": {"type": ["string", "object"]}
+        },
+        "last_checked_ts": {"type": "string"},
+        "status": {"type": "string"},
+        "gap_reason": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

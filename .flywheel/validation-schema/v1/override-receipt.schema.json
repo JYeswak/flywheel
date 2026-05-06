@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/wire-or-explain-override-receipt/v1/schema.json",
+  "title": "Wire Or Explain Override Receipt",
+  "schema_version": "wire-or-explain-override-receipt/v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "surface",
+    "issued_at",
+    "mode",
+    "owner",
+    "reason",
+    "expires_at",
+    "affected_rows",
+    "row_decisions",
+    "raw_evidence_included",
+    "secret_scrubbed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "wire-or-explain-override-receipt/v1"
+    },
+    "surface": {
+      "const": "Tick Close Permit Gate"
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mode": {
+      "enum": ["bootstrap", "shadow", "enforce"]
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "affected_rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "row_decisions": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["decision", "route", "next_action"],
+        "properties": {
+          "decision": {
+            "const": "overridden"
+          },
+          "route": {
+            "type": "object"
+          },
+          "next_action": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "bootstrap": {
+      "type": "boolean"
+    },
+    "bootstrap_consumed": {
+      "type": "boolean"
+    },
+    "bootstrap_proof": {
+      "type": ["string", "null"]
+    },
+    "raw_evidence_included": {
+      "const": false
+    },
+    "secret_scrubbed": {
+      "const": true
+    },
+    "source": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Tick Close Permit Gate Receipt",
+  "schema_version": "tick-close-receipt/v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "surface",
+    "allowed",
+    "exit_code",
+    "reason_code",
+    "row_count",
+    "top_actions",
+    "override_state",
+    "receipt_path",
+    "would_block"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "tick-close-receipt/v1"
+    },
+    "surface": {
+      "const": "Tick Close Permit Gate"
+    },
+    "allowed": {
+      "type": "boolean"
+    },
+    "exit_code": {
+      "type": "integer",
+      "enum": [0, 1, 2, 3, 4]
+    },
+    "reason_code": {
+      "type": "string"
+    },
+    "row_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "unresolved_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "local_unresolved_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "cross_orch_unresolved_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "skill_candidate_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "top_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["identity_key", "state", "route", "next_action"],
+        "properties": {
+          "identity_key": {"type": "string"},
+          "state": {"type": "string"},
+          "artifact_class": {"type": "string"},
+          "blocking_scope": {"type": "string"},
+          "locality": {"type": "string"},
+          "route": {"type": "object"},
+          "next_action": {"type": "string"}
+        }
+      }
+    },
+    "override_state": {
+      "type": "object",
+      "required": ["active", "source"],
+      "properties": {
+        "active": {"type": "boolean"},
+        "source": {"type": "string"},
+        "reason": {"type": ["string", "null"]}
+      }
+    },
+    "receipt_path": {
+      "type": ["string", "null"]
+    },
+    "would_block": {
+      "type": "boolean"
+    },
+    "verification_probe_command": {
+      "type": ["string", "null"]
+    },
+    "warnings": {
+      "type": "array"
+    },
+    "exit_codes": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/v1/orch-donella-trace-decision.schema.json",
+  "title": "Orchestrator Donella trace gate decision",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "version",
+    "ts",
+    "session",
+    "decision",
+    "reason",
+    "joshua_disposes_pattern",
+    "action_without_trace_pattern",
+    "donella_keywords",
+    "donella_keywords_found",
+    "required_keywords",
+    "blocker_class_matched",
+    "ledger_appended",
+    "warnings",
+    "ledger_written"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "orch-donella-trace-decision/v1"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "session": {
+      "type": "string",
+      "minLength": 1
+    },
+    "decision": {
+      "enum": ["allow", "refuse"]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "joshua_disposes_pattern": {
+      "type": ["string", "null"]
+    },
+    "action_without_trace_pattern": {
+      "type": ["string", "null"]
+    },
+    "donella_keywords": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": ["boundary", "stock", "flow", "loop", "leverage", "intervention", "measurement"]
+      }
+    },
+    "donella_keywords_found": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 7
+    },
+    "required_keywords": {
+      "const": 5
+    },
+    "blocker_class_matched": {
+      "type": ["string", "null"]
+    },
+    "ledger_appended": {
+      "type": "string",
+      "minLength": 1
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "ledger_written": {
+      "type": "boolean"
+    }
+  }
+}

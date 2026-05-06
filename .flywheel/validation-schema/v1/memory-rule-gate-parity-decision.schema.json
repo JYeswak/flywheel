@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/memory-rule-gate-parity-decision.schema.json",
+  "title": "Memory rule gate parity decision v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "audit_ts",
+    "repo",
+    "memory_dir",
+    "status",
+    "signal",
+    "total_meta_rules",
+    "wired",
+    "partial",
+    "unwired",
+    "unwired_rules",
+    "beads_filed",
+    "beads_would_file",
+    "ledger_appended",
+    "exit_code"
+  ],
+  "properties": {
+    "schema_version": { "const": "memory-rule-gate-parity/v1" },
+    "audit_ts": { "type": "string", "format": "date-time" },
+    "repo": { "type": "string", "minLength": 1 },
+    "memory_dir": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["pass", "warn", "fail", "gray"] },
+    "signal": { "enum": ["GREEN", "YELLOW", "RED", "GRAY"] },
+    "total_files": { "type": "integer", "minimum": 0 },
+    "total_meta_rules": { "type": "integer", "minimum": 0 },
+    "wired": { "type": "integer", "minimum": 0 },
+    "partial": { "type": "integer", "minimum": 0 },
+    "unwired": { "type": "integer", "minimum": 0 },
+    "not_meta_rule": { "type": "integer", "minimum": 0 },
+    "unwired_rules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/rule_gap" }
+    },
+    "partial_rules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/rule_gap" }
+    },
+    "rules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/rule" }
+    },
+    "beads_filed": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/bead_action" }
+    },
+    "beads_would_file": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/bead_action" }
+    },
+    "ledger_appended": { "type": "string", "minLength": 1 },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "errors": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "exit_code": { "type": "integer", "minimum": 0 }
+  },
+  "$defs": {
+    "rule_gap": {
+      "type": "object",
+      "required": ["rule_id", "memory_path", "missing_evidence"],
+      "properties": {
+        "rule_id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$" },
+        "memory_path": { "type": "string", "minLength": 1 },
+        "missing_evidence": {
+          "type": "array",
+          "items": { "enum": ["script", "hook", "test", "incidents"] },
+          "uniqueItems": true
+        },
+        "evidence_count": { "type": "integer", "minimum": 0, "maximum": 4 }
+      }
+    },
+    "rule": {
+      "type": "object",
+      "required": ["rule_id", "memory_path", "classification", "missing_evidence"],
+      "properties": {
+        "rule_id": { "type": "string" },
+        "memory_path": { "type": "string" },
+        "classification": { "enum": ["WIRED", "PARTIAL", "UNWIRED", "NOT_META_RULE"] },
+        "evidence_count": { "type": "integer", "minimum": 0, "maximum": 4 },
+        "evidence": { "type": "object" },
+        "missing_evidence": {
+          "type": "array",
+          "items": { "enum": ["script", "hook", "test", "incidents"] }
+        }
+      }
+    },
+    "bead_action": {
+      "type": "object",
+      "required": ["rule_id", "title", "bead_id", "action"],
+      "properties": {
+        "rule_id": { "type": "string" },
+        "title": { "type": "string" },
+        "bead_id": { "type": "string" },
+        "action": { "enum": ["would_file", "jsonl_fallback", "reused", "append_failed"] }
+      }
+    }
+  }
+}

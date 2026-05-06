@@ -1,0 +1,123 @@
+{
+  "axes": [
+    {
+      "axis": "bug_reality",
+      "evidence": [
+        "observed",
+        "expected",
+        "repro",
+        "version",
+        "cost"
+      ],
+      "findings": [
+        "all bug-reality proof elements present"
+      ],
+      "level": "high",
+      "passed": true,
+      "score": 2,
+      "suggestions": [],
+      "threshold": "high"
+    },
+    {
+      "axis": "dedup",
+      "evidence": [
+        "gh issue list",
+        "no duplicate"
+      ],
+      "findings": [
+        "duplicate-search command and result present"
+      ],
+      "level": "high",
+      "passed": true,
+      "score": 2,
+      "suggestions": [],
+      "threshold": "high"
+    },
+    {
+      "axis": "source_trace",
+      "evidence": [
+        "internal/robot/activity.go:826",
+        "internal/robot/activity.go:880",
+        "internal/status/unified.go:70",
+        "internal/robot/activity_test.go:714"
+      ],
+      "findings": [
+        "4 file:line citations plus version context"
+      ],
+      "level": "high",
+      "passed": true,
+      "score": 2,
+      "suggestions": [],
+      "threshold": "high"
+    },
+    {
+      "axis": "signal_not_prescription",
+      "evidence": [
+        "prescriptive_terms=0",
+        "out_of_scope"
+      ],
+      "findings": [
+        "contract gap is bounded without implementation prescription"
+      ],
+      "level": "high",
+      "passed": true,
+      "score": 2,
+      "suggestions": [],
+      "threshold": "high"
+    },
+    {
+      "axis": "tone_match",
+      "evidence": [
+        "words=588",
+        "sections=8",
+        "tracking"
+      ],
+      "findings": [
+        "direct, structured, tracked, and low-hedge"
+      ],
+      "level": "high",
+      "passed": true,
+      "score": 2,
+      "suggestions": [],
+      "threshold": "high"
+    },
+    {
+      "axis": "jeff_thank_test_hostile",
+      "evidence": [],
+      "findings": [
+        "no generic thanks, demand, vendor, or hostile wording"
+      ],
+      "level": "high",
+      "passed": true,
+      "score": 2,
+      "suggestions": [],
+      "threshold": "high"
+    },
+    {
+      "axis": "no_derail",
+      "evidence": [
+        "out_of_scope",
+        "tracking"
+      ],
+      "findings": [
+        "no derail risks detected"
+      ],
+      "level": "high",
+      "passed": true,
+      "score": 2,
+      "suggestions": [],
+      "threshold": "high"
+    }
+  ],
+  "axes_count": 7,
+  "checked_at": "2026-05-04T10:53:04Z",
+  "decision": "auto_post",
+  "draft_path": "/tmp/ntm-stale-error-issue.md",
+  "draft_sha256": "9815d6b8e4384449e30b105d59eadd29e840aafaa884f322ace7ab2d07e80732",
+  "hard_fail_axes": [],
+  "high_axes_count": 7,
+  "schema_version": "jeff-issue-rubric/v1",
+  "status": "pass",
+  "suggested_revisions": [],
+  "threshold": "high"
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": "validation-receipt/v1",
+  "task_id": "flywheel-b8zm",
+  "validated_at": "2026-05-04T09:45:00Z",
+  "validator": "flywheel:4 codex worker",
+  "verdict": "no-bead-receipt",
+  "verdict_reason": "remote_session_owns_closure_no_duplicate_flywheel_beads",
+  "trauma_class": "cross-session-dispatch-no-callback-closure",
+  "remote_session": "skillos",
+  "remote_beads": [
+    "skillos-e2n",
+    "skillos-xxf",
+    "skillos-s7v"
+  ],
+  "requested_remote_action": "skillos orchestrator should close or reopen these beads from its own callback/integration loop",
+  "why_no_new_flywheel_bead": "The remediation is ownership correction and callback closure by the remote orchestrator, not duplicate flywheel tracking beads for each remote bead.",
+  "evidence": [
+    {
+      "type": "path",
+      "ref": ".flywheel/fuckup-log/2026-05-04T04-00Z-skillos-cross-session-no-callback-closure.md"
+    },
+    {
+      "type": "path",
+      "ref": ".flywheel/PLANS/orchestrator-workforce-supervision-2026-05-04/01-RESEARCH-A-ADDENDUM.md"
+    },
+    {
+      "type": "path",
+      "ref": ".flywheel/PLANS/orchestrator-workforce-supervision-2026-05-04/02-REFINE-r2.md"
+    }
+  ],
+  "bead_actions": [
+    {
+      "action": "no_bead_reason",
+      "reason": "remote_session_owns_closure_no_duplicate_flywheel_beads"
+    }
+  ],
+  "next_phase_recommendation": "REMOTE_ORCH_CLOSEOUT",
+  "next_owner": "skillos:1 orchestrator"
+}

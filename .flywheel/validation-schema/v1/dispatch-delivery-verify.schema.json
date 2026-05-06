@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/flywheel/schemas/dispatch-delivery-verify.schema.json",
+  "title": "Dispatch Delivery Verification Receipt",
+  "type": "object",
+  "required": [
+    "verified",
+    "task_id",
+    "session",
+    "pane",
+    "matched_at_line",
+    "buffer_len",
+    "reason",
+    "buffer_tail",
+    "timeout_sec",
+    "ts"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "dispatch-delivery-verify/v1"
+    },
+    "verified": {
+      "type": "boolean"
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pane": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "matched_at_line": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "buffer_len": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "reason": {
+      "type": ["string", "null"]
+    },
+    "buffer_tail": {
+      "type": ["string", "null"]
+    },
+    "timeout_sec": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "attempts": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "ntm_rc": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "stderr": {
+      "type": ["string", "null"]
+    }
+  },
+  "additionalProperties": false
+}

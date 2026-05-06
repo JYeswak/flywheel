@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "repo": "/Users/josh/Developer/flywheel",
+  "repo_realpath": "/Users/josh/Developer/flywheel",
+  "git_root": "/Users/josh/Developer/flywheel",
+  "created_at": "20260501T052023Z",
+  "installed_from": "/Users/josh/Developer/flywheel/templates/flywheel-install",
+  "template_version": "0.1.0",
+  "template_hash": "fe22c635b4f1342eae3c2358b921c3849fc109cbab7c60e83e3d02275ff35b3f",
+  "docs": {
+    "mission": ".flywheel/MISSION.md",
+    "goal": ".flywheel/GOAL.md",
+    "state": ".flywheel/STATE.md"
+  },
+  "doctor_strict_command": "flywheel-loop doctor --strict --repo /Users/josh/Developer/flywheel --json",
+  "source_mutation_allowed_when": "Only after strict doctor returns ok and a loop tick selects a bounded patch."
+}

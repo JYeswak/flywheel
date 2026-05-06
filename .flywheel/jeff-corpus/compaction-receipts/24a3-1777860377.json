@@ -1,0 +1,23 @@
+{
+  "archive_delta_path": null,
+  "archive_manifest_path": "/Users/josh/Developer/flywheel/.flywheel/jeff-corpus/v1.archived-20260504T020618Z.json.gz",
+  "delta_path": "/Users/josh/Developer/flywheel/.flywheel/jeff-corpus/v2/delta-index.jsonl",
+  "delta_rows_merged": 0,
+  "idempotency_key": "24a3-1777860377",
+  "idempotent_replay": false,
+  "mode": "apply",
+  "output_manifest": "/Users/josh/Developer/flywheel/.flywheel/jeff-corpus/v3/manifest.json",
+  "post_total_mb": 3783.3,
+  "pre_total_mb": 66766.7,
+  "promoted_to_doctor_baseline": true,
+  "qdrant_deletes_attempted": 0,
+  "qdrant_ops": [],
+  "qdrant_points_deleted": 0,
+  "qdrant_refused_collections": [],
+  "receipt_path": "/Users/josh/Developer/flywheel/.flywheel/jeff-corpus/compaction-receipts/24a3-1777860377.json",
+  "recommended_schedule": "Sunday 04:00Z",
+  "retired_to_cold_storage": true,
+  "source_manifest": "/Users/josh/Developer/flywheel/.flywheel/jeff-corpus/v1/manifest.json",
+  "status": "pass",
+  "superseded_chunks_dropped": 0
+}

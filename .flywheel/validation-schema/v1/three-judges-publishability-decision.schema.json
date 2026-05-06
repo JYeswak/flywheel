@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/v1/three-judges-publishability-decision.schema.json",
+  "title": "Three Judges Publishability Decision v1",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "timestamp",
+    "repo_path",
+    "bead_id",
+    "mode",
+    "decision",
+    "exit_code",
+    "composite_score",
+    "per_facet_scores",
+    "judge_verdicts",
+    "rework_beads_filed",
+    "ledger_appended"
+  ],
+  "properties": {
+    "schema_version": { "const": "three-judges-publishability/v1" },
+    "timestamp": { "type": "string", "minLength": 1 },
+    "repo_path": { "type": "string", "minLength": 1 },
+    "bead_id": { "type": "string", "minLength": 1 },
+    "mode": { "enum": ["advisory", "strict"] },
+    "decision": { "enum": ["PASS", "WARN", "REFUSE"] },
+    "exit_code": { "enum": [0, 1] },
+    "close_allowed": { "type": "boolean" },
+    "composite_score": { "type": "number", "minimum": 0, "maximum": 10 },
+    "min_facet_score": { "type": "number", "minimum": 0, "maximum": 10 },
+    "per_facet_scores": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["facet_id", "facet", "score", "evidence"],
+        "properties": {
+          "facet_id": { "enum": ["F1", "F2", "F3", "F4", "F5", "F6", "F7"] },
+          "facet": { "type": "string", "minLength": 1 },
+          "score": { "type": "number", "minimum": 0, "maximum": 10 },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "failed_facets": { "type": "array" },
+    "judge_verdicts": {
+      "type": "object",
+      "required": ["Jeff", "Donella", "Joshua"]
+    },
+    "brand_voice": { "type": "object" },
+    "repo_state": { "type": "object" },
+    "rework_beads_filed": { "type": "array" },
+    "ledger_path": { "type": "string" },
+    "ledger_appended": { "type": "boolean" }
+  }
+}

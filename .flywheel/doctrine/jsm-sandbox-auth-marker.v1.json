@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "flywheel://jsm-sandbox-auth-marker.v1",
+  "title": "JSM Sandbox Auth Marker v1",
+  "description": "Read-only contract for /Users/josh/.local/state/jsm/sandbox-auth-ok.json. Flywheel owns this schema; skillos guarded runner owns writing markers that satisfy it.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ts",
+    "writer",
+    "writer_session",
+    "writer_pane",
+    "what_was_proven",
+    "proof_artifact_sha256",
+    "proof_artifact_path",
+    "expiry_ts",
+    "schema_version",
+    "hmac_sha256"
+  ],
+  "properties": {
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the marker was written."
+    },
+    "writer": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identity that wrote it, for example skillos-guarded-runner."
+    },
+    "writer_session": {
+      "type": "string",
+      "minLength": 1,
+      "description": "ntm session that wrote the marker."
+    },
+    "writer_pane": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "ntm pane that wrote the marker."
+    },
+    "what_was_proven": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Plain-text statement of the safety proof the runner verified."
+    },
+    "proof_artifact_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "sha256 of the proof artifact."
+    },
+    "proof_artifact_path": {
+      "type": "string",
+      "pattern": "^/",
+      "description": "Absolute path to the proof artifact."
+    },
+    "expiry_ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this marker becomes invalid."
+    },
+    "schema_version": {
+      "const": "v1",
+      "description": "Always v1 for this schema."
+    },
+    "hmac_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "HMAC-SHA256 of the canonical JSON object with hmac_sha256 removed, using ~/.local/state/jsm/marker-hmac-secret."
+    }
+  },
+  "x-flywheel-contract": {
+    "freshness_seconds": 86400,
+    "marker_path": "/Users/josh/.local/state/jsm/sandbox-auth-ok.json",
+    "hmac_secret_path": "/Users/josh/.local/state/jsm/marker-hmac-secret",
+    "writer_contract": "Only the skillos guarded runner or its successor writes this marker. All other orchestrators read only.",
+    "reader_contract": "Every orchestrator session start, JSM doctor, and JSM sync validates this marker before raw live JSM probes. If invalid, refuse the probe and surface probe_failure_reasons.<scope>=missing_sandbox_auth_marker.",
+    "hmac_input": "Canonical compact JSON with keys sorted recursively and hmac_sha256 removed.",
+    "invalidation_triggers": [
+      "expiry_ts in past",
+      "ts older than freshness_seconds",
+      "hmac mismatch",
+      "proof_artifact_path missing",
+      "proof_artifact_sha256 mismatch",
+      "JSM credential rotation; skillos drops marker out of band",
+      "JSM upgrade; skillos drops marker out of band"
+    ]
+  }
+}

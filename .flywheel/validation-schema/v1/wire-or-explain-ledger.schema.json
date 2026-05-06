@@ -1,0 +1,316 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/flywheel/schemas/wire-or-explain-ledger.schema.json",
+  "schema_name": "flywheel.wire-or-explain.v1",
+  "schema_version": "wire-or-explain-ledger/v1",
+  "title": "The Zest Ledger row contract",
+  "description": "The Zest Ledger is the wire-or-explain source of truth: every durable observation/finding/artifact must declare its stock, class, consumer or explicit deferral, owner, action ledger, verification probe, and tick/status consequence.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_name",
+    "schema_version",
+    "identity_key",
+    "timestamp",
+    "session_id",
+    "event_type",
+    "actor",
+    "target",
+    "payload",
+    "metadata",
+    "prev_hash",
+    "checksum",
+    "sequence_num",
+    "state",
+    "producer",
+    "owner",
+    "consumer",
+    "blocking_scope",
+    "owning_orch",
+    "ship_repo",
+    "ship_actor",
+    "artifact_class",
+    "subject",
+    "predicate",
+    "branch_ref",
+    "git_ref",
+    "reset_intent_hash",
+    "deferral_owner",
+    "deferral_until",
+    "auto_fire_trigger",
+    "drain_receipt_shape",
+    "verification_probe",
+    "tick_status_consequence",
+    "stock",
+    "inflow",
+    "action_ledger"
+  ],
+  "properties": {
+    "schema_name": {
+      "const": "flywheel.wire-or-explain.v1"
+    },
+    "schema_version": {
+      "const": "wire-or-explain-ledger/v1"
+    },
+    "identity_key": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable duplicate-detection key for an event identity."
+    },
+    "timestamp": {
+      "type": "string",
+      "minLength": 1
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "actor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target": {
+      "type": "string",
+      "minLength": 1
+    },
+    "payload": {
+      "type": "object"
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "prev_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "checksum": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sequence_num": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "state": {
+      "enum": [
+        "wired",
+        "deferred",
+        "unwired",
+        "questionably_wired",
+        "not_required",
+        "bypassed"
+      ]
+    },
+    "producer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consumer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "blocking_scope": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owning_orch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ship_repo": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ship_actor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifact_class": {
+      "enum": [
+        "finding",
+        "dispatch_packet",
+        "bead",
+        "callback",
+        "worker_branch",
+        "skill_candidate",
+        "ledger_rebuild",
+        "other"
+      ]
+    },
+    "subject": {
+      "type": "string",
+      "minLength": 1
+    },
+    "predicate": {
+      "type": "string",
+      "minLength": 1
+    },
+    "branch_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "git_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reset_intent_hash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "deferral_owner": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "deferral_until": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "auto_fire_trigger": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "drain_receipt_shape": {
+      "type": [
+        "string",
+        "object",
+        "null"
+      ]
+    },
+    "verification_probe": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tick_status_consequence": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stock": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inflow": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_ledger": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "wired"
+          }
+        },
+        "required": [
+          "state"
+        ]
+      },
+      "then": {
+        "properties": {
+          "payload": {
+            "type": "object",
+            "required": [
+              "evidence_output_hash"
+            ],
+            "properties": {
+              "evidence_output_hash": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "anyOf": [
+          {
+            "properties": {
+              "state": {
+                "const": "deferred"
+              }
+            },
+            "required": [
+              "state"
+            ]
+          },
+          {
+            "properties": {
+              "consumer": {
+                "const": "NONE"
+              }
+            },
+            "required": [
+              "consumer"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "properties": {
+          "deferral_owner": {
+            "type": "string",
+            "minLength": 1
+          },
+          "deferral_until": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "artifact_class": {
+            "const": "worker_branch"
+          }
+        },
+        "required": [
+          "artifact_class"
+        ]
+      },
+      "then": {
+        "properties": {
+          "branch_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "git_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reset_intent_hash": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/v1/two-truth-sources-decision.schema.json",
+  "title": "Two Truth Sources Pre-Dispatch Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "version",
+    "ts",
+    "session",
+    "pane",
+    "decision",
+    "sources_probed",
+    "required_sources",
+    "agreement",
+    "disagreement_detail",
+    "source_1",
+    "source_2",
+    "source_3",
+    "reason",
+    "ledger_appended",
+    "ledger_written"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "two-truth-sources-decision/v1"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "session": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pane": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "decision": {
+      "enum": ["allow", "refuse"]
+    },
+    "sources_probed": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 3
+    },
+    "required_sources": {
+      "type": "integer",
+      "minimum": 2,
+      "maximum": 3
+    },
+    "agreement": {
+      "enum": ["agree", "disagree", "partial"]
+    },
+    "disagreement_detail": {
+      "type": ["string", "null"]
+    },
+    "source_1": {
+      "$ref": "#/$defs/source"
+    },
+    "source_2": {
+      "$ref": "#/$defs/source"
+    },
+    "source_3": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/source"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ledger_appended": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ledger_written": {
+      "type": "boolean"
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "ok",
+        "source"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pane": {
+          "type": ["integer", "string", "null"]
+        },
+        "state": {
+          "type": ["string", "null"]
+        },
+        "agent_type": {
+          "type": ["string", "null"]
+        },
+        "capture_provenance": {
+          "type": ["string", "null"]
+        },
+        "capture_error": true,
+        "capture_collected_at": {
+          "type": ["string", "null"]
+        },
+        "detected_patterns": {
+          "type": "array"
+        },
+        "last_line": {
+          "type": ["string", "null"]
+        },
+        "chevron_visible": {
+          "type": "boolean"
+        },
+        "reminder_template": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "ntm_rc": {
+          "type": "integer"
+        },
+        "stderr": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

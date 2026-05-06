@@ -1,0 +1,26 @@
+# Flywheel README Compatibility Artifact
+
+Canonical operator documentation lives in `README.md`.
+
+This extensionless `README` exists because bead `flywheel-dw5w` AG3 named a
+`README` artifact in its proof contract and the closed-bead audit correctly
+flagged that path as missing.
+
+## Validation Discipline
+
+The validation-discipline operator workflow is documented in `README.md` under
+the validation and callback sections. The paired doctrine lives in `AGENTS.md`
+L71 `VALIDATE-AND-REDISPATCH-DISCIPLINE`; the cross-surface regression test is
+`tests/doctrine-memory-wire.sh`.
+
+Proof receipt for the audit-gap repair:
+
+```text
+B10_AG3=file:PASS path=README canonical=README.md
+```
+
+## Validation Command
+
+```bash
+bash tests/doctrine-memory-wire.sh
+```

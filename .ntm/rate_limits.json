@@ -1,0 +1,531 @@
+{
+  "state": {
+    "anthropic": {
+      "current_delay": 600000000000,
+      "consecutive_success": 1,
+      "last_rate_limit": "2026-05-06T05:04:54.017667-06:00",
+      "cooldown_until": "2026-05-06T05:14:54.017667-06:00",
+      "total_rate_limits": 40,
+      "total_successes": 40
+    },
+    "openai": {
+      "current_delay": 600000000000,
+      "consecutive_success": 0,
+      "last_rate_limit": "2026-05-06T06:32:14.067207-06:00",
+      "cooldown_until": "2026-05-06T06:42:14.067207-06:00",
+      "total_rate_limits": 61,
+      "total_successes": 66
+    }
+  },
+  "history": {
+    "anthropic": [
+      {
+        "time": "2026-04-30T18:24:31.088755-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-04-30T18:29:21.090288-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T10:56:11.391369-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T10:57:11.39314-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T11:18:01.40158-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T11:27:41.426635-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T11:36:11.382479-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T11:40:11.405041-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T15:46:01.453204-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T15:49:31.483426-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T19:33:31.589317-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T22:11:31.559409-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T23:06:41.585447-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T07:51:11.672891-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T07:51:31.81762-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T17:24:01.844546-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T17:33:21.839531-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T17:38:01.848312-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T17:40:11.824841-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T18:54:11.968185-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T20:10:01.975611-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T20:26:11.917567-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T20:55:31.928388-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T20:59:31.924577-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T21:14:11.925118-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T21:27:32.065762-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T23:19:22.079833-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T11:18:12.103418-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T12:30:32.870323-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T21:26:13.045994-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-04T09:34:23.252887-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-04T10:04:43.275244-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-04T10:06:53.267052-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-04T10:07:23.254304-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-04T22:32:03.436683-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-04T23:28:03.44926-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-04T23:50:23.477749-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-05T10:45:33.732152-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-06T04:30:04.051858-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-06T05:04:54.017667-06:00",
+        "provider": "anthropic",
+        "action": "send"
+      }
+    ],
+    "openai": [
+      {
+        "time": "2026-04-30T15:05:31.123125-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-04-30T15:54:31.055118-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T08:24:01.364309-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T09:28:31.379916-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T09:57:41.417888-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T11:36:31.480411-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T11:37:31.404913-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T11:40:51.39328-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T12:37:51.419088-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-01T13:37:51.429385-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T08:02:11.665382-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T17:25:11.848216-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T17:26:41.829685-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T17:27:21.847811-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T17:29:01.858538-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T17:30:21.837868-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T17:30:41.83223-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T17:32:51.833296-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T17:40:41.833817-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T17:42:01.853749-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T17:42:22.181148-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T19:19:51.98298-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T19:21:31.873635-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T19:32:01.901727-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T19:46:02.066502-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T20:30:31.935904-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T20:31:41.912354-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T20:33:11.923753-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T20:33:42.249426-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T20:51:32.065164-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T20:53:22.283817-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-02T22:40:51.940346-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T00:10:52.011538-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T00:11:11.940462-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T01:20:21.952368-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T11:37:12.509281-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T11:38:32.150701-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T16:16:32.932661-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T20:35:13.018844-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T20:35:13.018871-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T20:35:42.998438-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T20:37:02.991099-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T20:37:22.992054-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T20:38:32.986652-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T20:39:02.987775-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T20:39:43.00223-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T20:40:22.996409-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T23:46:33.056011-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T23:47:43.1856-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-03T23:52:33.06882-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-04T04:52:13.14328-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-04T04:52:53.137355-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-04T10:43:23.268635-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-04T16:58:33.364695-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-04T23:11:23.462634-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-05T00:39:43.483186-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-05T00:40:33.471635-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-05T12:59:53.730836-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-05T13:11:03.732338-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-05T13:16:13.730252-06:00",
+        "provider": "openai",
+        "action": "send"
+      },
+      {
+        "time": "2026-05-06T06:32:14.067207-06:00",
+        "provider": "openai",
+        "action": "send"
+      }
+    ]
+  }
+}

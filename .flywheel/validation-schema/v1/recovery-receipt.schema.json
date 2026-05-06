@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/flywheel/recovery-receipt.schema.json",
+  "title": "Flywheel Recovery Receipt",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "version",
+    "ts",
+    "session",
+    "pane",
+    "stage_succeeded",
+    "recovery_succeeded",
+    "recovery_receipt_path",
+    "retries_per_stage",
+    "escalate_to_respawn",
+    "dry_run",
+    "apply",
+    "planned_actions",
+    "actual_actions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "recovery-receipt.v1"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "session": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pane": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "stage_succeeded": {
+      "enum": [1, 2, 3, "none"]
+    },
+    "recovery_succeeded": {
+      "type": "boolean"
+    },
+    "recovery_receipt_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "retries_per_stage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage1_escape", "stage2_reprompt"],
+      "properties": {
+        "stage1_escape": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "stage2_reprompt": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "escalate_to_respawn": {
+      "type": "boolean"
+    },
+    "dry_run": {
+      "type": "boolean"
+    },
+    "apply": {
+      "type": "boolean"
+    },
+    "last_prompt_path": {
+      "type": "string"
+    },
+    "planned_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "actual_actions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

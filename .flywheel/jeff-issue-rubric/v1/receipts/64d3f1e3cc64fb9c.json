@@ -1,0 +1,148 @@
+{
+  "axes": [
+    {
+      "axis": "bug_reality",
+      "evidence": [
+        "observed",
+        "repro",
+        "version",
+        "cost"
+      ],
+      "findings": [
+        "missing expected"
+      ],
+      "level": "medium",
+      "passed": false,
+      "score": 1,
+      "suggestions": [
+        "Add the missing bug-reality proof element(s)."
+      ],
+      "threshold": "high"
+    },
+    {
+      "axis": "dedup",
+      "evidence": [],
+      "findings": [
+        "no duplicate-search evidence"
+      ],
+      "level": "low",
+      "passed": false,
+      "score": 0,
+      "suggestions": [
+        "Run and cite targeted `gh issue list --repo Dicklesworthstone/<repo> --search ...`."
+      ],
+      "threshold": "high"
+    },
+    {
+      "axis": "source_trace",
+      "evidence": [
+        "internal/robot/activity.go:826",
+        "internal/robot/activity.go:880",
+        "internal/status/unified.go:70",
+        "internal/robot/activity_test.go:714"
+      ],
+      "findings": [
+        "4 file:line citations plus version context"
+      ],
+      "level": "high",
+      "passed": true,
+      "score": 2,
+      "suggestions": [],
+      "threshold": "high"
+    },
+    {
+      "axis": "signal_not_prescription",
+      "evidence": [
+        "prescriptive_terms=6",
+        "out_of_scope"
+      ],
+      "findings": [
+        "contains 6 prescriptive terms but has boundary language"
+      ],
+      "level": "medium",
+      "passed": false,
+      "score": 1,
+      "suggestions": [
+        "Move fix sketches to prior-art language or remove implementation instructions."
+      ],
+      "threshold": "high"
+    },
+    {
+      "axis": "tone_match",
+      "evidence": [
+        "words=561",
+        "sections=7",
+        "tracking"
+      ],
+      "findings": [
+        "direct, structured, tracked, and low-hedge"
+      ],
+      "level": "high",
+      "passed": true,
+      "score": 2,
+      "suggestions": [],
+      "threshold": "high"
+    },
+    {
+      "axis": "jeff_thank_test_hostile",
+      "evidence": [],
+      "findings": [
+        "no generic thanks, demand, vendor, or hostile wording"
+      ],
+      "level": "high",
+      "passed": true,
+      "score": 2,
+      "suggestions": [],
+      "threshold": "high"
+    },
+    {
+      "axis": "no_derail",
+      "evidence": [
+        "out_of_scope",
+        "tracking"
+      ],
+      "findings": [
+        "no derail risks detected"
+      ],
+      "level": "high",
+      "passed": true,
+      "score": 2,
+      "suggestions": [],
+      "threshold": "high"
+    }
+  ],
+  "axes_count": 7,
+  "checked_at": "2026-05-04T10:52:17Z",
+  "decision": "withdraw",
+  "draft_path": "/tmp/ntm-stale-error-issue.md",
+  "draft_sha256": "64d3f1e3cc64fb9c1449df1ee5f9f80605298cce26e57952cba4eb232d8ec62a",
+  "hard_fail_axes": [
+    "bug_reality",
+    "dedup",
+    "signal_not_prescription"
+  ],
+  "high_axes_count": 4,
+  "schema_version": "jeff-issue-rubric/v1",
+  "status": "fail",
+  "suggested_revisions": [
+    {
+      "axis": "bug_reality",
+      "suggestions": [
+        "Add the missing bug-reality proof element(s)."
+      ]
+    },
+    {
+      "axis": "dedup",
+      "suggestions": [
+        "Run and cite targeted `gh issue list --repo Dicklesworthstone/<repo> --search ...`."
+      ]
+    },
+    {
+      "axis": "signal_not_prescription",
+      "suggestions": [
+        "Move fix sketches to prior-art language or remove implementation instructions."
+      ]
+    }
+  ],
+  "threshold": "high"
+}
