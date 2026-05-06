@@ -3204,3 +3204,8 @@ Evidence:
 - Cross-orch coordination: rows 147 (skillos→flywheel),
   155+156+157+callback (flywheel↔skillos).
 
+
+## Append-safe write primitive Phase 1 shipped (2026-05-06)
+
+Shipped append-safe-write.sh primitive + test + pilot INCIDENTS callsite doc-only migration. Phase 1 of migration plan. Uses primitive to append THIS entry (dogfooding). Reversible: git-revert + dispatch-template doc revert (2026-05-06).
+
