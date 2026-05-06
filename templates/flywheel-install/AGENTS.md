@@ -3022,3 +3022,179 @@ Finding 10 skillos-relay amendment, and CoralRaven memory classes
 (validate-and-redispatch), L82 (canonical CLI scope), L96 (3-surface doctrine),
 L102 (cache refresh), L107 (shared-surface reservations), and
 `feedback_wire_into_ecosystem.md`.
+
+## L115 — PEER-ORCH-RECOVERY-PERMIT-GATE
+
+---
+id: L115
+title: Peer orch recovery permit gate
+status: long_term
+shipped: 2026-05-05
+review_due: 2026-11-05
+trauma_class: peer-orch-recovery-false-ownership-refusal
+---
+
+`flywheel:1` owns recovery of frozen, deaf, or stuck peer orchestrator panes.
+Peer orchestrators such as `skillos:1`, `mobile-eats:1`, and similar fleet
+orchestrator panes are not untouchable when they are dead; recovering them is
+flywheel repo work. The self-respawn boundary remains hard: `flywheel:1` MUST
+NOT respawn `flywheel:1`.
+
+**Permit gate:** `.flywheel/scripts/peer-orch-respawn-permit.sh` is the
+canonical pre-flight before `/flywheel:respawn` targets a peer
+`orchestrator_pane`.
+
+**Canonical 6-step recovery protocol:**
+
+1. Read `~/.local/state/flywheel/session-topology.jsonl` with latest-by-
+   `effective_at` semantics for both `flywheel` and the target session.
+2. Refuse unless the actor is the latest `flywheel` orchestrator pane.
+3. Refuse self-orchestrator recovery: target `flywheel:<orchestrator_pane>` is
+   the calling-in-sick path and must be recovered by a peer.
+4. Respect `kill-recover-drill.sh` protected-session doctrine. Active client
+   and high-risk sessions are refused unless a specific Joshua-approved
+   exception is encoded in the permit gate; `skillos:1` peer-orch recovery is
+   the validated exception for this rule, while drill damage remains refused.
+5. Require freeze evidence before permit: either a hash-identical buffer sample
+   across the configured window, or robot activity state in
+   `{ERROR, UNKNOWN, deaf}`.
+6. On `--apply`, write
+   `~/.local/state/flywheel/peer-orch-recovery.jsonl`, then run
+   `/flywheel:respawn`; verify the recovered pane is live and log any repeated
+   recovery pattern to the learning substrate.
+
+**Doctor contract:** `flywheel-loop doctor --scope peer-orch-recovery --json`
+MUST expose `peer_orch_recovery_count_24h`, `last_peer_orch_recovery_ts`,
+`peer_orch_recovery_targets_top`, and
+`peer_orch_recovery_self_refuse_count_24h`. Status is `warn` when recovery
+count exceeds 5 in 24h and `fail` when self-refuse count is nonzero.
+
+**Forbidden outputs:**
+
+- Treating peer orchestrator panes as human-only or untouchable after freeze
+  evidence exists.
+- Respawning `flywheel:1` from `flywheel:1`.
+- Bypassing `.flywheel/scripts/peer-orch-respawn-permit.sh` before peer
+  orchestrator recovery.
+- Calling a peer-orch recovery clean without a permit/refuse ledger row and
+  post-respawn liveness evidence.
+- Using stale topology rows instead of latest-by-`effective_at`.
+
+**Evidence:** Joshua correction 2026-05-05T04:38Z; memory
+`feedback_flywheel_owns_orch_pane_recovery.md`; bead `flywheel-3rxt3`;
+validated recovery of `skillos:1` at 2026-05-05T04:39Z; permit gate
+`.flywheel/scripts/peer-orch-respawn-permit.sh`; fixture
+`tests/peer-orch-respawn-permit.sh`.
+
+**Cross-references:** L48, L57, L70, L75, L80, L82, L101, L107, and L110.
+
+## L116 — TICK-IS-PROCESS-NOT-DOCUMENT
+
+---
+id: L116
+title: Tick is process, not document
+status: long_term
+shipped: 2026-05-05
+review_due: 2026-11-05
+trauma_class: tick-hook-prose-without-process
+---
+
+Tick is a real process, not a markdown document. A primitive that claims
+`tick_hook_wired=yes` is not wired until it is registered in
+`.flywheel/scripts/tick-driver-manifest.json` and the launchd-backed driver
+`/Users/josh/.local/bin/flywheel-tick-driver` produces ledger-backed evidence
+for it in `~/.local/state/flywheel/tick-driver.jsonl`.
+
+`/flywheel:tick` remains the human/agent-invocable decision function. L116 adds
+the recurring process layer that makes tick-close primitives fire even when no
+agent manually re-reads `tick.md`.
+
+Shutdown/resume primitives are first-class manifest entries even though they are
+event-driven rather than tick-driven. Register them in
+`.flywheel/scripts/tick-driver-manifest.json` with `type: event_driven`; the
+driver records them as registered process substrate and skips invocation during
+normal tick fires.
+
+For fleet shutdown/reboot recovery, the canonical repo-local state path is
+`.flywheel/reboot-recovery/<iso-utc>/` with a `LATEST` symlink; divergent
+`.flywheel/recovery/` or `.flywheel/handoffs/` reboot-final paths are drift.
+
+**Required wiring:**
+
+1. Add the primitive to `.flywheel/scripts/tick-driver-manifest.json` with
+   `name`, `path`, `args`, and `timeout_sec`.
+2. Ensure the primitive writes its own ledger when invoked by the driver.
+3. Keep `/Users/josh/Library/LaunchAgents/com.flywheel.tick.plist` loaded with
+   StartInterval 300 and ProgramArguments pointing to
+   `/Users/josh/.local/bin/flywheel-tick-driver`.
+4. Verify `flywheel-loop doctor --scope tick-driver --json` reports
+   `tick_driver_last_fire_ts` fresher than two intervals and
+   `tick_driver_fires_24h_count > 0`.
+5. Run `.flywheel/scripts/tick-hook-firing-verifier.sh --apply --json` so pbt55
+   consumes both primitive ledgers and tick-driver fire evidence.
+
+**Doctor contract:** `flywheel-loop doctor --scope tick-driver --json` MUST
+expose `tick_driver_daemon_loaded`, `tick_driver_last_exit_status`,
+`tick_driver_last_fire_ts`, `tick_driver_fires_24h_count`,
+`tick_driver_expected_fires_24h`, `tick_driver_fire_rate_pct`, and
+`tick_driver_stalled_class_emitted_count_24h`.
+
+**Forbidden outputs:**
+
+- Claiming `tick_hook_wired=yes` because a script exists or `tick.md` names it.
+- Closing a tick-hook primitive without manifest registration and a driver
+  ledger row proving it fired.
+- Treating launchd plist presence as enough without `tick-driver.jsonl`
+  freshness, per L57.
+- Adding new tick-close primitives only to prose.
+
+**Evidence:** bead `flywheel-2h6le`; driver
+`/Users/josh/.local/bin/flywheel-tick-driver`; LaunchAgent
+`/Users/josh/Library/LaunchAgents/com.flywheel.tick.plist`; manifest
+`.flywheel/scripts/tick-driver-manifest.json`; fixture
+`tests/flywheel-tick-driver.sh`.
+
+**Cross-references:** L57, L70, L102, L110, L111, L115, and pbt55
+`tick-hook-firing-verifier.sh`.
+
+## L117 — PEER-ORCH-FREEZE-MONITOR-IS-A-DRIVER
+
+---
+id: L117
+title: Peer orchestrator freeze monitor is a driver
+status: long_term
+shipped: 2026-05-05
+review_due: 2026-11-05
+trauma_class: peer-orch-freeze-without-monitor
+---
+
+Peer orchestrator liveness is not proven by a pane being open. A peer
+orchestrator freeze monitor must scan current topology, ignore the flywheel
+orchestrator's own pane, reuse mk303 stuck classification for peer orch panes,
+and call the L115 permit gate before any recovery action.
+
+Auto-respawn is disabled by default. Recovery may mutate only when the monitor
+is run with `--apply`, `PEER_ORCH_AUTO_RESPAWN=1` is present, and
+`.flywheel/scripts/peer-orch-respawn-permit.sh` returns `decision=permit`.
+`flywheel:1` self-recovery remains forbidden.
+
+**Doctor contract:** `flywheel-loop doctor --scope peer-orch-monitor --json`
+MUST expose `monitor_last_fire_ts`, `mttr_p95_seconds`,
+`false_recovery_count_24h`, `permit_gate_refusals_24h`, `recoveries_24h`, and
+`monitor_alive`.
+
+**Forbidden outputs:**
+
+- Claiming peer orchestrators are healthy because topology or panes exist.
+- Respawning a peer orchestrator without an L115 permit/refuse decision.
+- Treating a disabled plist or script presence as proof that monitoring fired.
+- Reporting recovery clean when `false_recovery_count_24h > 0`.
+
+**Evidence:** bead `flywheel-3e5c7`; monitor
+`.flywheel/scripts/peer-orch-freeze-monitor.sh`; fixture
+`tests/peer-orch-freeze-monitor.sh`; manifest
+`.flywheel/scripts/tick-driver-manifest.json`; disabled plist
+`.flywheel/launchd/ai.zeststream.peer-orch-freeze-monitor.plist`.
+
+**Cross-references:** L57, L110, L111, L115, L116, and pbt55
+`tick-hook-firing-verifier.sh`.
