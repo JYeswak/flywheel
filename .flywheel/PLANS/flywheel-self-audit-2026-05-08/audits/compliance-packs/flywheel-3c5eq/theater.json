@@ -1,0 +1,20 @@
+{
+  "schema_version": "beads-compliance/theater/v1",
+  "bead_id": "flywheel-3c5eq",
+  "theater_risk": "low",
+  "claims_checked": [
+    {
+      "claim": "Root/template stop at L126 while canonical snapshot has L127/L128",
+      "evidence": "AGENTS.md:3703; templates/flywheel-install/AGENTS.md:3690; .flywheel/AGENTS-CANONICAL.md:3794-3823"
+    },
+    {
+      "claim": "Pending worker-close commit rule exists but has not landed as a three-surface L-rule",
+      "evidence": "/Users/josh/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_worker_close_requires_git_commit.md:7-21"
+    },
+    {
+      "claim": "DCG prose-trigger fired three times today",
+      "evidence": "/Users/josh/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_dcg_prose_trigger_strip_dangerous_substrings.md:7-27"
+    }
+  ],
+  "unsupported_claims": []
+}

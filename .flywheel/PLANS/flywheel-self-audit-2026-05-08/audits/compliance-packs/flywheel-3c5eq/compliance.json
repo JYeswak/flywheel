@@ -1,0 +1,43 @@
+{
+  "schema_version": "beads-compliance/compliance/v1",
+  "bead_id": "flywheel-3c5eq",
+  "status": "pass",
+  "score": 925,
+  "threshold": 700,
+  "checks": [
+    {
+      "id": "seven_section_contract",
+      "status": "pass",
+      "evidence": "doctrine.md contains Sections 1 through 7"
+    },
+    {
+      "id": "socraticode_k10_required_keywords",
+      "status": "pass",
+      "evidence": "6 Socraticode searches with limit=10 against canonical projectPath"
+    },
+    {
+      "id": "prior_audit_synthesis",
+      "status": "pass",
+      "evidence": "Section 7 maps all six prior audits to surfaced doctrine"
+    },
+    {
+      "id": "file_line_citations_sections_1_3",
+      "status": "pass",
+      "evidence": "Sections 1-3 cite AGENTS, canonical, template, mission, plan, memory, and prior audit lines"
+    },
+    {
+      "id": "non_mutation_discipline",
+      "status": "pass",
+      "evidence": "no live AGENTS.md or doctrine source files were modified"
+    },
+    {
+      "id": "no_bead_creation",
+      "status": "pass",
+      "evidence": "fix-bead manifest is recommendations only"
+    }
+  ],
+  "residual_risk": [
+    "Doctrine-broadcast leak-attempt count was supplied by dispatch context; the audit found the script filter but also notes missing durable refusal receipts.",
+    "Callsite counts are repo-local outside the three AGENTS surfaces; cross-repo callsites are not included."
+  ]
+}

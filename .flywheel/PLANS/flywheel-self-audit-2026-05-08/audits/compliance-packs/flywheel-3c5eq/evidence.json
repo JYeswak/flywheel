@@ -1,0 +1,44 @@
+{
+  "schema_version": "beads-compliance/evidence/v1",
+  "bead_id": "flywheel-3c5eq",
+  "artifact": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/doctrine.md",
+  "evidence_items": [
+    {
+      "id": "EV-001",
+      "claim": "Socraticode survey completed for six doctrine keyword groups with limit=10.",
+      "source": "MCP socraticode codebase_search projectPath=/Users/josh/Developer/flywheel",
+      "supports": ["C-001"]
+    },
+    {
+      "id": "EV-002",
+      "claim": "All six prior audits were read and synthesized.",
+      "source": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/{plan-space,bead-space,code-space,coordination,orchestrator,hygiene}.md",
+      "supports": ["C-002"]
+    },
+    {
+      "id": "EV-003",
+      "claim": "Doctrine surfaces and L-rule drift were inventoried with file:line citations.",
+      "source": "AGENTS.md:29-3703; .flywheel/AGENTS-CANONICAL.md:34-3823; templates/flywheel-install/AGENTS.md:29-3690",
+      "supports": ["C-003"]
+    },
+    {
+      "id": "EV-004",
+      "claim": "Section 6 recommends fix beads without filing them.",
+      "source": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/doctrine.md",
+      "supports": ["C-004"]
+    },
+    {
+      "id": "EV-005",
+      "claim": "File reservations were acquired for the audit artifact and compliance pack path before edits.",
+      "source": "Agent Mail reservations 8748 and 8754 held by OliveBear",
+      "supports": ["C-005"]
+    }
+  ],
+  "claims": [
+    {"id": "C-001", "status": "confirmed"},
+    {"id": "C-002", "status": "confirmed"},
+    {"id": "C-003", "status": "confirmed"},
+    {"id": "C-004", "status": "confirmed"},
+    {"id": "C-005", "status": "confirmed"}
+  ]
+}

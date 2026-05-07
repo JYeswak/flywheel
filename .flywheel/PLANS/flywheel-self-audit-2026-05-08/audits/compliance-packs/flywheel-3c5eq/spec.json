@@ -1,0 +1,25 @@
+{
+  "schema_version": "beads-compliance/spec/v1",
+  "bead_id": "flywheel-3c5eq",
+  "task": "doctrine layer audit",
+  "target_artifact": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/doctrine.md",
+  "required_sections": 7,
+  "hard_rules": [
+    "socraticode K=10 against /Users/josh/Developer/flywheel for doctrine keywords",
+    "read all six prior audits before authoring doctrine.md",
+    "file:line citations mandatory in Sections 1-3",
+    "no new bead creation",
+    "no mutations to live AGENTS.md or doctrine files",
+    "stage commits with explicit paths"
+  ],
+  "source_docs": [
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/00-PLAN.md",
+    ".flywheel/research/external-doctrine/agent-flywheel-com-complete-guide-2026-05-08.md",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/plan-space.md",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/bead-space.md",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/code-space.md",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/coordination.md",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/orchestrator.md",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/hygiene.md"
+  ]
+}

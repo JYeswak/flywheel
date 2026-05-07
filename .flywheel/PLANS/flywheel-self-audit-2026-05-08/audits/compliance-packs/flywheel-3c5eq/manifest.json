@@ -1,0 +1,24 @@
+{
+  "schema_version": "beads-compliance/manifest/v1",
+  "bead_id": "flywheel-3c5eq",
+  "artifact": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/doctrine.md",
+  "compliance_pack": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-3c5eq",
+  "inventory_count": 92,
+  "load_bearing_count": 74,
+  "vestigial_count": 6,
+  "tier_gaps_addressed": 5,
+  "fix_beads_proposed": 3,
+  "l_rules_load_bearing": 74,
+  "l_rules_vestigial": 6,
+  "doctrine_gaps_surfaced": 5,
+  "files": [
+    "spec.json",
+    "evidence.json",
+    "compliance.json",
+    "theater.json",
+    "test_depth.json",
+    "manifest.json",
+    "scorecard.md",
+    "REPORT.md"
+  ]
+}
