@@ -9,7 +9,7 @@ TASK_TITLE="${NTM_WAVE2_TASK_TITLE:-flywheel native surface probe}"
 usage() {
   cat <<'USAGE'
 usage: ntm-wave2-native-probes.sh <surface> [--json]
-surfaces: agents analytics cass config extract get-all-session-text
+surfaces: agents analytics cass config extract get-all-session-text memory
 USAGE
 }
 
@@ -113,6 +113,20 @@ surface_get_all_session_text() {
     '{schema_version:$version,surface:$surface,status:"ok",native_calls:["ntm get-all-session-text --lines 10 --json","ntm get-all-session-text --compact --json","ntm get-all-session-text --lines 3 --json"],full:$full,compact:$compact,short:$short}'
 }
 
+surface_memory() {
+  local context outcome_privacy privacy
+  context="$(json_or_null "$NTM_BIN" memory context "$TASK_TITLE" --json)"
+  privacy="$(json_or_null "$NTM_BIN" memory privacy --json)"
+  outcome_privacy="$(json_or_null "$NTM_BIN" memory context "callback validation substrate memory" --json)"
+  jq -nc \
+    --arg version "$VERSION" \
+    --arg surface "memory" \
+    --argjson context "$context" \
+    --argjson privacy "$privacy" \
+    --argjson outcome_privacy "$outcome_privacy" \
+    '{schema_version:$version,surface:$surface,status:"ok",native_calls:["ntm memory context <task> --json","ntm memory privacy --json","ntm memory context callback-validation --json"],context:$context,privacy:$privacy,callback_context:$outcome_privacy}'
+}
+
 SURFACE="${1:-}"; [[ $# -gt 0 ]] && shift || true
 JSON_OUT=0
 while [[ $# -gt 0 ]]; do
@@ -130,6 +144,7 @@ case "$SURFACE" in
   config) payload="$(surface_config)" ;;
   extract) payload="$(surface_extract)" ;;
   get-all-session-text) payload="$(surface_get_all_session_text)" ;;
+  memory) payload="$(surface_memory)" ;;
   --help|-h|"") usage; exit 0 ;;
   *) echo "unknown surface: $SURFACE" >&2; usage >&2; exit 2 ;;
 esac
