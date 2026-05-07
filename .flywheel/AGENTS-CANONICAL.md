@@ -3785,6 +3785,12 @@ Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
 **Cross-references:** L61, L80, L91, L111, L120, and
 `feedback_evidence_pack_replaces_four_lens.md`.
 
+**Doctrine note: mechanical polish convergence.** For complex `/flywheel:plan`
+arcs, polish convergence is mechanical: two consecutive Phase 5 telemetry
+artifacts must report `kills_gte_adds=true` and `no_new_deltas=true`. A
+vibes-declared "looks converged" claim is rejected by the close gate for complex
+plans.
+
 ## L127 — PREDICTION-LOCK-RECEIPTS
 
 ---

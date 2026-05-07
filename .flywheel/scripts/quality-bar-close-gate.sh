@@ -84,7 +84,7 @@ info_json() {
     --arg jsonl_append_lib "$JSONL_APPEND_LIB" \
     --arg ntm_coverage_trend_script "$NTM_COVERAGE_TREND_SCRIPT" \
     --arg evidence_pack_resolver "$EVIDENCE_PACK_RESOLVER" \
-    '{name:$name,version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,substrate_loop_contract_ledger:$contract_ledger,jsonl_append_lib:$jsonl_append_lib,ntm_coverage_trend_script:$ntm_coverage_trend_script,evidence_pack_resolver:$evidence_pack_resolver,exit_codes:{"0":"quality bar pass","1":"quality bar pending or fail","2":"usage error","3":"append primitive unavailable or failed"},thresholds:{pending:{warn:20,error:50},failed:{warn:5,error:10},compliance_score:{minimum:700,maximum:1000,convergence_streak_minimum:2},ntm_surface_coverage:{minimum_avg:7,target_avg:10}},required_evidence:["schema_version>=5:hypotheses[2..5]","schema_version>=5:exactly_one_third_alternative_H_alt","schema_version>=5:acceptance_when_killed","schema_version>=5:prediction_lock_receipt_valid_when_predictions_present","schema_version>=4:compliance_pack_path","schema_version>=4:compliance_score>=700","schema_version>=4:convergence_streak>=2","schema_version>=4:evidence_pack_resolves=yes for v2 packs","schema_version>=4:legacy pack includes spec.json+evidence.json+compliance.json+theater.json+test_depth.json+scorecard.md+REPORT.md","schema_version<4:quality_bar_passed","schema_version<4:jeff_score>=9","schema_version<4:donella_score>=9_or_auto_advance","schema_version<4:composite>=9.5","critical_findings=0","future ntm-surface-wire-in plans require ntm coverage_avg>=7"]}'
+    '{name:$name,version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,substrate_loop_contract_ledger:$contract_ledger,jsonl_append_lib:$jsonl_append_lib,ntm_coverage_trend_script:$ntm_coverage_trend_script,evidence_pack_resolver:$evidence_pack_resolver,exit_codes:{"0":"quality bar pass","1":"quality bar pending or fail","2":"usage error","3":"append primitive unavailable or failed"},thresholds:{pending:{warn:20,error:50},failed:{warn:5,error:10},compliance_score:{minimum:700,maximum:1000,convergence_streak_minimum:2},convergence_telemetry:{complex_requires_stable_rounds:2},ntm_surface_coverage:{minimum_avg:7,target_avg:10}},required_evidence:["schema_version>=5:hypotheses[2..5]","schema_version>=5:exactly_one_third_alternative_H_alt","schema_version>=5:acceptance_when_killed","schema_version>=5:prediction_lock_receipt_valid_when_predictions_present","schema_version>=4:compliance_pack_path","schema_version>=4:compliance_score>=700","schema_version>=4:convergence_streak>=2","schema_version>=4:complex plans require two stable 05-POLISH-rN.json telemetry rounds","schema_version>=4:evidence_pack_resolves=yes for v2 packs","schema_version>=4:legacy pack includes spec.json+evidence.json+compliance.json+theater.json+test_depth.json+scorecard.md+REPORT.md","schema_version<4:quality_bar_passed","schema_version<4:jeff_score>=9","schema_version<4:donella_score>=9_or_auto_advance","schema_version<4:composite>=9.5","critical_findings=0","future ntm-surface-wire-in plans require ntm coverage_avg>=7"]}'
 }
 
 examples_text() {
@@ -109,7 +109,7 @@ EOF
 schema_json() {
   case "$SCHEMA_TOPIC" in
     plan)
-      jq -nc --arg schema_version "$SCHEMA_VERSION.plan" '{schema_version:$schema_version,required:["plan_slug","decision","quality_bar_mode","critical_findings","reasons","hypothesis_slate_valid"],legacy_required:["jeff","donella","joshua","composite"],compliance_required:["compliance_score","compliance_threshold","compliance_pack_path","convergence_streak","evidence_pack_resolves"],schema_v5_required:["hypotheses[2..5]","third_alternative.id=H_alt","acceptance_when_killed"],prediction_lock_required_when_present:["STATE.json.prediction_lock.locked_at","STATE.json.predictions[].prediction","STATE.json.predictions[].ts","STATE.json.predictions[].hash","STATE.json.predictions[].applies_at_phase"],conditional_required:{ntm_surface_wire_in:["ntm_surface_coverage_trend.coverage_avg>=7"]}}' ;;
+      jq -nc --arg schema_version "$SCHEMA_VERSION.plan" '{schema_version:$schema_version,required:["plan_slug","decision","quality_bar_mode","critical_findings","reasons","hypothesis_slate_valid"],legacy_required:["jeff","donella","joshua","composite"],compliance_required:["compliance_score","compliance_threshold","compliance_pack_path","convergence_streak","evidence_pack_resolves"],schema_v5_required:["hypotheses[2..5]","third_alternative.id=H_alt","acceptance_when_killed"],prediction_lock_required_when_present:["STATE.json.prediction_lock.locked_at","STATE.json.predictions[].prediction","STATE.json.predictions[].ts","STATE.json.predictions[].hash","STATE.json.predictions[].applies_at_phase"],convergence_telemetry_required_for_complex_plans:["05-POLISH-rN.json","two consecutive rounds with kills_gte_adds=true","two consecutive rounds with no_new_deltas=true"],conditional_required:{ntm_surface_wire_in:["ntm_surface_coverage_trend.coverage_avg>=7"]}}' ;;
     doctor)
       jq -nc '{schema_version:"quality-bar-close-gate.doctor.v1",required:["plan_state_quality_bar_pending_count","plan_state_quality_bar_failed_count","plan_state_quality_bar_passed_count"]}' ;;
     ledger)
@@ -343,6 +343,160 @@ def convergence_from_pack(pack_path):
                     return int(value)
     return None
 
+def plan_artifact_paths(plan_dir):
+    names = [
+        "00-PLAN.md",
+        "00-PLAN.json",
+        "01-RESEARCH-DEEP-DIVE.md",
+        "02-REFINE-FINAL.json",
+        "02-REFINE.md",
+        "03-AUDIT-FINDINGS.md",
+        "04-BEADS-DAG.md",
+        "05-POLISH.md",
+        "STATE.json",
+    ]
+    paths = []
+    for name in names:
+        path = plan_dir / name
+        if path.is_file():
+            paths.append(path)
+    for pattern in ("02-REFINE*.md", "02-REFINE*.json", "03-*.md", "04-*.md", "05-POLISH-r*.json"):
+        for path in sorted(plan_dir.glob(pattern)):
+            if path.is_file() and path not in paths:
+                paths.append(path)
+    return paths
+
+def ev_anchors_in_plan_artifacts(plan_dir):
+    anchors = set()
+    sources = {}
+    for path in plan_artifact_paths(plan_dir):
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        for anchor in re.findall(r"\bEV-[0-9]{3,}\b", text):
+            anchors.add(anchor)
+            sources.setdefault(anchor, []).append(str(path))
+    return anchors, sources
+
+def evidence_rows_from_pack(pack_path):
+    rows = []
+    for name in ("evidence.json", "compliance.json", "manifest.json"):
+        data = read_json(pack_path / name)
+        if not isinstance(data, dict) or data.get("_invalid_json"):
+            continue
+        value = data.get("evidence")
+        if isinstance(value, list):
+            rows.extend(row for row in value if isinstance(row, dict))
+    return rows
+
+def compliance_findings_from_pack(pack_path):
+    data = read_json(pack_path / "compliance.json")
+    if not isinstance(data, dict) or data.get("_invalid_json"):
+        return []
+    findings = data.get("findings")
+    return findings if isinstance(findings, list) else []
+
+def active_finding_ids(pack_path):
+    active = set()
+    for row in compliance_findings_from_pack(pack_path):
+        if not isinstance(row, dict):
+            continue
+        finding_id = row.get("id") or row.get("finding_id") or row.get("target_finding_id")
+        status = str(row.get("status", "active")).strip().lower()
+        if isinstance(finding_id, str) and finding_id and status != "closed":
+            active.add(finding_id)
+    return active
+
+def resolve_ev_source_path(source_path, plan_dir, pack_path):
+    candidate = Path(source_path).expanduser()
+    if candidate.is_absolute() and candidate.is_file():
+        return candidate
+    for base in (plan_dir, repo, pack_path):
+        resolved = base / source_path
+        if resolved.is_file():
+            return resolved
+    return None
+
+def parse_ev_source(source):
+    if not isinstance(source, str):
+        return None, None, None
+    match = re.match(r"^(.+):([0-9]+)(?:-([0-9]+))?$", source)
+    if not match:
+        return None, None, None
+    start = int(match.group(2))
+    end = int(match.group(3) or match.group(2))
+    if start < 1 or end < start:
+        return None, None, None
+    return match.group(1), start, end
+
+def excerpt_from_source(source, plan_dir, pack_path):
+    source_path, start, end = parse_ev_source(source)
+    if source_path is None:
+        return None
+    path = resolve_ev_source_path(source_path, plan_dir, pack_path)
+    if path is None:
+        return None
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return None
+    if end > len(lines):
+        return None
+    return "\n".join(lines[start - 1:end])
+
+def validate_ev_anchors(plan_dir, pack_path):
+    cited_anchors, anchor_sources = ev_anchors_in_plan_artifacts(plan_dir)
+    evidence_rows = evidence_rows_from_pack(pack_path) if pack_path and pack_path.is_dir() else []
+    ev_ids = {row.get("ev_id") for row in evidence_rows if isinstance(row.get("ev_id"), str)}
+    missing = sorted(anchor for anchor in cited_anchors if anchor not in ev_ids)
+    errors = []
+    if missing:
+        errors.append("ev_anchor_unresolved")
+    active_ids = active_finding_ids(pack_path) if pack_path and pack_path.is_dir() else set()
+    refute_targets = sorted({
+        row.get("target_finding_id")
+        for row in evidence_rows
+        if row.get("relation") == "refutes" and row.get("target_finding_id") in active_ids
+    })
+    if refute_targets:
+        errors.append("refute_contradiction_unresolved")
+    excerpt_mismatches = []
+    schema_errors = []
+    for index, row in enumerate(evidence_rows, start=1):
+        ev_id = row.get("ev_id")
+        if not isinstance(ev_id, str) or not re.fullmatch(r"EV-[0-9]{3,}", ev_id):
+            schema_errors.append(f"evidence_{index}_ev_id_invalid")
+        relation = row.get("relation")
+        if relation not in {"supports", "refutes", "informs"}:
+            schema_errors.append(f"{ev_id or index}_relation_invalid")
+        if not non_empty_str(row.get("target_finding_id")):
+            schema_errors.append(f"{ev_id or index}_target_finding_id_missing")
+        excerpt = row.get("excerpt")
+        source = row.get("source")
+        expected = excerpt_from_source(source, plan_dir, pack_path)
+        if not isinstance(excerpt, str) or expected is None or excerpt != expected:
+            excerpt_mismatches.append(ev_id if isinstance(ev_id, str) else f"row_{index}")
+    if schema_errors:
+        errors.append("ev_evidence_schema_invalid")
+    if excerpt_mismatches:
+        errors.append("evidence_excerpt_mismatch")
+    status = "not_present"
+    if cited_anchors or evidence_rows:
+        status = "pass" if not errors else "fail"
+    return {
+        "ev_anchor_status": status,
+        "ev_anchor_cited_count": len(cited_anchors),
+        "ev_anchor_defined_count": len(ev_ids),
+        "ev_anchor_missing": missing,
+        "ev_anchor_sources": anchor_sources,
+        "ev_evidence_rows_count": len(evidence_rows),
+        "ev_evidence_schema_errors": sorted(set(schema_errors)),
+        "ev_excerpt_mismatches": sorted(set(excerpt_mismatches)),
+        "ev_refute_active_targets": refute_targets,
+        "ev_anchor_errors": errors,
+    }
+
 def best_compliance_evidence(state, plan_dir):
     evidence = state.get("quality_bar_evidence")
     rows = evidence if isinstance(evidence, list) else []
@@ -377,6 +531,16 @@ def evaluate_compliance_pack(state, plan_dir, result, pending, failing):
     result["evidence_pack_resolves"] = None
     result["evidence_pack_resolution"] = None
     result["convergence_streak"] = None
+    result["ev_anchor_status"] = "not_checked"
+    result["ev_anchor_cited_count"] = 0
+    result["ev_anchor_defined_count"] = 0
+    result["ev_anchor_missing"] = []
+    result["ev_anchor_sources"] = {}
+    result["ev_evidence_rows_count"] = 0
+    result["ev_evidence_schema_errors"] = []
+    result["ev_excerpt_mismatches"] = []
+    result["ev_refute_active_targets"] = []
+    result["ev_anchor_errors"] = []
     candidates = best_compliance_evidence(state, plan_dir)
     if not candidates:
         pending.append("compliance_pack_path_missing")
@@ -393,6 +557,10 @@ def evaluate_compliance_pack(state, plan_dir, result, pending, failing):
     pack_path = usable["pack_path"]
     result["compliance_pack_path"] = str(pack_path)
     result["compliance_threshold"] = usable["threshold"]
+    ev_result = validate_ev_anchors(plan_dir, pack_path)
+    result.update(ev_result)
+    for error in ev_result["ev_anchor_errors"]:
+        failing.append(error)
     result["evidence_pack_version"] = evidence_pack_version(pack_path)
     if result["evidence_pack_version"] == 2:
         resolution = resolve_v2_evidence_pack(pack_path)
@@ -619,6 +787,130 @@ def validate_prediction_lock(state):
         result["prediction_lock_status"] = "pass"
     return result
 
+def int_value(value, default=0):
+    parsed = as_num(value)
+    if isinstance(parsed, (int, float)):
+        return int(parsed)
+    return default
+
+def audit_findings_count(state):
+    by_sev = state.get("audit_findings_by_severity")
+    if isinstance(by_sev, dict):
+        total = sum(int_value(value) for value in by_sev.values())
+        if total:
+            return total
+    return int_value(state.get("audit_findings_count"))
+
+def bead_count_for_complexity(state, plan_dir):
+    candidates = [
+        int_value(state.get("total_beads_in_dag")),
+        int_value(state.get("beads_created_count")),
+        int_value(state.get("bead_count")),
+    ]
+    beads = state.get("beads_created")
+    if isinstance(beads, list):
+        candidates.append(len(beads))
+    dag_path = plan_dir / "04-BEADS-DAG.md"
+    if dag_path.is_file():
+        try:
+            text = dag_path.read_text(encoding="utf-8", errors="replace")
+            candidates.append(len(set(re.findall(r"\b[A-Za-z0-9._-]+-[A-Za-z0-9._-]{4,}\b", text))))
+        except OSError:
+            pass
+    return max(candidates) if candidates else 0
+
+def expected_polish_rounds(state, artifact_count):
+    candidates = [
+        int_value(state.get("expected_polish_rounds")),
+        int_value(state.get("polish_rounds_expected")),
+        int_value(state.get("phase5_expected_polish_rounds")),
+        int_value(state.get("polish_round")),
+        artifact_count,
+    ]
+    return max(candidates) if candidates else 0
+
+def load_polish_telemetry_artifacts(plan_dir):
+    rows = []
+    for path in sorted(plan_dir.glob("05-POLISH-r*.json")):
+        match = re.search(r"05-POLISH-r(\d+)\.json$", path.name)
+        data = read_json(path)
+        if not isinstance(data, dict) or data.get("_invalid_json"):
+            rows.append({
+                "path": str(path),
+                "round": int(match.group(1)) if match else None,
+                "valid": False,
+                "stable": False,
+                "reason": "invalid_json",
+            })
+            continue
+        round_value = data.get("round")
+        deltas = data.get("deltas")
+        stability = data.get("stability")
+        valid = (
+            isinstance(round_value, int)
+            and isinstance(deltas, dict)
+            and all(isinstance(deltas.get(key), int) for key in ("adds", "edits", "kills", "total_changes"))
+            and isinstance(data.get("open_findings_after"), int)
+            and isinstance(stability, dict)
+            and isinstance(stability.get("kills_gte_adds"), bool)
+            and isinstance(stability.get("no_new_deltas"), bool)
+        )
+        stable = bool(valid and stability.get("kills_gte_adds") and stability.get("no_new_deltas"))
+        rows.append({
+            "path": str(path),
+            "round": round_value if isinstance(round_value, int) else (int(match.group(1)) if match else None),
+            "valid": valid,
+            "stable": stable,
+            "deltas": deltas if isinstance(deltas, dict) else {},
+            "open_findings_after": data.get("open_findings_after"),
+            "stability": stability if isinstance(stability, dict) else {},
+            "reason": None if valid else "schema_invalid",
+        })
+    return sorted(rows, key=lambda row: row.get("round") or 0)
+
+def evaluate_convergence_telemetry(state, plan_dir):
+    artifacts = load_polish_telemetry_artifacts(plan_dir)
+    bead_count = bead_count_for_complexity(state, plan_dir)
+    findings_count = audit_findings_count(state)
+    expected_rounds = expected_polish_rounds(state, len(artifacts))
+    complex_reasons = []
+    if bead_count >= 8:
+        complex_reasons.append("beads_gte_8")
+    if expected_rounds > 3:
+        complex_reasons.append("polish_rounds_gt_3")
+    if findings_count >= 5:
+        complex_reasons.append("audit_findings_gte_5")
+    is_complex = bool(complex_reasons)
+    stable_streak = 0
+    max_stable_streak = 0
+    break_round = None
+    for row in artifacts:
+        if row.get("stable"):
+            stable_streak += 1
+            max_stable_streak = max(max_stable_streak, stable_streak)
+        else:
+            stable_streak = 0
+            break_round = row.get("round")
+    final_stable_streak = stable_streak
+    status = "pass" if final_stable_streak >= 2 else "unstable"
+    if not artifacts:
+        status = "missing"
+    if not is_complex and status != "pass":
+        status = "advisory"
+    return {
+        "convergence_telemetry_required": is_complex,
+        "convergence_telemetry_status": status,
+        "convergence_telemetry_complex_reasons": complex_reasons,
+        "convergence_telemetry_bead_count": bead_count,
+        "convergence_telemetry_audit_findings_count": findings_count,
+        "convergence_telemetry_expected_polish_rounds": expected_rounds,
+        "convergence_telemetry_stable_rounds_required": 2 if is_complex else 0,
+        "convergence_telemetry_final_stable_streak": final_stable_streak,
+        "convergence_telemetry_max_stable_streak": max_stable_streak,
+        "convergence_telemetry_break_round": break_round,
+        "convergence_telemetry_rounds": artifacts,
+    }
+
 def load_prediction_input(path):
     data = read_json(Path(path))
     if not isinstance(data, (list, dict)) or (isinstance(data, dict) and data.get("_invalid_json")):
@@ -746,6 +1038,16 @@ def evaluate(slug_value):
         "evidence_pack_resolves": None,
         "evidence_pack_resolution": None,
         "convergence_streak": None,
+        "ev_anchor_status": "not_checked",
+        "ev_anchor_cited_count": 0,
+        "ev_anchor_defined_count": 0,
+        "ev_anchor_missing": [],
+        "ev_anchor_sources": {},
+        "ev_evidence_rows_count": 0,
+        "ev_evidence_schema_errors": [],
+        "ev_excerpt_mismatches": [],
+        "ev_refute_active_targets": [],
+        "ev_anchor_errors": [],
         "hypothesis_slate_required": False,
         "hypothesis_slate_valid": "yes",
         "hypothesis_slate_source": None,
@@ -755,6 +1057,17 @@ def evaluate(slug_value):
         "prediction_lock_count": 0,
         "prediction_lock_locked_at": None,
         "prediction_lock_errors": [],
+        "convergence_telemetry_required": False,
+        "convergence_telemetry_status": "not_checked",
+        "convergence_telemetry_complex_reasons": [],
+        "convergence_telemetry_bead_count": 0,
+        "convergence_telemetry_audit_findings_count": 0,
+        "convergence_telemetry_expected_polish_rounds": 0,
+        "convergence_telemetry_stable_rounds_required": 0,
+        "convergence_telemetry_final_stable_streak": 0,
+        "convergence_telemetry_max_stable_streak": 0,
+        "convergence_telemetry_break_round": None,
+        "convergence_telemetry_rounds": [],
         "critical_findings": 0,
         "three_judges_evidence_present": False,
         "reasons": [],
@@ -868,6 +1181,13 @@ def evaluate(slug_value):
     result["critical_findings"] = critical
     if critical > 0:
         failing.append("critical_findings_present")
+    convergence_telemetry = evaluate_convergence_telemetry(state, plan_dir)
+    result.update(convergence_telemetry)
+    if (
+        result["convergence_telemetry_required"]
+        and result["convergence_telemetry_status"] != "pass"
+    ):
+        failing.append("convergence_telemetry_unstable")
     if failing:
         result["decision"] = "fail"
         result["result"] = "FAIL"
@@ -995,6 +1315,12 @@ ledger_row_json() {
       evidence_pack_version:.evidence_pack_version,
       evidence_pack_resolves:.evidence_pack_resolves,
       convergence_streak:.convergence_streak,
+      ev_anchor_status:.ev_anchor_status,
+      ev_anchor_cited_count:.ev_anchor_cited_count,
+      ev_evidence_rows_count:.ev_evidence_rows_count,
+      convergence_telemetry_status:.convergence_telemetry_status,
+      convergence_telemetry_final_stable_streak:.convergence_telemetry_final_stable_streak,
+      convergence_telemetry_max_stable_streak:.convergence_telemetry_max_stable_streak,
       critical_findings:.critical_findings,
       reasons:.reasons
     }
@@ -1118,6 +1444,11 @@ run_why() {
     compliance_pack_missing|compliance_pack_incomplete) text="The cited beads-compliance pack is missing or incomplete; close requires spec/evidence/compliance/theater/test-depth/scorecard/report files." ;;
     compliance_score_below_700) text="The beads-compliance score is below the 700/1000 close threshold." ;;
     convergence_streak_below_2|convergence_streak_missing) text="The compliance pack has not shown two consecutive zero-finding rounds; close stays blocked until convergence_streak >= 2." ;;
+    ev_anchor_unresolved) text="A plan artifact cites an EV anchor that is missing from the compliance pack evidence array." ;;
+    refute_contradiction_unresolved) text="A still-active finding has refuting evidence in the compliance pack; close requires resolving that contradiction first." ;;
+    evidence_excerpt_mismatch) text="A compliance-pack evidence excerpt does not exactly match its cited source line." ;;
+    ev_evidence_schema_invalid) text="A compliance-pack evidence row has an invalid EV id, relation, or target finding id." ;;
+    convergence_telemetry_unstable) text="Complex plans require two consecutive stable polish telemetry rounds where kills_gte_adds=true and no_new_deltas=true." ;;
     prediction_lock_post_hoc_amendment) text="A locked prediction no longer matches its pre-execution hash; close is blocked until the plan records the amendment as a failed lock." ;;
     prediction_lock_post_hoc_addition) text="A prediction row was timestamped after the plan lock boundary; close is blocked because the receipt was amended after convergence." ;;
     audit_findings_missing) text="03-AUDIT-FINDINGS.md is missing; close-time gate cannot verify the 3-judges audit evidence." ;;
