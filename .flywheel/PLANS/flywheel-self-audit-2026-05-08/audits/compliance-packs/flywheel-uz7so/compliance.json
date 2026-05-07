@@ -1,0 +1,56 @@
+{
+  "schema_version": "flywheel.audit.compliance.v1",
+  "task_id": "flywheel-uz7so",
+  "layer": "hygiene",
+  "generated_at": "2026-05-07T15:34:42-06:00",
+  "artifact": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/hygiene.md",
+  "source_docs": [
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/00-PLAN.md",
+    ".flywheel/research/external-doctrine/agent-flywheel-com-complete-guide-2026-05-08.md"
+  ],
+  "socraticode": {
+    "project_path": "/Users/josh/Developer/flywheel",
+    "required_k": 10,
+    "queries": [
+      "storage prune storage pressure hygiene cleanup disk free",
+      "session residue prune janitor cleanup temp files hygiene",
+      "git stash janitor stash bloat archive recovery bundle",
+      "cache janitor dev cache cleanup hygiene",
+      "apfs snapshot storage health prune snapshot cleanup",
+      "fuckup log promotion watcher pattern bank doctrine hygiene",
+      "doctrine sync canonical meta rules sync hygiene propagation",
+      "watcher pattern bank unknown stable detector fuckup promotion",
+      "stagger spawn thundering herd scheduling hygiene enforcement"
+    ],
+    "query_count": 9,
+    "indexed_chunks_observed": 1175
+  },
+  "contract": {
+    "sections_required": 6,
+    "sections_written": 6,
+    "inventory_count": 21,
+    "load_bearing_count": 10,
+    "vestigial_count": 6,
+    "tier_gaps_addressed": 3,
+    "fix_beads_proposed": 3,
+    "new_beads_filed": 0,
+    "live_skill_files_mutated": false
+  },
+  "files_changed": [
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/hygiene.md",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-uz7so/compliance.json"
+  ],
+  "validation": {
+    "commands": [
+      "rg -n '^## ' .flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/hygiene.md",
+      "git diff --check -- .flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/hygiene.md .flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-uz7so/compliance.json",
+      "python3 -m json.tool .flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-uz7so/compliance.json"
+    ],
+    "status": "pass"
+  },
+  "notes": [
+    "No live skill files were edited.",
+    "No fix beads were filed; manifest is recommendations only.",
+    "Existing dirty worktree state was left untouched."
+  ]
+}
