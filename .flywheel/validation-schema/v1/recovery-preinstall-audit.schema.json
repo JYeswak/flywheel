@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/flywheel/recovery-preinstall-audit.schema.json",
+  "title": "Flywheel recovery preinstall audit",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "source_plan",
+    "generated_at",
+    "confidence_min",
+    "apply_blocked",
+    "low_confidence_sessions",
+    "sessions",
+    "projects",
+    "agent_mail",
+    "loop_state",
+    "tick_receipts",
+    "dispatch_context"
+  ],
+  "properties": {
+    "schema_version": { "const": "recovery-preinstall-audit/v1" },
+    "source_plan": { "const": ".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md" },
+    "generated_at": { "type": "string" },
+    "confidence_min": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "apply_blocked": { "type": "boolean" },
+    "low_confidence_sessions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "sessions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "session",
+          "executable_path",
+          "topology_match",
+          "roster_match",
+          "confidence",
+          "low_confidence"
+        ],
+        "properties": {
+          "session": { "type": "string" },
+          "executable_path": { "type": ["string", "null"] },
+          "topology_match": { "type": "boolean" },
+          "roster_match": { "type": "boolean" },
+          "confidence": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "low_confidence": { "type": "boolean" }
+        }
+      }
+    },
+    "projects": { "type": "array" },
+    "agent_mail": { "type": "object" },
+    "loop_state": { "type": "object" },
+    "tick_receipts": { "type": "array" },
+    "dispatch_context": { "type": "array" }
+  }
+}
