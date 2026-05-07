@@ -1,0 +1,64 @@
+{
+  "schema_version": "flywheel-prtr-compliance-pack/v1",
+  "task_id": "flywheel-prtr",
+  "bead": "flywheel-prtr",
+  "source_evidence": "/tmp/flywheel-se3h-evidence.md",
+  "validator": ".flywheel/scripts/validate-callback-before-close.sh",
+  "validator_mode": "full_validator_json_no_lens_flag",
+  "jeff_lens_pass_post_patch": true,
+  "versioned_artifacts": [
+    {
+      "artifact": "/tmp/flywheel-se3h-evidence.md",
+      "marker": "schema_version: flywheel-se3h-evidence/v1"
+    },
+    {
+      "artifact": "session-topology decomposition contract",
+      "marker": "contract_version: session-topology-decomposition/v1"
+    },
+    {
+      "artifact": "session-topology gap follow-up contract",
+      "marker": "session-topology-gap-followup/v1"
+    },
+    {
+      "artifact": "session-topology dependency DAG receipt",
+      "marker": "session-topology-dependency-dag/v1"
+    },
+    {
+      "artifact": "dispatch acceptance ladder receipt",
+      "marker": "dispatch-acceptance-ladder/v1"
+    }
+  ],
+  "tests": [
+    {
+      "path": "tests/test_four_lens_jeff_version_contract_pass.sh",
+      "result": "pass"
+    },
+    {
+      "path": "tests/test_four_lens_jeff_version_contract_fail.sh",
+      "result": "pass"
+    },
+    {
+      "path": "tests/test_four_lens_validator_bash_3_2_compat.sh",
+      "result": "pass"
+    }
+  ],
+  "validator_receipt": {
+    "bead": "flywheel-se3h",
+    "four_lens": {
+      "brand": "pass",
+      "sniff": "pass",
+      "jeff": "pass",
+      "public": "pass"
+    },
+    "remaining_non_lens_blockers": [
+      "open_child_blocks_close: flywheel-se3h.1 state=IN_PROGRESS",
+      "open_child_blocks_close: flywheel-se3h.9 state=OPEN",
+      "open_child_blocks_close: flywheel-se3h.8 state=OPEN"
+    ]
+  },
+  "socraticode": {
+    "queries": 5,
+    "indexed_chunks_observed": 1273
+  },
+  "no_bead_reason": "parallel validator temp-file collision was transient test-run concurrency; reran isolated TMPDIR clean without changing validator"
+}
