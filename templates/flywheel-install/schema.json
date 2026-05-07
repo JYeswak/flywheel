@@ -13,6 +13,7 @@
   "polish_gate": {
     "schemas": [
       "polish-gate/v1/manifest.schema.json",
+      "polish-gate/v1/plan-phase2-refine.schema.json",
       "polish-gate/v1/grade-receipt.schema.json",
       "polish-gate/v1/latest-summary.schema.json",
       "polish-gate/v1/grade-run-result.schema.json",
@@ -224,6 +225,7 @@
           "items": { "type": "string" },
           "const": [
             "polish-gate/v1/manifest.schema.json",
+            "polish-gate/v1/plan-phase2-refine.schema.json",
             "polish-gate/v1/grade-receipt.schema.json",
             "polish-gate/v1/latest-summary.schema.json",
             "polish-gate/v1/grade-run-result.schema.json",

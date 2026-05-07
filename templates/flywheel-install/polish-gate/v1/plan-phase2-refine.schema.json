@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/polish-gate/v1/plan-phase2-refine.schema.json",
+  "title": "Flywheel plan Phase 2 refine output v1",
+  "description": "Forward-only schema v5 contract for /flywheel:plan Phase 2 Brenner-style hypothesis slates.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "hypotheses",
+    "third_alternative",
+    "acceptance_when_killed"
+  ],
+  "properties": {
+    "hypotheses": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/hypothesis"
+      },
+      "contains": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "const": "H_alt" }
+        }
+      },
+      "unevaluatedItems": false
+    },
+    "third_alternative": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "reason"],
+      "properties": {
+        "id": { "const": "H_alt" },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "acceptance_when_killed": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "all_killed",
+            "exactly_one_survives",
+            "two_or_more_survive"
+          ],
+          "properties": {
+            "all_killed": {
+              "type": "string",
+              "minLength": 1
+            },
+            "exactly_one_survives": {
+              "type": "string",
+              "minLength": 1
+            },
+            "two_or_more_survive": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        {
+          "type": "string",
+          "minLength": 1
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "hypothesis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "claim",
+        "kill_condition",
+        "decisive_test"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(H[1-5]|H_alt)$"
+        },
+        "claim": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kill_condition": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decisive_test": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}
