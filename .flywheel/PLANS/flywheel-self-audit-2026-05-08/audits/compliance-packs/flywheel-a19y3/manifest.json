@@ -1,0 +1,15 @@
+{
+  "schema_version": "beads-compliance/manifest/v1",
+  "bead_id": "flywheel-a19y3",
+  "files": [
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/code-space.md",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-a19y3/spec.json",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-a19y3/evidence.json",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-a19y3/compliance.json",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-a19y3/theater.json",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-a19y3/test_depth.json",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-a19y3/manifest.json",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-a19y3/scorecard.md",
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-a19y3/REPORT.md"
+  ]
+}

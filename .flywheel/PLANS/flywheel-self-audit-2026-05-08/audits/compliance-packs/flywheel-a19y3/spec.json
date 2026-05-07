@@ -1,0 +1,18 @@
+{
+  "schema_version": "beads-compliance/spec/v1",
+  "bead_id": "flywheel-a19y3",
+  "task": "code-space layer audit",
+  "required_artifact": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/code-space.md",
+  "required_sections": 6,
+  "source_docs": [
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/00-PLAN.md",
+    ".flywheel/research/external-doctrine/agent-flywheel-com-complete-guide-2026-05-08.md"
+  ],
+  "hard_rules": [
+    "socraticode K=10 against /Users/josh/Developer/flywheel for review, lint, test, harden, polish, ubs, security",
+    "file:line citations mandatory in Sections 1-3",
+    "no new bead creation",
+    "no mutations to live skill files",
+    "stage commits with explicit paths"
+  ]
+}

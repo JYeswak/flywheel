@@ -1,0 +1,20 @@
+{
+  "schema_version": "beads-compliance/theater/v1",
+  "bead_id": "flywheel-a19y3",
+  "theater_risk": "low",
+  "claims_checked": [
+    {
+      "claim": "UBS is documented as before-every-commit",
+      "evidence": "/Users/josh/.claude/skills/ubs/SKILL.md:17"
+    },
+    {
+      "claim": "UBS is not active as a repo pre-commit gate",
+      "evidence": ".git/hooks/pre-commit.sample exists; no active .git/hooks/pre-commit observed"
+    },
+    {
+      "claim": "de-slopify covers named Tier-3 patterns",
+      "evidence": "/Users/josh/.claude/skills/de-slopify/SKILL.md:47-51"
+    }
+  ],
+  "unsupported_claims": []
+}

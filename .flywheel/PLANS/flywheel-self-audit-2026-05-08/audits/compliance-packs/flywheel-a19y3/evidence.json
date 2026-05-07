@@ -1,0 +1,38 @@
+{
+  "schema_version": "beads-compliance/evidence/v1",
+  "bead_id": "flywheel-a19y3",
+  "artifact": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/code-space.md",
+  "sections_present": 6,
+  "inventory_count": 523,
+  "load_bearing_count": 10,
+  "vestigial_count": 4,
+  "tier_gaps_addressed": 4,
+  "fix_beads_proposed": 3,
+  "socraticode": {
+    "projectPath": "/Users/josh/Developer/flywheel",
+    "queries": [
+      "review code review cross-agent random exploration ubs",
+      "lint pre-commit ubs staged fail-on-warning hook",
+      "test fixtures flywheel tests validation hardening",
+      "harden security review secret scan safety UBS",
+      "polish ui mobile desktop de-slopify",
+      "ubs Ultimate Bug Scanner pre commit code-space",
+      "security review code audit"
+    ],
+    "limit_each": 10,
+    "result_slots_requested": 70
+  },
+  "grep_evidence": [
+    "rg for ubs/multi-pass-bug-hunting/de-slopify/code-review/security-review/ui-polish/simplify/code-simplifier/polish-gate",
+    "git hook inspection showed only pre-commit.sample, no active .git/hooks/pre-commit UBS gate",
+    "find counted 205 .flywheel/tests files, 278 tests files, 32 template test files"
+  ],
+  "agent_mail_reservation": {
+    "agent": "CoralLantern",
+    "reservation_ids": [8678, 8679],
+    "paths": [
+      ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/code-space.md",
+      ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-a19y3/*"
+    ]
+  }
+}

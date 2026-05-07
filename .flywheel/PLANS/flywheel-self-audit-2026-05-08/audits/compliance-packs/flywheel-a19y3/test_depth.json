@@ -1,0 +1,14 @@
+{
+  "schema_version": "beads-compliance/test-depth/v1",
+  "bead_id": "flywheel-a19y3",
+  "artifact_type": "audit",
+  "tests_run": [
+    "Socraticode survey: 7 queries with limit=10",
+    "line-citation reads with nl -ba for scoped skills and representative tests",
+    "repo test inventory count via find",
+    "audit section validation via rg",
+    "JSON compliance pack validation via jq"
+  ],
+  "runtime_tests_required": false,
+  "reason": "Documentation-only audit; no runtime code changed."
+}

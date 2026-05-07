@@ -1,0 +1,33 @@
+{
+  "schema_version": "beads-compliance/compliance/v1",
+  "bead_id": "flywheel-a19y3",
+  "status": "pass",
+  "checks": [
+    {
+      "id": "six_section_contract",
+      "status": "pass",
+      "evidence": "audit contains Section 1 through Section 6"
+    },
+    {
+      "id": "socraticode_k10_required_keywords",
+      "status": "pass",
+      "evidence": "7 Socraticode searches, each limit=10, canonical projectPath"
+    },
+    {
+      "id": "file_line_citations_sections_1_3",
+      "status": "pass",
+      "evidence": "Sections 1-3 include explicit file:line citations"
+    },
+    {
+      "id": "no_live_skill_mutation",
+      "status": "pass",
+      "evidence": "only audit artifact and compliance pack paths changed by this worker"
+    },
+    {
+      "id": "no_bead_creation",
+      "status": "pass",
+      "evidence": "Section 6 is recommendations only; no br create executed"
+    }
+  ],
+  "score": 930
+}
