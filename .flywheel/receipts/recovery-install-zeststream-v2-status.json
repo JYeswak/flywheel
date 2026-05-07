@@ -1,0 +1,77 @@
+{
+  "audit_command": {
+    "ok": true,
+    "rc": 0,
+    "stderr": "",
+    "stdout": "[see audit_receipt_path]",
+    "stdout_bytes": 148985
+  },
+  "audit_confidence": 20,
+  "audit_confidence_min_used": 20,
+  "audit_default_confidence_min_observed": 20,
+  "audit_low_confidence": false,
+  "audit_receipt_path": "/tmp/preinstall-zeststream-v2.json",
+  "dashed_name_quoting_validated": true,
+  "dry_run_pass": true,
+  "exactly_one_label": true,
+  "generated_at": "2026-05-07T23:19:45Z",
+  "label": "com.zeststream.zeststream-v2.watcher",
+  "launchctl_list_probe_path": "/tmp/zeststream-v2-watcher-launchctl-labels.txt",
+  "launchctl_load_attempted": false,
+  "loaded_label_count": 0,
+  "plist_path": "/Users/josh/Library/LaunchAgents/com.zeststream.zeststream-v2.watcher.plist",
+  "plutil_lint": "OK",
+  "plutil_result": {
+    "ok": true,
+    "rc": 0,
+    "stderr": "",
+    "stdout": "/Users/josh/Library/LaunchAgents/com.zeststream.zeststream-v2.watcher.plist: OK"
+  },
+  "program_arguments": [
+    "/Users/josh/.local/bin/ntm",
+    "watch",
+    "zeststream-v2",
+    "--activity",
+    "--interval",
+    "2s",
+    "--tail",
+    "20",
+    "--no-color",
+    "--no-timestamps",
+    "--config",
+    "/Users/josh/.config/ntm/config.toml"
+  ],
+  "readiness": {
+    "home": {
+      "exists": true,
+      "path": "/Users/josh"
+    },
+    "logs_dir": {
+      "exists": true,
+      "path": "/Users/josh/.local/state/flywheel/logs"
+    },
+    "ntm_binary": {
+      "executable": true,
+      "path": "/Users/josh/.local/bin/ntm"
+    },
+    "ntm_config": {
+      "exists": true,
+      "path": "/Users/josh/.config/ntm/config.toml"
+    },
+    "path": "/Users/josh/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "repo": {
+      "exists": true,
+      "path": "/Users/josh/Developer/zeststream-v2",
+      "writable": true
+    },
+    "stderr_path": "/Users/josh/.local/state/flywheel/logs/zeststream-v2-watcher.stderr.log",
+    "stdout_path": "/Users/josh/.local/state/flywheel/logs/zeststream-v2-watcher.stdout.log"
+  },
+  "reboot_recovery_claimed": false,
+  "schema_version": "recovery-session-watcher-install/v1",
+  "session": "zeststream-v2",
+  "source_plan": ".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md",
+  "status": "installed_not_loaded",
+  "working_directory": "/Users/josh/Developer/zeststream-v2",
+  "zeststream_v2_repo_path_validated": true
+}

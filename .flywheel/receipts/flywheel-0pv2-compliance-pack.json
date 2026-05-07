@@ -1,0 +1,33 @@
+{
+  "task_id": "flywheel-0pv2",
+  "bead": "flywheel-0pv2",
+  "kind": "recovery-system-plist-install",
+  "source_plan": ".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md",
+  "session": "zeststream-v2",
+  "label": "com.zeststream.zeststream-v2.watcher",
+  "evidence": [
+    ".flywheel/scripts/recovery-install-plist-zeststream-v2.sh",
+    "tests/test_recovery_install_plist_zeststream_v2.sh",
+    ".flywheel/receipts/recovery-install-zeststream-v2-status.json",
+    "/tmp/preinstall-zeststream-v2.json",
+    "/tmp/recovery-install-zeststream-v2-stdout.json",
+    "/Users/josh/Library/LaunchAgents/com.zeststream.zeststream-v2.watcher.plist"
+  ],
+  "checks": {
+    "preinstall_audit_ran": true,
+    "audit_confidence": 20,
+    "audit_confidence_min_used": 20,
+    "plist_written": true,
+    "plutil_lint_passed": true,
+    "launchctl_activation_attempted": false,
+    "dry_run_pass": true,
+    "exactly_one_label": true,
+    "reboot_recovery_claimed": false,
+    "zeststream_v2_repo_path_validated": true,
+    "dashed_name_quoting_validated": true,
+    "tests_added": 1,
+    "tests_passing": true,
+    "socraticode_queries": 1,
+    "indexed_chunks_observed": 10
+  }
+}
