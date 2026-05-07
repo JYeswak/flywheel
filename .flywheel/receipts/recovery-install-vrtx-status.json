@@ -1,0 +1,66 @@
+{
+  "schema_version": "recovery-session-watcher-install/v1",
+  "source_plan": ".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md",
+  "generated_at": "2026-05-07T23:16:02Z",
+  "session": "vrtx",
+  "label": "com.zeststream.vrtx.watcher",
+  "plist_path": "/Users/josh/Library/LaunchAgents/com.zeststream.vrtx.watcher.plist",
+  "audit_receipt_path": "/tmp/preinstall-vrtx.json",
+  "audit_confidence": 80,
+  "audit_low_confidence": false,
+  "dry_run_pass": true,
+  "plutil_lint": "OK",
+  "exactly_one_label": true,
+  "loaded_label_count": 0,
+  "launchctl_list_probe_path": "/tmp/vrtx-watcher-launchctl-labels.txt",
+  "launchctl_load_attempted": false,
+  "reboot_recovery_claimed": false,
+  "vrtx_repo_path_validated": true,
+  "watcher_race_and_stale_path_probe": {
+    "existing_loaded_label_count": 0,
+    "topology_repo_path": "/Users/josh/Developer/vrtx",
+    "ntm_config_repo_path": "/Users/josh/Developer/vrtx",
+    "working_directory_matches_topology": true,
+    "working_directory_matches_ntm_config": true
+  },
+  "program_arguments": [
+    "/Users/josh/.local/bin/ntm",
+    "watch",
+    "vrtx",
+    "--activity",
+    "--interval",
+    "2s",
+    "--tail",
+    "20",
+    "--no-color",
+    "--no-timestamps",
+    "--config",
+    "/Users/josh/.config/ntm/config.toml"
+  ],
+  "working_directory": "/Users/josh/Developer/vrtx",
+  "readiness": {
+    "path": "/Users/josh/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "home": {
+      "path": "/Users/josh",
+      "exists": true
+    },
+    "ntm_binary": {
+      "path": "/Users/josh/.local/bin/ntm",
+      "executable": true
+    },
+    "ntm_config": {
+      "path": "/Users/josh/.config/ntm/config.toml",
+      "exists": true
+    },
+    "repo": {
+      "path": "/Users/josh/Developer/vrtx",
+      "exists": true
+    },
+    "logs_dir": {
+      "path": "/Users/josh/.local/state/flywheel/logs",
+      "exists": true
+    },
+    "stdout_path": "/Users/josh/.local/state/flywheel/logs/vrtx.watcher.stdout.log",
+    "stderr_path": "/Users/josh/.local/state/flywheel/logs/vrtx.watcher.stderr.log"
+  }
+}
