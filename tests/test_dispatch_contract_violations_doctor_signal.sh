@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LOOP="${LOOP:-$HOME/.claude/skills/.flywheel/bin/flywheel-loop}"
+TMP="$(mktemp -d "${TMPDIR:-/tmp}/dispatch-contract-doctor.XXXXXX")"
+
+repo="$TMP/repo"
+mkdir -p "$repo/.flywheel"
+git -C "$repo" init -q
+printf '# Mission\n' > "$repo/.flywheel/MISSION.md"
+printf '# Goal\n' > "$repo/.flywheel/GOAL.md"
+printf '# State\n' > "$repo/.flywheel/STATE.md"
+
+{
+    jq -nc '{schema_version:2,event:"worker_callback",task_id:"bad1",callback_status:"DONE",socraticode_required:true,file_reservation_required:true,socraticode_queries:"nope",indexed_chunks_observed:"unknown",files_reserved:"tests/a",files_released:"tests/a",no_bead_reason:"fixture",did:"1/1",didnt:"none",gaps:"none",ts:"2026-05-07T00:00:00Z"}'
+    jq -nc '{schema_version:2,event:"worker_callback",task_id:"bad2",callback_status:"BLOCKED",socraticode_required:true,file_reservation_required:true,socraticode_queries:3,indexed_chunks_observed:10,ts:"2026-05-07T00:01:00Z"}'
+    jq -nc '{schema_version:1,event:"worker_callback",task_id:"legacy",callback_status:"DONE",ts:"2026-05-07T00:02:00Z"}'
+} > "$repo/.flywheel/dispatch-log.jsonl"
+
+out="$("$LOOP" doctor --repo "$repo" --json 2>/dev/null || true)"
+
+jq -e '
+  .dispatch_contract_violations == 2
+  and .dispatch_contract.status == "warn"
+  and .dispatch_contract.legacy_warn_only_count == 1
+' <<<"$out" >/dev/null

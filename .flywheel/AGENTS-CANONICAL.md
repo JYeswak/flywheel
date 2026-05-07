@@ -3510,6 +3510,12 @@ the field emerged twice as the same substrate shape.
 - Worker-tick that closes after callback.
 - Treating DONE transport-ack as proof of bead close.
 
+**Callback contract enforcement note:** Callback fields are enforced at the
+send-time hook gate. Numeric Socraticode fields are required when schema v2
+marks Socraticode required; `unknown` is rejected; the doctor exposes
+`dispatch_contract_violations` with amber/red thresholds so callback grammar
+drift is visible before close-handler substrate trusts the row.
+
 **Evidence:** Source proposal
 `~/.claude/skills/.flywheel/proposals/P-bg-agent-close-miss-2026-05-06.md`;
 skillos commits `d4ac88e` and `4e129fd`;
