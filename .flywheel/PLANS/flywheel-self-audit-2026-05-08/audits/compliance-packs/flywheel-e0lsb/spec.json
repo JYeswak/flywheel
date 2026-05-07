@@ -1,0 +1,27 @@
+{
+  "acceptance_criteria": [
+    {
+      "id": "AC1",
+      "text": "Write the bead-space audit artifact with all six required sections."
+    },
+    {
+      "id": "AC2",
+      "text": "Include file:line citations in Sections 1 through 3."
+    },
+    {
+      "id": "AC3",
+      "text": "Run Socraticode K=10 searches for polish, convergence, dedup, plan_to_bead, bead body, and br create."
+    },
+    {
+      "id": "AC4",
+      "text": "Address the four Tier-1 bead-space gaps from the agent-flywheel.com analysis."
+    },
+    {
+      "id": "AC5",
+      "text": "Recommend 1-3 fix beads without creating new beads."
+    }
+  ],
+  "bead_id": "flywheel-e0lsb",
+  "schema_version": "beads-compliance.spec.v1",
+  "target_artifact": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/bead-space.md"
+}

@@ -1,0 +1,12 @@
+{
+  "compliance_score": 910,
+  "findings": [
+    {
+      "severity": "low",
+      "text": "This is a research/audit artifact, so no runtime test suite applies beyond structural checks."
+    }
+  ],
+  "schema_version": "beads-compliance.compliance.v1",
+  "threshold": 700,
+  "verdict": "pass"
+}

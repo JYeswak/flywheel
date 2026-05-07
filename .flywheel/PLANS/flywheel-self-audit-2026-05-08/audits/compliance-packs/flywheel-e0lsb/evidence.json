@@ -1,0 +1,30 @@
+{
+  "evidence_items": [
+    {
+      "claim": "Audit artifact exists and has six top-level sections.",
+      "path": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/bead-space.md",
+      "proof": "rg -n '^## ' returned six sections."
+    },
+    {
+      "claim": "Required Socraticode searches were performed.",
+      "path": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/bead-space.md",
+      "proof": "Document records socraticode_queries=6 and K=10 each."
+    },
+    {
+      "claim": "Tier-1 bead-space gaps are covered.",
+      "path": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/bead-space.md",
+      "proof": "Section 4 has four gap subsections: polishing schedule, 0.75/0.90 thresholds, pseudo-beads, complete context."
+    },
+    {
+      "claim": "No new beads were created by this worker.",
+      "path": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/bead-space.md",
+      "proof": "Section 6 is recommendations only and no br create command was run."
+    },
+    {
+      "claim": "File reservation was acquired before the audit file was written.",
+      "path": "agent-mail",
+      "proof": "Agent Mail reservation id 8626 granted for the audit path."
+    }
+  ],
+  "schema_version": "beads-compliance.evidence.v1"
+}

@@ -1,0 +1,9 @@
+{
+  "bead_id": "flywheel-e0lsb",
+  "convergence": {
+    "streak": 1
+  },
+  "created_by": "StormyAnchor",
+  "schema_version": "beads-compliance.pack-manifest.v1",
+  "target_artifact": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/bead-space.md"
+}

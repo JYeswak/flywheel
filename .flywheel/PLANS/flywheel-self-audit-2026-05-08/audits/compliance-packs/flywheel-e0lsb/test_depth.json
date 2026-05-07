@@ -1,0 +1,14 @@
+{
+  "checks": [
+    {
+      "command": "rg -n '^## ' .flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/bead-space.md",
+      "result": "pass"
+    },
+    {
+      "command": "rg -n 'polish|0.75|0.90|pseudo|complete context|Fix beads proposed' .flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/bead-space.md",
+      "result": "pass"
+    }
+  ],
+  "schema_version": "beads-compliance.test-depth.v1",
+  "test_depth": "structural audit checks only; no code mutation"
+}
