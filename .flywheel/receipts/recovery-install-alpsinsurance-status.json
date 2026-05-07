@@ -1,0 +1,124 @@
+{
+  "alpsinsurance_repo_path_validated": true,
+  "audit_command": {
+    "ok": true,
+    "rc": 0,
+    "stderr": ""
+  },
+  "audit_confidence": 100,
+  "audit_receipt_path": "/tmp/preinstall-alpsinsurance.json",
+  "dry_run_pass": true,
+  "environment": {
+    "ALPSINSURANCE_REPO": "/Users/josh/Developer/alpsinsurance",
+    "HOME": "/Users/josh",
+    "NTM_CONFIG": "/Users/josh/.config/ntm/config.toml",
+    "PATH": "/Users/josh/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  },
+  "exactly_one_label": true,
+  "generated_at": "2026-05-07T23:11:27Z",
+  "label": "com.zeststream.alpsinsurance.watcher",
+  "launchctl_label_state": {
+    "count": 0,
+    "ok": true,
+    "result": {
+      "ok": true,
+      "rc": 0,
+      "stderr": ""
+    },
+    "rows": []
+  },
+  "launchctl_load_attempted": false,
+  "launchd_readiness": {
+    "home": {
+      "ready": true,
+      "value": "/Users/josh"
+    },
+    "logs_dir": {
+      "exists": true,
+      "path": "/Users/josh/.local/state/flywheel/logs",
+      "writable": true
+    },
+    "ntm_binary": {
+      "executable": true,
+      "exists": true,
+      "path": "/Users/josh/.local/bin/ntm"
+    },
+    "ntm_config": {
+      "exists": true,
+      "path": "/Users/josh/.config/ntm/config.toml"
+    },
+    "path": {
+      "ready": true,
+      "value": "/Users/josh/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    },
+    "plutil": {
+      "ok": true,
+      "rc": 0,
+      "stderr": "",
+      "stdout": "/Users/josh/Library/LaunchAgents/com.zeststream.alpsinsurance.watcher.plist: OK"
+    },
+    "repo": {
+      "exists": true,
+      "path": "/Users/josh/Developer/alpsinsurance",
+      "writable": true
+    }
+  },
+  "plist_path": "/Users/josh/Library/LaunchAgents/com.zeststream.alpsinsurance.watcher.plist",
+  "program_arguments": [
+    "/Users/josh/.local/bin/ntm",
+    "watch",
+    "alpsinsurance",
+    "--activity",
+    "--interval",
+    "2s",
+    "--tail",
+    "20",
+    "--no-color",
+    "--no-timestamps",
+    "--config",
+    "/Users/josh/.config/ntm/config.toml"
+  ],
+  "readiness": {
+    "home": {
+      "ready": true,
+      "value": "/Users/josh"
+    },
+    "logs_dir": {
+      "exists": true,
+      "path": "/Users/josh/.local/state/flywheel/logs",
+      "writable": true
+    },
+    "ntm_binary": {
+      "executable": true,
+      "exists": true,
+      "path": "/Users/josh/.local/bin/ntm"
+    },
+    "ntm_config": {
+      "exists": true,
+      "path": "/Users/josh/.config/ntm/config.toml"
+    },
+    "path": {
+      "ready": true,
+      "value": "/Users/josh/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    },
+    "plutil": {
+      "ok": true,
+      "rc": 0,
+      "stderr": "",
+      "stdout": "/Users/josh/Library/LaunchAgents/com.zeststream.alpsinsurance.watcher.plist: OK"
+    },
+    "repo": {
+      "exists": true,
+      "path": "/Users/josh/Developer/alpsinsurance",
+      "writable": true
+    }
+  },
+  "reboot_recovery_claimed": false,
+  "schema_version": "recovery-session-watcher-install/v1",
+  "session": "alpsinsurance",
+  "source_plan": ".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md",
+  "status": "installed_not_loaded",
+  "stderr_path": "/Users/josh/.local/state/flywheel/logs/alpsinsurance.watcher.err.log",
+  "stdout_path": "/Users/josh/.local/state/flywheel/logs/alpsinsurance.watcher.out.log",
+  "working_directory": "/Users/josh/Developer/alpsinsurance"
+}
