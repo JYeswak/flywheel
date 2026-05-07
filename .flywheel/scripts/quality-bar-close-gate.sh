@@ -10,6 +10,7 @@ REPO_ROOT="${QUALITY_BAR_CLOSE_GATE_REPO:-$REPO_ROOT_DEFAULT}"
 LEDGER="${QUALITY_BAR_CLOSE_GATE_LEDGER:-$HOME/.local/state/flywheel/quality-bar-close-gate.jsonl}"
 CONTRACT_LEDGER="${QUALITY_BAR_CLOSE_GATE_CONTRACT_LEDGER:-$HOME/.local/state/flywheel/substrate-loop-contract.jsonl}"
 NTM_COVERAGE_TREND_SCRIPT="${QUALITY_BAR_CLOSE_GATE_NTM_COVERAGE_TREND_SCRIPT:-$REPO_ROOT_DEFAULT/.flywheel/scripts/ntm-surface-coverage-trend.sh}"
+EVIDENCE_PACK_RESOLVER="${QUALITY_BAR_CLOSE_GATE_EVIDENCE_PACK_RESOLVER:-$REPO_ROOT_DEFAULT/.flywheel/scripts/evidence-pack-resolve.sh}"
 JSONL_APPEND_LIB="${FLYWHEEL_JSONL_APPEND_LIB:-$HOME/.local/share/flywheel-watchers/lib/jsonl-append.sh}"
 
 MODE=""
@@ -79,7 +80,8 @@ info_json() {
     --arg contract_ledger "$CONTRACT_LEDGER" \
     --arg jsonl_append_lib "$JSONL_APPEND_LIB" \
     --arg ntm_coverage_trend_script "$NTM_COVERAGE_TREND_SCRIPT" \
-    '{name:$name,version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,substrate_loop_contract_ledger:$contract_ledger,jsonl_append_lib:$jsonl_append_lib,ntm_coverage_trend_script:$ntm_coverage_trend_script,exit_codes:{"0":"quality bar pass","1":"quality bar pending or fail","2":"usage error","3":"append primitive unavailable or failed"},thresholds:{pending:{warn:20,error:50},failed:{warn:5,error:10},compliance_score:{minimum:700,maximum:1000,convergence_streak_minimum:2},ntm_surface_coverage:{minimum_avg:7,target_avg:10}},required_evidence:["schema_version>=5:hypotheses[2..5]","schema_version>=5:exactly_one_third_alternative_H_alt","schema_version>=5:acceptance_when_killed","schema_version>=4:compliance_pack_path","schema_version>=4:compliance_score>=700","schema_version>=4:convergence_streak>=2","schema_version>=4:spec.json+evidence.json+compliance.json+theater.json+test_depth.json+scorecard.md+REPORT.md","schema_version<4:quality_bar_passed","schema_version<4:jeff_score>=9","schema_version<4:donella_score>=9","schema_version<4:joshua_score>=9_or_auto_advance","schema_version<4:composite>=9.5","critical_findings=0","future ntm-surface-wire-in plans require ntm coverage_avg>=7"]}'
+    --arg evidence_pack_resolver "$EVIDENCE_PACK_RESOLVER" \
+    '{name:$name,version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,substrate_loop_contract_ledger:$contract_ledger,jsonl_append_lib:$jsonl_append_lib,ntm_coverage_trend_script:$ntm_coverage_trend_script,evidence_pack_resolver:$evidence_pack_resolver,exit_codes:{"0":"quality bar pass","1":"quality bar pending or fail","2":"usage error","3":"append primitive unavailable or failed"},thresholds:{pending:{warn:20,error:50},failed:{warn:5,error:10},compliance_score:{minimum:700,maximum:1000,convergence_streak_minimum:2},ntm_surface_coverage:{minimum_avg:7,target_avg:10}},required_evidence:["schema_version>=5:hypotheses[2..5]","schema_version>=5:exactly_one_third_alternative_H_alt","schema_version>=5:acceptance_when_killed","schema_version>=4:compliance_pack_path","schema_version>=4:compliance_score>=700","schema_version>=4:convergence_streak>=2","schema_version>=4:evidence_pack_resolves=yes for v2 packs","schema_version>=4:legacy pack includes spec.json+evidence.json+compliance.json+theater.json+test_depth.json+scorecard.md+REPORT.md","schema_version<4:quality_bar_passed","schema_version<4:jeff_score>=9","schema_version<4:donella_score>=9","schema_version<4:joshua_score>=9_or_auto_advance","schema_version<4:composite>=9.5","critical_findings=0","future ntm-surface-wire-in plans require ntm coverage_avg>=7"]}'
 }
 
 examples_text() {
@@ -103,7 +105,7 @@ EOF
 schema_json() {
   case "$SCHEMA_TOPIC" in
     plan)
-      jq -nc --arg schema_version "$SCHEMA_VERSION.plan" '{schema_version:$schema_version,required:["plan_slug","decision","quality_bar_mode","critical_findings","reasons","hypothesis_slate_valid"],legacy_required:["jeff","donella","joshua","composite"],compliance_required:["compliance_score","compliance_threshold","compliance_pack_path","convergence_streak"],schema_v5_required:["hypotheses[2..5]","third_alternative.id=H_alt","acceptance_when_killed"],conditional_required:{ntm_surface_wire_in:["ntm_surface_coverage_trend.coverage_avg>=7"]}}' ;;
+      jq -nc --arg schema_version "$SCHEMA_VERSION.plan" '{schema_version:$schema_version,required:["plan_slug","decision","quality_bar_mode","critical_findings","reasons","hypothesis_slate_valid"],legacy_required:["jeff","donella","joshua","composite"],compliance_required:["compliance_score","compliance_threshold","compliance_pack_path","convergence_streak","evidence_pack_resolves"],schema_v5_required:["hypotheses[2..5]","third_alternative.id=H_alt","acceptance_when_killed"],conditional_required:{ntm_surface_wire_in:["ntm_surface_coverage_trend.coverage_avg>=7"]}}' ;;
     doctor)
       jq -nc '{schema_version:"quality-bar-close-gate.doctor.v1",required:["plan_state_quality_bar_pending_count","plan_state_quality_bar_failed_count","plan_state_quality_bar_passed_count"]}' ;;
     ledger)
@@ -138,15 +140,17 @@ EOF
 
 quality_bar_python() {
   local py_mode="$1"
-  python3 - "$py_mode" "$REPO_ROOT" "${PLAN_SLUG:-}" <<'PY'
+  python3 - "$py_mode" "$REPO_ROOT" "${PLAN_SLUG:-}" "$EVIDENCE_PACK_RESOLVER" <<'PY'
 import json
 import re
+import subprocess
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-mode, repo_raw, slug = sys.argv[1], sys.argv[2], sys.argv[3]
+mode, repo_raw, slug, resolver_raw = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
 repo = Path(repo_raw)
+evidence_pack_resolver = Path(resolver_raw).expanduser()
 
 def read_json(path):
     try:
@@ -240,6 +244,61 @@ def resolve_pack_path(path_value, plan_dir):
         path = plan_dir / path
     return path
 
+def evidence_pack_version(pack_path):
+    if not pack_path.is_file():
+        return None
+    try:
+        text = pack_path.read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        return None
+    try:
+        parsed = json.loads(text)
+        if isinstance(parsed, dict):
+            return parsed.get("evidence_pack_version")
+    except Exception:
+        pass
+    if re.search(r"(?m)^\s*evidence_pack_version\s*:\s*2\s*$", text):
+        return 2
+    return None
+
+def resolve_v2_evidence_pack(pack_path):
+    if not evidence_pack_resolver.is_file():
+        return {
+            "status": "fail",
+            "exit_code": 127,
+            "errors": [f"evidence_pack_resolver_missing:{evidence_pack_resolver}"],
+        }
+    try:
+        completed = subprocess.run(
+            [str(evidence_pack_resolver), str(pack_path), "--json"],
+            check=False,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except Exception as exc:
+        return {
+            "status": "fail",
+            "exit_code": 127,
+            "errors": [f"evidence_pack_resolver_exec_failed:{type(exc).__name__}:{exc}"],
+        }
+    try:
+        payload = json.loads(completed.stdout or "{}")
+        if isinstance(payload, dict):
+            payload["exit_code"] = completed.returncode
+            if completed.stderr.strip():
+                payload["stderr"] = completed.stderr.strip()
+            return payload
+    except Exception:
+        pass
+    return {
+        "status": "fail",
+        "exit_code": completed.returncode,
+        "stdout": completed.stdout,
+        "stderr": completed.stderr,
+        "errors": ["evidence_pack_resolver_invalid_json"],
+    }
+
 def score_from_scorecard(pack_path):
     scorecard = pack_path / "scorecard.md"
     if not scorecard.is_file():
@@ -308,6 +367,9 @@ def evaluate_compliance_pack(state, plan_dir, result, pending, failing):
     result["compliance_threshold"] = 700
     result["compliance_pack_path"] = None
     result["compliance_pack_missing_files"] = []
+    result["evidence_pack_version"] = None
+    result["evidence_pack_resolves"] = None
+    result["evidence_pack_resolution"] = None
     result["convergence_streak"] = None
     candidates = best_compliance_evidence(state, plan_dir)
     if not candidates:
@@ -325,9 +387,34 @@ def evaluate_compliance_pack(state, plan_dir, result, pending, failing):
     pack_path = usable["pack_path"]
     result["compliance_pack_path"] = str(pack_path)
     result["compliance_threshold"] = usable["threshold"]
+    result["evidence_pack_version"] = evidence_pack_version(pack_path)
+    if result["evidence_pack_version"] == 2:
+        resolution = resolve_v2_evidence_pack(pack_path)
+        result["evidence_pack_resolution"] = resolution
+        result["evidence_pack_resolves"] = "yes" if resolution.get("status") == "pass" else "no"
+        if result["evidence_pack_resolves"] != "yes":
+            failing.append("evidence_pack_unresolved")
+        if isinstance(usable["row_score"], (int, float)):
+            result["compliance_score"] = usable["row_score"]
+        else:
+            pending.append("compliance_score_missing")
+        if isinstance(result["compliance_score"], (int, float)) and result["compliance_score"] < result["compliance_threshold"]:
+            failing.append("compliance_score_below_700")
+        root_streak = as_num(state.get("convergence_streak"))
+        streak_candidates = [
+            int(root_streak) if isinstance(root_streak, (int, float)) else None,
+            usable["row_streak"],
+        ]
+        result["convergence_streak"] = next((value for value in streak_candidates if isinstance(value, int)), None)
+        if result["convergence_streak"] is None:
+            pending.append("convergence_streak_missing")
+        elif result["convergence_streak"] < 2:
+            failing.append("convergence_streak_below_2")
+        return
     if not pack_path.is_dir():
         failing.append("compliance_pack_missing")
         return
+    result["evidence_pack_resolves"] = "yes"
     missing = [name for name in REQUIRED_COMPLIANCE_PACK_FILES if not (pack_path / name).is_file()]
     result["compliance_pack_missing_files"] = missing
     if missing:
@@ -526,6 +613,9 @@ def evaluate(slug_value):
         "compliance_threshold": None,
         "compliance_pack_path": None,
         "compliance_pack_missing_files": [],
+        "evidence_pack_version": None,
+        "evidence_pack_resolves": None,
+        "evidence_pack_resolution": None,
         "convergence_streak": None,
         "hypothesis_slate_required": False,
         "hypothesis_slate_valid": "yes",
@@ -756,6 +846,8 @@ ledger_row_json() {
       compliance_score:.compliance_score,
       compliance_threshold:.compliance_threshold,
       compliance_pack_path:.compliance_pack_path,
+      evidence_pack_version:.evidence_pack_version,
+      evidence_pack_resolves:.evidence_pack_resolves,
       convergence_streak:.convergence_streak,
       critical_findings:.critical_findings,
       reasons:.reasons
