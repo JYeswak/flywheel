@@ -8,6 +8,11 @@ flywheel-loop init to every flywheel-installed repo as
 reference this file and add only repo-specific operational rules.
 Domain rules (what we're building, not how we operate) belong in CLAUDE.md.
 
+Fleet propagation cross-link: `.flywheel/scripts/agents-md-fleet-propagator.sh`
+audits installed-repo AGENTS.md drift, and `flywheel-loop doctor --scope
+agents-md-fleet-propagation --json` exposes the drift count, drift repos, and
+last propagation apply health.
+
 ## L-Rule Schema
 
 Each L-rule below uses this frontmatter (YAML between `---` fences):
@@ -1149,6 +1154,16 @@ the same session: "I can't have this being a constant problem."
 - Doctor signal `ticks_punted_count` ≥ 1 → status=fail
 - Worker dispatch packet includes `chain_if_capacity` block
 
+**Counter cross-link:** `.flywheel/scripts/l70-ticks-punted-counter.sh` writes
+`~/.local/state/flywheel/l70-ticks-punted.jsonl`; `flywheel-loop doctor --scope
+l70-ticks-punted --json` exposes `l70_ticks_punted_24h`,
+`l70_ticks_punted_rate_pct`, and `l70_ticks_punted_top_signal`.
+`.flywheel/scripts/tick-hook-firing-verifier.sh` audits L70 and sibling
+tick-close hooks with ledger-backed firing evidence; `flywheel-loop doctor
+--scope tick-hook-firing --json` exposes `tick_hook_primitives_audited`,
+`tick_hook_primitives_firing`, `tick_hook_primitives_invisibly_broken`, and
+`tick_hook_primitives_invisibly_broken_names`.
+
 **Override:** None. There is no `JOSHUA_OVERRIDE` for this — Joshua flagged
 this as a recurring fleet-killer and the rule is not negotiable. If a chain
 genuinely cannot proceed (capacity exhausted, deadlock detected, etc.), the
@@ -2266,6 +2281,13 @@ If a reversible workaround passes copy-test, apply the workaround through the re
 
 **How to apply:** any dispatch, callback, or draft containing `jeff issue`, `file upstream`, `Jeff-worthy`, or `escalate to Jeff` must link a preceding `*-workarounds-research-*` task or receipt from the last 24 hours. A mechanical validator may treat the receipt as eligible only when this predicate passes: `jq -e '(.socraticode_queries >= 2 and .socraticode_k_per_query >= 10) and (.workarounds_ranked >= 5) and (.top_workarounds_copy_tested >= 2) and ((.jeff_issue_warranted == false) or (.all_workarounds_failed == true or .foundational_no_workaround == true))'`. Doctor should expose `jeff_issue_pending_without_workaround_research_count`, target `0`, and the issue-filing hook should block when no qualifying workaround-research callback exists.
 
+**2026-05-04 beads_rust dep-add note:** skillos hit `br dep add`
+`OpenRead root page 184`, then `root page 121` after fresh JSONL rebuild. L93
+prevented a duplicate upstream issue: the exact edge failed on installed
+`br 0.1.20`, but passed on disposable `br 0.2.4`; direct SQL + flush + rebuild
+also passed as a reversible fallback. Receipt:
+`/tmp/beads-rust-dep-add-corruption-jeff-issue-output.md`.
+
 **Cross-references:** L48 (substrate exhaustion before escalation), L63 (Jeff intel network), L64 (Jeff as mentor), L66 (outbound Jeff issue phased gate), L71 (validate-and-redispatch), L78 (Jeff corpus accretive ingestion), `feedback_jeff_issue_chain.md`, `feedback_jeff_issue_requires_full_workaround_research_first.md`, `reference_jeff_substrate_inventory.md`, `reference_upstream_issues.md`, and the `jeff-issue-chain` skill.
 
 ## L94 — SHARED-SQLITE-WRITES-MUST-SERIALIZE
@@ -2286,6 +2308,12 @@ Required write receipt fields are `db_path`, `db_fingerprint`, `operation_class`
 **Why:** 2026-05-04 produced a same-day SQLite writer family: v2a1 substrate REINDEX/repair moved live Beads state through b-tree/WAL failure modes, skillos beads-import rebuild did not rewrite malformed pages, and skillos source-refresh hit a parallel state DB lock. Each incident looked local, but the common system failure was unsynchronized writes against shared SQLite state.
 
 **How to apply:** add a pre-dispatch/pre-hook probe equivalent to `pre-dispatch-state-db-lock-check.sh --db <path> --operation <class> --json`; doctor should expose `sqlite_concurrent_writer_risk_count`, `sqlite_write_lock_conflict_count`, and `.sqlite_write_locks.top_conflicts`. A valid receipt should satisfy `jq -e '.lock_acquired == true and .competing_writer_count == 0 and .post_integrity_state != "worse"'` before mutating work is called safe.
+
+**Boundary note:** L94 covers shared-writer concurrency. A single-writer
+`br dep add` failure immediately after JSONL rebuild is the adjacent
+version-drift/write-path class; apply L93 first, then prefer `br 0.2.4+` or a
+validated direct-SQL/flush/rebuild fallback over filing a duplicate upstream
+issue.
 
 **Cross-references:** L51 (file reservations), L56 (promotion ladder), L60 (doctor signal contract), L71 (validate-and-redispatch), L72 (storage and repo-local state discipline), L90 (live capture before pane action), `feedback_shared_sqlite_writes_must_serialize.md`, and the 2026-05-04 SQLite trauma rows in `~/.local/state/flywheel/fuckup-log.jsonl`.
 
@@ -2949,7 +2977,9 @@ doctor fields in `~/.claude/skills/.flywheel/bin/flywheel-loop`.
 
 **Cross-references:** L50 (Socraticode preflight), L51 (file reservations),
 L61 (ecosystem wire-in), L96 (3-surface diff), L102 (META-RULE cache refresh),
-L105 (process gaps measured), and L107 (shared-surface reservations).
+L105 (process gaps measured), L107 (shared-surface reservations), and
+`.flywheel/scripts/doctrine-3-surface-divergence-probe.sh` (repo_role scoping:
+template surface is active only for `flywheel_origin` repos).
 
 ## L110 — SUBSTRATE-PRIMITIVES-DECLARE-SELF-REPAIR-LOOP
 
@@ -3001,6 +3031,10 @@ in-scope primitive is missing the required contract fields. Doctor/status
 surfaces expose backlog, unconsumed stock, failed drain attempts, and last
 successful drain timestamp for every primitive.
 
+**Validator:** `.flywheel/scripts/substrate-loop-contract-validator.sh` owns
+`substrate-loop-contract.v1`, emits the bootstrap self-row, and is exposed via
+`flywheel-loop doctor --scope substrate-loop-contract --json`.
+
 **Forbidden outputs:**
 - Shipping a watcher, ledger, report, finding class, or durable artifact without
   a named consumer or explicit deferral contract.
@@ -3022,6 +3056,121 @@ Finding 10 skillos-relay amendment, and CoralRaven memory classes
 (validate-and-redispatch), L82 (canonical CLI scope), L96 (3-surface doctrine),
 L102 (cache refresh), L107 (shared-surface reservations), and
 `feedback_wire_into_ecosystem.md`.
+
+## L111 — REAL-TIME-QUALITY-BAR-ON-EVERY-WORK-BODY
+
+---
+id: L111
+title: Real-time quality bar on every work body
+status: long_term
+shipped: 2026-05-04
+review_due: 2026-11-04
+trauma_class: ship-then-polish-later
+---
+
+Every body of work — plan output, audit, dispatch result, bead description,
+paradigm doc, AGENTS.md edit, memory file, code, callback envelope — MUST pass
+at WRITE-TIME (not audit-time, not polish-time) through a five-skill quality
+bar. Workers refuse to populate the callback envelope without
+`quality_bar_passed=yes` plus per-judge scores; orchestrators refuse to accept
+callbacks missing those fields.
+
+**Required gates per artifact:**
+
+1. `/rust-best-practices` (where Rust touched).
+2. `/python-best-practices` (where Python touched).
+3. `/canonical-cli-scoping` (every CLI surface or path referenced).
+4. `/readme-writing` (every doc edit, plan section, or AGENTS chunk).
+5. Three-judges sniff (Jeff / Donella / Joshua) — each scored 0-10 against
+   `~/.claude/skills/.flywheel/prompts/three-judges-rubric.md`. Composite
+   ≥9.5; no single judge <9.0. If the artifact cannot reach the bar, the
+   artifact gets fixed, not shipped at lower grade.
+
+**Required callback fields:**
+
+- `quality_bar_passed`: `yes` | `no`
+- `rust_clean`: `yes` | `no` | `n/a`
+- `python_clean`: `yes` | `no` | `n/a`
+- `cli_canonical`: `yes` | `no`
+- `readme_quality`: `yes` | `no`
+- `jeff_score`, `donella_score`, `joshua_score`: integer 0-10 each
+- `self_grade`: composite `N.N/10`
+
+**Rationale (Donella stock/flow/leverage):**
+
+- **Stock:** quality-debt artifacts (plans, doctrine docs, ledger rows, code,
+  callbacks shipped without 5-skill + 3-judges check).
+- **Inflow:** every dispatch close, every plan phase save, every L-rule
+  codification, every bead body write.
+- **Outflow before L111:** a "polish round" scheduled for later — that drained
+  in theory and never in practice (today: 8 audit lenses, 4 REFINE rounds,
+  PARADIGM doc, L110 codification all shipped without the 4-skill + 3-judges
+  check).
+- **Outflow with L111:** mechanical refusal at write-time. The producer fixes
+  the artifact before it lands, not the next plan.
+- **Loop:** balancing B (write → 5-skill check → fix or ship). Removes the
+  reinforcing R that lets quality-debt accumulate by deferring polish.
+- **Leverage point:** Meadows #5 (rules of the system). The rule shifts
+  authority over "is this good enough?" from a future polish phase to the
+  write-time gate, eliminating the deferred-polish escape hatch.
+- **Delay:** zero. Quality bar fires synchronously at write-time, not in a
+  later sweep.
+
+**Enforcement:**
+
+- Mechanical gate at callback validation: orchestrators reject callbacks that
+  do not include the seven required fields with passing values.
+- Inheritance through `flywheel:_shared:dispatch-template`: every dispatch
+  prompt embeds the five-skill checklist as an acceptance gate, the same way
+  L82 canonical CLI scoping is embedded today.
+- Doctor surface: `quality_bar_breach_count_24h` (callbacks with
+  `quality_bar_passed=no` or missing fields). Tick close gates refuse with
+  warn at >0, error at >3.
+- Validator path: `.flywheel/scripts/callback-envelope-schema-validator.sh`;
+  scoped doctor:
+  `flywheel-loop doctor --repo <repo> --scope callback-envelope-schema --json`.
+
+**Companion rules:**
+
+- L108 (3-surface sync) — quality bar applies to all three surfaces, not just
+  the canonical source.
+- L110 (substrate self-repair primitive) — L111 is the
+  `verification_probe`/`drain_receipt_shape` consumer for `artifact` stock.
+  L110 declares the loop; L111 enforces the quality of every artifact passing
+  through it.
+
+**Cost citation:** 2026-05-04. Joshua flagged that 8 audit lenses, 4 REFINE
+rounds, the substrate-self-organization paradigm doc, and the L110
+codification all shipped without 4-skill + 3-judges checks — producing tech
+debt on the very plans meant to eliminate it. Direct quote: "every body of
+work must pass real-time through `/rust-best-practices`,
+`/python-best-practices`, `/canonical-cli-scoping`, `/readme-writing`, and the
+3-judges sniff. Not later. Not in polish. AT WRITE-TIME." See
+`.flywheel/plans/wire-or-explain-tick-gate-2026-05-04/00-INTENT.md` Finding
+11 and `.flywheel/plans/orch-monitor-recovery-auto-act-2026-05-04/00-INTENT.md`
+Phase 1 supplemental II.
+
+**Forbidden outputs:**
+
+- Shipping any artifact with `quality_bar_passed=no` or missing per-judge
+  scores.
+- Deferring quality work to a "polish round" scheduled later.
+- Treating the 3-judges rubric as advisory rather than gating.
+- Orchestrator accepting a worker callback without the seven required fields.
+
+**Cross-references:** L29 (NTM dispatch hygiene), L50 (Socraticode preflight),
+L51 (file reservations), L52 (issues→beads), L53 (fuckups in callback), L57
+(loop-state vs driver), L61 (doctrine landing wires AGENTS+README), L70
+(no-punt chain forward), L71 (validate-and-redispatch), L82 (canonical CLI
+scoping), L96 (3-surface diff), L108 (3-surface cache vs gate), L110
+(substrate self-repair primitive),
+`~/.claude/skills/.flywheel/prompts/three-judges-rubric.md`,
+`.flywheel/PUBLISHABILITY-BAR.md`,
+`.flywheel/PARADIGM-substrate-self-organization-2026-05-04.md`,
+`feedback_publishability_bar_three_judges.md`,
+`feedback_validator_must_check_four_lenses.md`.
+
+**Authored:** 2026-05-04
 
 ## L115 — PEER-ORCH-RECOVERY-PERMIT-GATE
 
@@ -3086,7 +3235,11 @@ validated recovery of `skillos:1` at 2026-05-05T04:39Z; permit gate
 `.flywheel/scripts/peer-orch-respawn-permit.sh`; fixture
 `tests/peer-orch-respawn-permit.sh`.
 
-**Cross-references:** L48, L57, L70, L75, L80, L82, L101, L107, and L110.
+**Cross-references:** L48 (substrate exhaustion), L57 (loop state marker is not
+a driver), L70 (same-tick chain-forward), L75 (peer-orch blocker
+coordination), L80 (DID/DIDNT/GAPS callbacks), L82 (canonical CLI scoping),
+L101 (continuous fleet productivity), L107 (shared-surface reservations), and
+L110 (substrate primitives declare self-repair loop).
 
 ## L116 — TICK-IS-PROCESS-NOT-DOCUMENT
 
@@ -3139,6 +3292,10 @@ expose `tick_driver_daemon_loaded`, `tick_driver_last_exit_status`,
 `tick_driver_expected_fires_24h`, `tick_driver_fire_rate_pct`, and
 `tick_driver_stalled_class_emitted_count_24h`.
 
+Status is `error` when the daemon is not loaded, when the latest fire is older
+than two intervals, or when the normalized fire rate is below 50%. Status is
+`warn` when the normalized fire rate is below 80%.
+
 **Forbidden outputs:**
 
 - Claiming `tick_hook_wired=yes` because a script exists or `tick.md` names it.
@@ -3154,8 +3311,10 @@ expose `tick_driver_daemon_loaded`, `tick_driver_last_exit_status`,
 `.flywheel/scripts/tick-driver-manifest.json`; fixture
 `tests/flywheel-tick-driver.sh`.
 
-**Cross-references:** L57, L70, L102, L110, L111, L115, and pbt55
-`tick-hook-firing-verifier.sh`.
+**Cross-references:** L57 (loop-state marker is not driver), L70 (same-tick
+chain-forward), L102 (META-RULE cache refresh on tick), L110 (substrate
+self-repair primitive), L111 (quality bar), L115 (peer-orch recovery), and
+pbt55 `tick-hook-firing-verifier.sh`.
 
 ## L117 — PEER-ORCH-FREEZE-MONITOR-IS-A-DRIVER
 
@@ -3183,6 +3342,9 @@ MUST expose `monitor_last_fire_ts`, `mttr_p95_seconds`,
 `false_recovery_count_24h`, `permit_gate_refusals_24h`, `recoveries_24h`, and
 `monitor_alive`.
 
+Status is `fail` when false recoveries are nonzero, `warn` when the monitor is
+missing or stale, and `pass` only when recent monitor fire evidence exists.
+
 **Forbidden outputs:**
 
 - Claiming peer orchestrators are healthy because topology or panes exist.
@@ -3196,5 +3358,376 @@ MUST expose `monitor_last_fire_ts`, `mttr_p95_seconds`,
 `.flywheel/scripts/tick-driver-manifest.json`; disabled plist
 `.flywheel/launchd/ai.zeststream.peer-orch-freeze-monitor.plist`.
 
-**Cross-references:** L57, L110, L111, L115, L116, and pbt55
-`tick-hook-firing-verifier.sh`.
+**Cross-references:** L57 (loop-state marker is not driver), L110 (substrate
+self-repair primitive), L111 (quality bar), L115 (peer-orch recovery), L116
+(tick is process), and pbt55 `tick-hook-firing-verifier.sh`.
+
+## L118 — STABLE-FAILURE-REASON-CODES-BEFORE-PROSE
+
+---
+id: L118
+title: Stable failure reason codes before prose
+status: long_term
+shipped: 2026-05-05
+review_due: 2026-11-05
+trauma_class: prose-only-failure-taxonomy
+---
+
+Every agent-readable failure surface MUST carry a stable, machine-parseable
+reason code before or beside prose. Human explanation is useful, but a loop,
+validator, or downstream worker needs a durable enum to route the failure
+without re-parsing English.
+
+**How to apply:**
+- New doctor, probe, validator, callback, and repair JSON that can report
+  `warn`, `fail`, `blocked`, or `refuse` MUST expose `reason_code` or a named
+  equivalent field such as `failed_signal`, `violation.class`, `trauma_class`,
+  or `blocked_by`.
+- Prefer lowercase snake_case or kebab-case codes already used by the substrate;
+  introduce a new enum only when no existing code captures the failure.
+- When prose changes but the operational class is unchanged, keep the code
+  stable. When a code changes meaning, ship a schema or migration note.
+- Beads filed from failures SHOULD include the code in the title or labels so
+  repeated failures group mechanically.
+
+**Forbidden outputs:**
+- Routing a recurring failure from prose-only strings like "still broken" or
+  "could not validate".
+- Adding a new validator or doctor field whose failure classes cannot be
+  counted with `jq` or `rg` without natural-language parsing.
+- Renaming an existing failure code without a compatibility alias or migration
+  note.
+
+**Evidence:** Source: Jeff frankensearch:frankensearch/frankensearch/src/index_builder.rs:176 + ZestStream adaptation.
+The code-shaped failure pattern appears in the philosophy catalog as
+`failure-taxonomy-reason-codes`; flywheel adopts it
+for callbacks, doctor JSON, validators, and Beads routing so L52/L53 findings
+group by substrate class instead of prose.
+
+**Cross-references:** L50, L52, L53, L56, L60, L64, L71, L80, L111, and
+`dicklesworthstone-stack`.
+
+## L119 — TEMPLATES-NAME-SOURCES-NOT-VALUES
+
+---
+id: L119
+title: Templates name sources, not values
+status: long_term
+shipped: 2026-05-06
+review_due: 2026-11-06
+trauma_class: frozen-projection-of-mutable-state
+---
+
+Templates name sources, not values.
+Any cron, launchd, watcher, scheduler, or dispatch template that references
+mutable state must name the authoritative source path and field selector,
+never copy the current field value into prompt text.
+The receiving pane or agent must read the source at execution time and cite
+the path in closeout.
+Literal sampled values are allowed only when the value is immutable by
+construction or a receipt names why sampling is intentional.
+Doctor must count mutable-state literals in prompt templates and fail strict
+mode when the count is nonzero.
+
+Canonical token: `templates-name-sources-not-values`.
+
+**Why:** A frozen projection of mutable state is a long-lived prompt, plist,
+cron payload, watcher, scheduler, or dispatch template that captured a value at
+render/install time and later acted as if that value were still authoritative.
+The orch-uptime topology-stale gate, skillos cron-literal blocker payload, and
+mobile-eats cached pane metrics all hit the same trauma class:
+`frozen-projection-of-mutable-state`.
+
+**How to apply:**
+- Long-lived templates may name source paths, selectors, query names, schema
+  fields, immutable hashes/version IDs, command names, static repo paths, and
+  documented constant labels.
+- They MUST NOT bake mutable blocker IDs, active profile names, pane roles or
+  IDs, topology rows, freshness timestamps, secret values, current owner names,
+  or current recovery decisions into payloads when those values can change
+  before fire time.
+- At execution time, the receiving pane or agent reads the named source and
+  cites the path/selector in closeout.
+- Intentional sampling requires a receipt naming why the value is immutable or
+  why sampling is safe for the payload lifetime.
+- Doctor invariant scans count mutable-state literals in prompt templates;
+  existing debt may warn, newly modified templates fail strict mode.
+
+**Forbidden outputs:**
+- Installing a cron, launchd plist, watcher, scheduler, or dispatch packet that
+  copies current mutable values instead of naming source paths/selectors.
+- Treating a rendered prompt, topology row, active CAAM profile, blocker id, or
+  recovery decision as durable truth after its source may have changed.
+- Claiming a driver is refreshed when its payload can only replay values
+  captured at install time.
+- Embedding secret values or token fragments in templates; name vault paths or
+  secret classes instead per SEC-001.
+
+**Evidence:** Orch-uptime Lane C; skillos Option C Hybrid watcher +
+heartbeat-cron fix; cross-orch handoff row 203
+`blocker_class=frozen-projection-of-mutable-state`; mobile-eats sibling
+topology/cached-metrics pattern.
+
+**Cross-references:** SEC-001 mission-lock secret-values rule, L57
+(loop-state marker is not driver), L110 (substrate primitives declare
+self-repair loop), and L116 (tick is process, not document).
+
+## L120 — DISPATCH-CALLBACK-MUST-INCLUDE-BR-CLOSE-EXECUTED
+
+---
+id: L120
+title: Dispatch callback must include br close executed
+status: long_term
+shipped: 2026-05-06
+review_due: 2026-11-06
+trauma_class: bg-agent-close-miss
+---
+
+Every DONE callback MUST include br_close_executed=<yes|failed|not_applicable>.
+Workers MUST run br close BEFORE ntm send DONE; close-step before callback-step
+is the canonical worker-tick ordering.
+
+**Why:** Five-instance same-session validation showed `bg-agent-close-miss`
+when `br close` came after callback or was absent. Callback transport is a
+terminal signal; cleanup listed after `ntm send` is routinely skipped.
+
+**Validation:** skillos was 3-for-3 post-fix after adding the required callback
+field and step 8b ordering, versus 4-of-5 missed pre-fix. Flywheel
+SHIP-runbook line 45 independently already used `br_close_executed=yes`, so
+the field emerged twice as the same substrate shape.
+
+**How to apply:**
+- Every DONE envelope contains `br_close_executed=yes` when `br close` exited
+  0 before callback, or `br_close_executed=failed` when close was attempted and
+  failed.
+- `br_close_executed=not_applicable` is valid only for BLOCKED/DECLINED paths
+  where ownership returns to the orchestrator instead of closing the bead.
+- Worker-tick ordering is close first, callback second; dispatch templates must
+  encode that order structurally, not in prose after the callback command.
+
+**Forbidden outputs:**
+- DONE callback without `br_close_executed`.
+- Worker-tick that closes after callback.
+- Treating DONE transport-ack as proof of bead close.
+
+**Evidence:** Source proposal
+`~/.claude/skills/.flywheel/proposals/P-bg-agent-close-miss-2026-05-06.md`;
+skillos commits `d4ac88e` and `4e129fd`;
+`~/.claude/commands/flywheel/worker-tick.md` step 8b;
+`~/.claude/commands/flywheel/_shared/dispatch-template.md` callback contract;
+`.flywheel/PLANS/orch-uptime-2026-05-06/SHIP-runbook.md` line 45.
+
+**Cross-references:** L91 (dispatch four-state receipt), L119
+(templates-name-sources-not-values), L57 (marker-not-driver), and SEC-002
+(credential receipts).
+
+## L121 — LAUNCHD-SERIALIZE-WRAPPERS-MUST-BE-KILL-RESILIENT
+
+---
+id: L121
+title: Launchd serialize wrappers must be kill resilient
+status: long_term
+shipped: 2026-05-06
+review_due: 2026-11-06
+trauma_class: jsm-wrapper-killed-mid-sync-via-kickstart
+---
+
+Launchd-managed shell wrappers that supervise a subprocess capable of holding a
+SQLite lock, WAL write channel, file lock, queue lease, or similar mutation
+boundary MUST install TERM, INT, and EXIT cleanup before fleet use.
+
+**How to apply:**
+- Use `~/.claude/skills/.flywheel/scripts/sigterm-trap-helper.sh` or an
+  equivalent wrapper contract before spawning the child.
+- TERM/INT cleanup forwards termination to the child, waits up to a bounded
+  timeout, performs WAL/state recovery, emits a structured JSONL event, and
+  uses forced kill only as a last resort.
+- EXIT cleanup removes stale state and catches orphaned child cleanup paths.
+- `flywheel doctor` exposes the helper's launchd-managed script scan as the
+  `sigterm_trap_missing_count` invariant.
+
+**Forbidden outputs:**
+- Calling a launchd serialize wrapper production-ready without TERM, INT, and
+  EXIT cleanup.
+- Restarting a wrapper with a hard kill path when a graceful restart path or
+  trap-supervised wrapper exists.
+- Treating WAL checkpoint recovery as JSM-specific; the invariant applies to
+  any launchd wrapper supervising mutation-capable subprocesses.
+
+**Evidence:** proposal
+`~/.claude/skills/.flywheel/proposals/K-jsm-wrapper-killed-mid-sync-via-kickstart-2026-05-06.md`;
+skillos artifacts `state/jsm-wrapper-sigterm-handler-2026-05-06.json` and
+`tests/unit/test_jsm_wrapper_sigterm_handler.sh`; canonical helper
+`~/.claude/skills/.flywheel/scripts/sigterm-trap-helper.sh`; test
+`~/.claude/skills/.flywheel/tests/test_sigterm_trap_helper.sh`.
+
+## L122 — BULK-MUTATION-SCRIPTS-MUST-HAVE-SURGICAL-BOUNDS
+
+---
+id: L122
+title: Bulk mutation scripts must have surgical bounds
+status: long_term
+shipped: 2026-05-06
+review_due: 2026-11-06
+trauma_class: scope-creep-on-frontmatter-sweep
+---
+
+Any script that performs bulk mutation across a shared skill library,
+cross-repo file set, or fleet-shared operating substrate MUST enforce an
+in-memory pre/post diff, a per-file diff cap, and a session-level circuit
+breaker before its first production run.
+
+**How to apply:**
+- Use `~/.claude/skills/.flywheel/scripts/bulk-mutation-surgical-bound.sh` or
+  an equivalent guard for every candidate file write.
+- The guard reads pre/post content in memory, refuses oversized diffs per file,
+  records `aborted-surgical-bound` rows, and opens the circuit after
+  `max_consecutive_aborts`.
+- Live mutation requires an explicit apply mode; dry-run receipts must show
+  `migrated`, `skipped`, `aborted`, and circuit-breaker counts matching intent
+  before commit.
+- `flywheel doctor` exposes `bulk_mutation_surgical_bound_missing_count` as a
+  warn-first invariant for existing script debt.
+
+**Forbidden outputs:**
+- Running a broad sweep over shared skills, commands, hooks, scripts, or repo
+  files without a dry-run receipt and per-file abort gate.
+- Writing a candidate file before diffing the complete pre/post content.
+- Continuing mutation after consecutive surgical-bound aborts trip the breaker.
+
+**Evidence:** proposal
+`~/.claude/skills/.flywheel/proposals/L-scope-creep-on-frontmatter-sweep-2026-05-06.md`;
+skillos artifact `state/skillos-L-promotion-authoring-2026-05-06.md`; canonical
+guard `~/.claude/skills/.flywheel/scripts/bulk-mutation-surgical-bound.sh`;
+test `~/.claude/skills/.flywheel/tests/test_bulk_mutation_surgical_bound.sh`.
+
+## L123 — L29-RAW-TMUX-HISTORICAL-DEBT-MUST-BE-DOCTOR-VISIBLE
+
+---
+id: L123
+title: L29 raw tmux historical debt must be doctor visible
+status: long_term
+shipped: 2026-05-06
+review_due: 2026-11-06
+trauma_class: dispatch-substrate
+---
+
+L29 gate installation is incomplete until existing raw pane-I/O debt is scanned
+and surfaced through doctor. Forward gates block new raw operational tmux use;
+they do not prove pre-gate scripts, hooks, commands, or repo-local helpers are
+clean.
+
+**How to apply:**
+- Run `~/.claude/skills/.flywheel/scripts/raw-tmux-audit-doctor.sh --doctor
+  --json` across hooks, commands, `scripts/`, and `.flywheel/scripts/`.
+- Classify findings as `replace-with-ntm`, `ratchet-via-gate`,
+  `accept-with-receipt`, or `test-fixture`.
+- File migration beads for `replace-with-ntm`; add in-file receipts for
+  legitimate `accept-with-receipt` read-only probes where no ntm verb exists.
+- `flywheel doctor` exposes `l29_raw_tmux_operational_violations_count` and
+  keeps historical debt visible while the fleet migrates.
+
+**Forbidden outputs:**
+- Treating the raw tmux gate as proof existing files are clean.
+- Dispatching or documenting worker-pane operation through raw tmux verbs when
+  an ntm equivalent exists.
+- Hiding raw tmux debt in prose-only audit notes without a doctor-visible count.
+
+**Evidence:** skillos artifact
+`/Users/josh/Developer/skillos/state/skillos-L29-promotion-authoring-2026-05-06.md`;
+audit receipt `state/skillos-33v8-l29-raw-tmux-audit-2026-05-06.json`;
+canonical scanner `~/.claude/skills/.flywheel/scripts/raw-tmux-audit-doctor.sh`;
+test `~/.claude/skills/.flywheel/tests/test_raw_tmux_audit_doctor.sh`.
+
+## L124 — SUBSTRATE-DISCIPLINE-NO-ORCHESTRATOR-PAUSE
+
+---
+id: L124
+title: Substrate discipline no orchestrator pause
+status: long_term
+shipped: 2026-05-07
+review_due: 2026-11-07
+trauma_class: substrate-discipline
+---
+
+Beads substrate corruption, stale recovery debris, and low-disk write pressure
+are flywheel-owned auto-ops conditions. The orchestrator does not pause for
+manual direction when the safe repair class is already encoded: use `br` as the
+only Beads writer, rebuild disposable DB state from clean JSONL, and prune
+repo-local substrate bloat before WAL/JSONL writes degrade.
+
+**How to apply:**
+- `.beads/issues.jsonl` is written only through `br create`, `br update`, or
+  `br close`. Manual append fallback is a violation even when a callback or
+  fix-bead path is under pressure.
+- `beads.db` and its sidecars are disposable indexes. When
+  `br doctor --json` reports `workspace_health=unsafe` and the class is
+  rebuildable, run
+  `~/.claude/skills/.flywheel/scripts/beads-auto-rebuild-from-jsonl.sh --repo
+  <repo> --apply --json` after backing up to `/tmp`.
+- `flywheel doctor` exposes three substrate discipline scopes:
+  `beads.jsonl.write_discipline`, `beads.recovery.bloat`, and
+  `beads.sidecar.staleness`.
+- `.flywheel/scripts/storage-prune.sh` archives `.br_recovery/` bloat to
+  `/tmp`, removes stale `.beads/*.aside.*` and `.beads/*.bak.*` by exact path,
+  and archives old `jeff-corpus/*` entries.
+- `/flywheel:tick` enforcement is process-wired through
+  `.flywheel/scripts/tick-driver-manifest.json` entries for `storage-prune` and
+  `beads-auto-rebuild-from-jsonl`; prose-only wiring does not count.
+
+**Forbidden outputs:**
+- Asking Joshua whether to run a clean JSONL-backed Beads DB rebuild.
+- Appending issue rows, event rows, fallback close rows, or fix-bead rows
+  directly to `.beads/issues.jsonl`.
+- Treating `.br_recovery/`, stale sidecars, or low disk as a dashboard warning
+  without a doctor field and an auto-prune path.
+- Calling substrate recovery shipped without tick-driver manifest evidence.
+
+**Evidence:** memory rules
+`feedback_beads_jsonl_writes_via_br_only.md`,
+`feedback_substrate_rebuild_is_disposable_not_class_5.md`, and
+`feedback_storage_pressure_blocks_substrate.md`; doctor scopes in
+`~/.claude/skills/.flywheel/bin/flywheel`; primitive
+`~/.claude/skills/.flywheel/scripts/beads-auto-rebuild-from-jsonl.sh`; storage
+primitive `.flywheel/scripts/storage-prune.sh`; tick manifest
+`.flywheel/scripts/tick-driver-manifest.json`; Jeff WAL/lock prior-art receipt
+`/tmp/jeff-wal-lock-prior-art-2026-05-07.md`; storage correlation receipt
+`/tmp/storage-substrate-correlation-2026-05-07.md`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+**Cross-references:** L48, L50, L52, L53, L56, L60, L70, L71, L72, L96, L110,
+L116, and L120.
+
+## L125 — ENV-FILE-IS-SEALED-SUBSTRATE
+
+**Trauma class:** `read-tool-secret-leak`
+**Generalizes:** L58 (secret material never in pane text)
+**Sibling to:** L73 (runtime leak)
+**Backed by:** SEC-001..006
+
+`.env*` files are sealed substrate. Reading them via `Read`/`Edit`/`Write`/`cat`/MCP file-tools produces a transcript leak equivalent to the L58 pane-text leak. The Bash-surface guards (`dcg`, `infisical-safe.sh`, infisical PreToolUse hook) DO NOT cover file-read tools — that gap is by Anthropic-spec design, so the fix is doctrine + skill + heuristic, not new Claude-Code tool guards.
+
+**Canonical verification:** `cf-secret <NAME> | shasum -a 256` (single key, fingerprint only).
+
+**Canonical bulk audit:** read each key via per-key fingerprint, never bulk file read. If structure must be enumerated, use `awk -F= '{print $1}' .env*` (names only, never values).
+
+**Forbidden:**
+- `Read` tool on `.env*`, `.envrc`, `.secrets`, `*.pem`, `id_rsa*`, `**/credentials*`
+- `cat`/`head`/`tail`/`less`/`more` on `.env*`
+- Pasting env contents into prompts, code, or comments
+- Logging env contents to any file (even temp)
+- Sharing `.env*` via mcp filesystem tool
+
+**Allowed:**
+- `cf-secret <NAME> | shasum -a 256` for verification
+- `awk -F= '{print $1}' .env*` for name enumeration only
+- Reading `.env.example` or sentinel files with no real values
+
+**Promotion ladder this rule passed:** fuckup-row → `~/.claude/skills/infisical-secrets/references/INCIDENTS.md` → AGENTS-CANONICAL.md L-rule (here) → `flywheel-install/templates/AGENTS-TEMPLATE.md` broadcast → `canonical-meta-rules-sync` to all flywheel-installed repos.
+
+**Evidence:** mobile-eats:1 cross-orch handoff 2026-05-07T18:30Z (`/tmp/mobile-eats-secret-leak-flywheel-handoff.md`); Joshua directive 2026-05-07 "harden via L-rule + skill discipline, NOT new tool guards"; flywheel:1 ACK at `/tmp/flywheel-ack-mobile-eats-secret-leak-2026-05-07.md`; infisical-secrets skill File-Surface Discipline section to follow.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+**Cross-references:** L58, L73, L56, SEC-001..006; `templates/josh-request-schema.md` 9-class secret-scrub taxonomy; `mission-lock-negative-invariants-validator.sh` (SEC-007 packet validator extension to follow).

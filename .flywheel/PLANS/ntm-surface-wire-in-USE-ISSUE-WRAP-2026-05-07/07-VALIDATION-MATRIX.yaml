@@ -1,0 +1,3462 @@
+schema_version: 1
+generated_at: "2026-05-07T18:39:53Z"
+ntm_version: "v1.14.0-290-g99c67b31"
+generation_notes:
+  - "Inventory headline says 108 subcommands; master table resolves to 108 aliases after expanding personas/profiles and worktree/worktrees."
+  - "Source of truth for callsites/tests was actual grep across .flywheel/scripts, tests, and .flywheel/tests."
+  - "schema-validator-duo applies: this durable YAML should get a schema plus executable validator in a follow-up bead."
+socraticode:
+  project_path: "/Users/josh/Developer/flywheel/.flywheel/scripts"
+  queries_required: 10
+  queries_completed: 10
+  indexed_chunks_observed: 1998
+doctor_snapshot:
+  path: "/tmp/flywheel-doctor-gap-audit-2026-05-07.json"
+  status: "PASS"
+  observed_probe_count: 1
+  observed_probes:
+    - "dispatch_log_fitness via ntm timeline --json"
+coverage_summary:
+  surfaces_total: 106
+  coverage_avg: 6.7
+  below_7_count: 47
+  claimed_use_no_doctor_probe_count: 25
+surfaces:
+  - name: "activity"
+    decision: "USE"
+    inventory_row: 1
+    inventory_decision: "USE"
+    description: "Show agent activity states"
+    callsites:
+      - path: ".flywheel/scripts/codex-budget-watchdog.sh"
+        line: 60
+      - path: ".flywheel/scripts/pane-work-signal.sh"
+        line: 2
+      - path: ".flywheel/scripts/pane-work-signal.sh"
+        line: 28
+      - path: ".flywheel/scripts/frozen-pane-detector.sh.v1.bak"
+        line: 327
+      - path: ".flywheel/scripts/frozen-pane-detector.sh.v1.bak"
+        line: 383
+      - path: ".flywheel/scripts/ntm-fleet-health.sh"
+        line: 48
+    tests:
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises activity surface reference at line 29"
+      - path: "tests/idle-pane-auto-dispatch-work-started-validation-test.sh"
+        what_it_proves: "exercises activity surface reference at line 82"
+      - path: "tests/stale-error-auto-ping.sh"
+        what_it_proves: "exercises activity surface reference at line 25"
+      - path: "tests/stale-error-auto-ping.sh"
+        what_it_proves: "exercises activity surface reference at line 26"
+      - path: "tests/stale-error-auto-ping.sh"
+        what_it_proves: "exercises activity surface reference at line 36"
+    doctor_probes:
+      - path: ".flywheel/scripts/idle-state-probe.sh"
+        line: 7
+        what_it_asserts: "activity referenced in probe/doctor path"
+      - path: ".flywheel/scripts/idle-state-probe.sh"
+        line: 19
+        what_it_asserts: "activity referenced in probe/doctor path"
+      - path: ".flywheel/scripts/idle-state-probe.sh"
+        line: 56
+        what_it_asserts: "activity referenced in probe/doctor path"
+      - path: ".flywheel/scripts/idle-state-probe.sh"
+        line: 66
+        what_it_asserts: "activity referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "add"
+    decision: "EXCLUDED"
+    inventory_row: 2
+    inventory_decision: "EXCLUDED"
+    description: "Add agents to existing session"
+    receipt: "No-fit per plan §11. Flywheel respawns whole sessions."
+    callsites:
+      - path: ".flywheel/scripts/orch-donella-trace-gate.sh"
+        line: 83
+      - path: ".flywheel/scripts/orch-donella-trace-gate.sh"
+        line: 84
+      - path: ".flywheel/scripts/fleet-coherence-scan.sh"
+        line: 30
+    tests:
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises add surface reference at line 25"
+      - path: "tests/test_dispatch_mission_fitness_required.sh"
+        what_it_proves: "exercises add surface reference at line 49"
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises add surface reference at line 74"
+      - path: "tests/watcher-isomorphic-probe.sh"
+        what_it_proves: "exercises add surface reference at line 93"
+      - path: "tests/jeff-corpus-accretive.sh"
+        what_it_proves: "exercises add surface reference at line 45"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 317
+        what_it_asserts: "add referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 566
+        what_it_asserts: "add referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 575
+        what_it_asserts: "add referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 605
+        what_it_asserts: "add referenced in probe/doctor path"
+    coverage_score: 5
+    gap: null
+  - name: "adopt"
+    decision: "USE"
+    inventory_row: 3
+    inventory_decision: "USE"
+    description: "Adopt external tmux session"
+    callsites:
+      []
+    tests:
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises adopt surface reference at line 9"
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises adopt surface reference at line 46"
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises adopt surface reference at line 48"
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises adopt surface reference at line 54"
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises adopt surface reference at line 123"
+    doctor_probes:
+      - path: ".flywheel/scripts/value-gap-probe.sh"
+        line: 20
+        what_it_asserts: "adopt referenced in probe/doctor path"
+      - path: ".flywheel/scripts/jeff-pattern-citation-probe.sh"
+        line: 14
+        what_it_asserts: "adopt referenced in probe/doctor path"
+      - path: ".flywheel/scripts/jeff-pattern-citation-probe.sh"
+        line: 75
+        what_it_asserts: "adopt referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm adopt; add callsite/probe or downgrade inventory claim"
+  - name: "agents"
+    decision: "USE"
+    inventory_row: 4
+    inventory_decision: "USE"
+    description: "Manage agent profiles + capabilities"
+    callsites:
+      - path: ".flywheel/scripts/codex-budget-watchdog.sh"
+        line: 60
+      - path: ".flywheel/scripts/pane-work-signal.sh"
+        line: 28
+      - path: ".flywheel/scripts/ntm-fleet-health.sh"
+        line: 48
+      - path: ".flywheel/scripts/frozen-pane-detector.sh"
+        line: 33
+      - path: ".flywheel/scripts/idle-state-probe.sh"
+        line: 155
+      - path: ".flywheel/scripts/flywheel-resume"
+        line: 17
+    tests:
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises agents surface reference at line 30"
+      - path: "tests/peer-orch-respawn-permit.sh"
+        what_it_proves: "exercises agents surface reference at line 54"
+      - path: "tests/peer-orch-respawn-permit.sh"
+        what_it_proves: "exercises agents surface reference at line 118"
+      - path: "tests/idle-pane-auto-dispatch-work-started-validation-test.sh"
+        what_it_proves: "exercises agents surface reference at line 83"
+      - path: "tests/watcher-isomorphic-probe.sh"
+        what_it_proves: "exercises agents surface reference at line 44"
+    doctor_probes:
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 112
+        what_it_asserts: "agents referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 113
+        what_it_asserts: "agents referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 300
+        what_it_asserts: "agents referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 301
+        what_it_asserts: "agents referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "analytics"
+    decision: "USE"
+    inventory_row: 5
+    inventory_decision: "USE"
+    description: "Session analytics + statistics"
+    callsites:
+      - path: ".flywheel/scripts/daily-report.sh"
+        line: 35
+    tests:
+      - path: "tests/test_peer_orch_drift_alert_emitted.sh"
+        what_it_proves: "exercises analytics surface reference at line 31"
+    doctor_probes:
+      []
+    coverage_score: 8
+    gap: null
+  - name: "approve"
+    decision: "WRAP"
+    inventory_row: 6
+    inventory_decision: "USE (today's W2A wrapper)"
+    description: "Approval requests for dangerous ops"
+    wrapper_script: ".flywheel/scripts/ntm-approve-human-gates.sh"
+    why_keep_evidence: "Exact-question receipt and blocker-class validation around native approval requests."
+    deletion_tripwire: "delete when ntm approve requires exact_question receipts, approved_by, blocker taxonomy, and stable denial classes natively."
+    callsites:
+      - path: ".flywheel/scripts/ntm-approve-human-gates.sh"
+        line: 7
+      - path: ".flywheel/scripts/ntm-approve-human-gates.sh"
+        line: 9
+      - path: ".flywheel/scripts/ntm-approve-human-gates.sh"
+        line: 25
+      - path: ".flywheel/scripts/ntm-approve-human-gates.sh"
+        line: 26
+      - path: ".flywheel/scripts/ntm-approve-human-gates.sh"
+        line: 275
+    tests:
+      - path: "tests/fleet-shutdown-recovery.sh"
+        what_it_proves: "exercises approve surface reference at line 63"
+      - path: "tests/fleet-shutdown-recovery.sh"
+        what_it_proves: "exercises approve surface reference at line 80"
+      - path: "tests/fleet-shutdown-recovery.sh"
+        what_it_proves: "exercises approve surface reference at line 84"
+      - path: "tests/fleet-shutdown-recovery.sh"
+        what_it_proves: "exercises approve surface reference at line 88"
+      - path: "tests/orch-capture-parity-probe.sh"
+        what_it_proves: "exercises approve surface reference at line 100"
+    doctor_probes:
+      - path: ".flywheel/scripts/orch-capture-parity-probe.py"
+        line: 16
+        what_it_asserts: "approve referenced in probe/doctor path"
+      - path: ".flywheel/scripts/orch-capture-parity-probe.py"
+        line: 256
+        what_it_asserts: "approve referenced in probe/doctor path"
+      - path: ".flywheel/scripts/orch-capture-parity-probe.py"
+        line: 351
+        what_it_asserts: "approve referenced in probe/doctor path"
+      - path: ".flywheel/flywheel-loop-tick"
+        line: 140
+        what_it_asserts: "approve referenced in probe/doctor path"
+    coverage_score: 8
+    gap: "no top-level flywheel doctor probe asserts wrapper adoption or bypass resistance"
+  - name: "assign"
+    decision: "USE"
+    inventory_row: 7
+    inventory_decision: "USE"
+    description: "Intelligent work assignment via BV triage"
+    callsites:
+      - path: ".flywheel/scripts/dispatch-capacity-gate.sh"
+        line: 24
+      - path: ".flywheel/scripts/ntm-coordinator-shadow.sh"
+        line: 8
+      - path: ".flywheel/scripts/ntm-coordinator-shadow.sh"
+        line: 29
+      - path: ".flywheel/scripts/ntm-coordinator-shadow.sh"
+        line: 71
+      - path: ".flywheel/scripts/ntm-coordinator-shadow.sh"
+        line: 254
+      - path: ".flywheel/scripts/dispatch-and-log.sh"
+        line: 81
+    tests:
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises assign surface reference at line 11"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises assign surface reference at line 12"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises assign surface reference at line 54"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises assign surface reference at line 55"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises assign surface reference at line 56"
+    doctor_probes:
+      []
+    coverage_score: 8
+    gap: null
+  - name: "attach"
+    decision: "USE"
+    inventory_row: 8
+    inventory_decision: "USE"
+    description: "Attach to a tmux session"
+    callsites:
+      []
+    tests:
+      - path: ".flywheel/tests/test-orch-donella-trace-gate.sh"
+        what_it_proves: "exercises attach surface reference at line 74"
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm attach; add callsite/probe or downgrade inventory claim"
+  - name: "audit"
+    decision: "WRAP"
+    inventory_row: 9
+    inventory_decision: "USE (today's W3bA wrapper)"
+    description: "Query + verify audit logs"
+    wrapper_script: ".flywheel/scripts/ntm-audit-receipts.sh"
+    why_keep_evidence: "Canonical-writer and hash-chain audit report over native receipt ledgers."
+    deletion_tripwire: "delete when ntm audit verifies single canonical writer, full hash chain, invalid JSON rows, and writes immutable audit reports."
+    callsites:
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 16
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 212
+      - path: ".flywheel/scripts/ntm-preflight-l91-wrapper.sh"
+        line: 26
+      - path: ".flywheel/scripts/ntm-preflight-l91-wrapper.sh"
+        line: 251
+      - path: ".flywheel/scripts/ntm-policy-contracts.sh"
+        line: 405
+      - path: ".flywheel/scripts/ntm-policy-contracts.sh"
+        line: 546
+    tests:
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises audit surface reference at line 82"
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises audit surface reference at line 83"
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises audit surface reference at line 85"
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises audit surface reference at line 86"
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises audit surface reference at line 87"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 596
+        what_it_asserts: "audit referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 600
+        what_it_asserts: "audit referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 657
+        what_it_asserts: "audit referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 666
+        what_it_asserts: "audit referenced in probe/doctor path"
+    coverage_score: 8
+    gap: "no top-level flywheel doctor probe asserts wrapper adoption or bypass resistance"
+  - name: "beads"
+    decision: "EXCLUDED"
+    inventory_row: 10
+    inventory_decision: "EXCLUDED"
+    description: "Beads alias to br"
+    receipt: "br owns this."
+    callsites:
+      - path: ".flywheel/scripts/jeff-binary-version-watchtower.sh"
+        line: 83
+      - path: ".flywheel/scripts/dispatch-and-log.sh"
+        line: 81
+    tests:
+      - path: "tests/jeff-issue-rubric.sh"
+        what_it_proves: "exercises beads surface reference at line 29"
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises beads surface reference at line 81"
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises beads surface reference at line 82"
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises beads surface reference at line 95"
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises beads surface reference at line 100"
+    doctor_probes:
+      - path: ".flywheel/scripts/close-validator-contract-probe.sh"
+        line: 29
+        what_it_asserts: "beads referenced in probe/doctor path"
+      - path: ".flywheel/scripts/mission-fitness-doctor.sh"
+        line: 2
+        what_it_asserts: "beads referenced in probe/doctor path"
+      - path: ".flywheel/scripts/mission-fitness-doctor.sh"
+        line: 25
+        what_it_asserts: "beads referenced in probe/doctor path"
+      - path: ".flywheel/scripts/mission-fitness-doctor.sh"
+        line: 143
+        what_it_asserts: "beads referenced in probe/doctor path"
+    coverage_score: 5
+    gap: null
+  - name: "bind"
+    decision: "USE"
+    inventory_row: 11
+    inventory_decision: "USE"
+    description: "Tmux keybinding for palette/overlay"
+    callsites:
+      - path: ".flywheel/scripts/flywheel-onboard.sh"
+        line: 216
+    tests:
+      - path: "tests/test_apply_tmux_tuning.sh"
+        what_it_proves: "exercises bind surface reference at line 66"
+      - path: "tests/test_apply_tmux_tuning.sh"
+        what_it_proves: "exercises bind surface reference at line 68"
+      - path: "tests/test_apply_tmux_tuning.sh"
+        what_it_proves: "exercises bind surface reference at line 135"
+      - path: "tests/validate-tick-phase.sh"
+        what_it_proves: "exercises bind surface reference at line 43"
+      - path: "tests/validate-tick-phase.sh"
+        what_it_proves: "exercises bind surface reference at line 44"
+    doctor_probes:
+      - path: ".flywheel/scripts/leverage-ceiling-probe.sh"
+        line: 30
+        what_it_asserts: "bind referenced in probe/doctor path"
+      - path: ".flywheel/scripts/leverage-ceiling-probe.sh"
+        line: 135
+        what_it_asserts: "bind referenced in probe/doctor path"
+      - path: ".flywheel/scripts/leverage-ceiling-probe.sh"
+        line: 141
+        what_it_asserts: "bind referenced in probe/doctor path"
+      - path: ".flywheel/scripts/leverage-ceiling-probe.sh"
+        line: 142
+        what_it_asserts: "bind referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "bugs"
+    decision: "USE"
+    inventory_row: 12
+    inventory_decision: "USE"
+    description: "View + manage UBS findings"
+    callsites:
+      - path: ".flywheel/scripts/daily-report.sh"
+        line: 37
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 6
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm bugs; add callsite/probe or downgrade inventory claim"
+  - name: "cass"
+    decision: "USE"
+    inventory_row: 13
+    inventory_decision: "USE"
+    description: "Interact with CASS"
+    callsites:
+      - path: ".flywheel/scripts/frozen-pane-detector.sh.v1.bak"
+        line: 338
+      - path: ".flywheel/scripts/frozen-pane-detector.sh.v1.bak"
+        line: 360
+      - path: ".flywheel/scripts/frozen-pane-detector.sh.v1.bak"
+        line: 362
+      - path: ".flywheel/scripts/verify-callback-delivery.sh"
+        line: 50
+      - path: ".flywheel/scripts/stale-error-auto-ping.sh"
+        line: 21
+      - path: ".flywheel/scripts/stale-error-auto-ping.sh"
+        line: 30
+    tests:
+      - path: "tests/ntm-send-r3-workaround-copy-tests.sh"
+        what_it_proves: "exercises cass surface reference at line 40"
+      - path: "tests/ntm-send-r3-workaround-copy-tests.sh"
+        what_it_proves: "exercises cass surface reference at line 58"
+      - path: "tests/idle-pane-auto-dispatch-work-started-validation-test.sh"
+        what_it_proves: "exercises cass surface reference at line 65"
+      - path: "tests/stale-error-auto-ping.sh"
+        what_it_proves: "exercises cass surface reference at line 82"
+      - path: "tests/stale-error-auto-ping.sh"
+        what_it_proves: "exercises cass surface reference at line 83"
+    doctor_probes:
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 83
+        what_it_asserts: "cass referenced in probe/doctor path"
+      - path: ".flywheel/scripts/fleet-conformance-probe.sh"
+        line: 340
+        what_it_asserts: "cass referenced in probe/doctor path"
+      - path: ".flywheel/scripts/codex-budget-probe.sh"
+        line: 107
+        what_it_asserts: "cass referenced in probe/doctor path"
+      - path: ".flywheel/scripts/fleet-comms-health-probe.sh"
+        line: 486
+        what_it_asserts: "cass referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "changes"
+    decision: "USE"
+    inventory_row: 14
+    inventory_decision: "USE"
+    description: "File changes attributed to agents"
+    callsites:
+      []
+    tests:
+      - path: "tests/flywheel-recovery-session-paths.sh"
+        what_it_proves: "exercises changes surface reference at line 129"
+      - path: ".flywheel/tests/test_codex_queued_not_submitted_classifier_and_recovery.sh"
+        what_it_proves: "exercises changes surface reference at line 142"
+      - path: ".flywheel/tests/test_codex_queued_not_submitted_classifier_and_recovery.sh"
+        what_it_proves: "exercises changes surface reference at line 143"
+      - path: ".flywheel/tests/test_codex_queued_not_submitted_classifier_and_recovery.sh"
+        what_it_proves: "exercises changes surface reference at line 186"
+    doctor_probes:
+      - path: ".flywheel/scripts/value-gap-probe.sh"
+        line: 23
+        what_it_asserts: "changes referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm changes; add callsite/probe or downgrade inventory claim"
+  - name: "checkpoint"
+    decision: "WRAP"
+    inventory_row: 15
+    inventory_decision: "USE (today's W3bR wrapper)"
+    description: "Manage session checkpoints"
+    wrapper_script: ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh"
+    why_keep_evidence: "Checkpoint metadata hashes, dirty-worktree scoped exception, rollback stop conditions, and refusal receipts."
+    deletion_tripwire: "delete when ntm checkpoint/rollback supports dirty-worktree-policy=scoped-exception, metadata hash verification, reservation checks, and refusal receipt ledger."
+    callsites:
+      - path: ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh"
+        line: 18
+      - path: ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh"
+        line: 19
+      - path: ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh"
+        line: 24
+      - path: ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh"
+        line: 236
+      - path: ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh"
+        line: 299
+      - path: ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh"
+        line: 300
+    tests:
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises checkpoint surface reference at line 49"
+      - path: ".flywheel/tests/test_ntm_checkpoint_rollback_guard.sh"
+        what_it_proves: "exercises checkpoint surface reference at line 5"
+      - path: ".flywheel/tests/test_ntm_checkpoint_rollback_guard.sh"
+        what_it_proves: "exercises checkpoint surface reference at line 6"
+      - path: ".flywheel/tests/test_ntm_checkpoint_rollback_guard.sh"
+        what_it_proves: "exercises checkpoint surface reference at line 48"
+      - path: ".flywheel/tests/test_ntm_checkpoint_rollback_guard.sh"
+        what_it_proves: "exercises checkpoint surface reference at line 56"
+    doctor_probes:
+      []
+    coverage_score: 8
+    gap: "no top-level flywheel doctor probe asserts wrapper adoption or bypass resistance"
+  - name: "cleanup"
+    decision: "USE"
+    inventory_row: 16
+    inventory_decision: "USE"
+    description: "Clean up stale NTM temp files"
+    callsites:
+      - path: ".flywheel/scripts/private-tmp-prune.sh"
+        line: 20
+      - path: ".flywheel/scripts/private-tmp-prune.sh"
+        line: 45
+      - path: ".flywheel/scripts/private-tmp-prune.sh"
+        line: 82
+    tests:
+      - path: "tests/fleet-coherence-launchd.sh"
+        what_it_proves: "exercises cleanup surface reference at line 171"
+      - path: "tests/jsonl-orphan-migrations-test.sh"
+        what_it_proves: "exercises cleanup surface reference at line 9"
+      - path: "tests/jsonl-orphan-migrations-test.sh"
+        what_it_proves: "exercises cleanup surface reference at line 16"
+      - path: "tests/fleet-conductor-mvp-gate.sh"
+        what_it_proves: "exercises cleanup surface reference at line 10"
+      - path: "tests/fleet-conductor-mvp-gate.sh"
+        what_it_proves: "exercises cleanup surface reference at line 13"
+    doctor_probes:
+      - path: ".flywheel/scripts/test-loop-driver-doctor.sh"
+        line: 12
+        what_it_asserts: "cleanup referenced in probe/doctor path"
+      - path: ".flywheel/scripts/test-loop-driver-doctor.sh"
+        line: 15
+        what_it_asserts: "cleanup referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "completion"
+    decision: "USE"
+    inventory_row: 17
+    inventory_decision: "USE"
+    description: "Generate shell completion script"
+    callsites:
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 16
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 212
+      - path: ".flywheel/scripts/ntm-preflight-l91-wrapper.sh"
+        line: 26
+      - path: ".flywheel/scripts/ntm-preflight-l91-wrapper.sh"
+        line: 251
+      - path: ".flywheel/scripts/ntm-policy-contracts.sh"
+        line: 546
+      - path: ".flywheel/scripts/flywheel-onboard.sh"
+        line: 216
+    tests:
+      - path: "tests/peer-orch-respawn-permit.sh"
+        what_it_proves: "exercises completion surface reference at line 90"
+      - path: "tests/watcher-isomorphic-probe.sh"
+        what_it_proves: "exercises completion surface reference at line 46"
+      - path: "tests/watcher-isomorphic-probe.sh"
+        what_it_proves: "exercises completion surface reference at line 107"
+      - path: "tests/watcher-isomorphic-probe.sh"
+        what_it_proves: "exercises completion surface reference at line 150"
+      - path: "tests/quality-bar-close-gate.sh"
+        what_it_proves: "exercises completion surface reference at line 101"
+    doctor_probes:
+      - path: ".flywheel/scripts/jeff-issues-status-probe.sh"
+        line: 15
+        what_it_asserts: "completion referenced in probe/doctor path"
+      - path: ".flywheel/scripts/jeff-issues-status-probe.sh"
+        line: 50
+        what_it_asserts: "completion referenced in probe/doctor path"
+      - path: ".flywheel/scripts/jeff-issues-status-probe.sh"
+        line: 70
+        what_it_asserts: "completion referenced in probe/doctor path"
+      - path: ".flywheel/scripts/jeff-issues-status-probe.sh"
+        line: 71
+        what_it_asserts: "completion referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "config"
+    decision: "USE"
+    inventory_row: 18
+    inventory_decision: "USE"
+    description: "Manage NTM configuration"
+    callsites:
+      - path: ".flywheel/scripts/flywheel-recovery.sh"
+        line: 434
+    tests:
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises config surface reference at line 73"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises config surface reference at line 74"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises config surface reference at line 75"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises config surface reference at line 76"
+      - path: "tests/jeff-corpus-accretive.sh"
+        what_it_proves: "exercises config surface reference at line 42"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 142
+        what_it_asserts: "config referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 143
+        what_it_asserts: "config referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 291
+        what_it_asserts: "config referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 643
+        what_it_asserts: "config referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "conflicts"
+    decision: "USE"
+    inventory_row: 19
+    inventory_decision: "USE"
+    description: "File conflicts between agents"
+    callsites:
+      []
+    tests:
+      - path: "tests/fixtures/data-backed-deferral/l115-pane-state-contradiction-allow.json"
+        what_it_proves: "exercises conflicts surface reference at line 12"
+      - path: "tests/fixtures/data-backed-deferral/l115-pane-state-contradiction-allow.json"
+        what_it_proves: "exercises conflicts surface reference at line 14"
+      - path: "tests/fixtures/data-backed-deferral/l115-pane-state-contradiction-allow.json"
+        what_it_proves: "exercises conflicts surface reference at line 15"
+      - path: "tests/fixtures/data-backed-deferral/l115-pane-state-contradiction-allow.json"
+        what_it_proves: "exercises conflicts surface reference at line 21"
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm conflicts; add callsite/probe or downgrade inventory claim"
+  - name: "context"
+    decision: "USE"
+    inventory_row: 20
+    inventory_decision: "USE"
+    description: "Manage context packs for agent tasks"
+    callsites:
+      - path: ".flywheel/scripts/build-dispatch-packet.sh"
+        line: 38
+      - path: ".flywheel/scripts/build-dispatch-packet.sh"
+        line: 43
+      - path: ".flywheel/scripts/build-dispatch-packet.sh"
+        line: 102
+      - path: ".flywheel/scripts/build-dispatch-packet.sh"
+        line: 103
+      - path: ".flywheel/scripts/build-dispatch-packet.sh"
+        line: 138
+      - path: ".flywheel/scripts/build-dispatch-packet.sh"
+        line: 140
+    tests:
+      - path: "tests/validation-learn-routing.sh"
+        what_it_proves: "exercises context surface reference at line 46"
+      - path: "tests/validation-learn-routing.sh"
+        what_it_proves: "exercises context surface reference at line 47"
+      - path: "tests/validation-learn-routing.sh"
+        what_it_proves: "exercises context surface reference at line 48"
+      - path: "tests/validation-learn-routing.sh"
+        what_it_proves: "exercises context surface reference at line 50"
+      - path: "tests/doctor-validation-signals.sh"
+        what_it_proves: "exercises context surface reference at line 55"
+    doctor_probes:
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 72
+        what_it_asserts: "context referenced in probe/doctor path"
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 176
+        what_it_asserts: "context referenced in probe/doctor path"
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 180
+        what_it_asserts: "context referenced in probe/doctor path"
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 185
+        what_it_asserts: "context referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "controller"
+    decision: "USE"
+    inventory_row: 21
+    inventory_decision: "USE"
+    description: "Launch dedicated controller agent"
+    callsites:
+      []
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm controller; add callsite/probe or downgrade inventory claim"
+  - name: "coordinator"
+    decision: "WRAP"
+    inventory_row: 22
+    inventory_decision: "USE (today's W3aC wrapper for shadow mode)"
+    description: "Multi-agent session coordination"
+    wrapper_script: ".flywheel/scripts/ntm-coordinator-shadow.sh"
+    why_keep_evidence: "Shadow-only coordinator recommendations while ntm#124 blocks daemon auto-assign."
+    deletion_tripwire: "delete when ntm#124 lands and ntm coordinator/assign --watch --auto has safe daemon lifecycle and receipt parity."
+    callsites:
+      - path: ".flywheel/scripts/idle-pane-auto-dispatch.sh"
+        line: 9
+      - path: ".flywheel/scripts/ntm-coordinator-shadow.sh"
+        line: 7
+      - path: ".flywheel/scripts/ntm-coordinator-shadow.sh"
+        line: 8
+      - path: ".flywheel/scripts/ntm-coordinator-shadow.sh"
+        line: 9
+      - path: ".flywheel/scripts/ntm-coordinator-shadow.sh"
+        line: 24
+      - path: ".flywheel/scripts/ntm-coordinator-shadow.sh"
+        line: 25
+    tests:
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises coordinator surface reference at line 2"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises coordinator surface reference at line 7"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises coordinator surface reference at line 8"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises coordinator surface reference at line 10"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises coordinator surface reference at line 11"
+    doctor_probes:
+      - path: ".flywheel/scripts/caam-recovery-path-probe.sh"
+        line: 39
+        what_it_asserts: "coordinator referenced in probe/doctor path"
+      - path: ".flywheel/scripts/caam-recovery-path-probe.sh"
+        line: 121
+        what_it_asserts: "coordinator referenced in probe/doctor path"
+    coverage_score: 8
+    gap: "no top-level flywheel doctor probe asserts wrapper adoption or bypass resistance"
+  - name: "copy"
+    decision: "USE"
+    inventory_row: 23
+    inventory_decision: "USE"
+    description: "Copy pane output to clipboard"
+    callsites:
+      - path: ".flywheel/scripts/pane-work-signal.sh.bak.20260503T014204Z"
+        line: 60
+    tests:
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises copy surface reference at line 42"
+      - path: "tests/verify-callback-delivery.sh"
+        what_it_proves: "exercises copy surface reference at line 47"
+      - path: "tests/verify-callback-delivery.sh"
+        what_it_proves: "exercises copy surface reference at line 72"
+      - path: "tests/verify-callback-delivery.sh"
+        what_it_proves: "exercises copy surface reference at line 78"
+      - path: "tests/test_mission_lock_frontmatter_idempotent.sh"
+        what_it_proves: "exercises copy surface reference at line 43"
+    doctor_probes:
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 170
+        what_it_asserts: "copy referenced in probe/doctor path"
+      - path: ".flywheel/scripts/codex-hook-parity-probe.py"
+        line: 228
+        what_it_asserts: "copy referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 198
+        what_it_asserts: "copy referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "create"
+    decision: "USE"
+    inventory_row: 24
+    inventory_decision: "USE"
+    description: "Create tmux session"
+    callsites:
+      - path: ".flywheel/scripts/orch-donella-trace-gate.sh"
+        line: 83
+      - path: ".flywheel/scripts/orch-donella-trace-gate.sh"
+        line: 84
+      - path: ".flywheel/scripts/test-auto-respawn.sh"
+        line: 26
+    tests:
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises create surface reference at line 58"
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises create surface reference at line 81"
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises create surface reference at line 102"
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises create surface reference at line 104"
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises create surface reference at line 107"
+    doctor_probes:
+      - path: ".flywheel/scripts/mission-fitness-doctor.sh"
+        line: 208
+        what_it_asserts: "create referenced in probe/doctor path"
+      - path: ".flywheel/scripts/orch-capture-parity-probe.py"
+        line: 127
+        what_it_asserts: "create referenced in probe/doctor path"
+      - path: ".flywheel/scripts/orch-capture-parity-probe.py"
+        line: 350
+        what_it_asserts: "create referenced in probe/doctor path"
+      - path: ".flywheel/scripts/idle-state-probe.sh"
+        line: 232
+        what_it_asserts: "create referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "dashboard"
+    decision: "USE"
+    inventory_row: 25
+    inventory_decision: "USE"
+    description: "Interactive session dashboard"
+    callsites:
+      []
+    tests:
+      - path: "tests/test_peer_orch_drift_probe.sh"
+        what_it_proves: "exercises dashboard surface reference at line 114"
+      - path: "tests/fleet-observatory-aggregate.sh"
+        what_it_proves: "exercises dashboard surface reference at line 116"
+      - path: "tests/fleet-observatory-aggregate.sh"
+        what_it_proves: "exercises dashboard surface reference at line 117"
+      - path: "tests/test_dispatch_log_fitness_status_dashboard.sh"
+        what_it_proves: "exercises dashboard surface reference at line 45"
+      - path: "tests/test_apply_tmux_tuning.sh"
+        what_it_proves: "exercises dashboard surface reference at line 68"
+    doctor_probes:
+      - path: ".flywheel/scripts/mission-fitness-doctor.sh"
+        line: 312
+        what_it_asserts: "dashboard referenced in probe/doctor path"
+      - path: ".flywheel/scripts/probe-registry-audit.sh"
+        line: 18
+        what_it_asserts: "dashboard referenced in probe/doctor path"
+      - path: ".flywheel/scripts/probe-registry-audit.sh"
+        line: 19
+        what_it_asserts: "dashboard referenced in probe/doctor path"
+      - path: ".flywheel/scripts/probe-registry-audit.sh"
+        line: 40
+        what_it_asserts: "dashboard referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "interactive/documentation surface; add explicit no-bypass/no-script-use receipt for ntm dashboard"
+  - name: "deps"
+    decision: "USE"
+    inventory_row: 26
+    inventory_decision: "USE"
+    description: "Check required deps"
+    callsites:
+      - path: ".flywheel/scripts/flywheel-onboard.sh"
+        line: 216
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 6
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm deps; add callsite/probe or downgrade inventory claim"
+  - name: "diff"
+    decision: "USE"
+    inventory_row: 27
+    inventory_decision: "USE"
+    description: "Compare two agent panes"
+    callsites:
+      - path: ".flywheel/scripts/recency-weighted-two-truth-classifier.sh"
+        line: 12
+      - path: ".flywheel/scripts/recency-weighted-two-truth-classifier.sh"
+        line: 23
+      - path: ".flywheel/scripts/recency-weighted-two-truth-classifier.sh"
+        line: 25
+      - path: ".flywheel/scripts/recency-weighted-two-truth-classifier.sh"
+        line: 42
+    tests:
+      - path: "tests/jeff-corpus-accretive.sh"
+        what_it_proves: "exercises diff surface reference at line 6"
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises diff surface reference at line 5"
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises diff surface reference at line 8"
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises diff surface reference at line 45"
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises diff surface reference at line 46"
+    doctor_probes:
+      - path: ".flywheel/scripts/doctor-signal-bead-promotion.sh"
+        line: 255
+        what_it_asserts: "diff referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "doctor"
+    decision: "USE"
+    inventory_row: 28
+    inventory_decision: "USE"
+    description: "Validate NTM ecosystem health"
+    callsites:
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 16
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 212
+      - path: ".flywheel/scripts/frozen-pane-detector.sh"
+        line: 30
+      - path: ".flywheel/scripts/ntm-preflight-l91-wrapper.sh"
+        line: 26
+      - path: ".flywheel/scripts/ntm-preflight-l91-wrapper.sh"
+        line: 251
+      - path: ".flywheel/scripts/orch-donella-trace-gate.sh"
+        line: 83
+    tests:
+      - path: "tests/peer-orch-respawn-permit.sh"
+        what_it_proves: "exercises doctor surface reference at line 114"
+      - path: "tests/peer-orch-respawn-permit.sh"
+        what_it_proves: "exercises doctor surface reference at line 115"
+      - path: "tests/jeff-issue-rubric.sh"
+        what_it_proves: "exercises doctor surface reference at line 78"
+      - path: "tests/jeff-issue-rubric.sh"
+        what_it_proves: "exercises doctor surface reference at line 79"
+      - path: "tests/jeff-issue-rubric.sh"
+        what_it_proves: "exercises doctor surface reference at line 81"
+    doctor_probes:
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 4
+        what_it_asserts: "doctor referenced in probe/doctor path"
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 5
+        what_it_asserts: "doctor referenced in probe/doctor path"
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 6
+        what_it_asserts: "doctor referenced in probe/doctor path"
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 7
+        what_it_asserts: "doctor referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "ensemble"
+    decision: "USE"
+    inventory_row: 29
+    inventory_decision: "USE (W4T queued)"
+    description: "Manage reasoning ensembles"
+    callsites:
+      []
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm ensemble; add callsite/probe or downgrade inventory claim"
+  - name: "errors"
+    decision: "USE"
+    inventory_row: 30
+    inventory_decision: "USE"
+    description: "Show only error output from agents"
+    callsites:
+      - path: ".flywheel/scripts/stale-error-auto-ping.sh"
+        line: 20
+      - path: ".flywheel/scripts/stale-error-auto-ping.sh"
+        line: 24
+      - path: ".flywheel/scripts/stale-error-auto-ping.sh"
+        line: 30
+      - path: ".flywheel/scripts/stale-error-auto-ping.sh"
+        line: 32
+      - path: ".flywheel/scripts/stale-error-auto-ping.sh"
+        line: 42
+      - path: ".flywheel/scripts/stale-error-auto-ping.sh"
+        line: 81
+    tests:
+      - path: "tests/jeff-issue-rubric.sh"
+        what_it_proves: "exercises errors surface reference at line 85"
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises errors surface reference at line 58"
+      - path: "tests/orch-no-punt-chain.sh"
+        what_it_proves: "exercises errors surface reference at line 93"
+      - path: "tests/jeff-corpus-accretive.sh"
+        what_it_proves: "exercises errors surface reference at line 139"
+      - path: "tests/jeff-corpus-doctor-scoping.sh"
+        what_it_proves: "exercises errors surface reference at line 49"
+    doctor_probes:
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 78
+        what_it_asserts: "errors referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 432
+        what_it_asserts: "errors referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 436
+        what_it_asserts: "errors referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 450
+        what_it_asserts: "errors referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "extract"
+    decision: "USE"
+    inventory_row: 31
+    inventory_decision: "USE"
+    description: "Extract code blocks from agent output"
+    callsites:
+      []
+    tests:
+      - path: "tests/fleet-coherence-launchd.sh"
+        what_it_proves: "exercises extract surface reference at line 135"
+      - path: "tests/fleet-coherence-launchd.sh"
+        what_it_proves: "exercises extract surface reference at line 136"
+      - path: "tests/fleet-coherence-launchd.sh"
+        what_it_proves: "exercises extract surface reference at line 137"
+      - path: "tests/frozen-pane-detector-slo-thresholds.sh"
+        what_it_proves: "exercises extract surface reference at line 52"
+      - path: "tests/codex-watchtower.sh"
+        what_it_proves: "exercises extract surface reference at line 68"
+    doctor_probes:
+      - path: ".flywheel/scripts/mission-fitness-doctor.sh"
+        line: 161
+        what_it_asserts: "extract referenced in probe/doctor path"
+      - path: ".flywheel/scripts/mission-fitness-doctor.sh"
+        line: 179
+        what_it_asserts: "extract referenced in probe/doctor path"
+      - path: ".flywheel/scripts/codex-budget-probe.sh"
+        line: 70
+        what_it_asserts: "extract referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm extract; add callsite/probe or downgrade inventory claim"
+  - name: "get-all-session-text"
+    decision: "USE"
+    inventory_row: 32
+    inventory_decision: "USE"
+    description: "Markdown table of all panes"
+    callsites:
+      []
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm get-all-session-text; add callsite/probe or downgrade inventory claim"
+  - name: "git"
+    decision: "USE"
+    inventory_row: 33
+    inventory_decision: "USE"
+    description: "Git coordination commands"
+    callsites:
+      []
+    tests:
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises git surface reference at line 15"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises git surface reference at line 22"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises git surface reference at line 30"
+      - path: "tests/jeff-issue-rubric.sh"
+        what_it_proves: "exercises git surface reference at line 30"
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises git surface reference at line 31"
+    doctor_probes:
+      - path: ".flywheel/scripts/close-validator-contract-probe.sh"
+        line: 75
+        what_it_asserts: "git referenced in probe/doctor path"
+      - path: ".flywheel/scripts/mission-fitness-doctor.sh"
+        line: 10
+        what_it_asserts: "git referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 96
+        what_it_asserts: "git referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 141
+        what_it_asserts: "git referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm git; add callsite/probe or downgrade inventory claim"
+  - name: "grep"
+    decision: "USE"
+    inventory_row: 34
+    inventory_decision: "USE"
+    description: "Search pane output with regex"
+    callsites:
+      []
+    tests:
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises grep surface reference at line 66"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises grep surface reference at line 85"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises grep surface reference at line 92"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises grep surface reference at line 122"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises grep surface reference at line 123"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 82
+        what_it_asserts: "grep referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 105
+        what_it_asserts: "grep referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh.bak.20260503T083705Z"
+        line: 81
+        what_it_asserts: "grep referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh.bak.20260503T083705Z"
+        line: 104
+        what_it_asserts: "grep referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm grep; add callsite/probe or downgrade inventory claim"
+  - name: "guards"
+    decision: "USE"
+    inventory_row: 35
+    inventory_decision: "USE"
+    description: "Agent Mail pre-commit guards"
+    callsites:
+      []
+    tests:
+      - path: "tests/fixtures/wire-or-explain-classifier/reset_guard.json"
+        what_it_proves: "exercises guards surface reference at line 7"
+      - path: "tests/fixtures/wire-or-explain-classifier/reset_guard.json"
+        what_it_proves: "exercises guards surface reference at line 8"
+    doctor_probes:
+      - path: ".flywheel/scripts/safe-probe.sh"
+        line: 16
+        what_it_asserts: "guards referenced in probe/doctor path"
+      - path: ".flywheel/scripts/safe-probe.sh"
+        line: 174
+        what_it_asserts: "guards referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm guards; add callsite/probe or downgrade inventory claim"
+  - name: "handoff"
+    decision: "USE"
+    inventory_row: 36
+    inventory_decision: "USE"
+    description: "Create or manage session handoffs"
+    callsites:
+      - path: ".flywheel/scripts/jeff-issue.sh"
+        line: 154
+      - path: ".flywheel/scripts/jeff-issue.sh"
+        line: 155
+      - path: ".flywheel/scripts/jeff-issue.sh"
+        line: 157
+    tests:
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises handoff surface reference at line 5"
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises handoff surface reference at line 6"
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises handoff surface reference at line 63"
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises handoff surface reference at line 64"
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises handoff surface reference at line 65"
+    doctor_probes:
+      - path: ".flywheel/scripts/value-gap-probe.sh"
+        line: 26
+        what_it_asserts: "handoff referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "health"
+    decision: "USE"
+    inventory_row: 37
+    inventory_decision: "USE"
+    description: "Health status of session agents"
+    callsites:
+      - path: ".flywheel/scripts/peer-orch-respawn-permit.sh"
+        line: 85
+      - path: ".flywheel/scripts/peer-orch-respawn-permit.sh"
+        line: 131
+      - path: ".flywheel/scripts/peer-orch-respawn-permit.sh"
+        line: 204
+      - path: ".flywheel/scripts/peer-orch-respawn-permit.sh"
+        line: 227
+      - path: ".flywheel/scripts/peer-orch-respawn-permit.sh"
+        line: 228
+      - path: ".flywheel/scripts/dispatch-capacity-gate.sh"
+        line: 25
+    tests:
+      - path: "tests/peer-orch-respawn-permit.sh"
+        what_it_proves: "exercises health surface reference at line 40"
+      - path: "tests/peer-orch-respawn-permit.sh"
+        what_it_proves: "exercises health surface reference at line 50"
+      - path: "tests/peer-orch-respawn-permit.sh"
+        what_it_proves: "exercises health surface reference at line 51"
+      - path: "tests/peer-orch-respawn-permit.sh"
+        what_it_proves: "exercises health surface reference at line 52"
+      - path: "tests/peer-orch-respawn-permit.sh"
+        what_it_proves: "exercises health surface reference at line 96"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 14
+        what_it_asserts: "health referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 19
+        what_it_asserts: "health referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 309
+        what_it_asserts: "health referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 366
+        what_it_asserts: "health referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "help"
+    decision: "EXCLUDED"
+    inventory_row: 38
+    inventory_decision: "EXCLUDED"
+    description: "Help about any command"
+    receipt: "Self-referential."
+    callsites:
+      - path: ".flywheel/scripts/verify-callback-delivery.sh"
+        line: 10
+      - path: ".flywheel/scripts/verify-callback-delivery.sh"
+        line: 29
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 212
+      - path: ".flywheel/scripts/ntm-preflight-l91-wrapper.sh"
+        line: 251
+      - path: ".flywheel/scripts/wire-or-explain-detector.py"
+        line: 461
+      - path: ".flywheel/scripts/fleet-coherence-scan.sh"
+        line: 10
+    tests:
+      - path: "tests/stale-error-auto-ping.sh"
+        what_it_proves: "exercises help surface reference at line 47"
+      - path: "tests/fleet-coherence-launchd.sh"
+        what_it_proves: "exercises help surface reference at line 116"
+      - path: "tests/fleet-coherence-launchd.sh"
+        what_it_proves: "exercises help surface reference at line 117"
+      - path: "tests/fleet-coherence-launchd.sh"
+        what_it_proves: "exercises help surface reference at line 118"
+      - path: "tests/fleet-coherence-launchd.sh"
+        what_it_proves: "exercises help surface reference at line 119"
+    doctor_probes:
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 13
+        what_it_asserts: "help referenced in probe/doctor path"
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 23
+        what_it_asserts: "help referenced in probe/doctor path"
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 36
+        what_it_asserts: "help referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 67
+        what_it_asserts: "help referenced in probe/doctor path"
+    coverage_score: 5
+    gap: null
+  - name: "history"
+    decision: "USE"
+    inventory_row: 39
+    inventory_decision: "USE"
+    description: "View prompt history"
+    callsites:
+      - path: ".flywheel/scripts/pane-work-signal.sh"
+        line: 2
+      - path: ".flywheel/scripts/pane-work-signal.sh"
+        line: 31
+      - path: ".flywheel/scripts/verify-callback-delivery.sh"
+        line: 29
+      - path: ".flywheel/scripts/verify-callback-delivery.sh"
+        line: 40
+      - path: ".flywheel/scripts/verify-callback-delivery.sh"
+        line: 46
+      - path: ".flywheel/scripts/dispatch-delivery-verify.sh"
+        line: 12
+    tests:
+      - path: "tests/verify-callback-delivery.sh"
+        what_it_proves: "exercises history surface reference at line 28"
+      - path: "tests/verify-callback-delivery.sh"
+        what_it_proves: "exercises history surface reference at line 70"
+      - path: "tests/verify-callback-delivery.sh"
+        what_it_proves: "exercises history surface reference at line 71"
+      - path: "tests/verify-callback-delivery.sh"
+        what_it_proves: "exercises history surface reference at line 77"
+      - path: "tests/verify-callback-delivery.sh"
+        what_it_proves: "exercises history surface reference at line 93"
+    doctor_probes:
+      - path: ".flywheel/scripts/headless-browser-probe.sh"
+        line: 8
+        what_it_asserts: "history referenced in probe/doctor path"
+      - path: ".flywheel/scripts/headless-browser-probe.sh"
+        line: 56
+        what_it_asserts: "history referenced in probe/doctor path"
+      - path: ".flywheel/scripts/headless-browser-probe.sh"
+        line: 57
+        what_it_asserts: "history referenced in probe/doctor path"
+      - path: ".flywheel/scripts/headless-browser-probe.sh"
+        line: 80
+        what_it_asserts: "history referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "hooks"
+    decision: "USE"
+    inventory_row: 40
+    inventory_decision: "USE"
+    description: "Git hooks for quality + coordination"
+    callsites:
+      []
+    tests:
+      - path: "tests/codex-hook-parity-probe.sh"
+        what_it_proves: "exercises hooks surface reference at line 32"
+      - path: "tests/codex-hook-parity-probe.sh"
+        what_it_proves: "exercises hooks surface reference at line 45"
+      - path: "tests/codex-hook-parity-probe.sh"
+        what_it_proves: "exercises hooks surface reference at line 49"
+      - path: "tests/codex-hook-parity-probe.sh"
+        what_it_proves: "exercises hooks surface reference at line 64"
+      - path: "tests/codex-hook-parity-probe.sh"
+        what_it_proves: "exercises hooks surface reference at line 80"
+    doctor_probes:
+      - path: ".flywheel/scripts/codex-hook-parity-probe.py"
+        line: 16
+        what_it_asserts: "hooks referenced in probe/doctor path"
+      - path: ".flywheel/scripts/codex-hook-parity-probe.py"
+        line: 70
+        what_it_asserts: "hooks referenced in probe/doctor path"
+      - path: ".flywheel/scripts/codex-hook-parity-probe.py"
+        line: 72
+        what_it_asserts: "hooks referenced in probe/doctor path"
+      - path: ".flywheel/scripts/codex-hook-parity-probe.py"
+        line: 76
+        what_it_asserts: "hooks referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm hooks; add callsite/probe or downgrade inventory claim"
+  - name: "init"
+    decision: "USE"
+    inventory_row: 41
+    inventory_decision: "USE"
+    description: "Initialize NTM for project"
+    callsites:
+      - path: ".flywheel/scripts/flywheel-onboard.sh"
+        line: 16
+      - path: ".flywheel/scripts/flywheel-onboard.sh"
+        line: 216
+    tests:
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises init surface reference at line 22"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises init surface reference at line 59"
+      - path: "tests/ntm-send-r3-workaround-copy-tests.sh"
+        what_it_proves: "exercises init surface reference at line 42"
+      - path: "tests/ntm-send-r3-workaround-copy-tests.sh"
+        what_it_proves: "exercises init surface reference at line 44"
+      - path: "tests/ntm-send-r3-workaround-copy-tests.sh"
+        what_it_proves: "exercises init surface reference at line 47"
+    doctor_probes:
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 292
+        what_it_asserts: "init referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 321
+        what_it_asserts: "init referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 325
+        what_it_asserts: "init referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 330
+        what_it_asserts: "init referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "interrupt"
+    decision: "USE"
+    inventory_row: 42
+    inventory_decision: "USE"
+    description: "Send Ctrl+C to all agent panes"
+    callsites:
+      - path: ".flywheel/scripts/recovery-escape-then-reprompt.sh"
+        line: 18
+      - path: ".flywheel/scripts/recovery-escape-then-reprompt.sh"
+        line: 20
+      - path: ".flywheel/scripts/recovery-escape-then-reprompt.sh"
+        line: 28
+      - path: ".flywheel/scripts/recovery-escape-then-reprompt.sh"
+        line: 29
+    tests:
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises interrupt surface reference at line 122"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises interrupt surface reference at line 129"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises interrupt surface reference at line 131"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises interrupt surface reference at line 141"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises interrupt surface reference at line 143"
+    doctor_probes:
+      - path: ".flywheel/scripts/fleet-conformance-probe.sh"
+        line: 267
+        what_it_asserts: "interrupt referenced in probe/doctor path"
+      - path: ".flywheel/scripts/value-gap-probe.sh"
+        line: 25
+        what_it_asserts: "interrupt referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "kernel"
+    decision: "USE"
+    inventory_row: 43
+    inventory_decision: "USE"
+    description: "Inspect command kernel registry"
+    callsites:
+      []
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm kernel; add callsite/probe or downgrade inventory claim"
+  - name: "kill"
+    decision: "USE"
+    inventory_row: 44
+    inventory_decision: "USE"
+    description: "Kill a tmux session"
+    callsites:
+      - path: ".flywheel/scripts/frozen-pane-detector.sh.v1.bak"
+        line: 352
+      - path: ".flywheel/scripts/fleet-rotate-on-caam-swap.sh"
+        line: 100
+      - path: ".flywheel/scripts/test-auto-respawn.sh"
+        line: 18
+      - path: ".flywheel/scripts/test-auto-respawn.sh"
+        line: 25
+    tests:
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises kill surface reference at line 4"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises kill surface reference at line 4"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises kill surface reference at line 6"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises kill surface reference at line 148"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises kill surface reference at line 151"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 300
+        what_it_asserts: "kill referenced in probe/doctor path"
+      - path: ".flywheel/scripts/fleet-canonical-rule-freshness-probe.sh"
+        line: 19
+        what_it_asserts: "kill referenced in probe/doctor path"
+      - path: ".flywheel/scripts/fleet-canonical-rule-freshness-probe.sh"
+        line: 24
+        what_it_asserts: "kill referenced in probe/doctor path"
+      - path: ".flywheel/scripts/close-validator-contract-probe.sh"
+        line: 24
+        what_it_asserts: "kill referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "level"
+    decision: "USE"
+    inventory_row: 45
+    inventory_decision: "USE"
+    description: "View/change CLI proficiency tier"
+    callsites:
+      []
+    tests:
+      - path: "tests/pane-work-signal-fixtures-self-test.sh"
+        what_it_proves: "exercises level surface reference at line 53"
+      - path: "tests/fleet-coherence-writer.sh"
+        what_it_proves: "exercises level surface reference at line 60"
+      - path: ".flywheel/tests/test_caam_recovery_path_probe.sh"
+        what_it_proves: "exercises level surface reference at line 56"
+      - path: ".flywheel/tests/test_caam_recovery_path_probe.sh"
+        what_it_proves: "exercises level surface reference at line 67"
+      - path: ".flywheel/tests/test_caam_recovery_path_probe.sh"
+        what_it_proves: "exercises level surface reference at line 68"
+    doctor_probes:
+      - path: ".flywheel/scripts/mission-fitness-doctor.sh"
+        line: 10
+        what_it_asserts: "level referenced in probe/doctor path"
+      - path: ".flywheel/scripts/mission-fitness-doctor.sh"
+        line: 193
+        what_it_asserts: "level referenced in probe/doctor path"
+      - path: ".flywheel/scripts/codex-budget-probe.sh"
+        line: 4
+        what_it_asserts: "level referenced in probe/doctor path"
+      - path: ".flywheel/scripts/value-gap-probe.sh"
+        line: 22
+        what_it_asserts: "level referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm level; add callsite/probe or downgrade inventory claim"
+  - name: "list"
+    decision: "USE"
+    inventory_row: 46
+    inventory_decision: "USE"
+    description: "List all tmux sessions"
+    callsites:
+      - path: ".flywheel/scripts/codex-budget-watchdog.sh"
+        line: 53
+      - path: ".flywheel/scripts/ntm-fleet-health.sh"
+        line: 56
+      - path: ".flywheel/scripts/codex-budget-probe.sh"
+        line: 126
+      - path: ".flywheel/scripts/topology-tick-refresh.sh"
+        line: 57
+      - path: ".flywheel/scripts/topology-tick-refresh.sh"
+        line: 65
+      - path: ".flywheel/scripts/flywheel-recovery.sh"
+        line: 173
+    tests:
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises list surface reference at line 26"
+      - path: "tests/infisical-safe.sh"
+        what_it_proves: "exercises list surface reference at line 32"
+      - path: "tests/infisical-safe.sh"
+        what_it_proves: "exercises list surface reference at line 33"
+      - path: "tests/infisical-safe.sh"
+        what_it_proves: "exercises list surface reference at line 36"
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises list surface reference at line 53"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 380
+        what_it_asserts: "list referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 428
+        what_it_asserts: "list referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 492
+        what_it_asserts: "list referenced in probe/doctor path"
+      - path: ".flywheel/scripts/jeff-issues-status-probe.sh"
+        line: 24
+        what_it_asserts: "list referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "lock"
+    decision: "ISSUE"
+    inventory_row: 47
+    inventory_decision: "ISSUE"
+    description: "Reserve files via Agent Mail"
+    callsites:
+      - path: ".flywheel/scripts/ntm-fleet-health.sh"
+        line: 6
+      - path: ".flywheel/scripts/ntm-fleet-health.sh.bak.b56fix06-20260505T020725Z"
+        line: 10
+      - path: ".flywheel/scripts/fleet-coherence-scan.sh"
+        line: 10
+    tests:
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises lock surface reference at line 37"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises lock surface reference at line 38"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises lock surface reference at line 45"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises lock surface reference at line 46"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises lock surface reference at line 53"
+    doctor_probes:
+      - path: ".flywheel/scripts/ticks-punted-probe.sh"
+        line: 62
+        what_it_asserts: "lock referenced in probe/doctor path"
+      - path: ".flywheel/scripts/close-validator-contract-probe.sh"
+        line: 115
+        what_it_asserts: "lock referenced in probe/doctor path"
+      - path: ".flywheel/scripts/close-validator-contract-probe.sh"
+        line: 117
+        what_it_asserts: "lock referenced in probe/doctor path"
+      - path: ".flywheel/scripts/jeff-corpus-doctor.sh"
+        line: 63
+        what_it_asserts: "lock referenced in probe/doctor path"
+    coverage_score: 5
+    gap: "issue body exists; add native-gap regression test before USE promotion"
+  - name: "locks"
+    decision: "ISSUE"
+    inventory_row: 48
+    inventory_decision: "ISSUE (companion to #47)"
+    description: "Manage file reservations"
+    callsites:
+      []
+    tests:
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises locks surface reference at line 126"
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises locks surface reference at line 128"
+      - path: "tests/jeff-corpus-accretive.sh"
+        what_it_proves: "exercises locks surface reference at line 139"
+      - path: "tests/fleet-coherence-launchd.sh"
+        what_it_proves: "exercises locks surface reference at line 157"
+      - path: "tests/test_idle_pane_watcher_convergence.sh"
+        what_it_proves: "exercises locks surface reference at line 218"
+    doctor_probes:
+      - path: ".flywheel/scripts/mission-lock-age-probe.sh"
+        line: 70
+        what_it_asserts: "locks referenced in probe/doctor path"
+      - path: ".flywheel/scripts/headless-browser-probe.sh"
+        line: 159
+        what_it_asserts: "locks referenced in probe/doctor path"
+      - path: ".flywheel/scripts/headless-browser-probe.sh"
+        line: 167
+        what_it_asserts: "locks referenced in probe/doctor path"
+      - path: ".flywheel/scripts/headless-browser-probe.sh"
+        line: 184
+        what_it_asserts: "locks referenced in probe/doctor path"
+    coverage_score: 5
+    gap: "issue body exists; add native-gap regression test before USE promotion"
+  - name: "logs"
+    decision: "USE"
+    inventory_row: 49
+    inventory_decision: "USE"
+    description: "Aggregate + filter logs from agents"
+    callsites:
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 95
+    tests:
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises logs surface reference at line 53"
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises logs surface reference at line 115"
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises logs surface reference at line 117"
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises logs surface reference at line 126"
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises logs surface reference at line 128"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 61
+        what_it_asserts: "logs referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 164
+        what_it_asserts: "logs referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 181
+        what_it_asserts: "logs referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 236
+        what_it_asserts: "logs referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "mail"
+    decision: "USE"
+    inventory_row: 50
+    inventory_decision: "USE"
+    description: "Human Overseer messaging to agents"
+    callsites:
+      - path: ".flywheel/scripts/orch-donella-trace-gate.sh"
+        line: 83
+      - path: ".flywheel/scripts/orch-donella-trace-gate.sh"
+        line: 84
+      - path: ".flywheel/scripts/agent-mail-send-redacted.sh"
+        line: 51
+      - path: ".flywheel/scripts/agent-mail-send-redacted.sh"
+        line: 52
+      - path: ".flywheel/scripts/agent-mail-send-redacted.sh"
+        line: 53
+      - path: ".flywheel/scripts/agent-mail-send-redacted.sh"
+        line: 64
+    tests:
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises mail surface reference at line 69"
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises mail surface reference at line 101"
+      - path: "tests/jeff-corpus-accretive.sh"
+        what_it_proves: "exercises mail surface reference at line 42"
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises mail surface reference at line 39"
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises mail surface reference at line 48"
+    doctor_probes:
+      - path: ".flywheel/scripts/orch-capture-parity-probe.py"
+        line: 18
+        what_it_asserts: "mail referenced in probe/doctor path"
+      - path: ".flywheel/scripts/fleet-conformance-probe.sh"
+        line: 282
+        what_it_asserts: "mail referenced in probe/doctor path"
+      - path: ".flywheel/scripts/peer-orch-drift-probe.sh"
+        line: 221
+        what_it_asserts: "mail referenced in probe/doctor path"
+      - path: ".flywheel/scripts/peer-orch-drift-probe.sh"
+        line: 223
+        what_it_asserts: "mail referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "memory"
+    decision: "USE"
+    inventory_row: 51
+    inventory_decision: "USE"
+    description: "Interact with CASS Memory"
+    callsites:
+      []
+    tests:
+      - path: "tests/doctrine-memory-wire.sh"
+        what_it_proves: "exercises memory surface reference at line 8"
+      - path: "tests/doctrine-memory-wire.sh"
+        what_it_proves: "exercises memory surface reference at line 9"
+      - path: "tests/doctrine-memory-wire.sh"
+        what_it_proves: "exercises memory surface reference at line 10"
+      - path: "tests/doctrine-memory-wire.sh"
+        what_it_proves: "exercises memory surface reference at line 39"
+      - path: "tests/doctrine-memory-wire.sh"
+        what_it_proves: "exercises memory surface reference at line 60"
+    doctor_probes:
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 64
+        what_it_asserts: "memory referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 102
+        what_it_asserts: "memory referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 149
+        what_it_asserts: "memory referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 484
+        what_it_asserts: "memory referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm memory; add callsite/probe or downgrade inventory claim"
+  - name: "message"
+    decision: "USE"
+    inventory_row: 52
+    inventory_decision: "USE"
+    description: "Agent Mail messaging"
+    callsites:
+      - path: ".flywheel/scripts/verify-callback-delivery.sh"
+        line: 46
+      - path: ".flywheel/scripts/verify-callback-delivery.sh"
+        line: 50
+      - path: ".flywheel/scripts/peer-orch-drift-probe.sh"
+        line: 191
+      - path: ".flywheel/scripts/inbox-check-tick-step.sh"
+        line: 94
+      - path: ".flywheel/scripts/agentmail-registration-broadcast.sh"
+        line: 140
+      - path: ".flywheel/scripts/build-dispatch-packet.sh"
+        line: 135
+    tests:
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises message surface reference at line 69"
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises message surface reference at line 76"
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises message surface reference at line 89"
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises message surface reference at line 100"
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises message surface reference at line 101"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 486
+        what_it_asserts: "message referenced in probe/doctor path"
+      - path: ".flywheel/scripts/codex-hook-parity-probe.py"
+        line: 159
+        what_it_asserts: "message referenced in probe/doctor path"
+      - path: ".flywheel/scripts/jeff-corpus-doctor.sh"
+        line: 43
+        what_it_asserts: "message referenced in probe/doctor path"
+      - path: ".flywheel/scripts/jeff-corpus-doctor.sh"
+        line: 63
+        what_it_asserts: "message referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "metrics"
+    decision: "WRAP"
+    inventory_row: 53
+    inventory_decision: "USE (today's W1M wrapper)"
+    description: "View + manage success metrics"
+    wrapper_script: ".flywheel/scripts/ntm-metrics-doctor-probe.sh"
+    why_keep_evidence: "Maps quota metrics into flywheel doctor gate/action decisions."
+    deletion_tripwire: "delete when ntm metrics or ntm doctor emits flywheel-compatible gate/action mappings for quota capacity."
+    callsites:
+      - path: ".flywheel/scripts/ntm-metrics-doctor-probe.sh"
+        line: 4
+      - path: ".flywheel/scripts/ntm-metrics-doctor-probe.sh"
+        line: 31
+      - path: ".flywheel/scripts/ntm-metrics-doctor-probe.sh"
+        line: 73
+      - path: ".flywheel/scripts/ntm-metrics-doctor-probe.sh"
+        line: 96
+      - path: ".flywheel/scripts/ntm-metrics-doctor-probe.sh"
+        line: 97
+      - path: ".flywheel/scripts/ntm-metrics-doctor-probe.sh"
+        line: 98
+    tests:
+      - path: "tests/architecture-health-rollup.sh"
+        what_it_proves: "exercises metrics surface reference at line 83"
+      - path: "tests/peer-orch-freeze-monitor.sh"
+        what_it_proves: "exercises metrics surface reference at line 127"
+      - path: "tests/peer-orch-freeze-monitor.sh"
+        what_it_proves: "exercises metrics surface reference at line 128"
+      - path: "tests/fleet-observatory-aggregate.sh"
+        what_it_proves: "exercises metrics surface reference at line 48"
+      - path: "tests/fleet-observatory-aggregate.sh"
+        what_it_proves: "exercises metrics surface reference at line 70"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 272
+        what_it_asserts: "metrics referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 373
+        what_it_asserts: "metrics referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 385
+        what_it_asserts: "metrics referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 407
+        what_it_asserts: "metrics referenced in probe/doctor path"
+    coverage_score: 8
+    gap: "no top-level flywheel doctor probe asserts wrapper adoption or bypass resistance"
+  - name: "models"
+    decision: "USE"
+    inventory_row: 54
+    inventory_decision: "USE"
+    description: "Manage local Ollama models"
+    callsites:
+      []
+    tests:
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises models surface reference at line 99"
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm models; add callsite/probe or downgrade inventory claim"
+  - name: "modes"
+    decision: "USE"
+    inventory_row: 55
+    inventory_decision: "USE"
+    description: "Browse + explore reasoning modes"
+    callsites:
+      []
+    tests:
+      - path: "tests/validation-e2e.sh"
+        what_it_proves: "exercises modes surface reference at line 55"
+      - path: "tests/flywheel-recovery-session-paths.sh"
+        what_it_proves: "exercises modes surface reference at line 129"
+      - path: ".flywheel/tests/test_ntm_approve_human_gates.sh"
+        what_it_proves: "exercises modes surface reference at line 122"
+      - path: ".flywheel/tests/test_ntm_coordinator_shadow.sh"
+        what_it_proves: "exercises modes surface reference at line 110"
+      - path: ".flywheel/tests/test_golden_fixture_replay_runner.sh"
+        what_it_proves: "exercises modes surface reference at line 33"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 16
+        what_it_asserts: "modes referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 574
+        what_it_asserts: "modes referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh.bak.20260503T083705Z"
+        line: 15
+        what_it_asserts: "modes referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh.bak.20260503T083705Z"
+        line: 432
+        what_it_asserts: "modes referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm modes; add callsite/probe or downgrade inventory claim"
+  - name: "openapi"
+    decision: "USE"
+    inventory_row: 56
+    inventory_decision: "USE"
+    description: "OpenAPI spec management"
+    callsites:
+      []
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm openapi; add callsite/probe or downgrade inventory claim"
+  - name: "overlay"
+    decision: "USE"
+    inventory_row: 57
+    inventory_decision: "USE"
+    description: "Floating overlay above panes"
+    callsites:
+      []
+    tests:
+      - path: ".flywheel/tests/test_dispatch_skill_router_collision_resolver.sh"
+        what_it_proves: "exercises overlay surface reference at line 47"
+      - path: ".flywheel/tests/test_dispatch_skill_router_collision_resolver.sh"
+        what_it_proves: "exercises overlay surface reference at line 50"
+      - path: ".flywheel/tests/test_dispatch_skill_router_collision_resolver.sh"
+        what_it_proves: "exercises overlay surface reference at line 51"
+      - path: ".flywheel/tests/test_dispatch_author_contract_probe.sh"
+        what_it_proves: "exercises overlay surface reference at line 33"
+      - path: ".flywheel/tests/test_dispatch_author_contract_probe.sh"
+        what_it_proves: "exercises overlay surface reference at line 76"
+    doctor_probes:
+      - path: ".flywheel/scripts/dispatch-author-contract-probe.sh"
+        line: 25
+        what_it_asserts: "overlay referenced in probe/doctor path"
+      - path: ".flywheel/scripts/dispatch-author-contract-probe.sh"
+        line: 113
+        what_it_asserts: "overlay referenced in probe/doctor path"
+      - path: ".flywheel/scripts/dispatch-author-contract-probe.sh"
+        line: 115
+        what_it_asserts: "overlay referenced in probe/doctor path"
+      - path: ".flywheel/scripts/dispatch-author-contract-probe.sh"
+        line: 117
+        what_it_asserts: "overlay referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "interactive/documentation surface; add explicit no-bypass/no-script-use receipt for ntm overlay"
+  - name: "palette"
+    decision: "USE"
+    inventory_row: 58
+    inventory_decision: "USE"
+    description: "Interactive command palette"
+    callsites:
+      []
+    tests:
+      - path: "tests/test_apply_tmux_tuning.sh"
+        what_it_proves: "exercises palette surface reference at line 66"
+      - path: "tests/flywheel-readme.sh"
+        what_it_proves: "exercises palette surface reference at line 25"
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "interactive/documentation surface; add explicit no-bypass/no-script-use receipt for ntm palette"
+  - name: "personas"
+    aliases:
+      - "personas"
+      - "profiles"
+    decision: "USE"
+    inventory_row: 59
+    inventory_decision: "USE"
+    description: "Manage agent personas"
+    callsites:
+      []
+    tests:
+      - path: ".flywheel/tests/test_caam_recovery_path_probe.sh"
+        what_it_proves: "exercises personas surface reference at line 14"
+      - path: ".flywheel/tests/test_caam_recovery_path_probe.sh"
+        what_it_proves: "exercises personas surface reference at line 16"
+      - path: ".flywheel/tests/test_caam_recovery_path_probe.sh"
+        what_it_proves: "exercises personas surface reference at line 35"
+      - path: ".flywheel/tests/test_caam_recovery_path_probe.sh"
+        what_it_proves: "exercises personas surface reference at line 40"
+      - path: ".flywheel/tests/test_caam_recovery_path_probe.sh"
+        what_it_proves: "exercises personas surface reference at line 43"
+    doctor_probes:
+      - path: ".flywheel/scripts/caam-recovery-path-probe.sh"
+        line: 84
+        what_it_asserts: "personas referenced in probe/doctor path"
+      - path: ".flywheel/scripts/caam-recovery-path-probe.sh"
+        line: 95
+        what_it_asserts: "personas referenced in probe/doctor path"
+      - path: ".flywheel/scripts/caam-recovery-path-probe.sh"
+        line: 97
+        what_it_asserts: "personas referenced in probe/doctor path"
+      - path: ".flywheel/scripts/caam-recovery-path-probe.sh"
+        line: 98
+        what_it_asserts: "personas referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm personas; add callsite/probe or downgrade inventory claim"
+  - name: "pipeline"
+    decision: "WRAP"
+    inventory_row: 60
+    inventory_decision: "USE (today's W3aP wrapper)"
+    description: "Run + manage workflow pipelines"
+    wrapper_script: ".flywheel/scripts/ntm-pipeline-shadow.sh"
+    why_keep_evidence: "Dry-run deterministic DAG artifact while native pipeline execution is disabled pending ntm#124."
+    deletion_tripwire: "delete when ntm#124 lands and ntm pipeline dry-run emits deterministic DAG with no live mutation before apply."
+    callsites:
+      - path: ".flywheel/scripts/dispatch-and-log.sh"
+        line: 97
+      - path: ".flywheel/scripts/ntm-pipeline-shadow.sh"
+        line: 7
+      - path: ".flywheel/scripts/ntm-pipeline-shadow.sh"
+        line: 8
+      - path: ".flywheel/scripts/ntm-pipeline-shadow.sh"
+        line: 9
+      - path: ".flywheel/scripts/ntm-pipeline-shadow.sh"
+        line: 24
+      - path: ".flywheel/scripts/ntm-pipeline-shadow.sh"
+        line: 25
+    tests:
+      - path: "tests/test_peer_orch_drift_alert_emitted.sh"
+        what_it_proves: "exercises pipeline surface reference at line 31"
+      - path: ".flywheel/tests/test_ntm_pipeline_shadow.sh"
+        what_it_proves: "exercises pipeline surface reference at line 5"
+      - path: ".flywheel/tests/test_ntm_pipeline_shadow.sh"
+        what_it_proves: "exercises pipeline surface reference at line 6"
+      - path: ".flywheel/tests/test_ntm_pipeline_shadow.sh"
+        what_it_proves: "exercises pipeline surface reference at line 32"
+      - path: ".flywheel/tests/test_ntm_pipeline_shadow.sh"
+        what_it_proves: "exercises pipeline surface reference at line 54"
+    doctor_probes:
+      - path: ".flywheel/scripts/peer-orch-drift-probe.sh"
+        line: 39
+        what_it_asserts: "pipeline referenced in probe/doctor path"
+      - path: ".flywheel/scripts/value-gap-probe.sh"
+        line: 28
+        what_it_asserts: "pipeline referenced in probe/doctor path"
+    coverage_score: 8
+    gap: "no top-level flywheel doctor probe asserts wrapper adoption or bypass resistance"
+  - name: "plugins"
+    decision: "USE"
+    inventory_row: 61
+    inventory_decision: "USE"
+    description: "Manage installed plugins"
+    callsites:
+      []
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm plugins; add callsite/probe or downgrade inventory claim"
+  - name: "policy"
+    decision: "WRAP"
+    inventory_row: 62
+    inventory_decision: "USE (today's W3bP wrapper)"
+    description: "NTM policy configuration"
+    wrapper_script: ".flywheel/scripts/ntm-policy-contracts.sh"
+    why_keep_evidence: "Privilege-escalation block and warn-only policy contract semantics."
+    deletion_tripwire: "delete when ntm policy validate/audit fail closed on malformed policy, block privileged operations, and expose warn-only gate semantics."
+    callsites:
+      - path: ".flywheel/scripts/peer-orch-respawn-permit.sh"
+        line: 131
+      - path: ".flywheel/scripts/ntm-policy-contracts.sh"
+        line: 17
+      - path: ".flywheel/scripts/ntm-policy-contracts.sh"
+        line: 21
+      - path: ".flywheel/scripts/ntm-policy-contracts.sh"
+        line: 94
+      - path: ".flywheel/scripts/ntm-policy-contracts.sh"
+        line: 358
+      - path: ".flywheel/scripts/ntm-policy-contracts.sh"
+        line: 403
+    tests:
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises policy surface reference at line 37"
+      - path: "tests/jeff-issue-rubric.sh"
+        what_it_proves: "exercises policy surface reference at line 41"
+      - path: "tests/frozen-pane-detector-slo-thresholds.sh"
+        what_it_proves: "exercises policy surface reference at line 45"
+      - path: "tests/architecture-health-rollup.sh"
+        what_it_proves: "exercises policy surface reference at line 82"
+      - path: "tests/agent-mail-identity-registry.sh"
+        what_it_proves: "exercises policy surface reference at line 60"
+    doctor_probes:
+      - path: ".flywheel/scripts/close-validator-contract-probe.sh"
+        line: 106
+        what_it_asserts: "policy referenced in probe/doctor path"
+      - path: ".flywheel/scripts/close-validator-contract-probe.sh"
+        line: 155
+        what_it_asserts: "policy referenced in probe/doctor path"
+      - path: ".flywheel/scripts/close-validator-contract-probe.sh"
+        line: 156
+        what_it_asserts: "policy referenced in probe/doctor path"
+      - path: ".flywheel/scripts/probe-registry-audit.sh"
+        line: 18
+        what_it_asserts: "policy referenced in probe/doctor path"
+    coverage_score: 8
+    gap: "no top-level flywheel doctor probe asserts wrapper adoption or bypass resistance"
+  - name: "preflight"
+    decision: "WRAP"
+    inventory_row: 63
+    inventory_decision: "USE (today's W2P wrapper)"
+    description: "Validate prompt before sending"
+    wrapper_script: ".flywheel/scripts/ntm-preflight-l91-wrapper.sh"
+    why_keep_evidence: "L91 four-state receipt: transport accepted, prompt visible, prompt submitted, and work started."
+    deletion_tripwire: "delete when ntm preflight/send/history emits a native four-state L91 delivery receipt with freshness and work-started classification."
+    callsites:
+      - path: ".flywheel/scripts/ntm-preflight-l91-wrapper.sh"
+        line: 4
+      - path: ".flywheel/scripts/ntm-preflight-l91-wrapper.sh"
+        line: 26
+      - path: ".flywheel/scripts/ntm-preflight-l91-wrapper.sh"
+        line: 251
+    tests:
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises preflight surface reference at line 13"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises preflight surface reference at line 58"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises preflight surface reference at line 59"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises preflight surface reference at line 60"
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises preflight surface reference at line 94"
+    doctor_probes:
+      []
+    coverage_score: 8
+    gap: "no top-level flywheel doctor probe asserts wrapper adoption or bypass resistance"
+  - name: "profile"
+    decision: "USE"
+    inventory_row: 64
+    inventory_decision: "USE"
+    description: "Session spawn profiles"
+    callsites:
+      - path: ".flywheel/scripts/fleet-rotate-on-caam-swap.sh"
+        line: 8
+      - path: ".flywheel/scripts/caam-auto-rotate-on-usage-limit.sh"
+        line: 81
+    tests:
+      - path: "tests/headless-browser-probe.sh"
+        what_it_proves: "exercises profile surface reference at line 73"
+      - path: "tests/jsonl-orphan-migrations-test.sh"
+        what_it_proves: "exercises profile surface reference at line 80"
+      - path: ".flywheel/tests/test_caam_recovery_path_probe.sh"
+        what_it_proves: "exercises profile surface reference at line 14"
+      - path: ".flywheel/tests/test_caam_recovery_path_probe.sh"
+        what_it_proves: "exercises profile surface reference at line 16"
+      - path: ".flywheel/tests/test_caam_recovery_path_probe.sh"
+        what_it_proves: "exercises profile surface reference at line 35"
+    doctor_probes:
+      - path: ".flywheel/scripts/headless-browser-probe.sh"
+        line: 7
+        what_it_asserts: "profile referenced in probe/doctor path"
+      - path: ".flywheel/scripts/headless-browser-probe.sh"
+        line: 19
+        what_it_asserts: "profile referenced in probe/doctor path"
+      - path: ".flywheel/scripts/headless-browser-probe.sh"
+        line: 56
+        what_it_asserts: "profile referenced in probe/doctor path"
+      - path: ".flywheel/scripts/headless-browser-probe.sh"
+        line: 57
+        what_it_asserts: "profile referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "quick"
+    decision: "USE"
+    inventory_row: 65
+    inventory_decision: "USE"
+    description: "Quick project setup"
+    callsites:
+      []
+    tests:
+      - path: "tests/peer-orch-respawn-permit.sh"
+        what_it_proves: "exercises quick surface reference at line 88"
+      - path: "tests/watcher-isomorphic-probe.sh"
+        what_it_proves: "exercises quick surface reference at line 149"
+      - path: "tests/quality-bar-close-gate.sh"
+        what_it_proves: "exercises quick surface reference at line 99"
+      - path: "tests/test_dispatch_log_fitness_invariant.sh"
+        what_it_proves: "exercises quick surface reference at line 15"
+      - path: "tests/substrate-loop-contract-validator.sh"
+        what_it_proves: "exercises quick surface reference at line 103"
+    doctor_probes:
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 600
+        what_it_asserts: "quick referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 653
+        what_it_asserts: "quick referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 657
+        what_it_asserts: "quick referenced in probe/doctor path"
+      - path: ".flywheel/scripts/ntm-quota-proactive-probe.sh"
+        line: 26
+        what_it_asserts: "quick referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm quick; add callsite/probe or downgrade inventory claim"
+  - name: "quota"
+    decision: "WRAP"
+    inventory_row: 66
+    inventory_decision: "USE (today's W1Q wrapper)"
+    description: "Check agent quota usage"
+    wrapper_script: ".flywheel/scripts/ntm-quota-proactive-probe.sh"
+    why_keep_evidence: "Threshold classification and unknown-provider warn/fail policy over native ntm quota JSON."
+    deletion_tripwire: "delete when ntm quota emits capacity_class, remaining_units, provider classification, unknown-provider policy, and stable doctor-ready fields natively."
+    callsites:
+      - path: ".flywheel/scripts/ntm-quota-proactive-probe.sh"
+        line: 4
+      - path: ".flywheel/scripts/ntm-quota-proactive-probe.sh"
+        line: 6
+      - path: ".flywheel/scripts/ntm-quota-proactive-probe.sh"
+        line: 26
+      - path: ".flywheel/scripts/ntm-quota-proactive-probe.sh"
+        line: 28
+      - path: ".flywheel/scripts/ntm-quota-proactive-probe.sh"
+        line: 36
+      - path: ".flywheel/scripts/ntm-quota-proactive-probe.sh"
+        line: 64
+    tests:
+      - path: ".flywheel/tests/test_ntm_coordinator_shadow.sh"
+        what_it_proves: "exercises quota surface reference at line 46"
+      - path: ".flywheel/tests/test_ntm_coordinator_shadow.sh"
+        what_it_proves: "exercises quota surface reference at line 66"
+      - path: ".flywheel/tests/test_ntm_coordinator_shadow.sh"
+        what_it_proves: "exercises quota surface reference at line 77"
+      - path: ".flywheel/tests/test_ntm_quota_proactive_probe.sh"
+        what_it_proves: "exercises quota surface reference at line 5"
+      - path: ".flywheel/tests/test_ntm_quota_proactive_probe.sh"
+        what_it_proves: "exercises quota surface reference at line 6"
+    doctor_probes:
+      - path: ".flywheel/scripts/ntm-quota-proactive-probe.sh"
+        line: 4
+        what_it_asserts: "wrapper self-probe exists"
+      - path: ".flywheel/scripts/ntm-quota-proactive-probe.sh"
+        line: 6
+        what_it_asserts: "wrapper self-probe exists"
+      - path: ".flywheel/scripts/ntm-quota-proactive-probe.sh"
+        line: 7
+        what_it_asserts: "wrapper self-probe exists"
+      - path: ".flywheel/scripts/ntm-quota-proactive-probe.sh"
+        line: 10
+        what_it_asserts: "wrapper self-probe exists"
+    coverage_score: 8
+    gap: "no top-level flywheel doctor probe asserts wrapper adoption or bypass resistance"
+  - name: "rebalance"
+    decision: "USE"
+    inventory_row: 67
+    inventory_decision: "USE"
+    description: "Workload distribution"
+    callsites:
+      - path: ".flywheel/scripts/peer-orch-blocker-watch.sh"
+        line: 13
+      - path: ".flywheel/scripts/peer-orch-blocker-watch.sh"
+        line: 18
+      - path: ".flywheel/scripts/peer-orch-blocker-watch.sh"
+        line: 38
+      - path: ".flywheel/scripts/peer-orch-blocker-watch.sh"
+        line: 50
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 6
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm rebalance; add callsite/probe or downgrade inventory claim"
+  - name: "recipes"
+    decision: "USE"
+    inventory_row: 68
+    inventory_decision: "USE"
+    description: "Session recipes (presets)"
+    callsites:
+      []
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm recipes; add callsite/probe or downgrade inventory claim"
+  - name: "redact"
+    decision: "ISSUE"
+    inventory_row: 69
+    inventory_decision: "ISSUE"
+    description: "Redaction utilities"
+    callsites:
+      - path: ".flywheel/scripts/agent-mail-send-redacted.sh"
+        line: 42
+      - path: ".flywheel/scripts/agent-mail-send-redacted.sh"
+        line: 51
+    tests:
+      - path: "tests/wire-or-explain-doctor.sh"
+        what_it_proves: "exercises redact surface reference at line 51"
+      - path: "tests/wire-or-explain-doctor.sh"
+        what_it_proves: "exercises redact surface reference at line 72"
+      - path: "tests/wire-or-explain-classifier.sh"
+        what_it_proves: "exercises redact surface reference at line 112"
+      - path: "tests/fixtures/wire-or-explain-classifier/secret_evidence.json"
+        what_it_proves: "exercises redact surface reference at line 13"
+      - path: "tests/fixtures/wire-or-explain-doctor/secret-redaction.jsonl"
+        what_it_proves: "exercises redact surface reference at line 1"
+    doctor_probes:
+      - path: ".flywheel/scripts/dispatch-author-contract-probe.sh"
+        line: 130
+        what_it_asserts: "redact referenced in probe/doctor path"
+    coverage_score: 5
+    gap: "issue body exists; add native-gap regression test before USE promotion"
+  - name: "replay"
+    decision: "USE"
+    inventory_row: 70
+    inventory_decision: "USE"
+    description: "Replay prompt from history"
+    callsites:
+      - path: ".flywheel/scripts/recovery-escape-then-reprompt.sh"
+        line: 18
+      - path: ".flywheel/scripts/recovery-escape-then-reprompt.sh"
+        line: 20
+      - path: ".flywheel/scripts/recovery-escape-then-reprompt.sh"
+        line: 28
+      - path: ".flywheel/scripts/recovery-escape-then-reprompt.sh"
+        line: 29
+    tests:
+      - path: "tests/jeff-corpus-accretive.sh"
+        what_it_proves: "exercises replay surface reference at line 112"
+      - path: "tests/jeff-corpus-accretive.sh"
+        what_it_proves: "exercises replay surface reference at line 129"
+      - path: "tests/jeff-corpus-accretive.sh"
+        what_it_proves: "exercises replay surface reference at line 130"
+      - path: "tests/closed-bead-artifact-scan.sh"
+        what_it_proves: "exercises replay surface reference at line 144"
+      - path: "tests/closed-bead-artifact-scan.sh"
+        what_it_proves: "exercises replay surface reference at line 145"
+    doctor_probes:
+      - path: ".flywheel/scripts/dispatch-author-contract-probe.sh"
+        line: 136
+        what_it_asserts: "replay referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "repo"
+    decision: "USE"
+    inventory_row: 71
+    inventory_decision: "USE"
+    description: "Repo management commands"
+    callsites:
+      - path: ".flywheel/scripts/dispatch-log-fitness-invariant.sh"
+        line: 17
+      - path: ".flywheel/scripts/l70-ticks-punted-counter.sh"
+        line: 575
+      - path: ".flywheel/scripts/l70-ticks-punted-counter.sh"
+        line: 576
+      - path: ".flywheel/scripts/jeff-issue.sh"
+        line: 154
+      - path: ".flywheel/scripts/jeff-issue.sh"
+        line: 155
+      - path: ".flywheel/scripts/jeff-issue.sh"
+        line: 157
+    tests:
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises repo surface reference at line 28"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises repo surface reference at line 29"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises repo surface reference at line 59"
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises repo surface reference at line 32"
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises repo surface reference at line 78"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 274
+        what_it_asserts: "repo referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 275
+        what_it_asserts: "repo referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 280
+        what_it_asserts: "repo referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 281
+        what_it_asserts: "repo referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "respawn"
+    decision: "USE"
+    inventory_row: 72
+    inventory_decision: "USE"
+    description: "Kill + restart worker agents"
+    callsites:
+      - path: ".flywheel/scripts/worker-auto-respawn-watchdog.sh"
+        line: 32
+      - path: ".flywheel/scripts/worker-auto-respawn-watchdog.sh"
+        line: 47
+      - path: ".flywheel/scripts/worker-auto-respawn-watchdog.sh"
+        line: 61
+      - path: ".flywheel/scripts/peer-orch-respawn-permit.sh"
+        line: 127
+      - path: ".flywheel/scripts/peer-orch-respawn-permit.sh"
+        line: 131
+      - path: ".flywheel/scripts/peer-orch-respawn-permit.sh"
+        line: 205
+    tests:
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises respawn surface reference at line 35"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises respawn surface reference at line 36"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises respawn surface reference at line 123"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises respawn surface reference at line 126"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises respawn surface reference at line 129"
+    doctor_probes:
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 5
+        what_it_asserts: "respawn referenced in probe/doctor path"
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 107
+        what_it_asserts: "respawn referenced in probe/doctor path"
+      - path: ".flywheel/scripts/no-silent-darkness-probe.sh"
+        line: 239
+        what_it_asserts: "respawn referenced in probe/doctor path"
+      - path: ".flywheel/flywheel-loop-tick"
+        line: 245
+        what_it_asserts: "respawn referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "resume"
+    decision: "USE"
+    inventory_row: 73
+    inventory_decision: "USE"
+    description: "Resume work from handoff"
+    callsites:
+      - path: ".flywheel/scripts/frozen-pane-detector.sh.v1.bak"
+        line: 362
+    tests:
+      - path: "tests/fleet-shutdown-recovery.sh"
+        what_it_proves: "exercises resume surface reference at line 69"
+      - path: "tests/fleet-shutdown-recovery.sh"
+        what_it_proves: "exercises resume surface reference at line 89"
+      - path: "tests/fleet-shutdown-recovery.sh"
+        what_it_proves: "exercises resume surface reference at line 90"
+      - path: "tests/fleet-shutdown-recovery.sh"
+        what_it_proves: "exercises resume surface reference at line 91"
+      - path: "tests/fleet-shutdown-recovery.sh"
+        what_it_proves: "exercises resume surface reference at line 92"
+    doctor_probes:
+      []
+    coverage_score: 8
+    gap: null
+  - name: "review-queue"
+    decision: "ISSUE"
+    inventory_row: 74
+    inventory_decision: "ISSUE"
+    description: "List idle agents + suggest review"
+    callsites:
+      []
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "ISSUE surface has no acceptance probe proving current native gap for ntm review-queue"
+  - name: "rollback"
+    decision: "WRAP"
+    inventory_row: 75
+    inventory_decision: "USE (today's W3bR wrapper)"
+    description: "Restore session to checkpoint"
+    wrapper_script: ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh"
+    why_keep_evidence: "Same W3bR guard for restore path: refuses unsafe rollback and appends stop-condition receipt."
+    deletion_tripwire: "delete when ntm rollback supports scoped dirty-worktree preservation, attempt budgets, reservation state, and refusal receipts natively."
+    callsites:
+      - path: ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh"
+        line: 18
+      - path: ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh"
+        line: 20
+      - path: ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh"
+        line: 236
+      - path: ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh"
+        line: 299
+      - path: ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh"
+        line: 300
+      - path: ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh"
+        line: 301
+    tests:
+      - path: "tests/verify-callback-delivery.sh"
+        what_it_proves: "exercises rollback surface reference at line 48"
+      - path: "tests/identity-deferral-receipt.sh"
+        what_it_proves: "exercises rollback surface reference at line 87"
+      - path: "tests/test_apply_substrate_tuning.sh"
+        what_it_proves: "exercises rollback surface reference at line 28"
+      - path: "tests/frozen-pane-detector-self-test.sh"
+        what_it_proves: "exercises rollback surface reference at line 83"
+      - path: "tests/frozen-pane-detector-self-test.sh"
+        what_it_proves: "exercises rollback surface reference at line 206"
+    doctor_probes:
+      - path: ".flywheel/scripts/orch-capture-parity-probe.py"
+        line: 33
+        what_it_asserts: "rollback referenced in probe/doctor path"
+      - path: ".flywheel/scripts/orch-capture-parity-probe.py"
+        line: 168
+        what_it_asserts: "rollback referenced in probe/doctor path"
+      - path: ".flywheel/scripts/orch-capture-parity-probe.py"
+        line: 177
+        what_it_asserts: "rollback referenced in probe/doctor path"
+      - path: ".flywheel/scripts/orch-capture-parity-probe.py"
+        line: 239
+        what_it_asserts: "rollback referenced in probe/doctor path"
+    coverage_score: 8
+    gap: "no top-level flywheel doctor probe asserts wrapper adoption or bypass resistance"
+  - name: "rotate"
+    decision: "WRAP"
+    inventory_row: 76
+    inventory_decision: "USE (today's W0A wrapper)"
+    description: "Rotate to different account"
+    wrapper_script: ".flywheel/scripts/caam-auto-rotate-on-usage-limit.sh"
+    why_keep_evidence: "CAAM profile selection, idempotency receipt, and rotation/recovery ledgers around native ntm rotate."
+    deletion_tripwire: "delete when ntm rotate supports CAAM vault-profile selection, per-operation idempotency receipts, recovery ledger append, and safe non-stdin rotation without pane contamination."
+    callsites:
+      - path: ".flywheel/scripts/fleet-rotate-on-caam-swap.sh"
+        line: 5
+      - path: ".flywheel/scripts/fleet-rotate-on-caam-swap.sh"
+        line: 6
+      - path: ".flywheel/scripts/fleet-rotate-on-caam-swap.sh"
+        line: 136
+      - path: ".flywheel/scripts/meta-rule-structural-batch-gate.sh"
+        line: 25
+      - path: ".flywheel/scripts/meta-rule-structural-batch-gate.sh"
+        line: 87
+      - path: ".flywheel/scripts/orch-donella-trace-gate.sh"
+        line: 83
+    tests:
+      - path: "tests/fleet-coherence-writer.sh"
+        what_it_proves: "exercises rotate surface reference at line 96"
+      - path: "tests/fleet-coherence-writer.sh"
+        what_it_proves: "exercises rotate surface reference at line 105"
+      - path: "tests/agent-mail-identity-registry.sh"
+        what_it_proves: "exercises rotate surface reference at line 53"
+      - path: "tests/agent-mail-identity-registry.sh"
+        what_it_proves: "exercises rotate surface reference at line 54"
+      - path: "tests/agent-mail-identity-registry.sh"
+        what_it_proves: "exercises rotate surface reference at line 55"
+    doctor_probes:
+      - path: ".flywheel/scripts/codex-budget-probe.sh"
+        line: 164
+        what_it_asserts: "rotate referenced in probe/doctor path"
+      - path: ".flywheel/scripts/ntm-metrics-doctor-probe.sh"
+        line: 113
+        what_it_asserts: "rotate referenced in probe/doctor path"
+      - path: ".flywheel/scripts/ntm-metrics-doctor-probe.sh"
+        line: 197
+        what_it_asserts: "rotate referenced in probe/doctor path"
+      - path: ".flywheel/scripts/caam-recovery-path-probe.sh"
+        line: 138
+        what_it_asserts: "rotate referenced in probe/doctor path"
+    coverage_score: 8
+    gap: "no top-level flywheel doctor probe asserts wrapper adoption or bypass resistance"
+  - name: "safety"
+    decision: "WRAP"
+    inventory_row: 77
+    inventory_decision: "USE (today's W2D wrapper, advisory)"
+    description: "Destructive command protection"
+    wrapper_script: ".flywheel/scripts/ntm-safety-dcg-sibling.sh"
+    why_keep_evidence: "Keeps DCG authoritative while native ntm safety remains advisory; mismatch and malformed classifier fail closed."
+    deletion_tripwire: "delete when ntm safety can invoke/verify DCG as final authority with fail-closed JSON and no execution side effects."
+    callsites:
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 70
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 164
+      - path: ".flywheel/scripts/recovery-escape-then-reprompt.sh"
+        line: 18
+      - path: ".flywheel/scripts/ntm-safety-dcg-sibling.sh"
+        line: 5
+      - path: ".flywheel/scripts/ntm-safety-dcg-sibling.sh"
+        line: 6
+      - path: ".flywheel/scripts/ntm-safety-dcg-sibling.sh"
+        line: 23
+    tests:
+      - path: "tests/test_ntm_coordinator_wire.sh"
+        what_it_proves: "exercises safety surface reference at line 59"
+      - path: ".flywheel/tests/test_mission_lock_scaffold_validator.sh"
+        what_it_proves: "exercises safety surface reference at line 60"
+      - path: ".flywheel/tests/test_mission_lock_readiness_doctor.sh"
+        what_it_proves: "exercises safety surface reference at line 84"
+      - path: ".flywheel/tests/test_ntm_coordinator_shadow.sh"
+        what_it_proves: "exercises safety surface reference at line 49"
+      - path: ".flywheel/tests/test_ntm_coordinator_shadow.sh"
+        what_it_proves: "exercises safety surface reference at line 69"
+    doctor_probes:
+      []
+    coverage_score: 8
+    gap: "no top-level flywheel doctor probe asserts wrapper adoption or bypass resistance"
+  - name: "save"
+    decision: "USE"
+    inventory_row: 78
+    inventory_decision: "USE"
+    description: "Save pane outputs to files"
+    callsites:
+      []
+    tests:
+      - path: "tests/data-backed-deferral-guard.sh"
+        what_it_proves: "exercises save surface reference at line 119"
+      - path: "tests/data-backed-deferral-guard.sh"
+        what_it_proves: "exercises save surface reference at line 125"
+      - path: "tests/data-backed-deferral-guard.sh"
+        what_it_proves: "exercises save surface reference at line 126"
+      - path: "tests/data-backed-deferral-guard.sh"
+        what_it_proves: "exercises save surface reference at line 127"
+      - path: "tests/data-backed-deferral-guard.sh"
+        what_it_proves: "exercises save surface reference at line 132"
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm save; add callsite/probe or downgrade inventory claim"
+  - name: "scale"
+    decision: "USE"
+    inventory_row: 79
+    inventory_decision: "USE"
+    description: "Scale agents to target counts"
+    callsites:
+      []
+    tests:
+      []
+    doctor_probes:
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 268
+        what_it_asserts: "scale referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 269
+        what_it_asserts: "scale referenced in probe/doctor path"
+      - path: ".flywheel/scripts/peer-orch-drift-probe.sh"
+        line: 39
+        what_it_asserts: "scale referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm scale; add callsite/probe or downgrade inventory claim"
+  - name: "scan"
+    decision: "USE"
+    inventory_row: 80
+    inventory_decision: "USE"
+    description: "Run UBS scanner"
+    callsites:
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 4
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 16
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 152
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 212
+      - path: ".flywheel/scripts/daily-report.sh"
+        line: 38
+      - path: ".flywheel/scripts/fleet-coherence-scan.sh"
+        line: 8
+    tests:
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises scan surface reference at line 79"
+      - path: "tests/bead-quality-mining.sh"
+        what_it_proves: "exercises scan surface reference at line 98"
+      - path: "tests/fleet-coherence-launchd.sh"
+        what_it_proves: "exercises scan surface reference at line 75"
+      - path: "tests/fleet-coherence-launchd.sh"
+        what_it_proves: "exercises scan surface reference at line 76"
+      - path: "tests/fleet-coherence-launchd.sh"
+        what_it_proves: "exercises scan surface reference at line 79"
+    doctor_probes:
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 476
+        what_it_asserts: "scan referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 325
+        what_it_asserts: "scan referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 328
+        what_it_asserts: "scan referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh.bak.20260503T073417Z"
+        line: 161
+        what_it_asserts: "scan referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "scrub"
+    decision: "WRAP"
+    inventory_row: 81
+    inventory_decision: "USE (today's W2S wrapper)"
+    description: "Scan NTM artifacts for leaked secrets"
+    wrapper_script: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+    why_keep_evidence: "Fail-closed secret-class evidence and redacted callback artifact scanning while redact/scrub coverage is partial."
+    deletion_tripwire: "delete when ntm redact/scrub covers SEC fixture classes, sender_token JSON fields, bearer/long token values, and pre-capture token-handle discipline."
+    callsites:
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 4
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 16
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 70
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 92
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 96
+      - path: ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh"
+        line: 152
+    tests:
+      - path: "tests/wire-or-explain-close-gate-fault-injection.sh"
+        what_it_proves: "exercises scrub surface reference at line 160"
+      - path: "tests/wire-or-explain-close-gate-fault-injection.sh"
+        what_it_proves: "exercises scrub surface reference at line 162"
+      - path: "tests/wire-or-explain-close-gate-fault-injection.sh"
+        what_it_proves: "exercises scrub surface reference at line 164"
+      - path: "tests/wire-or-explain-close-gate-fault-injection.sh"
+        what_it_proves: "exercises scrub surface reference at line 166"
+      - path: "tests/wire-or-explain-close-gate.sh"
+        what_it_proves: "exercises scrub surface reference at line 142"
+    doctor_probes:
+      - path: ".flywheel/scripts/close-validator-contract-probe.sh"
+        line: 95
+        what_it_asserts: "scrub referenced in probe/doctor path"
+    coverage_score: 8
+    gap: "no top-level flywheel doctor probe asserts wrapper adoption or bypass resistance"
+  - name: "search"
+    decision: "USE"
+    inventory_row: 82
+    inventory_decision: "USE"
+    description: "Search archived agent output via CASS"
+    callsites:
+      - path: ".flywheel/scripts/frozen-pane-detector.sh.v1.bak"
+        line: 290
+      - path: ".flywheel/scripts/capacity-halt-driver-coverage.sh"
+        line: 102
+      - path: ".flywheel/scripts/dispatch-delivery-verify.sh"
+        line: 33
+      - path: ".flywheel/scripts/dispatch-and-log.sh"
+        line: 90
+    tests:
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises search surface reference at line 47"
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises search surface reference at line 127"
+      - path: "tests/jeff-philosophy-mine.sh"
+        what_it_proves: "exercises search surface reference at line 58"
+      - path: "tests/jeff-philosophy-mine.sh"
+        what_it_proves: "exercises search surface reference at line 70"
+      - path: "tests/flywheel-refresh-source-apply-lock-test.sh"
+        what_it_proves: "exercises search surface reference at line 85"
+    doctor_probes:
+      - path: ".flywheel/scripts/close-validator-contract-probe.sh"
+        line: 98
+        what_it_asserts: "search referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 436
+        what_it_asserts: "search referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 581
+        what_it_asserts: "search referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 985
+        what_it_asserts: "search referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "send"
+    decision: "USE"
+    inventory_row: 83
+    inventory_decision: "USE"
+    description: "Send prompt to agent panes"
+    callsites:
+      - path: ".flywheel/scripts/frozen-pane-detector.sh.v1.bak"
+        line: 338
+      - path: ".flywheel/scripts/frozen-pane-detector.sh.v1.bak"
+        line: 360
+      - path: ".flywheel/scripts/frozen-pane-detector.sh.v1.bak"
+        line: 362
+      - path: ".flywheel/scripts/verify-callback-delivery.sh"
+        line: 27
+      - path: ".flywheel/scripts/verify-callback-delivery.sh"
+        line: 50
+      - path: ".flywheel/scripts/stale-error-auto-ping.sh"
+        line: 21
+    tests:
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises send surface reference at line 38"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises send surface reference at line 39"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises send surface reference at line 51"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises send surface reference at line 54"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises send surface reference at line 72"
+    doctor_probes:
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 80
+        what_it_asserts: "send referenced in probe/doctor path"
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 83
+        what_it_asserts: "send referenced in probe/doctor path"
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 128
+        what_it_asserts: "send referenced in probe/doctor path"
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 133
+        what_it_asserts: "send referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "serve"
+    decision: "WRAP"
+    inventory_row: 84
+    inventory_decision: "USE (today's W1S wrapper)"
+    description: "HTTP server + REST + event streaming"
+    wrapper_script: ".flywheel/scripts/ntm-serve-eventstream-bridge.sh"
+    why_keep_evidence: "Loopback-bind default plus redacted SSE payload bridge from metrics receipts."
+    deletion_tripwire: "delete when ntm serve eventstream has loopback-only default, payload redaction, readiness receipt, and metrics payload schema."
+    callsites:
+      - path: ".flywheel/scripts/ntm-serve-eventstream-bridge.sh"
+        line: 4
+      - path: ".flywheel/scripts/ntm-serve-eventstream-bridge.sh"
+        line: 6
+      - path: ".flywheel/scripts/ntm-serve-eventstream-bridge.sh"
+        line: 21
+      - path: ".flywheel/scripts/ntm-serve-eventstream-bridge.sh"
+        line: 40
+      - path: ".flywheel/scripts/ntm-serve-eventstream-bridge.sh"
+        line: 90
+      - path: ".flywheel/scripts/ntm-serve-eventstream-bridge.sh"
+        line: 116
+    tests:
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises serve surface reference at line 67"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises serve surface reference at line 69"
+      - path: "tests/verify-callback-delivery.sh"
+        what_it_proves: "exercises serve surface reference at line 76"
+      - path: "tests/fleet-coherence-launchd.sh"
+        what_it_proves: "exercises serve surface reference at line 83"
+      - path: "tests/fleet-coherence-launchd.sh"
+        what_it_proves: "exercises serve surface reference at line 162"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 311
+        what_it_asserts: "serve referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 430
+        what_it_asserts: "serve referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 431
+        what_it_asserts: "serve referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 466
+        what_it_asserts: "serve referenced in probe/doctor path"
+    coverage_score: 8
+    gap: "no top-level flywheel doctor probe asserts wrapper adoption or bypass resistance"
+  - name: "session-templates"
+    decision: "USE"
+    inventory_row: 85
+    inventory_decision: "USE"
+    description: "Multi-agent template configs"
+    callsites:
+      []
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm session-templates; add callsite/probe or downgrade inventory claim"
+  - name: "sessions"
+    decision: "USE"
+    inventory_row: 86
+    inventory_decision: "USE"
+    description: "Manage saved session states"
+    callsites:
+      - path: ".flywheel/scripts/codex-budget-watchdog.sh"
+        line: 11
+      - path: ".flywheel/scripts/codex-budget-watchdog.sh"
+        line: 53
+      - path: ".flywheel/scripts/codex-budget-probe.sh"
+        line: 126
+      - path: ".flywheel/scripts/topology-tick-refresh.sh"
+        line: 57
+      - path: ".flywheel/scripts/l63-drill-specs.md"
+        line: 276
+      - path: ".flywheel/scripts/fleet-rotate-all-sessions.sh"
+        line: 4
+    tests:
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises sessions surface reference at line 27"
+      - path: "tests/peer-orch-respawn-permit.sh"
+        what_it_proves: "exercises sessions surface reference at line 31"
+      - path: "tests/orch-worker-identity-manifest.sh"
+        what_it_proves: "exercises sessions surface reference at line 24"
+      - path: "tests/orch-worker-identity-manifest.sh"
+        what_it_proves: "exercises sessions surface reference at line 38"
+      - path: "tests/orch-worker-identity-manifest.sh"
+        what_it_proves: "exercises sessions surface reference at line 41"
+    doctor_probes:
+      - path: ".flywheel/scripts/fleet-canonical-rule-freshness-probe.sh"
+        line: 19
+        what_it_asserts: "sessions referenced in probe/doctor path"
+      - path: ".flywheel/scripts/fleet-canonical-rule-freshness-probe.sh"
+        line: 93
+        what_it_asserts: "sessions referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 211
+        what_it_asserts: "sessions referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 214
+        what_it_asserts: "sessions referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "setup"
+    decision: "USE"
+    inventory_row: 87
+    inventory_decision: "USE"
+    description: "Initialize NTM for project"
+    callsites:
+      - path: ".flywheel/scripts/flywheel-onboard.sh"
+        line: 16
+      - path: ".flywheel/scripts/flywheel-onboard.sh"
+        line: 216
+      - path: ".flywheel/scripts/flywheel-onboard.sh"
+        line: 218
+      - path: ".flywheel/scripts/flywheel-onboard.sh"
+        line: 289
+    tests:
+      - path: "tests/unit/test_oom_killed_detector.bats"
+        what_it_proves: "exercises setup surface reference at line 8"
+    doctor_probes:
+      []
+    coverage_score: 8
+    gap: null
+  - name: "shell"
+    decision: "USE"
+    inventory_row: 88
+    inventory_decision: "USE"
+    description: "Shell integration script"
+    callsites:
+      - path: ".flywheel/scripts/fleet-rotate-on-caam-swap.sh"
+        line: 6
+      - path: ".flywheel/scripts/flywheel-onboard.sh"
+        line: 216
+    tests:
+      - path: "tests/jeff-daily-diff.sh"
+        what_it_proves: "exercises shell surface reference at line 44"
+      - path: "tests/jsonl-append-test.sh"
+        what_it_proves: "exercises shell surface reference at line 8"
+      - path: "tests/flywheel-loop-core.sh"
+        what_it_proves: "exercises shell surface reference at line 166"
+      - path: "tests/flywheel-loop-core.sh"
+        what_it_proves: "exercises shell surface reference at line 204"
+      - path: "tests/flywheel-refresh-source-canonical-cli.sh"
+        what_it_proves: "exercises shell surface reference at line 35"
+    doctor_probes:
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 2
+        what_it_asserts: "shell referenced in probe/doctor path"
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 185
+        what_it_asserts: "shell referenced in probe/doctor path"
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 189
+        what_it_asserts: "shell referenced in probe/doctor path"
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 191
+        what_it_asserts: "shell referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "spawn"
+    decision: "USE"
+    inventory_row: 89
+    inventory_decision: "USE"
+    description: "Create session + spawn agents"
+    callsites:
+      - path: ".flywheel/scripts/meta-rule-structural-batch-gate.sh"
+        line: 13
+      - path: ".flywheel/scripts/meta-rule-structural-batch-gate.sh"
+        line: 75
+      - path: ".flywheel/scripts/flywheel-onboard.sh"
+        line: 16
+      - path: ".flywheel/scripts/flywheel-onboard.sh"
+        line: 216
+    tests:
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises spawn surface reference at line 35"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises spawn surface reference at line 36"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises spawn surface reference at line 123"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises spawn surface reference at line 126"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises spawn surface reference at line 129"
+    doctor_probes:
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 5
+        what_it_asserts: "spawn referenced in probe/doctor path"
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 107
+        what_it_asserts: "spawn referenced in probe/doctor path"
+      - path: ".flywheel/scripts/no-silent-darkness-probe.sh"
+        line: 239
+        what_it_asserts: "spawn referenced in probe/doctor path"
+      - path: ".flywheel/flywheel-loop-tick"
+        line: 245
+        what_it_asserts: "spawn referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "status"
+    decision: "USE"
+    inventory_row: 90
+    inventory_decision: "USE"
+    description: "Detailed session status"
+    callsites:
+      - path: ".flywheel/scripts/ntm-fleet-health.sh"
+        line: 48
+      - path: ".flywheel/scripts/dispatch-log-fitness-invariant.sh"
+        line: 75
+      - path: ".flywheel/scripts/stale-error-auto-ping.sh"
+        line: 81
+      - path: ".flywheel/scripts/stale-error-auto-ping.sh"
+        line: 109
+      - path: ".flywheel/scripts/frozen-pane-detector.sh"
+        line: 30
+      - path: ".flywheel/scripts/frozen-pane-detector.sh"
+        line: 65
+    tests:
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises status surface reference at line 37"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises status surface reference at line 45"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises status surface reference at line 53"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises status surface reference at line 60"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises status surface reference at line 61"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 56
+        what_it_asserts: "status referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 58
+        what_it_asserts: "status referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 75
+        what_it_asserts: "status referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 78
+        what_it_asserts: "status referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "summary"
+    decision: "USE"
+    inventory_row: 91
+    inventory_decision: "USE"
+    description: "Activity summary for agents"
+    callsites:
+      - path: ".flywheel/scripts/ntm-fleet-health.sh"
+        line: 48
+      - path: ".flywheel/scripts/leverage-ceiling-probe.sh"
+        line: 15
+      - path: ".flywheel/scripts/leverage-ceiling-probe.sh"
+        line: 22
+      - path: ".flywheel/scripts/leverage-ceiling-probe.sh"
+        line: 75
+      - path: ".flywheel/scripts/leverage-ceiling-probe.sh"
+        line: 76
+      - path: ".flywheel/scripts/daily-report.sh"
+        line: 36
+    tests:
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises summary surface reference at line 142"
+      - path: "tests/auto-l112-gate-orch-adoption-test.sh"
+        what_it_proves: "exercises summary surface reference at line 146"
+      - path: "tests/ntm-send-r3-workaround-copy-tests.sh"
+        what_it_proves: "exercises summary surface reference at line 69"
+      - path: "tests/ntm-send-r3-workaround-copy-tests.sh"
+        what_it_proves: "exercises summary surface reference at line 73"
+      - path: "tests/test_dispatch_mission_fitness_required.sh"
+        what_it_proves: "exercises summary surface reference at line 137"
+    doctor_probes:
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 342
+        what_it_asserts: "summary referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 419
+        what_it_asserts: "summary referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 463
+        what_it_asserts: "summary referenced in probe/doctor path"
+      - path: ".flywheel/scripts/vc-observability-probe.sh"
+        line: 566
+        what_it_asserts: "summary referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "support-bundle"
+    decision: "USE"
+    inventory_row: 92
+    inventory_decision: "USE"
+    description: "Diagnostic bundle archive"
+    callsites:
+      []
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm support-bundle; add callsite/probe or downgrade inventory claim"
+  - name: "swarm"
+    decision: "USE"
+    inventory_row: 93
+    inventory_decision: "USE"
+    description: "Weighted multi-project swarm"
+    callsites:
+      - path: ".flywheel/scripts/peer-orch-blocker-watch.sh"
+        line: 13
+      - path: ".flywheel/scripts/peer-orch-blocker-watch.sh"
+        line: 18
+      - path: ".flywheel/scripts/peer-orch-blocker-watch.sh"
+        line: 37
+      - path: ".flywheel/scripts/peer-orch-blocker-watch.sh"
+        line: 50
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 6
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm swarm; add callsite/probe or downgrade inventory claim"
+  - name: "template"
+    decision: "USE"
+    inventory_row: 94
+    inventory_decision: "USE"
+    description: "Manage prompt templates"
+    callsites:
+      - path: ".flywheel/scripts/capacity-halt-driver-coverage.sh"
+        line: 102
+      - path: ".flywheel/scripts/recovery-escape-then-reprompt.sh"
+        line: 29
+      - path: ".flywheel/scripts/codex-template-stuck-detector.sh"
+        line: 15
+      - path: ".flywheel/scripts/codex-template-stuck-detector.sh"
+        line: 17
+      - path: ".flywheel/scripts/build-dispatch-packet.sh"
+        line: 38
+      - path: ".flywheel/scripts/build-dispatch-packet.sh"
+        line: 43
+    tests:
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises template surface reference at line 31"
+      - path: "tests/test_dispatch_mission_fitness_required.sh"
+        what_it_proves: "exercises template surface reference at line 123"
+      - path: "tests/test_dispatch_mission_fitness_required.sh"
+        what_it_proves: "exercises template surface reference at line 124"
+      - path: "tests/test_dispatch_mission_fitness_required.sh"
+        what_it_proves: "exercises template surface reference at line 125"
+      - path: "tests/test_dispatch_mission_fitness_required.sh"
+        what_it_proves: "exercises template surface reference at line 126"
+    doctor_probes:
+      - path: ".flywheel/scripts/peer-orch-drift-probe.sh"
+        line: 40
+        what_it_asserts: "template referenced in probe/doctor path"
+      - path: ".flywheel/scripts/peer-orch-drift-probe.sh"
+        line: 86
+        what_it_asserts: "template referenced in probe/doctor path"
+      - path: ".flywheel/scripts/docs-validation-probe.sh"
+        line: 71
+        what_it_asserts: "template referenced in probe/doctor path"
+      - path: ".flywheel/scripts/docs-validation-probe.sh"
+        line: 130
+        what_it_asserts: "template referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "timeline"
+    decision: "USE"
+    inventory_row: 95
+    inventory_decision: "USE"
+    description: "Session timeline history"
+    callsites:
+      - path: ".flywheel/scripts/dispatch-log-fitness-invariant.sh"
+        line: 17
+      - path: ".flywheel/scripts/dispatch-log-fitness-invariant.sh"
+        line: 27
+      - path: ".flywheel/scripts/dispatch-log-fitness-invariant.sh"
+        line: 59
+      - path: ".flywheel/scripts/dispatch-log-fitness-invariant.sh"
+        line: 75
+    tests:
+      []
+    doctor_probes:
+      - path: "/tmp/flywheel-doctor-gap-audit-2026-05-07.json"
+        line: 1
+        what_it_asserts: "flywheel doctor dispatch_log_fitness uses ntm timeline --json"
+    coverage_score: 7
+    gap: null
+  - name: "tutorial"
+    decision: "EXCLUDED"
+    inventory_row: 96
+    inventory_decision: "EXCLUDED"
+    description: "Interactive NTM tutorial"
+    receipt: "One-shot interactive."
+    callsites:
+      []
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "explicit exclusion is not asserted by a negative test or doctor policy for ntm tutorial"
+  - name: "unlock"
+    decision: "ISSUE"
+    inventory_row: 97
+    inventory_decision: "ISSUE (companion to #47)"
+    description: "Release file reservations"
+    callsites:
+      []
+    tests:
+      []
+    doctor_probes:
+      - path: ".flywheel/scripts/fleet-conformance-probe.sh"
+        line: 224
+        what_it_asserts: "unlock referenced in probe/doctor path"
+      - path: ".flywheel/scripts/mission-lock-age-probe.sh"
+        line: 44
+        what_it_asserts: "unlock referenced in probe/doctor path"
+      - path: ".flywheel/scripts/mission-lock-age-probe.sh"
+        line: 288
+        what_it_asserts: "unlock referenced in probe/doctor path"
+      - path: ".flywheel/scripts/mission-lock-age-probe.sh"
+        line: 304
+        what_it_asserts: "unlock referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "ISSUE surface has no acceptance probe proving current native gap for ntm unlock"
+  - name: "upgrade"
+    decision: "USE"
+    inventory_row: 98
+    inventory_decision: "USE"
+    description: "Upgrade NTM"
+    callsites:
+      - path: ".flywheel/scripts/jeff-binary-version-watchtower.sh"
+        line: 60
+      - path: ".flywheel/scripts/jeff-binary-version-watchtower.sh"
+        line: 83
+      - path: ".flywheel/scripts/jeff-binary-version-watchtower.sh"
+        line: 100
+    tests:
+      - path: "tests/jeff-binary-version-watchtower.sh"
+        what_it_proves: "exercises upgrade surface reference at line 31"
+      - path: "tests/jeff-binary-version-watchtower.sh"
+        what_it_proves: "exercises upgrade surface reference at line 33"
+      - path: "tests/jeff-binary-version-watchtower.sh"
+        what_it_proves: "exercises upgrade surface reference at line 57"
+      - path: "tests/jeff-binary-version-watchtower.sh"
+        what_it_proves: "exercises upgrade surface reference at line 58"
+      - path: "tests/jeff-binary-version-watchtower.sh"
+        what_it_proves: "exercises upgrade surface reference at line 63"
+    doctor_probes:
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 598
+        what_it_asserts: "upgrade referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 599
+        what_it_asserts: "upgrade referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh"
+        line: 609
+        what_it_asserts: "upgrade referenced in probe/doctor path"
+      - path: ".flywheel/scripts/gap-hunt-probe.sh.bak.20260503T073417Z"
+        line: 434
+        what_it_asserts: "upgrade referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "version"
+    decision: "USE"
+    inventory_row: 99
+    inventory_decision: "USE"
+    description: "Print version"
+    callsites:
+      - path: ".flywheel/scripts/worker-auto-respawn-watchdog.sh"
+        line: 32
+      - path: ".flywheel/scripts/frozen-pane-detector.sh.v1.bak"
+        line: 143
+      - path: ".flywheel/scripts/verify-callback-delivery.sh"
+        line: 4
+      - path: ".flywheel/scripts/verify-callback-delivery.sh"
+        line: 29
+      - path: ".flywheel/scripts/dispatch-log-fitness-invariant.sh"
+        line: 17
+      - path: ".flywheel/scripts/stale-error-auto-ping.sh"
+        line: 29
+    tests:
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises version surface reference at line 27"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises version surface reference at line 31"
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises version surface reference at line 29"
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises version surface reference at line 37"
+      - path: "tests/handoff-skill-to-skillos.sh"
+        what_it_proves: "exercises version surface reference at line 76"
+    doctor_probes:
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 4
+        what_it_asserts: "version referenced in probe/doctor path"
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 19
+        what_it_asserts: "version referenced in probe/doctor path"
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 23
+        what_it_asserts: "version referenced in probe/doctor path"
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 46
+        what_it_asserts: "version referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "view"
+    decision: "USE"
+    inventory_row: 100
+    inventory_decision: "USE"
+    description: "View all panes"
+    callsites:
+      []
+    tests:
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises view surface reference at line 40"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises view surface reference at line 48"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises view surface reference at line 56"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises view surface reference at line 61"
+      - path: "tests/test_install_contract_step10.sh"
+        what_it_proves: "exercises view surface reference at line 63"
+    doctor_probes:
+      - path: ".flywheel/scripts/agent-context-parity-probe.py"
+        line: 244
+        what_it_asserts: "view referenced in probe/doctor path"
+      - path: ".flywheel/scripts/docs-validation-probe.sh"
+        line: 86
+        what_it_asserts: "view referenced in probe/doctor path"
+      - path: ".flywheel/scripts/ntm-metrics-doctor-probe.sh"
+        line: 25
+        what_it_asserts: "view referenced in probe/doctor path"
+      - path: ".flywheel/scripts/ntm-metrics-doctor-probe.sh"
+        line: 297
+        what_it_asserts: "view referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "interactive/documentation surface; add explicit no-bypass/no-script-use receipt for ntm view"
+  - name: "wait"
+    decision: "USE"
+    inventory_row: 101
+    inventory_decision: "USE"
+    description: "Wait until agents reach desired state"
+    callsites:
+      - path: ".flywheel/scripts/worker-auto-respawn-watchdog.sh"
+        line: 32
+      - path: ".flywheel/scripts/worker-auto-respawn-watchdog.sh"
+        line: 57
+      - path: ".flywheel/scripts/verify-callback-delivery.sh"
+        line: 10
+      - path: ".flywheel/scripts/frozen-pane-detector.sh"
+        line: 30
+      - path: ".flywheel/scripts/frozen-pane-detector.sh"
+        line: 31
+      - path: ".flywheel/scripts/frozen-pane-detector.sh"
+        line: 35
+    tests:
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises wait surface reference at line 30"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises wait surface reference at line 115"
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises wait surface reference at line 175"
+      - path: "tests/peer-orch-respawn-permit.sh"
+        what_it_proves: "exercises wait surface reference at line 106"
+      - path: "tests/idle-pane-auto-dispatch-work-started-validation-test.sh"
+        what_it_proves: "exercises wait surface reference at line 35"
+    doctor_probes:
+      - path: ".flywheel/scripts/idle-state-probe.sh"
+        line: 16
+        what_it_asserts: "wait referenced in probe/doctor path"
+      - path: ".flywheel/scripts/idle-state-probe.sh"
+        line: 27
+        what_it_asserts: "wait referenced in probe/doctor path"
+      - path: ".flywheel/scripts/idle-state-probe.sh"
+        line: 63
+        what_it_asserts: "wait referenced in probe/doctor path"
+      - path: ".flywheel/scripts/idle-state-probe.sh"
+        line: 142
+        what_it_asserts: "wait referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "watch"
+    decision: "USE"
+    inventory_row: 102
+    inventory_decision: "USE"
+    description: "Stream agent output / file watcher"
+    callsites:
+      - path: ".flywheel/scripts/peer-orch-blocker-watch.sh"
+        line: 50
+      - path: ".flywheel/scripts/ntm-coordinator-shadow.sh"
+        line: 29
+      - path: ".flywheel/scripts/ntm-coordinator-shadow.sh"
+        line: 71
+      - path: ".flywheel/scripts/ntm-coordinator-shadow.sh"
+        line: 254
+    tests:
+      - path: "tests/kill-recover-drill-apply-gate-test.sh"
+        what_it_proves: "exercises watch surface reference at line 5"
+      - path: "tests/idle-pane-auto-dispatch-work-started-validation-test.sh"
+        what_it_proves: "exercises watch surface reference at line 105"
+      - path: "tests/watcher-isomorphic-probe.sh"
+        what_it_proves: "exercises watch surface reference at line 5"
+      - path: "tests/watcher-isomorphic-probe.sh"
+        what_it_proves: "exercises watch surface reference at line 6"
+      - path: "tests/watcher-isomorphic-probe.sh"
+        what_it_proves: "exercises watch surface reference at line 53"
+    doctor_probes:
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 5
+        what_it_asserts: "watch referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 14
+        what_it_asserts: "watch referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 15
+        what_it_asserts: "watch referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 16
+        what_it_asserts: "watch referenced in probe/doctor path"
+    coverage_score: 9
+    gap: null
+  - name: "work"
+    decision: "ISSUE"
+    inventory_row: 103
+    inventory_decision: "ISSUE"
+    description: "Intelligent work distribution"
+    callsites:
+      - path: ".flywheel/scripts/pane-work-signal.sh"
+        line: 2
+      - path: ".flywheel/scripts/frozen-pane-detector.sh.v1.bak"
+        line: 362
+      - path: ".flywheel/scripts/ntm-preflight-l91-wrapper.sh"
+        line: 251
+      - path: ".flywheel/scripts/flywheel-resume"
+        line: 15
+      - path: ".flywheel/scripts/fleet-coherence-scan.sh"
+        line: 8
+      - path: ".flywheel/scripts/fleet-coherence-scan.sh"
+        line: 10
+    tests:
+      - path: "tests/ntm-send-r3-workaround-copy-tests.sh"
+        what_it_proves: "exercises work surface reference at line 4"
+      - path: "tests/idle-pane-auto-dispatch-work-started-validation-test.sh"
+        what_it_proves: "exercises work surface reference at line 6"
+      - path: "tests/idle-pane-auto-dispatch-work-started-validation-test.sh"
+        what_it_proves: "exercises work surface reference at line 103"
+      - path: "tests/idle-pane-auto-dispatch-work-started-validation-test.sh"
+        what_it_proves: "exercises work surface reference at line 115"
+      - path: "tests/idle-pane-auto-dispatch-work-started-validation-test.sh"
+        what_it_proves: "exercises work surface reference at line 116"
+    doctor_probes:
+      - path: ".flywheel/scripts/recovery-doctor-probe.sh"
+        line: 143
+        what_it_asserts: "work referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 92
+        what_it_asserts: "work referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 167
+        what_it_asserts: "work referenced in probe/doctor path"
+      - path: ".flywheel/scripts/watcher-isomorphic-probe.sh"
+        line: 168
+        what_it_asserts: "work referenced in probe/doctor path"
+    coverage_score: 5
+    gap: "issue body exists; add native-gap regression test before USE promotion"
+  - name: "workflows"
+    decision: "USE"
+    inventory_row: 104
+    inventory_decision: "USE"
+    description: "Orchestration patterns"
+    callsites:
+      []
+    tests:
+      - path: "tests/jeff-issue.sh"
+        what_it_proves: "exercises workflows surface reference at line 34"
+    doctor_probes:
+      - path: ".flywheel/scripts/value-gap-probe.sh"
+        line: 23
+        what_it_asserts: "workflows referenced in probe/doctor path"
+    coverage_score: 4
+    gap: "claimed USE but no actual .flywheel/scripts callsite found for ntm workflows; add callsite/probe or downgrade inventory claim"
+  - name: "worktree"
+    aliases:
+      - "worktree"
+      - "worktrees"
+    decision: "ISSUE"
+    inventory_row: 105
+    inventory_decision: "ISSUE"
+    description: "Git worktrees for agent isolation"
+    callsites:
+      []
+    tests:
+      - path: ".flywheel/tests/test_ntm_checkpoint_rollback_guard.sh"
+        what_it_proves: "exercises worktree surface reference at line 86"
+      - path: ".flywheel/tests/test_ntm_checkpoint_rollback_guard.sh"
+        what_it_proves: "exercises worktree surface reference at line 120"
+      - path: ".flywheel/tests/test_ntm_checkpoint_rollback_guard.sh"
+        what_it_proves: "exercises worktree surface reference at line 121"
+    doctor_probes:
+      []
+    coverage_score: 5
+    gap: "issue body exists; add native-gap regression test before USE promotion"
+  - name: "zoom"
+    decision: "EXCLUDED"
+    inventory_row: 106
+    inventory_decision: "EXCLUDED"
+    description: "Zoom a specific pane"
+    receipt: "Interactive."
+    callsites:
+      []
+    tests:
+      []
+    doctor_probes:
+      []
+    coverage_score: 4
+    gap: "explicit exclusion is not asserted by a negative test or doctor policy for ntm zoom"

@@ -1,0 +1,38 @@
+{
+  "slug": "ntm-surface-wire-in-USE-ISSUE-WRAP-2026-05-07",
+  "topic": "ntm-surface-wire-in-USE-ISSUE-WRAP — execute USE/ISSUE/WRAP rule across 108 ntm surfaces × 231 flywheel scripts; ~38 beads; pipeline compressed per Joshua (inventory IS converged plan)",
+  "started_at": "2026-05-07T16:18:00Z",
+  "current_phase": "polish",
+  "phase_started_at": "2026-05-07T18:37:48Z",
+  "rounds_in_current_phase": 2,
+  "convergence_streak": 0,
+  "in_flight_dispatches": [],
+  "phase_3_skipped_reason": "Joshua-compressed pipeline 2026-05-07: inventory IS converged research+refine output after 3 rewrites against USE/ISSUE/WRAP rule; trust-the-document and dispatch decompose directly. Found-defects in beads will catch at worker step.",
+  "joshua_decision_pending": false,
+  "joshua_decision_at": null,
+  "audit_disposition": "auto_advance",
+  "audit_blocker_class": null,
+  "audit_blocker_classes": [],
+  "audit_blocker_reason": null,
+  "audit_findings_count": 0,
+  "audit_findings_by_severity": {"critical": 0, "high": 0, "medium": 0, "low": 0},
+  "beads_created": [],
+  "abort_reason": null,
+  "quality_bar_passed": true,
+  "quality_bar_evidence": [
+    {
+      "artifact": "/Users/josh/Developer/flywheel/.flywheel/plans/ntm-surface-wire-in-USE-ISSUE-WRAP-2026-05-07/05-POLISH-r1.md",
+      "rust": null,
+      "python": null,
+      "cli_canonical": true,
+      "readme_quality": null,
+      "jeff_score": 9.5,
+      "donella_score": 9.5,
+      "joshua_score": 9.5,
+      "composite": 9.5,
+      "graded_at": "2026-05-07T18:37:48Z"
+    }
+  ],
+  "schema_version": 3,
+  "compressed_pipeline_note": "Joshua-directive 2026-05-07: inventory IS converged research+refine output; skip Phase 1-2 lane fanout, run Phase 3 audit + Phase 4 decompose. Reference plan path: /Users/josh/Developer/flywheel/.flywheel/NTM-SURFACE-INVENTORY.md (symlinked as 00-PLAN.md)."
+}
