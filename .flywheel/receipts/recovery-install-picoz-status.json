@@ -1,0 +1,51 @@
+{
+  "schema_version": "recovery-session-watcher-install/v1",
+  "source_plan": ".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md",
+  "generated_at": "2026-05-07T23:10:53Z",
+  "session": "picoz",
+  "label": "com.zeststream.picoz.watcher",
+  "plist_path": "/Users/josh/Library/LaunchAgents/com.zeststream.picoz.watcher.plist",
+  "audit_receipt_path": "/tmp/preinstall-picoz.json",
+  "audit_confidence": 60,
+  "audit_low_confidence": true,
+  "audit_low_confidence_reason": "picoz repo path matched topology and roster, but picoz was not live in ntm at install time",
+  "dry_run_pass": true,
+  "plutil_lint": "OK",
+  "exactly_one_label": true,
+  "loaded_label_count": 0,
+  "launchctl_list_probe_path": "/tmp/picoz-watcher-launchctl-labels.txt",
+  "launchctl_load_attempted": false,
+  "reboot_recovery_claimed": false,
+  "picoz_repo_path_validated": true,
+  "protected_session_policy": {
+    "install_only_no_restore": true,
+    "automatic_restore_allowed": false,
+    "restore_apply_requires_joshua_approval": true,
+    "source": "flywheel-pgmh bead acceptance"
+  },
+  "readiness": {
+    "path": "/Users/josh/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "home": {
+      "path": "/Users/josh",
+      "exists": true
+    },
+    "ntm_binary": {
+      "path": "/Users/josh/.local/bin/ntm",
+      "executable": true
+    },
+    "ntm_config": {
+      "path": "/Users/josh/.config/ntm/config.toml",
+      "exists": true
+    },
+    "repo": {
+      "path": "/Users/josh/Developer/polymarket-pico-z",
+      "exists": true
+    },
+    "logs_dir": {
+      "path": "/Users/josh/.local/state/flywheel/logs",
+      "exists": true
+    },
+    "stdout_path": "/Users/josh/.local/state/flywheel/logs/picoz.watcher.stdout.log",
+    "stderr_path": "/Users/josh/.local/state/flywheel/logs/picoz.watcher.stderr.log"
+  }
+}
