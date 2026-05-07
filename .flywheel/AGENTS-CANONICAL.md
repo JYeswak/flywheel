@@ -3791,6 +3791,10 @@ artifacts must report `kills_gte_adds=true` and `no_new_deltas=true`. A
 vibes-declared "looks converged" claim is rejected by the close gate for complex
 plans.
 
+**Doctrine note: kill-first hypothesis slate.** Plans declare 2-5 candidate
+strategies including exactly one third alternative; each strategy has a
+non-empty `kill_condition`. Phase 3 transition is refused otherwise.
+
 ## L127 — PREDICTION-LOCK-RECEIPTS
 
 ---

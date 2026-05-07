@@ -84,7 +84,7 @@ info_json() {
     --arg jsonl_append_lib "$JSONL_APPEND_LIB" \
     --arg ntm_coverage_trend_script "$NTM_COVERAGE_TREND_SCRIPT" \
     --arg evidence_pack_resolver "$EVIDENCE_PACK_RESOLVER" \
-    '{name:$name,version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,substrate_loop_contract_ledger:$contract_ledger,jsonl_append_lib:$jsonl_append_lib,ntm_coverage_trend_script:$ntm_coverage_trend_script,evidence_pack_resolver:$evidence_pack_resolver,exit_codes:{"0":"quality bar pass","1":"quality bar pending or fail","2":"usage error","3":"append primitive unavailable or failed"},thresholds:{pending:{warn:20,error:50},failed:{warn:5,error:10},compliance_score:{minimum:700,maximum:1000,convergence_streak_minimum:2},convergence_telemetry:{complex_requires_stable_rounds:2},ntm_surface_coverage:{minimum_avg:7,target_avg:10}},required_evidence:["schema_version>=5:hypotheses[2..5]","schema_version>=5:exactly_one_third_alternative_H_alt","schema_version>=5:acceptance_when_killed","schema_version>=5:prediction_lock_receipt_valid_when_predictions_present","schema_version>=4:compliance_pack_path","schema_version>=4:compliance_score>=700","schema_version>=4:convergence_streak>=2","schema_version>=4:EV anchors resolve when plan artifacts cite EV-NNN","schema_version>=4:evidence[] excerpts match source lines when present","schema_version>=4:relation=refutes blocks active target findings","schema_version>=4:complex plans require two stable 05-POLISH-rN.json telemetry rounds","schema_version>=4:evidence_pack_resolves=yes for v2 packs","schema_version>=4:legacy pack includes spec.json+evidence.json+compliance.json+theater.json+test_depth.json+scorecard.md+REPORT.md","schema_version<4:quality_bar_passed","schema_version<4:jeff_score>=9","schema_version<4:donella_score>=9_or_auto_advance","schema_version<4:composite>=9.5","critical_findings=0","future ntm-surface-wire-in plans require ntm coverage_avg>=7"]}'
+    '{name:$name,version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,substrate_loop_contract_ledger:$contract_ledger,jsonl_append_lib:$jsonl_append_lib,ntm_coverage_trend_script:$ntm_coverage_trend_script,evidence_pack_resolver:$evidence_pack_resolver,exit_codes:{"0":"quality bar pass","1":"quality bar pending or fail","2":"usage error","3":"append primitive unavailable or failed"},thresholds:{pending:{warn:20,error:50},failed:{warn:5,error:10},compliance_score:{minimum:700,maximum:1000,convergence_streak_minimum:2},convergence_telemetry:{complex_requires_stable_rounds:2},ntm_surface_coverage:{minimum_avg:7,target_avg:10}},required_evidence:["schema_version>=5:hypothesis_slate[2..5]","schema_version>=5:exactly_one_is_third_alternative","schema_version>=5:kill_condition_per_strategy","schema_version>=5:prediction_lock_receipt_valid_when_predictions_present","schema_version>=4:compliance_pack_path","schema_version>=4:compliance_score>=700","schema_version>=4:convergence_streak>=2","schema_version>=4:EV anchors resolve when plan artifacts cite EV-NNN","schema_version>=4:evidence[] excerpts match source lines when present","schema_version>=4:relation=refutes blocks active target findings","schema_version>=4:complex plans require two stable 05-POLISH-rN.json telemetry rounds","schema_version>=4:evidence_pack_resolves=yes for v2 packs","schema_version>=4:legacy pack includes spec.json+evidence.json+compliance.json+theater.json+test_depth.json+scorecard.md+REPORT.md","schema_version<4:quality_bar_passed","schema_version<4:jeff_score>=9","schema_version<4:donella_score>=9_or_auto_advance","schema_version<4:composite>=9.5","critical_findings=0","future ntm-surface-wire-in plans require ntm coverage_avg>=7"]}'
 }
 
 examples_text() {
@@ -109,7 +109,7 @@ EOF
 schema_json() {
   case "$SCHEMA_TOPIC" in
     plan)
-      jq -nc --arg schema_version "$SCHEMA_VERSION.plan" '{schema_version:$schema_version,required:["plan_slug","decision","quality_bar_mode","critical_findings","reasons","hypothesis_slate_valid"],legacy_required:["jeff","donella","joshua","composite"],compliance_required:["compliance_score","compliance_threshold","compliance_pack_path","convergence_streak","evidence_pack_resolves"],schema_v5_required:["hypotheses[2..5]","third_alternative.id=H_alt","acceptance_when_killed"],prediction_lock_required_when_present:["STATE.json.prediction_lock.locked_at","STATE.json.predictions[].prediction","STATE.json.predictions[].ts","STATE.json.predictions[].hash","STATE.json.predictions[].applies_at_phase"],ev_anchor_required_when_present:["compliance-pack evidence[].ev_id","evidence[].source","evidence[].excerpt","evidence[].relation=supports|refutes|informs","evidence[].target_finding_id","plan artifact EV-NNN citations resolve"],convergence_telemetry_required_for_complex_plans:["05-POLISH-rN.json","two consecutive rounds with kills_gte_adds=true","two consecutive rounds with no_new_deltas=true"],conditional_required:{ntm_surface_wire_in:["ntm_surface_coverage_trend.coverage_avg>=7"]}}' ;;
+      jq -nc --arg schema_version "$SCHEMA_VERSION.plan" '{schema_version:$schema_version,required:["plan_slug","decision","quality_bar_mode","critical_findings","reasons","hypothesis_slate_valid"],legacy_required:["jeff","donella","joshua","composite"],compliance_required:["compliance_score","compliance_threshold","compliance_pack_path","convergence_streak","evidence_pack_resolves"],schema_v5_required:["hypothesis_slate[2..5]","exactly_one_is_third_alternative","kill_condition_per_strategy"],prediction_lock_required_when_present:["STATE.json.prediction_lock.locked_at","STATE.json.predictions[].prediction","STATE.json.predictions[].ts","STATE.json.predictions[].hash","STATE.json.predictions[].applies_at_phase"],ev_anchor_required_when_present:["compliance-pack evidence[].ev_id","evidence[].source","evidence[].excerpt","evidence[].relation=supports|refutes|informs","evidence[].target_finding_id","plan artifact EV-NNN citations resolve"],convergence_telemetry_required_for_complex_plans:["05-POLISH-rN.json","two consecutive rounds with kills_gte_adds=true","two consecutive rounds with no_new_deltas=true"],conditional_required:{ntm_surface_wire_in:["ntm_surface_coverage_trend.coverage_avg>=7"]}}' ;;
     doctor)
       jq -nc '{schema_version:"quality-bar-close-gate.doctor.v1",required:["plan_state_quality_bar_pending_count","plan_state_quality_bar_failed_count","plan_state_quality_bar_passed_count"]}' ;;
     ledger)
@@ -624,56 +624,41 @@ def validate_hypothesis_slate_object(obj):
     errors = []
     if not isinstance(obj, dict):
         return ["hypothesis_slate_source_not_object"]
-    hypotheses = obj.get("hypotheses")
-    if not isinstance(hypotheses, list):
-        errors.append("hypotheses_missing")
-        hypotheses = []
-    elif not (2 <= len(hypotheses) <= 5):
+    slate = obj.get("hypothesis_slate")
+    if not isinstance(slate, list):
+        errors.append("hypothesis_slate_missing")
+        slate = []
+    elif not (2 <= len(slate) <= 5):
         errors.append("hypothesis_count_not_2_to_5")
     ids = []
-    alt_count = 0
-    for index, row in enumerate(hypotheses, start=1):
+    third_count = 0
+    valid_statuses = {"active", "killed", "adopted"}
+    for index, row in enumerate(slate, start=1):
         if not isinstance(row, dict):
             errors.append(f"hypothesis_{index}_not_object")
             continue
         hid = row.get("id")
         ids.append(hid)
-        if hid == "H_alt":
-            alt_count += 1
-        elif not (isinstance(hid, str) and re.fullmatch(r"H[1-5]", hid)):
+        if not (isinstance(hid, str) and re.fullmatch(r"H[1-5]", hid)):
             errors.append(f"hypothesis_{index}_invalid_id")
-        for key in ("claim", "kill_condition", "decisive_test"):
+        for key in ("strategy", "kill_condition"):
             if not non_empty_str(row.get(key)):
                 errors.append(f"{hid or index}_{key}_missing")
+        if row.get("is_third_alternative") is True:
+            third_count += 1
+        elif row.get("is_third_alternative") not in (False, None):
+            errors.append(f"{hid or index}_is_third_alternative_not_boolean")
+        status = row.get("status")
+        if status not in valid_statuses:
+            errors.append(f"{hid or index}_status_invalid")
+        if "killed_by" not in row:
+            errors.append(f"{hid or index}_killed_by_missing")
+        if "adopted_at_phase" not in row:
+            errors.append(f"{hid or index}_adopted_at_phase_missing")
     if len(ids) != len(set(ids)):
         errors.append("hypothesis_ids_not_unique")
-    if alt_count != 1:
-        errors.append("third_alternative_hypothesis_not_exactly_one_H_alt")
-    third = obj.get("third_alternative")
-    if not isinstance(third, dict):
-        errors.append("third_alternative_missing")
-    else:
-        if third.get("id") != "H_alt":
-            errors.append("third_alternative_id_not_H_alt")
-        if not non_empty_str(third.get("reason")):
-            errors.append("third_alternative_reason_missing")
-    acceptance = obj.get("acceptance_when_killed")
-    if isinstance(acceptance, dict):
-        for key in ("all_killed", "exactly_one_survives", "two_or_more_survive"):
-            if not non_empty_str(acceptance.get(key)):
-                errors.append(f"acceptance_when_killed_{key}_missing")
-    elif non_empty_str(acceptance):
-        text = acceptance.lower()
-        checks = {
-            "all_killed": ("all hypotheses" in text or "all killed" in text) and "reject" in text,
-            "exactly_one_survives": ("exactly one" in text or "one survives" in text) and "commit" in text,
-            "two_or_more_survive": ("2+" in text or "two or more" in text or "2 or more" in text) and "re-decompose" in text,
-        }
-        for key, ok in checks.items():
-            if not ok:
-                errors.append(f"acceptance_when_killed_{key}_missing")
-    else:
-        errors.append("acceptance_when_killed_missing")
+    if third_count != 1:
+        errors.append("third_alternative_not_exactly_one")
     return errors
 
 def iter_json_slate_candidates(plan_dir):
@@ -697,7 +682,7 @@ def iter_json_slate_candidates(plan_dir):
                 data = json.loads(match.group(1).strip())
             except json.JSONDecodeError:
                 continue
-            if isinstance(data, dict) and "hypotheses" in data:
+            if isinstance(data, dict) and "hypothesis_slate" in data:
                 yield f"{path}#json_fence", data
 
 def validate_hypothesis_slate(state, plan_dir, version):
@@ -1098,6 +1083,18 @@ def evaluate(slug_value):
     result.update(prediction_lock_result)
     for error in prediction_lock_result["prediction_lock_errors"]:
         failing.append(error)
+    if version >= 5 and phase == "refine":
+        result["quality_bar_mode"] = "phase2_hypothesis_slate"
+        if failing:
+            result["decision"] = "fail"
+            result["result"] = "FAIL"
+            result["reasons"] = failing
+        else:
+            result["decision"] = "pass"
+            result["result"] = "PASS"
+            result["reasons"] = []
+        result["quality_bar_passed"] = result["decision"] == "pass"
+        return result
     if phase not in {"polish", "ready"}:
         pending.append(f"current_phase_not_polish_or_ready:{phase}")
     if version >= 4:

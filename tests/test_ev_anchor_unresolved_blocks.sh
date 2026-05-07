@@ -53,12 +53,10 @@ write_fixture() {
     convergence_streak:2,audit_findings_by_severity:{critical:0,high:0,medium:0,low:0},
     quality_bar_evidence:[{artifact:"fixture",compliance_pack_path:$pack,compliance_score:744,compliance_threshold:700,convergence_streak:2,graded_at:"2026-05-07T20:30:00Z"}],
     schema_version:5,
-    hypotheses:[
-      {id:"H1",claim:"Missing EV anchors block close.",kill_condition:"A missing anchor passes.",decisive_test:"Run close gate."},
-      {id:"H_alt",claim:"Missing anchors can be inferred.",kill_condition:"The validator requires exact anchors.",decisive_test:"Run close gate."}
-    ],
-    third_alternative:{id:"H_alt",reason:"Missing relation edges cannot be inferred from prose."},
-    acceptance_when_killed:{all_killed:"plan = REJECT",exactly_one_survives:"plan = COMMIT to that hypothesis",two_or_more_survive:"plan = re-decompose with sharper kill_conditions"}
+    hypothesis_slate:[
+      {id:"H1",strategy:"Missing EV anchors block close.",kill_condition:"A missing anchor passes.",is_third_alternative:false,status:"active",killed_by:null,adopted_at_phase:null},
+      {id:"H2",strategy:"Missing anchors can be inferred.",kill_condition:"The validator requires exact anchors.",is_third_alternative:true,status:"active",killed_by:null,adopted_at_phase:null}
+    ]
   }' >"$repo/.flywheel/plans/$slug/STATE.json"
 }
 

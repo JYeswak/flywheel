@@ -77,29 +77,26 @@ write_state_v5() {
         graded_at:"2026-05-07T20:30:00Z"
       }],
       schema_version:5,
-      hypotheses:[
+      hypothesis_slate:[
         {
           id:"H1",
-          claim:"Prediction locks make Phase 2 hypotheses falsifiable.",
+          strategy:"Prediction locks make Phase 2 hypotheses falsifiable.",
           kill_condition:"A mutated receipt can still pass the close gate.",
-          decisive_test:"Run the close gate after locking predictions."
+          is_third_alternative:false,
+          status:"active",
+          killed_by:null,
+          adopted_at_phase:null
         },
         {
-          id:"H_alt",
-          claim:"Compliance packs alone are enough to prevent post-hoc plan edits.",
+          id:"H2",
+          strategy:"Compliance packs alone are enough to prevent post-hoc plan edits.",
           kill_condition:"A post-lock prediction mutation is detected without a receipt.",
-          decisive_test:"Remove prediction hashes and rerun the close gate."
+          is_third_alternative:true,
+          status:"active",
+          killed_by:null,
+          adopted_at_phase:null
         }
-      ],
-      third_alternative:{
-        id:"H_alt",
-        reason:"The close gate needs both evidence quality and hypothesis immutability."
-      },
-      acceptance_when_killed:{
-        all_killed:"plan = REJECT",
-        exactly_one_survives:"plan = COMMIT to that hypothesis",
-        two_or_more_survive:"plan = re-decompose with sharper kill_conditions"
-      }
+      ]
     }' >"$repo/.flywheel/plans/$slug/STATE.json"
 }
 

@@ -4,7 +4,11 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/.flywheel/scripts/quality-bar-close-gate.sh"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/brenner-hypothesis-slate.XXXXXX")"
-trap 'rm -rf "$TMP"' EXIT
+cleanup() {
+  find "$TMP" -type f -delete 2>/dev/null || true
+  find "$TMP" -depth -type d -empty -delete 2>/dev/null || true
+}
+trap cleanup EXIT
 
 pass_count=0
 
@@ -82,45 +86,40 @@ write_state_v5() {
     }
     | if $slate_mode == "valid" then
         . + {
-          hypotheses:[
+          hypothesis_slate:[
             {
               id:"H1",
-              claim:"The native plan path is sufficient if the close gate can parse Phase 2 outputs.",
+              strategy:"The native plan path is sufficient if the close gate can parse Phase 2 outputs.",
               kill_condition:"A schema v5 plan with valid Phase 2 fields still fails the close gate.",
-              decisive_test:"Run quality-bar-close-gate.sh against this fixture and require PASS."
+              is_third_alternative:false,
+              status:"active",
+              killed_by:null,
+              adopted_at_phase:null
             },
             {
-              id:"H_alt",
-              claim:"Both template-only and validator-only approaches are insufficient.",
+              id:"H2",
+              strategy:"Both template-only and validator-only approaches are insufficient.",
               kill_condition:"Either the template or the validator alone enforces every required field.",
-              decisive_test:"Remove one surface and confirm the missing-slate fixture fails."
+              is_third_alternative:true,
+              status:"active",
+              killed_by:null,
+              adopted_at_phase:null
             }
-          ],
-          third_alternative:{
-            id:"H_alt",
-            reason:"The plan contract needs both author prompt pressure and close-time enforcement."
-          },
-          acceptance_when_killed:{
-            all_killed:"plan = REJECT",
-            exactly_one_survives:"plan = COMMIT to that hypothesis",
-            two_or_more_survive:"plan = re-decompose with sharper kill_conditions"
-          }
+          ]
         }
       elif $slate_mode == "one_hypothesis" then
         . + {
-          hypotheses:[
+          hypothesis_slate:[
             {
               id:"H1",
-              claim:"A single hypothesis is enough.",
+              strategy:"A single hypothesis is enough.",
               kill_condition:"The validator requires alternatives.",
-              decisive_test:"Run the close gate."
+              is_third_alternative:false,
+              status:"active",
+              killed_by:null,
+              adopted_at_phase:null
             }
-          ],
-          acceptance_when_killed:{
-            all_killed:"plan = REJECT",
-            exactly_one_survives:"plan = COMMIT to that hypothesis",
-            two_or_more_survive:"plan = re-decompose with sharper kill_conditions"
-          }
+          ]
         }
       else
         .
@@ -145,6 +144,6 @@ assert_jq "$TMP/valid_slate.out" '.decision == "pass" and .hypothesis_slate_vali
 
 write_state_v5 "$repo" one-hypothesis one_hypothesis
 expect_rc one_hypothesis 1 env QUALITY_BAR_CLOSE_GATE_CONTRACT_LEDGER="$contract" "$SCRIPT" --repo "$repo" --ledger "$ledger" --plan-slug one-hypothesis --json
-assert_jq "$TMP/one_hypothesis.out" '.decision == "fail" and .hypothesis_slate_valid == "no" and (.hypothesis_slate_errors | index("hypothesis_count_not_2_to_5")) and (.hypothesis_slate_errors | index("third_alternative_missing"))' "fixture_one_hypothesis_fails"
+assert_jq "$TMP/one_hypothesis.out" '.decision == "fail" and .hypothesis_slate_valid == "no" and (.hypothesis_slate_errors | index("hypothesis_count_not_2_to_5")) and (.hypothesis_slate_errors | index("third_alternative_not_exactly_one"))' "fixture_one_hypothesis_fails"
 
 printf 'OK brenner hypothesis slate tests pass=%s/3\n' "$pass_count"
