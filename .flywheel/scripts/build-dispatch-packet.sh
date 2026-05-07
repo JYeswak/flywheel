@@ -1,41 +1,19 @@
 #!/usr/bin/env bash
-# build-dispatch-packet.sh — materialize a canonical dispatch packet from a bead.
-#
-# One-stock-two-flows: BOTH /flywheel:dispatch (operator) AND
-# ntm-coordinator-pinned daemon (auto) call this primitive so workers receive
-# IDENTICAL packets regardless of dispatch path.
-#
-# Mission anchor: continuous-orchestrator-uptime-self-sustaining-fleet
-# Bead: flywheel-hctfn (T3B)
-# Donella: #4 self-organization, #3 goal — one canonical stock for dispatch
-#          packets eliminates the 2-stock divergence between operator-fired and
-#          coordinator-daemon-fired dispatches.
-#
-# Canonical-cli-scoping: --dry-run (default) | --apply | --json | --explain
-#                        --info | --examples | --schema | --help
-#
-# Exit codes:
-#   0  ok
-#   1  bad args / usage
-#   2  bead not found / br error
-#   3  topology lookup failed
-#   4  template missing
-#   5  contract validation fail (packet missing required block)
-
 set -euo pipefail
 
-VERSION="0.1.0"
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-REPO_ROOT="$( cd "$SCRIPT_DIR/../.." && pwd )"
+VERSION="0.2.0"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
 SHARED_DIR="${HOME}/.claude/commands/flywheel/_shared"
 TEMPLATE_FILE="$SHARED_DIR/dispatch-template.md"
 TOPOLOGY="${FLYWHEEL_TOPOLOGY:-$HOME/.local/state/flywheel/session-topology.jsonl}"
 JOSH_REQUESTS="${FLYWHEEL_JOSH_REQUESTS:-$HOME/.local/state/flywheel/josh-requests.jsonl}"
 IDENTITY_DIR="${FLYWHEEL_IDENTITY_DIR:-$HOME/.local/state/flywheel/orch-worker-identity}"
+NTM_BIN="${FLYWHEEL_NTM_BIN:-/Users/josh/.local/bin/ntm}"
 
 usage() {
   cat <<EOF
-build-dispatch-packet.sh v${VERSION} — materialize canonical dispatch packet
+build-dispatch-packet.sh v${VERSION} - materialize canonical dispatch packet
 
 USAGE:
   build-dispatch-packet.sh --bead-id <id> --target-pane <N> --target-session <name> [flags]
@@ -49,127 +27,31 @@ OPTIONAL:
   --task-id <id>           Override task id (default: <bead-id>-<short-ts>)
   --dispatch-channel <c>   auto | operator (default: operator)
   --output-dir <path>      Where to write packet (default: /tmp)
-  --apply                  Materialize the packet (default: dry-run preview)
-  --dry-run                Preview only, no file write (DEFAULT)
-  --json                   JSON output (path + sha256 + validation)
+  --apply                  Materialize packet (default: dry-run preview)
+  --dry-run                Preview only, no file write (default)
+  --json                   JSON output
 
 INTROSPECTION:
-  --explain                Design rationale + Donella + canonical-cli-scoping
-  --info                   Version, paths, contract source
-  --examples               Worked invocations
-  --schema                 JSON output schema
-  -h, --help               This help
+  --explain | --info | --examples | --schema | -h, --help
 
 EXIT CODES:
-  0 ok | 1 bad args | 2 bead lookup fail | 3 topology fail | 4 template missing | 5 contract validation fail
+  0 ok | 1 bad args | 2 bead lookup fail | 3 ntm/context/topology fail | 4 template missing | 5 contract validation fail
 EOF
 }
 
-explain() {
-  cat <<'EOF'
-EXPLAIN:
-Workers receive dispatch packets from two paths today:
-  (A) /flywheel:dispatch — operator-fired, hand-built packet with all 20+
-      contract blocks from _shared/dispatch-template.md
-  (B) ntm-coordinator-pinned daemon — auto-fired, minimal 16-line template
-      pointing at /flywheel:worker-tick
+explain() { printf '%s\n' "EXPLAIN:" "Single materializer for operator and daemon dispatch. Flywheel doctrine blocks stay local; task context/template mechanics come from NTM JSON: context build --json and template show marching_orders --body --json. Dry-run default, --apply mutation gate, --json schema, and stable exit codes remain per canonical-cli-scoping."; }
+info() { printf 'INFO:\n  version        = %s\n  ntm_bin        = %s\n  ntm_context    = ntm context build --json\n  ntm_template   = ntm template show marching_orders --body --json\n  contract_ref   = %s\n  topology       = %s\n  josh_requests  = %s\n  identity_dir   = %s\n' "$VERSION" "$NTM_BIN" "$TEMPLATE_FILE" "$TOPOLOGY" "$JOSH_REQUESTS" "$IDENTITY_DIR"; }
+examples() { printf '%s\n' "EXAMPLES:" "  build-dispatch-packet.sh --bead-id flywheel-abc --target-pane 2 --target-session flywheel --apply" "  build-dispatch-packet.sh --bead-id flywheel-abc --target-pane 2 --target-session flywheel --dispatch-channel auto --apply --json" "  build-dispatch-packet.sh --bead-id flywheel-abc --target-pane 2 --target-session flywheel --dry-run" "  build-dispatch-packet.sh --schema"; }
+schema() { printf '%s\n' '{"title":"build-dispatch-packet output (--json)","type":"object","required":["packet_path","packet_sha256","validation_status","fields_resolved","schema_version"],"properties":{"schema_version":{"const":"build-dispatch-packet.v1"},"packet_path":{"type":"string"},"packet_sha256":{"type":"string","pattern":"^[0-9a-f]{64}$"},"validation_status":{"enum":["pass","fail","dry-run"]},"validation_blocks_present":{"type":"array","items":{"type":"string"}},"validation_blocks_missing":{"type":"array","items":{"type":"string"}},"fields_resolved":{"type":"object"}}}'; }
 
-These two stocks diverge. Workers from path (B) miss josh_request_id,
-identity_name, skill auto-routes, file discipline, etc. Donella #6 (information
-flow) breaks because the same logical work flows differently by accident of
-who fired it.
-
-THIS SCRIPT collapses both paths to ONE materialized stock:
-- (A) /flywheel:dispatch becomes a thin wrapper: build-dispatch-packet → ntm send
-- (B) coordinator daemon's hook builds the packet pre-dispatch; minimal
-      template degrades to "Read /tmp/dispatch_<bead>.md"
-
-Donella read: #4 self-organization (system produces correct packet without
-operator vs daemon awareness), #3 goal (single canonical packet shape), #6
-information flow (workers get the same instructions every time).
-
-Canonical-cli-scoping: dry-run default refuses to mutate; --apply opens the
-write path; structured exit codes; --schema for machine integration.
-EOF
+die() { echo "ERROR: $*" >&2; exit "${2:-1}"; }
+jq_get() { jq -r "$1 // \"\"" 2>/dev/null; }
+json_array() {
+  if [[ "$#" -eq 0 ]]; then echo "[]"; else printf '%s\n' "$@" | jq -R . | jq -s .; fi
 }
 
-info() {
-  cat <<EOF
-INFO:
-  version          = $VERSION
-  template         = $TEMPLATE_FILE
-  topology         = $TOPOLOGY
-  josh_requests    = $JOSH_REQUESTS
-  identity_dir     = $IDENTITY_DIR
-  shared_helpers   = $SHARED_DIR
-  inject_memory    = $SHARED_DIR/inject-memory-hits.sh
-  inject_skills    = $SHARED_DIR/inject-skill-auto-routes.sh
-  bead_id_prefix   = (resolved per --target-session via topology)
-EOF
-}
-
-examples() {
-  cat <<'EOF'
-EXAMPLES:
-  # operator-fired dispatch (default)
-  build-dispatch-packet.sh --bead-id flywheel-abc --target-pane 2 --target-session flywheel --apply
-
-  # coordinator-daemon hook (auto channel)
-  build-dispatch-packet.sh --bead-id flywheel-abc --target-pane 2 --target-session flywheel \
-    --dispatch-channel auto --apply --json
-
-  # preview without writing
-  build-dispatch-packet.sh --bead-id flywheel-abc --target-pane 2 --target-session flywheel --dry-run
-
-  # introspect contract
-  build-dispatch-packet.sh --schema
-EOF
-}
-
-schema() {
-  cat <<'EOF'
-{
-  "title": "build-dispatch-packet output (--json)",
-  "type": "object",
-  "required": ["packet_path", "packet_sha256", "validation_status", "fields_resolved", "schema_version"],
-  "properties": {
-    "schema_version":  {"const": "build-dispatch-packet.v1"},
-    "packet_path":     {"type": "string", "pattern": "^/.+\\.md$"},
-    "packet_sha256":   {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-    "validation_status": {"enum": ["pass", "fail", "dry-run"]},
-    "validation_blocks_present": {"type": "array", "items": {"type": "string"}},
-    "validation_blocks_missing": {"type": "array", "items": {"type": "string"}},
-    "fields_resolved": {"type": "object",
-      "properties": {
-        "task_id": {"type": "string"},
-        "bead_id": {"type": "string"},
-        "target_pane": {"type": "integer"},
-        "target_session": {"type": "string"},
-        "callback_pane": {"type": "integer"},
-        "mission_anchor": {"type": ["string","null"]},
-        "mission_fitness_class": {"type": ["string","null"]},
-        "josh_request_id": {"type": ["string","null"]},
-        "identity_name": {"type": ["string","null"]},
-        "dispatch_channel": {"enum": ["auto", "operator"]},
-        "memory_hits_count": {"type": "integer"},
-        "skill_auto_routes_count": {"type": "integer"}
-      }
-    }
-  }
-}
-EOF
-}
-
-# ─── arg parse ───────────────────────────────────────────────────────────────
-BEAD_ID=""
-TARGET_PANE=""
-TARGET_SESSION=""
-TASK_ID=""
-DISPATCH_CHANNEL="operator"
-OUTPUT_DIR="/tmp"
-MODE="dry-run"
-JSON_OUT=false
-
+BEAD_ID="" TARGET_PANE="" TARGET_SESSION="" TASK_ID=""
+DISPATCH_CHANNEL="operator" OUTPUT_DIR="/tmp" MODE="dry-run" JSON_OUT=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --bead-id) BEAD_ID="$2"; shift 2 ;;
@@ -181,321 +63,123 @@ while [[ $# -gt 0 ]]; do
     --apply) MODE="apply"; shift ;;
     --dry-run) MODE="dry-run"; shift ;;
     --json) JSON_OUT=true; shift ;;
-    --help|-h) usage; exit 0 ;;
     --explain) explain; exit 0 ;;
     --info) info; exit 0 ;;
     --examples) examples; exit 0 ;;
     --schema) schema; exit 0 ;;
-    *) echo "unknown arg: $1" >&2; usage >&2; exit 1 ;;
+    --help|-h) usage; exit 0 ;;
+    *) usage >&2; die "unknown arg: $1" 1 ;;
   esac
 done
 
-[[ -z "$BEAD_ID" ]] && { echo "ERROR: --bead-id required" >&2; exit 1; }
-[[ -z "$TARGET_PANE" ]] && { echo "ERROR: --target-pane required" >&2; exit 1; }
-[[ -z "$TARGET_SESSION" ]] && { echo "ERROR: --target-session required" >&2; exit 1; }
-[[ -r "$TEMPLATE_FILE" ]] || { echo "ERROR: template missing: $TEMPLATE_FILE" >&2; exit 4; }
-
+[[ -n "$BEAD_ID" ]] || die "--bead-id required" 1
+[[ -n "$TARGET_PANE" ]] || die "--target-pane required" 1
+[[ -n "$TARGET_SESSION" ]] || die "--target-session required" 1
+[[ -r "$TEMPLATE_FILE" ]] || die "template missing: $TEMPLATE_FILE" 4
+[[ -x "$NTM_BIN" ]] || die "ntm not executable: $NTM_BIN" 3
 [[ -z "$TASK_ID" ]] && TASK_ID="${BEAD_ID}-$(date -u +%s | shasum | cut -c1-6)"
+NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-# ─── resolve dynamic fields ──────────────────────────────────────────────────
-NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+CALLBACK_PANE="$(jq -sr --arg s "$TARGET_SESSION" 'map(select(.session == $s)) | sort_by(.effective_at) | last | (.callback_pane // .orchestrator_pane // 1)' "$TOPOLOGY" 2>/dev/null || echo 1)"
+[[ "$CALLBACK_PANE" == "null" || -z "$CALLBACK_PANE" ]] && CALLBACK_PANE=1
 
-# Callback pane from topology (latest-wins)
-CALLBACK_PANE=$(jq -sr --arg s "$TARGET_SESSION" '
-  map(select(.session == $s))
-  | sort_by(.effective_at) | last
-  | (.callback_pane // .orchestrator_pane // 1)
-' "$TOPOLOGY" 2>/dev/null || echo "1")
-[[ "$CALLBACK_PANE" == "null" ]] && CALLBACK_PANE=1
-
-# Mission anchor + fitness from .flywheel/MISSION.md (best-effort)
 MISSION_ANCHOR="continuous-orchestrator-uptime-self-sustaining-fleet"
 MISSION_FILE="$REPO_ROOT/.flywheel/MISSION.md"
 if [[ -r "$MISSION_FILE" ]]; then
-  EXTRACTED=$(grep -E "^anchor:|^mission_anchor:|^## Mission Anchor" "$MISSION_FILE" 2>/dev/null | head -1 | sed 's/^[^:]*:[[:space:]]*//' | tr -d '\n' || true)
-  if [[ -n "${EXTRACTED:-}" ]]; then MISSION_ANCHOR="$EXTRACTED"; fi
+  EXTRACTED="$(grep -E '^anchor:|^mission_anchor:' "$MISSION_FILE" 2>/dev/null | head -1 | sed 's/^[^:]*:[[:space:]]*//' || true)"
+  [[ -n "${EXTRACTED:-}" ]] && MISSION_ANCHOR="$EXTRACTED"
 fi
 MISSION_FITNESS_CLASS="adjacent"
 MISSION_FITNESS_CLAIM="Bead $BEAD_ID advances substrate work supporting the mission anchor."
 
-# Bead body via br show — br emits an array even for single bead
-BEAD_JSON=$(br show "$BEAD_ID" --json 2>/dev/null || echo '[]')
-BEAD_TITLE=$(echo "$BEAD_JSON" | jq -r 'if type=="array" then .[0].title // "" else .title // "" end' 2>/dev/null || echo "")
-BEAD_BODY=$(echo "$BEAD_JSON" | jq -r 'if type=="array" then (.[0].description // .[0].body // "") else (.description // .body // "") end' 2>/dev/null || echo "")
-BEAD_PRIORITY=$(echo "$BEAD_JSON" | jq -r 'if type=="array" then (.[0].priority // 99) else (.priority // 99) end' 2>/dev/null || echo 99)
-if [[ -z "$BEAD_TITLE" ]]; then echo "ERROR: bead $BEAD_ID not found via br show" >&2; exit 2; fi
+BEAD_JSON="$(br show "$BEAD_ID" --json 2>/dev/null || echo '[]')"
+BEAD_TITLE="$(echo "$BEAD_JSON" | jq_get 'if type=="array" then .[0].title else .title end')"
+BEAD_BODY="$(echo "$BEAD_JSON" | jq_get 'if type=="array" then (.[0].description // .[0].body) else (.description // .body) end')"
+BEAD_PRIORITY="$(echo "$BEAD_JSON" | jq_get 'if type=="array" then (.[0].priority // 99) else (.priority // 99) end')"
+[[ -n "$BEAD_TITLE" ]] || die "bead $BEAD_ID not found via br show" 2
+BEAD_DEPS="$(br dep tree "$BEAD_ID" --json 2>/dev/null | jq -r '. | tostring' 2>/dev/null || echo '{}')"
 
-# Bead deps
-BEAD_DEPS=$(br dep tree "$BEAD_ID" --json 2>/dev/null | jq -r '. | tostring' 2>/dev/null || echo '{}')
+NTM_CONTEXT_JSON="$("$NTM_BIN" context build --bead "$BEAD_ID" --task "$BEAD_TITLE" --files "$SCRIPT_DIR/build-dispatch-packet.sh" --agent cod --json 2>/dev/null || true)"
+echo "$NTM_CONTEXT_JSON" | jq -e . >/dev/null 2>&1 || die "ntm context build --json failed" 3
+NTM_TEMPLATE_JSON="$("$NTM_BIN" template show marching_orders --body --json 2>/dev/null || true)"
+echo "$NTM_TEMPLATE_JSON" | jq -e . >/dev/null 2>&1 || die "ntm template show --json failed" 4
+NTM_CONTEXT_ID="$(echo "$NTM_CONTEXT_JSON" | jq_get '.id')"
+NTM_CONTEXT_REV="$(echo "$NTM_CONTEXT_JSON" | jq_get '.repo_rev')"
+NTM_CONTEXT_TOKENS="$(echo "$NTM_CONTEXT_JSON" | jq_get '.token_count')"
+NTM_TEMPLATE_NAME="$(echo "$NTM_TEMPLATE_JSON" | jq_get '.name')"
+NTM_TEMPLATE_SOURCE="$(echo "$NTM_TEMPLATE_JSON" | jq_get '.source')"
 
-# Josh request linkage (lookup; null if none)
 JOSH_REQUEST_ID="null"
 if [[ -r "$JOSH_REQUESTS" ]]; then
-  MATCH=$(jq -sr --arg b "$BEAD_ID" '
-    map(select(.linked_bead_ids // [] | index($b)))
-    | sort_by(.captured_at) | last
-    | (.id // "null")
-  ' "$JOSH_REQUESTS" 2>/dev/null || echo "null")
-  if [[ -n "${MATCH:-}" && "$MATCH" != "null" ]]; then JOSH_REQUEST_ID="$MATCH"; fi
+  MATCH="$(jq -sr --arg b "$BEAD_ID" 'map(select(.linked_bead_ids // [] | index($b))) | sort_by(.captured_at) | last | (.id // "null")' "$JOSH_REQUESTS" 2>/dev/null || echo null)"
+  [[ -n "$MATCH" && "$MATCH" != "null" ]] && JOSH_REQUEST_ID="$MATCH"
 fi
 
-# Worker identity from manifest
-IDENTITY_NAME="null"
-IDENTITY_STATUS="needs_registration"
+IDENTITY_NAME="null" IDENTITY_STATUS="needs_registration"
 IDENTITY_FILE="$IDENTITY_DIR/${TARGET_SESSION}.json"
 if [[ -r "$IDENTITY_FILE" ]]; then
-  IDENT_JSON=$(jq -r --argjson p "$TARGET_PANE" '
-    .workers[]? | select(.pane == $p) | {name: .fleet_mail_identity, status: .registration_status}
-  ' "$IDENTITY_FILE" 2>/dev/null || echo '{}')
-  IDENTITY_NAME=$(echo "$IDENT_JSON" | jq -r '.name // "null"')
-  IDENTITY_STATUS=$(echo "$IDENT_JSON" | jq -r '.status // "needs_registration"')
+  IDENT_JSON="$(jq -r --argjson p "$TARGET_PANE" '.workers[]? | select(.pane == $p) | {name:.fleet_mail_identity,status:.registration_status}' "$IDENTITY_FILE" 2>/dev/null || echo '{}')"
+  IDENTITY_NAME="$(echo "$IDENT_JSON" | jq_get '.name')"; [[ -z "$IDENTITY_NAME" ]] && IDENTITY_NAME="null"
+  IDENTITY_STATUS="$(echo "$IDENT_JSON" | jq_get '.status')"; [[ -z "$IDENTITY_STATUS" ]] && IDENTITY_STATUS="needs_registration"
 fi
 
-# ─── compose packet ──────────────────────────────────────────────────────────
 PACKET_FILE="$OUTPUT_DIR/dispatch_${TASK_ID}.md"
-TMP_BODY=$(mktemp -t dispatch-body.XXXXXX)
-trap 'rm -f "$TMP_BODY"' EXIT
+TMP_BODY="$(mktemp -t dispatch-body.XXXXXX)"
+trap 'rm -f "$TMP_BODY" "${TMP_BODY}.mem" "${TMP_BODY}.mem.routed" "${TMP_BODY}.routed"' EXIT
 
-# Write the task body that workers receive
-cat > "$TMP_BODY" <<EOF
-# DISPATCH PACKET (canonical)
-# Task ID: ${TASK_ID}
-# Bead: ${BEAD_ID} (P${BEAD_PRIORITY})
-# Title: ${BEAD_TITLE}
-# Target: ${TARGET_SESSION}:0.${TARGET_PANE}
-# Callback pane: ${CALLBACK_PANE}
-# Dispatch channel: ${DISPATCH_CHANNEL}
-# Identity: ${IDENTITY_NAME} (status=${IDENTITY_STATUS})
-# Started: ${NOW}
+{
+  printf '# DISPATCH PACKET (canonical)\n# Task ID: %s\n# Bead: %s (P%s)\n# Title: %s\n# Target: %s:0.%s\n# Callback pane: %s\n# Dispatch channel: %s\n# Identity: %s (status=%s)\n# Started: %s\n\n' "$TASK_ID" "$BEAD_ID" "$BEAD_PRIORITY" "$BEAD_TITLE" "$TARGET_SESSION" "$TARGET_PANE" "$CALLBACK_PANE" "$DISPATCH_CHANNEL" "$IDENTITY_NAME" "$IDENTITY_STATUS" "$NOW"
+  printf '## CALLBACK CONTRACT\n\nWhen complete, send EXACTLY ONE of:\n\n```\n/Users/josh/.local/bin/ntm send %s --pane=%s --no-cass-check "DONE %s task_id=%s josh_request_id=%s did=<n>/<total> didnt=<bead-ids-or-none> gaps=<bead-ids-or-none> evidence=<path> tests=PASS|FAIL|SKIPPED mission_fitness=direct|adjacent|infrastructure|drift br_close_executed=yes|failed|not_applicable four_lens=brand:N,sniff:N,jeff:N,public:N callback_delivery_verified=true"\n```\n\nIf blocked: `BLOCKED %s reason=<short> need=<short> mission_fitness=<class> josh_request_id=%s`\nIf declining: `DECLINED %s reason=<scope-mismatch|capability|risk> mission_fitness=drift josh_request_id=%s`\n\n' "$TARGET_SESSION" "$CALLBACK_PANE" "$BEAD_ID" "$TASK_ID" "$JOSH_REQUEST_ID" "$TASK_ID" "$JOSH_REQUEST_ID" "$TASK_ID" "$JOSH_REQUEST_ID"
+  printf '## MISSION FITNESS CLAIM BLOCK\n\n```text\nmission_anchor=%s\nmission_fitness_claim=%s\nmission_fitness_class=%s\n```\n\nWorkers MUST echo `mission_fitness=<direct|adjacent|infrastructure|drift>` in the DONE callback.\n\n' "$MISSION_ANCHOR" "$MISSION_FITNESS_CLAIM" "$MISSION_FITNESS_CLASS"
+  printf '## JOSH REQUEST LINKAGE BLOCK\n\n```text\njosh_request_id=%s\n```\n\nDONE/BLOCKED/DECLINED callbacks MUST include the same field and value verbatim.\n\n## LOCKED WORKER IDENTITY BLOCK\n\n```text\nidentity_name=%s\nidentity_source=%s\nworker_identity=%s\nworker_identity_status=%s\n```\n\nIf `worker_identity_status=needs_registration`, dispatch wrapper triggered registration before this packet was sent.\n\n' "$JOSH_REQUEST_ID" "$IDENTITY_NAME" "$IDENTITY_FILE" "$IDENTITY_NAME" "$IDENTITY_STATUS"
+  printf '## SHARED-SURFACE RESERVATION BLOCK (L107)\n\nBefore staging shared paths (commit-touched files), reserve:\n```bash\n.flywheel/scripts/shared-surface-reservation-check.sh --reserve <path> --pane=%s --task-id=%s --json\n```\nRelease after commit. Worker callback MUST include `shared_surface_reservations_checked=yes shared_surface_reservations_released=yes`.\n\n## FILE DISCIPLINE (PICOZ_WORKER_FILES)\n\nEdit ONLY files named in this packet TASK BODY or files explicitly named in the bead body. Other edits require an in-band ntm message asking for scope expansion BEFORE the edit.\n\n' "$TARGET_PANE" "$TASK_ID"
+  printf '## VERIFICATION (pre-DONE)\n\nRun verification commands from bead acceptance section if present. If none, run:\n```bash\nbash -n <any-edited-shell-script>\nbr show %s  # confirm bead state\n```\n\n## DID / DIDNT / GAPS BLOCK (L80)\n\nWorker DONE callback MUST include:\n- `did=<count>/<total-bead-acceptance-criteria>`\n- `didnt=<bead-ids-skipped-or-none>`\n- `gaps=<bead-ids-newly-discovered-or-none>`\n\n' "$BEAD_ID"
+  printf '## FOUR-LENS SELF-GRADE BLOCK\n\nScore 1-10 each:\n- `brand` (zest brand voice consistency)\n- `sniff` (smell test; does this look right)\n- `jeff` (Jeff Emanuel substrate alignment)\n- `public` (would I show this to a stranger)\n\nEcho as `four_lens=brand:N,sniff:N,jeff:N,public:N` in DONE callback.\n\n## L61 ECOSYSTEM-TOUCH BLOCK\n\nIf this work touches doctrine|INCIDENTS|canonical|L-rule|skill, callback MUST include:\n- `agents_md_updated=yes|no`\n- `readme_updated=yes|no`\n- `no_touch_reason=<reason>` (when either is `no`)\n\n'
+  printf '## L120 BR-CLOSE-EXECUTED BLOCK\n\nDONE callback MUST include `br_close_executed=yes|failed|not_applicable`.\n`yes` requires `br close %s` exited 0 BEFORE the ntm send DONE.\n\n## TASK BODY (bead context)\n\n### Title\n%s\n\n### Description\n' "$BEAD_ID" "$BEAD_TITLE"
+  printf '%s\n\n' "$BEAD_BODY"
+  printf '### Dependencies\n```json\n%s\n```\n\n### Priority\nP%s\n\n### NTM Context And Template\n```text\nntm_context_id=%s\nntm_context_repo_rev=%s\nntm_context_token_count=%s\nntm_template_name=%s\nntm_template_source=%s\n```\n\n' "$BEAD_DEPS" "$BEAD_PRIORITY" "$NTM_CONTEXT_ID" "$NTM_CONTEXT_REV" "$NTM_CONTEXT_TOKENS" "$NTM_TEMPLATE_NAME" "$NTM_TEMPLATE_SOURCE"
+  printf '## EXECUTION\n\n1. Read this entire packet\n2. Run `br show %s` to confirm context\n3. Run `br dep tree %s` to see dependencies\n4. Apply socraticode K>=10 if non-trivial code claim involved\n5. Reserve any shared paths via L107 script before edits\n6. Execute the bead acceptance criteria\n7. Run verification\n8. `br close %s` (BEFORE callback per L120)\n9. Send DONE callback per CALLBACK CONTRACT above\n\n## METADATA\n\n```text\nschema_version=dispatch-packet.v1\npacket_built_by=build-dispatch-packet.sh@%s\npacket_built_at=%s\ndispatch_channel=%s\nntm_context_source=context build --json\nntm_template_source=template show %s --body --json\n```\n' "$BEAD_ID" "$BEAD_ID" "$BEAD_ID" "$VERSION" "$NOW" "$DISPATCH_CHANNEL" "$NTM_TEMPLATE_NAME"
+} >"$TMP_BODY"
 
-## CALLBACK CONTRACT
-
-When complete, send EXACTLY ONE of:
-
-\`\`\`
-/Users/josh/.local/bin/ntm send ${TARGET_SESSION} --pane=${CALLBACK_PANE} --no-cass-check "DONE ${BEAD_ID} task_id=${TASK_ID} josh_request_id=${JOSH_REQUEST_ID} did=<n>/<total> didnt=<bead-ids-or-none> gaps=<bead-ids-or-none> evidence=<path> tests=PASS|FAIL|SKIPPED mission_fitness=direct|adjacent|infrastructure|drift br_close_executed=yes|failed|not_applicable four_lens=brand:N,sniff:N,jeff:N,public:N callback_delivery_verified=true"
-\`\`\`
-
-If blocked: \`BLOCKED ${TASK_ID} reason=<short> need=<short> mission_fitness=<class> josh_request_id=${JOSH_REQUEST_ID}\`
-If declining: \`DECLINED ${TASK_ID} reason=<scope-mismatch|capability|risk> mission_fitness=drift josh_request_id=${JOSH_REQUEST_ID}\`
-
-## MISSION FITNESS CLAIM BLOCK
-
-\`\`\`text
-mission_anchor=${MISSION_ANCHOR}
-mission_fitness_claim=${MISSION_FITNESS_CLAIM}
-mission_fitness_class=${MISSION_FITNESS_CLASS}
-\`\`\`
-
-Workers MUST echo \`mission_fitness=<direct|adjacent|infrastructure|drift>\` in the DONE callback.
-
-## JOSH REQUEST LINKAGE BLOCK
-
-\`\`\`text
-josh_request_id=${JOSH_REQUEST_ID}
-\`\`\`
-
-DONE/BLOCKED/DECLINED callbacks MUST include the same field and value verbatim.
-
-## LOCKED WORKER IDENTITY BLOCK
-
-\`\`\`text
-identity_name=${IDENTITY_NAME}
-identity_source=${IDENTITY_FILE}
-worker_identity=${IDENTITY_NAME}
-worker_identity_status=${IDENTITY_STATUS}
-\`\`\`
-
-If \`worker_identity_status=needs_registration\`, dispatch wrapper triggered registration before this packet was sent.
-
-## SHARED-SURFACE RESERVATION BLOCK (L107)
-
-Before staging shared paths (commit-touched files), reserve:
-\`\`\`bash
-.flywheel/scripts/shared-surface-reservation-check.sh --reserve <path> --pane=${TARGET_PANE} --task-id=${TASK_ID} --json
-\`\`\`
-Release after commit. Worker callback MUST include \`shared_surface_reservations_checked=yes shared_surface_reservations_released=yes\`.
-
-## FILE DISCIPLINE (PICOZ_WORKER_FILES)
-
-Edit ONLY files named in this packet's TASK BODY or files explicitly named in the bead body. Other edits require an in-band ntm message asking for scope expansion BEFORE the edit.
-
-## VERIFICATION (pre-DONE)
-
-Run verification commands from bead acceptance section if present. If none, run:
-\`\`\`bash
-bash -n <any-edited-shell-script>
-br show ${BEAD_ID}  # confirm bead state
-\`\`\`
-
-## DID / DIDNT / GAPS BLOCK (L80)
-
-Worker DONE callback MUST include:
-- \`did=<count>/<total-bead-acceptance-criteria>\`
-- \`didnt=<bead-ids-skipped-or-none>\`
-- \`gaps=<bead-ids-newly-discovered-or-none>\`
-
-## FOUR-LENS SELF-GRADE BLOCK
-
-Score 1-10 each:
-- \`brand\` (zest brand voice consistency)
-- \`sniff\` (smell test — does this look right)
-- \`jeff\` (Jeff Emanuel substrate alignment)
-- \`public\` (would I show this to a stranger)
-
-Echo as \`four_lens=brand:N,sniff:N,jeff:N,public:N\` in DONE callback.
-
-## L61 ECOSYSTEM-TOUCH BLOCK
-
-If this work touches doctrine|INCIDENTS|canonical|L-rule|skill, callback MUST include:
-- \`agents_md_updated=yes|no\`
-- \`readme_updated=yes|no\`
-- \`no_touch_reason=<reason>\` (when either is \`no\`)
-
-## L120 BR-CLOSE-EXECUTED BLOCK
-
-DONE callback MUST include \`br_close_executed=yes|failed|not_applicable\`.
-\`yes\` requires \`br close ${BEAD_ID}\` exited 0 BEFORE the ntm send DONE.
-
-## TASK BODY (bead context)
-
-### Title
-${BEAD_TITLE}
-
-### Description
-${BEAD_BODY}
-
-### Dependencies
-\`\`\`json
-${BEAD_DEPS}
-\`\`\`
-
-### Priority
-P${BEAD_PRIORITY}
-
-## EXECUTION
-
-1. Read this entire packet
-2. Run \`br show ${BEAD_ID}\` to confirm context
-3. Run \`br dep tree ${BEAD_ID}\` to see dependencies
-4. Apply socraticode K≥10 if non-trivial code claim involved
-5. Reserve any shared paths via L107 script before edits
-6. Execute the bead acceptance criteria
-7. Run verification
-8. \`br close ${BEAD_ID}\` (BEFORE callback per L120)
-9. Send DONE callback per CALLBACK CONTRACT above
-
-## METADATA
-
-\`\`\`text
-schema_version=dispatch-packet.v1
-packet_built_by=build-dispatch-packet.sh@${VERSION}
-packet_built_at=${NOW}
-dispatch_channel=${DISPATCH_CHANNEL}
-\`\`\`
-EOF
-
-# ─── inject memory hits + skill auto-routes (if helpers available) ───────────
 AUGMENTED_BODY="$TMP_BODY"
-if [[ -x "$SHARED_DIR/inject-memory-hits.sh" ]]; then
-  MEM_OUT="${TMP_BODY}.mem"
-  if "$SHARED_DIR/inject-memory-hits.sh" "$TMP_BODY" "$TASK_ID" "$BEAD_ID" "$REPO_ROOT" > "$MEM_OUT" 2>/dev/null; then
-    AUGMENTED_BODY="$MEM_OUT"
-  fi
+if [[ -x "$SHARED_DIR/inject-memory-hits.sh" ]] && "$SHARED_DIR/inject-memory-hits.sh" "$TMP_BODY" "$TASK_ID" "$BEAD_ID" "$REPO_ROOT" >"${TMP_BODY}.mem" 2>/dev/null; then
+  AUGMENTED_BODY="${TMP_BODY}.mem"
 fi
-if [[ -x "$SHARED_DIR/inject-skill-auto-routes.sh" ]]; then
-  ROUTED_OUT="${AUGMENTED_BODY}.routed"
-  if "$SHARED_DIR/inject-skill-auto-routes.sh" "$AUGMENTED_BODY" "$TASK_ID" > "$ROUTED_OUT" 2>/dev/null; then
-    AUGMENTED_BODY="$ROUTED_OUT"
-  fi
+if [[ -x "$SHARED_DIR/inject-skill-auto-routes.sh" ]] && "$SHARED_DIR/inject-skill-auto-routes.sh" "$AUGMENTED_BODY" "$TASK_ID" >"${AUGMENTED_BODY}.routed" 2>/dev/null; then
+  AUGMENTED_BODY="${AUGMENTED_BODY}.routed"
 fi
 
-# Memory hit count
-MEMORY_HITS=$(grep -c "^- " "$AUGMENTED_BODY" 2>/dev/null | tr -d '\n' || echo 0)
-SKILL_ROUTES=$(grep -c "^Skill:" "$AUGMENTED_BODY" 2>/dev/null | tr -d '\n' || echo 0)
-[[ -z "$MEMORY_HITS" || ! "$MEMORY_HITS" =~ ^[0-9]+$ ]] && MEMORY_HITS=0
-[[ -z "$SKILL_ROUTES" || ! "$SKILL_ROUTES" =~ ^[0-9]+$ ]] && SKILL_ROUTES=0
+MEMORY_HITS="$(grep -c '^- ' "$AUGMENTED_BODY" 2>/dev/null | tr -d '\n' || echo 0)"
+SKILL_ROUTES="$(grep -Ec '^skill_auto_routes=[0-9]+' "$AUGMENTED_BODY" 2>/dev/null | tr -d '\n' || echo 0)"
+[[ "$MEMORY_HITS" =~ ^[0-9]+$ ]] || MEMORY_HITS=0
+[[ "$SKILL_ROUTES" =~ ^[0-9]+$ ]] || SKILL_ROUTES=0
 
-# ─── validate contract blocks present ───────────────────────────────────────
-REQUIRED_BLOCKS=(
-  "CALLBACK CONTRACT"
-  "MISSION FITNESS CLAIM BLOCK"
-  "JOSH REQUEST LINKAGE BLOCK"
-  "LOCKED WORKER IDENTITY BLOCK"
-  "SHARED-SURFACE RESERVATION BLOCK"
-  "FILE DISCIPLINE"
-  "VERIFICATION"
-  "DID / DIDNT / GAPS BLOCK"
-  "FOUR-LENS SELF-GRADE BLOCK"
-  "L61 ECOSYSTEM-TOUCH BLOCK"
-  "L120 BR-CLOSE-EXECUTED BLOCK"
-  "TASK BODY"
-  "EXECUTION"
-)
-PRESENT=()
-MISSING=()
+REQUIRED_BLOCKS=("CALLBACK CONTRACT" "MISSION FITNESS CLAIM BLOCK" "JOSH REQUEST LINKAGE BLOCK" "LOCKED WORKER IDENTITY BLOCK" "SHARED-SURFACE RESERVATION BLOCK" "FILE DISCIPLINE" "VERIFICATION" "DID / DIDNT / GAPS BLOCK" "FOUR-LENS SELF-GRADE BLOCK" "L61 ECOSYSTEM-TOUCH BLOCK" "L120 BR-CLOSE-EXECUTED BLOCK" "TASK BODY" "EXECUTION")
+declare -a PRESENT=()
+declare -a MISSING=()
 for block in "${REQUIRED_BLOCKS[@]}"; do
-  if grep -q "^## ${block}" "$AUGMENTED_BODY"; then
-    PRESENT+=("$block")
-  else
-    MISSING+=("$block")
-  fi
+  if grep -q "^## ${block}" "$AUGMENTED_BODY"; then PRESENT+=("$block"); else MISSING+=("$block"); fi
 done
+VALIDATION="pass"; [[ ${#MISSING[@]} -gt 0 ]] && VALIDATION="fail"
 
-VALIDATION="pass"
-[[ ${#MISSING[@]} -gt 0 ]] && VALIDATION="fail"
-
-# ─── write packet ────────────────────────────────────────────────────────────
 if [[ "$MODE" == "apply" ]]; then
   cp "$AUGMENTED_BODY" "$PACKET_FILE"
-  PACKET_SHA=$(shasum -a 256 "$PACKET_FILE" | awk '{print $1}')
+  PACKET_SHA="$(shasum -a 256 "$PACKET_FILE" | awk '{print $1}')"
 else
-  PACKET_SHA=$(shasum -a 256 "$AUGMENTED_BODY" | awk '{print $1}')
+  PACKET_SHA="$(shasum -a 256 "$AUGMENTED_BODY" | awk '{print $1}')"
   VALIDATION="dry-run"
 fi
+if [[ ${#PRESENT[@]} -eq 0 ]]; then PRESENT_JSON="[]"; else PRESENT_JSON="$(json_array "${PRESENT[@]}")"; fi
+if [[ ${#MISSING[@]} -eq 0 ]]; then MISSING_JSON="[]"; else MISSING_JSON="$(json_array "${MISSING[@]}")"; fi
 
-# ─── output ──────────────────────────────────────────────────────────────────
 if $JSON_OUT; then
-  jq -nc \
-    --arg packet "$PACKET_FILE" \
-    --arg sha "$PACKET_SHA" \
-    --arg vstatus "$VALIDATION" \
-    --arg task "$TASK_ID" \
-    --arg bead "$BEAD_ID" \
-    --argjson tpane "$TARGET_PANE" \
-    --arg tsess "$TARGET_SESSION" \
-    --argjson cpane "$CALLBACK_PANE" \
-    --arg manchor "$MISSION_ANCHOR" \
-    --arg mclass "$MISSION_FITNESS_CLASS" \
-    --arg jrid "$JOSH_REQUEST_ID" \
-    --arg ident "$IDENTITY_NAME" \
-    --arg chan "$DISPATCH_CHANNEL" \
-    --argjson memhits "$MEMORY_HITS" \
-    --argjson skillroutes "$SKILL_ROUTES" \
-    --argjson present "$(printf '%s\n' "${PRESENT[@]}" | jq -R . | jq -s .)" \
-    --argjson missing "$(printf '%s\n' "${MISSING[@]}" | jq -R . | jq -s .)" \
-    '{
-      schema_version: "build-dispatch-packet.v1",
-      packet_path: $packet,
-      packet_sha256: $sha,
-      validation_status: $vstatus,
-      validation_blocks_present: $present,
-      validation_blocks_missing: $missing,
-      fields_resolved: {
-        task_id: $task,
-        bead_id: $bead,
-        target_pane: $tpane,
-        target_session: $tsess,
-        callback_pane: $cpane,
-        mission_anchor: $manchor,
-        mission_fitness_class: $mclass,
-        josh_request_id: (if $jrid == "null" then null else $jrid end),
-        identity_name: (if $ident == "null" then null else $ident end),
-        dispatch_channel: $chan,
-        memory_hits_count: $memhits,
-        skill_auto_routes_count: $skillroutes
-      }
-    }'
+  jq -nc --arg packet "$PACKET_FILE" --arg sha "$PACKET_SHA" --arg vstatus "$VALIDATION" \
+    --arg task "$TASK_ID" --arg bead "$BEAD_ID" --argjson tpane "$TARGET_PANE" --arg tsess "$TARGET_SESSION" \
+    --argjson cpane "$CALLBACK_PANE" --arg manchor "$MISSION_ANCHOR" --arg mclass "$MISSION_FITNESS_CLASS" \
+    --arg jrid "$JOSH_REQUEST_ID" --arg ident "$IDENTITY_NAME" --arg chan "$DISPATCH_CHANNEL" \
+    --arg context_id "$NTM_CONTEXT_ID" --arg template "$NTM_TEMPLATE_NAME" \
+    --argjson memhits "$MEMORY_HITS" --argjson skillroutes "$SKILL_ROUTES" --argjson present "$PRESENT_JSON" --argjson missing "$MISSING_JSON" \
+    '{schema_version:"build-dispatch-packet.v1",packet_path:$packet,packet_sha256:$sha,validation_status:$vstatus,validation_blocks_present:$present,validation_blocks_missing:$missing,fields_resolved:{task_id:$task,bead_id:$bead,target_pane:$tpane,target_session:$tsess,callback_pane:$cpane,mission_anchor:$manchor,mission_fitness_class:$mclass,josh_request_id:(if $jrid=="null" then null else $jrid end),identity_name:(if $ident=="null" then null else $ident end),dispatch_channel:$chan,memory_hits_count:$memhits,skill_auto_routes_count:$skillroutes,ntm_context_id:$context_id,ntm_template_name:$template}}'
 else
   echo "packet:    $PACKET_FILE"
   echo "sha256:    $PACKET_SHA"
@@ -506,6 +190,7 @@ else
   echo "bead_id:   $BEAD_ID"
   echo "target:    ${TARGET_SESSION}:0.${TARGET_PANE} (callback=${CALLBACK_PANE})"
   echo "identity:  $IDENTITY_NAME ($IDENTITY_STATUS)"
+  echo "ntm:       context=$NTM_CONTEXT_ID template=$NTM_TEMPLATE_NAME"
 fi
 
 [[ "$VALIDATION" == "fail" ]] && exit 5
