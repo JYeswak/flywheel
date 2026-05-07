@@ -1,0 +1,61 @@
+{
+  "schema_version": "flywheel-m482-compliance-pack/v1",
+  "task_id": "flywheel-m482",
+  "bead": "flywheel-m482",
+  "plan": ".flywheel/PLANS/data-backed-deferral-guard-2026-05-01.md",
+  "lint_script_path": ".flywheel/scripts/dispatch-deferral-lint.sh",
+  "dispatch_surfaces": [
+    "/Users/josh/.claude/commands/flywheel/dispatch.md",
+    "/Users/josh/.claude/commands/flywheel/_shared/dispatch-template.md"
+  ],
+  "tests_added": [
+    "tests/test_dispatch_deferral_lint_question_shape_blocked.sh",
+    "tests/test_dispatch_deferral_lint_override_blank_reason_blocked.sh",
+    "tests/test_dispatch_deferral_28v_to_8i5_flow.sh"
+  ],
+  "tests_run": [
+    {
+      "command": "bash tests/test_dispatch_deferral_lint_question_shape_blocked.sh",
+      "result": "pass"
+    },
+    {
+      "command": "bash tests/test_dispatch_deferral_lint_override_blank_reason_blocked.sh",
+      "result": "pass"
+    },
+    {
+      "command": "bash tests/test_dispatch_deferral_28v_to_8i5_flow.sh",
+      "result": "pass"
+    },
+    {
+      "command": "bash tests/data-backed-deferral-guard.sh",
+      "result": "pass",
+      "summary": "94/94 passed; fixtures=11"
+    },
+    {
+      "command": "rg -n \"data-backed-deferral|DATA_BACKED_DEFERRAL_DETECTED|flywheel-8i5|canonical dispatch\" /Users/josh/.claude/commands /Users/josh/.claude/skills/.flywheel .flywheel/scripts tests",
+      "result": "pass"
+    }
+  ],
+  "acceptance": {
+    "dispatch_authoring_lint_text": true,
+    "question_shape_block_validated": true,
+    "override_reason_required_validated": true,
+    "flow_28v_to_8i5_validated": true
+  },
+  "socraticode": {
+    "queries": 6,
+    "indexed_chunks_observed": 1289
+  },
+  "reservations": {
+    "files_reserved": [
+      "/Users/josh/.claude/commands/flywheel/dispatch.md",
+      "/Users/josh/.claude/commands/flywheel/_shared/dispatch-template.md",
+      ".flywheel/scripts/dispatch-deferral-lint.sh",
+      "tests/test_dispatch_deferral_lint_question_shape_blocked.sh",
+      "tests/test_dispatch_deferral_lint_override_blank_reason_blocked.sh",
+      "tests/test_dispatch_deferral_28v_to_8i5_flow.sh",
+      ".flywheel/receipts/flywheel-m482-compliance-pack.json"
+    ]
+  },
+  "no_bead_reason": "no new findings beyond scoped lint implementation"
+}
