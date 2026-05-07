@@ -1,0 +1,31 @@
+{
+  "task_id": "flywheel-zidg",
+  "bead": "flywheel-zidg",
+  "kind": "dispatch-ntm-pane-state-enforcement",
+  "source_plan": ".flywheel/PLANS/dispatch-enforcement-2026-05-01.md",
+  "evidence": [
+    "/Users/josh/.claude/hooks/flywheel-loop-dispatch-transport-gate.sh",
+    "/Users/josh/.claude/commands/flywheel/dispatch.md",
+    "README.md",
+    ".flywheel/validation-schema/v1/dispatch-log-entry-v2.schema.json",
+    ".flywheel/scripts/dispatch-log-schema-validator.sh",
+    "tests/test_pane_state_dispatch_raw_capture_blocked.sh",
+    "tests/test_pane_state_ntm_copy_allowed.sh",
+    "tests/test_pane_state_debugging_context_soft.sh",
+    "tests/test_dispatch_log_pane_state_source.sh",
+    "tests/test_dispatch_log_schema_v2.sh"
+  ],
+  "checks": {
+    "hard_deny_dispatch_context": true,
+    "soft_violation_debugging_context": true,
+    "ntm_copy_allowed": true,
+    "ntm_health_proof_allows_supplemental_capture": true,
+    "pane_state_source_schema_required": true,
+    "raw_capture_dispatch_row_rejected": true,
+    "rg_proof_keywords_found": "4/4",
+    "tests_added": 4,
+    "tests_passing": true,
+    "socraticode_queries": 3,
+    "indexed_chunks_observed": 30
+  }
+}

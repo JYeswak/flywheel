@@ -908,6 +908,13 @@ orchestrator/callback pane is reachable and actively processing loop callbacks.
 If liveness is not proven, file or update a local orphan/gap receipt and route
 the work to the peer orchestrator instead.
 
+Pane-state reads use the canonical NTM surface. Use `ntm health <session>` for
+state truth, `ntm copy <session>:<pane> -l <N>` for scrollback, `ntm grep
+<session> <pattern>` for content search, and `ntm save <session>:<pane> <path>`
+for persistence. Dispatch rows record `pane_state_source`; valid values are
+`ntm_health`, `ntm_copy`, `raw_capture`, or `none`, and dispatch context treats
+`raw_capture` as a gate violation.
+
 For README-only edits, a practical smoke check is:
 
 ```bash
@@ -920,7 +927,8 @@ rg -n "flywheel-loop|flywheel-autoloop|/flywheel:|ntm|br " /Users/josh/Developer
 - Use Socraticode before non-trivial edits.
 - Use canonical real paths, not symlink aliases.
 - Use Agent Mail file reservations before editing shared files.
-- Use NTM for pane I/O and callbacks.
+- Use NTM for pane I/O and callbacks: `ntm health`, `ntm copy`, `ntm grep`,
+  and `ntm save` are the pane-state verbs.
 - Keep Beads repo-local; do not reintroduce global Beads fallback or silent
   `.beads` walk-up behavior.
 - Do not use cached loop markers as proof of liveness; verify the driver.

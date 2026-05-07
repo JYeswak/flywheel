@@ -1,0 +1,126 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://zeststream.ai/flywheel/schemas/dispatch-log-entry-v2.json",
+  "title": "Flywheel dispatch-log entry v2",
+  "description": "Canonical dispatch ledger entry. v2 makes mission fitness metadata load-bearing at dispatch time and preserves post-callback fields.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "task_id",
+    "ts",
+    "from",
+    "to",
+    "pane",
+    "session",
+    "task_summary",
+    "task_file",
+    "agent_type",
+    "pane_state_source",
+    "mission_anchor",
+    "mission_fitness_claim",
+    "mission_fitness_class",
+    "idempotency_token",
+    "callback_received_at"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "from": {
+      "type": "string",
+      "minLength": 1
+    },
+    "to": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pane": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "session": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "task_file": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^/"
+    },
+    "agent_type": {
+      "enum": ["codex", "claude", "gemini", "other"]
+    },
+    "pane_state_source": {
+      "enum": ["ntm_health", "ntm_copy", "raw_capture", "none"]
+    },
+    "pane_state_secondary_source": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pane_state_disagreement": {
+      "type": "boolean"
+    },
+    "mission_anchor": {
+      "type": "string",
+      "const": "continuous-orchestrator-uptime-self-sustaining-fleet"
+    },
+    "mission_fitness_claim": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 240
+    },
+    "mission_fitness_class": {
+      "enum": ["direct", "adjacent", "infrastructure", "drift", "unknown"]
+    },
+    "idempotency_token": {
+      "type": "string",
+      "minLength": 1
+    },
+    "callback_received_at": {
+      "anyOf": [
+        { "type": "string", "format": "date-time" },
+        { "type": "null" }
+      ]
+    },
+    "topology_resolved_pane": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "topology_role": {
+      "type": "string",
+      "minLength": 1
+    },
+    "topology_row_effective_at": {
+      "anyOf": [
+        { "type": "string", "format": "date-time" },
+        { "type": "null" }
+      ]
+    },
+    "mission_fitness": {
+      "enum": ["direct", "adjacent", "infrastructure", "drift"]
+    },
+    "mission_fitness_evidence": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bead_closed": {
+      "enum": ["yes", "no"]
+    },
+    "validated": {
+      "enum": ["yes", "no"]
+    },
+    "backfilled": {
+      "type": "boolean"
+    }
+  }
+}
