@@ -9,7 +9,7 @@ TASK_TITLE="${NTM_WAVE2_TASK_TITLE:-flywheel native surface probe}"
 usage() {
   cat <<'USAGE'
 usage: ntm-wave2-native-probes.sh <surface> [--json]
-surfaces: agents analytics cass config extract get-all-session-text memory
+surfaces: agents analytics cass config extract get-all-session-text memory resume
 USAGE
 }
 
@@ -127,6 +127,25 @@ surface_memory() {
     '{schema_version:$version,surface:$surface,status:"ok",native_calls:["ntm memory context <task> --json","ntm memory privacy --json","ntm memory context callback-validation --json"],context:$context,privacy:$privacy,callback_context:$outcome_privacy}'
 }
 
+surface_resume() {
+  local latest dry explicit
+  latest="$(json_or_null "$NTM_BIN" resume "$SESSION" --dry-run --json)"
+  dry="$(json_or_null "$NTM_BIN" resume "$SESSION" --dry-run --json)"
+  if [[ -n "${NTM_WAVE2_HANDOFF_FILE:-}" ]]; then
+    explicit="$(json_or_null "$NTM_BIN" resume --from "$NTM_WAVE2_HANDOFF_FILE" --dry-run --json)"
+  else
+    explicit='null'
+  fi
+  jq -nc \
+    --arg version "$VERSION" \
+    --arg surface "resume" \
+    --arg session "$SESSION" \
+    --argjson latest "$latest" \
+    --argjson dry "$dry" \
+    --argjson explicit "$explicit" \
+    '{schema_version:$version,surface:$surface,status:"ok",session:$session,native_calls:["ntm resume <session> --dry-run --json","ntm resume <session> --dry-run --json","ntm resume --from <file> --dry-run --json"],latest:$latest,dry_run:$dry,explicit:$explicit}'
+}
+
 SURFACE="${1:-}"; [[ $# -gt 0 ]] && shift || true
 JSON_OUT=0
 while [[ $# -gt 0 ]]; do
@@ -145,6 +164,7 @@ case "$SURFACE" in
   extract) payload="$(surface_extract)" ;;
   get-all-session-text) payload="$(surface_get_all_session_text)" ;;
   memory) payload="$(surface_memory)" ;;
+  resume) payload="$(surface_resume)" ;;
   --help|-h|"") usage; exit 0 ;;
   *) echo "unknown surface: $SURFACE" >&2; usage >&2; exit 2 ;;
 esac
