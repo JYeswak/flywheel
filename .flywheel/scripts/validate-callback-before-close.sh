@@ -3,6 +3,8 @@ set -uo pipefail
 
 VERSION="validate-callback-before-close.v1.1.0"
 REPO="$PWD"
+NTM_BIN="${NTM_BIN:-/Users/josh/.local/bin/ntm}"
+NTM_SESSION="${NTM_SESSION:-flywheel}"
 BEAD=""
 EVIDENCE=""
 STRICT=0
@@ -205,6 +207,71 @@ lens_fail() {
   esac
 }
 
+short_probe_text() {
+  sed '/^$/d' "$@" 2>/dev/null | head -3 | tr '\n' ' ' | cut -c1-500
+}
+
+looks_like_db_busy() {
+  grep -qiE 'database is locked|database busy|SQLITE_BUSY|OpenRead|malformed|b-tree|database disk image|resource busy'
+}
+
+check_br_dep_cycles() {
+  cycles_json="$(mktemp "${TMPDIR:-/tmp}/br-dep-cycles.XXXXXX.json")"
+  cycles_err="$(mktemp "${TMPDIR:-/tmp}/br-dep-cycles.XXXXXX.err")"
+  set +e
+  (cd "$REPO_ABS" && br dep cycles --json >"$cycles_json" 2>"$cycles_err")
+  cycles_rc=$?
+  set -e
+
+  if jq -e . "$cycles_json" >/dev/null 2>&1; then
+    if jq -e '.error.code == "CYCLE_DETECTED"' "$cycles_json" >/dev/null 2>&1; then
+      summary="$(jq -c '.error.context // .error' "$cycles_json" | cut -c1-500)"
+      check_fail "br_dep_cycles_not_empty: count=1 summary=$summary"
+      rm -f "$cycles_json" "$cycles_err"
+      return 0
+    fi
+
+    if [ "$cycles_rc" -ne 0 ]; then
+      probe_text="$(short_probe_text "$cycles_json" "$cycles_err")"
+      if printf '%s\n' "$probe_text" | looks_like_db_busy; then
+        check_fail "br_dep_cycles_db_busy: $probe_text"
+      else
+        check_fail "br_dep_cycles_probe_failed: rc=$cycles_rc $probe_text"
+      fi
+      rm -f "$cycles_json" "$cycles_err"
+      return 0
+    fi
+
+    cycle_count="$(jq -r '
+      if (.count | type) == "number" then .count
+      elif (.cycles | type) == "array" then (.cycles | length)
+      elif type == "array" then length
+      else empty end
+    ' "$cycles_json")"
+    if ! printf '%s\n' "$cycle_count" | grep -qE '^[0-9]+$'; then
+      check_fail "br_dep_cycles_json_invalid_shape"
+      rm -f "$cycles_json" "$cycles_err"
+      return 0
+    fi
+    if [ "$cycle_count" -gt 0 ]; then
+      summary="$(jq -c '.cycles // .' "$cycles_json" | cut -c1-500)"
+      check_fail "br_dep_cycles_not_empty: count=$cycle_count cycles=$summary"
+    fi
+    rm -f "$cycles_json" "$cycles_err"
+    return 0
+  fi
+
+  probe_text="$(short_probe_text "$cycles_json" "$cycles_err")"
+  if [ "$cycles_rc" -ne 0 ] && printf '%s\n' "$probe_text" | looks_like_db_busy; then
+    check_fail "br_dep_cycles_db_busy: $probe_text"
+  elif [ "$cycles_rc" -ne 0 ]; then
+    check_fail "br_dep_cycles_probe_failed: rc=$cycles_rc $probe_text"
+  else
+    check_fail "br_dep_cycles_json_invalid: $probe_text"
+  fi
+  rm -f "$cycles_json" "$cycles_err"
+}
+
 if [ ! -f "$EVIDENCE_ABS" ]; then
   check_fail "evidence_missing: $EVIDENCE_ABS"
 elif [ ! -s "$EVIDENCE_ABS" ]; then
@@ -260,10 +327,7 @@ if command -v br >/dev/null 2>&1; then
     fi
   done
 
-  CYCLES=$(cd "$REPO_ABS" && br dep cycles 2>&1 | grep -v '^$' | grep -viE '(no cycles|no dependency cycles)' || true)
-  if [ -n "$CYCLES" ]; then
-    check_fail "br_dep_cycles_not_empty: $CYCLES"
-  fi
+  check_br_dep_cycles
 fi
 
 if [ -f "$EVIDENCE_ABS" ]; then
@@ -329,7 +393,7 @@ create_rework_bead() {
     return 0
   }
   title="[four-lens-rework] ${BEAD} close validation"
-  existing=$(cd "$REPO_ABS" && br list --json 2>/dev/null | jq -r --arg title "$title" '(.issues // .)[]? | select(.title == $title and (.status | ascii_downcase) != "closed") | .id' | head -1 2>/dev/null || true)
+  existing=$(cd "$REPO_ABS" && br list --json 2>/dev/null | jq -r --arg title "$title" '(if type == "object" and has("issues") then .issues else . end)[]? | select(.title == $title and (.status | ascii_downcase) != "closed") | .id' | head -1 2>/dev/null || true)
   if [ -n "$existing" ]; then
     REWORK_BEAD="$existing"
     REWORK_ACTION="reused"
@@ -363,6 +427,9 @@ create_rework_bead() {
 
 create_rework_bead
 
+NTM_CHANGES_JSON="$("$NTM_BIN" changes "$NTM_SESSION" --json 2>/dev/null || printf 'null\n')"
+NTM_CONFLICTS_JSON="$("$NTM_BIN" conflicts "$NTM_SESSION" --json --limit 50 2>/dev/null || printf 'null\n')"
+
 emit_json() {
   python3 - "$FAILURES" "$WARNINGS" <<PY
 import json
@@ -393,6 +460,8 @@ payload = {
         "action": os.environ["FW_VCBC_REWORK_ACTION"],
         "bead": os.environ["FW_VCBC_REWORK_BEAD"] or None,
     },
+    "ntm_changes": json.loads(os.environ["FW_VCBC_NTM_CHANGES"]),
+    "ntm_conflicts": json.loads(os.environ["FW_VCBC_NTM_CONFLICTS"]),
 }
 print(json.dumps(payload, sort_keys=True))
 PY
@@ -417,6 +486,8 @@ if [ "$JSON_OUT" -eq 1 ]; then
   export FW_VCBC_PUBLIC_REASON="$PUBLIC_REASON"
   export FW_VCBC_REWORK_ACTION="$REWORK_ACTION"
   export FW_VCBC_REWORK_BEAD="$REWORK_BEAD"
+  export FW_VCBC_NTM_CHANGES="$NTM_CHANGES_JSON"
+  export FW_VCBC_NTM_CONFLICTS="$NTM_CONFLICTS_JSON"
   emit_json
 else
   echo "=== validate-callback-before-close: $BEAD ==="
@@ -426,6 +497,8 @@ else
   echo "failures: $FAIL"
   echo "warnings: $WARN"
   echo "four_lens: brand=$BRAND_STATUS sniff=$SNIFF_STATUS jeff=$JEFF_STATUS public=$PUBLIC_STATUS"
+  echo "ntm_changes: $(printf '%s\n' "$NTM_CHANGES_JSON" | jq -c '{status:(.status // "ok"), changed_count:(.changed_count // .count // (.changes // [] | length) // 0)}' 2>/dev/null || printf 'null')"
+  echo "ntm_conflicts: $(printf '%s\n' "$NTM_CONFLICTS_JSON" | jq -c '{status:(.status // "ok"), conflict_count:(.conflict_count // .count // (.conflicts // [] | length) // 0)}' 2>/dev/null || printf 'null')"
   [ -n "$FAILURES" ] && { echo "FAIL:"; printf '%s\n' "$FAILURES" | sed '/^$/d; s/^/  - /'; }
   [ -n "$WARNINGS" ] && { echo "WARN:"; printf '%s\n' "$WARNINGS" | sed '/^$/d; s/^/  - /'; }
   [ "$REWORK_ACTION" != "none" ] && echo "auto_rework: action=$REWORK_ACTION bead=${REWORK_BEAD:-none}"
