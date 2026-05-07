@@ -3819,3 +3819,32 @@ bead `flywheel-gau3q`; close-gate implementation in
 `tests/test_prediction_lock_post_hoc_detection.sh`.
 
 Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+## L128 — EV-ANCHOR-RELATIONAL-EVIDENCE
+
+---
+id: L128
+title: EV anchors for relational compliance evidence
+status: long_term
+shipped: 2026-05-07
+review_due: 2026-11-07
+trauma_class: archival-evidence-without-relations
+---
+
+Compliance packs may include `evidence[]` rows with `EV-NNN` anchors and
+`supports`, `refutes`, or `informs` relations to target findings. Plan artifacts
+that cite an `EV-NNN` anchor MUST resolve it in the compliance pack; each
+evidence excerpt must match its cited source line, and refuting evidence against
+an active finding blocks close until the contradiction is resolved.
+
+**Evidence:** Brenner disposition Proposal 2 in
+`.flywheel/PLANS/jeff-ecosystem-deep-dive-2026-05-01/brenner-2026-05-07/01-RESEARCH-DEEP-DIVE.md`;
+bead `flywheel-d3q0j`; close-gate implementation in
+`.flywheel/scripts/quality-bar-close-gate.sh`; regression tests
+`tests/test_ev_anchor_resolution.sh`,
+`tests/test_ev_anchor_unresolved_blocks.sh`,
+`tests/test_refute_contradiction_detection.sh`,
+`tests/test_evidence_excerpt_mismatch.sh`, and
+`tests/test_compliance_pack_backward_compat.sh`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
