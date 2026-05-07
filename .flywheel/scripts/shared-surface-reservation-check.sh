@@ -2,10 +2,13 @@
 set -euo pipefail
 
 python3 - "$@" <<'PY'
+from __future__ import annotations
+
 import argparse
 import fcntl
 import json
 import os
+import subprocess
 import sys
 import time
 from datetime import datetime, timedelta, timezone
@@ -82,6 +85,36 @@ def current_holders(rows):
     return {path: holders for path, holders in state.items() if holders}
 
 
+def ntm_conflicts_snapshot(args, path: str | None = None) -> dict | None:
+    ntm_bin = os.environ.get("NTM_BIN", "/Users/josh/.local/bin/ntm")
+    cmd = [ntm_bin, "conflicts", args.session, "--json", "--limit", "50"]
+    try:
+        proc = subprocess.run(cmd, text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=8, check=False)
+    except Exception as exc:
+        return {"status": "unavailable", "error": str(exc), "native_surface": "ntm conflicts --json"}
+    try:
+        payload = json.loads(proc.stdout or "null")
+    except Exception:
+        payload = None
+    if payload is None:
+        return {"status": "ok", "raw": None, "exit_code": proc.returncode, "native_surface": "ntm conflicts --json"}
+    conflict_count = 0
+    path_hit = False
+    conflicts = payload.get("conflicts") if isinstance(payload, dict) else []
+    if isinstance(conflicts, list):
+        conflict_count = len(conflicts)
+        if path:
+            path_hit = any(path in json.dumps(row, sort_keys=True) for row in conflicts)
+    return {
+        "status": payload.get("status", "ok") if isinstance(payload, dict) else "ok",
+        "exit_code": proc.returncode,
+        "conflict_count": conflict_count,
+        "path_hit": path_hit,
+        "native_surface": "ntm conflicts --json",
+        "raw": payload,
+    }
+
+
 def append_jsonl(path: Path, row: dict):
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
@@ -141,6 +174,7 @@ def log_collision(args, path, holders, checked_at):
 def check_path(args, rows, malformed, checked_at):
     path = normalize_path(args.check, args.cwd)
     pane = infer_pane(args.pane)
+    native_conflicts = ntm_conflicts_snapshot(args, path)
     holders = current_holders(rows).get(path, [])
     blockers = [h for h in holders if pane is None or str(h.get("pane")) != str(pane)]
     payload = {
@@ -150,6 +184,7 @@ def check_path(args, rows, malformed, checked_at):
         "pane": pane,
         "holders": holders,
         "blocking_holders": blockers,
+        "ntm_conflicts": native_conflicts,
         "malformed_rows_count": len(malformed),
         "warnings": [{"code": "malformed_row_skipped", **m} for m in malformed[:5]],
     }
@@ -169,6 +204,7 @@ def reserve_path(args, rows, malformed, checked_at):
         emit({"schema_version": VERSION, "status": "usage_error", "reason": "--pane is required for --reserve"}, args.json)
         return 2
     holders = current_holders(rows).get(path, [])
+    native_conflicts = ntm_conflicts_snapshot(args, path)
     blockers = [h for h in holders if str(h.get("pane")) != str(pane)]
     if blockers:
         log_collision(args, path, blockers, checked_at)
@@ -178,6 +214,7 @@ def reserve_path(args, rows, malformed, checked_at):
             "path": path,
             "pane": pane,
             "blocking_holders": blockers,
+            "ntm_conflicts": native_conflicts,
             "detail": f"coordination-collision-detected: pane={blockers[0].get('pane')} path={path}",
             "malformed_rows_count": len(malformed),
         }, args.json)
@@ -197,6 +234,7 @@ def reserve_path(args, rows, malformed, checked_at):
         "path": path,
         "pane": pane,
         "task_id": args.task_id,
+        "ntm_conflicts": native_conflicts,
         "malformed_rows_count": len(malformed),
     }, args.json)
     return 0
@@ -234,6 +272,7 @@ def list_current(args, rows, malformed):
         "ledger": args.ledger,
         "reservations": [{"path": path, "holders": holders} for path, holders in sorted(current.items())],
         "active_count": sum(len(v) for v in current.values()),
+        "ntm_conflicts": ntm_conflicts_snapshot(args),
         "malformed_rows_count": len(malformed),
         "warnings": [{"code": "malformed_row_skipped", **m} for m in malformed[:5]],
     }
@@ -256,6 +295,7 @@ def doctor(args, rows, malformed):
         "status": "pass" if collisions == 0 else "warn",
         "coordination_collision_count_24h": collisions,
         "active_reservation_count": sum(len(v) for v in current_holders(rows).values()),
+        "ntm_conflicts": ntm_conflicts_snapshot(args),
         "malformed_rows_count": len(malformed),
         "fuckup_malformed_rows_count": len(fuckup_malformed),
         "ledger": args.ledger,
@@ -273,6 +313,7 @@ def info(args):
         "ledger": args.ledger,
         "fuckup_log": args.fuckup_log,
         "mutating_commands": ["--reserve", "--release"],
+        "native_surface": "ntm conflicts --json",
         "dry_run_default": False,
     }
     emit(payload, args.json)
