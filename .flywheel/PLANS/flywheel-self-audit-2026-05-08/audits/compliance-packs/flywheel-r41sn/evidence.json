@@ -1,0 +1,75 @@
+{
+  "bead_id": "flywheel-r41sn",
+  "generated_at": "2026-05-07T21:25:22Z",
+  "artifact": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/coordination.md",
+  "evidence_items": [
+    {
+      "id": "EV-001",
+      "description": "Socraticode survey completed with six K=10 searches for coordination keywords.",
+      "source": "MCP socraticode codebase_search",
+      "supports": ["C-001"]
+    },
+    {
+      "id": "EV-002",
+      "description": "NTM inventory status counts and row classifications cited.",
+      "source": ".flywheel/NTM-SURFACE-INVENTORY.md:15-28",
+      "supports": ["C-002"]
+    },
+    {
+      "id": "EV-003",
+      "description": "Agent Mail reservation and L51 dispatch reservation rules cited.",
+      "source": "/Users/josh/.claude/skills/agent-mail/SKILL.md:79-124; AGENTS.md:189-216",
+      "supports": ["C-003"]
+    },
+    {
+      "id": "EV-004",
+      "description": "Dispatch callback, close-handler, dispatch-log, and monitor/refill contracts cited.",
+      "source": "/Users/josh/.claude/commands/flywheel/_shared/dispatch-template.md:28-70; /Users/josh/.claude/commands/flywheel/_shared/close-handler.md:35-52; /Users/josh/.claude/commands/loop.md:33-59",
+      "supports": ["C-004"]
+    },
+    {
+      "id": "EV-005",
+      "description": "Doctrine-broadcast sidechannel scripts and receipts cited.",
+      "source": ".flywheel/scripts/doctrine-broadcast-send.sh:16-25; /Users/josh/.claude/skills/.flywheel/scripts/doctrine-broadcast-tail.sh:10-19; .flywheel/receipts/doctrine-broadcasts/*.json:1",
+      "supports": ["C-005"]
+    },
+    {
+      "id": "EV-006",
+      "description": "Fix-bead recommendations are present and no br create command was run.",
+      "source": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/coordination.md",
+      "supports": ["C-006"]
+    }
+  ],
+  "claims": [
+    {
+      "id": "C-001",
+      "statement": "Required Socraticode survey was performed.",
+      "status": "confirmed"
+    },
+    {
+      "id": "C-002",
+      "statement": "Inventory covers NTM, Agent Mail, dispatch-log, doctrine-broadcast, and callback contracts.",
+      "status": "confirmed"
+    },
+    {
+      "id": "C-003",
+      "statement": "Load-bearing and vestigial sections include mandatory file:line citations.",
+      "status": "confirmed"
+    },
+    {
+      "id": "C-004",
+      "statement": "Three Tier-2 coordination gaps are addressed.",
+      "status": "confirmed"
+    },
+    {
+      "id": "C-005",
+      "statement": "Today's zc9ie/5dmg7 and monitor/refill lessons are incorporated.",
+      "status": "confirmed"
+    },
+    {
+      "id": "C-006",
+      "statement": "The audit proposes fix beads without filing them.",
+      "status": "confirmed"
+    }
+  ]
+}

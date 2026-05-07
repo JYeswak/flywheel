@@ -1,0 +1,21 @@
+{
+  "bead_id": "flywheel-r41sn",
+  "generated_at": "2026-05-07T21:25:22Z",
+  "artifact": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/coordination.md",
+  "compliance_pack": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-r41sn",
+  "files": [
+    "spec.json",
+    "evidence.json",
+    "compliance.json",
+    "theater.json",
+    "test_depth.json",
+    "manifest.json",
+    "scorecard.md",
+    "REPORT.md"
+  ],
+  "inventory_count": 27,
+  "load_bearing_count": 14,
+  "vestigial_count": 9,
+  "tier_gaps_addressed": 3,
+  "fix_beads_proposed": 3
+}

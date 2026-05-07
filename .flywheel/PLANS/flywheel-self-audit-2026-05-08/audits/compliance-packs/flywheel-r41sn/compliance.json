@@ -1,0 +1,48 @@
+{
+  "bead_id": "flywheel-r41sn",
+  "score": 925,
+  "threshold": 700,
+  "verdict": "pass",
+  "dimensions": [
+    {
+      "name": "six_section_contract",
+      "score": 100,
+      "status": "pass",
+      "evidence": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/coordination.md"
+    },
+    {
+      "name": "source_coverage",
+      "score": 95,
+      "status": "pass",
+      "evidence": "All four source-of-truth docs plus scoped coordination surfaces cited."
+    },
+    {
+      "name": "file_line_citations",
+      "score": 95,
+      "status": "pass",
+      "evidence": "Sections 1-3 use file:line citations in every table row."
+    },
+    {
+      "name": "gap_analysis",
+      "score": 90,
+      "status": "pass",
+      "evidence": "Stagger spawn, file reservations, and cross-orch broadcast addressed."
+    },
+    {
+      "name": "non_mutation_discipline",
+      "score": 100,
+      "status": "pass",
+      "evidence": "Only audit doc and compliance pack written; no live skill files mutated; no bead created."
+    },
+    {
+      "name": "test_depth",
+      "score": 75,
+      "status": "partial",
+      "evidence": "Structural checks and JSON validation run; no broad test suite needed for documentation-only audit."
+    }
+  ],
+  "residual_risk": [
+    "Native ntm spawn help output is cited as an observed command result rather than a stable file path.",
+    "Peer-side doctrine-broadcast consumption is not proven beyond available receipts and tail script contract."
+  ]
+}

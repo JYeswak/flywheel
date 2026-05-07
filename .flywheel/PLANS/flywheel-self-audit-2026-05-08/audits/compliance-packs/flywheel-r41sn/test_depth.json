@@ -1,0 +1,22 @@
+{
+  "bead_id": "flywheel-r41sn",
+  "commands": [
+    {
+      "command": "rg -n '^## ' .flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/coordination.md",
+      "purpose": "Verify six-section structure.",
+      "status": "pass"
+    },
+    {
+      "command": "jq -e . .flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/compliance-packs/flywheel-r41sn/*.json",
+      "purpose": "Validate compliance-pack JSON.",
+      "status": "pass"
+    },
+    {
+      "command": "rg -n 'Inventory count: 27|Load-bearing count: 14|Vestigial/superseded count: 9|Fix beads proposed: 3' .flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/coordination.md",
+      "purpose": "Verify callback counts are present in the artifact.",
+      "status": "pass"
+    }
+  ],
+  "broad_tests_run": false,
+  "broad_tests_reason": "Documentation-only audit; no production code changed."
+}

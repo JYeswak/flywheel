@@ -1,0 +1,27 @@
+{
+  "bead_id": "flywheel-r41sn",
+  "task": "Coordination layer audit",
+  "target_artifact": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/coordination.md",
+  "required_sections": [
+    "Inventory",
+    "Load-bearing",
+    "Vestigial",
+    "Missing per agent-flywheel.com gap analysis",
+    "Lessons learned",
+    "Fix-bead manifest"
+  ],
+  "hard_rules": [
+    "socraticode K=10 against /Users/josh/Developer/flywheel for coordination keywords",
+    "file:line citations mandatory in Sections 1-3",
+    "no new bead creation",
+    "no mutations to live skill files",
+    "stage commits with explicit paths",
+    "compliance pack on close"
+  ],
+  "source_docs": [
+    ".flywheel/PLANS/flywheel-self-audit-2026-05-08/00-PLAN.md",
+    ".flywheel/research/external-doctrine/agent-flywheel-com-complete-guide-2026-05-08.md",
+    ".flywheel/NTM-SURFACE-INVENTORY.md",
+    ".flywheel/PLANS/ntm-surface-wire-in-USE-ISSUE-WRAP-2026-05-07/12-NOT-WIRED-DISPOSITIONS.md"
+  ]
+}
