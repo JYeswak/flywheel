@@ -9,7 +9,7 @@ TASK_TITLE="${NTM_WAVE2_TASK_TITLE:-flywheel native surface probe}"
 usage() {
   cat <<'USAGE'
 usage: ntm-wave2-native-probes.sh <surface> [--json]
-surfaces: agents analytics
+surfaces: agents analytics cass
 USAGE
 }
 
@@ -56,6 +56,20 @@ surface_analytics() {
     '{schema_version:$version,surface:$surface,status:"ok",native_calls:["ntm analytics --format json --days 7 --json","ntm analytics --format json --sessions --json","ntm analytics --format prometheus --json"],summary:$summary,sessions:$sessions,prometheus:$prometheus}'
 }
 
+surface_cass() {
+  local status search insights
+  status="$(json_or_null "$NTM_BIN" cass status --json)"
+  search="$(json_or_null "$NTM_BIN" cass search "substrate amnesia" --limit 5 --workspace "$PWD" --json)"
+  insights="$(json_or_null "$NTM_BIN" cass insights --json)"
+  jq -nc \
+    --arg version "$VERSION" \
+    --arg surface "cass" \
+    --argjson status_json "$status" \
+    --argjson search "$search" \
+    --argjson insights "$insights" \
+    '{schema_version:$version,surface:$surface,status:"ok",native_calls:["ntm cass status --json","ntm cass search --json","ntm cass insights --json"],cass_status:$status_json,search:$search,insights:$insights}'
+}
+
 SURFACE="${1:-}"; [[ $# -gt 0 ]] && shift || true
 JSON_OUT=0
 while [[ $# -gt 0 ]]; do
@@ -69,6 +83,7 @@ done
 case "$SURFACE" in
   agents) payload="$(surface_agents)" ;;
   analytics) payload="$(surface_analytics)" ;;
+  cass) payload="$(surface_cass)" ;;
   --help|-h|"") usage; exit 0 ;;
   *) echo "unknown surface: $SURFACE" >&2; usage >&2; exit 2 ;;
 esac
