@@ -1,0 +1,27 @@
+{
+  "schema_version": "flywheel-06dh-compliance-pack/v1",
+  "bead": "flywheel-06dh",
+  "created_at": "2026-05-07T23:43:00Z",
+  "mission_anchor": "continuous-orchestrator-uptime-self-sustaining-fleet",
+  "validator_path": ".flywheel/scripts/validate-callback-before-close.sh",
+  "socraticode_queries": 4,
+  "indexed_chunks_observed": 1273,
+  "bash_3_2_repro_observed": false,
+  "bash_3_2_repro_note": "Direct /bin/bash 3.2.57 invocations of the repo validator, skill validator copy, template-generated copy, and existing validator test all exited 0 on current state.",
+  "fix_kind": "syntax",
+  "files_reserved": [
+    "tests/test_four_lens_validator_bash_3_2_compat.sh",
+    ".flywheel/receipts/flywheel-06dh-compliance-pack.json"
+  ],
+  "tests": [
+    {
+      "command": "/bin/bash tests/test_four_lens_validator_bash_3_2_compat.sh",
+      "passed": true
+    },
+    {
+      "command": "/bin/bash tests/validate-callback-before-close.sh",
+      "passed": true
+    }
+  ],
+  "public_lens_no_bar_self_grade_fixture": true
+}
