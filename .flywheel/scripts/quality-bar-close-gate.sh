@@ -2,7 +2,7 @@
 # canonical-cli-scoping-allow-large: dispatch requires one portable gate script with canonical CLI surfaces and embedded plan/audit parser.
 set -euo pipefail
 
-VERSION="quality-bar-close-gate.v1.0.0"
+VERSION="quality-bar-close-gate.v1.1.0"
 SCHEMA_VERSION="quality-bar-close-gate.v1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_ROOT_DEFAULT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
@@ -25,6 +25,8 @@ WHY_ID=""
 SCHEMA_TOPIC="plan"
 COMPLETION_SHELL=""
 WIDTH=100
+PREDICTIONS_FILE=""
+APPLIES_AT_PHASE="phase3"
 
 usage() {
   cat <<'EOF'
@@ -34,6 +36,7 @@ usage:
   quality-bar-close-gate.sh --doctor [--json]
   quality-bar-close-gate.sh --health [--watch] [--interval N] [--json]
   quality-bar-close-gate.sh --repair [--scope ledger|substrate-contract|all] [--dry-run|--apply] [--json]
+  quality-bar-close-gate.sh lock-predictions --plan-slug SLUG --predictions-file PATH [--applies-at-phase PHASE] --apply [--json]
   quality-bar-close-gate.sh audit [--json]
   quality-bar-close-gate.sh why REASON [--json]
   quality-bar-close-gate.sh schema plan|doctor|ledger|contract [--json]
@@ -81,13 +84,14 @@ info_json() {
     --arg jsonl_append_lib "$JSONL_APPEND_LIB" \
     --arg ntm_coverage_trend_script "$NTM_COVERAGE_TREND_SCRIPT" \
     --arg evidence_pack_resolver "$EVIDENCE_PACK_RESOLVER" \
-    '{name:$name,version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,substrate_loop_contract_ledger:$contract_ledger,jsonl_append_lib:$jsonl_append_lib,ntm_coverage_trend_script:$ntm_coverage_trend_script,evidence_pack_resolver:$evidence_pack_resolver,exit_codes:{"0":"quality bar pass","1":"quality bar pending or fail","2":"usage error","3":"append primitive unavailable or failed"},thresholds:{pending:{warn:20,error:50},failed:{warn:5,error:10},compliance_score:{minimum:700,maximum:1000,convergence_streak_minimum:2},ntm_surface_coverage:{minimum_avg:7,target_avg:10}},required_evidence:["schema_version>=5:hypotheses[2..5]","schema_version>=5:exactly_one_third_alternative_H_alt","schema_version>=5:acceptance_when_killed","schema_version>=4:compliance_pack_path","schema_version>=4:compliance_score>=700","schema_version>=4:convergence_streak>=2","schema_version>=4:evidence_pack_resolves=yes for v2 packs","schema_version>=4:legacy pack includes spec.json+evidence.json+compliance.json+theater.json+test_depth.json+scorecard.md+REPORT.md","schema_version<4:quality_bar_passed","schema_version<4:jeff_score>=9","schema_version<4:donella_score>=9","schema_version<4:joshua_score>=9_or_auto_advance","schema_version<4:composite>=9.5","critical_findings=0","future ntm-surface-wire-in plans require ntm coverage_avg>=7"]}'
+    '{name:$name,version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,substrate_loop_contract_ledger:$contract_ledger,jsonl_append_lib:$jsonl_append_lib,ntm_coverage_trend_script:$ntm_coverage_trend_script,evidence_pack_resolver:$evidence_pack_resolver,exit_codes:{"0":"quality bar pass","1":"quality bar pending or fail","2":"usage error","3":"append primitive unavailable or failed"},thresholds:{pending:{warn:20,error:50},failed:{warn:5,error:10},compliance_score:{minimum:700,maximum:1000,convergence_streak_minimum:2},ntm_surface_coverage:{minimum_avg:7,target_avg:10}},required_evidence:["schema_version>=5:hypotheses[2..5]","schema_version>=5:exactly_one_third_alternative_H_alt","schema_version>=5:acceptance_when_killed","schema_version>=5:prediction_lock_receipt_valid_when_predictions_present","schema_version>=4:compliance_pack_path","schema_version>=4:compliance_score>=700","schema_version>=4:convergence_streak>=2","schema_version>=4:evidence_pack_resolves=yes for v2 packs","schema_version>=4:legacy pack includes spec.json+evidence.json+compliance.json+theater.json+test_depth.json+scorecard.md+REPORT.md","schema_version<4:quality_bar_passed","schema_version<4:jeff_score>=9","schema_version<4:donella_score>=9_or_auto_advance","schema_version<4:composite>=9.5","critical_findings=0","future ntm-surface-wire-in plans require ntm coverage_avg>=7"]}'
 }
 
 examples_text() {
   cat <<'EOF'
 quality-bar-close-gate.sh --plan-slug wire-or-explain-tick-gate-2026-05-04 --json
 quality-bar-close-gate.sh --plan-slug wire-or-explain-tick-gate-2026-05-04 --apply --json
+quality-bar-close-gate.sh lock-predictions --plan-slug wire-or-explain-tick-gate-2026-05-04 --predictions-file predictions.json --applies-at-phase phase3 --apply --json
 quality-bar-close-gate.sh --doctor --json | jq '.plan_state_quality_bar_pending_count'
 quality-bar-close-gate.sh repair --scope all --dry-run --json
 EOF
@@ -105,7 +109,7 @@ EOF
 schema_json() {
   case "$SCHEMA_TOPIC" in
     plan)
-      jq -nc --arg schema_version "$SCHEMA_VERSION.plan" '{schema_version:$schema_version,required:["plan_slug","decision","quality_bar_mode","critical_findings","reasons","hypothesis_slate_valid"],legacy_required:["jeff","donella","joshua","composite"],compliance_required:["compliance_score","compliance_threshold","compliance_pack_path","convergence_streak","evidence_pack_resolves"],schema_v5_required:["hypotheses[2..5]","third_alternative.id=H_alt","acceptance_when_killed"],conditional_required:{ntm_surface_wire_in:["ntm_surface_coverage_trend.coverage_avg>=7"]}}' ;;
+      jq -nc --arg schema_version "$SCHEMA_VERSION.plan" '{schema_version:$schema_version,required:["plan_slug","decision","quality_bar_mode","critical_findings","reasons","hypothesis_slate_valid"],legacy_required:["jeff","donella","joshua","composite"],compliance_required:["compliance_score","compliance_threshold","compliance_pack_path","convergence_streak","evidence_pack_resolves"],schema_v5_required:["hypotheses[2..5]","third_alternative.id=H_alt","acceptance_when_killed"],prediction_lock_required_when_present:["STATE.json.prediction_lock.locked_at","STATE.json.predictions[].prediction","STATE.json.predictions[].ts","STATE.json.predictions[].hash","STATE.json.predictions[].applies_at_phase"],conditional_required:{ntm_surface_wire_in:["ntm_surface_coverage_trend.coverage_avg>=7"]}}' ;;
     doctor)
       jq -nc '{schema_version:"quality-bar-close-gate.doctor.v1",required:["plan_state_quality_bar_pending_count","plan_state_quality_bar_failed_count","plan_state_quality_bar_passed_count"]}' ;;
     ledger)
@@ -140,7 +144,8 @@ EOF
 
 quality_bar_python() {
   local py_mode="$1"
-  python3 - "$py_mode" "$REPO_ROOT" "${PLAN_SLUG:-}" "$EVIDENCE_PACK_RESOLVER" <<'PY'
+  python3 - "$py_mode" "$REPO_ROOT" "${PLAN_SLUG:-}" "$EVIDENCE_PACK_RESOLVER" "${PREDICTIONS_FILE:-}" "${APPLIES_AT_PHASE:-phase3}" "$APPLY" "$(now_iso)" <<'PY'
+import hashlib
 import json
 import re
 import subprocess
@@ -149,6 +154,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 mode, repo_raw, slug, resolver_raw = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+predictions_file, applies_at_phase, apply_raw, now_value = sys.argv[5], sys.argv[6], sys.argv[7], sys.argv[8]
 repo = Path(repo_raw)
 evidence_pack_resolver = Path(resolver_raw).expanduser()
 
@@ -556,6 +562,129 @@ def validate_hypothesis_slate(state, plan_dir, version):
         "hypothesis_slate_errors": sorted(set(seen_errors)) or ["hypothesis_slate_missing"],
     }
 
+def canonical_prediction_hash(prediction):
+    payload = json.dumps(prediction, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+def prediction_lock_rows(state):
+    rows = state.get("predictions")
+    return rows if isinstance(rows, list) else []
+
+def prediction_lock_time(state):
+    lock = state.get("prediction_lock")
+    if isinstance(lock, dict):
+        return lock.get("locked_at") or lock.get("lock_ts")
+    return state.get("prediction_lock_ts") or state.get("lock_ts")
+
+def validate_prediction_lock(state):
+    rows = prediction_lock_rows(state)
+    result = {
+        "prediction_lock_present": bool(rows),
+        "prediction_lock_status": "not_present",
+        "prediction_lock_count": len(rows),
+        "prediction_lock_locked_at": prediction_lock_time(state),
+        "prediction_lock_errors": [],
+    }
+    if not rows:
+        return result
+    errors = []
+    locked_at_raw = result["prediction_lock_locked_at"]
+    locked_at = parse_dt(locked_at_raw)
+    if not locked_at:
+        errors.append("prediction_lock_missing_lock_ts")
+    for index, row in enumerate(rows, start=1):
+        if not isinstance(row, dict):
+            errors.append(f"prediction_{index}_not_object")
+            continue
+        if "prediction" not in row:
+            errors.append(f"prediction_{index}_text_missing")
+            continue
+        stored_hash = row.get("hash")
+        recomputed_hash = canonical_prediction_hash(row.get("prediction"))
+        if not isinstance(stored_hash, str) or not stored_hash:
+            errors.append(f"prediction_{index}_hash_missing")
+        elif stored_hash != recomputed_hash:
+            errors.append("prediction_lock_post_hoc_amendment")
+        row_ts = parse_dt(row.get("ts"))
+        if not row_ts:
+            errors.append(f"prediction_{index}_ts_missing")
+        elif locked_at and row_ts > locked_at:
+            errors.append("prediction_lock_post_hoc_addition")
+        if not non_empty_str(row.get("applies_at_phase")):
+            errors.append(f"prediction_{index}_applies_at_phase_missing")
+    if errors:
+        result["prediction_lock_status"] = "fail"
+        result["prediction_lock_errors"] = sorted(set(errors))
+    else:
+        result["prediction_lock_status"] = "pass"
+    return result
+
+def load_prediction_input(path):
+    data = read_json(Path(path))
+    if not isinstance(data, (list, dict)) or (isinstance(data, dict) and data.get("_invalid_json")):
+        raise SystemExit(f"prediction_file_invalid_json:{path}")
+    if isinstance(data, dict):
+        data = data.get("predictions")
+    if not isinstance(data, list):
+        raise SystemExit("prediction_file_predictions_not_array")
+    predictions = []
+    for index, row in enumerate(data, start=1):
+        if isinstance(row, str):
+            text = row
+        elif isinstance(row, dict) and isinstance(row.get("prediction"), str):
+            text = row["prediction"]
+        else:
+            raise SystemExit(f"prediction_{index}_invalid")
+        if not text.strip():
+            raise SystemExit(f"prediction_{index}_empty")
+        predictions.append(text)
+    if not predictions:
+        raise SystemExit("prediction_file_empty")
+    return predictions
+
+def lock_predictions(slug_value, predictions_path, applies_at_phase, apply_changes, now_value):
+    if not predictions_path:
+        raise SystemExit("--predictions-file required")
+    plan_dir = repo / ".flywheel" / "plans" / slug_value
+    state_path = plan_dir / "STATE.json"
+    state = read_json(state_path)
+    if not isinstance(state, dict) or state.get("_invalid_json"):
+        raise SystemExit(f"state_missing_or_invalid:{state_path}")
+    predictions = load_prediction_input(predictions_path)
+    rows = [
+        {
+            "prediction": prediction,
+            "ts": now_value,
+            "hash": canonical_prediction_hash(prediction),
+            "applies_at_phase": applies_at_phase,
+        }
+        for prediction in predictions
+    ]
+    updated_state = dict(state)
+    updated_state["prediction_lock"] = {
+        "locked_at": now_value,
+        "boundary": "phase2_to_phase3",
+        "algorithm": "sha256-canonical-json-v1",
+        "immutable_after_phase": 2,
+    }
+    updated_state["predictions"] = rows
+    validation = validate_prediction_lock(updated_state)
+    if validation["prediction_lock_status"] != "pass":
+        raise SystemExit(",".join(validation["prediction_lock_errors"]))
+    if apply_changes:
+        state_path.write_text(json.dumps(updated_state, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    return {
+        "schema_version": "quality-bar-close-gate.prediction-lock.v1",
+        "command": "lock-predictions",
+        "status": "pass",
+        "plan_slug": slug_value,
+        "state_path": str(state_path),
+        "apply": bool(apply_changes),
+        "prediction_lock": updated_state["prediction_lock"],
+        "prediction_lock_count": len(rows),
+        "predictions": rows,
+    }
+
 def min_evidence_score(evidence, key):
     values = []
     if isinstance(evidence, list):
@@ -621,6 +750,11 @@ def evaluate(slug_value):
         "hypothesis_slate_valid": "yes",
         "hypothesis_slate_source": None,
         "hypothesis_slate_errors": [],
+        "prediction_lock_present": False,
+        "prediction_lock_status": "not_present",
+        "prediction_lock_count": 0,
+        "prediction_lock_locked_at": None,
+        "prediction_lock_errors": [],
         "critical_findings": 0,
         "three_judges_evidence_present": False,
         "reasons": [],
@@ -647,6 +781,10 @@ def evaluate(slug_value):
     result.update(hypothesis_result)
     if result["hypothesis_slate_valid"] != "yes":
         failing.append("hypothesis_slate_invalid")
+    prediction_lock_result = validate_prediction_lock(state)
+    result.update(prediction_lock_result)
+    for error in prediction_lock_result["prediction_lock_errors"]:
+        failing.append(error)
     if phase not in {"polish", "ready"}:
         pending.append(f"current_phase_not_polish_or_ready:{phase}")
     if version >= 4:
@@ -793,6 +931,8 @@ if mode == "plan":
     print(json.dumps(evaluate(slug), sort_keys=True, separators=(",", ":")))
 elif mode == "doctor":
     print(json.dumps(doctor(), sort_keys=True, separators=(",", ":")))
+elif mode == "lock-predictions":
+    print(json.dumps(lock_predictions(slug, predictions_file, applies_at_phase, apply_raw == "1", now_value), sort_keys=True, separators=(",", ":")))
 else:
     raise SystemExit(f"unknown mode: {mode}")
 PY
@@ -805,6 +945,12 @@ evaluate_plan_json() {
 
 doctor_json() {
   quality_bar_python doctor
+}
+
+lock_predictions_json() {
+  [[ -n "$PLAN_SLUG" ]] || { echo "ERR: --plan-slug required" >&2; return 2; }
+  [[ -n "$PREDICTIONS_FILE" ]] || { echo "ERR: --predictions-file required" >&2; return 2; }
+  quality_bar_python lock-predictions
 }
 
 contract_row_json() {
@@ -920,6 +1066,12 @@ run_doctor() {
   emit "$payload" "status=$(jq -r '.status' <<<"$payload") pending=$(jq -r '.plan_state_quality_bar_pending_count' <<<"$payload") failed=$(jq -r '.plan_state_quality_bar_failed_count' <<<"$payload") passed=$(jq -r '.plan_state_quality_bar_passed_count' <<<"$payload")" 0
 }
 
+run_lock_predictions() {
+  local payload
+  payload="$(lock_predictions_json)"
+  emit "$payload" "prediction_lock plan=$(jq -r '.plan_slug' <<<"$payload") count=$(jq -r '.prediction_lock_count' <<<"$payload") apply=$(jq -r '.apply' <<<"$payload")" 0
+}
+
 run_health() {
   local payload
   while :; do
@@ -966,6 +1118,8 @@ run_why() {
     compliance_pack_missing|compliance_pack_incomplete) text="The cited beads-compliance pack is missing or incomplete; close requires spec/evidence/compliance/theater/test-depth/scorecard/report files." ;;
     compliance_score_below_700) text="The beads-compliance score is below the 700/1000 close threshold." ;;
     convergence_streak_below_2|convergence_streak_missing) text="The compliance pack has not shown two consecutive zero-finding rounds; close stays blocked until convergence_streak >= 2." ;;
+    prediction_lock_post_hoc_amendment) text="A locked prediction no longer matches its pre-execution hash; close is blocked until the plan records the amendment as a failed lock." ;;
+    prediction_lock_post_hoc_addition) text="A prediction row was timestamped after the plan lock boundary; close is blocked because the receipt was amended after convergence." ;;
     audit_findings_missing) text="03-AUDIT-FINDINGS.md is missing; close-time gate cannot verify the 3-judges audit evidence." ;;
     *_below_*|critical_findings_present|quality_bar_passed_false) text="The quality bar explicitly fails; do not auto-close the plan." ;;
     *) text="Inspect the plan validation JSON for the exact reason list." ;;
@@ -980,6 +1134,7 @@ parse_args() {
       --doctor|doctor) MODE="doctor"; shift ;;
       --health|health) MODE="health"; shift ;;
       --repair|repair) MODE="repair"; shift ;;
+      lock-predictions|--lock-predictions) MODE="lock-predictions"; shift ;;
       validate) MODE="validate"; [[ "${2:-}" == "plan" ]] && shift 2 || shift ;;
       audit) MODE="audit"; shift ;;
       why) MODE="why"; WHY_ID="${2:-}"; shift $(( $# > 1 ? 2 : 1 )) ;;
@@ -999,6 +1154,10 @@ parse_args() {
       --contract-ledger=*) CONTRACT_LEDGER="${1#*=}"; shift ;;
       --scope) REPAIR_SCOPE="${2:-}"; shift 2 ;;
       --scope=*) REPAIR_SCOPE="${1#*=}"; shift ;;
+      --predictions-file) PREDICTIONS_FILE="${2:-}"; shift 2 ;;
+      --predictions-file=*) PREDICTIONS_FILE="${1#*=}"; shift ;;
+      --applies-at-phase) APPLIES_AT_PHASE="${2:-}"; shift 2 ;;
+      --applies-at-phase=*) APPLIES_AT_PHASE="${1#*=}"; shift ;;
       --apply) APPLY=1; DRY_RUN=0; shift ;;
       --dry-run) APPLY=0; DRY_RUN=1; shift ;;
       --watch) WATCH=1; shift ;;
@@ -1023,6 +1182,7 @@ main() {
     doctor) run_doctor ;;
     health) run_health ;;
     repair) run_repair ;;
+    lock-predictions) run_lock_predictions ;;
     validate) run_validate ;;
     audit) run_audit ;;
     why) [[ -n "$WHY_ID" ]] || { echo "ERR: why requires REASON" >&2; exit 2; }; run_why ;;
