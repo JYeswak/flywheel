@@ -1,0 +1,60 @@
+{
+  "audit_command": {
+    "ok": true,
+    "rc": 0,
+    "stderr": "",
+    "stdout": "[see audit_receipt_path]",
+    "stdout_bytes": 148873
+  },
+  "audit_confidence": 60,
+  "audit_low_confidence": false,
+  "audit_receipt_path": "/tmp/preinstall-clutterfreespaces.json",
+  "clutterfreespaces_repo_path_validated": true,
+  "dry_run_pass": true,
+  "exactly_one_label": true,
+  "generated_at": "2026-05-07T23:13:47Z",
+  "label": "com.zeststream.clutterfreespaces.watcher",
+  "launchctl_list_probe_path": "/tmp/clutterfreespaces-watcher-launchctl-labels.txt",
+  "launchctl_load_attempted": false,
+  "loaded_label_count": 0,
+  "plist_path": "/Users/josh/Library/LaunchAgents/com.zeststream.clutterfreespaces.watcher.plist",
+  "plutil_lint": "OK",
+  "plutil_result": {
+    "ok": true,
+    "rc": 0,
+    "stderr": "",
+    "stdout": "/Users/josh/Library/LaunchAgents/com.zeststream.clutterfreespaces.watcher.plist: OK"
+  },
+  "readiness": {
+    "home": {
+      "exists": true,
+      "path": "/Users/josh"
+    },
+    "logs_dir": {
+      "exists": true,
+      "path": "/Users/josh/.local/state/flywheel/logs"
+    },
+    "ntm_binary": {
+      "executable": true,
+      "path": "/Users/josh/.local/bin/ntm"
+    },
+    "ntm_config": {
+      "exists": true,
+      "path": "/Users/josh/.config/ntm/config.toml"
+    },
+    "path": "/Users/josh/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+    "repo": {
+      "exists": true,
+      "path": "/Users/josh/Developer/clutterfreespaces",
+      "writable": true
+    },
+    "stderr_path": "/Users/josh/.local/state/flywheel/logs/clutterfreespaces-watcher.stderr.log",
+    "stdout_path": "/Users/josh/.local/state/flywheel/logs/clutterfreespaces-watcher.stdout.log"
+  },
+  "reboot_recovery_claimed": false,
+  "schema_version": "recovery-session-watcher-install/v1",
+  "session": "clutterfreespaces",
+  "source_plan": ".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md",
+  "status": "installed_not_loaded",
+  "watcher_race_failure_mode": "covered_by_plist_lint_label_count_and_readiness_probe"
+}
