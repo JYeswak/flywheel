@@ -9,7 +9,7 @@ TASK_TITLE="${NTM_WAVE2_TASK_TITLE:-flywheel native surface probe}"
 usage() {
   cat <<'USAGE'
 usage: ntm-wave2-native-probes.sh <surface> [--json]
-surfaces: agents analytics cass
+surfaces: agents analytics cass config
 USAGE
 }
 
@@ -70,6 +70,20 @@ surface_cass() {
     '{schema_version:$version,surface:$surface,status:"ok",native_calls:["ntm cass status --json","ntm cass search --json","ntm cass insights --json"],cass_status:$status_json,search:$search,insights:$insights}'
 }
 
+surface_config() {
+  local show validate diff
+  show="$(json_or_null "$NTM_BIN" config show --json)"
+  validate="$(json_or_null "$NTM_BIN" config validate --json)"
+  diff="$(json_or_null "$NTM_BIN" config diff --json)"
+  jq -nc \
+    --arg version "$VERSION" \
+    --arg surface "config" \
+    --argjson show "$show" \
+    --argjson validate "$validate" \
+    --argjson diff "$diff" \
+    '{schema_version:$version,surface:$surface,status:"ok",native_calls:["ntm config show --json","ntm config validate --json","ntm config diff --json"],show:$show,validate:$validate,diff:$diff}'
+}
+
 SURFACE="${1:-}"; [[ $# -gt 0 ]] && shift || true
 JSON_OUT=0
 while [[ $# -gt 0 ]]; do
@@ -84,6 +98,7 @@ case "$SURFACE" in
   agents) payload="$(surface_agents)" ;;
   analytics) payload="$(surface_analytics)" ;;
   cass) payload="$(surface_cass)" ;;
+  config) payload="$(surface_config)" ;;
   --help|-h|"") usage; exit 0 ;;
   *) echo "unknown surface: $SURFACE" >&2; usage >&2; exit 2 ;;
 esac
