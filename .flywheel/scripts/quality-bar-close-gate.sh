@@ -79,7 +79,7 @@ info_json() {
     --arg contract_ledger "$CONTRACT_LEDGER" \
     --arg jsonl_append_lib "$JSONL_APPEND_LIB" \
     --arg ntm_coverage_trend_script "$NTM_COVERAGE_TREND_SCRIPT" \
-    '{name:$name,version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,substrate_loop_contract_ledger:$contract_ledger,jsonl_append_lib:$jsonl_append_lib,ntm_coverage_trend_script:$ntm_coverage_trend_script,exit_codes:{"0":"quality bar pass","1":"quality bar pending or fail","2":"usage error","3":"append primitive unavailable or failed"},thresholds:{pending:{warn:20,error:50},failed:{warn:5,error:10},compliance_score:{minimum:700,maximum:1000,convergence_streak_minimum:2},ntm_surface_coverage:{minimum_avg:7,target_avg:10}},required_evidence:["schema_version>=4:compliance_pack_path","schema_version>=4:compliance_score>=700","schema_version>=4:convergence_streak>=2","schema_version>=4:spec.json+evidence.json+compliance.json+theater.json+test_depth.json+scorecard.md+REPORT.md","schema_version<4:quality_bar_passed","schema_version<4:jeff_score>=9","schema_version<4:donella_score>=9","schema_version<4:joshua_score>=9_or_auto_advance","schema_version<4:composite>=9.5","critical_findings=0","future ntm-surface-wire-in plans require ntm coverage_avg>=7"]}'
+    '{name:$name,version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,substrate_loop_contract_ledger:$contract_ledger,jsonl_append_lib:$jsonl_append_lib,ntm_coverage_trend_script:$ntm_coverage_trend_script,exit_codes:{"0":"quality bar pass","1":"quality bar pending or fail","2":"usage error","3":"append primitive unavailable or failed"},thresholds:{pending:{warn:20,error:50},failed:{warn:5,error:10},compliance_score:{minimum:700,maximum:1000,convergence_streak_minimum:2},ntm_surface_coverage:{minimum_avg:7,target_avg:10}},required_evidence:["schema_version>=5:hypotheses[2..5]","schema_version>=5:exactly_one_third_alternative_H_alt","schema_version>=5:acceptance_when_killed","schema_version>=4:compliance_pack_path","schema_version>=4:compliance_score>=700","schema_version>=4:convergence_streak>=2","schema_version>=4:spec.json+evidence.json+compliance.json+theater.json+test_depth.json+scorecard.md+REPORT.md","schema_version<4:quality_bar_passed","schema_version<4:jeff_score>=9","schema_version<4:donella_score>=9","schema_version<4:joshua_score>=9_or_auto_advance","schema_version<4:composite>=9.5","critical_findings=0","future ntm-surface-wire-in plans require ntm coverage_avg>=7"]}'
 }
 
 examples_text() {
@@ -103,7 +103,7 @@ EOF
 schema_json() {
   case "$SCHEMA_TOPIC" in
     plan)
-      jq -nc --arg schema_version "$SCHEMA_VERSION.plan" '{schema_version:$schema_version,required:["plan_slug","decision","quality_bar_mode","critical_findings","reasons"],legacy_required:["jeff","donella","joshua","composite"],compliance_required:["compliance_score","compliance_threshold","compliance_pack_path","convergence_streak"],conditional_required:{ntm_surface_wire_in:["ntm_surface_coverage_trend.coverage_avg>=7"]}}' ;;
+      jq -nc --arg schema_version "$SCHEMA_VERSION.plan" '{schema_version:$schema_version,required:["plan_slug","decision","quality_bar_mode","critical_findings","reasons","hypothesis_slate_valid"],legacy_required:["jeff","donella","joshua","composite"],compliance_required:["compliance_score","compliance_threshold","compliance_pack_path","convergence_streak"],schema_v5_required:["hypotheses[2..5]","third_alternative.id=H_alt","acceptance_when_killed"],conditional_required:{ntm_surface_wire_in:["ntm_surface_coverage_trend.coverage_avg>=7"]}}' ;;
     doctor)
       jq -nc '{schema_version:"quality-bar-close-gate.doctor.v1",required:["plan_state_quality_bar_pending_count","plan_state_quality_bar_failed_count","plan_state_quality_bar_passed_count"]}' ;;
     ledger)
@@ -356,6 +356,119 @@ def evaluate_compliance_pack(state, plan_dir, result, pending, failing):
     elif result["convergence_streak"] < 2:
         failing.append("convergence_streak_below_2")
 
+def non_empty_str(value):
+    return isinstance(value, str) and bool(value.strip())
+
+def validate_hypothesis_slate_object(obj):
+    errors = []
+    if not isinstance(obj, dict):
+        return ["hypothesis_slate_source_not_object"]
+    hypotheses = obj.get("hypotheses")
+    if not isinstance(hypotheses, list):
+        errors.append("hypotheses_missing")
+        hypotheses = []
+    elif not (2 <= len(hypotheses) <= 5):
+        errors.append("hypothesis_count_not_2_to_5")
+    ids = []
+    alt_count = 0
+    for index, row in enumerate(hypotheses, start=1):
+        if not isinstance(row, dict):
+            errors.append(f"hypothesis_{index}_not_object")
+            continue
+        hid = row.get("id")
+        ids.append(hid)
+        if hid == "H_alt":
+            alt_count += 1
+        elif not (isinstance(hid, str) and re.fullmatch(r"H[1-5]", hid)):
+            errors.append(f"hypothesis_{index}_invalid_id")
+        for key in ("claim", "kill_condition", "decisive_test"):
+            if not non_empty_str(row.get(key)):
+                errors.append(f"{hid or index}_{key}_missing")
+    if len(ids) != len(set(ids)):
+        errors.append("hypothesis_ids_not_unique")
+    if alt_count != 1:
+        errors.append("third_alternative_hypothesis_not_exactly_one_H_alt")
+    third = obj.get("third_alternative")
+    if not isinstance(third, dict):
+        errors.append("third_alternative_missing")
+    else:
+        if third.get("id") != "H_alt":
+            errors.append("third_alternative_id_not_H_alt")
+        if not non_empty_str(third.get("reason")):
+            errors.append("third_alternative_reason_missing")
+    acceptance = obj.get("acceptance_when_killed")
+    if isinstance(acceptance, dict):
+        for key in ("all_killed", "exactly_one_survives", "two_or_more_survive"):
+            if not non_empty_str(acceptance.get(key)):
+                errors.append(f"acceptance_when_killed_{key}_missing")
+    elif non_empty_str(acceptance):
+        text = acceptance.lower()
+        checks = {
+            "all_killed": ("all hypotheses" in text or "all killed" in text) and "reject" in text,
+            "exactly_one_survives": ("exactly one" in text or "one survives" in text) and "commit" in text,
+            "two_or_more_survive": ("2+" in text or "two or more" in text or "2 or more" in text) and "re-decompose" in text,
+        }
+        for key, ok in checks.items():
+            if not ok:
+                errors.append(f"acceptance_when_killed_{key}_missing")
+    else:
+        errors.append("acceptance_when_killed_missing")
+    return errors
+
+def iter_json_slate_candidates(plan_dir):
+    names = ("02-REFINE-FINAL.json", "00-PLAN.json", "STATE.json")
+    for name in names:
+        path = plan_dir / name
+        data = read_json(path)
+        if isinstance(data, dict) and not data.get("_invalid_json"):
+            yield str(path), data
+    for path in sorted(plan_dir.glob("02-REFINE-r*.json")):
+        data = read_json(path)
+        if isinstance(data, dict) and not data.get("_invalid_json"):
+            yield str(path), data
+    for path in sorted(list(plan_dir.glob("02-REFINE*.md")) + list(plan_dir.glob("00-PLAN.md"))):
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        for match in re.finditer(r"```(?:json)?\s*\n?(.*?)```", text, flags=re.S):
+            try:
+                data = json.loads(match.group(1).strip())
+            except json.JSONDecodeError:
+                continue
+            if isinstance(data, dict) and "hypotheses" in data:
+                yield f"{path}#json_fence", data
+
+def validate_hypothesis_slate(state, plan_dir, version):
+    if version < 5:
+        return {
+            "hypothesis_slate_required": False,
+            "hypothesis_slate_valid": "yes",
+            "hypothesis_slate_source": "grandfathered_schema_version_lt_5",
+            "hypothesis_slate_errors": [],
+        }
+    seen_errors = []
+    seen_sources = set()
+    for source, candidate in [("STATE.json", state)] + list(iter_json_slate_candidates(plan_dir)):
+        if source in seen_sources:
+            continue
+        seen_sources.add(source)
+        errors = validate_hypothesis_slate_object(candidate)
+        if not errors:
+            return {
+                "hypothesis_slate_required": True,
+                "hypothesis_slate_valid": "yes",
+                "hypothesis_slate_source": source,
+                "hypothesis_slate_errors": [],
+            }
+        seen_errors.extend(errors)
+    return {
+        "hypothesis_slate_required": True,
+        "hypothesis_slate_valid": "no",
+        "hypothesis_slate_source": None,
+        "hypothesis_slate_errors": sorted(set(seen_errors)) or ["hypothesis_slate_missing"],
+    }
+
 def min_evidence_score(evidence, key):
     values = []
     if isinstance(evidence, list):
@@ -414,6 +527,10 @@ def evaluate(slug_value):
         "compliance_pack_path": None,
         "compliance_pack_missing_files": [],
         "convergence_streak": None,
+        "hypothesis_slate_required": False,
+        "hypothesis_slate_valid": "yes",
+        "hypothesis_slate_source": None,
+        "hypothesis_slate_errors": [],
         "critical_findings": 0,
         "three_judges_evidence_present": False,
         "reasons": [],
@@ -436,6 +553,10 @@ def evaluate(slug_value):
     result["current_phase"] = phase
     result["state_schema_version"] = version
     result["audit_disposition"] = state.get("audit_disposition")
+    hypothesis_result = validate_hypothesis_slate(state, plan_dir, version)
+    result.update(hypothesis_result)
+    if result["hypothesis_slate_valid"] != "yes":
+        failing.append("hypothesis_slate_invalid")
     if phase not in {"polish", "ready"}:
         pending.append(f"current_phase_not_polish_or_ready:{phase}")
     if version >= 4:
