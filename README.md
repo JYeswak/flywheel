@@ -1,12 +1,42 @@
 # Flywheel
 
+> **Mission anchor (locked):** *continuous-orchestrator-uptime-self-sustaining-fleet*
+
 Flywheel is the source repo for Joshua Nowak's agentic coding control plane. It
 does not contain product code. It holds the repo-local doctrine, templates,
 scripts, audits, tests, and command contracts that keep NTM sessions, Beads,
 Agent Mail, Socraticode, flywheel loops, and skill updates coordinated across
 ZestStream's active repos.
 
-Treat this README as the first map. Treat `AGENTS.md` as the authority.
+I build this repo to keep the fleet moving when nobody is watching the panes:
+workers dispatched, callbacks reaped, recovery paths installed, evidence
+captured, and drift converted into beads before it becomes another lost day.
+
+Treat this README as the first map. Treat `AGENTS.md` as the authority. The
+architecture details live in [`ARCHITECTURE.md`](./ARCHITECTURE.md); the
+operating workflow lives in [`CONTRIBUTING.md`](./CONTRIBUTING.md). The slash
+surface is `/flywheel:README`.
+
+## Quickstart
+
+For the orchestrator:
+
+```bash
+/Users/josh/.local/bin/ntm health flywheel
+~/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json
+br ready --json
+```
+
+For a worker:
+
+```bash
+~/.cargo/bin/br show <bead-id>
+~/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json
+```
+
+Then read the task packet, reserve owned paths, use Socraticode before edits,
+ship with explicit path staging, and callback with the required L120-L128
+fields. Receipts beat memory.
 
 ## Start Here
 

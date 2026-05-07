@@ -1,0 +1,57 @@
+{
+  "schema_version": "flywheel.compliance_pack/v1",
+  "bead_id": "flywheel-wyxzx",
+  "task_id": "flywheel-wyxzx",
+  "generated_at": "2026-05-07T23:56:00Z",
+  "did": [
+    "authored flywheel root docs in skillos-inspired shape",
+    "added GitHub issue and pull request templates",
+    "archived root AGENTS.md and Beads backup sediment",
+    "created reusable ecosystem-polish-scaffold skill with templates and apply script",
+    "tightened .gitignore sediment patterns",
+    "added and ran scaffold test",
+    "recorded three-judges receipt"
+  ],
+  "didnt": [
+    "did not activate any recovery watcher",
+    "did not mutate active .beads content",
+    "did not touch flywheel-loop dispatcher, doctor libraries, callback validator, or validation schemas",
+    "did not push to a remote"
+  ],
+  "gaps": [
+    "three-judges review is a manual rubric receipt because no callable judge tool was provided",
+    "live GitHub fetch used gh api for README proof; local skillos clone supplied the full file corpus"
+  ],
+  "evidence_paths": [
+    "README.md",
+    "ARCHITECTURE.md",
+    "CONTRIBUTING.md",
+    "ROADMAP.md",
+    "SECURITY.md",
+    ".github/ISSUE_TEMPLATE/bug.md",
+    ".github/ISSUE_TEMPLATE/feature.md",
+    ".github/ISSUE_TEMPLATE/trauma.md",
+    ".github/PULL_REQUEST_TEMPLATE.md",
+    ".gitignore",
+    "tests/test_ecosystem_polish_scaffold.sh",
+    ".flywheel/receipts/flywheel-wyxzx-three-judges.json",
+    "/Users/josh/.claude/skills/ecosystem-polish-scaffold/SKILL.md",
+    "/Users/josh/.claude/skills/ecosystem-polish-scaffold/scripts/apply-to-repo.sh",
+    "/tmp/agents-md-bak-archive-2026-05-08.tar.gz",
+    "/tmp/beads-bak-archive-2026-05-08.tar.gz"
+  ],
+  "tests": [
+    {
+      "command": "bash tests/test_ecosystem_polish_scaffold.sh",
+      "status": "pass"
+    }
+  ],
+  "counts": {
+    "root_docs_count": "5/5",
+    "github_templates_count": 4,
+    "agents_md_bak_archived_count": 9,
+    "beads_bak_archived_count": 6,
+    "socraticode_queries": 10,
+    "indexed_chunks_observed": 100
+  }
+}

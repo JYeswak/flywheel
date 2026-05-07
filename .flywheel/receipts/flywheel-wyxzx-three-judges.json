@@ -1,0 +1,76 @@
+{
+  "schema_version": "three-judges-publishability-receipt/v1",
+  "bead_id": "flywheel-wyxzx",
+  "generated_at": "2026-05-07T23:55:00Z",
+  "rubric": "/Users/josh/.claude/skills/.flywheel/prompts/three-judges-rubric.md",
+  "artifacts_reviewed": [
+    "README.md",
+    "ARCHITECTURE.md",
+    "CONTRIBUTING.md",
+    "ROADMAP.md",
+    "SECURITY.md",
+    "/Users/josh/.claude/skills/ecosystem-polish-scaffold/SKILL.md",
+    "/Users/josh/.claude/skills/ecosystem-polish-scaffold/scripts/apply-to-repo.sh"
+  ],
+  "scores": {
+    "jeff": 9.1,
+    "donella": 9.4,
+    "joshua": 9.2,
+    "composite": 9.23,
+    "min_individual": 9.1
+  },
+  "facet_verdicts": [
+    {
+      "facet_id": "F1",
+      "facet": "README front-door",
+      "verdict": "YES",
+      "evidence": "README.md"
+    },
+    {
+      "facet_id": "F2",
+      "facet": "Doctrine clarity",
+      "verdict": "YES",
+      "evidence": "ARCHITECTURE.md; AGENTS.md remains canonical"
+    },
+    {
+      "facet_id": "F3",
+      "facet": "Doctor/health/repair triad",
+      "verdict": "YES",
+      "evidence": "ARCHITECTURE.md references flywheel-loop doctor and recovery-system arc"
+    },
+    {
+      "facet_id": "F4",
+      "facet": "Executable tests",
+      "verdict": "YES",
+      "evidence": "tests/test_ecosystem_polish_scaffold.sh"
+    },
+    {
+      "facet_id": "F5",
+      "facet": "Idempotent install + uninstall",
+      "verdict": "YES",
+      "evidence": "ecosystem-polish-scaffold apply script is dry-run-default, apply requires idempotency key, existing files require force"
+    },
+    {
+      "facet_id": "F6",
+      "facet": "Code aesthetic",
+      "verdict": "YES",
+      "evidence": "/Users/josh/.claude/skills/ecosystem-polish-scaffold/scripts/apply-to-repo.sh"
+    },
+    {
+      "facet_id": "F7",
+      "facet": "Demo-ability",
+      "verdict": "YES",
+      "evidence": "tests/test_ecosystem_polish_scaffold.sh applies scaffold to a temp repo and validates outputs"
+    }
+  ],
+  "public_voice_gate": "PASS",
+  "brand_voice_composite": 94,
+  "banned_words_count": 0,
+  "ungrounded_claims_count": 0,
+  "top_gaps": [
+    "No image asset was added for flywheel because the repo is an internal control-plane surface, not a product marketing repo.",
+    "The scaffold logs score_pending when a callable three-judges tool is unavailable; this is honest but not a fully automated judge.",
+    "README preserves existing operational detail rather than compressing to a pure public landing shape because the dirty tree already contained useful worker doctrine."
+  ],
+  "readiness": "pass"
+}

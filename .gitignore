@@ -50,3 +50,22 @@ __pycache__/
 *-shm
 /state.db
 /storage.sqlite3
+
+# Sediment + backups (archive under .git-archive/, never commit)
+AGENTS.md.bak.*
+.beads.bak.*
+.beads.failed.*
+.git-archive/
+.git-archive/*
+!.git-archive/.gitkeep
+
+# Cache
+.ruff_cache/
+.pytest_cache/
+
+# Continue/transient files
+.continue-here.md
+
+# Recovery scratch
+.flywheel/.STATE.md.preview.*
+.flywheel/.reconcile-*.diff
