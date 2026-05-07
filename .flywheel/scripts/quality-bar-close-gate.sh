@@ -9,6 +9,7 @@ REPO_ROOT_DEFAULT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
 REPO_ROOT="${QUALITY_BAR_CLOSE_GATE_REPO:-$REPO_ROOT_DEFAULT}"
 LEDGER="${QUALITY_BAR_CLOSE_GATE_LEDGER:-$HOME/.local/state/flywheel/quality-bar-close-gate.jsonl}"
 CONTRACT_LEDGER="${QUALITY_BAR_CLOSE_GATE_CONTRACT_LEDGER:-$HOME/.local/state/flywheel/substrate-loop-contract.jsonl}"
+NTM_COVERAGE_TREND_SCRIPT="${QUALITY_BAR_CLOSE_GATE_NTM_COVERAGE_TREND_SCRIPT:-$REPO_ROOT_DEFAULT/.flywheel/scripts/ntm-surface-coverage-trend.sh}"
 JSONL_APPEND_LIB="${FLYWHEEL_JSONL_APPEND_LIB:-$HOME/.local/share/flywheel-watchers/lib/jsonl-append.sh}"
 
 MODE=""
@@ -77,7 +78,8 @@ info_json() {
     --arg ledger "$LEDGER" \
     --arg contract_ledger "$CONTRACT_LEDGER" \
     --arg jsonl_append_lib "$JSONL_APPEND_LIB" \
-    '{name:$name,version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,substrate_loop_contract_ledger:$contract_ledger,jsonl_append_lib:$jsonl_append_lib,exit_codes:{"0":"quality bar pass","1":"quality bar pending or fail","2":"usage error","3":"append primitive unavailable or failed"},thresholds:{pending:{warn:20,error:50},failed:{warn:5,error:10}},required_evidence:["quality_bar_passed","jeff_score>=9","donella_score>=9","joshua_score>=9_or_auto_advance","composite>=9.5","critical_findings=0","03-AUDIT-FINDINGS.md three-judges evidence"]}'
+    --arg ntm_coverage_trend_script "$NTM_COVERAGE_TREND_SCRIPT" \
+    '{name:$name,version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,substrate_loop_contract_ledger:$contract_ledger,jsonl_append_lib:$jsonl_append_lib,ntm_coverage_trend_script:$ntm_coverage_trend_script,exit_codes:{"0":"quality bar pass","1":"quality bar pending or fail","2":"usage error","3":"append primitive unavailable or failed"},thresholds:{pending:{warn:20,error:50},failed:{warn:5,error:10},compliance_score:{minimum:700,maximum:1000,convergence_streak_minimum:2},ntm_surface_coverage:{minimum_avg:7,target_avg:10}},required_evidence:["schema_version>=4:compliance_pack_path","schema_version>=4:compliance_score>=700","schema_version>=4:convergence_streak>=2","schema_version>=4:spec.json+evidence.json+compliance.json+theater.json+test_depth.json+scorecard.md+REPORT.md","schema_version<4:quality_bar_passed","schema_version<4:jeff_score>=9","schema_version<4:donella_score>=9","schema_version<4:joshua_score>=9_or_auto_advance","schema_version<4:composite>=9.5","critical_findings=0","future ntm-surface-wire-in plans require ntm coverage_avg>=7"]}'
 }
 
 examples_text() {
@@ -101,7 +103,7 @@ EOF
 schema_json() {
   case "$SCHEMA_TOPIC" in
     plan)
-      jq -nc --arg schema_version "$SCHEMA_VERSION.plan" '{schema_version:$schema_version,required:["plan_slug","decision","jeff","donella","joshua","composite","critical_findings","reasons"]}' ;;
+      jq -nc --arg schema_version "$SCHEMA_VERSION.plan" '{schema_version:$schema_version,required:["plan_slug","decision","quality_bar_mode","critical_findings","reasons"],legacy_required:["jeff","donella","joshua","composite"],compliance_required:["compliance_score","compliance_threshold","compliance_pack_path","convergence_streak"],conditional_required:{ntm_surface_wire_in:["ntm_surface_coverage_trend.coverage_avg>=7"]}}' ;;
     doctor)
       jq -nc '{schema_version:"quality-bar-close-gate.doctor.v1",required:["plan_state_quality_bar_pending_count","plan_state_quality_bar_failed_count","plan_state_quality_bar_passed_count"]}' ;;
     ledger)
@@ -216,6 +218,144 @@ def critical_from_audit(text):
             return int(match.group(1))
     return None
 
+REQUIRED_COMPLIANCE_PACK_FILES = [
+    "spec.json",
+    "evidence.json",
+    "compliance.json",
+    "theater.json",
+    "test_depth.json",
+    "scorecard.md",
+    "REPORT.md",
+]
+
+def state_schema_version(state):
+    value = as_num(state.get("schema_version"))
+    return int(value) if isinstance(value, (int, float)) else 1
+
+def resolve_pack_path(path_value, plan_dir):
+    if not isinstance(path_value, str) or not path_value.strip():
+        return None
+    path = Path(path_value.strip()).expanduser()
+    if not path.is_absolute():
+        path = plan_dir / path
+    return path
+
+def score_from_scorecard(pack_path):
+    scorecard = pack_path / "scorecard.md"
+    if not scorecard.is_file():
+        return None
+    try:
+        text = scorecard.read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        return None
+    match = re.search(r"Score:\s*(\d+(?:\.\d+)?)\s*/\s*1000", text, flags=re.I)
+    return float(match.group(1)) if match else None
+
+def score_from_compliance_json(pack_path):
+    data = read_json(pack_path / "compliance.json")
+    if not isinstance(data, dict) or data.get("_invalid_json"):
+        return None
+    for key in ("compliance_score", "score", "total_score", "final_score"):
+        value = as_num(data.get(key))
+        if isinstance(value, (int, float)):
+            return float(value)
+    return None
+
+def convergence_from_pack(pack_path):
+    for name in ("convergence.json", "manifest.json"):
+        data = read_json(pack_path / name)
+        if not isinstance(data, dict) or data.get("_invalid_json"):
+            continue
+        for key in ("convergence_streak", "zero_finding_rounds", "clean_rounds"):
+            value = as_num(data.get(key))
+            if isinstance(value, (int, float)):
+                return int(value)
+        convergence = data.get("convergence")
+        if isinstance(convergence, dict):
+            for key in ("streak", "convergence_streak", "zero_finding_rounds", "clean_rounds"):
+                value = as_num(convergence.get(key))
+                if isinstance(value, (int, float)):
+                    return int(value)
+    return None
+
+def best_compliance_evidence(state, plan_dir):
+    evidence = state.get("quality_bar_evidence")
+    rows = evidence if isinstance(evidence, list) else []
+    candidates = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        pack_path = resolve_pack_path(row.get("compliance_pack_path") or row.get("evidence_pack_path"), plan_dir)
+        if pack_path is None and isinstance(row.get("artifact"), str):
+            artifact_path = resolve_pack_path(row.get("artifact"), plan_dir)
+            if artifact_path and artifact_path.is_dir():
+                pack_path = artifact_path
+        row_score = as_num(row.get("compliance_score"))
+        threshold = as_num(row.get("compliance_threshold"))
+        row_streak = as_num(row.get("convergence_streak"))
+        candidates.append({
+            "row": row,
+            "pack_path": pack_path,
+            "row_score": float(row_score) if isinstance(row_score, (int, float)) else None,
+            "threshold": int(threshold) if isinstance(threshold, (int, float)) else 700,
+            "row_streak": int(row_streak) if isinstance(row_streak, (int, float)) else None,
+        })
+    return candidates
+
+def evaluate_compliance_pack(state, plan_dir, result, pending, failing):
+    result["quality_bar_mode"] = "compliance_pack"
+    result["compliance_score"] = None
+    result["compliance_threshold"] = 700
+    result["compliance_pack_path"] = None
+    result["compliance_pack_missing_files"] = []
+    result["convergence_streak"] = None
+    candidates = best_compliance_evidence(state, plan_dir)
+    if not candidates:
+        pending.append("compliance_pack_path_missing")
+        return
+    usable = None
+    for candidate in candidates:
+        pack_path = candidate["pack_path"]
+        if pack_path is not None:
+            usable = candidate
+            break
+    if usable is None:
+        pending.append("compliance_pack_path_missing")
+        return
+    pack_path = usable["pack_path"]
+    result["compliance_pack_path"] = str(pack_path)
+    result["compliance_threshold"] = usable["threshold"]
+    if not pack_path.is_dir():
+        failing.append("compliance_pack_missing")
+        return
+    missing = [name for name in REQUIRED_COMPLIANCE_PACK_FILES if not (pack_path / name).is_file()]
+    result["compliance_pack_missing_files"] = missing
+    if missing:
+        failing.append("compliance_pack_incomplete")
+    score_candidates = [
+        usable["row_score"],
+        score_from_compliance_json(pack_path),
+        score_from_scorecard(pack_path),
+    ]
+    scores = [score for score in score_candidates if isinstance(score, (int, float))]
+    if scores:
+        result["compliance_score"] = min(scores)
+    else:
+        pending.append("compliance_score_missing")
+    if isinstance(result["compliance_score"], (int, float)) and result["compliance_score"] < result["compliance_threshold"]:
+        failing.append("compliance_score_below_700")
+    root_streak = as_num(state.get("convergence_streak"))
+    streak_candidates = [
+        int(root_streak) if isinstance(root_streak, (int, float)) else None,
+        usable["row_streak"],
+        convergence_from_pack(pack_path),
+    ]
+    result["convergence_streak"] = next((value for value in streak_candidates if isinstance(value, int)), None)
+    if result["convergence_streak"] is None:
+        pending.append("convergence_streak_missing")
+    elif result["convergence_streak"] < 2:
+        failing.append("convergence_streak_below_2")
+
 def min_evidence_score(evidence, key):
     values = []
     if isinstance(evidence, list):
@@ -260,12 +400,20 @@ def evaluate(slug_value):
         "audit_findings_present": audit_text is not None,
         "current_phase": None,
         "quality_bar_passed": None,
+        "state_quality_bar_passed": None,
         "audit_disposition": None,
+        "state_schema_version": None,
+        "quality_bar_mode": None,
         "jeff": None,
         "donella": None,
         "joshua": None,
         "joshua_auto_advance": False,
         "composite": None,
+        "compliance_score": None,
+        "compliance_threshold": None,
+        "compliance_pack_path": None,
+        "compliance_pack_missing_files": [],
+        "convergence_streak": None,
         "critical_findings": 0,
         "three_judges_evidence_present": False,
         "reasons": [],
@@ -284,11 +432,15 @@ def evaluate(slug_value):
         result["result"] = "FAIL"
         return result
     phase = state.get("current_phase")
+    version = state_schema_version(state)
     result["current_phase"] = phase
+    result["state_schema_version"] = version
     result["audit_disposition"] = state.get("audit_disposition")
     if phase not in {"polish", "ready"}:
         pending.append(f"current_phase_not_polish_or_ready:{phase}")
-    if "quality_bar_passed" not in state:
+    if version >= 4:
+        result["state_quality_bar_passed"] = None if "quality_bar_passed" not in state else truthy(state.get("quality_bar_passed"))
+    elif "quality_bar_passed" not in state:
         pending.append("quality_bar_passed_missing")
     else:
         result["quality_bar_passed"] = truthy(state.get("quality_bar_passed"))
@@ -296,7 +448,10 @@ def evaluate(slug_value):
             failing.append("quality_bar_passed_false")
         elif not truthy(state.get("quality_bar_passed")):
             pending.append("quality_bar_passed_unrecognized")
-    if audit_text is None:
+    if version >= 4:
+        audit_scores = {}
+        result["quality_bar_mode"] = "compliance_pack"
+    elif audit_text is None:
         pending.append("audit_findings_missing")
         audit_scores = {}
     else:
@@ -308,48 +463,52 @@ def evaluate(slug_value):
         }
         result["three_judges_evidence_present"] = all(audit_scores[k] is not None for k in ("jeff_score", "donella_score", "joshua_score"))
     evidence = state.get("quality_bar_evidence")
-    state_scores = {
-        "jeff_score": min_evidence_score(evidence, "jeff_score"),
-        "donella_score": min_evidence_score(evidence, "donella_score"),
-        "joshua_score": min_evidence_score(evidence, "joshua_score"),
-        "composite": min_evidence_score(evidence, "composite"),
-    }
-    scores = {}
-    for key in ("jeff_score", "donella_score", "joshua_score", "composite"):
-        candidates = [v for v in (audit_scores.get(key), state_scores.get(key)) if isinstance(v, (int, float))]
-        if candidates:
-            scores[key] = min(candidates)
-        elif audit_scores.get(key) == "auto_advance":
-            scores[key] = "auto_advance"
-        else:
-            scores[key] = None
-    result["jeff"] = scores["jeff_score"]
-    result["donella"] = scores["donella_score"]
-    result["joshua"] = scores["joshua_score"]
-    result["composite"] = scores["composite"]
-    if result["jeff"] is None:
-        pending.append("jeff_score_missing")
-    elif result["jeff"] < 9:
-        failing.append("jeff_score_below_9")
-    if result["donella"] is None:
-        pending.append("donella_score_missing")
-    elif result["donella"] < 9:
-        failing.append("donella_score_below_9")
-    auto_advance = state.get("audit_disposition") == "auto_advance"
-    if audit_text and re.search(r"joshua_(score_)?auto_advance\s*[:=]\s*(true|yes|1)|joshua\s*[:=|]\s*auto_advance", audit_text, flags=re.I):
-        auto_advance = True
-    result["joshua_auto_advance"] = auto_advance
-    if result["joshua"] is None:
-        if auto_advance:
-            result["joshua"] = "auto_advance"
-        else:
-            pending.append("joshua_score_missing")
-    elif isinstance(result["joshua"], (int, float)) and result["joshua"] < 9 and not auto_advance:
-        failing.append("joshua_score_below_9")
-    if result["composite"] is None:
-        pending.append("composite_missing")
-    elif result["composite"] < 9.5:
-        failing.append("composite_below_9_5")
+    if version >= 4:
+        evaluate_compliance_pack(state, plan_dir, result, pending, failing)
+    else:
+        result["quality_bar_mode"] = "legacy_four_lens"
+        state_scores = {
+            "jeff_score": min_evidence_score(evidence, "jeff_score"),
+            "donella_score": min_evidence_score(evidence, "donella_score"),
+            "joshua_score": min_evidence_score(evidence, "joshua_score"),
+            "composite": min_evidence_score(evidence, "composite"),
+        }
+        scores = {}
+        for key in ("jeff_score", "donella_score", "joshua_score", "composite"):
+            candidates = [v for v in (audit_scores.get(key), state_scores.get(key)) if isinstance(v, (int, float))]
+            if candidates:
+                scores[key] = min(candidates)
+            elif audit_scores.get(key) == "auto_advance":
+                scores[key] = "auto_advance"
+            else:
+                scores[key] = None
+        result["jeff"] = scores["jeff_score"]
+        result["donella"] = scores["donella_score"]
+        result["joshua"] = scores["joshua_score"]
+        result["composite"] = scores["composite"]
+        if result["jeff"] is None:
+            pending.append("jeff_score_missing")
+        elif result["jeff"] < 9:
+            failing.append("jeff_score_below_9")
+        if result["donella"] is None:
+            pending.append("donella_score_missing")
+        elif result["donella"] < 9:
+            failing.append("donella_score_below_9")
+        auto_advance = state.get("audit_disposition") == "auto_advance"
+        if audit_text and re.search(r"joshua_(score_)?auto_advance\s*[:=]\s*(true|yes|1)|joshua\s*[:=|]\s*auto_advance", audit_text, flags=re.I):
+            auto_advance = True
+        result["joshua_auto_advance"] = auto_advance
+        if result["joshua"] is None:
+            if auto_advance:
+                result["joshua"] = "auto_advance"
+            else:
+                pending.append("joshua_score_missing")
+        elif isinstance(result["joshua"], (int, float)) and result["joshua"] < 9 and not auto_advance:
+            failing.append("joshua_score_below_9")
+        if result["composite"] is None:
+            pending.append("composite_missing")
+        elif result["composite"] < 9.5:
+            failing.append("composite_below_9_5")
     state_critical = 0
     by_sev = state.get("audit_findings_by_severity")
     if isinstance(by_sev, dict):
@@ -372,6 +531,8 @@ def evaluate(slug_value):
         result["decision"] = "pass"
         result["result"] = "PASS"
         result["reasons"] = []
+    if version >= 4:
+        result["quality_bar_passed"] = result["decision"] == "pass"
     dt = latest_evidence_time(state)
     result["quality_bar_graded_at"] = dt.isoformat().replace("+00:00", "Z") if dt else None
     result["quality_bar_graded_within_30d"] = bool(dt and dt >= datetime.now(timezone.utc) - timedelta(days=30))
@@ -466,19 +627,69 @@ ledger_row_json() {
       ts:$ts,
       plan_slug:.plan_slug,
       decision:.decision,
+      quality_bar_mode:.quality_bar_mode,
       jeff:.jeff,
       donella:.donella,
       joshua:.joshua,
       composite:.composite,
+      compliance_score:.compliance_score,
+      compliance_threshold:.compliance_threshold,
+      compliance_pack_path:.compliance_pack_path,
+      convergence_streak:.convergence_streak,
       critical_findings:.critical_findings,
       reasons:.reasons
     }
   ' <<<"$payload"
 }
 
+ntm_surface_coverage_gate_json() {
+  if [[ "$PLAN_SLUG" != *"ntm-surface-wire-in"* ]]; then
+    jq -nc '{applies:false,status:"not_applicable"}'
+    return 0
+  fi
+  if [[ ! -x "$NTM_COVERAGE_TREND_SCRIPT" ]]; then
+    jq -nc --arg path "$NTM_COVERAGE_TREND_SCRIPT" '{applies:true,status:"fail",reason:"ntm_surface_coverage_trend_missing",script:$path,coverage_avg:null,minimum_coverage_avg:7}'
+    return 0
+  fi
+  local output rc
+  set +e
+  output="$("$NTM_COVERAGE_TREND_SCRIPT" status --json 2>/dev/null)"
+  rc=$?
+  set -e
+  if [[ -z "$output" ]] || ! jq -e 'type=="object"' >/dev/null 2>&1 <<<"$output"; then
+    jq -nc --arg path "$NTM_COVERAGE_TREND_SCRIPT" --argjson rc "$rc" '{applies:true,status:"fail",reason:"ntm_surface_coverage_trend_invalid_json",script:$path,exit_code:$rc,coverage_avg:null,minimum_coverage_avg:7}'
+    return 0
+  fi
+  jq -c --arg path "$NTM_COVERAGE_TREND_SCRIPT" '
+    (.coverage_avg // null) as $avg
+    | . + {
+        applies:true,
+        script:$path,
+        minimum_coverage_avg:7,
+        status:(if (($avg // -1) | tonumber) >= 7 then "pass" else "fail" end),
+        reason:(if (($avg // -1) | tonumber) >= 7 then null else "ntm_surface_coverage_below_7" end)
+      }
+  ' <<<"$output"
+}
+
 run_validate() {
-  local payload decision rc ledger_action="not_requested"
+  local payload decision rc ledger_action="not_requested" ntm_gate ntm_gate_status ntm_gate_reason ntm_gate_avg
   payload="$(evaluate_plan_json)"
+  ntm_gate="$(ntm_surface_coverage_gate_json)"
+  ntm_gate_status="$(jq -r '.status // "not_applicable"' <<<"$ntm_gate")"
+  if [[ "$ntm_gate_status" == "fail" ]]; then
+    ntm_gate_reason="$(jq -r '.reason // "ntm_surface_coverage_gate_failed"' <<<"$ntm_gate")"
+    ntm_gate_avg="$(jq -r '.coverage_avg // "unknown"' <<<"$ntm_gate")"
+    echo "NTM coverage close gate failed: coverage_avg=${ntm_gate_avg} < 7.0 for future wire-in plan; run ntm-surface-coverage-trend.sh chart --days 7 --jsonl and close coverage gaps before ready." >&2
+    payload="$(jq -c --arg reason "$ntm_gate_reason" --argjson gate "$ntm_gate" '
+      .ntm_surface_coverage_trend = $gate
+      | .decision = "fail"
+      | .result = "FAIL"
+      | .reasons = (((.reasons // []) + [$reason]) | unique)
+    ' <<<"$payload")"
+  else
+    payload="$(jq -c --argjson gate "$ntm_gate" '.ntm_surface_coverage_trend = $gate' <<<"$payload")"
+  fi
   decision="$(jq -r '.decision' <<<"$payload")"
   if [[ "$APPLY" -eq 1 ]]; then
     append_validated "$LEDGER" "$(ledger_row_json "$payload")"
@@ -538,6 +749,10 @@ run_why() {
   local text payload
   case "$WHY_ID" in
     quality_bar_passed_missing) text="STATE.json lacks quality_bar_passed; Phase 5 close stays pending until the quality bar evidence is written." ;;
+    compliance_pack_path_missing) text="STATE.json schema v4 lacks quality_bar_evidence[].compliance_pack_path; Phase 5 close stays pending until the beads-compliance evidence pack is cited." ;;
+    compliance_pack_missing|compliance_pack_incomplete) text="The cited beads-compliance pack is missing or incomplete; close requires spec/evidence/compliance/theater/test-depth/scorecard/report files." ;;
+    compliance_score_below_700) text="The beads-compliance score is below the 700/1000 close threshold." ;;
+    convergence_streak_below_2|convergence_streak_missing) text="The compliance pack has not shown two consecutive zero-finding rounds; close stays blocked until convergence_streak >= 2." ;;
     audit_findings_missing) text="03-AUDIT-FINDINGS.md is missing; close-time gate cannot verify the 3-judges audit evidence." ;;
     *_below_*|critical_findings_present|quality_bar_passed_false) text="The quality bar explicitly fails; do not auto-close the plan." ;;
     *) text="Inspect the plan validation JSON for the exact reason list." ;;

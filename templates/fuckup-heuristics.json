@@ -38,6 +38,18 @@
       "match": "exact",
       "should_become": "tool-patch",
       "recommended_action": "bead_db_repair.sh recovery path losing data; audit Gate 8 rebuild logic"
+    },
+    {
+      "pattern": "read-tool-secret-leak",
+      "match": "exact",
+      "should_become": "canonical-L-rule",
+      "recommended_action": "Read/Edit/Write/MCP-filesystem on .env* leaks via transcript; Bash-surface guards (dcg, infisical-safe.sh, PreToolUse Bash hooks) do NOT cover. Promoted to L125 ENV-FILE-IS-SEALED-SUBSTRATE 2026-05-07. Canonical verification = `cf-secret <NAME> | shasum -a 256` (fingerprint, never bulk read). See ~/.claude/skills/infisical-secrets/references/INCIDENTS.md and AGENTS-CANONICAL.md L125."
+    },
+    {
+      "pattern": "self-grade-claim-treated-as-fact",
+      "match": "exact",
+      "should_become": "canonical-L-rule",
+      "recommended_action": "Four-lens or three-judges self-grade was accepted as close truth. Apply L126: require beads-compliance evidence pack, compliance_score>=700, compliance_pack_path, and convergence_streak>=2 for schema v4 plan close gates."
     }
   ]
 }

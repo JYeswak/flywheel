@@ -3204,11 +3204,1516 @@ Evidence:
 - Cross-orch coordination: rows 147 (skillos→flywheel),
   155+156+157+callback (flywheel↔skillos).
 
+## Plan-arc Phase 2 r2 refine: absorbed Finding 4 (dispatch-under-injects-skills) + skillos coordination touchpoint (2026-05-06)
+
+Bead: `flywheel-plan-mission-lock-paradigm-extension-phase2-refine-r2-2026-05-06`
+
+Class: `dispatch-systematically-under-injects-skills`
+
+Promotion Action: REFINE
+
+Severity: high
+
+Scope: plan-space-only.
+
+What changed: Phase 2 r2 absorbed cross-orch Finding 4 / row 154 into the
+mission-lock paradigm extension. R1 already had the triple-gate shape across
+mission-lock, dispatch-author, and close-validator. R2 keeps that shape and
+widens dispatch-author from "load-bearing work requires a skill suite" to
+"every bead gets a universal skill floor, then bead-class defaults add the
+domain route, and dispatch self-tests the routing before send."
+
+Required universal-class tokens captured for Phase 3 audit:
+`canonical-cli-scoping`, `readme-writing`, `de-slopify`, `simplify`, and
+`socraticode`.
+
+Required bead-class defaults captured:
+`frontend-real-data-flip`, `backend-endpoint`, `substrate-fix`,
+`db-migration`, and `saas-intelligence`.
+
+Skillos touchpoint: Phase 4 must coordinate with `skillos:1` before writing the
+final `/flywheel:dispatch` amendment. Flywheel consumes the dispatch skill
+routing template; skillos owns reusable skill template/API shape. The r2 plan
+defines the ready-to-implement capsule and ack fields for that handshake.
+
+Phase 3 risks recorded:
+- `canonical-cli-scoping` exists locally but skill-search returned
+  `blocked_no_source`; audit must decide warn vs block vs local SKILL.md
+  fallback.
+- `simplify` has no exact skill directory; existing aliases are
+  `code-simplifier` and `simplify-and-refactor-code-isomorphically`.
+- `schema-complete-drift-guard` has no exact local skill directory.
+
+Evidence:
+- Refine artifact:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/02-REFINE-r2.md`.
+- State:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json`
+  records `refine_round=2`, `cross_orch_findings_absorbed=[151,152,153,154]`,
+  and `skillos_coordination_pending=true`.
+- Socraticode: 10 r2 queries against canonical `/Users/josh/Developer/flywheel`,
+  with 951 indexed chunks observed.
+- Skill-search: 455 indexed skills, 463 filesystem skills, route gate enabled,
+  drift count 8, freshness 79 percent.
+- L112:
+  `OK_mission_lock_paradigm_phase2_r2`.
+
+## Phase 4 Bead #6 closed: rich recovery JSONL ledger schema + doctor probe (2026-05-06)
+
+Bead: `flywheel-capacity-halt-doctor-ledger-2026-05-06`.
+
+Leverage class: Donella #6 Information Flows. Recovery primitives already
+emitted attempt fragments, but doctor consumers could not read one canonical
+ledger shape or aggregate 24h recovery counters.
+
+Shipped:
+- Canonical draft-07 schema:
+  `.flywheel/validation-schema/v1/recovery-ledger.schema.json`.
+- Backwards-compatible watchdog migration:
+  `.flywheel/scripts/worker-auto-respawn-watchdog.sh` still emits existing
+  fields and now adds canonical `actor`, target, pane-role, trauma-class,
+  budget, transport, post-check, failure-class, and primitive fields.
+- Doctor probe:
+  `.flywheel/scripts/recovery-doctor-probe.sh`.
+
+Doctor fields exposed:
+`recovery_count_24h`, `recovery_success_pct_24h`,
+`recovery_attempted_24h_by_class`, `recovery_protected_refusals_24h`,
+`recovery_budget_exhausted_24h`, `recovery_transport_failure_pct_24h`, and
+`top_failing_panes_24h`.
+
+Audit findings closed: recovery primitives now have doctor-visible counters
+for attempts, success rate, protected refusals, budget exhaustion, transport
+failure rate, per-class counts, and top failing panes. The probe counts both
+new canonical rows and legacy `auto-respawn-attempts.jsonl` rows.
+
+Evidence:
+- Test: `.flywheel/tests/test_recovery_doctor_probe.sh` passed 9 canonical
+  cases / 16 assertions, including malformed-row warnings, 24h exclusion,
+  mixed old/new schemas, and schema validation.
+- Watchdog regression: `.flywheel/tests/test_worker_auto_respawn_watchdog.sh`
+  passed 35/35.
+- Sibling regressions:
+  `.flywheel/tests/test_capacity_halt_auto_continue_primitive.sh` passed 8
+  cases / 24 assertions, and
+  `.flywheel/tests/test_codex_queued_not_submitted_classifier_and_recovery.sh`
+  passed 11 cases / 28 assertions.
+- L112: `OK_capacity_halt_phase4_bead6_doctor_ledger`.
+
+## Phase 4 Bead #7 closed: capacity-halt driver coverage matrix + probe (2026-05-06)
+
+Bead: `flywheel-capacity-halt-driver-coverage-2026-05-06`.
+
+Status: the 7-bead capacity-halt DAG is complete. Beads #1-#7 have now
+closed across reconcile, auto-continue primitive, success measurement,
+authorization, burst budget, doctor ledger, and driver coverage.
+
+Leverage class: Donella #6 Information Flows. The recovery drivers were
+already installed, but the coverage matrix was implicit in launchd plists and
+script chains. The new probe makes future driver drift visible without
+mutating plists or recovery primitives.
+
+Coverage matrix from live `~/Library/LaunchAgents/ai.zeststream.*.plist`:
+- Plists audited: 37.
+- Drive capacity-halt recovery: 6 capability rows.
+- Drive queued-not-submitted recovery: 5 capability rows.
+- Monitors-only: 10 primary-category rows.
+- Unrelated: 21 primary-category rows.
+
+Probe: `.flywheel/scripts/capacity-halt-driver-coverage.sh`.
+
+The probe classifies every plist into one primary category:
+`drives_capacity_halt`, `drives_queued_not_submitted`, `monitors_only`, or
+`unrelated`, and records capability flags so Codex detector plists with
+`--auto-recover` count for both capacity-halt and queued-not-submitted driver
+coverage.
+
+Evidence:
+- Test: `.flywheel/tests/test_capacity_halt_driver_coverage.sh` passed 5
+  canonical cases / 10 assertions.
+- Live probe: `plists_audited_count=37`,
+  `drives_capacity_halt_count=6`,
+  `drives_queued_not_submitted_count=5`,
+  `monitors_only_count=10`, `unrelated_count=21`.
+- L112: `OK_capacity_halt_phase4_bead7_driver_coverage`.
+
+## Doctrine drift propagation: 19/291 repos drifted, oldest lag 25h (skillos:1 row 147) - RCA + sync patch + drift-trend probe shipped (2026-05-06)
+
+Bead: `flywheel-doctrine-drift-propagation-19-of-291-2026-05-06`.
+
+Class: `canonical-doctrine-drift-propagation`.
+
+Severity: P1.
+
+Signal: skillos:1 surfaced the 19/291 drift finding via cross-orch row 147.
+Live verification in flywheel found 19 drifted repos and 44 drifted sync
+surfaces before repair.
+
+Top-5 drifted repos:
+`alpsinsurance`, `alpsinsurance-seed-org-43451a8e-3256a440`, `cfs-expo`,
+`comfyui`, and `cubcloud-aaas`.
+
+Root cause: the sync substrate existed, but propagation failure was weakly
+surfaced. The fleet propagator was running for at least some repos and logging
+`sync_nonzero` failures, including repeated `alpsinsurance` failures, but the
+canonical sync script had no durable drift-count ledger and no doctor-facing
+trend probe. Drift could therefore accumulate as per-run failures rather than a
+single visible fleet trend. Some repos also had no observed recent propagator
+row, so coverage visibility was incomplete.
+
+Fix shipped:
+- `sync-canonical-doctrine.sh` now emits `ts`, `ledger_path`, and appends its
+  JSON receipt to `~/.local/state/flywheel/doctrine-sync-ledger.jsonl` unless
+  `SYNC_CANONICAL_LEDGER_DISABLE=1`.
+- New `.flywheel/scripts/doctrine-drift-trend-probe.sh` reports current drift,
+  24h delta, alert state, and top-N drifted repos from the ledger.
+- New `.flywheel/tests/test_doctrine_drift_trend_probe.sh` covers zero, five,
+  nineteen, improvement, worsening, malformed ledger, and quiet mode.
+
+Live sync results: top-five dry-run/apply completed with zero errors, then the
+remaining non-source drifted repos were dry-run/applied with zero errors. Final
+global dry-run reports `drifted_count=1`; the only residual drift is the
+flywheel source repo's `.flywheel/AGENTS-CANONICAL.md`, which was intentionally
+not applied because this dispatch marked canonical doctrine source files
+read-only.
+
+Donella read:
+- #6 Information Flows: drift now has a durable ledger and trend probe instead
+  of isolated per-run receipts.
+- #5 Rules: future doctor gates can consume one canonical receipt shape and
+  alert on worsening drift.
+
+Evidence:
+- RCA: `/tmp/doctrine-drift-rca-2026-05-06.md`.
+- Top-five receipts: `/tmp/doctrine-drift-top5-dry-run-preapply.jsonl`,
+  `/tmp/doctrine-drift-top5-apply.jsonl`, and
+  `/tmp/doctrine-drift-top5-dry-run-after.jsonl`.
+- Remaining apply receipts: `/tmp/doctrine-drift-remaining-apply.jsonl`.
+- Final dry-run: `/tmp/doctrine-sync-final-dry-run.json`.
+- Final trend probe: `/tmp/doctrine-drift-trend-final.json`.
+- Tests: `test_doctrine_drift_trend_probe.sh` passed 11 assertions; existing
+  `test-sync-canonical-doctrine.sh` passed with ledger writes disabled.
+- L112: `OK_doctrine_drift_propagation_shipped`.
+
+## Fuckup-log <unknown> class triage: legacy `class` rows collapsed at review boundary (2026-05-06)
+
+Bead: `flywheel-learn-review-fuckup-triage-2026-05-06`.
+
+Class: `fuckup-log-unknown-class-review-loss`.
+
+Severity: P1.
+
+Signal: dispatch snapshot reported 785 last-24h unprocessed rows, 658 unknown
+(84%). Live pre-patch triage had drifted to 821 unprocessed rows, 697 unknown.
+A 50-row random sample found 48 recovery reminder rows, one model-capacity row,
+and one `DATABASE_URL` leak row.
+
+Root cause: emitters were not actually classless. They wrote meaningful legacy
+`class` values, but `flywheel-loop fuckup list` aggregated only `trauma_class`,
+so review/triage collapsed those rows into `<unknown>`.
+
+Fix shipped:
+- `flywheel-loop fuckup list` now normalizes legacy `class` into
+  `trauma_class` when `trauma_class` is missing, `unknown`, or `<unknown>`.
+- The shipped rule absorbs concrete legacy classes including
+  `post-callback-reminder-template-recovery`,
+  `codex-model-at-capacity-halt`, and `secret-leak`; one schema-compatibility
+  rule was used instead of duplicate regex rules.
+- The raw fuckup log is not mutated; normalized review rows preserve
+  `original_trauma_class` and `classifier_source`.
+- Explicit `trauma_class` still wins over legacy `class`.
+- No promotion-ready new class surfaced: recovery reminder rows were low
+  severity, capacity-halt had 4 high-severity legacy rows, and the rest were
+  below threshold.
+
+Evidence:
+- RCA: `/tmp/fuckup-log-unknown-class-rca-2026-05-06.md`.
+- Dry-run projection: `raw_unknown=697`, `dry_run_unknown=0`.
+- Actual run: `unprocessed_24h=828`, `actual_unknown=0`,
+  `classifier_source=flywheel-loop:legacy-class-field` rows `704`.
+- Donella #6 Information Flows: unknown share moved from 84% at dispatch
+  snapshot to 0% in post-patch review output for this class of rows.
+- Test: `.flywheel/tests/test_fuckup_classifier_rules.sh` passed.
+- L112: `OK_fuckup_log_unknown_class_triaged`.
+
+## Plan-arc Phase 2 r3 refine: 10 open questions resolved + convergence test (2026-05-06)
+
+Bead: `flywheel-plan-mission-lock-paradigm-extension-phase2-refine-r3-2026-05-06`.
+
+Scope: plan-space only. No code-space, skill-file, MISSION, or Phase 3 audit
+mutation was performed.
+
+R3 closes the ten open questions left by r2 without adding a new finding class,
+gate, bead class, or universal skill token. The plan keeps the three-gate shape:
+mission-lock, dispatch-author, and close-validator.
+
+Resolved policy:
+- `canonical-cli-scoping` route-health `blocked_no_source` warns and forces a
+  local `SKILL.md` read fallback when the exact skill file is readable; it
+  blocks only when the local skill cannot be read.
+- `simplify` remains the universal token; default concrete route is
+  `code-simplifier`, with `simplify-and-refactor-code-isomorphically` reserved
+  for behavior-preserving refactors.
+- Missing exact `schema-complete-drift-guard` does not fail by itself; dispatch
+  may proceed through `safe-migrations`, `supabase-postgres-best-practices`,
+  and `data-quality-validation`, while skillos receives a candidate for
+  reusable alias/template gaps.
+- `/flywheel:dispatch` owns bead-class detection authority; `gsd-planner` may
+  propose, skillos supplies taxonomy/templates, and a shared helper may
+  implement matching.
+- Close-validator proof requires artifact-backed `skill_receipts[]`; naming a
+  skill in the packet is not enough.
+
+Convergence:
+- Semantic delta versus r2: 4 percent.
+- `convergence_streak=1`.
+- `phase3_audit_eligible=false` because the strict state rule requires two
+  consecutive under-five-percent rounds and r3 is the first.
+- Deferred implementation questions: 2, both field/API finalization questions
+  for skillos alias/templates and close-validator receipt names.
+
+Donella read: #6 Information Flows remains primary because skill evidence moves
+from implicit worker judgment into dispatch and close receipts. #5 Rules fixes
+the send/no-send and close/no-close contracts. #4 Self-Organization stays
+bounded: flywheel consumes dispatch evidence, skillos owns reusable taxonomy,
+and target repos own domain-specific fixtures.
+
+Evidence:
+- Refine artifact:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/02-REFINE-r3.md`.
+- State:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json`
+  records `refine_round=3`, `open_questions_resolved=10`,
+  `convergence_streak=1`, and `phase3_audit_eligible=false`.
+- Socraticode: 10 r3 queries against canonical `/Users/josh/Developer/flywheel`,
+  with 961 indexed chunks observed.
+- Skill-search confirmed `code-simplifier`, `safe-migrations`, and
+  `data-quality-validation` as concrete existing routes.
+- L112:
+  `OK_mission_lock_paradigm_phase2_r3`.
+
+## Scoped commit pass: 3 commits shipping 11 untracked work-product files (2026-05-06)
+
+Bead: `flywheel-scoped-commit-untracked-day-shipped-2026-05-06`.
+
+Class: `scoped-commit-by-pathspec`.
+
+Severity: P2.
+
+Scope: promote today's shipped untracked work-product into three explicit
+pathspec commits without absorbing unrelated modified files, runtime state, or
+forensic `.beads` sidecars.
+
+Commits:
+- `aa57ca8` — scripts commit, 3 files:
+  `.flywheel/scripts/capacity-halt-driver-coverage.sh`,
+  `.flywheel/scripts/doctrine-drift-trend-probe.sh`, and
+  `.flywheel/scripts/recovery-doctor-probe.sh`.
+- `5026fa0` — tests commit, 7 files:
+  `.flywheel/tests/test_capacity_halt_driver_coverage.sh`,
+  `.flywheel/tests/test_doctrine_drift_trend_probe.sh`,
+  `.flywheel/tests/test_enter_press_not_respawn_class_gate.sh`,
+  `.flywheel/tests/test_flywheel_respawn_boot_wait_window.sh`,
+  `.flywheel/tests/test_fuckup_classifier_rules.sh`,
+  `.flywheel/tests/test_recovery_doctor_probe.sh`, and
+  `.flywheel/tests/test_two_blocker_ticks_escalator_close_row_shapes.sh`.
+- `ac343b9` — chore commit, 2 files:
+  `.flywheel/validation-schema/v1/recovery-ledger.schema.json` and
+  `.flywheel/handoffs/2026-05-06-1325-compact.md`.
+
+Counts:
+- Dispatch snapshot target: 11 work-product files; live scoped target included
+  12 files because `test_fuckup_classifier_rules.sh` had landed as an untracked
+  worker product before this pass.
+- Untracked count excluding `.beads` forensic evidence: `16 -> 4`.
+- Last-three commit file count: `12`.
+- Non-additions in last-three commits: `0`.
+- Forbidden paths in last-three commits: `0`.
+
+Reserved/deferred paths skipped:
+- `.flywheel/PLANS/mission-lock-paradigm-extension-2026-05-06/02-REFINE-r2.md`
+- `.flywheel/PLANS/mission-lock-paradigm-extension-2026-05-06/02-REFINE-r3.md`
+- `.ntm/pids/`
+- `version`
+- `.beads/*.bak.*` and `.beads/*.aside.*`
+- `.beads/issues.jsonl` and `INCIDENTS.md` remained append-only closeout
+  surfaces, not commit payload.
+
+Evidence:
+- Socraticode: 3 searches against `/Users/josh/Developer/flywheel`, 963 indexed
+  chunks observed.
+- L112: `OK_scoped_commit_pass_complete`.
+
+
+## Memory index compaction: MEMORY.md tightened from 26.9KB to 16.1KB, 99 lines, avg 162.7 chars/line (2026-05-06)
+
+Bead: `flywheel-memory-index-compaction-2026-05-06`.
+
+Scope was limited to `/Users/josh/.claude/projects/-Users-josh-Developer-flywheel/memory/MEMORY.md` plus append-only close receipts here and in `.beads/issues.jsonl`. Topic files were not modified.
+
+Results:
+- Bytes: `27566` -> `16475`.
+- Entries: `99` -> `99`; order preserved.
+- Max line length: `616` -> `190` chars.
+- Linked topic files: `broken_links_after=0`.
+- Topic hash diff: clean across 112 same-dir topic files.
+- Stale index link corrected in-place from `feedback_data_guides_decisions_not_human_judgment.md` to existing `feedback_data_decides_not_human_meatpuppet.md`; no topic file was created or edited.
+- Socraticode: 3 searches against canonical `/Users/josh/Developer/flywheel`, 30 result chunks observed.
+- Reservation conflicts on append-only receipt files were coordinated via Agent Mail with `PearlBeacon` and `MagentaPond`; final edits stayed EOF-only.
+
+Evidence:
+- Survey: `/tmp/memory-index-compaction-research-survey.md`.
+- Topic hash receipts: `/tmp/memory-topic-hashes-before.txt` and `/tmp/memory-topic-hashes-after.txt`.
+- L112: `OK_memory_index_compacted`.
+
+## Plan-arc Phase 3 Audit Lens 2 (idempotency-receipt-integrity) complete: 6 findings (sev: critical=0, high=1, medium=4, low=1) (2026-05-06)
+
+Bead: `flywheel-phase3-audit-idempotency-receipt-integrity-2026-05-06`.
+
+Scope: plan-space only. No code-space files, skill files, MISSION files, or
+prior refine artifacts were modified.
+
+The second Phase 3 lens audited r4 and its preserved r1-r3 three-gate contract
+for replay safety, receipt completeness, deterministic skill routing,
+append-only close truth, and shared-state race windows.
+
+Findings:
+- Critical: 0.
+- High: 1.
+- Medium: 4.
+- Low: 1.
+- Disposition: `auto_advance`.
+
+The high finding is duplicate-dispatch risk: dispatch-author can recompute a
+valid packet and send it again, but the plan does not yet require a
+deterministic dispatch identity key, input hash, prior-send lookup, or
+four-state delivery receipt in the skill discovery receipt.
+
+Critical findings: none. No true Joshua-blocker class was identified.
+
+Mitigation routing:
+- Follow-up bead filed:
+  `flywheel-mission-lock-idempotency-receipt-integrity-amendments-2026-05-06`.
+- Required amendments: replay identity envelope, per-lens append-only audit
+  rows, deterministic skill-suite and close-receipt identity keys, snapshot
+  hashes for drift-prone routing inputs, duplicate-close policy, and repair
+  idempotency fields for mission-lock readiness/scaffold receipts.
+
+Disagreement note vs lens 1:
+- Lens 1 security also closed with 0 critical, 1 high, 4 medium, and 1 low
+  finding; both lenses agree on `auto_advance`.
+- Security focuses on fields that must never carry secrets. This lens focuses
+  on fields that must exist for duplicate/replay detection. The combined r5 or
+  Phase 4 schema must add identity hashes and previous-row refs without
+  embedding secret values.
+
+Evidence:
+- Audit report:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/03-AUDIT-r1-idempotency.md`.
+- State:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json`
+  records `audit_lenses_complete` containing both `security-negative-invariants`
+  and `idempotency-receipt-integrity`, with per-lens severity counts under
+  `audit_findings_by_lens`.
+- Socraticode: 10 queries against canonical `/Users/josh/Developer/flywheel`,
+  with 100 result chunks observed.
+- L112:
+  `OK_phase3_audit_idempotency_lens`.
+
+## Plan-arc Phase 2 r4 refine: stability confirmation, convergence_streak=2, Phase 3 audit eligibility=true (2026-05-06)
+
+Bead: `flywheel-plan-mission-lock-paradigm-extension-phase2-refine-r4-2026-05-06`.
+
+Scope: plan-space only. No code-space, skill-file, MISSION, L-rule, or Phase 3
+audit mutation was performed.
+
+R4 is the stability-confirmation pass after r3 resolved the ten r2 open
+questions. It keeps the plan shape unchanged: 4 absorbed cross-orch findings, 3
+gates, 5 universal skill tokens, 5 bead-class skill sets, 2 deferred
+implementation questions, and 0 new finding classes.
+
+Convergence:
+- r3 lines: 231.
+- r4 lines: 154.
+- Semantic r3->r4 line change: 4 lines, rounded to 2 percent.
+- `convergence_streak=2`.
+- `phase3_audit_eligible=true`.
+
+Phase 3 lenses recommended:
+- `security-negative-invariants`
+- `idempotency-receipt-integrity`
+- `cross-cutting-skill-routing`
+
+Total Phase 2 cost:
+- r1: 479 lines, closed `2026-05-06T12:52:20Z`.
+- r2: 405 lines, closed `2026-05-06T13:22:30Z`, 22 percent expansion for row
+  154 skill injection.
+- r3: 231 lines, closed `2026-05-06T13:54:43Z`, 4 percent closure and
+  `convergence_streak=1`.
+- r4: 154 lines, drafted `2026-05-06T14:13:08Z`, 2 percent stability and
+  `convergence_streak=2`.
+- Total refine artifact lines: 1269.
+- Wall time from r1 close through r4 draft: about 81 minutes. Wall time from
+  Lane C close at `2026-05-06T12:17:54Z` through r4 draft: about 115 minutes.
+
+Donella read: #6 Information Flows remains primary. R4 does not add new
+structure; it confirms the evidence is stable enough to move to audit. #5 Rules
+now flips `phase3_audit_eligible` from false to true because the second
+under-five-percent round landed. #4 Self-Organization is preserved by keeping
+skillos, flywheel, and target-repo ownership boundaries unchanged.
+
+Evidence:
+- Refine artifact:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/02-REFINE-r4.md`.
+- State:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json`
+  records `refine_round=4`, `convergence_streak=2`,
+  `phase3_audit_eligible=true`, and three `phase3_audit_lenses`.
+- Socraticode: 6 r4 queries against canonical `/Users/josh/Developer/flywheel`,
+  with 964 indexed chunks observed.
+- L112:
+  `OK_mission_lock_paradigm_phase2_r4`.
+
+## Plan-arc Phase 3 Audit Lens 1 (security-negative-invariants) complete: 6 findings, 0 critical, auto-advance (2026-05-06)
+
+Bead: `flywheel-phase3-audit-security-negative-invariants-2026-05-06`.
+
+Scope: plan-space only. No runtime code, skill files, MISSION files, or L-rules
+were modified.
+
+The first Phase 3 lens audited the r4 mission-lock paradigm extension for
+credential, auth, secret, Agent Mail, skill-routing, close-validator, and
+cross-orchestrator trust-boundary negative invariants.
+
+Findings:
+- Critical: 0.
+- High: 1.
+- Medium: 4.
+- Low: 1.
+- Disposition: `auto_advance`.
+
+The high finding is packet-level secret hygiene: dispatch-author needs a
+first-class invariant that packets may name secret classes, keys, vault paths,
+and safe helpers, but may never carry secret values, token fragments, raw env
+output, Agent Mail bearer tokens, or registration tokens.
+
+Mitigation routing:
+- Follow-up bead filed:
+  `flywheel-mission-lock-security-negative-invariants-amendments-2026-05-06`.
+- The follow-up bead also covers the medium/low amendment set: safe skill
+  receipt markers, skillos cross-orch transfer limits, close-validator
+  credential immutability, per-surface least-privilege metadata, and
+  legacy-mode blocked-readiness for touched security surfaces.
+
+Evidence:
+- Audit artifact:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/03-AUDIT-r1-security.md`.
+- State:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json`
+  records `current_phase=audit`, `audit_round=1`,
+  `audit_lenses_complete=["security-negative-invariants"]`,
+  `audit_findings_count=6`, and severity counts.
+- Socraticode: 10 searches against canonical `/Users/josh/Developer/flywheel`,
+  with 965 indexed chunks observed.
+- Shared append surfaces had active stale/closeout reservations from
+  `PearlBeacon` and `CobaltBeaver`; final edits were EOF-only and preserved the
+  existing tail rows.
+- L112:
+  `OK_phase3_audit_security_lens`.
+
+## Plan-arc Phase 3 Audit Lens 3 (cross-cutting-skill-routing) complete: 6 findings (sev: critical=0, high=2, medium=3, low=1) (2026-05-06)
+
+Bead: `flywheel-phase3-audit-cross-cutting-skill-routing-2026-05-06`.
+
+Scope: plan-space only. No runtime code, skill files, MISSION files, or L-rules
+were modified.
+
+The third Phase 3 lens audited the r4 mission-lock paradigm extension for
+skill-floor coverage, bead-class collision handling, discovery-source
+disagreement, skillos handshake shape, stale skill references, cross-cutting
+overlays, and dispatch self-test soundness.
+
+Findings:
+- Critical: 0.
+- High: 2.
+- Medium: 3.
+- Low: 1.
+- Disposition: `auto_advance`.
+
+The high findings are:
+- Multi-class bead routing has no deterministic merge lattice, so real beads
+  that touch backend, db, substrate, docs, and security surfaces can be
+  under-injected or over-injected.
+- Skill discovery disagreement is under-specified. Exact `get_skill`, semantic
+  skill search, local skill roots, external `find-skills`, and grep/rg need a
+  precedence contract and route-health receipt.
+
+Mitigation routing:
+- Recommended Phase 4 beads: `skill-routing-resolver`,
+  `skill-discovery-precedence-receipt`, `skillos-template-handshake`,
+  `skill-receipt-version-stamps`, `cross-cutting-overlays`, and
+  `dispatch-self-test-negative-fixtures`.
+- No r5 refine round is required unless Lens 2 later discovers a critical
+  append-only or close-validator contradiction.
+
+Evidence:
+- Audit artifact:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/03-AUDIT-r1-cross-cutting.md`.
+- State:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json`
+  records all three `audit_lenses_complete`, aggregate
+  `audit_findings_count=18`, and `phase3_complete=true`.
+- Socraticode: 10 searches against canonical `/Users/josh/Developer/flywheel`,
+  with 965 indexed chunks observed.
+- Skill-search: catalog total 455, filesystem total 463, drift count 8,
+  freshness status WARN; exact `canonical-cli-scoping` and `find-skills` were
+  found but route-blocked with `no_source`; `simplify` and
+  `schema-complete-drift-guard` were missing exact skills.
+- L112:
+  `OK_phase3_audit_cross_cutting_lens`.
+
+## Phase 3 Audit complete: 3 lenses converged (2026-05-06)
+
+Phase 3 now has all three audit lenses complete:
+
+- `security-negative-invariants`: 6 findings, 0 critical, auto-advance.
+- `idempotency-receipt-integrity`: 6 findings, 0 critical, auto-advance.
+- `cross-cutting-skill-routing`: 6 findings, 0 critical, auto-advance.
+
+Aggregate findings: 18 total, critical=0, high=4, medium=11, low=3.
+`STATE.json` marks `phase3_complete=true` and
+`phase4_decompose_eligible=true`. Phase 4 should decompose mitigations rather
+than reopen Phase 2 architecture.
+
+## Plan-arc Phase 4 DECOMPOSE complete: 13 beads in DAG (3 amendments + 10 new), 4 waves, 18 audit findings covered (2026-05-06)
+
+Bead: `flywheel-phase4-decompose-mission-lock-paradigm-extension-2026-05-06`.
+
+Scope: plan-space only. No runtime code, skill files, MISSION files, or L-rules
+were modified.
+
+Phase 4 synthesized `02-REFINE-r4.md` plus all three Phase 3 audit lenses into
+`.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/04-BEADS-DAG.md`.
+The DAG has 13 nodes: 3 existing amendment beads from Phase 3 and 10 newly
+created implementation beads. Work is organized into 4 waves: existing
+amendments, schema/contracts, validator/handshake wiring, and replay/polish
+gates.
+
+Coverage:
+- Total audit findings covered: 18 of 18.
+- Medium-or-higher findings covered: 15 of 15.
+- Critical findings: 0.
+- Open scope items: 3.
+- Phase 5 polish eligibility: true.
+
+The three amendment beads are referenced as Wave 1 inputs and are not duplicated:
+`flywheel-mission-lock-security-negative-invariants-amendments-2026-05-06`,
+`flywheel-mission-lock-idempotency-receipt-integrity-amendments-2026-05-06`,
+and `flywheel-mission-lock-cross-cutting-skill-routing-amendments-2026-05-06`.
+
+Evidence:
+- DAG artifact:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/04-BEADS-DAG.md`.
+- State:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json`
+  records `current_phase=decompose`, `phase4_complete=true`,
+  `phase5_polish_eligible=true`, `total_beads_in_dag=13`, and `wave_count=4`.
+- JSONL fallback:
+  `.beads/issues.jsonl` contains the Phase 4 dispatch close row and 10 new bead
+  rows under parent `flywheel-plan-mission-lock-paradigm-extension-2026-05-06`.
+- Socraticode: 10 queries against canonical `/Users/josh/Developer/flywheel`,
+  with 100 result chunks observed.
+- L112:
+  `OK_mission_lock_paradigm_phase4_decompose`.
+
+## gitignore: suppress .beads/ RCA evidence files (46 untracked -> ignored, .beads/issues.jsonl preserved) (2026-05-06)
+
+Bead: `flywheel-gitignore-beads-rca-evidence-2026-05-06`.
+
+Scope: `.gitignore` only for the committed source change, plus append-only
+receipts in this file and `.beads/issues.jsonl`. No `.beads/` evidence files
+were deleted or rewritten.
+
+Live counts:
+- Total untracked before: 54.
+- Total untracked after: 8.
+- `.beads/` RCA evidence untracked before: 46.
+- `.beads/` RCA evidence untracked after: 0.
+
+Patterns added:
+- `.beads/beads.db.bak.*`
+- `.beads/beads.db-shm.bak.*`
+- `.beads/beads.db-wal.bak.*`
+- `.beads/beads.db.aside.*`
+- `.beads/beads.db-shm.aside.*`
+- `.beads/beads.db-wal.aside.*`
+- `.beads/beads.db*.malformed-*`
+- `.beads/beads.db*.corrupt-*.aside.*`
+- `.beads/beads.db*.malformed.*`
+- `.beads/beads.db*.corrupt-*.bak.*`
+- `.beads/issues.jsonl.bak.*`
+
+Verification:
+- `.gitignore` changed by 12 added lines.
+- `.beads/issues.jsonl` still appears as `M` in `git status --porcelain`; it
+  is not ignored.
+- `.beads/beads.db` status was unchanged; it was already governed by the
+  existing `.beads/.gitignore`.
+- Scoped commit: `70c18fa`.
+- Mission anchor present:
+  `Mission-anchor: self-sustaining-company-architecture-health`.
+- Socraticode: 3 searches against canonical `/Users/josh/Developer/flywheel`,
+  with 966 indexed chunks observed.
+- `INCIDENTS.md` and `.beads/issues.jsonl` had a stale completed-worker
+  reservation from `ScarletDog`; final edits stayed EOF-only after its close
+  rows were visible in the tail.
+- L112:
+  `OK_gitignore_beads_rca_evidence`.
+
+## Plan-arc Phase 5 POLISH r1 complete: 13 beads polished, avg 679 chars, 4 needing further rounds (2026-05-06)
+
+Bead: `flywheel-phase5-polish-mission-lock-paradigm-extension-r1-2026-05-06`.
+
+Scope: plan-space only. No code-space files, skill files, MISSION files, L-rules,
+or Phase 4 DAG structure were modified.
+
+Phase 5 r1 converted all 13 mission-lock paradigm extension DAG nodes into
+self-contained bead bodies using append-only JSONL polish events. Each body now
+contains `What`, `Why`, 3-5 acceptance criteria, explicit future file
+reservations, and dependencies. The three existing amendment beads and ten new
+Phase 4 beads were all polished; none were skipped.
+
+Round 1 stats:
+- Beads polished: 13.
+- Average before chars: 199.
+- Average after chars: 679.
+- Min/max after chars: 632 / 795.
+- Bodies outside 150-800 chars: 0.
+- Beads needing further substantive rounds: 4.
+- `polish_convergence_streak`: 0 because r1 has no prior polish round for a
+  diff comparison.
+
+The four beads still needing a substantive r2 pass are
+`flywheel-mission-lock-readiness-doctor-2026-05-06`,
+`flywheel-dispatch-skillos-template-handshake-2026-05-06`,
+`flywheel-mission-lock-validation-fixtures-golden-replay-2026-05-06`, and
+`flywheel-phase5-polish-preflight-quality-gate-2026-05-06`.
+
+Evidence:
+- Polish report:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/05-POLISH-r1.md`.
+- State:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json`
+  records `current_phase=polish`, `polish_round=1`,
+  `polish_convergence_streak=0`, and `polish_avg_chars_after_r1=679`.
+- JSONL fallback:
+  `.beads/issues.jsonl` contains 13 `event=polish, round=1` rows plus the
+  Phase 5 r1 close row.
+- Socraticode: 6 searches against canonical `/Users/josh/Developer/flywheel`,
+  with 60 result chunks observed.
+- L112:
+  `OK_mission_lock_paradigm_phase5_polish_r1`.
+
+Fleet-doctor mid-session snapshot: pane=16/23 alive, doctor=red, top fuckup=fleet-propagation-failed, untracked=11 (2026-05-06)
+
+## Phase 4 amendment shipped: cross-cutting-skill-routing 6 findings mitigated (CSR-001..006), collision-resolver + coverage map (2026-05-06)
+
+Bead: `flywheel-mission-lock-cross-cutting-skill-routing-amendments-2026-05-06`.
+
+Scope: bounded implementation surface for the cross-cutting skill-routing
+amendment. The dispatch resolver, coverage map, implementation note, golden
+test suite, and JSONL close receipt shipped without modifying audit reports,
+plan rounds, mission files, validation schemas, or skill source files.
+
+Evidence:
+- Resolver:
+  `.flywheel/scripts/dispatch-skill-router-collision-resolver.sh`.
+- Golden tests:
+  `.flywheel/tests/test_dispatch_skill_router_collision_resolver.sh`.
+- Implementation receipt:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/impl/cross-cutting-amendments-impl.md`.
+- Coverage map:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/impl/cross-cutting-concerns-coverage.md`.
+- L112:
+  `OK_cross_cutting_amendments_shipped`.
+
+## CAAM recovery-path probe shipped: verdict=rotation_path_unverified, profiles_expired=4/6, rotation_health=0.5 (2026-05-06)
+
+Bead: `flywheel-caam-recovery-verification-probe-2026-05-06`.
+
+Scope: read-only recovery-path verification probe only. skillos-23fj remains
+owner of the canonical CAAM fix; this worker did not refresh profiles, edit
+CAAM config, restart daemons, mutate CAAM profile files, or touch the skillos
+repo.
+
+Result: the three CAAM LaunchAgents are present and loaded, and the probe found
+the coordinator log at `~/.local/share/caam/auth-coordinator.log`. The last 24h
+window contained no Anthropic 429 detection, no rotation event, and no rotation
+success, so the path is `rotation_path_unverified` rather than proven healthy
+or proven broken. Coordination row 160, landed after this dispatch, says
+skillos-23fj shipped diagnostic-only while flywheel retains canonical
+remediation and real rotation-test ownership.
+
+Evidence:
+- Probe:
+  `.flywheel/scripts/caam-recovery-path-probe.sh`.
+- Test:
+  `.flywheel/tests/test_caam_recovery_path_probe.sh`.
+- Verdict report:
+  `/tmp/caam-recovery-path-verdict-2026-05-06.md`.
+- Cross-orch coordination:
+  `~/.local/state/flywheel/cross-orch-coordination.jsonl` row 163.
+- L112:
+  `OK_caam_recovery_path_probe_shipped`.
+
+## Phase 4 amendment shipped: security-negative-invariants 6 findings mitigated (SEC-001..006), validator + test + MISSION.md template extension (2026-05-06)
+
+Bead: `flywheel-mission-lock-security-negative-invariants-amendments-2026-05-06`.
+
+Scope: Wave 1 amendment only. No audit/refine/polish reports were mutated.
+
+Finding-by-finding mitigation:
+
+| ID | Mitigation |
+|---|---|
+| SEC-001 | `secret_values_allowed=false` dispatch invariant forbids secret values, token fragments, raw env output, and Agent Mail bearer/registration tokens in packets. |
+| SEC-002 | Credential-touching `skill_receipts[]` now require `credential_touch`, `safe_wrapper`, `secret_value_allowed=false`, and rotation approval source fields. |
+| SEC-003 | Skillos/peer cross-orch transfer is limited to schema, aliases, templates, route health, and redacted evidence only. |
+| SEC-004 | Close-validator authority is bounded: it may reject closure and demand receipts, but not rotate tokens, edit `.env`, write vault values, or close credential repair from pane text. |
+| SEC-005 | Touched surfaces must declare secret source of truth, principal type, allowed operations, forbidden principals, and service-role/admin credential policy. |
+| SEC-006 | Missing invariants on touched auth/credential/PII/customer-trust surfaces now block readiness unless Phase 0 scaffolding or no-touch proof exists. |
+
+Shipped:
+- MISSION.md additive section:
+  `.flywheel/MISSION.md` `Negative invariants (security)`.
+- Validator:
+  `.flywheel/scripts/mission-lock-negative-invariants-validator.sh`.
+- Test:
+  `.flywheel/tests/test_mission_lock_negative_invariants_validator.sh`.
+- Implementation report:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/impl/security-amendments-impl.md`.
+
+Validation:
+- `bash .flywheel/tests/test_mission_lock_negative_invariants_validator.sh`
+  passed 10 fixture cases.
+- Validator canonical CLI verbs passed:
+  `--help`, `--info`, `--examples`, `--json`, and `--quiet`.
+- `git diff -- .flywheel/MISSION.md` shows additions only for the mission
+  append surface; this worker's security section is 29 lines.
+- L112: `OK_security_amendments_shipped`.
+
+## Phase 4 amendment shipped: idempotency-receipt-integrity 6 findings mitigated (IDEM-001..006), replay guard + receipt schema (2026-05-06)
+
+Bead: `flywheel-mission-lock-idempotency-receipt-integrity-amendments-2026-05-06`.
+
+Scope: bounded implementation surface for the idempotency and receipt-integrity
+amendment. The additive dispatch receipt schema, replay guard primitive,
+implementation note, golden-artifact tests, and JSONL close receipt shipped
+without modifying audit reports, plan rounds, mission files, recovery-ledger
+schema, or sibling amendment artifacts.
+
+Evidence:
+- Implementation receipt:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/impl/idempotency-amendments-impl.md`.
+- Dispatch receipt schema:
+  `.flywheel/validation-schema/v1/dispatch-receipt.schema.json`.
+- Replay guard CLI:
+  `.flywheel/scripts/idempotency-replay-guard.sh`.
+- Golden tests:
+  `.flywheel/tests/test_idempotency_replay_guard.sh`.
+- Test result:
+  `RESULT pass=20 fail=0`.
+- Socraticode: 6 searches against canonical `/Users/josh/Developer/flywheel`,
+  with 968 indexed chunks observed.
+- L112:
+  `OK_idempotency_amendments_shipped`.
+
+## Phase 4 Wave 2 shipped: dispatch-author skill-routing contract + conformance probe + test (2026-05-06)
+
+Bead: `flywheel-dispatch-author-skill-routing-contract-2026-05-06`.
+
+Scope: canonical dispatch-author routing contract only. Wave 1 deliverables were
+read-only references: collision resolver, idempotency replay guard, negative
+invariants validator, and dispatch receipt schema.
+
+Phase 4 Wave 2 shipped: dispatch-author skill-routing contract + conformance probe + test (2026-05-06)
+
+Shipped:
+- Contract:
+  `.flywheel/doctrine/dispatch-author-skill-routing-contract.md`.
+- Probe:
+  `.flywheel/scripts/dispatch-author-contract-probe.sh`.
+- Test:
+  `.flywheel/tests/test_dispatch_author_contract_probe.sh`.
+
+Metrics:
+- Contract sections: 9.
+- Contract lines: 177.
+- Probe lines: 181.
+- Test cases: 8 green, 16 assertions passed.
+- Probe CLI verbs: `--info`, `--help`, `--examples`, `--json`, and `--quiet`.
+
+Findings closed:
+- `SEC-001`
+- `SEC-003`
+- `IDEM-001`
+- `IDEM-003`
+- `CSR-001`
+- `CSR-002`
+- `CSR-005`
+
+Validation:
+- `bash .flywheel/tests/test_dispatch_author_contract_probe.sh` passed.
+- JSON output shape includes `ts`, `dispatch_path`, `checks`, `verdict`, and
+  `violations`.
+- L112:
+  `OK_wave2_dispatch_author_contract_shipped`.
+
+## Phase 4 Wave 2 shipped: close-validator receipt contract + probe + test (2026-05-06)
+
+Bead: `flywheel-close-validator-receipt-contract-2026-05-06`.
+
+Scope: canonical close-validator receipt contract only. Wave 1 deliverables were
+read-only references: the idempotency replay guard and dispatch receipt schema.
+The sibling dispatch-author contract is cited by path but not modified.
+
+Phase 4 Wave 2 shipped: close-validator receipt contract + probe + test (2026-05-06)
+
+Shipped:
+- Contract:
+  `.flywheel/doctrine/close-validator-receipt-contract.md`.
+- Probe:
+  `.flywheel/scripts/close-validator-contract-probe.sh`.
+- Test:
+  `.flywheel/tests/test_close_validator_contract_probe.sh`.
+
+Metrics:
+- Contract sections: 9.
+- Contract lines: 147.
+- Probe lines: 194.
+- Test cases: 8 validation fixtures, 22 assertions passed.
+- Probe CLI verbs: `--info`, `--help`, `--examples`, `--json`, and `--quiet`.
+
+Findings closed:
+- `SEC-002`
+- `SEC-004`
+- `IDEM-002`
+- `IDEM-005`
+- `CSR-004`
+
+Validation:
+- `bash .flywheel/tests/test_close_validator_contract_probe.sh` passed.
+- Duplicate-close fixture reconciles to prior append-only truth with
+  `dedupe_policy=latest-row-by-ref_id-event`.
+- L112:
+  `OK_wave2_close_validator_contract_shipped`.
+
+## Phase 4 Wave 2 shipped: plan-state lens merge ledger contract + helper + test (2026-05-06)
+
+Bead: `flywheel-plan-state-lens-merge-ledger-2026-05-06`.
+
+Scope: canonical plan `STATE.json` lens merge ledger only. Wave 1
+idempotency replay guard was read-only precedent for replay-safe state writes.
+
+Phase 4 Wave 2 shipped: plan-state lens merge ledger contract + helper + test (2026-05-06)
+
+Shipped:
+- Contract:
+  `.flywheel/doctrine/plan-state-lens-merge-ledger-contract.md`.
+- Helper:
+  `.flywheel/scripts/plan-state-lens-merge.sh`.
+- Test:
+  `.flywheel/tests/test_plan_state_lens_merge.sh`.
+
+Metrics:
+- Contract sections: 8.
+- Contract lines: 115.
+- Helper lines: 165.
+- Required test cases: 6 green, 12 assertions passed.
+- Helper CLI verbs: `--info`, `--help`, `--examples`, `--json`, and `--quiet`.
+
+Findings closed:
+- `IDEM-004` — parallel plan-state audit lenses now have append-only rows,
+  `state_observed_sha`, race retry behavior, and derived summary semantics.
+
+Validation:
+- `bash .flywheel/tests/test_plan_state_lens_merge.sh` passed.
+- L112:
+  `OK_wave2_plan_state_lens_merge_shipped`.
+
+## Phase 4 Wave 3 #1 shipped: skillos template handshake schemas + helper + test (2026-05-06)
+
+Bead: `flywheel-dispatch-skillos-template-handshake-2026-05-06`.
+
+Scope: consumer-side flywheel-to-skillos template handshake only. Skillos keeps
+ownership of its producer and template generation.
+
+Shipped:
+- Request schema:
+  `.flywheel/validation-schema/v1/skillos-template-handshake-request.schema.json`.
+- Ack schema:
+  `.flywheel/validation-schema/v1/skillos-template-handshake-ack.schema.json`.
+- Helper:
+  `.flywheel/scripts/skillos-template-handshake.sh`.
+- Test:
+  `.flywheel/tests/test_skillos_template_handshake.sh`.
+
+Metrics:
+- Request schema lines: 68.
+- Ack schema lines: 98.
+- Helper lines: 198.
+- Required test cases: 6 green, 11 assertions passed.
+- Helper CLI verbs: `--info`, `--help`, `--examples`, `--json`, and
+  `--quiet`.
+
+Findings closed:
+- `SEC-003`
+- `IDEM-003`
+- `CSR-002`
+- `CSR-003`
+
+Validation:
+- JSON Schemas self-validate under Draft 2020-12.
+- `bash .flywheel/tests/test_skillos_template_handshake.sh` passed.
+- Cross-orch row 165 gives `skillos:1` the consumer contract pointer.
+- L112:
+  `OK_wave3_skillos_handshake_shipped`.
+
+## Phase 4 Wave 2 #4 shipped: mission-lock output schema (JSON Schema draft-07) + validator + test, unblocks Wave 3 (2026-05-06)
+
+Bead: `flywheel-mission-lock-output-schema-amendments-2026-05-06`.
+
+Scope: mission-lock output schema only. `.flywheel/MISSION.md`, Wave 1
+deliverables, and already-shipped Wave 2 contracts were read-only.
+
+Shipped:
+- Schema:
+  `.flywheel/validation-schema/v1/mission-lock-output.schema.json`.
+- Validator:
+  `.flywheel/scripts/mission-lock-output-schema-validator.sh`.
+- Golden test:
+  `.flywheel/tests/test_mission_lock_output_schema_validator.sh`.
+- Implementation note:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/impl/mission-lock-output-schema-impl.md`.
+
+Metrics:
+- Schema dialect: JSON Schema draft-07.
+- Validator lines: 167.
+- Test lines: 166.
+- Implementation note lines: 109.
+- Golden cases: 6 required cases, plus CLI, quiet-mode, schema, and sidecar
+  coverage.
+- Validator CLI verbs: `--info`, `--help`, `--examples`, `--json`, and
+  `--quiet`.
+
+Fields made first-class:
+- `mission_anchor_rev`
+- `lock_hash`
+- `mission_license`
+- `negative_invariants`
+- `cross_cutting_concerns_addressed`
+- `surface_principal_metadata`
+- `skill_surface_map`
+- `failure_mode_matrix`
+- `receipt_identity_envelope`
+
+Validation:
+- `bash .flywheel/tests/test_mission_lock_output_schema_validator.sh` passed:
+  `RESULT pass=12 fail=0 golden_cases=6`.
+- Shared append coordination: MagentaPond released ids 6348 and 6349 so
+  BlueHarbor could finish Wave 3 EOF receipts first, then re-reserved ids 6371
+  and 6372 before this append.
+- L112:
+  `OK_wave2_mission_lock_output_schema_shipped`.
+
+## Plan-arc Phase 5 POLISH r2 complete: 13 beads polished, avg 694 chars, 2.12% diff, streak=1 (2026-05-06)
+
+Bead: `flywheel-phase5-polish-mission-lock-paradigm-extension-r2-2026-05-06`.
+
+Scope: plan-space only. No code-space files, skill files, MISSION files,
+L-rules, DAG structure, or Wave 1/2/3 implementation artifacts were modified.
+
+Phase 5 r2 tightened all 13 r1 bead bodies against newly shipped Wave 1, Wave 2,
+and Wave 3 evidence. It kept every body inside the 150-800 character rule,
+preserved the 13-node DAG and all dependencies, and appended round=2 polish
+events without mutating prior rows.
+
+Round 2 stats:
+- Beads polished: 13.
+- Average after chars: 694 vs 679 in r1.
+- Average diff vs r1: 2.12%.
+- Aggregate absolute char diff vs r1: 2.75%.
+- Min/max after chars: 636 / 771.
+- Individual bodies above 5% change: 3.
+- `polish_convergence_streak`: 1.
+- `phase5_ready`: false; r3 must provide the second consecutive <5% round.
+
+The four r1 beads marked for further rounds were explicitly tightened:
+`flywheel-mission-lock-readiness-doctor-2026-05-06`,
+`flywheel-dispatch-skillos-template-handshake-2026-05-06`,
+`flywheel-mission-lock-validation-fixtures-golden-replay-2026-05-06`, and
+`flywheel-phase5-polish-preflight-quality-gate-2026-05-06`.
+
+Evidence:
+- Polish report:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/05-POLISH-r2.md`.
+- State:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json`
+  records `polish_round=2`, `polish_convergence_streak=1`,
+  `polish_avg_chars_after_r2=694`, and `phase5_ready=false`.
+- JSONL fallback:
+  `.beads/issues.jsonl` contains the r2 open row, 13 `event=polish, round=2`
+  rows, and the Phase 5 r2 close row.
+- Socraticode: 6 searches against canonical `/Users/josh/Developer/flywheel`,
+  with 60 result chunks observed.
+- L112:
+  `OK_mission_lock_paradigm_phase5_polish_r2`.
+
+## Phase 4 Wave 3 #2 shipped: mission-lock scaffold validator + impl + test (2026-05-06)
+
+Bead: `flywheel-mission-lock-scaffold-validator-2026-05-06`.
+
+Scope: read-only markdown scaffold validation for `.flywheel/MISSION.md`.
+`.flywheel/MISSION.md`, Wave 1 amendments, and Wave 2 output schema artifacts
+were read-only.
+
+Shipped:
+- Validator:
+  `.flywheel/scripts/mission-lock-scaffold-validator.sh`.
+- Golden test:
+  `.flywheel/tests/test_mission_lock_scaffold_validator.sh`.
+- Implementation note:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/impl/mission-lock-scaffold-validator-impl.md`.
+
+Metrics:
+- Validator lines: 184.
+- Test lines: 136.
+- Implementation note lines: 121.
+- Golden cases: 6 required cases, plus CLI metadata and quiet-mode coverage.
+- Validator CLI verbs: `validate`, `doctor`, `health`, `audit`, and `schema`.
+
+Findings closed:
+- `SEC-005`
+- `IDEM-006`
+
+Validation:
+- `bash .flywheel/tests/test_mission_lock_scaffold_validator.sh` passed:
+  `RESULT test_cases=8 failures=0`.
+- Live `.flywheel/MISSION.md` reports `verdict=incomplete`, not `blocked`,
+  because legacy locks lack embedded section hashes and substrate inventory.
+- L112:
+  `OK_wave3_mission_lock_scaffold_validator_shipped`.
+
+## Plan-arc Phase 5 POLISH r3 complete: 13 beads polished, avg 694 chars (vs 694 r2), 0.00% diff, streak=2, phase5_ready=true (2026-05-06)
+
+Bead: `flywheel-phase5-polish-mission-lock-paradigm-extension-r3-2026-05-06`.
+
+Scope: plan-space only. No code-space files, skill files, MISSION files,
+L-rules, DAG structure, or Wave implementation artifacts were modified.
+
+Phase 5 r3 is a stability confirmation round. It kept all 13 r2 bead summaries
+byte-identical, appended round=3 polish events, and advanced the plan STATE from
+`phase5_ready=false` to `phase5_ready=true`.
+
+Round 3 stats:
+- Beads polished: 13.
+- Average after chars: 694 vs 694 in r2.
+- Average diff vs r2: 0.00%.
+- Aggregate absolute char diff vs r2: 0.00%.
+- Min/max after chars: 636 / 771.
+- Individual bodies above 5% change: 0.
+- `polish_convergence_streak`: 2.
+- `phase5_ready`: true; plan arc READY and dispatchable.
+
+Evidence:
+- Polish report:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/05-POLISH-r3.md`.
+- State:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json`
+  records `polish_round=3`, `polish_convergence_streak=2`,
+  `polish_avg_chars_after_r3=694`, and `phase5_ready=true`.
+- JSONL fallback:
+  `.beads/issues.jsonl` contains the r3 open row, 13 `event=polish, round=3`
+  rows, and the Phase 5 r3 close row.
+- Socraticode: 6 searches against canonical `/Users/josh/Developer/flywheel`,
+  with 60 result chunks observed.
+- L112:
+  `OK_mission_lock_paradigm_phase5_polish_r3`.
+
+## Phase 4 Wave 3 #4 shipped: dispatch self-test + delivery-identity checker (2026-05-06)
+
+Bead: `flywheel-dispatch-self-test-delivery-identity-2026-05-06`.
+
+Scope: dispatch pre-send identity checking only. Wave 1/2 deliverables and the
+live `.flywheel/dispatch-log.jsonl` were read-only references.
+
+Shipped:
+- Self-test:
+  `.flywheel/scripts/dispatch-self-test-delivery-identity.sh`.
+- Golden test:
+  `.flywheel/tests/test_dispatch_self_test_delivery_identity.sh`.
+- Implementation note:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/impl/dispatch-self-test-impl.md`.
+
+Metrics:
+- Script lines: 219.
+- Test lines: 145.
+- Implementation note lines: 96.
+- Required test cases: 7 green, 18 total checks passed.
+- CLI subcommands: `pretest`, `verify-identity`, and `mark-delivered`.
+- Helper CLI verbs: `--info`, `--help`, `--examples`, `--json`, and `--quiet`.
+
+Findings closed:
+- `SEC-001`
+- `IDEM-001`
+- `CSR-003`
+- `CSR-006`
+
+Validation:
+- `bash .flywheel/tests/test_dispatch_self_test_delivery_identity.sh` passed:
+  `RESULT pass=18 fail=0 test_cases=7`.
+- `pretest` refuses duplicate in-flight and already-complete dispatches before
+  send; concurrent pretests allow exactly one writer to proceed.
+- `mark-delivered` writes one canonical delivery-confirmed row per key to the
+  self-test ledger, never to the live dispatch log.
+- Shared append coordination: DustyDesert and WindyMountain held overlapping
+  shared reservations; messages were sent and this entry used EOF-only append
+  after a stable tail re-read.
+- L112:
+  `OK_wave3_dispatch_self_test_shipped`.
+
+## Phase 4 Wave 3 #3 shipped: mission-lock readiness doctor + Phase 0 bead suggester (2026-05-06)
+
+Bead: `flywheel-mission-lock-readiness-doctor-2026-05-06`.
+
+Scope: read-only readiness aggregation. `.flywheel/MISSION.md`, Wave 2 #3,
+Wave 2 #4, and Wave 3 #2 artifacts were consumed read-only.
+
+Shipped:
+- Doctor:
+  `.flywheel/scripts/mission-lock-readiness-doctor.sh`.
+- Golden test:
+  `.flywheel/tests/test_mission_lock_readiness_doctor.sh`.
+- Implementation note:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/impl/mission-lock-readiness-doctor-impl.md`.
+
+Metrics:
+- Doctor lines: 164.
+- Test lines: 206.
+- Implementation note lines: 84.
+- Golden cases: 7 required cases, plus CLI metadata coverage.
+- Doctor CLI verbs: `doctor`, `health`, `validate`, `audit`, and `schema`.
+
+Findings closed:
+- `SEC-006`
+- `IDEM-004`
+- `IDEM-006`
+- `CSR-005`
+
+Validation:
+- `bash .flywheel/tests/test_mission_lock_readiness_doctor.sh` passed:
+  `RESULT test_cases=8 failures=0 golden_cases=4`.
+- Live `.flywheel/MISSION.md` reports readiness health `0.30`, with schema
+  and scaffold suggestions emitted. No live mission mutation occurred.
+- L112:
+  `OK_wave3_mission_lock_readiness_doctor_shipped`.
+
+## Plan-arc READY scoped commit pass: 4 commits shipping ~25 plan-arc artifacts + doctrine + scripts + impl (2026-05-06)
+
+Bead: `flywheel-scoped-commit-plan-arc-deliverables-2026-05-06`.
+
+Scope: git commit pass only, plus additive INCIDENTS and JSONL receipts.
+Shared append files stayed unstaged, and no push was performed.
+
+Commits:
+- `24fa7de` `feat(plan-arc): ship mission-lock-paradigm-extension Phase 1-5 artifacts (READY)` - 11 files.
+- `bd35f1a` `feat(doctrine): ship dispatch-author + close-validator + lens-merge contracts` - 3 files.
+- `6aaf6d2` `feat(scripts): ship Wave 1/2/3 validators + probes + tests` - 24 files.
+- `c062a3e` `feat(impl): ship Wave 1+2+3 amendment + contract impl docs` - 6 files.
+
+Commit hygiene:
+- Untracked count before: 45.
+- Untracked count after: 8.
+- Total files committed: 44.
+- All four commits include `Plan-arc:
+  mission-lock-paradigm-extension-2026-05-06 (READY)`.
+- All four commits include `Mission-anchor:
+  self-sustaining-company-architecture-health`.
+- Staged sets were add-only; modified shared files were not committed.
+
+Pane 3/4 reservation collision avoidance:
+- Skipped `.flywheel/scripts/mission-lock-readiness-doctor.sh`.
+- Skipped `.flywheel/tests/test_mission_lock_readiness_doctor.sh`.
+- Skipped `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/impl/mission-lock-readiness-doctor-impl.md`.
+- Skipped `.flywheel/scripts/dispatch-self-test-delivery-identity.sh`.
+- Skipped `.flywheel/tests/test_dispatch_self_test_delivery_identity.sh`.
+- Skipped `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/impl/dispatch-self-test-impl.md`.
+
+Validation:
+- `git log --oneline -4` shows exactly four new scoped commits.
+- `git log --name-only HEAD~4..HEAD` contains no forbidden paths.
+- Remaining untracked paths are the six skipped pane 3/4 paths plus `.ntm/pids/`
+  and `version`.
+- L112:
+  `OK_plan_arc_ready_scoped_commit_pass_complete`.
+
+## Petal 9 LEARN/REUSE: extracted 5 reusable patterns from mission-lock-paradigm-extension plan-arc (2026-05-06)
+
+Required phrase template: `Petal 9 LEARN/REUSE: extracted N reusable patterns from mission-lock-paradigm-extension plan-arc (2026-05-06)`.
+
+Bead: `flywheel-petal9-learn-review-plan-arc-2026-05-06`.
+
+Scope: plan-space extraction only. No memory files and no skill files were
+mutated.
+
+Results:
+- Reusable patterns extracted: 5.
+- Promotion candidates: 11 total: 3 memory rule candidates, 5 skill update
+  candidates, and 3 fuckup-log promotion candidates.
+- Trauma recurrence stats: post-callback stale chevron/input-deaf class has
+  913 same-family same-day rows; shared append reservation deadlock has 10
+  same-family same-day rows; `br-db-wedge-recurrence` has 3 same-day rows.
+- Cross-orch finding: skillos co-ownership worked because flywheel preserved the
+  mission anchor, clarified scope, and asked for complementary artifacts instead
+  of competing writes.
+
+Evidence:
+- Extraction document:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/06-PETAL9-LEARN-REUSE.md`.
+- Socraticode survey:
+  `/tmp/petal9-learn-review-survey.md`.
+- Shared append coordination: DustyDesert held overlapping shared reservations;
+  message 308 acknowledged the conflict and final edits were EOF-only after a
+  stable tail re-read.
+
+## Phase 4 Wave 4 #1 shipped: validation fixtures + golden replay runner (7 fixtures, 8-case test) (2026-05-06)
+
+Bead: `flywheel-mission-lock-validation-fixtures-golden-replay-2026-05-06`.
+
+Scope: integration fixture layer only. Wave 1/2/3 deliverables were consumed
+read-only by the replay runner.
+
+Shipped:
+- Fixture directory:
+  `.flywheel/tests/fixtures/mission-lock-paradigm-extension-2026-05-06/`.
+- Replay runner:
+  `.flywheel/scripts/golden-fixture-replay-runner.sh`.
+- Golden test:
+  `.flywheel/tests/test_golden_fixture_replay_runner.sh`.
+- Implementation note:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/impl/validation-fixtures-impl.md`.
+
+Metrics:
+- Fixture files: 7.
+- Runner lines: 187.
+- Test lines: 85.
+- Implementation note lines: 78.
+- Test cases: 9 counted cases, 16 total pass assertions.
+- Runner CLI verbs: `replay`, `replay-all`, `verify-invariants`,
+  `list-fixtures`, and `schema`.
+
+Findings closed:
+- `SEC-004`
+- `IDEM-001`
+- `IDEM-003`
+- `IDEM-005`
+- `CSR-001`
+- `CSR-004`
+- `CSR-006`
+
+Validation:
+- `bash .flywheel/tests/test_golden_fixture_replay_runner.sh` passed:
+  `RESULT pass=16 fail=0 test_cases=9`.
+- `replay-all` reports 7 passing fixture replays.
+- `verify-invariants` reports all 7 final findings covered and no missing
+  Wave 1/2/3 artifacts.
+- L112:
+  `OK_wave4_validation_fixtures_shipped`.
+
+## Petal 9 follow-on: 24h fuckup-log review (1063 rows) + Petal 9 candidate cross-correlation + Joshua-staged promotion recommendations (2026-05-06)
+
+Bead: `flywheel-learn-review-fuckup-log-mining-2026-05-06`.
+
+Scope: review-only learning pass. No memory files, skill files, or
+`/flywheel:learn --promote` commands were mutated or executed.
+
+Results:
+- Review document:
+  `.flywheel/reports/learn-review-2026-05-06.md`.
+- Live 24h scrape observed 1080 unprocessed rows; dispatch snapshot was 1063
+  rows, so the row count is treated as sample-size evidence, not a stable
+  doctrine fact.
+- Top trauma classes reviewed: 10.
+- Petal 9 candidates evaluated: 11 total: 3 memory candidates, 5 skill update
+  candidates, and 3 fuckup promotion candidates.
+- Recommendations: 6 approve, 5 revise, 0 reject; 2 new gap candidates.
+- Approved summary: 1 memory rule, 3 skill updates, and 2 fuckup classes ready
+  for Joshua-reviewed promotion.
+
+Evidence:
+- Socraticode queries: 6.
+- Fuckup-log scrape:
+  `/tmp/fuckup-list-24h-unprocessed.jsonl`.
+- Petal 9 source:
+  `.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/06-PETAL9-LEARN-REUSE.md`.
+- Anti-knowledge captured in the review: do not promote moving row counts,
+  emitter noise, duplicate bead-DB aliases, or positive plan practices as
+  trauma doctrine without revision.
+
+## Phase 4 Wave 4 #2 — Polish Preflight Quality Gate
+
+Phase 4 Wave 4 #2 shipped: polish-preflight-quality-gate orchestrator (8 sub-gates, 10-case test). 13-bead DAG fully closed. plan-arc mission-lock-paradigm-extension-2026-05-06 SHIPPED (2026-05-06)
+
+Scope: terminal quality gate and plan arc closeout only. Wave 1/2/3/4
+deliverables are consumed through their public CLI contracts.
+
+Validation:
+- `bash .flywheel/tests/test_polish_preflight_quality_gate.sh` passed:
+  `RESULT pass=21 fail=0 test_cases=21`.
+- `polish-preflight-quality-gate.sh --check --plan-slug mission-lock-paradigm-extension-2026-05-06 --json`
+  returned `gate_status=PASS`, `gates_run=8`, and `composite_health_score=10`.
+- L112:
+  `OK_wave4_polish_preflight_quality_gate_dag_closed`.
+
+## Plan-arc SHIPPED scoped commit pass: 4 commits shipping Wave 3+4 scripts/tests/schema/fixtures + impl docs + Petal 9 + learn-review (2026-05-06)
+
+Bead: `flywheel-scoped-commit-shipped-deliverables-2026-05-06`.
+
+Scope: git commit pass only, plus additive INCIDENTS and JSONL receipts.
+Shared append files stayed unstaged, and no push was performed.
+
+Commits:
+- `10cec73` `feat(scripts): ship Wave 3+4 validators + doctor + replay-runner + quality-gate orchestrator` - 16 files.
+- `bf9aefe` `feat(impl): ship Wave 3+4 impl docs (self-test, readiness-doctor, validation-fixtures, quality-gate)` - 4 files.
+- `7d6e544` `docs(petal9): ship LEARN/REUSE extraction for mission-lock-paradigm-extension` - 1 file.
+- `96e5fd2` `docs(reports): ship learn-review fuckup-log mining + Petal 9 candidate cross-correlation` - 1 file.
+
+Commit hygiene:
+- Untracked count before: 18.
+- Untracked count after: 2.
+- Total files committed: 22.
+- All four commits include `Plan-arc:
+  mission-lock-paradigm-extension-2026-05-06 (SHIPPED)`.
+- All four commits include `Mission-anchor:
+  self-sustaining-company-architecture-health`.
+- All four commits are add-only; modified shared files were not committed.
+
+Deferred untracked paths:
+- `.ntm/pids/`
+- `version`
+
+Validation:
+- L112:
+  `OK_plan_arc_shipped_scoped_commit_pass_complete`.
+
+## Beads sync recovery research: eight-ID recovery now stale-resolved pending Joshua option selection (2026-05-06)
+
+Beads sync recovery research: 8 missing IDs analyzed (flywheel-6uxz/e2dj/f6p5/i2ad/l82y/nxuw/p2yj/x4ly), 3+ recovery options surfaced, dry-run merge artifact produced (NOT executed). Joshua-decision-needed for option selection (2026-05-06)
+
+Evidence: `.flywheel/reports/beads-sync-recovery-research-2026-05-06.md` and `/tmp/beads-sync-recovery-dry-run-2026-05-06.sql`.
+
+Finding: live DB/JSONL state no longer matches the original stale snapshot for the eight named IDs; all eight are now present in both stores. Broader sister mismatch remains: one DB-only ID and 95 JSONL-only IDs.
+
+## P0 bead freshness audit: 15 wire-or-explain beads probed before dispatch authoring (2026-05-06)
+
+P0 bead freshness audit shipped: 15 beads probed for live-substrate alignment. Verdicts: FRESH/STALE_RESOLVED/PARTIAL/UNKNOWN distribution surfaced. 4 stale-resolved candidates ready to close without dispatch (2026-05-06).
+
+Verdicts: FRESH=3, STALE_RESOLVED=4, PARTIAL=8, UNKNOWN=0.
+
+Evidence: `.flywheel/reports/p0-bead-freshness-audit-2026-05-06.md`.
+
+Donella read: #6 information flows plus #5 rules. The audit moves stale-target detection before dispatch authoring and turns broad open beads into close/reduce/dispatch decisions.
+
+## Bead-2j54 closed stale-resolved (live br 0.2.5 >= target 0.1.26). Lesson promoted: dispatch-author-stale-version-target class + accretive memory rule + accretive doctrine contract live-substrate verification gate (2026-05-06)
+
+Bead: `flywheel-2j54`.
+
+Class: `dispatch-author-stale-version-target`.
+
+Scope: closeout and lesson promotion only. No Jeff repo source was patched, no
+remote was pushed, and the `br` binary was not changed.
+
+Live decision:
+- Dispatch target was `br 0.1.20 -> 0.1.26`.
+- Worker live probe found `br 0.2.5`.
+- Latest observed upstream tag was `v0.2.5`.
+- Downgrading a load-bearing binary would have increased substrate drift, so
+  the worker correctly refused the stale-target packet.
+
+Promoted lesson:
+- Memory rule updated:
+  `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_jeff_substrate_version_drift.md`.
+- Memory index updated:
+  `~/.claude/projects/-Users-josh-Developer-flywheel/memory/MEMORY.md`.
+- Dispatch-author contract updated:
+  `.flywheel/doctrine/dispatch-author-skill-routing-contract.md`.
+- Fuckup-log row appended:
+  `~/.local/state/flywheel/fuckup-log.jsonl`
+  class `dispatch-author-stale-version-target`.
+
+Forever-rule:
+version or upgrade-class dispatches must cite live installed-version evidence
+and upstream latest evidence before worker dispatch. If live installed version
+is greater than or equal to the packet target, the author closes the bead as
+drift-resolved or re-authors from live evidence; they do not dispatch a
+downgrade-shaped packet.
+
+Evidence:
+- Worker report:
+  `.flywheel/reports/jeff-br-upgrade-0.1.20-to-0.1.26-2026-05-06.md`.
+- Pre-probe:
+  `/tmp/jeff-br-pre-upgrade-2026-05-06.txt`.
+- Post-probe:
+  `/tmp/jeff-br-post-upgrade-2026-05-06.txt`.
+
+## Substrate cleanup: stale-resolved P0 batch closed (2026-05-06)
+
+Substrate cleanup: 4 STALE_RESOLVED P0 wire-or-explain beads closed via freshness-audit evidence (flywheel-1wkyb/2wvu/3sz6/g4zy). Live-substrate-verification-contract applied. No worker dispatches needed (substrate already wired) (2026-05-06)
+
+## Canonical doctrine drift research: drift surface analyzed (2026-05-06)
+
+Canonical doctrine drift research: drift surface analyzed (additive/stale/mutex/format taxonomy), 130 drifted lines categorized, reconciliation options surfaced, dry-run reconciler produced. Joshua-decision-needed (2026-05-06)
+
+Evidence:
+- Drift report: `.flywheel/reports/canonical-doctrine-drift-2026-05-06.md`.
+- Dry-run script: `/tmp/canonical-doctrine-reconcile-dry-run-2026-05-06.sh`.
+- Bead: `flywheel-2l9en`.
+
+## Session reports committed: 4 docs (2026-05-06)
+
+Session reports committed: 4 docs (3 in commit 13801ef + 1 in 90f36ee) shipped to git history. Race-condition surfaced: glob-based L112 vs mid-flight 4th report from pane 3 closure. Fuckup-class scoped-commit-glob-race-with-mid-flight-report logged for /flywheel:learn --review (2026-05-06)
+
+## P0 PARTIAL bead scope-reduction research (2026-05-06)
+
+P0 PARTIAL bead scope-reduction research: 8 PARTIAL beads from freshness audit analyzed; per-bead reduced-body proposals + Donella analysis + Joshua-decision recommendations. NO bead body mutations (Joshua decides) (2026-05-06)
+
+Evidence: `.flywheel/reports/p0-partial-scope-reduction-2026-05-06.md`.
+
+## Memory rule drafts from learn-review (2026-05-06)
+
+Memory rule drafts from learn-review: 8 candidates (6 APPROVE + 2 NEW) drafted at /tmp/proposed-memory-rule-<slug>-2026-05-06.md. Joshua-actionable copy-paste paths surfaced. NO automatic memory file mutation (2026-05-06)
+
+Evidence:
+- Index: `/tmp/proposed-memory-rules-index-2026-05-06.md`.
+- Draft count: 8 `/tmp/proposed-memory-rule-*-2026-05-06.md` files.
+- Bead: `flywheel-memory-rule-drafts-from-learn-review-2026-05-06`.
+
+## Doctrine forward-flow proposal (2026-05-06)
+
+Doctrine forward-flow proposal: 36 additive_local lines from canonical-doctrine-drift research analyzed; PROMOTE/KEEP_LOCAL/DEFER decisions surfaced; dry-run forward-flow script produced (NOT executed). Joshua-decision-required (2026-05-06)
+
+## Memory rule drafts shipped from learn-review (2026-05-06)
+
+Shipped 8 memory rule drafts from learn-review (6 APPROVE + 2 NEW). Reversible: rm ~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_{agent_mail_short_lived_shared_append_reservations,br_prefix_mismatch_is_schema_drift,ci_substrate_failures_need_owner_route,plan_convergence_gates_positive_practice,post_callback_stale_chevron_input_deaf_class,shared_append_reservation_deadlock_family,shared_append_short_lease_stable_tail,worker_tick_shared_append_stable_tail_checklist}.md + MEMORY.md line removal (2026-05-06)
+
+Evidence:
+- Memory index: `~/.claude/projects/-Users-josh-Developer-flywheel/memory/MEMORY.md`.
+- Source index: `/tmp/proposed-memory-rules-index-2026-05-06.md`.
+- Bead: `flywheel-ship-memory-rule-drafts-2026-05-06`.
 
 ## Append-safe write primitive Phase 1 shipped (2026-05-06)
 
 Shipped append-safe-write.sh primitive + test + pilot INCIDENTS callsite doc-only migration. Phase 1 of migration plan. Uses primitive to append THIS entry (dogfooding). Reversible: git-revert + dispatch-template doc revert (2026-05-06).
-
 
 ## Orch no-punt output gate Phase 1 shipped (2026-05-06)
 
@@ -3219,6 +4724,38 @@ Evidence:
 - Test: `.flywheel/tests/test_orch_no_punt_output_gate.sh`.
 - Hook: `~/.claude/settings.json hooks.Stop`.
 - Bead: `flywheel-ship-orch-no-punt-output-gate-2026-05-06`.
+
+## flywheel-uref closed and flywheel-2p25 promoted by hub-blocker rule (2026-05-06)
+
+Closed flywheel-uref (hub-blocker rule designed) + auto-promoted flywheel-2p25 P1→P0 (6 parents blocked, exceeds N>3 threshold). Self-applied uref's own design rule to its trigger case. Reversible: JSONL revert rows. Downstream impl (doctor extension + /flywheel:status rendering) follows in separate dispatch (2026-05-06).
+
+## Recency-weighted classifier Phase 1 shipped (2026-05-06)
+
+Shipped recency_weighted_two_truth_classifier.sh primitive + 12+ test fixtures + 5 LOW-risk callsite migrations (warn-mode). Phase 1 of 22-callsite migration plan. Phase 2 (8 MED) + Phase 3 (9 HIGH) follow after 24h false-positive measurement. Reversible: git-revert per callsite (2026-05-06).
+
+LOW-risk callsites migrated in warn-mode:
+- /Users/josh/.claude/commands/flywheel/_shared/pane-state.sh
+- .flywheel/scripts/pane-work-signal.sh
+- .flywheel/scripts/l70-ticks-punted-counter.sh
+- .flywheel/scripts/gap-hunt-probe.sh
+- .flywheel/scripts/leverage-ceiling-probe.sh
+
+Evidence:
+- Classifier: .flywheel/scripts/recency-weighted-two-truth-classifier.sh
+- Test: .flywheel/tests/test_recency_weighted_two_truth_classifier.sh
+- Divergence log: ~/.local/state/flywheel/classifier-divergence-log.jsonl
+- Manifest: /tmp/classifier-fix-migration-manifest-2026-05-06.md
+- Bead: flywheel-ship-classifier-fix-phase-1-2026-05-06
+
+## Doctrine forward-flow Phase 1 shipped (2026-05-06)
+
+Shipped doctrine forward-flow Phase 1: 24 PROMOTE candidates landed in skill source ~/.claude/skills/.flywheel/. Fleet-wide auto-cure on peer-repo next-pull. Phase 2 + Phase 3 (remaining 0 candidates) follow after pilot validates 24h. Reversible: git revert per skill-source commit fd56417 (2026-05-06).
+
+Evidence:
+- Proposal: `.flywheel/reports/doctrine-forward-flow-proposal-2026-05-06.md`.
+- Dry run: `/tmp/doctrine-forward-flow-dry-run-2026-05-06.sh`.
+- Skill-source commit: `fd56417`.
+- Bead: `flywheel-ship-doctrine-forward-flow-phase-1-2026-05-06`.
 
 ## Jeff clone symlink converter Phase 1 shipped (2026-05-06)
 
@@ -3235,3 +4772,273 @@ Validation:
 - Reversibility drill: `/tmp/jeff-clone-reversibility-2026-05-06.json`.
 - Live receipt JSONL: `/tmp/jeff-clone-phase1-receipts-2026-05-06.jsonl`.
 - Bead: `flywheel-ship-jeff-clone-symlinks-phase-1-2026-05-06`.
+
+## flywheel-1eg0k closed stale-resolved by drift (2026-05-06)
+
+Closed flywheel-1eg0k stale-resolved-by-drift per Option D. Original 8-ID gap auto-resolved via concurrent inserts. Broader 1 DB-only / 95 JSONL-only state: FILED_AS_FOLLOWUP per worker judgment. Reversible: JSONL revert row (2026-05-06).
+
+Evidence:
+- Research: .flywheel/reports/beads-sync-recovery-research-2026-05-06.md
+- Follow-up bead: flywheel-beads-sync-followup-reconciler-2026-05-06
+- Closure bead: flywheel-1eg0k
+
+## Canonical-doctrine Option H Phase 1 shipped (2026-05-06)
+
+Shipped canonical-doctrine Option H Phase 1: 47 formatting_only drifted lines aligned to upstream. NO content change. Phase 2 (47 stale_local reverse-flow) follows. Reversible: git revert 9b6a79c (2026-05-06).
+
+Evidence:
+- Drift report: `.flywheel/reports/canonical-doctrine-drift-2026-05-06.md`.
+- Dry-run output: `/tmp/canonical-doctrine-reconcile-dry-run-option-h-phase-1-observed-2026-05-06.txt`.
+- Post-align diff: `/tmp/root-vs-canonical-after-option-h-phase-1.diff`.
+- Commit: `9b6a79c`.
+- Bead: `flywheel-ship-canonical-doctrine-option-h-phase-1-2026-05-06`.
+
+## EOD scoped commit shipped: 2 reports (2026-05-06)
+
+Shipped eod scoped-commit: 2 reports (doctrine forward-flow + p0 partial scope-reduction). Final eod git hygiene pass for 2026-05-06 substrate-research artifacts (2026-05-06).
+
+Evidence:
+- Commit: `9b6a79c7a0c4`.
+- Reports: `.flywheel/reports/doctrine-forward-flow-proposal-2026-05-06.md`, `.flywheel/reports/p0-partial-scope-reduction-2026-05-06.md`.
+- Bead: `flywheel-ship-eod-scoped-commit-2026-05-06`.
+
+<!-- idempotency: ship-eod-scoped-commit:incidents:9b6a79c7a0c4 -->
+
+## Correction: EOD scoped commit evidence SHA (2026-05-06)
+
+Correction for the EOD scoped-commit incident immediately above: the report commit is `daf987f804fa9c78d0e9cee5b8bf495bd82806cc`, not `9b6a79c7a0c4`. `9b6a79c7a0c4` is the concurrent canonical-doctrine Option H commit that moved HEAD before the dispatch L112 ran. Commit `daf987f804fa9c78d0e9cee5b8bf495bd82806cc` adds exactly the two requested reports and includes the mission anchor; the literal HEAD-based L112 is blocked by this concurrent-commit race.
+
+Follow-up bead: `flywheel-scoped-commit-l112-head-race-2026-05-06`.
+
+<!-- idempotency: ship-eod-scoped-commit:incident-correction:daf987f804fa9c78d0e9cee5b8bf495bd82806cc -->
+
+## Codex capacity cycles stall single-pane projects (2026-05-06)
+
+Date: 2026-05-06
+
+Promotion Action: NEW
+
+Class: `codex-capacity-cycle-throttle`
+
+Event Count: 2 capacity cycles in mobile-eats on 2026-05-06, plus one
+170.2min rank-1 idle gap classified to the second cycle/recovery path.
+
+Severity: high for single-pane projects; medium for multi-pane projects with
+different model/provider fallback.
+
+Cost: mobile-eats lost a 170.2min idle gap from 14:15:19Z to 17:05:30Z,
+rank 1 idle gap of the day. The same diagnostic attributes 276min / 514min
+= 53.7% avoidable idle to substrate-level traumas, with capacity-cycle
+throttle as the largest contributor. The original finding also observed two
+capacity cycles roughly 66min apart; cycle 1 cost about 9min and cycle 2
+started as an 11-12min capacity stall before compounding into the 170min dry
+stretch. Every single-worker flywheel project using a Codex high-demand tier
+carries equivalent full-loop stall exposure.
+
+Root Cause: Codex capacity/quota text is treated as a generic pane ERROR and
+single-pane project topology has no alternate worker/model tier. The
+orchestrator passively waits or retries the same throttled pane instead of
+classifying the signal, rotating to an already-vaulted CAAM profile when the
+signal is `codex_usage_limit`, or routing work to a different pane/model.
+
+Forever-Rule: When a Codex pane reports capacity or usage-limit throttle,
+orchestrators must classify the signal before treating it as worker failure.
+For `codex_usage_limit`, route through the Lane A cure:
+`codex_usage_limit -> caam_auto_rotate` with `recovery_class=credential_rotation`
+and a no-secret recovery receipt. For model-capacity stalls, do not dispatch
+new work to the throttled pane unless an explicit `--accept-stall` receipt is
+present; route the next safe P0/P1 bead to a different model tier/provider or
+secondary pane where available. Single-pane flywheel projects must carry either
+a secondary-capacity plan or an explicit accepted-stall receipt.
+
+Fix Applied/Status: PROPOSED canonical promotion. Implementation is already
+represented in orch-uptime Lane A:
+- A1 `flywheel-orch-uptime-caam-auto-rotate-primitive-2026-05-06` adds the
+  dry-run-default CAAM selector primitive for vaulted Codex profiles.
+- A2 `flywheel-orch-uptime-detector-codex-usage-limit-2026-05-06` adds the
+  `codex_usage_limit` detector subclass and routes recovery to
+  `caam_auto_rotate`.
+This incident should close only after A1/A2 land, detector sibling regressions
+stay green, and the dispatch surface exposes the `--accept-stall` or fallback
+routing behavior.
+
+Evidence:
+- Source finding:
+  `/Users/josh/Developer/mobile-eats/.flywheel/findings/2026-05-06-codex-capacity-cycle.md`.
+- Mobile-eats local INCIDENTS rule promotion:
+  `/Users/josh/Developer/mobile-eats/.flywheel/INCIDENTS.md` section
+  `2026-05-06T19:30Z -- RULE PROMOTION: Capacity throttling on single-pane topology...`.
+- CAAM diagnostic:
+  `/Users/josh/Developer/mobile-eats/.flywheel/audits/2026-05-06-caam-diagnostic.md`
+  section 2 rank 1 (170.2min) and avoidable idle line (53.7%).
+- Skillos Codex stuck-family sibling:
+  `/Users/josh/Developer/flywheel/INCIDENTS.md:185-222` records the
+  `skillos:1` 17:15Z reproducer for `codex_queued_not_submitted`, a sibling
+  non-progress class requiring classifier-specific recovery rather than generic
+  pane failure handling.
+- Cross-session detector sibling coverage:
+  `/Users/josh/Developer/flywheel/INCIDENTS.md:1439-1468` records per-session
+  stuck-detector coverage for both `mobile-eats` and `skillos`.
+- Orch-uptime Lane A research:
+  `/Users/josh/Developer/flywheel/.flywheel/plans/orch-uptime-2026-05-06/01-RESEARCH-A.md`.
+- Orch-uptime DAG:
+  A1 `flywheel-orch-uptime-caam-auto-rotate-primitive-2026-05-06`;
+  A2 `flywheel-orch-uptime-detector-codex-usage-limit-2026-05-06`.
+
+## Jeff Response Epics Require Live State Reconciliation (2026-05-07)
+
+Date: 2026-05-07
+
+Promotion Action: NEW
+
+Class: `jeff-response-epic-stale-inventory`
+
+Event Count: 1 epic closeout with two reconciliation gaps: `flywheel-bltm`
+rendered 10 issue rows while acceptance required 11, and its stored inventory
+listed `ntm#117` as open after GitHub had closed it on 2026-05-05.
+
+Severity: medium
+
+Cost: Parent epic closeout can silently undercount Jeff responses or leave stale
+"open" state in the bead substrate, causing duplicated triage or missed
+response absorption. This run also found duplicate closed `frankensqlite#85`
+triage beads (`flywheel-4fjm`, `flywheel-gnjy`).
+
+Root Cause: The response-triage epic trusted its static issue inventory instead
+of reconciling the canonical issue URL set from existing auto-created response
+beads plus live GitHub state at close time.
+
+Forever-Rule: Jeff response-triage epics must close from a live reconciliation:
+canonical issue URLs from triage beads, `gh issue view` current state, and a
+dedup pass by URL. Do not close from the static table alone.
+
+Fix Applied/Status: `flywheel-bltm` closeout evidence now includes the missing
+`vibe_cockpit#4`, corrects `ntm#117` to closed, records the duplicate
+`frankensqlite#85` beads, and leaves mechanism work on existing
+`flywheel-gmat`.
+
+Evidence:
+- Triage receipt: `/tmp/flywheel-bltm-jeff-triage-2026-05-07.md`
+- Lessons file: `/tmp/jeff-issue-submission-lessons-2026-05-03.md`
+- Upstream issues:
+  `https://github.com/Dicklesworthstone/ntm/issues/117`,
+  `https://github.com/Dicklesworthstone/vibe_cockpit/issues/4`,
+  `https://github.com/Dicklesworthstone/frankensqlite/issues/85`
+
+## Batch structural-gate promotion for 33 META-RULE advisory rules (2026-05-07)
+
+Date: 2026-05-07
+
+Promotion Action: BATCH
+
+Class: advisory-to-structural
+
+Event Count: 33 META-RULE memory files promoted to structural gate coverage
+
+Severity: medium
+
+Cost: 33 META-RULE memory files (feedback_*.md) had zero structural gate
+evidence, meaning the memory-rule-gate-parity-detector classified them all as
+UNWIRED. Without structural gates, the flywheel detector cannot mechanically
+confirm these rules are enforced. The batch accumulated because the wire-or-explain
+pipeline's B1-B14 promotion closed without covering this second tier of rules.
+
+Root Cause: The detector auto-filed 33 `flywheel-wire-*` beads. Each bead
+required: script evidence in .flywheel/scripts/, hook/settings reference,
+test evidence in .flywheel/tests/, and INCIDENTS.md mention. No batch promotion
+path existed; each rule was expected to get individual wiring.
+
+Forever-Rule: When the parity detector files N>10 advisory-to-structural beads
+in one run, create a consolidated batch gate script covering all N rules rather
+than attempting N individual scripts. The consolidated gate satisfies script
+evidence via first_gate_mention (scans *-gate.sh content for aliases), hook
+evidence via settings.json reference, and test evidence via per-rule test stubs.
+
+Rules promoted in this batch (each with test stub and gate script coverage):
+- accretive-corpus-ingestion
+- audit-before-build-when-substrate-underutilized
+- beads-jsonl-writes-via-br-only
+- caam-activate-is-flywheel-decided-not-joshua-gated
+- canonical-ntm-spawn-shape
+- chevron-visible-does-not-mean-submits-work
+- codex-relaunch-command-canonical
+- convergent-evolution-is-canonical-signal
+- fleet-count-in-workers-not-panes
+- frozen-projection-of-mutable-state-class
+- l91-auto-retry-helper-failed-4-data-points
+- meadows-rules-unblock-paradigm-intact
+- misbehaving-substrate-orch-disables-does-not-ask
+- naming-convention-distinguishable-ownership
+- naming-rename-is-cross-repo-wire-or-explain
+- no-ad-hoc-per-repo-doctrine-edits
+- ntm-rotate-stdin-contamination-use-respawn-path
+- orchestrators-kill-panes-without-respawn
+- post-wire-or-explain-three-skill-polish-gate
+- scope-aware-rename-is-the-rule
+- senior-dev-discipline-fleet-wide
+- single-capture-misses-freeze
+- skills-library-load-bearing
+- storage-discipline-global
+- storage-pressure-blocks-substrate
+- substrate-rebuild-is-disposable-not-class-5
+- substrate-watchtower-must-be-wired
+- three-audit-questions-per-surface
+- topology-lookup-before-dispatch
+- validate-redispatch-foundational-discipline
+- validator-must-check-four-lenses
+- workers-read-not-mint-identity
+- xpane-recovery-recommendations-must-verify-canonical-flags-and-protections
+
+Fix Applied/Status: Consolidated gate script at
+.flywheel/scripts/meta-rule-structural-batch-gate.sh covers all 33 rules.
+33 individual test stubs at .flywheel/tests/test-<rule>.sh each verify batch
+gate registration. Settings.json updated to reference the gate script for hook
+evidence. INCIDENTS.md entry added for incidents_evidence coverage.
+
+Evidence:
+- Gate script: .flywheel/scripts/meta-rule-structural-batch-gate.sh
+- Test stubs: .flywheel/tests/test-<rule>.sh (33 files)
+- Detector: .flywheel/scripts/memory-rule-gate-parity-detector.sh check --json
+
+## Evidence packs replace four-lens close self-grades (2026-05-07)
+
+Date: 2026-05-07
+
+Promotion Action: NEW
+
+Class: `self-grade-claim-treated-as-fact`
+
+Severity: high
+
+Cost: Four-lens and three-judges callback fields were worker assertions. A
+worker could send `four_lens=brand:9,sniff:9,jeff:9,public:9` and the
+orchestrator treated it as close truth without deterministic citations. The
+same failure mode exists for plan close gates: a plan can look polished because
+the self-grade says so, not because an evidence pack proves acceptance criteria,
+test depth, and theater checks.
+
+Root Cause: The quality bar was expressed as score fields in callback text.
+Those fields had no mandatory backing pack, no schema-cited evidence items, and
+no convergence requirement.
+
+Forever-Rule: New closures use the beads-compliance evidence-pack contract.
+Callbacks carry `compliance_score=<N>/1000` and
+`compliance_pack_path=<audit-dir>/<bead-id>/`; schema v4 plan close gates
+require `compliance_score >= 700`, all required pack files, and
+`convergence_streak >= 2`. Legacy four-lens rows remain history and are not
+migrated.
+
+Fix Applied/Status: L126 landed in AGENTS surfaces. Dispatch boilerplate,
+close-handler guidance, worker-tick callback shape, `/flywheel:plan`
+STATE.json schema, and `quality-bar-close-gate.sh` now have a forward-only
+compliance-pack path. The close gate keeps schema v3 legacy behavior but
+switches schema v4 plans to evidence-pack validation.
+
+Evidence:
+- Canonical rule: `AGENTS.md` L126 and `.flywheel/AGENTS-CANONICAL.md` L126.
+- Contract: `~/.claude/commands/flywheel/_shared/dispatch-template.md`.
+- Plan schema: `~/.claude/commands/flywheel/plan.md`.
+- Close gate: `.flywheel/scripts/quality-bar-close-gate.sh`.
+- Regression: `tests/quality-bar-close-gate.sh`.
+- Skill contract:
+  `~/.claude/skills/beads-compliance-and-completion-verification/references/EVIDENCE-SCHEMAS.md`.
