@@ -1,0 +1,56 @@
+{
+  "schema_version": "flywheel-a3rm-compliance-pack/v1",
+  "bead": "flywheel-a3rm",
+  "created_at": "2026-05-07T23:34:00Z",
+  "source_plan": ".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md",
+  "mission_anchor": "continuous-orchestrator-uptime-self-sustaining-fleet",
+  "socraticode_queries": 5,
+  "indexed_chunks_observed": 1259,
+  "files_reserved": [
+    ".flywheel/scripts/recovery-baseline-snapshot.sh",
+    ".flywheel/scripts/recovery-restore-harness.sh",
+    ".flywheel/scripts/recovery-baseline-status.sh",
+    "tests/test_recovery_baseline_snapshot.sh",
+    "tests/test_recovery_nightly_cron_install.sh",
+    "tests/test_recovery_restore_dry_run.sh",
+    "tests/test_recovery_restore_apply_blocked_without_key.sh",
+    "tests/test_recovery_restore_drill.sh",
+    ".flywheel/receipts/flywheel-a3rm-compliance-pack.json",
+    "/Users/josh/Library/LaunchAgents/com.zeststream.recovery.nightly-snapshot.plist",
+    "/Users/josh/.claude/commands/flywheel/status.md"
+  ],
+  "baseline_manifest_path": "/Users/josh/.flywheel/recovery/snapshots/baseline-20260507T233254Z.manifest.json",
+  "baseline_tarball_path": "/Users/josh/.flywheel/recovery/snapshots/baseline-20260507T233254Z.tar.gz",
+  "nightly_plist_path": "/Users/josh/Library/LaunchAgents/com.zeststream.recovery.nightly-snapshot.plist",
+  "restore_harness_path": ".flywheel/scripts/recovery-restore-harness.sh",
+  "drill_receipt_path": "/Users/josh/.flywheel/recovery/drills/drill-20260507T032000Z.json",
+  "protected_sessions_restore_blocked": [
+    "alpsinsurance",
+    "picoz"
+  ],
+  "tests": [
+    {
+      "command": "tests/test_recovery_baseline_snapshot.sh",
+      "passed": true
+    },
+    {
+      "command": "tests/test_recovery_nightly_cron_install.sh",
+      "passed": true
+    },
+    {
+      "command": "tests/test_recovery_restore_dry_run.sh",
+      "passed": true
+    },
+    {
+      "command": "tests/test_recovery_restore_apply_blocked_without_key.sh",
+      "passed": true
+    },
+    {
+      "command": "tests/test_recovery_restore_drill.sh",
+      "passed": true
+    }
+  ],
+  "launchctl_load_attempted": false,
+  "nightly_snapshot_label_active": false,
+  "drill_pass": true
+}
