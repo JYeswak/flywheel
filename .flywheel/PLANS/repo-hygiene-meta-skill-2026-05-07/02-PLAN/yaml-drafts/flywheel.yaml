@@ -1,0 +1,100 @@
+schema_version: 1
+repo_path: /Users/josh/Developer/flywheel
+doctrine_version: "2026-05-07.L126"
+provenance:
+  source_plan: repo-hygiene-meta-skill-2026-05-07
+  source_artifact: /Users/josh/Developer/flywheel/.flywheel/plans/repo-hygiene-meta-skill-2026-05-07/01-RESEARCH-DEEP-DIVE.md
+  source_sections:
+    - "Section 1 - Per-Repo Trauma Classes / flywheel"
+    - "Section 2 - Cross-Repo Patterns"
+    - "Section 4 - .gitignore Coverage Gaps"
+    - "Section 5 - Existing Prior Art"
+  generated_by: flywheel-1p9of-phase2
+safety_contract:
+  dry_run_default: true
+  idempotency_key_required: true
+  refuses_tracked_files: true
+  receipt_dir: .flywheel/receipts/repo-hygiene
+trauma_classes:
+  - name: beads_backup_roots
+    patterns:
+      - .beads.bak.*
+      - .beads.failed.*
+    min_age_days: 7
+    max_total_mb: 500
+    safety: age-gated
+    applicable_skills:
+      - storage-health
+      - disk-observer
+      - path-rationalization
+      - canonical-cli-scoping
+      - extreme-software-optimization
+    provenance:
+      - "Section 1 flywheel: beads backup roots 719450112 bytes; beads failed roots 4149248 bytes"
+  - name: beads_db_sidecars
+    patterns:
+      - .beads/*.bak*
+      - .beads/*.aside.*
+      - .beads/.br_recovery/
+    min_age_days: 3
+    max_total_mb: 128
+    safety: age-gated
+    applicable_skills:
+      - storage-health
+      - disk-observer
+      - path-rationalization
+      - canonical-cli-scoping
+    provenance:
+      - "Section 1 flywheel: beads db backups 7 paths / 14573568 bytes"
+      - "Section 5 flywheel: storage-prune.sh prior art"
+  - name: lock_skill_previews
+    patterns:
+      - .flywheel/*.md.preview.*
+      - .flywheel/.reconcile-*.diff
+    min_age_days: 7
+    max_total_mb: 50
+    safety: age-gated
+    applicable_skills:
+      - path-rationalization
+      - disk-observer
+      - canonical-cli-scoping
+    provenance:
+      - "Section 1 flywheel: lock preview drafts and reconcile diffs"
+  - name: python_bytecode
+    patterns:
+      - __pycache__/
+    min_age_days: 0
+    max_total_mb: 100
+    safety: always-safe
+    applicable_skills:
+      - dev-cache-janitor
+      - disk-observer
+    provenance:
+      - "Section 1 flywheel: Python bytecode 2 paths / 704512 bytes"
+      - "Section 2: __pycache__/ common to 4 repos"
+  - name: sqlite_runtime
+    patterns:
+      - storage.sqlite3
+      - storage.sqlite3-wal
+      - storage.sqlite3-shm
+    min_age_days: null
+    max_total_mb: null
+    safety: never-delete-only-document
+    applicable_skills:
+      - storage-health
+      - disk-observer
+      - path-rationalization
+    provenance:
+      - "Section 1 flywheel: sqlite sidecars marked never-delete-only-document while process may own DB"
+gitignore_gaps:
+  - pattern: .flywheel/MISSION.md.corrupted-*
+    disposition: add-to-hygiene-targets
+    root_cause_fix_tier: hygiene-target
+    provenance:
+      - "Section 4 flywheel: corrupted mission files are substrate-corruption evidence"
+  - pattern: .beads/events.jsonl.recovery-archive-*
+    disposition: add-to-hygiene-targets
+    root_cause_fix_tier: hygiene-target
+    provenance:
+      - "Section 4 flywheel: recovery archive should be age-gated"
+

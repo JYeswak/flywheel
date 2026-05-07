@@ -1,0 +1,106 @@
+schema_version: 1
+repo_path: /Users/josh/Developer/zesttube
+doctrine_version: "2026-05-07.L126"
+provenance:
+  source_plan: repo-hygiene-meta-skill-2026-05-07
+  source_artifact: /Users/josh/Developer/flywheel/.flywheel/plans/repo-hygiene-meta-skill-2026-05-07/01-RESEARCH-DEEP-DIVE.md
+  source_sections:
+    - "Section 1 - Per-Repo Trauma Classes / zesttube"
+    - "Section 3 - Per-Tooling Residue"
+    - "Section 4 - .gitignore Coverage Gaps"
+    - "Section 5 - Existing Prior Art"
+  generated_by: flywheel-1p9of-phase2
+safety_contract:
+  dry_run_default: true
+  idempotency_key_required: true
+  refuses_tracked_files: true
+  receipt_dir: .flywheel/receipts/repo-hygiene
+trauma_classes:
+  - name: zesttube_regenerable_caches
+    patterns:
+      - pre_ship_av_check_cache/
+      - intro_outro_grade_cache/
+      - pre_ship_failures/
+      - .zest-cache/
+    min_age_days: 14
+    max_total_mb: 1000
+    safety: age-gated
+    applicable_skills:
+      - storage-health
+      - dev-cache-janitor
+      - disk-observer
+      - path-rationalization
+      - extreme-software-optimization
+    provenance:
+      - "Section 1 zesttube: AV/intro/failure caches total 545153024 bytes"
+      - "Section 5 zesttube: src/storage/cache_prune.py owns this class"
+  - name: remotion_build_outputs
+    patterns:
+      - remotion/out/
+      - remotion/build/
+    min_age_days: 3
+    max_total_mb: 1000
+    safety: age-gated
+    applicable_skills:
+      - storage-health
+      - dev-cache-janitor
+      - disk-observer
+      - extreme-software-optimization
+    provenance:
+      - "Section 1 zesttube: remotion/out 654729216 bytes and remotion/build 89616384 bytes"
+      - "Section 3: Remotion outputs often evidence, so age-gated"
+  - name: archived_media
+    patterns:
+      - render-*.mp4
+      - "*.mov"
+      - "*.wav"
+    min_age_days: null
+    max_total_mb: null
+    safety: never-delete-only-document
+    applicable_skills:
+      - storage-health
+      - disk-observer
+      - path-rationalization
+    provenance:
+      - "Section 1 zesttube: archived render mp4s 103403520 bytes, marked never-delete-only-document"
+  - name: python_bytecode
+    patterns:
+      - __pycache__/
+    min_age_days: 0
+    max_total_mb: 300
+    safety: always-safe
+    applicable_skills:
+      - dev-cache-janitor
+      - disk-observer
+    provenance:
+      - "Section 1 zesttube: pycache 1220 paths / 210681856 bytes"
+  - name: doctrine_backups
+    patterns:
+      - AGENTS.md.bak.*
+      - .flywheel/AGENTS-CANONICAL.md.bak.*
+    min_age_days: 7
+    max_total_mb: 250
+    safety: age-gated
+    applicable_skills:
+      - storage-health
+      - disk-observer
+      - path-rationalization
+    provenance:
+      - "Section 4 zesttube: repeated AGENTS backup files untracked"
+gitignore_gaps:
+  - pattern: AGENTS.md.bak.*
+    disposition: add-to-hygiene-targets
+    root_cause_fix_tier: hygiene-target
+    provenance:
+      - "Section 4 zesttube: age-gated doctrine backup"
+  - pattern: .flywheel/AGENTS-CANONICAL.md.bak.*
+    disposition: add-to-hygiene-targets
+    root_cause_fix_tier: hygiene-target
+    provenance:
+      - "Section 4 zesttube: age-gated doctrine backup"
+  - pattern: visual/candidates/**
+    disposition: never-delete-only-document
+    root_cause_fix_tier: document-only
+    provenance:
+      - "Section 4 zesttube: visual evidence"
+

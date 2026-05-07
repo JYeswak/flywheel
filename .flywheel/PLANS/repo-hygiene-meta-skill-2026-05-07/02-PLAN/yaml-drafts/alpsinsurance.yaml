@@ -1,0 +1,93 @@
+schema_version: 1
+repo_path: /Users/josh/Developer/alpsinsurance
+doctrine_version: "2026-05-07.L126"
+provenance:
+  source_plan: repo-hygiene-meta-skill-2026-05-07
+  source_artifact: /Users/josh/Developer/flywheel/.flywheel/plans/repo-hygiene-meta-skill-2026-05-07/01-RESEARCH-DEEP-DIVE.md
+  source_sections:
+    - "Section 1 - Per-Repo Trauma Classes / alpsinsurance"
+    - "Section 3 - Per-Tooling Residue"
+    - "Section 4 - .gitignore Coverage Gaps"
+    - "Section 5 - Existing Prior Art"
+  generated_by: flywheel-1p9of-phase2
+safety_contract:
+  dry_run_default: true
+  idempotency_key_required: true
+  refuses_tracked_files: true
+  receipt_dir: .flywheel/receipts/repo-hygiene
+trauma_classes:
+  - name: next_build_output
+    patterns:
+      - frontend/.next/
+    min_age_days: 1
+    max_total_mb: 1000
+    safety: age-gated
+    applicable_skills:
+      - dev-cache-janitor
+      - disk-observer
+      - extreme-software-optimization
+      - canonical-cli-scoping
+    provenance:
+      - "Section 1 alpsinsurance: frontend/.next 1224 paths / 777158656 bytes"
+      - "Section 3: Next.js build/runtime outputs"
+  - name: substrate_backups
+    patterns:
+      - "*.bak*"
+    min_age_days: 7
+    max_total_mb: 1000
+    safety: age-gated
+    applicable_skills:
+      - storage-health
+      - disk-observer
+      - path-rationalization
+    provenance:
+      - "Section 1 alpsinsurance: substrate backups 80 paths / 815861760 bytes"
+  - name: python_bytecode
+    patterns:
+      - __pycache__/
+    min_age_days: 0
+    max_total_mb: 300
+    safety: always-safe
+    applicable_skills:
+      - dev-cache-janitor
+      - disk-observer
+    provenance:
+      - "Section 1 alpsinsurance: pycache 1386 paths / 207667200 bytes"
+  - name: supabase_temp
+    patterns:
+      - supabase/.temp/
+    min_age_days: 3
+    max_total_mb: 50
+    safety: age-gated
+    applicable_skills:
+      - storage-health
+      - docker-storage-ops
+      - orbstack-ops
+      - disk-observer
+    provenance:
+      - "Section 1 alpsinsurance: Supabase temp 10 paths / 73728 bytes"
+      - "Section 3: Supabase CLI temp/local branch state"
+  - name: rehearsal_evidence
+    patterns:
+      - knowledge/rehearsal-screenshots/
+    min_age_days: null
+    max_total_mb: null
+    safety: never-delete-only-document
+    applicable_skills:
+      - disk-observer
+      - path-rationalization
+    provenance:
+      - "Section 1 alpsinsurance: rehearsal screenshots 9781248 bytes, marked evidence"
+  - name: venv_caches
+    patterns:
+      - backend/.venv*/
+    min_age_days: null
+    max_total_mb: null
+    safety: never-delete-only-document
+    applicable_skills:
+      - dev-cache-janitor
+      - path-rationalization
+    provenance:
+      - "Section 1 alpsinsurance: coverage paths were package dirs inside venvs, not coverage reports"
+gitignore_gaps: []
+

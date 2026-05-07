@@ -1,0 +1,99 @@
+schema_version: 1
+repo_path: /Users/josh/Developer/skillos
+doctrine_version: "2026-05-07.L126"
+provenance:
+  source_plan: repo-hygiene-meta-skill-2026-05-07
+  source_artifact: /Users/josh/Developer/flywheel/.flywheel/plans/repo-hygiene-meta-skill-2026-05-07/01-RESEARCH-DEEP-DIVE.md
+  source_sections:
+    - "Section 1 - Per-Repo Trauma Classes / skillos"
+    - "Section 2 - Cross-Repo Patterns"
+    - "Section 4 - .gitignore Coverage Gaps"
+    - "Section 5 - Existing Prior Art"
+  generated_by: flywheel-1p9of-phase2
+safety_contract:
+  dry_run_default: true
+  idempotency_key_required: true
+  refuses_tracked_files: true
+  receipt_dir: .flywheel/receipts/repo-hygiene
+trauma_classes:
+  - name: beads_backups
+    patterns:
+      - .beads/*.bak*
+    min_age_days: 7
+    max_total_mb: 100
+    safety: age-gated
+    applicable_skills:
+      - storage-health
+      - disk-observer
+      - path-rationalization
+      - canonical-cli-scoping
+    provenance:
+      - "Section 1 skillos: beads db backups 68 paths / 73949184 bytes"
+  - name: runtime_logs
+    patterns:
+      - state/*.log
+      - state/*-counters.json
+      - state/*-schedule.jsonl
+      - state/*-escalations.jsonl
+    min_age_days: 14
+    max_total_mb: 100
+    safety: age-gated
+    applicable_skills:
+      - storage-health
+      - disk-observer
+      - path-rationalization
+    provenance:
+      - "Section 4 skillos: loop logs and blocker state JSONL untracked"
+  - name: evidence_receipts
+    patterns:
+      - state/beads-compliance-*.md
+      - outputs/
+    min_age_days: null
+    max_total_mb: null
+    safety: never-delete-only-document
+    applicable_skills:
+      - disk-observer
+      - path-rationalization
+    provenance:
+      - "Section 1 skillos: outputs can be evidence"
+      - "Section 4 skillos: beads-compliance markdown is audit evidence"
+  - name: preview_drafts
+    patterns:
+      - "*.preview.*"
+    min_age_days: 7
+    max_total_mb: 50
+    safety: age-gated
+    applicable_skills:
+      - path-rationalization
+      - disk-observer
+    provenance:
+      - "Section 1 skillos: preview files 16384 bytes"
+  - name: python_bytecode
+    patterns:
+      - __pycache__/
+      - .pytest_cache/
+    min_age_days: 0
+    max_total_mb: 25
+    safety: always-safe
+    applicable_skills:
+      - dev-cache-janitor
+      - disk-observer
+    provenance:
+      - "Section 1 skillos: pycache and pytest cache"
+gitignore_gaps:
+  - pattern: state/loop-30m.log
+    disposition: add-to-hygiene-targets
+    root_cause_fix_tier: hygiene-target
+    provenance:
+      - "Section 4 skillos: runtime log"
+  - pattern: state/loop-schedule.jsonl
+    disposition: add-to-hygiene-targets
+    root_cause_fix_tier: hygiene-target
+    provenance:
+      - "Section 4 skillos: runtime schedule state"
+  - pattern: state/beads-compliance-*.md
+    disposition: never-delete-only-document
+    root_cause_fix_tier: document-only
+    provenance:
+      - "Section 4 skillos: audit evidence"
+

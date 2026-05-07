@@ -1,0 +1,100 @@
+schema_version: 1
+repo_path: /Users/josh/Developer/mobile-eats
+doctrine_version: "2026-05-07.L126"
+provenance:
+  source_plan: repo-hygiene-meta-skill-2026-05-07
+  source_artifact: /Users/josh/Developer/flywheel/.flywheel/plans/repo-hygiene-meta-skill-2026-05-07/01-RESEARCH-DEEP-DIVE.md
+  source_sections:
+    - "Section 1 - Per-Repo Trauma Classes / mobile-eats"
+    - "Section 2 - Cross-Repo Patterns"
+    - "Section 3 - Per-Tooling Residue"
+    - "Section 4 - .gitignore Coverage Gaps"
+  generated_by: flywheel-1p9of-phase2
+safety_contract:
+  dry_run_default: true
+  idempotency_key_required: true
+  refuses_tracked_files: true
+  receipt_dir: .flywheel/receipts/repo-hygiene
+trauma_classes:
+  - name: node_dependencies
+    patterns:
+      - next-app/node_modules/
+    min_age_days: null
+    max_total_mb: null
+    safety: never-delete-only-document
+    applicable_skills:
+      - dev-cache-janitor
+      - disk-observer
+      - path-rationalization
+    provenance:
+      - "Section 1 mobile-eats: node_modules 1028063232 bytes, never-delete-only-document by default"
+  - name: substrate_backups
+    patterns:
+      - "*.bak.*"
+      - .beads/*.bak*
+    min_age_days: 7
+    max_total_mb: 100
+    safety: age-gated
+    applicable_skills:
+      - storage-health
+      - disk-observer
+      - path-rationalization
+      - canonical-cli-scoping
+    provenance:
+      - "Section 1 mobile-eats: substrate backups 93 paths / 19959808 bytes"
+      - "Section 2: backup patterns common to all 5 repos"
+  - name: flywheel_ticks
+    patterns:
+      - .flywheel/ticks/
+    min_age_days: 7
+    max_total_mb: 25
+    safety: age-gated
+    applicable_skills:
+      - disk-observer
+      - path-rationalization
+      - canonical-cli-scoping
+    provenance:
+      - "Section 1 mobile-eats: flywheel tick receipts 47 paths / 376832 bytes"
+  - name: test_residue
+    patterns:
+      - next-app/test-results/
+      - next-app/.mobile-eats-visual-gate*/
+    min_age_days: 2
+    max_total_mb: 250
+    safety: age-gated
+    applicable_skills:
+      - dev-cache-janitor
+      - disk-observer
+      - extreme-software-optimization
+    provenance:
+      - "Section 1 mobile-eats: Playwright results and visual-gate artifacts"
+      - "Section 5 mobile-eats: visual-gate writes screenshot receipts"
+  - name: vercel_state
+    patterns:
+      - .vercel/
+    min_age_days: null
+    max_total_mb: null
+    safety: never-delete-only-document
+    applicable_skills:
+      - storage-health
+      - disk-observer
+      - path-rationalization
+    provenance:
+      - "Section 1 mobile-eats: Vercel state observed; Section 3 warns credentials risk"
+gitignore_gaps:
+  - pattern: .beads/issues.jsonl.bak
+    disposition: add-to-gitignore
+    root_cause_fix_tier: gitignore
+    provenance:
+      - "Section 4 mobile-eats: backup accumulator"
+  - pattern: .claude/scheduled_tasks.lock
+    disposition: add-to-hygiene-targets
+    root_cause_fix_tier: hygiene-target
+    provenance:
+      - "Section 4 mobile-eats: stale lock candidate"
+  - pattern: .flywheel/audits/**
+    disposition: no-action
+    root_cause_fix_tier: no-action
+    provenance:
+      - "Section 4 mobile-eats: likely evidence/WIP"
+
