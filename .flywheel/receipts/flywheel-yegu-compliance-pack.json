@@ -1,0 +1,33 @@
+{
+  "task_id": "flywheel-yegu",
+  "bead": "flywheel-yegu",
+  "kind": "fleet-skill-discovery-substrate",
+  "source_plan": ".flywheel/PLANS/fleet-skill-reporting-2026-05-01.md",
+  "schema_version": "skill-discovery/v1",
+  "jsonl_path": "/Users/josh/.local/state/flywheel/skill-discoveries.jsonl",
+  "evidence": [
+    "/Users/josh/.claude/skills/.flywheel/lib/skill-discovery.sh",
+    "/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop",
+    "tests/test_skill_discovery_init.sh",
+    "tests/test_skill_discovery_schema.sh",
+    "tests/test_skill_discovery_dry_run.sh",
+    "tests/test_skill_discovery_apply_append.sh",
+    "tests/test_skill_discovery_lock_safe.sh",
+    "/Users/josh/.local/state/flywheel/skill-discoveries.jsonl"
+  ],
+  "checks": {
+    "init_creates_jsonl": true,
+    "schema_command_passed": true,
+    "discovery_kind_count": 7,
+    "dry_run_shape_passed": true,
+    "apply_append_shape_passed": true,
+    "invalid_kind_machine_error_passed": true,
+    "lock_safe_validated": true,
+    "concurrent_append_count": 3,
+    "tests_added": 5,
+    "tests_passing": true,
+    "socraticode_queries": 4,
+    "indexed_chunks_observed": 40,
+    "bin_loop_lines_after": 240
+  }
+}
