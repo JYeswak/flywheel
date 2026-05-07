@@ -456,12 +456,14 @@ def build_report(args):
         row["dirty_worktree"] = dirty_worktree(project["repo_path"], owners)
         project_rows.append(row)
     low = [row for row in session_rows if row["low_confidence"]]
-    return {
+    report = {
         "schema_version": SCHEMA_VERSION,
         "source_plan": SOURCE_PLAN,
         "generated_at": args.now or now_iso(),
         "repo": as_abs(args.repo),
+        "selected_session": args.session,
         "confidence_min": args.confidence_min,
+        "confidence_per_session": {row["session"]: row["confidence"] for row in session_rows},
         "apply_blocked": bool(low),
         "low_confidence_sessions": [row["session"] for row in low],
         "sources": {
@@ -479,11 +481,13 @@ def build_report(args):
         "tick_receipts": recent_tick_receipts(projects, args.receipt_limit),
         "dispatch_context": dispatch_context(projects, args.dispatch_log_limit),
     }
+    return report
 
 
 def main(argv):
     parser = argparse.ArgumentParser(description="Read-only recovery-system preinstall audit.")
     parser.add_argument("--repo", default="/Users/josh/Developer/flywheel")
+    parser.add_argument("--session")
     parser.add_argument("--ntm-bin", default=NTM_BIN)
     parser.add_argument("--ntm-config", default=NTM_CONFIG)
     parser.add_argument("--topology", default=TOPOLOGY)
@@ -497,6 +501,7 @@ def main(argv):
     parser.add_argument("--receipt-limit", type=int, default=20)
     parser.add_argument("--now")
     parser.add_argument("--output")
+    parser.add_argument("--json", action="store_true", help="Compatibility flag; output is always JSON.")
     parser.add_argument("--pretty", action="store_true")
     args = parser.parse_args(argv)
     report = build_report(args)
