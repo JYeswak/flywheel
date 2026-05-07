@@ -9,7 +9,7 @@ TASK_TITLE="${NTM_WAVE2_TASK_TITLE:-flywheel native surface probe}"
 usage() {
   cat <<'USAGE'
 usage: ntm-wave2-native-probes.sh <surface> [--json]
-surfaces: agents analytics cass config
+surfaces: agents analytics cass config extract
 USAGE
 }
 
@@ -84,6 +84,21 @@ surface_config() {
     '{schema_version:$version,surface:$surface,status:"ok",native_calls:["ntm config show --json","ntm config validate --json","ntm config diff --json"],show:$show,validate:$validate,diff:$diff}'
 }
 
+surface_extract() {
+  local last bash_blocks all_blocks
+  last="$(json_or_null "$NTM_BIN" extract "$SESSION" --last --json --lines 120)"
+  bash_blocks="$(json_or_null "$NTM_BIN" extract "$SESSION" --last --lang bash --json --lines 120)"
+  all_blocks="$(json_or_null "$NTM_BIN" extract "$SESSION" --json --lines 120)"
+  jq -nc \
+    --arg version "$VERSION" \
+    --arg surface "extract" \
+    --arg session "$SESSION" \
+    --argjson last "$last" \
+    --argjson bash_blocks "$bash_blocks" \
+    --argjson all_blocks "$all_blocks" \
+    '{schema_version:$version,surface:$surface,status:"ok",session:$session,native_calls:["ntm extract <session> --last --json","ntm extract <session> --lang bash --json","ntm extract <session> --json"],last:$last,bash_blocks:$bash_blocks,all_blocks:$all_blocks}'
+}
+
 SURFACE="${1:-}"; [[ $# -gt 0 ]] && shift || true
 JSON_OUT=0
 while [[ $# -gt 0 ]]; do
@@ -99,6 +114,7 @@ case "$SURFACE" in
   analytics) payload="$(surface_analytics)" ;;
   cass) payload="$(surface_cass)" ;;
   config) payload="$(surface_config)" ;;
+  extract) payload="$(surface_extract)" ;;
   --help|-h|"") usage; exit 0 ;;
   *) echo "unknown surface: $SURFACE" >&2; usage >&2; exit 2 ;;
 esac
