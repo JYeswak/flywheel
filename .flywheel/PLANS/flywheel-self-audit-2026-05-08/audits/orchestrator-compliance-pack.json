@@ -1,0 +1,42 @@
+{
+  "schema_version": "flywheel.compliance_pack.v1",
+  "bead_id": "flywheel-up0uw",
+  "artifact": ".flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/orchestrator.md",
+  "compliance_score": 860,
+  "checks": [
+    {
+      "name": "socraticode_preflight",
+      "status": "pass",
+      "evidence": "5 codebase_search calls against /Users/josh/Developer/flywheel with limit=10 for tick/dispatch/callback/reap/respawn/loop/handoff/monitor keywords"
+    },
+    {
+      "name": "six_section_contract",
+      "status": "pass",
+      "evidence": "orchestrator.md contains Inventory, Load-bearing, Vestigial, Missing, Lessons learned, and Fix-bead manifest sections"
+    },
+    {
+      "name": "file_line_citations",
+      "status": "pass",
+      "evidence": "Sections 1-3 cite command, script, dispatch-log, and test file:line surfaces"
+    },
+    {
+      "name": "no_live_skill_mutation",
+      "status": "pass",
+      "evidence": "Only audit artifact and compliance pack were edited"
+    },
+    {
+      "name": "no_new_beads",
+      "status": "pass",
+      "evidence": "No br create command was run; Section 6 is recommendations only"
+    },
+    {
+      "name": "gap_analysis_addressed",
+      "status": "pass",
+      "evidence": "Three requested orchestrator gaps addressed: strategic drift, outcome-shape benchmark, clockwork deity framing"
+    }
+  ],
+  "residual_risks": [
+    "Callsite counts are grep-based snapshots and may include documentation references as well as executable references.",
+    "The missing ~/.claude/skills/loop/SKILL.md path was treated as vestigial because the active /loop source is ~/.claude/commands/loop.md."
+  ]
+}
