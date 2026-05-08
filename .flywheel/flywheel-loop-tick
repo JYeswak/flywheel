@@ -13,6 +13,8 @@ LOG="${LOG:-$REPO/.flywheel/dispatch-log.jsonl}"
 LOCK="$STATE_DIR/loop.lock"
 LAST="$STATE_DIR/last_run.json"
 NTM="${NTM:-/Users/josh/.local/bin/ntm}"
+PANE_WORK_SIGNAL_SCRIPT="${PANE_WORK_SIGNAL_SCRIPT:-$REPO/.flywheel/scripts/pane-work-signal.sh}"
+PANE_WORK_SIGNAL_STATE_DIR="${PANE_WORK_SIGNAL_STATE_DIR:-${FLYWHEEL_STATE_DIR:-$HOME/.local/state/flywheel}}"
 DRY_RUN="${FLYWHEEL_LOOP_TICK_DRY_RUN:-0}"
 FROZEN_DETECTOR_OVERRIDE="${FLYWHEEL_TICK_FROZEN_DETECTOR_OVERRIDE:-0}"
 CANONICAL_SOURCE="${FLYWHEEL_CANONICAL_DOCTRINE_SOURCE:-/Users/josh/Developer/flywheel/.flywheel/AGENTS-CANONICAL.md}"
@@ -560,12 +562,35 @@ detect_phase() {
 }
 
 dispatch_capacity_snapshot() {
-  local panes="${DISPATCH_CAPACITY_PANES:-2 3 4}" pane gate_output gate_exit gate_json tmp
+  local panes="${DISPATCH_CAPACITY_PANES:-2 3 4}" pane gate_output gate_exit gate_json tmp health_json
+  local pws_output pws_classify pws_sample pws_by_pane pws_disagreements pws_soft pws_sampled pws_disabled pws_disabled_reason
+  local pane_agent pane_activity pane_status pane_process pane_truth pane_source pane_reason pane_disagrees gate_json_original
   tmp="$(mktemp "${TMPDIR:-/tmp}/dispatch-capacity.XXXXXX")"
+  pws_sampled=false
+  pws_disabled=false
+  pws_disabled_reason=""
+  pws_by_pane="{}"
+  pws_disagreements="[]"
+  pws_soft="[]"
+
+  if [[ "${FLYWHEEL_PANE_WORK_SIGNAL_DISABLE:-0}" == "1" ]]; then
+    pws_disabled=true
+    pws_disabled_reason="pws_disabled_via_env"
+  elif [[ -f "$REPO/.flywheel/disable-pane-work-signal" ]]; then
+    pws_disabled=true
+    pws_disabled_reason="pws_disabled_via_file"
+  fi
 
   for pane in $panes; do
+    if [[ -n "${HEALTH_JSON:-}" ]]; then
+      health_json="$HEALTH_JSON"
+    elif [[ -n "${HEALTH_JSON_FILE:-}" ]]; then
+      health_json="$(cat "$HEALTH_JSON_FILE")"
+    else
+      health_json="$("$NTM" health "$SESSION" --pane "$pane" --json 2>/dev/null || printf '{}\n')"
+    fi
     set +e
-    gate_output="$(bash "$REPO/.flywheel/scripts/dispatch-capacity-gate.sh" "$SESSION" "$pane" 2>&1)"
+    gate_output="$(HEALTH_JSON="$health_json" bash "$REPO/.flywheel/scripts/dispatch-capacity-gate.sh" "$SESSION" "$pane" 2>&1)"
     gate_exit=$?
     set -e
 
@@ -574,15 +599,126 @@ dispatch_capacity_snapshot() {
     else
       gate_json="$(jq -nc --arg raw "$gate_output" '{verdict:"error",reason:"invalid_gate_json",raw:$raw}')"
     fi
+    gate_json_original="$gate_json"
+
+    pane_agent="$(jq -r --arg p "$pane" '
+      def pane_id: (.pane? // .pane_idx? // .index? // .pane_index? // "");
+      first(.agents[]? | select((pane_id|tostring) == $p)) // {} |
+      (.agent_type // .agent_kind // .kind // "unknown")
+    ' <<<"$health_json" 2>/dev/null || printf 'unknown')"
+    pane_activity="$(jq -r --arg p "$pane" '
+      def pane_id: (.pane? // .pane_idx? // .index? // .pane_index? // "");
+      first(.agents[]? | select((pane_id|tostring) == $p)) // {} |
+      (.activity // .state // "unknown")
+    ' <<<"$health_json" 2>/dev/null || printf 'unknown')"
+    pane_status="$(jq -r --arg p "$pane" '
+      def pane_id: (.pane? // .pane_idx? // .index? // .pane_index? // "");
+      first(.agents[]? | select((pane_id|tostring) == $p)) // {} |
+      (.status // "unknown")
+    ' <<<"$health_json" 2>/dev/null || printf 'unknown')"
+    pane_process="$(jq -r --arg p "$pane" '
+      def pane_id: (.pane? // .pane_idx? // .index? // .pane_index? // "");
+      first(.agents[]? | select((pane_id|tostring) == $p)) // {} |
+      (.process_status // "unknown")
+    ' <<<"$health_json" 2>/dev/null || printf 'unknown')"
+    pane_truth=""
+    pane_source="ntm_health"
+    pane_reason="ntm_health_canonical"
+    pane_disagrees=false
+
+    case "$(printf '%s' "$pane_agent" | tr '[:upper:]' '[:lower:]')" in
+      cod|codex)
+        if [[ "$pws_disabled" == "false" && -x "$PANE_WORK_SIGNAL_SCRIPT" ]]; then
+          pws_sampled=true
+          pws_output="$(FLYWHEEL_STATE_DIR="$PANE_WORK_SIGNAL_STATE_DIR" NTM_BIN="$NTM" "$PANE_WORK_SIGNAL_SCRIPT" "$SESSION" "$pane" --lines 80 2>/dev/null || true)"
+          pws_sample="$(jq -c . <<<"$pws_output" 2>/dev/null || jq -nc --arg raw "$pws_output" '{truth_state:"sample_error",truth_source:"pane_work_signal",truth_reason:"invalid_sample_json",raw:$raw}')"
+          pws_output="$(FLYWHEEL_STATE_DIR="$PANE_WORK_SIGNAL_STATE_DIR" NTM_BIN="$NTM" "$PANE_WORK_SIGNAL_SCRIPT" --classify "$SESSION" "$pane" 2>/dev/null || true)"
+          pws_classify="$(jq -c . <<<"$pws_output" 2>/dev/null || jq -nc --arg raw "$pws_output" '{truth_state:"sample_error",truth_source:"pane_work_signal",truth_reason:"invalid_classify_json",raw:$raw}')"
+          pane_truth="$(jq -r '.truth_state // .classification // "unknown"' <<<"$pws_classify")"
+          pane_source="$(jq -r '.truth_source // "pane_work_signal"' <<<"$pws_classify")"
+          pane_reason="$(jq -r '.truth_reason // "pane_work_signal_classification"' <<<"$pws_classify")"
+          if [[ "$pane_truth" == "working" && ( "$pane_activity" == "idle" || "$pane_activity" == "error" || "$pane_activity" == "ERROR" || "$pane_status" == "error" ) ]]; then
+            pane_disagrees=true
+            pws_disagreements="$(jq -nc \
+              --argjson base "$pws_disagreements" \
+              --arg pane "$pane" \
+              --arg ntm_activity "$pane_activity" \
+              --arg ntm_status "$pane_status" \
+              --arg truth_state "$pane_truth" \
+              '$base + [{pane:($pane|tonumber? // $pane),ntm_activity:$ntm_activity,ntm_status:$ntm_status,truth_state:$truth_state}]')"
+            pws_soft="$(jq -nc \
+              --argjson base "$pws_soft" \
+              --arg class "pane_work_signal_disagrees_with_ntm_health" \
+              --arg pane "$pane" \
+              --arg ntm_activity "$pane_activity" \
+              --arg ntm_status "$pane_status" \
+              --arg truth_state "$pane_truth" \
+              '$base + [{class:$class,pane:($pane|tonumber? // $pane),ntm_activity:$ntm_activity,ntm_status:$ntm_status,truth_state:$truth_state,mode:"SOFT"}]')"
+          fi
+          if [[ "$pane_truth" != "idle" ]]; then
+            gate_json="$(jq -c \
+              --arg reason "pane_work_signal_${pane_truth}" \
+              --argjson pws "$pws_classify" \
+              '. + {verdict:"blocked",reason:$reason,pane_work_signal:$pws,capacity:false}' <<<"$gate_json")"
+            gate_exit=1
+          else
+            gate_json="$(jq -c --argjson pws "$pws_classify" '. + {pane_work_signal:$pws,capacity:true}' <<<"$gate_json")"
+          fi
+        elif [[ "$pws_disabled" == "true" ]]; then
+          pane_truth="$pane_activity"
+          pane_source="ntm_health"
+          pane_reason="$pws_disabled_reason"
+        else
+          pane_truth="$pane_activity"
+          pane_source="ntm_health"
+          pane_reason="pws_script_unavailable"
+        fi
+        ;;
+      *)
+        pane_truth="$pane_activity"
+        pane_source="ntm_health"
+        pane_reason="ntm_non_codex"
+        ;;
+    esac
+
+    pws_by_pane="$(jq -nc \
+      --argjson base "$pws_by_pane" \
+      --arg pane "$pane" \
+      --arg agent_kind "$pane_agent" \
+      --arg ntm_status "$pane_status" \
+      --arg ntm_activity "$pane_activity" \
+      --arg ntm_process "$pane_process" \
+      --arg truth_state "$pane_truth" \
+      --arg truth_source "$pane_source" \
+      --arg truth_reason "$pane_reason" \
+      --argjson disagrees "$pane_disagrees" \
+      '$base + {($pane): {agent_kind:$agent_kind,ntm_status:$ntm_status,ntm_activity:$ntm_activity,ntm_process_status:$ntm_process,truth_state:$truth_state,truth_source:$truth_source,truth_reason:$truth_reason,disagrees_with_ntm_health:$disagrees}}')"
 
     jq -nc \
       --arg pane "$pane" \
       --argjson exit_code "$gate_exit" \
       --argjson gate "$gate_json" \
-      '{pane:($pane|tonumber? // $pane),exit_code:$exit_code,gate:$gate}' >>"$tmp"
+      --argjson original_gate "$gate_json_original" \
+      '{pane:($pane|tonumber? // $pane),exit_code:$exit_code,gate:$gate,original_gate:$original_gate}' >>"$tmp"
   done
 
-  jq -s --arg session "$SESSION" '{session:$session,panes:.}' "$tmp"
+  jq -s \
+    --arg session "$SESSION" \
+    --argjson pane_work_signal_sampled "$pws_sampled" \
+    --argjson pane_work_signal_disabled "$pws_disabled" \
+    --arg pane_work_signal_disabled_reason "$pws_disabled_reason" \
+    --argjson pane_work_signal_by_pane "$pws_by_pane" \
+    --argjson pane_work_signal_disagreements "$pws_disagreements" \
+    --argjson pane_work_signal_soft_violations "$pws_soft" \
+    '{session:$session,panes:.,
+      pane_work_signal_sampled:$pane_work_signal_sampled,
+      pane_work_signal_disabled:$pane_work_signal_disabled,
+      pane_work_signal_disabled_reason:(if $pane_work_signal_disabled_reason == "" then null else $pane_work_signal_disabled_reason end),
+      pane_work_signal_by_pane:$pane_work_signal_by_pane,
+      pane_work_signal_disagreements:$pane_work_signal_disagreements,
+      pane_work_signal_soft_violations:$pane_work_signal_soft_violations,
+      idle_capacity_source:(if $pane_work_signal_sampled then "pane_work_signal_for_codex" else "ntm_health" end)
+    }' "$tmp"
   rm -f "$tmp"
 }
 
@@ -1173,6 +1309,7 @@ jq -nc \
   --argjson frozen_detector "$FROZEN_DETECTOR_SUMMARY" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --argjson value_gap "$VALUE_GAP_RESULT" \
+  --argjson dispatch_capacity "$DISPATCH_CAPACITY_RESULT" \
   --arg send_output "$send_output" \
   '{
     ts:$ts,event:$event,task_id:$task_id,repo:$repo,session:$session,pane:($pane|tonumber),
@@ -1204,6 +1341,14 @@ jq -nc \
     frozen_detector_l60_all_present:($frozen_detector.l60_all_present // false),
     frozen_detector_soft_violations:($frozen_detector.soft_violations // []),
     frozen_detector_durable_receipts:($frozen_detector.durable_receipts // []),
+    dispatch_capacity:$dispatch_capacity,
+    pane_work_signal_sampled:($dispatch_capacity.pane_work_signal_sampled // false),
+    pane_work_signal_disabled:($dispatch_capacity.pane_work_signal_disabled // false),
+    pane_work_signal_disabled_reason:($dispatch_capacity.pane_work_signal_disabled_reason // null),
+    pane_work_signal_by_pane:($dispatch_capacity.pane_work_signal_by_pane // {}),
+    pane_work_signal_disagreements:($dispatch_capacity.pane_work_signal_disagreements // []),
+    pane_work_signal_soft_violations:($dispatch_capacity.pane_work_signal_soft_violations // []),
+    idle_capacity_source:($dispatch_capacity.idle_capacity_source // "ntm_health"),
     value_gap:$value_gap,value_gap_dimension_scanned:($value_gap.value_gap_dimension_scanned // null),
     value_gap_finding:($value_gap.value_gap_finding // null),bead_filed_id:($value_gap.bead_filed_id // null),
     agent_mail_fd_status:($agent_mail_fd.status // null),agent_mail_fd_total_fds:($agent_mail_fd.total_fds // null),
@@ -1261,6 +1406,7 @@ jq -nc \
   --argjson frozen_detector "$FROZEN_DETECTOR_SUMMARY" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --argjson value_gap "$VALUE_GAP_RESULT" \
+  --argjson dispatch_capacity "$DISPATCH_CAPACITY_RESULT" \
   '{
     ts:$ts,run_id:$run_id,task_id:$task_id,phase:$phase,phase_reason:$phase_reason,
     tick_class:$tick_class,prompt_file:$prompt_file,dispatch_status:$status,
@@ -1292,6 +1438,14 @@ jq -nc \
     frozen_detector_l60_all_present:($frozen_detector.l60_all_present // false),
     frozen_detector_soft_violations:($frozen_detector.soft_violations // []),
     frozen_detector_durable_receipts:($frozen_detector.durable_receipts // []),
+    dispatch_capacity:$dispatch_capacity,
+    pane_work_signal_sampled:($dispatch_capacity.pane_work_signal_sampled // false),
+    pane_work_signal_disabled:($dispatch_capacity.pane_work_signal_disabled // false),
+    pane_work_signal_disabled_reason:($dispatch_capacity.pane_work_signal_disabled_reason // null),
+    pane_work_signal_by_pane:($dispatch_capacity.pane_work_signal_by_pane // {}),
+    pane_work_signal_disagreements:($dispatch_capacity.pane_work_signal_disagreements // []),
+    pane_work_signal_soft_violations:($dispatch_capacity.pane_work_signal_soft_violations // []),
+    idle_capacity_source:($dispatch_capacity.idle_capacity_source // "ntm_health"),
     value_gap:$value_gap,value_gap_dimension_scanned:($value_gap.value_gap_dimension_scanned // null),
     value_gap_finding:($value_gap.value_gap_finding // null),bead_filed_id:($value_gap.bead_filed_id // null),
     agent_mail_fd_status:($agent_mail_fd.status // null),agent_mail_fd_total_fds:($agent_mail_fd.total_fds // null),

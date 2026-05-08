@@ -108,6 +108,69 @@
         }
       }
     },
+    "dispatch_capacity": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "pane_work_signal_sampled": {
+      "type": "boolean"
+    },
+    "pane_work_signal_disabled": {
+      "type": "boolean"
+    },
+    "pane_work_signal_disabled_reason": {
+      "type": ["string", "null"],
+      "enum": ["pws_disabled_via_env", "pws_disabled_via_file", null]
+    },
+    "pane_work_signal_by_pane": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["agent_kind", "ntm_status", "ntm_activity", "truth_state", "truth_source", "truth_reason"],
+        "properties": {
+          "agent_kind": {
+            "type": "string"
+          },
+          "ntm_status": {
+            "type": "string"
+          },
+          "ntm_activity": {
+            "type": "string"
+          },
+          "truth_state": {
+            "type": "string"
+          },
+          "truth_source": {
+            "type": "string"
+          },
+          "truth_reason": {
+            "type": "string"
+          },
+          "disagrees_with_ntm_health": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "pane_work_signal_disagreements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["pane", "ntm_activity", "ntm_status", "truth_state"]
+      }
+    },
+    "pane_work_signal_soft_violations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "idle_capacity_source": {
+      "enum": ["pane_work_signal_for_codex", "ntm_health"]
+    },
     "value_gap": {
       "type": "object",
       "additionalProperties": true
