@@ -20,6 +20,15 @@ Sister orchs MUST sync at tick start via `./sync.sh` (or symlink-cache locally).
 4. **feedback_flywheel_owns_continuous_productivity_no_downtime_unless_josh_blocker.md**
    flywheel:1 owns fleet productivity continuously. Peer-orch idle >5min + workers WAITING + non-empty findings = productivity-escalation xpane SAME TICK. 9-source always-available-work hierarchy. True Josh-blocker = Pushover+mac-alert. NEVER silent.
 
+5. **feedback_foundational_tool_error_halt_class.md**
+   Foundational tool failures are halt-class substrate failures. Repair or prove the tool path before continuing with local task work.
+
+6. **feedback_substrate_loss_worker_commit_orphan.md**
+   Lost worker substrate creates possible orphan commits and callbacks. Reconcile commits, files, callback delivery, and bead state before redispatch or close.
+
+7. **feedback_tactical_execution_licensed.md**
+   Mission lock licenses tactical execution. Once the locked next bounded action is known, execute it unless new evidence invalidates the lock.
+
 ## How to consume
 
 - At tick start, every orch should `bash /Users/josh/.flywheel/canonical-meta-rules/sync.sh` to fetch latest into local cache.
@@ -142,6 +151,26 @@ If ALL nine return zero, then session is genuinely caught up — surface to Josh
 - `project_self_sustaining_company_paradigm_2026_05_04.md` (architecture-health frame)
 
 ---
+# feedback_foundational_tool_error_halt_class.md
+
+# Foundational Tool Error Is a Halt Class
+
+---
+source: /Users/josh/.claude/projects/-Users-josh-Developer-alpsinsurance/memory/feedback-foundational-tool-error-halt-class.md
+imported_by: flywheel-c1zgt
+imported_at: 2026-05-05
+---
+
+When a foundational tool blocks execution, stop the current task and repair the
+tooling substrate first. Do not work around missing dispatch, callback, bead,
+agent-mail, or pane-routing primitives as if they were local task friction.
+
+Apply when the failing tool owns fleet coordination, task accounting, callback
+delivery, shared state mutation, or command transport. The valid next action is
+bounded tool repair, an evidence-backed unblock, or explicit escalation with a
+probe ledger.
+
+---
 # feedback_single_capture_misses_freeze.md
 
 ---
@@ -175,6 +204,45 @@ This is the L91/L95 sibling: L91 catches first-tick non-start, L95 catches stall
 - L95 worker-stall-recovery-protocol
 - `feedback_orchestrator_is_the_killer_not_codex.md` (sibling — single-frame misread of ERROR)
 - `.flywheel/scripts/frozen-pane-detector.sh` (canonical detector, byte-delta sampling)
+
+---
+# feedback_substrate_loss_worker_commit_orphan.md
+
+# Substrate Loss Creates Worker Commit Orphans
+
+---
+source: /Users/josh/.claude/projects/-Users-josh-Developer-alpsinsurance/memory/feedback-substrate-loss-worker-commit-orphan.md
+imported_by: flywheel-c1zgt
+imported_at: 2026-05-05
+---
+
+If a worker's substrate link is lost, do not assume its commits, callback, file
+reservations, or bead state landed. Reconcile the worker's actual commit state,
+changed files, callback delivery, and bead status before redispatching or
+declaring the task complete.
+
+The orchestrator owns orphan cleanup. A lost worker session must produce either
+an integrated commit/callback trail or a clear no-integration receipt with the
+files and bead IDs named.
+
+---
+# feedback_tactical_execution_licensed.md
+
+# Tactical Execution Licensed by Mission Lock
+
+---
+source: /Users/josh/.claude/projects/-Users-josh-Developer-alpsinsurance/memory/feedback-tactical-execution-licensed-by-mission-lock.md
+imported_by: flywheel-c1zgt
+imported_at: 2026-05-05
+---
+
+When mission lock names the tactical next action, execute that action instead
+of re-opening strategy unless new evidence invalidates the lock. Planning and
+research are subordinate to the locked mission once the concrete operation is
+selected.
+
+Use this to prevent question-shaped deferral after the system has already
+identified the next bounded, in-doctrine move.
 
 ---
 # feedback_xpane_recovery_recommendations_must_verify_canonical_flags_and_protections.md
