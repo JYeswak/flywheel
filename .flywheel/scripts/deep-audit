@@ -1,0 +1,393 @@
+#!/usr/bin/env python3
+"""Doctrine-tier deep audit contract for the flywheel loop."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
+from collections import Counter, defaultdict
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any
+
+
+VERSION = "flywheel.deep-audit.v1"
+DEFAULT_REPO = "/Users/josh/Developer/flywheel"
+DEFAULT_FUCKUP_LOG = Path.home() / ".local/state/flywheel/fuckup-log.jsonl"
+DEFAULT_AUTOLOOP_LOG = Path.home() / ".local/state/flywheel/autoloop.jsonl"
+DEFAULT_RECEIPT_DIR = ".flywheel/deep-audit-receipts"
+LOOKBACK_HOURS = 12
+PROMOTION_EVENT_THRESHOLD = 3
+
+STEPS = [
+    ("AUTOLOOP RECEIPT REVIEW", 5, "Read last 12h of autoloop JSONL and identify sustained warn/fail repos."),
+    ("FUCKUP-LOG CROSS-REPO AGGREGATE", 5, "Group last 12h fuckup-log rows by trauma_class and repo."),
+    ("TICK-CONTRACT VIOLATION RATE", 5, "Compute per-repo and per-check tick violation rates."),
+    ("INCIDENTS.md DELTA", 5, "Inspect recent INCIDENTS.md deltas and cross-reference trauma classes."),
+    ("GAP-TO-BEADS", 10, "Plan flywheel Beads for canonical L-rule, doctor invariant, or template gaps."),
+    ("WORK THROUGH BEADS", 24, "Dispatch or work doctrine Beads until queue empty or budget is hit."),
+    ("DOC SYNC + LOCK", 5, "Plan docs sync, canonical doctrine redistribution, and lock state."),
+    ("SHUTDOWN", 1, "Write shutdown state and next doctrine tick schedule."),
+]
+
+
+def utc_now() -> datetime:
+    return datetime.now(timezone.utc).replace(microsecond=0)
+
+
+def iso(dt: datetime) -> str:
+    return dt.astimezone(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
+
+
+def parse_time(value: Any) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def read_jsonl(path: Path, since: datetime) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    if not path.exists():
+        return rows
+    for raw in path.read_text(encoding="utf-8", errors="ignore").splitlines():
+        if not raw.strip():
+            continue
+        try:
+            row = json.loads(raw)
+        except json.JSONDecodeError:
+            continue
+        ts = parse_time(row.get("ts") or row.get("created_at") or row.get("generated_at"))
+        if ts is None or ts >= since:
+            rows.append(row)
+    return rows
+
+
+def load_fixture(path: str | None) -> dict[str, Any]:
+    if not path:
+        return {}
+    return json.loads(Path(path).read_text(encoding="utf-8"))
+
+
+def repo_for(row: dict[str, Any]) -> str:
+    return str(row.get("repo") or row.get("repo_path") or row.get("project_path") or row.get("project") or "unknown")
+
+
+def trauma_for(row: dict[str, Any]) -> str:
+    return str(row.get("trauma_class") or row.get("class") or row.get("failure_class") or "unknown")
+
+
+def step_rows() -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    elapsed = 0
+    for idx, (name, minutes, description) in enumerate(STEPS, start=1):
+        elapsed += minutes
+        rows.append(
+            {
+                "step": idx,
+                "name": name,
+                "budget_minutes": minutes,
+                "cumulative_budget_minutes": elapsed,
+                "description": description,
+                "planned_actions": planned_actions_for(name),
+            }
+        )
+    return rows
+
+
+def planned_actions_for(name: str) -> list[str]:
+    return {
+        "AUTOLOOP RECEIPT REVIEW": ["read_autoloop_receipts", "flag_sustained_warn_fail_repos"],
+        "FUCKUP-LOG CROSS-REPO AGGREGATE": ["aggregate_trauma_class_by_repo", "classify_l56_candidates"],
+        "TICK-CONTRACT VIOLATION RATE": ["compute_worker_orch_violation_rates", "propose_soft_to_warn_graduations"],
+        "INCIDENTS.md DELTA": ["inspect_recent_incidents_deltas", "cross_reference_other_repos"],
+        "GAP-TO-BEADS": ["plan_or_update_flywheel_beads", "attach_fuckup_log_or_incidents_evidence"],
+        "WORK THROUGH BEADS": ["dispatch_only_in_apply_mode", "stop_at_budget"],
+        "DOC SYNC + LOCK": ["plan_agents_readme_sync", "plan_flywheel_loop_init", "plan_lock_if_structural"],
+        "SHUTDOWN": ["write_shutdown_state", "schedule_next_doctrine_tick"],
+    }[name]
+
+
+def autoloop_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    status_by_repo: dict[str, Counter[str]] = defaultdict(Counter)
+    for row in rows:
+        status = str(row.get("doctor_status") or row.get("status") or row.get("doctor") or "unknown")
+        status_by_repo[repo_for(row)][status] += 1
+    needs_triage = [
+        {"repo": repo, "warn": counts.get("warn", 0), "fail": counts.get("fail", 0)}
+        for repo, counts in sorted(status_by_repo.items())
+        if counts.get("warn", 0) + counts.get("fail", 0) >= 2
+    ]
+    return {"rows_read": len(rows), "repos_needing_triage": needs_triage}
+
+
+def fuckup_summary(rows: list[dict[str, Any]], existing_beads: dict[str, str]) -> dict[str, Any]:
+    grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for row in rows:
+        grouped[trauma_for(row)].append(row)
+
+    candidates: list[dict[str, Any]] = []
+    repo_deferrals: list[dict[str, Any]] = []
+    for trauma_class, items in sorted(grouped.items()):
+        repos = sorted({repo_for(item) for item in items})
+        if len(items) >= PROMOTION_EVENT_THRESHOLD and len(repos) >= 2:
+            candidates.append(
+                {
+                    "action": "planned_canonical_l_rule_promotion_bead",
+                    "trauma_class": trauma_class,
+                    "event_count": len(items),
+                    "repo_count": len(repos),
+                    "repos": repos,
+                    "bead_title": f"[deep-audit] promote trauma_class={trauma_class} to canonical L-rule",
+                    "owner_queue": "flywheel",
+                    "evidence_refs": evidence_refs(items),
+                }
+            )
+        elif len(items) >= PROMOTION_EVENT_THRESHOLD:
+            repo_deferrals.append(
+                {
+                    "trauma_class": trauma_class,
+                    "repo": repos[0] if repos else "unknown",
+                    "event_count": len(items),
+                    "route": "repo_orchestrator",
+                    "existing_bead": existing_beads.get(trauma_class),
+                    "no_bead_reason": None
+                    if trauma_class in existing_beads
+                    else "single_repo_trauma_left_for_repo_orchestrator_per_L56",
+                }
+            )
+    return {
+        "rows_read": len(rows),
+        "promotion_candidates": candidates,
+        "repo_orchestrator_deferrals": repo_deferrals,
+    }
+
+
+def evidence_refs(rows: list[dict[str, Any]]) -> list[str]:
+    refs: list[str] = []
+    for idx, row in enumerate(rows[:5], start=1):
+        refs.append(str(row.get("evidence_ref") or row.get("source_ref") or row.get("id") or f"fixture-row-{idx}"))
+    return refs
+
+
+def tick_violation_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    counts: Counter[tuple[str, str]] = Counter()
+    for row in rows:
+        check = str(row.get("check") or row.get("check_id") or row.get("failure_class") or "unknown")
+        counts[(repo_for(row), check)] += 1
+    graduation = [
+        {"repo": repo, "check": check, "count": count, "action": "consider_soft_to_warn_graduation"}
+        for (repo, check), count in sorted(counts.items())
+        if count >= PROMOTION_EVENT_THRESHOLD
+    ]
+    return {"rows_read": len(rows), "graduation_candidates": graduation}
+
+
+def incidents_summary(rows: list[dict[str, Any]], fuckup_rows: list[dict[str, Any]]) -> dict[str, Any]:
+    fuckup_repos_by_class: dict[str, set[str]] = defaultdict(set)
+    for row in fuckup_rows:
+        fuckup_repos_by_class[trauma_for(row)].add(repo_for(row))
+    cross_refs: list[dict[str, Any]] = []
+    for row in rows:
+        trauma_class = trauma_for(row)
+        repos = sorted(fuckup_repos_by_class.get(trauma_class, set()))
+        if len(repos) >= 2:
+            cross_refs.append(
+                {
+                    "trauma_class": trauma_class,
+                    "incident_repo": repo_for(row),
+                    "other_repos": repos,
+                    "action": "canonical_promotion_review",
+                }
+            )
+    return {"rows_read": len(rows), "cross_repo_incident_refs": cross_refs}
+
+
+def build_payload(args: argparse.Namespace) -> dict[str, Any]:
+    now = parse_time(args.now) or utc_now()
+    since = now - timedelta(hours=LOOKBACK_HOURS)
+    fixture = load_fixture(args.fixture)
+    autoloop_rows = fixture.get("autoloop_receipts")
+    if autoloop_rows is None:
+        autoloop_rows = read_jsonl(Path(args.autoloop_log).expanduser(), since)
+    fuckup_rows = fixture.get("fuckup_rows")
+    if fuckup_rows is None:
+        fuckup_rows = read_jsonl(Path(args.fuckup_log).expanduser(), since)
+    tick_rows = fixture.get("tick_violations", [])
+    incident_rows = fixture.get("incidents_deltas", [])
+    existing_beads = fixture.get("existing_beads", {})
+    simulated_elapsed = float(fixture.get("simulated_elapsed_minutes", 0))
+    budget_exceeded = simulated_elapsed > args.budget_minutes
+    next_tick = now + timedelta(hours=12)
+
+    steps = step_rows()
+    payload = {
+        "schema_version": VERSION,
+        "command": "deep-audit",
+        "repo": str(Path(args.repo).expanduser()),
+        "mode": "apply" if args.apply else "dry_run",
+        "status": "handoff" if budget_exceeded else "planned" if args.dry_run or not args.apply else "applied",
+        "generated_at": iso(now),
+        "lookback_hours": LOOKBACK_HOURS,
+        "duration_budget_minutes": args.budget_minutes,
+        "simulated_elapsed_minutes": simulated_elapsed,
+        "budget_exceeded": budget_exceeded,
+        "steps": steps,
+        "autoloop_receipt_review": autoloop_summary(autoloop_rows),
+        "fuckup_log_cross_repo_aggregate": fuckup_summary(fuckup_rows, existing_beads),
+        "tick_contract_violation_rate": tick_violation_summary(tick_rows),
+        "incidents_delta": incidents_summary(incident_rows, fuckup_rows),
+        "gap_to_beads": {},
+        "docs_sync_lock": {
+            "docs_sync_status": "planned" if not budget_exceeded else "deferred_budget_exceeded",
+            "lock_status": "planned" if not budget_exceeded else "deferred_budget_exceeded",
+            "next_scheduled_doctrine_tick": iso(next_tick),
+        },
+        "handoff_receipt": None,
+        "receipt_path": None,
+        "would_call_external": [] if args.apply else ["br create --dry-run <planned-promotion-beads>"],
+    }
+    promotions = payload["fuckup_log_cross_repo_aggregate"]["promotion_candidates"]
+    deferrals = payload["fuckup_log_cross_repo_aggregate"]["repo_orchestrator_deferrals"]
+    payload["gap_to_beads"] = {
+        "planned_beads": promotions,
+        "repo_orchestrator_deferrals": deferrals,
+        "dispatch_work": "apply_mode_only",
+    }
+    if budget_exceeded:
+        payload["handoff_receipt"] = {
+            "reason": "duration_budget_exceeded",
+            "elapsed_minutes": simulated_elapsed,
+            "budget_minutes": args.budget_minutes,
+            "safe_local_work_remaining": False,
+            "next_action": "resume_deep_audit_from_receipt",
+        }
+    return payload
+
+
+def write_receipt(payload: dict[str, Any], repo: str, receipt_dir: str) -> str:
+    target_dir = Path(repo).expanduser() / receipt_dir
+    target_dir.mkdir(parents=True, exist_ok=True)
+    path = target_dir / f"deep-audit-{payload['generated_at'].replace(':', '').replace('-', '')}.json"
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    return str(path)
+
+
+def schema() -> dict[str, Any]:
+    return {
+        "schema_version": VERSION,
+        "command": "schema",
+        "required": ["schema_version", "command", "status", "steps", "docs_sync_lock"],
+        "status_enum": ["planned", "applied", "handoff"],
+        "step_names": [name for name, _, _ in STEPS],
+    }
+
+
+def static_command(command: str, args: argparse.Namespace) -> dict[str, Any] | str:
+    if command == "completion":
+        return "complete -W 'doctor health repair validate audit why completion --dry-run --apply --json --schema --fixture' deep-audit\n"
+    base = {"schema_version": VERSION, "command": command, "status": "pass", "repo": args.repo}
+    if command == "doctor":
+        base["checks"] = ["eight_step_contract_defined", "dry_run_default", "apply_writes_receipt_only"]
+    elif command == "health":
+        base["script"] = str(Path(__file__).resolve())
+    elif command == "repair":
+        base.update(
+            {
+                "dry_run": not args.apply,
+                "planned_actions": ["no automatic repair; rerun deep-audit --dry-run --json and file/update beads"],
+                "would_write": [] if not args.apply else [str(Path(args.repo) / args.receipt_dir)],
+            }
+        )
+    elif command == "validate":
+        base["required_steps"] = [name for name, _, _ in STEPS]
+    elif command == "audit":
+        base["writes_are_repo_local"] = True
+    elif command == "why":
+        base["explanation"] = "Deep audit turns repeated failure evidence into L56 promotion decisions on a bounded schedule."
+    return base
+
+
+def parse_args(argv: list[str]) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="deep-audit",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=(
+            "Run the 8-step doctrine-tier deep audit: AUTOLOOP RECEIPT REVIEW, "
+            "FUCKUP-LOG CROSS-REPO AGGREGATE, TICK-CONTRACT VIOLATION RATE, "
+            "INCIDENTS.md DELTA, GAP-TO-BEADS, WORK THROUGH BEADS, DOC SYNC + LOCK, SHUTDOWN."
+        ),
+    )
+    parser.add_argument("--repo", default=DEFAULT_REPO)
+    parser.add_argument("--dry-run", action="store_true", help="plan actions without mutating state")
+    parser.add_argument("--apply", action="store_true", help="write a receipt; live dispatch remains out of scope")
+    parser.add_argument("--json", action="store_true", help="emit JSON")
+    parser.add_argument("--schema", action="store_true", help="emit output schema summary")
+    parser.add_argument("--info", action="store_true", help="emit command metadata")
+    parser.add_argument("--examples", action="store_true", help="emit command examples")
+    parser.add_argument("--fixture", help="fixture JSON path for deterministic tests")
+    parser.add_argument("--budget-minutes", type=float, default=60.0)
+    parser.add_argument("--now", help="override current time for tests")
+    parser.add_argument("--receipt-dir", default=DEFAULT_RECEIPT_DIR)
+    parser.add_argument("--fuckup-log", default=str(DEFAULT_FUCKUP_LOG))
+    parser.add_argument("--autoloop-log", default=str(DEFAULT_AUTOLOOP_LOG))
+    parser.add_argument("command", nargs="?", choices=["doctor", "health", "repair", "validate", "audit", "why", "completion"])
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str]) -> int:
+    args = parse_args(argv)
+    if args.info:
+        payload = {
+            "schema_version": VERSION,
+            "command": "info",
+            "binary": str(Path(__file__).resolve()),
+            "repo": args.repo,
+            "dry_run_default": True,
+            "apply_writes_receipt_only": True,
+        }
+        print(json.dumps(payload, sort_keys=True) if args.json else json.dumps(payload, indent=2, sort_keys=True))
+        return 0
+    if args.examples:
+        payload = {
+            "schema_version": VERSION,
+            "command": "examples",
+            "examples": [
+                ".flywheel/scripts/deep-audit --dry-run --json",
+                ".flywheel/scripts/deep-audit --dry-run --json --fixture /tmp/deep-audit-fixture.json",
+                ".flywheel/scripts/deep-audit --apply --json",
+            ],
+        }
+        print(json.dumps(payload, sort_keys=True) if args.json else "\n".join(payload["examples"]))
+        return 0
+    if args.command:
+        result = static_command(args.command, args)
+        if isinstance(result, str):
+            print(result, end="")
+        else:
+            print(json.dumps(result, sort_keys=True) if args.json else json.dumps(result, indent=2, sort_keys=True))
+        return 0
+    if args.schema:
+        print(json.dumps(schema(), sort_keys=True) if args.json else json.dumps(schema(), indent=2, sort_keys=True))
+        return 0
+    if args.apply and args.dry_run:
+        print("ERR: choose only one of --dry-run or --apply", file=sys.stderr)
+        return 2
+    if not args.apply:
+        args.dry_run = True
+    payload = build_payload(args)
+    if args.apply:
+        payload["receipt_path"] = write_receipt(payload, args.repo, args.receipt_dir)
+    if args.json:
+        print(json.dumps(payload, sort_keys=True))
+    else:
+        print(json.dumps(payload, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))
