@@ -5192,3 +5192,51 @@ Evidence:
 - Skills: `~/.claude/skills/flywheel-recovery/SKILL.md` Forever-Rule
   `loop-integrity-still-limping`; `~/.claude/skills/loop-enforcement/SKILL.md`.
 - Beads: `flywheel-id0pm`, `flywheel-668a`, `flywheel-hg2w`.
+
+## three-surface-drift-detected
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `three-surface-drift-detected`
+
+Event Count: 78 events in 7 days
+
+Severity: medium
+
+Cost: Three-surface doctrine drift fired repeatedly after L96/L108 already
+named the correct convergence gate. The repeated rows turned a clear rule into
+ambient telemetry: workers had to rediscover whether cache freshness,
+propagator success, or actual `--check-three-surface` convergence was the
+truth source before closing drift work.
+
+Root Cause: The sync substrate and L-rules existed, but the recurring trauma
+class had no layer-2 INCIDENTS target. That let the ladder keep filing
+promotion candidates even when live flywheel convergence was clean, because the
+history had not been processed into durable repo doctrine.
+
+Forever-Rule: A three-surface drift event is not closed by cache freshness,
+prose, or a stale prior sync claim. The close evidence must include a
+machine-readable `sync.sh --check-three-surface --target <repo> --json`
+receipt. If `drift_count=0`, close or route the promotion candidate as
+processed; if drift remains nonzero, route to the existing L96/L108 repair
+path or a concrete sync/apply owner bead.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote three-surface-drift-detected`. The live flywheel check now reports
+`status=pass` and `drift_count=0`; this entry supplies the missing L56
+INCIDENTS coverage so future scans point at the L96/L108 convergence rule
+instead of filing duplicate promotion candidates.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L625`: first recorded
+  `three-surface-drift-detected` row in the current log.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L3606-L4331`: recent flywheel
+  cluster behind the promotion-candidate count.
+- `/Users/josh/.flywheel/canonical-meta-rules/sync.sh --check-three-surface --target /Users/josh/Developer/flywheel --json`:
+  `status=pass`, `drift_count=0`, and all three surfaces have 91 rules.
+- L96/L108 in `AGENTS.md` define the convergence rule and the
+  cache-is-not-convergence distinction.
+- Skills covered: `flywheel`, `flywheel-doctor-author`; no new skill gap.
+- Bead: `flywheel-g9gbe`.
