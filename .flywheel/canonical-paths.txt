@@ -91,6 +91,8 @@ agentmail_registration_broadcast_tests	tests/agentmail-registration-broadcast.sh
 agent_mail_fd_doctor	.flywheel/scripts/agent-mail-fd-doctor.sh	flywheel-ntaf	Agent Mail file-descriptor doctor with child PID, numeric FD, max FD, lock FD, plist maxfiles, and service resource-limit checks.
 agent_mail_restart_helper	.flywheel/scripts/agent-mail-restart.sh	flywheel-ntaf	Dry-run-first launchctl bootout/bootstrap/kickstart helper for Agent Mail restart and child PID verification.
 agent_mail_fd_doctor_tests	tests/agent-mail-fd-doctor.sh	flywheel-ntaf	Fixture-backed tests for service resource limits, lock FD warnings, total FD failures, and flywheel-loop doctor wiring.
+orphaned_mcp_tool_call_probe	.flywheel/scripts/orphaned-mcp-tool-call-probe.py	flywheel-2b0n	Doctor producer joining tools/call, notifications/cancelled, and response rows to count cancelled MCP tool calls that never resolve.
+orphaned_mcp_tool_call_tests	tests/orphaned-mcp-tool-call-doctor.sh	flywheel-2b0n	Fixture-backed tests for unresolved-after-cancel, resolved-after-cancel, pane-capture-unavailable, Agent Mail FD-pressure-only, doctor JSON wiring, and promotion route.
 codex_watchtower_daily	~/.local/bin/codex-watchtower-daily.sh	flywheel-ezyf	Daily openai/codex issues/releases ingest that feeds tick Step 4t and durable high-relevance ledgers.
 codex_cli_tracker_skill	~/.claude/skills/codex-cli-tracker	flywheel-ezyf	Skill substrate for Codex pinned-version constraints, upstream issue map, recovery patterns, and upstream comment candidates.
 codex_watchtower_tests	tests/codex-watchtower.sh	flywheel-ezyf	Validation harness for Codex watchtower skill refs, daily ingest, launchd schedule, incident evidence, and tick Step 4t wiring.

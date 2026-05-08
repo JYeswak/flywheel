@@ -22,6 +22,8 @@ DISPATCH_CONTRACT_THRESHOLD="${DOCTOR_SIGNAL_DISPATCH_CONTRACT_THRESHOLD:-5}"
 ROOT_CAUSE_FLEET_SKILL_DISCOVERY="${DOCTOR_SIGNAL_ROOT_CAUSE_FLEET_SKILL_DISCOVERY-}"
 FLEET_SKILL_DISCOVERY_PENDING_THRESHOLD="${DOCTOR_SIGNAL_FLEET_SKILL_DISCOVERY_PENDING_THRESHOLD:-1}"
 FLEET_SKILL_DISCOVERY_SUSPICIOUS_THRESHOLD="${DOCTOR_SIGNAL_FLEET_SKILL_DISCOVERY_SUSPICIOUS_THRESHOLD:-1}"
+ROOT_CAUSE_ORPHANED_MCP_TOOL_CALL="${DOCTOR_SIGNAL_ROOT_CAUSE_ORPHANED_MCP_TOOL_CALL-flywheel-2b0n}"
+ORPHANED_MCP_TOOL_CALL_THRESHOLD="${DOCTOR_SIGNAL_ORPHANED_MCP_TOOL_CALL_THRESHOLD:-1}"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -125,6 +127,7 @@ root_cause_for_symptom() {
     pws_false_idle) printf '%s\n' "$ROOT_CAUSE_PWS_FALSE_IDLE" ;;
     dispatch_contract) printf '%s\n' "$ROOT_CAUSE_DISPATCH_CONTRACT" ;;
     fleet_skill_discovery) printf '%s\n' "$ROOT_CAUSE_FLEET_SKILL_DISCOVERY" ;;
+    orphaned_mcp_tool_call) printf '%s\n' "$ROOT_CAUSE_ORPHANED_MCP_TOOL_CALL" ;;
     *) printf '\n' ;;
   esac
 }
@@ -273,7 +276,13 @@ FLEET_SKILL_DISCOVERY_TRIGGER=0
 if [ "${FLEET_SKILL_DISCOVERY_PENDING:-0}" -ge "${FLEET_SKILL_DISCOVERY_PENDING_THRESHOLD:-1}" ] || [ "${FLEET_SKILL_DISCOVERY_SUSPICIOUS:-0}" -ge "${FLEET_SKILL_DISCOVERY_SUSPICIOUS_THRESHOLD:-1}" ]; then
   FLEET_SKILL_DISCOVERY_TRIGGER=1
 fi
-if [ "$STATUS" != "fail" ] && [ "$ROOT_DRIFT" != "true" ] && [ "${DOCTRINE_3_SURFACE_DIVERGENT_COUNT:-0}" -le 0 ] && [ "${FLEET_L_RULE_LAG_COUNT:-0}" -le 0 ] && [ "${PUNTED_COUNT:-0}" -le 0 ] && [ "${PEER_ORCH_IDLE_ON_BLOCKER_COUNT:-0}" -le 0 ] && [ "$STORAGE_TRIGGER" -eq 0 ] && [ "$HEADLESS_BROWSER_TRIGGER" -eq 0 ] && [ "$AGENTMAIL_IDENTITY_TRIGGER" -eq 0 ] && [ "$DAILY_REPORT_TRIGGER" -eq 0 ] && [ "${REPO_LOCAL_CLIS_BELOW:-0}" -le 0 ] && [ "$MONOLITHIC_FILE_DEBT_TRIGGER" -eq 0 ] && [ "$WIRE_OR_EXPLAIN_TRIGGER" -eq 0 ] && [ "$PWS_FALSE_IDLE_TRIGGER" -eq 0 ] && [ "$DISPATCH_CONTRACT_TRIGGER" -eq 0 ] && [ "$FLEET_SKILL_DISCOVERY_TRIGGER" -eq 0 ]; then
+ORPHANED_MCP_TOOL_CALL_COUNT="$(jq -r '.orphaned_mcp_tool_call_count // .orphaned_mcp_tool_call_detail.orphaned_mcp_tool_call_count // 0' <<<"$DOCTOR_JSON")"
+ORPHANED_MCP_TOOL_CALL_SOURCE="$(jq -r '.orphaned_mcp_tool_call_detail.source // "unknown"' <<<"$DOCTOR_JSON")"
+ORPHANED_MCP_TOOL_CALL_TRIGGER=0
+if [ "${ORPHANED_MCP_TOOL_CALL_COUNT:-0}" -ge "${ORPHANED_MCP_TOOL_CALL_THRESHOLD:-1}" ]; then
+  ORPHANED_MCP_TOOL_CALL_TRIGGER=1
+fi
+if [ "$STATUS" != "fail" ] && [ "$ROOT_DRIFT" != "true" ] && [ "${DOCTRINE_3_SURFACE_DIVERGENT_COUNT:-0}" -le 0 ] && [ "${FLEET_L_RULE_LAG_COUNT:-0}" -le 0 ] && [ "${PUNTED_COUNT:-0}" -le 0 ] && [ "${PEER_ORCH_IDLE_ON_BLOCKER_COUNT:-0}" -le 0 ] && [ "$STORAGE_TRIGGER" -eq 0 ] && [ "$HEADLESS_BROWSER_TRIGGER" -eq 0 ] && [ "$AGENTMAIL_IDENTITY_TRIGGER" -eq 0 ] && [ "$DAILY_REPORT_TRIGGER" -eq 0 ] && [ "${REPO_LOCAL_CLIS_BELOW:-0}" -le 0 ] && [ "$MONOLITHIC_FILE_DEBT_TRIGGER" -eq 0 ] && [ "$WIRE_OR_EXPLAIN_TRIGGER" -eq 0 ] && [ "$PWS_FALSE_IDLE_TRIGGER" -eq 0 ] && [ "$DISPATCH_CONTRACT_TRIGGER" -eq 0 ] && [ "$FLEET_SKILL_DISCOVERY_TRIGGER" -eq 0 ] && [ "$ORPHANED_MCP_TOOL_CALL_TRIGGER" -eq 0 ]; then
   jq -nc --arg reason "doctor_status=$STATUS" '{action:"noop",reason:$reason}'
   exit 0
 fi
@@ -423,6 +432,14 @@ if [ "$FLEET_SKILL_DISCOVERY_TRIGGER" -eq 1 ]; then
     "Auto-created by doctor-signal-bead-promotion.sh. Doctor reports fleet_skill_discovery.status=$FLEET_SKILL_DISCOVERY_STATUS pending_coordinator_action_count=$FLEET_SKILL_DISCOVERY_PENDING suspicious_callback_warning_count=$FLEET_SKILL_DISCOVERY_SUSPICIOUS malformed_rows_count=$FLEET_SKILL_DISCOVERY_MALFORMED top_candidate=$FLEET_SKILL_DISCOVERY_TOP. Skill discovery rows must flow to skillos and long worker callbacks must report skill_discoveries/sd_ids or an explicit legal no-discovery reason; see .flywheel/PLANS/fleet-skill-reporting-2026-05-01.md."
 fi
 
+if [ "$ORPHANED_MCP_TOOL_CALL_TRIGGER" -eq 1 ]; then
+  handle_symptom \
+    "orphaned_mcp_tool_call" \
+    'orphaned_mcp_tool_call|cancelled.*mcp.*tool|tools/call.*unresolved|notifications/cancelled' \
+    "[auto-doctor:orphaned_mcp_tool_call] orphaned_mcp_tool_call_count=$ORPHANED_MCP_TOOL_CALL_COUNT" \
+    "Auto-created by doctor-signal-bead-promotion.sh. Doctor reports orphaned_mcp_tool_call_count=$ORPHANED_MCP_TOOL_CALL_COUNT source=$ORPHANED_MCP_TOOL_CALL_SOURCE. Cancelled MCP tools/call requests must either resolve after notifications/cancelled or route runtime lifecycle repair instead of living only in pane scrollback; see openai/codex#20925 and flywheel-2b0n."
+fi
+
 if [ "$DB_STATUS" = "fail" ]; then
   handle_symptom \
     "db_fail" \
@@ -480,6 +497,8 @@ jq -nc \
   --argjson fleet_skill_discovery_suspicious "${FLEET_SKILL_DISCOVERY_SUSPICIOUS:-0}" \
   --argjson fleet_skill_discovery_malformed "${FLEET_SKILL_DISCOVERY_MALFORMED:-0}" \
   --arg fleet_skill_discovery_top "$FLEET_SKILL_DISCOVERY_TOP" \
+  --argjson orphaned_mcp_tool_call_count "${ORPHANED_MCP_TOOL_CALL_COUNT:-0}" \
+  --arg orphaned_mcp_tool_call_source "$ORPHANED_MCP_TOOL_CALL_SOURCE" \
   --argjson dry_run "$([[ "$DRY_RUN" = "1" ]] && printf true || printf false)" \
   --arg db "$DB_STATUS" \
   --argjson actions "$actions_json" \
@@ -487,6 +506,6 @@ jq -nc \
     action:"promoted",
     dry_run:$dry_run,
     doctor_status:$doctor_status,
-    symptoms:{leakage:$leakage, drift:$drift, root_drift:$root_drift, ticks_punted_count:$punted_count, peer_orch_blocker:{peer_orch_idle_on_blocker_count:$peer_orch_idle_on_blocker_count,peer_orch_blocker_age_seconds:$peer_orch_blocker_age_seconds}, storage:{status:$storage_status,disk_free_pct:$storage_free_pct,stale_baks_count:$storage_stale_baks}, agent_browser_leak:{status:$headless_browser_status,headless_agent_browser_count:$headless_browser_count,oldest_age_minutes:$headless_browser_oldest}, agentmail_identity:{identity_registry_drift:$identity_registry_drift,identity_token_orphan:$identity_token_orphan,orphan_tokens_unswept_count:$orphan_tokens_unswept_count,identity_rotation_count_24h:$identity_rotation_count_24h,identity_chain_max_length:$identity_chain_max_length,agentmail_pending_registration_broadcasts_count:$agentmail_pending_registration_broadcasts}, daily_report:{status:$daily_report_status,daily_report_age_hours:$daily_report_age_hours}, monolithic_file_debt:{oversized_files_count:$oversized_files_count}, wire_or_explain:{status:$wire_or_explain_status,unresolved_count:$wire_or_explain_unresolved,overdue_count:$wire_or_explain_overdue,skill_candidate_backlog_count:$wire_or_explain_skill_backlog,skill_candidate_relay_failure_count:$wire_or_explain_skill_relay_failure}, pws_false_idle:{ntm_codex_false_idle_error_count:$pws_false_idle_error_count}, dispatch_contract:{dispatch_contract_violations:$dispatch_contract_violations}, fleet_skill_discovery:{status:$fleet_skill_discovery_status,pending_coordinator_action_count:$fleet_skill_discovery_pending,suspicious_callback_warning_count:$fleet_skill_discovery_suspicious,malformed_rows_count:$fleet_skill_discovery_malformed,top_candidate:$fleet_skill_discovery_top}, db:$db},
+    symptoms:{leakage:$leakage, drift:$drift, root_drift:$root_drift, ticks_punted_count:$punted_count, peer_orch_blocker:{peer_orch_idle_on_blocker_count:$peer_orch_idle_on_blocker_count,peer_orch_blocker_age_seconds:$peer_orch_blocker_age_seconds}, storage:{status:$storage_status,disk_free_pct:$storage_free_pct,stale_baks_count:$storage_stale_baks}, agent_browser_leak:{status:$headless_browser_status,headless_agent_browser_count:$headless_browser_count,oldest_age_minutes:$headless_browser_oldest}, agentmail_identity:{identity_registry_drift:$identity_registry_drift,identity_token_orphan:$identity_token_orphan,orphan_tokens_unswept_count:$orphan_tokens_unswept_count,identity_rotation_count_24h:$identity_rotation_count_24h,identity_chain_max_length:$identity_chain_max_length,agentmail_pending_registration_broadcasts_count:$agentmail_pending_registration_broadcasts}, daily_report:{status:$daily_report_status,daily_report_age_hours:$daily_report_age_hours}, monolithic_file_debt:{oversized_files_count:$oversized_files_count}, wire_or_explain:{status:$wire_or_explain_status,unresolved_count:$wire_or_explain_unresolved,overdue_count:$wire_or_explain_overdue,skill_candidate_backlog_count:$wire_or_explain_skill_backlog,skill_candidate_relay_failure_count:$wire_or_explain_skill_relay_failure}, pws_false_idle:{ntm_codex_false_idle_error_count:$pws_false_idle_error_count}, dispatch_contract:{dispatch_contract_violations:$dispatch_contract_violations}, fleet_skill_discovery:{status:$fleet_skill_discovery_status,pending_coordinator_action_count:$fleet_skill_discovery_pending,suspicious_callback_warning_count:$fleet_skill_discovery_suspicious,malformed_rows_count:$fleet_skill_discovery_malformed,top_candidate:$fleet_skill_discovery_top}, orphaned_mcp_tool_call:{orphaned_mcp_tool_call_count:$orphaned_mcp_tool_call_count,source:$orphaned_mcp_tool_call_source}, db:$db},
     actions:$actions
   }'
