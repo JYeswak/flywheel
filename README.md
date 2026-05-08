@@ -946,6 +946,12 @@ for persistence. Dispatch rows record `pane_state_source`; valid values are
 `ntm_health`, `ntm_copy`, `raw_capture`, or `none`, and dispatch context treats
 `raw_capture` as a gate violation.
 
+Codex dispatch capacity has an additional defense-in-depth truth source:
+Pane Work Signal. The rollout proof lives in `tests/test_pws_integration_proof.sh`
+and writes `/tmp/flywheel-5ktd-final-receipt.md`. PWS owns per-pane Codex truth
+after a session is known; `flywheel-3bk` owns dynamic session coverage and
+session-level freshness.
+
 For README-only edits, a practical smoke check is:
 
 ```bash
