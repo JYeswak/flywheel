@@ -6108,3 +6108,61 @@ Evidence:
 - Skill: `~/.claude/skills/jeff-issue-chain/SKILL.md` section
   `FOREVER-RULE: jeff-dedupe-bead-stale-scope`.
 - Bead: `flywheel-cgnv5`.
+
+## parent-bead-dispatched-with-open-children
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `parent-bead-dispatched-with-open-children`
+
+Event Count: 5 events in 7 days
+
+Severity: medium
+
+Cost: Five dispatches sent workers to parent beads whose own close gates were
+blocked by open child decomposition work. The workers repeatedly rediscovered
+the same topology, ran read-only probes, and returned BLOCKED callbacks instead
+of advancing the actionable child beads.
+
+Root Cause: The idle dispatch path treated a parent bead as dispatchable because
+the parent itself was open, while the real work had already been decomposed into
+children. The Beads graph and parent notes carried enough evidence to route to
+the first open child, but the dispatch selector did not fail closed on parent
+close gates owned by open children.
+
+Forever-Rule: Do not dispatch a parent bead when its acceptance gate is owned by
+open child beads. Before dispatching a parent, inspect `br dep tree`, `br show`,
+and any parent close notes for open or in-progress children. If children remain,
+dispatch the first actionable child or emit a no-candidate receipt naming the
+blocked topology; do not spend a worker slot proving the parent still cannot
+close.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote parent-bead-dispatched-with-open-children`. This entry gives
+promotion-candidate bead `flywheel-9xi4q` durable L56 coverage and routes
+future rows to the idle dispatch gate and Beads child-DAG selection rule instead
+of creating duplicate parent-dispatch promotion candidates.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1198`: `flywheel-se3h` parent was
+  dispatched even though its notes required nine child beads
+  `flywheel-se3h.1-.9` to close first.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1205`: `flywheel-se3h` was sent to
+  a worker while open/in-progress topology children still blocked parent close.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1214`: the same `flywheel-se3h`
+  parent redispatch repeated the open-child close blocker.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1227`: later `flywheel-se3h`
+  dispatch still found nine open children and a parent validator note saying
+  children must close first.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1237`: a fifth `flywheel-se3h`
+  parent dispatch again found the child DAG open and returned a bounded child
+  dispatch next action.
+- Plan evidence: `.flywheel/PLANS/INFRA-GAP-SCAN-2026-05-05.md` D2.G4 and
+  DCT.8 name the idle dispatcher refusal rule for parents with open children.
+- Test evidence: `tests/failure-class-emit.sh` covers
+  `gate_unmet_open_children`.
+- Skill: `~/.claude/skills/beads-br/SKILL.md`.
+- Skill: `~/.claude/skills/dispatch-tool-contracts/SKILL.md`.
+- Bead: `flywheel-9xi4q`.
