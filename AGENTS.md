@@ -3753,6 +3753,325 @@ Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
 **Cross-references:** L61, L80, L91, L111, L120, and
 `feedback_evidence_pack_replaces_four_lens.md`.
 
+## L127 — PREDICTION-LOCK-RECEIPTS
+
+---
+id: L127
+title: Prediction-lock receipts for high-risk hypotheses
+status: long_term
+shipped: 2026-05-07
+review_due: 2026-11-07
+trauma_class: post-hoc-plan-rationalization
+---
+
+High-risk `/flywheel:plan` hypotheses MUST be pre-registered before execution
+starts. At the Phase 2 to Phase 3 convergence boundary, write
+`STATE.json.prediction_lock` plus `STATE.json.predictions[]` rows containing
+`prediction`, `ts`, `hash`, and `applies_at_phase`; the hash is SHA-256 over the
+canonical JSON serialization of the prediction text. The receipt is immutable
+after Phase 2: close gates fail on text/hash mismatch
+(`prediction_lock_post_hoc_amendment`) or prediction rows timestamped after the
+lock boundary (`prediction_lock_post_hoc_addition`).
+
+**Evidence:** Brenner disposition Proposal 3 in
+`.flywheel/PLANS/jeff-ecosystem-deep-dive-2026-05-01/brenner-2026-05-07/01-RESEARCH-DEEP-DIVE.md`;
+bead `flywheel-gau3q`; close-gate implementation in
+`.flywheel/scripts/quality-bar-close-gate.sh`; regression tests
+`tests/test_prediction_lock_receipt.sh` and
+`tests/test_prediction_lock_post_hoc_detection.sh`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+## L128 PLAN-CONVERGENCE-PROVED-WITH-DATA
+
+---
+id: L128
+title: Plan convergence proved with data
+status: long_term
+shipped: 2026-05-07
+review_due: 2026-11-07
+trauma_class: plan-convergence-by-vibes
+---
+
+A flywheel plan cannot ship if it cannot prove convergence with data. Six
+mechanisms together constitute the discipline:
+
+1. Hypothesis-slate with kill-conditions `[flywheel-ykkhv]` — every plan
+   declares 2-5 candidate strategies including one third-alternative; each has a
+   `kill_condition`. Phase 3 transition is refused otherwise.
+
+   Why: kills picoz failure-mode "plans converge by consensus, never declared
+   what would falsify them".
+
+2. Prediction-lock receipts `[flywheel-gau3q]` — `STATE.json.predictions[]` is
+   content-hashed at Phase 2 to Phase 3 transition; close-gate flags hash deltas
+   and post-hoc additions.
+
+   Why: kills picoz failure-mode "post-hoc rationalization without trace".
+
+3. ADD/EDIT/KILL deltas in idea duels `[flywheel-2xsag]` —
+   `dueling-idea-wizards` emits structured JSON deltas instead of prose;
+   validator rejects prose-only outputs.
+
+   Why: kills picoz failure-mode "idea duels produce prose, not mergeable
+   decision objects".
+
+4. Convergence telemetry in polish gate `[flywheel-xhfbw]` — each polish round
+   emits adds/edits/kills/no-deltas counts; close-gate requires kills >= adds
+   and `no_new_deltas` across 2 consecutive rounds for complex plans.
+
+   Why: kills picoz failure-mode "we said it converged but the data shows
+   otherwise".
+
+5. EV-anchored evidence with supports/refutes/informs `[flywheel-d3q0j]` —
+   compliance packs may include `evidence[]` with `EV-NNN` anchors and typed
+   relations; close-gate refuses unresolved anchors and active findings with
+   refuting evidence on file.
+
+   Why: kills picoz failure-mode "audit trail without relational structure".
+
+6. Advanced `/brenner` surfaces for evidence/anomaly/critique/assumption
+   recording `[flywheel-26hsk]` — research sessions record via experiment
+   encode, evidence add, anomaly create, critique create, and assumption create
+   instead of prose summaries.
+
+   Why: kills picoz failure-mode "research conclusions buried in prose, not
+   queryable".
+
+Close gate refuses ship if any of mechanisms 1 through 5 fail. Mechanism 6 is
+the upstream recording discipline that feeds mechanism 5.
+
+**Source:** Brenner research deep-dive 2026-05-07 in
+`.flywheel/PLANS/jeff-ecosystem-deep-dive-2026-05-01/brenner-2026-05-07/`.
+Picoz-killer doctrine: Joshua spent 30 days building picoz because no single
+rule said convergence had to be proved with data.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+## L129 — WORKER-SUBSTRATE-EXPLICIT
+
+---
+id: L129
+title: Worker substrate explicit for dispatch and convergence work
+status: long_term
+shipped: 2026-05-07
+review_due: 2026-11-07
+trauma_class: convergence-audit-bypass-codex-workers
+---
+
+Every schema v2 dispatch row and packet header MUST classify the worker
+substrate explicitly:
+`worker_substrate=codex-pane|claude-pane|background-agent|local` and
+`agent_type=codex|claude|unknown`. `/flywheel:dispatch` defaults NTM pane
+sends to `worker_substrate=codex-pane agent_type=codex`.
+
+Convergence, adversarial review, audit-wave, and synthesis work requires
+`worker_substrate=codex-pane` unless `JOSHUA_OVERRIDE` is present and logged by
+the worker-substrate lint gate with reason
+`convergence_to_background_agent_blocked` or `joshua_override`.
+
+**Why:** L120-L127 callback enforcement and L128 convergence-proved-with-data
+only compose when work travels through the visible NTM dispatch substrate.
+Background-agent side channels bypass dispatch-log, close-handler, callback
+contract, and validation evidence, so L128's data trail disappears.
+
+**Evidence:** bead `flywheel-2tv3`; plan
+`.flywheel/PLANS/dispatch-enforcement-2026-05-01.md`; lint gate
+`.flywheel/scripts/dispatch-worker-substrate-gate.sh`; command docs
+`~/.claude/commands/flywheel/dispatch.md` and
+`~/.claude/commands/flywheel/_shared/dispatch-template.md`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+**Cross-references:** L48, L50, L52, L53, L56, L60, L70, L71, L72, L96, L110,
+L116, and L120.
+
+## L130 — DISPATCH-SKILL-REQUIRED-HOOK-GATE
+
+---
+id: L130
+title: Dispatch skill required hook gate
+status: long_term
+shipped: 2026-05-07
+review_due: 2026-11-07
+trauma_class: dispatch-wrapper-bypass
+---
+
+Raw worker-dispatch `ntm send` commands are rejected unless they carry
+`/flywheel:dispatch` wrapper proof. The `dispatch_skill_required` hook gate
+matches worker-dispatch language such as dispatch-file reads, worker-tick
+parity, and task callback instructions; allow proof is
+`FLYWHEEL_DISPATCH_WRAPPER=1`, a `dispatch_skill_version` receipt, or
+`JOSHUA_OVERRIDE=1`. Per-gate disable remains available for false-positive
+recovery. Without this gate, dispatch-log entries do not exist and L120-L128
+enforcement can silent-fail.
+
+**Evidence:** bead `flywheel-wbjg`; hook
+`~/.claude/hooks/flywheel-loop-dispatch-transport-gate.sh`; tests
+`tests/test_dispatch_skill_required_blocks_raw_send.sh`,
+`tests/test_dispatch_skill_required_allows_with_wrapper.sh`,
+`tests/test_dispatch_skill_required_warn_mode.sh`, and
+`tests/test_dispatch_skill_required_disable_per_gate.sh`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+## L131 — PLIST-COVERAGE-DRIFT-DOCTOR-INVARIANT
+
+---
+id: L131
+title: Plist coverage drift doctor invariant
+status: long_term
+shipped: 2026-05-07
+review_due: 2026-11-07
+trauma_class: frozen-projection-of-mutable-state
+---
+
+Doctor `plist_coverage_drift` compares live sessions from
+`~/.local/state/flywheel/session-topology.jsonl` and `team-roster.jsonl` against
+`~/Library/LaunchAgents/com.zeststream.<session>.watcher.plist`. It reports
+`sessions_without_plist[]`, `plists_without_session[]`, and `missing_count`;
+severity is amber for 1-2 missing active-session watcher plists and red for 3+
+missing. Red blocks doctor health.
+
+This closes the `frozen-projection-of-mutable-state` trauma where recovery plans
+freeze the fleet roster at authoring time while new sessions are onboarded later
+and silently miss reboot survivability coverage.
+
+**Evidence:** bead `flywheel-f7u17`; mobile-eats gap-fill bead
+`flywheel-lndxj`; implementation in
+`~/.claude/skills/.flywheel/lib/misc.sh` and
+`~/.claude/skills/.flywheel/lib/portable/core.sh`; regression
+`tests/test_doctor_plist_coverage_drift.sh`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+## L132 — SCHEMA-VERSIONED-INGESTION-JEFF-DOCTRINE
+
+---
+id: L132
+title: Schema-versioned ingestion is required for Jeff lens pass
+status: long_term
+shipped: 2026-05-07
+review_due: 2026-11-07
+trauma_class: unversioned-contract-ingestion
+---
+
+Every contract, schema, receipt, and payload artifact carries an explicit
+`schema_version=N` field or a `<name>/v1` marker. The four-lens validator's Jeff
+lens treats bare unversioned artifacts as close blockers because unversioned
+ingestion makes contract evolution silent and unauditable.
+
+**Evidence:** memory
+`feedback_validator_must_check_four_lenses.md`; validator reason
+`contract_without_version`; bead `flywheel-prtr`; fixtures
+`tests/test_four_lens_jeff_version_contract_pass.sh` and
+`tests/test_four_lens_jeff_version_contract_fail.sh`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+## L133 — DATA-BACKED-DEFERRAL-DOCTOR-SURFACE
+
+---
+id: L133
+title: Data-backed deferral doctor surface
+status: long_term
+shipped: 2026-05-07
+review_due: 2026-11-07
+trauma_class: data-decides-not-meatpuppet
+---
+
+Doctor surfaces `data_backed_deferral` with saves, overrides, and recent
+violation counts from the fleet JSONL receipts. Status is `ok` when recent
+violations are zero, `warn` when violations are 1-4, and `fail` at 5 or more.
+The doctor field may include a single-line `last_suggested_action` summary, but
+must not echo raw pane scrollback or multiline draft text.
+
+This makes the doctrine "data decides, not human meatpuppet" visible every tick:
+the lint/enforcement side creates receipt rows, and doctor turns the rows into a
+stable machine-readable signal.
+
+**Evidence:** bead `flywheel-7mq1`; implementation in
+`~/.claude/skills/.flywheel/lib/misc.sh` and
+`~/.claude/skills/.flywheel/lib/portable/core.sh`; regressions
+`tests/test_doctor_data_backed_deferral_clean_state.sh`,
+`tests/test_doctor_data_backed_deferral_warn_threshold.sh`,
+`tests/test_doctor_data_backed_deferral_fail_threshold.sh`, and
+`tests/test_doctor_data_backed_deferral_no_raw_pane_text.sh`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+## L134 — TEAM-ROSTER-FRESHNESS-GATES-LOOPS
+
+---
+id: L134
+title: Team roster freshness gates loops
+status: long_term
+shipped: 2026-05-08
+review_due: 2026-11-08
+trauma_class: silent-session-loop
+---
+
+Doctor surfaces team-roster freshness per session. Pulse age greater than 15
+minutes is `DEAD` unless the latest roster event is dormant, paused, or
+teardown; `/flywheel:loop` refuses on missing roster rows or stale/missing
+pulse rows. Silent sessions cannot keep running loops from stale markers.
+
+**Evidence:** bead `flywheel-32so`; implementation in
+`~/.claude/skills/.flywheel/lib/session.sh`,
+`~/.claude/skills/.flywheel/lib/portable/core.sh`, and
+`~/.claude/commands/flywheel/loop.md`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+## L135 — SKILL-DISCOVERY-CALLBACK-FIELDS
+
+---
+id: L135
+title: Skill discovery callback fields
+status: long_term
+shipped: 2026-05-08
+review_due: 2026-11-08
+trauma_class: skill-discovery-substrate-unwired
+---
+
+Workers MUST report `skill_discoveries=<N> sd_ids=<list|none>` in DONE and
+BLOCKED callbacks. When discoveries are emitted, workers append rows to
+`~/.local/state/flywheel/skill-discoveries.jsonl` and include the emitted
+`sd-*` IDs. `skill_discoveries>0 sd_ids=none` rejects close. Legal
+no-discovery reasons are documented in the dispatch template.
+
+**Evidence:** bead `flywheel-nvny`; dispatch contract
+`~/.claude/commands/flywheel/_shared/dispatch-template.md`; worker contract
+`~/.claude/commands/flywheel/worker-tick.md`; validator
+`.flywheel/scripts/validate-skill-discovery-callback.sh`; tests
+`tests/test_skill_discovery_callback_valid.sh` and
+`tests/test_skill_discovery_callback_mismatch.sh`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+## L136 — ABSOLUTE-PATH-KEYING-FOR-CROSS-PROJECT-STATE
+
+---
+id: L136
+title: Absolute path keying for cross-project state
+status: long_term
+shipped: 2026-05-08
+review_due: 2026-11-08
+trauma_class: basename-keying-collision
+---
+
+Cross-project state is keyed by absolute path from `realpath` or `pwd -P`, not
+by repo basename. Same-basename workspaces collide silently. Migration rule:
+all `cm` calls include `--workspace <abs-path>`, and substrate JSONL uses
+`project_path` or `repo_path` rather than basename-only `project` when the row
+identifies a workspace.
+
+**Evidence:** Jeff ntm#132, commit `cb0a98de`; bead `flywheel-9f7h6`; memory
+`feedback_basename_keying_collision_class.md`; audit receipt
+`.flywheel/receipts/flywheel-9f7h6-cm-workspace-audit.md`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
 ## L137 — BEADS-MUTATIONS-USE-A-SERIAL-WRITE-LANE
 
 ---
