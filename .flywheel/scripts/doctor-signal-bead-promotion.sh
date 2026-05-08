@@ -17,6 +17,8 @@ ROOT_CAUSE_MONOLITHIC_FILE_DEBT="${DOCTOR_SIGNAL_ROOT_CAUSE_MONOLITHIC_FILE_DEBT
 ROOT_CAUSE_PEER_ORCH_BLOCKER="${DOCTOR_SIGNAL_ROOT_CAUSE_PEER_ORCH_BLOCKER-flywheel-vc3e}"
 ROOT_CAUSE_WIRE_OR_EXPLAIN="${DOCTOR_SIGNAL_ROOT_CAUSE_WIRE_OR_EXPLAIN-flywheel-2eow}"
 ROOT_CAUSE_PWS_FALSE_IDLE="${DOCTOR_SIGNAL_ROOT_CAUSE_PWS_FALSE_IDLE-flywheel-yqbku}"
+ROOT_CAUSE_DISPATCH_CONTRACT="${DOCTOR_SIGNAL_ROOT_CAUSE_DISPATCH_CONTRACT-}"
+DISPATCH_CONTRACT_THRESHOLD="${DOCTOR_SIGNAL_DISPATCH_CONTRACT_THRESHOLD:-5}"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -118,6 +120,7 @@ root_cause_for_symptom() {
     peer_orch_blocker) printf '%s\n' "$ROOT_CAUSE_PEER_ORCH_BLOCKER" ;;
     wire_or_explain) printf '%s\n' "$ROOT_CAUSE_WIRE_OR_EXPLAIN" ;;
     pws_false_idle) printf '%s\n' "$ROOT_CAUSE_PWS_FALSE_IDLE" ;;
+    dispatch_contract) printf '%s\n' "$ROOT_CAUSE_DISPATCH_CONTRACT" ;;
     *) printf '\n' ;;
   esac
 }
@@ -251,7 +254,13 @@ PWS_FALSE_IDLE_TRIGGER=0
 if [ "${PWS_FALSE_IDLE_ERROR_COUNT:-0}" -gt 0 ] || { [ "$PWS_FALSE_IDLE_STATUS" = "fail" ] && [ "$(jq -r '.pane_work_signal.error_count // 0' <<<"$DOCTOR_JSON")" -gt 0 ]; }; then
   PWS_FALSE_IDLE_TRIGGER=1
 fi
-if [ "$STATUS" != "fail" ] && [ "$ROOT_DRIFT" != "true" ] && [ "${DOCTRINE_3_SURFACE_DIVERGENT_COUNT:-0}" -le 0 ] && [ "${FLEET_L_RULE_LAG_COUNT:-0}" -le 0 ] && [ "${PUNTED_COUNT:-0}" -le 0 ] && [ "${PEER_ORCH_IDLE_ON_BLOCKER_COUNT:-0}" -le 0 ] && [ "$STORAGE_TRIGGER" -eq 0 ] && [ "$HEADLESS_BROWSER_TRIGGER" -eq 0 ] && [ "$AGENTMAIL_IDENTITY_TRIGGER" -eq 0 ] && [ "$DAILY_REPORT_TRIGGER" -eq 0 ] && [ "${REPO_LOCAL_CLIS_BELOW:-0}" -le 0 ] && [ "$MONOLITHIC_FILE_DEBT_TRIGGER" -eq 0 ] && [ "$WIRE_OR_EXPLAIN_TRIGGER" -eq 0 ] && [ "$PWS_FALSE_IDLE_TRIGGER" -eq 0 ]; then
+DISPATCH_CONTRACT_VIOLATIONS="$(jq -r '.dispatch_contract_violations // .dispatch_contract.dispatch_contract_violations // 0' <<<"$DOCTOR_JSON")"
+DISPATCH_CONTRACT_STATUS="$(jq -r '.dispatch_contract.status // "pass"' <<<"$DOCTOR_JSON")"
+DISPATCH_CONTRACT_TRIGGER=0
+if [ "${DISPATCH_CONTRACT_VIOLATIONS:-0}" -gt "${DISPATCH_CONTRACT_THRESHOLD:-5}" ] || { [ "$DISPATCH_CONTRACT_STATUS" = "fail" ] && [ "${DISPATCH_CONTRACT_VIOLATIONS:-0}" -gt 0 ]; }; then
+  DISPATCH_CONTRACT_TRIGGER=1
+fi
+if [ "$STATUS" != "fail" ] && [ "$ROOT_DRIFT" != "true" ] && [ "${DOCTRINE_3_SURFACE_DIVERGENT_COUNT:-0}" -le 0 ] && [ "${FLEET_L_RULE_LAG_COUNT:-0}" -le 0 ] && [ "${PUNTED_COUNT:-0}" -le 0 ] && [ "${PEER_ORCH_IDLE_ON_BLOCKER_COUNT:-0}" -le 0 ] && [ "$STORAGE_TRIGGER" -eq 0 ] && [ "$HEADLESS_BROWSER_TRIGGER" -eq 0 ] && [ "$AGENTMAIL_IDENTITY_TRIGGER" -eq 0 ] && [ "$DAILY_REPORT_TRIGGER" -eq 0 ] && [ "${REPO_LOCAL_CLIS_BELOW:-0}" -le 0 ] && [ "$MONOLITHIC_FILE_DEBT_TRIGGER" -eq 0 ] && [ "$WIRE_OR_EXPLAIN_TRIGGER" -eq 0 ] && [ "$PWS_FALSE_IDLE_TRIGGER" -eq 0 ] && [ "$DISPATCH_CONTRACT_TRIGGER" -eq 0 ]; then
   jq -nc --arg reason "doctor_status=$STATUS" '{action:"noop",reason:$reason}'
   exit 0
 fi
@@ -385,6 +394,14 @@ if [ "$PWS_FALSE_IDLE_TRIGGER" -eq 1 ]; then
     "Auto-created by doctor-signal-bead-promotion.sh. Doctor reports error-severity pane_work_signal class=ntm_codex_false_idle. PWS is defense-in-depth after ntm#124 IsLiveBusy, but repeated false-idle disagreement still needs a follow-up bead; see .flywheel/PLANS/pws-vs-islivebusy-2026-05-08.md."
 fi
 
+if [ "$DISPATCH_CONTRACT_TRIGGER" -eq 1 ]; then
+  handle_symptom \
+    "dispatch_contract" \
+    'dispatch_contract|callback_contract_required|dispatch.*callback.*contract|dispatch-enforcement' \
+    "[auto-doctor:dispatch_contract] violations=$DISPATCH_CONTRACT_VIOLATIONS" \
+    "Auto-created by doctor-signal-bead-promotion.sh. Doctor reports dispatch_contract_violations=$DISPATCH_CONTRACT_VIOLATIONS status=$DISPATCH_CONTRACT_STATUS. Dispatch callbacks must carry numeric Socraticode fields, DID/DIDNT/GAPS, file reservation receipts, L52 bead/no-bead receipt, and L53 blocker logging; see .flywheel/PLANS/dispatch-enforcement-2026-05-01.md."
+fi
+
 if [ "$DB_STATUS" = "fail" ]; then
   handle_symptom \
     "db_fail" \
@@ -436,6 +453,7 @@ jq -nc \
   --argjson wire_or_explain_skill_backlog "${WIRE_OR_EXPLAIN_SKILL_BACKLOG:-0}" \
   --argjson wire_or_explain_skill_relay_failure "${WIRE_OR_EXPLAIN_SKILL_RELAY_FAILURE:-0}" \
   --argjson pws_false_idle_error_count "${PWS_FALSE_IDLE_ERROR_COUNT:-0}" \
+  --argjson dispatch_contract_violations "${DISPATCH_CONTRACT_VIOLATIONS:-0}" \
   --argjson dry_run "$([[ "$DRY_RUN" = "1" ]] && printf true || printf false)" \
   --arg db "$DB_STATUS" \
   --argjson actions "$actions_json" \
@@ -443,6 +461,6 @@ jq -nc \
     action:"promoted",
     dry_run:$dry_run,
     doctor_status:$doctor_status,
-    symptoms:{leakage:$leakage, drift:$drift, root_drift:$root_drift, ticks_punted_count:$punted_count, peer_orch_blocker:{peer_orch_idle_on_blocker_count:$peer_orch_idle_on_blocker_count,peer_orch_blocker_age_seconds:$peer_orch_blocker_age_seconds}, storage:{status:$storage_status,disk_free_pct:$storage_free_pct,stale_baks_count:$storage_stale_baks}, agent_browser_leak:{status:$headless_browser_status,headless_agent_browser_count:$headless_browser_count,oldest_age_minutes:$headless_browser_oldest}, agentmail_identity:{identity_registry_drift:$identity_registry_drift,identity_token_orphan:$identity_token_orphan,orphan_tokens_unswept_count:$orphan_tokens_unswept_count,identity_rotation_count_24h:$identity_rotation_count_24h,identity_chain_max_length:$identity_chain_max_length,agentmail_pending_registration_broadcasts_count:$agentmail_pending_registration_broadcasts}, daily_report:{status:$daily_report_status,daily_report_age_hours:$daily_report_age_hours}, monolithic_file_debt:{oversized_files_count:$oversized_files_count}, wire_or_explain:{status:$wire_or_explain_status,unresolved_count:$wire_or_explain_unresolved,overdue_count:$wire_or_explain_overdue,skill_candidate_backlog_count:$wire_or_explain_skill_backlog,skill_candidate_relay_failure_count:$wire_or_explain_skill_relay_failure}, pws_false_idle:{ntm_codex_false_idle_error_count:$pws_false_idle_error_count}, db:$db},
+    symptoms:{leakage:$leakage, drift:$drift, root_drift:$root_drift, ticks_punted_count:$punted_count, peer_orch_blocker:{peer_orch_idle_on_blocker_count:$peer_orch_idle_on_blocker_count,peer_orch_blocker_age_seconds:$peer_orch_blocker_age_seconds}, storage:{status:$storage_status,disk_free_pct:$storage_free_pct,stale_baks_count:$storage_stale_baks}, agent_browser_leak:{status:$headless_browser_status,headless_agent_browser_count:$headless_browser_count,oldest_age_minutes:$headless_browser_oldest}, agentmail_identity:{identity_registry_drift:$identity_registry_drift,identity_token_orphan:$identity_token_orphan,orphan_tokens_unswept_count:$orphan_tokens_unswept_count,identity_rotation_count_24h:$identity_rotation_count_24h,identity_chain_max_length:$identity_chain_max_length,agentmail_pending_registration_broadcasts_count:$agentmail_pending_registration_broadcasts}, daily_report:{status:$daily_report_status,daily_report_age_hours:$daily_report_age_hours}, monolithic_file_debt:{oversized_files_count:$oversized_files_count}, wire_or_explain:{status:$wire_or_explain_status,unresolved_count:$wire_or_explain_unresolved,overdue_count:$wire_or_explain_overdue,skill_candidate_backlog_count:$wire_or_explain_skill_backlog,skill_candidate_relay_failure_count:$wire_or_explain_skill_relay_failure}, pws_false_idle:{ntm_codex_false_idle_error_count:$pws_false_idle_error_count}, dispatch_contract:{dispatch_contract_violations:$dispatch_contract_violations}, db:$db},
     actions:$actions
   }'

@@ -232,6 +232,20 @@ Every non-trivial worker dispatch in this repo should include:
 | Callback | `ntm send flywheel --pane="$CALLBACK_PANE" "Callback: task_id=<id> status=done ..."` |
 | Receipts | `socraticode_queries=N`, reservation release, Bead update or `no_bead_reason`, and fuckup rows for blockers. |
 
+Dispatch-log v2 migration is dry-run first:
+`.flywheel/scripts/dispatch-log-backfill-v2.sh --repo "$PWD" --dry-run --json`
+prints planned annotations without editing `.flywheel/dispatch-log.jsonl`.
+Applied backfills require `--idempotency-key <key>` and write an audit receipt
+under `.flywheel/receipts/`.
+
+Rollback controls do not require code edits. Use
+`FLYWHEEL_DISPATCH_GATE_DISABLE=callback_contract_required` for one gate,
+`FLYWHEEL_DISPATCH_ENFORCE=0` for global emergency rollback,
+`~/.local/state/flywheel/dispatch-gates-disabled/<gate>` for fleet-local
+sentinels, or `.flywheel/no-enforce-dispatch` for a repo-local temporary
+sentinel with a dated reason. Doctor remains active during rollback and reports
+`dispatch_contract_violations` / `dispatch_contract`.
+
 Use this callback pane lookup:
 
 ```bash

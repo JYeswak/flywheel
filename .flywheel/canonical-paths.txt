@@ -6,6 +6,10 @@ validation_receipt_fixtures_v1	.flywheel/validation-schema/v1/fixtures	flywheel-
 dispatch_template_validation_block	/Users/josh/.claude/commands/flywheel/_shared/dispatch-template.md	flywheel-scwo	Shared worker dispatch template with required VALIDATION BLOCK.
 dispatch_template_audit_v1	.flywheel/validation-schema/v1/dispatch-template-audit.sh	flywheel-scwo	Read-only audit for dispatch validation-block requirements.
 dispatch_template_fixtures_v1	.flywheel/validation-schema/v1/fixtures/dispatch-template	flywheel-scwo	Valid/invalid dispatch packet fixtures for B02.
+dispatch_log_backfill_v2	.flywheel/scripts/dispatch-log-backfill-v2.sh	flywheel-u1x3	Dry-run-first migration helper for legacy dispatch-log rows; apply requires idempotency key and writes audit receipt.
+dispatch_log_backfill_tests	tests/test_dispatch_enforcement_backfill.sh	flywheel-u1x3	Fixture-backed proof that dry-run does not mutate and apply requires idempotency key.
+dispatch_enforcement_rollback_tests	tests/test_dispatch_enforcement_rollback_knobs.sh	flywheel-u1x3	Fixture-backed proof for FLYWHEEL_DISPATCH_ENFORCE, FLYWHEEL_DISPATCH_GATE_DISABLE, global sentinels, and repo no-enforce sentinel.
+dispatch_contract_promotion_tests	tests/test_dispatch_contract_promotion.sh	flywheel-u1x3	Fixture-backed proof that repeated dispatch_contract_violations create or match an auto-doctor bead.
 validate_tick_driver	.flywheel/flywheel-loop-tick	flywheel-hf58	Tick driver with VALIDATE phase before INTEGRATE.
 tick_receipt_schema_v1	.flywheel/validation-schema/v1/tick-receipt.schema.json	flywheel-hf58	Tick receipt schema including validation_summary fields.
 validate_tick_phase_tests	tests/validate-tick-phase.sh	flywheel-hf58	Fixture-backed tests for VALIDATE phase routing.

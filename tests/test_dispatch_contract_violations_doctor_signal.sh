@@ -21,6 +21,23 @@ out="$("$LOOP" doctor --repo "$repo" --json 2>/dev/null || true)"
 
 jq -e '
   .dispatch_contract_violations == 2
+  and .dispatch_contract.status == "fail"
+  and .dispatch_contract.legacy_warn_only_count == 1
+  and .dispatch_contract.dispatch_enforcement.legacy_policy == "warn_only"
+  and .dispatch_contract.dispatch_enforcement.v2_policy == "fail_on_contract_violation"
+' <<<"$out" >/dev/null
+
+legacy_repo="$TMP/legacy-repo"
+mkdir -p "$legacy_repo/.flywheel"
+git -C "$legacy_repo" init -q
+printf '# Mission\n' > "$legacy_repo/.flywheel/MISSION.md"
+printf '# Goal\n' > "$legacy_repo/.flywheel/GOAL.md"
+printf '# State\n' > "$legacy_repo/.flywheel/STATE.md"
+jq -nc '{schema_version:1,event:"worker_callback",callback_status:"DONE",task_id:"legacy-only",ts:"2026-05-07T00:02:00Z"}' > "$legacy_repo/.flywheel/dispatch-log.jsonl"
+
+legacy_out="$("$LOOP" doctor --repo "$legacy_repo" --json 2>/dev/null || true)"
+jq -e '
+  .dispatch_contract_violations == 0
   and .dispatch_contract.status == "warn"
   and .dispatch_contract.legacy_warn_only_count == 1
-' <<<"$out" >/dev/null
+' <<<"$legacy_out" >/dev/null
