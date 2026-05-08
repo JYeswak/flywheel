@@ -5240,3 +5240,55 @@ Evidence:
   cache-is-not-convergence distinction.
 - Skills covered: `flywheel`, `flywheel-doctor-author`; no new skill gap.
 - Bead: `flywheel-g9gbe`.
+
+## tick-driver-primitive-failed
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `tick-driver-primitive-failed`
+
+Event Count: 70 events in 7 days
+
+Severity: high
+
+Cost: The tick driver kept firing while manifest primitives failed underneath
+it. The loop looked alive because fire IDs were emitted, but safety and repair
+subsystems were dark for repeated ticks: `storage-headroom-watcher` failed 29
+times, `agents-md-fleet-propagator` failed 27 times, and
+`regen-sources-from-gh` failed 14 times. Counting those degraded fires as
+productive loop activity would hide an outage behind normal tick cadence.
+
+Root Cause: Primitive failure telemetry existed in fuckup-log rows, and the
+`loop-enforcement` skill already had a forever-rule for this exact class, but
+the flywheel repo lacked a layer-2 INCIDENTS entry. That left the 70-event
+cluster eligible for repeated promotion scans instead of a durable owner-routing
+rule.
+
+Forever-Rule: A tick-driver fire with any primitive `status=error`, nonzero
+`exit_status`, or timeout is a degraded loop fire, not a healthy tick. Three
+consecutive degraded ticks on the same primitive must be treated as a
+primitive-down outage: inspect the primitive's stderr and script, run the
+primitive manually with the same driver args, file or update the primitive
+owner bead, and do not count the degraded fire as productive throughput until a
+later tick-driver ledger row reports `status=ok` or the primitive is explicitly
+disabled with an owner and repair bead.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote tick-driver-primitive-failed`. The entry links the 70-row cluster to
+the existing `loop-enforcement` forever-rule and makes the recovery route
+explicit for future promotion-candidate scans.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L697`: first
+  `storage-headroom-watcher` tick-driver primitive failure in the cluster.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L709`: first
+  `agents-md-fleet-propagator` tick-driver primitive failure in the cluster.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L858`: first
+  `regen-sources-from-gh` tick-driver primitive failure in the cluster.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L697-L1046`: full 70-row
+  high-severity cluster behind the promotion candidate.
+- Skill: `~/.claude/skills/loop-enforcement/SKILL.md` Forever-Rule
+  `tick-driver-primitive-failed`.
+- Bead: `flywheel-og9n4`.
