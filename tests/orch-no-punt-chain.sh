@@ -19,6 +19,36 @@ if [[ "$(jq -r '.ticks_punted_count' <<<"$probe_json")" != "1" ]]; then
   printf 'FAIL: expected ticks_punted_count=1\n%s\n' "$probe_json" >&2
   exit 1
 fi
+if [[ "$(jq -r '.malformed_row_count // 0' <<<"$probe_json")" != "0" ]]; then
+  printf 'FAIL: expected clean probe malformed_row_count=0\n%s\n' "$probe_json" >&2
+  exit 1
+fi
+
+MIXED_LOG="$TMP/mixed-dispatch-log.jsonl"
+printf 'not-json historical row\n' >"$MIXED_LOG"
+printf '{"event":"l70_chain_decision","chain_required":true,"chained":false}\n' >>"$MIXED_LOG"
+mixed_probe_json="$("$PROBE" --log "$MIXED_LOG" --json)"
+if [[ "$(jq -r '.ticks_punted_count' <<<"$mixed_probe_json")" != "1" || "$(jq -r '.malformed_row_count' <<<"$mixed_probe_json")" != "1" || "$(jq -r '.malformed_rows[0].line' <<<"$mixed_probe_json")" != "1" ]]; then
+  printf 'FAIL: expected mixed malformed dispatch log to succeed with line count\n%s\n' "$mixed_probe_json" >&2
+  exit 1
+fi
+
+BAD_LOG="$TMP/bad-dispatch-log.jsonl"
+printf 'not-json\nalso-not-json\n' >"$BAD_LOG"
+set +e
+bad_probe_json="$("$PROBE" --log "$BAD_LOG" --json)"
+bad_probe_rc=$?
+unreadable_probe_json="$("$PROBE" --log "$TMP" --json)"
+unreadable_probe_rc=$?
+set -e
+if [[ "$bad_probe_rc" -eq 0 || "$(jq -r '.status' <<<"$bad_probe_json")" != "error" ]]; then
+  printf 'FAIL: expected all-unreadable dispatch log to fail\n%s\n' "$bad_probe_json" >&2
+  exit 1
+fi
+if [[ "$unreadable_probe_rc" -eq 0 || "$(jq -r '.warning' <<<"$unreadable_probe_json")" != "dispatch_log_unreadable" ]]; then
+  printf 'FAIL: expected unreadable dispatch log path to fail\n%s\n' "$unreadable_probe_json" >&2
+  exit 1
+fi
 
 REPO="$TMP/repo"
 mkdir -p "$REPO/.flywheel/scripts" "$REPO/.flywheel/plans" "$REPO/.beads"
