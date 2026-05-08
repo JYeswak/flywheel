@@ -5042,3 +5042,51 @@ Evidence:
 - Regression: `tests/quality-bar-close-gate.sh`.
 - Skill contract:
   `~/.claude/skills/beads-compliance-and-completion-verification/references/EVIDENCE-SCHEMAS.md`.
+
+## ci-substrate-failure
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `ci-substrate-failure`
+
+Event Count: 3 events in 7 days
+
+Severity: medium
+
+Cost: Three ALPS post-merge PRs reported CI substrate failures after admin
+self-merge while local validation and Vercel staging evidence were green. Each
+worker had to distinguish task-local correctness from shared CI substrate
+breakage before closeout, which turns routine verification into repeated
+worker-local triage.
+
+Root Cause: CI failures were treated as task verdicts even when the failing
+surface was outside the changed code path. The loop lacked an owner-routing
+rule that captures runner, command, failing substrate, retry evidence, and why
+the issue is not a task-local fix.
+
+Forever-Rule: When CI fails outside the changed code path, the worker must
+record the exact CI command or job, runner, failing substrate, ownership guess,
+retry or corroborating evidence, and `why_not_task_local_fix`. If the task's
+targeted local validation and live/staging smoke pass, route the failure to a
+CI-substrate repair bead or owner handoff instead of overfitting the task patch.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote ci-substrate-failure`. Existing memory rule
+`feedback_ci_substrate_failures_need_owner_route` already carries the operator
+reflex; this entry makes the L56 INCIDENTS coverage explicit and points future
+promotion-candidate scans at a durable repo doctrine surface.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1287`: PR #172 CI failed before
+  build at Infisical OIDC 403 while Vercel staging `/demo` returned 200.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1290`: PR #174 reported
+  pre-existing substrate failures after local validation and staging `/demo`
+  passed.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1292`: PR #178 reported
+  pre-existing substrate failures after local validation, Vercel staging, and
+  live `/demo` toast smoke passed.
+- Memory: `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_ci_substrate_failures_need_owner_route.md`.
+- Review source: `.flywheel/reports/learn-review-2026-05-06.md`.
+- Bead: `flywheel-mh983`.
