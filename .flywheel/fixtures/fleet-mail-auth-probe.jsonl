@@ -1,0 +1,5 @@
+{"case":"valid","expected_status":"pass","expected_ready":true,"expected_project_key":"/Users/josh/.local/state/flywheel/fleet-mail-project","expected_l61_countable":true}
+{"case":"invalid_token","expected_status":"fail","expected_ready":false,"expected_failure_class":"fleet_mail_token_invalid","expected_l61_countable":false}
+{"case":"missing_token","expected_status":"fail","expected_ready":false,"expected_failure_class":"fleet_mail_token_missing","expected_l61_countable":false}
+{"case":"missing_identity","expected_status":"fail","expected_ready":false,"expected_failure_class":"fleet_mail_identity_invalid_or_missing","expected_l61_countable":false}
+{"case":"mcp_unavailable","expected_status":"fail","expected_ready":false,"expected_failure_class":"agent_mail_mcp_unavailable","expected_l61_countable":false}
