@@ -1,0 +1,29 @@
+{
+  "schema_version": "fleet-coherence-scan-sample/v1",
+  "scanner_contract": "fleet-coherence-scanner/v1",
+  "l112_observed": "OK_phase1a_scanner",
+  "phase": "phase_1a_scanner_skeleton",
+  "status": "ok",
+  "timeouts_sec": {
+    "ntm_health": 3,
+    "pane_work_signal": 3,
+    "total_pass": 30,
+    "overlap_lock": 2
+  },
+  "p95_targets_sec": {
+    "sessions_8": 10,
+    "sessions_16": 60
+  },
+  "event": {
+    "schema_version": 2,
+    "record_type": "event",
+    "class": "fleet_scan_heartbeat",
+    "detector": "fleet-coherence",
+    "detector_version": "fleet-coherence-scanner/v1",
+    "state": "open",
+    "severity": "info",
+    "session": "fleet-coherence",
+    "pane": null
+  },
+  "scope_note": "The Phase 1a scanner reads fleet substrates and emits a neutral heartbeat; drift classification remains out of scope."
+}
