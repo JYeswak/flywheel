@@ -1,0 +1,63 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-s08u",
+  "created_ts": "2026-05-08T01:24:30Z",
+  "source_plan": ".flywheel/PLANS/fleet-skill-reporting-2026-05-01.md",
+  "bead": "flywheel-s08u",
+  "evidence": [
+    {
+      "artifact": ".flywheel/scripts/skillos-discovery-coordinator.py",
+      "purpose": "Reusable skillos coordinator command for skill-discoveries promotion ladder",
+      "checks": [
+        "reads skill-discoveries JSONL over a 24h window",
+        "groups by exact-normalized candidate_skill_name",
+        "emits 1/2/3/5 sighting actions",
+        "gates apply mode on idempotency key",
+        "writes fleet-skill-pulse JSONL row"
+      ]
+    },
+    {
+      "artifact": "tests/test_skillos_discovery_coordinator.sh",
+      "purpose": "Fixture coverage for all acceptance gates",
+      "result": "PASS",
+      "pass_count": 12,
+      "fail_count": 0
+    },
+    {
+      "artifact": "~/.local/state/flywheel/skill-discoveries.jsonl",
+      "purpose": "Skill discovery emitted for this coordinator pattern",
+      "sd_ids": [
+        "sd-f7bdb09749655854"
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "cmd": "python3 -m py_compile .flywheel/scripts/skillos-discovery-coordinator.py",
+      "status": "pass"
+    },
+    {
+      "cmd": "bash -n tests/test_skillos_discovery_coordinator.sh",
+      "status": "pass"
+    },
+    {
+      "cmd": "tests/test_skillos_discovery_coordinator.sh",
+      "status": "pass",
+      "summary": "SUMMARY pass=12 fail=0"
+    }
+  ],
+  "acceptance": {
+    "dry_run_works": true,
+    "one_sighting_action": "log_only",
+    "two_sighting_action": "agent_mail_thread_needed",
+    "three_sighting_action": "skill_builder_bead_needed",
+    "apply_idempotency_enforced": true,
+    "five_sighting_action": "dispatch_worker_needed",
+    "pulse_row_emitted": true
+  },
+  "joshua_lens_depth_check": {
+    "operator_grade_durability": "The coordinator keeps live dispatch and Agent Mail mutation out of the first implementation, so an operations team can observe the ladder before trusting it with automated work assignment.",
+    "team_fit": "The dry-run/apply/idempotency split is first-90-days senior ops hire shippable: readable output, reversible posture, and a fixture harness for the operational thresholds.",
+    "company_building_leverage": "The pulse row turns isolated worker discoveries into a durable HQ signal that can compound across sessions and still be understood after the original author leaves."
+  }
+}
