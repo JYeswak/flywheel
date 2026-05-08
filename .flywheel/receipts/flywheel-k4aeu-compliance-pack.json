@@ -1,0 +1,32 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-k4aeu",
+  "worker": "flywheel-pane4",
+  "status": "done",
+  "source_bead": "flywheel-k4aeu",
+  "evidence": [
+    {
+      "path": "/Users/josh/.claude/commands/flywheel/respawn.md",
+      "claim": "respawn output surfaces checkpoint.working_dir and gating_decision"
+    },
+    {
+      "path": "tests/test_respawn_checkpoint_working_dir_surfaced.sh",
+      "claim": "fixture validates populated checkpoint.working_dir and legacy missing-field compatibility"
+    },
+    {
+      "path": "/Users/josh/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_legacy_compat_both_empty_either_empty.md",
+      "claim": "legacy compatibility memory reinforced for respawn recovery envelopes"
+    }
+  ],
+  "checks": {
+    "socraticode_queries": 5,
+    "indexed_chunks_observed": 50,
+    "tests_added": 1,
+    "tests_passing": true,
+    "working_dir_surfaced": true,
+    "legacy_compat_validated": true,
+    "memory_reinforced": true,
+    "skill_discoveries": 1,
+    "sd_ids": ["sd-2a18189d57d1677b"]
+  }
+}
