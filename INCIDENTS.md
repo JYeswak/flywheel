@@ -5455,3 +5455,62 @@ Evidence:
   D3.G2/D3.G3 and `.flywheel/PLANS/fleet-autonomy-v1-2026-05-05/01-REVIEW-donella.md`
   revision 7 owner-custody loop primitive.
 - Bead: `flywheel-n3hs0`.
+
+## br-db-wedge-recurrence
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `br-db-wedge-recurrence`
+
+Event Count: 3 events in 7 days
+
+Severity: high
+
+Cost: The Beads DB wedge recurred after the same-day repair path: `br close`
+again hit WAL corruption and SQLite freelist/page errors, while workers had to
+choose between DB-backed mutation, JSONL-truth closeout, and read-only
+diagnosis. The recurrence made the existing repair entry insufficiently
+machine-routable for L56 because the exact fuckup class was not a heading or
+processed promotion target.
+
+Root Cause: The original `br-db-wedge` incident documented repair and the later
+RCA documented freelist recurrence, but the `br-db-wedge-recurrence` trauma
+class still lacked an exact layer-2 INCIDENTS target. That left the class
+eligible for promotion-candidate rediscovery even though the operational answer
+is already known: integrity is measured by SQLite checks, DB-backed mutation is
+red when integrity is not `ok`, and recovery routes through the monitor/rebuild
+path rather than manual `.beads/issues.jsonl` fallback rows.
+
+Forever-Rule: When `br-db-wedge-recurrence` appears, first run or cite
+`.flywheel/scripts/br-db-corruption-monitor.sh` and
+`.flywheel/scripts/verify-br-db-close-path-active.sh`; do not trust
+`br sync --status` alone. If `PRAGMA integrity_check` is not `ok`, treat
+DB-backed create/close/update as red, preserve JSONL truth without manual
+append edits, and route to the Beads recovery/rebuild owner under AGENTS L124.
+If the monitor reports healthy on current `br`, close the promotion candidate
+as stale-resolved with monitor evidence rather than reopening the old wedge
+response.
+
+Fix Applied/Status: NEW exact-class layer-2 INCIDENTS entry from
+`/flywheel:learn --promote br-db-wedge-recurrence`. This entry points future
+promotion scans at the existing `br-db wedge repair` and `br-db wedge recurrence
+root-cause + mitigation` incidents while giving the exact trauma class a
+durable L56 target and processed ledger row.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1335`: `br close
+  flywheel-wire-dispatch-delivery-valida-f29a` failed with WAL corruption and
+  freelist/page integrity errors after concurrent shared-file closeouts.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1337`: follow-on closeout hit
+  existing Beads DB corruption and JSONL priority schema fallback.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1338`: recurrence persisted after
+  repair, with freelist leaf count errors on pages 765/766.
+- Existing incident: `INCIDENTS.md#br-db-wedge-repair--jsonl-fallback-eliminated-on-close-2026-05-05`.
+- Existing RCA incident: `INCIDENTS.md#br-db-wedge-recurrence-root-cause--mitigation-2026-05-05`.
+- Monitor: `.flywheel/scripts/br-db-corruption-monitor.sh`.
+- Probe: `.flywheel/scripts/verify-br-db-close-path-active.sh`.
+- Doctrine: `AGENTS.md` L124 `SUBSTRATE-DISCIPLINE-NO-ORCHESTRATOR-PAUSE`.
+- Skill: `~/.claude/skills/beads-br/SKILL.md`.
+- Bead: `flywheel-69974`.
