@@ -6491,3 +6491,31 @@ Evidence:
   blocks new ingestion and doctor exposes Jeff corpus storage fields.
 - Skill: `~/.claude/skills/storage-health/SKILL.md`.
 - Bead: `flywheel-l82y`.
+
+## ubs-module-checksum-mismatch
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `ubs-module-checksum-mismatch`
+
+Event Count: 4 events in 7 days
+
+Severity: medium
+
+Cost: Four mobile-eats worker validations could not run UBS as intended because UBS module checksum verification failed for JS/Python/helper modules, and `ubs doctor --fix` did not restore the expected checksums. Workers fell back to typecheck/lint/tests/Playwright/a11y/build/security checks, which protected local code paths but left the UBS safety lane unavailable exactly when pre-close review was needed.
+
+Root Cause: UBS treats module checksum mismatch as a hard integrity failure, but the repair path (`doctor --fix`) did not converge for the affected JS/Python/helper/type_narrowing modules. The fleet had safety-stack guidance that UBS is required pre-merge, but no layer-2 incident target distinguishing "UBS unavailable due to module checksum drift" from a normal code finding or from a worker skipping UBS.
+
+Forever-Rule: A UBS module checksum mismatch is a safety-substrate failure, not a clean UBS pass and not a worker-local waiver. When checksum verification fails, run the documented repair once, record expected/got module evidence, and if repair does not converge route to the UBS/tool-patch owner while using alternate verification only as a bounded fallback. Closeout must say `UBS unavailable: checksum mismatch` and name the replacement checks that ran; do not report the fallback as equivalent to UBS.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn --promote ubs-module-checksum-mismatch`. This entry gives promotion-candidate bead `flywheel-w5j7t` durable L56 coverage and routes future rows to UBS substrate repair/tool-patch ownership instead of recreating promotion candidates or silently downgrading the safety lane.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L2856`: `mobile-2igc` UBS scan blocked because JS/Python/helper module checksums mismatched even after `doctor --fix`.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L2951`: `mobile-ulhv` changed-file scan blocked by JS/Python checksum mismatches; `doctor --fix` reproduced mismatch; fallback checks verified code path and existing bead `mobile-o2wt` tracked the tool issue.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L3190`: `mobile-eats-hkio` could not refresh JS/Python/type_narrowing modules; compile/test/build still passed.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L3533`: `mobile-1eis` UBS scan could not run; JS mismatch persisted after previous repair, so build/trace/security checks were used instead.
+- Reference: `~/.claude/references/claude-md-safety.md` UBS safety-stack guidance.
+- Bead: `flywheel-w5j7t`.
