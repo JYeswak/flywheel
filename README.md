@@ -232,6 +232,15 @@ Every non-trivial worker dispatch in this repo should include:
 | Callback | `ntm send flywheel --pane="$CALLBACK_PANE" "Callback: task_id=<id> status=done ..."` |
 | Receipts | `socraticode_queries=N`, reservation release, Bead update or `no_bead_reason`, and fuckup rows for blockers. |
 
+Doctor JSON exposes `.fleet_skill_discovery` for the skill-discovery reporting
+loop. It reads `~/.local/state/flywheel/skill-discoveries.jsonl`, reports
+`last_24h_discoveries`, malformed-row counts, top candidates by sightings, and
+pending skillos coordinator actions. It warns when a candidate reaches the
+3-sighting skill-builder threshold or when 3 consecutive worker callbacks over
+2 hours report `skill_discoveries=0 sd_ids=none` without an explicit legal
+no-discovery reason. `doctor-signal-bead-promotion.sh` promotes those warnings
+as `[auto-doctor:fleet_skill_discovery]` beads with candidate evidence.
+
 Dispatch-log v2 migration is dry-run first:
 `.flywheel/scripts/dispatch-log-backfill-v2.sh --repo "$PWD" --dry-run --json`
 prints planned annotations without editing `.flywheel/dispatch-log.jsonl`.
