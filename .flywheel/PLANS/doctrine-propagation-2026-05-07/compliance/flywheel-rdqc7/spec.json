@@ -1,0 +1,17 @@
+{
+  "schema_version": "beads-compliance-spec/v1",
+  "bead": "flywheel-rdqc7",
+  "claim": "Plan a four-wave skillos doctrine propagation cohort with cross-orch handoff and no bulk apply",
+  "required_artifacts": [
+    ".flywheel/PLANS/doctrine-propagation-2026-05-07/03-SKILLOS-COHORT-PLAN.md",
+    ".flywheel/PLANS/doctrine-propagation-2026-05-07/03-SKILLOS-COHORT-PLAN.json"
+  ],
+  "required_checks": [
+    "four waves",
+    "75 total rules",
+    "handoff required every wave",
+    "distinct idempotency keys",
+    "bulk apply forbidden",
+    "tool precondition gap filed"
+  ]
+}

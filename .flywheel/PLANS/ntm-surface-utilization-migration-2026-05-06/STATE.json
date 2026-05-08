@@ -1,0 +1,85 @@
+{
+  "slug": "ntm-surface-utilization-migration-2026-05-06",
+  "topic": "ntm-surface-utilization-migration — decompose 109-bead audit into wave-structured DAG (W0-W4)",
+  "started_at": "2026-05-06T22:42:00Z",
+  "current_phase": "polish",
+  "phase_started_at": "2026-05-07T14:51:18Z",
+  "rounds_in_current_phase": 0,
+  "convergence_streak": 2,
+  "in_flight_dispatches": [
+    {
+      "task_id": "ntm-surface-migration-lane-a-2026-05-06",
+      "pane": 2,
+      "started": "2026-05-06T22:42:00Z",
+      "callback_received_at": "2026-05-06T23:30:00Z",
+      "self_grade": 8.7,
+      "verdict": "steady_state"
+    },
+    {
+      "task_id": "ntm-surface-migration-lane-b-2026-05-06",
+      "pane": 3,
+      "started": "2026-05-06T22:42:00Z",
+      "callback_received_at": "2026-05-06T22:58:00Z",
+      "self_grade": 8.3,
+      "l91_verdict": "wrapper",
+      "m_gate_verdict": "hybrid"
+    },
+    {
+      "task_id": "ntm-surface-migration-lane-c-2026-05-06",
+      "pane": 4,
+      "started": "2026-05-06T22:42:00Z",
+      "callback_received_at": "2026-05-06T23:08:00Z",
+      "self_grade": 8.0,
+      "total_beads": 15,
+      "cap_verdict": "fits_one_plan"
+    }
+  ],
+  "joshua_decision_pending": false,
+  "joshua_decision_at": null,
+  "audit_disposition": null,
+  "audit_blocker_class": null,
+  "audit_blocker_classes": [],
+  "audit_blocker_reason": null,
+  "audit_findings_count": 26,
+  "audit_findings_by_severity": {
+    "critical": 0,
+    "high": 10,
+    "medium": 12,
+    "low": 4
+  },
+  "beads_created": [
+    "flywheel-kboe9",
+    "flywheel-h9swh",
+    "flywheel-d7ci4",
+    "flywheel-jztnm",
+    "flywheel-fcyrt",
+    "flywheel-wojns",
+    "flywheel-981x5",
+    "flywheel-dt5lf",
+    "flywheel-r4d7r",
+    "flywheel-ewa3g",
+    "flywheel-h3exf",
+    "flywheel-hgex7",
+    "flywheel-imcs2",
+    "flywheel-j3if6",
+    "flywheel-kle2o"
+  ],
+  "abort_reason": null,
+  "quality_bar_passed": true,
+  "quality_bar_evidence": [
+    {
+      "artifact": "02-REFINE-r2.md",
+      "cli_canonical": true,
+      "readme_quality": true,
+      "jeff_score": 9.6,
+      "donella_score": 9.6,
+      "joshua_score": 9.6,
+      "composite": 9.6,
+      "graded_at": "2026-05-07T00:35:00Z"
+    }
+  ],
+  "schema_version": 3,
+  "audit_input_canonical": "/tmp/ntm-surface-audit-summary-2026-05-06.md",
+  "audit_input_beads_filed": 109,
+  "audit_input_socraticode_k": 327
+}

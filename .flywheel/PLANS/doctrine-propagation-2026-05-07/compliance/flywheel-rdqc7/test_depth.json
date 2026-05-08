@@ -1,0 +1,16 @@
+{
+  "schema_version": "beads-compliance-test-depth/v1",
+  "bead": "flywheel-rdqc7",
+  "test_type": "schema-and-contract-validation",
+  "commands": [
+    "python3 - <<'PY' ... validate 03-SKILLOS-COHORT-PLAN.json ... PY"
+  ],
+  "coverage": [
+    "wave count",
+    "L-rule count sum",
+    "handoff requirement",
+    "idempotency key uniqueness",
+    "bulk apply prohibition",
+    "tool precondition gap"
+  ]
+}

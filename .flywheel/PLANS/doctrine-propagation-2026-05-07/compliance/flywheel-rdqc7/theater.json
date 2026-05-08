@@ -1,0 +1,15 @@
+{
+  "schema_version": "beads-compliance-theater/v1",
+  "bead": "flywheel-rdqc7",
+  "theater_risks": [
+    {
+      "risk": "plan claims wave apply but current doctrine-sync can only bulk apply",
+      "mitigation": "gap flywheel-rdqc7.1 filed and wave apply blocked until allowlist support exists"
+    },
+    {
+      "risk": "cross-orch handoff described but not enforced",
+      "mitigation": "per-wave Agent Mail ACK template and apply_requires_ack=true encoded in JSON"
+    }
+  ],
+  "residual_risk": "future executor must honor the tool precondition before Wave 1 apply"
+}

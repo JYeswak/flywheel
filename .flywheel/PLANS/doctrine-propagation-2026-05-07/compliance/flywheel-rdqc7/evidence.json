@@ -1,0 +1,22 @@
+{
+  "schema_version": "beads-compliance-evidence/v1",
+  "bead": "flywheel-rdqc7",
+  "evidence": [
+    {
+      "path": ".flywheel/PLANS/doctrine-propagation-2026-05-07/01-VERIFY-PASS.json",
+      "claim": "skillos missing_l_rules_total=75 and proposed_doctrine_version=2026-05-07.L126"
+    },
+    {
+      "path": ".flywheel/PLANS/doctrine-propagation-2026-05-07/03-SKILLOS-COHORT-PLAN.json",
+      "claim": "machine-readable four-wave cohort plan"
+    },
+    {
+      "path": ".flywheel/PLANS/doctrine-propagation-2026-05-07/03-SKILLOS-COHORT-PLAN.md",
+      "claim": "human-readable plan with Agent Mail handoff template and compliance contract"
+    },
+    {
+      "path": "br:flywheel-rdqc7.1",
+      "claim": "gap filed for doctrine-sync per-rule allowlist required before wave apply"
+    }
+  ]
+}

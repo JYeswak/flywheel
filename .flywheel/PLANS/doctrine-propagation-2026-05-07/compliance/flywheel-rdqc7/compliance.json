@@ -1,0 +1,15 @@
+{
+  "schema_version": "beads-compliance-result/v1",
+  "bead": "flywheel-rdqc7",
+  "score": 820,
+  "threshold": 700,
+  "status": "pass",
+  "checks": {
+    "artifact_exists": true,
+    "machine_plan_validates": true,
+    "bulk_apply_forbidden": true,
+    "cross_orch_handoff_each_wave": true,
+    "gap_filed_for_apply_tool_limit": true,
+    "final_apply_not_run": true
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "schema_version": "skillos_doctrine_cohort_plan/v1",
+  "bead": "flywheel-rdqc7",
+  "target_repo": "/Users/josh/Developer/skillos",
+  "target_session": "skillos",
+  "target_pane": 1,
+  "source_receipt": ".flywheel/PLANS/doctrine-propagation-2026-05-07/01-VERIFY-PASS.json",
+  "proposed_doctrine_version": "2026-05-07.L126",
+  "missing_l_rules_total": 75,
+  "hard_rules": {
+    "bulk_apply_allowed": false,
+    "cross_orch_handoff_required_each_wave": true,
+    "skillos_veto_allowed": true,
+    "compliance_pack_required_each_wave": true,
+    "l107_and_three_surface_watchdog_required_each_wave": true
+  },
+  "tool_precondition": {
+    "status": "gap_filed",
+    "gap_bead": "flywheel-rdqc7.1",
+    "reason": "flywheel-doctrine-sync currently has no per-rule allowlist; plain --apply would bulk-apply all missing rules",
+    "required_before_wave_1_apply": "add --l-rules allowlist or equivalent wave-plan input"
+  },
+  "waves": [
+    {
+      "wave": 1,
+      "name": "foundation",
+      "l_rules": ["L29", "L35", "L48", "L50", "L51", "L52", "L53", "L54", "L55", "L56", "L57"],
+      "count": 11,
+      "range_note": "Requested L48-L57; L49 is not present in the verify-pass missing list.",
+      "handoff_required": true,
+      "agent_mail_subject": "[doctrine-prop wave 1] skillos foundation L-rule conflict review",
+      "apply_idempotency_key": "skillos-doctrine-20260507-L126-wave1-foundation",
+      "apply_requires_ack": true,
+      "post_apply_verification": ["doctrine-sync dry-run reports wave rules absent from missing set", "skillos:1 next tick confirms no local doctrine conflict"],
+      "compliance_pack": "wave-1-foundation"
+    },
+    {
+      "wave": 2,
+      "name": "substrate",
+      "l_rules": ["L58", "L59", "L60", "L61", "L62", "L63", "L64", "L65", "L66", "L67", "L68", "L69", "L70", "L71", "L72", "L73"],
+      "count": 16,
+      "handoff_required": true,
+      "agent_mail_subject": "[doctrine-prop wave 2] skillos substrate L-rule conflict review",
+      "apply_idempotency_key": "skillos-doctrine-20260507-L126-wave2-substrate",
+      "apply_requires_ack": true,
+      "post_apply_verification": ["L107 reservations clean", "canonical-meta-rules-sync three-surface watchdog passes", "skillos:1 confirms no conflict"],
+      "compliance_pack": "wave-2-substrate"
+    },
+    {
+      "wave": 3,
+      "name": "recovery-dispatch",
+      "l_rules": ["L75", "L76", "L77", "L78", "L79", "L80", "L81", "L82", "L83", "L84", "L85", "L86", "L87", "L88", "L89", "L90", "L91", "L92", "L93", "L94", "L95", "L96", "L97", "L98", "L99"],
+      "count": 25,
+      "handoff_required": true,
+      "agent_mail_subject": "[doctrine-prop wave 3] skillos recovery+dispatch L-rule conflict review",
+      "apply_idempotency_key": "skillos-doctrine-20260507-L126-wave3-recovery-dispatch",
+      "apply_requires_ack": true,
+      "post_apply_verification": ["dispatch callback contract remains valid", "three-surface watchdog passes", "skillos:1 confirms no dispatch doctrine conflict"],
+      "compliance_pack": "wave-3-recovery-dispatch"
+    },
+    {
+      "wave": 4,
+      "name": "recent",
+      "l_rules": ["L100", "L101", "L102", "L103", "L104", "L105", "L106", "L107", "L108", "L110", "L111", "L115", "L116", "L117", "L118", "L119", "L120", "L121", "L122", "L123", "L124", "L125", "L126"],
+      "count": 23,
+      "handoff_required": true,
+      "agent_mail_subject": "[doctrine-prop wave 4] skillos recent L-rule conflict review",
+      "apply_idempotency_key": "skillos-doctrine-20260507-L126-wave4-recent",
+      "apply_requires_ack": true,
+      "post_apply_verification": ["skillos doctrine_version stamps 2026-05-07.L126", "L125 and L126 present on required surfaces", "skillos:1 next tick confirms no conflict"],
+      "compliance_pack": "wave-4-recent"
+    }
+  ],
+  "final_success_criteria": [
+    "all four wave compliance packs exist",
+    "skillos:1 acked each wave before apply",
+    "each apply used a distinct idempotency key",
+    "skillos doctrine_version is 2026-05-07.L126",
+    "no deferred rule lacks a documented skillos veto reason"
+  ]
+}
