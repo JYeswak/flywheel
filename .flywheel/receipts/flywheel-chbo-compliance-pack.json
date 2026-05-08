@@ -1,0 +1,84 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-chbo",
+  "created_ts": "2026-05-08T02:53:00Z",
+  "bead": "flywheel-chbo",
+  "evidence": [
+    {
+      "artifact": ".flywheel/receipts/flywheel-chbo-receipt.md",
+      "purpose": "RCA, concurrency measurement, mitigation decision, and propagation proof",
+      "checks": [
+        "locking model classified",
+        "incident-window git history measured",
+        "single mitigation selected",
+        "Joshua-lens operator pattern cited"
+      ]
+    },
+    {
+      "artifact": "/Users/josh/.claude/skills/beads-workflow/SKILL.md",
+      "purpose": "Worker-facing Beads workflow rule for serial write lane",
+      "result": "updated",
+      "line_anchor": 199
+    },
+    {
+      "artifact": "AGENTS.md",
+      "purpose": "Repo-local L137 rule",
+      "result": "updated",
+      "line_anchor": 3756
+    },
+    {
+      "artifact": ".flywheel/AGENTS-CANONICAL.md",
+      "purpose": "Canonical L137 rule",
+      "result": "updated",
+      "line_anchor": 4120
+    },
+    {
+      "artifact": "templates/flywheel-install/AGENTS.md",
+      "purpose": "Fleet install propagation path for L137",
+      "result": "updated",
+      "line_anchor": 3743
+    }
+  ],
+  "commands": [
+    {
+      "cmd": "mcp__socraticode__codebase_search against /Users/josh/Developer/beads_rust",
+      "status": "pass",
+      "observed_matches": 10
+    },
+    {
+      "cmd": "mcp__socraticode__codebase_search against /Users/josh/Developer/flywheel",
+      "status": "pass",
+      "observed_matches": 10
+    },
+    {
+      "cmd": "mcp__socraticode__codebase_search against /Users/josh/.claude/skills",
+      "status": "pass",
+      "observed_matches": 10
+    },
+    {
+      "cmd": "git log --since/--until incident windows -- .beads/issues.jsonl",
+      "status": "pass",
+      "summary": "0 committed writes in each 60-second trauma window"
+    },
+    {
+      "cmd": "rg -n \"L137|beads_write_lane_queued|Shared Beads Write Lane\" ...",
+      "status": "pass",
+      "summary": "anchors present in skill, AGENTS.md, canonical AGENTS, and flywheel-install template"
+    }
+  ],
+  "acceptance": {
+    "rca_locking_model_complete": true,
+    "concurrency_rate_measured": true,
+    "mitigation_proposed": true,
+    "beads_workflow_skill_updated": true,
+    "agents_md_l_rule_added": true,
+    "fleet_propagation_verified": true,
+    "joshua_lens_25yr_ops_cited": true
+  },
+  "joshua_lens_depth_check": {
+    "operator_grade_durability": "The serial lane removes recurring lock contention from the daily operator path instead of letting every worker diagnose the same contention class.",
+    "team_fit": "A junior worker can queue a Beads mutation and keep moving; they do not need to understand SQLite WAL, MCP reservations, and JSONL export semantics to stay productive.",
+    "company_building_leverage": "The doctrine lands in the install template, so the rule compounds across fleet repos instead of being a one-repo note.",
+    "turnover_resilience": "The queue reason, L-rule, and skill guidance are durable surfaces that survive the original worker leaving the pane."
+  }
+}
