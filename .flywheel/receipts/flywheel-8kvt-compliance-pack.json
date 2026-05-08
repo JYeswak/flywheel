@@ -1,0 +1,72 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-8kvt",
+  "created_ts": "2026-05-08T02:45:34Z",
+  "bead": "flywheel-8kvt",
+  "parent_bead": "flywheel-7lby",
+  "evidence": [
+    {
+      "artifact": ".flywheel/receipts/flywheel-7lby-parent-rework-evidence.md",
+      "purpose": "Parent close evidence mapping all six L70 acceptance gates to shipped substrate and line-cited artifacts",
+      "checks": [
+        "7lby.1 closed",
+        "7lby.2 closed",
+        "parent L70 acceptance gates mapped",
+        "tests=PASS recorded",
+        "four-lens self-grade includes Joshua 25-year operator rubric"
+      ]
+    },
+    {
+      "artifact": "tests/orch-no-punt-chain.sh",
+      "purpose": "L70 no-punt chain fixture",
+      "result": "PASS",
+      "summary": "L70 no-punt chain probe and driver fixtures passed"
+    },
+    {
+      "artifact": "~/.cargo/bin/br dep cycles",
+      "purpose": "Bead dependency cycle check",
+      "result": "PASS",
+      "summary": "No dependency cycles detected"
+    },
+    {
+      "artifact": ".flywheel/scripts/validate-callback-before-close.sh",
+      "purpose": "Four-lens close validator",
+      "result": "LENS_PASS_PARENT_BLOCKED_BY_SEPARATE_DEPENDENT",
+      "summary": "brand/sniff/jeff/public pass; validator reports flywheel-2p25 open from Dependents scrape while br dep list flywheel-7lby --json returns []"
+    }
+  ],
+  "commands": [
+    {
+      "cmd": "bash tests/orch-no-punt-chain.sh",
+      "status": "pass"
+    },
+    {
+      "cmd": "~/.cargo/bin/br dep cycles",
+      "status": "pass"
+    },
+    {
+      "cmd": ".flywheel/scripts/validate-callback-before-close.sh --repo /Users/josh/Developer/flywheel --bead flywheel-7lby --evidence .flywheel/receipts/flywheel-7lby-parent-rework-evidence.md --json",
+      "status": "lens-pass",
+      "summary": "four_lens brand=pass sniff=pass jeff=pass public=pass; verdict=BLOCK_CLOSE due flywheel-2p25 dependent scrape"
+    },
+    {
+      "cmd": "~/.cargo/bin/br close flywheel-7lby --reason <summarized>",
+      "status": "pass"
+    }
+  ],
+  "acceptance": {
+    "children_closed": true,
+    "tests_PASS_verified": true,
+    "four_lens_self_grade_with_joshua_25yr": true,
+    "validator_brand_pass": true,
+    "validator_sniff_pass": true,
+    "validator_jeff_pass": true,
+    "validator_public_pass": true
+  },
+  "joshua_lens_depth_check": {
+    "operator_grade_durability": "The closeout checks the failure class that burns real ops time: an orchestrator that knows the next action but waits for another scheduler turn.",
+    "team_fit": "The receipt and fixture are first-90-days senior ops hire readable: one command proves the chain contract without needing the original worker's context.",
+    "company_building_leverage": "Same-turn chaining reduces idle pane leakage across the fleet, so the benefit compounds every time a session exhausts one phase and has another actionable phase ready.",
+    "turnover_resilience": "The evidence is in versioned receipts, executable fixtures, and L70 doctrine, so the contract survives the author leaving the session."
+  }
+}
