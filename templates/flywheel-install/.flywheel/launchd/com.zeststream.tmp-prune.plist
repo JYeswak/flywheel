@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.zeststream.tmp-prune</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/josh/Developer/flywheel/.flywheel/scripts/tmp-prune.sh</string>
+    <string>--apply</string>
+    <string>--idempotency-key</string>
+    <string>launchd-daily</string>
+    <string>--json</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key>
+    <string>/Users/josh</string>
+    <key>PATH</key>
+    <string>/Users/josh/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>3</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+  <key>StandardOutPath</key>
+  <string>/Users/josh/.local/state/flywheel/logs/tmp-prune.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/josh/.local/state/flywheel/logs/tmp-prune.err.log</string>
+</dict>
+</plist>
