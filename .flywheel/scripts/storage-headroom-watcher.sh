@@ -545,7 +545,8 @@ def run_payload():
 
 def doctor_payload():
     rows = read_jsonl(ledger)
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+    cutoff_base = parse_ts(now) or datetime.now(timezone.utc)
+    cutoff = cutoff_base - timedelta(hours=24)
     last_fired_ts = None
     ts_values = [row.get("ts") for row in rows if parse_ts(row.get("ts"))]
     if ts_values:
