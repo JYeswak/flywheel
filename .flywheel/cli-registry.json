@@ -1,0 +1,227 @@
+{
+  "schema_version": "flywheel-cli-registry/v1",
+  "owner": "flywheel",
+  "doctrine": {
+    "skill": "canonical-cli-scoping",
+    "source": "/Users/josh/.claude/skills/canonical-cli-scoping/SKILL.md",
+    "summary": "Flywheel CLI help, examples, schema IDs, output formats, and ownership should be emitted from this registry before being duplicated in scripts or docs."
+  },
+  "surfaces": [
+    {
+      "name": "cli-registry-emit.sh",
+      "path": ".flywheel/scripts/cli-registry-emit.sh",
+      "lane": "cli-registry",
+      "owner": "flywheel",
+      "schema_id": "flywheel-cli-registry.emit/v1",
+      "summary": "Emit canonical help, info, examples, and schema text from .flywheel/cli-registry.json.",
+      "usage": "cli-registry-emit.sh SCRIPT [--mode help|info|examples|schema] [--registry PATH] [--json]",
+      "args": [
+        {"flag": "SCRIPT", "value_hint": "", "desc": "Registered script name, path, or basename.", "required": true},
+        {"flag": "--mode", "value_hint": "MODE", "desc": "One of help, info, examples, or schema. Defaults to help.", "required": false},
+        {"flag": "--registry", "value_hint": "PATH", "desc": "Override registry path.", "required": false},
+        {"flag": "--json", "value_hint": "", "desc": "Emit machine-readable info or examples where supported.", "required": false},
+        {"flag": "-h, --help", "value_hint": "", "desc": "Emit bootstrap helper usage.", "required": false}
+      ],
+      "examples": [
+        {"name": "tmp_prune_help", "command": "cli-registry-emit.sh tmp-prune.sh --mode help"},
+        {"name": "tmp_prune_info_json", "command": "cli-registry-emit.sh tmp-prune.sh --mode info --json"},
+        {"name": "registry_schema", "command": "cli-registry-emit.sh tmp-prune.sh --mode schema"}
+      ],
+      "output_formats": ["text", "json"],
+      "exit_codes": {"0": "emitted", "1": "surface not registered", "2": "usage error", "3": "registry read error", "69": "jq missing"},
+      "notes": [
+        "This helper is the bootstrap consumer for registry-backed CLI help.",
+        "Scripts can call it for --help while retaining a local fallback for older template copies."
+      ]
+    },
+    {
+      "name": "tmp-prune.sh",
+      "path": ".flywheel/scripts/tmp-prune.sh",
+      "lane": "storage",
+      "owner": "flywheel",
+      "schema_id": "tmp-prune/v1",
+      "summary": "Prune allowlisted stale fleet scratch directories under a selected temporary root.",
+      "usage": "tmp-prune.sh [--root PATH] [--days N] [--dry-run|--apply --idempotency-key KEY] [--json]",
+      "args": [
+        {"flag": "--root", "value_hint": "PATH", "desc": "Temporary root to scan. Allowed roots are /private/tmp, /tmp, and /var/folders descendants.", "required": false},
+        {"flag": "--days", "value_hint": "N", "desc": "Minimum age in mtime days. Defaults to FLYWHEEL_TMP_PRUNE_DAYS or 1.", "required": false},
+        {"flag": "--dry-run", "value_hint": "", "desc": "Plan only. This is the default mode.", "required": false},
+        {"flag": "--apply", "value_hint": "", "desc": "Delete allowlisted candidates after requiring --idempotency-key.", "required": false},
+        {"flag": "--idempotency-key", "value_hint": "KEY", "desc": "Required with --apply; recorded in the receipt.", "required": false},
+        {"flag": "--json", "value_hint": "", "desc": "Emit the receipt JSON to stdout.", "required": false},
+        {"flag": "-h, --help", "value_hint": "", "desc": "Emit help from .flywheel/cli-registry.json.", "required": false}
+      ],
+      "examples": [
+        {"name": "dry_run_json", "command": "tmp-prune.sh --root /private/tmp --days 1 --dry-run --json"},
+        {"name": "apply_with_key", "command": "tmp-prune.sh --root /private/tmp --days 7 --apply --idempotency-key weekly-prune --json"},
+        {"name": "fixture_root", "command": "FLYWHEEL_TMP_PRUNE_RECEIPT_DIR=/tmp/receipts tmp-prune.sh --root /tmp/fixture --dry-run --json"}
+      ],
+      "output_formats": ["text", "json"],
+      "exit_codes": {"0": "success", "2": "usage error", "3": "candidate escaped allowlist guard"},
+      "notes": [
+        "Default is dry-run.",
+        "Candidates are limited to explicit fleet scratch prefixes under the selected tmp root.",
+        "Forbidden prefixes such as com.apple.* and launchd-* are counted but never pruned."
+      ]
+    },
+    {
+      "name": "storage-prune.sh",
+      "path": ".flywheel/scripts/storage-prune.sh",
+      "lane": "storage",
+      "owner": "flywheel",
+      "schema_id": "storage-prune/v1",
+      "summary": "Plan or apply repo-local storage cleanup for Beads backups, dispatch artifacts, recovery dirs, sidecars, and Jeff corpus entries.",
+      "usage": "storage-prune.sh [--repo PATH] [--days N] [--dry-run|--apply] [--json] --idempotency-key KEY",
+      "args": [
+        {"flag": "--repo", "value_hint": "PATH", "desc": "Repo root to scan.", "required": false},
+        {"flag": "--days", "value_hint": "N", "desc": "Minimum age in days for stale candidates.", "required": false},
+        {"flag": "--dry-run", "value_hint": "", "desc": "Plan only; default mode.", "required": false},
+        {"flag": "--apply", "value_hint": "", "desc": "Apply the plan; requires --idempotency-key.", "required": false},
+        {"flag": "--idempotency-key", "value_hint": "KEY", "desc": "Required with --apply.", "required": false},
+        {"flag": "--json", "value_hint": "", "desc": "Emit JSON plan.", "required": false}
+      ],
+      "examples": [
+        {"name": "repo_dry_run", "command": "storage-prune.sh --repo /Users/josh/Developer/flywheel --dry-run --json"},
+        {"name": "apply", "command": "storage-prune.sh --repo /Users/josh/Developer/flywheel --apply --idempotency-key storage-weekly --json"}
+      ],
+      "output_formats": ["text", "json"],
+      "exit_codes": {"0": "success", "2": "usage error"},
+      "notes": ["Docker cleanup is reported as a manual command; this script never prunes docker volumes."]
+    },
+    {
+      "name": "agent-mail-fd-pressure-check.sh",
+      "path": ".flywheel/scripts/agent-mail-fd-pressure-check.sh",
+      "lane": "agent-mail",
+      "owner": "flywheel",
+      "schema_id": "agent-mail-fd-pressure-check/v1",
+      "summary": "Measure Agent Mail file-descriptor pressure against the current soft limit.",
+      "usage": "agent-mail-fd-pressure-check.sh [--json] [--process-pattern PATTERN] [--warn-pct N] [--error-pct N]",
+      "args": [
+        {"flag": "--json", "value_hint": "", "desc": "Emit JSON.", "required": false},
+        {"flag": "--process-pattern", "value_hint": "PATTERN", "desc": "Process pattern for pgrep.", "required": false},
+        {"flag": "--warn-pct", "value_hint": "N", "desc": "Warning threshold percentage.", "required": false},
+        {"flag": "--error-pct", "value_hint": "N", "desc": "Error threshold percentage.", "required": false}
+      ],
+      "examples": [
+        {"name": "live_json", "command": "agent-mail-fd-pressure-check.sh --json"},
+        {"name": "synthetic", "command": "FAKE_FD_COUNT=90 FAKE_ULIMIT=100 agent-mail-fd-pressure-check.sh --json"}
+      ],
+      "output_formats": ["text", "json"],
+      "exit_codes": {"0": "ok or warn JSON emitted", "1": "pressure error", "64": "usage error", "69": "missing dependency"},
+      "notes": ["Synthetic test overrides: FAKE_FD_COUNT, FAKE_ULIMIT, FAKE_PID."]
+    },
+    {
+      "name": "agent-mail-fd-doctor.sh",
+      "path": ".flywheel/scripts/agent-mail-fd-doctor.sh",
+      "lane": "agent-mail",
+      "owner": "flywheel",
+      "schema_id": "agent-mail-fd-doctor/v1",
+      "summary": "Read-only Agent Mail FD doctor that checks service health and lock/file descriptor pressure.",
+      "usage": "agent-mail-fd-doctor.sh [--doctor|--health|--info|--schema|--examples|completion] [--json]",
+      "args": [
+        {"flag": "--doctor", "value_hint": "", "desc": "Run doctor mode.", "required": false},
+        {"flag": "--health", "value_hint": "", "desc": "Run health mode.", "required": false},
+        {"flag": "--info", "value_hint": "", "desc": "Emit metadata.", "required": false},
+        {"flag": "--schema", "value_hint": "", "desc": "Emit schema.", "required": false},
+        {"flag": "--examples", "value_hint": "", "desc": "Emit examples.", "required": false},
+        {"flag": "--json", "value_hint": "", "desc": "Emit JSON where supported.", "required": false}
+      ],
+      "examples": [
+        {"name": "doctor_json", "command": "agent-mail-fd-doctor.sh --doctor --json"},
+        {"name": "health_json", "command": "agent-mail-fd-doctor.sh --health --json"}
+      ],
+      "output_formats": ["text", "json"],
+      "exit_codes": {"0": "PASS", "1": "WARN", "2": "FAIL"},
+      "notes": ["Warn thresholds: total FDs >128 or lock FDs >25; fail thresholds include service down or total FDs >220."]
+    },
+    {
+      "name": "agent-mail-restart.sh",
+      "path": ".flywheel/scripts/agent-mail-restart.sh",
+      "lane": "agent-mail",
+      "owner": "flywheel",
+      "schema_id": "agent-mail-restart/v1",
+      "summary": "Reload Agent Mail LaunchAgent with bootout/bootstrap/kickstart and verify the Python child starts.",
+      "usage": "agent-mail-restart.sh --dry-run|--apply [--explain] [--json]",
+      "args": [
+        {"flag": "--dry-run", "value_hint": "", "desc": "Plan restart commands without mutating launchd.", "required": false},
+        {"flag": "--apply", "value_hint": "", "desc": "Run restart commands.", "required": false},
+        {"flag": "--explain", "value_hint": "", "desc": "Include rationale.", "required": false},
+        {"flag": "--json", "value_hint": "", "desc": "Emit JSONL.", "required": false},
+        {"flag": "--info", "value_hint": "", "desc": "Emit metadata.", "required": false}
+      ],
+      "examples": [
+        {"name": "dry_run", "command": "agent-mail-restart.sh --dry-run --explain --json"},
+        {"name": "apply", "command": "agent-mail-restart.sh --apply --explain --json"}
+      ],
+      "output_formats": ["text", "jsonl"],
+      "exit_codes": {"0": "success", "1": "restart or verification failure", "2": "usage error"},
+      "notes": ["Default is dry-run."]
+    },
+    {
+      "name": "close-validator-contract-probe.sh",
+      "path": ".flywheel/scripts/close-validator-contract-probe.sh",
+      "lane": "validation",
+      "owner": "flywheel",
+      "schema_id": "close-validator-contract-probe.info/v1",
+      "summary": "Probe callback close receipts for skill receipts, stale routes, credential immutability, duplicate close, L112 hashes, and sanitized evidence.",
+      "usage": "close-validator-contract-probe.sh [--callback-file PATH|--callback-text TEXT] [--close-ledger PATH] [--json] [--quiet]",
+      "args": [
+        {"flag": "--callback-file", "value_hint": "PATH", "desc": "Read callback receipt from file.", "required": false},
+        {"flag": "--callback-text", "value_hint": "TEXT", "desc": "Read callback receipt from argument.", "required": false},
+        {"flag": "--close-ledger", "value_hint": "PATH", "desc": "Close ledger to check for duplicates.", "required": false},
+        {"flag": "--json", "value_hint": "", "desc": "Emit JSON.", "required": false},
+        {"flag": "--quiet", "value_hint": "", "desc": "Emit compact status.", "required": false}
+      ],
+      "examples": [
+        {"name": "file", "command": "close-validator-contract-probe.sh --callback-file /tmp/close-receipt.json --close-ledger .beads/issues.jsonl --json"},
+        {"name": "text", "command": "close-validator-contract-probe.sh --callback-text \"DONE task evidence=/tmp/e.md\" --json"}
+      ],
+      "output_formats": ["text", "json"],
+      "exit_codes": {"0": "pass", "1": "contract failure", "64": "usage error"},
+      "notes": ["Contract version: close-validator-receipt-contract/v1."]
+    },
+    {
+      "name": "br-create-validated.sh",
+      "path": ".flywheel/scripts/br-create-validated.sh",
+      "lane": "beads",
+      "owner": "flywheel",
+      "schema_id": "bead-ag-format/v1",
+      "summary": "Validate canonical AG<N> acceptance gates before delegating to br create.",
+      "usage": "br-create-validated.sh --title TITLE --description-file FILE [br create args...]",
+      "args": [
+        {"flag": "--title", "value_hint": "TITLE", "desc": "Bead title passed to br create.", "required": true},
+        {"flag": "--description-file", "value_hint": "FILE", "desc": "Markdown body to validate and pass as description.", "required": true},
+        {"flag": "--description", "value_hint": "TEXT", "desc": "Inline description; written to a temp file for validation.", "required": false},
+        {"flag": "-h, --help", "value_hint": "", "desc": "Emit help.", "required": false}
+      ],
+      "examples": [
+        {"name": "create_from_file", "command": "br-create-validated.sh --title \"ship gate\" --description-file /tmp/body.md --priority 1 --type task"}
+      ],
+      "output_formats": ["text"],
+      "exit_codes": {"0": "br create succeeded", "1": "AG validation failed", "2": "usage error"},
+      "notes": ["Warnings are printed to stderr; format errors block creation."]
+    },
+    {
+      "name": "caam-recovery-path-probe.sh",
+      "path": ".flywheel/scripts/caam-recovery-path-probe.sh",
+      "lane": "caam",
+      "owner": "flywheel",
+      "schema_id": "caam.recovery_path_probe.v1",
+      "summary": "Read-only probe for CAAM recovery path health across launchd, profiles, and recent rotation logs.",
+      "usage": "caam-recovery-path-probe.sh [--json|--quiet] [--info] [--examples]",
+      "args": [
+        {"flag": "--json", "value_hint": "", "desc": "Emit full JSON.", "required": false},
+        {"flag": "--quiet", "value_hint": "", "desc": "Emit verdict only.", "required": false},
+        {"flag": "--info", "value_hint": "", "desc": "Emit metadata.", "required": false},
+        {"flag": "--examples", "value_hint": "", "desc": "Emit examples.", "required": false}
+      ],
+      "examples": [
+        {"name": "live", "command": "caam-recovery-path-probe.sh --json"},
+        {"name": "fixture", "command": "CAAM_PROBE_LOG_DIRS=/tmp/caam-logs caam-recovery-path-probe.sh --json"}
+      ],
+      "output_formats": ["text", "json"],
+      "exit_codes": {"0": "probe emitted", "2": "usage error"},
+      "notes": ["This registry row captures the existing hand-written help surface as a representative migration target."]
+    }
+  ]
+}

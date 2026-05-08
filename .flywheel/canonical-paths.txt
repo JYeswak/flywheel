@@ -192,3 +192,6 @@ jeff_pattern_citation_tests	tests/jeff-pattern-citation-probe.sh	flywheel-jhcd	F
 failure_taxonomy_contract	.flywheel/doctrine/failure-taxonomy.md	flywheel-esdx	Canonical failure_class, retry_policy, and recovery_hint taxonomy for validation receipts, doctor JSON, callbacks, and repair helpers.
 failure_taxonomy_emit_helper	.flywheel/scripts/failure-class-emit.sh	flywheel-esdx	Read-only helper mapping legacy raw failure shapes to failure-taxonomy-envelope/v1 JSON.
 failure_taxonomy_emit_tests	tests/failure-class-emit.sh	flywheel-esdx	Fixture-backed tests for open-child, DCG, reservation, runtime, artifact, context drift, correctness, invalid callback, and unknown mappings.
+flywheel_cli_registry	.flywheel/cli-registry.json	flywheel-ryzt	Canonical source of truth for flywheel CLI surface name, lane, owner, schema id, output formats, args, examples, and notes.
+flywheel_cli_registry_emitter	.flywheel/scripts/cli-registry-emit.sh	flywheel-ryzt	Helper that emits help, info, examples, and schema text from .flywheel/cli-registry.json.
+flywheel_cli_registry_tests	tests/test_cli_registry_emit.sh	flywheel-ryzt	Fixture-backed test proving registry schema coverage and tmp-prune help round-trip through the registry emitter.

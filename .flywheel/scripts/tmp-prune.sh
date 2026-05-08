@@ -8,8 +8,14 @@ APPLY=0
 JSON_OUT=0
 IDEMPOTENCY_KEY="${FLYWHEEL_TMP_PRUNE_IDEMPOTENCY_KEY:-}"
 TMP_PRUNE_WORKDIR=""
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+CLI_REGISTRY_EMIT="${FLYWHEEL_CLI_REGISTRY_EMIT:-$SCRIPT_DIR/cli-registry-emit.sh}"
 
 usage() {
+  if [ -x "$CLI_REGISTRY_EMIT" ]; then
+    "$CLI_REGISTRY_EMIT" tmp-prune.sh --mode help
+    return
+  fi
   printf '%s\n' \
     "Usage: tmp-prune.sh [--root PATH] [--days N] [--dry-run|--apply --idempotency-key KEY] [--json]" \
     "Default is dry-run. Candidates are limited to explicit fleet scratch prefixes under the selected tmp root."
