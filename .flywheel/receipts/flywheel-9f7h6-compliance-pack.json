@@ -1,0 +1,25 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-9f7h6",
+  "worker": "flywheel-pane4",
+  "status": "done",
+  "did": "4/4",
+  "evidence": [
+    ".flywheel/receipts/flywheel-9f7h6-cm-workspace-audit.md",
+    ".flywheel/AGENTS-CANONICAL.md",
+    "/Users/josh/.claude/skills/cass/SKILL.md",
+    "/Users/josh/.claude/skills/cass-memory/SKILL.md",
+    "/Users/josh/.claude/skills/worker-orchestration/SKILL.md"
+  ],
+  "checks": {
+    "socraticode_queries": 5,
+    "indexed_chunks_observed": 50,
+    "cm_bare_callsite_gate_passed": true,
+    "cass_skills_audited": true,
+    "substrate_basename_key_count": 2124,
+    "followup_beads_filed": 0,
+    "doctrine_l_rule_added": true,
+    "skill_discoveries": 1,
+    "sd_ids": ["sd-5ded1b9081be1939"]
+  }
+}
