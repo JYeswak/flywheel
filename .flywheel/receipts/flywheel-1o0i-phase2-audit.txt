@@ -1,0 +1,18 @@
+Phase 2 Audit — 2026-05-08T00:03:15Z
+  - no tombstone DB present (marker only), global vault inactive
+PASS T2.1 global vault tombstone + stale IDs closed
+PASS T2.2 spot-check active repos have .beads/beads.db
+  - /Users/josh/Developer/ntm/.beads/beads.db -> source_repo='.' count=195
+  - /Users/josh/Developer/cfs-expo/.beads/beads.db -> source_repo='.' count=98
+  - checked DBs: 40
+  - skipped non-DB/non-issues dirs: 87
+FAIL T2.3 source_repo='.' count is 0 in repo-local DBs
+FAIL T2.4 br create writes absolute source_repo
+  - source_repo is not absolute: tmp.xpV46aEDHT
+PASS T2.5 br where from flywheel resolves local DB
+  - bd found at /Users/josh/.cargo/bin/bd
+FAIL T2.6 bd and br-real absent from PATH
+PASS T2.7 RunBrReal not called in ntm/internal
+PASS T2.8 runtime_handoff has working_dir column
+
+Summary: 5/8 passed, 3 failed

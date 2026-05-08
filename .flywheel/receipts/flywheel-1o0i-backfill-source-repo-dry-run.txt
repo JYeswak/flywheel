@@ -1,0 +1,46 @@
+[SKIP] /Users/josh/Developer/frankensqlite: all 2265 issues already have source_repo
+[SKIP] /Users/josh/Developer/vibe-cockpit: all 167 issues already have source_repo
+[SKIP] /Users/josh/Developer/mobile-eats: all 576 issues already have source_repo
+[SKIP] /Users/josh/Developer/email-migration: all 27 issues already have source_repo
+[SKIP] /Users/josh/Developer/cubcloud-bears: all 73 issues already have source_repo
+[SKIP] /Users/josh/Developer/clutterfreespaces: all 1 issues already have source_repo
+[SKIP] /Users/josh/Developer/agent-bench: all 47 issues already have source_repo
+[SKIP] /Users/josh/Developer/zeststream-infra: all 220 issues already have source_repo
+[SKIP] /Users/josh/Developer/terratitle: all 43 issues already have source_repo
+[SKIP] /Users/josh/Developer/comfyui: all 165 issues already have source_repo
+[SKIP] /Users/josh/Developer/franken: all 0 issues already have source_repo
+[SKIP] /Users/josh/Developer/alpsinsurance: all 1697 issues already have source_repo
+[SKIP] /Users/josh/Developer/fleet-dashboard: all 7 issues already have source_repo
+[SKIP] /Users/josh/Developer/asupersync: all 0 issues already have source_repo
+[SKIP] /Users/josh/Developer/rano: all 5 issues already have source_repo
+[SKIP] /Users/josh/Developer/gpu-optimization: all 919 issues already have source_repo
+[SKIP] /Users/josh/Developer/frankentui: all 0 issues already have source_repo
+[SKIP] /Users/josh/Developer/coo: all 7 issues already have source_repo
+[SKIP] /Users/josh/Developer/zesty-worker-session: all 4 issues already have source_repo
+[SKIP] /Users/josh/Developer/polymarket-pico-z: all 2156 issues already have source_repo
+[SKIP] /Users/josh/Developer/ntm: all 0 issues already have source_repo
+[SKIP] /Users/josh/Developer/destructive_command_guard: all 0 issues already have source_repo
+[SKIP] /Users/josh/Developer/zeststream-v2: all 0 issues already have source_repo
+[SKIP] /Users/josh/Developer/orchestrator-a: all 9308 issues already have source_repo
+[SKIP] /Users/josh/Developer/flywheel: all 1159 issues already have source_repo
+[SKIP] /Users/josh/Developer/zeststream-procurement: all 55 issues already have source_repo
+[DRY] /Users/josh/Developer/cfs-expo: 98/98 issues need source_repo backfill
+[SKIP] /Users/josh/Developer/alpsinsurance-celery-fix: all 649 issues already have source_repo
+[SKIP] /Users/josh/Developer/soundsoftheforest: all 16 issues already have source_repo
+[SKIP] /Users/josh/Developer/remote_compilation_helper: all 637 issues already have source_repo
+[SKIP] /Users/josh/Developer/local-agents: all 73 issues already have source_repo
+[SKIP] /Users/josh/Developer/cubcloud-aaas: all 1550 issues already have source_repo
+[SKIP] /Users/josh/Developer/process_triage: all 521 issues already have source_repo
+[SKIP] /Users/josh/Developer/agno-service: all 0 issues already have source_repo
+[SKIP] /Users/josh/Developer/100minds-mcp: all 64 issues already have source_repo
+[SKIP] /Users/josh/Developer/beads_rust: all 550 issues already have source_repo
+[SKIP] /Users/josh/Developer/zesttube: all 850 issues already have source_repo
+[SKIP] /Users/josh/Developer/cubden-web: all 1 issues already have source_repo
+[SKIP] /Users/josh/Developer/skillos: all 555 issues already have source_repo
+[SKIP] /Users/josh/Developer/fleet-commander: all 409 issues already have source_repo
+[SKIP] /Users/josh/Developer/vrtx: all 1 issues already have source_repo
+[SKIP] /Users/josh/Developer/langgraph-toolkit: all 0 issues already have source_repo
+[SKIP] /Users/josh/Developer/josh-ops: all 146 issues already have source_repo
+[SKIP] /Users/josh/Developer/storage_ballast_helper: all 211 issues already have source_repo
+
+Scanned 44 databases, 1 needed updates.

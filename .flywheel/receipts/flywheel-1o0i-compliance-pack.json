@@ -1,0 +1,58 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-1o0i",
+  "worker": "flywheel-pane4",
+  "created_at": "2026-05-08T00:08:00Z",
+  "source_plan": ".flywheel/PLANS/bead-isolation-fix-2026-04-30.md",
+  "artifacts": [
+    ".flywheel/PLANS/bead-isolation-fix-2026-04-30/PHASE-2-RUNBOOK.md",
+    ".flywheel/receipts/flywheel-1o0i-backfill-source-repo-dry-run.txt",
+    ".flywheel/receipts/flywheel-1o0i-phase2-audit.txt",
+    ".flywheel/receipts/flywheel-1o0i-compliance-pack.json"
+  ],
+  "socraticode": {
+    "queries": 5,
+    "indexed_chunks_observed": 50,
+    "project_path": "/Users/josh/Developer/flywheel"
+  },
+  "acceptance": {
+    "stale_global_beads_runbook": true,
+    "active_repo_init_list_confirmed_or_gated": true,
+    "source_repo_backfill_plan_covers_repo_local_dbs": true,
+    "symlink_tombstone_procedure_documented": true,
+    "bd_br_real_consolidation_plan_documented": true,
+    "fm8_child_bead_filed": "flywheel-1o0i.1"
+  },
+  "tests": {
+    "command": "tests/phase2-audit.sh",
+    "receipt": ".flywheel/receipts/flywheel-1o0i-phase2-audit.txt",
+    "passed": false,
+    "passed_count": 5,
+    "total_count": 8,
+    "documented_blockers": [
+      "T2.3 source_repo='.' rows remain in ntm and cfs-expo",
+      "T2.4 br create writes non-absolute source_repo in temp fixture",
+      "T2.6 bd remains available on PATH"
+    ]
+  },
+  "backfill": {
+    "dry_run_captured": true,
+    "receipt": ".flywheel/receipts/flywheel-1o0i-backfill-source-repo-dry-run.txt",
+    "databases_scanned": 44,
+    "databases_needing_updates": 1,
+    "explicit_audit_blockers": [
+      "/Users/josh/Developer/ntm",
+      "/Users/josh/Developer/cfs-expo"
+    ]
+  },
+  "beads": {
+    "fm8_child_bead": "flywheel-1o0i.1",
+    "stale_bead_count_in_runbook": 11
+  },
+  "jeff_issue_filed": "n/a",
+  "notes": [
+    "No live runtime DB mutation performed.",
+    "No Jeff-owned repo push performed.",
+    "No manual .beads/issues.jsonl edit performed; child bead was filed via br create."
+  ]
+}
