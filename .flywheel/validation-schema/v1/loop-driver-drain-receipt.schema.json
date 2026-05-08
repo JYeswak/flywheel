@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/flywheel/loop-driver-drain-receipt.schema.json",
+  "title": "Loop Driver Drain Receipt",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "ts",
+    "driver",
+    "state",
+    "trigger",
+    "in_flight_tasks",
+    "drained_count",
+    "timed_out_count",
+    "next_start_policy"
+  ],
+  "properties": {
+    "schema_version": { "const": "loop-driver-drain-receipt.v1" },
+    "ts": { "type": "string", "minLength": 20 },
+    "driver": { "type": "string", "minLength": 1 },
+    "state": {
+      "type": "string",
+      "enum": [
+        "graceful_drain",
+        "timeout_drain",
+        "operator_pause",
+        "crash_recovery",
+        "restart_handoff"
+      ]
+    },
+    "trigger": { "type": "string", "minLength": 1 },
+    "in_flight_tasks": { "type": "integer", "minimum": 0 },
+    "drained_count": { "type": "integer", "minimum": 0 },
+    "timed_out_count": { "type": "integer", "minimum": 0 },
+    "next_start_policy": {
+      "type": "string",
+      "enum": [
+        "resume_on_next_interval",
+        "manual_resume",
+        "restart_immediately",
+        "hold_for_operator",
+        "crash_recover_then_resume"
+      ]
+    },
+    "request_id": { "type": ["string", "null"] }
+  }
+}

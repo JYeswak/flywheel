@@ -21,6 +21,7 @@ fleet_skill_reporting_secret_scrub_tests	tests/test_fleet_skill_reporting_secret
 validate_tick_driver	.flywheel/flywheel-loop-tick	flywheel-hf58	Tick driver with VALIDATE phase before INTEGRATE.
 tick_receipt_schema_v1	.flywheel/validation-schema/v1/tick-receipt.schema.json	flywheel-hf58	Tick receipt schema including validation_summary fields.
 validate_tick_phase_tests	tests/validate-tick-phase.sh	flywheel-hf58	Fixture-backed tests for VALIDATE phase routing.
+loop_driver_drain_receipt_schema_v1	.flywheel/validation-schema/v1/loop-driver-drain-receipt.schema.json	flywheel-e7c2	Shutdown/drain receipt contract for loop drivers; emitted by flywheel-tick-driver drain-receipt and surfaced by flywheel-loop doctor loop-driver.
 l70_ticks_punted_probe	.flywheel/scripts/ticks-punted-probe.sh	flywheel-zdva	Doctor-backed L70 probe for same-tick chain punts without chain_blocked_reason.
 worker_callback_delivery_verifier	.flywheel/scripts/verify-callback-delivery.sh	flywheel-f589	Worker-side ntm callback send wrapper that verifies delivery before clean DONE.
 worker_callback_delivery_tests	tests/verify-callback-delivery.sh	flywheel-f589	Fixture-backed tests for success, queued-not-submitted, FTS5 send failure, and pane-disappeared modes.

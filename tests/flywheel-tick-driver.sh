@@ -107,6 +107,7 @@ env_base=(
   "FLYWHEEL_TICK_DRIVER_LEDGER=$state/tick-driver.jsonl"
   "FLYWHEEL_TICK_DRIVER_FUCKUP_LOG=$state/fuckup-log.jsonl"
   "FLYWHEEL_TICK_DRIVER_CONTRACT_LEDGER=$state/substrate-loop-contract.jsonl"
+  "FLYWHEEL_TICK_DRIVER_DRAIN_LEDGER=$state/loop-driver-drain-receipts.jsonl"
   "FLYWHEEL_TICK_DRIVER_LOCK=$state/tick-driver.lock"
   "FLYWHEEL_JSONL_APPEND_LIB=$append_lib"
 )
@@ -116,6 +117,19 @@ env "${env_base[@]}" "$DRIVER" --json >"$TMP/run.json"
 assert_jq "$TMP/run.json" '.primitive_count == 3 and .ok_count == 1 and .timeout_count == 1 and .error_count == 1' "synthetic_invokes_all"
 assert_jq "$state/tick-driver.jsonl" '.primitive_count == 3 and .status == "degraded"' "ledger_row_written"
 assert_jq "$state/fuckup-log.jsonl" '[inputs] | length >= 1' "fuckup_for_failed_primitive"
+
+env "${env_base[@]}" "$DRIVER" schema drain-receipt --json >"$TMP/drain-schema.json"
+assert_jq "$TMP/drain-schema.json" '.state_enum == ["graceful_drain","timeout_drain","operator_pause","crash_recovery","restart_handoff"] and (.required | index("next_start_policy"))' "drain_receipt_schema_surface"
+env "${env_base[@]}" "$DRIVER" drain-receipt --state graceful_drain --trigger SIGTERM --in-flight-tasks 0 --drained-count 0 --timed-out-count 0 --next-start-policy resume_on_next_interval --request-id zero --json >"$TMP/drain-zero.json"
+assert_jq "$TMP/drain-zero.json" '.status == "written" and .receipt.state == "graceful_drain" and .receipt.in_flight_tasks == 0' "drain_zero_in_flight"
+env "${env_base[@]}" "$DRIVER" drain-receipt --state graceful_drain --trigger SIGTERM --in-flight-tasks 3 --drained-count 3 --timed-out-count 0 --next-start-policy resume_on_next_interval --request-id success --json >"$TMP/drain-success.json"
+assert_jq "$TMP/drain-success.json" '.receipt.drained_count == 3 and .receipt.timed_out_count == 0' "drain_successful_drain"
+env "${env_base[@]}" "$DRIVER" drain-receipt --state timeout_drain --trigger SIGTERM --in-flight-tasks 2 --drained-count 1 --timed-out-count 1 --next-start-policy hold_for_operator --request-id timeout --json >"$TMP/drain-timeout.json"
+assert_jq "$TMP/drain-timeout.json" '.receipt.state == "timeout_drain" and .receipt.timed_out_count == 1 and .receipt.next_start_policy == "hold_for_operator"' "drain_timeout_drain"
+env "${env_base[@]}" "$DRIVER" drain-receipt --state timeout_drain --trigger SIGTERM --in-flight-tasks 2 --drained-count 1 --timed-out-count 1 --next-start-policy hold_for_operator --request-id timeout --json >"$TMP/drain-duplicate.json"
+assert_jq "$TMP/drain-duplicate.json" '.status == "duplicate_ignored"' "drain_duplicate_shutdown_request"
+env "${env_base[@]}" "$DRIVER" drain-receipt --state restart_handoff --trigger restart_after_drain --in-flight-tasks 0 --drained-count 0 --timed-out-count 0 --next-start-policy restart_immediately --request-id restart --json >"$TMP/drain-restart.json"
+assert_jq "$TMP/drain-restart.json" '.receipt.state == "restart_handoff" and .receipt.next_start_policy == "restart_immediately"' "drain_restart_after_drain"
 
 hold_lock_and_run "$state/tick-driver.lock" env "${env_base[@]}" "$DRIVER" --json >"$TMP/locked.json"
 assert_jq "$TMP/locked.json" '.status == "skipped_lock"' "flock_prevents_overlap"
@@ -151,8 +165,8 @@ else
 fi
 
 if [[ "$fail_count" -gt 0 ]]; then
-  printf 'FAIL flywheel-tick-driver tests pass=%d/5 fail=%d\n' "$pass_count" "$fail_count" >&2
+  printf 'FAIL flywheel-tick-driver tests pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2
   exit 1
 fi
 
-printf 'OK flywheel-tick-driver tests pass=%d/5\n' "$pass_count"
+printf 'OK flywheel-tick-driver tests pass=%d\n' "$pass_count"

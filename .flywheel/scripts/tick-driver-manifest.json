@@ -14,10 +14,45 @@
       "timeout_sec": 30
     },
     {
+      "name": "storage-prune",
+      "path": ".flywheel/scripts/storage-prune.sh",
+      "args": ["--apply", "--idempotency-key", "tick-driver-substrate-discipline"],
+      "timeout_sec": 30,
+      "purpose": "Auto-prune repo-local substrate pressure: archive .br_recovery bloat, remove stale Beads sidecars by exact path, and archive old Jeff corpus entries."
+    },
+    {
+      "name": "beads-auto-rebuild-from-jsonl",
+      "path": "/Users/josh/.claude/skills/.flywheel/scripts/beads-auto-rebuild-from-jsonl.sh",
+      "args": ["--repo", "/Users/josh/Developer/flywheel", "--apply", "--trigger", "tick"],
+      "timeout_sec": 60,
+      "purpose": "If br doctor reports unsafe rebuildable Beads state, back up to /tmp, restore clean JSONL, remove disposable beads.db sidecars, and rerun br doctor."
+    },
+    {
       "name": "agents-md-fleet-propagator",
       "path": ".flywheel/scripts/agents-md-fleet-propagator.sh",
       "args": ["--apply"],
       "timeout_sec": 60
+    },
+    {
+      "name": "topology-tick-refresh",
+      "path": ".flywheel/scripts/topology-tick-refresh.sh",
+      "args": ["--apply", "--json"],
+      "timeout_sec": 30,
+      "purpose": "Refresh topology freshness after L102 meta-rule sync and before topology-consuming gates; writes per-fire topology-tick-refresh ledger rows."
+    },
+    {
+      "name": "ntm-surface-validation-driver",
+      "path": ".flywheel/scripts/ntm-surface-validation-driver.sh",
+      "args": ["--dry-run", "--json", "--max-surfaces", "20"],
+      "timeout_sec": 60,
+      "purpose": "Step 6 NTM surface validation dry-run: rechecks 07-VALIDATION-MATRIX.yaml shape and emits current pass/fail surface evidence without mutating the validation ledger."
+    },
+    {
+      "name": "ntm-surface-coverage-trend",
+      "path": ".flywheel/scripts/ntm-surface-coverage-trend.sh",
+      "args": ["record", "--apply", "--idempotency-key", "tick-driver-ntm-surface-coverage", "--json"],
+      "timeout_sec": 30,
+      "purpose": "Daily trend receipt for NTM wire-in measurement: appends coverage_avg by decision class to ~/.local/state/flywheel/ntm-surface-coverage-trend.jsonl."
     },
     {
       "name": "codex-stuck-detector",
@@ -57,6 +92,17 @@
       "args": ["--dry-run", "--json"],
       "timeout_sec": 120,
       "type": "scheduled_weekly"
+    },
+    {
+      "name": "dispatch-and-verify",
+      "path": ".flywheel/scripts/dispatch-and-verify.sh",
+      "args": ["<session>", "<pane>", "<dispatch-file-path>"],
+      "purpose": "Canonical recovery wrapper for codex-chevron-stuck-on-dispatch and dispatch-not-consumed: send dispatch via ntm send, then verify live work via activity velocity, ntm changes, or permissive pane-content delta with STUCK hysteresis.",
+      "exit_codes": {"0": "worker confirmed live work evidence", "1": "still stuck after probe window (diagnostic dump emitted)", "2": "usage error, invalid probe mode, or missing dispatch file"},
+      "source_finding": "mobile-eats/.flywheel/findings/2026-05-06-codex-chevron-stuck-on-dispatch.md",
+      "verdict_source": "flywheel:1 ack 2026-05-06",
+      "timeout_sec": 60,
+      "type": "event_driven"
     }
   ]
 }
