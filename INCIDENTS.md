@@ -5346,3 +5346,55 @@ Evidence:
 - Process-gap route: `AGENTS.md` L105 and
   `.flywheel/scripts/fleet-process-gap-detector.sh`.
 - Bead: `flywheel-lx47b`.
+
+## br-sync-stale-db-export-blocked
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `br-sync-stale-db-export-blocked`
+
+Event Count: 9 events in 7 days
+
+Severity: medium
+
+Cost: Workers could close or update beads in the live Beads DB, but
+`br sync --flush-only --json` refused to export because DB and JSONL counts had
+diverged and export would lose eight issue IDs. Each closeout had to preserve
+DB truth, skip lossy export, and explain why `.beads/issues.jsonl` could not be
+committed as a normal sync artifact.
+
+Root Cause: The sync guard correctly blocked data loss, but the recurring
+class had no layer-2 INCIDENTS entry separating "br DB mutation works" from
+"DB-to-JSONL export is stale and unsafe." Without that routing, workers kept
+re-reporting the same eight-ID loss set instead of treating it as a known
+substrate convergence issue owned by Beads recovery.
+
+Forever-Rule: When `br sync --flush-only --json` refuses export because the
+DB/JSONL delta would lose issue IDs, do not force export and do not manually
+append `.beads/issues.jsonl`. Verify the intended `br` mutation with `br show`
+or the relevant `br dep` command, record the refused sync with the exact lost
+IDs or count, route convergence to the existing Beads recovery owner, and
+continue task closeout with DB-visible evidence rather than treating JSONL
+export as the source of truth.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote br-sync-stale-db-export-blocked`. The entry connects the 9-row cluster
+to `beads-br` explicit-sync discipline and AGENTS L124 substrate discipline:
+`br` owns Beads writes, lossy JSONL export is blocked, and rebuild/convergence
+belongs to the Beads recovery path rather than ad-hoc worker fallback rows.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1161`: `flywheel-0cm9` close
+  succeeded in DB, but `br sync --flush-only --json` refused export because it
+  would lose eight issue IDs.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1170-L1185`: repeated close/update
+  events hit the same stale DB/JSONL export guard.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1190-L1235`: follow-on closeouts
+  and parent-note updates again preserved DB truth while skipping lossy export.
+- Existing recovery context: `INCIDENTS.md#beads-sync-recovery-research-eight-id-recovery-now-stale-resolved-pending-joshua-option-selection-2026-05-06`.
+- Doctrine: `AGENTS.md` L124 `SUBSTRATE-DISCIPLINE-NO-ORCHESTRATOR-PAUSE`.
+- Skill: `~/.claude/skills/beads-br/SKILL.md` explicit `br sync --flush-only`
+  discipline.
+- Bead: `flywheel-1irgl`.
