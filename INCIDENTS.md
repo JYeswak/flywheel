@@ -5845,3 +5845,103 @@ Evidence:
 - Doctrine: `AGENTS.md` L137 `BEADS-MUTATIONS-USE-A-SERIAL-WRITE-LANE`.
 - Skill: `~/.claude/skills/agent-mail/SKILL.md`.
 - Bead: `flywheel-3gc1p`.
+
+## integrate_worker_active
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `integrate_worker_active`
+
+Event Count: 3 events in 7 days
+
+Severity: low
+
+Cost: Mobile-eats integrate prelude saw pane 2 still `THINKING` three times
+and correctly deferred callback reaping instead of touching worker files. The
+behavior was safe, but without layer-2 coverage the same safe deferral class
+kept surfacing as an unprocessed promotion candidate rather than being routed
+to the worker-progress receipt substrate.
+
+Root Cause: The loop had canonical worker-progress rules in AGENTS.md and a
+stall probe, but the exact positive/safe deferral class was not represented in
+`INCIDENTS.md`. Doctrine-ladder triage could not distinguish "worker active,
+wait" from callback-overdue, stuck-worker, or no-progress failure classes.
+
+Forever-Rule: When INTEGRATE sees a worker pane still classified as active
+`THINKING`, do not reap callbacks, mutate worker-owned files, or mark the
+worker stale from a single snapshot. Record the active-worker evidence, defer
+reaping, and continue only through the L91/L95 path: live activity/capture
+proof, dispatch-log callback state, output-advance or stall receipt, and the
+worker-stall recovery ladder if activity stops advancing. `integrate_worker_active`
+is a wait/observe class, not a closeout failure.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote integrate_worker_active`. This entry closes promotion-candidate bead
+`flywheel-2ljj` and routes future rows to the existing worker-progress receipt
+and stall-probe surfaces instead of creating duplicate promotion candidates.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L435-L437`: three mobile-eats
+  INTEGRATE prelude rows where pane 2 was still `THINKING`, so callback reaping
+  was deferred.
+- Doctrine: `AGENTS.md` L91 `DISPATCH-DELIVERY-IS-A-FOUR-STATE-RECEIPT`.
+- Doctrine: `AGENTS.md` L95 worker-stall recovery guidance.
+- Probe: `.flywheel/scripts/worker-stall-alert-probe.sh`.
+- Test: `tests/worker-stall-alert-probe.sh`.
+- Bead: `flywheel-2ljj`.
+
+## worker-evidence-file-write-before-reservation
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `worker-evidence-file-write-before-reservation`
+
+Event Count: 3 events in 7 days
+
+Severity: low
+
+Cost: Three flywheel validation/redispatch paths wrote `/tmp` evidence
+artifacts before taking a matching Agent Mail reservation for those evidence
+paths. No source file or repo substrate was mutated in the observed rows, but
+the pattern weakens L51/L107 by training workers that "temporary evidence" is
+outside the reservation contract.
+
+Root Cause: The dispatch and closeout rules clearly reserve source and shared
+append paths, but evidence artifacts generated during validation probes were
+treated as harmless scratch output. That left a narrow write-before-reserve
+class with no layer-2 coverage, even though the Agent Mail skill already states
+that additive/evidence writes are not exempt from pre-flight reservations.
+
+Forever-Rule: Evidence files are write targets. Before a worker writes probe,
+dry-run, validation, callback, or closeout evidence to `/tmp`, `.flywheel/`, or
+any shared substrate path, reserve the exact evidence path or a narrow evidence
+directory first. If the evidence is intentionally ephemeral and reservation
+would be disproportionate, record the exception before writing and keep it out
+of source, bead, dispatch-log, and shared append surfaces. Never use a clean
+source diff as proof that write-before-reserve did not happen.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote worker-evidence-file-write-before-reservation`. This entry gives
+promotion-candidate bead `flywheel-eikur` durable L56 coverage and routes
+future rows to the Agent Mail reservation discipline instead of treating `/tmp`
+evidence writes as outside the worker contract.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1102`: `flywheel-668a`
+  redispatch generated `/tmp/flywheel-668a-*` probe evidence before Agent Mail
+  reservations for those evidence paths.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1111`: `flywheel-g343`
+  validation wrote `/tmp/flywheel-g343-vibing-forbidden.json` before a matching
+  Agent Mail reservation.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1112`: `flywheel-g343`
+  validation wrote `/tmp/flywheel-g343-dryrun-preview.json` before a matching
+  Agent Mail reservation.
+- Doctrine: `AGENTS.md` L51 `DISPATCH-FILE-RESERVATIONS-MANDATORY`.
+- Doctrine: `AGENTS.md` L107 `SHARED-SURFACE-RESERVATION-BEFORE-STAGING`.
+- Skill: `~/.claude/skills/agent-mail/SKILL.md`.
+- Skill: `~/.claude/skills/dispatch-tool-contracts/SKILL.md`.
+- Bead: `flywheel-eikur`.
