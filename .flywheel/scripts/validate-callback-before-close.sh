@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-VERSION="validate-callback-before-close.v1.2.0"
+VERSION="validate-callback-before-close.v1.2.1"
 REPO="$PWD"
 NTM_BIN="${NTM_BIN:-/Users/josh/.local/bin/ntm}"
 NTM_SESSION="${NTM_SESSION:-flywheel}"
@@ -167,6 +167,7 @@ ENVELOPE_DIDNT_VALUE=""
 ENVELOPE_GAPS_VALUE=""
 ENVELOPE_TMP_DIR_RELEASED_VALUE=""
 ENVELOPE_STRUCTURAL_SOURCE="none"
+BLOCK_CLOSE_REASON=""
 
 append_line() {
   var_name="$1"
@@ -257,7 +258,8 @@ check_callback_envelope_structure() {
       did_total="${ENVELOPE_DID_VALUE#*/}"
       if [ "$did_done" -lt "$did_total" ]; then
         ENVELOPE_DID_TOTAL_MISMATCH="$ENVELOPE_DID_VALUE"
-        structural_fail "validator_structural_pass=false envelope_did_total_mismatch=$ENVELOPE_DID_TOTAL_MISMATCH"
+        continuation="${ENVELOPE_GAPS_VALUE:-none}"
+        structural_fail "validator_structural_pass=false partial_work_with_continuation envelope_did_total_mismatch=$ENVELOPE_DID_TOTAL_MISMATCH continuation=$continuation"
       elif [ "$did_done" -gt "$did_total" ]; then
         structural_fail "validator_structural_pass=false envelope_did_total_invalid=$ENVELOPE_DID_VALUE"
       fi
@@ -271,7 +273,7 @@ check_callback_envelope_structure() {
       ;;
     *)
       continuation="${ENVELOPE_GAPS_VALUE:-none}"
-      structural_fail "validator_structural_pass=false envelope_didnt_not_none=$ENVELOPE_DIDNT_VALUE continuation=$continuation"
+      structural_fail "validator_structural_pass=false partial_work_with_continuation envelope_didnt_not_none=$ENVELOPE_DIDNT_VALUE continuation=$continuation"
       ;;
   esac
 
@@ -483,6 +485,14 @@ elif [ "$STRICT" -eq 1 ] && [ "$WARN" -gt 0 ]; then
   VERDICT="BLOCK_CLOSE"
 fi
 
+if [ "$VERDICT" = "BLOCK_CLOSE" ]; then
+  if [ "$VALIDATOR_STRUCTURAL_PASS" = "false" ] && { [ -n "$ENVELOPE_DID_TOTAL_MISMATCH" ] || { [ -n "$ENVELOPE_DIDNT_VALUE" ] && [ "$ENVELOPE_DIDNT_VALUE" != "none" ] && [ "$ENVELOPE_DIDNT_VALUE" != "0" ] && [ "$ENVELOPE_DIDNT_VALUE" != "0/0" ]; }; }; then
+    BLOCK_CLOSE_REASON="partial_work_with_continuation did=${ENVELOPE_DID_VALUE:-missing} didnt=${ENVELOPE_DIDNT_VALUE:-missing} continuation=${ENVELOPE_GAPS_VALUE:-none}"
+  else
+    BLOCK_CLOSE_REASON="$(printf '%s\n' "$FAILURES" | sed '/^$/d' | head -1)"
+  fi
+fi
+
 create_rework_bead() {
   [ "$VERDICT" = "BLOCK_CLOSE" ] || return 0
   command -v br >/dev/null 2>&1 || {
@@ -543,6 +553,7 @@ payload = {
     "evidence": os.environ["FW_VCBC_EVIDENCE"],
     "mode": os.environ["FW_VCBC_MODE"],
     "verdict": os.environ["FW_VCBC_VERDICT"],
+    "block_close_reason": os.environ["FW_VCBC_BLOCK_CLOSE_REASON"] or None,
     "failures_count": int(os.environ["FW_VCBC_FAIL"]),
     "warnings_count": int(os.environ["FW_VCBC_WARN"]),
     "failures": failures,
@@ -582,6 +593,7 @@ if [ "$JSON_OUT" -eq 1 ]; then
   export FW_VCBC_EVIDENCE="$EVIDENCE_ABS"
   export FW_VCBC_MODE="$MODE"
   export FW_VCBC_VERDICT="$VERDICT"
+  export FW_VCBC_BLOCK_CLOSE_REASON="$BLOCK_CLOSE_REASON"
   export FW_VCBC_FAIL="$FAIL"
   export FW_VCBC_WARN="$WARN"
   export FW_VCBC_STRUCTURAL_PASS="$VALIDATOR_STRUCTURAL_PASS"
@@ -618,6 +630,7 @@ else
   [ -n "$FAILURES" ] && { echo "FAIL:"; printf '%s\n' "$FAILURES" | sed '/^$/d; s/^/  - /'; }
   [ -n "$WARNINGS" ] && { echo "WARN:"; printf '%s\n' "$WARNINGS" | sed '/^$/d; s/^/  - /'; }
   [ "$REWORK_ACTION" != "none" ] && echo "auto_rework: action=$REWORK_ACTION bead=${REWORK_BEAD:-none}"
+  [ -n "$BLOCK_CLOSE_REASON" ] && echo "block_close_reason: $BLOCK_CLOSE_REASON"
   echo "VERDICT: $VERDICT"
 fi
 

@@ -60,7 +60,7 @@ Result: did less than total is a close blocker before rubber-stamp drift can ent
 Joshua lens: 25-year operations manager judgment says every silenced partial becomes tomorrow's broken regression, so the validator refuses APPROVE_CLOSE on did less than total.
 EOF
 
-bad_envelope="DONE fixture did=5/9 didnt=4 gaps=test-continuation tmp_dir_released=true tests_passing=true validator_brand_pass=true validator_sniff_pass=true validator_jeff_pass=true validator_public_pass=true"
+bad_envelope="DONE fixture did=5/9 didnt=none gaps=test-continuation tmp_dir_released=true tests_passing=true validator_brand_pass=true validator_sniff_pass=true validator_jeff_pass=true validator_public_pass=true"
 set +e
 "$VALIDATOR" --repo "$repo" --bead "$bead" --evidence "$evidence" --envelope "$bad_envelope" --json >"$TMP/bad.json"
 bad_rc=$?
@@ -70,17 +70,41 @@ set -e
 jq -e '
   .verdict == "BLOCK_CLOSE"
   and .validator_structural_pass == false
+  and (.block_close_reason | contains("partial_work_with_continuation"))
+  and (.block_close_reason | contains("continuation=test-continuation"))
   and .envelope_did_total_mismatch == "5/9"
   and .structural.did == "5/9"
-  and .structural.didnt == "4"
+  and .structural.didnt == "none"
   and .four_lens.brand.status == "pass"
   and .four_lens.sniff.status == "pass"
   and .four_lens.jeff.status == "pass"
   and .four_lens.public.status == "pass"
-  and any(.failures[]; contains("validator_structural_pass=false envelope_did_total_mismatch=5/9"))
+  and any(.failures[]; contains("partial_work_with_continuation"))
+  and any(.failures[]; contains("envelope_did_total_mismatch=5/9"))
 ' "$TMP/bad.json" >/dev/null || {
   jq . "$TMP/bad.json" >&2 || true
   fail "did less than total structural JSON shape wrong"
+}
+
+bad_didnt_envelope="DONE fixture did=9/9 didnt=test-continuation gaps=test-continuation tmp_dir_released=true tests_passing=true validator_brand_pass=true validator_sniff_pass=true validator_jeff_pass=true validator_public_pass=true"
+set +e
+"$VALIDATOR" --repo "$repo" --bead "$bead" --evidence "$evidence" --envelope "$bad_didnt_envelope" --json >"$TMP/bad-didnt.json"
+bad_didnt_rc=$?
+set -e
+
+[ "$bad_didnt_rc" -eq 1 ] || fail "didnt not none envelope should block close"
+jq -e '
+  .verdict == "BLOCK_CLOSE"
+  and .validator_structural_pass == false
+  and .envelope_did_total_mismatch == null
+  and .structural.did == "9/9"
+  and .structural.didnt == "test-continuation"
+  and (.block_close_reason | contains("partial_work_with_continuation"))
+  and (.block_close_reason | contains("continuation=test-continuation"))
+  and any(.failures[]; contains("envelope_didnt_not_none=test-continuation"))
+' "$TMP/bad-didnt.json" >/dev/null || {
+  jq . "$TMP/bad-didnt.json" >&2 || true
+  fail "didnt not none structural JSON shape wrong"
 }
 
 good_envelope="DONE fixture did=9/9 didnt=none gaps=none tmp_dir_released=true tests_passing=true validator_brand_pass=true validator_sniff_pass=true validator_jeff_pass=true validator_public_pass=true"
@@ -88,6 +112,7 @@ good_envelope="DONE fixture did=9/9 didnt=none gaps=none tmp_dir_released=true t
 jq -e '
   .verdict == "SAFE_TO_CLOSE"
   and .validator_structural_pass == true
+  and .block_close_reason == null
   and .envelope_did_total_mismatch == null
   and .structural.did == "9/9"
   and .four_lens.public.status == "pass"
