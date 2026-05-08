@@ -5782,3 +5782,66 @@ Evidence:
 - Doctrine: `AGENTS.md` L51 `DISPATCH-FILE-RESERVATIONS-MANDATORY`.
 - Skill: `~/.claude/skills/agent-mail/SKILL.md`.
 - Bead: `flywheel-2tgl`.
+
+## file-reservation-closeout-conflict
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `file-reservation-closeout-conflict`
+
+Event Count: 4 events in 7 days
+
+Severity: medium
+
+Cost: Four flywheel workers completed implementation or plan artifacts but
+could not write required closeout evidence to `INCIDENTS.md` and/or
+`.beads/issues.jsonl` because active exclusive reservations were held by other
+agents. The result was partial closeout state: completed work had to wait,
+message holders, write side artifacts, or report that L112/close gates failed
+only because append surfaces were locked.
+
+Root Cause: L51 correctly prevented write-through on active reservations, but
+closeout append lanes were treated as ordinary per-worker locks. Workers had
+the right safety rule and no explicit layer-2 doctrine for how to close or
+route completed work when the implementation is done and only shared closeout
+surfaces are blocked.
+
+Forever-Rule: When implementation is done but closeout rows are blocked by
+active file reservations on `INCIDENTS.md`, `.beads/issues.jsonl`, or another
+append lane, do not write through the lock and do not claim fully closed
+status. Preserve implementation evidence in a worker-owned artifact, message
+the holders, retry or reserve with holder evidence, and either wait for release
+or callback BLOCKED/partial with `file-reservation-closeout-conflict` plus the
+exact holder and reservation IDs. If the holder is stale or idle, release only
+with coordination evidence. Shared closeout append lanes should be serialized,
+not bypassed.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote file-reservation-closeout-conflict`. This entry separates legitimate
+reservation respect from silent closeout loss: the next worker should preserve
+evidence and coordinate the append lane rather than bypassing L51 or leaving the
+task indistinguishable from incomplete work.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1561`: continuous productivity
+  detector implementation shipped, but append-only `INCIDENTS.md` and
+  `.beads/issues.jsonl` closeout rows were blocked by active FrostyBasin and
+  CloudyGorge reservations.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1654`: capacity-halt Phase 1-3
+  artifacts were complete, but `INCIDENTS.md` marker and `.beads/issues.jsonl`
+  closure were blocked by active CloudyAnchor and CyanCreek reservations.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1665`: Phase 4 capacity-halt
+  decompose built the plan-local DAG, but could not append seven bead rows, an
+  INCIDENTS entry, or JSONL closure because CyanCreek held active exclusive
+  reservations.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1832`: wire-calling-in-sick-policy
+  hook/settings/test completed, but shared `INCIDENTS.md` and
+  `.beads/issues.jsonl` append closure was blocked by active CrimsonGlen and
+  MistySparrow reservations.
+- Doctrine: `AGENTS.md` L51 `DISPATCH-FILE-RESERVATIONS-MANDATORY`.
+- Doctrine: `AGENTS.md` L107 `SHARED-SURFACE-RESERVATION-BEFORE-STAGING`.
+- Doctrine: `AGENTS.md` L137 `BEADS-MUTATIONS-USE-A-SERIAL-WRITE-LANE`.
+- Skill: `~/.claude/skills/agent-mail/SKILL.md`.
+- Bead: `flywheel-3gc1p`.
