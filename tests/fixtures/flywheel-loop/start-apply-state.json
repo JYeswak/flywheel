@@ -1,0 +1,26 @@
+{
+  "schema_version": "flywheel-loop-state/v1",
+  "project": "fixture",
+  "repo": "/Users/josh/Developer/fixture",
+  "session": "fixture",
+  "tier": "active_normal",
+  "interval": "30m",
+  "worker_cadence": "30m",
+  "active": true,
+  "started_at": "2026-05-08T00:00:00Z",
+  "started_by": "flywheel:loop",
+  "pane": 1,
+  "topology": {
+    "session": "fixture",
+    "orchestrator_pane": 1,
+    "orchestrator_kind": "cc",
+    "worker_panes": [2, 3],
+    "worker_cadence": "30m"
+  },
+  "driver": {
+    "mode": "claude_code_loop_skill",
+    "activation_command": "Skill(\"loop\", args=\"30m /flywheel:tick\")",
+    "verified": true
+  },
+  "auto_revive_on_reboot": true
+}

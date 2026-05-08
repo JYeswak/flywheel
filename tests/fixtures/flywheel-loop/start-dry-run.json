@@ -1,0 +1,22 @@
+{
+  "schema_version": "flywheel-loop-start/v1",
+  "status": "dry_run",
+  "dry_run": true,
+  "project": "fixture",
+  "repo": "/Users/josh/Developer/fixture",
+  "tier": "active_normal",
+  "interval": "30m",
+  "planned_orchestrator_cadence": "30m",
+  "planned_worker_cadence": "30m",
+  "live_pane_input_written": false,
+  "state_path": "~/.flywheel/loops/fixture.json",
+  "registry_path": "~/.local/state/flywheel/substrate-registry.jsonl",
+  "activation_steps": [
+    "validate_state",
+    "register_substrate",
+    "write_state",
+    "activate_driver",
+    "verify_driver"
+  ],
+  "guidance": "rerun with --apply after reviewing topology and driver proof"
+}

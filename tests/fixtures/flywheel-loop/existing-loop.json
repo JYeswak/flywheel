@@ -1,0 +1,6 @@
+{
+  "schema_version": "flywheel-loop-start/v1",
+  "status": "idempotent",
+  "reason": "existing_loop_same_contract",
+  "guidance": "Existing loop state matches requested tier, interval, session, and pane; no duplicate activation sent."
+}

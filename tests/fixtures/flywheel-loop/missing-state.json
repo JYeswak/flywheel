@@ -1,0 +1,6 @@
+{
+  "schema_version": "flywheel-loop-start/v1",
+  "status": "blocked",
+  "reason": "missing_flywheel_state",
+  "guidance": "Run /flywheel:init before /flywheel:loop start; required .flywheel/loop.json was not found."
+}
