@@ -1,0 +1,74 @@
+{
+  "schema_version": "fleet-coherence-latest/v1",
+  "writer_contract": "fleet-coherence-writer/v1",
+  "generated_at": "2026-05-07T00:00:00Z",
+  "latest_path": "/Users/josh/.local/state/flywheel/fleet-coherence-latest.json",
+  "status": "ok",
+  "l112_observed": "OK_fleet_coherence_writer",
+  "valid_event_count": 3,
+  "corrupt_row_count": 0,
+  "detector_runtime_drift_count": 0,
+  "detector_runtime_drift": [],
+  "open_count": 2,
+  "closed_count": 1,
+  "active_suppressions": [
+    {
+      "suppression_id": "suppression-demo-1",
+      "class": "fleet_coherence_demo_warning",
+      "session": "flywheel",
+      "pane": 3,
+      "severity": "warning",
+      "state": "open",
+      "dedupe_key": "demo-warning"
+    }
+  ],
+  "latest_event": {
+    "schema_version": "fleet-coherence-event/v2",
+    "id": "fixture-heartbeat-1",
+    "ts": "2026-05-07T00:00:00Z",
+    "class": "fleet_scan_heartbeat",
+    "severity": "info",
+    "state": "closed",
+    "session": "flywheel",
+    "pane": 3,
+    "target_session": "flywheel",
+    "target_pane": 3,
+    "detector": "fleet_coherence_fixture",
+    "summary": "Fixture heartbeat for cached drift-status smoke tests",
+    "raw_source_refs": [
+      "fixture:fleet-coherence-latest-v2"
+    ],
+    "evidence": {
+      "source_quality": {
+        "ntm_health_activity_authoritative": true,
+        "metadata_only_idle_forbidden": true,
+        "suppressions_visible": true
+      }
+    },
+    "l61": {
+      "ntm_attempted": true,
+      "agent_mail_attempted": true,
+      "l61_pairing_status": "paired",
+      "degraded_reason": null
+    },
+    "l62": {
+      "repair_callback_required": false,
+      "sd_count": 0,
+      "sd_ids": []
+    },
+    "l63": {
+      "recovery_action_requires_drill": false,
+      "recovery_drill_ids": []
+    },
+    "actions": {
+      "would_bead": false,
+      "would_l61": false,
+      "would_no_bead_reason": "fixture_heartbeat_closed",
+      "receipt_required": false
+    }
+  },
+  "retention": {
+    "max_rows": 2000,
+    "retained_rows": 3
+  }
+}
