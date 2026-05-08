@@ -6220,3 +6220,56 @@ Evidence:
   `Forever-Rule: Orchestrator owns shared-repo dirty preflight before
   dispatch`.
 - Bead: `flywheel-zz858`.
+
+## l70-orch-pane-refill-delay
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `l70-orch-pane-refill-delay`
+
+Event Count: 3 events in 7 days
+
+Severity: high
+
+Cost: Three flywheel worker panes returned to `WAITING` after callback or
+blocker handling while the orchestrator still had parallel-independent work
+available. Each missed refill converted available worker capacity into idle
+time and required Joshua or later validation to notice that L70 same-tick
+chaining had stopped at the first completed pane.
+
+Root Cause: Callback/blocker handling was treated as the end of the tick for
+the individual pane instead of a trigger to re-run live pane activity, ready
+work, and capacity selection immediately. L70 existed as doctrine, but the
+orchestrator path lacked a hard post-callback refill decision artifact for every
+hot pane.
+
+Forever-Rule: After every worker callback, BLOCKED callback, or pane-return
+classification, the orchestrator must run a live hot-pane refill decision before
+composing the next human-facing summary. If the pane is `WAITING`, capacity
+exists, and ready independent work exists, dispatch in the same tick and write
+the auto-refill decision row. If no refill occurs, record the concrete blocker
+such as `no_ready_work`, `capacity_exhausted`, `worker_active`, or
+`reservation_conflict`; a silent idle pane is an L70 violation.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote l70-orch-pane-refill-delay`. This entry gives promotion-candidate
+bead `flywheel-nh7tt` durable L56 coverage and routes future rows to the L70
+same-tick chain gate plus the hot-pane auto-refill decision helper instead of
+creating duplicate promotion candidates.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L592`: pane 2 stayed `WAITING`
+  after a cross-cutting callback until Joshua flagged the missing same-tick
+  dispatch.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L597`: pane 3 stayed `WAITING`
+  after a security callback; live pane verification found the second same-session
+  refill miss.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L612`: pane 4 returned idle after a
+  Phase 4 BLOCKED callback and was not refilled with parallel-independent work.
+- Doctrine: `AGENTS.md` L70 `ORCH-NO-PUNT`.
+- Helper: `.flywheel/scripts/auto-refill-decision-log.sh`.
+- Tests: `tests/test_hot_pane_refill_after_callback_reap.sh` and
+  `tests/orch-no-punt-chain.sh`.
+- Bead: `flywheel-nh7tt`.
