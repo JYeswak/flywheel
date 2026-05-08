@@ -80,7 +80,7 @@ done
 assert_jq "$TMP/sweep.json" '.schema_version == "agent-mail-orphan-token-sweep/v1" and .dry_run == true and .orphan_tokens_seen_count >= 0' "orphan_sweep_dry_run_reports"
 
 "$LOOP" identity --doctor --json >"$TMP/doctor.json"
-assert_jq "$TMP/doctor.json" '.schema_version == "agent-mail-identity-registry-doctor/v1" and .total_registered >= 3 and .drift_count >= 1 and .orphan_token_count >= 0 and .orphan_tokens_unswept_count >= 0 and .identity_rotation_count_24h >= 6 and .identity_chain_max_length >= 1 and (.signals[]?.name | select(. == "orphan_tokens_unswept_count"))' "doctor_reports_drift_orphans_and_churn"
+assert_jq "$TMP/doctor.json" '.schema_version == "agent-mail-identity-registry-doctor/v1" and .total_registered >= 3 and .raw_topology_drift_count >= 1 and .topology_drift_unvalidated_count >= 1 and .confirmed_unreachable_session_count >= 0 and .orphan_token_count >= 0 and .orphan_tokens_unswept_count >= 0 and .identity_rotation_count_24h >= 6 and .identity_chain_max_length >= 1 and (.signals[]?.name | select(. == "confirmed_unreachable_session_count"))' "doctor_reports_drift_orphans_and_churn"
 
 fake_br="$TMP/br"
 printf '%s\n' \
