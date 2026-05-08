@@ -1,0 +1,53 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-32so",
+  "worker": "flywheel-pane4",
+  "created_at": "2026-05-08T00:23:00Z",
+  "source_plan": ".flywheel/PLANS/team-roster-2026-05-01.md",
+  "artifacts": [
+    "/Users/josh/.claude/skills/.flywheel/lib/session.sh",
+    "/Users/josh/.claude/skills/.flywheel/lib/portable/core.sh",
+    "/Users/josh/.claude/commands/flywheel/loop.md",
+    ".flywheel/AGENTS-CANONICAL.md",
+    "tests/test_doctor_team_roster_fresh.sh",
+    "tests/test_doctor_team_roster_stale.sh",
+    "tests/test_doctor_team_roster_dead.sh",
+    "tests/test_doctor_team_roster_missing.sh",
+    "tests/test_doctor_team_roster_dormant.sh",
+    "tests/test_loop_refuses_missing_roster.sh",
+    "tests/test_loop_refuses_stale_pulse.sh",
+    "tests/test_doctor_fleet_capacity_counts.sh"
+  ],
+  "socraticode": {
+    "queries": 5,
+    "indexed_chunks_observed": 50,
+    "project_path": "/Users/josh/Developer/flywheel"
+  },
+  "acceptance": {
+    "doctor_team_roster_freshness_section": true,
+    "doctor_orchestrator_pane_integrity": true,
+    "doctor_fleet_capacity": true,
+    "loop_refuses_missing_roster": true,
+    "loop_refuses_stale_pulse": true,
+    "dead_threshold_minutes": 15,
+    "dormant_exception_validated": true
+  },
+  "tests": {
+    "added": 8,
+    "passing": true,
+    "commands": [
+      "tests/test_doctor_team_roster_fresh.sh",
+      "tests/test_doctor_team_roster_stale.sh",
+      "tests/test_doctor_team_roster_dead.sh",
+      "tests/test_doctor_team_roster_missing.sh",
+      "tests/test_doctor_team_roster_dormant.sh",
+      "tests/test_loop_refuses_missing_roster.sh",
+      "tests/test_loop_refuses_stale_pulse.sh",
+      "tests/test_doctor_fleet_capacity_counts.sh"
+    ]
+  },
+  "notes": [
+    "Full flywheel-loop doctor integration was not used as the primary test because unrelated live doctor probes can run long in this dirty multi-pane workspace.",
+    "The new doctor function is fixture-tested directly and syntax-checked with portable/core.sh."
+  ]
+}
