@@ -1,5 +1,6 @@
 {
   "schema_version": "flywheel-cli-registry/v1",
+  "registry_version": "1.0.0",
   "owner": "flywheel",
   "doctrine": {
     "skill": "canonical-cli-scoping",

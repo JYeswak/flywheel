@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# flywheel-cli-surface: true
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 REGISTRY="${FLYWHEEL_CLI_REGISTRY:-$ROOT/.flywheel/cli-registry.json}"
@@ -9,7 +10,7 @@ SCRIPT_NAME=""
 
 usage() {
   cat <<'USAGE'
-usage: cli-registry-emit.sh SCRIPT [--mode help|info|examples|schema] [--registry PATH] [--json]
+usage: cli-registry-emit.sh SCRIPT [--mode help|info|examples|schema|version] [--registry PATH] [--json]
 
 Emits canonical CLI surface text from .flywheel/cli-registry.json.
 USAGE
@@ -105,8 +106,31 @@ case "$MODE" in
       schema_version:$schema_version,
       command:$command,
       registry:$registry,
-      required_registry_fields:["name","summary","args","examples","notes","schema_id","owner","output_formats"]
+      required_registry_fields:["name","path","lane","summary","usage","args","examples","notes","schema_id","owner","output_formats","exit_codes"]
     }'
+    ;;
+  version)
+    if [ "$JSON_OUT" -eq 1 ]; then
+      jq -c --arg key "$SCRIPT_NAME" '
+        . as $registry
+        | ($registry.surfaces[]
+          | select(.name == $key or .path == $key or (.path | split("/")[-1]) == $key))
+        | {
+            name,
+            schema_version:"flywheel-cli-registry.version/v1",
+            registry_schema_version:$registry.schema_version,
+            registry_version:($registry.registry_version // "unknown"),
+            surface_schema_id:.schema_id
+          }
+      ' "$REGISTRY"
+    else
+      jq -r --arg key "$SCRIPT_NAME" '
+        . as $registry
+        | ($registry.surfaces[]
+          | select(.name == $key or .path == $key or (.path | split("/")[-1]) == $key))
+        | "name=\(.name)\nregistry_schema_version=\($registry.schema_version)\nregistry_version=\($registry.registry_version // "unknown")\nsurface_schema_id=\(.schema_id)"
+      ' "$REGISTRY"
+    fi
     ;;
   *)
     fail_usage "unknown mode: $MODE"

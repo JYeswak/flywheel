@@ -6,11 +6,11 @@ receipt_schema_version: four-lens-close-validator/v1
 
 # flywheel-ryzt CLI registry evidence
 
-task_id: flywheel-ryzt
+task_id: flywheel-ryzt-008b4c
 bead: flywheel-ryzt
-did=8/8 didnt=none gaps=none tests=PASS
-socraticode_queries=6
-indexed_chunks_observed=60
+did=5/5 didnt=none gaps=none tests=PASS
+socraticode_queries=1
+indexed_chunks_observed=10
 
 ## Acceptance gates
 
@@ -19,9 +19,10 @@ indexed_chunks_observed=60
 | Enumerate representative help surfaces | PASS | Captured current `--help` output for `tmp-prune.sh`, `storage-prune.sh`, `agent-mail-fd-pressure-check.sh`, `agent-mail-fd-doctor.sh`, `agent-mail-restart.sh`, `close-validator-contract-probe.sh`, `br-create-validated.sh`, and `caam-recovery-path-probe.sh`. |
 | Add canonical registry | PASS | `.flywheel/cli-registry.json` declares name, path, lane, owner, schema id, summary, usage, args, examples, output formats, exit codes, and notes for 9 CLI surfaces. |
 | Add registry emitter | PASS | `.flywheel/scripts/cli-registry-emit.sh` emits `help`, `info`, `examples`, and `schema` from `.flywheel/cli-registry.json`. |
+| Add version surface | PASS | `.flywheel/scripts/cli-registry-emit.sh` emits `version` from registry metadata and the selected surface schema id. |
 | Refactor one script | PASS | `.flywheel/scripts/tmp-prune.sh` now serves `--help` through the registry emitter with a local fallback for older template copies. |
-| Add round-trip fixture | PASS | `tests/test_cli_registry_emit.sh` proves registry schema shape, registered path existence, missing-surface refusal, and byte-for-byte `tmp-prune.sh --help` round-trip. |
-| Document source of truth | PASS | `.flywheel/canonical-paths.txt` now names `flywheel_cli_registry`, `flywheel_cli_registry_emitter`, and `flywheel_cli_registry_tests`. |
+| Add round-trip fixture | PASS | `tests/test_cli_registry_emit.sh` proves registry schema shape, marked CLI script coverage, registered path existence, missing-surface refusal, version emission, and byte-for-byte `tmp-prune.sh --help` round-trip. |
+| Document source of truth | PASS | `.flywheel/canonical-paths.txt` now names `flywheel_cli_registry`, `flywheel_cli_registry_emitter`, and `flywheel_cli_registry_tests`, including version and marked-CLI coverage. |
 | Preserve existing behavior | PASS | `tests/test-tmp-prune.sh` still passes 14 checks after the help refactor. |
 | Joshua lens applied | PASS | CLI help drift is the silent operator trap: 25-year operations-manager judgment says every undocumented flag is tomorrow's runbook gap; the registry is the runbook source and survives turnover better than copied usage strings. |
 
@@ -44,7 +45,7 @@ bash -n .flywheel/scripts/cli-registry-emit.sh .flywheel/scripts/tmp-prune.sh te
 # PASS
 
 bash tests/test_cli_registry_emit.sh
-# SUMMARY pass=22 fail=0
+# SUMMARY pass=25 fail=0
 
 bash tests/test-tmp-prune.sh
 # PASS: 14 checks
@@ -54,6 +55,9 @@ bash tests/test-tmp-prune.sh
 
 .flywheel/scripts/tmp-prune.sh --help
 # byte-for-byte match with registry-emitted help
+
+.flywheel/scripts/cli-registry-emit.sh tmp-prune.sh --mode version --json
+# emitted flywheel-cli-registry.version/v1 from registry metadata
 ```
 
 ## Four-Lens Self-Grade
