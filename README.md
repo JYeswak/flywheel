@@ -975,6 +975,15 @@ include `identity_name=<registry-identity-name>` and, when available,
 include `identity_resolved=<identity_name>` and must not carry raw Agent Mail
 tokens.
 
+Identity registration can be deferred when an Agent Mail reservation blocks the
+current doctrine surface. The bounded receipt schema is
+`.flywheel/validation-schema/v1/identity-registration-deferral.schema.json`,
+with fixture coverage in `tests/identity-deferral-receipt.sh`. The identity
+doctor honors active `identity-registration-deferral/v1` receipts and reports
+`identity_registry.deferred_count`, `identity_registry.deferred_rows`, and
+`identity_registry.receipt_honored` so workers can distinguish covered drift
+from identity work that still needs registration.
+
 Identity history for churn diagnosis:
 
 ```bash
