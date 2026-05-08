@@ -8,11 +8,6 @@ flywheel-loop init to every flywheel-installed repo as
 reference this file and add only repo-specific operational rules.
 Domain rules (what we're building, not how we operate) belong in CLAUDE.md.
 
-Fleet propagation cross-link: `.flywheel/scripts/agents-md-fleet-propagator.sh`
-audits installed-repo AGENTS.md drift, and `flywheel-loop doctor --scope
-agents-md-fleet-propagation --json` exposes the drift count, drift repos, and
-last propagation apply health.
-
 ## L-Rule Schema
 
 Each L-rule below uses this frontmatter (YAML between `---` fences):
@@ -1153,16 +1148,6 @@ the same session: "I can't have this being a constant problem."
 - Tick driver chains `BEADS → DISPATCH` when new beads land
 - Doctor signal `ticks_punted_count` ≥ 1 → status=fail
 - Worker dispatch packet includes `chain_if_capacity` block
-
-**Counter cross-link:** `.flywheel/scripts/l70-ticks-punted-counter.sh` writes
-`~/.local/state/flywheel/l70-ticks-punted.jsonl`; `flywheel-loop doctor --scope
-l70-ticks-punted --json` exposes `l70_ticks_punted_24h`,
-`l70_ticks_punted_rate_pct`, and `l70_ticks_punted_top_signal`.
-`.flywheel/scripts/tick-hook-firing-verifier.sh` audits L70 and sibling
-tick-close hooks with ledger-backed firing evidence; `flywheel-loop doctor
---scope tick-hook-firing --json` exposes `tick_hook_primitives_audited`,
-`tick_hook_primitives_firing`, `tick_hook_primitives_invisibly_broken`, and
-`tick_hook_primitives_invisibly_broken_names`.
 
 **Override:** None. There is no `JOSHUA_OVERRIDE` for this — Joshua flagged
 this as a recurring fleet-killer and the rule is not negotiable. If a chain
@@ -3126,9 +3111,6 @@ callbacks missing those fields.
 - Doctor surface: `quality_bar_breach_count_24h` (callbacks with
   `quality_bar_passed=no` or missing fields). Tick close gates refuse with
   warn at >0, error at >3.
-- Validator path: `.flywheel/scripts/callback-envelope-schema-validator.sh`;
-  scoped doctor:
-  `flywheel-loop doctor --repo <repo> --scope callback-envelope-schema --json`.
 
 **Companion rules:**
 
@@ -3235,11 +3217,7 @@ validated recovery of `skillos:1` at 2026-05-05T04:39Z; permit gate
 `.flywheel/scripts/peer-orch-respawn-permit.sh`; fixture
 `tests/peer-orch-respawn-permit.sh`.
 
-**Cross-references:** L48 (substrate exhaustion), L57 (loop state marker is not
-a driver), L70 (same-tick chain-forward), L75 (peer-orch blocker
-coordination), L80 (DID/DIDNT/GAPS callbacks), L82 (canonical CLI scoping),
-L101 (continuous fleet productivity), L107 (shared-surface reservations), and
-L110 (substrate primitives declare self-repair loop).
+**Cross-references:** L48, L57, L70, L75, L80, L82, L101, L107, and L110.
 
 ## L116 — TICK-IS-PROCESS-NOT-DOCUMENT
 
@@ -3292,10 +3270,6 @@ expose `tick_driver_daemon_loaded`, `tick_driver_last_exit_status`,
 `tick_driver_expected_fires_24h`, `tick_driver_fire_rate_pct`, and
 `tick_driver_stalled_class_emitted_count_24h`.
 
-Status is `error` when the daemon is not loaded, when the latest fire is older
-than two intervals, or when the normalized fire rate is below 50%. Status is
-`warn` when the normalized fire rate is below 80%.
-
 **Forbidden outputs:**
 
 - Claiming `tick_hook_wired=yes` because a script exists or `tick.md` names it.
@@ -3311,10 +3285,8 @@ than two intervals, or when the normalized fire rate is below 50%. Status is
 `.flywheel/scripts/tick-driver-manifest.json`; fixture
 `tests/flywheel-tick-driver.sh`.
 
-**Cross-references:** L57 (loop-state marker is not driver), L70 (same-tick
-chain-forward), L102 (META-RULE cache refresh on tick), L110 (substrate
-self-repair primitive), L111 (quality bar), L115 (peer-orch recovery), and
-pbt55 `tick-hook-firing-verifier.sh`.
+**Cross-references:** L57, L70, L102, L110, L111, L115, and pbt55
+`tick-hook-firing-verifier.sh`.
 
 ## L117 — PEER-ORCH-FREEZE-MONITOR-IS-A-DRIVER
 
@@ -3342,9 +3314,6 @@ MUST expose `monitor_last_fire_ts`, `mttr_p95_seconds`,
 `false_recovery_count_24h`, `permit_gate_refusals_24h`, `recoveries_24h`, and
 `monitor_alive`.
 
-Status is `fail` when false recoveries are nonzero, `warn` when the monitor is
-missing or stale, and `pass` only when recent monitor fire evidence exists.
-
 **Forbidden outputs:**
 
 - Claiming peer orchestrators are healthy because topology or panes exist.
@@ -3358,9 +3327,8 @@ missing or stale, and `pass` only when recent monitor fire evidence exists.
 `.flywheel/scripts/tick-driver-manifest.json`; disabled plist
 `.flywheel/launchd/ai.zeststream.peer-orch-freeze-monitor.plist`.
 
-**Cross-references:** L57 (loop-state marker is not driver), L110 (substrate
-self-repair primitive), L111 (quality bar), L115 (peer-orch recovery), L116
-(tick is process), and pbt55 `tick-hook-firing-verifier.sh`.
+**Cross-references:** L57, L110, L111, L115, L116, and pbt55
+`tick-hook-firing-verifier.sh`.
 
 ## L118 — STABLE-FAILURE-REASON-CODES-BEFORE-PROSE
 
@@ -3509,12 +3477,6 @@ the field emerged twice as the same substrate shape.
 - DONE callback without `br_close_executed`.
 - Worker-tick that closes after callback.
 - Treating DONE transport-ack as proof of bead close.
-
-**Callback contract enforcement note:** Callback fields are enforced at the
-send-time hook gate. Numeric Socraticode fields are required when schema v2
-marks Socraticode required; `unknown` is rejected; the doctor exposes
-`dispatch_contract_violations` with amber/red thresholds so callback grammar
-drift is visible before close-handler substrate trusts the row.
 
 **Evidence:** Source proposal
 `~/.claude/skills/.flywheel/proposals/P-bg-agent-close-miss-2026-05-06.md`;
@@ -3702,41 +3664,6 @@ primitive `.flywheel/scripts/storage-prune.sh`; tick manifest
 
 Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
 
-## L129 — WORKER-SUBSTRATE-EXPLICIT
-
----
-id: L129
-title: Worker substrate explicit for dispatch and convergence work
-status: long_term
-shipped: 2026-05-07
-review_due: 2026-11-07
-trauma_class: convergence-audit-bypass-codex-workers
----
-
-Every schema v2 dispatch row and packet header MUST classify the worker
-substrate explicitly:
-`worker_substrate=codex-pane|claude-pane|background-agent|local` and
-`agent_type=codex|claude|unknown`. `/flywheel:dispatch` defaults NTM pane
-sends to `worker_substrate=codex-pane agent_type=codex`.
-
-Convergence, adversarial review, audit-wave, and synthesis work requires
-`worker_substrate=codex-pane` unless `JOSHUA_OVERRIDE` is present and logged by
-the worker-substrate lint gate with reason
-`convergence_to_background_agent_blocked` or `joshua_override`.
-
-**Why:** L120-L127 callback enforcement and L128 convergence-proved-with-data
-only compose when work travels through the visible NTM dispatch substrate.
-Background-agent side channels bypass dispatch-log, close-handler, callback
-contract, and validation evidence, so L128's data trail disappears.
-
-**Evidence:** bead `flywheel-2tv3`; plan
-`.flywheel/PLANS/dispatch-enforcement-2026-05-01.md`; lint gate
-`.flywheel/scripts/dispatch-worker-substrate-gate.sh`; command docs
-`~/.claude/commands/flywheel/dispatch.md` and
-`~/.claude/commands/flywheel/_shared/dispatch-template.md`.
-
-Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
-
 **Cross-references:** L48, L50, L52, L53, L56, L60, L70, L71, L72, L96, L110,
 L116, and L120.
 
@@ -3765,13 +3692,13 @@ L116, and L120.
 - `awk -F= '{print $1}' .env*` for name enumeration only
 - Reading `.env.example` or sentinel files with no real values
 
-**Promotion ladder this rule passed:** fuckup-row → `~/.claude/skills/infisical-secrets/references/INCIDENTS.md` → AGENTS-CANONICAL.md L-rule (here) → `flywheel-install/templates/AGENTS-TEMPLATE.md` broadcast → `canonical-meta-rules-sync` to all flywheel-installed repos.
+**Promotion ladder:** fuckup-row → infisical-secrets/INCIDENTS.md → AGENTS.md L-rule (here) + AGENTS-CANONICAL.md → flywheel-install/templates/AGENTS-TEMPLATE.md broadcast → canonical-meta-rules-sync to all flywheel-installed repos.
 
-**Evidence:** mobile-eats:1 cross-orch handoff 2026-05-07T18:30Z (`/tmp/mobile-eats-secret-leak-flywheel-handoff.md`); Joshua directive 2026-05-07 "harden via L-rule + skill discipline, NOT new tool guards"; flywheel:1 ACK at `/tmp/flywheel-ack-mobile-eats-secret-leak-2026-05-07.md`; infisical-secrets skill File-Surface Discipline section to follow.
+**Evidence:** mobile-eats:1 cross-orch handoff 2026-05-07; Joshua directive "harden via L-rule + skill discipline, NOT new tool guards"; flywheel:1 ACK; infisical-secrets skill File-Surface Discipline section; templates/fuckup-heuristics.json 6th heuristic row; mobile-192v SEC-007 packet validator extension bead (cross-orch).
 
 Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
 
-**Cross-references:** L58, L73, L56, SEC-001..006; `templates/josh-request-schema.md` 9-class secret-scrub taxonomy; `mission-lock-negative-invariants-validator.sh` (SEC-007 packet validator extension to follow).
+**Cross-references:** L58, L73, L56, SEC-001..006.
 
 ## L126 — EVIDENCE-PACK-REPLACES-SELF-GRADE
 
@@ -3825,16 +3752,6 @@ Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
 
 **Cross-references:** L61, L80, L91, L111, L120, and
 `feedback_evidence_pack_replaces_four_lens.md`.
-
-**Doctrine note: mechanical polish convergence.** For complex `/flywheel:plan`
-arcs, polish convergence is mechanical: two consecutive Phase 5 telemetry
-artifacts must report `kills_gte_adds=true` and `no_new_deltas=true`. A
-vibes-declared "looks converged" claim is rejected by the close gate for complex
-plans.
-
-**Doctrine note: kill-first hypothesis slate.** Plans declare 2-5 candidate
-strategies including exactly one third alternative; each strategy has a
-non-empty `kill_condition`. Phase 3 transition is refused otherwise.
 
 ## L127 — PREDICTION-LOCK-RECEIPTS
 
@@ -3930,6 +3847,44 @@ Picoz-killer doctrine: Joshua spent 30 days building picoz because no single
 rule said convergence had to be proved with data.
 
 Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+## L129 — WORKER-SUBSTRATE-EXPLICIT
+
+---
+id: L129
+title: Worker substrate explicit for dispatch and convergence work
+status: long_term
+shipped: 2026-05-07
+review_due: 2026-11-07
+trauma_class: convergence-audit-bypass-codex-workers
+---
+
+Every schema v2 dispatch row and packet header MUST classify the worker
+substrate explicitly:
+`worker_substrate=codex-pane|claude-pane|background-agent|local` and
+`agent_type=codex|claude|unknown`. `/flywheel:dispatch` defaults NTM pane
+sends to `worker_substrate=codex-pane agent_type=codex`.
+
+Convergence, adversarial review, audit-wave, and synthesis work requires
+`worker_substrate=codex-pane` unless `JOSHUA_OVERRIDE` is present and logged by
+the worker-substrate lint gate with reason
+`convergence_to_background_agent_blocked` or `joshua_override`.
+
+**Why:** L120-L127 callback enforcement and L128 convergence-proved-with-data
+only compose when work travels through the visible NTM dispatch substrate.
+Background-agent side channels bypass dispatch-log, close-handler, callback
+contract, and validation evidence, so L128's data trail disappears.
+
+**Evidence:** bead `flywheel-2tv3`; plan
+`.flywheel/PLANS/dispatch-enforcement-2026-05-01.md`; lint gate
+`.flywheel/scripts/dispatch-worker-substrate-gate.sh`; command docs
+`~/.claude/commands/flywheel/dispatch.md` and
+`~/.claude/commands/flywheel/_shared/dispatch-template.md`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+**Cross-references:** L48, L50, L52, L53, L56, L60, L70, L71, L72, L96, L110,
+L116, and L120.
 
 ## L130 — DISPATCH-SKILL-REQUIRED-HOOK-GATE
 
@@ -4296,3 +4251,145 @@ Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
 
 **Cross-references:** L48, L50, L52, L53, L56, L60, L70, L71, L72, L96, L110,
 L116, and L120.
+## L140 — DISPATCH-AND-VERIFY-MANDATORY
+
+---
+id: L140
+title: Every worker-pane dispatch must verify pane shifted to THINKING_LIVE
+status: long_term
+shipped: 2026-05-08
+review_due: 2026-11-08
+trauma_class: codex-chevron-stuck-on-dispatch
+---
+
+Every worker-pane dispatch MUST go through
+`.flywheel/scripts/dispatch-and-verify.sh` OR an equivalent post-send delivery
+postcheck (per `/flywheel:dispatch` Step 5b). A successful `ntm send` exit
+code is NOT proof of submission. Pane state showing `THINKING` immediately
+after send is NOT proof. Only post-send pane-state probing for
+`THINKING_LIVE` (state=THINKING AND velocity>0), with empty-Enter retry
+on `STUCK`, is proof.
+
+**Forbidden orchestrator pattern:**
+
+```bash
+FLYWHEEL_DISPATCH_WRAPPER=1 /Users/josh/.local/bin/ntm send "$SESSION" --pane="$PANE" "$WORKER_PROMPT"
+```
+
+**Canonical orchestrator pattern:**
+
+```bash
+.flywheel/scripts/dispatch-and-verify.sh "$SESSION" "$PANE" "/tmp/dispatch_${TASK_ID}.md"
+DISPATCH_VERIFIED_RC=$?
+if [[ $DISPATCH_VERIFIED_RC -ne 0 ]]; then
+  exit 4
+fi
+```
+
+**Why:** A raw `ntm send` to a codex pane can land in the prepared chevron
+buffer without submitting. The orchestrator records `dispatch_status=send_ok`
+while the worker never starts. The wrapper sleeps 15s, probes for
+THINKING_LIVE, fires empty Enter on STUCK, retries 3x, fails closed with
+diagnostic. Without it, the loop appears active but produces no accretion.
+
+**Evidence:** finding 2026-05-08T15:50Z — three flywheel:2/3/4 dispatches via
+raw ntm send; two of three sat in chevron buffer requiring manual Enter from
+Joshua. Doctrine: `.flywheel/doctrine/loop-non-accretive-trauma-class.md`.
+Wrapper: `.flywheel/scripts/dispatch-and-verify.sh`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+**Cross-references:** L130, L70, L116, L120.
+
+## L141 — LOOP-MUST-BE-ACCRETIVE
+
+---
+id: L141
+title: Tick body must produce accretion, not just ceremony
+status: long_term
+shipped: 2026-05-08
+review_due: 2026-11-08
+trauma_class: loop-non-accretive
+---
+
+A `/flywheel:tick` body MUST execute one of these accretive paths each tick:
+
+1. **Dispatch path** — call `/flywheel:dispatch` for at least one WAITING
+   worker if ready beads exist.
+2. **Reap path** — process at least one callback from dispatch-log since
+   last tick.
+3. **Local-lane path** — make a scoped change to repo state.
+4. **Audit path** (fallback) — run a probe that produces a finding bead.
+
+If NONE of 1-4 happen AND `br ready` reports a ready bead AND
+`ntm --robot-activity` reports a WAITING worker, the tick MUST emit a
+`tick_non_accretive` row to dispatch-log AND ScheduleWakeup at 600s
+(not 1800s). Three consecutive non-accretive ticks for the same project
+trigger doctor warn; five trigger doctor fail.
+
+**Why:** Discovered 2026-05-08T15:30Z — Joshua observed 9-hour fleet idle
+despite cc loop pulse "active". Tick body audited beads (closed 2 stale)
+without invoking `/flywheel:dispatch`. Workers stayed WAITING. Receipt
+validated `receipt_ok=true` while loop produced no work-flow accretion.
+
+**Receipt v2 extension:** `accretive_signals` (counts of dispatches_sent,
+callbacks_reaped, beads_closed_via_callback, commits_with_substrate_change,
+findings_filed); `accretion_path` enum
+(dispatch | reap | local_lane | audit | non_accretive); `non_accretive_reason`
+required when accretion_path=non_accretive.
+
+**Evidence:** doctrine
+`.flywheel/doctrine/loop-non-accretive-trauma-class.md`; memory
+`feedback_orch_punt_is_l70_failure_dispatch_dont_ask`; LOOP.md step 4.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+**Cross-references:** L70, L101, L130, L140.
+
+## L142 — CODEX-PREPARED-CHEVRON-NOT-STALE-BUFFER
+
+---
+id: L142
+title: Codex prepared chevron is the normal pre-dispatch state
+status: long_term
+shipped: 2026-05-08
+review_due: 2026-11-08
+trauma_class: dispatch-validator-false-positive
+---
+
+`dispatch-pre-send-validator.sh` refuses dispatch with
+`reason=capture_disagreement_reminder_template` when a codex pane shows
+`state=WAITING` per robot-activity but the tail capture shows a CASS
+reminder template in the buffer. **This is a false positive.** Per Joshua
+directive 2026-05-08: codex workers always have prepared buffer content
+sitting there; we paste into it. The "reminder template" is the codex
+pane's normal prepared chevron buffer waiting for input.
+
+**Override pattern (canonical for codex-pane dispatches):** when the
+validator refuses with `capture_disagreement_reminder_template` AND the
+pane is a codex worker AND robot-activity confirms
+`state=WAITING capture_provenance=live`, log an override to dispatch-log
+and proceed:
+
+```text
+validator_override_reason="codex_prepared_buffer_normal_state_per_joshua_directive_2026_05_08_dispatch_validator_false_positive_capture_disagreement_reminder_template"
+```
+
+The dispatch packet is still built via `build-dispatch-packet.sh`; L130
+gate is satisfied by `FLYWHEEL_DISPATCH_WRAPPER=1` env on ntm send;
+post-send delivery is verified per L140 (`dispatch-and-verify.sh`).
+
+**Forbidden:** override does NOT apply to genuinely stale buffers (need
+`/flywheel:respawn`), other validator failure reasons
+(`pane_not_waiting`, `stale_capture`, `probe_failure`), or non-codex panes.
+
+**Permanent fix (followup):** validator should distinguish prepared codex
+chevron from genuinely stale buffer using a heuristic.
+
+**Evidence:** finding 2026-05-08T15:30Z (9-hour fleet idle root cause);
+doctrine `.flywheel/doctrine/loop-non-accretive-trauma-class.md`; validator
+`~/.claude/commands/flywheel/_shared/dispatch-pre-send-validator.sh`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+**Cross-references:** L130, L140, L141.

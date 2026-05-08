@@ -4234,3 +4234,145 @@ Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
 
 **Cross-references:** L48, L50, L52, L53, L56, L60, L70, L71, L72, L96, L110,
 L116, and L120.
+## L140 — DISPATCH-AND-VERIFY-MANDATORY
+
+---
+id: L140
+title: Every worker-pane dispatch must verify pane shifted to THINKING_LIVE
+status: long_term
+shipped: 2026-05-08
+review_due: 2026-11-08
+trauma_class: codex-chevron-stuck-on-dispatch
+---
+
+Every worker-pane dispatch MUST go through
+`.flywheel/scripts/dispatch-and-verify.sh` OR an equivalent post-send delivery
+postcheck (per `/flywheel:dispatch` Step 5b). A successful `ntm send` exit
+code is NOT proof of submission. Pane state showing `THINKING` immediately
+after send is NOT proof. Only post-send pane-state probing for
+`THINKING_LIVE` (state=THINKING AND velocity>0), with empty-Enter retry
+on `STUCK`, is proof.
+
+**Forbidden orchestrator pattern:**
+
+```bash
+FLYWHEEL_DISPATCH_WRAPPER=1 /Users/josh/.local/bin/ntm send "$SESSION" --pane="$PANE" "$WORKER_PROMPT"
+```
+
+**Canonical orchestrator pattern:**
+
+```bash
+.flywheel/scripts/dispatch-and-verify.sh "$SESSION" "$PANE" "/tmp/dispatch_${TASK_ID}.md"
+DISPATCH_VERIFIED_RC=$?
+if [[ $DISPATCH_VERIFIED_RC -ne 0 ]]; then
+  exit 4
+fi
+```
+
+**Why:** A raw `ntm send` to a codex pane can land in the prepared chevron
+buffer without submitting. The orchestrator records `dispatch_status=send_ok`
+while the worker never starts. The wrapper sleeps 15s, probes for
+THINKING_LIVE, fires empty Enter on STUCK, retries 3x, fails closed with
+diagnostic. Without it, the loop appears active but produces no accretion.
+
+**Evidence:** finding 2026-05-08T15:50Z — three flywheel:2/3/4 dispatches via
+raw ntm send; two of three sat in chevron buffer requiring manual Enter from
+Joshua. Doctrine: `.flywheel/doctrine/loop-non-accretive-trauma-class.md`.
+Wrapper: `.flywheel/scripts/dispatch-and-verify.sh`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+**Cross-references:** L130, L70, L116, L120.
+
+## L141 — LOOP-MUST-BE-ACCRETIVE
+
+---
+id: L141
+title: Tick body must produce accretion, not just ceremony
+status: long_term
+shipped: 2026-05-08
+review_due: 2026-11-08
+trauma_class: loop-non-accretive
+---
+
+A `/flywheel:tick` body MUST execute one of these accretive paths each tick:
+
+1. **Dispatch path** — call `/flywheel:dispatch` for at least one WAITING
+   worker if ready beads exist.
+2. **Reap path** — process at least one callback from dispatch-log since
+   last tick.
+3. **Local-lane path** — make a scoped change to repo state.
+4. **Audit path** (fallback) — run a probe that produces a finding bead.
+
+If NONE of 1-4 happen AND `br ready` reports a ready bead AND
+`ntm --robot-activity` reports a WAITING worker, the tick MUST emit a
+`tick_non_accretive` row to dispatch-log AND ScheduleWakeup at 600s
+(not 1800s). Three consecutive non-accretive ticks for the same project
+trigger doctor warn; five trigger doctor fail.
+
+**Why:** Discovered 2026-05-08T15:30Z — Joshua observed 9-hour fleet idle
+despite cc loop pulse "active". Tick body audited beads (closed 2 stale)
+without invoking `/flywheel:dispatch`. Workers stayed WAITING. Receipt
+validated `receipt_ok=true` while loop produced no work-flow accretion.
+
+**Receipt v2 extension:** `accretive_signals` (counts of dispatches_sent,
+callbacks_reaped, beads_closed_via_callback, commits_with_substrate_change,
+findings_filed); `accretion_path` enum
+(dispatch | reap | local_lane | audit | non_accretive); `non_accretive_reason`
+required when accretion_path=non_accretive.
+
+**Evidence:** doctrine
+`.flywheel/doctrine/loop-non-accretive-trauma-class.md`; memory
+`feedback_orch_punt_is_l70_failure_dispatch_dont_ask`; LOOP.md step 4.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+**Cross-references:** L70, L101, L130, L140.
+
+## L142 — CODEX-PREPARED-CHEVRON-NOT-STALE-BUFFER
+
+---
+id: L142
+title: Codex prepared chevron is the normal pre-dispatch state
+status: long_term
+shipped: 2026-05-08
+review_due: 2026-11-08
+trauma_class: dispatch-validator-false-positive
+---
+
+`dispatch-pre-send-validator.sh` refuses dispatch with
+`reason=capture_disagreement_reminder_template` when a codex pane shows
+`state=WAITING` per robot-activity but the tail capture shows a CASS
+reminder template in the buffer. **This is a false positive.** Per Joshua
+directive 2026-05-08: codex workers always have prepared buffer content
+sitting there; we paste into it. The "reminder template" is the codex
+pane's normal prepared chevron buffer waiting for input.
+
+**Override pattern (canonical for codex-pane dispatches):** when the
+validator refuses with `capture_disagreement_reminder_template` AND the
+pane is a codex worker AND robot-activity confirms
+`state=WAITING capture_provenance=live`, log an override to dispatch-log
+and proceed:
+
+```text
+validator_override_reason="codex_prepared_buffer_normal_state_per_joshua_directive_2026_05_08_dispatch_validator_false_positive_capture_disagreement_reminder_template"
+```
+
+The dispatch packet is still built via `build-dispatch-packet.sh`; L130
+gate is satisfied by `FLYWHEEL_DISPATCH_WRAPPER=1` env on ntm send;
+post-send delivery is verified per L140 (`dispatch-and-verify.sh`).
+
+**Forbidden:** override does NOT apply to genuinely stale buffers (need
+`/flywheel:respawn`), other validator failure reasons
+(`pane_not_waiting`, `stale_capture`, `probe_failure`), or non-codex panes.
+
+**Permanent fix (followup):** validator should distinguish prepared codex
+chevron from genuinely stale buffer using a heuristic.
+
+**Evidence:** finding 2026-05-08T15:30Z (9-hour fleet idle root cause);
+doctrine `.flywheel/doctrine/loop-non-accretive-trauma-class.md`; validator
+`~/.claude/commands/flywheel/_shared/dispatch-pre-send-validator.sh`.
+
+Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet.
+
+**Cross-references:** L130, L140, L141.
