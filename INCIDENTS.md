@@ -1916,6 +1916,7 @@ Evidence:
 - Regression test: `.flywheel/tests/test-phase2-bead-inventory-parity.sh`.
 - State rows: `.beads/issues.jsonl` append-only close receipts tagged
   `closure_reconciliation_via=p2-12-f4`.
+- Validator repair bead: `flywheel-ke5ll`.
 
 ## backup-proliferation flywheel-lock-pattern triage (from skillos audit) (2026-05-06)
 
@@ -5042,6 +5043,7 @@ Evidence:
 - Regression: `tests/quality-bar-close-gate.sh`.
 - Skill contract:
   `~/.claude/skills/beads-compliance-and-completion-verification/references/EVIDENCE-SCHEMAS.md`.
+- Doctrine bead: `flywheel-x6ok8`.
 
 ## ci-substrate-failure
 
@@ -5090,3 +5092,103 @@ Evidence:
 - Memory: `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_ci_substrate_failures_need_owner_route.md`.
 - Review source: `.flywheel/reports/learn-review-2026-05-06.md`.
 - Bead: `flywheel-mh983`.
+
+## dispatch_callback_overdue
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `dispatch_callback_overdue`
+
+Event Count: 98 events in 7 days
+
+Severity: medium
+
+Cost: Callback-overdue repeats kept orchestration in passive wait loops while
+worker panes had either no proper callback, stale idle output, or unresolved
+dispatch state. The repeated failure forced humans and orchestrators to
+reconstruct worker truth from pane state, dispatch logs, and bead state instead
+of receiving the normal callback contract.
+
+Root Cause: Overdue callbacks were recorded as repeated observations, but the
+loop lacked a layer-2 routing rule for turning an overdue dispatch into a
+specific recovery decision. That let the same class recur as telemetry noise
+instead of forcing validation, redispatch, bead repair, or an explicit
+no-action reason.
+
+Forever-Rule: When a dispatch callback is overdue, the orchestrator must treat
+the callback as missing evidence, not as a reason to keep waiting. Validate the
+dispatch against pane state, dispatch log, expected artifact, and bead state,
+then record exactly one recovery outcome: callback recovered with evidence,
+redispatched or respawned, repair bead opened or updated, or explicit
+`no_bead_reason` when the worker is still legitimately within budget.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote dispatch_callback_overdue`. The entry gives the promotion-candidate
+bead `flywheel-3jf8s` durable L56 coverage and routes future scans toward
+validate-and-redispatch / callback-delivery verification instead of repeatedly
+creating duplicate promotion candidates.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L298`: early mobile-eats callback
+  overdue event before the main 2026-05-05 cluster.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L389`: second early mobile-eats
+  callback overdue event.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L681-L1268`: main cluster of
+  callback-overdue rows that drove the 7-day count.
+- `~/.local/state/flywheel/fuckup-processed.jsonl#L157`: prior aggregate
+  processing row recorded 96 callback-overdue lines and created follow-up bead
+  coverage, leaving this promotion-candidate entry as the missing INCIDENTS
+  layer.
+- Bead: `flywheel-3jf8s`.
+
+## skillos-loop-integrity-still-limping
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `skillos-loop-integrity-still-limping`
+
+Event Count: 12 events in 7 days
+
+Severity: high
+
+Cost: The same validation bead (`flywheel-668a`) was redispatched repeatedly
+while skillos stayed LIMPING. Workers re-ran dry-run classifiers, pane health,
+relay checks, and design-artifact probes, then rediscovered the same two failed
+L60 signals instead of routing to the apply owner. This burned worker cycles and
+kept the skillos loop in a partial-failure state that looked inspected but not
+repaired.
+
+Root Cause: LIMPING was treated as validation evidence to re-check, not as a
+halt-and-repair state. The loop had enough doctrine to name the failing signals,
+but no layer-2 incident rule forcing the redispatch path to stop after repeated
+no-state-change probes and route recovery to the bounded apply/decision owner.
+
+Forever-Rule: When a session reports `driver_status=VERIFIED` but loop
+integrity is still LIMPING, classify it as a live partial failure. If the same
+failed L60 signals recur after three redispatches without state change, halt new
+validation redispatches for that bead, attach the latest `no_silent_darkness`
+or `gap-hunt` JSON to the apply-owner bead, and require recovery evidence of
+`verdict=OK` plus all five L60 signals before closing the validation bead.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote skillos-loop-integrity-still-limping`. The entry binds the 12-row
+cluster to the `flywheel-recovery` LIMPING recovery rule and `loop-enforcement`
+stall gate, making future handlers route to repair state rather than another
+validation-only redispatch.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1074`: first `flywheel-668a`
+  validation found skillos LIMPING with `callback_received_in_last_2_ticks` and
+  `fuckup_log_decisions_made_since_last_tick` failed.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1079`: redispatch without state
+  change reproduced the same failed signals.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1086-L1171`: follow-on
+  redispatches continued to find skillos LIMPING while `flywheel-hg2w` remained
+  the apply/decision owner.
+- Skills: `~/.claude/skills/flywheel-recovery/SKILL.md` Forever-Rule
+  `loop-integrity-still-limping`; `~/.claude/skills/loop-enforcement/SKILL.md`.
+- Beads: `flywheel-id0pm`, `flywheel-668a`, `flywheel-hg2w`.
