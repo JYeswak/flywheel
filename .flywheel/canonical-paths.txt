@@ -10,9 +10,14 @@ dispatch_log_backfill_v2	.flywheel/scripts/dispatch-log-backfill-v2.sh	flywheel-
 dispatch_log_backfill_tests	tests/test_dispatch_enforcement_backfill.sh	flywheel-u1x3	Fixture-backed proof that dry-run does not mutate and apply requires idempotency key.
 dispatch_enforcement_rollback_tests	tests/test_dispatch_enforcement_rollback_knobs.sh	flywheel-u1x3	Fixture-backed proof for FLYWHEEL_DISPATCH_ENFORCE, FLYWHEEL_DISPATCH_GATE_DISABLE, global sentinels, and repo no-enforce sentinel.
 dispatch_contract_promotion_tests	tests/test_dispatch_contract_promotion.sh	flywheel-u1x3	Fixture-backed proof that repeated dispatch_contract_violations create or match an auto-doctor bead.
+fleet_skill_discoveries_ledger	~/.local/state/flywheel/skill-discoveries.jsonl	flywheel-yegu	Append-only global ledger for reusable skill discoveries emitted by workers and consumed by coordinator, notify, and doctor.
+fleet_skill_discovery_coordinator	.flywheel/scripts/skillos-discovery-coordinator.py	flywheel-s08u	Promotion ladder coordinator for 1/2/3/5 sighting thresholds; writes fleet-skill-pulse rows.
+fleet_skill_discovery_notify	.flywheel/scripts/skillos-notify.py	flywheel-f2oy	Token-safe skillos notification and deterministic Agent Mail thread planner for skill discovery candidates.
 fleet_skill_discovery_doctor	/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop	flywheel-5gyv	Doctor field fleet_skill_discovery for skill-discoveries JSONL health, top candidates, pending skillos action, and skipped discovery-duty callbacks.
 fleet_skill_discovery_doctor_tests	tests/test_fleet_skill_discovery_doctor.sh	flywheel-5gyv	Fixture-backed tests for missing ledger, malformed row resilience, 24h candidate counts, pending action, and suspicious no-discovery callbacks.
 fleet_skill_discovery_promotion_tests	tests/test_fleet_skill_discovery_promotion.sh	flywheel-5gyv	Fixture-backed promotion test for auto-doctor:fleet_skill_discovery beads with candidate evidence.
+fleet_skill_reporting_e2e_tests	tests/test_fleet_skill_reporting_e2e.sh	flywheel-5hnh	E2E smoke for append, callback validator, coordinator dry-run, doctor JSON, and skillos notify dry-run.
+fleet_skill_reporting_secret_scrub_tests	tests/test_fleet_skill_reporting_secret_scrub.sh	flywheel-5hnh	Fixture proving synthetic token-shaped values are redacted before send and omitted from stored discovery evidence.
 validate_tick_driver	.flywheel/flywheel-loop-tick	flywheel-hf58	Tick driver with VALIDATE phase before INTEGRATE.
 tick_receipt_schema_v1	.flywheel/validation-schema/v1/tick-receipt.schema.json	flywheel-hf58	Tick receipt schema including validation_summary fields.
 validate_tick_phase_tests	tests/validate-tick-phase.sh	flywheel-hf58	Fixture-backed tests for VALIDATE phase routing.

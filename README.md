@@ -241,6 +241,54 @@ pending skillos coordinator actions. It warns when a candidate reaches the
 no-discovery reason. `doctor-signal-bead-promotion.sh` promotes those warnings
 as `[auto-doctor:fleet_skill_discovery]` beads with candidate evidence.
 
+Fleet skill discovery is a four-step operator chain:
+
+```bash
+# append
+~/.claude/skills/.flywheel/bin/flywheel-loop skill-discovery append \
+  --candidate-skill-name <kebab-skill-name> \
+  --discovery-kind pattern-emerged \
+  --session flywheel \
+  --worker-pane 4 \
+  --worker-kind codex \
+  --task-context "<task summary>" \
+  --evidence-json '{"source":"synthetic-or-redacted-evidence"}' \
+  --json
+
+# coordinate
+.flywheel/scripts/skillos-discovery-coordinator.py \
+  --discoveries ~/.local/state/flywheel/skill-discoveries.jsonl \
+  --dry-run \
+  --json
+
+# inspect
+~/.claude/skills/.flywheel/bin/flywheel-loop doctor \
+  --repo /Users/josh/Developer/flywheel \
+  --json | jq '.fleet_skill_discovery'
+
+# notify skillos without sending
+.flywheel/scripts/skillos-notify.py \
+  --discovery-json <single-discovery-row.json> \
+  --dry-run \
+  --json
+```
+
+Workers should report `pattern-emerged` when they invent a reusable workflow or
+implementation pattern during a task, `skill-search-miss` when they searched the
+skill/Socraticode substrate and found no suitable skill, and
+`skill-found-but-incomplete` when an existing skill is useful but misses a
+material command, recovery step, or edge case. Store only synthetic or redacted
+evidence in the discovery ledger; notification redaction is a second safety net,
+not permission to put token-shaped material into storage.
+
+No new L-rule is added for this close-out. The fleet-skill-reporting chain is an
+E2E wire-in of existing doctrine: L50 makes skill/Socraticode survey mandatory,
+L55 routes missing-skill classes to skillos, L56 defines the promotion ladder,
+L61 requires README/canonical-path wire-in, and L71 requires validation before
+redispatch or close. The already-landed skill-discovery callback rule supplies
+the callback field contract, so `flywheel-5hnh` closes the documentation and
+smoke-test gap rather than minting duplicate doctrine.
+
 Dispatch-log v2 migration is dry-run first:
 `.flywheel/scripts/dispatch-log-backfill-v2.sh --repo "$PWD" --dry-run --json`
 prints planned annotations without editing `.flywheel/dispatch-log.jsonl`.
