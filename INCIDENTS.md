@@ -6519,3 +6519,34 @@ Evidence:
 - `~/.local/state/flywheel/fuckup-log.jsonl#L3533`: `mobile-1eis` UBS scan could not run; JS mismatch persisted after previous repair, so build/trace/security checks were used instead.
 - Reference: `~/.claude/references/claude-md-safety.md` UBS safety-stack guidance.
 - Bead: `flywheel-w5j7t`.
+
+## ubs-module-checksum
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `ubs-module-checksum`
+
+Event Count: 4+ events in 7 days (6 exact-class rows observed at promotion time)
+
+Severity: medium
+
+Cost: UBS file-targeted and focused scans were repeatedly unavailable across mobile-eats workers because cached or refreshed JS/Python/helper modules failed checksum verification. Several workers had to stop `ubs doctor --fix`, accept that the repair path did not converge, and substitute local adoption scans, typecheck, lint, tests, build, Playwright, or a11y checks. Those fallback checks protected individual code paths, but the fleet lost the intended UBS safety lane during pre-close review.
+
+Root Cause: UBS module acquisition and cache refresh can land in a checksum drift state where both the cached module and the refreshed module disagree with the expected checksum. The operational doctrine treated UBS as an invocable pre-merge scanner but lacked an exact-class L56 incident for "UBS unavailable because the module checksum substrate is unhealthy." Without that incident, workers kept rediscovering the same tool-substrate failure and recording fallback verification as isolated closeout context.
+
+Forever-Rule: A `ubs-module-checksum` row means the UBS substrate is unavailable, not that UBS found no issues. Run the documented refresh/repair path once, capture the expected/got checksum evidence when available, and route recurring failures to UBS/tool-patch ownership. A worker may use bounded fallback verification to finish local work, but closeout must explicitly say `UBS unavailable: module checksum` and name the replacement checks. Do not treat fallback verification as equivalent to UBS, and do not create another promotion candidate while this exact-class incident is active.
+
+Fix Applied/Status: NEW exact-class layer-2 INCIDENTS entry from `/flywheel:learn --promote ubs-module-checksum`. This entry gives promotion-candidate bead `flywheel-5wfy4` durable L56 coverage, points future scans at UBS substrate repair/tool-patch ownership, and cross-links the narrower mismatch class already promoted in `INCIDENTS.md#ubs-module-checksum-mismatch`.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L2525`: `mobile-eats-1gqt.21` file-targeted scan did not complete because the cached JS module checksum differed; `ubs doctor --fix` from `/tmp` hung and was stopped.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L2920`: `mobile-1aps` UBS scan and `ubs doctor --fix` failed because JS/Python/helper modules downloaded with checksum mismatches; worker used adoption scan plus typecheck/lint/tests as fallback.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L2943`: `mobile-2gzh` UBS JS scan blocked by cached JS module checksum mismatch; refresh fetched a different checksum and failed verification.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L3017`: `mobile-1ocb` UBS JS sweep could not run because cached and refreshed JS module checksums mismatched the expected checksum.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L3912`: UBS focused scan could not run because JS module checksum verification failed after refresh.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L3918`: `mobile-eats-1skv.13` UBS scan could not run because JS module checksum verification failed after refresh; evidence captured expected/got checksum prefix.
+- Related incident: `INCIDENTS.md#ubs-module-checksum-mismatch`.
+- Reference: `~/.claude/references/claude-md-safety.md` UBS safety-stack guidance.
+- Bead: `flywheel-5wfy4`.
