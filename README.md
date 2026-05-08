@@ -227,6 +227,7 @@ Every non-trivial worker dispatch in this repo should include:
 | Socraticode | 3 to 5 required searches, using `/Users/josh/Developer/flywheel` as canonical path. |
 | File reservation | Agent Mail reservation for every file that will be edited. |
 | Skills | Named skills to consult before work. |
+| Skill discovery | Workers append reusable pattern findings to `~/.local/state/flywheel/skill-discoveries.jsonl` and callback with `skill_discoveries=<N> sd_ids=<list|none>`. |
 | Output | A durable report path, usually `/tmp/<task>_findings.md` for research or an edited repo file for implementation. |
 | Callback | `ntm send flywheel --pane="$CALLBACK_PANE" "Callback: task_id=<id> status=done ..."` |
 | Receipts | `socraticode_queries=N`, reservation release, Bead update or `no_bead_reason`, and fuckup rows for blockers. |
