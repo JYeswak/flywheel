@@ -1,0 +1,86 @@
+{
+  "schema_version": "flywheel-state-store-authority/v1",
+  "owner_bead": "flywheel-94si",
+  "generated_from": "~/.local/state/jeff-intel/learnings/04-sqlite-db-patterns.md",
+  "stores": [
+    {
+      "id": "beads",
+      "kind": "sqlite_mirror_of_jsonl",
+      "authority": "jsonl_source",
+      "source_path": ".beads/issues.jsonl",
+      "derived_mirrors": [
+        {
+          "path": ".beads/beads.db",
+          "freshness_source": ".beads/issues.jsonl"
+        }
+      ],
+      "backup_path": "/tmp/beads-db-recover-<timestamp>/",
+      "migration_command": "br sync --flush-only",
+      "integrity_probe_command": ".flywheel/scripts/beads-db-recover.sh validate repo --repo \"$PWD\" --json",
+      "repair_command": ".flywheel/scripts/beads-db-recover.sh --repo \"$PWD\" --dry-run --json",
+      "repair_contract": {
+        "dry_run_command": ".flywheel/scripts/beads-db-recover.sh --repo \"$PWD\" --dry-run --json",
+        "apply_command": ".flywheel/scripts/beads-db-recover.sh --repo \"$PWD\" --apply --force --json",
+        "receipt_path": "~/.local/state/flywheel/beads-recovery.jsonl",
+        "append_only_ledgers_never_truncated": [
+          ".beads/issues.jsonl",
+          "~/.local/state/flywheel/beads-recovery.jsonl"
+        ]
+      },
+      "audited_at": "2026-05-08T16:44:45Z"
+    },
+    {
+      "id": "dispatch_log",
+      "kind": "jsonl_append_only_ledger",
+      "authority": "jsonl_source",
+      "source_path": ".flywheel/dispatch-log.jsonl",
+      "derived_mirrors": [
+        {
+          "path": ".flywheel/dispatch-log-validation.jsonl",
+          "freshness_source": ".flywheel/dispatch-log.jsonl",
+          "required": false
+        }
+      ],
+      "backup_path": ".flywheel/receipts/dispatch-log-backfill-<idempotency-key>.json",
+      "migration_command": ".flywheel/scripts/dispatch-log-backfill-v2.sh --repo \"$PWD\" --dry-run --json",
+      "integrity_probe_command": ".flywheel/scripts/dispatch-log-schema-validator.sh --repo \"$PWD\" validate --json",
+      "repair_command": ".flywheel/scripts/dispatch-log-schema-validator.sh --repo \"$PWD\" --apply --json",
+      "repair_contract": {
+        "dry_run_command": ".flywheel/scripts/dispatch-log-backfill-v2.sh --repo \"$PWD\" --dry-run --json",
+        "apply_command": ".flywheel/scripts/dispatch-log-backfill-v2.sh --repo \"$PWD\" --apply --idempotency-key flywheel-94si --json",
+        "receipt_path": ".flywheel/receipts/dispatch-log-backfill-flywheel-94si.json",
+        "append_only_ledgers_never_truncated": [
+          ".flywheel/dispatch-log.jsonl",
+          ".flywheel/dispatch-log-validation.jsonl"
+        ]
+      },
+      "audited_at": "2026-05-08T16:44:45Z"
+    },
+    {
+      "id": "session_topology",
+      "kind": "shared_jsonl_state",
+      "authority": "global_jsonl_source",
+      "source_path": "~/.local/state/flywheel/session-topology.jsonl",
+      "derived_mirrors": [
+        {
+          "path": "~/.local/state/flywheel/topology-tick-refresh.jsonl",
+          "freshness_source": "~/.local/state/flywheel/session-topology.jsonl"
+        }
+      ],
+      "backup_path": "~/.local/state/flywheel/shutdown-recovery/<iso-utc>/session-topology.jsonl",
+      "migration_command": ".flywheel/scripts/topology-tick-refresh.sh --dry-run --json",
+      "integrity_probe_command": ".flywheel/scripts/topology-tick-refresh.sh --json",
+      "repair_command": ".flywheel/scripts/topology-tick-refresh.sh --apply --json",
+      "repair_contract": {
+        "dry_run_command": ".flywheel/scripts/topology-tick-refresh.sh --json",
+        "apply_command": ".flywheel/scripts/topology-tick-refresh.sh --apply --json",
+        "receipt_path": "~/.local/state/flywheel/topology-tick-refresh.jsonl",
+        "append_only_ledgers_never_truncated": [
+          "~/.local/state/flywheel/session-topology.jsonl",
+          "~/.local/state/flywheel/topology-tick-refresh.jsonl"
+        ]
+      },
+      "audited_at": "2026-05-08T16:44:45Z"
+    }
+  ]
+}
