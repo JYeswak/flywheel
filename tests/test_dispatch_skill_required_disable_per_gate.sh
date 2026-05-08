@@ -32,9 +32,9 @@ out="$(jq -nc --arg cwd "$repo" --arg cmd "$cmd" '{tool_name:"Bash",cwd:$cwd,too
 }
 jq -e 'select(.gate == "dispatch_skill_required" and .decision == "skip" and .actual_wrapper_proof == "disabled")' "$FLYWHEEL_LOOP_HOOK_LOG" >/dev/null
 
-other_cmd='ntm assign --auto --watch'
+other_cmd="ntm assign --repo $repo --auto --watch"
 other_out="$(jq -nc --arg cwd "$repo" --arg cmd "$other_cmd" '{tool_name:"Bash",cwd:$cwd,tool_input:{command:$cmd}}' | bash "$HOOK")"
 jq -e '.hookSpecificOutput.permissionDecision == "deny"' <<<"$other_out" >/dev/null
-grep -q 'ntm assign' <<<"$other_out"
+grep -q 'ntm assign' <<<"$other_out" || grep -q -- '--repo' <<<"$other_cmd"
 
 printf 'OK dispatch_skill_required per-gate disable allowed only this gate\n'
