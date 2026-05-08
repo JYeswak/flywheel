@@ -6327,6 +6327,57 @@ Evidence:
 - Doctrine: `AGENTS.md` L95 worker-stall recovery guidance.
 - Bead: `flywheel-ozha`.
 
+## dispatch-health-and-capacity-gate
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `dispatch-health-and-capacity-gate`
+
+Event Count: 3 events in 7 days
+
+Severity: medium
+
+Cost: Mobile-eats DISPATCH aborted three times in one short window because
+doctor health was red and the target worker pane was not `WAITING`. The aborts
+were safety-correct, but without exact-class layer-2 coverage the same health
+plus capacity refusal could recur as promotion debt instead of routing to the
+doctor owners and pane-capacity gate.
+
+Root Cause: Dispatch health checks and pane capacity checks both fired, but the
+combined class lacked a durable incident target. Existing `dispatch-capacity-gate`
+coverage handles robot-mode disagreement and override cases; this class is the
+sibling hard-stop case where doctor errors plus no waiting worker pane mean
+dispatch must not proceed.
+
+Forever-Rule: Dispatch requires both a healthy-enough substrate and real worker
+capacity. If doctor reports blocking classes such as `beads_db_health_failed`,
+`storage_low_headroom`, or `publishability_bar_score_low`, and the selected
+worker pane is not `WAITING`, abort dispatch, record the exact doctor classes
+and pane state, and route to the health owner or capacity refill path. Do not
+override a health failure simply because a dispatch candidate exists.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote dispatch-health-and-capacity-gate`. This entry gives
+promotion-candidate bead `flywheel-hm88f` durable L56 coverage and routes
+future rows to the health/capacity refusal path instead of duplicating
+promotion candidates.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L487`: mobile-eats DISPATCH
+  aborted on doctor errors `beads_db_health_failed`,
+  `storage_low_headroom`, `publishability_bar_score_low`, and pane 2 not
+  `WAITING`.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L488`: later DISPATCH `150759`
+  aborted on the same doctor error set and pane 2 not `WAITING`.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L489`: DISPATCH `151302` repeated
+  the same health/capacity refusal.
+- Sibling incident: `INCIDENTS.md#robot-mode-classification-disagreement`.
+- Script: `.flywheel/scripts/dispatch-capacity-gate.sh`.
+- Skill: `~/.claude/skills/dispatch-tool-contracts/SKILL.md`.
+- Bead: `flywheel-hm88f`.
+
 ## agent-mail-too-many-open-files
 
 Date: 2026-05-08
@@ -6386,3 +6437,57 @@ Evidence:
 - Test: `tests/agent-mail-fd-doctor.sh`.
 - Skill: `~/.claude/skills/agent-mail/SKILL.md`.
 - Bead: `flywheel-bika`.
+
+## jeff-corpus-storage-red-integrate-blocker
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `jeff-corpus-storage-red-integrate-blocker`
+
+Event Count: 3 events in 7 days
+
+Severity: medium
+
+Cost: Mobile-eats INTEGRATE prelude blocked three times in a ten-minute window
+because flywheel doctor reported Jeff corpus storage RED at `66766.7 MB`.
+The refusal was safety-correct, but without exact-class layer-2 coverage the
+same signal stayed as promotion debt instead of routing directly to the Jeff
+corpus storage budget and compaction owner.
+
+Root Cause: The Jeff corpus had a doctor-visible storage budget signal, but
+the repeated mobile-eats blocker class lacked an INCIDENTS target that tied
+the downstream INTEGRATE prelude refusal to L72 storage discipline and L78
+Jeff corpus accretive ingestion. General integrate-prelude coverage explains
+why callback reaping stopped; this class names the exact corpus storage owner.
+
+Forever-Rule: `jeff_corpus_storage_health=RED` blocks corpus-growth work and
+any integration path whose next step would depend on fresh Jeff corpus ingest,
+mirror growth, or Qdrant expansion. Treat downstream INTEGRATE rows as a safe
+refusal and route them to Jeff corpus compaction/storage recovery, not to
+worker-stall recovery. Resume only after doctor reports Jeff corpus storage
+`GREEN` or `YELLOW`, or after a valid storage override receipt explicitly
+scopes the allowed non-growth work.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote jeff-corpus-storage-red-integrate-blocker`. This entry gives
+promotion-candidate bead `flywheel-l82y` durable L56 coverage, links the class
+to L72/L78 and the `storage-health` skill, and prevents future doctrine-ladder
+scans from recreating the same promotion candidate.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L405`: mobile-eats INTEGRATE
+  prelude blocked because doctor reported Jeff corpus storage RED at
+  `66766.7 MB`.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L408`: same blocker recurred five
+  minutes later with the same RED storage value.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L412`: third recurrence kept the
+  integration path halted on the same Jeff corpus storage signal.
+- Doctrine: `AGENTS.md` L72 `STORAGE-DISCIPLINE-SYSTEM-WIDE`.
+- Doctrine: `AGENTS.md` L78 `Jeff corpus accretive ingestion`.
+- Sibling incident: `INCIDENTS.md#integrate-prelude-blocked`.
+- Test: `tests/jeff-corpus-accretive.sh` storage budget fixture asserts RED
+  blocks new ingestion and doctor exposes Jeff corpus storage fields.
+- Skill: `~/.claude/skills/storage-health/SKILL.md`.
+- Bead: `flywheel-l82y`.
