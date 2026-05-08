@@ -13,23 +13,31 @@ LOG="${LOG:-$REPO/.flywheel/dispatch-log.jsonl}"
 LOCK="$STATE_DIR/loop.lock"
 LAST="$STATE_DIR/last_run.json"
 NTM="${NTM:-/Users/josh/.local/bin/ntm}"
+COORDINATOR_BIN="${COORDINATOR_BIN:-/Users/josh/.local/bin/ntm-coordinator-pinned}"
 PANE_WORK_SIGNAL_SCRIPT="${PANE_WORK_SIGNAL_SCRIPT:-$REPO/.flywheel/scripts/pane-work-signal.sh}"
 PANE_WORK_SIGNAL_STATE_DIR="${PANE_WORK_SIGNAL_STATE_DIR:-${FLYWHEEL_STATE_DIR:-$HOME/.local/state/flywheel}}"
 DRY_RUN="${FLYWHEEL_LOOP_TICK_DRY_RUN:-0}"
 FROZEN_DETECTOR_OVERRIDE="${FLYWHEEL_TICK_FROZEN_DETECTOR_OVERRIDE:-0}"
 CANONICAL_SOURCE="${FLYWHEEL_CANONICAL_DOCTRINE_SOURCE:-/Users/josh/Developer/flywheel/.flywheel/AGENTS-CANONICAL.md}"
 CANONICAL_PULL_MAX_AGE_SECONDS="${FLYWHEEL_CANONICAL_PULL_MAX_AGE_SECONDS:-300}"
+TOPOLOGY_TICK_REFRESH_TIMEOUT_SEC="${TOPOLOGY_TICK_REFRESH_TIMEOUT_SEC:-30}"
 
 ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 
 mkdir -p "$STATE_DIR" "$PROMPT_DIR" "$(dirname "$LOG")"
 
 json_or_raw() {
-  local raw="${1:-}"
-  if jq -e . >/dev/null 2>&1 <<<"$raw"; then
-    printf '%s\n' "$raw"
+  local raw="${1:-}" extracted
+  extracted="$(jq -c -s 'map(select(type == "object")) | .[-1] // empty' <<<"$raw" 2>/dev/null || true)"
+  if [[ -n "$extracted" ]]; then
+    printf '%s\n' "$extracted"
   else
-    jq -nc --arg raw "$raw" '{action:"error",raw:$raw}'
+    extracted="$(jq -R -s -c 'split("\n") | map(try (fromjson) catch empty) | map(select(type == "object")) | .[-1] // empty' <<<"$raw" 2>/dev/null || true)"
+    if [[ -n "$extracted" ]]; then
+      printf '%s\n' "$extracted"
+    else
+      jq -nc --arg raw "$raw" '{action:"error",raw:$raw}'
+    fi
   fi
 }
 
@@ -39,6 +47,23 @@ first_json_or_raw() {
     jq -c -s '.[0]' <<<"$raw"
   else
     jq -nc --arg raw "$raw" '{action:"error",raw:$raw}'
+  fi
+}
+
+json_stream_last_object_or_default() {
+  local raw="${1:-}" default_json="${2:-{}}" extracted
+  extracted="$(jq -c -s 'map(select(type == "object")) | .[-1] // empty' <<<"$raw" 2>/dev/null || true)"
+  if [[ -n "$extracted" ]]; then
+    printf '%s\n' "$extracted"
+  else
+    extracted="$(jq -R -s -c 'split("\n") | map(try (fromjson) catch empty) | map(select(type == "object")) | .[-1] // empty' <<<"$raw" 2>/dev/null || true)"
+    if [[ -n "$extracted" ]]; then
+      printf '%s\n' "$extracted"
+    elif jq -e . >/dev/null 2>&1 <<<"$default_json"; then
+      jq -c . <<<"$default_json"
+    else
+      jq -nc '{success:false,status:"error",warnings:["invalid_default_json"]}'
+    fi
   fi
 }
 
@@ -111,7 +136,7 @@ codex_watchtower_probe() {
   summary="$(json_or_raw "$summary")"
   doctor="$("$HOME/.claude/skills/codex-cli-tracker/scripts/codex-tracker-probe.sh" --doctor --json 2>&1 || printf '{"success":false,"warnings":["tracker_doctor_failed"]}')"
   doctor="$(json_or_raw "$doctor")"
-  frozen="$("$REPO/.flywheel/scripts/frozen-pane-detector.sh" --session=all --json 2>&1 || printf '{"success":false,"warnings":["frozen_pane_probe_failed"]}')"
+  frozen="$("$REPO/.flywheel/scripts/frozen-pane-detector.sh" --session=all --json 2>&1 || printf '{"success":false,"status":"degraded","source_health":{"status":"unhealthy"},"warnings":["frozen_detector_helper_unavailable"]}')"
   frozen="$(json_or_raw "$frozen")"
   high_count="$(jq '(.codex_relevant_issues // []) | length' <<<"$summary" 2>/dev/null || printf '0')"
   strike_count="$(jq '[.. | objects | (.strike_count_7d? // .strikes_7d? // .strike_count? // empty)] | map(select(type == "number")) | max // 0' <<<"$frozen" 2>/dev/null || printf '0')"
@@ -150,16 +175,14 @@ codex_watchtower_probe() {
 }
 
 frozen_detector_probe() {
-  local output exit_code
+  local output exit_code normalized default_json
   set +e
   output="$("$REPO/.flywheel/scripts/frozen-pane-detector.sh" --session=all --json 2>&1)"
   exit_code=$?
   set -e
-  if jq -e . >/dev/null 2>&1 <<<"$output"; then
-    jq -c --argjson exit_code "$exit_code" 'if type == "object" then . + {probe_exit_code:$exit_code} else . end' <<<"$output"
-  else
-    jq -nc --arg raw "$output" --argjson exit_code "$exit_code" '{success:false,status:"error",source_health:{status:"unhealthy"},probe_exit_code:$exit_code,warnings:["invalid_frozen_detector_json"],raw:$raw}'
-  fi
+  default_json="$(jq -nc --arg raw "$output" '{success:false,status:"degraded",source_health:{status:"unhealthy"},warnings:["frozen_detector_helper_unavailable"],raw:$raw}')"
+  normalized="$(json_stream_last_object_or_default "$output" "$default_json")"
+  jq -c --argjson exit_code "$exit_code" 'if type == "object" then . + {probe_exit_code:$exit_code} else {success:false,status:"degraded",source_health:{status:"unhealthy"},probe_exit_code:$exit_code,warnings:["invalid_frozen_detector_json"]} end' <<<"$normalized"
 }
 
 sanitize_frozen_detector_json() {
@@ -319,6 +342,10 @@ agent_mail_fd_probe() {
   run_probe_json "$REPO/.flywheel/scripts/agent-mail-fd-doctor.sh" --doctor --json
 }
 
+leverage_ceiling_probe() {
+  run_probe_json "$REPO/.flywheel/scripts/leverage-ceiling-probe.sh" --doctor --json
+}
+
 mobile_eats_probe() {
   run_probe_json "$REPO/.flywheel/scripts/mobile-eats-receipt-bridge.sh" --doctor --json
 }
@@ -342,6 +369,10 @@ daily_jeff_probe() {
     sources_file:(.paths.sources_file // .sources_file // null),
     warnings:(.warnings // [])
   }' <<<"$result"
+}
+
+jeff_philosophy_probe() {
+  run_probe_json "$REPO/.flywheel/scripts/jeff-philosophy-mine.sh" doctor --json
 }
 
 jeff_binary_version_probe() {
@@ -385,6 +416,37 @@ fleet_onboard_probe() {
     warnings:([.[] | .warnings[]?] + if length == 0 then ["fleet_roster_empty_or_missing"] else [] end)
   }' "$tmp"
   rm -f "$tmp"
+}
+
+topology_tick_refresh_probe() {
+  local output exit_code timeout_sec cmd
+  timeout_sec="${TOPOLOGY_TICK_REFRESH_TIMEOUT_SEC:-30}"
+  cmd=("$REPO/.flywheel/scripts/topology-tick-refresh.sh" "--json")
+  if [[ "$DRY_RUN" != "1" ]]; then
+    cmd+=("--apply")
+  fi
+
+  set +e
+  if command -v timeout >/dev/null 2>&1; then
+    output="$(timeout "$timeout_sec" "${cmd[@]}" 2>&1)"
+  else
+    output="$("${cmd[@]}" 2>&1)"
+  fi
+  exit_code=$?
+  set -e
+
+  if jq -e . >/dev/null 2>&1 <<<"$output"; then
+    jq -c \
+      --argjson exit_code "$exit_code" \
+      --argjson timeout_sec "$timeout_sec" \
+      '. + {probe_exit_code:$exit_code, timeout_sec:$timeout_sec}' <<<"$output"
+  else
+    jq -nc \
+      --arg raw "$output" \
+      --argjson exit_code "$exit_code" \
+      --argjson timeout_sec "$timeout_sec" \
+      '{schema_version:"topology-tick-refresh.result.v1",status:"error",probe_exit_code:$exit_code,timeout_sec:$timeout_sec,warnings:["invalid_topology_tick_refresh_json"],raw:$raw}'
+  fi
 }
 
 valid_phase() {
@@ -449,6 +511,90 @@ br_ready_count() {
   jq 'if type=="array" then length else (.issues // [] | length) end' 2>/dev/null <<<"$out" || return 1
 }
 
+br_ready_work_summary_json() {
+  local out count source="br_ready_fallback" warning=""
+  if ! command -v br >/dev/null 2>&1; then
+    jq -nc '{schema_version:"coordinator-digest-consumption/v1",coordinator_digest_consumed:"no",source:"br_ready_fallback",work_summary:{pending_tasks:0,in_progress_tasks:0,completed_today:0,blocked_tasks:0},warnings:["br_missing"]}'
+    return 0
+  fi
+  if ! out="$(cd "$REPO" && br ready --json 2>/dev/null)"; then
+    jq -nc '{schema_version:"coordinator-digest-consumption/v1",coordinator_digest_consumed:"no",source:"br_ready_fallback",work_summary:{pending_tasks:0,in_progress_tasks:0,completed_today:0,blocked_tasks:0},warnings:["br_ready_failed"]}'
+    return 0
+  fi
+  count="$(jq 'if type=="array" then length else (.issues // [] | length) end' 2>/dev/null <<<"$out")" || {
+    count=0
+    warning="br_ready_parse_error"
+  }
+  jq -nc \
+    --arg source "$source" \
+    --arg warning "$warning" \
+    --argjson count "${count:-0}" \
+    '{
+      schema_version:"coordinator-digest-consumption/v1",
+      coordinator_digest_consumed:"no",
+      source:$source,
+      work_summary:{pending_tasks:$count,in_progress_tasks:0,completed_today:0,blocked_tasks:0},
+      warnings:(if $warning == "" then [] else [$warning] end)
+    }'
+}
+
+coordinator_work_summary_json() {
+  local out summary
+  if [[ -n "${FLYWHEEL_COORDINATOR_DIGEST_FIXTURE:-}" ]]; then
+    if [[ -r "$FLYWHEEL_COORDINATOR_DIGEST_FIXTURE" ]]; then
+      out="$(jq -c . "$FLYWHEEL_COORDINATOR_DIGEST_FIXTURE" 2>/dev/null || true)"
+    else
+      br_ready_work_summary_json
+      return 0
+    fi
+  elif [[ -x "$COORDINATOR_BIN" ]]; then
+    out="$("$COORDINATOR_BIN" --session="$SESSION" digest --json 2>/dev/null || true)"
+  else
+    br_ready_work_summary_json
+    return 0
+  fi
+
+  summary="$(jq -s -c '
+    map(select(
+      (.work_summary | type) == "object"
+      and ((.work_summary.pending_tasks // null) | type) == "number"
+      and ((.work_summary.in_progress_tasks // null) | type) == "number"
+      and ((.work_summary.completed_today // null) | type) == "number"
+      and ((.work_summary.blocked_tasks // null) | type) == "number"
+    )) | .[0] // empty
+  ' 2>/dev/null <<<"${out:-}")"
+
+  if [[ -n "$summary" ]] && jq -e '
+    (.work_summary | type) == "object"
+    and ((.work_summary.pending_tasks // null) | type) == "number"
+    and ((.work_summary.in_progress_tasks // null) | type) == "number"
+    and ((.work_summary.completed_today // null) | type) == "number"
+    and ((.work_summary.blocked_tasks // null) | type) == "number"
+  ' >/dev/null 2>&1 <<<"$summary"; then
+    jq -c '{
+      schema_version:"coordinator-digest-consumption/v1",
+      coordinator_digest_consumed:"yes",
+      source:"coordinator",
+      work_summary:{
+        pending_tasks:(.work_summary.pending_tasks // 0),
+        in_progress_tasks:(.work_summary.in_progress_tasks // 0),
+        completed_today:(.work_summary.completed_today // 0),
+        blocked_tasks:(.work_summary.blocked_tasks // 0)
+      },
+      digest:.,
+      warnings:[]
+    }' <<<"$summary"
+  else
+    br_ready_work_summary_json
+  fi
+}
+
+work_summary_ready_count() {
+  local summary
+  summary="$(json_stream_last_object_or_default "${1:-{}}" "$(jq -nc '{work_summary:{pending_tasks:0}}')")"
+  jq -r '.work_summary.pending_tasks // 0' 2>/dev/null <<<"$summary" || printf '0\n'
+}
+
 capacity_available() {
   jq -e '(.panes // []) | any((.gate.verdict // "") | test("^(ready|idle|available|ok)$"; "i"))' >/dev/null 2>&1 <<<"${1:-{}}"
 }
@@ -457,6 +603,137 @@ unprocessed_fuckup_count() {
   local log="${FLYWHEEL_FUCKUP_LOG:-$HOME/.local/state/flywheel/fuckup-log.jsonl}"
   [[ -f "$log" ]] || { printf '0\n'; return 0; }
   jq -s '[.[]? | select((.processed_at // .promoted_at // .resolved_at // "") == "")] | length' "$log" 2>/dev/null || printf '0\n'
+}
+
+tick_contract_registry_path() {
+  local path="${FLYWHEEL_TICK_CONTRACT_REGISTRY:-$REPO/.flywheel/tick-contract-registry/v1/registry.json}"
+  if [[ -f "$path" ]]; then
+    printf '%s\n' "$path"
+  elif [[ -f "/Users/josh/Developer/flywheel/.flywheel/tick-contract-registry/v1/registry.json" ]]; then
+    printf '%s\n' "/Users/josh/Developer/flywheel/.flywheel/tick-contract-registry/v1/registry.json"
+  else
+    printf '%s\n' "$path"
+  fi
+}
+
+tick_contract_registry_json() {
+  local path
+  path="$(tick_contract_registry_path)"
+  if [[ -f "$path" ]]; then
+    jq -c . "$path" 2>/dev/null || jq -nc --arg path "$path" '{schema_version:"tick-contract-registry/v1",contract_id:"tick-contract-core",registry_path:$path,cadence_tiers:{},graduation:{},checks:[],warnings:["tick_contract_registry_invalid_json"]}'
+  else
+    jq -nc --arg path "$path" '{schema_version:"tick-contract-registry/v1",contract_id:"tick-contract-core",registry_path:$path,cadence_tiers:{},graduation:{},checks:[],warnings:["tick_contract_registry_missing"]}'
+  fi
+}
+
+tick_contract_checks_json() {
+  local registry_json="$1" log now default_log
+  default_log="${FLYWHEEL_FUCKUP_LOG:-$HOME/.local/state/flywheel/fuckup-log.jsonl}"
+  log="${FLYWHEEL_TICK_CONTRACT_FUCKUP_LOG:-$default_log}"
+  now="${FLYWHEEL_TICK_CONTRACT_NOW:-$(ts)}"
+  if [[ -f "$log" ]]; then
+    jq -s -c --argjson registry "$registry_json" --arg log "$log" --arg now "$now" '
+      def parse_time: try fromdateiso8601 catch 0;
+      def rank($mode): if $mode == "HALT" then 3 elif $mode == "WARN" then 2 else 1 end;
+      def max_mode($a; $b): if rank($a) >= rank($b) then $a else $b end;
+      ($now | parse_time) as $now_epoch
+      | ($registry.graduation.evidence_window_seconds // 604800) as $window
+      | . as $rows
+      | [($registry.checks // [])[] as $check
+          | [ $rows[]?
+              | select(((.trauma_class // .class // .failure_class // "") == ($check.failure_class // "")))
+              | select((((.ts // .created_ts // .observed_at // "") | parse_time) >= ($now_epoch - $window)))
+            ] as $events
+          | ($events | length) as $event_count
+          | (any($events[]?; ((.severity // "") | ascii_upcase) == "CRITICAL")) as $critical
+          | (if $critical or $event_count >= 6 then "HALT" elif $event_count >= 3 then "WARN" else "SOFT" end) as $graduated_mode
+          | max_mode(($check.default_mode // "SOFT"); $graduated_mode) as $mode
+          | $check + {
+              mode:$mode,
+              computed_mode:$graduated_mode,
+              effective_mode:$mode,
+              event_count_7d:$event_count,
+              critical_seen:$critical,
+              evidence_window:"7d",
+              event_log:$log,
+              graduation_reason:(if $critical then "critical_override" elif $event_count >= 6 then "event_count_gte_6" elif $event_count >= 3 then "event_count_3_to_5" else "event_count_0_to_2" end)
+            }
+        ]' "$log" 2>/dev/null || jq -nc '[]'
+  else
+    jq -n -c --argjson registry "$registry_json" --arg log "$log" '
+      [($registry.checks // [])[] | . + {
+        mode:(.default_mode // "SOFT"),
+        computed_mode:"SOFT",
+        effective_mode:(.default_mode // "SOFT"),
+        event_count_7d:0,
+        critical_seen:false,
+        evidence_window:"7d",
+        event_log:$log,
+        graduation_reason:"event_log_missing"
+      }]'
+  fi
+}
+
+tick_contract_graduation_json() {
+  local registry_json="$1" checks_json="$2" now default_log log
+  default_log="${FLYWHEEL_FUCKUP_LOG:-$HOME/.local/state/flywheel/fuckup-log.jsonl}"
+  log="${FLYWHEEL_TICK_CONTRACT_FUCKUP_LOG:-$default_log}"
+  now="${FLYWHEEL_TICK_CONTRACT_NOW:-$(ts)}"
+  jq -n -c \
+    --arg now "$now" \
+    --arg log "$log" \
+    --argjson registry "$registry_json" \
+    --argjson checks "$checks_json" \
+    '{
+      schema_version:"tick-contract-graduation-result/v1",
+      source_rule:($registry.graduation.source_rule // "L56"),
+      evidence_window:($registry.graduation.evidence_window // "7d"),
+      evidence_window_seconds:($registry.graduation.evidence_window_seconds // 604800),
+      thresholds:($registry.graduation.thresholds // {}),
+      critical_override:($registry.graduation.critical_override // {}),
+      event_log:$log,
+      computed_at:$now,
+      checks_total:($checks | length),
+      mode_counts:{
+        SOFT:([$checks[]? | select(.mode == "SOFT")] | length),
+        WARN:([$checks[]? | select(.mode == "WARN")] | length),
+        HALT:([$checks[]? | select(.mode == "HALT")] | length)
+      },
+      graduated_checks:[$checks[]? | select((.computed_mode // "SOFT") != "SOFT" or (.critical_seen == true)) | {id,owner_class,failure_class,mode,event_count_7d,critical_seen,graduation_reason}]
+    }'
+}
+
+tick_contract_json() {
+  local registry_json="$1" checks_json="$2" phase="$3" tick_class="$4" registry_path tier
+  registry_path="$(tick_contract_registry_path)"
+  case "$phase" in
+    DISPATCH|VALIDATE|INTEGRATE|LEARN) tier="active_high" ;;
+    INIT|RESEARCH|PLAN|BEADS) tier="active_normal" ;;
+    *) tier="active_normal" ;;
+  esac
+  jq -n -c \
+    --arg phase "$phase" \
+    --arg tick_class "$tick_class" \
+    --arg tier "$tier" \
+    --arg registry_path "$registry_path" \
+    --argjson registry "$registry_json" \
+    --argjson checks "$checks_json" \
+    '{
+      schema_version:"tick-contract/v1",
+      contract_id:($registry.contract_id // "tick-contract-core"),
+      registry_schema_version:($registry.schema_version // "tick-contract-registry/v1"),
+      registry_path:$registry_path,
+      source_bead:($registry.source_bead // null),
+      plan_source:($registry.plan_source // null),
+      phase:$phase,
+      tick_class:$tick_class,
+      active_cadence_tier:$tier,
+      active_interval:(($registry.cadence_tiers // {})[$tier].interval // null),
+      cadence_tiers:($registry.cadence_tiers // {}),
+      check_count:($checks | length),
+      owner_classes:($checks | map(.owner_class) | unique),
+      receipt_fields:["tick_contract","tick_contract_checks","tick_contract_graduation"]
+    }'
 }
 
 latest_callback_next_phase() {
@@ -512,13 +789,13 @@ detect_phase() {
     fi
   fi
 
-  if ready_count="$(br_ready_count)"; then
+  if ready_count="$(work_summary_ready_count "${WORK_SUMMARY_RESULT:-{}}")"; then
     if [[ "${ready_count:-0}" -gt 0 ]]; then
-      emit_phase "DISPATCH" "br_ready:${ready_count}"
+      emit_phase "DISPATCH" "work_summary:$(jq -r '.source // "unknown"' <<<"${WORK_SUMMARY_RESULT:-{}}" 2>/dev/null || printf unknown):${ready_count}"
       return 0
     fi
   else
-    PHASE_REASON="br_unavailable_jsonl_fallback"
+    PHASE_REASON="work_summary_unavailable_jsonl_fallback"
   fi
 
   open_jsonl="$(jsonl_open_bead_count)"
@@ -553,8 +830,8 @@ detect_phase() {
     return 0
   fi
 
-  if [[ "$PHASE_REASON" == "br_unavailable_jsonl_fallback" ]]; then
-    emit_phase "LEARN" "br_unavailable_no_jsonl_state"
+  if [[ "$PHASE_REASON" == "work_summary_unavailable_jsonl_fallback" ]]; then
+    emit_phase "LEARN" "work_summary_unavailable_no_jsonl_state"
     return 0
   fi
 
@@ -766,6 +1043,176 @@ l70_chain_decision_json() {
     '{source:$source,from_phase:(if $from_phase=="" then null else $from_phase end),to_phase:(if $to_phase=="" then null else $to_phase end),selected_phase:$selected_phase,phase_reason:$phase_reason,chain_required:$chain_required,chained:$chained,chain_blocked_reason:(if $chain_blocked_reason=="" then null else $chain_blocked_reason end)}'
 }
 
+data_backed_deferral_ready_head_json() {
+  local out
+  if ! command -v br >/dev/null 2>&1; then
+    jq -nc '{ready_bead_count:0,ready_bead_id:null,ready_bead_title:null,source:"br_missing"}'
+    return 0
+  fi
+  out="$(cd "$REPO" && br ready --json 2>/dev/null)" || {
+    jq -nc '{ready_bead_count:0,ready_bead_id:null,ready_bead_title:null,source:"br_error"}'
+    return 0
+  }
+  jq -c '
+    if type == "array" then
+      {ready_bead_count:length, ready_bead_id:(.[0].id // .[0].issue_id // null), ready_bead_title:(.[0].title // null), source:"br_ready"}
+    else
+      (.issues // []) as $issues
+      | {ready_bead_count:($issues | length), ready_bead_id:($issues[0].id // $issues[0].issue_id // null), ready_bead_title:($issues[0].title // null), source:"br_ready"}
+    end
+  ' <<<"$out" 2>/dev/null || jq -nc '{ready_bead_count:0,ready_bead_id:null,ready_bead_title:null,source:"br_parse_error"}'
+}
+
+data_backed_deferral_tick_signals() {
+  local task_id="$1" phase="$2" phase_reason="$3" capacity_json="$4" chain_json="$5" ready_json idle_count ready_count ready_id ready_title action_in_doctrine score draft suggested_action
+  if [[ -n "${FLYWHEEL_DATA_BACKED_DEFERRAL_TICK_FIXTURE:-}" ]]; then
+    if [[ -r "$FLYWHEEL_DATA_BACKED_DEFERRAL_TICK_FIXTURE" ]]; then
+      jq -c . "$FLYWHEEL_DATA_BACKED_DEFERRAL_TICK_FIXTURE"
+    else
+      jq -nc --arg path "$FLYWHEEL_DATA_BACKED_DEFERRAL_TICK_FIXTURE" '{error:"fixture_not_readable",path:$path}'
+    fi
+    return 0
+  fi
+
+  ready_json="$(data_backed_deferral_ready_head_json)"
+  idle_count="$(jq '[.panes[]? | select((.gate.verdict // "") | test("^(ready|idle|available|ok)$"; "i"))] | length' <<<"$capacity_json" 2>/dev/null || printf 0)"
+  ready_count="$(jq -r '.ready_bead_count // 0' <<<"$ready_json" 2>/dev/null || printf 0)"
+  ready_id="$(jq -r '.ready_bead_id // empty' <<<"$ready_json" 2>/dev/null || true)"
+  ready_title="$(jq -r '.ready_bead_title // empty' <<<"$ready_json" 2>/dev/null || true)"
+  if [[ "$phase" == "DISPATCH" || "$phase" == "VALIDATE" || "$phase" == "INTEGRATE" ]]; then
+    action_in_doctrine=true
+  else
+    action_in_doctrine=false
+  fi
+  score=0
+  [[ "${idle_count:-0}" -ge 1 ]] && score=$((score + 1))
+  [[ "${ready_count:-0}" -ge 1 ]] && score=$((score + 1))
+  [[ "$action_in_doctrine" == "true" ]] && score=$((score + 1))
+  [[ -n "$ready_id" ]] && score=$((score + 1))
+
+  suggested_action="${FLYWHEEL_DATA_BACKED_DEFERRAL_SUGGESTED_ACTION:-}"
+  if [[ -z "$suggested_action" ]]; then
+    if [[ -n "$ready_id" ]]; then
+      suggested_action="dispatch ${ready_id}${ready_title:+: $ready_title}"
+    else
+      suggested_action="continue ${phase} tick without asking Joshua"
+    fi
+  fi
+  draft="${FLYWHEEL_DATA_BACKED_DEFERRAL_TICK_DRAFT:-}"
+  if [[ -z "$draft" ]]; then
+    if [[ "$phase" == "DISPATCH" && "${idle_count:-0}" -ge 1 && "${ready_count:-0}" -ge 1 ]]; then
+      draft="Should I ask Joshua whether to ${suggested_action}?"
+    else
+      draft="Action taken: ${suggested_action}."
+    fi
+  fi
+
+  jq -nc \
+    --arg task_id "$task_id" \
+    --arg session "$SESSION" \
+    --arg phase "$phase" \
+    --arg phase_reason "$phase_reason" \
+    --arg suggested_action "$suggested_action" \
+    --arg draft_text "$draft" \
+    --arg ready_bead_id "$ready_id" \
+    --arg ready_bead_title "$ready_title" \
+    --argjson pane "$TARGET_PANE" \
+    --argjson idle_worker_count "${idle_count:-0}" \
+    --argjson ready_bead_count "${ready_count:-0}" \
+    --argjson data_alignment_score "$score" \
+    --argjson action_in_doctrine "$action_in_doctrine" \
+    --argjson dispatch_capacity "$capacity_json" \
+    --argjson l70_chain "$chain_json" \
+    '{
+      fixture:"tick-derived",
+      source_ref:"flywheel-loop-tick",
+      case_id:$task_id,
+      class:"tick-data-backed-deferral",
+      session:$session,
+      pane:$pane,
+      phase:$phase,
+      phase_reason:$phase_reason,
+      idle_worker_count:$idle_worker_count,
+      ready_bead_count:$ready_bead_count,
+      data_alignment_score:$data_alignment_score,
+      action_in_doctrine:$action_in_doctrine,
+      ready_bead_id:(if $ready_bead_id == "" then null else $ready_bead_id end),
+      highest_priority_ready_bead:(if $ready_bead_id == "" then null else $ready_bead_id end),
+      ready_bead_title:(if $ready_bead_title == "" then null else $ready_bead_title end),
+      suggested_action:$suggested_action,
+      draft_question:$draft_text,
+      draft_text:$draft_text,
+      signals:{
+        idle_worker_count:$idle_worker_count,
+        ready_bead_count:$ready_bead_count,
+        data_alignment_score:$data_alignment_score,
+        action_in_doctrine:$action_in_doctrine,
+        ready_bead_id:(if $ready_bead_id == "" then null else $ready_bead_id end)
+      },
+      dispatch_capacity:$dispatch_capacity,
+      l70_chain:$l70_chain
+    }'
+}
+
+data_backed_deferral_tick_probe() {
+  local task_id="$1" phase="$2" phase_reason="$3" capacity_json="$4" chain_json="$5" tmp signals_json output rc event tick_action rewrite_path soft_violation
+  tmp="$(mktemp "${TMPDIR:-/tmp}/data-backed-deferral-tick.XXXXXX.json")"
+  signals_json="$(data_backed_deferral_tick_signals "$task_id" "$phase" "$phase_reason" "$capacity_json" "$chain_json")"
+  printf '%s\n' "$signals_json" >"$tmp"
+
+  set +e
+  output="$("$HOME/.claude/skills/.flywheel/bin/flywheel-loop" data-backed-deferral-check \
+    --signals "$tmp" \
+    --json \
+    --record-save \
+    --record-override 2>&1)"
+  rc=$?
+  set -e
+  rm -f "$tmp"
+
+  if ! jq -e . >/dev/null 2>&1 <<<"$output"; then
+    jq -nc --arg raw "$output" --argjson rc "$rc" '{schema_version:"data-backed-deferral-tick/v1",status:"error",event:"data_backed_deferral_tick_error",soft_violation:false,rewrite_path:false,checker_exit:$rc,raw:$raw}'
+    return 0
+  fi
+
+  event="data_backed_deferral_clear"
+  tick_action="no_rewrite"
+  rewrite_path=false
+  soft_violation=false
+  if jq -e '.code == "orch_question_when_data_clear"' >/dev/null 2>&1 <<<"$output"; then
+    event="orch_question_when_data_clear"
+    tick_action="rewrite_to_data_implied_action"
+    rewrite_path=true
+    soft_violation=true
+  elif jq -e '(.question_shape == true) and (.allowed_reason // "" | length > 0)' >/dev/null 2>&1 <<<"$output"; then
+    event="orch_question_allowed_with_evidence"
+    tick_action="allow_question_with_evidence"
+  fi
+
+  jq -c \
+    --arg task_id "$task_id" \
+    --arg phase "$phase" \
+    --arg phase_reason "$phase_reason" \
+    --arg event "$event" \
+    --arg tick_action "$tick_action" \
+    --argjson checker_exit "$rc" \
+    --argjson soft_violation "$soft_violation" \
+    --argjson rewrite_path "$rewrite_path" \
+    '. + {
+      schema_version:"data-backed-deferral-tick/v1",
+      task_id:$task_id,
+      phase:$phase,
+      phase_reason:$phase_reason,
+      event:$event,
+      tick_action:$tick_action,
+      soft_violation:$soft_violation,
+      rewrite_path:$rewrite_path,
+      checker_exit:$checker_exit,
+      selected_action_source:(.selected_action_source // "suggested_action"),
+      rewrite_action:(if $rewrite_path then .suggested_action else null end)
+    }' <<<"$output"
+}
+
 callback_validation_reaper_gate() {
   local last_task_id tail_file latest_callback task_description validation_output validation_exit validation_json
   if [[ ! -f "$LAST" ]]; then
@@ -937,6 +1384,18 @@ validated_integration_phase() {
   esac
 }
 
+if [[ "${FLYWHEEL_LOOP_TICK_TEST_DATA_BACKED_DEFERRAL:-0}" == "1" ]]; then
+  test_capacity="$(jq -nc '{session:"flywheel",panes:[{pane:2,gate:{verdict:"ready"}}]}')"
+  test_chain="$(jq -nc '{source:"test",selected_phase:"DISPATCH",phase_reason:"test",chain_required:false,chained:false,chain_blocked_reason:null}')"
+  data_backed_deferral_tick_probe \
+    "${FLYWHEEL_LOOP_TICK_TEST_TASK_ID:-data-backed-deferral-tick-test}" \
+    "${FLYWHEEL_LOOP_TICK_TEST_PHASE:-DISPATCH}" \
+    "${FLYWHEEL_LOOP_TICK_TEST_PHASE_REASON:-test}" \
+    "$test_capacity" \
+    "$test_chain"
+  exit 0
+fi
+
 JOSH_REQUESTS_RESULT="$(bash "$REPO/.flywheel/scripts/josh-request-tick-promote.sh" --json 2>&1 || printf '{"action":"error","unread":0,"highest_priority":null,"ids":[],"error":"josh_request_tick_promote_failed"}')"
 if ! jq -e . >/dev/null 2>&1 <<<"$JOSH_REQUESTS_RESULT"; then
   JOSH_REQUESTS_RESULT="$(jq -nc --arg raw "$JOSH_REQUESTS_RESULT" '{action:"error",unread:0,highest_priority:null,ids:[],raw:$raw}')"
@@ -995,6 +1454,14 @@ jq -nc \
   --argjson result "$AGENT_MAIL_FD_RESULT" \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
+LEVERAGE_CEILING_RESULT="$(leverage_ceiling_probe 2>&1 || printf '{"action":"error"}')"
+LEVERAGE_CEILING_RESULT="$(first_json_or_raw "$LEVERAGE_CEILING_RESULT")"
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "leverage_ceiling_probe" \
+  --argjson result "$LEVERAGE_CEILING_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
 MOBILE_EATS_RESULT="$(mobile_eats_probe 2>&1 || printf '{"action":"error"}')"
 MOBILE_EATS_RESULT="$(first_json_or_raw "$MOBILE_EATS_RESULT")"
 jq -nc \
@@ -1017,6 +1484,14 @@ jq -nc \
   --arg ts "$(ts)" \
   --arg event "daily_jeff_ingest_doctor" \
   --argjson result "$DAILY_JEFF_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
+JEFF_PHILOSOPHY_RESULT="$(jeff_philosophy_probe 2>&1 || printf '{"action":"error"}')"
+JEFF_PHILOSOPHY_RESULT="$(first_json_or_raw "$JEFF_PHILOSOPHY_RESULT")"
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "jeff_philosophy_doctor" \
+  --argjson result "$JEFF_PHILOSOPHY_RESULT" \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
 JEFF_BINARY_VERSION_RESULT="$(jeff_binary_version_probe 2>&1 || printf '{"action":"error"}')"
@@ -1088,6 +1563,18 @@ if [[ "${META_RULE_THREE_SURFACE_DRIFT:-0}" -gt 0 ]]; then
     --json >/dev/null 2>&1 || true
 fi
 
+TOPOLOGY_TICK_REFRESH_RESULT="$(topology_tick_refresh_probe 2>&1 || printf '{"schema_version":"topology-tick-refresh.result.v1","status":"error","warnings":["topology_tick_refresh_failed"]}')"
+TOPOLOGY_TICK_REFRESH_RESULT_DEFAULT="$(jq -nc '{schema_version:"topology-tick-refresh.result.v1",status:"error",warnings:["topology_tick_refresh_invalid_json"]}')"
+TOPOLOGY_TICK_REFRESH_RESULT="$(json_stream_last_object_or_default "$TOPOLOGY_TICK_REFRESH_RESULT" "$TOPOLOGY_TICK_REFRESH_RESULT_DEFAULT")"
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "topology_tick_refresh" \
+  --arg ordering_after "meta_rule_three_surface" \
+  --arg ordering_before "codex_watchtower_probe" \
+  --argjson timeout_sec "$TOPOLOGY_TICK_REFRESH_TIMEOUT_SEC" \
+  --argjson result "$TOPOLOGY_TICK_REFRESH_RESULT" \
+  '{ts:$ts,event:$event,ordering_after:$ordering_after,ordering_before:$ordering_before,timeout_sec:$timeout_sec,result:$result}' >>"$LOG"
+
 CODEX_WATCHTOWER_RESULT="$(codex_watchtower_probe 2>&1 || printf '{"action":"error"}')"
 CODEX_WATCHTOWER_RESULT="$(first_json_or_raw "$CODEX_WATCHTOWER_RESULT")"
 jq -nc \
@@ -1105,8 +1592,10 @@ FROZEN_DETECTOR_SUMMARY="$(frozen_detector_summary "$CODEX_WATCHTOWER_RESULT")"
 if [[ "$(jq -r '.source_health_status // "invalid"' <<<"$FROZEN_DETECTOR_SUMMARY" 2>/dev/null || printf invalid)" == "invalid" ]]; then
   FROZEN_DETECTOR_SUMMARY="$(frozen_detector_summary_from_codex "$CODEX_WATCHTOWER_RESULT" || frozen_detector_summary)"
 fi
-FROZEN_DETECTOR_RESULT="$(jq -c . <<<"$FROZEN_DETECTOR_RESULT" 2>/dev/null || jq -nc --arg raw "$FROZEN_DETECTOR_RESULT" '{success:false,warnings:["invalid_frozen_detector_json"],raw:$raw}')"
-FROZEN_DETECTOR_SUMMARY="$(jq -c . <<<"$FROZEN_DETECTOR_SUMMARY" 2>/dev/null || jq -nc '{success:false,source_health_status:"invalid",frozen_panes_detected:0,unknown_panes_detected:1,stale_template_prompt_count:0,queued_not_submitted_count:0,respawn_suppressed_count:0,recovery_suppressed_count:0,l60_signals_present:{},l60_signal_expected_count:5,l60_signal_present_count:0,l60_signal_missing:["no_silent_darkness","live_truth_delta","unknown_separated","recovery_budget","recovery_lease"],l60_all_present:false,soft_violations:[],durable_receipts:[]}' )"
+FROZEN_DETECTOR_RESULT_DEFAULT="$(jq -nc --arg raw "$FROZEN_DETECTOR_RESULT" '{success:false,warnings:["invalid_frozen_detector_json"],raw:$raw}')"
+FROZEN_DETECTOR_SUMMARY_DEFAULT="$(jq -nc '{success:false,source_health_status:"invalid",frozen_panes_detected:0,unknown_panes_detected:1,stale_template_prompt_count:0,queued_not_submitted_count:0,respawn_suppressed_count:0,recovery_suppressed_count:0,l60_signals_present:{},l60_signal_expected_count:5,l60_signal_present_count:0,l60_signal_missing:["no_silent_darkness","live_truth_delta","unknown_separated","recovery_budget","recovery_lease"],l60_all_present:false,soft_violations:[],durable_receipts:[]}')"
+FROZEN_DETECTOR_RESULT="$(json_stream_last_object_or_default "$FROZEN_DETECTOR_RESULT" "$FROZEN_DETECTOR_RESULT_DEFAULT")"
+FROZEN_DETECTOR_SUMMARY="$(json_stream_last_object_or_default "$FROZEN_DETECTOR_SUMMARY" "$FROZEN_DETECTOR_SUMMARY_DEFAULT")"
 FROZEN_DETECTOR_BLOCK_REASON="$(frozen_detector_block_reason "$FROZEN_DETECTOR_SUMMARY")"
 jq -nc \
   --arg ts "$(ts)" \
@@ -1116,6 +1605,18 @@ jq -nc \
   --arg block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --arg override "$([[ "$FROZEN_DETECTOR_OVERRIDE" == "1" || "$FROZEN_DETECTOR_OVERRIDE" == "true" ]] && printf true || printf false)" \
   '{ts:$ts,event:$event,result:($result | fromjson? // {success:false,raw:$result}),summary:($summary | fromjson? // {success:false,source_health_status:"invalid"}),dispatch_block_reason:$block_reason,override:($override == "true")}' >>"$LOG"
+
+# Step 6: NTM surface validation follows fleet self-diagnosis and writes an
+# accretive matrix receipt without blocking the tick while known gaps backfill.
+NTM_SURFACE_VALIDATION_RESULT="$("$REPO/.flywheel/scripts/ntm-surface-validation-driver.sh" --json 2>&1 || printf '{"schema_version":"ntm-surface-validation-driver.v1","status":"error","warnings":["ntm_surface_validation_failed"]}')"
+NTM_SURFACE_VALIDATION_RESULT="$(json_stream_last_object_or_default "$NTM_SURFACE_VALIDATION_RESULT" "$(jq -nc '{schema_version:"ntm-surface-validation-driver.v1",status:"error",warnings:["ntm_surface_validation_invalid_json"]}')")"
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "ntm_surface_validation" \
+  --arg ordering_after "frozen_detector_v2" \
+  --arg ordering_before "inbox_check" \
+  --argjson result "$NTM_SURFACE_VALIDATION_RESULT" \
+  '{ts:$ts,event:$event,ordering_after:$ordering_after,ordering_before:$ordering_before,result:$result}' >>"$LOG"
 
 INBOX_RESULT="$(SESSION="$SESSION" ORCH_PANE="$TARGET_PANE" bash "$REPO/.flywheel/scripts/inbox-check-tick-step.sh" 2>&1 || printf '{"action":"error"}')"
 INBOX_RESULT="$(first_json_or_raw "$INBOX_RESULT")"
@@ -1164,9 +1665,14 @@ fi
 
 run_id="$(date -u +%Y%m%dT%H%M%SZ)"
 task_id="flywheel_loop_$run_id"
+WORK_SUMMARY_RESULT="$(coordinator_work_summary_json)"
 PHASE="$(detect_phase)"
 PHASE_REASON="$(cat "$STATE_DIR/phase_reason.txt" 2>/dev/null || printf 'unknown')"
 TICK_CLASS="$(tick_class_for_phase "$PHASE")"
+TICK_CONTRACT_REGISTRY_JSON="$(tick_contract_registry_json)"
+TICK_CONTRACT_CHECKS="$(tick_contract_checks_json "$TICK_CONTRACT_REGISTRY_JSON")"
+TICK_CONTRACT_GRADUATION="$(tick_contract_graduation_json "$TICK_CONTRACT_REGISTRY_JSON" "$TICK_CONTRACT_CHECKS")"
+TICK_CONTRACT="$(tick_contract_json "$TICK_CONTRACT_REGISTRY_JSON" "$TICK_CONTRACT_CHECKS" "$PHASE" "$TICK_CLASS")"
 L70_CHAIN_DECISION="$(l70_chain_decision_json "$PHASE" "$PHASE_REASON" "$DISPATCH_CAPACITY_RESULT")"
 jq -nc \
   --arg ts "$(ts)" \
@@ -1175,6 +1681,19 @@ jq -nc \
   --arg repo "$REPO" \
   --argjson decision "$L70_CHAIN_DECISION" \
   '{ts:$ts,event:$event,task_id:$task_id,repo:$repo} + $decision' >>"$LOG"
+
+DATA_BACKED_DEFERRAL_RESULT="$(data_backed_deferral_tick_probe "$task_id" "$PHASE" "$PHASE_REASON" "$DISPATCH_CAPACITY_RESULT" "$L70_CHAIN_DECISION")"
+DATA_BACKED_DEFERRAL_RESULT="$(json_stream_last_object_or_default "$DATA_BACKED_DEFERRAL_RESULT" "$(jq -nc '{schema_version:"data-backed-deferral-tick/v1",status:"error",event:"data_backed_deferral_tick_invalid",soft_violation:false,rewrite_path:false}')")"
+DATA_BACKED_DEFERRAL_EVENT="$(jq -r '.event // "data_backed_deferral_clear"' <<<"$DATA_BACKED_DEFERRAL_RESULT" 2>/dev/null || printf 'data_backed_deferral_clear')"
+DATA_BACKED_DEFERRAL_ACTION="$(jq -r '.rewrite_action // .suggested_action // empty' <<<"$DATA_BACKED_DEFERRAL_RESULT" 2>/dev/null || true)"
+DATA_BACKED_DEFERRAL_SOURCE="$(jq -r '.selected_action_source // "suggested_action"' <<<"$DATA_BACKED_DEFERRAL_RESULT" 2>/dev/null || printf 'suggested_action')"
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "data_backed_deferral_tick" \
+  --arg task_id "$task_id" \
+  --arg repo "$REPO" \
+  --argjson result "$DATA_BACKED_DEFERRAL_RESULT" \
+  '{ts:$ts,event:$event,task_id:$task_id,repo:$repo,result:$result}' >>"$LOG"
 
 VALUE_GAP_RESULT="$(value_gap_probe "$task_id" 2>&1 || printf '{"action":"error"}')"
 if ! jq -e . >/dev/null 2>&1 <<<"$VALUE_GAP_RESULT"; then
@@ -1218,6 +1737,8 @@ ls -1t "$PROMPT_DIR"/flywheel-tick-*.md 2>/dev/null | tail -n +201 | xargs rm -f
   printf '%s\n\n' "$JEFF_FIXES_RESULT"
   printf '## Agent Mail FD pre-tick\n'
   printf '%s\n\n' "$AGENT_MAIL_FD_RESULT"
+  printf '## Leverage ceiling pre-tick\n'
+  printf '%s\n\n' "$LEVERAGE_CEILING_RESULT"
   printf '## Mobile-eats receipt pre-tick\n'
   printf '%s\n\n' "$MOBILE_EATS_RESULT"
   printf '## Skillos loop receipt pre-tick\n'
@@ -1230,18 +1751,30 @@ ls -1t "$PROMPT_DIR"/flywheel-tick-*.md 2>/dev/null | tail -n +201 | xargs rm -f
   printf '%s\n\n' "$FLEET_ONBOARD_RESULT"
   printf '## Canonical doctrine pull pre-tick\n'
   printf '%s\n\n' "$CANONICAL_PULL_RESULT"
+  printf '## Topology tick refresh pre-tick\n'
+  printf '%s\n\n' "$TOPOLOGY_TICK_REFRESH_RESULT"
   printf '## Codex watchtower pre-tick\n'
   printf '%s\n\n' "$CODEX_WATCHTOWER_RESULT"
   printf '## Frozen detector v2 pre-tick\n'
   printf '%s\n\n' "$FROZEN_DETECTOR_SUMMARY"
+  printf '## NTM surface validation pre-tick\n'
+  printf '%s\n\n' "$NTM_SURFACE_VALIDATION_RESULT"
   printf '## Value gap pre-tick\n'
   printf '%s\n\n' "$VALUE_GAP_RESULT"
   printf '## Inbox pre-tick (%s)\n' "$INBOX_IDENTITY"
   printf '%s\n\n' "$INBOX_RESULT"
   printf '## Dispatch capacity pre-tick\n'
   printf '%s\n\n' "$DISPATCH_CAPACITY_RESULT"
+  printf '## Coordinator work summary pre-tick\n'
+  printf '%s\n\n' "$WORK_SUMMARY_RESULT"
   printf '## L70 chain decision\n'
   printf '%s\n\n' "$L70_CHAIN_DECISION"
+  printf '## Tick contract pre-tick\n'
+  printf '%s\n\n' "$TICK_CONTRACT"
+  printf '## Tick contract graduation pre-tick\n'
+  printf '%s\n\n' "$TICK_CONTRACT_GRADUATION"
+  printf '## Data-backed deferral pre-tick\n'
+  printf '%s\n\n' "$DATA_BACKED_DEFERRAL_RESULT"
   printf '## Callback validation pre-tick\n'
   printf '%s\n\n' "$CALLBACK_VALIDATION_RESULT"
   printf '## Validation fix bead pre-tick\n'
@@ -1253,7 +1786,13 @@ ls -1t "$PROMPT_DIR"/flywheel-tick-*.md 2>/dev/null | tail -n +201 | xargs rm -f
   printf 'Run one bounded `/flywheel:tick` for this repo, constrained to the driver-selected phase `%s`. Read AGENTS.md first, then execute the normal flywheel tick path for `%s`.\n\n' "$PHASE" "$REPO"
   printf 'Phase guardrails: previous callback `next_phase` is authoritative when present. Do not fall back to RESEARCH when `br` is unavailable and `.beads/issues.jsonl` or plans provide enough state. JSONL open beads mean DISPATCH; all-closed beads with plans mean BEADS.\n\n'
   printf 'VALIDATE phase guardrail: DISPATCH callback reap flows to VALIDATE before INTEGRATE. If callback validation is pending, fail, or unknown, remain in VALIDATE and record remediation state. Only status=pass may proceed to INTEGRATE.\n\n'
+  if [[ "$DATA_BACKED_DEFERRAL_EVENT" == "orch_question_when_data_clear" ]]; then
+    printf 'Data-backed deferral soft violation: orch_question_when_data_clear. Rewrite this tick away from asking Joshua and execute/report the selected action from %s: %s.\n\n' "$DATA_BACKED_DEFERRAL_SOURCE" "$DATA_BACKED_DEFERRAL_ACTION"
+  elif [[ "$DATA_BACKED_DEFERRAL_EVENT" == "orch_question_allowed_with_evidence" ]]; then
+    printf 'Data-backed deferral allow path: question is permitted only because explicit evidence was named. Preserve the question with the named evidence in the receipt.\n\n'
+  fi
   printf 'Frozen detector v2 guardrail: no dispatch into FROZEN, UNKNOWN, unhealthy source, or incomplete L60 5-signal state unless FLYWHEEL_TICK_FROZEN_DETECTOR_OVERRIDE=1 is set. Current block reason: %s.\n\n' "$FROZEN_DETECTOR_BLOCK_REASON"
+  printf 'NTM surface validation guardrail: inspect ntm_surface_coverage_avg and FAIL/UNVERIFIED rows before claiming the native surface matrix is converged. Known backfill gaps are advisory unless the driver is run with --strict.\n\n'
   printf 'Callback validation guardrail: if Callback validation pre-tick reports status=fail or status=unknown, do not summarize or integrate the callback as DONE until bead, reopen-candidate, or no-bead remediation routing is recorded.\n\n'
   printf 'chain_if_capacity: if this tick names a concrete next_phase and dispatch capacity remains, run that next phase in this same orchestrator turn. If capacity or safety gates block chaining, callback with chain_blocked_reason=<concrete cause>. Missing chain and missing blocker increments ticks_punted_count.\n\n'
   printf 'Callback discipline remains the repo default: worker callbacks go through `/Users/josh/.local/bin/ntm send` with `--no-cass-check`.\n'
@@ -1293,30 +1832,54 @@ jq -nc \
   --arg phase_reason "$PHASE_REASON" \
   --arg tick_class "$TICK_CLASS" \
   --argjson validation_summary "$(callback_validation_summary)" \
+  --argjson work_summary "$WORK_SUMMARY_RESULT" \
   --argjson validation_fix_bead "$AUTO_FIX_BEAD_RESULT" \
+  --argjson tick_contract "$TICK_CONTRACT" \
+  --argjson tick_contract_checks "$TICK_CONTRACT_CHECKS" \
+  --argjson tick_contract_graduation "$TICK_CONTRACT_GRADUATION" \
   --argjson l70_chain "$L70_CHAIN_DECISION" \
+  --argjson data_backed_deferral "$DATA_BACKED_DEFERRAL_RESULT" \
   --argjson jeff_status "$JEFF_STATUS_RESULT" \
   --argjson jeff_fixes "$JEFF_FIXES_RESULT" \
   --argjson agent_mail_fd "$AGENT_MAIL_FD_RESULT" \
+  --argjson leverage_ceiling "$LEVERAGE_CEILING_RESULT" \
   --argjson mobile_eats "$MOBILE_EATS_RESULT" \
   --argjson skillos_loop "$SKILLOS_LOOP_RESULT" \
   --argjson daily_jeff "$DAILY_JEFF_RESULT" \
+  --argjson jeff_philosophy "$JEFF_PHILOSOPHY_RESULT" \
   --argjson jeff_binary_version "$JEFF_BINARY_VERSION_RESULT" \
   --argjson fleet_onboard "$FLEET_ONBOARD_RESULT" \
   --argjson codex_watchtower "$CODEX_WATCHTOWER_RESULT" \
   --argjson canonical_pull "$CANONICAL_PULL_RESULT" \
   --argjson meta_rule_three_surface "$META_RULE_THREE_SURFACE_OUT" \
+  --argjson topology_tick_refresh "$TOPOLOGY_TICK_REFRESH_RESULT" \
   --argjson frozen_detector "$FROZEN_DETECTOR_SUMMARY" \
+  --argjson ntm_surface_validation "$NTM_SURFACE_VALIDATION_RESULT" \
+  --argjson dispatch_capacity "$DISPATCH_CAPACITY_RESULT" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --argjson value_gap "$VALUE_GAP_RESULT" \
-  --argjson dispatch_capacity "$DISPATCH_CAPACITY_RESULT" \
   --arg send_output "$send_output" \
   '{
     ts:$ts,event:$event,task_id:$task_id,repo:$repo,session:$session,pane:($pane|tonumber),
     prompt_file:$prompt_file,phase:$phase,phase_reason:$phase_reason,tick_class:$tick_class,
     validation_summary:$validation_summary,validation_fix_bead:$validation_fix_bead,l70_chain:$l70_chain,
+    coordinator_digest:$work_summary,
+    coordinator_digest_consumed:($work_summary.coordinator_digest_consumed // "no"),
+    coordinator_digest_source:($work_summary.source // null),
+    work_summary:($work_summary.work_summary // {}),
+    tick_contract:$tick_contract,
+    tick_contract_checks:$tick_contract_checks,
+    tick_contract_graduation:$tick_contract_graduation,
+    data_backed_deferral:$data_backed_deferral,
+    data_backed_deferral_event:($data_backed_deferral.event // null),
+    data_backed_deferral_soft_violation:($data_backed_deferral.soft_violation // false),
+    data_backed_deferral_rewrite_path:($data_backed_deferral.rewrite_path // false),
+    data_backed_deferral_action_source:($data_backed_deferral.selected_action_source // null),
+    data_backed_deferral_rewrite_action:($data_backed_deferral.rewrite_action // null),
     jeff_status:$jeff_status,jeff_fixes:$jeff_fixes,agent_mail_fd:$agent_mail_fd,
+    leverage_ceiling:$leverage_ceiling,
     mobile_eats_receipt:$mobile_eats,skillos_loop:$skillos_loop,daily_jeff_ingest:$daily_jeff,
+    jeff_philosophy:$jeff_philosophy,
     jeff_binary_version:$jeff_binary_version,
     fleet_onboard:$fleet_onboard,codex_watchtower:$codex_watchtower,
     canonical_doctrine_pull:$canonical_pull,
@@ -1325,6 +1888,10 @@ jq -nc \
     meta_rule_three_surface_status:($meta_rule_three_surface.status // null),
     meta_rule_three_surface_drift_count:($meta_rule_three_surface.drift_count // 0),
     meta_rule_three_surface_missing_rules_count:($meta_rule_three_surface.missing_rules_count // 0),
+    topology_tick_refresh:$topology_tick_refresh,
+    topology_tick_refresh_status:($topology_tick_refresh.status // null),
+    topology_tick_refresh_timeout_sec:($topology_tick_refresh.timeout_sec // null),
+    topology_tick_refresh_ledger_row_written:($topology_tick_refresh.post_check.ledger_row_written // null),
     frozen_detector:$frozen_detector,
     frozen_detector_dispatch_block_reason:$frozen_detector_block_reason,
     frozen_detector_source_health_status:($frozen_detector.source_health_status // null),
@@ -1341,6 +1908,11 @@ jq -nc \
     frozen_detector_l60_all_present:($frozen_detector.l60_all_present // false),
     frozen_detector_soft_violations:($frozen_detector.soft_violations // []),
     frozen_detector_durable_receipts:($frozen_detector.durable_receipts // []),
+    ntm_surface_validation:$ntm_surface_validation,
+    ntm_surface_coverage_avg:($ntm_surface_validation.ntm_surface_coverage_avg // null),
+    ntm_surface_validation_status:($ntm_surface_validation.status // null),
+    ntm_surface_validation_fail_count:($ntm_surface_validation.status_counts.FAIL // 0),
+    ntm_surface_validation_unverified_count:($ntm_surface_validation.status_counts.UNVERIFIED // 0),
     dispatch_capacity:$dispatch_capacity,
     pane_work_signal_sampled:($dispatch_capacity.pane_work_signal_sampled // false),
     pane_work_signal_disabled:($dispatch_capacity.pane_work_signal_disabled // false),
@@ -1355,6 +1927,13 @@ jq -nc \
     agent_mail_fd_lock_fd_count:($agent_mail_fd.lock_fd_count // null),
     agent_mail_fd_exit_code:($agent_mail_fd.exit_code // $agent_mail_fd.probe_exit_code // null),
     agent_mail_fd_warnings:($agent_mail_fd.warnings // []),
+    leverage_ceiling_score:($leverage_ceiling.leverage_ceiling_score // null),
+    leverage_ceiling_binding_constraint:($leverage_ceiling.binding_constraint // "unknown"),
+    leverage_ceiling_binding_evidence:($leverage_ceiling.binding_evidence // null),
+    leverage_ceiling_warnings:($leverage_ceiling.warnings // []),
+    leverage_ceiling_accounts_active:($leverage_ceiling.accounts_active // null),
+    leverage_ceiling_worker_panes_total:($leverage_ceiling.worker_panes_total // null),
+    leverage_ceiling_worker_panes_working_count:($leverage_ceiling.worker_panes_working_count // null),
     mobile_eats_receipt_status:($mobile_eats.status // null),
     mobile_eats_last_run_ts:($mobile_eats.mobile_eats.last_run_ts // null),
     mobile_eats_latest_tick_decision:($mobile_eats.mobile_eats.latest_tick_decision // null),
@@ -1364,6 +1943,11 @@ jq -nc \
     daily_jeff_ingest_sources_file:($daily_jeff.sources_file // null),
     daily_jeff_ingest_deps_missing:($daily_jeff.deps_missing // []),
     daily_jeff_ingest_warnings:($daily_jeff.warnings // []),
+    jeff_philosophy_status:($jeff_philosophy.status // null),
+    jeff_philosophy_pattern_count:($jeff_philosophy.pattern_count // 0),
+    jeff_philosophy_complete_pattern_count:($jeff_philosophy.complete_pattern_count // 0),
+    jeff_philosophy_latest_snapshot_path:($jeff_philosophy.latest_snapshot_path // null),
+    jeff_philosophy_patterns_jsonl_exists:($jeff_philosophy.checks.patterns_jsonl_exists // false),
     jeff_binary_version_status:($jeff_binary_version.status // null),
     jeff_binary_version_stale_count:($jeff_binary_version.stale_count // 0),
     jeff_binary_version_highest_priority:($jeff_binary_version.highest_priority // null),
@@ -1390,11 +1974,17 @@ jq -nc \
   --arg status "$status" \
   --argjson callback_validation "$CALLBACK_VALIDATION_RESULT" \
   --argjson validation_summary "$(callback_validation_summary)" \
+  --argjson work_summary "$WORK_SUMMARY_RESULT" \
   --argjson validation_fix_bead "$AUTO_FIX_BEAD_RESULT" \
+  --argjson tick_contract "$TICK_CONTRACT" \
+  --argjson tick_contract_checks "$TICK_CONTRACT_CHECKS" \
+  --argjson tick_contract_graduation "$TICK_CONTRACT_GRADUATION" \
   --argjson l70_chain "$L70_CHAIN_DECISION" \
+  --argjson data_backed_deferral "$DATA_BACKED_DEFERRAL_RESULT" \
   --argjson jeff_status "$JEFF_STATUS_RESULT" \
   --argjson jeff_fixes "$JEFF_FIXES_RESULT" \
   --argjson agent_mail_fd "$AGENT_MAIL_FD_RESULT" \
+  --argjson leverage_ceiling "$LEVERAGE_CEILING_RESULT" \
   --argjson mobile_eats "$MOBILE_EATS_RESULT" \
   --argjson skillos_loop "$SKILLOS_LOOP_RESULT" \
   --argjson daily_jeff "$DAILY_JEFF_RESULT" \
@@ -1403,16 +1993,32 @@ jq -nc \
   --argjson codex_watchtower "$CODEX_WATCHTOWER_RESULT" \
   --argjson canonical_pull "$CANONICAL_PULL_RESULT" \
   --argjson meta_rule_three_surface "$META_RULE_THREE_SURFACE_OUT" \
+  --argjson topology_tick_refresh "$TOPOLOGY_TICK_REFRESH_RESULT" \
   --argjson frozen_detector "$FROZEN_DETECTOR_SUMMARY" \
+  --argjson ntm_surface_validation "$NTM_SURFACE_VALIDATION_RESULT" \
+  --argjson dispatch_capacity "$DISPATCH_CAPACITY_RESULT" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --argjson value_gap "$VALUE_GAP_RESULT" \
-  --argjson dispatch_capacity "$DISPATCH_CAPACITY_RESULT" \
   '{
     ts:$ts,run_id:$run_id,task_id:$task_id,phase:$phase,phase_reason:$phase_reason,
     tick_class:$tick_class,prompt_file:$prompt_file,dispatch_status:$status,
     callback_validation:$callback_validation,validation_summary:$validation_summary,
+    coordinator_digest:$work_summary,
+    coordinator_digest_consumed:($work_summary.coordinator_digest_consumed // "no"),
+    coordinator_digest_source:($work_summary.source // null),
+    work_summary:($work_summary.work_summary // {}),
     validation_fix_bead:$validation_fix_bead,l70_chain:$l70_chain,
+    tick_contract:$tick_contract,
+    tick_contract_checks:$tick_contract_checks,
+    tick_contract_graduation:$tick_contract_graduation,
+    data_backed_deferral:$data_backed_deferral,
+    data_backed_deferral_event:($data_backed_deferral.event // null),
+    data_backed_deferral_soft_violation:($data_backed_deferral.soft_violation // false),
+    data_backed_deferral_rewrite_path:($data_backed_deferral.rewrite_path // false),
+    data_backed_deferral_action_source:($data_backed_deferral.selected_action_source // null),
+    data_backed_deferral_rewrite_action:($data_backed_deferral.rewrite_action // null),
     jeff_status:$jeff_status,jeff_fixes:$jeff_fixes,agent_mail_fd:$agent_mail_fd,
+    leverage_ceiling:$leverage_ceiling,
     mobile_eats_receipt:$mobile_eats,skillos_loop:$skillos_loop,daily_jeff_ingest:$daily_jeff,
     jeff_binary_version:$jeff_binary_version,
     fleet_onboard:$fleet_onboard,codex_watchtower:$codex_watchtower,
@@ -1422,6 +2028,10 @@ jq -nc \
     meta_rule_three_surface_status:($meta_rule_three_surface.status // null),
     meta_rule_three_surface_drift_count:($meta_rule_three_surface.drift_count // 0),
     meta_rule_three_surface_missing_rules_count:($meta_rule_three_surface.missing_rules_count // 0),
+    topology_tick_refresh:$topology_tick_refresh,
+    topology_tick_refresh_status:($topology_tick_refresh.status // null),
+    topology_tick_refresh_timeout_sec:($topology_tick_refresh.timeout_sec // null),
+    topology_tick_refresh_ledger_row_written:($topology_tick_refresh.post_check.ledger_row_written // null),
     frozen_detector:$frozen_detector,
     frozen_detector_dispatch_block_reason:$frozen_detector_block_reason,
     frozen_detector_source_health_status:($frozen_detector.source_health_status // null),
@@ -1438,6 +2048,11 @@ jq -nc \
     frozen_detector_l60_all_present:($frozen_detector.l60_all_present // false),
     frozen_detector_soft_violations:($frozen_detector.soft_violations // []),
     frozen_detector_durable_receipts:($frozen_detector.durable_receipts // []),
+    ntm_surface_validation:$ntm_surface_validation,
+    ntm_surface_coverage_avg:($ntm_surface_validation.ntm_surface_coverage_avg // null),
+    ntm_surface_validation_status:($ntm_surface_validation.status // null),
+    ntm_surface_validation_fail_count:($ntm_surface_validation.status_counts.FAIL // 0),
+    ntm_surface_validation_unverified_count:($ntm_surface_validation.status_counts.UNVERIFIED // 0),
     dispatch_capacity:$dispatch_capacity,
     pane_work_signal_sampled:($dispatch_capacity.pane_work_signal_sampled // false),
     pane_work_signal_disabled:($dispatch_capacity.pane_work_signal_disabled // false),
@@ -1452,6 +2067,13 @@ jq -nc \
     agent_mail_fd_lock_fd_count:($agent_mail_fd.lock_fd_count // null),
     agent_mail_fd_exit_code:($agent_mail_fd.exit_code // $agent_mail_fd.probe_exit_code // null),
     agent_mail_fd_warnings:($agent_mail_fd.warnings // []),
+    leverage_ceiling_score:($leverage_ceiling.leverage_ceiling_score // null),
+    leverage_ceiling_binding_constraint:($leverage_ceiling.binding_constraint // "unknown"),
+    leverage_ceiling_binding_evidence:($leverage_ceiling.binding_evidence // null),
+    leverage_ceiling_warnings:($leverage_ceiling.warnings // []),
+    leverage_ceiling_accounts_active:($leverage_ceiling.accounts_active // null),
+    leverage_ceiling_worker_panes_total:($leverage_ceiling.worker_panes_total // null),
+    leverage_ceiling_worker_panes_working_count:($leverage_ceiling.worker_panes_working_count // null),
     mobile_eats_receipt_status:($mobile_eats.status // null),
     mobile_eats_last_run_ts:($mobile_eats.mobile_eats.last_run_ts // null),
     mobile_eats_latest_tick_decision:($mobile_eats.mobile_eats.latest_tick_decision // null),

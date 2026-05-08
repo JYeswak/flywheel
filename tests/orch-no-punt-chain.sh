@@ -74,6 +74,15 @@ if [[ "$(jq -r '.source' <<<"$decision")" != "dispatch_no_ready_plan_artifacts" 
   printf 'FAIL: expected DISPATCH->BEADS chain decision\n%s\n' "$decision" >&2
   exit 1
 fi
+if ! jq -e . "$REPO/.flywheel/dispatch-log.jsonl" >/dev/null; then
+  printf 'FAIL: synthetic dispatch log contains invalid JSON\n' >&2
+  exit 1
+fi
+frozen_row="$(jq -s '[.[] | select(.event=="frozen_detector_v2")] | .[-1]' "$REPO/.flywheel/dispatch-log.jsonl")"
+if [[ "$(jq -r '.summary.source_health_status // "missing"' <<<"$frozen_row")" != "unhealthy" ]] || [[ "$(jq -r '.result.status // "missing"' <<<"$frozen_row")" != "degraded" ]]; then
+  printf 'FAIL: expected missing optional frozen detector to yield one degraded JSON object\n%s\n' "$frozen_row" >&2
+  exit 1
+fi
 prompt="$(jq -r '.prompt_file' "$REPO/.flywheel/runtime/flywheel-loop/last_run.json")"
 if ! grep -q 'chain_if_capacity' "$prompt"; then
   printf 'FAIL: prompt missing chain_if_capacity block\n' >&2
