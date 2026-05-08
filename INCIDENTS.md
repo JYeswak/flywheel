@@ -5675,3 +5675,110 @@ Evidence:
   `feedback_br_prefix_mismatch_is_schema_drift.md`.
 - Skill: `~/.claude/skills/beads-br/SKILL.md`.
 - Bead: `flywheel-tdy4m`.
+
+## agent-mail-identity-needs-registration
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `agent-mail-identity-needs-registration`
+
+Event Count: 7 events in 7 days
+
+Severity: medium
+
+Cost: Agent Mail identity rows reached `needs_registration` without a
+same-loop drain to token-safe registration broadcast or deferral. Dispatch and
+callback code then had to choose between operating with incomplete
+file-reservation/contact identity or attempting ad-hoc registration in
+pane-visible context.
+
+Root Cause: The identity registry can represent `needs_registration`, and
+`agentmail-registration-broadcast.sh` can drain live rows safely, but this
+trauma class lacked a layer-2 incident rule forcing handlers to classify each
+row as live-broadcastable, deferrable, or already active before dispatch/Agent
+Mail operations.
+
+Forever-Rule: A `needs_registration` identity row is not a worker prompt to
+paste registration material. Resolve identity by
+`(session,pane,fleet_mail_project_key)`, run or cite
+`agentmail-registration-broadcast.sh --doctor --json`, honor active
+`identity-registration-deferral/v1` receipts for dead sessions, and only
+continue once the row is `active`, broadcasted, or explicitly deferred. Never
+mint from memory or send raw registration tokens through NTM, callbacks, or
+reports.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote agent-mail-identity-needs-registration`. The entry gives
+`flywheel-77qds` L56 coverage and points future scans at L76/L58, the identity
+registry, and the token-safe registration broadcaster.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L574`: needs-registration row
+  evidence; body intentionally not quoted.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L588-L615`: later six-row cluster;
+  bodies intentionally not quoted.
+- `AGENTS.md` L76: `AGENTMAIL-IDENTITY-CANONICAL`.
+- `AGENTS.md` L58: `SECRET-MATERIAL-NEVER-IN-PANE-TEXT`.
+- Broadcaster: `.flywheel/scripts/agentmail-registration-broadcast.sh`.
+- Fixture coverage: `tests/agentmail-registration-broadcast.sh`.
+- Identity registry tests: `tests/agent-mail-identity-registry.sh`.
+- Bead: `flywheel-77qds`.
+
+## agent-mail-reservation-timeout
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `agent-mail-reservation-timeout`
+
+Event Count: 3 events in 7 days
+
+Severity: medium
+
+Cost: Three flywheel workers attempted required L51 Agent Mail file
+reservations and hit 120-second timeouts or registration-path stalls before
+narrow edits. The tasks still landed with evidence, but each worker had to
+record an exception path and proceed without the reservation substrate that
+normally prevents concurrent file edits.
+
+Root Cause: Agent Mail reservation availability was treated as a worker-local
+runtime problem instead of a routed substrate incident. Existing diagnostic bead
+`flywheel-0w1` identified an Agent Mail FD/lock leak family and
+`flywheel-ntaf` tracks launchd maxfiles/doctor follow-up, but the exact
+`agent-mail-reservation-timeout` class lacked layer-2 L56 coverage. That left
+doctrine-ladder scans creating duplicate promotion candidates instead of
+routing to the existing Agent Mail recovery owner.
+
+Forever-Rule: Required Agent Mail reservations that time out are a reservation
+substrate outage, not permission to silently downgrade L51. A worker may
+continue only for a narrow, documented edit after recording the timeout,
+checking for existing owner beads, and preserving unrelated worktree state. The
+next owner action is Agent Mail health/FD diagnosis, release/retry evidence, or
+an existing recovery bead update; do not paste raw tokens, retry indefinitely,
+or treat a timed-out reservation as a successful lock.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote agent-mail-reservation-timeout`. This entry gives
+promotion-candidate bead `flywheel-2tgl` durable L56 coverage and points future
+scans at the existing `flywheel-0w1` / `flywheel-ntaf` Agent Mail reservation
+recovery family.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L472`: `flywheel-sur0` reservation
+  calls timed out after 120 seconds and reservation resource reads also timed
+  out.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L473`: `flywheel-hxzw` file
+  reservation timed out and the `.claude` registration path required an
+  existing-token identity.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L474`: `flywheel-eyvi` reserved the
+  `~/.claude` target binary, but the flywheel repo test-file reservation timed
+  out twice.
+- Existing diagnostic bead: `flywheel-0w1`.
+- Existing follow-up bead: `flywheel-ntaf`
+  `agent-mail-launchd-maxfiles-and-doctor-fd-probe`.
+- Doctrine: `AGENTS.md` L51 `DISPATCH-FILE-RESERVATIONS-MANDATORY`.
+- Skill: `~/.claude/skills/agent-mail/SKILL.md`.
+- Bead: `flywheel-2tgl`.
