@@ -78,7 +78,14 @@ candidates=()
 while IFS= read -r path; do
     base="$(basename "$path")"
     case "$base" in
-        com.apple.*|.*|claude-*|launchd-*) continue ;;
+        # System / Apple
+        com.apple.*|.*) continue ;;
+        # Active IPC sockets — DO NOT TOUCH (incident 2026-05-08T23:09Z killed 4 fleet sessions)
+        tmux-*|launchd-*|sshd-*|com.googlecode.*) continue ;;
+        # Active session scratch
+        claude-*|claude_*) continue ;;
+        # Per-uid socket dirs
+        *-501|*-0) continue ;;
     esac
     candidates+=("$path")
 done < <(find /private/tmp -maxdepth 1 -mindepth 1 -mtime "+$max_mtime_days" 2>/dev/null)
