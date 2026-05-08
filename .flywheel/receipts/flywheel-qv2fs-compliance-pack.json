@@ -1,0 +1,31 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-qv2fs",
+  "worker": "flywheel-pane4",
+  "status": "done",
+  "source_bead": "flywheel-qv2fs",
+  "evidence": [
+    {
+      "path": "/Users/josh/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_ntm_assign_watch_unsafe_pending_124.md",
+      "claim": "memory marked resolved while preserving historical halted incident"
+    },
+    {
+      "path": "tests/test_ntm_assign_watch_dry_run_preflight.sh",
+      "claim": "dry-run watch preflight asserts Would assign output and unchanged pane state"
+    },
+    {
+      "path": ".flywheel/PLANS/auto-assign-daemon-reinstatement-2026-05-08.md",
+      "claim": "staged reinstatement plan keeps daemon disabled until explicit approval"
+    }
+  ],
+  "checks": {
+    "socraticode_queries": 5,
+    "indexed_chunks_observed": 50,
+    "tests_added": 1,
+    "tests_passing": true,
+    "memory_marked_resolved": true,
+    "daemon_enabled": false,
+    "skill_discoveries": 1,
+    "sd_ids": ["sd-278118996888270c"]
+  }
+}
