@@ -6166,3 +6166,57 @@ Evidence:
 - Skill: `~/.claude/skills/beads-br/SKILL.md`.
 - Skill: `~/.claude/skills/dispatch-tool-contracts/SKILL.md`.
 - Bead: `flywheel-9xi4q`.
+
+## orchestrator-delegates-preflight-to-worker
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `orchestrator-delegates-preflight-to-worker`
+
+Event Count: 3 events in 7 days
+
+Severity: high
+
+Cost: Three skillos dispatch observations showed the orchestrator sending
+shared-repo readiness work to workers after the packet was already in flight.
+Workers correctly refused dirty shared-repo cleanup/verification as out of
+scope, but the dispatches still consumed worker slots and delayed the actual
+owner action: clean or route the shared substrate before dispatch.
+
+Root Cause: The orchestrator treated pre-flight as a checklist that could be
+delegated inside the worker packet. That collapses two ownership layers:
+orchestrator-owned substrate readiness and worker-owned scoped implementation.
+Once the packet is sent, the worker can report dirty state, but it cannot make
+the dispatch valid retroactively.
+
+Forever-Rule: Orchestrators must complete shared-repo and substrate pre-flight
+before authoring or sending the worker packet. Do not dispatch "clean the
+shared repo, verify it is clean, then do the work" as a worker task. If
+pre-flight finds dirty state, token gaps, missing schemas, or shared-index
+contention, the orchestrator owns the repair, waiver, or owner-route before
+worker selection. Worker packets may verify their scoped pathspec, but they
+must not be used to outsource dispatch-readiness gates.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote orchestrator-delegates-preflight-to-worker`. This entry gives
+promotion-candidate bead `flywheel-zz858` durable L56 coverage and links the
+exact delegation anti-pattern to sibling incident
+`INCIDENTS.md#shared-repo-dirty-preflight` and the existing
+`dispatch-tool-contracts` dirty-preflight rule.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1633`: `skillos-1z8x` BLOCKED
+  because the orchestrator dispatched clean-`~/.claude` verification to the
+  worker instead of running the shared-repo pre-flight first.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1634`: codex refused a packet that
+  expected it to clean a shared repo, verify it, then do scoped work.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1635`: PB-2 repeated the same
+  pre-flight delegation anti-pattern within 90 minutes and raised severity to
+  high.
+- Sibling incident: `INCIDENTS.md#shared-repo-dirty-preflight`.
+- Skill: `~/.claude/skills/dispatch-tool-contracts/SKILL.md` section
+  `Forever-Rule: Orchestrator owns shared-repo dirty preflight before
+  dispatch`.
+- Bead: `flywheel-zz858`.
