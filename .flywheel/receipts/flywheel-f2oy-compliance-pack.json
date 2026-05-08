@@ -1,0 +1,63 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-f2oy",
+  "created_ts": "2026-05-08T01:32:20Z",
+  "source_plan": ".flywheel/PLANS/fleet-skill-reporting-2026-05-01.md",
+  "bead": "flywheel-f2oy",
+  "evidence": [
+    {
+      "artifact": ".flywheel/scripts/skillos-notify.py",
+      "purpose": "Token-safe skillos NTM notification wrapper plus deterministic Agent Mail thread state",
+      "checks": [
+        "dry-run emits target session, pane, candidate, discovery id, message",
+        "apply mode defaults to /Users/josh/.local/bin/ntm",
+        "thread key is [skill-discovery] <candidate_skill_name>",
+        "same candidate reuses the thread key",
+        "archive decision fires on skill_shipped or last_sighting_age_days >= 30",
+        "missing topology returns skillos_target_unavailable"
+      ]
+    },
+    {
+      "artifact": "tests/test_skillos_notify.sh",
+      "purpose": "Fixture coverage for notification, token scrub, thread reuse, archive, and missing topology gates",
+      "result": "PASS",
+      "pass_count": 12,
+      "fail_count": 0
+    },
+    {
+      "artifact": "~/.local/state/flywheel/skill-discoveries.jsonl",
+      "purpose": "Skill discovery emitted for the reusable notification/thread wrapper pattern",
+      "sd_ids": [
+        "sd-1c4b0a3551fa1f77"
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "cmd": "python3 -m py_compile .flywheel/scripts/skillos-notify.py",
+      "status": "pass"
+    },
+    {
+      "cmd": "bash -n tests/test_skillos_notify.sh",
+      "status": "pass"
+    },
+    {
+      "cmd": "tests/test_skillos_notify.sh",
+      "status": "pass",
+      "summary": "SUMMARY pass=12 fail=0"
+    }
+  ],
+  "acceptance": {
+    "dry_run_works": true,
+    "token_safety_verified": true,
+    "thread_key_deterministic": true,
+    "idempotent_reuse": true,
+    "auto_archive_works": true,
+    "missing_topology_handled": true
+  },
+  "joshua_lens_depth_check": {
+    "operator_grade_durability": "The wrapper refuses to depend on tribal memory: skillos target resolution comes from topology data, notification is dry-run first, and missing topology leaves the discovery row intact for the next tick instead of creating a silent dropped handoff.",
+    "team_fit": "This is the kind of first-90-days senior ops hire output Joshua could hand to a fleet maintainer: deterministic thread keys, fixture-backed failure cases, and no token material in pane-visible output.",
+    "company_building_leverage": "The second-order effect is that reusable skill signals move from isolated worker callbacks into a shared HQ thread surface. That survives turnover because the thread key and pulse path are data, not the original author's memory."
+  }
+}
