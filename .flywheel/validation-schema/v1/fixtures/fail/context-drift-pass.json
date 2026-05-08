@@ -10,23 +10,52 @@
     "raw_ref": "dispatch-log://fixture/context-drift"
   },
   "status": "pass",
+  "failure_class": null,
+  "retry_policy": "none",
+  "recovery_hint": "No recovery needed; validation passed.",
   "failure_classes": [],
   "evidence": [
-    {"type": "command", "ref": "which dcg"}
+    {
+      "type": "command",
+      "ref": "which dcg"
+    }
   ],
   "artifact_checks": [
-    {"artifact_id": "runtime-probe", "path": "/tmp/synthetic-context-drift.json", "status": "exists"}
+    {
+      "artifact_id": "runtime-probe",
+      "path": "/tmp/synthetic-context-drift.json",
+      "status": "exists"
+    }
   ],
   "runtime_context": {
-    "agent_context": {"status": "unknown", "probe_ref": "ntm-agent-callback://flywheel/3/context-drift"},
-    "orchestrator_shell_context": {"status": "responsive", "probe_ref": "shell://context-drift", "resolved_tools": ["dcg"]},
+    "agent_context": {
+      "status": "unknown",
+      "probe_ref": "ntm-agent-callback://flywheel/3/context-drift"
+    },
+    "orchestrator_shell_context": {
+      "status": "responsive",
+      "probe_ref": "shell://context-drift",
+      "resolved_tools": [
+        "dcg"
+      ]
+    },
     "timeout": false,
     "timeout_seconds": 0,
     "context_drift": true
   },
   "bead_actions": [
-    {"action": "no_bead_reason", "reason": "context drift incorrectly treated as pass"}
+    {
+      "action": "no_bead_reason",
+      "reason": "context drift incorrectly treated as pass"
+    }
   ],
-  "learn_route": {"route": "review", "reason": "context drift must not pass"},
-  "chain_blocker": {"next_phase": null, "capacity_available": false, "chain_blocked_reason": null}
+  "learn_route": {
+    "route": "review",
+    "reason": "context drift must not pass"
+  },
+  "chain_blocker": {
+    "next_phase": null,
+    "capacity_available": false,
+    "chain_blocked_reason": null
+  }
 }

@@ -22,6 +22,9 @@ REQUIRED = [
     "dispatch_id",
     "callback_ref",
     "status",
+    "failure_class",
+    "retry_policy",
+    "recovery_hint",
     "failure_classes",
     "evidence",
     "artifact_checks",
@@ -32,6 +35,8 @@ REQUIRED = [
 ]
 
 STATUS = {"pass", "fail", "unknown"}
+FAILURE_CLASS = {"transient", "persistent", "correctness", "missing_artifact", "invalid_callback", "context_drift", "unknown"}
+RETRY_POLICY = {"none", "exponential", "manual", "permanent"}
 CALLBACK_KIND = {"DONE", "BLOCKED", "TIMEOUT", "UNKNOWN"}
 TRANSPORT = {"ntm", "agent_mail", "manual_fixture"}
 EVIDENCE_TYPES = {
@@ -137,6 +142,18 @@ def validate_receipt(data, path):
     if status not in STATUS:
         add(errors, "status_invalid", "status must be pass, fail, or unknown", path)
 
+    failure_class = data.get("failure_class")
+    if failure_class is not None and failure_class not in FAILURE_CLASS:
+        add(errors, "failure_class_enum_invalid", f"failure_class must be null or one of {sorted(FAILURE_CLASS)}", path)
+
+    retry_policy = data.get("retry_policy")
+    if retry_policy not in RETRY_POLICY:
+        add(errors, "retry_policy_invalid", f"retry_policy must be one of {sorted(RETRY_POLICY)}", path)
+
+    recovery_hint = data.get("recovery_hint")
+    if not is_nonempty_str(recovery_hint):
+        add(errors, "recovery_hint_missing", "recovery_hint must be a non-empty string", path)
+
     failure_classes = data.get("failure_classes")
     if not isinstance(failure_classes, list):
         add(errors, "failure_classes_not_array", "failure_classes must be an array", path)
@@ -220,8 +237,18 @@ def validate_receipt(data, path):
     # Cross-field invariants used by callback validation.
     if status == "pass" and failure_classes:
         add(errors, "pass_with_failure_classes", "status=pass cannot carry failure_classes", path)
+    if status == "pass" and failure_class is not None:
+        add(errors, "pass_with_failure_class", "status=pass must carry failure_class=null", path)
+    if status != "pass" and failure_class is None:
+        add(errors, "failure_missing_failure_class", "non-pass receipts require failure_class", path)
     if status == "fail" and not failure_classes:
         add(errors, "fail_missing_failure_classes", "status=fail requires at least one failure_class", path)
+    if failure_class == "transient" and retry_policy != "exponential":
+        add(errors, "transient_retry_policy_invalid", "failure_class=transient requires retry_policy=exponential", path)
+    if failure_class == "correctness" and retry_policy != "permanent":
+        add(errors, "correctness_retry_policy_invalid", "failure_class=correctness requires retry_policy=permanent", path)
+    if failure_class in {"missing_artifact", "invalid_callback", "context_drift", "persistent", "unknown"} and retry_policy not in {"manual", "permanent"}:
+        add(errors, "non_flake_retry_policy_invalid", "non-transient failure classes must not use exponential retry", path)
 
     if is_obj(runtime):
         agent = runtime.get("agent_context") if is_obj(runtime.get("agent_context")) else {}

@@ -12,9 +12,32 @@ This directory defines the first machine-readable receipt contract for validatin
 | `tick-receipt.schema.json` | JSON Schema contract for tick receipts with VALIDATE phase summaries. |
 | `parse.sh` | Read-only parser and semantic invariant checker. |
 | `dispatch-template-audit.sh` | Read-only audit for dispatch packets and the shared dispatch template. |
+| `wire-or-explain-ledger.schema.json` | JSON Schema contract for The Zest Ledger. |
 | `fixtures/pass/*.json` | Receipts that must validate. |
 | `fixtures/fail/*.json` | Receipts that must be rejected with deterministic JSON errors. |
 | `fixtures/dispatch-template/*.md` | Valid and invalid dispatch-packet fixtures for B02. |
+
+## The Zest Ledger - Part of the Yuzu Method framework by ZestStream.
+
+The Zest Ledger is the append-only JSONL stock ledger for wire-or-explain work.
+It uses schema name `flywheel.wire-or-explain.v1` and canonical runtime path
+`~/.local/state/flywheel/wire-or-explain-ledger.jsonl`.
+
+The ledger encodes the L110 primitive: every durable observation/finding/artifact must declare its stock, class, consumer or explicit deferral, owner, action ledger, verification probe, and tick/status consequence.
+
+Rows include `sequence_num`, `prev_hash`, and `checksum` so chain verification can
+detect tampering without printing payload data. Duplicate event identity keys are
+idempotent: the writer emits a duplicate receipt and does not create a second
+active row.
+
+Run:
+
+```bash
+bash .flywheel/scripts/wire-or-explain-ledger-writer.sh --info --json
+bash .flywheel/scripts/wire-or-explain-ledger-writer.sh --row tests/fixtures/wire-or-explain-ledger/valid-wired.json --ledger /tmp/wire-or-explain-ledger.jsonl --json
+bash .flywheel/scripts/wire-or-explain-chain-verifier.sh --ledger /tmp/wire-or-explain-ledger.jsonl --json
+bash tests/wire-or-explain-ledger.sh
+```
 
 ## Parser
 
@@ -63,6 +86,9 @@ with deterministic JSON errors.
 | `dispatch_id` | Connects receipt to the dispatched work. | Non-empty id required. | Used by B02/B03 dispatch docs. | Can be routed into dispatch logs and learn ledgers. |
 | `callback_ref` | Records callback transport, session, pane, kind, timestamp, and raw ref. | Parser rejects malformed refs. | Transport/kind enums in schema. | Lets orchestrator trace the callback source. |
 | `status` | Validation verdict: `pass`, `fail`, or `unknown` only. | Parser rejects any other value. | Enum documented in schema. | Downstream doctor/tick can count pass/fail/unknown. |
+| `failure_class` | Canonical single-class routing value. | Parser rejects unknown enum values and flaky retry policies for correctness/invalid callbacks. | Taxonomy table below. | Doctor, dispatch logs, and validators can route without prose parsing. |
+| `retry_policy` | Deterministic retry behavior: `none`, `exponential`, `manual`, or `permanent`. | Parser rejects transient/non-transient policy mismatches. | Taxonomy table below. | Prevents correctness regressions and invalid callbacks from becoming flakes. |
+| `recovery_hint` | Operator-facing next action paired with the class. | Parser requires non-empty text. | Taxonomy table below. | Callback validators can emit repair guidance in JSON. |
 | `failure_classes[]` | Names machine-actionable failures. | `fail` requires at least one; `pass` forbids them. | Class array documented in schema. | Feeds fix-bead, reopen, fuckup, and learn routing. |
 | `evidence[]` | Typed proof references. | Parser checks type/ref shape and secret-like values. | Supported types listed below. | Durable refs are usable by B06/B07/B09. |
 | `artifact_checks[]` | Checks claimed artifact paths and status. | `pass` cannot include missing artifacts. | Shape documented in schema. | Feeds missing-artifact doctor/reopen signals. |
@@ -84,6 +110,27 @@ The schema supports the required typed references:
 - `joshua_confirmation_hash`
 
 It also supports `fuckup_log` because L53 requires BLOCKED callbacks to surface a durable trauma row.
+
+## Failure Taxonomy
+
+Every validation receipt carries both the legacy detail list
+`failure_classes[]` and the canonical routing triple:
+`failure_class`, `retry_policy`, and `recovery_hint`.
+
+| `failure_class` | Meaning | `retry_policy` | Recovery rule |
+|---|---|---|---|
+| `null` | Validation passed. | `none` | No recovery needed. |
+| `transient` | Timeout or runtime unresponsive signal that may clear on bounded retry. | `exponential` | Retry once with bounded backoff; repeated hits become persistent substrate work. |
+| `persistent` | Stable substrate condition such as locked DB, schema mismatch, or I/O failure. | `manual` | Repair substrate state before rerunning the receipt. |
+| `correctness` | Test, assertion, L112, dependency, or implementation regression. | `permanent` | Fix code or graph; never classify as a flake. |
+| `missing_artifact` | Claimed evidence or artifact path is absent. | `manual` | Restore/regenerate the artifact and rerun validation with the same path. |
+| `invalid_callback` | Callback shape, schema, remediation, ecosystem, or request-linkage contract is invalid. | `manual` | Regenerate the callback with required fields and durable routing. |
+| `context_drift` | Agent context and orchestrator shell context disagree. | `manual` | Reprobe both contexts before summary or integration. |
+| `unknown` | No stable class exists yet. | `manual` | Preserve raw failure detail and add a taxonomy alias or migration-tested class. |
+
+Doctor and validator JSON MUST expose `failure_class` directly. Consumers should
+use `failure_class` for routing and keep `failure_classes[]` as detailed
+evidence.
 
 ## Fixture Coverage
 

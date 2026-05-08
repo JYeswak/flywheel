@@ -23,6 +23,67 @@ L61_TASK_RE = re.compile(r"\b(doctrine|INCIDENTS|canonical|L-rule|skill ship)\b"
 L61_REQUIRED_FIELDS = ("agents_md_updated", "readme_updated")
 JOSH_REQUEST_ID_RE = re.compile(r"\bjosh_request_id\s*[:=]\s*`?([^`\s]+)`?")
 
+RETRY_POLICIES = {"none", "exponential", "manual", "permanent"}
+FAILURE_CLASS_VALUES = {
+    "transient",
+    "persistent",
+    "correctness",
+    "missing_artifact",
+    "invalid_callback",
+    "context_drift",
+    "unknown",
+}
+
+TAXONOMY_RULES: tuple[tuple[set[str], str, str, str], ...] = (
+    (
+        {"runtime_unresponsive", "timeout", "test_timeout", "doctor_timeout"},
+        "transient",
+        "exponential",
+        "Rerun the bounded probe once; if it repeats, promote to persistent with the timeout source attached.",
+    ),
+    (
+        {"database_locked", "schema_mismatch", "io_error", "persistent_substrate"},
+        "persistent",
+        "manual",
+        "Repair the persistent substrate condition, then rerun validation from the same receipt.",
+    ),
+    (
+        {"correctness", "test_failed", "assertion_failed", "l112_verify_failed", "dependency_inversion", "cycle_detected"},
+        "correctness",
+        "permanent",
+        "Fix the implementation, dependency graph, or failing assertion before retry; do not classify as a flake.",
+    ),
+    (
+        {"artifact_missing", "missing_artifact", "evidence_missing", "closed_bead_artifact_missing_count"},
+        "missing_artifact",
+        "manual",
+        "Restore or regenerate the referenced evidence artifact, then rerun validation with the same evidence path.",
+    ),
+    (
+        {
+            "invalid_callback",
+            "callback_malformed",
+            "validation_receipt_schema_invalid",
+            "orch_callback_missing_l61_fields",
+            "remediation_missing",
+            "blocked_without_fuckup_log",
+            "dispatch_missing_josh_request_id",
+            "callback_missing_josh_request_id",
+            "callback_josh_request_id_mismatch",
+            "callback_validation_failed",
+        },
+        "invalid_callback",
+        "manual",
+        "Resend or regenerate the callback with required fields, evidence, and durable bead/no-bead routing.",
+    ),
+    (
+        {"context_drift", "agent_context_probe_drift_count"},
+        "context_drift",
+        "manual",
+        "Reprobe from both orchestrator and agent contexts; do not summarize until the contexts agree or the drift is named.",
+    ),
+)
+
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
@@ -58,6 +119,30 @@ def parse_kv_text(raw: str) -> dict[str, str]:
     for match in re.finditer(r"([A-Za-z_][A-Za-z0-9_-]*)=([^ \t\n]+)", raw):
         out[match.group(1)] = match.group(2).strip("`\"'")
     return out
+
+
+def classify_failure_taxonomy(failure_classes: list[str], status: str) -> dict[str, str | None]:
+    if status == "pass" and not failure_classes:
+        return {
+            "failure_class": None,
+            "retry_policy": "none",
+            "recovery_hint": "No recovery needed; validation passed.",
+        }
+
+    values = {str(item).strip().lower() for item in failure_classes if str(item).strip()}
+    for aliases, failure_class, retry_policy, recovery_hint in TAXONOMY_RULES:
+        if values & aliases:
+            return {
+                "failure_class": failure_class,
+                "retry_policy": retry_policy,
+                "recovery_hint": recovery_hint,
+            }
+
+    return {
+        "failure_class": "unknown",
+        "retry_policy": "manual",
+        "recovery_hint": "Preserve the raw failure classes, add a taxonomy alias or migration-tested class, then rerun validation.",
+    }
 
 
 def source_text_value(source: dict[str, Any], key: str) -> str | None:
@@ -292,11 +377,13 @@ def build_receipt(
         failure_classes.append("remediation_missing")
 
     failure_classes = sorted(set(failure_classes))
+    taxonomy = classify_failure_taxonomy(failure_classes, status)
     receipt = {
         "schema_version": SCHEMA_VERSION,
         "dispatch_id": dispatch_id,
         "callback_ref": callback_ref,
         "status": status,
+        **taxonomy,
         "failure_classes": failure_classes,
         "evidence": evidence,
         "artifact_checks": artifact_checks,
@@ -378,6 +465,8 @@ def output_schema(repo: Path) -> dict[str, Any]:
         "exit_codes": {"0": "pass", "1": "fail", "2": "usage", "3": "unknown"},
         "required_args": ["--repo", "--dispatch-id", "--callback-ref"],
         "optional_args": ["--task-description"],
+        "failure_class_enum": sorted(FAILURE_CLASS_VALUES),
+        "retry_policy_enum": sorted(RETRY_POLICIES),
         "read_only_default": True,
         "write_requires": "--write-receipt",
     }
@@ -408,6 +497,9 @@ def why_receipt(path: Path) -> dict[str, Any]:
     return {
         "receipt": str(path),
         "status": status,
+        "failure_class": receipt.get("failure_class"),
+        "retry_policy": receipt.get("retry_policy"),
+        "recovery_hint": receipt.get("recovery_hint"),
         "failure_classes": failures,
         "summary_allowed": status == "pass",
         "integration_allowed": status == "pass",
@@ -469,7 +561,10 @@ def main() -> int:
         "schema_valid": schema_valid,
         "schema_errors": schema_errors,
         "status": status,
-        "failure_class": receipt["failure_classes"][0] if receipt["failure_classes"] else None,
+        "failure_class": receipt.get("failure_class"),
+        "legacy_failure_class": receipt["failure_classes"][0] if receipt["failure_classes"] else None,
+        "retry_policy": receipt.get("retry_policy"),
+        "recovery_hint": receipt.get("recovery_hint"),
         "failure_classes": receipt["failure_classes"],
         "summary_allowed": status == "pass",
         "integration_allowed": status == "pass",
@@ -486,6 +581,9 @@ def main() -> int:
             "dispatch_id": args.dispatch_id,
             "validation_receipt": str(receipt_path) if receipt_path else None,
             "status": status,
+            "failure_class": receipt.get("failure_class"),
+            "retry_policy": receipt.get("retry_policy"),
+            "recovery_hint": receipt.get("recovery_hint"),
             "failure_classes": receipt["failure_classes"],
             "summary_allowed": status == "pass",
             "integration_allowed": status == "pass",

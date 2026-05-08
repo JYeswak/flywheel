@@ -10,24 +10,46 @@
     "raw_ref": "dispatch-log://fixture/tick-punted"
   },
   "status": "pass",
+  "failure_class": null,
+  "retry_policy": "none",
+  "recovery_hint": "No recovery needed; validation passed.",
   "failure_classes": [],
   "evidence": [
-    {"type": "dispatch_log", "ref": "dispatch-log://fixture/tick-punted"}
+    {
+      "type": "dispatch_log",
+      "ref": "dispatch-log://fixture/tick-punted"
+    }
   ],
   "artifact_checks": [
-    {"artifact_id": "next-phase", "path": "/tmp/synthetic-next-phase.json", "status": "exists"}
+    {
+      "artifact_id": "next-phase",
+      "path": "/tmp/synthetic-next-phase.json",
+      "status": "exists"
+    }
   ],
   "runtime_context": {
-    "agent_context": {"status": "responsive", "probe_ref": "fixture://agent-tick-punted"},
-    "orchestrator_shell_context": {"status": "responsive", "probe_ref": "fixture://shell-tick-punted"},
+    "agent_context": {
+      "status": "responsive",
+      "probe_ref": "fixture://agent-tick-punted"
+    },
+    "orchestrator_shell_context": {
+      "status": "responsive",
+      "probe_ref": "fixture://shell-tick-punted"
+    },
     "timeout": false,
     "timeout_seconds": 0,
     "context_drift": false
   },
   "bead_actions": [
-    {"action": "no_bead_reason", "reason": "tick punt incorrectly accepted as pass"}
+    {
+      "action": "no_bead_reason",
+      "reason": "tick punt incorrectly accepted as pass"
+    }
   ],
-  "learn_route": {"route": "review", "reason": "tick punt must produce blocker or chain"},
+  "learn_route": {
+    "route": "review",
+    "reason": "tick punt must produce blocker or chain"
+  },
   "chain_blocker": {
     "next_phase": "BEADS",
     "capacity_available": true,

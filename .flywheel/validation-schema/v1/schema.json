@@ -10,6 +10,9 @@
     "dispatch_id",
     "callback_ref",
     "status",
+    "failure_class",
+    "retry_policy",
+    "recovery_hint",
     "failure_classes",
     "evidence",
     "artifact_checks",
@@ -56,6 +59,26 @@
     },
     "status": {
       "enum": ["pass", "fail", "unknown"]
+    },
+    "failure_class": {
+      "type": ["string", "null"],
+      "enum": [
+        "transient",
+        "persistent",
+        "correctness",
+        "missing_artifact",
+        "invalid_callback",
+        "context_drift",
+        "unknown",
+        null
+      ]
+    },
+    "retry_policy": {
+      "enum": ["none", "exponential", "manual", "permanent"]
+    },
+    "recovery_hint": {
+      "type": "string",
+      "minLength": 1
     },
     "failure_classes": {
       "type": "array",

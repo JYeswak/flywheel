@@ -10,11 +10,25 @@
     "raw_ref": "dispatch-log://fixture/runtime-unresponsive"
   },
   "status": "unknown",
-  "failure_classes": ["runtime_unresponsive"],
+  "failure_class": "transient",
+  "retry_policy": "exponential",
+  "recovery_hint": "Rerun the bounded probe once; if it repeats, promote to persistent with the timeout source attached.",
+  "failure_classes": [
+    "runtime_unresponsive"
+  ],
   "evidence": [
-    {"type": "dispatch_log", "ref": "dispatch-log://fixture/runtime-unresponsive"},
-    {"type": "command", "ref": "ntm send flywheel --pane=4 <probe>"},
-    {"type": "transcript_hash", "ref": "sha256:3333333333333333333333333333333333333333333333333333333333333333"}
+    {
+      "type": "dispatch_log",
+      "ref": "dispatch-log://fixture/runtime-unresponsive"
+    },
+    {
+      "type": "command",
+      "ref": "ntm send flywheel --pane=4 <probe>"
+    },
+    {
+      "type": "transcript_hash",
+      "ref": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+    }
   ],
   "artifact_checks": [
     {
@@ -32,7 +46,9 @@
     "orchestrator_shell_context": {
       "status": "responsive",
       "probe_ref": "shell://fixture-runtime-unresponsive",
-      "resolved_tools": ["ntm"]
+      "resolved_tools": [
+        "ntm"
+      ]
     },
     "timeout": true,
     "timeout_seconds": 90,

@@ -30,10 +30,248 @@
       "minLength": 1
     },
     "dispatch_status": {
-      "enum": ["sent", "dry_run", "failed", "blocked_frozen_detector"]
+      "enum": ["sent", "dry_run", "failed", "blocked_frozen_detector", "blocked_canonical_pull", "hold"]
+    },
+    "hold_reason": {
+      "type": ["string", "null"]
+    },
+    "mode": {
+      "enum": ["SOFT", "WARN", "HALT"]
+    },
+    "checks_run": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "violations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["check_id", "failure_class", "mode", "status"]
+      }
+    },
+    "phase_a": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["schema_version", "mode", "checks_run", "checks", "violations", "violation_count"],
+      "properties": {
+        "schema_version": {
+          "const": "flywheel-tick-phase-a/v1"
+        },
+        "mode": {
+          "enum": ["SOFT", "WARN", "HALT"]
+        },
+        "checks_run": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["check_id", "mode", "status", "failure_class"]
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "required": ["check_id", "failure_class", "mode", "status"]
+          }
+        },
+        "violation_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
     },
     "callback_validation": {
       "type": "object"
+    },
+    "tick_contract": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema_version",
+        "contract_id",
+        "active_cadence_tier",
+        "cadence_tiers",
+        "check_count",
+        "receipt_fields"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "tick-contract/v1"
+        },
+        "contract_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "registry_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "active_cadence_tier": {
+          "enum": ["doctrine", "active_high", "active_normal", "inactive"]
+        },
+        "active_interval": {
+          "type": ["string", "null"]
+        },
+        "cadence_tiers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object"
+          }
+        },
+        "check_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "receipt_fields": {
+          "type": "array",
+          "items": {
+            "enum": ["tick_contract", "tick_contract_checks", "tick_contract_graduation"]
+          }
+        }
+      }
+    },
+    "tick_contract_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "id",
+          "owner_class",
+          "source_rule",
+          "default_mode",
+          "failure_class",
+          "producer",
+          "measurement",
+          "consumer",
+          "promotion_path",
+          "mode",
+          "event_count_7d"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "owner_class": {
+            "enum": ["orchestrator", "worker"]
+          },
+          "source_rule": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default_mode": {
+            "enum": ["SOFT", "WARN", "HALT"]
+          },
+          "failure_class": {
+            "type": "string",
+            "minLength": 1
+          },
+          "producer": {
+            "type": "string",
+            "minLength": 1
+          },
+          "measurement": {
+            "type": "string",
+            "minLength": 1
+          },
+          "consumer": {
+            "type": "string",
+            "minLength": 1
+          },
+          "promotion_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "mode": {
+            "enum": ["SOFT", "WARN", "HALT"]
+          },
+          "computed_mode": {
+            "enum": ["SOFT", "WARN", "HALT"]
+          },
+          "effective_mode": {
+            "enum": ["SOFT", "WARN", "HALT"]
+          },
+          "event_count_7d": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "critical_seen": {
+            "type": "boolean"
+          },
+          "graduation_reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "tick_contract_graduation": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema_version",
+        "source_rule",
+        "evidence_window",
+        "thresholds",
+        "mode_counts",
+        "checks_total"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "tick-contract-graduation-result/v1"
+        },
+        "source_rule": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_window": {
+          "const": "7d"
+        },
+        "evidence_window_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "thresholds": {
+          "type": "object"
+        },
+        "mode_counts": {
+          "type": "object",
+          "required": ["SOFT", "WARN", "HALT"],
+          "properties": {
+            "SOFT": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "WARN": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "HALT": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "checks_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "graduated_checks": {
+          "type": "array"
+        }
+      }
     },
     "validation_summary": {
       "type": "object",

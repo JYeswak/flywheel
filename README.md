@@ -428,14 +428,17 @@ Common current scripts:
 | `bead-ag-format.py` | Validates canonical `AG<N>:` single-line acceptance gates and flags nested/non-testable bead gates. |
 | `br-create-validated.sh` | Validated `br create` wrapper that blocks noncanonical AG format before bead creation. |
 | `verify-callback-delivery.sh` | Worker-side callback sender that verifies ntm delivery before clean exit. |
-| `validate-callback-before-close.sh` | Four-lens close validator that blocks bead close on evidence or bar failures and can create/reuse a rework bead with `--apply`. |
-| `sync-four-lens-validator.sh` | Fleet sync/audit helper that installs the close validator from the flywheel-install template into active flywheel repos. |
-| `~/.claude/skills/.flywheel/bin/flywheel-conductor --mvp-gate` | Fleet-conductor MVP/demo readiness gate; surfaces artifacts only on four-lens pass or explicit `pre-bar`, otherwise files/reuses rework and records Joshua-time-saved. |
+| `validate-callback-before-close.sh` | Legacy four-lens close validator for pre-L126 dispatches; new closures use beads-compliance evidence packs and `quality-bar-close-gate.sh`. |
+| `auto-l112-gate.sh` | Re-runs callback L112 probe fields in a sandbox before close; records rates in `auto-l112-gate-ledger.jsonl`. |
+| `br-close-with-gate.sh` | Runs `auto-l112-gate.sh` before delegating to `br close`. |
+| `sync-four-lens-validator.sh` | Legacy fleet sync/audit helper for pre-L126 four-lens validators. |
+| `~/.claude/skills/.flywheel/bin/flywheel-conductor --mvp-gate` | Fleet-conductor MVP/demo readiness gate; legacy runs still accept four-lens pass or explicit `pre-bar`; new runs should cite `compliance_pack_path`. |
 | `sync-canonical-doctrine.sh` | Canonical doctrine sync helper. |
 | `peer-orch-blocker-watch.sh` | L75 cross-orch blocker watcher for stale flywheel-class blockers awaiting `flywheel:1` acknowledgement. |
 | `three-q-surface-audit.py` | Audits the surface registry for validated, documented, and surfaced evidence. |
 | `jeff-issue-rubric.py` | Scores Jeff issue drafts against the 7-axis pre-posting quality gate. |
 | `jeff-binary-version-watchtower.sh` | Hourly tick probe for installed-vs-latest Jeff substrate binaries; auto-files version-drift beads. |
+| `jeff-philosophy-mine.sh` | Mines Jeff-corpus pattern classes, writes `~/.local/state/jeff-philosophy/patterns.jsonl`, and produces daily learning snapshots. |
 | `headless-browser-probe.sh` | Detects orphaned `agent-browser-chrome` processes without touching the primary Chrome profile. |
 | `headless-browser-reap.sh` | Dry-run-first reaper for stale or over-count agent browser processes. |
 | `flywheel-loop identity` | Resolves durable Agent Mail identity by session:pane and reports identity registry drift in doctor JSON. |
@@ -523,6 +526,19 @@ go under `.flywheel/validation-receipts/` and must validate against
 `.flywheel/validation-schema/v1/schema.json` before an INTEGRATE step treats a
 worker `DONE` as usable proof.
 
+Validation receipts expose a canonical error taxonomy in JSON:
+
+| field | meaning |
+|---|---|
+| `failure_class` | Single routing class: `transient`, `persistent`, `correctness`, `missing_artifact`, `invalid_callback`, `context_drift`, `unknown`, or `null` on pass. |
+| `retry_policy` | `none`, `exponential`, `manual`, or `permanent`. Correctness and invalid-callback failures are never exponential retries. |
+| `recovery_hint` | Deterministic next action for the class. |
+| `failure_classes[]` | Legacy detailed class list retained as evidence. |
+
+The canonical contract lives at
+`.flywheel/validation-schema/v1/README.md#failure-taxonomy`; validator and
+doctor JSON should route on `failure_class` without ANSI/prose parsing.
+
 Failed callback validation can be routed to a fix bead with:
 
 ```bash
@@ -572,6 +588,31 @@ The helper sends with `ntm --no-cass-check`, verifies the callback is visible
 via `ntm logs` or `ntm copy`, retries idempotently, and writes
 `/tmp/<task-id>-callback-failed.md` instead of exiting cleanly after repeated
 delivery failures.
+
+Auto-L112 close gating uses callback envelope fields:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/auto-l112-gate.sh \
+  --task-id <task-id> \
+  --callback-envelope-file <callback-envelope-file> \
+  --json
+```
+
+The envelope must provide `l112_probe_command`, `l112_probe_expected`, and
+`l112_probe_timeout_sec`. The gate exits `0` on a matching rerun, `1` on an
+assertion mismatch with a fix bead filed, `2` on malformed envelope, and `3` on
+timeout or sandbox refusal. Doctor output is available with:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/auto-l112-gate.sh --doctor --json
+```
+
+L126 replaces worker self-grades with beads-compliance evidence packs for new
+closures. New DONE callbacks carry `compliance_score=<N>/1000` and
+`compliance_pack_path=<audit-dir>/<bead-id>/`; schema v4 `/flywheel:plan`
+close gates refuse plans without a pack scoring at least 700/1000 and a
+`convergence_streak >= 2`. Legacy four-lens and three-judges rows remain
+historical receipts for already-issued dispatches.
 
 Agent-context parity validation uses:
 
@@ -716,6 +757,33 @@ Qdrant, and `/tmp` dispatch-artifact metrics. The doctor fails when
 the storage preflight before diff pulls or mirror clones and aborts below 10%.
 Policy and dry-run pruning live in `.flywheel/STORAGE.md`.
 
+Substrate-discipline auto-ops extend that storage gate for Beads recovery:
+
+```bash
+~/.claude/skills/.flywheel/bin/flywheel doctor
+
+/Users/josh/Developer/flywheel/.flywheel/scripts/storage-prune.sh \
+  --repo /Users/josh/Developer/flywheel \
+  --dry-run \
+  --json
+
+~/.claude/skills/.flywheel/scripts/beads-auto-rebuild-from-jsonl.sh \
+  --repo /Users/josh/Developer/flywheel \
+  --dry-run \
+  --json
+
+bash /Users/josh/Developer/flywheel/tests/substrate-discipline-primitives.sh
+```
+
+`flywheel doctor` exposes `beads.jsonl.write_discipline`,
+`beads.recovery.bloat`, and `beads.sidecar.staleness`. The tick driver manifest
+runs `storage-prune` and `beads-auto-rebuild-from-jsonl` so stale recovery
+debris, Beads sidecars, and rebuildable unsafe DB state drain without an
+orchestrator pause. The May 7 storage correlation audit showed `<10%` free space
+is a substrate breaker and `<5%` is emergency serialization/cleanup territory;
+broader `/private/tmp`, cache, ballast, and growth-admission work belongs to the
+storage-health layer, not this repo-local prune primitive.
+
 Joshua-disposed storage overrides use
 `.flywheel/validation-schema/v1/storage-override.schema.json` and receipts under
 `~/.local/state/flywheel/storage-overrides/`. `flywheel-loop doctor` honors
@@ -775,10 +843,44 @@ The canonical operator surface is `.flywheel/scripts/jeff-intel-network.sh`
 and `/flywheel:jeff-intel`; `daily-jeff-ingest.sh` and
 `jeff-intel-scheduled-runner.sh` are implementation helpers behind that surface.
 Active launchd labels are `ai.zeststream.flywheel-daily-jeff-ingest` for the
-daily GitHub/git, website/RSS, X, JSM, and mirror ingest, and
-`ai.zeststream.flywheel-jeff-x-poll` for the hourly @doodlestein X poll. Both
-write receipts under `~/.local/state/jeff-intel/`; daily ingest also writes
-`~/.local/state/flywheel/daily-jeff-ingest.jsonl`.
+daily GitHub/git, website/RSS, X, JSM, mirror ingest, and Jeff daily philosophy
+snapshot; `ai.zeststream.flywheel-jeff-x-poll` for the hourly @doodlestein X
+poll; and `ai.zeststream.flywheel-jeff-philosophy-monthly` for the monthly deep
+mine. Schedule receipts land under `~/.local/state/jeff-intel/`; daily ingest
+also writes `~/.local/state/flywheel/daily-jeff-ingest.jsonl`; philosophy runs
+append audit rows under `~/.local/state/jeff-philosophy/audit.jsonl`.
+
+Jeff philosophy mining is the learning layer on top of that corpus:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-philosophy-mine.sh \
+  --deep-mine \
+  --json
+
+/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-philosophy-mine.sh \
+  --daily-snapshot \
+  --skip-fetch \
+  --json
+
+/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-philosophy-mine.sh \
+  doctor \
+  --json
+
+bash /Users/josh/Developer/flywheel/tests/jeff-philosophy-mine.sh
+```
+
+The deep mine writes `~/.local/state/jeff-philosophy/patterns.jsonl` and
+`/tmp/jeff-philosophy-deep-mine_findings.md`; the daily snapshot writes
+`~/.local/state/jeff-philosophy/daily-snapshots/YYYY-MM-DD.md`. The slash
+surface is `/flywheel:jeff-philosophy`, and tick/status consume the read-only
+doctor fields `jeff_philosophy_pattern_count`,
+`jeff_philosophy_complete_pattern_count`, and
+`jeff_philosophy_latest_snapshot_path`.
+
+L118 internalizes stable failure reason codes before prose. Source: Jeff frankensearch:frankensearch/frankensearch/src/index_builder.rs:176 + ZestStream adaptation.
+The pattern came from `~/.local/state/jeff-philosophy/patterns.jsonl` class
+`failure-taxonomy-reason-codes` and is now canonical for flywheel callbacks,
+doctor JSON, validators, and Beads routing.
 
 Daily reporting is a doctor-backed learning surface:
 

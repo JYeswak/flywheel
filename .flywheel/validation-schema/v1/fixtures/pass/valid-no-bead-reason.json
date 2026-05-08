@@ -10,10 +10,19 @@
     "raw_ref": "fixture://valid-no-bead-reason"
   },
   "status": "pass",
+  "failure_class": null,
+  "retry_policy": "none",
+  "recovery_hint": "No recovery needed; validation passed.",
   "failure_classes": [],
   "evidence": [
-    {"type": "path", "ref": ".flywheel/validation-schema/v1/fixtures/pass/valid-no-bead-reason.json"},
-    {"type": "joshua_confirmation_hash", "ref": "sha256:4444444444444444444444444444444444444444444444444444444444444444"}
+    {
+      "type": "path",
+      "ref": ".flywheel/validation-schema/v1/fixtures/pass/valid-no-bead-reason.json"
+    },
+    {
+      "type": "joshua_confirmation_hash",
+      "ref": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+    }
   ],
   "artifact_checks": [
     {
