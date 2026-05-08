@@ -5292,3 +5292,57 @@ Evidence:
 - Skill: `~/.claude/skills/loop-enforcement/SKILL.md` Forever-Rule
   `tick-driver-primitive-failed`.
 - Bead: `flywheel-og9n4`.
+
+## fleet-propagation-failed
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `fleet-propagation-failed`
+
+Event Count: 211 events in 7 days
+
+Severity: medium
+
+Cost: Agents-md fleet propagation failed repeatedly across peer repositories,
+mostly through `sync_nonzero` canonical-sync exits. The loop kept recording
+per-repo propagation failures while doctrine drift and dirty target surfaces
+remained a fleet-level process gap, making operators read hundreds of symptom
+rows instead of one routed repair state.
+
+Root Cause: The propagator had telemetry and edge tests, but the recurring
+failure class lacked a layer-2 incident rule that forces aggregation by reason
+and target surface. A `/flywheel:learn --review` pass coalesced the 211 rows
+into an attempted bead route, but without INCIDENTS coverage future promotion
+scans kept treating the class as uncodified doctrine debt.
+
+Forever-Rule: When `agents-md-fleet-propagator` emits repeated
+`fleet-propagation-failed` rows, handlers must aggregate by `reason`, `repo`,
+and target surface, run the fleet process-gap detector, and update the existing
+repair bead or file exactly one new repair bead. Do not keep rerunning the
+propagator as a per-repo retry loop after the same class crosses the L56
+threshold; route to the structural sync/drift owner with the latest ledger and
+representative fuckup-log lines.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote fleet-propagation-failed`. The entry gives promotion-candidate bead
+`flywheel-lx47b` durable L56 coverage and points future scans at the existing
+L105 process-gap detector and agents-md fleet propagator telemetry instead of
+creating duplicate promotion candidates.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L698`: first observed
+  `fleet-propagation-failed` row in the 211-event cluster.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L702-L708`: first multi-repo
+  burst across mobile-eats, skillos, terratitle, zeststream-infra, zesttube,
+  vrtx, and polymarket-pico-z.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1033-L1049`: tail cluster showing
+  the same `sync_nonzero` propagation failure recurring hours later.
+- `~/.local/state/flywheel/fuckup-processed.jsonl#L156`: prior review
+  coalesced 211 rows and attempted to route them to a repair bead.
+- Producer: `.flywheel/scripts/agents-md-fleet-propagator.sh`.
+- Edge tests: `tests/agents-md-fleet-propagator.sh`.
+- Process-gap route: `AGENTS.md` L105 and
+  `.flywheel/scripts/fleet-process-gap-detector.sh`.
+- Bead: `flywheel-lx47b`.
