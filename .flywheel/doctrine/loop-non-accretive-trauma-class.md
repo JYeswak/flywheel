@@ -89,6 +89,44 @@ failure honestly) but increment a fleet-level non-accretive-tick counter.
 Three consecutive non-accretive ticks for the same project trigger a doctor
 warn surface; five trigger a doctor fail.
 
+## Validator false-positive: capture_disagreement_reminder_template
+
+A specific L70-NO-PUNT root cause discovered 2026-05-08T15:46Z when investigating
+9-hour fleet idle: the `dispatch-pre-send-validator.sh` two-truth-sources gate
+refuses dispatch with reason `capture_disagreement_reminder_template` when a
+codex pane shows `state=WAITING` per robot-activity but the tail capture shows
+a CASS reminder template in the buffer.
+
+**Joshua directive 2026-05-08:** "codex workers always have prepared buffer
+content sitting there - we just have to paste into it." The "reminder template"
+is the codex pane's NORMAL prepared chevron buffer waiting for input. The
+validator treats this as a stale-buffer disagreement when it is actually the
+expected pre-dispatch state.
+
+**Impact:** Three flywheel worker panes (2/3/4), one skillos pane, three alps
+panes, two mobile-eats panes were all blocked from dispatch by this false
+positive. Orchestrators that respected the validator's ABORT instruction
+correctly per the contract sat idle while the substrate was actually
+dispatchable. Result: 9+ hours of fleet idle when 300 ready beads existed.
+
+**Override pattern (used 2026-05-08T15:46Z):** When the validator refuses with
+`capture_disagreement_reminder_template` AND the pane is a codex worker AND
+robot-activity confirms `state=WAITING capture_provenance=live`, log an
+override to dispatch-log and proceed:
+
+```text
+validator_override_reason="codex_prepared_buffer_normal_state_per_joshua_directive_2026_05_08_dispatch_validator_false_positive_capture_disagreement_reminder_template"
+```
+
+The dispatch packet still gets built via `build-dispatch-packet.sh`; the L130
+gate is satisfied by `FLYWHEEL_DISPATCH_WRAPPER=1` env on the ntm send. Only
+the false-positive 1b cross-check is bypassed.
+
+**Permanent fix (followup bead recommended):** The validator should distinguish
+the prepared-codex-chevron pattern from a genuinely stale buffer (e.g. an
+incomplete previous dispatch that never submitted). Until then, the override
+pattern above is canonical for codex-pane dispatches.
+
 ## Cross-references
 
 - LOOP.md step 4 ("Dispatch every idle worker pane")
@@ -96,6 +134,7 @@ warn surface; five trigger a doctor fail.
 - Memory: `feedback_flywheel_owns_continuous_productivity_no_downtime_unless_josh_blocker`
 - Memory: `feedback_data_decides_not_human_meatpuppet`
 - Skill: `/flywheel:dispatch` (the L130 wrapper that satisfies dispatch transport gate)
+- Validator: `~/.claude/commands/flywheel/_shared/dispatch-pre-send-validator.sh`
 
 ## Joshua lens
 
