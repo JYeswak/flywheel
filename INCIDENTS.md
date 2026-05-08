@@ -5945,3 +5945,110 @@ Evidence:
 - Skill: `~/.claude/skills/agent-mail/SKILL.md`.
 - Skill: `~/.claude/skills/dispatch-tool-contracts/SKILL.md`.
 - Bead: `flywheel-eikur`.
+
+## fire-and-forget-dispatch
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `fire-and-forget-dispatch`
+
+Event Count: 3 events in 7 days
+
+Severity: high
+
+Cost: Three skillos dispatches were treated as terminal sends instead of the
+start of a monitored work window. Joshua had to notice the first "fire and
+forget" case directly, and a later dirty-preflight BLOCKED callback sat for
+roughly 30 minutes before the orchestrator re-established worker truth.
+
+Root Cause: Dispatch packets carried callback contracts, but the orchestrator
+path did not consistently prove post-send liveness, callback timers, or a
+probe schedule within the first few minutes after send. That let transport
+success stand in for work-start evidence and allowed a single-strike defense
+to drift toward canonical doctrine without the L56 three-strike evidence trail.
+
+Forever-Rule: A worker dispatch is not complete at `ntm send`. Every dispatch
+must enter a monitored liveness window: record the send receipt, verify pane
+activity or blocked state, set or honor `callback_expected_by`, and run a
+post-send probe within five minutes. If the worker is blocked, idle, unhealthy,
+or silent, route through L91/L95/L120 recovery immediately instead of waiting
+for the callback window to expire.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote fire-and-forget-dispatch`. This entry gives promotion-candidate bead
+`flywheel-bin7a` durable L56 coverage and routes future rows toward dispatch
+delivery verification, callback timers, and worker-stall recovery instead of
+treating send success as an orchestration closeout.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1628`: `skillos-1z8x` dispatch
+  was sent without a post-send liveness probe; Joshua flagged the "fire and
+  forget" pattern after the orchestrator treated dispatch as terminal.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1629`: `PB-2` dispatch had no
+  post-send probe, and a dirty-preflight BLOCKED callback was not detected for
+  roughly 30 minutes.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1630`: same-day recurrence showed
+  dispatch packets without a liveness-window contract, callback timer, or
+  post-send probe schedule.
+- Doctrine: `AGENTS.md` L91 `DISPATCH-DELIVERY-IS-A-FOUR-STATE-RECEIPT`.
+- Doctrine: `AGENTS.md` L95 worker-stall recovery guidance.
+- Doctrine: `AGENTS.md` L120 callback close-executed requirement.
+- Probe: `.flywheel/scripts/dispatch-delivery-verify.sh`.
+- Probe: `.flywheel/scripts/verify-callback-delivery.sh`.
+- Skill: `~/.claude/skills/dispatch-tool-contracts/SKILL.md`.
+- Bead: `flywheel-bin7a`.
+
+## shared-repo-dirty-preflight
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `shared-repo-dirty-preflight`
+
+Event Count: 3 events in 7 days
+
+Severity: medium
+
+Cost: Three skillos dispatches reached worker pre-flight with dirty or
+untracked shared-repo state already present. Workers correctly refused or
+blocked instead of writing through the dirt, but each dispatch burned a worker
+slot and pushed cleanup back to the orchestrator after the packet was already
+sent.
+
+Root Cause: Shared-repo cleanliness was treated as a worker-owned pre-flight
+check instead of an orchestrator-owned dispatch gate. The dispatch packet could
+name a clean-tree requirement, but the worker cannot make a shared repo safe
+after the orchestrator has already selected the pane, written the packet, and
+started the task.
+
+Forever-Rule: Orchestrators own dirty pre-flight for every shared repo they
+dispatch into. Before sending a worker to `~/.claude`, `~/Developer/skillos`,
+or another shared substrate, run `git status --short` on that repo and resolve,
+route, or explicitly waive all dirty/untracked paths before packet generation.
+Do not ask the worker to clean the shared repo as part of the dispatched scope;
+the worker's correct response to unexpected dirty state is BLOCKED with the
+dirty paths and owner surface.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote shared-repo-dirty-preflight`. This entry gives promotion-candidate
+bead `flywheel-7xcfl` durable L56 coverage and routes future rows to the
+existing dispatch dirty-preflight discipline in `dispatch-tool-contracts`
+instead of treating dirty shared-repo state as a worker-local setup problem.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1344`: `skillos-1z8x` dispatch
+  required clean `~/.claude` pre-flight, but `git status --short` reported
+  1697 dirty paths and an untracked `skills/rust-best-practices` target.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1485`: `PB-2` strictness sweep
+  required clean skillos git state, but the repo carried many dirty paths and
+  untracked validation schema targets.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1632`: third strike where skillos
+  still carried 50+ dirty paths and untracked validation schemas at dispatch
+  time.
+- Skill: `~/.claude/skills/dispatch-tool-contracts/SKILL.md` section
+  `Forever-Rule: Orchestrator owns shared-repo dirty preflight before
+  dispatch`.
+- Bead: `flywheel-7xcfl`.
