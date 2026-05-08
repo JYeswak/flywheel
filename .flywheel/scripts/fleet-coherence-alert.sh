@@ -130,19 +130,21 @@ def schema(args):
             "agent_mail_message_id",
             "ntm_result",
             "l61_pairing_status",
+            "channel",
+            "retry_after_ts",
         ],
         "event_schema_version": 2,
-        "l61_pairing_status": ["complete", "mail_only", "ntm_only", "degraded", "suppressed"],
-        "stable_exit_codes": {"0": "complete or suppressed", "1": "degraded", "64": "usage", "65": "invalid event row"},
+        "l61_pairing_status": ["not_attempted", "complete", "degraded", "failed", "suppressed"],
+        "stable_exit_codes": {"0": "complete or suppressed", "1": "degraded or failed", "64": "usage", "65": "invalid event row"},
     }
 
 
 def check_fixtures(args, mode):
     rows = load_jsonl(args.fixtures)
     cases = {r.get("case") for r in rows}
-    required = {"success", "agent_mail_fails", "ntm_fails", "resend_suppressed", "stale_callback_pane"}
+    required = {"success", "agent_mail_fails", "ntm_fails", "both_legs_fail", "resend_suppressed", "stale_callback_pane"}
     status = "ok" if required.issubset(cases) else "warn"
-    return {
+    payload = {
         "schema_version": f"{VERSION}/{mode}",
         "mode": mode,
         "status": status,
@@ -150,6 +152,15 @@ def check_fixtures(args, mode):
         "fixtures": args.fixtures,
         "read_only": True,
     }
+    if mode == "audit":
+        attempts = load_jsonl(args.ledger)
+        statuses = [str(r.get("l61_pairing_status") or "unknown") for r in attempts]
+        payload["attempt_count"] = len(attempts)
+        payload["delivered_count"] = statuses.count("complete")
+        payload["degraded_count"] = statuses.count("degraded")
+        payload["failed_count"] = statuses.count("failed")
+        payload["suppressed_count"] = statuses.count("suppressed")
+    return payload
 
 
 def why(args):
@@ -248,11 +259,70 @@ def pairing_status(mail_ok, ntm_ok, suppressed=False):
         return "suppressed"
     if mail_ok and ntm_ok:
         return "complete"
+    if mail_ok or ntm_ok:
+        return "degraded"
+    return "failed"
+
+
+def degraded_channel(mail_ok, ntm_ok, ntm_status=None, auth_failed=False):
+    if auth_failed:
+        return "agent_mail"
     if mail_ok and not ntm_ok:
-        return "mail_only"
+        return "ntm"
     if ntm_ok and not mail_ok:
-        return "ntm_only"
-    return "degraded"
+        return "agent_mail"
+    if ntm_status == "stale_callback_pane":
+        return "ntm"
+    return "both"
+
+
+def degradation_reason(mail_ok, ntm_ok, ntm_status=None, auth_failed=False):
+    if auth_failed:
+        return "fleet_mail_auth_probe_failed"
+    if ntm_status == "stale_callback_pane":
+        return "stale_callback_pane"
+    if mail_ok and not ntm_ok:
+        return "ntm_send_failed"
+    if ntm_ok and not mail_ok:
+        return "agent_mail_send_failed"
+    return "both_channels_failed"
+
+
+def alert_channel_degraded_event(event, now, channel, reason):
+    source = json.loads(json.dumps(event))
+    original_id = source.get("event_id") or source.get("id") or "unknown"
+    original_class = source.get("class") or "unknown"
+    session = source.get("session") or "fleet"
+    row = source
+    row["event_id"] = f"{original_id}_alert_channel_degraded"
+    row["class"] = "alert_channel_degraded"
+    row["severity"] = "error"
+    row["state"] = "open"
+    row["ts"] = now
+    row["source_ts"] = now
+    row["source_age_s"] = 0
+    row["first_seen_ts"] = row.get("first_seen_ts") or now
+    row["last_seen_ts"] = now
+    row["dedupe_key"] = f"alert_channel_degraded:{session}:{original_class}:{channel}"
+    row["resend_after_ts"] = source.get("resend_after_ts") or now
+    evidence = row.setdefault("evidence", {})
+    evidence["alert_channel_degraded"] = {
+        "channel": channel,
+        "degraded_reason": reason,
+        "original_event_id": original_id,
+        "original_class": original_class,
+    }
+    actions = row.setdefault("actions", {})
+    actions.update({
+        "would_l61": False,
+        "would_bead": True,
+        "would_no_bead_reason": None,
+        "bead_id": None,
+        "no_bead_reason": None,
+        "receipt_required": True,
+        "shadow_mode": False,
+    })
+    return row
 
 
 def append_event(args, event):
@@ -290,13 +360,16 @@ def send(args):
     mail = {"attempted": False, "exit_code": None, "stdout": "", "stderr": "", "message_id": None}
     ntm = {"attempted": False, "exit_code": None, "stdout": "", "stderr": "", "status": None}
     degraded_reason = None
+    channel = None
 
     if suppress:
         status = "suppressed"
         degraded_reason = suppress_reason
+        channel = None
     elif not auth.get("ready", False):
-        status = "degraded"
-        degraded_reason = "fleet_mail_auth_probe_failed"
+        status = "failed"
+        degraded_reason = degradation_reason(False, False, auth_failed=True)
+        channel = degraded_channel(False, False, auth_failed=True)
     else:
         mail = attempt_agent_mail(args, event, sender, recipient, subject, body)
         mail_ok = mail.get("exit_code") == 0 and bool(mail.get("message_id"))
@@ -305,14 +378,8 @@ def send(args):
         ntm_ok = ntm.get("exit_code") == 0
         status = pairing_status(mail_ok, ntm_ok)
         if status != "complete":
-            if mail_ok and not ntm_ok:
-                degraded_reason = "ntm_send_failed"
-            elif ntm_ok and not mail_ok:
-                degraded_reason = "agent_mail_send_failed"
-            else:
-                degraded_reason = "both_channels_failed"
-            if ntm.get("status") == "stale_callback_pane":
-                degraded_reason = "stale_callback_pane"
+            degraded_reason = degradation_reason(mail_ok, ntm_ok, ntm.get("status"))
+            channel = degraded_channel(mail_ok, ntm_ok, ntm.get("status"))
 
     updated = json.loads(json.dumps(event))
     l61 = updated.setdefault("l61", {})
@@ -332,11 +399,17 @@ def send(args):
         "ntm_result": {"exit_code": ntm.get("exit_code"), "status": ntm.get("status"), "stdout": ntm.get("stdout")},
         "l61_pairing_status": status,
         "degraded_reason": degraded_reason,
+        "channel": channel,
+        "retry_after_ts": event.get("resend_after_ts"),
+        "retry_recommended": status in {"degraded", "failed"},
     })
     updated["ts"] = now
     updated["last_seen_ts"] = now
     if suppress:
         updated.setdefault("actions", {})["would_l61"] = False
+
+    if status == "failed" and str(event.get("severity")) in {"error", "critical"}:
+        updated = alert_channel_degraded_event(updated, now, channel or "both", degraded_reason or "both_channels_failed")
 
     write_result = append_event(args, updated)
     attempt = {
@@ -351,6 +424,10 @@ def send(args):
         "ntm_result": {"exit_code": ntm.get("exit_code"), "status": ntm.get("status")},
         "l61_pairing_status": status,
         "degraded_reason": degraded_reason,
+        "channel": channel,
+        "retry_after_ts": event.get("resend_after_ts"),
+        "retry_recommended": status in {"degraded", "failed"},
+        "resend_after_ts": event.get("resend_after_ts"),
         "resend_suppressed": bool(suppress),
         "alert_sent": status == "complete",
         "event_write_exit_code": write_result.get("exit_code"),
