@@ -28,11 +28,12 @@ bead="$(cd "$repo" && br create "validator fixture parent" --priority 1 --type t
 good="$TMP/good.md"
 cat >"$good" <<EOF
 # Evidence
-did=4/4 didnt=none gaps=none tests=PASS
+did=4/4 didnt=none gaps=none tmp_dir_released=true tests=PASS
 
 Acceptance gates:
 - gate 1 passed
 - gate 2 passed
+- br dep cycles: No dependency cycles detected.
 
 Files:
 - \`$SCRIPT\`
@@ -55,9 +56,56 @@ EOF
 "$SCRIPT" --repo "$repo" --bead "$bead" --evidence "$good" --json >"$TMP/good.json"
 jq -e '.verdict == "SAFE_TO_CLOSE" and .four_lens.public.status == "pass"' "$TMP/good.json" >/dev/null || fail "good evidence should pass"
 
+fakebin="$TMP/fakebin"
+mkdir -p "$fakebin"
+cat >"$fakebin/br" <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+case "${1:-} ${2:-} ${3:-}" in
+  "show "*)
+    printf '[-- · CLOSED] fixture\n'
+    ;;
+  "dep cycles --json")
+    case "${FAKE_BR_MODE:-cycle}" in
+      cycle)
+        printf '{"cycles":[["test-a","test-b","test-a"]],"count":1}\n'
+        ;;
+      busy)
+        printf 'database is locked\n' >&2
+        exit 1
+        ;;
+      *)
+        printf '{"cycles":[],"count":0}\n'
+        ;;
+    esac
+    ;;
+  "list --json")
+    printf '[]\n'
+    ;;
+  *)
+    printf '{}\n'
+    ;;
+esac
+SH
+chmod +x "$fakebin/br"
+
+set +e
+PATH="$fakebin:$PATH" "$SCRIPT" --repo "$repo" --bead "$bead" --evidence "$good" --json >"$TMP/cycle.json"
+cycle_rc=$?
+set -e
+[ "$cycle_rc" -eq 1 ] || fail "actual cycle fixture should block close"
+jq -e '.verdict == "BLOCK_CLOSE" and (.failures[] | contains("br_dep_cycles_not_empty") and contains("count=1"))' "$TMP/cycle.json" >/dev/null || fail "actual cycle fixture should report cycle count"
+
+set +e
+FAKE_BR_MODE=busy PATH="$fakebin:$PATH" "$SCRIPT" --repo "$repo" --bead "$bead" --evidence "$good" --json >"$TMP/db-busy.json"
+busy_rc=$?
+set -e
+[ "$busy_rc" -eq 1 ] || fail "db busy fixture should block close"
+jq -e '.verdict == "BLOCK_CLOSE" and (.failures[] | contains("br_dep_cycles_db_busy")) and ([.failures[] | contains("br_dep_cycles_not_empty")] | any | not)' "$TMP/db-busy.json" >/dev/null || fail "db busy fixture should not report cycles"
+
 bad="$TMP/bad.md"
 cat >"$bad" <<EOF
-did=1/4 didnt=3 gaps=none tests=PASS
+did=1/4 didnt=3 gaps=none tmp_dir_released=true tests=PASS
 status: robust solution
 EOF
 
@@ -76,6 +124,66 @@ set -e
 rework="$(jq -r '.auto_rework.bead // empty' "$TMP/apply.json")"
 [ -n "$rework" ] || fail "apply should create rework bead"
 (cd "$repo" && br show "$rework" >/dev/null) || fail "rework bead not found"
+
+tmp_missing="$TMP/tmp-missing.md"
+cat >"$tmp_missing" <<EOF
+did=4/4 didnt=none gaps=none tests=PASS
+
+Acceptance gates:
+- gate one passed.
+- br dep cycles: No dependency cycles detected.
+
+Files:
+- \`$SCRIPT\`
+- \`tests/validate-callback-before-close.sh\`
+
+Run:
+\`\`\`bash
+bash tests/validate-callback-before-close.sh
+\`\`\`
+
+Contract version: four-lens-close-validator/v1.
+Four-Lens Self-Grade: brand voice pass; Joshua sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
+Outcome: fixture proves missing scratch cleanup blocks close.
+Result: close path refuses tmp_dir_not_released before stale scratch accumulates.
+EOF
+
+set +e
+"$SCRIPT" --repo "$repo" --bead "$bead" --evidence "$tmp_missing" --json >"$TMP/tmp-missing.json"
+tmp_missing_rc=$?
+set -e
+[ "$tmp_missing_rc" -eq 1 ] || fail "missing tmp_dir_released should block close"
+jq -e '.verdict == "BLOCK_CLOSE" and any(.failures[]; contains("tmp_dir_not_released"))' "$TMP/tmp-missing.json" >/dev/null || fail "missing tmp_dir_released failure not reported"
+
+tmp_bad_path="$TMP/tmp-bad-path.md"
+cat >"$tmp_bad_path" <<EOF
+did=4/4 didnt=none gaps=none tmp_dir_released=true tests=PASS evidence=/private/tmp/${bead}-evidence.md
+
+Acceptance gates:
+- gate one passed.
+- br dep cycles: No dependency cycles detected.
+
+Files:
+- \`$SCRIPT\`
+- \`tests/validate-callback-before-close.sh\`
+
+Run:
+\`\`\`bash
+bash tests/validate-callback-before-close.sh
+\`\`\`
+
+Contract version: four-lens-close-validator/v1.
+Four-Lens Self-Grade: brand voice pass; Joshua sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
+Outcome: fixture proves bare task-shaped private tmp evidence paths block close.
+Result: workers must use a mktemp directory, not loose /private/tmp artifacts.
+EOF
+
+set +e
+"$SCRIPT" --repo "$repo" --bead "$bead" --evidence "$tmp_bad_path" --json >"$TMP/tmp-bad-path.json"
+tmp_bad_path_rc=$?
+set -e
+[ "$tmp_bad_path_rc" -eq 1 ] || fail "bare tmp evidence path should block close"
+jq -e '.verdict == "BLOCK_CLOSE" and any(.failures[]; contains("tmp_evidence_outside_mktemp_dir"))' "$TMP/tmp-bad-path.json" >/dev/null || fail "bare tmp evidence path failure not reported"
 
 "$SCRIPT" --help >/dev/null
 "$SCRIPT" --info >/dev/null

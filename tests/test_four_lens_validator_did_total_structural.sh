@@ -34,7 +34,7 @@ receipt_schema_version: four-lens-close-validator/v1
 
 # Evidence
 
-did=9/9 didnt=none gaps=none tests=PASS
+did=9/9 didnt=none gaps=none tmp_dir_released=true tests=PASS
 
 Acceptance gates:
 - gate one passed with receipt line 12.
@@ -60,7 +60,7 @@ Result: did less than total is a close blocker before rubber-stamp drift can ent
 Joshua lens: 25-year operations manager judgment says every silenced partial becomes tomorrow's broken regression, so the validator refuses APPROVE_CLOSE on did less than total.
 EOF
 
-bad_envelope="DONE fixture did=5/9 didnt=4 gaps=test-continuation tests_passing=true validator_brand_pass=true validator_sniff_pass=true validator_jeff_pass=true validator_public_pass=true"
+bad_envelope="DONE fixture did=5/9 didnt=4 gaps=test-continuation tmp_dir_released=true tests_passing=true validator_brand_pass=true validator_sniff_pass=true validator_jeff_pass=true validator_public_pass=true"
 set +e
 "$VALIDATOR" --repo "$repo" --bead "$bead" --evidence "$evidence" --envelope "$bad_envelope" --json >"$TMP/bad.json"
 bad_rc=$?
@@ -83,7 +83,7 @@ jq -e '
   fail "did less than total structural JSON shape wrong"
 }
 
-good_envelope="DONE fixture did=9/9 didnt=none gaps=none tests_passing=true validator_brand_pass=true validator_sniff_pass=true validator_jeff_pass=true validator_public_pass=true"
+good_envelope="DONE fixture did=9/9 didnt=none gaps=none tmp_dir_released=true tests_passing=true validator_brand_pass=true validator_sniff_pass=true validator_jeff_pass=true validator_public_pass=true"
 "$VALIDATOR" --repo "$repo" --bead "$bead" --evidence "$evidence" --envelope "$good_envelope" --json >"$TMP/good.json"
 jq -e '
   .verdict == "SAFE_TO_CLOSE"

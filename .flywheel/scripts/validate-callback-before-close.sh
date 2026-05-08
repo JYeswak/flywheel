@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-VERSION="validate-callback-before-close.v1.1.0"
+VERSION="validate-callback-before-close.v1.2.0"
 REPO="$PWD"
 NTM_BIN="${NTM_BIN:-/Users/josh/.local/bin/ntm}"
 NTM_SESSION="${NTM_SESSION:-flywheel}"
@@ -165,6 +165,7 @@ ENVELOPE_DID_TOTAL_MISMATCH=""
 ENVELOPE_DID_VALUE=""
 ENVELOPE_DIDNT_VALUE=""
 ENVELOPE_GAPS_VALUE=""
+ENVELOPE_TMP_DIR_RELEASED_VALUE=""
 ENVELOPE_STRUCTURAL_SOURCE="none"
 
 append_line() {
@@ -239,7 +240,7 @@ check_callback_envelope_structure() {
     structural_text="$ENVELOPE"
     ENVELOPE_STRUCTURAL_SOURCE="envelope"
   elif [ -f "$EVIDENCE_ABS" ]; then
-    structural_text="$(grep -E '(^|[[:space:]])(did|didnt|gaps)=' "$EVIDENCE_ABS" | head -20 || true)"
+    structural_text="$(grep -E '(^|[[:space:]])(did|didnt|gaps|tmp_dir_released)=' "$EVIDENCE_ABS" | head -20 || true)"
     [ -n "$structural_text" ] && ENVELOPE_STRUCTURAL_SOURCE="evidence"
   fi
 
@@ -248,6 +249,7 @@ check_callback_envelope_structure() {
   ENVELOPE_DID_VALUE="$(first_kv_token did "$structural_text" || true)"
   ENVELOPE_DIDNT_VALUE="$(first_kv_token didnt "$structural_text" || true)"
   ENVELOPE_GAPS_VALUE="$(first_kv_token gaps "$structural_text" || true)"
+  ENVELOPE_TMP_DIR_RELEASED_VALUE="$(first_kv_token tmp_dir_released "$structural_text" || true)"
 
   if [ -n "$ENVELOPE_DID_VALUE" ]; then
     if printf '%s\n' "$ENVELOPE_DID_VALUE" | grep -qE '^[0-9]+/[0-9]+$'; then
@@ -272,6 +274,31 @@ check_callback_envelope_structure() {
       structural_fail "validator_structural_pass=false envelope_didnt_not_none=$ENVELOPE_DIDNT_VALUE continuation=$continuation"
       ;;
   esac
+
+  if [ "$ENVELOPE_TMP_DIR_RELEASED_VALUE" != "true" ]; then
+    structural_fail "tmp_dir_not_released: tmp_dir_released=${ENVELOPE_TMP_DIR_RELEASED_VALUE:-missing}"
+  fi
+}
+
+check_tmp_evidence_paths() {
+  [ -f "$EVIDENCE_ABS" ] || return 0
+  bead_short="${BEAD#flywheel-}"
+  tmp_paths="$EVIDENCE_ABS"
+  tmp_paths="$tmp_paths
+$(grep -oE '`(/[^`]+)`' "$EVIDENCE_ABS" 2>/dev/null | sed 's/`//g' || true)"
+  tmp_paths="$tmp_paths
+$(grep -oE '(^|[[:space:]])evidence=[^[:space:]]+' "$EVIDENCE_ABS" 2>/dev/null | sed -E 's/^[[:space:]]*evidence=//' || true)"
+
+  while IFS= read -r P; do
+    [ -n "$P" ] || continue
+    case "$P" in
+      /tmp/"$BEAD"-*|/private/tmp/"$BEAD"-*|/var/tmp/"$BEAD"-*|/tmp/"$bead_short"-*|/private/tmp/"$bead_short"-*|/var/tmp/"$bead_short"-*)
+        structural_fail "tmp_evidence_outside_mktemp_dir: path=$P expected=mktemp -d -t ${bead_short}.XXXXXX"
+        ;;
+    esac
+  done <<EOF
+$tmp_paths
+EOF
 }
 
 short_probe_text() {
@@ -346,6 +373,7 @@ elif [ ! -s "$EVIDENCE_ABS" ]; then
 fi
 
 check_callback_envelope_structure
+check_tmp_evidence_paths
 
 if [ -f "$EVIDENCE_ABS" ]; then
   if ! grep -qE '\b(did|didnt|gaps)\b' "$EVIDENCE_ABS"; then
@@ -527,6 +555,7 @@ payload = {
         "did": os.environ["FW_VCBC_ENVELOPE_DID_VALUE"] or None,
         "didnt": os.environ["FW_VCBC_ENVELOPE_DIDNT_VALUE"] or None,
         "gaps": os.environ["FW_VCBC_ENVELOPE_GAPS_VALUE"] or None,
+        "tmp_dir_released": os.environ["FW_VCBC_ENVELOPE_TMP_DIR_RELEASED_VALUE"] or None,
         "envelope_did_total_mismatch": os.environ["FW_VCBC_ENVELOPE_DID_TOTAL_MISMATCH"] or None,
     },
     "four_lens": {
@@ -560,6 +589,7 @@ if [ "$JSON_OUT" -eq 1 ]; then
   export FW_VCBC_ENVELOPE_DID_VALUE="$ENVELOPE_DID_VALUE"
   export FW_VCBC_ENVELOPE_DIDNT_VALUE="$ENVELOPE_DIDNT_VALUE"
   export FW_VCBC_ENVELOPE_GAPS_VALUE="$ENVELOPE_GAPS_VALUE"
+  export FW_VCBC_ENVELOPE_TMP_DIR_RELEASED_VALUE="$ENVELOPE_TMP_DIR_RELEASED_VALUE"
   export FW_VCBC_ENVELOPE_STRUCTURAL_SOURCE="$ENVELOPE_STRUCTURAL_SOURCE"
   export FW_VCBC_BRAND_STATUS="$BRAND_STATUS"
   export FW_VCBC_BRAND_REASON="$BRAND_REASON"
@@ -581,7 +611,7 @@ else
   echo "mode: $MODE"
   echo "failures: $FAIL"
   echo "warnings: $WARN"
-  echo "structural: validator_structural_pass=$VALIDATOR_STRUCTURAL_PASS envelope_did_total_mismatch=${ENVELOPE_DID_TOTAL_MISMATCH:-none}"
+  echo "structural: validator_structural_pass=$VALIDATOR_STRUCTURAL_PASS envelope_did_total_mismatch=${ENVELOPE_DID_TOTAL_MISMATCH:-none} tmp_dir_released=${ENVELOPE_TMP_DIR_RELEASED_VALUE:-missing}"
   echo "four_lens: brand=$BRAND_STATUS sniff=$SNIFF_STATUS jeff=$JEFF_STATUS public=$PUBLIC_STATUS"
   echo "ntm_changes: $(printf '%s\n' "$NTM_CHANGES_JSON" | jq -c '{status:(.status // "ok"), changed_count:(.changed_count // .count // (.changes // [] | length) // 0)}' 2>/dev/null || printf 'null')"
   echo "ntm_conflicts: $(printf '%s\n' "$NTM_CONFLICTS_JSON" | jq -c '{status:(.status // "ok"), conflict_count:(.conflict_count // .count // (.conflicts // [] | length) // 0)}' 2>/dev/null || printf 'null')"

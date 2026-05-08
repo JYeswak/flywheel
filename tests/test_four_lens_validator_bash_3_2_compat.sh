@@ -50,7 +50,7 @@ good="$TMP/good.md"
 cat >"$good" <<EOF
 # Evidence
 
-did=5/5 didnt=none gaps=none tests=PASS
+did=5/5 didnt=none gaps=none tmp_dir_released=true tests=PASS
 
 Acceptance gates:
 - gate 1 passed with receipt line 12
@@ -89,7 +89,7 @@ bad="$TMP/bad-no-bar.md"
 cat >"$bad" <<EOF
 # Evidence
 
-did=5/5 didnt=none gaps=none tests=PASS
+did=5/5 didnt=none gaps=none tmp_dir_released=true tests=PASS
 
 Acceptance gates:
 - gate 1 passed with receipt line 12

@@ -117,6 +117,8 @@ assert_jq() {
 
 repo="$(make_repo)"
 storage_fixture="$TMP/storage-healthy.json"
+tmp_entry_root="$TMP/private-tmp-ok"
+mkdir -p "$tmp_entry_root"
 jq -nc '{
   disk_total_gb:926,
   disk_free_gb:400,
@@ -131,8 +133,8 @@ jq -nc '{
 out="$TMP/doctor.json"
 strict_out="$TMP/doctor-strict.json"
 
-FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 FLYWHEEL_STORAGE_PROBE_FIXTURE="$storage_fixture" "$BIN" doctor --repo "$repo" --json >"$out" 2>"$TMP/doctor.err" || true
-FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 FLYWHEEL_STORAGE_PROBE_FIXTURE="$storage_fixture" "$BIN" doctor --strict --repo "$repo" --json >"$strict_out" 2>"$TMP/doctor-strict.err" && strict_rc=0 || strict_rc=$?
+FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 FLYWHEEL_TMP_ENTRY_ROOT="$tmp_entry_root" FLYWHEEL_STORAGE_PROBE_FIXTURE="$storage_fixture" "$BIN" doctor --repo "$repo" --json >"$out" 2>"$TMP/doctor.err" || true
+FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 FLYWHEEL_TMP_ENTRY_ROOT="$tmp_entry_root" FLYWHEEL_STORAGE_PROBE_FIXTURE="$storage_fixture" "$BIN" doctor --strict --repo "$repo" --json >"$strict_out" 2>"$TMP/doctor-strict.err" && strict_rc=0 || strict_rc=$?
 
 assert_jq "$out" '.callbacks_unvalidated_count == 1' "B04_AG1 callbacks_unvalidated_count"
 assert_jq "$out" '.callbacks_validated_with_failures_count >= 1' "B04_AG2 callbacks_validated_with_failures_count"
@@ -142,7 +144,7 @@ assert_jq "$out" '.closed_bead_artifact_missing_count == 1' "B04_AG5 closed_bead
 assert_jq "$out" '.closed_bead_reopen_candidates_count == 1 and (.callback_validation.closed_bead_reopen_scan.candidates | length) == 1' "B07 doctor field closed_bead_reopen_candidates_count"
 assert_jq "$out" '.validation_receipts_schema_invalid_count >= 1 and .agent_context_probe_drift_count == 1 and .validation_events_unrouted_count == 1' "B04_AG6 secondary validation signals"
 assert_jq "$out" '(.callback_validation.signals | length) >= 8 and all(.callback_validation.signals[]; has("producer") and has("measurement") and has("consumer") and has("promotion_path"))' "B04_AG7 L60 signal metadata"
-assert_jq "$out" '.storage.status == "ok" and .storage.disk_free_pct == 43 and .storage.stale_baks_count == 0' "B13 storage doctor field"
+assert_jq "$out" '.storage.status == "ok" and .storage.disk_free_pct == 43 and .storage.stale_baks_count == 0 and .storage.tmp_entry_count == 0 and .storage.tmp_entry_count_status == "ok"' "B13 storage doctor field"
 assert_jq "$out" 'has("storage_override") and .storage_override_active_count == 0 and (.storage_override_expiring_in_min == null)' "B13 storage override doctor fields"
 if [[ "$strict_rc" -ne 0 ]] && jq -e '.status == "fail" and any(.errors[]?; .code == "callbacks_unvalidated_count")' "$strict_out" >/dev/null; then
   pass "B04_AG8 strict fails on unvalidated callbacks"

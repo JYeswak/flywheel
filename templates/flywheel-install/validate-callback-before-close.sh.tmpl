@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
+# canonical-cli-scoping-allow-large: installed single-file validator template; P2-08 adds the fifth close lens without changing renderer topology.
 set -uo pipefail
 
-VERSION="validate-callback-before-close.v1.1.0"
+VERSION="validate-callback-before-close.v1.2.0"
 REPO="$PWD"
 BEAD=""
 EVIDENCE=""
@@ -15,6 +16,7 @@ usage: validate-callback-before-close.sh [--repo PATH] --bead ID --evidence PATH
        validate-callback-before-close.sh ID PATH [--strict]
 
 Blocks bead closeout when mechanical evidence or the four-lens bar fails.
+Adds polish-gate as the fifth close lens for touched operational surfaces.
 
 Options:
   --repo PATH       repo whose bead DB and relative evidence paths are checked
@@ -36,9 +38,10 @@ info() {
 name: validate-callback-before-close.sh
 version: $VERSION
 schema_version: four-lens-close-validator/v1
+close_validation_result_schema: polish-gate/close-validation-result/v1
 read_only_default: true
 mutates_only_with: --apply
-purpose: gate br close on evidence receipts plus brand/sniff/Jeff/public lens checks
+purpose: gate br close on evidence receipts plus brand/sniff/Jeff/public/polish-gate lens checks
 EOF
 }
 
@@ -143,10 +146,19 @@ BRAND_STATUS="pass"
 SNIFF_STATUS="pass"
 JEFF_STATUS="pass"
 PUBLIC_STATUS="pass"
+POLISH_STATUS="pass"
 BRAND_REASON=""
 SNIFF_REASON=""
 JEFF_REASON=""
 PUBLIC_REASON=""
+POLISH_REASON=""
+POLISH_MODE="bootstrap"
+POLISH_VERDICT_RAW=""
+POLISH_VERDICT="NOT_APPLICABLE"
+POLISH_WAIVER_RECEIPT=""
+TOUCHED_SURFACES=""
+POLISH_EXIT_CODE=0
+RESULT_EXIT_CODE=0
 REWORK_BEAD=""
 REWORK_ACTION="none"
 
@@ -202,7 +214,160 @@ lens_fail() {
       PUBLIC_STATUS="fail"
       append_reason PUBLIC_REASON "$reason"
       ;;
+    polish)
+      POLISH_STATUS="fail"
+      append_reason POLISH_REASON "$reason"
+      ;;
   esac
+}
+
+load_polish_mode() {
+  manifest="$REPO_ABS/.flywheel/polish-gate/manifest.json"
+  [ -f "$manifest" ] || { printf 'bootstrap\n'; return 0; }
+  python3 - "$manifest" <<'PY' 2>/dev/null || printf 'bootstrap\n'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    payload = json.load(handle)
+mode = payload.get("mode", "bootstrap")
+print(mode if mode in {"bootstrap", "audit_only", "blocking"} else "bootstrap")
+PY
+}
+
+detect_touched_surfaces() {
+  git -C "$REPO_ABS" rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 0
+  git -C "$REPO_ABS" status --porcelain --untracked-files=no 2>/dev/null | while IFS= read -r line; do
+    path="${line#???}"
+    case "$path" in
+      *" -> "*) path="${path##* -> }" ;;
+    esac
+    case "$path" in
+      .flywheel/polish-gate/grades.jsonl|.flywheel/polish-gate/latest.json) ;;
+      .flywheel/*|templates/flywheel-install/*|bin/*|scripts/*|docs/*|README.md|AGENTS.md|MISSION.md|GOAL.md|STATE.md)
+        printf '%s\n' "$path"
+        ;;
+    esac
+  done | sort -u
+}
+
+extract_field() {
+  key="$1"
+  [ -f "$EVIDENCE_ABS" ] || return 0
+  grep -oE "(^|[[:space:]])${key}=[^[:space:]]+" "$EVIDENCE_ABS" | head -1 | sed -E "s/^[[:space:]]*${key}=//" || true
+}
+
+extract_polish_verdict() {
+  raw="$(extract_field polish_gate_verdict)"
+  if [ -z "$raw" ]; then
+    raw="$(extract_field polish_gate)"
+    case "$raw" in
+      pass) raw="PASS" ;;
+      not_applicable) raw="NOT_APPLICABLE" ;;
+      waived) raw="WAIVED" ;;
+      audit_only) raw="AUDIT_ONLY" ;;
+    esac
+  fi
+  case "$raw" in
+    PASS|NOT_APPLICABLE|WAIVED|AUDIT_ONLY) printf '%s\n' "$raw" ;;
+    "") ;;
+    *) printf 'INVALID:%s\n' "$raw" ;;
+  esac
+}
+
+waiver_receipt_abs() {
+  raw="$(extract_field polish_gate_waiver_receipt)"
+  [ -n "$raw" ] || raw="$(extract_field waiver_receipt)"
+  [ -n "$raw" ] || return 0
+  if [ "${raw#/}" = "$raw" ]; then
+    printf '%s/%s\n' "$REPO_ABS" "$raw"
+  else
+    printf '%s\n' "$raw"
+  fi
+}
+
+grade_receipt_schema_path() {
+  installed="$REPO_ABS/.flywheel/polish-gate/v1/grade-receipt.schema.json"
+  template="$REPO_ABS/templates/flywheel-install/polish-gate/v1/grade-receipt.schema.json"
+  if [ -f "$installed" ]; then
+    printf '%s\n' "$installed"
+  else
+    printf '%s\n' "$template"
+  fi
+}
+
+validate_waiver_receipt() {
+  receipt="$1"
+  schema="$(grade_receipt_schema_path)"
+  [ -f "$receipt" ] || return 1
+  [ -f "$schema" ] || return 1
+  python3 - "$schema" "$receipt" <<'PY' >/dev/null 2>&1
+import json
+import sys
+from jsonschema import Draft202012Validator
+
+schema_path, receipt_path = sys.argv[1:3]
+with open(schema_path, encoding="utf-8") as handle:
+    schema = json.load(handle)
+with open(receipt_path, encoding="utf-8") as handle:
+    payload = json.load(handle)
+Draft202012Validator.check_schema(schema)
+Draft202012Validator(schema, format_checker=Draft202012Validator.FORMAT_CHECKER).validate(payload)
+if payload.get("verdict") != "WAIVED":
+    raise SystemExit("waiver receipt verdict must be WAIVED")
+if "waiver" not in payload:
+    raise SystemExit("waiver receipt missing waiver object")
+PY
+}
+
+evaluate_polish_gate() {
+  POLISH_MODE="$(load_polish_mode)"
+  TOUCHED_SURFACES="$(detect_touched_surfaces)"
+  touched_count=$(printf '%s\n' "$TOUCHED_SURFACES" | sed '/^$/d' | wc -l | tr -d ' ')
+  [ "$touched_count" -gt 0 ] || return 0
+
+  POLISH_VERDICT_RAW="$(extract_polish_verdict)"
+  if [ -z "$POLISH_VERDICT_RAW" ]; then
+    if [ "$POLISH_MODE" = "blocking" ]; then
+      lens_fail polish "missing_verdict_blocking"
+      check_fail "polish_gate_missing_verdict: touched_surfaces=$touched_count mode=$POLISH_MODE"
+      POLISH_EXIT_CODE=2
+    else
+      check_warn "polish_gate_missing_verdict_warn_only: touched_surfaces=$touched_count mode=$POLISH_MODE"
+    fi
+    return 0
+  fi
+
+  case "$POLISH_VERDICT_RAW" in
+    INVALID:*)
+      lens_fail polish "invalid_verdict"
+      check_fail "polish_gate_invalid_verdict: ${POLISH_VERDICT_RAW#INVALID:}"
+      POLISH_EXIT_CODE=1
+      return 0
+      ;;
+    *)
+      POLISH_VERDICT="$POLISH_VERDICT_RAW"
+      ;;
+  esac
+
+  if [ "$POLISH_VERDICT" = "AUDIT_ONLY" ] && [ "$POLISH_MODE" = "blocking" ]; then
+    lens_fail polish "audit_only_insufficient_in_blocking"
+    check_fail "polish_gate_audit_only_blocks_close: mode=blocking"
+    POLISH_EXIT_CODE=1
+  fi
+
+  if [ "$POLISH_VERDICT" = "WAIVED" ]; then
+    POLISH_WAIVER_RECEIPT="$(waiver_receipt_abs)"
+    if [ -z "$POLISH_WAIVER_RECEIPT" ]; then
+      lens_fail polish "waiver_receipt_missing"
+      check_fail "polish_gate_waiver_receipt_missing"
+      POLISH_EXIT_CODE=1
+    elif ! validate_waiver_receipt "$POLISH_WAIVER_RECEIPT"; then
+      lens_fail polish "waiver_receipt_invalid"
+      check_fail "polish_gate_waiver_receipt_invalid: $POLISH_WAIVER_RECEIPT"
+      POLISH_EXIT_CODE=1
+    fi
+  fi
 }
 
 if [ ! -f "$EVIDENCE_ABS" ]; then
@@ -215,6 +380,26 @@ if [ -f "$EVIDENCE_ABS" ]; then
   if ! grep -qE '\b(did|didnt|gaps)\b' "$EVIDENCE_ABS"; then
     check_warn "evidence_missing_did_didnt_gaps_tokens"
   fi
+
+  TMP_DIR_RELEASED="$(grep -oE '(^|[[:space:]])tmp_dir_released=[^[:space:]]+' "$EVIDENCE_ABS" | head -1 | sed -E 's/^[[:space:]]*tmp_dir_released=//' || true)"
+  if [ "$TMP_DIR_RELEASED" != "true" ]; then
+    check_fail "tmp_dir_not_released: tmp_dir_released=${TMP_DIR_RELEASED:-missing}"
+  fi
+
+  BEAD_SHORT="${BEAD#flywheel-}"
+  TMP_EVIDENCE_PATHS="$EVIDENCE_ABS
+$(grep -oE '`(/[^`]+)`' "$EVIDENCE_ABS" 2>/dev/null | sed 's/`//g' || true)
+$(grep -oE '(^|[[:space:]])evidence=[^[:space:]]+' "$EVIDENCE_ABS" 2>/dev/null | sed -E 's/^[[:space:]]*evidence=//' || true)"
+  while IFS= read -r TMP_PATH; do
+    [ -n "$TMP_PATH" ] || continue
+    case "$TMP_PATH" in
+      /tmp/"$BEAD"-*|/private/tmp/"$BEAD"-*|/var/tmp/"$BEAD"-*|/tmp/"$BEAD_SHORT"-*|/private/tmp/"$BEAD_SHORT"-*|/var/tmp/"$BEAD_SHORT"-*)
+        check_fail "tmp_evidence_outside_mktemp_dir: path=$TMP_PATH expected=mktemp -d -t ${BEAD_SHORT}.XXXXXX"
+        ;;
+    esac
+  done <<EOF
+$TMP_EVIDENCE_PATHS
+EOF
 
   GAPS=$(grep -oE '(^|[[:space:]])gaps=[a-z]+-[a-z0-9]+(\.[0-9]+)*(,[a-z]+-[a-z0-9]+(\.[0-9]+)*)*([[:space:]]|$)' "$EVIDENCE_ABS" | head -1 | sed -E 's/^[[:space:]]*gaps=//; s/[[:space:]]*$//' | tr ',' '\n' | grep -v '^none$' || true)
   for G in $GAPS; do
@@ -303,12 +488,15 @@ if [ -f "$EVIDENCE_ABS" ]; then
   fi
 fi
 
-for lens in brand sniff jeff public; do
+evaluate_polish_gate
+
+for lens in brand sniff jeff public polish; do
   case "$lens" in
     brand) status="$BRAND_STATUS"; reason="$BRAND_REASON" ;;
     sniff) status="$SNIFF_STATUS"; reason="$SNIFF_REASON" ;;
     jeff) status="$JEFF_STATUS"; reason="$JEFF_REASON" ;;
     public) status="$PUBLIC_STATUS"; reason="$PUBLIC_REASON" ;;
+    polish) status="$POLISH_STATUS"; reason="$POLISH_REASON" ;;
   esac
   if [ "$status" = "fail" ]; then
     check_fail "lens_${lens}_fail: $reason"
@@ -322,6 +510,14 @@ elif [ "$STRICT" -eq 1 ] && [ "$WARN" -gt 0 ]; then
   VERDICT="BLOCK_CLOSE"
 fi
 
+if [ "$VERDICT" = "BLOCK_CLOSE" ]; then
+  if [ "$POLISH_EXIT_CODE" -gt 0 ]; then
+    RESULT_EXIT_CODE="$POLISH_EXIT_CODE"
+  else
+    RESULT_EXIT_CODE=3
+  fi
+fi
+
 create_rework_bead() {
   [ "$VERDICT" = "BLOCK_CLOSE" ] || return 0
   command -v br >/dev/null 2>&1 || {
@@ -329,7 +525,7 @@ create_rework_bead() {
     return 0
   }
   title="[four-lens-rework] ${BEAD} close validation"
-  existing=$(cd "$REPO_ABS" && br list --json 2>/dev/null | jq -r --arg title "$title" '(.issues // .)[]? | select(.title == $title and (.status | ascii_downcase) != "closed") | .id' | head -1 2>/dev/null || true)
+  existing=$(cd "$REPO_ABS" && br list --json 2>/dev/null | jq -r --arg title "$title" '(if type == "object" then (.issues // []) else . end)[]? | select(.title == $title and (.status | ascii_downcase) != "closed") | .id' | head -1 2>/dev/null || true)
   if [ -n "$existing" ]; then
     REWORK_BEAD="$existing"
     REWORK_ACTION="reused"
@@ -368,27 +564,51 @@ emit_json() {
 import json
 import os
 import sys
+from datetime import datetime, timezone
 
 failures = [line for line in sys.argv[1].splitlines() if line]
 warnings = [line for line in sys.argv[2].splitlines() if line]
+four_lens = {
+    "brand": {"status": os.environ["FW_VCBC_BRAND_STATUS"], "reason": os.environ["FW_VCBC_BRAND_REASON"]},
+    "sniff": {"status": os.environ["FW_VCBC_SNIFF_STATUS"], "reason": os.environ["FW_VCBC_SNIFF_REASON"]},
+    "jeff": {"status": os.environ["FW_VCBC_JEFF_STATUS"], "reason": os.environ["FW_VCBC_JEFF_REASON"]},
+    "public": {"status": os.environ["FW_VCBC_PUBLIC_STATUS"], "reason": os.environ["FW_VCBC_PUBLIC_REASON"]},
+}
+polish_verdict = os.environ["FW_VCBC_POLISH_VERDICT"] or "NOT_APPLICABLE"
+composite = "FAIL" if os.environ["FW_VCBC_VERDICT"] == "BLOCK_CLOSE" else ("WAIVED" if polish_verdict == "WAIVED" else "PASS")
 payload = {
+    "ts": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
     "schema_version": "four-lens-close-validator/v1",
+    "close_validation_result_schema_version": "polish-gate/close-validation-result/v1",
     "version": os.environ["FW_VCBC_VERSION"],
     "repo": os.environ["FW_VCBC_REPO"],
+    "repo_path": os.environ["FW_VCBC_REPO"],
     "bead": os.environ["FW_VCBC_BEAD"],
     "evidence": os.environ["FW_VCBC_EVIDENCE"],
-    "mode": os.environ["FW_VCBC_MODE"],
+    "mode": os.environ["FW_VCBC_POLISH_MODE"],
+    "validator_mode": os.environ["FW_VCBC_MODE"],
     "verdict": os.environ["FW_VCBC_VERDICT"],
+    "composite_verdict": composite,
+    "exit_code": int(os.environ["FW_VCBC_RESULT_EXIT_CODE"]),
     "failures_count": int(os.environ["FW_VCBC_FAIL"]),
     "warnings_count": int(os.environ["FW_VCBC_WARN"]),
     "failures": failures,
     "warnings": warnings,
-    "four_lens": {
-        "brand": {"status": os.environ["FW_VCBC_BRAND_STATUS"], "reason": os.environ["FW_VCBC_BRAND_REASON"]},
-        "sniff": {"status": os.environ["FW_VCBC_SNIFF_STATUS"], "reason": os.environ["FW_VCBC_SNIFF_REASON"]},
-        "jeff": {"status": os.environ["FW_VCBC_JEFF_STATUS"], "reason": os.environ["FW_VCBC_JEFF_REASON"]},
-        "public": {"status": os.environ["FW_VCBC_PUBLIC_STATUS"], "reason": os.environ["FW_VCBC_PUBLIC_REASON"]},
+    "touched_surfaces": [line for line in os.environ["FW_VCBC_TOUCHED_SURFACES"].splitlines() if line],
+    "callback_envelope": {
+        "polish_gate_verdict": os.environ["FW_VCBC_POLISH_VERDICT_RAW"] or None,
+        "polish_gate_waiver_receipt": os.environ["FW_VCBC_POLISH_WAIVER_RECEIPT"] or None,
     },
+    "polish_gate_verdict": polish_verdict,
+    "polish_gate_lens_passed": os.environ["FW_VCBC_POLISH_STATUS"] == "pass",
+    "polish_gate": {
+        "mode": os.environ["FW_VCBC_POLISH_MODE"],
+        "status": os.environ["FW_VCBC_POLISH_STATUS"],
+        "reason": os.environ["FW_VCBC_POLISH_REASON"],
+        "waiver_receipt": os.environ["FW_VCBC_POLISH_WAIVER_RECEIPT"] or None,
+    },
+    "four_lens": four_lens,
+    "four_lens_results": four_lens,
     "auto_rework": {
         "action": os.environ["FW_VCBC_REWORK_ACTION"],
         "bead": os.environ["FW_VCBC_REWORK_BEAD"] or None,
@@ -404,7 +624,9 @@ if [ "$JSON_OUT" -eq 1 ]; then
   export FW_VCBC_BEAD="$BEAD"
   export FW_VCBC_EVIDENCE="$EVIDENCE_ABS"
   export FW_VCBC_MODE="$MODE"
+  export FW_VCBC_POLISH_MODE="$POLISH_MODE"
   export FW_VCBC_VERDICT="$VERDICT"
+  export FW_VCBC_RESULT_EXIT_CODE="$RESULT_EXIT_CODE"
   export FW_VCBC_FAIL="$FAIL"
   export FW_VCBC_WARN="$WARN"
   export FW_VCBC_BRAND_STATUS="$BRAND_STATUS"
@@ -415,6 +637,12 @@ if [ "$JSON_OUT" -eq 1 ]; then
   export FW_VCBC_JEFF_REASON="$JEFF_REASON"
   export FW_VCBC_PUBLIC_STATUS="$PUBLIC_STATUS"
   export FW_VCBC_PUBLIC_REASON="$PUBLIC_REASON"
+  export FW_VCBC_POLISH_STATUS="$POLISH_STATUS"
+  export FW_VCBC_POLISH_REASON="$POLISH_REASON"
+  export FW_VCBC_POLISH_VERDICT_RAW="$POLISH_VERDICT_RAW"
+  export FW_VCBC_POLISH_VERDICT="$POLISH_VERDICT"
+  export FW_VCBC_POLISH_WAIVER_RECEIPT="$POLISH_WAIVER_RECEIPT"
+  export FW_VCBC_TOUCHED_SURFACES="$TOUCHED_SURFACES"
   export FW_VCBC_REWORK_ACTION="$REWORK_ACTION"
   export FW_VCBC_REWORK_BEAD="$REWORK_BEAD"
   emit_json
@@ -422,10 +650,12 @@ else
   echo "=== validate-callback-before-close: $BEAD ==="
   echo "repo: $REPO_ABS"
   echo "evidence: $EVIDENCE_ABS"
-  echo "mode: $MODE"
+  echo "mode: $POLISH_MODE"
+  echo "validator_mode: $MODE"
   echo "failures: $FAIL"
   echo "warnings: $WARN"
   echo "four_lens: brand=$BRAND_STATUS sniff=$SNIFF_STATUS jeff=$JEFF_STATUS public=$PUBLIC_STATUS"
+  echo "polish_gate_lens: status=$POLISH_STATUS verdict=$POLISH_VERDICT touched=$(printf '%s\n' "$TOUCHED_SURFACES" | sed '/^$/d' | wc -l | tr -d ' ')"
   [ -n "$FAILURES" ] && { echo "FAIL:"; printf '%s\n' "$FAILURES" | sed '/^$/d; s/^/  - /'; }
   [ -n "$WARNINGS" ] && { echo "WARN:"; printf '%s\n' "$WARNINGS" | sed '/^$/d; s/^/  - /'; }
   [ "$REWORK_ACTION" != "none" ] && echo "auto_rework: action=$REWORK_ACTION bead=${REWORK_BEAD:-none}"
@@ -433,6 +663,9 @@ else
 fi
 
 if [ "$VERDICT" = "BLOCK_CLOSE" ]; then
+  if [ "$RESULT_EXIT_CODE" -eq 2 ]; then
+    exit 2
+  fi
   exit 1
 fi
 exit 0

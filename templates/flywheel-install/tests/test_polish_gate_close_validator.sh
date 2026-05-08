@@ -60,7 +60,7 @@ write_good_evidence() {
   local path="$1" extra="${2:-}"
   {
     printf '# Evidence\n'
-    printf 'did=4/4 didnt=none gaps=none tests=PASS %s\n\n' "$extra"
+    printf 'did=4/4 didnt=none gaps=none tmp_dir_released=true tests=PASS %s\n\n' "$extra"
     printf 'Acceptance gates:\n'
     printf -- '- gate one passed with receipt line 12\n'
     printf -- '- gate two passed with `templates/flywheel-install/validate-callback-before-close.sh.tmpl`\n'
@@ -83,7 +83,7 @@ write_good_evidence() {
 write_bad_evidence() {
   local path="$1"
   {
-    printf 'did=1/4 didnt=3 gaps=none tests=PASS\n'
+    printf 'did=1/4 didnt=3 gaps=none tmp_dir_released=true tests=PASS\n'
     printf 'status: robust solution\n'
   } >"$path"
 }

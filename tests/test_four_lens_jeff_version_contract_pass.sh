@@ -34,7 +34,7 @@ receipt_schema_version: four-lens-close-validator/v1
 
 # Evidence
 
-did=5/5 didnt=none gaps=none tests=PASS
+did=5/5 didnt=none gaps=none tmp_dir_released=true tests=PASS
 
 Acceptance gates:
 - gate 1 passed with receipt line 12

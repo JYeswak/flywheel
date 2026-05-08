@@ -50,15 +50,16 @@ Required fields:
 | `invalid_callback` | `manual` | Resend a callback with the required numeric fields, evidence, and durable no-bead/bead routing receipt. | `invalid_callback`, `callback_malformed`, `missing_did_didnt_gaps`, `orch_callback_missing_l61_fields`, `remediation_missing` |
 | `context_drift` | `manual` | Reprobe from both orchestrator and agent contexts; do not summarize until the contexts agree or the drift is named. | `context_drift`, `agent_context_probe_drift_count` |
 | `gate_unmet_open_children` | `none` | Close or explicitly preserve the named child blocker before retrying parent close. | `BLOCK_CLOSE_open_children_preserved`, `BLOCK_CLOSE_open_child_wbnb`, `open_child_blocks_close`, `open_child_*` |
+| `tmp_dir_not_released` | `manual` | `rm -rf $TMPDIR/<bead-id>.* && re-run br close`. | `tmp_dir_not_released`, `BLOCK_CLOSE_tmp_dir_not_released`, `tmp_dir_released=false`, `tmp_dir_released=missing` |
 | `dcg_blocked_destructive_command` | `manual` | Read the DCG reason and use a non-destructive alternate command; do not retry the same blocked command. | `dcg_block_handled=redirect_truncate_varfolders`, `dcg_blocked`, `redirect_truncate_*` |
 | `file_reservation_conflict` | `manual` | Coordinate with the active reservation holder, wait for lease expiry, or release the stale reservation before writing. | `file_reservation_conflict`, `shared_append_reservation_conflict`, `append_reservation_conflict`, `bead_close_blocked_by=.beads_reservation_conflict_*` |
 | `unknown` | `manual` | Preserve the raw failure string, add a taxonomy alias or new migration-tested class, then rerun classification. | any unmatched failure shape |
 
-These ten classes cover the Jeff-derived minimum set: transient, persistent,
+These eleven classes cover the Jeff-derived minimum set: transient, persistent,
 correctness, missing artifact, invalid callback, context drift, and unknown.
-The three flywheel-specific classes capture the recurring dispatch surfaces
-mined for this bead: open-child close blocks, DCG destructive-command handling,
-and Agent Mail/file-reservation conflicts.
+The four flywheel-specific classes capture the recurring dispatch surfaces
+mined for this bead: open-child close blocks, tmp lifecycle close blocks, DCG
+destructive-command handling, and Agent Mail/file-reservation conflicts.
 
 ## Mined Failure Shapes
 
