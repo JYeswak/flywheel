@@ -7,13 +7,14 @@ NTM_BIN="${NTM_BIN:-/Users/josh/.local/bin/ntm}"
 NTM_SESSION="${NTM_SESSION:-flywheel}"
 BEAD=""
 EVIDENCE=""
+ENVELOPE=""
 STRICT=0
 JSON_OUT=0
 MODE="dry-run"
 
 usage() {
   cat <<'EOF'
-usage: validate-callback-before-close.sh [--repo PATH] --bead ID --evidence PATH [--dry-run|--apply] [--strict] [--json]
+usage: validate-callback-before-close.sh [--repo PATH] --bead ID --evidence PATH [--envelope TEXT] [--dry-run|--apply] [--strict] [--json]
        validate-callback-before-close.sh ID PATH [--strict]
 
 Blocks bead closeout when mechanical evidence or the four-lens bar fails.
@@ -22,6 +23,7 @@ Options:
   --repo PATH       repo whose bead DB and relative evidence paths are checked
   --bead ID         bead id being considered for close
   --evidence PATH   worker evidence file
+  --envelope TEXT   callback envelope to structurally validate, including did=N/M
   --dry-run         report verdict and planned rework bead only (default)
   --apply           create or reuse a repo-local rework bead on BLOCK_CLOSE
   --strict          treat warnings as close blockers
@@ -41,6 +43,7 @@ schema_version: four-lens-close-validator/v1
 read_only_default: true
 mutates_only_with: --apply
 purpose: gate br close on evidence receipts plus brand/sniff/Jeff/public lens checks
+structural_gate: did=N/M with N<M blocks close even when all lenses pass
 EOF
 }
 
@@ -48,6 +51,7 @@ examples() {
   cat <<'EOF'
 validate-callback-before-close.sh flywheel-123a /tmp/flywheel-123a-evidence.md --strict
 validate-callback-before-close.sh --repo /Users/josh/Developer/flywheel --bead flywheel-123a --evidence /tmp/flywheel-123a-evidence.md --json
+validate-callback-before-close.sh --repo . --bead flywheel-123a --evidence /tmp/flywheel-123a-evidence.md --envelope "DONE flywheel-123a did=5/9 didnt=4 gaps=flywheel-abcd" --json
 validate-callback-before-close.sh --repo . --bead flywheel-123a --evidence /tmp/flywheel-123a-evidence.md --apply --json
 EOF
 }
@@ -73,6 +77,11 @@ while [ "$#" -gt 0 ]; do
     --evidence)
       [ -n "${2:-}" ] || fail_usage "--evidence requires PATH"
       EVIDENCE="$2"
+      shift 2
+      ;;
+    --envelope)
+      [ -n "${2:-}" ] || fail_usage "--envelope requires TEXT"
+      ENVELOPE="$2"
       shift 2
       ;;
     --strict)
@@ -151,6 +160,12 @@ JEFF_REASON=""
 PUBLIC_REASON=""
 REWORK_BEAD=""
 REWORK_ACTION="none"
+VALIDATOR_STRUCTURAL_PASS="true"
+ENVELOPE_DID_TOTAL_MISMATCH=""
+ENVELOPE_DID_VALUE=""
+ENVELOPE_DIDNT_VALUE=""
+ENVELOPE_GAPS_VALUE=""
+ENVELOPE_STRUCTURAL_SOURCE="none"
 
 append_line() {
   var_name="$1"
@@ -203,6 +218,58 @@ lens_fail() {
     public)
       PUBLIC_STATUS="fail"
       append_reason PUBLIC_REASON "$reason"
+      ;;
+  esac
+}
+
+structural_fail() {
+  VALIDATOR_STRUCTURAL_PASS="false"
+  check_fail "$1"
+}
+
+first_kv_token() {
+  key="$1"
+  text="$2"
+  printf '%s\n' "$text" | tr '[:space:]' '\n' | grep -E "^${key}=" | head -1 | sed -E "s/^${key}=//"
+}
+
+check_callback_envelope_structure() {
+  structural_text=""
+  if [ -n "$ENVELOPE" ]; then
+    structural_text="$ENVELOPE"
+    ENVELOPE_STRUCTURAL_SOURCE="envelope"
+  elif [ -f "$EVIDENCE_ABS" ]; then
+    structural_text="$(grep -E '(^|[[:space:]])(did|didnt|gaps)=' "$EVIDENCE_ABS" | head -20 || true)"
+    [ -n "$structural_text" ] && ENVELOPE_STRUCTURAL_SOURCE="evidence"
+  fi
+
+  [ -n "$structural_text" ] || return 0
+
+  ENVELOPE_DID_VALUE="$(first_kv_token did "$structural_text" || true)"
+  ENVELOPE_DIDNT_VALUE="$(first_kv_token didnt "$structural_text" || true)"
+  ENVELOPE_GAPS_VALUE="$(first_kv_token gaps "$structural_text" || true)"
+
+  if [ -n "$ENVELOPE_DID_VALUE" ]; then
+    if printf '%s\n' "$ENVELOPE_DID_VALUE" | grep -qE '^[0-9]+/[0-9]+$'; then
+      did_done="${ENVELOPE_DID_VALUE%/*}"
+      did_total="${ENVELOPE_DID_VALUE#*/}"
+      if [ "$did_done" -lt "$did_total" ]; then
+        ENVELOPE_DID_TOTAL_MISMATCH="$ENVELOPE_DID_VALUE"
+        structural_fail "validator_structural_pass=false envelope_did_total_mismatch=$ENVELOPE_DID_TOTAL_MISMATCH"
+      elif [ "$did_done" -gt "$did_total" ]; then
+        structural_fail "validator_structural_pass=false envelope_did_total_invalid=$ENVELOPE_DID_VALUE"
+      fi
+    else
+      structural_fail "validator_structural_pass=false envelope_did_invalid=$ENVELOPE_DID_VALUE"
+    fi
+  fi
+
+  case "$ENVELOPE_DIDNT_VALUE" in
+    ""|none|0|0/0)
+      ;;
+    *)
+      continuation="${ENVELOPE_GAPS_VALUE:-none}"
+      structural_fail "validator_structural_pass=false envelope_didnt_not_none=$ENVELOPE_DIDNT_VALUE continuation=$continuation"
       ;;
   esac
 }
@@ -277,6 +344,8 @@ if [ ! -f "$EVIDENCE_ABS" ]; then
 elif [ ! -s "$EVIDENCE_ABS" ]; then
   check_fail "evidence_empty: $EVIDENCE_ABS"
 fi
+
+check_callback_envelope_structure
 
 if [ -f "$EVIDENCE_ABS" ]; then
   if ! grep -qE '\b(did|didnt|gaps)\b' "$EVIDENCE_ABS"; then
@@ -450,6 +519,16 @@ payload = {
     "warnings_count": int(os.environ["FW_VCBC_WARN"]),
     "failures": failures,
     "warnings": warnings,
+    "validator_structural_pass": os.environ["FW_VCBC_STRUCTURAL_PASS"] == "true",
+    "envelope_did_total_mismatch": os.environ["FW_VCBC_ENVELOPE_DID_TOTAL_MISMATCH"] or None,
+    "structural": {
+        "validator_structural_pass": os.environ["FW_VCBC_STRUCTURAL_PASS"] == "true",
+        "source": os.environ["FW_VCBC_ENVELOPE_STRUCTURAL_SOURCE"],
+        "did": os.environ["FW_VCBC_ENVELOPE_DID_VALUE"] or None,
+        "didnt": os.environ["FW_VCBC_ENVELOPE_DIDNT_VALUE"] or None,
+        "gaps": os.environ["FW_VCBC_ENVELOPE_GAPS_VALUE"] or None,
+        "envelope_did_total_mismatch": os.environ["FW_VCBC_ENVELOPE_DID_TOTAL_MISMATCH"] or None,
+    },
     "four_lens": {
         "brand": {"status": os.environ["FW_VCBC_BRAND_STATUS"], "reason": os.environ["FW_VCBC_BRAND_REASON"]},
         "sniff": {"status": os.environ["FW_VCBC_SNIFF_STATUS"], "reason": os.environ["FW_VCBC_SNIFF_REASON"]},
@@ -476,6 +555,12 @@ if [ "$JSON_OUT" -eq 1 ]; then
   export FW_VCBC_VERDICT="$VERDICT"
   export FW_VCBC_FAIL="$FAIL"
   export FW_VCBC_WARN="$WARN"
+  export FW_VCBC_STRUCTURAL_PASS="$VALIDATOR_STRUCTURAL_PASS"
+  export FW_VCBC_ENVELOPE_DID_TOTAL_MISMATCH="$ENVELOPE_DID_TOTAL_MISMATCH"
+  export FW_VCBC_ENVELOPE_DID_VALUE="$ENVELOPE_DID_VALUE"
+  export FW_VCBC_ENVELOPE_DIDNT_VALUE="$ENVELOPE_DIDNT_VALUE"
+  export FW_VCBC_ENVELOPE_GAPS_VALUE="$ENVELOPE_GAPS_VALUE"
+  export FW_VCBC_ENVELOPE_STRUCTURAL_SOURCE="$ENVELOPE_STRUCTURAL_SOURCE"
   export FW_VCBC_BRAND_STATUS="$BRAND_STATUS"
   export FW_VCBC_BRAND_REASON="$BRAND_REASON"
   export FW_VCBC_SNIFF_STATUS="$SNIFF_STATUS"
@@ -496,6 +581,7 @@ else
   echo "mode: $MODE"
   echo "failures: $FAIL"
   echo "warnings: $WARN"
+  echo "structural: validator_structural_pass=$VALIDATOR_STRUCTURAL_PASS envelope_did_total_mismatch=${ENVELOPE_DID_TOTAL_MISMATCH:-none}"
   echo "four_lens: brand=$BRAND_STATUS sniff=$SNIFF_STATUS jeff=$JEFF_STATUS public=$PUBLIC_STATUS"
   echo "ntm_changes: $(printf '%s\n' "$NTM_CHANGES_JSON" | jq -c '{status:(.status // "ok"), changed_count:(.changed_count // .count // (.changes // [] | length) // 0)}' 2>/dev/null || printf 'null')"
   echo "ntm_conflicts: $(printf '%s\n' "$NTM_CONFLICTS_JSON" | jq -c '{status:(.status // "ok"), conflict_count:(.conflict_count // .count // (.conflicts // [] | length) // 0)}' 2>/dev/null || printf 'null')"
