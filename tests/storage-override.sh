@@ -13,6 +13,60 @@ fail_count=0
 pass() { printf 'PASS %s\n' "$1"; pass_count=$((pass_count + 1)); }
 fail() { printf 'FAIL %s\n' "$1"; fail_count=$((fail_count + 1)); }
 
+schema_validate() {
+  local receipt="$1" label="$2"
+  if python3 - "$SCHEMA" "$receipt" <<'PY'
+import json
+import sys
+
+from jsonschema import Draft202012Validator, FormatChecker
+
+schema_path, receipt_path = sys.argv[1], sys.argv[2]
+with open(schema_path, encoding="utf-8") as f:
+    schema = json.load(f)
+with open(receipt_path, encoding="utf-8") as f:
+    receipt = json.load(f)
+
+Draft202012Validator.check_schema(schema)
+Draft202012Validator(schema, format_checker=FormatChecker()).validate(receipt)
+PY
+  then
+    pass "$label"
+  else
+    fail "$label"
+    jq . "$receipt" || true
+  fi
+}
+
+schema_reject() {
+  local receipt="$1" label="$2"
+  if python3 - "$SCHEMA" "$receipt" <<'PY'
+import json
+import sys
+
+from jsonschema import Draft202012Validator, FormatChecker, ValidationError
+
+schema_path, receipt_path = sys.argv[1], sys.argv[2]
+with open(schema_path, encoding="utf-8") as f:
+    schema = json.load(f)
+with open(receipt_path, encoding="utf-8") as f:
+    receipt = json.load(f)
+
+Draft202012Validator.check_schema(schema)
+try:
+    Draft202012Validator(schema, format_checker=FormatChecker()).validate(receipt)
+except ValidationError:
+    sys.exit(0)
+sys.exit(1)
+PY
+  then
+    pass "$label"
+  else
+    fail "$label"
+    jq . "$receipt" || true
+  fi
+}
+
 fixture() {
   local path="$1" pct="$2"
   jq -nc \
@@ -47,6 +101,7 @@ write_receipt() {
   local dir="$1" name="$2" issued="$3" expires="$4" min_free="$5" applies="$6"
   mkdir -p "$dir"
   jq -nc \
+    --arg name "$name" \
     --arg issued "$issued" \
     --arg expires "$expires" \
     --arg min_free "$min_free" \
@@ -57,11 +112,30 @@ write_receipt() {
       expires_at:$expires,
       issuer:"Joshua",
       scope:"fleet",
+      min_free_gb_override:40,
       min_free_pct_override:($min_free | tonumber),
       applies_to:$applies,
       rotation_reason:"fixture storage headroom override",
       auto_clear_signal:"STORAGE-CLEARED",
-      rollback_guard:{requires_event:"STORAGE-CLEARED"}
+      rollback_guard:{
+        requires_event:"STORAGE-CLEARED",
+        rollback_id:("storage-override-fixture-" + $name),
+        before_state:{
+          storage_gate:"base",
+          min_free_gb:50,
+          min_free_pct:10
+        },
+        after_state:{
+          storage_gate:"override",
+          min_free_gb:40,
+          min_free_pct:($min_free | tonumber)
+        },
+        idempotency_key:("storage-override-fixture-" + $name),
+        timestamp:$issued,
+        failure_class:"rollback_failed",
+        failure_taxonomy_ref:".flywheel/doctrine/failure-taxonomy.md",
+        recovery_hint:"If STORAGE-CLEARED is not recorded before expiry, restore the base storage threshold."
+      }
     }' >"$dir/$name.json"
 }
 
@@ -87,33 +161,39 @@ assert_jq() {
 }
 
 bash -n "$BIN" && pass "flywheel_loop_syntax" || fail "flywheel_loop_syntax"
-jq -e '.["$id"] and .required and (.properties.schema_version.const == "storage-override/v1")' "$SCHEMA" >/dev/null \
+jq -e '.["$id"] and .required and (.properties.schema_version.const == "storage-override/v1") and (.properties.rollback_guard.type == "object") and (.properties.rollback_guard.required | index("rollback_id")) and (.properties.rollback_guard.properties.failure_class.enum | index("rollback_failed"))' "$SCHEMA" >/dev/null \
   && pass "schema_declares_storage_override_v1" || fail "schema_declares_storage_override_v1"
+schema_validate "$ROOT/tests/fixtures/storage-override/valid-rollback-guard.json" "static_valid_rollback_guard_schema"
+schema_reject "$ROOT/tests/fixtures/storage-override/invalid-rollback-guard.json" "static_invalid_rollback_guard_schema"
 
 low="$TMP/low.json"
 above="$TMP/above.json"
-fixture "$low" 9.2
+fixture "$low" 5.2
 fixture "$above" 42
 
 repo="$(make_repo storage-override-repo)"
 valid="$TMP/valid-overrides"
 write_receipt "$valid" valid "2026-05-04T02:10:00Z" "2026-05-04T03:18:00Z" 8 "[\"$repo\",\"storage-override-repo\"]"
+schema_validate "$valid/valid.json" "valid_receipt_schema"
 run_doctor "$repo" "$low" "$valid" "$TMP/valid-low.out"
 assert_jq "$TMP/valid-low.out" '.storage_override_active_count == 1 and .storage_override.effective_min_free_pct == 8 and .storage.status != "fail" and (.storage.errors | map(.code) | index("storage_low_headroom") | not)' "valid_receipt_lowers_low_storage_gate"
 assert_jq "$TMP/valid-low.out" '.storage_override.auto_clear_signal == "STORAGE-CLEARED" and .storage_override.rows[0].auto_clear_signal == "STORAGE-CLEARED"' "doctor_exposes_auto_clear_signal"
 
 expired="$TMP/expired-overrides"
 write_receipt "$expired" expired "2026-05-04T01:00:00Z" "2026-05-04T02:00:00Z" 8 "[\"$repo\"]"
+schema_validate "$expired/expired.json" "expired_receipt_schema"
 run_doctor "$repo" "$low" "$expired" "$TMP/expired-low.out"
 assert_jq "$TMP/expired-low.out" '.storage_override_active_count == 0 and .storage.status == "fail" and any(.storage.errors[]?; .code == "storage_low_headroom")' "expired_receipt_fails_closed"
 
 wrong_target="$TMP/wrong-target-overrides"
 write_receipt "$wrong_target" wrong "2026-05-04T02:10:00Z" "2026-05-04T03:18:00Z" 8 "[\"other-repo\"]"
+schema_validate "$wrong_target/wrong.json" "wrong_target_receipt_schema"
 run_doctor "$repo" "$low" "$wrong_target" "$TMP/wrong-target.out"
 assert_jq "$TMP/wrong-target.out" '.storage_override_active_count == 0 and .storage.status == "fail" and any(.storage.errors[]?; .code == "storage_low_headroom")' "missing_applies_to_fails_closed"
 
 clear="$TMP/clear-overrides"
 write_receipt "$clear" clear "2026-05-04T02:10:00Z" "2026-05-04T03:18:00Z" 8 "[\"*\"]"
+schema_validate "$clear/clear.json" "auto_clear_receipt_schema"
 run_doctor "$repo" "$above" "$clear" "$TMP/clear.out"
 assert_jq "$TMP/clear.out" '.storage_override_active_count == 0 and .storage.status == "ok" and .storage_override.effective_min_free_pct == 10' "receipt_above_threshold_auto_reverts"
 if grep -q '"STORAGE-CLEARED"' "$clear/events.jsonl"; then
@@ -127,6 +207,7 @@ mkdir -p "$cli_overrides"
 FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
   FLYWHEEL_STORAGE_PROBE_FIXTURE="$low" \
   FLYWHEEL_STORAGE_OVERRIDES_DIR="$cli_overrides" \
+  FLYWHEEL_STORAGE_MIN_FREE_GB=40 \
   "$BIN" doctor --repo "$repo" --storage-min-free-pct 8 --json >"$TMP/cli.out" 2>"$TMP/cli.out.err" || true
 assert_jq "$TMP/cli.out" '.storage_override_active_count == 0 and .storage_override.effective_min_free_pct == 8 and .storage.status != "fail"' "cli_flag_storage_min_free_pct"
 
@@ -135,6 +216,7 @@ mkdir -p "$env_overrides"
 FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
   FLYWHEEL_STORAGE_PROBE_FIXTURE="$low" \
   FLYWHEEL_STORAGE_OVERRIDES_DIR="$env_overrides" \
+  FLYWHEEL_STORAGE_MIN_FREE_GB=40 \
   FLYWHEEL_STORAGE_MIN_FREE_PCT=8 \
   "$BIN" doctor --repo "$repo" --json >"$TMP/env.out" 2>"$TMP/env.out.err" || true
 assert_jq "$TMP/env.out" '.storage_override_active_count == 0 and .storage_override.effective_min_free_pct == 8 and .storage.status != "fail"' "env_var_storage_min_free_pct"

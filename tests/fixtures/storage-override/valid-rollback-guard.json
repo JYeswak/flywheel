@@ -1,0 +1,33 @@
+{
+  "schema_version": "storage-override/v1",
+  "issued_at": "2026-05-04T02:10:00Z",
+  "expires_at": "2026-05-04T03:18:00Z",
+  "issuer": "Joshua",
+  "scope": "fleet",
+  "min_free_gb_override": 40,
+  "min_free_pct_override": 8,
+  "applies_to": [
+    "*"
+  ],
+  "rotation_reason": "fixture storage headroom override",
+  "auto_clear_signal": "STORAGE-CLEARED",
+  "rollback_guard": {
+    "requires_event": "STORAGE-CLEARED",
+    "rollback_id": "storage-override-fixture-valid",
+    "before_state": {
+      "storage_gate": "base",
+      "min_free_gb": 50,
+      "min_free_pct": 10
+    },
+    "after_state": {
+      "storage_gate": "override",
+      "min_free_gb": 40,
+      "min_free_pct": 8
+    },
+    "idempotency_key": "storage-override-fixture-valid",
+    "timestamp": "2026-05-04T02:10:00Z",
+    "failure_class": "rollback_failed",
+    "failure_taxonomy_ref": ".flywheel/doctrine/failure-taxonomy.md",
+    "recovery_hint": "If STORAGE-CLEARED is not recorded before expiry, restore the base storage threshold."
+  }
+}

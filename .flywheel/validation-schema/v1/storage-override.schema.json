@@ -77,8 +77,65 @@
       "const": "STORAGE-CLEARED"
     },
     "rollback_guard": {
-      "type": "string",
-      "minLength": 1
+      "type": "object",
+      "required": [
+        "requires_event",
+        "rollback_id",
+        "before_state",
+        "after_state",
+        "idempotency_key",
+        "timestamp",
+        "failure_class"
+      ],
+      "properties": {
+        "requires_event": {
+          "type": "string",
+          "const": "STORAGE-CLEARED",
+          "description": "Event that must clear or revert the override."
+        },
+        "rollback_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "before_state": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "Gate state before the temporary override."
+        },
+        "after_state": {
+          "type": "object",
+          "minProperties": 1,
+          "description": "Gate state while the override is active."
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "failure_class": {
+          "type": "string",
+          "enum": [
+            "rollback_failed",
+            "dcg_blocked",
+            "dcg_blocked_destructive_command",
+            "persistent",
+            "correctness"
+          ],
+          "description": "Receipt-local rollback failure class. dcg_blocked maps to failure-taxonomy dcg_blocked_destructive_command; rollback_failed routes to persistent/correctness until promoted."
+        },
+        "failure_taxonomy_ref": {
+          "type": "string",
+          "const": ".flywheel/doctrine/failure-taxonomy.md"
+        },
+        "recovery_hint": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
     },
     "signature": {
       "type": "string"

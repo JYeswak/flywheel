@@ -1,0 +1,15 @@
+{
+  "schema_version": "storage-override/v1",
+  "issued_at": "2026-05-04T02:10:00Z",
+  "expires_at": "2026-05-04T03:18:00Z",
+  "issuer": "Joshua",
+  "scope": "fleet",
+  "min_free_gb_override": 40,
+  "min_free_pct_override": 8,
+  "applies_to": [
+    "*"
+  ],
+  "rotation_reason": "fixture storage headroom override",
+  "auto_clear_signal": "STORAGE-CLEARED",
+  "rollback_guard": "STORAGE-CLEARED"
+}
