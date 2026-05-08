@@ -13,7 +13,9 @@ Template-backed source files for portable `flywheel-loop init`.
 
 ## Polish Gate
 
-Polish Gate is the Phase 2 quality gate for flywheel-installed repos: it starts in `bootstrap`, can run as `audit_only`, and becomes `blocking` once required surfaces are reconciled. The manifest schema is `polish-gate/v1/manifest.schema.json`; grade JSONL rows use `polish-gate/v1/grade-receipt.schema.json`; the current aggregate uses `polish-gate/v1/latest-summary.schema.json`; mode examples live under `polish-gate/fixtures/`; the implementation plan remains the Phase 2 P2-01 through P2-04 polish-gate plan.
+Polish Gate is the Phase 2 quality gate for flywheel-installed repos: it starts in `bootstrap`, can run as `audit_only`, and becomes `blocking` once required surfaces are reconciled. The manifest schema is `polish-gate/v1/manifest.schema.json`; grade JSONL rows use `polish-gate/v1/grade-receipt.schema.json`; the current aggregate uses `polish-gate/v1/latest-summary.schema.json`; mode examples live under `polish-gate/fixtures/`.
+
+Read `polish-gate/README.md` for the operator contract: quick start, modes, receipts, waivers, lifecycle, failure modes, anti-patterns, and the 5-skill rubric reference.
 
 Run the discovery script before grading so client/domain roots stay outside the gate:
 
