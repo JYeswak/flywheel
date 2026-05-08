@@ -4,7 +4,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 SCRIPT="$ROOT/.flywheel/scripts/memory-rule-gate-parity-detector.sh"
 SCHEMA="$ROOT/.flywheel/validation-schema/v1/memory-rule-gate-parity-decision.schema.json"
-TMP="$(mktemp -d "${TMPDIR:-/tmp}/memory-rule-gate-parity-test.XXXXXX")"
+BR_BIN="${BR_BIN:-/Users/josh/.cargo/bin/br}"
+TMP="$(mktemp -d -t memory-rule-gate-parity-test.XXXXXX)"
 trap 'rm -rf "$TMP"' EXIT
 
 pass_count=0
@@ -29,8 +30,10 @@ expect_rc() {
 make_repo() {
   local name="$1" repo
   repo="$TMP/$name/repo"
-  mkdir -p "$repo/.flywheel/scripts" "$repo/.flywheel/tests" "$repo/.beads"
-  : >"$repo/.beads/issues.jsonl"
+  mkdir -p "$repo/.flywheel/scripts" "$repo/.flywheel/tests"
+  repo="$(cd "$repo" && pwd -P)"
+  git -C "$repo" init -q
+  (cd "$repo" && "$BR_BIN" init --prefix flywheel >/dev/null)
   : >"$repo/INCIDENTS.md"
   printf '%s\n' "$repo"
 }
@@ -116,9 +119,33 @@ repo="$(make_repo idem)"; mem="$(make_memory idem)"
 write_meta "$mem" "idem_rule"
 run_detector idem1 "$repo" "$mem" --auto-bead
 run_detector idem2 "$repo" "$mem" --auto-bead
-[[ "$(wc -l <"$repo/.beads/issues.jsonl" | tr -d ' ')" == "1" ]] || fail "auto_bead_duplicate"
-assert_jq "$TMP/idem1.json" '.beads_filed[0].action == "jsonl_fallback"' "auto_bead_first_append"
+[[ "$(sqlite3 "$repo/.beads/beads.db" "SELECT COUNT(*) FROM issues WHERE title='wire-idem-rule-as-structural-gate';")" == "1" ]] || fail "auto_bead_duplicate"
+[[ "$(sqlite3 "$repo/.beads/beads.db" "SELECT COUNT(*) FROM issues WHERE title='wire-idem-rule-as-structural-gate' AND source_repo='$repo';")" == "1" ]] || fail "auto_bead_source_repo_absolute"
+assert_jq "$TMP/idem1.json" '.beads_filed[0].action == "br_created"' "auto_bead_first_create"
 assert_jq "$TMP/idem2.json" '.beads_filed[0].action == "reused"' "auto_bead_second_reused"
+
+scope_home="$TMP/scope-home"
+scope_target="$scope_home/Developer/flywheel"
+scope_sister="$TMP/alpsinsurance"
+mkdir -p "$scope_home/.claude/projects/-Users-josh-Developer-flywheel/memory" "$scope_target/.flywheel/scripts" "$scope_target/.flywheel/tests" "$scope_sister"
+scope_target="$(cd "$scope_target" && pwd -P)"
+scope_sister="$(cd "$scope_sister" && pwd -P)"
+git -C "$scope_target" init -q
+git -C "$scope_sister" init -q
+(cd "$scope_target" && "$BR_BIN" init --prefix flywheel >/dev/null)
+(cd "$scope_sister" && "$BR_BIN" init --prefix alps >/dev/null)
+: >"$scope_target/INCIDENTS.md"
+: >"$scope_sister/INCIDENTS.md"
+write_meta "$scope_home/.claude/projects/-Users-josh-Developer-flywheel/memory" "scope_rule"
+HOME="$scope_home" \
+MEMORY_RULE_GATE_PARITY_HOOKS_DIR="$TMP/scope/hooks" \
+MEMORY_RULE_GATE_PARITY_SETTINGS_JSON="$TMP/scope/settings.json" \
+MEMORY_RULE_GATE_PARITY_LEDGER="$TMP/scope-ledger.jsonl" \
+  "$SCRIPT" check --repo "$scope_sister" --auto-bead --json >"$TMP/scope.json"
+assert_jq "$TMP/scope.json" '.repo == "'"$scope_target"'" and .repo_scope.corrected == true and (.warnings | index("repo_memory_scope_mismatch_corrected"))' "scope_guard_corrects_flywheel_memory_repo"
+[[ "$(sqlite3 "$scope_target/.beads/beads.db" "SELECT COUNT(*) FROM issues WHERE title='wire-scope-rule-as-structural-gate';")" == "1" ]] || fail "scope_target_received_bead"
+[[ "$(sqlite3 "$scope_target/.beads/beads.db" "SELECT COUNT(*) FROM issues WHERE title='wire-scope-rule-as-structural-gate' AND source_repo='$scope_target';")" == "1" ]] || fail "scope_target_source_repo_absolute"
+[[ "$(sqlite3 "$scope_sister/.beads/beads.db" "SELECT COUNT(*) FROM issues;")" == "0" ]] || fail "scope_sister_no_bleed"
 
 repo="$(make_repo missing)"
 expect_rc missing 2 env MEMORY_RULE_GATE_PARITY_LEDGER="$TMP/missing-ledger.jsonl" "$SCRIPT" check --repo "$repo" --memory-dir "$TMP/does-not-exist" --json

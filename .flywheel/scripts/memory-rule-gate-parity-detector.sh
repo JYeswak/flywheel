@@ -15,6 +15,8 @@ ISSUES_JSONL="${MEMORY_RULE_GATE_PARITY_ISSUES_JSONL:-$REPO/.beads/issues.jsonl}
 COMMAND="check"
 AUTO_BEAD=0
 JSON_OUT=0
+REPO_SCOPE_CORRECTED_FROM=""
+REPO_SCOPE_WARNING=""
 
 usage() {
   cat <<'EOF'
@@ -37,6 +39,61 @@ EOF
 }
 
 now_iso() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+
+canonical_dir() {
+  local path="$1"
+  if [[ -d "$path" ]]; then
+    (cd "$path" 2>/dev/null && pwd -P) || printf '%s\n' "$path"
+  else
+    printf '%s\n' "$path"
+  fi
+}
+
+sql_escape() {
+  printf '%s' "$1" | sed "s/'/''/g"
+}
+
+flywheel_memory_dir() {
+  canonical_dir "$HOME/.claude/projects/-Users-josh-Developer-flywheel/memory"
+}
+
+normalize_created_bead_source_repo() {
+  local bead_id="$1" db="$REPO/.beads/beads.db" repo_sql id_sql
+  [[ -n "$bead_id" && -f "$db" ]] || return 0
+  command -v sqlite3 >/dev/null 2>&1 || return 0
+  repo_sql="$(sql_escape "$REPO")"
+  id_sql="$(sql_escape "$bead_id")"
+  sqlite3 "$db" "UPDATE issues SET source_repo = '$repo_sql' WHERE id = '$id_sql' AND (source_repo IS NULL OR source_repo != '$repo_sql');" >/dev/null 2>&1 || true
+}
+
+flywheel_repo_dir() {
+  canonical_dir "$HOME/Developer/flywheel"
+}
+
+expected_repo_for_memory_dir() {
+  local memory_abs="$1" flywheel_memory flywheel_repo
+  flywheel_memory="$(flywheel_memory_dir)"
+  flywheel_repo="$(flywheel_repo_dir)"
+  if [[ "$memory_abs" == "$flywheel_memory" && -d "$flywheel_repo" ]]; then
+    printf '%s\n' "$flywheel_repo"
+    return 0
+  fi
+  return 1
+}
+
+apply_repo_scope_guard() {
+  local memory_abs expected
+  REPO="$(canonical_dir "$REPO")"
+  memory_abs="$(canonical_dir "$MEMORY_DIR")"
+  expected="$(expected_repo_for_memory_dir "$memory_abs" || true)"
+  if [[ -n "$expected" && "$REPO" != "$expected" && "${MEMORY_RULE_GATE_PARITY_ALLOW_CROSS_REPO:-0}" != "1" ]]; then
+    REPO_SCOPE_CORRECTED_FROM="$REPO"
+    REPO_SCOPE_WARNING="repo_memory_scope_mismatch_corrected"
+    REPO="$expected"
+  fi
+  INCIDENTS_PATH="$REPO/INCIDENTS.md"
+  ISSUES_JSONL="$REPO/.beads/issues.jsonl"
+}
 
 info_json() {
   jq -nc \
@@ -214,7 +271,7 @@ existing_bead_for_title() {
 }
 
 bead_action_for_rule() {
-  local stem="$1" memory_path="$2" title id existing now desc row
+  local stem="$1" memory_path="$2" title id existing now desc created rc br_output br_id
   title="wire-${stem}-as-structural-gate"
   id="$(bead_id_for_rule "$stem")"
   existing="$(existing_bead_for_title "$title" || true)"
@@ -228,13 +285,23 @@ bead_action_for_rule() {
   fi
   now="$(now_iso)"
   desc="Auto-filed by memory-rule-gate-parity-detector. META-RULE memory file has zero structural gate evidence. Wire script + hook/settings + test + INCIDENTS entry, then rerun detector. memory_path=$memory_path"
-  mkdir -p "$(dirname "$ISSUES_JSONL")"
-  row="$(jq -nc --arg id "$id" --arg title "$title" --arg desc "$desc" --arg now "$now" --arg repo "$REPO" \
-    '{id:$id,title:$title,description:$desc,status:"open",priority:0,issue_type:"bug",created_at:$now,created_by:"memory-rule-gate-parity-detector",updated_at:$now,source_repo:$repo,labels:["memory-rule-gate-parity","auto-repair","advisory-to-structural"],compaction_level:0,original_size:0}')"
-  if printf '%s\n' "$row" >>"$ISSUES_JSONL"; then
-    jq -nc --arg rule "$stem" --arg title "$title" --arg id "$id" '{rule_id:$rule,title:$title,bead_id:$id,action:"jsonl_fallback"}'
+  if [[ ! -d "$REPO/.beads" ]]; then
+    jq -nc --arg rule "$stem" --arg title "$title" --arg id "$id" --arg repo "$REPO" \
+      '{rule_id:$rule,title:$title,bead_id:$id,action:"create_failed",reason:"repo_beads_missing",repo:$repo}'
+    return 0
+  fi
+  set +e
+  br_output="$(cd "$REPO" && br create "$title" --type bug --priority P0 --description "$desc" --labels "memory-rule-gate-parity,auto-repair,advisory-to-structural" --actor "memory-rule-gate-parity-detector" --json 2>&1)"
+  rc=$?
+  if [[ "$rc" -eq 0 ]]; then
+    br_id="$(jq -r '.id // .issue.id // empty' <<<"$br_output" 2>/dev/null | head -1)"
+    [[ -n "$br_id" ]] || br_id="$id"
+    normalize_created_bead_source_repo "$br_id"
+    jq -nc --arg rule "$stem" --arg title "$title" --arg id "$br_id" --arg repo "$REPO" \
+      '{rule_id:$rule,title:$title,bead_id:$id,action:"br_created",repo:$repo}'
   else
-    jq -nc --arg rule "$stem" --arg title "$title" --arg id "$id" '{rule_id:$rule,title:$title,bead_id:$id,action:"append_failed"}'
+    jq -nc --arg rule "$stem" --arg title "$title" --arg id "$id" --arg repo "$REPO" --arg rc "$rc" \
+      '{rule_id:$rule,title:$title,bead_id:$id,action:"create_failed",repo:$repo,exit_code:($rc|tonumber)}'
   fi
 }
 
@@ -280,7 +347,7 @@ run_check() {
     emit "$payload" "GRAY memory_dir_missing=$MEMORY_DIR" 2
     return $?
   fi
-  tmp="$(mktemp -d "${TMPDIR:-/tmp}/memory-rule-gate-parity.XXXXXX")"
+  tmp="$(mktemp -d -t memory-rule-gate-parity.XXXXXX)"
   rows_file="$tmp/rows.jsonl"; beads_file="$tmp/beads.jsonl"; files_file="$tmp/files.txt"
   find "$MEMORY_DIR" -maxdepth 1 -type f -name 'feedback_*.md' -print 2>/dev/null | sort >"$files_file"
   while IFS= read -r file; do
@@ -296,6 +363,7 @@ run_check() {
   beads_json="$(jq -s -c '.' "$beads_file")"
   payload="$(jq -nc \
     --arg schema "$SCHEMA_VERSION" --arg ts "$audit_ts" --arg repo "$REPO" --arg memory_dir "$MEMORY_DIR" --arg ledger "$LEDGER" \
+    --arg scope_warning "$REPO_SCOPE_WARNING" --arg scope_from "$REPO_SCOPE_CORRECTED_FROM" \
     --argjson rows "$rows_json" --argjson beads "$beads_json" \
     '($rows | map(select(.classification != "NOT_META_RULE"))) as $meta
      | ($rows | map(select(.classification == "WIRED"))) as $wired
@@ -311,10 +379,11 @@ run_check() {
         unwired_rules:($unwired | map({rule_id,memory_path,missing_evidence})),
         partial_rules:($partial | map({rule_id,memory_path,missing_evidence,evidence_count})),
         rules:$rows,
-        beads_filed:($beads | map(select(.action == "jsonl_fallback" or .action == "reused"))),
+        beads_filed:($beads | map(select(.action == "br_created" or .action == "reused" or .action == "create_failed"))),
         beads_would_file:($beads | map(select(.action == "would_file"))),
+        repo_scope:{corrected:($scope_from != ""),corrected_from:(if $scope_from == "" then null else $scope_from end),active_repo:$repo},
         ledger_appended:$ledger,
-        errors:[],warnings:[],
+        errors:[],warnings:([if $scope_warning == "" then empty else $scope_warning end]),
         exit_code:0
       }')"
   rm -rf "$tmp"
@@ -336,6 +405,8 @@ while [[ $# -gt 0 ]]; do
     *) printf 'ERR unknown argument: %s\n' "$1" >&2; usage >&2; exit 2 ;;
   esac
 done
+
+apply_repo_scope_guard
 
 case "$COMMAND" in
   check) run_check ;;

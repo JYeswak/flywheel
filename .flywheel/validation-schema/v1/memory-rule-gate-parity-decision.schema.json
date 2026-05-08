@@ -102,7 +102,7 @@
         "rule_id": { "type": "string" },
         "title": { "type": "string" },
         "bead_id": { "type": "string" },
-        "action": { "enum": ["would_file", "jsonl_fallback", "reused", "append_failed"] }
+        "action": { "enum": ["would_file", "jsonl_fallback", "br_created", "reused", "append_failed", "create_failed"] }
       }
     }
   }
