@@ -7,7 +7,13 @@ STORAGE_OVERRIDE_SCHEMA_SOURCE="${SYNC_STORAGE_OVERRIDE_SCHEMA_SOURCE:-/Users/jo
 IDENTITY_DEFERRAL_SCHEMA_SOURCE="${SYNC_IDENTITY_DEFERRAL_SCHEMA_SOURCE:-/Users/josh/Developer/flywheel/.flywheel/validation-schema/v1/identity-registration-deferral.schema.json}"
 BEAD_QUALITY_MINING_SOURCE="${SYNC_BEAD_QUALITY_MINING_SOURCE:-/Users/josh/Developer/flywheel/.flywheel/scripts/bead-quality-mining.sh}"
 ORCH_VALIDATION_SKILL_SOURCE="${SYNC_ORCH_VALIDATION_SKILL_SOURCE:-/Users/josh/.claude/skills/orchestrator-validation-discipline/SKILL.md}"
+DOCTRINE_DOCS_SOURCE_DIR="${SYNC_DOCTRINE_DOCS_SOURCE_DIR:-/Users/josh/Developer/flywheel/.flywheel/doctrine}"
+SHARED_SCRIPT_SOURCE_DIR="${SYNC_SHARED_SCRIPT_SOURCE_DIR:-/Users/josh/Developer/flywheel/.flywheel/scripts}"
+SHARED_SCRIPT_ALLOWLIST="${SYNC_SHARED_SCRIPT_ALLOWLIST:-bead-quality-mining.sh dispatch-and-verify.sh tmp-aggressive-prune.sh topology-tick-refresh.sh sync-canonical-doctrine.sh}"
+LAUNCHD_TEMPLATE_SOURCE_DIR="${SYNC_LAUNCHD_TEMPLATE_SOURCE_DIR:-/Users/josh/Developer/flywheel/.flywheel/launchd}"
 LOOPS_DIR="${SYNC_CANONICAL_LOOPS_DIR:-$HOME/.flywheel/loops}"
+SYNC_LEDGER="${SYNC_CANONICAL_LEDGER:-$HOME/.local/state/flywheel/doctrine-sync-ledger.jsonl}"
+SYNC_TS="${SYNC_CANONICAL_NOW:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
 ROOT_BLOCK_BEGIN="<!-- BEGIN-CANONICAL-FLYWHEEL-DOCTRINE -->"
 ROOT_BLOCK_END="<!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->"
 ROOTS=()
@@ -30,6 +36,12 @@ Synchronizes two doctrine surfaces for each flywheel-installed repo:
      is copied from the canonical source repo when present, with backup-before-write.
   5. .flywheel/scripts/bead-quality-mining.sh is copied from the canonical
      source repo when present, with backup-before-write.
+  6. .flywheel/doctrine/*.md is copied from the canonical source repo when
+     present, with backup-before-write.
+  7. Allowlisted .flywheel/scripts/*.sh files are copied from the canonical
+     source repo when present, with backup-before-write and executable mode.
+  8. .flywheel/launchd/*.plist templates are copied from the canonical source
+     repo when present, with backup-before-write.
 
 Existing root AGENTS.md content outside the block is preserved. The canonical
 source repo root is treated as already synchronized to avoid self-embedding the
@@ -46,9 +58,15 @@ Environment:
   SYNC_STORAGE_OVERRIDE_SCHEMA_SOURCE=/path/to/storage-override.schema.json
   SYNC_IDENTITY_DEFERRAL_SCHEMA_SOURCE=/path/to/identity-registration-deferral.schema.json
   SYNC_BEAD_QUALITY_MINING_SOURCE=/path/to/bead-quality-mining.sh
+  SYNC_DOCTRINE_DOCS_SOURCE_DIR=/path/to/.flywheel/doctrine
+  SYNC_SHARED_SCRIPT_SOURCE_DIR=/path/to/.flywheel/scripts
+  SYNC_SHARED_SCRIPT_ALLOWLIST="bead-quality-mining.sh dispatch-and-verify.sh"
+  SYNC_LAUNCHD_TEMPLATE_SOURCE_DIR=/path/to/.flywheel/launchd
   SYNC_ORCH_VALIDATION_SKILL_SOURCE=/path/to/orchestrator-validation-discipline/SKILL.md
   SYNC_CANONICAL_ROOTS="/path/a:/path/b"
   SYNC_CANONICAL_LOOPS_DIR=/path/to/loops-json-dir
+  SYNC_CANONICAL_LEDGER=/path/to/doctrine-sync-ledger.jsonl
+  SYNC_CANONICAL_LEDGER_DISABLE=1
 EOF
 }
 
@@ -184,6 +202,59 @@ json_string_array_from_file() {
   jq -R . "$file" | jq -s -c .
 }
 
+copy_managed_file() {
+  local repo="$1" source_file="$2" target_file="$3" action="$4" executable="${5:-0}"
+  local source_hash target_hash tmp new_hash
+  [[ -f "$source_file" ]] || return 0
+  MANAGED_FILE_TARGET_COUNT=$((MANAGED_FILE_TARGET_COUNT + 1))
+  source_hash="$(sha256_file "$source_file")"
+  target_hash="$(sha256_file "$target_file")"
+  if [[ "$target_hash" == "$source_hash" ]]; then
+    jq -cn --arg repo "$repo" --arg source "$source_file" --arg target "$target_file" --arg action "$action" --arg hash "$target_hash" \
+      '{repo:$repo,source:$source,target:$target,action:$action,status:"in_sync",hash:$hash}' >>"$MANAGED_DETAILS_FILE"
+    return 0
+  fi
+
+  MANAGED_FILE_DRIFTED_COUNT=$((MANAGED_FILE_DRIFTED_COUNT + 1))
+  if [[ "$MODE" != "apply" ]]; then
+    jq -cn --arg repo "$repo" --arg source "$source_file" --arg target "$target_file" --arg action "$action" --arg source_hash "$source_hash" --arg target_hash "$target_hash" \
+      '{repo:$repo,source:$source,target:$target,action:$action,status:"drifted",source_hash:$source_hash,target_hash:$target_hash}' >>"$MANAGED_DETAILS_FILE"
+    return 0
+  fi
+
+  mkdir -p "$(dirname "$target_file")"
+  tmp="${target_file}.tmp.$$"
+  if cp "$source_file" "$tmp"; then
+    backup_file "$target_file"
+    if mv "$tmp" "$target_file"; then
+      if [[ "$executable" == "1" ]]; then
+        chmod +x "$target_file" 2>/dev/null || true
+      fi
+      new_hash="$(sha256_file "$target_file")"
+      if [[ "$new_hash" == "$source_hash" ]]; then
+        MANAGED_FILE_SYNCED_COUNT=$((MANAGED_FILE_SYNCED_COUNT + 1))
+        jq -cn --arg repo "$repo" --arg source "$source_file" --arg target "$target_file" --arg action "$action" --arg prior_hash "$target_hash" --arg new_hash "$new_hash" \
+          '{repo:$repo,source:$source,target:$target,action:$action,status:"synced",prior_hash:$prior_hash,new_hash:$new_hash}' >>"$MANAGED_DETAILS_FILE"
+        jq -cn --arg path "$target_file" --arg action "$action" '{path:$path,action:$action}' >>"$WRITES_FILE"
+      else
+        ERROR_COUNT=$((ERROR_COUNT + 1))
+        jq -cn --arg repo "$repo" --arg source "$source_file" --arg target "$target_file" --arg action "$action" --arg code "managed_file_hash_mismatch" \
+          '{repo:$repo,source:$source,target:$target,action:$action,status:"error",code:$code,message:"managed file hash did not match source after copy"}' >>"$ERRORS_FILE"
+      fi
+    else
+      rm -f "$tmp" 2>/dev/null || true
+      ERROR_COUNT=$((ERROR_COUNT + 1))
+      jq -cn --arg repo "$repo" --arg source "$source_file" --arg target "$target_file" --arg action "$action" --arg code "managed_file_move_failed" \
+        '{repo:$repo,source:$source,target:$target,action:$action,status:"error",code:$code,message:"failed to move managed file into place"}' >>"$ERRORS_FILE"
+    fi
+  else
+    rm -f "$tmp" 2>/dev/null || true
+    ERROR_COUNT=$((ERROR_COUNT + 1))
+    jq -cn --arg repo "$repo" --arg source "$source_file" --arg target "$target_file" --arg action "$action" --arg code "managed_file_copy_failed" \
+      '{repo:$repo,source:$source,target:$target,action:$action,status:"error",code:$code,message:"failed to copy managed file"}' >>"$ERRORS_FILE"
+  fi
+}
+
 collect_targets() {
   local target_tmp="$1" root repo_path
   : >"$target_tmp"
@@ -236,19 +307,30 @@ DETAILS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-details.XXXXXX")"
 ROOT_DETAILS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-root-details.XXXXXX")"
 WRITES_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-writes.XXXXXX")"
 ERRORS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-errors.XXXXXX")"
+MANAGED_DETAILS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-managed-details.XXXXXX")"
 SOURCE_RULES_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-source-rules.XXXXXX")"
-trap 'rm -f "$TARGETS_FILE" "$REPOS_FILE" "$DETAILS_FILE" "$ROOT_DETAILS_FILE" "$WRITES_FILE" "$ERRORS_FILE" "$SOURCE_RULES_FILE"' EXIT
+trap 'rm -f "$TARGETS_FILE" "$REPOS_FILE" "$DETAILS_FILE" "$ROOT_DETAILS_FILE" "$WRITES_FILE" "$ERRORS_FILE" "$MANAGED_DETAILS_FILE" "$SOURCE_RULES_FILE"' EXIT
 
 collect_targets "$TARGETS_FILE"
 : >"$DETAILS_FILE"
 : >"$ROOT_DETAILS_FILE"
 : >"$WRITES_FILE"
 : >"$ERRORS_FILE"
+: >"$MANAGED_DETAILS_FILE"
 : >"$REPOS_FILE"
 extract_l_rules "$SOURCE" >"$SOURCE_RULES_FILE"
 
 SOURCE_HASH="$(sha256_file "$SOURCE")"
 SOURCE_REPO="$(canonicalize_dir "$(dirname "$SOURCE")")"
+if [[ -z "${SYNC_DOCTRINE_DOCS_SOURCE_DIR:-}" ]]; then
+  DOCTRINE_DOCS_SOURCE_DIR="$SOURCE_REPO/.flywheel/doctrine"
+fi
+if [[ -z "${SYNC_SHARED_SCRIPT_SOURCE_DIR:-}" ]]; then
+  SHARED_SCRIPT_SOURCE_DIR="$SOURCE_REPO/.flywheel/scripts"
+fi
+if [[ -z "${SYNC_LAUNCHD_TEMPLATE_SOURCE_DIR:-}" ]]; then
+  LAUNCHD_TEMPLATE_SOURCE_DIR="$SOURCE_REPO/.flywheel/launchd"
+fi
 TARGET_COUNT=0
 CANONICAL_DRIFTED_COUNT=0
 CANONICAL_SYNCED_COUNT=0
@@ -264,6 +346,9 @@ IDENTITY_DEFERRAL_SCHEMA_SYNCED_COUNT=0
 BEAD_MINING_TARGET_COUNT=0
 BEAD_MINING_DRIFTED_COUNT=0
 BEAD_MINING_SYNCED_COUNT=0
+MANAGED_FILE_TARGET_COUNT=0
+MANAGED_FILE_DRIFTED_COUNT=0
+MANAGED_FILE_SYNCED_COUNT=0
 ERROR_COUNT=0
 SCHEMA_SOURCE_HASH="$(sha256_file "$STORAGE_OVERRIDE_SCHEMA_SOURCE")"
 IDENTITY_DEFERRAL_SCHEMA_HASH="$(sha256_file "$IDENTITY_DEFERRAL_SCHEMA_SOURCE")"
@@ -512,8 +597,32 @@ if [[ -f "$IDENTITY_DEFERRAL_SCHEMA_SOURCE" ]]; then
   done <"$REPOS_FILE"
 fi
 
-DRIFTED_COUNT=$((CANONICAL_DRIFTED_COUNT + ROOT_DRIFTED_COUNT + SCHEMA_DRIFTED_COUNT + IDENTITY_DEFERRAL_SCHEMA_DRIFTED_COUNT + BEAD_MINING_DRIFTED_COUNT))
-SYNCED_COUNT=$((CANONICAL_SYNCED_COUNT + ROOT_SYNCED_COUNT + SCHEMA_SYNCED_COUNT + IDENTITY_DEFERRAL_SCHEMA_SYNCED_COUNT + BEAD_MINING_SYNCED_COUNT))
+while IFS= read -r repo; do
+  [[ -n "$repo" ]] || continue
+  if [[ -d "$DOCTRINE_DOCS_SOURCE_DIR" ]]; then
+    for doctrine_source in "$DOCTRINE_DOCS_SOURCE_DIR"/*.md; do
+      [[ -f "$doctrine_source" ]] || continue
+      copy_managed_file "$repo" "$doctrine_source" "$repo/.flywheel/doctrine/$(basename "$doctrine_source")" "copy_doctrine_doc" 0
+    done
+  fi
+  if [[ -d "$SHARED_SCRIPT_SOURCE_DIR" ]]; then
+    for script_name in $SHARED_SCRIPT_ALLOWLIST; do
+      [[ "$script_name" == *.sh ]] || continue
+      script_source="$SHARED_SCRIPT_SOURCE_DIR/$script_name"
+      [[ -f "$script_source" ]] || continue
+      copy_managed_file "$repo" "$script_source" "$repo/.flywheel/scripts/$script_name" "copy_shared_script" 1
+    done
+  fi
+  if [[ -d "$LAUNCHD_TEMPLATE_SOURCE_DIR" ]]; then
+    for plist_source in "$LAUNCHD_TEMPLATE_SOURCE_DIR"/*.plist; do
+      [[ -f "$plist_source" ]] || continue
+      copy_managed_file "$repo" "$plist_source" "$repo/.flywheel/launchd/$(basename "$plist_source")" "copy_launchd_template" 0
+    done
+  fi
+done <"$REPOS_FILE"
+
+DRIFTED_COUNT=$((CANONICAL_DRIFTED_COUNT + ROOT_DRIFTED_COUNT + SCHEMA_DRIFTED_COUNT + IDENTITY_DEFERRAL_SCHEMA_DRIFTED_COUNT + BEAD_MINING_DRIFTED_COUNT + MANAGED_FILE_DRIFTED_COUNT))
+SYNCED_COUNT=$((CANONICAL_SYNCED_COUNT + ROOT_SYNCED_COUNT + SCHEMA_SYNCED_COUNT + IDENTITY_DEFERRAL_SCHEMA_SYNCED_COUNT + BEAD_MINING_SYNCED_COUNT + MANAGED_FILE_SYNCED_COUNT))
 
 STATUS="ok"
 if [[ "$ERROR_COUNT" -gt 0 ]]; then
@@ -529,9 +638,11 @@ ERRORS="$(jq -s -c '.' "$ERRORS_FILE")"
 TARGETS="$(json_string_array_from_file "$TARGETS_FILE")"
 REPOS="$(json_string_array_from_file "$REPOS_FILE")"
 RESULT="$(jq -nc \
+  --arg ts "$SYNC_TS" \
   --arg mode "$MODE" \
   --arg status "$STATUS" \
   --arg source "$SOURCE" \
+  --arg ledger_path "$SYNC_LEDGER" \
   --arg source_hash "$SOURCE_HASH" \
   --argjson target_count "$TARGET_COUNT" \
   --argjson drifted_count "$DRIFTED_COUNT" \
@@ -556,6 +667,13 @@ RESULT="$(jq -nc \
   --argjson bead_quality_mining_target_count "$BEAD_MINING_TARGET_COUNT" \
   --argjson bead_quality_mining_drifted_count "$BEAD_MINING_DRIFTED_COUNT" \
   --argjson bead_quality_mining_synced_count "$BEAD_MINING_SYNCED_COUNT" \
+  --arg doctrine_docs_source_dir "$DOCTRINE_DOCS_SOURCE_DIR" \
+  --arg shared_script_source_dir "$SHARED_SCRIPT_SOURCE_DIR" \
+  --arg shared_script_allowlist "$SHARED_SCRIPT_ALLOWLIST" \
+  --arg launchd_template_source_dir "$LAUNCHD_TEMPLATE_SOURCE_DIR" \
+  --argjson managed_file_target_count "$MANAGED_FILE_TARGET_COUNT" \
+  --argjson managed_file_drifted_count "$MANAGED_FILE_DRIFTED_COUNT" \
+  --argjson managed_file_synced_count "$MANAGED_FILE_SYNCED_COUNT" \
   --arg orch_validation_skill_source "$ORCH_VALIDATION_SKILL_SOURCE" \
   --arg orch_validation_skill_hash "$ORCH_VALIDATION_SKILL_HASH" \
   --argjson errors_count "$ERROR_COUNT" \
@@ -565,10 +683,13 @@ RESULT="$(jq -nc \
   --argjson root_details "$ROOT_DETAILS" \
   --argjson writes "$WRITES" \
   --argjson errors "$ERRORS" \
+  --slurpfile managed_details "$MANAGED_DETAILS_FILE" \
   '{
+    ts:$ts,
     mode:$mode,
     status:$status,
     source:$source,
+    ledger_path:$ledger_path,
     source_hash:$source_hash,
     target_count:$target_count,
     drifted_count:$drifted_count,
@@ -593,6 +714,13 @@ RESULT="$(jq -nc \
     bead_quality_mining_target_count:$bead_quality_mining_target_count,
     bead_quality_mining_drifted_count:$bead_quality_mining_drifted_count,
     bead_quality_mining_synced_count:$bead_quality_mining_synced_count,
+    doctrine_docs_source_dir:$doctrine_docs_source_dir,
+    shared_script_source_dir:$shared_script_source_dir,
+    shared_script_allowlist:$shared_script_allowlist,
+    launchd_template_source_dir:$launchd_template_source_dir,
+    managed_file_target_count:$managed_file_target_count,
+    managed_file_drifted_count:$managed_file_drifted_count,
+    managed_file_synced_count:$managed_file_synced_count,
     orch_validation_skill_source:$orch_validation_skill_source,
     orch_validation_skill_hash:$orch_validation_skill_hash,
     errors_count:$errors_count,
@@ -600,9 +728,15 @@ RESULT="$(jq -nc \
     repos:$repos,
     details:$details,
     root_details:$root_details,
+    managed_details:$managed_details,
     writes:$writes,
     errors:$errors
   }')"
+
+if [[ "${SYNC_CANONICAL_LEDGER_DISABLE:-0}" != "1" ]]; then
+  mkdir -p "$(dirname "$SYNC_LEDGER")"
+  printf '%s\n' "$RESULT" >>"$SYNC_LEDGER"
+fi
 
 if [[ "$JSON_OUT" -eq 1 ]]; then
   printf '%s\n' "$RESULT"
