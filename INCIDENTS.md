@@ -6052,3 +6052,59 @@ Evidence:
   `Forever-Rule: Orchestrator owns shared-repo dirty preflight before
   dispatch`.
 - Bead: `flywheel-7xcfl`.
+
+## jeff-dedupe-bead-stale-scope
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `jeff-dedupe-bead-stale-scope`
+
+Event Count: 4 events in 7 days
+
+Severity: high
+
+Cost: Four `flywheel-zaat` redispatches sent workers back into stale Jeff
+dedupe scope: the bead still targeted `/Users/josh/Developer/dicklesworthstone-stack`
+and 19 flat clones while live substrate had moved to `/Users/josh/Developer/jeff-corpus`
+with 177 flat Dicklesworthstone clones and seven dirty direct-child repos.
+Each redispatch consumed a worker slot, repeated the same read-only probe, and
+preserved no safe mutation path.
+
+Root Cause: The dedupe decision treated an old bead/title match and stale
+acceptance wording as authoritative after the underlying Jeff corpus substrate
+changed. The correct live owner, `flywheel-2mz2x`, already covered the current
+177-clone reconciliation shape, but `flywheel-zaat` remained dispatchable
+because INCIDENTS coverage did not yet name this stale-scope class.
+
+Forever-Rule: Jeff dedupe matches are advisory until the live substrate proves
+the matched bead is open and still in scope. Before redispatching, closing, or
+merging evidence into a Jeff dedupe bead, run a live probe of the actual corpus
+path, `br show` the candidate bead, and compare the current evidence against
+the bead description. If the corpus path, count, dirty-state premise, or
+successor owner has changed, stop the stale bead and route the worker to the
+current owner instead of reusing the old scope.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote jeff-dedupe-bead-stale-scope`. This entry closes promotion-candidate
+bead `flywheel-cgnv5`, cites the already-updated `jeff-issue-chain` skill
+Forever-Rule for the operational runbook, and gives doctrine-ladder scans a
+durable repo INCIDENTS target instead of recreating the same promotion
+candidate.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1073`: first `flywheel-zaat`
+  stale-scope row found the missing `dicklesworthstone-stack` path, 177 live
+  flat clones, canonical `jeff-corpus`, and seven dirty repos.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1081`: redispatch repeated the
+  contradiction and confirmed successor bead `flywheel-2mz2x` owned the live
+  177-clone corpus problem.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1091`: later dispatch still
+  targeted the missing path and 19-clone premise; worker blocked without
+  rename, symlink, or delete mutation.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L1099`: fourth recurrence again
+  blocked on stale scope while `flywheel-2mz2x` remained the current owner.
+- Skill: `~/.claude/skills/jeff-issue-chain/SKILL.md` section
+  `FOREVER-RULE: jeff-dedupe-bead-stale-scope`.
+- Bead: `flywheel-cgnv5`.
