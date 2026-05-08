@@ -2,9 +2,10 @@
 
 Repo: flywheel
 Reviewed: 2026-05-04
-Reviewer: flywheel-wcq5 worker
+Reviewer: flywheel-wcq5 worker; MagentaPond via flywheel-lzc6 for L89 voice gate
 Doctrine: `.flywheel/PUBLISHABILITY-BAR.md`
 Public repo: no
+L89 classification: private/internal ZestStream infrastructure
 
 ## Facets
 
@@ -30,6 +31,17 @@ Score: 5/7
 | Ungrounded claims count | 0 |
 | Scorecard log | `.planning/scorecard-log.jsonl` |
 | Skill source | `/Users/josh/.claude/skills/zeststream-brand-voice/SKILL.md` |
+
+
+## L89 Public Voice Audit
+
+| gate | result | evidence |
+|---|---|---|
+| AG1 repo classification | PASS | `SECURITY.md` says this repository is private ZestStream infrastructure; L89 public voice gate is exempt until public release prep. |
+| AG2 scorecard requirement | EXEMPT | Because `Public repo: no`, the publishability probe returns `proof_level=exempt_internal`; no README/MISSION public scorecard run is required. |
+| AG3 audit fields | PASS | This audit records `ZestStream voice score=100`, `Banned words count=0`, `Ungrounded claims count=0`, and scorecard path. |
+| AG4 prepublish hook | PASS_NOOP | `.flywheel/scripts/zeststream-public-prepublish-hook.sh origin git@example.com:private.git --repo /Users/josh/Developer/flywheel --json` returned `status=pass`, `target_public=false`, `skipped=true`. |
+| AG5 follow-up beads | PASS_NOOP | No score below 95, banned words, ungrounded claims, or missing public-copy surface applies while the repo is private/internal. |
 
 ## Follow-Ups
 
