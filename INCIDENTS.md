@@ -5398,3 +5398,60 @@ Evidence:
 - Skill: `~/.claude/skills/beads-br/SKILL.md` explicit `br sync --flush-only`
   discipline.
 - Bead: `flywheel-1irgl`.
+
+## owner-custody-missing
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `owner-custody-missing`
+
+Event Count: 71 events in 7 days
+
+Severity: medium
+
+Cost: Mobile-eats kept redispatching and polling `mobile-eats-31g` after the
+same Nango owner-social connection was absent. The loop produced 71
+medium-severity rows and many idle receipts, but no new owner-state delta,
+which burned worker cycles and made the project look continuously active while
+the underlying custody prerequisite remained unchanged.
+
+Root Cause: The 2026-05-06 review correctly routed the class to the existing
+product owner bead `mobile-eats-31g`, with `mobile-eats-1en` covering callback
+evidence formatting, but the flywheel repo still lacked layer-2 INCIDENTS
+coverage. That left the class eligible for promotion-candidate rediscovery
+even though the downstream owner bead already existed.
+
+Forever-Rule: Repeated owner-custody blockers are not productive redispatch
+work. After the same target artifact reports `owner-custody-missing` twice
+without `owner_state_delta`, stop idle poll/reap redispatches, update the
+single custody owner bead with the latest evidence, and require either a live
+owner-connection proof or an explicit owner decision before live-send can
+resume. Do not file duplicate product canary work or treat idle receipts as
+progress.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote owner-custody-missing`. The existing downstream owner route remains
+`/Users/josh/Developer/mobile-eats/.beads/issues.jsonl#mobile-eats-31g`; this
+entry makes the flywheel L56 coverage explicit so future scans route to the
+known custody owner instead of creating another promotion-candidate bead.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L754`: first
+  `owner-custody-missing` row, showing the Nango owner-social canary could not
+  live-send because the target owner/truck/provider social connection was
+  absent.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L754-L1267`: full 71-row
+  owner-custody cluster behind the promotion candidate.
+- `~/.local/state/flywheel/fuckup-processed.jsonl#L158`: prior
+  `/flywheel:learn --review` row routed the class to existing bead
+  `mobile-eats-31g` and related callback bead `mobile-eats-1en`.
+- Owner bead:
+  `/Users/josh/Developer/mobile-eats/.beads/issues.jsonl#mobile-eats-31g`.
+- Callback evidence bead:
+  `/Users/josh/Developer/mobile-eats/.beads/issues.jsonl#mobile-eats-1en`.
+- Planning substrate: `.flywheel/PLANS/INFRA-GAP-SCAN-2026-05-05.md`
+  D3.G2/D3.G3 and `.flywheel/PLANS/fleet-autonomy-v1-2026-05-05/01-REVIEW-donella.md`
+  revision 7 owner-custody loop primitive.
+- Bead: `flywheel-n3hs0`.
