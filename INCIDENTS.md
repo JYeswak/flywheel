@@ -6273,3 +6273,116 @@ Evidence:
 - Tests: `tests/test_hot_pane_refill_after_callback_reap.sh` and
   `tests/orch-no-punt-chain.sh`.
 - Bead: `flywheel-nh7tt`.
+
+## integrate-prelude-blocked
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `integrate-prelude-blocked`
+
+Event Count: 7 observed rows in 7 days
+
+Severity: medium
+
+Cost: Mobile-eats INTEGRATE prelude repeatedly stopped before callback reaping
+because doctor errors and an active worker pane made integration unsafe. The
+behavior protected live work, but repeated prelude blocks without layer-2
+coverage made the loop look stuck and kept spawning promotion-candidate debt
+instead of routing to the exact doctor/worker-progress blockers.
+
+Root Cause: INTEGRATE prelude had enough evidence to refuse unsafe callback
+reaping: `daily_report_missing`, `storage_low_headroom`, `jeff_corpus_storage_red`,
+and pane 2 still `THINKING`. The missing piece was a durable distinction
+between safe prelude refusal and productive integration work. Without that
+incident target, the same block class recurred as unresolved promotion stock.
+
+Forever-Rule: An INTEGRATE prelude block is a safe refusal, not an idle loop
+failure. When doctor failures or active worker panes make reaping unsafe, do
+not reap callbacks, mutate worker files, or mark work complete. Record the
+blocking doctor classes and worker activity proof, route each blocker to its
+owner, and resume INTEGRATE only after the doctor signal clears or the worker
+progress path reaches a valid callback/stall outcome.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote integrate-prelude-blocked`. This entry gives promotion-candidate bead
+`flywheel-ozha` durable L56 coverage and routes future rows to the doctor
+blocker plus worker-progress receipts instead of creating duplicate promotion
+candidates. It is sibling to `INCIDENTS.md#integrate_worker_active`: active
+worker evidence is safe wait/observe; doctor-prelude failures are safe refusal
+until the blockers clear.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L419-L420`: mobile-eats INTEGRATE
+  prelude blocked on doctor errors including `daily_report_missing` and pane 2
+  still `THINKING`.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L425-L429`: repeated
+  `daily_report_missing` / `storage_low_headroom` prelude blocks while pane 2
+  continued work on `mobile-eats-67r.1`.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L432-L433`: later auth-proof
+  continuation still blocked on doctor errors plus active pane 2.
+- Sibling incident: `INCIDENTS.md#integrate_worker_active`.
+- Doctrine: `AGENTS.md` L91 `DISPATCH-DELIVERY-IS-A-FOUR-STATE-RECEIPT`.
+- Doctrine: `AGENTS.md` L95 worker-stall recovery guidance.
+- Bead: `flywheel-ozha`.
+
+## agent-mail-too-many-open-files
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `agent-mail-too-many-open-files`
+
+Event Count: 8 events in 7 days at promotion-candidate creation; 10
+exact-class rows observed by closeout
+
+Severity: high
+
+Cost: Agent Mail file reservation and session bootstrap calls repeatedly failed
+with "Too many open files" during concurrent worker dispatches. Workers had to
+fall back to narrow path discipline, local append primitives, or incomplete
+reservation receipts, weakening L51's concurrency guarantee exactly when the
+fleet was under high parallel load.
+
+Root Cause: Agent Mail FD pressure was treated as a transient per-worker MCP
+failure instead of a shared substrate health signal. The server could sometimes
+free cached repos or recover on retry, but the recurring class still meant the
+daemon's file descriptor budget, lock-file pressure, and cleanup behavior had
+crossed a fleet-level threshold.
+
+Forever-Rule: A repeated `agent-mail-too-many-open-files` row is a substrate
+health event, not a worker-local reservation exception. After two same-session
+or same-day rows, stop treating reservation fallback as normal, run the Agent
+Mail FD doctor, inspect service `maxfiles` and lock FD pressure, and route to
+the existing Agent Mail launchd/maxfiles recovery owner. Workers may continue
+only on explicitly non-overlapping scoped files with `files_reserved` marked as
+failed; orchestrators must not silently absorb the FD pressure while continuing
+to dispatch overlapping file work.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote agent-mail-too-many-open-files`. This entry gives
+promotion-candidate bead `flywheel-bika` durable L56 coverage and routes future
+rows to the FD doctor plus existing Agent Mail reservation recovery family
+instead of creating duplicate promotion candidates or normalizing reservation
+fallback.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L131-L133`: first three
+  alpsinsurance rows where reservation grant/release, `macro_start_session`, and
+  `file_reservation_paths` failed with "Too many open files".
+- `~/.local/state/flywheel/fuckup-log.jsonl#L135-L137`: three more
+  alpsinsurance bootstrap/reservation failures during the same worker wave.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L139-L140`: seventh and eighth
+  exact-class rows, completing the original promotion threshold.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L2503`: later flywheel worker
+  reservation attempts failed twice with the same class under storage-headroom
+  analysis.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L2505`: side-effect discovery row
+  identified FD exhaustion under sustained Agent Mail query load.
+- Existing incident: `INCIDENTS.md#agent-mail-reservation-timeout`.
+- Diagnostic: `.flywheel/scripts/agent-mail-fd-doctor.sh`.
+- Test: `tests/agent-mail-fd-doctor.sh`.
+- Skill: `~/.claude/skills/agent-mail/SKILL.md`.
+- Bead: `flywheel-bika`.
