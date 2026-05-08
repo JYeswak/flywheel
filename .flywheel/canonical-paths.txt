@@ -189,3 +189,6 @@ zeststream_voice_prepublish_hook	.flywheel/scripts/zeststream-public-prepublish-
 zeststream_voice_prepublish_tests	tests/zeststream-public-prepublish-hook.sh	flywheel-06zn	Fixture-backed tests for public pass, public fail, and non-public skip.
 jeff_pattern_citation_probe	.flywheel/scripts/jeff-pattern-citation-probe.sh	flywheel-jhcd	Validator and doctor-equivalent probe for uncited Jeff-originated doctrine, skill, and plan imports.
 jeff_pattern_citation_tests	tests/jeff-pattern-citation-probe.sh	flywheel-jhcd	Fixture-backed tests for valid, vague, and missing-file-line Jeff import citations.
+failure_taxonomy_contract	.flywheel/doctrine/failure-taxonomy.md	flywheel-esdx	Canonical failure_class, retry_policy, and recovery_hint taxonomy for validation receipts, doctor JSON, callbacks, and repair helpers.
+failure_taxonomy_emit_helper	.flywheel/scripts/failure-class-emit.sh	flywheel-esdx	Read-only helper mapping legacy raw failure shapes to failure-taxonomy-envelope/v1 JSON.
+failure_taxonomy_emit_tests	tests/failure-class-emit.sh	flywheel-esdx	Fixture-backed tests for open-child, DCG, reservation, runtime, artifact, context drift, correctness, invalid callback, and unknown mappings.
