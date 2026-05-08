@@ -5619,3 +5619,59 @@ Evidence:
 - Skill: `~/.claude/skills/agent-mail/SKILL.md`.
 - Existing related bead: `flywheel-1d3` fleet-mail identity token vault.
 - Bead: `flywheel-amzsf`.
+
+## br-prefix-mismatch
+
+Date: 2026-05-08
+
+Promotion Action: NEW
+
+Class: `br-prefix-mismatch`
+
+Event Count: 3 events in 7 days
+
+Severity: medium
+
+Cost: Mobile-eats workers hit `br` prefix checks while trying to inspect or
+create beads: `br show` failed with `CONFIG_ERROR Prefix mismatch expected
+mobile found flywheel-wire ids`, auto-import rejected mixed-prefix JSONL, and
+follow-up bead creation had to be skipped even though task validation itself
+passed. Each event forced read-only fallback through SQLite or `.beads/issues.jsonl`
+and made workers choose between preserving repo truth and filing needed follow-up
+work.
+
+Root Cause: The repo-local Beads substrate contained issue IDs from more than
+one prefix family. `br` correctly refused to auto-import or mutate mixed-prefix
+state, but the class had no layer-2 INCIDENTS entry routing it to schema/ID
+normalization. The 2026-05-06 learn review explicitly identified
+`br-prefix-mismatch` as a net-new gap with no targeted memory or classifier
+coverage.
+
+Forever-Rule: A Beads prefix mismatch is schema/ID drift, not a reason to
+guess a manual closeout path. Treat mutating `br create`, `br close`, and
+auto-import as blocked until the prefix state is normalized. Use read-only
+inspection with `--no-auto-import --allow-stale`, SQLite, or direct JSONL reads
+only to recover context; then route a Beads schema/ID normalization owner bead
+or update the existing recovery owner. Do not manually rewrite issue IDs or
+append mixed-prefix rows from a worker closeout.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote br-prefix-mismatch`. This entry gives promotion-candidate bead
+`flywheel-tdy4m` durable L56 coverage and points future scans at Beads
+schema/ID normalization instead of repeated worker-local fallback.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L2269`: `br show` failed with
+  `CONFIG_ERROR Prefix mismatch expected mobile found flywheel-wire ids`; the
+  worker recovered context read-only through SQLite and `.beads/issues.jsonl`.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L2326`: auto-import rejected
+  `.beads/issues.jsonl` because `flywheel-wire` IDs violated the mobile prefix;
+  read-only `br` with `--no-auto-import --allow-stale` worked.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L2345`: follow-up bead writes were
+  blocked by mixed issue prefixes while the task's Stripe KV dedupe work passed
+  verification.
+- Review report: `.flywheel/reports/learn-review-2026-05-06.md` ranked
+  `br-prefix-mismatch` as a rising net-new/partial class and recommended
+  `feedback_br_prefix_mismatch_is_schema_drift.md`.
+- Skill: `~/.claude/skills/beads-br/SKILL.md`.
+- Bead: `flywheel-tdy4m`.
