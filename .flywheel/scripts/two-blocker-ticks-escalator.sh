@@ -10,6 +10,7 @@ DISPATCH_LOG="${TWO_BLOCKER_TICKS_DISPATCH_LOG:-$REPO/.flywheel/dispatch-log.jso
 STATE="${TWO_BLOCKER_TICKS_STATE:-$HOME/.local/state/flywheel/two-blocker-ticks-state.json}"
 LEDGER="${TWO_BLOCKER_TICKS_LEDGER:-$HOME/.local/state/flywheel/two-blocker-ticks-escalator-ledger.jsonl}"
 COORDINATION_LOG="${TWO_BLOCKER_TICKS_COORDINATION_LOG:-$HOME/.local/state/flywheel/cross-orch-coordination.jsonl}"
+FUCKUP_LOG="${TWO_BLOCKER_TICKS_FUCKUP_LOG:-$HOME/.local/state/flywheel/fuckup-log.jsonl}"
 ISSUES_JSONL="${TWO_BLOCKER_TICKS_ISSUES_JSONL:-$REPO/.beads/issues.jsonl}"
 THRESHOLD="${TWO_BLOCKER_TICKS_THRESHOLD:-2}"
 COMMAND=""
@@ -42,15 +43,16 @@ info_json() {
 }
 
 run_check() {
-  python3 - "$REPO" "$DISPATCH_LOG" "$STATE" "$LEDGER" "$COORDINATION_LOG" "$ISSUES_JSONL" "$THRESHOLD" "$AUTO_ESCALATE" "${TWO_BLOCKER_TICKS_NOW:-}" "$JSON_OUT" "${TWO_BLOCKER_TICKS_TICK_ID:-}" "${TWO_BLOCKER_TICKS_LOOKBACK_HOURS:-12}" <<'PY'
+  python3 - "$REPO" "$DISPATCH_LOG" "$STATE" "$LEDGER" "$COORDINATION_LOG" "$FUCKUP_LOG" "$ISSUES_JSONL" "$THRESHOLD" "$AUTO_ESCALATE" "${TWO_BLOCKER_TICKS_NOW:-}" "$JSON_OUT" "${TWO_BLOCKER_TICKS_TICK_ID:-}" "${TWO_BLOCKER_TICKS_LOOKBACK_HOURS:-12}" <<'PY'
 import fcntl, hashlib, json, os, re, sys, tempfile
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-repo, dispatch_log, state_path, ledger_path, coord_path, issues_path = map(Path, sys.argv[1:7])
-threshold, auto_escalate = int(sys.argv[7]), sys.argv[8] == "1"
-now_arg, json_out, tick_id_arg, lookback_hours = sys.argv[9], sys.argv[10] == "1", sys.argv[11], float(sys.argv[12])
+repo, dispatch_log, state_path, ledger_path, coord_path, fuckup_log, issues_path = map(Path, sys.argv[1:8])
+threshold, auto_escalate = int(sys.argv[8]), sys.argv[9] == "1"
+now_arg, json_out, tick_id_arg, lookback_hours = sys.argv[10], sys.argv[11] == "1", sys.argv[12], float(sys.argv[13])
 SCHEMA_VERSION = "two-blocker-ticks/v1"
+CAPSULE_SCHEMA_VERSION = "sister-orch-escalation-capsule/v1"
 CLOSED = {"closed", "done", "resolved", "archived"}
 
 def parse_ts(value, base=None):
@@ -203,6 +205,50 @@ def existing_capsule(path, dedupe_key):
     rows, _ = read_jsonl(path)
     return any(row.get("dedupe_key") == dedupe_key and (row.get("kind") == "blocker_escalation" or row.get("event") == "blocker_escalation") for row in rows)
 
+def sister_session():
+    return os.environ.get("TWO_BLOCKER_TICKS_SISTER_SESSION") or repo.name or "unknown"
+
+def evidence_paths(bead):
+    return [str(dispatch_log), str(issues_path), str(state_path), str(ledger_path)]
+
+def capsule_subject(bead):
+    return f"[ESCALATE] blocker survived 2 ticks: {bead['bead_id']}"
+
+def capsule_body(bead, escalation_bead_id):
+    evidence = ",".join(evidence_paths(bead))
+    return "\n".join([
+        f"schema_version: {CAPSULE_SCHEMA_VERSION}",
+        f"blocker_id: {bead['bead_id']}",
+        f"tick_count: {bead['consecutive_tick_count']}",
+        f"sister_session: {sister_session()}",
+        "blocker_class: sister-orch-2-tick-blocker",
+        f"evidence_paths: {evidence}",
+        f"escalation_bead_id: {escalation_bead_id}",
+        f"next_action: /flywheel:plan accretive fix for {bead['bead_id']}",
+        "owner_route: flywheel:1",
+    ]) + "\n"
+
+def append_fuckup_for_capsule(bead, escalation_bead_id, audit_ts):
+    row = {
+        "ts": audit_ts,
+        "session": sister_session(),
+        "pane": None,
+        "agent": "two-blocker-ticks-escalator",
+        "git_repo": str(repo),
+        "trauma_class": "sister-orch-2-tick-blocker",
+        "severity": "high",
+        "what_happened": f"sister orchestrator blocker {bead['bead_id']} survived {bead['consecutive_tick_count']} consecutive ticks",
+        "what_attempted": ["local sister-orch tick loop retried blocker path twice"],
+        "what_worked": ["escalated to flywheel:1 with [ESCALATE] capsule and /flywheel:plan staging bead"],
+        "rule_violated_or_proven": "feedback_two_blocker_ticks_escalate_to_flywheel_plan",
+        "evidence": evidence_paths(bead),
+        "should_become": "bead",
+        "escalation_bead_id": escalation_bead_id,
+        "blocker_id": bead["bead_id"],
+        "tick_count": bead["consecutive_tick_count"],
+    }
+    append_jsonl(fuckup_log, row)
+
 def blocked_from_dispatch(rows, now, closed_issue_index):
     latest, blocked = {}, {}
     closed_via_issues = []
@@ -271,7 +317,7 @@ def build_payload():
                 bead_id, action = existing, "reused"
             else:
                 bead_id = "flywheel-escalate-" + hashlib.sha1(bead["bead_id"].encode()).hexdigest()[:8]
-                row = {"id": bead_id, "title": title, "description": f"Auto-filed by two-blocker-ticks-escalator for blocker {bead['bead_id']} surviving {bead['consecutive_tick_count']} consecutive ticks. flywheel:1 should consume this through /flywheel:plan; detector does not auto-trigger the plan.", "status": "open", "priority": 0, "issue_type": "task", "created_at": audit_ts, "updated_at": audit_ts, "created_by": "two-blocker-ticks-escalator", "source_repo": str(repo), "labels": ["two-blocker-ticks-escalate", "flywheel-plan", "jsonl-fallback"]}
+                row = {"id": bead_id, "title": title, "description": f"Auto-filed by two-blocker-ticks-escalator for blocker {bead['bead_id']} surviving {bead['consecutive_tick_count']} consecutive ticks. Next action: /flywheel:plan accretive fix for {bead['bead_id']}.", "status": "open", "priority": 0, "issue_type": "task", "created_at": audit_ts, "updated_at": audit_ts, "created_by": "two-blocker-ticks-escalator", "source_repo": str(repo), "labels": ["two-blocker-ticks-escalate", "flywheel-plan", "jsonl-fallback"]}
                 append_jsonl(issues_path, row)
                 latest[bead_id] = row
                 filed.append(bead_id)
@@ -280,8 +326,9 @@ def build_payload():
             if existing_capsule(coord_path, dedupe):
                 cap_action = "reused"
             else:
-                cap = {"schema_version": "cross_orch_handoff.v1", "ts": audit_ts, "kind": "blocker_escalation", "event": "blocker_escalation", "from": "two-blocker-ticks-escalator", "to": "flywheel:1", "target": "flywheel-orch", "target_session": "flywheel", "target_pane": 1, "requested_owner": "flywheel:1", "blocker_type": "flywheel_class", "blocker_class": "two-blocker-ticks-escalate", "bead_id": bead["bead_id"], "consecutive_tick_count": bead["consecutive_tick_count"], "callback_expected_by": bead["callback_expected_by"], "proposed_action": f"/flywheel:plan accretive fix for {bead['bead_id']}", "flywheel_orch_action_required": True, "dedupe_key": dedupe}
+                cap = {"schema_version": "cross_orch_handoff.v1", "capsule_schema_version": CAPSULE_SCHEMA_VERSION, "ts": audit_ts, "kind": "blocker_escalation", "event": "blocker_escalation", "from": "two-blocker-ticks-escalator", "to": "flywheel:1", "target": "flywheel-orch", "target_session": "flywheel", "target_pane": 1, "requested_owner": "flywheel:1", "blocker_type": "flywheel_class", "blocker_class": "sister-orch-2-tick-blocker", "bead_id": bead["bead_id"], "blocker_id": bead["bead_id"], "tick_count": bead["consecutive_tick_count"], "consecutive_tick_count": bead["consecutive_tick_count"], "sister_session": sister_session(), "callback_expected_by": bead["callback_expected_by"], "proposed_action": f"/flywheel:plan accretive fix for {bead['bead_id']}", "flywheel_orch_action_required": True, "agent_mail_subject": capsule_subject(bead), "agent_mail_body_md": capsule_body(bead, bead_id), "evidence_paths": evidence_paths(bead), "dedupe_key": dedupe}
                 append_jsonl(coord_path, cap)
+                append_fuckup_for_capsule(bead, bead_id, audit_ts)
                 capsules.append(dedupe)
                 cap_action = "jsonl_append"
             bead["escalated"] = True
