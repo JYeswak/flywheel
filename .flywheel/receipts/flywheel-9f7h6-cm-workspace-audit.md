@@ -72,7 +72,7 @@ rg -n '"project"\s*:\s*"[^/"]+"' /Users/josh/.local/state/flywheel/*.jsonl /User
 
 Findings:
 
-- Basename-shaped `project` hits: 2,124.
+- Basename-shaped `project` hits: 2,129.
 - Files with basename-shaped project fields: 4.
 - `loop-driver-runs.jsonl` dominates the count and uses labels such as
   `project:"flywheel"` alongside absolute loop/plist paths.
