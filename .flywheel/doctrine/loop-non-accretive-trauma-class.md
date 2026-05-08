@@ -127,6 +127,64 @@ the prepared-codex-chevron pattern from a genuinely stale buffer (e.g. an
 incomplete previous dispatch that never submitted). Until then, the override
 pattern above is canonical for codex-pane dispatches.
 
+## Hard rule: every dispatch MUST verify the message landed
+
+A separate failure surfaced 2026-05-08T15:50Z when I bypassed the validator
+override path and sent dispatches to flywheel:2/3/4 directly via raw
+`ntm send`. State probes showed all three panes shifted to THINKING within 5
+seconds. **But two of three dispatches sat in the codex chevron buffer
+without submitting** — Joshua had to manually press Enter on panes 2 and 3.
+The orchestrator had recorded false progress.
+
+This is exactly the `codex-chevron-stuck-on-dispatch` trauma class. The
+canonical resolution is `.flywheel/scripts/dispatch-and-verify.sh`:
+
+```bash
+.flywheel/scripts/dispatch-and-verify.sh <session> <pane> <dispatch-file-path>
+```
+
+Behavior:
+1. Sends the canonical "Read <file> and execute it..." prompt via `ntm send`
+2. Sleeps 15s, probes pane state via `ntm --robot-activity`
+3. If state is `WAITING` or `THINKING` with zero velocity, fires empty Enter
+4. Retries up to 3 cycles
+5. Exits 0 on confirmed `THINKING_LIVE`; exits 1 with diagnostic dump if stuck
+
+**Hard rule (effective 2026-05-08):** every worker-pane dispatch MUST go
+through `dispatch-and-verify.sh` OR its equivalent post-send delivery
+postcheck (per `/flywheel:dispatch` Step 5b). A successful `ntm send` exit
+code is NOT proof of submission — only post-send pane-state probing is.
+
+Bypassing the verify path produces:
+- False `dispatch_status=send_ok` rows in dispatch-log
+- Beads marked in-flight that never start
+- Orchestrator scheduling next ticks expecting callback events that never
+  arrive
+- Apparent loop activity with zero accretion
+
+**Forbidden orchestrator pattern:**
+
+```bash
+# BANNED — no post-send verification
+FLYWHEEL_DISPATCH_WRAPPER=1 /Users/josh/.local/bin/ntm send "$SESSION" --pane="$PANE" "$WORKER_PROMPT"
+```
+
+**Canonical orchestrator pattern:**
+
+```bash
+# REQUIRED — verifies pane shifted to THINKING_LIVE before continuing
+.flywheel/scripts/dispatch-and-verify.sh "$SESSION" "$PANE" "/tmp/dispatch_${TASK_ID}.md"
+DISPATCH_VERIFIED_RC=$?
+if [[ $DISPATCH_VERIFIED_RC -ne 0 ]]; then
+  # Update dispatch-log row dispatch_status=delivery_failed; route via fuckup-log
+  exit 4
+fi
+```
+
+The L130 `flywheel-loop-dispatch-transport-gate` hook already requires
+`FLYWHEEL_DISPATCH_WRAPPER=1` proof on raw `ntm send`. Extending that to
+require `dispatch-and-verify` invocation is the next gate-hardening step.
+
 ## Cross-references
 
 - LOOP.md step 4 ("Dispatch every idle worker pane")
