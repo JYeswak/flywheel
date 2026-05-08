@@ -1,0 +1,11 @@
+# flywheel-te36 canary secret scan canonical surfaces
+#
+# These are evidence-artifact surfaces where canary-secret scans should run
+# before persistence or closeout. Values are path/glob inputs accepted by
+# .flywheel/scripts/canary-secret-scan.sh.
+.flywheel/receipts/**
+.flywheel/dispatch-log.jsonl
+.flywheel/reports/**
+.flywheel/runtime/**
+.flywheel/validation-receipts/**
+/tmp/flywheel-*-evidence.md

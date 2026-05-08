@@ -1,0 +1,43 @@
+{
+  "schema_version": "canary-secret-corpus/v1",
+  "synthetic_only": true,
+  "owner_bead": "flywheel-te36",
+  "patterns": [
+    {
+      "name": "aws_access_key_id_canary",
+      "example": "CANARY_TEST_AKIA0000000000000000",
+      "purpose": "Detect command-arg or markdown evidence that carries AWS-shaped canary material without using a real AWS key."
+    },
+    {
+      "name": "agent_mail_registration_token_canary",
+      "example": "CANARY_TEST_AGENTMAIL_REG_abcdefghijklmnopqrstuvwxyz12",
+      "purpose": "Detect Agent Mail registration-token echo regressions with synthetic material only."
+    },
+    {
+      "name": "bearer_token_canary",
+      "example": "CANARY_TEST_BEARER_abcdefghijklmnopqrstuvwxyz12",
+      "purpose": "Detect bearer-token-shaped canaries in callback, doctor, or dispatch evidence."
+    },
+    {
+      "name": "github_pat_canary",
+      "example": "CANARY_TEST_GITHUB_PAT_abcdefghijklmnopqrstuvwxyz12",
+      "purpose": "Detect PAT-shaped canaries without using a real GitHub token prefix."
+    },
+    {
+      "name": "openai_key_canary",
+      "example": "CANARY_TEST_OPENAI_SK_abcdefghijklmnopqrstuvwxyz12",
+      "purpose": "Detect model-provider-key-shaped canaries without using a live provider prefix."
+    },
+    {
+      "name": "env_secret_canary",
+      "example": "CANARY_TEST_ENV_SECRET_abcdefghijklmnopqrstuvwxyz12",
+      "purpose": "Detect env-shaped secret canaries in evidence and reports."
+    }
+  ],
+  "false_positive_examples": [
+    "CANARY_TEST_AKIA_PLACEHOLDER",
+    "CANARY_TEST_BEARER_REDACTED",
+    "[REDACTED:agent_mail_registration_token]",
+    "CANARY_TEST_OPENAI_SK_<redacted>"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "schema_version": "doctor-fixture/v1",
+  "status": "fail",
+  "payload": {
+    "authorization": "CANARY_TEST_BEARER_abcdefghijklmnopqrstuvwxyz12",
+    "env_secret": "CANARY_TEST_ENV_SECRET_abcdefghijklmnopqrstuvwxyz12"
+  }
+}

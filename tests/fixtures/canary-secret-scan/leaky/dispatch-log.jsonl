@@ -1,0 +1,1 @@
+{"task_id":"canary-dispatch","env":"AGENT_MAIL_REGISTRATION_TOKEN=CANARY_TEST_AGENTMAIL_REG_abcdefghijklmnopqrstuvwxyz12","args":["--token","CANARY_TEST_GITHUB_PAT_abcdefghijklmnopqrstuvwxyz12"]}
