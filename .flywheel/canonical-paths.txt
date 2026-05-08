@@ -3,6 +3,8 @@
 validation_receipt_schema_v1	.flywheel/validation-schema/v1/schema.json	flywheel-bc7c	Canonical validation receipt schema for validate-and-redispatch B01.
 validation_receipt_parser_v1	.flywheel/validation-schema/v1/parse.sh	flywheel-bc7c	Read-only parser for validation receipt fixtures and callback receipts.
 validation_receipt_fixtures_v1	.flywheel/validation-schema/v1/fixtures	flywheel-bc7c	Pass/fail fixture corpus for validation receipt v1.
+validation_receipt_agent_mail_fields	.flywheel/scripts/validate-callback.py	flywheel-f2bm	Dispatch validation receipt fields for agent_mail_thread, identity_name, files_reserved, files_released, reservation_conflicts, and reservation_lifecycle state.
+validation_receipt_agent_mail_tests	tests/validate-callback.sh	flywheel-f2bm	Fixture-backed tests for clean release, missing release, conflict, expired, force-released, and no-edit reservation lifecycle receipts without token exposure.
 dispatch_template_validation_block	/Users/josh/.claude/commands/flywheel/_shared/dispatch-template.md	flywheel-scwo	Shared worker dispatch template with required VALIDATION BLOCK.
 dispatch_template_audit_v1	.flywheel/validation-schema/v1/dispatch-template-audit.sh	flywheel-scwo	Read-only audit for dispatch validation-block requirements.
 dispatch_template_fixtures_v1	.flywheel/validation-schema/v1/fixtures/dispatch-template	flywheel-scwo	Valid/invalid dispatch packet fixtures for B02.

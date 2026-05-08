@@ -17,6 +17,7 @@
     "evidence",
     "artifact_checks",
     "runtime_context",
+    "agent_mail",
     "bead_actions",
     "learn_route",
     "chain_blocker"
@@ -141,6 +142,59 @@
         },
         "context_drift": {
           "type": "boolean"
+        }
+      }
+    },
+    "agent_mail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agent_mail_thread",
+        "identity_name",
+        "files_reserved",
+        "files_released",
+        "reservation_conflicts",
+        "reservation_lifecycle"
+      ],
+      "properties": {
+        "agent_mail_thread": {
+          "type": ["string", "null"]
+        },
+        "identity_name": {
+          "type": ["string", "null"]
+        },
+        "files_reserved": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "files_released": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "reservation_conflicts": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "reservation_lifecycle": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "reason"],
+          "properties": {
+            "state": {
+              "enum": [
+                "no_reservation_required",
+                "reservation_succeeded",
+                "released",
+                "conflict",
+                "expired",
+                "force-released"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
         }
       }
     },

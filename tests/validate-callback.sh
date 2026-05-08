@@ -51,6 +51,59 @@ timeout["timeout"] = True
 timeout["agent_status"] = "unresponsive"
 timeout["artifact_paths"] = []
 (tmp / "runtime-timeout-callback.json").write_text(json.dumps(timeout))
+correctness = dict(base)
+correctness["status"] = "fail"
+correctness["failure_classes"] = ["l112_verify_failed"]
+correctness["bead_actions"] = [{"action": "no_bead_reason", "reason": "fixture correctness regression routed"}]
+(tmp / "correctness-callback.json").write_text(json.dumps(correctness))
+clean_reservation = dict(base)
+clean_reservation["agent_mail_thread"] = "thread-clean-001"
+clean_reservation["identity_name"] = "CloudyMill"
+clean_reservation["files_reserved"] = ["README.md"]
+clean_reservation["files_released"] = ["README.md"]
+(tmp / "clean-reservation-callback.json").write_text(json.dumps(clean_reservation))
+missing_release = dict(base)
+missing_release["agent_mail"] = {
+    "agent_mail_thread": "thread-missing-release-001",
+    "identity_name": "CloudyMill",
+    "files_reserved": ["AGENTS.md"],
+    "files_released": [],
+}
+missing_release["bead_actions"] = [{"action": "no_bead_reason", "reason": "fixture missing release routed to worker correction"}]
+(tmp / "missing-release-callback.json").write_text(json.dumps(missing_release))
+conflict = dict(base)
+conflict["agent_mail"] = {
+    "agent_mail_thread": "thread-conflict-001",
+    "identity_name": "CloudyMill",
+    "files_reserved": ["AGENTS.md"],
+    "files_released": [],
+    "reservation_conflicts": ["holder=OtherPane:path=AGENTS.md"],
+}
+conflict["bead_actions"] = [{"action": "no_bead_reason", "reason": "fixture conflict evidence routed to orchestrator"}]
+(tmp / "reservation-conflict-callback.json").write_text(json.dumps(conflict))
+expired = dict(base)
+expired["agent_mail"] = {
+    "agent_mail_thread": "thread-expired-001",
+    "identity_name": "CloudyMill",
+    "files_reserved": ["README.md"],
+    "files_released": [],
+    "reservation_state": "expired",
+}
+expired["bead_actions"] = [{"action": "no_bead_reason", "reason": "fixture expired reservation routed to re-reserve"}]
+(tmp / "expired-reservation-callback.json").write_text(json.dumps(expired))
+force_released = dict(base)
+force_released["agent_mail"] = {
+    "agent_mail_thread": "thread-force-release-001",
+    "identity_name": "CloudyMill",
+    "files_reserved": ["README.md"],
+    "files_released": [],
+    "reservation_state": "force-released",
+}
+(tmp / "force-released-callback.json").write_text(json.dumps(force_released))
+no_edit = dict(base)
+no_edit["files_reserved"] = "NONE_NO_EDITS"
+no_edit["files_released"] = "NONE_NO_EDITS"
+(tmp / "no-edit-callback.json").write_text(json.dumps(no_edit))
 (tmp / "invalid-callback.json").write_text("{not-json")
 PY
 }
@@ -68,7 +121,7 @@ assert_jq() {
 make_fixtures
 
 schema_out="$(run_json schema --schema)"
-assert_jq "$schema_out" '.command == "flywheel-loop validate-callback" and .read_only_default == true' "B03_AG1 command surface schema"
+assert_jq "$schema_out" '.command == "flywheel-loop validate-callback" and .read_only_default == true and (.agent_mail_receipt_fields | index("reservation_conflicts")) and (.reservation_lifecycle_states | index("force-released"))' "B03_AG1 command surface schema"
 
 examples_out="$(run_json examples --examples)"
 assert_jq "$examples_out" '(.examples | length) >= 4' "B03_AG2 examples surface"
@@ -80,7 +133,7 @@ if [[ "$missing_rc" != "0" ]]; then
 else
   fail "B03_AG3 missing artifact exits non-zero"
 fi
-assert_jq "$missing_out" '.status == "fail" and .failure_class == "artifact_missing" and .summary_allowed == false and .integration_allowed == false' "B03_AG3 missing artifact receipt"
+assert_jq "$missing_out" '.status == "fail" and .failure_class == "missing_artifact" and .retry_policy == "manual" and .summary_allowed == false and .integration_allowed == false' "B03_AG3 missing artifact receipt"
 assert_jq "$missing_out" '.remediation_required == true and .remediation_present == false' "B03_AG7 failed callback requires remediation before summary"
 
 timeout_out="$(run_json timeout --dispatch-id b03-timeout --callback-ref "$TMP/runtime-timeout-callback.json")"
@@ -90,7 +143,7 @@ if [[ "$timeout_rc" == "3" ]]; then
 else
   fail "B03_AG4 runtime timeout exits unknown"
 fi
-assert_jq "$timeout_out" '.status == "unknown" and .failure_class == "runtime_unresponsive"' "B03_AG4 runtime timeout class"
+assert_jq "$timeout_out" '.status == "unknown" and .failure_class == "transient" and .retry_policy == "exponential"' "B03_AG4 runtime timeout class"
 
 valid_out="$(run_json valid --dispatch-id b03-valid --callback-ref "$TMP/valid-done-callback.json")"
 assert_jq "$valid_out" '.status == "pass" and (.validation_receipt.evidence | length) == 1 and .schema_valid == true' "B03_AG5 valid DONE records typed evidence"
@@ -117,7 +170,31 @@ jr_valid_out="$(run_json jr-valid --dispatch-id jr-valid --task-description "ord
 assert_jq "$jr_valid_out" '.status == "pass" and .meta.dispatch_josh_request_id == "jr-test-001" and .meta.callback_josh_request_id == "jr-test-001"' "sur0 matching josh_request_id passes validation"
 
 invalid_out="$(run_json invalid --dispatch-id b03-invalid --callback-ref "$TMP/invalid-callback.json")"
-assert_jq "$invalid_out" '.status == "fail" and (.failure_classes | index("validation_receipt_schema_invalid"))' "B03 audit amendment invalid callback receipt"
+assert_jq "$invalid_out" '.status == "fail" and (.failure_classes | index("validation_receipt_schema_invalid")) and .failure_class == "invalid_callback" and .retry_policy != "exponential"' "B03 audit amendment invalid callback receipt"
+
+correctness_out="$(run_json correctness --dispatch-id b03-correctness --callback-ref "$TMP/correctness-callback.json")"
+assert_jq "$correctness_out" '.status == "fail" and .failure_class == "correctness" and .retry_policy == "permanent"' "correctness regression is permanent not flake"
+
+clean_reservation_out="$(run_json clean-reservation --dispatch-id f2bm-clean --callback-ref "$TMP/clean-reservation-callback.json")"
+assert_jq "$clean_reservation_out" '.status == "pass" and .validation_receipt.agent_mail.agent_mail_thread == "thread-clean-001" and .validation_receipt.agent_mail.identity_name == "CloudyMill" and .validation_receipt.agent_mail.files_reserved == ["README.md"] and .validation_receipt.agent_mail.files_released == ["README.md"] and .validation_receipt.agent_mail.reservation_conflicts == [] and .validation_receipt.agent_mail.reservation_lifecycle.state == "released"' "f2bm clean reservation lifecycle passes"
+
+missing_release_out="$(run_json missing-release --dispatch-id f2bm-missing-release --callback-ref "$TMP/missing-release-callback.json")"
+assert_jq "$missing_release_out" '.status == "fail" and (.failure_classes | index("reservation_missing_release")) and .validation_receipt.agent_mail.reservation_lifecycle.state == "reservation_succeeded"' "f2bm missing release blocks validation"
+
+reservation_conflict_out="$(run_json reservation-conflict --dispatch-id f2bm-conflict --callback-ref "$TMP/reservation-conflict-callback.json")"
+assert_jq "$reservation_conflict_out" '.status == "fail" and (.failure_classes | index("reservation_conflict")) and .validation_receipt.agent_mail.reservation_lifecycle.state == "conflict" and (.validation_receipt.agent_mail.reservation_conflicts | length) == 1' "f2bm reservation conflict blocks validation"
+
+expired_reservation_out="$(run_json expired-reservation --dispatch-id f2bm-expired --callback-ref "$TMP/expired-reservation-callback.json")"
+assert_jq "$expired_reservation_out" '.status == "fail" and (.failure_classes | index("reservation_expired")) and .validation_receipt.agent_mail.reservation_lifecycle.state == "expired"' "f2bm expired reservation blocks validation"
+
+force_released_out="$(run_json force-released --dispatch-id f2bm-force-released --callback-ref "$TMP/force-released-callback.json")"
+assert_jq "$force_released_out" '.status == "pass" and .validation_receipt.agent_mail.reservation_lifecycle.state == "force-released"' "f2bm force-released reservation is distinguished"
+
+no_edit_out="$(run_json no-edit --dispatch-id f2bm-no-edit --callback-ref "$TMP/no-edit-callback.json")"
+assert_jq "$no_edit_out" '.status == "pass" and .validation_receipt.agent_mail.reservation_lifecycle.state == "no_reservation_required" and .validation_receipt.agent_mail.files_reserved == ["NONE_NO_EDITS"]' "f2bm no-edit dispatch records no reservation required"
+
+raw_callback_out="$(run_json raw-callback --dispatch-id f2bm-raw --callback-ref "DONE f2bm evidence=$TMP/evidence.md josh_request_id=null agent_mail_thread=thread-raw-001 identity_name=CloudyMill files_reserved=README.md files_released=README.md reservation_conflicts=none no_bead_reason=raw-callback-fixture-routed")"
+assert_jq "$raw_callback_out" '.status == "pass" and .validation_receipt.agent_mail.agent_mail_thread == "thread-raw-001" and .validation_receipt.agent_mail.identity_name == "CloudyMill" and .validation_receipt.agent_mail.reservation_lifecycle.state == "released"' "f2bm raw worker callback fields parse without tokens"
 
 receipt_out="$(run_json write --dispatch-id b03-write --callback-ref "$TMP/valid-done-callback.json" --write-receipt --receipt-dir "$TMP/receipts")"
 receipt_path="$(jq -r '.receipt_path' "$receipt_out")"

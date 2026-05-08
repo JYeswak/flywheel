@@ -71,6 +71,9 @@ TAXONOMY_RULES: tuple[tuple[set[str], str, str, str], ...] = (
             "callback_missing_josh_request_id",
             "callback_josh_request_id_mismatch",
             "callback_validation_failed",
+            "reservation_conflict",
+            "reservation_expired",
+            "reservation_missing_release",
         },
         "invalid_callback",
         "manual",
@@ -119,6 +122,83 @@ def parse_kv_text(raw: str) -> dict[str, str]:
     for match in re.finditer(r"([A-Za-z_][A-Za-z0-9_-]*)=([^ \t\n]+)", raw):
         out[match.group(1)] = match.group(2).strip("`\"'")
     return out
+
+
+def split_csv_field(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    if not isinstance(value, str):
+        return []
+    text = value.strip()
+    if not text or text in {"none", "NONE", "null"}:
+        return []
+    return [part.strip() for part in text.split(",") if part.strip()]
+
+
+def reservation_field(source: dict[str, Any], kv: dict[str, str], key: str) -> Any:
+    if key in source:
+        return source[key]
+    agent_mail = source.get("agent_mail") if isinstance(source.get("agent_mail"), dict) else {}
+    if key in agent_mail:
+        return agent_mail[key]
+    return kv.get(key)
+
+
+def build_agent_mail_receipt(source: dict[str, Any], kv: dict[str, str]) -> tuple[dict[str, Any], list[str]]:
+    fields = {
+        "agent_mail_thread": reservation_field(source, kv, "agent_mail_thread"),
+        "identity_name": reservation_field(source, kv, "identity_name"),
+        "files_reserved": reservation_field(source, kv, "files_reserved"),
+        "files_released": reservation_field(source, kv, "files_released"),
+        "reservation_conflicts": reservation_field(source, kv, "reservation_conflicts"),
+    }
+
+    files_reserved = split_csv_field(fields["files_reserved"])
+    files_released = split_csv_field(fields["files_released"])
+    reservation_conflicts = split_csv_field(fields["reservation_conflicts"])
+    reserved_markers = set(files_reserved)
+    released_markers = set(files_released)
+    explicit_state = reservation_field(source, kv, "reservation_state")
+    if explicit_state is not None:
+        explicit_state = str(explicit_state).strip().lower().replace("_", "-")
+
+    state = "no_reservation_required"
+    reason = "no edit reservation required"
+    failures: list[str] = []
+
+    if explicit_state in {"expired", "force-released", "force_released"}:
+        state = "force-released" if explicit_state == "force_released" else explicit_state
+        reason = f"explicit reservation_state={state}"
+        if state == "expired":
+            failures.append("reservation_expired")
+    elif reservation_conflicts or any(item.startswith(("CONFLICT", "UNAVAILABLE:conflict")) for item in files_reserved):
+        state = "conflict"
+        reason = "reservation conflict evidence present"
+        failures.append("reservation_conflict")
+    elif reserved_markers & {"NONE_READONLY", "NONE_NO_EDITS"}:
+        state = "no_reservation_required"
+        reason = next(iter(reserved_markers & {"NONE_READONLY", "NONE_NO_EDITS"}))
+    elif files_reserved:
+        unreleased = sorted(set(files_reserved) - set(files_released))
+        if unreleased:
+            state = "reservation_succeeded"
+            reason = f"reserved files missing release: {','.join(unreleased)}"
+            failures.append("reservation_missing_release")
+        else:
+            state = "released"
+            reason = "all reserved files released"
+
+    return {
+        "agent_mail_thread": str(fields["agent_mail_thread"]).strip() if fields["agent_mail_thread"] else None,
+        "identity_name": str(fields["identity_name"]).strip() if fields["identity_name"] else None,
+        "files_reserved": files_reserved,
+        "files_released": files_released,
+        "reservation_conflicts": reservation_conflicts,
+        "reservation_lifecycle": {
+            "state": state,
+            "reason": reason,
+        },
+    }, failures
 
 
 def classify_failure_taxonomy(failure_classes: list[str], status: str) -> dict[str, str | None]:
@@ -290,6 +370,8 @@ def build_receipt(
 
     callback_ref = normalize_callback_ref(source, raw_ref, received_at)
     kv = parse_kv_text(raw_ref)
+    agent_mail_receipt, agent_mail_failures = build_agent_mail_receipt(source, kv)
+    failure_classes.extend(agent_mail_failures)
     l61_required = l61_task_requires_fields(source, task_description)
     l61_missing = l61_missing_fields(source, kv) if l61_required else []
     if l61_missing:
@@ -410,6 +492,7 @@ def build_receipt(
             "timeout_seconds": int(source.get("timeout_seconds") or 0),
             "context_drift": context_drift,
         },
+        "agent_mail": agent_mail_receipt,
         "bead_actions": bead_actions,
         "learn_route": learn_route,
         "chain_blocker": chain_blocker,
@@ -467,6 +550,22 @@ def output_schema(repo: Path) -> dict[str, Any]:
         "optional_args": ["--task-description"],
         "failure_class_enum": sorted(FAILURE_CLASS_VALUES),
         "retry_policy_enum": sorted(RETRY_POLICIES),
+        "agent_mail_receipt_fields": [
+            "agent_mail_thread",
+            "identity_name",
+            "files_reserved",
+            "files_released",
+            "reservation_conflicts",
+            "reservation_lifecycle",
+        ],
+        "reservation_lifecycle_states": [
+            "no_reservation_required",
+            "reservation_succeeded",
+            "released",
+            "conflict",
+            "expired",
+            "force-released",
+        ],
         "read_only_default": True,
         "write_requires": "--write-receipt",
     }
@@ -480,6 +579,7 @@ def examples_json() -> dict[str, Any]:
             "flywheel-loop validate-callback --repo . --dispatch-id abc --callback-ref /tmp/callback.json --write-receipt --json",
             "flywheel-loop validate-callback --repo . --why .flywheel/validation-receipts/abc-done.json --json",
             "flywheel-loop validate-callback --repo . --dispatch-id abc --task-description 'ship canonical L-rule josh_request_id=null' --callback-ref 'DONE abc evidence=/tmp/evidence.md josh_request_id=null agents_md_updated=yes readme_updated=no no_touch_reason=README-not-user-facing' --json",
+            "flywheel-loop validate-callback --repo . --dispatch-id abc --callback-ref 'DONE abc evidence=/tmp/evidence.md josh_request_id=null agent_mail_thread=thread-123 identity_name=CloudyMill files_reserved=README.md files_released=README.md reservation_conflicts=none' --json",
         ]
     }
 

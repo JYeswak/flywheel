@@ -29,6 +29,7 @@ REQUIRED = [
     "evidence",
     "artifact_checks",
     "runtime_context",
+    "agent_mail",
     "bead_actions",
     "learn_route",
     "chain_blocker",
@@ -51,6 +52,7 @@ EVIDENCE_TYPES = {
 }
 ARTIFACT_STATUS = {"exists", "missing", "unknown"}
 RUNTIME_STATUS = {"responsive", "unresponsive", "unknown"}
+RESERVATION_STATES = {"no_reservation_required", "reservation_succeeded", "released", "conflict", "expired", "force-released"}
 BEAD_ACTIONS = {"filed", "updated", "no_bead_reason", "reopen_candidate", "none"}
 LEARN_ROUTES = {"ignore", "review", "promote", "skill_extend"}
 WEAK_NO_BEAD_REASONS = {"", "n/a", "na", "none", "no", "because", "not needed", "skip"}
@@ -198,6 +200,29 @@ def validate_receipt(data, path):
     elif "runtime_context" in data:
         add(errors, "runtime_context_not_object", "runtime_context must be an object", path)
 
+    agent_mail = data.get("agent_mail")
+    if is_obj(agent_mail):
+        for key in ("files_reserved", "files_released", "reservation_conflicts"):
+            value = agent_mail.get(key)
+            if not isinstance(value, list):
+                add(errors, "agent_mail_list_invalid", f"agent_mail.{key} must be an array", path)
+            elif any(not is_nonempty_str(item) for item in value):
+                add(errors, "agent_mail_list_entry_invalid", f"agent_mail.{key} entries must be non-empty strings", path)
+        for key in ("agent_mail_thread", "identity_name"):
+            value = agent_mail.get(key)
+            if value is not None and not is_nonempty_str(value):
+                add(errors, "agent_mail_string_invalid", f"agent_mail.{key} must be null or a non-empty string", path)
+        lifecycle = agent_mail.get("reservation_lifecycle")
+        if is_obj(lifecycle):
+            if lifecycle.get("state") not in RESERVATION_STATES:
+                add(errors, "reservation_lifecycle_state_invalid", f"agent_mail.reservation_lifecycle.state must be one of {sorted(RESERVATION_STATES)}", path)
+            if not is_nonempty_str(lifecycle.get("reason")):
+                add(errors, "reservation_lifecycle_reason_missing", "agent_mail.reservation_lifecycle.reason must be non-empty", path)
+        else:
+            add(errors, "reservation_lifecycle_not_object", "agent_mail.reservation_lifecycle must be an object", path)
+    elif "agent_mail" in data:
+        add(errors, "agent_mail_not_object", "agent_mail must be an object", path)
+
     bead_actions = data.get("bead_actions")
     if not isinstance(bead_actions, list):
         add(errors, "bead_actions_not_array", "bead_actions must be an array", path)
@@ -261,6 +286,14 @@ def validate_receipt(data, path):
 
     if status == "pass" and any(is_obj(a) and a.get("status") == "missing" for a in artifact_checks):
         add(errors, "pass_with_missing_artifact", "status=pass cannot include missing artifacts", path)
+
+    if is_obj(agent_mail):
+        lifecycle = agent_mail.get("reservation_lifecycle") if is_obj(agent_mail.get("reservation_lifecycle")) else {}
+        lifecycle_state = lifecycle.get("state")
+        if lifecycle_state in {"conflict", "expired"} and status == "pass":
+            add(errors, "pass_with_bad_reservation_lifecycle", "conflict or expired reservation lifecycle cannot validate as pass", path)
+        if lifecycle_state == "reservation_succeeded" and status == "pass":
+            add(errors, "pass_with_unreleased_reservation", "reserved files without release cannot validate as pass", path)
 
     evidence_types = {e.get("type") for e in evidence if is_obj(e)}
     if is_obj(callback) and callback.get("kind") == "BLOCKED" and "fuckup_log" not in evidence_types:
