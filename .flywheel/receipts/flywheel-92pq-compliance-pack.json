@@ -1,0 +1,31 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-92pq",
+  "worker": "flywheel-pane4",
+  "status": "done",
+  "source_bead": "flywheel-92pq",
+  "evidence": [
+    {
+      "path": "beads_compliance_audit/passes/2026-05-07T19-03-18Z/beads/flywheel-ty21/scorecard.md",
+      "claim": "flywheel-ty21 evidence now has versioned contract markers and four-lens self-grade"
+    },
+    {
+      "path": ".flywheel/scripts/validate-callback-before-close.sh",
+      "claim": "read-only validator rerun returned SAFE_TO_CLOSE with jeff and public lenses passing"
+    }
+  ],
+  "checks": {
+    "socraticode_queries": 5,
+    "indexed_chunks_observed": 50,
+    "tests_added": 0,
+    "tests_passing": true,
+    "jeff_lens_pass_post_patch": true,
+    "public_lens_pass_post_patch": true,
+    "versioned_artifacts_count": 6,
+    "four_lens_scores_named": 4,
+    "validator_lens_flag_supported": false,
+    "validator_lens_flag_note": "current validate-callback-before-close.v1.1.0 has no --lens flag; full four-lens run was used and jeff/public statuses were checked in JSON",
+    "skill_discoveries": 1,
+    "sd_ids": ["sd-fee1b5f8efb31179"]
+  }
+}
