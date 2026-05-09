@@ -7313,3 +7313,73 @@ Evidence:
   `flywheel-4m68`, `flywheel-9osi`, `flywheel-zuqc`, plus 10
   mobile-eats MISSION Section 14 followup beads.
 - Bead: `flywheel-e4tfe`.
+
+## daily_report_missing_dispatch_gate — already covered by L91+L92 (2026-05-09 cross-reference)
+
+Date: 2026-05-09
+
+Class: `daily_report_missing_dispatch_gate`
+
+Event Count: 4 events on 2026-05-04 (clustered 04:06-04:21Z, mobile-eats session, pane 1, agent claude); zero recurrence in the 5 days since.
+
+Severity: low
+
+Cost: dispatcher refused to dispatch mobile-eats tasks because doctor errors
+contained `daily_report_missing` while pane 2 was visibly WAITING. 4 dispatch
+attempts blocked over 15 minutes. The pattern is dispatch_gate treating a
+telemetry-class doctor signal (daily-report freshness) as a hard structural
+blocker rather than a non-blocking warning.
+
+Root Cause: dispatch_gate's error-class predicate did not partition between
+structural blockers (br-db corruption, pane unhealthy, identity drift) and
+telemetry-class signals (daily_report_missing, fuckup-log freshness, etc.).
+A WAITING worker was therefore gated by an operational telemetry error rather
+than a true substrate fault.
+
+Forever-Rule (already shipped, 2026-05-04): L91 (`dispatch-delivery-is-a-four-state-receipt`,
+`.flywheel/rules/L045-L91-dispatch-delivery-is-a-four-state-receipt.md`)
+explicitly cites this trauma class in its Why section ("`daily_report_missing_dispatch_gate`
+4 rows `~/.local/state/flywheel/fuckup-log.jsonl#L445-L448`"). L92
+(`audit-findings-route-by-data`, `.flywheel/rules/L046-L92-audit-findings-route-by-data.md`)
+also cites it. Both rules direct dispatch decisions to use machine-readable
+four-state receipts plus data-routed disposition rather than treating any
+non-zero doctor signal as a hard block.
+
+Fix Applied/Status: Doctrine landed 2026-05-04 in L91+L92 (same day as the
+4 events). No source-code change to dispatch-capacity-gate.sh was needed
+because the L91 contract reframed dispatch decisions: a worker is dispatchable
+if the four-state receipt (transport_accepted + prompt_visible_in_target +
+prompt_submitted + work_started) is achievable, irrespective of telemetry-class
+doctor noise. Zero recurrence since 2026-05-04 confirms the gate refinement
+took.
+
+Recurrence Prevention: The L56 ladder probe (`doctrine-ladder-promote.sh`)
+inspects `~/.claude/skills/.flywheel/INCIDENTS.md`, `$REPO/INCIDENTS.md`, and
+`$REPO/AGENTS.md` for class-name coverage but does NOT scan `.flywheel/rules/`.
+This caused the ladder to keep filing promotion-candidate beads (4 in this
+case: ticks 2026-05-04T04:06+, 04:33+, 06:06+, 07:11+, 13:01+, plus today
+2026-05-09T17:16+ and 17:19+) for a class already covered by L91+L92. This
+INCIDENTS.md cross-reference entry closes that loop. Donella leverage point
+#5 (rules) is now wired to leverage point #6 (information flow) by giving the
+ladder probe a discoverable INCIDENTS surface.
+
+Evidence:
+- Trauma rows: `~/.local/state/flywheel/fuckup-log.jsonl` 4 rows on 2026-05-04
+  (04:06:29Z, 04:11:28Z, 04:16:47Z, 04:21:29Z), all session=mobile-eats pane=1.
+- L91 rule: `.flywheel/rules/L045-L91-dispatch-delivery-is-a-four-state-receipt.md`.
+- L92 rule: `.flywheel/rules/L046-L92-audit-findings-route-by-data.md`.
+- Verify-pass: `.flywheel/PLANS/doctrine-propagation-2026-05-07/01-VERIFY-PASS.json`
+  documents L91+L92 body text including this class citation.
+- Promote script: `.flywheel/scripts/doctrine-ladder-promote.sh`
+  (incident-paths function omits `.flywheel/rules/` — see Recurrence Prevention).
+- Bead: `flywheel-u5ml3` (this dispatch).
+- Memory cross-ref: `feedback_dispatch_delivery_validation_required.md`,
+  `feedback_audit_findings_are_data_decided_not_joshua_gated.md`.
+
+Follow-up Bead Filed (separate dispatch): None — the underlying class is
+already covered. A future improvement would be extending
+`doctrine-ladder-promote.sh`'s `default_incident_paths()` function to scan
+`.flywheel/rules/*.md` so the ladder doesn't re-fire on classes already
+covered at the L-rule layer (per `feedback_calibrate_test_to_actual_contract_before_filing_upstream`:
+calibrate the gate to the actual coverage surface rather than treat the
+known-good state as a bug).
