@@ -188,6 +188,13 @@ for a in data.get("agents", []):
             emit("THINKING_LIVE", "working_state_quiet", state, vel, content_delta, changes_delta); sys.exit(0)
         if working:
             emit("STUCK", "working_state_without_live_signal", state, vel, content_delta, changes_delta); sys.exit(0)
+        if mode == "permissive" and state in {"WAITING", "IDLE", "UNKNOWN"} and (content_delta or changes_delta):
+            # Codex slow-start while pane state still classified as WAITING/IDLE/UNKNOWN —
+            # but pane content or ntm changes have shifted since baseline. That means the
+            # worker IS booting (showing skill loads, banner, hook trust prompts, etc).
+            # Treat as THINKING_LIVE in permissive mode to suppress the false-negative
+            # "consider respawn" when codex just hasn't transitioned yet.
+            emit("THINKING_LIVE", "settling_with_delta", state, vel, content_delta, changes_delta); sys.exit(0)
         if state in {"WAITING", "IDLE", "UNKNOWN"}:
             emit("STUCK", f"state_{state.lower()}", state, vel, content_delta, changes_delta); sys.exit(0)
         emit("UNKNOWN", f"state_{state.lower()}", state, vel, content_delta, changes_delta); sys.exit(0)
