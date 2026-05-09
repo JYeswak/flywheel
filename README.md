@@ -1146,6 +1146,31 @@ recovery layer:
 bash tests/stale-error-auto-ping.sh
 ```
 
+Pane-specific sidecar respawn is available when a canary worker needs a different
+agent binary/config without changing the fleet pin:
+
+```bash
+.flywheel/scripts/ntm-pane-sidecar-respawn.sh \
+  --session flywheel \
+  --pane 2 \
+  --command-path /opt/homebrew/bin/codex \
+  --command-arg --dangerously-bypass-approvals-and-sandbox \
+  --cwd /Users/josh/Developer/flywheel \
+  --env CODEX_HOME=/tmp/codex-sidecar-home \
+  --config-override 'model="gpt-5.5"' \
+  --dry-run \
+  --json
+
+.flywheel/scripts/ntm-pane-sidecar-respawn.sh \
+  --session flywheel \
+  --pane 2 \
+  --rollback \
+  --apply \
+  --json
+
+bash tests/ntm-pane-sidecar-respawn.sh
+```
+
 Cross-session auto-dispatch requires a live callback receiver. Fleet-wide or
 infrastructure-deployment work may be selected by flywheel, but work must not be
 sent directly to another session's worker pane unless that session's
