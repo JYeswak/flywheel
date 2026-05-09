@@ -1,0 +1,10 @@
+{
+  "probe": "memory-without-cross-link",
+  "memory_file": "feedback_peer_orch_idle_on_blocker.md",
+  "cross_linked": true,
+  "anchor_hits": [
+    "/Users/josh/Developer/flywheel/INCIDENTS.md"
+  ],
+  "ts": "2026-05-09T13:24Z",
+  "verdict": "gap_closed"
+}

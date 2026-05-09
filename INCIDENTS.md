@@ -6551,3 +6551,98 @@ Evidence:
 - Related incident: `INCIDENTS.md#ubs-module-checksum-mismatch`.
 - Reference: `~/.claude/references/claude-md-safety.md` UBS safety-stack guidance.
 - Bead: `flywheel-5wfy4`.
+
+## peer-orch-idle-on-blocker — escalate flywheel-class blocker within 5min (2026-05-04)
+
+Date: 2026-05-04 (cross-link landed 2026-05-09 via flywheel-2xdi.27)
+
+Promotion Action: NEW
+
+Class: `peer-orch-idle-on-blocker`
+
+Event Count: 3 documented occurrences (mobile-eats canonical_doctrine_drift
+30+min idle before flywheel:1 probed directly; skillos auth-marker contract
+bounced to Joshua instead of flywheel:1; mobile-eats L70 punt-to-next-tick
+on a flywheel-class blocker).
+
+Severity: medium (orchestrator-uptime drag on the self-sustaining-fleet
+mission anchor; same family as L70 ORCH-NO-PUNT).
+
+Cost: peer orchestrator sits idle while a flywheel-class blocker waits
+for cross-orch coordination. Joshua flagged 2026-05-04T00:31Z: "we need
+orchestrator rules that say — when you've gotten a flywheel blocker —
+work with pane 1 of flywheel to address all of it — they can't sit idle
+due to a blocker."
+
+Root Cause: peer orchestrators (mobile-eats, skillos, alps, etc.) had no
+forever-rule that classified blockers as flywheel-class vs peer-class
+vs external, and no canonical xpane handoff packet shape for
+flywheel-class blockers. The default failure mode was either single-tasking
+on the blocker (idle) or bouncing to Joshua when flywheel:1 had the
+scope, data, and delegation to unblock.
+
+Forever-Rule: when a peer orchestrator detects a flywheel-class blocker
+(originates from doctrine/substrate flywheel:1 owns, or unblockable by
+cross-repo file edits / system-wide rule ratification), it MUST:
+
+1. Classify within minutes: `flywheel_class | peer_class | external`.
+2. If `flywheel_class`: send xpane packet to flywheel:1 within 5 minutes
+   with `blocker_class`, `requested_owner`, `proposed_action`,
+   `flywheel_orch_action_required`.
+3. While awaiting flywheel:1 response: continue OTHER work in the queue.
+   Single-tasking on a remote-owned blocker is the failure mode.
+4. Log to `cross-orch-coordination.jsonl` with `blocker_type`, `ts`,
+   `ack_expected_by`.
+
+flywheel:1 must (a) probe peer-orch state directly rather than wait for
+explicit packets (sibling rule
+`feedback_orch_paralysis_recurring.md`), (b) apply file-edits or
+rule-ratification to unblock when the substrate is in scope, and
+(c) ACK in `cross-orch-coordination.jsonl` within minutes, not hours.
+
+Anti-patterns:
+- Peer-orch sends packet then idles awaiting reply (single-task instead
+  of multi-task)
+- Peer-orch bounces to Joshua when flywheel:1 has scope + data + delegation
+- Flywheel:1 waits for explicit ask when proactive probe would unblock
+  faster (orch-paralysis-recurring sibling)
+- Flywheel:1 dispatches into peer's WORKERS to fix (scope violation per
+  `feedback_orchestrator_scope_boundary.md`)
+
+Companion canonical:
+- AGENTS.md L70 ORCH-NO-PUNT (next actionable runs same tick, not next tick)
+- AGENTS.md L71 VALIDATE-AND-REDISPATCH-DISCIPLINE
+- INCIDENTS.md `orchestrator-idle-with-actionable-work` (sibling pattern
+  on the flywheel:1 side; same family at the peer-orch side)
+- INCIDENTS.md `orchestrator-paralysis-on-meadows-rules-not-yet-ratified`
+  (Joshua-judgment escalation that pairs with this rule)
+
+Companion memory:
+- `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_peer_orch_idle_on_blocker.md`
+- `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_orch_paralysis_recurring.md`
+- `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_orchestrator_scope_boundary.md`
+- `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_two_blocker_ticks_escalate_to_flywheel_plan.md`
+- `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_meadows_rules_unblock_paradigm_intact.md`
+
+Bead audit trail:
+- `flywheel-2xdi.27` (this cross-link landing) — gap-hunt-probe
+  `memory-without-cross-link:feedback_peer_orch_idle_on_blocker.md`.
+
+Evidence:
+- `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_peer_orch_idle_on_blocker.md`:
+  trauma-class authoring memory entry written from Joshua's
+  2026-05-04T00:31Z directive; cites 3 documented occurrences
+  (mobile-eats canonical_doctrine_drift idle 30+min; skillos
+  auth-marker bounced to Joshua; mobile-eats L70 punt-to-next-tick).
+- `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_orch_paralysis_recurring.md`:
+  sibling memory describing the flywheel:1-side mirror failure mode
+  (waits for explicit asks instead of probing).
+- `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_orchestrator_scope_boundary.md`:
+  defines flywheel-orch's scope so peer-orch knows what to escalate.
+- `.flywheel/audit/flywheel-2xdi.27/`: cross-link landing evidence
+  pack; includes deterministic re-probe receipt
+  (`probe-result.json`) showing
+  `memory-without-cross-link:feedback_peer_orch_idle_on_blocker.md`
+  no longer emits.
+- `.flywheel/scripts/gap-hunt-probe.sh:498-512`
+  (`probe_memory_without_cross_link`): probe source.
