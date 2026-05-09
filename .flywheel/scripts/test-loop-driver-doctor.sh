@@ -64,7 +64,7 @@ write_tick_script() {
   cat >"$script" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-ntm send synthetic --pane=1 --file /tmp/synthetic-prompt --no-cass-check
+ntm send synthetic --pane=1 --no-cass-check --file /tmp/synthetic-prompt
 EOF
   chmod +x "$script"
   printf '%s\n' "$script"
@@ -85,9 +85,11 @@ doctor_json() {
     FLYWHEEL_LOOP_LAUNCH_AGENTS_DIR="$LAUNCH_AGENTS" \
     FLYWHEEL_LOOP_LOG_DIR="$LOGS" \
     FLYWHEEL_LOOP_LAUNCHCTL_LIST="$LAUNCHCTL_LIST" \
+    FLYWHEEL_LOOP_NTM_HEALTH_JSON='{"agents":[{"pane":1,"process_status":"running"}]}' \
+    FLYWHEEL_LOOP_ROBOT_TAIL_JSON='{"panes":{"1":{"lines":["Callback: task_id synthetic loop-driver doctor"]}}}' \
     FLYWHEEL_LOOP_MEM_CLI=/nonexistent/mem \
     FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
-    "$FLYWHEEL_LOOP_BIN" doctor --repo "$repo" --json 2>/dev/null
+    "$FLYWHEEL_LOOP_BIN" doctor --repo "$repo" --scope loop-driver --json 2>/dev/null
   )"
   rc=$?
   set -e
@@ -96,7 +98,7 @@ doctor_json() {
 }
 
 assert_case() {
-  local label="$1" repo="$2" expected_driver="$3" expected_status="$4" expected_error="${5:-}" out rc driver status error_count
+  local label="$1" repo="$2" expected_driver="$3" expected_status="$4" expected_error="${5:-}" expected_label_state="${6:-}" out rc driver status label_state error_count
   set +e
   out="$(doctor_json "$repo")"
   rc=$?
@@ -114,7 +116,19 @@ assert_case() {
     exit 1
   fi
   if [[ "$expected_status" == "fail" && "$rc" -eq 0 ]]; then
-    echo "FAIL $label: expected non-zero doctor exit for fail status" >&2
+    echo "FAIL $label: expected non-zero rc for fail status" >&2
+    echo "$out" >&2
+    exit 1
+  fi
+  if [[ "$expected_status" != "fail" && "$rc" -ne 0 ]]; then
+    echo "FAIL $label: expected zero rc for status=$expected_status got rc=$rc" >&2
+    echo "$out" >&2
+    exit 1
+  fi
+  label_state="$(jq -r '.loop_driver.active_marker_project_label_loaded.state // empty' <<<"$out")"
+  if [[ -n "$expected_label_state" && "$label_state" != "$expected_label_state" ]]; then
+    echo "FAIL $label: expected active_marker_project_label_loaded.state=$expected_label_state got=$label_state" >&2
+    echo "$out" >&2
     exit 1
   fi
   if [[ -n "$expected_error" ]]; then
@@ -125,7 +139,7 @@ assert_case() {
       exit 1
     fi
   fi
-  echo "PASS $label driver_status=$driver status=$status"
+  echo "PASS $label driver_status=$driver status=$status label_state=${label_state:-none}"
 }
 
 verified_repo="$(seed_repo verified-proj)"
@@ -142,6 +156,7 @@ cat >"$LAUNCHCTL_LIST" <<EOF
 PID	Status	Label
 -	0	ai.zeststream.verified-proj-flywheel-loop
 -	0	ai.zeststream.stale-proj-flywheel-loop
+-	0	com.flywheel.tick
 EOF
 
 write_marker verified-proj "$verified_repo" active_high 60s
@@ -152,9 +167,30 @@ write_marker missing-driver-proj "$missing_repo" active_normal 60s ',"dispatch_m
 printf '{"ts":"%s","event":"ntm_dispatch_sent"}\n' "$(ts_now)" >"$LOGS/verified-proj-flywheel-loop.jsonl"
 printf '{"ts":"%s","event":"ntm_dispatch_sent"}\n' "$(ts_old)" >"$LOGS/stale-proj-flywheel-loop.jsonl"
 
-assert_case VERIFIED "$verified_repo" VERIFIED ok
-assert_case MARKER_ONLY "$marker_only_repo" MARKER_ONLY fail loop_driver_marker_only
-assert_case STALE "$stale_repo" STALE warn
-assert_case MISSING_DRIVER "$missing_repo" MISSING_DRIVER fail loop_driver_missing_driver
+assert_case VERIFIED "$verified_repo" VERIFIED pass "" project_label_loaded
+assert_case MARKER_ONLY "$marker_only_repo" MARKER_ONLY fail loop_driver_marker_only not_launchd_prompt
+assert_case STALE "$stale_repo" STALE warn "" project_label_loaded
+assert_case MISSING_DRIVER "$missing_repo" MISSING_DRIVER fail loop_driver_missing_driver generic_tick_loaded_project_label_absent
+
+cat >"$LOOPS/alpsinsurance.json" <<EOF
+{"project":"alpsinsurance","repo":"/Users/josh/Developer/alpsinsurance","active":false,"last_tick":"2026-05-05T20:00:55Z","last_tick_source":"flywheel-loop-driver-writeback","dispatch_mode":"launchd_prompt","driver_status":"VERIFIED"}
+EOF
+cat >"$LOOPS/mobile-eats.json" <<EOF
+{"project":"mobile-eats","repo":"/Users/josh/Developer/mobile-eats","active":false,"stopped_at":"2026-05-05T15:31:52Z","last_tick":"2026-05-05T20:00:55Z","last_tick_source":"flywheel-loop-driver-writeback","dispatch_mode":"launchd_prompt","driver_status":"VERIFIED"}
+EOF
+cat >"$LOOPS/skillos.json" <<EOF
+{"project":"skillos","repo":"/Users/josh/Developer/skillos","active":false,"stopped_at":"2026-05-05T16:50:00Z","last_tick":"2026-05-05T20:00:55Z","last_tick_source":"flywheel-loop-driver-writeback","dispatch_mode":"launchd_prompt","driver_status":"VERIFIED"}
+EOF
+
+inactive_out="$(doctor_json "$verified_repo")"
+inactive_count="$(jq -r '.loop_driver.inactive_marker_post_stop_tick_count // -1' <<<"$inactive_out")"
+inactive_warning_count="$(jq '[.warnings[]? | select(.code == "inactive_marker_post_stop_tick")] | length' <<<"$inactive_out")"
+missing_stopped_at_count="$(jq -r '.loop_driver.inactive_marker_post_stop_tick.inactive_without_stopped_at_count // -1' <<<"$inactive_out")"
+if [[ "$inactive_count" != "2" || "$inactive_warning_count" -lt 1 || "$missing_stopped_at_count" != "1" ]]; then
+  echo "FAIL inactive marker post-stop tick fixture: count=$inactive_count warning_count=$inactive_warning_count missing_stopped_at_count=$missing_stopped_at_count" >&2
+  echo "$inactive_out" >&2
+  exit 1
+fi
+echo "PASS inactive-marker post-stop tick count=$inactive_count missing_stopped_at_count=$missing_stopped_at_count"
 
 echo "PASS loop-driver doctor verdict taxonomy"

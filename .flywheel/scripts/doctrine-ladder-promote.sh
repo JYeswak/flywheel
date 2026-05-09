@@ -41,6 +41,12 @@ default_incident_paths() {
   printf '%s\n' "$HOME"/.claude/skills/*/references/INCIDENTS.md
   printf '%s\n' "$REPO/INCIDENTS.md"
   printf '%s\n' "$REPO/AGENTS.md"
+  # flywheel-iyaym: also scan canonical flywheel INCIDENTS at its absolute
+  # path so worktree-relative $REPO/INCIDENTS.md never masks coverage. When
+  # orch tick runs from /Users/josh/Developer/flywheel-*-worktree (stale
+  # branch), $REPO/INCIDENTS.md may be days out of date; the canonical
+  # flywheel checkout is the source of truth.
+  printf '%s\n' "/Users/josh/Developer/flywheel/INCIDENTS.md"
 }
 
 incident_paths() {

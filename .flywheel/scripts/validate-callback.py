@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+# canonical-cli-scoping-allow-large: validate-callback is the close-validation
+# gate for every flywheel callback, very high blast radius, and currently
+# ~840 lines (~2.1x python threshold). flywheel-62mf9 audit (recommendation
+# validate-callback-R001) flagged this for "document or split". Split
+# candidates: lens-fail rules (currently inline) could move to a sibling
+# module — that is filed as a future per-surface bead. For now this file
+# stays whole with a documented receipt; landing --info introspection (this
+# bead, flywheel-4x6pu) is the higher-leverage agent-ergonomics win.
 """Build and validate flywheel callback validation receipts."""
 
 from __future__ import annotations
@@ -705,6 +713,32 @@ def output_schema(repo: Path) -> dict[str, Any]:
     }
 
 
+def info_json() -> dict[str, Any]:
+    """flywheel-4x6pu: --info introspection surface per agent-ergonomics-cli-max R001.
+
+    Returns descriptive metadata about validate-callback so agents can discover
+    the tool's purpose, schema_version, canonical paths, and surface contracts
+    without reading the full --help output.
+    """
+    return {
+        "tool": "validate-callback",
+        "purpose": "Build and validate flywheel callback validation receipts",
+        "schema_version": SCHEMA_VERSION,
+        "default_schema_dir": str(DEFAULT_SCHEMA_DIR),
+        "default_receipt_dir": str(RECEIPT_DIR),
+        "canonical_surfaces": {
+            "introspection": ["--help", "--info", "--schema", "--examples"],
+            "primary": ["--dispatch-id", "--callback-ref", "--task-description"],
+            "lifecycle": ["--dry-run", "--write-receipt", "--why"],
+            "output": ["--json"],
+        },
+        "doctrine_pointers": {
+            "agent_ergonomics_cli_max_audit": ".flywheel/receipts/flywheel-62mf9/audit/recommendations.jsonl",
+            "validation_schema": str(DEFAULT_SCHEMA_DIR / "schema.json"),
+        },
+    }
+
+
 def examples_json() -> dict[str, Any]:
     return {
         "examples": [
@@ -756,11 +790,17 @@ def main() -> int:
     parser.add_argument("--receipt-dir", default=str(RECEIPT_DIR))
     parser.add_argument("--schema", action="store_true")
     parser.add_argument("--examples", action="store_true")
+    parser.add_argument("--info", action="store_true",
+                        help="emit descriptive tool metadata (flywheel-4x6pu / agent-ergo R001)")
     parser.add_argument("--why")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
     repo = Path(args.repo).expanduser().resolve()
+    if args.info:
+        payload = info_json()
+        print(json.dumps(payload, indent=None if args.json else 2, sort_keys=True))
+        return 0
     if args.schema:
         print(json.dumps(output_schema(repo), indent=None if args.json else 2, sort_keys=True))
         return 0

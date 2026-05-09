@@ -1,0 +1,40 @@
+schema_version: 1
+repo_path: /Users/josh/Developer/flywheel
+doctrine_version: 2026-05-08.repo_hygiene
+provenance:
+  source_plan: flywheel-1p9of
+  source_artifact: /tmp/flywheel-1p9of-7b4c92-compliance/flywheel-1p9of/
+  source_sections: [socraticode-deep-dive, fast-walk-inventory, safety-contract]
+  generated_by: repo-hygiene
+safety_contract:
+  dry_run_default: true
+  idempotency_key_required: true
+  refuses_tracked_files: true
+  receipt_dir: .flywheel/receipts/repo-hygiene
+trauma_classes:
+  - name: flywheel_dispatch_residue
+    patterns: [.flywheel/dispatches/*.md, /tmp/dispatch_flywheel-*.md]
+    min_age_days: 7
+    max_total_mb: null
+    safety: age-gated
+    applicable_skills: [storage-health, canonical-cli-scoping, path-rationalization]
+    provenance: [socraticode:templates-peer-orch-broadcasts-repo-hygiene, bead:flywheel-1p9of]
+  - name: beads_backup_sidecars
+    patterns: [.beads.bak.*, .beads/*.bak.*, .beads/*.aside.*]
+    min_age_days: 7
+    max_total_mb: null
+    safety: age-gated
+    applicable_skills: [storage-health, canonical-cli-scoping]
+    provenance: [socraticode:storage-prune-prior-art, bead:flywheel-1p9of]
+  - name: ntm_local_logs
+    patterns: [.ntm/logs/*.log, .ntm/pids/*]
+    min_age_days: 14
+    max_total_mb: null
+    safety: age-gated
+    applicable_skills: [storage-health, disk-observer]
+    provenance: [socraticode:README-repo-local-scripts, bead:flywheel-1p9of]
+gitignore_gaps:
+  - pattern: .ntm/pids/
+    disposition: add-to-gitignore
+    root_cause_fix_tier: gitignore
+    provenance: [socraticode:repo-hygiene-survey]

@@ -4,6 +4,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 PROBE="${FLYWHEEL_HEADLESS_BROWSER_PROBE:-$ROOT/.flywheel/scripts/headless-browser-probe.sh}"
 HISTORY="${FLYWHEEL_HEADLESS_BROWSER_REAP_HISTORY:-$HOME/.local/state/flywheel/headless-browser-reaps.jsonl}"
+JSONL_APPEND_LIB="${FLYWHEEL_JSONL_APPEND_LIB:-$HOME/.local/share/flywheel-watchers/lib/jsonl-append.sh}"
+JSONL_APPEND_AVAILABLE=0
 MIN_AGE_MINUTES="${FLYWHEEL_HEADLESS_BROWSER_REAP_MIN_AGE_MINUTES:-30}"
 COUNT_THRESHOLD="${FLYWHEEL_HEADLESS_BROWSER_REAP_COUNT_THRESHOLD:-5}"
 APPLY=0
@@ -11,6 +13,13 @@ FIXTURE=""
 NOW_EPOCH=""
 NOTIFY=0
 NOTIFY_BIN="${NOTIFY_BIN:-$HOME/.local/bin/notify}"
+
+if [[ -f "$JSONL_APPEND_LIB" ]]; then
+  # shellcheck disable=SC1090,SC1091
+  if source "$JSONL_APPEND_LIB" && declare -F fw_jsonl_append_validated >/dev/null; then
+    JSONL_APPEND_AVAILABLE=1
+  fi
+fi
 
 usage() {
   printf '%s\n' \
@@ -24,6 +33,21 @@ usage() {
 
 now_iso() {
   date -u +%Y-%m-%dT%H:%M:%SZ
+}
+
+append_jsonl_best_effort() {
+  local path="$1" row="$2" label="$3" rc
+  if [[ "$JSONL_APPEND_AVAILABLE" -ne 1 ]] || ! declare -F fw_jsonl_append_validated >/dev/null; then
+    printf 'WARN: %s append skipped; JSONL primitive unavailable: %s\n' "$label" "$JSONL_APPEND_LIB" >&2
+    return 0
+  fi
+  if fw_jsonl_append_validated "$path" "$row"; then
+    return 0
+  else
+    rc=$?
+    printf 'WARN: %s append failed rc=%s path=%s\n' "$label" "$rc" "$path" >&2
+    return 0
+  fi
 }
 
 while [[ $# -gt 0 ]]; do
@@ -134,6 +158,8 @@ payload="$(jq -nc \
     history_path:null
   }')"
 
-mkdir -p "$(dirname "$HISTORY")"
-printf '%s\n' "$(jq -c --arg path "$HISTORY" '.history_path=$path' <<<"$payload")" >>"$HISTORY"
-jq -c --arg path "$HISTORY" '.history_path=$path' <<<"$payload"
+history_row="$(jq -c --arg path "$HISTORY" '.history_path=$path' <<<"$payload")"
+if [[ "$APPLY" -eq 1 ]]; then
+  append_jsonl_best_effort "$HISTORY" "$history_row" "headless-browser reap history"
+fi
+printf '%s\n' "$history_row"

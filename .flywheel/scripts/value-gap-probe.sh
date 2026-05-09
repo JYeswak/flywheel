@@ -118,12 +118,19 @@ existing_bead_id() {
   if ! command -v "$BR_BIN" >/dev/null 2>&1; then
     return 1
   fi
-  out="$(cd "$REPO" && "$BR_BIN" list --json 2>/dev/null)" || return 1
-  jq -r --arg title "$title" '(.issues // . // [])[]? | select((.title // "") == $title) | .id' <<<"$out" | head -1
+  out="$(cd "$REPO" && "$BR_BIN" list --all --limit 0 --json 2>/dev/null)" || return 1
+  jq -r --arg title "$title" '
+    if type == "array" then .
+    elif type == "object" and ((.issues // null) | type) == "array" then .issues
+    else [] end
+    | map(select((.title // "") == $title))
+    | sort_by(.created_at // "")
+    | .[0].id // empty
+  ' <<<"$out" | head -1
 }
 
 file_bead() {
-  local dim="$1" title desc existing create_args=() out
+  local dim="$1" title desc existing create_args=() out err raw_err
   title="[value-gap] $(jq -r .id <<<"$dim")"
   existing="$(existing_bead_id "$title" || true)"
   if [ -n "$existing" ]; then
@@ -139,10 +146,15 @@ file_bead() {
   if [ -n "$PARENT_BEAD" ]; then
     create_args+=("--parent" "$PARENT_BEAD")
   fi
-  if out="$(cd "$REPO" && "$BR_BIN" create "${create_args[@]}" --json 2>&1)"; then
-    jq -nc --argjson raw "$out" '{action:"created",bead_filed_id:($raw.id // $raw.issue.id // null),raw:$raw}'
+  err="$(mktemp "${TMPDIR:-/tmp}/value-gap-br-create.XXXXXX")"
+  if out="$(cd "$REPO" && "$BR_BIN" create "${create_args[@]}" --json 2>"$err")" && jq -e . >/dev/null 2>&1 <<<"$out"; then
+    raw_err="$(cat "$err")"
+    rm -f "$err"
+    jq -nc --argjson raw "$out" --arg br_stderr "$raw_err" '{action:"created",bead_filed_id:($raw.id // $raw.issue.id // null),raw:$raw,br_stderr:$br_stderr}'
   else
-    jq -nc --arg raw "$out" '{action:"error",bead_filed_id:null,raw:$raw}'
+    raw_err="$(cat "$err")"
+    rm -f "$err"
+    jq -nc --arg raw "$out" --arg br_stderr "$raw_err" '{action:"error",bead_filed_id:null,raw:$raw,br_stderr:$br_stderr}'
   fi
 }
 

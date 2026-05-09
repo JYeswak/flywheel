@@ -18,7 +18,9 @@ DEFAULT_REPO = "/Users/josh/Developer/flywheel"
 DEFAULT_LEDGER = "$HOME/.local/state/flywheel/wire-or-explain-ledger.jsonl"
 DEFAULT_RECEIPTS = "$HOME/.local/state/flywheel/wire-or-explain/closeout-receipts"
 DEFAULT_OVERRIDE_RECEIPTS = "$HOME/.local/state/flywheel/wire-or-explain/override-receipts"
+DEFAULT_FLEET_ROLLOUT = ".flywheel/wire-or-explain/fleet-rollout.json"
 UNRESOLVED_STATES = {"unwired", "questionably_wired"}
+ROLLOUT_STATES = {"disabled", "shadow", "enforce", "deferred"}
 EXIT_CODES = {
     "0": "close allowed",
     "1": "enforce mode found unresolved local rows",
@@ -50,6 +52,8 @@ def usage() -> str:
   wire-or-explain-close-gate.py [--repo PATH] [--ledger PATH] [--mode shadow|enforce|bootstrap] [--override PATH] [--json] [--dry-run]
   wire-or-explain-close-gate.py --schema
   wire-or-explain-close-gate.py doctor|health|validate|audit|repair [--json] [--dry-run]
+  wire-or-explain-close-gate.py rollout-status [--repo PATH] [--session NAME] [--json]
+  wire-or-explain-close-gate.py rollback [--repo PATH] [--session NAME] --target-state shadow|disabled [--dry-run|--apply] [--json]
   wire-or-explain-close-gate.py why [ID] [--json]
   wire-or-explain-close-gate.py --why [ID] [--json]
   wire-or-explain-close-gate.py --info|--examples|quickstart [--json]
@@ -138,11 +142,15 @@ def real_text(path_text: Any) -> str:
 def owns_local(row: dict[str, Any], repo: Path, session: str) -> bool:
     repo_real = os.path.realpath(str(repo))
     owning = str(row.get("owning_orch") or "")
+    if owning:
+        return (
+            owning == session
+            or owning.startswith(f"{session}:")
+            or owning.startswith(f"{session}:pane-")
+        )
     return (
         real_text(row.get("ship_repo")) == repo_real
         or str(row.get("session_id") or "") == session
-        or owning.startswith(f"{session}:")
-        or owning.startswith(f"{session}:pane-")
     )
 
 def route(row: dict[str, Any]) -> dict[str, str]:
@@ -168,6 +176,7 @@ def safe_action(row: dict[str, Any], repo: Path, session: str, now: datetime) ->
         "subject": scrub_text(row.get("subject")),
         "predicate": scrub_text(row.get("predicate")),
         "blocking_scope": scope,
+        "trust_domain": scrub_text(row.get("trust_domain") or "repo-local"),
         "owning_orch": scrub_text(row.get("owning_orch")),
         "ship_repo": scrub_text(row.get("ship_repo")),
         "locality": "local" if local else "cross_orch",
@@ -207,19 +216,114 @@ def read_rows(path: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         raise GateError("ledger_read_failed", str(exc), 3) from exc
     return rows, [{"code": "ledger_empty", "message": f"ledger has no rows: {path}"}] if not rows else []
 
-def mode_for(repo: Path, explicit: str | None) -> str:
+def rollout_config_path(repo: Path, value: str | None = None) -> Path:
+    raw = value or os.environ.get("FLYWHEEL_WIRE_OR_EXPLAIN_FLEET_CONFIG") or DEFAULT_FLEET_ROLLOUT
+    path = expand_path(raw)
+    if not path.is_absolute():
+        path = repo / path
+    return path
+
+def load_rollout_config(repo: Path, path_text: str | None = None) -> tuple[dict[str, Any], list[dict[str, Any]], Path]:
+    path = rollout_config_path(repo, path_text)
+    if not path.exists():
+        return {"schema_version": "wire-or-explain-rollout/v1", "repos": []}, [{"code": "fleet_rollout_config_missing", "message": f"rollout config missing: {path}"}], path
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        return {"schema_version": "wire-or-explain-rollout/v1", "repos": []}, [{"code": "fleet_rollout_config_parse_failed", "message": str(exc)}], path
+    except OSError as exc:
+        return {"schema_version": "wire-or-explain-rollout/v1", "repos": []}, [{"code": "fleet_rollout_config_read_failed", "message": str(exc)}], path
+    if not isinstance(payload, dict) or not isinstance(payload.get("repos"), list):
+        return {"schema_version": "wire-or-explain-rollout/v1", "repos": []}, [{"code": "fleet_rollout_config_bad_shape", "message": "expected object with repos[]"}], path
+    warnings: list[dict[str, Any]] = []
+    for idx, entry in enumerate(payload.get("repos", [])):
+        if not isinstance(entry, dict):
+            warnings.append({"code": "fleet_rollout_entry_bad_shape", "index": idx})
+            continue
+        state = str(entry.get("state") or "")
+        if state not in ROLLOUT_STATES:
+            warnings.append({"code": "fleet_rollout_bad_state", "index": idx, "state": state})
+    return payload, warnings, path
+
+def rollout_entry(repo: Path, session: str, config: dict[str, Any]) -> dict[str, Any] | None:
+    repo_real = os.path.realpath(str(repo))
+    for entry in config.get("repos", []):
+        if not isinstance(entry, dict):
+            continue
+        entry_repo = real_text(entry.get("repo"))
+        entry_session = str(entry.get("session") or "")
+        if (entry_repo and entry_repo == repo_real) or (entry_session and entry_session == session):
+            return entry
+    return None
+
+def mode_for(repo: Path, explicit: str | None, session: str = "flywheel", fleet_config: str | None = None) -> tuple[str, dict[str, Any], list[dict[str, Any]]]:
+    config, warnings, config_path = load_rollout_config(repo, fleet_config)
+    entry = rollout_entry(repo, session, config)
     candidates = [
         explicit,
         os.environ.get("FLYWHEEL_WIRE_OR_EXPLAIN_CLOSE_MODE"),
         os.environ.get("FLYWHEEL_WIRE_OR_EXPLAIN_MODE"),
     ]
+    if entry:
+        candidates.append(str(entry.get("state") or ""))
     mode_file = repo / ".flywheel/wire-or-explain/mode"
     if mode_file.exists():
         candidates.append(mode_file.read_text(encoding="utf-8").strip())
     for value in candidates:
-        if value in {"bootstrap", "shadow", "enforce"}:
-            return value
-    return "shadow"
+        if value in {"bootstrap", *ROLLOUT_STATES}:
+            state = value
+            return state, rollout_payload(config_path, entry, state), warnings
+    return "shadow", rollout_payload(config_path, entry, "shadow"), warnings
+
+def rollout_payload(path: Path, entry: dict[str, Any] | None, state: str) -> dict[str, Any]:
+    return scrub({
+        "schema_version": "wire-or-explain-rollout/v1",
+        "config_path": str(path),
+        "state": state,
+        "entry": entry,
+        "states": sorted(ROLLOUT_STATES),
+    })
+
+def rollback_payload(opts: dict[str, Any]) -> dict[str, Any]:
+    repo = expand_path(opts["repo"]).resolve()
+    config, warnings, path = load_rollout_config(repo, opts.get("fleet_config"))
+    target = str(opts.get("target_state") or "shadow")
+    if target not in {"disabled", "shadow"}:
+        raise GateError("rollback_target_state_invalid", "rollback target must be disabled or shadow", 2)
+    entry = rollout_entry(repo, opts["session"], config)
+    if entry is None:
+        entry = {
+            "repo": str(repo),
+            "session": opts["session"],
+            "trust_domain": f"repo:{repo.name}",
+            "owning_orch": f"{opts['session']}:pane-1",
+            "state": target,
+            "leader": "flywheel",
+            "followers": [],
+        }
+        config.setdefault("repos", []).append(entry)
+    old_state = entry.get("state")
+    entry["state"] = target
+    result = {
+        "schema_version": "wire-or-explain-rollout-rollback/v1",
+        "command": "rollback",
+        "repo": str(repo),
+        "session": opts["session"],
+        "config_path": str(path),
+        "old_state": old_state,
+        "new_state": target,
+        "apply": bool(opts.get("apply")),
+        "ledger_history_deleted": False,
+        "warnings": warnings,
+    }
+    if opts.get("apply"):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(config, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+        result["written"] = True
+    else:
+        result["written"] = False
+        result["planned_config"] = scrub(config)
+    return result
 
 def override_state() -> dict[str, Any]:
     legacy = os.environ.get("FLYWHEEL_WIRE_OR_EXPLAIN_CLOSE_OVERRIDE") or os.environ.get("JOSHUA_OVERRIDE")
@@ -409,9 +513,10 @@ def write_override_receipt(result: dict[str, Any], opts: dict[str, Any], context
 def evaluate(opts: dict[str, Any]) -> dict[str, Any]:
     repo = expand_path(opts["repo"]).resolve()
     ledger = expand_path(opts["ledger"])
-    mode = mode_for(repo, opts.get("mode"))
+    mode, rollout, rollout_warnings = mode_for(repo, opts.get("mode"), opts["session"], opts.get("fleet_config"))
     now = now_dt(opts.get("now"))
     rows, warnings = read_rows(ledger)
+    warnings.extend(rollout_warnings)
     unresolved = [row for row in rows if row.get("state") in UNRESOLVED_STATES]
     actions = [safe_action(row, repo, opts["session"], now) for row in unresolved]
     actions.sort(key=action_key)
@@ -430,7 +535,15 @@ def evaluate(opts: dict[str, Any]) -> dict[str, Any]:
     if override_actions:
         actions.extend(override_actions)
         actions.sort(key=action_key)
-    if would_block and mode == "shadow":
+    if mode == "disabled":
+        allowed = True
+        would_block = False
+        reason = "rollout_disabled"
+    elif mode == "deferred":
+        allowed = True
+        would_block = False
+        reason = "rollout_deferred"
+    elif would_block and mode == "shadow":
         reason = "shadow_unresolved_local_rows"
     elif would_block and mode == "enforce":
         allowed = False
@@ -458,6 +571,7 @@ def evaluate(opts: dict[str, Any]) -> dict[str, Any]:
         "repo": str(repo),
         "ledger_path": str(ledger),
         "mode": mode,
+        "fleet_rollout": rollout,
         "allowed": allowed,
         "exit_code": exit_code,
         "reason_code": reason,
@@ -493,13 +607,16 @@ def parse(argv: list[str]) -> dict[str, Any]:
         "limit": 5,
         "now": None,
         "session": "flywheel",
+        "fleet_config": None,
+        "target_state": "shadow",
+        "apply": False,
         "verification_probe_command": None,
         "id": None,
         "completion_shell": "bash",
         "idempotency_key": None,
     }
-    commands = {"run", "doctor", "health", "validate", "audit", "repair", "why", "schema", "quickstart", "help", "completion"}
-    value_opts = {"--repo", "--ledger", "--receipt-dir", "--override-receipt-dir", "--override", "--mode", "--limit", "--now", "--session", "--verification-probe-command", "--idempotency-key", "--scope", "--width", "--tick-id"}
+    commands = {"run", "doctor", "health", "validate", "audit", "repair", "rollback", "rollout-status", "why", "schema", "quickstart", "help", "completion"}
+    value_opts = {"--repo", "--ledger", "--receipt-dir", "--override-receipt-dir", "--override", "--mode", "--limit", "--now", "--session", "--fleet-config", "--target-state", "--verification-probe-command", "--idempotency-key", "--scope", "--width", "--tick-id"}
     i = 0
     while i < len(argv):
         arg = argv[i]
@@ -527,7 +644,9 @@ def parse(argv: list[str]) -> dict[str, Any]:
             opts["dry_run"] = True
         elif arg == "--explain":
             opts["explain"] = True
-        elif arg in {"--apply", "--no-color", "--no-emoji"}:
+        elif arg == "--apply":
+            opts["apply"] = True
+        elif arg in {"--no-color", "--no-emoji"}:
             pass
         elif arg in value_opts:
             i += 1
@@ -547,10 +666,10 @@ def parse(argv: list[str]) -> dict[str, Any]:
     return opts
 
 def info() -> dict[str, Any]:
-    return {"command": "info", "surface": SURFACE, "schema_version": VERSION, "override_schema_version": OVERRIDE_VERSION, "exit_codes": EXIT_CODES, "default_mode": "shadow", "mutation_requires": "non-dry-run receipt write only"}
+    return {"command": "info", "surface": SURFACE, "schema_version": VERSION, "override_schema_version": OVERRIDE_VERSION, "exit_codes": EXIT_CODES, "default_mode": "shadow", "rollout_states": sorted(ROLLOUT_STATES), "rollback": "rollback --target-state shadow|disabled [--apply]", "mutation_requires": "non-dry-run receipt write only"}
 
 def examples() -> dict[str, Any]:
-    items = [("green dry-run", "wire-or-explain-close-gate.py --json --dry-run"), ("shadow", "FLYWHEEL_WIRE_OR_EXPLAIN_CLOSE_MODE=shadow wire-or-explain-close-gate.py --json"), ("enforce", "wire-or-explain-close-gate.py --mode enforce --json"), ("override", "wire-or-explain-close-gate.py --mode enforce --override override.json --json"), ("schema", "wire-or-explain-close-gate.py --schema"), ("why", "wire-or-explain-close-gate.py --why --json")]
+    items = [("green dry-run", "wire-or-explain-close-gate.py --json --dry-run"), ("shadow", "FLYWHEEL_WIRE_OR_EXPLAIN_CLOSE_MODE=shadow wire-or-explain-close-gate.py --json"), ("enforce", "wire-or-explain-close-gate.py --mode enforce --json"), ("rollback", "wire-or-explain-close-gate.py rollback --target-state shadow --dry-run --json"), ("override", "wire-or-explain-close-gate.py --mode enforce --override override.json --json"), ("schema", "wire-or-explain-close-gate.py --schema"), ("why", "wire-or-explain-close-gate.py --why --json")]
     return {"command": "examples", "examples": [{"name": name, "command": command} for name, command in items]}
 
 def quickstart() -> dict[str, Any]:
@@ -559,8 +678,8 @@ def quickstart() -> dict[str, Any]:
 
 def completion(shell: str) -> str:
     if shell == "zsh":
-        return "compadd run doctor health validate audit repair why schema quickstart completion --json --dry-run --mode --ledger --repo --override --override-receipt-dir --why\n"
-    return "complete -W 'run doctor health validate audit repair why schema quickstart completion --json --dry-run --mode --ledger --repo --override --override-receipt-dir --why' wire-or-explain-close-gate.py\n"
+        return "compadd run doctor health validate audit repair rollback rollout-status why schema quickstart completion --json --dry-run --apply --mode --ledger --repo --session --fleet-config --target-state --override --override-receipt-dir --why\n"
+    return "complete -W 'run doctor health validate audit repair rollback rollout-status why schema quickstart completion --json --dry-run --apply --mode --ledger --repo --session --fleet-config --target-state --override --override-receipt-dir --why' wire-or-explain-close-gate.py\n"
 
 def why_payload(result: dict[str, Any], wanted: str | None) -> dict[str, Any]:
     rows = {
@@ -619,6 +738,12 @@ def main(argv: list[str]) -> int:
             result = evaluate({**opts, "dry_run": True})
             wanted = opts.get("id")
             return emit(why_payload(result, wanted), True)
+        if cmd == "rollback":
+            return emit(rollback_payload(opts), opts["json"] or True)
+        if cmd == "rollout-status":
+            repo = expand_path(opts["repo"]).resolve()
+            mode, rollout, warnings = mode_for(repo, opts.get("mode"), opts["session"], opts.get("fleet_config"))
+            return emit({"schema_version": "wire-or-explain-rollout-status/v1", "command": "rollout-status", "repo": str(repo), "session": opts["session"], "mode": mode, "fleet_rollout": rollout, "warnings": warnings}, opts["json"] or True)
         if cmd in {"doctor", "health", "validate", "audit", "repair", "run"}:
             result = evaluate(opts)
             result["command"] = "run" if cmd in {"run", "doctor", "validate"} else cmd

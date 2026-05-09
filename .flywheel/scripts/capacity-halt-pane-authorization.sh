@@ -13,6 +13,24 @@ from pathlib import Path
 
 VERSION, TOPOLOGY, NOW_RAW, MAX_AGE_RAW = sys.argv[1:5]
 PANE_RE = re.compile(r"^[0-9]+$")
+CREDENTIAL_ROTATION_CLASS = "credential_rotation"
+CREDENTIAL_ROTATION_TOOL = "codex"
+CREDENTIAL_ROTATION_PRIMITIVE = "caam-auto-rotate-on-usage-limit"
+CREDENTIAL_ROTATION_DEFAULT_OPERATION = "caam_activate_existing_profile"
+CREDENTIAL_ROTATION_AUTHORIZED_OPS = [
+    "caam_activate_existing_profile",
+    "caam_status_post_check",
+    "append_recovery_ledger",
+]
+CREDENTIAL_ROTATION_FORBIDDEN_OPS = [
+    "pane_mutation",
+    "respawn",
+    "launchctl",
+    "new_credential_creation",
+    "token_rotation",
+    "oauth_refresh",
+    "vault_write",
+]
 
 def parse_args():
     p = argparse.ArgumentParser(description="Authorize capacity-halt auto-continue for worker panes only.")
@@ -21,6 +39,10 @@ def parse_args():
     p.add_argument("--json", action="store_true")
     p.add_argument("--session", default="")
     p.add_argument("--pane", default="")
+    p.add_argument("--tool", default="")
+    p.add_argument("--recovery-class", default="")
+    p.add_argument("--primitive", default=CREDENTIAL_ROTATION_PRIMITIVE)
+    p.add_argument("--operation", default=CREDENTIAL_ROTATION_DEFAULT_OPERATION)
     p.add_argument("--quiet", action="store_true")
     return p.parse_args(sys.argv[5:])
 
@@ -98,6 +120,53 @@ def with_ledger(payload):
     }
     return payload
 
+def credential_rotation_fields(args, stale_allowed):
+    return {
+        "tool": args.tool,
+        "recovery_class": args.recovery_class,
+        "primitive": args.primitive,
+        "operation": args.operation,
+        "stale_topology_allowed": bool(stale_allowed),
+        "authorized_operations": CREDENTIAL_ROTATION_AUTHORIZED_OPS,
+        "forbidden_operations": CREDENTIAL_ROTATION_FORBIDDEN_OPS,
+        "credential_secret_values_observed": 0,
+    }
+
+def credential_rotation_refusal(args, row=None, age=None, role="unknown", status="malformed", rc=3, reason="unsupported_credential_rotation_request", stale_allowed=False):
+    return with_ledger(dict(
+        base(args, row, age),
+        status=status,
+        role=role,
+        authorized=False,
+        authorization_outcome=status,
+        refusal_reason=reason,
+        **credential_rotation_fields(args, stale_allowed),
+    )), rc
+
+def validate_credential_rotation(args, row=None, age=None, role="unknown", stale_allowed=False):
+    if args.recovery_class != CREDENTIAL_ROTATION_CLASS:
+        return None
+    if args.tool != CREDENTIAL_ROTATION_TOOL:
+        return credential_rotation_refusal(args, row, age, role, reason="unsupported_tool_for_credential_rotation", stale_allowed=stale_allowed)
+    if args.primitive != CREDENTIAL_ROTATION_PRIMITIVE:
+        return credential_rotation_refusal(args, row, age, role, reason="unsupported_credential_rotation_primitive", stale_allowed=stale_allowed)
+    if args.operation in CREDENTIAL_ROTATION_FORBIDDEN_OPS:
+        return credential_rotation_refusal(args, row, age, role, status="protected_refusal", rc=5, reason="forbidden_operation", stale_allowed=stale_allowed)
+    if args.operation not in CREDENTIAL_ROTATION_AUTHORIZED_OPS:
+        return credential_rotation_refusal(args, row, age, role, reason="unsupported_credential_rotation_operation", stale_allowed=stale_allowed)
+    return None
+
+def credential_rotation_authorized(args, row, age, role, stale_allowed):
+    return with_ledger(dict(
+        base(args, row, age),
+        status="authorized",
+        role=role,
+        authorized=True,
+        authorization_outcome="authorized",
+        refusal_reason=None,
+        **credential_rotation_fields(args, stale_allowed),
+    ))
+
 def info(args):
     emit(args, {
         "schema_version": "capacity-halt-pane-authorization.info.v1",
@@ -105,7 +174,14 @@ def info(args):
         "version": VERSION,
         "topology_file": TOPOLOGY,
         "max_age_seconds": int(MAX_AGE_RAW),
-        "verbs": ["--info", "--help", "--examples", "--json", "--session", "--pane", "--quiet"],
+        "verbs": ["--info", "--help", "--examples", "--json", "--session", "--pane", "--tool", "--recovery-class", "--primitive", "--operation", "--quiet"],
+        "credential_rotation": {
+            "tool": CREDENTIAL_ROTATION_TOOL,
+            "recovery_class": CREDENTIAL_ROTATION_CLASS,
+            "primitive": CREDENTIAL_ROTATION_PRIMITIVE,
+            "authorized_operations": CREDENTIAL_ROTATION_AUTHORIZED_OPS,
+            "forbidden_operations": CREDENTIAL_ROTATION_FORBIDDEN_OPS,
+        },
         "exit_codes": {"0": "authorized-worker-pane", "3": "malformed", "5": "protected-refusal", "6": "unknown-pane", "7": "topology-stale"},
     }, 0)
 
@@ -115,6 +191,7 @@ def examples(args):
         "examples": [
             {"name": "worker", "command": "capacity-halt-pane-authorization.sh --session flywheel --pane 3 --json"},
             {"name": "quiet", "command": "capacity-halt-pane-authorization.sh --session flywheel --pane 1 --quiet"},
+            {"name": "credential_rotation", "command": "capacity-halt-pane-authorization.sh --session flywheel --pane 2 --tool codex --recovery-class credential_rotation --json"},
         ],
     }, 0)
 
@@ -138,9 +215,29 @@ def main():
     if source_epoch is None:
         emit(args, with_ledger(dict(base(args, row), status="malformed", role="unknown", authorized=False, authorization_outcome="malformed", refusal_reason="missing_or_invalid_effective_at")), 3)
     age = max(0, now_epoch() - int(source_epoch))
-    if age > int(MAX_AGE_RAW):
-        emit(args, with_ledger(dict(base(args, row, age), status="topology_stale", role="unknown", authorized=False, authorization_outcome="topology_stale", refusal_reason="topology_stale")), 7)
     role = role_for_pane(row, args.pane)
+    if age > int(MAX_AGE_RAW):
+        if args.recovery_class == CREDENTIAL_ROTATION_CLASS:
+            invalid = validate_credential_rotation(args, row, age, role, stale_allowed=True)
+            if invalid:
+                payload, rc = invalid
+                emit(args, payload, rc)
+            if role == "worker_pane":
+                emit(args, credential_rotation_authorized(args, row, age, role, stale_allowed=True), 0)
+            if role == "unknown":
+                emit(args, with_ledger(dict(base(args, row, age), status="unknown_pane", role=role, authorized=False, authorization_outcome="unknown_pane", refusal_reason="unknown_pane", **credential_rotation_fields(args, True))), 6)
+            emit(args, with_ledger(dict(base(args, row, age), status="protected_refusal", role=role, authorized=False, authorization_outcome="protected_refusal", refusal_reason="protected", **credential_rotation_fields(args, True))), 5)
+        emit(args, with_ledger(dict(base(args, row, age), status="topology_stale", role="unknown", authorized=False, authorization_outcome="topology_stale", refusal_reason="topology_stale")), 7)
+    if args.recovery_class == CREDENTIAL_ROTATION_CLASS:
+        invalid = validate_credential_rotation(args, row, age, role, stale_allowed=False)
+        if invalid:
+            payload, rc = invalid
+            emit(args, payload, rc)
+        if role == "worker_pane":
+            emit(args, credential_rotation_authorized(args, row, age, role, stale_allowed=False), 0)
+        if role == "unknown":
+            emit(args, with_ledger(dict(base(args, row, age), status="unknown_pane", role=role, authorized=False, authorization_outcome="unknown_pane", refusal_reason="unknown_pane", **credential_rotation_fields(args, False))), 6)
+        emit(args, with_ledger(dict(base(args, row, age), status="protected_refusal", role=role, authorized=False, authorization_outcome="protected_refusal", refusal_reason="protected", **credential_rotation_fields(args, False))), 5)
     if role == "worker_pane":
         emit(args, with_ledger(dict(base(args, row, age), status="authorized", role=role, authorized=True, authorization_outcome="authorized", refusal_reason=None)), 0)
     if role == "unknown":

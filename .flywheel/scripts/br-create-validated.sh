@@ -18,6 +18,27 @@ description_file=""
 description_text=""
 pass_args=()
 
+sql_escape() {
+  printf '%s' "$1" | sed "s/'/''/g"
+}
+
+normalize_created_source_repo() {
+  local output="$1" repo_abs db repo_sql id
+  repo_abs="$(pwd -P)"
+  db="$repo_abs/.beads/beads.db"
+  [[ -f "$db" ]] || return 0
+  command -v sqlite3 >/dev/null 2>&1 || return 0
+  repo_sql="$(sql_escape "$repo_abs")"
+  while IFS= read -r id; do
+    [[ -n "$id" && "$id" != "null" ]] || continue
+    case "$id" in
+      *[!A-Za-z0-9._-]*) continue ;;
+    esac
+    sqlite3 "$db" "UPDATE issues SET source_repo = '$repo_sql' WHERE id = '$id' AND (source_repo IS NULL OR source_repo != '$repo_sql');" >/dev/null 2>&1 || true
+  done < <(jq -r '.. | objects | .id? // empty' <<<"$output" 2>/dev/null | sort -u)
+  br sync --flush-only --force --json >/dev/null 2>&1 || true
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --help|-h)
@@ -68,4 +89,6 @@ if jq -e '.warnings | length > 0' <<<"$validation" >/dev/null; then
   jq -r '.warnings[] | "WARN \(.code): \(.message) (line \(.line // "n/a"))"' <<<"$validation" >&2
 fi
 
-exec br create "$title" "${pass_args[@]}"
+output="$(br create "$title" "${pass_args[@]}")"
+normalize_created_source_repo "$output"
+printf '%s\n' "$output"

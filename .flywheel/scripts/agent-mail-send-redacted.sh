@@ -1,323 +1,95 @@
 #!/usr/bin/env bash
-# Prepare an Agent Mail send_message call without rendering token values.
-#
-# Contract:
-#   - callers pass --sender-token-handle vault:<agent>, env:<VAR>, or none
-#   - literal token values are rejected before any capture/log output is written
-#   - output artifacts contain only redacted token metadata
-#
-# The MCP Agent Mail server is not a shell CLI. This wrapper provides the
-# pane-safe contract and dry-run/synthetic regression surface; token-bearing
-# live MCP calls must use MCP-native session auth or a future non-rendering MCP
-# bridge, not shell-visible token arguments.
 set -euo pipefail
 
-usage() {
-  cat <<'USAGE'
-Usage:
-  agent-mail-send-redacted.sh send_message \
-    --project-key <path> \
-    --sender-name <agent> \
-    --to <agent[,agent...]> \
-    --subject <subject> \
-    --body <text> | --body-file <path> \
-    [--sender-token-handle vault:<agent>|env:<VAR>|none] \
-    [--capture-dir <dir>] \
-    [--dry-run]
+NTM="${AGENT_MAIL_SEND_REDACTED_NTM_BIN:-/Users/josh/.local/bin/ntm}"
 
-  agent-mail-send-redacted.sh register_agent \
-    --project-key <path> \
-    --program <program> \
-    --model <model> \
-    [--agent-name <agent>] \
-    [--task-description <text>] \
-    [--registration-token-handle vault:<agent>|env:<VAR>|none] \
-    [--capture-dir <dir>] \
-    [--dry-run]
+usage(){ printf '%s\n' \
+  'Usage:' \
+  '  agent-mail-send-redacted.sh send_message --project-key PATH --sender-name AGENT --to AGENT[,AGENT...] --subject TEXT (--body TEXT|--body-file PATH) [--sender-token-handle vault:AGENT|env:VAR|none] [--capture-dir DIR] [--dry-run]' \
+  '  agent-mail-send-redacted.sh register_agent --project-key PATH --program PROGRAM --model MODEL [--agent-name AGENT] [--task-description TEXT] [--registration-token-handle vault:AGENT|env:VAR|none] [--capture-dir DIR] [--dry-run]'; }
+die(){ printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+need(){ command -v "$1" >/dev/null 2>&1 || die "$1 is required"; }
 
-Token values must never be passed directly. Use a vault/env handle.
-USAGE
-}
-
-die() {
-  printf 'ERROR: %s\n' "$*" >&2
-  exit 1
-}
-
-redact_stream() {
-  sed -E \
-    -e 's/(registration_token|sender_token)[=:][^[:space:]",}]*/\1=[REDACTED]/g' \
-    -e 's/FAKE_AGENT_MAIL_TOKEN_[A-Za-z0-9_=-]+/[REDACTED_TOKEN]/g' \
-    -e 's/[A-Za-z0-9_=-]{32,}/[REDACTED_TOKEN]/g'
-}
-
-json_escape() {
-  python3 -c 'import json,sys; print(json.dumps(sys.stdin.read())[1:-1])'
-}
-
-require_no_literal_token() {
-  local label="$1"
-  local value="$2"
-
+reject_literal_token(){
+  local label="$1" value="$2"
   case "$value" in
-    FAKE_AGENT_MAIL_TOKEN_*|*registration_token=*|*sender_token=*)
-      die "$label contains literal token-shaped text; pass a handle instead"
-      ;;
+    FAKE_AGENT_MAIL_TOKEN_*|*registration_token=*|*sender_token=*|Bearer\ *) die "$label contains token-shaped text; pass a handle" ;;
   esac
-
   if printf '%s' "$value" | grep -Eq '^[A-Za-z0-9_=-]{32,}$'; then
     die "$label looks like token material; pass vault:<agent> or env:<VAR>"
   fi
 }
 
-resolve_token_handle() {
-  local handle="$1"
-  local vault_dir="${AGENT_MAIL_TOKEN_VAULT_DIR:-$HOME/.local/state/flywheel/fleet-mail-tokens}"
-  local name var file token
-
+resolve_handle(){
+  local handle="${1:-none}" vault="${AGENT_MAIL_TOKEN_VAULT_DIR:-$HOME/.local/state/flywheel/fleet-mail-tokens}" name var file token
+  reject_literal_token "token handle" "$handle"
   case "$handle" in
-    none|"")
-      return 0
-      ;;
-    vault:*)
-      name="${handle#vault:}"
-      name="${name%%:*}"
-      require_no_literal_token "vault handle" "$name"
-      file="$vault_dir/${name}.token"
-      [[ -f "$file" ]] || die "token handle not found: vault:${name}"
-      token="$(cat "$file")"
-      [[ -n "$token" ]] || die "token handle is empty: vault:${name}"
-      ;;
-    env:*)
-      var="${handle#env:}"
-      require_no_literal_token "env handle" "$var"
-      [[ "$var" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || die "invalid env handle name: $var"
-      token="${!var:-}"
-      [[ -n "$token" ]] || die "token handle env var is unset or empty: env:${var}"
-      ;;
-    *)
-      die "unsupported token handle '$handle'; use vault:<agent>, env:<VAR>, or none"
-      ;;
+    none|"") return 0 ;;
+    vault:*) name="${handle#vault:}"; name="${name%%:*}"; reject_literal_token "vault handle" "$name"; file="$vault/${name}.token"; [[ -f "$file" ]] || die "token handle not found"; token="$(<"$file")"; [[ -n "$token" ]] || die "token handle is empty" ;;
+    env:*) var="${handle#env:}"; reject_literal_token "env handle" "$var"; [[ "$var" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || die "invalid env handle name"; token="${!var:-}"; [[ -n "$token" ]] || die "token handle env var is unset or empty" ;;
+    *) die "unsupported token handle; use vault:<agent>, env:<VAR>, or none" ;;
   esac
-
-  # Deliberately do not print or export $token. Resolution proves the handle is
-  # usable while keeping token material out of pane-visible arguments.
-  return 0
 }
 
-write_capture_files() {
-  local dir="$1"
-  local project_key="$2"
-  local sender_name="$3"
-  local to="$4"
-  local subject="$5"
-  local body="$6"
-  local sender_token_handle="$7"
-  local dry_run="$8"
-  local project_json sender_json to_json subject_json body_json handle_json mode_json
-
-  mkdir -p "$dir"
-  chmod 700 "$dir"
-
-  project_json="$(printf '%s' "$project_key" | json_escape)"
-  sender_json="$(printf '%s' "$sender_name" | json_escape)"
-  to_json="$(printf '%s' "$to" | json_escape)"
-  subject_json="$(printf '%s' "$subject" | json_escape)"
-  body_json="$(printf '%s' "$body" | json_escape)"
-  handle_json="$(printf '%s' "$sender_token_handle" | json_escape)"
-  mode_json="$(printf '%s' "$dry_run" | json_escape)"
-
-  {
-    printf 'Agent Mail send_message prepared with redacted token handling\n'
-    printf 'project_key=%s\n' "$project_key"
-    printf 'sender_name=%s\n' "$sender_name"
-    printf 'to=%s\n' "$to"
-    printf 'subject=%s\n' "$subject"
-    printf 'sender_token_handle=%s\n' "$sender_token_handle"
-    printf 'sender_token_value=[REDACTED]\n'
-    printf 'dry_run=%s\n' "$dry_run"
-  } | redact_stream >"$dir/wrapper.log"
-
-  {
-    printf 'Use MCP Agent Mail send_message with these pane-safe arguments:\n'
-    printf 'project_key: %s\n' "$project_key"
-    printf 'sender_name: %s\n' "$sender_name"
-    printf 'to: %s\n' "$to"
-    printf 'subject: %s\n' "$subject"
-    printf 'body: <provided, %s bytes>\n' "$(printf '%s' "$body" | wc -c | tr -d ' ')"
-    printf 'sender_token: [RESOLVED_OUT_OF_BAND_FROM_%s]\n' "$sender_token_handle"
-  } | redact_stream >"$dir/dispatch.txt"
-
-  cat >"$dir/pane-visible-tool-call-args.json" <<JSON
-{
-  "tool": "mcp__mcp-agent-mail__send_message",
-  "project_key": "$project_json",
-  "sender_name": "$sender_json",
-  "to": "$to_json",
-  "subject": "$subject_json",
-  "body": "$body_json",
-  "sender_token_handle": "$handle_json",
-  "sender_token": "[REDACTED]",
-  "dry_run": "$mode_json"
-}
-JSON
+scrub_text(){
+  perl -0pe 's/FAKE_AGENT_MAIL_TOKEN_[A-Za-z0-9_=-]+/[REDACTED_TOKEN]/g; s/Bearer[[:space:]]+[A-Za-z0-9._=-]+/Bearer [REDACTED]/g; s/sk-ant-[A-Za-z0-9_-]+/[REDACTED_TOKEN]/g; s/sk-(proj-)?[A-Za-z0-9_-]{16,}/[REDACTED_TOKEN]/g; s/github_pat_[A-Za-z0-9_]+/[REDACTED_TOKEN]/g; s/gh[pousr]_[A-Za-z0-9_]{20,}/[REDACTED_TOKEN]/g; s/(AKIA|ASIA)[A-Z0-9]{16}/[REDACTED_TOKEN]/g; s/AIza[A-Za-z0-9_-]{35}/[REDACTED_TOKEN]/g; s/xox[abprs]-[A-Za-z0-9-]+/[REDACTED_TOKEN]/g; s/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/[REDACTED_TOKEN]/g; s/((registration|sender)_token|token|secret|password|api[_-]?key)(["'\''[:space:]]*[:=]["'\''[:space:]]*)[A-Za-z0-9._\/+=:-]{8,}/$1$3[REDACTED_TOKEN]/gi; s/\b[A-Za-z0-9_=-]{40,}\b/[REDACTED_TOKEN]/g;'
 }
 
-write_register_capture_files() {
-  local dir="$1"
-  local project_key="$2"
-  local agent_name="$3"
-  local program="$4"
-  local model="$5"
-  local task_description="$6"
-  local registration_token_handle="$7"
-  local dry_run="$8"
-  local project_json agent_json program_json model_json task_json handle_json mode_json
-
-  mkdir -p "$dir"
-  chmod 700 "$dir"
-
-  project_json="$(printf '%s' "$project_key" | json_escape)"
-  agent_json="$(printf '%s' "$agent_name" | json_escape)"
-  program_json="$(printf '%s' "$program" | json_escape)"
-  model_json="$(printf '%s' "$model" | json_escape)"
-  task_json="$(printf '%s' "$task_description" | json_escape)"
-  handle_json="$(printf '%s' "$registration_token_handle" | json_escape)"
-  mode_json="$(printf '%s' "$dry_run" | json_escape)"
-
-  {
-    printf 'Agent Mail register_agent prepared with redacted token handling\n'
-    printf 'project_key=%s\n' "$project_key"
-    printf 'agent_name=%s\n' "${agent_name:-<auto>}"
-    printf 'program=%s\n' "$program"
-    printf 'model=%s\n' "$model"
-    printf 'registration_token_handle=%s\n' "$registration_token_handle"
-    printf 'registration_token_value=[REDACTED]\n'
-    printf 'dry_run=%s\n' "$dry_run"
-  } | redact_stream >"$dir/wrapper.log"
-
-  {
-    printf 'Use MCP Agent Mail register_agent with these pane-safe arguments:\n'
-    printf 'project_key: %s\n' "$project_key"
-    printf 'agent_name: %s\n' "${agent_name:-<auto>}"
-    printf 'program: %s\n' "$program"
-    printf 'model: %s\n' "$model"
-    printf 'task_description: <provided, %s bytes>\n' "$(printf '%s' "$task_description" | wc -c | tr -d ' ')"
-    printf 'registration_token: [RESOLVED_OUT_OF_BAND_FROM_%s]\n' "$registration_token_handle"
-  } | redact_stream >"$dir/dispatch.txt"
-
-  cat >"$dir/pane-visible-tool-call-args.json" <<JSON
-{
-  "tool": "mcp__mcp-agent-mail__register_agent",
-  "project_key": "$project_json",
-  "agent_name": "$agent_json",
-  "program": "$program_json",
-  "model": "$model_json",
-  "task_description": "$task_json",
-  "registration_token_handle": "$handle_json",
-  "registration_token": "[REDACTED]",
-  "dry_run": "$mode_json"
-}
-JSON
+redact_text(){
+  local text="$1" tmp out
+  need jq; need perl
+  tmp="$(mktemp "${TMPDIR:-/tmp}/agent-mail-redact-input.XXXXXX")"; chmod 600 "$tmp"; printf '%s' "$text" >"$tmp"
+  if ! out="$("$NTM" redact preview --json --file "$tmp" | jq -r '.output')"; then rm -f "$tmp"; return 1; fi
+  rm -f "$tmp"
+  printf '%s' "$out" | scrub_text
 }
 
-main() {
-  local command="${1:-}"
-  shift || true
-
-  [[ "$command" == "send_message" || "$command" == "register_agent" ]] || {
-    usage >&2
-    exit 2
-  }
-
-  local project_key=""
-  local sender_name=""
-  local to=""
-  local subject=""
-  local body=""
-  local body_file=""
-  local sender_token_handle="none"
-  local registration_token_handle="none"
-  local agent_name=""
-  local program=""
-  local model=""
-  local task_description=""
-  local capture_dir=""
-  local dry_run=0
-
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      --project-key) project_key="${2:?--project-key needs value}"; shift 2 ;;
-      --sender-name) sender_name="${2:?--sender-name needs value}"; shift 2 ;;
-      --to) to="${2:?--to needs value}"; shift 2 ;;
-      --subject) subject="${2:?--subject needs value}"; shift 2 ;;
-      --body) body="${2:?--body needs value}"; shift 2 ;;
-      --body-file) body_file="${2:?--body-file needs value}"; shift 2 ;;
-      --sender-token-handle) sender_token_handle="${2:?--sender-token-handle needs value}"; shift 2 ;;
-      --registration-token-handle) registration_token_handle="${2:?--registration-token-handle needs value}"; shift 2 ;;
-      --agent-name) agent_name="${2:?--agent-name needs value}"; shift 2 ;;
-      --program) program="${2:?--program needs value}"; shift 2 ;;
-      --model) model="${2:?--model needs value}"; shift 2 ;;
-      --task-description) task_description="${2:?--task-description needs value}"; shift 2 ;;
-      --capture-dir) capture_dir="${2:?--capture-dir needs value}"; shift 2 ;;
-      --dry-run) dry_run=1; shift ;;
-      -h|--help) usage; exit 0 ;;
-      *) die "unknown argument: $1" ;;
-    esac
-  done
-
-  [[ -n "$project_key" ]] || die "--project-key required"
-
-  if [[ -z "$capture_dir" ]]; then
-    capture_dir="$(mktemp -d "${TMPDIR:-/tmp}/agent-mail-redacted.XXXXXX")"
-  fi
-
-  if [[ "$command" == "send_message" ]]; then
-    [[ -n "$sender_name" ]] || die "--sender-name required"
-    [[ -n "$to" ]] || die "--to required"
-    [[ -n "$subject" ]] || die "--subject required"
-    [[ -z "$body" || -z "$body_file" ]] || die "use --body or --body-file, not both"
-    if [[ -n "$body_file" ]]; then
-      [[ -f "$body_file" ]] || die "body file not found: $body_file"
-      body="$(cat "$body_file")"
-    fi
-    [[ -n "$body" ]] || die "--body or --body-file required"
-
-    require_no_literal_token "sender token handle" "$sender_token_handle"
-    resolve_token_handle "$sender_token_handle"
-
-    write_capture_files \
-      "$capture_dir" \
-      "$project_key" \
-      "$sender_name" \
-      "$to" \
-      "$subject" \
-      "$body" \
-      "$sender_token_handle" \
-      "$dry_run"
-  else
-    [[ -n "$program" ]] || die "--program required"
-    [[ -n "$model" ]] || die "--model required"
-    require_no_literal_token "registration token handle" "$registration_token_handle"
-    resolve_token_handle "$registration_token_handle"
-
-    write_register_capture_files \
-      "$capture_dir" \
-      "$project_key" \
-      "$agent_name" \
-      "$program" \
-      "$model" \
-      "$task_description" \
-      "$registration_token_handle" \
-      "$dry_run"
-  fi
-
-  printf 'Prepared redacted Agent Mail %s capture: %s\n' "$command" "$capture_dir" | redact_stream
-
-  if [[ "$dry_run" != "1" ]]; then
-    printf 'ERROR: live token-bearing MCP invocation is intentionally not shell-rendered; use MCP session auth or future non-rendering bridge.\n' >&2
-    exit 2
-  fi
+write_send_capture(){
+  local dir="$1" project="$2" sender="$3" to="$4" subject="$5" body="$6" handle="$7" dry="$8" redacted_body
+  redacted_body="$(redact_text "$body")"
+  mkdir -p "$dir"; chmod 700 "$dir"
+  redact_text "$(printf 'Agent Mail send_message prepared via ntm mail+redact\nproject_key=%s\nsender_name=%s\nto=%s\nsubject=%s\nsender_token_handle=%s\nsender_token_value=[REDACTED]\ndry_run=%s\n' "$project" "$sender" "$to" "$subject" "$handle" "$dry")" >"$dir/wrapper.log"
+  redact_text "$(printf 'Use ntm mail send --json with this scrubbed body:\nproject_key: %s\nsender_name: %s\nto: %s\nsubject: %s\nbody: %s\nsender_token: [RESOLVED_OUT_OF_BAND_FROM_%s]\n' "$project" "$sender" "$to" "$subject" "$redacted_body" "$handle")" >"$dir/dispatch.txt"
+  jq -n --arg project_key "$project" --arg sender_name "$sender" --arg to "$to" --arg subject "$subject" --arg body "$redacted_body" --arg handle "$handle" --arg dry_run "$dry" '{tool:"ntm mail send --json",project_key:$project_key,sender_name:$sender_name,to:$to,subject:$subject,body:$body,sender_token_handle:$handle,sender_token:"[REDACTED]",dry_run:$dry_run}' >"$dir/pane-visible-tool-call-args.json"
 }
 
-main "$@"
+write_register_capture(){
+  local dir="$1" project="$2" agent="$3" program="$4" model="$5" task="$6" handle="$7" dry="$8"
+  mkdir -p "$dir"; chmod 700 "$dir"
+  redact_text "$(printf 'Agent Mail register_agent prepared with redacted token handling\nproject_key=%s\nagent_name=%s\nprogram=%s\nmodel=%s\nregistration_token_handle=%s\nregistration_token_value=[REDACTED]\ndry_run=%s\n' "$project" "${agent:-<auto>}" "$program" "$model" "$handle" "$dry")" >"$dir/wrapper.log"
+  redact_text "$(printf 'Use MCP Agent Mail register_agent with pane-safe arguments:\nproject_key: %s\nagent_name: %s\nprogram: %s\nmodel: %s\ntask_description: <provided, %s bytes>\nregistration_token: [RESOLVED_OUT_OF_BAND_FROM_%s]\n' "$project" "${agent:-<auto>}" "$program" "$model" "$(printf '%s' "$task" | wc -c | tr -d ' ')" "$handle")" >"$dir/dispatch.txt"
+  jq -n --arg project_key "$project" --arg agent_name "$agent" --arg program "$program" --arg model "$model" --arg task_description "$task" --arg handle "$handle" --arg dry_run "$dry" '{tool:"mcp__mcp-agent-mail__register_agent",project_key:$project_key,agent_name:$agent_name,program:$program,model:$model,task_description:$task_description,registration_token_handle:$handle,registration_token:"[REDACTED]",dry_run:$dry_run}' >"$dir/pane-visible-tool-call-args.json"
+}
+
+send_live(){ local project="$1" to="$2" subject="$3" body="$4" recipients=() args=(); IFS=, read -ra recipients <<<"$to"; args=(mail send "$project" --json --subject "$subject"); for recipient in "${recipients[@]}"; do args+=(--to "$recipient"); done; "$NTM" "${args[@]}" "$body"; }
+
+cmd="${1:-}"; shift || true
+[[ "$cmd" == send_message || "$cmd" == register_agent || "$cmd" == -h || "$cmd" == --help ]] || { usage >&2; exit 2; }
+[[ "$cmd" == -h || "$cmd" == --help ]] && { usage; exit 0; }
+project=""; sender=""; to=""; subject=""; body=""; body_file=""; sender_handle="none"; reg_handle="none"; agent=""; program=""; model=""; task=""; capture=""; dry=0
+while [[ $# -gt 0 ]]; do case "$1" in
+  --project-key) project="${2:?}"; shift 2;; --sender-name) sender="${2:?}"; shift 2;; --to) to="${2:?}"; shift 2;; --subject) subject="${2:?}"; shift 2;;
+  --body) body="${2:?}"; shift 2;; --body-file) body_file="${2:?}"; shift 2;; --sender-token-handle) sender_handle="${2:?}"; shift 2;;
+  --registration-token-handle) reg_handle="${2:?}"; shift 2;; --agent-name) agent="${2:?}"; shift 2;; --program) program="${2:?}"; shift 2;; --model) model="${2:?}"; shift 2;;
+  --task-description) task="${2:?}"; shift 2;; --capture-dir) capture="${2:?}"; shift 2;; --dry-run) dry=1; shift;; -h|--help) usage; exit 0;; *) die "unknown argument" ;;
+esac; done
+
+[[ -n "$project" ]] || die "--project-key required"
+[[ -n "$capture" ]] || capture="$(mktemp -d "${TMPDIR:-/tmp}/agent-mail-redacted.XXXXXX")"
+
+if [[ "$cmd" == send_message ]]; then
+  [[ -n "$sender" && -n "$to" && -n "$subject" ]] || die "--sender-name, --to, and --subject required"
+  [[ -z "$body" || -z "$body_file" ]] || die "use --body or --body-file, not both"
+  [[ -n "$body_file" ]] && { [[ -f "$body_file" ]] || die "body file not found"; body="$(<"$body_file")"; }
+  [[ -n "$body" ]] || die "--body or --body-file required"
+  resolve_handle "$sender_handle"
+  write_send_capture "$capture" "$project" "$sender" "$to" "$subject" "$body" "$sender_handle" "$dry"
+  redact_text "$(printf 'Prepared redacted Agent Mail send_message capture: %s\n' "$capture")"
+  [[ "$dry" == 1 ]] || send_live "$project" "$to" "$subject" "$(jq -r '.body' "$capture/pane-visible-tool-call-args.json")"
+else
+  [[ -n "$program" && -n "$model" ]] || die "--program and --model required"
+  resolve_handle "$reg_handle"
+  write_register_capture "$capture" "$project" "$agent" "$program" "$model" "$task" "$reg_handle" "$dry"
+  redact_text "$(printf 'Prepared redacted Agent Mail register_agent capture: %s\n' "$capture")"
+  [[ "$dry" == 1 ]] || { printf 'ERROR: ntm mail has no register_agent apply surface; use the captured MCP register_agent arguments.\n' >&2; exit 2; }
+fi

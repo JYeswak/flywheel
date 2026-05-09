@@ -1,7 +1,7 @@
 {
   "canonical_index": ".flywheel/AGENTS-CANONICAL.md",
   "round_trip_command": "cat .flywheel/rules/L*.md | shasum -a 256",
-  "rule_count": 101,
+  "rule_count": 103,
   "rules": [
     {
       "id": "L48",
@@ -117,7 +117,7 @@
       "id": "L58",
       "order": 12,
       "path": ".flywheel/rules/L012-L58-secret-material-never-in-pane-text.md",
-      "sha256": "bbbf8e205024c4c42712bcd80f2f3b7d52e3ad74616a30876461190efe77a358",
+      "sha256": "cef6b1d5173c8bf8986bf10aa60032cbce572a92ce88b547847664a39a7a0d17",
       "shipped": "2026-05-02",
       "status": "long_term",
       "title": "SECRET-MATERIAL-NEVER-IN-PANE-TEXT",
@@ -237,7 +237,7 @@
       "id": "L70",
       "order": 24,
       "path": ".flywheel/rules/L024-L70-orch-no-punt-next-actionable-runs-same-tick-not-next-tick.md",
-      "sha256": "293749a5dc23432bff7f19f5f2ae43843b0cdacf482ca94504552134bc800c53",
+      "sha256": "e5a3c6fbd2a524d14358b4ea48b332e28f42f02d768cc76e1a42182dce32b1e3",
       "shipped": "2026-05-03",
       "status": "long_term",
       "title": "ORCH-NO-PUNT (next actionable runs same tick, not next tick)",
@@ -377,7 +377,7 @@
       "id": "L84",
       "order": 38,
       "path": ".flywheel/rules/L038-L84-locked-worker-identities-canonical.md",
-      "sha256": "c84839f2acaa457b18d883ed5e71ee1c02a47bc784e3baa2154bd1c59b337a2f",
+      "sha256": "6f1788024b8094aa9ff8915efef9b142c7bbe883d2dc2c212c2e53f2778d52c3",
       "shipped": "2026-05-04",
       "status": "long_term",
       "title": "LOCKED-WORKER-IDENTITIES-CANONICAL",
@@ -407,7 +407,7 @@
       "id": "L87",
       "order": 41,
       "path": ".flywheel/rules/L041-L87-stale-error-text-auto-ping-recovery.md",
-      "sha256": "4ddc67e6d2ca73c21eba3d040b920129f04bad2d6965baa15780ae850f79feeb",
+      "sha256": "c5e147fd8d51f6fd3236371ae3ffda0fe938e42c6d4d39a1fab6bce454b66970",
       "shipped": "2026-05-04",
       "status": "temporary",
       "title": "STALE-ERROR-TEXT-AUTO-PING-RECOVERY",
@@ -1012,9 +1012,29 @@
       "status": "long_term",
       "title": "SKILL-NAMING-CONSTRAINT",
       "trauma_class": "codex-skill-name-length"
+    },
+    {
+      "id": "L151",
+      "order": 102,
+      "path": ".flywheel/rules/L102-L151-jeffrey-comment-response-sla.md",
+      "sha256": "568308be58e5de09f24dd08bf15056b15dab3756ee158570ba256ac199cba5ae",
+      "shipped": "2026-05-09",
+      "status": "long_term",
+      "title": "JEFFREY-COMMENT-RESPONSE-SLA",
+      "trauma_class": "jeffrey-comment-orchestrator-blind-spot"
+    },
+    {
+      "id": "L152",
+      "order": 103,
+      "path": ".flywheel/rules/L103-L152-coordinator-daemon-canonical-dispatch.md",
+      "sha256": "3a891597202774530cae8c04c8b40796cf0746eaa78fd8ecf5f819eb240a71ac",
+      "shipped": "2026-05-07",
+      "status": "long_term",
+      "title": "COORDINATOR-DAEMON-CANONICAL-DISPATCH",
+      "trauma_class": "dispatch-substrate-drift"
     }
   ],
-  "rules_body_sha256": "aaee2ddf0e13012eac5e9500863ff6ec2dc1566a09dde3896c8cc05e6f15f749",
+  "rules_body_sha256": "892bd0707282b5f1ba2a7b2f246b86c5943d2c64dd2ec85f05e4794ac73a466f",
   "schema_version": "agents-canonical-shards/v1",
   "source": "AGENTS.md"
 }

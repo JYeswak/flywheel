@@ -483,7 +483,7 @@ def apply_actions(actions, args, checked_at):
                 "No action required if this pane is live; this ping refreshes cross-orch liveness after a silent comms window.",
                 f"reason={action['reason']}",
             ])
-            ok = subprocess.call([args.ntm, "send", session, f"--pane={action['target_pane']}", body]) == 0
+            ok = subprocess.call([args.ntm, "send", session, f"--pane={action['target_pane']}", "--no-cass-check", body]) == 0
             result = {**action, "ok": ok}
             append_jsonl(args.ledger, {"ts": checked_at, "event": "fleet_comms_ping_sent", **result})
             actual.append(result)

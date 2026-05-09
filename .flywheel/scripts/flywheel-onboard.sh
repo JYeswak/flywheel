@@ -115,6 +115,103 @@ run_native() {
   return "$rc"
 }
 
+coordinator_daemon_probe() {
+  local script="$REPO_ABS/.flywheel/scripts/install-coordinator-daemon.sh" stdout_file stderr_file rc
+  if [[ ! -x "$script" ]]; then
+    jq -nc --arg script "$script" '{available:false,script:$script,success:false,skipped_reason:"script_not_executable"}'
+    return 0
+  fi
+
+  stdout_file="$(mktemp)"
+  stderr_file="$(mktemp)"
+  set +e
+  "$script" doctor --all-sessions --json >"$stdout_file" 2>"$stderr_file"
+  rc=$?
+  set -e
+  if jq empty "$stdout_file" >/dev/null 2>&1; then
+    jq --argjson rc "$rc" --arg stderr "$(head -c 2000 "$stderr_file")" '. + {available:true,probe_exit_code:$rc,stderr:$stderr}' "$stdout_file"
+  else
+    jq -nc --arg script "$script" --argjson rc "$rc" --arg stdout "$(head -c 2000 "$stdout_file")" --arg stderr "$(head -c 2000 "$stderr_file")" \
+      '{available:true,script:$script,success:false,probe_exit_code:$rc,stdout:$stdout,stderr:$stderr}'
+  fi
+  rm -f "$stdout_file" "$stderr_file"
+}
+
+hygiene_targets_probe() {
+  local yaml_path="$REPO_ABS/.flywheel/hygiene-targets.yaml"
+  local schema_path="/Users/josh/Developer/flywheel/templates/flywheel-install/hygiene-targets.schema.json"
+  if [[ ! -f "$yaml_path" ]]; then
+    jq -nc --arg path "$yaml_path" '{present:false,valid:false,path:$path,reason:"missing"}'
+    return 0
+  fi
+  if python3 - "$schema_path" "$yaml_path" >/dev/null 2>&1 <<'PY'
+import json, sys
+import yaml
+from jsonschema import Draft202012Validator
+with open(sys.argv[1], encoding="utf-8") as f:
+    schema = json.load(f)
+with open(sys.argv[2], encoding="utf-8") as f:
+    data = yaml.safe_load(f)
+Draft202012Validator.check_schema(schema)
+Draft202012Validator(schema).validate(data)
+PY
+  then
+    jq -nc --arg path "$yaml_path" '{present:true,valid:true,path:$path,reason:null}'
+  else
+    jq -nc --arg path "$yaml_path" '{present:true,valid:false,path:$path,reason:"schema_validation_failed"}'
+  fi
+}
+
+stash_health_probe() {
+  local count status mode recommendation warning
+  if ! git -C "$REPO_ABS" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    jq -nc --arg repo "$REPO_ABS" '{repo:$repo,status:"UNKNOWN",stash_count:null,warnings:["not_a_git_work_tree"]}'
+    return 0
+  fi
+  count="$(git -C "$REPO_ABS" stash list 2>/dev/null | wc -l | tr -d '[:space:]')"
+  case "$count" in
+    ''|*[!0-9]*) count=0 ;;
+  esac
+  status="HEALTHY"
+  mode="manual"
+  recommendation=""
+  warning=""
+  if [[ "$count" -ge 80 ]]; then
+    status="WARN"
+    mode="comprehensive"
+    recommendation="/git-stash-janitor"
+    warning="stash_count_requires_git_stash_janitor"
+  elif [[ "$count" -ge 10 ]]; then
+    status="WARN"
+    mode="standard"
+    recommendation="/git-stash-janitor"
+    warning="stash_count_requires_git_stash_janitor"
+  elif [[ "$count" -ge 5 ]]; then
+    mode="quick"
+    recommendation="/git-stash-janitor"
+  fi
+  jq -nc \
+    --arg repo "$REPO_ABS" \
+    --arg status "$status" \
+    --arg mode "$mode" \
+    --arg recommendation "$recommendation" \
+    --arg warning "$warning" \
+    --argjson stash_count "$count" \
+    '{
+      repo:$repo,
+      status:$status,
+      stash_count:$stash_count,
+      recommended_mode:$mode,
+      recommended_skill:(if $recommendation == "" then null else $recommendation end),
+      recommend_before_continue:($stash_count >= 10),
+      manual_threshold:"<5",
+      quick_threshold:"5-9",
+      standard_threshold:"10-80",
+      comprehensive_threshold:"80+",
+      warnings:(if $warning == "" then [] else [$warning] end)
+    }'
+}
+
 emit_info() {
   if [[ "$JSON_OUT" -eq 1 ]]; then
     jq -nc --arg version "$VERSION" --arg contract "$CONTRACT_VERSION" --arg ntm "$NTM_BIN" '{
@@ -123,7 +220,7 @@ emit_info() {
       version:$version,
       contract_version:$contract,
       ntm_bin:$ntm,
-      native_surfaces:["deps","setup","init","shell","completion","bind","spawn"],
+      native_surfaces:["deps","setup","init","shell","completion","bind","spawn","coordinator-daemon","repo-hygiene"],
       default_dry_run:true
     }'
   else
@@ -242,14 +339,21 @@ run_native "completion" "completion" "read" completion "$DEFAULT_SHELL"
 run_native "bind-show" "bind" "read" bind --show
 run_native "spawn" "spawn" "mutate" spawn "$PROJECT" --no-user --json
 
+coordinator_probe="$(coordinator_daemon_probe)"
+hygiene_probe="$(hygiene_targets_probe)"
+stash_probe="$(stash_health_probe)"
 planned_json="$(jq -sc '.' "$PLANNED_FILE")"
 results_json="$(jq -sc '.' "$RESULTS_FILE")"
 skipped_json="$(jq -sc '.' "$SKIPPED_FILE")"
 failed_reads="$(jq -s '[.[] | select(.executed == true and .exit_code != 0 and (.surface == "deps" or .id == "setup-status"))] | length' "$RESULTS_FILE")"
 mutation_failures="$(jq -s '[.[] | select(.executed == true and .exit_code != 0 and (.surface == "setup" or .surface == "init" or .surface == "spawn"))] | length' "$RESULTS_FILE")"
+hygiene_failures="$(jq -n --argjson probe "$hygiene_probe" 'if ($probe.present == true and $probe.valid == true) then 0 else 1 end')"
+stash_failures="$(jq -n --argjson probe "$stash_probe" 'if (($probe.stash_count // 0) >= 10) then 1 else 0 end')"
 
 STATUS="HEALTHY"
 [[ "$failed_reads" -gt 0 ]] && STATUS="PARTIAL"
+[[ "$hygiene_failures" -gt 0 && "$STATUS" == "HEALTHY" ]] && STATUS="PARTIAL"
+[[ "$stash_failures" -gt 0 && "$STATUS" == "HEALTHY" ]] && STATUS="PARTIAL"
 [[ "$mutation_failures" -gt 0 ]] && STATUS="BLOCKED"
 
 payload="$(jq -nc \
@@ -264,6 +368,9 @@ payload="$(jq -nc \
   --argjson planned "$planned_json" \
   --argjson results "$results_json" \
   --argjson skipped "$skipped_json" \
+  --argjson coordinator_probe "$coordinator_probe" \
+  --argjson hygiene_probe "$hygiene_probe" \
+  --argjson stash_probe "$stash_probe" \
   '{
     success:($status != "BLOCKED"),
     schema_version:"flywheel.onboard.contract.v1",
@@ -276,10 +383,24 @@ payload="$(jq -nc \
     apply:($apply=="1"),
     explain:($explain=="1"),
     status:$status,
-    native_surfaces:["deps","setup","init","shell","completion","bind","spawn"],
+    native_surfaces:["deps","setup","init","shell","completion","bind","spawn","coordinator-daemon","repo-hygiene"],
     planned_commands:$planned,
     native_results:$results,
     mutating_commands_skipped:$skipped,
+    coordinator_daemon_probe:$coordinator_probe,
+    hygiene_targets_probe:$hygiene_probe,
+    stash_health_probe:$stash_probe,
+    stash_count:($stash_probe.stash_count // null),
+    stash_health_status:($stash_probe.status // "UNKNOWN"),
+    stash_recommended_mode:($stash_probe.recommended_mode // null),
+    stash_recommended_skill:($stash_probe.recommended_skill // null),
+    stash_recommend_before_continue:($stash_probe.recommend_before_continue // false),
+    hygiene_targets_present:($hygiene_probe.present // false),
+    hygiene_targets_valid:($hygiene_probe.valid // false),
+    hygiene_targets_path:($hygiene_probe.path // null),
+    fleet_coordinator_daemon_coverage:($coordinator_probe.fleet_coordinator_daemon_coverage // "0/0"),
+    fleet_coordinator_daemon_coverage_count:($coordinator_probe.fleet_coordinator_daemon_coverage_count // 0),
+    fleet_coordinator_daemon_coverage_total:($coordinator_probe.fleet_coordinator_daemon_coverage_total // 0),
     actual_actions:($results | map(select(.executed == true))),
     no_hand_roll_create_attach:true
   }')"

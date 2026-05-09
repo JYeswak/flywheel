@@ -318,6 +318,13 @@ def build_payload(args: argparse.Namespace) -> dict[str, Any]:
 def write_receipt(repo: Path, payload: dict[str, Any], receipt_dir: Path) -> Path:
     receipt_dir.mkdir(parents=True, exist_ok=True)
     status = "fail" if payload["three_q_unaudited_count"] else "pass"
+    failure_class = "unknown" if status == "fail" else None
+    retry_policy = "manual" if status == "fail" else "none"
+    recovery_hint = (
+        "Wire the unaudited three-Q surfaces or add explicit no-touch reasons."
+        if status == "fail"
+        else "No recovery needed; validation passed."
+    )
     receipt = {
         "schema_version": "validation-receipt/v1",
         "dispatch_id": "three-q-surface-audit",
@@ -330,6 +337,9 @@ def write_receipt(repo: Path, payload: dict[str, Any], receipt_dir: Path) -> Pat
             "raw_ref": f"three_q_unaudited_count={payload['three_q_unaudited_count']}",
         },
         "status": status,
+        "failure_class": failure_class,
+        "retry_policy": retry_policy,
+        "recovery_hint": recovery_hint,
         "failure_classes": ["three_q_surface_gap"] if status == "fail" else [],
         "evidence": [{"type": "path", "ref": payload["registry_path"]}],
         "artifact_checks": [

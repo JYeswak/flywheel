@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# flywheel-cli-surface: true
 
 ROOT_PATH="${FLYWHEEL_TMP_PRUNE_ROOT:-/private/tmp}"
 RECEIPT_DIR="${FLYWHEEL_TMP_PRUNE_RECEIPT_DIR:-$HOME/.local/state/flywheel/tmp-prune-receipts}"

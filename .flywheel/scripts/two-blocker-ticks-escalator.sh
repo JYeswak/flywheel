@@ -140,6 +140,8 @@ def latest_by_id(rows):
     for row in rows:
         if row.get("id"):
             latest[str(row["id"])] = row
+        elif row.get("ref_id") and (row.get("status") or str(row.get("event") or "").lower() in {"close", "open", "reopen"}):
+            latest[str(row["ref_id"])] = row
     return latest
 
 def slugify(value):
@@ -165,11 +167,13 @@ def load_closed_issue_index(rows):
         if str(row.get("status") or "").lower() not in CLOSED:
             continue
         add_closed_key(index["by_key"], issue_id, issue_id, "issue_id")
-        for field in ("task_id", "dispatch_task_id", "original_blocker_task_id", "blocked_bead_id"):
+        for field in ("task_id", "dispatch_task_id", "original_blocker_task_id", "blocked_bead_id", "ref_id"):
             add_closed_key(index["by_key"], row.get(field), issue_id, field)
-        title_slug = slugify(row.get("title"))
-        if title_slug:
-            index["titles"].append({"issue_id": issue_id, "title_slug": title_slug, "match": "title_slug"})
+        for title_source, match_type in ((row.get("title"), "title_slug"), (row.get("ref_id"), "ref_id_slug")):
+            title_slug = slugify(title_source)
+            if not title_slug:
+                continue
+            index["titles"].append({"issue_id": issue_id, "title_slug": title_slug, "match": match_type})
             match = re.match(r"^escalate-blocker-(.+)-via-flywheel-plan$", title_slug)
             if match:
                 add_closed_key(index["by_key"], match.group(1), issue_id, "escalation_title")
@@ -193,6 +197,8 @@ def closed_issue_match(item, index):
             title_slug = title["title_slug"]
             if title_slug == base or title_slug.startswith(f"{base}-") or base.startswith(f"{title_slug}-"):
                 return title
+            if (len(base) >= 12 and base in title_slug) or (len(title_slug) >= 12 and title_slug in base):
+                return {**title, "match": f"{title['match']}_contains"}
     return None
 
 def existing_escalation(latest, title):

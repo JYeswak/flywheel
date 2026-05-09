@@ -101,7 +101,24 @@ escalating), L60 (no-silent-darkness — punted ticks are silent darkness), L61
 (orchestrator validates callbacks — same family of orchestrator-knows-and-punts
 trauma), `flywheel-7lby` (mechanical gate implementation),
 `feedback_orchestrator_must_dispatch.md`, `feedback_flywheel_never_idles.md`,
-`feedback_three_audit_questions_per_surface.md` umbrella.
+`feedback_three_audit_questions_per_surface.md` umbrella,
+`feedback_meat_puppet_gate_at_phase_complete.md` (Joshua's 2026-05-03T16:48Z
+"this is the major fuck up that keeps happening over and over" callout — the
+genesis incident this rule was distilled from; defines the forbidden
+"Joshua-disposes pending" framing on data-decided dispatches),
+`feedback_orch_punt_is_l70_failure_dispatch_dont_ask.md` (data-decides corollary
+naming this rule by id),
+`feedback_data_decides_not_human_meatpuppet.md` (don't render Joshua as a
+meat-puppet gate when probe + Donella + Jeff methodology already decides),
+`feedback_donella_first_no_stop_to_ask.md` (apply 7-step Donella filter on
+every action before treating it as Joshua-disposes),
+`feedback_orchestrator_must_finish_p0_before_filing_more.md` (Joshua's
+2026-05-04 callout — *"orchestrators can not let this shit happen — this is a
+major fuck up and learning lesson — why are we having workers do work and then
+not finishing it out?"* — orchestrator drives oldest open P0s to closure
+before filing/dispatching new beads; trauma class
+`orchestrator-buries-old-p0-under-new-work`; measurement at
+`.flywheel/tests/test-orchestrator-must-finish-p0-before-filing-more.sh`).
 
 **Detector substrate:** `.flywheel/scripts/punt-phrase-detector.py` scans
 dispatch logs and handoff bodies for the forbidden phrase catalog. Daily report

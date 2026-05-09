@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
 set -euo pipefail
 
 VERSION="storage-probe.v1"
 REPO="/Users/josh/Developer/flywheel"
 DISK_PATH="/"
 HISTORY="${FLYWHEEL_STORAGE_HISTORY:-$HOME/.local/state/flywheel/storage-history.jsonl}"
+JSONL_APPEND_LIB="${FLYWHEEL_JSONL_APPEND_LIB:-$HOME/.local/share/flywheel-watchers/lib/jsonl-append.sh}"
+JSONL_APPEND_AVAILABLE=0
 FIXTURE=""
 JSON_OUT=1
 RECORD_HISTORY=0
@@ -14,6 +17,13 @@ FIRE_FREE_PCT="${FLYWHEEL_STORAGE_FIRE_FREE_PCT:-5}"
 NOTIFY_BIN="${NOTIFY_BIN:-$HOME/.local/bin/notify}"
 PROBE_WARNINGS_FILE="$(mktemp "${TMPDIR:-/tmp}/storage-probe-warnings.XXXXXX")"
 trap 'rm -f "$PROBE_WARNINGS_FILE"' EXIT
+
+if [[ -f "$JSONL_APPEND_LIB" ]]; then
+  # shellcheck disable=SC1090,SC1091
+  if source "$JSONL_APPEND_LIB" && declare -F fw_jsonl_append_validated >/dev/null; then
+    JSONL_APPEND_AVAILABLE=1
+  fi
+fi
 
 usage() {
   printf '%s\n' \
@@ -77,6 +87,21 @@ du_gb() {
 
 warn_probe() {
   printf '%s\n' "$1" >>"$PROBE_WARNINGS_FILE"
+}
+
+append_jsonl_best_effort() {
+  local path="$1" row="$2" label="$3" rc
+  if [[ "$JSONL_APPEND_AVAILABLE" -ne 1 ]] || ! declare -F fw_jsonl_append_validated >/dev/null; then
+    printf 'WARN: %s append skipped; JSONL primitive unavailable: %s\n' "$label" "$JSONL_APPEND_LIB" >&2
+    return 0
+  fi
+  if fw_jsonl_append_validated "$path" "$row"; then
+    return 0
+  else
+    rc=$?
+    printf 'WARN: %s append failed rc=%s path=%s\n' "$label" "$rc" "$path" >&2
+    return 0
+  fi
 }
 
 cached_metric() {
@@ -249,9 +274,9 @@ status_json() {
 
 record_history() {
   local row="$1" cutoff tmp
-  mkdir -p "$(dirname "$HISTORY")"
-  touch "$HISTORY"
-  printf '%s\n' "$row" >>"$HISTORY"
+  mkdir -p "$(dirname "$HISTORY")" 2>/dev/null || true
+  append_jsonl_best_effort "$HISTORY" "$row" "storage history"
+  [ -s "$HISTORY" ] || return 0
   cutoff="$(date -u -v-90d +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || python3 - <<'PY'
 import datetime
 print((datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=90)).strftime("%Y-%m-%dT%H:%M:%SZ"))

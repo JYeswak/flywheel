@@ -31,7 +31,7 @@ ZERO_HASH = "0" * 64
 REQUIRED_B1_FIELDS = """
 schema_name schema_version identity_key timestamp session_id event_type actor target
 payload metadata prev_hash checksum sequence_num state producer owner consumer
-blocking_scope owning_orch ship_repo ship_actor artifact_class subject predicate
+trust_domain blocking_scope owning_orch ship_repo ship_actor artifact_class subject predicate
 branch_ref git_ref reset_intent_hash deferral_owner deferral_until auto_fire_trigger
 drain_receipt_shape verification_probe tick_status_consequence stock inflow
 action_ledger
@@ -236,6 +236,7 @@ def build_row(event: dict[str, Any], *, schema_path: Path = DEFAULT_SCHEMA) -> d
         "producer": event.get("producer") or "wire-or-explain-classifier",
         "owner": event.get("owner") or event.get("owning_orch") or "flywheel:1",
         "consumer": consumer,
+        "trust_domain": event.get("trust_domain") or "repo:flywheel",
         "blocking_scope": event.get("blocking_scope") or ("none" if state == "not_required" else "tick_status"),
         "owning_orch": event.get("owning_orch") or "flywheel:1",
         "ship_repo": event.get("ship_repo") or "/Users/josh/Developer/flywheel",

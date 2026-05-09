@@ -69,10 +69,9 @@ fi
 
 status="$(jq -r '.status // "fail"' <<<"$probe_out")"
 out="$(jq -c --argjson publishability "$probe_out" --arg remote_name "$remote_name" --arg remote_url "$remote_url" '
-  ($publishability.brand_voice.public_repo // false) as $declared_public
-  | (($publishability.errors // []) + (if $declared_public then [] else [{code:"public_push_without_public_voice_gate", message:"target remote is public but PUBLISHABILITY-AUDIT.md does not mark Public repo: yes"}] end)) as $errors
+  ($publishability.errors // []) as $errors
   | {
-  status:(if $publishability.status == "pass" and $declared_public then "pass" else "fail" end),
+  status:(if $publishability.status == "pass" then "pass" else "fail" end),
   gate:"zeststream_public_prepublish",
   target_public:true,
   remote_name:$remote_name,

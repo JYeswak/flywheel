@@ -51,3 +51,19 @@ must cite the registry identity; workers must echo that identity in callbacks.
 text), L65 (identity proof beats command name), L76 (AgentMail identity
 canonical), L80 (DID/DIDNT/GAPS callbacks), and the Agent Mail skill.
 
+**Companion memories:**
+- `feedback_workers_read_not_mint_identity.md` — Joshua's 2026-05-04 callout
+  (*"workers grab new agentmail identities every time they register. they need
+  to have locked identities that survive reboot"*) — the genesis incident this
+  rule was distilled from. Names the trauma class
+  `agent-mail-identity-sprawl-recurring`, the canonical resolver path
+  `~/.local/state/flywheel/agent-mail/sessions/<session>:<pane>.json`, and the
+  fail-closed-without-registry-row contract this rule mechanizes.
+- `feedback_identity_stability_session_pane_project_primary_key.md` — sibling
+  discipline naming `(session, pane, project)` as the primary key for identity
+  stability across rotation/respawn.
+- `feedback_agent_mail_token_echo.md` — paired discipline (do not echo
+  registration tokens in pane text after registry resolve).
+- `reference_lavenderglen_fleet_mail.md` — example registry identity for
+  flywheel-p1's cross-orch role.
+

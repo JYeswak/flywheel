@@ -31,25 +31,102 @@ RETRY_SLEEP_SECONDS="${DISPATCH_VERIFY_RETRY_SLEEP_SECONDS:-15}"
 MAX_PROBES="${DISPATCH_VERIFY_MAX_PROBES:-3}"
 SNAPSHOT_LINES="${DISPATCH_VERIFY_SNAPSHOT_LINES:-120}"
 
-usage() {
-  echo "usage: dispatch-and-verify [--probe-mode=permissive|strict] <session> <pane> <dispatch-file-path>" >&2
+print_usage() {
+  cat <<'EOF'
+usage: dispatch-and-verify [--probe-mode=permissive|strict] <session> <pane> <dispatch-file-path>
+       dispatch-and-verify --info [--json]
+       dispatch-and-verify --examples [--json]
+       dispatch-and-verify --schema
+
+Verifies that an ntm dispatch was actually submitted and the target pane started
+work, rather than only accepting text into an input buffer.
+
+Options:
+  --probe-mode permissive|strict  Choose pane-start evidence threshold.
+  --json                          Emit JSON for supported introspection modes.
+  --info                          Print runtime configuration.
+  --examples                      Print copy-paste workflows.
+  --schema                        Print machine-readable contract.
+  -h, --help                      Print this help.
+
+Exit codes:
+  0  work-start evidence observed, or introspection succeeded
+  1  pane stayed stuck after the probe window
+  2  usage/configuration error
+EOF
+}
+
+usage_error() {
+  print_usage >&2
   exit 2
 }
 
+info() {
+  if [[ "${JSON_OUT:-false}" == "true" ]]; then
+    jq -nc --arg ntm "$NTM_BIN" \
+      --arg probe_mode "$PROBE_MODE" \
+      --arg initial "$INITIAL_SLEEP_SECONDS" \
+      --arg retry "$RETRY_SLEEP_SECONDS" \
+      --arg max "$MAX_PROBES" \
+      '{command:"info",name:"dispatch-and-verify",schema_version:"dispatch-and-verify.info.v1",ntm_bin:$ntm,probe_mode_default:$probe_mode,probe_windows:{initial_sleep_seconds:($initial|tonumber),retry_sleep_seconds:($retry|tonumber),max_probes:($max|tonumber)},mutation:"ntm_send_only",canonical_cli_scoping:["help","info","examples","schema","stable_exit_codes"]}'
+  else
+    printf 'dispatch-and-verify\n'
+    printf '  ntm_bin: %s\n' "$NTM_BIN"
+    printf '  probe_mode_default: %s\n' "$PROBE_MODE"
+    printf '  probe_windows: initial=%ss retry=%ss max=%s\n' "$INITIAL_SLEEP_SECONDS" "$RETRY_SLEEP_SECONDS" "$MAX_PROBES"
+  fi
+}
+
+examples() {
+  if [[ "${JSON_OUT:-false}" == "true" ]]; then
+    jq -nc '{command:"examples",schema_version:"dispatch-and-verify.examples.v1",examples:[{name:"permissive_dispatch",command:".flywheel/scripts/dispatch-and-verify.sh --probe-mode=permissive flywheel 2 /tmp/dispatch_flywheel-abc.md"},{name:"strict_dispatch",command:".flywheel/scripts/dispatch-and-verify.sh --probe-mode=strict flywheel 2 /tmp/dispatch_flywheel-abc.md"},{name:"short_test_window",command:"DISPATCH_VERIFY_INITIAL_SLEEP_SECONDS=0 DISPATCH_VERIFY_RETRY_SLEEP_SECONDS=0 DISPATCH_VERIFY_MAX_PROBES=1 .flywheel/scripts/dispatch-and-verify.sh flywheel 2 /tmp/dispatch_flywheel-abc.md"}]}'
+  else
+    cat <<'EOF'
+EXAMPLES:
+  .flywheel/scripts/dispatch-and-verify.sh --probe-mode=permissive flywheel 2 /tmp/dispatch_flywheel-abc.md
+  .flywheel/scripts/dispatch-and-verify.sh --probe-mode=strict flywheel 2 /tmp/dispatch_flywheel-abc.md
+  DISPATCH_VERIFY_INITIAL_SLEEP_SECONDS=0 DISPATCH_VERIFY_RETRY_SLEEP_SECONDS=0 DISPATCH_VERIFY_MAX_PROBES=1 .flywheel/scripts/dispatch-and-verify.sh flywheel 2 /tmp/dispatch_flywheel-abc.md
+EOF
+  fi
+}
+
+schema() {
+  jq -nc '{schema_version:"dispatch-and-verify.schema.v1",command:"schema",exit_codes:{"0":"work-start evidence observed or introspection succeeded","1":"pane stayed stuck after probe window","2":"usage/configuration error"},json_surfaces:["--info --json","--examples --json","--schema"],probe_modes:["permissive","strict"],env_vars:["NTM_BIN","DISPATCH_VERIFY_PROBE_MODE","DISPATCH_VERIFY_INITIAL_SLEEP_SECONDS","DISPATCH_VERIFY_RETRY_SLEEP_SECONDS","DISPATCH_VERIFY_MAX_PROBES","DISPATCH_VERIFY_SNAPSHOT_LINES"]}'
+}
+
 ARGS=()
+JSON_OUT=false
+INTROSPECTION_MODE=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --json)
+      JSON_OUT=true
+      shift
+      ;;
+    --info)
+      INTROSPECTION_MODE="info"
+      shift
+      ;;
+    --examples)
+      INTROSPECTION_MODE="examples"
+      shift
+      ;;
+    --schema|schema)
+      INTROSPECTION_MODE="schema"
+      shift
+      ;;
     --probe-mode=*)
       PROBE_MODE="${1#--probe-mode=}"
       shift
       ;;
     --probe-mode)
-      [[ $# -ge 2 ]] || usage
+      [[ $# -ge 2 ]] || usage_error
       PROBE_MODE="$2"
       shift 2
       ;;
     -h|--help)
-      usage
+      print_usage
+      exit 0
       ;;
     *)
       ARGS+=("$1")
@@ -58,7 +135,13 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ "${#ARGS[@]}" -eq 3 ]] || usage
+case "$INTROSPECTION_MODE" in
+  info) info; exit 0 ;;
+  examples) examples; exit 0 ;;
+  schema) schema; exit 0 ;;
+esac
+
+[[ "${#ARGS[@]}" -eq 3 ]] || usage_error
 [[ "$PROBE_MODE" == "permissive" || "$PROBE_MODE" == "strict" ]] || {
   echo "dispatch-and-verify: invalid --probe-mode: $PROBE_MODE" >&2
   exit 2

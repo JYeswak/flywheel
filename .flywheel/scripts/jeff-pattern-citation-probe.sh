@@ -70,14 +70,48 @@ claim_line() {
   local line="$1" lower
   lower="$(printf '%s' "$line" | tr '[:upper:]' '[:lower:]')"
   [[ "$lower" =~ (jeff|dicklesworthstone) ]] || return 1
+  # Existing whitelist of self-referential / canonical-mentor tokens.
   [[ "$lower" =~ (jeff-pattern-citation|jeff_pattern_uncited_count|feedback_meadows_jeff_mentors|reference_dicklesworthstone|dicklesworthstone-stack) ]] && return 1
   [[ "$line" == *"Source: Jeff <repo>:<file>:<line> + ZestStream adaptation"* ]] && return 1
+  # bead flywheel-4rmc approved exclusion classes:
+  #   1. Markdown section headers — they introduce a block; the
+  #      citation is on a separate line within the block. Header
+  #      lines themselves are metadata, not claims.
+  #   2. Sanitized historical excerpts in MISSION.md / receipts /
+  #      audit packs — these capture past state (e.g.
+  #      `**sanitized_excerpt:** "...jeff_patterns_adopted=N..."`)
+  #      and are not new pattern claims.
+  #   3. References to Jeff-DERIVED SKILLS (`jeff-convergence-audit`,
+  #      `jeff-issue-chain`, `jeff-corpus`, `jeff-intel`, etc.) when
+  #      they appear as the substrate name rather than a pattern
+  #      adopted from Jeff source. These are skill citations, not
+  #      pattern imports.
+  # See .flywheel/audit/flywheel-4rmc/compliance-pack.md for the
+  # full rationale and approved-exclusion fixture.
+  [[ "$line" =~ ^\#+[[:space:]] ]] && return 1
+  [[ "$lower" == *"sanitized_excerpt:"* ]] && return 1
+  [[ "$lower" =~ jeff-(convergence-audit|issue-chain|corpus|intel|substrate|clone-backups|patterns?|swarm-ops|status|philosophy)[[:space:]]+(phase|skill|directory|tool|loop|tracker|substrate) ]] && return 1
+  [[ "$lower" == *"jeff-convergence-audit "* || "$lower" == *"jeff-convergence-audit."* || "$lower" == *"jeff-issue-chain "* || "$lower" == *"jeff-issue-chain."* ]] && return 1
   [[ "$lower" =~ (source:[[:space:]]*jeff|inspired[[:space:]]+by[[:space:]]+jeff|jeff[^[:alnum:]]+(pattern|method|doctrine|skill|origin|originated|mentor|style|prior[[:space:]]+art)|dicklesworthstone[^[:alnum:]]+(pattern|method|doctrine|origin|originated)|adopt[^[:alnum:]]+.*jeff|adapt[^[:alnum:]]+.*jeff|learn[^[:alnum:]]+.*jeff|jeff-originated) ]]
 }
 
 valid_citation() {
   local line="$1"
-  [[ "$line" =~ Source:[[:space:]]Jeff[[:space:]][^[:space:]:]+:[^[:space:]]+:[0-9]+[[:space:]]\+[[:space:]]ZestStream[[:space:]]adaptation ]]
+  # Canonical prose shape (per bead body):
+  #   "Source: Jeff <repo>:<file>:<line> + ZestStream adaptation"
+  if [[ "$line" =~ Source:[[:space:]]Jeff[[:space:]][^[:space:]:]+:[^[:space:]]+:[0-9]+[[:space:]]\+[[:space:]]ZestStream[[:space:]]adaptation ]]; then
+    return 0
+  fi
+  # Alternative structured-key shape adopted in wire-or-explain plan
+  # outputs (bead flywheel-4rmc approved exclusion class — see
+  # .flywheel/audit/flywheel-4rmc/compliance-pack.md). Lines that
+  # carry an explicit `jeff_evidence_path=<path>:<line-or-range>`
+  # are properly cited in machine-readable form even when they
+  # don't use the prose shape.
+  if [[ "$line" =~ jeff_evidence_path=\`?[^[:space:]\`]+:[0-9]+(-[0-9]+)?\`? ]]; then
+    return 0
+  fi
+  return 1
 }
 
 relative_path() {
@@ -93,9 +127,19 @@ collect_default_paths() {
   for p in "$REPO/AGENTS.md" "$REPO/README.md" "$REPO/.flywheel/AGENTS.md" "$REPO/.flywheel/MISSION.md"; do
     [[ -f "$p" ]] && printf '%s\n' "$p"
   done
-  for p in "$REPO/.flywheel/PLANS" "$REPO/.flywheel/plans" "$REPO/.flywheel/doctrine"; do
+  # Walk PLANS (canonical uppercase) and doctrine. Skip the lowercase
+  # `.flywheel/plans/` duplicate when both trees exist with identical
+  # content — every hit there is already counted under PLANS, so the
+  # walk would otherwise double-count. This is one of the
+  # bead flywheel-4rmc approved exclusion classes; see
+  # .flywheel/audit/flywheel-4rmc/compliance-pack.md for the
+  # rationale + fixture.
+  for p in "$REPO/.flywheel/PLANS" "$REPO/.flywheel/doctrine"; do
     [[ -d "$p" ]] && find "$p" -type f -name '*.md' -print
   done
+  if [[ -d "$REPO/.flywheel/plans" && ! -d "$REPO/.flywheel/PLANS" ]]; then
+    find "$REPO/.flywheel/plans" -type f -name '*.md' -print
+  fi
 }
 
 tmp_files="$(mktemp "${TMPDIR:-/tmp}/jeff-pattern-files.XXXXXX")"

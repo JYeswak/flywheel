@@ -57,6 +57,39 @@ while [ $# -gt 0 ]; do
             grep '^#' "$SCRIPT_PATH" | head -40
             exit 0
             ;;
+        # flywheel-hzij2: introspection triad per agent-ergonomics-cli-max R001.
+        # --info / --schema / --examples emit machine-readable metadata so
+        # agents can discover this tool's contract without parsing --help text.
+        --info)
+            cat <<INFO_JSON
+{"tool":"tmp-aggressive-prune","purpose":"default-aggressive /private/tmp lifecycle enforcement (Layer 2 doctrine)","schema_version":"tmp-aggressive-prune.v1","doctrine_pointer":"flywheel-2bd2r","blast_radius":"medium","mutation_default":"dry-run","canonical_surfaces":{"introspection":["--help","--info","--schema","--examples"],"primary":["--apply","--dry-run","--idempotency-key","--max-mtime-days","--root"],"output":["--json"]},"safety_gates":["--apply requires --idempotency-key","mkdir-atomic mutex lock","deny-list protects system+IPC paths"]}
+INFO_JSON
+            exit 0
+            ;;
+        --schema)
+            cat <<SCHEMA_JSON
+{"schema_version":"tmp-aggressive-prune.v1","tool":"tmp-aggressive-prune","output_modes":[{"mode":"dry-run","fields":["status","apply","ts","root","candidates_count","protected_count","sample_size_failures","max_mtime_days","sample","protected_sample"]},{"mode":"apply","fields":["status","apply","ts","root","idempotency_key","candidates_count","protected_count","sample_size_failures","deleted_count","max_mtime_days","free_after_gb"]}],"exit_codes":{"0":"success","1":"lock_conflict","2":"validation_failure"}}
+SCHEMA_JSON
+            exit 0
+            ;;
+        --examples)
+            cat <<'EXAMPLES'
+# Dry-run (default) — report what would be pruned, mutate nothing
+tmp-aggressive-prune.sh
+tmp-aggressive-prune.sh --json
+
+# Apply — actually prune; --idempotency-key required (cron passes UTC timestamp)
+tmp-aggressive-prune.sh --apply --idempotency-key=$(date -u +%Y%m%dT%H%M%SZ)
+tmp-aggressive-prune.sh --apply --idempotency-key=daily-$(date -u +%Y-%m-%d) --json
+
+# Custom mtime threshold (default: 1 day)
+tmp-aggressive-prune.sh --max-mtime-days=7
+
+# Test/fixture root (instead of /private/tmp)
+tmp-aggressive-prune.sh --root=/tmp/test-fixture --json
+EXAMPLES
+            exit 0
+            ;;
         *) echo "unknown arg: $1" >&2; exit 2 ;;
     esac
     shift

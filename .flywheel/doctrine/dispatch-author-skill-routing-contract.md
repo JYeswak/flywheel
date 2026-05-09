@@ -118,6 +118,30 @@ dispatch receipt schema from Wave 1. Required fields:
 Naming a skill without receipt evidence is insufficient. Duplicate or replayed
 packets must resolve through `idempotency-replay-guard.sh` before send.
 
+### Live-substrate verification gate
+
+Version or upgrade-class dispatches must prove their target was live-checked
+before the packet was authored. The author applies the dispatch-time guard in
+`feedback_jeff_substrate_version_drift.md`: probe the installed binary version,
+probe upstream latest tag or release, and cite both numbers in the packet.
+
+The dispatch-log row for any version or upgrade-class dispatch must emit:
+
+- `live_state_verified_at: <iso-ts>`
+- `live_state_evidence: <paths-or-command-receipt-refs>`
+
+For Jeff-substrate upgrade packets, `live_state_evidence` must include both the
+local installed-version probe and the upstream latest probe. If live installed
+version is greater than or equal to the packet target, the author refuses to
+dispatch, logs `dispatch-author-stale-version-target`, and closes or re-authors
+from live evidence.
+
+Validators that inspect `dispatch-log.jsonl` may refuse to count a version-class
+dispatch as conformant when `live_state_verified_at` or `live_state_evidence`
+is absent. Treat missing fields as a CSR-class extension: the packet may still
+be visible as an attempted dispatch, but it does not satisfy the dispatch-author
+contract until the live-state receipt exists.
+
 ## 7. Prompt-Budget Pruning
 
 Default packet shape is skill names plus one-line reasons. Excerpts are reserved

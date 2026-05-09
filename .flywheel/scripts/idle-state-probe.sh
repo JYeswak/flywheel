@@ -3,6 +3,7 @@ set -euo pipefail
 
 SESSION="flywheel"
 REPO="/Users/josh/Developer/flywheel"
+BR_BIN="${FLYWHEEL_BR_BIN:-${BR_BIN:-/Users/josh/.cargo/bin/br}}"
 ACTIVITY_FIXTURE="${FLYWHEEL_IDLE_STATE_ACTIVITY_FIXTURE:-}"
 READY_FIXTURE="${FLYWHEEL_IDLE_STATE_READY_FIXTURE:-}"
 MISSION_FIXTURE="${FLYWHEEL_IDLE_STATE_MISSION_FIXTURE:-}"
@@ -19,13 +20,33 @@ usage() {
 }
 
 info() {
-  jq -nc '{
+  jq -nc --arg br "$BR_BIN" '{
     command:"idle-state-probe.sh",
     schema_version:"idle-state-probe/v1",
     purpose:"Classify idle worker panes for doctor and watcher consumption",
     states:["dispatching","cooldown","light_queue","saturated","disabled_class","not_waiting"],
+    dependencies:{br:$br},
     canonical_paths:[".flywheel/scripts/idle-state-probe.sh",".flywheel/validation-schema/v1/idle-state-config.schema.json"]
   }'
+}
+
+normalize_ready_json() {
+  jq -c '
+    if type == "array" then .
+    elif type == "object" then (.issues // .items // .ready // .beads // [])
+    else [] end
+    | if type == "array" then . else [] end
+  ' 2>/dev/null || printf '[]'
+}
+
+resolve_br_cli() {
+  if [[ -x "$BR_BIN" ]]; then
+    printf '%s\n' "$BR_BIN"
+  elif command -v br >/dev/null 2>&1; then
+    command -v br
+  else
+    return 1
+  fi
 }
 
 examples() {
@@ -113,6 +134,10 @@ if [[ "$enabled" != "true" ]]; then
     status:"pass",
     session:$session,
     repo:$repo,
+    br_ready_count:0,
+    br_ready_p0_p1_count:0,
+    br_ready_source:"disabled",
+    br_ready_error:null,
     idle_state_class:[],
     idle_state_summary:{dispatching:0,cooldown:0,light_queue:0,saturated:0,disabled_class:0,not_waiting:0},
     idle_dispatching_over_threshold_count:0,
@@ -131,13 +156,38 @@ else
 fi
 
 ready_json='[]'
+br_ready_source="none"
+br_ready_error=""
 if [[ -n "$READY_FIXTURE" ]]; then
-  ready_json="$(jq -c . "$READY_FIXTURE")"
+  ready_json="$(jq -c . "$READY_FIXTURE" | normalize_ready_json)"
+  br_ready_source="fixture"
 else
   if [[ -d "$REPO" ]]; then
-    ready_json="$(cd "$REPO" && br ready --json 2>/dev/null || printf '[]')"
+    br_cli=""
+    if br_cli="$(resolve_br_cli)"; then
+      ready_err="$(mktemp "${TMPDIR:-/tmp}/idle-state-br-ready.XXXXXX")"
+      ready_raw=""
+      ready_rc=0
+      ready_raw="$(cd "$REPO" && "$br_cli" ready --json 2>"$ready_err")" || ready_rc=$?
+      if [[ "$ready_rc" -eq 0 ]] && jq -e . >/dev/null 2>&1 <<<"$ready_raw"; then
+        ready_json="$(normalize_ready_json <<<"$ready_raw")"
+        br_ready_source="$br_cli"
+      else
+        ready_json='[]'
+        br_ready_source="$br_cli"
+        br_ready_error="$(tr '\n' ' ' <"$ready_err" | sed 's/[[:space:]]*$//')"
+        [[ -n "$br_ready_error" ]] || br_ready_error="br_ready_failed_rc_$ready_rc"
+      fi
+      rm -f "$ready_err"
+    else
+      ready_json='[]'
+      br_ready_source="missing"
+      br_ready_error="br_cli_not_found"
+    fi
   fi
 fi
+br_ready_count="$(jq -r 'length' <<<"$ready_json")"
+br_ready_p0_p1_count="$(jq -r '[.[] | select((.priority // 99) <= 1)] | length' <<<"$ready_json")"
 
 mission_pending_count=0
 if [[ -n "$MISSION_FIXTURE" ]]; then
@@ -167,9 +217,13 @@ entries="$(jq -nc \
   --argjson pane_cooldown_seconds "$pane_cooldown_seconds" \
   --argjson light_queue_ready_count "$light_queue_ready_count" \
   --argjson include_non_waiting "$([[ "$INCLUDE_NON_WAITING" -eq 1 ]] && printf true || printf false)" '
-  def epic: ((.title // .description // "") | test("(^|[^a-z])epic[- ]|EPIC|meta-?epic"; "i"));
+  def ready_items:
+    if ($ready | type) == "array" then $ready
+    elif ($ready | type) == "object" then (($ready.issues // $ready.items // $ready.ready // $ready.beads // []) | if type == "array" then . else [] end)
+    else [] end;
+  def epic: ((.title // .description // "") | test("(^|[^[:alnum:]_])(epic|meta[- ]?epic)([^[:alnum:]_]|$)"; "i"));
   def open_ready:
-    $ready
+    ready_items
     | map(select((.priority // 99) <= 1))
     | map(select(epic | not));
   def candidates:
@@ -248,11 +302,19 @@ jq -nc \
   --argjson summary "$summary" \
   --argjson over_threshold "$over_threshold" \
   --argjson threshold "$dispatching_fail_seconds" \
+  --argjson br_ready_count "$br_ready_count" \
+  --argjson br_ready_p0_p1_count "$br_ready_p0_p1_count" \
+  --arg br_ready_source "$br_ready_source" \
+  --arg br_ready_error "$br_ready_error" \
   '{
     schema_version:$schema_version,
     status:$status,
     session:$session,
     repo:$repo,
+    br_ready_count:$br_ready_count,
+    br_ready_p0_p1_count:$br_ready_p0_p1_count,
+    br_ready_source:$br_ready_source,
+    br_ready_error:(if $br_ready_error == "" then null else $br_ready_error end),
     idle_state_class:$entries,
     idle_state_summary:$summary,
     idle_dispatching_over_threshold_count:$over_threshold,

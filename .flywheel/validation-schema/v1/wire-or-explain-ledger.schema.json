@@ -25,6 +25,7 @@
     "producer",
     "owner",
     "consumer",
+    "trust_domain",
     "blocking_scope",
     "owning_orch",
     "ship_repo",
@@ -116,6 +117,11 @@
     "consumer": {
       "type": "string",
       "minLength": 1
+    },
+    "trust_domain": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Trust boundary for cross-orchestrator rollout decisions, e.g. repo:flywheel or client:alps."
     },
     "blocking_scope": {
       "type": "string",
