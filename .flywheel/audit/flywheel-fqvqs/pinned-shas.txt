@@ -1,0 +1,3 @@
+03431fb75778ae04fe7bda5ce669226ac1362f94081a0ba2672b74f8e0e4a82a  /Users/josh/.claude/skills/agent-lifecycle/scripts/self-test.sh
+8a4de36e8b1dda11d5a4889c33d5584b09b936a72e51a6e5f40a08d8c7db820d  /Users/josh/.claude/skills/agent-lifecycle/SELF-TEST.md
+6bd36b17dd64e3f1f87fb7a6e90e6731ed896e1233eaaaa4c2248cf277bd19e7  /Users/josh/Developer/flywheel/.flywheel/audit/flywheel-fqvqs/agent-lifecycle.jsm-import-ready.patch

@@ -1,0 +1,157 @@
+# jsm-import-ready patch — agent-lifecycle skill
+# Source: flywheel-fqvqs-f577cc on 2026-05-09
+# Apply via: cd ~/.claude/skills/agent-lifecycle && patch -p1 < <this-file>
+# Or: jsm push <skill-bundle-with-these-files>
+#
+# Files added:
+#   scripts/self-test.sh   (executable)
+#   SELF-TEST.md
+
+--- /dev/null
++++ b/scripts/self-test.sh
+@@ -0,0 +1,106 @@
++#!/usr/bin/env bash
++# self-test.sh — agent-lifecycle skill self-test wrapper
++#
++# Validates the lifecycle_manager.py entrypoint can compile and that the
++# canonical `--deploy --json` smoke path returns a well-formed envelope.
++# Exists to satisfy `~/.claude/skills/skill-builder/scripts/validate-skill.sh`
++# scripts/*.sh requirement; canonical Python coverage stays in
++# lifecycle_manager.py itself. Bead: flywheel-fqvqs.
++set -euo pipefail
++
++VERSION="0.1.0"
++SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
++LIFECYCLE_PY="$SCRIPT_DIR/lifecycle_manager.py"
++
++usage() {
++  cat <<EOF
++self-test.sh — agent-lifecycle smoke wrapper
++
++Default invocation runs:
++  1. python3 -m py_compile lifecycle_manager.py
++  2. python3 lifecycle_manager.py --deploy --json (envelope shape check)
++
++Flags:
++  --info       help + version + paths; exit 0
++  --version    print version; exit 0
++  --json       emit a single-line JSON status envelope; exit 0/1
++  --help, -h   this help; exit 0
++
++Exit codes:
++  0   self-test PASSED
++  1   self-test FAILED (compile error or malformed envelope)
++  2   usage error
++EOF
++}
++
++info() {
++  cat <<EOF
++self-test.sh ${VERSION}
++script_dir:  ${SCRIPT_DIR}
++target:      ${LIFECYCLE_PY}
++checks:
++  - py_compile: ${LIFECYCLE_PY}
++  - smoke:      python3 ${LIFECYCLE_PY##*/} --deploy --json
++schema_out:  agent-lifecycle.self-test.v1
++EOF
++}
++
++JSON_OUT=0
++case "${1:-}" in
++  --info) info; exit 0 ;;
++  --version) printf 'self-test.sh %s\n' "$VERSION"; exit 0 ;;
++  --help|-h) usage; exit 0 ;;
++  --json) JSON_OUT=1 ;;
++  "") : ;;
++  *) printf 'ERR: unknown argument: %s\n' "$1" >&2; usage >&2; exit 2 ;;
++esac
++
++emit() {
++  # $1 = status, $2 = exit_code, $3 = message, $4 = pyc_status, $5 = smoke_status
++  if [[ "$JSON_OUT" -eq 1 ]]; then
++    jq -nc \
++      --arg status "$1" \
++      --argjson exit_code "$2" \
++      --arg message "$3" \
++      --arg pyc "$4" \
++      --arg smoke "$5" \
++      --arg version "$VERSION" \
++      --arg target "$LIFECYCLE_PY" \
++      '{schema_version:"agent-lifecycle.self-test.v1",version:$version,status:$status,exit_code:$exit_code,message:$message,target:$target,checks:{py_compile:$pyc,deploy_json_smoke:$smoke}}'
++  else
++    printf '%s: %s (py_compile=%s, deploy_smoke=%s)\n' "$1" "$3" "$4" "$5"
++  fi
++}
++
++if [[ ! -f "$LIFECYCLE_PY" ]]; then
++  emit fail 1 "lifecycle_manager.py missing at $LIFECYCLE_PY" missing skipped
++  exit 1
++fi
++
++# Check 1: py_compile catches syntax errors without executing the module.
++PYC_STATUS=fail
++if python3 -m py_compile "$LIFECYCLE_PY" 2>/dev/null; then
++  PYC_STATUS=pass
++else
++  emit fail 1 "py_compile failed for lifecycle_manager.py" "$PYC_STATUS" skipped
++  exit 1
++fi
++
++# Check 2: --deploy --json smoke. The default-config path returns
++# operation=deploy, status=completed, summary.total_findings>=1.
++SMOKE_STATUS=fail
++SMOKE_OUT="$(python3 "$LIFECYCLE_PY" --deploy --json 2>/dev/null | sed -n '/^{/,$p')"
++if jq -e '
++  (.operation == "deploy")
++  and (.status == "completed")
++  and ((.findings // []) | length) >= 1
++  and ((.summary.total_findings // 0) >= 1)
++' >/dev/null 2>&1 <<<"$SMOKE_OUT"; then
++  SMOKE_STATUS=pass
++else
++  emit fail 1 "deploy --json smoke envelope malformed or missing fields" "$PYC_STATUS" "$SMOKE_STATUS"
++  exit 1
++fi
++
++emit pass 0 "self-test passed" "$PYC_STATUS" "$SMOKE_STATUS"
++exit 0
+
+--- /dev/null
++++ b/SELF-TEST.md
+@@ -0,0 +1,35 @@
++# agent-lifecycle SELF-TEST
++
++Quick validation that this skill's substrate is load-bearing.
++
++## Run
++
++```bash
++bash ~/.claude/skills/agent-lifecycle/scripts/self-test.sh           # human-readable
++bash ~/.claude/skills/agent-lifecycle/scripts/self-test.sh --json    # machine envelope
++```
++
++Expected: exit 0 with `status=pass`, `py_compile=pass`,
++`deploy_json_smoke=pass`. Schema: `agent-lifecycle.self-test.v1`.
++
++## What it checks
++
++1. `python3 -m py_compile scripts/lifecycle_manager.py` — catches
++   syntax breakage in the skill's Python entrypoint without executing
++   the module.
++2. `python3 scripts/lifecycle_manager.py --deploy --json` — the
++   canonical deploy smoke. Asserts the envelope has
++   `operation=deploy`, `status=completed`, and at least one finding
++   with `summary.total_findings >= 1`.
++
++The wrapper exits non-zero when either check fails so
++`~/.claude/skills/skill-builder/scripts/validate-skill.sh` gets a
++truthful signal.
++
++## See also
++
++- `scripts/lifecycle_manager.py` — Python entrypoint (canonical
++  per-op coverage).
++- `SKILL.md` — full lifecycle doctrine.
++- `~/.claude/skills/skill-builder/scripts/validate-skill.sh` — fleet
++  validator that requires this skill to ship at least one `.sh` file.

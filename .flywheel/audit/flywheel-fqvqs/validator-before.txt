@@ -1,0 +1,8 @@
+OK:   Anti-Patterns table present
+FAIL: scripts/ has no .sh files
+OK:   all scripts pass bash -n
+OK:   references/ has 3 .md file(s)
+OK:   SKILL.md line count: 293 (< 500)
+WARN: SELF-TEST.md missing (recommended)
+
+FAIL: validate-skill: 1 hard check(s) failed for /Users/josh/.claude/skills/agent-lifecycle

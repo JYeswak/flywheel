@@ -1,0 +1,1 @@
+{"schema_version":"agent-lifecycle.self-test.v1","version":"0.1.0","status":"pass","exit_code":0,"message":"self-test passed","target":"/Users/josh/.claude/skills/agent-lifecycle/scripts/lifecycle_manager.py","checks":{"py_compile":"pass","deploy_json_smoke":"pass"}}
