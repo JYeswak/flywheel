@@ -1,0 +1,407 @@
+diff --git a/skills/beads-workflow/SKILL.md b/skills/beads-workflow/SKILL.md
+index b4bf990..c11256a 100644
+--- a/skills/beads-workflow/SKILL.md
++++ b/skills/beads-workflow/SKILL.md
+@@ -1,9 +1,12 @@
+ ---
+ name: beads-workflow
+-description: "Use when 'create beads', 'plan to beads', 'convert plan to tasks', 'bead decomposition', 'task graph', 'dependency structure', 'polish beads', 'br create', 'br init', 'bead lifecycle', 'beads from PRD', 'task breakdown', 'implementation beads', 'swarm dispatch beads', 'bead quality check'. Convert markdown plans into self-contained beads with dependencies via br CLI. Polish iteratively until steady-state before swarm dispatch."
++description: >-
++  Convert markdown plans into beads with dependencies using br CLI. Use when
++  creating task graphs, polishing beads before implementation, or bridging
++  planning to agent swarm execution.
+ ---
+ 
+-<!-- TOC: Quick Start | Prompts | br Commands | Quality Checklist | Agent Mail | Anti-Patterns | References -->
++<!-- TOC: Quick Start | THE EXACT PROMPT | Polishing | br Commands | bd → br Migration | Quality Checklist | Troubleshooting | References -->
+ 
+ # Beads Workflow — From Plan to Actionable Tasks
+ 
+@@ -30,80 +33,68 @@ bv --robot-insights  # Check graph health
+ bv --robot-next      # Get first bead
+ ```
+ 
+-## Reject-and-revert is healthy flywheel state
++---
+ 
+-Round 5 trauma (zesttube zt-1y92 shipped fictional output at a8b06741, reverted at 8cce364) proved this is a load-bearing pattern, not a failure mode.
++## THE EXACT PROMPT — Plan to Beads Conversion
+ 
+-When post-ship variance/invariant verification (see `/dispatch-tool-contracts` § Bead-class callback fields) reveals that a freshly-merged bead has GREEN process gates but RED math gates — REVERT. Do not patch forward.
++```
++OK so now read ALL of [YOUR_PLAN_FILE].md; please take ALL of that and elaborate on it and use it to create a comprehensive and granular set of beads for all this with tasks, subtasks, and dependency structure overlaid, with detailed comments so that the whole thing is totally self-contained and self-documenting (including relevant background, reasoning/justification, considerations, etc.-- anything we'd want our "future self" to know about the goals and intentions and thought process and how it serves the over-arching goals of the project.). The beads should be so detailed that we never need to consult back to the original markdown plan document. Remember to ONLY use the `br` tool to create and modify the beads and add the dependencies. Use ultrathink.
++```
+ 
+-Lifecycle:
+-1. **Detect:** post-ship triple-verify catches the false PASS (markdown summary alone is insufficient — read raw JSONL/output, count distinct values, verify variance)
+-2. **Revert:** `git revert <sha>` (history-preserving) — push immediately so origin doesn't carry the lie
+-3. **Reopen:** `br update <consumer-id> --status open --json <consumer-id>` with `--reason "INVALIDATED — post-ship variance check failed; trauma class X"`
+-4. **File missing primitive:** if the bead failed because a load-bearing primitive doesn't actually exist in src/ (worker invented it to satisfy acceptance), file the primitive as a NEW bead and `br dep add <consumer> <new-primitive>` to the dep graph
+-5. **Codify:** add a permanent guard to project-level CLAUDE.md § Silent Failure Rule and a check to the dispatch-tool-contracts variance template
++### Shorter Version
+ 
+-Reject-and-revert is HEALTHY, not embarrassing. The graph correctly says "consumer cannot ship until primitive exists" and the swarm continues dispatching unblocked work in parallel. Round 6 proved end-to-end that the trauma class is fully prevented when guards are in place: same bead body that produced fictional output at a8b06741 produced 7 distinct texts + 6 distinct composites at 03239f5 once the real primitive shipped.
++```
++OK so please take ALL of that and elaborate on it more and then create a comprehensive and granular set of beads for all this with tasks, subtasks, and dependency structure overlaid, with detailed comments so that the whole thing is totally self-contained and self-documenting (including relevant background, reasoning/justification, considerations, etc.-- anything we'd want our "future self" to know about the goals and intentions and thought process and how it serves the over-arching goals of the project.)  Use only the `br` tool to create and modify the beads and add the dependencies. Use ultrathink.
++```
++
++### What This Creates
+ 
+-**Anti-pattern:** patching the consumer to "look better" without reverting. That hides the missing-primitive root cause and re-traumatizes the next session.
++- Tasks and subtasks with clear scope
++- Dependency links (what blocks what)
++- Detailed descriptions with background, reasoning, considerations
++- Self-contained (never need to consult original plan)
+ 
+ ---
+ 
+-## Which Stage Am I In?
++## Polishing Beads
+ 
+-| Situation | Stage | Action | Rounds |
+-|-----------|-------|--------|--------|
+-| Have a markdown plan, no beads | Conversion | Run Plan-to-Beads prompt | 1x |
+-| Beads exist, still changing | Polishing | Run Polish prompt | 6-9x |
+-| Polish flatlined, no new changes | Fresh eyes | New CC session → re-establish → polish | 1-2x |
+-| Tests missing from beads | Coverage | Run Test Coverage prompt | 1x |
+-| All polish rounds done | Cross-model | Have Codex/GPT 5.2 do final review | 1x |
+-| Beads at steady-state | Ready | Validate → dispatch via NTM | — |
+-| Legacy `bd` in docs | Migration | See [TROUBLESHOOTING.md](references/TROUBLESHOOTING.md) for bd→br mapping | — |
++### THE EXACT PROMPT — Polish (Standard)
+ 
+----
++```
++Reread AGENTS dot md so it's still fresh in your mind. Check over each bead super carefully-- are you sure it makes sense? Is it optimal? Could we change anything to make the system work better for users? If so, revise the beads. It's a lot easier and faster to operate in "plan space" before we start implementing these things!
++
++DO NOT OVERSIMPLIFY THINGS! DO NOT LOSE ANY FEATURES OR FUNCTIONALITY!
+ 
+-## Pre-Conversion Checklist
++Also, make sure that as part of these beads, we include comprehensive unit tests and e2e test scripts with great, detailed logging so we can be sure that everything is working perfectly after implementation. Remember to ONLY use the `br` tool to create and modify the beads and to add the dependencies to beads. Use ultrathink.
++```
+ 
+-Before converting a plan to beads, verify:
++### Polishing Protocol
+ 
+-- [ ] Plan has reached steady-state (consecutive review rounds < 5% changes)
+-- [ ] Plan has 3-5 stories max per PRD (>5 = split into sequential PRDs)
+-- [ ] Every story has testable acceptance criteria
+-- [ ] Dependencies explicitly mapped with `dependsOn`
+-- [ ] Schema → API → UI ordering enforced
+-- [ ] Plan is self-contained (no "see the X doc" references)
+-- [ ] `br init` run in target project
+-- [ ] Sync branch configured: `br config set sync.branch beads-sync`
++1. Run polish prompt
++2. Review changes
++3. Repeat until steady-state (typically 6-9 rounds)
++4. If it flatlines, start a fresh CC session
++5. Optionally have Codex/GPT 5.5 do a final round
+ 
+ ---
+ 
+-## THE EXACT PROMPT — Plan to Beads
++## Fresh Session Technique
+ 
+-```
+-OK so now read ALL of [YOUR_PLAN_FILE].md; please take ALL of that and
+-elaborate on it and use it to create a comprehensive and granular set of
+-beads for all this with tasks, subtasks, and dependency structure overlaid,
+-with detailed comments so that the whole thing is totally self-contained and
+-self-documenting. The beads should be so detailed that we never need to
+-consult back to the original markdown plan document. Remember to ONLY use
+-the `br` tool to create and modify the beads and add the dependencies.
+-Use ultrathink.
+-```
++If polishing flatlines, start a new Claude Code session:
+ 
+-See [PROMPTS.md](references/PROMPTS.md) for shorter version, polish prompts, fresh session prompts, and test coverage prompt.
++### THE EXACT PROMPT — Re-establish Context
+ 
+----
++```
++First read ALL of the AGENTS dot md file and README dot md file super carefully and understand ALL of both! Then use your code investigation agent mode to fully understand the code, and technical architecture and purpose of the project.  Use ultrathink.
++```
+ 
+-## Polishing Protocol
++### THE EXACT PROMPT — Then Review Beads
+ 
+-1. Run polish prompt (see [PROMPTS.md](references/PROMPTS.md))
+-2. Review changes — are beads more granular? Tests added?
+-3. Repeat until steady-state (typically 6-9 rounds)
+-4. If flatlines early → start fresh CC session, re-establish context, then polish
+-5. Cross-model final round: Codex/GPT 5.2
++```
++We recently transformed a markdown plan file into a bunch of new beads. I want you to very carefully review and analyze these using `br` and `bv`.
++```
+ 
+-**Key rules:** DO NOT OVERSIMPLIFY. DO NOT LOSE FEATURES. Complexity exists for reasons.
++Then follow up with the standard polish prompt.
+ 
+ ---
+ 
+@@ -148,6 +139,28 @@ git add .beads/ && git commit -m "Update beads"
+ 
+ ---
+ 
++## bd → br Migration (Docs)
++
++Use this when you see legacy `bd` references in AGENTS.md or docs.
++
++**Behavioral difference (only one):**
++- **`br sync` never runs git commands**. After `br sync --flush-only`, you must `git add .beads/` and `git commit` (and `git push`) yourself.
++
++**Transform checklist (order matters):**
++1. `bd` commands → `br` commands
++2. `bd sync` → `br sync --flush-only` + `git add .beads/` + `git commit`
++3. Do NOT assume issue IDs must change `bd-*` → `br-*` — the prefix is configurable (often remains `bd-*`).
++4. Remove daemon/auto-commit references
++
++**Verify:**
++```bash
++grep -c '`bd ' file.md        # must be 0
++grep -c 'bd sync' file.md     # must be 0
++grep -c 'br sync --flush-only' file.md  # must be > 0
++```
++
++---
++
+ ## BV Robot Mode
+ 
+ **CRITICAL:** Never run bare `bv` — it launches interactive TUI.
+@@ -167,16 +180,13 @@ bv --robot-insights | jq '.bottlenecks'
+ Before implementation, verify each bead:
+ 
+ - [ ] **Self-contained** — Understandable without external context
+-- [ ] **Clear scope** — One coherent piece of work, ≤500 words, ≤5 files
++- [ ] **Clear scope** — One coherent piece of work
+ - [ ] **Dependencies explicit** — Links to blocking/blocked beads
+-- [ ] **Testable** — Acceptance criteria: "run X, expect Y"
++- [ ] **Testable** — Clear success criteria
+ - [ ] **Includes tests** — Unit and e2e tests in scope
+ - [ ] **Preserves features** — Nothing from plan was lost
+ - [ ] **Not oversimplified** — Complexity preserved where needed
+ - [ ] **No cycles** — `br dep cycles` returns empty
+-- [ ] **Graph healthy** — `bv --robot-insights | jq '.Cycles'` is empty
+-- [ ] **No empty descriptions** — `br list --json | jq '.[] | select(.description == "")'` returns nothing
+-- [ ] **Synced** — `br sync --flush-only` + `git add .beads/` + `git commit`
+ 
+ ---
+ 
+@@ -196,36 +206,11 @@ br close br-123 --reason "Completed"
+ release_file_reservations(...)
+ ```
+ 
+-### Shared Beads Write Lane
+-
+-Normal `br create`, `br update`, and `br close` calls are Beads mutations, not
+-manual file edits. Do not reserve `.beads/issues.jsonl` or `.beads/beads.db`
+-as ordinary edit files around a `br` command. `br` owns the SQLite transaction
+-and JSONL export path; Agent Mail reservations only coordinate humans and
+-agents around shared files.
+-
+-When multiple panes need to mutate Beads in the same repo, use one serialized
+-Beads write lane:
+-
+-1. Queue the requested mutation in the bead thread or orchestrator callback.
+-2. One writer owner runs exactly one bounded `br` mutation at a time.
+-3. Use `br --lock-timeout 10000 ...` for agent automation when the installed
+-   `br` supports it.
+-4. Release the lane immediately after the mutation and any required
+-   `br sync --flush-only`.
+-5. If the lane is busy, report `beads_write_lane_queued` instead of holding an
+-   exclusive `.beads/` file reservation.
+-
+-Joshua-lens: lock contention masquerading as the bug of the week is the same
+-operator-pain class as a queue depth metric ignored until the storm hits. A
+-junior worker should not need a lock-doctorate to close a bead; the operating
+-system should expose one write lane and a queue.
+-
+ ---
+ 
+ ## When Beads Are Ready
+ 
+-Beads are ready for implementation when:
++Your beads are ready for implementation when:
+ 
+ 1. **Steady-state reached** — Multiple polish rounds yield minimal changes
+ 2. **Cross-model reviewed** — At least one alternative model reviewed
+@@ -235,88 +220,53 @@ Beads are ready for implementation when:
+ 
+ ---
+ 
+-## Wave A execution criterion
+-
+-If an epic has all three:
+-
+-1. Parent plan r2 SHIP after cold-read review.
+-2. Explicit bead DAG with no cycles.
+-3. Every bead has invariant, measurement, named error class, and halt-on-breach.
+-
+-Then dispatch in dependency order without reopening plan-space after each bead.
+-Each DONE callback should name the next unblocked bead(s). Reopen planning only
+-on BLOCKED/PATCH callbacks, missing primitive evidence, or dependency-cycle
+-drift.
+-
+-Session-25 exemplar: Voicebox Wave A ran 9/9 nodes from `zt-zw34` without a
+-plan rewrite because `4f5c4b0` named the graph and halt conditions up front.
++## References
+ 
+-Cross-reference: use `multi-model-triangulation` to get the parent plan to r2
+-SHIP before converting it into an autonomous Wave A bead graph.
++| Topic | Reference |
++|-------|-----------|
++| All prompts | [PROMPTS.md](references/PROMPTS.md) |
++| Bead structure | [BEAD-ANATOMY.md](references/BEAD-ANATOMY.md) |
++| Troubleshooting | [TROUBLESHOOTING.md](references/TROUBLESHOOTING.md) |
++| br command reference | See br --help or beads_rust README |
++| BV integration | See bv-graph-triage skill |
+ 
+ ---
+ 
+-## Anti-Patterns
++## Troubleshooting
+ 
+-| Anti-Pattern | Fix |
+-|-------------|-----|
+-| Vague beads without acceptance criteria | Every bead needs testable AC: "run X, expect Y." Can't write AC = not granular enough. |
+-| Oversimplifying during polish | If description >500 words or >5 files, split. Complexity exists for reasons. |
+-| Creating beads before plan convergence | Converge in markdown first (4-6 rounds). Convert to beads ONCE — beads are the final format. |
+-| Circular dependencies | Run `br dep cycles` after every batch. Must return empty. Break the weakest link. |
+-| Ignoring PageRank for triage | Use `bvp --robot-next` — it sees dependency cascades you don't. |
+-| Multiple agents on overlapping files | Same-file beads MUST have `dependsOn` chains + Agent Mail file reservations. |
+-| Skipping test beads | Polish prompt requires tests. If missing after polish, add manually. |
+-| Not syncing to git | `br sync --flush-only` + `git add .beads/` + `git commit` after every batch. |
+-| 17+ beads per PRD | O(n²) coordination. Cap at 3-5 per wave. Split into sequential waves. |
++### Worktree Error Fix
+ 
+----
++If you get `failed to create worktree: 'main' is already checked out`:
+ 
+-## FOREVER-RULE: br-prefix-mismatch — JSONL Pollution Guard
+-
+-> **Source:** 3 fuckup-log incidents 2026-05-06 (`br-prefix-mismatch`). Trauma class: cross-repo `br` ops append foreign-prefix rows to `.beads/issues.jsonl`, causing every subsequent `br create` / `br lint` / `br ready` to fail with `CONFIG_ERROR`.
++```bash
++git branch beads-sync main
++git push -u origin beads-sync
++br config set sync-branch beads-sync
++```
+ 
+-**Trigger phrases:** `CONFIG_ERROR` from `br create` | wrong-prefix bead ID returned | `br lint` fails immediately | `br ready` returns nothing when beads exist | `issue_prefix mismatch` in `br doctor`
++Always use a dedicated sync branch that you never check out directly.
+ 
+-**Rule:** Before ANY `br` command in a session, validate prefix purity. If FAIL, run repair before proceeding.
++### Quick Health Check
+ 
+ ```bash
+-# 1. Validate (fast, read-only — run before br create/lint/ready)
+-scripts/skillos_beads_prefix_guard.py validate .beads/issues.jsonl
+-
+-# 2. On FAIL — repair (backup auto-created, idempotent)
+-scripts/skillos_beads_prefix_guard.py repair .beads/issues.jsonl
+-
+-# 3. Confirm clean, then proceed
+-scripts/skillos_beads_prefix_guard.py doctor --json
++br config list        # All settings
++br dep cycles         # Must be empty
++which br              # Verify br is installed
+ ```
+ 
+-**Anti-patterns:**
+-- Forcing `br create` after `CONFIG_ERROR` without running repair first — the error will persist
+-- Manually editing `.beads/issues.jsonl` to match the prefix — use `repair`, not hand-editing
+-- Grepping out foreign rows without backup — `repair` backs up automatically
++See [TROUBLESHOOTING.md](references/TROUBLESHOOTING.md) for full diagnostics.
+ 
+-**Escalate to `beads-br` § DB-Wedge JSONL Fallback** if `br doctor` shows DB corruption alongside prefix mismatch (both trauma classes can co-occur).
++---
+ 
+-**Permanent guards (skillos-2pfc):** pre-commit hook blocks polluted JSONL commits; LaunchAgent watcher (`ai.zeststream.skillos-beads-prefix-watcher`) auto-repairs on write. Run `scripts/skillos_beads_prefix_guard.py daemon-status --json` to verify watcher health.
++## Validation
+ 
+----
++```bash
++# Check for cycles (must be empty)
++br dep cycles
+ 
+-## References
++# Check graph health
++bv --robot-insights | jq '.Cycles'
+ 
+-| Topic | Reference |
+-|-------|-----------|
+-| All exact prompts | [PROMPTS.md](references/PROMPTS.md) |
+-| Bead structure | [BEAD-ANATOMY.md](references/BEAD-ANATOMY.md) |
+-| Troubleshooting & migration | [TROUBLESHOOTING.md](references/TROUBLESHOOTING.md) |
+-| Authoritative sources | [sources.md](references/sources.md) |
+-| br command reference | `br --help` or beads_rust README |
+-| BV integration | See beads-bv skill |
+-
+-**Related Skills:**
+-- `planning-workflow` — upstream: produces plans before bead conversion
+-- `beads-bv` — graph-aware triage with PageRank scoring
+-- `beads-br` — br CLI reference and bead lifecycle
+-- `ntm` — downstream: dispatches beads to agent panes
+-- `multi-agent-swarm-workflow` — swarm coordination patterns
+-- `agent-mail` — inter-agent messaging and file reservations
++# Verify all beads have descriptions
++br list --json | jq '.[] | select(.description == "")'
++```
+diff --git a/skills/brenner/SKILL.md b/skills/brenner/SKILL.md
+index a5e94b4..118b826 100644
+--- a/skills/brenner/SKILL.md
++++ b/skills/brenner/SKILL.md
+@@ -134,27 +134,6 @@ Agents emit changes via fenced JSON blocks:
+ 
+ **Full operators**: See [references/OPERATORS.md](references/OPERATORS.md)
+ 
+-## Advanced Commands by Intent
+-
+-The `/brenner` exact-prompt workflow above stays canonical for orchestrating sessions. These advanced subcommands surface state and provenance the workflow already produces — use them when you need to record, audit, or cite that state directly. Each row names one canonical example; the upstream `--help` lists every flag.
+-
+-| Intent | Command family | Canonical example | What it gives you |
+-|---|---|---|---|
+-| **Run a controlled test** | `experiment` | `brenner experiment run --thread-id <id> --test-id T-001 --out-file out.json -- pytest -k auth` | Captured exit code, stdout, stderr, cwd, replayability flag — feeds back into the artifact |
+-| **Encode a result for the artifact** | `experiment encode` | `brenner experiment encode --result-file out.json` | Generates the artifact-shaped record (test_id, expected, actual, verdict) for an EDIT delta |
+-| **Stand up an evidence pack** | `evidence init` | `brenner evidence init --thread-id <id>` | Creates the evidence ledger this thread will accumulate |
+-| **Log a typed evidence row** | `evidence add` | `brenner evidence add --thread-id <id> --type literature --title "Brenner 1974" --source <doi> --supports H1 --refutes H2` | Stores an EV-NNN row with explicit `supports/refutes/informs` edges to hypotheses |
+-| **Anchor a verbatim excerpt** | `evidence add-excerpt` | `brenner evidence add-excerpt --thread-id <id> --evidence-id EV-007 --text "..." --verbatim --location "p.4 ¶2"` | Pins quoted text against EV-NNN so close-gates can verify byte-for-byte fidelity |
+-| **Independently verify an EV-NNN** | `evidence verify` | `brenner evidence verify --thread-id <id> --evidence-id EV-007 --notes "reproduced 2026-05-08"` | Records that a second agent re-checked the evidence (anti-rubber-stamp) |
+-| **Quarantine an anomaly** | `anomaly create` | `brenner anomaly create --observation "<s>" --conflicts-with H1,H2 --conflict-description "<s>"` | Forces unexpected results into the active register instead of the summary |
+-| **Attack a hypothesis or test** | `critique create` | `brenner critique create --target H-002 --attack "<s>" --evidence-to-confirm "<s>" --severity serious` | Treats critiques as first-class objects with disposition (modified/killed/new_test) |
+-| **Surface a hidden assumption** | `assumption create` | `brenner assumption create --statement "<s>" --type methodological --load-description "<s>"` | Pre-registers what the plan is assuming so it can be later challenged or falsified |
+-| **Render the full evidence ledger** | `evidence render / list` | `brenner evidence list --thread-id <id> --json` | Dumps the relational evidence pack for audits or close-gate consumption |
+-
+-**When to reach for these.** If the canonical exact-prompt is enough to keep the session moving, prefer it — these subcommands add ceremony. Reach for them when (a) you need to *cite* a result downstream (`experiment encode`), (b) you need the relation graph machine-checkable (`evidence add` with `--supports/--refutes/--informs`), (c) something doesn't fit the leading hypothesis and you need to quarantine it (`anomaly create`), or (d) you want a critique or assumption tracked across rounds rather than buried in prose.
+-
+-**Doctrine link.** Local flywheel wires consume this surface: `flywheel-d3q0j` (EV anchors in compliance packs), `flywheel-gau3q` (prediction-lock receipts), `flywheel-ykkhv` (hypothesis slate + kill criteria). Those wires assume the brenner side records via `evidence add` / `experiment encode` / `assumption create` rather than prose summaries.
+-
+ ## Heuristics
+ 
+ | Signal | Meaning | Action |
+diff --git a/skills/cass/SKILL.md b/skills/cass/SKILL.md
+index 042bb31..5520ca6 100644
+--- a/skills/cass/SKILL.md
++++ b/skills/cass/SKILL.md
+@@ -19,7 +19,6 @@ dependencies:
+ - [THE EXACT PROMPT — Discovery Workflow](#the-exact-prompt--discovery-workflow)
+ - [Version Pinning Caveat](#version-pinning-caveat)
+ - [Two-Step Bootstrap (Replaces "ALWAYS first")](#two-step-bootstrap-replaces-always-first)
+-- [Workspace Scoping Audit](#workspace-scoping-audit)
+ - [Stuck-Index & Recovery Decision Tree](#stuck-index--recovery-decision-tree)
+ - [Quick Reference](#quick-reference)
+ - [When to Use What](#when-to-use-what)
+@@ -100,15 +99,6 @@ cass capabilities --json | jq '{version: .crate_version, features, connectors}'
+ cass introspect --json   | jq '.commands[].name'
+ ```
+ 
+-## Workspace Scoping Audit
+-
+-Audit date: 2026-05-08, bead `flywheel-9f7h6`.
+-
+-The CASS skill already scopes searches with exact `--workspace <abs-path>`
+-examples. Keep those paths physical and absolute, preferably from `pwd -P`,
+-and do not derive memory, cache, or project keys from repo basename alone.
+-This mirrors Jeff ntm#132: same-basename workspaces must not share context.
+-
+ ---
+ 
+ ## Two-Step Bootstrap (Replaces "ALWAYS first")

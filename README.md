@@ -1194,6 +1194,9 @@ Update this README when a change affects how a new worker should understand or
 operate the repo:
 
 - new or renamed CLI surface
+- Skill-enhance dispatches must run the JSM discipline gate before touching
+  `~/.claude/skills`: managed skills get `jsm-push-ready` patch artifacts,
+  unmanaged skills get paired `jsm-import-ready` patch artifacts.
 - new slash command
 - new loop-driver behavior
 - new validation gate
