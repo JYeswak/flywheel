@@ -1,5 +1,133 @@
 #!/usr/bin/env bash
+# canonical-cli-scoping-allow-large: 2424-line tick-driver retains a single-script
+# shape because every section is in the same dynamic scope (lock, dispatch-log,
+# tick-state, callback summarization). Splitting introduces shell-scope contracts
+# the existing tick-state mutation cannot tolerate without a fixture-first refactor.
+# See flywheel-dfe0m (Phase 4 of agent-ergonomics-cli-max audit) for the receipt.
 set -euo pipefail
+
+# Canonical-CLI introspection surface (per canonical-cli-scoping skill).
+# Phase 4 (flywheel-dfe0m): land --help, --info, --schema, --examples so agents
+# can introspect this tick-driver without grep-then-read.
+_flywheel_loop_tick_help() {
+  cat <<'EOF'
+flywheel-loop-tick — flywheel orchestrator tick driver
+
+Usage:
+  flywheel-loop-tick                    # run one tick (default)
+  flywheel-loop-tick --help|-h          # this help
+  flywheel-loop-tick --info             # what this tool does + when it runs
+  flywheel-loop-tick --schema           # JSON schema of last_run.json receipt
+  flywheel-loop-tick --examples         # invocation examples
+
+Environment:
+  REPO                  flywheel repo path (default: /Users/josh/Developer/flywheel)
+  SESSION               ntm session name (default: flywheel)
+  TARGET_PANE           orchestrator pane id (default: 1)
+  STATE_DIR             tick-state directory (default: $REPO/.flywheel/runtime/flywheel-loop)
+  PROMPT_DIR            dispatch-prompt staging dir (default: $REPO/.flywheel/prompts)
+  LOG                   dispatch-log JSONL path (default: $REPO/.flywheel/dispatch-log.jsonl)
+  FLYWHEEL_LOOP_TICK_DRY_RUN=1          do everything except actually send to ntm
+  FLYWHEEL_TICK_FROZEN_DETECTOR_OVERRIDE=1   bypass frozen-pane detector
+
+Exit codes:
+  0 — tick sent or dry-run completed; OR introspection flag handled
+  1 — tick blocked (canonical-pull stale, frozen detector hold, etc.)
+  2 — tick errored (lock conflict, doctor fail)
+
+See also: ~/.claude/skills/canonical-cli-scoping/SKILL.md
+EOF
+}
+
+_flywheel_loop_tick_info() {
+  cat <<'EOF'
+flywheel-loop-tick is the canonical orchestrator-side tick driver for the
+flywheel session. It is invoked by the launchd plist
+ai.zeststream.flywheel-flywheel-loop and runs every ~5 minutes.
+
+Per tick it:
+  1. Acquires a tick-lock under $STATE_DIR
+  2. Pulls canonical doctrine if stale (FLYWHEEL_CANONICAL_PULL_MAX_AGE_SECONDS)
+  3. Runs the doctor surface (.flywheel/scripts/portable-core-doctor)
+  4. Probes the orchestrator pane for receptiveness via
+     ntm-coordinator-pinned + frozen-pane-detector + pane-work-signal
+  5. If receptive: drafts a tick prompt under $PROMPT_DIR and sends via ntm
+  6. Writes the receipt to $LAST (last_run.json) and appends to $LOG
+  7. Releases the tick-lock and exits with appropriate code
+
+This is one of the highest-blast-radius tools in the fleet — incorrect
+behavior here can break the entire orchestrator dispatch loop.
+EOF
+}
+
+_flywheel_loop_tick_schema() {
+  cat <<'EOF'
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "flywheel-loop-tick.last_run",
+  "type": "object",
+  "description": "Receipt written to $LAST (default: $STATE_DIR/last_run.json) at end of each tick.",
+  "required": ["ts", "status"],
+  "properties": {
+    "ts": {"type": "string", "description": "ISO8601 UTC timestamp of tick completion"},
+    "status": {"type": "string", "enum": ["sent", "dry_run", "blocked_frozen_detector", "blocked_canonical_pull", "skipped", "error"]},
+    "session": {"type": "string"},
+    "target_pane": {"type": "string"},
+    "prompt_path": {"type": ["string", "null"]},
+    "frozen_detector_override": {"type": "boolean"},
+    "canonical_pull_status": {"type": ["string", "null"]},
+    "doctor_status": {"type": ["string", "null"]},
+    "ntm_send_rc": {"type": ["integer", "null"]},
+    "hold_reason": {"type": ["string", "null"]},
+    "daily_jeff_ingest_status": {"type": ["string", "null"]},
+    "fleet_onboard_status": {"type": ["string", "null"]},
+    "jeff_binary_version_status": {"type": ["string", "null"]}
+  },
+  "additionalProperties": true
+}
+EOF
+}
+
+_flywheel_loop_tick_examples() {
+  cat <<'EOF'
+# Standard tick (invoked by launchd):
+flywheel-loop-tick
+
+# Dry-run (everything except the ntm send):
+FLYWHEEL_LOOP_TICK_DRY_RUN=1 flywheel-loop-tick
+
+# Force a tick despite a frozen pane (operator override):
+FLYWHEEL_TICK_FROZEN_DETECTOR_OVERRIDE=1 flywheel-loop-tick
+
+# Inspect the last receipt:
+jq . /Users/josh/Developer/flywheel/.flywheel/runtime/flywheel-loop/last_run.json
+
+# Tail recent dispatch-log entries:
+tail -5 /Users/josh/Developer/flywheel/.flywheel/dispatch-log.jsonl | jq -c '{ts, action, target}'
+
+# Validate JSON schema (after --schema):
+flywheel-loop-tick --schema | jq -e '.title == "flywheel-loop-tick.last_run"' >/dev/null && echo schema-ok
+EOF
+}
+
+case "${1:-}" in
+  --help|-h)
+    _flywheel_loop_tick_help
+    exit 0
+    ;;
+  --info)
+    _flywheel_loop_tick_info
+    exit 0
+    ;;
+  --schema)
+    _flywheel_loop_tick_schema
+    exit 0
+    ;;
+  --examples)
+    _flywheel_loop_tick_examples
+    exit 0
+    ;;
+esac
 
 export HOME="/Users/josh"
 export PATH="/Users/josh/.local/bin:/Users/josh/.cargo/bin:/opt/homebrew/Cellar/util-linux/2.41.3_1/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
@@ -23,6 +151,7 @@ CANONICAL_PULL_MAX_AGE_SECONDS="${FLYWHEEL_CANONICAL_PULL_MAX_AGE_SECONDS:-300}"
 TOPOLOGY_TICK_REFRESH_TIMEOUT_SEC="${TOPOLOGY_TICK_REFRESH_TIMEOUT_SEC:-30}"
 
 ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+TICK_START_EPOCH="$(date -u +%s)"
 
 mkdir -p "$STATE_DIR" "$PROMPT_DIR" "$(dirname "$LOG")"
 
@@ -418,6 +547,76 @@ fleet_onboard_probe() {
   rm -f "$tmp"
 }
 
+fleet_stash_bloat_probe() {
+  local roster tmp repo count status mode signal warning
+  roster="${FLYWHEEL_FLEET_ROSTER:-$HOME/.local/state/flywheel/fleet-roster.json}"
+  tmp="$(mktemp "${TMPDIR:-/tmp}/fleet-stash-bloat.XXXXXX")"
+  if [[ -f "$roster" ]]; then
+    jq -r '
+      if type == "array" then .[]? | (.repo // .path // empty)
+      elif (.repos? | type == "array") then .repos[]? | (.repo // .path // empty)
+      else empty end
+    ' "$roster" 2>/dev/null | sort -u | while IFS= read -r repo; do
+      [[ -n "$repo" ]] || continue
+      if ! git -C "$repo" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        jq -nc --arg repo "$repo" '{repo:$repo,status:"UNKNOWN",warnings:["not_a_git_work_tree"]}' >>"$tmp"
+        continue
+      fi
+      count="$(git -C "$repo" stash list 2>/dev/null | wc -l | tr -d '[:space:]')"
+      case "$count" in
+        ''|*[!0-9]*) count=0 ;;
+      esac
+      status="HEALTHY"
+      mode="manual"
+      signal=""
+      warning=""
+      if [[ "$count" -ge 80 ]]; then
+        status="SOFT"
+        mode="comprehensive"
+        signal="fleet_stash_bloat_detected"
+        warning="fleet_stash_bloat_detected"
+      elif [[ "$count" -ge 10 ]]; then
+        status="SOFT"
+        mode="standard"
+        signal="fleet_stash_bloat_detected"
+        warning="fleet_stash_bloat_detected"
+      elif [[ "$count" -ge 5 ]]; then
+        mode="quick"
+      fi
+      jq -nc \
+        --arg repo "$repo" \
+        --arg status "$status" \
+        --arg mode "$mode" \
+        --arg signal "$signal" \
+        --arg warning "$warning" \
+        --argjson stash_count "$count" \
+        '{
+          repo:$repo,
+          status:$status,
+          stash_count:$stash_count,
+          recommended_mode:$mode,
+          recommended_skill:"/git-stash-janitor",
+          signal:(if $signal == "" then null else $signal end),
+          warnings:(if $warning == "" then [] else [$warning] end)
+        }' >>"$tmp"
+    done
+  fi
+  jq -s --arg roster "$roster" '{
+    action:"checked",
+    roster:$roster,
+    checked_repos:length,
+    rows:.,
+    status:(if length == 0 then "UNKNOWN" elif any(.[]; (.stash_count // 0) >= 10) then "SOFT" else "HEALTHY" end),
+    fleet_stash_bloat_detected:any(.[]; (.stash_count // 0) >= 10),
+    soft_signal:(if any(.[]; (.stash_count // 0) >= 10) then "fleet_stash_bloat_detected" else null end),
+    bloat_repo_count:([.[] | select((.stash_count // 0) >= 10)] | length),
+    quick_mode_repo_count:([.[] | select((.stash_count // 0) >= 5 and (.stash_count // 0) < 10)] | length),
+    worst_repo:([.[] | select(.stash_count != null)] | sort_by(.stash_count) | reverse | .[0] // null),
+    warnings:([.[] | .warnings[]?] + if length == 0 then ["fleet_roster_empty_or_missing"] else [] end)
+  }' "$tmp"
+  rm -f "$tmp"
+}
+
 topology_tick_refresh_probe() {
   local output exit_code timeout_sec cmd
   timeout_sec="${TOPOLOGY_TICK_REFRESH_TIMEOUT_SEC:-30}"
@@ -603,6 +802,220 @@ unprocessed_fuckup_count() {
   local log="${FLYWHEEL_FUCKUP_LOG:-$HOME/.local/state/flywheel/fuckup-log.jsonl}"
   [[ -f "$log" ]] || { printf '0\n'; return 0; }
   jq -s '[.[]? | select((.processed_at // .promoted_at // .resolved_at // "") == "")] | length' "$log" 2>/dev/null || printf '0\n'
+}
+
+phase_a_fuckup_log_path() {
+  printf '%s\n' "${FLYWHEEL_TICK_PHASE_A_FUCKUP_LOG:-${FLYWHEEL_FUCKUP_LOG:-$HOME/.local/state/flywheel/fuckup-log.jsonl}}"
+}
+
+phase_a_append_fuckup() {
+  local failure_class="$1" check_id="$2" detail_json="${3:-{}}" log_path
+  log_path="$(phase_a_fuckup_log_path)"
+  if [[ "$DRY_RUN" == "1" && -z "${FLYWHEEL_TICK_PHASE_A_FUCKUP_LOG:-}" && -z "${FLYWHEEL_FUCKUP_LOG:-}" ]]; then
+    printf 'false\n'
+    return 0
+  fi
+  mkdir -p "$(dirname "$log_path")"
+  jq -nc \
+    --arg ts "$(ts)" \
+    --arg trauma_class "$failure_class" \
+    --arg failure_class "$failure_class" \
+    --arg check_id "$check_id" \
+    --arg repo "$REPO" \
+    --arg session "$SESSION" \
+    --arg pane "$TARGET_PANE" \
+    --argjson detail "$detail_json" \
+    '{
+      ts:$ts,
+      trauma_class:$trauma_class,
+      failure_class:$failure_class,
+      class:$failure_class,
+      severity:"medium",
+      mode:"SOFT",
+      source:"flywheel-loop-tick.phase_a",
+      repo:$repo,
+      session:$session,
+      pane:($pane|tonumber? // $pane),
+      check_id:$check_id,
+      what_happened:"Phase A orchestrator tick check emitted a SOFT violation",
+      what_attempted:["/flywheel:tick Phase A orchestrator checks"],
+      rule_violated:$check_id,
+      evidence:$detail
+    }' >>"$log_path"
+  printf 'true\n'
+}
+
+phase_a_unprocessed_fuckup_count() {
+  local log
+  log="$(phase_a_fuckup_log_path)"
+  [[ -f "$log" ]] || { printf '0\n'; return 0; }
+  jq -s '[.[]? | select((.processed_at // .promoted_at // .resolved_at // "") == "")] | length' "$log" 2>/dev/null || printf '0\n'
+}
+
+phase_a_autoloop_check_json() {
+  local log_path="${FLYWHEEL_TICK_AUTOLOOP_LOG:-}" last_status="unknown" receipt_count=0 unread_count=0 stale_no_receipts=false
+  if [[ -z "$log_path" ]]; then
+    log_path="$HOME/.claude/skills/.flywheel/logs/autoloop-$(date -u +%Y%m%d).jsonl"
+  fi
+  if [[ -f "$log_path" ]]; then
+    receipt_count="$(jq -s '[.[]? | select((.event // "") == "tick_complete" or (.schema_version // "" | test("autoloop|tick"; "i")))] | length' "$log_path" 2>/dev/null || printf 0)"
+    unread_count="$(jq -s '[.[]? | select((.unread // false) == true or (.read // true) == false or (.status // "") == "unread")] | length' "$log_path" 2>/dev/null || printf 0)"
+    last_status="$(jq -r -s '[.[]? | .status? // .event?] | map(select(. != null)) | .[-1] // "unknown"' "$log_path" 2>/dev/null || printf unknown)"
+  fi
+  if [[ "${receipt_count:-0}" -eq 0 && "${FLYWHEEL_TICK_AUTOLOOP_STALE_NO_RECEIPTS:-0}" == "1" ]]; then
+    stale_no_receipts=true
+  fi
+  jq -nc \
+    --arg check_id "autoloop-receipts-read" \
+    --arg failure_class "orch_skipped_substrate_read" \
+    --arg log_path "$log_path" \
+    --arg last_status "$last_status" \
+    --argjson receipt_count "${receipt_count:-0}" \
+    --argjson unread_count "${unread_count:-0}" \
+    --argjson stale_no_receipts "$stale_no_receipts" \
+    '{
+      id:$check_id,
+      check_id:$check_id,
+      mode:"SOFT",
+      status:(if $unread_count > 0 or $stale_no_receipts then "violation" else "pass" end),
+      failure_class:$failure_class,
+      receipt_count:$receipt_count,
+      unread_count:$unread_count,
+      last_autoloop_status:$last_status,
+      log_path:$log_path,
+      stale_no_receipts:$stale_no_receipts
+    }'
+}
+
+phase_a_learn_review_check_json() {
+  local count learn_review_ran=false learn_review_status="skipped"
+  count="$(phase_a_unprocessed_fuckup_count)"
+  if [[ "${FLYWHEEL_TICK_LEARN_REVIEW_RAN:-0}" == "1" ]]; then
+    learn_review_ran=true
+    learn_review_status="observed"
+  fi
+  jq -nc \
+    --arg check_id "learn-review-when-unprocessed" \
+    --arg failure_class "orch_skipped_learn_review" \
+    --argjson unprocessed_count "${count:-0}" \
+    --argjson learn_review_ran "$learn_review_ran" \
+    --arg learn_review_status "$learn_review_status" \
+    '{
+      id:$check_id,
+      check_id:$check_id,
+      mode:"SOFT",
+      status:(if $unprocessed_count >= 3 and ($learn_review_ran | not) then "violation" else "pass" end),
+      failure_class:$failure_class,
+      unprocessed_fuckup_events:$unprocessed_count,
+      learn_review_ran:$learn_review_ran,
+      learn_review_status:$learn_review_status
+    }'
+}
+
+phase_a_worker_state_check_json() {
+  local phase="$1" capacity_json="${2:-}" pane_count=0
+  [[ -n "$capacity_json" ]] || capacity_json="{}"
+  pane_count="$(jq '(.panes // []) | length' <<<"$capacity_json" 2>/dev/null)" || pane_count=0
+  jq -nc \
+    --arg check_id "worker-pane-state-verified" \
+    --arg failure_class "orch_dispatched_blind" \
+    --arg phase "$phase" \
+    --argjson pane_count "${pane_count:-0}" \
+    '{
+      id:$check_id,
+      check_id:$check_id,
+      mode:"SOFT",
+      status:(if $phase == "DISPATCH" and $pane_count == 0 then "violation" else "pass" end),
+      failure_class:$failure_class,
+      phase:$phase,
+      pane_states_observed:$pane_count
+    }'
+}
+
+phase_a_ntm_transport_check_json() {
+  local evidence="${FLYWHEEL_TICK_TRANSPORT_EVIDENCE_LOG:-$LOG}" raw_count=0
+  if [[ -f "$evidence" ]]; then
+    raw_count="$(grep -E -c '(^|[^[:alnum:]_-])tmux[[:space:]]+(send-keys|capture-pane|ls)([^[:alnum:]_-]|$)' "$evidence" 2>/dev/null || true)"
+    raw_count="${raw_count:-0}"
+  fi
+  jq -nc \
+    --arg check_id "ntm-dispatch-discipline" \
+    --arg failure_class "orch_used_raw_tmux" \
+    --arg evidence "$evidence" \
+    --argjson raw_count "${raw_count:-0}" \
+    '{
+      id:$check_id,
+      check_id:$check_id,
+      mode:"SOFT",
+      status:(if $raw_count > 0 then "violation" else "pass" end),
+      failure_class:$failure_class,
+      evidence_path:$evidence,
+      raw_transport_evidence_count:$raw_count
+    }'
+}
+
+phase_a_budget_check_json() {
+  local now elapsed budget exceeded=false
+  now="$(date -u +%s)"
+  elapsed=$((now - TICK_START_EPOCH))
+  budget="${FLYWHEEL_TICK_BUDGET_SECONDS:-0}"
+  if [[ "$budget" =~ ^[0-9]+$ && "$budget" -gt 0 && "$elapsed" -gt "$budget" ]]; then
+    exceeded=true
+  fi
+  jq -nc \
+    --arg check_id "tick-runtime-budget" \
+    --arg failure_class "tick_budget_exceeded" \
+    --argjson elapsed_seconds "$elapsed" \
+    --argjson budget_seconds "${budget:-0}" \
+    --argjson exceeded "$exceeded" \
+    '{
+      id:$check_id,
+      check_id:$check_id,
+      mode:"SOFT",
+      status:(if $exceeded then "violation" else "pass" end),
+      failure_class:$failure_class,
+      elapsed_seconds:$elapsed_seconds,
+      budget_seconds:$budget_seconds,
+      handoff_receipt:(if $exceeded then {required:true,reason:"tick_budget_exceeded"} else {required:false} end)
+    }'
+}
+
+phase_a_checks_json() {
+  local phase="$1" capacity_json="${2:-}" tmp check violation logged violations checks
+  [[ -n "$capacity_json" ]] || capacity_json="{}"
+  tmp="$(mktemp "${TMPDIR:-/tmp}/phase-a-checks.XXXXXX")"
+  phase_a_autoloop_check_json >>"$tmp"
+  phase_a_learn_review_check_json >>"$tmp"
+  phase_a_worker_state_check_json "$phase" "$capacity_json" >>"$tmp"
+  phase_a_ntm_transport_check_json >>"$tmp"
+  phase_a_budget_check_json >>"$tmp"
+
+  violations="[]"
+  while IFS= read -r check; do
+    [[ -n "$check" ]] || continue
+    if jq -e '.status == "violation"' >/dev/null 2>&1 <<<"$check"; then
+      violation="$(jq -c '{check_id, failure_class, mode, status, detail:.}' <<<"$check")"
+      logged="$(phase_a_append_fuckup "$(jq -r '.failure_class' <<<"$check")" "$(jq -r '.check_id' <<<"$check")" "$check")"
+      violation="$(jq -c --argjson logged "$logged" '. + {logged_to_fuckup_log:$logged}' <<<"$violation")"
+      violations="$(jq -nc --argjson base "$violations" --argjson row "$violation" '$base + [$row]')"
+    fi
+  done <"$tmp"
+  checks="$(jq -s -c '.' "$tmp")"
+  rm -f "$tmp"
+
+  jq -nc \
+    --arg schema_version "flywheel-tick-phase-a/v1" \
+    --arg mode "SOFT" \
+    --argjson checks "$checks" \
+    --argjson violations "$violations" \
+    '{
+      schema_version:$schema_version,
+      mode:$mode,
+      checks_run:($checks | map(.check_id)),
+      checks:$checks,
+      violations:$violations,
+      violation_count:($violations | length)
+    }'
 }
 
 tick_contract_registry_path() {
@@ -1510,6 +1923,14 @@ jq -nc \
   --argjson result "$FLEET_ONBOARD_RESULT" \
   '{ts:$ts,event:$event,result:$result}' >>"$LOG"
 
+FLEET_STASH_BLOAT_RESULT="$(fleet_stash_bloat_probe 2>&1 || printf '{"action":"error"}')"
+FLEET_STASH_BLOAT_RESULT="$(first_json_or_raw "$FLEET_STASH_BLOAT_RESULT")"
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "fleet_stash_bloat_probe" \
+  --argjson result "$FLEET_STASH_BLOAT_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
 CANONICAL_PULL_RESULT="$(canonical_pull_before_dispatch 2>&1 || printf '{"status":"fail","action":"error","warnings":["canonical_pull_failed"]}')"
 if ! jq -e . >/dev/null 2>&1 <<<"$CANONICAL_PULL_RESULT"; then
   CANONICAL_PULL_RESULT="$(jq -nc --arg raw "$CANONICAL_PULL_RESULT" '{schema_version:"canonical-doctrine-pull/v1",status:"fail",action:"invalid_json",canonical_pull_freshness_seconds:null,warnings:["canonical_pull_invalid_json"],raw:$raw}')"
@@ -1674,6 +2095,14 @@ TICK_CONTRACT_CHECKS="$(tick_contract_checks_json "$TICK_CONTRACT_REGISTRY_JSON"
 TICK_CONTRACT_GRADUATION="$(tick_contract_graduation_json "$TICK_CONTRACT_REGISTRY_JSON" "$TICK_CONTRACT_CHECKS")"
 TICK_CONTRACT="$(tick_contract_json "$TICK_CONTRACT_REGISTRY_JSON" "$TICK_CONTRACT_CHECKS" "$PHASE" "$TICK_CLASS")"
 L70_CHAIN_DECISION="$(l70_chain_decision_json "$PHASE" "$PHASE_REASON" "$DISPATCH_CAPACITY_RESULT")"
+PHASE_A_CHECKS_RESULT="$(phase_a_checks_json "$PHASE" "$DISPATCH_CAPACITY_RESULT")"
+HOLD_REASON="$(
+  jq -r --arg phase "$PHASE" '
+    if ((.work_summary.pending_tasks // 0) | tonumber) == 0 then
+      if $phase == "DISPATCH" then "dispatch_no_ready_bead" else ("phase_" + ($phase | ascii_downcase) + "_no_worker_dispatch") end
+    else "none" end
+  ' <<<"$WORK_SUMMARY_RESULT" 2>/dev/null || printf 'work_summary_unavailable'
+)"
 jq -nc \
   --arg ts "$(ts)" \
   --arg event "l70_chain_decision" \
@@ -1773,6 +2202,8 @@ ls -1t "$PROMPT_DIR"/flywheel-tick-*.md 2>/dev/null | tail -n +201 | xargs rm -f
   printf '%s\n\n' "$TICK_CONTRACT"
   printf '## Tick contract graduation pre-tick\n'
   printf '%s\n\n' "$TICK_CONTRACT_GRADUATION"
+  printf '## Phase A orchestrator checks\n'
+  printf '%s\n\n' "$PHASE_A_CHECKS_RESULT"
   printf '## Data-backed deferral pre-tick\n'
   printf '%s\n\n' "$DATA_BACKED_DEFERRAL_RESULT"
   printf '## Callback validation pre-tick\n'
@@ -1837,6 +2268,7 @@ jq -nc \
   --argjson tick_contract "$TICK_CONTRACT" \
   --argjson tick_contract_checks "$TICK_CONTRACT_CHECKS" \
   --argjson tick_contract_graduation "$TICK_CONTRACT_GRADUATION" \
+  --argjson phase_a "$PHASE_A_CHECKS_RESULT" \
   --argjson l70_chain "$L70_CHAIN_DECISION" \
   --argjson data_backed_deferral "$DATA_BACKED_DEFERRAL_RESULT" \
   --argjson jeff_status "$JEFF_STATUS_RESULT" \
@@ -1849,6 +2281,7 @@ jq -nc \
   --argjson jeff_philosophy "$JEFF_PHILOSOPHY_RESULT" \
   --argjson jeff_binary_version "$JEFF_BINARY_VERSION_RESULT" \
   --argjson fleet_onboard "$FLEET_ONBOARD_RESULT" \
+  --argjson fleet_stash_bloat "$FLEET_STASH_BLOAT_RESULT" \
   --argjson codex_watchtower "$CODEX_WATCHTOWER_RESULT" \
   --argjson canonical_pull "$CANONICAL_PULL_RESULT" \
   --argjson meta_rule_three_surface "$META_RULE_THREE_SURFACE_OUT" \
@@ -1857,6 +2290,7 @@ jq -nc \
   --argjson ntm_surface_validation "$NTM_SURFACE_VALIDATION_RESULT" \
   --argjson dispatch_capacity "$DISPATCH_CAPACITY_RESULT" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
+  --arg hold_reason "$HOLD_REASON" \
   --argjson value_gap "$VALUE_GAP_RESULT" \
   --arg send_output "$send_output" \
   '{
@@ -1870,6 +2304,10 @@ jq -nc \
     tick_contract:$tick_contract,
     tick_contract_checks:$tick_contract_checks,
     tick_contract_graduation:$tick_contract_graduation,
+    phase_a:$phase_a,
+    checks_run:$phase_a.checks_run,
+    violations:$phase_a.violations,
+    mode:$phase_a.mode,
     data_backed_deferral:$data_backed_deferral,
     data_backed_deferral_event:($data_backed_deferral.event // null),
     data_backed_deferral_soft_violation:($data_backed_deferral.soft_violation // false),
@@ -1881,7 +2319,10 @@ jq -nc \
     mobile_eats_receipt:$mobile_eats,skillos_loop:$skillos_loop,daily_jeff_ingest:$daily_jeff,
     jeff_philosophy:$jeff_philosophy,
     jeff_binary_version:$jeff_binary_version,
-    fleet_onboard:$fleet_onboard,codex_watchtower:$codex_watchtower,
+    fleet_onboard:$fleet_onboard,fleet_stash_bloat:$fleet_stash_bloat,codex_watchtower:$codex_watchtower,
+    fleet_stash_bloat_detected:($fleet_stash_bloat.fleet_stash_bloat_detected // false),
+    fleet_stash_bloat_repo_count:($fleet_stash_bloat.bloat_repo_count // 0),
+    fleet_stash_bloat_worst_count:($fleet_stash_bloat.worst_repo.stash_count // 0),
     canonical_doctrine_pull:$canonical_pull,
     canonical_pull_freshness_seconds:($canonical_pull.canonical_pull_freshness_seconds // null),
     meta_rule_three_surface:$meta_rule_three_surface,
@@ -1960,7 +2401,7 @@ jq -nc \
     jeff_status_stale_open_count:($jeff_status.stale_open_count // null),
     jeff_tracked_issue_count:($jeff_status.tracked_count // null),
     jeff_fixes_status:($jeff_fixes.status // null),
-    dispatch_status:$status,ntm_send_output:$send_output
+    dispatch_status:$status,hold_reason:(if $hold_reason == "none" then null else $hold_reason end),ntm_send_output:$send_output
   }' >>"$LOG"
 
 jq -nc \
@@ -1979,6 +2420,7 @@ jq -nc \
   --argjson tick_contract "$TICK_CONTRACT" \
   --argjson tick_contract_checks "$TICK_CONTRACT_CHECKS" \
   --argjson tick_contract_graduation "$TICK_CONTRACT_GRADUATION" \
+  --argjson phase_a "$PHASE_A_CHECKS_RESULT" \
   --argjson l70_chain "$L70_CHAIN_DECISION" \
   --argjson data_backed_deferral "$DATA_BACKED_DEFERRAL_RESULT" \
   --argjson jeff_status "$JEFF_STATUS_RESULT" \
@@ -1990,6 +2432,7 @@ jq -nc \
   --argjson daily_jeff "$DAILY_JEFF_RESULT" \
   --argjson jeff_binary_version "$JEFF_BINARY_VERSION_RESULT" \
   --argjson fleet_onboard "$FLEET_ONBOARD_RESULT" \
+  --argjson fleet_stash_bloat "$FLEET_STASH_BLOAT_RESULT" \
   --argjson codex_watchtower "$CODEX_WATCHTOWER_RESULT" \
   --argjson canonical_pull "$CANONICAL_PULL_RESULT" \
   --argjson meta_rule_three_surface "$META_RULE_THREE_SURFACE_OUT" \
@@ -1998,6 +2441,7 @@ jq -nc \
   --argjson ntm_surface_validation "$NTM_SURFACE_VALIDATION_RESULT" \
   --argjson dispatch_capacity "$DISPATCH_CAPACITY_RESULT" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
+  --arg hold_reason "$HOLD_REASON" \
   --argjson value_gap "$VALUE_GAP_RESULT" \
   '{
     ts:$ts,run_id:$run_id,task_id:$task_id,phase:$phase,phase_reason:$phase_reason,
@@ -2011,6 +2455,10 @@ jq -nc \
     tick_contract:$tick_contract,
     tick_contract_checks:$tick_contract_checks,
     tick_contract_graduation:$tick_contract_graduation,
+    phase_a:$phase_a,
+    checks_run:$phase_a.checks_run,
+    violations:$phase_a.violations,
+    mode:$phase_a.mode,
     data_backed_deferral:$data_backed_deferral,
     data_backed_deferral_event:($data_backed_deferral.event // null),
     data_backed_deferral_soft_violation:($data_backed_deferral.soft_violation // false),
@@ -2021,7 +2469,10 @@ jq -nc \
     leverage_ceiling:$leverage_ceiling,
     mobile_eats_receipt:$mobile_eats,skillos_loop:$skillos_loop,daily_jeff_ingest:$daily_jeff,
     jeff_binary_version:$jeff_binary_version,
-    fleet_onboard:$fleet_onboard,codex_watchtower:$codex_watchtower,
+    fleet_onboard:$fleet_onboard,fleet_stash_bloat:$fleet_stash_bloat,codex_watchtower:$codex_watchtower,
+    fleet_stash_bloat_detected:($fleet_stash_bloat.fleet_stash_bloat_detected // false),
+    fleet_stash_bloat_repo_count:($fleet_stash_bloat.bloat_repo_count // 0),
+    fleet_stash_bloat_worst_count:($fleet_stash_bloat.worst_repo.stash_count // 0),
     canonical_doctrine_pull:$canonical_pull,
     canonical_pull_freshness_seconds:($canonical_pull.canonical_pull_freshness_seconds // null),
     meta_rule_three_surface:$meta_rule_three_surface,
@@ -2094,7 +2545,8 @@ jq -nc \
     fleet_onboard_warnings:($fleet_onboard.warnings // []),
     jeff_status_stale_open_count:($jeff_status.stale_open_count // null),
     jeff_tracked_issue_count:($jeff_status.tracked_count // null),
-    jeff_fixes_status:($jeff_fixes.status // null)
+    jeff_fixes_status:($jeff_fixes.status // null),
+    hold_reason:(if $hold_reason == "none" then null else $hold_reason end)
   }' >"$LAST"
 
 [[ "$status" == "sent" || "$status" == "dry_run" || "$status" == "blocked_frozen_detector" || "$status" == "blocked_canonical_pull" ]]
