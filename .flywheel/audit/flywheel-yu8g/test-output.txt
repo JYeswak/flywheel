@@ -1,0 +1,21 @@
+PASS validator exit 0 on 3 conformant v2 rows
+PASS validator invalid==0 on conformant rows
+PASS doctor wrapper exit 0 on conformant rows
+PASS doctor wrapper count==0 on conformant rows
+PASS doctor wrapper status=pass on conformant rows
+PASS validator exit 1 on row with missing required fields
+PASS validator invalid==1 on dirty tail
+PASS doctor wrapper exit 1 on dirty tail
+PASS doctor wrapper count==1 on dirty tail
+PASS doctor wrapper status=fail on dirty tail
+PASS doctor wrapper packet has key=schema_version
+PASS doctor wrapper packet has key=status
+PASS doctor wrapper packet has key=dispatch_log_v2_violations_count
+PASS doctor wrapper packet has key=tail_size
+PASS doctor wrapper packet has key=dispatch_log_v2_total_rows_checked
+PASS doctor wrapper packet has key=log_present
+PASS doctor wrapper packet has key=errors
+PASS doctor wrapper packet has key=warnings
+PASS tick.md cites dispatch-log-v2-violations-doctor.sh
+PASS tick.md cites dispatch_log_v2_violations_count field
+SUMMARY pass=20 fail=0

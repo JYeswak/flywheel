@@ -10,16 +10,20 @@ EXPLAIN=0
 DRY_RUN=1
 QUIET=0
 COMMAND="scan"
+TAIL_N=0
 EXPECTED_ANCHOR="${FLYWHEEL_MISSION_ANCHOR:-continuous-orchestrator-uptime-self-sustaining-fleet}"
 
 usage() {
   cat <<'EOF'
 usage:
-  dispatch-log-schema-validator.sh [--repo PATH] [--dry-run] [--json] [--explain]
-  dispatch-log-schema-validator.sh --apply [--repo PATH] [--json]
+  dispatch-log-schema-validator.sh [--repo PATH] [--dry-run] [--json] [--explain] [--tail N]
+  dispatch-log-schema-validator.sh --apply [--repo PATH] [--json] [--tail N]
   dispatch-log-schema-validator.sh --schema|--info|--examples|-h|--help
-  dispatch-log-schema-validator.sh doctor|health|validate [--repo PATH] [--json]
+  dispatch-log-schema-validator.sh doctor|health|validate [--repo PATH] [--json] [--tail N]
   dispatch-log-schema-validator.sh completion [bash|zsh|fish]
+
+flags:
+  --tail N    validate only the last N rows of the log (0 = all rows, default)
 
 exit codes: 0=report emitted, 1=doctor/validate found invalid v2 rows, 2=usage or input error
 EOF
@@ -132,6 +136,8 @@ while [[ $# -gt 0 ]]; do
     --no-color) shift ;;
     --width) [[ $# -ge 2 ]] || die_usage "--width requires N"; shift 2 ;;
     --width=*) shift ;;
+    --tail) [[ $# -ge 2 ]] || die_usage "--tail requires N"; TAIL_N="$2"; shift 2 ;;
+    --tail=*) TAIL_N="${1#*=}"; shift ;;
     --info) info; exit 0 ;;
     --examples) examples; exit 0 ;;
     --schema) cat "$REPO/.flywheel/validation-schema/v1/dispatch-log-entry-v2.schema.json"; exit 0 ;;
@@ -149,9 +155,17 @@ SIDECAR="$REPO/.flywheel/dispatch-log-validation.jsonl"
 [[ -r "$SCHEMA_PATH" ]] || die_usage "schema not readable: $SCHEMA_PATH"
 
 TMP="$(mktemp "${TMPDIR:-/tmp}/dispatch-log-schema-validator.XXXXXX")"
-trap 'rm -f "$TMP" "${SIDE_TMP:-}"' EXIT
+TAIL_TMP=""
+trap 'rm -f "$TMP" "${SIDE_TMP:-}" "${TAIL_TMP:-}"' EXIT
 
-python3 - "$LOG_PATH" "$SCHEMA_PATH" "$EXPECTED_ANCHOR" "$VERSION" >"$TMP" <<'PY'
+EFFECTIVE_LOG="$LOG_PATH"
+if [[ "$TAIL_N" =~ ^[0-9]+$ ]] && [[ "$TAIL_N" -gt 0 ]] && [[ -f "$LOG_PATH" ]]; then
+  TAIL_TMP="$(mktemp "${TMPDIR:-/tmp}/dispatch-log-schema-validator-tail.XXXXXX")"
+  tail -n "$TAIL_N" "$LOG_PATH" >"$TAIL_TMP"
+  EFFECTIVE_LOG="$TAIL_TMP"
+fi
+
+python3 - "$EFFECTIVE_LOG" "$SCHEMA_PATH" "$EXPECTED_ANCHOR" "$VERSION" >"$TMP" <<'PY'
 import json
 import sys
 from collections import Counter
