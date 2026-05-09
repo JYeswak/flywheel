@@ -8254,3 +8254,86 @@ Evidence:
   `feedback_data_decides_not_human_meatpuppet.md`,
   `feedback_convergent_evolution_is_canonical_signal.md`.
 
+## worker_capacity_gate_false_block — already covered by L90 (2026-05-09 cross-reference)
+
+Date: 2026-05-09
+
+Class: `worker_capacity_gate_false_block`
+
+Event Count: 5 events in 7d (all 2026-05-03T20:10-21:17Z, ~1-hour cluster); zero recurrence in 6 days.
+
+Severity: low (orchestrator falsely-blocking on stale robot-activity reads when fresh-capture would unblock; no substrate damage).
+
+Cost: 5 INTEGRATE/DISPATCH cycles aborted because robot-activity reported pane2
+ERROR/THINKING while robot-agent-health reported idle/healthy. Each abort
+added ~5 min of orch idle time waiting for the next tick. Total ~25 min of
+unnecessary orch latency in the 1-hour window. The trauma is the divergence
+between two truth sources (stale robot-activity vs. fresh agent-health) being
+treated as an authoritative blocker rather than a capacity-gate-resolution
+signal.
+
+Root Cause: orchestrator's capacity gate was reading robot-activity (stale
+text-based pane state) as authoritative, but robot-activity can report ERROR
+or THINKING for stale reasons (last-frame text artifacts, cached HTTP 429,
+prior-tick chevron state). When robot-agent-health (live capture) disagrees,
+the gate should ROUTE BY DATA per L90, not fail-closed.
+
+Forever-Rule (already shipped, 2026-05-04):
+
+- **L90** (`L044-L90-pane-action-plan-requires-live-capture.md`,
+  `trauma_class: orchestrator-pane-action-without-live-truth`):
+  before any destructive, interrupting, or recovery pane action, the
+  orchestrator MUST produce a pane-action receipt from FRESH LIVE CAPTURE.
+  Robot activity, stale error text, pane title, old health JSON, or capacity
+  math are HINTS, not authority. Required receipt fields: `session`, `pane`,
+  `capture_ts`, `capture_provenance`, `visible_prompt_class`,
+  `activity_state`, `target_action`, `allowed_by_rule`,
+  `forbidden_actions_checked`, `recovery_postcondition`. Validator check:
+  `capture_provenance == "live"`, `capture_ts` within freshness window,
+  destructive actions blocked unless `visible_prompt_class` proves recoverable
+  shell or confirmed-dead state.
+
+Canonical pivot for capacity-gate / pane-state divergence:
+
+1. **Two-truth-sources reconciliation** — when robot-activity and
+   robot-agent-health disagree, run a fresh live-capture probe. The fresh
+   capture is the tiebreaker, not the older text-based read.
+2. **Capacity gate routes by live-capture verdict** — if visible_prompt_class
+   shows clean shell prompt + activity_state=idle, dispatch is allowed even if
+   robot-activity reports ERROR/THINKING (text artifact, not active work).
+3. **Blocker_class declaration on genuine block** — if live-capture also shows
+   active work, declare `blocker_class=worker-active-not-waiting` and respect
+   it (don't override).
+4. **Per `feedback_two_truth_sources_before_decide`** — cross-check ntm health
+   + tmux capture + ledger tail before any dispatch/refill/append.
+
+Fix Applied/Status: Doctrine landed 2026-05-04 in L90 (next day after the 5
+events). Zero recurrence in 6 days suggests L90 enforcement took. The
+orchestrator's capacity gate now requires `capture_provenance=live` + fresh
+`capture_ts` to abort dispatch.
+
+Recurrence Prevention: Donella leverage point #5 (rules) — L90 is the
+canonical rule. Donella #6 (information flow) — INCIDENTS cross-reference
+makes the ladder probe see the coverage. `flywheel-vl0c9` (filed by
+`flywheel-u5ml3`) tracks the systemic ladder-probe improvement.
+
+Evidence:
+- Trauma rows: `~/.local/state/flywheel/fuckup-log.jsonl` 5 rows from
+  2026-05-03T20:10:06Z, 20:17:19Z, 20:34:34Z, 20:47:22Z, 21:17:57Z; all
+  session=mobile-eats; severity=low.
+- L90 rule: `.flywheel/rules/L044-L90-pane-action-plan-requires-live-capture.md`
+  (canonical doctrine, requires live-capture provenance).
+- This dispatch (7th cross-reference today): `flywheel-dfs9y`.
+- Sibling cross-references today (6-prior-instance precedent): `flywheel-u5ml3`,
+  `flywheel-8io1s`, `flywheel-2xdi.40`, `flywheel-l7ssi`, `flywheel-wwinm`,
+  `flywheel-v8yr7`.
+- Systemic followup (already filed): `flywheel-vl0c9` (extend ladder probe
+  to scan `.flywheel/rules/`).
+- Related class: `worker_capacity_gate_failed` — same probe family, separate
+  bead arc.
+- Memory cross-refs:
+  `feedback_two_truth_sources_before_decide.md`,
+  `feedback_chevron_visible_does_not_mean_submits_work.md`,
+  `feedback_single_capture_misses_freeze.md`,
+  `feedback_data_decides_not_human_meatpuppet.md`.
+
