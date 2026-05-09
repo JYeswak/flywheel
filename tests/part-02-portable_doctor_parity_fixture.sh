@@ -62,7 +62,10 @@ bash "$TMP/probe.sh" >"$TMP/probe.out" 2>"$TMP/probe.err" \
 grep -q "portable_doctor loaded" "$TMP/probe.out" || fail "portable_doctor type-check missing"
 pass "portable_doctor loads via core.sh dispatcher"
 
-# 5. Arg-parser surface — required flags must be recognized
+# 5. Arg-parser surface — required flags must be recognized.
+# Phase 6 (flywheel-luzk7+): flag literals may live in entry OR in
+# sibling portable_doctor.d/*.sh helpers (the dispatcher sources them).
+# Search across the loaded-code surface, not just $LIB_PATH.
 required_flags=(
   "--strict"
   "--fix"
@@ -71,28 +74,30 @@ required_flags=(
   "--storage-min-free-gb"
   "--storage-min-free-pct"
 )
+SEARCH_PATHS=("$LIB_PATH")
+HELPER_DIR="$(dirname "$LIB_PATH")/portable_doctor.d"
+if [[ -d "$HELPER_DIR" ]]; then
+  while IFS= read -r helper; do
+    SEARCH_PATHS+=("$helper")
+  done < <(find "$HELPER_DIR" -maxdepth 1 -type f -name "*.sh" 2>/dev/null)
+fi
 missing_flags=()
 for flag in "${required_flags[@]}"; do
-  if ! grep -qE -- "\"$flag\"|--scope=\\*" "$LIB_PATH"; then
+  if ! grep -qhE -- "\"$flag\"|--scope=\\*" "${SEARCH_PATHS[@]}"; then
     missing_flags+=("$flag")
   fi
 done
 if [[ "${#missing_flags[@]}" -gt 0 ]]; then
   fail "arg-parser surface missing flags: ${missing_flags[*]}"
 fi
-pass "arg-parser surface preserves all 6 required flags"
+pass "arg-parser surface preserves all 6 required flags (search-paths=${#SEARCH_PATHS[@]})"
 
-# 6. wire-or-explain scope subcommands matrix
-required_subcommands=(validate audit why schema)
+# 6. wire-or-explain scope subcommands matrix.
+# Phase 6: scope-cmd handler may also live in helper(s) post-split.
 missing_subcommands=()
-for sub in "${required_subcommands[@]}"; do
-  if ! grep -qE "scope_cmd.*=.*\"$sub\"|^(validate|audit|why|schema)\\)" "$LIB_PATH"; then
-    # fallback regex match for scope_cmd matching
-    if ! grep -qE "validate\|audit\|why\|schema" "$LIB_PATH"; then
-      missing_subcommands+=("$sub")
-    else
-      break
-    fi
+for sub in validate audit why schema; do
+  if ! grep -qhE "scope_cmd.*=.*\"$sub\"|^(validate|audit|why|schema)\\)|validate\|audit\|why\|schema" "${SEARCH_PATHS[@]}"; then
+    missing_subcommands+=("$sub")
   fi
 done
 if [[ "${#missing_subcommands[@]}" -gt 0 ]]; then

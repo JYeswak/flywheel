@@ -1,0 +1,62 @@
+fatal: /Users/josh/.claude/skills/.flywheel/lib/portable/core.d/part-02-portable_doctor.sh: '/Users/josh/.claude/skills/.flywheel/lib/portable/core.d/part-02-portable_doctor.sh' is outside repository at '/Users/josh/Developer/flywheel'
+
+=== NEW FILE: portable_doctor.d/01-arg-parse.sh ===
+# 01-arg-parse.sh — argument parsing for portable_doctor()
+# Extracted from part-02-portable_doctor.sh per flywheel-luzk7 (Phase 6.1).
+#
+# Caller contract: outer function (portable_doctor) MUST declare these locals
+# BEFORE calling _portable_doctor_parse_args:
+#   local strict=0 fix=0 scope="" scope_cmd="" scope_cmd_arg=""
+#   local storage_min_free_gb="${FLYWHEEL_STORAGE_MIN_FREE_GB:-50}"
+#   local storage_min_free_pct="${FLYWHEEL_STORAGE_MIN_FREE_PCT:-10}"
+#   local args=()
+# Then: _portable_doctor_parse_args "$@"
+#
+# Bash dynamic scoping: assignments resolve to caller's locals. This is the
+# canonical no-self-local extraction shape (Phase 6.1 pattern proof for sub-
+# beads 6.2-6.8).
+
+_portable_doctor_parse_args() {
+    local arg
+    while [[ $# -gt 0 ]]; do
+        arg="$1"
+        if [[ "$arg" == "--strict" ]]; then
+            strict=1
+            shift
+        elif [[ "$arg" == "--fix" ]]; then
+            fix=1
+            shift
+        elif [[ "$arg" == "--scope" ]]; then
+            [[ -n "${2:-}" ]] || { echo "ERR: --scope requires SCOPE" >&2; exit 64; }
+            scope="$2"
+            shift 2
+        elif [[ "$arg" == --scope=* ]]; then
+            scope="${arg#*=}"
+            shift
+        elif [[ "$scope" == "wire-or-explain" && -z "$scope_cmd" && "$arg" =~ ^(validate|audit|why|schema)$ ]]; then
+            scope_cmd="$arg"
+            shift
+            if [[ "$scope_cmd" == "why" && $# -gt 0 && "${1:-}" != --* ]]; then
+                scope_cmd_arg="$1"
+                shift
+            fi
+        elif [[ "$arg" == "--storage-min-free-pct" ]]; then
+            [[ -n "${2:-}" ]] || { echo "ERR: --storage-min-free-pct requires N" >&2; exit 64; }
+            storage_min_free_pct="$2"
+            shift 2
+        elif [[ "$arg" == --storage-min-free-pct=* ]]; then
+            storage_min_free_pct="${arg#*=}"
+            shift
+        elif [[ "$arg" == "--storage-min-free-gb" ]]; then
+            [[ -n "${2:-}" ]] || { echo "ERR: --storage-min-free-gb requires N" >&2; exit 64; }
+            storage_min_free_gb="$2"
+            shift 2
+        elif [[ "$arg" == --storage-min-free-gb=* ]]; then
+            storage_min_free_gb="${arg#*=}"
+            shift
+        else
+            args+=("$arg")
+            shift
+        fi
+    done
+}
