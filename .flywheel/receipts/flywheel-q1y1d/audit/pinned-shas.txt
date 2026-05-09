@@ -1,0 +1,9 @@
+incidents-md-pre: 09c9839a30d6852250005500f9c874edd54c4004
+branch: master
+head: d0a2f58227ead2cda2eaf603bf76081f8d682367
+trauma-rows: 6 events @ 2026-05-08T05:30:08.935018Z (single timestamp), all alpsinsurance, all severity:high
+blockers: oauth_smoke_T0118Z, p2_backlog_T2040Z, role_mapping_T2040Z, sdk_adapter_T2040Z, sdk_bead_minting_T2020Z, sdk_deep_research_T0115Z
+parent-incident: INCIDENTS.md:1476 'Wired two-blocker-ticks-escalate as auto-escalator' (2026-05-06)
+covering-script: .flywheel/scripts/two-blocker-ticks-escalator.sh
+zero-recurrence-since: 2026-05-08T05:30:08Z (~36h ago)
+doctrine-ladder-script: 37f5ef5da2c43e870bd15340575343638c15b537

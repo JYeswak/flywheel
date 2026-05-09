@@ -1,0 +1,51 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-q1y1d-e26679",
+  "bead": "flywheel-q1y1d",
+  "trauma_class": "sister-orch-2-tick-blocker",
+  "disposition": "synonym-cross-reference-already-covered-by-two-blocker-ticks-escalate",
+  "event_count_7d": 6,
+  "event_window": "2026-05-08T05:30:08.935018Z (single timestamp)",
+  "blocker_names": [
+    "oauth_smoke_T0118Z",
+    "p2_backlog_T2040Z",
+    "role_mapping_T2040Z",
+    "sdk_adapter_T2040Z",
+    "sdk_bead_minting_T2020Z",
+    "sdk_deep_research_T0115Z"
+  ],
+  "session": "alpsinsurance",
+  "zero_recurrence_since": "2026-05-08T05:30:08Z",
+  "parent_incident": "INCIDENTS.md:1476 'Wired two-blocker-ticks-escalate as auto-escalator' (2026-05-06)",
+  "covering_artifacts": [
+    ".flywheel/scripts/two-blocker-ticks-escalator.sh",
+    ".flywheel/tests/test-two-blocker-ticks-escalator.sh",
+    ".flywheel/validation-schema/v1/two-blocker-ticks-decision.schema.json"
+  ],
+  "score": 870,
+  "max": 1000,
+  "score_basis": "exact-pattern match with sibling cross-refs (wb6oc, u5ml3); zero-recurrence-since proves the escalator took effect; synonym-aware bridge entry closes ladder coverage gap; entry cites all 6 ts-precise blocker names + parent INCIDENTS line + sibling cross-refs from this session; L107 race mitigation applied per flywheel-y4e47 lesson",
+  "cli_canonical": "n/a",
+  "rust_clean": "n/a",
+  "python_clean": "n/a",
+  "readme_quality": "n/a",
+  "skill_auto_routes_addressed": {
+    "canonical-cli-scoping": "n/a",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "four_lens": {"brand": 9, "sniff": 9, "jeff": 9, "public": 9},
+  "files_reserved": [
+    "/Users/josh/Developer/flywheel/INCIDENTS.md"
+  ],
+  "evidence_paths": [
+    ".flywheel/receipts/flywheel-q1y1d/audit/evidence.md",
+    ".flywheel/receipts/flywheel-q1y1d/audit/incidents-entry-prestaged.md",
+    ".flywheel/receipts/flywheel-q1y1d/audit/pinned-shas.txt"
+  ],
+  "l107_race_mitigation": "hold reservation through git add+commit per flywheel-y4e47 lesson; release only after commit lands",
+  "agents_md_updated": "no",
+  "readme_updated": "not_applicable",
+  "no_touch_reason": "cross-reference entries match the precedent established by daily_report_missing_dispatch_gate (5e04d36) and mobile-eats-dispatch-health-gate-fail (e6db5a9); convention is INCIDENTS.md only"
+}
