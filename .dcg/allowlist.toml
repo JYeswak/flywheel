@@ -1,0 +1,11 @@
+[[allow]]
+exact_command = "/Users/josh/.local/bin/flywheel-cleanup-scratch"
+reason = "Canonical flywheel scratch cleanup wrapper validates narrow tmp scratch prefixes before removal"
+added_by = "josh"
+added_at = "2026-05-09T04:45:47Z"
+
+[[allow]]
+exact_command = "/Users/josh/Developer/flywheel/.flywheel/scripts/cleanup-scratch.sh"
+reason = "Repo-local canonical scratch cleanup helper validates narrow tmp scratch prefixes before removal"
+added_by = "josh"
+added_at = "2026-05-09T04:45:51Z"
