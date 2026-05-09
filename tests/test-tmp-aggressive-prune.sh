@@ -80,6 +80,23 @@ else
   fail "ordinary_old_removed"
 fi
 
+du_fixture="$TMP/du-private-tmp"
+fake_bin="$TMP/bin"
+mkdir -p "$du_fixture" "$fake_bin"
+make_old_dir "$du_fixture/unsizable-old"
+cat >"$fake_bin/du" <<'SH'
+#!/usr/bin/env bash
+case "$*" in
+  *unsizable-old*) exit 1 ;;
+  *) /usr/bin/du "$@" ;;
+esac
+SH
+chmod +x "$fake_bin/du"
+
+PATH="$fake_bin:$PATH" "$SCRIPT" --root "$du_fixture" --max-mtime-days 1 --dry-run --json >"$TMP/du-failure.json"
+assert_jq "$TMP/du-failure.json" '.status == "ok" and .apply == false and .candidates_count == 1 and .sample_size_failures == 1' "du_failure_still_emits_json"
+assert_jq "$TMP/du-failure.json" '.sample | test("unsizable-old=unknown")' "du_failure_sample_unknown"
+
 if [ "$fail_count" -ne 0 ]; then
   printf 'FAIL: %s failures, %s passes\n' "$fail_count" "$pass_count" >&2
   exit 1

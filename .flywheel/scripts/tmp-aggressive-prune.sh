@@ -132,15 +132,20 @@ count_planned="${#candidates[@]}"
 
 # Sample sizes (top 5) for receipt
 sample_sizes=""
+sample_size_failures=0
 for p in "${candidates[@]:0:5}"; do
-    sz="$(du -sh "$p" 2>/dev/null | awk '{print $1}')"
+    sz="$(du -sh "$p" 2>/dev/null | awk '{print $1}' || true)"
+    if [ -z "$sz" ]; then
+        sz="unknown"
+        sample_size_failures=$((sample_size_failures + 1))
+    fi
     sample_sizes="${sample_sizes}${p}=${sz} "
 done
 
 if [ "$apply" = "0" ]; then
     if [ "$emit_json" = "1" ]; then
-        printf '{"status":"ok","apply":false,"ts":"%s","root":"%s","candidates_count":%d,"protected_count":%d,"max_mtime_days":%s,"sample":"%s","protected_sample":"%s"}\n' \
-            "$ts" "$target_root" "$count_planned" "$protected_count" "$max_mtime_days" "$sample_sizes" "$protected_sample"
+        printf '{"status":"ok","apply":false,"ts":"%s","root":"%s","candidates_count":%d,"protected_count":%d,"sample_size_failures":%d,"max_mtime_days":%s,"sample":"%s","protected_sample":"%s"}\n' \
+            "$ts" "$target_root" "$count_planned" "$protected_count" "$sample_size_failures" "$max_mtime_days" "$sample_sizes" "$protected_sample"
     else
         echo "DRY-RUN — would prune $count_planned entries from $target_root >${max_mtime_days}d mtime"
         echo "Protected: $protected_count ($protected_sample)"
@@ -170,6 +175,7 @@ cat >"$receipt" <<EOF
   "idempotency_key": "$idem_key",
   "candidates_count": $count_planned,
   "protected_count": $protected_count,
+  "sample_size_failures": $sample_size_failures,
   "deleted_count": $deleted_count,
   "max_mtime_days": $max_mtime_days,
   "free_after_gb": $free_after_gb
