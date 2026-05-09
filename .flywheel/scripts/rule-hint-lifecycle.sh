@@ -166,7 +166,7 @@ def candidates_for(rules: list[Rule], counts: dict[str, int], demote_threshold: 
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Analyze L-rule hint usage and file Joshua-approved lifecycle proposal beads.")
-    parser.add_argument("command", nargs="?", default="analyze", choices=["analyze", "doctor", "health", "schema", "examples"])
+    parser.add_argument("command", nargs="?", default="analyze", choices=["analyze", "doctor", "health", "repair", "validate", "audit", "why", "schema", "examples", "quickstart", "completion"])
     parser.add_argument("--repo", default=os.getcwd())
     parser.add_argument("--rules-dir", default=".flywheel/rules")
     parser.add_argument("--usage-log", default=str(Path.home() / ".local/state/flywheel/rule-hint-usage.jsonl"))
@@ -174,16 +174,23 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--demote-threshold", type=int, default=5)
     parser.add_argument("--promote-threshold", type=int, default=50)
     parser.add_argument("--br-bin", default=os.environ.get("BR_BIN", "br"))
+    parser.add_argument("--rule-id")
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
 
     if args.command == "schema":
-        emit({"schema_version": SCHEMA, "fields": ["rule_id", "count", "action", "marker"], "exit_codes": {"0": "ok", "1": "apply failed", "2": "usage"}}, args.json)
+        emit({"schema_version": SCHEMA, "fields": ["rule_id", "count", "action", "marker"], "commands": ["analyze", "doctor", "health", "repair", "validate", "audit", "why", "schema", "examples", "quickstart", "completion"], "exit_codes": {"0": "ok", "1": "apply failed", "2": "usage"}}, args.json)
         return 0
     if args.command == "examples":
         emit({"schema_version": SCHEMA, "examples": ["rule-hint-lifecycle.sh --json", "rule-hint-lifecycle.sh --apply --json"]}, args.json)
+        return 0
+    if args.command == "quickstart":
+        emit({"schema_version": SCHEMA, "steps": ["Run inject-l-rule-hints through dispatch packets", "Run rule-hint-lifecycle.sh --json for daily proposal review", "Run --apply only to file proposal beads; Joshua approves actual lifecycle changes"]}, args.json)
+        return 0
+    if args.command == "completion":
+        print("complete -W 'analyze doctor health repair validate audit why schema examples quickstart completion --json --dry-run --apply --repo --usage-log --rules-dir --rule-id' rule-hint-lifecycle.sh")
         return 0
 
     repo = Path(args.repo).expanduser().resolve()
@@ -211,10 +218,25 @@ def main(argv: list[str]) -> int:
         "candidates": candidates,
         "beads": [],
     }
-    if args.command in {"doctor", "health"}:
+    if args.command in {"doctor", "health", "validate", "audit"}:
         payload["action"] = args.command
         emit(payload, args.json)
         return 0
+    if args.command == "repair":
+        payload["action"] = "repair"
+        payload["planned_actions"] = []
+        payload["repair_note"] = "No repair actions; lifecycle changes are proposal-bead only."
+        emit(payload, args.json)
+        return 0
+    if args.command == "why":
+        rule_id = (args.rule_id or "").upper()
+        rule = next((item for item in rules if item.rule_id == rule_id), None)
+        payload["action"] = "why"
+        payload["rule_id"] = rule_id
+        payload["rule"] = None if rule is None else {"id": rule.rule_id, "title": rule.title, "path": rule.path, "count": counts.get(rule.rule_id, 0)}
+        payload["decision"] = next((item for item in candidates if item["rule_id"] == rule_id), None)
+        emit(payload, args.json)
+        return 0 if rule else 1
     if args.apply:
         try:
             payload["beads"] = [create_bead(repo, args.br_bin, candidate) for candidate in candidates]

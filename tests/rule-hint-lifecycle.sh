@@ -63,6 +63,10 @@ assert_jq "$TMP/dry.json" '.mode=="dry_run" and .usage_rows_seen==55 and .candid
 assert_jq "$TMP/dry.json" '(.candidates[] | select(.rule_id=="L10" and .action=="demote" and .count==4))' "demote candidate traceable"
 assert_jq "$TMP/dry.json" '(.candidates[] | select(.rule_id=="L20" and .action=="promote" and .count==51))' "promote candidate traceable"
 assert_jq "$TMP/dry.json" '.joshua_approval_required_before_lifecycle_apply==true and .canonical_l_rule_mutation_performed==false' "joshua approval gate preserved"
+"$BIN" schema --json >"$TMP/schema.json"
+assert_jq "$TMP/schema.json" '(.commands | index("doctor")) and (.commands | index("repair")) and (.commands | index("why"))' "canonical cli command surface"
+"$BIN" why --repo "$repo" --usage-log "$usage" --rule-id L20 --json >"$TMP/why.json"
+assert_jq "$TMP/why.json" '.action=="why" and .rule.count==51 and .decision.action=="promote"' "why explains rule decision"
 
 "$BIN" --repo "$repo" --usage-log "$usage" --apply --json >"$TMP/apply.json"
 assert_jq "$TMP/apply.json" '.action=="proposal_beads_created" and (.beads|length)==2' "apply creates proposal beads"
