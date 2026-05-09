@@ -1,0 +1,137 @@
+{
+  "schema_version": "validation-receipt/v1",
+  "dispatch_id": "flywheel-13u0.4-3eb1bf",
+  "callback_ref": {
+    "transport": "ntm",
+    "kind": "DONE",
+    "session": "flywheel",
+    "pane": 1,
+    "received_at": "2026-05-09T08:32:00Z"
+  },
+  "status": "pass",
+  "failure_class": null,
+  "retry_policy": "none",
+  "recovery_hint": "No recovery required; all four named learn-review artifacts are dispositioned without unapproved INCIDENTS.md mutation.",
+  "failure_classes": [],
+  "evidence": [
+    {
+      "type": "path",
+      "ref": ".flywheel/audit/flywheel-13u0.4/disposition.md"
+    },
+    {
+      "type": "path",
+      "ref": ".flywheel/audit/flywheel-13u0.4/compliance-pack.md"
+    },
+    {
+      "type": "command",
+      "ref": ".flywheel/audit/flywheel-13u0.4/l112-probe.sh"
+    },
+    {
+      "type": "bead_id",
+      "ref": "flywheel-13u0.4"
+    }
+  ],
+  "artifact_checks": [
+    {
+      "artifact_id": "disposition",
+      "path": ".flywheel/audit/flywheel-13u0.4/disposition.md",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "compliance-pack",
+      "path": ".flywheel/audit/flywheel-13u0.4/compliance-pack.md",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "l112-probe",
+      "path": ".flywheel/audit/flywheel-13u0.4/l112-probe.sh",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "packet",
+      "path": "/tmp/dispatch_flywheel-13u0.4-3eb1bf.md",
+      "status": "exists"
+    }
+  ],
+  "runtime_context": {
+    "agent_context": {
+      "status": "responsive",
+      "probe_ref": ".flywheel/audit/flywheel-13u0.4/l112-probe.sh",
+      "resolved_tools": [
+        "socraticode",
+        "br",
+        "git",
+        "bash",
+        "jq",
+        "rg"
+      ]
+    },
+    "orchestrator_shell_context": {
+      "status": "responsive",
+      "probe_ref": ".flywheel/scripts/verify-callback-delivery.sh",
+      "resolved_tools": [
+        "ntm"
+      ]
+    },
+    "timeout": false,
+    "context_drift": false
+  },
+  "agent_mail": {
+    "agent_mail_thread": "flywheel-13u0.4-3eb1bf",
+    "identity_name": "MistyCliff",
+    "files_reserved": [
+      ".flywheel/audit/flywheel-13u0.4",
+      ".beads/issues.jsonl"
+    ],
+    "files_released": [
+      ".flywheel/audit/flywheel-13u0.4",
+      ".beads/issues.jsonl"
+    ],
+    "reservation_conflicts": [],
+    "reservation_lifecycle": {
+      "state": "released",
+      "reason": "All L107 shared-surface reservations are released before DONE callback."
+    }
+  },
+  "evidence_redaction": {
+    "evidence_redacted": "n/a",
+    "required": false,
+    "evidence_paths": [
+      ".flywheel/audit/flywheel-13u0.4/disposition.md",
+      ".flywheel/audit/flywheel-13u0.4/compliance-pack.md"
+    ],
+    "status": "pass",
+    "owner": "MistyCliff",
+    "remediation": "No secret-bearing material collected."
+  },
+  "bead_actions": [
+    {
+      "action": "updated",
+      "bead": "flywheel-13u0.4"
+    },
+    {
+      "action": "updated",
+      "bead": "flywheel-13u0.5",
+      "reason": "Existing open owner for the br-source-repo-dot-after-create local doctrine decision."
+    },
+    {
+      "action": "no_bead_reason",
+      "reason": "No new bead needed; all classes are either routed to existing flywheel-13u0.5 or have closed stale-candidate plus structural-repair evidence."
+    }
+  ],
+  "learn_route": {
+    "route": "review",
+    "reason": "Disposition-only follow-up; no unapproved INCIDENTS.md mutation."
+  },
+  "chain_blocker": {
+    "next_phase": "flywheel-13u0.5",
+    "capacity_available": false,
+    "chain_blocked_reason": "next owner is existing open bead; this dispatch scope is disposition-only and closes after routing"
+  },
+  "summary": {
+    "socraticode_queries": 1,
+    "indexed_chunks_observed": 10,
+    "compliance_score": "850/1000",
+    "incidents_touched": false
+  }
+}
