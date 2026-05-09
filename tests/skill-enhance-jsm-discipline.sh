@@ -86,6 +86,40 @@ MD
 "$SCRIPT" --validate-packet "$TMP/unmanaged-import.md" --jsm-list-json "$TMP/jsm-list.json" --json >"$TMP/unmanaged-import.json"
 assert_jq "$TMP/unmanaged-import.json" '.status == "pass" and .skills[0].managed == false and .skills[0].import_ready_patch_present == true' "unmanaged import artifact passes"
 
+# Bead flywheel-odugq: JSM unavailability must surface as a stable
+# distinguishable signal (status=skipped, jsm_list_status=offline|unavailable)
+# without hanging or refusing the worker.
+
+# Case 1: JSM_OFFLINE=1 — explicit opt-out path
+JSM_OFFLINE=1 "$SCRIPT" --validate-packet "$TMP/managed-direct.md" --json >"$TMP/offline.json"
+assert_jq "$TMP/offline.json" '.status == "skipped" and .jsm_list_status == "offline" and .reason == "jsm_unavailable" and ((.skills // []) | all(.jsm_status == "unavailable"))' "JSM_OFFLINE=1 emits skipped + jsm_list_status=offline + per-skill unavailable"
+
+# Case 2: jsm binary missing — JSM_BIN points at a no-such path
+JSM_BIN=/nonexistent/jsm-no-such-binary "$SCRIPT" --validate-packet "$TMP/managed-direct.md" --json >"$TMP/missing.json"
+assert_jq "$TMP/missing.json" '.status == "skipped" and .jsm_list_status == "unavailable" and (.jsm_list_reason | test("not on PATH"))' "missing jsm binary surfaces jsm_list_status=unavailable"
+
+# Case 3: jsm wrapper times out fast — fake binary that sleeps longer than the timeout
+cat >"$TMP/fake-jsm-slow.sh" <<'JSM'
+#!/usr/bin/env bash
+sleep 60
+JSM
+chmod +x "$TMP/fake-jsm-slow.sh"
+JSM_BIN="$TMP/fake-jsm-slow.sh" JSM_LIST_TIMEOUT_SEC=2 \
+  "$SCRIPT" --validate-packet "$TMP/managed-direct.md" --json >"$TMP/timeout.json"
+assert_jq "$TMP/timeout.json" '.status == "skipped" and .jsm_list_status == "unavailable" and (.jsm_list_reason | test("timed out"))' "slow jsm list times out fast and surfaces jsm_list_status=unavailable"
+
+# Case 4: pre-existing fixture path still emits live-class semantics with
+# jsm_list_status=fixture so callers can distinguish from real-JSM live runs.
+# (managed-direct.md is intentionally a refused fixture; bracket set -e.)
+set +e
+"$SCRIPT" --validate-packet "$TMP/managed-direct.md" --jsm-list-json "$TMP/jsm-list.json" --json >"$TMP/fixture.json"
+set -e
+assert_jq "$TMP/fixture.json" '.jsm_list_status == "fixture"' "fixture path surfaces jsm_list_status=fixture"
+
+# Case 5: per-skill record carries jsm_status=managed|unmanaged when classification IS available.
+assert_jq "$TMP/managed-patch.json" '(.skills[0].jsm_status == "managed") and (.skills[0].managed == true)' "managed skill record carries jsm_status=managed"
+assert_jq "$TMP/unmanaged-import.json" '(.skills[0].jsm_status == "unmanaged") and (.skills[0].managed == false)' "unmanaged skill record carries jsm_status=unmanaged"
+
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"
   exit 1

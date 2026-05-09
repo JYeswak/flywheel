@@ -1,0 +1,15 @@
+PASS script syntax
+PASS audit classifies managed and unmanaged
+PASS managed direct mutation refused rc
+PASS managed direct mutation refused json
+PASS managed patch artifact passes
+PASS unmanaged missing artifact refused rc
+PASS unmanaged missing import artifact refused
+PASS unmanaged import artifact passes
+PASS JSM_OFFLINE=1 emits skipped + jsm_list_status=offline + per-skill unavailable
+PASS missing jsm binary surfaces jsm_list_status=unavailable
+PASS slow jsm list times out fast and surfaces jsm_list_status=unavailable
+PASS fixture path surfaces jsm_list_status=fixture
+PASS managed skill record carries jsm_status=managed
+PASS unmanaged skill record carries jsm_status=unmanaged
+SUMMARY pass=14 fail=0
