@@ -1,0 +1,53 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-wb6oc-3c4a66",
+  "bead": "flywheel-wb6oc",
+  "trauma_class": "mobile-eats-dispatch-health-gate-fail",
+  "disposition": "cross-reference-already-covered-by-L91-L92",
+  "event_count_7d": 11,
+  "event_window": "2026-05-04T04:49:25Z..2026-05-04T05:37:18Z",
+  "zero_recurrence_since": "2026-05-04T05:37:18Z",
+  "sibling_incident": "INCIDENTS.md#daily_report_missing_dispatch_gate (line 7514)",
+  "covering_rules": [
+    ".flywheel/rules/L045-L91-dispatch-delivery-is-a-four-state-receipt.md",
+    ".flywheel/rules/L046-L92-audit-findings-route-by-data.md"
+  ],
+  "score": 870,
+  "max": 1000,
+  "score_basis": "exact-pattern match with sibling daily_report_missing_dispatch_gate cross-ref (commit 5e04d36); zero-recurrence-since proves L91+L92 took; entry cites file:line for both rules + sibling INCIDENTS line + 11 ts-precise trauma rows + L107 collision history; future improvement (default_incident_paths extension) named with explicit rationale for not filing follow-up bead",
+  "cli_canonical": "n/a",
+  "rust_clean": "n/a",
+  "python_clean": "n/a",
+  "readme_quality": "n/a",
+  "skill_auto_routes_addressed": {
+    "canonical-cli-scoping": "n/a",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "four_lens": {"brand": 9, "sniff": 9, "jeff": 9, "public": 9},
+  "files_reserved": [
+    "/Users/josh/Developer/flywheel/INCIDENTS.md"
+  ],
+  "evidence_paths": [
+    ".flywheel/receipts/flywheel-wb6oc/audit/evidence.md",
+    ".flywheel/receipts/flywheel-wb6oc/audit/incidents-entry-prestaged.md",
+    ".flywheel/receipts/flywheel-wb6oc/audit/pinned-shas.txt"
+  ],
+  "l107_collision_history": [
+    {"ts": "2026-05-09T20:24:56Z", "holder_pane": 4, "holder_task": "flywheel-6grpt-7a4fb3"},
+    {"ts": "2026-05-09T20:28:09Z", "holder_pane": 3, "holder_task": "flywheel-wwinm-2b01e8"},
+    {"ts": "2026-05-09T20:29:Z+", "acquired_by": 2, "task": "flywheel-wb6oc-3c4a66", "pattern": "poll-and-acquire-via-until-loop"}
+  ],
+  "race_finding": {
+    "summary": "pane 3 commit 37d0de7 accidentally bundled this dispatch's INCIDENTS.md append because git add ran AFTER pane 3 released L107 but BEFORE pane 2 (this dispatch) committed",
+    "wrong_commit": "37d0de7",
+    "wrong_commit_message": "incidents(wwinm): cross-reference orch-punt-to-next-tick to L70+L152",
+    "follow_up_bead": "flywheel-y4e47",
+    "functional_outcome": "entry is in HEAD; attribution is wrong"
+  },
+  "beads_filed": ["flywheel-y4e47"],
+  "agents_md_updated": "no",
+  "readme_updated": "not_applicable",
+  "no_touch_reason": "cross-reference entries match the precedent established by daily_report_missing_dispatch_gate (commit 5e04d36); convention is to add the cross-ref to INCIDENTS.md only"
+}

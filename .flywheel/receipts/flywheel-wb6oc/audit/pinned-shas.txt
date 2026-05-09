@@ -1,0 +1,9 @@
+incidents-md-pre: ece8aaf096bddf66f028ec041f1a468b5b5dc237
+incidents-md-working: 0b670d4d04643a8ccfa7af5305ca23e67d69c1fa8aba0186a4307b2eb243d58d
+branch: master
+head: 8a1ba55123d39bfd2339a774e9bef0dc092201fa
+trauma-rows: 11 (2026-05-04T04:49:25Z..05:37:18Z, mobile-eats:1)
+sibling-incident: INCIDENTS.md#daily_report_missing_dispatch_gate (line 7514)
+forever-rules: L91 (.flywheel/rules/L045-...), L92 (.flywheel/rules/L046-...)
+zero-recurrence-since: 2026-05-04T05:37:18Z
+doctrine-ladder-script: 37f5ef5da2c43e870bd15340575343638c15b537
