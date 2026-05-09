@@ -1,0 +1,12 @@
+{
+  "errors": [],
+  "files_checked": 1,
+  "results": [
+    {
+      "file": "/tmp/dispatch_flywheel-gb54d.1-44bdd6.md",
+      "valid": true
+    }
+  ],
+  "schema": "dispatch-template-validation/v1",
+  "valid": true
+}
