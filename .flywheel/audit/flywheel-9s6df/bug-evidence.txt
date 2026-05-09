@@ -1,0 +1,16 @@
+== uname -s ==
+Darwin
+
+== xargs -d failure on macOS (current state) ==
+xargs: invalid option -- d
+usage: xargs [-0opt] [-E eofstr] [-I replstr [-R replacements] [-S replsize]]
+             [-J replstr] [-L number] [-n number [-x]] [-P maxprocs]
+             [-s size] [utility [argument ...]]
+
+== xargs -0 with tr fix works on macOS (proposed) ==
+got: line1
+got: line2
+
+== inventory-beads.sh current line 141 ==
+xargs -d '\n' -P "$PARALLELISM" -I {} bash -c 'per_bead "$@"' _ {} \
+  < "$PASS_DIR/inventory.jsonl"

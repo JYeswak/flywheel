@@ -1,0 +1,41 @@
+# jsm-push-ready patch — beads-compliance-and-completion-verification
+# Source bead: flywheel-9s6df-2ac2a3 on 2026-05-09
+# Apply: cd ~/.claude/skills/beads-compliance-and-completion-verification && patch -p1 < <this-file>
+# Or:    jsm push <bundle-with-patched-scripts/inventory-beads.sh>
+#
+# What it does:
+#   Replaces GNU-only `xargs -d '\n'` (line 141) with portable
+#   `tr '\n' '\0' < ... | xargs -0` so the script runs on macOS/BSD xargs
+#   without losing newline-as-record-separator semantics. The preceding
+#   comment block is updated to drop GNU-only language and explain the
+#   BSD-portable shape.
+#
+# Verified:
+#   - bash -n on patched copy passes
+#   - patch -p1 dry-run apply succeeds against an unpatched skill copy
+#   - flywheel tests/inventory-beads-xargs-portability.sh PASS 5/5
+#
+--- a/scripts/inventory-beads.sh
++++ b/scripts/inventory-beads.sh
+@@ -136,10 +136,17 @@
+
+ # `xargs -P 0` would use unlimited parallelism — bound it to PARALLELISM
+ # (default 8) so we don't fork-bomb br + git on huge bead universes. -I {}
+-# binds each line as a single argument; -d '\n' makes whitespace-bearing
+-# bead bodies (rare but possible in JSONL) safe.
+-xargs -d '\n' -P "$PARALLELISM" -I {} bash -c 'per_bead "$@"' _ {} \
+-  < "$PASS_DIR/inventory.jsonl"
++# binds each input record as a single argument. We need a non-whitespace
++# delimiter so a bead body containing spaces (rare but possible in JSONL)
++# is not split mid-record. GNU xargs offers `-d '\n'` for that, but BSD/
++# macOS xargs rejects -d (`xargs: invalid option -- d`). The portable
++# shape is `tr '\n' '\0' | xargs -0`: convert newlines to NUL and let
++# xargs split on NUL, which is supported on both GNU and BSD. flywheel-9s6df
++# 2026-05-09: macOS portability fix (parent: flywheel-9o2lz BCV harness
++# scoped fallback — this patches the upstream skill so the fallback is no
++# longer required).
++tr '\n' '\0' < "$PASS_DIR/inventory.jsonl" \
++  | xargs -0 -P "$PARALLELISM" -I {} bash -c 'per_bead "$@"' _ {}
+
+ # Print summary to stderr.
+ echo "Inventoried $TOTAL beads to $PASS_DIR/inventory.jsonl (parallelism=$PARALLELISM)" >&2

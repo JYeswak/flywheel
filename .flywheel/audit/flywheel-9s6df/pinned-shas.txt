@@ -1,0 +1,3 @@
+b473a65c921254dfc95a241c72149271408e9d06fe256675fd64dc0036560927  tests/inventory-beads-xargs-portability.sh
+63de8923eb881101b84a0ef2af7108668edd879afe31acc226b11756d122022f  .flywheel/audit/flywheel-9s6df/inventory-beads.jsm-push-ready.patch
+9985899ca4e50f369f166636756d8fae75c4d89165f5c3539064452996e05d04  /Users/josh/.claude/skills/beads-compliance-and-completion-verification/scripts/inventory-beads.sh
