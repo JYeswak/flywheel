@@ -1,0 +1,34 @@
+stash@{0}	2026-04-25T18:37:28	WIP on main: a73b7576 fix(health): align decision_ledger recent_null_ratio cohort to 24h window [bd-
+stash@{1}	2026-04-25T18:34:44	WIP on main: a73b7576 fix(health): align decision_ledger recent_null_ratio cohort to 24h window [bd-
+stash@{2}	2026-04-25T17:14:48	WIP on main: 76acca83 feat(scanner): bd-2phhg deadband review — KEEP 0.05, D1 regression diagnosed
+stash@{3}	2026-04-25T16:46:54	WIP on main: a22ad80e feat(scanner): edge_refresh timeout-rate diagnostic + 5% setpoint alarm [bd-2l
+stash@{4}	2026-04-25T14:45:07	On main: bd-pre-existing-test-fix-WIP
+stash@{5}	2026-04-25T13:53:29	WIP on main: 06f936ee feat(reliability): preflight 7th gate check_reliability_north_star with fail-c
+stash@{6}	2026-04-23T17:12:49	On main: agent-F-pre-rebase-stash
+stash@{7}	2026-04-21T22:36:57	WIP on main: b9de7087 feat(s5): route preflight_ledger writes through DualWriter [bd-10pug]
+stash@{8}	2026-04-21T22:09:34	WIP on main: 9ac5a3a0 fix(obs): resolve socraticode collection by projectPath hash [bd-mlxst]
+stash@{9}	2026-04-21T20:31:53	WIP on main: 9860e5cd fix(trade-path): close 2 of 5 pre-trade blockers from 4-agent ESO review
+stash@{10}	2026-04-21T18:59:21	On main: wave6-deferred-files
+stash@{11}	2026-04-21T07:29:36	WIP on main: a1edc0ab test(migration): regression test for mig-038 column mismatch [bd-mig-038-test-
+stash@{12}	2026-04-21T07:10:32	WIP on main: ae6b5a4e docs(review): REVIEW 9 — probe green at 14:04Z, cred rotation is the gate [r
+stash@{13}	2026-04-21T07:03:28	WIP on main: cabc9063 milestone: 4-of-4 READY:YES — mission gate UNLOCKED [milestone]
+stash@{14}	2026-04-20T23:00:25	On main: pane2-bd-14ufj-corrupted-schema-2026-04-21
+stash@{15}	2026-04-19T20:47:02	WIP on main: 41681ca8 feat(db): db_safe_ddl.sh shadow-copy DDL executor [bd-24pua]
+stash@{16}	2026-04-19T13:22:42	WIP on main: bfed634f docs: operator tools reference + L40 dispatch fallback + L41 paired-tools inde
+stash@{17}	2026-04-18T17:16:07	WIP on main: 0fd48d77 fix(preflight): require real L2 pnl reconciliation [MS][SF][PR] [bd-jmbel]
+stash@{18}	2026-04-18T16:21:25	WIP on main: 60c97a33 fix(cal): preserve NULL CI as missing evidence [MS] [bd-j4dd5]
+stash@{19}	2026-04-18T12:39:38	On main: bd-n9mv7 preserved work: narrow except at Kalshi API boundary (blocked on post-ship probe r
+stash@{20}	2026-04-18T11:59:16	WIP on main: 45eeab36 fix(signal): unify attribution writer path [bd-zj3wl]
+stash@{21}	2026-04-17T18:18:09	WIP on main: c8f5cb8b test(parity): paper-live isomorphism contracts [PLD-0] [bd-vwupk]
+stash@{22}	2026-04-16T04:41:56	WIP on main: fa16756d fix(health): coverage_log numerator market-level + wire decided counter [bd-2g
+stash@{23}	2026-04-15T16:22:14	WIP on main: 8b1fcb8e fix(writer): redrive retry_count cast defensive [bd-28w7j]
+stash@{24}	2026-04-13T21:19:55	WIP on main: 2b26ce8c feat(ops): loop_guard + BUDGET + STATE scaffolding for overnight ecosystem loo
+stash@{25}	2026-04-13T16:48:38	WIP on main: 402592bd fix(cli): address 20 Grok findings in cli.py
+stash@{26}	2026-04-13T14:42:34	WIP on main: e2667f74 fix(engine): address 21 Grok findings in decision_audit.py
+stash@{27}	2026-04-13T13:37:18	WIP on main: fbffdd87 fix(ingest): address 10 Grok findings in kalshi_price_snapshots.py
+stash@{28}	2026-04-13T13:21:15	WIP on main: 65e7ccbe fix: address 11 Grok findings in edge_refresh.py
+stash@{29}	2026-04-12T17:42:41	On main: incomplete P2 cron label fix — needs proper bead
+stash@{30}	2026-04-10T08:23:57	On main: session68-bg-worker-wip: incomplete Phase 1B for compute_features/edge_analyzer/kalshi_trad
+stash@{31}	2026-04-09T01:09:14	WIP on main: bd0d83e2 fix(tui): stability — 15s tick, 2s DB timeout to prevent freeze
+stash@{32}	2026-04-08T23:57:21	On main: my v4_palette gradient helpers — P1 used StyledText instead
+stash@{33}	2026-04-07T21:11:18	WIP on main: 83778d0c fix(test): correct temperature ladder test expectations for concentrated calib
