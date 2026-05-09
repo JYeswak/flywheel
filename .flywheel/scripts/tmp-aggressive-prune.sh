@@ -15,6 +15,7 @@
 #   --apply       actually prune; requires --idempotency-key
 #   --idempotency-key=<key>  required for --apply (cron passes UTC timestamp)
 #   --max-mtime-days=N       default 1 (24h)
+#   --root=PATH   target root, default /private/tmp (test/fixture support)
 #   --json        emit JSON receipt
 #
 # Excludes (deny-list):
@@ -22,7 +23,9 @@
 #   /private/tmp/.*           — dot-files (system + tooling state)
 #   /private/tmp/claude-*     — active Claude Code session scratch
 #   /private/tmp/launchd-*    — launchd
-#   <currently-active mktemp dirs>  — any dir with files mtime <1h
+#   /private/tmp/tmux-*       — tmux/socket transport
+#   /private/tmp/<service>-<uid> — service-owned IPC directories
+#   <directories containing sockets> — active IPC transport dirs
 #
 # Returns 0 on success, 1 on lock conflict, 2 on validation failure.
 
@@ -37,6 +40,7 @@ apply=0
 idem_key=""
 max_mtime_days=1
 emit_json=0
+target_root="/private/tmp"
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -46,6 +50,8 @@ while [ $# -gt 0 ]; do
         --idempotency-key) shift; idem_key="$1" ;;
         --max-mtime-days=*) max_mtime_days="${1#*=}" ;;
         --max-mtime-days) shift; max_mtime_days="$1" ;;
+        --root=*) target_root="${1#*=}" ;;
+        --root) shift; target_root="$1" ;;
         --json) emit_json=1 ;;
         --help|-h)
             grep '^#' "$SCRIPT_PATH" | head -40
@@ -61,6 +67,11 @@ if [ "$apply" = "1" ] && [ -z "$idem_key" ]; then
     exit 2
 fi
 
+if [ ! -d "$target_root" ]; then
+    echo "ERROR: root does not exist or is not a directory: $target_root" >&2
+    exit 2
+fi
+
 # Mutex lock (mkdir-atomic)
 if [ "$apply" = "1" ]; then
     if ! mkdir "$LOCK_DIR" 2>/dev/null; then
@@ -72,23 +83,50 @@ fi
 
 ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
+has_socket_entry() {
+    local path="$1"
+    [ -d "$path" ] || return 1
+    find "$path" -type s -print -quit 2>/dev/null | grep -q .
+}
+
+protected_reason() {
+    local path="$1"
+    local base="$2"
+    case "$base" in
+        # System / Apple
+        com.apple.*|.*) echo "system"; return 0 ;;
+        # Active IPC sockets — DO NOT TOUCH (incident 2026-05-08T23:09Z killed 4 fleet sessions)
+        tmux-*|launchd-*|sshd-*|com.googlecode.*) echo "ipc-name"; return 0 ;;
+        # Active session scratch
+        claude-*|claude_*) echo "session-scratch"; return 0 ;;
+    esac
+    if [[ "$base" =~ ^[A-Za-z0-9_.-]+-[0-9]+$ ]]; then
+        echo "service-uid-ipc"
+        return 0
+    fi
+    if has_socket_entry "$path"; then
+        echo "socket-entry"
+        return 0
+    fi
+    return 1
+}
+
 # Identify candidates: top-level entries in /private/tmp older than threshold,
 # excluding deny-list patterns.
 candidates=()
+protected_count=0
+protected_sample=""
 while IFS= read -r path; do
     base="$(basename "$path")"
-    case "$base" in
-        # System / Apple
-        com.apple.*|.*) continue ;;
-        # Active IPC sockets — DO NOT TOUCH (incident 2026-05-08T23:09Z killed 4 fleet sessions)
-        tmux-*|launchd-*|sshd-*|com.googlecode.*) continue ;;
-        # Active session scratch
-        claude-*|claude_*) continue ;;
-        # Per-uid socket dirs
-        *-501|*-0) continue ;;
-    esac
+    if reason="$(protected_reason "$path" "$base")"; then
+        protected_count=$((protected_count + 1))
+        if [ "$protected_count" -le 5 ]; then
+            protected_sample="${protected_sample}${path}=${reason} "
+        fi
+        continue
+    fi
     candidates+=("$path")
-done < <(find /private/tmp -maxdepth 1 -mindepth 1 -mtime "+$max_mtime_days" 2>/dev/null)
+done < <(find "$target_root" -maxdepth 1 -mindepth 1 -mtime "+$max_mtime_days" 2>/dev/null)
 
 count_planned="${#candidates[@]}"
 
@@ -101,10 +139,11 @@ done
 
 if [ "$apply" = "0" ]; then
     if [ "$emit_json" = "1" ]; then
-        printf '{"status":"ok","apply":false,"ts":"%s","candidates_count":%d,"max_mtime_days":%s,"sample":"%s"}\n' \
-            "$ts" "$count_planned" "$max_mtime_days" "$sample_sizes"
+        printf '{"status":"ok","apply":false,"ts":"%s","root":"%s","candidates_count":%d,"protected_count":%d,"max_mtime_days":%s,"sample":"%s","protected_sample":"%s"}\n' \
+            "$ts" "$target_root" "$count_planned" "$protected_count" "$max_mtime_days" "$sample_sizes" "$protected_sample"
     else
-        echo "DRY-RUN — would prune $count_planned entries from /private/tmp >${max_mtime_days}d mtime"
+        echo "DRY-RUN — would prune $count_planned entries from $target_root >${max_mtime_days}d mtime"
+        echo "Protected: $protected_count ($protected_sample)"
         echo "Sample: $sample_sizes"
     fi
     exit 0
@@ -127,8 +166,10 @@ cat >"$receipt" <<EOF
   "status": "ok",
   "apply": true,
   "ts": "$ts",
+  "root": "$target_root",
   "idempotency_key": "$idem_key",
   "candidates_count": $count_planned,
+  "protected_count": $protected_count,
   "deleted_count": $deleted_count,
   "max_mtime_days": $max_mtime_days,
   "free_after_gb": $free_after_gb
