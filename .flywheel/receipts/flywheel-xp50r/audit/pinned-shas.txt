@@ -1,0 +1,8 @@
+branch: master
+head: 9cccd7770322e6bed89d92034a054b4ad1df644d
+escalator-working: 1bdefce5adfe72cc04090b08da78b55a2dbc704daa6dcc53c92fa7c916af8131
+test-working: 2853b1be5a1f1827d08ac448c6bbb5cefc787d0e5114e35df1a947b54295c6d5
+stall-probe: db9ace666e709c4141ad66a6bfddf74302a7c64c
+two-blocker-ticks-pattern: ed023519d4f1ea4d7646cb0bb0bb49a6ef9c1d4c
+regression-test: pass=14 fail=0
+live-detection-window-336h: 1 stalled pane (mobile-eats:1, 6 consecutive Sub-shape B events 2026-05-03T19:41-20:07Z)

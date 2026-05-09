@@ -1,0 +1,56 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-xp50r-47e0d4",
+  "bead": "flywheel-xp50r",
+  "fix_artifact": ".flywheel/scripts/integrate-stall-escalator.sh",
+  "fix_pattern": "N-strikes-then-escalate detector modeled on two-blocker-ticks-escalator.sh; reads fuckup-log + filters trauma_class+sub-shape; --apply invokes worker-stall-alert-probe.sh per stalled pane; idempotent ledger",
+  "regression_test": {
+    "path": ".flywheel/tests/test-integrate-stall-escalator.sh",
+    "pass": 14,
+    "fail": 0,
+    "gates": [
+      "triad rc=0 (info/schema/doctor/examples)",
+      "above-threshold fixture plans 1 escalation, count=6",
+      "below-threshold fixture (sub-A filtered + sub-B count=2) plans 0",
+      "multi-pane fixture plans 2",
+      "second --apply is idempotent (already_escalated marker)",
+      "schema_version canonical",
+      "bash -n syntax"
+    ]
+  },
+  "live_dod_proof": {
+    "lookback_336h_stalled_panes": 1,
+    "stalled_pane_session": "mobile-eats",
+    "stalled_pane_pane": "1",
+    "stalled_pane_count": 6,
+    "stalled_pane_first_event": "2026-05-03T19:41:37Z",
+    "stalled_pane_latest_event": "2026-05-03T20:07:18Z",
+    "matches_bead_incident": true
+  },
+  "score": 920,
+  "max": 1000,
+  "score_basis": "all 3 DoD gates met (locate, implement, test); 14/14 regression PASS exercising above-threshold + below-threshold + multi-pane + idempotency + introspection; live detection finds exact bead's incident; new-files-only scope (no L107 race exposure); canonical-CLI triad + apply/dry-run discipline preserved; sibling-pattern reuse",
+  "cli_canonical": "yes",
+  "rust_clean": "n/a",
+  "python_clean": "yes",
+  "readme_quality": "n/a",
+  "skill_auto_routes_addressed": {
+    "canonical-cli-scoping": "yes",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "yes",
+    "readme-writing": "n/a"
+  },
+  "four_lens": {"brand": 9, "sniff": 9, "jeff": 9, "public": 9},
+  "files_reserved": [
+    "/Users/josh/Developer/flywheel/.flywheel/scripts/integrate-stall-escalator.sh",
+    "/Users/josh/Developer/flywheel/.flywheel/tests/test-integrate-stall-escalator.sh"
+  ],
+  "evidence_paths": [
+    ".flywheel/receipts/flywheel-xp50r/audit/evidence.md",
+    ".flywheel/receipts/flywheel-xp50r/audit/test-output.txt",
+    ".flywheel/receipts/flywheel-xp50r/audit/pinned-shas.txt"
+  ],
+  "agents_md_updated": "no",
+  "readme_updated": "not_applicable",
+  "no_touch_reason": "new script + new test; closes existing L95 ladder; no doctrine surface mutated"
+}

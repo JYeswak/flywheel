@@ -1,0 +1,17 @@
+PASS T1a --info rc=0
+PASS T1b --schema rc=0
+PASS T1c --doctor rc=0
+PASS T1d --examples rc=0
+PASS T2a above-threshold fixture plans 1 escalation
+PASS T2b above-threshold fixture finds 1 stalled pane
+PASS T2c stalled pane consecutive_count=6
+PASS T3 below-threshold fixture plans 0 escalations (sub-A filtered, sub-B count=2)
+PASS T4a multi-pane fixture plans 2 escalations
+PASS T4b multi-pane fixture finds 2 stalled panes
+PASS T5a second --apply plans 0 (idempotent)
+PASS T5b stalled pane marked already_escalated
+PASS T6 emits canonical schema_version
+PASS T7 escalator passes bash -n
+
+=== test-integrate-stall-escalator.sh ===
+pass=14 fail=0
