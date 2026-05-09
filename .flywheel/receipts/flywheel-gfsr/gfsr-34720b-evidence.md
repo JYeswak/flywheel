@@ -53,9 +53,9 @@ Results:
 
 ## L52 Receipt
 
-- New beads filed: none
+- New beads filed: `flywheel-odugq`
 - Beads updated: none
-- No-bead reason: no new gap found; the JSM timeout is recorded here as dispatch evidence, not a separate product gap for this migration.
+- Reason: JSM mutation preflight timed out on `jsm list --json`; the migration proceeded because the bead explicitly targets live `.flywheel` source, but the preflight substrate needs a bounded unavailable state.
 
 ## Skill Routes
 
