@@ -2,7 +2,12 @@
 set -uo pipefail
 
 VERSION="gap-hunt-probe.v1"
-SCRIPT_VERSION="2026-05-03.3"
+SCRIPT_VERSION="2026-05-09.1"
+# 2026-05-09.1: separate marker_fresh, callback_receipt_fresh, and
+# canonical_bridge_fresh as explicit loop-integrity signals so a fresh fleet
+# marker writeback cannot mask stale callback receipts or stale canonical
+# bridge state. Owns: bead flywheel-2xdi.15.1. Preserves: flywheel-dwmb.1
+# receipt-mirror/full-doctor split.
 # 2026-05-03.3: add loop-integrity gap class for active loop markers that
 # have driver artifacts but stopped producing loop output closure.
 # 2026-05-03.2: narrow bead-without-followup false positives for plan-space
@@ -111,7 +116,16 @@ print(json.dumps({
         "receipt_files_written_since_last_tick",
         "callback_received_in_last_2_ticks",
         "fuckup_log_decisions_made_since_last_tick",
+        "marker_fresh",
+        "callback_receipt_fresh",
+        "canonical_bridge_fresh",
     ],
+    "loop_integrity_signals_owned_by": {
+        "marker_fresh": "flywheel-2xdi.15.1",
+        "callback_receipt_fresh": "flywheel-2xdi.15.1",
+        "canonical_bridge_fresh": "flywheel-2xdi.15.1",
+        "receipt_files_written_since_last_tick": "flywheel-dwmb.1",
+    },
     "read_only_discovery": True,
     "fail_open": True,
 }, sort_keys=True))
@@ -901,10 +915,50 @@ def signal_fuckup_decisions(project: str, repo: Path, interval_seconds: int) -> 
     }
 
 
+def explicit_freshness_signals(project: str, repo: Path, interval_seconds: int) -> list[dict]:
+    """Return marker_fresh, callback_receipt_fresh, canonical_bridge_fresh
+    as independent verdicts. Owned by bead flywheel-2xdi.15.1; preserves
+    flywheel-dwmb.1's receipt-mirror/full-doctor split untouched."""
+    validator = REPO_ROOT / ".flywheel/scripts/loop-integrity-signals.sh"
+    if not validator.exists():
+        warn(f"loop-integrity-signals.sh missing at {validator}; explicit signals skipped")
+        return []
+    args = [str(validator), "--project", project, "--repo", str(repo), "--json"]
+    if interval_seconds and interval_seconds > 0:
+        args.extend(["--window-seconds", str(interval_seconds * 2)])
+    try:
+        result = subprocess.run(
+            args,
+            text=True,
+            capture_output=True,
+            timeout=8,
+            check=False,
+        )
+    except Exception as exc:
+        warn(f"loop-integrity-signals subprocess failed for {project}: {exc}")
+        return []
+    try:
+        payload = json.loads(result.stdout)
+    except Exception:
+        warn(f"loop-integrity-signals non-json output for {project}: rc={result.returncode}")
+        return []
+    signals_dict = payload.get("signals") or {}
+    out: list[dict] = []
+    for name in ("marker_fresh", "callback_receipt_fresh", "canonical_bridge_fresh"):
+        sig = signals_dict.get(name) or {}
+        out.append({
+            "name": name,
+            "ok": bool(sig.get("ok")),
+            "evidence": str(sig.get("evidence") or "no_evidence"),
+        })
+    return out
+
+
 def classify_loop(marker: dict) -> dict:
     project = str(marker.get("project") or "").strip()
     repo = repo_for_marker(marker)
     interval = parse_interval_seconds(marker.get("interval"))
+    explicit = explicit_freshness_signals(project, repo, interval)
     signals = [
         signal_from_recent_file(
             "ledger_writes_since_last_tick",
@@ -919,6 +973,7 @@ def classify_loop(marker: dict) -> dict:
         ),
         newest_callback_signal(project, repo, interval * 2),
         signal_fuckup_decisions(project, repo, interval),
+        *explicit,
     ]
     failed = [str(item["name"]) for item in signals if not item.get("ok")]
     verdict = "HEALTHY"
@@ -934,6 +989,7 @@ def classify_loop(marker: dict) -> dict:
         "verdict": verdict,
         "failed_signals": failed,
         "signals": {str(item["name"]): item for item in signals},
+        "explicit_freshness_signals": [str(item["name"]) for item in explicit],
         "marker": str(marker.get("_marker_path") or ""),
     }
 
