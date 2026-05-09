@@ -6810,6 +6810,65 @@ Sibling Classes:
   different doctrine paths (this section for INTEGRATE prelude
   variant; L91+L92 for dispatch-gate variant).
 
+### Sibling Sub-Class: research-health-prelude-fail (RESEARCH variant + diagnostic-opacity caveat — 2026-05-09 merge)
+
+Sub-class: `research-health-prelude-fail` — the RESEARCH-tick
+shape of the parent INTEGRATE-tick `integrate-prelude-blocked`
+class. Same family ("tick prelude refuses safely on doctor
+failure"), different tick (RESEARCH instead of INTEGRATE). Filed
+as `flywheel-i2k6v` by `doctrine-ladder-promote.sh` after 4 rows
+on 2026-05-02.
+
+Event Count: 4 events on 2026-05-02 (22:07:24, 22:17:07, 22:57:09,
+23:07:32 UTC), all `mobile-eats:0.1` (`agent=codex`,
+`commit_sha=60bf303`), all `severity=medium`, all
+`what_attempted=[]`, all `what_worked=[]`.
+`fuckup-log.jsonl#L208,L209,L212,L213`.
+
+Cost: identical to parent class — RESEARCH tick correctly
+aborted ("safe refusal" pattern intact) when
+`flywheel-loop doctor` returned `status=fail` while
+`ntm health` reported pane errors. No worker file mutation, no
+substrate damage.
+
+Diagnostic-Opacity Caveat (substrate bug surfaced): all 4 rows
+record that `flywheel-loop doctor` returned `status=fail` with
+**EMPTY errors AND warnings arrays**. When errors/warnings are
+both empty, the parent class's Forever-Rule ("record the blocking
+doctor classes and worker activity proof, route each blocker to
+its owner") cannot route — there's nothing named to route. The
+probe is doing the right thing operationally (refuse) but failing
+diagnostically (no signal). Filed `flywheel-q53pp` (P3) for the
+doctor-emit substrate fix (when `status=fail`, at least one
+diagnostic field — `errors[]`, `warnings[]`, or fallback
+`reason=`).
+
+Forever-Rule (parent applies; sub-class extension): a RESEARCH
+tick prelude block on doctor failure is safe refusal — the
+parent's wait/observe semantics extend verbatim. ADDITIONALLY,
+when the doctor emits `status=fail` with empty errors/warnings,
+the worker MUST treat the missing diagnostic as a probe-quality
+blocker (route to `flywheel-q53pp`) rather than as an
+integrator-routable doctor class.
+
+Fix Applied/Status: Path A merge — no doctor edit (that's
+flywheel-q53pp's scope), no source-code change. Sub-class block
+makes the L56 ladder probe see coverage and skip re-firing on
+the 4-row precedent cluster.
+
+Evidence (sub-class):
+- Trauma rows: `~/.local/state/flywheel/fuckup-log.jsonl` lines
+  208, 209, 212, 213 on 2026-05-02 22:07:24Z–23:07:32Z; all
+  `mobile-eats:0.1`, `agent=codex`,
+  `git_repo=/Users/josh/Developer/mobile-eats`, all
+  `severity=medium`, all `what_attempted=[]`,
+  `what_worked=[]`.
+- Parent class: `## integrate-prelude-blocked` above.
+- Substrate-bug follow-up bead: `flywheel-q53pp` (filed by this
+  close — names the doctor-emit-status-fail-with-empty-errors
+  fix as a separate scope).
+- Bead: `flywheel-i2k6v` (this dispatch).
+
 ## dispatch-health-and-capacity-gate
 
 Date: 2026-05-08
