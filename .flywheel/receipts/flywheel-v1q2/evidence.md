@@ -4,6 +4,7 @@ task_id=flywheel-v1q2-8a0e98
 bead=flywheel-v1q2
 mission_fitness=adjacent
 evidence_redacted=yes
+tmp_dir_released=true
 
 ## Outcome
 
