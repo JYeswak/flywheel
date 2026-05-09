@@ -113,3 +113,13 @@ four_lens=brand:9,sniff:9,jeff:9,public:9 — **4/4 PASS**
 - Team-roster gate row: `~/.local/state/flywheel/team-roster.jsonl` 2026-05-01T14:18:00Z notes — "(alpsinsurance, vrtx, zesttube, skillos, clutterfreespaces, zeststream-v2) NOT YET REGISTERED — await per-session Joshua confirmation walkthrough."
 - Audit evidence: `/tmp/preinstall-zesttube.json` (confidence=20, threshold=70)
 - L-rules cited: L48 (class-2 Joshua gates), L70 (no-punt — surfaced same tick as evidence), L107 (shared-surface reservation, applied for evidence path), L52 (bead-receipt; no_bead_reason captured)
+
+---
+
+## Joshua disposition 2026-05-09
+
+**Verdict: zesttube is ACTIVE.**
+
+Quote: "its active - its a project I want to continue building and packaging up... its not active in the sense that its live and open right now but it is an active project"
+
+**Action:** keep zesttube in fleet recovery system, do NOT decommission. Update team-roster status to `active_paused` or equivalent (project is alive but not currently in live development). No decommission bead filed.
