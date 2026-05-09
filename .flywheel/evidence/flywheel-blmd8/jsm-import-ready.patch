@@ -1,0 +1,156 @@
+# JSM-import-ready patch for flywheel-blmd8 (Phase 6.7)
+# Skill: ~/.claude/skills/.flywheel/ (unmanaged by JSM at dispatch time)
+# Repo head pre: 8400b94 (post-u3cf7); post: this commit
+# Date: 2026-05-09
+
+## Changeset summary
+
+### File 1 (edit): ~/.claude/skills/.flywheel/lib/portable/core.d/part-02-portable_doctor.sh
+
+Two regions edited:
+
+(a) Top-of-file source-helper preamble:
+- Added `source $_PD_HELPER_DIR/02-scoped-probes-pre.sh`
+- Updated comment to name 02-scoped-probes-pre as another bash-dynamic-scoping
+  helper (paired with 01-arg-parse).
+
+(b) 11 case-statement bodies replaced with 1-line helper calls:
+- `auto-l112-gate)` (was 57 lines): `_scoped_probe_auto_l112_gate; return $?`
+- `quality-bar-close-gate)` (was 19 lines): `_scoped_probe_run quality-bar-close-gate.sh y y; return $?`
+- `watcher-isomorphic)` (was 16 lines): `_scoped_probe_run watcher-isomorphic-probe.sh y n; return $?`
+- `stale-in-progress)` (was 16 lines): `_scoped_probe_run stale-in-progress-reaper.sh y n; return $?`
+- `jsm-sandbox-auth-marker)` (was 16 lines): `_scoped_probe_run validate-jsm-sandbox-auth-marker.sh n n; return $?`
+- `substrate-loop-contract)` (was 19 lines): `_scoped_probe_run substrate-loop-contract-validator.sh y y; return $?`
+- `storage-headroom-watcher)` (was 19 lines): `_scoped_probe_run storage-headroom-watcher.sh y y; return $?`
+- `peer-orch-recovery)` (was 19 lines): `_scoped_probe_run peer-orch-respawn-permit.sh y y; return $?`
+- `peer-orch-monitor)` (was 19 lines): `_scoped_probe_run peer-orch-freeze-monitor.sh y y; return $?`
+- `codex-stuck-detector)` (was 19 lines): `_scoped_probe_run codex-template-stuck-detector.sh y y; return $?`
+- `callback-envelope-schema)` (was 19 lines): `_scoped_probe_run callback-envelope-schema-validator.sh y y; return $?`
+
+Helper-arg semantics:
+- Arg 1: script_name (basename under .flywheel/scripts/)
+- Arg 2: pass_repo ("y" passes --repo $REPO_ABS; "n" omits)
+- Arg 3: use_fallback ("y" tries $HOME/Developer/flywheel/.flywheel/scripts/<basename>
+  if $REPO_ABS variant is missing; "n" goes straight to fail-emit)
+
+Net line count: 1705 -> 1503 (-202 lines in entry).
+
+### File 2 (create): ~/.claude/skills/.flywheel/lib/portable/core.d/portable_doctor.d/02-scoped-probes-pre.sh
+
+New file, 107 lines, content embedded below. Defines:
+- `_scoped_probe_emit_missing_script_fail` (shared fail-output)
+- `_scoped_probe_run` (generic 10-of-11 handler with parameterized fallback + repo-passing)
+- `_scoped_probe_auto_l112_gate` (special-case 1-of-11 handler with legacy-trend trend-computation)
+
+DRY win: original 11 case bodies totaled ~238 lines; helper file is 107 lines.
+The 10 generic probes shared 90% boilerplate (script-resolve + invoke + fail-emit);
+unified helper expresses this once with parameterization.
+
+=== NEW FILE CONTENT: portable_doctor.d/02-scoped-probes-pre.sh ===
+# 02-scoped-probes-pre.sh — pre-aggregation scoped-probe handlers for portable_doctor()
+# Extracted from part-02-portable_doctor.sh per flywheel-blmd8 (Phase 6.7).
+#
+# Pattern: bash dynamic scoping. Each handler relies on caller's locals:
+#   $REPO_ABS, $JSON_OUT, $scope, $scope_cmd, $scope_cmd_arg, $strict, $fix
+# Helpers `return` their handler's exit code; caller's case body does
+# `_scoped_probe_<name>; return $?` so exit codes propagate to portable_doctor().
+#
+# Two helper shapes:
+#   _scoped_probe_run     — generic script-runner; covers 10 of 11 probes
+#   _scoped_probe_auto_l112_gate — special-case (legacy-trend trend computation)
+#
+# Standardization note: the original 10 generic handlers had minor argv-order
+# variations (--doctor --repo --json vs --doctor --json --repo) and 3 of them
+# omitted the $HOME/Developer/flywheel fallback. The unified helper standardizes
+# to `--doctor [--repo $REPO_ABS] [--json]` ordering and parameterizes
+# fallback + repo-passing per call site to preserve original semantics.
+
+# Standardized fail-output for missing/non-executable scoped_doctor.
+_scoped_probe_emit_missing_script_fail() {
+    local scoped_doctor="$1"
+    if [[ "$JSON_OUT" -eq 1 ]]; then
+        jq -n -c --arg scope "$scope" --arg repo "$REPO_ABS" --arg script "$scoped_doctor" '{status:"fail",scope:$scope,repo:$repo,reason:"scoped_doctor_script_missing_or_not_executable",script:$script}'
+    else
+        printf 'FAIL scope=%s reason=scoped_doctor_script_missing_or_not_executable script=%s\n' "$scope" "$scoped_doctor"
+    fi
+}
+
+# Generic scoped-probe runner used by 10 of the 11 pre-aggregation probes.
+#   $1 = script_name (basename under .flywheel/scripts/)
+#   $2 = pass_repo: "y" (default) | "n"
+#   $3 = use_fallback: "y" (default) | "n"
+_scoped_probe_run() {
+    local script_name="$1"
+    local pass_repo="${2:-y}"
+    local use_fallback="${3:-y}"
+    local scoped_doctor="$REPO_ABS/.flywheel/scripts/$script_name"
+    if [[ "$use_fallback" == "y" && ! -x "$scoped_doctor" ]]; then
+        scoped_doctor="$HOME/Developer/flywheel/.flywheel/scripts/$script_name"
+    fi
+    if [[ -x "$scoped_doctor" ]]; then
+        local args=(--doctor)
+        [[ "$pass_repo" == "y" ]] && args+=(--repo "$REPO_ABS")
+        [[ "$JSON_OUT" -eq 1 ]] && args+=(--json)
+        "$scoped_doctor" "${args[@]}"
+        return $?
+    fi
+    _scoped_probe_emit_missing_script_fail "$scoped_doctor"
+    return 1
+}
+
+# Probe 1/11 — auto-l112-gate (special: computes legacy-trend JSON from ledger,
+# then jq-augments scoped_output with auto_l112_gate_* fields before emit).
+_scoped_probe_auto_l112_gate() {
+    local scoped_doctor="$REPO_ABS/.flywheel/scripts/auto-l112-gate.sh"
+    if [[ -x "$scoped_doctor" ]]; then
+        local scoped_output scoped_rc legacy_trend_json ledger_path
+        set +e
+        if [[ "$JSON_OUT" -eq 1 ]]; then
+            scoped_output="$("$scoped_doctor" --doctor --json)"
+        else
+            scoped_output="$("$scoped_doctor" --doctor --json)"
+        fi
+        scoped_rc=$?
+        set -e
+        if [[ "$scoped_rc" -ne 0 ]] || ! jq -e . >/dev/null 2>&1 <<<"$scoped_output"; then
+            if [[ "$JSON_OUT" -eq 1 ]]; then
+                jq -n -c --arg scope "$scope" --arg repo "$REPO_ABS" --arg output "$scoped_output" '{status:"fail",scope:$scope,repo:$repo,reason:"scoped_doctor_invalid_json",output:$output}'
+            else
+                printf 'FAIL scope=%s reason=scoped_doctor_invalid_json\n' "$scope"
+            fi
+            return 1
+        fi
+        ledger_path="$(jq -r '.ledger_path // empty' <<<"$scoped_output")"
+        if [[ -n "$ledger_path" && -f "$ledger_path" ]]; then
+            legacy_trend_json="$(jq -s -c '
+              map(select(type == "object")) as $all
+              | ($all | map(select(((.ts | fromdateiso8601? // 0) >= (now - 86400)) and ((.failure_class == "missing_or_invalid_l112_probe_fields") or (.failure_class == "missing_or_invalid_l112_probe_fields_or_skill_auto_routes") or (.failure_class == "malformed_envelope")))) | length) as $current
+              | ($all | map(select(((.ts | fromdateiso8601? // 0) < (now - 86400)) and ((.ts | fromdateiso8601? // 0) >= (now - 172800)) and ((.failure_class == "missing_or_invalid_l112_probe_fields") or (.failure_class == "missing_or_invalid_l112_probe_fields_or_skill_auto_routes") or (.failure_class == "malformed_envelope")))) | length) as $previous
+              | {current:$current,previous:$previous,trend:(if $current < $previous then "decreasing" elif $current == $previous then "flat" else "increasing" end)}
+            ' "$ledger_path")"
+        else
+            legacy_trend_json='{"current":0,"previous":0,"trend":"flat"}'
+        fi
+        scoped_output="$(jq -c --argjson trend "$legacy_trend_json" '
+          .auto_l112_gate_runs_24h = (.gate_runs_last_24h // 0)
+          | .auto_l112_gate_pass_rate_24h = (.gate_pass_rate // 1)
+          | .auto_l112_gate_envelope_missing_count_24h = (.envelope_missing_probe_count // $trend.current // 0)
+          | .auto_l112_gate_envelope_missing_count_previous_24h = ($trend.previous // 0)
+          | .auto_l112_gate_legacy_migration_trend = ($trend.trend // "flat")
+          | .auto_l112_gate_legacy_migration_health = (if (($trend.current // 0) <= ($trend.previous // 0)) then "pass" else "warn" end)
+          | .status = (if (($trend.current // 0) <= ($trend.previous // 0)) then "pass" else "warn" end)
+        ' <<<"$scoped_output")"
+        if [[ "$JSON_OUT" -eq 1 ]]; then
+            printf '%s\n' "$scoped_output"
+        else
+            printf 'status=%s auto_l112_gate_runs_24h=%s auto_l112_gate_pass_rate_24h=%s auto_l112_gate_envelope_missing_count_24h=%s\n' \
+                "$(jq -r '.status' <<<"$scoped_output")" \
+                "$(jq -r '.auto_l112_gate_runs_24h' <<<"$scoped_output")" \
+                "$(jq -r '.auto_l112_gate_pass_rate_24h' <<<"$scoped_output")" \
+                "$(jq -r '.auto_l112_gate_envelope_missing_count_24h' <<<"$scoped_output")"
+        fi
+        return 0
+    fi
+    _scoped_probe_emit_missing_script_fail "$scoped_doctor"
+    return 1
+}
