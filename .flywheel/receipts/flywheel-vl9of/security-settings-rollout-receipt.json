@@ -1,0 +1,50 @@
+{
+  "schema_version": "security-settings-rollout/v1",
+  "bead": "flywheel-vl9of",
+  "scope": {
+    "env": "sandbox",
+    "mode": "receipt-only"
+  },
+  "source": {
+    "path": ".flywheel/security/v1/claude-settings-deny.json",
+    "managed_block_id": "canonical-agent-security-deny/v1"
+  },
+  "targets": [
+    {
+      "repo": "flywheel",
+      "path": ".claude/settings.json",
+      "status": "covered_by_fixture_apply",
+      "blocked_by": null
+    },
+    {
+      "repo": "mobile-eats",
+      "path": ".claude/settings.json",
+      "status": "blocked",
+      "blocked_by": "sandbox_receipt_only_cross_repo_apply_deferred"
+    },
+    {
+      "repo": "skillos",
+      "path": ".claude/settings.json",
+      "status": "blocked",
+      "blocked_by": "sandbox_receipt_only_cross_repo_apply_deferred"
+    },
+    {
+      "repo": "alpsinsurance",
+      "path": ".claude/settings.json",
+      "status": "blocked",
+      "blocked_by": "sandbox_receipt_only_cross_repo_apply_deferred"
+    },
+    {
+      "repo": "polymarket-pico-z",
+      "path": ".claude/settings.json",
+      "status": "blocked",
+      "blocked_by": "sandbox_receipt_only_cross_repo_apply_deferred"
+    }
+  ],
+  "rollback_guard": {
+    "restore_pattern": ".claude/settings.json.bak.<UTC_TIMESTAMP>",
+    "guard": "restore_backup_before_retry",
+    "blocked_target_action": "do_not_overwrite_without_manual_restore"
+  },
+  "token_shaped_values": false
+}

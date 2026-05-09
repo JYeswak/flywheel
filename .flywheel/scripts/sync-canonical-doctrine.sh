@@ -11,6 +11,7 @@ DOCTRINE_DOCS_SOURCE_DIR="${SYNC_DOCTRINE_DOCS_SOURCE_DIR:-/Users/josh/Developer
 SHARED_SCRIPT_SOURCE_DIR="${SYNC_SHARED_SCRIPT_SOURCE_DIR:-/Users/josh/Developer/flywheel/.flywheel/scripts}"
 SHARED_SCRIPT_ALLOWLIST="${SYNC_SHARED_SCRIPT_ALLOWLIST:-bead-quality-mining.sh dispatch-and-verify.sh tmp-aggressive-prune.sh topology-tick-refresh.sh sync-canonical-doctrine.sh}"
 LAUNCHD_TEMPLATE_SOURCE_DIR="${SYNC_LAUNCHD_TEMPLATE_SOURCE_DIR:-/Users/josh/Developer/flywheel/.flywheel/launchd}"
+SECURITY_SETTINGS_DENY_SOURCE="${SYNC_SECURITY_SETTINGS_DENY_SOURCE:-/Users/josh/Developer/flywheel/.flywheel/security/v1/claude-settings-deny.json}"
 LOOPS_DIR="${SYNC_CANONICAL_LOOPS_DIR:-$HOME/.flywheel/loops}"
 SYNC_LEDGER="${SYNC_CANONICAL_LEDGER:-$HOME/.local/state/flywheel/doctrine-sync-ledger.jsonl}"
 SYNC_TS="${SYNC_CANONICAL_NOW:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
@@ -42,6 +43,8 @@ Synchronizes two doctrine surfaces for each flywheel-installed repo:
      source repo when present, with backup-before-write and executable mode.
   8. .flywheel/launchd/*.plist templates are copied from the canonical source
      repo when present, with backup-before-write.
+  9. .claude/settings.json receives the canonical managed security deny rules
+     while preserving non-managed settings, with backup-before-write.
 
 Existing root AGENTS.md content outside the block is preserved. The canonical
 source repo root is treated as already synchronized to avoid self-embedding the
@@ -62,6 +65,7 @@ Environment:
   SYNC_SHARED_SCRIPT_SOURCE_DIR=/path/to/.flywheel/scripts
   SYNC_SHARED_SCRIPT_ALLOWLIST="bead-quality-mining.sh dispatch-and-verify.sh"
   SYNC_LAUNCHD_TEMPLATE_SOURCE_DIR=/path/to/.flywheel/launchd
+  SYNC_SECURITY_SETTINGS_DENY_SOURCE=/path/to/claude-settings-deny.json
   SYNC_ORCH_VALIDATION_SKILL_SOURCE=/path/to/orchestrator-validation-discipline/SKILL.md
   SYNC_CANONICAL_ROOTS="/path/a:/path/b"
   SYNC_CANONICAL_LOOPS_DIR=/path/to/loops-json-dir
@@ -140,6 +144,15 @@ backup_file() {
   [[ -f "$file" ]] || return 0
   ts="$(date -u +%Y%m%dT%H%M%SZ)"
   cp "$file" "${file}.bak.${ts}"
+}
+
+backup_file_with_path() {
+  local file="$1" ts backup
+  [[ -f "$file" ]] || return 0
+  ts="$(date -u +%Y%m%dT%H%M%SZ)"
+  backup="${file}.bak.${ts}"
+  cp "$file" "$backup"
+  printf '%s\n' "$backup"
 }
 
 extract_l_rules() {
@@ -255,6 +268,147 @@ copy_managed_file() {
   fi
 }
 
+render_security_settings() {
+  local source_file="$1" target_file="$2" out_file="$3"
+  python3 - "$source_file" "$target_file" "$out_file" <<'PY'
+from __future__ import annotations
+
+import hashlib
+import json
+import sys
+from pathlib import Path
+
+
+source_path = Path(sys.argv[1])
+target_path = Path(sys.argv[2])
+out_path = Path(sys.argv[3])
+
+source = json.loads(source_path.read_text())
+existing: dict[str, object] = {}
+if target_path.exists():
+    loaded = json.loads(target_path.read_text())
+    if not isinstance(loaded, dict):
+        raise TypeError("settings_json_not_object")
+    existing = loaded
+
+permissions = existing.get("permissions")
+if not isinstance(permissions, dict):
+    permissions = {}
+
+source_permissions = source.get("permissions")
+if not isinstance(source_permissions, dict):
+    raise TypeError("source_permissions_not_object")
+
+source_deny = source_permissions.get("deny")
+if not isinstance(source_deny, list):
+    raise TypeError("source_permissions_deny_not_array")
+
+existing_deny = permissions.get("deny")
+if not isinstance(existing_deny, list):
+    existing_deny = []
+
+deny: list[str] = []
+seen: set[str] = set()
+for value in [*existing_deny, *source_deny]:
+    if isinstance(value, str) and value not in seen:
+        deny.append(value)
+        seen.add(value)
+
+permissions["deny"] = deny
+existing["permissions"] = permissions
+
+metadata = existing.get("flywheel_security")
+if not isinstance(metadata, dict):
+    metadata = {}
+metadata.update(
+    {
+        "schema_version": "security-settings-sync/v1",
+        "managed_block_id": source.get("managed_block_id", "agent-security-deny/v1"),
+        "control_schema_version": source.get(
+            "control_schema_version", "agent-security-control/v1"
+        ),
+        "source": ".flywheel/security/v1/claude-settings-deny.json",
+        "source_sha256": hashlib.sha256(source_path.read_bytes()).hexdigest(),
+        "sync_surface": "sync-canonical-doctrine.sh",
+    }
+)
+existing["flywheel_security"] = metadata
+
+out_path.write_text(json.dumps(existing, indent=2, sort_keys=True) + "\n")
+PY
+}
+
+sync_security_settings_for_repo() {
+  local repo="$1" target_file rendered_tmp source_hash target_hash new_hash backup_path rc blocked_by
+  target_file="$repo/.claude/settings.json"
+  SECURITY_SETTINGS_TARGET_COUNT=$((SECURITY_SETTINGS_TARGET_COUNT + 1))
+
+  if [[ ! -f "$SECURITY_SETTINGS_DENY_SOURCE" ]]; then
+    SECURITY_SETTINGS_BLOCKED_COUNT=$((SECURITY_SETTINGS_BLOCKED_COUNT + 1))
+    jq -cn --arg repo "$repo" --arg target "$target_file" --arg blocked_by "security_settings_deny_source_missing" \
+      '{repo:$repo,target:$target,status:"blocked",blocked_by:$blocked_by}' >>"$SECURITY_SETTINGS_DETAILS_FILE"
+    return 0
+  fi
+
+  rendered_tmp="$(mktemp "${TMPDIR:-/tmp}/sync-security-settings.XXXXXX")"
+  set +e
+  render_security_settings "$SECURITY_SETTINGS_DENY_SOURCE" "$target_file" "$rendered_tmp" 2>/dev/null
+  rc=$?
+  set -e
+  if [[ "$rc" -ne 0 ]]; then
+    rm -f "$rendered_tmp" 2>/dev/null || true
+    blocked_by="settings_json_render_failed"
+    if [[ -f "$target_file" ]] && ! jq -e 'type == "object"' "$target_file" >/dev/null 2>&1; then
+      blocked_by="settings_json_invalid"
+    fi
+    SECURITY_SETTINGS_BLOCKED_COUNT=$((SECURITY_SETTINGS_BLOCKED_COUNT + 1))
+    jq -cn --arg repo "$repo" --arg target "$target_file" --arg blocked_by "$blocked_by" \
+      '{repo:$repo,target:$target,status:"blocked",blocked_by:$blocked_by}' >>"$SECURITY_SETTINGS_DETAILS_FILE"
+    return 0
+  fi
+
+  source_hash="$(sha256_file "$rendered_tmp")"
+  target_hash="$(sha256_file "$target_file")"
+  if [[ "$target_hash" == "$source_hash" ]]; then
+    jq -cn --arg repo "$repo" --arg target "$target_file" --arg hash "$target_hash" \
+      '{repo:$repo,target:$target,status:"in_sync",hash:$hash,blocked_by:null}' >>"$SECURITY_SETTINGS_DETAILS_FILE"
+    rm -f "$rendered_tmp"
+    return 0
+  fi
+
+  SECURITY_SETTINGS_DRIFTED_COUNT=$((SECURITY_SETTINGS_DRIFTED_COUNT + 1))
+  if [[ "$MODE" != "apply" ]]; then
+    jq -cn --arg repo "$repo" --arg target "$target_file" --arg source_hash "$source_hash" --arg target_hash "$target_hash" \
+      '{repo:$repo,target:$target,status:"drifted",source_hash:$source_hash,target_hash:$target_hash,blocked_by:null}' >>"$SECURITY_SETTINGS_DETAILS_FILE"
+    rm -f "$rendered_tmp"
+    return 0
+  fi
+
+  mkdir -p "$(dirname "$target_file")"
+  backup_path=""
+  if [[ -f "$target_file" ]]; then
+    backup_path="$(backup_file_with_path "$target_file")"
+  fi
+  if mv "$rendered_tmp" "$target_file"; then
+    new_hash="$(sha256_file "$target_file")"
+    if [[ "$new_hash" == "$source_hash" ]]; then
+      SECURITY_SETTINGS_SYNCED_COUNT=$((SECURITY_SETTINGS_SYNCED_COUNT + 1))
+      jq -cn --arg repo "$repo" --arg target "$target_file" --arg prior_hash "$target_hash" --arg new_hash "$new_hash" --arg backup_path "$backup_path" \
+        '{repo:$repo,target:$target,status:"synced",prior_hash:$prior_hash,new_hash:$new_hash,backup_path:($backup_path // empty),blocked_by:null}' >>"$SECURITY_SETTINGS_DETAILS_FILE"
+      jq -cn --arg path "$target_file" --arg action "merge_security_settings_deny" '{path:$path,action:$action}' >>"$WRITES_FILE"
+    else
+      ERROR_COUNT=$((ERROR_COUNT + 1))
+      jq -cn --arg repo "$repo" --arg target "$target_file" --arg code "security_settings_hash_mismatch" \
+        '{repo:$repo,target:$target,status:"error",code:$code,message:"security settings hash did not match rendered source after write"}' >>"$ERRORS_FILE"
+    fi
+  else
+    rm -f "$rendered_tmp" 2>/dev/null || true
+    ERROR_COUNT=$((ERROR_COUNT + 1))
+    jq -cn --arg repo "$repo" --arg target "$target_file" --arg code "security_settings_move_failed" \
+      '{repo:$repo,target:$target,status:"error",code:$code,message:"failed to move security settings into place"}' >>"$ERRORS_FILE"
+  fi
+}
+
 collect_targets() {
   local target_tmp="$1" root repo_path
   : >"$target_tmp"
@@ -292,6 +446,7 @@ STORAGE_OVERRIDE_SCHEMA_SOURCE="$(canonicalize_file "$STORAGE_OVERRIDE_SCHEMA_SO
 IDENTITY_DEFERRAL_SCHEMA_SOURCE="$(canonicalize_file "$IDENTITY_DEFERRAL_SCHEMA_SOURCE")"
 BEAD_QUALITY_MINING_SOURCE="$(canonicalize_file "$BEAD_QUALITY_MINING_SOURCE")"
 ORCH_VALIDATION_SKILL_SOURCE="$(canonicalize_file "$ORCH_VALIDATION_SKILL_SOURCE")"
+SECURITY_SETTINGS_DENY_SOURCE="$(canonicalize_file "$SECURITY_SETTINGS_DENY_SOURCE")"
 if [[ ! -f "$SOURCE" ]]; then
   if [[ "$JSON_OUT" -eq 1 ]]; then
     jq -nc --arg source "$SOURCE" '{mode:"error",status:"error",source:$source,errors:[{code:"source_missing",message:"canonical source is missing",path:$source}]}'
@@ -308,8 +463,9 @@ ROOT_DETAILS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-root-details.XXXXXX"
 WRITES_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-writes.XXXXXX")"
 ERRORS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-errors.XXXXXX")"
 MANAGED_DETAILS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-managed-details.XXXXXX")"
+SECURITY_SETTINGS_DETAILS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-security-settings.XXXXXX")"
 SOURCE_RULES_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-source-rules.XXXXXX")"
-trap 'rm -f "$TARGETS_FILE" "$REPOS_FILE" "$DETAILS_FILE" "$ROOT_DETAILS_FILE" "$WRITES_FILE" "$ERRORS_FILE" "$MANAGED_DETAILS_FILE" "$SOURCE_RULES_FILE"' EXIT
+trap 'rm -f "$TARGETS_FILE" "$REPOS_FILE" "$DETAILS_FILE" "$ROOT_DETAILS_FILE" "$WRITES_FILE" "$ERRORS_FILE" "$MANAGED_DETAILS_FILE" "$SECURITY_SETTINGS_DETAILS_FILE" "$SOURCE_RULES_FILE"' EXIT
 
 collect_targets "$TARGETS_FILE"
 : >"$DETAILS_FILE"
@@ -317,6 +473,7 @@ collect_targets "$TARGETS_FILE"
 : >"$WRITES_FILE"
 : >"$ERRORS_FILE"
 : >"$MANAGED_DETAILS_FILE"
+: >"$SECURITY_SETTINGS_DETAILS_FILE"
 : >"$REPOS_FILE"
 extract_l_rules "$SOURCE" >"$SOURCE_RULES_FILE"
 
@@ -349,11 +506,16 @@ BEAD_MINING_SYNCED_COUNT=0
 MANAGED_FILE_TARGET_COUNT=0
 MANAGED_FILE_DRIFTED_COUNT=0
 MANAGED_FILE_SYNCED_COUNT=0
+SECURITY_SETTINGS_TARGET_COUNT=0
+SECURITY_SETTINGS_DRIFTED_COUNT=0
+SECURITY_SETTINGS_SYNCED_COUNT=0
+SECURITY_SETTINGS_BLOCKED_COUNT=0
 ERROR_COUNT=0
 SCHEMA_SOURCE_HASH="$(sha256_file "$STORAGE_OVERRIDE_SCHEMA_SOURCE")"
 IDENTITY_DEFERRAL_SCHEMA_HASH="$(sha256_file "$IDENTITY_DEFERRAL_SCHEMA_SOURCE")"
 BEAD_QUALITY_MINING_HASH="$(sha256_file "$BEAD_QUALITY_MINING_SOURCE")"
 ORCH_VALIDATION_SKILL_HASH="$(sha256_file "$ORCH_VALIDATION_SKILL_SOURCE")"
+SECURITY_SETTINGS_DENY_HASH="$(sha256_file "$SECURITY_SETTINGS_DENY_SOURCE")"
 
 while IFS= read -r target; do
   [[ -n "$target" ]] || continue
@@ -599,6 +761,11 @@ fi
 
 while IFS= read -r repo; do
   [[ -n "$repo" ]] || continue
+  sync_security_settings_for_repo "$repo"
+done <"$REPOS_FILE"
+
+while IFS= read -r repo; do
+  [[ -n "$repo" ]] || continue
   if [[ -d "$DOCTRINE_DOCS_SOURCE_DIR" ]]; then
     for doctrine_source in "$DOCTRINE_DOCS_SOURCE_DIR"/*.md; do
       [[ -f "$doctrine_source" ]] || continue
@@ -621,8 +788,8 @@ while IFS= read -r repo; do
   fi
 done <"$REPOS_FILE"
 
-DRIFTED_COUNT=$((CANONICAL_DRIFTED_COUNT + ROOT_DRIFTED_COUNT + SCHEMA_DRIFTED_COUNT + IDENTITY_DEFERRAL_SCHEMA_DRIFTED_COUNT + BEAD_MINING_DRIFTED_COUNT + MANAGED_FILE_DRIFTED_COUNT))
-SYNCED_COUNT=$((CANONICAL_SYNCED_COUNT + ROOT_SYNCED_COUNT + SCHEMA_SYNCED_COUNT + IDENTITY_DEFERRAL_SCHEMA_SYNCED_COUNT + BEAD_MINING_SYNCED_COUNT + MANAGED_FILE_SYNCED_COUNT))
+DRIFTED_COUNT=$((CANONICAL_DRIFTED_COUNT + ROOT_DRIFTED_COUNT + SCHEMA_DRIFTED_COUNT + IDENTITY_DEFERRAL_SCHEMA_DRIFTED_COUNT + BEAD_MINING_DRIFTED_COUNT + SECURITY_SETTINGS_DRIFTED_COUNT + MANAGED_FILE_DRIFTED_COUNT))
+SYNCED_COUNT=$((CANONICAL_SYNCED_COUNT + ROOT_SYNCED_COUNT + SCHEMA_SYNCED_COUNT + IDENTITY_DEFERRAL_SCHEMA_SYNCED_COUNT + BEAD_MINING_SYNCED_COUNT + SECURITY_SETTINGS_SYNCED_COUNT + MANAGED_FILE_SYNCED_COUNT))
 
 STATUS="ok"
 if [[ "$ERROR_COUNT" -gt 0 ]]; then
@@ -637,6 +804,29 @@ WRITES="$(jq -s -c '.' "$WRITES_FILE")"
 ERRORS="$(jq -s -c '.' "$ERRORS_FILE")"
 TARGETS="$(json_string_array_from_file "$TARGETS_FILE")"
 REPOS="$(json_string_array_from_file "$REPOS_FILE")"
+SECURITY_SETTINGS_DETAILS="$(jq -s -c '.' "$SECURITY_SETTINGS_DETAILS_FILE")"
+SECURITY_ROLLOUT_RECEIPT="$(jq -nc \
+  --arg schema_version "security-settings-rollout/v1" \
+  --arg ts "$SYNC_TS" \
+  --arg scope "sandbox" \
+  --arg source "$SECURITY_SETTINGS_DENY_SOURCE" \
+  --arg source_hash "$SECURITY_SETTINGS_DENY_HASH" \
+  --arg rollback_restore_pattern ".claude/settings.json.bak.<UTC_TIMESTAMP>" \
+  --arg rollback_guard "restore_backup_before_retry" \
+  --argjson targets "$SECURITY_SETTINGS_DETAILS" \
+  '{
+    schema_version:$schema_version,
+    ts:$ts,
+    scope:{env:$scope},
+    source:{path:$source,sha256:$source_hash},
+    targets:$targets,
+    rollback_guard:{
+      restore_pattern:$rollback_restore_pattern,
+      guard:$rollback_guard,
+      blocked_target_action:"do_not_overwrite_without_manual_restore"
+    },
+    token_shaped_values:false
+  }')"
 RESULT="$(jq -nc \
   --arg ts "$SYNC_TS" \
   --arg mode "$MODE" \
@@ -667,6 +857,14 @@ RESULT="$(jq -nc \
   --argjson bead_quality_mining_target_count "$BEAD_MINING_TARGET_COUNT" \
   --argjson bead_quality_mining_drifted_count "$BEAD_MINING_DRIFTED_COUNT" \
   --argjson bead_quality_mining_synced_count "$BEAD_MINING_SYNCED_COUNT" \
+  --arg security_settings_deny_source "$SECURITY_SETTINGS_DENY_SOURCE" \
+  --arg security_settings_deny_hash "$SECURITY_SETTINGS_DENY_HASH" \
+  --argjson security_settings_target_count "$SECURITY_SETTINGS_TARGET_COUNT" \
+  --argjson security_settings_drifted_count "$SECURITY_SETTINGS_DRIFTED_COUNT" \
+  --argjson security_settings_synced_count "$SECURITY_SETTINGS_SYNCED_COUNT" \
+  --argjson security_settings_blocked_count "$SECURITY_SETTINGS_BLOCKED_COUNT" \
+  --argjson security_settings_details "$SECURITY_SETTINGS_DETAILS" \
+  --argjson security_rollout_receipt "$SECURITY_ROLLOUT_RECEIPT" \
   --arg doctrine_docs_source_dir "$DOCTRINE_DOCS_SOURCE_DIR" \
   --arg shared_script_source_dir "$SHARED_SCRIPT_SOURCE_DIR" \
   --arg shared_script_allowlist "$SHARED_SCRIPT_ALLOWLIST" \
@@ -714,6 +912,30 @@ RESULT="$(jq -nc \
     bead_quality_mining_target_count:$bead_quality_mining_target_count,
     bead_quality_mining_drifted_count:$bead_quality_mining_drifted_count,
     bead_quality_mining_synced_count:$bead_quality_mining_synced_count,
+    security_settings_deny_source:$security_settings_deny_source,
+    security_settings_deny_hash:$security_settings_deny_hash,
+    security_settings_target_count:$security_settings_target_count,
+    security_settings_drifted_count:$security_settings_drifted_count,
+    security_settings_synced_count:$security_settings_synced_count,
+    security_settings_blocked_count:$security_settings_blocked_count,
+    security_settings_drift:{
+      target_count:$security_settings_target_count,
+      drifted_count:$security_settings_drifted_count,
+      synced_count:$security_settings_synced_count,
+      blocked_count:$security_settings_blocked_count
+    },
+    security:{
+      settings_deny:{
+        source:$security_settings_deny_source,
+        source_hash:$security_settings_deny_hash,
+        target_count:$security_settings_target_count,
+        drifted_count:$security_settings_drifted_count,
+        synced_count:$security_settings_synced_count,
+        blocked_count:$security_settings_blocked_count,
+        details:$security_settings_details
+      },
+      rollout_receipt:$security_rollout_receipt
+    },
     doctrine_docs_source_dir:$doctrine_docs_source_dir,
     shared_script_source_dir:$shared_script_source_dir,
     shared_script_allowlist:$shared_script_allowlist,
