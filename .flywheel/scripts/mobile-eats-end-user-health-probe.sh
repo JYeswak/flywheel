@@ -1,0 +1,307 @@
+#!/usr/bin/env bash
+# mobile-eats-end-user-health-probe.sh — smallest recurring measurement
+# for value-gap dimension `mobile-eats-end-user-health` (#6 of 10 in
+# `.flywheel/scripts/value-gap-probe.sh:DIMENSIONS[]`).
+#
+# Owns: bead flywheel-1rmp.7. Sister: flywheel-1rmp.5 (cost-telemetry-token-burn,
+# closed); same shape: proxy metrics + explicit no-surface receipt.
+#
+# What this measures (proxy-only — production database is not exposed
+# via flywheel substrate today):
+#   - artifact presence + freshness for the SaaS KPI surface
+#     (saas-kpi-strip.ts, saas-metrics.ts, mrr-rollup.ts,
+#     community-health-metrics.ts) and their tests
+#   - mtime-as-freshness proxy (newest-source-edit per surface)
+#   - test coverage proxy (each KPI source has a paired *.test.ts)
+#
+# Step 4o anti-pattern guardrail: this probe SURFACES the gap; it does
+# NOT auto-create beads or dispatch fixes. Parent value-gap-probe.sh
+# enforces that contract.
+#
+# Stable exit codes: 0 ok | 1 domain | 64 usage
+# Triad: doctor / info / schema; --json default for robot consumers.
+
+set -uo pipefail
+
+VERSION="mobile-eats-end-user-health-probe.v1"
+SCRIPT_VERSION="2026-05-09.1"
+
+REPO="${MOBILE_EATS_REPO:-/Users/josh/Developer/mobile-eats}"
+LEDGER="${MOBILE_EATS_HEALTH_LEDGER:-$HOME/.local/state/flywheel/mobile-eats-end-user-health.jsonl}"
+HOURS_FRESHNESS_BUDGET="${MOBILE_EATS_HEALTH_FRESHNESS_HOURS:-72}"
+
+KPI_SURFACES=(
+  "next-app/lib/mobile-eats/saas-kpi-strip.ts"
+  "next-app/lib/mobile-eats/saas-metrics.ts"
+  "next-app/lib/mobile-eats/mrr-rollup.ts"
+  "next-app/lib/mobile-eats/community-health-metrics.ts"
+)
+KPI_TESTS=(
+  "next-app/lib/mobile-eats/saas-kpi-strip.test.ts"
+  "next-app/lib/mobile-eats/saas-metrics.test.ts"
+  "next-app/lib/mobile-eats/community-health-metrics.test.ts"
+)
+
+JSON_OUT=0
+MODE="run"
+APPLY=0
+DRY_RUN=0
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  mobile-eats-end-user-health-probe.sh [--apply|--dry-run] [--json]
+  mobile-eats-end-user-health-probe.sh --doctor [--json]
+  mobile-eats-end-user-health-probe.sh --info [--json]
+  mobile-eats-end-user-health-probe.sh --schema [--json]
+  mobile-eats-end-user-health-probe.sh --help
+
+Smallest recurring measurement for the value-gap-hunter dimension
+"mobile-eats-end-user-health" (Meadows #8 information flow). Probes
+artifact presence + mtime freshness for SaaS-tier KPI sources;
+emits explicit no-surface receipt for first-party DB-backed user
+health telemetry.
+USAGE
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --json) JSON_OUT=1; shift ;;
+    --apply) APPLY=1; DRY_RUN=0; shift ;;
+    --dry-run) DRY_RUN=1; APPLY=0; shift ;;
+    --repo) REPO="${2:?}"; shift 2 ;;
+    --ledger) LEDGER="${2:?}"; shift 2 ;;
+    --doctor) MODE="doctor"; shift ;;
+    --info) MODE="info"; shift ;;
+    --schema) MODE="schema"; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "mobile-eats-end-user-health-probe.sh: unknown arg: $1" >&2; usage >&2; exit 64 ;;
+  esac
+done
+
+if [[ $MODE == "run" && $APPLY -eq 0 && $DRY_RUN -eq 0 ]]; then
+  DRY_RUN=1
+fi
+
+now_iso() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+emit() {
+  if [[ $JSON_OUT -eq 1 || $MODE == "info" || $MODE == "schema" || $MODE == "doctor" ]]; then
+    printf '%s\n' "$1"
+  fi
+}
+
+info_payload() {
+  jq -nc \
+    --arg version "$VERSION" \
+    --arg script_version "$SCRIPT_VERSION" \
+    --arg repo "$REPO" \
+    --arg ledger "$LEDGER" \
+    --argjson freshness_hours "$HOURS_FRESHNESS_BUDGET" \
+    --argjson surfaces "$(printf '%s\n' "${KPI_SURFACES[@]}" | jq -R . | jq -s .)" \
+    --argjson tests "$(printf '%s\n' "${KPI_TESTS[@]}" | jq -R . | jq -s .)" \
+    '{
+      version: $version,
+      script_version: $script_version,
+      schema_version: "mobile-eats-end-user-health/v1",
+      mode: "info",
+      mobile_eats_repo: $repo,
+      ledger: $ledger,
+      kpi_surfaces: $surfaces,
+      kpi_tests: $tests,
+      freshness_budget_hours: $freshness_hours,
+      modes: ["run","doctor","info","schema"],
+      owns: "flywheel-1rmp.7",
+      parent: "flywheel-1rmp",
+      value_gap_dimension: "mobile-eats-end-user-health",
+      meadows_tier: "#8 information flow",
+      first_party_user_health: "no_db_surface_yet",
+      first_party_no_surface_reason: "Mobile-eats production database (Postgres via Supabase / Railway) is not exposed via flywheel substrate; KPIs (MRR/ARR/paying-owners/trial-to-paid/churn-30d, community-health) are server-rendered for Joshua admin pages but no flywheel-readable JSON snapshot exists. The smallest recurring measurement is artifact-presence + mtime freshness against KPI source files until the app exports a thin flywheel-snapshot endpoint.",
+      step_4o_anti_pattern_guardrail: "this probe surfaces; it does NOT auto-dispatch fixes",
+      status: "ok"
+    }'
+}
+
+schema_payload() {
+  jq -nc '{
+    schema_version: "mobile-eats-end-user-health/v1",
+    ledger_row_required_fields: [
+      "schema_version","ts","repo","kpi_surfaces_present_count",
+      "kpi_surfaces_total","kpi_tests_present_count","kpi_tests_total",
+      "newest_kpi_source_mtime","newest_kpi_source_path",
+      "freshness_age_hours","freshness_budget_hours","freshness_status",
+      "actual_user_health","actual_user_health_no_surface_reason",
+      "kpi_surfaces","kpi_tests"
+    ],
+    proxy_metrics: [
+      {"name":"kpi_surfaces_present_count","describes":"count of present KPI source TS files in the canonical 4-surface set"},
+      {"name":"kpi_tests_present_count","describes":"count of paired *.test.ts files in the canonical 3-test set"},
+      {"name":"freshness_age_hours","describes":"hours since newest mtime across KPI sources"},
+      {"name":"freshness_status","describes":"fresh|stale verdict against freshness_budget_hours (default 72h)"}
+    ],
+    actual_user_health: {
+      type: "string",
+      enum: ["no_db_surface_yet","computed","partial"],
+      no_surface_explanation: "Production DB not exposed via flywheel substrate; first-party MRR/ARR/churn telemetry is server-rendered to Joshua admin pages but not snapshot-export to a flywheel-readable JSON path."
+    },
+    surfaced_via: ["ledger:~/.local/state/flywheel/mobile-eats-end-user-health.jsonl","cli:mobile-eats-end-user-health-probe.sh","value-gap-probe parent ledger"],
+    exit_codes: {"0":"ok","1":"domain","64":"usage"},
+    mode: "schema",
+    status: "ok"
+  }'
+}
+
+doctor_payload() {
+  local issues=()
+  command -v jq >/dev/null 2>&1 || issues+=("jq_missing")
+  [[ -d "$REPO" ]] || issues+=("repo_missing=$REPO")
+  mkdir -p "$(dirname "$LEDGER")" 2>/dev/null
+  [[ -w "$(dirname "$LEDGER")" ]] || issues+=("ledger_dir_not_writable=$(dirname "$LEDGER")")
+  local issues_json
+  if [[ ${#issues[@]} -gt 0 ]]; then
+    issues_json=$(printf '%s\n' "${issues[@]}" | jq -R . | jq -s .)
+  else
+    issues_json='[]'
+  fi
+  jq -nc \
+    --arg version "$VERSION" \
+    --argjson issues "$issues_json" \
+    '{
+      version: $version,
+      schema_version: "mobile-eats-end-user-health/v1",
+      mode: "doctor",
+      issues: $issues,
+      status: (if ($issues|length)==0 then "ok" else "degraded" end)
+    }'
+}
+
+# --- core measurement ---------------------------------------------------------
+mtime_iso() {
+  local p="$1"
+  if [[ -f "$p" ]]; then
+    stat -f '%Sm' -t '%Y-%m-%dT%H:%M:%SZ' "$p" 2>/dev/null
+  fi
+}
+
+mtime_epoch() {
+  local p="$1"
+  if [[ -f "$p" ]]; then
+    stat -f '%m' "$p" 2>/dev/null
+  fi
+}
+
+run_pass() {
+  local mode_label="$1"
+  local now_epoch
+  now_epoch=$(date -u +%s)
+
+  local present_surfaces=0 total_surfaces=${#KPI_SURFACES[@]}
+  local present_tests=0 total_tests=${#KPI_TESTS[@]}
+  local newest_mtime=0 newest_path="" newest_iso=""
+  local surfaces_json='[]' tests_json='[]'
+
+  for rel in "${KPI_SURFACES[@]}"; do
+    local abs="$REPO/$rel"
+    local present="false"
+    local mt_iso="" mt_ep=0
+    if [[ -f "$abs" ]]; then
+      present="true"
+      present_surfaces=$((present_surfaces+1))
+      mt_iso=$(mtime_iso "$abs")
+      mt_ep=$(mtime_epoch "$abs")
+      if (( mt_ep > newest_mtime )); then
+        newest_mtime=$mt_ep
+        newest_path="$rel"
+        newest_iso="$mt_iso"
+      fi
+    fi
+    surfaces_json=$(jq -c \
+      --arg rel "$rel" --arg abs "$abs" --arg present "$present" \
+      --arg mt "$mt_iso" \
+      '. + [{path: $rel, abs: $abs, present: ($present == "true"), mtime: (if $mt == "" then null else $mt end)}]' \
+      <<<"$surfaces_json")
+  done
+
+  for rel in "${KPI_TESTS[@]}"; do
+    local abs="$REPO/$rel"
+    local present="false"
+    local mt_iso=""
+    if [[ -f "$abs" ]]; then
+      present="true"
+      present_tests=$((present_tests+1))
+      mt_iso=$(mtime_iso "$abs")
+    fi
+    tests_json=$(jq -c \
+      --arg rel "$rel" --arg present "$present" --arg mt "$mt_iso" \
+      '. + [{path: $rel, present: ($present == "true"), mtime: (if $mt == "" then null else $mt end)}]' \
+      <<<"$tests_json")
+  done
+
+  local age_hours=999999 status_label="stale"
+  if (( newest_mtime > 0 )); then
+    age_hours=$(( (now_epoch - newest_mtime) / 3600 ))
+    if (( age_hours <= HOURS_FRESHNESS_BUDGET )); then
+      status_label="fresh"
+    fi
+  fi
+
+  local row
+  row=$(jq -nc \
+    --arg ts "$(now_iso)" \
+    --arg repo "$REPO" \
+    --argjson present_surfaces "$present_surfaces" \
+    --argjson total_surfaces "$total_surfaces" \
+    --argjson present_tests "$present_tests" \
+    --argjson total_tests "$total_tests" \
+    --arg newest_mtime "$newest_iso" \
+    --arg newest_path "$newest_path" \
+    --argjson age_hours "$age_hours" \
+    --argjson budget "$HOURS_FRESHNESS_BUDGET" \
+    --arg status "$status_label" \
+    --argjson surfaces "$surfaces_json" \
+    --argjson tests "$tests_json" \
+    '{
+      schema_version: "mobile-eats-end-user-health/v1",
+      ts: $ts,
+      repo: $repo,
+      kpi_surfaces_present_count: $present_surfaces,
+      kpi_surfaces_total: $total_surfaces,
+      kpi_tests_present_count: $present_tests,
+      kpi_tests_total: $total_tests,
+      newest_kpi_source_mtime: (if $newest_mtime == "" then null else $newest_mtime end),
+      newest_kpi_source_path: (if $newest_path == "" then null else $newest_path end),
+      freshness_age_hours: $age_hours,
+      freshness_budget_hours: $budget,
+      freshness_status: $status,
+      actual_user_health: "no_db_surface_yet",
+      actual_user_health_no_surface_reason: "Mobile-eats production DB (Postgres via Supabase/Railway) is not exposed via flywheel substrate; KPIs are server-rendered for Joshua admin pages but no flywheel-readable JSON snapshot exists. Smallest recurring proxy is artifact presence + mtime freshness against KPI source files; first-party DB telemetry wireup is a separate value-gap-followup bead under parent flywheel-1rmp.",
+      kpi_surfaces: $surfaces,
+      kpi_tests: $tests
+    }')
+
+  if [[ "$mode_label" == "apply" ]]; then
+    mkdir -p "$(dirname "$LEDGER")" 2>/dev/null
+    printf '%s\n' "$row" >> "$LEDGER" 2>/dev/null
+  fi
+
+  emit "$(printf '%s' "$row" | jq -c \
+    --arg mode "$mode_label" --arg ledger "$LEDGER" \
+    '{mode:$mode, ledger:$ledger} + .')"
+  return 0
+}
+
+case "$MODE" in
+  info)   emit "$(info_payload)"; exit 0 ;;
+  schema) emit "$(schema_payload)"; exit 0 ;;
+  doctor)
+    payload="$(doctor_payload)"
+    emit "$payload"
+    [[ "$(printf '%s' "$payload" | jq -r .status)" == "ok" ]] && exit 0 || exit 1
+    ;;
+esac
+
+if [[ $DRY_RUN -eq 1 ]]; then
+  run_pass dry-run
+  exit $?
+fi
+run_pass apply
+exit $?
