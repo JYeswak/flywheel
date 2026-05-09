@@ -1,183 +1,105 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -u
 
-VERSION="worker-callback-delivery.v1"
-NTM="${NTM:-/Users/josh/.local/bin/ntm}"
-SESSION=""
-PANE=""
-TASK_ID=""
-MESSAGE=""
-MESSAGE_FILE=""
-RETRIES="${VERIFY_CALLBACK_RETRIES:-3}"
-WAIT_SECONDS="${VERIFY_CALLBACK_WAIT_SECONDS:-3}"
-JSON=0
-SEND=1
-FAILED_PATH=""
+VERSION="worker-callback-delivery.v3"; NTM="${NTM:-/Users/josh/.local/bin/ntm}"
+SESSION="flywheel"; PANE="1"; TASK_ID=""; MESSAGE=""; MESSAGE_FILE=""
+RETRIES=6; WAIT_SECONDS=1; JSON=0; SEND=1; FAILED_PATH=""
+SPOOL_DIR="${FLYWHEEL_CALLBACK_SPOOL_DIR:-$HOME/.local/state/flywheel/callback-spool}"
+SPOOL_PATH=""
 
-usage() {
-  printf '%s\n' "Usage: verify-callback-delivery.sh --session S --pane N --task-id ID (--message TEXT|--message-file PATH) [--json] [--no-send] [--retries N] [--wait-seconds N] [--ntm PATH]"
+usage(){ cat <<'USAGE'
+Usage: verify-callback-delivery.sh --task-id ID (--message TEXT|--message-file PATH) [--json] [--no-send]
+Options: --session NAME --pane N --retries N --wait-seconds N --failed-path PATH --ntm PATH
+         --spool-dir PATH (default: $HOME/.local/state/flywheel/callback-spool)
+         --schema --examples --info --help
+Failure classes: ntm_send_failed, pane_not_in_input_mode, pane_disappeared, callback_not_observed
+On pane_not_in_input_mode the callback body is spooled to <spool-dir>/<session>/<task-id>.json
+for callback-spool-reap.sh to retry once the pane is back in input mode.
+USAGE
 }
-
-examples() {
-  printf '%s\n' "Examples:"
-  printf '%s\n' "  .flywheel/scripts/verify-callback-delivery.sh --session flywheel --pane 1 --task-id abc --message 'DONE abc evidence=/tmp/e.md callback_delivery_verified=pending' --json"
-  printf '%s\n' "  .flywheel/scripts/verify-callback-delivery.sh --session flywheel --pane 1 --task-id abc --message-file /tmp/callback.txt --json"
-}
-
-schema() {
-  jq -nc --arg version "$VERSION" '{
-    schema:"flywheel.worker_callback_delivery.v1",
-    version:$version,
-    required_args:["session","pane","task_id","message|message_file"],
-    output_fields:["status","callback_delivery_verified","attempts","failure_class","verify_method","failed_path"],
-    exit_codes:{"0":"verified","1":"not_verified","2":"usage"}
-  }'
-}
-
-info() {
-  jq -nc --arg version "$VERSION" --arg ntm "$NTM" --arg retries "$RETRIES" --arg wait "$WAIT_SECONDS" \
-    '{version:$version,ntm:$ntm,default_retries:($retries|tonumber),default_wait_seconds:($wait|tonumber)}'
-}
-
-json_string() {
-  jq -Rn --arg value "$1" '$value'
-}
-
-load_message() {
-  if [[ -n "$MESSAGE_FILE" ]]; then
-    [[ -f "$MESSAGE_FILE" ]] || { echo "ERR: message file missing: $MESSAGE_FILE" >&2; exit 2; }
-    MESSAGE="$(cat "$MESSAGE_FILE")"
+jesc(){ python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))'; }
+emit(){
+  if [[ "$JSON" == 1 ]]; then
+    printf '{"schema_version":"%s","status":"%s","callback_delivery_verified":%s,"attempts":%s,"failure_class":"%s","verify_method":"%s","failed_path":%s,"spool_path":%s}\n' "$VERSION" "$1" "$2" "$3" "$4" "$5" "$(printf '%s' "$6" | jesc)" "$(printf '%s' "${SPOOL_PATH:-}" | jesc)"
+  else
+    printf '%s callback_delivery_verified=%s attempts=%s failure_class=%s verify_method=%s failed_path=%s spool_path=%s\n' "$1" "$2" "$3" "$4" "$5" "$6" "${SPOOL_PATH:-}"
   fi
-  [[ -n "$MESSAGE" ]] || { echo "ERR: --message or --message-file required" >&2; exit 2; }
 }
 
-verify_in_text() {
-  local text="$1"
-  [[ "$text" == *"$TASK_ID"* ]] || return 1
-  if [[ "$MESSAGE" == *"DONE"* && "$text" != *"DONE"* ]]; then
-    return 1
+write_spool(){
+  local cls="$1" err="$2" sp now
+  mkdir -p "$SPOOL_DIR/$SESSION" 2>/dev/null || return 0
+  sp="$SPOOL_DIR/$SESSION/$TASK_ID.json"
+  now="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  if command -v jq >/dev/null 2>&1; then
+    jq -n --arg schema_version "callback-spool/v1" \
+          --arg ts "$now" --arg session "$SESSION" --arg pane "$PANE" \
+          --arg task_id "$TASK_ID" --arg failure_class "$cls" \
+          --arg send_stderr "$err" --arg message "$MESSAGE" \
+          '{schema_version:$schema_version,ts:$ts,session:$session,pane:$pane,task_id:$task_id,failure_class:$failure_class,send_stderr:$send_stderr,message:$message,status:"pending",attempts:0}' >"$sp" 2>/dev/null || return 0
+  else
+    {
+      printf '{"schema_version":"callback-spool/v1","ts":"%s","session":"%s","pane":"%s","task_id":"%s","failure_class":"%s","status":"pending","attempts":0,"message":' "$now" "$SESSION" "$PANE" "$TASK_ID" "$cls"
+      printf '%s' "$MESSAGE" | jesc
+      printf ',"send_stderr":'
+      printf '%s' "$err" | jesc
+      printf '}\n'
+    } >"$sp"
   fi
-  if [[ "$MESSAGE" == *"BLOCKED"* && "$text" != *"BLOCKED"* ]]; then
-    return 1
-  fi
-  return 0
+  SPOOL_PATH="$sp"
 }
 
-ntm_logs_text() {
-  "$NTM" logs "$SESSION" --panes="$PANE" 2>/dev/null || true
-}
+while [[ $# -gt 0 ]]; do case "$1" in
+  --session) SESSION="$2"; shift 2;; --pane) PANE="$2"; shift 2;;
+  --task-id) TASK_ID="$2"; shift 2;; --message) MESSAGE="$2"; shift 2;;
+  --message-file) MESSAGE_FILE="$2"; shift 2;; --retries) RETRIES="$2"; shift 2;;
+  --wait-seconds) WAIT_SECONDS="$2"; shift 2;; --failed-path) FAILED_PATH="$2"; shift 2;;
+  --spool-dir) SPOOL_DIR="$2"; shift 2;;
+  --ntm) NTM="$2"; shift 2;; --no-send) SEND=0; shift;; --json) JSON=1; shift;;
+  --schema) printf '{"schema_version":"%s","fields":["status","callback_delivery_verified","attempts","failure_class","verify_method","failed_path","spool_path"]}\n' "$VERSION"; exit 0;;
+  --examples|--help|-h) usage; exit 0;; --info) printf 'verify-callback-delivery %s uses ntm history --json; spools to %s on pane_not_in_input_mode\n' "$VERSION" "$SPOOL_DIR"; exit 0;;
+  *) echo "unknown argument: $1" >&2; usage >&2; exit 2;;
+esac; done
 
-ntm_copy_text() {
-  local out="$1"
-  "$NTM" copy "$SESSION:$PANE" -l 40 --redact redact --output "$out" --quiet 2>/dev/null || return 1
-  cat "$out"
-}
+[[ -n "$MESSAGE_FILE" ]] && MESSAGE="$(cat "$MESSAGE_FILE")"
+[[ -z "$TASK_ID" || -z "$MESSAGE" ]] && { usage >&2; exit 2; }
+[[ -z "$FAILED_PATH" ]] && FAILED_PATH="/tmp/${TASK_ID}-callback-failed.md"
 
-send_callback() {
-  "$NTM" send "$SESSION" --pane="$PANE" --no-cass-check "$MESSAGE" >/dev/null 2>/dev/null
+token(){
+  case "$MESSAGE" in *DONE*) printf DONE;; *BLOCKED*) printf BLOCKED;; *DECLINED*) printf DECLINED;; *) printf '%s' "$TASK_ID";; esac
 }
-
-write_failure() {
-  local reason="$1" logs="$2" copy_file="$3"
-  FAILED_PATH="${FAILED_PATH:-/tmp/${TASK_ID}-callback-failed.md}"
+history_json(){ "$NTM" history "$SESSION" --json 2>/dev/null || "$NTM" history --json 2>/dev/null; }
+matches(){ local want; want="$(token)"; [[ "$1" == *"$TASK_ID"* && "$1" == *"$want"* ]]; }
+fail_artifact(){
   {
-    printf '# Callback Delivery Verification Failed\n\n'
-    printf 'task_id: %s\n' "$TASK_ID"
-    printf 'session: %s\n' "$SESSION"
-    printf 'pane: %s\n' "$PANE"
-    printf 'failure_class: %s\n' "$reason"
-    printf 'attempts: %s\n' "$RETRIES"
-    printf 'callback_delivery_verified: false\n\n'
-    printf '## Callback Message SHA256\n\n'
-    printf '%s' "$MESSAGE" | shasum -a 256 | awk '{print $1}'
-    printf '\n\n## Logs Probe\n\n```text\n%s\n```\n\n' "$logs"
-    if [[ -f "$copy_file" ]]; then
-      printf '## Copy Probe\n\n```text\n'
-      cat "$copy_file"
-      printf '\n```\n'
-    fi
+    printf '# Callback delivery verification failed\n\n'
+    printf -- '- task_id: %s\n- session: %s\n- pane: %s\n- failure_class: %s\n- attempts: %s\n- verify_method: ntm_history\n\n' "$TASK_ID" "$SESSION" "$PANE" "$1" "$2"
+    printf '## Expected callback\n\n```text\n%s\n```\n\n## ntm history --json probe\n\n```json\n%s\n```\n' "$MESSAGE" "$3"
   } >"$FAILED_PATH"
 }
 
-emit_result() {
-  local status="$1" verified="$2" attempts="$3" failure="$4" method="$5"
-  jq -nc \
-    --arg status "$status" \
-    --argjson verified "$verified" \
-    --argjson attempts "$attempts" \
-    --arg failure "$failure" \
-    --arg method "$method" \
-    --arg failed_path "$FAILED_PATH" \
-    '{status:$status,callback_delivery_verified:$verified,attempts:$attempts,failure_class:(if $failure == "" then null else $failure end),verify_method:(if $method == "" then null else $method end),failed_path:(if $failed_path == "" then null else $failed_path end)}'
-}
-
-verify_delivery() {
-  local attempt logs copy_file copy_text send_rc=0
-  copy_file="/tmp/${TASK_ID}-callback-verify.txt"
-  for attempt in $(seq 1 "$RETRIES"); do
-    if [[ "$SEND" -eq 1 ]]; then
-      send_callback || send_rc=$?
-      if [[ "$send_rc" -ne 0 ]]; then
-        write_failure "ntm_send_failed" "" "$copy_file"
-        emit_result "fail" false "$attempt" "ntm_send_failed" ""
-        return 1
-      fi
+if [[ "$SEND" == 1 ]]; then
+  err_log="$(mktemp -t verify-callback-send-err.XXXXXX)"
+  if ! "$NTM" send "$SESSION" --pane="$PANE" --no-cass-check "$MESSAGE" >/dev/null 2>"$err_log"; then
+    err_text="$(cat "$err_log" 2>/dev/null || true)"
+    rm -f "$err_log"
+    if printf '%s' "$err_text" | grep -qiE 'not in a mode|pane.*(copy|view|visual).*mode|input mode unavailable'; then
+      cls="pane_not_in_input_mode"
+      write_spool "$cls" "$err_text"
+    else
+      cls="ntm_send_failed"
     fi
-    sleep "$WAIT_SECONDS"
-    logs="$(ntm_logs_text)"
-    if verify_in_text "$logs"; then
-      emit_result "pass" true "$attempt" "" "ntm_logs"
-      return 0
-    fi
-    if copy_text="$(ntm_copy_text "$copy_file")"; then
-      if verify_in_text "$copy_text"; then
-        emit_result "pass" true "$attempt" "" "ntm_copy"
-        return 0
-      fi
-    elif [[ "$attempt" -ge "$RETRIES" ]]; then
-      write_failure "pane_disappeared" "$logs" "$copy_file"
-      emit_result "fail" false "$attempt" "pane_disappeared" ""
-      return 1
-    fi
-  done
-  write_failure "callback_not_observed" "$(ntm_logs_text)" "$copy_file"
-  emit_result "fail" false "$RETRIES" "callback_not_observed" ""
-  return 1
-}
-
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --session) SESSION="${2:-}"; shift 2 ;;
-    --pane) PANE="${2:-}"; shift 2 ;;
-    --task-id) TASK_ID="${2:-}"; shift 2 ;;
-    --message) MESSAGE="${2:-}"; shift 2 ;;
-    --message-file) MESSAGE_FILE="${2:-}"; shift 2 ;;
-    --retries) RETRIES="${2:-}"; shift 2 ;;
-    --wait-seconds) WAIT_SECONDS="${2:-}"; shift 2 ;;
-    --failed-path) FAILED_PATH="${2:-}"; shift 2 ;;
-    --ntm) NTM="${2:-}"; shift 2 ;;
-    --no-send) SEND=0; shift ;;
-    --json) JSON=1; shift ;;
-    --help|-h) usage; exit 0 ;;
-    --examples) examples; exit 0 ;;
-    --schema) schema; exit 0 ;;
-    --info) info; exit 0 ;;
-    *) echo "ERR: unknown argument: $1" >&2; usage >&2; exit 2 ;;
-  esac
-done
-
-[[ -n "$SESSION" && -n "$PANE" && -n "$TASK_ID" ]] || { usage >&2; exit 2; }
-[[ "$RETRIES" =~ ^[0-9]+$ && "$RETRIES" -gt 0 ]] || { echo "ERR: --retries must be positive integer" >&2; exit 2; }
-[[ "$WAIT_SECONDS" =~ ^[0-9]+$ ]] || { echo "ERR: --wait-seconds must be integer" >&2; exit 2; }
-load_message
-
-set +e
-result="$(verify_delivery)"
-rc=$?
-set -e
-if [[ "$JSON" -eq 1 ]]; then
-  printf '%s\n' "$result"
-else
-  jq -r '"callback_delivery_verified=\(.callback_delivery_verified) status=\(.status) attempts=\(.attempts) failure_class=\(.failure_class // "none")"' <<<"$result"
+    fail_artifact "$cls" 1 "$err_text"
+    emit fail false 1 "$cls" ntm_history "$FAILED_PATH"; exit 1
+  fi
+  rm -f "$err_log"
 fi
-exit "$rc"
+
+last=""
+for ((i=1; i<=RETRIES; i++)); do
+  if ! last="$(history_json)"; then fail_artifact pane_disappeared "$i" ""; emit fail false "$i" pane_disappeared ntm_history "$FAILED_PATH"; exit 1; fi
+  if matches "$last"; then emit ok true "$i" none ntm_history ""; exit 0; fi
+  sleep "$WAIT_SECONDS"
+done
+fail_artifact callback_not_observed "$RETRIES" "$last"
+emit fail false "$RETRIES" callback_not_observed ntm_history "$FAILED_PATH"; exit 1

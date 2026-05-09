@@ -1,107 +1,110 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SCRIPT="$ROOT/.flywheel/scripts/verify-callback-delivery.sh"
-FIXTURES="$ROOT/tests/fixtures/verify-callback-delivery"
-TMP="$(mktemp -d "${TMPDIR:-/tmp}/verify-callback-delivery.XXXXXX")"
-trap 'rm -rf "$TMP"' EXIT
+TMP="$(mktemp -d)"
+trap 'find "$TMP" -mindepth 1 -delete; rmdir "$TMP"' EXIT
 
-pass_count=0
-fail_count=0
+FAKE_NTM="$TMP/ntm"
+STATE="$TMP/state"
+CALLS="$TMP/calls"
+MODE="${MODE:-success}"
+printf '0' >"$STATE"
+: >"$CALLS"
 
-pass() { printf 'PASS %s\n' "$1"; pass_count=$((pass_count + 1)); }
-fail() { printf 'FAIL %s\n' "$1"; fail_count=$((fail_count + 1)); }
+cat >"$FAKE_NTM" <<'NTM'
+#!/usr/bin/env bash
+set -euo pipefail
+echo "$*" >>"${CALLS:?}"
+cmd="${1:-}"; shift || true
+case "$cmd" in
+  send)
+    count="$(cat "${STATE:?}")"
+    printf '%s' "$((count + 1))" >"$STATE"
+    [[ "${MODE:-success}" == fts5 ]] && exit 1
+    if [[ "${MODE:-success}" == copy_mode ]]; then
+      printf 'ntm: pane %%1 is not in a mode that accepts input\n' >&2
+      exit 1
+    fi
+    exit 0
+    ;;
+  history)
+    [[ "${MODE:-success}" == pane ]] && exit 1
+    count="$(cat "${STATE:?}")"
+    case "${MODE:-success}" in
+      success)
+        cat <<JSON
+[{"session":"flywheel","pane":1,"text":"DONE task-success evidence=/tmp/task-success.md"}]
+JSON
+        ;;
+      queued)
+        cat <<JSON
+[{"session":"flywheel","pane":1,"text":"prompt queued only count=$count"}]
+JSON
+        ;;
+      *)
+        printf '[]\n'
+        ;;
+    esac
+    ;;
+  logs|copy)
+    echo "legacy scrollback command must not be used" >&2
+    exit 42
+    ;;
+  *)
+    echo "unexpected ntm command: $cmd" >&2
+    exit 64
+    ;;
+esac
+NTM
+chmod +x "$FAKE_NTM"
 
-make_fake_ntm() {
-  local mode="$1" ntm counter
-  ntm="$TMP/ntm-$mode"
-  counter="$TMP/send-count-$mode"
-  printf '0\n' >"$counter"
-  {
-    printf '%s\n' '#!/usr/bin/env bash'
-    printf '%s\n' 'set -euo pipefail'
-    printf 'MODE=%q\n' "$mode"
-    printf 'COUNTER=%q\n' "$counter"
-    printf '%s\n' 'if [[ "${1:-}" == "send" ]]; then'
-    printf '%s\n' '  n="$(cat "$COUNTER")"; n=$((n + 1)); printf "%s\n" "$n" >"$COUNTER"'
-    printf '%s\n' '  if [[ "$MODE" == "fts5" ]]; then printf "fts5: syntax error near quote\n" >&2; exit 1; fi'
-    printf '%s\n' '  printf "{\"success\":true}\n"; exit 0'
-    printf '%s\n' 'fi'
-    printf '%s\n' 'if [[ "${1:-}" == "logs" ]]; then'
-    printf '%s\n' '  if [[ "$MODE" == "success" ]]; then printf "orchestrator pane saw DONE task-success evidence=/tmp/task-success.md\n"; else printf "stale orchestrator text\n"; fi'
-    printf '%s\n' '  exit 0'
-    printf '%s\n' 'fi'
-    printf '%s\n' 'if [[ "${1:-}" == "copy" ]]; then'
-    printf '%s\n' '  out=""'
-    printf '%s\n' '  while [[ $# -gt 0 ]]; do if [[ "$1" == "--output" ]]; then out="$2"; shift 2; else shift; fi; done'
-    printf '%s\n' '  if [[ "$MODE" == "pane" ]]; then exit 1; fi'
-    printf '%s\n' '  if [[ "$MODE" == "success-copy" ]]; then printf "DONE task-success\n" >"$out"; else printf "old pane text\n" >"$out"; fi'
-    printf '%s\n' '  exit 0'
-    printf '%s\n' 'fi'
-    printf '%s\n' 'printf "{}\n"'
-  } >"$ntm"
-  chmod +x "$ntm"
-  printf '%s\n' "$ntm"
+SPOOL_DIR="$TMP/spool"
+
+run_json() {
+  MODE="$1" CALLS="$CALLS" STATE="$STATE" \
+    "$SCRIPT" --ntm "$FAKE_NTM" --task-id "$2" --message "$3" \
+      --retries 2 --wait-seconds 0 --spool-dir "$SPOOL_DIR" --json
 }
 
-run_case() {
-  local label="$1" mode="$2" task_id="$3" fixture="$4" expected_rc="$5" jq_filter="$6"
-  local ntm out rc=0 failed_path
-  ntm="$(make_fake_ntm "$mode")"
-  out="$TMP/$task_id.json"
-  failed_path="$TMP/$task_id-callback-failed.md"
-  "$SCRIPT" \
-    --session flywheel \
-    --pane 1 \
-    --task-id "$task_id" \
-    --message-file "$FIXTURES/$fixture" \
-    --ntm "$ntm" \
-    --retries 2 \
-    --wait-seconds 0 \
-    --failed-path "$failed_path" \
-    --json >"$out" || rc=$?
-  if [[ "$rc" == "$expected_rc" ]] && jq -e "$jq_filter" "$out" >/dev/null; then
-    pass "$label"
-  else
-    fail "$label"
-    printf 'rc=%s expected=%s\n' "$rc" "$expected_rc"
-    jq . "$out" || true
-  fi
+assert_jq() {
+  local json="$1" expr="$2"
+  jq -e "$expr" <<<"$json" >/dev/null
 }
 
-run_case "success via logs" "success" "task-success" "success.txt" 0 '.callback_delivery_verified == true and .verify_method == "ntm_logs"'
-run_case "queued-not-submitted retries and fails" "queued" "task-queued" "queued-not-submitted.txt" 1 '.callback_delivery_verified == false and .failure_class == "callback_not_observed"'
-run_case "FTS5 escape send failure" "fts5" "task-fts5" "fts5-escape.txt" 1 '.callback_delivery_verified == false and .failure_class == "ntm_send_failed"'
-run_case "pane disappeared" "pane" "task-pane" "pane-disappeared.txt" 1 '.callback_delivery_verified == false and .failure_class == "pane_disappeared"'
+out="$(run_json success task-success 'DONE task-success evidence=/tmp/task-success.md')"
+assert_jq "$out" '.status == "ok" and .callback_delivery_verified == true and .verify_method == "ntm_history"'
+grep -q '^history ' "$CALLS"
+! grep -Eq '^(logs|copy) ' "$CALLS"
 
-default_task_id="task-default-$$"
-default_failed_path="/tmp/${default_task_id}-callback-failed.md"
-rm -f "$default_failed_path"
-default_ntm="$(make_fake_ntm queued)"
-default_out="$TMP/default-failed-path.json"
-default_rc=0
-"$SCRIPT" \
-  --session flywheel \
-  --pane 1 \
-  --task-id "$default_task_id" \
-  --message-file "$FIXTURES/queued-not-submitted.txt" \
-  --ntm "$default_ntm" \
-  --retries 1 \
-  --wait-seconds 0 \
-  --json >"$default_out" || default_rc=$?
-if [[ "$default_rc" == "1" ]] \
-  && jq -e --arg path "$default_failed_path" '.callback_delivery_verified == false and .failed_path == $path' "$default_out" >/dev/null \
-  && [[ -f "$default_failed_path" ]] \
-  && rg -q 'callback_delivery_verified: false' "$default_failed_path"; then
-  pass "default failure artifact path"
-else
-  fail "default failure artifact path"
-  printf 'rc=%s path=%s\n' "$default_rc" "$default_failed_path"
-  jq . "$default_out" || true
-fi
-rm -f "$default_failed_path"
+: >"$CALLS"
+out="$(run_json queued task-queued 'DONE task-queued evidence=/tmp/task-queued.md')" || true
+assert_jq "$out" '.status == "fail" and .callback_delivery_verified == false and .failure_class == "callback_not_observed"'
+grep -q '^history ' "$CALLS"
+! grep -Eq '^(logs|copy) ' "$CALLS"
 
-echo
-printf 'Summary: %s passed, %s failed\n' "$pass_count" "$fail_count"
-[[ "$fail_count" -eq 0 ]]
+: >"$CALLS"
+out="$(run_json fts5 task-fts 'DONE task-fts evidence=/tmp/task-fts.md')" || true
+assert_jq "$out" '.status == "fail" and .failure_class == "ntm_send_failed"'
+
+: >"$CALLS"
+out="$(run_json pane task-pane 'DONE task-pane evidence=/tmp/task-pane.md')" || true
+assert_jq "$out" '.status == "fail" and .failure_class == "pane_disappeared"'
+
+: >"$CALLS"
+out="$(run_json copy_mode task-copymode 'DONE task-copymode evidence=/tmp/task-copymode.md')" || true
+assert_jq "$out" '.status == "fail" and .failure_class == "pane_not_in_input_mode" and (.spool_path | length > 0)'
+SPOOLED="$SPOOL_DIR/flywheel/task-copymode.json"
+test -s "$SPOOLED" || { echo "expected spool file at $SPOOLED" >&2; exit 1; }
+jq -e '.schema_version == "callback-spool/v1" and .task_id == "task-copymode" and .failure_class == "pane_not_in_input_mode" and .status == "pending" and .attempts == 0 and (.message | contains("DONE task-copymode"))' "$SPOOLED" >/dev/null \
+  || { echo "spool file missing required fields" >&2; jq . "$SPOOLED" >&2; exit 1; }
+
+FAILED="$TMP/custom-failure.md"
+MODE=queued CALLS="$CALLS" STATE="$STATE" \
+  "$SCRIPT" --ntm "$FAKE_NTM" --task-id task-failed-path --message 'DONE task-failed-path evidence=/tmp/task-failed.md' \
+  --retries 1 --wait-seconds 0 --failed-path "$FAILED" --json >/dev/null || true
+test -s "$FAILED"
+grep -q 'verify_method: ntm_history' "$FAILED"
+
+echo "verify-callback-delivery tests passed"
