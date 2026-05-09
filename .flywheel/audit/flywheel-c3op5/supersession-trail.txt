@@ -1,0 +1,27 @@
+== existing INCIDENTS.md sections referencing br-db-wedge ==
+106:## br-db wedge repair — JSONL-fallback eliminated on close (2026-05-05)
+1033:## br-db wedge recurrence root-cause + mitigation (2026-05-05)
+5460:## br-db-wedge-recurrence
+
+== INCIDENTS.md reference count for br-db-wedge ==
+15
+
+== full event list for br-db-wedge class (7 events) ==
+{"ts":"2026-04-30T21:31:47Z","what":"br list DATABASE_ERROR; bead_db_repair.sh Gate 8 left empty DB; rebuild path lost data"}
+{"ts":"2026-05-05T23:39:51Z","what":"br show/update/close unavailable for flywheel-2h3vs because beads DB is malformed; used JSONL fallback close"}
+{"ts":"2026-05-05T23:54:03Z","what":"P2-12 br create failed with database disk image malformed; used JSONL fallback for main and follow-up beads."}
+{"ts":"2026-05-06T00:09:51Z","what":"Live .beads/beads.db malformed on B-tree pages 3364-3372; close path forced JSONL fallback during Phase 2."}
+
+== dedup-skip status (post-qnkj2 fix) ==
+br-db-wedge:incidents_covered
+br-db-wedge-recurrence:incidents_covered
+
+== sister beads ==
+{"id":"flywheel-69974","title":"[promotion-candidate] br-db-wedge-recurrence (3 events in 7d)","status":"closed","closed_at":"2026-05-08T18:04:37.528496Z"}
+
+== open sibling bead flywheel-hujtc (br-db-wedge-recurrence promotion-candidate) ==
+○ flywheel-hujtc · [promotion-candidate] br-db-wedge-recurrence (3 events in 7d)   [● P2 · OPEN]
+Owner: josh · Type: task
+Created: 2026-05-09 · Updated: 2026-05-09
+
+Auto-created by doctrine-ladder-promote.sh per L56 ladder. Trauma class 'br-db-wedge-recurrence' hit 3 times in last 7d with no INCIDENTS coverage. Run /flywheel:learn --promote br-db-wedge-recurrence to draft doctrine entry.
