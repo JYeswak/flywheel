@@ -42,7 +42,8 @@ fields. Receipts beat memory.
 
 Read these in order when you land in this repo:
 
-1. `AGENTS.md` - canonical operating doctrine and L-rules.
+1. `AGENTS.md` - thin canonical doctrine index. Full L-rule bodies live in
+   `.flywheel/rules/L*.md`.
 2. `.flywheel/MISSION.md` - what this repo owns.
 3. `.flywheel/GOAL.md` - current repo-level goal and acceptance criteria.
 4. `.flywheel/STATE.md` - current resume state, handoff pointers, and safe next actions.
@@ -73,6 +74,13 @@ Before editing:
    `canonical-cli-scoping`, `beads-workflow`, `agent-mail`, `dcg`, or
    `dicklesworthstone-stack`.
 
+   For skill-enhance work, classify the target substrate before picking an
+   evaluator. Shell-first flywheel surfaces such as `canonical-cli-scoping`,
+   `jsm`, `beads-br`, and `agent-orchestration` use shell-first dispatch
+   guidance, not `skill-autoresearch` as the primary route. Python-operational
+   `skill-builder` targets may use `skill-autoresearch`. See
+   `.flywheel/doctrine/skill-autoresearch-tooling-preference-class.md`.
+
 4. Reserve files through Agent Mail before editing:
 
    ```text
@@ -93,14 +101,15 @@ Before editing:
 
 | Path | Role |
 |---|---|
-| `AGENTS.md` | Canonical operating doctrine. This is distributed to repo-local `.flywheel/AGENTS-CANONICAL.md` installs. |
+| `AGENTS.md` | Thin canonical operating doctrine index distributed to repo-local `.flywheel/AGENTS-CANONICAL.md` installs. |
 | `README.md` | Worker entrypoint and command map. Keep it current when doctrine or user-facing command behavior changes. |
 | `MISSION.md`, `GOAL.md`, `STATE.md` | Root compact docs for repo discovery. |
 | `.flywheel/MISSION.md`, `.flywheel/GOAL.md`, `.flywheel/STATE.md` | Locked repo-local mission, goal, and state used by loop doctor checks. |
 | `.flywheel/loop.json` | Repo-local loop configuration. Active loop markers are not proof of a driver. |
-| `.flywheel/AGENTS-CANONICAL.md` | Installed copy of canonical doctrine for portable loop repos. |
+| `.flywheel/AGENTS-CANONICAL.md` | Installed thin canonical doctrine index for portable loop repos. |
+| `.flywheel/rules/L*.md` | Full canonical L-rule bodies, ordered so `cat .flywheel/rules/L*.md` round-trips through `.flywheel/rules/MANIFEST.json`. |
 | `.flywheel/PUBLISHABILITY-BAR.md` | Three-judges publishability rubric for README, doctrine, doctor, tests, install, code aesthetic, and demo-ability. |
-| `.flywheel/PUBLISHABILITY-AUDIT.md` | Repo-local publishability assessment consumed by the doctor signal. |
+| `.flywheel/PUBLISHABILITY-AUDIT.md` | Repo-local publishability assessment consumed by the doctor signal. Private status is metadata; only `EXEMPT_CLIENT_OWNED` and `EXEMPT_PUBLIC_FACING` bypass ZestStream voice scoring. |
 | `.flywheel/PLANS/` | Design plans, research briefs, RCA packets, and dispatch architecture notes. |
 | `.flywheel/handoffs/` | End-of-session handoffs. Read the latest one when resuming orchestration. |
 | `.flywheel/scripts/` | Repo-local helper/probe scripts wired into slash commands or tick steps. |
@@ -148,6 +157,25 @@ smoke tests, doctor posture fields, redacted scanner output, and
 `bash tests/security-control-fleet-smoke.sh --dry-run` before reporting a repo
 security-clean.
 
+L149 adds the commit-time and diagnostic-readback layer. Security-clean repos
+must install the repo-local pre-commit secret scanner through
+`.flywheel/scripts/security-precommit-installer.sh install --apply --json` or
+an equivalent gitleaks hook, and doctor must expose the install state as
+`pre_commit_secret_scanner_installed` or `security.precommit_hook_installed`.
+Secret-adjacent evidence should carry handles and redaction labels, not raw
+values. Files under `/tmp` written from secret-bearing sources in the same
+session are tainted: use metadata/key-only probes such as `shasum`, `wc -c`,
+`jq 'keys'`, or `jq -r '.[].secretKey'`; do not read values back into pane
+context. The full stack lives at
+`.flywheel/doctrine/secrets-leak-prevention-stack.md`.
+
+Phase 4 adds callback-time evidence redaction. Worker DONE callbacks carry
+`evidence_redacted=yes|no|n/a`; `yes` is required when `files_reserved` includes
+evidence-class paths such as `*/evidence/*`, `*/validation/*`, `*/secrets/*`,
+or `*/.flywheel/*-evidence.md`. `n/a` is valid only when no evidence-class
+files were touched, and `no` is rejected until the worker scans or redacts the
+evidence with the repo redactor or `gitleaks --no-git --piped`.
+
 ## Key Runtime Surfaces
 
 | Surface | Location | Purpose |
@@ -179,12 +207,13 @@ names a wrapper.
 | `~/.claude/skills/.flywheel/bin/flywheel-loop fleet --root /Users/josh/Developer --json` | Scan flywheel-installed repos. |
 | `~/.claude/skills/.flywheel/bin/flywheel-loop fuckup log/list/triage/harvest` | Capture and promote recurring failure signals. |
 | `~/.flywheel/canonical-meta-rules/sync.sh --check-three-surface --target PATH --json` | Verify AGENTS.md, `.flywheel/AGENTS-CANONICAL.md`, and template doctrine convergence. |
+| `.flywheel/scripts/wire-or-explain-close-gate.sh --json` | L109 flow gate for tick close; `flywheel-loop doctor --repo PATH --json` exposes the `.wire_or_explain` field for unresolved count, overdue count, skill-candidate backlog, relay failures, and next action. |
 | `~/.claude/skills/.flywheel/bin/flywheel-loop state-mine --json` | Mine fleet `STATE.md` files for latent unresolved, stale, recurring, pattern, and orphaned opportunities. |
 | `~/.claude/skills/.flywheel/bin/flywheel-readme` | Cross-pane README review CLI with draft/submit/review/reject/pass/signoff plus L61 dual-channel submit/reject transport, canonical doctor/health/repair, validate/audit/why, schemas, and observability. |
 | `.flywheel/scripts/daily-report.sh --repo PATH --json` | Generate `.flywheel/reports/daily-YYYY-MM-DD.md` and feed the `daily_report_age_hours` doctor signal. |
 | `.flywheel/scripts/bead-quality-mining.sh --repo PATH --json` | Back-mine recently closed beads, verify acceptance-gate artifacts, and create parented audit-gap beads for unverified gates. |
-| `.flywheel/scripts/publishability-bar.sh --doctor --json` | Score the repo against the three-judges publishability bar and feed `publishability_bar_score` into `flywheel-loop doctor`. |
-| `.flywheel/scripts/zeststream-public-prepublish-hook.sh public <url> --json` | Pre-publish gate for public ZestStream repos; blocks public pushes when brand voice score, banned words, or ungrounded claims fail. |
+| `.flywheel/scripts/publishability-bar.sh --doctor --json` | Score the repo against the three-judges publishability bar and feed `publishability_bar_score` into `flywheel-loop doctor`; private/internal repos are scored unless the audit declares `EXEMPT_CLIENT_OWNED` or `EXEMPT_PUBLIC_FACING`. |
+| `.flywheel/scripts/zeststream-public-prepublish-hook.sh public <url> --json` | Pre-publish gate for ZestStream repos; blocks public pushes when brand voice score, banned words, or ungrounded claims fail, regardless of current private hosting status. |
 | `.flywheel/scripts/state-md-miner.sh --json` | Fleet-wide `/flywheel:learn --mine-state` backend with dry-run, apply, doctor, and 5/day/repo auto-bead cap. |
 | `~/.claude/skills/.flywheel/bin/flywheel-autoloop` | Scheduled selector/driver for bounded fleet progression. |
 | `ntm send/copy/grep/health/save` | Canonical pane I/O. Use `ntm`, not direct multiplexer operations. |
@@ -213,6 +242,7 @@ surface when validating from shell.
 | `/flywheel:bead-new` | Create a repo-local Bead through the safe path. |
 | `/flywheel:init` | Install or reconcile `.flywheel/` docs. |
 | `/flywheel:onboard` | Diagnose a repo against fleet onboarding gates. |
+| `/flywheel:repo-hygiene` | Build a dry-run repo hygiene prompt from `.flywheel/hygiene-targets.yaml`; pairs with `/readme-writing` as a per-repo standardization gate. |
 | `/flywheel:loop` | Manage project-level loop markers and drivers. |
 | `/flywheel:tick` | Run one orchestrator tick. |
 | `/flywheel:ntm` | Pane operations through the canonical transport. |
@@ -263,6 +293,10 @@ Every non-trivial worker dispatch in this repo should include:
 | Output | A durable report path, usually `/tmp/<task>_findings.md` for research or an edited repo file for implementation. |
 | Callback | `ntm send flywheel --pane="$CALLBACK_PANE" "Callback: task_id=<id> status=done ..."` |
 | Receipts | `socraticode_queries=N`, reservation release, Bead update or `no_bead_reason`, and fuckup rows for blockers. |
+
+Skill installs are part of the dispatch substrate. Codex-visible skill
+frontmatter names must stay at 64 characters or fewer per L150; use short
+aliases and upstream issues for overlong third-party skill names.
 
 Doctor JSON exposes `.fleet_skill_discovery` for the skill-discovery reporting
 loop. It reads `~/.local/state/flywheel/skill-discoveries.jsonl`, reports
@@ -435,7 +469,7 @@ Common current scripts:
 
 | Script | Purpose |
 |---|---|
-| `flywheel-onboard.sh` | Fleet onboarding doctor/dry-run surface. |
+| `flywheel-onboard.sh` | Fleet onboarding doctor/dry-run surface; exposes `hygiene_targets_present` and `hygiene_targets_valid` for repo hygiene readiness. |
 | `topology-gap-probe.sh` | Session topology ledger schema/latest-wins/bootstrap conformance probe for the `flywheel-31p` registry. |
 | `pane-work-signal.sh` | Pane work-signal probe. |
 | `frozen-pane-detector.sh` | Frozen-pane detection input. |
@@ -454,7 +488,7 @@ Common current scripts:
 | `agent-mail-fd-doctor.sh` | Agent Mail file-descriptor pressure doctor. |
 | `agent-mail-restart.sh` | Dry-run-first Agent Mail LaunchAgent restart helper with bootout/bootstrap/kickstart recovery. |
 | `mobile-eats-receipt-bridge.sh` | Product receipt to canonical tick-shaped JSON bridge. |
-| `validate-callback.py` | Builds B01 validation receipts from worker callback claims before integration; enforces L61 ecosystem-touch callback fields for doctrine-shaped dispatches. |
+| `validate-callback.py` | Builds B01 validation receipts from worker callback claims before integration; enforces L61 ecosystem-touch callback fields and Phase 4 `evidence_redacted` gates for evidence-class paths. |
 | `validation-fix-bead.py` | Plans or applies repo-local fix beads for failed validation receipts. |
 | `closed-bead-artifact-scan.py` | Detects closed beads whose shipped artifact evidence fails mechanical probes and can reopen them explicitly. |
 | `bead-ag-format.py` | Validates canonical `AG<N>:` single-line acceptance gates and flags nested/non-testable bead gates. |
@@ -1041,6 +1075,21 @@ The broadcaster sends only coordination packets to live orchestrator panes,
 dedupes each session:pane for 60 minutes, and honors active deferral receipts
 for dead sessions.
 
+Intra-fleet orchestrator handshakes are not Joshua approval gates. Agent Mail
+contact approvals, peer-orch trust, and fleet-mail trust grants should use
+auto-trust or a file-based sidechannel when both sides are flywheel-owned. The
+advisory Stop hook lives at
+`~/.claude/hooks/flywheel-orch-handshakes-never-gate-on-joshua-gate.sh`, with
+the repo gate and regression here:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/orch-handshakes-never-gate-on-joshua-gate.sh \
+  --check-text "Agent Mail contact approval fallback Option C: ask Joshua" \
+  --json
+
+bash /Users/josh/Developer/flywheel/.flywheel/tests/test-orch-handshakes-never-gate-on-joshua.sh
+```
+
 Fleet comms health uses:
 
 ```bash
@@ -1210,6 +1259,9 @@ rg -n "flywheel-loop|flywheel-autoloop|/flywheel:|ntm|br " /Users/josh/Developer
 - Do not use cached loop markers as proof of liveness; verify the driver.
 - Do not rotate secrets or tokens unless Joshua explicitly asks.
 - Do not edit JSM-managed skills directly; use the owning sync/push workflow.
+- Skill-enhance dispatches must run the JSM discipline gate before touching
+  `~/.claude/skills`: managed skills get `jsm-push-ready` patch artifacts,
+  unmanaged skills get paired `jsm-import-ready` patch artifacts.
 - Keep detailed session history in `.flywheel/STATE.md`, `.flywheel/handoffs/`,
   `.flywheel/PLANS/`, `INCIDENTS.md`, Beads, and memory files.
 
@@ -1219,9 +1271,6 @@ Update this README when a change affects how a new worker should understand or
 operate the repo:
 
 - new or renamed CLI surface
-- Skill-enhance dispatches must run the JSM discipline gate before touching
-  `~/.claude/skills`: managed skills get `jsm-push-ready` patch artifacts,
-  unmanaged skills get paired `jsm-import-ready` patch artifacts.
 - new slash command
 - new loop-driver behavior
 - new validation gate

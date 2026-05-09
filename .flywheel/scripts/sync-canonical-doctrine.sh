@@ -8,8 +8,9 @@ IDENTITY_DEFERRAL_SCHEMA_SOURCE="${SYNC_IDENTITY_DEFERRAL_SCHEMA_SOURCE:-/Users/
 BEAD_QUALITY_MINING_SOURCE="${SYNC_BEAD_QUALITY_MINING_SOURCE:-/Users/josh/Developer/flywheel/.flywheel/scripts/bead-quality-mining.sh}"
 ORCH_VALIDATION_SKILL_SOURCE="${SYNC_ORCH_VALIDATION_SKILL_SOURCE:-/Users/josh/.claude/skills/orchestrator-validation-discipline/SKILL.md}"
 DOCTRINE_DOCS_SOURCE_DIR="${SYNC_DOCTRINE_DOCS_SOURCE_DIR:-/Users/josh/Developer/flywheel/.flywheel/doctrine}"
+RULES_SOURCE_DIR="${SYNC_RULES_SOURCE_DIR:-/Users/josh/Developer/flywheel/.flywheel/rules}"
 SHARED_SCRIPT_SOURCE_DIR="${SYNC_SHARED_SCRIPT_SOURCE_DIR:-/Users/josh/Developer/flywheel/.flywheel/scripts}"
-SHARED_SCRIPT_ALLOWLIST="${SYNC_SHARED_SCRIPT_ALLOWLIST:-bead-quality-mining.sh dispatch-and-verify.sh tmp-aggressive-prune.sh topology-tick-refresh.sh sync-canonical-doctrine.sh}"
+SHARED_SCRIPT_ALLOWLIST="${SYNC_SHARED_SCRIPT_ALLOWLIST:-agents-md-shard-extract.sh bead-quality-mining.sh dispatch-and-verify.sh tmp-aggressive-prune.sh topology-tick-refresh.sh sync-canonical-doctrine.sh publishability-bar.sh zeststream-public-prepublish-hook.sh}"
 LAUNCHD_TEMPLATE_SOURCE_DIR="${SYNC_LAUNCHD_TEMPLATE_SOURCE_DIR:-/Users/josh/Developer/flywheel/.flywheel/launchd}"
 SECURITY_SETTINGS_DENY_SOURCE="${SYNC_SECURITY_SETTINGS_DENY_SOURCE:-/Users/josh/Developer/flywheel/.flywheel/security/v1/claude-settings-deny.json}"
 LOOPS_DIR="${SYNC_CANONICAL_LOOPS_DIR:-$HOME/.flywheel/loops}"
@@ -26,24 +27,25 @@ usage() {
   cat <<'EOF'
 usage: sync-canonical-doctrine.sh [--dry-run|--apply] [--json] [--source PATH] [--root PATH ...]
 
-Synchronizes two doctrine surfaces for each flywheel-installed repo:
-  1. .flywheel/AGENTS-CANONICAL.md remains a full canonical snapshot.
-  2. ROOT AGENTS.md gets a replaceable canonical block between:
+Synchronizes doctrine surfaces for each flywheel-installed repo:
+  1. .flywheel/AGENTS-CANONICAL.md remains a thin canonical index.
+  2. .flywheel/rules/L*.md carries the full canonical L-rule shards.
+  3. ROOT AGENTS.md gets a replaceable canonical block between:
      <!-- BEGIN-CANONICAL-FLYWHEEL-DOCTRINE -->
      <!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->
-  3. .flywheel/validation-schema/v1/storage-override.schema.json is copied
+  4. .flywheel/validation-schema/v1/storage-override.schema.json is copied
      from the canonical source repo when present, with backup-before-write.
-  4. .flywheel/validation-schema/v1/identity-registration-deferral.schema.json
+  5. .flywheel/validation-schema/v1/identity-registration-deferral.schema.json
      is copied from the canonical source repo when present, with backup-before-write.
-  5. .flywheel/scripts/bead-quality-mining.sh is copied from the canonical
+  6. .flywheel/scripts/bead-quality-mining.sh is copied from the canonical
      source repo when present, with backup-before-write.
-  6. .flywheel/doctrine/*.md is copied from the canonical source repo when
+  7. .flywheel/doctrine/*.md is copied from the canonical source repo when
      present, with backup-before-write.
-  7. Allowlisted .flywheel/scripts/*.sh files are copied from the canonical
+  8. Allowlisted .flywheel/scripts/*.sh files are copied from the canonical
      source repo when present, with backup-before-write and executable mode.
-  8. .flywheel/launchd/*.plist templates are copied from the canonical source
+  9. .flywheel/launchd/*.plist templates are copied from the canonical source
      repo when present, with backup-before-write.
-  9. .claude/settings.json receives the canonical managed security deny rules
+  10. .claude/settings.json receives the canonical managed security deny rules
      while preserving non-managed settings, with backup-before-write.
 
 Existing root AGENTS.md content outside the block is preserved. The canonical
@@ -62,6 +64,7 @@ Environment:
   SYNC_IDENTITY_DEFERRAL_SCHEMA_SOURCE=/path/to/identity-registration-deferral.schema.json
   SYNC_BEAD_QUALITY_MINING_SOURCE=/path/to/bead-quality-mining.sh
   SYNC_DOCTRINE_DOCS_SOURCE_DIR=/path/to/.flywheel/doctrine
+  SYNC_RULES_SOURCE_DIR=/path/to/.flywheel/rules
   SYNC_SHARED_SCRIPT_SOURCE_DIR=/path/to/.flywheel/scripts
   SYNC_SHARED_SCRIPT_ALLOWLIST="bead-quality-mining.sh dispatch-and-verify.sh"
   SYNC_LAUNCHD_TEMPLATE_SOURCE_DIR=/path/to/.flywheel/launchd
@@ -158,7 +161,10 @@ backup_file_with_path() {
 extract_l_rules() {
   local file="$1"
   [[ -f "$file" ]] || return 0
-  sed -nE 's/^## (L[0-9]+)[[:space:]].*/\1/p' "$file" | sort -u
+  sed -nE \
+    -e 's/^## (L[0-9]+)[[:space:]].*/\1/p' \
+    -e 's/^\|[[:space:]]*[0-9]+[[:space:]]*\|[[:space:]]*(L[0-9]+)[[:space:]]+—.*/\1/p' \
+    "$file" | sort -u
 }
 
 extract_root_block() {
@@ -480,7 +486,10 @@ extract_l_rules "$SOURCE" >"$SOURCE_RULES_FILE"
 SOURCE_HASH="$(sha256_file "$SOURCE")"
 SOURCE_REPO="$(canonicalize_dir "$(dirname "$SOURCE")")"
 if [[ -z "${SYNC_DOCTRINE_DOCS_SOURCE_DIR:-}" ]]; then
-  DOCTRINE_DOCS_SOURCE_DIR="$SOURCE_REPO/.flywheel/doctrine"
+DOCTRINE_DOCS_SOURCE_DIR="$SOURCE_REPO/.flywheel/doctrine"
+fi
+if [[ -z "${SYNC_RULES_SOURCE_DIR:-}" ]]; then
+  RULES_SOURCE_DIR="$SOURCE_REPO/.flywheel/rules"
 fi
 if [[ -z "${SYNC_SHARED_SCRIPT_SOURCE_DIR:-}" ]]; then
   SHARED_SCRIPT_SOURCE_DIR="$SOURCE_REPO/.flywheel/scripts"
@@ -766,6 +775,12 @@ done <"$REPOS_FILE"
 
 while IFS= read -r repo; do
   [[ -n "$repo" ]] || continue
+  if [[ -d "$RULES_SOURCE_DIR" ]]; then
+    for rule_source in "$RULES_SOURCE_DIR"/L*.md "$RULES_SOURCE_DIR"/MANIFEST.json; do
+      [[ -f "$rule_source" ]] || continue
+      copy_managed_file "$repo" "$rule_source" "$repo/.flywheel/rules/$(basename "$rule_source")" "copy_rule_shard" 0
+    done
+  fi
   if [[ -d "$DOCTRINE_DOCS_SOURCE_DIR" ]]; then
     for doctrine_source in "$DOCTRINE_DOCS_SOURCE_DIR"/*.md; do
       [[ -f "$doctrine_source" ]] || continue
@@ -866,6 +881,7 @@ RESULT="$(jq -nc \
   --argjson security_settings_details "$SECURITY_SETTINGS_DETAILS" \
   --argjson security_rollout_receipt "$SECURITY_ROLLOUT_RECEIPT" \
   --arg doctrine_docs_source_dir "$DOCTRINE_DOCS_SOURCE_DIR" \
+  --arg rules_source_dir "$RULES_SOURCE_DIR" \
   --arg shared_script_source_dir "$SHARED_SCRIPT_SOURCE_DIR" \
   --arg shared_script_allowlist "$SHARED_SCRIPT_ALLOWLIST" \
   --arg launchd_template_source_dir "$LAUNCHD_TEMPLATE_SOURCE_DIR" \
@@ -937,6 +953,7 @@ RESULT="$(jq -nc \
       rollout_receipt:$security_rollout_receipt
     },
     doctrine_docs_source_dir:$doctrine_docs_source_dir,
+    rules_source_dir:$rules_source_dir,
     shared_script_source_dir:$shared_script_source_dir,
     shared_script_allowlist:$shared_script_allowlist,
     launchd_template_source_dir:$launchd_template_source_dir,

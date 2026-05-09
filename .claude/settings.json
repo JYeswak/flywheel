@@ -1,0 +1,44 @@
+{
+  "flywheel_security": {
+    "control_schema_version": "agent-security-control/v1",
+    "managed_block_id": "canonical-agent-security-deny/v1",
+    "schema_version": "security-settings-sync/v1",
+    "source": ".flywheel/security/v1/claude-settings-deny.json",
+    "source_sha256": "93e8d4f78c9bbe3c0ad8df3ba87baa30e3dedc7f6f0563d8a5822b13c996ee18",
+    "sync_surface": "sync-canonical-doctrine.sh"
+  },
+  "permissions": {
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/.dev.vars)",
+      "Read(**/.dev.vars.*)",
+      "Read(**/secrets/**)",
+      "Read(**/credentials/**)",
+      "Read(**/.aws/**)",
+      "Read(**/.ssh/**)",
+      "Read(**/.npmrc)",
+      "Read(**/.pypirc)",
+      "Read(**/.netrc)",
+      "Read(**/.git-credentials)",
+      "Read(**/.config/infisical/**)",
+      "Read(**/opencode.json)",
+      "Read(**/.opencode/**)",
+      "Read(**/.mcp.json)",
+      "Read(**/mcp.json)",
+      "Read(**/*_rsa)",
+      "Read(**/*_dsa)",
+      "Read(**/*_ecdsa)",
+      "Read(**/*_ed25519)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*.p12)",
+      "Read(**/*.pfx)",
+      "Read(**/*.kubeconfig)",
+      "Read(**/.docker/config.json)",
+      "Read(**/firebase-service-account*.json)",
+      "Read(**/*service-account*.json)",
+      "Read(**/*credentials*.json)"
+    ]
+  }
+}

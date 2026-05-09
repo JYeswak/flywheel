@@ -1,0 +1,1020 @@
+{
+  "canonical_index": ".flywheel/AGENTS-CANONICAL.md",
+  "round_trip_command": "cat .flywheel/rules/L*.md | shasum -a 256",
+  "rule_count": 101,
+  "rules": [
+    {
+      "id": "L48",
+      "order": 1,
+      "path": ".flywheel/rules/L001-L48-substrate-exhaustion-before-escalation.md",
+      "sha256": "068bbc5b62ac9181f4d9a57add0768911e9303f4f74e1eedf3ed9401c35aaff8",
+      "shipped": "2026-04-30",
+      "status": "long_term",
+      "title": "SUBSTRATE-EXHAUSTION-BEFORE-ESCALATION",
+      "trauma_class": "phantom-substrate"
+    },
+    {
+      "id": "L29",
+      "order": 2,
+      "path": ".flywheel/rules/L002-L29-ntm-only-doctrine.md",
+      "sha256": "08787bbb2bc0923387362672b51434216accf0cf8f592f1e4c084655b5114e73",
+      "shipped": "2026-04-30",
+      "status": "long_term",
+      "title": "NTM-only doctrine",
+      "trauma_class": "dispatch-substrate"
+    },
+    {
+      "id": "L35",
+      "order": 3,
+      "path": ".flywheel/rules/L003-L35-every-tier-3-classification-requires-a-paired-tool-bead.md",
+      "sha256": "425640e2e08357bb12b08343d45514248eb035c9d0fd027d8c430f5f5fe2650f",
+      "shipped": "2026-04-19",
+      "status": "long_term",
+      "title": "Every Tier 3 classification requires a paired-tool bead",
+      "trauma_class": "autonomy-ratchet"
+    },
+    {
+      "id": "L50",
+      "order": 4,
+      "path": ".flywheel/rules/L004-L50-socraticode-mandatory-in-every-dispatch-every-ntm-dispatch-surveys-wha.md",
+      "sha256": "91dc0609ded2e7a5eebd66d44cef216f6279f5b152ffd1b553cc00b5bc074864",
+      "shipped": "2026-04-30",
+      "status": "long_term",
+      "title": "SOCRATICODE-MANDATORY-IN-EVERY-DISPATCH (every NTM dispatch surveys what we have before writing what we want)",
+      "trauma_class": "substrate-amnesia"
+    },
+    {
+      "id": "L51",
+      "order": 5,
+      "path": ".flywheel/rules/L005-L51-dispatch-file-reservations-mandatory-every-multi-file-worker-dispatch-.md",
+      "sha256": "6aac14975c7b41620f507b34f8f390cd6c3092e749200fe8f8c844d094606a47",
+      "shipped": "2026-04-30",
+      "status": "long_term",
+      "title": "DISPATCH-FILE-RESERVATIONS-MANDATORY (every multi-file worker dispatch reserves files via agent-mail before edits)",
+      "trauma_class": "concurrent-worker-drift"
+    },
+    {
+      "id": "L52",
+      "order": 6,
+      "path": ".flywheel/rules/L006-L52-issues-to-beads-or-explicit-no-bead-receipt-no-observed-gap-is-absorbe.md",
+      "sha256": "1e8db89f95a373e385937965338a8f5784a0523698b00865558fa65db28cdfdb",
+      "shipped": "2026-04-30",
+      "status": "long_term",
+      "title": "ISSUES-TO-BEADS-OR-EXPLICIT-NO-BEAD-RECEIPT (no observed gap is absorbed silently)",
+      "trauma_class": "silent-finding-loss"
+    },
+    {
+      "id": "L53",
+      "order": 7,
+      "path": ".flywheel/rules/L007-L53-fuckups-reported-in-callback-every-blocker-trauma-gap-surfaces-as-a-fu.md",
+      "sha256": "b866929baa59f56d856aa54aaa9581ce54f9365ca60183edfc2872534250a33c",
+      "shipped": "2026-04-30",
+      "status": "long_term",
+      "title": "FUCKUPS-REPORTED-IN-CALLBACK (every blocker / trauma / gap surfaces as a fuckup-log row)",
+      "trauma_class": "trauma-amnesia"
+    },
+    {
+      "id": "L54",
+      "order": 8,
+      "path": ".flywheel/rules/L008-L54-skill-deep-dive-on-blockers-workers-climb-the-skill-tree-before-declar.md",
+      "sha256": "376be565db045ee4cb0005735c4bc8f3261061fd1f349f5bb723f8160c747e27",
+      "shipped": "2026-04-30",
+      "status": "long_term",
+      "title": "SKILL-DEEP-DIVE-ON-BLOCKERS (workers climb the skill tree before declaring a wall)",
+      "trauma_class": "skill-substrate-bypass"
+    },
+    {
+      "id": "L55",
+      "order": 9,
+      "path": ".flywheel/rules/L009-L55-skillos-escalation-for-missing-skills-when-no-skill-exists-for-a-traum.md",
+      "sha256": "57edc54da5a1b2e27170f3ecacef3be10132296c1150cfbebba4db9f1b85537a",
+      "shipped": "2026-04-30",
+      "status": "long_term",
+      "title": "SKILLOS-ESCALATION-FOR-MISSING-SKILLS (when no skill exists for a trauma class, route to skillos)",
+      "trauma_class": "skill-arsenal-gap"
+    },
+    {
+      "id": "L56",
+      "order": 10,
+      "path": ".flywheel/rules/L010-L56-fuckup-log-incidents-canonical-l-rule-promotion-ladder.md",
+      "sha256": "07adef1f559bfd394a967c74ec25eee86ff0100e410bcd20a448f88f5311fcc1",
+      "shipped": "2026-04-30",
+      "status": "long_term",
+      "title": "FUCKUP-LOG \u2192 INCIDENTS \u2192 CANONICAL-L-RULE PROMOTION LADDER",
+      "trauma_class": "doctrine-orphaning"
+    },
+    {
+      "id": "L57",
+      "order": 11,
+      "path": ".flywheel/rules/L011-L57-loop-state-marker-not-driver.md",
+      "sha256": "4fd3ff4a7793f2c3e73550f322749498dda5ffd6e7660d1dd4c205202ae5d14f",
+      "shipped": "2026-05-02",
+      "status": "long_term",
+      "title": "LOOP-STATE-MARKER-NOT-DRIVER",
+      "trauma_class": "loop-state-without-driver"
+    },
+    {
+      "id": "L58",
+      "order": 12,
+      "path": ".flywheel/rules/L012-L58-secret-material-never-in-pane-text.md",
+      "sha256": "f41b60852a640a0ecf60dfc418c220655af62828dd61c2e6baf653fbf853587c",
+      "shipped": "2026-05-02",
+      "status": "long_term",
+      "title": "SECRET-MATERIAL-NEVER-IN-PANE-TEXT",
+      "trauma_class": "secret-leak"
+    },
+    {
+      "id": "L59",
+      "order": 13,
+      "path": ".flywheel/rules/L013-L59-reconcile-script-postcheck-step.md",
+      "sha256": "71c5309459d4dd2dcd40b9559515289146f6d3b7d836ebaf68c1b45c2cb0c852",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "RECONCILE-SCRIPT-POSTCHECK-STEP",
+      "trauma_class": "ntm-worktree-conflicts-post-reconcile"
+    },
+    {
+      "id": "L60",
+      "order": 14,
+      "path": ".flywheel/rules/L014-L60-loop-integrity-5-signal-contract.md",
+      "sha256": "591d503a0d519a0e769ce9ae1e83a86ef0e134e37552d8c8c0963b6c546a580a",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "LOOP-INTEGRITY-5-SIGNAL-CONTRACT",
+      "trauma_class": "loop-integrity-liveness"
+    },
+    {
+      "id": "L61",
+      "order": 15,
+      "path": ".flywheel/rules/L015-L61-doctrine-landing-wires-into-agents-and-readme.md",
+      "sha256": "6415c9c15a35a508d8dd92b4eb2810a82681813a36bcf0a73a79d93577345482",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "DOCTRINE-LANDING-WIRES-INTO-AGENTS-AND-README",
+      "trauma_class": "doctrine-orphaning"
+    },
+    {
+      "id": "L62",
+      "order": 16,
+      "path": ".flywheel/rules/L016-L62-state-md-is-latent-opportunity-substrate.md",
+      "sha256": "7332737e0c770a65b341386e0219094715f9ea00b5ce01591fc7a4a9306a8412",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "STATE-MD-IS-LATENT-OPPORTUNITY-SUBSTRATE",
+      "trauma_class": "latent-state-amnesia"
+    },
+    {
+      "id": "L63",
+      "order": 17,
+      "path": ".flywheel/rules/L017-L63-jeff-intel-network-is-canonical-substrate-dependency.md",
+      "sha256": "c1949a9df8df571c07b1ee0ef6376616635ee436cdb20c74539dc138f97545d0",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "JEFF-INTEL-NETWORK-IS-CANONICAL-SUBSTRATE-DEPENDENCY",
+      "trauma_class": "jeff-intel-substrate-drift"
+    },
+    {
+      "id": "L64",
+      "order": 18,
+      "path": ".flywheel/rules/L018-L64-jeff-is-mentor-not-just-dependency.md",
+      "sha256": "c68bbccbf373abf82e29fd8f829ac38ecddd5645f16c086f30fec76da061f9d2",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "JEFF-IS-MENTOR-NOT-JUST-DEPENDENCY",
+      "trauma_class": "jeff-mentor-bypass"
+    },
+    {
+      "id": "L65",
+      "order": 19,
+      "path": ".flywheel/rules/L019-L65-cli-identity-beats-command-name.md",
+      "sha256": "c898eeae9cfc5f3a5d73bf471e232c9928f52c4df03844ce01b893c8513b1552",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "CLI-IDENTITY-BEATS-COMMAND-NAME",
+      "trauma_class": "cli-identity-drift"
+    },
+    {
+      "id": "L66",
+      "order": 20,
+      "path": ".flywheel/rules/L020-L66-outbound-jeff-issues-use-phased-command-gate.md",
+      "sha256": "7751b6d49fcb98896bf58d4d36f0141d81fb8cde96cb594539068a09269bed74",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "OUTBOUND-JEFF-ISSUES-USE-PHASED-COMMAND-GATE",
+      "trauma_class": "jeff-issue-gate-bypass"
+    },
+    {
+      "id": "L67",
+      "order": 21,
+      "path": ".flywheel/rules/L021-L67-truth-source-must-be-live-not-cached.md",
+      "sha256": "9caaa1f63f5f2be7cc1f31209b410aea79587aa14b153bf91a5c14cea88370b7",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "TRUTH-SOURCE-MUST-BE-LIVE-NOT-CACHED",
+      "trauma_class": "cached-truth-drift"
+    },
+    {
+      "id": "L68",
+      "order": 22,
+      "path": ".flywheel/rules/L022-L68-no-silent-darkness-goal-contract.md",
+      "sha256": "14d54401500d8337127defc504b6599b55340f31e62816d13c67bf4c1f452c31",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "NO-SILENT-DARKNESS-GOAL-CONTRACT",
+      "trauma_class": "silent-darkness"
+    },
+    {
+      "id": "L69",
+      "order": 23,
+      "path": ".flywheel/rules/L023-L69-orch-probe-agent-context-probe-runs-through-agent-execution-not-orches.md",
+      "sha256": "728b41aca9ac97714f4170ba7963ddd8b83c13b4bc226099181d88aab7edab1e",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "ORCH-PROBE-AGENT-CONTEXT (probe runs THROUGH agent execution, not orchestrator shell)",
+      "trauma_class": "orchestrator-probe-discipline"
+    },
+    {
+      "id": "L70",
+      "order": 24,
+      "path": ".flywheel/rules/L024-L70-orch-no-punt-next-actionable-runs-same-tick-not-next-tick.md",
+      "sha256": "6c582eecf67967c4bad8e38ae039bbc87d1b0764741bfa2cbe7b033db3571a6f",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "ORCH-NO-PUNT (next actionable runs same tick, not next tick)",
+      "trauma_class": "orch-punt-to-next-tick-instead-of-next-actionable"
+    },
+    {
+      "id": "L71",
+      "order": 25,
+      "path": ".flywheel/rules/L025-L71-validate-and-redispatch-discipline.md",
+      "sha256": "39d50aaea57fb7c09cbd9fcdec468fb2f229aad54c96806104e6453d9d881016",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "VALIDATE-AND-REDISPATCH-DISCIPLINE",
+      "trauma_class": "orchestrator-skipped-callback-validation"
+    },
+    {
+      "id": "L72",
+      "order": 26,
+      "path": ".flywheel/rules/L026-L72-storage-discipline-system-wide.md",
+      "sha256": "cc3588482872afe1e4583b160ef42f226f6fa38b2af66f0ee0386f85b870123f",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "STORAGE-DISCIPLINE-SYSTEM-WIDE",
+      "trauma_class": "storage-headroom-blind-growth"
+    },
+    {
+      "id": "L73",
+      "order": 27,
+      "path": ".flywheel/rules/L027-L73-headless-browser-orphan-leak-doctor.md",
+      "sha256": "3999241d9023b557f379be13a72e75f29c0db66fa1c34443f97b9a9884aeb32c",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "HEADLESS-BROWSER-ORPHAN-LEAK-DOCTOR",
+      "trauma_class": "headless-browser-orphan-leak"
+    },
+    {
+      "id": "L74",
+      "order": 28,
+      "path": ".flywheel/rules/L028-L74-agent-security-deny-rules-canonical.md",
+      "sha256": "65863054a834bc9e226c95f71c0d15e6326c4940df8f149c247307e8042aaeb5",
+      "shipped": "2026-05-09",
+      "status": "long_term",
+      "title": "AGENT-SECURITY-DENY-RULES-CANONICAL",
+      "trauma_class": "agent-security-control-drift"
+    },
+    {
+      "id": "L75",
+      "order": 29,
+      "path": ".flywheel/rules/L029-L75-orch-blocker-coordination.md",
+      "sha256": "1af8be67c6754ea45cde8544c3973ccc5e35cae5a292cd63cf669b5983c33909",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "ORCH-BLOCKER-COORDINATION",
+      "trauma_class": "peer-orch-idle-on-blocker"
+    },
+    {
+      "id": "L76",
+      "order": 30,
+      "path": ".flywheel/rules/L030-L76-agentmail-identity-canonical.md",
+      "sha256": "bd6251a1660354561294fd396d9a77c52cf5f00de2af04873faefc256abdd344",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "AGENTMAIL-IDENTITY-CANONICAL",
+      "trauma_class": "agentmail-identity-sprawl"
+    },
+    {
+      "id": "L77",
+      "order": 31,
+      "path": ".flywheel/rules/L031-L77-daily-report-learning-rollup.md",
+      "sha256": "aef156432ce207febe83386a89953999cacbfcb2ab5ba497accbaba643c4c747",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "DAILY-REPORT-LEARNING-ROLLUP",
+      "trauma_class": "no-daily-narrative"
+    },
+    {
+      "id": "L78",
+      "order": 32,
+      "path": ".flywheel/rules/L032-L78-jeff-corpus-accretive-ingestion.md",
+      "sha256": "9061328952e073c2243b2cc1d5ffd021a0a3b24dd8ef46ce57f8ea714cffa3a9",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "JEFF-CORPUS-ACCRETIVE-INGESTION",
+      "trauma_class": "bulk-ingest-without-maintenance-plan"
+    },
+    {
+      "id": "L79",
+      "order": 33,
+      "path": ".flywheel/rules/L033-L79-storage-override-receipts-are-mechanical.md",
+      "sha256": "9a2a48381da536baa19d7e62a7273479b3c38497f67b79fd70c8a6135f8224fa",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "STORAGE-OVERRIDE-RECEIPTS-ARE-MECHANICAL",
+      "trauma_class": "manual-storage-threshold-override"
+    },
+    {
+      "id": "L80",
+      "order": 34,
+      "path": ".flywheel/rules/L034-L80-closed-bead-audit-mining.md",
+      "sha256": "051833db5bd198fef5e956fb39890e4529841fcd0d72c4b38b1c8085b870b624",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "CLOSED-BEAD-AUDIT-MINING",
+      "trauma_class": "closed-bead-quality-drift"
+    },
+    {
+      "id": "L81",
+      "order": 35,
+      "path": ".flywheel/rules/L035-L81-docs-are-load-bearing-cross-pane-validated.md",
+      "sha256": "6f64620e759aedace0762badc4c5c83086c9ef5349f43497730cc69342a6fe62",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "DOCS-ARE-LOAD-BEARING-CROSS-PANE-VALIDATED",
+      "trauma_class": "documentation-substrate"
+    },
+    {
+      "id": "L82",
+      "order": 36,
+      "path": ".flywheel/rules/L036-L82-canonical-cli-scoping-mandatory-for-all-flywheel-clis.md",
+      "sha256": "a8b65d561de4a78c974a1b3c498b98238a7eef65f26e5c3f89f2c06e8504eaf2",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "CANONICAL-CLI-SCOPING-MANDATORY-FOR-ALL-FLYWHEEL-CLIS",
+      "trauma_class": "partial-cli-surface"
+    },
+    {
+      "id": "L83",
+      "order": 37,
+      "path": ".flywheel/rules/L037-L83-file-length-discipline-fleet-wide.md",
+      "sha256": "bd0b258395ce1b79f1ad995fac6b455e35b1750bfc62beac7c8b9c897702d3a9",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "FILE-LENGTH-DISCIPLINE-FLEET-WIDE",
+      "trauma_class": "monolithic-file-debt-accumulating"
+    },
+    {
+      "id": "L84",
+      "order": 38,
+      "path": ".flywheel/rules/L038-L84-locked-worker-identities-canonical.md",
+      "sha256": "c84839f2acaa457b18d883ed5e71ee1c02a47bc784e3baa2154bd1c59b337a2f",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "LOCKED-WORKER-IDENTITIES-CANONICAL",
+      "trauma_class": "agent-mail-identity-sprawl-recurring"
+    },
+    {
+      "id": "L85",
+      "order": 39,
+      "path": ".flywheel/rules/L039-L85-idle-state-class-canonical.md",
+      "sha256": "4709e2d9e69943b1d95476e5c820cd2e7aabe5226eb8c7aa8a6a4efec2b6e4a3",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "IDLE-STATE-CLASS-CANONICAL",
+      "trauma_class": "idle-pane-recovery-hidden-in-watcher"
+    },
+    {
+      "id": "L86",
+      "order": 40,
+      "path": ".flywheel/rules/L040-L86-cross-session-callback-receiver-must-be-live.md",
+      "sha256": "26cce076c569124a1a6079d39547c38a86cc2d85bb2a5cb368b2f1db3aaa44a4",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "CROSS-SESSION-CALLBACK-RECEIVER-MUST-BE-LIVE",
+      "trauma_class": "cross-session-dispatch-no-callback-closure"
+    },
+    {
+      "id": "L87",
+      "order": 41,
+      "path": ".flywheel/rules/L041-L87-stale-error-text-auto-ping-recovery.md",
+      "sha256": "4ddc67e6d2ca73c21eba3d040b920129f04bad2d6965baa15780ae850f79feeb",
+      "shipped": "2026-05-04",
+      "status": "temporary",
+      "title": "STALE-ERROR-TEXT-AUTO-PING-RECOVERY",
+      "trauma_class": "ntm-classifier-stale-error-poisoning"
+    },
+    {
+      "id": "L88",
+      "order": 42,
+      "path": ".flywheel/rules/L042-L88-publishability-bar-canonical.md",
+      "sha256": "d49ea0514d0cf06e0794fe754c0802575bf07c3b72b33ccb994c7ed4f632bb62",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "PUBLISHABILITY-BAR-CANONICAL",
+      "trauma_class": "publishability-drift"
+    },
+    {
+      "id": "L89",
+      "order": 43,
+      "path": ".flywheel/rules/L043-L89-zeststream-voice-public-repo-canonical.md",
+      "sha256": "9b19fee045fdbec871ac3452bbfed5a81a34f870076d4375d7797ff4628cf545",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "ZESTSTREAM-VOICE-PUBLIC-REPO-CANONICAL",
+      "trauma_class": "public-work-without-joshua-voice"
+    },
+    {
+      "id": "L90",
+      "order": 44,
+      "path": ".flywheel/rules/L044-L90-pane-action-plan-requires-live-capture.md",
+      "sha256": "b41bf7e0b339a6302b11a469a3270e4f3e53ef2c4792b737f70987acba8498f5",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "PANE-ACTION-PLAN-REQUIRES-LIVE-CAPTURE",
+      "trauma_class": "orchestrator-pane-action-without-live-truth"
+    },
+    {
+      "id": "L91",
+      "order": 45,
+      "path": ".flywheel/rules/L045-L91-dispatch-delivery-is-a-four-state-receipt.md",
+      "sha256": "9f3e01d901d3dcebeccc9766d95cd4054fab1c018a929e06576bdc180656dede",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "DISPATCH-DELIVERY-IS-A-FOUR-STATE-RECEIPT",
+      "trauma_class": "dispatch-transport-ack-mistaken-for-work-started"
+    },
+    {
+      "id": "L92",
+      "order": 46,
+      "path": ".flywheel/rules/L046-L92-audit-findings-route-by-data.md",
+      "sha256": "5fdaef65729dc387d9a99a12bc3767d3c42ce70b6bd5af6e6ef6811781aecac7",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "AUDIT-FINDINGS-ROUTE-BY-DATA",
+      "trauma_class": "audit-findings-joshua-gated-after-data-verdict"
+    },
+    {
+      "id": "L93",
+      "order": 47,
+      "path": ".flywheel/rules/L047-L93-jeff-issue-requires-workaround-research-first.md",
+      "sha256": "d4e7ed5048359061d4b7bcb50e8fdd26f09e598693d0adef9e7b25cf41663935",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "JEFF-ISSUE-REQUIRES-WORKAROUND-RESEARCH-FIRST",
+      "trauma_class": "upstream-escalation-without-workaround-research"
+    },
+    {
+      "id": "L94",
+      "order": 48,
+      "path": ".flywheel/rules/L048-L94-shared-sqlite-writes-must-serialize.md",
+      "sha256": "82e49eaae3afce41abf5368d4bd7870c90792d8a99b374b20359eca7fa5bbcd3",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "SHARED-SQLITE-WRITES-MUST-SERIALIZE",
+      "trauma_class": "sqlite-concurrent-writers"
+    },
+    {
+      "id": "L95",
+      "order": 49,
+      "path": ".flywheel/rules/L049-L95-worker-stall-recovery-protocol.md",
+      "sha256": "8a302f2ce5283b87e74d24488998ba7ff043515400a941c9a05a1c23e761f72d",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "WORKER-STALL-RECOVERY-PROTOCOL",
+      "trauma_class": "l70-worker-stall-undetected"
+    },
+    {
+      "id": "L96",
+      "order": 50,
+      "path": ".flywheel/rules/L050-L96-doctrine-lands-as-3-surface-diff-or-does-not-land.md",
+      "sha256": "4d8fb622148d5bcc1a5bd88f888b55d14461c3e4ab423cca03ad44eee0253d8a",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "DOCTRINE-LANDS-AS-3-SURFACE-DIFF-OR-DOES-NOT-LAND",
+      "trauma_class": "canonical-doctrine-single-surface-drift"
+    },
+    {
+      "id": "L97",
+      "order": 51,
+      "path": ".flywheel/rules/L051-L97-orch-dispatches-only-to-known-workers.md",
+      "sha256": "e6837cb6473fe3a835d8f8ebbf10b9dd7e4706df31211cd23d23f41064e2d987",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "ORCH-DISPATCHES-ONLY-TO-KNOWN-WORKERS",
+      "trauma_class": "orchestrator-dispatched-without-worker-identity"
+    },
+    {
+      "id": "L98",
+      "order": 52,
+      "path": ".flywheel/rules/L052-L98-architecture-health-measured-not-individuals.md",
+      "sha256": "552a6c950a8c287cf9c345afe4d2b0a2eb2fe6cdd9c6d46d1b4c2ba2635cbc39",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "ARCHITECTURE-HEALTH-MEASURED-NOT-INDIVIDUALS",
+      "trauma_class": "agent-shaming-vs-system-improvement"
+    },
+    {
+      "id": "L99",
+      "order": 53,
+      "path": ".flywheel/rules/L053-L99-worker-recovery-slo-180s.md",
+      "sha256": "282dfa1b00e43855b014dd0aeb7052247f85dc6a5d864396143f24a52c36e4bb",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "WORKER-RECOVERY-SLO-180S",
+      "trauma_class": "silent-frozen-worker-undetected-by-fleet"
+    },
+    {
+      "id": "L100",
+      "order": 54,
+      "path": ".flywheel/rules/L054-L100-identity-primary-key-is-session-pane-project.md",
+      "sha256": "155c6f05dc25523ebd32ea02268b4fd75449b9317b4b96d34bffff76f9df7e86",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "IDENTITY-PRIMARY-KEY-IS-SESSION-PANE-PROJECT",
+      "trauma_class": "agent-mail-identity-name-churn"
+    },
+    {
+      "id": "L101",
+      "order": 55,
+      "path": ".flywheel/rules/L055-L101-flywheel-owns-continuous-fleet-productivity.md",
+      "sha256": "b880b18cd18918fc6573d829de42fc3991cbefcd1d426b8db84305697ebbb3e0",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "FLYWHEEL-OWNS-CONTINUOUS-FLEET-PRODUCTIVITY",
+      "trauma_class": "idle-with-work-available"
+    },
+    {
+      "id": "L102",
+      "order": 56,
+      "path": ".flywheel/rules/L056-L102-meta-rule-cache-must-refresh-on-tick.md",
+      "sha256": "7e438f6866b4d3fa4cf1edc0553b2e4bb68a9a639e6cc0976c3e93b57ab02494",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "META-RULE-CACHE-MUST-REFRESH-ON-TICK",
+      "trauma_class": "fleet-meta-rule-propagation-drift"
+    },
+    {
+      "id": "L103",
+      "order": 57,
+      "path": ".flywheel/rules/L057-L103-fleet-conformance-score-is-the-gate.md",
+      "sha256": "eb493268832321890a1c90237eecdabde050db2ed8404c73709137a08b88188e",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "FLEET-CONFORMANCE-SCORE-IS-THE-GATE",
+      "trauma_class": "fragmented-fleet-conformance-drift"
+    },
+    {
+      "id": "L104",
+      "order": 58,
+      "path": ".flywheel/rules/L058-L104-fleet-comms-measured-not-assumed.md",
+      "sha256": "9f74251c1372468716f444d6a4e6b0f12209a5fdc4b7aa0fbf50836c07884bb6",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "FLEET-COMMS-MEASURED-NOT-ASSUMED",
+      "trauma_class": "assumed-open-fleet-comms"
+    },
+    {
+      "id": "L105",
+      "order": 59,
+      "path": ".flywheel/rules/L059-L105-process-gaps-are-measured-and-auto-routed.md",
+      "sha256": "fb877b5b383f73a076b1a9bae57f22a8fbfa5677776a122b8f5cacbeb5e7b4d9",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "PROCESS-GAPS-ARE-MEASURED-AND-AUTO-ROUTED",
+      "trauma_class": "process-gap-drift"
+    },
+    {
+      "id": "L106",
+      "order": 60,
+      "path": ".flywheel/rules/L060-L106-fleet-health-is-a-single-number-aggregated-from-8-spines.md",
+      "sha256": "26882ae5bb6c6428989f0bbfed9e20b34da182633a2c6ae7542591e13e3e1c77",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "FLEET-HEALTH-IS-A-SINGLE-NUMBER-AGGREGATED-FROM-8-SPINES",
+      "trauma_class": "dashboard-sprawl-without-strategic-health"
+    },
+    {
+      "id": "L107",
+      "order": 61,
+      "path": ".flywheel/rules/L061-L107-shared-surface-writes-must-reserve-across-panes.md",
+      "sha256": "e9748e97fc1eda9c2f77e6ecde7b68c56a25163746b199d1ad9a8c20fd135d4d",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "SHARED-SURFACE-WRITES-MUST-RESERVE-ACROSS-PANES",
+      "trauma_class": "coordination-collision-shared-surface"
+    },
+    {
+      "id": "L108",
+      "order": 62,
+      "path": ".flywheel/rules/L062-L108-meta-rule-cache-is-cache-not-convergence-gate.md",
+      "sha256": "9208b9b2db1f8f48d0fb08828ef3f046a10f6b2dbb35a662df3dc19e9eb15494",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "META-RULE-CACHE-IS-CACHE-NOT-CONVERGENCE-GATE",
+      "trauma_class": "cache-freshness-mistaken-for-convergence"
+    },
+    {
+      "id": "L109",
+      "order": 63,
+      "path": ".flywheel/rules/L063-L109-wire-or-explain-is-a-flow-gate.md",
+      "sha256": "6a93af59170e8c34518a8170818f15b7166861eb548c041496b73026235ff983",
+      "shipped": "2026-05-08",
+      "status": "long_term",
+      "title": "WIRE-OR-EXPLAIN-IS-A-FLOW-GATE",
+      "trauma_class": "advisory-wire-drift"
+    },
+    {
+      "id": "L110",
+      "order": 64,
+      "path": ".flywheel/rules/L064-L110-substrate-primitives-declare-self-repair-loop.md",
+      "sha256": "de2cc2064a464187155d9c10e6a0de25fe7ade95db7d01d7d856eade148764ae",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "SUBSTRATE-PRIMITIVES-DECLARE-SELF-REPAIR-LOOP",
+      "trauma_class": "ship-then-orphan-substrate"
+    },
+    {
+      "id": "L111",
+      "order": 65,
+      "path": ".flywheel/rules/L065-L111-real-time-quality-bar-on-every-work-body.md",
+      "sha256": "27fa7024038956cccf639e805e120d2bac7c4611ee8f24f934576442e56bb86a",
+      "shipped": "2026-05-04",
+      "status": "long_term",
+      "title": "REAL-TIME-QUALITY-BAR-ON-EVERY-WORK-BODY",
+      "trauma_class": "ship-then-polish-later"
+    },
+    {
+      "id": "L115",
+      "order": 66,
+      "path": ".flywheel/rules/L066-L115-peer-orch-recovery-permit-gate.md",
+      "sha256": "67f1f441da2a9837e4581d33618d90e9114c3c4dcecef8c9ed31eb9df0136215",
+      "shipped": "2026-05-05",
+      "status": "long_term",
+      "title": "PEER-ORCH-RECOVERY-PERMIT-GATE",
+      "trauma_class": "peer-orch-recovery-false-ownership-refusal"
+    },
+    {
+      "id": "L116",
+      "order": 67,
+      "path": ".flywheel/rules/L067-L116-tick-is-process-not-document.md",
+      "sha256": "6617e75d9b4ecab41bee553d4f24fa4f73edca1984ce42bc75d42da3f47fbece",
+      "shipped": "2026-05-05",
+      "status": "long_term",
+      "title": "TICK-IS-PROCESS-NOT-DOCUMENT",
+      "trauma_class": "tick-hook-prose-without-process"
+    },
+    {
+      "id": "L117",
+      "order": 68,
+      "path": ".flywheel/rules/L068-L117-peer-orch-freeze-monitor-is-a-driver.md",
+      "sha256": "6e8c040a6bca47224b85e0d25ea670a47cf276d349063f877c14ab6da856a7e4",
+      "shipped": "2026-05-05",
+      "status": "long_term",
+      "title": "PEER-ORCH-FREEZE-MONITOR-IS-A-DRIVER",
+      "trauma_class": "peer-orch-freeze-without-monitor"
+    },
+    {
+      "id": "L118",
+      "order": 69,
+      "path": ".flywheel/rules/L069-L118-stable-failure-reason-codes-before-prose.md",
+      "sha256": "f64706cfb65760355f3e16c9c053ce5db87aab3c4fe3d60cf70c1fccfd03f55e",
+      "shipped": "2026-05-05",
+      "status": "long_term",
+      "title": "STABLE-FAILURE-REASON-CODES-BEFORE-PROSE",
+      "trauma_class": "prose-only-failure-taxonomy"
+    },
+    {
+      "id": "L119",
+      "order": 70,
+      "path": ".flywheel/rules/L070-L119-templates-name-sources-not-values.md",
+      "sha256": "652a982c416eeb95f62f3782fcc2ab8b2abe76395654ebe0a46fad47e9889baf",
+      "shipped": "2026-05-06",
+      "status": "long_term",
+      "title": "TEMPLATES-NAME-SOURCES-NOT-VALUES",
+      "trauma_class": "frozen-projection-of-mutable-state"
+    },
+    {
+      "id": "L120",
+      "order": 71,
+      "path": ".flywheel/rules/L071-L120-dispatch-callback-must-include-br-close-executed.md",
+      "sha256": "7ab6864db9855663bd9933400bafb28a19174a4afc04866312f30cedfccf95d9",
+      "shipped": "2026-05-06",
+      "status": "long_term",
+      "title": "DISPATCH-CALLBACK-MUST-INCLUDE-BR-CLOSE-EXECUTED",
+      "trauma_class": "bg-agent-close-miss"
+    },
+    {
+      "id": "L121",
+      "order": 72,
+      "path": ".flywheel/rules/L072-L121-launchd-serialize-wrappers-must-be-kill-resilient.md",
+      "sha256": "07478774b09f4e54073b32b0eed6fb19ecd45d4b9969c2bbff63e88562925d86",
+      "shipped": "2026-05-06",
+      "status": "long_term",
+      "title": "LAUNCHD-SERIALIZE-WRAPPERS-MUST-BE-KILL-RESILIENT",
+      "trauma_class": "jsm-wrapper-killed-mid-sync-via-kickstart"
+    },
+    {
+      "id": "L122",
+      "order": 73,
+      "path": ".flywheel/rules/L073-L122-bulk-mutation-scripts-must-have-surgical-bounds.md",
+      "sha256": "735612dccb6458b0464c233c10f2acf76ff5ff5dc948350305db838a0277bff0",
+      "shipped": "2026-05-06",
+      "status": "long_term",
+      "title": "BULK-MUTATION-SCRIPTS-MUST-HAVE-SURGICAL-BOUNDS",
+      "trauma_class": "scope-creep-on-frontmatter-sweep"
+    },
+    {
+      "id": "L123",
+      "order": 74,
+      "path": ".flywheel/rules/L074-L123-l29-raw-tmux-historical-debt-must-be-doctor-visible.md",
+      "sha256": "cd3490ece6d42a5f6e4aa0a2dcb54aab1b725eaba0bd49c3c64ab93b179b05a4",
+      "shipped": "2026-05-06",
+      "status": "long_term",
+      "title": "L29-RAW-TMUX-HISTORICAL-DEBT-MUST-BE-DOCTOR-VISIBLE",
+      "trauma_class": "dispatch-substrate"
+    },
+    {
+      "id": "L124",
+      "order": 75,
+      "path": ".flywheel/rules/L075-L124-substrate-discipline-no-orchestrator-pause.md",
+      "sha256": "67060a5e7c16eee8179aac5346ab2b351f204bb26e4de605d94fefd7e3e90a4d",
+      "shipped": "2026-05-07",
+      "status": "long_term",
+      "title": "SUBSTRATE-DISCIPLINE-NO-ORCHESTRATOR-PAUSE",
+      "trauma_class": "substrate-discipline"
+    },
+    {
+      "id": "L125",
+      "order": 76,
+      "path": ".flywheel/rules/L076-L125-env-file-is-sealed-substrate.md",
+      "sha256": "6c68b07099cd5dde82a8a691e63d3ad4f6d692afd30bd2705c87723759800a04",
+      "shipped": "2026-05-07",
+      "status": "long_term",
+      "title": "ENV-FILE-IS-SEALED-SUBSTRATE",
+      "trauma_class": "read-tool-secret-leak"
+    },
+    {
+      "id": "L126",
+      "order": 77,
+      "path": ".flywheel/rules/L077-L126-evidence-pack-replaces-self-grade.md",
+      "sha256": "51baf756a9751c061eb882356af9c4549a31377d567bace5c75656b4d0643f39",
+      "shipped": "2026-05-07",
+      "status": "long_term",
+      "title": "EVIDENCE-PACK-REPLACES-SELF-GRADE",
+      "trauma_class": "self-grade-claim-treated-as-fact"
+    },
+    {
+      "id": "L127",
+      "order": 78,
+      "path": ".flywheel/rules/L078-L127-prediction-lock-receipts.md",
+      "sha256": "68bfeaabfd88b915c074c370beda49bb9b5059fdeb06651f9c60d719e572f8fc",
+      "shipped": "2026-05-07",
+      "status": "long_term",
+      "title": "PREDICTION-LOCK-RECEIPTS",
+      "trauma_class": "post-hoc-plan-rationalization"
+    },
+    {
+      "id": "L128",
+      "order": 79,
+      "path": ".flywheel/rules/L079-L128-plan-convergence-proved-with-data.md",
+      "sha256": "b9c9de4519f2fe8bed4b6eb0138e26e6b79d2e424bb625206c78f5961479aa1e",
+      "shipped": "2026-05-07",
+      "status": "long_term",
+      "title": "PLAN-CONVERGENCE-PROVED-WITH-DATA",
+      "trauma_class": "plan-convergence-by-vibes"
+    },
+    {
+      "id": "L129",
+      "order": 80,
+      "path": ".flywheel/rules/L080-L129-worker-substrate-explicit.md",
+      "sha256": "e38d570e81ad362e319fb49b11c9fd8dc75e2a86e1a624c365721bea73929710",
+      "shipped": "2026-05-07",
+      "status": "long_term",
+      "title": "WORKER-SUBSTRATE-EXPLICIT",
+      "trauma_class": "convergence-audit-bypass-codex-workers"
+    },
+    {
+      "id": "L130",
+      "order": 81,
+      "path": ".flywheel/rules/L081-L130-dispatch-skill-required-hook-gate.md",
+      "sha256": "5422b56302611c846fde94b8b4ebfe95d654558f956e56dc536cca8c7043f4c7",
+      "shipped": "2026-05-07",
+      "status": "long_term",
+      "title": "DISPATCH-SKILL-REQUIRED-HOOK-GATE",
+      "trauma_class": "dispatch-wrapper-bypass"
+    },
+    {
+      "id": "L131",
+      "order": 82,
+      "path": ".flywheel/rules/L082-L131-plist-coverage-drift-doctor-invariant.md",
+      "sha256": "fbc63483f61f0ade9390b8ce2ae4ec3fc213fbaefbf7bd95a778f7410c857efe",
+      "shipped": "2026-05-07",
+      "status": "long_term",
+      "title": "PLIST-COVERAGE-DRIFT-DOCTOR-INVARIANT",
+      "trauma_class": "frozen-projection-of-mutable-state"
+    },
+    {
+      "id": "L132",
+      "order": 83,
+      "path": ".flywheel/rules/L083-L132-schema-versioned-ingestion-jeff-doctrine.md",
+      "sha256": "5f628af944b16db46fe57864f1244dd43128f65eb21920e87d21f0aad70d6867",
+      "shipped": "2026-05-07",
+      "status": "long_term",
+      "title": "SCHEMA-VERSIONED-INGESTION-JEFF-DOCTRINE",
+      "trauma_class": "unversioned-contract-ingestion"
+    },
+    {
+      "id": "L133",
+      "order": 84,
+      "path": ".flywheel/rules/L084-L133-data-backed-deferral-doctor-surface.md",
+      "sha256": "dded76e61fcbb939223af3f9b747020172339172bb2b412c794c6a11604402ea",
+      "shipped": "2026-05-07",
+      "status": "long_term",
+      "title": "DATA-BACKED-DEFERRAL-DOCTOR-SURFACE",
+      "trauma_class": "data-decides-not-meatpuppet"
+    },
+    {
+      "id": "L134",
+      "order": 85,
+      "path": ".flywheel/rules/L085-L134-team-roster-freshness-gates-loops.md",
+      "sha256": "ccfff14329bf099ec05f59809f61572dd0aa17e65f9ab0d149326e4b596cd7c0",
+      "shipped": "2026-05-08",
+      "status": "long_term",
+      "title": "TEAM-ROSTER-FRESHNESS-GATES-LOOPS",
+      "trauma_class": "silent-session-loop"
+    },
+    {
+      "id": "L135",
+      "order": 86,
+      "path": ".flywheel/rules/L086-L135-skill-discovery-callback-fields.md",
+      "sha256": "244f964da243f873306bb597f25406924971416dc8cd9a31c9672b628af07bf6",
+      "shipped": "2026-05-08",
+      "status": "long_term",
+      "title": "SKILL-DISCOVERY-CALLBACK-FIELDS",
+      "trauma_class": "skill-discovery-substrate-unwired"
+    },
+    {
+      "id": "L136",
+      "order": 87,
+      "path": ".flywheel/rules/L087-L136-absolute-path-keying-for-cross-project-state.md",
+      "sha256": "1f27a51151c192b33ff456d812c2d78cd4f3ffa253430bb062a9fe19a80c304d",
+      "shipped": "2026-05-08",
+      "status": "long_term",
+      "title": "ABSOLUTE-PATH-KEYING-FOR-CROSS-PROJECT-STATE",
+      "trauma_class": "basename-keying-collision"
+    },
+    {
+      "id": "L137",
+      "order": 88,
+      "path": ".flywheel/rules/L088-L137-beads-mutations-use-a-serial-write-lane.md",
+      "sha256": "22478b3581acd5585f9b81f1f04bb930def74e443afa011fbd1f816b520dd113",
+      "shipped": "2026-05-08",
+      "status": "long_term",
+      "title": "BEADS-MUTATIONS-USE-A-SERIAL-WRITE-LANE",
+      "trauma_class": "file-reservation-conflict"
+    },
+    {
+      "id": "L138",
+      "order": 89,
+      "path": ".flywheel/rules/L089-L138-identity-deferral-after-reservation-clear.md",
+      "sha256": "ee3611751da2914ab30948f844d3211712382e426d8f33e32825cfccc6b7cfed",
+      "shipped": "2026-05-08",
+      "status": "long_term",
+      "title": "IDENTITY-DEFERRAL-AFTER-RESERVATION-CLEAR",
+      "trauma_class": "identity-deferral-reservation-drift"
+    },
+    {
+      "id": "L139",
+      "order": 90,
+      "path": ".flywheel/rules/L090-L139-tmp-lifecycle-is-a-close-gate-and-doctor-invariant.md",
+      "sha256": "4d390912686ef2dbe528873d4fea113e83a69807f890637060b56a2507581937",
+      "shipped": "2026-05-08",
+      "status": "long_term",
+      "title": "TMP-LIFECYCLE-IS-A-CLOSE-GATE-AND-DOCTOR-INVARIANT",
+      "trauma_class": "tmp-lifecycle-blindness"
+    },
+    {
+      "id": "L140",
+      "order": 91,
+      "path": ".flywheel/rules/L091-L140-dispatch-and-verify-mandatory.md",
+      "sha256": "4ff37d6f951f910679b30ef772d349380546fd248dcb4b6617e92e09c7a393d0",
+      "shipped": "2026-05-08",
+      "status": "long_term",
+      "title": "DISPATCH-AND-VERIFY-MANDATORY",
+      "trauma_class": "codex-chevron-stuck-on-dispatch"
+    },
+    {
+      "id": "L141",
+      "order": 92,
+      "path": ".flywheel/rules/L092-L141-loop-must-be-accretive.md",
+      "sha256": "5ac8cc7a8a9fc47657bc25d4a80b6fccd7209856a4eb041e95971bc4a67c1fea",
+      "shipped": "2026-05-08",
+      "status": "long_term",
+      "title": "LOOP-MUST-BE-ACCRETIVE",
+      "trauma_class": "loop-non-accretive"
+    },
+    {
+      "id": "L142",
+      "order": 93,
+      "path": ".flywheel/rules/L093-L142-codex-prepared-chevron-not-stale-buffer.md",
+      "sha256": "0186542cc5f4fd314c641aee86c9a2712d88083d300057a04566c64be5dcbf3d",
+      "shipped": "2026-05-08",
+      "status": "long_term",
+      "title": "CODEX-PREPARED-CHEVRON-NOT-STALE-BUFFER",
+      "trauma_class": "dispatch-validator-false-positive"
+    },
+    {
+      "id": "L143",
+      "order": 94,
+      "path": ".flywheel/rules/L094-L143-worker-close-requires-git-commit.md",
+      "sha256": "01567607787a6454396d2fdaf06050a68a0303fe0883e04d0d1e76b25c51e685",
+      "shipped": "2026-05-08",
+      "status": "long_term",
+      "title": "WORKER-CLOSE-REQUIRES-GIT-COMMIT",
+      "trauma_class": "worker-closes-bead-without-git-commit"
+    },
+    {
+      "id": "L144",
+      "order": 95,
+      "path": ".flywheel/rules/L095-L144-git-stash-janitor-fleet-hygiene.md",
+      "sha256": "9431390e446bb1d7533562af7a509775367438ae7c9311edadfe8a89c9516a4b",
+      "shipped": "2026-05-08",
+      "status": "long_term",
+      "title": "GIT-STASH-JANITOR-FLEET-HYGIENE",
+      "trauma_class": "stash-bloat-state-leak"
+    },
+    {
+      "id": "L145",
+      "order": 96,
+      "path": ".flywheel/rules/L096-L145-orch-handshakes-never-gate-on-joshua.md",
+      "sha256": "f7f2184ef851ee0c168b3fd288423eb52a890f897f40a618665a70d2bedc17ba",
+      "shipped": "2026-05-08",
+      "status": "long_term",
+      "title": "ORCH-HANDSHAKES-NEVER-GATE-ON-JOSHUA",
+      "trauma_class": "phantom-joshua-blocker"
+    },
+    {
+      "id": "L146",
+      "order": 97,
+      "path": ".flywheel/rules/L097-L146-skill-enhance-honors-jsm-management.md",
+      "sha256": "4ee3381a5782a0bcfb3c8688e886be57348a3a43eb0434f3ab149f72a939a8c0",
+      "shipped": "2026-05-08",
+      "status": "long_term",
+      "title": "SKILL-ENHANCE-HONORS-JSM-MANAGEMENT",
+      "trauma_class": "jsm-managed-skill-direct-edit-overwrite"
+    },
+    {
+      "id": "L147",
+      "order": 98,
+      "path": ".flywheel/rules/L098-L147-skill-autoresearch-routes-by-tooling-substrate.md",
+      "sha256": "1bb980345ca64b4ec0df6c0e9cfc1d699eec39ea88bd7a0bdade6c66437a2c34",
+      "shipped": "2026-05-09",
+      "status": "long_term",
+      "title": "SKILL-AUTORESEARCH-ROUTES-BY-TOOLING-SUBSTRATE",
+      "trauma_class": "skill-autoresearch-python-vs-shell-mismatch"
+    },
+    {
+      "id": "L148",
+      "order": 99,
+      "path": ".flywheel/rules/L099-L148-public-ready-default.md",
+      "sha256": "2a9b46ff1493f52bb66449594aa3b1efa2fab02e8954a095129f4f1dcbb21857",
+      "shipped": "2026-05-09",
+      "status": "long_term",
+      "title": "PUBLIC-READY-DEFAULT",
+      "trauma_class": "private-status-as-quality-exemption"
+    },
+    {
+      "id": "L149",
+      "order": 100,
+      "path": ".flywheel/rules/L100-L149-pre-commit-gitleaks-mandatory.md",
+      "sha256": "7c5d94133aadd1a99a50ef6e8e21e939cc1be2465c8537f625fb1a8f2bcd4cdb",
+      "shipped": "2026-05-09",
+      "status": "long_term",
+      "title": "PRE-COMMIT-GITLEAKS-MANDATORY",
+      "trauma_class": "rank-3-secret-handle-drift"
+    },
+    {
+      "id": "L150",
+      "order": 101,
+      "path": ".flywheel/rules/L101-L150-skill-naming-constraint.md",
+      "sha256": "07767c6db130a0e963336f087b0e7f724c0ffc530991794e05fdadb6ed963b7b",
+      "shipped": "2026-05-09",
+      "status": "long_term",
+      "title": "SKILL-NAMING-CONSTRAINT",
+      "trauma_class": "codex-skill-name-length"
+    }
+  ],
+  "rules_body_sha256": "f4311834a2f59b4aea6aedc386c8daf8b31d582c5be4d6ae0f1778280c3b67d6",
+  "schema_version": "agents-canonical-shards/v1",
+  "source": "AGENTS.md"
+}

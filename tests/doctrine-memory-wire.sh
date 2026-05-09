@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 AGENTS="$ROOT/AGENTS.md"
 AGENTS_CANONICAL="$ROOT/.flywheel/AGENTS-CANONICAL.md"
 AGENTS_TEMPLATE="$ROOT/templates/flywheel-install/AGENTS.md"
+RULES_DIR="$ROOT/.flywheel/rules"
 README="$ROOT/README.md"
 CANONICAL="$ROOT/.flywheel/canonical-paths.txt"
 MEMORY_DIR="/Users/josh/.claude/projects/-Users-josh-Developer-flywheel/memory"
@@ -38,33 +39,52 @@ regex() {
   fi
 }
 
+doctrine_has() {
+  local pattern="$1" label="$2"
+  if rg -n --fixed-strings "$pattern" "$AGENTS" "$RULES_DIR" >/dev/null; then
+    pass "$label"
+  else
+    fail "$label missing pattern=$pattern doctrine_surfaces=$AGENTS,$RULES_DIR"
+  fi
+}
+
+doctrine_regex() {
+  local pattern="$1" label="$2"
+  if rg -n "$pattern" "$AGENTS" "$RULES_DIR" >/dev/null; then
+    pass "$label"
+  else
+    fail "$label missing regex=$pattern doctrine_surfaces=$AGENTS,$RULES_DIR"
+  fi
+}
+
 test -f "$SKILL" && pass "B10_AG5 skill present" || fail "B10_AG5 skill present"
 test -f "$SECURITY_SKILL_DRAFT" && pass "B10_SECURITY skill draft present" || fail "B10_SECURITY skill draft present"
 test -f "$MEMORY_NOTE" && pass "B10_AG4 memory note present" || fail "B10_AG4 memory note present"
 
-regex "$AGENTS" '^## L71 — VALIDATE-AND-REDISPATCH-DISCIPLINE$' "B10_AG2 L71 heading"
-has "$AGENTS" 'id: L71' "B10_AG2 id"
-has "$AGENTS" 'status: long_term' "B10_AG2 long-term status after B12 smoke"
-has "$AGENTS" 'review_due: 2026-11-03' "B10_AG2 review_due present"
-has "$AGENTS" 'trauma_class: orchestrator-skipped-callback-validation' "B10_AG2 trauma_class present"
-has "$AGENTS" '**Forbidden outputs:**' "B10_AG2 forbidden outputs present"
-has "$AGENTS" '**Evidence:**' "B10_AG2 evidence present"
-has "$AGENTS" '**Companion rules:**' "B10_AG2 companion rules present"
+doctrine_regex '^## L71 — VALIDATE-AND-REDISPATCH-DISCIPLINE$' "B10_AG2 L71 heading"
+doctrine_has 'id: L71' "B10_AG2 id"
+doctrine_has 'status: long_term' "B10_AG2 long-term status after B12 smoke"
+doctrine_has 'review_due: 2026-11-03' "B10_AG2 review_due present"
+doctrine_has 'trauma_class: orchestrator-skipped-callback-validation' "B10_AG2 trauma_class present"
+doctrine_has '**Forbidden outputs:**' "B10_AG2 forbidden outputs present"
+doctrine_has '**Evidence:**' "B10_AG2 evidence present"
+doctrine_has '**Companion rules:**' "B10_AG2 companion rules present"
 
 for file in "$AGENTS" "$AGENTS_CANONICAL" "$AGENTS_TEMPLATE"; do
-  regex "$file" '^## L74 — AGENT-SECURITY-DENY-RULES-CANONICAL$' "B10_SECURITY L74 heading $(basename "$file")"
-  has "$file" 'id: L74' "B10_SECURITY L74 id $(basename "$file")"
-  has "$file" 'agent-security-control/v1' "B10_SECURITY L74 schema marker $(basename "$file")"
-  has "$file" 'security-control' "B10_SECURITY L74 security-control marker $(basename "$file")"
-  has "$file" 'canonical-security-allow' "B10_SECURITY L74 override marker $(basename "$file")"
+  regex "$file" 'L[0-9]+-L74-agent-security-deny-rules-canonical\.md' "B10_SECURITY L74 index $(basename "$file")"
 done
+doctrine_regex '^## L74 — AGENT-SECURITY-DENY-RULES-CANONICAL$' "B10_SECURITY L74 heading shard"
+doctrine_has 'id: L74' "B10_SECURITY L74 id shard"
+doctrine_has 'agent-security-control/v1' "B10_SECURITY L74 schema marker shard"
+doctrine_has 'security-control' "B10_SECURITY L74 security-control marker shard"
+doctrine_has 'canonical-security-allow' "B10_SECURITY L74 override marker shard"
 
 for ref in L60 L69 L70 flywheel-1z65 flywheel-7lby feedback_orchestrator_validates_callbacks.md feedback_worker_verify_callback_delivered.md feedback_low_bead_threshold_work_hunt.md; do
-  has "$AGENTS" "$ref" "B10_AG6 AGENTS cites $ref"
+  doctrine_has "$ref" "B10_AG6 AGENTS cites $ref"
 done
 
 for bead in flywheel-0wbf flywheel-hf58 flywheel-8xrn flywheel-i8b6 flywheel-zdva flywheel-u2dr flywheel-f589; do
-  has "$AGENTS" "$bead" "B10_AG1 executable proof cites $bead"
+  doctrine_has "$bead" "B10_AG1 executable proof cites $bead"
 done
 
 has "$README" "$PRIMITIVE" "B10_AG3 README primitive"
@@ -89,7 +109,11 @@ has "$CANONICAL" "agent_security_control_doctrine_l74" "B10_SECURITY canonical L
 has "$CANONICAL" "agent_security_control_skill_draft" "B10_SECURITY canonical skill draft path"
 
 for file in "$AGENTS" "$README" "$MEMORY_NOTE" "$SKILL"; do
-  has "$file" "$PRIMITIVE" "B10_AG7 primitive drift check $(basename "$file")"
+  if [[ "$file" == "$AGENTS" ]]; then
+    doctrine_has "$PRIMITIVE" "B10_AG7 primitive drift check $(basename "$file")"
+  else
+    has "$file" "$PRIMITIVE" "B10_AG7 primitive drift check $(basename "$file")"
+  fi
 done
 
 if "$ROOT/.flywheel/scripts/sync-canonical-doctrine.sh" --dry-run --json --root "$ROOT" >/tmp/doctrine-memory-wire-sync.json 2>/tmp/doctrine-memory-wire-sync.err || true; then
