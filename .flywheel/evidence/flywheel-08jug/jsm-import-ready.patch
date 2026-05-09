@@ -1,0 +1,214 @@
+# JSM-import-ready patch for flywheel-08jug (Phase 6.8 — last sub-bead)
+# Skill: ~/.claude/skills/.flywheel/ (unmanaged by JSM at dispatch time)
+# Repo head pre: post-blmd8; post: this commit
+# Date: 2026-05-09
+
+## Changeset summary
+
+### File 1 (edit): ~/.claude/skills/.flywheel/lib/portable/core.d/part-02-portable_doctor.sh
+
+Two regions edited:
+
+(a) Top-of-file source-helper preamble:
+- Added `source $_PD_HELPER_DIR/03-scoped-probes-mid.sh` (paired with the
+  existing 02-scoped-probes-pre source from blmd8).
+
+(b) 6 case-statement bodies replaced with 1-line helper calls:
+- `tick-hook-firing)` (was 19 lines): `_scoped_probe_tick_hook_firing; return $?`
+- `tick-driver)` (was 16 lines): `_scoped_probe_tick_driver; return $?`
+- `loop-driver-writeback)` (was 16 lines): `_scoped_probe_loop_driver_writeback; return $?`
+- `l70-ticks-punted)` (was 19 lines): `_scoped_probe_l70_ticks_punted; return $?`
+- `agents-md-fleet-propagation)` (was 19 lines): `_scoped_probe_agents_md_fleet_propagation; return $?`
+- `beads-db-recovery)` (was 19 lines): `_scoped_probe_beads_db_recovery; return $?`
+
+Net line count: 1503 -> 1415 (-88 lines in entry).
+
+### File 2 (edit): ~/.claude/skills/.flywheel/lib/portable/core.d/portable_doctor.d/02-scoped-probes-pre.sh
+
+Extended `_scoped_probe_run` with two more args (backward-compatible defaults):
+- $4 = base_path (default: "$REPO_ABS/.flywheel/scripts"; alt: "$HOME/.local/bin")
+- $5 = doctor_form: "flag" (default, emits --doctor) | "subcmd" (emits doctor)
+
+These accommodate the 2 mid-probes (tick-driver, loop-driver-writeback) that
+live in $HOME/.local/bin and use a subcommand form (`doctor` not `--doctor`).
+
+Header doc updated to mention the cross-Phase-6.7+6.8 reuse.
+
+Net line count: 107 -> 118 (+11 lines for the new args + comment expansion).
+
+### File 3 (create): ~/.claude/skills/.flywheel/lib/portable/core.d/portable_doctor.d/03-scoped-probes-mid.sh
+
+New file, 43 lines, content embedded below. Defines 6 thin wrapper functions
+(one per mid-probe), each calling `_scoped_probe_run` with the right per-probe
+args. Each wrapper is 3 lines (1 comment, 1 function decl, 1 body line).
+
+DRY win continued: original 6 case bodies totaled ~108 lines; new wrappers + the
++11 lines of generic-helper extension = ~54 lines. Net entry-side savings: 88
+lines collapsed into 18 lines of case bodies. The DRY pattern from 6.7 covered
+ALL 17 mid+pre probes (10 standard + 4 mid + 1 special + 2 alt-path) with one
+parameterized helper.
+
+=== NEW FILE CONTENT: portable_doctor.d/03-scoped-probes-mid.sh ===
+# 03-scoped-probes-mid.sh — mid-aggregation scoped-probe handlers for portable_doctor()
+# Extracted from part-02-portable_doctor.sh per flywheel-08jug (Phase 6.8).
+#
+# Pattern: bash dynamic scoping (luzk7 + blmd8 precedent). Each handler reads
+# caller's locals: $REPO_ABS, $JSON_OUT, $scope.
+#
+# Reuse note: this file depends on _scoped_probe_run + _scoped_probe_emit_missing_script_fail
+# from 02-scoped-probes-pre.sh (sourced before this file by the entry preamble).
+# Phase 6.8 added two more args to _scoped_probe_run (base_path + doctor_form)
+# to cover the 2 mid-probes that use $HOME/.local/bin/<binary> instead of the
+# default $REPO_ABS/.flywheel/scripts/<basename>. The other 4 mid-probes fit
+# the original pattern and could call _scoped_probe_run directly; thin wrappers
+# here exist for self-documentation and for symmetry with the 11 pre-probes.
+
+# Probe 1/6 — tick-hook-firing (standard pattern with --repo + fallback).
+_scoped_probe_tick_hook_firing() {
+    _scoped_probe_run tick-hook-firing-verifier.sh y y
+}
+
+# Probe 2/6 — tick-driver (lives in $HOME/.local/bin; flag form).
+_scoped_probe_tick_driver() {
+    _scoped_probe_run flywheel-tick-driver y n "$HOME/.local/bin" flag
+}
+
+# Probe 3/6 — loop-driver-writeback (lives in $HOME/.local/bin; subcommand form, no --repo).
+_scoped_probe_loop_driver_writeback() {
+    _scoped_probe_run flywheel-loop-driver-writeback n n "$HOME/.local/bin" subcmd
+}
+
+# Probe 4/6 — l70-ticks-punted (standard pattern but no --repo).
+_scoped_probe_l70_ticks_punted() {
+    _scoped_probe_run l70-ticks-punted-counter.sh n y
+}
+
+# Probe 5/6 — agents-md-fleet-propagation (standard pattern but no --repo).
+_scoped_probe_agents_md_fleet_propagation() {
+    _scoped_probe_run agents-md-fleet-propagator.sh n y
+}
+
+# Probe 6/6 — beads-db-recovery (standard pattern with --repo + fallback).
+_scoped_probe_beads_db_recovery() {
+    _scoped_probe_run beads-db-recover.sh y y
+}
+
+=== EXTENDED FILE: portable_doctor.d/02-scoped-probes-pre.sh (post-08jug) ===
+# 02-scoped-probes-pre.sh — pre-aggregation scoped-probe handlers for portable_doctor()
+# Extracted from part-02-portable_doctor.sh per flywheel-blmd8 (Phase 6.7).
+#
+# Pattern: bash dynamic scoping. Each handler relies on caller's locals:
+#   $REPO_ABS, $JSON_OUT, $scope, $scope_cmd, $scope_cmd_arg, $strict, $fix
+# Helpers `return` their handler's exit code; caller's case body does
+# `_scoped_probe_<name>; return $?` so exit codes propagate to portable_doctor().
+#
+# Two helper shapes:
+#   _scoped_probe_run     — generic script-runner; covers 10 of 11 probes
+#   _scoped_probe_auto_l112_gate — special-case (legacy-trend trend computation)
+#
+# Standardization note: the original 10 generic handlers had minor argv-order
+# variations (--doctor --repo --json vs --doctor --json --repo) and 3 of them
+# omitted the $HOME/Developer/flywheel fallback. The unified helper standardizes
+# to `--doctor [--repo $REPO_ABS] [--json]` ordering and parameterizes
+# fallback + repo-passing per call site to preserve original semantics.
+
+# Standardized fail-output for missing/non-executable scoped_doctor.
+_scoped_probe_emit_missing_script_fail() {
+    local scoped_doctor="$1"
+    if [[ "$JSON_OUT" -eq 1 ]]; then
+        jq -n -c --arg scope "$scope" --arg repo "$REPO_ABS" --arg script "$scoped_doctor" '{status:"fail",scope:$scope,repo:$repo,reason:"scoped_doctor_script_missing_or_not_executable",script:$script}'
+    else
+        printf 'FAIL scope=%s reason=scoped_doctor_script_missing_or_not_executable script=%s\n' "$scope" "$scoped_doctor"
+    fi
+}
+
+# Generic scoped-probe runner used by both pre- and mid-aggregation probes
+# (10/11 from 6.7 + 4/6 from 6.8; remaining 2 mid-probes use the same helper
+# with optional base_path + doctor_form args added per flywheel-08jug).
+#   $1 = script_name (basename under base_path/)
+#   $2 = pass_repo: "y" (default) | "n"
+#   $3 = use_fallback: "y" (default) | "n"
+#   $4 = base_path (default: "$REPO_ABS/.flywheel/scripts"; alt: "$HOME/.local/bin")
+#   $5 = doctor_form: "flag" (default, emits --doctor) | "subcmd" (emits doctor)
+_scoped_probe_run() {
+    local script_name="$1"
+    local pass_repo="${2:-y}"
+    local use_fallback="${3:-y}"
+    local base_path="${4:-$REPO_ABS/.flywheel/scripts}"
+    local doctor_form="${5:-flag}"
+    local scoped_doctor="$base_path/$script_name"
+    if [[ "$use_fallback" == "y" && ! -x "$scoped_doctor" ]]; then
+        scoped_doctor="$HOME/Developer/flywheel/.flywheel/scripts/$script_name"
+    fi
+    if [[ -x "$scoped_doctor" ]]; then
+        local args=()
+        if [[ "$doctor_form" == "subcmd" ]]; then
+            args+=(doctor)
+        else
+            args+=(--doctor)
+        fi
+        [[ "$pass_repo" == "y" ]] && args+=(--repo "$REPO_ABS")
+        [[ "$JSON_OUT" -eq 1 ]] && args+=(--json)
+        "$scoped_doctor" "${args[@]}"
+        return $?
+    fi
+    _scoped_probe_emit_missing_script_fail "$scoped_doctor"
+    return 1
+}
+
+# Probe 1/11 — auto-l112-gate (special: computes legacy-trend JSON from ledger,
+# then jq-augments scoped_output with auto_l112_gate_* fields before emit).
+_scoped_probe_auto_l112_gate() {
+    local scoped_doctor="$REPO_ABS/.flywheel/scripts/auto-l112-gate.sh"
+    if [[ -x "$scoped_doctor" ]]; then
+        local scoped_output scoped_rc legacy_trend_json ledger_path
+        set +e
+        if [[ "$JSON_OUT" -eq 1 ]]; then
+            scoped_output="$("$scoped_doctor" --doctor --json)"
+        else
+            scoped_output="$("$scoped_doctor" --doctor --json)"
+        fi
+        scoped_rc=$?
+        set -e
+        if [[ "$scoped_rc" -ne 0 ]] || ! jq -e . >/dev/null 2>&1 <<<"$scoped_output"; then
+            if [[ "$JSON_OUT" -eq 1 ]]; then
+                jq -n -c --arg scope "$scope" --arg repo "$REPO_ABS" --arg output "$scoped_output" '{status:"fail",scope:$scope,repo:$repo,reason:"scoped_doctor_invalid_json",output:$output}'
+            else
+                printf 'FAIL scope=%s reason=scoped_doctor_invalid_json\n' "$scope"
+            fi
+            return 1
+        fi
+        ledger_path="$(jq -r '.ledger_path // empty' <<<"$scoped_output")"
+        if [[ -n "$ledger_path" && -f "$ledger_path" ]]; then
+            legacy_trend_json="$(jq -s -c '
+              map(select(type == "object")) as $all
+              | ($all | map(select(((.ts | fromdateiso8601? // 0) >= (now - 86400)) and ((.failure_class == "missing_or_invalid_l112_probe_fields") or (.failure_class == "missing_or_invalid_l112_probe_fields_or_skill_auto_routes") or (.failure_class == "malformed_envelope")))) | length) as $current
+              | ($all | map(select(((.ts | fromdateiso8601? // 0) < (now - 86400)) and ((.ts | fromdateiso8601? // 0) >= (now - 172800)) and ((.failure_class == "missing_or_invalid_l112_probe_fields") or (.failure_class == "missing_or_invalid_l112_probe_fields_or_skill_auto_routes") or (.failure_class == "malformed_envelope")))) | length) as $previous
+              | {current:$current,previous:$previous,trend:(if $current < $previous then "decreasing" elif $current == $previous then "flat" else "increasing" end)}
+            ' "$ledger_path")"
+        else
+            legacy_trend_json='{"current":0,"previous":0,"trend":"flat"}'
+        fi
+        scoped_output="$(jq -c --argjson trend "$legacy_trend_json" '
+          .auto_l112_gate_runs_24h = (.gate_runs_last_24h // 0)
+          | .auto_l112_gate_pass_rate_24h = (.gate_pass_rate // 1)
+          | .auto_l112_gate_envelope_missing_count_24h = (.envelope_missing_probe_count // $trend.current // 0)
+          | .auto_l112_gate_envelope_missing_count_previous_24h = ($trend.previous // 0)
+          | .auto_l112_gate_legacy_migration_trend = ($trend.trend // "flat")
+          | .auto_l112_gate_legacy_migration_health = (if (($trend.current // 0) <= ($trend.previous // 0)) then "pass" else "warn" end)
+          | .status = (if (($trend.current // 0) <= ($trend.previous // 0)) then "pass" else "warn" end)
+        ' <<<"$scoped_output")"
+        if [[ "$JSON_OUT" -eq 1 ]]; then
+            printf '%s\n' "$scoped_output"
+        else
+            printf 'status=%s auto_l112_gate_runs_24h=%s auto_l112_gate_pass_rate_24h=%s auto_l112_gate_envelope_missing_count_24h=%s\n' \
+                "$(jq -r '.status' <<<"$scoped_output")" \
+                "$(jq -r '.auto_l112_gate_runs_24h' <<<"$scoped_output")" \
+                "$(jq -r '.auto_l112_gate_pass_rate_24h' <<<"$scoped_output")" \
+                "$(jq -r '.auto_l112_gate_envelope_missing_count_24h' <<<"$scoped_output")"
+        fi
+        return 0
+    fi
+    _scoped_probe_emit_missing_script_fail "$scoped_doctor"
+    return 1
+}
