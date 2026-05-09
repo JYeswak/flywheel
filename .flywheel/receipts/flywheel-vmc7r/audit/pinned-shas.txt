@@ -1,0 +1,8 @@
+probe-pre-fix: 58e297d696af60dde10e3730ed8423b9f1e47919
+probe-post-fix-working: da73394a31fee181c6e659ad41ef15756fa40cfdf5a5ec2a5dbebe829ebcedea
+test-working: 7e5569507f3f8a2b6d5a80d65f1ba7c41cb1c640a42e81d6aa943ef9c405a929
+branch: master
+head: e6f5d437e5f12e6f2bfce0eb3319a9d3c5205856
+vmc7r-status: ○ flywheel-vmc7r · [heuristic-fix] gap-hunt-probe wired-but-cold: 4MB budget cap creates false positives   [● P3 · OPEN]
+7h3om-status: ✓ flywheel-7h3om · [gap-hunt-probe] wired-but-cold detector false-positive when 4MB ledger budget caps before later-alphabet ledgers   [● P3 · CLOSED]
+regression-test: pass=7 fail=0

@@ -1,0 +1,43 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-vmc7r-399a75",
+  "bead": "flywheel-vmc7r",
+  "supersedes": "flywheel-7h3om",
+  "fix_function": "recent_ledger_text in .flywheel/scripts/gap-hunt-probe.sh:355",
+  "fix_shape": "two-pass: always-complete name corpus (no budget) + budgeted content sorted mtime-desc; repo dispatch-log included",
+  "live_dod_proof": {
+    "lib_mission_sh_flagged": false,
+    "lib_fuckup_sh_flagged": false,
+    "wired_but_cold_count_after_fix": 20
+  },
+  "regression_test": {
+    "path": ".flywheel/tests/test-gap-hunt-probe-wired-but-cold-budget.sh",
+    "pass": 7,
+    "fail": 0
+  },
+  "score": 920,
+  "max": 1000,
+  "score_basis": "DoD met (target scripts no longer flagged); regression test 7/7 PASS with fixture exercising the actual budget-cap mechanism; structural fix not allowlist; canonical-cli-scoping triad preserved; foreign duplicate bead closed as superseded by orch",
+  "cli_canonical": "yes",
+  "rust_clean": "n/a",
+  "python_clean": "yes",
+  "readme_quality": "n/a",
+  "skill_auto_routes_addressed": {
+    "canonical-cli-scoping": "yes",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "yes",
+    "readme-writing": "n/a"
+  },
+  "four_lens": {"brand": 9, "sniff": 9, "jeff": 9, "public": 9},
+  "files_reserved": [
+    "/Users/josh/Developer/flywheel/.flywheel/scripts/gap-hunt-probe.sh",
+    "/Users/josh/Developer/flywheel/.flywheel/tests/test-gap-hunt-probe-wired-but-cold-budget.sh"
+  ],
+  "evidence_paths": [
+    ".flywheel/receipts/flywheel-vmc7r/audit/evidence.md",
+    ".flywheel/receipts/flywheel-vmc7r/audit/test-output.txt",
+    ".flywheel/receipts/flywheel-vmc7r/audit/pinned-shas.txt"
+  ],
+  "beads_filed": [],
+  "beads_updated": ["flywheel-7h3om"]
+}

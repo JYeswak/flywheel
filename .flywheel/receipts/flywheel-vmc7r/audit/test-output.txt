@@ -1,0 +1,10 @@
+PASS T1 probe ran against fixture
+PASS T2 fixture junk ledgers exceed 4MB budget (have=5616000)
+PASS T3 target script vmc7r-target.sh NOT flagged wired-but-cold (regression for vmc7r/2xdi.41/2xdi.42)
+PASS T4a lib/mission.sh NOT flagged in live wired-but-cold (vmc7r DoD)
+PASS T4b lib/fuckup.sh NOT flagged in live wired-but-cold (2xdi.41 DoD)
+PASS T5a --info still rc=0
+PASS T5b --schema still rc=0
+
+=== test-gap-hunt-probe-wired-but-cold-budget.sh ===
+pass=7 fail=0

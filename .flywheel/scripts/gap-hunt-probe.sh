@@ -353,26 +353,68 @@ def gap(cls: str, name: str, evidence: str) -> dict:
 
 
 def recent_ledger_text(days: int = 30, max_bytes: int = 4_000_000) -> str:
+    """
+    Build a corpus of recent ledger evidence for the wired-but-cold detector.
+
+    Two-pass design (fix for flywheel-vmc7r false-positive class):
+
+      Pass 1 — name corpus, ALWAYS COMPLETE (no budget). Every recent-window
+      ledger basename joins the corpus. Fixes the case where a script is only
+      referenced by a same-named ledger file that sorts alphabetically late
+      enough to be elided by Pass 2's budget cap (e.g. fuckup-log.jsonl,
+      doctrine-sync-ledger.jsonl behind agents-md-fleet-propagation.jsonl
+      @1.8MB and br-db-corruption-monitor-ledger.jsonl @991KB).
+
+      Pass 2 — content corpus, BUDGETED, mtime-DESCENDING. Most recent
+      ledgers get sampled first so high-signal recent activity always
+      contributes content even when the budget is tight.
+
+    Also pulls in the repo-local dispatch-log.jsonl (high-signal source for
+    wired/warm scripts) per the bead's fix proposal #4.
+    """
     cutoff = time.time() - days * 86400
-    chunks: list[str] = []
-    used = 0
     if not STATE_DIR.exists():
         warn(f"state dir missing: {STATE_DIR}")
         return ""
-    for path in sorted(STATE_DIR.glob("*.jsonl")):
+
+    candidates: list[tuple[float, Path]] = []
+    for path in STATE_DIR.glob("*.jsonl"):
         if path.name == LEDGER.name:
             continue
         try:
-            if path.stat().st_mtime < cutoff:
-                continue
-            text = read_text(path, max(0, max_bytes - used))
-            chunks.append(path.name + "\n" + text)
-            used += len(text)
-            if used >= max_bytes:
-                warn("recent ledger text capped for cold-wire audit")
-                break
+            mtime = path.stat().st_mtime
         except Exception:
             continue
+        if mtime < cutoff:
+            continue
+        candidates.append((mtime, path))
+
+    repo_dispatch_log = REPO_ROOT / ".flywheel" / "dispatch-log.jsonl"
+    if repo_dispatch_log.exists():
+        try:
+            mtime = repo_dispatch_log.stat().st_mtime
+            if mtime >= cutoff:
+                candidates.append((mtime, repo_dispatch_log))
+        except Exception:
+            pass
+
+    name_corpus = "\n".join(path.name for _, path in candidates)
+
+    chunks: list[str] = [name_corpus]
+    used = len(name_corpus)
+    candidates.sort(key=lambda kv: kv[0], reverse=True)
+    for _, path in candidates:
+        if used >= max_bytes:
+            warn("recent ledger text content capped (names always-complete)")
+            break
+        try:
+            text = read_text(path, max(0, max_bytes - used))
+        except Exception:
+            continue
+        if not text:
+            continue
+        chunks.append(text)
+        used += len(text)
     return "\n".join(chunks)
 
 
