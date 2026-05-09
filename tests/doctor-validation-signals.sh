@@ -17,7 +17,8 @@ make_repo() {
   rm -rf "$repo"
   mkdir -p "$repo/.flywheel/scripts" "$repo/.flywheel/runtime/flywheel-loop" \
     "$repo/.flywheel/validation-schema/v1" "$repo/.flywheel/validation-receipts" \
-    "$repo/.beads"
+    "$repo/.flywheel/security/v1" "$repo/.flywheel/receipts/flywheel-vl9of" \
+    "$repo/.claude" "$repo/.beads"
   git -C "$repo" init -q >/dev/null 2>&1
   printf '# Mission\n\nstatus: ready\n' >"$repo/.flywheel/MISSION.md"
   printf '# Goal\n\nstatus: ready\n' >"$repo/.flywheel/GOAL.md"
@@ -28,6 +29,21 @@ make_repo() {
   cp "$ROOT/.flywheel/validation-schema/v1/schema.json" "$repo/.flywheel/validation-schema/v1/schema.json"
   cp "$ROOT/.flywheel/validation-schema/v1/parse.sh" "$repo/.flywheel/validation-schema/v1/parse.sh"
   chmod +x "$repo/.flywheel/validation-schema/v1/parse.sh" "$repo/.flywheel/scripts/ticks-punted-probe.sh" "$repo/.flywheel/scripts/closed-bead-artifact-scan.py"
+  cp "$ROOT/.flywheel/security/v1/claude-settings-deny.json" "$repo/.flywheel/security/v1/claude-settings-deny.json"
+  jq '{permissions:{deny:.permissions.deny}}' "$repo/.flywheel/security/v1/claude-settings-deny.json" >"$repo/.claude/settings.json"
+  python3 - "$repo" <<'PY'
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+import sys
+
+repo = Path(sys.argv[1])
+(repo / ".flywheel/receipts/flywheel-vl9of/security-settings-rollout-receipt.json").write_text(json.dumps({
+    "schema_version": "security-settings-rollout/v1",
+    "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+    "token_shaped_values": False,
+}))
+PY
   printf 'validation_receipt_schema_v1\t.flywheel/validation-schema/v1/schema.json\tflywheel-bc7c\tpresent\n' >"$repo/.flywheel/canonical-paths.txt"
   printf 'missing_surface\t.flywheel/missing-surface.txt\tflywheel-zgo3\tfixture missing path\n' >>"$repo/.flywheel/canonical-paths.txt"
   python3 - "$repo" <<'PY'
@@ -49,6 +65,9 @@ base = {
         "raw_ref": "DONE b04-fixture evidence=fixture",
     },
     "status": "pass",
+    "failure_class": None,
+    "retry_policy": "none",
+    "recovery_hint": "No recovery needed; validation passed.",
     "failure_classes": [],
     "evidence": [{"type": "path", "ref": ".flywheel/validation-schema/v1/schema.json"}],
     "artifact_checks": [{"artifact_id": "schema", "path": ".flywheel/validation-schema/v1/schema.json", "status": "exists"}],
@@ -69,6 +88,9 @@ failed = dict(base)
 failed["dispatch_id"] = "b04-failed"
 failed["status"] = "fail"
 failed["failure_classes"] = ["artifact_missing"]
+failed["failure_class"] = "missing_artifact"
+failed["retry_policy"] = "manual"
+failed["recovery_hint"] = "Restore or regenerate the referenced evidence artifact, then rerun validation with the same evidence path."
 failed["artifact_checks"] = [{"artifact_id": "missing", "path": "missing-artifact.md", "status": "missing"}]
 failed["learn_route"] = {"route": "review", "reason": "fixture failed validation"}
 (receipts / "02-fail.json").write_text(json.dumps(failed))
@@ -77,6 +99,9 @@ drift = dict(base)
 drift["dispatch_id"] = "b04-drift"
 drift["status"] = "fail"
 drift["failure_classes"] = ["context_drift"]
+drift["failure_class"] = "context_drift"
+drift["retry_policy"] = "manual"
+drift["recovery_hint"] = "Reprobe from both orchestrator and agent contexts; do not summarize until the contexts agree or the drift is named."
 drift["runtime_context"] = dict(base["runtime_context"])
 drift["runtime_context"]["context_drift"] = True
 drift["learn_route"] = {"route": "review", "reason": "fixture context drift"}
@@ -144,6 +169,8 @@ assert_jq "$out" '.closed_bead_artifact_missing_count == 1' "B04_AG5 closed_bead
 assert_jq "$out" '.closed_bead_reopen_candidates_count == 1 and (.callback_validation.closed_bead_reopen_scan.candidates | length) == 1' "B07 doctor field closed_bead_reopen_candidates_count"
 assert_jq "$out" '.validation_receipts_schema_invalid_count >= 1 and .agent_context_probe_drift_count == 1 and .validation_events_unrouted_count == 1' "B04_AG6 secondary validation signals"
 assert_jq "$out" '(.callback_validation.signals | length) >= 8 and all(.callback_validation.signals[]; has("producer") and has("measurement") and has("consumer") and has("promotion_path"))' "B04_AG7 L60 signal metadata"
+assert_jq "$out" 'has("security") and (.security.settings_deny_rules_present | type) == "boolean"' "security doctor settings_deny_rules_present boolean"
+assert_jq "$out" '(.security.signals | length) >= 5 and all(.security.signals[]; has("producer") and has("measurement") and has("consumer") and has("promotion_path"))' "security doctor signal metadata"
 assert_jq "$out" '.storage.status == "ok" and .storage.disk_free_pct == 43 and .storage.stale_baks_count == 0 and .storage.tmp_entry_count == 0 and .storage.tmp_entry_count_status == "ok"' "B13 storage doctor field"
 assert_jq "$out" 'has("storage_override") and .storage_override_active_count == 0 and (.storage_override_expiring_in_min == null)' "B13 storage override doctor fields"
 if [[ "$strict_rc" -ne 0 ]] && jq -e '.status == "fail" and any(.errors[]?; .code == "callbacks_unvalidated_count")' "$strict_out" >/dev/null; then
