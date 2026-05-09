@@ -5988,6 +5988,72 @@ Evidence:
 - Test: `tests/worker-stall-alert-probe.sh`.
 - Bead: `flywheel-2ljj`.
 
+### Sibling Sub-Class: integrate_worker_not_waiting (synonym, earlier precedent — 2026-05-09 merge)
+
+Sub-class: `integrate_worker_not_waiting` — a synonym of the
+parent class with negative-frame phrasing. Same shape, same fleet,
+earlier-precedent rows than the parent (`fuckup-log.jsonl` lines
+351, 353, 358, 359 on 2026-05-03 — predates the parent's L435-L437
+rows on 2026-05-04 by ~5h). The parent's Forever-Rule applies
+verbatim; this sub-class block exists so the L56 ladder probe
+recognizes the synonym and stops re-firing as a separate
+promotion candidate.
+
+Event Count: 4 events on 2026-05-03 (21:42:52, 21:47:49, 22:02:54,
+22:13:05 UTC), all `mobile-eats:0.1`, all `severity=low`,
+`what_attempted=[]`, `what_worked=[]`. Probe
+`doctrine-ladder-promote.sh` filed `flywheel-6grpt` after
+detecting these 4 rows.
+
+Cost: identical to parent class — INTEGRATE tick correctly
+deferred callback reaping when worker pane 2 was still THINKING.
+The pattern carried slightly different prose ("reaping blocked by
+worker-capacity gate" instead of "deferred reaping without
+touching worker files"), but the canonical-safe-deferral outcome
+was the same. No worker files mutated, no substrate damage.
+
+Root Cause (extends parent): two synonymous trauma-class names
+("integrate_worker_not_waiting" and "integrate_worker_active")
+were emitted by different code paths on the same fleet pane during
+overlapping date ranges, so the L56 ladder treated them as
+distinct classes and double-promoted. The behavior under both
+names is identical and canonical-safe; the divergence is naming
+discipline, not behavior.
+
+Forever-Rule (parent applies; sub-class extension): every
+"INTEGRATE prelude saw pane THINKING, deferred reaping" event,
+regardless of which synonym name the emitting probe uses, routes
+to the parent class's wait/observe contract (L91/L95 path).
+Probes/scripts emitting this trauma class SHOULD use the parent
+name `integrate_worker_active`; the synonym
+`integrate_worker_not_waiting` is recognized for backward
+compatibility but discouraged for new code.
+
+Synonym Naming Note: a future maintenance bead
+(`flywheel-jlc4q`, see Evidence) may unify the emitting probe to
+emit only `integrate_worker_active` so the L56 ladder dedup is
+deterministic.
+
+Fix Applied/Status: Path A merge — no source-code change, no new
+top-level INCIDENTS section, no probe edit. Sub-class block makes
+the L56 ladder see synonym coverage and skip re-firing on the
+4-row precedent cluster.
+
+Evidence (sub-class):
+- Trauma rows: `~/.local/state/flywheel/fuckup-log.jsonl` lines
+  351, 353, 358, 359 on 2026-05-03T21:42:52Z, 21:47:49Z,
+  22:02:54Z, 22:13:05Z; all `mobile-eats:0.1`,
+  `git_repo=/Users/josh/Developer/mobile-eats`, all
+  `severity=low`, `what_attempted=[]`, `what_worked=[]`.
+- Parent class rows for comparison:
+  `~/.local/state/flywheel/fuckup-log.jsonl` lines 435-437 on
+  2026-05-04T02:56:13Z, 03:01:05Z, 03:16:13Z (same fleet pane).
+- Parent class section: `## integrate_worker_active` above.
+- Bead: `flywheel-6grpt` (this dispatch).
+- Synonym-unification follow-up bead: `flywheel-jlc4q` (filed by
+  this close — names the probe-emitter unification work as a
+  separate scope).
+
 ## worker-evidence-file-write-before-reservation
 
 Date: 2026-05-08
@@ -7832,3 +7898,87 @@ Evidence:
 - Bead: `flywheel-2xdi.40` (this dispatch).
 - Sibling fix (precedent): `flywheel-2xdi.32` (made autoloop-executor.sh self-log to address `wired-but-cold` rule; this dispatch handles the sibling `cross-source-silos` rule for the same ledger).
 - Systemic followup: `flywheel-gui5f` (extend cross-source-silos probe with self-instrumentation awareness).
+
+## file-reservation-conflict — already covered by L137+L138 (2026-05-09 cross-reference)
+
+Date: 2026-05-09
+
+Class: `file-reservation-conflict`
+
+Event Count: 12 events in 7d (2026-05-05 → 2026-05-09); HIGH-frequency operational class.
+
+Severity: low (working-as-designed reservation system surfacing legitimate conflicts; canonical pivot patterns exist).
+
+Cost: workers attempting to mutate shared surfaces (`INCIDENTS.md`,
+`.beads/issues.jsonl`, `AGENTS.md`, `.flywheel/AGENTS-CANONICAL.md`,
+backend/src/hubspot_governance/customer_sync.py, T12 copy.ts, etc.)
+encounter active Agent Mail / shared-surface reservations from peer panes.
+Each event adds 30s-3min of pivot time as the worker either (a) retries with
+Monitor/poll, (b) coordinates via Agent Mail, (c) skips the mutation and
+records BLOCKED, OR (d) splits into additive-only artifacts with reservation
+ranges scoped narrowly. No data lost or substrate corrupted.
+
+Root Cause: shared-surface reservation system is operating correctly. The
+trauma is the EXPECTED LATENCY of multi-pane coordination on hot files
+(INCIDENTS.md cycled through panes 2/3/4 ~6 times today; .beads/issues.jsonl
+similar; AGENTS.md occasional) plus the operational cost of pivot patterns.
+The pattern is healthy fleet-coordination, not a bug.
+
+Forever-Rule (already shipped, 2026-05-08):
+
+- **L137** (`L088-L137-beads-mutations-use-a-serial-write-lane.md`,
+  `trauma_class: file-reservation-conflict`): repo-local Beads mutation is
+  a single-writer lane. Workers do NOT reserve `.beads/issues.jsonl` or
+  `.beads/beads.db` as ordinary edit files around `br create`/`br update`/
+  `br close`. `br` owns SQLite transactions, WAL/busy-timeout, atomic JSONL
+  export. Use `br --lock-timeout 10000` for automation; do not hold long-
+  lived exclusive reservations on `.beads/`. If multiple panes need bead
+  writes in the same minute, serialize through the lane and report queue
+  depth instead of fail-closing on file-reservation conflict.
+
+- **L138** (`L089-L138-identity-deferral-after-reservation-clear.md`):
+  identity decisions are state reads, not dispatch-time memory. When a
+  worker observes an active reservation on `AGENTS.md`,
+  `.flywheel/AGENTS-CANONICAL.md`, `.flywheel/AGENTS.md`, or
+  `.beads/issues.jsonl` while identity doctrine is relevant, defer identity
+  decisions until the reservation clears, then re-read.
+
+Canonical pivot patterns (worker-side, observed today):
+
+1. **Monitor/poll-and-retry** — worker spawns `until reserve --reserve PATH ...; do sleep 5; done` and waits up to ~5 min. Used by `flywheel-8io1s` retry r2 (`f8ebdb`) and this dispatch (`l7ssi`). Best for additive INCIDENTS appends.
+
+2. **BLOCKED callback** — worker emits `BLOCKED reason=<path>-reserved-by-peer-pane-N` with draft entry in evidence; orchestrator re-dispatches when free. Used by `flywheel-8io1s` r1 (`ad242e`).
+
+3. **Agent Mail coordination** — worker sends a `request_contact` / coordination message and resumes after peer acks (per `feedback_shared_append_reservation_deadlock_family`).
+
+4. **Additive-namespace scoping** — when the conflict is on prose content (e.g. T12 copy.ts), edit a different namespace within the same file rather than racing the prose owner.
+
+5. **`br --lock-timeout 10000`** — for `.beads/` mutations, use the explicit lock-timeout flag instead of file reservation (per L137).
+
+Fix Applied/Status: Doctrine landed 2026-05-08 in L137+L138. No source-code
+change to the reservation system needed because the system IS the fix —
+reservations correctly serialize concurrent edits. This INCIDENTS entry
+documents the canonical pivot patterns for worker reuse and closes the L56
+ladder probe loop for the class.
+
+Recurrence Prevention: Donella leverage point #6 (information flow) — the
+ladder probe now sees the class in INCIDENTS.md and skips. Donella #5 (rules)
+— L137 + L138 are the canonical doctrine. Donella #2 (buffer size) — the
+canonical pivot patterns above are the worker-side knobs (poll, BLOCK,
+coordinate, scope, lock-timeout). `flywheel-vl0c9` (filed by `flywheel-u5ml3`)
+will eventually extend the ladder probe to scan `.flywheel/rules/` too,
+eliminating per-class INCIDENTS edits for L-rule-covered classes.
+
+Evidence:
+- Trauma rows: `~/.local/state/flywheel/fuckup-log.jsonl` 12 rows from
+  2026-05-05T10:38:34Z through 2026-05-09T04:18:34Z; affected surfaces include
+  `.beads/issues.jsonl` (5+ events), `INCIDENTS.md` (3+ events), `AGENTS.md`
+  (1 event), backend/src files (2 events), T12 copy.ts (1 event).
+- L137 rule: `.flywheel/rules/L088-L137-beads-mutations-use-a-serial-write-lane.md`.
+- L138 rule: `.flywheel/rules/L089-L138-identity-deferral-after-reservation-clear.md`.
+- Reservation system: `.flywheel/scripts/shared-surface-reservation-check.sh` + ledger `~/.local/state/flywheel/file-reservations.jsonl`.
+- This dispatch (4th instance of cross-reference pattern today): `flywheel-l7ssi`.
+- Sibling cross-references today (precedent): `flywheel-u5ml3` (daily_report_missing_dispatch_gate), `flywheel-8io1s` (dcg-blocked-temp-cleanup), `flywheel-2xdi.40` (autoloop-executor.jsonl), this dispatch.
+- Memory cross-refs: `feedback_shared_append_reservation_deadlock_family.md`,
+  `feedback_orch_handshakes_never_gate_on_joshua.md`,
+  `feedback_shared_append_short_lease_stable_tail.md`.
