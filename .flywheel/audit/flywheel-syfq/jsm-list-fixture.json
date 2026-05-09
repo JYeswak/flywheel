@@ -1,0 +1,14 @@
+{
+  "skills": [
+    {
+      "name": "agent-fleet-management",
+      "version": 1,
+      "is_saved": false,
+      "is_jeffreys": false,
+      "installed_at": ""
+    }
+  ],
+  "count": 1,
+  "source": "fixture for packet validation after live jsm list timed out; publish decision is defer/no-push"
+}
+

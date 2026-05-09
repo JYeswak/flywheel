@@ -1,0 +1,134 @@
+{
+  "schema_version": "validation-receipt/v1",
+  "dispatch_id": "flywheel-syfq-0272b3",
+  "callback_ref": {
+    "transport": "ntm",
+    "kind": "DONE",
+    "session": "flywheel",
+    "pane": 1,
+    "received_at": "2026-05-09T08:18:00Z"
+  },
+  "status": "pass",
+  "failure_class": null,
+  "retry_policy": "none",
+  "recovery_hint": "No recovery required; JSM publication is explicitly deferred until publish scope or a redacting publisher wrapper exists.",
+  "failure_classes": [],
+  "evidence": [
+    {
+      "type": "path",
+      "ref": ".flywheel/audit/flywheel-syfq/compliance-pack.md"
+    },
+    {
+      "type": "command",
+      "ref": ".flywheel/audit/flywheel-syfq/l112-probe.sh"
+    },
+    {
+      "type": "bead_id",
+      "ref": "flywheel-syfq"
+    },
+    {
+      "type": "bead_id",
+      "ref": "flywheel-th8w"
+    }
+  ],
+  "artifact_checks": [
+    {
+      "artifact_id": "decision-evidence",
+      "path": ".flywheel/audit/flywheel-syfq/compliance-pack.md",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "l112-probe",
+      "path": ".flywheel/audit/flywheel-syfq/l112-probe.sh",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "jsm-fixture",
+      "path": ".flywheel/audit/flywheel-syfq/jsm-list-fixture.json",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "packet",
+      "path": "/tmp/dispatch_flywheel-syfq-0272b3.md",
+      "status": "exists"
+    }
+  ],
+  "runtime_context": {
+    "agent_context": {
+      "status": "responsive",
+      "probe_ref": ".flywheel/audit/flywheel-syfq/l112-probe.sh",
+      "resolved_tools": [
+        "socraticode",
+        "br",
+        "git",
+        "bash",
+        "jq",
+        "rg",
+        "jsm"
+      ]
+    },
+    "orchestrator_shell_context": {
+      "status": "responsive",
+      "probe_ref": ".flywheel/scripts/verify-callback-delivery.sh",
+      "resolved_tools": [
+        "ntm"
+      ]
+    },
+    "timeout": false,
+    "context_drift": false
+  },
+  "agent_mail": {
+    "agent_mail_thread": "flywheel-syfq-0272b3",
+    "identity_name": "MistyCliff",
+    "files_reserved": [
+      ".flywheel/audit/flywheel-syfq",
+      ".beads/issues.jsonl"
+    ],
+    "files_released": [
+      ".flywheel/audit/flywheel-syfq",
+      ".beads/issues.jsonl"
+    ],
+    "reservation_conflicts": [],
+    "reservation_lifecycle": {
+      "state": "released",
+      "reason": "All L107 shared-surface reservations are released before DONE callback."
+    }
+  },
+  "evidence_redaction": {
+    "evidence_redacted": "n/a",
+    "required": false,
+    "evidence_paths": [
+      ".flywheel/audit/flywheel-syfq/compliance-pack.md"
+    ],
+    "status": "pass",
+    "owner": "MistyCliff",
+    "remediation": "No push output or signed upload URL was collected."
+  },
+  "bead_actions": [
+    {
+      "action": "updated",
+      "bead": "flywheel-syfq"
+    },
+    {
+      "action": "no_bead_reason",
+      "reason": "No new bead needed; publish remains gated on explicit publish scope or a redacting publisher wrapper."
+    }
+  ],
+  "learn_route": {
+    "route": "ignore",
+    "reason": "This is a scoped publish decision closeout, not a reusable skill change."
+  },
+  "chain_blocker": {
+    "next_phase": null,
+    "capacity_available": false,
+    "chain_blocked_reason": null
+  },
+  "summary": {
+    "decision": "keep-local-only",
+    "push_executed": false,
+    "jsm_validate": "pass",
+    "socraticode_queries": 1,
+    "indexed_chunks_observed": 10,
+    "compliance_score": "850/1000"
+  }
+}
