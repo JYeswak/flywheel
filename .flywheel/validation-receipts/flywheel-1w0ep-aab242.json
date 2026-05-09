@@ -1,0 +1,119 @@
+{
+  "schema_version": "validation-receipt/v1",
+  "dispatch_id": "flywheel-1w0ep-aab242",
+  "callback_ref": {
+    "transport": "ntm",
+    "session": "flywheel",
+    "pane": 1,
+    "kind": "DONE",
+    "received_at": "2026-05-09T01:20:33Z",
+    "raw_ref": "pending-callback"
+  },
+  "status": "pass",
+  "failure_class": null,
+  "retry_policy": "none",
+  "recovery_hint": "none",
+  "failure_classes": [],
+  "evidence": [
+    {
+      "type": "path",
+      "ref": ".flywheel/receipts/flywheel-1w0ep/evidence.md"
+    },
+    {
+      "type": "path",
+      "ref": ".flywheel/compliance-packs/flywheel-1w0ep/"
+    },
+    {
+      "type": "command",
+      "ref": "bash tests/security-precommit-hook.sh"
+    }
+  ],
+  "artifact_checks": [
+    {
+      "artifact_id": "committed-hook",
+      "path": "githooks/pre-commit",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "installer",
+      "path": ".flywheel/scripts/security-precommit-installer.sh",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "test",
+      "path": "tests/security-precommit-hook.sh",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "compliance-pack",
+      "path": ".flywheel/compliance-packs/flywheel-1w0ep/",
+      "status": "exists"
+    }
+  ],
+  "runtime_context": {
+    "agent_context": {
+      "status": "responsive",
+      "probe_ref": "codex-pane active",
+      "resolved_tools": [
+        "exec_command",
+        "apply_patch",
+        "socraticode"
+      ]
+    },
+    "orchestrator_shell_context": {
+      "status": "responsive",
+      "probe_ref": "dispatch-template-audit valid=true",
+      "resolved_tools": [
+        "ntm"
+      ]
+    },
+    "timeout": false,
+    "timeout_seconds": 0,
+    "context_drift": false
+  },
+  "agent_mail": {
+    "agent_mail_thread": null,
+    "identity_name": "MagentaPond",
+    "files_reserved": [
+      "githooks/pre-commit",
+      ".flywheel/scripts/security-precommit-installer.sh",
+      "tests/security-precommit-hook.sh",
+      "tests/fixtures/security-precommit-hook/safe/.env.example",
+      "tests/fixtures/security-precommit-hook/README.md",
+      ".flywheel/receipts/flywheel-1w0ep/evidence.md",
+      ".flywheel/validation-receipts/flywheel-1w0ep-aab242.json",
+      ".flywheel/compliance-packs/flywheel-1w0ep/"
+    ],
+    "files_released": [
+      "githooks/pre-commit",
+      ".flywheel/scripts/security-precommit-installer.sh",
+      "tests/security-precommit-hook.sh",
+      "tests/fixtures/security-precommit-hook/safe/.env.example",
+      "tests/fixtures/security-precommit-hook/README.md",
+      ".flywheel/receipts/flywheel-1w0ep/evidence.md",
+      ".flywheel/validation-receipts/flywheel-1w0ep-aab242.json",
+      ".flywheel/compliance-packs/flywheel-1w0ep/"
+    ],
+    "reservation_conflicts": [],
+    "reservation_lifecycle": {
+      "state": "released",
+      "reason": "L107 shared-surface reservations released after path-scoped commit."
+    }
+  },
+  "bead_actions": [
+    {
+      "action": "no_bead_reason",
+      "reason": "No new issue was discovered; this dispatch completed the existing bead acceptance gates.",
+      "evidence_ref": ".flywheel/receipts/flywheel-1w0ep/evidence.md"
+    }
+  ],
+  "learn_route": {
+    "route": "ignore",
+    "reason": "Clean implementation dispatch; no new recurring failure class."
+  },
+  "chain_blocker": {
+    "next_phase": "flywheel-1gyiv",
+    "capacity_available": false,
+    "chain_blocked_reason": "B09 remains gated by other open prerequisites outside this dispatch."
+  }
+}

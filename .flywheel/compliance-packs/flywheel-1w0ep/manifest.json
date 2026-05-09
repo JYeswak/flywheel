@@ -1,0 +1,20 @@
+{
+  "schema_version": "beads-compliance-pack/v1",
+  "bead_id": "flywheel-1w0ep",
+  "task_id": "flywheel-1w0ep-aab242",
+  "generated_at": "2026-05-09T01:20:33Z",
+  "compliance_score": 930,
+  "required_files": [
+    "spec.json",
+    "evidence.json",
+    "compliance.json",
+    "theater.json",
+    "test_depth.json",
+    "scorecard.md",
+    "REPORT.md"
+  ],
+  "convergence": {
+    "streak": 2,
+    "basis": "bead acceptance plus fixture-backed integration test"
+  }
+}

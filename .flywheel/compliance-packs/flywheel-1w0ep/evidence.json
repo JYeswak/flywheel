@@ -1,0 +1,20 @@
+{
+  "evidence_items": [
+    {
+      "path": "githooks/pre-commit",
+      "claim": "Committed pre-commit dispatcher invokes the security installer hook path."
+    },
+    {
+      "path": ".flywheel/scripts/security-precommit-installer.sh",
+      "claim": "Installer supports dry-run/apply, staged scan, run-hook chaining, JSON state commands, and stable exit codes."
+    },
+    {
+      "path": "tests/security-precommit-hook.sh",
+      "claim": "Fixture-backed test proves install, block, safe pass, and chained-hook behavior."
+    },
+    {
+      "path": ".flywheel/security/v1/secret-patterns.json",
+      "claim": "Scanner reads the shared synthetic secret pattern corpus and emits classes/paths only."
+    }
+  ]
+}

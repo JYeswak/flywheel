@@ -1,0 +1,17 @@
+{
+  "test_depth": "fixture integration",
+  "commands": [
+    "bash tests/security-precommit-hook.sh",
+    "bash tests/canary-secret-scan.sh",
+    "bash .flywheel/scripts/test-safe-probe.sh",
+    "bash .flywheel/validation-schema/v1/dispatch-template-audit.sh /tmp/dispatch_flywheel-1w0ep-aab242.md"
+  ],
+  "coverage": [
+    "installer dry-run",
+    "installer apply",
+    "staged secret block",
+    "safe .env.example pass",
+    "existing hook backup and chain",
+    "doctor JSON state"
+  ]
+}

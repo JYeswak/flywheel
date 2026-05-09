@@ -1,0 +1,19 @@
+{
+  "theater_signals": [
+    {
+      "signal": "real_git_commit_fixture",
+      "status": "pass",
+      "evidence": "tests/security-precommit-hook.sh runs actual fixture commits through core.hooksPath=githooks."
+    },
+    {
+      "signal": "secret_value_non_echo",
+      "status": "pass",
+      "evidence": "Blocked commit output is asserted not to contain the synthetic canary value."
+    },
+    {
+      "signal": "dry_run_mutation_gate",
+      "status": "pass",
+      "evidence": "Dry-run leaves core.hooksPath unset."
+    }
+  ]
+}

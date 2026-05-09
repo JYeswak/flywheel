@@ -1,0 +1,36 @@
+{
+  "bead_id": "flywheel-1w0ep",
+  "task_id": "flywheel-1w0ep-aab242",
+  "acceptance_criteria": [
+    {
+      "id": "AG1",
+      "text": "bash tests/security-precommit-hook.sh passes",
+      "status": "pass",
+      "evidence": "PASS security-precommit-hook tests=11"
+    },
+    {
+      "id": "AG2",
+      "text": "staged fake secret blocks commit with class/path only",
+      "status": "pass",
+      "evidence": "staged_fake_secret_blocks_commit_class_path_only"
+    },
+    {
+      "id": "AG3",
+      "text": "safe synthetic .env.example passes",
+      "status": "pass",
+      "evidence": "safe_synthetic_env_example_passes"
+    },
+    {
+      "id": "AG4",
+      "text": "fixture sets core.hooksPath only after --apply",
+      "status": "pass",
+      "evidence": "dry_run_does_not_mutate_hooks_path and fixture_sets_core_hooks_path_after_apply"
+    },
+    {
+      "id": "AG5",
+      "text": "existing hook is preserved or chained with backup",
+      "status": "pass",
+      "evidence": "existing_hook_is_backed_up_and_chained and existing_hook_preserved_or_chained_with_backup"
+    }
+  ]
+}

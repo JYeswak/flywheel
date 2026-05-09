@@ -1,0 +1,10 @@
+{
+  "compliance_score": 930,
+  "threshold": 700,
+  "findings": [],
+  "notes": [
+    "All five bead acceptance gates passed.",
+    "Canonical CLI route is addressed for the new operator-facing installer surface.",
+    "Python and Rust route checks are not applicable: no standalone Python or Rust modules were authored."
+  ]
+}
