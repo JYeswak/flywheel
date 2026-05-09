@@ -1,0 +1,71 @@
+== source location confirmed ==
+-rw-r--r--@ 1 josh  staff  8682 May  8 18:17 /Users/josh/.claude/skills/.flywheel/lib/repo.d/part-01-repo_dirty_count-to-repo_infisical_state.sh
+
+== drift checker function (lines 78-122) ==
+repo_docs_state() {
+    local missing=0 needs_review=0 drift=0 p
+    # FM-10 fix (2026-04-30, bd-cwfs2 Step 3): use frontmatter parser if shared
+    # helper is available, fall back to body-grep only when missing. The
+    # legacy body-grep tripped on STATE.md table rows merely mentioning the
+    # trip-phrase (incident 2026-04-30T19:00Z).
+    local _shared="${HOME}/.claude/hooks/_shared/frontmatter.sh"
+    local use_frontmatter=0
+    if [[ -r "$_shared" ]]; then
+        # shellcheck source=/dev/null
+        if source "$_shared" 2>/dev/null && declare -f frontmatter_status >/dev/null 2>&1; then
+            use_frontmatter=1
+        fi
+    fi
+    for p in "$(repo_state_path)" "$(repo_goal_path)" "$(repo_mission_path)"; do
+        [[ -f "$p" ]] || { missing=1; continue; }
+        if [[ "$use_frontmatter" -eq 1 ]]; then
+            local status
+            status="$(frontmatter_status "$p" 2>/dev/null)"
+            case "$status" in
+                locked)
+                    local lock_hash body_hash
+                    lock_hash="$(frontmatter_lock_hash "$p" 2>/dev/null)"
+                    body_hash="$(frontmatter_body_sha256 "$p")"
+                    if [[ -z "$lock_hash" || "$lock_hash" != "$body_hash" ]]; then
+                        drift=1
+                    fi
+                    ;;
+                ready) ;;
+                *) needs_review=1 ;;
+            esac
+        else
+            grep -q 'needs_owner_review' "$p" 2>/dev/null && needs_review=1
+        fi
+    done
+    if [[ "$missing" -eq 1 ]]; then
+        printf 'missing'
+    elif [[ "$drift" -eq 1 ]]; then
+        printf 'drift_detected'
+    elif [[ "$needs_review" -eq 1 ]]; then
+        printf 'needs_owner_review'
+    else
+        printf 'ready'
+    fi
+}
+
+== flywheel doctrine docs lock_hash vs source_sha256 ==
+MISSION.md: lock_hash=96db8f2f0805f846 source_sha256=cff6eb918478d7de drift=DRIFT
+GOAL.md: lock_hash=77891224844c4055 source_sha256=576e5bb5975e223e drift=DRIFT
+STATE.md: lock_hash=bf7d082005faa217 source_sha256=388526164bd1d0c5 drift=DRIFT
+
+== lock_hash consumers in flywheel-loop substrate ==
+/Users/josh/.claude/hooks/_shared/frontmatter.sh
+/Users/josh/.claude/hooks/_shared/tests/test_frontmatter.sh
+/Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop
+/Users/josh/.claude/skills/.flywheel/bin/flywheel-lock-repair
+/Users/josh/.claude/skills/.flywheel/bin/flywheel-lock-repair.README.md
+/Users/josh/.claude/skills/.flywheel/lib/bead.sh
+/Users/josh/.claude/skills/.flywheel/lib/canonical.sh
+/Users/josh/.claude/skills/.flywheel/lib/doctor.d/part-01-doctor_cache_path-to-doctor_schema_postcheck.sh
+/Users/josh/.claude/skills/.flywheel/lib/misc.d/part-04-doctor_check_pane_work_signal-to-selected_incident_slugs.sh
+/Users/josh/.claude/skills/.flywheel/lib/mission.sh
+/Users/josh/.claude/skills/.flywheel/lib/portable/core.d/part-02-portable_doctor.sh
+/Users/josh/.claude/skills/.flywheel/lib/print.sh
+/Users/josh/.claude/skills/.flywheel/lib/reconcile.sh
+/Users/josh/.claude/skills/.flywheel/lib/render.sh
+/Users/josh/.claude/skills/.flywheel/lib/repo.d/part-01-repo_dirty_count-to-repo_infisical_state.sh

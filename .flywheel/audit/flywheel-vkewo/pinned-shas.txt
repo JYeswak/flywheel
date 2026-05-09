@@ -1,0 +1,2 @@
+a4c02e613f141c8c2e5c4b25d411dc0d2fe0dd0270f091dd26d8beb9231ebb2c  .flywheel/handoffs/2026-05-09T170000Z-from-skillos-1-mission-lock-hash-collision-finding.md
+f52ab1aae7b77a9bd223114414a23f41878d6ac5ce6aac0694dcf5005ec3b1f8  .flywheel/handoffs/2026-05-09T173900Z-from-flywheel-1-to-skillos-1-mission-lock-hash-resolution.md
