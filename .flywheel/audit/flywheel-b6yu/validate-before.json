@@ -1,0 +1,40 @@
+{
+  "valid": false,
+  "results": [
+    {
+      "path": "/Users/josh/.config/ntm/config.toml",
+      "type": "main",
+      "valid": false,
+      "errors": [
+        {
+          "message": "failed to load: parsing config: unknown field(s): agents.claude-local, agents.deepagents, agents.zesty, agents.zesty-worker, coordinator.schema_version, coordinator.session_default, coordinator.session_default.auto_assign, coordinator.session_default.conflict_negotiate, coordinator.session_default.conflict_notify, coordinator.session_default.send_digests, health.researcher_sessions, models.claude-local, models.claude-local.coder, models.claude-local.fast, models.claude-local.haiku, models.claude-local.opus, models.claude-local.sonnet, models.claude-local.vl, models.pi, models.pi.chat, models.pi.coder, models.pi.embedding, models.pi.fast, models.pi.general, models.pi.vl, models.zesty, models.zesty.fast, models.zesty.haiku, models.zesty.opus, models.zesty.sonnet, scanner.warning_threshold, session_paths, session_paths.agent-bench, session_paths.alps-insurance, session_paths.alpsinsurance, session_paths.bearnecessities, session_paths.chanelscloset, session_paths.clutterfreespaces, session_paths.cubchat, session_paths.cubcloud-bears, session_paths.fc-sandbox, session_paths.flywheel, session_paths.gpu-optimization, session_paths.josh-ops, session_paths.local-agents, session_paths.openfang-setup, session_paths.picoz, session_paths.skillos, session_paths.terratitle, session_paths.vrtx, session_paths.zeststream-v2, session_paths.zesttube"
+        }
+      ]
+    },
+    {
+      "path": "/Users/josh/.config/ntm/recipes.toml",
+      "type": "recipes",
+      "valid": false,
+      "errors": [
+        {
+          "field": "cubcode",
+          "message": "in recipe \"cubcode\": unsupported recipe agent type \"zesty\""
+        },
+        {
+          "field": "pi-team",
+          "message": "in recipe \"pi-team\": unsupported recipe agent type \"pi\""
+        },
+        {
+          "field": "hybrid",
+          "message": "in recipe \"hybrid\": unsupported recipe agent type \"zesty\""
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "files_checked": 2,
+    "error_count": 4,
+    "warning_count": 0,
+    "fixable_count": 0
+  }
+}
