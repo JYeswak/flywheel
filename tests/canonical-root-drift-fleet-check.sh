@@ -72,4 +72,37 @@ set -e
 [[ "$timeout_rc" -eq 124 ]] || fail "timeout exits 124"
 assert_jq "$TMP/timeout.json" '.status == "error" and .classification == "sync_helper_timeout" and .timed_out == true' "timeout_classified"
 
-printf 'PASS cases=3 assertions=%s failures=0\n' "$pass_count"
+## Direct-repo-root short-circuit regression (flywheel-fppjx)
+##
+## When --root points DIRECTLY at a repo (not a parent dir), the sync
+## helper must use the known .flywheel/AGENTS-CANONICAL.md path instead
+## of recursing the repo tree. Recursion blows the dispatch timeout budget
+## when many explicit roots are passed (g0qv9 receipt: 67 target repos).
+##
+## Regression strategy: build a repo whose tree contains decoy nested
+## .flywheel/AGENTS-CANONICAL.md files. The short-circuit picks only the
+## top-level file; the old recursive find would have grabbed decoys too
+## and inflated root_target_count.
+deep="$TMP/repos/repo-deep"
+mkdir -p "$deep/.flywheel"
+cp "$source" "$deep/.flywheel/AGENTS-CANONICAL.md"
+{
+  printf '# Local repo\n\n'
+  printf '%s\n' "$BEGIN"
+  cat "$source"
+  printf '%s\n' "$END"
+} >"$deep/AGENTS.md"
+mkdir -p "$deep/sub1/.flywheel" "$deep/sub2/sub3/.flywheel"
+printf 'decoy-1\n' >"$deep/sub1/.flywheel/AGENTS-CANONICAL.md"
+printf 'decoy-2\n' >"$deep/sub2/sub3/.flywheel/AGENTS-CANONICAL.md"
+
+"$SCRIPT" --sync "$SYNC" --source "$source" --root "$deep" --timeout 5 --json >"$TMP/direct-root.json"
+assert_jq "$TMP/direct-root.json" '.status == "pass" and .root_target_count == 1 and .timed_out == false' "direct_repo_root_no_recursive_scan"
+
+# Performance regression: with --root set to a direct repo path, the
+# helper should complete well under a tight timeout because it does not
+# run a recursive find.
+"$SCRIPT" --sync "$SYNC" --source "$source" --root "$deep" --timeout 2 --json >"$TMP/perf.json"
+assert_jq "$TMP/perf.json" '.status == "pass" and .timed_out == false' "direct_repo_root_completes_under_short_timeout"
+
+printf 'PASS cases=4 assertions=%s failures=0\n' "$pass_count"

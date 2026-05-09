@@ -451,6 +451,16 @@ collect_targets() {
   for root in "${ROOTS[@]}"; do
     root="$(expand_path "$root")"
     [[ -d "$root" ]] || continue
+    # Direct-repo-root short-circuit (flywheel-fppjx): when an explicit
+    # --root resolves to a repo with .flywheel/AGENTS-CANONICAL.md, use the
+    # known path without a recursive find. With 67+ explicit roots passed in
+    # one call, cumulative tree walks blow the dispatch timeout budget; the
+    # canonical location is fully determined by the root path so recursion
+    # adds latency without information.
+    if [[ "$EXPLICIT_ROOTS" -eq 1 && -f "$root/.flywheel/AGENTS-CANONICAL.md" ]]; then
+      printf '%s/.flywheel/AGENTS-CANONICAL.md\n' "$root" >>"$target_tmp"
+      continue
+    fi
     find "$root" -maxdepth 4 -name 'AGENTS-CANONICAL.md' -path '*/.flywheel/*' -type f -print 2>/dev/null >>"$target_tmp"
   done
 

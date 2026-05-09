@@ -5,7 +5,7 @@ VERSION="canonical-root-drift-fleet-check.v1.0.0"
 SCHEMA_VERSION="canonical-root-drift-fleet-check/v1"
 SYNC="${CANONICAL_ROOT_DRIFT_SYNC:-/Users/josh/Developer/flywheel/.flywheel/scripts/sync-canonical-doctrine.sh}"
 SOURCE="${CANONICAL_ROOT_DRIFT_SOURCE:-/Users/josh/Developer/flywheel/AGENTS.md}"
-TIMEOUT_SECONDS="${CANONICAL_ROOT_DRIFT_TIMEOUT_SECONDS:-20}"
+TIMEOUT_SECONDS="${CANONICAL_ROOT_DRIFT_TIMEOUT_SECONDS:-60}"
 JSON_OUT=0
 ROOTS=()
 MODE="check"
@@ -76,6 +76,24 @@ if [[ ! -x "$SYNC" ]]; then
   payload="$(jq -nc --arg schema "$SCHEMA_VERSION" --arg sync "$SYNC" '{schema_version:$schema,status:"error",classification:"sync_helper_missing",sync_helper:$sync,timed_out:false}')"
   [[ "$JSON_OUT" -eq 1 ]] && printf '%s\n' "$payload" || jq -r '"status=\(.status) classification=\(.classification)"' <<<"$payload"
   exit 2
+fi
+
+# When no explicit --root is supplied, auto-populate from the active loop
+# registry (~/.flywheel/loops/*.json). This bounds the default fleet check
+# to flywheel-loop-registered repos, triggers the explicit-root
+# short-circuit in sync-canonical-doctrine.sh (flywheel-fppjx fix), and
+# avoids the broad /Users/josh/Developer recursive scan that exceeded
+# dispatch budgets in flywheel-g0qv9. Operators who want a full-disk scan
+# can still pass --root /Users/josh/Developer explicitly.
+LOOPS_DIR="${CANONICAL_ROOT_DRIFT_LOOPS_DIR:-$HOME/.flywheel/loops}"
+if [[ "${#ROOTS[@]}" -eq 0 && -d "$LOOPS_DIR" ]]; then
+  while IFS= read -r loop_json; do
+    [[ -f "$loop_json" ]] || continue
+    repo_path="$(jq -r '.repo_path // .repo // .project_path // empty' "$loop_json" 2>/dev/null || true)"
+    [[ -n "$repo_path" && "$repo_path" != "null" ]] || continue
+    [[ -f "$repo_path/.flywheel/AGENTS-CANONICAL.md" ]] || continue
+    ROOTS+=("$repo_path")
+  done < <(find "$LOOPS_DIR" -maxdepth 1 -name '*.json' -not -name '*.bak.*' -type f -print 2>/dev/null | sort)
 fi
 
 OUT="$(mktemp "${TMPDIR:-/tmp}/canonical-root-drift-fleet-check.XXXXXX.out")"
