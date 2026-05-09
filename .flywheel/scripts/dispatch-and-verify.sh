@@ -181,19 +181,12 @@ for a in data.get("agents", []):
         if mode == "permissive" and working and content_delta:
             emit("THINKING_LIVE", "pane_content_delta", state, vel, content_delta, changes_delta); sys.exit(0)
         if mode == "permissive" and working:
-            # Codex slow-start: agent in working state (THINKING/GENERATING) without yet
-            # emitting velocity, ntm-changes, or pane-content delta. Common when worker is
-            # loading skills, MCP servers, hooks, or fetching context. Treat as OK in
-            # permissive mode — the worker IS dispatched, just not yet observably busy.
+            # Codex slow-start in working state without live signal. See doctrine.
             emit("THINKING_LIVE", "working_state_quiet", state, vel, content_delta, changes_delta); sys.exit(0)
         if working:
             emit("STUCK", "working_state_without_live_signal", state, vel, content_delta, changes_delta); sys.exit(0)
         if mode == "permissive" and state in {"WAITING", "IDLE", "UNKNOWN"} and (content_delta or changes_delta):
-            # Codex slow-start while pane state still classified as WAITING/IDLE/UNKNOWN —
-            # but pane content or ntm changes have shifted since baseline. That means the
-            # worker IS booting (showing skill loads, banner, hook trust prompts, etc).
-            # Treat as THINKING_LIVE in permissive mode to suppress the false-negative
-            # "consider respawn" when codex just hasn't transitioned yet.
+            # Codex booting: state still WAITING/IDLE/UNKNOWN but pane delta visible.
             emit("THINKING_LIVE", "settling_with_delta", state, vel, content_delta, changes_delta); sys.exit(0)
         if state in {"WAITING", "IDLE", "UNKNOWN"}:
             emit("STUCK", f"state_{state.lower()}", state, vel, content_delta, changes_delta); sys.exit(0)
