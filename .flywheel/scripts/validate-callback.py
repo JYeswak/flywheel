@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import hashlib
 import json
 import os
@@ -22,6 +23,17 @@ RECEIPT_DIR = Path(".flywheel/validation-receipts")
 L61_TASK_RE = re.compile(r"\b(doctrine|INCIDENTS|canonical|L-rule|skill ship)\b", re.IGNORECASE)
 L61_REQUIRED_FIELDS = ("agents_md_updated", "readme_updated")
 JOSH_REQUEST_ID_RE = re.compile(r"\bjosh_request_id\s*[:=]\s*`?([^`\s]+)`?")
+EVIDENCE_REDACTION_PATH_PATTERNS = (
+    "*/evidence/*",
+    "*/validation/*",
+    "*/secrets/*",
+    "*/.flywheel/*-evidence.md",
+)
+EVIDENCE_REDACTION_REMEDIATION = (
+    "Worker owns evidence redaction: run gitleaks --no-git --piped on each "
+    "evidence-class file before close, regenerate redacted evidence, and resend "
+    "the callback with evidence_redacted=yes."
+)
 
 RETRY_POLICIES = {"none", "exponential", "manual", "permanent"}
 FAILURE_CLASS_VALUES = {
@@ -74,6 +86,11 @@ TAXONOMY_RULES: tuple[tuple[set[str], str, str, str], ...] = (
             "reservation_conflict",
             "reservation_expired",
             "reservation_missing_release",
+            "evidence_redaction_missing",
+            "evidence_redaction_invalid",
+            "evidence_redaction_required",
+            "evidence_redaction_declared_no",
+            "evidence_redaction_na_on_evidence",
         },
         "invalid_callback",
         "manual",
@@ -133,6 +150,50 @@ def split_csv_field(value: Any) -> list[str]:
     if not text or text in {"none", "NONE", "null"}:
         return []
     return [part.strip() for part in text.split(",") if part.strip()]
+
+
+def is_evidence_redaction_path(path: str) -> bool:
+    normalized = path.strip().replace("\\", "/")
+    if not normalized or normalized in {"NONE_READONLY", "NONE_NO_EDITS"} or normalized.startswith("UNAVAILABLE:"):
+        return False
+    candidates = [normalized]
+    if not normalized.startswith("/"):
+        candidates.append(f"/{normalized}")
+    return any(
+        fnmatch.fnmatchcase(candidate, pattern)
+        for candidate in candidates
+        for pattern in EVIDENCE_REDACTION_PATH_PATTERNS
+    )
+
+
+def build_evidence_redaction_receipt(
+    source: dict[str, Any],
+    kv: dict[str, str],
+    files_reserved: list[str],
+) -> tuple[dict[str, Any], list[str]]:
+    raw_value = source_text_value(source, "evidence_redacted") or kv.get("evidence_redacted")
+    value = raw_value.strip().lower() if isinstance(raw_value, str) else None
+    evidence_paths = [path for path in files_reserved if is_evidence_redaction_path(path)]
+    required = bool(evidence_paths)
+    failures: list[str] = []
+
+    if value not in {"yes", "no", "n/a"}:
+        failures.append("evidence_redaction_missing" if value is None else "evidence_redaction_invalid")
+    elif value == "no":
+        failures.append("evidence_redaction_declared_no")
+    elif required and value != "yes":
+        failures.append("evidence_redaction_required")
+        if value == "n/a":
+            failures.append("evidence_redaction_na_on_evidence")
+
+    return {
+        "evidence_redacted": value or "missing",
+        "required": required,
+        "evidence_paths": evidence_paths,
+        "status": "fail" if failures else "pass",
+        "owner": "worker",
+        "remediation": EVIDENCE_REDACTION_REMEDIATION if failures else "No redaction remediation required.",
+    }, failures
 
 
 def reservation_field(source: dict[str, Any], kv: dict[str, str], key: str) -> Any:
@@ -295,6 +356,22 @@ def evidence_from_path(path: str, repo: Path) -> dict[str, str]:
 
 
 def artifact_check(item: Any, repo: Path) -> dict[str, str]:
+    return artifact_check_with_options(item, repo, allow_missing_tmp_evidence=False)
+
+
+def is_tmp_evidence_path(path: str, repo: Path) -> bool:
+    if not path:
+        return False
+    expanded = expand_path(repo, path).resolve(strict=False)
+    tmp_roots = {
+        Path(tempfile.gettempdir()).resolve(strict=False),
+        Path("/tmp").resolve(strict=False),
+        Path("/private/tmp").resolve(strict=False),
+    }
+    return any(expanded == root or root in expanded.parents for root in tmp_roots)
+
+
+def artifact_check_with_options(item: Any, repo: Path, *, allow_missing_tmp_evidence: bool) -> dict[str, str]:
     if isinstance(item, str):
         artifact_id = Path(item).name or "artifact"
         path = item
@@ -308,12 +385,41 @@ def artifact_check(item: Any, repo: Path) -> dict[str, str]:
         path = ""
         expected = "exists"
     exists = bool(path) and expand_path(repo, path).exists()
+    status = "exists" if exists else "missing"
+    if not exists and allow_missing_tmp_evidence and is_tmp_evidence_path(path, repo):
+        status = "unknown"
+        expected = "missing_tmp_evidence_allowed"
     return {
         "artifact_id": artifact_id,
         "path": path or "<missing-path>",
-        "status": "exists" if exists else "missing",
+        "status": status,
         "expected": expected,
     }
+
+
+def evidence_artifact_items(source: dict[str, Any]) -> list[dict[str, str]]:
+    items: list[dict[str, str]] = []
+    evidence_items = source.get("evidence") if isinstance(source.get("evidence"), list) else []
+    for index, item in enumerate(evidence_items, start=1):
+        if isinstance(item, dict):
+            path = str(item.get("ref") or item.get("path") or "")
+            if item.get("type") == "path" and path:
+                artifact_id = str(item.get("artifact_id") or item.get("id") or f"evidence_{index}")
+                items.append({"artifact_id": artifact_id, "path": path, "expected": "exists"})
+        elif isinstance(item, str) and item.strip():
+            items.append({"artifact_id": Path(item).name or f"evidence_{index}", "path": item.strip(), "expected": "exists"})
+    return items
+
+
+def bool_field(source: dict[str, Any], kv: dict[str, str], key: str) -> bool:
+    value = source.get(key)
+    if value is None:
+        value = kv.get(key)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "y"}
+    return False
 
 
 def normalize_callback_ref(source: dict[str, Any], raw_ref: str, received_at: str) -> dict[str, Any]:
@@ -360,6 +466,7 @@ def build_receipt(
     callback_ref_arg: str,
     received_at: str,
     task_description: str | None = None,
+    allow_missing_tmp_evidence: bool = False,
 ) -> tuple[dict[str, Any], dict[str, Any]]:
     source, raw_ref, source_error = source_from_callback_ref(callback_ref_arg, repo)
     failure_classes: list[str] = []
@@ -372,6 +479,12 @@ def build_receipt(
     kv = parse_kv_text(raw_ref)
     agent_mail_receipt, agent_mail_failures = build_agent_mail_receipt(source, kv)
     failure_classes.extend(agent_mail_failures)
+    evidence_redaction_receipt, evidence_redaction_failures = build_evidence_redaction_receipt(
+        source,
+        kv,
+        agent_mail_receipt["files_reserved"],
+    )
+    failure_classes.extend(evidence_redaction_failures)
     l61_required = l61_task_requires_fields(source, task_description)
     l61_missing = l61_missing_fields(source, kv) if l61_required else []
     if l61_missing:
@@ -394,10 +507,24 @@ def build_receipt(
         if key in kv and kv[key] not in {"none", "NONE", "null"}:
             evidence.append(evidence_from_path(kv[key], repo))
 
+    allow_tmp_evidence = allow_missing_tmp_evidence or bool_field(source, kv, "allow_missing_tmp_evidence")
     artifact_items = source.get("artifact_checks") or source.get("artifacts") or source.get("artifact_paths") or []
-    artifact_checks = [artifact_check(item, repo) for item in artifact_items] if isinstance(artifact_items, list) else []
+    artifact_checks = (
+        [artifact_check_with_options(item, repo, allow_missing_tmp_evidence=allow_tmp_evidence) for item in artifact_items]
+        if isinstance(artifact_items, list)
+        else []
+    )
+    for item in evidence_artifact_items(source):
+        if not any(check["path"] == item["path"] for check in artifact_checks):
+            artifact_checks.append(artifact_check_with_options(item, repo, allow_missing_tmp_evidence=allow_tmp_evidence))
     if "evidence" in kv and kv["evidence"] not in {"none", "NONE", "null"}:
-        artifact_checks.append(artifact_check({"artifact_id": "callback_evidence", "path": kv["evidence"]}, repo))
+        artifact_checks.append(
+            artifact_check_with_options(
+                {"artifact_id": "callback_evidence", "path": kv["evidence"]},
+                repo,
+                allow_missing_tmp_evidence=allow_tmp_evidence,
+            )
+        )
 
     runtime_source = source.get("runtime_context") if isinstance(source.get("runtime_context"), dict) else {}
     agent_context_source = runtime_source.get("agent_context") if isinstance(runtime_source.get("agent_context"), dict) else {}
@@ -493,6 +620,7 @@ def build_receipt(
             "context_drift": context_drift,
         },
         "agent_mail": agent_mail_receipt,
+        "evidence_redaction": evidence_redaction_receipt,
         "bead_actions": bead_actions,
         "learn_route": learn_route,
         "chain_blocker": chain_blocker,
@@ -505,6 +633,8 @@ def build_receipt(
         "josh_request_id_required": bool(task_description),
         "dispatch_josh_request_id": dispatch_jr_id,
         "callback_josh_request_id": callback_jr_id,
+        "evidence_redaction": evidence_redaction_receipt,
+        "allow_missing_tmp_evidence": allow_tmp_evidence,
     }
     return receipt, meta
 
@@ -548,6 +678,7 @@ def output_schema(repo: Path) -> dict[str, Any]:
         "exit_codes": {"0": "pass", "1": "fail", "2": "usage", "3": "unknown"},
         "required_args": ["--repo", "--dispatch-id", "--callback-ref"],
         "optional_args": ["--task-description"],
+        "tmp_evidence_override": "--allow-missing-tmp-evidence marks missing /tmp or /private/tmp evidence paths unknown instead of missing; durable evidence paths still fail closed.",
         "failure_class_enum": sorted(FAILURE_CLASS_VALUES),
         "retry_policy_enum": sorted(RETRY_POLICIES),
         "agent_mail_receipt_fields": [
@@ -558,6 +689,9 @@ def output_schema(repo: Path) -> dict[str, Any]:
             "reservation_conflicts",
             "reservation_lifecycle",
         ],
+        "evidence_redacted_values": ["yes", "no", "n/a"],
+        "evidence_redaction_required_when_files_reserved_match": list(EVIDENCE_REDACTION_PATH_PATTERNS),
+        "evidence_redaction_remediation": EVIDENCE_REDACTION_REMEDIATION,
         "reservation_lifecycle_states": [
             "no_reservation_required",
             "reservation_succeeded",
@@ -575,11 +709,13 @@ def examples_json() -> dict[str, Any]:
     return {
         "examples": [
             "flywheel-loop validate-callback --repo /Users/josh/Developer/flywheel --dispatch-id abc --callback-ref /tmp/callback.json --json",
-            "flywheel-loop validate-callback --repo . --dispatch-id abc --task-description 'josh_request_id=null' --callback-ref 'DONE bead=x evidence=/tmp/evidence.md josh_request_id=null' --json",
+            "flywheel-loop validate-callback --repo . --dispatch-id abc --task-description 'josh_request_id=null' --callback-ref 'DONE bead=x evidence=/tmp/evidence.md josh_request_id=null evidence_redacted=n/a no_bead_reason=fixture' --json",
+            "flywheel-loop validate-callback --repo . --dispatch-id abc --callback-ref 'DONE abc evidence=/tmp/evidence.md josh_request_id=null files_reserved=reports/evidence/proof.md files_released=reports/evidence/proof.md evidence_redacted=yes no_bead_reason=redacted-evidence' --json",
             "flywheel-loop validate-callback --repo . --dispatch-id abc --callback-ref /tmp/callback.json --write-receipt --json",
             "flywheel-loop validate-callback --repo . --why .flywheel/validation-receipts/abc-done.json --json",
-            "flywheel-loop validate-callback --repo . --dispatch-id abc --task-description 'ship canonical L-rule josh_request_id=null' --callback-ref 'DONE abc evidence=/tmp/evidence.md josh_request_id=null agents_md_updated=yes readme_updated=no no_touch_reason=README-not-user-facing' --json",
-            "flywheel-loop validate-callback --repo . --dispatch-id abc --callback-ref 'DONE abc evidence=/tmp/evidence.md josh_request_id=null agent_mail_thread=thread-123 identity_name=CloudyMill files_reserved=README.md files_released=README.md reservation_conflicts=none' --json",
+            "flywheel-loop validate-callback --repo . --dispatch-id abc --task-description 'ship canonical L-rule josh_request_id=null' --callback-ref 'DONE abc evidence=/tmp/evidence.md josh_request_id=null evidence_redacted=n/a agents_md_updated=yes readme_updated=no no_touch_reason=README-not-user-facing' --json",
+            "flywheel-loop validate-callback --repo . --dispatch-id abc --callback-ref 'DONE abc evidence=/tmp/evidence.md josh_request_id=null evidence_redacted=n/a agent_mail_thread=thread-123 identity_name=CloudyMill files_reserved=README.md files_released=README.md reservation_conflicts=none no_bead_reason=fixture' --json",
+            "flywheel-loop validate-callback --repo . --dispatch-id abc --callback-ref 'DONE abc evidence=/tmp/ephemeral-proof-dir evidence_redacted=n/a no_bead_reason=tmp-dir-fixture' --allow-missing-tmp-evidence --json",
         ]
     }
 
@@ -614,6 +750,7 @@ def main() -> int:
     parser.add_argument("--callback-ref")
     parser.add_argument("--task-description", default="")
     parser.add_argument("--received-at")
+    parser.add_argument("--allow-missing-tmp-evidence", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--write-receipt", action="store_true")
     parser.add_argument("--receipt-dir", default=str(RECEIPT_DIR))
@@ -644,6 +781,7 @@ def main() -> int:
         args.callback_ref,
         args.received_at or utc_now(),
         args.task_description,
+        args.allow_missing_tmp_evidence,
     )
     schema_valid, schema_errors = validate_receipt(repo, receipt)
     if not schema_valid and receipt["status"] == "pass":

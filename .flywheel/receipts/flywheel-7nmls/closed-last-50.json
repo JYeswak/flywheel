@@ -1,0 +1,1331 @@
+[
+  {
+    "close_reason": "Stage B picoz handoff delivered via file-channel (picoz ntm session not running). Handoff written to /Users/josh/Developer/polymarket-pico-z/.flywheel/handoffs/2026-05-09T0540Z-from-flywheel-1-l70-mission-fidelity-canonicalization.md. picoz worker will pick up when session starts. Doctrine already propagated via sync-canonical-doctrine 6h cadence (verified shards=101 across all 8 fleet repos).",
+    "closed_at": "2026-05-09T05:35:14.946138Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T05:06:57.455637Z",
+    "created_by": "josh",
+    "description": "## Goal\nSend the flywheel-bv8zn Stage B mission-fidelity/L70 handoff to picoz pane 1 when the picoz NTM session exists.\n\n## Context\nPHASE: Stage B propagation\nCRITERION: mission-fidelity-substrate\nflywheel-bv8zn delivered the handoff to alpsinsurance:1 and vrtx:1, but NTM reported session \"picoz\" not found. Available sessions at the time: alpsinsurance, clutterfreespaces, flywheel, mobile-eats, recover, skillos, vrtx.\n\n## Dependencies\nBlocked by: picoz NTM session being live/adopted.\n\n## Inputs / Outputs\nINPUTS: /Users/josh/Developer/flywheel/.flywheel/doctrine/mission-fidelity-substrate.md; L70 canonical shard; punt phrase detector evidence.\nOUTPUTS: NTM delivery receipt for picoz:1, or a documented alternate canonical session name.\n\n## Acceptance Criteria\n- ntm list shows a picoz or documented polymarket-pico-z session.\n- ntm send <session> --pane=1 delivers the Stage B handoff successfully.\n- Delivery receipt is recorded in the bead close reason.\n\n## Testing Obligations\n- Run ntm list --json and ntm send ... --json; include both outcomes.\n- SKILLS: beads-workflow, agent-orchestration.\n\n## Definition of Done\nCOMMIT: chore(flywheel): record picoz Stage B handoff receipt\n- Handoff delivered or canonical replacement session documented\n- AUTONOMY: autonomous",
+    "id": "flywheel-ae8aq",
+    "issue_type": "task",
+    "original_size": 0,
+    "priority": 2,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "Propagate Stage B mission-fidelity handoff to picoz",
+    "updated_at": "2026-05-09T05:35:14.946300Z"
+  },
+  {
+    "close_reason": "Investigated /private/var/folders/d0 without cleanup; classified d0/T pressure as 186.11G beads_mem temp DB/WAL stock plus live macOS/app state; added explicit no-clean receipt and filed flywheel-1935y for protected cleanup primitive.",
+    "closed_at": "2026-05-09T05:27:24.571375Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T04:08:51.124777Z",
+    "created_by": "josh",
+    "description": "Follow-up from flywheel-ecjmq. Targeted mobile-eats /private/tmp cleanup removed 47 candidates and reduced /private/tmp to ~46G, but storage-pressure-doctor still reports FIRE (disk_free_gb=35.67, disk_free_pct=3.85). Prior flywheel-0y1nr evidence identified /private/var/folders/d0 at ~201G, with /private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn around ~202G. Evidence pack: /tmp/flywheel-ecjmq-compliance/flywheel-ecjmq/ and /tmp/flywheel-0y1nr-compliance/flywheel-0y1nr/. Acceptance: inspect var/folders d0 contents without destructive cleanup; classify disposable cache vs live macOS/app state; add a protected cleanup/offload policy or explicit no-clean receipt; rerun storage-pressure-doctor.",
+    "id": "flywheel-hoj82",
+    "issue_type": "task",
+    "labels": [
+      "follow-up",
+      "macos",
+      "storage",
+      "var-folders"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[storage] investigate private var folders d0 pressure after mobile-eats tmp cleanup",
+    "updated_at": "2026-05-09T05:27:24.571564Z"
+  },
+  {
+    "close_reason": "completed: shards canonical, mirrors generated, fleet mirror detector passes",
+    "closed_at": "2026-05-09T05:26:38.963698Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T03:35:47.297711Z",
+    "created_by": "josh",
+    "description": "## Source\nPhase 4 of agents-md refactor (dep: Phase 1 shards exist, sync mechanism preserved).\n\nEliminates 3x mirror drift between AGENTS.md, AGENTS-CANONICAL.md, templates/flywheel-install/AGENTS.md.\n\n## Acceptance gates\nAG1: Shards (.flywheel/rules/L<NN>.md) become canonical source.\nAG2: AGENTS.md (root) becomes generated artifact \u2014 concatenated index + pointer to shards.\nAG3: templates/flywheel-install/AGENTS.md becomes generated artifact (same generator).\nAG4: Pre-commit hook blocks direct edits to AGENTS.md and templates/flywheel-install/AGENTS.md (must edit shards instead).\nAG5: Mirror-drift detector returns 0 violations across all 57 fleet repos.\nAG6: doctrine-sync 6h cadence regenerates mirrors from shards on apply.\n\n## Cross-refs\n- Phase 1 dep: shards must be source of truth post-extract\n- Existing 3-way sync: .flywheel/scripts/sync-canonical-doctrine.sh\n- Pre-commit hook substrate: githooks/pre-commit (already lands per flywheel-1w0ep)",
+    "id": "flywheel-aduvv",
+    "issue_type": "task",
+    "labels": [
+      "agents-md-refactor",
+      "canonical-source",
+      "doctrine",
+      "mirror-drift-zero",
+      "phase-4"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[agents-md-Phase4] single source of truth \u2014 shards canonical, AGENTS.md mirrors generated",
+    "updated_at": "2026-05-09T05:26:38.963959Z"
+  },
+  {
+    "close_reason": "superseded: fleet mirror detector now reports zero drift across installed repos",
+    "closed_at": "2026-05-09T05:26:38.736522Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T04:47:01.123356Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-09T04:47:01.123356Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-aduvv",
+        "issue_id": "flywheel-aduvv.1",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "parent-child"
+      }
+    ],
+    "description": "Follow-up from flywheel-aduvv worker tick. Implementation made shards canonical and mirrors generated in flywheel, but fast 3-surface fleet detector found 8/73 installed repos still drifted after local changes. Evidence: /tmp/flywheel-aduvv-3surface-fleet-summary.json. Drifted repos: alpsinsurance-baseline-ci-restore-0210, alpsinsurance-installer-0335, alpsinsurance-makefile-0345, alpsinsurance-metrics-verify, alpsinsurance-proxy-idempotency, alpsinsurance-schema-validate, flywheel-fk2r-worktree, mobile-eats. Scope requires external repo writes via doctrine sync/apply; original dispatch edit scope did not authorize cross-repo mutations.",
+    "id": "flywheel-aduvv.1",
+    "issue_type": "task",
+    "labels": [
+      "agents-md-refactor",
+      "fleet-sync",
+      "mirror-drift-zero"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[agents-md-Phase4] apply generated doctrine mirrors to drifted fleet repos",
+    "updated_at": "2026-05-09T05:26:38.736731Z"
+  },
+  {
+    "close_reason": "Score 820/1000. AUTONOMY: autonomous. Verification completed and evidence committed in 89e5755. Doctrine/rule sync reached mobile-eats, alpsinsurance, and skillos, and the validator gate passes via flywheel-dwavb l112 probe. Observed NTM callback histories still show 0 callback strings with evidence_redacted across mobile-eats/alpsinsurance/skillos samples, so adoption is not complete. Filed follow-up flywheel-kvt8v for peer callback template/wrapper propagation and fresh 24h verification. No broad sync-canonical-doctrine apply run.",
+    "closed_at": "2026-05-09T05:18:43.115385Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T03:46:44.075089Z",
+    "created_by": "josh",
+    "description": "Follow-up from flywheel-dwavb. Canonical callback contract, worker-tick docs, validator, schema, tests, README, AGENTS, and secrets leak doctrine now define evidence_redacted=yes|no|n/a. Need verify after doctrine-sync cadence and the next 24h of mobile-eats:1, alpsinsurance:1, and skillos:1 worker callbacks that the new field appears and evidence-class paths require evidence_redacted=yes. Avoid broad apply of sync-canonical-doctrine unless unrelated managed drift is intentionally in scope.",
+    "id": "flywheel-cg0mr",
+    "issue_type": "task",
+    "labels": [
+      "callback-contract",
+      "doctrine-sync",
+      "follow-up",
+      "security-scanner"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[follow-up] verify evidence_redacted fleet callback adoption",
+    "updated_at": "2026-05-09T05:18:43.115549Z"
+  },
+  {
+    "close_reason": "Updated PicoZ .flywheel/PUBLISHABILITY-AUDIT.md with explicit landing copy waiver: no public web route/static site/app surface exists; README/MISSION are the public front door until a real landing route is added. Reran public prepublish hook and publishability doctor: both pass. PicoZ commit 9a45970c; flywheel evidence commit d528317.",
+    "closed_at": "2026-05-09T05:15:49.932465Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T03:12:33.129305Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-09T03:12:33.129305Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-lzw7",
+        "issue_id": "flywheel-lzw7.4",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "parent-child"
+      }
+    ],
+    "description": "picoz has README/MISSION public copy but no landing-page copy surface. Add the public landing copy surface if picoz will have a public route, or update .flywheel/PUBLISHABILITY-AUDIT.md with a specific waiver if README is the only intended public front door. Rerun the public prepublish hook after the decision.",
+    "id": "flywheel-lzw7.4",
+    "issue_type": "task",
+    "labels": [
+      "landing-copy",
+      "picoz",
+      "publishability",
+      "voice-gap",
+      "zeststream"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[voice-repair-picoz] add or explicitly waive public landing copy surface",
+    "updated_at": "2026-05-09T05:15:49.932674Z"
+  },
+  {
+    "close_reason": "Score 900/1000. AUTONOMY: autonomous. Current picoz public-copy probes already pass with banned_words_count=0; no public copy edits required. Evidence committed in 8d4a301 at .flywheel/audit/flywheel-lzw7.3/compliance.md. Verification: publishability-bar doctor PASS, public prepublish hook PASS, public prose banned-term scan clean, dispatch template audit valid. No new gaps; no new beads.",
+    "closed_at": "2026-05-09T05:14:23.653986Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T03:12:32.997640Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-09T03:12:32.997640Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-lzw7",
+        "issue_id": "flywheel-lzw7.3",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "parent-child"
+      }
+    ],
+    "description": "Remove banned ZestStream voice terms currently detected in picoz public copy: bandwidth, ecosystem, orchestration, platform, stakeholder. Keep technical meaning intact and rerun the publishability/public prepublish probes until banned_words_count=0.",
+    "id": "flywheel-lzw7.3",
+    "issue_type": "task",
+    "labels": [
+      "banned-words",
+      "picoz",
+      "publishability",
+      "voice-gap",
+      "zeststream"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[voice-repair-picoz] remove banned ZestStream words from public copy",
+    "updated_at": "2026-05-09T05:14:23.654160Z"
+  },
+  {
+    "close_reason": "Picoz public README claims grounded/removed; publishability reports ungrounded_claims_count=0 and exact old claims absent. Commit /Users/josh/Developer/polymarket-pico-z@ce50572e.",
+    "closed_at": "2026-05-09T05:12:16.318356Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T03:12:32.868217Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-09T03:12:32.868217Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-lzw7",
+        "issue_id": "flywheel-lzw7.2",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "parent-child"
+      }
+    ],
+    "description": "Ground or remove these picoz public-copy claims before public publish: Dynamic taker fees approach 0% at market extremes; 11-point risk assertion chain; Overall Brier: 0.613 (target <0.20). Either cite durable repo evidence in the copy/scorecard log or rewrite without the claim. Rerun publishability until ungrounded_claims_count=0.",
+    "id": "flywheel-lzw7.2",
+    "issue_type": "task",
+    "labels": [
+      "grounding",
+      "picoz",
+      "publishability",
+      "voice-gap",
+      "zeststream"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[voice-repair-picoz] ground or remove public README claims",
+    "updated_at": "2026-05-09T05:12:16.318537Z"
+  },
+  {
+    "close_reason": "Score 9/10. AUTONOMY: autonomous. Stage B substrate committed in 56fb342; L70 shard, mission-fidelity doctrine, punt detector, daily-report integration, evidence pack, and AGENTS shard sync verified. Handoffs delivered to alpsinsurance:1 and vrtx:1; picoz unavailable, follow-up flywheel-ae8aq filed. Tests: py_compile, bash -n, tests/punt-phrase-detector.sh, punt detector doctor/scan, agents shard dry-run, dispatch template audit, targeted daily-report fixture. Known local gap: full tests/daily-report.sh has pre-existing LaunchAgent/doctor fixture issue, but new punt-report assertion passed.",
+    "closed_at": "2026-05-09T05:10:13.322762Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T04:02:04.718638Z",
+    "created_by": "josh",
+    "description": "## Source\n\nskillos:1 ratification request 2026-05-09T035705Z. Two universal-canonical doctrines proven on skillos + cross-validated on mobile-eats.\n\nHandoff: .flywheel/handoffs/2026-05-09T035705Z-from-skillos-1-mission-fidelity-substrate-and-l70-doctrine-canonical-ratification.md\n\nflywheel:1 RATIFY decision: 2026-05-09T~03:58Z. Both doctrines accepted as canonical with Stage B sequencing.\n\n## Phase 1: L70 ORCH-NO-PUNT canonical L-rule\n\nAuthor L70 section in .flywheel/AGENTS-CANONICAL.md:\n- 17-pattern forbidden-phrase catalog (\"should I...\", \"want me to...\", \"would you like me to...\", \"let me know if...\", etc)\n- Three-predicate dispatch check: named next bead + worker pane idle + no blocker on path = dispatch immediately, never ask\n- False-premise debunks for common rationalizations\n- Reference: skillos PR #124 (skillos AGENTS.md L70 section)\n\n## Phase 2: Mission-fidelity substrate doctrine\n\nAuthor .flywheel/doctrine/mission-fidelity-substrate.md:\n- Pattern: structured mission_claims: frontmatter in MISSION.md\n- Parser emitting skillos.mission_claim.v1 artifacts\n- mission-claim-coverage doctor invariant\n- Audit-to-pack-feedback bridge for unwired claims\n- Donella rank-4 verdict: negative-feedback delay drops from weekly to per-tick\n\n## Phase 3: Punt-phrase detector adoption\n\nAdopt scripts/skillos_punt_phrase_detector.py as flywheel-side substrate. Wire into dispatch-log audit pass.\n\n## Acceptance gates\n\nAG1: L70 section authored canonically in AGENTS-CANONICAL.md (and AGENTS.md mirror, templates/AGENTS.md mirror via sync-canonical-doctrine.sh).\nAG2: Mission-fidelity-substrate.md doctrine doc authored under .flywheel/doctrine/.\nAG3: Punt-phrase detector copied to .flywheel/scripts/punt-phrase-detector.py + wired into validate-callback or daily-report.\nAG4: Stage B propagation handoffs sent from flywheel:1 to alpsinsurance:1, vrtx:1, picoz:1 (mobile-eats:1 already has via skillos direct).\nAG5: Cross-link with flywheel-oq267 (agents-md shard extract) \u2014 L70 becomes a canonical shard at .flywheel/rules/L70.md when Phase 1 of that workstream lands.\n\n## Stage B/C sequencing\n\n**Stage B (this bead AGs1-4):** propagation only \u2014 ratification + canonical doc + propagation handoffs to client orchs.\n\n**Stage C (separate beads, after risks #1 and #3 mitigated):**\n- Risk #1: substrate-integrity doctor invariant + canonical-files manifest (closeout-auto-commit cannot delete files in manifest without override)\n- Risk #3: dispatch ID \u2194 bead-DB ID reconciliation (50/50 unresolvable on skillos audit; 42 occurrences of callback-grade-dispatch-required trauma class) \u2014 file separate bead\n\n## Cross-references\n\n- skillos handoff: 2026-05-09T035705Z-from-skillos-1-mission-fidelity-substrate-and-l70-doctrine-canonical-ratification.md\n- skillos PRs: #115 (mission frontmatter), #118+#127 (audit\u2192pack-feedback bridge), #121 (mission monitor template), #123 (punt detector), #124 (L70 doctrine)\n- Memory rules: feedback_l70_no_punt_after_pr_merge.md, feedback_no_silent_defer_flywheel_substrate.md\n- Doctrine cascade: flywheel-uzhd3 PUBLIC-READY-DEFAULT (related directive class), flywheel-oq267 agents-md shard refactor (L70 destination shard)",
+    "id": "flywheel-bv8zn",
+    "issue_type": "task",
+    "labels": [
+      "L-rule",
+      "L70-orch-no-punt",
+      "canonical-doctrine",
+      "cross-orch-skillos",
+      "mission-fidelity-substrate",
+      "stage-A"
+    ],
+    "original_size": 0,
+    "priority": 0,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[L-rule canonicalize] L70 ORCH-NO-PUNT + mission-fidelity substrate per skillos:1 ratification",
+    "updated_at": "2026-05-09T05:10:13.322945Z"
+  },
+  {
+    "close_reason": "Implemented explicit rule shard drift detector in sync-canonical-doctrine.sh; proved scratch shardless detection, scratch apply propagation of 101 shards + MANIFEST, and bounded fleet rule_shard_drift_count=0. Commit 2050af7. Follow-up for default fleet dry-run stall: flywheel-nttji.",
+    "closed_at": "2026-05-09T05:09:02.797130Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T04:55:32.644430Z",
+    "created_by": "josh",
+    "description": "## Source\n2026-05-09 fleet-wide AGENTS.md refactor propagation. doctrine-sync.sh successfully propagated AGENTS-CANONICAL.md (thin index, 142 lines) to all 7 fleet repos. But .flywheel/rules/ shard directory only landed on alpsinsurance \u2014 6 other repos got CANONICAL=142 shards=0.\n\nManual cp /Users/josh/Developer/flywheel/.flywheel/rules/L*.md to each missing repo resolved the immediate gap (verified 8/8 repos now have 101 shards). But sync-canonical-doctrine.sh has a bug.\n\n## Acceptance gates\nAG1: Reproduce: make a fresh test repo, run sync \u2014 does .flywheel/rules/ propagate?\nAG2: Diff alpsinsurance vs others \u2014 what made alpsinsurance succeed?\nAG3: Patch sync-canonical-doctrine.sh to ALWAYS propagate .flywheel/rules/L*.md + MANIFEST.json\nAG4: Add fleet drift detector \u2014 if any repo CANONICAL=142 but shards<99, flag as drift\nAG5: Re-run sync, verify all repos sync clean",
+    "id": "flywheel-1ebor",
+    "issue_type": "bug",
+    "labels": [
+      "bug-class",
+      "doctrine-sync",
+      "fleet-propagation",
+      "shards-gap"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[doctrine-sync] sync-canonical-doctrine.sh missed .flywheel/rules/ propagation to 6 of 7 fleet repos",
+    "updated_at": "2026-05-09T05:09:02.797326Z"
+  },
+  {
+    "close_reason": "Picoz public copy voice repair completed; publishability doctor passes with composite 96, banned_words_count=0, ungrounded_claims_count=0. Commit /Users/josh/Developer/polymarket-pico-z@1f76bda8.",
+    "closed_at": "2026-05-09T05:08:17.961164Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T03:12:32.724457Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-09T03:12:32.724457Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-lzw7",
+        "issue_id": "flywheel-lzw7.1",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "parent-child"
+      }
+    ],
+    "description": "Repair picoz public copy so README.md + MISSION.md + .flywheel/MISSION.md score >=95 under zeststream-brand-voice. Preserve trading-safety truth: do not weaken risk caveats or overstate live-trading readiness. Rerun /Users/josh/Developer/polymarket-pico-z/.flywheel/scripts/publishability-bar.sh --doctor --json --repo /Users/josh/Developer/polymarket-pico-z and update .planning/scorecard-log.jsonl plus .flywheel/PUBLISHABILITY-AUDIT.md.",
+    "id": "flywheel-lzw7.1",
+    "issue_type": "task",
+    "labels": [
+      "picoz",
+      "public-ready-default",
+      "publishability",
+      "voice-gap",
+      "zeststream"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[voice-repair-picoz] raise ZestStream public voice score above 95",
+    "updated_at": "2026-05-09T05:08:17.961351Z"
+  },
+  {
+    "close_reason": "Implemented canonical scratch cleanup helper; tests, DCG allowlist, doctrine sync local propagation, L112 probe, and evidence receipt pass. Commit 9492552.",
+    "closed_at": "2026-05-09T04:58:46.212022Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T02:56:44.382801Z",
+    "created_by": "josh",
+    "description": "## Source\n\nRecurring fuckup class observed 10+ times in last 3 hours (2026-05-08T23:52Z onward):\n- flywheel-glrlb rm -rf absolute path blocked\n- flywheel-olp9b rm-rf, find-delete, mv-to-Trash all blocked\n- flywheel-z6lk3 rm-rf + mv from /var/folders blocked\n- flywheel-mjrly reservation+cleanup combo blocked\n- flywheel-wire-worker-close-requires-git-commit-a1912c82 unlinks blocked\n- flywheel-rdqc7.1 recursive cleanup blocked\n- flywheel-03uki overbroad scratch cleanup blocked\n- flywheel-ftj0m rm -rf dispatch scratch blocked\n- flywheel-wire-dispatch-to-lib-not-bin redirect-truncate blocked\n- ... and counting\n\n## Pattern\n\nWorkers create scratch via `mktemp -d /var/folders/.../T/flywheel-<bead-id>.XXXXXX.*`, do work, attempt `rm -rf <absolute_path>` to clean up. DCG PreToolUse hook blocks `rm -rf` regardless of path scope. Workers recover via fallback (rmdir, explicit unlinks, mv-to-Trash) which is less reliable + leaves orphans in `/var/folders/.../T/`.\n\n## Fix: canonical helper\n\nAuthor `~/.local/bin/flywheel-cleanup-scratch` (or `.flywheel/scripts/cleanup-scratch.sh`).\n- Single argument: absolute path\n- Validates path matches `^/var/folders/.*/T/(flywheel|josh|wave)-.*` OR `^/tmp/(flywheel|dispatch_)-.*`\n- If validates: emits `rm -rf` via internal logic\n- DCG allowlist: permit this binary by full path (already proven pattern with tmp-aggressive-prune-cron-wrapper)\n\n## Acceptance gates\n\nAG1: Author `.flywheel/scripts/cleanup-scratch.sh` with path validation + JSON output (--dry-run / --apply / --json shape).\nAG2: Add to DCG allowlist by full path (per `dcg` skill canonical-by-full-path pattern).\nAG3: Update worker-tick template to call `flywheel-cleanup-scratch $TMPDIR_PATH` instead of raw `rm -rf` at end of bead.\nAG4: Test fixtures: valid paths (canonical scratch), invalid paths (refused with reason), non-existent paths (no-op).\nAG5: Doctrine: `.flywheel/doctrine/scratch-cleanup-canonical-pattern.md` capturing the pattern + reference to fuckup history (10+ occurrences).\nAG6: Propagate via doctrine-sync 6h cadence \u2014 all 57 fleet repos pick up cleanup helper + worker-tick template change.\n\n## Cross-references\n\n- Memory: `feedback_dcg_prose_trigger_strip_dangerous_substrings`\n- Skill: `dcg` (canonical destructive-command-guard)\n- Existing canonical-by-full-path pattern: `tmp-aggressive-prune-cron-wrapper`, `codex-rollout-permission-janitor`\n- Fuckup-log evidence at ~/.local/state/flywheel/fuckup-log.jsonl (10+ entries 2026-05-08T23:52Z+)",
+    "id": "flywheel-l95he",
+    "issue_type": "task",
+    "labels": [
+      "dcg",
+      "doctrine",
+      "fuckup-class-recurring",
+      "scratch-dir",
+      "worker-cleanup"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[doctrine] flywheel-cleanup-scratch helper \u2014 DCG-allowlisted scratch-dir cleanup primitive",
+    "updated_at": "2026-05-09T04:58:46.212223Z"
+  },
+  {
+    "close_reason": "Implementation complete (3/3 ACs per pane 3 worker, commit abc2a1b). Was blocked on .beads reservation contention with pane 2 aduvv. aduvv now closed. Closing from orch per L70.",
+    "closed_at": "2026-05-09T04:55:32.477202Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T00:14:02.053402Z",
+    "created_by": "josh",
+    "description": "## Source\n\nObserved while closing flywheel-wire-worker-close-requires-git-commit-a1912c82: `bash tests/test_worker_close_requires_git_commit.sh` fails with `FAIL: beads-compliance skill missing deterministic check`.\n\n## Gap\n\nThe root worker-close regression expects the `beads-compliance-and-completion-verification` skill to contain the deterministic dirty-scope marker (`declared_scope_dirty_at_close` / close requires committed declared scope). That skill is JSM-managed, so this worker did not patch it directly.\n\n## Acceptance\n\n- Update the canonical skill source through the JSM-owned path so the installed `~/.claude/skills/beads-compliance-and-completion-verification/SKILL.md` exposes the deterministic worker-close dirty-scope check.\n- `bash tests/test_worker_close_requires_git_commit.sh` passes.\n- Preserve L143 callback semantics: code-work close requires `git_committed=yes` or `git_committed=no_changes`; `git_committed=skipped` remains a violation.",
+    "id": "flywheel-tynj3",
+    "issue_type": "bug",
+    "labels": [
+      "beads-compliance",
+      "memory-rule-gate-parity",
+      "worker-close-requires-git-commit"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "beads-compliance skill missing worker-close dirty-scope marker",
+    "updated_at": "2026-05-09T04:55:32.477368Z"
+  },
+  {
+    "close_reason": "Repaired public-copy banned words and publishability evidence: publishability doctor passes with brand_voice_composite=96, banned_words_count=0, ungrounded_claims_count=0; public prepublish hook passes; evidence in .flywheel/receipts/flywheel-lzc6.1/evidence.md; commits 5ac9883 and 83d34bf.",
+    "closed_at": "2026-05-09T04:52:59.007145Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T03:04:42.236751Z",
+    "created_by": "CloudyMill",
+    "dependencies": [
+      {
+        "created_at": "2026-05-09T03:04:42.236751Z",
+        "created_by": "CloudyMill",
+        "depends_on_id": "flywheel-lzc6",
+        "issue_id": "flywheel-lzc6.1",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "parent-child"
+      }
+    ],
+    "description": "Repair flywheel public-ready ZestStream copy after flywheel-lzc6 audit. L89/L148 now score private repos as public-ready by default. Current `.flywheel/scripts/publishability-bar.sh --doctor --json --repo /Users/josh/Developer/flywheel` returns `status=fail`, `brand_voice_composite=82`, `banned_words_count=5`, banned words: artifact, ecosystem, handoff, orchestration, paradigm. Acceptance: rewrite README/MISSION public-copy surfaces or adjust audit scope with evidence so banned_words_count=0, brand_voice_composite>=95, ungrounded_claims_count=0; rerun publishability-bar and zeststream-public-prepublish-hook public remote; update .flywheel/PUBLISHABILITY-AUDIT.md and .planning/scorecard-log.jsonl with passing scorecard evidence.",
+    "id": "flywheel-lzc6.1",
+    "issue_type": "task",
+    "labels": [
+      "public-ready-default",
+      "publishability",
+      "voice-gap",
+      "zeststream"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[voice-repair-flywheel] remove banned ZestStream words from public copy",
+    "updated_at": "2026-05-09T04:52:59.007714Z"
+  },
+  {
+    "close_reason": "Done: rule hint usage ledger append added to inject-l-rule-hints; daily rule-hint-lifecycle analyzer computes 30-day counts and creates Joshua-approval proposal beads for demote/promote candidates; sample demote/promote e2e test passes. commit=303bca6",
+    "closed_at": "2026-05-09T04:31:12.349019Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T03:35:47.168077Z",
+    "created_by": "josh",
+    "description": "## Source\nPhase 3 of agents-md refactor (dep: Phase 2 hint injector \u2014 needs usage data).\n\nJoshua axiom 5: AI proposes, Joshua disposes. Promote/demote suggested via beads, Joshua signs off.\n\n## Acceptance gates\nAG1: Usage log at ~/.local/state/flywheel/rule-hint-usage.jsonl \u2014 append on every hint injection (rule_id, ts, dispatch_id, bead_id).\nAG2: Daily aggregator script computes 30-day usage per rule.\nAG3: Rules with <5 invocations / 30d \u2192 file demote bead (move from L-rule canonical to memory rule).\nAG4: Rules with >50 invocations / 30d \u2192 file promote bead (move from L-rule canonical to skill auto-route entry).\nAG5: Joshua approves promote/demote before apply (axiom 5).\nAG6: Test: 2 sample triggers (one demote candidate, one promote candidate) traceable end-to-end.\n\n## Cross-refs\n- Phase 2 dep: hint injector populates usage log\n- Existing skill catalog: ~/.claude/skills/\n- Existing memory: ~/.claude/projects/.../memory/",
+    "id": "flywheel-u5yuq",
+    "issue_type": "task",
+    "labels": [
+      "agents-md-refactor",
+      "doctrine",
+      "phase-3",
+      "promote-demote",
+      "usage-log"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[agents-md-Phase3] promote/demote ladder \u2014 usage-log driven L-rule lifecycle",
+    "updated_at": "2026-05-09T04:31:12.349200Z"
+  },
+  {
+    "close_reason": "Phase 1 quick wins complete: R-001 checker JSON/capabilities/exit-code dictionary and R-003 state-handling examples/corpus landed; remaining 990+ ladder split to flywheel-gb54d.1 and flywheel-gb54d.2.",
+    "closed_at": "2026-05-09T04:29:38.530043Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T22:12:26.211423Z",
+    "created_by": "josh",
+    "description": "## Source\n\nAgent-ergonomics audit fork 2026-05-08 ran 11-dim methodology against canonical-cli-scoping. Result: 681/1000 weighted avg.\n\n**Joshua directive 2026-05-08T22:14Z: target 1000 if anywhere possible.**\n\nPath requires applying ALL 10 recommendations + iterative re-audit + addressing each weak-dimension structurally.\n\n## Current scorecard\n\n- Strongest: output_parseability 810, self_documentation 770, safety_with_recovery 750\n- Weakest: intent_inference 510, regression_resistance 545\n- Worst surfaces: S016/S017/S018/S019 (own scripts, 495-645) \u2014 meta-paradox\n\n## Path to 1000 \u2014 4-phase plan\n\n### Phase 1 \u2014 Quick wins (681 \u2192 745, low blast)\n- R-001: Add --json + capabilities + exit-code dictionary to check-cli-scoping.sh\n- R-003: Concrete \"state-handling\" examples for triad trigger S002 (3-5 worked examples + corpus)\n- AG: re-audit, confirm \u2265 745\n\n### Phase 2 \u2014 Subagent validator (745 \u2192 820, Joshua-review HIGH blast)\n- R-002: doctor/health/repair contract validator subagent \u2014 reads source + binary + emits per-rule scorecard\n- R-005, R-006, R-008 from recommendations.jsonl: catches partial-implementation gaps that static probes miss\n- AG: re-audit, confirm \u2265 820\n\n### Phase 3 \u2014 Regression resistance ladder (820 \u2192 920)\n- Snapshot/golden tests for every contract rule (15 rules \u00d7 test pair = 30 tests)\n- Wrong-but-legible invocation corpus (deliberately malformed dispatches that should still be parseable + actionable)\n- Mutation testing: introduce single-char rule changes, confirm validator catches each\n- AG: re-audit, confirm \u2265 920\n\n### Phase 4 \u2014 Asymptote (920 \u2192 1000)\n- Intent_inference structural fix: fuzzy matching, partial-implementation tolerance with graceful degradation\n- Self-application: every rule the skill enforces, the skill itself implements as exemplar\n- Cross-skill consistency: align with agent-ergonomics + jeff-issue-chain + dispatch-template idioms\n- Fresh-agent-from-scratch test: subagent with zero context successfully invokes canonical-cli-scoping correctly first try, scoring all 11 dims at 90+\n- AG: re-audit, confirm 1000 (or 990+ \u2014 last 10 may be irreducible \u2014 accept floor at 990)\n\n## Acceptance gates\n\nAG1-Phase1: 745+\nAG2-Phase2: 820+ (Joshua review subagent infra change)\nAG3-Phase3: 920+\nAG4-Phase4: 1000 (or 990+ if irreducible asymptote)\nAG5: Re-run audit on top-10 fleet skills using same 4-phase template once canonical-cli-scoping hits 990+\nAG6: Doctrine page `.flywheel/doctrine/skill-self-application-1000-pattern.md` \u2014 the 4-phase ladder as reusable methodology\n\n## Cross-references\n\n- Audit artifacts: /tmp/canonical-cli-scoping-agent-ergonomics-audit/\n- flywheel-rzgqc: agent-ergonomics name-length codex bug\n- Memory: `feedback_canonical_cli_at_dispatch`\n- Skill: agent-ergonomics-and-agent-intuitiveness-maximization-for-cli-tools",
+    "id": "flywheel-gb54d",
+    "issue_type": "task",
+    "labels": [
+      "agent-ergonomics",
+      "canonical-cli-scoping",
+      "paradox-fix",
+      "skill-uplift",
+      "top-3-recs"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[skill-uplift] canonical-cli-scoping 681\u2192745 via agent-ergonomics audit recommendations",
+    "updated_at": "2026-05-09T04:29:38.530211Z"
+  },
+  {
+    "close_reason": "Phase 2 hint injector implementation complete (6/6 ACs per pane 2 worker). Close was blocked on .beads reservation held by pane 3 oq267; oq267 now closed (commit a42e050) and .beads released. Closing from orch per L70.",
+    "closed_at": "2026-05-09T04:25:35.373888Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T03:35:47.027896Z",
+    "created_by": "josh",
+    "description": "## Source\nPhase 2 of agents-md refactor (dep: Phase 1 shard extract).\n\nModeled after Joshua's ~/.claude/hooks/claude-md-reference-hint.sh (128 lines). Adapt for flywheel codex dispatch packet seam.\n\n## Acceptance gates\nAG1: Author `.flywheel/scripts/inject-l-rule-hints.sh` (sibling to existing inject-memory-hits.sh + inject-skill-auto-routes.sh).\nAG2: Inject \u22643 most-relevant L-rule hints per dispatch packet based on packet content keywords.\nAG3: 30-minute dedup window \u2014 same hint not injected twice within window.\nAG4: Fail-closed \u2014 if hint injector errors, dispatch proceeds without hints (never blocks).\nAG5: Wire into dispatch-template.md generator.\nAG6: Test fixtures: known packet \u2192 known hints; missing rules dir \u2192 graceful degrade.\n\n## Cross-refs\n- Phase 1 dep: shards must exist at .flywheel/rules/\n- Existing siblings: .flywheel/scripts/inject-memory-hits.sh, inject-skill-auto-routes.sh\n- Joshua's exemplar: ~/.claude/hooks/claude-md-reference-hint.sh",
+    "id": "flywheel-nghdi",
+    "issue_type": "task",
+    "labels": [
+      "agents-md-refactor",
+      "dispatch-template",
+      "doctrine",
+      "hint-injector",
+      "phase-2"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[agents-md-Phase2] hint injector \u2014 UserPromptSubmit-style L-rule auto-router for codex workers",
+    "updated_at": "2026-05-09T04:25:35.374089Z"
+  },
+  {
+    "close_reason": "Done: split canonical AGENTS doctrine into 101 ordered .flywheel/rules shards; thin AGENTS indexes are 140 lines; round-trip hash f4311834a2f59b4aea6aedc386c8daf8b31d582c5be4d6ae0f1778280c3b67d6; sync dry-run local root zero drift; tests passed. commit=a42e050",
+    "closed_at": "2026-05-09T04:23:41.105339Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T03:35:46.843793Z",
+    "created_by": "josh",
+    "description": "## Source\nResearch-triad synthesis 2026-05-09: AGENTS-CANONICAL.md is 4859 lines / ~61k tokens loaded by every codex worker boot. Joshua's own ~/.claude/CLAUDE.md is 119 lines + sharded references \u2014 41x ratio. This phase transcribes his pattern to AGENTS.md.\n\nAnthropic doc cite (today): \"target under 200 lines per CLAUDE.md file\" + \"@-imports do NOT reduce context\".\n\nPlan artifact: /tmp/agents-md-refactor-plan-2026-05-09.md\n\n## Acceptance gates\nAG1: `wc -l .flywheel/AGENTS-CANONICAL.md` \u2264 200 lines post-extract (was 4859).\nAG2: `ls .flywheel/rules/L*.md | wc -l` \u2265 99 (one shard per L-rule).\nAG3: sha256 round-trip \u2014 `cat .flywheel/rules/L*.md | sha256` matches the original body bytes between sentinels.\nAG4: `.flywheel/scripts/sync-canonical-doctrine.sh --dry-run` returns status=in_sync after --apply (preserves 3-way sync contract).\nAG5: Idempotent re-extract yields zero diff.\nAG6: Each shard passes frontmatter validator (id|title|status|shipped|trauma_class).\nAG7: Preserve `<!-- BEGIN-CANONICAL-FLYWHEEL-DOCTRINE -->` and `<!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->` sentinels \u2014 these gate sync-canonical-doctrine.sh.\n\n## Cross-refs\n- Local exemplar: ~/.claude/CLAUDE.md (119 lines) + ~/.claude/references/claude-md-*.md\n- Sync mechanism: .flywheel/scripts/sync-canonical-doctrine.sh\n- Phase 2-4 follow as separate beads (dependencies: this bead)",
+    "id": "flywheel-oq267",
+    "issue_type": "task",
+    "labels": [
+      "agents-md-refactor",
+      "doctrine",
+      "donella-6",
+      "foundation",
+      "phase-1",
+      "shard-extract"
+    ],
+    "original_size": 0,
+    "priority": 0,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[agents-md-Phase1] shard extract \u2014 split AGENTS-CANONICAL.md to .flywheel/rules/L<NN>.md + thin index",
+    "updated_at": "2026-05-09T04:23:41.105502Z"
+  },
+  {
+    "close_reason": "Fixed: verified Codex limit applies to SKILL.md frontmatter name, confirmed local short-name workaround, filed upstream issue https://github.com/Dicklesworthstone/jeffreysprompts.com/issues/5, documented L150 SKILL-NAMING-CONSTRAINT on canonical doctrine surfaces and README; evidence .flywheel/receipts/flywheel-rzgqc/skill-name-findings.md",
+    "closed_at": "2026-05-09T04:09:11.172912Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T22:06:10.972349Z",
+    "created_by": "josh",
+    "description": "## Source\n\nJoshua's purchased skill from jeffreys-skills.md fails to load on every codex 0.125 / 0.129 startup with:\n\n```\n\u26a0 /Users/josh/.codex/skills/agent-ergonomics-and-agent-intuitiveness-maximization-for-cli-tools/SKILL.md:\n  invalid name: exceeds maximum length of 64 characters\n\u26a0 /Users/josh/.claude/skills/agent-ergonomics-and-agent-intuitiveness-maximization-for-cli-tools/SKILL.md:\n  invalid name: exceeds maximum length of 64 characters\n```\n\nSkill name from SKILL.md frontmatter:\n`agent-ergonomics-and-agent-intuitiveness-maximization-for-cli-tools` = 76 chars\n\n## Workaround\n\nSymlink with shorter name:\n```bash\nln -s agent-ergonomics-and-agent-intuitiveness-maximization-for-cli-tools \\\n  ~/.claude/skills/agent-ergonomics\n```\n\nThis may or may not work depending on whether codex resolves symlinks before validating name. If frontmatter `name:` is what's checked, need to also patch SKILL.md frontmatter to a shorter alias.\n\n## Acceptance gates\n\nAG1: Verify whether codex's 64-char limit applies to:\n- Directory name\n- SKILL.md frontmatter `name:` field\n- Both\nDetermines workaround shape.\n\nAG2: Apply workaround locally \u2014 shorten name to fit. Suggested: `agent-ergonomics-cli` (already exists at ~/.claude/skills/agent-ergonomics-cli/ \u2014 different/older skill).\nOr: `agent-ergonomics-max` (20 chars).\n\nAG3: File issue at jeffreys-skills.md / Dicklesworthstone/jeffreys-skills (or wherever the skill ships from) noting the name length collides with codex 64-char limit.\n\nAG4: Document the codex 64-char limit as a SKILL-NAMING-CONSTRAINT canonical L-rule for our own skills (avoid future authoring trip).\n\n## Cross-references\n\n- Jeffrey announcement piece (Joshua shared 2026-05-08T~21:50Z)\n- Memory: `feedback_jeffrey_emanuel_name_preference` (Jeffrey not Jeff)\n- canonical-cli-scoping skill (audit subject of meta-application \u2014 being audited via this skill)",
+    "id": "flywheel-rzgqc",
+    "issue_type": "bug",
+    "labels": [
+      "agent-ergonomics",
+      "codex-cli",
+      "jeff-skill",
+      "jeffrey-skills-md",
+      "skill-name-length-limit"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[skill-bug] agent-ergonomics-... skill name 76 chars exceeds codex 64-char limit",
+    "updated_at": "2026-05-09T04:09:11.173096Z"
+  },
+  {
+    "close_reason": "Implemented and applied targeted private tmp prune policy for mobile-eats validation/build/stale scratch roots. Commit: 0933863 Add targeted private tmp prune. Evidence pack: /tmp/flywheel-ecjmq-compliance/flywheel-ecjmq/. Live apply removed 47 candidates; post dry-run found zero eligible candidates; /private/tmp now 46G and storage doctor reports disk_free_gb=35.67. Host remains FIRE, but this bead's mobile-eats tmp root cleanup is complete.",
+    "closed_at": "2026-05-09T04:06:32.271762Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T03:47:29.072471Z",
+    "created_by": "josh",
+    "description": "Storage investigation flywheel-0y1nr found Data volume in FIRE state (~3.24% free, ~30GiB free) with /private/tmp at ~88GiB. Top /private/tmp consumers are recent mobile-eats validation dirs (mostly ~1.1GiB each), and the hourly tmp-aggressive-prune job is firing but the max-mtime-days=1 cutoff leaves recent large validation stock untouched. Evidence pack: /tmp/flywheel-0y1nr-compliance/flywheel-0y1nr/ (private-tmp-top.txt, private-tmp-recent-count.txt, storage-pressure-doctor.json, private-tmp-cron.txt). Acceptance: inspect whether mobile-eats validation tmp roots are disposable; add a targeted retention/close-gate/prune policy for recent large validation dirs with live-path protections; rerun storage-pressure-doctor and document reclaimed capacity.",
+    "id": "flywheel-ecjmq",
+    "issue_type": "task",
+    "labels": [
+      "mobile-eats",
+      "private-tmp",
+      "storage",
+      "tmp-lifecycle"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[storage] handle recent large mobile-eats validation tmp roots",
+    "updated_at": "2026-05-09T04:06:32.271991Z"
+  },
+  {
+    "close_reason": "Applied agent-ergonomics baseline to flywheel CLI substrate: top-10 inventory, top-3 artifacts, low-blast dispatch-and-verify introspection patch, doctrine cadence, and follow-up for high-blast surfaces.",
+    "closed_at": "2026-05-09T04:00:11.520018Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T21:55:17.706471Z",
+    "created_by": "josh",
+    "description": "## Source\n\nJeffrey Emanuel released /agent-ergonomics-and-agent-intuitiveness-maximization-for-cli-tools \u2014 a 189-file, 1.5MB skill for converting CLIs from human-first to agent-first via 11-dim scoring + recommendation loop. Already in our skill registry (Joshua paid $20/mo). Joshua shared his announcement piece + GPT-5.5 review 2026-05-08T~21:50Z.\n\n## Why apply to our substrate\n\nOur flywheel runs on CLIs that workers + orchestrators + watchdogs invoke constantly:\n- `flywheel-loop`, `dispatch-and-verify.sh`, `build-dispatch-packet.sh`\n- `validate-callback.py`, `tmp-aggressive-prune.sh`, `flywheel-doctor`\n- `frozen-pane-detector-fleet.sh`, `peer-orch-respawn-permit.sh`\n- 50+ scripts across `.flywheel/scripts/`\n\nIf we apply the skill to even the top-10 most-invoked, we'd:\n- Surface agent-friction patterns we've been hand-treating\n- Generate `agent_surfaces.jsonl` baseline for time-series tracking\n- Get specific 11-dim scores + ranked recommendations per script\n- Catch wrong-but-legible invocation failure modes (exact LODP false-negatives we've been seeing)\n\n## Acceptance gates\n\nAG1: Inventory top-10 most-invoked CLIs in our substrate. Rank by dispatch-log frequency \u00d7 failure-rate \u00d7 blast-radius (skill's own ranking heuristic).\n\nAG2: Run skill against the top-3 (likely: `flywheel-loop`, `dispatch-and-verify.sh`, `build-dispatch-packet.sh`). Generate `agent_surfaces.jsonl` + `recommendations.jsonl` per tool.\n\nAG3: Apply changes auto-mode for low-blast-radius recommendations; surface high-blast-radius for Joshua review.\n\nAG4: Re-score post-changes. Confirm fresh-agent simulation (subagent without prior context) successfully invokes each tool first-try.\n\nAG5: Doctrine: `.flywheel/doctrine/agent-ergonomics-application-baseline-2026-05-08.md` capturing 11-dim scores + applied changes + re-score deltas.\n\nAG6: Establish quarterly re-audit cadence \u2014 agent-ergonomics is a time-series, not one-off.\n\n## Strategic angle\n\nThis skill IS the meta-skill for our entire flywheel substrate. Every dispatch packet, every wrapper script, every doctor tool either does or doesn't pass agent-first design. Applying systematically gives us:\n- Compounding leverage: one rubric \u2192 50+ improved tools \u2192 fleet-wide friction reduction\n- Cross-orch propagation: doctrine-sync 6h cadence pushes improved scripts to alps/mobile-eats/skillos\n- New-orch onboarding: future workers face cleaner tooling, climb learning curve faster\n\n## Cross-references\n\n- Jeffrey's piece (shared by Joshua 2026-05-08T21:50Z)\n- GPT-5.5 review of skill in same context\n- Memory: `feedback_canonical_cli_at_dispatch` (canonical-cli-scoping enforcement at dispatch)\n- Skill: `canonical-cli-scoping` (our existing CLI discipline skill \u2014 complementary)\n- Skill: `world-class-doctor-mode-for-cli-tools` (Jeffrey's prior CLI doctor skill, already applied)\n- Memory: `feedback_jeffrey_emanuel_name_preference` (Jeffrey not Jeff in human-facing surfaces)",
+    "id": "flywheel-r52ig",
+    "issue_type": "task",
+    "labels": [
+      "agent-ergonomics",
+      "cli-design",
+      "doctrine",
+      "fleet-leverage",
+      "jeffrey-skill",
+      "scripts-quality"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[doctrine] apply agent-ergonomics skill to our own .flywheel/scripts substrate",
+    "updated_at": "2026-05-09T04:00:11.520375Z"
+  },
+  {
+    "close_reason": "Completed storage pressure investigation and shipped fleet-wide storage-pressure-doctor. Evidence: /tmp/flywheel-0y1nr-compliance/flywheel-0y1nr/. Commit: 6412d63 Add storage pressure doctor. Findings: Data volume is genuinely at FIRE pressure (~3.24% free), not a Time Machine snapshot pile; major pressure is /private/var/folders/d0 (~201G) and /private/tmp (~88G), dominated by recent mobile-eats validation tmp dirs. Follow-up filed: flywheel-ecjmq.",
+    "closed_at": "2026-05-09T03:47:34.049577Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T21:44:26.504800Z",
+    "created_by": "josh",
+    "description": "## Source\n\nJoshua observation 2026-05-08T21:30Z: \"getting low on storage again\". df -h shows:\n- /dev/disk3s1s1: 926Gi total, 11Gi used, 16Gi avail, 42% capacity, ifree 168M\n\nWait \u2014 used=11Gi but avail=16Gi on a 926Gi disk doesn't add up. Either df is lying about apparent vs free, OR there's snapshot space reserved. APFS sealed system volume + snapshot reserved space likely accounts for ~900Gi of \"missing\" capacity.\n\n## Acceptance gates\n\nAG1: Audit actual data consumers \u2014 run `du -sh ~/Developer/* ~/.socraticode/* ~/.knowledge/* ~/Library/Caches/* /private/tmp/* /private/var/folders/* 2>/dev/null | sort -rh | head -30` to find real top consumers.\n\nAG2: Identify whether APFS snapshots are pinning space \u2014 `tmutil listlocalsnapshots / | wc -l` and `diskutil apfs list | grep -A2 Snapshot`.\n\nAG3: Audit jeff-corpus + socraticode-data sizes \u2014 these accrete daily per memory rule (`feedback_jeff_corpus_indexed_data_separates_from_source`). Source bulk is disposable, indexed qdrant data is precious.\n\nAG4: Audit /private/tmp \u2014 current cron-wrapper runs hourly with --max-mtime-days=1. Verify it's actually firing + freeing space. Check `~/.local/state/flywheel/tmp-aggressive-prune-cron.jsonl` for ledger.\n\nAG5: Author + ship a fleet-wide storage-pressure-doctor that surfaces top consumers + snapshot reservation + recommends action when avail <20Gi.\n\n## Cross-references\n\n- Memory rule: `feedback_private_tmp_accretes_until_disk_dies` (312GB on 926GB disk before noticed)\n- Memory rule: `feedback_storage_pressure_blocks_substrate` (<5% free degrades WAL/JSONL)\n- Memory rule: `feedback_retention_policy_by_default_for_accreting_surfaces`\n- Skill: `storage-health`, `apfs-snapshot-ops`, `dev-cache-janitor`\n- Hourly prune: `~/Library/LaunchAgents/ai.zeststream.tmp-aggressive-prune.plist`",
+    "id": "flywheel-0y1nr",
+    "issue_type": "task",
+    "labels": [
+      "disk-pressure",
+      "investigation",
+      "jeff-corpus",
+      "private-tmp",
+      "socraticode-data",
+      "storage"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[storage] investigate where 910Gi+ used disk lives \u2014 16Gi avail trending wrong",
+    "updated_at": "2026-05-09T03:47:34.049746Z"
+  },
+  {
+    "close_reason": "Implemented evidence_redacted callback contract docs, validator/schema gate, tests, and doctrine architecture; fleet adoption requires follow-up observation window.",
+    "closed_at": "2026-05-09T03:46:43.879649Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T21:54:16.974514Z",
+    "created_by": "josh",
+    "description": "## Source\n\nskillos:1 Phase 3 COMPLETE (PR #90, 29fb309d, skillos-dispatch-send wrapper auto-invokes linter on every dispatch). Phase 4 (joint) unblocked from flywheel side. Joshua green-lit full 4-phase split.\n\n## Phase 4 scope (this bead)\n\nAG1: Add `evidence_redacted=yes|no` field to canonical worker callback contract.\n- `.flywheel/_shared/dispatch-template.md` \u2014 DID/DIDNT/GAPS/EVIDENCE block adds the field\n- `flywheel:worker-tick` skill \u2014 worker generates field as part of close payload\n- Documentation: when yes vs no vs n/a (n/a = no evidence files touched)\n\nAG2: Validator gate in `.flywheel/scripts/validate-callback.py`:\n- If `files_reserved` includes paths matching `*/evidence/*`, `*/validation/*`, `*/secrets/*`, `*/.flywheel/*-evidence.md` \u2192 `evidence_redacted=yes` REQUIRED\n- `evidence_redacted=no` \u2192 REJECT close, surface redaction owner + remediation path (run gitleaks --no-git --piped on evidence file before close)\n- `evidence_redacted=n/a` allowed only when no evidence-class files touched\n\nAG3: Doctrine page `.flywheel/doctrine/secrets-leak-prevention-stack.md`:\n- Full architecture: pre-commit gitleaks (Phase 1+2) + skillos linter wrapper (Phase 3) + evidence-redaction callback contract (Phase 4) + rank-3 secret-handle convention\n- Cross-references: skillos PR #90, mobile-eats Nango leak commit 63c9d58, flywheel-uzhd3 PUBLIC-READY-DEFAULT, flywheel-hv071 Phase 1 L-rule\n\nAG4: Propagate via doctrine-sync 6h cadence \u2014 all 57 fleet repos pick up validator + worker-tick changes + dispatch-template field.\n\nAG5: Update mobile-eats:1 + alpsinsurance:1 + skillos:1 worker-tick local copies via doctrine-sync; verify next 24h of callbacks across fleet include the field.\n\n## Cross-references\n\n- flywheel-hv071 (Phase 1 L-rule canonical authoring)\n- skillos PR #90 (Phase 3 linter wrapper, 29fb309d)\n- skillos handoff: .flywheel/handoffs/2026-05-08T214700Z-from-skillos-1-secrets-l-rule-phase3-status.md\n- Mobile-eats incident: commit 63c9d58, finding \"powt\"\n- Joshua directive flywheel-uzhd3: PUBLIC-READY-DEFAULT\n- Existing skill: secret-emission-discipline (LLM emission layer, complementary)",
+    "id": "flywheel-dwavb",
+    "issue_type": "task",
+    "labels": [
+      "L-rule",
+      "callback-contract",
+      "evidence-redaction",
+      "joint-skillos",
+      "phase-4",
+      "rank-3",
+      "secrets"
+    ],
+    "original_size": 0,
+    "priority": 0,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[L-rule Phase 4] evidence_redacted callback contract field + validator gate",
+    "updated_at": "2026-05-09T03:46:43.879818Z"
+  },
+  {
+    "close_reason": "L149 PRE-COMMIT-GITLEAKS-MANDATORY landed on the three doctrine surfaces; vector-6 readback rule, doctor invariants, stack doc, README wire-in, and validation receipt are complete.",
+    "closed_at": "2026-05-09T03:34:42.367038Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T21:46:29.983584Z",
+    "created_by": "josh",
+    "description": "Cross-orch from skillos:1 (BrightLake), Joshua green-lit. Mobile-eats had TWO leaks today:\n- 1st: Nango credential commit 63c9d58 (caught by CI gitleaks 2 days later)\n- 2nd: DATABASE_URL via `head -c 200 /tmp/safe-sink.json` readback (~6h after 1st, vector-6 readback class)\n\nJoshua directive: \"I will rotate all secrets later \u2014 once we can prove our systems can stop leaking our damn secrets.\" No rotation until structural fix lands.\n\n## Phase 1 scope (this bead, EXPANDED with vector-6)\n\nL-rule canonical authoring covers MULTIPLE vectors of the same rank-3 root (agent never holds raw secret values):\n\nAG1: Author canonical L-rule PRE-COMMIT-GITLEAKS-MANDATORY in .flywheel/AGENTS-CANONICAL.md.\n\nAG2: EXTEND with vector #6 readback class:\n> Orchestrator bash MUST NOT read contents of any file under /tmp/ written from infisical|curl|vercel env pull|gitleaks source in same session.\n> Permitted: shasum, wc -c, jq 'keys', jq -r '.[].secretKey' (key-only, never value).\n> Forbidden: head -c, cat, tail, grep, awk, sed, jq -r '.[].value', any value-revealing op on tainted tmp-files.\n\nAG3: Doctor invariants (BOTH classes):\n- pre_commit_secret_scanner_installed=yes|no (WARN 7-day grace, FAIL after)\n- pretooluse_bash_diagnostic_hook_installed=yes|no per orchestrator session (WARN absent)\n\nAG4: Author .flywheel/doctrine/secrets-leak-prevention-stack.md describing:\n- Layer A: PreToolUse bash hook (skillos:1 owns, pending Joshua-authorize on global ~/.claude/settings.json)\n- Layer B: Vercel-Infisical native (mobile-eats:1 per-repo deploy concern)\n- Layer C: Rank-3 generalization to diagnostics (skillos:1 inline)\n- Layer D: AGENTS-CANONICAL L-rule extension (THIS BEAD)\n- 3-layer dispatch architecture (Phase 1+2: pre-commit + Phase 3: skillos linter + Phase 4: evidence_redacted)\n\nAG5: Phase 2 (wire-up) + Phase 3 (skillos linter \u2014 DONE PR #90) + Phase 4 (rank-3 callback contract \u2014 flywheel-dwavb) tracked separately.\n\n## Cross-references\n\n- skillos:1 handoffs:\n  - .flywheel/handoffs/2026-05-08T212656Z-from-skillos-1-secrets-l-rule-promotion.md\n  - .flywheel/handoffs/2026-05-08T220500Z-from-skillos-1-vector-6-l-rule-extension.md\n- skillos rank-3 canonical: state/secrets-leak-prevention-rank-3-doctrine-2026-05-08.json\n- skillos PR #88, #90 (linter + wrapper) \u2014 Phase 3 DONE\n- Mobile-eats incidents: commit 63c9d58 (vector-1) + DATABASE_URL readback (vector-6)\n- Joshua directives: flywheel-uzhd3 PUBLIC-READY-DEFAULT + 2026-05-08T21:55Z no-rotation-until-fix\n- flywheel-dwavb: Phase 4 evidence_redacted callback contract",
+    "id": "flywheel-hv071",
+    "issue_type": "task",
+    "labels": [
+      "L-rule",
+      "cross-orch-skillos",
+      "gitleaks",
+      "pre-commit",
+      "rank-3",
+      "secrets"
+    ],
+    "original_size": 0,
+    "priority": 0,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[L-rule] PRE-COMMIT-GITLEAKS-MANDATORY + rank-3 secret-handle convention (Phase 1)",
+    "updated_at": "2026-05-09T03:34:42.367240Z"
+  },
+  {
+    "close_reason": "Completed L89 public-ready-default audit for zeststream-infra; scorecard logged score=41, banned_words=0, ungrounded_claims=4; public prepublish hook installed; follow-up beads flywheel-r2hd.1/.2/.3 filed for repair.",
+    "closed_at": "2026-05-09T03:22:10.282734Z",
+    "comments": [
+      {
+        "author": "josh",
+        "created_at": "2026-05-09T02:51:24Z",
+        "id": 40,
+        "issue_id": "flywheel-r2hd",
+        "text": "Reopened: REOPENED by flywheel-sib04 re-audit: close relied on deprecated private_internal / EXEMPT_PRIVATE_INTERNAL posture. flywheel-uzhd3 PUBLIC-READY-DEFAULT requires Joshua-owned ZestStream/public-brand repos to be audited/scored as public-ready even when currently private. Evidence: /tmp/flywheel-sib04-compliance/flywheel-sib04/re-audit-report.md"
+      }
+    ],
+    "compaction_level": 0,
+    "created_at": "2026-05-04T11:22:53.563731Z",
+    "created_by": "josh",
+    "description": "Audit zeststream-infra against L89 ZestStream public repo voice binding.\\n\\nAcceptance gates:\\nAG1 Determine whether zeststream-infra is public ZestStream-owned, private/internal, client-owned, or Jeff-owned; record exemption or public gate.\\nAG2 If public ZestStream-owned, run zeststream-brand-voice scorecard on README + MISSION + landing copy and append scorecard log evidence.\\nAG3 Update .flywheel/PUBLISHABILITY-AUDIT.md with ZestStream voice score, banned words count, ungrounded claims count, and scorecard log path.\\nAG4 Install or explicitly no-op the .flywheel/scripts/zeststream-public-prepublish-hook.sh public-remote gate.\\nAG5 File facet-specific beads for any score <95, banned words, ungrounded claims, or missing public copy surface.\\n\\nFiled by flywheel-06zn as AG7 downstream propagation.",
+    "id": "flywheel-r2hd",
+    "issue_type": "task",
+    "labels": [
+      "publishability",
+      "voice-gap",
+      "zeststream"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[voice-gap-zeststream-infra] ZestStream public voice score audit",
+    "updated_at": "2026-05-09T03:22:10.283015Z"
+  },
+  {
+    "close_reason": "Cleaned ZestTube public-ready mission voice hits across MISSION.md and .flywheel/MISSION.md; appended pass scorecard row zesttube-public-ready-voice-2026-05-09-flywheel-1t8t.1; updated publishability audit to PASS_PUBLIC_READY. Validation: deterministic scan hit_count=0, publishability status=pass public_repo=true brand_voice_composite=96 banned_words_count=0 ungrounded_claims_count=0, doctor surfaces passing publishability_bar_score. Evidence: /tmp/flywheel-1t8t.1-compliance/flywheel-1t8t.1.",
+    "closed_at": "2026-05-09T03:15:13.127657Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-09T02:59:12.006845Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-09T02:59:12.006845Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-1t8t",
+        "issue_id": "flywheel-1t8t.1",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "parent-child"
+      }
+    ],
+    "description": "Follow-up from flywheel-1t8t public-ready audit. PUBLIC-READY-DEFAULT removed the private_internal exemption for Joshua-owned ZestStream repos. Deterministic scan of README.md + .flywheel/MISSION.md + MISSION.md against zeststream-brand-voice found 13 hard-rule hits: 4 banned-word hits in MISSION.md (orchestration, ecosystem, end-to-end x2) and 9 operator-variant hits for 'Josh' across MISSION.md and .flywheel/MISSION.md metadata/source text. Repo-local publishability probe also reports 4 unique banned words (artifact, ecosystem, end-to-end, orchestration) because its substring matcher catches artifacts. Clean mission public copy or explicitly scope scanner/audit surfaces so ZestTube can carry a >=95 scorecard row with no hard-rule hits. Evidence: /tmp/flywheel-1t8t-validation/public-voice-scan-final.json and /tmp/flywheel-1t8t-validation/publishability-final.json.",
+    "id": "flywheel-1t8t.1",
+    "issue_type": "task",
+    "labels": [
+      "public-ready-default",
+      "publishability",
+      "zeststream-voice"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "flywheel",
+    "status": "closed",
+    "title": "[zesttube-public-ready] clean MISSION public voice operator/path hits",
+    "updated_at": "2026-05-09T03:15:13.127842Z"
+  },
+  {
+    "close_reason": "Re-audited picoz under L89 public-ready default: classified as Joshua-owned ZestStream infrastructure with no exemption, installed the public prepublish hook, appended scorecard evidence, updated picoz PUBLISHABILITY-AUDIT, verified the public hook blocks current score/banned/ungrounded state, and filed follow-ups flywheel-lzw7.1 through flywheel-lzw7.4.",
+    "closed_at": "2026-05-09T03:13:31.263401Z",
+    "closed_by_session": "flywheel",
+    "comments": [
+      {
+        "author": "josh",
+        "created_at": "2026-05-09T02:51:24Z",
+        "id": 39,
+        "issue_id": "flywheel-lzw7",
+        "text": "Reopened: REOPENED by flywheel-sib04 re-audit: close relied on deprecated private_internal / EXEMPT_PRIVATE_INTERNAL posture. flywheel-uzhd3 PUBLIC-READY-DEFAULT requires Joshua-owned ZestStream/public-brand repos to be audited/scored as public-ready even when currently private. Evidence: /tmp/flywheel-sib04-compliance/flywheel-sib04/re-audit-report.md"
+      }
+    ],
+    "compaction_level": 0,
+    "created_at": "2026-05-04T11:22:53.264603Z",
+    "created_by": "josh",
+    "description": "Audit picoz against L89 ZestStream public repo voice binding.\\n\\nAcceptance gates:\\nAG1 Determine whether picoz is public ZestStream-owned, private/internal, client-owned, or Jeff-owned; record exemption or public gate.\\nAG2 If public ZestStream-owned, run zeststream-brand-voice scorecard on README + MISSION + landing copy and append scorecard log evidence.\\nAG3 Update .flywheel/PUBLISHABILITY-AUDIT.md with ZestStream voice score, banned words count, ungrounded claims count, and scorecard log path.\\nAG4 Install or explicitly no-op the .flywheel/scripts/zeststream-public-prepublish-hook.sh public-remote gate.\\nAG5 File facet-specific beads for any score <95, banned words, ungrounded claims, or missing public copy surface.\\n\\nFiled by flywheel-06zn as AG7 downstream propagation.",
+    "id": "flywheel-lzw7",
+    "issue_type": "task",
+    "labels": [
+      "publishability",
+      "voice-gap",
+      "zeststream"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[voice-gap-picoz] ZestStream public voice score audit",
+    "updated_at": "2026-05-09T03:13:31.263583Z"
+  },
+  {
+    "close_reason": "Re-audited flywheel under L89/L148 public-ready default: classified as Joshua-owned ZestStream infrastructure with no exemption, appended scorecard log, updated PUBLISHABILITY-AUDIT, verified public hook blocks current banned-word state, and filed follow-up flywheel-lzc6.1 for public-copy repair.",
+    "closed_at": "2026-05-09T03:05:40.376314Z",
+    "closed_by_session": "flywheel",
+    "comments": [
+      {
+        "author": "josh",
+        "created_at": "2026-05-09T02:51:24Z",
+        "id": 37,
+        "issue_id": "flywheel-lzc6",
+        "text": "Reopened: REOPENED by flywheel-sib04 re-audit: close relied on deprecated private_internal / EXEMPT_PRIVATE_INTERNAL posture. flywheel-uzhd3 PUBLIC-READY-DEFAULT requires Joshua-owned ZestStream/public-brand repos to be audited/scored as public-ready even when currently private. Evidence: /tmp/flywheel-sib04-compliance/flywheel-sib04/re-audit-report.md"
+      }
+    ],
+    "compaction_level": 0,
+    "created_at": "2026-05-04T11:22:52.831874Z",
+    "created_by": "josh",
+    "description": "Audit flywheel against L89 ZestStream public repo voice binding.\\n\\nAcceptance gates:\\nAG1 Determine whether flywheel is public ZestStream-owned, private/internal, client-owned, or Jeff-owned; record exemption or public gate.\\nAG2 If public ZestStream-owned, run zeststream-brand-voice scorecard on README + MISSION + landing copy and append scorecard log evidence.\\nAG3 Update .flywheel/PUBLISHABILITY-AUDIT.md with ZestStream voice score, banned words count, ungrounded claims count, and scorecard log path.\\nAG4 Install or explicitly no-op the .flywheel/scripts/zeststream-public-prepublish-hook.sh public-remote gate.\\nAG5 File facet-specific beads for any score <95, banned words, ungrounded claims, or missing public copy surface.\\n\\nFiled by flywheel-06zn as AG7 downstream propagation.",
+    "id": "flywheel-lzc6",
+    "issue_type": "task",
+    "labels": [
+      "publishability",
+      "voice-gap",
+      "zeststream"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[voice-gap-flywheel] ZestStream public voice score audit",
+    "updated_at": "2026-05-09T03:05:40.376541Z"
+  },
+  {
+    "close_reason": "Updated zesttube .flywheel/PUBLISHABILITY-AUDIT.md for PUBLIC-READY-DEFAULT, appended scorecard row zesttube-public-ready-voice-2026-05-09-flywheel-1t8t, verified publishability/doctor now surface public_repo=true score=5 brand_voice_composite=0 banned_words_count=4 and fail as expected. Filed follow-up flywheel-1t8t.1 for mission public voice cleanup/scoping. Evidence: /tmp/flywheel-1t8t-compliance/flywheel-1t8t.",
+    "closed_at": "2026-05-09T03:03:57.820015Z",
+    "comments": [
+      {
+        "author": "josh",
+        "created_at": "2026-05-09T02:51:24Z",
+        "id": 38,
+        "issue_id": "flywheel-1t8t",
+        "text": "Reopened: REOPENED by flywheel-sib04 re-audit: close relied on deprecated private_internal / EXEMPT_PRIVATE_INTERNAL posture. flywheel-uzhd3 PUBLIC-READY-DEFAULT requires Joshua-owned ZestStream/public-brand repos to be audited/scored as public-ready even when currently private. Evidence: /tmp/flywheel-sib04-compliance/flywheel-sib04/re-audit-report.md"
+      }
+    ],
+    "compaction_level": 0,
+    "created_at": "2026-05-04T11:13:50.113153Z",
+    "created_by": "josh",
+    "description": "Run the L88 publishability bar for zesttube.\\n\\nAcceptance gates:\\nAG1 Create or update .flywheel/PUBLISHABILITY-AUDIT.md with all seven facets F1-F7.\\nAG2 Run the repo-local publishability probe or equivalent and record score/status evidence.\\nAG3 Any NO facet has a follow-up bead or explicit no_bead_reason.\\nAG4 If repo has flywheel-loop doctor wiring, doctor JSON surfaces publishability_bar_score.\\nAG5 Callback reports validated/documented/surfaced evidence.\\n\\nOwner context: filed by flywheel-wcq5 as the ft04 propagation gate for L88.",
+    "id": "flywheel-1t8t",
+    "issue_type": "task",
+    "labels": [
+      "ft04",
+      "publishability",
+      "three-judges"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[publishability-audit] zesttube three-judges audit",
+    "updated_at": "2026-05-09T03:03:57.820194Z"
+  },
+  {
+    "close_reason": "Implemented PUBLIC-READY-DEFAULT: L148 three-surface doctrine, L89 taxonomy update, private repo scanner enforcement, explicit exemption preservation, doctrine sync allowlist, tests, and compliance pack.",
+    "closed_at": "2026-05-09T02:58:25.560735Z",
+    "closed_by_session": "flywheel",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T21:31:35.860504Z",
+    "created_by": "josh",
+    "description": "## Joshua directive 2026-05-08T21:26Z\n\n> \"I want all repos to be set up as if they were public \u2014 even if they are private \u2014 if I decide to flip the switch one day, it needs to be ready.\"\n\n## Exemption taxonomy (CLARIFIED)\n\nThree exemption classes \u2014 only ONE is now deprecated:\n\n| Class | Status under PUBLIC-READY-DEFAULT |\n|---|---|\n| **private_internal** (Joshua-owned, currently private) | **DEPRECATED** \u2014 re-audit per flywheel-sib04. Joshua wants public-ready posture regardless of current visibility. |\n| **EXEMPT_CLIENT_OWNED** (client deliverable, client owns public posture) | **KEEP EXEMPT** \u2014 ZestStream voice gate doesn't apply because the surface isn't ZestStream-owned. Client decides their own public posture. Examples: alpsinsurance, mobile-eats client deliverables. |\n| **EXEMPT_PUBLIC_FACING** (already public, no scoring needed because already passed gate) | **KEEP** \u2014 no-op for already-public surfaces. |\n\n## Precision rule\n\nThe directive applies to surfaces where ZestStream brand-voice IS the canonical voice \u2014 i.e. flywheel, skillos, zeststream-infra, picoz, polymarket-pico-z, vrtx (Joshua-owned/internal). Client-owned surfaces (alpsinsurance, mobile-eats, etc) maintain their EXEMPT_CLIENT_OWNED status.\n\n## Acceptance gates (UNCHANGED, scope refined)\n\nAG1: Author canonical L-rule PUBLIC-READY-DEFAULT in .flywheel/AGENTS-CANONICAL.md.\nAG2: Update publishability-bar.sh + L89 voice-gate scripts: remove `private_internal` short-circuit, KEEP `EXEMPT_CLIENT_OWNED` and `EXEMPT_PUBLIC_FACING` short-circuits.\nAG3: Re-audit per flywheel-sib04 \u2014 only the `private_internal` closes (lzc6, f3s7, u1zd, 1t8t, lzw7), NOT the `EXEMPT_CLIENT_OWNED` closes (wrjv etc).\nAG4: Propagate via doctrine-sync 6h cadence \u2014 all 57 fleet repos pick up the L-rule + script changes.\nAG5: Update L89 trigger language to reflect three-way exemption taxonomy.\n\n## Why this matters\n\n- Optionality: Joshua can flip private\u2192public on Joshua-owned repos without scrambling\n- Brand discipline: ZestStream voice + grounding applies to Joshua-owned, not client-owned\n- Quality consistency: same bar for same class\n- Client respect: client-owned voice posture stays client-owned",
+    "id": "flywheel-uzhd3",
+    "issue_type": "task",
+    "labels": [
+      "L-rule",
+      "all-repos-public-bound",
+      "doctrine-shift",
+      "public-ready-default",
+      "publishability"
+    ],
+    "original_size": 0,
+    "priority": 0,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[L-rule] PUBLIC-READY-DEFAULT \u2014 all repos audited/scored as if public, regardless of private status",
+    "updated_at": "2026-05-09T02:58:25.560908Z"
+  },
+  {
+    "close_reason": "DONE: re-audited six listed private/client exemption closes against flywheel-uzhd3 PUBLIC-READY-DEFAULT. Reopened deprecated private/internal closes flywheel-lzc6, flywheel-1t8t, flywheel-lzw7, flywheel-r2hd; retained client/product-brand exemptions flywheel-f3s7 and flywheel-u1zd. Evidence /tmp/flywheel-sib04-compliance/flywheel-sib04/re-audit-report.md",
+    "closed_at": "2026-05-09T02:51:47.665664Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T21:44:26.408697Z",
+    "created_by": "josh",
+    "description": "## Closes to re-audit (today, expanded)\n\n- flywheel-lzc6 ZestStream voice audit flywheel: classification=private_internal, hook_skipped=true, voice_score=100 (skipped public hook)\n- flywheel-f3s7 voice audit (private repo) \u2014 L89 client exemption\n- flywheel-u1zd voice audit (private repo) \u2014 L89 client exemption\n- flywheel-1t8t voice audit (private repo) \u2014 L89 private-repo-exemption\n- flywheel-lzw7 (polymarket-pico-z) \u2014 classification=private_internal, public_voice_gate=EXEMPT_INTERNAL, prepublish_hook=no_op (closed POST flywheel-uzhd3 because worker didn't have directive context \u2014 packet built pre-directive)\n- flywheel-r2hd (closed POST flywheel-uzhd3 \u2014 classification=EXEMPT_PRIVATE_INTERNAL, public_voice_gate=EXEMPT_PRIVATE_INTERNAL, prepublish_hook=EXPLICIT_NO_OP)",
+    "id": "flywheel-sib04",
+    "issue_type": "task",
+    "labels": [
+      "L89-exemption-deprecated",
+      "public-ready-default",
+      "quality-gap-followup",
+      "re-audit"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[re-audit] today's private-exemption closes against PUBLIC-READY-DEFAULT (flywheel-uzhd3)",
+    "updated_at": "2026-05-09T02:51:47.665825Z"
+  },
+  {
+    "close_reason": "DONE: skillos README/MISSION deterministic ZestStream voice scan returns banned_words_count=0; PUBLISHABILITY-AUDIT and scorecard log updated; skillos commit e7282ee; evidence /tmp/flywheel-7xbaw-compliance/flywheel-7xbaw",
+    "closed_at": "2026-05-09T02:45:57.078690Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T21:22:18.321994Z",
+    "created_by": "josh",
+    "description": "## Goal\nRemove or replace all ZestStream banned words from skillos public README/MISSION/landing-copy surfaces.\n\n## Context\nParent: flywheel-k677. Manual L89 scan found 15 banned-word hits across enterprise, orchestration, platform, ecosystem, end-to-end, and artifact.\n\n## Inputs / Outputs\nINPUTS: /Users/josh/Developer/skillos/README.md, /Users/josh/Developer/skillos/.flywheel/MISSION.md, /Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml\nOUTPUTS: Public copy with banned_words_count=0 and updated scorecard log.\n\n## Acceptance Criteria\n- Deterministic scan against voice.yaml banned_words and banned_phrases returns zero hits on scored surfaces.\n- Update /Users/josh/Developer/skillos/.flywheel/PUBLISHABILITY-AUDIT.md with banned words count 0.\n\n## Testing Obligations\n- Re-run the banned-word scan used by flywheel-k677 and include the command output in evidence.\n\n## Definition of Done\n- Tests green\n- AUTONOMY: autonomous",
+    "id": "flywheel-7xbaw",
+    "issue_type": "task",
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[skillos-voice] remove L89 banned words",
+    "updated_at": "2026-05-09T02:45:57.078890Z"
+  },
+  {
+    "close_reason": "landed L147 skill-autoresearch tooling substrate routing doctrine; packet guard and regression test added; failed beads parked known-pattern-mismatch; doctrine-sync dry-run receipts for alpsinsurance/mobile-eats/skillos; tests=PASS",
+    "closed_at": "2026-05-09T02:39:22.452088Z",
+    "closed_by_session": "flywheel-ftj0m-882210",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T20:15:36.224342Z",
+    "created_by": "josh",
+    "description": "## Source\n\nThree consecutive skill-enhance / skillos-new-skill-request beads closed scope-pass with four_lens scores below 7:\n\n- flywheel-spdu (skill-enhance-beads-br) \u2014 brand:4,sniff:4,jeff:5,public:3, before:3.54 \u2192 after:5.25\n- flywheel-2gvl (skillos-new-skill-request mutation-safety-contract) \u2014 4/5/5/4\n- flywheel-njzi (skillos-new-skill-request ipc-transport-contract) \u2014 4/5/5/4\n\nALL THREE workers cited the SAME root cause:\n`skill_autoresearch_operational_tooling_python_preference_mismatch`\n\nDiagnostic: skill-autoresearch substrate prefers Python operational tooling but the canonical flywheel surface (canonical-cli-scoping, jsm, beads-br, agent-orchestration) is shell-first. Workers correctly bound scope (no out-of-scope mutations) but the underlying tooling-preference mismatch produces low brand/sniff/public scores because the resulting skill files don't match flywheel surface conventions.\n\nWorkers in flywheel-werb (agent-memory) and flywheel-w304 (accretive-cron-orchestration) and flywheel-puwl (agent-orchestration) and flywheel-raq3 (validation-fixture-contract) and flywheel-cmf4 (failure-taxonomy-receipts) all scored 8-9 on the same patterns \u2014 so it's not a worker-skill issue, it's a target-skill-class issue.\n\n## Acceptance gates\n\nAG1: Audit skill-autoresearch SKILL.md + scripts/ to identify python-vs-shell tooling preference. Document explicitly which substrates skill-autoresearch is suited for vs not.\n\nAG2: Author doctrine page `.flywheel/doctrine/skill-autoresearch-tooling-preference-class.md` capturing: the three failure beads, the root cause, the working pattern (5 beads scored 8-9), the failing pattern (3 beads scored 4-5), and the routing rule (which skill-enhance bead-class needs which substrate).\n\nAG3: Update dispatch packet contract: when bead targets a shell-first skill (canonical-cli-scoping, jsm, beads-br, agent-orchestration), DON'T route through skill-autoresearch. When bead targets a python-friendly skill (skill-builder-managed), skill-autoresearch is fine.\n\nAG4: Re-route the three failed beads (spdu, 2gvl, njzi) \u2014 do NOT re-dispatch as-is. Re-author with explicit shell-first tooling guidance OR park as known-pattern-mismatch.\n\nAG5: Propagate doctrine via doctrine-sync 6h cadence to peer orchs (alpsinsurance, mobile-eats, skillos) so they don't repeat the same pattern.",
+    "id": "flywheel-ftj0m",
+    "issue_type": "task",
+    "labels": [
+      "doctrine",
+      "four-lens-low-score-class",
+      "scope-vs-quality-gap",
+      "skill-autoresearch"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[doctrine] skill-autoresearch python-vs-shell tooling preference mismatch class",
+    "updated_at": "2026-05-09T02:39:22.452261Z"
+  },
+  {
+    "close_reason": "Completed via JSM-managed push-ready patch artifact. Evidence pack: /tmp/flywheel-gjjrp-compliance/flywheel-gjjrp; L112: bash /tmp/flywheel-gjjrp-validation/l112-probe.sh. Filed follow-ups flywheel-g9ews and flywheel-z0crr.",
+    "closed_at": "2026-05-09T02:31:20.664174Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T19:57:10.704144Z",
+    "created_by": "josh",
+    "description": "## Source\n\nflywheel-spdu callback 2026-05-08: scoped fix landed (before_score=3.54 \u2192 after_score=5.25 on beads-br SKILL.md) but underlying skill-builder structure has gaps:\n\n- `gaps=skill-builder_missing_scripts_dir_scope_expansion_needed` \u2014 beads-br skill missing scripts/ directory the skill-builder validator expects\n- `jsm_status=timeout_15s_integrity_ok` \u2014 jsm validate hits 15s timeout (integrity passes despite)\n- `tests=FAIL` \u2014 pre-existing test surface failing outside dispatched scope\n- `four_lens=brand:4,sniff:4,jeff:5,public:3` \u2014 low scores reflect structural debt, not spdu work quality\n\nWorker correctly bound scope (SKILL.md only) per L70 + scope discipline. This bead captures the gap surfaced.\n\n## Acceptance gates\n\nAG1: Add `scripts/` dir to ~/.claude/skills/beads-br/ with at minimum `validate.sh` + `audit.sh` per skill-builder canonical layout.\n\nAG2: Diagnose jsm 15s timeout (likely socraticode rebuild during validate). Either bump timeout in skill-builder validator, or move heavy validate work to async/background.\n\nAG3: Fix the failing pre-existing tests OR document them as known-blocked-pending-X with explicit no-fix reason.\n\nAG4: Re-run jsm-validate + structural assertions; before_score should rise above 7 four-lens floor.\n\nAG5: Propagate fix pattern to other skill-builder-managed skills if same scripts/ dir gap exists fleet-wide.",
+    "id": "flywheel-gjjrp",
+    "issue_type": "task",
+    "labels": [
+      "beads-br",
+      "jsm-timeout",
+      "scope-expansion-followup",
+      "scripts-dir",
+      "skill-builder"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[skill-builder] scripts/ dir + jsm 15s timeout \u2014 beads-br SKILL.md scoped fix exposed structural debt",
+    "updated_at": "2026-05-09T02:31:20.664359Z"
+  },
+  {
+    "close_reason": "Implemented pane-specific NTM sidecar respawn surface with dry-run/apply/rollback evidence.",
+    "closed_at": "2026-05-09T02:26:37.327381Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T19:45:45.027324Z",
+    "created_by": "josh",
+    "description": "Discovered during flywheel-x2okl: codex-cli 0.129 sidecar install succeeded and GPT-5.5 probe passed, but NTM only exposes respawn with the recorded command. Need a canonical NTM surface for restarting a single pane with an explicit sidecar command/config without changing fleet codex pin or using raw pane substrate. Acceptance: dry-run shows target pane, command path, cwd, env/config overrides; apply restarts only that pane; status/health evidence proves binary/version; rollback returns to recorded command.",
+    "id": "flywheel-fg2v5",
+    "issue_type": "task",
+    "labels": [
+      "codex-cli",
+      "ntm",
+      "sidecar-canary"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "Add NTM pane-specific sidecar respawn command surface",
+    "updated_at": "2026-05-09T02:26:37.327553Z"
+  },
+  {
+    "close_reason": "sidecar and goal config verified; gpt-5.5 reachable; 0.129 canary failed stability and rollout halted via flywheel-mspmr",
+    "closed_at": "2026-05-09T02:19:40.792522Z",
+    "comments": [
+      {
+        "author": "MagentaPond",
+        "created_at": "2026-05-09T02:19:40Z",
+        "id": 36,
+        "issue_id": "flywheel-x2okl",
+        "text": "Canary closeout: AG1 sidecar verified (/Users/josh/.local/bin/codex-129 -> codex-cli 0.129.0) while canonical /Users/josh/.local/bin/codex remains codex-cli 0.125.0. AG3 scoped config has features.goals=true. 0.129 sidecar reached gpt-5.5 via ephemeral exec and returned OK_X2OKL_MODEL_REACHABLE. AG2/AG4 canary stability failed: flywheel-mspmr records two 0.129 /goal freeze occurrences, so rollout is halted and AG5 is not applicable until a clean future canary. Evidence pack: /tmp/flywheel-x2okl-compliance/flywheel-x2okl/; L112: bash /tmp/flywheel-x2okl-validation/l112-probe.sh."
+      }
+    ],
+    "compaction_level": 0,
+    "created_at": "2026-05-08T19:35:00.019386Z",
+    "created_by": "josh",
+    "description": "## Source\n\nJoshua signal 2026-05-08: X (Twitter) feedback says GPT-5.5 + /goal mode \"is insane\". Asked for research on codex /goal compat.\n\n## Findings\n\n| Version | /goal | Notes |\n|---|---|---|\n| 0.125.0 (current pin) | absent | no goal code |\n| 0.128.0 | broken | issues #20548, #20591, #21477 |\n| 0.129.0 | working | cut 2026-05-07 \u2014 discoverable, paused-across-resume, clearer validation |\n| 0.130.0-alpha | unstable | dev only |\n\nGPT-5.5 compat: ChatGPT signin still works in 0.129; API-key path still unsupported (unchanged from 5/5 baseline).\n\n## Acceptance gates\n\nAG1: Sidecar-install codex-cli 0.129 to second binary path (e.g. /Users/josh/.local/bin/codex-129) \u2014 does NOT replace /Users/josh/.local/bin/codex (0.125 pin stays canonical for 23 active panes during canary).\n\nAG2: On flywheel:4 only \u2014 relaunch worker pane with sidecar binary. Verify chatgpt-signin works, GPT-5.5 reachable, no freeze regression in first 4h.\n\nAG3: Enable features.goals=true in scoped ~/.codex/config.canary.toml. Issue /goal <objective> on pane 4 with a real bead-shaped objective.\n\nAG4: 24h canary \u2014 track pane-4 throughput vs panes 2/3 on 0.125. Compare four_lens scores, callback latency, freeze events. Halt rollout if regressions.\n\nAG5: If canary clean, document version-bump procedure in .flywheel/doctrine/codex-version-pin-canary.md + propagate to peer orchs (alpsinsurance, mobile-eats, skillos) via doctrine-sync 6h cadence. Roll fleet pin to 0.129 only after 48h aggregate canary.\n\n## Cross-references\n\n- Memory: reference_codex_gpt55_upgrade_findings_2026_05_05.md (5/5 baseline \u2014 needs update post-0.129 cut)\n- Memory: reference_codex_0_129_goal_mode_2026_05_08.md (today's research)\n- L142: CODEX-PREPARED-CHEVRON validator \u2014 0.129 chevron behavior unverified\n- L143: WORKER-CLOSE-REQUIRES-GIT-COMMIT\n- Issue #20548 / #20591 / #21477 (0.128 /goal bugs)\n\n## Anti-patterns (refused)\n\n- DON'T fleet-rollout 0.128 (broken /goal, known regressions)\n- DON'T conflate 0.129 with freeze fix \u2014 orthogonal; watchdog substrate is the freeze fix\n- DON'T bump 23 panes simultaneously \u2014 canary one pane first\n- DON'T migrate to paid-API path (~2142/mo extra) just to get /goal \u2014 0.129 + chatgpt signin still works",
+    "id": "flywheel-x2okl",
+    "issue_type": "feature",
+    "labels": [
+      "codex-cli",
+      "fleet-rollout",
+      "goal-mode",
+      "gpt55-compat",
+      "sidecar-install",
+      "version-canary"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[infra-codex] sidecar install codex-cli 0.129 + /goal canary on pane 4",
+    "updated_at": "2026-05-09T02:19:40.792704Z"
+  },
+  {
+    "close_reason": "Shipped JSM skill-enhance discipline gate, audit receipts, managed-skill patch artifact, L146 doctrine, README boundary, and regression/L112 probes.",
+    "closed_at": "2026-05-09T02:16:22.714555Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T19:01:02.245536Z",
+    "created_by": "josh",
+    "description": "## Joshua observation (2026-05-08T18:55Z)\n\n\"When we update our jsm skills - since some of these are jsm skills - they will overwrite the edits we're making here.\"\n\n## Risk\n\nWorkers across waves 13-14 have been directly editing skill files at \\`~/.claude/skills/<name>/SKILL.md\\`. Some of those skills are JSM-managed. The next \\`jsm push\\` or \\`jsm pull --update\\` will OVERWRITE the worker's edits with the canonical JSM version.\n\n## What we've seen\n\nWorker discipline IS present in some cases:\n- flywheel-irm9 (skill-enhance-cass): worker detected JSM management, produced \\`jsm_push_ready_patch=yes\\` artifact INSTEAD of direct mutation. CORRECT PATTERN.\n- flywheel-jf7c, npo8, 96np, nf7x, ewqr, d7lv: worker reported \\`jsm_status=not_installed_or_saved_in_jsm_db\\` and edited directly. SAFE for now but unprotected against future JSM enrollment.\n\n## Acceptance gates\n\nAG1: AUDIT \u2014 generate report of which \\`~/.claude/skills/*/SKILL.md\\` files are JSM-managed vs unmanaged. Use \\`jsm list\\` and check each skill that received worker edits this session (waves 13-14).\n\nAG2: REVERT-OR-PROMOTE \u2014 for each JSM-managed skill that received direct worker edits this session: either revert the live skill (jsm pull) and produce a jsm-push-ready patch instead, OR push the worker's edits via jsm push.\n\nAG3: ENFORCEMENT \u2014 extend worker dispatch packet for skill-enhance class:\n  - Pre-flight: \\`jsm status <skill-name>\\` MUST run before any direct skill mutation\n  - If JSM-managed: worker MUST produce jsm-push-ready patch artifact (not mutate live)\n  - If unmanaged: worker MAY mutate directly, but MUST also write the same patch as a jsm-import-ready artifact in case the skill becomes JSM-managed later\n\nAG4: DOCTRINE \u2014 promote this pattern to canonical L-rule (or extend an existing one): skill-enhance work MUST honor JSM management state, with jsm-push-ready-patch as the canonical artifact, not direct mutation.\n\nAG5: REGRESSION \u2014 fixture test: skill-enhance dispatch packet to JSM-managed skill MUST refuse direct mutation; dispatch packet to unmanaged skill MUST still produce jsm-push-ready patch as artifact.\n\n## Cross-references\n\n- This session waves 13-14: ewqr, ftbe, irm9, jf7c, npo8, 96np, nf7x, d7lv (all skill-enhance class)\n- ~/.claude/skills/jsm/ \u2014 JSM skill management substrate\n- L62 series (skill management doctrine) \u2014 locate canonical L-rule for skill mutation discipline\n- flywheel-irm9 callback \u2014 shows the correct jsm_push_ready_patch=yes pattern",
+    "id": "flywheel-ljrjw",
+    "issue_type": "bug",
+    "labels": [
+      "critical",
+      "jsm-skill-protection",
+      "operational-discovery",
+      "skill-enhance-jeff-pattern"
+    ],
+    "original_size": 0,
+    "priority": 0,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[CRITICAL] JSM-managed skills will overwrite our worker edits \u2014 audit + jsm-push-ready-patch discipline needed",
+    "updated_at": "2026-05-09T02:16:22.714780Z"
+  },
+  {
+    "close_reason": "Implemented --l-rules wave allowlist for flywheel-doctrine-sync, including partial-state-stamp protection, invalid-rule fail-closed behavior, evidence pack, and L112 probe. Commit: 9483ee0",
+    "closed_at": "2026-05-09T02:11:30.014972Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T19:14:59.890872Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-08T19:14:59.890872Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-rdqc7",
+        "issue_id": "flywheel-rdqc7.1",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "parent-child"
+      }
+    ],
+    "description": "Dispatch flywheel-rdqc7-fda50c requires four wave-limited doctrine applies for skillos, but /Users/josh/.local/bin/flywheel-doctrine-sync currently supports only --target-repo, --dry-run/--apply, --idempotency-key, and --json. A plain --apply would append all missing L-rules and violate the bead's NO bulk apply rule. Add an allowlist flag such as --l-rules L29,L35,L48,... or a wave-plan input so each wave can apply only reviewed rules with its own idempotency key.",
+    "id": "flywheel-rdqc7.1",
+    "issue_type": "task",
+    "labels": [
+      "doctrine-prop",
+      "skillos",
+      "validation-gap",
+      "wave-apply"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[doctrine-prop] add wave allowlist to flywheel-doctrine-sync",
+    "updated_at": "2026-05-09T02:11:30.015170Z"
+  },
+  {
+    "close_reason": "Implemented background-terminal detector class, CAAM rotate-and-respawn primitive, recovery wire-in, doctor metrics, and focused tests. Evidence: .flywheel/receipts/flywheel-ggld7/evidence.md. Commit: c4a284c",
+    "closed_at": "2026-05-09T02:01:44.076845Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T18:39:34.621690Z",
+    "created_by": "josh",
+    "description": "## Source\n\nskillos:1 / BrightLake cross-orch coordination 2026-05-08T18:35Z. Severity: high \u2014 silent 30+ min freeze observed at skillos:2 today (post-completion, child process hung).\n\n## Two gaps in current detector\n\n**Gap 1: detector doesn't catch background-terminal hangs**\nCurrent `codex-template-stuck-detector.sh` v2 classifies: model_at_capacity_halt, post_completion, input_deaf/buffer_stuck. Missing: pattern `Waiting for background terminal (Xm Ys \u2022 esc to interrupt)`. The timer increments so hash-stability check returns alive.\n\n**Gap 2: caam-rotate-and-respawn primitive doesn't exist**\n`test_caam_auto_rotate_on_usage_limit.sh` exists but detector's `recover()` doesn't invoke `caam activate <next-profile>`.\n\n## Proposed acceptance gates\n\nAG1: Add `background_terminal_stuck` subclass to classify() with `Waiting for background terminal \\(([0-9]+)m` pattern + 5min threshold; strip timer text from t0/t1 before sha comparison\n\nAG2: New script `.flywheel/scripts/caam-rotate-and-respawn.sh` orchestrating 6-step rotation:\n  1. Read current active CAAM profile (`caam profile current`)\n  2. Pick next from rotation roster\n  3. `caam activate <next>`\n  4. ntm-send Ctrl-C, wait clean prompt\n  5. `/flywheel:respawn` on new profile\n  6. Re-dispatch last in-flight bead from dispatch-log.jsonl\n\nAG3: Wire `caam-rotate-and-respawn` into detector's `recover()` for both `model_at_capacity_halt` and new `background_terminal_stuck` subclasses\n\nAG4: Doctor extension \u2014 add 5 metrics: codex_freeze_recovery_attempted_24h, codex_freeze_recovery_succeeded_24h, codex_freeze_recovery_success_pct_24h, caam_rotation_count_24h, caam_active_profile, caam_profiles_available; WARN if success_pct < 0.5; FAIL if profiles_available < 1\n\nAG5: Tests \u2014 fixtures for new subclass + e2e test for rotate-and-respawn\n\n## Effort estimate\n\n- bg-terminal class: ~1 hr\n- caam-rotate-and-respawn primitive: ~2-3 hrs\n- recover() wire-in: ~30 min\n- doctor metrics: ~30 min\n- tests: ~1.5 hrs\n\nTotal ~5-6 hrs flywheel-side work.\n\n## Real-world impact\n\nskillos:2 freeze observed 2026-05-08T18:30Z: post-completion (PR #69 merged at 0af88c35), spawned bg terminal task, hung 30+ min undetected, Joshua manually respawned. Every active codex worker pane is at risk.\n\n## Cross-references\n\n- `.flywheel/scripts/codex-template-stuck-detector.sh` v2 (extend)\n- `.flywheel/tests/test_caam_auto_rotate_on_usage_limit.sh` (already exists)\n- `.flywheel/scripts/worker-auto-respawn-watchdog.sh` (sibling)\n- `~/.claude/skills/caam/SKILL.md`\n- `/Users/josh/.local/bin/caam` (rotation CLI)\n- AGENTS.md L91, L115 (siblings)\n- INCIDENTS fire-and-forget-dispatch 2026-05-08 (same trauma family)",
+    "id": "flywheel-ggld7",
+    "issue_type": "feature",
+    "labels": [
+      "caam-rotation",
+      "detector-hardening",
+      "fleet-autonomy",
+      "skillos-handoff"
+    ],
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[skillos-proposal] codex-stuck-detector bg-terminal class + caam-rotate-and-respawn primitive",
+    "updated_at": "2026-05-09T02:01:44.077075Z"
+  },
+  {
+    "close_reason": "DONE security doctrine wire. L74 added across root/canonical/template AGENTS surfaces; README and .flywheel/canonical-paths.txt now mention agent-security-control/v1 security-control; plan-local skill draft added; doctrine-memory wire test covers L74/canonical paths; conformance/fleet smoke and L112 probe pass. Evidence .flywheel/receipts/flywheel-03uki/compliance-pack.md. Commit 9898bd9.",
+    "closed_at": "2026-05-09T01:55:34.319463Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T17:47:50.723103Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-08T17:47:53.315944Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-1gyiv",
+        "issue_id": "flywheel-03uki",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      },
+      {
+        "created_at": "2026-05-08T17:47:53.128618Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-98t5l",
+        "issue_id": "flywheel-03uki",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      }
+    ],
+    "description": "Plan source: /Users/josh/Developer/flywheel/.flywheel/PLANS/agent-security-controls-fleet-wide-2026-05-04/00-PLAN.md\\n\\nWave 5 / B10. Wire L74 candidate, README, skill draft decision, and canonical paths after conformance. Acceptance: AGENTS.md contains ## L74 \u2014 AGENT-SECURITY-DENY-RULES-CANONICAL; README.md and .flywheel/canonical-paths.txt mention agent-security-control/v1/security-control; skill draft exists in plan or skillos-owned path or records blocked_by=skillos_skill_publication; doctrine/memory wire test covers L74/canonical paths; strict doctor does not fail on missing security docs after B09 receipt.",
+    "id": "flywheel-03uki",
+    "issue_type": "feature",
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "fix(security-doctrine): wire L74, README, skill draft, and canonical paths",
+    "updated_at": "2026-05-09T01:55:34.319635Z"
+  },
+  {
+    "close_reason": "Implemented security doctor drift promotion to deduped auto-doctor beads and daily-report Security section. Evidence: .flywheel/receipts/flywheel-98t5l/evidence.md. Commit: 9266898.",
+    "closed_at": "2026-05-09T01:48:07.464990Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T17:47:50.216803Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-08T17:47:51.527294Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-qegt3",
+        "issue_id": "flywheel-98t5l",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      }
+    ],
+    "description": "Plan source: /Users/josh/Developer/flywheel/.flywheel/PLANS/agent-security-controls-fleet-wide-2026-05-04/00-PLAN.md\\n\\nWave 3 / B05. Route security doctor drift into deduped beads and daily-report Security section. Acceptance: leaked_secret_pattern_count fixture creates or matches one P0 auto-doctor bead; missing deny/pre-commit/runtime-visible fixtures create expected class-specific beads with no duplicates on rerun; healthy fixture is noop; daily-report fixture shows status/counts/top failing repos; recent-closed dedupe works; descriptions never include secret values.",
+    "id": "flywheel-98t5l",
+    "issue_type": "feature",
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "fix(security-promotion): route security doctor drift to beads and daily report",
+    "updated_at": "2026-05-09T01:48:07.465188Z"
+  },
+  {
+    "close_reason": "DONE security-control conformance harness and fleet dry-run smoke pass. Evidence .flywheel/receipts/flywheel-1gyiv/compliance-pack.md, conformance report .flywheel/receipts/flywheel-1gyiv/conformance-report.md, validation receipt .flywheel/validation-receipts/flywheel-1gyiv-aae9be.json, commit 4ac1101.",
+    "closed_at": "2026-05-09T01:44:26.678859Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T17:47:50.608685Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-08T17:47:52.744930Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-1w0ep",
+        "issue_id": "flywheel-1gyiv",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      },
+      {
+        "created_at": "2026-05-08T17:47:52.939835Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-mzvd0",
+        "issue_id": "flywheel-1gyiv",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      },
+      {
+        "created_at": "2026-05-08T17:47:52.400759Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-qegt3",
+        "issue_id": "flywheel-1gyiv",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      },
+      {
+        "created_at": "2026-05-08T17:47:52.222946Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-vl9of",
+        "issue_id": "flywheel-1gyiv",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      },
+      {
+        "created_at": "2026-05-08T17:47:52.574244Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-x3n1n",
+        "issue_id": "flywheel-1gyiv",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      }
+    ],
+    "description": "Plan source: /Users/josh/Developer/flywheel/.flywheel/PLANS/agent-security-controls-fleet-wide-2026-05-04/00-PLAN.md\\n\\nWave 5 / B09. Build end-to-end conformance and fleet dry-run smoke for agent-security-control/v1. Acceptance: bash tests/security-control-conformance.sh passes; bash tests/security-control-fleet-smoke.sh --dry-run passes; report lists every MUST clause; strict mode fails fixture repos with missing deny rules/hook/leaked synthetic token; redaction report includes recall/precision; validation receipt writes under .flywheel/validation-receipts/ and routes through validation-learn.",
+    "id": "flywheel-1gyiv",
+    "issue_type": "feature",
+    "original_size": 0,
+    "priority": 0,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "fix(security-e2e): run conformance harness and fleet dry-run smoke",
+    "updated_at": "2026-05-09T01:44:26.679033Z"
+  },
+  {
+    "close_reason": "DONE security posture doctor exposes .security, boolean settings_deny_rules_present, metadata-rich signals, PASS/WARN/FAIL/strict fixtures, and redacted counts/classes output. Evidence .flywheel/receipts/flywheel-qegt3/compliance-pack.md commit 0bf8fb4.",
+    "closed_at": "2026-05-09T01:34:21.121794Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T17:47:50.124464Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-08T17:47:51.005494Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-m0v31",
+        "issue_id": "flywheel-qegt3",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      },
+      {
+        "created_at": "2026-05-08T17:47:51.190486Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-oxr6e",
+        "issue_id": "flywheel-qegt3",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      },
+      {
+        "created_at": "2026-05-08T17:47:51.361178Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-vl9of",
+        "issue_id": "flywheel-qegt3",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      }
+    ],
+    "description": "Plan source: /Users/josh/Developer/flywheel/.flywheel/PLANS/agent-security-controls-fleet-wide-2026-05-04/00-PLAN.md\\n\\nWave 3 / B04. Add security posture signals to flywheel-loop doctor with producer, measurement, consumer, and promotion_path metadata. Acceptance: doctor --repo /Users/josh/Developer/flywheel --json exposes .security; settings_deny_rules_present is boolean; all .security.signals rows include producer/measurement/consumer/promotion_path; fixtures cover PASS/WARN/FAIL/strict FAIL; output contains counts/classes only; tests/doctor-validation-signals.sh still passes.",
+    "id": "flywheel-qegt3",
+    "issue_type": "feature",
+    "original_size": 0,
+    "priority": 0,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "fix(security-doctor): expose security posture signals in flywheel-loop doctor",
+    "updated_at": "2026-05-09T01:34:21.121970Z"
+  },
+  {
+    "close_reason": "done",
+    "closed_at": "2026-05-09T01:30:39.624540Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T17:47:50.517844Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-08T17:47:52.052523Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-oxr6e",
+        "issue_id": "flywheel-mzvd0",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      }
+    ],
+    "description": "Plan source: /Users/josh/Developer/flywheel/.flywheel/PLANS/agent-security-controls-fleet-wide-2026-05-04/00-PLAN.md\\n\\nWave 4 / B08. Define high-risk prod-credential container isolation profile. Acceptance: .flywheel/security/v1/container-isolation.md exists; tests/security-container-isolation.sh rejects privileged mode, host network, Docker socket, or .env mount; high-security fixture proves env allow-list mode; hardened fixture passes read-only root and explicit workspace mount; README documents when sandbox is required; doctor reports recommendation, not blanket failure.",
+    "id": "flywheel-mzvd0",
+    "issue_type": "feature",
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "fix(security-sandbox): define prod-credential container isolation profile",
+    "updated_at": "2026-05-09T01:30:39.624720Z"
+  },
+  {
+    "close_reason": "Shipped committed pre-commit dispatcher/installer and fixture integration test. Commit c68d900. Tests: bash tests/security-precommit-hook.sh; bash tests/canary-secret-scan.sh; bash .flywheel/scripts/test-safe-probe.sh; validation receipt parse passed. Evidence: .flywheel/receipts/flywheel-1w0ep/evidence.md; compliance pack .flywheel/compliance-packs/flywheel-1w0ep/.",
+    "closed_at": "2026-05-09T01:23:01.572357Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T17:47:50.410715Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-08T17:47:51.874393Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-oxr6e",
+        "issue_id": "flywheel-1w0ep",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      }
+    ],
+    "description": "Plan source: /Users/josh/Developer/flywheel/.flywheel/PLANS/agent-security-controls-fleet-wide-2026-05-04/00-PLAN.md\\n\\nWave 4 / B07. Ship committed secret pre-commit dispatcher/installer using the shared corpus. Acceptance: bash tests/security-precommit-hook.sh passes; staged fake secret blocks commit with class/path only; safe synthetic .env.example passes; fixture sets core.hooksPath only after --apply; existing hook is preserved or chained with backup.",
+    "id": "flywheel-1w0ep",
+    "issue_type": "feature",
+    "original_size": 0,
+    "priority": 0,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "fix(security-hooks): install committed secret pre-commit dispatcher",
+    "updated_at": "2026-05-09T01:23:01.572538Z"
+  },
+  {
+    "close_reason": "Implemented security settings deny propagation, fixture apply/idempotency coverage, and sandbox rollout receipt.",
+    "closed_at": "2026-05-09T01:18:50.378440Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T17:47:50.034161Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-08T17:47:50.835819Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-m0v31",
+        "issue_id": "flywheel-vl9of",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      }
+    ],
+    "description": "Plan source: /Users/josh/Developer/flywheel/.flywheel/PLANS/agent-security-controls-fleet-wide-2026-05-04/00-PLAN.md\\n\\nWave 2 / B03. Extend canonical doctrine/settings propagation for security deny rollout receipts. Acceptance: sync-canonical-doctrine.sh --dry-run --json reports security_settings_drift/security; fixture apply preserves non-managed settings and writes backup; re-run apply is idempotent; sandbox rollout receipt covers flywheel plus active agent-mail repos or records blocked_by; receipt has rollback guard and no token-shaped values.",
+    "id": "flywheel-vl9of",
+    "issue_type": "feature",
+    "original_size": 0,
+    "priority": 0,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "fix(security-propagation): extend ft04 sync for settings deny rollout receipts",
+    "updated_at": "2026-05-09T01:18:50.378635Z"
+  },
+  {
+    "close_reason": "Implemented B06 env.test/runtime-output safety fixtures, migration receipt, README contract; tests/security-env-test-runtime.sh, tests/canary-secret-scan.sh, test-safe-probe, dispatch-template audit pass; commit 5295c1f.",
+    "closed_at": "2026-05-09T01:09:46.037810Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T17:47:50.310559Z",
+    "created_by": "josh",
+    "dependencies": [
+      {
+        "created_at": "2026-05-08T17:47:51.696802Z",
+        "created_by": "josh",
+        "depends_on_id": "flywheel-oxr6e",
+        "issue_id": "flywheel-x3n1n",
+        "metadata": "{}",
+        "thread_id": "",
+        "type": "blocks"
+      }
+    ],
+    "description": "Plan source: /Users/josh/Developer/flywheel/.flywheel/PLANS/agent-security-controls-fleet-wide-2026-05-04/00-PLAN.md\\n\\nWave 4 / B06. Standardize synthetic .env.test and runtime-output safety. Acceptance: synthetic .env.test fixture passes; live-shaped sk_live_, AKIA, private key, or JWT in .env.test fails unless explicitly synthetic; runtime failure fixture does not print raw token values; prod .env* repos get migration receipt or blocked_by; README lists allowed fixture prefixes and forbidden classes.",
+    "id": "flywheel-x3n1n",
+    "issue_type": "feature",
+    "original_size": 0,
+    "priority": 0,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "fix(security-fixtures): standardize .env.test and runtime-output safety",
+    "updated_at": "2026-05-09T01:09:46.037980Z"
+  },
+  {
+    "close_reason": "Defined agent-security-control/v1 schema, canonical Claude settings deny template, README/schema docs, and evidence receipts; validation gates pass.",
+    "closed_at": "2026-05-09T01:04:21.195687Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T17:47:49.800214Z",
+    "created_by": "josh",
+    "description": "Plan source: /Users/josh/Developer/flywheel/.flywheel/PLANS/agent-security-controls-fleet-wide-2026-05-04/00-PLAN.md\\n\\nWave 1 / B01. Define the sandbox-only agent-security-control/v1 schema and canonical Claude settings deny template. Acceptance: json.tool validates .flywheel/validation-schema/v1/agent-security-control.schema.json; jq proves schema_version const agent-security-control/v1; json.tool validates .flywheel/security/v1/claude-settings-deny.json; deny list length >=20; README/schema docs mention agent-security-control/v1 and canonical-security-allow. Out of scope: secret rotation or live credential reads.",
+    "id": "flywheel-m0v31",
+    "issue_type": "feature",
+    "original_size": 0,
+    "priority": 0,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "fix(security-contract): define agent-security-control/v1 and canonical deny template",
+    "updated_at": "2026-05-09T01:04:21.195874Z"
+  },
+  {
+    "close_reason": "Fixed tmp-aggressive-prune dry-run JSON sample sizing failure; fake-du regression and live dry-run JSON pass. Commit fb5739d.",
+    "closed_at": "2026-05-09T00:56:12.581099Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T05:18:57.292180Z",
+    "created_by": "josh",
+    "description": "Observed during flywheel-2bd2r verification. .flywheel/scripts/tmp-aggressive-prune.sh --dry-run --json exits rc=1 with no JSON on the live default candidate set. bash -x shows it reaches candidates_count=7 and dies while computing sample_sizes for /private/tmp/devio_semaphore_logi_hpp_OptionsPlus_A7D4B139-F9F9-44A6-9F5D-7BC0A9B8B80F. Layer 2 script was read-only in flywheel-2bd2r, so this needs a follow-up patch that preserves dry-run JSON even when du/awk cannot size a candidate.\n\n## Acceptance gates\nAG1: The artifact, command, or doctrine surface named in `[tmp-cleanup] tmp-aggressive-prune dry-run exits before JSON on sample-size failure` is updated with close evidence.\nAG2: A targeted test, dry-run, or validator command passes and is named in the close receipt.\nAG3: `br show flywheel-2bd2r.1` remains open or in_progress until the evidence artifact exists.\n",
+    "id": "flywheel-2bd2r.1",
+    "issue_type": "bug",
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[tmp-cleanup] tmp-aggressive-prune dry-run exits before JSON on sample-size failure",
+    "updated_at": "2026-05-09T00:56:12.581335Z"
+  },
+  {
+    "close_reason": "Completed scoped canonical-root drift propagation for current discovered fleet. Updated 67 .flywheel/AGENTS-CANONICAL.md snapshots and root AGENTS.md canonical blocks via bounded scoped helper, then proved canonical-root-drift-fleet-check status=pass with canonical_root_drift_count=0, canonical_snapshot_drift_count=0, timed_out=false. Evidence: .flywheel/receipts/flywheel-g0qv9/closeout.md. Follow-up for default sync-helper timeout: flywheel-fppjx.",
+    "closed_at": "2026-05-09T00:53:26.132981Z",
+    "compaction_level": 0,
+    "created_at": "2026-05-08T04:12:17.504818Z",
+    "created_by": "josh",
+    "description": "cf3c bounded verifier run on 2026-05-08 discovered current sync-canonical-doctrine default scope now sees 50 targets with canonical_root_drift_count=49 and canonical_snapshot_drift_count=50. This is separate from flywheel-kdbm's May 4 timeout gap: kdbm's original 18-target apply/check receipt was clean, while the current canonical source has moved since then. Acceptance: run sync-canonical-doctrine.sh --apply or an approved scoped propagation plan for the current 50-target fleet, then prove canonical-root-drift-fleet-check.sh --json status=pass.\n\n## Acceptance gates\nAG1: The artifact, command, or doctrine surface named in `[followup] current canonical-root drift after bounded verifier` is updated with close evidence.\nAG2: A targeted test, dry-run, or validator command passes and is named in the close receipt.\nAG3: `br show flywheel-g0qv9` remains open or in_progress until the evidence artifact exists.\n",
+    "id": "flywheel-g0qv9",
+    "issue_type": "task",
+    "original_size": 0,
+    "priority": 1,
+    "source_repo": "/Users/josh/Developer/flywheel",
+    "status": "closed",
+    "title": "[followup] current canonical-root drift after bounded verifier",
+    "updated_at": "2026-05-09T00:53:26.133160Z"
+  }
+]

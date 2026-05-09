@@ -1,0 +1,735 @@
+{
+  "advertised_evidence_paths": 45,
+  "callbacks_found": 48,
+  "closed_beads_checked": 50,
+  "missing": [],
+  "missing_evidence_paths": 0,
+  "rows": [
+    {
+      "advertised_evidence_paths": [],
+      "bead": "flywheel-ae8aq",
+      "callback_entry_id": null,
+      "callback_found": false,
+      "callback_ts": null,
+      "closed_at": "2026-05-09T05:35:14.946138Z",
+      "title": "Propagate Stage B mission-fidelity handoff to picoz"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-hoj82/no-clean-receipt.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-hoj82/no-clean-receipt.md"
+        }
+      ],
+      "bead": "flywheel-hoj82",
+      "callback_entry_id": "1778304542860-62263687",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T05:29:02.8604Z",
+      "closed_at": "2026-05-09T05:27:24.571375Z",
+      "title": "[storage] investigate private var folders d0 pressure after mobile-eats tmp cleanup"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/audit/flywheel-aduvv/evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/audit/flywheel-aduvv/evidence.md"
+        }
+      ],
+      "bead": "flywheel-aduvv",
+      "callback_entry_id": "1778304475516-beee9337",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T05:27:55.51675Z",
+      "closed_at": "2026-05-09T05:26:38.963698Z",
+      "title": "[agents-md-Phase4] single source of truth \u2014 shards canonical, AGENTS.md mirrors generated"
+    },
+    {
+      "advertised_evidence_paths": [],
+      "bead": "flywheel-aduvv.1",
+      "callback_entry_id": null,
+      "callback_found": false,
+      "callback_ts": null,
+      "closed_at": "2026-05-09T05:26:38.736522Z",
+      "title": "[agents-md-Phase4] apply generated doctrine mirrors to drifted fleet repos"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/audit/flywheel-cg0mr/compliance.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/audit/flywheel-cg0mr/compliance.md"
+        }
+      ],
+      "bead": "flywheel-cg0mr",
+      "callback_entry_id": "1778303960800-35722cce",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T05:19:20.800259Z",
+      "closed_at": "2026-05-09T05:18:43.115385Z",
+      "title": "[follow-up] verify evidence_redacted fleet callback adoption"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-lzw7.4/evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-lzw7.4/evidence.md"
+        }
+      ],
+      "bead": "flywheel-lzw7.4",
+      "callback_entry_id": "1778303800735-bafaf8ae",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T05:16:40.735911Z",
+      "closed_at": "2026-05-09T05:15:49.932465Z",
+      "title": "[voice-repair-picoz] add or explicitly waive public landing copy surface"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/audit/flywheel-lzw7.3/compliance.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/audit/flywheel-lzw7.3/compliance.md"
+        }
+      ],
+      "bead": "flywheel-lzw7.3",
+      "callback_entry_id": "1778303706362-d0001497",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T05:15:06.362816Z",
+      "closed_at": "2026-05-09T05:14:23.653986Z",
+      "title": "[voice-repair-picoz] remove banned ZestStream words from public copy"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/Users/josh/Developer/polymarket-pico-z/.flywheel/audit/flywheel-lzw7.2/compliance.md",
+          "resolved": "/Users/josh/Developer/polymarket-pico-z/.flywheel/audit/flywheel-lzw7.2/compliance.md"
+        }
+      ],
+      "bead": "flywheel-lzw7.2",
+      "callback_entry_id": "1778303557936-e2ab9dfd",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T05:12:37.93641Z",
+      "closed_at": "2026-05-09T05:12:16.318356Z",
+      "title": "[voice-repair-picoz] ground or remove public README claims"
+    },
+    {
+      "advertised_evidence_paths": [],
+      "bead": "flywheel-bv8zn",
+      "callback_entry_id": "1778303469470-7f27321a",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T05:11:09.470211Z",
+      "closed_at": "2026-05-09T05:10:13.322762Z",
+      "title": "[L-rule canonicalize] L70 ORCH-NO-PUNT + mission-fidelity substrate per skillos:1 ratification"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-1ebor/evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-1ebor/evidence.md"
+        }
+      ],
+      "bead": "flywheel-1ebor",
+      "callback_entry_id": "1778303482018-e8b95d50",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T05:11:22.018309Z",
+      "closed_at": "2026-05-09T05:09:02.797130Z",
+      "title": "[doctrine-sync] sync-canonical-doctrine.sh missed .flywheel/rules/ propagation to 6 of 7 fleet repos"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/Users/josh/Developer/polymarket-pico-z/.flywheel/audit/flywheel-lzw7.1/compliance.md",
+          "resolved": "/Users/josh/Developer/polymarket-pico-z/.flywheel/audit/flywheel-lzw7.1/compliance.md"
+        }
+      ],
+      "bead": "flywheel-lzw7.1",
+      "callback_entry_id": "1778303331515-6bec5ac4",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T05:08:51.515958Z",
+      "closed_at": "2026-05-09T05:08:17.961164Z",
+      "title": "[voice-repair-picoz] raise ZestStream public voice score above 95"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-l95he-528b0c-evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-l95he-528b0c-evidence.md"
+        }
+      ],
+      "bead": "flywheel-l95he",
+      "callback_entry_id": "1778302824607-bb57bac7",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T05:00:24.607227Z",
+      "closed_at": "2026-05-09T04:58:46.212022Z",
+      "title": "[doctrine] flywheel-cleanup-scratch helper \u2014 DCG-allowlisted scratch-dir cleanup primitive"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-tynj3/jsm-push-ready-beads-compliance-worker-close-dirty-scope.patch",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-tynj3/jsm-push-ready-beads-compliance-worker-close-dirty-scope.patch"
+        }
+      ],
+      "bead": "flywheel-tynj3",
+      "callback_entry_id": "1778301734017-fcb549c8",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T04:42:14.01715Z",
+      "closed_at": "2026-05-09T04:55:32.477202Z",
+      "title": "beads-compliance skill missing worker-close dirty-scope marker"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-lzc6.1/evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-lzc6.1/evidence.md"
+        }
+      ],
+      "bead": "flywheel-lzc6.1",
+      "callback_entry_id": "1778302466738-f1883163",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T04:54:26.738075Z",
+      "closed_at": "2026-05-09T04:52:59.007145Z",
+      "title": "[voice-repair-flywheel] remove banned ZestStream words from public copy"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/tmp/flywheel-u5yuq-compliance/flywheel-u5yuq/evidence.json",
+          "resolved": "/tmp/flywheel-u5yuq-compliance/flywheel-u5yuq/evidence.json"
+        }
+      ],
+      "bead": "flywheel-u5yuq",
+      "callback_entry_id": "1778301218007-bd05d82f",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T04:33:38.007049Z",
+      "closed_at": "2026-05-09T04:31:12.349019Z",
+      "title": "[agents-md-Phase3] promote/demote ladder \u2014 usage-log driven L-rule lifecycle"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-gb54d/evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-gb54d/evidence.md"
+        }
+      ],
+      "bead": "flywheel-gb54d",
+      "callback_entry_id": "1778301105019-f375ac8c",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T04:31:45.019284Z",
+      "closed_at": "2026-05-09T04:29:38.530043Z",
+      "title": "[skill-uplift] canonical-cli-scoping 681\u2192745 via agent-ergonomics audit recommendations"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-nghdi/evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-nghdi/evidence.md"
+        }
+      ],
+      "bead": "flywheel-nghdi",
+      "callback_entry_id": "1778300333150-849e7337",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T04:18:53.150301Z",
+      "closed_at": "2026-05-09T04:25:35.373888Z",
+      "title": "[agents-md-Phase2] hint injector \u2014 UserPromptSubmit-style L-rule auto-router for codex workers"
+    },
+    {
+      "advertised_evidence_paths": [],
+      "bead": "flywheel-oq267",
+      "callback_entry_id": "1778300704333-78cad0ac",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T04:25:04.333963Z",
+      "closed_at": "2026-05-09T04:23:41.105339Z",
+      "title": "[agents-md-Phase1] shard extract \u2014 split AGENTS-CANONICAL.md to .flywheel/rules/L<NN>.md + thin index"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-rzgqc/skill-name-findings.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-rzgqc/skill-name-findings.md"
+        }
+      ],
+      "bead": "flywheel-rzgqc",
+      "callback_entry_id": "1778299815921-9e6713c0",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T04:10:15.921821Z",
+      "closed_at": "2026-05-09T04:09:11.172912Z",
+      "title": "[skill-bug] agent-ergonomics-... skill name 76 chars exceeds codex 64-char limit"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/tmp/flywheel-ecjmq-compliance/flywheel-ecjmq/",
+          "resolved": "/tmp/flywheel-ecjmq-compliance/flywheel-ecjmq"
+        }
+      ],
+      "bead": "flywheel-ecjmq",
+      "callback_entry_id": "1778299764223-4364db1a",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T04:09:24.223394Z",
+      "closed_at": "2026-05-09T04:06:32.271762Z",
+      "title": "[storage] handle recent large mobile-eats validation tmp roots"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-r52ig/compliance-pack.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-r52ig/compliance-pack.md"
+        }
+      ],
+      "bead": "flywheel-r52ig",
+      "callback_entry_id": "1778299283189-a72328fa",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T04:01:23.18983Z",
+      "closed_at": "2026-05-09T04:00:11.520018Z",
+      "title": "[doctrine] apply agent-ergonomics skill to our own .flywheel/scripts substrate"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/tmp/flywheel-0y1nr-compliance/flywheel-0y1nr/",
+          "resolved": "/tmp/flywheel-0y1nr-compliance/flywheel-0y1nr"
+        }
+      ],
+      "bead": "flywheel-0y1nr",
+      "callback_entry_id": "1778298560362-b0eb3bc0",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T03:49:20.362207Z",
+      "closed_at": "2026-05-09T03:47:34.049577Z",
+      "title": "[storage] investigate where 910Gi+ used disk lives \u2014 16Gi avail trending wrong"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-dwavb/compliance-pack.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-dwavb/compliance-pack.md"
+        }
+      ],
+      "bead": "flywheel-dwavb",
+      "callback_entry_id": "1778298583255-81d28841",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T03:49:43.255913Z",
+      "closed_at": "2026-05-09T03:46:43.879649Z",
+      "title": "[L-rule Phase 4] evidence_redacted callback contract field + validator gate"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-hv071/compliance-pack.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-hv071/compliance-pack.md"
+        }
+      ],
+      "bead": "flywheel-hv071",
+      "callback_entry_id": "1778297810035-ae46d83e",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T03:36:50.035438Z",
+      "closed_at": "2026-05-09T03:34:42.367038Z",
+      "title": "[L-rule] PRE-COMMIT-GITLEAKS-MANDATORY + rank-3 secret-handle convention (Phase 1)"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/Users/josh/Developer/zeststream-infra/.flywheel/receipts/flywheel-r2hd/compliance-pack.md",
+          "resolved": "/Users/josh/Developer/zeststream-infra/.flywheel/receipts/flywheel-r2hd/compliance-pack.md"
+        }
+      ],
+      "bead": "flywheel-r2hd",
+      "callback_entry_id": "1778297111775-61b9bd7a",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T03:25:11.775952Z",
+      "closed_at": "2026-05-09T03:22:10.282734Z",
+      "title": "[voice-gap-zeststream-infra] ZestStream public voice score audit"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/tmp/flywheel-1t8t.1-compliance/flywheel-1t8t.1",
+          "resolved": "/tmp/flywheel-1t8t.1-compliance/flywheel-1t8t.1"
+        }
+      ],
+      "bead": "flywheel-1t8t.1",
+      "callback_entry_id": "1778296626380-c59b5487",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T03:17:06.380599Z",
+      "closed_at": "2026-05-09T03:15:13.127657Z",
+      "title": "[zesttube-public-ready] clean MISSION public voice operator/path hits"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-lzw7.4/evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-lzw7.4/evidence.md"
+        }
+      ],
+      "bead": "flywheel-lzw7",
+      "callback_entry_id": "1778303800735-bafaf8ae",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T05:16:40.735911Z",
+      "closed_at": "2026-05-09T03:13:31.263401Z",
+      "title": "[voice-gap-picoz] ZestStream public voice score audit"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-lzc6.1/evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-lzc6.1/evidence.md"
+        }
+      ],
+      "bead": "flywheel-lzc6",
+      "callback_entry_id": "1778302466738-f1883163",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T04:54:26.738075Z",
+      "closed_at": "2026-05-09T03:05:40.376314Z",
+      "title": "[voice-gap-flywheel] ZestStream public voice score audit"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/tmp/flywheel-1t8t.1-compliance/flywheel-1t8t.1",
+          "resolved": "/tmp/flywheel-1t8t.1-compliance/flywheel-1t8t.1"
+        }
+      ],
+      "bead": "flywheel-1t8t",
+      "callback_entry_id": "1778296626380-c59b5487",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T03:17:06.380599Z",
+      "closed_at": "2026-05-09T03:03:57.820015Z",
+      "title": "[publishability-audit] zesttube three-judges audit"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-uzhd3/compliance-pack.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-uzhd3/compliance-pack.md"
+        }
+      ],
+      "bead": "flywheel-uzhd3",
+      "callback_entry_id": "1778295596216-5c3852ee",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T02:59:56.216139Z",
+      "closed_at": "2026-05-09T02:58:25.560735Z",
+      "title": "[L-rule] PUBLIC-READY-DEFAULT \u2014 all repos audited/scored as if public, regardless of private status"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/tmp/flywheel-sib04-compliance/flywheel-sib04/re-audit-report.md",
+          "resolved": "/tmp/flywheel-sib04-compliance/flywheel-sib04/re-audit-report.md"
+        }
+      ],
+      "bead": "flywheel-sib04",
+      "callback_entry_id": "1778295252035-c002f67b",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T02:54:12.035506Z",
+      "closed_at": "2026-05-09T02:51:47.665664Z",
+      "title": "[re-audit] today's private-exemption closes against PUBLIC-READY-DEFAULT (flywheel-uzhd3)"
+    },
+    {
+      "advertised_evidence_paths": [],
+      "bead": "flywheel-7xbaw",
+      "callback_entry_id": "1778294808349-5ada6317",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T02:46:48.349674Z",
+      "closed_at": "2026-05-09T02:45:57.078690Z",
+      "title": "[skillos-voice] remove L89 banned words"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-ftj0m/compliance-pack.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-ftj0m/compliance-pack.md"
+        }
+      ],
+      "bead": "flywheel-ftj0m",
+      "callback_entry_id": "1778294403938-57534ef6",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T02:40:03.938525Z",
+      "closed_at": "2026-05-09T02:39:22.452088Z",
+      "title": "[doctrine] skill-autoresearch python-vs-shell tooling preference mismatch class"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/tmp/flywheel-gjjrp-compliance/flywheel-gjjrp/REPORT.md",
+          "resolved": "/tmp/flywheel-gjjrp-compliance/flywheel-gjjrp/REPORT.md"
+        }
+      ],
+      "bead": "flywheel-gjjrp",
+      "callback_entry_id": "1778293973073-35a9055c",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T02:32:53.073871Z",
+      "closed_at": "2026-05-09T02:31:20.664174Z",
+      "title": "[skill-builder] scripts/ dir + jsm 15s timeout \u2014 beads-br SKILL.md scoped fix exposed structural debt"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-fg2v5/compliance-pack.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-fg2v5/compliance-pack.md"
+        }
+      ],
+      "bead": "flywheel-fg2v5",
+      "callback_entry_id": "1778293696036-ac82b170",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T02:28:16.036305Z",
+      "closed_at": "2026-05-09T02:26:37.327381Z",
+      "title": "Add NTM pane-specific sidecar respawn command surface"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/tmp/flywheel-x2okl-compliance/flywheel-x2okl/REPORT.md",
+          "resolved": "/tmp/flywheel-x2okl-compliance/flywheel-x2okl/REPORT.md"
+        }
+      ],
+      "bead": "flywheel-x2okl",
+      "callback_entry_id": "1778293244581-c3a1a769",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T02:20:44.581923Z",
+      "closed_at": "2026-05-09T02:19:40.792522Z",
+      "title": "[infra-codex] sidecar install codex-cli 0.129 + /goal canary on pane 4"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-ljrjw/compliance-pack.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-ljrjw/compliance-pack.md"
+        }
+      ],
+      "bead": "flywheel-ljrjw",
+      "callback_entry_id": "1778293051202-d4f1c472",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T02:17:31.202783Z",
+      "closed_at": "2026-05-09T02:16:22.714555Z",
+      "title": "[CRITICAL] JSM-managed skills will overwrite our worker edits \u2014 audit + jsm-push-ready-patch discipline needed"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-rdqc7.1/evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-rdqc7.1/evidence.md"
+        }
+      ],
+      "bead": "flywheel-rdqc7.1",
+      "callback_entry_id": "1778292790775-d218792d",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T02:13:10.77597Z",
+      "closed_at": "2026-05-09T02:11:30.014972Z",
+      "title": "[doctrine-prop] add wave allowlist to flywheel-doctrine-sync"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-ggld7/evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-ggld7/evidence.md"
+        }
+      ],
+      "bead": "flywheel-ggld7",
+      "callback_entry_id": "1778292163636-d8536455",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T02:02:43.636043Z",
+      "closed_at": "2026-05-09T02:01:44.076845Z",
+      "title": "[skillos-proposal] codex-stuck-detector bg-terminal class + caam-rotate-and-respawn primitive"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-03uki/compliance-pack.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-03uki/compliance-pack.md"
+        }
+      ],
+      "bead": "flywheel-03uki",
+      "callback_entry_id": "1778291783059-8dee31af",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T01:56:23.059182Z",
+      "closed_at": "2026-05-09T01:55:34.319463Z",
+      "title": "fix(security-doctrine): wire L74, README, skill draft, and canonical paths"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-98t5l/evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-98t5l/evidence.md"
+        }
+      ],
+      "bead": "flywheel-98t5l",
+      "callback_entry_id": "1778291339927-2b7f0934",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T01:48:59.927989Z",
+      "closed_at": "2026-05-09T01:48:07.464990Z",
+      "title": "fix(security-promotion): route security doctor drift to beads and daily report"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-1gyiv/compliance-pack.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-1gyiv/compliance-pack.md"
+        }
+      ],
+      "bead": "flywheel-1gyiv",
+      "callback_entry_id": "1778291170989-03bfa499",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T01:46:10.98951Z",
+      "closed_at": "2026-05-09T01:44:26.678859Z",
+      "title": "fix(security-e2e): run conformance harness and fleet dry-run smoke"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-qegt3/compliance-pack.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-qegt3/compliance-pack.md"
+        }
+      ],
+      "bead": "flywheel-qegt3",
+      "callback_entry_id": "1778290634624-e482040c",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T01:37:14.624644Z",
+      "closed_at": "2026-05-09T01:34:21.121794Z",
+      "title": "fix(security-doctor): expose security posture signals in flywheel-loop doctor"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-mzvd0/evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-mzvd0/evidence.md"
+        }
+      ],
+      "bead": "flywheel-mzvd0",
+      "callback_entry_id": "1778290299976-a3d0e606",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T01:31:39.976718Z",
+      "closed_at": "2026-05-09T01:30:39.624540Z",
+      "title": "fix(security-sandbox): define prod-credential container isolation profile"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-1w0ep/evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-1w0ep/evidence.md"
+        }
+      ],
+      "bead": "flywheel-1w0ep",
+      "callback_entry_id": "1778289859177-40d4f624",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T01:24:19.177966Z",
+      "closed_at": "2026-05-09T01:23:01.572357Z",
+      "title": "fix(security-hooks): install committed secret pre-commit dispatcher"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-vl9of/compliance-pack.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-vl9of/compliance-pack.md"
+        }
+      ],
+      "bead": "flywheel-vl9of",
+      "callback_entry_id": "1778289597410-1b816703",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T01:19:57.41093Z",
+      "closed_at": "2026-05-09T01:18:50.378440Z",
+      "title": "fix(security-propagation): extend ft04 sync for settings deny rollout receipts"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-x3n1n/evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-x3n1n/evidence.md"
+        }
+      ],
+      "bead": "flywheel-x3n1n",
+      "callback_entry_id": "1778289043673-e8022d7b",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T01:10:43.67337Z",
+      "closed_at": "2026-05-09T01:09:46.037810Z",
+      "title": "fix(security-fixtures): standardize .env.test and runtime-output safety"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-m0v31/security-contract-evidence.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-m0v31/security-contract-evidence.md"
+        }
+      ],
+      "bead": "flywheel-m0v31",
+      "callback_entry_id": "1778288772995-374f4ba2",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T01:06:12.995295Z",
+      "closed_at": "2026-05-09T01:04:21.195687Z",
+      "title": "fix(security-contract): define agent-security-control/v1 and canonical deny template"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-2bd2r.1/sample-size-json-hotfix.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-2bd2r.1/sample-size-json-hotfix.md"
+        }
+      ],
+      "bead": "flywheel-2bd2r.1",
+      "callback_entry_id": "1778288216928-0d5a1156",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T00:56:56.928111Z",
+      "closed_at": "2026-05-09T00:56:12.581099Z",
+      "title": "[tmp-cleanup] tmp-aggressive-prune dry-run exits before JSON on sample-size failure"
+    },
+    {
+      "advertised_evidence_paths": [
+        {
+          "exists": true,
+          "path": ".flywheel/receipts/flywheel-g0qv9/closeout.md",
+          "resolved": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-g0qv9/closeout.md"
+        }
+      ],
+      "bead": "flywheel-g0qv9",
+      "callback_entry_id": "1778288073156-82549963",
+      "callback_found": true,
+      "callback_ts": "2026-05-09T00:54:33.156522Z",
+      "closed_at": "2026-05-09T00:53:26.132981Z",
+      "title": "[followup] current canonical-root drift after bounded verifier"
+    }
+  ],
+  "source": {
+    "closed_beads": ".beads/issues.jsonl sorted by closed_at desc, first 50",
+    "match_rule": "prompt starts DONE/BLOCKED/DECLINED for bead or contains bead= / task_id= bead",
+    "ntm_history": "/tmp/flywheel-7nmls-history.json"
+  },
+  "task": "flywheel-7nmls"
+}

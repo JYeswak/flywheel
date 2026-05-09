@@ -40,12 +40,21 @@ base = {
     },
     "evidence": [{"type": "path", "ref": str(tmp / "evidence.md")}],
     "artifact_paths": [{"artifact_id": "evidence", "path": str(tmp / "evidence.md")}],
+    "evidence_redacted": "n/a",
     "bead_actions": [{"action": "none"}],
 }
 (tmp / "valid-done-callback.json").write_text(json.dumps(base))
 missing = dict(base)
 missing["artifact_paths"] = [{"artifact_id": "missing", "path": str(tmp / "missing.md")}]
 (tmp / "missing-artifact-callback.json").write_text(json.dumps(missing))
+structured_missing = dict(base)
+structured_missing["evidence"] = [{"type": "path", "ref": str(tmp / "structured-missing.md")}]
+structured_missing["artifact_paths"] = []
+(tmp / "structured-missing-evidence-callback.json").write_text(json.dumps(structured_missing))
+tmp_missing = dict(base)
+tmp_missing["evidence"] = [{"type": "path", "ref": "/tmp/flywheel-7nmls-ephemeral-proof-dir"}]
+tmp_missing["artifact_paths"] = []
+(tmp / "tmp-missing-evidence-callback.json").write_text(json.dumps(tmp_missing))
 timeout = dict(base)
 timeout["timeout"] = True
 timeout["agent_status"] = "unresponsive"
@@ -104,6 +113,20 @@ no_edit = dict(base)
 no_edit["files_reserved"] = "NONE_NO_EDITS"
 no_edit["files_released"] = "NONE_NO_EDITS"
 (tmp / "no-edit-callback.json").write_text(json.dumps(no_edit))
+redacted_required = dict(base)
+redacted_required["files_reserved"] = ["reports/evidence/proof.md"]
+redacted_required["files_released"] = ["reports/evidence/proof.md"]
+redacted_required["evidence_redacted"] = "yes"
+(tmp / "redacted-required-callback.json").write_text(json.dumps(redacted_required))
+redacted_missing = dict(redacted_required)
+redacted_missing.pop("evidence_redacted", None)
+(tmp / "redacted-missing-callback.json").write_text(json.dumps(redacted_missing))
+redacted_declared_no = dict(redacted_required)
+redacted_declared_no["evidence_redacted"] = "no"
+(tmp / "redacted-no-callback.json").write_text(json.dumps(redacted_declared_no))
+redacted_na_required = dict(redacted_required)
+redacted_na_required["evidence_redacted"] = "n/a"
+(tmp / "redacted-na-required-callback.json").write_text(json.dumps(redacted_na_required))
 (tmp / "invalid-callback.json").write_text("{not-json")
 PY
 }
@@ -121,7 +144,7 @@ assert_jq() {
 make_fixtures
 
 schema_out="$(run_json schema --schema)"
-assert_jq "$schema_out" '.command == "flywheel-loop validate-callback" and .read_only_default == true and (.agent_mail_receipt_fields | index("reservation_conflicts")) and (.reservation_lifecycle_states | index("force-released"))' "B03_AG1 command surface schema"
+assert_jq "$schema_out" '.command == "flywheel-loop validate-callback" and .read_only_default == true and (.agent_mail_receipt_fields | index("reservation_conflicts")) and (.reservation_lifecycle_states | index("force-released")) and (.evidence_redacted_values | index("yes")) and (.evidence_redaction_required_when_files_reserved_match | index("*/evidence/*"))' "B03_AG1 command surface schema"
 
 examples_out="$(run_json examples --examples)"
 assert_jq "$examples_out" '(.examples | length) >= 4' "B03_AG2 examples surface"
@@ -136,6 +159,12 @@ fi
 assert_jq "$missing_out" '.status == "fail" and .failure_class == "missing_artifact" and .retry_policy == "manual" and .summary_allowed == false and .integration_allowed == false' "B03_AG3 missing artifact receipt"
 assert_jq "$missing_out" '.remediation_required == true and .remediation_present == false' "B03_AG7 failed callback requires remediation before summary"
 
+structured_missing_out="$(run_json structured-missing --dispatch-id nmls-structured-missing --callback-ref "$TMP/structured-missing-evidence-callback.json")"
+assert_jq "$structured_missing_out" '.status == "fail" and (.failure_classes | index("artifact_missing")) and (.validation_receipt.artifact_checks[] | select(.artifact_id == "evidence_1" and .status == "missing"))' "7nmls structured evidence path must exist"
+
+tmp_override_out="$(run_json tmp-override --dispatch-id nmls-tmp-override --callback-ref "$TMP/tmp-missing-evidence-callback.json" --allow-missing-tmp-evidence)"
+assert_jq "$tmp_override_out" '.status == "pass" and .meta.allow_missing_tmp_evidence == true and (.validation_receipt.artifact_checks[] | select(.status == "unknown" and .expected == "missing_tmp_evidence_allowed"))' "7nmls tmp evidence override is explicit"
+
 timeout_out="$(run_json timeout --dispatch-id b03-timeout --callback-ref "$TMP/runtime-timeout-callback.json")"
 timeout_rc="$(cat "$TMP/timeout.rc")"
 if [[ "$timeout_rc" == "3" ]]; then
@@ -148,25 +177,25 @@ assert_jq "$timeout_out" '.status == "unknown" and .failure_class == "transient"
 valid_out="$(run_json valid --dispatch-id b03-valid --callback-ref "$TMP/valid-done-callback.json")"
 assert_jq "$valid_out" '.status == "pass" and (.validation_receipt.evidence | length) == 1 and .schema_valid == true' "B03_AG5 valid DONE records typed evidence"
 
-l61_missing_out="$(run_json l61-missing --dispatch-id l61-missing --task-description "ship canonical L-rule josh_request_id=null" --callback-ref "DONE l61-missing evidence=$TMP/evidence.md josh_request_id=null")"
+l61_missing_out="$(run_json l61-missing --dispatch-id l61-missing --task-description "ship canonical L-rule josh_request_id=null" --callback-ref "DONE l61-missing evidence=$TMP/evidence.md josh_request_id=null evidence_redacted=n/a")"
 assert_jq "$l61_missing_out" '.status == "fail" and (.failure_classes | index("orch_callback_missing_l61_fields")) and (.meta.l61_missing_fields | index("agents_md_updated")) and (.meta.l61_missing_fields | index("readme_updated"))' "L61 missing ecosystem callback fields fail validation"
 
-l61_no_reason_out="$(run_json l61-no-reason --dispatch-id l61-no-reason --task-description "doctrine update josh_request_id=null" --callback-ref "DONE l61-no-reason evidence=$TMP/evidence.md josh_request_id=null agents_md_updated=yes readme_updated=no")"
+l61_no_reason_out="$(run_json l61-no-reason --dispatch-id l61-no-reason --task-description "doctrine update josh_request_id=null" --callback-ref "DONE l61-no-reason evidence=$TMP/evidence.md josh_request_id=null evidence_redacted=n/a agents_md_updated=yes readme_updated=no")"
 assert_jq "$l61_no_reason_out" '.status == "fail" and (.failure_classes | index("orch_callback_missing_l61_fields")) and (.meta.l61_missing_fields | index("no_touch_reason"))' "L61 no-touch reason required when ecosystem field is no"
 
-l61_valid_out="$(run_json l61-valid --dispatch-id l61-valid --task-description "skill ship josh_request_id=null" --callback-ref "DONE l61-valid evidence=$TMP/evidence.md josh_request_id=null agents_md_updated=yes readme_updated=no no_touch_reason=README-not-user-facing")"
+l61_valid_out="$(run_json l61-valid --dispatch-id l61-valid --task-description "skill ship josh_request_id=null" --callback-ref "DONE l61-valid evidence=$TMP/evidence.md josh_request_id=null evidence_redacted=n/a agents_md_updated=yes readme_updated=no no_touch_reason=README-not-user-facing")"
 assert_jq "$l61_valid_out" '.status == "pass" and .meta.l61_required == true and .schema_valid == true' "L61 ecosystem callback fields pass validation"
 
-jr_dispatch_missing_out="$(run_json jr-dispatch-missing --dispatch-id jr-dispatch-missing --task-description "ordinary dispatch without request id" --callback-ref "DONE jr-dispatch-missing evidence=$TMP/evidence.md josh_request_id=null no_bead_reason=not-needed")"
+jr_dispatch_missing_out="$(run_json jr-dispatch-missing --dispatch-id jr-dispatch-missing --task-description "ordinary dispatch without request id" --callback-ref "DONE jr-dispatch-missing evidence=$TMP/evidence.md josh_request_id=null evidence_redacted=n/a no_bead_reason=not-needed")"
 assert_jq "$jr_dispatch_missing_out" '.status == "fail" and (.failure_classes | index("dispatch_missing_josh_request_id")) and .meta.josh_request_id_required == true' "sur0 dispatch missing josh_request_id fails validation"
 
-jr_callback_missing_out="$(run_json jr-callback-missing --dispatch-id jr-callback-missing --task-description "ordinary dispatch josh_request_id=jr-test-001" --callback-ref "DONE jr-callback-missing evidence=$TMP/evidence.md no_bead_reason=not-needed")"
+jr_callback_missing_out="$(run_json jr-callback-missing --dispatch-id jr-callback-missing --task-description "ordinary dispatch josh_request_id=jr-test-001" --callback-ref "DONE jr-callback-missing evidence=$TMP/evidence.md evidence_redacted=n/a no_bead_reason=not-needed")"
 assert_jq "$jr_callback_missing_out" '.status == "fail" and (.failure_classes | index("callback_missing_josh_request_id")) and .meta.dispatch_josh_request_id == "jr-test-001"' "sur0 callback missing josh_request_id fails validation"
 
-jr_callback_mismatch_out="$(run_json jr-callback-mismatch --dispatch-id jr-callback-mismatch --task-description "ordinary dispatch josh_request_id=jr-test-001" --callback-ref "DONE jr-callback-mismatch evidence=$TMP/evidence.md josh_request_id=jr-test-002 no_bead_reason=not-needed")"
+jr_callback_mismatch_out="$(run_json jr-callback-mismatch --dispatch-id jr-callback-mismatch --task-description "ordinary dispatch josh_request_id=jr-test-001" --callback-ref "DONE jr-callback-mismatch evidence=$TMP/evidence.md josh_request_id=jr-test-002 evidence_redacted=n/a no_bead_reason=not-needed")"
 assert_jq "$jr_callback_mismatch_out" '.status == "fail" and (.failure_classes | index("callback_josh_request_id_mismatch")) and .meta.callback_josh_request_id == "jr-test-002"' "sur0 callback mismatched josh_request_id fails validation"
 
-jr_valid_out="$(run_json jr-valid --dispatch-id jr-valid --task-description "ordinary dispatch josh_request_id=jr-test-001" --callback-ref "DONE jr-valid evidence=$TMP/evidence.md josh_request_id=jr-test-001")"
+jr_valid_out="$(run_json jr-valid --dispatch-id jr-valid --task-description "ordinary dispatch josh_request_id=jr-test-001" --callback-ref "DONE jr-valid evidence=$TMP/evidence.md josh_request_id=jr-test-001 evidence_redacted=n/a")"
 assert_jq "$jr_valid_out" '.status == "pass" and .meta.dispatch_josh_request_id == "jr-test-001" and .meta.callback_josh_request_id == "jr-test-001"' "sur0 matching josh_request_id passes validation"
 
 invalid_out="$(run_json invalid --dispatch-id b03-invalid --callback-ref "$TMP/invalid-callback.json")"
@@ -193,7 +222,19 @@ assert_jq "$force_released_out" '.status == "pass" and .validation_receipt.agent
 no_edit_out="$(run_json no-edit --dispatch-id f2bm-no-edit --callback-ref "$TMP/no-edit-callback.json")"
 assert_jq "$no_edit_out" '.status == "pass" and .validation_receipt.agent_mail.reservation_lifecycle.state == "no_reservation_required" and .validation_receipt.agent_mail.files_reserved == ["NONE_NO_EDITS"]' "f2bm no-edit dispatch records no reservation required"
 
-raw_callback_out="$(run_json raw-callback --dispatch-id f2bm-raw --callback-ref "DONE f2bm evidence=$TMP/evidence.md josh_request_id=null agent_mail_thread=thread-raw-001 identity_name=CloudyMill files_reserved=README.md files_released=README.md reservation_conflicts=none no_bead_reason=raw-callback-fixture-routed")"
+redacted_required_out="$(run_json redacted-required --dispatch-id dwavb-required --callback-ref "$TMP/redacted-required-callback.json")"
+assert_jq "$redacted_required_out" '.status == "pass" and .validation_receipt.evidence_redaction.required == true and .validation_receipt.evidence_redaction.status == "pass" and .validation_receipt.evidence_redaction.evidence_redacted == "yes"' "dwavb evidence-class reservation requires redacted yes"
+
+redacted_missing_out="$(run_json redacted-missing --dispatch-id dwavb-missing --callback-ref "$TMP/redacted-missing-callback.json")"
+assert_jq "$redacted_missing_out" '.status == "fail" and (.failure_classes | index("evidence_redaction_missing")) and .validation_receipt.evidence_redaction.required == true and .validation_receipt.evidence_redaction.owner == "worker"' "dwavb missing evidence_redacted blocks evidence close"
+
+redacted_no_out="$(run_json redacted-no --dispatch-id dwavb-no --callback-ref "$TMP/redacted-no-callback.json")"
+assert_jq "$redacted_no_out" '.status == "fail" and (.failure_classes | index("evidence_redaction_declared_no")) and (.validation_receipt.evidence_redaction.remediation | contains("gitleaks --no-git --piped"))' "dwavb evidence_redacted no returns remediation"
+
+redacted_na_required_out="$(run_json redacted-na-required --dispatch-id dwavb-na-required --callback-ref "$TMP/redacted-na-required-callback.json")"
+assert_jq "$redacted_na_required_out" '.status == "fail" and (.failure_classes | index("evidence_redaction_na_on_evidence")) and .validation_receipt.evidence_redaction.required == true' "dwavb n/a rejected for evidence-class paths"
+
+raw_callback_out="$(run_json raw-callback --dispatch-id f2bm-raw --callback-ref "DONE f2bm evidence=$TMP/evidence.md josh_request_id=null evidence_redacted=n/a agent_mail_thread=thread-raw-001 identity_name=CloudyMill files_reserved=README.md files_released=README.md reservation_conflicts=none no_bead_reason=raw-callback-fixture-routed")"
 assert_jq "$raw_callback_out" '.status == "pass" and .validation_receipt.agent_mail.agent_mail_thread == "thread-raw-001" and .validation_receipt.agent_mail.identity_name == "CloudyMill" and .validation_receipt.agent_mail.reservation_lifecycle.state == "released"' "f2bm raw worker callback fields parse without tokens"
 
 receipt_out="$(run_json write --dispatch-id b03-write --callback-ref "$TMP/valid-done-callback.json" --write-receipt --receipt-dir "$TMP/receipts")"
