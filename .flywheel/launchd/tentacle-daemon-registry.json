@@ -1,0 +1,35 @@
+{
+  "schema_version": "tentacle-daemon-registry/v1",
+  "updated_at": "2026-05-09T06:05:00Z",
+  "policy": {
+    "audit_mode": "read_only",
+    "mutation": "no_unload_reload_in_audit_mode",
+    "missing_running_route": "warn"
+  },
+  "daemons": [
+    {
+      "name": "ntm-fleet-health",
+      "tentacle": "ntm",
+      "plist_label": "ai.zeststream.ntm-fleet-health",
+      "plist_path": "/Users/josh/Library/LaunchAgents/ai.zeststream.ntm-fleet-health.plist",
+      "expected_state": "running",
+      "expected_uptime_seconds": 60,
+      "binary_path": "/Users/josh/Developer/flywheel/.flywheel/scripts/ntm-fleet-health.sh",
+      "restart_policy": "manual_restart_on_missing",
+      "restart_command": "launchctl kickstart -k gui/501/ai.zeststream.ntm-fleet-health",
+      "notes": "Read-only audit reports missing or recently restarted state; restart remains operator action."
+    },
+    {
+      "name": "vc-daemon",
+      "tentacle": "vibe-cockpit",
+      "plist_label": "com.vc.daemon",
+      "plist_path": "/Users/josh/Library/LaunchAgents/com.vc.daemon.plist.disabled-2026-04-30",
+      "expected_state": "disabled",
+      "expected_uptime_seconds": 0,
+      "binary_path": "/Users/josh/.local/bin/vc",
+      "restart_policy": "blocked_pending_upstream",
+      "restart_command": null,
+      "notes": "Disabled after vc daemon regression; audit should warn if loaded rather than trying to restart."
+    }
+  ]
+}
