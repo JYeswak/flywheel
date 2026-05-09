@@ -21,6 +21,8 @@ No `INCIDENTS.md` edit was made.
 
 This is not the exact closed dot-after-create upstream issue. It should be tracked as a separate current source-repo hygiene/write-path gap.
 
+Follow-up bead: `flywheel-8x2le`.
+
 ## Commands Run
 
 ```bash

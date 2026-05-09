@@ -37,7 +37,7 @@ Therefore the old dot-after-create incident is owned by the upstream issue and s
 
 That is not the same as the exact `br-source-repo-dot-after-create` promotion request. It is a current `source_repo` hygiene/write-path regression and should be tracked separately rather than promoted as the old dot-after-create incident.
 
-Follow-up bead filing is pending `.beads/issues.jsonl` reservation release. If the bead lane opens before callback, this pack will be patched with the follow-up bead ID.
+Follow-up bead: `flywheel-8x2le`.
 
 ## Missing /tmp Drafts
 
@@ -101,7 +101,7 @@ No doctrine, canonical L-rule, skill, AGENTS, README, or `INCIDENTS.md` source w
 
 L52 for the exact class: `no_followup_needed` because upstream and local tracking are closed.
 
-L52 for the distinct current source-repo hygiene gap: follow-up bead filing pending `.beads/issues.jsonl` reservation release.
+L52 for the distinct current source-repo hygiene gap: filed follow-up bead `flywheel-8x2le`.
 
 No fuckup row was logged.
 
