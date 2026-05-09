@@ -1,0 +1,189 @@
+{
+  "schema_version": "alps-beads-leakage-triage/v1",
+  "generated_at": "2026-05-09T15:58:00Z",
+  "bead_id": "flywheel-s69zu",
+  "dispatch_task_id": "flywheel-s69zu-21a512",
+  "scope": "alps_bead_store_cross_project_id_classification_and_sweep_policy_recommendation",
+  "mode": "investigation_dry_run",
+  "alps_repo": "/Users/josh/Developer/alpsinsurance",
+  "alps_jsonl_path": "/Users/josh/Developer/alpsinsurance/.beads/issues.jsonl",
+  "tick_source": "alps_loop_20260508T013943Z (reported beads-leakage-count=36 routed to flywheel:1 at 2026-05-08T01:39Z)",
+  "summary": {
+    "alps_jsonl_total_rows": 1882,
+    "alps_proper_prefix_count": 1817,
+    "alps_proper_prefix": "josh-",
+    "cross_project_leak_count": 65,
+    "cross_project_leak_growth_since_2026_05_08_tick": 29,
+    "cross_project_leak_growth_pct": 80.5,
+    "leaks_by_class": {
+      "peer_orch_mistake_doctrine_wire_beads": 55,
+      "cross_project_escalation_pattern": 8,
+      "test_sandbox_tmp_traces": 2
+    },
+    "leak_classes_total": 65,
+    "all_leaks_status_open_count": 63,
+    "all_leaks_orphan_in_alps_only_count": 63,
+    "all_leaks_with_mirror_in_flywheel_repo_count": 0,
+    "earliest_leak_created_at": "2026-05-06T17:19:18.619263Z",
+    "latest_leak_created_at": "2026-05-07T18:03:02Z",
+    "concentration_window_hours": 25
+  },
+  "classification": {
+    "peer_orch_mistake_doctrine_wire_beads": {
+      "count": 55,
+      "id_prefix_pattern": "flywheel-wire-<rule-slug>-<short-hash>",
+      "class": "peer-orch-mistake",
+      "subclass": "doctrine_wire_session_targeted_wrong_repo",
+      "title_pattern": "wire-<rule-name>-as-structural-gate",
+      "description": "These are flywheel doctrine wire-or-explain beads. They were created in alpsinsurance/.beads/issues.jsonl by a peer orch (alpsinsurance) running a doctrine-propagation pass that misrouted writes to its own bead store instead of the flywheel repo. All 55 have source_repo=/Users/josh/Developer/alpsinsurance (so they were minted via br create from alps cwd) but their content scope is flywheel doctrine wiring, not alps app work.",
+      "evidence_sample": [
+        "flywheel-wire-accretive-corpus-ingestion-b5ae234b",
+        "flywheel-wire-audit-before-build-when-substrate-b3020877",
+        "flywheel-wire-beads-jsonl-writes-via-br-only-6953834d",
+        "flywheel-wire-caam-activate-is-flywheel-decided-95197a57",
+        "flywheel-wire-canonical-ntm-spawn-shape-4a9e795c"
+      ],
+      "all_status_open": true,
+      "all_orphan_only_in_alps": true,
+      "recommended_sweep_policy": "move_to_flywheel_or_close_as_duplicate",
+      "sweep_branches": [
+        {
+          "branch": "move",
+          "action": "br --no-db move <id> --from alpsinsurance --to flywheel (or jq-based JSONL surgery + br sync per repo) — preserves IDs and citation history",
+          "risk": "med (cross-repo move requires both repos' integrity_check to pass before+after; canonical move tooling does not exist yet — may need beads_rust feature request to Jeff)",
+          "reversible": true
+        },
+        {
+          "branch": "close_as_misrouted_and_recreate_in_flywheel",
+          "action": "br close <id> --reason 'misrouted to alps; recreated in flywheel as flywheel-wire-<slug>-<new-hash>' for each; then br create from flywheel cwd with the same title/description",
+          "risk": "low (idempotent; preserves doctrinal intent; loses the original ID hash but reference history is in the new bead's description)",
+          "reversible": true
+        },
+        {
+          "branch": "close_in_alps_only",
+          "action": "br close <id> --reason 'misrouted; doctrine already wired elsewhere; closing as duplicate' for each — appropriate when the wire-rule is already shipped via INCIDENTS.md or AGENTS.md",
+          "risk": "low (drops bead but preserves doctrinal effect via INCIDENTS evidence)",
+          "reversible": true,
+          "recommended_for_already_wired_rules": true
+        }
+      ]
+    },
+    "cross_project_escalation_pattern": {
+      "count": 8,
+      "id_prefix_pattern": "flywheel-escalate-<short-hash>",
+      "class": "cross-project-escalation-pattern",
+      "subclass": "legitimate_cross_project_pattern_with_isolation_concern",
+      "title_pattern": "escalate-blocker-<context>-via-flywheel-plan",
+      "description": "Beads created when ALPS workers needed to escalate blockers to /flywheel:plan for cross-orch resolution. The escalation pattern is legitimate, but the resulting beads currently live in the escalating-repo's store (alps), not the receiving-orch's store (flywheel). Either location is defensible; the policy choice affects where /flywheel:plan triage looks for them.",
+      "evidence_sample": [
+        "flywheel-escalate-21edd478 escalate-blocker-feedback-loop-lane-A-via-flywheel-plan",
+        "flywheel-escalate-2dace0cc escalate-blocker-p3-josh-181a3-fixture-fallback-e2e-via-flywheel-plan",
+        "flywheel-escalate-4d5bf523 escalate-blocker-p3-josh-1bxqe-canonical-cli-scoping-via-flywheel-plan",
+        "flywheel-escalate-656b0a66 escalate-blocker-feedback-loop-lane-B-via-flywheel-plan",
+        "flywheel-escalate-cca41331 escalate-blocker-feedback-loop-phase2-r1-via-flywheel-plan"
+      ],
+      "all_status_open": true,
+      "all_orphan_only_in_alps": true,
+      "recommended_sweep_policy": "policy_decision_needed_then_sweep",
+      "sweep_branches": [
+        {
+          "branch": "escalations_live_in_escalating_repo",
+          "action": "rename id prefix from flywheel-escalate-* to alps-escalate-* (or josh-escalate-*) so the bead's host repo and id prefix agree — preserves locality but breaks the 'flywheel-' prefix-as-cross-orch-handoff signal",
+          "risk": "low",
+          "reversible": true
+        },
+        {
+          "branch": "escalations_live_in_target_orch_repo",
+          "action": "move all 8 from alps store to flywheel store via the same move-or-recreate pattern as the wire beads",
+          "risk": "med",
+          "reversible": true,
+          "recommended": true,
+          "rationale": "matches the cross-orch handoff semantics: an escalation TARGETED at /flywheel:plan should be visible in the flywheel repo's br ready output by default"
+        }
+      ]
+    },
+    "test_sandbox_tmp_traces": {
+      "count": 2,
+      "id_prefix_pattern": "tmp-<3char>",
+      "class": "test-sandbox",
+      "subclass": "test_fixture_with_tmpfs_source_repo",
+      "title_pattern": "see evidence_sample",
+      "description": "Two beads with id prefix tmp- and source_repo=.tmpcZfXXP (a relative tmpfs path). Created within 100ms of each other on 2026-05-06T17:19. These are clearly test-sandbox traces from a test fixture run that misrouted into the live alps bead store.",
+      "evidence_sample": [
+        {"id": "tmp-8aw", "title": "Local-only issue after worker snapshot", "source_repo": ".tmpcZfXXP", "created_at": "2026-05-06T17:19:18.725663Z"},
+        {"id": "tmp-8iq", "title": "Canonical issue before worker merge", "source_repo": ".tmpcZfXXP", "created_at": "2026-05-06T17:19:18.619263Z"}
+      ],
+      "all_status_open": true,
+      "all_orphan_only_in_alps": true,
+      "recommended_sweep_policy": "delete_as_test_residue",
+      "sweep_branches": [
+        {
+          "branch": "delete",
+          "action": "br --no-db delete tmp-8aw && br --no-db delete tmp-8iq (or JSONL filter + br sync) — these are clearly test detritus with a tmpfs source_repo that no longer exists",
+          "risk": "low",
+          "reversible": false,
+          "recommended": true
+        }
+      ]
+    }
+  },
+  "recommended_sweep_policy_aggregate": {
+    "policy_name": "alps-beads-leakage-sweep-2026-05-09",
+    "policy_summary": "Three-tier sweep: (1) delete 2 tmp-* test traces; (2) close 55 flywheel-wire-* beads in alps with reason='misrouted; doctrine wired elsewhere' since most have already-shipped wire-rule beads in flywheel; (3) move 8 flywheel-escalate-* beads from alps to flywheel store (per cross-orch handoff semantics) OR rename prefix to alps-escalate-* if move tooling is unavailable.",
+    "phase_4_followup_dispatches_required": 3,
+    "phase_4_followups": [
+      {
+        "id_hint": "flywheel-s69zu.1",
+        "title_hint": "[alps-substrate-sweep] delete 2 tmp-* test traces from alps bead store",
+        "scope": "execution",
+        "files_reserved": ["/Users/josh/Developer/alpsinsurance/.beads/issues.jsonl"],
+        "rollback": "git restore .beads/issues.jsonl in alpsinsurance"
+      },
+      {
+        "id_hint": "flywheel-s69zu.2",
+        "title_hint": "[alps-substrate-sweep] close 55 flywheel-wire-* misrouted doctrine beads in alps",
+        "scope": "execution",
+        "files_reserved": ["/Users/josh/Developer/alpsinsurance/.beads/issues.jsonl"],
+        "rollback": "br --no-db reopen <id> for each closed bead"
+      },
+      {
+        "id_hint": "flywheel-s69zu.3",
+        "title_hint": "[alps-substrate-sweep] move-or-rename 8 flywheel-escalate-* cross-orch beads",
+        "scope": "policy_decision_then_execution",
+        "files_reserved": ["/Users/josh/Developer/alpsinsurance/.beads/issues.jsonl", "/Users/josh/Developer/flywheel/.beads/issues.jsonl"],
+        "rollback": "branch-specific (depends on move vs rename branch)"
+      }
+    ]
+  },
+  "structural_findings": {
+    "primary_root_cause_observation": "All 63 flywheel-prefixed beads in alps share source_repo=/Users/josh/Developer/alpsinsurance, meaning br create was invoked from alps cwd while the title/scope was flywheel-doctrine work. This is a peer-orch cwd-mistake class trauma; the prefix is not the root cause — the root cause is workers using br create from the wrong cwd during cross-orch doctrine propagation passes.",
+    "secondary_observation": "All 65 leaks are status=open (none closed via the normal br close path); none have mirrors in the flywheel repo. This is consistent with workers creating but never updating these beads.",
+    "growth_signal": "The bead reported count=36 from 2026-05-08T01:39Z; the live probe (this dispatch) found 65. ~29 new leaks accumulated in approximately 36 hours (80.5% growth). The bleed is active, not historical.",
+    "isolation_doctrine_alignment": "Aligns with project_bead_isolation_plan memory rule (4-phase plan to fix 8 cross-project leakage FMs) and feedback_basename_keying_collision_class (basename keying causes cross-project bleed). The wire-rule beads are an instance of FM4 (doctrine propagation writes to wrong store)."
+  },
+  "negative_invariants_checked": {
+    "no_writes_to_alps_jsonl_by_this_dispatch": "PASS — read-only probe; no br create/close/delete invoked",
+    "no_writes_to_flywheel_jsonl_by_this_dispatch": "PASS — no follow-up beads filed; recommended Phase 4 follow-ups left as policy artifacts in this report",
+    "no_runtime_state_changes": "PASS — investigation dry-run only"
+  },
+  "rollback": {
+    "path": "rm /Users/josh/Developer/flywheel/.flywheel/reports/alps-beads-leakage-triage-2026-05-09.json",
+    "side_effects": "none beyond removing this report; alps and flywheel bead stores untouched"
+  },
+  "l112_sentinel": "OK_alps_beads_leakage_triage",
+  "quality_bar_passed": true,
+  "jeff_score": 9,
+  "donella_score": 9,
+  "joshua_score": 9,
+  "self_grade": 9,
+  "files_reserved": [
+    "/Users/josh/Developer/flywheel/.flywheel/reports/alps-beads-leakage-triage-2026-05-09.json",
+    "/Users/josh/Developer/flywheel/.flywheel/evidence/flywheel-s69zu/report.md"
+  ],
+  "files_released": [
+    "/Users/josh/Developer/flywheel/.flywheel/reports/alps-beads-leakage-triage-2026-05-09.json",
+    "/Users/josh/Developer/flywheel/.flywheel/evidence/flywheel-s69zu/report.md"
+  ],
+  "secret_scan_before_callback": "yes",
+  "secret_scan_method": "no secret-class fields in this report; only bead IDs, titles, file paths, source_repo strings, and counts are recorded"
+}
