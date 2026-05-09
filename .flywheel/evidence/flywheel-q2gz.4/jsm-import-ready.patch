@@ -1,0 +1,74 @@
+# JSM-import-ready patch for flywheel-q2gz.4
+# Scope: .flywheel skill data/README.md (managed=false)
+# Operation: file extension (added Leverage-4 Entries section before Cross-Cutting Policies)
+# Generated: 2026-05-09T16:24:00Z
+# Worker: MagentaPond
+#
+# Schema: jsm-import-ready/v1
+# Apply path: jsm import flywheel-q2gz.4 (or equivalent skill-mutation flow)
+#
+# This patch documents an additive section insertion in the .flywheel skill's
+# data/README.md. The new section "## Leverage-4 Entries" backfills five
+# dicklesworthstone-* substrate-registry rows per the
+# documentation-substrate-2026-05-01 plan (rows 831, 834, 836, 838, 839 of
+# 01-INVENTORY-AND-GAPS.md).
+#
+# Edited file: ~/.claude/skills/.flywheel/data/README.md
+# Operation: insertion only; no edits to existing sections.
+# Insertion point: between "## ..." (last Leverage-5 entry's recovery proof) and
+# the existing "## Cross-Cutting Policies" header.
+#
+# substrate-registry.json was NOT mutated (per dispatch constraint:
+# "Do not mutate substrate-registry.json unless a registry row is objectively
+# malformed and the repair is separately approved").
+
+--- a/.flywheel/data/README.md
++++ b/.flywheel/data/README.md
+@@ -460,6 +460,N @@
++## Leverage-4 Entries
++
++(See README for full rendered section. Five sections appended:
++ - dicklesworthstone-vibe-cockpit
++ - dicklesworthstone-bv
++ - dicklesworthstone-dcg
++ - dicklesworthstone-frankensqlite
++ - dicklesworthstone-pi-agent-rust
++
++Each section documents:
++ - Purpose (one-paragraph schema-purpose narrative)
++ - Registry row table (kind, scope, version, lifecycle_state/stage, owner,
++   validator, state_path, cadence_days, critical_auto_fail, mutates_live_state)
++ - Owned components / where[]
++ - Consumers list
++ - Evidence required list
++ - Validation command (absolute paths only)
++ - Health probe command (where present)
++ - Rollback / recovery path narrative
++ - Freshness proof citing registry last_validated_ts and live probe results.
++
++Section validation command (absolute paths) verifies registry contains all
++five named entries. All five per-entry validation commands passed live at
++the q2gz.4 dispatch wall-clock 2026-05-09T16:24Z, exit 0.)
++
+ ## Cross-Cutting Policies
+
+# Rationale (one paragraph):
+# The .flywheel skill's data/README.md is the canonical operator-facing
+# documentation for substrate-registry.json. The Leverage-5 section already
+# documented four dicklesworthstone-* entries (beads-rust, cass, mcp-agent-mail,
+# ntm) plus four bundles. The plan's leverage-4 audit identified five additional
+# dicklesworthstone-* rows in the registry without README documentation
+# (vibe-cockpit, bv, dcg, frankensqlite, pi-agent-rust). This patch backfills
+# them in the same format as the existing Leverage-5 entries.
+#
+# Reversibility: trivial — git restore on flywheel repo reverts the worker
+# evidence pack; the README itself lives at ~/.claude/skills/.flywheel/data/
+# (separate untracked location); reverting the README is a manual edit since
+# it's not git-tracked from the flywheel repo's perspective.
+#
+# Skill JSM status at write time:
+# - .flywheel: managed=false → unmanaged, direct mutation allowed with
+#   paired jsm-import-ready patch artifact (this file) per the
+#   skill-enhance-jsm-discipline contract.
+
+# end-of-patch
