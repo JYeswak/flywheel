@@ -1,0 +1,82 @@
+== ntm version (installed) ==
+ntm version dev
+  commit:    none
+  built:     unknown
+  builder:   unknown
+  go:        go1.25.6
+  platform:  darwin/arm64
+
+== installed binary metadata ==
+-rwxr-xr-x@ 1 josh  staff  54884370 May  7 18:24 /Users/josh/.local/bin/ntm
+916bdafbe3f8b37019dc5df6d1baf26c777c4b3ce20e28b068be02a489efe8a7  /Users/josh/.local/bin/ntm
+
+== local clone HEAD ==
+7d1fc78e feat(ensemble): add pi agent support
+7d1fc78ebf19af12b193c972d25016ec707d8f87
+
+== 4c176e92 ancestry ==
+4c176e92 IS ancestor of HEAD
+
+== fix commit ==
+commit 4c176e92666551d4bc167d69e8f207f3624282aa
+Author: Dicklesworthstone <jeff141421@gmail.com>
+Date:   Mon May 4 15:15:10 2026 -0400
+
+    fix(robot/activity): debounce CategoryError to live-window when an idle prompt is present (#118)
+    
+    ntm#118: codex panes were sticking in ERROR state long after the failure
+    had been resolved. The pattern was reproducible whenever an old "failed"
+    or "api error" line sat ~30+ lines above a fresh chevron prompt. The
+    classifier ran its `Match` over the full capture, the historical
+    `failed_text` substring matched, and ERROR has hard priority over every
+    other state in `classifyState` — so the pane was pinned to ERROR even
+    though the agent was sitting at an idle prompt waiting for the next user
+    turn. The same shape already existed for CategoryThinking and was solved
+    by `filterThinkingToLive`; CategoryError just needed the same treatment
+    with one extra guard (the pane has to be observably idle).
+    
+    Implementation:
+    
+    - New `filterErrorToLiveWhenIdle(full, live)` mirrors the structure of
+      `filterThinkingToLive`. It drops CategoryError entries from `full`
+      whose pattern name does not also appear in `live`, but only when the
+      live tail contains a CategoryIdle prompt match. Without that idle
+      guard, a pane that just rolled an error past the live window with no
+      follow-up prompt (still mid-output) would silently lose the error and
+      misclassify as the next-best non-error state — that case is still a
+      legitimate ERROR signal and must be preserved.
+    
+    - `classifyInternal` now applies the new filter to `effectiveMatches`
+      immediately after `filterThinkingToLive`. The two filters compose
+      cleanly: thinking filter handles long-idle thinking matches above an
+      idle prompt; error filter handles long-idle error matches above an
+      idle prompt. Fresh errors that land inside `liveThinkingWindowLines`
+      still classify as ERROR.
+    
+    - The fast paths (no error in `full`, no idle in `live`, or every
+      CategoryError pattern is also in `live`) all return `full` unchanged
+      with no allocation.
+    
+    Tests:
+    
+    - `TestFilterErrorToLiveWhenIdle_DropsHistoricalErrorAboveLivePrompt`
+      is the direct regression: 1 historical "failed" line, 30 padding
+      lines, then a codex chevron + model status footer. Asserts the full
+      scan saw the historical match (test premise), the live scan did not,
+      the live tail has an idle match, the filter dropped the stale match,
+      and `classifyState` now returns WAITING.
+    
+    - `TestFilterErrorToLiveWhenIdle_KeepsFreshErrorInLiveTail` is the
+      inverse — a write-conflict error and the chevron land in the same
+      live window. The filter must NOT drop it and `classifyState` must
+      still return ERROR.
+    
+    - `TestFilterErrorToLiveWhenIdle_NoIdlePromptKeepsHistoricalError`
+      pins the idle-guard branch: an old error followed by streaming
+      output (no chevron yet) must keep ERROR priority because we cannot
+      yet conclude the pane has recovered.
+    
+    Each test asserts its premise (full vs. live `Match` results) before
+    asserting the filter behavior, so a future pattern-library change that
+    shifts what `failed_text` or the codex chevron matches will fail loudly
+    on the premise rather than silently passing.

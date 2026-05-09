@@ -257,6 +257,35 @@ surface when validating from shell.
 A loop is active only when its driver is verified. State files and receipts are
 markers; they are not drivers.
 
+The loop's goal contract is **L68 — NO-SILENT-DARKNESS-GOAL-CONTRACT**
+(`.flywheel/rules/L022-L68-no-silent-darkness-goal-contract.md`). A loop is
+healthy only when all four goal-quality metrics plus the L60 5-signal contract
+hold: `silent_dark_minutes=0`, `blackout_detection_latency_p95<=2m`,
+`false_recovery_count=0`, `unknown_autorecovery_count=0`,
+`L60_signals_present=5/5`. Frozen-pane detection is an input to this contract,
+not the contract itself — a pane can be unfrozen while the loop is still
+LIMPING or DEAD.
+
+The truth consumer for live pane state is **frozen-pane-detector v2**
+(`.flywheel/scripts/frozen-pane-detector.sh`, v1 archived at
+`frozen-pane-detector.sh.v1.bak`). v2 makes live sequential scrollback
+byte-delta the primary liveness signal; NTM robot state is a candidate
+selector/tie-breaker only. `/flywheel:tick` Step 4t consumes detector v2 output;
+the goal-quality metrics are emitted by
+`.flywheel/scripts/no-silent-darkness-probe.sh --doctor --json`.
+
+Shipped detector evidence comes from the
+`codex-fleet-stuck-thinking-RCA-2026-05-03` parallelism map
+(`.flywheel/PLANS/codex-fleet-stuck-thinking-RCA-2026-05-03/04-BEADS-DAG.md`):
+
+- **Lane A** — stuck-THINKING audit → detector v2 core (`flywheel-mugq` closed)
+  + self-tests/SOFT violations (`flywheel-g6ln` closed) + tick consumer
+  (`flywheel-i8rd` closed).
+- **Lane B** — post-pkill ERROR + ntm robot-tail provenance upstream
+  (`flywheel-rca-c8`, fed into `flywheel-6pns` recovery ledger, closed).
+- **Lane C** — stale-tail / DB+driver blockers cleared first
+  (`flywheel-u2m8` beads-DB health, `flywheel-emyk` loop-driver marker, closed).
+
 The usual flow is:
 
 1. `flywheel-autoloop` or a repo-specific launchd driver wakes on schedule.
@@ -294,6 +323,7 @@ Every non-trivial worker dispatch in this repo should include:
 | Output | A durable report path, usually `/tmp/<task>_findings.md` for research or an edited repo file for implementation. |
 | Callback | `ntm send flywheel --pane="$CALLBACK_PANE" "Callback: task_id=<id> status=done ..."` |
 | Receipts | `socraticode_queries=N`, reservation release, Bead update or `no_bead_reason`, and fuckup rows for blockers. |
+| Coordinator daemon (L152) | The NTM coordinator daemon (`launchctl` label `ai.zeststream.flywheel-coordinator-daemon`) is the **canonical** auto-dispatch substrate, picking ready beads from `<repo>/.beads/issues.jsonl` and routing them to idle worker panes via `assign --watch --auto`. `/flywheel:dispatch` is the **manual override** path. Daemon health: `.flywheel/scripts/coordinator-daemon-health.sh --json` returns `status:pass` + `coordinator_daemon_alive:true`. |
 
 Skill installs are part of the dispatch substrate. Codex-visible skill
 frontmatter names must stay at 64 characters or fewer per L150; use short
@@ -1186,8 +1216,18 @@ classification thresholds and peer-orchestrator defaults live in the
 
 Stale `failed_text` or `api_error` in pane scrollback can temporarily poison
 `ntm` activity classification even when a fresh Codex chevron prompt is present.
-Until upstream `ntm` resolves that classifier edge case, use the dry-run-first
-recovery layer:
+Upstream `ntm` resolved this on 2026-05-04 via commit `4c176e92` (issue
+[#118](https://github.com/Dicklesworthstone/ntm/issues/118),
+`fix(robot/activity): debounce CategoryError to live-window when an idle
+prompt is present`). The fix is present in the local `ntm` clone at
+`/Users/josh/Developer/ntm` (HEAD includes `4c176e92`), but the installed
+binary at `/Users/josh/.local/bin/ntm` reports `version=dev commit=none
+built=unknown` — binary metadata cannot prove the fix is compiled in.
+Until a properly version-stamped rebuild (`make build` from the local
+clone) is installed and the fixture below is re-run against it, the
+dry-run-first recovery layer remains as fallback (see L87 in
+`.flywheel/rules/` and `flywheel-vkw88` audit pack for the sunset
+checklist):
 
 ```bash
 .flywheel/scripts/stale-error-auto-ping.sh --json

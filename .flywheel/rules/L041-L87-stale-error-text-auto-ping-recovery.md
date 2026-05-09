@@ -48,3 +48,22 @@ error-pattern priority; workaround script
 (validate-and-redispatch discipline), L80 (DID/DIDNT/GAPS callbacks), and L85
 (idle state class canonical).
 
+**Status update 2026-05-09 (flywheel-vkw88):** Upstream `ntm` issue
+[#118](https://github.com/Dicklesworthstone/ntm/issues/118) is CLOSED. Jeffrey
+Emanuel landed the fix in commit `4c176e92`
+(`fix(robot/activity): debounce CategoryError to live-window when an idle
+prompt is present (#118)`). Local `ntm` clone at `/Users/josh/Developer/ntm`
+HEAD `7d1fc78e` contains `4c176e92` (`git merge-base --is-ancestor 4c176e92
+HEAD` exits 0). Sunset gate `flywheel-pp1g` is CLOSED 2026-05-08 with
+the fallback test (`tests/stale-error-auto-ping.sh`) passing 7/7.
+
+This rule **remains live (`status: temporary`)** because the binary
+installed at `/Users/josh/.local/bin/ntm` cannot prove it includes the
+fix: `ntm version dev / commit: none / built: unknown / builder: unknown`.
+Until a fresh build with `Makefile` ldflags (`make build` from the local
+clone yields `commit=<sha>`) replaces the installed binary AND the
+`tests/stale-error-auto-ping.sh` fixture re-runs against the rebuilt
+binary, the recovery layer stays as fallback. Retirement is
+Joshua-gated and routes through follow-up bead — see the
+`flywheel-vkw88` audit pack for the gated checklist.
+
