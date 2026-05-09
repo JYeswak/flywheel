@@ -1,0 +1,2 @@
+630deab9dba23daf56379c00ff93742a9aeb422b7821e21cdd1645df41e6efd5  .beads/beads.db
+c1902a1187b67195bc9432c15ff341994a6eaf43b04b2aadf2bf9653f88c6cd9  .beads/beads.db.bak.cvzls-20260509T172440Z
