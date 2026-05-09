@@ -839,14 +839,21 @@ def jsonl_rows_since(path: Path, since_epoch: float, needles: list[str] | None =
 
 
 def row_matches_loop_project(row: dict, project: str, repo: Path) -> bool:
+    explicit_owner = False
     for key in ("session", "project"):
         value = str(row.get(key) or "")
+        if value:
+            explicit_owner = True
         if value == project:
             return True
     for key in ("git_repo", "repo"):
         value = str(row.get(key) or "")
+        if value:
+            explicit_owner = True
         if value and value == str(repo):
             return True
+    if explicit_owner:
+        return False
     if project == "flywheel":
         return False
     encoded = json.dumps(row, sort_keys=True)
