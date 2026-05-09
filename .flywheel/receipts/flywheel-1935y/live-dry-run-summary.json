@@ -1,0 +1,25 @@
+{
+  "schema_version": "beads-mem-tmp-cleanup/v1",
+  "status": "ok",
+  "dry_run": true,
+  "tmpdir": "/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T",
+  "age_threshold_seconds": 86400,
+  "planned_count": 14832,
+  "planned_bytes": 143771503288,
+  "planned_gib": 133.8976465985179,
+  "deleted_count": 0,
+  "deleted_bytes": 0,
+  "skipped_count": 4900,
+  "skipped_bytes": 56545475352,
+  "lsof": {
+    "bin": "lsof",
+    "checked_count": 19732,
+    "open_count": 0
+  },
+  "post_run_storage_pressure_doctor": {
+    "error": "storage_pressure_doctor_timeout",
+    "source": "/Users/josh/Developer/flywheel/.flywheel/scripts/storage-pressure-doctor.sh",
+    "status": "unknown",
+    "timeout_seconds": 5
+  }
+}
