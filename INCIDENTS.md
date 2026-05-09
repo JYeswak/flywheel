@@ -7685,3 +7685,62 @@ Evidence:
   closed 2026-05-09).
 - This bead: `flywheel-2xdi.39` (gap-hunt-probe surfaced the
   missing INCIDENTS coverage; closed via this entry).
+
+## autoloop-executor.jsonl — self-instrumentation ledger (cross-source-silos cross-reference, 2026-05-09)
+
+Date: 2026-05-09
+
+Class: `cross-source-silos:autoloop-executor.jsonl`
+
+Event Count: 1 finding (gap-hunt-probe scan, surfaced as `flywheel-2xdi.40`).
+
+Severity: low (probe correctly surfacing a category gap-hunt's cross-source-silos rule
+doesn't yet model — self-instrumentation ledgers).
+
+Cost: gap-hunt-probe's `probe_cross_source_silos()` flags every `*.jsonl` in
+`~/.local/state/flywheel/` that isn't referenced by the 6 receiver surfaces
+(tick.md, status.md, synth.md, AGENTS.md, INCIDENTS.md, README.md). The
+autoloop-executor.jsonl ledger is self-instrumentation: it exists so that
+gap-hunt-probe's `wired-but-cold` rule sees the autoloop-executor library
+being exercised. It is NOT meant to be consumed by doctrine surfaces.
+
+Root Cause: cross-source-silos rule does not yet distinguish self-instrumentation
+ledgers (whose contract IS to be sampled by gap-hunt-probe) from operational-data
+ledgers (whose absence from doctrine surfaces is a real silo).
+
+Forever-Rule (already in writer): `~/.claude/skills/.flywheel/lib/autoloop-executor.sh`
+header explicitly declares the self-instrumentation contract:
+"[wired-but-cold fix flywheel-2xdi.32] Self-logs each main()-entry to
+AUTOLOOP_EXECUTOR_LEDGER so gap-hunt-probe's wired-but-cold sampling of
+$HOME/.local/state/flywheel/*.jsonl sees this library being exercised."
+
+The `~/.claude/skills/.flywheel/lib/doctor.d/part-03-security-posture.sh`
+follows the same pattern (writes to `security-posture.jsonl`).
+
+Fix Applied/Status: This INCIDENTS cross-reference makes
+`autoloop-executor.jsonl` visible in the cross-source-silos receiver-text scan,
+resolving the immediate finding. Systemic improvement (gap-hunt-probe knows
+about self-instrumentation ledgers without per-ledger INCIDENTS edits) tracked
+under `flywheel-gui5f`.
+
+Recurrence Prevention: Donella leverage point #6 (information flow) — the
+cross-source-silos probe now sees the ledger name in INCIDENTS.md. Long-term
+fix at flywheel-gui5f extends the probe with a known-silo allowlist or
+self-instrumentation schema marker, eliminating per-ledger INCIDENTS edits
+for the 15+ findings of this class. Until then, similar self-instrumentation
+ledgers (e.g. `security-posture.jsonl`) can be cross-referenced in this same
+INCIDENTS section.
+
+Other known self-instrumentation ledgers (named here for cross-source-silos
+visibility):
+- `autoloop-executor.jsonl` — written by `lib/autoloop-executor.sh`
+- `security-posture.jsonl` — written by `lib/doctor.d/part-03-security-posture.sh`
+
+Evidence:
+- Ledger: `~/.local/state/flywheel/autoloop-executor.jsonl` (1 entry, 2026-05-09T16:11:40Z, schema=`autoloop-executor.entry.v1`).
+- Writer: `~/.claude/skills/.flywheel/lib/autoloop-executor.sh` (declares self-instrumentation contract in header).
+- Probe: `.flywheel/scripts/gap-hunt-probe.sh::probe_cross_source_silos()` (lines 642-654).
+- Receiver-text source: `command_text()` reads tick.md, status.md, synth.md, AGENTS.md, INCIDENTS.md, README.md.
+- Bead: `flywheel-2xdi.40` (this dispatch).
+- Sibling fix (precedent): `flywheel-2xdi.32` (made autoloop-executor.sh self-log to address `wired-but-cold` rule; this dispatch handles the sibling `cross-source-silos` rule for the same ledger).
+- Systemic followup: `flywheel-gui5f` (extend cross-source-silos probe with self-instrumentation awareness).
