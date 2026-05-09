@@ -1,0 +1,16 @@
+stash@{0}	2026-05-09T09:14:00	On chore/jeff-stack-triage-2026-05-09: phase18-fork-stash
+stash@{1}	2026-05-08T12:57:04	On main: out-of-scope: pre-existing blocker-tick-counters
+stash@{2}	2026-05-08T11:58:30	On main: out-of-scope: pre-existing AGENTS+blocker noise
+stash@{3}	2026-05-08T10:48:38	On main: out-of-scope-tick-noise: AGENTS + blocker-counters
+stash@{4}	2026-05-08T10:24:02	On main: AGENTS-CANONICAL pre-reset
+stash@{5}	2026-05-08T10:19:42	On main: AGENTS-CANONICAL noise blocking pull
+stash@{6}	2026-05-08T10:11:52	On main: out-of-scope: AGENTS-CANONICAL.md pre-existing leak
+stash@{7}	2026-05-08T09:57:22	On feat/skillos-15-5k-expand-audit-patterns: out-of-scope-heartbeat: blocker-tick-counters
+stash@{8}	2026-05-08T09:23:10	On feat/skillos-15-5fghij-cli-unify-doctor-hooks-extractions: out-of-scope-tick-heartbeat:
+stash@{9}	2026-05-08T00:00:43	On main: out-of-scope-ATTEMPT-2: pane 2 re-applied AGENTS-CANONICAL despite hard guardrail
+stash@{10}	2026-05-07T23:48:43	On main: out-of-scope: pane 2 AGENTS-CANONICAL rewrite + heartbeat
+stash@{11}	2026-05-07T10:48:27	On feat/loop-1-wave-c-drift-router: wave-d-stash
+stash@{12}	2026-05-07T09:45:54	On feat/yuzu-hero-upgrade: track-1-stash-1778168754
+stash@{13}	2026-05-06T22:28:00	On master: j1ad-linter-stripped-class
+stash@{14}	2026-05-06T13:05:32	WIP on master: b1d7d9f fix(jsm-db): repair malformation from kickstart trauma [skillos-hhx
+stash@{15}	2026-05-05T16:00:50	On master: G-pre-commit-smoke
