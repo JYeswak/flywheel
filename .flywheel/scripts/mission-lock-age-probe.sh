@@ -12,6 +12,7 @@ usage() {
   cat <<'USAGE'
 Usage:
   mission-lock-age-probe.sh --repo=<path> [--json]
+  mission-lock-age-probe.sh --repo=<path> --status --json
   mission-lock-age-probe.sh --repo=<path> --doctor --json
   mission-lock-age-probe.sh --repo=<path> --health --json
   mission-lock-age-probe.sh --info --json
@@ -24,6 +25,7 @@ emit_examples() {
   cat <<'EXAMPLES'
 Examples:
   .flywheel/scripts/mission-lock-age-probe.sh --repo /Users/josh/Developer/flywheel --json
+  .flywheel/scripts/mission-lock-age-probe.sh --repo /Users/josh/Developer/flywheel --status --json
   .flywheel/scripts/mission-lock-age-probe.sh --repo /Users/josh/Developer/mobile-eats --doctor --json
   .flywheel/scripts/mission-lock-age-probe.sh --info --json
   .flywheel/scripts/mission-lock-age-probe.sh --schema
@@ -35,12 +37,17 @@ emit_schema() {
     schema_version:$schema_version,
     probe_version:$version,
     required_fields:[
+      "status",
       "mission_lock_age_hours",
       "mission_lock_status",
+      "mission_schema_version",
       "locked_at",
       "mission_lock_id",
-      "lock_hash_matches_lock_log"
+      "lock_hash_valid",
+      "lock_hash_matches_lock_log",
+      "last_lock_log_row"
     ],
+    status_values:["ok","degraded","blocked"],
     mission_lock_status_values:["fresh","stale-warn","stale-error","unlocked","missing"],
     thresholds:{fresh_hours:168, stale_error_hours:720},
     doctor_probe:{
@@ -248,9 +255,11 @@ def mission_rows(rows: list[dict], mission_lock_id: str | None) -> list[dict]:
 
 
 def base_payload(repo: Path, mission_path: Path, status: str, reason: str) -> dict:
+    aggregate_status = "blocked" if status in {"missing", "unlocked"} else "degraded"
     return {
         "schema_version": schema_version,
         "mode": mode,
+        "status": aggregate_status,
         "success": status == "fresh",
         "probe_version": version,
         "checked_at": iso_now(),
@@ -263,15 +272,18 @@ def base_payload(repo: Path, mission_path: Path, status: str, reason: str) -> di
         "threshold_days": stale_error_hours // 24,
         "mission_lock_status": status,
         "state": status,
+        "mission_schema_version": None,
         "locked_at": None,
         "mission_lock_id": None,
         "lock_hash": None,
+        "lock_hash_valid": None,
         "computed_body_hash": None,
         "lock_hash_matches_body": None,
         "lock_hash_matches_lock_log": None,
         "mission_lock_id_matches_lock_log": None,
         "metadata_source": None,
         "lock_log_path": str(repo / ".flywheel" / "lock-log.jsonl"),
+        "last_lock_log_row": None,
         "reason": reason,
         "warnings": [reason],
     }
@@ -326,6 +338,8 @@ matching_id_rows = [r for r in rows if mission_lock_id and r.get("mission_lock_i
 lock_hash_matches_lock_log = None if (not lock_hash or (not mission_lock_id and not hash_evidence_rows)) else bool(matching_hash_rows)
 mission_lock_id_matches_lock_log = None if not mission_lock_id else bool(matching_id_rows)
 lock_hash_matches_body = None if not lock_hash else lock_hash == computed_hash
+known_hash_checks = [value for value in (lock_hash_matches_body, lock_hash_matches_lock_log) if value is not None]
+lock_hash_valid = None if not lock_hash or not known_hash_checks else all(known_hash_checks)
 
 if lock_hash_matches_lock_log is False:
     warnings.append("lock_hash_not_found_in_lock_log")
@@ -342,9 +356,17 @@ if locked is not None:
     age_hours_value = round(max(0.0, (now_utc() - locked).total_seconds() / 3600), 2)
     age_days_value = int(age_hours_value // 24)
 
+if mission_status in ("missing", "unlocked"):
+    aggregate_status = "blocked"
+elif mission_status == "fresh" and lock_hash_valid is not False and not warnings:
+    aggregate_status = "ok"
+else:
+    aggregate_status = "degraded"
+
 payload = {
     "schema_version": schema_version,
     "mode": mode,
+    "status": aggregate_status,
     "success": mission_status == "fresh",
     "probe_version": version,
     "checked_at": iso_now(),
@@ -362,15 +384,18 @@ payload = {
     },
     "mission_lock_status": mission_status,
     "state": mission_status,
+    "mission_schema_version": metadata.get("schema_version"),
     "locked_at": locked_at_raw,
     "mission_lock_id": mission_lock_id,
     "lock_hash": lock_hash,
+    "lock_hash_valid": lock_hash_valid,
     "computed_body_hash": computed_hash,
     "lock_hash_matches_body": lock_hash_matches_body,
     "lock_hash_matches_lock_log": lock_hash_matches_lock_log,
     "mission_lock_id_matches_lock_log": mission_lock_id_matches_lock_log,
     "metadata_source": metadata_source,
     "lock_log_path": str(flywheel_dir / "lock-log.jsonl"),
+    "last_lock_log_row": selected_rows[-1] if selected_rows else None,
     "lock_log_match": {
         "hash_match_count": len(matching_hash_rows),
         "id_match_count": len(matching_id_rows),
@@ -402,6 +427,9 @@ while [ "$#" -gt 0 ]; do
       ;;
     --health)
       MODE="health"
+      ;;
+    --status)
+      MODE="status"
       ;;
     --info)
       MODE="info"
@@ -435,7 +463,7 @@ case "$MODE" in
   examples)
     emit_examples
     ;;
-  snapshot|doctor|health)
+  snapshot|doctor|health|status)
     emit_probe "$REPO" "$MODE"
     ;;
 esac
