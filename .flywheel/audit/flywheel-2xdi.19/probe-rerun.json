@@ -1,0 +1,12 @@
+{
+  "rule": "L64",
+  "tick_md_path": "/Users/josh/.claude/commands/flywheel/tick.md",
+  "agents_md_path": "/Users/josh/Developer/flywheel/AGENTS.md",
+  "agents_md_has_L64": true,
+  "tick_md_has_L64": true,
+  "tick_md_match_offsets": [
+    45142
+  ],
+  "gap_still_emits": false,
+  "rerun_ts": "2026-05-09T12:23Z"
+}
