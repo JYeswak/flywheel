@@ -5,7 +5,8 @@ REAL="${INFISICAL_REAL:-/opt/homebrew/bin/infisical}"
 
 block() {
   printf 'INFISICAL_SAFE_BLOCKED: %s\n' "$1" >&2
-  printf 'Use: infisical-safe secrets list --silent --output=json | jq -r .[].secretKey\n' >&2
+  printf 'Use: infisical-safe secrets list --silent --output=text 2>/dev/null | awk "/^[A-Z_]+=/ {sub(/=.*/, \"\"); print}"\n' >&2
+  printf '     (--output=json leaks secretValue via stdout before jq filter — see L58)\n' >&2
   exit 2
 }
 

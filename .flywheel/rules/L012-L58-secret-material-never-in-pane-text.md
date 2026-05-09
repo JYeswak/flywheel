@@ -15,7 +15,10 @@ trauma_class: secret-leak
 
 **How to apply:**
 - Prefer MCP Agent Mail tools with structured token parameters over shell-visible commands or prose snippets containing `registration_token`.
-- Prefer `~/.flywheel/bin/infisical-safe` over raw `infisical` for any command that can enumerate or read secrets; key-only listing uses `secrets list --silent --output=json | jq -r '.[].secretKey'`.
+- Prefer `~/.flywheel/bin/infisical-safe` over raw `infisical` for any command that can enumerate or read secrets. **WARNING (2026-05-09):** the previously canonical `secrets list --silent --output=json | jq -r '.[].secretKey'` pattern leaks `secretValue` — `infisical-safe` emits the full JSON envelope (including secret values) to stdout BEFORE the jq filter runs. The leak surfaces in process memory, tee/log captures, `set -x` traces, and any intermediate pipe inspection. mobile-eats:1 discovered this 2026-05-09 and is filing the upstream bug. Until upstream patches `infisical-safe` to mask `secretValue` server-side: **do NOT use `--output=json` on infisical-safe for key-only enumeration**. Use one of these safe alternatives instead:
+  - `infisical-safe secrets list --silent --output=text 2>/dev/null | awk '/^[A-Z_]+=/ {sub(/=.*/,""); print}'` (text output strips values before they reach stdout)
+  - `infisical-safe run --command 'env | awk -F= "/^[A-Z_]+=/ {print \$1}"'` (ephemeral process env, never serialized to wrapper stdout)
+  - For a list of available keys, prefer the Infisical project schema in `.flywheel/state/` if one exists rather than enumerating live values
 - Store and load reusable Agent Mail tokens through vault-backed helpers; do not paste tokens into dispatch packets or callback examples.
 - When pane evidence is required, prefer `ntm --robot-tail=<session> --panes=<pane> --lines=<N> --json`, pass it through a redacting filter first, and report only "token-shaped text observed", never the value.
 - Before closing secret-adjacent work, grep changed files and intended reports for `registration_token`, `secretValue`, `--plain`, and long token-shaped fragments.
