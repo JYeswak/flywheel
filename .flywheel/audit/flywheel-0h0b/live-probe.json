@@ -1,0 +1,9 @@
+{
+  "source_health.tmux.status": "fresh",
+  "source_health.tmux.collected_at": "2026-05-09T12:31:16Z",
+  "source_health.tmux.provenance": "live",
+  "source_health.tmux.stale_after_sec": 5,
+  "agents_count": 4,
+  "first_agent_capture_provenance": "live",
+  "first_agent_pane_pid": 45437
+}
