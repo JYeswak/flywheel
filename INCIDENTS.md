@@ -6339,6 +6339,112 @@ Evidence:
   to `doctrine-ladder-promote.sh default_incident_paths`).
 - Bead: `flywheel-8qal5`.
 
+## worker-close-git-commit-skipped-dirty-shared-doctrine-surfaces — already covered by L143 (2026-05-09 cross-reference)
+
+Date: 2026-05-09
+
+Class: `worker-close-git-commit-skipped-dirty-shared-doctrine-surfaces`
+
+Event Count: 3 events on 2026-05-09 (clustered 03:34-04:00Z, all
+flywheel session pane 2, agent claude); the third event explicitly
+cites L143 in its `rule_violated_or_proven` field.
+
+Severity: low
+
+Cost: Three flywheel worker dispatches (`flywheel-hv071`,
+`flywheel-dwavb`, `flywheel-r52ig`) closed bead with
+`git_committed=skipped` because shared doctrine surfaces (`AGENTS.md`,
+`.flywheel/AGENTS-CANONICAL.md`, `templates/flywheel-install/AGENTS.md`,
+`README.md`, `.beads/issues.jsonl`) carried unrelated dirty changes
+from concurrent worker panes. The workers' own scope was clean and
+their compliance pack landed, but the implementation files stayed
+dirty in the working tree because the workers refused to bundle
+unrelated drift into a same-bead commit.
+
+Root Cause: Pre-L143 close-handler doctrine permitted
+`git_committed=skipped` as an exception path for "shared doctrine
+surfaces have unrelated dirty changes." Workers used the exception
+to preserve other panes' work, which was a correct read of the
+**Joshua-disposes** axiom (don't bundle other workers' drift). But
+the exception left every closed bead's implementation in dirty
+state, violating the L120 br-close-before-callback contract's
+implicit "close means done" semantic.
+
+Forever-Rule (already shipped 2026-05-08 in L143
+`WORKER-CLOSE-REQUIRES-GIT-COMMIT`,
+`.flywheel/rules/L094-L143-worker-close-requires-git-commit.md`):
+Workers MUST emit `git_committed=<yes|no_changes|skipped>` alongside
+`br_close_executed=yes` in every DONE callback. `skipped` is a
+workflow violation and a fuckup-log promotion candidate.
+Close-handler refuses close when any declared file-scope path is
+dirty or when `git_committed=yes` lacks a commit reachable from
+HEAD after dispatch start. The canonical fix workers should
+practice now is **pathspec staging only**: `git add -- <declared
+scope paths only>` followed by `git commit`, leaving every
+unrelated dirty path untouched. This pairs with the
+`shared-repo-dirty-preflight` orch-side gate (line 6205) which
+ensures the orchestrator surfaces dirty preconditions BEFORE
+dispatch generation rather than after.
+
+Fix Applied/Status: Doctrine landed 2026-05-08 in L143 (one day
+before these 3 events). The 3 events on 2026-05-09 are the L143
+contract working as intended — the rule's
+`rule_violated_or_proven` field captures the violation in the
+fuckup-log so the L56 ladder fires a promotion candidate. This
+INCIDENTS.md cross-reference entry closes the doctrine-ladder
+visibility loop: the existing L143 surface is canonical, but
+without a discoverable INCIDENTS surface the ladder kept filing
+re-promotion candidates (`flywheel-35exy`, this bead) for a class
+already covered.
+
+Recurrence Prevention: The L56 ladder probe
+(`doctrine-ladder-promote.sh`) inspects
+`~/.claude/skills/.flywheel/INCIDENTS.md`, `$REPO/INCIDENTS.md`, and
+`$REPO/AGENTS.md` for class-name coverage but does NOT scan
+`.flywheel/rules/`. Same Recurrence Prevention shape as pane 3's
+`flywheel-u5ml3` cross-reference for `daily_report_missing_dispatch_gate`
+(line 7421+ in this file). The L56 ladder gap is a known
+heuristic-narrowing follow-up; the immediate fix is this
+INCIDENTS surface giving the dedup heuristic a discoverable hit.
+
+Evidence:
+- Trauma rows: `~/.local/state/flywheel/fuckup-log.jsonl#L4614,L4623,L4627`,
+  3 rows on 2026-05-09 (03:34Z, 03:48Z, 04:00Z), all
+  `session=flywheel pane=2 agent=claude` with
+  `git_committed=skipped` recorded in the worker's own DONE
+  callback path.
+- L143 rule: `.flywheel/rules/L094-L143-worker-close-requires-git-commit.md`
+  (status: long_term, shipped 2026-05-08, review_due 2026-11-08).
+- AGENTS.md citation: line 132 of root `AGENTS.md`
+  (`L143 — WORKER-CLOSE-REQUIRES-GIT-COMMIT | long_term |
+  .flywheel/rules/L094-L143-worker-close-requires-git-commit.md`).
+- Per-bead receipts:
+  `~/.flywheel/receipts/flywheel-hv071/compliance-pack.md`,
+  `~/.flywheel/receipts/flywheel-dwavb/compliance-pack.md`,
+  `~/.flywheel/receipts/flywheel-r52ig/compliance-pack.md`.
+- Sister INCIDENTS entries:
+  `INCIDENTS.md#shared-repo-dirty-preflight` (line 6205, orch-side
+  pre-flight gate),
+  `INCIDENTS.md#concurrent-dirty-validation-drift` (line 6258, the
+  worker-side validation-isolation sister pattern),
+  `INCIDENTS.md#worker-evidence-file-write-before-reservation`
+  (line 5991, related L107 reservation contract).
+- Memory cross-ref:
+  `feedback_worker_close_requires_git_commit.md` (META-RULE
+  2026-05-07: "br_close_executed=yes (L120) without
+  git_committed=yes leaves impl in dirty tree; mobile-eats audit
+  found 7/8 worst-scoring closed beads in this state").
+- Companion dedup fix: `flywheel-qnkj2` (repo-local INCIDENTS.md
+  path search ensures this section is discovered).
+- Bead: `flywheel-35exy`.
+
+Follow-up Bead Filed (separate dispatch): None — the underlying
+class is already covered by L143. A future improvement would be
+extending `doctrine-ladder-promote.sh`'s `default_incident_paths()`
+function to scan `.flywheel/rules/*.md` so the ladder doesn't
+re-fire on classes already covered at the L-rule layer (per
+pane 3's `flywheel-u5ml3` Recurrence Prevention note).
+
 ## jeff-dedupe-bead-stale-scope
 
 Date: 2026-05-08
