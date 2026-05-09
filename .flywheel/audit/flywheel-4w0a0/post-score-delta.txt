@@ -1,0 +1,13 @@
+== Pre-score (per .flywheel/receipts/flywheel-62mf9/audit/post_scores.jsonl) ==
+{"tool":"sync-canonical-doctrine","lines":1080,"baseline_pre_score":690,"this_pass_pre_score":690,"this_pass_post_score":690,"delta":0,"introspection":{"help_exists":true,"info_json":false,"schema":false,"examples":true,"dry_run_in_source":true,"apply_in_source":true,"json_in_source":3}}
+
+== Post-rework introspection (live probe) ==
+{"help_exists":true,"info_json":true,"schema":true,"examples_flag":true,"lines":1267,"threshold":500,"ratio":2.534,"dry_run_in_source":true,"apply_in_source":true,"json_in_source":4,"oversized_receipt_comment":true}
+
+== Estimated delta (acceptance target was 820 from baseline 690) ==
+Pre: 690
+Add --info: +50
+Add --schema: +50
+Add --examples flag (not just usage prose): +20
+Add allow-large receipt comment: +20
+Estimated post-score: 830 (target 820 met)

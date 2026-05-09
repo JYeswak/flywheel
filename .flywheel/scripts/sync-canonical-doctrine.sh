@@ -1,6 +1,19 @@
 #!/usr/bin/env bash
 # Sync generated canonical doctrine mirrors into repo-local doctrine copies.
+#
+# canonical-cli-scoping-allow-large: this script is a fleet-propagation
+# aggregator (10+ doctrine surfaces, 6 schema validators, security
+# settings rollout). At ~1270 lines it is 2.54x the 500-line shell
+# threshold; the oversize is acceptable per flywheel-62mf9 audit
+# recommendation sync-canonical-doctrine-R001 ("oversized-receipt path
+# is acceptable given the script's role as fleet-propagation
+# aggregator"). Splitting would fragment the per-surface
+# idempotency/drift contract across modules without behavior parity.
+# Per-surface bead flywheel-4w0a0 landed --info/--schema/--examples
+# introspection so agent ergonomics are restored without splitting.
 set -euo pipefail
+
+VERSION="sync-canonical-doctrine/v1"
 
 DEFAULT_SOURCE="/Users/josh/Developer/flywheel/AGENTS.md"
 SOURCE="${SYNC_CANONICAL_SOURCE:-$DEFAULT_SOURCE}"
@@ -86,6 +99,138 @@ Environment:
 EOF
 }
 
+emit_info() {
+  jq -nc \
+    --arg name "sync-canonical-doctrine.sh" \
+    --arg version "$VERSION" \
+    --arg path "/Users/josh/Developer/flywheel/.flywheel/scripts/sync-canonical-doctrine.sh" \
+    --arg default_source "$DEFAULT_SOURCE" \
+    --arg canonical_index_target "$CANONICAL_INDEX_TARGET" \
+    --arg template_index_target "$TEMPLATE_INDEX_TARGET" \
+    --arg ledger "$SYNC_LEDGER" \
+    --arg loops_dir "$LOOPS_DIR" \
+    --arg orch_validation_skill_source "$ORCH_VALIDATION_SKILL_SOURCE" \
+    --arg shared_script_allowlist "$SHARED_SCRIPT_ALLOWLIST" \
+    --argjson oversized_line_count 1110 \
+    --argjson oversized_threshold 500 \
+    --argjson oversized_ratio 2.22 \
+    '{
+      schema_version: "tool-info/v1",
+      name: $name,
+      version: $version,
+      path: $path,
+      default_source: $default_source,
+      canonical_index_target: $canonical_index_target,
+      template_index_target: $template_index_target,
+      ledger_path: $ledger,
+      loops_dir: $loops_dir,
+      orch_validation_skill_source: $orch_validation_skill_source,
+      shared_script_allowlist: ($shared_script_allowlist | split(" ") | map(select(length > 0))),
+      modes: ["check","apply"],
+      flags: ["--dry-run","--check","--apply","--json","--source PATH","--root PATH","--info","--schema","--examples","--help","-h"],
+      env_vars: [
+        "SYNC_CANONICAL_SOURCE","SYNC_AGENTS_MD_GENERATOR","SYNC_GENERATED_MIRRORS_DISABLE",
+        "SYNC_CANONICAL_INDEX_TARGET","SYNC_CANONICAL_TEMPLATE_TARGET",
+        "SYNC_STORAGE_OVERRIDE_SCHEMA_SOURCE","SYNC_IDENTITY_DEFERRAL_SCHEMA_SOURCE",
+        "SYNC_BEAD_QUALITY_MINING_SOURCE","SYNC_DOCTRINE_DOCS_SOURCE_DIR",
+        "SYNC_RULES_SOURCE_DIR","SYNC_SHARED_SCRIPT_SOURCE_DIR","SYNC_SHARED_SCRIPT_ALLOWLIST",
+        "SYNC_LAUNCHD_TEMPLATE_SOURCE_DIR","SYNC_SECURITY_SETTINGS_DENY_SOURCE",
+        "SYNC_ORCH_VALIDATION_SKILL_SOURCE","SYNC_CANONICAL_ROOTS","SYNC_CANONICAL_LOOPS_DIR",
+        "SYNC_CANONICAL_LEDGER","SYNC_CANONICAL_LEDGER_DISABLE","SYNC_CANONICAL_NOW"
+      ],
+      mutates: "--apply writes to AGENTS.md mirrors, validation schemas, doctrine docs, allowlisted scripts, launchd templates, .claude/settings.json security deny rules, and the doctrine-sync ledger; backups before write",
+      default_mode: "check",
+      exit_codes: {"0":"in-sync or apply-succeeded","1":"drift-detected (check mode)","2":"usage/configuration error"},
+      receipt_schema: "sync-canonical-doctrine-receipt/v1",
+      oversized_receipt: {
+        line_count: $oversized_line_count,
+        threshold: $oversized_threshold,
+        ratio: $oversized_ratio,
+        receipt_id: "flywheel-62mf9 audit recommendation sync-canonical-doctrine-R001",
+        note: "fleet-propagation aggregator role makes oversize acceptable; --info/--schema/--examples introspection landed via flywheel-4w0a0 to compensate"
+      }
+    }'
+}
+
+emit_schema() {
+  jq -nc \
+    --arg schema_id "https://zeststream.ai/flywheel/schemas/sync-canonical-doctrine-receipt-v1.json" \
+    '{
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "$id": $schema_id,
+      schema_version: "sync-canonical-doctrine-receipt/v1",
+      title: "sync-canonical-doctrine receipt",
+      description: "Receipt envelope emitted by --check or --apply with --json. Each *_count field carries an integer; *_hash fields carry a 64-char sha256.",
+      type: "object",
+      required: ["ts","mode","status","source","ledger_path","source_hash","target_count","drifted_count","synced_count"],
+      properties: {
+        ts: {type:"string", format:"date-time"},
+        mode: {type:"string", enum:["check","apply","error"]},
+        status: {type:"string", enum:["in-sync","drift","applied","error"]},
+        source: {type:"string"},
+        ledger_path: {type:"string"},
+        source_hash: {type:"string", pattern:"^[0-9a-f]{64}$"},
+        target_count: {type:"integer", minimum:0},
+        drifted_count: {type:"integer", minimum:0},
+        synced_count: {type:"integer", minimum:0},
+        canonical_drifted_count: {type:"integer", minimum:0},
+        canonical_synced_count: {type:"integer", minimum:0},
+        root_target_count: {type:"integer", minimum:0},
+        root_drifted_count: {type:"integer", minimum:0},
+        root_synced_count: {type:"integer", minimum:0},
+        storage_override_schema_target_count: {type:"integer", minimum:0},
+        storage_override_schema_drifted_count: {type:"integer", minimum:0},
+        storage_override_schema_synced_count: {type:"integer", minimum:0},
+        identity_deferral_schema_target_count: {type:"integer", minimum:0},
+        bead_quality_mining_target_count: {type:"integer", minimum:0},
+        security_settings_target_count: {type:"integer", minimum:0},
+        security_settings_drifted_count: {type:"integer", minimum:0},
+        security_settings_synced_count: {type:"integer", minimum:0},
+        security_settings_blocked_count: {type:"integer", minimum:0},
+        security_settings_details: {type:"array"},
+        security_rollout_receipt: {type:"object", description:"schema_version: security-settings-rollout/v1"},
+        rule_shard_drift_count: {type:"integer", minimum:0},
+        rule_shard_min_count: {type:"integer", minimum:0},
+        rule_shard_drift_details: {type:"array"}
+      }
+    }'
+}
+
+emit_examples() {
+  cat <<'EOF'
+# Default check mode (read-only drift report; exits 1 on drift, 0 in-sync)
+sync-canonical-doctrine.sh
+
+# Machine-readable check (same shape as --apply --json receipt)
+sync-canonical-doctrine.sh --check --json
+
+# Apply mode (writes the canonical block + mirrors with backup-before-write)
+sync-canonical-doctrine.sh --apply --json
+
+# Override the canonical AGENTS.md source
+sync-canonical-doctrine.sh --check --json \
+  --source /Users/josh/Developer/flywheel/AGENTS.md
+
+# Limit to specific root repos
+sync-canonical-doctrine.sh --apply --json \
+  --root /Users/josh/Developer/flywheel \
+  --root /Users/josh/Developer/skillos
+
+# Introspection
+sync-canonical-doctrine.sh --info --json     # tool metadata + env vars + flags
+sync-canonical-doctrine.sh --schema           # JSON Schema for receipt envelope
+sync-canonical-doctrine.sh --examples         # this list
+sync-canonical-doctrine.sh --help             # usage text
+
+# Disable ledger writes (e.g., test fixtures)
+SYNC_CANONICAL_LEDGER_DISABLE=1 sync-canonical-doctrine.sh --check --json
+
+# Pin time for reproducible receipts
+SYNC_CANONICAL_NOW=2026-05-09T00:00:00Z \
+  sync-canonical-doctrine.sh --check --json
+EOF
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run|--check)
@@ -110,6 +255,18 @@ while [[ $# -gt 0 ]]; do
       ROOTS+=("$2")
       EXPLICIT_ROOTS=1
       shift 2
+      ;;
+    --info)
+      emit_info
+      exit 0
+      ;;
+    --schema)
+      emit_schema
+      exit 0
+      ;;
+    --examples)
+      emit_examples
+      exit 0
       ;;
     -h|--help)
       usage
@@ -439,6 +596,11 @@ sync_security_settings_for_repo() {
 collect_targets() {
   local target_tmp="$1" root repo_path
   : >"$target_tmp"
+  TARGET_DISCOVERY_TIMEOUT_COUNT=0
+  TARGET_DISCOVERY_TIMEOUT_ROOTS=""
+  local timeout_bin
+  timeout_bin="$(command -v gtimeout || command -v timeout || true)"
+  local timeout_sec="${SYNC_CANONICAL_DISCOVERY_TIMEOUT_SECONDS:-30}"
 
   if [[ -n "${SYNC_CANONICAL_ROOTS:-}" && "${#ROOTS[@]}" -eq 0 ]]; then
     IFS=':' read -r -a ROOTS <<<"$SYNC_CANONICAL_ROOTS"
@@ -461,7 +623,26 @@ collect_targets() {
       printf '%s/.flywheel/AGENTS-CANONICAL.md\n' "$root" >>"$target_tmp"
       continue
     fi
-    find "$root" -maxdepth 4 -name 'AGENTS-CANONICAL.md' -path '*/.flywheel/*' -type f -print 2>/dev/null >>"$target_tmp"
+    # flywheel-nttji: bound the recursive find with a wall-clock timeout so
+    # default-root dry-runs cannot stall silently under concurrent fleet
+    # filesystem activity. Tunable via SYNC_CANONICAL_DISCOVERY_TIMEOUT_SECONDS
+    # (default 30s). On timeout the partial result is preserved and the
+    # event is surfaced via TARGET_DISCOVERY_TIMEOUT_COUNT for the JSON
+    # rollup at the bottom of the script.
+    local find_rc=0
+    if [[ -n "$timeout_bin" ]]; then
+      "$timeout_bin" "$timeout_sec" find "$root" -maxdepth 4 -name 'AGENTS-CANONICAL.md' -path '*/.flywheel/*' -type f -print 2>/dev/null >>"$target_tmp" || find_rc=$?
+    else
+      find "$root" -maxdepth 4 -name 'AGENTS-CANONICAL.md' -path '*/.flywheel/*' -type f -print 2>/dev/null >>"$target_tmp" || find_rc=$?
+    fi
+    if [[ "$find_rc" -eq 124 ]]; then
+      TARGET_DISCOVERY_TIMEOUT_COUNT=$((TARGET_DISCOVERY_TIMEOUT_COUNT + 1))
+      if [[ -z "$TARGET_DISCOVERY_TIMEOUT_ROOTS" ]]; then
+        TARGET_DISCOVERY_TIMEOUT_ROOTS="$root"
+      else
+        TARGET_DISCOVERY_TIMEOUT_ROOTS="$TARGET_DISCOVERY_TIMEOUT_ROOTS,$root"
+      fi
+    fi
   done
 
   if [[ "$EXPLICIT_ROOTS" -eq 0 && -d "$LOOPS_DIR" ]]; then
@@ -970,6 +1151,9 @@ RESULT="$(jq -nc \
   --arg orch_validation_skill_source "$ORCH_VALIDATION_SKILL_SOURCE" \
   --arg orch_validation_skill_hash "$ORCH_VALIDATION_SKILL_HASH" \
   --argjson errors_count "$ERROR_COUNT" \
+  --argjson target_discovery_timeout_count "${TARGET_DISCOVERY_TIMEOUT_COUNT:-0}" \
+  --arg target_discovery_timeout_roots "${TARGET_DISCOVERY_TIMEOUT_ROOTS:-}" \
+  --arg target_discovery_timeout_seconds "${SYNC_CANONICAL_DISCOVERY_TIMEOUT_SECONDS:-30}" \
   --argjson targets "$TARGETS" \
   --argjson repos "$REPOS" \
   --argjson details "$DETAILS" \
@@ -1039,6 +1223,9 @@ RESULT="$(jq -nc \
     },
     rule_shard_drift_count:$rule_shard_drift_count,
     rule_shard_drift_repos:($rule_shard_drift_details | map(.repo)),
+    target_discovery_timeout_count:$target_discovery_timeout_count,
+    target_discovery_timeout_roots:$target_discovery_timeout_roots,
+    target_discovery_timeout_seconds:$target_discovery_timeout_seconds,
     doctrine_docs_source_dir:$doctrine_docs_source_dir,
     rules_source_dir:$rules_source_dir,
     shared_script_source_dir:$shared_script_source_dir,
