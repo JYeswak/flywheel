@@ -15,6 +15,7 @@ NTM_BIN="${NTM_BIN:-/Users/josh/.local/bin/ntm}"
 BR_BIN="${BR_BIN:-/Users/josh/.cargo/bin/br}"
 BV_BIN="${BV_BIN:-/opt/homebrew/bin/bv}"
 DOCTOR_BIN="${DOCTOR_BIN:-/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop}"
+BV_READINESS_PROBE="${BV_READINESS_PROBE:-$(cd "$(dirname "$0")" && pwd)/bv-readiness-probe.sh}"
 
 usage() {
   cat <<'EOF'
@@ -154,7 +155,11 @@ else
     "$NTM_BIN" --robot-activity="$SESSION" --panes="$PANES" >"$TMP/robot.json" 2>/dev/null || printf '{}\n' >"$TMP/robot.json"
     idle_worker_count="$(jq '[.agents[]? | select((.state == "WAITING") or (.activity == "idle"))] | length' "$TMP/robot.json" 2>/dev/null || printf '0')"
   fi
-  if command -v "$BR_BIN" >/dev/null 2>&1; then
+  if [ -x "$BV_READINESS_PROBE" ]; then
+    "$BV_READINESS_PROBE" --repo "$REPO" --json >"$TMP/readiness.json" 2>/dev/null || printf '{"ready_count":0}\n' >"$TMP/readiness.json"
+    ready_work_count="$(jq -r '.ready_count // 0' "$TMP/readiness.json" 2>/dev/null || printf '0')"
+    selected_action="$(jq -r '.selected_id // empty' "$TMP/readiness.json" 2>/dev/null || true)"
+  elif command -v "$BR_BIN" >/dev/null 2>&1; then
     (cd "$REPO" && "$BR_BIN" ready --json) >"$TMP/ready.json" 2>/dev/null || printf '[]\n' >"$TMP/ready.json"
     ready_work_count="$(jq 'length' "$TMP/ready.json" 2>/dev/null || printf '0')"
     selected_action="$(jq -r '.[0].id // empty' "$TMP/ready.json" 2>/dev/null || true)"
