@@ -1,0 +1,35 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-1rmp.17-9c5377",
+  "bead": "flywheel-1rmp.17",
+  "disposition": "duplicate-of-flywheel-1rmp.7",
+  "value_gap_dimension": "mobile-eats-end-user-health",
+  "measurement": ".flywheel/scripts/mobile-eats-end-user-health-probe.sh",
+  "surfaced": "yes",
+  "ledger": "~/.local/state/flywheel/mobile-eats-end-user-health.jsonl",
+  "ledger_rows": 2,
+  "ledger_newest_ts": "2026-05-09T20:00:02Z",
+  "score": 850,
+  "max": 1000,
+  "score_basis": "duplicate disposition documented + probe header upgraded with structured duplicate_of_owns + live ledger row demonstrating measurement is alive + doctor=ok + Step 4o anti-pattern guardrail preserved",
+  "cli_canonical": "yes",
+  "rust_clean": "n/a",
+  "python_clean": "n/a",
+  "readme_quality": "n/a",
+  "skill_auto_routes_addressed": {
+    "canonical-cli-scoping": "yes",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "four_lens": {"brand": 9, "sniff": 9, "jeff": 9, "public": 9},
+  "files_reserved": [
+    "/Users/josh/Developer/flywheel/.flywheel/scripts/mobile-eats-end-user-health-probe.sh"
+  ],
+  "evidence_paths": [
+    ".flywheel/receipts/flywheel-1rmp.17/audit/evidence.md",
+    ".flywheel/receipts/flywheel-1rmp.17/audit/ledger-tail.jsonl",
+    ".flywheel/receipts/flywheel-1rmp.17/audit/ledger-head.jsonl",
+    ".flywheel/receipts/flywheel-1rmp.17/audit/pinned-shas.txt"
+  ]
+}

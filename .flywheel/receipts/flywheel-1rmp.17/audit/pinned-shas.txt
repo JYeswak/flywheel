@@ -1,0 +1,9 @@
+probe: 2705a05f1579589eeca336b5462d1d9134994043 (HEAD)
+probe-working: c16b8589b240b7292844cc0d8e2f090455229284448196b9863f998f338524ff
+value-gap-probe: 379baea5926c850bb1c5e09520ddbea16a3f8040
+branch: master
+head: 5d49941e24a1767dc4e936d87a521e1dd5669e30
+ledger-rows:        2
+ledger-newest-ts: 2026-05-09T20:00:02Z
+bead-7-status: ✓ flywheel-1rmp.7 · [value-gap] mobile-eats-end-user-health   [● P3 · CLOSED]
+bead-17-status: ○ flywheel-1rmp.17 · [value-gap] mobile-eats-end-user-health   [● P3 · OPEN]
