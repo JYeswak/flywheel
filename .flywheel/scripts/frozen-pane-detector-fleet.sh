@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034,SC2221,SC2222
 # Fleet launchd wrapper for frozen-pane-detector.sh. Conservative by design:
 # scheduled cycles observe and record; recovery requires explicit --apply and
 # healthy live-truth gates.
@@ -14,6 +15,8 @@ DOMAIN="${FROZEN_FLEET_DOMAIN:-gui/$(id -u)}"
 TARGET="${DOMAIN}/${LABEL}"
 STATE_DIR="${FROZEN_FLEET_STATE_DIR:-$HOME/.local/state/flywheel/frozen-pane-detector-fleet}"
 EVENTS="${FROZEN_FLEET_EVENTS:-$STATE_DIR/events.jsonl}"
+JSONL_APPEND_LIB="${FLYWHEEL_JSONL_APPEND_LIB:-$HOME/.local/share/flywheel-watchers/lib/jsonl-append.sh}"
+JSONL_APPEND_AVAILABLE=0
 BUDGET_FILE="${FROZEN_FLEET_BUDGET_FILE:-$STATE_DIR/budgets.json}"
 FATAL_FILE="${FROZEN_FLEET_FATAL_FILE:-$STATE_DIR/FATAL}"
 STOP_FILE="${FROZEN_FLEET_STOP_FILE:-$HOME/.flywheel/STOP-frozen-pane-detector-fleet}"
@@ -30,6 +33,13 @@ APPLY=0
 SESSION="all"
 PANE=""
 IDEMPOTENCY_KEY=""
+
+if [[ -f "$JSONL_APPEND_LIB" ]]; then
+  # shellcheck disable=SC1090,SC1091
+  if source "$JSONL_APPEND_LIB" && declare -F fw_jsonl_append_validated >/dev/null; then
+    JSONL_APPEND_AVAILABLE=1
+  fi
+fi
 
 usage() {
   cat <<'USAGE'
@@ -61,10 +71,25 @@ emit_json() {
   printf '%s\n' "$1"
 }
 
+append_jsonl_best_effort() {
+  local path="$1" row="$2" label="$3" rc
+  if [[ "$JSONL_APPEND_AVAILABLE" -ne 1 ]] || ! declare -F fw_jsonl_append_validated >/dev/null; then
+    printf 'WARN: %s append skipped; JSONL primitive unavailable: %s\n' "$label" "$JSONL_APPEND_LIB" >&2
+    return 0
+  fi
+  if fw_jsonl_append_validated "$path" "$row"; then
+    return 0
+  else
+    rc=$?
+    printf 'WARN: %s append failed rc=%s path=%s\n' "$label" "$rc" "$path" >&2
+    return 0
+  fi
+}
+
 event_append() {
   local payload="$1"
   ensure_dirs
-  printf '%s\n' "$payload" >>"$EVENTS"
+  append_jsonl_best_effort "$EVENTS" "$payload" "frozen-pane fleet event"
 }
 
 plist_payload() {
@@ -434,6 +459,11 @@ while [[ $# -gt 0 ]]; do
     completion) MODE="completion"; shift ;;
     --info) MODE="info"; shift ;;
     --examples|examples) MODE="examples"; shift ;;
+    # flywheel-ecujm: --schema flag delegates to schema_json (the `schema`
+    # subcommand) so the introspection triad+1 (--help/--info/--schema/
+    # --examples) is uniformly accessible as flags per
+    # agent-ergonomics-cli-max R001.
+    --schema) MODE="schema"; shift ;;
     --json) JSON_OUT=1; shift ;;
     --dry-run) DRY_RUN=1; APPLY=0; shift ;;
     --apply) APPLY=1; DRY_RUN=0; shift ;;

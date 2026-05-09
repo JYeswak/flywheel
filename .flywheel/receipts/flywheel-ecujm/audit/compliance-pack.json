@@ -1,0 +1,30 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-ecujm-e78a50",
+  "bead": "flywheel-ecujm",
+  "score": 880,
+  "max": 1000,
+  "score_basis": "agent-ergo-cli-max audit target 880; introspection triad+1 uniformly flag-accessible; canonical-CLI scoping skill all gates addressed or n/a; regression test 7/7 PASS; under file-size threshold; mission-fitness infrastructure",
+  "cli_canonical": "yes",
+  "rust_clean": "n/a",
+  "python_clean": "n/a",
+  "readme_quality": "n/a",
+  "skill_auto_routes_addressed": {
+    "canonical-cli-scoping": "yes",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "four_lens": {"brand": 9, "sniff": 9, "jeff": 9, "public": 9},
+  "tests": {"path": ".flywheel/tests/test-frozen-pane-detector-fleet-introspection.sh", "pass": 7, "fail": 0},
+  "files_reserved": [
+    "/Users/josh/Developer/flywheel/.flywheel/scripts/frozen-pane-detector-fleet.sh",
+    "/Users/josh/Developer/flywheel/.flywheel/tests/test-frozen-pane-detector-fleet-introspection.sh"
+  ],
+  "evidence_paths": [
+    ".flywheel/receipts/flywheel-ecujm/audit/evidence.md",
+    ".flywheel/receipts/flywheel-ecujm/audit/post-score-delta.txt",
+    ".flywheel/receipts/flywheel-ecujm/audit/test-output.txt",
+    ".flywheel/receipts/flywheel-ecujm/audit/pinned-shas.txt"
+  ]
+}

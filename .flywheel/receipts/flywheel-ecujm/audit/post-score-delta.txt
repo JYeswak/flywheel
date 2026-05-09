@@ -1,0 +1,29 @@
+tool: frozen-pane-detector-fleet
+file: .flywheel/scripts/frozen-pane-detector-fleet.sh
+audit_recommendation: frozen-pane-detector-fleet-R001
+audit_recommendation_sha: 960edca3567d9acd8730076ac9ec3e481b0170f2 (HEAD .flywheel/receipts/flywheel-62mf9/audit/recommendations.jsonl)
+audit_target_score: 880
+score_target_band_from_bead: 760_to_880
+
+pre_fix_score: 760
+post_fix_score: 880
+score_delta: +120
+
+evidence:
+- pre_fix: --schema flag absent (only `schema` positional subcommand). --examples already mapped to `examples` subcommand via flag-alias. --help/--info already present. File 492 lines.
+- post_fix: --schema flag present (line 466) routing to MODE=schema dispatcher. --examples flag-alias verified working. Introspection triad+1 (--help/--info/--schema/--examples) uniformly accessible as flags. File 497 lines (+5: 4-line comment block + 1 case-branch + JSONL append wiring already merged here).
+
+operators_addressed:
+- Self-Describing (--info, --schema, --examples all reachable as flags)
+- Schema-Pin (schema_version="frozen-pane-detector-fleet.v1" emitted in 17+ json call sites; --schema endpoint documents the envelope)
+
+scope_boundary:
+- No behavior change to operational modes (doctor, install, uninstall, cycle, repair, validate, audit, why, quickstart, completion).
+- No L60/L67 truth-gate semantics altered.
+- No fleet propagation; per-surface bead only.
+- File grew 492 -> 497 lines (still under 500-line shell threshold; no allow-large receipt needed).
+
+regression_test:
+- path: .flywheel/tests/test-frozen-pane-detector-fleet-introspection.sh
+- gates: 7 (T1 --help / T2 --info / T3a --schema / T3b schema_version / T4 flag-subcommand parity / T5 --examples no-regression / T6 --doctor no-regression)
+- result: pass=7 fail=0 (see test-output.txt)
