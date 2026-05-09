@@ -662,6 +662,7 @@ Root Cause: Orchestrator drew "X is missing/broken" conclusions before doing bre
 
 Forever-Rule: Before any "X is missing/broken" framing in a dispatch packet OR research lane prompt, orchestrator MUST run breadth-first substrate inventory and cite findings:
 1. **Config files** — every `~/.config/<tool>/`, `~/.<tool>rc`, project `.toml`/`.json`
+   - RU-backed multi-repo systems must also inspect `~/.config/ru/config` and `~/.config/ru/repos.d/*.txt` before framing repo discovery, path drift, or cross-repo absence.
 2. **State files** — every `~/.local/state/<tool>/`, `~/.<tool>/state*`
 3. **Live processes** — `ps aux | grep -i <tool>` for daemons/monitors
 4. **launchd plists** — `launchctl list | grep <tool>` AND `~/Library/LaunchAgents/*<tool>*`
