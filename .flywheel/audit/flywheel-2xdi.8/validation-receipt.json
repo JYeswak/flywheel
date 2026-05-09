@@ -1,0 +1,132 @@
+{
+  "schema_version": "validation-receipt/v1",
+  "dispatch_id": "flywheel-2xdi.8-64ab3c",
+  "callback_ref": {
+    "transport": "ntm",
+    "kind": "DONE",
+    "session": "flywheel",
+    "pane": 1,
+    "received_at": "2026-05-09T08:08:00Z"
+  },
+  "status": "pass",
+  "failure_class": null,
+  "retry_policy": "none",
+  "recovery_hint": "No recovery required; flywheel-2xdi is a gap-hunter parent with child follow-ups and durable triage/evidence surfaces.",
+  "failure_classes": [],
+  "evidence": [
+    {
+      "type": "path",
+      "ref": ".flywheel/audit/flywheel-2xdi.8/compliance-pack.md"
+    },
+    {
+      "type": "command",
+      "ref": ".flywheel/audit/flywheel-2xdi.8/l112-probe.sh"
+    },
+    {
+      "type": "bead_id",
+      "ref": "flywheel-2xdi.8"
+    },
+    {
+      "type": "bead_id",
+      "ref": "flywheel-2xdi"
+    }
+  ],
+  "artifact_checks": [
+    {
+      "artifact_id": "parent-bead",
+      "path": "flywheel-2xdi",
+      "status": "exists",
+      "evidence_ref": "br show flywheel-2xdi --json"
+    },
+    {
+      "artifact_id": "compliance-pack",
+      "path": ".flywheel/audit/flywheel-2xdi.8/compliance-pack.md",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "l112-probe",
+      "path": ".flywheel/audit/flywheel-2xdi.8/l112-probe.sh",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "packet",
+      "path": "/tmp/dispatch_flywheel-2xdi.8-64ab3c.md",
+      "status": "exists"
+    }
+  ],
+  "runtime_context": {
+    "agent_context": {
+      "status": "responsive",
+      "probe_ref": ".flywheel/audit/flywheel-2xdi.8/l112-probe.sh",
+      "resolved_tools": [
+        "socraticode",
+        "br",
+        "git",
+        "bash",
+        "jq",
+        "rg"
+      ]
+    },
+    "orchestrator_shell_context": {
+      "status": "responsive",
+      "probe_ref": ".flywheel/scripts/verify-callback-delivery.sh",
+      "resolved_tools": [
+        "ntm"
+      ]
+    },
+    "timeout": false,
+    "context_drift": false
+  },
+  "agent_mail": {
+    "agent_mail_thread": "flywheel-2xdi.8-64ab3c",
+    "identity_name": "MistyCliff",
+    "files_reserved": [
+      ".flywheel/audit/flywheel-2xdi.8",
+      ".beads/issues.jsonl"
+    ],
+    "files_released": [
+      ".flywheel/audit/flywheel-2xdi.8",
+      ".beads/issues.jsonl"
+    ],
+    "reservation_conflicts": [],
+    "reservation_lifecycle": {
+      "state": "released",
+      "reason": "All L107 shared-surface reservations are released before DONE callback."
+    }
+  },
+  "evidence_redaction": {
+    "evidence_redacted": "n/a",
+    "required": false,
+    "evidence_paths": [
+      ".flywheel/audit/flywheel-2xdi.8/compliance-pack.md"
+    ],
+    "status": "pass",
+    "owner": "MistyCliff",
+    "remediation": "No secret-bearing evidence collected."
+  },
+  "bead_actions": [
+    {
+      "action": "updated",
+      "bead": "flywheel-2xdi.8"
+    },
+    {
+      "action": "no_bead_reason",
+      "reason": "No follow-up bead needed; the parent gap hunter already created child follow-ups and later gap-hunt triage owns class-level refinement."
+    }
+  ],
+  "learn_route": {
+    "route": "ignore",
+    "reason": "This is a stale gap-hunt row closed with evidence rather than a new learning candidate."
+  },
+  "chain_blocker": {
+    "next_phase": null,
+    "capacity_available": false,
+    "chain_blocked_reason": null
+  },
+  "summary": {
+    "classification": "stale_false_positive",
+    "socraticode_queries": 1,
+    "indexed_chunks_observed": 10,
+    "compliance_score": "860/1000"
+  }
+}
