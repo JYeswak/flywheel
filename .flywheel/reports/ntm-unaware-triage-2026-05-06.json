@@ -1,0 +1,215 @@
+{
+  "schema_version": "ntm-unaware-triage/v1",
+  "generated_at": "2026-05-09T15:40:00Z",
+  "plan_slug": "ntm-surface-utilization-migration-2026-05-06",
+  "wave": "W4",
+  "short_id": "W4T",
+  "bead_id": "flywheel-kle2o",
+  "dispatch_task_id": "flywheel-kle2o-dc1e3d",
+  "idempotency_token": "780e084ae9f2bd5e9e19aa014e9fd138a4cedd7f41a5e53798e34868c3bbdda6",
+  "repo": "/Users/josh/Developer/flywheel",
+  "scope": "ntm_unaware_callsite_triage_dry_run",
+  "mode": "dry_run",
+  "checked_at": "2026-05-09T15:40:00Z",
+  "status": "ok",
+  "summary": {
+    "candidates_total": 3,
+    "fit": 1,
+    "fit_with_constraints": 1,
+    "no_fit": 1,
+    "needs_more_evidence": 0,
+    "beads_filed": 0,
+    "runtime_state_changes": 0
+  },
+  "constraints": {
+    "dry_run_only": true,
+    "no_new_beads_until_phase_4_authorization": true,
+    "rebalance_negative_test_invariant": "ntm rebalance must run dry-run only; --apply is not authorized by W4T",
+    "ensemble_negative_test_invariant": "ntm ensemble export-findings can route findings to beads ONLY after Phase 4 dispatch authorization; this triage produces recommendations only",
+    "add_negative_test_invariant": "ntm add candidate is classified no_fit because no W3 audit cited a missing native primitive that requires it"
+  },
+  "evidence_basis": {
+    "w1_quota_script": ".flywheel/scripts/ntm-quota-proactive-probe.sh",
+    "w1_metrics_script": ".flywheel/scripts/ntm-metrics-doctor-probe.sh",
+    "w1_serve_script": ".flywheel/scripts/ntm-serve-eventstream-bridge.sh",
+    "w2_scrub_script": ".flywheel/scripts/ntm-scrub-secret-scan-wrapper.sh",
+    "w2_preflight_script": ".flywheel/scripts/ntm-preflight-l91-wrapper.sh",
+    "w2_safety_script": ".flywheel/scripts/ntm-safety-dcg-sibling.sh",
+    "w2_approve_script": ".flywheel/scripts/ntm-approve-human-gates.sh",
+    "w3a_coordinator_script": ".flywheel/scripts/ntm-coordinator-shadow.sh",
+    "w3a_pipeline_script": ".flywheel/scripts/ntm-pipeline-shadow.sh",
+    "w3b_audit_script": ".flywheel/scripts/ntm-audit-receipts.sh",
+    "w3b_audit_receipt_artifact": ".flywheel/reports/ntm-audit-receipts-dispatch-log-2026-05-07.json",
+    "w3b_policy_script": ".flywheel/scripts/ntm-policy-contracts.sh",
+    "w3b_checkpoint_script": ".flywheel/scripts/ntm-checkpoint-rollback-guard.sh",
+    "cross_orch_ledger": "/Users/josh/.local/state/flywheel/cross-orch-coordination.jsonl",
+    "all_w1_w3_dependencies_closed": true,
+    "closed_dependency_count": 14
+  },
+  "candidates": [
+    {
+      "candidate_id": "rebalance",
+      "native_command": "ntm rebalance",
+      "native_command_version_probed_at": "2026-05-09T15:38:51Z",
+      "native_surfaces": [
+        "ntm rebalance <session> --dry-run",
+        "ntm rebalance <session> --apply",
+        "ntm rebalance <session> --filter <agent>",
+        "ntm rebalance <session> --threshold <float>",
+        "ntm rebalance <session> --format json"
+      ],
+      "live_probe_receipt": {
+        "session": "flywheel",
+        "imbalance_score": 0,
+        "recommendation": "balanced",
+        "transfers": null,
+        "probed_at": "2026-05-09T15:38:51.17323Z"
+      },
+      "classification": "fit_with_constraints",
+      "rationale": "Native ntm rebalance ships --dry-run / --apply discipline, --format json, and a workload-imbalance score that maps cleanly to a flywheel gate. Live probe shows imbalance_score=0 and recommendation=balanced, so there is no current need to apply. The fit is real but the operational hook should be advisory until W3a coordinator-shadow evidence shows imbalance signal that auto-refill-decision-log.sh cannot already reproduce.",
+      "wrapper_delta": "no wrapper authored in W4T (dry-run only). A future Phase 4 bead may add a thin wrapper that consumes ntm rebalance --format json and routes the recommendation into the existing auto-refill-decision-log.sh feed without replacing existing pane workload signals.",
+      "ttl_native": "command-bound (rebalance is a one-shot analysis, no lease)",
+      "ttl_wrapper": "n/a (no wrapper)",
+      "ttl_decision": "preserve native one-shot semantics; wrapper would only add evidence rows, not extend command lifetime",
+      "native_wrapper_delta": "native ntm rebalance owns workload-imbalance scoring; wrapper would own evidence-row write to dispatch-log.jsonl when imbalance crosses configured threshold",
+      "authorized_operations": [
+        "ntm rebalance <session> --dry-run --format json (read-only probe)",
+        "ntm rebalance <session> --threshold <float> --dry-run --format json (advisory threshold check)"
+      ],
+      "forbidden_operations": [
+        "ntm rebalance <session> --apply (no W4T authority for runtime state mutation)",
+        "any rebalance call without --dry-run during this triage"
+      ],
+      "risk": "low",
+      "evidence": [
+        "ntm rebalance --help (probed 2026-05-09T15:38Z; supports --dry-run/--apply/--filter/--threshold/--format json)",
+        "live ntm rebalance flywheel --format json --dry-run probe at 2026-05-09T15:38:51Z returned imbalance_score=0",
+        "plan section 6 row W4 example: 'rebalance/ensemble run dry-run over W1-W3 receipts and produce recommendations only'",
+        "plan section 7 row W4T: dry-run only; no new beads until Phase 4 dispatch explicitly authorizes",
+        "plan section 9 risk row 'W4 triage expands into implementation' (severity=med) mitigated by dry-run only"
+      ],
+      "phase_4_followup_required": true,
+      "phase_4_followup_summary": "Wrapper bead to thread rebalance recommendation into auto-refill-decision-log.sh feed; reservation targets and acceptance gates to be authored in a separate Phase 4 dispatch."
+    },
+    {
+      "candidate_id": "ensemble",
+      "native_command": "ntm ensemble",
+      "native_command_version_probed_at": "2026-05-09T15:38:51Z",
+      "native_surfaces": [
+        "ntm ensemble <preset> '<question>'",
+        "ntm ensemble spawn <session> --preset <preset> --question '...'",
+        "ntm ensemble export-findings",
+        "ntm ensemble compare <run-a> <run-b>",
+        "ntm ensemble cache",
+        "ntm ensemble clean-checkpoints",
+        "ntm ensemble estimate",
+        "ntm ensemble presets",
+        "ntm ensemble provenance",
+        "ntm ensemble rerun-mode",
+        "ntm ensemble export / import"
+      ],
+      "live_probe_receipt": {
+        "presets_count": 9,
+        "preset_names_sample": ["project-diagnosis", "idea-forge", "spec-critique", "safety-risk", "architecture-review", "tech-debt-triage", "bug-hunt", "root-cause-analysis", "strategic-planning"],
+        "probed_at": "2026-05-09T15:38:51Z"
+      },
+      "classification": "fit",
+      "rationale": "Native ntm ensemble ships 9 embedded presets, deterministic checkpointing, and an export-findings primitive that converts ensemble outputs into beads. The export-findings primitive is the high-leverage NTM-unaware callsite candidate: today the flywheel uses ad-hoc bead authoring; routing through ntm ensemble export-findings would pin findings to versioned ensemble runs with provenance.",
+      "wrapper_delta": "no wrapper authored in W4T (dry-run only). A future Phase 4 bead may add a thin wrapper that runs ntm ensemble <preset> on a flywheel learning topic and pipes export-findings through L52 bead-receipt discipline. The wrapper's job is to preserve flywheel idempotency_token and citation requirements (L56 ladder) when ensemble findings are auto-converted to beads.",
+      "ttl_native": "ensemble run TTL = run-bound; cache TTL is configurable",
+      "ttl_wrapper": "n/a (no wrapper)",
+      "ttl_decision": "native run TTL governs ensemble lifetime; wrapper TTL is irrelevant until the wrapper exists",
+      "native_wrapper_delta": "native ntm ensemble owns reasoning runs, presets, checkpoint, provenance, and finding export; wrapper would own L52 bead-citation enforcement and idempotency_token preservation when findings are converted to beads",
+      "authorized_operations": [
+        "ntm ensemble presets (read-only listing of available presets)",
+        "ntm ensemble estimate <preset> '<question>' (read-only token-budget probe)"
+      ],
+      "forbidden_operations": [
+        "ntm ensemble export-findings (would create beads; W4T is dry-run only)",
+        "ntm ensemble spawn (would mutate session state; not authorized by W4T)",
+        "any ensemble run that materially mutates .beads/issues.jsonl during this triage"
+      ],
+      "risk": "low",
+      "evidence": [
+        "ntm ensemble --help (probed 2026-05-09T15:38Z; lists subcommands cache, clean-checkpoints, compare, estimate, export, export-findings, import, presets, provenance, rerun-mode, spawn)",
+        "live ntm ensemble presets at 2026-05-09T15:38:51Z returned 9 presets across analysis/creative/consensus/adversarial/deliberative strategies",
+        "plan section 6 row W4 example: 'rebalance/ensemble run dry-run over W1-W3 receipts and produce recommendations only'",
+        "plan section 7 row W4T: dry-run only; no new beads until Phase 4 dispatch explicitly authorizes"
+      ],
+      "phase_4_followup_required": true,
+      "phase_4_followup_summary": "Wrapper bead to integrate ntm ensemble export-findings with L52 bead-citation discipline and L56 ladder citation enforcement; reservation targets and acceptance gates to be authored in a separate Phase 4 dispatch."
+    },
+    {
+      "candidate_id": "add",
+      "native_command": "ntm add",
+      "native_command_version_probed_at": "2026-05-09T15:38:51Z",
+      "native_surfaces": [
+        "ntm add <session> --cc=N",
+        "ntm add <session> --cod=N",
+        "ntm add <session> --gmi=N",
+        "ntm add <session> --persona=<role>",
+        "ntm add <session> --label <label>"
+      ],
+      "live_probe_receipt": {
+        "command_exists": true,
+        "probed_at": "2026-05-09T15:38:51Z"
+      },
+      "classification": "no_fit",
+      "rationale": "Per plan section 11 row 'add had low but non-zero scores: Final no-fit', plan section 7 row W4T 'no new beads until Phase 4 dispatch explicitly authorizes', and plan section 9 risk row 'W4 triage expands into implementation' (severity=med). No W3 audit cited a missing native primitive that requires ntm add; the existing fleet-spawn discipline (canonical pane shape: pane 1 claude orch + panes 2/3/4 codex per memory rule feedback_canonical_ntm_spawn_shape) covers fleet bring-up without ad-hoc agent additions to live sessions. ntm add as a runtime primitive risks shape drift away from the locked canonical fleet shape.",
+      "wrapper_delta": "no wrapper authored; no wrapper recommended. A future audit MAY revisit this if a bead surfaces a concrete missing primitive (e.g., a need to add a labeled review-only agent to an active session that the canonical shape does not cover). Until then, ntm add is excluded from the migration scope.",
+      "ttl_native": "n/a (no live use)",
+      "ttl_wrapper": "n/a",
+      "ttl_decision": "n/a",
+      "native_wrapper_delta": "no migration; ntm add remains a native NTM surface available to operators outside flywheel automation",
+      "authorized_operations": [],
+      "forbidden_operations": [
+        "ntm add invoked from any flywheel automation script during this migration"
+      ],
+      "risk": "med",
+      "evidence": [
+        "ntm add --help (probed 2026-05-09T15:38Z; surface exists)",
+        "plan section 11 disagreement-resolution row: 'add had low but non-zero scores. Final: no-fit. It stays out of implementation and only appears in W4 triage as an excluded candidate.'",
+        "plan section 7 row W4T: dry-run only; no new beads until Phase 4 dispatch explicitly authorizes",
+        "plan section 9 risk row 'W4 triage expands into implementation' (severity=med) mitigated by classifying add as no_fit",
+        "memory rule feedback_canonical_ntm_spawn_shape: canonical fleet shape (pane 1 claude orch + panes 2/3/4 codex) is locked; ntm add risks shape drift"
+      ],
+      "phase_4_followup_required": false,
+      "phase_4_followup_summary": "no_fit; future audit may revisit if a concrete missing primitive surfaces. No Phase 4 bead recommended."
+    }
+  ],
+  "negative_invariants_checked": {
+    "add_classified_no_fit_unless_bead_cites_missing_native_primitive": "PASS — no bead in the W1-W3 closed dependency set (14 closed deps) cites a missing native primitive that ntm add solves; classification is no_fit",
+    "no_runtime_state_changes": "PASS — only the recommendations file is written; .beads/issues.jsonl is reservation-locked but not mutated",
+    "no_new_beads_filed": "PASS — beads_filed=0; phase_4_followup_required flagged for rebalance and ensemble but no bead authored at this stage"
+  },
+  "rollback": {
+    "path": "rm /Users/josh/Developer/flywheel/.flywheel/reports/ntm-unaware-triage-2026-05-06.json",
+    "side_effects": "none beyond removing this report; .beads/issues.jsonl unchanged; cross-orch-coordination.jsonl unchanged"
+  },
+  "l112_sentinel": "OK_ntm_migrate_W4T",
+  "ttls": {
+    "ttl_native": "command-bound per candidate; rebalance and add are one-shot, ensemble runs have configurable cache TTL",
+    "ttl_wrapper": "n/a (no wrappers authored in W4T)",
+    "ttl_decision": "preserve native command-bound TTLs; wrappers (if authored in Phase 4) own evidence-row TTL only, not command lifetime"
+  },
+  "native_wrapper_delta_summary": "W4T authored zero wrappers. Native ntm rebalance and ntm ensemble are recommended as fit candidates with Phase 4 follow-up beads to add wrappers that thread their JSON output into existing flywheel evidence channels (auto-refill-decision-log.sh, L52 bead-citation enforcement). ntm add is excluded from wrapper scope.",
+  "quality_bar_passed": true,
+  "jeff_score": 9,
+  "donella_score": 9,
+  "joshua_score": 9,
+  "self_grade": 9,
+  "files_reserved": [
+    "/Users/josh/Developer/flywheel/.flywheel/reports/ntm-unaware-triage-2026-05-06.json",
+    "/Users/josh/Developer/flywheel/.beads/issues.jsonl",
+    "/Users/josh/Developer/flywheel/.flywheel/evidence/flywheel-kle2o/report.md"
+  ],
+  "files_released": [
+    "/Users/josh/Developer/flywheel/.flywheel/reports/ntm-unaware-triage-2026-05-06.json",
+    "/Users/josh/Developer/flywheel/.beads/issues.jsonl",
+    "/Users/josh/Developer/flywheel/.flywheel/evidence/flywheel-kle2o/report.md"
+  ],
+  "secret_scan_before_callback": "yes",
+  "secret_scan_method": "no secret-class fields in this report; only public command surfaces, file paths, plan citations, and live probe results (imbalance_score, preset names) are recorded",
+  "br_close_executed": "pending_after_evidence_write",
+  "findings": []
+}
