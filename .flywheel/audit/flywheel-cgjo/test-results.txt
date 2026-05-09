@@ -1,0 +1,21 @@
+Cross-session worker borrow protocol fixture sweep 2026-05-09T14:08:49Z
+
+=== T1: REQUEST + REQUEST again (idempotency) ===
+{"test":"T1-first","state":"requested","reason":"eligible","borrow_id":"799cb69669cad717","new_row_written":true}
+{"test":"T1-second","state":"requested","reason":"idempotency_collision","borrow_id":"799cb69669cad717","new_row_written":false}
+
+=== T2: STALE PULSE ===
+{"test":"T2","state":"refused","reason":"pulse_stale"}
+
+=== T3: PROTECTED/CLIENT TIER ===
+{"test":"T3","state":"refused","reason":"client_tier_no_override"}
+
+=== T4: WORKER DEATH ===
+{"test":"T4","state":"refused","reason":"target_pane_dead"}
+
+=== T5: REQUEST → RELEASE ===
+{"test":"T5-request","state":"requested","reason":"eligible","borrow_id":"58e925d23523e46f"}
+{"test":"T5-release","state":"released","borrow_id":"58e925d23523e46f","new_row_written":true}
+
+=== LIST SUMMARY ===
+[{"state":"refused","count":3},{"state":"released","count":1},{"state":"requested","count":2}]

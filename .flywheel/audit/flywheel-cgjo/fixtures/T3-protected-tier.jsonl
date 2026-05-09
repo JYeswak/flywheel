@@ -1,0 +1,2 @@
+{"kind":"roster","session":"alpsinsurance","row":{"ts":"NOW_PLACEHOLDER","session":"alpsinsurance","tier":"client_reference","client":"alps","available_for_borrow":true,"max_borrow_workers":1,"orchestrator":{"pane":1,"kind":"claude"}}}
+{"kind":"pane","session":"alpsinsurance","pane":2,"state":"WAITING"}
