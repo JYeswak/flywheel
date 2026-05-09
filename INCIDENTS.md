@@ -6149,6 +6149,90 @@ Evidence:
   dispatch`.
 - Bead: `flywheel-7xcfl`.
 
+## concurrent-dirty-validation-drift
+
+Date: 2026-05-09
+
+Promotion Action: NEW
+
+Class: `concurrent-dirty-validation-drift`
+
+Event Count: 13 events in 7 days
+
+Severity: medium
+
+Cost: Thirteen mobile-eats worker validations on 2026-05-08 (between
+09:34Z and 15:17Z) saw their `pnpm test` / `pnpm typecheck` / `pnpm
+build` fail because of unrelated dirty edits a sibling pane had made
+in the same shared worktree. Each affected worker re-ran validation
+in an isolated `/tmp/mobile-eats-<task>-validate-<pid>` worktree and
+the validation passed there, proving the worker's own changes were
+clean — only the cross-pane drift was poisoning shared validation.
+The cost is wasted CI cycles, false-failure noise, and worker time
+spent recovering an isolated worktree.
+
+Root Cause: Validation tooling (`pnpm test`, `pnpm typecheck`,
+`pnpm build`) is whole-repo by design — it picks up every dirty file
+in the worktree, including paths the worker never touched. When two
+worker panes operate in the same git worktree on parallel tracks
+(common in multi-pane mobile-eats sessions), pane A's clean validation
+on its own narrow scope is gated by pane B's in-flight dirty edits
+that have nothing to do with pane A's task. Sister class to
+`shared-repo-dirty-preflight` above: that one is about
+orchestrator-side dispatch gates; this one is about worker-side
+validation surfaces.
+
+Forever-Rule: When a worker performs full-repo validation
+(`pnpm test`, `pnpm build`, `pnpm typecheck`, `pytest -q`, etc.)
+inside a shared worktree where another active pane has dirty state,
+**the worker MUST validate in a dedicated isolated worktree** rather
+than the shared one. The canonical pattern observed in the 13 events
+is `git worktree add /tmp/<repo>-<task>-validate-<pid> <commit-sha>`
+followed by validation against that path. The worker's own narrow
+scope can still ship from the shared worktree (so pathspec staging
+discipline holds), but the validation gate runs against the isolated
+copy. A worker MUST NOT downgrade validation to "no full test run"
+just because the shared worktree is poisoned; the isolated worktree
+is the canonical workaround.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote concurrent-dirty-validation-drift` (worker-tick by
+`flywheel-8qal5`). Pairs with `shared-repo-dirty-preflight` (sister
+section above): orchestrator gates on dirty pre-flight before
+dispatch (orch layer); worker isolates validation when dirty state
+appears mid-flight (worker layer). The isolated-worktree pattern is
+already canon in mobile-eats per the 13 events; this entry codifies
+it as Forever-Rule.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L4263,L4264,L4267,L4268,L4273,L4274,L4277,L4278,L4279,L4281,L4283,L4285,L4287`:
+  the 13 events, all on 2026-05-08 09:34Z–15:17Z, all
+  `session=mobile-eats` with cross-pollution between panes 2 and 3
+  (Track A vs Track B vs Track H validation work).
+- Pattern observed in every event: shared `pnpm test`/`pnpm
+  typecheck`/`pnpm build` failure + isolated
+  `/tmp/mobile-eats-<task>-validate-<pid>` worktree validation
+  passes.
+- Failure-shape distribution:
+  - Pane 3 dirty billing/copy edits poisoning Track A: 2 rows
+  - Pane 2 dirty entitlements/dunning/stripe edits poisoning Track L: 2 rows
+  - Track H email-sequences cross-pollination: 4 rows
+  - Track A/B fixture drift: 1 row
+  - Track H7/customer-reengagement copy drift: 4 rows
+- Sister INCIDENTS entry: `INCIDENTS.md#shared-repo-dirty-preflight`
+  (the orch-layer counterpart).
+- Doctrine: `AGENTS.md` L107 `SHARED-SURFACE-WRITES-MUST-RESERVE`
+  covers the file-level reservation case; this rule covers the
+  whole-repo validation-tooling case where reservations don't help
+  because the validation itself reads every file.
+- Skill: `~/.claude/skills/dispatch-tool-contracts/SKILL.md` (the
+  shared-repo-dirty-preflight Forever-Rule lives here; this section's
+  isolated-worktree-validation pattern should be added to the same
+  skill in a follow-up).
+- Companion dedup fix: `flywheel-qnkj2` (added `$REPO/INCIDENTS.md`
+  to `doctrine-ladder-promote.sh default_incident_paths`).
+- Bead: `flywheel-8qal5`.
+
 ## jeff-dedupe-bead-stale-scope
 
 Date: 2026-05-08
@@ -7058,3 +7142,68 @@ Sibling Classes:
   `josh-ylpa3`).
 - Companion bead: `flywheel-uyd9i` (Path A merge into this section;
   bead closes as superseded after the cross-link lands).
+
+## br-source-repo-dot-after-create
+
+Date: 2026-05-09
+
+Promotion Action: NEW
+
+Class: `br-source-repo-dot-after-create`
+
+Event Count: 7 events in 7 days (bead claimed 5; live count is 7)
+
+Severity: low
+
+Cost: `br create` invocations from absolute repo paths (e.g.
+`/Users/josh/Developer/flywheel`, `/Users/josh/Developer/mobile-eats`)
+were emitting bead rows with `source_repo='.'` (literal dot string)
+instead of the resolved absolute repo path. Operators had to manually
+repair each row after creation, either via direct SQLite UPDATE or
+via `br update <id> --source-repo <absolute-path>`. With 7 events in
+the recent window, this manual repair burden was non-trivial and
+risked rows being left mis-attributed if the repair step was skipped.
+
+Root Cause: A `br create` code path resolves `source_repo` from the
+shell's current working directory representation rather than from
+`pwd -P`/`realpath`. When the working dir is queried via a
+short-cut that returns "." (or when `source_repo` defaults to the
+literal "." sentinel), the resulting row stores "." rather than
+the absolute path. Mis-attribution downstream: cross-repo bead
+queries can't filter by canonical source_repo, and any tooling
+that joins beads back to their source repo (e.g. fleet rollups,
+plan-source-pinning) sees opaque "." values.
+
+Forever-Rule: Every `br create` invocation MUST produce a row whose
+`source_repo` is an absolute path. Two enforcement layers:
+1. **Worker discipline**: workers SHOULD `cd "$(realpath "$REPO")"`
+   before `br create`, and verify the resulting row via
+   `br show <id> --json | jq -e '.source_repo | startswith("/")'`.
+   On failure, repair via `br update <id> --source-repo "$(realpath
+   "$REPO")"` BEFORE the bead is referenced downstream.
+2. **Tool patch (Jeff-substrate)**: `br create` should canonicalize
+   `source_repo` to an absolute path internally and refuse to write
+   "." or relative paths. This is upstream `br` work; surface
+   via a Jeffrey issue if not already filed.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from
+`/flywheel:learn --promote br-source-repo-dot-after-create` (this
+dispatch). 7 observed events all involve `br create` from various
+absolute-path working directories producing `source_repo='.'`. The
+entry establishes the worker-side verify-or-repair contract; the
+upstream `br` canonicalization fix is recommended but out of worker
+scope.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl` lines 198, 200, 231,
+  240, 248, 249, 251 (durable copy at
+  `.flywheel/audit/flywheel-e4tfe/fuckup-evidence.jsonl`).
+- 7 events on 2026-05-02 to 2026-05-03, all `severity:low`, all
+  describing manual row repair after `br create` emitted
+  `source_repo='.'`.
+- Affected repos: `/Users/josh/Developer/flywheel`,
+  `/Users/josh/Developer/mobile-eats`, skillos tick context.
+- Affected beads (representative): `flywheel-0oms`, `flywheel-zb5n`,
+  `flywheel-4m68`, `flywheel-9osi`, `flywheel-zuqc`, plus 10
+  mobile-eats MISSION Section 14 followup beads.
+- Bead: `flywheel-e4tfe`.
