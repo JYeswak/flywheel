@@ -1,0 +1,38 @@
+{
+    "failed_surfaces": [],
+    "mode": "probe",
+    "schema_version": "codex-pane-path-probe/v1",
+    "status": "ok",
+    "surfaces": {
+        "respawn_plist_path": {
+            "note": "all_plists_have_local_bin",
+            "ok": true,
+            "path_excerpt": "[{\"path_excerpt\": \"/opt/homebrew/Cellar/util-linux/2.41.3_1/bin:/Users/josh/.cargo/bin:/Users/josh/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin\", \"plist\": \"ai.zeststream.mobile-eats-flywheel-loop.plist\"}, {\"path_excerpt\": \"/Users/josh/.local/bin:/opt/homebrew/bin:/usr/bin:/bin\", \"plist\": \"ai.zeststream.codex-rollout-permission-janitor.plist\"}, {\"path_excerpt\": \"/Users/josh/.local/bin:/opt/"
+        },
+        "tmux_server_global_path": {
+            "note": "local_bin_in_tmux_server_PATH=True",
+            "ok": true,
+            "path_excerpt": "/Users/josh/.opencode/bin:/Users/josh/.local/bin:/Users/josh/.cargo/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+        },
+        "worker_self_probe": {
+            "note": "all_jeff_binaries_resolved",
+            "ok": true,
+            "path_excerpt": "/Users/josh/.local/bin:/Users/josh/.local/bin:/Users/josh/.opencode/bin:/Users/josh/.bun/bin:/Users/josh/.bun/bin:/Users/josh/go/bin:/Users/josh/.local/bin:/Users/josh/.cargo/bin",
+            "resolved": {
+                "br": "/Users/josh/.cargo/bin/br",
+                "cm": "/Users/josh/.local/bin/cm",
+                "dcg": "/Users/josh/.local/bin/dcg",
+                "jsm": "/Users/josh/.local/bin/jsm",
+                "ntm": "/Users/josh/.local/bin/ntm"
+            }
+        },
+        "zsh_login_path": {
+            "note": "local_bin_in_fresh_zsh_login_PATH=True",
+            "ok": true,
+            "path_excerpt": "/Users/josh/.local/bin:/Users/josh/.local/bin:/Users/josh/.opencode/bin:/Users/josh/.bun/bin:/Users/josh/.bun/bin:/Users/josh/go/bin:/Users/josh/.local/bin:/Users/josh/.cargo/bin"
+        }
+    },
+    "ts": "2026-05-09T13:04:37Z",
+    "verdict": "green",
+    "version": "codex-pane-path-probe.v1"
+}

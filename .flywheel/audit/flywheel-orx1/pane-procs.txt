@@ -1,0 +1,5 @@
+  UID   PID  PPID   C STIME   TTY           TIME CMD
+  501 57847 82441   0  6:08AM ttys006    9:04.81 claude --dangerously-skip-permissions
+  501 34187  5046   0  6:10AM ttys038   10:13.72 claude --dangerously-skip-permissions
+  501 45916 45437   0 Thu11PM ttys055  206:34.99 claude --dangerously-skip-permissions --model claude-opus-4-6
+  501 62146 15410   0  6:09AM ttys058    8:02.20 claude --dangerously-skip-permissions
