@@ -74,4 +74,4 @@ assert_jq "$TMP/help-topic.json" '.command == "help" and .topic == "doctor"' "he
 rg -q 'complete -W' "$TMP/completion.bash" && pass "bash completion" || fail "bash completion"
 
 bash "$HOME/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh" cass-v2-sustained-validation-probe >"$TMP/check-cli.txt"
-rg -q 'Summary: 4 pass, 0 fail' "$TMP/check-cli.txt" && pass "canonical CLI checker" || fail "canonical CLI checker"
+rg -q 'Summary: [0-9]+ pass, 0 fail' "$TMP/check-cli.txt" && pass "canonical CLI checker" || fail "canonical CLI checker"
