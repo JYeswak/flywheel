@@ -10,13 +10,39 @@ template_version: "0.1.0"
 template_hash: 1c262f716519326ffa0ba1fcc6ce0b8f8fd41236a0d885f2d4b70f878a852494
 rendered_at: 20260501T052023Z
 rendered_by: flywheel-loop-reconcile
-lock_hash: d966bf77c91b729ac2c10a064d78345be4dc8fc216494b4dbaf3f61872d9f48f
-locked_at: 2026-05-03T21:03:46Z
+lock_hash: bf7d082005faa217c0a6a5df1ba556b250966063bfd45550c452547b014e13ca
+locked_at: 2026-05-07T04:07:55Z
 locked_by: flywheel-loop-reconcile
 source_path: /Users/josh/Developer/flywheel/.flywheel/STATE.md
 source_sha256: 388526164bd1d0c507cfd6ae930c87729a3ef291ea084171994bca1d24c34e77
 source_section: existing .flywheel/STATE.md
 provenance_note: Migrated by flywheel-loop init --reconcile from existing repo-local docs.
+
+## Senior-Dev Orientation
+
+> **Cold-worker pointer (added 2026-05-09 by flywheel-q2gz.3 — Lane 3 doctrine-doc floor).**
+> Read this block first if you are touching `.flywheel/STATE.md` and have not edited it before.
+
+- **Purpose.** Live operational state for `/Users/josh/Developer/flywheel`. Names the active mission anchor pointer, the success definition, the resume-context handoff chain (latest + prior + earlier), and the next-actions queue the orchestrator reads when a session resumes cold. Companion docs: `/Users/josh/Developer/flywheel/.flywheel/MISSION.md` (locked north-star), `/Users/josh/Developer/flywheel/.flywheel/GOAL.md` (target outcomes), and the most recent file under `/Users/josh/Developer/flywheel/.flywheel/handoffs/` (full session restore).
+- **Update boundary.** This file is **locked at the metadata level** (`status: locked`, `locked_by: flywheel-loop-reconcile`, `lock_hash` above) but its body is updated by `flywheel-loop` reconcile passes and by hand at session-end. Hand-edits append handoff lines under `## Resume Context`; do not delete prior `Latest:` / `Prior:` / `Earlier:` rows — they are an append-only chain. Do not strip the metadata block (`schema_version` through `provenance_note`); flywheel-loop reads those fields verbatim. Wholesale rewrite is owner-gated and routes through its own bead.
+- **Validation.** Run from anywhere:
+  ```bash
+  test -s /Users/josh/Developer/flywheel/.flywheel/STATE.md \
+    && grep -q '^## Senior-Dev Orientation$' /Users/josh/Developer/flywheel/.flywheel/STATE.md \
+    && grep -Eq '^lock_hash: [0-9a-f]{64}$' /Users/josh/Developer/flywheel/.flywheel/STATE.md \
+    && grep -Eq '^source_sha256: [0-9a-f]{64}$' /Users/josh/Developer/flywheel/.flywheel/STATE.md \
+    && grep -q '^## Resume Context$' /Users/josh/Developer/flywheel/.flywheel/STATE.md \
+    && [ "$(wc -l < /Users/josh/Developer/flywheel/.flywheel/STATE.md)" -ge 50 ] \
+    && echo ok || echo missing
+  ```
+  Expected: literal `ok`. Failure means the orientation marker, lock-hash, source SHA, or `## Resume Context` chain has drifted (the `wc -l >= 50` floor proves the resume-context chain was not truncated).
+- **Provenance.** Source path and SHA are pinned in the metadata block above (`source_path`, `source_sha256`, `template_hash`, `installed_from`). Reconcile origin: `flywheel-loop init --reconcile` per `provenance_note`. The `## Resume Context` chain links every prior handoff under `.flywheel/handoffs/`, each of which carries its own datestamp and content sha (visible via `git log -p`).
+- **Stale signals.**
+  - `Latest handoff:` row points at a path that does not exist under `/Users/josh/Developer/flywheel/.flywheel/handoffs/`.
+  - `Latest handoff:` ts is older than the most recent file in that handoffs directory by more than 24h.
+  - `lock_hash` drift without a paired reconcile entry in `git log` for this file.
+  - Any `## Next Actions` items naming a bead that has been CLOSED for more than 7 days.
+- **Out-of-scope for this orientation block.** Authoring next-actions content, rotating the resume-context chain, or editing the metadata block. Those changes are owner-gated and route through their own bead.
 
 ## Mission Anchor
 
@@ -209,3 +235,7 @@ DECISION: tick=reap; flywheel-b6js DONE 5/9 (validation; tests PASS, 3 gaps (ski
 - 2026-05-05T01:36Z eod → `.flywheel/handoffs/2026-05-05-0132-eod.md` (10 sections + B47 ship update)
 
 **Latest handoff:** `.flywheel/handoffs/2026-05-06T1120-eod-wednesday-flywheel-day4.md` (2026-05-06 eod-wednesday-flywheel-day4)
+
+**Latest handoff:** `.flywheel/handoffs/2026-05-06T2144-orch-uptime-wave1-mid-shipping.md` (2026-05-06 orch-uptime Wave 1 mid-shipping; W0+B1+C1 SHIPPED, A1 in flight pane 3; plan-arc Phase 5 r3 ratified 0.00% diff streak=2; 21-doc plan dir ratified; L119+L120 doctrine landed; INCIDENTS +73 lines codex-capacity-cycle-throttle; cross-orch coord row 203 frozen-projection-of-mutable-state; 6 memory rules earned; pending: A1 callback + 109-surface ntm audit dispatch queued at /tmp/dispatch_ntm-surface-audit-bead-file-2026-05-06.md)
+
+**Latest handoff:** `.flywheel/handoffs/2026-05-06-2230-compact-resume-ntm-audit-pivot.md` (2026-05-06T22:30Z post-compact resume + AUDIT-PIVOT: pane 4 109-surface ntm audit is gating; NEW bead authoring PAUSED until audit lands; once delivered, run /flywheel:plan ntm-surface-utilization-migration to decompose; Wave 2-4 of orch-uptime may be reframed/superseded by audit findings; in-flight A3 pane 2 + B2 pane 3 + audit pane 4 all THINKING; /flywheel:learn --review for 1515 unprocessed fuckup rows queued in parallel)
