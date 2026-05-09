@@ -1014,7 +1014,7 @@
       "trauma_class": "codex-skill-name-length"
     }
   ],
-  "rules_body_sha256": "f1a5f13b901d63e4b02449e976e3803b78d440464d0d1881dd410b57ca88275d",
+  "rules_body_sha256": "aaee2ddf0e13012eac5e9500863ff6ec2dc1566a09dde3896c8cc05e6f15f749",
   "schema_version": "agents-canonical-shards/v1",
   "source": "AGENTS.md"
 }
