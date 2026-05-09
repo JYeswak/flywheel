@@ -6613,6 +6613,31 @@ Evidence:
 - Doctrine: `AGENTS.md` L95 worker-stall recovery guidance.
 - Bead: `flywheel-ozha`.
 
+Sibling Classes:
+- `daily-report-missing-integrate-blocker` (`flywheel-qqv5r`) — 4
+  fuckup-log events on 2026-05-04 between 01:25Z and 01:40Z
+  (`fuckup-log.jsonl#L402,L406,L409,L413`), all "INTEGRATE prelude
+  blocked because doctor reports daily_report_missing". This class is
+  the specific INTEGRATE-prelude shape of the parent trauma; this
+  section's Forever-Rule already covers the canonical response (record
+  blocking doctor classes + worker activity proof, route to owner,
+  resume after the doctor signal clears). Companion bead: `flywheel-qqv5r`
+  (Path A merge into this section; bead closes as superseded after
+  the cross-link lands). Prior closed sibling `flywheel-vy0t` (2026-05-08)
+  cited canonical AGENTS-CANONICAL.md coverage; this Sibling Classes
+  citation gives the L56 doctrine-ladder dedup heuristic a discoverable
+  INCIDENTS surface, post `flywheel-qnkj2`'s repo-local INCIDENTS.md
+  path-search fix.
+- Cross-gate sibling (different gate, same root cause):
+  `daily_report_missing_dispatch_gate` covered at
+  `INCIDENTS.md#daily_report_missing_dispatch_gate` (line 7317, sister
+  bead `flywheel-u5ml3`, 2026-05-09). That class is the dispatch-gate
+  shape; canonical L-rule coverage is L91 + L92 per that section's
+  Forever-Rule. Both classes share the "doctor signal
+  `daily_report_missing` as a blocker" trauma family but resolve via
+  different doctrine paths (this section for INTEGRATE prelude
+  variant; L91+L92 for dispatch-gate variant).
+
 ## dispatch-health-and-capacity-gate
 
 Date: 2026-05-08

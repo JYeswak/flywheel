@@ -1,0 +1,33 @@
+# Path A patch — append Sibling Classes block to existing INCIDENTS section
+# `## integrate-prelude-blocked` (line 6563), citing
+# `daily-report-missing-integrate-blocker` as a specific blocker shape
+# already covered by that section.
+#
+# Apply: insert AFTER the last `- Bead:` bullet of the
+# integrate-prelude-blocked section (around line ~6614, before the next
+# `## dispatch-health-and-capacity-gate` heading at line 6616).
+#
+# Source: flywheel-qqv5r evidence pack
+# Sister section author: flywheel-ozha (per the Fix Applied/Status note
+# at the top of the integrate-prelude-blocked section).
+
+# --- Insertion content ---
+
+Sibling Classes:
+- `daily-report-missing-integrate-blocker` (`flywheel-qqv5r`) — 4
+  fuckup-log events on 2026-05-04 between 01:25Z and 01:40Z
+  (`fuckup-log.jsonl#L402,L406,L409,L413`), all "INTEGRATE prelude
+  blocked because doctor reports daily_report_missing". This class is
+  the specific shape "doctor signal `daily_report_missing` is the
+  prelude blocker"; the parent `integrate-prelude-blocked` Forever-Rule
+  already covers the canonical response (record blocking doctor
+  classes + worker activity proof, route to owner, resume after
+  signal clears).
+- Companion bead: `flywheel-qqv5r` (Path A merge into this section;
+  bead closes as superseded after the cross-link lands).
+- Sister bead with related shape: `flywheel-u5ml3`
+  (`daily_report_missing_dispatch_gate`, 4 events, the
+  doctor-signal-blocking-DISPATCH variant of this class). Both
+  classes can coexist as siblings under this section since the
+  Forever-Rule applies uniformly to "daily_report_missing as a
+  prelude/dispatch gate blocker."
