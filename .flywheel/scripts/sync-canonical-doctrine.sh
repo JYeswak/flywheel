@@ -176,6 +176,18 @@ extract_l_rules() {
     "$file" | sort -u
 }
 
+count_rule_shards() {
+  local rules_dir="$1"
+  [[ -d "$rules_dir" ]] || { printf '0\n'; return 0; }
+  find "$rules_dir" -maxdepth 1 -type f -name 'L*.md' -print 2>/dev/null | wc -l | tr -d ' '
+}
+
+count_file_lines() {
+  local file="$1"
+  [[ -f "$file" ]] || { printf '0\n'; return 0; }
+  wc -l <"$file" | tr -d ' '
+}
+
 extract_root_block() {
   local file="$1" out="$2"
   [[ -f "$file" ]] || return 1
@@ -495,7 +507,8 @@ ERRORS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-errors.XXXXXX")"
 MANAGED_DETAILS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-managed-details.XXXXXX")"
 SECURITY_SETTINGS_DETAILS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-security-settings.XXXXXX")"
 SOURCE_RULES_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-source-rules.XXXXXX")"
-trap 'rm -f "$TARGETS_FILE" "$REPOS_FILE" "$DETAILS_FILE" "$ROOT_DETAILS_FILE" "$WRITES_FILE" "$ERRORS_FILE" "$MANAGED_DETAILS_FILE" "$SECURITY_SETTINGS_DETAILS_FILE" "$SOURCE_RULES_FILE"' EXIT
+RULE_SHARD_DRIFT_DETAILS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-rule-shard-drift.XXXXXX")"
+trap 'rm -f "$TARGETS_FILE" "$REPOS_FILE" "$DETAILS_FILE" "$ROOT_DETAILS_FILE" "$WRITES_FILE" "$ERRORS_FILE" "$MANAGED_DETAILS_FILE" "$SECURITY_SETTINGS_DETAILS_FILE" "$SOURCE_RULES_FILE" "$RULE_SHARD_DRIFT_DETAILS_FILE"' EXIT
 
 collect_targets "$TARGETS_FILE"
 : >"$DETAILS_FILE"
@@ -504,6 +517,7 @@ collect_targets "$TARGETS_FILE"
 : >"$ERRORS_FILE"
 : >"$MANAGED_DETAILS_FILE"
 : >"$SECURITY_SETTINGS_DETAILS_FILE"
+: >"$RULE_SHARD_DRIFT_DETAILS_FILE"
 : >"$REPOS_FILE"
 extract_l_rules "$SOURCE" >"$SOURCE_RULES_FILE"
 
@@ -543,6 +557,9 @@ SECURITY_SETTINGS_TARGET_COUNT=0
 SECURITY_SETTINGS_DRIFTED_COUNT=0
 SECURITY_SETTINGS_SYNCED_COUNT=0
 SECURITY_SETTINGS_BLOCKED_COUNT=0
+RULE_SHARD_DRIFT_COUNT=0
+RULE_SHARD_MIN_COUNT="${SYNC_RULE_SHARD_MIN_COUNT:-99}"
+RULE_SHARD_THIN_CANONICAL_LINES="${SYNC_RULE_SHARD_THIN_CANONICAL_LINES:-142}"
 ERROR_COUNT=0
 SCHEMA_SOURCE_HASH="$(sha256_file "$STORAGE_OVERRIDE_SCHEMA_SOURCE")"
 IDENTITY_DEFERRAL_SCHEMA_HASH="$(sha256_file "$IDENTITY_DEFERRAL_SCHEMA_SOURCE")"
@@ -827,7 +844,31 @@ while IFS= read -r repo; do
   fi
 done <"$REPOS_FILE"
 
-DRIFTED_COUNT=$((CANONICAL_DRIFTED_COUNT + ROOT_DRIFTED_COUNT + SCHEMA_DRIFTED_COUNT + IDENTITY_DEFERRAL_SCHEMA_DRIFTED_COUNT + BEAD_MINING_DRIFTED_COUNT + SECURITY_SETTINGS_DRIFTED_COUNT + MANAGED_FILE_DRIFTED_COUNT))
+while IFS= read -r repo; do
+  [[ -n "$repo" ]] || continue
+  canonical_target="$repo/.flywheel/AGENTS-CANONICAL.md"
+  rules_target_dir="$repo/.flywheel/rules"
+  canonical_lines="$(count_file_lines "$canonical_target")"
+  rule_shards="$(count_rule_shards "$rules_target_dir")"
+  manifest_present=false
+  [[ -f "$rules_target_dir/MANIFEST.json" ]] && manifest_present=true
+  if [[ "$canonical_lines" -eq "$RULE_SHARD_THIN_CANONICAL_LINES" && "$rule_shards" -lt "$RULE_SHARD_MIN_COUNT" ]]; then
+    RULE_SHARD_DRIFT_COUNT=$((RULE_SHARD_DRIFT_COUNT + 1))
+    jq -cn \
+      --arg repo "$repo" \
+      --arg canonical_target "$canonical_target" \
+      --arg rules_dir "$rules_target_dir" \
+      --argjson canonical_lines "$canonical_lines" \
+      --argjson rule_shards "$rule_shards" \
+      --argjson min_shards "$RULE_SHARD_MIN_COUNT" \
+      --argjson manifest_present "$manifest_present" \
+      '{repo:$repo,canonical_target:$canonical_target,rules_dir:$rules_dir,canonical_lines:$canonical_lines,rule_shards:$rule_shards,min_shards:$min_shards,manifest_present:$manifest_present,status:"drifted"}' >>"$RULE_SHARD_DRIFT_DETAILS_FILE"
+  fi
+done <"$REPOS_FILE"
+
+RULE_SHARD_DRIFT_DETAILS="$(jq -s -c '.' "$RULE_SHARD_DRIFT_DETAILS_FILE")"
+
+DRIFTED_COUNT=$((CANONICAL_DRIFTED_COUNT + ROOT_DRIFTED_COUNT + SCHEMA_DRIFTED_COUNT + IDENTITY_DEFERRAL_SCHEMA_DRIFTED_COUNT + BEAD_MINING_DRIFTED_COUNT + SECURITY_SETTINGS_DRIFTED_COUNT + MANAGED_FILE_DRIFTED_COUNT + RULE_SHARD_DRIFT_COUNT))
 SYNCED_COUNT=$((CANONICAL_SYNCED_COUNT + ROOT_SYNCED_COUNT + SCHEMA_SYNCED_COUNT + IDENTITY_DEFERRAL_SCHEMA_SYNCED_COUNT + BEAD_MINING_SYNCED_COUNT + SECURITY_SETTINGS_SYNCED_COUNT + MANAGED_FILE_SYNCED_COUNT))
 
 STATUS="ok"
@@ -904,6 +945,10 @@ RESULT="$(jq -nc \
   --argjson security_settings_blocked_count "$SECURITY_SETTINGS_BLOCKED_COUNT" \
   --argjson security_settings_details "$SECURITY_SETTINGS_DETAILS" \
   --argjson security_rollout_receipt "$SECURITY_ROLLOUT_RECEIPT" \
+  --argjson rule_shard_drift_count "$RULE_SHARD_DRIFT_COUNT" \
+  --argjson rule_shard_min_count "$RULE_SHARD_MIN_COUNT" \
+  --argjson rule_shard_thin_canonical_lines "$RULE_SHARD_THIN_CANONICAL_LINES" \
+  --argjson rule_shard_drift_details "$RULE_SHARD_DRIFT_DETAILS" \
   --arg doctrine_docs_source_dir "$DOCTRINE_DOCS_SOURCE_DIR" \
   --arg rules_source_dir "$RULES_SOURCE_DIR" \
   --arg shared_script_source_dir "$SHARED_SCRIPT_SOURCE_DIR" \
@@ -976,6 +1021,14 @@ RESULT="$(jq -nc \
       },
       rollout_receipt:$security_rollout_receipt
     },
+    rule_shard_drift:{
+      drifted_count:$rule_shard_drift_count,
+      min_shards:$rule_shard_min_count,
+      thin_canonical_lines:$rule_shard_thin_canonical_lines,
+      details:$rule_shard_drift_details
+    },
+    rule_shard_drift_count:$rule_shard_drift_count,
+    rule_shard_drift_repos:($rule_shard_drift_details | map(.repo)),
     doctrine_docs_source_dir:$doctrine_docs_source_dir,
     rules_source_dir:$rules_source_dir,
     shared_script_source_dir:$shared_script_source_dir,
