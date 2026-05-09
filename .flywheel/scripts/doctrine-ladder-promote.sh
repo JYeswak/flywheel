@@ -39,6 +39,7 @@ PY
 default_incident_paths() {
   printf '%s\n' "$HOME/.claude/skills/.flywheel/INCIDENTS.md"
   printf '%s\n' "$HOME"/.claude/skills/*/references/INCIDENTS.md
+  printf '%s\n' "$REPO/INCIDENTS.md"
   printf '%s\n' "$REPO/AGENTS.md"
 }
 
