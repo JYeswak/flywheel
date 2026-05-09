@@ -27,3 +27,10 @@ Probe:
 ```bash
 bash .flywheel/receipts/flywheel-fg2v5/l112-probe.sh
 ```
+
+## Four-Lens Self-Grade
+
+- brand: 8/10. The surface is operator-shaped and scoped to the canary pane.
+- sniff: 8/10. The wrapper is dry-run first, emits health/version evidence, and avoids raw pane substrate.
+- jeff: 8/10. It adds a boring executable primitive plus a regression test rather than another prose-only recovery note.
+- public: 8/10. Three Judges check: a skeptical operator sees the exact NTM plan, a maintainer gets fake-NTM coverage, and a future worker gets a re-runnable L112 probe.
