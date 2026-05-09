@@ -7514,3 +7514,73 @@ already covered. A future improvement would be extending
 covered at the L-rule layer (per `feedback_calibrate_test_to_actual_contract_before_filing_upstream`:
 calibrate the gate to the actual coverage surface rather than treat the
 known-good state as a bug).
+
+## dcg-blocked-temp-cleanup — DCG canonical primitive working correctly (2026-05-09)
+
+Date: 2026-05-09
+
+Class: `dcg-blocked-temp-cleanup`
+
+Event Count: 3 events in 7d (2026-05-04T20:23:17Z, 2026-05-05T00:47:39Z,
+2026-05-09T00:02:55Z); all workers pivoted safely after DCG block.
+
+Severity: low (DCG firing IS the intended safety; no substrate damage in any event)
+
+Cost: workers attempted recursive-force deletion on scratch/temp dirs and DCG
+(Destructive Command Guard) blocked execution. Each event added 30-60s of
+pivot time as the worker rewrote the cleanup to use either a
+unique-temp-dir-without-deletion pattern OR the canonical
+`flywheel-cleanup-scratch` / `.flywheel/scripts/cleanup-scratch.sh --apply --json
+$WORK_TMP` helper. No data lost or substrate corrupted.
+
+Root Cause: workers don't reflexively reach for the canonical scratch-cleanup
+helper; bare recursive-force deletion of `$WORK_TMP` is muscle memory. DCG is
+the canonical safety surface and IS firing correctly. The trauma is the worker
+pattern, not a substrate fault.
+
+Forever-Rule (already in worker-tick contract step 8b + memory): every
+dispatch that creates a `WORK_TMP` scratch directory MUST close it via the
+canonical helper:
+- `flywheel-cleanup-scratch --apply --json "$WORK_TMP"` (preferred)
+- OR `.flywheel/scripts/cleanup-scratch.sh --apply --json "$WORK_TMP"` (fallback)
+- NEVER bare recursive-force-delete on `$WORK_TMP` in worker reports, dispatch
+  packets, commit messages, or `br create -d` prose — DCG will block execution
+  and the redirect-prose may also trip prose-trigger blocks (see
+  `feedback_dcg_prose_trigger_strip_dangerous_substrings`).
+
+Memory references:
+- `feedback_dcg_prose_trigger_strip_dangerous_substrings.md` — DCG matches
+  dangerous shell substrings even inline in br/ntm prose; rephrase before submit.
+- `feedback_retention_policy_by_default_for_accreting_surfaces.md` — every
+  accreting surface gets launchd/cron retention at creation, not after-the-fact
+  recursive-force cleanup. Long-term solution to the underlying motivation.
+
+Fix Applied/Status: No source-code change needed. DCG is working as designed.
+Workers' canonical pivot pattern (use cleanup-scratch.sh or skip deletion
+entirely) is already documented in worker-tick contract step 8b. This INCIDENTS
+entry makes the doctrine visible to the L56 ladder probe so it stops re-firing
+on already-canonical-handled classes.
+
+Recurrence Prevention: Donella leverage point #6 (information flow) — the
+ladder probe now sees coverage in INCIDENTS.md and skips. Donella #5 (rules) —
+DCG is the safety surface and remains untouched. Donella #2 (buffer size) —
+canonical scratch-cleanup helpers + memory rules are the worker-side knobs.
+`flywheel-vl0c9` (filed by `flywheel-u5ml3` in the prior tick) will eventually
+extend the ladder probe to scan `.flywheel/rules/` too, reducing future
+probe-firing on L-rule-covered classes (this class is INCIDENTS-covered, not
+L-rule-covered).
+
+Evidence:
+- Trauma rows: `~/.local/state/flywheel/fuckup-log.jsonl` 3 rows on
+  2026-05-04T20:23:17Z, 2026-05-05T00:47:39Z, 2026-05-09T00:02:55Z; all
+  `severity=low` and `what_attempted=[]` (DCG fired BEFORE execution).
+- DCG canonical: `~/.claude/skills/dcg/SKILL.md`.
+- Canonical scratch cleanup: `.flywheel/scripts/cleanup-scratch.sh` +
+  `~/.local/bin/flywheel-cleanup-scratch`.
+- Worker contract (already documents the pattern): worker-tick step 8b.
+- Memory: `feedback_dcg_prose_trigger_strip_dangerous_substrings.md`,
+  `feedback_retention_policy_by_default_for_accreting_surfaces.md`.
+- Bead: `flywheel-8io1s` (this dispatch — retry of `f8ebdb` after r1 `ad242e`
+  blocked on peer reservation).
+- Sibling completed today (precedent): `flywheel-u5ml3` (closed; same
+  cross-reference pattern for `daily_report_missing_dispatch_gate`).
