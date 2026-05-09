@@ -138,6 +138,16 @@ socket access, `.env` mounts, and ambient env injection outside the documented
 allow-list. It is not required for synthetic `.env.test` fixtures, redacted
 evidence, or offline docs and schema work that never loads live credentials.
 
+The `agent-security-control/v1` security-control contract is the canonical
+fleet readiness shape for agent worker repos. It binds the schema in
+`.flywheel/validation-schema/v1/agent-security-control.schema.json`, the deny
+template in `.flywheel/security/v1/claude-settings-deny.json`, conformance
+smoke tests, doctor posture fields, redacted scanner output, and
+`canonical-security-allow` override receipts. Use
+`bash tests/security-control-conformance.sh` and
+`bash tests/security-control-fleet-smoke.sh --dry-run` before reporting a repo
+security-clean.
+
 ## Key Runtime Surfaces
 
 | Surface | Location | Purpose |

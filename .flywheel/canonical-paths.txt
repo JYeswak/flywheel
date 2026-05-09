@@ -48,6 +48,13 @@ validate_redispatch_discipline_memory	/Users/josh/.claude/projects/-Users-josh-D
 doctrine_memory_wire_tests	tests/doctrine-memory-wire.sh	flywheel-dw5w	Regression checks for L71, README, memory, skill, canonical paths, and shared primitive-name drift.
 doctrine_memory_wire_readme_compat	README	flywheel-dw5w.1	Extensionless README compatibility artifact for B10_AG3 path evidence; canonical operator docs remain README.md.
 doctrine_memory_wire_drift_check_compat	AGENTS/README/memory/skill	flywheel-dw5w.2	Compatibility artifact for B10_AG7 parsed path evidence; executable drift check remains tests/doctrine-memory-wire.sh.
+agent_security_control_schema_v1	.flywheel/validation-schema/v1/agent-security-control.schema.json	flywheel-m0v31	Canonical agent-security-control/v1 security-control schema for sandbox agent worker repos.
+agent_security_control_deny_template	.flywheel/security/v1/claude-settings-deny.json	flywheel-m0v31	Canonical settings deny template consumed by sync-canonical-doctrine and security posture doctor checks.
+agent_security_control_secret_patterns	.flywheel/security/v1/secret-patterns.json	flywheel-oxr6e	Synthetic-only secret pattern corpus for redacted security-control scanner checks.
+agent_security_control_conformance_tests	tests/security-control-conformance.sh	flywheel-1gyiv	Conformance harness proving every agent-security-control/v1 MUST clause, strict fixture failure, redaction recall, precision, and validation-learn routing.
+agent_security_control_fleet_smoke	tests/security-control-fleet-smoke.sh	flywheel-1gyiv	Dry-run fleet smoke wrapper for security-control conformance without durable artifact mutation.
+agent_security_control_doctrine_l74	AGENTS.md	flywheel-03uki	Canonical L74 doctrine for AGENT-SECURITY-DENY-RULES-CANONICAL.
+agent_security_control_skill_draft	.flywheel/PLANS/agent-security-controls-fleet-wide-2026-05-04/skill-draft-agent-security-control.md	flywheel-03uki	Plan-local skill draft request for skillos publication of reusable agent-security-control practice.
 validation_learn_router	/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop	flywheel-kscr	flywheel-loop validation-learn routes validation receipts into /flywheel:learn/fuckup-log exactly once.
 validation_learn_ledger	.flywheel/validation-learn-ledger.jsonl	flywheel-kscr	Repo-local dedupe ledger for validation receipt learn routing; created on first --apply route.
 validation_learn_tests	tests/validation-learn-routing.sh	flywheel-kscr	Fixture-backed tests for failed validation dedupe, positive ignore routing, promote ladder routing, and skill-extension routing.
