@@ -1,0 +1,24 @@
+{
+  "incidents_compat": {
+    "path": "/Users/josh/Developer/flywheel/INCIDENTS",
+    "exists": true,
+    "bytes": 973,
+    "mtime": "2026-05-04T09:35:21Z"
+  },
+  "incidents_md_canonical": {
+    "path": "/Users/josh/Developer/flywheel/INCIDENTS.md",
+    "exists": true,
+    "bytes": 335843,
+    "mtime": "2026-05-09T12:41:30Z"
+  },
+  "skill_incidents_md": {
+    "path": "/Users/josh/.claude/skills/.flywheel/INCIDENTS.md",
+    "exists": true,
+    "bytes": 136172,
+    "mtime": "2026-05-09T12:57:12Z"
+  },
+  "ts": "2026-05-09T13:19:34Z",
+  "verdict": "all_three_present",
+  "bead_claim_path_missing_for": "/Users/josh/Developer/flywheel/INCIDENTS",
+  "bead_claim_now_obsolete": true
+}
