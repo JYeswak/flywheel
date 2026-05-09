@@ -8184,3 +8184,73 @@ Evidence:
 
 Follow-up Bead Filed (separate dispatch): None — the underlying class is already covered by the parent incident + escalator. The `default_incident_paths()` extension to scan `.flywheel/rules/*.md` AND the synonym-aware class match are documented as future improvements in the wb6oc + u5ml3 cross-refs but intentionally not file-and-forget.
 
+## three_q_surface_gap — already covered by L92 (2026-05-09 cross-reference)
+
+Date: 2026-05-09
+
+Class: `three_q_surface_gap`
+
+Event Count: 6 events in 7d (all 2026-05-04T00:16-00:20Z + 2026-05-04T07:35-07:39Z); zero recurrence in 5 days.
+
+Severity: low (validation-receipt-route=review surfacing the surface-audit's own findings; the audit IS the system working).
+
+Cost: `three-q-surface-audit.py` validation receipts marked `status=fail
+route=review` 6 times in a 15-minute window on 2026-05-04. Each receipt
+identified a flywheel surface that lacks one of the three Three-Q dimensions
+(VALIDATED, DOCUMENTED, SURFACED). The trauma is the OPERATIONAL COST of
+investigating each surfaced gap, not data damage.
+
+Root Cause: Three-Q surface audit is a discovery primitive. When it routes a
+finding to `review`, the finding is informational data the orchestrator should
+process per L92 (audit-findings-route-by-data) — convert findings into
+follow-up beads or wave them per severity, NOT treat the route=review as a
+synthesis-blocker.
+
+Forever-Rule (already shipped, 2026-05-04):
+
+- **L92** (`L046-L92-audit-findings-route-by-data.md`): explicitly cites
+  `three_q_surface_gap` 6 rows in its Why section. Doctrine: audit findings
+  are routed by severity/composite/coverage/disposition; route=review
+  findings produce mitigation beads or wave-progression based on data, not
+  on Joshua-decision pause. The validator check is
+  `jq -e '(.critical_count == 0) and (.composite >= 7) and ((.lens_disagreement // 0) < 2) and (.coverage_converged == true)'`.
+
+Canonical disposition for Three-Q surface gap findings (per L92):
+
+1. **route=review with composite >= 7 + zero criticals** — auto-advance, NO
+   Joshua-decision pause; convert finding into a mitigation bead with severity
+   inherited from the audit composite.
+2. **route=review with criticals or low composite** — file P1 first-wave
+   mitigation bead; orch dispatches it in same tick (per L70).
+3. **NEVER let `status=fail route=review` stall the synthesis pipeline** —
+   `route=review` is data, not a Joshua-gate.
+
+Fix Applied/Status: Doctrine landed 2026-05-04 in L92 (same day as the 6
+events). Zero recurrence since suggests L92 enforcement took. This INCIDENTS
+entry makes the doctrine visible to the L56 ladder probe so it stops
+re-firing.
+
+Recurrence Prevention: Donella leverage point #5 (rules) — L92 is the
+canonical rule. Donella #6 (information flow) — INCIDENTS cross-reference
+makes the ladder probe see the coverage. `flywheel-vl0c9` (filed by
+`flywheel-u5ml3`) tracks the systemic ladder-probe improvement so future
+L-rule-covered classes don't need per-class INCIDENTS edits.
+
+Evidence:
+- Trauma rows: `~/.local/state/flywheel/fuckup-log.jsonl` 6 rows from
+  2026-05-04T00:16:51Z, 00:17:17Z, 00:18:57Z, 00:20:25Z, 07:35:33Z, 07:39:35Z;
+  all `validation receipt three-q-surface-audit status=fail route=review`.
+- L92 rule: `.flywheel/rules/L046-L92-audit-findings-route-by-data.md`
+  (Why section explicitly cites this trauma class with row range).
+- Audit script: `.flywheel/scripts/three-q-surface-audit.py`.
+- This dispatch (6th cross-reference today): `flywheel-v8yr7`.
+- Sibling cross-references today (5-prior-instance precedent): `flywheel-u5ml3`,
+  `flywheel-8io1s`, `flywheel-2xdi.40`, `flywheel-l7ssi`, `flywheel-wwinm`.
+- Systemic followup (already filed): `flywheel-vl0c9` (extend ladder probe
+  to scan `.flywheel/rules/`).
+- Memory cross-refs:
+  `feedback_audit_findings_are_data_decided_not_joshua_gated.md`,
+  `feedback_three_audit_questions_per_surface.md`,
+  `feedback_data_decides_not_human_meatpuppet.md`,
+  `feedback_convergent_evolution_is_canonical_signal.md`.
+
