@@ -256,7 +256,7 @@ receipt = {
         "session": "flywheel",
         "pane": 2,
         "kind": "DONE",
-        "received_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "received_at": "2026-05-09T01:37:27Z",
         "raw_ref": "security-control conformance harness pass",
     },
     "status": status,
