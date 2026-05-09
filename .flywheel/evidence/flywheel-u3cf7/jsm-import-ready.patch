@@ -1,3 +1,35 @@
+# JSM-import-ready patch for flywheel-u3cf7 (Phase 6.2 reshaped)
+# Skill: ~/.claude/skills/.flywheel/ (unmanaged by JSM at dispatch time)
+# Repo head pre: a8e26a0; post: this commit
+# Date: 2026-05-09
+
+## Changeset summary
+
+### File 1 (edit): ~/.claude/skills/.flywheel/lib/portable/core.d/part-02-portable_doctor.sh
+
+Two regions edited:
+
+(a) Top-of-file source-helper preamble (lines 1-9 pre, 1-12 post):
+- Updated header comment to name both Phase 6.1 (luzk7) and 6.2 (u3cf7) extractions.
+- Added `source $_PD_HELPER_DIR/02-doctor-field-aggregator.sh` paired with the
+  existing `source $_PD_HELPER_DIR/01-arg-parse.sh` from luzk7.
+- Updated the descriptive comment to name the two coexisting patterns
+  (bash dynamic scoping vs functional shell).
+
+(b) Inline jq aggregator block (lines 1689-1791 pre, replaced with 3 lines post):
+- Removed the 99-line inline jq invocation: `local agents_canonical=...`,
+  `[[ -f $agents_canonical ]] || agents_canonical=""`, then the
+  `packet="$(jq -c --arg agents_canonical ... ' ... ' <<<"$packet")"` block
+  containing `def lrule()`, `def primitive()`, and Sections A-G.
+- Replaced with a 3-line call: comment + single-line invocation of
+  `_portable_doctor_apply_field_aggregator "$packet"` capturing the result
+  back into `$packet`.
+
+Net line count: 1803 -> 1705 (-98 lines in entry).
+
+### File 2 (create): ~/.claude/skills/.flywheel/lib/portable/core.d/portable_doctor.d/02-doctor-field-aggregator.sh
+
+New file, 121 lines, content embedded below.
 
 === NEW FILE: portable_doctor.d/02-doctor-field-aggregator.sh ===
 # 02-doctor-field-aggregator.sh — doctor packet field aggregator for portable_doctor()
