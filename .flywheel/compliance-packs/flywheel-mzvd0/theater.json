@@ -1,0 +1,10 @@
+{
+  "schema_version": "theater-check/v1",
+  "task_id": "flywheel-mzvd0-4746c0",
+  "status": "pass",
+  "checks": [
+    "unsafe fixtures reject concrete prohibited Docker surfaces",
+    "hardened fixture proves positive path",
+    "doctor behavior is documented as recommendation, not blanket failure"
+  ]
+}

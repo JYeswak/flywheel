@@ -1,0 +1,15 @@
+{
+  "schema_version": "compliance-pack-manifest/v1",
+  "task_id": "flywheel-mzvd0-4746c0",
+  "bead_id": "flywheel-mzvd0",
+  "generated_at": "2026-05-09T01:28:39Z",
+  "files": [
+    "spec.json",
+    "evidence.json",
+    "compliance.json",
+    "theater.json",
+    "test_depth.json",
+    "scorecard.md",
+    "REPORT.md"
+  ]
+}

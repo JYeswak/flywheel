@@ -1,0 +1,13 @@
+{
+  "schema_version": "compliance-score/v1",
+  "task_id": "flywheel-mzvd0-4746c0",
+  "score": 920,
+  "max_score": 1000,
+  "status": "pass",
+  "deductions": [
+    {
+      "points": 80,
+      "reason": "Container policy is a static conformance profile, not yet wired into doctor runtime automation by this scoped bead."
+    }
+  ]
+}

@@ -104,7 +104,7 @@ Before editing:
 | `.flywheel/PLANS/` | Design plans, research briefs, RCA packets, and dispatch architecture notes. |
 | `.flywheel/handoffs/` | End-of-session handoffs. Read the latest one when resuming orchestration. |
 | `.flywheel/scripts/` | Repo-local helper/probe scripts wired into slash commands or tick steps. |
-| `.flywheel/security/v1/` | Canonical security controls, including the `agent-security-control/v1` schema companion deny template and `canonical-security-allow` override token. |
+| `.flywheel/security/v1/` | Canonical security controls, including the `agent-security-control/v1` schema companion deny template, `container-isolation/v1` prod-credential sandbox profile, and `canonical-security-allow` override token. |
 | `.flywheel/doctrine/` | Doctrine adoption packets and handoff doctrine sources. |
 | `.flywheel/dispatch-log.jsonl` | Dispatch record and callback tracking surface. |
 | `.flywheel/last_closeout_receipt.json` | Latest repo-local loop closeout receipt. |
@@ -130,6 +130,13 @@ tokens, bearer tokens, database URLs, and production `.env*` material. Runtime
 failure fixtures must print redaction labels and variable names only, never raw
 values. Production `.env*` repos must carry a migration receipt or a
 `blocked_by` entry before conformance closeout.
+
+Use `.flywheel/security/v1/container-isolation.md` for prod credentials when a
+task loads production secrets or runs code while live credential material is
+present. The required sandbox rejects privileged mode, host networking, Docker
+socket access, `.env` mounts, and ambient env injection outside the documented
+allow-list. It is not required for synthetic `.env.test` fixtures, redacted
+evidence, or offline docs and schema work that never loads live credentials.
 
 ## Key Runtime Surfaces
 

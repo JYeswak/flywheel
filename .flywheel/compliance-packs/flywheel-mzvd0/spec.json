@@ -1,0 +1,12 @@
+{
+  "schema_version": "compliance-pack-spec/v1",
+  "task_id": "flywheel-mzvd0-4746c0",
+  "bead_id": "flywheel-mzvd0",
+  "title": "fix(security-sandbox): define prod-credential container isolation profile",
+  "acceptance_total": 6,
+  "required_artifacts": [
+    ".flywheel/security/v1/container-isolation.md",
+    "tests/security-container-isolation.sh",
+    "README.md"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": "test-depth/v1",
+  "task_id": "flywheel-mzvd0-4746c0",
+  "status": "pass",
+  "depth": "policy_fixture_and_acceptance",
+  "negative_cases": [
+    "privileged",
+    "host_network",
+    "docker_socket",
+    "env_file",
+    "env_mount",
+    "env_not_allowlisted"
+  ],
+  "positive_cases": [
+    "env_allowlist",
+    "hardened_fixture"
+  ]
+}
