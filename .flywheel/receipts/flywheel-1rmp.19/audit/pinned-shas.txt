@@ -1,0 +1,10 @@
+probe: 3c8c5b621446f7efb0b7b367600d92f2db12d553
+probe-working: 1e049fabfb7ff90e5897f7046edcc49319b817e53b60eec50bdb258049d6aec9
+value-gap-probe: 379baea5926c850bb1c5e09520ddbea16a3f8040
+branch: master
+head: aff62bce137b514e3a8e4a4731e8779e7cc8a907
+ledger-rows:        2
+ledger-newest-ts: 2026-05-09T20:03:57Z
+bead-9-status: ✓ flywheel-1rmp.9 · [value-gap] cross-time-synthesis   [● P3 · CLOSED]
+bead-19-status: ○ flywheel-1rmp.19 · [value-gap] cross-time-synthesis   [● P3 · OPEN]
+dedup-bead-filed: flywheel-t9iva [value-gap-probe] dedup filings against still-open same-dimension beads

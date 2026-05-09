@@ -1,0 +1,35 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-1rmp.19-25e795",
+  "bead": "flywheel-1rmp.19",
+  "disposition": "duplicate-of-flywheel-1rmp.9",
+  "value_gap_dimension": "cross-time-synthesis",
+  "measurement": ".flywheel/scripts/cross-time-synthesis-probe.sh",
+  "surfaced": "yes",
+  "ledger": "~/.local/state/flywheel/cross-time-synthesis.jsonl",
+  "ledger_rows": 2,
+  "ledger_newest_ts": "2026-05-09T20:03:57Z",
+  "score": 870,
+  "max": 1000,
+  "score_basis": "duplicate disposition + structured probe trail + live ledger + L52 dedup-enhancement bead filed (flywheel-t9iva) + Step 4o guardrail preserved + second-occurrence pattern recognition",
+  "cli_canonical": "yes",
+  "rust_clean": "n/a",
+  "python_clean": "n/a",
+  "readme_quality": "n/a",
+  "skill_auto_routes_addressed": {
+    "canonical-cli-scoping": "yes",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "four_lens": {"brand": 9, "sniff": 9, "jeff": 9, "public": 9},
+  "files_reserved": [
+    "/Users/josh/Developer/flywheel/.flywheel/scripts/cross-time-synthesis-probe.sh"
+  ],
+  "evidence_paths": [
+    ".flywheel/receipts/flywheel-1rmp.19/audit/evidence.md",
+    ".flywheel/receipts/flywheel-1rmp.19/audit/ledger-tail.jsonl",
+    ".flywheel/receipts/flywheel-1rmp.19/audit/pinned-shas.txt"
+  ],
+  "beads_filed": ["flywheel-t9iva"]
+}
