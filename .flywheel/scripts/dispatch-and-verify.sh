@@ -113,7 +113,7 @@ print(json.dumps({
 # probe_pane echoes: CLASSIFICATION reason=<reason> state=<state> velocity=<n> content_delta=<bool> changes_delta=<bool>
 probe_pane() {
   local activity_json snapshot_json changes_json changes_count_now changes_hash_now
-  activity_json="$("$NTM_BIN" --robot-activity --session "$SESSION" 2>/dev/null || true)"
+  activity_json="$("$NTM_BIN" --robot-activity="$SESSION" --panes="$PANE" 2>/dev/null || true)"
   if [[ -z "$activity_json" ]]; then
     echo "UNKNOWN reason=activity_unavailable state=UNKNOWN velocity=0 content_delta=false changes_delta=false"
     return
@@ -232,7 +232,7 @@ done
 
 echo "[dispatch-and-verify] FAIL — pane ${SESSION}:${PANE} still stuck after ${MAX_PROBES} probes." >&2
 echo "[dispatch-and-verify] diagnostic dump:" >&2
-"$NTM_BIN" --robot-activity --session "$SESSION" >&2 || true
+"$NTM_BIN" --robot-activity="$SESSION" --panes="$PANE" >&2 || true
 echo "[dispatch-and-verify] pane content failure snapshot: $(pane_snapshot | jq -c . 2>/dev/null || printf 'null')" >&2
 echo "[dispatch-and-verify] ntm changes failure snapshot: $(ntm_changes_snapshot | jq -c . 2>/dev/null || printf 'null')" >&2
 echo "[dispatch-and-verify] ntm conflicts failure snapshot: $(ntm_conflicts_snapshot | jq -c . 2>/dev/null || printf 'null')" >&2
