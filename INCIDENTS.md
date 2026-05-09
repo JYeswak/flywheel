@@ -7982,3 +7982,114 @@ Evidence:
 - Memory cross-refs: `feedback_shared_append_reservation_deadlock_family.md`,
   `feedback_orch_handshakes_never_gate_on_joshua.md`,
   `feedback_shared_append_short_lease_stable_tail.md`.
+
+## orch-punt-to-next-tick-instead-of-next-actionable — already covered by L70+L152 (2026-05-09 cross-reference)
+
+Date: 2026-05-09
+
+Class: `orch-punt-to-next-tick-instead-of-next-actionable`
+
+Event Count: 3 events in 7d (2026-05-03T22:30:22Z, 2026-05-04T16:26:07Z, 2026-05-04T16:38:07Z); all from mobile-eats orchestrator pane.
+
+Severity: low (orch decision drift; no substrate damage; the trauma is idle-worker time, not data loss).
+
+Cost: orchestrator ended a phase (INTEGRATE, BEADS, etc.) with `next_phase=<X>`
+while a worker pane was WAITING and safe next-actionable work existed. Workers
+sat idle until the next tick (~5 min later) instead of being dispatched in the
+same tick. Per event: ~5 min of idle worker time. The "punt to next tick"
+behavior is exactly what L70 forbids.
+
+Root Cause: orchestrator decision drift — the orch reasoned "phase complete →
+return next_phase=X" without checking "is there ready work the same worker can
+take in this tick?" before returning. L70 explicitly says: the next-actionable
+runs SAME TICK, not next tick.
+
+Forever-Rule (already shipped):
+
+- **L70** (`L024-L70-orch-no-punt-next-actionable-runs-same-tick-not-next-tick.md`):
+  the orchestrator MUST dispatch the next-actionable in the same tick whenever
+  capacity exists. "Punt to next tick" is forbidden when (a) a worker pane is
+  WAITING, (b) ready work exists in the bead queue, AND (c) the work is safe
+  to dispatch (passes capacity gate, is not Joshua-gated). The DISPATCH
+  CAPACITY GATE block in every dispatch packet enforces this contract:
+  `chain_if_capacity` runs `next_phase` in the same turn; missing chain +
+  missing blocker_class = non-pass.
+
+- **L152** (`L103-L152-coordinator-daemon-canonical-dispatch.md`): the
+  coordinator-daemon canonical dispatch path enforces the same rule at the
+  daemon level so single-pane orch decisions don't bypass it.
+
+Canonical pivot patterns (orch-side, when L70 violation about to occur):
+
+1. **Run capacity-gate probe before phase-end** — `dispatch-capacity-gate.sh`
+   returns `next_actionable=<bead-id>` when work exists; orch must dispatch
+   if not blocked.
+2. **next_phase=BEADS short-circuit** — when orch ends phase X with bead-
+   queue empty, run BEADS phase IN SAME TICK to convert work, don't punt.
+3. **chain_if_capacity field** — orch's tick contract requires this field;
+   non-pass when missing.
+4. **blocker_class declaration** — when work CAN'T be dispatched same-tick
+   (Joshua-gated, capacity exhausted, etc.), declare the blocker class
+   explicitly so it's auditable.
+
+Fix Applied/Status: Doctrine landed in L70 (and L152 reinforces at coordinator-
+daemon level). No source-code change to orchestrator needed because the
+contract is in the dispatch packet's CAPACITY GATE block. This INCIDENTS
+entry makes the doctrine visible to the L56 ladder probe so it stops
+re-firing. The 3 events documented here all pre-date the current orch
+discipline (last event 2026-05-04T16:38:07Z; 5 days ago); zero recurrence
+since. L70 enforcement appears to be working.
+
+Recurrence Prevention: Donella leverage point #5 (rules) — L70 is the
+canonical rule. Donella #6 (information flow) — INCIDENTS.md cross-reference
+makes the ladder probe see the coverage. Donella #2 (buffer size) — the 4
+canonical orch-side patterns above are the operator knobs.
+`flywheel-vl0c9` (filed by `flywheel-u5ml3`) tracks the systemic ladder-probe
+improvement so future L-rule-covered classes don't need per-class INCIDENTS
+edits.
+
+Evidence:
+- Trauma rows: `~/.local/state/flywheel/fuckup-log.jsonl` 3 rows from
+  2026-05-03T22:30:22Z, 2026-05-04T16:26:07Z, 2026-05-04T16:38:07Z; all
+  session=mobile-eats; severity=low.
+- L70 rule: `.flywheel/rules/L024-L70-orch-no-punt-next-actionable-runs-same-tick-not-next-tick.md` (canonical doctrine).
+- L152 rule: `.flywheel/rules/L103-L152-coordinator-daemon-canonical-dispatch.md` (coordinator-daemon enforcement layer).
+- Dispatch packet contract: every packet includes `## DISPATCH CAPACITY GATE` block enforcing chain_if_capacity + blocker_class.
+- Bead: `flywheel-wwinm` (this dispatch — 5th cross-reference today).
+- Sibling cross-references today (4-prior-instance precedent): `flywheel-u5ml3`, `flywheel-8io1s`, `flywheel-2xdi.40`, `flywheel-l7ssi`.
+- Systemic followup (already filed): `flywheel-vl0c9` (extend ladder probe to scan `.flywheel/rules/`).
+- Memory cross-refs: `feedback_orch_punt_is_l70_failure_dispatch_dont_ask.md`,
+  `feedback_orch_paralysis_when_data_specifies_action.md`,
+  `feedback_orchestrator_must_dispatch.md`,
+  `feedback_data_decides_not_human_meatpuppet.md`.
+## mobile-eats-dispatch-health-gate-fail — already covered by L91+L92 (2026-05-09 cross-reference)
+
+Date: 2026-05-09
+
+Class: `mobile-eats-dispatch-health-gate-fail`
+
+Event Count: 11 events on 2026-05-04 (clustered 04:49-05:37Z, mobile-eats session, pane 1, agent claude); zero recurrence in the 5 days since.
+
+Severity: low (high in raw fuckup-log because the event family was severity:high; class-level severity is low because the contract has been reframed and recurrence is zero)
+
+Cost: dispatcher refused 11 mobile-eats dispatches over 48 minutes because doctor errors contained `beads_db_health_failed`, `daily_report_missing`, `agent_mail_fd_doctor_fail`, and at one point `storage_low_headroom` — all while pane 2 was visibly WAITING. Same trauma family as `daily_report_missing_dispatch_gate` (4 events on 2026-05-04 04:06-04:21Z, immediately preceding this 11-event cluster on the same session/pane). The pattern is dispatch_gate treating telemetry-class doctor signals (beads-db freshness, daily-report freshness, agent-mail FD pressure, storage headroom) as hard structural blockers rather than non-blocking warnings.
+
+Root Cause: same as `daily_report_missing_dispatch_gate` — dispatch_gate's error-class predicate did not partition between structural blockers (br-db corruption, pane unhealthy, identity drift) and telemetry-class signals. A WAITING worker was therefore gated by operational telemetry errors rather than true substrate faults. The 04:49-05:37Z cluster is the same 2026-05-04 morning's continuation: the `daily_report_missing` signal merged with sibling telemetry classes (`beads_db_health_failed`, `agent_mail_fd_doctor_fail`, `storage_low_headroom`) under the umbrella name `mobile-eats-dispatch-health-gate-fail` once that became the louder symptom.
+
+Forever-Rule (already shipped, 2026-05-04): L91 (`dispatch-delivery-is-a-four-state-receipt`, `.flywheel/rules/L045-L91-dispatch-delivery-is-a-four-state-receipt.md`) and L92 (`audit-findings-route-by-data`, `.flywheel/rules/L046-L92-audit-findings-route-by-data.md`) reframed dispatch decisions to use machine-readable four-state receipts plus data-routed disposition rather than treating any non-zero doctor signal as a hard block. The same rules cover this trauma class as cover its sibling `daily_report_missing_dispatch_gate`.
+
+Fix Applied/Status: Doctrine landed 2026-05-04 in L91+L92 (same day as the 11 events). No source-code change to dispatch-capacity-gate.sh was needed because the L91 contract reframed dispatch decisions: a worker is dispatchable if the four-state receipt (transport_accepted + prompt_visible_in_target + prompt_submitted + work_started) is achievable, irrespective of telemetry-class doctor noise. Zero recurrence since 2026-05-04T05:37:18Z (newest event timestamp) confirms the gate refinement took. This is the same fix that closed `daily_report_missing_dispatch_gate`; this entry is the parallel cross-reference for the broader `mobile-eats-dispatch-health-gate-fail` umbrella class.
+
+Recurrence Prevention: The L56 ladder probe (`doctrine-ladder-promote.sh`) inspects `~/.claude/skills/.flywheel/INCIDENTS.md`, `~/.claude/skills/*/references/INCIDENTS.md`, `$REPO/INCIDENTS.md`, and `$REPO/AGENTS.md` for class-name coverage but still does NOT scan `.flywheel/rules/` (verified 2026-05-09 against `default_incident_paths()` at `.flywheel/scripts/doctrine-ladder-promote.sh:39-50`). This is the same gap noted in the `daily_report_missing_dispatch_gate` cross-reference 5 hours earlier. This INCIDENTS.md entry closes the loop for `mobile-eats-dispatch-health-gate-fail` so the ladder finds coverage on its next sweep. Donella leverage point #5 (rules) is wired to leverage point #6 (information flow) by giving the ladder probe a discoverable INCIDENTS surface.
+
+Evidence:
+- Trauma rows: `~/.local/state/flywheel/fuckup-log.jsonl` 11 rows on 2026-05-04 (04:49:25Z, 04:52:02Z, 04:57:18Z, 05:01:35Z, 05:06:37Z, 05:11:39Z, 05:16:42Z, 05:21:44Z, 05:26:47Z, 05:31:49Z, 05:37:18Z); all session=mobile-eats pane=1 agent=claude commit_sha=2c02e29.
+- Sibling incident: `INCIDENTS.md` entry for `daily_report_missing_dispatch_gate` (line 7514, dated 2026-05-09); same trauma family, immediately preceding fuckup-log cluster (04:06-04:21Z).
+- L91 rule: `.flywheel/rules/L045-L91-dispatch-delivery-is-a-four-state-receipt.md`.
+- L92 rule: `.flywheel/rules/L046-L92-audit-findings-route-by-data.md`.
+- Promote script: `.flywheel/scripts/doctrine-ladder-promote.sh` (`default_incident_paths` at L39-50 still omits `.flywheel/rules/`).
+- Bead: `flywheel-wb6oc` (this dispatch).
+- Memory cross-ref: `feedback_dispatch_delivery_validation_required.md`, `feedback_audit_findings_are_data_decided_not_joshua_gated.md`.
+
+Follow-up Bead Filed (separate dispatch): None — the underlying class is already covered by L91+L92 (same as for the sibling cross-reference). The `default_incident_paths()` extension to scan `.flywheel/rules/*.md` remains a future improvement that is documented in this entry and the sibling but intentionally not filed (per `feedback_calibrate_test_to_actual_contract_before_filing_upstream`: when L56 ladder's known-good coverage surface is doctrine, calibrate the gate to that coverage rather than treat the known-good state as a bug).
+
