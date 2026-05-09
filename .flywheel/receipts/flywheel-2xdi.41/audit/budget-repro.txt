@@ -1,0 +1,51 @@
+Reproduction script for the gap-hunt-probe wired-but-cold 4MB-budget false-positive.
+Run from any flywheel checkout against ~/.local/state/flywheel.
+
+```python
+import time
+from pathlib import Path
+
+state = Path.home() / '.local/state/flywheel'
+cutoff = time.time() - 30 * 86400
+files = sorted([p for p in state.glob('*.jsonl')
+                if p.stat().st_mtime >= cutoff and p.name != 'gap-hunt.jsonl'])
+
+budget = 4_000_000
+used = 0
+ledger_names_kept, ledger_names_dropped = [], []
+fuckup_in_kept_text = False
+fuckup_in_kept_names = False
+
+for p in files:
+    name = p.name
+    sz = p.stat().st_size
+    text_size = min(sz, max(0, budget - used))
+    if text_size <= 0:
+        ledger_names_dropped.append(name)
+        continue
+    ledger_names_kept.append(name)
+    if 'fuckup' in name:
+        fuckup_in_kept_names = True
+    chunk = p.read_text(errors='replace')[:text_size]
+    if 'fuckup' in chunk:
+        fuckup_in_kept_text = True
+    used += len(chunk)
+
+print('kept_count={} dropped_count={} bytes_used={}'.format(
+    len(ledger_names_kept), len(ledger_names_dropped), used))
+print('fuckup_in_kept_names={} fuckup_in_kept_text={}'.format(
+    fuckup_in_kept_names, fuckup_in_kept_text))
+```
+
+Observed output 2026-05-09T20:09Z:
+```
+kept_count=12 dropped_count=97 bytes_used=4000000
+fuckup_in_kept_names=False fuckup_in_kept_text=False
+fuckup-files:
+  DROPPED: fuckup-log.jsonl
+  DROPPED: fuckup-processed.jsonl
+```
+
+Both fuckup ledgers exist with today's mtime but their NAMES are dropped from
+ledger_text because the alphabetical pre-cursors (agents-md-fleet-propagation
+@1.8MB, br-db-corruption-monitor @991KB, etc.) consume the 4MB budget first.

@@ -1,0 +1,10 @@
+subject-script: ~/.claude/skills/.flywheel/lib/fuckup.sh
+subject-mtime: 2026-05-07T18:33:54Z
+subject-line-count:      307
+wiring-evidence: ~/.claude/skills/.flywheel/lib/portable/core.d/part-02-portable_doctor.sh:614 calls fuckup_triage_compute_json
+branch: master
+head: fd7dd3619747339ff4b799fbc50396306a3ad13d
+gap-hunt-probe-sha: 58e297d696af60dde10e3730ed8423b9f1e47919
+follow-up-bead-filed: flywheel-7h3om [gap-hunt-probe] wired-but-cold detector false-positive when 4MB ledger budget caps
+fuckup-ledgers-present-but-dropped: fuckup-log.jsonl (4.8MB, mtime 2026-05-09T13:37Z), fuckup-processed.jsonl (113KB, mtime 2026-05-09T13:35Z)
+ledger-budget-stats: kept_count=12 dropped_count=97 bytes_used=4000000 (cap)

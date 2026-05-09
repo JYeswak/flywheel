@@ -1,0 +1,32 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-2xdi.41-2b48f6",
+  "bead": "flywheel-2xdi.41",
+  "disposition": "false-positive-from-gap-hunt-probe-4mb-budget-cap",
+  "subject_script": "~/.claude/skills/.flywheel/lib/fuckup.sh",
+  "wired_evidence": "~/.claude/skills/.flywheel/lib/portable/core.d/part-02-portable_doctor.sh:614 calls fuckup_triage_compute_json",
+  "warm_evidence": "~/.local/state/flywheel/fuckup-log.jsonl 4.8MiB mtime 2026-05-09T13:37Z + fuckup-processed.jsonl mtime 2026-05-09T13:35Z",
+  "false_positive_root_cause": "recent_ledger_text 4MB cap drops alphabetically-later ledger names before they enter the substring corpus",
+  "score": 850,
+  "max": 1000,
+  "score_basis": "concrete reproduction script captured, wiring + warmth proven with file:line + mtime evidence, source-fix bead flywheel-7h3om filed with two-pass corpus design + acceptance gates, no foreign-WIP contamination",
+  "cli_canonical": "n/a",
+  "rust_clean": "n/a",
+  "python_clean": "n/a",
+  "readme_quality": "n/a",
+  "skill_auto_routes_addressed": {
+    "canonical-cli-scoping": "n/a",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "four_lens": {"brand": 9, "sniff": 9, "jeff": 9, "public": 9},
+  "files_reserved": [],
+  "files_reserved_reason": "NONE_NO_EDITS receipt-only disposition; foreign-WIP in ~/.claude prevents safe in-place comment edit",
+  "evidence_paths": [
+    ".flywheel/receipts/flywheel-2xdi.41/audit/evidence.md",
+    ".flywheel/receipts/flywheel-2xdi.41/audit/budget-repro.txt",
+    ".flywheel/receipts/flywheel-2xdi.41/audit/pinned-shas.txt"
+  ],
+  "beads_filed": ["flywheel-7h3om"]
+}
