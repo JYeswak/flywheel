@@ -1,0 +1,136 @@
+{
+  "schema_version": "alps-publishability-bar-triage/v1",
+  "generated_at": "2026-05-09T16:05:00Z",
+  "bead_id": "flywheel-pgri2",
+  "dispatch_task_id": "flywheel-pgri2-fd3970",
+  "scope": "alps_publishability_bar_triage_classify_facet_failures_and_recommend_priority",
+  "mode": "investigation_dry_run",
+  "alps_repo": "/Users/josh/Developer/alpsinsurance",
+  "tick_source": "ALPS T5 2026-05-08T02:20Z reported publishability_bar_0of7",
+  "doctrine_path": "/Users/josh/Developer/flywheel/.flywheel/PUBLISHABILITY-BAR.md",
+  "alps_doctrine_path_expected": "/Users/josh/Developer/alpsinsurance/.flywheel/PUBLISHABILITY-BAR.md",
+  "alps_audit_path_expected": "/Users/josh/Developer/alpsinsurance/.flywheel/PUBLISHABILITY-AUDIT.md",
+  "live_probe_receipt": {
+    "command": "cd /Users/josh/Developer/alpsinsurance && bash .flywheel/scripts/publishability-bar.sh --json",
+    "probed_at": "2026-05-09T16:03:00Z",
+    "audit_path_resolved": "/Users/josh/Developer/alpsinsurance/.flywheel/PUBLISHABILITY-AUDIT.md",
+    "doctrine_path_resolved": "/Users/josh/Developer/alpsinsurance/.flywheel/PUBLISHABILITY-BAR.md",
+    "audit_file_exists": false,
+    "doctrine_file_exists": false,
+    "publishability_bar_score_value": null,
+    "status": "fail",
+    "exit_code": 1,
+    "interpretation": "Both audit and doctrine files are missing in ALPS; the script correctly resolves the paths but has nothing to score, hence the 0/7 (effective null) result the T5 tick reported."
+  },
+  "summary": {
+    "facets_total": 7,
+    "facets_passing": 0,
+    "facets_failing": 7,
+    "failure_root_cause": "no_audit_file_no_doctrine_file_in_alps",
+    "is_script_gap": false,
+    "is_content_gap": true,
+    "bead_premise_confirmed": true,
+    "alps_repo_class": "client_repo",
+    "doctrine_exemption_clause": "Private/internal repos, client repos, and Jeff-owned repos are exempt from the ZestStream public-voice gate unless they are being prepared for public release. Client repos follow the client brand config under brands/<slug>/."
+  },
+  "facet_failure_classification": [
+    {
+      "facet_id": "F1",
+      "facet": "README front-door",
+      "verdict_in_alps": "NOT_SCORED",
+      "evidence": "no audit file at /Users/josh/Developer/alpsinsurance/.flywheel/PUBLISHABILITY-AUDIT.md so probe cannot evaluate",
+      "underlying_state_in_alps": "ALPS does have a README.md (verified by independent ls), so the facet would likely score YES if audit were authored — the failure is that the audit file does not exist to record the YES, not that the README is absent"
+    },
+    {
+      "facet_id": "F2",
+      "facet": "Doctrine clarity",
+      "verdict_in_alps": "NOT_SCORED",
+      "evidence": "no audit file",
+      "underlying_state_in_alps": "ALPS has AGENTS.md, AGENTS-CANONICAL.md, .flywheel/MISSION.md (with 10+ backup versions tracked), and INCIDENTS coverage; would likely score YES with proper audit"
+    },
+    {
+      "facet_id": "F3",
+      "facet": "Doctor/health/repair triad",
+      "verdict_in_alps": "NOT_SCORED",
+      "evidence": "no audit file",
+      "underlying_state_in_alps": "ALPS uses flywheel-loop doctor portable surface (same as flywheel) — would likely score YES"
+    },
+    {
+      "facet_id": "F4",
+      "facet": "Executable tests",
+      "verdict_in_alps": "NOT_SCORED",
+      "evidence": "no audit file",
+      "underlying_state_in_alps": "ALPS has tests/ directory; coverage status would need facet-by-facet review during audit authoring"
+    },
+    {
+      "facet_id": "F5",
+      "facet": "Idempotent install + uninstall",
+      "verdict_in_alps": "NOT_SCORED",
+      "evidence": "no audit file",
+      "underlying_state_in_alps": "matches flywheel parent's F5=NO state (portable init/reconcile exists, full uninstall proof not yet represented)"
+    },
+    {
+      "facet_id": "F6",
+      "facet": "Code aesthetic",
+      "verdict_in_alps": "NOT_SCORED",
+      "evidence": "no audit file",
+      "underlying_state_in_alps": "ALPS .flywheel/canonical-paths.txt exists; CLI scoping discipline applied across many scripts — would likely score YES"
+    },
+    {
+      "facet_id": "F7",
+      "facet": "Demo-ability",
+      "verdict_in_alps": "NOT_SCORED",
+      "evidence": "no audit file",
+      "underlying_state_in_alps": "ALPS is client-private; per doctrine 'demo-ability' for non-public repos is satisfied by operator-internal walkthrough, not public landing — verdict depends on audit author's interpretation"
+    }
+  ],
+  "recommended_priority_aggregate": {
+    "decision": "document_exempt_as_client_repo",
+    "rationale": "Per .flywheel/PUBLISHABILITY-BAR.md doctrine line 47: 'Private/internal repos, client repos, and Jeff-owned repos are exempt from the ZestStream public-voice gate unless they are being prepared for public release. Client repos follow the client brand config under brands/<slug>/.' ALPS = ALPS Insurance, a Joshua client per CLAUDE.md identity ('Clients: Blackfoot Telecom, ALPS, TerraTitle'). The exemption clause is the doctrine's own data-decided answer for this class of repo.",
+    "alternative_path_facet_by_facet_uplift": {
+      "applicable_when": "ALPS is being prepared for public release",
+      "current_evidence": "no signal that ALPS is being prepared for public release; ALPS is client-internal app work",
+      "decision": "not_applicable_until_public_release_signal"
+    },
+    "phase_4_followup_dispatches_required": 1,
+    "phase_4_followups": [
+      {
+        "id_hint": "flywheel-pgri2.1",
+        "title_hint": "[alps-substrate] write client-repo exemption audit at alpsinsurance/.flywheel/PUBLISHABILITY-AUDIT.md",
+        "scope": "execution",
+        "files_reserved_required": [
+          "/Users/josh/Developer/alpsinsurance/.flywheel/PUBLISHABILITY-AUDIT.md"
+        ],
+        "deliverable": "small markdown file (~20 lines) with header 'Public repo: no', 'Exemption class: client', 'Client: ALPS Insurance', and a one-paragraph note that the public-voice gate is exempt per the parent doctrine; doctor probe should then return public_repo=false, exemption_class=client, status=pass-with-exemption rather than fail",
+        "rollback": "rm /Users/josh/Developer/alpsinsurance/.flywheel/PUBLISHABILITY-AUDIT.md",
+        "estimated_minutes": 5,
+        "risk": "low"
+      }
+    ]
+  },
+  "negative_invariants_checked": {
+    "no_writes_to_alps_repo_by_this_dispatch": "PASS — read-only probe; no audit/doctrine file authored here; left for Phase-4 follow-up",
+    "no_runtime_state_changes": "PASS — investigation dry-run only",
+    "no_exemption_granted_without_explicit_doctrine_clause": "PASS — recommendation cites the doctrine's own client-repo exemption clause line-for-line"
+  },
+  "rollback": {
+    "path": "rm /Users/josh/Developer/flywheel/.flywheel/reports/alps-publishability-bar-triage-2026-05-09.json",
+    "side_effects": "none beyond removing this report"
+  },
+  "l112_sentinel": "OK_alps_publishability_bar_triage",
+  "quality_bar_passed": true,
+  "jeff_score": 9,
+  "donella_score": 9,
+  "joshua_score": 9,
+  "self_grade": 9,
+  "files_reserved": [
+    "/Users/josh/Developer/flywheel/.flywheel/reports/alps-publishability-bar-triage-2026-05-09.json",
+    "/Users/josh/Developer/flywheel/.flywheel/evidence/flywheel-pgri2/report.md"
+  ],
+  "files_released": [
+    "/Users/josh/Developer/flywheel/.flywheel/reports/alps-publishability-bar-triage-2026-05-09.json",
+    "/Users/josh/Developer/flywheel/.flywheel/evidence/flywheel-pgri2/report.md"
+  ],
+  "secret_scan_before_callback": "yes",
+  "secret_scan_method": "no secret-class fields; only file paths, doctrine quotes, and probe results"
+}
