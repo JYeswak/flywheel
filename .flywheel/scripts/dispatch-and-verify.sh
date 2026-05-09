@@ -180,6 +180,12 @@ for a in data.get("agents", []):
             emit("THINKING_LIVE", "ntm_changes_delta", state, vel, content_delta, changes_delta); sys.exit(0)
         if mode == "permissive" and working and content_delta:
             emit("THINKING_LIVE", "pane_content_delta", state, vel, content_delta, changes_delta); sys.exit(0)
+        if mode == "permissive" and working:
+            # Codex slow-start: agent in working state (THINKING/GENERATING) without yet
+            # emitting velocity, ntm-changes, or pane-content delta. Common when worker is
+            # loading skills, MCP servers, hooks, or fetching context. Treat as OK in
+            # permissive mode — the worker IS dispatched, just not yet observably busy.
+            emit("THINKING_LIVE", "working_state_quiet", state, vel, content_delta, changes_delta); sys.exit(0)
         if working:
             emit("STUCK", "working_state_without_live_signal", state, vel, content_delta, changes_delta); sys.exit(0)
         if state in {"WAITING", "IDLE", "UNKNOWN"}:
