@@ -1,0 +1,123 @@
+
+=== NEW FILE: portable_doctor.d/02-doctor-field-aggregator.sh ===
+# 02-doctor-field-aggregator.sh — doctor packet field aggregator for portable_doctor()
+# Extracted from part-02-portable_doctor.sh per flywheel-u3cf7 (Phase 6.2 reshaped).
+# Replaces the 5 mis-decomposed Section sub-beads (6.2-6.6) per flywheel-rusvs.
+#
+# Pattern: pure functional shell — stdin/stdout transformation. Helper takes the
+# current $packet, runs the entire jq aggregator (15 lrule calls + 11 primitive
+# calls + 5 Section field-blocks for Sections C-G), returns the augmented packet
+# on stdout. NO bash dynamic scoping; NO caller-locals contract; jq is its own
+# scope. Caller pattern: packet="$(_portable_doctor_apply_field_aggregator "$packet")"
+#
+# This is the second of two coexisting Phase-6 extraction patterns:
+# 1. Bash dynamic scoping (used in 6.1 luzk7 + future 6.7/6.8) — for case/if
+#    shell blocks that mutate caller-locals
+# 2. Functional shell (this file) — for stdin/stdout value transformations
+
+_portable_doctor_apply_field_aggregator() {
+    local packet="$1"
+    local agents_canonical="$HOME/Developer/flywheel/.flywheel/AGENTS-CANONICAL.md"
+    [[ -f "$agents_canonical" ]] || agents_canonical=""
+    jq -c \
+      --arg agents_canonical "$agents_canonical" \
+      '
+      # Helper: emit an L-rule field-set with source deferred_until the
+      # rule-violation ledger lands (stock: backlog of L-rule violations).
+      def lrule($n; $stock):
+        {
+          ("l" + $n + "_violation_count_24h"): 0,
+          ("l" + $n + "_violation_status"): "deferred",
+          ("l" + $n + "_last_violation_ts"): null,
+          ("l" + $n + "_canonical_path"): ($agents_canonical + "#L" + $n),
+          ("l" + $n + "_stock_measured"): $stock,
+          ("l" + $n + "_deferred_until"): "lrule_violation_ledger_jsonl"
+        };
+      # Helper: substrate primitive auto-fire surface (stock: liveness of the
+      # self-repair loop declared by L110).
+      def primitive($name):
+        {
+          ($name + "_auto_fire_status"): "dormant",
+          ($name + "_last_fire_ts"): null,
+          ($name + "_deferred_until"): "primitive_auto_fire_ledger_jsonl"
+        };
+      . as $p
+      # --- Section A: L-rule fields (15 rules x 5 = wired) -------------------
+      | . + lrule("29";  "ntm_doctrine_violations")
+      | . + lrule("35";  "tier3_classification_paired_bead")
+      | . + lrule("48";  "substrate_exhaustion_before_escalation")
+      | . + lrule("50";  "socraticode_in_dispatch")
+      | . + lrule("51";  "dispatch_file_reservation_present")
+      | . + lrule("52";  "issues_to_beads_or_no_bead_receipt")
+      | . + lrule("53";  "fuckups_reported_in_callback")
+      | . + lrule("54";  "skill_deep_dive_on_blockers")
+      | . + lrule("55";  "skillos_escalation_for_missing_skills")
+      | . + lrule("56";  "fuckup_to_lrule_promotion_ladder")
+      | . + lrule("57";  "loop_state_marker_not_driver")
+      | . + lrule("61";  "doctrine_landing_wire_into_agents_readme")
+      | . + lrule("70";  "orch_no_punt_same_tick")
+      | . + lrule("108"; "metarule_cache_not_convergence_gate")
+      | . + lrule("110"; "substrate_primitives_self_repair_loop")
+      | . + lrule("111"; "real_time_quality_bar_at_write_time")
+      # --- Section B: substrate primitive auto-fire surfaces (11) ------------
+      | . + primitive("wire_or_explain_ledger")
+      | . + primitive("beads_db_vacuum")
+      | . + primitive("worker_watcher")
+      | . + primitive("agentmail_resolver")
+      | . + primitive("substrate_loss_dcg")
+      | . + primitive("skillos_relay_primitive")
+      | . + primitive("dispatch_log_artifact_shipped")
+      | . + primitive("closeout_receipt_validation")
+      | . + primitive("agent_browser_leak_cleanup")
+      | . + primitive("storage_override_expiry")
+      | . + primitive("canonical_root_drift_autofix")
+      # --- Section C: quality-bar fields (8) ---------------------------------
+      | . + {
+          quality_bar_artifacts_audited_24h: 0,
+          quality_bar_artifacts_failed_24h: 0,
+          rust_best_practices_violations_count: 0,
+          python_best_practices_violations_count: 0,
+          cli_canonical_violations_count: 0,
+          readme_quality_violations_count: 0,
+          three_judges_avg_composite_24h: null,
+          three_judges_below_threshold_count_24h: 0,
+          quality_bar_deferred_until: "plan_state_quality_bar_evidence_index"
+        }
+      # --- Section D: README/AGENTS.md propagation fields (6) ----------------
+      | . + {
+          readme_three_surface_drift_count: 0,
+          readme_quality_bar_violations_count: 0,
+          agents_md_propagation_age_per_repo: {},
+          memory_md_consistency_status: "deferred",
+          memory_file_shape_violations_count: 0,
+          skill_discovery_pending_count: 0,
+          readme_propagation_deferred_until: "readme_propagation_ledger_jsonl"
+        }
+      # --- Section E: /flywheel:plan skill fields (6) ------------------------
+      | . + {
+          plan_quality_bar_passed_count_24h: 0,
+          plan_three_judges_skipped_count: 0,
+          plan_phase5_polish_quality_failures: 0,
+          plan_bead_quality_violations_count: 0,
+          plan_isomorphism_check_skipped_count: 0,
+          dispatch_log_retroactive_audit_pending_count: 0,
+          plan_skill_metrics_deferred_until: "plan_state_jsonl_aggregator"
+        }
+      # --- Section F: comms fields (3) ---------------------------------------
+      | . + {
+          unacked_xpane_count_4h: 0,
+          topology_truth_source_drift_count: 0,
+          agent_mail_paired_send_violations_count: 0,
+          comms_metrics_deferred_until: "xpane_ack_ledger_jsonl"
+        }
+      # --- Section G: session-level violation fields (5) ---------------------
+      | . + {
+          l70_orch_pane_refill_delays_24h: 0,
+          callbacks_pending_verified_count: 0,
+          plan_round_amendment_misses_count: 0,
+          refine_line_diff_vs_quality_mismatches: 0,
+          phase_deferred_unconsumed_count: 0,
+          session_violation_metrics_deferred_until: "session_violation_ledger_jsonl"
+        }
+      ' <<<"$packet"
+}
