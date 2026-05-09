@@ -14,6 +14,7 @@ CHECK_SCRIPT="${DAILY_JEFF_CHECK_SCRIPT:-$HOME/.claude/skills/dicklesworthstone-
 SNAPSHOT_DIFF_SCRIPT="${DAILY_JEFF_SNAPSHOT_DIFF_SCRIPT:-$HOME/.claude/skills/dicklesworthstone-stack/scripts/snapshot-diff-fallback.sh}"
 BR_BIN="${DAILY_JEFF_BR_BIN:-br}"
 STORAGE_PROBE="${DAILY_JEFF_STORAGE_PROBE:-/Users/josh/Developer/flywheel/.flywheel/scripts/storage-probe.sh}"
+SHADOW_SOCRATICODE_SCRIPT="${DAILY_JEFF_SHADOW_SOCRATICODE_SCRIPT:-/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-shadow-socraticode.sh}"
 STORAGE_MIN_FREE_PCT="${DAILY_JEFF_STORAGE_MIN_FREE_PCT:-10}"
 DAILY_JEFF_NOTIFY_BIN="${DAILY_JEFF_NOTIFY_BIN:-$HOME/.local/bin/notify}"
 MAX_BEADS=5
@@ -525,6 +526,34 @@ EOF
   fi
 }
 
+refresh_jeff_shadow() {
+  local out rc item_count status
+  if [ ! -x "$SHADOW_SOCRATICODE_SCRIPT" ]; then
+    warn "jeff-shadow refresh helper missing: $SHADOW_SOCRATICODE_SCRIPT"
+    return 0
+  fi
+  out="$TMP_ROOT/jeff-shadow-socraticode.json"
+  set +e
+  if [ "$DRY_RUN" -eq 1 ]; then
+    "$SHADOW_SOCRATICODE_SCRIPT" refresh --dry-run --json >"$out" 2>"$out.err"
+  else
+    "$SHADOW_SOCRATICODE_SCRIPT" refresh --apply --json >"$out" 2>"$out.err"
+  fi
+  rc=$?
+  set -e
+  if ! jq empty "$out" >/dev/null 2>&1; then
+    warn "jeff-shadow refresh returned invalid JSON"
+    return 0
+  fi
+  status="$(jq -r '.status // "unknown"' "$out")"
+  item_count="$(jq -r '.repo_count // 0' "$out")"
+  INDEXED="$(jq -r '.indexed_count // 0' "$out")"
+  record_group "jeff-shadow" "$status" "$item_count" "$(jq -r '.state_file // "none"' "$out")"
+  if [ "$rc" -ne 0 ]; then
+    warn "jeff-shadow refresh exited nonzero: $rc"
+  fi
+}
+
 mirror_new_repos() {
   local repos_file="$1" today="$2" prior additions repo target
   if [ "$NO_MIRROR" -eq 1 ]; then
@@ -677,11 +706,12 @@ info_json() {
     --arg ledger "$LEDGER" \
     --arg shadow_dir "$SHADOW_DIR" \
     --arg storage_probe "$STORAGE_PROBE" \
+    --arg jeff_shadow_script "$SHADOW_SOCRATICODE_SCRIPT" \
     --arg sources_file "$SOURCES_FILE" \
     '{success:true,mode:"info",version:$version,script_version:$script_version,
       state_dir:$state_dir,snapshot_dir:$snapshot_dir,ledger:$ledger,
-      shadow_dir:$shadow_dir,sources_file:$sources_file,storage_probe:$storage_probe,
-      mutates:["daily storage-history append","daily ledger append","daily snapshots","optional jeff-corpus clones","optional br beads"],
+      shadow_dir:$shadow_dir,jeff_shadow_script:$jeff_shadow_script,sources_file:$sources_file,storage_probe:$storage_probe,
+      mutates:["daily storage-history append","daily ledger append","daily snapshots","optional jeff-corpus clones","jeff-shadow clone/fetch refresh","optional br beads"],
       cron_installed:false}'
 }
 
@@ -781,6 +811,7 @@ run_ingest() {
   fetch_rss "$today"
   fetch_x "$today"
   fetch_agent_flywheel "$today"
+  refresh_jeff_shadow
   file_actionable_beads
   write_digest "$today"
   write_ledger "$started"
