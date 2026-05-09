@@ -1,0 +1,23 @@
+PASS runner shell syntax
+PASS daily launchd plist lint
+PASS x launchd plist lint
+PASS monthly launchd plist lint
+PASS tentacle drift launchd plist lint
+PASS schema documents labels and source cadences
+PASS schema documents receipt paths
+PASS daily dry-run runs intel and philosophy snapshot
+PASS daily dry-run skips schedule ledger write
+PASS monthly dry-run runs philosophy deep mine
+PASS monthly dry-run skips schedule ledger write
+PASS tentacle drift dry-run routes warning receipt
+PASS tentacle drift dry-run skips schedule ledger write
+PASS x dry-run passes without writes
+PASS x apply writes latest path
+PASS x receipt ledger written
+PASS schedule receipt ledger written
+PASS doctor validates loaded labels and plists
+PASS README/AGENTS mention daily label
+PASS README/AGENTS mention x label
+PASS README mentions monthly philosophy label
+PASS registry/launchd/runner mention tentacle drift label
+PASS jeff-intel-schedule tests pass=22 fail=0

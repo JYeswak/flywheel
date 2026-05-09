@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.zeststream.flywheel-tentacle-drift-sweep</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-intel-scheduled-runner.sh</string>
+    <string>--mode</string>
+    <string>tentacle-drift</string>
+    <string>--json</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/josh/Developer/flywheel</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/Users/josh/.local/bin:/Users/josh/.cargo/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Weekday</key>
+    <integer>1</integer>
+    <key>Hour</key>
+    <integer>3</integer>
+    <key>Minute</key>
+    <integer>30</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/Users/josh/.local/state/flywheel/logs/tentacle-drift-sweep.out</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/josh/.local/state/flywheel/logs/tentacle-drift-sweep.err</string>
+</dict>
+</plist>

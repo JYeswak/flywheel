@@ -137,6 +137,11 @@ jeff_intel_scheduled_runner	.flywheel/scripts/jeff-intel-scheduled-runner.sh	fly
 jeff_intel_schedule_tests	tests/jeff-intel-schedule.sh	flywheel-1lpv.1	Fixture-backed tests for Jeff intel launchd labels, plists, source cadences, receipt paths, and docs.
 jeff_intel_daily_launchd	~/Library/LaunchAgents/ai.zeststream.flywheel-daily-jeff-ingest.plist	flywheel-1lpv.1	Daily 06:05 LaunchAgent for GitHub/git, website/RSS, X, JSM, and mirror ingest.
 jeff_intel_x_launchd	~/Library/LaunchAgents/ai.zeststream.flywheel-jeff-x-poll.plist	flywheel-1lpv.1	Hourly LaunchAgent for @doodlestein X timeline capture.
+tentacle_drift_sweep	.flywheel/scripts/tentacle-drift-sweep.sh	flywheel-x18	Read-only Jeff checkout drift sweep that writes repo, local_head, upstream_head, commits_behind, and status rows.
+tentacle_drift_sweep_tests	tests/tentacle-drift-sweep.sh	flywheel-x18	Fixture-backed tests for dry-run, apply JSONL append, thresholds, alert path, and no target-repo mutation.
+tentacle_drift_ledger	~/.local/state/flywheel/tentacle-drift.jsonl	flywheel-x18	Append-only weekly Jeff checkout drift sweep ledger.
+tentacle_drift_alert_ledger	~/.local/state/flywheel/tentacle-drift-alerts.jsonl	flywheel-x18	Append-only alert rows for warn/fail/missing/unknown tentacle drift statuses.
+tentacle_drift_launchd	launchd/ai.zeststream.flywheel-tentacle-drift-sweep.plist	flywheel-x18	Weekly source LaunchAgent for scheduled tentacle drift sweep via jeff-intel-scheduled-runner.sh --mode tentacle-drift.
 dicklesworthstone_sources_regenerator	.flywheel/scripts/regenerate-dicklesworthstone-sources.sh	flywheel-152b.1	Idempotent gh-backed regeneration of dicklesworthstone-stack data/sources.txt with backups, JSON summary, branch fidelity, archived exclusion, and preserved doctrine/X sections.
 dicklesworthstone_sources_regenerator_tests	tests/regenerate-dicklesworthstone-sources.sh	flywheel-152b.1	Fixture-backed tests for main/master branch selection, archived repo exclusion, manual-edit clobber warning, backups, dry-run, and idempotent apply.
 closed_bead_quality_mining	.flywheel/scripts/bead-quality-mining.sh	flywheel-7yic	Closed-bead acceptance-gate miner that creates parented audit-gap beads and emits doctor JSON.
