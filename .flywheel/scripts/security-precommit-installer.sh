@@ -118,6 +118,24 @@ paths = [line for line in diff.stdout.splitlines() if line]
 findings = []
 skipped = []
 
+protected_generated = {"AGENTS.md", "templates/flywheel-install/AGENTS.md"}
+generated_paths = sorted(protected_generated.intersection(paths))
+has_canonical_source_change = any(
+    path.startswith(".flywheel/rules/")
+    or path == ".flywheel/scripts/agents-md-shard-extract.sh"
+    or path == ".flywheel/scripts/sync-canonical-doctrine.sh"
+    for path in paths
+)
+if generated_paths and not has_canonical_source_change:
+    for path in generated_paths:
+        findings.append({
+            "path": path,
+            "line": 1,
+            "class": "generated_doctrine_direct_edit",
+            "pattern": "generated-doctrine-mirror",
+            "redaction": "[REDACTED:generated_doctrine_direct_edit]",
+        })
+
 for path in paths:
     blob = subprocess.run(
         ["git", "-C", repo, "show", f":{path}"],

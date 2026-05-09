@@ -115,4 +115,26 @@ pass "existing_hook_preserved_or_chained_with_backup"
 "$repo/.flywheel/scripts/security-precommit-installer.sh" doctor --repo "$repo" --json >"$TMP/doctor.json"
 assert_jq "$TMP/doctor.json" '.status == "pass" and .hooks_path == "githooks" and .committed_hook_executable == true' "doctor_reports_installed"
 
+generated_repo="$TMP/generated-repo"
+make_repo "$generated_repo"
+mkdir -p "$generated_repo/templates/flywheel-install" "$generated_repo/.flywheel/rules" "$generated_repo/.flywheel/scripts"
+printf 'generated root\n' >"$generated_repo/AGENTS.md"
+printf 'generated template\n' >"$generated_repo/templates/flywheel-install/AGENTS.md"
+printf 'rule shard\n' >"$generated_repo/.flywheel/rules/L001-L1-fixture.md"
+git -C "$generated_repo" add AGENTS.md templates/flywheel-install/AGENTS.md .flywheel/rules/L001-L1-fixture.md
+git -C "$generated_repo" commit -q -m "generated baseline"
+"$generated_repo/.flywheel/scripts/security-precommit-installer.sh" install --repo "$generated_repo" --apply --json >"$TMP/generated-apply.json"
+printf 'direct edit\n' >>"$generated_repo/AGENTS.md"
+git -C "$generated_repo" add AGENTS.md
+set +e
+"$generated_repo/.flywheel/scripts/security-precommit-installer.sh" scan-staged --repo "$generated_repo" --json >"$TMP/generated-block.json"
+generated_block_rc=$?
+set -e
+[[ "$generated_block_rc" -eq 1 ]] || fail "generated_direct_edit_should_block"
+assert_jq "$TMP/generated-block.json" '.status == "fail" and (.classes | index("generated_doctrine_direct_edit")) and (.paths | index("AGENTS.md"))' "generated_direct_edit_reports_class_path"
+printf 'canonical source edit\n' >>"$generated_repo/.flywheel/rules/L001-L1-fixture.md"
+git -C "$generated_repo" add .flywheel/rules/L001-L1-fixture.md
+"$generated_repo/.flywheel/scripts/security-precommit-installer.sh" scan-staged --repo "$generated_repo" --json >"$TMP/generated-allowed.json"
+assert_jq "$TMP/generated-allowed.json" '.status == "pass"' "generated_edit_allowed_with_shard_change"
+
 printf 'PASS security-precommit-hook tests=%s\n' "$pass_count"

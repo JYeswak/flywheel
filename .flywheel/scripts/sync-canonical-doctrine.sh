@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
-# Sync /Users/josh/Developer/flywheel/AGENTS.md into repo-local doctrine copies.
+# Sync generated canonical doctrine mirrors into repo-local doctrine copies.
 set -euo pipefail
 
-SOURCE="${SYNC_CANONICAL_SOURCE:-/Users/josh/Developer/flywheel/AGENTS.md}"
+DEFAULT_SOURCE="/Users/josh/Developer/flywheel/AGENTS.md"
+SOURCE="${SYNC_CANONICAL_SOURCE:-$DEFAULT_SOURCE}"
+AGENTS_MD_GENERATOR="${SYNC_AGENTS_MD_GENERATOR:-/Users/josh/Developer/flywheel/.flywheel/scripts/agents-md-shard-extract.sh}"
+CANONICAL_INDEX_TARGET="${SYNC_CANONICAL_INDEX_TARGET:-/Users/josh/Developer/flywheel/.flywheel/AGENTS-CANONICAL.md}"
+TEMPLATE_INDEX_TARGET="${SYNC_CANONICAL_TEMPLATE_TARGET:-/Users/josh/Developer/flywheel/templates/flywheel-install/AGENTS.md}"
 STORAGE_OVERRIDE_SCHEMA_SOURCE="${SYNC_STORAGE_OVERRIDE_SCHEMA_SOURCE:-/Users/josh/Developer/flywheel/.flywheel/validation-schema/v1/storage-override.schema.json}"
 IDENTITY_DEFERRAL_SCHEMA_SOURCE="${SYNC_IDENTITY_DEFERRAL_SCHEMA_SOURCE:-/Users/josh/Developer/flywheel/.flywheel/validation-schema/v1/identity-registration-deferral.schema.json}"
 BEAD_QUALITY_MINING_SOURCE="${SYNC_BEAD_QUALITY_MINING_SOURCE:-/Users/josh/Developer/flywheel/.flywheel/scripts/bead-quality-mining.sh}"
@@ -28,8 +32,9 @@ usage() {
 usage: sync-canonical-doctrine.sh [--dry-run|--apply] [--json] [--source PATH] [--root PATH ...]
 
 Synchronizes doctrine surfaces for each flywheel-installed repo:
-  1. .flywheel/AGENTS-CANONICAL.md remains a thin canonical index.
-  2. .flywheel/rules/L*.md carries the full canonical L-rule shards.
+  1. .flywheel/rules/L*.md is the canonical L-rule source.
+  2. AGENTS.md, .flywheel/AGENTS-CANONICAL.md, and
+     templates/flywheel-install/AGENTS.md are generated thin indexes.
   3. ROOT AGENTS.md gets a replaceable canonical block between:
      <!-- BEGIN-CANONICAL-FLYWHEEL-DOCTRINE -->
      <!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->
@@ -60,6 +65,10 @@ Exit codes:
 
 Environment:
   SYNC_CANONICAL_SOURCE=/path/to/AGENTS.md
+  SYNC_AGENTS_MD_GENERATOR=/path/to/agents-md-shard-extract.sh
+  SYNC_GENERATED_MIRRORS_DISABLE=1
+  SYNC_CANONICAL_INDEX_TARGET=/path/to/.flywheel/AGENTS-CANONICAL.md
+  SYNC_CANONICAL_TEMPLATE_TARGET=/path/to/templates/flywheel-install/AGENTS.md
   SYNC_STORAGE_OVERRIDE_SCHEMA_SOURCE=/path/to/storage-override.schema.json
   SYNC_IDENTITY_DEFERRAL_SCHEMA_SOURCE=/path/to/identity-registration-deferral.schema.json
   SYNC_BEAD_QUALITY_MINING_SOURCE=/path/to/bead-quality-mining.sh
@@ -448,11 +457,26 @@ collect_targets() {
 }
 
 SOURCE="$(canonicalize_file "$SOURCE")"
+DEFAULT_SOURCE_CANONICAL="$(canonicalize_file "$DEFAULT_SOURCE")"
+AGENTS_MD_GENERATOR="$(canonicalize_file "$AGENTS_MD_GENERATOR")"
+CANONICAL_INDEX_TARGET="$(canonicalize_file "$CANONICAL_INDEX_TARGET")"
+TEMPLATE_INDEX_TARGET="$(canonicalize_file "$TEMPLATE_INDEX_TARGET")"
 STORAGE_OVERRIDE_SCHEMA_SOURCE="$(canonicalize_file "$STORAGE_OVERRIDE_SCHEMA_SOURCE")"
 IDENTITY_DEFERRAL_SCHEMA_SOURCE="$(canonicalize_file "$IDENTITY_DEFERRAL_SCHEMA_SOURCE")"
 BEAD_QUALITY_MINING_SOURCE="$(canonicalize_file "$BEAD_QUALITY_MINING_SOURCE")"
 ORCH_VALIDATION_SKILL_SOURCE="$(canonicalize_file "$ORCH_VALIDATION_SKILL_SOURCE")"
 SECURITY_SETTINGS_DENY_SOURCE="$(canonicalize_file "$SECURITY_SETTINGS_DENY_SOURCE")"
+RULES_SOURCE_DIR="$(canonicalize_dir "$RULES_SOURCE_DIR")"
+if [[ "${SYNC_GENERATED_MIRRORS_DISABLE:-0}" != "1" && "$SOURCE" == "$DEFAULT_SOURCE_CANONICAL" && -x "$AGENTS_MD_GENERATOR" && -d "$RULES_SOURCE_DIR" ]]; then
+  "$AGENTS_MD_GENERATOR" \
+    --source "$SOURCE" \
+    --canonical "$CANONICAL_INDEX_TARGET" \
+    --root "$SOURCE" \
+    --template "$TEMPLATE_INDEX_TARGET" \
+    --rules-dir "$RULES_SOURCE_DIR" \
+    --apply \
+    --json >/dev/null
+fi
 if [[ ! -f "$SOURCE" ]]; then
   if [[ "$JSON_OUT" -eq 1 ]]; then
     jq -nc --arg source "$SOURCE" '{mode:"error",status:"error",source:$source,errors:[{code:"source_missing",message:"canonical source is missing",path:$source}]}'

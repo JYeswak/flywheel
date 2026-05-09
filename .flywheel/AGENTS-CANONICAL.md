@@ -26,6 +26,8 @@ Each L-rule below uses this frontmatter (YAML between `---` fences):
 
 ## Rules
 
+<!-- GENERATED: edit .flywheel/rules/L*.md, then run .flywheel/scripts/agents-md-shard-extract.sh --apply -->
+
 <!-- BEGIN-CANONICAL-FLYWHEEL-DOCTRINE -->
 
 The full canonical L-rule bodies are sharded under `.flywheel/rules/`.

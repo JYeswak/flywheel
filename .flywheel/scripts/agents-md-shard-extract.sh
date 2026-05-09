@@ -15,6 +15,7 @@ from pathlib import Path
 
 BEGIN = "<!-- BEGIN-CANONICAL-FLYWHEEL-DOCTRINE -->"
 END = "<!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->"
+GENERATED_MARKER = "<!-- GENERATED: edit .flywheel/rules/L*.md, then run .flywheel/scripts/agents-md-shard-extract.sh --apply -->"
 INDEX_BEGIN = "<!-- BEGIN-RULES-INDEX -->"
 INDEX_END = "<!-- END-RULES-INDEX -->"
 RULE_RE = re.compile(r"(?m)^## (L\d+)(?:\s+—\s+|\s+)(.+)$")
@@ -174,10 +175,13 @@ def validate_rules(rules: list[Rule]) -> list[dict[str, str]]:
 
 def render_index(leading: str, rules: list[Rule], manifest_name: str) -> str:
     prefix = re.sub(r"(\n## Rules\s*)+\Z", "\n## Rules", leading.rstrip())
+    prefix = re.sub(rf"\n?{re.escape(GENERATED_MARKER)}\n*", "\n", prefix).rstrip()
     lines = [prefix, ""]
     if not re.search(r"(?m)^## Rules\s*$", prefix):
         lines.extend(["## Rules", ""])
     lines.extend([
+        GENERATED_MARKER,
+        "",
         BEGIN,
         "",
         "The full canonical L-rule bodies are sharded under `.flywheel/rules/`.",
@@ -194,11 +198,19 @@ def render_index(leading: str, rules: list[Rule], manifest_name: str) -> str:
     return "\n".join(lines)
 
 
+def stable_path(path: Path, base: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(base.resolve()))
+    except ValueError:
+        return str(path)
+
+
 def render_manifest(rules: list[Rule], source_path: Path, canonical_path: Path, rules_body: str) -> str:
+    base = source_path.parent
     payload = {
         "schema_version": "agents-canonical-shards/v1",
-        "source": str(source_path),
-        "canonical_index": str(canonical_path),
+        "source": stable_path(source_path, base),
+        "canonical_index": stable_path(canonical_path, base),
         "rule_count": len(rules),
         "round_trip_command": "cat .flywheel/rules/L*.md | shasum -a 256",
         "rules_body_sha256": sha256_text(rules_body),
@@ -266,8 +278,6 @@ def main(argv: list[str]) -> int:
 
     if not dry_run:
         rules_dir.mkdir(parents=True, exist_ok=True)
-        for old in rules_dir.glob("L*.md"):
-            old.unlink()
     for rule in rules:
         write_if_changed(rules_dir / rule.filename, rule.body, dry_run, writes, drifts)
     write_if_changed(rules_dir / manifest_name, manifest, dry_run, writes, drifts)

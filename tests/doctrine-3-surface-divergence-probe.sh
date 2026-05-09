@@ -54,10 +54,30 @@ make_surface "$repo/.flywheel/AGENTS-CANONICAL.md" L93 L94 L95 L96
 make_surface "$repo/templates/flywheel-install/AGENTS.md" L93 L94 L95 L96
 
 out="$("$PROBE" --repo "$repo" --json)"
-if jq -e '.status == "pass" and .doctrine_3_surface_divergent_count == 0 and .exit_code == 0' <<<"$out" >/dev/null; then
+if jq -e '.status == "pass" and .doctrine_3_surface_divergent_count == 0 and .exit_code == 0 and .surface_rule_counts.agents_md == 4' <<<"$out" >/dev/null; then
   pass "coherent surfaces pass"
 else
   fail "coherent surfaces pass"
+  jq . <<<"$out" || true
+fi
+
+cat >"$repo/AGENTS.md" <<'EOF'
+# Doctrine
+
+<!-- BEGIN-RULES-INDEX -->
+| Order | Rule | Status | Shard |
+|---:|---|---|---|
+| 1 | L93 — fixture | long_term | `.flywheel/rules/L001-L93.md` |
+| 2 | L94 — fixture | long_term | `.flywheel/rules/L002-L94.md` |
+<!-- END-RULES-INDEX -->
+EOF
+cp "$repo/AGENTS.md" "$repo/.flywheel/AGENTS-CANONICAL.md"
+cp "$repo/AGENTS.md" "$repo/templates/flywheel-install/AGENTS.md"
+out="$("$PROBE" --repo "$repo" --json)"
+if jq -e '.status == "pass" and .surface_rule_counts.agents_md == 2 and .surface_rule_counts.canonical == 2 and .surface_rule_counts.template == 2' <<<"$out" >/dev/null; then
+  pass "generated index rows count as rules"
+else
+  fail "generated index rows count as rules"
   jq . <<<"$out" || true
 fi
 
