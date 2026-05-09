@@ -10,6 +10,7 @@ CLOSE_HANDLER="$HOME/.claude/commands/flywheel/_shared/close-handler.md"
 AGENTS="$ROOT/AGENTS.md"
 CANONICAL="$ROOT/.flywheel/AGENTS-CANONICAL.md"
 INSTALL_TEMPLATE="$ROOT/templates/flywheel-install/AGENTS.md"
+L143_RULE="$ROOT/.flywheel/rules/L094-L143-worker-close-requires-git-commit.md"
 COMPLIANCE_SKILL="$HOME/.claude/skills/beads-compliance-and-completion-verification/SKILL.md"
 
 fail() {
@@ -79,8 +80,9 @@ need rg
 
 rg -q 'git_committed=<yes\|no_changes\|skipped>' "$DISPATCH_TEMPLATE" || fail "dispatch template missing git_committed field"
 rg -q 'declared scope has uncommitted changes' "$CLOSE_HANDLER" || fail "close-handler missing dirty-scope refusal"
+rg -q '^## L143 — WORKER-CLOSE-REQUIRES-GIT-COMMIT' "$L143_RULE" || fail "missing L143 rule shard"
 for f in "$AGENTS" "$CANONICAL" "$INSTALL_TEMPLATE"; do
-  rg -q '^## L143 — WORKER-CLOSE-REQUIRES-GIT-COMMIT' "$f" || fail "missing L143 in $f"
+  rg -q 'L143 — WORKER-CLOSE-REQUIRES-GIT-COMMIT' "$f" || fail "missing L143 index entry in $f"
 done
 rg -q 'declared_scope_dirty_at_close' "$COMPLIANCE_SKILL" || fail "beads-compliance skill missing deterministic check"
 pass "static doctrine surfaces wired"

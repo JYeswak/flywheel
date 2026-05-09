@@ -1,0 +1,23 @@
+diff --git a/beads-compliance-and-completion-verification/SKILL.md b/beads-compliance-and-completion-verification/SKILL.md
+--- a/beads-compliance-and-completion-verification/SKILL.md
++++ b/beads-compliance-and-completion-verification/SKILL.md
+@@
+ ### Three habits that prevent 90% of mistakes
+ 
+ 1. **Never trust `status: closed`.** It's a claim made by an agent. Re-derive from evidence.
+ 2. **Never delete a prior pass dir.** History IS the convergence signal — `passes/<UTC>/` is sacred (Axiom 9).
+ 3. **Never tune the rubric mid-pass.** Score deltas vs the prior pass become uninterpretable; use `☖ STAKE-RUBRIC` operator.
+ 
++### Worker-Close Dirty Scope Check
++
++For worker-close audits, the verifier MUST capture
++`declared_scope_dirty_at_close` as a deterministic field. A code-work close is
++compliant only when every declared file-scope path is clean at close and the
++callback reports `git_committed=yes` with a declared-scope commit after dispatch
++start, or `git_committed=no_changes` with no accepted file mutation. Treat
++`git_committed=skipped`, a dirty declared scope, or `git_committed=yes` without
++a declared-scope commit as workflow violations.
++
+ If the user gives an ambiguous request, the kickoff prompts in [KICKOFF-PROMPTS.md](references/KICKOFF-PROMPTS.md) cover 24 paste-ready variants — start there before improvising.
+ 
+ ---
