@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-05-09T06:05:33Z",
+  "invariant_id": "ntm:spawn-templates-versioned",
+  "ntm": {
+    "built_at": "unknown",
+    "commit": "none",
+    "go_version": "go1.25.6",
+    "path": "/Users/josh/.local/bin/ntm",
+    "platform": "darwin/arm64",
+    "raw": {
+      "built_at": "unknown",
+      "built_by": "unknown",
+      "commit": "none",
+      "generated_at": "2026-05-09T06:05:33.606108Z",
+      "go_version": "go1.25.6",
+      "platform": "darwin/arm64",
+      "version": "dev"
+    },
+    "status": "ok",
+    "version": "dev",
+    "warnings": []
+  },
+  "schema_version": "ntm-spawn-templates-versioned/v1",
+  "template_count": 0,
+  "template_dir": "/Users/josh/.config/ntm/spawn-templates",
+  "template_dir_exists": false,
+  "templates": []
+}
