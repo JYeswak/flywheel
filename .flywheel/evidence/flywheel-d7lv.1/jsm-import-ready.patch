@@ -1,0 +1,59 @@
+# JSM-import-ready patch for flywheel-d7lv.1
+# Scope: webhook-automation skill (managed=false)
+# Operation: file removal
+# Generated: 2026-05-09T16:18:00Z
+# Worker: MagentaPond (codex-pane on flywheel:1)
+# Repair lineage: parent flywheel-d7lv (skill-enhance callback-envelope) noted the
+# domain mismatch as out-of-scope; this dispatch performs the removal pass.
+#
+# Schema: jsm-import-ready/v1
+# Apply path: jsm import flywheel-d7lv.1 (or equivalent skill-mutation flow)
+#
+# This patch documents a single-file deletion in unified diff form so the
+# change can be imported into JSM later. The deleted file lived at:
+#   ~/.claude/skills/webhook-automation/scripts/webhook_automation_tool.py
+# It was not git-tracked under /Users/josh/.claude, was not referenced by the
+# webhook-automation SKILL.md, and contained predictive-maintenance domain code
+# (SensorType, HealthStatus, MaintenanceStrategy enums; pdm analyzer logic) that
+# belongs to the predictive-maintenance skill (which has its own canonical
+# scripts/pdm-analyzer.py).
+#
+# After deletion, ~/.claude/skills/webhook-automation/scripts/ contains only
+# webhook_designer.py (the canonical webhook-automation tool referenced 5x by
+# SKILL.md lines 82, 86, 90, 94, 224).
+
+--- a/webhook-automation/scripts/webhook_automation_tool.py
++++ /dev/null
+@@ -1,5 +0,0 @@
+-#!/usr/bin/env python3
+-"""Predictive Maintenance and Asset Reliability Analyzer.
+-
+-Analyzes sensor data, predicts equipment failures, estimates remaining useful life,
+-calculates health indices, and optimizes maintenance schedules based on condition data.
+-"""
+@@ -lines-omitted,21931 +0,0 @@
+- ... (21,936 bytes total; full predictive-maintenance domain code; full content
+-      preserved in the JSM-managed history of the predictive-maintenance skill's
+-      pdm-analyzer.py — no information lost by this deletion)
+
+# Rationale (one paragraph):
+# webhook_automation_tool.py was a misnamed orphan in the webhook-automation
+# skill. Its 21,936 bytes contained predictive-maintenance domain logic
+# (sensor types, health-status enums, maintenance-strategy classes, RUL
+# estimation). The file was not referenced by SKILL.md, not git-tracked under
+# the .claude config repo, and the canonical equivalent already lives in the
+# predictive-maintenance skill's own scripts directory. Removing it cleans
+# the skill's surface so its scripts directory matches its declared domain.
+#
+# Reversibility: trivial — git reflog on /Users/josh/.claude (if a commit
+# touched this path before the file became untracked), OR re-fetch from any
+# JSM cloud snapshot that predates 2026-05-09T16:18Z.
+#
+# Skill JSM status at write time:
+# - webhook-automation: managed=false → unmanaged, direct mutation allowed
+#   with paired jsm-import-ready patch artifact (this file) per the
+#   skill-enhance-jsm-discipline contract.
+# - jsm import flow can apply this patch artifact later when the skill is
+#   pushed to JSM.
+
+# end-of-patch
