@@ -1,0 +1,98 @@
+[
+  {
+    "closedAt": null,
+    "number": 20871,
+    "state": "OPEN",
+    "title": "Codex CLI permanently fails with 401 on Linux VMs despite valid API key - auth.json not updated by codex login"
+  },
+  {
+    "closedAt": "2026-05-03T15:00:25Z",
+    "number": 20873,
+    "state": "CLOSED",
+    "title": "This chat was flagged for possible cybersecurity risk"
+  },
+  {
+    "closedAt": "2026-05-03T19:59:15Z",
+    "number": 20875,
+    "state": "CLOSED",
+    "title": "Tool-contract ambiguity: exec_command.cmd lets models over-quote shell operators"
+  },
+  {
+    "closedAt": null,
+    "number": 20880,
+    "state": "OPEN",
+    "title": "App silently creates empty `~/Documents/Codex` folder on every launch"
+  },
+  {
+    "closedAt": "2026-05-05T15:29:04Z",
+    "number": 20887,
+    "state": "CLOSED",
+    "title": "Initial new-chat conversation ignores selected model and falls back to GPT-5.5"
+  },
+  {
+    "closedAt": null,
+    "number": 20900,
+    "state": "OPEN",
+    "title": "Windows Codex Desktop BusyHang when opening thread mini window / popout (thread-overlay)"
+  },
+  {
+    "closedAt": null,
+    "number": 20906,
+    "state": "OPEN",
+    "title": "Got Reason: The sandbox launcher is unavailable when using workspace-write"
+  },
+  {
+    "closedAt": null,
+    "number": 20925,
+    "state": "OPEN",
+    "title": "mcp-server: notifications/cancelled halts work but tools/call is never resolved"
+  },
+  {
+    "closedAt": "2026-05-04T02:20:35Z",
+    "number": 20929,
+    "state": "CLOSED",
+    "title": "missing history for /goal"
+  },
+  {
+    "closedAt": null,
+    "number": 20935,
+    "state": "OPEN",
+    "title": "mousing over the right edge of the codex window brings up an unrelated and useless dialogue that blocks 'steer' button activation ability"
+  },
+  {
+    "closedAt": null,
+    "number": 20942,
+    "state": "OPEN",
+    "title": "Windows: automations forced read-only when sandbox_mode is danger-full-access (parse_policy rejects DangerFullAccess)"
+  },
+  {
+    "closedAt": "2026-05-05T17:33:43Z",
+    "number": 20945,
+    "state": "CLOSED",
+    "title": "codex fork --last ignores default cwd filtering and can fork a session from another project"
+  },
+  {
+    "closedAt": null,
+    "number": 20946,
+    "state": "OPEN",
+    "title": "Codex App advertises bundled imagegen skill but does not materialize $CODEX_HOME/skills/.system"
+  },
+  {
+    "closedAt": null,
+    "number": 20959,
+    "state": "OPEN",
+    "title": "Codex Mac app hides unarchived local threads until they are messaged again"
+  },
+  {
+    "closedAt": null,
+    "number": 20967,
+    "state": "OPEN",
+    "title": "Codex App on Windows WSL responding very slow compared to CLI"
+  },
+  {
+    "closedAt": null,
+    "number": 20970,
+    "state": "OPEN",
+    "title": "codex mcp get shows Slack MCP server, but codex mcp remove slack says it does not exist"
+  }
+]
