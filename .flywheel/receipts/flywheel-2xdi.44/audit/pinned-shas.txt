@@ -1,0 +1,11 @@
+subject-script: ~/.claude/skills/.flywheel/data/skill-packs/ai-codebase-intelligence-pack/validate.sh
+subject-mtime: 2026-04-29T07:36:35Z
+subject-line-count:      103
+subject-runs-cleanly: yes (exit 0; prints OK lines for socraticode SKILL.md gates)
+registry-entry: substrate-registry.json contains ai-codebase-intelligence-pack-validate row
+branch: master
+head: 1198f1b137f40e7c0bf9d42766b6e06476fd19d8
+gap-hunt-probe-sha: 5814ede3dad2c98aba9003ccdfdce621de71c619
+wired-but-cold-count-after-vmc7r: 20
+of-which-pack-validators: 18 (90%)
+follow-up-bead-filed: flywheel-2fw7v [gap-hunt-probe] wired-but-cold detector flags on-demand pack validators as cold

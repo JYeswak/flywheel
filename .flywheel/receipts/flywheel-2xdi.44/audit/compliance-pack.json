@@ -1,0 +1,36 @@
+{
+  "schema_version": "compliance-pack/v1",
+  "task_id": "flywheel-2xdi.44-7926d8",
+  "bead": "flywheel-2xdi.44",
+  "disposition": "false-positive-on-demand-validator-class",
+  "subject_script": "~/.claude/skills/.flywheel/data/skill-packs/ai-codebase-intelligence-pack/validate.sh",
+  "wired_evidence": "substrate-registry.json contains ai-codebase-intelligence-pack-validate row; bash <path> exits 0 cleanly with OK lines for socraticode SKILL.md gates",
+  "intent_evidence": "validators are invoked synchronously during pack scaffold/promotion/audit; cron-driving them would be an anti-pattern",
+  "false_positive_class": "on-demand-validator: substrate-registered + functional + intentionally non-ledger-emitting",
+  "scale": {
+    "wired_but_cold_total_after_vmc7r": 20,
+    "pack_validators_in_total": 18,
+    "false_positive_share_pct": 90
+  },
+  "score": 870,
+  "max": 1000,
+  "score_basis": "concrete classification with file:line evidence + 90% scale signal + structural source-fix bead (flywheel-2fw7v) covering all 18 affected packs + 3 fix options ranked + builds cleanly on flywheel-vmc7r's prior 4MB-budget fix",
+  "cli_canonical": "n/a",
+  "rust_clean": "n/a",
+  "python_clean": "n/a",
+  "readme_quality": "n/a",
+  "skill_auto_routes_addressed": {
+    "canonical-cli-scoping": "n/a",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "four_lens": {"brand": 9, "sniff": 9, "jeff": 9, "public": 9},
+  "files_reserved": [],
+  "files_reserved_reason": "NONE_NO_EDITS receipt-only disposition",
+  "evidence_paths": [
+    ".flywheel/receipts/flywheel-2xdi.44/audit/evidence.md",
+    ".flywheel/receipts/flywheel-2xdi.44/audit/pinned-shas.txt"
+  ],
+  "beads_filed": ["flywheel-2fw7v"]
+}

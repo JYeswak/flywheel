@@ -6054,6 +6054,89 @@ Evidence (sub-class):
   this close — names the probe-emitter unification work as a
   separate scope).
 
+
+### Sibling Sub-Class: worker_capacity_gate_failed (synonym + ERROR-state escalation gap — 2026-05-09 merge)
+
+Sub-class: `worker_capacity_gate_failed` — third synonym for the
+"INTEGRATE prelude refuses safely on non-WAITING pane" family.
+Filed as `flywheel-ovd29` after 12 rows on 2026-05-03 19:11–20:07
+UTC (mobile-eats:0.1, ~1h burst). Splits into two sub-shapes
+along severity:
+
+| Sub-shape | Count | Pane state | Severity | Disposition |
+|---|---|---|---|---|
+| A — pane THINKING | 6 | active worker | low | Parent class `integrate_worker_active` covers verbatim (synonym, like `integrate_worker_not_waiting` above). |
+| B — pane ERROR after callback delivered | 6 | failed worker | medium | Parent's "wait/observe" applies for the prelude-refusal — but the worker pane needs L95 stall-recovery escalation, which the integrate-prelude probe did NOT trigger after 6 consecutive 5min-cycle re-fires. |
+
+Sub-shape B specifically records `mobile-eats-o73 callback being
+available` in the first medium-severity row (2026-05-03T19:41:37Z) —
+the work was DONE, the callback was DELIVERED, but pane 2 went
+to ERROR state and the INTEGRATE gate kept correctly refusing
+for ~30 minutes without escalating to L95 worker-stall recovery.
+That's a CALLER-SIDE escalation gap: the prelude probe stops at
+"pane not WAITING" and re-fires the trauma row instead of
+invoking the canonical recovery ladder.
+
+Cost: prelude-refusal cost is identical to parent (no worker
+file mutation, no substrate damage). The escalation gap COST is
+~30 minutes of stuck-pane time per occurrence, plus 6 redundant
+fuckup-log rows that look like medium-severity recurrence
+without actionable routing.
+
+Root Cause (extends parent + names new gap): two divergences:
+1. **Trauma-class naming** (synonym, parent class behavior): same
+   shape as `integrate_worker_active` and
+   `integrate_worker_not_waiting` for the THINKING events.
+2. **L95 escalation gap** (new): the integrate-prelude probe lacks
+   an N-strikes-then-escalate to L95 worker-stall recovery, so
+   ERROR-state panes accumulate prelude-refusal rows without
+   invoking respawn/Joshua-notify.
+
+Forever-Rule (parent applies; sub-class extension): every
+"INTEGRATE prelude refuses on non-WAITING pane" event routes to
+the parent's wait/observe contract for the FIRST few cycles.
+After N consecutive emissions of the same trauma class on the
+same pane (suggested N=3 per `flywheel-xp50r`), the prelude probe
+SHOULD invoke L95 worker-stall recovery (respawn / Joshua
+notify / dispatch-blocker filing) instead of re-emitting the
+same fuckup-log row. Probes/scripts emitting this trauma class
+SHOULD use the parent name `integrate_worker_active`; the
+synonym `worker_capacity_gate_failed` is recognized for
+backward compatibility but discouraged for new code.
+
+Synonym Naming Note: `flywheel-pjfqw` (filed by flywheel-6grpt
+earlier today) covers the broader probe-emitter unification work
+across all three synonyms (`integrate_worker_active`,
+`integrate_worker_not_waiting`, `worker_capacity_gate_failed`).
+
+Fix Applied/Status: Path A merge — no source-code change, no new
+top-level INCIDENTS section, no probe edit. Sub-class block makes
+the L56 ladder probe see synonym coverage and skip re-firing on
+the 12-row precedent cluster. The ERROR-state escalation gap is
+filed as `flywheel-xp50r` so the L95 caller-side wiring is a
+named follow-up scope.
+
+Evidence (sub-class):
+- Sub-shape A trauma rows: `~/.local/state/flywheel/fuckup-log.jsonl`
+  6 rows on 2026-05-03 19:11:22Z, 19:16:24Z, 19:21:27Z, 19:26:29Z,
+  19:31:25Z, 19:36:32Z; all `mobile-eats:0.1`, `severity=low`,
+  what_happened="pane 2 robot-activity was THINKING, not WAITING".
+- Sub-shape B trauma rows: same fuckup-log, 6 rows on 2026-05-03
+  19:41:37Z, 19:46:41Z, 19:51:38Z, 19:56:48Z, 20:01:52Z,
+  20:07:18Z; all `mobile-eats:0.1`, `severity=medium`,
+  what_happened="pane 2 robot-activity was ERROR, not WAITING".
+  First medium row notes "despite mobile-eats-o73 callback being
+  available".
+- Parent class: `## integrate_worker_active` above.
+- Synonym sibling: `### Sibling Sub-Class: integrate_worker_not_waiting`
+  above (also a 2026-05-09 merge).
+- L95 escalation-gap follow-up bead: `flywheel-xp50r` (filed by
+  this close — names the integrate-prelude N-strikes-then-escalate
+  wiring as a separate scope).
+- Synonym-unification follow-up bead (covers all three names):
+  `flywheel-pjfqw`.
+- Bead: `flywheel-ovd29` (this dispatch).
+
 ## worker-evidence-file-write-before-reservation
 
 Date: 2026-05-08
