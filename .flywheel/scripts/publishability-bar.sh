@@ -73,12 +73,20 @@ brand_voice_banned_words_json() {
 }
 
 brand_voice_metrics_json() {
-    local repo="$1" audit="$2" public_repo score scorecard_log ungrounded words_json text_file matches_json banned_count
+    local repo="$1" audit="$2" public_repo public_repo_json exemption score scorecard_log ungrounded words_json text_file scan_file matches_json banned_count
     public_repo="$(header_value "Public repo" "$audit" | tr '[:upper:]' '[:lower:]')"
-    if [[ "$public_repo" != "yes" && "$public_repo" != "true" && "$public_repo" != "public" ]]; then
-        jq -nc '{
-          public_repo:false,
-          proof_level:"exempt_internal",
+    public_repo_json=false
+    if [[ "$public_repo" == "yes" || "$public_repo" == "true" || "$public_repo" == "public" ]]; then
+        public_repo_json=true
+    fi
+    exemption="$(header_value "Exemption" "$audit" | tr '[:lower:]' '[:upper:]')"
+    if [[ "$exemption" == "EXEMPT_CLIENT_OWNED" || "$exemption" == "EXEMPT_PUBLIC_FACING" ]]; then
+        jq -nc --argjson public_repo "$public_repo_json" --arg exemption "$exemption" '{
+          public_repo:$public_repo,
+          public_ready_default:true,
+          exempt:true,
+          exemption_class:$exemption,
+          proof_level:($exemption | ascii_downcase),
           brand_voice_composite:100,
           banned_words_count:0,
           banned_words:[],
@@ -101,24 +109,31 @@ brand_voice_metrics_json() {
         [[ -f "$repo/.flywheel/MISSION.md" ]] && printf '%s\n' "--- .flywheel/MISSION.md ---" && sed -n '1,220p' "$repo/.flywheel/MISSION.md"
         [[ -f "$repo/MISSION.md" ]] && printf '%s\n' "--- MISSION.md ---" && sed -n '1,220p' "$repo/MISSION.md"
     } > "$text_file"
+    scan_file="$(mktemp "${TMPDIR:-/tmp}/publishability-public-prose.XXXXXX")"
+    sed -E 's/`[^`]*`//g' "$text_file" > "$scan_file"
     matches_json="$(
       jq -r '.[]' <<<"$words_json" | while IFS= read -r word; do
         [[ -z "$word" ]] && continue
-        if grep -IiqF -- "$word" "$text_file"; then
+        if grep -IiqF -- "$word" "$scan_file"; then
             printf '%s\n' "$word"
         fi
       done | sort -u | jq -Rsc 'split("\n") | map(select(length > 0))'
     )"
-    rm -f "$text_file"
+    rm -f "$text_file" "$scan_file"
     banned_count="$(jq 'length' <<<"$matches_json")"
     jq -nc \
+      --argjson public_repo "$public_repo_json" \
+      --arg exemption "$exemption" \
       --argjson score "$score" \
       --argjson ungrounded "$ungrounded" \
       --arg scorecard_log "$scorecard_log" \
       --argjson banned_words "$matches_json" \
       --argjson banned_count "$banned_count" \
       '{
-        public_repo:true,
+        public_repo:$public_repo,
+        public_ready_default:true,
+        exempt:false,
+        exemption_class:(if $exemption == "" then null else $exemption end),
         proof_level:"scorecard_linked",
         brand_voice_composite:$score,
         banned_words_count:$banned_count,

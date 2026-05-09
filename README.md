@@ -46,11 +46,11 @@ Read these in order when you land in this repo:
    `.flywheel/rules/L*.md`.
 2. `.flywheel/MISSION.md` - what this repo owns.
 3. `.flywheel/GOAL.md` - current repo-level goal and acceptance criteria.
-4. `.flywheel/STATE.md` - current resume state, handoff pointers, and safe next actions.
+4. `.flywheel/STATE.md` - current resume state, next-action pointers, and safe work.
 5. `.beads/issues.jsonl` or `br ready --json` - current task graph.
 6. This README - command map and worker workflow.
 
-For live ecosystem state, read `~/.claude/skills/.flywheel/GOAL.md`,
+For live fleet state, read `~/.claude/skills/.flywheel/GOAL.md`,
 `~/.claude/skills/.flywheel/WORK.md`, `~/.claude/skills/.flywheel/LOOP.md`,
 and `~/.claude/skills/.flywheel/STATE.md`.
 
@@ -76,7 +76,7 @@ Before editing:
 
    For skill-enhance work, classify the target substrate before picking an
    evaluator. Shell-first flywheel surfaces such as `canonical-cli-scoping`,
-   `jsm`, `beads-br`, and `agent-orchestration` use shell-first dispatch
+   `jsm`, `beads-br`, and the agent coordination skill use shell-first dispatch
    guidance, not `skill-autoresearch` as the primary route. Python-operational
    `skill-builder` targets may use `skill-autoresearch`. See
    `.flywheel/doctrine/skill-autoresearch-tooling-preference-class.md`.
@@ -111,10 +111,10 @@ Before editing:
 | `.flywheel/PUBLISHABILITY-BAR.md` | Three-judges publishability rubric for README, doctrine, doctor, tests, install, code aesthetic, and demo-ability. |
 | `.flywheel/PUBLISHABILITY-AUDIT.md` | Repo-local publishability assessment consumed by the doctor signal. Private status is metadata; only `EXEMPT_CLIENT_OWNED` and `EXEMPT_PUBLIC_FACING` bypass ZestStream voice scoring. |
 | `.flywheel/PLANS/` | Design plans, research briefs, RCA packets, and dispatch architecture notes. |
-| `.flywheel/handoffs/` | End-of-session handoffs. Read the latest one when resuming orchestration. |
+| `.flywheel/handoffs/` | End-of-session resume notes. Read the latest one when resuming coordination. |
 | `.flywheel/scripts/` | Repo-local helper/probe scripts wired into slash commands or tick steps. |
 | `.flywheel/security/v1/` | Canonical security controls, including the `agent-security-control/v1` schema companion deny template, `container-isolation/v1` prod-credential sandbox profile, and `canonical-security-allow` override token. |
-| `.flywheel/doctrine/` | Doctrine adoption packets and handoff doctrine sources. |
+| `.flywheel/doctrine/` | Doctrine adoption packets and resume doctrine sources. |
 | `.flywheel/dispatch-log.jsonl` | Dispatch record and callback tracking surface. |
 | `.flywheel/last_closeout_receipt.json` | Latest repo-local loop closeout receipt. |
 | `.beads/issues.jsonl` | Repo-local Beads task graph. |
@@ -198,7 +198,7 @@ names a wrapper.
 |---|---|
 | `~/.claude/skills/.flywheel/bin/flywheel-codex-orient` | Start-of-session delta snapshot for Codex workers. |
 | `~/.claude/skills/.flywheel/bin/flywheel deltas --unsurfaced` | Show fresh external/internal deltas not yet surfaced. |
-| `~/.claude/skills/.flywheel/bin/flywheel doctor` | Ecosystem doctor across hooks, runtime binaries, skill OS, source registry, proposals, and incidents. |
+| `~/.claude/skills/.flywheel/bin/flywheel doctor` | Fleet doctor across hooks, runtime binaries, skill OS, source registry, proposals, and incidents. |
 | `~/.claude/skills/.flywheel/bin/flywheel-loop doctor --strict --repo PATH --json` | Repo-local readiness gate. |
 | `~/.claude/skills/.flywheel/bin/flywheel-loop init --repo PATH --json` | Install portable `.flywheel/` docs. |
 | `~/.claude/skills/.flywheel/bin/flywheel-loop init --reconcile --repo PATH --json` | Preview or apply migration of older repo-local docs. |
@@ -211,7 +211,7 @@ names a wrapper.
 | `~/.claude/skills/.flywheel/bin/flywheel-loop state-mine --json` | Mine fleet `STATE.md` files for latent unresolved, stale, recurring, pattern, and orphaned opportunities. |
 | `~/.claude/skills/.flywheel/bin/flywheel-readme` | Cross-pane README review CLI with draft/submit/review/reject/pass/signoff plus L61 dual-channel submit/reject transport, canonical doctor/health/repair, validate/audit/why, schemas, and observability. |
 | `.flywheel/scripts/daily-report.sh --repo PATH --json` | Generate `.flywheel/reports/daily-YYYY-MM-DD.md` and feed the `daily_report_age_hours` doctor signal. |
-| `.flywheel/scripts/bead-quality-mining.sh --repo PATH --json` | Back-mine recently closed beads, verify acceptance-gate artifacts, and create parented audit-gap beads for unverified gates. |
+| `.flywheel/scripts/bead-quality-mining.sh --repo PATH --json` | Back-mine recently closed beads, verify acceptance-gate evidence, and create parented audit-gap beads for unverified gates. |
 | `.flywheel/scripts/publishability-bar.sh --doctor --json` | Score the repo against the three-judges publishability bar and feed `publishability_bar_score` into `flywheel-loop doctor`; private/internal repos are scored unless the audit declares `EXEMPT_CLIENT_OWNED` or `EXEMPT_PUBLIC_FACING`. |
 | `.flywheel/scripts/zeststream-public-prepublish-hook.sh public <url> --json` | Pre-publish gate for ZestStream repos; blocks public pushes when brand voice score, banned words, or ungrounded claims fail, regardless of current private hosting status. |
 | `.flywheel/scripts/state-md-miner.sh --json` | Fleet-wide `/flywheel:learn --mine-state` backend with dry-run, apply, doctor, and 5/day/repo auto-bead cap. |
@@ -248,7 +248,7 @@ surface when validating from shell.
 | `/flywheel:ntm` | Pane operations through the canonical transport. |
 | `/flywheel:synth` | Digest callbacks, reports, Beads, mail, and git activity. |
 | `/flywheel:lock` | Promote draft docs to locked state. |
-| `/flywheel:handoff` | End-of-session handoff. |
+| `/flywheel:handoff` | End-of-session resume note. |
 | `/flywheel:worker-tick` | Worker-side tick discipline when explicitly dispatched. |
 
 ## Loop Model

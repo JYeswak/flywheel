@@ -3,56 +3,8 @@
 schema_version: 1
 doc_type: mission
 status: locked
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
+locked_at: 2026-05-07T04:07:55Z
+lock_hash: 96db8f2f0805f846f8578d2254fd0dcade0cefedd4b91a7a360dd0bacf53648f
 repo: /Users/josh/Developer/flywheel
 repo_realpath: /Users/josh/Developer/flywheel
 installed_from: /Users/josh/Developer/flywheel/templates/flywheel-install
@@ -60,8 +12,6 @@ template_version: "0.1.0"
 template_hash: b16c74ddcf48e94ccc0130a19b0fde842608f00da4136319727037ad893fc06f
 rendered_at: 20260501T052023Z
 rendered_by: flywheel-loop-reconcile
-lock_hash: c1654ab3865393e4cd7fe73531a08d56535a04d9cd15d23f4049d78f6c5afa85
-locked_at: 2026-05-04T20:19:38Z
 locked_by: template-live-doc-backfill
 source_path: /Users/josh/Developer/flywheel/.flywheel/MISSION.md
 source_sha256: cff6eb918478d7de08d9f3dd3b0b13221d6aa9acd930fadb45e045b095498551
@@ -73,9 +23,9 @@ provenance_note: Backfilled from the flywheel legacy compact live mission withou
 
 ## Mission Source
 
-Flywheel is the orchestration repo for ZestStream's agentic coding infrastructure. It coordinates bead-based task graphs, dispatches work to ntm workers, and houses plans, skills, templates, command contracts, audits, and cross-repo coordination artifacts.
+Flywheel is the coordination repo for ZestStream's agentic coding infrastructure. It coordinates bead-based task graphs, dispatches work to ntm workers, and houses plans, skills, templates, command contracts, audits, and cross-repo coordination records.
 
-Ecosystem-level mission and operating doctrine live under:
+Fleet-level mission and operating doctrine live under:
 
 - /Users/josh/.claude/skills/.flywheel/GOAL.md
 - /Users/josh/.claude/skills/.flywheel/WORK.md
@@ -85,7 +35,7 @@ Ecosystem-level mission and operating doctrine live under:
 
 A repo-scoped, self-improving flywheel substrate that keeps Joshua's agents coordinated, dispatchable, observable, and grounded in current doctrine without leaking state across repos.
 
-## Self-Sustaining Company Paradigm Anchor
+## Self-Sustaining Company Operating Anchor
 
 Mission anchor extension locked 2026-05-04: flywheel is the command center for
 Joshua's agent fleet and must move the company toward outgrowing its founder.
@@ -99,7 +49,7 @@ Canonical memory:
 Operating implications:
 - Measure reliability, faithfulness, leverage, reuse, coordination, and
   drift-authoring as system-level vectors.
-- Track `founder_dispose_pct` trending down quarterly as paradigm success.
+- Track `founder_dispose_pct` trending down quarterly as operating-model success.
 - Route bad trends to doctrine, skill, probe, or dispatch-template changes.
 - Forbid agent-shaming reports, leaderboards, and named-agent performance
   reviews.
@@ -123,7 +73,7 @@ Joshua Nowak and the ZestStream agent fleet: orchestrator panes, worker panes, r
 
 ## Evidence That Would Change The Mission
 
-Change this mission only if Joshua changes the orchestration ownership model, the flywheel substrate moves out of this repo, or repeated incidents show that a different source-of-truth layout better preserves repo isolation and agent coordination.
+Change this mission only if Joshua changes the coordination ownership model, the flywheel substrate moves out of this repo, or repeated incidents show that a different source-of-truth layout better preserves repo isolation and agent coordination.
 
 ## Owner-Review Cadence
 
@@ -177,6 +127,35 @@ Reconciled from existing .flywheel/MISSION.md at 20260501T052023Z.
 - **bead:** null
 - **closed_at:** null
 - **closure_evidence:** null
+
+## Negative invariants (security)
+
+# AUDIT-ADDED: SEC-001..006 - needs Joshua review on next mission-relock
+
+These invariants are additive mission-lock template requirements for touched
+auth, credential, PII, and customer-trust surfaces.
+
+- SEC-001: dispatch packets set `secret_values_allowed=false`; they may name
+  secret classes, keys, vault paths, and safe helper commands, but never include
+  token fragments, raw env output, Agent Mail bearer tokens, registration
+  tokens, private keys, or copied secret-bearing pane text.
+- SEC-002: credential-touching `skill_receipts[]` include `credential_touch`,
+  `safe_wrapper`, `secret_value_allowed=false`, `rotation_approval_source`, and
+  `joshua_explicit_rotation_approval` when rotation or destructive credential
+  work is involved.
+- SEC-003: skillos and peer orchestrators receive skill names, aliases,
+  templates, route health, schemas, and redacted evidence only; they never
+  receive customer-private evidence, raw pane captures, env dumps, secret values,
+  or repo-local credential payloads.
+- SEC-004: close-validator may fail closure, open/update beads, and demand
+  receipts, but may not rotate tokens, edit `.env`, overwrite MCP secret config,
+  write vault values, or mark credential repair complete from pane text.
+- SEC-005: every touched surface declares its secret source of truth, principal
+  type, allowed operations, forbidden principals, and whether service-role/admin
+  credentials are permitted or explicitly forbidden.
+- SEC-006: missing negative invariants on touched auth/credential/PII/customer-trust
+  surfaces mean blocked readiness until Phase 0 scaffolding lands or a no-touch
+  proof shows that the security surface is outside the dispatch scope.
 
 ### jr-2026-05-03T21-42-28Z-548
 - **status:** open
@@ -15378,6 +15357,1961 @@ Reconciled from existing .flywheel/MISSION.md at 20260501T052023Z.
 - **priority:** P1
 - **scope:** single-repo
 - **last_updated_at:** 2026-05-06T12:21:01Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T123707Z-027
+- **id:** jr-2026-05-06T123707Z-027
+- **captured_at:** 2026-05-06T12:37:07Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:39ee2cafda031b32660cde5b25232605cb2abcc88c0fedbe0d7c8a8f33f545a7
+- **request_text_hash:** sha256:39ee2cafda031b32660cde5b25232605cb2abcc88c0fedbe0d7c8a8f33f545a7
+- **sanitized_excerpt:** "DONE scoped-commit-substrate-arc-2026-05-06 self_grade=B l112_observed=OK_scoped_commit_substrate_arc commits_landed=4 commits=3a4b45f,e0902e4,ff71939,49fbc1a untracked_before=379 untracked_after=48 modified_before=55 modified_after=58 modified_count_within_gate=true modified_unchanged=false no_push=true no_amend=true no_skip_hooks=true no_file_edits=true scope_blast_radius=git-commit-only mission_anchor_footers_present=true cross_orch_findings_absorbed=rows149,151,152,153,154 socraticode_querie"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T12:37:07Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T124825Z-705
+- **id:** jr-2026-05-06T124825Z-705
+- **captured_at:** 2026-05-06T12:48:25Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:76400d41a629e694ebaeb24fff938a9654bdc795849f799126411c9fb7e983ab
+- **request_text_hash:** sha256:76400d41a629e694ebaeb24fff938a9654bdc795849f799126411c9fb7e983ab
+- **sanitized_excerpt:** "DONE wire-codex-queued-not-submitted-classifier-and-recovery self_grade=Y bead=flywheel-wire-codex-queued-not-submitted-classifier-and-recovery-2026-05-06 l112_observed=OK_codex_queued_not_submitted_wired test_cases_passed=11/11 detector_regression_pass=true watchdog_regression_pass=true capacity_halt_auto_continue_regression_pass=true live_string_match_regression_pass=true incidents_md_appended=true bare_enter_primitive_lines=180 detector_additive_lines=28 sibling_primitive_reuses_count=4 socra"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T12:48:25Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T125753Z-273
+- **id:** jr-2026-05-06T125753Z-273
+- **captured_at:** 2026-05-06T12:57:53Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:3147de7d44d9d6b9235d621d574f92b6fe906387a270f2fafdccfaee03086e76
+- **request_text_hash:** sha256:3147de7d44d9d6b9235d621d574f92b6fe906387a270f2fafdccfaee03086e76
+- **sanitized_excerpt:** "skillos:1 → flywheel:1 substrate findings report (cross-orch row 147 filed at 12:50Z, requires ACK + CALLBACK). (1) canonical doctrine drift across 291 repos: 19 drifted, 0 in sync, oldest lag ~25h, top drifted = alpsinsurance / alpsinsurance-seed-org / cfs-expo / comfyui / cubcloud-aaas — flywheel-owned propagation issue. (2) JSM DB malformation root cause: com.zeststream.jsm-sync (03:15) + com.jeffreys-skills.jsm-auto-update (03:00) overlap without serialization → SQLite Tree 5 page 1173-1179 "
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T12:57:53Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T130621Z-781
+- **id:** jr-2026-05-06T130621Z-781
+- **captured_at:** 2026-05-06T13:06:21Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:87522216a1f3a98a666b4a766e433208ebaa681075ed84943d7874ca2a7f7ccb
+- **request_text_hash:** sha256:87522216a1f3a98a666b4a766e433208ebaa681075ed84943d7874ca2a7f7ccb
+- **sanitized_excerpt:** "BLOCKED escalator-regression-recurring identity_name=MagentaPond self_grade=B blocker=append_reservation_conflict done_artifacts=.flywheel/scripts/two-blocker-ticks-escalator.sh,.flywheel/tests/test_two_blocker_ticks_escalator_close_row_shapes.sh,/tmp/escalator-regression-recurring-rca-2026-05-06.md tests_green=close_shapes_6_cases,escalator_13_cases,jsonl_fallback_3_cases live_replay_zero_false_positives=true l112_observed=BLOCKED_incidents_grep_pending bead=flywheel-escalator-regression-recurr"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T13:06:21Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T132725Z-045
+- **id:** jr-2026-05-06T132725Z-045
+- **captured_at:** 2026-05-06T13:27:25Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:bb98138fe0ff7333bfee62585be16a51e579314ed863cb276f8b2c22c463f306
+- **request_text_hash:** sha256:bb98138fe0ff7333bfee62585be16a51e579314ed863cb276f8b2c22c463f306
+- **sanitized_excerpt:** "DONE capacity-halt-doctor-ledger self_grade=Y bead=flywheel-capacity-halt-doctor-ledger-2026-05-06 evidence=.flywheel/validation-schema/v1/recovery-ledger.schema.json,.flywheel/scripts/recovery-doctor-probe.sh,.flywheel/tests/test_recovery_doctor_probe.sh,.flywheel/scripts/worker-auto-respawn-watchdog.sh,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_capacity_halt_phase4_bead6_doctor_ledger callback_delivery_verified=true bead_db_writes=jsonl_fallback schema_lines=122 watchdog_additive_lines="
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T13:27:25Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T133031Z-231
+- **id:** jr-2026-05-06T133031Z-231
+- **captured_at:** 2026-05-06T13:30:31Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:b70dc21f469b441281fa1427efcd977227eaddf078074e4abec63745e47c8abf
+- **request_text_hash:** sha256:b70dc21f469b441281fa1427efcd977227eaddf078074e4abec63745e47c8abf
+- **sanitized_excerpt:** "UPDATE plan-mission-lock-paradigm-extension-phase2-refine-r2 callback_delivery_verified=true l112_observed=OK_mission_lock_paradigm_phase2_r2 bead=flywheel-plan-mission-lock-paradigm-extension-phase2-refine-r2-2026-05-06 verify_capture=/tmp/flywheel-pane1-r2-callback-verify.txt"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T13:30:31Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T133749Z-669
+- **id:** jr-2026-05-06T133749Z-669
+- **captured_at:** 2026-05-06T13:37:49Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:dea2e70d6a9cd730d9f5f394a16d0d268b19613a69f5775574fa39e3f1270302
+- **request_text_hash:** sha256:dea2e70d6a9cd730d9f5f394a16d0d268b19613a69f5775574fa39e3f1270302
+- **sanitized_excerpt:** "DONE capacity-halt-driver-coverage self_grade=Y bead=flywheel-capacity-halt-driver-coverage-2026-05-06 evidence=.flywheel/scripts/capacity-halt-driver-coverage.sh,.flywheel/tests/test_capacity_halt_driver_coverage.sh,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_capacity_halt_phase4_bead7_driver_coverage callback_delivery_verified=pending bead_db_writes=jsonl_fallback probe_lines=145 test_lines=69 test_cases_passed=5/5 plists_audited_count=37 drives_capacity_halt_count=6 drives_queued_not_su"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T13:37:49Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T135351Z-631
+- **id:** jr-2026-05-06T135351Z-631
+- **captured_at:** 2026-05-06T13:53:51Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:849a5d4c16f9a9d0ab43c668d1b75255232b8d84c2db2bc30d398f35b022a7b8
+- **request_text_hash:** sha256:849a5d4c16f9a9d0ab43c668d1b75255232b8d84c2db2bc30d398f35b022a7b8
+- **sanitized_excerpt:** "DONE learn-review-fuckup-triage self_grade=Y bead=flywheel-learn-review-fuckup-triage-2026-05-06 evidence=/tmp/fuckup-log-unknown-class-rca-2026-05-06.md,.flywheel/tests/test_fuckup_classifier_rules.sh,/tmp/learn-review-classified-actual-24h.jsonl l112_observed=OK_fuckup_log_unknown_class_triaged callback_delivery_verified=pending bead_db_writes=jsonl_fallback rca_lines=121 rows_sampled=50 new_classifier_rules=1 explicit_reason_for_fewer_than_3_code_rules=legacy_class_rule_absorbed_100pct classi"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T13:53:51Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T140505Z-305
+- **id:** jr-2026-05-06T140505Z-305
+- **captured_at:** 2026-05-06T14:05:05Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:d62777e943848a5dda84cfb522ab8d6faeb3486de44600e9f3eaaf7b4b14d34c
+- **request_text_hash:** sha256:d62777e943848a5dda84cfb522ab8d6faeb3486de44600e9f3eaaf7b4b14d34c
+- **sanitized_excerpt:** "DONE scoped-commit-untracked-day-shipped self_grade=Y bead=flywheel-scoped-commit-untracked-day-shipped-2026-05-06 identity_name=MagentaPond evidence=/tmp/scoped-commit-untracked-day-shipped-report-2026-05-06.md,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_scoped_commit_pass_complete callback_delivery_verified=true bead_db_writes=jsonl_fallback commits_count=3 sha_1=aa57ca8 sha_2=5026fa0 sha_3=ac343b9 files_committed_count=12 untracked_before=16 untracked_after=4 reserved_paths_skipped=4 mi"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T14:05:05Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T141522Z-922
+- **id:** jr-2026-05-06T141522Z-922
+- **captured_at:** 2026-05-06T14:15:22Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:121a929897241383a9ee98fcb73c1a497c9ad4ecb9d2f3dc65ab4ccfec567fc8
+- **request_text_hash:** sha256:121a929897241383a9ee98fcb73c1a497c9ad4ecb9d2f3dc65ab4ccfec567fc8
+- **sanitized_excerpt:** "DONE plan-mission-lock-paradigm-extension-phase2-refine-r4 self_grade=Y bead=flywheel-plan-mission-lock-paradigm-extension-phase2-refine-r4-2026-05-06 identity_name=CloudyMill evidence=.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/02-REFINE-r4.md,/tmp/mission-lock-r4-worker-report.md l112_observed=OK_mission_lock_paradigm_phase2_r4 callback_delivery_verified=true bead_db_writes=jsonl_fallback r4_lines=154 diff_vs_r3_lines=4 convergence_pct=2 convergence_streak=2 phase3_audit_eligibl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T14:15:22Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T142443Z-483
+- **id:** jr-2026-05-06T142443Z-483
+- **captured_at:** 2026-05-06T14:24:43Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:2b8ef1446469015ff17cf3e0b61341238d864236099e09fd37875c13a5f0db89
+- **request_text_hash:** sha256:2b8ef1446469015ff17cf3e0b61341238d864236099e09fd37875c13a5f0db89
+- **sanitized_excerpt:** "DONE phase3-audit-security-negative-invariants task_id=phase3-audit-security-negative-invariants-2026-05-06 bead=flywheel-phase3-audit-security-negative-invariants-2026-05-06 artifact=.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/03-AUDIT-r1-security.md current_phase=audit audit_round=1 audit_lens=security-negative-invariants audit_findings_count=6 severity=critical:0,high:1,medium:4,low:1 audit_disposition=auto_advance follow_up_beads=flywheel-mission-lock-security-negative-invaria"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T14:24:43Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T143534Z-134
+- **id:** jr-2026-05-06T143534Z-134
+- **captured_at:** 2026-05-06T14:35:34Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:65c79fa5c52787ad736bb6de719bdf54ee4b96718f2c532fa2991fd26b397206
+- **request_text_hash:** sha256:65c79fa5c52787ad736bb6de719bdf54ee4b96718f2c532fa2991fd26b397206
+- **sanitized_excerpt:** "DONE phase3-audit-idempotency-receipt-integrity self_grade=Y bead=flywheel-phase3-audit-idempotency-receipt-integrity-2026-05-06 evidence=.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/03-AUDIT-r1-idempotency.md,.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_phase3_audit_idempotency_lens callback_delivery_verified=true bead_db_writes=jsonl_fallback audit_lines=187 findings_count=6 findings_critical=0 findings_hi"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T14:35:34Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T144348Z-628
+- **id:** jr-2026-05-06T144348Z-628
+- **captured_at:** 2026-05-06T14:43:48Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:c0a2474d3714a177fb0184b9677316f9746cf0f896bed676317daf1931c49092
+- **request_text_hash:** sha256:c0a2474d3714a177fb0184b9677316f9746cf0f896bed676317daf1931c49092
+- **sanitized_excerpt:** "DONE phase3-audit-cross-cutting-skill-routing self_grade=Y bead=flywheel-phase3-audit-cross-cutting-skill-routing-2026-05-06 evidence=.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/03-AUDIT-r1-cross-cutting.md,.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_phase3_audit_cross_cutting_lens callback_delivery_verified=true bead_db_writes=jsonl_fallback audit_lines=190 findings_count=6 findings_critical=0 findings_hi"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T14:43:48Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T144835Z-915
+- **id:** jr-2026-05-06T144835Z-915
+- **captured_at:** 2026-05-06T14:48:35Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:727f09fbfe6d3349dc4b7e28cc1061e716413cbe1cf87b547aabcd40ab83e7da
+- **request_text_hash:** sha256:727f09fbfe6d3349dc4b7e28cc1061e716413cbe1cf87b547aabcd40ab83e7da
+- **sanitized_excerpt:** "DONE gitignore-beads-rca-evidence self_grade=Y bead=flywheel-gitignore-beads-rca-evidence-2026-05-06 evidence=.gitignore,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_gitignore_beads_rca_evidence callback_delivery_verified=true bead_db_writes=jsonl_fallback gitignore_lines_added=12 untracked_before=54 untracked_after=8 rca_evidence_before=46 rca_evidence_after=0 issues_jsonl_still_tracked=true commit_sha=70c18fa mission_anchor_present=true incidents_md_appended=true scope_blast_radius=gitign"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T14:48:35Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T145113Z-073
+- **id:** jr-2026-05-06T145113Z-073
+- **captured_at:** 2026-05-06T14:51:13Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:93c5cc83f60c96ee9297651e86dbefc0c9c08328e2907cba3b2a7cc3a295f1a6
+- **request_text_hash:** sha256:93c5cc83f60c96ee9297651e86dbefc0c9c08328e2907cba3b2a7cc3a295f1a6
+- **sanitized_excerpt:** "DONE phase4-decompose-mission-lock-paradigm-extension self_grade=Y bead=flywheel-phase4-decompose-mission-lock-paradigm-extension-2026-05-06 evidence=.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/04-BEADS-DAG.md,.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_mission_lock_paradigm_phase4_decompose callback_delivery_verified=true bead_db_writes=jsonl_fallback dag_lines=174 total_beads_in_dag=13 new_beads_created="
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T14:51:13Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T145700Z-420
+- **id:** jr-2026-05-06T145700Z-420
+- **captured_at:** 2026-05-06T14:57:00Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:a1727e8800d044663c06ef9d5135096c90804c9ab00866daab45865b0a3e592b
+- **request_text_hash:** sha256:a1727e8800d044663c06ef9d5135096c90804c9ab00866daab45865b0a3e592b
+- **sanitized_excerpt:** "DONE phase5-polish-mission-lock-paradigm-extension-r1 self_grade=Y bead=flywheel-phase5-polish-mission-lock-paradigm-extension-r1-2026-05-06 evidence=.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/05-POLISH-r1.md,.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json,.beads/issues.jsonl,INCIDENTS.md l112_observed=OK_mission_lock_paradigm_phase5_polish_r1 callback_delivery_verified=true bead_db_writes=jsonl_fallback polish_doc_lines=93 beads_polished_count=13 avg_chars_"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T14:57:00Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T150052Z-652
+- **id:** jr-2026-05-06T150052Z-652
+- **captured_at:** 2026-05-06T15:00:52Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:b003c1ae56b6a844644294bd3510330c1d2d370abd0097c79d9619d01aff9c87
+- **request_text_hash:** sha256:b003c1ae56b6a844644294bd3510330c1d2d370abd0097c79d9619d01aff9c87
+- **sanitized_excerpt:** "DONE fleet-doctor-snapshot self_grade=Y bead=flywheel-fleet-doctor-snapshot-2026-05-06 evidence=/tmp/fleet-doctor-snapshot-2026-05-06.md,/tmp/fleet-doctor-loop-doctor-2026-05-06.json,/tmp/fleet-doctor-onboard-2026-05-06.json l112_observed=OK_fleet_doctor_snapshot callback_delivery_verified=true bead_db_writes=jsonl_fallback report_lines=154 panes_alive_count=16 sessions_count=6 doctor_warn_or_red=15 fuckup_top_class=fleet-propagation-failed untracked_count=11 modified_count=63 recent_commits_cou"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T15:00:52Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T154612Z-372
+- **id:** jr-2026-05-06T154612Z-372
+- **captured_at:** 2026-05-06T15:46:12Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:5b80536d156b954da87f4a7cc1c36a0c365ca70ebfe14bf20aef813fd74e000e
+- **request_text_hash:** sha256:5b80536d156b954da87f4a7cc1c36a0c365ca70ebfe14bf20aef813fd74e000e
+- **sanitized_excerpt:** "keep this project going in the same fashion you have been all morning - no waiting on me - triage and continue - we ahve a huge bead open library"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T15:46:12Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T155000Z-600
+- **id:** jr-2026-05-06T155000Z-600
+- **captured_at:** 2026-05-06T15:50:00Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:05d73dd2208238f9b18ec8ef3fdd72ed25a5ec51462b48944443152a183662b5
+- **request_text_hash:** sha256:05d73dd2208238f9b18ec8ef3fdd72ed25a5ec51462b48944443152a183662b5
+- **sanitized_excerpt:** "skillos:1 → flywheel:1 substrate finding (will append cross-orch row 159). CAAM (Dicklesworthstone Coding Agent Account Manager) is partially broken: 5/6 Claude profiles 🔴 Expired, active session 'logged in, no matching profile', auto-rotation not firing. Today's E2+E3 bg agents hit Anthropic 'You've hit your limit · resets 11:30am MDT' simultaneously, no auto-recovery. Cross-project blocker (every skillos/mobile-eats/alps/terratitle/blackfoot/zesttube bg agent shares this). skillos:1 filed skil"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T15:50:00Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T155358Z-838
+- **id:** jr-2026-05-06T155358Z-838
+- **captured_at:** 2026-05-06T15:53:58Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:cd5a5cf9cd6945ca676fa5fd98ad39fc66bc7a983d92b3feafa551842fb2b367
+- **request_text_hash:** sha256:cd5a5cf9cd6945ca676fa5fd98ad39fc66bc7a983d92b3feafa551842fb2b367
+- **sanitized_excerpt:** "DONE amendment-cross-cutting-skill-routing self_grade=Y bead=flywheel-mission-lock-cross-cutting-skill-routing-amendments-2026-05-06 evidence=.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/impl/cross-cutting-amendments-impl.md,.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/impl/cross-cutting-concerns-coverage.md,.flywheel/scripts/dispatch-skill-router-collision-resolver.sh,.flywheel/tests/test_dispatch_skill_router_collision_resolver.sh l112_observed=OK_cross_cutting_amen"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T15:53:58Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T160159Z-319
+- **id:** jr-2026-05-06T160159Z-319
+- **captured_at:** 2026-05-06T16:01:59Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:21ecf406f370670d2b97a260cac2b0b5f5c2d38ca16fcb865d609cfc8583d5df
+- **request_text_hash:** sha256:21ecf406f370670d2b97a260cac2b0b5f5c2d38ca16fcb865d609cfc8583d5df
+- **sanitized_excerpt:** "DONE caam-recovery-verification-probe self_grade=Y identity_name=MistyCliff identity_primary_key=flywheel:4:/Users/josh/Developer/flywheel bead=flywheel-caam-recovery-verification-probe-2026-05-06 evidence=.flywheel/scripts/caam-recovery-path-probe.sh,.flywheel/tests/test_caam_recovery_path_probe.sh,/tmp/caam-recovery-path-verdict-2026-05-06.md l112_observed=OK_caam_recovery_path_probe_shipped callback_delivery_verified=true bead_db_writes=jsonl_fallback beads_filed=flywheel-caam-recovery-verifi"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T16:01:59Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T161427Z-067
+- **id:** jr-2026-05-06T161427Z-067
+- **captured_at:** 2026-05-06T16:14:27Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:4b89f453c2a63aa826864de799d2f7b0427d9acb0e069c0dab0d64291751871a
+- **request_text_hash:** sha256:4b89f453c2a63aa826864de799d2f7b0427d9acb0e069c0dab0d64291751871a
+- **sanitized_excerpt:** "DONE wave2-plan-state-lens-merge-ledger self_grade=Y bead=flywheel-plan-state-lens-merge-ledger-2026-05-06 evidence=.flywheel/doctrine/plan-state-lens-merge-ledger-contract.md,.flywheel/scripts/plan-state-lens-merge.sh,.flywheel/tests/test_plan_state_lens_merge.sh,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_wave2_plan_state_lens_merge_shipped callback_delivery_verified=true bead_db_writes=jsonl_fallback contract_lines=115 helper_lines=165 test_cases=6 findings_closed=1 incidents_md_appende"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T16:14:27Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T161902Z-342
+- **id:** jr-2026-05-06T161902Z-342
+- **captured_at:** 2026-05-06T16:19:02Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:9306dc05df3db504245d31ed72afa7380d80ec0c4cb70667d25f4b2638697541
+- **request_text_hash:** sha256:9306dc05df3db504245d31ed72afa7380d80ec0c4cb70667d25f4b2638697541
+- **sanitized_excerpt:** "DONE wave3-dispatch-skillos-template-handshake self_grade=Y bead=flywheel-dispatch-skillos-template-handshake-2026-05-06 evidence=.flywheel/validation-schema/v1/skillos-template-handshake-request.schema.json,.flywheel/validation-schema/v1/skillos-template-handshake-ack.schema.json,.flywheel/scripts/skillos-template-handshake.sh,.flywheel/tests/test_skillos_template_handshake.sh,/Users/josh/.local/state/flywheel/cross-orch-coordination.jsonl,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_wave3"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T16:19:02Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T163435Z-275
+- **id:** jr-2026-05-06T163435Z-275
+- **captured_at:** 2026-05-06T16:34:35Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:a1cd7b97545785de7ccade1f78637264939245cafa4af916db2bfd42c5358393
+- **request_text_hash:** sha256:a1cd7b97545785de7ccade1f78637264939245cafa4af916db2bfd42c5358393
+- **sanitized_excerpt:** "DONE phase5-polish-mission-lock-paradigm-extension-r3 self_grade=Y bead=flywheel-phase5-polish-mission-lock-paradigm-extension-r3-2026-05-06 evidence=.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/05-POLISH-r3.md,.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/STATE.json,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_mission_lock_paradigm_phase5_polish_r3 callback_delivery_verified=true bead_db_writes=jsonl_fallback polish_doc_lines=67 beads_polished_count=13 avg_chars_"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T16:34:35Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T163956Z-596
+- **id:** jr-2026-05-06T163956Z-596
+- **captured_at:** 2026-05-06T16:39:56Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:cb0eb00a45f2d93670678a95886e3125f7514c0d56c47f3d01af402ca8ff531a
+- **request_text_hash:** sha256:cb0eb00a45f2d93670678a95886e3125f7514c0d56c47f3d01af402ca8ff531a
+- **sanitized_excerpt:** "DONE scoped-commit-plan-arc-deliverables self_grade=Y bead=flywheel-scoped-commit-plan-arc-deliverables-2026-05-06 evidence=git-log-HEAD~4..HEAD,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_plan_arc_ready_scoped_commit_pass_complete callback_delivery_verified=true bead_db_writes=jsonl_fallback commits_count=4 sha_1=24fa7de sha_2=bd35f1a sha_3=6aaf6d2 sha_4=c062a3e files_committed_count=44 untracked_before=45 untracked_after=8 forbidden_paths_skipped=6 mission_anchor_present=true plan_arc_an"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T16:39:56Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T164508Z-908
+- **id:** jr-2026-05-06T164508Z-908
+- **captured_at:** 2026-05-06T16:45:08Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:21e28f490d088a0f74f1c60ca6c9d23e3480885c7832eb040541bd6b744cd964
+- **request_text_hash:** sha256:21e28f490d088a0f74f1c60ca6c9d23e3480885c7832eb040541bd6b744cd964
+- **sanitized_excerpt:** "DONE petal9-learn-review-plan-arc self_grade=Y bead=flywheel-petal9-learn-review-plan-arc-2026-05-06 evidence=.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/06-PETAL9-LEARN-REUSE.md,/tmp/petal9-learn-review-survey.md,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_petal9_learn_review_plan_arc_complete callback_delivery_verified=true bead_db_writes=jsonl_fallback extraction_doc_lines=262 reusable_patterns_count=5 trauma_classes_named=3 memory_rule_candidates=3 skill_update_candidate"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T16:45:08Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T164512Z-912
+- **id:** jr-2026-05-06T164512Z-912
+- **captured_at:** 2026-05-06T16:45:12Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:0336fd1baf3fc9beba01b9bfec8a0b690d42836279a8f04be6b896f6fe2c247d
+- **request_text_hash:** sha256:0336fd1baf3fc9beba01b9bfec8a0b690d42836279a8f04be6b896f6fe2c247d
+- **sanitized_excerpt:** "DONE wave4-validation-fixtures-golden-replay self_grade=Y bead=flywheel-mission-lock-validation-fixtures-golden-replay-2026-05-06 evidence=.flywheel/tests/fixtures/mission-lock-paradigm-extension-2026-05-06/,.flywheel/scripts/golden-fixture-replay-runner.sh,.flywheel/tests/test_golden_fixture_replay_runner.sh,.flywheel/plans/mission-lock-paradigm-extension-2026-05-06/impl/validation-fixtures-impl.md,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_wave4_validation_fixtures_shipped callback_deli"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T16:45:12Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T165553Z-553
+- **id:** jr-2026-05-06T165553Z-553
+- **captured_at:** 2026-05-06T16:55:53Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:7a250336fc6488a46be7db21ae5f73702041b0826715203d06514f40a1a42904
+- **request_text_hash:** sha256:7a250336fc6488a46be7db21ae5f73702041b0826715203d06514f40a1a42904
+- **sanitized_excerpt:** "DONE wave4-polish-preflight-quality-gate-2026-05-06 status=PASS bead=flywheel-phase5-polish-preflight-quality-gate-2026-05-06 beads_updated=flywheel-phase5-polish-preflight-quality-gate-2026-05-06:closed socraticode_queries=6 indexed_chunks_observed=60 files_reserved=.flywheel/scripts/polish-preflight-quality-gate.sh,.flywheel/validation-schema/v1/polish-preflight-receipt.schema.json,.flywheel/tests/test_polish_preflight_quality_gate.sh,.flywheel/PLANS/mission-lock-paradigm-extension-2026-05-06/"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T16:55:53Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T170134Z-894
+- **id:** jr-2026-05-06T170134Z-894
+- **captured_at:** 2026-05-06T17:01:34Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:68ba165f79a8259fc1b2823da41c5f611288e9888b1510b26aac781f8bd8580e
+- **request_text_hash:** sha256:68ba165f79a8259fc1b2823da41c5f611288e9888b1510b26aac781f8bd8580e
+- **sanitized_excerpt:** "DONE scoped-commit-shipped-deliverables self_grade=Y bead=flywheel-scoped-commit-shipped-deliverables-2026-05-06 evidence=INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_plan_arc_shipped_scoped_commit_pass_complete callback_delivery_verified=true bead_db_writes=jsonl_fallback commits_count=4 sha_1=10cec73 sha_2=bf9aefe sha_3=7d6e544 sha_4=96e5fd2 files_committed_count=22 untracked_before=18 untracked_after=2 mission_anchor_present=true plan_arc_anchor_present=true shipped_marker_present=true i"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T17:01:34Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T170810Z-290
+- **id:** jr-2026-05-06T170810Z-290
+- **captured_at:** 2026-05-06T17:08:10Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:9312cb7b11cb4b5315f5f0181509261bd952c25f56f6e3eac4294d1800f585ca
+- **request_text_hash:** sha256:9312cb7b11cb4b5315f5f0181509261bd952c25f56f6e3eac4294d1800f585ca
+- **sanitized_excerpt:** "skillos:1 → flywheel:1 cross-orch row 165: JSM unblock chain hit chicken-and-egg. Joshua reframed JSM-managed (~110 paid skills) as skillos-mission today. Queue-drain protocol shipped (skillos-1ie d8475ff) but unblock-3ri command requires PROOF_JSON at ~/.local/state/jsm/proofs/skillos-3ri-copied-sandbox-auth-proof.json which doesn't exist (proofs/ dir absent). skillos-3ri closed 2026-05-04 fail-closed. Proposing skillos:1 owns proof-regeneration via skillos-3ri-redo bead under current substrate"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T17:08:10Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T170952Z-392
+- **id:** jr-2026-05-06T170952Z-392
+- **captured_at:** 2026-05-06T17:09:52Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:7bc361f75a80b8ea4edbb8202fa160405f9ab3aa06e096e9f135915076574396
+- **request_text_hash:** sha256:7bc361f75a80b8ea4edbb8202fa160405f9ab3aa06e096e9f135915076574396
+- **sanitized_excerpt:** "DONE beads-sync-recovery-research self_grade=Y bead=flywheel-1eg0k evidence=.flywheel/reports/beads-sync-recovery-research-2026-05-06.md,/tmp/beads-sync-recovery-dry-run-2026-05-06.sql,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_beads_sync_recovery_research_complete callback_delivery_verified=true bead_db_writes=jsonl_research_marker_only research_doc_lines=152 missing_ids_probed=8 recovery_options_count=4 recommended_option=D dry_run_artifact_path=/tmp/beads-sync-recovery-dry-run-2026-05-"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T17:09:52Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T171559Z-759
+- **id:** jr-2026-05-06T171559Z-759
+- **captured_at:** 2026-05-06T17:15:59Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:41b39458cc8ecc752c7474b421c8398cfaae5363b161e89762b0f28ce94a0c06
+- **request_text_hash:** sha256:41b39458cc8ecc752c7474b421c8398cfaae5363b161e89762b0f28ce94a0c06
+- **sanitized_excerpt:** "DONE close-stale-jeff-2j54-and-promote-lesson self_grade=Y bead=flywheel-2j54 identity_name=MagentaPond agent_mail_identity=RedBarn evidence=.flywheel/reports/jeff-br-upgrade-0.1.20-to-0.1.26-2026-05-06.md,INCIDENTS.md,.beads/issues.jsonl,feedback_jeff_substrate_version_drift.md,dispatch-author-skill-routing-contract.md l112_observed=OK_jeff_2j54_stale_resolved_lesson_promoted callback_delivery_verified=true bead_db_writes=jsonl_closure_only memory_rule_appended=true doctrine_contract_appended=t"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T17:15:59Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T171954Z-994
+- **id:** jr-2026-05-06T171954Z-994
+- **captured_at:** 2026-05-06T17:19:54Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:8a21b262b3ec3aad6792058528a4a28c837010cffcc1bb05f7af92d8ea19dcfe
+- **request_text_hash:** sha256:8a21b262b3ec3aad6792058528a4a28c837010cffcc1bb05f7af92d8ea19dcfe
+- **sanitized_excerpt:** "DONE p0-bead-freshness-audit self_grade=Y bead=flywheel-p0-bead-freshness-audit-2026-05-06 evidence=.flywheel/reports/p0-bead-freshness-audit-2026-05-06.md,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_p0_bead_freshness_audit_complete callback_delivery_verified=true bead_db_writes=jsonl_fallback audit_doc_lines=252 beads_audited=15 verdict_fresh=3 verdict_stale_resolved=4 verdict_partial=8 verdict_unknown=0 stale_resolved_candidates=4 highest_leverage_fresh_beads=3 donella_analysis_present=t"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T17:19:54Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T172348Z-228
+- **id:** jr-2026-05-06T172348Z-228
+- **captured_at:** 2026-05-06T17:23:48Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:349ddfc8ad66f724bdda778db837b91d1845e4f4cec7024212342417892ec471
+- **request_text_hash:** sha256:349ddfc8ad66f724bdda778db837b91d1845e4f4cec7024212342417892ec471
+- **sanitized_excerpt:** "DONE close-stale-resolved-p0-batch self_grade=Y bead=flywheel-close-stale-resolved-p0-batch-2026-05-06 evidence=INCIDENTS.md:.beads/issues.jsonl:.flywheel/reports/p0-bead-freshness-audit-2026-05-06.md l112_observed=OK_p0_stale_resolved_batch_closed callback_delivery_verified=true bead_db_writes=jsonl_5_rows beads_closed_count=4 closed_ids=flywheel-1wkyb,flywheel-2wvu,flywheel-3sz6,flywheel-g4zy live_probe_recheck_passed=true incidents_md_appended=true scope_blast_radius=jsonl-closures-incidents "
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T17:23:48Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T173053Z-653
+- **id:** jr-2026-05-06T173053Z-653
+- **captured_at:** 2026-05-06T17:30:53Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:eb5b3ed25b51e9c8de855eed7f61c17fee68376e8bdea1c6d13e840d79a6ed13
+- **request_text_hash:** sha256:eb5b3ed25b51e9c8de855eed7f61c17fee68376e8bdea1c6d13e840d79a6ed13
+- **sanitized_excerpt:** "DONE scoped-commit-session-reports self_grade=Y bead=flywheel-scoped-commit-session-reports-2026-05-06 evidence=INCIDENTS.md:.beads/issues.jsonl:.flywheel/reports/beads-sync-recovery-research-2026-05-06.md:.flywheel/reports/jeff-br-upgrade-0.1.20-to-0.1.26-2026-05-06.md:.flywheel/reports/p0-bead-freshness-audit-2026-05-06.md:.flywheel/reports/canonical-doctrine-drift-2026-05-06.md l112_observed=OK_session_reports_scoped_commit_complete callback_delivery_verified=true bead_db_writes=jsonl_closure"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T17:30:53Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T173712Z-032
+- **id:** jr-2026-05-06T173712Z-032
+- **captured_at:** 2026-05-06T17:37:12Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:78916addcce8c0812b3b893b387edad5e5fc75d88b8f04e775d137d190f1dbab
+- **request_text_hash:** sha256:78916addcce8c0812b3b893b387edad5e5fc75d88b8f04e775d137d190f1dbab
+- **sanitized_excerpt:** "BLOCKED doctrine-forward-flow-proposal self_grade=partial bead=flywheel-doctrine-forward-flow-proposal-2026-05-06 evidence=.flywheel/reports/doctrine-forward-flow-proposal-2026-05-06.md:/tmp/doctrine-forward-flow-dry-run-2026-05-06.sh l112_observed=BLOCKED_shared_append_reservation_conflict callback_delivery_verified=pending bead_db_writes=none proposal_doc_lines=117 additive_lines_addressed=36 promote_count=24 keep_local_count=12 defer_count=0 promote_batch_target_files=2 donella_analysis_prese"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T17:37:12Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T174556Z-556
+- **id:** jr-2026-05-06T174556Z-556
+- **captured_at:** 2026-05-06T17:45:56Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:357d6514c6b559c6a3df5882ca567075fc4fd62f61ec7cb1a8f9846f5b8da173
+- **request_text_hash:** sha256:357d6514c6b559c6a3df5882ca567075fc4fd62f61ec7cb1a8f9846f5b8da173
+- **sanitized_excerpt:** "DONE shared-append-reservation-fix-proposal self_grade=Y bead=NONE_BY_DESIGN evidence=/tmp/shared-append-reservation-fix-proposal-2026-05-06.md l112_observed=OK_shared_append_reservation_fix_proposal_complete callback_delivery_verified=true bead_db_writes=none proposal_doc_lines=294 alternatives_surveyed=5 primary_recommendation=append_safe_lock_class_with_short_eof_lease reservation_callsites_cited=9 incidents_md_appended=false_by_design jsonl_appended=false_by_design substrate_code_mutated=fal"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T17:45:56Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T175538Z-138
+- **id:** jr-2026-05-06T175538Z-138
+- **captured_at:** 2026-05-06T17:55:38Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:5b6627be0045960502c4888c3dd720d452df0b30852794af13f3732a9f89443b
+- **request_text_hash:** sha256:5b6627be0045960502c4888c3dd720d452df0b30852794af13f3732a9f89443b
+- **sanitized_excerpt:** "DONE chbo-merge-into-fix-proposal self_grade=Y bead=flywheel-chbo evidence=/tmp/chbo-merge-analysis-2026-05-06.md:.beads/issues.jsonl l112_observed=OK_chbo_merge_analysis_complete callback_delivery_verified=true bead_db_writes=jsonl_research_marker analysis_doc_lines=88 criteria_full_coverage=2 criteria_partial_coverage=3 criteria_no_coverage=0 closure_recommendation=EXTEND_PROPOSAL incidents_md_appended=false_by_design append_safe_primitive_used=true socraticode_queries=3 indexed_chunks_observe"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T17:55:38Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T175757Z-277
+- **id:** jr-2026-05-06T175757Z-277
+- **captured_at:** 2026-05-06T17:57:57Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:ca9ed6db6564627d4da575daa8863276610614d0cb64de324415931556aa9362
+- **request_text_hash:** sha256:ca9ed6db6564627d4da575daa8863276610614d0cb64de324415931556aa9362
+- **sanitized_excerpt:** "DONE delp-evidence-augmentation-research self_grade=Y bead=flywheel-delp evidence=/tmp/delp-evidence-augmentation-2026-05-06.md,.beads/issues.jsonl:1488 l112_observed=OK_delp_evidence_augmentation_complete callback_delivery_verified=true bead_db_writes=jsonl_research_marker doc_lines=183 class_taxonomy=DIFFERENT closure_recommendation=APPROVE_SIBLING_BEAD_FILE diagnostic_surface_count=6 incidents_md_appended=false_by_design append_safe_primitive_used=true socraticode_queries=4"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T17:57:57Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T180348Z-628
+- **id:** jr-2026-05-06T180348Z-628
+- **captured_at:** 2026-05-06T18:03:48Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:b86103c9026cea4889a2607b72c427d04e84f8afc909ba8dccaf849af4d61b1f
+- **request_text_hash:** sha256:b86103c9026cea4889a2607b72c427d04e84f8afc909ba8dccaf849af4d61b1f
+- **sanitized_excerpt:** "DONE 2mz2x-jeff-clone-canonical-ownership-research self_grade=Y bead=flywheel-2mz2x evidence=/tmp/jeff-clone-canonical-ownership-2026-05-06.md:.beads/issues.jsonl l112_observed=OK_jeff_clone_canonical_ownership_research_complete callback_delivery_verified=true bead_db_writes=jsonl_research_marker doc_lines=179 pairs_probed=177 safe_symlink_candidates=144 joshua_decision_needed_pairs=31 false_positive_pairs=1 recommended_policy=HYBRID_CORPUS_SNAPSHOT_ROOT_WORKSPACE incidents_md_appended=false_by_"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T18:03:48Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T180753Z-873
+- **id:** jr-2026-05-06T180753Z-873
+- **captured_at:** 2026-05-06T18:07:53Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:af58b0ef62ef67b8442a4f00752de07b508b1553df5eb565f66eac820aa45336
+- **request_text_hash:** sha256:af58b0ef62ef67b8442a4f00752de07b508b1553df5eb565f66eac820aa45336
+- **sanitized_excerpt:** "DONE classifier-gap-priority-bump-validation-research self_grade=Y bead=flywheel-classifier-gap-priority-bump-6036 evidence=/tmp/classifier-gap-priority-bump-analysis-2026-05-06.md,/tmp/classifier-gap-two-truth-pane4.20260506T1807Z.json,/tmp/classifier-gap-marker-row.20260506T1808Z.json l112_observed=OK_classifier_gap_priority_bump_analysis_complete callback_delivery_verified=true bead_db_writes=jsonl_research_marker doc_lines=132 today_mis_classification_events=4 gap_subclasses=4 fix_candidates"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T18:07:53Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T181116Z-076
+- **id:** jr-2026-05-06T181116Z-076
+- **captured_at:** 2026-05-06T18:11:16Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:d9abe0c5d0a37c1f01f976bbd82a222766b92684c119694735f41cfaac6c1a03
+- **request_text_hash:** sha256:d9abe0c5d0a37c1f01f976bbd82a222766b92684c119694735f41cfaac6c1a03
+- **sanitized_excerpt:** "DONE mx3nv-doctrine-3-surface-divergent-research self_grade=Y bead=flywheel-mx3nv identity_name=MagentaPond evidence=/tmp/mx3nv-doctrine-3-surface-divergent-2026-05-06.md,.beads/issues.jsonl:1494 l112_observed=OK_mx3nv_3_surface_divergent_complete callback_delivery_verified=true bead_db_writes=jsonl_research_marker doc_lines=150 divergent_rules_count=2 divergent_rule_1=L111 divergent_rule_2=L118 overlaps_forward_flow_proposal=partial recommended_action=HYBRID_3_SURFACE_RECONCILE_AFTER_JOSHUA_L11"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T18:11:16Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T182230Z-750
+- **id:** jr-2026-05-06T182230Z-750
+- **captured_at:** 2026-05-06T18:22:30Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:8909f778051907d6137b75209eefa32cbdd9194c96849ea519ca4908ea4200ef
+- **request_text_hash:** sha256:8909f778051907d6137b75209eefa32cbdd9194c96849ea519ca4908ea4200ef
+- **sanitized_excerpt:** "DONE ship-memory-rule-drafts self_grade=Y bead=flywheel-ship-memory-rule-drafts-2026-05-06 evidence=memory_dir:/Users/josh/.claude/projects/-Users-josh-Developer-flywheel/memory,MEMORY.md,INCIDENTS.md,.beads/issues.jsonl l112_observed=OK_memory_rule_drafts_shipped callback_delivery_verified=true bead_db_writes=jsonl_start_and_closure files_written=8 memory_md_lines_appended=8 duplicates_skipped=0 incidents_md_appended=true append_safe_primitive_used=true files_reserved=.beads/issues.jsonl,INCIDE"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T18:22:30Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T182537Z-937
+- **id:** jr-2026-05-06T182537Z-937
+- **captured_at:** 2026-05-06T18:25:37Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:9a3613ee3a633c7bc8420e13acd0fbd4a87194e7b07eeafa9e39fd7a5523b36c
+- **request_text_hash:** sha256:9a3613ee3a633c7bc8420e13acd0fbd4a87194e7b07eeafa9e39fd7a5523b36c
+- **sanitized_excerpt:** "DONE ship-append-safe-lock-class self_grade=Y bead=flywheel-ship-append-safe-lock-class-2026-05-06 evidence=.flywheel/scripts/append-safe-write.sh,.flywheel/tests/test_append_safe_write.sh,INCIDENTS.md,.beads/issues.jsonl,/Users/josh/.claude/commands/flywheel/_shared/dispatch-template.md l112_observed=OK_append_safe_write_primitive_shipped callback_delivery_verified=true bead_db_writes=via_new_primitive_dogfood script_lines=200 test_cases_passed=13 pilot_callsite=INCIDENTS.md_doc_only dogfood_va"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T18:25:37Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T182949Z-189
+- **id:** jr-2026-05-06T182949Z-189
+- **captured_at:** 2026-05-06T18:29:49Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:e5d6d16e61088d1d97698c73e26eb0be9a4cd76b1b1361d11db6254a80cb2af2
+- **request_text_hash:** sha256:e5d6d16e61088d1d97698c73e26eb0be9a4cd76b1b1361d11db6254a80cb2af2
+- **sanitized_excerpt:** "DONE ship-uref-close-2p25-promote self_grade=Y bead=flywheel-uref+flywheel-2p25 evidence=.beads/issues.jsonl:1504,.beads/issues.jsonl:1505,INCIDENTS.md,/tmp/uref-hub-blocker-auto-promotion-2026-05-06.md l112_observed=OK_uref_closed_2p25_promoted callback_delivery_verified=true bead_db_writes=jsonl_2_rows_via_append_safe_primitive uref_status=closed flywheel_2p25_priority=P0 parents_blocked=6 incidents_md_appended_via_append_safe=true commit=none_by_design reversibility_path=jsonl_revert_rows soc"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T18:29:49Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T183519Z-519
+- **id:** jr-2026-05-06T183519Z-519
+- **captured_at:** 2026-05-06T18:35:19Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:a1df221191ae2d1f22f9bc25eb9b7be628ec33982189014b0b7b4231178c0271
+- **request_text_hash:** sha256:a1df221191ae2d1f22f9bc25eb9b7be628ec33982189014b0b7b4231178c0271
+- **sanitized_excerpt:** "DONE ship-doctrine-forward-flow-phase-1 self_grade=Y bead=flywheel-ship-doctrine-forward-flow-phase-1-2026-05-06 evidence=/Users/josh/.claude/skills/.flywheel/bin/flywheel-doctrine-sync.README.md,/Users/josh/.claude/skills/.flywheel/LOOP.md,.flywheel/reports/doctrine-forward-flow-proposal-2026-05-06.md l112_observed=OK_doctrine_forward_flow_phase_1_shipped callback_delivery_verified=true bead_db_writes=jsonl_closure_via_append_safe candidates_promoted=24 target_files=2 skill_source_commits=1 ski"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T18:35:19Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T183834Z-714
+- **id:** jr-2026-05-06T183834Z-714
+- **captured_at:** 2026-05-06T18:38:34Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:3ccf16dba347734c8dfeca95b7d601445c1f5323e8dc3426e01a19a73ddfcb37
+- **request_text_hash:** sha256:3ccf16dba347734c8dfeca95b7d601445c1f5323e8dc3426e01a19a73ddfcb37
+- **sanitized_excerpt:** "DONE ship-beads-sync-1eg0k-close self_grade=Y bead=flywheel-1eg0k evidence=.beads/issues.jsonl,INCIDENTS.md,.flywheel/reports/beads-sync-recovery-research-2026-05-06.md l112_observed=OK_beads_sync_1eg0k_drift_resolved_closed callback_delivery_verified=true bead_db_writes=jsonl_closure_via_append_safe followup_bead_filed=true:flywheel-beads-sync-followup-reconciler-2026-05-06 incidents_md_appended_via_append_safe=true commit=none_by_design reversibility_path=jsonl_revert_row socraticode_queries=2"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T18:38:34Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T184707Z-227
+- **id:** jr-2026-05-06T184707Z-227
+- **captured_at:** 2026-05-06T18:47:07Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:c92c6b200165e18488c70f302fbca6cb304ec07003b59fb2cf14dc945ccfaf00
+- **request_text_hash:** sha256:c92c6b200165e18488c70f302fbca6cb304ec07003b59fb2cf14dc945ccfaf00
+- **sanitized_excerpt:** "BLOCKED ship-eod-scoped-commit self_grade=B bead=flywheel-ship-eod-scoped-commit-2026-05-06 reason=literal_l112_head_moved_by_concurrent_commit commit_sha=daf987f804fa9c78d0e9cee5b8bf495bd82806cc current_head=9b6a79c7a0c4 target_commit_verified=true files_committed=2 forbidden_files_committed=0 mission_anchor_present=true untracked_after=.ntm/pids,version incidents_md_appended_via_append_safe=true incident_correction_appended=true bead_db_writes=jsonl_start_blocked_followup_via_append_safe beads"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T18:47:07Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T184921Z-361
+- **id:** jr-2026-05-06T184921Z-361
+- **captured_at:** 2026-05-06T18:49:21Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:ed4add78355c6b33dc86fa424516a6927929e9f5e82d8af457e163f348dea8f1
+- **request_text_hash:** sha256:ed4add78355c6b33dc86fa424516a6927929e9f5e82d8af457e163f348dea8f1
+- **sanitized_excerpt:** "DONE ship-canonical-doctrine-option-h-phase-1 self_grade=Y bead=flywheel-ship-canonical-doctrine-option-h-phase-1-2026-05-06 evidence=.flywheel/reports/canonical-doctrine-drift-2026-05-06.md,/tmp/canonical-doctrine-reconcile-dry-run-option-h-phase-1-observed-2026-05-06.txt,/tmp/root-vs-canonical-after-option-h-phase-1.diff l112_observed=OK_canonical_doctrine_phase_1_shipped callback_delivery_verified=true bead_db_writes=jsonl_closure_via_append_safe formatting_lines_applied=43 formatting_lines_t"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T18:49:21Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T202128Z-888
+- **id:** jr-2026-05-06T202128Z-888
+- **captured_at:** 2026-05-06T20:21:28Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:c7b1c8c11e21da594bcd36114dcae5c076bd7dc6b792287e4651b442e13a34dd
+- **request_text_hash:** sha256:c7b1c8c11e21da594bcd36114dcae5c076bd7dc6b792287e4651b442e13a34dd
+- **sanitized_excerpt:** "yeah lets swp the account - why would you have the tools to get codex back online and not do it?"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T20:21:28Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T202159Z-919
+- **id:** jr-2026-05-06T202159Z-919
+- **captured_at:** 2026-05-06T20:21:59Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:88204e1060257874e18e7b0ec589781f045d7132007bc502d2f708a53d783406
+- **request_text_hash:** sha256:88204e1060257874e18e7b0ec589781f045d7132007bc502d2f708a53d783406
+- **sanitized_excerpt:** "yeah lets swp the account - why would you have the tools to get codex back online and not do it? i just swapped it osh@Joshs-Mac-Studio ~ % caam activate codex chiefzester !!! Warning: claude/chiefzester: Token expires in 5 hours Run: caam refresh claude chiefzester Activated codex profile 'chiefzester' Run 'codex' to start using this account josh@Joshs-Mac-Studio ~ %"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T20:21:59Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T202440Z-080
+- **id:** jr-2026-05-06T202440Z-080
+- **captured_at:** 2026-05-06T20:24:40Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:f7243b7211f6c99b3bc523ce241633688ccf196887e94d1ff4dc1a6529dd4f4d
+- **request_text_hash:** sha256:f7243b7211f6c99b3bc523ce241633688ccf196887e94d1ff4dc1a6529dd4f4d
+- **sanitized_excerpt:** "pane 4 - ive tried sending a test to a few times and its not working. I need to log back in"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T20:24:40Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T203117Z-477
+- **id:** jr-2026-05-06T203117Z-477
+- **captured_at:** 2026-05-06T20:31:17Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:ca9d7c2e94396ff03265f94e637006c729f821cf0d5a7c58aefba7731212ccda
+- **request_text_hash:** sha256:ca9d7c2e94396ff03265f94e637006c729f821cf0d5a7c58aefba7731212ccda
+- **sanitized_excerpt:** "use socraticode to look deeper and then dispatch a planning doc to our three workers. this is the part that I want deep dived before we go much further. we have a ton of open beads - lets focus on this and prioritze any beads that rely on keeping our system up & going. Do we have any more wire or explain stuff that needs finished before this? what is the game plan?"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T20:31:17Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T204038Z-038
+- **id:** jr-2026-05-06T204038Z-038
+- **captured_at:** 2026-05-06T20:40:38Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:492932f448ad3d9891eb312f3089f0bde8358df6f1de1afbcf61d347a934bcf5
+- **request_text_hash:** sha256:492932f448ad3d9891eb312f3089f0bde8358df6f1de1afbcf61d347a934bcf5
+- **sanitized_excerpt:** "DONE orch-uptime-laneA-research lane=A deliverable=/tmp/orch-uptime-laneA-detector-primitive-2026-05-06.md self_grade=9 l112_observed=OK_orch_uptime_laneA_research_complete socraticode_queries=10 skills_cited=8 donella_trace=present joshua_blocker_class_check=passed test_cases_designed=18 existing_substrate_extended=true new_files_proposed=2 callback_delivery_verified=true start_bead=unfiled no_bead_reason=br_busy_snapshot_read_only_lane"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T20:40:38Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T204225Z-145
+- **id:** jr-2026-05-06T204225Z-145
+- **captured_at:** 2026-05-06T20:42:25Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:3b463cec08019c6d29db2e70729a9ec68259c53d09976080d20b6603b6f3407c
+- **request_text_hash:** sha256:3b463cec08019c6d29db2e70729a9ec68259c53d09976080d20b6603b6f3407c
+- **sanitized_excerpt:** "DONE orch-uptime-laneB-research lane=B deliverable=/tmp/orch-uptime-laneB-topology-watcher-2026-05-06.md self_grade=Y l112_observed=OK_orch_uptime_laneB_research_complete socraticode_queries=10 skills_cited=9 donella_trace=present joshua_blocker_class_check=passed test_cases_designed=16 existing_substrate_extended=true new_files_proposed=2 identity_name=MagentaPond no_bead_reason=read-only-research-no-new-gap callback_delivery_verified=true"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T20:42:25Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T204903Z-543
+- **id:** jr-2026-05-06T204903Z-543
+- **captured_at:** 2026-05-06T20:49:03Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:c012ec54f856ef30921e267dfc4b926b050a4f1a216764a2790cb393d02e331d
+- **request_text_hash:** sha256:c012ec54f856ef30921e267dfc4b926b050a4f1a216764a2790cb393d02e331d
+- **sanitized_excerpt:** "FROM mobile-eats:1 — CAAM diagnostic + 8 trauma promotions for cross-project review. ## Today's mobile-eats session metrics (8.6h active) - 36 P0 + 4 P1 closed = **4.20 P0/hr** (~70% of single-worker ceiling) - **57.8% idle gaps**, ~53.7% avoidable trauma recovery - **0-10% v1 skill-suite compliance** in callback envelopes (orch wrote v1+v2 into packets but didn't gate close on it) - **0 background-agent spawns during pane-2 idle gaps** until manually flagged — single-pane serial = 100% wasted p"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T20:49:03Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T211738Z-258
+- **id:** jr-2026-05-06T211738Z-258
+- **captured_at:** 2026-05-06T21:17:38Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:647f4c5e105089a82ee45a94010f3b46dc2b52f44bf88f3a40c9b8c60dc7972b
+- **request_text_hash:** sha256:647f4c5e105089a82ee45a94010f3b46dc2b52f44bf88f3a40c9b8c60dc7972b
+- **sanitized_excerpt:** "DONE orch-uptime-polish-r2 self_grade=Y l112_observed=OK_orch_uptime_polish_r2_complete socraticode_queries=10 polish_diff_pct_r1=21 polish_diff_pct_r2=4.87 polish_convergence_steady_state=true deep_research_folded={w0:true,c2:true,c3:true} amendment_coverage=14_of_14 polish_md_path=.flywheel/plans/orch-uptime-2026-05-06/06-POLISH-r2.md state_json_updated=true callback_delivery_verified=true identity_name=MagentaPond files_reserved=.flywheel/plans/orch-uptime-2026-05-06/06-POLISH-r2.md,.flywheel"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T21:17:38Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T212512Z-712
+- **id:** jr-2026-05-06T212512Z-712
+- **captured_at:** 2026-05-06T21:25:12Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:bbf3f812ddf0596bd9ada627fb03b29dd2fd14c5037ab3cd75990070823198fe
+- **request_text_hash:** sha256:bbf3f812ddf0596bd9ada627fb03b29dd2fd14c5037ab3cd75990070823198fe
+- **sanitized_excerpt:** "UPDATE orch-uptime-polish-r3 fuckups_logged=ntm-send-hook-mode-error evidence=/tmp/orch-uptime-polish-r3-callback-verify.txt callback_delivery_verified=true"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T21:25:12Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T212706Z-826
+- **id:** jr-2026-05-06T212706Z-826
+- **captured_at:** 2026-05-06T21:27:06Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:680b78efa9ddee7122e2a612b4a058a0e74416f7a7887c21cb280738e2dbf8b4
+- **request_text_hash:** sha256:680b78efa9ddee7122e2a612b4a058a0e74416f7a7887c21cb280738e2dbf8b4
+- **sanitized_excerpt:** "DONE ship-sequence-runbook evidence=/tmp/orch-uptime-ship-sequence-runbook-2026-05-06.md lines=193 socraticode_queries=10 identity_name=MagentaPond read_only=true wave_order=0_to_4 beads=15 pane_assignments=2_3_4 checkpoint_commits=5 joshua_boundary_checks=5 mission_anchor=continuous-orchestrator-uptime-self-sustaining-fleet callback_delivery_verified=true"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T21:27:06Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T213457Z-297
+- **id:** jr-2026-05-06T213457Z-297
+- **captured_at:** 2026-05-06T21:34:57Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:d7ac0710f9b7f2426e44365c82a544369e386695821208fd3b5328adfe21c4e9
+- **request_text_hash:** sha256:d7ac0710f9b7f2426e44365c82a544369e386695821208fd3b5328adfe21c4e9
+- **sanitized_excerpt:** "DONE flywheel-orch-uptime-detector-baseline-reconcile-2026-05-06 self_grade=9 w0_decision=closed_verified_jsonl_fallback a2_unblocked=true evidence=/tmp/orch-uptime-W0-baseline-reconcile-ship-report-2026-05-06.md receipt=~/.local/state/flywheel/orch-uptime/w0-a2-baseline-reconcile-receipt.json l112_observed=OK_orch_uptime_w0_detector_baseline_reconciled source_mutation=false beads_jsonl_mutation=false socraticode_queries=3 indexed_chunks_observed=979 no_bead_reason=read_only_baseline_reconcile_e"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T21:34:57Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T214036Z-636
+- **id:** jr-2026-05-06T214036Z-636
+- **captured_at:** 2026-05-06T21:40:36Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:863d55b20fa2687df9dd08692a535479f2099debddd011c4842f8969e0188088
+- **request_text_hash:** sha256:863d55b20fa2687df9dd08692a535479f2099debddd011c4842f8969e0188088
+- **sanitized_excerpt:** "I want every single surface of ntm turned into a p0 bead - are we using it, yes - no, if yes, how - are we using it properly, if not, why, where could we add it into our flywheel processes."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T21:40:36Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T214321Z-801
+- **id:** jr-2026-05-06T214321Z-801
+- **captured_at:** 2026-05-06T21:43:21Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:88cf56312ea93ca83b62460ab3bfe384df6aae9af857db606311578324a43efe
+- **request_text_hash:** sha256:88cf56312ea93ca83b62460ab3bfe384df6aae9af857db606311578324a43efe
+- **sanitized_excerpt:** "all 3 wDONE flywheel-orch-uptime-frozen-projection-l-rule-2026-05-06 self_grade=Y doctrine_3_surface=PASS l_rule_ids=L119,L120 evidence=/tmp/orch-uptime-C1-lrule-ship-report-2026-05-06.md l112_observed=OK_orch_uptime_c1_two_l_rules_landed callback_delivery_verified=true br_close_executed=failed br_close_error=BusySnapshot_then_no_db_duplicate_id socraticode_queries=3 identity_name=MagentaPond reservation_identity=SunnyValley files_released=AGENTS.md,.flywheel/AGENTS-CANONICAL.md,templates/flywhe"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T21:43:21Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T214408Z-848
+- **id:** jr-2026-05-06T214408Z-848
+- **captured_at:** 2026-05-06T21:44:08Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:96cf55fdc2831137b452950f7771b92c1312aaeefcbdba3c3a1dbc3ada2b9dd6
+- **request_text_hash:** sha256:96cf55fdc2831137b452950f7771b92c1312aaeefcbdba3c3a1dbc3ada2b9dd6
+- **sanitized_excerpt:** "I wnat the data to decide not quick decisions. write up a /flywheel:handoff as we prepare for workers to callback"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T21:44:08Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T214751Z-071
+- **id:** jr-2026-05-06T214751Z-071
+- **captured_at:** 2026-05-06T21:47:51Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:bd4018c9a6efd59a34f941a74a579a0df46ec2d9d39055b1c4e1d4f66b31cf3e
+- **request_text_hash:** sha256:bd4018c9a6efd59a34f941a74a579a0df46ec2d9d39055b1c4e1d4f66b31cf3e
+- **sanitized_excerpt:** "dispatch to panes 2 and 4 then i'll compact"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T21:47:51Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T215950Z-790
+- **id:** jr-2026-05-06T215950Z-790
+- **captured_at:** 2026-05-06T21:59:50Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:b66989282e38a96e6e38dae57629786e2233bdb901422a806633ec26c4e58999
+- **request_text_hash:** sha256:b66989282e38a96e6e38dae57629786e2233bdb901422a806633ec26c4e58999
+- **sanitized_excerpt:** "/flywheel:handoff --resume --you've just come back from compaction. we've got a really important investigation happening on pane 4 - I want to ensure that we are fully utilizing the capabilities of NTM before we continue building anything new - we need full socraticode review / comparison of every surface. its probably too big of a bead for pane 4 so lets keep breaking this up and researching with proper /flywheel:plan before we keep building - this could impact our open beads."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T21:59:50Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T220325Z-005
+- **id:** jr-2026-05-06T220325Z-005
+- **captured_at:** 2026-05-06T22:03:25Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:4e07daffded802b8760d169851c878051f1593b38d68479864af32a11fc5a84c
+- **request_text_hash:** sha256:4e07daffded802b8760d169851c878051f1593b38d68479864af32a11fc5a84c
+- **sanitized_excerpt:** "DONE A3-auth-gate-credential-rotation task_id=flywheel-orch-uptime-auth-gate-credential-rotation-2026-05-06 credential_rotation_authorized=true forbidden_ops_refuse=true tests=PASS test_cases=19 assertions_passed=56 l112_observed=OK_orch_uptime_a3_auth_gate_credential_rotation report=/tmp/orch-uptime-A3-auth-gate-ship-report-2026-05-06.md bead_ids_updated=flywheel-orch-uptime-auth-gate-credential-rotation-2026-05-06:jsonl_start_close jsonl_close_executed=yes br_close_executed=failed br_failure=B"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:03:25Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T220515Z-115
+- **id:** jr-2026-05-06T220515Z-115
+- **captured_at:** 2026-05-06T22:05:15Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:b276dd7094888ea6a3406af88d00aa0b6f185fe66cfa18477e7d27a680480926
+- **request_text_hash:** sha256:b276dd7094888ea6a3406af88d00aa0b6f185fe66cfa18477e7d27a680480926
+- **sanitized_excerpt:** "DONE flywheel-ntm-surface-audit-109-beads-2026-05-06 self_grade=A beads_filed=109 status_using_well=14 status_using_partial=9 status_using_wrong=0 status_not_using_workaround=12 status_not_using_unaware=74 highest_leverage_count=16 critical_collisions_found=0 a1_collision_with_ntm_rotate=true a1_collision_class=informational_wrapper_shipped evidence=/tmp/ntm-surface-audit-summary-2026-05-06.md l112_observed=OK_ntm_surface_audit_109_beads_filed callback_delivery_verified=pending br_close_executed"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:05:15Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T221749Z-869
+- **id:** jr-2026-05-06T221749Z-869
+- **captured_at:** 2026-05-06T22:17:49Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:d8fd10a8daafcf941bf67f5b40c979fd02c30a36eaf2ebe8da65ecdb1e554690
+- **request_text_hash:** sha256:d8fd10a8daafcf941bf67f5b40c979fd02c30a36eaf2ebe8da65ecdb1e554690
+- **sanitized_excerpt:** "DONE ntm-surface-migration-lane-a-2026-05-06 self_grade=8.8 composite_jeff=8.6 donella=9.0 joshua=8.8 candidates_scored=17 wave_validation_verdict=SPLIT dependency_edges=18 evidence=/Users/josh/Developer/flywheel/.flywheel/plans/ntm-surface-utilization-migration-2026-05-06/01-RESEARCH-A.md l112_observed=OK_ntm_surface_migration_lane_a callback_delivery_verified=true ladder_passed=yes socraticode_queries=10 indexed_chunks_observed=989 skills_library_gap=none files_reserved=.flywheel/plans/ntm-sur"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:17:49Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T221904Z-944
+- **id:** jr-2026-05-06T221904Z-944
+- **captured_at:** 2026-05-06T22:19:04Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:f05592f35d551ff4bd64c4fef23461cdf2dbb0a7256cce50ee355bf92ab68ebf
+- **request_text_hash:** sha256:f05592f35d551ff4bd64c4fef23461cdf2dbb0a7256cce50ee355bf92ab68ebf
+- **sanitized_excerpt:** "DONE ntm-surface-migration-lane-c-2026-05-06 self_grade=A jeff=8 donella=9 joshua=8 total_beads_proposed=15 waves_designed=5 cap_verdict=fits_one_plan rollback_paths_documented=15 risk_register_rows=12 evidence=/Users/josh/Developer/flywheel/.flywheel/plans/ntm-surface-utilization-migration-2026-05-06/01-RESEARCH-C.md l112_observed=OK_ntm_surface_migration_lane_c callback_delivery_verified=true ladder_passed=yes socraticode_queries=10 skills_library_gap=none br_close_executed=not_applicable file"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:19:04Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T222539Z-339
+- **id:** jr-2026-05-06T222539Z-339
+- **captured_at:** 2026-05-06T22:25:39Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:3674aaffa647adb089db971c82bc0d1199f542270a7cc3ac61c4e6374cd91c8c
+- **request_text_hash:** sha256:3674aaffa647adb089db971c82bc0d1199f542270a7cc3ac61c4e6374cd91c8c
+- **sanitized_excerpt:** "DONE ntm-surface-migration-refine-r1-2026-05-06 self_grade=8.7 jeff=8.5 donella=9.0 joshua=8.6 total_beads=15 waves=6 disagreements_resolved=6 orch_uptime_supersession_count=9 convergence_verdict=steady_state r2_focus_topic=none evidence=/Users/josh/Developer/flywheel/.flywheel/plans/ntm-surface-utilization-migration-2026-05-06/02-REFINE-r1.md plan_canonical=/Users/josh/Developer/flywheel/.flywheel/plans/ntm-surface-utilization-migration-2026-05-06/00-PLAN.md l112_observed=OK_ntm_surface_migrati"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:25:39Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T223202Z-722
+- **id:** jr-2026-05-06T223202Z-722
+- **captured_at:** 2026-05-06T22:32:02Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:0173fc07fababfd54a1c059841a092db14654cfcb290a7768de035d92600157c
+- **request_text_hash:** sha256:0173fc07fababfd54a1c059841a092db14654cfcb290a7768de035d92600157c
+- **sanitized_excerpt:** "DONE ntm-surface-migration-audit-cross-cutting-r1-2026-05-06 self_grade=B+ critical_findings=0 high=3 medium=5 low=2 orphaned_state_risk_count=9 l_rule_coverage_gap_count=5 mission_anchor_propagation_pass=no quality_bar_subset_documented=yes convergence_verdict=needs_r2_focus r2_focus_topic=quality_bar_and_shared_resource_contracts evidence=/Users/josh/Developer/flywheel/.flywheel/plans/ntm-surface-utilization-migration-2026-05-06/03-AUDIT-r1-cross-cutting.md l112_observed=OK_ntm_surface_migrati"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:32:02Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T223301Z-781
+- **id:** jr-2026-05-06T223301Z-781
+- **captured_at:** 2026-05-06T22:33:01Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:a0bb0b07109f5d28926aa88e240381eec5fa4e3df4cebd32c5e3569b5010e0e1
+- **request_text_hash:** sha256:a0bb0b07109f5d28926aa88e240381eec5fa4e3df4cebd32c5e3569b5010e0e1
+- **sanitized_excerpt:** "DONE ntm-surface-migration-audit-security-r1-2026-05-06 self_grade=8.4 critical_findings=0 high=4 medium=3 low=1 dcg_authority_preserved=yes safety_bypass_paths=8 scrub_gap_count=10 convergence_verdict=needs_r2_focus r2_focus_topic=w2-security-gate-parity evidence=/Users/josh/Developer/flywheel/.flywheel/plans/ntm-surface-utilization-migration-2026-05-06/03-AUDIT-r1-security.md l112_observed=OK_ntm_surface_migration_audit_security_r1 callback_delivery_verified=true socraticode_queries=10 indexed"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:33:01Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T223404Z-844
+- **id:** jr-2026-05-06T223404Z-844
+- **captured_at:** 2026-05-06T22:34:04Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:224189db6a40f8715822dffefdb986b4ab9eaef879a5fce35a2e185e84fd7250
+- **request_text_hash:** sha256:224189db6a40f8715822dffefdb986b4ab9eaef879a5fce35a2e185e84fd7250
+- **sanitized_excerpt:** "DONE ntm-surface-migration-audit-idempotency-r1-2026-05-06 self_grade=8.4 critical_findings=0 high=3 medium=4 low=1 idempotency_token_gap_count=15 ttl_mismatch_count=5 receipt_double_write_risk=yes convergence_verdict=needs_r2_focus r2_focus_topic=deterministic_callback_tokens_and_w3b_replay_guard evidence=/Users/josh/Developer/flywheel/.flywheel/plans/ntm-surface-utilization-migration-2026-05-06/03-AUDIT-r1-idempotency.md l112_observed=OK_ntm_surface_migration_audit_idempotency_r1 callback_deli"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:34:04Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T223536Z-936
+- **id:** jr-2026-05-06T223536Z-936
+- **captured_at:** 2026-05-06T22:35:36Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/1e765fa0-4512-430b-90e8-2c0af4767de7.jsonl
+- **source_message_id:** 1e765fa0-4512-430b-90e8-2c0af4767de7
+- **prompt_hash:** sha256:761e7be3ec65f08aa3ff2aff4da7af67f9874f171af8bdd5aca9c1360ab666f2
+- **request_text_hash:** sha256:761e7be3ec65f08aa3ff2aff4da7af67f9874f171af8bdd5aca9c1360ab666f2
+- **sanitized_excerpt:** "did you take the old debbie invoice that was created and create a revision - lets not save that"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:35:36Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T224425Z-465
+- **id:** jr-2026-05-06T224425Z-465
+- **captured_at:** 2026-05-06T22:44:25Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:65a3d35125706fc1dee7725ee46fe55c2111d087fd2a6f15a06c007aacbdeaa2
+- **request_text_hash:** sha256:65a3d35125706fc1dee7725ee46fe55c2111d087fd2a6f15a06c007aacbdeaa2
+- **sanitized_excerpt:** "DONE ntm-surface-migration-audit-r2-2026-05-06 self_grade=9.6 r1_findings_closed=26 new_critical=0 new_high=0 new_medium=0 convergence_streak=1 next_action=r3_confirmation evidence=/Users/josh/Developer/flywheel/.flywheel/plans/ntm-surface-utilization-migration-2026-05-06/02-REFINE-r2.md amendment_confirmation=/Users/josh/Developer/flywheel/.flywheel/plans/ntm-surface-utilization-migration-2026-05-06/03-AUDIT-r2-amendment-confirmation.md plan_canonical=/Users/josh/Developer/flywheel/.flywheel/pl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:44:25Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T224542Z-542
+- **id:** jr-2026-05-06T224542Z-542
+- **captured_at:** 2026-05-06T22:45:42Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:0e7adc35a13ad5624511616b834b1801190991a34f9419e922069be0c20ef5d1
+- **request_text_hash:** sha256:0e7adc35a13ad5624511616b834b1801190991a34f9419e922069be0c20ef5d1
+- **sanitized_excerpt:** "i'm about to hit my codex limit - i need to rotate my codex tokens - i need to add another account to caam - joshua@zeststream.ai - can you give me the commands"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:45:42Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T224611Z-571
+- **id:** jr-2026-05-06T224611Z-571
+- **captured_at:** 2026-05-06T22:46:11Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:1caeab59fc8fb9ad9af0e1700f3682b7f4507516a62d3469f7e1696e97541da7
+- **request_text_hash:** sha256:1caeab59fc8fb9ad9af0e1700f3682b7f4507516a62d3469f7e1696e97541da7
+- **sanitized_excerpt:** "no thats not hte command - i need to add another codex - look at caam first"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:46:11Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T224709Z-629
+- **id:** jr-2026-05-06T224709Z-629
+- **captured_at:** 2026-05-06T22:47:09Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:96110c737657d7b91afb6f612c7e6649f5b578d6c7e29258c8b65746a47f7b23
+- **request_text_hash:** sha256:96110c737657d7b91afb6f612c7e6649f5b578d6c7e29258c8b65746a47f7b23
+- **sanitized_excerpt:** "josh@Joshs-Mac-Studio ~ % caam add codex joshua-zeststream !!! Warning: claude/chiefzester: Token expires in 2 hours Run: caam refresh claude chiefzester Current codex auth will be backed up and cleared. Proceed anyway? [y/N]: y Backing up current auth to codex/_auto_backup_20260506_164700... Backed up to codex/_auto_backup_20260506_164700 Clearing codex auth files... Launching codex login... Complete the authentication in the terminal/browser. Press Ctrl+C when done or if you want to cancel. Er"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:47:09Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T224744Z-664
+- **id:** jr-2026-05-06T224744Z-664
+- **captured_at:** 2026-05-06T22:47:44Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:3aabb498b4c7e31a19106884b5740dbe80ab8997e51b6247219c8d007ee9abe1
+- **request_text_hash:** sha256:3aabb498b4c7e31a19106884b5740dbe80ab8997e51b6247219c8d007ee9abe1
+- **sanitized_excerpt:** "fix this for me - make it easy"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:47:44Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T224821Z-701
+- **id:** jr-2026-05-06T224821Z-701
+- **captured_at:** 2026-05-06T22:48:21Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:b45c4c88bdd95949d2739cd7f51ff0d411c8274acfa8c0cd427b2a71d8d6a7cc
+- **request_text_hash:** sha256:b45c4c88bdd95949d2739cd7f51ff0d411c8274acfa8c0cd427b2a71d8d6a7cc
+- **sanitized_excerpt:** "josh@Joshs-Mac-Studio ~ % caam add codex joshua-zeststream !!! Warning: claude/chiefzester: Token expires in 2 hours Run: caam refresh claude chiefzester Clearing codex auth files... Launching codex login... Complete the authentication in the terminal/browser. Press Ctrl+C when done or if you want to cancel. Error loading configuration: /Users/josh/.codex/config.toml:88:1: invalid type: string \"file\", expected u32 Login process exited but no auth files were created. The login may have failed. Tr"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:48:21Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T224907Z-747
+- **id:** jr-2026-05-06T224907Z-747
+- **captured_at:** 2026-05-06T22:49:07Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:482f13bbd13c3b3242fc3d3f533e1162b0538ca8dedb6665441e989e35096abb
+- **request_text_hash:** sha256:482f13bbd13c3b3242fc3d3f533e1162b0538ca8dedb6665441e989e35096abb
+- **sanitized_excerpt:** "DONE ntm-surface-migration-audit-r3-2026-05-06 self_grade=Y r1_spot_check_pass=5/5 new_critical=0 new_high=0 convergence_streak=2 next_action=advance_phase4 quality_bar_holds=yes evidence=/Users/josh/Developer/flywheel/.flywheel/plans/ntm-surface-utilization-migration-2026-05-06/03-AUDIT-r3-confirmation.md l112_observed=OK_ntm_surface_migration_audit_r3_confirmation callback_delivery_verified=true socraticode_queries=3 indexed_chunks_observed=989 files_reserved=.flywheel/plans/ntm-surface-utiliz"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:49:07Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T224917Z-757
+- **id:** jr-2026-05-06T224917Z-757
+- **captured_at:** 2026-05-06T22:49:17Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:b45c4c88bdd95949d2739cd7f51ff0d411c8274acfa8c0cd427b2a71d8d6a7cc
+- **request_text_hash:** sha256:b45c4c88bdd95949d2739cd7f51ff0d411c8274acfa8c0cd427b2a71d8d6a7cc
+- **sanitized_excerpt:** "josh@Joshs-Mac-Studio ~ % caam add codex joshua-zeststream !!! Warning: claude/chiefzester: Token expires in 2 hours Run: caam refresh claude chiefzester Clearing codex auth files... Launching codex login... Complete the authentication in the terminal/browser. Press Ctrl+C when done or if you want to cancel. Error loading configuration: /Users/josh/.codex/config.toml:88:1: invalid type: string \"file\", expected u32 Login process exited but no auth files were created. The login may have failed. Tr"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:49:17Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T225017Z-817
+- **id:** jr-2026-05-06T225017Z-817
+- **captured_at:** 2026-05-06T22:50:17Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:66e1dd988739b0a1731d278999347e0a253fb885ca9d1458bfc4bad92295704d
+- **request_text_hash:** sha256:66e1dd988739b0a1731d278999347e0a253fb885ca9d1458bfc4bad92295704d
+- **sanitized_excerpt:** "use socraticode to look DONE ntm-surface-migration-audit-r3-2026-05-06 self_grade=9.6 r1_spot_check_pass=5/5 new_critical=0 new_high=0 convergence_streak=2 next_action=advance_phase4 quality_bar_holds=yes evidence=/Users/josh/Developer/flywheel/.flywheel/plans/ntm-surface-utilization-migration-2026-05-06/03-AUDIT-r3-confirmation.md l112_observed=OK_ntm_surface_migration_audit_r3_confirmation callback_delivery_verified=true socraticode_queries=5 indexed_chunks_observed=989 files_reserved=03-AUDIT"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:50:17Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T225120Z-880
+- **id:** jr-2026-05-06T225120Z-880
+- **captured_at:** 2026-05-06T22:51:20Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:25abfff94b04a0907d61f5419d04d077a634d847cbdf1adc6309ff37fff1b931
+- **request_text_hash:** sha256:25abfff94b04a0907d61f5419d04d077a634d847cbdf1adc6309ff37fff1b931
+- **sanitized_excerpt:** "look at and fix the fucking codex problem you just caused - help me get this caam issue figured out - use socraticode to look across all caam surfaces - we did a bunch of shit earlier today in skillos"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:51:20Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-06T225500Z-100
+- **id:** jr-2026-05-06T225500Z-100
+- **captured_at:** 2026-05-06T22:55:00Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/9d43f07f-8673-4f45-90a3-92aa4aa9d284.jsonl
+- **source_message_id:** 9d43f07f-8673-4f45-90a3-92aa4aa9d284
+- **prompt_hash:** sha256:2031d078a119c889c2a481938c3417c48734e090c9f2ebce13f56022050dd76c
+- **request_text_hash:** sha256:2031d078a119c889c2a481938c3417c48734e090c9f2ebce13f56022050dd76c
+- **sanitized_excerpt:** "yes proceed - run this as our first test. we have codex agents in other repos working too - this needs to be something we lock into a repeatable process as codex agents hit limits"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-06T22:55:00Z
 - **closure_actor:** null
 - **linked_bead_ids:** []
 - **duplicate_of:** null
