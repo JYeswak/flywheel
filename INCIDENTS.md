@@ -5784,6 +5784,101 @@ Evidence:
 - Skill: `~/.claude/skills/agent-mail/SKILL.md`.
 - Bead: `flywheel-2tgl`.
 
+## agent-mail-reservation-unavailable
+
+Date: 2026-05-09
+
+Promotion Action: NEW
+
+Class: `agent-mail-reservation-unavailable`
+
+Event Count: 13 events in 7 days
+
+Severity: medium
+
+Cost: Thirteen flywheel/skillos worker preflights tried to take an L51 Agent
+Mail file reservation and could not even reach the reservation surface — the
+attempt failed before any timeout fired. Each worker proceeded with edits
+under a documented narrow-scope exception path; none of the 13 had the
+substrate-level concurrency lock that L51 requires. The events clustered
+across ~4 hours (2026-05-09T00:08Z through 2026-05-09T04:19Z), all on the
+skillos session, indicating a session-level Agent Mail outage rather than 13
+independent transient miss-fires.
+
+Root Cause: `agent-mail-reservation-unavailable` is the **preflight-failure
+sibling** of `agent-mail-reservation-timeout` (entry above). Where the
+timeout class fires when a reservation call is accepted but never returns,
+this class fires when the call cannot connect at all. Three failure shapes
+appear in the 13 fuckup-log rows:
+
+1. **FD exhaustion** ("Too many open files"): 7 of 13 — the Agent Mail
+   server-side process has run out of file descriptors and refuses new
+   reservation requests at the OS level. Symptomatically identical to the
+   `agent-mail-too-many-open-files` family already covered at line 6382 of
+   this file; this class is the worker-side observation of that
+   server-side state.
+2. **MCP transport failure** ("HTTP request failure to 127.0.0.1:8765" /
+   "Agent-mail MCP transport was unavailable"): 4 of 13 — the local
+   Agent Mail HTTP server is down, restarting, or unreachable on its
+   canonical port. Sister to `flywheel-ntaf` `agent-mail-launchd-maxfiles`
+   doctor concerns.
+3. **Registration token gap** ("required a registration token in this MCP
+   session"): 1 of 13 — the worker pane held a non-Agent-Mail-authenticated
+   MCP session and could not surface a reservation without first
+   re-authenticating. Sister to the `agent-mail-identity-needs-registration`
+   class at line 5680.
+
+Existing recovery beads `flywheel-0w1` (FD/lock leak family) and
+`flywheel-ntaf` (launchd maxfiles + doctor follow-up), plus the
+`agent-mail-fd-doctor.sh` diagnostic, already own these three failure
+shapes. This entry's job is to give the **preflight-unavailable observer**
+a layer-2 INCIDENTS landing pad so doctrine-ladder scans route future rows
+to the existing recovery family instead of filing duplicate
+promotion-candidate beads.
+
+Forever-Rule: An Agent Mail file reservation that is **unavailable at
+preflight** (FD exhaustion, MCP transport down, missing registration) is a
+substrate outage just like a reservation timeout, not permission to silently
+downgrade L51. A worker may continue only for a narrow, documented edit
+after recording the unavailability shape (FD / transport / registration),
+checking for an existing owner bead under `flywheel-0w1` /
+`flywheel-ntaf` / `agent-mail-too-many-open-files`, and preserving
+unrelated worktree state. The next owner action is Agent Mail FD doctor
+(`agent-mail-fd-doctor.sh`), MCP transport health check, or
+registration-token rotation — never indefinite retry, never downgraded
+locking semantics, never silent preflight skip.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote agent-mail-reservation-unavailable` (worker-tick by
+`flywheel-ijsb7`). This entry pairs with the `agent-mail-reservation-timeout`
+entry above so doctrine-ladder scans dedup BOTH preflight-unavailable AND
+in-call-timeout shapes, with the dedup heuristic now searching repo-local
+INCIDENTS.md (fixed in companion bead `flywheel-qnkj2`).
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl#L4547,L4581,L4587,L4590,L4594,L4605,L4613,L4615,L4621,L4625,L4629,L4631,L4636`:
+  the 13 events, all on 2026-05-09, clustered between 00:08Z and 04:19Z
+  on the skillos session.
+- Failure-shape distribution:
+  - FD exhaustion ("Too many open files"): 7 rows
+  - MCP transport failure: 4 rows
+  - Registration token gap: 1 row
+  - Other ("Agent-mail MCP transport was unavailable" without specific
+    sub-shape): 1 row
+- Sister INCIDENTS entry: `INCIDENTS.md#agent-mail-reservation-timeout`
+  (line 5730).
+- Server-side sibling: `INCIDENTS.md#agent-mail-too-many-open-files`
+  (line 6382).
+- Existing diagnostic bead: `flywheel-0w1`.
+- Existing follow-up bead: `flywheel-ntaf`
+  `agent-mail-launchd-maxfiles-and-doctor-fd-probe`.
+- Diagnostic: `.flywheel/scripts/agent-mail-fd-doctor.sh`.
+- Doctrine: `AGENTS.md` L51 `DISPATCH-FILE-RESERVATIONS-MANDATORY`.
+- Skill: `~/.claude/skills/agent-mail/SKILL.md`.
+- Companion dedup fix: `flywheel-qnkj2` (added `$REPO/INCIDENTS.md` to
+  `doctrine-ladder-promote.sh default_incident_paths`).
+- Bead: `flywheel-ijsb7`.
+
 ## file-reservation-closeout-conflict
 
 Date: 2026-05-08
@@ -6646,3 +6741,231 @@ Evidence:
   no longer emits.
 - `.flywheel/scripts/gap-hunt-probe.sh:498-512`
   (`probe_memory_without_cross_link`): probe source.
+
+## jeff-corpus-compactor-production-safety-gaps (2026-05-04, recorded 2026-05-09)
+
+Root Cause: The `jeff-corpus-compact.sh` script had four production-safety
+gaps when `flywheel-cwov` tried to trigger live compaction against the
+66.7GB v1 corpus that was reading RED on `jeff_corpus_storage_health`.
+All four gaps would have silently failed or produced doctor-invisible
+output:
+
+1. The script rejected `--idempotency-key` as an unknown argument, but
+   the production dispatch required `--idempotency-key cwov-1777858715`
+   for safe re-run semantics.
+2. `--apply` wrote a v3 manifest to
+   `.flywheel/jeff-corpus/v3/manifest.json`, but the doctor reads
+   `total_repo_size_mb` from the v1 manifest at
+   `.flywheel/jeff-corpus/v1/manifest.json`. Compaction could not move
+   the doctor's RED → GREEN/YELLOW signal.
+3. Cold-storage archive went to
+   `.flywheel/jeff-corpus/cold-storage/manifest-v1-retired-<ts>.json.gz`
+   instead of the doctrine-required
+   `.flywheel/jeff-corpus/v1.archived-<ts>.json.gz` path that the
+   doctor and downstream auditors read.
+4. The script never called Qdrant. It could not prove superseded chunks
+   were dropped or produce a pre/post point-count diff — so a
+   compaction run could "succeed" by exit code while leaving the
+   embedding store unchanged.
+
+A production compaction with the unfixed script would have looked like
+a successful 66.7GB drop in v3 while v1 still RED in doctor,
+cold-storage in the wrong path, Qdrant unchanged, and no idempotency
+receipt.
+
+Forever-Rule: Before triggering any production substrate-mutation
+script (compaction, manifest promotion, embedding rebuild, archive),
+audit the script for these four production-safety gates: (a)
+idempotency-key argument with durable receipt; (b) output path matches
+the doctor's read path so health signals can move; (c) archive path
+matches the doctrine-required canonical, not the script author's
+ad-hoc choice; (d) external system mutations (Qdrant, sqlite, etc.)
+are actually performed and proven via pre/post diff. A P0
+foundational-substrate compaction must surface a `--dry-run` plan that
+itemizes exactly which storage layers will change before `--apply` is
+allowed.
+
+Fix Applied/Status: All four gaps fixed in `jeff-corpus-compact.sh`
+before the production compaction ran. As of 2026-05-09:
+
+- `--idempotency-key KEY` accepted; receipt path
+  `<receipt_dir>/<safe_key>.json` written on apply
+  (`jeff-corpus-compact.sh:35,71-72`).
+- Production usage path documented in script header
+  (`jeff-corpus-compact.sh:19`).
+- Sibling beads `flywheel-cwov` (production trigger),
+  `flywheel-cwov.1` (cold-storage path correction), and
+  `flywheel-w3pr` (related deep pattern mining) all closed alongside
+  this bead.
+
+Evidence:
+- Bead: `flywheel-24a3`
+  ([cwov.audit-gap] jeff corpus compactor is not production-safe).
+- Bead: `flywheel-cwov`
+  ([jeff-corpus-compaction-trigger] PRODUCTION run of compact.sh —
+  66.7GB RED right now).
+- Bead: `flywheel-cwov.1`
+  ([flywheel-cwov.audit-gap] AG5 cold-storage manifests created at
+  `.flywheel/jeff-corpus/v1.archived-<ts>.json.gz`).
+- Bead: `flywheel-w3pr`
+  ([jeff-corpus-deep-pattern-mining] systematic measure of Jeff's
+  work/quality/methods).
+- Live precompact doctor at time of audit:
+  `/tmp/cwov-pre-compact.json` — `jeff_corpus_v1_total_mb=66766.7`,
+  `jeff_corpus_storage_health=RED`.
+- Compactor surface today: `.flywheel/scripts/jeff-corpus-compact.sh`
+  (idempotency-key, doctor-path manifest promotion, canonical
+  cold-storage path, Qdrant pre/post diff all addressed).
+- Probe source: `.flywheel/scripts/gap-hunt-probe.sh:582-607`
+  (`probe_bead_without_followup`).
+
+## Coordinator daemon wire-in complete (2026-05-07, recorded 2026-05-09)
+
+Auto-assign live with custom worker-tick template. Full bleed-immunity
+proven 4/4 CWDs identical (no working-dir cross-contamination between
+worker spawns). First end-to-end auto-dispatched bead `flywheel-olhg`
+closed cleanly 2026-05-07. The NTM coordinator daemon
+(`launchctl` label `ai.zeststream.flywheel-coordinator-daemon`)
+becomes the canonical worker dispatch substrate, with
+`/flywheel:dispatch` retained as the manual override path.
+
+Root Cause: For the period after the original `--watch --auto` design
+landed but before ntm#122 + ntm#124 closed upstream,
+`feedback_ntm_assign_watch_unsafe_pending_124` halted the daemon and
+made `/flywheel:dispatch` the canonical dispatch path. Live auto-assign
+could route to busy panes when robot-activity wasn't honored. The
+session ran for several days on operator-fired dispatch only, which is
+correct for safety but inverted the substrate intent — `/flywheel:dispatch`
+was always meant to be the override, not the default.
+
+Forever-Rule (now codified as L152): Worker dispatch substrate is
+the **NTM coordinator daemon**. Auto-dispatch via the pinned-wrapper
+daemon is the canonical path. Operator-fired `/flywheel:dispatch`
+becomes the manual override path for cases where the daemon's
+selection is wrong, the work needs operator-pinned routing, or the
+daemon is intentionally halted for safety. When upstream ntm has an
+open safety issue blocking auto-assign, halt the daemon via
+`launchctl bootout gui/501/<label>` and switch to override-only
+operation until remediation lands; never re-enable while the
+upstream contract is unresolved.
+
+Fix Applied/Status: Daemon installed via
+`.flywheel/scripts/install-coordinator-daemon.sh`; health probe
+`.flywheel/scripts/coordinator-daemon-health.sh --json` returns
+`status:pass`, `coordinator_daemon_alive:true`, daemon uptime
+60724+ seconds at 2026-05-09. Memory
+`feedback_ntm_assign_watch_unsafe_pending_124` updated 2026-05-08 to
+RESOLVED — old halt obsolete. ntm#122 + ntm#124 closed upstream
+(commits `c0f8f222` plumbed `AutoReassignOptions.DryRun` through
+`runWatchMode`/`PerformAutoReassignment`/`WatchLoop.handleCompletion`;
+`3e44fe9e` added `robot.IsLiveBusy()` busy-pane defense). L152
+shipped 2026-05-09 codifying the canonical/override split. README
+Dispatch Contract gains a coordinator-daemon row.
+
+Evidence:
+- Bead: `flywheel-8d11`
+  ([coord-wire-in T6] INCIDENTS.md + AGENTS.md L121 + README
+  ecosystem-wire-in — bead title's "L121" was stale at filing,
+  rule shipped at next-free L152 instead).
+- First end-to-end auto-dispatched bead: `flywheel-olhg` (closed
+  cleanly 2026-05-07; bleed-immunity verified 4/4 CWDs identical).
+- L-rule: `.flywheel/rules/L103-L152-coordinator-daemon-canonical-dispatch.md`.
+- Daemon installer:
+  `.flywheel/scripts/install-coordinator-daemon.sh`.
+- Daemon health probe:
+  `.flywheel/scripts/coordinator-daemon-health.sh`.
+- Install ledger:
+  `~/.local/state/flywheel/coordinator-daemon-install.jsonl`.
+- launchd plist:
+  `templates/flywheel-install/launchd/ai.zeststream.flywheel-coordinator-daemon.plist`.
+- launchctl label: `ai.zeststream.flywheel-coordinator-daemon`.
+- Memory:
+  `~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_ntm_assign_watch_unsafe_pending_124.md`
+  (RESOLVED 2026-05-08 — supersedes the halt).
+- Upstream commits: ntm `c0f8f222` + `3e44fe9e`.
+- Upstream issues closed: `Dicklesworthstone/ntm#122`, `#124`.
+
+## parent-redispatched-before-open-child-complete (3 events 2026-05-05, recorded 2026-05-09)
+
+Root Cause: The autoloop / orchestrator dispatch selector picks
+parent beads for closure verification while open children or open
+rework beads still exist. The worker resolves identity, runs
+Socraticode, inspects bead state, and finds the parent CANNOT close
+because acceptance gates depend on open children or open rework.
+Work is genuine — Socraticode, doctor, dep tree, validator probes
+all run cleanly — but the SELECTION was wrong. The next-actionable
+was the child or rework, not the parent.
+
+Three fuckup-log events in 11 minutes on 2026-05-05 (all on
+`flywheel:0.3` worker, all `severity: medium`):
+
+| Time (UTC) | Parent | Open blockers found |
+|---|---|---|
+| 14:43:51 | `flywheel-useh` | child `.1` open (Phase B split); rework `flywheel-uc9x` open (parent evidence/Four-Lens rework) |
+| 14:47:42 | `flywheel-se3h` | children `.1`-`.9` open/in_progress; rework `flywheel-2yt5` open |
+| 14:54:54 | `flywheel-useh` (re-redispatch) | same blockers as 14:43:51 — selector picked the same dead parent twice |
+
+Each event's worker correctly identified the next-actionable
+("finish child .1 → rework → re-run parent close validation") but
+the dispatch path didn't take that. The third event proves the
+selector lacks memory: it picked the same dead-end parent twice in
+11 minutes.
+
+The close-time gate IS in place: `validate-callback-before-close.sh:425`
+fires `open_child_blocks_close: $C state=$STATE`. So a parent that
+TRIES to close gets blocked correctly. The gap is at the **selector
+layer**: dispatch-time selection should pre-filter parents whose
+`br dep tree` shows open children OR whose name has a sibling
+`*-rework-*` open. Today the selector only checks "is this bead
+ready" without "are this bead's children/rework still open."
+
+Forever-Rule: Before dispatching a parent bead for closure
+verification, the selector must check (a) `br dep tree <bead>` for
+open children — if any child is `open` or `in_progress`, route the
+dispatch to the highest-priority open child instead; (b) open
+rework beads via the heuristic
+`br list --status open --search '<parent-bead-id>'` (rework beads
+typically include the parent's id in their title). If either check
+returns hits, the parent dispatch is preempted and the child/rework
+is dispatched in its place. The close-time `open_child_blocks_close`
+gate remains as the safety net but should rarely fire because the
+selector has already routed correctly.
+
+Fix Applied/Status: Doctrine codified here (no L-rule yet — three
+strikes promotes to INCIDENTS per L56 ladder; further hits would
+promote to a numbered L-rule). Recommended sibling bead (NOT
+auto-filed per worker scope):
+`[selector] add open-child / open-rework pre-filter to autoloop
+parent dispatch selector` — the dispatch selector improvement
+that prevents this trauma class at the SELECTION layer rather
+than catching it at the close-validation layer. Until that ships,
+workers receiving parent dispatches with open children should:
+
+1. Run `br dep tree <parent>` first.
+2. If any child is open / in_progress, BLOCKED-callback with
+   `reason=parent-redispatched-with-open-children
+   need=route-to-<child-id>-instead`. Do NOT do the parent's
+   research; surface the misroute to the orchestrator.
+3. Same for rework: search for sibling rework beads before
+   committing parent-research time.
+
+Evidence:
+- Bead: `flywheel-41xjl` ([promotion-candidate]
+  parent-redispatched-before-open-child-complete; auto-created by
+  doctrine-ladder-promote.sh on 3-strike threshold).
+- Fuckup-log entries (3 events, all `severity:medium`):
+  `~/.local/state/flywheel/fuckup-log.jsonl` filtered on
+  `trauma_class:"parent-redispatched-before-open-child-complete"`.
+- Close-time gate (already in place):
+  `.flywheel/scripts/validate-callback-before-close.sh:425`
+  emits `open_child_blocks_close` failure class.
+- Cited parent beads (open at time of incident): `flywheel-useh`
+  (child `.1` + rework `flywheel-uc9x`), `flywheel-se3h`
+  (children `.1`-`.9` + rework `flywheel-2yt5`).
+- Promoter: `.flywheel/scripts/doctrine-ladder-promote.sh` (the
+  L56 ladder script that auto-files promotion-candidate beads).
+- Companion rules: L56 (doctrine-ladder promotion), L70
+  (orch-no-punt — selector should route next-actionable
+  same-tick), L71 (validate-and-redispatch discipline — the
+  redispatch path itself is what should be validated against
+  open children/rework).

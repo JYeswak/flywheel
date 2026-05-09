@@ -1,0 +1,12 @@
+section span: 5787 to 5882
+
+field=Date: count=1
+field=Promotion Action: count=1
+field=Class: count=1
+field=Event Count: count=1
+field=Severity: count=1
+field=Cost: count=1
+field=Root Cause: count=1
+field=Forever-Rule: count=1
+field=Fix Applied/Status: count=1
+field=Evidence: count=1
