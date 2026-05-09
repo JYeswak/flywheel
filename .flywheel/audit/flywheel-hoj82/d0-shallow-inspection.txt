@@ -1,0 +1,14 @@
+## df -g targets
+Filesystem   1G-blocks Used Available Capacity  iused     ifree %iused  Mounted on
+/dev/disk3s5       926  871        31    97% 12737671 327136480    4%   /System/Volumes/Data
+/dev/disk3s5       926  871        31    97% 12737671 327136480    4%   /System/Volumes/Data
+/dev/disk3s5       926  871        31    97% 12737671 327136480    4%   /System/Volumes/Data
+
+## d0 top level
+206G	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn
+
+## user var folders subdirs
+8.0K	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/0
+385M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/C
+3.9G	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/X
+201G	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T

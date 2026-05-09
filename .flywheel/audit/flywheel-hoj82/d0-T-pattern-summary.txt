@@ -1,0 +1,11 @@
+## top-level file pattern byte summary
+0.00G	18	codex_stuck_detector
+0.00G	9	ntm_pinned
+0.11G	9203	other_file
+89.34G	9845	beads_mem_db
+96.77G	9845	beads_mem_db_wal
+
+## beads_mem total and mtime ranges
+count=19690 total_gib=186.11 oldest=2026-05-03T12:15:14-0600 newest=2026-05-08T23:17:30-0600
+
+## lsof beads_mem sample

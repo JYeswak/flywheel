@@ -1,0 +1,113 @@
+## top-level count
+31941
+
+## T top-level entries by size via find+xargs
+ 16M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_19963_0.db-wal
+ 16M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_29989_0.db-wal
+ 16M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_80409_0.db-wal
+ 16M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_89803_0.db-wal
+ 20M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_51480_0.db
+ 21M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_51480_0.db-wal
+ 24M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_40203_0.db
+ 25M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_40203_0.db-wal
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_12937_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_2266_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_33514_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_34440_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_35739_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_37556_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_39946_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_40455_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_40468_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_46854_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_49104_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_51990_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_62598_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_69025_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_71124_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_81551_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_87141_0.db
+ 26M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_9719_0.db
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_11570_0.db
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_11570_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_2266_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_26001_0.db
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_26001_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_26240_0.db
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_26240_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_33514_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_34440_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_35739_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_37556_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_39946_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_40455_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_40468_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_41851_0.db
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_41851_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_46854_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_49104_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_51990_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_62598_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_67642_0.db
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_69025_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_71124_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_77769_0.db
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_81551_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_87141_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_96012_0.db
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_9719_0.db-wal
+ 27M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_99040_0.db
+ 28M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_11793_0.db
+ 28M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_27531_0.db
+ 28M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_41165_0.db
+ 28M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_42288_0.db
+ 28M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_59167_0.db
+ 28M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_59955_0.db
+ 28M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_64880_0.db
+ 28M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_67642_0.db-wal
+ 28M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_76683_0.db
+ 28M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_77769_0.db-wal
+ 28M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_78173_0.db-wal
+ 28M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_99040_0.db-wal
+ 29M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_11793_0.db-wal
+ 29M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_25902_0.db
+ 29M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_27531_0.db-wal
+ 29M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_41165_0.db-wal
+ 29M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_49471_0.db
+ 29M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_59167_0.db-wal
+ 29M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_64880_0.db-wal
+ 30M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_25902_0.db-wal
+ 30M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_42288_0.db-wal
+ 30M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_49471_0.db-wal
+ 30M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_96012_0.db-wal
+ 31M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_12937_0.db-wal
+ 31M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_59955_0.db-wal
+ 31M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_76683_0.db-wal
+ 61M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/com.apple.imagent
+136M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_97451_0.db-wal
+142M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_17961_0.db-wal
+144M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_38226_0.db-wal
+144M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_57016_0.db-wal
+144M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_58856_0.db-wal
+144M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_60559_0.db-wal
+145M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_94825_0.db-wal
+153M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_34181_0.db-wal
+153M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_87658_0.db-wal
+153M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_89770_0.db-wal
+165M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/go-build2769151419
+192M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/z7b8.XXXXXX.gHXxjiC6Gd
+198M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/beads_mem_6354_0.db-wal
+257M	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/browsirai-normal
+1.0G	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/alps-josh-9rex4.XXXXXX.K8pI1k0XU5
+1.0G	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/alps-u4lnr.XXXXXX.l1zoFcqpN0
+2.9G	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/node-compile-cache
+4.0G	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/com.apple.fileproviderd
+
+## T top-level entries >1G only
+2.93G	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/node-compile-cache
+3.97G	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/com.apple.fileproviderd
+
+## com.apple.fileproviderd subdirs
+4.0G	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/com.apple.fileproviderd/TemporaryItems
+4.0G	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/com.apple.fileproviderd/TemporaryItems/fileprovider-fpck
+4.0G	/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/com.apple.fileproviderd/TemporaryItems/fileprovider-fpck/16212379-7417-4814-BE75-E10056757CA3
