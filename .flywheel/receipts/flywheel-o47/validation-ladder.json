@@ -1,0 +1,164 @@
+{
+  "checked_at": "2026-05-09T05:57:48Z",
+  "draft_path": ".flywheel/receipts/flywheel-o47/draft.md",
+  "exit_code": 1,
+  "ledger_id": "rubric-fc82ebb39671",
+  "phase": "rubric",
+  "rubric": {
+    "axes": [
+      {
+        "axis": "bug_reality",
+        "evidence": [
+          "observed",
+          "expected",
+          "repro",
+          "cost"
+        ],
+        "findings": [
+          "missing version"
+        ],
+        "level": "medium",
+        "passed": false,
+        "score": 1,
+        "suggestions": [
+          "Add the missing bug-reality proof element(s)."
+        ],
+        "threshold": "high"
+      },
+      {
+        "axis": "dedup",
+        "evidence": [],
+        "findings": [
+          "no duplicate-search evidence"
+        ],
+        "level": "low",
+        "passed": false,
+        "score": 0,
+        "suggestions": [
+          "Run and cite targeted `gh issue list --repo Dicklesworthstone/<repo> --search ...`."
+        ],
+        "threshold": "high"
+      },
+      {
+        "axis": "source_trace",
+        "evidence": [
+          "INCIDENTS.md:619",
+          "INCIDENTS.md:631"
+        ],
+        "findings": [
+          "2 file:line citations; version context present=False"
+        ],
+        "level": "medium",
+        "passed": false,
+        "score": 1,
+        "suggestions": [
+          "Add enough file:line citations and commit/version context to trace the contract."
+        ],
+        "threshold": "high"
+      },
+      {
+        "axis": "signal_not_prescription",
+        "evidence": [
+          "prescriptive_terms=2",
+          "out_of_scope"
+        ],
+        "findings": [
+          "contains 2 prescriptive terms but has boundary language"
+        ],
+        "level": "medium",
+        "passed": false,
+        "score": 1,
+        "suggestions": [
+          "Move fix sketches to prior-art language or remove implementation instructions."
+        ],
+        "threshold": "high"
+      },
+      {
+        "axis": "tone_match",
+        "evidence": [
+          "words=174",
+          "sections=9",
+          "tracking"
+        ],
+        "findings": [
+          "direct, structured, tracked, and low-hedge"
+        ],
+        "level": "high",
+        "passed": true,
+        "score": 2,
+        "suggestions": [],
+        "threshold": "high"
+      },
+      {
+        "axis": "jeff_thank_test_hostile",
+        "evidence": [],
+        "findings": [
+          "no generic thanks, demand, vendor, or hostile wording"
+        ],
+        "level": "high",
+        "passed": true,
+        "score": 2,
+        "suggestions": [],
+        "threshold": "high"
+      },
+      {
+        "axis": "no_derail",
+        "evidence": [
+          "out_of_scope",
+          "tracking"
+        ],
+        "findings": [
+          "no derail risks detected"
+        ],
+        "level": "high",
+        "passed": true,
+        "score": 2,
+        "suggestions": [],
+        "threshold": "high"
+      }
+    ],
+    "axes_count": 7,
+    "checked_at": "2026-05-09T05:57:48Z",
+    "decision": "withdraw",
+    "draft_path": "/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-o47/draft.md",
+    "draft_sha256": "065370a552dc26c46febf6fc3bb14829bd74936c5adcb2e80196ac765da796a7",
+    "hard_fail_axes": [
+      "bug_reality",
+      "dedup",
+      "source_trace",
+      "signal_not_prescription"
+    ],
+    "high_axes_count": 3,
+    "schema_version": "jeff-issue-rubric/v1",
+    "status": "fail",
+    "suggested_revisions": [
+      {
+        "axis": "bug_reality",
+        "suggestions": [
+          "Add the missing bug-reality proof element(s)."
+        ]
+      },
+      {
+        "axis": "dedup",
+        "suggestions": [
+          "Run and cite targeted `gh issue list --repo Dicklesworthstone/<repo> --search ...`."
+        ]
+      },
+      {
+        "axis": "source_trace",
+        "suggestions": [
+          "Add enough file:line citations and commit/version context to trace the contract."
+        ]
+      },
+      {
+        "axis": "signal_not_prescription",
+        "suggestions": [
+          "Move fix sketches to prior-art language or remove implementation instructions."
+        ]
+      }
+    ],
+    "threshold": "high"
+  },
+  "schema_version": "jeff-issue/v1",
+  "status": "fail"
+}

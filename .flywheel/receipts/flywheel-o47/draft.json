@@ -1,0 +1,56 @@
+{
+  "actual_actions": [],
+  "checked_at": "2026-05-09T05:57:48Z",
+  "draft_body": "# Watcher reports healthy when GitHub token is invalid\n\n## What happened\nObserved: Jeff watcher reported healthy while GITHUB_TOKEN auth failed and unauthenticated REST still showed ntm#111 open\n\n## Repro\n```bash\nexport GITHUB_TOKEN=invalid && run Jeff watcher status probe; compare gh auth status with unauthenticated REST issue state\n```\n\n## Expected vs observed\nExpected: Watcher classifies 401 or 403 GitHub auth as unhealthy and preserves a clear monitor signal\n\nObserved: Jeff watcher reported healthy while GITHUB_TOKEN auth failed and unauthenticated REST still showed ntm#111 open\n\n## File:line citations\n- `INCIDENTS.md:619`\n- `INCIDENTS.md:631`\n\n## Why this matters / cost citation\nThis breaks downstream flywheel substrate expectations; see tracking bead.\n\n## Tracking\nTracking on flywheel side: bead flywheel-o47\n\n## Monitor plan\nAfter filing, track the upstream issue in `~/.local/state/flywheel/jeff-issues.jsonl`, poll with `.flywheel/scripts/jeff-issue-response-poll.sh`, and close or update flywheel-o47 only after the upstream state or response is reconciled.\n\n## Out of scope\nNot asking for a PR, patch, or implementation prescription here; this is a contract/repro report for Dicklesworthstone/ntm.\n",
+  "draft_path": ".flywheel/receipts/flywheel-o47/state/drafts/jeff-issue-5c0b23ff4c6a.md",
+  "draft_sha256": "be1eb70f2e8704dbc0e7f3c5f8644c4154c718d2545ea0e5e2c8c05d6210b7df",
+  "dry_run": true,
+  "exit_code": 0,
+  "ledger_id": "draft-be1eb70f2e87",
+  "phase": "draft",
+  "planned_actions": [
+    {
+      "action": "write",
+      "path": ".flywheel/receipts/flywheel-o47/state/drafts/jeff-issue-5c0b23ff4c6a.md"
+    }
+  ],
+  "repo": "Dicklesworthstone/ntm",
+  "schema_version": "jeff-issue/v1",
+  "status": "pass",
+  "template_checks": [
+    {
+      "name": "repo_is_dicklesworthstone",
+      "passed": true
+    },
+    {
+      "name": "title_present",
+      "passed": true
+    },
+    {
+      "name": "title_length_lte_72",
+      "passed": true
+    },
+    {
+      "name": "tracking_bead",
+      "passed": true
+    },
+    {
+      "name": "observed_present",
+      "passed": true
+    },
+    {
+      "name": "expected_present",
+      "passed": true
+    },
+    {
+      "name": "repro_present",
+      "passed": true
+    },
+    {
+      "name": "source_refs_present",
+      "passed": true
+    }
+  ],
+  "title": "Watcher reports healthy when GitHub token is invalid",
+  "tracking_bead": "flywheel-o47"
+}

@@ -1,0 +1,37 @@
+{
+  "actual_actions": [],
+  "blocked_by": [
+    "dry_run",
+    "missing_joshua_approval",
+    "missing_idempotency_key",
+    "rubric_not_pass"
+  ],
+  "checked_at": "2026-05-09T05:57:48Z",
+  "exit_code": 4,
+  "ledger_id": "submit-2c9fbe6d6924",
+  "phase": "submit",
+  "planned_actions": [
+    {
+      "action": "gh_issue_create",
+      "body_file": ".flywheel/receipts/flywheel-o47/draft.md",
+      "repo": "Dicklesworthstone/ntm",
+      "title": "Watcher reports healthy when GitHub token is invalid"
+    },
+    {
+      "action": "gh_issue_view_verify_body",
+      "repo": "Dicklesworthstone/ntm"
+    },
+    {
+      "action": "append_registry",
+      "path": "/Users/josh/.local/state/flywheel/jeff-issues.jsonl"
+    }
+  ],
+  "post_submit_body_length": null,
+  "repo": "Dicklesworthstone/ntm",
+  "rubric_decision": "withdraw",
+  "rubric_status": "fail",
+  "schema_version": "jeff-issue/v1",
+  "status": "blocked",
+  "title": "Watcher reports healthy when GitHub token is invalid",
+  "tracking_bead": "flywheel-o47"
+}

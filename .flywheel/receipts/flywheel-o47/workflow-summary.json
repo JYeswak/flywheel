@@ -1,0 +1,17 @@
+{
+  "source_status": "pass",
+  "dedup_mode": "online",
+  "dedup_match_count": 0,
+  "draft_status": "pass",
+  "draft_sections": 8,
+  "rubric_status": "fail",
+  "rubric_decision": "withdraw",
+  "submit_status": "blocked",
+  "submit_blocked_by": [
+    "dry_run",
+    "missing_joshua_approval",
+    "missing_idempotency_key",
+    "rubric_not_pass"
+  ],
+  "no_issue_submitted": true
+}

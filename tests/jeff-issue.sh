@@ -63,6 +63,7 @@ assert_jq "$TMP/source.json" '.phase == "source" and .source_probe_complete == t
   --json \
   --state-dir "$state" >"$TMP/draft.json"
 assert_jq "$TMP/draft.json" '.phase == "draft" and .status == "pass" and .dry_run == true and (.actual_actions | length) == 0 and (.draft_body | contains("Out of scope"))' "draft dry-run renders template without write"
+assert_jq "$TMP/draft.json" '(.draft_body | split("\n") | map(select(startswith("## "))) | length) == 8 and (.draft_body | contains("## Monitor plan"))' "draft renders eight sections with monitor plan"
 
 "$CLI" draft \
   --repo Dicklesworthstone/ntm \
@@ -130,6 +131,13 @@ assert_jq "$TMP/why.json" '.matches | length >= 1' "why traces idempotency key"
 
 "$CLI" completion bash | grep -q 'jeff-issue.sh' && pass "completion emits shell hook" || fail "completion emits shell hook"
 test -f "$HOME/.claude/commands/flywheel/jeff-issue.md" && pass "slash wrapper exists" || fail "slash wrapper exists"
+test -f "$HOME/.claude/commands/flywheel/file-jeff.md" && pass "file-jeff slash wrapper exists" || fail "file-jeff slash wrapper exists"
+grep -q -- '--dry-run' "$HOME/.claude/commands/flywheel/file-jeff.md" && pass "file-jeff command generation dry-run default" || fail "file-jeff command generation dry-run default"
+if grep -q 'gh issue create' "$HOME/.claude/commands/flywheel/file-jeff.md"; then
+  fail "file-jeff wrapper must not contain direct gh issue create"
+else
+  pass "file-jeff wrapper avoids direct filing"
+fi
 
 echo
 printf 'Summary: %s passed, %s failed\n' "$pass_count" "$fail_count"

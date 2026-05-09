@@ -361,6 +361,9 @@ Observed: {observed}
 ## Tracking
 Tracking on flywheel side: bead {tracking}
 
+## Monitor plan
+After filing, track the upstream issue in `~/.local/state/flywheel/jeff-issues.jsonl`, poll with `.flywheel/scripts/jeff-issue-response-poll.sh`, and close or update {tracking} only after the upstream state or response is reconciled.
+
 ## Out of scope
 Not asking for a PR, patch, or implementation prescription here; this is a contract/repro report for {repo}.
 """
