@@ -1,0 +1,52 @@
+# JSM-import-ready patch for flywheel-3bfgw (lib/polish.sh coupling fix)
+# Skill: ~/.claude/skills/.flywheel/ (unmanaged by JSM at dispatch time)
+# Repo head pre: post-2xdi.45
+# Date: 2026-05-09
+
+## Changeset summary
+
+### File 1 (edit): ~/.claude/skills/.flywheel/lib/portable/core.d/part-02-portable_doctor.sh
+
+Added explicit dependency declaration on lib/polish.sh after the existing
+Phase 6 helper-source preamble (line ~16):
+
+```bash
+# flywheel-3bfgw: explicit dependency on lib/polish.sh. When core.sh is the
+# entry point (vs bin/flywheel-loop's module-list loop), the polish-gate
+# scope handler at line ~141 + the polish_gate aggregation at line ~429 call
+# polish_gate_doctor_json / quality_bar_close_gate_doctor_json /
+# publishability_bar_doctor_json — those functions live in lib/polish.sh
+# which is NOT in core.d/'s autosource glob. Sourcing it explicitly here
+# makes the dependency declared, not implicit.
+_FLYWHEEL_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+if [[ -f "$_FLYWHEEL_LIB_DIR/polish.sh" ]]; then
+    # shellcheck source=/dev/null
+    source "$_FLYWHEEL_LIB_DIR/polish.sh"
+fi
+```
+
+Net line count: +12 lines (10 lines preamble comment + 4 lines logic; existing
+content unchanged).
+
+Path math: `part-02-portable_doctor.sh` lives at `lib/portable/core.d/`. Going
+up 2 levels (`../..`) reaches `lib/`. The conditional `[[ -f ... ]]` guard
+ensures graceful behavior if polish.sh is ever moved or absent.
+
+### Files NOT changed (deliberately)
+
+- `lib/polish.sh` — not relocated; its existing self-instrumentation
+  (flywheel-2xdi.43) is preserved; bin/flywheel-loop's module-list loop
+  still finds it at the original path.
+- `lib/portable/core.sh` — not extended to autosource lib/*.sh; that would
+  have wider blast radius (file ordering, name collisions). The Option 1
+  approach (explicit consumer-side source) is the narrowest fix.
+
+### Behavior verification
+
+- core.sh entry path: `bash -c 'source ~/.claude/skills/.flywheel/lib/portable/core.sh && type polish_gate_doctor_json'` returns "polish_gate_doctor_json is a function". Pre-fix: "command not found".
+- bin/flywheel-loop module-list entry: polish_gate_doctor_json still defined (the explicit `source $LIB/polish.sh` line in the module-list loop fires first, then core.d/part-02-portable_doctor.sh's explicit source fires — bash function definitions are idempotent under double-definition).
+- portable_doctor + all Phase 6 helpers (_portable_doctor_parse_args, _portable_doctor_apply_field_aggregator, _scoped_probe_run, _scoped_probe_tick_hook_firing) still defined.
+
+### Regression test
+
+`tests/test-3bfgw-polish-coupling.sh` (78 lines, 8 assertions) — all PASS.
