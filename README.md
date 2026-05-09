@@ -117,6 +117,20 @@ Before editing:
 There is no top-level `bin/` directory in this checkout. The active flywheel
 binary surface lives in `~/.claude/skills/.flywheel/bin/`.
 
+## Security Fixture Contract
+
+Synthetic `.env.test` fixtures are allowed only when every secret-shaped value
+is visibly fake. Allowed fixture prefixes are `CANARY_TEST_`, `FIXTURE_`,
+`SYNTHETIC_`, and `EXAMPLE_`; live-shaped values require an inline
+`# synthetic-ok` marker and must stay in test fixtures only.
+
+Forbidden classes in `.env.test` without that marker: OpenAI or Stripe live
+secret keys, AWS access key IDs, private key PEM blocks, JWTs, Agent Mail
+tokens, bearer tokens, database URLs, and production `.env*` material. Runtime
+failure fixtures must print redaction labels and variable names only, never raw
+values. Production `.env*` repos must carry a migration receipt or a
+`blocked_by` entry before conformance closeout.
+
 ## Key Runtime Surfaces
 
 | Surface | Location | Purpose |

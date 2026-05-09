@@ -1,0 +1,47 @@
+{
+  "schema_version": "security-env-test-migration-receipt/v1",
+  "bead": "flywheel-x3n1n",
+  "issued_at": "2026-05-09T01:10:00Z",
+  "scope": "flywheel-source-repo",
+  "policy": "production .env* files must be migrated to synthetic .env.test fixtures or carry blocked_by before B09 conformance",
+  "secret_values_recorded": false,
+  "allowed_fixture_prefixes": [
+    "CANARY_TEST_",
+    "FIXTURE_",
+    "SYNTHETIC_",
+    "EXAMPLE_"
+  ],
+  "forbidden_live_classes": [
+    "openai_live_secret",
+    "aws_access_key_id",
+    "private_key_pem",
+    "jwt",
+    "agent_mail_token",
+    "bearer_token",
+    "database_url"
+  ],
+  "checks": [
+    {
+      "repo": "/Users/josh/Developer/flywheel",
+      "prod_env_globs": [
+        ".env",
+        ".env.*"
+      ],
+      "prod_env_path_count": 0,
+      "status": "migration_not_required",
+      "migration_receipt": null,
+      "blocked_by": null
+    },
+    {
+      "repo": "fleet-target-repos",
+      "prod_env_globs": [
+        ".env",
+        ".env.*"
+      ],
+      "prod_env_path_count": null,
+      "status": "blocked",
+      "migration_receipt": null,
+      "blocked_by": "flywheel-1gyiv"
+    }
+  ]
+}
