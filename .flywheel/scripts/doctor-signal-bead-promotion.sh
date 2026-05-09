@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# canonical-cli-scoping-allow-large: existing promotion router is a shared doctor-signal hub; this patch preserves locality while file-length decomposition remains owned by flywheel-useh.
 set -euo pipefail
 
 REPO="/Users/josh/Developer/flywheel"
@@ -24,6 +25,10 @@ FLEET_SKILL_DISCOVERY_PENDING_THRESHOLD="${DOCTOR_SIGNAL_FLEET_SKILL_DISCOVERY_P
 FLEET_SKILL_DISCOVERY_SUSPICIOUS_THRESHOLD="${DOCTOR_SIGNAL_FLEET_SKILL_DISCOVERY_SUSPICIOUS_THRESHOLD:-1}"
 ROOT_CAUSE_ORPHANED_MCP_TOOL_CALL="${DOCTOR_SIGNAL_ROOT_CAUSE_ORPHANED_MCP_TOOL_CALL-flywheel-2b0n}"
 ORPHANED_MCP_TOOL_CALL_THRESHOLD="${DOCTOR_SIGNAL_ORPHANED_MCP_TOOL_CALL_THRESHOLD:-1}"
+ROOT_CAUSE_SECURITY_LEAKED_SECRETS="${DOCTOR_SIGNAL_ROOT_CAUSE_SECURITY_LEAKED_SECRETS-}"
+ROOT_CAUSE_SECURITY_MISSING_DENY="${DOCTOR_SIGNAL_ROOT_CAUSE_SECURITY_MISSING_DENY-}"
+ROOT_CAUSE_SECURITY_PRECOMMIT="${DOCTOR_SIGNAL_ROOT_CAUSE_SECURITY_PRECOMMIT-}"
+ROOT_CAUSE_SECURITY_RUNTIME_VISIBLE="${DOCTOR_SIGNAL_ROOT_CAUSE_SECURITY_RUNTIME_VISIBLE-}"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -100,12 +105,13 @@ matching_issue() {
 }
 
 recent_closed_auto_doctor() {
-  local symptom="$1" cutoff
+  local symptom="$1" cutoff symptom_slug
   cutoff="$(cutoff_24h)"
-  issues_json_all | jq -r --arg pat "[auto-doctor:$symptom]" --arg cutoff "$cutoff" '
+  symptom_slug="${symptom//_/-}"
+  issues_json_all | jq -r --arg pat "[auto-doctor:$symptom]" --arg slug_pat "[auto-doctor:$symptom_slug]" --arg cutoff "$cutoff" '
     (if type == "array" then .[] else .issues[]? end)
     | select(.status == "closed")
-    | select((.title // "") | contains($pat))
+    | select(((.title // "") | contains($pat)) or ((.title // "") | contains($slug_pat)))
     | select((.updated_at // .closed_at // "") > $cutoff)
     | .id
   ' | head -1
@@ -128,6 +134,10 @@ root_cause_for_symptom() {
     dispatch_contract) printf '%s\n' "$ROOT_CAUSE_DISPATCH_CONTRACT" ;;
     fleet_skill_discovery) printf '%s\n' "$ROOT_CAUSE_FLEET_SKILL_DISCOVERY" ;;
     orphaned_mcp_tool_call) printf '%s\n' "$ROOT_CAUSE_ORPHANED_MCP_TOOL_CALL" ;;
+    security_leaked_secret_patterns) printf '%s\n' "$ROOT_CAUSE_SECURITY_LEAKED_SECRETS" ;;
+    security_missing_deny_rules) printf '%s\n' "$ROOT_CAUSE_SECURITY_MISSING_DENY" ;;
+    security_precommit_missing) printf '%s\n' "$ROOT_CAUSE_SECURITY_PRECOMMIT" ;;
+    security_runtime_visible_secrets) printf '%s\n' "$ROOT_CAUSE_SECURITY_RUNTIME_VISIBLE" ;;
     *) printf '\n' ;;
   esac
 }
@@ -282,7 +292,34 @@ ORPHANED_MCP_TOOL_CALL_TRIGGER=0
 if [ "${ORPHANED_MCP_TOOL_CALL_COUNT:-0}" -ge "${ORPHANED_MCP_TOOL_CALL_THRESHOLD:-1}" ]; then
   ORPHANED_MCP_TOOL_CALL_TRIGGER=1
 fi
-if [ "$STATUS" != "fail" ] && [ "$ROOT_DRIFT" != "true" ] && [ "${DOCTRINE_3_SURFACE_DIVERGENT_COUNT:-0}" -le 0 ] && [ "${FLEET_L_RULE_LAG_COUNT:-0}" -le 0 ] && [ "${PUNTED_COUNT:-0}" -le 0 ] && [ "${PEER_ORCH_IDLE_ON_BLOCKER_COUNT:-0}" -le 0 ] && [ "$STORAGE_TRIGGER" -eq 0 ] && [ "$HEADLESS_BROWSER_TRIGGER" -eq 0 ] && [ "$AGENTMAIL_IDENTITY_TRIGGER" -eq 0 ] && [ "$DAILY_REPORT_TRIGGER" -eq 0 ] && [ "${REPO_LOCAL_CLIS_BELOW:-0}" -le 0 ] && [ "$MONOLITHIC_FILE_DEBT_TRIGGER" -eq 0 ] && [ "$WIRE_OR_EXPLAIN_TRIGGER" -eq 0 ] && [ "$PWS_FALSE_IDLE_TRIGGER" -eq 0 ] && [ "$DISPATCH_CONTRACT_TRIGGER" -eq 0 ] && [ "$FLEET_SKILL_DISCOVERY_TRIGGER" -eq 0 ] && [ "$ORPHANED_MCP_TOOL_CALL_TRIGGER" -eq 0 ]; then
+SECURITY_STATUS="$(jq -r '.security.status // "pass"' <<<"$DOCTOR_JSON")"
+SECURITY_LEAKED_SECRET_PATTERN_COUNT="$(jq -r '.security.leaked_secret_pattern_count // .security.leaked_secret_patterns_count // 0' <<<"$DOCTOR_JSON")"
+SECURITY_LEAKED_SECRET_PATTERN_CLASSES="$(jq -r '(.security.leaked_secret_pattern_classes // (.security.leaked_secret_pattern_counts // {} | keys) // []) | map(tostring) | sort | join(",")' <<<"$DOCTOR_JSON")"
+SECURITY_SETTINGS_DENY_PRESENT="$(jq -r '.security.settings_deny_rules_present // true' <<<"$DOCTOR_JSON")"
+SECURITY_SECRET_PATH_DENY_MISSING_COUNT="$(jq -r '.security.secret_path_deny_missing_count // .security.settings_deny_missing_count // 0' <<<"$DOCTOR_JSON")"
+SECURITY_PRECOMMIT_INSTALLED="$(jq -r '.security.precommit_hook_installed // .security.pre_commit_hook_installed // .security.precommit.installed // true' <<<"$DOCTOR_JSON")"
+SECURITY_PRECOMMIT_STATUS="$(jq -r '.security.precommit_hook_status // .security.precommit.status // "pass"' <<<"$DOCTOR_JSON")"
+SECURITY_PRECOMMIT_MISSING_COUNT="$(jq -r '.security.precommit_hook_missing_count // .security.pre_commit_hook_missing_count // 0' <<<"$DOCTOR_JSON")"
+SECURITY_RUNTIME_VISIBLE_COUNT="$(jq -r '.security.runtime_secret_visible_count // .security.runtime_visible_secret_count // .security.runtime_visible_secrets_count // .security.runtime.visible_secret_count // 0' <<<"$DOCTOR_JSON")"
+SECURITY_RUNTIME_VISIBLE_STATUS="$(jq -r '.security.runtime_visible_status // .security.runtime_visible.status // .security.runtime.status // "pass"' <<<"$DOCTOR_JSON")"
+SECURITY_RUNTIME_VALUES_VISIBLE="$(jq -r '.security.runtime_secret_values_visible // .security.runtime_visible_secret_values // false' <<<"$DOCTOR_JSON")"
+SECURITY_LEAKED_SECRET_TRIGGER=0
+SECURITY_MISSING_DENY_TRIGGER=0
+SECURITY_PRECOMMIT_TRIGGER=0
+SECURITY_RUNTIME_VISIBLE_TRIGGER=0
+if [ "${SECURITY_LEAKED_SECRET_PATTERN_COUNT:-0}" -gt 0 ]; then
+  SECURITY_LEAKED_SECRET_TRIGGER=1
+fi
+if [ "$SECURITY_SETTINGS_DENY_PRESENT" != "true" ] || [ "${SECURITY_SECRET_PATH_DENY_MISSING_COUNT:-0}" -gt 0 ]; then
+  SECURITY_MISSING_DENY_TRIGGER=1
+fi
+if [ "$SECURITY_PRECOMMIT_INSTALLED" = "false" ] || [ "$SECURITY_PRECOMMIT_STATUS" = "fail" ] || [ "$SECURITY_PRECOMMIT_STATUS" = "warn" ] || [ "${SECURITY_PRECOMMIT_MISSING_COUNT:-0}" -gt 0 ]; then
+  SECURITY_PRECOMMIT_TRIGGER=1
+fi
+if [ "$SECURITY_RUNTIME_VALUES_VISIBLE" = "true" ] || [ "$SECURITY_RUNTIME_VISIBLE_STATUS" = "fail" ] || [ "${SECURITY_RUNTIME_VISIBLE_COUNT:-0}" -gt 0 ]; then
+  SECURITY_RUNTIME_VISIBLE_TRIGGER=1
+fi
+if [ "$STATUS" != "fail" ] && [ "$ROOT_DRIFT" != "true" ] && [ "${DOCTRINE_3_SURFACE_DIVERGENT_COUNT:-0}" -le 0 ] && [ "${FLEET_L_RULE_LAG_COUNT:-0}" -le 0 ] && [ "${PUNTED_COUNT:-0}" -le 0 ] && [ "${PEER_ORCH_IDLE_ON_BLOCKER_COUNT:-0}" -le 0 ] && [ "$STORAGE_TRIGGER" -eq 0 ] && [ "$HEADLESS_BROWSER_TRIGGER" -eq 0 ] && [ "$AGENTMAIL_IDENTITY_TRIGGER" -eq 0 ] && [ "$DAILY_REPORT_TRIGGER" -eq 0 ] && [ "${REPO_LOCAL_CLIS_BELOW:-0}" -le 0 ] && [ "$MONOLITHIC_FILE_DEBT_TRIGGER" -eq 0 ] && [ "$WIRE_OR_EXPLAIN_TRIGGER" -eq 0 ] && [ "$PWS_FALSE_IDLE_TRIGGER" -eq 0 ] && [ "$DISPATCH_CONTRACT_TRIGGER" -eq 0 ] && [ "$FLEET_SKILL_DISCOVERY_TRIGGER" -eq 0 ] && [ "$ORPHANED_MCP_TOOL_CALL_TRIGGER" -eq 0 ] && [ "$SECURITY_LEAKED_SECRET_TRIGGER" -eq 0 ] && [ "$SECURITY_MISSING_DENY_TRIGGER" -eq 0 ] && [ "$SECURITY_PRECOMMIT_TRIGGER" -eq 0 ] && [ "$SECURITY_RUNTIME_VISIBLE_TRIGGER" -eq 0 ]; then
   jq -nc --arg reason "doctor_status=$STATUS" '{action:"noop",reason:$reason}'
   exit 0
 fi
@@ -440,6 +477,38 @@ if [ "$ORPHANED_MCP_TOOL_CALL_TRIGGER" -eq 1 ]; then
     "Auto-created by doctor-signal-bead-promotion.sh. Doctor reports orphaned_mcp_tool_call_count=$ORPHANED_MCP_TOOL_CALL_COUNT source=$ORPHANED_MCP_TOOL_CALL_SOURCE. Cancelled MCP tools/call requests must either resolve after notifications/cancelled or route runtime lifecycle repair instead of living only in pane scrollback; see openai/codex#20925 and flywheel-2b0n."
 fi
 
+if [ "$SECURITY_LEAKED_SECRET_TRIGGER" -eq 1 ]; then
+  handle_symptom \
+    "security_leaked_secret_patterns" \
+    'auto-doctor:security-leaked-secret-patterns|security.*leaked.*secret|leaked_secret_pattern_count|secret.*pattern.*count' \
+    "[auto-doctor:security-leaked-secret-patterns] leaked_secret_pattern_count=$SECURITY_LEAKED_SECRET_PATTERN_COUNT" \
+    "Auto-created by doctor-signal-bead-promotion.sh. Doctor reports security.status=$SECURITY_STATUS leaked_secret_pattern_count=$SECURITY_LEAKED_SECRET_PATTERN_COUNT leaked_secret_pattern_classes=${SECURITY_LEAKED_SECRET_PATTERN_CLASSES:-none}. Evidence is counts/classes only; matched values are not emitted. Repair the scanned source and rerun flywheel-loop doctor --repo <repo> --json."
+fi
+
+if [ "$SECURITY_MISSING_DENY_TRIGGER" -eq 1 ]; then
+  handle_symptom \
+    "security_missing_deny_rules" \
+    'auto-doctor:security-missing-deny-rules|security.*missing.*deny|secret_path_deny_missing_count|settings_deny_rules_present' \
+    "[auto-doctor:security-missing-deny-rules] secret_path_deny_missing_count=$SECURITY_SECRET_PATH_DENY_MISSING_COUNT" \
+    "Auto-created by doctor-signal-bead-promotion.sh. Doctor reports security.settings_deny_rules_present=$SECURITY_SETTINGS_DENY_PRESENT secret_path_deny_missing_count=$SECURITY_SECRET_PATH_DENY_MISSING_COUNT. Apply the canonical security deny template and rerun flywheel-loop doctor --repo <repo> --json."
+fi
+
+if [ "$SECURITY_PRECOMMIT_TRIGGER" -eq 1 ]; then
+  handle_symptom \
+    "security_precommit_missing" \
+    'auto-doctor:security-precommit-missing|security.*pre.?commit|precommit_hook_missing_count|precommit_hook_installed' \
+    "[auto-doctor:security-precommit-missing] precommit_status=$SECURITY_PRECOMMIT_STATUS missing_count=$SECURITY_PRECOMMIT_MISSING_COUNT" \
+    "Auto-created by doctor-signal-bead-promotion.sh. Doctor reports security.precommit_hook_installed=$SECURITY_PRECOMMIT_INSTALLED precommit_status=$SECURITY_PRECOMMIT_STATUS precommit_hook_missing_count=$SECURITY_PRECOMMIT_MISSING_COUNT. Install or repair the repo-local security pre-commit hook and rerun flywheel-loop doctor --repo <repo> --json."
+fi
+
+if [ "$SECURITY_RUNTIME_VISIBLE_TRIGGER" -eq 1 ]; then
+  handle_symptom \
+    "security_runtime_visible_secrets" \
+    'auto-doctor:security-runtime-visible-secrets|security.*runtime.*visible|runtime_visible_secret_count|runtime_secret_visible_count' \
+    "[auto-doctor:security-runtime-visible-secrets] runtime_visible_secret_count=$SECURITY_RUNTIME_VISIBLE_COUNT" \
+    "Auto-created by doctor-signal-bead-promotion.sh. Doctor reports security.runtime_visible_status=$SECURITY_RUNTIME_VISIBLE_STATUS runtime_visible_secret_count=$SECURITY_RUNTIME_VISIBLE_COUNT runtime_secret_values_visible=$SECURITY_RUNTIME_VALUES_VISIBLE. Runtime evidence must redact values and report classes/counts only; rerun the runtime fixture after repair."
+fi
+
 if [ "$DB_STATUS" = "fail" ]; then
   handle_symptom \
     "db_fail" \
@@ -499,6 +568,17 @@ jq -nc \
   --arg fleet_skill_discovery_top "$FLEET_SKILL_DISCOVERY_TOP" \
   --argjson orphaned_mcp_tool_call_count "${ORPHANED_MCP_TOOL_CALL_COUNT:-0}" \
   --arg orphaned_mcp_tool_call_source "$ORPHANED_MCP_TOOL_CALL_SOURCE" \
+  --arg security_status "$SECURITY_STATUS" \
+  --argjson security_leaked_secret_pattern_count "${SECURITY_LEAKED_SECRET_PATTERN_COUNT:-0}" \
+  --arg security_leaked_secret_pattern_classes "$SECURITY_LEAKED_SECRET_PATTERN_CLASSES" \
+  --argjson security_secret_path_deny_missing_count "${SECURITY_SECRET_PATH_DENY_MISSING_COUNT:-0}" \
+  --arg security_settings_deny_present "$SECURITY_SETTINGS_DENY_PRESENT" \
+  --arg security_precommit_installed "$SECURITY_PRECOMMIT_INSTALLED" \
+  --arg security_precommit_status "$SECURITY_PRECOMMIT_STATUS" \
+  --argjson security_precommit_missing_count "${SECURITY_PRECOMMIT_MISSING_COUNT:-0}" \
+  --arg security_runtime_visible_status "$SECURITY_RUNTIME_VISIBLE_STATUS" \
+  --argjson security_runtime_visible_count "${SECURITY_RUNTIME_VISIBLE_COUNT:-0}" \
+  --arg security_runtime_values_visible "$SECURITY_RUNTIME_VALUES_VISIBLE" \
   --argjson dry_run "$([[ "$DRY_RUN" = "1" ]] && printf true || printf false)" \
   --arg db "$DB_STATUS" \
   --argjson actions "$actions_json" \
@@ -506,6 +586,6 @@ jq -nc \
     action:"promoted",
     dry_run:$dry_run,
     doctor_status:$doctor_status,
-    symptoms:{leakage:$leakage, drift:$drift, root_drift:$root_drift, ticks_punted_count:$punted_count, peer_orch_blocker:{peer_orch_idle_on_blocker_count:$peer_orch_idle_on_blocker_count,peer_orch_blocker_age_seconds:$peer_orch_blocker_age_seconds}, storage:{status:$storage_status,disk_free_pct:$storage_free_pct,stale_baks_count:$storage_stale_baks}, agent_browser_leak:{status:$headless_browser_status,headless_agent_browser_count:$headless_browser_count,oldest_age_minutes:$headless_browser_oldest}, agentmail_identity:{identity_registry_drift:$identity_registry_drift,identity_token_orphan:$identity_token_orphan,orphan_tokens_unswept_count:$orphan_tokens_unswept_count,identity_rotation_count_24h:$identity_rotation_count_24h,identity_chain_max_length:$identity_chain_max_length,agentmail_pending_registration_broadcasts_count:$agentmail_pending_registration_broadcasts}, daily_report:{status:$daily_report_status,daily_report_age_hours:$daily_report_age_hours}, monolithic_file_debt:{oversized_files_count:$oversized_files_count}, wire_or_explain:{status:$wire_or_explain_status,unresolved_count:$wire_or_explain_unresolved,overdue_count:$wire_or_explain_overdue,skill_candidate_backlog_count:$wire_or_explain_skill_backlog,skill_candidate_relay_failure_count:$wire_or_explain_skill_relay_failure}, pws_false_idle:{ntm_codex_false_idle_error_count:$pws_false_idle_error_count}, dispatch_contract:{dispatch_contract_violations:$dispatch_contract_violations}, fleet_skill_discovery:{status:$fleet_skill_discovery_status,pending_coordinator_action_count:$fleet_skill_discovery_pending,suspicious_callback_warning_count:$fleet_skill_discovery_suspicious,malformed_rows_count:$fleet_skill_discovery_malformed,top_candidate:$fleet_skill_discovery_top}, orphaned_mcp_tool_call:{orphaned_mcp_tool_call_count:$orphaned_mcp_tool_call_count,source:$orphaned_mcp_tool_call_source}, db:$db},
+    symptoms:{leakage:$leakage, drift:$drift, root_drift:$root_drift, ticks_punted_count:$punted_count, peer_orch_blocker:{peer_orch_idle_on_blocker_count:$peer_orch_idle_on_blocker_count,peer_orch_blocker_age_seconds:$peer_orch_blocker_age_seconds}, storage:{status:$storage_status,disk_free_pct:$storage_free_pct,stale_baks_count:$storage_stale_baks}, agent_browser_leak:{status:$headless_browser_status,headless_agent_browser_count:$headless_browser_count,oldest_age_minutes:$headless_browser_oldest}, agentmail_identity:{identity_registry_drift:$identity_registry_drift,identity_token_orphan:$identity_token_orphan,orphan_tokens_unswept_count:$orphan_tokens_unswept_count,identity_rotation_count_24h:$identity_rotation_count_24h,identity_chain_max_length:$identity_chain_max_length,agentmail_pending_registration_broadcasts_count:$agentmail_pending_registration_broadcasts}, daily_report:{status:$daily_report_status,daily_report_age_hours:$daily_report_age_hours}, monolithic_file_debt:{oversized_files_count:$oversized_files_count}, wire_or_explain:{status:$wire_or_explain_status,unresolved_count:$wire_or_explain_unresolved,overdue_count:$wire_or_explain_overdue,skill_candidate_backlog_count:$wire_or_explain_skill_backlog,skill_candidate_relay_failure_count:$wire_or_explain_skill_relay_failure}, pws_false_idle:{ntm_codex_false_idle_error_count:$pws_false_idle_error_count}, dispatch_contract:{dispatch_contract_violations:$dispatch_contract_violations}, fleet_skill_discovery:{status:$fleet_skill_discovery_status,pending_coordinator_action_count:$fleet_skill_discovery_pending,suspicious_callback_warning_count:$fleet_skill_discovery_suspicious,malformed_rows_count:$fleet_skill_discovery_malformed,top_candidate:$fleet_skill_discovery_top}, orphaned_mcp_tool_call:{orphaned_mcp_tool_call_count:$orphaned_mcp_tool_call_count,source:$orphaned_mcp_tool_call_source}, security:{status:$security_status,leaked_secret_pattern_count:$security_leaked_secret_pattern_count,leaked_secret_pattern_classes:($security_leaked_secret_pattern_classes | split(",") | map(select(length > 0))),settings_deny_rules_present:($security_settings_deny_present == "true"),secret_path_deny_missing_count:$security_secret_path_deny_missing_count,precommit_hook_installed:($security_precommit_installed == "true"),precommit_hook_status:$security_precommit_status,precommit_hook_missing_count:$security_precommit_missing_count,runtime_visible_status:$security_runtime_visible_status,runtime_visible_secret_count:$security_runtime_visible_count,runtime_secret_values_visible:($security_runtime_values_visible == "true")}, db:$db},
     actions:$actions
   }'

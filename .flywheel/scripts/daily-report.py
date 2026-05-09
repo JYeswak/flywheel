@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# canonical-cli-scoping-allow-large: existing report generator exceeds the Python threshold; this patch adds a bounded security rollup while decomposition remains owned by flywheel-useh.
 from __future__ import annotations
 
 import argparse
@@ -241,6 +242,69 @@ def notify_if_needed(notify_bin: str, report_path: Path, hard_blockers: list[str
         return False
 
 
+def security_summary(doc: dict[str, Any]) -> dict[str, Any]:
+    security = doc.get("security")
+    if not isinstance(security, dict):
+        return {
+            "status": "not_reported",
+            "leaked_secret_pattern_count": 0,
+            "secret_path_deny_missing_count": 0,
+            "precommit_hook_missing_count": 0,
+            "runtime_visible_secret_count": 0,
+            "top_failing_repos": [],
+        }
+
+    def num(*keys: str) -> int:
+        for key in keys:
+            value: Any = security
+            for part in key.split("."):
+                if not isinstance(value, dict):
+                    value = None
+                    break
+                value = value.get(part)
+            try:
+                return int(value or 0)
+            except (TypeError, ValueError):
+                continue
+        return 0
+
+    top_rows = security.get("top_failing_repos") or security.get("failing_repos") or []
+    if not isinstance(top_rows, list):
+        top_rows = []
+    if not top_rows:
+        repo_rows = security.get("repo_statuses") or []
+        if isinstance(repo_rows, list):
+            top_rows = [
+                row
+                for row in repo_rows
+                if isinstance(row, dict) and str(row.get("status") or "pass").lower() != "pass"
+            ]
+
+    top_failing: list[str] = []
+    for row in top_rows[:5]:
+        if isinstance(row, dict):
+            repo_name = str(row.get("repo") or row.get("name") or row.get("path") or "unknown")
+            status = str(row.get("status") or "fail")
+            count = row.get("leaked_secret_pattern_count")
+            suffix = f" leaked_secret_pattern_count={count}" if count is not None else ""
+            top_failing.append(f"{repo_name} status={status}{suffix}")
+        else:
+            top_failing.append(str(row))
+
+    return {
+        "status": str(security.get("status") or "unknown"),
+        "leaked_secret_pattern_count": num("leaked_secret_pattern_count", "leaked_secret_patterns_count"),
+        "secret_path_deny_missing_count": num("secret_path_deny_missing_count", "settings_deny_missing_count"),
+        "precommit_hook_missing_count": num("precommit_hook_missing_count", "pre_commit_hook_missing_count"),
+        "runtime_visible_secret_count": num(
+            "runtime_visible_secret_count",
+            "runtime_secret_visible_count",
+            "runtime.visible_secret_count",
+        ),
+        "top_failing_repos": top_failing,
+    }
+
+
 def generate(args: argparse.Namespace) -> dict[str, Any]:
     repo = Path(args.repo).expanduser().resolve()
     now = utc_now()
@@ -297,6 +361,7 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
     incidents_text = incidents_path.read_text(errors="replace") if incidents_path.exists() else ""
     incident_lines = [line.strip() for line in incidents_text.splitlines() if date_text in line]
     doc = doctor_json(repo, Path(args.doctor_json).expanduser() if args.doctor_json else None)
+    security = security_summary(doc)
     state_miner = state_md_miner_json(repo)
     state_md_unmined_count = int(state_miner.get("state_md_unmined_count") or 0)
     jeff_projection = jeff_storage_projection_json(Path(args.jeff_storage_projection).expanduser())
@@ -359,6 +424,14 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
         f"- doctor_status: {doc.get('status', 'unknown')}",
         f"- hard_blockers: {len(hard_blockers)}",
         "",
+        "## Security",
+        f"- status: {security['status']}",
+        f"- leaked_secret_pattern_count: {security['leaked_secret_pattern_count']}",
+        f"- secret_path_deny_missing_count: {security['secret_path_deny_missing_count']}",
+        f"- precommit_hook_missing_count: {security['precommit_hook_missing_count']}",
+        f"- runtime_visible_secret_count: {security['runtime_visible_secret_count']}",
+        *line_items(security["top_failing_repos"], "No failing security repos reported."),
+        "",
         "## What shipped?",
         f"- class_breakdown: {class_line}",
         *line_items(shipped_lines, "No beads closed today."),
@@ -417,6 +490,7 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
         "ready_count": len(ready_issues),
         "stale_in_flight_count": len(in_flight_stale),
         "state_md_unmined_count": state_md_unmined_count,
+        "security_summary": security,
         "jeff_corpus_storage_projection": jeff_projection,
         "sections": [
             "what_shipped",
