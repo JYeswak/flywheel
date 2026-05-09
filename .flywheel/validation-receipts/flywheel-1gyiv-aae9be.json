@@ -1,0 +1,87 @@
+{
+  "agent_mail": {
+    "agent_mail_thread": null,
+    "files_released": [
+      "tests/security-control-conformance.sh",
+      "tests/security-control-fleet-smoke.sh"
+    ],
+    "files_reserved": [
+      "tests/security-control-conformance.sh",
+      "tests/security-control-fleet-smoke.sh"
+    ],
+    "identity_name": "CloudyMill",
+    "reservation_conflicts": [],
+    "reservation_lifecycle": {
+      "reason": "shared-surface reservations released before callback",
+      "state": "released"
+    }
+  },
+  "artifact_checks": [
+    {
+      "artifact_id": "conformance_report",
+      "path": ".flywheel/receipts/flywheel-1gyiv/conformance-report.md",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "validation_receipt",
+      "path": ".flywheel/validation-receipts/flywheel-1gyiv-aae9be.json",
+      "status": "exists"
+    }
+  ],
+  "bead_actions": [
+    {
+      "action": "no_bead_reason",
+      "reason": "positive conformance receipt for assigned bead"
+    }
+  ],
+  "callback_ref": {
+    "kind": "DONE",
+    "pane": 2,
+    "raw_ref": "security-control conformance harness pass",
+    "received_at": "2026-05-09T01:43:52.532180Z",
+    "session": "flywheel",
+    "transport": "manual_fixture"
+  },
+  "chain_blocker": {
+    "capacity_available": false,
+    "chain_blocked_reason": "scope limited to assigned bead",
+    "next_phase": "flywheel-03uki"
+  },
+  "dispatch_id": "flywheel-1gyiv-aae9be",
+  "evidence": [
+    {
+      "ref": ".flywheel/receipts/flywheel-1gyiv/conformance-report.md",
+      "type": "path"
+    }
+  ],
+  "failure_class": null,
+  "failure_classes": [],
+  "learn_route": {
+    "dedupe_key": "flywheel-1gyiv-aae9be",
+    "reason": "positive security conformance receipt",
+    "route": "ignore"
+  },
+  "recovery_hint": "No recovery needed; validation passed.",
+  "retry_policy": "none",
+  "runtime_context": {
+    "agent_context": {
+      "probe_ref": "fixture://security-control-conformance",
+      "resolved_tools": [
+        "jq",
+        "python3"
+      ],
+      "status": "responsive"
+    },
+    "context_drift": false,
+    "orchestrator_shell_context": {
+      "probe_ref": "fixture://security-control-conformance",
+      "resolved_tools": [
+        "ntm"
+      ],
+      "status": "responsive"
+    },
+    "timeout": false
+  },
+  "schema_version": "validation-receipt/v1",
+  "status": "pass"
+}
