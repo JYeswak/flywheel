@@ -6042,6 +6042,112 @@ Evidence:
 - Skill: `~/.claude/skills/dispatch-tool-contracts/SKILL.md`.
 - Bead: `flywheel-eikur`.
 
+## coordination-collision-detected
+
+Date: 2026-05-09
+
+Promotion Action: NEW
+
+Class: `coordination-collision-detected`
+
+Event Count: 184 events in 7 days (largest L56 cluster observed
+2026-05-07 → 2026-05-09)
+
+Severity: medium-volume / low-individual
+
+Cost: 184 reservation requests via
+`.flywheel/scripts/shared-surface-reservation-check.sh --reserve`
+returned `status=blocked` because another flywheel pane already held
+an active L107 reservation on the same path. Each row is a single
+collision; on its own each is a healthy "another worker is editing
+this; back off and coordinate" signal — the trauma is the **volume**.
+The 184-event cluster reveals that many shared surfaces are
+collision-hot and the current reservation TTL + EOF-lease model
+forces serialized worker access at human-scale cadence rather than
+multi-pane parallelism.
+
+Top collision targets (per fuckup-log breakdown):
+- `/Users/josh/Developer/flywheel/.beads/issues.jsonl` — 94
+  collisions (51% of total)
+- `/Users/josh/Developer/flywheel/INCIDENTS.md` — 42 collisions
+  (23%)
+- `~/.claude/skills/.flywheel/lib/portable/core.sh` — 6
+- `.flywheel/AGENTS-CANONICAL.md` — 5
+- `~/.local/state/flywheel/fuckup-processed.jsonl` — 4
+- `~/.claude/skills/.flywheel/lib/loop.sh` — 4
+- `~/.claude/skills/.flywheel/bin/flywheel-loop` — 4
+- 6 other paths with 1–3 collisions each.
+
+Pane attribution: `flywheel:2` (74 collisions), `flywheel:3` (55),
+`flywheel:4` (51), `flywheel:worker` (2), `flywheel:?` (2). All four
+worker panes saturate the top two surfaces (`.beads/issues.jsonl`
+and `INCIDENTS.md`) which are the canonical append targets for
+worker callbacks and L56 promotions respectively.
+
+Root Cause: Shared-append surfaces in flywheel are reservation-gated
+via `shared-surface-reservation-check.sh`, but the canonical worker
+flow (write evidence → append to `.beads/issues.jsonl` via `br
+close` → append to `INCIDENTS.md` via `/flywheel:learn --promote`)
+hits both top-collision targets back-to-back at the end of every
+worker tick. With 3+ active worker panes, the probability of two
+panes wanting the same target inside the same TTL window is high;
+that's by design (the reservation system catches it) but it surfaces
+as a 184-row cluster in the fuckup-log. The healthy resolution
+(retry after the holder releases) is what every blocked worker
+already does — see `flywheel-uyd9i` (this session) for the canonical
+"reservation blocked → drafted patch artifacts → re-tried after
+release → applied" pattern.
+
+Forever-Rule: A `coordination-collision-detected` event is a
+**healthy collision-prevention signal**, not a worker failure.
+Workers MUST treat the `status=blocked` return from
+`shared-surface-reservation-check.sh --reserve` as a coordination
+boundary: (a) capture the blocker pane + task id from the
+`blocking_holders` field, (b) draft any patch artifacts in the audit
+pack so the work doesn't stall on the reservation, (c) retry the
+reservation after the holder's TTL or after observing them release.
+Workers MUST NOT bypass the reservation, MUST NOT extend their own
+reservation indefinitely to avoid contention, and MUST NOT downgrade
+to a non-coordinated write path. Orchestrators routing through
+high-collision surfaces (`.beads/issues.jsonl`, `INCIDENTS.md`)
+should prefer dispatching one worker tick at a time per high-traffic
+target rather than fanning out simultaneously when contention is
+already saturated.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from `/flywheel:learn
+--promote coordination-collision-detected` (worker-tick by
+`flywheel-8nrza`). Recategorizes the trauma class from "184
+failures" to "184 healthy back-offs that revealed two saturation
+hotspots." The Forever-Rule is the existing organic discipline
+(used today by `flywheel-uyd9i` to coordinate the
+INCIDENTS.md merge with `flywheel-s2yd8`). Companion observation: a
+follow-up `coordination-collision-saturation-hotspots` analysis bead
+could quantify whether the `.beads/issues.jsonl` / `INCIDENTS.md`
+saturation warrants a per-target reservation TTL tune or a fan-in
+serialization gate; that's beyond this bead's scope.
+
+Evidence:
+- 184 fuckup-log rows across `~/.local/state/flywheel/fuckup-log.jsonl`
+  spanning 2026-05-07T13:50Z → 2026-05-09T18:54Z, all
+  `trauma_class:"coordination-collision-detected"`. Earliest:
+  pane=4 path=.beads/issues.jsonl. Latest: pane=2 path=INCIDENTS.md
+  during today's `flywheel-uyd9i` race (resolved per evidence pack).
+- Top-target distribution validated: `grep -c 'path=/Users/josh/Developer/flywheel/.beads/issues.jsonl'` returns 94, `grep -c 'INCIDENTS.md'` returns 42, totaling 74% of the cluster on two targets.
+- Pane attribution: 74/55/51 across panes 2/3/4 respectively (the canonical worker pane allocation for flywheel session).
+- Reservation script: `.flywheel/scripts/shared-surface-reservation-check.sh`.
+- Sister INCIDENTS entries (the L107 reservation family):
+  `INCIDENTS.md#file-reservation-closeout-conflict` (line 5882),
+  `INCIDENTS.md#worker-evidence-file-write-before-reservation` (line
+  5991).
+- Doctrine: `AGENTS.md` L107 `SHARED-SURFACE-RESERVATION-BEFORE-STAGING`.
+- Sister bead pattern (this session): `flywheel-uyd9i` evidence pack
+  documents the canonical reservation-blocked-then-released flow,
+  reusable for future `coordination-collision-detected` events.
+- Companion dedup fix: `flywheel-qnkj2` (added `$REPO/INCIDENTS.md`
+  to `doctrine-ladder-promote.sh default_incident_paths`, which
+  ensures future ladder runs see this section).
+- Bead: `flywheel-8nrza`.
+
 ## fire-and-forget-dispatch
 
 Date: 2026-05-08
