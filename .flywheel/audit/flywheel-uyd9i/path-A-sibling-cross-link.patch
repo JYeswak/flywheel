@@ -1,0 +1,28 @@
+# Path A patch — append sibling-class cross-link to flywheel-s2yd8's
+# authored INCIDENTS section for `bead-missing-from-local-db`.
+#
+# Apply ONLY after flywheel-s2yd8 has committed the canonical
+# INCIDENTS section. The exact line numbers below are placeholders;
+# the orchestrator should locate the "Evidence:" block of the
+# bead-missing-from-local-db section in INCIDENTS.md and insert this
+# block immediately AFTER the last evidence bullet (before the next
+# `## ` heading).
+#
+# Source: flywheel-uyd9i evidence pack
+# Companion bead authoring sibling section: flywheel-s2yd8
+
+# --- Insertion content (append after Evidence block of bead-missing-from-local-db) ---
+
+Sibling Classes:
+- `bead-substrate-missing` (`flywheel-uyd9i`) — same trauma, cosmetic
+  class-name variant. 7 fuckup-log events on 2026-05-08 between
+  02:40Z and 03:31Z reporting the same `br show / br close
+  ISSUE_NOT_FOUND` shape against `josh-*` bead IDs.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L4078,L4081,L4144,L4181,L4182,L4185,L4186`:
+  the 7 sibling events.
+- Doctrine-ladder dedup: `flywheel-qnkj2` commit `0a2ee86` ensures
+  future ladder runs see this entry via repo-local `INCIDENTS.md`
+  search; the `bead-substrate-missing` cosmetic alias is suppressed
+  by this Sibling Classes citation.
+- Companion bead: `flywheel-uyd9i` (closes as superseded after the
+  sibling cross-link lands).

@@ -6969,3 +6969,92 @@ Evidence:
   same-tick), L71 (validate-and-redispatch discipline — the
   redispatch path itself is what should be validated against
   open children/rework).
+
+## bead-missing-from-local-db
+
+Date: 2026-05-09
+
+Promotion Action: NEW
+
+Class: `bead-missing-from-local-db`
+
+Event Count: 3 events in 7 days
+
+Severity: low
+
+Cost: Worker dispatches received bead IDs (e.g. `josh-19yvg`,
+`josh-2jyzb`, `josh-bmd26`) that existed orch-side but were absent
+from the worker's local `.beads/beads.db`. Workers could not run
+`br show <id>`, `br close <id>`, or `br update <id>` to mark
+dispatch state, forcing them to either skip Beads-DB updates,
+fall back to JSONL-only mode, or attempt cross-repo lookups
+that the canonical `br` CLI doesn't expose. Closeout receipts
+became less reliable because the bead-state machine could not
+follow the dispatch through the worker tick.
+
+Root Cause: Beads stores per-repo SQLite DBs at `.beads/beads.db`
+plus a JSONL export at `.beads/issues.jsonl`. When orch creates a
+dispatch bead in repo A and dispatches to a worker checked out in
+repo B (e.g. `/private/tmp/alpsinsurance-worker-pane-4-josh-...`),
+repo B's local `.beads/beads.db` does NOT have the bead until
+it (a) `br sync --import-only` after a `git pull`, or (b) the orch
+explicitly publishes the bead through some inter-repo channel.
+Worker-pane checkouts spun up via `mktemp -d` worktrees inherit
+whatever `issues.jsonl` was committed at branch-base time and
+miss any beads created post-branch in the parent repo.
+
+Forever-Rule: Worker dispatches that operate on a bead ID MUST
+verify the bead is present in the worker's local Beads DB before
+attempting `br show|update|close`. The canonical sequence is:
+1. `br show <id> --json` — fast-path check.
+2. If absent, `br sync --import-only` — pull JSONL → DB.
+3. If still absent, `br close` is not authoritative; worker MUST
+   surface `bead-missing-from-local-db` in the closeout receipt
+   and let orch reconcile via `br sync --flush-only` on the orch
+   side.
+A worker MUST NOT silently treat a missing bead as success, and
+MUST NOT fabricate a `br close` outcome by writing directly to
+`.beads/issues.jsonl` (the canonical write path is `br close`).
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry from
+`/flywheel:learn --promote bead-missing-from-local-db` (this
+dispatch). Three observed events all originated from alpsinsurance
+session pane 4 cross-worktree dispatches; the entry establishes the
+canonical sync-or-surface contract so workers stop fabricating
+close outcomes when the bead is missing locally.
+
+Evidence:
+- `~/.local/state/flywheel/fuckup-log.jsonl` lines 3928, 3929, 3930
+  (durable copy at `.flywheel/audit/flywheel-s2yd8/fuckup-evidence.jsonl`):
+  three `trauma_class:"bead-missing-from-local-db"` rows on
+  2026-05-07T18:43-19:01Z, all session=alpsinsurance pane=4,
+  beads = josh-19yvg, josh-2jyzb, josh-bmd26.
+- One row records `should_become=tool-patch`, indicating the worker
+  recognized this as a structural gap, not a one-off.
+- Cross-repo paths involved: `/Users/josh/Developer/alpsinsurance`
+  (orch-side) vs `/private/tmp/alpsinsurance-worker-pane-4-josh-*`
+  (worker mktemp worktrees).
+- Doctrine: `AGENTS.md` L120 `BR-CLOSE-EXECUTED` (close before
+  callback); the rule fires too early when the bead isn't
+  worker-local.
+- Beads CLI: `br sync --import-only` is the canonical worker-side
+  pull; `br sync --flush-only` is the orch-side push.
+- Bead: `flywheel-s2yd8`.
+
+Sibling Classes:
+- `bead-substrate-missing` (cosmetic alias, same trauma) — 7 fuckup-log
+  events on 2026-05-08 between 02:40Z and 03:31Z reporting the same
+  `br show / br close ISSUE_NOT_FOUND` shape against `josh-*` bead
+  IDs. The class-name divergence emerged from slightly different
+  `--class` strings used by fuckup-log writers; the underlying trauma
+  is identical to `bead-missing-from-local-db` above. This sibling
+  citation gives doctrine-ladder dedup (post `flywheel-qnkj2`'s
+  repo-local `INCIDENTS.md` path search) a single landing pad, so
+  future ladder runs that see the alias-class string still find
+  canonical coverage here.
+- `~/.local/state/flywheel/fuckup-log.jsonl#L4078,L4081,L4144,L4181,L4182,L4185,L4186`:
+  the 7 sibling events, all with `josh-*` bead IDs (`josh-q32zp`,
+  `josh-8lliy`, `josh-8kp1u`, `josh-c8tqy`, `josh-e84oj`, `josh-qrp79`,
+  `josh-ylpa3`).
+- Companion bead: `flywheel-uyd9i` (Path A merge into this section;
+  bead closes as superseded after the cross-link lands).
