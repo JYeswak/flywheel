@@ -217,6 +217,28 @@ def jeff_storage_projection_json(path: Path) -> dict[str, Any] | None:
     return payload if isinstance(payload, dict) else None
 
 
+def punt_phrase_report_json(repo: Path) -> dict[str, Any]:
+    raw = os.environ.get("FLYWHEEL_PUNT_PHRASE_REPORT_JSON")
+    if raw:
+        try:
+            payload = json.loads(raw)
+            return payload if isinstance(payload, dict) else {}
+        except json.JSONDecodeError:
+            return {"schema_version": "flywheel.l70_punt_report.v1", "status": "warn", "event_count": 0}
+    file_path = os.environ.get("FLYWHEEL_PUNT_PHRASE_REPORT_JSON_FILE")
+    if file_path:
+        payload = read_json(Path(file_path).expanduser())
+        return payload if isinstance(payload, dict) else {}
+    detector = repo / ".flywheel/scripts/punt-phrase-detector.py"
+    if not detector.exists():
+        detector = Path.home() / "Developer/flywheel/.flywheel/scripts/punt-phrase-detector.py"
+    if detector.exists():
+        payload = run_json([sys.executable, str(detector), "report", "--since-hours", "24", "--top-phrases", "--json"], repo)
+        if isinstance(payload, dict):
+            return payload
+    return {"schema_version": "flywheel.l70_punt_report.v1", "status": "unavailable", "event_count": 0}
+
+
 def line_items(items: list[str], empty: str, limit: int = 8) -> list[str]:
     if not items:
         return [f"- {empty}"]
@@ -362,6 +384,8 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
     incident_lines = [line.strip() for line in incidents_text.splitlines() if date_text in line]
     doc = doctor_json(repo, Path(args.doctor_json).expanduser() if args.doctor_json else None)
     security = security_summary(doc)
+    punt_report = punt_phrase_report_json(repo)
+    punt_event_count = int(punt_report.get("event_count") or 0)
     state_miner = state_md_miner_json(repo)
     state_md_unmined_count = int(state_miner.get("state_md_unmined_count") or 0)
     jeff_projection = jeff_storage_projection_json(Path(args.jeff_storage_projection).expanduser())
@@ -410,6 +434,8 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
         stuck_lines.append(f"{dispatch_in_flight} dispatch rows from today have no callback_received_at")
     if (doc.get("ticks_punted_count") or 0) and int(doc.get("ticks_punted_count") or 0) > 0:
         stuck_lines.append(f"ticks_punted_count={doc.get('ticks_punted_count')}")
+    if punt_event_count > 0:
+        stuck_lines.append(f"l70_punt_phrase_events_24h={punt_event_count}")
     next_lines = [
         f"{issue_id(row)} P{issue_priority(row)} {issue_title(row)}"
         for row in ready_issues[:8]
@@ -450,6 +476,7 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
         "## What's stuck?",
         f"- stale_in_flight_beads: {len(in_flight_stale)}",
         f"- dispatch_rows_today: {dispatch_count}",
+        f"- l70_punt_phrase_events_24h: {punt_event_count}",
         *line_items(stuck_lines, "No stale in-flight beads or punted phases found."),
         "",
         "## What's next?",
@@ -491,6 +518,7 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
         "stale_in_flight_count": len(in_flight_stale),
         "state_md_unmined_count": state_md_unmined_count,
         "security_summary": security,
+        "l70_punt_phrase_report": punt_report,
         "jeff_corpus_storage_projection": jeff_projection,
         "sections": [
             "what_shipped",

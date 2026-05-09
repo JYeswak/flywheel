@@ -237,7 +237,7 @@
       "id": "L70",
       "order": 24,
       "path": ".flywheel/rules/L024-L70-orch-no-punt-next-actionable-runs-same-tick-not-next-tick.md",
-      "sha256": "6c582eecf67967c4bad8e38ae039bbc87d1b0764741bfa2cbe7b033db3571a6f",
+      "sha256": "293749a5dc23432bff7f19f5f2ae43843b0cdacf482ca94504552134bc800c53",
       "shipped": "2026-05-03",
       "status": "long_term",
       "title": "ORCH-NO-PUNT (next actionable runs same tick, not next tick)",
@@ -1014,7 +1014,7 @@
       "trauma_class": "codex-skill-name-length"
     }
   ],
-  "rules_body_sha256": "f4311834a2f59b4aea6aedc386c8daf8b31d582c5be4d6ae0f1778280c3b67d6",
+  "rules_body_sha256": "f1a5f13b901d63e4b02449e976e3803b78d440464d0d1881dd410b57ca88275d",
   "schema_version": "agents-canonical-shards/v1",
   "source": "AGENTS.md"
 }

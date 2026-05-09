@@ -96,17 +96,20 @@ JSON
 printf '{"issues":[]}\n' >"$TMP/stuck-ready.json"
 write_br "$TMP/br-stuck" "$TMP/stuck-list.json" "$TMP/stuck-ready.json"
 printf '{"status":"fail","ticks_punted_count":1}\n' >"$TMP/doctor-fail.json"
+printf '{"schema_version":"flywheel.l70_punt_report.v1","status":"ok","event_count":2,"top_phrases":[["want me to",2]]}\n' >"$TMP/punt-report.json"
 notify_log="$TMP/notify.log"
 notify_bin="$TMP/notify"
 printf '#!/usr/bin/env bash\nprintf "%%s\\n" "$*" >>"%s"\n' "$notify_log" >"$notify_bin"
 chmod +x "$notify_bin"
 BR_BIN="$TMP/br-stuck" FLYWHEEL_DAILY_REPORT_NOW="${date_today}T12:00:00Z" \
+  FLYWHEEL_PUNT_PHRASE_REPORT_JSON_FILE="$TMP/punt-report.json" \
   "$DAILY" --repo "$stuck_repo" --date "$date_today" --doctor-json "$TMP/doctor-fail.json" \
   --dispatch-log "$empty_log" --fuckup-log "$empty_log" --cross-orch-log "$empty_log" \
   --jeff-digest "$empty_log" --incidents-file "$TMP/no-incidents.md" --notify --notify-bin "$notify_bin" --json >"$TMP/stuck.out"
 stuck_report="$(jq -r '.report_path' "$TMP/stuck.out")"
 assert_jq "$TMP/stuck.out" '.hard_blockers_count >= 2 and .notify_sent == true' "all_stuck_day_notifies"
 assert_file_contains "$stuck_report" 'flywheel-stuck.*age>24h' "all_stuck_day_report"
+assert_file_contains "$stuck_report" 'l70_punt_phrase_events_24h: 2' "punt_phrase_events_reported"
 if grep -q 'FLYWHEEL DAILY BLOCKERS' "$notify_log"; then pass "notify_integration"; else fail "notify_integration"; fi
 
 normal_repo="$TMP/normal"
