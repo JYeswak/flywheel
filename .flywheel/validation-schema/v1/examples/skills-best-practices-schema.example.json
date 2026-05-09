@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/flywheel/examples/skills-best-practices.schema.example.json",
+  "title": "/flywheel:skills-best-practices --schema example",
+  "description": "Example schema emitted by /flywheel:skills-best-practices --schema. It matches the documented --json lookup packet and keeps the command read-only.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "status",
+    "domain_hint",
+    "search_terms",
+    "total_matches",
+    "returned",
+    "skills",
+    "warnings"
+  ],
+  "properties": {
+    "status": {
+      "enum": ["ok", "no_matches", "degraded", "blocked", "usage_error"]
+    },
+    "domain_hint": {
+      "type": "string",
+      "minLength": 1
+    },
+    "search_terms": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "total_matches": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "returned": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "skills": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/skill_match" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    }
+  },
+  "$defs": {
+    "skill_match": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "score", "description", "path"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "score": { "type": "integer", "minimum": 0 },
+        "description": { "type": "string", "minLength": 1 },
+        "path": { "type": "string", "pattern": "^~/.claude/skills/.+/SKILL.md$" },
+        "forever_rules": {
+          "type": "array",
+          "description": "Present only when --include-content is requested.",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

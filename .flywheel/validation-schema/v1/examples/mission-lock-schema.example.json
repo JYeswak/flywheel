@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/flywheel/examples/mission-lock.schema.example.json",
+  "title": "/flywheel:mission-lock --schema example",
+  "description": "Example schema emitted by /flywheel:mission-lock --schema. It documents the mission-lock output packet and the lock-log row without changing live mission locking behavior.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "output_packet", "lock_log_row"],
+  "properties": {
+    "schema_version": {
+      "const": "mission-lock-schema/v1"
+    },
+    "output_packet": {
+      "$ref": "#/$defs/output_packet"
+    },
+    "lock_log_row": {
+      "$ref": "#/$defs/lock_log_row"
+    }
+  },
+  "$defs": {
+    "status": {
+      "enum": ["mission-locked", "preview_only", "blocked", "usage_error"]
+    },
+    "output_packet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "repo",
+        "reason",
+        "mission_lock_id",
+        "sections_completed",
+        "socraticode_queries",
+        "socraticode_patterns_adopted",
+        "research_triad_queries",
+        "research_triad_findings_adopted",
+        "files_changed",
+        "backup",
+        "lock_hash",
+        "doctor_strict",
+        "autoloop_status",
+        "followup_beads",
+        "elapsed_minutes",
+        "next"
+      ],
+      "properties": {
+        "status": { "$ref": "#/$defs/status" },
+        "repo": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "mission_lock_id": { "type": "string", "minLength": 1 },
+        "sections_completed": { "type": "string", "pattern": "^[0-9]+/[0-9]+$" },
+        "socraticode_queries": { "type": "integer", "minimum": 0 },
+        "socraticode_patterns_adopted": { "type": "integer", "minimum": 0 },
+        "research_triad_queries": { "type": "integer", "minimum": 0 },
+        "research_triad_findings_adopted": { "type": "integer", "minimum": 0 },
+        "files_changed": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "backup": { "type": "string", "minLength": 1 },
+        "lock_hash": { "type": "string", "pattern": "^(sha256:)?[0-9a-fA-F]{64}$" },
+        "doctor_strict": { "enum": ["ok", "fail"] },
+        "autoloop_status": { "enum": ["verified", "paused", "not_applicable"] },
+        "followup_beads": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "elapsed_minutes": { "type": "number", "minimum": 0 },
+        "next": { "type": "string", "minLength": 1 }
+      }
+    },
+    "lock_log_row": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema_version",
+        "action",
+        "mission_lock_id",
+        "repo",
+        "reason",
+        "lock_hash",
+        "locked_at",
+        "locked_by",
+        "doctor_strict",
+        "sections_completed"
+      ],
+      "properties": {
+        "schema_version": { "const": "mission-lock-log/v1" },
+        "action": { "const": "mission-lock" },
+        "mission_lock_id": { "type": "string", "minLength": 1 },
+        "repo": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "lock_hash": { "type": "string", "pattern": "^(sha256:)?[0-9a-fA-F]{64}$" },
+        "locked_at": { "type": "string", "format": "date-time" },
+        "locked_by": { "const": "flywheel:mission-lock" },
+        "doctor_strict": { "enum": ["ok", "fail"] },
+        "sections_completed": { "type": "string", "pattern": "^[0-9]+/[0-9]+$" },
+        "followup_beads": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}
