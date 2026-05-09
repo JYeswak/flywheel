@@ -572,6 +572,21 @@ def bead_followup_false_positive_reason(row: dict) -> str | None:
                 "recov_pane_command_design.md",
             ],
         ),
+        (
+            # 2026-05-09 (flywheel-2xdi.37): bead flywheel-0h0b drafts an
+            # upstream ntm#114 issue body and routes the comment-vs-new
+            # decision through Joshua signoff. The body mentions "doctrine"
+            # only via the standard AG1 boilerplate ("doctrine surface
+            # named in...") and "canonical" only via skill name reference
+            # ("canonical-cli-scoping"), neither of which signals a local
+            # INCIDENTS/AGENTS promotion.
+            "upstream-issue-draft-or-comment-decision",
+            [
+                "[upstream-issue]",
+                "comment-on-114",
+                "joshua signoff",
+            ],
+        ),
     ]
     for reason, needles in suppressions:
         if all(needle in text for needle in needles):

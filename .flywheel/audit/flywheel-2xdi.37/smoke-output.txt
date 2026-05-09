@@ -1,0 +1,8 @@
+PASS gap-hunt-probe.sh is executable
+PASS gap-hunt-probe.sh bash syntax ok
+PASS suppression entry + 3 needles present in source
+PASS gap-hunt-probe --info --json still emits valid envelope
+PASS gap-hunt-probe --dry-run produced a valid envelope
+PASS flywheel-0h0b is suppressed in --dry-run gap_ids
+PASS gap_class_distribution.bead-without-followup is a number
+SUMMARY pass=7 fail=0
