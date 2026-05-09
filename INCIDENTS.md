@@ -7585,6 +7585,94 @@ Evidence:
 - Sibling completed today (precedent): `flywheel-u5ml3` (closed; same
   cross-reference pattern for `daily_report_missing_dispatch_gate`).
 
+### Sibling Sub-Class: dcg-worktree-remove-block (2026-05-09 merge)
+
+Sub-class: `dcg-worktree-remove-block` — same shape as the parent
+`dcg-blocked-temp-cleanup` class, but the safety surface is the
+`strict_git:worktree-remove` DCG rule (DCG pack `strict_git`,
+enabled by default in `dcg packs --enabled`) rather than
+`core.filesystem:rm-rf-general`.
+
+Event Count: 7 events on 2026-05-08 (12:38–17:08 UTC), all on
+`mobile-eats:0.3` during isolated-worktree validation cycles
+(`/tmp/mobile-eats-<id>-validate`). All `severity=low`,
+`what_attempted=[]` (DCG fired BEFORE execution, no destructive
+action ever ran). Probe `doctrine-ladder-promote.sh` filed
+`flywheel-95a51` after detecting 6 of these events.
+
+Cost: workers ran `git worktree remove /tmp/mobile-eats-<id>-validate`
+to clean up scratch validation worktrees after a passing run, and
+the strict_git guard refused. The worktree was left in place. Each
+event added 30-60s of pivot time (or no pivot at all — the worker
+simply continued and left the directory for retention/janitor).
+No data lost, no substrate corrupted, no branch deletion.
+
+Root Cause: the validation pattern (create `/tmp/<repo>-<id>-validate`
+worktree, run isolated tests, remove worktree) treats worktree
+removal as routine cleanup. The strict_git pack (per
+`~/.claude/skills/git-worktree-branch-rationalization/SKILL.md`
+Axiom 11: "`rm -rf <worktree-path>` is forbidden;
+`git worktree remove` is the structured operation… DCG blocks
+`rm -rf` and we don't fight it… the bundle stays in place at end
+of run") canonically requires explicit authorization for any
+worktree-directory removal because removing the wrong worktree
+silently destroys uncommitted state in the wrong place. The
+trauma is the worker reflex (mistaking validation cleanup for a
+trivial operation), not a substrate fault.
+
+Forever-Rule (extension of parent class rule): every dispatch
+that creates a transient git worktree for isolated validation
+MUST close it via one of:
+- Leave the worktree in place and let scheduled retention or a
+  scoped `git worktree prune` (deferred; not in the same
+  worker-tick) reap stale admin metadata. **Default for
+  validation-only workflows** — the substrate cost of a stale
+  `/tmp/<repo>-<id>-validate` directory is bounded by the
+  retention policy (see
+  `feedback_retention_policy_by_default_for_accreting_surfaces`).
+- Request explicit operator authorization before
+  `git worktree remove`, naming the exact path and the captured
+  state. Required for any worker that NEEDS to remove the
+  worktree in the same tick (rare).
+- NEVER substitute `rm -rf` for the structured operation —
+  core.filesystem:rm-rf-general will fire (the parent class) and
+  in addition stale `.git/worktrees/<id>/` admin metadata is left
+  behind. See git-worktree-branch-rationalization SKILL.md
+  Axiom 11.
+
+Memory references (extends parent class):
+- `~/.claude/skills/git-worktree-branch-rationalization/SKILL.md`
+  (Axiom 11; the canonical worktree-cleanup doctrine).
+- `~/.claude/skills/git-worktree-branch-rationalization/references/KEY-INSIGHTS.md:97`
+  ("when DCG blocks something, the skill takes that as evidence
+  the design is correct, not as a problem to bypass").
+- `feedback_retention_policy_by_default_for_accreting_surfaces.md`
+  (long-term scratch-cleanup answer is retention, not
+  end-of-tick deletion).
+
+Fix Applied/Status: No source-code change needed. strict_git
+working as designed; canonical pivot ("leave worktree, let
+retention reap it") is documented in
+git-worktree-branch-rationalization SKILL.md Axiom 11. This
+sub-class merge makes the L56 ladder probe see coverage for the
+`strict_git:worktree-remove` shape so it stops re-firing. The
+parent class's Recurrence Prevention applies verbatim.
+
+Evidence (sub-class):
+- Trauma rows: `~/.local/state/flywheel/fuckup-log.jsonl` 7 rows
+  on 2026-05-08T12:38:16Z, T15:55:14Z, T16:17:07Z, T16:27:00Z,
+  T16:39:02Z, T16:50:11Z, T17:08:28Z; all `severity=low`,
+  `what_attempted=[]`, all on `mobile-eats:0.3`, all
+  `git_repo=/Users/josh/Developer/mobile-eats`.
+- DCG rule: `strict_git:worktree-remove` (DCG pack `strict_git`,
+  enabled per `dcg packs --enabled` 2026-05-09 probe).
+- Canonical doctrine:
+  `~/.claude/skills/git-worktree-branch-rationalization/SKILL.md`
+  Axiom 11; cleanup conductor reference at
+  `subagents/cleanup-conductor.md`.
+- Bead: `flywheel-95a51` (this dispatch).
+- Parent class: `dcg-blocked-temp-cleanup` (this section above).
+
 ## sniff-lens-status-without-outcome — activity-shaped evidence treated as outcome (2026-05-09 promotion)
 
 Date: 2026-05-09
