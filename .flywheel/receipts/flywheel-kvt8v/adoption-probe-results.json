@@ -1,0 +1,27 @@
+{
+  "schema_version": "flywheel-kvt8v-adoption-probe/v1",
+  "generated_at": "2026-05-09T05:28:00Z",
+  "probes": {
+    "mobile-eats": [
+      {
+        "ts": "2026-05-09T05:27:15.193466Z",
+        "prompt": "Callback: task_id=flywheel-kvt8v-evidence-redacted-adoption-probe-v2 status=done source_session=flywheel source_worker=CloudyMill evidence=/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-kvt8v/evidence.md evidence_redacted=yes tests=PASS adoption_probe=true no_repo_mutation=true callback_target_workaround=mobile-eats-pane1-copy-mode",
+        "error": null
+      }
+    ],
+    "alpsinsurance": [
+      {
+        "ts": "2026-05-09T05:26:34.532037Z",
+        "prompt": "Callback: task_id=flywheel-kvt8v-evidence-redacted-adoption-probe-v2 status=done source_session=flywheel source_worker=CloudyMill evidence=/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-kvt8v/evidence.md evidence_redacted=yes tests=PASS adoption_probe=true no_repo_mutation=true",
+        "error": null
+      }
+    ],
+    "skillos": [
+      {
+        "ts": "2026-05-09T05:26:34.530909Z",
+        "prompt": "Callback: task_id=flywheel-kvt8v-evidence-redacted-adoption-probe-v2 status=done source_session=flywheel source_worker=CloudyMill evidence=/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-kvt8v/evidence.md evidence_redacted=yes tests=PASS adoption_probe=true no_repo_mutation=true",
+        "error": null
+      }
+    ]
+  }
+}
