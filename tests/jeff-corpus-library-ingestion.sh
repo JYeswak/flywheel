@@ -80,7 +80,39 @@ learning_artifact_check() {
 
 derived_beads_check() {
   br list --json --limit 0 >"$TMP/beads.json"
-  assert_jq "$TMP/beads.json" '[.issues[] | select(((.labels // []) | index("jeff-corpus-derived")) and (.priority <= 1))] | length >= 5' "AG6 five P0/P1 jeff-corpus-derived beads exist"
+  # Shape-tolerant: tolerate both top-level array (legacy br shape) and
+  # object-with-issues key (current br 0.2.5 shape). flywheel-keji
+  # 2026-05-09: bead-keji rework after br shape drift exposed by
+  # flywheel-1lpv 2026-05-04 validation.
+  assert_jq "$TMP/beads.json" \
+    '[(if type == "object" then .issues else . end)[] | select(((.labels // []) | index("jeff-corpus-derived")) and (.priority <= 1))] | length >= 5' \
+    "AG6 five P0/P1 jeff-corpus-derived beads exist"
+}
+
+derived_beads_shape_fixture_check() {
+  # flywheel-keji fixture: prove the AG6 jq is shape-tolerant on BOTH
+  # br list shapes. Uses a tiny synthetic input with a single matching
+  # row in each shape.
+  cat >"$TMP/beads-array.json" <<'EOF'
+[{"id":"f-1","labels":["jeff-corpus-derived"],"priority":0},
+ {"id":"f-2","labels":["jeff-corpus-derived"],"priority":1},
+ {"id":"f-3","labels":["jeff-corpus-derived"],"priority":1},
+ {"id":"f-4","labels":["jeff-corpus-derived"],"priority":1},
+ {"id":"f-5","labels":["jeff-corpus-derived"],"priority":0}]
+EOF
+  cat >"$TMP/beads-object.json" <<'EOF'
+{"issues":[{"id":"f-1","labels":["jeff-corpus-derived"],"priority":0},
+ {"id":"f-2","labels":["jeff-corpus-derived"],"priority":1},
+ {"id":"f-3","labels":["jeff-corpus-derived"],"priority":1},
+ {"id":"f-4","labels":["jeff-corpus-derived"],"priority":1},
+ {"id":"f-5","labels":["jeff-corpus-derived"],"priority":0}]}
+EOF
+  assert_jq "$TMP/beads-array.json" \
+    '[(if type == "object" then .issues else . end)[] | select(((.labels // []) | index("jeff-corpus-derived")) and (.priority <= 1))] | length == 5' \
+    "AG6-fixture array shape (5 matching beads)"
+  assert_jq "$TMP/beads-object.json" \
+    '[(if type == "object" then .issues else . end)[] | select(((.labels // []) | index("jeff-corpus-derived")) and (.priority <= 1))] | length == 5' \
+    "AG6-fixture object-with-issues shape (5 matching beads)"
 }
 
 canonical_paths_check() {
@@ -104,6 +136,7 @@ main() {
   progress_resume_check
   learning_artifact_check
   derived_beads_check
+  derived_beads_shape_fixture_check
   canonical_paths_check
   doctor_signal_check
   if [ "$fail_count" -gt 0 ]; then

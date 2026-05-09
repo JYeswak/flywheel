@@ -1,0 +1,7 @@
+PASS AG1 verified repo state covers 177 repos
+PASS AG3 persistent progress supports resume-after-interrupt
+PASS AG5 ten per-query learning artifacts exist
+PASS AG5 learning artifacts carry required sections
+PASS AG9 fixture query artifacts present
+PASS AG8 jeff-intel state and learnings canonical paths exist
+PASS AG7 doctor exposes jeff_corpus_indexed_count
