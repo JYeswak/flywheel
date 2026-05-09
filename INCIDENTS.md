@@ -7584,3 +7584,104 @@ Evidence:
   blocked on peer reservation).
 - Sibling completed today (precedent): `flywheel-u5ml3` (closed; same
   cross-reference pattern for `daily_report_missing_dispatch_gate`).
+
+## sniff-lens-status-without-outcome — activity-shaped evidence treated as outcome (2026-05-09 promotion)
+
+Date: 2026-05-09
+
+Promotion Action: NEW
+
+Class: `sniff-lens-status-without-outcome`
+
+Event Count: 8 events on 2026-05-04 alone, plus reworks for
+`flywheel-w3pr.3`, `flywheel-0rlc`, `flywheel-1wbr`, `flywheel-lam3`,
+and the `flywheel-keji` audit row cluster (notes lines 140, 174, 246,
+280, 297, 444 region, 1138). Pattern continued through 2026-05-09.
+
+Severity: medium
+
+Cost: Workers shipped substantively correct work (skill drafts, L-rule
+candidates, validator hooks) but worded close evidence as activity
+("mapped N candidates", "reviewed K patterns", "scanned X files")
+instead of founder-ops outcome ("shipped N promotion-ready skills
+usable for next-tick selection; saved Y human-review-hours/week;
+closed Z gaps in skill library"). The sniff-lens validator (Joshua-tone,
+25-year-ops-judgment perspective) correctly flagged this as
+`status_without_outcome` and BLOCK_CLOSED the bead. Each rework cycle
+cost a full worker-tick to reframe evidence without changing
+substance — pure prose rework, zero code/doctrine delta. On
+2026-05-04 this fired 6+ times in a single day across multiple
+workers (OrangeRaven, GoldSnow, NobleVale, others), indicating the
+trauma is workflow-shaped not worker-shaped.
+
+Root Cause: The dispatch-template's evidence-pack contract names
+required FIELDS (DID/DIDNT/GAPS, validation, files-changed,
+acceptance-receipts) but does not require outcome-shaped LANGUAGE.
+A worker can populate every required field with activity verbs and
+pass mechanical validation while failing the sniff lens. The
+beads-compliance evidence pack contract (L126, INCIDENTS section
+"Evidence packs replace four-lens close self-grades") solves the
+worker-self-grade-as-fact failure mode but is orthogonal to the
+activity-vs-outcome framing failure mode — workers can produce a
+700+ scoring evidence pack that still reads as Kubernetes status,
+not founder leverage.
+
+Forever-Rule: Closure evidence packs MUST shape the headline finding
+as outcome ("we shipped X usable for Y; saved Z; closed N gaps"),
+not activity ("we mapped/scanned/reviewed N items"). The sniff-lens
+validator (`scripts/sniff-lens-validator.sh` or equivalent) is the
+mechanical gate; `flywheel-0rlc`'s evidence pack
+(`.flywheel/evidence/flywheel-0rlc/report.md`) is the canonical
+fix-shape: activity-vs-outcome table + outcome math + gate-by-gate
+restating + concrete leverage delta. Future workers facing a
+`status_without_outcome` BLOCK_CLOSE follow the 0rlc reframe
+template, not new substrate.
+
+Fix Applied/Status: NEW layer-2 INCIDENTS entry surfaced from
+`gap-hunt-probe` (filed `flywheel-2xdi.39` because `flywheel-0rlc`
+shipped doctrine/canonical/promotion work — the activity→outcome
+reframe pattern + 5 staged skill drafts + 5 candidate L-rules — but
+was not cited in INCIDENTS.md). The 0rlc evidence pack and its
+sibling rework `flywheel-w3pr.3` evidence pack ARE the canonical
+fix-shape. No code change required; this entry makes the doctrine
+visible to the L56 ladder probe so it stops re-firing on the
+already-canonical-handled class.
+
+Recurrence Prevention: Donella leverage point #6 (information
+flow) — the L56 ladder now sees coverage in INCIDENTS.md and skips.
+Donella #5 (rules) — sniff-lens validator IS the active rule;
+`status_without_outcome` is the canonical FAIL token; no new gate
+needed. Donella #4 (self-organization) — the 0rlc precedent
+("activity-vs-outcome table + outcome math + gate-by-gate restating")
+gives future workers a copy-pasteable template, reducing the
+per-rework cycle from ~1 worker-tick of trial-and-error to
+~5-min reframe.
+
+Sibling Classes:
+- `self-grade-claim-treated-as-fact` (INCIDENTS section "Evidence
+  packs replace four-lens close self-grades", 2026-05-07): worker
+  asserting a four-lens score without backing pack. Different
+  failure mode (no evidence vs evidence shaped wrong); same family
+  (close-quality drift).
+
+Evidence:
+- 0rlc evidence pack: `.flywheel/evidence/flywheel-0rlc/report.md`
+  + `.flywheel/evidence/flywheel-0rlc/w3pr.3-rework-target.md`
+  (canonical fix-shape with activity→outcome table).
+- w3pr.3 rework evidence pack:
+  `.flywheel/evidence/flywheel-w3pr.3/report.md`.
+- 1wbr rework evidence: `.flywheel/audit/flywheel-1wbr/evidence.md:13`
+  cites the same `status_without_outcome` finding.
+- lam3 rework target: `.flywheel/evidence/flywheel-lam3/152b.1-rework-target.md:43`
+  shows the same outcome-vocabulary check pattern.
+- 2026-05-04 cluster: `.flywheel/audit/flywheel-keji/before-test-output-merged.txt`
+  notes lines 140, 174, 246, 280, 297, 1138 — 6 BLOCK_CLOSE events
+  in a single day.
+- Memory: `feedback_post_wire_or_explain_three_skill_polish_gate.md`
+  (5-skill polish gate), `user_joshua_lens_judgment_depth.md`
+  (Joshua-lens grades operator-durability + team-fit + company-
+  building leverage, NOT generic mission-fit).
+- Doctrine bead: `flywheel-0rlc` (canonical fix-shape demonstrated;
+  closed 2026-05-09).
+- This bead: `flywheel-2xdi.39` (gap-hunt-probe surfaced the
+  missing INCIDENTS coverage; closed via this entry).
