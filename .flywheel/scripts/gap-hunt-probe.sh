@@ -614,7 +614,7 @@ def probe_cross_source_silos(receivers_text: str) -> list[dict]:
     gaps = []
     for path in sorted(STATE_DIR.glob("*.jsonl")):
         name = path.name
-        if name in {"gap-hunt.jsonl"}:
+        if name in {"gap-hunt.jsonl", "gap-hunt-false-positives.jsonl"}:
             continue
         if name not in receivers_text and path.stem not in receivers_text:
             gaps.append(gap("cross-source-silos", name, f"{path} ledger exists but is not referenced by sampled tick/status/synth/doctrine surfaces"))
