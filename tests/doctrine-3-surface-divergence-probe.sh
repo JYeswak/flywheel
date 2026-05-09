@@ -26,6 +26,7 @@ make_surface() {
 
 repo="$TMP/repo"
 mkdir -p "$repo/.flywheel" "$repo/templates/flywheel-install"
+printf 'repo_role: flywheel_origin\n' >"$repo/.flywheel/MISSION.md"
 
 make_surface "$repo/AGENTS.md" L93 L94 L95
 make_surface "$repo/.flywheel/AGENTS-CANONICAL.md" L93 L94 L95 L96
@@ -78,6 +79,25 @@ if jq -e '.status == "pass" and .surface_rule_counts.agents_md == 2 and .surface
   pass "generated index rows count as rules"
 else
   fail "generated index rows count as rules"
+  jq . <<<"$out" || true
+fi
+
+fleet="$TMP/fleet"
+origin="$fleet/origin"
+installed="$fleet/installed"
+mkdir -p "$origin/.git" "$origin/.flywheel" "$origin/templates/flywheel-install" "$installed/.git" "$installed/.flywheel"
+printf 'repo_role: flywheel_origin\n' >"$origin/.flywheel/MISSION.md"
+make_surface "$origin/AGENTS.md" L93 L94 L95 L96
+cp "$origin/AGENTS.md" "$origin/.flywheel/AGENTS-CANONICAL.md"
+cp "$origin/AGENTS.md" "$origin/templates/flywheel-install/AGENTS.md"
+make_surface "$installed/AGENTS.md" L93 L94 L95 L96
+cp "$installed/AGENTS.md" "$installed/.flywheel/AGENTS-CANONICAL.md"
+
+out="$(DOCTRINE_3_SURFACE_FLEET_REPOS="$origin,$installed" "$PROBE" --fleet --json)"
+if jq -e '.status == "pass" and .fleet_repo_count == 2 and .fleet_mirror_drift_count == 0' <<<"$out" >/dev/null; then
+  pass "fleet mode reports zero mirror drift"
+else
+  fail "fleet mode reports zero mirror drift"
   jq . <<<"$out" || true
 fi
 
