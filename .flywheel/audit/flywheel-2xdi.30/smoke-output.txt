@@ -1,0 +1,8 @@
+PASS hook exists and is executable
+PASS --info exposes schema + mission lock hash
+PASS --examples cites --session and --dry-run
+PASS unknown flag returns exit 1
+PASS missing packet => silent no-op (exit 0, empty stdout)
+PASS --json envelope conforms to flywheel.session_start_hook.status.v1 (noop)
+PASS SKILLOS_DISABLED=1 silent no-op exit 0
+SUMMARY pass=7 fail=0
