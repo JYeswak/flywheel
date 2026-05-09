@@ -1,0 +1,121 @@
+{
+  "schema_version": "claude-settings-deny/v1",
+  "control_schema_version": "agent-security-control/v1",
+  "managed_block_id": "canonical-agent-security-deny/v1",
+  "description": "Canonical sandbox deny template for Claude settings. Operators copy the permissions.deny entries into the managed settings surface and document any bounded override with canonical-security-allow metadata.",
+  "canonical_security_allow": {
+    "token": "canonical-security-allow",
+    "required_fields": [
+      "reason",
+      "owner",
+      "issued_at",
+      "expires_at",
+      "risk_ack",
+      "exact_path_or_command_scope",
+      "tracking_bead"
+    ],
+    "max_ttl_hours": 24,
+    "wildcards_allowed": false,
+    "notes": "JSON comments are invalid; store override metadata in the adjacent managed settings metadata surface or an override receipt, never inline as a comment."
+  },
+  "permissions": {
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/.dev.vars)",
+      "Read(**/.dev.vars.*)",
+      "Read(**/secrets/**)",
+      "Read(**/credentials/**)",
+      "Read(**/.aws/**)",
+      "Read(**/.ssh/**)",
+      "Read(**/.npmrc)",
+      "Read(**/.pypirc)",
+      "Read(**/.netrc)",
+      "Read(**/.git-credentials)",
+      "Read(**/.config/infisical/**)",
+      "Read(**/opencode.json)",
+      "Read(**/.opencode/**)",
+      "Read(**/.mcp.json)",
+      "Read(**/mcp.json)",
+      "Read(**/*_rsa)",
+      "Read(**/*_dsa)",
+      "Read(**/*_ecdsa)",
+      "Read(**/*_ed25519)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*.p12)",
+      "Read(**/*.pfx)",
+      "Read(**/*.kubeconfig)",
+      "Read(**/.docker/config.json)",
+      "Read(**/firebase-service-account*.json)",
+      "Read(**/*service-account*.json)",
+      "Read(**/*credentials*.json)"
+    ]
+  },
+  "path_denies": [
+    ".env",
+    ".env.*",
+    ".dev.vars",
+    ".dev.vars.*",
+    "secrets/**",
+    "credentials/**",
+    ".aws/**",
+    ".ssh/**",
+    ".npmrc",
+    ".pypirc",
+    ".netrc",
+    ".git-credentials",
+    ".config/infisical/**",
+    ".opencode/**",
+    ".mcp.json",
+    "mcp.json",
+    "*_rsa",
+    "*_dsa",
+    "*_ecdsa",
+    "*_ed25519",
+    "*.pem",
+    "*.key",
+    "*.p12",
+    "*.pfx",
+    "*.kubeconfig",
+    ".docker/config.json",
+    "firebase-service-account*.json",
+    "*service-account*.json",
+    "*credentials*.json"
+  ],
+  "bash_output_deny": {
+    "emit_secret_values": false,
+    "emit_secret_fragments": false,
+    "allowed_secret_evidence": [
+      "class",
+      "count",
+      "path",
+      "line",
+      "field_path",
+      "redaction_label"
+    ],
+    "required_redaction_label_format": "[REDACTED:<class>]"
+  },
+  "fixture_policy": {
+    "synthetic_only": true,
+    "corpus_path": ".flywheel/security/v1/secret-patterns.json",
+    "production_secret_reads_allowed": false
+  },
+  "doctor_signals": [
+    {
+      "name": "agent_security_control_status",
+      "failure_class": "security_control_rollback_failed",
+      "consumer": "flywheel-loop doctor"
+    },
+    {
+      "name": "secret_output_redaction_status",
+      "failure_class": "secret_output_leak",
+      "consumer": "dispatch close validation"
+    }
+  ],
+  "rollback_guard": {
+    "rollback_id": "canonical-agent-security-deny/v1",
+    "failure_class": "security_control_rollback_failed",
+    "recovery_hint": "Restore the last passing deny block or remove the bounded canonical-security-allow receipt after expiry."
+  }
+}

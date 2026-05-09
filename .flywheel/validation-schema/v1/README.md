@@ -13,9 +13,32 @@ This directory defines the first machine-readable receipt contract for validatin
 | `parse.sh` | Read-only parser and semantic invariant checker. |
 | `dispatch-template-audit.sh` | Read-only audit for dispatch packets and the shared dispatch template. |
 | `wire-or-explain-ledger.schema.json` | JSON Schema contract for The Zest Ledger. |
+| `agent-security-control.schema.json` | JSON Schema contract for `agent-security-control/v1` security-control receipts. |
 | `fixtures/pass/*.json` | Receipts that must validate. |
 | `fixtures/fail/*.json` | Receipts that must be rejected with deterministic JSON errors. |
 | `fixtures/dispatch-template/*.md` | Valid and invalid dispatch-packet fixtures for B02. |
+
+## Agent Security Control
+
+`agent-security-control/v1` defines the sandbox-only security contract for
+fleet agent settings: the canonical deny template path, path denies, redacted
+Bash output policy, synthetic fixture policy, doctor signals, issuance metadata,
+and rollback guard. The canonical deny template lives at
+`.flywheel/security/v1/claude-settings-deny.json`.
+
+Temporary exceptions must use the `canonical-security-allow` token with owner,
+reason, expiry, risk acknowledgement, tracking bead, and exact path or command
+scope. Wildcard and parent-directory exceptions are intentionally outside the
+v1 contract.
+
+Run:
+
+```bash
+python3 -m json.tool .flywheel/validation-schema/v1/agent-security-control.schema.json >/dev/null
+jq -e '.properties.schema_version.const == "agent-security-control/v1"' .flywheel/validation-schema/v1/agent-security-control.schema.json
+python3 -m json.tool .flywheel/security/v1/claude-settings-deny.json >/dev/null
+jq -e '.permissions.deny | length >= 20' .flywheel/security/v1/claude-settings-deny.json
+```
 
 ## The Zest Ledger - Part of the Yuzu Method framework by ZestStream.
 

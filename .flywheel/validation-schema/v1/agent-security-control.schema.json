@@ -1,0 +1,319 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/agent-security-control/v1/schema.json",
+  "title": "Agent Security Control v1",
+  "description": "Sandbox-only agent security control contract for fleet Claude settings denies, path denies, redacted output policy, bounded overrides, synthetic fixtures, doctor signals, issuance metadata, and rollback guards.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "scope",
+    "settings_deny",
+    "path_denies",
+    "bash_output_deny",
+    "override_policy",
+    "fixture_policy",
+    "doctor_signals",
+    "issued_at",
+    "expires_at",
+    "issuer",
+    "rollback_guard"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "agent-security-control/v1"
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "env",
+        "applies_to"
+      ],
+      "properties": {
+        "env": {
+          "type": "string",
+          "const": "sandbox"
+        },
+        "applies_to": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "session": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "settings_deny": {
+      "type": "object",
+      "required": [
+        "template_path",
+        "managed_block_id",
+        "minimum_rule_count",
+        "required_rule_ids"
+      ],
+      "properties": {
+        "template_path": {
+          "type": "string",
+          "const": ".flywheel/security/v1/claude-settings-deny.json"
+        },
+        "managed_block_id": {
+          "type": "string",
+          "const": "canonical-agent-security-deny/v1"
+        },
+        "minimum_rule_count": {
+          "type": "integer",
+          "minimum": 20
+        },
+        "required_rule_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "path_denies": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "pattern",
+          "reason",
+          "severity"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "pattern": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "high",
+              "medium",
+              "low"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "bash_output_deny": {
+      "type": "object",
+      "required": [
+        "redaction_required",
+        "emit_secret_values",
+        "emit_secret_fragments",
+        "classes"
+      ],
+      "properties": {
+        "redaction_required": {
+          "type": "boolean",
+          "const": true
+        },
+        "emit_secret_values": {
+          "type": "boolean",
+          "const": false
+        },
+        "emit_secret_fragments": {
+          "type": "boolean",
+          "const": false
+        },
+        "classes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "override_policy": {
+      "type": "object",
+      "required": [
+        "token",
+        "requires",
+        "exact_scope_required",
+        "max_ttl_hours",
+        "wildcards_allowed"
+      ],
+      "properties": {
+        "token": {
+          "type": "string",
+          "const": "canonical-security-allow"
+        },
+        "requires": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "reason",
+              "owner",
+              "issued_at",
+              "expires_at",
+              "risk_ack",
+              "exact_path_or_command_scope",
+              "tracking_bead"
+            ]
+          },
+          "contains": {
+            "const": "expires_at"
+          },
+          "uniqueItems": true
+        },
+        "exact_scope_required": {
+          "type": "boolean",
+          "const": true
+        },
+        "max_ttl_hours": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 24
+        },
+        "wildcards_allowed": {
+          "type": "boolean",
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "fixture_policy": {
+      "type": "object",
+      "required": [
+        "synthetic_only",
+        "production_secret_reads_allowed",
+        "corpus_path"
+      ],
+      "properties": {
+        "synthetic_only": {
+          "type": "boolean",
+          "const": true
+        },
+        "production_secret_reads_allowed": {
+          "type": "boolean",
+          "const": false
+        },
+        "corpus_path": {
+          "type": "string",
+          "const": ".flywheel/security/v1/secret-patterns.json"
+        }
+      },
+      "additionalProperties": false
+    },
+    "doctor_signals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "status_field",
+          "failure_class",
+          "consumer"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status_field": {
+            "type": "string",
+            "minLength": 1
+          },
+          "failure_class": {
+            "type": "string",
+            "minLength": 1
+          },
+          "consumer": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "issued_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "issuer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "rollback_guard": {
+      "type": "object",
+      "required": [
+        "rollback_id",
+        "before_state",
+        "after_state",
+        "idempotency_key",
+        "failure_class",
+        "recovery_hint"
+      ],
+      "properties": {
+        "rollback_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "before_state": {
+          "type": "object",
+          "minProperties": 1
+        },
+        "after_state": {
+          "type": "object",
+          "minProperties": 1
+        },
+        "idempotency_key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "failure_class": {
+          "type": "string",
+          "enum": [
+            "security_control_rollback_failed",
+            "settings_deny_missing",
+            "override_scope_invalid",
+            "secret_output_leak"
+          ]
+        },
+        "recovery_hint": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

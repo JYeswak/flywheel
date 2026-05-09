@@ -104,6 +104,7 @@ Before editing:
 | `.flywheel/PLANS/` | Design plans, research briefs, RCA packets, and dispatch architecture notes. |
 | `.flywheel/handoffs/` | End-of-session handoffs. Read the latest one when resuming orchestration. |
 | `.flywheel/scripts/` | Repo-local helper/probe scripts wired into slash commands or tick steps. |
+| `.flywheel/security/v1/` | Canonical security controls, including the `agent-security-control/v1` schema companion deny template and `canonical-security-allow` override token. |
 | `.flywheel/doctrine/` | Doctrine adoption packets and handoff doctrine sources. |
 | `.flywheel/dispatch-log.jsonl` | Dispatch record and callback tracking surface. |
 | `.flywheel/last_closeout_receipt.json` | Latest repo-local loop closeout receipt. |
