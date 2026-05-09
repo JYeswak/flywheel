@@ -1,0 +1,41 @@
+# JSM-import-ready patch for flywheel-2xdi.43 (wired-but-cold for lib/polish.sh)
+# Skill: ~/.claude/skills/.flywheel/ (unmanaged by JSM at dispatch time)
+# Repo head pre: post-2xdi.40
+# Date: 2026-05-09
+
+## Changeset summary
+
+### File 1 (edit): ~/.claude/skills/.flywheel/lib/polish.sh
+
+Added self-instrumentation per flywheel-2xdi.32 precedent (autoloop-executor.sh
++ doctor.d/part-03-security-posture.sh use the same pattern):
+
+(a) Top-of-file preamble (+24 lines):
+- Header comment naming the wired-but-cold fix and citing prior patterns.
+- POLISH_EXECUTOR_LEDGER variable (default $HOME/.local/state/flywheel/polish.jsonl).
+- _polish_executor_log_entry() helper that appends a `polish.entry.v1` row to
+  the ledger with `ts`, `schema_version`, `script`, and `fn` fields.
+
+(b) Per-public-function _polish_executor_log_entry call (+1 line each, 3 lines total):
+- polish_gate_doctor_json() — line ~28
+- quality_bar_close_gate_doctor_json() — line ~234
+- publishability_bar_doctor_json() — line ~270
+
+Net line count: 281 -> 309 (+28).
+
+Behavioral test confirmed: `_polish_executor_log_entry test` writes valid
+`polish.entry.v1` JSON to the ledger.
+
+### Files NOT changed (deliberately)
+
+- `lib/portable/core.sh` — the deeper coupling bug (lib/polish.sh not auto-
+  sourced when core.sh is the entry point) is filed as flywheel-3bfgw, not
+  fixed in this dispatch. This dispatch's narrow scope is the wired-but-cold
+  finding; the deeper coupling is a separate workstream.
+
+### Caller behavior (already exists, not changed)
+
+- `~/.claude/skills/.flywheel/bin/flywheel-loop` (line 28-36) sources
+  `lib/polish.sh` via the module list — when invoked through bin/flywheel-loop,
+  the new self-log will fire on each public-function call.
+
