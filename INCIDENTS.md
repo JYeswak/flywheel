@@ -6030,7 +6030,7 @@ name `integrate_worker_active`; the synonym
 compatibility but discouraged for new code.
 
 Synonym Naming Note: a future maintenance bead
-(`flywheel-jlc4q`, see Evidence) may unify the emitting probe to
+(`flywheel-pjfqw`, see Evidence) may unify the emitting probe to
 emit only `integrate_worker_active` so the L56 ladder dedup is
 deterministic.
 
@@ -6050,7 +6050,7 @@ Evidence (sub-class):
   2026-05-04T02:56:13Z, 03:01:05Z, 03:16:13Z (same fleet pane).
 - Parent class section: `## integrate_worker_active` above.
 - Bead: `flywheel-6grpt` (this dispatch).
-- Synonym-unification follow-up bead: `flywheel-jlc4q` (filed by
+- Synonym-unification follow-up bead: `flywheel-pjfqw` (filed by
   this close — names the probe-emitter unification work as a
   separate scope).
 
