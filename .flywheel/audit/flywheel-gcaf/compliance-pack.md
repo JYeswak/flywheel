@@ -38,7 +38,7 @@ timeout 20 jsm validate /Users/josh/.claude/skills/railway-api --json
 
 Both return `success=false` with `EXECUTABLE_NOT_ALLOWED` for executable scripts under `scripts/`. This appears aligned with the already-known library-wide executable-bit backlog described in `~/.claude/skills/.flywheel/GAPS-LIVE.md` (`G-CF-38`, `G-CF-52`), but it means this closeout cannot honestly cite current `jsm validate` pass evidence.
 
-Follow-up bead filing was attempted, but `.beads/issues.jsonl` was reserved by `flywheel-syfq-0272b3` at the time this pack was created. If the bead lane opens before callback, this pack will be patched with the follow-up bead ID.
+Follow-up bead: `flywheel-ovp71`.
 
 ## Acceptance Gates
 
@@ -76,7 +76,7 @@ No doctrine, canonical L-rule, or skill surface was modified by this worker. `ag
 
 ## L52 / L53
 
-Observed gap: current JSM validation fails for the two updated skills due executable-script policy. Follow-up bead filing is pending `.beads/issues.jsonl` reservation release.
+Observed gap: current JSM validation fails for the two updated skills due executable-script policy. Filed follow-up bead `flywheel-ovp71`.
 
 No fuckup row was logged. The gap is a known validation-policy backlog, not a task-blocking runtime incident for the routed-decision loop evidence.
 

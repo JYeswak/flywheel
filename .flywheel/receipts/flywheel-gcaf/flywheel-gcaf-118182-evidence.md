@@ -32,6 +32,7 @@ bash .flywheel/receipts/flywheel-gcaf/l112-probe.sh
 - `nango-integrations` contains Nango action and self-hosted Railway handoff coverage.
 - `railway-api` contains a Nango-on-Railway runbook.
 - Current `jsm validate` fails on executable-script policy for both updated skills.
+- Follow-up bead `flywheel-ovp71` tracks the JSM validation caveat.
 
 ## Acceptance
 
