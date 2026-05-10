@@ -1,0 +1,525 @@
+--- .flywheel/audit/flywheel-wzjo9.1.7/flywheel-loop.before	2026-05-10 15:31:47
++++ /Users/josh/.claude/skills/.flywheel/bin/flywheel-loop	2026-05-10 15:38:37
+@@ -2,6 +2,507 @@
+ # flywheel-loop: thin dispatcher; command behavior lives in ../lib.
+ set -euo pipefail
+ 
++
++# ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======
++# flywheel-cli-surface: true
++# canonical-cli-scoping: passing (filled in by flywheel-wzjo9.1.7)
++# doctor-mode-tier: filled (bead flywheel-wzjo9.1.7 over flywheel-ws02m scaffold)
++#
++# This block was APPENDED by scaffold-canonical-cli.sh. flywheel-loop already
++# implements doctor/health/repair/validate/audit/why/quickstart natively
++# (portable_doctor / portable_health / etc., sourced from lib/*.sh). The
++# canonical-cli intercept BYPASSES colliding verbs to the native dispatcher
++# (see _scaffold_is_canonical_arg) so consumers like agent.sh:146 and the
++# loop-driver-writeback continue to reach portable_doctor via
++# `flywheel-loop doctor --repo PATH --json`. Only INTROSPECTION-only canonical
++# surfaces (--info / --schema / --examples / help <topic> / completion) are
++# routed to the scaffold here. The scaffold_cmd_X stubs were filled per
++# .flywheel/audit/flywheel-wzjo9.1.7/apply-spec.md as scaffold-meta probes
++# (probing the canonical-cli scaffold layer itself, NOT duplicating native).
++
++_SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
++_SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
++if [[ -r "$_SCAFFOLD_HELPER_LIB" ]]; then
++  # shellcheck source=/dev/null
++  source "$_SCAFFOLD_HELPER_LIB"
++fi
++
++SCAFFOLD_SCHEMA_VERSION="flywheel-loop/v1"
++SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/flywheel-loop-runs.jsonl}"
++
++scaffold_usage() {
++  cat <<'USG'
++usage: flywheel-loop [SUBCOMMAND] [OPTIONS]
++
++Backward-compatible run mode: default invocation routes to the original
++top-level logic (now exposed as `cmd_run`).
++
++Canonical CLI surfaces:
++  doctor [--json]          probe substrate health
++  health [--json]          last-run status
++  repair --scope <s>       repair misconfigured state
++                            Default: --dry-run; mutate with --apply --idempotency-key KEY
++  validate <subject> [...] validate per-subject contract (TODO: define subjects)
++  audit [--json]           recent run history
++  why <id>                 explain provenance for a given id (TODO: id semantics)
++  quickstart [--json]      operator orientation
++  help <topic>             topic help (run | doctor | health | repair | validate)
++  completion <shell>       emit bash or zsh completion
++
++Introspection:
++  --info --json            version, paths, env vars, dependencies, sha256
++  --schema [<surface>]     JSON Schema for output envelopes
++  --examples --json        curated workflow examples
++  --help / -h              this help
++USG
++}
++
++scaffold_emit_info() {
++  if ! command -v cli_emit_info >/dev/null; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg name "flywheel-loop" \
++      '{schema_version:$sv,command:"info",name:$name,helper_lib_missing:true}'
++    return 0
++  fi
++  cli_emit_info \
++    "flywheel-loop" \
++    "scaffolded-v0" \
++    "$SCAFFOLD_SCHEMA_VERSION" \
++    "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
++    "SCAFFOLD_AUDIT_LOG" \
++    '{}'
++}
++
++scaffold_emit_examples() {
++  local jsonl
++  jsonl="$(jq -nc '{name:"default run",invocation:"flywheel-loop",purpose:"backward-compatible original behavior"}'
++)"$'\n'"$(jq -nc '{name:"doctor",invocation:"flywheel-loop doctor --json",purpose:"probe substrate health"}'
++)"
++  if command -v cli_emit_examples >/dev/null; then
++    cli_emit_examples "$SCAFFOLD_SCHEMA_VERSION" "$jsonl"
++  else
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"examples",helper_lib_missing:true}'
++  fi
++}
++
++scaffold_emit_quickstart() {
++  local steps
++  steps="$(jq -nc '{step:1,action:"probe doctor",command:"flywheel-loop doctor --json"}'
++)"
++  if command -v cli_emit_quickstart >/dev/null; then
++    cli_emit_quickstart "$SCAFFOLD_SCHEMA_VERSION" "$steps" "doctor,health,repair"
++  else
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"quickstart",helper_lib_missing:true}'
++  fi
++}
++
++scaffold_emit_schema() {
++  local surface="${1:-default}"
++  case "$surface" in
++    doctor)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surface:"doctor",scope:"scaffold-meta",fields:{ts:"ISO8601",status:"pass|warn|fail",checks:"array of {name,status,detail?}"},note:"scaffold-meta-doctor probes the canonical-cli scaffold layer; native flywheel-loop doctor (portable_doctor) handles substrate-wide probes — bypassed by colliding-verb intercept"}'
++      ;;
++    health)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surface:"health",fields:{ts:"ISO8601",status:"pass|warn|fail",audit_log:"path",last_run_ts:"ISO8601 or null",age_seconds:"int or null",recent_runs:"int (last 20)",total_runs:"int"},env:"SCAFFOLD_AUDIT_LOG"}'
++      ;;
++    repair)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surface:"repair",scopes:["audit_log_dir","audit_log_truncate"],contract:{requires_idempotency_key_when_apply:true,refusal_exit_code:3,dry_run_default:true},note:"scaffold-meta-repair affects only scaffold audit ledger; native flywheel-loop repair (if it had one) would affect substrate"}'
++      ;;
++    validate)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surface:"validate",subjects:["helper_lib","audit_log","env"],contract:{rejects_with_rc1:"on schema violation"}}'
++      ;;
++    audit)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surface:"audit",audit_log_env:"SCAFFOLD_AUDIT_LOG",row_shape:{ts:"ISO8601",action:"string",status:"string"},limit_default:20}'
++      ;;
++    why)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surface:"why",input:"id (ts OR idempotency_key OR run_id)",states:["found","not_found","unavailable"],source:"SCAFFOLD_AUDIT_LOG"}'
++      ;;
++    audit-row)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surface:"audit-row",required_fields:["ts","action"],optional_fields:["status","sha256","scope","mode","idempotency_key"]}'
++      ;;
++    default|*)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surfaces:["doctor","health","repair","validate","audit","why","audit-row"],note:"flywheel-loop canonical-cli surface; native verbs (doctor/health/repair/validate/audit/why/quickstart) bypass to portable_* dispatchers via _scaffold_is_canonical_arg colliding-verb guard"}'
++      ;;
++  esac
++}
++
++scaffold_emit_topic_help() {
++  local topic="${1:-}"
++  case "$topic" in
++    run)      printf 'topic: run — default backward-compatible invocation routes to native flywheel-loop dispatcher (sources lib/*.sh and dispatches to portable_doctor/portable_health/etc.); see flywheel-loop --help for native subcommand list\n' ;;
++    doctor)   printf 'topic: doctor — colliding verb. flywheel-loop doctor goes to native portable_doctor (substrate-wide); scaffold-meta-doctor (only reachable via direct scaffold_main call) probes scaffold layer: helper_lib path, FLYWHEEL_HOME, audit_log writability, schema version\n' ;;
++    health)   printf 'topic: health — colliding verb. flywheel-loop health goes to native portable_health; scaffold-meta-health tails $SCAFFOLD_AUDIT_LOG (separate ledger from substrate health), reports last_run_ts, age_seconds, recent_runs, total_runs\n' ;;
++    repair)   printf 'topic: repair — colliding verb. flywheel-loop repair (if implemented natively) handles substrate; scaffold-meta-repair scopes: audit_log_dir, audit_log_truncate. Apply contract: --apply requires --idempotency-key (rc=3 refusal)\n' ;;
++    validate) printf 'topic: validate — colliding verb. flywheel-loop validate (loop|receipt) goes to native; scaffold-meta-validate subjects: helper_lib (canonical helpers presence), audit_log (writability), env (FLYWHEEL_HOME / SCAFFOLD_AUDIT_LOG)\n' ;;
++    audit)    printf 'topic: audit — colliding verb. flywheel-loop audit goes to native; scaffold-meta-audit tails $SCAFFOLD_AUDIT_LOG via cli_emit_audit_tail (path-then-schema positional order); --limit N\n' ;;
++    why)      printf 'topic: why — colliding verb. flywheel-loop why <id> goes to native; scaffold-meta-why <id> matches against $SCAFFOLD_AUDIT_LOG ts/idempotency_key/run_id (states: found/not_found/unavailable)\n' ;;
++    quickstart) printf 'topic: quickstart — colliding verb. flywheel-loop quickstart goes to native; scaffold-meta-quickstart emits canonical-cli surface listing\n' ;;
++    completion) printf 'topic: completion <bash|zsh> — emit shell completion script for canonical-cli verbs (bypasses native dispatch)\n' ;;
++    *)        printf 'topics: run | doctor | health | repair | validate | audit | why | quickstart | completion\n' ;;
++  esac
++}
++
++scaffold_emit_completion() {
++  local shell="${1:-bash}"
++  case "$shell" in
++    -h|--help) scaffold_emit_topic_help completion 2>/dev/null \
++                 || printf 'topic: completion <bash|zsh> — emit shell completion script\n'
++               return 0 ;;
++    bash) command -v cli_emit_completion_bash >/dev/null \
++            && cli_emit_completion_bash "flywheel-loop" "doctor,health,repair,validate,audit,why,quickstart,help,completion" "--json,--apply,--dry-run,--idempotency-key,--info,--schema,--examples" \
++            || printf '# helper lib missing — completion unavailable\n' ;;
++    zsh)  command -v cli_emit_completion_zsh >/dev/null \
++            && cli_emit_completion_zsh "flywheel-loop" "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
++            || printf '# helper lib missing — completion unavailable\n' ;;
++    *) printf 'ERR: unknown shell %s (use bash|zsh)\n' "$shell" >&2; return 64 ;;
++  esac
++}
++
++# ---------- canonical-cli stubs (TODO markers preserved) ----------
++
++scaffold_cmd_doctor() {
++  # Scaffold-meta-doctor: probes the canonical-cli scaffold layer.
++  # Native flywheel-loop doctor (portable_doctor) handles substrate-wide probes
++  # and is reached via the colliding-verb bypass at _scaffold_is_canonical_arg.
++  local fw_home="${FLYWHEEL_HOME:-$HOME/.claude/skills/.flywheel}"
++  local helper_lib="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
++  local audit_log="$SCAFFOLD_AUDIT_LOG"
++  local audit_log_dir; audit_log_dir="$(dirname "$audit_log")"
++  local fw_status="fail" lib_status="fail" helper_status="fail"
++  local audit_dir_status="fail" audit_writable="fail" schema_status="fail"
++  local overall="pass"
++
++  if [[ -d "$fw_home" ]]; then fw_status="pass"; fi
++  if [[ -d "$fw_home/lib" ]]; then lib_status="pass"; fi
++  if [[ -r "$helper_lib" ]]; then helper_status="pass"; fi
++  if [[ -d "$audit_log_dir" ]]; then audit_dir_status="pass"; fi
++  if [[ -w "$audit_log_dir" || ( ! -e "$audit_log_dir" && -w "$(dirname "$audit_log_dir")" ) ]]; then audit_writable="pass"; fi
++  if [[ -n "$SCAFFOLD_SCHEMA_VERSION" ]]; then schema_status="pass"; fi
++
++  for st in "$fw_status" "$lib_status" "$helper_status" "$schema_status"; do
++    if [[ "$st" == "fail" ]]; then overall="fail"; fi
++  done
++  if [[ "$overall" == "pass" ]]; then
++    for st in "$audit_dir_status" "$audit_writable"; do
++      if [[ "$st" == "fail" ]]; then overall="warn"; fi
++    done
++  fi
++
++  jq -nc \
++    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++    --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
++    --arg overall "$overall" \
++    --arg fw_home "$fw_home" --arg fw_status "$fw_status" \
++    --arg lib_dir "$fw_home/lib" --arg lib_status "$lib_status" \
++    --arg helper_lib "$helper_lib" --arg helper_status "$helper_status" \
++    --arg audit_dir "$audit_log_dir" --arg audit_dir_status "$audit_dir_status" --arg audit_writable "$audit_writable" \
++    --arg audit_log "$audit_log" \
++    --arg schema_status "$schema_status" --arg schema_version "$SCAFFOLD_SCHEMA_VERSION" \
++    '{schema_version:$sv,command:"doctor",scope:"scaffold-meta",ts:$ts,status:$overall,
++      checks:[
++        {name:"flywheel_home",path:$fw_home,status:$fw_status},
++        {name:"lib_dir",path:$lib_dir,status:$lib_status},
++        {name:"helper_lib",path:$helper_lib,status:$helper_status},
++        {name:"audit_log_dir",path:$audit_dir,status:$audit_dir_status},
++        {name:"audit_log_writable",status:$audit_writable},
++        {name:"schema_version_set",status:$schema_status,detail:$schema_version}
++      ],
++      audit_log:$audit_log,
++      note:"native flywheel-loop doctor: see portable_doctor (substrate); use `flywheel-loop doctor --repo PATH --json`"
++    }'
++}
++
++scaffold_cmd_health() {
++  local audit_log="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/flywheel-loop-audit.jsonl}"
++  local now ts last_run_ts="" age_seconds total_runs=0 recent_runs=0 status="pass"
++  local stale_threshold="${LOOP_HEALTH_STALE_THRESHOLD_SECONDS:-86400}"
++  ts="$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
++  if [[ ! -r "$audit_log" ]]; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$audit_log" \
++      '{schema_version:$sv,command:"health",scope:"scaffold-meta",ts:$ts,status:"warn",audit_log:$log,reason:"audit_log_missing",last_run_ts:null,age_seconds:null,recent_runs:0,total_runs:0}'
++    return 0
++  fi
++  total_runs="$(wc -l < "$audit_log" 2>/dev/null | tr -d ' ' || echo 0)"
++  recent_runs="$(tail -20 "$audit_log" 2>/dev/null | wc -l | tr -d ' ' || echo 0)"
++  last_run_ts="$(tail -1 "$audit_log" 2>/dev/null | jq -r '.ts // empty' 2>/dev/null || true)"
++  if [[ -n "$last_run_ts" ]]; then
++    now="$(date -u +%s)"
++    local last_epoch
++    last_epoch="$(date -u -j -f '%Y-%m-%dT%H:%M:%SZ' "$last_run_ts" +%s 2>/dev/null \
++                  || date -u -d "$last_run_ts" +%s 2>/dev/null \
++                  || echo 0)"
++    age_seconds=$((now - last_epoch))
++    if [[ "$age_seconds" -gt "$stale_threshold" ]]; then status="warn"; fi
++  else
++    age_seconds=null
++    status="warn"
++  fi
++  jq -nc \
++    --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg status "$status" \
++    --arg log "$audit_log" --arg last_run_ts "$last_run_ts" \
++    --argjson age "${age_seconds:-null}" \
++    --argjson total "$total_runs" --argjson recent "$recent_runs" \
++    --argjson stale "$stale_threshold" \
++    '{schema_version:$sv,command:"health",scope:"scaffold-meta",ts:$ts,status:$status,audit_log:$log,
++      last_run_ts:(if $last_run_ts == "" then null else $last_run_ts end),
++      age_seconds:$age, recent_runs:$recent, total_runs:$total,
++      stale_threshold_seconds:$stale}'
++}
++
++scaffold_cmd_repair() {
++  local scope="" mode="dry_run" idem_key=""
++  while [[ $# -gt 0 ]]; do
++    case "$1" in
++      -h|--help) scaffold_emit_topic_help repair; return 0 ;;
++      --scope) scope="${2:-}"; shift 2 ;;
++      --dry-run) mode="dry_run"; shift ;;
++      --apply) mode="apply"; shift ;;
++      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
++      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
++      --json) shift ;;
++      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; return 64 ;;
++    esac
++  done
++  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
++    if command -v cli_refuse_apply_without_idem_key >/dev/null; then
++      cli_refuse_apply_without_idem_key "$SCAFFOLD_SCHEMA_VERSION" "repair" "$scope"
++    else
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
++        '{schema_version:$sv,command:"repair",status:"refused",mode:"apply",scope:$scope,reason:"--apply requires --idempotency-key"}'
++      exit 3
++    fi
++  fi
++  local audit_log="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/flywheel-loop-audit.jsonl}"
++  local audit_log_dir; audit_log_dir="$(dirname "$audit_log")"
++  local action="" status="ok"
++  case "$scope" in
++    audit_log_dir)
++      if [[ -d "$audit_log_dir" ]]; then
++        action="audit_log_dir_exists_noop"
++      elif [[ "$mode" == "apply" ]]; then
++        if mkdir -p "$audit_log_dir" 2>/dev/null; then
++          action="audit_log_dir_created"
++        else
++          action="audit_log_dir_create_failed"; status="fail"
++        fi
++      else
++        action="audit_log_dir_create_planned"
++      fi
++      ;;
++    audit_log_truncate)
++      if [[ ! -f "$audit_log" ]]; then
++        action="audit_log_absent_noop"
++      elif [[ "$mode" == "apply" ]]; then
++        if : > "$audit_log" 2>/dev/null; then
++          action="audit_log_truncated"
++        else
++          action="audit_log_truncate_failed"; status="fail"
++        fi
++      else
++        action="audit_log_truncate_planned"
++      fi
++      ;;
++    "")
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"repair",scope:"scaffold-meta",status:"refused",reason:"--scope required",valid_scopes:["audit_log_dir","audit_log_truncate"]}'
++      return 64
++      ;;
++    *)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
++        '{schema_version:$sv,command:"repair",scope:"scaffold-meta",status:"refused",reason:"unknown scope",scope_in:$scope,valid_scopes:["audit_log_dir","audit_log_truncate"]}'
++      return 64
++      ;;
++  esac
++  local envelope
++  envelope="$(jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" --arg action "$action" --arg status "$status" \
++    '{schema_version:$sv,command:"repair",scope:$scope,status:$status,mode:$mode,idempotency_key:$idem,action:$action}')"
++  printf '%s\n' "$envelope"
++  if command -v cli_audit_append >/dev/null 2>&1; then
++    cli_audit_append "$audit_log" "repair" "$status" \
++      "$(jq -nc --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" --arg act "$action" \
++          '{scope:$scope,mode:$mode,idempotency_key:$idem,action:$act}')"
++  fi
++}
++
++scaffold_cmd_validate() {
++  local subject="${1:-}" target="${2:-}"
++  case "$subject" in
++    helper_lib)
++      local helper="${target:-${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}}"
++      if [[ ! -r "$helper" ]]; then
++        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$helper" \
++          '{schema_version:$sv,command:"validate",scope:"scaffold-meta",subject:"helper_lib",status:"fail",path:$p,reason:"missing_or_unreadable"}'
++        return 1
++      fi
++      if grep -qE '^cli_audit_append\(\)|^cli_emit_audit_tail\(\)' "$helper"; then
++        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$helper" \
++          '{schema_version:$sv,command:"validate",scope:"scaffold-meta",subject:"helper_lib",status:"pass",path:$p,has_audit_append:true,has_emit_audit_tail:true}'
++        return 0
++      fi
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$helper" \
++        '{schema_version:$sv,command:"validate",scope:"scaffold-meta",subject:"helper_lib",status:"fail",path:$p,reason:"missing_canonical_helpers"}'
++      return 1
++      ;;
++    audit_log)
++      local log="${target:-$SCAFFOLD_AUDIT_LOG}"
++      local dir; dir="$(dirname "$log")"
++      if [[ ! -d "$dir" ]]; then
++        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$log" \
++          '{schema_version:$sv,command:"validate",scope:"scaffold-meta",subject:"audit_log",status:"fail",path:$p,reason:"dir_missing"}'
++        return 1
++      fi
++      if [[ -e "$log" && ! -w "$log" ]]; then
++        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$log" \
++          '{schema_version:$sv,command:"validate",scope:"scaffold-meta",subject:"audit_log",status:"fail",path:$p,reason:"unwritable"}'
++        return 1
++      fi
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$log" \
++        '{schema_version:$sv,command:"validate",scope:"scaffold-meta",subject:"audit_log",status:"pass",path:$p,exists:'"$([[ -e "$log" ]] && echo true || echo false)"'}'
++      return 0
++      ;;
++    env)
++      local fw="${FLYWHEEL_HOME:-}"
++      if [[ -z "$fw" || ! -d "$fw" ]]; then
++        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg fw "$fw" \
++          '{schema_version:$sv,command:"validate",scope:"scaffold-meta",subject:"env",status:"fail",FLYWHEEL_HOME:$fw,reason:"FLYWHEEL_HOME_missing_or_invalid"}'
++        return 1
++      fi
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg fw "$fw" --arg log "$SCAFFOLD_AUDIT_LOG" \
++        '{schema_version:$sv,command:"validate",scope:"scaffold-meta",subject:"env",status:"pass",FLYWHEEL_HOME:$fw,SCAFFOLD_AUDIT_LOG:$log}'
++      return 0
++      ;;
++    "")
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"validate",scope:"scaffold-meta",status:"refused",reason:"--subject required",valid_subjects:["helper_lib","audit_log","env"]}'
++      return 64
++      ;;
++    *)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$subject" \
++        '{schema_version:$sv,command:"validate",scope:"scaffold-meta",status:"refused",reason:"unknown subject",subject:$s,valid_subjects:["helper_lib","audit_log","env"]}'
++      return 64
++      ;;
++  esac
++}
++
++scaffold_cmd_audit() {
++  local limit=20
++  while [[ $# -gt 0 ]]; do
++    case "$1" in
++      -h|--help) scaffold_emit_topic_help audit; return 0 ;;
++      --limit) limit="${2:-20}"; shift 2 ;;
++      --limit=*) limit="${1#--limit=}"; shift ;;
++      --json) shift ;;
++      *) printf 'ERR: unknown audit arg %s\n' "$1" >&2; return 64 ;;
++    esac
++  done
++  if command -v cli_emit_audit_tail >/dev/null 2>&1; then
++    # Canonical signature: (path, schema, limit) — path-then-schema positional order
++    cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" "$limit"
++    return 0
++  fi
++  if [[ ! -r "$SCAFFOLD_AUDIT_LOG" ]]; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
++      '{schema_version:$sv,command:"audit",scope:"scaffold-meta",audit_log:$log,status:"warn",reason:"audit_log_missing",rows:[]}'
++    return 0
++  fi
++  local rows
++  rows="$(tail -n "$limit" "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | jq -s '.' 2>/dev/null || echo '[]')"
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" --argjson rows "$rows" --argjson limit "$limit" \
++    '{schema_version:$sv,command:"audit",scope:"scaffold-meta",audit_log:$log,status:"pass",limit:$limit,rows:$rows,row_count:($rows|length)}'
++}
++
++scaffold_cmd_why() {
++  local id="${1:-}"
++  if [[ -z "$id" ]]; then
++    printf 'ERR: why requires <id> argument\n' >&2; return 64
++  fi
++  if [[ ! -r "$SCAFFOLD_AUDIT_LOG" ]]; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg log "$SCAFFOLD_AUDIT_LOG" \
++      '{schema_version:$sv,command:"why",scope:"scaffold-meta",id:$id,status:"unavailable",reason:"audit_log_missing",audit_log:$log}'
++    return 0
++  fi
++  local match
++  match="$(jq -c --arg id "$id" 'select(.ts == $id or (.idempotency_key // "") == $id or (.run_id // "") == $id)' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | tail -1)"
++  if [[ -n "$match" ]]; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --argjson row "$match" \
++      '{schema_version:$sv,command:"why",scope:"scaffold-meta",id:$id,status:"found",row:$row}'
++    return 0
++  fi
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
++    '{schema_version:$sv,command:"why",scope:"scaffold-meta",id:$id,status:"not_found"}'
++}
++
++# ---------- scaffolded main dispatcher ----------
++
++# When the scaffolder appends this block, it expects the target's original
++# top-level main is renamed to `cmd_run` (or the original final
++# `main "$@"` line is replaced with this dispatcher). Default invocation
++# falls through to the original logic for backward compat.
++scaffold_main() {
++  if [[ $# -eq 0 ]]; then
++    scaffold_usage; exit 0
++  fi
++  case "$1" in
++    -h|--help)    scaffold_usage; exit 0 ;;
++    --info)       shift; scaffold_emit_info "$@"; exit 0 ;;
++    --schema)     shift; scaffold_emit_schema "${1:-default}"; exit 0 ;;
++    --examples)   shift; scaffold_emit_examples "$@"; exit 0 ;;
++    doctor)       shift; scaffold_cmd_doctor "$@"; exit $? ;;
++    health)       shift; scaffold_cmd_health "$@"; exit $? ;;
++    repair)       shift; scaffold_cmd_repair "$@"; exit $? ;;
++    validate)     shift; scaffold_cmd_validate "$@"; exit $? ;;
++    audit)        shift; scaffold_cmd_audit "$@"; exit $? ;;
++    why)          shift; scaffold_cmd_why "$@"; exit $? ;;
++    quickstart)   shift; scaffold_emit_quickstart "$@"; exit 0 ;;
++    help)         shift; scaffold_emit_topic_help "${1:-}"; exit 0 ;;
++    completion)   shift; scaffold_emit_completion "${1:-bash}"; exit $? ;;
++    *)
++      printf 'ERR: unknown canonical subcommand: %s\n' "$1" >&2
++      scaffold_usage >&2
++      exit 64 ;;
++  esac
++}
++
++# Early-dispatch intercept: if argv[0] looks like a canonical subcommand
++# or introspection flag, run the canonical surface and exit BEFORE the
++# target's original arg parser sees the args. Works for both `main "$@"`
++# style and inline `while [[ $# -gt 0 ]]` style targets.
++#
++# VERB COLLISION BYPASS (flywheel-sacan): the target's own argparse
++# already handles canonical verbs (doctor|health|repair|validate|...).
++# When any of the per-target flags below are present in argv, the
++# intercept yields and cmd_run handles the per-bead path unchanged.
++# Per-target bypass flags: --check,--worker-mode
++_scaffold_is_canonical_arg() {
++  # flywheel-wzjo9.1.7 fillin: ALL canonical surfaces collide with native.
++  # flywheel-loop ALREADY implements --info / --schema / --examples / help /
++  # completion / doctor / health / repair / validate / audit / why / quickstart
++  # natively (see the case statement at lines 120-200 of this file, dispatching
++  # to portable_* via lib/*.sh). The scaffold's intercept must bypass ALL of
++  # these to native, otherwise the scaffold's stubs (or scaffold-meta probes)
++  # would shadow the native implementations and break:
++  #   - agent.sh:146 → flywheel-loop doctor --json (e5f2f probe)
++  #   - loop-driver-writeback → flywheel-loop doctor --scope X
++  #   - tests/flywheel-loop-canonical-cli.sh native-surface assertions
++  #   - any operator: flywheel-loop --info expects .binary and .flywheel_home
++  # The scaffold_cmd_* fillins below are PRESERVED as documentation /
++  # scaffold-meta probes (reachable only via direct scaffold_main call) per
++  # the wave-2.0a apply-spec, but the intercept yields universally.
++  return 1
++}
++
++if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
++  scaffold_main "$@"
++  exit $?
++fi
++# ====== END canonical-cli scaffold ======
+ FLYWHEEL_HOME="${FLYWHEEL_HOME:-$HOME/.claude/skills/.flywheel}"
+ STATE_DIR="${FLYWHEEL_LOOP_STATE_DIR:-$HOME/.local/state/flywheel-pane3}"
+ TICK_JSON="$STATE_DIR/last_tick.json"
+@@ -110,7 +611,13 @@
+     if [[ "$DRY_RUN" -eq 0 ]]; then
+         printf '%s\n' "$packet" > "$receipt"
+     fi
+-    [[ "$JSON_OUT" -eq 1 ]] && printf '%s\n' "$packet" || print_human_packet "$packet"
++    # flywheel-wzjo9.1.7: L4-clean replacement for `[[ ]] && X || Y` last-expr
++    # (under set -e the failed branch may exit early — use if/then/else/fi).
++    if [[ "$JSON_OUT" -eq 1 ]]; then
++        printf '%s\n' "$packet"
++    else
++        print_human_packet "$packet"
++    fi
+ }
+ 
+ canonical_normalize_args "$@"

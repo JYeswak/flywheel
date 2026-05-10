@@ -1,0 +1,345 @@
+#!/usr/bin/env bash
+# flywheel-loop: thin dispatcher; command behavior lives in ../lib.
+set -euo pipefail
+
+FLYWHEEL_HOME="${FLYWHEEL_HOME:-$HOME/.claude/skills/.flywheel}"
+STATE_DIR="${FLYWHEEL_LOOP_STATE_DIR:-$HOME/.local/state/flywheel-pane3}"
+TICK_JSON="$STATE_DIR/last_tick.json"
+SESSION_TOPOLOGY="${FLYWHEEL_SESSION_TOPOLOGY:-$HOME/.local/state/flywheel/session-topology.jsonl}"
+APPEND_SAFE_WRITE="${FLYWHEEL_APPEND_SAFE_WRITE:-${APPEND_SAFE_WRITE:-$HOME/Developer/flywheel/.flywheel/scripts/append-safe-write.sh}}"
+FLEET_MAIL_TOKEN_VAULT="${FLYWHEEL_FLEET_MAIL_TOKEN_VAULT:-$HOME/.local/state/flywheel/fleet-mail-tokens}"
+AGENT_MAIL_STATE_DIR="${FLYWHEEL_AGENT_MAIL_STATE_DIR:-$HOME/.local/state/flywheel/agent-mail}"
+AGENT_MAIL_SESSION_DIR="${FLYWHEEL_AGENT_MAIL_SESSION_DIR:-$AGENT_MAIL_STATE_DIR/sessions}"
+AGENT_MAIL_TOKEN_DIR="${FLYWHEEL_AGENT_MAIL_TOKEN_DIR:-$AGENT_MAIL_STATE_DIR/tokens}"
+LEGACY_AGENT_MAIL_TOKEN_DIR="${FLYWHEEL_LEGACY_AGENT_MAIL_TOKEN_DIR:-$HOME/.local/state/flywheel/agent-mail-tokens}"
+TEAM_ROSTER="${FLYWHEEL_TEAM_ROSTER:-$HOME/.local/state/flywheel/team-roster.jsonl}"
+export FLYWHEEL_HOME STATE_DIR TICK_JSON SESSION_TOPOLOGY APPEND_SAFE_WRITE
+export FLEET_MAIL_TOKEN_VAULT AGENT_MAIL_STATE_DIR AGENT_MAIL_SESSION_DIR AGENT_MAIL_TOKEN_DIR
+export LEGACY_AGENT_MAIL_TOKEN_DIR TEAM_ROSTER
+
+FRONTMATTER_SH="$HOME/.claude/hooks/_shared/frontmatter.sh"
+[[ -r "$FRONTMATTER_SH" ]] && source "$FRONTMATTER_SH"
+MISSION_ANCHOR_SH="$HOME/.claude/hooks/_shared/mission_anchor.sh"
+[[ -r "$MISSION_ANCHOR_SH" ]] && source "$MISSION_ANCHOR_SH"
+
+LIB="$FLYWHEEL_HOME/lib"
+# shellcheck source=/dev/null
+source "$LIB/common.sh"
+for module in \
+    misc parse repo canonical mission render reconcile bead wire fuckup memory \
+    tentacle loop storage jeff daily agent fleet callback polish recovery doctor \
+    session print portable skill-discovery step4i-coherence
+do
+    # shellcheck source=/dev/null
+    source "$LIB/$module.sh"
+done
+
+portable_tick() {
+    local worker_mode=0 args=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --worker-mode|worker-mode)
+                worker_mode=1; shift ;;
+            *)
+                args+=("$1"); shift ;;
+        esac
+    done
+    if [[ "$worker_mode" -eq 1 ]]; then
+        # shellcheck source=/dev/null
+        source "$FLYWHEEL_HOME/lib/portable/worker.sh"
+        portable_worker_tick "${args[@]+"${args[@]}"}"
+        return $?
+    fi
+    parse_repo_args "${args[@]+"${args[@]}"}"
+    auto_respawn_before_tick
+    local dirty tests decision action receipt="" docs_state override_required tick_close_gate
+    local packet_status=ok
+    dirty="$(repo_dirty_count)"
+    tests="$(detect_tests_json)"
+    docs_state="$(repo_docs_state)"
+    if [[ -z "$(repo_git_root)" ]]; then
+        decision="DECISION: stop; target is not a git repo"
+        action="choose_git_repo"
+    elif [[ "$docs_state" != "ready" ]]; then
+        decision="DECISION: define repo-local MISSION/GOAL/STATE before edits"
+        action="fill_repo_local_mission_goal_state"
+    elif [[ -f "$(repo_override_path)" ]]; then
+        override_required="$(jq -r '.required_next_action // "execute_next_tick_override"' "$(repo_override_path)" 2>/dev/null || printf 'execute_next_tick_override')"
+        decision="DECISION: execute repo-local next_tick_override before normal planning"
+        action="$override_required"
+        packet_status=interrupt
+    elif [[ "${dirty:-0}" -gt 0 ]]; then
+        decision="DECISION: review existing repo changes before editing"
+        action="summarize_dirty_worktree"
+    elif [[ "$(jq 'length' <<<"$tests")" -gt 0 ]]; then
+        decision="DECISION: run baseline validation before choosing a patch"
+        action="run_baseline_validation"
+    else
+        decision="DECISION: orient repo and identify one accretive target"
+        action="read_repo_docs_and_find_validation"
+    fi
+    tick_close_gate="$(wire_or_explain_close_gate_result_json dry-run)"
+    if jq -e '.allowed == false' >/dev/null 2>&1 <<<"$tick_close_gate"; then
+        packet_status=fail
+        decision="DECISION: resolve wire-or-explain tick close gate before close"
+        action="$(jq -r '.top_actions[0].next_action // "drain_or_explain_wire_or_explain_rows"' <<<"$tick_close_gate")"
+    fi
+    if [[ "$DRY_RUN" -eq 0 ]]; then
+        local ts ticks_dir
+        ts="$(date -u +%Y%m%dT%H%M%SZ)"
+        ticks_dir="$REPO_ABS/.flywheel/ticks"
+        mkdir -p "$ticks_dir"
+        receipt="$ticks_dir/$ts.json"
+    fi
+    local packet step4i
+    packet="$(repo_packet_json tick "$packet_status" "$decision" "$action" "$receipt")"
+    step4i="$(flywheel_step4i_coherence_json "$REPO_ABS" "$DRY_RUN")"
+    packet="$(jq -c --argjson step4i "$step4i" '
+      . + {
+        fleet_coherence_step4i:$step4i,
+        fleet_coherence_step4i_status:$step4i.status,
+        fleet_coherence_step4i_open_decision_count:$step4i.open_decision_count,
+        fleet_coherence_step4i_receipt_decision_count:$step4i.receipt_decision_count,
+        fleet_coherence_step4i_action_decision_count:$step4i.action_decision_count,
+        fleet_coherence_step4i_fleet_repair_dispatch_count:$step4i.fleet_repair_dispatch_count,
+        fleet_coherence_step4i_l62_callback_violation_count:$step4i.l62_callback_violation_count,
+        fleet_coherence_step4i_event_ids:$step4i.receipt_event_ids,
+        fleet_coherence_step4i_malformed_rows:$step4i.malformed_rows,
+        fleet_coherence_step4i_latest_stale:$step4i.latest_stale
+      }' <<<"$packet")"
+    if [[ "$DRY_RUN" -eq 0 ]]; then
+        printf '%s\n' "$packet" > "$receipt"
+    fi
+    [[ "$JSON_OUT" -eq 1 ]] && printf '%s\n' "$packet" || print_human_packet "$packet"
+}
+
+canonical_normalize_args "$@"
+set -- "${CANONICAL_NORMALIZED_ARGS[@]}"
+
+case "${1:-}" in
+    -h|--help)
+        usage
+        exit 0 ;;
+    --info)
+        shift
+        portable_info "$@"
+        exit $? ;;
+    --examples|examples)
+        shift
+        portable_examples "$@"
+        exit $? ;;
+    --schema)
+        # flywheel-ss1bq: --schema flag delegates to portable_schema (the
+        # `schema` subcommand) so the introspection triad
+        # (--info / --schema / --examples) is uniformly accessible as flags
+        # per agent-ergonomics-cli-max recommendation R002.
+        shift
+        portable_schema "$@"
+        exit $? ;;
+    --dry-run)
+        usage
+        exit 0 ;;
+    --json)
+        portable_info --json
+        exit $? ;;
+    --check) ;;
+    health)
+        shift
+        portable_health "$@"
+        exit $? ;;
+    repair)
+        shift
+        portable_repair "$@"
+        exit $? ;;
+    validate)
+        shift
+        portable_validate "$@"
+        exit $? ;;
+    audit)
+        shift
+        portable_audit "$@"
+        exit $? ;;
+    why)
+        shift
+        portable_why "$@"
+        exit $? ;;
+    schema)
+        shift
+        portable_schema "$@"
+        exit $? ;;
+    quickstart)
+        shift
+        portable_quickstart "$@"
+        exit $? ;;
+    help)
+        shift
+        portable_help_topic "$@"
+        exit $? ;;
+    completion)
+        shift
+        portable_completion "$@"
+        exit $? ;;
+    init)
+        shift
+        portable_init "$@"
+        exit 0 ;;
+    doctor)
+        shift
+        portable_doctor "$@"
+        exit $? ;;
+    wire-status)
+        shift
+        portable_wire_status "$@"
+        exit $? ;;
+    tick)
+        shift
+        portable_tick "$@"
+        exit 0 ;;
+    tick-contract)
+        shift
+        portable_tick_contract "$@"
+        exit $? ;;
+    finalize-state-lock)
+        shift
+        portable_finalize_state_lock "$@"
+        exit $? ;;
+    data-backed-deferral-check)
+        shift
+        portable_data_backed_deferral_check "$@"
+        exit $? ;;
+    validate-receipt)
+        shift
+        portable_validate_receipt "$@"
+        exit $? ;;
+    validate-callback)
+        shift
+        portable_validate_callback "$@"
+        exit $? ;;
+    validation-learn)
+        shift
+        portable_validation_learn "$@"
+        exit $? ;;
+    state-mine)
+        shift
+        portable_state_mine "$@"
+        exit $? ;;
+    identity)
+        shift
+        portable_identity "$@"
+        exit $? ;;
+    fleet)
+        shift
+        portable_fleet "$@"
+        exit 0 ;;
+    roster)
+        shift
+        portable_roster "$@"
+        exit 0 ;;
+    notify)
+        shift
+        portable_notify "$@"
+        exit $? ;;
+    revive)
+        shift
+        portable_revive "$@"
+        exit $? ;;
+    check)
+        shift
+        portable_check "$@"
+        exit $? ;;
+    register-session)
+        shift
+        portable_register_session "$@"
+        exit $? ;;
+    verdict)
+        shift
+        portable_verdict "$@"
+        exit $? ;;
+    blocks)
+        shift
+        portable_blocks "$@"
+        exit 0 ;;
+    fuckup)
+        shift
+        portable_fuckup "$@"
+        exit 0 ;;
+    skill-discovery)
+        shift
+        skill_discovery_main "$@"
+        exit $? ;;
+    drift-status)
+        shift
+        # shellcheck source=/dev/null
+        source "$LIB/drift-status.sh"
+        cmd_drift_status "$@"
+        exit $? ;;
+    "")
+        ;;
+    *)
+        echo "ERR: unknown argument: $1" >&2
+        exit 2 ;;
+esac
+
+missing=0
+require_file() {
+    local path="$1" label="$2"
+    if [[ -f "$path" ]]; then
+        printf 'ok %s=%s\n' "$label" "$path"
+    else
+        printf 'missing %s=%s\n' "$label" "$path"
+        missing=$((missing + 1))
+    fi
+}
+
+require_file "$FLYWHEEL_HOME/LOOP.md" "loop_contract"
+require_file "$FLYWHEEL_HOME/STATE.md" "state"
+require_file "$FLYWHEEL_HOME/WORK.md" "work"
+require_file "$FLYWHEEL_HOME/GOAL.md" "goal"
+require_file "$HOME/.claude/commands/loop.md" "claude_loop_command"
+require_file "$HOME/.codex/AGENTS.md" "codex_agents"
+
+if [[ "${1:-}" == "--check" ]]; then
+    if grep -q "flywheel-loop" "$HOME/.codex/AGENTS.md" 2>/dev/null; then
+        printf 'ok codex_loop_directive=flywheel-loop\n'
+    else
+        printf 'missing codex_loop_directive=flywheel-loop\n'
+        missing=$((missing + 1))
+    fi
+    if grep -q "flywheel-loop" "$HOME/.claude/commands/loop.md" 2>/dev/null; then
+        printf 'ok claude_loop_directive=flywheel-loop\n'
+    else
+        printf 'missing claude_loop_directive=flywheel-loop\n'
+        missing=$((missing + 1))
+    fi
+    exit "$missing"
+fi
+
+cat <<EOF
+# Flywheel /loop
+
+status=$([[ "$missing" -eq 0 ]] && printf ready || printf incomplete)
+contract=$FLYWHEEL_HOME/LOOP.md
+state=$FLYWHEEL_HOME/STATE.md
+work=$FLYWHEEL_HOME/WORK.md
+goal=$FLYWHEEL_HOME/GOAL.md
+tick_state=$TICK_JSON
+
+This is Joshua's flywheel loop, not Claude's built-in scheduled cron loop.
+Do not use CronCreate, CronDelete, ScheduleWakeup, or .mission-pulse.md unless
+Joshua explicitly asks for scheduled recurrence.
+
+Required model behavior for this tick:
+1. Read LOOP.md, STATE.md, WORK.md, and GOAL.md.
+2. Emit exactly one DECISION: line before implementation work.
+3. Reap callbacks, dispatch idle panes, or work one local lane.
+4. Validate the changed surface.
+5. Commit the coherent receipt when repo files change.
+6. Record flywheel outcome for the dominant skill.
+7. Update $TICK_JSON.
+EOF
+
+if [[ -f "$TICK_JSON" ]]; then
+    printf '\n## Last Tick\n\n'
+    cat "$TICK_JSON"
+    printf '\n'
+fi
