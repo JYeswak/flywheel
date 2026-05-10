@@ -1,8 +1,15 @@
 [loop]
 session = "flywheel"
 orchestrator_pane = 1
-dispatch_mode = "launchd_prompt"
-driver_kind = "launchd_prompt"
+# flywheel-kmf4z migration 2026-05-10: dispatch_mode + driver_kind moved from
+# "launchd_prompt" -> "cc_skill_loop" per Joshua directive 2026-05-08
+# (memory: feedback_orch_wake_event_driven_not_time_based). The launchd plist
+# referenced below was never installed; the loop is driven by Skill("loop")
+# inside the Claude Code session. The plist + plist_label fields are kept
+# as historical reference for any future switch-back. dispatch_mode value
+# matches probe-recognized set at lib/loop.d/loop_driver_doctor_json.py:167.
+dispatch_mode = "cc_skill_loop"
+driver_kind = "cc_skill_loop"
 tier = "doctrine"
 interval = "30m"
 plist_label = "ai.zeststream.flywheel-flywheel-loop"

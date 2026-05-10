@@ -1,0 +1,1 @@
+{"status":"fail","identity_registry_drift":0,"fail_codes":["beads_db_health_failed"],"loop_driver_status":"NOT_APPLICABLE_CC","loop_driver_dispatch_mode":"cc_skill_loop","loop_driver_project_label_state":"not_launchd_prompt","identity_in_fail":false,"loop_driver_in_fail":false}
