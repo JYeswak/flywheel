@@ -1,0 +1,7 @@
+PASS JSONL exists at /Users/josh/Developer/flywheel/.beads/issues.jsonl
+PASS JSONL has 0 basename-source_repo rows (was 291 before fix)
+PASS JSONL all 1645 rows have canonical source_repo
+PASS JSONL has exactly 1 distinct source_repo value (canonical only)
+PASS DB leakage_count=0 (was 253 before fix; matches gate at lib/doctor.d/part-02-check_beads_db_health-to-detect_tests_json.sh:87)
+PASS regression guard: bug-shape "source_repo":"flywheel" absent in JSONL
+SUMMARY pass=6 fail=0
