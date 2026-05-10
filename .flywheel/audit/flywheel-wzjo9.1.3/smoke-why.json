@@ -1,0 +1,1 @@
+{"schema_version":"flywheel-trauma-check/v1","command":"why","id":"some-session","status":"unavailable","reason":"audit ledger absent","audit_log":"/Users/josh/.local/state/flywheel/flywheel-trauma-check-runs.jsonl"}

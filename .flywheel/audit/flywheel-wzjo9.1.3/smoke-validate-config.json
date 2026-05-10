@@ -1,0 +1,1 @@
+{"schema_version":"flywheel-trauma-check/v1","command":"validate","subject":"config","status":"pass","state_db":"/Users/josh/.claude/skills/.flywheel/state.db","emit_log":"/Users/josh/.cache/flywheel-trauma-emitted.jsonl","cache_dir":"/Users/josh/.cache","missing":[]}
