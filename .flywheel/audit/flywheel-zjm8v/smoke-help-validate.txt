@@ -1,0 +1,1 @@
+topic: validate — subjects: sync-binary (verify .flywheel/scripts/sync-canonical-doctrine.sh is executable bash with --apply/--dry-run/--json); fixture-state PATH (verify a TMP fixture has the expected canonical/repos/no-loops layout).

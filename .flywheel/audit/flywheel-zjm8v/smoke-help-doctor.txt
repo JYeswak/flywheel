@@ -1,0 +1,1 @@
+topic: doctor — probes harness substrate (sync-canonical-doctrine.sh executable, jq/shasum/mktemp on PATH, $TMPDIR writable, repo root resolved, helper-lib loaded). Pass = ready to run; warn = recoverable; fail = harness blocked.

@@ -1,0 +1,1 @@
+{"schema_version":"test-sync-canonical-doctrine/v1","command":"repair","status":"applied","mode":"apply","scope":"audit_log_dir","idempotency_key":"zjm8v-evidence-key","planned_actions":[],"applied_actions":[]}

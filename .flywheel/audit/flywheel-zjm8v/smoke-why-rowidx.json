@@ -1,0 +1,1 @@
+{"schema_version":"test-sync-canonical-doctrine/v1","command":"why","id":"-1","status":"pass","match_count":1,"matches":[{"ts":"2026-05-10T16:46:08Z","action":"repair","status":"applied","sha256":"d7d3f0c47482b722a1581d9c909f4eb358775f44d75f13c89a07bf0211ba7222","scope":"audit_log_dir","idempotency_key":"zjm8v-evidence-key"}]}

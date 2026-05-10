@@ -1,0 +1,1 @@
+{"schema_version":"test-sync-canonical-doctrine/v1","command":"validate","subject":"fixture-state","status":"fail","path":"/tmp","missing":["source/AGENTS.md","repos/"]}
