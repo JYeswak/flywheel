@@ -1,0 +1,134 @@
+{
+  "schema_version": "validation-e2e/v1",
+  "owner_bead": "flywheel-yasl",
+  "status": "fail",
+  "receipt_dir": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts",
+  "rollout_plan": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/rollout-plan.json",
+  "validation_receipt": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/work/repo/.flywheel/validation-receipts/b12-missing-done-7ed6c5eac7f5.json",
+  "component_outputs": {
+    "synthetic_dispatch": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/synthetic-dispatch.md",
+    "validate_callback": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/validate-callback-missing.json",
+    "fix_bead_dry_run": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/fix-bead-dry-run.json",
+    "doctor": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/doctor.json"
+  },
+  "changed_surfaces": [
+    {
+      "surface": "command",
+      "path": ".flywheel/scripts/validation-e2e-smoke.sh"
+    },
+    {
+      "surface": "template",
+      "path": "/Users/josh/.claude/commands/flywheel/_shared/dispatch-template.md"
+    },
+    {
+      "surface": "doctor",
+      "path": "~/.claude/skills/.flywheel/bin/flywheel-loop doctor"
+    },
+    {
+      "surface": "tick",
+      "path": ".flywheel/flywheel-loop-tick"
+    },
+    {
+      "surface": "learn",
+      "path": "~/.claude/skills/.flywheel/bin/flywheel-loop validation-learn"
+    },
+    {
+      "surface": "docs",
+      "path": "README.md"
+    },
+    {
+      "surface": "skill",
+      "path": "/Users/josh/.claude/skills/orchestrator-validation-discipline/SKILL.md"
+    },
+    {
+      "surface": "tests",
+      "path": "tests/validation-e2e.sh"
+    }
+  ],
+  "gates": [
+    {
+      "gate": "B12_AG1",
+      "status": "pass",
+      "label": "synthetic dispatch carries validation block",
+      "artifact": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/synthetic-dispatch.md",
+      "detail": "VALIDATION BLOCK fields present"
+    },
+    {
+      "gate": "B12_AG2",
+      "status": "pass",
+      "label": "missing artifact fails before integration",
+      "artifact": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/validate-callback-missing.json",
+      "detail": "exit=1"
+    },
+    {
+      "gate": "B12_AG2",
+      "status": "fail",
+      "label": "failed callback blocks summary and integration",
+      "artifact": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/validate-callback-missing.json",
+      "detail": ".status == \"fail\" and .summary_allowed == false and .integration_allowed == false and (.failure_classes | index(\"artifact_missing\"))"
+    },
+    {
+      "gate": "B12_AG3",
+      "status": "pass",
+      "label": "failed validation emits dry-run fix bead payload",
+      "artifact": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/fix-bead-dry-run.json",
+      "detail": ".status == \"dry_run\" and .action == \"create\" and (.planned_actions[0].br_argv | index(\"--dry-run\"))"
+    },
+    {
+      "gate": "B12_AG3",
+      "status": "pass",
+      "label": "doctor sees exactly one failed callback validation",
+      "artifact": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/doctor.json",
+      "detail": ".callbacks_validated_with_failures_count == 1"
+    },
+    {
+      "gate": "B12_AG4",
+      "status": "fail",
+      "label": "VALIDATE phase blocks integration without remediation route",
+      "artifact": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/validate-tick-phase.log",
+      "detail": "cd '/Users/josh/Developer/flywheel' && bash tests/validate-tick-phase.sh"
+    },
+    {
+      "gate": "B12_AG5",
+      "status": "pass",
+      "label": "learn routing records failed validation exactly once",
+      "artifact": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/fuckup-log.jsonl",
+      "detail": "line_count=1"
+    },
+    {
+      "gate": "B12_AG5",
+      "status": "pass",
+      "label": "duplicate learn route links existing event",
+      "artifact": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/learn-duplicate.json",
+      "detail": ".results[0].action == \"linked_existing\""
+    },
+    {
+      "gate": "B12_AG6",
+      "status": "pass",
+      "label": "L70 DISPATCH->BEADS->DISPATCH chain fixture passes",
+      "artifact": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/orch-no-punt-chain.log",
+      "detail": "cd '/Users/josh/Developer/flywheel' && bash tests/orch-no-punt-chain.sh"
+    },
+    {
+      "gate": "B12_AG7",
+      "status": "fail",
+      "label": "Codex/Claude agent-context parity fixture passes",
+      "artifact": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/agent-context-parity-probe.log",
+      "detail": "cd '/Users/josh/Developer/flywheel' && bash tests/agent-context-parity-probe.sh"
+    },
+    {
+      "gate": "B12_AG8",
+      "status": "pass",
+      "label": "rollout plan has staged modes",
+      "artifact": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/rollout-plan.json",
+      "detail": "(.rollout_modes | map(.mode)) == [\"schema-only\",\"warn-only-doctor\",\"strict-doctor\",\"mutating-remediation\"]"
+    },
+    {
+      "gate": "B12_AG9",
+      "status": "pass",
+      "label": "final receipt records every changed surface",
+      "artifact": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/9ijf-smoke.XXXXXX.V2zfIXzosq/receipts/final-receipt.json",
+      "detail": "command,template,doctor,tick,learn,docs,skill,tests"
+    }
+  ]
+}
