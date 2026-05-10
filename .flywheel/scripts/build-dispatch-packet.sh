@@ -31,12 +31,16 @@ OPTIONAL:
   --apply                  Materialize packet (default: dry-run preview)
   --dry-run                Preview only, no file write (default)
   --json                   JSON output
+  --allow-trigger-gated    Build packet even if bead is trigger-gated and
+                           watchtower has not yet flipped to release_available.
+                           Default refuses (exit 6) to save the worker round-trip.
+  --skip-trigger-gated-precheck  Skip the precheck entirely (escape hatch).
 
 INTROSPECTION:
   --explain | --info | --examples | --schema | -h, --help
 
 EXIT CODES:
-  0 ok | 1 bad args | 2 bead lookup fail | 3 ntm/context/topology fail | 4 template missing | 5 contract validation fail
+  0 ok | 1 bad args | 2 bead lookup fail | 3 ntm/context/topology fail | 4 template missing | 5 contract validation fail | 6 trigger-gated bead, watchtower not yet release_available
 EOF
 }
 
@@ -53,6 +57,7 @@ json_array() {
 
 BEAD_ID="" TARGET_PANE="" TARGET_SESSION="" TASK_ID=""
 DISPATCH_CHANNEL="operator" OUTPUT_DIR="/tmp" MODE="dry-run" JSON_OUT=false
+ALLOW_TRIGGER_GATED=false SKIP_TRIGGER_GATED_PRECHECK=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --bead-id) BEAD_ID="$2"; shift 2 ;;
@@ -64,6 +69,8 @@ while [[ $# -gt 0 ]]; do
     --apply) MODE="apply"; shift ;;
     --dry-run) MODE="dry-run"; shift ;;
     --json) JSON_OUT=true; shift ;;
+    --allow-trigger-gated) ALLOW_TRIGGER_GATED=true; shift ;;
+    --skip-trigger-gated-precheck) SKIP_TRIGGER_GATED_PRECHECK=true; shift ;;
     --explain) explain; exit 0 ;;
     --info) info; exit 0 ;;
     --examples) examples; exit 0 ;;
@@ -106,6 +113,41 @@ BEAD_BODY="$(echo "$BEAD_JSON" | jq_get 'if type=="array" then (.[0].description
 BEAD_PRIORITY="$(echo "$BEAD_JSON" | jq_get 'if type=="array" then (.[0].priority // 99) else (.priority // 99) end')"
 [[ -n "$BEAD_TITLE" ]] || die "bead $BEAD_ID not found via br show" 2
 BEAD_DEPS="$(br dep tree "$BEAD_ID" --json 2>/dev/null | jq -r '. | tostring' 2>/dev/null || echo '{}')"
+
+# Trigger-gated pre-check (flywheel-lh64t): if the bead body declares
+# external_trigger_watchtower=<name>, consult the named watchtower BEFORE
+# building the packet so the worker is not round-tripped to learn the
+# trigger has not fired. Default refuses (exit 6); --allow-trigger-gated
+# downgrades to a stderr warning; --skip-trigger-gated-precheck skips entirely.
+TRIGGER_GATED_PRECHECK_STATUS="not_run"
+TRIGGER_GATED_PRECHECK_JSON='null'
+PRECHECK_BIN="$SCRIPT_DIR/dispatch-trigger-gated-precheck.sh"
+if [[ "$SKIP_TRIGGER_GATED_PRECHECK" != "true" && -x "$PRECHECK_BIN" ]]; then
+  PRECHECK_BODY_TMP="$(mktemp -t dispatch-trigger-precheck-body.XXXXXX)"
+  printf '%s' "$BEAD_BODY" >"$PRECHECK_BODY_TMP"
+  set +e
+  PRECHECK_OUT="$("$PRECHECK_BIN" validate --bead-body-file "$PRECHECK_BODY_TMP" --json 2>/dev/null)"
+  PRECHECK_RC=$?
+  set -e
+  rm -f "$PRECHECK_BODY_TMP"
+  TRIGGER_GATED_PRECHECK_JSON="$PRECHECK_OUT"
+  TRIGGER_GATED_PRECHECK_STATUS="$(echo "$PRECHECK_OUT" | jq -r '.status // "unknown"' 2>/dev/null || echo unknown)"
+  if [[ "$PRECHECK_RC" -eq 6 ]]; then
+    if [[ "$ALLOW_TRIGGER_GATED" == "true" ]]; then
+      WT_NAME="$(echo "$PRECHECK_OUT" | jq -r '.watchtower // ""' 2>/dev/null)"
+      WT_STATUS="$(echo "$PRECHECK_OUT" | jq -r '.watchtower_status // ""' 2>/dev/null)"
+      echo "WARN: bead $BEAD_ID is trigger-gated (watchtower=$WT_NAME status=$WT_STATUS); --allow-trigger-gated set, building packet anyway" >&2
+    else
+      echo "ERROR: bead $BEAD_ID is trigger-gated and watchtower has not flipped to release_available" >&2
+      echo "$PRECHECK_OUT" | jq -r '"  watchtower=\(.watchtower) status=\(.watchtower_status) reason=\(.reason_code)"' >&2 || true
+      echo "  see .flywheel/doctrine/trigger-gated-bead-precheck.md" >&2
+      echo "  override: --allow-trigger-gated  |  bypass: --skip-trigger-gated-precheck" >&2
+      exit 6
+    fi
+  elif [[ "$PRECHECK_RC" -ne 0 ]]; then
+    echo "WARN: trigger-gated pre-check returned rc=$PRECHECK_RC, continuing without enforcement" >&2
+  fi
+fi
 
 SKILL_ENHANCE=0
 declare -a SKILL_ENHANCE_SKILLS=()
@@ -254,7 +296,8 @@ if $JSON_OUT; then
     --arg jrid "$JOSH_REQUEST_ID" --arg ident "$IDENTITY_NAME" --arg chan "$DISPATCH_CHANNEL" \
     --arg context_id "$NTM_CONTEXT_ID" --arg template "$NTM_TEMPLATE_NAME" \
     --argjson memhits "$MEMORY_HITS" --argjson skillroutes "$SKILL_ROUTES" --argjson lrules "$L_RULE_HINTS" --argjson present "$PRESENT_JSON" --argjson missing "$MISSING_JSON" \
-    '{schema_version:"build-dispatch-packet.v1",packet_path:$packet,packet_sha256:$sha,validation_status:$vstatus,validation_blocks_present:$present,validation_blocks_missing:$missing,fields_resolved:{task_id:$task,bead_id:$bead,target_pane:$tpane,target_session:$tsess,callback_pane:$cpane,mission_anchor:$manchor,mission_fitness_class:$mclass,josh_request_id:(if $jrid=="null" then null else $jrid end),identity_name:(if $ident=="null" then null else $ident end),dispatch_channel:$chan,memory_hits_count:$memhits,skill_auto_routes_count:$skillroutes,l_rule_hints_count:$lrules,ntm_context_id:$context_id,ntm_template_name:$template}}'
+    --arg trigger_gated_status "$TRIGGER_GATED_PRECHECK_STATUS" --argjson trigger_gated_probe "${TRIGGER_GATED_PRECHECK_JSON:-null}" \
+    '{schema_version:"build-dispatch-packet.v1",packet_path:$packet,packet_sha256:$sha,validation_status:$vstatus,validation_blocks_present:$present,validation_blocks_missing:$missing,fields_resolved:{task_id:$task,bead_id:$bead,target_pane:$tpane,target_session:$tsess,callback_pane:$cpane,mission_anchor:$manchor,mission_fitness_class:$mclass,josh_request_id:(if $jrid=="null" then null else $jrid end),identity_name:(if $ident=="null" then null else $ident end),dispatch_channel:$chan,memory_hits_count:$memhits,skill_auto_routes_count:$skillroutes,l_rule_hints_count:$lrules,ntm_context_id:$context_id,ntm_template_name:$template,trigger_gated_precheck:{status:$trigger_gated_status,probe:$trigger_gated_probe}}}'
 else
   echo "packet:    $PACKET_FILE"
   echo "sha256:    $PACKET_SHA"
