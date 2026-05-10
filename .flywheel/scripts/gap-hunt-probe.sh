@@ -418,6 +418,156 @@ def recent_ledger_text(days: int = 30, max_bytes: int = 4_000_000) -> str:
     return "\n".join(chunks)
 
 
+_RUNTIME_SOURCE_CORPUS: str | None = None
+_SIBLING_LEDGER_CORPUS: str | None = None
+
+
+def runtime_source_corpus() -> str:
+    """Build a corpus of `source <path>` references from .sh files in scope.
+
+    Used by the wired-but-cold detector to recognize scripts that are sourced
+    by other shell scripts at runtime — e.g. doctor.d/* modules sourced by
+    doctor.sh, lib/* helpers sourced by flywheel-loop. A single-axis ledger
+    check misses these because the sourced module's name never lands in any
+    JSONL ledger; the parent that sources it does.
+
+    Filed under flywheel-8vw0o as the 3-strike convergent fix for false-positive
+    wired-but-cold flags on doctor.d modules and similar runtime-sourced
+    libraries (signal: flywheel-2xdi.34, flywheel-2xdi.35).
+    """
+    global _RUNTIME_SOURCE_CORPUS
+    if _RUNTIME_SOURCE_CORPUS is not None:
+        return _RUNTIME_SOURCE_CORPUS
+    pieces: list[str] = []
+    candidates: set[Path] = set()
+    candidates.update(safe_iter_files(CLAUDE_ROOT / "skills", "*.sh", 5000))
+    candidates.update(safe_iter_files(REPO_ROOT / ".flywheel/scripts", "*.sh", 500))
+    candidates.update(safe_iter_files(CLAUDE_ROOT / "skills", "*.bash", 500))
+    # Match lines that source a file directly (`source X`, `. X`) AND lines
+    # that reference a `*.d/` module-glob directory. The .d/ pattern catches
+    # variable-indirected glob sources like
+    #   _dir="${BASH_SOURCE[0]%/*}/doctor.d"
+    #   for m in "${_dir}"/*.sh; do source "$m"; done
+    # where the literal basename (part-01-...sh) never appears in any
+    # `source` line, but `doctor.d` does in the assigning line.
+    dot_d_re = re.compile(r"[A-Za-z0-9_-]+\.d(?=[/\"'\s]|$)")
+    for f in candidates:
+        try:
+            text = read_text(f, 200_000)
+        except Exception:
+            continue
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("source ") or stripped.startswith(". "):
+                pieces.append(stripped)
+            elif dot_d_re.search(line):
+                pieces.append(line.rstrip())
+    _RUNTIME_SOURCE_CORPUS = "\n".join(pieces)
+    return _RUNTIME_SOURCE_CORPUS
+
+
+def sibling_repo_ledger_corpus(days: int = 30, max_bytes: int = 1_500_000) -> str:
+    """Build a corpus of recent evidence from sibling fleet repos.
+
+    For cross-repo umbrella paths (e.g., ~/.claude/skills/.flywheel/) a script
+    can be alive via sibling-repo references even when the primary flywheel
+    state dir doesn't reference it. Example: tick_guard.sh referenced from
+    skillos tests/unit/tick_guard.bats.
+
+    Sources (mtime-DESC, budgeted):
+      - <sibling>/.flywheel/dispatch-log.jsonl (recent ledger refs)
+      - <sibling>/tests/**/*.{bats,sh,py} (cross-repo test fixtures)
+      - <sibling>/.flywheel/scripts/*.sh (sibling probe wiring)
+
+    Configurable via env var GAP_HUNT_DEV_ROOT (defaults to ~/Developer).
+
+    Filed under flywheel-8vw0o as the 3-strike convergent fix for false-positive
+    wired-but-cold flags on cross-repo umbrella scripts (signal: flywheel-2xdi.31).
+    """
+    global _SIBLING_LEDGER_CORPUS
+    if _SIBLING_LEDGER_CORPUS is not None:
+        return _SIBLING_LEDGER_CORPUS
+    cutoff = time.time() - days * 86400
+    dev_root_raw = os.environ.get("GAP_HUNT_DEV_ROOT", str(Path.home() / "Developer"))
+    dev_root = Path(dev_root_raw)
+    if not dev_root.is_dir():
+        _SIBLING_LEDGER_CORPUS = ""
+        return _SIBLING_LEDGER_CORPUS
+    try:
+        repo_resolved = REPO_ROOT.resolve()
+    except Exception:
+        repo_resolved = REPO_ROOT
+    candidates: list[tuple[float, Path]] = []
+    for entry in dev_root.iterdir():
+        if not entry.is_dir() or entry.name.startswith("."):
+            continue
+        try:
+            entry_resolved = entry.resolve()
+        except Exception:
+            entry_resolved = entry
+        if entry_resolved == repo_resolved:
+            continue  # primary repo already covered by recent_ledger_text
+        # dispatch-log.jsonl
+        log = entry / ".flywheel" / "dispatch-log.jsonl"
+        if log.is_file():
+            try:
+                mtime = log.stat().st_mtime
+                if mtime >= cutoff:
+                    candidates.append((mtime, log))
+            except Exception:
+                pass
+        # cross-repo test fixtures (capped per repo)
+        tests_dir = entry / "tests"
+        if tests_dir.is_dir():
+            for pattern in ("**/*.bats", "**/*.sh", "**/*.py"):
+                try:
+                    for f in list(tests_dir.glob(pattern))[:200]:
+                        try:
+                            mtime = f.stat().st_mtime
+                        except Exception:
+                            continue
+                        if mtime < cutoff:
+                            continue
+                        candidates.append((mtime, f))
+                except Exception:
+                    continue
+        # sibling probe wiring
+        scripts_dir = entry / ".flywheel" / "scripts"
+        if scripts_dir.is_dir():
+            try:
+                for f in list(scripts_dir.glob("*.sh"))[:300]:
+                    try:
+                        mtime = f.stat().st_mtime
+                    except Exception:
+                        continue
+                    if mtime < cutoff:
+                        continue
+                    candidates.append((mtime, f))
+            except Exception:
+                pass
+    # Pass 1 — name corpus, ALWAYS COMPLETE (no budget). Filenames carry the
+    # script's stem (e.g., tick_guard.bats matches tick_guard.sh). Same shape
+    # as recent_ledger_text's two-pass design.
+    name_corpus = "\n".join(p.name for _, p in candidates)
+    chunks: list[str] = [name_corpus]
+    used = len(name_corpus)
+    # Pass 2 — content corpus, BUDGETED, mtime-DESC. Most recent files first.
+    candidates.sort(key=lambda kv: kv[0], reverse=True)
+    for _, path in candidates:
+        if used >= max_bytes:
+            break
+        try:
+            text = read_text(path, max(0, max_bytes - used))
+        except Exception:
+            continue
+        if not text:
+            continue
+        chunks.append(text)
+        used += len(text)
+    _SIBLING_LEDGER_CORPUS = "\n".join(chunks)
+    return _SIBLING_LEDGER_CORPUS
+
+
 def previous_ledger_ids() -> set[str]:
     if not LEDGER.exists():
         return set()
@@ -549,6 +699,8 @@ def on_demand_script_allowlist() -> set[Path]:
 
 def probe_wired_but_cold() -> list[dict]:
     ledger_text = recent_ledger_text()
+    sibling_text = sibling_repo_ledger_corpus()
+    source_text = runtime_source_corpus()
     on_demand = on_demand_script_allowlist()
     scripts = []
     scripts.extend(safe_iter_files(CLAUDE_ROOT / "skills", "*.sh", 3000))
@@ -564,7 +716,33 @@ def probe_wired_but_cold() -> list[dict]:
             resolved = script
         if resolved in on_demand:
             continue
-        if name not in ledger_text and script.stem not in ledger_text:
+        # flywheel-8vw0o: cold = absent from ALL THREE corpora
+        # (1) primary flywheel state-dir ledgers (recent_ledger_text)
+        # (2) sibling-repo dispatch-logs (sibling_repo_ledger_corpus) — catches
+        #     cross-repo umbrella refs e.g. tick_guard.sh in skillos tests
+        # (3) runtime source-line corpus (runtime_source_corpus) — catches
+        #     doctor.d/* modules sourced by doctor.sh and similar
+        in_local = name in ledger_text or script.stem in ledger_text
+        in_sibling = bool(sibling_text) and (name in sibling_text or script.stem in sibling_text)
+        # source corpus: name + stem + parent-dir-name (catches glob-sourced
+        # modules like doctor.d/*.sh sourced via `source <dir>/doctor.d/*.sh`
+        # where the actual basename never appears literally in source lines).
+        in_source = False
+        if source_text:
+            if name in source_text or script.stem in source_text:
+                in_source = True
+            else:
+                try:
+                    parent_name = script.parent.name
+                except Exception:
+                    parent_name = ""
+                # Only trust parent-dir matches for module-glob conventions:
+                # *.d (e.g., doctor.d, fleet.d, misc.d) where the dir name
+                # itself is the source-level identity. Non-suffixed parent
+                # dirs would be too noisy a signal.
+                if parent_name.endswith(".d") and parent_name in source_text:
+                    in_source = True
+        if not (in_local or in_sibling or in_source):
             try:
                 rel = str(script.relative_to(Path.home()))
             except Exception:

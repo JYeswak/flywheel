@@ -1,0 +1,11 @@
+PASS T1 gap-hunt-probe.sh passes bash -n
+PASS T2 gap-hunt-probe.sh defines runtime_source_corpus + sibling_repo_ledger_corpus
+PASS T3 probe_wired_but_cold checks three corpora (local + sibling + source)
+PASS T4 probe checks *.d parent-dir name against source corpus (glob-source convention)
+PASS T5 source-line ref catches alive-via-source-line.sh (basename in source line)
+PASS T6 sibling-repo test fixture name corpus catches alive-via-sibling-test.sh
+PASS T7 *.d glob-source convention catches widget.d/alive-via-d-glob.sh
+PASS T8 negative — script with no refs in any corpus is still flagged cold
+
+=== test-gap-hunt-probe-cross-repo-and-source-corpus.sh ===
+pass=8 fail=0

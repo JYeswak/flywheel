@@ -1,0 +1,93 @@
+{
+  "task_id": "flywheel-8vw0o",
+  "dispatch_id": "flywheel-8vw0o-afb047",
+  "identity_name": "CloudyMill",
+  "pane": "flywheel:0.2",
+  "callback_pane": "flywheel:1",
+  "title": "[gap-hunt-probe-improvement] expand probe scope to detect runtime-sourced libraries and cross-repo umbrellas",
+  "did": "5/5",
+  "compliance_score": 900,
+  "compliance_max": 1000,
+  "four_lens": {
+    "brand": 9,
+    "sniff": 9,
+    "jeff": 9,
+    "public": 9
+  },
+  "score_components": {
+    "fix_correctness_3_class_false_positives_eliminated": 200,
+    "test_coverage_8_of_8": 180,
+    "live_effect_verified_11_to_0_cohort_flip": 150,
+    "lazy_caching_avoids_recomputation": 60,
+    "evidence_md_complete_with_before_after": 80,
+    "regression_test_isolated_fixture_no_live_beads": 100,
+    "L61_ecosystem_touch_handled": 40,
+    "scope_discipline_d_marker_intentionally_narrow": 60,
+    "GAP_HUNT_DEV_ROOT_env_var_for_testability": 30,
+    "subtotal": 900,
+    "total": 900
+  },
+  "did_gates": [
+    {
+      "gate": "Probe extended to check sibling-repo ledgers when target is cross-repo umbrella",
+      "status": "done",
+      "evidence": "sibling_repo_ledger_corpus() reads <sibling>/.flywheel/dispatch-log.jsonl + tests/**/*.{bats,sh,py} + .flywheel/scripts/*.sh"
+    },
+    {
+      "gate": "Probe greps for source <path> patterns referencing target",
+      "status": "done",
+      "evidence": "runtime_source_corpus() captures lines starting with 'source ' or '. ' AND lines containing *.d/ module-dir tokens"
+    },
+    {
+      "gate": "3 false-positive classes fixed (tick_guard.sh, doctor.d/*, fleet.d/*, misc.d/*)",
+      "status": "done",
+      "evidence": "live --dry-run --json probe verified 11-script cohort flips from flagged to alive"
+    },
+    {
+      "gate": "bash -n clean",
+      "status": "done",
+      "evidence": "T1 PASS in regression test"
+    },
+    {
+      "gate": "Regression test 8/8 PASS",
+      "status": "done",
+      "evidence": "tests/test-gap-hunt-probe-cross-repo-and-source-corpus.sh — 8 tests including isolated fixture, env-overrides, and negative case"
+    }
+  ],
+  "files_touched": [
+    ".flywheel/scripts/gap-hunt-probe.sh",
+    ".flywheel/tests/test-gap-hunt-probe-cross-repo-and-source-corpus.sh",
+    ".flywheel/receipts/flywheel-8vw0o/audit/evidence.md",
+    ".flywheel/receipts/flywheel-8vw0o/audit/pinned-shas.txt",
+    ".flywheel/receipts/flywheel-8vw0o/audit/test-output.txt",
+    ".flywheel/receipts/flywheel-8vw0o/audit/compliance-pack.json"
+  ],
+  "beads_filed": [],
+  "beads_updated": ["flywheel-8vw0o"],
+  "no_bead_reason": "parent flywheel-2xdi rollup tracks the convergent-evolution class; child beads 2xdi.31/.34/.35 already closed; the 3-strike fix lands here per memory rule feedback_convergent_evolution_is_canonical_signal",
+  "fuckups_logged": [],
+  "skill_auto_routes": {
+    "canonical-cli-scoping": "yes-partial",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "L61_ecosystem_touch": {
+    "agents_md_updated": "no",
+    "readme_updated": "not_applicable",
+    "no_touch_reason": "probe-mechanism enhancement; canonical L56 ladder doctrine in AGENTS.md remains accurate; the change tightens the wired-but-cold gate without reshaping the doctrine surface"
+  },
+  "L107_reservations": {
+    "files": [
+      "/Users/josh/Developer/flywheel/.flywheel/scripts/gap-hunt-probe.sh",
+      "/Users/josh/Developer/flywheel/.flywheel/tests/test-gap-hunt-probe-cross-repo-and-source-corpus.sh"
+    ],
+    "release_required": true
+  },
+  "L112_probe": {
+    "command": "bash /Users/josh/Developer/flywheel/.flywheel/tests/test-gap-hunt-probe-cross-repo-and-source-corpus.sh",
+    "expected": "grep:pass=8 fail=0"
+  },
+  "mission_fitness": "infrastructure",
+  "mission_rationale": "The wired-but-cold detector is the L56 ladder's leading-edge probe for skill/script vitality. By teaching it to recognize cross-repo umbrellas and runtime-sourced libraries, this fix collapses an 11-script false-positive cohort that was eating fleet attention via gap-hunt auto-bead-filing rotation. Directly serves continuous-orchestrator-uptime by removing one of the recurring orchestrator-noise sources."
+}
