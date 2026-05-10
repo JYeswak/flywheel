@@ -8511,3 +8511,91 @@ Evidence:
   `feedback_single_capture_misses_freeze.md`,
   `feedback_data_decides_not_human_meatpuppet.md`.
 
+## clobbered_doctrine_docs — canonical recovery primitive shipped 2026-05-09
+
+Date: 2026-05-09
+
+Class: `clobbered_doctrine_docs`
+
+Event Count: 1 event (flywheel-m49r2 worker, 2026-05-09); canonical primitive
+shipped same-day before second event accumulates.
+
+Severity: high (doctrine docs truncated to single-line schema_version, blocking
+all downstream consumers of MISSION/STATE/GOAL/AGENTS/INCIDENTS until restored).
+
+Cost: when a worker fails to `cd` into a temp fixture path (typically
+special-char-escape failure), subsequent `printf` / `echo` redirect lands in
+the repo ROOT instead of the intended scratch dir. The redirect TRUNCATES the
+target file to a single-line schema_version. flywheel-m49r2 today clobbered
+3 doctrine docs simultaneously (MISSION 17345 → 1 line, STATE 241 → 1 line,
+GOAL 138 → 1 line); restored from HEAD commit 9c1f61f after manual recovery.
+
+Root Cause: shell command `cd "$WORK_TMP" && printf '%s' "$content" > target.md`
+silently keeps the OLD pwd when `cd` fails (e.g., `WORK_TMP` unset, or path
+contains unescaped special chars). The redirect then writes to `./target.md`
+from the OLD pwd — typically the repo root. Files matching the doctrine-doc
+names get clobbered.
+
+Forever-Rule (canonical primitive shipped same-day):
+
+- **Recovery script**: `.flywheel/scripts/clobber-recovery.sh` — restores files
+  from HEAD via `git show HEAD:<path> > <path>` (NOT `git checkout`, which
+  DCG blocks). Heuristic gate in default mode only restores files where
+  `cur_bytes < 100 AND head_bytes > 1000` (truncation signature); explicit
+  `--paths` bypasses the heuristic. Per-file NOOP if blob hash matches HEAD;
+  REFUSED if HEAD blob is tiny; NOT_CLOBBER if heuristic doesn't fire (legit
+  runtime drift). Receipts append to `.flywheel/clobber-recovery-log.jsonl`
+  + fuckup-log row class=`clobber-recovery`. Exit codes: 0 restore/dry-run,
+  3 all-refused, 4 all-noop.
+
+- **Smoke test**: `tests/clobber-recovery-smoke.sh` (5/5 PASS):
+  T1 noop on clean tree, T2 single-line truncation restored to HEAD bytes,
+  T3 small-file runtime drift NOT_CLOBBER, T4 tiny-HEAD refused, T5 receipt
+  appended.
+
+Canonical orch dispatch policy (AG3 from `flywheel-tpprm`):
+When a worker callback line contains `clobbered_doctrine_docs` OR
+`damage=mission.md_*->1` (or sibling marker), the orchestrator MUST invoke
+`.flywheel/scripts/clobber-recovery.sh` non-interactively (NO Joshua-ask)
+then proceed with re-dispatch. The recovery is bounded (<5s for canonical
+default set), idempotent (NOOP on clean tree), and refuses unsafely-tiny
+HEAD blobs — so non-interactive invocation is safe.
+
+Worker-side prevention (forward): always validate `WORK_TMP` is set + the
+`cd "$WORK_TMP"` succeeded before any `>` redirect. The unsafe pattern:
+
+```bash
+# UNSAFE — if WORK_TMP unset or cd fails, redirect lands in repo root
+cd "$WORK_TMP" && printf '%s' "$content" > target.md
+```
+
+The safe pattern:
+
+```bash
+WORK_TMP="$(mktemp -d -t my-task.XXXXXX)" || { echo "ERR: mktemp failed" >&2; exit 1; }
+cd "$WORK_TMP" || { echo "ERR: cd failed: $WORK_TMP" >&2; exit 1; }
+printf '%s' "$content" > target.md
+```
+
+Fix Applied/Status: Recovery primitive shipped 2026-05-09 in
+`.flywheel/scripts/clobber-recovery.sh` (smoke test 5/5 PASS). Dispatch
+template (`~/.claude/commands/flywheel/_shared/dispatch-template.md`) updated
+with pointer to canonical recovery primitive. INCIDENTS entry (this section)
+documents the class + the orch dispatch policy.
+
+Recurrence Prevention: Donella leverage point #5 (rules) — canonical recovery
+primitive is the rule. Donella #6 (information flow) — INCIDENTS entry +
+dispatch-template pointer make the recovery path discoverable. Donella #2
+(buffer size) — the worker-side prevention pattern (validate `cd` before
+redirect) is the per-worker buffer.
+
+Evidence:
+- Trauma event: flywheel-m49r2 (2026-05-09; clobbered MISSION/STATE/GOAL,
+  restored from HEAD 9c1f61f)
+- Recovery script: `.flywheel/scripts/clobber-recovery.sh`
+- Smoke test: `tests/clobber-recovery-smoke.sh` (5/5 PASS)
+- Receipt ledger: `.flywheel/clobber-recovery-log.jsonl`
+- Bead: `flywheel-tpprm` (this canonical primitive ship)
+- Memory cross-refs: `feedback_dcg_prose_trigger_strip_dangerous_substrings.md`
+  (DCG context for why `git checkout` is replaced with `git show > file`).
+
