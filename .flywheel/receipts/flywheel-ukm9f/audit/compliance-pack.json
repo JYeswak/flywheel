@@ -1,0 +1,72 @@
+{
+  "task_id": "flywheel-ukm9f",
+  "dispatch_id": "flywheel-ukm9f-d50d61",
+  "identity_name": "CloudyMill",
+  "pane": "flywheel:0.2",
+  "callback_pane": "flywheel:1",
+  "title": "[fleet-death-rca-launch] launch codex-deathtrap-launcher in codex-canary session per Joshua pick",
+  "did": "2/6",
+  "callback_kind": "BLOCKED",
+  "blocker_type": "flywheel_class",
+  "blocker_class": "experiment_post_launch_continuation_requires_orch_authority_and_unbounded_wait",
+  "compliance_score": 760,
+  "compliance_max": 1000,
+  "four_lens": {
+    "brand": 8,
+    "sniff": 8,
+    "jeff": 8,
+    "public": 8
+  },
+  "score_components": {
+    "AG1_session_spawned_with_ntm": 150,
+    "AG2_launcher_wrapping_codex_with_correct_args": 200,
+    "follow_up_bead_filed_for_AG3-AG6": 130,
+    "evidence_pack_complete_with_process_tree": 100,
+    "scope_discipline_no_production_beads_to_canary": 80,
+    "L52_explicit_no_bead_reason_followup_route": 60,
+    "L61_ecosystem_touch_handled": 30,
+    "subtotal": 750,
+    "polish_bonus_used_existing_canonical_cli_readonly": 30,
+    "deduct_workflow_clutter_from_kill_and_relaunch_sequence": -20,
+    "total": 760
+  },
+  "did_gates": [
+    {"gate": "AG1: codex-canary session exists or spawned", "status": "done", "evidence": "tmux session codex-canary--fleet-death-experiment spawned via ntm spawn; pane 0 = %120; repo at ~/Developer/codex-canary"},
+    {"gate": "AG2: codex worker via codex-deathtrap-launcher.sh on codex-canary:1", "status": "done", "evidence": "Launcher PID 5838 wrapping codex PID 5842 (gpt-5.3-codex xhigh); stderr teed to stderr-5838-20260510T023307Z.log; args captured in args-5838-20260510T023307Z.txt"},
+    {"gate": "AG3: run normal worker dispatch loop", "status": "blocked", "evidence": "orch authority + unbounded scope; routed to flywheel-b2zpg"},
+    {"gate": "AG4: read exit_evidence-PID-TS.json on death", "status": "blocked", "evidence": "unbounded wait; routed to flywheel-b2zpg with L112 watch probe"},
+    {"gate": "AG5: classify per H1/H2/H3 hypothesis matrix", "status": "blocked", "evidence": "depends on AG4 evidence; routed to flywheel-b2zpg"},
+    {"gate": "AG6: file upstream issue OR local mitigation", "status": "blocked", "evidence": "depends on AG5 verdict; routed to flywheel-b2zpg"}
+  ],
+  "files_touched": [
+    ".flywheel/receipts/flywheel-ukm9f/audit/evidence.md",
+    ".flywheel/receipts/flywheel-ukm9f/audit/launcher-args.txt",
+    ".flywheel/receipts/flywheel-ukm9f/audit/launcher-info.json",
+    ".flywheel/receipts/flywheel-ukm9f/audit/pane-state-at-launch.txt",
+    ".flywheel/receipts/flywheel-ukm9f/audit/process-tree.txt",
+    ".flywheel/receipts/flywheel-ukm9f/audit/pinned-shas.txt",
+    ".flywheel/receipts/flywheel-ukm9f/audit/compliance-pack.json"
+  ],
+  "beads_filed": ["flywheel-b2zpg"],
+  "beads_updated": ["flywheel-ukm9f"],
+  "no_bead_reason": "follow-up bead flywheel-b2zpg filed for AG3-AG6 (post-launch monitor + classify + file); no L52 silent absorption",
+  "fuckups_logged": [],
+  "skill_auto_routes": {
+    "canonical-cli-scoping": "yes",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "L61_ecosystem_touch": {
+    "agents_md_updated": "not_applicable",
+    "readme_updated": "not_applicable",
+    "no_touch_reason": "experiment launch + follow-up filing; no doctrine/INCIDENTS/canonical-L-rule/skill surface touched"
+  },
+  "L107_reservations": {"files": [], "release_required": false, "files_reserved_value": "NONE_NO_EDITS"},
+  "L112_probe": {
+    "command": "tmux has-session -t codex-canary--fleet-death-experiment 2>/dev/null && pgrep -af 'codex-deathtrap-launcher' | grep -q 'fleet-death-experiment' && [ -f /Users/josh/.local/state/flywheel/codex-death-evidence/args-5838-20260510T023307Z.txt ] && echo PASS_LAUNCH",
+    "expected": "grep:PASS_LAUNCH"
+  },
+  "mission_fitness": "infrastructure",
+  "mission_rationale": "Instruments the codex-fleet-death observation surface. Joshua's prior reports of clean-exit-to-bash with no crash trace had no forensic capture. This dispatch puts the launcher in place so the next death event is captured by design (exit_evidence-PID-TS.json). Serves continuous-orchestrator-uptime by transforming an unobservable failure class into a measurable one."
+}

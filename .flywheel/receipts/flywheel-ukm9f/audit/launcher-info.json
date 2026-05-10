@@ -1,0 +1,1 @@
+{"schema_version":"codex-deathtrap-launcher.v1","success":true,"mode":"info","hypotheses_supported":["H1_voluntary_turn_complete_exit","H2_mcp_fatal_error","H3_tmux_misreport"],"symptom_to_evidence":["clean exit zero stderr -> stderr_byte_count==0","non-zero exit code with stderr -> H2 candidate","exit code 0 with empty stderr -> H1 candidate"]}

@@ -1,0 +1,31 @@
+│ directory:   ~/Developer/codex-canary               │
+│ permissions: YOLO mode                              │
+╰─────────────────────────────────────────────────────╯
+
+  Tip: Try the Codex App. Run 'codex app' or visit https://chatgpt.com/codex?app
+-landing-page=true
+josh@Joshs-Mac-Studio codex-canary %
+josh@Joshs-Mac-Studio codex-canary % q/quit
+zsh: no such file or directory: q/quit
+josh@Joshs-Mac-Studio codex-canary % /Users/josh/Developer/flywheel/.flywheel/sc
+ripts/codex-deathtrap-launcher.sh --label fleet-death-experiment -- --dangerousl
+y-bypass-approvals-and-sandbox -m gpt-5.
+3-codex -c model_reasoning_effort=xhigh -c model_reasoning_summary_format=experi
+mental --search
+╭─────────────────────────────────────────────────────╮
+│ >_ OpenAI Codex (v0.125.0)                          │
+│                                                     │
+│ model:       gpt-5.3-codex xhigh   /model to change │
+│ directory:   ~/Developer/codex-canary               │
+│ permissions: YOLO mode                              │
+╰─────────────────────────────────────────────────────╯
+
+  Tip: Try the Codex App. Run 'codex app' or visit
+  https://chatgpt.com/codex?app-landing-page=true
+
+
+› Use /skills to list available skills
+
+  gpt-5.3-codex xhigh · ~/Developer/codex-canary
+
+

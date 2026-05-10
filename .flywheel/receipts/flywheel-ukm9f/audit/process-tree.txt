@@ -1,0 +1,1 @@
+  501  5838 98150   0  8:33PM ttys057    0:00.01 bash /Users/josh/Developer/flywheel/.flywheel/scripts/codex-deathtrap-launcher.sh --label fleet-death-experiment -- --dangerously-bypass-approvals-and-sandbox -m gpt-5.3-codex -c model_reasoning_effort=xhigh -c model_reasoning_summary_format=experimental --search

@@ -1,0 +1,15 @@
+branch: master
+head-pre: 2f1e12886508c3435e849ba00514c73011ca0726
+tmux-session: codex-canary--fleet-death-experiment
+tmux-pane: 0
+tmux-pane-id: %120
+launcher-pid: 5838
+codex-pid: 5842
+launcher-args: --label fleet-death-experiment -- --dangerously-bypass-approvals-and-sandbox -m gpt-5.3-codex -c model_reasoning_effort=xhigh -c model_reasoning_summary_format=experimental --search
+evidence-dir: /Users/josh/.local/state/flywheel/codex-death-evidence/
+args-file: args-5838-20260510T023307Z.txt
+stderr-log: stderr-5838-20260510T023307Z.log (currently 0 bytes — codex running cleanly)
+follow-up-bead-filed: flywheel-b2zpg
+launcher-script: /Users/josh/Developer/flywheel/.flywheel/scripts/codex-deathtrap-launcher.sh
+launcher-script-sha256: 45f6cf1a124ec03be75851c08af08aa927172ab96897e56e768ea40490ede089
+joshua-pick: codex-canary (per 2026-05-09T~21:30Z directive)
