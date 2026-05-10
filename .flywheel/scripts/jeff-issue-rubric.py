@@ -27,8 +27,25 @@ AXES = [
     "tone_match",
     "jeff_thank_test_hostile",
     "no_derail",
+    "corpus_aware",
 ]
 LEVEL_SCORE = {"low": 0, "medium": 1, "high": 2}
+HIGH_COUNT_FOR_AUTO_POST = len(AXES)        # all axes high
+HIGH_COUNT_FOR_REVISE = len(AXES) - 1       # exactly one off-high
+
+# Corpus-scan citation categories — bead flywheel-wbnb AG1.
+# The rubric inspects the DRAFT for textual citation evidence; the
+# orchestrator-side cross-collection-fanout producer is what actually
+# runs `mcp__socraticode__codebase_search`. Architecture rationale:
+# socraticode is MCP-only and not directly callable from a Python CLI;
+# the producer/consumer split keeps the rubric a deterministic checker
+# while still surfacing whether the draft author cited the corpus.
+CORPUS_CATEGORIES = [
+    "same_issue_already_filed",
+    "prior_art",
+    "shape_precedent",
+    "anti_pattern",
+]
 
 
 def utc_now() -> str:
@@ -161,6 +178,131 @@ def score_no_derail(text: str) -> dict[str, Any]:
     return axis(level, issues, ["Remove derail risks and add explicit out-of-scope plus tracking bead."], issues)
 
 
+def categorize_corpus_citations(text: str) -> dict[str, list[str]]:
+    """Bucket draft-internal corpus citations into 4 canonical categories.
+    Returns dict[category] = list of evidence excerpts (first 8 per category).
+
+    Bead flywheel-wbnb AG1.
+    """
+    buckets: dict[str, list[str]] = {c: [] for c in CORPUS_CATEGORIES}
+
+    # Anchor: any reference to Dicklesworthstone/<repo> or its GitHub URL
+    # forms. Each category then matches a contextual cue around the anchor.
+    cite_anchor = re.compile(
+        r"(Dicklesworthstone/[A-Za-z0-9_.\-]+(?:[#@/][A-Za-z0-9_.\-]+)?|"
+        r"github\.com/Dicklesworthstone/[A-Za-z0-9_./#-]+)",
+        re.IGNORECASE,
+    )
+
+    same_issue_cues = re.compile(
+        r"\b(see (?:also )?issue\s*#?\d+|already filed|duplicate of\s*#?\d+|"
+        r"existing issue|tracked at\s*#?\d+|comment(?:ed)? on\s*#?\d+)\b",
+        re.IGNORECASE,
+    )
+    prior_art_cues = re.compile(
+        r"\b(prior art|Jeff(?:rey)? (?:also|already) (?:did|solved|fixed|implemented)|"
+        r"consistent with .*? in (?:repo|the)\s+\S+|"
+        r"already solved in [A-Za-z0-9_.\-/]+)\b",
+        re.IGNORECASE,
+    )
+    shape_cues = re.compile(
+        r"\b(Jeff(?:rey)?'s? (?:idiom|API convention|pattern|shape)|"
+        r"matches the pattern in|same shape as|mirrors? .*? convention|"
+        r"API convention[s]? for this primitive)\b",
+        re.IGNORECASE,
+    )
+    anti_pattern_cues = re.compile(
+        r"\b(Jeff(?:rey)? (?:explicitly )?rejected|anti-?pattern in|"
+        r"avoided pattern|Jeff (?:has )?said no to|removed in upstream)\b",
+        re.IGNORECASE,
+    )
+
+    # Walk lines so each citation lives near its category cue (5-line window).
+    lines = text.splitlines()
+    for idx, line in enumerate(lines):
+        if not cite_anchor.search(line):
+            continue
+        # Inspect a small surrounding window for category cue presence.
+        lo = max(0, idx - 2)
+        hi = min(len(lines), idx + 3)
+        window = "\n".join(lines[lo:hi])
+        snippet = line.strip()[:200]
+        if same_issue_cues.search(window):
+            buckets["same_issue_already_filed"].append(snippet)
+        elif anti_pattern_cues.search(window):
+            buckets["anti_pattern"].append(snippet)
+        elif prior_art_cues.search(window):
+            buckets["prior_art"].append(snippet)
+        elif shape_cues.search(window):
+            buckets["shape_precedent"].append(snippet)
+        else:
+            # Uncategorized citation — count toward prior_art by default
+            # so the author still gets credit for citing the corpus.
+            buckets["prior_art"].append(snippet)
+    # cap each bucket at 8 to keep envelopes readable
+    return {k: v[:8] for k, v in buckets.items()}
+
+
+def score_corpus_aware(text: str) -> dict[str, Any]:
+    buckets = categorize_corpus_citations(text)
+    counts = {k: len(v) for k, v in buckets.items()}
+    total = sum(counts.values())
+    same_issue = counts["same_issue_already_filed"]
+    distinct_categories = sum(1 for c in counts.values() if c > 0)
+
+    # Hard-fail signal — same-issue-already-filed citation in the draft
+    # means the orchestrator should amend an existing issue rather than
+    # file a new one. Bead AG4 makes this a blocker.
+    if same_issue > 0:
+        return axis(
+            "low",
+            [f"draft cites {same_issue} same-issue-already-filed reference(s); amend existing instead of file new"],
+            ["Resolve the cited existing issue(s) first; either amend with new evidence or close this draft."],
+            [f"same_issue_count={same_issue}", f"total_citations={total}"],
+        )
+    # No corpus citations at all → low
+    if total == 0:
+        return axis(
+            "low",
+            ["draft has zero corpus citations; orchestrator should run cross-collection-fanout against the indexed Jeff corpus before filing"],
+            ["Inject prior-art / shape-precedent / anti-pattern citations from the corpus-scan output, or attach the citation block emitted by cross-collection-fanout."],
+            [f"total_citations=0"],
+        )
+    # 1 citation or only one category → medium
+    if total < 2 or distinct_categories < 2:
+        return axis(
+            "medium",
+            [f"only {total} citation(s) in {distinct_categories} category/categories; corpus-aware threshold is 2+ across 2+ categories"],
+            ["Add at least one more corpus citation in a different category (prior_art / shape_precedent / anti_pattern)."],
+            [f"total_citations={total}", f"distinct_categories={distinct_categories}"],
+        )
+    # 2+ citations across 2+ categories, no same-issue blocker → high
+    return axis(
+        "high",
+        [f"{total} corpus citations across {distinct_categories} categories with no same-issue blocker"],
+        [],
+        [f"total_citations={total}", f"distinct_categories={distinct_categories}"],
+    )
+
+
+def render_citation_block(buckets: dict[str, list[str]]) -> str:
+    """Markdown citation block for issue-body injection (bead AG2)."""
+    out = ["## Corpus-aware citations (cross-collection-fanout)"]
+    any_section = False
+    for cat in CORPUS_CATEGORIES:
+        items = buckets.get(cat) or []
+        if not items:
+            continue
+        any_section = True
+        title = cat.replace("_", " ").title()
+        out.append(f"\n### {title} ({len(items)})")
+        for snippet in items:
+            out.append(f"- {snippet}")
+    if not any_section:
+        out.append("\n_No corpus citations present; run cross-collection-fanout before filing._")
+    return "\n".join(out) + "\n"
+
+
 SCORERS = {
     "bug_reality": score_bug_reality,
     "dedup": score_dedup,
@@ -169,19 +311,26 @@ SCORERS = {
     "tone_match": score_tone_match,
     "jeff_thank_test_hostile": score_jeff_thank_test_hostile,
     "no_derail": score_no_derail,
+    "corpus_aware": score_corpus_aware,
 }
 
 
-def score_draft(path: Path, text: str, *, checked_at: str) -> dict[str, Any]:
+def score_draft(path: Path, text: str, *, checked_at: str, corpus_scan_enabled: bool = False) -> dict[str, Any]:
+    # Backwards-compat: when --corpus-scan is NOT set, evaluate only the
+    # original 7 axes so existing fixtures and tests continue to pass.
+    # The corpus_aware axis lights up only when explicitly requested.
+    active_axes = AXES if corpus_scan_enabled else [a for a in AXES if a != "corpus_aware"]
     axes = []
-    for axis_id in AXES:
+    for axis_id in active_axes:
         result = SCORERS[axis_id](text)
         result["axis"] = axis_id
         axes.append(result)
     high_count = sum(1 for item in axes if item["level"] == "high")
-    if high_count == 7:
+    high_for_auto = len(active_axes)
+    high_for_revise = len(active_axes) - 1
+    if high_count == high_for_auto:
         decision = "auto_post"
-    elif high_count == 6:
+    elif high_count == high_for_revise:
         decision = "revise"
     else:
         decision = "withdraw"
@@ -191,6 +340,7 @@ def score_draft(path: Path, text: str, *, checked_at: str) -> dict[str, Any]:
         for item in axes
         if item["suggestions"]
     ]
+    corpus_buckets = categorize_corpus_citations(text)
     return {
         "schema_version": SCHEMA_VERSION,
         "checked_at": checked_at,
@@ -204,6 +354,12 @@ def score_draft(path: Path, text: str, *, checked_at: str) -> dict[str, Any]:
         "hard_fail_axes": hard_fail,
         "axes": axes,
         "suggested_revisions": suggestions,
+        "corpus_scan": {
+            "categories": {k: len(v) for k, v in corpus_buckets.items()},
+            "buckets": corpus_buckets,
+            "citation_block_md": render_citation_block(corpus_buckets),
+            "same_issue_blocker": len(corpus_buckets["same_issue_already_filed"]) > 0,
+        },
     }
 
 
@@ -248,6 +404,20 @@ def doctor_payload(repo: Path, draft_glob: str, receipts_dir: Path, checked_at: 
             }
         )
     unrubricd = [row for row in rows if not row["rubric_current"]]
+
+    # Corpus-scan signal — count drafts whose body has zero corpus
+    # citations (any category). Bead flywheel-wbnb AG5.
+    unscanned_rows = []
+    for raw in sorted(glob.glob(os.path.expanduser(draft_glob))):
+        path = Path(raw)
+        if not path.is_file():
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        buckets = categorize_corpus_citations(text)
+        total = sum(len(v) for v in buckets.values())
+        if total == 0:
+            unscanned_rows.append({"draft_path": str(path), "total_citations": 0})
+
     return {
         "schema_version": "jeff-issue-rubric-doctor/v1",
         "checked_at": checked_at,
@@ -255,9 +425,11 @@ def doctor_payload(repo: Path, draft_glob: str, receipts_dir: Path, checked_at: 
         "receipts_dir": str(receipts_dir),
         "drafts_checked_count": len(rows),
         "jeff_drafts_unrubricd_count": len(unrubricd),
+        "jeff_drafts_unscanned_count": len(unscanned_rows),
         "top_unrubricd_drafts": unrubricd[:10],
+        "top_unscanned_drafts": unscanned_rows[:10],
         "rows": rows,
-        "status": "fail" if unrubricd else "pass",
+        "status": "fail" if (unrubricd or unscanned_rows) else "pass",
         "signals": [
             {
                 "name": "jeff_drafts_unrubricd_count",
@@ -267,7 +439,16 @@ def doctor_payload(repo: Path, draft_glob: str, receipts_dir: Path, checked_at: 
                 "threshold": ">=1",
                 "gate_behavior": "warn in normal doctor; fail in strict",
                 "promotion_path": "feedback_jeff_issue_chain -> flywheel-3p1j",
-            }
+            },
+            {
+                "name": "jeff_drafts_unscanned_count",
+                "producer": ".flywheel/scripts/jeff-issue-rubric.py --doctor",
+                "measurement": "count /tmp/jeff-issue-*.md drafts with zero corpus-scan citations across all 4 categories",
+                "consumer": "flywheel-loop doctor JSON and Jeff issue posting gate",
+                "threshold": ">=1",
+                "gate_behavior": "warn in normal doctor; fail in strict",
+                "promotion_path": "feedback_jeff_issue_chain -> flywheel-wbnb",
+            },
         ],
     }
 
@@ -277,8 +458,21 @@ def schema_payload() -> dict[str, Any]:
         "schema_version": SCHEMA_VERSION,
         "axes": AXES,
         "levels": ["low", "medium", "high"],
-        "required_output_fields": ["draft_path", "draft_sha256", "status", "decision", "high_axes_count", "axes", "hard_fail_axes"],
-        "decision_policy": {"7_high": "auto_post", "6_high": "revise", "0_to_5_high": "withdraw"},
+        "required_output_fields": [
+            "draft_path", "draft_sha256", "status", "decision",
+            "high_axes_count", "axes", "hard_fail_axes",
+        ],
+        "decision_policy": {
+            f"{HIGH_COUNT_FOR_AUTO_POST}_high": "auto_post",
+            f"{HIGH_COUNT_FOR_REVISE}_high": "revise",
+            f"0_to_{HIGH_COUNT_FOR_REVISE - 1}_high": "withdraw",
+        },
+        "exit_codes": {
+            "0": "rubric pass",
+            "1": "rubric fail (one or more axes < high)",
+            "4": "same-issue-already-filed corpus citation present (--corpus-scan; AG4 blocker)",
+        },
+        "corpus_categories": CORPUS_CATEGORIES,
     }
 
 
@@ -304,6 +498,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--schema", action="store_true")
     parser.add_argument("--examples", action="store_true")
     parser.add_argument("--json", action="store_true")
+    parser.add_argument(
+        "--corpus-scan",
+        action="store_true",
+        help="(bead flywheel-wbnb AG1) emit corpus-scan citation block + categorize "
+             "draft-internal corpus citations. Same-issue-already-filed hits force "
+             "exit code 4 (block draft until amend-or-withdraw decision). The actual "
+             "live MCP-driven socraticode search is owned by the orchestrator-side "
+             "cross-collection-fanout producer and writes its citations into the "
+             "draft body BEFORE this rubric runs (produce-then-consume architecture).",
+    )
     return parser.parse_args()
 
 
@@ -326,10 +530,15 @@ def main() -> int:
         raise SystemExit("--draft is required unless --doctor/--schema/--examples is used")
     draft = resolve_path(repo, args.draft)
     text = draft.read_text(encoding="utf-8", errors="replace")
-    payload = score_draft(draft, text, checked_at=checked_at)
+    payload = score_draft(draft, text, checked_at=checked_at, corpus_scan_enabled=args.corpus_scan)
     if args.write_receipt:
         payload["receipt_path"] = str(write_receipt(payload, receipts_dir))
     print(json.dumps(payload, indent=2 if args.json else None, sort_keys=True))
+    # AG4 — same-issue-already-filed citation is a hard blocker
+    # (operator must amend the existing issue rather than file new).
+    # Use exit code 4 to make this distinct from generic rubric-fail (1).
+    if args.corpus_scan and payload.get("corpus_scan", {}).get("same_issue_blocker"):
+        return 4
     return 0 if payload["status"] == "pass" else 1
 
 

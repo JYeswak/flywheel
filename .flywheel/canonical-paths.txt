@@ -78,10 +78,12 @@ storage_override_doctrine_flywheel_agents	.flywheel/AGENTS.md	flywheel-vso8.2	Re
 storage_override_doctor	/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop	flywheel-vso8	Doctor support for storage_override_active_count, storage_override_expiring_in_min, --storage-min-free-pct, and FLYWHEEL_STORAGE_MIN_FREE_PCT.
 storage_override_tests	tests/storage-override.sh	flywheel-vso8	Fixture-backed tests for valid, expired, wrong-target, recovered, CLI flag, and env override cases.
 storage_override_receipts	/Users/josh/.local/state/flywheel/storage-overrides	flywheel-vso8	Fleet-local receipt directory for storage-override/v1 JSON and STORAGE-CLEARED event log rows.
-jeff_issue_rubric	.flywheel/scripts/jeff-issue-rubric.py	flywheel-3p1j	Deterministic 7-axis quality gate for Jeff issue drafts before posting.
+jeff_issue_rubric	.flywheel/scripts/jeff-issue-rubric.py	flywheel-3p1j,flywheel-wbnb	Deterministic 8-axis quality gate for Jeff issue drafts before posting (corpus_aware axis added by flywheel-wbnb).
 jeff_issue_rubric_docs	.flywheel/jeff-issue-rubric/v1/README.md	flywheel-3p1j	Axis definitions, thresholds, commands, and doctor signal contract.
 jeff_issue_rubric_fixtures	.flywheel/jeff-issue-rubric/v1/fixtures	flywheel-3p1j	High-quality, low-quality, ambiguous, and anti-pattern draft fixtures.
 jeff_issue_rubric_tests	tests/jeff-issue-rubric.sh	flywheel-3p1j	Fixture-backed tests for scoring, receipt writing, doctor counts, and strict failure.
+jeff_issue_rubric_corpus_scan_tests	tests/jeff-issue-rubric-corpus-scan.sh	flywheel-wbnb	Corpus-aware axis tests: prior-art / zero-citations / same-issue blocker (rc=4) / doctor signal jeff_drafts_unscanned_count.
+jeff_corpus_rubric_augment_doctrine	.flywheel/doctrine/jeff-corpus-rubric-augment.md	flywheel-wbnb	Produce-then-consume architecture for corpus-aware citation flow; companion bead spec for the cross-collection-fanout producer.
 l73_headless_browser_orphan_leak	AGENTS.md	flywheel-3ck3	Canonical L73 doctrine for headless agent-browser orphan leak handling.
 headless_browser_probe	.flywheel/scripts/headless-browser-probe.sh	flywheel-3ck3	JSON doctor probe for agent-browser-chrome process count, age, memory, locks, and thresholds.
 headless_browser_reap	.flywheel/scripts/headless-browser-reap.sh	flywheel-3ck3	Dry-run-first reaper for stale or over-count agent-browser-chrome processes; applied runs append receipts.

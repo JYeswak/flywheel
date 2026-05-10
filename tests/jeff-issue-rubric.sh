@@ -38,10 +38,14 @@ make_repo() {
 
 python3 -m py_compile "$PROBE" && pass "rubric script syntax" || fail "rubric script syntax"
 python3 "$PROBE" --schema --json >"$TMP/schema.json"
-assert_jq "$TMP/schema.json" '.schema_version == "jeff-issue-rubric/v1" and (.axes | length) == 7 and .decision_policy."7_high" == "auto_post"' "AG_DOC schema exposes 7 axes and thresholds"
+# flywheel-wbnb (2026-05-10) added the opt-in corpus_aware axis (8th).
+# Without --corpus-scan the rubric still evaluates the original 7; the
+# schema enumerates all 8 supported axes for discoverability.
+assert_jq "$TMP/schema.json" '.schema_version == "jeff-issue-rubric/v1" and (.axes | length) == 8 and .decision_policy."8_high" == "auto_post" and (.axes | index("corpus_aware") != null)' "AG_DOC schema exposes 8 axes (corpus_aware opt-in)"
 
 python3 "$PROBE" --draft "$ROOT/.flywheel/jeff-issue-rubric/v1/fixtures/high-quality.md" --json >"$TMP/high.json"
-assert_jq "$TMP/high.json" '.status == "pass" and .decision == "auto_post" and .high_axes_count == 7 and all(.axes[]; .passed == true)' "AG_VALIDATED high-quality fixture auto-posts"
+# Default (no --corpus-scan) still evaluates the original 7 axes.
+assert_jq "$TMP/high.json" '.status == "pass" and .decision == "auto_post" and .high_axes_count == 7 and all(.axes[]; .passed == true)' "AG_VALIDATED high-quality fixture auto-posts (7 axes default)"
 
 python3 "$PROBE" --draft "$ROOT/.flywheel/jeff-issue-rubric/v1/fixtures/ambiguous.md" --json >"$TMP/ambiguous.json" && ambiguous_rc=0 || ambiguous_rc=$?
 if [[ "${ambiguous_rc:-0}" -ne 0 ]] && jq -e '.status == "fail" and .decision == "revise" and .high_axes_count == 6 and (.hard_fail_axes | index("signal_not_prescription"))' "$TMP/ambiguous.json" >/dev/null; then
@@ -69,7 +73,8 @@ fi
 
 live="$TMP/live.json"
 python3 "$PROBE" --draft /tmp/jeff-issue-runtime-handoff-singleton.md --write-receipt --json >"$live" && live_rc=0 || live_rc=$?
-assert_jq "$live" '.schema_version == "jeff-issue-rubric/v1" and (.axes | length) == 7 and .receipt_path' "AG_VALIDATED live draft produces receipt and score"
+# flywheel-wbnb: default invocation (no --corpus-scan) still evaluates 7 axes.
+assert_jq "$live" '.schema_version == "jeff-issue-rubric/v1" and (.axes | length) == 7 and .receipt_path' "AG_VALIDATED live draft produces receipt and score (7 axes default)"
 
 repo="$(make_repo)"
 cp "$ROOT/.flywheel/jeff-issue-rubric/v1/fixtures/high-quality.md" "$TMP/jeff-issue-high.md"
