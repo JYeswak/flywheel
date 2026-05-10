@@ -380,6 +380,13 @@ scaffold_emit_completion() {
 scaffold_cmd_doctor() {
   # TODO(canonical-cli-scaffold): probe substrate this script depends on
   # (env vars, paths, external tools) and emit per-check status.
+  # Canonical pattern (per L4 lint rule — NEVER use \`[[ ]] && X || Y\`
+  # as the last expression of a helper; use if/then/else/fi):
+  #   if [[ -d "\$ROOT/.flywheel" ]]; then
+  #     printf '{"check":"flywheel-dir","status":"pass"}\\n'
+  #   else
+  #     printf '{"check":"flywheel-dir","status":"fail"}\\n'
+  #   fi
   jq -nc --arg sv "\$SCAFFOLD_SCHEMA_VERSION" --arg ts "\$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \\
     '{schema_version:\$sv,command:"doctor",ts:\$ts,status:"todo",checks:[],note:"TODO(canonical-cli-scaffold): fill in doctor checks"}'
 }
@@ -501,6 +508,15 @@ EOF
 emit_test_scaffold() {
   local target_basename="$1"
   local target_rel="$2"
+  # flywheel-x4e3s bug 1: when target is an absolute path outside REPO_ROOT
+  # (e.g., ~/.claude/skills/.flywheel/bin/<binary>), emit a SCRIPT= line
+  # without the $ROOT/ prefix to avoid double-slash.
+  local script_var_value
+  if [[ "$target_rel" = /* ]]; then
+    script_var_value="${target_rel}"
+  else
+    script_var_value="\$ROOT/${target_rel}"
+  fi
   cat <<EOF
 #!/usr/bin/env bash
 # tests/${target_basename%.sh}-canonical-cli.sh
@@ -512,7 +528,7 @@ emit_test_scaffold() {
 set -uo pipefail
 
 ROOT="\$(cd "\$(dirname "\${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="\$ROOT/${target_rel}"
+SCRIPT="${script_var_value}"
 
 pass_count=0
 fail_count=0
@@ -760,7 +776,19 @@ scaffold_target() {
         exit 3
       fi
     fi
-    backup_path="${target_abs}.bak.scaffold-$(iso_now | tr -d ':-')"
+    # flywheel-x4e3s bug 3: append PID + nanosecond resolution so concurrent
+    # scaffolder runs in the same UTC second produce non-colliding backups.
+    # Real incident: aav72 wave 2 + hj4ip wave 3 ran in parallel and 8 backups
+    # were overwritten 2026-05-10T16:03:18-19Z.
+    local _ts_nanosecond _bak_pid _ts_token
+    _ts_nanosecond="$(date -u +%Y%m%dT%H%M%S%N 2>/dev/null)"
+    if [[ -z "$_ts_nanosecond" || "$_ts_nanosecond" =~ %N ]]; then
+      # macOS / BSD date lacks %N; fall back to seconds + bash $RANDOM.
+      _ts_nanosecond="$(date -u +%Y%m%dT%H%M%S)$(printf '%09d' "$RANDOM$RANDOM" | tail -c 9)"
+    fi
+    _bak_pid="$$"
+    _ts_token="${_ts_nanosecond}Z-${_bak_pid}"
+    backup_path="${target_abs}.bak.scaffold-${_ts_token}"
     cp -p "$target_abs" "$backup_path"
     cp -p "$tmp_new" "$target_abs"
     chmod +x "$target_abs" 2>/dev/null || true
