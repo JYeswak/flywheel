@@ -1,0 +1,1 @@
+{"command":"quickstart","schema_version":"flywheel-readme/v1","steps":[{"action":"probe doctor","command":"flywheel-readme doctor --json","step":1},{"action":"check health","command":"flywheel-readme health --json","step":2},{"action":"tail audit","command":"flywheel-readme audit --json","step":3}]}
