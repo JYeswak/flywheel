@@ -1,0 +1,4 @@
+{"test":"tests/flywheel-install-hooks-canonical-cli.sh","summary":"SUMMARY pass=13 fail=0"}
+{"test":"tests/flywheel-outcome-canonical-cli.sh","summary":"SUMMARY pass=13 fail=0"}
+{"test":"tests/flywheel-render-latest-canonical-cli.sh","summary":"SUMMARY pass=13 fail=0"}
+{"test":"tests/flywheel-source-monitor-canonical-cli.sh","summary":"SUMMARY pass=13 fail=0"}
