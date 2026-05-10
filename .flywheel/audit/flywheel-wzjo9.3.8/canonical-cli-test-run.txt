@@ -1,0 +1,21 @@
+PASS syntax
+PASS --info emits canonical envelope
+PASS --schema emits canonical envelope
+PASS --examples emits canonical envelope
+PASS doctor emits canonical envelope
+PASS health emits canonical envelope
+PASS repair --dry-run emits canonical envelope
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate emits canonical envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS --info schema_version matches tick-skill-version-check/v1 pattern
+PASS --schema envelope is well-formed JSON
+PASS doctor: 5+ probes incl. tick_md_present + expected_version_constant
+PASS repair --scope expected-version-prime emits non-stub envelope with expected_version + drift
+PASS validate --row-json enforces row schema
+PASS validate --tick-md probes tick.md skill_version declaration (version-check-specific subject)
+PASS cmd_run passthrough — bare invocation emits OK/DRIFT/WARN/ERROR line (original behavior preserved)
+SUMMARY pass=20 fail=0
