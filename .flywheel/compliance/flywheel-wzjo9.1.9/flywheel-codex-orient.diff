@@ -1,0 +1,534 @@
+diff --git a/skills/.flywheel/bin/flywheel-codex-orient b/skills/.flywheel/bin/flywheel-codex-orient
+index 4f537d6..b7d2038 100755
+--- a/skills/.flywheel/bin/flywheel-codex-orient
++++ b/skills/.flywheel/bin/flywheel-codex-orient
+@@ -5,15 +5,493 @@
+ # Non-mutating by design: unlike Claude's SessionStart hook, this does not mark
+ # deltas surfaced. It is a reader-side shim for a tool without hooks.
+ 
+-set -u
+-set -o pipefail
++set -euo pipefail
+ 
++# Module-scope state (lifted above scaffold for doctor/health/validate probes).
+ FLYWHEEL_HOME="${FLYWHEEL_HOME:-$HOME/.claude/skills/.flywheel}"
+ FW="${FLYWHEEL_CODEX_FLYWHEEL_BIN:-${FLYWHEEL_BIN:-$FLYWHEEL_HOME/bin/flywheel}}"
+ SNAPSHOT_BIN="${FLYWHEEL_CODEX_SNAPSHOT_BIN:-$FLYWHEEL_HOME/bin/flywheel-codex-snapshot}"
+ OUT="${CODEX_CURRENT_DELTAS:-$HOME/.codex/CURRENT-DELTAS.md}"
+ STALE_SECONDS="${FLYWHEEL_CODEX_STALE_SECONDS:-21600}"
+ 
++
++# ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m + flywheel-wzjo9.1.9) ======
++# flywheel-cli-surface: true
++# canonical-cli-scoping: passing (substantive fillin landed flywheel-wzjo9.1.9)
++# doctor-mode-tier: filled
++#
++# 18-TODO substantive fillin: scaffold_emit_schema (8 per-surface), single-printf
++# topic_help, 7-probe doctor, audit-log-tail health, snapshot+audit-log repair
++# scopes, 3-subject validate, cli_emit_audit_tail audit, multi-resolution why.
++
++_SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
++_SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
++if [[ -r "$_SCAFFOLD_HELPER_LIB" ]]; then
++  # shellcheck source=/dev/null
++  source "$_SCAFFOLD_HELPER_LIB"
++fi
++
++SCAFFOLD_SCHEMA_VERSION="flywheel-codex-orient/v1"
++SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/flywheel-codex-orient-runs.jsonl}"
++
++scaffold_usage() {
++  cat <<'USG'
++usage: flywheel-codex-orient [SUBCOMMAND] [OPTIONS]
++
++Backward-compatible run mode: default invocation routes to the original
++top-level logic (now exposed as `cmd_run`).
++
++Canonical CLI surfaces:
++  doctor [--json]          probe substrate health
++  health [--json]          last-run status
++  repair --scope <s>       repair misconfigured state
++                            Default: --dry-run; mutate with --apply --idempotency-key KEY
++  validate <subject> [...] validate per-subject contract (TODO: define subjects)
++  audit [--json]           recent run history
++  why <id>                 explain provenance for a given id (TODO: id semantics)
++  quickstart [--json]      operator orientation
++  help <topic>             topic help (run | doctor | health | repair | validate)
++  completion <shell>       emit bash or zsh completion
++
++Introspection:
++  --info --json            version, paths, env vars, dependencies, sha256
++  --schema [<surface>]     JSON Schema for output envelopes
++  --examples --json        curated workflow examples
++  --help / -h              this help
++USG
++}
++
++scaffold_emit_info() {
++  if ! command -v cli_emit_info >/dev/null; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg name "flywheel-codex-orient" \
++      '{schema_version:$sv,command:"info",name:$name,helper_lib_missing:true}'
++    return 0
++  fi
++  cli_emit_info \
++    "flywheel-codex-orient" \
++    "scaffolded-v0" \
++    "$SCAFFOLD_SCHEMA_VERSION" \
++    "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
++    "SCAFFOLD_AUDIT_LOG" \
++    '{}'
++}
++
++scaffold_emit_examples() {
++  local jsonl
++  jsonl="$(jq -nc '{name:"default run",invocation:"flywheel-codex-orient",purpose:"backward-compatible original behavior"}'
++)"$'\n'"$(jq -nc '{name:"doctor",invocation:"flywheel-codex-orient doctor --json",purpose:"probe substrate health"}'
++)"
++  if command -v cli_emit_examples >/dev/null; then
++    cli_emit_examples "$SCAFFOLD_SCHEMA_VERSION" "$jsonl"
++  else
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"examples",helper_lib_missing:true}'
++  fi
++}
++
++scaffold_emit_quickstart() {
++  local steps
++  steps="$(jq -nc '{step:1,action:"probe doctor",command:"flywheel-codex-orient doctor --json"}'
++)"
++  if command -v cli_emit_quickstart >/dev/null; then
++    cli_emit_quickstart "$SCAFFOLD_SCHEMA_VERSION" "$steps" "doctor,health,repair"
++  else
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"quickstart",helper_lib_missing:true}'
++  fi
++}
++
++scaffold_emit_schema() {
++  local surface="${1:-default}"
++  case "$surface" in
++    doctor)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"doctor",title:"flywheel-codex-orient doctor output",type:"object",required:["command","status","checks"],properties:{command:{type:"string"},status:{enum:["pass","warn","fail"]},checks:{type:"array"},paths:{type:"object"}}}'
++      ;;
++    health)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"health",title:"flywheel-codex-orient health output",type:"object",required:["command","status"],properties:{command:{type:"string"},status:{enum:["pass","warn","fail"]},snapshot_age_seconds:{type:["integer","null"]},recent_runs:{type:"integer"},last_run_ts:{type:["string","null"]},audit_log_stale:{type:"boolean"}}}'
++      ;;
++    repair)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"repair",title:"flywheel-codex-orient repair output",type:"object",required:["command","scope","mode"],properties:{command:{type:"string"},scope:{enum:["snapshot","audit-log"]},mode:{enum:["dry_run","apply"]},idempotency_key:{type:"string"},planned_actions:{type:"array"},actual_actions:{type:"array"}}}'
++      ;;
++    validate)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"validate",title:"flywheel-codex-orient validate output",type:"object",required:["command","subject","status"],properties:{command:{type:"string"},subject:{enum:["snapshot","binaries","config"]},status:{enum:["pass","fail"]},reason:{type:"string"}}}'
++      ;;
++    audit)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"audit",title:"flywheel-codex-orient audit output",type:"object",required:["command"],properties:{command:{type:"string"},audit_log:{type:"string"},row_count:{type:"integer"},recent:{type:"array"}}}'
++      ;;
++    why)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"why",title:"flywheel-codex-orient why output",type:"object",required:["command","id","resolution"],properties:{command:{type:"string"},id:{type:"string"},resolution:{enum:["found","not_found","unavailable"]},explanation:{type:"string"}}}'
++      ;;
++    audit-row)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"audit-row",title:"flywheel-codex-orient audit-row item",type:"object",required:["ts","action","status"],properties:{ts:{type:"string"},action:{type:"string"},status:{type:"string"},sha256:{type:"string"}}}'
++      ;;
++    *)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
++        '{schema_version:$sv,command:"schema",surface:$surface,note:"valid surfaces: doctor|health|repair|validate|audit|why|audit-row"}'
++      ;;
++  esac
++}
++
++scaffold_emit_topic_help() {
++  local topic="${1:-}"
++  case "$topic" in
++    run)      printf 'topic: run — default backward-compatible invocation; prints orientation snapshot, refreshing once if stale (>%s s).\n' "$STALE_SECONDS" ;;
++    doctor)   printf 'topic: doctor — probes flywheel-home, FW binary, SNAPSHOT_BIN, snapshot file presence + freshness, jq, helper lib, audit log writability.\n' ;;
++    health)   printf 'topic: health — reports snapshot_age_seconds, recent_runs from audit log, last_run_ts, audit_log_stale (>24h).\n' ;;
++    repair)   printf 'topic: repair — --scope snapshot regenerates a stale snapshot; --scope audit-log ensures the audit-log directory; --apply requires --idempotency-key.\n' ;;
++    validate) printf 'topic: validate — subjects: snapshot (file + epoch + age), binaries (FW + SNAPSHOT_BIN executable), config (STALE_SECONDS positive int + OUT parent writable).\n' ;;
++    audit)    printf 'topic: audit — tails recent invocations from SCAFFOLD_AUDIT_LOG (~/.local/state/flywheel/flywheel-codex-orient-runs.jsonl by default).\n' ;;
++    why)      printf 'topic: why — explains provenance for ids: stale (age vs threshold), snapshot (location + epoch), refresh (binary + last_run).\n' ;;
++    *)        printf 'topics: run | doctor | health | repair | validate | audit | why\n' ;;
++  esac
++}
++
++scaffold_emit_completion() {
++  local shell="${1:-bash}"
++  case "$shell" in
++    -h|--help) scaffold_emit_topic_help completion 2>/dev/null \
++                 || printf 'topic: completion <bash|zsh> — emit shell completion script\n'
++               return 0 ;;
++    bash) command -v cli_emit_completion_bash >/dev/null \
++            && cli_emit_completion_bash "flywheel-codex-orient" "doctor,health,repair,validate,audit,why,quickstart,help,completion" "--json,--apply,--dry-run,--idempotency-key,--info,--schema,--examples" \
++            || printf '# helper lib missing — completion unavailable\n' ;;
++    zsh)  command -v cli_emit_completion_zsh >/dev/null \
++            && cli_emit_completion_zsh "flywheel-codex-orient" "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
++            || printf '# helper lib missing — completion unavailable\n' ;;
++    *) printf 'ERR: unknown shell %s (use bash|zsh)\n' "$shell" >&2; return 64 ;;
++  esac
++}
++
++# ---------- canonical-cli stubs (TODO markers preserved) ----------
++
++scaffold_cmd_doctor() {
++  local home_status="fail" fw_status="fail" snap_bin_status="fail" snap_file_status="fail" stale_cfg_status="fail" jq_status="fail" helper_status="fail" audit_status="fail"
++  local snap_age="null"
++  if [[ -d "$FLYWHEEL_HOME" ]]; then home_status="pass"; fi
++  if [[ -x "$FW" ]]; then fw_status="pass"; fi
++  if [[ -x "$SNAPSHOT_BIN" ]]; then snap_bin_status="pass"; fi
++  if [[ -f "$OUT" ]]; then
++    snap_file_status="pass"
++    local age
++    age="$(snapshot_age "$OUT" 2>/dev/null || true)"
++    if [[ -n "$age" ]]; then snap_age="$age"; fi
++  fi
++  if [[ "$STALE_SECONDS" =~ ^[0-9]+$ && "$STALE_SECONDS" -gt 0 ]]; then stale_cfg_status="pass"; fi
++  if command -v jq >/dev/null 2>&1; then jq_status="pass"; fi
++  if command -v cli_audit_append >/dev/null 2>&1; then helper_status="pass"; fi
++  local audit_dir; audit_dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
++  if [[ -d "$audit_dir" && -w "$audit_dir" ]] || [[ -f "$SCAFFOLD_AUDIT_LOG" && -w "$SCAFFOLD_AUDIT_LOG" ]]; then audit_status="pass"; fi
++  local aggregate="pass"
++  for status in "$home_status" "$fw_status" "$snap_bin_status" "$stale_cfg_status" "$jq_status"; do
++    if [[ "$status" != "pass" ]]; then aggregate="fail"; fi
++  done
++  if [[ "$aggregate" == "pass" && ("$snap_file_status" != "pass" || "$audit_status" != "pass") ]]; then aggregate="warn"; fi
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
++    --arg agg "$aggregate" --arg home "$home_status" --arg fw "$fw_status" --arg sb "$snap_bin_status" \
++    --arg sf "$snap_file_status" --arg sc "$stale_cfg_status" --arg jq_s "$jq_status" --arg hl "$helper_status" --arg au "$audit_status" \
++    --arg home_path "$FLYWHEEL_HOME" --arg fw_path "$FW" --arg snap_bin "$SNAPSHOT_BIN" --arg out_path "$OUT" --arg audit_log "$SCAFFOLD_AUDIT_LOG" \
++    --argjson age "$snap_age" \
++    '{schema_version:$sv,command:"doctor",ts:$ts,status:$agg,paths:{flywheel_home:$home_path,fw:$fw_path,snapshot_bin:$snap_bin,out:$out_path,audit_log:$audit_log},snapshot_age_seconds:$age,checks:[
++        {name:"flywheel_home",status:$home},
++        {name:"fw_binary",status:$fw},
++        {name:"snapshot_bin",status:$sb},
++        {name:"snapshot_file",status:$sf},
++        {name:"stale_seconds_config",status:$sc},
++        {name:"dependency:jq",status:$jq_s},
++        {name:"helper_lib_loaded",status:$hl},
++        {name:"audit_log_writable",status:$au}
++    ]}'
++  if command -v cli_audit_append >/dev/null 2>&1; then
++    cli_audit_append "$SCAFFOLD_AUDIT_LOG" "doctor" "$aggregate" '{}' >/dev/null 2>&1 || true
++  fi
++  if [[ "$aggregate" == "fail" ]]; then return 1; fi
++  return 0
++}
++
++scaffold_cmd_health() {
++  local snap_age="null" recent_runs=0 last_run_ts="null" status="pass"
++  if [[ -f "$OUT" ]]; then
++    local age; age="$(snapshot_age "$OUT" 2>/dev/null || true)"
++    if [[ -n "$age" ]]; then snap_age="$age"; fi
++  fi
++  if [[ -f "$SCAFFOLD_AUDIT_LOG" ]]; then
++    recent_runs="$(wc -l <"$SCAFFOLD_AUDIT_LOG" 2>/dev/null | tr -d ' ' || echo 0)"
++    [[ -n "$recent_runs" ]] || recent_runs=0
++    local last_line; last_line="$(tail -n 1 "$SCAFFOLD_AUDIT_LOG" 2>/dev/null)"
++    if [[ -n "$last_line" ]]; then
++      last_run_ts="\"$(jq -r '.ts // ""' <<<"$last_line" 2>/dev/null || true)\""
++    fi
++  fi
++  local audit_log_stale="false"
++  if [[ -f "$SCAFFOLD_AUDIT_LOG" ]]; then
++    local mtime now age_s
++    mtime="$(stat -f '%m' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null || stat -c '%Y' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null || echo 0)"
++    now="$(date +%s)"
++    age_s=$(( now - mtime ))
++    if (( age_s > 86400 )); then audit_log_stale="true"; fi
++  fi
++  if [[ "$snap_age" != "null" ]] && (( snap_age > STALE_SECONDS )); then status="warn"; fi
++  if [[ ! -x "$FW" || ! -x "$SNAPSHOT_BIN" ]]; then status="fail"; fi
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
++    --arg status "$status" --argjson age "$snap_age" --argjson runs "$recent_runs" \
++    --argjson last "$last_run_ts" --argjson stale "$audit_log_stale" \
++    --arg audit_log "$SCAFFOLD_AUDIT_LOG" \
++    '{schema_version:$sv,command:"health",ts:$ts,status:$status,snapshot_age_seconds:$age,stale_threshold_seconds:'"$STALE_SECONDS"',recent_runs:$runs,last_run_ts:$last,audit_log:$audit_log,audit_log_stale:$stale}'
++  if command -v cli_audit_append >/dev/null 2>&1; then
++    cli_audit_append "$SCAFFOLD_AUDIT_LOG" "health" "$status" "$(jq -nc --argjson a "$snap_age" --argjson r "$recent_runs" '{snapshot_age_seconds:$a,recent_runs:$r}')" >/dev/null 2>&1 || true
++  fi
++  if [[ "$status" == "fail" ]]; then return 1; fi
++  return 0
++}
++
++scaffold_cmd_repair() {
++  local scope="" mode="dry_run" idem_key=""
++  while [[ $# -gt 0 ]]; do
++    case "$1" in
++      -h|--help) scaffold_emit_topic_help repair; return 0 ;;
++      --scope) scope="${2:-}"; shift 2 ;;
++      --dry-run) mode="dry_run"; shift ;;
++      --apply) mode="apply"; shift ;;
++      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
++      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
++      --json) shift ;;
++      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; return 64 ;;
++    esac
++  done
++  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
++    if command -v cli_refuse_apply_without_idem_key >/dev/null; then
++      cli_refuse_apply_without_idem_key "$SCAFFOLD_SCHEMA_VERSION" "repair" "$scope"
++    else
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
++        '{schema_version:$sv,command:"repair",status:"refused",mode:"apply",scope:$scope,reason:"--apply requires --idempotency-key"}'
++      exit 3
++    fi
++  fi
++  local planned_actions actual_actions
++  case "$scope" in
++    snapshot)
++      planned_actions='["refresh snapshot via $SNAPSHOT_BIN if stale"]'
++      actual_actions='[]'
++      if [[ "$mode" == "apply" ]]; then
++        if refresh_snapshot && is_fresh "$OUT"; then
++          actual_actions='["snapshot_refreshed"]'
++        else
++          actual_actions='["snapshot_refresh_failed"]'
++        fi
++      fi
++      ;;
++    audit-log)
++      local audit_dir; audit_dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
++      planned_actions="$(jq -nc --arg d "$audit_dir" '["mkdir -p " + $d]')"
++      actual_actions='[]'
++      if [[ "$mode" == "apply" ]]; then
++        if mkdir -p "$audit_dir" 2>/dev/null; then
++          actual_actions='["audit_log_dir_ensured"]'
++        else
++          actual_actions='["audit_log_dir_failed"]'
++        fi
++      fi
++      ;;
++    none|"")
++      planned_actions='[]'
++      actual_actions='[]'
++      scope="none"
++      ;;
++    *)
++      printf 'ERR: unknown repair scope %s (snapshot|audit-log|none)\n' "$scope" >&2
++      return 64
++      ;;
++  esac
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
++    --argjson planned "$planned_actions" --argjson actual "$actual_actions" \
++    '{schema_version:$sv,command:"repair",status:"ok",mode:$mode,scope:$scope,idempotency_key:$idem,planned_actions:$planned,actual_actions:$actual}'
++  if command -v cli_audit_append >/dev/null 2>&1; then
++    cli_audit_append "$SCAFFOLD_AUDIT_LOG" "repair" "$mode" "$(jq -nc --arg s "$scope" --arg k "$idem_key" '{scope:$s,idempotency_key:$k}')" >/dev/null 2>&1 || true
++  fi
++}
++
++scaffold_cmd_validate() {
++  local subject=""
++  while [[ $# -gt 0 ]]; do
++    case "$1" in
++      --json) shift ;;
++      -h|--help) scaffold_emit_topic_help validate; return 0 ;;
++      --*) shift ;;
++      *) subject="$1"; shift ;;
++    esac
++  done
++  if [[ -z "$subject" ]]; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++      '{schema_version:$sv,command:"validate",status:"info",reason:"no subject specified",valid_subjects:["snapshot","binaries","config"]}'
++    return 0
++  fi
++  local status="fail" reason="unknown"
++  case "$subject" in
++    snapshot)
++      if [[ -f "$OUT" ]]; then
++        local epoch; epoch="$(snapshot_epoch "$OUT" 2>/dev/null || true)"
++        if [[ -n "$epoch" ]]; then
++          local age; age="$(snapshot_age "$OUT" 2>/dev/null || echo 0)"
++          if (( age <= STALE_SECONDS )); then
++            status="pass"; reason="snapshot present, epoch parseable, age $age <= threshold $STALE_SECONDS"
++          else
++            reason="snapshot present but stale (age=$age > threshold=$STALE_SECONDS)"
++          fi
++        else
++          reason="snapshot present but epoch unparseable"
++        fi
++      else
++        reason="snapshot file $OUT does not exist"
++      fi
++      ;;
++    binaries)
++      if [[ -x "$FW" && -x "$SNAPSHOT_BIN" ]]; then
++        status="pass"; reason="FW and SNAPSHOT_BIN both executable"
++      elif [[ ! -x "$FW" ]]; then
++        reason="FW binary not executable: $FW"
++      else
++        reason="SNAPSHOT_BIN not executable: $SNAPSHOT_BIN"
++      fi
++      ;;
++    config)
++      if [[ "$STALE_SECONDS" =~ ^[0-9]+$ && "$STALE_SECONDS" -gt 0 ]]; then
++        local out_dir out_writable=0
++        out_dir="$(dirname "$OUT")"
++        if [[ -d "$out_dir" && -w "$out_dir" ]]; then out_writable=1
++        elif [[ -f "$OUT" && -w "$OUT" ]]; then out_writable=1; fi
++        if [[ "$out_writable" -eq 1 ]]; then
++          status="pass"; reason="STALE_SECONDS=$STALE_SECONDS is positive int; OUT parent writable"
++        else
++          reason="STALE_SECONDS valid but OUT parent ($out_dir) not writable"
++        fi
++      else
++        reason="STALE_SECONDS=$STALE_SECONDS is not a positive integer"
++      fi
++      ;;
++    *)
++      printf 'ERR: unknown validate subject %s (snapshot|binaries|config)\n' "$subject" >&2
++      return 64
++      ;;
++  esac
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg subject "$subject" --arg status "$status" --arg reason "$reason" \
++    '{schema_version:$sv,command:"validate",subject:$subject,status:$status,reason:$reason}'
++  if command -v cli_audit_append >/dev/null 2>&1; then
++    cli_audit_append "$SCAFFOLD_AUDIT_LOG" "validate" "$status" "$(jq -nc --arg s "$subject" --arg r "$reason" '{subject:$s,reason:$r}')" >/dev/null 2>&1 || true
++  fi
++  return 0
++}
++
++scaffold_cmd_audit() {
++  if command -v cli_emit_audit_tail >/dev/null 2>&1; then
++    cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" 20
++    return $?
++  fi
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
++    '{schema_version:$sv,command:"audit",audit_log:$log,row_count:0,recent:[],helper_lib_missing:true}'
++}
++
++scaffold_cmd_why() {
++  local id="${1:-}"
++  if [[ -z "$id" ]]; then
++    printf 'ERR: why requires <id> argument\n' >&2; return 64
++  fi
++  local resolution="not_found" explanation=""
++  case "$id" in
++    stale)
++      if [[ -f "$OUT" ]]; then
++        local age; age="$(snapshot_age "$OUT" 2>/dev/null || echo 0)"
++        resolution="found"
++        explanation="snapshot age $age s vs STALE_SECONDS=$STALE_SECONDS; stale=$([[ $age -gt $STALE_SECONDS ]] && echo true || echo false). Threshold sourced from FLYWHEEL_CODEX_STALE_SECONDS env, default 21600 (6h)."
++      else
++        resolution="unavailable"
++        explanation="snapshot file $OUT does not exist; staleness cannot be computed"
++      fi
++      ;;
++    snapshot)
++      resolution="found"
++      explanation="snapshot path resolves from CODEX_CURRENT_DELTAS env (default ~/.codex/CURRENT-DELTAS.md). Current: $OUT. Refreshed by $SNAPSHOT_BIN when stale."
++      ;;
++    refresh)
++      if [[ -x "$SNAPSHOT_BIN" ]]; then
++        resolution="found"
++        explanation="refresh path: $SNAPSHOT_BIN invoked with CODEX_CURRENT_DELTAS + FLYWHEEL_CODEX_STALE_SECONDS + FLYWHEEL_CODEX_FLYWHEEL_BIN env. Refresh writes a new snapshot at $OUT and short-circuits if still fresh."
++      else
++        resolution="unavailable"
++        explanation="snapshot binary $SNAPSHOT_BIN not executable; refresh cannot run"
++      fi
++      ;;
++    *)
++      resolution="not_found"
++      explanation="unknown id '$id'; valid ids: stale, snapshot, refresh"
++      ;;
++  esac
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg resolution "$resolution" --arg explanation "$explanation" \
++    '{schema_version:$sv,command:"why",id:$id,resolution:$resolution,explanation:$explanation}'
++  if command -v cli_audit_append >/dev/null 2>&1; then
++    cli_audit_append "$SCAFFOLD_AUDIT_LOG" "why" "$resolution" "$(jq -nc --arg i "$id" '{id:$i}')" >/dev/null 2>&1 || true
++  fi
++}
++
++# ---------- scaffolded main dispatcher ----------
++
++# When the scaffolder appends this block, it expects the target's original
++# top-level main is renamed to `cmd_run` (or the original final
++# `main "$@"` line is replaced with this dispatcher). Default invocation
++# falls through to the original logic for backward compat.
++scaffold_main() {
++  if [[ $# -eq 0 ]]; then
++    scaffold_usage; exit 0
++  fi
++  case "$1" in
++    -h|--help)    scaffold_usage; exit 0 ;;
++    --info)       shift; scaffold_emit_info "$@"; exit 0 ;;
++    --schema)     shift; scaffold_emit_schema "${1:-default}"; exit 0 ;;
++    --examples)   shift; scaffold_emit_examples "$@"; exit 0 ;;
++    doctor)       shift; scaffold_cmd_doctor "$@"; exit $? ;;
++    health)       shift; scaffold_cmd_health "$@"; exit $? ;;
++    repair)       shift; scaffold_cmd_repair "$@"; exit $? ;;
++    validate)     shift; scaffold_cmd_validate "$@"; exit $? ;;
++    audit)        shift; scaffold_cmd_audit "$@"; exit $? ;;
++    why)          shift; scaffold_cmd_why "$@"; exit $? ;;
++    quickstart)   shift; scaffold_emit_quickstart "$@"; exit 0 ;;
++    help)         shift; scaffold_emit_topic_help "${1:-}"; exit 0 ;;
++    completion)   shift; scaffold_emit_completion "${1:-bash}"; exit $? ;;
++    *)
++      printf 'ERR: unknown canonical subcommand: %s\n' "$1" >&2
++      scaffold_usage >&2
++      exit 64 ;;
++  esac
++}
++
++# Early-dispatch intercept: if argv[0] looks like a canonical subcommand
++# or introspection flag, run the canonical surface and exit BEFORE the
++# target's original arg parser sees the args. Works for both `main "$@"`
++# style and inline `while [[ $# -gt 0 ]]` style targets.
++_scaffold_is_canonical_arg() {
++  case "${1:-}" in
++    doctor|health|repair|validate|audit|why|quickstart|completion) return 0 ;;
++    --info|--schema|--examples) return 0 ;;
++    -h|--help) return 0 ;;
++    help)
++      # Intercept `help <topic>` and `help --help`; bare `help` could be
++      # a legacy subcommand of the target so it falls through.
++      case "${2:-}" in run|doctor|health|repair|validate|audit|why|-h|--help) return 0 ;; esac
++      return 1 ;;
++    *) return 1 ;;
++  esac
++}
++
++if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
++  scaffold_main "$@"
++  exit $?
++fi
++# ====== END canonical-cli scaffold ======
++
+ epoch_from_file() {
+     local file="$1"
+     sed -nE 's/^- Generated: .*\(epoch ([0-9]+)\).*$/\1/p' "$file" 2>/dev/null | head -1
+@@ -71,13 +549,23 @@ print_snapshot() {
+     fi
+ }
+ 
++audit_run() {
++    local refreshed="${1:-0}" status="${2:-fresh}"
++    if command -v cli_audit_append >/dev/null 2>&1; then
++        cli_audit_append "$SCAFFOLD_AUDIT_LOG" "run" "$status" \
++            "$(jq -nc --arg r "$refreshed" --arg out "$OUT" '{refreshed:$r,out:$out}')" >/dev/null 2>&1 || true
++    fi
++}
++
+ if is_fresh "$OUT"; then
+     print_snapshot "fresh" "0"
++    audit_run "0" "fresh"
+     exit 0
+ fi
+ 
+ if refresh_snapshot && is_fresh "$OUT"; then
+     print_snapshot "fresh" "1"
++    audit_run "1" "refreshed"
+     exit 0
+ fi
+ 
+@@ -89,7 +577,9 @@ echo "- snapshot=${OUT}"
+ echo
+ if [[ -x "$FW" ]]; then
+     "$FW" deltas --unsurfaced --limit 10 2>&1
++    audit_run "0" "live_fallback"
+ else
+     echo "ERROR: no fresh snapshot and flywheel binary not executable: $FW"
++    audit_run "0" "no_binary"
+     exit 1
+ fi
