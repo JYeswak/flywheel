@@ -1,0 +1,1 @@
+{"schema_version":"recovery-baseline-status/v1","command":"validate","subject":"manifest","manifest_path":"/Users/josh/.flywheel/recovery/snapshots/baseline-20260507T233254Z.manifest.json","status":"pass","valid":true,"missing_required":[]}

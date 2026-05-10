@@ -1,0 +1,1 @@
+{"schema_version":"recovery-baseline-status/v1","command":"validate","subject":"config","status":"pass","snapshot_dir":"/Users/josh/.flywheel/recovery/snapshots","drill_dir":"/Users/josh/.flywheel/recovery/drills","launchctl_bin":"/bin/launchctl","missing":[]}

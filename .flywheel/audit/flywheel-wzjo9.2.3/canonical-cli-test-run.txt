@@ -1,0 +1,21 @@
+PASS syntax
+PASS --info emits canonical envelope
+PASS --schema emits canonical envelope
+PASS --examples emits canonical envelope
+PASS doctor emits canonical envelope
+PASS health emits canonical envelope
+PASS repair --dry-run emits canonical envelope
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate emits canonical envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS --info schema_version matches recovery-baseline-status/v1 pattern
+PASS --schema envelope is well-formed JSON
+PASS doctor: 5+ named substrate probes incl. python3_on_path + launchctl_executable
+PASS repair --scope snapshot-dir-prime emits non-stub envelope
+PASS validate --row-json enforces row schema
+PASS validate --manifest probes baseline manifest (recovery-specific subject)
+PASS cmd_run --json passthrough — reaches original python heredoc with distinct schema_version
+SUMMARY pass=20 fail=0
