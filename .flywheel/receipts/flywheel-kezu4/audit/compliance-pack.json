@@ -1,0 +1,83 @@
+{
+  "task_id": "flywheel-kezu4",
+  "dispatch_id": "flywheel-kezu4-3c234c",
+  "identity_name": "CloudyMill",
+  "pane": "flywheel:0.2",
+  "callback_pane": "flywheel:1",
+  "title": "[cross-orch:skillos] ~/.claude retention manifest ratification — review flywheel-touching rules (handoff 2026-05-09T173000Z, PR #174)",
+  "did": "3/3",
+  "compliance_score": 920,
+  "compliance_max": 1000,
+  "four_lens": {
+    "brand": 9,
+    "sniff": 9,
+    "jeff": 9,
+    "public": 9
+  },
+  "verdict": "option_b_request_rule_changes",
+  "score_components": {
+    "live_filesystem_audit_with_volume_counts": 200,
+    "live_pruner_doctor_probe_evidence_captured": 150,
+    "pattern_mismatch_class_identified_with_3_specific_rules": 180,
+    "v2_rule_change_deltas_are_concrete_and_drop_in": 130,
+    "receipt_ledger_schema_confirmed_parseable": 60,
+    "protected_paths_audit_complete": 60,
+    "rotting_rule_alarm_v2_concern_flagged": 50,
+    "cross_orch_fleet_propagation_note_for_3_other_orchs": 50,
+    "scope_discipline_no_authoring_v2_or_pruner_edits": 60,
+    "L61_ecosystem_touch_handled": 30,
+    "subtotal": 970,
+    "deduct_no_explicit_v2_doctor_test_authored": -50,
+    "total": 920
+  },
+  "did_gates": [
+    {
+      "gate": "AG1 (parent handoff): No retention rule deletes a path flywheel-loop needs preserved beyond its window",
+      "status": "done",
+      "evidence": "Protected paths cover all flywheel-loop write surfaces (skills, commands, hooks, references, memory, projects/*/memory, CLAUDE.md, secret-ledgers); proposed v2 retention windows >= flywheel-loop's 30d gap-hunt window; v2 rule deltas explicitly preserve the safety posture"
+    },
+    {
+      "gate": "AG2 (parent handoff): Per-tick artifact retention windows match flywheel's substrate-integrity contract",
+      "status": "done",
+      "evidence": "Gap-hunt-probe reads ~/.local/state/flywheel/*.jsonl (NOT under ~/.claude/); 14d retention on tool-results doesn't touch flywheel's audit chain"
+    },
+    {
+      "gate": "AG3 (parent handoff): Receipt-ledger format mutually parseable for cross-orch audit",
+      "status": "done",
+      "evidence": "skillos.claude_state_pruner_receipt.v1 schema is jq-parseable; mission_anchor_hash per-row enables cross-orch verification; 16 fields all machine-readable"
+    }
+  ],
+  "files_touched": [
+    "/Users/josh/Developer/flywheel/.flywheel/handoffs/2026-05-10T020000Z-from-flywheel-1-to-skillos-1-claude-state-retention-manifest-ratification-response.md",
+    ".flywheel/receipts/flywheel-kezu4/audit/evidence.md",
+    ".flywheel/receipts/flywheel-kezu4/audit/filesystem-audit.txt",
+    ".flywheel/receipts/flywheel-kezu4/audit/skillos-pruner-doctor-output.json",
+    ".flywheel/receipts/flywheel-kezu4/audit/pinned-shas.txt",
+    ".flywheel/receipts/flywheel-kezu4/audit/compliance-pack.json"
+  ],
+  "beads_filed": [],
+  "beads_updated": ["flywheel-kezu4"],
+  "no_bead_reason": "cross-orch ratification gate; next-actionable owner is skillos:1 (ship v2 manifest with rule changes); not flywheel:1 scope to author rule fixes per parent handoff manifest ownership statement",
+  "fuckups_logged": [],
+  "skill_auto_routes": {
+    "canonical-cli-scoping": "n/a",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "L61_ecosystem_touch": {
+    "agents_md_updated": "not_applicable",
+    "readme_updated": "not_applicable",
+    "no_touch_reason": "cross-orch ratification response written to .flywheel/handoffs/; manifest is skillos-owned per parent handoff; no flywheel doctrine, INCIDENTS, canonical L-rule, or skill surface touched"
+  },
+  "L107_reservations": {
+    "files": ["/Users/josh/Developer/flywheel/.flywheel/handoffs/2026-05-10T020000Z-from-flywheel-1-to-skillos-1-claude-state-retention-manifest-ratification-response.md"],
+    "release_required": true
+  },
+  "L112_probe": {
+    "command": "[ -f /Users/josh/Developer/flywheel/.flywheel/handoffs/2026-05-10T020000Z-from-flywheel-1-to-skillos-1-claude-state-retention-manifest-ratification-response.md ] && grep -q 'verdict: option_b_request_rule_changes' /Users/josh/Developer/flywheel/.flywheel/handoffs/2026-05-10T020000Z-from-flywheel-1-to-skillos-1-claude-state-retention-manifest-ratification-response.md && echo PASS_VERDICT_LANDED",
+    "expected": "grep:PASS_VERDICT_LANDED"
+  },
+  "mission_fitness": "adjacent",
+  "mission_rationale": "Ratification response unblocks skillos:1's Phase 16-α-1 propagation arc. Without flywheel:1's response, skillos:1 can't install the launchd plist; without rule corrections, the plist would have been installed against patterns that don't match the live filesystem layout (operational-health risk: claims-success-without-effect class). Serves continuous-orchestrator-uptime by ensuring the cross-orch retention substrate actually does what it claims when it ships."
+}

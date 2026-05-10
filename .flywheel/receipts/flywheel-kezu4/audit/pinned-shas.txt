@@ -1,0 +1,10 @@
+branch: master
+head-pre: cf74b1c01610ed063e903bddc2031a9bd2b21343
+manifest-path: /Users/josh/Developer/skillos/state/claude-state-retention-manifest-v1.json
+manifest-sha256: 308a574eabae2beb04f60ee13a34070bf54f4a6cb04f2dd6407f1fbff0d45988
+manifest-ratified-at: null
+manifest-version: 1
+manifest-rules-count: 20
+pruner-script: /Users/josh/Developer/skillos/scripts/skillos_claude_state_pruner.py
+pruner-sha256: 14b95eab86b68c25b932873658f6a13d7efcce3e2bfda988f440a6278194c51c
+handoff-sha256: 2a13b223595d3f2dea3adb19405ff842f9efe57c4b131a1564b78ffb414280cd

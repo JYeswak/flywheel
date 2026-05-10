@@ -1,0 +1,15 @@
+=== ~/.claude/projects/ filesystem audit (2026-05-10T02:00:00Z) ===
+Total files: 13992
+Top-level *.jsonl (transcripts): 756
+*/tool-results/*: 589
+*/subagents/*: 5827
+*/memory/* (protected): 6783
+
+=== Manifest pattern probe ===
+tasks/ dirs under ~/.claude/projects: 0
+conversations/ dirs under ~/.claude/projects: 0
+(both should be 0 for the pattern-mismatch verdict to hold)
+
+=== Sister filesystem ===
+/private/tmp/claude-501/ tasks count: 468
+(this is a separate root, target_root=/Users/josh/.claude does NOT include it)

@@ -1,0 +1,48 @@
+{
+  "status": "FAIL",
+  "file_count": null,
+  "manifest_ratified_at": null,
+  "manifest_version": 1,
+  "rule_summaries": [
+    {
+      "id": null,
+      "pattern": "~/.claude/transcripts",
+      "retention": "last-N-days",
+      "matched_count": null,
+      "eligible_count": 362,
+      "eligible_after_window": null
+    },
+    {
+      "id": null,
+      "pattern": "~/.claude/paste-cache",
+      "retention": "last-N-days",
+      "matched_count": null,
+      "eligible_count": 1349,
+      "eligible_after_window": null
+    },
+    {
+      "id": null,
+      "pattern": "~/.claude/agent-context",
+      "retention": "last-N-days",
+      "matched_count": null,
+      "eligible_count": 9,
+      "eligible_after_window": null
+    },
+    {
+      "id": null,
+      "pattern": "~/.claude/backup_hooks",
+      "retention": "last-N-files",
+      "matched_count": null,
+      "eligible_count": 1149,
+      "eligible_after_window": null
+    },
+    {
+      "id": null,
+      "pattern": "~/.claude/ensemble",
+      "retention": "last-N-days",
+      "matched_count": null,
+      "eligible_count": 1,
+      "eligible_after_window": null
+    }
+  ]
+}
