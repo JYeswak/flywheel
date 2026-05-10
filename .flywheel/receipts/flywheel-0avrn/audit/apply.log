@@ -1,0 +1,35 @@
+
+===== PRE-STATE (ts=2026-05-10T03:18:23Z) =====
+disk_free_gb=30
+disk_free_pct=3
+  pre /Users/josh/Developer/zesttube/.artifacts/langgraph-checkpoints: bytes=65467379712 files=14
+  pre /Users/josh/Developer/vibe_cockpit/target: bytes=17432285184 files=34055
+  pre /Users/josh/Developer/zesttube-avatars/third_party: bytes=5990256640 files=2910
+  pre /Users/josh/Developer/comfyui/output: bytes=33356685312 files=4838
+
+===== ITEM 1: zesttube langgraph-checkpoints (ts=2026-05-10T03:18:25Z) =====
+Removing /Users/josh/Developer/zesttube/.artifacts/langgraph-checkpoints ...
+Removed.
+
+===== ITEM 2: vibe_cockpit cargo clean (ts=2026-05-10T03:18:30Z) =====
+     Removed 34055 files, 17.0GiB total
+cargo clean done.
+
+===== ITEM 3: zesttube-avatars third_party (ts=2026-05-10T03:18:36Z) =====
+Removing /Users/josh/Developer/zesttube-avatars/third_party ...
+Removed.
+
+===== ITEM 4: comfyui output archive-then-prune (ts=2026-05-10T03:18:37Z) =====
+Building >30d filelist for /Users/josh/Developer/comfyui/output ...
+filelist=/Users/josh/Developer/flywheel/.flywheel/receipts/flywheel-0avrn/audit/item4-archive-filelist.txt count=4838
+Building archive at /Users/josh/Developer/comfyui-archives/output-archive-20260510.tar.zst ...
+/*stdin*\            : 99.52%   (  31.1 GiB =>   30.9 GiB, /Users/josh/Developer/comfyui-archives/output-archive-20260510.tar.zst) 
+archive_bytes=33200554829
+Verifying archive (zstd --test) ...
+/Users/josh/Developer/comfyui-archives/output-archive-20260510.tar.zst: 33359728640 bytes 
+Verify also: tar listing readable
+output/new-gen-1024/kitchen_01_v01_00002_.png
+output/new-gen-1024/closet_01_v01_00001_.png
+output/new-gen-1024/kitchen_01_v02_00001_.png
+listed_count=4838 (expected=4838)
+Removing archived source files only ...

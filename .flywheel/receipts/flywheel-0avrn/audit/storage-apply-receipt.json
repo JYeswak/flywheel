@@ -1,0 +1,54 @@
+{
+  "schema_version": "flywheel.storage-apply-receipt.v1",
+  "bead_id": "flywheel-0avrn",
+  "task_id": "flywheel-0avrn-b6f3ce",
+  "spec_path": ".flywheel/audit/flywheel-9hnp3/storage-apply-spec.md",
+  "ts_started": "2026-05-10T03:18:23Z",
+  "ts_completed": "2026-05-10T03:21:30Z",
+  "stop_on_first_error": true,
+  "errors": [],
+  "pre": {
+    "disk_free_gb": 30,
+    "disk_free_pct": 3,
+    "items": {
+      "zesttube_langgraph_checkpoints": {"path": "/Users/josh/Developer/zesttube/.artifacts/langgraph-checkpoints", "bytes": 65467379712, "files": 14},
+      "vibe_cockpit_target":             {"path": "/Users/josh/Developer/vibe_cockpit/target",                     "bytes": 17432285184, "files": 34055},
+      "zesttube_avatars_third_party":    {"path": "/Users/josh/Developer/zesttube-avatars/third_party",            "bytes": 5990256640,  "files": 2910},
+      "comfyui_output":                  {"path": "/Users/josh/Developer/comfyui/output",                          "bytes": 33356685312, "files": 4838}
+    },
+    "total_source_bytes": 122246606848
+  },
+  "post": {
+    "disk_free_gb": 113,
+    "disk_free_pct": 12,
+    "items": {
+      "zesttube_langgraph_checkpoints": {"removed": true, "bytes": 0, "files": 0},
+      "vibe_cockpit_target":             {"removed": true, "bytes": 0, "files": 0, "method": "cargo clean"},
+      "zesttube_avatars_third_party":    {"removed": true, "bytes": 0, "files": 0},
+      "comfyui_output":                  {"removed": true, "bytes": 0, "files": 0, "preserved_in_archive": true}
+    }
+  },
+  "archive": {
+    "path": "/Users/josh/Developer/comfyui-archives/output-archive-20260510.tar.zst",
+    "bytes": 33200554829,
+    "files_archived": 4838,
+    "compression_ratio_pct": 99.52,
+    "compression_note": "PNG content already entropy-compressed; zstd reduces only metadata overhead",
+    "zstd_test_passed": true,
+    "tar_listing_verified": true,
+    "listed_count_matches_filelist": true,
+    "filelist_path": ".flywheel/receipts/flywheel-0avrn/audit/item4-archive-filelist.txt"
+  },
+  "reclaim_bytes_source": 122246606848,
+  "reclaim_gb_source": 113,
+  "net_disk_free_gain_gb": 83,
+  "net_gain_explanation": "113GB source removed minus 31GB archive retained on disk per Joshua preserve directive",
+  "fire_tier_exit": true,
+  "fire_tier_exit_explanation": "pre 3% < 5% FIRE threshold; post 12% > 5%",
+  "ok_tier_reached": false,
+  "ok_tier_explanation": "post 12% < 15% OK threshold; gap is the 31GB archive retained per preserve directive (without archive: 15.4% would clear OK)",
+  "warn_tier_status": "warn",
+  "warn_tier_explanation": "10% <= 12% < 15% per .flywheel/STORAGE.md — warning tier, soft prune recommended; not fail/fire",
+  "joshua_preserve_directive_honored": true,
+  "execution_log_path": ".flywheel/receipts/flywheel-0avrn/audit/apply.log"
+}
