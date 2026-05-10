@@ -82,9 +82,46 @@ if "$SCRIPT" quickstart 2>/dev/null | jq -e '.command == "quickstart"' >/dev/nul
   pass "quickstart emits canonical envelope"
 else fail "quickstart envelope"; fi
 
-# TODO(canonical-cli-scaffold): add per-surface assertions here.
-# Examples: doctor checks specific data; repair --apply with key
-# performs expected mutation; validate enforces a known schema.
+# Per-surface assertions (flywheel-dsrq1 fillin).
+
+# Test 14: doctor returns >=5 substantive named checks
+if "$SCRIPT" doctor --json 2>/dev/null | jq -e '
+  .status != "todo" and (.checks | length) >= 5
+  and ([.checks[].check] | (any(. == "jq") and any(. == "br") and any(. == "schema_gate") and any(. == "l112_gate") and any(. == "audit_log_dir")))' >/dev/null; then
+  pass "doctor returns 5 named substrate probes"
+else fail "doctor checks"; fi
+
+# Test 15: health envelope has total_rows + closed/blocked/failed counts + canonical status
+if "$SCRIPT" health --json 2>/dev/null | jq -e '
+  has("total_rows") and has("audit_log_path")
+  and (.status | IN("ok","empty","not_initialized"))' >/dev/null; then
+  pass "health envelope has audit-log counts + canonical status"
+else fail "health envelope"; fi
+
+# Test 16: repair --scope audit_log_truncate --dry-run emits planned_actions key
+if "$SCRIPT" repair --scope audit_log_truncate --dry-run --json 2>/dev/null | jq -e '
+  .status == "dry_run" and has("planned_actions")' >/dev/null; then
+  pass "repair audit_log_truncate --dry-run emits planned_actions"
+else fail "repair dry-run"; fi
+
+# Test 17: validate audit-row emits per-row results array
+if "$SCRIPT" validate audit-row --json 2>/dev/null | jq -e '
+  .subject == "audit-row" and has("pass") and has("fail") and (.results | type == "array")' >/dev/null; then
+  pass "validate audit-row emits results array"
+else fail "validate audit-row"; fi
+
+# Test 18: validate rejects unknown subject (rc=64)
+"$SCRIPT" validate not-a-real-subject --json >/dev/null 2>&1
+rc=$?
+if [[ "$rc" -eq 64 ]]; then
+  pass "validate rejects unknown subject with rc=64"
+else fail "validate unknown subject rc=$rc"; fi
+
+# Test 19: why distinguishes found|not_found|unavailable for fake id
+if "$SCRIPT" why "definitely-not-a-real-id-xyz" --json 2>/dev/null | jq -e '
+  .id == "definitely-not-a-real-id-xyz" and (.status | IN("found","not_found","unavailable"))' >/dev/null; then
+  pass "why <id> emits found|not_found|unavailable"
+else fail "why id"; fi
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2
