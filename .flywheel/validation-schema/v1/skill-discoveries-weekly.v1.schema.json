@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "flywheel.skill-discoveries-weekly.v1",
+  "title": "Skill discoveries weekly rollup envelope",
+  "description": "Aggregated weekly skill-discovery insight surface produced by .flywheel/scripts/skill-discoveries-aggregator.sh. Bead flywheel-4s3oy.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "week",
+    "window_start",
+    "window_end",
+    "total_entries",
+    "unique_candidates",
+    "top_n",
+    "first_time_classes",
+    "cross_worker_agreements",
+    "long_tail",
+    "by_kind",
+    "by_worker"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["skill-discoveries-weekly.v1"]},
+    "week":           {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}$"},
+    "window_start":   {"type": "string", "format": "date-time"},
+    "window_end":     {"type": "string", "format": "date-time"},
+    "total_entries":     {"type": "integer", "minimum": 0},
+    "unique_candidates": {"type": "integer", "minimum": 0},
+    "top_n": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["candidate", "count"],
+        "properties": {
+          "candidate":   {"type": "string"},
+          "count":       {"type": "integer", "minimum": 1},
+          "kinds":       {"type": "array", "items": {"type": "string"}},
+          "workers":     {"type": "array", "items": {"type": "string"}},
+          "example_ts":  {"type": ["string", "null"]}
+        }
+      }
+    },
+    "first_time_classes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["candidate", "count"],
+        "properties": {
+          "candidate": {"type": "string"},
+          "count":     {"type": "integer", "minimum": 1},
+          "ts":        {"type": ["string", "null"]},
+          "kinds":     {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "cross_worker_agreements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["candidate", "count", "distinct_workers"],
+        "properties": {
+          "candidate":        {"type": "string"},
+          "count":            {"type": "integer", "minimum": 2},
+          "distinct_workers": {"type": "array", "minItems": 2, "items": {"type": "string"}}
+        }
+      }
+    },
+    "long_tail": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["candidate"],
+        "properties": {
+          "candidate": {"type": "string"},
+          "ts":        {"type": ["string", "null"]},
+          "kind":      {"type": ["string", "null"]},
+          "worker":    {"type": ["string", "null"]}
+        }
+      }
+    },
+    "by_kind": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["kind", "count"],
+        "properties": {
+          "kind":  {"type": "string"},
+          "count": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "by_worker": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["worker", "count"],
+        "properties": {
+          "worker": {"type": "string"},
+          "count":  {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "report_path": {"type": "string"}
+  }
+}
