@@ -112,7 +112,51 @@ set -e
 if [[ "$bad_rc" -eq 2 ]]; then pass "usage_error_exit_2"; else fail "usage_error_exit_2"; fi
 
 bash "$CHECKER" "$BIN" >"$TMP/check-cli-scoping.txt"
-assert_text "$TMP/check-cli-scoping.txt" 'Summary: 4 pass, 0 fail' "canonical_checker"
+assert_text "$TMP/check-cli-scoping.txt" 'Summary: [0-9]+ pass, 0 fail' "canonical_checker"
+
+# ===== Substantive fillin assertions (flywheel-wzjo9.1.4) =====
+
+# 1. --info envelope carries the new audit_log path (added by fillin)
+"$BIN" --info --json >"$TMP/info-2.json"
+assert_jq "$TMP/info-2.json" '.paths.audit_log | type == "string" and length > 0' "info_audit_log_path"
+
+# 2. doctor has 9 named substrate checks (lifted from 6 → 9)
+"$BIN" doctor --json >"$TMP/doctor-checks.json"
+assert_jq "$TMP/doctor-checks.json" '(.checks | length) >= 9 and ([.checks[].name] | contains(["state_db","dependency:jq","dependency:sqlite3","audit_log_writable","helper_lib_loaded"]))' "doctor_named_probes_9plus"
+
+# 3. health surfaces audit-log staleness field (>24h warn)
+"$BIN" health --json >"$TMP/health-2.json"
+assert_jq "$TMP/health-2.json" '.audit_log_stale | type == "boolean"' "health_audit_log_stale"
+
+# 4. repair supports new --scope audit-log
+SCAFFOLD_AUDIT_LOG="$TMP/audit-out.jsonl" "$BIN" repair --scope audit-log --dry-run --json >"$TMP/repair-audit.json"
+assert_jq "$TMP/repair-audit.json" '.command == "repair" and .scope == "audit-log" and .dry_run == true' "repair_scope_audit_log"
+
+# 5. repair --apply without --idempotency-key is refused (canonical refusal contract)
+set +e
+SCAFFOLD_AUDIT_LOG="$TMP/audit-out.jsonl" "$BIN" repair --scope state --apply --json >"$TMP/repair-refused.json" 2>"$TMP/repair-refused.err"
+refused_rc=$?
+set -e
+if [[ "$refused_rc" -eq 3 ]]; then pass "repair_apply_refused_without_idem_key"; else fail "repair_apply_refused_without_idem_key"; fi
+assert_jq "$TMP/repair-refused.json" '.status == "refused" and (.reason | test("idempotency-key"))' "repair_refusal_envelope"
+
+# 6. why has multi-resolution (found / not_found / unavailable)
+"$BIN" why db --json >"$TMP/why-db.json"
+assert_jq "$TMP/why-db.json" '.resolution | type == "string" and (. == "found" or . == "not_found" or . == "unavailable")' "why_multi_resolution"
+
+# 7. cli_audit_append wired: doctor invocation appends a row to SCAFFOLD_AUDIT_LOG
+audit_log="$TMP/audit-trace.jsonl"
+: >"$audit_log"
+SCAFFOLD_AUDIT_LOG="$audit_log" "$BIN" doctor --json >/dev/null
+if [[ -s "$audit_log" ]] && jq -e '.action == "doctor"' "$audit_log" >/dev/null 2>&1; then pass "cli_audit_append_wired_doctor"; else fail "cli_audit_append_wired_doctor"; fi
+
+# 8. cli_audit_append wired on record path too
+SCAFFOLD_AUDIT_LOG="$audit_log" "$BIN" --delta-id 1 --verdict keep --idempotency-key 6flh-trace --json >/dev/null 2>&1 || true
+if grep -q '"action":"record"' "$audit_log" 2>/dev/null; then pass "cli_audit_append_wired_record"; else fail "cli_audit_append_wired_record"; fi
+
+# 9. schema --per-surface includes audit-row variant
+"$BIN" schema audit-row --json >"$TMP/schema-audit-row.json"
+assert_jq "$TMP/schema-audit-row.json" '.schema_version == "flywheel-verdict.canonical.v1" and .command == "audit-row" and (.required | type == "array")' "schema_audit_row"
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]

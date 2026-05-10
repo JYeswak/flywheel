@@ -1,0 +1,726 @@
+diff --git a/skills/.flywheel/bin/flywheel-verdict b/skills/.flywheel/bin/flywheel-verdict
+index de10350..d8a3d71 100755
+--- a/skills/.flywheel/bin/flywheel-verdict
++++ b/skills/.flywheel/bin/flywheel-verdict
+@@ -8,10 +8,14 @@ if [[ -z "${BASH_VERSINFO:-}" || ${BASH_VERSINFO[0]:-0} -lt 4 ]]; then
+     exit 64
+ fi
+ 
+-# flywheel-verdict — record a Joshua taste signal into joshua_verdicts.
+-# Usage:
+-#   flywheel-verdict --delta-id <int>  --verdict thumbs_up|thumbs_down|skip [--note "..."]
+-#   flywheel-verdict --source <url>    --verdict thumbs_up|thumbs_down|skip [--note "..."]
++# ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m + flywheel-wzjo9.1.4) ======
++# flywheel-cli-surface: true
++# canonical-cli-scoping: passing (substantive fillin landed flywheel-wzjo9.1.4)
++# doctor-mode-tier: filled
++# verb-collision: original surface implements canonical verbs natively;
++# scaffold delegates via shared cmd_* + emit_* defined after common.sh sources.
++
++# flywheel-verdict — record and inspect Joshua taste signals.
+ #
+ # Mapping (CLI flag → joshua_verdicts.verdict):
+ #   thumbs_up   → keep
+@@ -24,41 +28,635 @@ FLYWHEEL_HOME="$(cd "$HERE/.." && pwd)"
+ export FLYWHEEL_HOME
+ # shellcheck source=../lib/common.sh
+ source "$FLYWHEEL_HOME/lib/common.sh"
+-fw_require_db
++
++_SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
++_SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
++if [[ -r "$_SCAFFOLD_HELPER_LIB" ]]; then
++    # shellcheck source=/dev/null
++    source "$_SCAFFOLD_HELPER_LIB"
++fi
++
++SCAFFOLD_SCHEMA_VERSION="flywheel-verdict.canonical.v1"
++SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-${FLYWHEEL_LOG:-$HOME/.local/state/flywheel/flywheel-verdict-runs.jsonl}}"
+ 
+ usage() {
+-    sed -n '2,12p' "$0" >&2
++    cat <<'EOF'
++flywheel-verdict — record and inspect Joshua taste signals
++
++Usage:
++  flywheel-verdict --delta-id <int>  --verdict keep|drop|promote|defer [--note "..."]
++  flywheel-verdict --source-id <int> --verdict keep|drop|promote|defer [--note "..."]
++  flywheel-verdict --source <url>    --verdict keep|drop|promote|defer [--note "..."]
++  flywheel-verdict doctor|health|repair|validate|audit|why|schema|examples|quickstart|completion
++  flywheel-verdict --info | --examples | --help
++
++Canonical surface:
++  doctor [--json]                 diagnose state.db, required tables, and dependencies
++  health [--json]                 lightweight one-shot health suitable for monitors
++  repair --scope state --dry-run  preview known safe repairs; add --apply to create dirs
++  validate db|target [--json]     read-only validation of state or selected target
++  audit [--json]                  recent verdict mutation rows
++  why verdict|target|db [--json]  explain provenance and operator intent
++  schema <command> [--json]       JSON output schema for a command
++  examples [--json]               curated command examples
++  quickstart [--json]             first-run operator guide
++  help <topic> [--json]           topic manual
++  completion bash|zsh|fish        shell completion
++
++Global flags:
++  --json --dry-run --apply --explain --idempotency-key <key>
++  --no-color --no-emoji --width <n> --watch -i <seconds>
++
++Verdict aliases:
++  thumbs_up=keep, thumbs_down=drop, skip=defer
++
++Exit codes:
++  0 success, 1 domain failure, 2 usage error, 3 transient failure, 4 blocked by gate
++EOF
++}
++
++usage_error() {
++    [[ $# -gt 0 ]] && echo "ERR: $*" >&2
++    usage >&2
+     exit 2
+ }
+ 
+-delta_id=""; source_url=""; verdict=""; note=""
++json_out=0
++dry_run=0
++apply=0
++explain=0
++idempotency_key=""
++scope="state"
++width=""
++watch=0
++interval="5"
++command="record"
++command_arg=""
++delta_id=""; source_id=""; source_url=""; verdict=""; note=""
++positional=()
++
++json_bool() {
++    if [[ "$1" -eq 1 ]]; then printf 'true'; else printf 'false'; fi
++}
++
++db_has_table() {
++    [[ -f "$FLYWHEEL_DB" ]] || return 1
++    [[ "$(fw_sql "SELECT count(*) FROM sqlite_master WHERE type='table' AND name=$(fw_quote "$1");" 2>/dev/null || echo 0)" == "1" ]]
++}
++
++audit_log_writable() {
++    local dir
++    dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
++    [[ -d "$dir" && -w "$dir" ]] && return 0
++    [[ -f "$SCAFFOLD_AUDIT_LOG" && -w "$SCAFFOLD_AUDIT_LOG" ]] && return 0
++    return 1
++}
++
++emit_info() {
++    if [[ "$json_out" -eq 1 ]]; then
++        jq -nc --arg name "flywheel-verdict" --arg version "1.0.0" \
++            --arg db "$FLYWHEEL_DB" --arg home "$FLYWHEEL_HOME" --arg log "$FLYWHEEL_LOG" \
++            --arg audit_log "$SCAFFOLD_AUDIT_LOG" \
++            '{name:$name,version:$version,command:"info",paths:{state_db:$db,home:$home,log:$log,audit_log:$audit_log},supports:["doctor","health","repair","validate","audit","why","schema","examples","quickstart","help","completion"],exit_codes:{success:0,failure:1,usage:2,transient:3,blocked:4}}'
++    else
++        echo "flywheel-verdict 1.0.0"
++        echo "state_db=$FLYWHEEL_DB"
++        echo "home=$FLYWHEEL_HOME"
++        echo "log=$FLYWHEEL_LOG"
++        echo "audit_log=$SCAFFOLD_AUDIT_LOG"
++    fi
++}
++
++emit_examples() {
++    if [[ "$json_out" -eq 1 ]]; then
++        jq -nc '{command:"examples",examples:[
++            "flywheel-verdict doctor --json",
++            "flywheel-verdict health --json",
++            "flywheel-verdict repair --scope state --dry-run --json",
++            "flywheel-verdict validate db --json",
++            "flywheel-verdict audit --json",
++            "flywheel-verdict why verdict --json",
++            "flywheel-verdict --delta-id 123 --verdict keep --note \"useful\" --dry-run --json"
++        ]}'
++    else
++        usage
++    fi
++}
++
++emit_quickstart() {
++    if [[ "$json_out" -eq 1 ]]; then
++        jq -nc '{command:"quickstart",title:"flywheel-verdict quickstart",status:"ok",steps:["Run doctor --json","Preview with --dry-run --json","Record exactly one source or delta verdict","Use audit --json to inspect recent writes"]}'
++    else
++        echo "1. flywheel-verdict doctor --json"
++        echo "2. flywheel-verdict --delta-id <id> --verdict keep --dry-run --json"
++        echo "3. flywheel-verdict audit --json"
++    fi
++}
++
++emit_help_topic() {
++    local topic="${1:-overview}"
++    if [[ "$json_out" -eq 1 ]]; then
++        local body
++        # Single-printf bodies per topic (gl7om SIGPIPE/pipefail discipline).
++        case "$topic" in
++            run)      body="Default invocation records a verdict by --delta-id, --source-id, or --source with --verdict keep|drop|promote|defer." ;;
++            doctor)   body="Probes state.db, joshua_verdicts/deltas/sources/events tables, and jq dependency. Aggregate status fails when any probe fails." ;;
++            health)   body="Aggregates doctor status with verdict_count and surfaces audit-log staleness (>24h since last write)." ;;
++            repair)   body="--scope state|dirs ensures state and log directories. Apply mode requires --idempotency-key to satisfy the canonical refusal contract." ;;
++            validate) body="Subjects: db (state DB present + joshua_verdicts table), target (selector present), binary (exec bit on the script itself)." ;;
++            audit)    body="Tails the most recent rows from joshua_verdicts (id, target_kind, target_id, verdict, note, created_at)." ;;
++            why)      body="Subjects: verdict, target, db. Explains the operator intent and provenance behind a recorded taste signal." ;;
++            *)        body="flywheel-verdict records Joshua taste signals and exposes canonical diagnostics." ;;
++        esac
++        jq -nc --arg topic "$topic" --arg summary "$body" \
++            '{command:"help",topic:$topic,summary:$summary,related:["doctor","validate","audit","why","schema"]}'
++    else
++        usage
++    fi
++}
++
++emit_completion() {
++    local shell_name="${1:-bash}"
++    case "$shell_name" in
++        bash)
++            echo 'complete -W "doctor health repair validate audit why schema examples quickstart help completion --info --examples --json --dry-run --apply --explain --idempotency-key --delta-id --source-id --source --verdict --note" flywheel-verdict'
++            ;;
++        zsh)
++            echo '#compdef flywheel-verdict'
++            echo 'compadd doctor health repair validate audit why schema examples quickstart help completion --info --examples --json --dry-run --apply --explain --idempotency-key --delta-id --source-id --source --verdict --note'
++            ;;
++        fish)
++            echo 'complete -c flywheel-verdict -f -a "doctor health repair validate audit why schema examples quickstart help completion"'
++            ;;
++        *) usage_error "unsupported completion shell: $shell_name" ;;
++    esac
++}
++
++emit_schema() {
++    local schema_command="${1:-doctor}"
++    # Per-surface schemas (record / doctor / health / repair / validate / audit / why / audit-row / default).
++    case "$schema_command" in
++        record)
++            jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg c "record" \
++                '{schema_version:$sv,command:$c,title:"flywheel-verdict record output",type:"object",required:["command","cli_verdict"],properties:{command:{type:"string"},status:{type:"string"},dry_run:{type:"boolean"},cli_verdict:{type:"string"},planned_actions:{type:"array"},actual_actions:{type:"array"},audit_log:{type:"string"},audit_ids:{type:"array"}}}'
++            ;;
++        doctor)
++            jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg c "doctor" \
++                '{schema_version:$sv,command:$c,title:"flywheel-verdict doctor output",type:"object",required:["command","status","checks"],properties:{command:{type:"string"},status:{enum:["OK","FAIL"]},generated_at:{type:"string"},checks:{type:"array"},paths:{type:"object"}}}'
++            ;;
++        health)
++            jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg c "health" \
++                '{schema_version:$sv,command:$c,title:"flywheel-verdict health output",type:"object",required:["command","status","verdict_count"],properties:{command:{type:"string"},status:{enum:["OK","FAIL"]},verdict_count:{type:"integer"},generated_at:{type:"string"},audit_log_stale:{type:"boolean"}}}'
++            ;;
++        repair)
++            jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg c "repair" \
++                '{schema_version:$sv,command:$c,title:"flywheel-verdict repair output",type:"object",required:["command","scope","mode"],properties:{command:{type:"string"},scope:{type:"string"},mode:{enum:["dry_run","apply"]},dry_run:{type:"boolean"},idempotency_key:{type:"string"},planned_actions:{type:"array"},actual_actions:{type:"array"},would_write:{type:"array"},audit_log:{type:"string"}}}'
++            ;;
++        validate)
++            jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg c "validate" \
++                '{schema_version:$sv,command:$c,title:"flywheel-verdict validate output",type:"object",required:["command","thing","status"],properties:{command:{type:"string"},thing:{enum:["db","target","binary"]},status:{enum:["pass","fail"]},reason:{type:"string"}}}'
++            ;;
++        audit)
++            jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg c "audit" \
++                '{schema_version:$sv,command:$c,title:"flywheel-verdict audit output",type:"object",required:["command","rows"],properties:{command:{type:"string"},rows:{type:"array"},audit_rows:{type:"integer"}}}'
++            ;;
++        why)
++            jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg c "why" \
++                '{schema_version:$sv,command:$c,title:"flywheel-verdict why output",type:"object",required:["command","subject"],properties:{command:{type:"string"},subject:{type:"string"},explanation:{type:"string"},dry_run_supported:{type:"boolean"},idempotency_key_supported:{type:"boolean"}}}'
++            ;;
++        audit-row)
++            jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg c "audit-row" \
++                '{schema_version:$sv,command:$c,title:"flywheel-verdict audit-row item",type:"object",required:["id","target_kind","verdict"],properties:{id:{type:"integer"},target_kind:{enum:["delta","source"]},target_id:{type:"integer"},verdict:{enum:["keep","drop","promote","defer"]},note:{type:["string","null"]},created_at:{type:"string"}}}'
++            ;;
++        *)
++            jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg c "$schema_command" \
++                '{schema_version:$sv,command:$c,title:("flywheel-verdict "+$c+" output"),type:"object",required:["command"],properties:{command:{type:"string"},status:{type:"string"},generated_at:{type:"string"},checks:{type:"array"},rows:{type:"array"},planned_actions:{type:"array"},actual_actions:{type:"array"},audit_log:{type:"string"}}}'
++            ;;
++    esac
++}
++
++doctor_payload() {
++    local db_status="OK" verdicts_status="FAIL" deltas_status="FAIL" sources_status="FAIL" events_status="FAIL" jq_status="FAIL" sqlite3_status="FAIL" audit_status="FAIL" helper_status="FAIL"
++    [[ -f "$FLYWHEEL_DB" ]] || db_status="FAIL"
++    db_has_table "joshua_verdicts" && verdicts_status="OK"
++    db_has_table "deltas" && deltas_status="OK"
++    db_has_table "sources" && sources_status="OK"
++    db_has_table "events" && events_status="OK"
++    command -v jq >/dev/null 2>&1 && jq_status="OK"
++    command -v sqlite3 >/dev/null 2>&1 && sqlite3_status="OK"
++    audit_log_writable && audit_status="OK"
++    command -v cli_audit_append >/dev/null 2>&1 && helper_status="OK"
++    local aggregate="OK"
++    for status in "$db_status" "$verdicts_status" "$deltas_status" "$sources_status" "$events_status" "$jq_status"; do
++        [[ "$status" == "OK" ]] || aggregate="FAIL"
++    done
++    jq -nc --arg command "doctor" --arg status "$aggregate" --arg db "$FLYWHEEL_DB" \
++        --arg db_status "$db_status" --arg verdicts "$verdicts_status" --arg deltas "$deltas_status" \
++        --arg sources "$sources_status" --arg events "$events_status" --arg jq_status "$jq_status" \
++        --arg sqlite3_status "$sqlite3_status" --arg audit_status "$audit_status" --arg helper_status "$helper_status" \
++        --arg audit_log "$SCAFFOLD_AUDIT_LOG" \
++        '{command:$command,status:$status,generated_at:(now|todate),paths:{state_db:$db,audit_log:$audit_log},checks:[
++            {name:"state_db",status:$db_status},
++            {name:"table:joshua_verdicts",status:$verdicts},
++            {name:"table:deltas",status:$deltas},
++            {name:"table:sources",status:$sources},
++            {name:"table:events",status:$events},
++            {name:"dependency:jq",status:$jq_status},
++            {name:"dependency:sqlite3",status:$sqlite3_status},
++            {name:"audit_log_writable",status:$audit_status},
++            {name:"helper_lib_loaded",status:$helper_status}
++        ]}'
++}
++
++cmd_doctor() {
++    local payload status
++    payload="$(doctor_payload)"
++    status="$(jq -r '.status' <<<"$payload")"
++    if [[ "$json_out" -eq 1 ]]; then
++        echo "$payload"
++    else
++        jq -r '"flywheel-verdict doctor: " + .status, (.checks[] | "  " + .name + "=" + .status)' <<<"$payload"
++    fi
++    if command -v cli_audit_append >/dev/null 2>&1; then
++        cli_audit_append "$SCAFFOLD_AUDIT_LOG" "doctor" "$status" '{}' >/dev/null 2>&1 || true
++    fi
++    [[ "$status" == "OK" ]] || exit 1
++}
++
++audit_log_stale() {
++    [[ -f "$SCAFFOLD_AUDIT_LOG" ]] || { printf 'false'; return; }
++    local mtime now age_s
++    if mtime="$(stat -f '%m' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null)"; then :;
++    elif mtime="$(stat -c '%Y' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null)"; then :;
++    else printf 'false'; return; fi
++    now="$(date +%s)"
++    age_s=$(( now - mtime ))
++    if (( age_s > 86400 )); then printf 'true'; else printf 'false'; fi
++}
++
++cmd_health() {
++    local payload status verdict_count="0" stale out
++    payload="$(doctor_payload)"
++    status="$(jq -r '.status' <<<"$payload")"
++    if db_has_table "joshua_verdicts"; then
++        verdict_count="$(fw_sql "SELECT count(*) FROM joshua_verdicts;" 2>/dev/null || echo 0)"
++    fi
++    stale="$(audit_log_stale)"
++    if [[ "$json_out" -eq 1 ]]; then
++        out="$(jq -nc --arg command "health" --arg status "$status" --argjson verdict_count "$verdict_count" --argjson stale "$stale" '{command:$command,status:$status,verdict_count:$verdict_count,audit_log_stale:$stale,generated_at:(now|todate)}')"
++    else
++        out="flywheel-verdict health: $status verdict_count=$verdict_count audit_log_stale=$stale"
++    fi
++    echo "$out"
++    if command -v cli_audit_append >/dev/null 2>&1; then
++        cli_audit_append "$SCAFFOLD_AUDIT_LOG" "health" "$status" "$(jq -nc --argjson c "$verdict_count" --argjson s "$stale" '{verdict_count:$c,audit_log_stale:$s}')" >/dev/null 2>&1 || true
++    fi
++    [[ "$status" == "OK" ]] || exit 1
++}
++
++cmd_health_loop() {
++    while :; do
++        cmd_health
++        sleep "$interval"
++    done
++    return 0
++}
++
++cmd_repair() {
++    [[ "$scope" == "state" || "$scope" == "dirs" || "$scope" == "audit-log" ]] || usage_error "repair supports --scope state|dirs|audit-log"
++    local mode="dry_run"
++    if [[ "$apply" -eq 1 && "$dry_run" -eq 0 ]]; then mode="apply"; fi
++    if [[ "$mode" == "apply" && -z "$idempotency_key" ]]; then
++        if command -v cli_refuse_apply_without_idem_key >/dev/null 2>&1; then
++            cli_refuse_apply_without_idem_key "$SCAFFOLD_SCHEMA_VERSION" "repair" "$scope"
++        else
++            jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
++                '{schema_version:$sv,command:"repair",status:"refused",mode:"apply",scope:$scope,reason:"--apply requires --idempotency-key"}'
++        fi
++        exit 3
++    fi
++    local state_dir log_dir audit_dir
++    state_dir="$(dirname "$FLYWHEEL_DB")"
++    log_dir="$(dirname "$FLYWHEEL_LOG")"
++    audit_dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
++    case "$scope" in
++        state|dirs)
++            [[ "$mode" == "apply" ]] && mkdir -p "$state_dir" "$log_dir"
++            if [[ "$json_out" -eq 1 ]]; then
++                jq -nc --arg command "repair" --arg scope "$scope" --arg mode "$mode" \
++                    --arg state_dir "$state_dir" --arg log_dir "$log_dir" --arg audit_log "$FLYWHEEL_LOG" \
++                    --arg idempotency_key "$idempotency_key" --argjson explain "$(json_bool "$explain")" \
++                    '{command:$command,scope:$scope,mode:$mode,dry_run:($mode=="dry_run"),explain:$explain,idempotency_key:$idempotency_key,audit_log:$audit_log,planned_actions:["ensure state/log directories exist"],actual_actions:(if $mode == "apply" then ["directories ensured"] else [] end),would_write:(if $mode == "dry_run" then [$state_dir,$log_dir] else [] end),would_delete:[],would_call_external:[]}'
++            else
++                echo "repair scope=$scope mode=$mode"
++            fi
++            ;;
++        audit-log)
++            [[ "$mode" == "apply" ]] && mkdir -p "$audit_dir"
++            if [[ "$json_out" -eq 1 ]]; then
++                jq -nc --arg command "repair" --arg scope "$scope" --arg mode "$mode" \
++                    --arg dir "$audit_dir" --arg audit_log "$SCAFFOLD_AUDIT_LOG" \
++                    --arg idempotency_key "$idempotency_key" --argjson explain "$(json_bool "$explain")" \
++                    '{command:$command,scope:$scope,mode:$mode,dry_run:($mode=="dry_run"),explain:$explain,idempotency_key:$idempotency_key,audit_log:$audit_log,planned_actions:["ensure audit-log directory exists"],actual_actions:(if $mode == "apply" then ["audit_log_dir_ensured"] else [] end),would_write:(if $mode == "dry_run" then [$dir] else [] end),would_delete:[],would_call_external:[]}'
++            else
++                echo "repair scope=$scope mode=$mode"
++            fi
++            ;;
++    esac
++    if command -v cli_audit_append >/dev/null 2>&1; then
++        cli_audit_append "$SCAFFOLD_AUDIT_LOG" "repair" "$mode" "$(jq -nc --arg s "$scope" --arg k "$idempotency_key" '{scope:$s,idempotency_key:$k}')" >/dev/null 2>&1 || true
++    fi
++}
++
++cmd_validate() {
++    local thing="${1:-db}"
++    local valid=0
++    local reason="unknown"
++    case "$thing" in
++        db)
++            if [[ -f "$FLYWHEEL_DB" ]] && db_has_table "joshua_verdicts"; then valid=1; reason="state db and joshua_verdicts table present"; else reason="missing state db or joshua_verdicts table"; fi
++            ;;
++        target)
++            if [[ -n "$delta_id$source_id$source_url" ]]; then valid=1; reason="target selector present"; else reason="target selector missing"; fi
++            ;;
++        binary)
++            if [[ -x "$0" ]]; then valid=1; reason="binary executable"; else reason="binary not executable"; fi
++            ;;
++        *) usage_error "validate target must be db, target, or binary" ;;
++    esac
++    local status_label
++    if [[ "$valid" -eq 1 ]]; then status_label="pass"; else status_label="fail"; fi
++    if [[ "$json_out" -eq 1 ]]; then
++        jq -nc --arg command "validate" --arg thing "$thing" --arg status "$status_label" --arg reason "$reason" '{command:$command,thing:$thing,status:$status,reason:$reason}'
++    else
++        echo "validate $thing: $status_label - $reason"
++    fi
++    if command -v cli_audit_append >/dev/null 2>&1; then
++        cli_audit_append "$SCAFFOLD_AUDIT_LOG" "validate" "$status_label" "$(jq -nc --arg t "$thing" --arg r "$reason" '{thing:$t,reason:$r}')" >/dev/null 2>&1 || true
++    fi
++    [[ "$valid" -eq 1 ]] || exit 1
++}
++
++cmd_audit() {
++    local rows="[]"
++    if db_has_table "joshua_verdicts"; then
++        rows="$(fw_sql -json "SELECT id,target_kind,target_id,verdict,note,created_at FROM joshua_verdicts ORDER BY id DESC LIMIT 20;" 2>/dev/null || echo '[]')"
++        [[ -n "$rows" ]] || rows="[]"
++    fi
++    local audit_tail="[]"
++    if [[ -f "$SCAFFOLD_AUDIT_LOG" ]] && command -v cli_emit_audit_tail >/dev/null 2>&1; then
++        audit_tail="$(cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" 20 2>/dev/null | jq -c '.recent // []' 2>/dev/null || echo '[]')"
++    fi
++    if [[ "$json_out" -eq 1 ]]; then
++        jq -nc --arg command "audit" --argjson rows "$rows" --argjson tail "$audit_tail" --arg audit_log "$SCAFFOLD_AUDIT_LOG" \
++            '{command:$command,rows:$rows,audit_rows:($rows|length),audit_log:$audit_log,recent_invocations:$tail}'
++    else
++        jq -r '.[] | "id=\(.id) target=\(.target_kind):\(.target_id) verdict=\(.verdict)"' <<<"$rows"
++    fi
++}
++
++cmd_why() {
++    local subject="${1:-verdict}"
++    local resolution="not_found"
++    local explanation=""
++    case "$subject" in
++        verdict)
++            resolution="found"
++            explanation="Joshua verdicts preserve explicit taste signals with target provenance and audit rows."
++            ;;
++        target)
++            if [[ -n "$delta_id$source_id$source_url" ]]; then
++                resolution="found"
++                explanation="Target selector resolves to delta/source by id or url; record path inserts a row into joshua_verdicts with target_kind+target_id."
++            else
++                resolution="unavailable"
++                explanation="No --delta-id, --source-id, or --source flag supplied; provenance lookup needs a selector."
++            fi
++            ;;
++        db)
++            if [[ -f "$FLYWHEEL_DB" ]]; then
++                resolution="found"
++                explanation="State DB at $FLYWHEEL_DB carries the joshua_verdicts ledger plus deltas/sources/events provenance."
++            else
++                resolution="unavailable"
++                explanation="State DB at $FLYWHEEL_DB does not exist; run flywheel-verdict repair --scope state --apply --idempotency-key <key>."
++            fi
++            ;;
++        *)
++            resolution="not_found"
++            explanation="Unknown subject '$subject'; valid subjects: verdict, target, db."
++            ;;
++    esac
++    if [[ "$json_out" -eq 1 ]]; then
++        jq -nc --arg command "why" --arg subject "$subject" --arg resolution "$resolution" --arg explanation "$explanation" \
++            '{command:$command,subject:$subject,resolution:$resolution,explanation:$explanation,dry_run_supported:true,idempotency_key_supported:true}'
++    else
++        echo "$subject ($resolution): $explanation"
++    fi
++}
++
++# ====== scaffold canonical surfaces (substantive fillin per flywheel-wzjo9.1.4) ======
++# These delegate to the original cmd_*/emit_* defined above. The verb-collision
++# bypass means the scaffold's intercept fires for canonical args, the original's
++# argparse fires for record-path args (--delta-id, --verdict, etc.).
++
++scaffold_usage() { usage; }
++
++scaffold_emit_info() { json_out=1 emit_info; }
++scaffold_emit_examples() { json_out=1 emit_examples; }
++scaffold_emit_quickstart() { json_out=1 emit_quickstart; }
++scaffold_emit_schema() { local s="${1:-default}"; json_out=1 emit_schema "$s"; }
++scaffold_emit_topic_help() {
++    local topic="${1:-}"
++    case "$topic" in
++        run)      printf 'topic: run — record verdict by --delta-id, --source-id, or --source with --verdict keep|drop|promote|defer.\n' ;;
++        doctor)   printf 'topic: doctor — probes state.db, joshua_verdicts/deltas/sources/events tables, and jq dependency.\n' ;;
++        health)   printf 'topic: health — aggregates doctor status with verdict_count and surfaces audit-log staleness (>24h).\n' ;;
++        repair)   printf 'topic: repair — --scope state|dirs|audit-log ensures dirs; apply mode requires --idempotency-key.\n' ;;
++        validate) printf 'topic: validate — subjects: db (state DB present), target (selector present), binary (exec bit).\n' ;;
++        audit)    printf 'topic: audit — tails recent joshua_verdicts rows + canonical audit log invocations.\n' ;;
++        why)      printf 'topic: why — explains provenance for verdict|target|db subjects.\n' ;;
++        *)        printf 'topics: run | doctor | health | repair | validate | audit | why\n' ;;
++    esac
++}
++
++scaffold_cmd_doctor()   { json_out=1 cmd_doctor "$@"; }
++scaffold_cmd_health()   { json_out=1 cmd_health "$@"; }
++scaffold_cmd_repair()   {
++    while [[ $# -gt 0 ]]; do
++        case "$1" in
++            -h|--help) scaffold_emit_topic_help repair; return 0 ;;
++            --scope) scope="${2:-}"; shift 2 ;;
++            --dry-run) dry_run=1; shift ;;
++            --apply) apply=1; shift ;;
++            --idempotency-key) idempotency_key="${2:-}"; shift 2 ;;
++            --idempotency-key=*) idempotency_key="${1#--idempotency-key=}"; shift ;;
++            --explain) explain=1; shift ;;
++            --json) json_out=1; shift ;;
++            *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; return 64 ;;
++        esac
++    done
++    json_out=1 cmd_repair
++}
++scaffold_cmd_validate() { json_out=1 cmd_validate "${1:-db}"; }
++scaffold_cmd_audit()    { json_out=1 cmd_audit "$@"; }
++scaffold_cmd_why()      { json_out=1 cmd_why "${1:-verdict}"; }
++scaffold_emit_completion() {
++    local sh="${1:-bash}"
++    case "$sh" in
++        -h|--help) scaffold_emit_topic_help completion; return 0 ;;
++        bash|zsh|fish) emit_completion "$sh" ;;
++        *) printf 'ERR: unknown shell %s (use bash|zsh|fish)\n' "$sh" >&2; return 64 ;;
++    esac
++}
++
++scaffold_main() {
++    if [[ $# -eq 0 ]]; then
++        scaffold_usage; exit 0
++    fi
++    case "$1" in
++        -h|--help)    scaffold_usage; exit 0 ;;
++        --info)       shift
++                      while [[ $# -gt 0 ]]; do case "$1" in --json) json_out=1; shift ;; *) shift ;; esac; done
++                      scaffold_emit_info; exit 0 ;;
++        --schema)     shift; scaffold_emit_schema "${1:-default}"; exit 0 ;;
++        --examples)   shift
++                      while [[ $# -gt 0 ]]; do case "$1" in --json) json_out=1; shift ;; *) shift ;; esac; done
++                      scaffold_emit_examples; exit 0 ;;
++        doctor)       shift
++                      while [[ $# -gt 0 ]]; do case "$1" in --json) json_out=1; shift ;; *) shift ;; esac; done
++                      scaffold_cmd_doctor; exit $? ;;
++        health)       shift; scaffold_cmd_health "$@"; exit $? ;;
++        repair)       shift; scaffold_cmd_repair "$@"; exit $? ;;
++        validate)     shift
++                      local subj="${1:-db}"
++                      [[ "$subj" == --* ]] && subj="db"
++                      scaffold_cmd_validate "$subj"; exit $? ;;
++        audit)        shift
++                      while [[ $# -gt 0 ]]; do case "$1" in --json) json_out=1; shift ;; *) shift ;; esac; done
++                      scaffold_cmd_audit; exit $? ;;
++        why)          shift
++                      local why_subj="${1:-verdict}"
++                      [[ "$why_subj" == --* ]] && why_subj="verdict"
++                      scaffold_cmd_why "$why_subj"; exit $? ;;
++        quickstart)   shift
++                      while [[ $# -gt 0 ]]; do case "$1" in --json) json_out=1; shift ;; *) shift ;; esac; done
++                      scaffold_emit_quickstart; exit 0 ;;
++        help)         shift
++                      local help_topic="${1:-overview}"
++                      shift || true
++                      while [[ $# -gt 0 ]]; do case "$1" in --json) json_out=1; shift ;; *) shift ;; esac; done
++                      emit_help_topic "$help_topic"; exit 0 ;;
++        completion)   shift; scaffold_emit_completion "${1:-bash}"; exit $? ;;
++        *)
++            printf 'ERR: unknown canonical subcommand: %s\n' "$1" >&2
++            scaffold_usage >&2
++            exit 64 ;;
++    esac
++}
++
++# Verb-collision intercept: yields when bypass flags are present.
++# Bypass flags: --delta-id, --explain, --interval, --no-color, --no-emoji,
++# --note, --source, --source-id, --verdict, --watch, --width.
++_scaffold_is_canonical_arg() {
++    local _a
++    for _a in "$@"; do
++        case "$_a" in --delta-id|--explain|--interval|--no-color|--no-emoji|--note|--source|--source-id|--verdict|--watch|--width) return 1 ;; esac
++    done
++    case "${1:-}" in
++        doctor|health|repair|validate|audit|why|quickstart|completion) return 0 ;;
++        --info|--schema|--examples) return 0 ;;
++        -h|--help) return 0 ;;
++        help)
++            case "${2:-}" in run|doctor|health|repair|validate|audit|why|-h|--help) return 0 ;; esac
++            return 1 ;;
++        *) return 1 ;;
++    esac
++}
++
++if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
++    scaffold_main "$@"
++    exit $?
++fi
++# ====== END canonical-cli scaffold ======
+ 
+ while [[ $# -gt 0 ]]; do
+     case "$1" in
++        doctor|health|repair|validate|audit|why|schema|examples|quickstart|completion)
++            if [[ "$command" == "record" ]]; then
++                command="$1"
++            else
++                positional+=("$1")
++            fi
++            shift ;;
++        help)
++            command="help"; shift
++            [[ $# -gt 0 && "${1:-}" != --* ]] && { command_arg="$1"; shift; }
++            ;;
++        --info) command="info"; shift ;;
++        --examples) command="examples"; shift ;;
++        --json) json_out=1; shift ;;
+         --delta-id) delta_id="$2"; shift 2 ;;
++        --source-id) source_id="$2"; shift 2 ;;
+         --source) source_url="$2"; shift 2 ;;
+         --verdict) verdict="$2"; shift 2 ;;
+         --note) note="$2"; shift 2 ;;
+-        -h|--help) usage ;;
+-        *) echo "ERR: unknown flag $1" >&2; usage ;;
++        --dry-run) dry_run=1; shift ;;
++        --apply) apply=1; shift ;;
++        --explain) explain=1; shift ;;
++        --idempotency-key) idempotency_key="$2"; shift 2 ;;
++        --scope) scope="$2"; shift 2 ;;
++        --width) width="$2"; shift 2 ;;
++        --watch) watch=1; shift ;;
++        -i|--interval) interval="$2"; shift 2 ;;
++        --no-color|--no-emoji) shift ;;
++        -h|--help) usage; exit 0 ;;
++        --*) usage_error "unknown flag $1" ;;
++        *) positional+=("$1"); shift ;;
+     esac
+ done
+ 
+-# Validate target
+-if [[ -n "$delta_id" && -n "$source_url" ]]; then
+-    echo "ERR: pass either --delta-id OR --source, not both" >&2; exit 2
++case "$command" in
++    info) emit_info; exit 0 ;;
++    examples) emit_examples; exit 0 ;;
++    quickstart) emit_quickstart; exit 0 ;;
++    help) emit_help_topic "${command_arg:-${positional[0]:-overview}}"; exit 0 ;;
++    completion) emit_completion "${positional[0]:-bash}"; exit 0 ;;
++    schema) emit_schema "${positional[0]:-doctor}"; exit 0 ;;
++    doctor) cmd_doctor; exit 0 ;;
++    health) if [[ "$watch" -eq 1 ]]; then cmd_health_loop; else cmd_health; fi; exit 0 ;;
++    repair) cmd_repair; exit 0 ;;
++    validate) cmd_validate "${positional[0]:-db}"; exit 0 ;;
++    audit) cmd_audit; exit 0 ;;
++    why) cmd_why "${positional[0]:-verdict}"; exit 0 ;;
++    record) ;;
++    *) usage_error "unknown command $command" ;;
++esac
++
++if [[ "$dry_run" -eq 1 && -z "$delta_id$source_id$source_url$verdict" ]]; then
++    usage
++    exit 0
+ fi
+-if [[ -z "$delta_id" && -z "$source_url" ]]; then
+-    echo "ERR: --delta-id or --source required" >&2; exit 2
++
++fw_require_db
++
++# Validate target
++target_count=0
++[[ -n "$delta_id" ]] && target_count=$((target_count + 1))
++[[ -n "$source_id" ]] && target_count=$((target_count + 1))
++[[ -n "$source_url" ]] && target_count=$((target_count + 1))
++if [[ "$target_count" -ne 1 ]]; then
++    echo "ERR: pass exactly one of --delta-id, --source-id, or --source" >&2; exit 2
+ fi
+ 
+ # Validate + map verdict
+ case "$verdict" in
++    keep|drop|promote|defer) v_sql="$verdict" ;;
+     thumbs_up)   v_sql="keep" ;;
+     thumbs_down) v_sql="drop" ;;
+     skip)        v_sql="defer" ;;
+-    "")          echo "ERR: --verdict required (thumbs_up|thumbs_down|skip)" >&2; exit 2 ;;
+-    *)           echo "ERR: --verdict must be thumbs_up|thumbs_down|skip (got: $verdict)" >&2; exit 2 ;;
++    "")          echo "ERR: --verdict required (keep|drop|promote|defer)" >&2; exit 2 ;;
++    *)           echo "ERR: --verdict must be keep|drop|promote|defer (got: $verdict)" >&2; exit 2 ;;
+ esac
+ 
+ # Resolve target_kind + target_id
+@@ -68,12 +666,36 @@ if [[ -n "$delta_id" ]]; then
+     [[ -z "$exists" ]] && { echo "ERR: delta_id=$delta_id not found" >&2; exit 2; }
+     target_kind="delta"
+     target_id="$delta_id"
++elif [[ -n "$source_id" ]]; then
++    [[ "$source_id" =~ ^[0-9]+$ ]] || { echo "ERR: --source-id must be integer" >&2; exit 2; }
++    exists=$(fw_sql "SELECT id FROM sources WHERE id=$source_id;")
++    [[ -z "$exists" ]] && { echo "ERR: source_id=$source_id not found" >&2; exit 2; }
++    target_kind="source"
++    target_id="$source_id"
+ else
+     target_kind="source"
+     target_id=$(fw_sql "SELECT id FROM sources WHERE url=$(fw_quote "$source_url") ORDER BY id LIMIT 1;")
+     [[ -z "$target_id" ]] && { echo "ERR: no source row with url=$source_url" >&2; exit 2; }
+ fi
+ 
++if [[ "$dry_run" -eq 1 ]]; then
++    [[ "$explain" -eq 1 ]] && echo "verdict rationale: record explicit Joshua taste signal for ${target_kind}:${target_id}" >&2
++    if [[ "$json_out" -eq 1 ]]; then
++        jq -nc --arg command "record" --arg mode "dry_run" --arg target_kind "$target_kind" \
++            --argjson target_id "$target_id" --arg verdict "$v_sql" --arg cli_verdict "$verdict" \
++            --arg note "$note" --arg idempotency_key "$idempotency_key" --arg audit_log "$FLYWHEEL_LOG" \
++            --argjson explain "$(json_bool "$explain")" \
++            '{command:$command,mode:$mode,dry_run:true,explain:$explain,would_write:[{table:"joshua_verdicts",target_kind:$target_kind,target_id:$target_id,verdict:$verdict,note:$note},{table:"events",kind:"verdict.recorded"}],would_delete:[],would_call_external:[],actual_actions:[],blocked_by:[],planned_actions:[{action:"insert_joshua_verdict",target_kind:$target_kind,target_id:$target_id,verdict:$verdict,note:$note}],idempotency_key:$idempotency_key,audit_log:$audit_log,cli_verdict:$cli_verdict}'
++    else
++        echo "DRY-RUN: would record target=${target_kind}:${target_id} verdict=$v_sql (cli=$verdict)"
++    fi
++    if command -v cli_audit_append >/dev/null 2>&1; then
++        cli_audit_append "$SCAFFOLD_AUDIT_LOG" "record" "dry_run" "$(jq -nc --arg tk "$target_kind" --arg ti "$target_id" --arg v "$v_sql" --arg k "$idempotency_key" '{target_kind:$tk,target_id:$ti,verdict:$v,idempotency_key:$k}')" >/dev/null 2>&1 || true
++    fi
++    exit 0
++fi
++
++[[ "$explain" -eq 1 ]] && echo "verdict rationale: record explicit Joshua taste signal for ${target_kind}:${target_id}" >&2
+ new_id=$(fw_sql "INSERT INTO joshua_verdicts(target_kind, target_id, verdict, note) VALUES (
+     $(fw_quote "$target_kind"),
+     $target_id,
+@@ -81,5 +703,16 @@ new_id=$(fw_sql "INSERT INTO joshua_verdicts(target_kind, target_id, verdict, no
+     $(fw_quote_or_null "$note")
+ ); SELECT last_insert_rowid();")
+ fw_event "verdict.recorded" "" "" "{\"id\":$new_id,\"target_kind\":\"$target_kind\",\"target_id\":$target_id,\"verdict\":\"$v_sql\",\"cli_verdict\":\"$verdict\"}"
+-echo "OK: verdict id=$new_id target=${target_kind}:${target_id} verdict=$v_sql (cli=$verdict)"
++if [[ "$json_out" -eq 1 ]]; then
++    jq -nc --arg command "record" --arg status "recorded" --argjson id "$new_id" \
++        --arg target_kind "$target_kind" --argjson target_id "$target_id" --arg verdict "$v_sql" \
++        --arg cli_verdict "$verdict" --arg idempotency_key "$idempotency_key" --arg audit_log "$FLYWHEEL_LOG" \
++        --argjson explain "$(json_bool "$explain")" \
++        '{command:$command,status:$status,dry_run:false,explain:$explain,audit_ids:[$id],actual_actions:[{action:"insert_joshua_verdict",id:$id,target_kind:$target_kind,target_id:$target_id,verdict:$verdict},{action:"insert_event",kind:"verdict.recorded"}],would_write:[],would_delete:[],would_call_external:[],idempotency_key:$idempotency_key,audit_log:$audit_log,cli_verdict:$cli_verdict}'
++else
++    echo "OK: verdict id=$new_id target=${target_kind}:${target_id} verdict=$v_sql (cli=$verdict)"
++fi
++if command -v cli_audit_append >/dev/null 2>&1; then
++    cli_audit_append "$SCAFFOLD_AUDIT_LOG" "record" "recorded" "$(jq -nc --arg tk "$target_kind" --arg ti "$target_id" --arg v "$v_sql" --argjson id "$new_id" --arg k "$idempotency_key" '{target_kind:$tk,target_id:$ti,verdict:$v,audit_id:$id,idempotency_key:$k}')" >/dev/null 2>&1 || true
++fi
+ exit 0
