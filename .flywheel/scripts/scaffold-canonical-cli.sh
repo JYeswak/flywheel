@@ -324,6 +324,9 @@ scaffold_emit_topic_help() {
 scaffold_emit_completion() {
   local shell="\${1:-bash}"
   case "\$shell" in
+    -h|--help) scaffold_emit_topic_help completion 2>/dev/null \\
+                 || printf 'topic: completion <bash|zsh> — emit shell completion script\\n'
+               return 0 ;;
     bash) command -v cli_emit_completion_bash >/dev/null \\
             && cli_emit_completion_bash "${target_basename%.sh}" "doctor,health,repair,validate,audit,why,quickstart,help,completion" "--json,--apply,--dry-run,--idempotency-key,--info,--schema,--examples" \\
             || printf '# helper lib missing — completion unavailable\\n' ;;
@@ -353,6 +356,7 @@ scaffold_cmd_repair() {
   local scope="" mode="dry_run" idem_key=""
   while [[ \$# -gt 0 ]]; do
     case "\$1" in
+      -h|--help) scaffold_emit_topic_help repair; return 0 ;;
       --scope) scope="\${2:-}"; shift 2 ;;
       --dry-run) mode="dry_run"; shift ;;
       --apply) mode="apply"; shift ;;
@@ -437,10 +441,11 @@ _scaffold_is_canonical_arg() {
   case "\${1:-}" in
     doctor|health|repair|validate|audit|why|quickstart|completion) return 0 ;;
     --info|--schema|--examples) return 0 ;;
+    -h|--help) return 0 ;;
     help)
-      # Only intercept \`help <topic>\` form; bare \`help\` could be a
-      # legacy subcommand of the target. Require a topic-like second arg.
-      case "\${2:-}" in run|doctor|health|repair|validate|audit|why) return 0 ;; esac
+      # Intercept \`help <topic>\` and \`help --help\`; bare \`help\` could be
+      # a legacy subcommand of the target so it falls through.
+      case "\${2:-}" in run|doctor|health|repair|validate|audit|why|-h|--help) return 0 ;; esac
       return 1 ;;
     *) return 1 ;;
   esac
