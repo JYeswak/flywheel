@@ -12,6 +12,8 @@ FIXTURE=""
 SOURCES_FILE="$DEFAULT_SOURCES_FILE"
 OUTPUT_FILE=""
 NOW_ISO=""
+IDEMPOTENCY_KEY=""
+AUDIT_LOG="${REGEN_DICKLESWORTHSTONE_AUDIT_LOG:-$HOME/.local/state/flywheel/regenerate-dicklesworthstone-sources-runs.jsonl}"
 
 usage() {
   cat <<'USAGE'
@@ -22,13 +24,19 @@ Usage:
 
 Options:
   --dry-run            Render without modifying sources.txt. Default.
-  --apply              Rewrite sources.txt when rendered content differs.
+  --apply              Rewrite sources.txt when rendered content differs. Requires --idempotency-key.
+  --idempotency-key K  Required under --apply. Per-(key, sources-file) ledger-replay no-ops re-runs.
   --fixture PATH       Use gh-compatible JSON fixture instead of live GitHub.
   --sources-file PATH  Target sources file. Default: ~/.claude/skills/dicklesworthstone-stack/data/sources.txt
   --output PATH        Write rendered content to PATH in dry-run mode.
   --now ISO8601        Test-only regenerated timestamp.
   --json               Emit JSON summary.
   --help               Show this help.
+
+Exit codes:
+  0  success or replay-no-op
+  2  usage error
+  3  --apply without --idempotency-key (canonical refusal contract)
 
 Live source command:
   gh repo list Dicklesworthstone --limit 200 --json name,description,isArchived,updatedAt,defaultBranchRef
@@ -57,6 +65,8 @@ json_summary() {
     --arg sources_file "$SOURCES_FILE" \
     --arg backup_path "$backup_path" \
     --arg rendered_path "$rendered_path" \
+    --arg idempotency_key "$IDEMPOTENCY_KEY" \
+    --arg audit_log "$AUDIT_LOG" \
     --arg gh_command "gh repo list $ORG --limit 200 --json $GH_JSON_FIELDS" \
     --argjson active_repo_count "$active_count" \
     --argjson archived_repo_count "$archived_count" \
@@ -71,6 +81,8 @@ json_summary() {
       status: $status,
       mode: $mode,
       sources_file: $sources_file,
+      idempotency_key: $idempotency_key,
+      audit_log: $audit_log,
       backup_path: (if ($backup_path | length) > 0 then $backup_path else null end),
       rendered_path: (if ($rendered_path | length) > 0 then $rendered_path else null end),
       source_command: $gh_command,
@@ -144,6 +156,8 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --dry-run) MODE="dry-run"; shift ;;
     --apply) MODE="apply"; shift ;;
+    --idempotency-key) IDEMPOTENCY_KEY="${2:-}"; [[ -n "$IDEMPOTENCY_KEY" ]] || die "--idempotency-key requires VALUE"; shift 2 ;;
+    --idempotency-key=*) IDEMPOTENCY_KEY="${1#--idempotency-key=}"; [[ -n "$IDEMPOTENCY_KEY" ]] || die "--idempotency-key requires VALUE"; shift ;;
     --json) JSON_OUT=1; shift ;;
     --fixture) FIXTURE="${2:-}"; [[ -n "$FIXTURE" ]] || die "--fixture requires PATH"; shift 2 ;;
     --sources-file) SOURCES_FILE="${2:-}"; [[ -n "$SOURCES_FILE" ]] || die "--sources-file requires PATH"; shift 2 ;;
@@ -153,6 +167,37 @@ while [[ $# -gt 0 ]]; do
     *) die "unknown argument: $1" ;;
   esac
 done
+
+# Mutation gate (7axmt P1 fix, sister j0xpa per-repo-scoped-whole-run-replay-pattern).
+# Fires BEFORE any side-effect (hoqq8 invariant). Without a key, retries make
+# orphaned timestamped backups; per-(key, sources-file) replay prevents this.
+if [[ "$MODE" == "apply" && -z "$IDEMPOTENCY_KEY" ]]; then
+  jq -nc \
+    --arg schema "dicklesworthstone-sources-regeneration/v1" \
+    --arg sources_file "$SOURCES_FILE" \
+    '{schema_version:$schema,command:"regenerate-dicklesworthstone-sources",status:"refused",mode:"apply",sources_file:$sources_file,reason:"--apply requires --idempotency-key"}' >&2
+  exit 3
+fi
+
+# Replay-check (whole-run-scoped-per-target variant per sister j0xpa). Tolerant-parse
+# (jq -Rc 'fromjson?') per sister 8sx9w skill discovery — survives historical row
+# corruption. Scope: (idempotency_key, sources_file) tuple. Same key in different
+# sources-file applies; same (key, sources_file) replays.
+replay_prior_regen() {
+  if [[ -z "$IDEMPOTENCY_KEY" || ! -r "$AUDIT_LOG" ]]; then
+    printf ''
+    return 0
+  fi
+  jq -Rc --arg k "$IDEMPOTENCY_KEY" --arg sf "$SOURCES_FILE" \
+    'fromjson? | select((.idempotency_key // "") == $k and (.sources_file // "") == $sf and ((.status // "") | IN("applied","replay","no_change")))' \
+    "$AUDIT_LOG" 2>/dev/null | tail -n 1 || true
+}
+
+audit_append_regen() {
+  local row="$1"
+  mkdir -p "$(dirname "$AUDIT_LOG")" 2>/dev/null || true
+  printf '%s\n' "$row" >>"$AUDIT_LOG"
+}
 
 have jq || die "jq is required"
 NOW_ISO="${NOW_ISO:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
@@ -184,6 +229,16 @@ if [[ -f "$SOURCES_FILE" ]] && cmp -s "$RENDERED" "$SOURCES_FILE"; then
 fi
 
 if [[ "$MODE" == "apply" ]]; then
+  # Per-(key, sources-file) replay-check: emit prior receipt + exit 0 if already applied.
+  REPLAY_ROW="$(replay_prior_regen)"
+  if [[ -n "$REPLAY_ROW" ]]; then
+    if [[ "$JSON_OUT" -eq 1 ]]; then
+      jq -c --arg k "$IDEMPOTENCY_KEY" '. + {replay:true,replay_for_idempotency_key:$k,status:"replay"}' <<<"$REPLAY_ROW"
+    else
+      printf 'regenerate-dicklesworthstone-sources: replay idempotency_key=%s sources_file=%s — prior row found, no-op\n' "$IDEMPOTENCY_KEY" "$SOURCES_FILE"
+    fi
+    exit 0
+  fi
   mkdir -p "$(dirname "$SOURCES_FILE")"
   if [[ "$CHANGED" == "true" ]]; then
     if [[ -f "$SOURCES_FILE" ]]; then
@@ -192,9 +247,23 @@ if [[ "$MODE" == "apply" ]]; then
     fi
     mv "$RENDERED" "$SOURCES_FILE"
     RENDERED_PATH="$SOURCES_FILE"
+    APPLY_STATUS="applied"
   else
     RENDERED_PATH="$SOURCES_FILE"
+    APPLY_STATUS="no_change"
   fi
+  # Audit row: per-(key, sources-file) row carrying content sha + backup path.
+  CONTENT_SHA="$(shasum -a 256 "$SOURCES_FILE" 2>/dev/null | awk '{print $1}' || true)"
+  audit_append_regen "$(jq -nc \
+    --arg schema "dicklesworthstone-sources-regeneration/v1" \
+    --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --arg status "${APPLY_STATUS:-applied}" \
+    --arg sources_file "$SOURCES_FILE" \
+    --arg idempotency_key "$IDEMPOTENCY_KEY" \
+    --arg backup_path "$BACKUP_PATH" \
+    --arg content_sha "$CONTENT_SHA" \
+    --argjson active_repo_count "$ACTIVE_COUNT" \
+    '{schema_version:$schema,ts:$ts,status:$status,sources_file:$sources_file,idempotency_key:$idempotency_key,backup_path:(if ($backup_path | length) > 0 then $backup_path else null end),content_sha256:$content_sha,active_repo_count:$active_repo_count}')"
 else
   if [[ -n "$OUTPUT_FILE" ]]; then
     mkdir -p "$(dirname "$OUTPUT_FILE")"
