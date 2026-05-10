@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-SCRIPT_VERSION="2026-05-04.1"
+SCRIPT_VERSION="2026-05-10.1"
 SCHEMA_VERSION="flywheel.agent_mail_fd_doctor.v1"
 LABEL="${AGENT_MAIL_FD_LABEL:-ai.zeststream.mcp-agent-mail-local}"
 DOMAIN="${AGENT_MAIL_FD_DOMAIN:-gui/$UID}"
@@ -10,6 +10,16 @@ PLIST="${AGENT_MAIL_FD_PLIST:-$HOME/Library/LaunchAgents/${LABEL}.plist}"
 WARN_FDS="${AGENT_MAIL_FD_WARN_FDS:-128}"
 WARN_LOCK_FDS="${AGENT_MAIL_FD_WARN_LOCK_FDS:-25}"
 FAIL_FDS="${AGENT_MAIL_FD_FAIL_FDS:-220}"
+# flywheel-5pjt2: portable liveness fallback. When lsof is unavailable
+# (e.g., minimal hosts, Linux without procfs lsof, container images),
+# the doctor previously returned FAIL even when the Agent Mail service
+# was healthy. The portable path now probes the canonical
+# /health/liveness HTTP endpoint (per memory rule
+# reference_agent_mail_service.md) and downgrades lsof-unavailable to
+# WARN if the service is alive — operator gets clear "FD-pressure data
+# unavailable, service alive" signal instead of confusing FAIL.
+LIVENESS_URL="${AGENT_MAIL_FD_LIVENESS_URL:-http://127.0.0.1:8765/health/liveness}"
+LIVENESS_TIMEOUT="${AGENT_MAIL_FD_LIVENESS_TIMEOUT:-3}"
 MODE="doctor"
 JSON=0
 
@@ -25,8 +35,9 @@ Usage:
 
 Read-only Agent Mail FD pressure probe. Exit codes:
   0 PASS
-  1 WARN: total FDs >128 or lock FDs >25
-  2 FAIL: service down, child PID missing, lsof unavailable, or total FDs >220
+  1 WARN: total FDs >128, lock FDs >25, or lsof unavailable + liveness OK
+  2 FAIL: service down (HTTP /health/liveness failed AND child PID missing),
+        or total FDs >220
 USAGE
 }
 
@@ -136,6 +147,27 @@ child_pid_for() {
     return 0
   fi
   pgrep -P "$parent" -f 'mcp_agent_mail\.cli serve-http' 2>/dev/null | head -1
+}
+
+# flywheel-5pjt2: portable liveness probe.
+# Returns 0 if the canonical /health/liveness endpoint reports alive,
+# 1 if curl is unavailable or the endpoint is unreachable / unhealthy.
+# Honors AGENT_MAIL_FD_LIVENESS_OVERRIDE for fixture testing
+# ("alive" → return 0, "down" → return 1, "no_curl" → simulates missing curl).
+check_liveness() {
+  case "${AGENT_MAIL_FD_LIVENESS_OVERRIDE:-}" in
+    alive)   return 0 ;;
+    down)    return 1 ;;
+    no_curl) return 1 ;;
+  esac
+  command -v curl >/dev/null 2>&1 || return 1
+  local body
+  body="$(curl -fsS --max-time "$LIVENESS_TIMEOUT" "$LIVENESS_URL" 2>/dev/null || true)"
+  [ -n "$body" ] || return 1
+  case "$body" in
+    *'"status":"alive"'*|*'"status": "alive"'*) return 0 ;;
+    *) return 1 ;;
+  esac
 }
 
 emit_human() {
@@ -259,9 +291,22 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 2
 fi
 if ! command -v lsof >/dev/null 2>&1; then
-  printf '%s\n' "lsof unavailable" >>"$CHECKS_FILE"
-  STATUS="FAIL"
-  EXIT_CODE=2
+  # flywheel-5pjt2: lsof unavailable. Try the canonical Agent Mail
+  # /health/liveness endpoint as a portable liveness probe before
+  # declaring the service down. If liveness OK → WARN with
+  # fd_pressure_unknown_no_lsof code (operator sees "service alive,
+  # FD data missing"); if liveness fails → FAIL with both codes.
+  if check_liveness; then
+    printf '%s\n' "lsof unavailable; liveness OK via $LIVENESS_URL — fd_pressure data unavailable" >>"$CHECKS_FILE"
+    if [ "$EXIT_CODE" -eq 0 ]; then
+      STATUS="WARN"
+      EXIT_CODE=1
+    fi
+  else
+    printf '%s\n' "lsof unavailable AND liveness failed at $LIVENESS_URL" >>"$CHECKS_FILE"
+    STATUS="FAIL"
+    EXIT_CODE=2
+  fi
 else
   LAUNCH_PID="$(launch_pid)"
   if [ -z "$LAUNCH_PID" ]; then
