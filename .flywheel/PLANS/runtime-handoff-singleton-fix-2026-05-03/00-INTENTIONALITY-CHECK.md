@@ -1,3 +1,10 @@
+---
+title: "runtime_handoff Intentionality Check"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # runtime_handoff Intentionality Check
 
 Task: verify whether `/tmp/jeff-issue-runtime-handoff-singleton.md` should be

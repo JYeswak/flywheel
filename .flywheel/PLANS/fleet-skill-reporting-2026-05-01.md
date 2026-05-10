@@ -1,3 +1,10 @@
+---
+title: "Lane A.3 — Fleet-wide Skill Discovery Reporting → skillos"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane A.3 — Fleet-wide Skill Discovery Reporting → skillos
 
 Author: picoz-p0 orchestrator (Claude)

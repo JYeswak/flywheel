@@ -1,3 +1,10 @@
+---
+title: "Phase 3 Audit r1: Cross-Cutting Skill Routing"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 Audit r1: Cross-Cutting Skill Routing
 
 task_id: phase3-audit-cross-cutting-skill-routing-2026-05-06

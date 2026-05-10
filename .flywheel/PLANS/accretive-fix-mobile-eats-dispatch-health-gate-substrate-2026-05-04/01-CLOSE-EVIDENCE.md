@@ -1,3 +1,10 @@
+---
+title: "Close Evidence — accretive-fix-mobile-eats-dispatch-health-gate-substrate"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Close Evidence — accretive-fix-mobile-eats-dispatch-health-gate-substrate
 
 Bead: `flywheel-6ahy`  

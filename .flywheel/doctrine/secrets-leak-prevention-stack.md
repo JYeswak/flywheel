@@ -1,3 +1,10 @@
+---
+title: "Secrets Leak Prevention Stack"
+type: doctrine
+created: 2026-05-09
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Secrets Leak Prevention Stack
 
 Status: Phase 4 callback contract landed by `flywheel-dwavb`.

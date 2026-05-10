@@ -1,3 +1,10 @@
+---
+title: "Phase 3 AUDIT r2 — Bootstrap Recursion (Phase 4 Expansion II)"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 AUDIT r2 — Bootstrap Recursion (Phase 4 Expansion II)
 
 Plan: `wire-or-explain-tick-gate-2026-05-04` + sibling

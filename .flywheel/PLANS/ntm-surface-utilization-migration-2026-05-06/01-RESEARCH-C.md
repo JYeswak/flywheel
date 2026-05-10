@@ -1,3 +1,10 @@
+---
+title: "Lane C Research - Implementation Design"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane C Research - Implementation Design
 
 Task: `ntm-surface-migration-lane-c-2026-05-06`  

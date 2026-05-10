@@ -1,3 +1,10 @@
+---
+title: "Phase 4 DECOMPOSE: wire-or-explain tick gate"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 4 DECOMPOSE: wire-or-explain tick gate
 
 Plan: `wire-or-explain-tick-gate-2026-05-04`

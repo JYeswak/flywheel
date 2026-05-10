@@ -1,3 +1,10 @@
+---
+title: "Phase 2 Refine r1 - Integrated Plan"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 2 Refine r1 - Integrated Plan
 
 Primary input remains `/tmp/overnight-velocity-report/SUMMARY.md`.

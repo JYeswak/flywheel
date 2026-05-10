@@ -1,3 +1,10 @@
+---
+title: "Phase 5 POLISH r2 - validate everything bead polish"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 5 POLISH r2 - validate everything bead polish
 
 Plan: `validate-everything-we-build-2026-05-03`

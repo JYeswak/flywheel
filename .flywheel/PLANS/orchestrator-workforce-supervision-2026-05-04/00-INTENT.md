@@ -1,3 +1,10 @@
+---
+title: "Plan Intent — orchestrator-workforce-supervision-deep-redesign"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Plan Intent — orchestrator-workforce-supervision-deep-redesign
 
 **Slug:** orchestrator-workforce-supervision-2026-05-04

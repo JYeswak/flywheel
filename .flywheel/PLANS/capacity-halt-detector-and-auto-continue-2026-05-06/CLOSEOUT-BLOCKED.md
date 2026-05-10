@@ -1,3 +1,10 @@
+---
+title: "Closeout Blocked"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Closeout Blocked
 
 Plan-space artifacts through Phase 3 are complete.

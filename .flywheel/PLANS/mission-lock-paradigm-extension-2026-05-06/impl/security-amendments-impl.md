@@ -1,3 +1,10 @@
+---
+title: "Security Negative-Invariants Amendments Implementation"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Security Negative-Invariants Amendments Implementation
 
 task_id: `amendment-security-negative-invariants-2026-05-06`

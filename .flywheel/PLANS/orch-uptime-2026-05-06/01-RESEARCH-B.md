@@ -1,3 +1,10 @@
+---
+title: "Lane B Research: Topology Freshness + Watcher Load"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane B Research: Topology Freshness + Watcher Load
 
 Task: `orch-uptime-plan-2026-05-06` lane B  

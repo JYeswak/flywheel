@@ -1,3 +1,10 @@
+---
+title: "CASS Skill Enhancement Patch: append-only audit lineage"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # CASS Skill Enhancement Patch: append-only audit lineage
 
 Bead: `flywheel-irm9`

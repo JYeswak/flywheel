@@ -1,3 +1,10 @@
+---
+title: "Phase 5 Polish r1: event-driven orch heartbeat"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 5 Polish r1: event-driven orch heartbeat
 
 Task: `phase5-polish-orch-heartbeat-event-driven-2026-05-06`

@@ -1,3 +1,10 @@
+---
+title: "Phase 3 Audit r1: Idempotency Receipt Integrity"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 Audit r1: Idempotency Receipt Integrity
 
 task_id: phase3-audit-idempotency-receipt-integrity-2026-05-06

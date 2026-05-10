@@ -1,3 +1,10 @@
+---
+title: "Worker alpha - beta-1 sub-DAG bead specs (15 beads)"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Worker alpha - beta-1 sub-DAG bead specs (15 beads)
 
 ## Self-grade

@@ -1,3 +1,10 @@
+---
+title: "Jeff Ecosystem Deep Dive — 02 Issue Patterns"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Jeff Ecosystem Deep Dive — 02 Issue Patterns
 
 **Snapshot:** 2026-05-01

@@ -1,3 +1,10 @@
+---
+title: "INTENT — orch-monitor-recovery-auto-act-2026-05-04"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # INTENT — orch-monitor-recovery-auto-act-2026-05-04
 
 ## Verbatim topic from Joshua

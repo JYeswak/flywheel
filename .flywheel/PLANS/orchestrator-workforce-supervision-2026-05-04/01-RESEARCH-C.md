@@ -1,3 +1,10 @@
+---
+title: "Lane C - Implementation Design"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane C - Implementation Design
 
 Plan: `orchestrator-workforce-supervision-2026-05-04`

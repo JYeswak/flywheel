@@ -1,3 +1,10 @@
+---
+title: "Loop-Non-Accretive Trauma Class"
+type: doctrine
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Loop-Non-Accretive Trauma Class
 
 A failure mode where `/flywheel:tick` runs through ceremony (read state, emit

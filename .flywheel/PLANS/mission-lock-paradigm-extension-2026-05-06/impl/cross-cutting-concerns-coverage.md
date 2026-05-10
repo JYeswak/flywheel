@@ -1,3 +1,10 @@
+---
+title: "Cross-Cutting Concerns Coverage"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Cross-Cutting Concerns Coverage
 
 Task: `amendment-cross-cutting-skill-routing-2026-05-06`

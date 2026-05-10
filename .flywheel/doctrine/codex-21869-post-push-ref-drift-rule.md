@@ -1,3 +1,10 @@
+---
+title: "Codex #21869 — post-push ref-drift rule (2026-05-10)"
+type: doctrine
+created: 2026-05-09
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Codex #21869 — post-push ref-drift rule (2026-05-10)
 
 **Source**: openai/codex#21869 (filed upstream, 2026-05-09).

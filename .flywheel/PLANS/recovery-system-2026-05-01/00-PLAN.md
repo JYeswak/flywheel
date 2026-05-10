@@ -1,3 +1,10 @@
+---
+title: "Flywheel Recovery System Plan - 2026-05-01"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Flywheel Recovery System Plan - 2026-05-01
 
 Source lanes:

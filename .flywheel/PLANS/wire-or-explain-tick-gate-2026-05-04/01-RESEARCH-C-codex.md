@@ -1,3 +1,10 @@
+---
+title: "01-RESEARCH-C-codex - Lane C Implementation Design"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 01-RESEARCH-C-codex - Lane C Implementation Design
 
 Plan: `wire-or-explain-tick-gate-2026-05-04`

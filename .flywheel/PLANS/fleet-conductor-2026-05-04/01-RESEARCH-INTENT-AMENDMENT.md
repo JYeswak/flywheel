@@ -1,3 +1,10 @@
+---
+title: "Fleet-conductor INTENT amendment — issued 04:24Z mid-Phase-1"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Fleet-conductor INTENT amendment — issued 04:24Z mid-Phase-1
 
 After Lanes A+B dispatched, Joshua sent 3 escalation messages reframing the plan from "observability" to "autonomous founder substrate" with specific scale anchors:

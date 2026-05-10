@@ -1,3 +1,10 @@
+---
+title: "Phase 3 AUDIT r1 - Cross-Cutting"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 AUDIT r1 - Cross-Cutting
 
 task_id: `ntm-surface-migration-audit-cross-cutting-r1-2026-05-06`  

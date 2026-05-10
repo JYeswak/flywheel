@@ -1,3 +1,10 @@
+---
+title: "NTM Surface Utilization Migration - Refine r1"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # NTM Surface Utilization Migration - Refine r1
 
 task_id: ntm-surface-migration-refine-r1-2026-05-06  

@@ -1,3 +1,10 @@
+---
+title: "Doctrine Forward-Flow Dry Run - codex-capacity-cycle-throttle"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Doctrine Forward-Flow Dry Run - codex-capacity-cycle-throttle
 
 Scope: read-only research for propagating the newly shipped flywheel

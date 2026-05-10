@@ -1,3 +1,10 @@
+---
+title: "Orchestrator Uptime Phase 3 Audit: Lens 1 Security"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Orchestrator Uptime Phase 3 Audit: Lens 1 Security
 
 task_id: orch-uptime-audit-lens1-security-2026-05-06

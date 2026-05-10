@@ -1,3 +1,10 @@
+---
+title: "Petal 9 LEARN/REUSE - mission-lock paradigm extension"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Petal 9 LEARN/REUSE - mission-lock paradigm extension
 
 Date: 2026-05-06

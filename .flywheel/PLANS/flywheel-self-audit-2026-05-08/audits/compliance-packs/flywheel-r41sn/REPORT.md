@@ -1,3 +1,11 @@
+---
+title: "Compliance Report - flywheel-r41sn"
+type: plan
+created: 2026-05-07
+bead: flywheel-self
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Compliance Report - flywheel-r41sn
 
 Verdict: PASS

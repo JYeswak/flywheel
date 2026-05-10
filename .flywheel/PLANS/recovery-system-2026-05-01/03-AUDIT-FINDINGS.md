@@ -1,3 +1,10 @@
+---
+title: "Recovery Phase 3 Audit Findings Synthesis"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Recovery Phase 3 Audit Findings Synthesis
 Task: `recovery_audit_synthesis`
 Date: 2026-05-01

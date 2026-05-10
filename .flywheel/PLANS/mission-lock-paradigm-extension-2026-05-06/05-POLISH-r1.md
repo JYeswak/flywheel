@@ -1,3 +1,10 @@
+---
+title: "Phase 5 POLISH r1 - Mission-Lock Paradigm Extension"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 5 POLISH r1 - Mission-Lock Paradigm Extension
 
 task_id: `phase5-polish-mission-lock-paradigm-extension-r1-2026-05-06`

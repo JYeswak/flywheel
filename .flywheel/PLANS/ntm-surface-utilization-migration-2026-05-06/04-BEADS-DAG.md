@@ -1,3 +1,10 @@
+---
+title: "Phase 4 Beads DAG - NTM Surface Migration"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 4 Beads DAG - NTM Surface Migration
 
 Mission-anchor: continuous-orchestrator-uptime-self-sustaining-fleet

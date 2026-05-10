@@ -1,3 +1,10 @@
+---
+title: "Fleet-Coherence Drift Detection — Research Brief for Triangulated Planning"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Fleet-Coherence Drift Detection — Research Brief for Triangulated Planning
 
 **Created:** 2026-05-01T15:14Z

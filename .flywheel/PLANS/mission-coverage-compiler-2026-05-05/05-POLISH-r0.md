@@ -1,3 +1,10 @@
+---
+title: "05-POLISH-r0 - Mission Coverage Compiler Bead Review"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 05-POLISH-r0 - Mission Coverage Compiler Bead Review
 
 Task: polish-review-mission-coverage-2026-05-05

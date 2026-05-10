@@ -1,3 +1,10 @@
+---
+title: "Phase 4 DECOMPOSE - Mission-Lock Paradigm Extension Bead DAG"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 4 DECOMPOSE - Mission-Lock Paradigm Extension Bead DAG
 
 task_id: `phase4-decompose-mission-lock-paradigm-extension-2026-05-06`

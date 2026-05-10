@@ -1,3 +1,10 @@
+---
+title: "Phase 4 Decomposition — Agent Security Controls Fleet-Wide"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 4 Decomposition — Agent Security Controls Fleet-Wide
 
 Bead: `flywheel-cnw0`

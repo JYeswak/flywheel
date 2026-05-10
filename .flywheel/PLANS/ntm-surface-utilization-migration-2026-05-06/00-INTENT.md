@@ -1,3 +1,10 @@
+---
+title: "INTENT — ntm-surface-utilization-migration-2026-05-06"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # INTENT — ntm-surface-utilization-migration-2026-05-06
 
 ## Verbatim topic

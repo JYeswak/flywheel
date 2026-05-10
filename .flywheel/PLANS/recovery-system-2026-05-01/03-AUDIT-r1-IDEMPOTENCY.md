@@ -1,3 +1,10 @@
+---
+title: "Recovery r1 Audit - Idempotency + Race Conditions"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Recovery r1 Audit - Idempotency + Race Conditions
 
 Task: `recovery_audit_idempotency`

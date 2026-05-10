@@ -1,3 +1,10 @@
+---
+title: "Plan Intent — fleet-conductor-accretive-observability-and-intervention"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Plan Intent — fleet-conductor-accretive-observability-and-intervention
 
 **Slug:** fleet-conductor-2026-05-04

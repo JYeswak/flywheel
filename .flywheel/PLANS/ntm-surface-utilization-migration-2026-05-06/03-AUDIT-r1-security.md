@@ -1,3 +1,10 @@
+---
+title: "NTM Surface Migration Audit r1 - Security"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # NTM Surface Migration Audit r1 - Security
 
 task_id: ntm-surface-migration-audit-security-r1-2026-05-06  

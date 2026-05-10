@@ -1,3 +1,10 @@
+---
+title: "Codex Death-Event Flow"
+type: doctrine
+created: 2026-05-09
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Codex Death-Event Flow
 
 Version: `codex-death-event-flow/v1`

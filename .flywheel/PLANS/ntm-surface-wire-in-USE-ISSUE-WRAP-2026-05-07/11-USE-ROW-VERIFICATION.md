@@ -1,3 +1,10 @@
+---
+title: "USE-Row Callsite Verification - flywheel-7p45b"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # USE-Row Callsite Verification - flywheel-7p45b
 
 Generated: 2026-05-07

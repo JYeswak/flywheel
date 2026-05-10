@@ -1,3 +1,10 @@
+---
+title: "Phase 5 POLISH r1 - Orchestrator Uptime Beads"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 5 POLISH r1 - Orchestrator Uptime Beads
 
 task_id: `orch-uptime-polish-2026-05-06`

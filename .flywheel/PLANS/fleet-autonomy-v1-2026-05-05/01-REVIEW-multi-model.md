@@ -1,3 +1,10 @@
+---
+title: "Fleet Autonomy v1 Review - GPT-5.5 /planning-workflow exact-prompt"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Fleet Autonomy v1 Review - GPT-5.5 /planning-workflow exact-prompt
 
 Review date: 2026-05-05  

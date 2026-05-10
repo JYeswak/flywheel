@@ -1,3 +1,10 @@
+---
+title: "Brenner System Deep Dive - 2026-05-07"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Brenner System Deep Dive - 2026-05-07
 
 ## Section 1 - Headline numbers

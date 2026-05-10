@@ -1,3 +1,10 @@
+---
+title: "Phase 3 AUDIT r1 Lens 2 — Idempotency"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 AUDIT r1 Lens 2 — Idempotency
 
 Plan: `agent-security-controls-fleet-wide-2026-05-04`

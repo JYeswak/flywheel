@@ -1,3 +1,10 @@
+---
+title: "Phase 5 Polish r2"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 5 Polish r2
 
 ## r2 Snapshot

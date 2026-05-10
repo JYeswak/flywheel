@@ -1,3 +1,10 @@
+---
+title: "01-REVIEW-multi-model - Manager Loop Architecture"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 01-REVIEW-multi-model - Manager Loop Architecture
 
 ## 0. Execution Note

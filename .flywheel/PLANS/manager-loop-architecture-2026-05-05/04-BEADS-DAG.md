@@ -1,3 +1,10 @@
+---
+title: "Manager Loop Architecture - Phase 4 Beads DAG"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Manager Loop Architecture - Phase 4 Beads DAG
 Artifact: `04-BEADS-DAG.md`
 Plan input: `.flywheel/PLANS/manager-loop-architecture-2026-05-05/00-PLAN-r2.md`

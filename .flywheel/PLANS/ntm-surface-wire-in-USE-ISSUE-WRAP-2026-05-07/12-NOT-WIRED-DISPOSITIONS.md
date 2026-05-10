@@ -1,3 +1,10 @@
+---
+title: "NOT-WIRED Dispositions - flywheel-a2lff"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # NOT-WIRED Dispositions - flywheel-a2lff
 
 Generated: 2026-05-07

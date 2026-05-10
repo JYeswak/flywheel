@@ -1,3 +1,10 @@
+---
+title: "Cross-Pane Protocol Lane 2 - CLI Surface and Protocols"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Cross-Pane Protocol Lane 2 - CLI Surface and Protocols
 
 Date: 2026-05-01

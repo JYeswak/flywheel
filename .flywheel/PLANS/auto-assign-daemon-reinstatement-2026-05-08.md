@@ -1,3 +1,10 @@
+---
+title: "Auto-Assign Daemon Reinstatement Plan"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Auto-Assign Daemon Reinstatement Plan
 
 Source bead: `flywheel-qv2fs`

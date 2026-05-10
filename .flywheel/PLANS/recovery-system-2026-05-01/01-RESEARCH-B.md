@@ -1,3 +1,10 @@
+---
+title: "/flywheel:recovery Lane B - Jeff Recovery Pattern Audit"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # /flywheel:recovery Lane B - Jeff Recovery Pattern Audit
 
 task_id: recovery_lane_b_jeff_patterns

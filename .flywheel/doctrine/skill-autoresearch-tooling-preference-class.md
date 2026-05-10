@@ -1,3 +1,10 @@
+---
+title: "Skill Autoresearch Tooling Preference Class"
+type: doctrine
+created: 2026-05-09
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Skill Autoresearch Tooling Preference Class
 
 ## Rule

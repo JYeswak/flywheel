@@ -1,3 +1,10 @@
+---
+title: "Tick-script standard: skillos doctor receipt emission"
+type: doctrine
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Tick-script standard: skillos doctor receipt emission
 
 Per cross-orch coordination (skillos:1 / BrightLake → flywheel:1 / LavenderGlen,

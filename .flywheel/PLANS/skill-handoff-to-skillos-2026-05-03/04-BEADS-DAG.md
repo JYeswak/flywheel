@@ -1,3 +1,10 @@
+---
+title: "Phase 4 BEADS DAG"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 4 BEADS DAG
 
 > 8 beads, 14 dependencies, 0 cycles. Plan-space only — DO NOT DISPATCH until current ready queue (4 in-progress + 14 pre-existing ready) drains.

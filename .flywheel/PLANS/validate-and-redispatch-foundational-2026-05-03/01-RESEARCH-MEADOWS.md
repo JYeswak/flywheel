@@ -1,3 +1,10 @@
+---
+title: "Meadows Leverage Analysis — codex-orch-feedback-gap (and validate-everything umbrella)"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Meadows Leverage Analysis — codex-orch-feedback-gap (and validate-everything umbrella)
 
 Captured: 2026-05-03T22:42Z by flywheel:1 orch

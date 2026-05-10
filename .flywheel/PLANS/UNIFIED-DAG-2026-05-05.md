@@ -1,3 +1,10 @@
+---
+title: "Unified 29-Bead DAG Rollup And Ship Decision"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Unified 29-Bead DAG Rollup And Ship Decision
 Artifact: `.flywheel/PLANS/UNIFIED-DAG-2026-05-05.md`
 Task: `unified-dag-rollup-2026-05-05`

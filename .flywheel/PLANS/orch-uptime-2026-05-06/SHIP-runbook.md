@@ -1,3 +1,10 @@
+---
+title: "Orch-Uptime 15-Bead Ship Sequence Runbook"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Orch-Uptime 15-Bead Ship Sequence Runbook
 
 Generated: `2026-05-06T21:25:01Z`

@@ -1,3 +1,10 @@
+---
+title: "Converged plan: skill-handoff-to-skillos"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Converged plan: skill-handoff-to-skillos
 
 > Phase 2 REFINE output. Self-authored. Single round (steady-state by construction).

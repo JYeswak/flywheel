@@ -1,3 +1,10 @@
+---
+title: "Phase 1 Lane B - Ecosystem Audit"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 1 Lane B - Ecosystem Audit
 
 Plan arc: `capacity-halt-detector-and-auto-continue-recovery`.

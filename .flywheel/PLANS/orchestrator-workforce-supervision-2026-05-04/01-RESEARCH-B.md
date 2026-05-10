@@ -1,3 +1,10 @@
+---
+title: "Lane B - Ecosystem Audit"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane B - Ecosystem Audit
 
 Plan: `orchestrator-workforce-supervision-2026-05-04`

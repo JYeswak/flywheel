@@ -1,3 +1,10 @@
+---
+title: "W0 Baseline Reconcile Deep Research - 2026-05-06"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # W0 Baseline Reconcile Deep Research - 2026-05-06
 
 Scope: read-only research for W0 before A2 edits the Codex stuck detector.

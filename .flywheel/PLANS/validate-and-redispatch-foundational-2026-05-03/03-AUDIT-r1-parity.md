@@ -1,3 +1,10 @@
+---
+title: "Phase 3 AUDIT r1 - Lens A Cross-Runtime Parity And Agent-Context Proof"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 AUDIT r1 - Lens A Cross-Runtime Parity And Agent-Context Proof
 
 Plan: `validate-everything-we-build-2026-05-03`

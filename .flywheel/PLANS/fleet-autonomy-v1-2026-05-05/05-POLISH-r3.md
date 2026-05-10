@@ -1,3 +1,10 @@
+---
+title: "Fleet Autonomy Polish r3 Micro-Apply"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Fleet Autonomy Polish r3 Micro-Apply
 
 Task: `polish-r3-fleet-autonomy-2026-05-05`

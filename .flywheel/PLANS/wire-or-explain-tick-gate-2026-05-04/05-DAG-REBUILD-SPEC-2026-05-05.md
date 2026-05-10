@@ -1,3 +1,10 @@
+---
+title: "05 — DAG REBUILD SPEC — wire-or-explain-tick-gate-2026-05-04"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 05 — DAG REBUILD SPEC — wire-or-explain-tick-gate-2026-05-04
 
 > **Status:** plan-space, READ-ONLY on `.beads/`. Generated 2026-05-05T00:11Z.

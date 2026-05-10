@@ -1,3 +1,10 @@
+---
+title: "03-AUDIT-r1 - Idempotency + Replay Safety"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 03-AUDIT-r1 - Idempotency + Replay Safety
 
 Task: `ntm-surface-migration-audit-idempotency-r1-2026-05-06`  

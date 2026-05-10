@@ -1,3 +1,10 @@
+---
+title: "External Prior-Art Audit: Wire-Or-Explain Tick Gate"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # External Prior-Art Audit: Wire-Or-Explain Tick Gate
 plan: wire-or-explain-tick-gate-2026-05-04
 task_id: woe-research-triad-external-05dd33

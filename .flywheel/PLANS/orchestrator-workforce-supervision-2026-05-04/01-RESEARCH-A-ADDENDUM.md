@@ -1,3 +1,10 @@
+---
+title: "Lane A ADDENDUM — cross-session-dispatch-no-callback-closure"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane A ADDENDUM — cross-session-dispatch-no-callback-closure
 # Added 2026-05-04T04:05Z by orchestrator after live fuckup observed mid-plan
 

@@ -1,3 +1,10 @@
+---
+title: "Phase 4 Unified Bead DAG - validator-v2-three-outcome-and-stock-backpressure-2026-05-04"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 4 Unified Bead DAG - validator-v2-three-outcome-and-stock-backpressure-2026-05-04
 
 task_id: phase4-merge-synthesis-2026-05-04

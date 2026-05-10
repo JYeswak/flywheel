@@ -1,3 +1,11 @@
+---
+title: "Scorecard - flywheel-r41sn"
+type: plan
+created: 2026-05-07
+bead: flywheel-self
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Scorecard - flywheel-r41sn
 
 Score: 925/1000 (PASS)

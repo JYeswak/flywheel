@@ -1,3 +1,10 @@
+---
+title: "Doctrine Sync Apply Verification — 2026-05-07"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Doctrine Sync Apply Verification — 2026-05-07
 
 Read-only verification of the 20:00Z apply pass across:

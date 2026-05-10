@@ -1,3 +1,10 @@
+---
+title: "Plan Intent — accretive-fix-mobile-eats-dispatch-health-gate-substrate"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Plan Intent — accretive-fix-mobile-eats-dispatch-health-gate-substrate
 
 **Slug:** accretive-fix-mobile-eats-dispatch-health-gate-substrate-2026-05-04

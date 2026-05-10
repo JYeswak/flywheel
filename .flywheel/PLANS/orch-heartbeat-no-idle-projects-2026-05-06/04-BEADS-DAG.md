@@ -1,3 +1,10 @@
+---
+title: "Phase 4 Beads DAG: orch-heartbeat no idle projects"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 4 Beads DAG: orch-heartbeat no idle projects
 
 Task: `plan-orch-heartbeat-phase4-decompose-2026-05-06`

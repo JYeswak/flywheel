@@ -1,3 +1,11 @@
+---
+title: "Phase 2 Flywheel-Install 5-Skill Polish Gate Plan"
+type: plan
+created: 2026-05-06
+bead: flywheel-install
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 2 Flywheel-Install 5-Skill Polish Gate Plan
 
 date: 2026-05-05

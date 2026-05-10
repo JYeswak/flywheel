@@ -1,3 +1,10 @@
+---
+title: "Close-Validator Receipt Contract"
+type: doctrine
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Close-Validator Receipt Contract
 
 Contract version: `close-validator-receipt-contract/v1`

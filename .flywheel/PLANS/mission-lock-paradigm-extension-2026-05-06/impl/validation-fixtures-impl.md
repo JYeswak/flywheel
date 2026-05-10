@@ -1,3 +1,10 @@
+---
+title: "Validation Fixtures + Golden Replay Implementation"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Validation Fixtures + Golden Replay Implementation
 
 Bead: `flywheel-mission-lock-validation-fixtures-golden-replay-2026-05-06`

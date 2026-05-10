@@ -1,3 +1,10 @@
+---
+title: "Lane C: Implementation design - runtime-handoff-singleton-fix"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane C: Implementation design - runtime-handoff-singleton-fix
 
 ## Lane status

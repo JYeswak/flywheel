@@ -1,3 +1,10 @@
+---
+title: "Repo Hygiene Meta-Skill Phase 1 Research Deep Dive"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Repo Hygiene Meta-Skill Phase 1 Research Deep Dive
 
 Generated: 2026-05-07T20:03:00Z

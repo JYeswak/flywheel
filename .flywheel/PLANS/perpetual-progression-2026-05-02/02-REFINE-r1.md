@@ -1,3 +1,10 @@
+---
+title: "Perpetual-Progression — REFINE r1 (synthesis of 3 lanes)"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Perpetual-Progression — REFINE r1 (synthesis of 3 lanes)
 
 **Inputs:** `01-RESEARCH-A.md` (literature, /tmp/perpA, 348 lines, 27 cites) + `01-RESEARCH-B.md` (substrate, /tmp/perpB, 606 lines, 31 entries, 14 gaps, 7 orphans) + `01-RESEARCH-C.md` (taxonomy, /tmp/perpC, 946 lines, 6 classes × 9 fields, 18 failure modes).

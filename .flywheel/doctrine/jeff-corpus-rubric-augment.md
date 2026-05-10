@@ -1,3 +1,10 @@
+---
+title: "jeff-corpus-rubric-augment doctrine"
+type: doctrine
+created: 2026-05-09
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # jeff-corpus-rubric-augment doctrine
 
 **Bead origin:** flywheel-wbnb (extends flywheel-3p1j jeff-issue-rubric).

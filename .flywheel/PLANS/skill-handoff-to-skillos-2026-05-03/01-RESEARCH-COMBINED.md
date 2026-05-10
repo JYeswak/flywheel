@@ -1,3 +1,10 @@
+---
+title: "Phase 1 RESEARCH (combined lanes A/B/C — self-authored)"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 1 RESEARCH (combined lanes A/B/C — self-authored)
 
 ## Skills library cited (META-RULE 2026-05-03 source-(a))

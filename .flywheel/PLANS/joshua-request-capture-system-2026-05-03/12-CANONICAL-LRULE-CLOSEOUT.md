@@ -1,3 +1,10 @@
+---
+title: "josh-req-12 canonical L-rule closeout"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # josh-req-12 canonical L-rule closeout
 
 Task: `flywheel-flmn-6fe627`

@@ -1,3 +1,10 @@
+---
+title: "scaffold-canonical-cli doctrine"
+type: doctrine
+created: 2026-05-10
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # scaffold-canonical-cli doctrine
 
 **Bead origin:** flywheel-ws02m (depends on flywheel-tiugg helper lib).

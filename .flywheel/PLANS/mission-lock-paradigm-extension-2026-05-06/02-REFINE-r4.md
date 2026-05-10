@@ -1,3 +1,10 @@
+---
+title: "Refine r4 - Stability Confirmation and Phase 3 Entry"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Refine r4 - Stability Confirmation and Phase 3 Entry
 
 Task: `plan-mission-lock-paradigm-extension-phase2-refine-r4-2026-05-06`

@@ -1,3 +1,10 @@
+---
+title: "Meadows Component Analysis - Validate Everything We Build"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Meadows Component Analysis - Validate Everything We Build
 
 Plan: `validate-everything-we-build-2026-05-03`

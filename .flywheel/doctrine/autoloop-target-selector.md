@@ -1,3 +1,10 @@
+---
+title: "autoloop-target-selector doctrine"
+type: doctrine
+created: 2026-05-09
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # autoloop-target-selector doctrine
 
 **Bead origin:** flywheel-se3h.9 (extends parent flywheel-se3h

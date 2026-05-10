@@ -1,3 +1,10 @@
+---
+title: "Phase 5 Polish r1 DAG preview: event-driven orch heartbeat"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 5 Polish r1 DAG preview: event-driven orch heartbeat
 
 Preview only. This file does not mutate the nine existing Phase 4 bead rows.

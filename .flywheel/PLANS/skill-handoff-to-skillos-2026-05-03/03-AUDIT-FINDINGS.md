@@ -1,3 +1,10 @@
+---
+title: "Phase 3 AUDIT findings"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 AUDIT findings
 
 > Self-authored audit lens (security/idempotency/cross-cutting). 4 findings. None critical. All have mitigating beads in Phase 4 DAG.

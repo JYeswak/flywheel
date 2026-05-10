@@ -1,3 +1,10 @@
+---
+title: "Phase 4 DECOMPOSE — orch-monitor-recovery-auto-act-2026-05-04"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 4 DECOMPOSE — orch-monitor-recovery-auto-act-2026-05-04
 
 Plan: `orch-monitor-recovery-auto-act-2026-05-04`

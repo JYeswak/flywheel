@@ -1,3 +1,10 @@
+---
+title: "Recovery System Beads DAG Close Evidence"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Recovery System Beads DAG Close Evidence
 
 Plan: `/Users/josh/Developer/flywheel/.flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md`

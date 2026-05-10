@@ -1,3 +1,10 @@
+---
+title: "00-PLAN - Watchdog Enablement r1"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 00-PLAN - Watchdog Enablement r1
 
 Date: 2026-05-05

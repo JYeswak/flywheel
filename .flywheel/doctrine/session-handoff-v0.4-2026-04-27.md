@@ -1,3 +1,10 @@
+---
+title: "usession handoff v0.4 2026 04 27"
+type: doctrine
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 ================================================================
 SESSION HANDOFF — v0.4 (2026-04-27 evening)
 Pairs with: orchestrator-post-compact-prompt-v3.txt (v3.4+)

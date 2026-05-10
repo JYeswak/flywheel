@@ -1,3 +1,10 @@
+---
+title: "Bead Isolation Phase 2 Runbook"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Bead Isolation Phase 2 Runbook
 
 Source plan: `.flywheel/PLANS/bead-isolation-fix-2026-04-30.md`

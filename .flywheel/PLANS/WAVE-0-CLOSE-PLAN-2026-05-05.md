@@ -1,3 +1,10 @@
+---
+title: "WAVE-0 Close Plan - Duplicates and Obsoletes"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # WAVE-0 Close Plan - Duplicates and Obsoletes
 
 date: 2026-05-05

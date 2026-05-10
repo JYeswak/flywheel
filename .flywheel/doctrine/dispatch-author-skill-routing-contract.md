@@ -1,3 +1,10 @@
+---
+title: "Dispatch Author Skill Routing Contract"
+type: doctrine
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Dispatch Author Skill Routing Contract
 
 Version: `dispatch-author-skill-routing-contract/v1`

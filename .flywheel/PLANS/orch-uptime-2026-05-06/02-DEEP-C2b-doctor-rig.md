@@ -1,3 +1,10 @@
+---
+title: "C2 Doctor Invariant Rig: frozen-projection-invariant"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # C2 Doctor Invariant Rig: frozen-projection-invariant
 
 Task: read-only follow-on design for `flywheel-loop doctor --scope frozen-projection-invariant --json`.

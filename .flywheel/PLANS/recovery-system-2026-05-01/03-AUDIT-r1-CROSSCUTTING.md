@@ -1,3 +1,10 @@
+---
+title: "/flywheel:recovery Phase 3 Audit — Cross-Cutting Verification Lens"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # /flywheel:recovery Phase 3 Audit — Cross-Cutting Verification Lens
 
 Task: `recovery_audit_crosscutting`

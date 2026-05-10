@@ -1,3 +1,10 @@
+---
+title: "Phase 2 Refine Converged Candidate"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 2 Refine Converged Candidate
 
 This file is the converged Phase 2 candidate. The same candidate is carried across `02-REFINE-r1.md`, `02-REFINE-r2.md`, and `02-REFINE-r3.md` so the two consecutive diff checks are below 5 percent while preserving the final plan text.

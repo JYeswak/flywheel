@@ -1,3 +1,10 @@
+---
+title: "codebase-pattern-extraction Jeff audit lineage enhancement"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # codebase-pattern-extraction Jeff audit lineage enhancement
 
 Task: `flywheel-hvag-b8df52`

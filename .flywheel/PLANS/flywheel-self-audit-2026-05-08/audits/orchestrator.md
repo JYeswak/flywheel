@@ -1,3 +1,11 @@
+---
+title: "Orchestrator Layer Audit - 2026-05-08"
+type: plan
+created: 2026-05-07
+bead: flywheel-self
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Orchestrator Layer Audit - 2026-05-08
 
 Bead: `flywheel-up0uw`

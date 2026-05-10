@@ -1,3 +1,10 @@
+---
+title: "Phase 2 REFINE r1 — Converged Agent Security Controls Plan"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 2 REFINE r1 — Converged Agent Security Controls Plan
 
 Plan: `agent-security-controls-fleet-wide-2026-05-04`

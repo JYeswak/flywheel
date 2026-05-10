@@ -1,3 +1,10 @@
+---
+title: "R1 Cross-Plan Audit: Manager-Loop x Fleet-Autonomy"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # R1 Cross-Plan Audit: Manager-Loop x Fleet-Autonomy
 
 A001. Executive verdict: contradictions-found-revise.

@@ -1,3 +1,10 @@
+---
+title: "04-BEADS-DAG — ntm surface wire-in USE/ISSUE/WRAP backlog"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 04-BEADS-DAG — ntm surface wire-in USE/ISSUE/WRAP backlog
 
 Mission anchor: `continuous-orchestrator-uptime-self-sustaining-fleet`

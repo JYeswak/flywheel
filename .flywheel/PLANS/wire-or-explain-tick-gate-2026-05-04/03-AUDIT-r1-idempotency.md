@@ -1,3 +1,10 @@
+---
+title: "Phase 3 AUDIT r1 - Idempotency Lens"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 AUDIT r1 - Idempotency Lens
 
 Plan: `wire-or-explain-tick-gate-2026-05-04`

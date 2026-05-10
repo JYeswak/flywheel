@@ -1,3 +1,10 @@
+---
+title: "Trigger-Gated Bead Pre-Check"
+type: doctrine
+created: 2026-05-09
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Trigger-Gated Bead Pre-Check
 
 Version: `trigger-gated-bead-precheck/v1`

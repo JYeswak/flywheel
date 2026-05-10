@@ -1,3 +1,10 @@
+---
+title: "Orch Uptime Wave 0/Wave 1 Ship Preflight - 2026-05-06"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Orch Uptime Wave 0/Wave 1 Ship Preflight - 2026-05-06
 
 Scope: read-only ship-prep for W0/A1/B1/C1 so ship dispatches can fire without re-research.

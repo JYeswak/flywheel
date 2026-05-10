@@ -1,3 +1,10 @@
+---
+title: "Phase 1 Lane A — Problem-Space Inventory"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 1 Lane A — Problem-Space Inventory
 
 Plan: `validate-and-redispatch-foundational-2026-05-03`

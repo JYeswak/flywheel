@@ -1,3 +1,10 @@
+---
+title: "Perpetual-Progression — REFINE r2 (post-AUDIT)"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Perpetual-Progression — REFINE r2 (post-AUDIT)
 
 **Inputs since r1:** `perpD_audit_crosscutting.md` (845 lines, 6 findings, 18 risks, 5 collisions, 0 cycles) + `perpE_audit_safety.md` (617 lines, 24 invariants, 4 deadlocks, 4 drift mitigations, 6 findings).

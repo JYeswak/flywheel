@@ -1,3 +1,10 @@
+---
+title: "AUDIT FINDINGS — workforce-supervision-mesh"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # AUDIT FINDINGS — workforce-supervision-mesh
 # Phase 3 r1 complete: 22 findings, 7 P0, 11 P1, 4 P2
 

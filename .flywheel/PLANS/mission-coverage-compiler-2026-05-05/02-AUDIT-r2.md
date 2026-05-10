@@ -1,3 +1,10 @@
+---
+title: "02-AUDIT-r2 - Mission Coverage Compiler"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 02-AUDIT-r2 - Mission Coverage Compiler
 
 Task: audit-r2-mission-coverage-2026-05-05

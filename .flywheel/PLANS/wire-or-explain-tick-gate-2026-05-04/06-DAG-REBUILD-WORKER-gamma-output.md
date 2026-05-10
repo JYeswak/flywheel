@@ -1,3 +1,10 @@
+---
+title: "06 DAG Rebuild Worker Gamma Output"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 06 DAG Rebuild Worker Gamma Output
 
 Task: `dag-rebuild-gamma-l4-readme-coral-2026-05-05`

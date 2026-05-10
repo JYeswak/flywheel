@@ -1,3 +1,10 @@
+---
+title: "NTM Surface Migration - Audit r2 Amendment Confirmation"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # NTM Surface Migration - Audit r2 Amendment Confirmation
 
 task_id: ntm-surface-migration-audit-r2-2026-05-06  

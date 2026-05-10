@@ -1,3 +1,10 @@
+---
+title: "C3 Wire-Or-Explain Bootstrap Deep Research"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # C3 Wire-Or-Explain Bootstrap Deep Research
 
 Date: 2026-05-06

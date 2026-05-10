@@ -1,3 +1,10 @@
+---
+title: "Fleet Autonomy Polish r1 Apply Receipt"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Fleet Autonomy Polish r1 Apply Receipt
 
 Task: `polish-r1-apply-fleet-autonomy-2026-05-05`

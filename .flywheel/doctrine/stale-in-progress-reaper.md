@@ -1,3 +1,10 @@
+---
+title: "stale-in-progress-reaper doctrine"
+type: doctrine
+created: 2026-05-09
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # stale-in-progress-reaper doctrine
 
 **Bead origin:** flywheel-8ht5f.

@@ -1,3 +1,10 @@
+---
+title: "Phase 4 Beads DAG: capacity-halt detector and auto-continue"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 4 Beads DAG: capacity-halt detector and auto-continue
 
 Task: `plan-capacity-halt-phase4-decompose-2026-05-06`

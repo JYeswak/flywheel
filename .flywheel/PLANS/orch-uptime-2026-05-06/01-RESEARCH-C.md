@@ -1,3 +1,10 @@
+---
+title: "Lane C - Integration + Wire-Or-Explain Audit"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane C - Integration + Wire-Or-Explain Audit
 
 Date: 2026-05-06  

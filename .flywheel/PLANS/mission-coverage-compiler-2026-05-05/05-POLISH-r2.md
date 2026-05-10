@@ -1,3 +1,10 @@
+---
+title: "05-POLISH-r2: mission coverage compiler review"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 05-POLISH-r2: mission coverage compiler review
 
 ## 0. Dispatch Receipt

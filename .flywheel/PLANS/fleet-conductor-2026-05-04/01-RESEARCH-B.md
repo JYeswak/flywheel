@@ -1,3 +1,10 @@
+---
+title: "Lane B: Ecosystem Audit — fleet-conductor"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane B: Ecosystem Audit — fleet-conductor
 
 Plan: `fleet-conductor-2026-05-04`

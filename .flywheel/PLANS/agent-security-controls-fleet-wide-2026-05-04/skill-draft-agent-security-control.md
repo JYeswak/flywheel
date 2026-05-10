@@ -1,3 +1,10 @@
+---
+title: "Skill Draft: agent-security-control"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Skill Draft: agent-security-control
 
 Status: `draft_for_skillos_publication`

@@ -1,3 +1,10 @@
+---
+title: "Intent — /flywheel:recovery"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Intent — /flywheel:recovery
 
 ## Original prompt (Joshua, 2026-05-01)

@@ -1,3 +1,10 @@
+---
+title: "Phase 1 Research A - Problem-Space Inventory"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 1 Research A - Problem-Space Inventory
 
 Primary input: `/tmp/overnight-velocity-report/SUMMARY.md`.

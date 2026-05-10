@@ -1,3 +1,10 @@
+---
+title: "Fleet Autonomy v1 — Plan Input for /planning-workflow Review"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Fleet Autonomy v1 — Plan Input for /planning-workflow Review
 
 **Date:** 2026-05-05

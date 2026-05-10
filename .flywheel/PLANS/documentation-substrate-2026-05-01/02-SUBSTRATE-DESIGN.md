@@ -1,3 +1,10 @@
+---
+title: "Documentation Substrate Design - Lane 2"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Documentation Substrate Design - Lane 2
 
 Date: 2026-05-01

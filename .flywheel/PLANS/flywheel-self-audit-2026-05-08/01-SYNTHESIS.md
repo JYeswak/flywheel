@@ -1,3 +1,11 @@
+---
+title: "Flywheel Self-Audit Synthesis - 2026-05-08"
+type: plan
+created: 2026-05-07
+bead: flywheel-self
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Flywheel Self-Audit Synthesis - 2026-05-08
 
 Bead: `flywheel-ug399`

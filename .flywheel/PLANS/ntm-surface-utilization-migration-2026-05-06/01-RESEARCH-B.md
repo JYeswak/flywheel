@@ -1,3 +1,10 @@
+---
+title: "01-RESEARCH-B - NTM Surface Migration Ecosystem Audit"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 01-RESEARCH-B - NTM Surface Migration Ecosystem Audit
 
 Task: `ntm-surface-migration-lane-b-2026-05-06`  

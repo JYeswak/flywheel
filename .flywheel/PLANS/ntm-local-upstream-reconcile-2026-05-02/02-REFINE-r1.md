@@ -1,3 +1,10 @@
+---
+title: "REFINE r1: Chosen Model B Runbook Design"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # REFINE r1: Chosen Model B Runbook Design
 
 Chosen model: **Model B, vendor branch + local overlay**.

@@ -1,3 +1,10 @@
+---
+title: "Orch Heartbeat No Idle Projects - Intent"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Orch Heartbeat No Idle Projects - Intent
 
 Plan slug: `orch-heartbeat-no-idle-projects-2026-05-06`

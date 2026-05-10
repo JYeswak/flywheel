@@ -1,3 +1,10 @@
+---
+title: "Jeff Review - Fleet Autonomy v1"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 ```diff
 diff --git a/.flywheel/scripts/idle-state-probe.sh b/.flywheel/scripts/idle-state-probe.sh
 @@

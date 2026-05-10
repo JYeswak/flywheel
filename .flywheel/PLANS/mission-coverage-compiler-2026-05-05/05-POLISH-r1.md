@@ -1,3 +1,10 @@
+---
+title: "05-POLISH-r1 - Mission Coverage Apply Log"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 05-POLISH-r1 - Mission Coverage Apply Log
 
 Task: `polish-r1-apply-mission-coverage-2026-05-05`

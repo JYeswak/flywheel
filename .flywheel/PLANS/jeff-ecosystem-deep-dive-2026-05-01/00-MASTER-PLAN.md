@@ -1,3 +1,10 @@
+---
+title: "Master Plan — Jeff Ecosystem Deep Dive"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Master Plan — Jeff Ecosystem Deep Dive
 
 **Snapshot:** 2026-05-01T17:50Z

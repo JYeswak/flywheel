@@ -1,3 +1,10 @@
+---
+title: "Draft GitHub Issue: Config schema-loader drift beyond `[coordinator]`"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Draft GitHub Issue: Config schema-loader drift beyond `[coordinator]`
 
 Do not file from this worker. Joshua files if desired.

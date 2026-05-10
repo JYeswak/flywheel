@@ -1,3 +1,10 @@
+---
+title: "Codex Capacity Cycle INCIDENTS Promotion Research"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Codex Capacity Cycle INCIDENTS Promotion Research
 
 Date: 2026-05-06

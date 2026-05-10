@@ -1,3 +1,10 @@
+---
+title: "Mission-Lock Output Schema Implementation"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Mission-Lock Output Schema Implementation
 
 Date: 2026-05-06

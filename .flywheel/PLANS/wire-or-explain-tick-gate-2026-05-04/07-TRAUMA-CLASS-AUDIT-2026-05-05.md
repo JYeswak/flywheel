@@ -1,3 +1,10 @@
+---
+title: "Substrate-wide Trauma-Class Audit - 2026-05-05"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Substrate-wide Trauma-Class Audit - 2026-05-05
 
 Task: `b56-substrate-trauma-class-audit-2026-05-05`

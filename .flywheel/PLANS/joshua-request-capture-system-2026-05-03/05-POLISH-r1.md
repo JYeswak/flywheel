@@ -1,3 +1,10 @@
+---
+title: "Phase 5 POLISH r1 — adversarial review"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 5 POLISH r1 — adversarial review
 
 ## Verdict

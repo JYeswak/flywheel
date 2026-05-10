@@ -1,3 +1,10 @@
+---
+title: "Fleet Doctrine HR Policy"
+type: doctrine
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Fleet Doctrine HR Policy
 
 How canonical doctrine stays propagated across all flywheel-installed repos

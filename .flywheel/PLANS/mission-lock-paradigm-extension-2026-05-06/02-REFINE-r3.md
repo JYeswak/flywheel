@@ -1,3 +1,10 @@
+---
+title: "Refine r3 - Open Question Closure and Convergence Test"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Refine r3 - Open Question Closure and Convergence Test
 
 Task: `plan-mission-lock-paradigm-extension-phase2-refine-r3-2026-05-06`

@@ -1,3 +1,10 @@
+---
+title: "INTENT — validate-everything-we-build as foundational flywheel primitive"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # INTENT — validate-everything-we-build as foundational flywheel primitive
 
 Captured: 2026-05-03T22:19Z (initial scope: validate-and-redispatch worker callbacks)

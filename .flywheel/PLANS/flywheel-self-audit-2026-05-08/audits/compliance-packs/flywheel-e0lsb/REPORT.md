@@ -1,3 +1,11 @@
+---
+title: "Compliance Report"
+type: plan
+created: 2026-05-07
+bead: flywheel-self
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Compliance Report
 
 The bead-space audit artifact satisfies the dispatch contract.

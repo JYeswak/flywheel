@@ -1,3 +1,10 @@
+---
+title: "Lightweight Orchestrator Dispatch Pattern (LODP)"
+type: doctrine
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lightweight Orchestrator Dispatch Pattern (LODP)
 
 A pragmatic orchestrator dispatch flow that ships ~25 dispatches/hour with

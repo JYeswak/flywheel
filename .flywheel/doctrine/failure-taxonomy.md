@@ -1,3 +1,10 @@
+---
+title: "Failure Taxonomy Contract"
+type: doctrine
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Failure Taxonomy Contract
 
 owner_bead: flywheel-esdx

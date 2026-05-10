@@ -1,3 +1,10 @@
+---
+title: "INTENT — Substrate Failure Recovery 2026-05-05"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # INTENT — Substrate Failure Recovery 2026-05-05
 
 **Date:** 2026-05-05

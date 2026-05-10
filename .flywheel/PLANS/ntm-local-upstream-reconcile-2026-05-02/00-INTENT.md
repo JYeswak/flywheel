@@ -1,3 +1,10 @@
+---
+title: "NTM Local-Upstream Reconcile: Intent"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # NTM Local-Upstream Reconcile: Intent
 
 Date: 2026-05-02

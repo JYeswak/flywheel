@@ -1,3 +1,10 @@
+---
+title: "Lane B: Ecosystem audit — runtime_handoff-class state isolation"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane B: Ecosystem audit — runtime_handoff-class state isolation
 
 ## Jeff-stack intent inventory

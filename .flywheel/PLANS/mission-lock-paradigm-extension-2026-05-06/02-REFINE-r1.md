@@ -1,3 +1,10 @@
+---
+title: "Refine r1 - Substrate-Quality-Gate Triple"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Refine r1 - Substrate-Quality-Gate Triple
 
 Plan arc: `mission-lock-paradigm-extension-2026-05-06`

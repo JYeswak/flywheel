@@ -1,3 +1,10 @@
+---
+title: "Jeff Ecosystem Recon — Local Stack Audit"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Jeff Ecosystem Recon — Local Stack Audit
 
 Task: `jeff_eco_pane3`

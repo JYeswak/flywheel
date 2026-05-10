@@ -1,3 +1,10 @@
+---
+title: "R2 Cross-Plan Audit - Manager Loop x Fleet Autonomy x Mission Coverage Compiler"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # R2 Cross-Plan Audit - Manager Loop x Fleet Autonomy x Mission Coverage Compiler
 Artifact: `.flywheel/PLANS/02-AUDIT-r2-cross-plan.md`
 Task: `cross-plan-audit-r2-2026-05-05`

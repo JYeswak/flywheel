@@ -1,3 +1,10 @@
+---
+title: "/tmp Lifecycle Doctrine"
+type: doctrine
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # /tmp Lifecycle Doctrine
 
 owner_bead: flywheel-2bd2r

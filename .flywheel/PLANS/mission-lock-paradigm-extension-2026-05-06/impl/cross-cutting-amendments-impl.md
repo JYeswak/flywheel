@@ -1,3 +1,10 @@
+---
+title: "Cross-Cutting Skill Routing Amendments"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Cross-Cutting Skill Routing Amendments
 
 Task: `amendment-cross-cutting-skill-routing-2026-05-06`

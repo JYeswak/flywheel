@@ -1,3 +1,10 @@
+---
+title: "NTM Reconcile Research"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # NTM Reconcile Research
 
 Mode: read-only research. Commands used: `git status`, `git log`, `git show`, `git diff`, `git branch`, file reads, and Socraticode search. No git mutation was performed.

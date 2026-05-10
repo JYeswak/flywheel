@@ -1,3 +1,11 @@
+---
+title: "flywheel-3c5eq Compliance Scorecard"
+type: plan
+created: 2026-05-07
+bead: flywheel-self
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # flywheel-3c5eq Compliance Scorecard
 
 Score: 925/1000

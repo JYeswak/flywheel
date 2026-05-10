@@ -1,3 +1,10 @@
+---
+title: "Orchestrator Uptime Audit Lens 2: Cross-Cutting Skill Routing"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Orchestrator Uptime Audit Lens 2: Cross-Cutting Skill Routing
 
 Task: `orch-uptime-audit-2026-05-06`  

@@ -1,3 +1,11 @@
+---
+title: "Plan-Space Layer Audit - 2026-05-08"
+type: plan
+created: 2026-05-07
+bead: flywheel-self
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Plan-Space Layer Audit - 2026-05-08
 
 Bead: `flywheel-ivy6g`  

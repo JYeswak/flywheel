@@ -1,3 +1,10 @@
+---
+title: "Mission-Lock Paradigm Extension - Intent"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Mission-Lock Paradigm Extension - Intent
 
 Plan arc: `mission-lock-paradigm-extension-2026-05-06`

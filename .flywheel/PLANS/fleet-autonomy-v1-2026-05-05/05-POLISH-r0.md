@@ -1,3 +1,10 @@
+---
+title: "05-POLISH-r0 - Fleet Autonomy Bead Dispatchability Review"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 05-POLISH-r0 - Fleet Autonomy Bead Dispatchability Review
 
 Task ID: polish-review-fleet-autonomy-2026-05-05

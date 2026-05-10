@@ -1,3 +1,10 @@
+---
+title: "Documentation Substrate Inventory and Gap Matrix"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Documentation Substrate Inventory and Gap Matrix
 
 Lane 1 inventory only. This document does not implement docs substrate, hooks, doctor checks, or process changes.

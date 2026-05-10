@@ -1,3 +1,10 @@
+---
+title: "Jeff Emanuel Ecosystem — Repo Inventory"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Jeff Emanuel Ecosystem — Repo Inventory
 
 **Snapshot:** 2026-05-01

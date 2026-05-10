@@ -1,3 +1,10 @@
+---
+title: "Reconcile: pane 4 capacity-halt fix plus M1 lease closure"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Reconcile: pane 4 capacity-halt fix plus M1 lease closure
 
 Task: `capacity-halt-production-path-reconcile-2026-05-06`

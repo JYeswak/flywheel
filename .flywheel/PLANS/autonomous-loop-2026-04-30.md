@@ -1,3 +1,10 @@
+---
+title: "Autonomous Loop Plan"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Autonomous Loop Plan
 
 Question: "how do we make this loop process CORE to the entire flywheel? every project I'm working on right now is stopped - completely idle - until I jump in and ask it to do something. That is not flywheel."

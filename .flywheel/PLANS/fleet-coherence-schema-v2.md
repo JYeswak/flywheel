@@ -1,3 +1,10 @@
+---
+title: "Fleet-Coherence Schema v2"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Fleet-Coherence Schema v2
 
 **Created:** 2026-05-01  

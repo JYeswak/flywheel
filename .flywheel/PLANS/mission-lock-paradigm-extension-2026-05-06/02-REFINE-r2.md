@@ -1,3 +1,10 @@
+---
+title: "Refine r2 - Skill Injection Gate"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Refine r2 - Skill Injection Gate
 
 Plan arc: `mission-lock-paradigm-extension-2026-05-06`

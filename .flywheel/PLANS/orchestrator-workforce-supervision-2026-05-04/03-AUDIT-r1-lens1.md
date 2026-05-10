@@ -1,3 +1,10 @@
+---
+title: "Phase 3 AUDIT r1 Lens 1 - Observability, Safety, Cross-Session Boundary"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 AUDIT r1 Lens 1 - Observability, Safety, Cross-Session Boundary
 
 Plan: `orchestrator-workforce-supervision-2026-05-04`

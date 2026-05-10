@@ -1,3 +1,10 @@
+---
+title: "INFRA GAP SCAN 2026-05-05"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # INFRA GAP SCAN 2026-05-05
 
 Scan time: 2026-05-05T19:30Z.

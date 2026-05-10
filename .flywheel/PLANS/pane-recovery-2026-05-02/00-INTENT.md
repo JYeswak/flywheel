@@ -1,3 +1,10 @@
+---
+title: "Pane-Recovery System — Intent"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Pane-Recovery System — Intent
 
 **Plan ID:** pane-recovery-2026-05-02

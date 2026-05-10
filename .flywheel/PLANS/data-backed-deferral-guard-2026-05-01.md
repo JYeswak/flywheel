@@ -1,3 +1,10 @@
+---
+title: "Data-Backed Deferral Guard - flywheel-28v"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Data-Backed Deferral Guard - flywheel-28v
 
 status: plan-space

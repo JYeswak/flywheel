@@ -1,3 +1,10 @@
+---
+title: "Fleet Autonomy V1 Beads DAG"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Fleet Autonomy V1 Beads DAG
 ## Receipt
 - plan: fleet-autonomy-v1-2026-05-05

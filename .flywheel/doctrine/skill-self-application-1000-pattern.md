@@ -1,3 +1,10 @@
+---
+title: "Skill Self-Application 1000-Pattern"
+type: doctrine
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Skill Self-Application 1000-Pattern
 
 ## Status

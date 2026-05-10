@@ -1,3 +1,10 @@
+---
+title: "Cross-Pane Protocol Lane 1 - Docs Doctrine and State Machine"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Cross-Pane Protocol Lane 1 - Docs Doctrine and State Machine
 
 status: plan-space

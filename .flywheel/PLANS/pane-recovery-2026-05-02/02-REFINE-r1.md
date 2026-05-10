@@ -1,3 +1,10 @@
+---
+title: "Pane-Recovery — REFINE r1 (synthesis)"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Pane-Recovery — REFINE r1 (synthesis)
 
 **Inputs:** `01-RESEARCH-A.md` (detector, 1166 lines) + `01-RESEARCH-B.md` (recovery ladder, 1186 lines) + `01-RESEARCH-C.md` (integration, 1200 lines) — total 3552 lines plan-space.

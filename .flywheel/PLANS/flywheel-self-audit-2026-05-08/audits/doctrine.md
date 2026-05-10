@@ -1,3 +1,11 @@
+---
+title: "Doctrine Layer Audit - 2026-05-08"
+type: plan
+created: 2026-05-07
+bead: flywheel-self
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Doctrine Layer Audit - 2026-05-08
 
 Bead: `flywheel-3c5eq`

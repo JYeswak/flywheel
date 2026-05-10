@@ -1,3 +1,10 @@
+---
+title: "webhook-automation Jeff callback envelope enhancement"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # webhook-automation Jeff callback envelope enhancement
 
 Task: `flywheel-d7lv-eec6d5`

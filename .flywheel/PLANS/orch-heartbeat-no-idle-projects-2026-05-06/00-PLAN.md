@@ -1,3 +1,10 @@
+---
+title: "Orch Heartbeat No Idle Projects - Canonical Plan"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Orch Heartbeat No Idle Projects - Canonical Plan
 
 Status: converged through Phase 2, audited through Phase 3 in this plan arc.

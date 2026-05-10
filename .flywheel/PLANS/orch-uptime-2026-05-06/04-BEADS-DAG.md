@@ -1,3 +1,10 @@
+---
+title: "Phase 4 DECOMPOSE - Orchestrator Uptime Bead DAG"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 4 DECOMPOSE - Orchestrator Uptime Bead DAG
 
 task_id: `orch-uptime-decompose-2026-05-06`

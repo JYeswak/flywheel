@@ -1,3 +1,10 @@
+---
+title: "Lane B Codex-Parallel Ecosystem Audit"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane B Codex-Parallel Ecosystem Audit
 
 Plan: wire-or-explain-tick-gate-2026-05-04

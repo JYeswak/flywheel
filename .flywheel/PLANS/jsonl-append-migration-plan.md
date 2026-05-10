@@ -1,3 +1,10 @@
+---
+title: "JSONL Append Migration Plan"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # JSONL Append Migration Plan
 
 Source audit: `.flywheel/plans/wire-or-explain-tick-gate-2026-05-04/07-TRAUMA-CLASS-AUDIT-2026-05-05.md:50-72`.

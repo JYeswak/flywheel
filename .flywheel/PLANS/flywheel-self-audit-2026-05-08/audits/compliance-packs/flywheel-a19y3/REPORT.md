@@ -1,3 +1,11 @@
+---
+title: "flywheel-a19y3 Compliance Report"
+type: plan
+created: 2026-05-07
+bead: flywheel-self
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # flywheel-a19y3 Compliance Report
 
 Artifact: `.flywheel/PLANS/flywheel-self-audit-2026-05-08/audits/code-space.md`

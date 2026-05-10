@@ -1,3 +1,10 @@
+---
+title: "Fleet Coherence Signal Quality Report"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Fleet Coherence Signal Quality Report
 
 - Generated: `2026-05-08T19:38:27Z`

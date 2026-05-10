@@ -1,3 +1,10 @@
+---
+title: "Hive And Fleet-Mail Cross-Link Index"
+type: plan
+created: 2026-05-09
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Hive And Fleet-Mail Cross-Link Index
 
 Date: 2026-05-09

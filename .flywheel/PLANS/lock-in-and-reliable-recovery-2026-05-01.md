@@ -1,3 +1,10 @@
+---
+title: "Lock-In + Proven-Reliable NTM Recovery Plan"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lock-In + Proven-Reliable NTM Recovery Plan
 
 Date: 2026-05-01T14:05Z

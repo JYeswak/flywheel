@@ -1,3 +1,10 @@
+---
+title: "C2 Frozen Projection Invariant Scanner Deep Research"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # C2 Frozen Projection Invariant Scanner Deep Research
 
 Scope: read-only design for `frozen-projection-of-mutable-state` scanner. Sources read: `/Users/josh/Developer/flywheel/.flywheel/plans/orch-uptime-2026-05-06/01-RESEARCH-C.md` sections "Frozen Projection Extension" and "Doctor Invariant Proposal"; `/Users/josh/Developer/flywheel/.flywheel/plans/orch-uptime-2026-05-06/03-AUDIT-r1-paradigm.md` F4 amendment.

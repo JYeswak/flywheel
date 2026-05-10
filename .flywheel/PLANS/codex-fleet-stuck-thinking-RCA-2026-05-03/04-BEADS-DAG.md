@@ -1,3 +1,10 @@
+---
+title: "Codex Fleet Stuck THINKING RCA - Phase 4 Bead DAG"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Codex Fleet Stuck THINKING RCA - Phase 4 Bead DAG
 
 Status: review-ready markdown DAG only. No `br create` executed.

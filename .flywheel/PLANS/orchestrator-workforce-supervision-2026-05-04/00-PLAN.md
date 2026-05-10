@@ -1,3 +1,10 @@
+---
+title: "Phase 2 REFINE r2 - Orchestrator Workforce Supervision"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 2 REFINE r2 - Orchestrator Workforce Supervision
 
 Plan: `orchestrator-workforce-supervision-2026-05-04`

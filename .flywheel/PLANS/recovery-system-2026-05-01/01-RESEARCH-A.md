@@ -1,3 +1,10 @@
+---
+title: "/flywheel:recovery Lane A - State Inventory + Reboot Surface Mapping"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # /flywheel:recovery Lane A - State Inventory + Reboot Surface Mapping
 
 Task: `recovery_lane_a_state_inventory`

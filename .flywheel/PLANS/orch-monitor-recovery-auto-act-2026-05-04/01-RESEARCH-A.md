@@ -1,3 +1,10 @@
+---
+title: "Lane A: Problem-Space Failure-Class Taxonomy — orch-monitor-recovery-auto-act"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane A: Problem-Space Failure-Class Taxonomy — orch-monitor-recovery-auto-act
 
 ## Executive Summary

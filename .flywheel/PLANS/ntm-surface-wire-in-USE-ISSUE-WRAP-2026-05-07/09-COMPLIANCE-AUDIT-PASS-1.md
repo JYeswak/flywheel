@@ -1,3 +1,10 @@
+---
+title: "Beads Compliance Audit Pass 1"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Beads Compliance Audit Pass 1
 
 Date: 2026-05-07

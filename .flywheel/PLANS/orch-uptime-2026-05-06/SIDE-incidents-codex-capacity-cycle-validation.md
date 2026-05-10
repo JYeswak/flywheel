@@ -1,3 +1,10 @@
+---
+title: "SIDE Incident Validation - codex-capacity-cycle-throttle"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # SIDE Incident Validation - codex-capacity-cycle-throttle
 
 Read-only validation for:

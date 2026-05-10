@@ -1,3 +1,10 @@
+---
+title: "L66-L70 Adoption Packet"
+type: doctrine
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # L66-L70 Adoption Packet
 
 Status: plan-space adoption companion

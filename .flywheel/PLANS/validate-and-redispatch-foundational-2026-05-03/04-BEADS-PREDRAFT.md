@@ -1,3 +1,10 @@
+---
+title: "Phase 4 PRE-DRAFT - Bead Bodies"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 4 PRE-DRAFT - Bead Bodies
 
 Plan: `validate-everything-we-build-2026-05-03`

@@ -1,3 +1,10 @@
+---
+title: "Pane Work Signal Doctor Field"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Pane Work Signal Doctor Field
 
 `flywheel-loop doctor --json` now exposes `.pane_work_signal` as a defense-in-depth health surface for Codex false-idle disagreement after ntm#124.

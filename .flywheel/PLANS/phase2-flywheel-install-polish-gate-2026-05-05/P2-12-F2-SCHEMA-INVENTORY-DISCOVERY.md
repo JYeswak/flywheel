@@ -1,3 +1,11 @@
+---
+title: "P2-12 f2 Polish-Gate Schema Inventory Discovery"
+type: plan
+created: 2026-05-06
+bead: flywheel-install
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # P2-12 f2 Polish-Gate Schema Inventory Discovery
 
 Date: 2026-05-06

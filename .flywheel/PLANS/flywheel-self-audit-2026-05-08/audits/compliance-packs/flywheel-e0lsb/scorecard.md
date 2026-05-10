@@ -1,3 +1,11 @@
+---
+title: "Scorecard"
+type: plan
+created: 2026-05-07
+bead: flywheel-self
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Scorecard
 
 Bead: `flywheel-e0lsb`

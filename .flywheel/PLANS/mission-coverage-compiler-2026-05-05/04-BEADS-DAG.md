@@ -1,3 +1,10 @@
+---
+title: "04-BEADS-DAG - Mission Coverage Compiler"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 04-BEADS-DAG - Mission Coverage Compiler
 
 Task: mission-coverage-dag-doc-2026-05-05

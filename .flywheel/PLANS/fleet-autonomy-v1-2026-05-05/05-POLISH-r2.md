@@ -1,3 +1,10 @@
+---
+title: "Fleet Autonomy Polish R2 Review"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Fleet Autonomy Polish R2 Review
 date: 2026-05-05
 mode: read-only polish convergence review

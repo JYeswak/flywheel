@@ -1,3 +1,10 @@
+---
+title: "Phase 1 Lane A - Problem-Space Inventory"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 1 Lane A - Problem-Space Inventory
 
 Plan arc: `capacity-halt-detector-and-auto-continue-recovery`.

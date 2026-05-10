@@ -1,3 +1,10 @@
+---
+title: "Lane A Codex: Problem-Space Taxonomy — wire-or-explain-tick-gate"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane A Codex: Problem-Space Taxonomy — wire-or-explain-tick-gate
 
 Plan: `wire-or-explain-tick-gate-2026-05-04`

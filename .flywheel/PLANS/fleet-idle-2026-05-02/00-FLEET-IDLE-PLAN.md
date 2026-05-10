@@ -1,3 +1,10 @@
+---
+title: "Fleet-Idle Plan - 2026-05-02"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Fleet-Idle Plan - 2026-05-02
 Task: `fleet_idle_lane_d_synthesis`
 Mode: plan-space synthesis, read-only substrate inputs

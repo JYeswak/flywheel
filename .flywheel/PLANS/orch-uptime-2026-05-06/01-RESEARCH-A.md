@@ -1,3 +1,10 @@
+---
+title: "Lane A Research: `codex_usage_limit` Detector + `caam-auto-rotate` Primitive"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane A Research: `codex_usage_limit` Detector + `caam-auto-rotate` Primitive
 
 Task: `orch-uptime-plan-2026-05-06`  

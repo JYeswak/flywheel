@@ -1,3 +1,11 @@
+---
+title: "Code-Space Layer Audit"
+type: plan
+created: 2026-05-07
+bead: flywheel-self
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Code-Space Layer Audit
 
 Audit bead: `flywheel-a19y3`

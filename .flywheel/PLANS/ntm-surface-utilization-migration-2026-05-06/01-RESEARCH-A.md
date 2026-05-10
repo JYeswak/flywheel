@@ -1,3 +1,10 @@
+---
+title: "RESEARCH-A - NTM surface migration prioritization"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # RESEARCH-A - NTM surface migration prioritization
 
 Task: `ntm-surface-migration-lane-a-2026-05-06`  

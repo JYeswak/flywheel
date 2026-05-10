@@ -1,3 +1,10 @@
+---
+title: "NTM Surface Gap Audit Spreadsheet"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # NTM Surface Gap Audit Spreadsheet
 
 Date: 2026-05-07

@@ -1,3 +1,10 @@
+---
+title: "Identity Deferral Doctrine"
+type: doctrine
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Identity Deferral Doctrine
 
 owner_bead: flywheel-ulha

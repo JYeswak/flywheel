@@ -1,3 +1,10 @@
+---
+title: "DEPENDENTS-AUDIT-2026-05-05"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # DEPENDENTS-AUDIT-2026-05-05
 
 dispatch: /tmp/dispatch_dependents-audit-2026-05-05.md

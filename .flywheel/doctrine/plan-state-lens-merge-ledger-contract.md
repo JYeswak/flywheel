@@ -1,3 +1,10 @@
+---
+title: "Plan STATE Lens Merge Ledger Contract"
+type: doctrine
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Plan STATE Lens Merge Ledger Contract
 
 Version: `plan-state-lens-merge-ledger/v1`

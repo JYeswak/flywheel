@@ -1,3 +1,10 @@
+---
+title: "Phase 3 AUDIT r2 Confirmation - Wire-Or-Explain"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 AUDIT r2 Confirmation - Wire-Or-Explain
 task_id: woe-audit-r2-confirmation-eab070
 mode: PLAN-SPACE READ-ONLY

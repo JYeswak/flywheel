@@ -1,3 +1,10 @@
+---
+title: "Compliance Subagent Wire-In Research"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Compliance Subagent Wire-In Research
 
 Bead: `flywheel-9sqze`

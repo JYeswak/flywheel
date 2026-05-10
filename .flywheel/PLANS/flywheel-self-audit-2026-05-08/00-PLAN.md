@@ -1,3 +1,11 @@
+---
+title: "Flywheel Self-Audit Plan — 2026-05-08"
+type: plan
+created: 2026-05-08
+bead: flywheel-self
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Flywheel Self-Audit Plan — 2026-05-08
 
 **Trigger:** agent-flywheel.com /complete-guide pulled + bidirectional gap analysis at `.flywheel/research/external-doctrine/agent-flywheel-com-complete-guide-2026-05-08.md`. User directive: "turn the flywheel into beads — make sure we're auditing all layers of our flywheel and coming back with lessons learned."

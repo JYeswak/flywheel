@@ -1,3 +1,10 @@
+---
+title: "Phase 5 POLISH r3 - mission-lock paradigm extension"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 5 POLISH r3 - mission-lock paradigm extension
 
 Date: 2026-05-06

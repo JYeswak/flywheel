@@ -1,3 +1,10 @@
+---
+title: "Phase 3 Audit r1: Security Negative Invariants"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 Audit r1: Security Negative Invariants
 
 task_id: phase3-audit-security-negative-invariants-2026-05-06

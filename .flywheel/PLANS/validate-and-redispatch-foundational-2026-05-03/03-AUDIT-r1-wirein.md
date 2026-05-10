@@ -1,3 +1,10 @@
+---
+title: "Phase 3 AUDIT r1 Lens C: Doctrine, Learning Loop, and No-Punt Wire-In"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 AUDIT r1 Lens C: Doctrine, Learning Loop, and No-Punt Wire-In
 
 Plan: `validate-everything-we-build-2026-05-03`

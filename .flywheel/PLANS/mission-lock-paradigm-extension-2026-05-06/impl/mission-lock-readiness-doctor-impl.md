@@ -1,3 +1,10 @@
+---
+title: "Mission-Lock Readiness Doctor Implementation"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Mission-Lock Readiness Doctor Implementation
 
 Bead: `flywheel-mission-lock-readiness-doctor-2026-05-06`

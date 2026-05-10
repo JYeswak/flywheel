@@ -1,3 +1,10 @@
+---
+title: "AUDIT: NTM Reconcile Plan"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # AUDIT: NTM Reconcile Plan
 
 ## Safety

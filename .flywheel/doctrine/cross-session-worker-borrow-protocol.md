@@ -1,3 +1,10 @@
+---
+title: "Cross-session worker borrowing protocol (B06)"
+type: doctrine
+created: 2026-05-09
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Cross-session worker borrowing protocol (B06)
 
 Owns: bead `flywheel-cgjo`. Plan source:

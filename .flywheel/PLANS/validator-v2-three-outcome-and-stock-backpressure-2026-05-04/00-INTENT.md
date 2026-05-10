@@ -1,3 +1,10 @@
+---
+title: "Plan Intent — validator-v2-three-outcome-and-stock-backpressure"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Plan Intent — validator-v2-three-outcome-and-stock-backpressure
 
 **Slug:** validator-v2-three-outcome-and-stock-backpressure-2026-05-04

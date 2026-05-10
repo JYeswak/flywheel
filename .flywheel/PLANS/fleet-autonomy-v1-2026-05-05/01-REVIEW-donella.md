@@ -1,3 +1,10 @@
+---
+title: "Donella Lens Review - Fleet Autonomy v1"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Donella Lens Review - Fleet Autonomy v1
 
 Task: `fleet-autonomy-v1-lane-donella-2026-05-05`

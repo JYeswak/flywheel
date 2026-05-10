@@ -1,3 +1,10 @@
+---
+title: "Fleet Autonomy v1 - R2 Integrated Plan"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Fleet Autonomy v1 - R2 Integrated Plan
 
 ---

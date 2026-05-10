@@ -1,3 +1,10 @@
+---
+title: "Converged plan: joshua-request-capture-system"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Converged plan: joshua-request-capture-system
 
 > Phase 2 REFINE output. Self-authored. Single round (steady-state by construction — internally consistent across the doctor-signal/jeff-issue-chain patterns shipped today).

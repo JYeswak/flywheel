@@ -1,3 +1,10 @@
+---
+title: "Research C - Implementation Design"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Research C - Implementation Design
 
 Plan arc: `mission-lock-paradigm-extension-2026-05-06`

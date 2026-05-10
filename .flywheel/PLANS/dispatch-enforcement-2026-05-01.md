@@ -1,3 +1,10 @@
+---
+title: "Dispatch Enforcement Plan"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Dispatch Enforcement Plan
 
 Task: `flywheel-8i5`

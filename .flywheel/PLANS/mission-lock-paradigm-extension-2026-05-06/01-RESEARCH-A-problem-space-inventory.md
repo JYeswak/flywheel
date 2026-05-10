@@ -1,3 +1,10 @@
+---
+title: "Research A - Problem-Space Inventory"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Research A - Problem-Space Inventory
 
 Plan arc: `mission-lock-paradigm-extension-2026-05-06`

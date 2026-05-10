@@ -1,3 +1,10 @@
+---
+title: "Phase 3 Audit Round 1"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 Audit Round 1
 
 Audit method: broad sweep using the `jeff-convergence-audit` style, limited to three lenses required by dispatch. Scope is plan-space; no code was changed.

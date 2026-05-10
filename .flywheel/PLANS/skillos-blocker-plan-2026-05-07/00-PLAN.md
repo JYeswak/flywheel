@@ -1,3 +1,10 @@
+---
+title: "skillos Blocker Plan — 2026-05-07"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # skillos Blocker Plan — 2026-05-07
 
 ## 1. Root Cause Analysis

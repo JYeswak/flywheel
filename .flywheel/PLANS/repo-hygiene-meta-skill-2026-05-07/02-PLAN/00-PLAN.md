@@ -1,3 +1,10 @@
+---
+title: "Repo Hygiene Phase 2 Plan"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Repo Hygiene Phase 2 Plan
 
 Generated: 2026-05-07T20:28:00Z

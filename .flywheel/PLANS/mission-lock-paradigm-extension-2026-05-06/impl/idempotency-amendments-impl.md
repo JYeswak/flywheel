@@ -1,3 +1,10 @@
+---
+title: "Idempotency Receipt Integrity Amendments Implementation"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Idempotency Receipt Integrity Amendments Implementation
 
 task_id: amendment-idempotency-receipt-integrity-2026-05-06

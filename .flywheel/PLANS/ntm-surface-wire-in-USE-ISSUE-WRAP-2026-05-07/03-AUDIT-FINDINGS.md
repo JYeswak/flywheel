@@ -1,3 +1,10 @@
+---
+title: "Phase 5 Quality-Bar Audit"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 5 Quality-Bar Audit
 
 plan_slug: ntm-surface-wire-in-USE-ISSUE-WRAP-2026-05-07

@@ -1,3 +1,10 @@
+---
+title: "Capacity Halt Detector And Auto-Continue Recovery Plan"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Capacity Halt Detector And Auto-Continue Recovery Plan
 
 Plan arc: `capacity-halt-detector-and-auto-continue-recovery`.

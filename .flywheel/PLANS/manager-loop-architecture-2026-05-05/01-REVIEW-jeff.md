@@ -1,3 +1,10 @@
+---
+title: "Jeff Review: Manager-Loop Architecture"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 doctor_json="$(flywheel-loop doctor --json)"
 triage_json="$(bv --robot-triage --limit 20)"
 attention_json="$(ntm robot-attention --profile=operator --json)"

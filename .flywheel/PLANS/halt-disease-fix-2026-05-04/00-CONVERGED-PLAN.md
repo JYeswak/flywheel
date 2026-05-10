@@ -1,3 +1,10 @@
+---
+title: "Halt-disease structural fix — converged plan"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Halt-disease structural fix — converged plan
 
 **Author:** RubyCastle synthesis of Lanes A/B/C (codex panes 2/3/4) + orchestrator

@@ -1,3 +1,10 @@
+---
+title: "DAG Rebuild Worker Beta Output - L3 Quality + Plan-Skill Beads"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # DAG Rebuild Worker Beta Output - L3 Quality + Plan-Skill Beads
 
 Task: `dag-rebuild-beta-l3-quality-2026-05-05`

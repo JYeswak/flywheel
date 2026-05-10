@@ -1,3 +1,10 @@
+---
+title: "Storage Override Rollback Schema"
+type: doctrine
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Storage Override Rollback Schema
 
 `storage-override/v1` receipts are temporary storage gate changes. The rollback

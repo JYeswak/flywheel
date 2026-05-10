@@ -1,3 +1,10 @@
+---
+title: "Pane Work Signal as Codex Truth Source"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Pane Work Signal as Codex Truth Source
 
 Bead: `flywheel-u2x`

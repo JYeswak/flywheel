@@ -1,3 +1,10 @@
+---
+title: "Donella Review: Manager-Loop Architecture"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Donella Review: Manager-Loop Architecture
 
 001. SYSTEM: flywheel orchestration across workers, watchers, validators, doctors, integrators, and Joshua.

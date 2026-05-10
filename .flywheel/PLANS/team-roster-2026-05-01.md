@@ -1,3 +1,10 @@
+---
+title: "Lane A.2 — Team Roster + Interactive /flywheel:init Confirmation"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane A.2 — Team Roster + Interactive /flywheel:init Confirmation
 
 Author: picoz-p0 orchestrator (Claude)

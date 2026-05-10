@@ -1,3 +1,10 @@
+---
+title: "Manager Loop Phase 5 Polish Review - r2"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Manager Loop Phase 5 Polish Review - r2
 
 Artifact: `.flywheel/PLANS/manager-loop-architecture-2026-05-05/05-POLISH-r2.md`

@@ -1,3 +1,10 @@
+---
+title: "Convergence Bead Plan — Autoloop Diagnose-Then-Repair + Fleet Coverage"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Convergence Bead Plan — Autoloop Diagnose-Then-Repair + Fleet Coverage
 
 Generated: 2026-05-01

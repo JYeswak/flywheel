@@ -1,3 +1,10 @@
+---
+title: "Lane A — Problem-Space Inventory: agent-security-controls-fleet-wide"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane A — Problem-Space Inventory: agent-security-controls-fleet-wide
 
 Plan: `agent-security-controls-fleet-wide-2026-05-04`

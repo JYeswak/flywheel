@@ -1,3 +1,10 @@
+---
+title: "skill-discoveries-aggregator doctrine"
+type: doctrine
+created: 2026-05-09
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # skill-discoveries-aggregator doctrine
 
 **Bead origin:** flywheel-4s3oy.

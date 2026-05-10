@@ -1,3 +1,10 @@
+---
+title: "01-REVIEW-jeff - Watchdog Enablement"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 01-REVIEW-jeff - Watchdog Enablement
 
 Date: 2026-05-05

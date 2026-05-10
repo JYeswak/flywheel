@@ -1,3 +1,10 @@
+---
+title: "Phase 3 AUDIT r1 - Lens B: Evidence Contract and Closeout Integrity"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 AUDIT r1 - Lens B: Evidence Contract and Closeout Integrity
 
 Plan: `validate-everything-we-build-2026-05-03`

@@ -1,3 +1,10 @@
+---
+title: "Dispatch Self-Test Delivery Identity Implementation"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Dispatch Self-Test Delivery Identity Implementation
 
 Task: `wave3-dispatch-self-test-delivery-identity-2026-05-06`

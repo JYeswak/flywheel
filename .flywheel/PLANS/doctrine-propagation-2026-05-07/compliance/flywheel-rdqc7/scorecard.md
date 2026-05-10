@@ -1,3 +1,11 @@
+---
+title: "flywheel-rdqc7 compliance scorecard"
+type: plan
+created: 2026-05-08
+bead: flywheel-rdqc7
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # flywheel-rdqc7 compliance scorecard
 
 Score: 820/1000

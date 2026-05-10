@@ -1,3 +1,10 @@
+---
+title: "00-INTENT — ntm-surface-wire-in-USE-ISSUE-WRAP-2026-05-07"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 00-INTENT — ntm-surface-wire-in-USE-ISSUE-WRAP-2026-05-07
 
 ## Verbatim topic

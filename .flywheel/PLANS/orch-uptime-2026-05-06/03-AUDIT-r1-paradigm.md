@@ -1,3 +1,10 @@
+---
+title: "Orch Uptime Audit Lens 3 - Paradigm Conflict With Active Mission"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Orch Uptime Audit Lens 3 - Paradigm Conflict With Active Mission
 
 Task: `orch-uptime-audit-2026-05-06`  

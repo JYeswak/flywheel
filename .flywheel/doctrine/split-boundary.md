@@ -1,3 +1,10 @@
+---
+title: "Cherry-Pick Boundary Doctrine"
+type: doctrine
+created: 2026-05-09
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Cherry-Pick Boundary Doctrine
 
 When an upstream cherry-pick mixes Jeff-canonical code with Joshua-local code,

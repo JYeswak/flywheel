@@ -1,3 +1,10 @@
+---
+title: "Topology Restoration After Migration Strip"
+type: doctrine
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Topology Restoration After Migration Strip
 
 A documented failure class where a topology-rewriting script silently drops

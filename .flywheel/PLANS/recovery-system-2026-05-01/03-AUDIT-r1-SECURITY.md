@@ -1,3 +1,10 @@
+---
+title: "03-AUDIT-r1-SECURITY - /flywheel:recovery"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 03-AUDIT-r1-SECURITY - /flywheel:recovery
 
 task_id: recovery_audit_security

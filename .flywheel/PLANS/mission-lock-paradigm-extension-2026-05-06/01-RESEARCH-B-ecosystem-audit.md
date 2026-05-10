@@ -1,3 +1,10 @@
+---
+title: "Research B - Ecosystem Audit"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Research B - Ecosystem Audit
 
 Plan arc: `mission-lock-paradigm-extension-2026-05-06`

@@ -1,3 +1,10 @@
+---
+title: "Lane A: Artifact-Class Taxonomy & Wiring Evidence — wire-or-explain-tick-gate"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane A: Artifact-Class Taxonomy & Wiring Evidence — wire-or-explain-tick-gate
 
 **Status:** RESEARCH COMPLETE  

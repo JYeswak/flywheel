@@ -1,3 +1,10 @@
+---
+title: "01-REVIEW-jeff - Mission Coverage Compiler"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 01-REVIEW-jeff - Mission Coverage Compiler
 
 ## 0. Position

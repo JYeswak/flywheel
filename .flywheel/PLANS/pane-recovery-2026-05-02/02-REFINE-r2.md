@@ -1,3 +1,10 @@
+---
+title: "Pane-Recovery — REFINE r2 (post-AUDIT)"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Pane-Recovery — REFINE r2 (post-AUDIT)
 
 **Inputs added since r1:** `recovD_audit_crosscutting.md` (899 lines, 6 findings, 13 risks, 0 cycles) + `recovE_audit_safety.md` (819 lines, 8 invariants, 6 races, CLI 4/6 PASS).

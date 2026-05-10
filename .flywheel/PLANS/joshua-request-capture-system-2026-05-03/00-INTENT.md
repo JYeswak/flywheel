@@ -1,3 +1,10 @@
+---
+title: "INTENT: joshua-request-capture-system"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # INTENT: joshua-request-capture-system
 
 **Originator:** Joshua (flywheel orch session, 2026-05-03 ~21:00Z)

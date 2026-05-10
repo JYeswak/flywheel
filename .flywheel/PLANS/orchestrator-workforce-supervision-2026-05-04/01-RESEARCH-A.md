@@ -1,3 +1,10 @@
+---
+title: "Lane A - Problem-Space Inventory"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Lane A - Problem-Space Inventory
 
 Plan: `orchestrator-workforce-supervision-2026-05-04`

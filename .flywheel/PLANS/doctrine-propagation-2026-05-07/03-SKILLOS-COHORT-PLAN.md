@@ -1,3 +1,10 @@
+---
+title: "skillos doctrine cohort plan"
+type: plan
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # skillos doctrine cohort plan
 
 Bead: `flywheel-rdqc7`

@@ -1,3 +1,10 @@
+---
+title: "EXECUTION-PROGRESS — ntm-surface-wire-in-USE-ISSUE-WRAP-2026-05-07"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # EXECUTION-PROGRESS — ntm-surface-wire-in-USE-ISSUE-WRAP-2026-05-07
 
 **Snapshot:** 2026-05-07T18:28:47Z

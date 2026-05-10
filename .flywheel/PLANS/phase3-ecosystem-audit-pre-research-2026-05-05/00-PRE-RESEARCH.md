@@ -1,3 +1,10 @@
+---
+title: "Phase 3 Ecosystem Audit Pre-Research"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 Ecosystem Audit Pre-Research
 
 date: 2026-05-05

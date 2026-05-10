@@ -1,3 +1,10 @@
+---
+title: "/flywheel:recovery Lane C — Implementation Design + Bead Decomposition"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # /flywheel:recovery Lane C — Implementation Design + Bead Decomposition
 
 Task: `recovery_lane_c_implementation_design`

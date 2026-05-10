@@ -1,3 +1,10 @@
+---
+title: "Mission-Fidelity Substrate"
+type: doctrine
+created: 2026-05-08
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Mission-Fidelity Substrate
 
 ## Status

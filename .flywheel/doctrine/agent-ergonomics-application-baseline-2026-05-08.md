@@ -1,3 +1,10 @@
+---
+title: "Agent Ergonomics Application Baseline — 2026-05-08"
+type: doctrine
+created: 2026-05-09
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Agent Ergonomics Application Baseline — 2026-05-08
 
 ## Scope

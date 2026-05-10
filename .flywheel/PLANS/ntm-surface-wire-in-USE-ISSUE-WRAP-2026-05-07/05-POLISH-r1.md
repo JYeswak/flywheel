@@ -1,3 +1,10 @@
+---
+title: "Phase 5 Polish r1 — ntm-surface-wire-in-USE-ISSUE-WRAP-2026-05-07"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 5 Polish r1 — ntm-surface-wire-in-USE-ISSUE-WRAP-2026-05-07
 
 snapshot_ts: 2026-05-07T18:28:47Z  

@@ -1,3 +1,10 @@
+---
+title: "Mission-Lock Scaffold Validator Implementation"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Mission-Lock Scaffold Validator Implementation
 
 Date: 2026-05-06

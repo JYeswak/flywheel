@@ -1,3 +1,10 @@
+---
+title: "jeff-daily-corpus-diff doctrine"
+type: doctrine
+created: 2026-05-09
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # jeff-daily-corpus-diff doctrine
 
 **Bead origin:** flywheel-ys7em (replaces J3-J11 local-clone chain).

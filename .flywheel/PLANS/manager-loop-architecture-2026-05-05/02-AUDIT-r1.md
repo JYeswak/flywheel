@@ -1,3 +1,10 @@
+---
+title: "02-AUDIT-r1 - Manager Loop Architecture"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # 02-AUDIT-r1 - Manager Loop Architecture
 
 ## 1. Executive Verdict

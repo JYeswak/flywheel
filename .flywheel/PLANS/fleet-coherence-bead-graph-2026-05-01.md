@@ -1,3 +1,10 @@
+---
+title: "Fleet-Coherence Bead Graph (canonical intent)"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Fleet-Coherence Bead Graph (canonical intent)
 
 **Created:** 2026-05-01T16:21Z

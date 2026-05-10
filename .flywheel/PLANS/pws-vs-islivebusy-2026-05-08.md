@@ -1,3 +1,10 @@
+---
+title: "PWS vs ntm IsLiveBusy Audit"
+type: plan
+created: 2026-05-07
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # PWS vs ntm IsLiveBusy Audit
 
 Date: 2026-05-08

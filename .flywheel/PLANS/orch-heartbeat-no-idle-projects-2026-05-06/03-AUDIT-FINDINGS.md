@@ -1,3 +1,10 @@
+---
+title: "Phase 3 Audit Findings"
+type: plan
+created: 2026-05-06
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # Phase 3 Audit Findings
 
 Primary empirical input: `/tmp/overnight-velocity-report/SUMMARY.md`.

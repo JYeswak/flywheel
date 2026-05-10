@@ -1,3 +1,10 @@
+---
+title: "REFINE r2: Red-Team Review And Refinement"
+type: plan
+created: 2026-05-04
+frontmatter_source: scaffold-doc-frontmatter
+---
+
 # REFINE r2: Red-Team Review And Refinement
 
 This is a self-review of `02-REFINE-r1.md`.
