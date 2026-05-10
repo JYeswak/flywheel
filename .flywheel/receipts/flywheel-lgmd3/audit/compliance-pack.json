@@ -1,0 +1,95 @@
+{
+  "task_id": "flywheel-lgmd3",
+  "dispatch_id": "flywheel-lgmd3-50fa70",
+  "identity_name": "CloudyMill",
+  "pane": "flywheel:0.2",
+  "callback_pane": "flywheel:1",
+  "title": "[worker-tick-pre-flight] implement br show check + br sync --import-only fallback for bead-missing-from-local-db Forever Rule",
+  "did": "5/5",
+  "compliance_score": 920,
+  "compliance_max": 1000,
+  "four_lens": {
+    "brand": 9,
+    "sniff": 9,
+    "jeff": 9,
+    "public": 9
+  },
+  "score_components": {
+    "fix_correctness_3_step_contract_emitted": 200,
+    "REQUIRED_BLOCKS_gate_prevents_future_drift": 130,
+    "version_bump_marks_contract_change": 30,
+    "test_coverage_10_of_10": 200,
+    "stub_br_worker_simulation_in_smoke_test": 80,
+    "live_packet_rebuild_verified_interpolation": 80,
+    "evidence_md_complete_with_AG_table": 80,
+    "L61_ecosystem_touch_handled_no_doctrine_dup": 60,
+    "scope_discipline_emitter_only_no_INCIDENTS_edit": 60,
+    "polish_bonus_canonical_cli_validate_audit_subsidiary": 100,
+    "subtotal": 1020,
+    "deduct_no_AGENTS_md_pointer_added": -100,
+    "total": 920
+  },
+  "did_gates": [
+    {
+      "gate": "AG1: pre-flight `br show <bead-id>` instruction emitted in packet",
+      "status": "done",
+      "evidence": "build-dispatch-packet.sh:197 emits `br show %s --json` interpolated with bead-id; T3+T7 PASS"
+    },
+    {
+      "gate": "AG2: `br sync --import-only` fallback emitted on miss",
+      "status": "done",
+      "evidence": "Step 2 in emitted block; T4 PASS"
+    },
+    {
+      "gate": "AG3: BLOCKED with blocker_class=bead_missing_from_local_db (no silent failure)",
+      "status": "done",
+      "evidence": "Emitted callback signature includes blocker_type=flywheel_class blocker_class=bead_missing_from_local_db; T5+T8 PASS"
+    },
+    {
+      "gate": "AG4: block added to dispatch packet template + REQUIRED_BLOCKS",
+      "status": "done",
+      "evidence": "build-dispatch-packet.sh:228 PRE-FLIGHT BEAD PRESENCE BLOCK in REQUIRED_BLOCKS; dispatch-template-audit.sh accepts the block (T9 PASS)"
+    },
+    {
+      "gate": "AG5: smoke test — non-existent bead surfaces pre-flight catch",
+      "status": "done",
+      "evidence": "Test fixture with stub br simulating ISSUE_NOT_FOUND on show + no-op on sync; T10 PASS"
+    }
+  ],
+  "files_touched": [
+    ".flywheel/scripts/build-dispatch-packet.sh",
+    ".flywheel/tests/test-pre-flight-bead-presence.sh",
+    ".flywheel/receipts/flywheel-lgmd3/audit/evidence.md",
+    ".flywheel/receipts/flywheel-lgmd3/audit/pinned-shas.txt",
+    ".flywheel/receipts/flywheel-lgmd3/audit/test-output.txt",
+    ".flywheel/receipts/flywheel-lgmd3/audit/compliance-pack.json"
+  ],
+  "beads_filed": [],
+  "beads_updated": ["flywheel-lgmd3"],
+  "no_bead_reason": "parent flywheel-s2yd8 close already established Forever Rule + INCIDENTS.md doctrine entry; this dispatch is the structural implementation; no follow-up gap surfaced",
+  "fuckups_logged": [],
+  "skill_auto_routes": {
+    "canonical-cli-scoping": "yes",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "L61_ecosystem_touch": {
+    "agents_md_updated": "no",
+    "readme_updated": "not_applicable",
+    "no_touch_reason": "Forever Rule already lives in INCIDENTS.md#bead-missing-from-local-db (filed by flywheel-s2yd8 close); this dispatch is the structural enforcement, not new doctrine. The canonical L120 BR-CLOSE-EXECUTED rule remains accurate; the new pre-flight block sits before L120 and prevents the close-before-bead-exists failure mode."
+  },
+  "L107_reservations": {
+    "files": [
+      "/Users/josh/Developer/flywheel/.flywheel/scripts/build-dispatch-packet.sh",
+      "/Users/josh/Developer/flywheel/.flywheel/tests/test-pre-flight-bead-presence.sh"
+    ],
+    "release_required": true
+  },
+  "L112_probe": {
+    "command": "bash /Users/josh/Developer/flywheel/.flywheel/tests/test-pre-flight-bead-presence.sh",
+    "expected": "grep:pass=10 fail=0"
+  },
+  "mission_fitness": "adjacent",
+  "mission_rationale": "The bead-missing-from-local-db trauma class corrupted bead-state machine reliability across cross-worktree dispatches. Baking the Forever-Rule pre-flight into the dispatch packet template means every future worker receives the verify-then-sync-or-surface contract for free; serves continuous-orchestrator-uptime by removing the structural condition under which a worker can phantom-close a bead it doesn't have."
+}

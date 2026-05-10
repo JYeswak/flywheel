@@ -1,0 +1,7 @@
+branch: master
+head-pre: 6e031e3896d89d093d59a686c49c4ae80d0efb32
+builder-bytes:    30799
+builder-sha256: f18d431645a57115ff88b3345d58cfa6e1946b11dced61c8345d6b61b867e60a
+builder-version: VERSION="0.3.2"
+test-bytes:     6347
+test-sha256: 88a392a32fa868a5ce1e29665ffcff41e3dbee2bc1c8525fba2300044a809330

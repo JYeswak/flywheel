@@ -1,0 +1,13 @@
+PASS T1 build-dispatch-packet.sh passes bash -n
+PASS T2 PRE-FLIGHT BEAD PRESENCE BLOCK is in REQUIRED_BLOCKS
+PASS T3 emitter prints br show fast-path check
+PASS T4 emitter prints br sync --import-only recovery fallback
+PASS T5 emitter surfaces BLOCKED with blocker_class=bead_missing_from_local_db
+PASS T6 generated packet contains PRE-FLIGHT BEAD PRESENCE BLOCK section
+PASS T7 generated packet interpolates bead-id into pre-flight check
+PASS T8 generated packet emits BLOCKED Forever-Rule signature
+PASS T9 dispatch-template-audit.sh accepts packet with PRE-FLIGHT block
+PASS T10 worker pre-flight surfaces BLOCKED on missing bead (not silent)
+
+=== test-pre-flight-bead-presence.sh ===
+pass=10 fail=0
