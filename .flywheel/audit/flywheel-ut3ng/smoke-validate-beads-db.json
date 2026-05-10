@@ -1,0 +1,1 @@
+{"schema_version":"br-db-corruption-monitor/v1","command":"validate","subject":"beads-db","status":"pass","path":"/Users/josh/Developer/flywheel/.beads/beads.db","integrity":"ok"}

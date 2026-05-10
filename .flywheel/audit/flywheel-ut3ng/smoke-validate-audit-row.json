@@ -1,0 +1,1 @@
+{"schema_version":"br-db-corruption-monitor/v1","command":"validate","subject":"audit-row","status":"pass","row":{"ts":"2026-05-10T20:30:00Z","status":"pass","action":"check"}}

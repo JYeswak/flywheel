@@ -1,0 +1,1 @@
+{"schema_version":"br-db-corruption-monitor/v1","command":"why","id":"-1","status":"pass","match_count":1,"matches":[{"ts":"2026-05-10T18:19:06Z","action":"repair","status":"applied","sha256":"4403eb1b7256782118422e51ae0b1db0582ee38c15c80df442a5c72e4de3f7b0","scope":"audit_log_dir","idempotency_key":"ut3ng-evidence"}]}

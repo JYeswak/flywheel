@@ -1,0 +1,1 @@
+topic: doctor — probes substrate (sqlite3 binary, .beads/beads.db, beads-db-recover sister primitive, ledger dir, jq/python3 deps, audit log dir, repo root). Pass = monitor ready; warn = recoverable; fail = blocked.
