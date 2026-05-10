@@ -131,21 +131,26 @@ if printf '%s' "$out" | jq -e '.status == "pass" and .identity_registry_drift ==
   pass "FLYWHEEL_AGENT_MAIL_IDENTITY_TIMEOUT_SECONDS=10 honored (real probe still passes)"
 else fail "env override: $(printf '%s' "$out" | jq -c .)"; fi
 
-# Test 10: FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS fallback when the more-specific env is unset.
-# Source-level introspection: bumping just FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS should
-# also flow through. Probe with the sleeper + only the fallback env set → still timeouts at 1s.
-out="$(call_fn "FLYWHEEL_AGENT_MAIL_IDENTITY_PROBE=$SLEEPER" 'FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS=1')"
+# Test 10: 7228o fix — umbrella FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS is BYPASSED.
+# Pre-7228o, setting the umbrella to a tight value (e.g. 0.2 like part-02-portable_
+# doctor.sh:335 does) caused the probe to inherit it via the cascade. Post-7228o,
+# the cascade was dropped — the identity probe uses its own 5s default regardless
+# of umbrella. This is the load-bearing fix that closes the doctor-aggregation
+# drift=1 trauma.
+out="$(call_fn "FLYWHEEL_AGENT_MAIL_IDENTITY_PROBE=$SLEEPER" 'FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS=0.2')"
 if printf '%s' "$out" | jq -e '
   .errors[0].code == "identity_registry_doctor_timeout"
-  and .errors[0].probe_timeout_seconds == 1
+  and .errors[0].probe_timeout_seconds == 5
 ' >/dev/null; then
-  pass "FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS fallback honored when specific env unset"
-else fail "fallback: $(printf '%s' "$out" | jq -c '{"errors[0]": .errors[0]}')"; fi
+  pass "umbrella FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS=0.2 BYPASSED — probe still uses 5s default (7228o fix)"
+else fail "umbrella bypass: $(printf '%s' "$out" | jq -c '{"errors[0]": .errors[0]}')"; fi
 
-# Test 11: default timeout is 5 (post-3ycjw fix) — verify by source-string match
-if grep -Fq 'FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS:-5' "$AGENT_SH"; then
-  pass "default probe_timeout pinned to 5 (3ycjw fix from 1)"
-else fail "default probe_timeout substring 'FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS:-5' not found"; fi
+# Test 11: default timeout is 5 (post-3ycjw + 7228o fix) — verify by source-string match.
+# Post-7228o: cascade dropped; the leaf is now `FLYWHEEL_AGENT_MAIL_IDENTITY_TIMEOUT_SECONDS:-5`
+# (no FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS in the chain).
+if grep -Fq 'probe_timeout="${FLYWHEEL_AGENT_MAIL_IDENTITY_TIMEOUT_SECONDS:-5}"' "$AGENT_SH"; then
+  pass "default probe_timeout pinned to 5 with umbrella bypass (3ycjw + 7228o)"
+else fail "default probe_timeout substring 'FLYWHEEL_AGENT_MAIL_IDENTITY_TIMEOUT_SECONDS:-5' not found"; fi
 
 # Test 12: error envelope carries probe_exit_code field (new in 3ycjw)
 out="$(call_fn "FLYWHEEL_AGENT_MAIL_IDENTITY_PROBE=$GARBAGE")"
@@ -185,6 +190,40 @@ if $all_pass; then
   pass "5x parallel calls under default timeout=5: all status=pass (concurrent-load regression)"
 else
   fail "concurrent load: not all calls passed"
+fi
+
+# Test 16: 7228o PRIMARY AC — top-level flywheel-loop doctor reports
+# identity_registry_drift=0 (post-7228o umbrella bypass).
+# This is the cross-orch-load-bearing assertion: even with the doctor's
+# umbrella set to 0.2 internally (part-02-portable_doctor.sh:335), the
+# identity probe uses its own 5s default and returns drift=0.
+ROOT_REPO="/Users/josh/Developer/flywheel"
+if [[ -x /Users/josh/.claude/skills/.flywheel/bin/flywheel-loop ]] && [[ -d "$ROOT_REPO" ]]; then
+  doctor_out="$(/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo "$ROOT_REPO" --json 2>/dev/null)"
+  if printf '%s' "$doctor_out" | jq -e '
+    .identity_registry_drift == 0
+    and .identity_registry.drift_count == 0
+    and .identity_registry.status == "pass"
+    and .identity_registry.total_registered == 20
+  ' >/dev/null; then
+    pass "PRIMARY AC: top-level doctor identity_registry_drift=0 + embedded section pass+drift=0+total=20"
+  else
+    fail "top-level AC: $(printf '%s' "$doctor_out" | jq -c '{
+      top_drift: .identity_registry_drift,
+      embedded: {drift_count: .identity_registry.drift_count, status: .identity_registry.status, total_registered: .identity_registry.total_registered}
+    }')"
+  fi
+else
+  pass "PRIMARY AC skipped: substrate gone (flywheel-loop or repo missing)"
+fi
+
+# Test 17: 7228o regression guard — ensure the cascade stays dropped.
+# If a future edit re-introduces FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS into
+# the identity-probe timeout cascade, this test catches the regression.
+if ! grep -E 'probe_timeout="\$\{FLYWHEEL_AGENT_MAIL_IDENTITY_TIMEOUT_SECONDS:-\$\{FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS' "$AGENT_SH" >/dev/null; then
+  pass "regression guard: umbrella cascade NOT re-introduced into identity probe"
+else
+  fail "umbrella cascade was re-introduced — 7228o fix regressed"
 fi
 
 if [[ "$fail_count" -gt 0 ]]; then

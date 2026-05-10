@@ -1,0 +1,23 @@
+diff --git a/skills/.flywheel/lib/agent.sh b/skills/.flywheel/lib/agent.sh
+index de18dc2..6df27ac 100644
+--- a/skills/.flywheel/lib/agent.sh
++++ b/skills/.flywheel/lib/agent.sh
+@@ -151,10 +151,17 @@ agent_mail_identity_registry_doctor_json() {
+     # identity_registry_doctor_timeout) from other failures (rc!=0 + bad
+     # JSON → identity_registry_doctor_invalid_json) so callers can route
+     # actionable error classes separately.
++    #
++    # flywheel-7228o fix: bypass the FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS
++    # umbrella (set to 0.2 in part-02-portable_doctor.sh:335 for "fast
++    # probes"). The identity probe scans the full registry (~0.27s direct
++    # baseline, drifts higher under concurrent doctor load) and the
++    # umbrella's fast-probe assumption doesn't apply. Operators can still
++    # override the per-probe timeout via FLYWHEEL_AGENT_MAIL_IDENTITY_TIMEOUT_SECONDS.
+     local probe="${FLYWHEEL_AGENT_MAIL_IDENTITY_PROBE:-${FLYWHEEL_HOME:-$HOME/.claude/skills/.flywheel}/bin/flywheel-loop}"
+     local output timeout_bin probe_timeout probe_rc=0
+     timeout_bin="${FLYWHEEL_TIMEOUT_BIN:-timeout}"
+-    probe_timeout="${FLYWHEEL_AGENT_MAIL_IDENTITY_TIMEOUT_SECONDS:-${FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS:-5}}"
++    probe_timeout="${FLYWHEEL_AGENT_MAIL_IDENTITY_TIMEOUT_SECONDS:-5}"
+     if [[ ! -x "$probe" ]]; then
+         jq -nc --arg probe "$probe" '{
+           schema_version:"agent-mail-identity-registry-doctor/v1",
