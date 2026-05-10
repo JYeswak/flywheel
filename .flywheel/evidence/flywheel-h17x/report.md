@@ -160,3 +160,81 @@ Pack path: `.flywheel/evidence/flywheel-h17x/`.
   `feedback_data_decides_not_human_meatpuppet.md`,
   `feedback_calibrate_test_to_actual_contract_before_filing_upstream.md`
 - L-rules cited: L70 (no-punt — same-tick disposition), L52 (issues-to-beads — flywheel-dn3d2), L48 (worker scope — refused to author Axiom 23 against bead's explicit DEFER instruction)
+
+---
+
+## RE-DISPATCH 2026-05-10 — DEFER gate still not met
+
+**Re-dispatched 2026-05-10T02:59:19Z (task_id flywheel-h17x-1c9831).** Disposition: BLOCKED unchanged.
+
+### Delta since prior probe (2026-05-09)
+
+| Metric | Prior (2026-05-09) | Current (2026-05-10) | Delta |
+|---|---|---|---|
+| Total ledger rows | 30 | 32 | +2 |
+| Valid rows (schema-bridge: `.ts != null` OR `.observed_at != null`) | 24 | 30 | +6 |
+| Distinct calendar days populated | 3 (05-03, 05-04, 05-07) | 4 (05-03, 05-04, 05-07, 05-09) | **+1** |
+| Distinct days needed | 7 | 7 | (same threshold) |
+| Days remaining | 4 | **3** | -1 |
+
+Schema-bridge invariant from `flywheel-dn3d2` (closed 2026-05-10) now lets us count both legacy `.ts`-bearing rows AND current `.observed_at`-bearing rows toward the cohort. Distinct-day count uses `(.ts // .observed_at)[0:10] | sort -u`.
+
+### Honest read of the gate today
+
+- **Calendar span**: 2026-05-03 → 2026-05-09 = **7 days inclusive** (most-generous interpretation barely meets 7-day floor)
+- **Distinct days populated**: 4 of 7 (gaps: 05-05, 05-06, 05-08; today 05-10 not yet emitted)
+- **14-day baseline gap** (per bead MEASURE clause): even if next 3 daily ticks fire, 14-day-average-vs-baseline is still ~7 more days out
+- **Spirit reading** (continuous data sufficient for measurement): GATE NOT MET
+
+### Why the gaps persist (root cause)
+
+Probe is wired to `tick.md` Step 4l (`leverage-ceiling-probe.sh --doctor --json`) which appends to ledger every tick. But:
+- No background cadence (no launchd plist, no cron entry — verified `crontab -l` empty for "leverage", no `~/Library/LaunchAgents/*leverage*`)
+- Cadence depends on orch tick fires, which only happen when an active orch session is running
+- 2026-05-05, 05-06, 05-08 had no flywheel orch ticks (orch session paused or Joshua-offline)
+
+### Three unblock paths (recommended action)
+
+| Path | Action | Estimated unblock date |
+|---|---|---|
+| **A: Natural accumulation** | Wait for daily-tick cadence to fill 3+ more distinct days | ~2026-05-15 (3 more daily ticks if cadence holds) |
+| **B: Cadence wire-up (RECOMMENDED)** | Install launchd plist or cron entry that runs `leverage-ceiling-probe.sh --json` daily; would auto-fill missing days going forward + close cadence gap | ~2026-05-13 (2 more daily emits if cadence cleanly fires) |
+| **C: Backfill** | Approximate ts for missing days from another observability source (NOT recommended; loses fidelity) | n/a |
+
+### Sister BLOCKED-with-evidence dispositions today
+
+This re-dispatch joins 5 sister BLOCKED disposition shapes shipped this session, each with distinct precondition-shape signatures:
+
+- `flywheel-g6xaw` — trigger-gated (external release wait)
+- `flywheel-nsjse` — multi-actor experiment (orch + Joshua + unbounded wait)
+- `flywheel-fqsmx` — cohort-policy-not-met (producer cadence not active)
+- `flywheel-ze4xv` — cross-repo cohort partial-DONE (skillos repo + Joshua-gate split)
+- `flywheel-u4fmq` — fleet-impacting substrate swap (orch authority + Joshua-disposes)
+- `flywheel-h17x` (this re-dispatch) — DEFER-gated doctrine (data cadence not yet sufficient)
+
+Convergent precondition-shape-decides-which-gate-fires class continues to fire. The 6th shipped today.
+
+### Honoring the bead's spirit
+
+Bead body: "writing this BEFORE B6 ships measurement = vigilance theater (Meadows: rules without info flow are reminders, not interventions)."
+
+Writing Axiom 23 today with 4 distinct days of sparse data, when the bead's MEASURE clause requires a 14-day baseline, would be exactly that vigilance theater. Honoring DEFER is the discipline.
+
+### Compliance Pack (re-dispatch update)
+
+Score: 870/1000 (BLOCKED with explicit gate-not-met data + delta-since-last-probe + 3 unblock paths).
+
+- 0/1 acceptance gate DID (single AC: "write Axiom 23"); 1/1 PRECONDITION re-probed with delta
+- 4 distinct days probed vs 7 threshold
+- Cadence root-cause named (no scheduled job; tick-only firing)
+- Path B (cadence wire-up) recommended as the cleanest unblock
+
+### L52 / L70 receipt (re-dispatch)
+
+- L52: `no_bead_reason=BLOCKED-on-defer-gate-cadence-recommendation-surfaced-as-orch-action-not-new-bead`. Path B (cadence wire-up) could be filed as a tiny flywheel-* bead; deferring to orch's discretion.
+- L70: BLOCKED + delta + 3 unblock paths IS the next-actionable for THIS re-dispatch tick.
+
+### Skill discovery (re-dispatch update)
+
+`sd_ids=defer-gated-doctrine-bead-blocked-on-data-cadence-class` — sister to today's other "data-precondition-not-met" BLOCKED classes. The cadence-mechanism-absent root cause is a recurring shape (matches flywheel-fqsmx producer-side cohort gap, flywheel-ze4xv cadence punt). Convergent rule signal.
+
