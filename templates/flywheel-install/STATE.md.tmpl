@@ -26,6 +26,28 @@ provenance_note: {{provenance_note}}
 
 {{success_definition}}
 
+## Polish Gate runtime
+
+polish_gate_mode_active: <inherited from mission unless overridden>
+polish_gate_last_run_ts: <iso or null>
+polish_gate_surfaces_graded_count: 0
+polish_gate_surfaces_passed_count: 0
+polish_gate_surfaces_failed_count: 0
+polish_gate_pending_waivers: 0
+polish_gate_min_composite: null
+polish_gate_min_composite_surface: null
+
+## Stash Snapshot
+
+<!-- stash-snapshot:begin -->
+- ts: <updated by .flywheel/scripts/stash-discipline-check.sh --update-state-md>
+- stash_count: 0
+- class: clean
+- thresholds: notable=1 bead=5 halt=10
+- doctrine: .flywheel/doctrine/git-stash-discipline.md
+- snapshot_log: ~/.local/state/flywheel/stash-discipline-snapshots.jsonl
+<!-- stash-snapshot:end -->
+
 ## Resume Context
 
 {{resume_context}}

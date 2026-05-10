@@ -266,10 +266,28 @@ build_decision() {
     fi
   fi
   eclass="$(evidence_class "$evidence")"
+  # Stash discipline gate (L120 extension; doctrine: .flywheel/doctrine/git-stash-discipline.md).
+  # Only gates DONE callbacks (br_close_executed=yes). Halt threshold (default N>=10) refuses
+  # close. Bead-class (N>=5) emits warning but allows close. Notable (N>=1) is signal-only.
+  local stash_count=-1 stash_class="" stash_halt=false
+  local stash_check_script
+  stash_check_script="$(dirname "${BASH_SOURCE[0]}")/stash-discipline-check.sh"
+  if [[ "$br_close" == "yes" ]] && [[ -x "$stash_check_script" ]]; then
+    local stash_envelope
+    stash_envelope="$("$stash_check_script" --repo "$REPO" --no-append --json 2>/dev/null || printf '')"
+    if [[ -n "$stash_envelope" ]] && printf '%s' "$stash_envelope" | jq -e .stash_count >/dev/null 2>&1; then
+      stash_count="$(printf '%s' "$stash_envelope" | jq -r '.stash_count // -1')"
+      stash_class="$(printf '%s' "$stash_envelope" | jq -r '.class // ""')"
+      stash_halt="$(printf '%s' "$stash_envelope" | jq -r '.halt // false')"
+    fi
+  fi
+
   if [[ "${#missing[@]}" -gt 0 ]]; then
     decision="reject_malformed"; rc=2
   elif [[ "$fitness" == "drift" ]]; then
     decision="reject_drift"; rc=3
+  elif [[ "$stash_halt" == "true" ]]; then
+    decision="reject_stash_halt_threshold"; rc=4
   elif [[ "$fitness" == "infrastructure" ]] && last_five_infra; then
     decision="warn_infra_recursion"; rc=1
   else
@@ -312,7 +330,11 @@ build_decision() {
     --argjson log_written "$log_written" \
     --argjson dispatch_updates "$dispatch_updates" \
     --argjson drift_alert "$drift_alert" \
-    '. + {log_written:$log_written,dispatch_log_updated:$dispatch_updates,drift_alert_written:$drift_alert}' <<<"$row")"
+    --argjson stash_count "$stash_count" \
+    --arg stash_class "$stash_class" \
+    --argjson stash_halt "${stash_halt:-false}" \
+    '. + {log_written:$log_written,dispatch_log_updated:$dispatch_updates,drift_alert_written:$drift_alert,
+          stash_count:$stash_count,stash_class:$stash_class,stash_halt:$stash_halt}' <<<"$row")"
   if [[ "$APPLY" -eq 1 ]]; then
     append_jsonl "$LOG_PATH" "$row"
   fi

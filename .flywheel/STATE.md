@@ -239,3 +239,14 @@ DECISION: tick=reap; flywheel-b6js DONE 5/9 (validation; tests PASS, 3 gaps (ski
 **Latest handoff:** `.flywheel/handoffs/2026-05-06T2144-orch-uptime-wave1-mid-shipping.md` (2026-05-06 orch-uptime Wave 1 mid-shipping; W0+B1+C1 SHIPPED, A1 in flight pane 3; plan-arc Phase 5 r3 ratified 0.00% diff streak=2; 21-doc plan dir ratified; L119+L120 doctrine landed; INCIDENTS +73 lines codex-capacity-cycle-throttle; cross-orch coord row 203 frozen-projection-of-mutable-state; 6 memory rules earned; pending: A1 callback + 109-surface ntm audit dispatch queued at /tmp/dispatch_ntm-surface-audit-bead-file-2026-05-06.md)
 
 **Latest handoff:** `.flywheel/handoffs/2026-05-06-2230-compact-resume-ntm-audit-pivot.md` (2026-05-06T22:30Z post-compact resume + AUDIT-PIVOT: pane 4 109-surface ntm audit is gating; NEW bead authoring PAUSED until audit lands; once delivered, run /flywheel:plan ntm-surface-utilization-migration to decompose; Wave 2-4 of orch-uptime may be reframed/superseded by audit findings; in-flight A3 pane 2 + B2 pane 3 + audit pane 4 all THINKING; /flywheel:learn --review for 1515 unprocessed fuckup rows queued in parallel)
+
+## Stash Snapshot
+
+<!-- stash-snapshot:begin -->
+- ts: 2026-05-10T18:01:02Z
+- stash_count: 2
+- class: notable
+- thresholds: notable=1 bead=5 halt=10
+- doctrine: .flywheel/doctrine/git-stash-discipline.md
+- snapshot_log: /Users/josh/.local/state/flywheel/stash-discipline-snapshots.jsonl
+<!-- stash-snapshot:end -->
