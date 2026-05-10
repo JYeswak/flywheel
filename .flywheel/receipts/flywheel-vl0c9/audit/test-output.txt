@@ -1,0 +1,10 @@
+PASS T1 doctrine-ladder-promote.sh passes bash -n
+PASS T2 default_incident_paths source contains >=2 rules-glob lines (count=3)
+PASS T3 empty fuckup-log run creates 0, skips 0 (action=completed)
+PASS T4 synthetic class with L-rule-only coverage returns skipped:incidents_covered
+PASS T5 without rules fixture, synthetic class is NOT skipped:incidents_covered (proves rules-glob is the gate)
+PASS T5b stub br_bin forces bead_exists path (no live bead created)
+PASS T6 INCIDENTS.md-only fixture still returns covered (backward compat)
+
+=== test-doctrine-ladder-promote-rules-coverage.sh ===
+pass=7 fail=0

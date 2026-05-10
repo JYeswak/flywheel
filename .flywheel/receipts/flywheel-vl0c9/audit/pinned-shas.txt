@@ -1,0 +1,8 @@
+branch: master
+head: 627828850edc903fa4372f664c771c6ed5a091ef
+promote-script-pre: 010abfb4ae857e72d509739799da475083837caa
+promote-script-working: d741e5936598d9048d691d0146610c5210eaa4ef692a2f2d7f342c2050ea592e
+test-working: 3defd147405f46c528d4fe6ed2de22b2cac9d1d26aa3436155bad7dfb87ac8d3
+regression-test: pass=7 fail=0
+live-effect: 60+ trauma classes (e.g. daily_report_missing_dispatch_gate, sister-orch-2-tick-blocker, three_q_surface_gap, mobile-eats-dispatch-health-gate-fail) now skip via incidents_covered against L-rule body text
+spillage-incident: 58 beads accidentally created during initial test design (sourced script triggers main flow); all batch-closed; test rewritten to subprocess-only with FUCKUP_LOG=empty + br_bin stub for bead_exists path

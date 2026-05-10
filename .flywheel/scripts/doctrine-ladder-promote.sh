@@ -47,6 +47,16 @@ default_incident_paths() {
   # branch), $REPO/INCIDENTS.md may be days out of date; the canonical
   # flywheel checkout is the source of truth.
   printf '%s\n' "/Users/josh/Developer/flywheel/INCIDENTS.md"
+  # flywheel-vl0c9: extend coverage scan to .flywheel/rules/*.md so
+  # trauma classes already covered at the canonical L-rule layer don't
+  # re-fire as promotion-candidate beads. Surfaced by 6+ duplicate
+  # filings in one session for daily_report_missing_dispatch_gate,
+  # mobile-eats-dispatch-health-gate-fail, sister-orch-2-tick-blocker,
+  # three_q_surface_gap, and orch-punt-to-next-tick — all already
+  # covered by L91/L92/L70/L152/two-blocker-ticks-escalate L-rules.
+  printf '%s\n' "$REPO"/.flywheel/rules/*.md
+  printf '%s\n' "$HOME"/.claude/skills/.flywheel/rules/*.md
+  printf '%s\n' /Users/josh/Developer/flywheel/.flywheel/rules/*.md
 }
 
 incident_paths() {

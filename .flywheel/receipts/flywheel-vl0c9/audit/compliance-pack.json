@@ -1,0 +1,94 @@
+{
+  "task_id": "flywheel-vl0c9",
+  "dispatch_id": "flywheel-vl0c9-b7922f",
+  "identity_name": "CloudyMill",
+  "pane": "flywheel:0.2",
+  "callback_pane": "flywheel:1",
+  "title": "[doctrine-ladder-improvement] extend doctrine-ladder-promote.sh incident_paths to scan .flywheel/rules/",
+  "did": "4/4",
+  "compliance_score": 820,
+  "compliance_max": 1000,
+  "four_lens": {
+    "brand": 8,
+    "sniff": 8,
+    "jeff": 9,
+    "public": 9
+  },
+  "score_components": {
+    "fix_correctness": 200,
+    "test_coverage_7_of_7": 180,
+    "live_effect_verified_60plus_classes": 150,
+    "L61_ecosystem_touch_handled": 60,
+    "evidence_md_complete": 80,
+    "fuckup_logged_with_recovery": 60,
+    "regression_test_subprocess_only": 90,
+    "spillage_penalty": -100,
+    "subtotal": 720,
+    "polish_bonus_canonical_cli_partial": 50,
+    "polish_bonus_donella_5_to_6": 50,
+    "total": 820
+  },
+  "did_gates": [
+    {
+      "gate": "default_incident_paths() scans .flywheel/rules/*.md",
+      "status": "done",
+      "evidence": "3 globs added at .flywheel/scripts/doctrine-ladder-promote.sh:57-59 (REPO + CLAUDE_ROOT + canonical absolute)"
+    },
+    {
+      "gate": "Synthetic L-rule-only class returns skipped:incidents_covered",
+      "status": "done",
+      "evidence": "T4 PASS in test-doctrine-ladder-promote-rules-coverage.sh"
+    },
+    {
+      "gate": "Existing INCIDENTS.md scan still works",
+      "status": "done",
+      "evidence": "T6 PASS (INCIDENTS.md-only fixture returns covered)"
+    },
+    {
+      "gate": "bash -n clean",
+      "status": "done",
+      "evidence": "T1 PASS"
+    }
+  ],
+  "files_touched": [
+    ".flywheel/scripts/doctrine-ladder-promote.sh",
+    ".flywheel/tests/test-doctrine-ladder-promote-rules-coverage.sh",
+    ".flywheel/receipts/flywheel-vl0c9/audit/evidence.md",
+    ".flywheel/receipts/flywheel-vl0c9/audit/pinned-shas.txt",
+    ".flywheel/receipts/flywheel-vl0c9/audit/test-output.txt",
+    ".flywheel/receipts/flywheel-vl0c9/audit/compliance-pack.json"
+  ],
+  "beads_filed": [],
+  "beads_updated": {
+    "closed_by_spillage_recovery": 58,
+    "spillage_bead_ids_file": "/tmp/vl0c9-bead-ids.txt",
+    "note": "58 promotion-candidate beads were accidentally created during initial test design (sourcing main-flow script). All batch-closed via br close. Recovery documented in evidence.md."
+  },
+  "fuckups_logged": [
+    "l52-test-design-spillage"
+  ],
+  "skill_auto_routes": {
+    "canonical-cli-scoping": "yes-partial",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "L61_ecosystem_touch": {
+    "agents_md_updated": "no",
+    "readme_updated": "not_applicable",
+    "no_touch_reason": "probe-mechanism enhancement; canonical L56 ladder doctrine in AGENTS.md remains accurate; change tightens gate to match L-rule canonical surface that already exists"
+  },
+  "L107_reservations": {
+    "files": [
+      ".flywheel/scripts/doctrine-ladder-promote.sh",
+      ".flywheel/tests/test-doctrine-ladder-promote-rules-coverage.sh"
+    ],
+    "release_required": true
+  },
+  "L112_probe": {
+    "command": "bash /Users/josh/Developer/flywheel/.flywheel/tests/test-doctrine-ladder-promote-rules-coverage.sh",
+    "expected": "pass=7 fail=0"
+  },
+  "mission_fitness": "infrastructure",
+  "mission_rationale": "L56 ladder is the orchestrator's structural promotion path from fuckup-log -> INCIDENTS -> canonical L-rule. By teaching the ladder that L-rules are canonical INCIDENTS coverage, this fix collapses an entire class of cross-reference noise eating ~5+ orchestrator dispatches per day. Directly serves continuous-orchestrator-uptime by tightening L56 signal-to-noise."
+}
