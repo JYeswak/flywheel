@@ -1,0 +1,1 @@
+{"schema_version":"blocker-ac-tick-cadence/v1","command":"validate","subject":"counter-state","status":"pass","counter_file":"/Users/josh/.local/state/flywheel/blocker-ac-tick-counter.json","counter":6,"last_tick_ts":"2026-05-10T19:36:21Z","default_n":4,"fires_on_next_tick":false}

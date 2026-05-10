@@ -1,0 +1,1 @@
+{"schema_version":"blocker-ac-tick-cadence/v1","command":"tick","ts":"2026-05-10T19:36:21Z","status":"pass","tick_counter":6,"default_n":4,"blocker_count":0,"fired":0,"skipped_not_nth":0,"skipped_fresh":0,"skipped_no_ac":0,"errors":0,"per_blocker":[]}
