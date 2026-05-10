@@ -1,0 +1,18 @@
+=== bundle test ===
+PASS[1]: absolute target → SCRIPT="<absolute-no-double-slash>" : SCRIPT="/private/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/scaffold-bugfix-bundle.XXXXXX.he2JsZ0jVy/abs-fixture-56679.sh"
+PASS[1b]: in-repo relative-path test still uses $ROOT prefix (regression guard)
+PASS[2]: freshly-scaffolded stubs pass canonical-cli-lint --rule L4
+PASS[2b]: exemplar if/then/else/fi pattern visible in stub TODO comments
+PASS[3]: both backups survive: bak-a-56679.sh.bak.scaffold-20260510T183107382688000Z-56795 vs bak-b-56679.sh.bak.scaffold-20260510T183107507289000Z-56841
+PASS[3b]: backup name ends with -<pid> suffix: bak-a-56679.sh.bak.scaffold-20260510T183107382688000Z-56795
+PASS scaffold-canonical-cli-bugfix-bundle (5 assertion groups: AG1+1b, AG2+2b, AG3+3b)
+
+=== e2e test ===
+PASS scaffolder refuses uninventoried target with rc=66
+PASS --allow-uninventoried bypasses uninventoried refusal
+SUMMARY pass=20 fail=0
+
+=== shebang guard ===
+PASS[8]: /bin/sh still scaffolds
+PASS[9]: no-shebang file still scaffolds (no false positive)
+PASS scaffold-canonical-cli-shebang-guard (9 assertions)
