@@ -1,0 +1,1 @@
+{"schema_version":"beads-db-recover/v1","command":"why","id":"-1","status":"pass","match_count":1,"matches":[{"ts":"2026-05-10T17:58:49Z","action":"repair","status":"applied","sha256":"8ebb211eca0d63b96ea20c194929cb2572ffd464bc3155eb900808ff87cb61af","scope":"audit_log_dir","idempotency_key":"qprlj-evidence"}]}

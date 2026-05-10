@@ -1,0 +1,1 @@
+topic: validate — subjects: beads-db PATH (sqlite3 PRAGMA integrity_check on the .beads/beads.db file); audit-row JSONL_LINE (verify ts/status fields).

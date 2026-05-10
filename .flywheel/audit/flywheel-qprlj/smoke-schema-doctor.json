@@ -1,0 +1,1 @@
+{"schema_version":"beads-db-recover/v1","command":"schema","surface":"doctor","fields":{"schema_version":"string","command":"\"doctor\"","status":"\"pass\"|\"warn\"|\"fail\"","checks":"[{name,status,detail}]","ts":"string(iso8601)"}}
