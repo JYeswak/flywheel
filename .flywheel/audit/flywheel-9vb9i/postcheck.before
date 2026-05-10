@@ -1,0 +1,410 @@
+# doctor.sh extracted functions: doctor_cache_path..doctor_schema_postcheck
+
+doctor_cache_path() {
+    local key="$1" dir
+    dir="${FLYWHEEL_DOCTOR_CACHE_DIR:-${TMPDIR:-/tmp}/flywheel-loop-doctor-cache}"
+    printf '%s/%s.json\n' "$dir" "$key"
+}
+
+
+doctor_cache_mtime() {
+    local path="$1"
+    stat -f %m "$path" 2>/dev/null || stat -c %Y "$path" 2>/dev/null || printf '0\n'
+}
+
+
+doctor_cache_get() {
+    local key="$1" cache now mtime ttl age
+    [[ "${FLYWHEEL_DOCTOR_CACHE_DISABLE:-0}" != "1" ]] || return 1
+    cache="$(doctor_cache_path "$key")"
+    [[ -s "$cache" ]] || return 1
+    now="$(date +%s)"
+    mtime="$(doctor_cache_mtime "$cache")"
+    ttl="${FLYWHEEL_DOCTOR_CACHE_TTL_SECONDS:-120}"
+    age=$((now - mtime))
+    if [[ "$age" -ge 0 && "$age" -le "$ttl" ]] && jq -e . "$cache" >/dev/null 2>&1; then
+        jq -c --argjson age "$age" '. + {doctor_cache_hit:true, doctor_cache_age_seconds:$age}' "$cache"
+        return 0
+    fi
+    return 1
+}
+
+
+doctor_cache_put() {
+    local key="$1" payload="$2" cache dir
+    [[ "${FLYWHEEL_DOCTOR_CACHE_DISABLE:-0}" != "1" ]] || return 0
+    jq -e . >/dev/null 2>&1 <<<"$payload" || return 0
+    cache="$(doctor_cache_path "$key")"
+    dir="$(dirname "$cache")"
+    mkdir -p "$dir"
+    printf '%s\n' "$payload" >"$cache"
+}
+
+
+doctor_ntm_health_json() {
+    local session ntm_bin list_json health_json diagnose_json fixture diagnose_fixture timeout_bin ntm_timeout
+    session="${FLYWHEEL_DOCTOR_SESSION:-$(basename "$REPO_ABS")}"
+    fixture="${FLYWHEEL_DOCTOR_NTM_ROBOT_HEALTH_JSON:-${FLYWHEEL_DOCTOR_NTM_HEALTH_JSON:-}}"
+    diagnose_fixture="${FLYWHEEL_DOCTOR_NTM_ROBOT_DIAGNOSE_JSON:-}"
+    if [[ -n "$fixture" ]]; then
+        if [[ -f "$fixture" ]]; then
+            health_json="$(cat "$fixture")"
+        else
+            health_json="$fixture"
+        fi
+        if ! jq -e . >/dev/null 2>&1 <<<"$health_json"; then
+            jq -nc --arg source "$fixture" '{session:null,errors:[{code:"ntm_robot_health_fixture_invalid_json",message:"FLYWHEEL_DOCTOR_NTM_ROBOT_HEALTH_JSON / FLYWHEEL_DOCTOR_NTM_HEALTH_JSON did not parse",source:$source}],warnings:[]}'
+            return 0
+        fi
+        diagnose_json='{}'
+        if [[ -n "$diagnose_fixture" ]]; then
+            if [[ -f "$diagnose_fixture" ]]; then
+                diagnose_json="$(cat "$diagnose_fixture")"
+            else
+                diagnose_json="$diagnose_fixture"
+            fi
+            jq -e . >/dev/null 2>&1 <<<"$diagnose_json" || diagnose_json='{}'
+        fi
+    else
+        if [[ "${FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED:-0}" == "1" ]]; then
+            jq -nc '{session:null,errors:[],warnings:[],skipped:true,reason:"disabled"}'
+            return 0
+        fi
+
+        ntm_bin="${FLYWHEEL_NTM_BIN:-/Users/josh/.local/bin/ntm}"
+        if [[ ! -x "$ntm_bin" ]]; then
+            jq -nc --arg ntm "$ntm_bin" '{session:null,errors:[],warnings:[{code:"ntm_missing",message:"ntm binary missing",path:$ntm}],skipped:true}'
+            return 0
+        fi
+
+        timeout_bin="${FLYWHEEL_TIMEOUT_BIN:-timeout}"
+        ntm_timeout="${FLYWHEEL_DOCTOR_NTM_TIMEOUT_SECONDS:-8}"
+        if command -v "$timeout_bin" >/dev/null 2>&1; then
+            list_json="$("$timeout_bin" "$ntm_timeout" "$ntm_bin" list --json 2>/dev/null || true)"
+        else
+            list_json="$("$ntm_bin" list --json 2>/dev/null || true)"
+        fi
+        if ! jq -e --arg s "$session" '
+            ((.sessions // .) | if type == "array" then . else [] end)
+            | any(.name == $s)
+          ' <<<"$list_json" >/dev/null 2>&1; then
+            jq -nc --arg session "$session" '{session:$session,errors:[],warnings:[],skipped:true,reason:"session_not_registered"}'
+            return 0
+        fi
+
+        if command -v "$timeout_bin" >/dev/null 2>&1; then
+            health_json="$("$timeout_bin" "$ntm_timeout" "$ntm_bin" --robot-health="$session" --json 2>/dev/null || true)"
+        else
+            health_json="$("$ntm_bin" --robot-health="$session" --json 2>/dev/null || true)"
+        fi
+        if ! jq -e . >/dev/null 2>&1 <<<"$health_json"; then
+            jq -nc --arg session "$session" '{session:$session,errors:[],warnings:[{code:"ntm_robot_health_invalid_json",message:"ntm --robot-health did not return valid JSON"}],skipped:true}'
+            return 0
+        fi
+        if command -v "$timeout_bin" >/dev/null 2>&1; then
+            diagnose_json="$("$timeout_bin" "$ntm_timeout" "$ntm_bin" --robot-diagnose="$session" --json 2>/dev/null || printf '{}')"
+        else
+            diagnose_json="$("$ntm_bin" --robot-diagnose="$session" --json 2>/dev/null || printf '{}')"
+        fi
+        if ! jq -e . >/dev/null 2>&1 <<<"$diagnose_json"; then
+            diagnose_json='{}'
+        fi
+    fi
+
+    jq -c --arg session "$session" --argjson diagnose "$diagnose_json" '
+      def agents: (.agents // []);
+      def bad_agents:
+        [agents[]
+          | select(
+              ((.health // "") | ascii_downcase) as $health
+              | ((.status // "") | ascii_downcase) as $status
+              | ((.process_status // "") | ascii_downcase) as $process
+              | ($health | IN("unhealthy","crashed","unresponsive","error"))
+                or ($health == "" and ($status == "error" or $process == "exited"))
+            )
+          | {
+              pane,
+              agent_type,
+              health,
+              status,
+              process_status,
+              activity,
+              last_error,
+              restarts,
+              confidence,
+              last_activity,
+              issues:(.issues // [])
+            }];
+      bad_agents as $bad
+      | {
+          session:(.session // $session),
+          checked_at,
+          errors:(
+            if ($bad | length) > 0 then
+              [{
+                code:"ntm_pane_error_unhealthy",
+                session:(.session // $session),
+                panes:($bad | map(.pane)),
+                since:($bad | map(.last_activity // empty) | min // null),
+                message:("ntm robot-health reports unhealthy panes for " + (.session // $session)),
+                details:$bad,
+                recommendations:($diagnose.recommendations // [])
+              }]
+            else [] end
+          ),
+          warnings:[]
+        }
+    ' <<<"$health_json"
+}
+
+
+command_help_parity_doctor_json() {
+    local probe="${FLYWHEEL_COMMAND_HELP_PARITY_AUDIT:-$HOME/Developer/flywheel/.flywheel/scripts/command-help-parity-audit.sh}" output
+    if [[ ! -x "$probe" ]]; then
+        jq -nc --arg probe "$probe" '{
+          schema_version:"flywheel-command-help-parity-audit/v1",
+          command:"command-help-parity-audit",
+          doctor_scope:"command-help-parity",
+          status:"warn",
+          errors:[],
+          warnings:[{code:"command_help_parity_audit_missing", message:"command help parity audit script missing or not executable", path:$probe}]
+        }'
+        return 0
+    fi
+    output="$("$probe" --doctor --json 2>/dev/null)" || true
+    if jq -e '.schema_version == "flywheel-command-help-parity-audit/v1"' >/dev/null 2>&1 <<<"$output"; then
+        jq -c . <<<"$output"
+    else
+        jq -nc --arg probe "$probe" '{
+          schema_version:"flywheel-command-help-parity-audit/v1",
+          command:"command-help-parity-audit",
+          doctor_scope:"command-help-parity",
+          status:"fail",
+          errors:[{code:"command_help_parity_audit_invalid_json", message:"command help parity audit did not return valid JSON", path:$probe}],
+          warnings:[]
+        }'
+    fi
+}
+
+
+doctor_schema_postcheck() {
+    local packet="$1" ntm_health command_help_parity
+    command_help_parity="$(command_help_parity_doctor_json)"
+    packet="$(jq -c --argjson command_help_parity "$command_help_parity" '. + {command_help_parity:$command_help_parity}' <<<"$packet")"
+    if [[ "$(jq -r '.status // ""' <<<"$packet" 2>/dev/null)" == "fail" ]]; then
+        ntm_health="$(doctor_ntm_health_json)"
+    else
+        ntm_health='{"errors":[],"warnings":[]}'
+    fi
+    jq -c --argjson ntm_health "$ntm_health" '
+      def maybe($cond; $item): if $cond then [$item] else [] end;
+      def nonempty($v): (($v // "") | tostring | length) > 0;
+      def row_key($r): (($r.session // "") + ":" + (($r.pane // -1) | tostring));
+      def routed_identity_keys:
+        [ .agentmail_registration_broadcast.results[]?
+          | select((.action // "") == "sent" or (.action // "") == "deduped_recent_send")
+          | .row_key
+        ];
+      def identity_drift_rows:
+        [ .identity_registry.rows[]?
+          | select((.role // "") != "worker" and (.role // "") != "archived")
+          | select((.status // "") != "active" or (.token_exists // false) != true)
+        ];
+      def local_or_unrouted_identity_drift_rows:
+        [ identity_drift_rows[] as $r
+          | select(
+              (($r.fleet_mail_project_key // "") == (.repo // ""))
+              or ((routed_identity_keys | index(row_key($r))) == null)
+            )
+          | $r
+        ];
+      def doctrine_flywheel_origin:
+        ((.repo_role // .doctrine_3_surface_divergence.repo_role // "") == "flywheel_origin");
+      def routed_external_identity_drift_rows:
+        [ identity_drift_rows[] as $r
+          | select(
+              (($r.fleet_mail_project_key // "") != (.repo // ""))
+              and ((routed_identity_keys | index(row_key($r))) != null)
+            )
+          | $r
+        ];
+      def action_error:
+        if ((.repo // "") != "" and ((.git_root // "") == "")) then
+          {code:"repo_not_git", message:"target path is not inside a git repo", action:(.action // null), repo:.repo}
+        elif .action == "choose_git_repo" then
+          {code:"repo_not_git", message:"target path is not inside a git repo", action:.action, repo:.repo}
+        elif .action == "fill_repo_local_mission_anchor" then
+          {code:"mission_anchor_unfilled", message:"repo-local MISSION.md is missing owner-reviewed content", action:.action, path:.repo_mission_path}
+        elif .action == "restore_canonical_doctrine_snapshot" then
+          {code:"canonical_doctrine_drift_local", message:"repo-local canonical doctrine snapshot drifted from source", action:.action}
+        else empty end;
+      (
+        (.errors // [])
+        + [action_error]
+        + maybe((.mission_anchor.state // "") == "unfilled";
+            {code:"mission_anchor_unfilled", message:(.mission_anchor.reason // "MISSION.md unfilled"), path:.mission_anchor.path})
+        + ((.lifecycle_check.errors // []) | map({code:"rule_lifecycle_error", message:(.detail // .issue // "lifecycle error"), detail:.}))
+        + maybe((.beads_db_health.status // "ok") == "fail";
+            {code:"beads_db_health_failed", message:(.beads_db_health.integrity_output // "beads DB health failed"), detail:.beads_db_health})
+        + maybe((.memory_health.status // "OK") == "FAIL";
+            {code:"memory_health_failed", message:"memory doctor reported FAIL", detail:.memory_health})
+        + (.storage.errors // [])
+        + maybe((.ntm_spawn_templates_versioned_status // .ntm_spawn_templates_versioned.status // "pass") == "error";
+            {code:"ntm_spawn_templates_versioned_error", message:"NTM spawn-template version invariant probe errored", detail:.ntm_spawn_templates_versioned})
+        + (.file_length.errors // [])
+        + (.jeff_corpus.errors // [])
+        + (.daily_report.errors // [])
+        + maybe((.loop_driver.driver_status // "") == "MARKER_ONLY";
+            {code:"loop_driver_marker_only", message:"active loop marker exists without verified driver proof", detail:.loop_driver})
+        + maybe((.loop_driver.driver_status // "") == "MISSING_DRIVER";
+            {code:"loop_driver_missing_driver", message:"active loop marker expects a launchd prompt driver but no driver plist was found", detail:.loop_driver})
+        + maybe((((.loop_driver.active_marker_project_label_loaded.state // "") == "project_label_absent") or ((.loop_driver.active_marker_project_label_loaded.state // "") == "generic_tick_loaded_project_label_absent"));
+            {code:"active_marker_project_label_not_loaded", message:"active loop marker project launchd label is not loaded", detail:.loop_driver})
+        + maybe((.secret_leak_count_1h // 0) > 0;
+            {code:"secret_leak_recent", message:"fresh secret-leak lock-log events require auto-pause", detail:.secret_leak})
+        + maybe((.ticks_punted_count // 0) > 0;
+            {code:"ticks_punted_count", message:"L70 same-tick chain opportunity was punted without chain_blocked_reason", detail:.l70_chain_state})
+        + maybe((.peer_orch_idle_on_blocker_count // 0) > 0;
+            {code:"peer_orch_idle_on_blocker", message:"L75 flywheel-class peer orchestrator blocker exceeded coordination threshold", detail:.peer_orch_blocker_watch})
+        + maybe((.peer_orch_idle_with_work_available_count // 0) > 0;
+            {code:"peer_orch_idle_with_work_available_count", message:"L101 peer orchestrator idle with work available exceeded productivity threshold", detail:.peer_orch_productivity_watch})
+        + maybe((.true_josh_blocker_count // 0) > 0;
+            {code:"true_josh_blocker_count", message:"L101 true Joshua blocker requires immediate notify path", detail:.peer_orch_productivity_watch})
+        + maybe(((.doctor_strict // false) == true and (.callbacks_unvalidated_count // 0) > 0);
+            {code:"callbacks_unvalidated_count", message:"callback validation found worker callbacks not yet validated", detail:.callback_validation})
+        + maybe(((.doctor_strict // false) == true and (.repo_local_clis_below_canonical_floor // 0) > 0);
+            {code:"repo_local_clis_below_canonical_floor", message:"repo-local bin/ CLIs are below the canonical CLI scoping floor", detail:.repo_local_cli_floor})
+        + maybe((.validation_receipts_schema_invalid_count // 0) > 0;
+            {code:"validation_receipts_schema_invalid_count", message:"validation receipt ledger contains receipts rejected by schema parser", detail:.callback_validation})
+        + maybe(((.doctrine_3_surface_divergent_count // 0) > 0) and doctrine_flywheel_origin;
+            {code:"doctrine_3_surface_divergent_count", message:"canonical doctrine three-surface divergence found in a repo that owns the template surface", detail:.doctrine_3_surface_divergence})
+        + maybe(((.doctor_strict // false) == true and (.orchs_with_capture_gap_count // 0) > 0);
+            {code:"orchs_with_capture_gap_count", message:"orchestrator runtimes lack canonical Joshua-input capture proof", detail:.orch_capture_parity})
+        + maybe(((.doctor_strict // false) == true and (.three_q_unaudited_count // 0) > 0);
+            {code:"three_q_unaudited_count", message:"three-Q surface registry has required surfaces missing validation/documentation/surfacing proof", detail:.three_q_surface_audit})
+        + maybe(((.doctor_strict // false) == true and (.jeff_drafts_unrubricd_count // 0) > 0);
+            {code:"jeff_drafts_unrubricd_count", message:"Jeff issue drafts exist without a current rubric receipt", detail:.jeff_issue_rubric})
+        + maybe((if (.publishability_bar_score | type) == "object" then (.publishability_bar_score.score // 0) else (.publishability_bar_score // 0) end) < 3;
+            {code:"publishability_bar_score_low", message:"publishability bar score is below readiness floor", detail:.publishability_bar})
+        + maybe((.plan_state_quality_bar_pending_count // 0) >= 50;
+            {code:"plan_state_quality_bar_pending_count", message:"Phase 5 quality-bar pending count reached error threshold", detail:.quality_bar_close_gate})
+        + maybe((.plan_state_quality_bar_failed_count // 0) >= 10;
+            {code:"plan_state_quality_bar_failed_count", message:"Phase 5 quality-bar failed count reached error threshold", detail:.quality_bar_close_gate})
+        + (.quality_bar_close_gate.errors // [])
+        + (.agent_mail_fd_pressure.errors // [])
+        + (.orphaned_mcp_tool_call_detail.errors // [])
+        + (.identity_registry.errors // [])
+        + (.agentmail_registration_broadcast.errors // [])
+        + (.command_help_parity.errors // [])
+        + maybe((local_or_unrouted_identity_drift_rows | length) > 0;
+            {code:"identity_registry_drift", message:("Agent Mail identity registry drift_count=" + ((local_or_unrouted_identity_drift_rows | length) | tostring)), detail:(.identity_registry + {local_or_unrouted_identity_drift_rows:local_or_unrouted_identity_drift_rows})})
+        + maybe((.confirmed_unreachable_session_count // .agentmail_orphan_session_rows_count // 0) > 0;
+            {code:"agentmail_confirmed_unreachable_session_count", message:("Agent Mail identity registry has confirmed unreachable session rows count=" + ((.confirmed_unreachable_session_count // .agentmail_orphan_session_rows_count // 0) | tostring)), detail:.identity_registry})
+        + maybe((.identity_token_orphan_local // 0) > 0;
+            {code:"identity_token_orphan_local", message:("Agent Mail identity registry has local orphan token count=" + ((.identity_token_orphan_local // 0) | tostring)), detail:.identity_registry})
+        + maybe((.orphan_tokens_unswept_count // 0) > 0;
+            {code:"orphan_tokens_unswept_count", message:("Agent Mail token vault has unswept orphan tokens count=" + ((.orphan_tokens_unswept_count // 0) | tostring)), detail:.identity_registry})
+        + maybe((.agentmail_pending_registration_broadcasts_count // 0) > 0;
+            {code:"agentmail_pending_registration_broadcasts_count", message:("Agent Mail registration broadcasts pending count=" + ((.agentmail_pending_registration_broadcasts_count // 0) | tostring)), detail:.agentmail_registration_broadcast})
+        + ($ntm_health.errors // [])
+      ) as $errors
+      | (
+        (.warnings // [])
+	        + maybe((.loop_driver.driver_status // "") == "STALE";
+	            {code:"loop_driver_stale", message:"loop driver proof exists but last dispatch is stale", detail:.loop_driver})
+	        + maybe((.loop_driver.inactive_marker_post_stop_tick_count // 0) > 0;
+	            {code:"inactive_marker_post_stop_tick", message:"inactive loop marker last_tick is newer than stopped_at", detail:.loop_driver.inactive_marker_post_stop_tick})
+	        + maybe((.canonical_root_drift.drift? == true);
+	            {code:"canonical_root_drift", message:"root AGENTS.md canonical flywheel block drifted from source", detail:.canonical_root_drift})
+        + maybe(((.mission_lock_age.mission_lock_status // .mission_lock_age.state // "") == "stale-warn");
+            {code:"mission_lock_stale_warn", message:"MISSION.md locked_at is older than 7 days", detail:.mission_lock_age})
+        + maybe(((.mission_lock_age.mission_lock_status // .mission_lock_age.state // "") == "stale-error");
+            {code:"mission_lock_stale_error", message:"MISSION.md locked_at is older than 30 days", detail:.mission_lock_age})
+        + maybe((((.mission_lock_age.mission_lock_status // .mission_lock_age.state // "") == "unlocked") or ((.mission_lock_age.mission_lock_status // .mission_lock_age.state // "") == "missing"));
+            {code:"mission_lock_unlocked_or_missing", message:"MISSION.md is not mission-locked", detail:.mission_lock_age})
+        + maybe((.mission_lock_age.lock_hash_matches_lock_log? == false);
+            {code:"mission_lock_log_mismatch", message:"MISSION.md lock_hash was not found in lock-log evidence", detail:.mission_lock_age})
+        + maybe(((.doctor_strict // false) != true and (.callbacks_unvalidated_count // 0) > 0);
+            {code:"callbacks_unvalidated_count", message:"callback validation found worker callbacks not yet validated", detail:.callback_validation})
+        + maybe(((.doctor_strict // false) != true and (.repo_local_clis_below_canonical_floor // 0) > 0);
+            {code:"repo_local_clis_below_canonical_floor", message:"repo-local bin/ CLIs are below the canonical CLI scoping floor", detail:.repo_local_cli_floor})
+        + maybe((.topology_drift_unvalidated_count // 0) > 0;
+            {code:"topology_drift_unvalidated", message:("Agent Mail identity registry raw topology drift requires validation count=" + ((.topology_drift_unvalidated_count // 0) | tostring)), detail:.identity_registry})
+        + maybe((.callbacks_validated_with_failures_count // 0) > 0;
+            {code:"callbacks_validated_with_failures_count", message:"callback validation receipts include failed validations", detail:.callback_validation})
+        + (.storage.warnings // [])
+        + maybe((.ntm_spawn_templates_versioned_status // .ntm_spawn_templates_versioned.status // "pass") == "warn";
+            {code:"ntm_spawn_templates_versioned_warn", message:"NTM spawn-template SHA/version matrix needs review", detail:.ntm_spawn_templates_versioned})
+        + (.file_length.warnings // [])
+        + maybe((.oversized_files_count // 0) > 3;
+            {code:"oversized_files_count", message:"more than 3 files exceed canonical file-length thresholds", detail:.file_length})
+        + (.jeff_corpus.warnings // [])
+        + (.daily_report.warnings // [])
+        + (.recovery_slo.warnings // [])
+        + (.watcher_isomorphic.warnings // [])
+        + (.stale_in_progress.warnings // [])
+        + (.watcher_isomorphic_fleet.warnings // [])
+        + maybe((.peer_orch_substrate_blocked_count // 0) > 0;
+            {code:"peer_orch_substrate_blocked_count", message:"L101 peer orchestrator has flywheel-owned substrate blockers", detail:.peer_orch_productivity_watch})
+        + maybe((.recovery_slo_status // "green") == "yellow";
+            {code:"recovery_slo_yellow", message:"protected-session recovery SLO has incomplete or warning-grade measurement", detail:.recovery_slo})
+        + maybe((.recovery_slo_status // "green") == "red";
+            {code:"recovery_slo_red", message:"protected-session recovery SLO breach budget exceeded in the last 24h", detail:.recovery_slo})
+        + maybe((.watcher_reenable_recommendation // "green") != "green";
+            {code:"watcher_reenable_not_green", message:"watcher isomorphic probe does not recommend apply-mode re-enable", detail:.watcher_isomorphic})
+        + maybe((.watcher_isomorphic_fleet_status // "green") != "green";
+            {code:"watcher_isomorphic_fleet_not_green", message:"fleet watcher isomorphic probe does not recommend fleet-wide apply-mode re-enable", detail:.watcher_isomorphic_fleet})
+        + maybe((.stale_in_progress_count_24h // 0) > 5;
+            {code:"stale_in_progress_count_24h", message:"more than five in_progress beads have no recent assignee, commit, callback, or touch signal", detail:.stale_in_progress})
+        + maybe((.surfaces_unwired_count // 0) > 0;
+            {code:"surfaces_unwired_count", message:"canonical validation surfaces include missing or malformed registered paths", detail:.callback_validation})
+        + maybe((.closed_bead_artifact_missing_count // 0) > 0;
+            {code:"closed_bead_artifact_missing_count", message:"closed bead artifact evidence references missing paths", detail:.callback_validation})
+        + maybe((.closed_bead_reopen_candidates_count // 0) > 0;
+            {code:"closed_bead_reopen_candidates_count", message:"closed bead validation found mechanical reopen candidates", detail:.callback_validation})
+        + maybe((.agent_context_probe_drift_count // 0) > 0;
+            {code:"agent_context_probe_drift_count", message:"validation receipts show drift between agent and orchestrator probe contexts", detail:.callback_validation})
+        + maybe((.validation_events_unrouted_count // 0) > 0;
+            {code:"validation_events_unrouted_count", message:"validation receipt events are missing /flywheel:learn routing", detail:.callback_validation})
+        + maybe((.coordination_collision_count_24h // 0) > 0;
+            {code:"coordination_collision_count_24h", message:"L107 shared-surface coordination collisions detected in the last 24h", detail:.shared_surface_reservation})
+        + maybe((.identity_token_orphan_owned_elsewhere // 0) > 0;
+            {code:"identity_token_orphan_owned_elsewhere", message:("Agent Mail identity registry has routed orphan tokens owned by another repo count=" + ((.identity_token_orphan_owned_elsewhere // 0) | tostring)), detail:.identity_registry})
+        + maybe((.identity_chain_max_length // 0) > 3;
+            {code:"identity_chain_max_length", message:("Agent Mail identity predecessor chain max length=" + ((.identity_chain_max_length // 0) | tostring)), detail:.identity_registry})
+        + maybe(([.identity_rotation_count_24h_by_session[]?] | max // 0) > 3;
+            {code:"identity_rotation_count_24h", message:"Agent Mail identity rotations exceed 3 in 24h for at least one session", detail:.identity_registry})
+        + maybe(((.doctrine_3_surface_divergent_count // 0) > 0) and (doctrine_flywheel_origin | not);
+            {code:"doctrine_3_surface_divergence_installed_repo", message:"canonical doctrine divergence is visible across installed repo-owned surfaces", detail:.doctrine_3_surface_divergence})
+        + maybe(((.doctor_strict // false) != true and (.orchs_with_capture_gap_count // 0) > 0);
+            {code:"orchs_with_capture_gap_count", message:"orchestrator runtimes lack canonical Joshua-input capture proof", detail:.orch_capture_parity})
+        + maybe(((.doctor_strict // false) != true and (.three_q_unaudited_count // 0) > 0);
+            {code:"three_q_unaudited_count", message:"three-Q surface registry has required surfaces missing validation/documentation/surfacing proof", detail:.three_q_surface_audit})
+        + maybe(((.doctor_strict // false) != true and (.jeff_drafts_unrubricd_count // 0) > 0);
+            {code:"jeff_drafts_unrubricd_count", message:"Jeff issue drafts exist without a current rubric receipt", detail:.jeff_issue_rubric})
+        + maybe(((if (.publishability_bar_score | type) == "object" then (.publishability_bar_score.score // 0) else (.publishability_bar_score // 0) end) >= 3 and (if (.publishability_bar_score | type) == "object" then (.publishability_bar_score.score // 0) else (.publishability_bar_score // 0) end) < 5);
+            {code:"publishability_bar_score_warn", message:"publishability bar score is below publishability threshold", detail:.publishability_bar})
+        + maybe((.plan_state_quality_bar_pending_count // 0) >= 20 and (.plan_state_quality_bar_pending_count // 0) < 50;
+            {code:"plan_state_quality_bar_pending_count", message:"Phase 5 quality-bar pending count reached warning threshold", detail:.quality_bar_close_gate})
+        + maybe((.plan_state_quality_bar_failed_count // 0) >= 5 and (.plan_state_quality_bar_failed_count // 0) < 10;
+            {code:"plan_state_quality_bar_failed_count", message:"Phase 5 quality-bar failed count reached warning threshold", detail:.quality_bar_close_gate})
+        + (.quality_bar_close_gate.warnings // [])
+        + (.agent_mail_fd_pressure.warnings // [])
+        + (.orphaned_mcp_tool_call_detail.warnings // [])
+        + (.command_help_parity.warnings // [])
+        + maybe((routed_external_identity_drift_rows | length) > 0;
+            {code:"identity_registry_drift_routed_external", message:("Agent Mail identity registry has routed external drift_count=" + ((routed_external_identity_drift_rows | length) | tostring)), detail:{rows:routed_external_identity_drift_rows, agentmail_registration_broadcast:.agentmail_registration_broadcast}})
+        + ($ntm_health.warnings // [])
+      ) as $warnings
+      | . + {errors:$errors,warnings:$warnings}
+      | if (.status == "fail" and ((.errors // []) | length) == 0) then
+          .errors = [{
+            code:"doctor_internal_empty_fail",
+            message:"doctor emitted status=fail without a captured cause; postcheck inserted sentinel",
+            action:(.action // null),
+            mode:(.mode // null),
+            repo:(.repo // null)
+          }]
+        else . end
+    ' <<<"$packet"
+}

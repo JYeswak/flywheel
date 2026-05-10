@@ -1,0 +1,12 @@
+--- /var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/flywheel-9vb9i.XXXXXX.hXR8UxsZHW/postcheck.before	2026-05-10 15:09:22
++++ /Users/josh/.claude/skills/.flywheel/lib/doctor.d/part-01-doctor_cache_path-to-doctor_schema_postcheck.sh	2026-05-10 15:09:38
+@@ -286,6 +286,9 @@
+             {code:"jeff_drafts_unrubricd_count", message:"Jeff issue drafts exist without a current rubric receipt", detail:.jeff_issue_rubric})
+         + maybe((if (.publishability_bar_score | type) == "object" then (.publishability_bar_score.score // 0) else (.publishability_bar_score // 0) end) < 3;
+             {code:"publishability_bar_score_low", message:"publishability bar score is below readiness floor", detail:.publishability_bar})
++        + (.publishability_bar.errors // [])
++        + maybe((.publishability_bar.status // "ok") == "fail" and ((.publishability_bar.errors // []) | length) == 0;
++            {code:"publishability_bar_status_failed_silent", message:"publishability_bar reported status=fail but emitted no errors[] entries (loud-failure invariant — flywheel-9vb9i)", detail:.publishability_bar})
+         + maybe((.plan_state_quality_bar_pending_count // 0) >= 50;
+             {code:"plan_state_quality_bar_pending_count", message:"Phase 5 quality-bar pending count reached error threshold", detail:.quality_bar_close_gate})
+         + maybe((.plan_state_quality_bar_failed_count // 0) >= 10;
