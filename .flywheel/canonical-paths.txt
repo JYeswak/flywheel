@@ -153,6 +153,9 @@ worker_did_didnt_gaps_contract	/Users/josh/.claude/commands/flywheel/worker-tick
 learn_bead_quality_mining	/Users/josh/.claude/commands/flywheel/learn.md	flywheel-7yic	/flywheel:learn --bead-quality-mining entry point and review routing contract.
 session_topology_conformance_probe	.flywheel/scripts/topology-gap-probe.sh	flywheel-se3h.1	Read-only session-topology.jsonl schema/latest-wins/bootstrap conformance probe hardening flywheel-31p.
 session_topology_conformance_tests	tests/session-topology-ledger.sh	flywheel-se3h.1	Fixture-backed tests for live topology existence, latest-wins jq, repeated rows, required field errors, bootstrap sessions, and flywheel-31p documentation.
+autoloop_target_selector	.flywheel/scripts/autoloop-target-selector.sh	flywheel-se3h.9	Topology-driven autoloop target selector; reads session-topology.jsonl, fails closed on ghost/null-status sessions, emits eligible+skipped envelope.
+autoloop_target_selector_tests	tests/autoloop-target-selector-e2e.sh	flywheel-se3h.9	13/13 PASS fixture-backed tests covering eligible / ghost / missing-orch / status-not-allowed / latest-row-per-session / allow-list widening / cold-start rc=2 / AG6 read-only invariant.
+autoloop_target_selector_doctrine	.flywheel/doctrine/autoloop-target-selector.md	flywheel-se3h.9	Eligibility rule, skip-reason classes, latest-row semantics, AG6 read-only invariant, cross-refs to topology writer.
 file_length_probe	.flywheel/scripts/file-length-probe.sh	flywheel-useh	Canonical file-length threshold probe for bash, Python, Rust, and doctrine Markdown.
 file_length_probe_tests	tests/file-length-probe.sh	flywheel-useh	Fixture-backed tests for bash-over, python-over, rust-over, allowed override, doctrine Markdown override, and auto-promotion.
 file_length_doctrine_l83	AGENTS.md	flywheel-useh	Canonical L83 fleet-wide file-length discipline and doctor/promotion contract.
