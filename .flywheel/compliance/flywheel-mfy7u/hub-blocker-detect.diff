@@ -1,0 +1,209 @@
+diff --git a/.flywheel/scripts/hub-blocker-detect.sh b/.flywheel/scripts/hub-blocker-detect.sh
+index 81372d9..324d833 100755
+--- a/.flywheel/scripts/hub-blocker-detect.sh
++++ b/.flywheel/scripts/hub-blocker-detect.sh
+@@ -12,16 +12,27 @@ THRESHOLD="${HUB_BLOCKER_THRESHOLD:-3}"
+ APPLY=0
+ JSON_OUT=0
+ COMMAND="check"
++IDEMPOTENCY_KEY=""
++AUDIT_LOG="${HUB_BLOCKER_AUDIT_LOG:-$HOME/.local/state/flywheel/hub-blocker-detect-runs.jsonl}"
+ 
+ usage() {
+   cat <<'EOF'
+ usage:
+-  hub-blocker-detect.sh [check|doctor] [--repo PATH] [--threshold N] [--apply] [--json]
++  hub-blocker-detect.sh [check|doctor] [--repo PATH] [--threshold N] [--apply --idempotency-key KEY] [--json]
+   hub-blocker-detect.sh --info|--examples|--help
+ 
+ Detects open beads that block more than N parent closures. In apply mode it
+ promotes hub blockers to P0, labels them hub_blocker, and logs one fuckup row
+ per detected occurrence.
++
++--apply requires --idempotency-key (rc=3 if missing). Per-bead ledger-replay
++filters bead_ids already promoted under the same key (sister 1o9fa pattern).
++
++Exit codes:
++  0  probe completed or replay-no-op
++  1  hub blocker detected (doctor/check mode)
++  2  usage or substrate error
++  3  --apply without --idempotency-key (canonical refusal contract)
+ EOF
+ }
+ 
+@@ -29,7 +40,7 @@ examples() {
+   cat <<'EOF'
+ examples:
+   .flywheel/scripts/hub-blocker-detect.sh --json
+-  .flywheel/scripts/hub-blocker-detect.sh --threshold 3 --apply --json
++  .flywheel/scripts/hub-blocker-detect.sh --threshold 3 --apply --idempotency-key=hourly-$(date -u +%Y%m%d-%H) --json
+   HUB_BLOCKER_THRESHOLD=5 .flywheel/scripts/hub-blocker-detect.sh doctor --json
+ EOF
+ }
+@@ -58,13 +69,23 @@ while [[ "$#" -gt 0 ]]; do
+       APPLY=1
+       shift
+       ;;
++    --idempotency-key)
++      [[ -n "${2:-}" ]] || { printf 'ERR: --idempotency-key requires VALUE\n' >&2; exit 2; }
++      IDEMPOTENCY_KEY="$2"
++      shift 2
++      ;;
++    --idempotency-key=*)
++      IDEMPOTENCY_KEY="${1#--idempotency-key=}"
++      [[ -n "$IDEMPOTENCY_KEY" ]] || { printf 'ERR: --idempotency-key requires VALUE\n' >&2; exit 2; }
++      shift
++      ;;
+     --json)
+       JSON_OUT=1
+       shift
+       ;;
+     --info)
+-      jq -nc --arg version "$VERSION" --arg schema "$SCHEMA_VERSION" --arg repo "$REPO" \
+-        '{name:"hub-blocker-detect.sh",version:$version,schema_version:$schema,repo:$repo,commands:["check","doctor","--repo","--threshold","--apply","--json","--info","--examples","--help"],exits:{"0":"probe completed","1":"hub blocker detected in doctor/check mode","2":"usage or substrate error"}}'
++      jq -nc --arg version "$VERSION" --arg schema "$SCHEMA_VERSION" --arg repo "$REPO" --arg audit_log "$AUDIT_LOG" \
++        '{name:"hub-blocker-detect.sh",version:$version,schema_version:$schema,repo:$repo,audit_log:$audit_log,apply_requires:"--idempotency-key",commands:["check","doctor","--repo","--threshold","--apply","--idempotency-key","--json","--info","--examples","--help"],exits:{"0":"probe completed or replay-no-op","1":"hub blocker detected in doctor/check mode","2":"usage or substrate error","3":"--apply without --idempotency-key (canonical refusal)"}}'
+       exit 0
+       ;;
+     --examples)
+@@ -89,6 +110,36 @@ case "$THRESHOLD" in
+     ;;
+ esac
+ 
++# Mutation gate (7axmt P2 fix, sister 1o9fa per-pane-replay-granularity-pattern adapted
++# to per-bead). Fires BEFORE any br update call (hoqq8 invariant). Without a key,
++# retries double-write br audit-trail rows; per-(key, bead_id) replay prevents this.
++if [[ "$APPLY" -eq 1 && -z "$IDEMPOTENCY_KEY" ]]; then
++  jq -nc \
++    --arg schema "$SCHEMA_VERSION" \
++    --arg repo "$REPO" \
++    '{schema_version:$schema,command:"hub-blocker-detect",status:"refused",mode:"apply",repo:$repo,reason:"--apply requires --idempotency-key"}' >&2
++  exit 3
++fi
++
++# Per-bead replay-check (sister 1o9fa per-target variant). Tolerant-parse via
++# jq -R 'fromjson?' per sister 8sx9w skill discovery. Returns JSON array of
++# bead_id values already promoted with the same idempotency_key.
++replay_already_promoted_bead_ids() {
++  if [[ -z "$IDEMPOTENCY_KEY" || ! -r "$AUDIT_LOG" ]]; then
++    printf '[]\n'
++    return 0
++  fi
++  jq -Rcs --arg k "$IDEMPOTENCY_KEY" \
++    '[ split("\n")[] | select(length > 0) | fromjson? | select((.idempotency_key // "") == $k and (.action // "") == "br_update_priority") | (.bead_id // empty) ] | unique' \
++    "$AUDIT_LOG" 2>/dev/null || printf '[]\n'
++}
++
++audit_append_hub() {
++  local row="$1"
++  mkdir -p "$(dirname "$AUDIT_LOG")" 2>/dev/null || true
++  printf '%s\n' "$row" >>"$AUDIT_LOG"
++}
++
+ if ! command -v jq >/dev/null 2>&1; then
+   printf '{"schema_version":"%s","status":"error","error":"jq_missing"}\n' "$SCHEMA_VERSION"
+   exit 2
+@@ -127,8 +178,18 @@ trap 'rm -f "$rows_file"' EXIT
+ 
+ promoted_count=0
+ fuckup_log_count=0
++replay_skipped_count=0
+ actions=()
+ 
++# Per-bead replay-skip set (sister 1o9fa pattern): bead_ids already promoted with
++# this idempotency_key. Filter them out before the promote/label/fuckup loop fires.
++REPLAY_SKIPPED_BEAD_IDS_JSON="$(replay_already_promoted_bead_ids)"
++declare -A REPLAY_SKIP_SET=()
++while IFS= read -r skipped; do
++  [[ -n "$skipped" ]] || continue
++  REPLAY_SKIP_SET["$skipped"]=1
++done < <(jq -r '.[]' <<<"$REPLAY_SKIPPED_BEAD_IDS_JSON")
++
+ while IFS=$'\t' read -r bead_id priority parent_count title status; do
+   [[ -n "${bead_id:-}" ]] || continue
+   deps_json="$(cd "$REPO" && "$BR_BIN" dep list "$bead_id" --json 2>/dev/null || printf '[]')"
+@@ -137,11 +198,20 @@ while IFS=$'\t' read -r bead_id priority parent_count title status; do
+   would_promote=false
+   promoted=false
+   labeled=false
++  replay_skipped=false
+   if [[ "${priority:-4}" != "0" ]]; then
+     would_promote=true
+   fi
+-  if [[ "$APPLY" -eq 1 ]]; then
+-    if [[ "${priority:-4}" != "0" ]]; then
++  # Per-bead replay: if this bead_id was already promoted under the same key, skip
++  # the br update / br label / fuckup-log calls entirely. Row still emitted for
++  # transparency (with replay_skipped=true).
++  if [[ "$APPLY" -eq 1 && -n "${REPLAY_SKIP_SET[$bead_id]:-}" ]]; then
++    replay_skipped=true
++    replay_skipped_count=$((replay_skipped_count + 1))
++    actions+=("replay_skipped:$bead_id")
++  elif [[ "$APPLY" -eq 1 ]]; then
++    prior_priority="${priority:-4}"
++    if [[ "$prior_priority" != "0" ]]; then
+       (cd "$REPO" && "$BR_BIN" update "$bead_id" --priority 0 --json >/dev/null)
+       promoted=true
+       promoted_count=$((promoted_count + 1))
+@@ -149,6 +219,15 @@ while IFS=$'\t' read -r bead_id priority parent_count title status; do
+     (cd "$REPO" && "$BR_BIN" label add "$bead_id" --label hub_blocker --json >/dev/null) || true
+     labeled=true
+     actions+=("promoted_or_labeled:$bead_id")
++    audit_append_hub "$(jq -nc \
++      --arg sv "$SCHEMA_VERSION" \
++      --arg ts "$(now_iso)" \
++      --arg k "$IDEMPOTENCY_KEY" \
++      --arg bead_id "$bead_id" \
++      --argjson prior_priority "$prior_priority" \
++      --argjson new_priority 0 \
++      --argjson parent_block_count "${parent_count:-0}" \
++      '{schema_version:$sv,ts:$ts,action:"br_update_priority",idempotency_key:$k,bead_id:$bead_id,prior_priority:$prior_priority,new_priority:$new_priority,parent_block_count:$parent_block_count}')"
+     if [[ -x "$LOOP_BIN" ]]; then
+       if (cd "$REPO" && "$LOOP_BIN" fuckup log \
+           --class hub-blocker \
+@@ -183,6 +262,7 @@ while IFS=$'\t' read -r bead_id priority parent_count title status; do
+     --argjson would_promote "$would_promote" \
+     --argjson promoted "$promoted" \
+     --argjson labeled "$labeled" \
++    --argjson replay_skipped "$replay_skipped" \
+     '{
+       id:$id,
+       title:$title,
+@@ -193,7 +273,8 @@ while IFS=$'\t' read -r bead_id priority parent_count title status; do
+       parent_status_counts:$parent_status_counts,
+       would_promote:$would_promote,
+       promoted:$promoted,
+-      labeled:$labeled
++      labeled:$labeled,
++      replay_skipped:$replay_skipped
+     }' >>"$rows_file"
+ done <<<"$hub_ids"
+ 
+@@ -233,6 +314,10 @@ payload="$(
+     --argjson top_parent_ids "$top_parent_ids" \
+     --argjson promoted_count "$promoted_count" \
+     --argjson fuckup_log_count "$fuckup_log_count" \
++    --argjson replay_skipped_count "$replay_skipped_count" \
++    --argjson replay_skipped_bead_ids "$REPLAY_SKIPPED_BEAD_IDS_JSON" \
++    --arg idempotency_key "$IDEMPOTENCY_KEY" \
++    --arg audit_log "$AUDIT_LOG" \
+     --arg dashboard_line "$dashboard_line" \
+     --argjson rows "$rows_json" \
+     --argjson actions "$actions_json" \
+@@ -245,12 +330,16 @@ payload="$(
+       signal:$signal,
+       threshold:$threshold,
+       apply:$apply,
++      idempotency_key:$idempotency_key,
++      audit_log:$audit_log,
+       hub_blocker_count:$hub_blocker_count,
+       max_parent_block_count:$max_parent_block_count,
+       top_hub_blocker_id:$top_hub_blocker_id,
+       top_parent_ids:$top_parent_ids,
+       promoted_count:$promoted_count,
+       fuckup_log_count:$fuckup_log_count,
++      replay_skipped_count:$replay_skipped_count,
++      replay_skipped_bead_ids:$replay_skipped_bead_ids,
+       dashboard_line:$dashboard_line,
+       operator_lens:"Hub blockers are the ops-manager bottleneck signal: when one child blocks more than three parent closures, queue depth escalates before the storm hits.",
+       hub_blockers:$rows,

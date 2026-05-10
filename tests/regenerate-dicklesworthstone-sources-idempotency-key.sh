@@ -94,11 +94,14 @@ if jq -e '.status == "ok" and (.replay // false) == false' "$TMP/ag8.json" >/dev
   pass "AG8: fresh key on same sources-file → applies (no replay)"
 else fail "AG8: fresh key incorrectly replayed"; fi
 
-# Test 9: audit log has 3 applied rows (AG5 on A, AG7 on B, AG8 on A)
-applied_count=$(jq -Rc 'fromjson? | select(.status == "applied")' "$REGEN_DICKLESWORTHSTONE_AUDIT_LOG" 2>/dev/null | wc -l | tr -d ' ')
-if [[ "$applied_count" -eq 3 ]]; then
-  pass "AG9: audit log has 3 applied rows (per-(key, sources-file) scoping verified)"
-else fail "AG9: audit log row count $applied_count != 3"; fi
+# Test 9: audit log has 3 non-replay rows from AG5 on A, AG7 on B, AG8 on A.
+# Each row's status is "applied" (new content) or "no_change" (same content,
+# possible if AG5+AG8 land in the same wall-clock second since the default
+# --now uses date -u). Count both as "actual writes that happened".
+nonreplay_count=$(jq -Rc 'fromjson? | select((.status // "") | IN("applied","no_change"))' "$REGEN_DICKLESWORTHSTONE_AUDIT_LOG" 2>/dev/null | wc -l | tr -d ' ')
+if [[ "$nonreplay_count" -eq 3 ]]; then
+  pass "AG9: audit log has 3 non-replay rows (per-(key, sources-file) scoping verified)"
+else fail "AG9: audit log non-replay row count $nonreplay_count != 3"; fi
 
 # Test 10: audit row carries content_sha256 + backup_path fields
 if jq -Rc 'fromjson? | select(.status == "applied")' "$REGEN_DICKLESWORTHSTONE_AUDIT_LOG" 2>/dev/null | tail -1 | jq -e 'has("content_sha256") and has("backup_path")' >/dev/null 2>&1; then
@@ -114,11 +117,17 @@ if jq -e '.status == "replay" and .replay == true' "$TMP/ag11.json" >/dev/null 2
   pass "AG11: tolerant-parse survives corrupt audit row, replay still fires"
 else fail "AG11: tolerant-parse broke"; fi
 
-# Test 12: when changed=false (same content) audit row uses status=no_change
-# Re-render to same sources file, content is identical → changed=false. Fresh key so no replay.
-"$SCRIPT" --apply --idempotency-key=ag12-no-change --fixture "$TMP/fixture.json" --sources-file "$SOURCES_A" --json >"$TMP/ag12.json" 2>&1
+# Test 12: when changed=false (same content) audit row uses status=no_change.
+# The rendered file embeds the "--now" timestamp, so we must pin it to get
+# byte-identical content across runs and exercise the cmp -s short-circuit.
+PINNED_NOW="2026-05-10T20:00:00Z"
+SOURCES_C="$TMP/sources-c.txt"
+# First write with pinned --now under one key
+"$SCRIPT" --apply --idempotency-key=ag12-write --fixture "$TMP/fixture.json" --sources-file "$SOURCES_C" --now "$PINNED_NOW" --json >/dev/null 2>&1
+# Second write with pinned --now + different key (so replay-check skips) should be content-identical
+"$SCRIPT" --apply --idempotency-key=ag12-no-change --fixture "$TMP/fixture.json" --sources-file "$SOURCES_C" --now "$PINNED_NOW" --json >"$TMP/ag12.json" 2>&1
 if jq -e '.status == "ok" and .changed == false' "$TMP/ag12.json" >/dev/null 2>&1; then
-  pass "AG12: content-unchanged path uses changed=false (cmp -s short-circuit)"
+  pass "AG12: content-unchanged path uses changed=false (cmp -s short-circuit with pinned --now)"
 else fail "AG12: changed=false detection broken"; fi
 if jq -Rc 'fromjson? | select((.idempotency_key // "") == "ag12-no-change")' "$REGEN_DICKLESWORTHSTONE_AUDIT_LOG" 2>/dev/null | jq -e '.status == "no_change"' >/dev/null 2>&1; then
   pass "AG12.audit: no_change audit row written for unchanged content"
