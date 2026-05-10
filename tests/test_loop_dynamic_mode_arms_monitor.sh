@@ -49,7 +49,7 @@ planned_monitor_command() {
   local tasklist_fixture="$2"
 
   if has_thinking_worker "$activity_fixture" && ! monitor_already_armed "$tasklist_fixture"; then
-    printf "tail -F %s/.flywheel/dispatch-log.jsonl | grep --line-buffered '\\\"event\\\":\\\"callback\\\"'\n" "$REPO_PATH"
+    printf "tail -n 0 -F %s/.flywheel/dispatch-log.jsonl | grep --line-buffered '\\\"event\\\":\\\"callback\\\"'\n" "$REPO_PATH"
   fi
 }
 
@@ -58,13 +58,13 @@ trap 'rm -rf "$tmpdir"' EXIT
 
 : >"$tmpdir/no_tasks.txt"
 cat >"$tmpdir/monitor_tasks.txt" <<EOF_TASKS
-Task 12 Monitor persistent true tail -F ${REPO_PATH}/.flywheel/dispatch-log.jsonl | grep --line-buffered '"event":"callback"'
+Task 12 Monitor persistent true tail -n 0 -F ${REPO_PATH}/.flywheel/dispatch-log.jsonl | grep --line-buffered '"event":"callback"'
 EOF_TASKS
 
 assert_contains 'feedback_orch_wake_event_driven_not_time_based' "$LOOP_MD"
 assert_contains 'allowed-tools: Bash, Read, Edit, Write, Skill, TaskList, Monitor, ScheduleWakeup' "$LOOP_MD"
 assert_contains 'ntm --robot-activity=<session> --activity-type=codex,claude' "$LOOP_MD"
-assert_contains "tail -F <repo>/.flywheel/dispatch-log.jsonl | grep --line-buffered '\\\"event\\\":\\\"callback\\\"'" "$LOOP_MD"
+assert_contains "tail -n 0 -F <repo>/.flywheel/dispatch-log.jsonl | grep --line-buffered '\\\"event\\\":\\\"callback\\\"'" "$LOOP_MD"
 assert_contains 'ScheduleWakeup` is the FALLBACK heartbeat only' "$LOOP_MD"
 assert_contains '_Wake: event-driven via dispatch-log Monitor (task <id>); fallback heartbeat 1800s_' "$LOOP_MD"
 assert_contains 'Worker callback append to orchestrator callback reap should be <=30s' "$LOOP_MD"
