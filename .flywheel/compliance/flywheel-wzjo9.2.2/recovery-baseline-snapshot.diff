@@ -1,0 +1,509 @@
+diff --git a/.flywheel/scripts/recovery-baseline-snapshot.sh b/.flywheel/scripts/recovery-baseline-snapshot.sh
+index b5ba50a..895bf0e 100755
+--- a/.flywheel/scripts/recovery-baseline-snapshot.sh
++++ b/.flywheel/scripts/recovery-baseline-snapshot.sh
+@@ -1,6 +1,504 @@
+ #!/usr/bin/env bash
+ set -euo pipefail
+ 
++
++# ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m + flywheel-wzjo9.2.2) ======
++# flywheel-cli-surface: true
++# canonical-cli-scoping: passing (substantive fillin landed flywheel-wzjo9.2.2)
++# doctor-mode-tier: filled
++#
++# 18-TODO substantive fillin: per-surface schemas, single-printf topic_help,
++# 8-probe doctor, audit-log-aware health, snapshot-dir + audit-log repair scopes,
++# manifest/config/snapshot-dir validate subjects, cli_emit_audit_tail audit,
++# multi-resolution why (baseline/retention/protected/trigger/sessions/schema).
++
++_SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
++_SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
++if [[ -r "$_SCAFFOLD_HELPER_LIB" ]]; then
++  # shellcheck source=/dev/null
++  source "$_SCAFFOLD_HELPER_LIB"
++fi
++
++SCAFFOLD_SCHEMA_VERSION="recovery-baseline-snapshot/v1"
++SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/recovery-baseline-snapshot-runs.jsonl}"
++
++# Module-scope substrate paths (mirror the Python's defaults for shell-side probing).
++RBS_SNAPSHOT_DIR="${FLYWHEEL_RECOVERY_SNAPSHOT_DIR:-$HOME/.flywheel/recovery/snapshots}"
++RBS_STATE_DIR="${FLYWHEEL_RECOVERY_STATE_DIR:-$HOME/.local/state/flywheel}"
++RBS_NTM_CONFIG="${FLYWHEEL_RECOVERY_NTM_CONFIG:-$HOME/.config/ntm/config.toml}"
++RBS_LAUNCHAGENTS_DIR="${FLYWHEEL_RECOVERY_LAUNCHAGENTS_DIR:-$HOME/Library/LaunchAgents}"
++RBS_SOURCE_PLAN="${FLYWHEEL_RECOVERY_SOURCE_PLAN:-$_SCAFFOLD_REPO_ROOT/.flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md}"
++RBS_MANIFEST_SCHEMA="flywheel-recovery-baseline/v1"
++RBS_DAILY_KEEP=14
++RBS_WEEKLY_KEEP=8
++RBS_PROTECTED_SESSIONS=("alpsinsurance" "picoz")
++RBS_SESSIONS=("flywheel" "alpsinsurance" "clutterfreespaces" "picoz" "skillos" "vrtx" "zeststream-v2" "mobile-eats")
++
++scaffold_usage() {
++  cat <<'USG'
++usage: recovery-baseline-snapshot.sh [SUBCOMMAND] [OPTIONS]
++
++Backward-compatible run mode: default invocation routes to the original
++top-level logic (now exposed as `cmd_run`).
++
++Canonical CLI surfaces:
++  doctor [--json]          probe substrate health
++  health [--json]          last-run status
++  repair --scope <s>       repair misconfigured state
++                            Default: --dry-run; mutate with --apply --idempotency-key KEY
++  validate <subject> [...] validate per-subject contract (TODO: define subjects)
++  audit [--json]           recent run history
++  why <id>                 explain provenance for a given id (TODO: id semantics)
++  quickstart [--json]      operator orientation
++  help <topic>             topic help (run | doctor | health | repair | validate)
++  completion <shell>       emit bash or zsh completion
++
++Introspection:
++  --info --json            version, paths, env vars, dependencies, sha256
++  --schema [<surface>]     JSON Schema for output envelopes
++  --examples --json        curated workflow examples
++  --help / -h              this help
++USG
++}
++
++scaffold_emit_info() {
++  if ! command -v cli_emit_info >/dev/null; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg name "recovery-baseline-snapshot.sh" \
++      '{schema_version:$sv,command:"info",name:$name,helper_lib_missing:true}'
++    return 0
++  fi
++  cli_emit_info \
++    "recovery-baseline-snapshot.sh" \
++    "scaffolded-v0" \
++    "$SCAFFOLD_SCHEMA_VERSION" \
++    "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
++    "SCAFFOLD_AUDIT_LOG" \
++    '{}'
++}
++
++scaffold_emit_examples() {
++  local jsonl
++  jsonl="$(jq -nc '{name:"default run",invocation:"recovery-baseline-snapshot.sh",purpose:"backward-compatible original behavior"}'
++)"$'\n'"$(jq -nc '{name:"doctor",invocation:"recovery-baseline-snapshot.sh doctor --json",purpose:"probe substrate health"}'
++)"
++  if command -v cli_emit_examples >/dev/null; then
++    cli_emit_examples "$SCAFFOLD_SCHEMA_VERSION" "$jsonl"
++  else
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"examples",helper_lib_missing:true}'
++  fi
++}
++
++scaffold_emit_quickstart() {
++  local steps
++  steps="$(jq -nc '{step:1,action:"probe doctor",command:"recovery-baseline-snapshot.sh doctor --json"}'
++)"
++  if command -v cli_emit_quickstart >/dev/null; then
++    cli_emit_quickstart "$SCAFFOLD_SCHEMA_VERSION" "$steps" "doctor,health,repair"
++  else
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"quickstart",helper_lib_missing:true}'
++  fi
++}
++
++scaffold_emit_schema() {
++  local surface="${1:-default}"
++  case "$surface" in
++    doctor)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"doctor",title:"recovery-baseline-snapshot doctor",type:"object",required:["command","status","checks"],properties:{command:{type:"string"},status:{enum:["pass","warn","fail"]},checks:{type:"array"},paths:{type:"object"}}}'
++      ;;
++    health)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"health",title:"recovery-baseline-snapshot health",type:"object",required:["command","status"],properties:{command:{type:"string"},status:{enum:["pass","warn","fail"]},latest_manifest:{type:["string","null"]},latest_manifest_age_seconds:{type:["integer","null"]},manifest_count:{type:"integer"},audit_log_stale:{type:"boolean"}}}'
++      ;;
++    repair)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"repair",title:"recovery-baseline-snapshot repair",type:"object",required:["command","scope","mode"],properties:{command:{type:"string"},scope:{enum:["snapshot-dir","audit-log","none"]},mode:{enum:["dry_run","apply"]},idempotency_key:{type:"string"},planned_actions:{type:"array"},actual_actions:{type:"array"}}}'
++      ;;
++    validate)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"validate",title:"recovery-baseline-snapshot validate",type:"object",required:["command","subject","status"],properties:{command:{type:"string"},subject:{enum:["manifest","config","snapshot-dir"]},status:{enum:["pass","fail"]},reason:{type:"string"}}}'
++      ;;
++    audit)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"audit",title:"recovery-baseline-snapshot audit",type:"object",required:["command"],properties:{command:{type:"string"},audit_log:{type:"string"},row_count:{type:"integer"},recent:{type:"array"}}}'
++      ;;
++    why)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"why",title:"recovery-baseline-snapshot why",type:"object",required:["command","id","resolution"],properties:{command:{type:"string"},id:{type:"string"},resolution:{enum:["found","not_found","unavailable"]},explanation:{type:"string"}}}'
++      ;;
++    audit-row)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"audit-row",title:"recovery-baseline-snapshot audit-row",type:"object",required:["ts","action","status"],properties:{ts:{type:"string"},action:{type:"string"},status:{type:"string"},sha256:{type:"string"}}}'
++      ;;
++    manifest)
++      jq -nc --arg sv "$RBS_MANIFEST_SCHEMA" \
++        '{schema_version:$sv,command:"manifest",title:"flywheel-recovery-baseline manifest",type:"object",required:["schema_version","created_at","trigger","sessions"],properties:{schema_version:{const:"flywheel-recovery-baseline/v1"},created_at:{type:"string"},trigger:{enum:["manual","nightly","pre-reboot","post-reboot","drill"]},sessions:{type:"array"},protected_sessions_restore_blocked:{type:"array"},retention:{type:"object"}}}'
++      ;;
++    *)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
++        '{schema_version:$sv,command:"schema",surface:$surface,note:"valid surfaces: doctor|health|repair|validate|audit|why|audit-row|manifest"}'
++      ;;
++  esac
++}
++
++scaffold_emit_topic_help() {
++  local topic="${1:-}"
++  case "$topic" in
++    run)      printf 'topic: run — invokes python3 heredoc to write a baseline snapshot tarball + manifest (defaults to snapshot dir %s).\n' "$RBS_SNAPSHOT_DIR" ;;
++    doctor)   printf 'topic: doctor — probes python3, snapshot dir writability, state dir, ntm config, jq, helper lib, audit log writability, source-plan presence.\n' ;;
++    health)   printf 'topic: health — reports latest manifest path + age + manifest count + audit-log staleness (>24h).\n' ;;
++    repair)   printf 'topic: repair — --scope snapshot-dir creates snapshot directory; --scope audit-log ensures audit log dir; --apply requires --idempotency-key.\n' ;;
++    validate) printf 'topic: validate — subjects: manifest (schema_version=flywheel-recovery-baseline/v1), config (deps + writable paths), snapshot-dir (existence + writability).\n' ;;
++    audit)    printf 'topic: audit — tails recent invocations from SCAFFOLD_AUDIT_LOG (~/.local/state/flywheel/recovery-baseline-snapshot-runs.jsonl).\n' ;;
++    why)      printf 'topic: why — explains ids: baseline (source plan + schema), retention (daily=14, weekly=8), protected (alpsinsurance+picoz no-restore), trigger (manual|nightly|pre-reboot|post-reboot|drill).\n' ;;
++    *)        printf 'topics: run | doctor | health | repair | validate | audit | why\n' ;;
++  esac
++}
++
++scaffold_emit_completion() {
++  local shell="${1:-bash}"
++  case "$shell" in
++    -h|--help) scaffold_emit_topic_help completion 2>/dev/null \
++                 || printf 'topic: completion <bash|zsh> — emit shell completion script\n'
++               return 0 ;;
++    bash) command -v cli_emit_completion_bash >/dev/null \
++            && cli_emit_completion_bash "recovery-baseline-snapshot" "doctor,health,repair,validate,audit,why,quickstart,help,completion" "--json,--apply,--dry-run,--idempotency-key,--info,--schema,--examples" \
++            || printf '# helper lib missing — completion unavailable\n' ;;
++    zsh)  command -v cli_emit_completion_zsh >/dev/null \
++            && cli_emit_completion_zsh "recovery-baseline-snapshot" "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
++            || printf '# helper lib missing — completion unavailable\n' ;;
++    *) printf 'ERR: unknown shell %s (use bash|zsh)\n' "$shell" >&2; return 64 ;;
++  esac
++}
++
++# ---------- canonical-cli stubs (TODO markers preserved) ----------
++
++scaffold_cmd_doctor() {
++  local python3_status="fail" snap_dir_status="fail" state_dir_status="fail" ntm_cfg_status="fail" jq_status="fail" helper_status="fail" audit_status="fail" source_plan_status="fail"
++  if command -v python3 >/dev/null 2>&1; then python3_status="pass"; fi
++  if [[ -d "$RBS_SNAPSHOT_DIR" && -w "$RBS_SNAPSHOT_DIR" ]]; then
++    snap_dir_status="pass"
++  elif [[ ! -e "$RBS_SNAPSHOT_DIR" ]]; then
++    local parent; parent="$(dirname "$RBS_SNAPSHOT_DIR")"
++    if [[ -d "$parent" && -w "$parent" ]]; then snap_dir_status="warn"; fi
++  fi
++  if [[ -d "$RBS_STATE_DIR" ]]; then state_dir_status="pass"; fi
++  if [[ -r "$RBS_NTM_CONFIG" ]]; then ntm_cfg_status="pass"; else ntm_cfg_status="warn"; fi
++  if command -v jq >/dev/null 2>&1; then jq_status="pass"; fi
++  if command -v cli_audit_append >/dev/null 2>&1; then helper_status="pass"; fi
++  local audit_dir; audit_dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
++  if [[ -d "$audit_dir" && -w "$audit_dir" ]] || [[ -f "$SCAFFOLD_AUDIT_LOG" && -w "$SCAFFOLD_AUDIT_LOG" ]]; then audit_status="pass"; fi
++  if [[ -r "$RBS_SOURCE_PLAN" ]]; then source_plan_status="pass"; else source_plan_status="warn"; fi
++  local aggregate="pass"
++  for status in "$python3_status" "$jq_status"; do
++    if [[ "$status" != "pass" ]]; then aggregate="fail"; fi
++  done
++  if [[ "$aggregate" == "pass" ]]; then
++    for status in "$snap_dir_status" "$state_dir_status" "$ntm_cfg_status" "$audit_status" "$source_plan_status"; do
++      if [[ "$status" == "fail" ]]; then aggregate="fail"; break; fi
++      if [[ "$status" == "warn" && "$aggregate" == "pass" ]]; then aggregate="warn"; fi
++    done
++  fi
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
++    --arg agg "$aggregate" --arg py "$python3_status" --arg sd "$snap_dir_status" --arg st "$state_dir_status" \
++    --arg nt "$ntm_cfg_status" --arg jq_s "$jq_status" --arg hl "$helper_status" --arg au "$audit_status" --arg sp "$source_plan_status" \
++    --arg snap "$RBS_SNAPSHOT_DIR" --arg state "$RBS_STATE_DIR" --arg ntm "$RBS_NTM_CONFIG" --arg al "$SCAFFOLD_AUDIT_LOG" --arg plan "$RBS_SOURCE_PLAN" \
++    '{schema_version:$sv,command:"doctor",ts:$ts,status:$agg,paths:{snapshot_dir:$snap,state_dir:$state,ntm_config:$ntm,audit_log:$al,source_plan:$plan},checks:[
++        {name:"dependency:python3",status:$py},
++        {name:"snapshot_dir",status:$sd},
++        {name:"state_dir",status:$st},
++        {name:"ntm_config_readable",status:$nt},
++        {name:"dependency:jq",status:$jq_s},
++        {name:"helper_lib_loaded",status:$hl},
++        {name:"audit_log_writable",status:$au},
++        {name:"source_plan_readable",status:$sp}
++    ]}'
++  if command -v cli_audit_append >/dev/null 2>&1; then
++    cli_audit_append "$SCAFFOLD_AUDIT_LOG" "doctor" "$aggregate" '{}' >/dev/null 2>&1 || true
++  fi
++  if [[ "$aggregate" == "fail" ]]; then return 1; fi
++  return 0
++}
++
++scaffold_cmd_health() {
++  local manifest_count=0 latest="null" latest_age="null" audit_log_stale="false" status="pass"
++  if [[ -d "$RBS_SNAPSHOT_DIR" ]]; then
++    manifest_count="$(find "$RBS_SNAPSHOT_DIR" -maxdepth 1 -name 'baseline-*.manifest.json' -type f 2>/dev/null | wc -l | tr -d ' ')"
++    [[ -z "$manifest_count" ]] && manifest_count=0
++    local newest
++    newest="$(find "$RBS_SNAPSHOT_DIR" -maxdepth 1 -name 'baseline-*.manifest.json' -type f -print 2>/dev/null | sort | tail -n 1 || true)"
++    if [[ -n "$newest" && -f "$newest" ]]; then
++      latest="\"$newest\""
++      local mtime now
++      mtime="$(stat -f '%m' "$newest" 2>/dev/null || stat -c '%Y' "$newest" 2>/dev/null || echo 0)"
++      now="$(date +%s)"
++      latest_age=$(( now - mtime ))
++      if (( latest_age > 86400 )); then status="warn"; fi
++    fi
++  fi
++  if [[ "$manifest_count" -eq 0 ]]; then status="warn"; fi
++  if [[ -f "$SCAFFOLD_AUDIT_LOG" ]]; then
++    local amtime now age_s
++    amtime="$(stat -f '%m' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null || stat -c '%Y' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null || echo 0)"
++    now="$(date +%s)"
++    age_s=$(( now - amtime ))
++    if (( age_s > 86400 )); then audit_log_stale="true"; fi
++  fi
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
++    --arg status "$status" --argjson latest "$latest" --argjson age "$latest_age" \
++    --argjson count "$manifest_count" --argjson stale "$audit_log_stale" \
++    --arg snap "$RBS_SNAPSHOT_DIR" --arg al "$SCAFFOLD_AUDIT_LOG" \
++    '{schema_version:$sv,command:"health",ts:$ts,status:$status,latest_manifest:$latest,latest_manifest_age_seconds:$age,manifest_count:$count,snapshot_dir:$snap,audit_log:$al,audit_log_stale:$stale}'
++  if command -v cli_audit_append >/dev/null 2>&1; then
++    cli_audit_append "$SCAFFOLD_AUDIT_LOG" "health" "$status" "$(jq -nc --argjson c "$manifest_count" --argjson a "$latest_age" '{manifest_count:$c,latest_manifest_age_seconds:$a}')" >/dev/null 2>&1 || true
++  fi
++}
++
++scaffold_cmd_repair() {
++  local scope="" mode="dry_run" idem_key=""
++  while [[ $# -gt 0 ]]; do
++    case "$1" in
++      -h|--help) scaffold_emit_topic_help repair; return 0 ;;
++      --scope) scope="${2:-}"; shift 2 ;;
++      --dry-run) mode="dry_run"; shift ;;
++      --apply) mode="apply"; shift ;;
++      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
++      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
++      --json) shift ;;
++      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; return 64 ;;
++    esac
++  done
++  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
++    if command -v cli_refuse_apply_without_idem_key >/dev/null; then
++      cli_refuse_apply_without_idem_key "$SCAFFOLD_SCHEMA_VERSION" "repair" "$scope"
++    else
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
++        '{schema_version:$sv,command:"repair",status:"refused",mode:"apply",scope:$scope,reason:"--apply requires --idempotency-key"}'
++      exit 3
++    fi
++  fi
++  local planned_actions actual_actions
++  case "$scope" in
++    snapshot-dir)
++      planned_actions="$(jq -nc --arg d "$RBS_SNAPSHOT_DIR" '["mkdir -p " + $d]')"
++      actual_actions='[]'
++      if [[ "$mode" == "apply" ]]; then
++        if mkdir -p "$RBS_SNAPSHOT_DIR" 2>/dev/null; then
++          actual_actions='["snapshot_dir_ensured"]'
++        else
++          actual_actions='["snapshot_dir_failed"]'
++        fi
++      fi
++      ;;
++    audit-log)
++      local audit_dir; audit_dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
++      planned_actions="$(jq -nc --arg d "$audit_dir" '["mkdir -p " + $d]')"
++      actual_actions='[]'
++      if [[ "$mode" == "apply" ]]; then
++        if mkdir -p "$audit_dir" 2>/dev/null; then
++          actual_actions='["audit_log_dir_ensured"]'
++        else
++          actual_actions='["audit_log_dir_failed"]'
++        fi
++      fi
++      ;;
++    none|"")
++      scope="none"
++      planned_actions='[]'
++      actual_actions='[]'
++      ;;
++    *)
++      printf 'ERR: unknown repair scope %s (snapshot-dir|audit-log|none)\n' "$scope" >&2
++      return 64
++      ;;
++  esac
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
++    --argjson planned "$planned_actions" --argjson actual "$actual_actions" \
++    '{schema_version:$sv,command:"repair",status:"ok",mode:$mode,scope:$scope,idempotency_key:$idem,planned_actions:$planned,actual_actions:$actual}'
++  if command -v cli_audit_append >/dev/null 2>&1; then
++    cli_audit_append "$SCAFFOLD_AUDIT_LOG" "repair" "$mode" "$(jq -nc --arg s "$scope" --arg k "$idem_key" '{scope:$s,idempotency_key:$k}')" >/dev/null 2>&1 || true
++  fi
++}
++
++scaffold_cmd_validate() {
++  local subject=""
++  while [[ $# -gt 0 ]]; do
++    case "$1" in
++      --json) shift ;;
++      -h|--help) scaffold_emit_topic_help validate; return 0 ;;
++      --*) shift ;;
++      *) subject="$1"; shift ;;
++    esac
++  done
++  if [[ -z "$subject" ]]; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++      '{schema_version:$sv,command:"validate",status:"info",reason:"no subject specified",valid_subjects:["manifest","config","snapshot-dir"]}'
++    return 0
++  fi
++  local status="fail" reason="unknown"
++  case "$subject" in
++    manifest)
++      local newest
++      newest="$(find "$RBS_SNAPSHOT_DIR" -maxdepth 1 -name 'baseline-*.manifest.json' -type f -print 2>/dev/null | sort | tail -n 1 || true)"
++      if [[ -z "$newest" ]]; then
++        reason="no baseline manifest in $RBS_SNAPSHOT_DIR"
++      elif [[ ! -r "$newest" ]]; then
++        reason="latest manifest $newest not readable"
++      else
++        local sv
++        sv="$(jq -r '.schema_version // ""' "$newest" 2>/dev/null || true)"
++        if [[ "$sv" == "$RBS_MANIFEST_SCHEMA" ]]; then
++          status="pass"; reason="manifest $newest carries schema_version=$RBS_MANIFEST_SCHEMA"
++        else
++          reason="manifest $newest schema_version='$sv' (want '$RBS_MANIFEST_SCHEMA')"
++        fi
++      fi
++      ;;
++    config)
++      local missing=()
++      command -v python3 >/dev/null 2>&1 || missing+=("python3")
++      command -v jq >/dev/null 2>&1 || missing+=("jq")
++      [[ -d "$RBS_STATE_DIR" ]] || missing+=("state_dir:$RBS_STATE_DIR")
++      [[ -d "$(dirname "$RBS_SNAPSHOT_DIR")" ]] || missing+=("snapshot_dir_parent:$(dirname "$RBS_SNAPSHOT_DIR")")
++      if [[ ${#missing[@]} -eq 0 ]]; then
++        status="pass"; reason="python3 + jq present; state_dir + snapshot_dir parent both exist"
++      else
++        reason="missing dependencies/paths: $(IFS=,; echo "${missing[*]}")"
++      fi
++      ;;
++    snapshot-dir)
++      if [[ -d "$RBS_SNAPSHOT_DIR" && -w "$RBS_SNAPSHOT_DIR" ]]; then
++        status="pass"; reason="snapshot dir $RBS_SNAPSHOT_DIR exists and is writable"
++      elif [[ ! -e "$RBS_SNAPSHOT_DIR" ]]; then
++        reason="snapshot dir $RBS_SNAPSHOT_DIR does not exist; run repair --scope snapshot-dir --apply --idempotency-key <k>"
++      else
++        reason="snapshot dir $RBS_SNAPSHOT_DIR exists but is not writable"
++      fi
++      ;;
++    *)
++      printf 'ERR: unknown validate subject %s (manifest|config|snapshot-dir)\n' "$subject" >&2
++      return 64
++      ;;
++  esac
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg subject "$subject" --arg status "$status" --arg reason "$reason" \
++    '{schema_version:$sv,command:"validate",subject:$subject,status:$status,reason:$reason}'
++  if command -v cli_audit_append >/dev/null 2>&1; then
++    cli_audit_append "$SCAFFOLD_AUDIT_LOG" "validate" "$status" "$(jq -nc --arg s "$subject" --arg r "$reason" '{subject:$s,reason:$r}')" >/dev/null 2>&1 || true
++  fi
++  return 0
++}
++
++scaffold_cmd_audit() {
++  if command -v cli_emit_audit_tail >/dev/null 2>&1; then
++    cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" 20
++    return $?
++  fi
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
++    '{schema_version:$sv,command:"audit",audit_log:$log,row_count:0,recent:[],helper_lib_missing:true}'
++}
++
++scaffold_cmd_why() {
++  local id="${1:-}"
++  if [[ -z "$id" ]]; then
++    printf 'ERR: why requires <id> argument\n' >&2; return 64
++  fi
++  local resolution="not_found" explanation=""
++  case "$id" in
++    baseline)
++      resolution="found"
++      explanation="A baseline snapshot writes a tarball + manifest to $RBS_SNAPSHOT_DIR carrying schema_version=$RBS_MANIFEST_SCHEMA. Source plan: $RBS_SOURCE_PLAN. Each manifest captures fleet state for ${#RBS_SESSIONS[@]} sessions across .beads/issues.jsonl + dispatch-log + MISSION/GOAL/STATE.md + watcher plists."
++      ;;
++    retention)
++      resolution="found"
++      explanation="Retention policy: daily_keep=$RBS_DAILY_KEEP newest manifests; weekly_keep=$RBS_WEEKLY_KEEP additional manifests one per ISO week. Older manifests + their tarballs are pruned by rotate_snapshots() inside the python heredoc."
++      ;;
++    protected)
++      resolution="found"
++      explanation="Protected sessions ($(IFS=,; echo "${RBS_PROTECTED_SESSIONS[*]}")) appear in manifests but are flagged restore-blocked per recovery-system-2026-05-01/B12 policy; restore tooling must refuse mutating restore actions for them."
++      ;;
++    trigger)
++      resolution="found"
++      explanation="Valid --trigger values: manual, nightly, pre-reboot, post-reboot, drill. Each tags the manifest's trigger field; restore + drill flows filter manifests by trigger."
++      ;;
++    sessions)
++      resolution="found"
++      explanation="Tracked sessions: $(IFS=,; echo "${RBS_SESSIONS[*]}"). zesttube is excluded per B11.1 deferred-low-audit-confidence (follow-up flywheel-4scjn)."
++      ;;
++    schema)
++      if [[ -r "$RBS_SOURCE_PLAN" ]]; then
++        resolution="found"
++        explanation="Manifest schema_version pinned at $RBS_MANIFEST_SCHEMA; structural definition documented in $RBS_SOURCE_PLAN."
++      else
++        resolution="unavailable"
++        explanation="Manifest schema is $RBS_MANIFEST_SCHEMA but source plan $RBS_SOURCE_PLAN is unreadable; cannot cite structural definition."
++      fi
++      ;;
++    *)
++      resolution="not_found"
++      explanation="unknown id '$id'; valid ids: baseline, retention, protected, trigger, sessions, schema"
++      ;;
++  esac
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg resolution "$resolution" --arg explanation "$explanation" \
++    '{schema_version:$sv,command:"why",id:$id,resolution:$resolution,explanation:$explanation}'
++  if command -v cli_audit_append >/dev/null 2>&1; then
++    cli_audit_append "$SCAFFOLD_AUDIT_LOG" "why" "$resolution" "$(jq -nc --arg i "$id" '{id:$i}')" >/dev/null 2>&1 || true
++  fi
++}
++
++# ---------- scaffolded main dispatcher ----------
++
++# When the scaffolder appends this block, it expects the target's original
++# top-level main is renamed to `cmd_run` (or the original final
++# `main "$@"` line is replaced with this dispatcher). Default invocation
++# falls through to the original logic for backward compat.
++scaffold_main() {
++  if [[ $# -eq 0 ]]; then
++    scaffold_usage; exit 0
++  fi
++  case "$1" in
++    -h|--help)    scaffold_usage; exit 0 ;;
++    --info)       shift; scaffold_emit_info "$@"; exit 0 ;;
++    --schema)     shift; scaffold_emit_schema "${1:-default}"; exit 0 ;;
++    --examples)   shift; scaffold_emit_examples "$@"; exit 0 ;;
++    doctor)       shift; scaffold_cmd_doctor "$@"; exit $? ;;
++    health)       shift; scaffold_cmd_health "$@"; exit $? ;;
++    repair)       shift; scaffold_cmd_repair "$@"; exit $? ;;
++    validate)     shift; scaffold_cmd_validate "$@"; exit $? ;;
++    audit)        shift; scaffold_cmd_audit "$@"; exit $? ;;
++    why)          shift; scaffold_cmd_why "$@"; exit $? ;;
++    quickstart)   shift; scaffold_emit_quickstart "$@"; exit 0 ;;
++    help)         shift; scaffold_emit_topic_help "${1:-}"; exit 0 ;;
++    completion)   shift; scaffold_emit_completion "${1:-bash}"; exit $? ;;
++    *)
++      printf 'ERR: unknown canonical subcommand: %s\n' "$1" >&2
++      scaffold_usage >&2
++      exit 64 ;;
++  esac
++}
++
++# Early-dispatch intercept: if argv[0] looks like a canonical subcommand
++# or introspection flag, run the canonical surface and exit BEFORE the
++# target's original arg parser sees the args. Works for both `main "$@"`
++# style and inline `while [[ $# -gt 0 ]]` style targets.
++_scaffold_is_canonical_arg() {
++  case "${1:-}" in
++    doctor|health|repair|validate|audit|why|quickstart|completion) return 0 ;;
++    --info|--schema|--examples) return 0 ;;
++    -h|--help) return 0 ;;
++    help)
++      # Intercept `help <topic>` and `help --help`; bare `help` could be
++      # a legacy subcommand of the target so it falls through.
++      case "${2:-}" in run|doctor|health|repair|validate|audit|why|-h|--help) return 0 ;; esac
++      return 1 ;;
++    *) return 1 ;;
++  esac
++}
++
++if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
++  scaffold_main "$@"
++  exit $?
++fi
++# ====== END canonical-cli scaffold ======
+ python3 - "$@" <<'PY'
+ import argparse
+ import datetime as dt
