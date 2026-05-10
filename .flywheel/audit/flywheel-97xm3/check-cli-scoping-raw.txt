@@ -1,0 +1,16 @@
+PASS: doctor command exists
+FAIL: health command exists - Add <cli> health per SKILL.md mandatory triad.
+FAIL: repair command exists - Add <cli> repair per SKILL.md mandatory triad.
+FAIL: repair documents --dry-run - Document and implement repair --dry-run as the default safe mutation surface.
+FAIL: validate command exists - If this CLI handles state, add validate <thing>; otherwise document why state-handling is out of scope.
+PASS: audit command exists
+FAIL: why command exists - If this CLI stores or mutates objects, add why <id> provenance tracing; otherwise document why state-handling is out of scope.
+PASS: --json flag documented in root help
+FAIL: --info surface exists - Add --info with version, config paths, env, dependencies, and runtime sha.
+FAIL: --examples or examples surface exists - Add --examples or examples with curated workflows.
+FAIL: quickstart command exists - Add quickstart for fresh operators.
+FAIL: help <topic> surface exists - Add help <topic> for major topics, distinct from --help.
+PASS: completion subcommand exists
+
+Summary: 4 pass, 9 fail
+Exit code: 1
