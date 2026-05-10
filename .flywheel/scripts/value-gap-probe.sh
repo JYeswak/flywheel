@@ -129,9 +129,40 @@ existing_bead_id() {
   ' <<<"$out" | head -1
 }
 
+# flywheel-t9iva: explicit OPEN-status predicate. The existing existing_bead_id
+# match-by-title returned ANY-status hits (including closed), but two duplicate
+# pairs (1rmp.7↔1rmp.17, 1rmp.9↔1rmp.19) showed the dedup was insufficient when
+# a prior same-dimension bead was OPEN at re-filing time. This predicate
+# explicitly filters to status="open" so the gate fires precisely on the
+# duplicate-while-open class. Closed-bead re-filings remain handled by the
+# existing existing_bead_id path (returns action:existing).
+dimension_has_open_bead() {
+  local title="$1" out
+  if ! command -v "$BR_BIN" >/dev/null 2>&1; then
+    return 1
+  fi
+  out="$(cd "$REPO" && "$BR_BIN" list --all --limit 0 --json 2>/dev/null)" || return 1
+  jq -r --arg title "$title" '
+    if type == "array" then .
+    elif type == "object" and ((.issues // null) | type) == "array" then .issues
+    else [] end
+    | map(select((.title // "") == $title and (.status // "") == "open"))
+    | sort_by(.created_at // "")
+    | .[0].id // empty
+  ' <<<"$out" | head -1
+}
+
 file_bead() {
-  local dim="$1" title desc existing create_args=() out err raw_err
+  local dim="$1" title desc existing open_existing create_args=() out err raw_err
   title="[value-gap] $(jq -r .id <<<"$dim")"
+  # flywheel-t9iva: open-bead dedupe predicate fires BEFORE the closed-bead
+  # existing-check so duplicates filed against still-open same-dimension
+  # beads emit action:skipped_duplicate (not action:existing nor action:created).
+  open_existing="$(dimension_has_open_bead "$title" || true)"
+  if [ -n "$open_existing" ]; then
+    jq -nc --arg action "skipped_duplicate" --arg bead_id "$open_existing" '{action:$action,bead_filed_id:$bead_id}'
+    return 0
+  fi
   existing="$(existing_bead_id "$title" || true)"
   if [ -n "$existing" ]; then
     jq -nc --arg action "existing" --arg bead_id "$existing" '{action:$action,bead_filed_id:$bead_id}'
