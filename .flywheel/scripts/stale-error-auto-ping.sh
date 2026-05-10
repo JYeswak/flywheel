@@ -12,24 +12,28 @@ WATCH=0
 INTERVAL_SECONDS=300
 ERRORS_FILE=""
 PING_TEXT="ping: stale-error auto-recovery probe -- reply alive if read this"
+IDEMPOTENCY_KEY=""
+AUDIT_LOG="${STALE_ERROR_AUDIT_LOG:-$HOME/.local/state/flywheel/stale-error-auto-ping-runs.jsonl}"
 
 usage() { cat <<'USAGE'
-Usage: stale-error-auto-ping.sh [doctor|health|repair|validate] [--session NAME] [--panes 2,3,4] [--dry-run|--apply] [--watch] [--json]
+Usage: stale-error-auto-ping.sh [doctor|health|repair|validate] [--session NAME] [--panes 2,3,4] [--dry-run|--apply --idempotency-key KEY] [--watch] [--json]
        stale-error-auto-ping.sh validate errors --errors-file PATH [--json]
        stale-error-auto-ping.sh --info [--json] | --examples | --version
 Finds temporary L87 stale-error candidates from native `ntm errors --json`.
 Apply sends only bounded no-op `ntm send --no-cass-check` pings. Default is dry-run.
+--apply requires --idempotency-key (rc=3 if missing). Per-pane ledger-replay skips
+panes already pinged with the same key (sister 8sx9w pair-pattern).
 USAGE
 }
-examples() { printf '%s\n' "Examples:" "  .flywheel/scripts/stale-error-auto-ping.sh --json" "  .flywheel/scripts/stale-error-auto-ping.sh --apply --json --session flywheel --panes 2,3,4" "  .flywheel/scripts/stale-error-auto-ping.sh validate errors --errors-file /tmp/ntm-errors.json --json"; }
+examples() { printf '%s\n' "Examples:" "  .flywheel/scripts/stale-error-auto-ping.sh --json" "  .flywheel/scripts/stale-error-auto-ping.sh --apply --idempotency-key=\$(date -u +%Y%m%d-%H%M%S) --json --session flywheel --panes 2,3,4" "  .flywheel/scripts/stale-error-auto-ping.sh validate errors --errors-file /tmp/ntm-errors.json --json"; }
 json_msg() { jq -nc --arg schema_version "$VERSION" --arg status "$1" --arg message "$2" '{schema_version:$schema_version,status:$status,message:$message}'; }
 
 emit_info() {
   if [[ "$JSON_OUT" -eq 1 ]]; then
-    jq -nc --arg schema_version "$VERSION" --arg ntm "$NTM_BIN" --arg session "$SESSION" --arg panes "$PANES" --argjson interval "$INTERVAL_SECONDS" \
-      '{schema_version:$schema_version,mode:"info",ntm:$ntm,default_session:$session,default_panes:$panes,default_interval_seconds:$interval,mutation_default:"dry-run",candidate_source:"ntm errors --json",apply_transport:"ntm send --no-cass-check"}'
+    jq -nc --arg schema_version "$VERSION" --arg ntm "$NTM_BIN" --arg session "$SESSION" --arg panes "$PANES" --argjson interval "$INTERVAL_SECONDS" --arg audit_log "$AUDIT_LOG" \
+      '{schema_version:$schema_version,mode:"info",ntm:$ntm,default_session:$session,default_panes:$panes,default_interval_seconds:$interval,mutation_default:"dry-run",candidate_source:"ntm errors --json",apply_transport:"ntm send --no-cass-check",apply_requires:"--idempotency-key",audit_log:$audit_log,exit_codes:{"0":"success or replay-no-op","2":"usage error","3":"--apply without --idempotency-key"},flags:["doctor","health","repair","validate","--session","--panes","--dry-run","--apply","--idempotency-key","--watch","--interval-seconds","--ping-text","--json","--info","--examples","--version","--help"]}'
   else
-    printf '%s\nntm=%s\ndefault_session=%s\ndefault_panes=%s\ncandidate_source=ntm errors --json\nmutation_default=dry-run\n' "$VERSION" "$NTM_BIN" "$SESSION" "$PANES"
+    printf '%s\nntm=%s\ndefault_session=%s\ndefault_panes=%s\ncandidate_source=ntm errors --json\nmutation_default=dry-run\napply_requires=--idempotency-key\naudit_log=%s\n' "$VERSION" "$NTM_BIN" "$SESSION" "$PANES" "$AUDIT_LOG"
   fi
 }
 
@@ -55,8 +59,28 @@ candidates_filter() {
       | {pane_idx:$p,agent_type:(.agent_type // "codex"),match_type:(.match_type // null),content:(.content // null),context:(.context // []),timestamp:(.timestamp // null),source:"ntm_errors_json"}]'
 }
 
+replay_already_pinged_panes() {
+  # Per-pane replay-check (sister 8sx9w pair-pattern, adapted to granular per-pane semantics).
+  # Returns JSON array of pane_idx values already pinged with the same idempotency_key.
+  # Uses jq -R 'fromjson?' (tolerant parse) per sister 8sx9w skill discovery
+  # ledger-replay-check-with-tolerant-parse — handles historical row corruption.
+  if [[ -z "$IDEMPOTENCY_KEY" || ! -r "$AUDIT_LOG" ]]; then
+    printf '[]\n'
+    return 0
+  fi
+  jq -Rcs --arg k "$IDEMPOTENCY_KEY" \
+    '[ split("\n")[] | select(length > 0) | fromjson? | select((.idempotency_key // "") == $k and (.action // "") == "ntm_send_ping") | (.pane // empty) ] | unique' \
+    "$AUDIT_LOG" 2>/dev/null || printf '[]\n'
+}
+
+audit_append() {
+  local row="$1"
+  mkdir -p "$(dirname "$AUDIT_LOG")" 2>/dev/null || true
+  printf '%s\n' "$row" >>"$AUDIT_LOG"
+}
+
 run_once() {
-  local started panes_json before_file after_file before_candidates after_candidates sends
+  local started panes_json before_file after_file before_candidates after_candidates sends already_pinged eligible_panes
   started="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   panes_json="$(panes_to_json)"
   before_file="$(mktemp "${TMPDIR:-/tmp}/stale-error-before.XXXXXX")"
@@ -64,21 +88,27 @@ run_once() {
 
   errors_json >"$before_file"
   before_candidates="$(candidates_filter "$panes_json" <"$before_file")"
+  already_pinged="$(replay_already_pinged_panes)"
+  # Filter: keep only candidates whose pane_idx isn't in already_pinged.
+  eligible_panes="$(jq -c --argjson skip "$already_pinged" '[.[] | select(.pane_idx as $p | $skip | index($p) | not)]' <<<"$before_candidates")"
   sends=0
   if [[ "$APPLY" -eq 1 ]]; then
     while IFS= read -r pane; do
       [[ -n "$pane" ]] || continue
       "$NTM_BIN" send "$SESSION" --pane="$pane" --no-cass-check "$PING_TEXT" >/dev/null
+      audit_append "$(jq -nc --arg sv "$VERSION" --arg k "$IDEMPOTENCY_KEY" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg session "$SESSION" --argjson pane "$pane" --arg ping_text "$PING_TEXT" \
+        '{schema_version:$sv,ts:$ts,action:"ntm_send_ping",idempotency_key:$k,session:$session,pane:$pane,ping_text:$ping_text}')"
       sends=$((sends + 1))
-    done < <(jq -r '.[].pane_idx' <<<"$before_candidates")
+    done < <(jq -r '.[].pane_idx' <<<"$eligible_panes")
   fi
   errors_json >"$after_file"
   after_candidates="$(candidates_filter "$panes_json" <"$after_file")"
 
   jq -nc --arg schema_version "$VERSION" --arg ts "$started" --arg session "$SESSION" --argjson panes "$panes_json" \
     --argjson dry_run "$([[ "$DRY_RUN" -eq 1 ]] && echo true || echo false)" --argjson apply "$([[ "$APPLY" -eq 1 ]] && echo true || echo false)" --arg ping_text "$PING_TEXT" \
-    --argjson before "$before_candidates" --argjson after "$after_candidates" --argjson sends "$sends" \
-    '{schema_version:$schema_version,ts:$ts,mode:"run",session:$session,panes:$panes,candidate_source:"ntm errors --json",dry_run:$dry_run,apply:$apply,stale_error_candidate_count:($before|length),stale_error_candidates:$before,planned_actions:($before|map({action:"ntm_send_ping",pane:.pane_idx,text:$ping_text})),actual_actions:(if $apply then ($before|map({action:"ntm_send_ping",pane:.pane_idx,text:$ping_text})) else [] end),send_count:$sends,post_recheck_candidate_count:($after|length),post_recheck_candidates:$after,recovered_count:(($before|length)-($after|length)),status:(if (($before|length)==0) then "no_candidates" elif $apply and (($after|length)<($before|length)) then "recovered_or_improved" elif $apply then "sent_recheck_still_candidate" else "dry_run_candidates" end)}'
+    --arg idempotency_key "$IDEMPOTENCY_KEY" --argjson already_pinged "$already_pinged" \
+    --argjson before "$before_candidates" --argjson eligible "$eligible_panes" --argjson after "$after_candidates" --argjson sends "$sends" \
+    '{schema_version:$schema_version,ts:$ts,mode:"run",session:$session,panes:$panes,candidate_source:"ntm errors --json",dry_run:$dry_run,apply:$apply,idempotency_key:$idempotency_key,stale_error_candidate_count:($before|length),stale_error_candidates:$before,replay_skipped_panes:$already_pinged,replay_skipped_count:($already_pinged|length),eligible_candidate_count:($eligible|length),planned_actions:($eligible|map({action:"ntm_send_ping",pane:.pane_idx,text:$ping_text})),actual_actions:(if $apply then ($eligible|map({action:"ntm_send_ping",pane:.pane_idx,text:$ping_text})) else [] end),send_count:$sends,post_recheck_candidate_count:($after|length),post_recheck_candidates:$after,recovered_count:(($before|length)-($after|length)),status:(if (($before|length)==0) then "no_candidates" elif (($eligible|length)==0 and ($already_pinged|length)>0) then "all_replay_skipped" elif $apply and (($after|length)<($before|length)) then "recovered_or_improved" elif $apply then "sent_recheck_still_candidate" else "dry_run_candidates" end)}'
   rm -f "$before_file" "$after_file"
 }
 
@@ -95,6 +125,8 @@ while [[ $# -gt 0 ]]; do case "$1" in
   --panes) PANES="${2:?--panes requires list}"; shift 2 ;;
   --errors-file|--activity-file) ERRORS_FILE="${2:?--errors-file requires PATH}"; shift 2 ;;
   --dry-run) APPLY=0; DRY_RUN=1; shift ;; --apply) APPLY=1; DRY_RUN=0; shift ;;
+  --idempotency-key) [[ -n "${2:-}" ]] || { printf 'ERR: --idempotency-key requires VALUE\n' >&2; exit 2; }; IDEMPOTENCY_KEY="$2"; shift 2 ;;
+  --idempotency-key=*) IDEMPOTENCY_KEY="${1#--idempotency-key=}"; [[ -n "$IDEMPOTENCY_KEY" ]] || { printf 'ERR: --idempotency-key requires VALUE\n' >&2; exit 2; }; shift ;;
   --json) JSON_OUT=1; shift ;; --watch) WATCH=1; shift ;;
   --interval-seconds) INTERVAL_SECONDS="${2:?--interval-seconds requires N}"; shift 2 ;;
   --ping-text) PING_TEXT="${2:?--ping-text requires TEXT}"; shift 2 ;;
@@ -102,6 +134,15 @@ while [[ $# -gt 0 ]]; do case "$1" in
   --version) printf '%s\n' "$VERSION"; exit 0 ;; --help|-h) usage; exit 0 ;;
   errors|activity) shift ;; *) printf 'ERR: unknown argument: %s\n' "$1" >&2; exit 2 ;;
 esac; done
+
+# Mutation gate (7axmt P1 fix, sister 8sx9w pair-pattern): --apply requires --idempotency-key.
+# Fires BEFORE first ntm send (hoqq8 invariant). Pinging is external pane-state mutation;
+# re-running without a key double-pings workers.
+if [[ "$APPLY" -eq 1 && -z "$IDEMPOTENCY_KEY" ]]; then
+  jq -nc --arg sv "$VERSION" \
+    '{schema_version:$sv,command:"stale-error-auto-ping",status:"refused",mode:"apply",reason:"--apply requires --idempotency-key"}' >&2
+  exit 3
+fi
 
 case "$COMMAND" in
   doctor|health)
