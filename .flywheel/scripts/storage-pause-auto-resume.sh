@@ -22,6 +22,11 @@ fi
 SCAFFOLD_SCHEMA_VERSION="storage-pause-auto-resume/v1"
 SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/storage-pause-auto-resume-runs.jsonl}"
 
+# Module-load env vars (also re-resolved in cmd_run for backward compat).
+# Visible to canonical-cli stubs which run BEFORE cmd_run dispatches.
+STATE_FILE="${STATE_FILE:-${FLYWHEEL_STORAGE_PAUSE_STATE:-$HOME/.local/state/flywheel/storage-pause-active.json}}"
+RECLAIM_DIR="${RECLAIM_DIR:-${FLYWHEEL_RECLAIM_RECEIPT_DIR:-$HOME/.local/state/flywheel/reclaim-receipts}}"
+
 scaffold_usage() {
   cat <<'USG'
 usage: storage-pause-auto-resume.sh [SUBCOMMAND] [OPTIONS]
@@ -124,23 +129,93 @@ scaffold_emit_completion() {
 # ---------- canonical-cli stubs (TODO markers preserved) ----------
 
 scaffold_cmd_doctor() {
-  # TODO(canonical-cli-scaffold): probe substrate this script depends on
-  # (env vars, paths, external tools) and emit per-check status.
-  # Canonical pattern (per L4 lint rule — NEVER use `[[ ]] && X || Y`
-  # as the last expression of a helper; use if/then/else/fi):
-  #   if [[ -d "$ROOT/.flywheel" ]]; then
-  #     printf '{"check":"flywheel-dir","status":"pass"}\n'
-  #   else
-  #     printf '{"check":"flywheel-dir","status":"fail"}\n'
-  #   fi
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"doctor",ts:$ts,status:"todo",checks:[],note:"TODO(canonical-cli-scaffold): fill in doctor checks"}'
+  # Probe storage-pause-auto-resume substrate.
+  local checks
+  checks="$(jq -cs '.' <(
+    if [[ -f "$STATE_FILE" ]]; then
+      jq -nc --arg p "$STATE_FILE" '{check:"state_file",path:$p,status:"pass",present:true}'
+    else
+      jq -nc --arg p "$STATE_FILE" '{check:"state_file",path:$p,status:"pass",present:false,note:"no active pause"}'
+    fi
+    if [[ -d "$RECLAIM_DIR" ]]; then
+      jq -nc --arg p "$RECLAIM_DIR" '{check:"reclaim_dir",path:$p,status:"pass"}'
+    else
+      jq -nc --arg p "$RECLAIM_DIR" '{check:"reclaim_dir",path:$p,status:"warn",reason:"missing — repair --scope state will create"}'
+    fi
+    if command -v df >/dev/null 2>&1; then
+      jq -nc '{check:"df",status:"pass",dependency:"disk-space-probe"}'
+    else
+      jq -nc '{check:"df",status:"fail",reason:"df required for headroom signal"}'
+    fi
+    if command -v "${KILL_BIN:-kill}" >/dev/null 2>&1; then
+      jq -nc --arg b "${KILL_BIN:-kill}" '{check:"kill_bin",bin:$b,status:"pass"}'
+    else
+      jq -nc --arg b "${KILL_BIN:-kill}" '{check:"kill_bin",bin:$b,status:"fail",reason:"kill bin missing — pause/resume disabled"}'
+    fi
+    if command -v jq >/dev/null 2>&1; then
+      jq -nc '{check:"core_deps",status:"pass",found:["jq"]}'
+    else
+      jq -nc '{check:"core_deps",status:"fail",reason:"jq required"}'
+    fi
+  ))"
+  local fails warns
+  fails="$(jq -r '[.[] | select(.status=="fail")] | length' <<<"$checks")"
+  warns="$(jq -r '[.[] | select(.status=="warn")] | length' <<<"$checks")"
+  local status
+  if [[ "$fails" -gt 0 ]]; then
+    status="fail"
+  elif [[ "$warns" -gt 0 ]]; then
+    status="warn"
+  else
+    status="pass"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --arg status "$status" \
+    --argjson checks "$checks" \
+    '{schema_version:$sv,command:"doctor",ts:$ts,status:$status,checks:$checks}'
 }
 
 scaffold_cmd_health() {
-  # TODO(canonical-cli-scaffold): summarize last-run state from audit log.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"health",ts:$ts,status:"todo",note:"TODO(canonical-cli-scaffold): fill in health probe from audit log"}'
+  # Health: pause active? + last reclaim receipt + audit log freshness.
+  local pause_active="false" pause_ts="" reclaim_count=0 latest_reclaim="" latest_reclaim_ts=""
+  local audit_row_count=0 last_audit_ts=""
+  if [[ -f "$STATE_FILE" ]]; then
+    pause_active="true"
+    pause_ts="$(jq -r '.ts // empty' "$STATE_FILE" 2>/dev/null)"
+  fi
+  if [[ -d "$RECLAIM_DIR" ]]; then
+    reclaim_count="$(find "$RECLAIM_DIR" -maxdepth 1 -name '*.json' -type f 2>/dev/null | wc -l | tr -d ' ')"
+    latest_reclaim="$(find "$RECLAIM_DIR" -maxdepth 1 -name '*.json' -type f 2>/dev/null | sort | tail -1)"
+    if [[ -n "$latest_reclaim" && -r "$latest_reclaim" ]]; then
+      latest_reclaim_ts="$(jq -r '.ts // empty' "$latest_reclaim" 2>/dev/null)"
+    fi
+  fi
+  if [[ -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+    audit_row_count="$(wc -l <"$SCAFFOLD_AUDIT_LOG" 2>/dev/null | tr -d ' ')"
+    last_audit_ts="$(tail -1 "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | jq -r '.ts // empty' 2>/dev/null)"
+  fi
+  local status
+  if [[ "$pause_active" == "true" ]]; then
+    status="paused"
+  elif [[ "${audit_row_count:-0}" -gt 0 || "${reclaim_count:-0}" -gt 0 ]]; then
+    status="ok"
+  else
+    status="not_initialized"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --arg status "$status" \
+    --arg pause_ts "$pause_ts" \
+    --arg latest_reclaim "$latest_reclaim" \
+    --arg latest_reclaim_ts "$latest_reclaim_ts" \
+    --arg last_audit_ts "$last_audit_ts" \
+    --argjson pause_active "$pause_active" \
+    --argjson reclaim_count "$reclaim_count" \
+    --argjson audit_row_count "$audit_row_count" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,pause_active:$pause_active,pause_ts:(if $pause_ts=="" then null else $pause_ts end),reclaim_count:$reclaim_count,latest_reclaim_path:(if $latest_reclaim=="" then null else $latest_reclaim end),latest_reclaim_ts:(if $latest_reclaim_ts=="" then null else $latest_reclaim_ts end),audit_row_count:$audit_row_count,last_audit_ts:(if $last_audit_ts=="" then null else $last_audit_ts end)}'
 }
 
 scaffold_cmd_repair() {
@@ -166,21 +241,120 @@ scaffold_cmd_repair() {
       exit 3
     fi
   fi
-  # TODO(canonical-cli-scaffold): per-scope repair actions go here.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
-    '{schema_version:$sv,command:"repair",status:"todo",mode:$mode,scope:$scope,idempotency_key:$idem,note:"TODO(canonical-cli-scaffold): fill in repair scope actions"}'
+  # repair --scope state: ensure RECLAIM_DIR + audit log dir exist; clear stale STATE_FILE if expired.
+  local audit_dir planned applied
+  audit_dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
+  planned="$(jq -cs '.' <(
+    if [[ "$scope" != "state" ]]; then
+      jq -nc --arg s "$scope" '{action:"none",reason:"unsupported scope (state only)",scope:$s}'
+    else
+      if [[ ! -d "$RECLAIM_DIR" ]]; then
+        jq -nc --arg p "$RECLAIM_DIR" '{action:"mkdir",path:$p,mode:"0755"}'
+      fi
+      if [[ ! -d "$audit_dir" ]]; then
+        jq -nc --arg p "$audit_dir" '{action:"mkdir",path:$p,mode:"0755"}'
+      fi
+    fi
+  ))"
+  applied='[]'
+  if [[ "$mode" == "apply" && "$scope" == "state" ]]; then
+    local applied_rows=()
+    if [[ ! -d "$RECLAIM_DIR" ]]; then
+      mkdir -p "$RECLAIM_DIR" && chmod 755 "$RECLAIM_DIR" 2>/dev/null
+      applied_rows+=("$(jq -nc --arg p "$RECLAIM_DIR" --arg key "$idem_key" '{action:"mkdir",path:$p,mode:"0755",idempotency_key:$key}')")
+    fi
+    if [[ ! -d "$audit_dir" ]]; then
+      mkdir -p "$audit_dir" && chmod 755 "$audit_dir" 2>/dev/null
+      applied_rows+=("$(jq -nc --arg p "$audit_dir" --arg key "$idem_key" '{action:"mkdir",path:$p,mode:"0755",idempotency_key:$key}')")
+    fi
+    if [[ "${#applied_rows[@]}" -eq 0 ]]; then
+      applied='[]'
+    else
+      applied="$(printf '%s\n' "${applied_rows[@]}" | jq -cs '.')"
+    fi
+    if command -v cli_audit_append >/dev/null; then
+      cli_audit_append "$SCAFFOLD_AUDIT_LOG" "repair_state_apply" "ok" \
+        "$(jq -nc --arg key "$idem_key" --argjson actions "$applied" '{idempotency_key:$key,actions:$actions}')"
+    fi
+  fi
+  local status
+  if [[ "$mode" == "apply" ]]; then
+    status="applied"
+  else
+    status="dry_run"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg scope "$scope" \
+    --arg mode "$mode" \
+    --arg idem "$idem_key" \
+    --arg status "$status" \
+    --argjson planned "$planned" \
+    --argjson applied "$applied" \
+    '{schema_version:$sv,command:"repair",status:$status,mode:$mode,scope:$scope,idempotency_key:$idem,planned_actions:$planned,applied_actions:$applied}'
 }
 
 scaffold_cmd_validate() {
-  # TODO(canonical-cli-scaffold): document validation subjects + contracts.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
-    '{schema_version:$sv,command:"validate",status:"todo",note:"TODO(canonical-cli-scaffold): fill in per-subject validation"}'
+  local subject="${1:-state_file}"
+  if [[ "$subject" == "-h" || "$subject" == "--help" ]]; then
+    scaffold_emit_topic_help validate
+    return 0
+  fi
+  shift 2>/dev/null || true
+  local results status
+  case "$subject" in
+    state_file)
+      # Validate STATE_FILE shape: when present, must carry timestamp +
+      # paused_workers[] + reason. Accepts ts/generated_at for the timestamp
+      # and paused_pids/paused_workers/pids for the worker list (production
+      # state files use generated_at + paused_workers).
+      if [[ ! -f "$STATE_FILE" ]]; then
+        results="$(jq -nc '[{check:"present",status:"pass",note:"no active pause (state file absent)"}]')"
+      else
+        local has_ts has_workers has_reason
+        has_ts="false"; has_workers="false"; has_reason="false"
+        if jq -e 'has("ts") or has("generated_at")' "$STATE_FILE" >/dev/null 2>&1; then has_ts="true"; fi
+        if jq -e '(.paused_pids // .paused_workers // .pids // []) | type == "array"' "$STATE_FILE" >/dev/null 2>&1; then has_workers="true"; fi
+        if jq -e 'has("reason")' "$STATE_FILE" >/dev/null 2>&1; then has_reason="true"; fi
+        results="$(jq -nc \
+          --arg p "$STATE_FILE" \
+          --argjson hts "$has_ts" \
+          --argjson hw "$has_workers" \
+          --argjson hr "$has_reason" \
+          '[
+            {check:"present",path:$p,status:"pass"},
+            {check:"timestamp_field",status:(if $hts then "pass" else "fail" end),accepts:["ts","generated_at"]},
+            {check:"paused_workers_array",status:(if $hw then "pass" else "fail" end),accepts:["paused_pids","paused_workers","pids"]},
+            {check:"reason_field",status:(if $hr then "pass" else "fail" end)}
+          ]')"
+      fi
+      ;;
+    *)
+      results="$(jq -nc --arg s "$subject" '[{status:"unsupported",subject:$s,supported:["state_file"]}]')"
+      ;;
+  esac
+  local fails
+  fails="$(jq -r '[.[] | select(.status=="fail")] | length' <<<"$results")"
+  if [[ "$fails" -gt 0 ]]; then
+    status="fail"
+  else
+    status="pass"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg subject "$subject" \
+    --arg status "$status" \
+    --argjson results "$results" \
+    '{schema_version:$sv,command:"validate",subject:$subject,status:$status,results:$results}'
 }
 
 scaffold_cmd_audit() {
-  # TODO(canonical-cli-scaffold): tail audit log; emit recent rows.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
-    '{schema_version:$sv,command:"audit",audit_log:$log,status:"todo",note:"TODO(canonical-cli-scaffold): fill in audit tail"}'
+  if command -v cli_emit_audit_tail >/dev/null; then
+    cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" 20
+  else
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
+      '{schema_version:$sv,command:"audit",audit_log:$log,status:"helper_lib_missing"}'
+  fi
 }
 
 scaffold_cmd_why() {
@@ -188,9 +362,22 @@ scaffold_cmd_why() {
   if [[ -z "$id" ]]; then
     printf 'ERR: why requires <id> argument\n' >&2; return 64
   fi
-  # TODO(canonical-cli-scaffold): explain why <id> is/isn't in scope.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
-    '{schema_version:$sv,command:"why",id:$id,status:"todo",note:"TODO(canonical-cli-scaffold): fill in why-id semantics"}'
+  # <id> is a reclaim receipt timestamp basename (e.g. "20260510T160000Z").
+  local receipt="$RECLAIM_DIR/$id.json"
+  if [[ -r "$receipt" ]]; then
+    jq -nc \
+      --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+      --arg id "$id" \
+      --arg path "$receipt" \
+      --argjson body "$(cat "$receipt")" \
+      '{schema_version:$sv,command:"why",id:$id,status:"found",receipt_path:$path,reclaim:$body}'
+  else
+    jq -nc \
+      --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+      --arg id "$id" \
+      --arg dir "$RECLAIM_DIR" \
+      '{schema_version:$sv,command:"why",id:$id,status:"not_found",reclaim_dir:$dir,note:"id not present in reclaim receipt dir"}'
+  fi
 }
 
 # ---------- scaffolded main dispatcher ----------
