@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Cross-orch canonical-cli receipt v1",
+  "description": "Ratified 2026-05-10T16:48Z under cross-orch-anti-divergence-v1 P2 between flywheel:1 and skillos:1. Both orchs emit receipts in this exact 13-dimension shape so cross-impl drift is mechanically detectable. Bash writer: cli_emit_canonical_receipt in .flywheel/lib/canonical-cli-helpers.sh. TS adapter: emitCanonicalReceipt (skillos T+48h).",
+  "type": "object",
+  "required": [
+    "orch",
+    "surface",
+    "spec_version",
+    "score",
+    "dimensions",
+    "evidence",
+    "ts"
+  ],
+  "properties": {
+    "orch": {
+      "type": "string",
+      "description": "Orchestrator identity (e.g., flywheel:1, skillos:1, alpsinsurance:1).",
+      "pattern": "^[a-z][a-z0-9_-]*:[0-9]+$"
+    },
+    "surface": {
+      "type": "string",
+      "description": "Surface identifier (script basename or skill name).",
+      "minLength": 1
+    },
+    "spec_version": {
+      "type": "string",
+      "description": "Canonical-cli-scoping spec version this receipt validates against.",
+      "minLength": 1
+    },
+    "score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 13,
+      "description": "Total PASS dimensions out of 13. N/A dimensions count as PASS for scoring."
+    },
+    "dimensions": {
+      "type": "object",
+      "description": "13-dimension verdict per canonical-cli-scoping rubric.",
+      "required": [
+        "doctor_health_repair_triad",
+        "validate_audit_why_subsidiary",
+        "info_examples_quickstart_help_completion",
+        "json_everywhere",
+        "exit_code_taxonomy",
+        "format_text_json_toon",
+        "dry_run_explain_on_mutating_ops",
+        "per_adapter_scoping",
+        "upstream_report",
+        "cross_repo_resolvable",
+        "deps_buildable_graceful_failure",
+        "errJSON_exit_pair",
+        "doctor_namespace_named_subsystems"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "doctor_health_repair_triad": {"$ref": "#/$defs/dimension_verdict"},
+        "validate_audit_why_subsidiary": {"$ref": "#/$defs/dimension_verdict"},
+        "info_examples_quickstart_help_completion": {"$ref": "#/$defs/dimension_verdict"},
+        "json_everywhere": {"$ref": "#/$defs/dimension_verdict"},
+        "exit_code_taxonomy": {"$ref": "#/$defs/dimension_verdict"},
+        "format_text_json_toon": {"$ref": "#/$defs/dimension_verdict"},
+        "dry_run_explain_on_mutating_ops": {"$ref": "#/$defs/dimension_verdict"},
+        "per_adapter_scoping": {"$ref": "#/$defs/dimension_verdict"},
+        "upstream_report": {"$ref": "#/$defs/dimension_verdict"},
+        "cross_repo_resolvable": {"$ref": "#/$defs/dimension_verdict"},
+        "deps_buildable_graceful_failure": {"$ref": "#/$defs/dimension_verdict"},
+        "errJSON_exit_pair": {"$ref": "#/$defs/dimension_verdict"},
+        "doctor_namespace_named_subsystems": {"$ref": "#/$defs/dimension_verdict"}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "description": "Evidence pointers backing this receipt.",
+      "required": ["doctor_path", "ci_run_url", "test_count"],
+      "additionalProperties": false,
+      "properties": {
+        "doctor_path": {
+          "type": "string",
+          "description": "Re-runnable command or path that yielded the doctor verdict."
+        },
+        "ci_run_url": {
+          "type": ["string", "null"],
+          "description": "URL of the CI run that produced this verdict (null when local-only)."
+        },
+        "test_count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of tests run as part of this verdict."
+        }
+      }
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "UTC ISO-8601 timestamp the receipt was written.",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "schema_version": {
+      "type": "string",
+      "const": "cross-orch-canonical-cli-receipt/v1",
+      "description": "Schema version of this receipt format."
+    }
+  },
+  "$defs": {
+    "dimension_verdict": {
+      "type": "string",
+      "enum": ["PASS", "FAIL", "NA"],
+      "description": "PASS=dimension implemented per spec. FAIL=dimension missing/violated. NA=dimension not applicable to this surface (e.g., per_adapter_scoping for non-aggregator CLIs)."
+    }
+  }
+}

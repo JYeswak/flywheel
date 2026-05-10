@@ -264,9 +264,131 @@ echo "$missing_out" | jq -e '.status == "missing" and .row_count == 0' >/dev/nul
   || report_fail 25 "audit_tail missing file: $missing_out"
 pass 25 "cli_emit_audit_tail missing file"
 
+# --- cross-orch protocols v1 helper (flywheel-4wxn6) ---
+
+# Build a valid 13-dimension dimensions_json fixture.
+build_dims() {
+  jq -nc '{
+    doctor_health_repair_triad: "PASS",
+    validate_audit_why_subsidiary: "PASS",
+    info_examples_quickstart_help_completion: "PASS",
+    json_everywhere: "PASS",
+    exit_code_taxonomy: "PASS",
+    format_text_json_toon: "NA",
+    dry_run_explain_on_mutating_ops: "PASS",
+    per_adapter_scoping: "NA",
+    upstream_report: "PASS",
+    cross_repo_resolvable: "PASS",
+    deps_buildable_graceful_failure: "PASS",
+    errJSON_exit_pair: "PASS",
+    doctor_namespace_named_subsystems: "FAIL"
+  }'
+}
+build_evidence() {
+  jq -nc '{doctor_path:"flywheel-loop doctor --json",ci_run_url:null,test_count:13}'
+}
+
+# Use a sandboxed cross-orch state dir so smoke doesn't pollute live receipts.
+export CANONICAL_CLI_CROSS_ORCH_STATE_DIR="$TMP/cross-orch-state"
+export CANONICAL_CLI_CROSS_ORCH_SCHEMA_PATH="$CANONICAL_CLI_CROSS_ORCH_STATE_DIR/schema/receipt.schema.json"
+mkdir -p "$CANONICAL_CLI_CROSS_ORCH_STATE_DIR/schema"
+cp /Users/josh/.local/state/canonical-cli-scoping/schema/receipt.schema.json \
+   "$CANONICAL_CLI_CROSS_ORCH_SCHEMA_PATH" 2>/dev/null || true
+
+# (26) cli_emit_canonical_receipt happy path
+dims_ok="$(build_dims)"
+ev_ok="$(build_evidence)"
+recv_path="$(cli_emit_canonical_receipt "flywheel:1" "flywheel-loop" 12 "$dims_ok" "$ev_ok")"
+if [[ -f "$recv_path" ]] && jq -e '.schema_version == "cross-orch-canonical-cli-receipt/v1" and .orch == "flywheel:1" and .surface == "flywheel-loop" and .score == 12 and (.dimensions | length == 13)' "$recv_path" >/dev/null; then
+  pass 26 "cli_emit_canonical_receipt happy path: $recv_path"
+else
+  report_fail 26 "cli_emit_canonical_receipt happy path failed (path=$recv_path)"
+fi
+
+# (27) Receipt path follows <orch>/<surface>-<ts>.json convention
+if [[ "$recv_path" =~ /receipts/flywheel:1/flywheel-loop-[0-9TZ]+\.json$ ]]; then
+  pass 27 "receipt path matches <orch>/<surface>-<ts>.json convention"
+else
+  report_fail 27 "receipt path shape: $recv_path"
+fi
+
+# (28) Schema sidecar exists with required top-level fields
+if [[ -r "$CANONICAL_CLI_CROSS_ORCH_SCHEMA_PATH" ]]; then
+  if jq -e '.required | (index("orch") and index("surface") and index("score") and index("dimensions") and index("evidence") and index("ts"))' "$CANONICAL_CLI_CROSS_ORCH_SCHEMA_PATH" >/dev/null; then
+    pass 28 "schema sidecar has required 6 top-level fields"
+  else
+    report_fail 28 "schema sidecar missing required fields"
+  fi
+else
+  report_fail 28 "schema sidecar not present at $CANONICAL_CLI_CROSS_ORCH_SCHEMA_PATH"
+fi
+
+# (29) Schema dimensions enumerate 13 keys
+if jq -e '.properties.dimensions.required | length == 13' "$CANONICAL_CLI_CROSS_ORCH_SCHEMA_PATH" >/dev/null; then
+  pass 29 "schema dimensions.required has 13 keys"
+else
+  report_fail 29 "schema dimensions.required not 13"
+fi
+
+# (30) Negative: invalid orch returns rc=2
+set +e
+cli_emit_canonical_receipt "BAD ORCH" "x" 0 "$dims_ok" "$ev_ok" >/dev/null 2>&1
+rc30=$?
+set -e
+[[ "$rc30" -eq 2 ]] || report_fail 30 "invalid orch expected rc=2 got $rc30"
+pass 30 "invalid orch rejected rc=2"
+
+# (31) Negative: missing dimension key returns rc=2
+set +e
+bad_dims="$(jq 'del(.json_everywhere)' <<<"$dims_ok")"
+cli_emit_canonical_receipt "flywheel:1" "x" 0 "$bad_dims" "$ev_ok" >/dev/null 2>&1
+rc31=$?
+set -e
+[[ "$rc31" -eq 2 ]] || report_fail 31 "missing dim expected rc=2 got $rc31"
+pass 31 "missing dimension key rejected rc=2"
+
+# (32) Negative: invalid verdict (not PASS|FAIL|NA) returns rc=2
+set +e
+bad_verdicts="$(jq '.json_everywhere = "MAYBE"' <<<"$dims_ok")"
+cli_emit_canonical_receipt "flywheel:1" "x" 0 "$bad_verdicts" "$ev_ok" >/dev/null 2>&1
+rc32=$?
+set -e
+[[ "$rc32" -eq 2 ]] || report_fail 32 "invalid verdict expected rc=2 got $rc32"
+pass 32 "invalid verdict (non-PASS|FAIL|NA) rejected rc=2"
+
+# (33) Negative: missing evidence key returns rc=2
+set +e
+bad_ev="$(jq 'del(.test_count)' <<<"$ev_ok")"
+cli_emit_canonical_receipt "flywheel:1" "x" 0 "$dims_ok" "$bad_ev" >/dev/null 2>&1
+rc33=$?
+set -e
+[[ "$rc33" -eq 2 ]] || report_fail 33 "missing evidence expected rc=2 got $rc33"
+pass 33 "missing evidence key rejected rc=2"
+
+# (34) Negative: out-of-range score returns rc=2
+set +e
+cli_emit_canonical_receipt "flywheel:1" "x" 99 "$dims_ok" "$ev_ok" >/dev/null 2>&1
+rc34=$?
+set -e
+[[ "$rc34" -eq 2 ]] || report_fail 34 "out-of-range score expected rc=2 got $rc34"
+pass 34 "out-of-range score rejected rc=2"
+
+# (35) Receipt body validates against the schema sidecar (structural check)
+recv_path2="$(cli_emit_canonical_receipt "skillos:1" "ts-helper-binary" 13 "$dims_ok" "$ev_ok")"
+if jq -e '
+  has("orch") and has("surface") and has("spec_version") and has("score")
+  and has("dimensions") and has("evidence") and has("ts") and has("schema_version")
+  and (.dimensions | length == 13)
+  and (.evidence | has("doctor_path") and has("ci_run_url") and has("test_count"))
+' "$recv_path2" >/dev/null; then
+  pass 35 "receipt structurally matches schema sidecar (top-level + dimensions + evidence)"
+else
+  report_fail 35 "receipt structural shape mismatch: $recv_path2"
+fi
+
 if [[ "$fail" -gt 0 ]]; then
   echo "FAIL: $fail assertion(s) failed" >&2
   exit 1
 fi
-echo "PASS canonical-cli-helpers-smoke (25 assertions)"
+echo "PASS canonical-cli-helpers-smoke (35 assertions)"
 exit 0

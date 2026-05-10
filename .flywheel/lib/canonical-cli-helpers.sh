@@ -467,6 +467,158 @@ cli_emit_audit_tail() {
   return 0
 }
 
+# ---------- cross-orch canonical-cli receipt (flywheel-4wxn6) ----------
+
+# Cross-orch state directory holding the receipt schema sidecar + per-orch
+# receipt files. Both flywheel:1 and skillos:1 write here so each side can
+# scan the other's verdicts without traversing repo boundaries.
+CANONICAL_CLI_CROSS_ORCH_STATE_DIR="${CANONICAL_CLI_CROSS_ORCH_STATE_DIR:-$HOME/.local/state/canonical-cli-scoping}"
+CANONICAL_CLI_CROSS_ORCH_SCHEMA_PATH="${CANONICAL_CLI_CROSS_ORCH_SCHEMA_PATH:-$CANONICAL_CLI_CROSS_ORCH_STATE_DIR/schema/receipt.schema.json}"
+
+# cli_emit_canonical_receipt <orch> <surface> <score> <dimensions_json> <evidence_json> [<spec_version>] [<ts>]
+#
+# Implements P2 of the cross-orch-anti-divergence-v1 protocol set
+# (ratified 2026-05-10T16:48Z; ref:
+# .flywheel/handoffs/2026-05-10T164800Z-from-flywheel-1-to-skillos-1-protocols-v1-ratification.md).
+#
+# Writes a 13-dimension receipt to
+# `~/.local/state/canonical-cli-scoping/receipts/<orch>/<surface>-<ts>.json`
+# matching the agreed schema sidecar at
+# `~/.local/state/canonical-cli-scoping/schema/receipt.schema.json`.
+#
+# Pre-write validation:
+#   1. dimensions_json: 13 keys exactly, each value PASS|FAIL|NA.
+#   2. evidence_json: must contain doctor_path, ci_run_url, test_count.
+#   3. score: 0..13.
+#   4. orch: matches `^[a-z][a-z0-9_-]*:[0-9]+$`.
+#
+# Args:
+#   orch              — orchestrator identity (e.g., "flywheel:1")
+#   surface           — surface name (script basename or skill name)
+#   score             — integer 0..13 (PASS+NA count out of 13)
+#   dimensions_json   — JSON object with all 13 dimensions
+#   evidence_json     — JSON object with doctor_path, ci_run_url, test_count
+#   spec_version      — optional; default "canonical-cli-scoping/v1"
+#   ts                — optional; default cli_iso_now
+#
+# Echoes the canonical receipt path on stdout. Exit codes:
+#   0  ok (receipt written + validated)
+#   2  validation error (invalid args or schema mismatch)
+#   3  helper-lib unavailable / missing dependency
+cli_emit_canonical_receipt() {
+  local orch
+  local surface
+  local score
+  local dimensions_json
+  local evidence_json
+  local spec_version
+  local ts
+  orch="${1:-}"
+  surface="${2:-}"
+  score="${3:-}"
+  dimensions_json="${4:-}"
+  evidence_json="${5:-}"
+  spec_version="${6:-canonical-cli-scoping/v1}"
+  ts="${7:-$(cli_iso_now)}"
+
+  if ! command -v jq >/dev/null 2>&1; then
+    printf 'ERR: cli_emit_canonical_receipt requires jq\n' >&2
+    return 3
+  fi
+
+  if [[ -z "$orch" || -z "$surface" || -z "$score" || -z "$dimensions_json" || -z "$evidence_json" ]]; then
+    printf 'ERR: cli_emit_canonical_receipt requires <orch> <surface> <score> <dimensions_json> <evidence_json>\n' >&2
+    return 2
+  fi
+
+  if ! [[ "$orch" =~ ^[a-z][a-z0-9_-]*:[0-9]+$ ]]; then
+    printf 'ERR: orch must match ^[a-z][a-z0-9_-]*:[0-9]+$ (got %s)\n' "$orch" >&2
+    return 2
+  fi
+
+  if ! [[ "$score" =~ ^[0-9]+$ ]] || [[ "$score" -lt 0 || "$score" -gt 13 ]]; then
+    printf 'ERR: score must be integer 0..13 (got %s)\n' "$score" >&2
+    return 2
+  fi
+
+  if ! printf '%s' "$dimensions_json" | jq -e . >/dev/null 2>&1; then
+    printf 'ERR: dimensions_json is not valid JSON\n' >&2
+    return 2
+  fi
+  if ! printf '%s' "$evidence_json" | jq -e . >/dev/null 2>&1; then
+    printf 'ERR: evidence_json is not valid JSON\n' >&2
+    return 2
+  fi
+
+  local required_dims
+  required_dims='["doctor_health_repair_triad","validate_audit_why_subsidiary","info_examples_quickstart_help_completion","json_everywhere","exit_code_taxonomy","format_text_json_toon","dry_run_explain_on_mutating_ops","per_adapter_scoping","upstream_report","cross_repo_resolvable","deps_buildable_graceful_failure","errJSON_exit_pair","doctor_namespace_named_subsystems"]'
+
+  local missing
+  missing="$(jq -nc --argjson dims "$dimensions_json" --argjson required "$required_dims" \
+    '$required - ($dims | keys)' 2>/dev/null)"
+  if [[ "$missing" != "[]" ]]; then
+    printf 'ERR: dimensions_json missing keys: %s\n' "$missing" >&2
+    return 2
+  fi
+
+  local extra
+  extra="$(jq -nc --argjson dims "$dimensions_json" --argjson required "$required_dims" \
+    '($dims | keys) - $required' 2>/dev/null)"
+  if [[ "$extra" != "[]" ]]; then
+    printf 'ERR: dimensions_json has unknown keys: %s\n' "$extra" >&2
+    return 2
+  fi
+
+  local invalid_verdicts
+  invalid_verdicts="$(jq -nc --argjson dims "$dimensions_json" \
+    '[$dims | to_entries[] | select(.value as $v | ["PASS","FAIL","NA"] | index($v) | not)] | map(.key)' 2>/dev/null)"
+  if [[ "$invalid_verdicts" != "[]" ]]; then
+    printf 'ERR: dimensions with non-PASS|FAIL|NA values: %s\n' "$invalid_verdicts" >&2
+    return 2
+  fi
+
+  local missing_evidence
+  missing_evidence="$(jq -nc --argjson ev "$evidence_json" \
+    '["doctor_path","ci_run_url","test_count"] - ($ev | keys)' 2>/dev/null)"
+  if [[ "$missing_evidence" != "[]" ]]; then
+    printf 'ERR: evidence_json missing keys: %s\n' "$missing_evidence" >&2
+    return 2
+  fi
+
+  local receipts_dir
+  receipts_dir="$CANONICAL_CLI_CROSS_ORCH_STATE_DIR/receipts/$orch"
+  mkdir -p "$receipts_dir" 2>/dev/null || true
+
+  local ts_token
+  ts_token="$(printf '%s' "$ts" | tr -d ':-')"
+  local receipt_path
+  receipt_path="$receipts_dir/${surface}-${ts_token}.json"
+
+  local receipt_body
+  receipt_body="$(jq -nc \
+    --arg orch "$orch" \
+    --arg surface "$surface" \
+    --arg spec_version "$spec_version" \
+    --arg ts "$ts" \
+    --argjson score "$score" \
+    --argjson dimensions "$dimensions_json" \
+    --argjson evidence "$evidence_json" \
+    '{
+      schema_version: "cross-orch-canonical-cli-receipt/v1",
+      orch: $orch,
+      surface: $surface,
+      spec_version: $spec_version,
+      score: $score,
+      dimensions: $dimensions,
+      evidence: $evidence,
+      ts: $ts
+    }')"
+
+  printf '%s\n' "$receipt_body" >"$receipt_path"
+  printf '%s\n' "$receipt_path"
+  return 0
+}
+
 # ---------- topic help dispatcher ----------
 
 # cli_emit_topic_help <topic> <topic_map_file>
