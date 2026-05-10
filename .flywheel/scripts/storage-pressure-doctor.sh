@@ -10,7 +10,7 @@ set -euo pipefail
 # This block is APPENDED by scaffold-canonical-cli.sh. The original
 # top-level dispatch is preserved as `cmd_run` (the new main routes
 # default invocation through cmd_run for backward compat). Surface-
-# specific logic stays as TODO markers — see grep '# TODO(canonical-cli-scaffold)'.
+# specific logic was filled in by flywheel-al24y (P3 sub-bead).
 
 _SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
 _SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
@@ -88,20 +88,36 @@ scaffold_emit_quickstart() {
 }
 
 scaffold_emit_schema() {
-  local surface="${1:-default}"
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
-    '{schema_version:$sv,command:"schema",surface:$surface,note:"TODO(canonical-cli-scaffold): per-surface schema fill-in"}'
+  local surface="${1:-storage-pressure-doctor}"
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" '{
+    schema_version:$sv,
+    command:"schema",
+    surface:$surface,
+    description:"diagnose storage pressure: disk usage via storage-probe.sh delegate, top consumers, /private/tmp aggregate, snapshot inventory, recommendations.",
+    inputs:{
+      storage_probe:{type:"path",default:"$ROOT/.flywheel/scripts/storage-probe.sh"},
+      tmp_prune_ledger:{type:"path",env:"FLYWHEEL_TMP_PRUNE_LEDGER",default:"$HOME/.local/state/flywheel/tmp-aggressive-prune-cron.jsonl"},
+      storage_fixture:{type:"path",env:"FLYWHEEL_STORAGE_PRESSURE_STORAGE_FIXTURE",description:"override storage-probe output for testing"}
+    },
+    outputs:{
+      runs_log:{path:"$HOME/.local/state/flywheel/storage-pressure-doctor-runs.jsonl"},
+      stdout:{type:"json",fields:["ts","storage","top_consumers","snapshots","private_tmp","recommendations"]}
+    },
+    side_effects:["read-only by default","invokes storage-probe.sh as delegate","reads tmp-prune ledger"]
+  }'
 }
 
 scaffold_emit_topic_help() {
   local topic="${1:-}"
   case "$topic" in
-    run)      printf 'topic: run — default backward-compatible invocation routes to cmd_run.\n' ;;
-    doctor)   printf 'topic: doctor — TODO(canonical-cli-scaffold): document doctor checks specific to this surface.\n' ;;
-    health)   printf 'topic: health — TODO(canonical-cli-scaffold): document health probes specific to this surface.\n' ;;
-    repair)   printf 'topic: repair — TODO(canonical-cli-scaffold): document repair scopes + idempotency contract.\n' ;;
-    validate) printf 'topic: validate — TODO(canonical-cli-scaffold): document validation subjects + contracts.\n' ;;
-    *)        printf 'topics: run | doctor | health | repair | validate\n' ;;
+    run)      printf 'topic: run — default invocation runs the full storage diagnostic: delegates to storage-probe.sh, computes top disk consumers, scans /private/tmp aggregate, lists APFS snapshots, emits recommendations. Read-only.\n' ;;
+    doctor)   printf 'topic: doctor — probes 6 substrate dimensions: storage-probe.sh executable, df present, jq present, tmp-prune ledger writable, runs ledger writable, ROOT is a flywheel repo.\n' ;;
+    health)   printf 'topic: health — tail tmp-prune ledger; reports recent prune count, last prune ts, age_seconds_since_last. Status warn when stale >24 hours (cron may be off).\n' ;;
+    repair)   printf 'topic: repair — scopes: stale-prune (re-run private-tmp-prune via canonical script), runs-log-rotate (rotate scaffold runs ledger when >5MB). --apply requires --idempotency-key.\n' ;;
+    validate) printf 'topic: validate — subjects: storage-probe-output (--probe-json=JSON; check required fields), tmp-prune-row (--row-json against ts/path/action), config (env values).\n' ;;
+    audit)    printf 'topic: audit — tail recent rows from the runs ledger. --tail=N (default 10).\n' ;;
+    why)      printf 'topic: why <path> — explain whether <path> is a top consumer; if it appears in tmp-prune-ledger, emit prune provenance.\n' ;;
+    *)        printf 'topics: run | doctor | health | repair | validate | audit | why\n' ;;
   esac
 }
 
@@ -124,23 +140,108 @@ scaffold_emit_completion() {
 # ---------- canonical-cli stubs (TODO markers preserved) ----------
 
 scaffold_cmd_doctor() {
-  # TODO(canonical-cli-scaffold): probe substrate this script depends on
-  # (env vars, paths, external tools) and emit per-check status.
-  # Canonical pattern (per L4 lint rule — NEVER use `[[ ]] && X || Y`
-  # as the last expression of a helper; use if/then/else/fi):
-  #   if [[ -d "$ROOT/.flywheel" ]]; then
-  #     printf '{"check":"flywheel-dir","status":"pass"}\n'
-  #   else
-  #     printf '{"check":"flywheel-dir","status":"fail"}\n'
-  #   fi
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"doctor",ts:$ts,status:"todo",checks:[],note:"TODO(canonical-cli-scaffold): fill in doctor checks"}'
+  # 6 substrate checks. Pure if/then/else/fi (no L4 short-circuits).
+  local ts script_dir storage_probe tmp_prune_ledger runs_log root
+  ts="$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+  root="$(cd "$script_dir/../.." 2>/dev/null && pwd -P)"
+  storage_probe="$root/.flywheel/scripts/storage-probe.sh"
+  tmp_prune_ledger="${FLYWHEEL_TMP_PRUNE_LEDGER:-$HOME/.local/state/flywheel/tmp-aggressive-prune-cron.jsonl}"
+  runs_log="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/storage-pressure-doctor-runs.jsonl}"
+
+  local probe_status="fail" probe_reason=""
+  if [[ -x "$storage_probe" ]]; then probe_status="pass"
+  elif [[ -e "$storage_probe" ]]; then probe_reason="exists but not executable: $storage_probe"
+  else probe_reason="storage-probe.sh absent: $storage_probe"; fi
+
+  local df_status="fail" df_reason=""
+  if command -v df >/dev/null 2>&1; then df_status="pass"
+  else df_reason="df not on PATH"; fi
+
+  local jq_status="fail" jq_reason=""
+  if command -v jq >/dev/null 2>&1; then jq_status="pass"
+  else jq_reason="jq not on PATH"; fi
+
+  local tmp_status="fail" tmp_reason=""
+  if [[ -f "$tmp_prune_ledger" && -r "$tmp_prune_ledger" ]]; then tmp_status="pass"
+  elif [[ -f "$tmp_prune_ledger" ]]; then tmp_reason="exists but not readable: $tmp_prune_ledger"
+  elif [[ -d "$(dirname "$tmp_prune_ledger")" ]]; then tmp_status="pass"; tmp_reason="absent but parent dir exists"
+  else tmp_reason="parent dir absent: $(dirname "$tmp_prune_ledger")"; fi
+
+  local runs_status="fail" runs_reason=""
+  if [[ -f "$runs_log" && -w "$runs_log" ]]; then runs_status="pass"
+  elif [[ -f "$runs_log" ]]; then runs_reason="exists but not writable: $runs_log"
+  elif [[ -w "$(dirname "$runs_log")" ]]; then runs_status="pass"; runs_reason="absent but parent writable"
+  else runs_reason="parent not writable: $(dirname "$runs_log")"; fi
+
+  local root_status="fail" root_reason=""
+  if [[ -d "$root/.flywheel" ]]; then root_status="pass"
+  else root_reason="$root is not a flywheel repo (no .flywheel/)"; fi
+
+  local overall="pass"
+  for s in "$probe_status" "$df_status" "$jq_status" "$tmp_status" "$runs_status" "$root_status"; do
+    if [[ "$s" == "fail" ]]; then overall="fail"; fi
+  done
+
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg overall "$overall" \
+    --arg storage_probe "$storage_probe" --arg probe_status "$probe_status" --arg probe_reason "$probe_reason" \
+    --arg df_status "$df_status" --arg df_reason "$df_reason" \
+    --arg jq_status "$jq_status" --arg jq_reason "$jq_reason" \
+    --arg tmp_log "$tmp_prune_ledger" --arg tmp_status "$tmp_status" --arg tmp_reason "$tmp_reason" \
+    --arg runs_log "$runs_log" --arg runs_status "$runs_status" --arg runs_reason "$runs_reason" \
+    --arg root "$root" --arg root_status "$root_status" --arg root_reason "$root_reason" \
+    '{schema_version:$sv,command:"doctor",ts:$ts,status:$overall,checks:[
+      {name:"storage_probe_executable",status:$probe_status,path:$storage_probe,reason:$probe_reason},
+      {name:"df_on_path",status:$df_status,reason:$df_reason},
+      {name:"jq_on_path",status:$jq_status,reason:$jq_reason},
+      {name:"tmp_prune_ledger_readable",status:$tmp_status,path:$tmp_log,reason:$tmp_reason},
+      {name:"runs_ledger_writable",status:$runs_status,path:$runs_log,reason:$runs_reason},
+      {name:"flywheel_root_resolvable",status:$root_status,path:$root,reason:$root_reason}
+    ]}'
 }
 
 scaffold_cmd_health() {
-  # TODO(canonical-cli-scaffold): summarize last-run state from audit log.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"health",ts:$ts,status:"todo",note:"TODO(canonical-cli-scaffold): fill in health probe from audit log"}'
+  # Tail tmp-prune ledger and report freshness.
+  local ts tmp_log tail_count=20 tail_lines total last_ts age_seconds
+  ts="$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  tmp_log="${FLYWHEEL_TMP_PRUNE_LEDGER:-$HOME/.local/state/flywheel/tmp-aggressive-prune-cron.jsonl}"
+
+  if [[ ! -f "$tmp_log" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$tmp_log" \
+      '{schema_version:$sv,command:"health",ts:$ts,status:"warn",reason:"tmp-prune ledger absent (no prune cron runs yet)",ledger:$log,recent_count:0}'
+    return 0
+  fi
+
+  set +e
+  tail_lines="$(tail -n "$tail_count" "$tmp_log" 2>/dev/null)"
+  total="$(printf '%s\n' "$tail_lines" | grep -c . || echo 0)"
+  last_ts="$(printf '%s\n' "$tail_lines" | tail -1 | jq -r '.ts // ""' 2>/dev/null)"
+  set -e
+
+  if [[ -n "$last_ts" ]]; then
+    local now_epoch last_epoch
+    now_epoch="$(date -u +%s)"
+    last_epoch="$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$last_ts" +%s 2>/dev/null || echo "$now_epoch")"
+    age_seconds=$((now_epoch - last_epoch))
+  else
+    age_seconds=null
+  fi
+
+  local status="pass" reason=""
+  if [[ "$total" -eq 0 ]]; then
+    status="warn"; reason="tmp-prune ledger present but empty"
+  elif [[ "$age_seconds" != "null" ]] && [[ "$age_seconds" -gt 86400 ]]; then
+    status="warn"; reason="last prune > 24 hours ago (age=${age_seconds}s) — cron may be stalled"
+  fi
+
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg status "$status" --arg reason "$reason" \
+    --arg log "$tmp_log" \
+    --argjson total "$total" \
+    --arg last_ts "$last_ts" --argjson age "${age_seconds:-null}" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,reason:(if $reason == "" then null else $reason end),
+      ledger:$log,recent_count:$total,
+      last_prune_ts:(if $last_ts == "" then null else $last_ts end),
+      age_seconds_since_last:$age}'
 }
 
 scaffold_cmd_repair() {
@@ -166,31 +267,183 @@ scaffold_cmd_repair() {
       exit 3
     fi
   fi
-  # TODO(canonical-cli-scaffold): per-scope repair actions go here.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
-    '{schema_version:$sv,command:"repair",status:"todo",mode:$mode,scope:$scope,idempotency_key:$idem,note:"TODO(canonical-cli-scaffold): fill in repair scope actions"}'
+  # Per-scope repair:
+  #   stale-prune       — point at canonical private-tmp-prune.sh path
+  #   runs-log-rotate   — rotate scaffold runs ledger when >5MB
+  local runs_log script_dir root prune_script
+  runs_log="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/storage-pressure-doctor-runs.jsonl}"
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+  root="$(cd "$script_dir/../.." 2>/dev/null && pwd -P)"
+  prune_script="$root/.flywheel/scripts/private-tmp-prune.sh"
+
+  case "$scope" in
+    stale-prune)
+      local prune_present=false
+      if [[ -x "$prune_script" ]]; then prune_present=true; fi
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
+        --arg prune "$prune_script" --argjson prune_present "$prune_present" \
+        '{schema_version:$sv,command:"repair",status:"plan",mode:$mode,scope:$scope,idempotency_key:$idem,canonical_prune_script:$prune,prune_script_present:$prune_present,note:"plan-only emitted; the canonical apply path is `private-tmp-prune.sh --apply --idempotency-key KEY` (filed as flywheel-gam2k surface; this scope merely points at it)"}'
+      ;;
+    runs-log-rotate)
+      local size=0 rotate_threshold=5242880  # 5 MB
+      if [[ -f "$runs_log" ]]; then
+        size="$(wc -c <"$runs_log" | tr -d ' ')"
+      fi
+      local needs_rotate=false
+      if [[ "$size" -gt "$rotate_threshold" ]]; then needs_rotate=true; fi
+      if [[ "$mode" == "apply" && "$needs_rotate" == "true" ]]; then
+        local rotated="${runs_log}.$(date -u +%Y%m%dT%H%M%SZ)"
+        mv "$runs_log" "$rotated" 2>/dev/null
+        : > "$runs_log"
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg idem "$idem_key" \
+          --arg runs_log "$runs_log" --arg rotated "$rotated" --argjson size "$size" \
+          '{schema_version:$sv,command:"repair",status:"ok",mode:"apply",scope:$scope,idempotency_key:$idem,runs_log:$runs_log,rotated_to:$rotated,old_size_bytes:$size}'
+      elif [[ "$mode" == "apply" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg idem "$idem_key" \
+          --arg runs_log "$runs_log" --argjson size "$size" --argjson threshold "$rotate_threshold" \
+          '{schema_version:$sv,command:"repair",status:"noop",mode:"apply",scope:$scope,idempotency_key:$idem,runs_log:$runs_log,size_bytes:$size,threshold_bytes:$threshold,reason:"under threshold; no rotation needed"}'
+      else
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
+          --arg runs_log "$runs_log" --argjson size "$size" --argjson threshold "$rotate_threshold" --argjson needs "$needs_rotate" \
+          '{schema_version:$sv,command:"repair",status:"plan",mode:"dry_run",scope:$scope,runs_log:$runs_log,size_bytes:$size,threshold_bytes:$threshold,needs_rotate:$needs}'
+      fi
+      ;;
+    ""|none)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg mode "$mode" --arg scope "$scope" \
+        '{schema_version:$sv,command:"repair",status:"info",mode:$mode,scope:$scope,reason:"no scope specified",valid_scopes:["stale-prune","runs-log-rotate"]}'
+      ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg mode "$mode" --arg scope "$scope" \
+        '{schema_version:$sv,command:"repair",status:"refused",mode:$mode,scope:$scope,reason:"unknown scope",valid_scopes:["stale-prune","runs-log-rotate"]}'
+      return 64
+      ;;
+  esac
 }
 
 scaffold_cmd_validate() {
-  # TODO(canonical-cli-scaffold): document validation subjects + contracts.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
-    '{schema_version:$sv,command:"validate",status:"todo",note:"TODO(canonical-cli-scaffold): fill in per-subject validation"}'
+  # Per-subject validation:
+  #   --probe-json=<JSON>    validate storage-probe.sh output against required fields
+  #   --row-json=<JSON>      validate one tmp-prune ledger row
+  #   --config               validate env vars + paths
+  local subject="" probe_json="" row_json=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --probe-json=*) probe_json="${1#--probe-json=}"; subject="probe"; shift ;;
+      --row-json=*) row_json="${1#--row-json=}"; subject="row"; shift ;;
+      --config) subject="config"; shift ;;
+      --json) shift ;;
+      -h|--help) scaffold_emit_topic_help validate; return 0 ;;
+      *) printf 'ERR: unknown validate arg: %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+
+  case "$subject" in
+    probe)
+      [[ -z "$probe_json" ]] && { jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",status:"refused",reason:"--probe-json=JSON required"}'; return 64; }
+      local required='["filesystem","size","used","available","use_percent"]'
+      local missing valid
+      missing="$(echo "$probe_json" | jq -c --argjson req "$required" --argjson r "$probe_json" '[$req[] | select(. as $f | ($r | has($f) | not))] // []' 2>/dev/null || echo "[]")"
+      if echo "$probe_json" | jq -e 'type == "object"' >/dev/null 2>&1; then valid=true; else valid=false; fi
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --argjson valid "$valid" --argjson missing "$missing" --argjson r "$probe_json" \
+        '{schema_version:$sv,command:"validate",subject:"probe",status:(if $valid and ($missing | length == 0) then "pass" else "fail" end),valid:$valid,missing_fields:$missing,probe:$r}'
+      ;;
+    row)
+      [[ -z "$row_json" ]] && { jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",status:"refused",reason:"--row-json=JSON required"}'; return 64; }
+      local required='["ts","action"]'
+      local missing valid
+      missing="$(echo "$row_json" | jq -c --argjson req "$required" --argjson r "$row_json" '[$req[] | select(. as $f | ($r | has($f) | not))] // []' 2>/dev/null || echo "[]")"
+      if echo "$row_json" | jq -e 'type == "object"' >/dev/null 2>&1; then valid=true; else valid=false; fi
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --argjson valid "$valid" --argjson missing "$missing" --argjson r "$row_json" \
+        '{schema_version:$sv,command:"validate",subject:"row",status:(if $valid and ($missing | length == 0) then "pass" else "fail" end),valid:$valid,missing_fields:$missing,row:$r}'
+      ;;
+    config)
+      local script_dir root storage_probe tmp_log probe_valid=false log_valid=false root_valid=false
+      script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+      root="$(cd "$script_dir/../.." 2>/dev/null && pwd -P)"
+      storage_probe="$root/.flywheel/scripts/storage-probe.sh"
+      tmp_log="${FLYWHEEL_TMP_PRUNE_LEDGER:-$HOME/.local/state/flywheel/tmp-aggressive-prune-cron.jsonl}"
+      [[ -x "$storage_probe" ]] && probe_valid=true
+      [[ -d "$(dirname "$tmp_log")" ]] && log_valid=true
+      [[ -d "$root/.flywheel" ]] && root_valid=true
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        --arg probe "$storage_probe" --argjson probe_valid "$probe_valid" \
+        --arg log "$tmp_log" --argjson log_valid "$log_valid" \
+        --arg root "$root" --argjson root_valid "$root_valid" \
+        '{schema_version:$sv,command:"validate",subject:"config",
+          status:(if $probe_valid and $log_valid and $root_valid then "pass" else "fail" end),
+          storage_probe:{value:$probe,valid:$probe_valid},
+          tmp_prune_ledger:{value:$log,valid:$log_valid},
+          repo_root:{value:$root,valid:$root_valid}}'
+      ;;
+    "")
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"validate",status:"info",reason:"no subject specified",valid_subjects:["probe","row","config"]}'
+      ;;
+  esac
 }
 
 scaffold_cmd_audit() {
-  # TODO(canonical-cli-scaffold): tail audit log; emit recent rows.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
-    '{schema_version:$sv,command:"audit",audit_log:$log,status:"todo",note:"TODO(canonical-cli-scaffold): fill in audit tail"}'
+  # Tail the runs ledger.
+  local runs_log="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/storage-pressure-doctor-runs.jsonl}"
+  local tail_n=10
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --tail=*) tail_n="${1#--tail=}"; shift ;;
+      --tail) tail_n="${2:-10}"; shift 2 ;;
+      --json) shift ;;
+      -h|--help) scaffold_emit_topic_help audit; return 0 ;;
+      *) printf 'ERR: unknown audit arg: %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+  if [[ ! -f "$runs_log" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$runs_log" --argjson tail_n "$tail_n" \
+      '{schema_version:$sv,command:"audit",audit_log:$log,tail_n:$tail_n,count:0,status:"warn",reason:"runs ledger absent",rows:[]}'
+    return 0
+  fi
+  local rows count
+  rows="$(tail -n "$tail_n" "$runs_log" | jq -sc '.' 2>/dev/null || echo '[]')"
+  count="$(echo "$rows" | jq 'length')"
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$runs_log" \
+    --argjson tail_n "$tail_n" --argjson count "$count" --argjson rows "$rows" \
+    '{schema_version:$sv,command:"audit",audit_log:$log,tail_n:$tail_n,count:$count,rows:$rows}'
 }
 
 scaffold_cmd_why() {
   local id="${1:-}"
   if [[ -z "$id" ]]; then
-    printf 'ERR: why requires <id> argument\n' >&2; return 64
+    printf 'ERR: why requires <path> argument\n' >&2; return 64
   fi
-  # TODO(canonical-cli-scaffold): explain why <id> is/isn't in scope.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
-    '{schema_version:$sv,command:"why",id:$id,status:"todo",note:"TODO(canonical-cli-scaffold): fill in why-id semantics"}'
+  # 2-tier provenance: tmp-prune ledger lookup + filesystem existence/size
+  local tmp_log="${FLYWHEEL_TMP_PRUNE_LEDGER:-$HOME/.local/state/flywheel/tmp-aggressive-prune-cron.jsonl}"
+
+  set +e
+  local row=""
+  if [[ -f "$tmp_log" ]]; then
+    row="$(grep -F "$id" "$tmp_log" 2>/dev/null | tail -1)"
+  fi
+  local exists=false size_bytes=0
+  if [[ -e "$id" ]]; then
+    exists=true
+    size_bytes="$(du -sk "$id" 2>/dev/null | awk '{print $1 * 1024}')"
+    [[ -z "$size_bytes" ]] && size_bytes=0
+  fi
+  set -e
+
+  if [[ -n "$row" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --argjson row "$row" \
+      --argjson exists "$exists" --argjson size "$size_bytes" \
+      '{schema_version:$sv,command:"why",id:$id,status:"found_in_tmp_prune_ledger",
+        provenance:{ts:$row.ts,action:$row.action,row:$row},
+        currently_exists:$exists,
+        current_size_bytes:$size}'
+  else
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
+      --argjson exists "$exists" --argjson size "$size_bytes" \
+      '{schema_version:$sv,command:"why",id:$id,status:"not_in_ledger",
+        currently_exists:$exists,
+        current_size_bytes:$size,
+        reason:"id not found in tmp-prune ledger; reporting filesystem state only"}'
+  fi
 }
 
 # ---------- scaffolded main dispatcher ----------
@@ -488,6 +741,7 @@ parse_args() {
       *) printf 'ERROR: unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
   done
+  return 0
 }
 
 main() {
