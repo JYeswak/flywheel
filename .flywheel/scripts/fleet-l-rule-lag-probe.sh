@@ -46,7 +46,18 @@ from pathlib import Path
 root = Path(sys.argv[1]).expanduser()
 source = Path(sys.argv[2]).expanduser()
 loops_dir = Path(sys.argv[3]).expanduser()
-pattern = re.compile(r"^## (L[0-9]+)\b")
+
+# flywheel-t0iur (per flywheel-s3hb5 finding): canonical doctrine in
+# AGENTS-CANONICAL.md uses TABLE format, not H2 headers. The H2-only regex
+# returned source_rule_count=0 → empty set difference → status=pass forever
+# (false negative). Match BOTH formats:
+#   1. H2 header form: "## L91 — ..." (legacy AGENTS.md format)
+#   2. Canonical table-row form: "| <num> | L91 — ..." (canonical AGENTS-CANONICAL.md format)
+# Each pattern's group(1) captures the L<id> token.
+PATTERNS = (
+    re.compile(r"^## (L[0-9]+)\b"),
+    re.compile(r"^\|\s*\d+\s*\|\s*(L[0-9]+)\b"),
+)
 
 
 def read_rules(path: Path) -> set[str]:
@@ -54,9 +65,11 @@ def read_rules(path: Path) -> set[str]:
         return set()
     rules: set[str] = set()
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
-        match = pattern.match(line)
-        if match:
-            rules.add(match.group(1))
+        for pattern in PATTERNS:
+            match = pattern.match(line)
+            if match:
+                rules.add(match.group(1))
+                break
     return rules
 
 
