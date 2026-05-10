@@ -92,6 +92,32 @@ if "$SCRIPT" --schema 2>/dev/null | jq -e '.schema_version' >/dev/null; then
   pass "--schema envelope is well-formed JSON with schema_version"
 else fail "--schema well-formed"; fi
 
+# Per-surface assertions (flywheel-39vhm fillin).
+
+# Test 16: doctor returns >=5 substantive named checks (not status:todo)
+if "$SCRIPT" doctor --json 2>/dev/null | jq -e '
+  .status != "todo" and (.checks | length) >= 5
+  and ([.checks[].check] | (any(. == "jq") and any(. == "repo_root") and any(. == "ledger_dir") and any(. == "ledger_file") and any(. == "decision_schema_sidecar")))' >/dev/null; then
+  pass "doctor returns 5 named substrate probes"
+else fail "doctor checks"; fi
+
+# Test 17: health envelope reports total_rows + canonical status drawn from real ledger
+if "$SCRIPT" health --json 2>/dev/null | jq -e '
+  has("total_rows") and has("ledger_path") and (.status | IN("ok","empty","not_initialized"))' >/dev/null; then
+  pass "health envelope has total_rows + canonical status"
+else fail "health envelope"; fi
+
+# Test 18: validate ledger emits per-row results array bound to real schema
+if "$SCRIPT" validate ledger --json 2>/dev/null | jq -e '
+  .subject == "ledger" and has("pass") and has("fail") and (.results | type == "array")' >/dev/null; then
+  pass "validate ledger emits results array"
+else fail "validate ledger"; fi
+
+# Test 19: why <ts> distinguishes found|not_found|unavailable using real provenance lookup
+if "$SCRIPT" why "1999-01-01T00:00:00Z" --json 2>/dev/null | jq -e '
+  .id == "1999-01-01T00:00:00Z" and (.status | IN("found","not_found","unavailable"))' >/dev/null; then
+  pass "why <ts> emits found|not_found|unavailable"
+else fail "why id"; fi
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2
