@@ -1,0 +1,186 @@
+diff --git a/skills/.flywheel/lib/agent.sh b/skills/.flywheel/lib/agent.sh
+index f282126..de18dc2 100644
+--- a/skills/.flywheel/lib/agent.sh
++++ b/skills/.flywheel/lib/agent.sh
+@@ -1,7 +1,7 @@
+ # lib/agent.sh — owner: modules C tier 2; agent-mail, browser leak, identity, and pane helpers
+ 
+ agent_mail_fd_pressure_json() {
+-    local probe="${FLYWHEEL_AGENT_MAIL_FD_PROBE:-$HOME/Developer/flywheel/.flywheel/scripts/agent-mail-fd-doctor.sh}" output
++    local probe="${FLYWHEEL_AGENT_MAIL_FD_PROBE:-$HOME/Developer/flywheel/.flywheel/scripts/agent-mail-fd-doctor.sh}" output timeout_bin probe_timeout
+     if [[ ! -x "$probe" ]]; then
+         jq -nc --arg probe "$probe" '{
+           subsystem:"agent-mail",
+@@ -15,7 +15,13 @@ agent_mail_fd_pressure_json() {
+         }'
+         return 0
+     fi
+-    output="$("$probe" --doctor --json 2>/dev/null)" || true
++    timeout_bin="${FLYWHEEL_TIMEOUT_BIN:-timeout}"
++    probe_timeout="${FLYWHEEL_AGENT_MAIL_FD_TIMEOUT_SECONDS:-${FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS:-1}}"
++    if command -v "$timeout_bin" >/dev/null 2>&1; then
++        output="$("$timeout_bin" "$probe_timeout" "$probe" --doctor --json 2>/dev/null)" || true
++    else
++        output="$("$probe" --doctor --json 2>/dev/null)" || true
++    fi
+     if jq -e . >/dev/null 2>&1 <<<"$output"; then
+         jq -c '
+           .status = ((.status // "ok") | ascii_downcase | if . == "pass" then "ok" elif . == "fail" then "error" else . end)
+@@ -38,8 +44,52 @@ agent_mail_fd_pressure_json() {
+     }'
+ }
+ 
++orphaned_mcp_tool_call_json() {
++    local probe="${FLYWHEEL_ORPHANED_MCP_TOOL_CALL_PROBE:-$HOME/Developer/flywheel/.flywheel/scripts/orphaned-mcp-tool-call-probe.py}" output timeout_bin probe_timeout
++    if [[ ! -x "$probe" ]]; then
++        jq -nc --arg probe "$probe" '{
++          schema_version:"orphaned-mcp-tool-call-doctor/v1",
++          status:"warn",
++          source:null,
++          checked_at:null,
++          orphaned_mcp_tool_call_count:0,
++          evidence_refs:[],
++          errors:[],
++          warnings:[{code:"orphaned_mcp_tool_call_probe_missing",message:"orphaned MCP tool-call probe is missing or not executable",path:$probe}]
++        }'
++        return 0
++    fi
++    timeout_bin="${FLYWHEEL_TIMEOUT_BIN:-timeout}"
++    probe_timeout="${FLYWHEEL_ORPHANED_MCP_TOOL_CALL_TIMEOUT_SECONDS:-${FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS:-1}}"
++    if command -v "$timeout_bin" >/dev/null 2>&1; then
++        output="$("$timeout_bin" "$probe_timeout" "$probe" --doctor --json --repo "$REPO_ABS" 2>/dev/null)" || true
++    else
++        output="$("$probe" --doctor --json --repo "$REPO_ABS" 2>/dev/null)" || true
++    fi
++    if jq -e '.schema_version == "orphaned-mcp-tool-call-doctor/v1"' >/dev/null 2>&1 <<<"$output"; then
++        jq -c '
++          .status = ((.status // "pass") | ascii_downcase | if . == "fail" then "error" elif . == "pass" then "ok" else . end)
++          | .orphaned_mcp_tool_call_count = (.orphaned_mcp_tool_call_count // 0)
++          | .evidence_refs = (.evidence_refs // [])
++          | .errors = (.errors // [])
++          | .warnings = (.warnings // [])
++        ' <<<"$output"
++        return 0
++    fi
++    jq -nc --arg probe "$probe" '{
++      schema_version:"orphaned-mcp-tool-call-doctor/v1",
++      status:"warn",
++      source:null,
++      checked_at:null,
++      orphaned_mcp_tool_call_count:0,
++      evidence_refs:[],
++      errors:[],
++      warnings:[{code:"orphaned_mcp_tool_call_probe_invalid_json",message:"orphaned MCP tool-call probe did not return valid JSON",path:$probe}]
++    }'
++}
++
+ agent_browser_leak_doctor_json() {
+-    local probe="$REPO_ABS/.flywheel/scripts/headless-browser-probe.sh" output
++    local probe="$REPO_ABS/.flywheel/scripts/headless-browser-probe.sh" output timeout_bin probe_timeout
+     if [[ ! -x "$probe" ]]; then
+         probe="$HOME/Developer/flywheel/.flywheel/scripts/headless-browser-probe.sh"
+     fi
+@@ -58,9 +108,20 @@ agent_browser_leak_doctor_json() {
+         }'
+         return 0
+     fi
+-    output="$("$probe" --doctor --json 2>/dev/null)" || true
++    timeout_bin="${FLYWHEEL_TIMEOUT_BIN:-timeout}"
++    probe_timeout="${FLYWHEEL_HEADLESS_BROWSER_TIMEOUT_SECONDS:-${FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS:-1}}"
++    if command -v "$timeout_bin" >/dev/null 2>&1; then
++        output="$("$timeout_bin" "$probe_timeout" "$probe" --doctor --json 2>/dev/null)" || true
++    else
++        output="$("$probe" --doctor --json 2>/dev/null)" || true
++    fi
+     if jq -e . >/dev/null 2>&1 <<<"$output"; then
+-        jq -c '.' <<<"$output"
++        jq -c '
++          .rows = ((.rows // [])[:20])
++          | .orphan_session_rows = ((.orphan_session_rows // [])[:20])
++          | .orphan_tokens = ((.orphan_tokens // [])[:20])
++          | .recent_rotations = ((.recent_rotations // [])[:20])
++        ' <<<"$output"
+         return 0
+     fi
+     jq -nc --arg probe "$probe" '{
+@@ -83,10 +144,17 @@ agent_mail_identity_registry_doctor_json() {
+     # caller binary without the `identity` subcommand, producing synth-fail.
+     # Sister probes (lines 4, 167) use absolute-path resolution. Override
+     # via FLYWHEEL_AGENT_MAIL_IDENTITY_PROBE for tests/alt-binaries.
++    #
++    # flywheel-3ycjw fix: bumped default timeout 1→5 (skillos-diagnosed:
++    # under doctor concurrent-load the probe trips exit 124 even though
++    # direct invocation takes ~0.27s). Also distinguish timeout (rc=124 →
++    # identity_registry_doctor_timeout) from other failures (rc!=0 + bad
++    # JSON → identity_registry_doctor_invalid_json) so callers can route
++    # actionable error classes separately.
+     local probe="${FLYWHEEL_AGENT_MAIL_IDENTITY_PROBE:-${FLYWHEEL_HOME:-$HOME/.claude/skills/.flywheel}/bin/flywheel-loop}"
+-    local output timeout_bin probe_timeout
++    local output timeout_bin probe_timeout probe_rc=0
+     timeout_bin="${FLYWHEEL_TIMEOUT_BIN:-timeout}"
+-    probe_timeout="${FLYWHEEL_AGENT_MAIL_IDENTITY_TIMEOUT_SECONDS:-${FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS:-1}}"
++    probe_timeout="${FLYWHEEL_AGENT_MAIL_IDENTITY_TIMEOUT_SECONDS:-${FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS:-5}}"
+     if [[ ! -x "$probe" ]]; then
+         jq -nc --arg probe "$probe" '{
+           schema_version:"agent-mail-identity-registry-doctor/v1",
+@@ -102,15 +170,21 @@ agent_mail_identity_registry_doctor_json() {
+         return 0
+     fi
+     if command -v "$timeout_bin" >/dev/null 2>&1; then
+-        output="$("$timeout_bin" "$probe_timeout" "$probe" identity --doctor --json 2>/dev/null)" || true
++        output="$("$timeout_bin" "$probe_timeout" "$probe" identity --doctor --json 2>/dev/null)" || probe_rc=$?
+     else
+-        output="$("$probe" identity --doctor --json 2>/dev/null)" || true
++        output="$("$probe" identity --doctor --json 2>/dev/null)" || probe_rc=$?
+     fi
+     if jq -e . >/dev/null 2>&1 <<<"$output"; then
+         jq -c '.' <<<"$output"
+         return 0
+     fi
+-    jq -nc '{
++    # Probe failed AND output didn't parse as JSON. Classify rc to give
++    # callers an actionable error class.
++    local error_code="identity_registry_doctor_invalid_json"
++    if [[ "$probe_rc" -eq 124 ]]; then
++        error_code="identity_registry_doctor_timeout"
++    fi
++    jq -nc --arg ec "$error_code" --argjson rc "$probe_rc" --argjson tmo "$probe_timeout" '{
+       schema_version:"agent-mail-identity-registry-doctor/v1",
+       status:"fail",
+       total_registered:0,
+@@ -119,12 +193,12 @@ agent_mail_identity_registry_doctor_json() {
+       orphan_token_count:0,
+       identity_token_orphan:0,
+       rows:[],
+-      errors:[{code:"identity_registry_doctor_invalid_json"}]
++      errors:[{code:$ec, probe_exit_code:$rc, probe_timeout_seconds:$tmo}]
+     }'
+ }
+ 
+ agent_mail_registration_broadcast_doctor_json() {
+-    local probe="/Users/josh/Developer/flywheel/.flywheel/scripts/agentmail-registration-broadcast.sh" output
++    local probe="/Users/josh/Developer/flywheel/.flywheel/scripts/agentmail-registration-broadcast.sh" output timeout_bin probe_timeout
+     if [[ ! -x "$probe" ]]; then
+         jq -nc '{
+           schema_version:"agentmail-registration-broadcast/v1",
+@@ -136,7 +210,13 @@ agent_mail_registration_broadcast_doctor_json() {
+         }'
+         return 0
+     fi
+-    output="$("$probe" --doctor --json 2>/dev/null)" || true
++    timeout_bin="${FLYWHEEL_TIMEOUT_BIN:-timeout}"
++    probe_timeout="${FLYWHEEL_AGENTMAIL_BROADCAST_TIMEOUT_SECONDS:-${FLYWHEEL_DOCTOR_PROBE_TIMEOUT_SECONDS:-1}}"
++    if command -v "$timeout_bin" >/dev/null 2>&1; then
++        output="$("$timeout_bin" "$probe_timeout" "$probe" --doctor --json 2>/dev/null)" || true
++    else
++        output="$("$probe" --doctor --json 2>/dev/null)" || true
++    fi
+     if jq -e . >/dev/null 2>&1 <<<"$output"; then
+         jq -c '.' <<<"$output"
+         return 0
+@@ -173,5 +253,3 @@ tmux_shell_panes_json() {
+       | jq -R 'tonumber' \
+       | jq -s -c .
+ }
+-
+-
