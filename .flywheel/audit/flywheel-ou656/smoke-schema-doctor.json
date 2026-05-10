@@ -1,0 +1,1 @@
+{"command":"schema","required":["status","checks"],"schema_version":"fleet-rotate-on-caam-swap/v1","status_enum":["pass","fail","warn"],"surface":"doctor"}

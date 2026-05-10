@@ -1,0 +1,15 @@
+PASS python ast parse (syntax)
+PASS --info emits canonical envelope
+PASS --schema doctor emits canonical envelope
+PASS --schema default emits canonical envelope
+PASS --examples emits canonical envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS quickstart emits canonical envelope
+PASS schema_version matches <surface>/v1 pattern
+PASS target default invocation rc <= 2 (no shim breakage)
+PASS doctor returns >=5 named checks with tool_focus=fleet_rotation
+PASS doctor probes ntm_executable + caam_executable (load-bearing for rotation)
+PASS health binds audit_log + reports concrete totals
+PASS why returns canonical state (unavailable)
+SUMMARY pass=14 fail=0
