@@ -1,0 +1,1 @@
+{"schema_version":"dispatch-deferral-lint/v1","command":"validate","subject":"audit-row","status":"fail","reason":"row is not valid JSON"}

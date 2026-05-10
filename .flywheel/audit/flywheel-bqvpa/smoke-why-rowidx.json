@@ -1,0 +1,1 @@
+{"schema_version":"dispatch-deferral-lint/v1","command":"why","id":"-1","status":"pass","match_count":1,"matches":[{"ts":"2026-05-10T17:22:07Z","action":"lint","status":"pass","sha256":"27c66b57d148f129b86ffad7c1189c343aa256f89ae5d2d8593f0a09ce134b68","draft_path":"/tmp/dispatch_flywheel-bqvpa-849095.md","verdict":"pass","fail_reason":"ok"}]}

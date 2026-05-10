@@ -1,0 +1,1 @@
+topic: validate — subjects: dispatch-draft PATH (run lint, report verdict + fail_reason); audit-row JSONL_LINE (verify ts/verdict fields).

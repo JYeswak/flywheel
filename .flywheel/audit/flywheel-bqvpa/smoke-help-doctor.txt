@@ -1,0 +1,1 @@
+topic: doctor — probes lint substrate (ntm/br/bv binaries, flywheel-loop doctor, bv-readiness-probe sister, jq/awk/grep, audit log dir, repo root). Pass = lint can run; warn = recoverable; fail = blocked.
