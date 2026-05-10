@@ -1,0 +1,167 @@
+diff --git a/.flywheel/scripts/security-precommit-installer.sh b/.flywheel/scripts/security-precommit-installer.sh
+index 97c147b..a5c3bea 100755
+--- a/.flywheel/scripts/security-precommit-installer.sh
++++ b/.flywheel/scripts/security-precommit-installer.sh
+@@ -5,7 +5,7 @@ VERSION="security-precommit-installer.v1.0.0"
+ 
+ usage() {
+   cat <<'EOF'
+-usage: security-precommit-installer.sh <command> [--repo PATH] [--json] [--dry-run|--apply]
++usage: security-precommit-installer.sh <command> [--repo PATH] [--json] [--dry-run|--apply --idempotency-key KEY]
+ 
+ Commands:
+   install       Install the committed githooks/pre-commit dispatcher.
+@@ -29,7 +29,15 @@ Exit codes:
+   0  success or no staged secret findings
+   1  staged secret findings or validation failure
+   2  usage error
++  3  --apply without --idempotency-key (canonical refusal contract)
+   4  mutation refused by mode gate
++
++Idempotency:
++  install --apply requires --idempotency-key KEY. A prior successful install
++  with the same key for the same repo replays (no-op exit 0). This makes
++  retry-after-partial-failure safe — accumulating backups under
++  .git/flywheel-security-hook-backups/ when the timestamped path keeps
++  changing is the failure mode the key prevents.
+ EOF
+ }
+ 
+@@ -38,6 +46,8 @@ JSON_OUT=0
+ MODE="dry-run"
+ COMMAND=""
+ TOPIC=""
++IDEMPOTENCY_KEY=""
++AUDIT_LOG="${SECURITY_PRECOMMIT_AUDIT_LOG:-$HOME/.local/state/flywheel/security-precommit-installer-runs.jsonl}"
+ 
+ json_escape() {
+   python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()))'
+@@ -178,9 +188,30 @@ sys.exit(1 if findings else 0)
+ PY
+ }
+ 
++replay_prior_install() {
++  # Whole-run replay-check (sister 8sx9w pair-pattern). Per-repo scope: a successful
++  # install with the same idempotency_key in the same repo means no-op. Uses jq -R
++  # 'fromjson?' (tolerant-parse) per 8sx9w's ledger-replay-check-with-tolerant-parse
++  # skill discovery.
++  local repo="$1"
++  if [[ -z "$IDEMPOTENCY_KEY" || ! -r "$AUDIT_LOG" ]]; then
++    printf ''
++    return 0
++  fi
++  jq -Rc --arg k "$IDEMPOTENCY_KEY" --arg r "$repo" \
++    'fromjson? | select((.idempotency_key // "") == $k and (.repo // "") == $r and ((.status // "") | IN("applied","replay")))' \
++    "$AUDIT_LOG" 2>/dev/null | tail -n 1 || true
++}
++
++audit_append_install() {
++  local row="$1"
++  mkdir -p "$(dirname "$AUDIT_LOG")" 2>/dev/null || true
++  printf '%s\n' "$row" >>"$AUDIT_LOG"
++}
++
+ install_hook() {
+   local repo="$1"
+-  local current_hooks_path current_hook backup_dir backup_path action_json
++  local current_hooks_path current_hook backup_dir backup_path action_json replay_row
+   current_hooks_path="$(git_get "$repo" core.hooksPath)"
+   current_hook="$(hook_path_for_hooks_path "$repo" "$current_hooks_path")"
+   backup_dir="$repo/.git/flywheel-security-hook-backups"
+@@ -193,7 +224,30 @@ install_hook() {
+       --arg current_hooks_path "$current_hooks_path" \
+       --arg planned_hooks_path "githooks" \
+       --arg current_hook "$current_hook" \
+-      '{schema_version:$schema,status:$status,dry_run:true,current_hooks_path:$current_hooks_path,planned_hooks_path:$planned_hooks_path,current_hook:$current_hook,would_set_hooks_path:true,would_backup_existing_hook:($current_hook != "" and ($current_hook | test("/githooks/pre-commit$") | not))}'
++      --arg idempotency_key "$IDEMPOTENCY_KEY" \
++      '{schema_version:$schema,status:$status,dry_run:true,idempotency_key:$idempotency_key,current_hooks_path:$current_hooks_path,planned_hooks_path:$planned_hooks_path,current_hook:$current_hook,would_set_hooks_path:true,would_backup_existing_hook:($current_hook != "" and ($current_hook | test("/githooks/pre-commit$") | not))}'
++    return 0
++  fi
++
++  # Mutation gate (7axmt P1 fix, sister 8sx9w pair-pattern): --apply requires --idempotency-key.
++  # Fires BEFORE any side-effect (hoqq8 invariant from m12ji). Without a key, an interrupted
++  # install + retry creates orphaned backups (every apply makes a fresh timestamped backup
++  # and overwrites flywheel.securityPrecommitChain, leaving prior backups unreferenced).
++  if [[ -z "$IDEMPOTENCY_KEY" ]]; then
++    jq -nc \
++      --arg schema "security-precommit-install/v1" \
++      --arg repo "$repo" \
++      '{schema_version:$schema,command:"install",status:"refused",mode:"apply",repo:$repo,reason:"--apply requires --idempotency-key"}' >&2
++    exit 3
++  fi
++
++  # Whole-run replay-check (per-repo scope): if a prior install with this key already
++  # landed for this repo, no-op early-exit emitting the prior receipt.
++  replay_row="$(replay_prior_install "$repo")"
++  if [[ -n "$replay_row" ]]; then
++    if [[ "$JSON_OUT" -eq 1 ]] || true; then
++      jq -c --arg k "$IDEMPOTENCY_KEY" '. + {replay:true,replay_for_idempotency_key:$k,status:"replay"}' <<<"$replay_row"
++    fi
+     return 0
+   fi
+ 
+@@ -212,7 +266,11 @@ install_hook() {
+     --arg schema "security-precommit-install/v1" \
+     --arg status "applied" \
+     --arg backup_path "$backup_path" \
+-    '{schema_version:$schema,status:$status,dry_run:false,hooks_path:"githooks",backup_path:(if $backup_path == "" then null else $backup_path end),chain_configured:($backup_path | length > 0)}')"
++    --arg idempotency_key "$IDEMPOTENCY_KEY" \
++    --arg repo "$repo" \
++    --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
++    '{schema_version:$schema,status:$status,dry_run:false,ts:$ts,repo:$repo,idempotency_key:$idempotency_key,hooks_path:"githooks",backup_path:(if $backup_path == "" then null else $backup_path end),chain_configured:($backup_path | length > 0)}')"
++  audit_append_install "$action_json"
+   emit_json "$action_json"
+ }
+ 
+@@ -251,18 +309,18 @@ emit_static_json() {
+         '{schema_version:"security-precommit-audit/v1",command:$command,hooks_path:$hooks_path,chain_path:$chain,why:"core.hooksPath points Git at the committed githooks dispatcher; chain_path preserves the prior hook when one existed."}'
+       ;;
+     schema|--schema)
+-      jq -nc '{schema_version:"security-precommit-cli-schema/v1",commands:["install","scan-staged","run-hook","doctor","health","repair","validate","audit","why"],mutating_commands:["install","repair"],default_mode:"dry-run",json_outputs:true,exit_codes:{success:0,findings_or_validation_failure:1,usage:2,blocked_by_gate:4}}'
++      jq -nc '{schema_version:"security-precommit-cli-schema/v1",commands:["install","scan-staged","run-hook","doctor","health","repair","validate","audit","why"],mutating_commands:["install","repair"],default_mode:"dry-run",json_outputs:true,apply_requires:"--idempotency-key",audit_log:"$HOME/.local/state/flywheel/security-precommit-installer-runs.jsonl",exit_codes:{success:0,findings_or_validation_failure:1,usage:2,refused_no_idempotency_key:3,blocked_by_gate:4}}'
+       ;;
+     quickstart)
+-      jq -nc '{schema_version:"security-precommit-quickstart/v1",steps:["bash .flywheel/scripts/security-precommit-installer.sh install --dry-run --json","bash .flywheel/scripts/security-precommit-installer.sh install --apply --json","git add <files>","git commit -m <message>"],limit:"synthetic canary corpus in v1"}'
++      jq -nc '{schema_version:"security-precommit-quickstart/v1",steps:["bash .flywheel/scripts/security-precommit-installer.sh install --dry-run --json","bash .flywheel/scripts/security-precommit-installer.sh install --apply --idempotency-key=$(date -u +%Y%m%d-%H%M%S) --json","git add <files>","git commit -m <message>"],limit:"synthetic canary corpus in v1"}'
+       ;;
+     examples|--examples)
+-      jq -nc '{schema_version:"security-precommit-examples/v1",examples:["security-precommit-installer.sh install --dry-run --json","security-precommit-installer.sh install --apply --json","security-precommit-installer.sh scan-staged --json","security-precommit-installer.sh doctor --json"]}'
++      jq -nc '{schema_version:"security-precommit-examples/v1",examples:["security-precommit-installer.sh install --dry-run --json","security-precommit-installer.sh install --apply --idempotency-key=v1-2026-05-10 --json","security-precommit-installer.sh scan-staged --json","security-precommit-installer.sh doctor --json"]}'
+       ;;
+     completion)
+       case "$TOPIC" in
+         zsh) printf '#compdef security-precommit-installer.sh\ncompadd install scan-staged run-hook doctor health repair validate audit why schema quickstart examples completion help\n' ;;
+-        bash|"") printf 'complete -W "install scan-staged run-hook doctor health repair validate audit why schema quickstart examples completion help --repo --json --dry-run --apply" security-precommit-installer.sh\n' ;;
++        bash|"") printf 'complete -W "install scan-staged run-hook doctor health repair validate audit why schema quickstart examples completion help --repo --json --dry-run --apply --idempotency-key" security-precommit-installer.sh\n' ;;
+         *) printf 'unsupported shell: %s\n' "$TOPIC" >&2; return 2 ;;
+       esac
+       ;;
+@@ -298,6 +356,16 @@ while [[ "$#" -gt 0 ]]; do
+       MODE="apply"
+       shift
+       ;;
++    --idempotency-key)
++      [[ -n "${2:-}" ]] || { printf 'ERR: --idempotency-key requires VALUE\n' >&2; exit 2; }
++      IDEMPOTENCY_KEY="$2"
++      shift 2
++      ;;
++    --idempotency-key=*)
++      IDEMPOTENCY_KEY="${1#--idempotency-key=}"
++      [[ -n "$IDEMPOTENCY_KEY" ]] || { printf 'ERR: --idempotency-key requires VALUE\n' >&2; exit 2; }
++      shift
++      ;;
+     --schema)
+       COMMAND="schema"
+       shift
+@@ -342,7 +410,10 @@ case "$COMMAND" in
+     emit_static_json "$COMMAND" "$ROOT"
+     ;;
+   --info)
+-    jq -nc --arg version "$VERSION" --arg repo "$ROOT" '{name:"security-precommit-installer",version:$version,repo:$repo,mutates_only_with:"install --apply",default_mode:"dry-run"}'
++    jq -nc --arg version "$VERSION" --arg repo "$ROOT" --arg audit_log "$AUDIT_LOG" '{name:"security-precommit-installer",version:$version,repo:$repo,mutates_only_with:"install --apply",apply_requires:"--idempotency-key",audit_log:$audit_log,default_mode:"dry-run",exit_codes:{"0":"success or replay-no-op","1":"findings or validation failure","2":"usage error","3":"--apply without --idempotency-key","4":"mutation refused by mode gate"}}'
++    ;;
++  -h|--help)
++    usage
+     ;;
+   *)
+     printf 'ERR: unknown command: %s\n' "$COMMAND" >&2
