@@ -1,0 +1,6 @@
+2778be00e075504b2153302e0c461ed6e31e74c82fca24d08fe334d7220a2f0f  .flywheel/scripts/fleet-coherence-quality-report.sh
+c7c0b51e219bf4dd23490015b3a83d18c98f9442853cc52170e165d90ee093e2  .flywheel/scripts/emit-polish-round-telemetry.py
+a66c969ac33dba106e957cb21b983ffbee0636072ba95242866ba5524930e3ad  .flywheel/scripts/gap-hunt-probe.sh
+739c25222c507b6f6ce92c9687cdac35065bf1203e611ad4f0829a513275abed  .flywheel/scripts/plan-state-lens-merge.sh
+eb5bc639fb8b3ea866eef71d0a2247df54668458a018ae93167674c59f4b1b96  tests/aic04-flywheel-plans-case-portability.sh
+claude_commit_sha: 98238858ea3f01371afa13f415544290986467c4

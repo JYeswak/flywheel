@@ -30,9 +30,9 @@ info() {
 
 examples() {
   jq -nc '{examples:[
-    "plan-state-lens-merge.sh append --plan .flywheel/plans/x --lens security --row-json '\''{\"findings_by_severity\":{\"high\":1}}'\'' --json",
-    "plan-state-lens-merge.sh derived --plan .flywheel/plans/x --json",
-    "plan-state-lens-merge.sh validate --plan .flywheel/plans/x --json"
+    "plan-state-lens-merge.sh append --plan .flywheel/PLANS/x --lens security --row-json '\''{\"findings_by_severity\":{\"high\":1}}'\'' --json",
+    "plan-state-lens-merge.sh derived --plan .flywheel/PLANS/x --json",
+    "plan-state-lens-merge.sh validate --plan .flywheel/PLANS/x --json"
   ]}'
 }
 

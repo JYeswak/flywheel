@@ -131,7 +131,7 @@ def build_artifact(args):
 def parse_args(argv):
     parser = argparse.ArgumentParser(description="Emit Phase 5 polish convergence telemetry.")
     parser.add_argument("--repo", default=".", help="repository root")
-    parser.add_argument("--plan-slug", required=True, help="plan slug under .flywheel/plans")
+    parser.add_argument("--plan-slug", required=True, help="plan slug under .flywheel/PLANS")
     parser.add_argument("--round", required=True, type=int, help="polish round number")
     parser.add_argument("--delta-stream", action="append", default=[], help="validated dueling-idea-wizards delta JSON")
     parser.add_argument("--previous-md", help="previous polish markdown artifact for text diff fallback")

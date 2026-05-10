@@ -818,7 +818,10 @@ def probe_skill_without_jsm_publish() -> list[dict]:
 def probe_memory_without_cross_link() -> list[dict]:
     memory_root = CLAUDE_ROOT / "projects/-Users-josh-Developer-flywheel/memory"
     refs = command_text()
-    for path in safe_iter_files(REPO_ROOT / ".flywheel/plans", "*.md", 200):
+    # flywheel-aic04: canonical PLANS/ uppercase for Linux portability;
+    # macOS APFS aliases the lowercase form transparently per
+    # core.ignorecase=true.
+    for path in safe_iter_files(REPO_ROOT / ".flywheel/PLANS", "*.md", 200):
         refs += "\n" + read_text(path, 200_000)
     gaps = []
     for path in sorted(memory_root.glob("*.md")):
