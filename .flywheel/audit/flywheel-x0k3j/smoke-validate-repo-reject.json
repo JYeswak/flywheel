@@ -1,0 +1,2 @@
+{"schema_version":"jeff-daily-diff/v1","command":"validate","subject":"repo-name","ts":"2026-05-10T23:39:58Z","status":"reject","value":"bad name","reason":"pattern_mismatch","pattern":"^[A-Za-z0-9_.-]+$"}
+rc=1

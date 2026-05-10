@@ -1,0 +1,1 @@
+{"schema_version":"jeff-daily-diff/v1","command":"repair","status":"ok","ts":"2026-05-10T23:39:58Z","mode":"dry_run","scope":"state_dir","idempotency_key":"","target":"/Users/josh/.local/state/jeff-intel","existed_before":true}

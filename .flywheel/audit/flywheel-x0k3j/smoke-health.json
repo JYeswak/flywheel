@@ -1,0 +1,1 @@
+{"schema_version":"jeff-daily-diff/v1","command":"health","ts":"2026-05-10T23:39:58Z","status":"warn","audit_log":"/Users/josh/.local/state/flywheel/jeff-daily-diff-runs.jsonl","reason":"audit_log_missing","last_run_ts":null,"age_seconds":null,"recent_runs":0,"total_runs":0}
