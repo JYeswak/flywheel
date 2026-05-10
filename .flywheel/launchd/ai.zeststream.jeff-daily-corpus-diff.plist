@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.zeststream.jeff-daily-corpus-diff</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>set -euo pipefail; STATE=/Users/josh/Developer/flywheel/.flywheel/state; REPORTS=/Users/josh/Developer/flywheel/.flywheel/reports; YMD=$(date -u +%Y-%m-%d); SNAP="$STATE/jeff-corpus-activity-$YMD.json"; REPORT="$REPORTS/jeff-corpus-diff-$YMD.md"; if [[ -s "$REPORT" ]]; then printf 'idempotent skip: %s exists\n' "$REPORT"; exit 0; fi; /Users/josh/Developer/flywheel/.flywheel/scripts/jeff-daily-corpus-diff.sh --apply --json &gt; "$STATE/.jeff-daily-collector-$YMD.json"; /Users/josh/Developer/flywheel/.flywheel/scripts/jeff-daily-corpus-diff-render.sh --apply --in="$SNAP" --out="$REPORT"</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>8</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>KeepAlive</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>/Users/josh/.local/state/flywheel/jeff-daily-corpus-diff.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/josh/.local/state/flywheel/jeff-daily-corpus-diff.err.log</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+</dict>
+</plist>

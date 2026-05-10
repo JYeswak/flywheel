@@ -41,6 +41,11 @@ applied to a different latent-signal source.
   `~/.local/state/jeff-intel/scheduled-runs.jsonl`,
   `~/.local/state/jeff-intel/x-poll.jsonl`, and
   `~/.local/state/flywheel/daily-jeff-ingest.jsonl`
+- API-only daily corpus-diff feed at `.flywheel/reports/jeff-corpus-diff-<UTC-date>.md`
+  rendered from `.flywheel/state/jeff-corpus-activity-<UTC-date>.json`; launchd
+  `ai.zeststream.jeff-daily-corpus-diff` runs the collector + renderer at 08:00
+  local daily (idempotent skip if today's report exists). Doctrine:
+  `.flywheel/doctrine/jeff-daily-corpus-diff.md`. Bead: flywheel-ys7em.
 - Cross-link new Jeff commits with existing flywheel doctrine; surface in tick
   receipt via Step 4r
 - High-signal new artifact (release, blog post, X-thread referencing one of our
@@ -63,7 +68,9 @@ audit confirming 0/9 Jeff repos cloned locally; bead `flywheel-1lpv`
 ([jeff-intel-network] daily monitoring epic);
 `reference_jeff_substrate_inventory` memory listing 7+ canonical binaries we
 depend on; `feedback_jeff_substrate_version_drift` META-RULE that this rule
-mechanizes.
+mechanizes; daily-corpus-diff API feed at `.flywheel/reports/jeff-corpus-diff-*.md`
+(bead `flywheel-ys7em`, Joshua signoff 2026-05-10) replacing J3-J11 local-clone
+chain with the 4-endpoint GitHub API poll across 178 Dicklesworthstone repos.
 
 **Companion rules:** L62 (latent-signal-substrate paradigm); L61 (ecosystem
 wire-in); L11 Live API Truth (Jeff's repos ARE the live truth for our
