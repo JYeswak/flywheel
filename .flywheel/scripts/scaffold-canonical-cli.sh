@@ -745,7 +745,26 @@ scaffold_target() {
 
   diff -u "$target_abs" "$tmp_new" > "$tmp_diff" || true
 
-  # 4. Optionally scaffold tests
+  # 4a. Apply gate FIRST: --apply without --idempotency-key must refuse before
+  # any side-effect (test scaffolding, backup, mutation). Moved ahead of the
+  # test-scaffold block per flywheel-hoqq8 — previously a refused apply still
+  # wrote tests/<name>-canonical-cli.sh, polluting the repo with a test
+  # pointing at an unscaffolded target.
+  local backup_path=""
+  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
+    if command -v cli_refuse_apply_without_idem_key >/dev/null 2>&1; then
+      # shellcheck source=/dev/null
+      source "$HELPER_LIB" 2>/dev/null
+      cli_refuse_apply_without_idem_key "$SCHEMA_VERSION" "scaffold" "$target_rel"
+    else
+      jq -nc --arg sv "$SCHEMA_VERSION" --arg target "$target_rel" \
+        '{schema_version:$sv,command:"scaffold",status:"refused",mode:"apply",target:$target,reason:"--apply requires --idempotency-key"}'
+      exit 3
+    fi
+  fi
+
+  # 4b. Optionally scaffold tests (after the apply-gate so refused applies
+  # leave no trace; see flywheel-hoqq8 regression test).
   local test_path test_scaffolded=false
   test_path="$TESTS_DIR/${target_basename%.sh}-canonical-cli.sh"
   if [[ "$no_test" -ne 1 ]]; then
@@ -762,20 +781,8 @@ scaffold_target() {
     fi
   fi
 
-  # 5. Apply or just emit
-  local backup_path=""
+  # 5. Apply (key already validated above)
   if [[ "$mode" == "apply" ]]; then
-    if [[ -z "$idem_key" ]]; then
-      if command -v cli_refuse_apply_without_idem_key >/dev/null 2>&1; then
-        # shellcheck source=/dev/null
-        source "$HELPER_LIB" 2>/dev/null
-        cli_refuse_apply_without_idem_key "$SCHEMA_VERSION" "scaffold" "$target_rel"
-      else
-        jq -nc --arg sv "$SCHEMA_VERSION" --arg target "$target_rel" \
-          '{schema_version:$sv,command:"scaffold",status:"refused",mode:"apply",target:$target,reason:"--apply requires --idempotency-key"}'
-        exit 3
-      fi
-    fi
     # flywheel-x4e3s bug 3: append PID + nanosecond resolution so concurrent
     # scaffolder runs in the same UTC second produce non-colliding backups.
     # Real incident: aav72 wave 2 + hj4ip wave 3 ran in parallel and 8 backups

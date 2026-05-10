@@ -1,0 +1,10 @@
+PASS refused apply returns rc=3
+PASS refused apply does NOT write test scaffold to TESTS_DIR (no leak)
+PASS refused apply does NOT mutate fixture (magic comment absent)
+PASS dry-run returns rc=0
+PASS dry-run does NOT write test scaffold to TESTS_DIR (correctly staged in tmp)
+PASS dry-run does NOT mutate fixture (magic comment absent)
+PASS valid apply returns rc=0
+PASS valid apply DID write test scaffold to TESTS_DIR (correct)
+PASS valid apply DID inject magic comment into fixture (correct)
+SUMMARY pass=9 fail=0
