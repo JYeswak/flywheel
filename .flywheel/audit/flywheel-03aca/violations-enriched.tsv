@@ -1,0 +1,148 @@
+delta_sec|ref|new_sha|author|bead_id|first_line
+0|refs/heads/master|cd7a8f8e|Josh|flywheel-5m9gp|chore(journal): journey entry for flywheel-5m9gp [flywheel-5
+0|refs/heads/master|0ac3a4de|Josh|flywheel-5m9gp|feat(replay-verify): adopt skillos-2j7.1 deterministic-tick 
+0|HEAD|cd7a8f8e|Josh|flywheel-5m9gp|chore(journal): journey entry for flywheel-5m9gp [flywheel-5
+0|HEAD|0ac3a4de|Josh|flywheel-5m9gp|feat(replay-verify): adopt skillos-2j7.1 deterministic-tick 
+5|refs/heads/master|4d4cc652|Josh|flywheel-iro0k|feat(cross-pane-git-discipline): wire-in 2 canonical-cli sur
+5|HEAD|4d4cc652|Josh|flywheel-iro0k|feat(cross-pane-git-discipline): wire-in 2 canonical-cli sur
+1|refs/heads/master|b571f74c|Josh|flywheel-1fk5f.8|chore(journal): journey entry for flywheel-1fk5f.8
+0|refs/heads/master|7353c76f|Josh|flywheel-1fk5f.8|feat(canonical-cli): substantive 18-TODO fillin for ntm-pane
+1|HEAD|b571f74c|Josh|flywheel-1fk5f.8|chore(journal): journey entry for flywheel-1fk5f.8
+0|HEAD|7353c76f|Josh|flywheel-1fk5f.8|feat(canonical-cli): substantive 18-TODO fillin for ntm-pane
+5|refs/heads/master|7dbc7d64|Josh|flywheel-readme|feat(canonical-cli): exercise py-scaffolder on flywheel-read
+5|HEAD|7dbc7d64|Josh|flywheel-readme|feat(canonical-cli): exercise py-scaffolder on flywheel-read
+0|refs/heads/master|802e9f39|Josh|flywheel-1fk5f.4|chore(journal): journey entry for flywheel-1fk5f.4
+0|refs/heads/master|644cd5bf|Josh|flywheel-1fk5f.4|feat(canonical-cli): substantive 18-TODO fillin for idle-pan
+0|HEAD|802e9f39|Josh|flywheel-1fk5f.4|chore(journal): journey entry for flywheel-1fk5f.4
+0|HEAD|644cd5bf|Josh|flywheel-1fk5f.4|feat(canonical-cli): substantive 18-TODO fillin for idle-pan
+1|refs/heads/master|5e60e630|Josh|flywheel-1fk5f.1|chore(journal): journey entry for flywheel-1fk5f.1
+0|refs/heads/master|5a436c3f|Josh|flywheel-1fk5f.1|feat(canonical-cli): substantive 18-TODO fillin for dispatch
+1|HEAD|5e60e630|Josh|flywheel-1fk5f.1|chore(journal): journey entry for flywheel-1fk5f.1
+0|HEAD|5a436c3f|Josh|flywheel-1fk5f.1|feat(canonical-cli): substantive 18-TODO fillin for dispatch
+5|refs/heads/master|3b63103f|Josh|flywheel-1fk5f.2|feat(dispatch-surface-conflict-probe): substantive 18-TODO f
+5|HEAD|3b63103f|Josh|flywheel-1fk5f.2|feat(dispatch-surface-conflict-probe): substantive 18-TODO f
+1|refs/heads/master|160c6b85|Josh|flywheel-dmbqj|chore(journal): journey entry for flywheel-dmbqj [flywheel-d
+0|refs/heads/master|3a88e25f|Josh|flywheel-dmbqj|docs(audit): flywheel-dmbqj superseded-by-flywheel-x4e3s —
+1|HEAD|160c6b85|Josh|flywheel-dmbqj|chore(journal): journey entry for flywheel-dmbqj [flywheel-d
+0|HEAD|3a88e25f|Josh|flywheel-dmbqj|docs(audit): flywheel-dmbqj superseded-by-flywheel-x4e3s —
+0|refs/heads/master|82b42463|Josh|flywheel-dsrq1|chore(journal): journey entry for flywheel-dsrq1 [flywheel-d
+0|refs/heads/master|427a4efa|Josh|flywheel-dsrq1|feat(canonical-cli): substantive 18-TODO fillin for br-close
+0|HEAD|82b42463|Josh|flywheel-dsrq1|chore(journal): journey entry for flywheel-dsrq1 [flywheel-d
+0|HEAD|427a4efa|Josh|flywheel-dsrq1|feat(canonical-cli): substantive 18-TODO fillin for br-close
+1|refs/heads/master|c82d0ec2|Josh|flywheel-pynxp|chore(journal): journey entry for flywheel-pynxp [flywheel-p
+0|refs/heads/master|a9f1312d|Josh|flywheel-loop|feat(stash-discipline): wire git-stash-discipline doctrine i
+1|HEAD|c82d0ec2|Josh|flywheel-pynxp|chore(journal): journey entry for flywheel-pynxp [flywheel-p
+0|HEAD|a9f1312d|Josh|flywheel-loop|feat(stash-discipline): wire git-stash-discipline doctrine i
+0|refs/heads/master|3338539b|Josh|flywheel-gl7om|chore(journal): journey entry for flywheel-gl7om [flywheel-g
+0|refs/heads/master|fab94c64|Josh|flywheel-gl7om|feat(canonical-cli): substantive 18-TODO fillin for mission-
+0|HEAD|3338539b|Josh|flywheel-gl7om|chore(journal): journey entry for flywheel-gl7om [flywheel-g
+0|HEAD|fab94c64|Josh|flywheel-gl7om|feat(canonical-cli): substantive 18-TODO fillin for mission-
+0|refs/heads/master|37af601a|Josh|flywheel-39vhm|feat(canonical-cli): substantive 18-TODO fillin for dispatch
+0|HEAD|37af601a|Josh|flywheel-39vhm|feat(canonical-cli): substantive 18-TODO fillin for dispatch
+0|refs/heads/master|1ae1bc69|Josh|flywheel-loop|feat(joint-dogfood): flywheel-loop receipt + drift detector 
+0|HEAD|1ae1bc69|Josh|flywheel-loop|feat(joint-dogfood): flywheel-loop receipt + drift detector 
+1|refs/heads/master|3596af99|Josh|flywheel-4pwc5|feat(storage-probe): fill canonical-cli surfaces with substa
+1|HEAD|3596af99|Josh|flywheel-4pwc5|feat(storage-probe): fill canonical-cli surfaces with substa
+0|refs/heads/master|28189976|Josh|flywheel-j0zuh|feat(storage-pause-auto-resume): fill canonical-cli surfaces
+0|HEAD|28189976|Josh|flywheel-j0zuh|feat(storage-pause-auto-resume): fill canonical-cli surfaces
+1|refs/heads/master|eb420f7f|Josh|flywheel-dulh3|feat(doctrine-sync): fill canonical-cli surfaces with substa
+1|HEAD|eb420f7f|Josh|flywheel-dulh3|feat(doctrine-sync): fill canonical-cli surfaces with substa
+0|refs/heads/master|b62852f0|Josh|flywheel-mae86|feat(doctrine-broadcast-send): fill canonical-cli surfaces w
+0|HEAD|b62852f0|Josh|flywheel-mae86|feat(doctrine-broadcast-send): fill canonical-cli surfaces w
+1|refs/heads/master|ec7308f8|Josh|flywheel-e4lfb|feat(scaffold-canonical-cli): refuse non-bash shebang [flywh
+1|HEAD|ec7308f8|Josh|flywheel-e4lfb|feat(scaffold-canonical-cli): refuse non-bash shebang [flywh
+0|refs/heads/master|8d803701|Josh|flywheel-hi4e6|chore(beads): close flywheel-hi4e6 jsonl flush
+0|HEAD|8d803701|Josh|flywheel-hi4e6|chore(beads): close flywheel-hi4e6 jsonl flush
+0|refs/heads/master|af3c49c3|Josh|flywheel-3wxzi|refactor(daily-report-enabled-repos): use canonical-cli-help
+0|HEAD|af3c49c3|Josh|flywheel-3wxzi|refactor(daily-report-enabled-repos): use canonical-cli-help
+0|HEAD|be3d3833|Josh|flywheel-ahlv|chore(beads): close flywheel-ahlv (force, dep zbs8 still in_
+0|refs/heads/master|81dd744e|Josh|flywheel-ahlv|docs(incidents): cite implementing beads on three convergenc
+0|HEAD|81dd744e|Josh|flywheel-ahlv|docs(incidents): cite implementing beads on three convergenc
+0|HEAD|5ee2fcd2|Josh|flywheel-9hnp3|docs(flywheel-9hnp3): journey entry for storage options surf
+2|refs/heads/master|33ee11b9|Josh|(none)|feat(handoff): blocker resolution to skillos:1 — AM-FD ver
+2|HEAD|33ee11b9|Josh|(none)|feat(handoff): blocker resolution to skillos:1 — AM-FD ver
+0|HEAD|8e258fe7|Josh|(none)|incidents(q1y1d): cross-ref sister-orch-2-tick-blocker → t
+4|refs/heads/master|56fb3424|Josh|(none)|feat(doctrine): add L70 punt substrate
+4|HEAD|56fb3424|Josh|(none)|feat(doctrine): add L70 punt substrate
+0|worktrees/flywheel-fk2r-worktree/HEAD|e0035dc7|Josh|(none)|synthesis: consolidate flywheel self-audit
+4|refs/heads/master|93f5b9c4|Josh|(none)|feat(ntm-wire-in): wire `ntm config` per flsau [config]
+4|HEAD|93f5b9c4|Josh|(none)|feat(ntm-wire-in): wire `ntm config` per flsau [config]
+0|HEAD|7e6faa2d|Josh|(none)|feat(audit): a2lff dispositions — 50 not-wired surfaces cl
+0|HEAD|9818363e|Josh|(none)|feat(repo-hygiene): Phase 2 PLAN — per-repo YAML schema + 
+5|refs/heads/master|bf9aefe6|Josh|(none)|feat(impl): ship Wave 3+4 impl docs (self-test, readiness-do
+5|HEAD|bf9aefe6|Josh|(none)|feat(impl): ship Wave 3+4 impl docs (self-test, readiness-do
+4|refs/heads/master|58a90981|Josh|(none)|feat(conformance): add fleet conformance probe
+4|HEAD|58a90981|Josh|(none)|feat(conformance): add fleet conformance probe
+0|refs/heads/master|6443a1f4|Josh|(none)|docs(doctrine): record beads dep-add workaround finding
+0|HEAD|6443a1f4|Josh|(none)|docs(doctrine): record beads dep-add workaround finding
+5|refs/heads/master|0bf788d7|Josh|(none)|feat(agentmail): add identity history CLI
+5|HEAD|0bf788d7|Josh|(none)|feat(agentmail): add identity history CLI
+3|refs/heads/master|70dff2a9|Josh|(none)|test(agentmail): cover identity tuple rotation triggers
+3|HEAD|70dff2a9|Josh|(none)|test(agentmail): cover identity tuple rotation triggers
+4|refs/heads/master|7ec64209|Josh|(none)|feat(secrets): add infisical-safe output-shape wrapper
+4|HEAD|7ec64209|Josh|(none)|feat(secrets): add infisical-safe output-shape wrapper
+0|refs/heads/master|91062a21|Josh|(none)|docs(plans): ratify team-roster-2026-05-01 plan family
+0|refs/heads/master|eb2f7948|Josh|(none)|docs(plans): ratify skill-handoff-to-skillos-2026-05-03 plan
+0|refs/heads/master|9e189164|Josh|(none)|docs(plans): ratify session-topology-2026-05-01 plan family
+0|refs/heads/master|e9c9f7e6|Josh|(none)|docs(plans): ratify runtime-handoff-singleton-fix-2026-05-03
+0|refs/heads/master|1b0b8067|Josh|(none)|docs(plans): ratify recovery-system-2026-05-01 plan family
+0|HEAD|91062a21|Josh|(none)|docs(plans): ratify team-roster-2026-05-01 plan family
+0|HEAD|eb2f7948|Josh|(none)|docs(plans): ratify skill-handoff-to-skillos-2026-05-03 plan
+0|HEAD|9e189164|Josh|(none)|docs(plans): ratify session-topology-2026-05-01 plan family
+0|HEAD|e9c9f7e6|Josh|(none)|docs(plans): ratify runtime-handoff-singleton-fix-2026-05-03
+0|HEAD|1b0b8067|Josh|(none)|docs(plans): ratify recovery-system-2026-05-01 plan family
+1|refs/heads/master|4a053f38|Josh|(none)|docs(plans): ratify perpetual-progression-2026-05-02 plan fa
+0|refs/heads/master|40edf442|Josh|(none)|docs(plans): ratify pane-work-signal-truth-source-2026-05-01
+0|refs/heads/master|5fe3cde6|Josh|(none)|docs(plans): ratify pane-recovery-2026-05-02 plan family
+0|refs/heads/master|20f62391|Josh|(none)|docs(plans): ratify orchestrator-workforce-supervision-2026-
+0|refs/heads/master|69dc728c|Josh|(none)|docs(plans): ratify ntm-local-upstream-reconcile-2026-05-02 
+0|refs/heads/master|9a66c487|Josh|(none)|docs(plans): ratify lock-in-and-reliable-recovery-2026-05-01
+1|HEAD|4a053f38|Josh|(none)|docs(plans): ratify perpetual-progression-2026-05-02 plan fa
+0|HEAD|40edf442|Josh|(none)|docs(plans): ratify pane-work-signal-truth-source-2026-05-01
+0|HEAD|5fe3cde6|Josh|(none)|docs(plans): ratify pane-recovery-2026-05-02 plan family
+0|HEAD|20f62391|Josh|(none)|docs(plans): ratify orchestrator-workforce-supervision-2026-
+0|HEAD|69dc728c|Josh|(none)|docs(plans): ratify ntm-local-upstream-reconcile-2026-05-02 
+0|HEAD|9a66c487|Josh|(none)|docs(plans): ratify lock-in-and-reliable-recovery-2026-05-01
+1|refs/heads/master|29e43ee7|Josh|(none)|docs(plans): ratify joshua-request-capture-system-2026-05-03
+0|refs/heads/master|e32b9212|Josh|(none)|docs(plans): ratify jeff-ecosystem-deep-dive-2026-05-01 plan
+0|refs/heads/master|61c0b0f8|Josh|(none)|docs(plans): ratify halt-disease-fix-2026-05-04 plan family
+0|refs/heads/master|dd7faf09|Josh|(none)|docs(plans): ratify fleet-skill-reporting-2026-05-01 plan fa
+0|refs/heads/master|cfc780be|Josh|(none)|docs(plans): ratify fleet-idle-2026-05-02 plan family
+0|refs/heads/master|d1949933|Josh|(none)|docs(plans): ratify fleet-conductor-2026-05-04 plan family
+1|HEAD|29e43ee7|Josh|(none)|docs(plans): ratify joshua-request-capture-system-2026-05-03
+0|HEAD|e32b9212|Josh|(none)|docs(plans): ratify jeff-ecosystem-deep-dive-2026-05-01 plan
+0|HEAD|61c0b0f8|Josh|(none)|docs(plans): ratify halt-disease-fix-2026-05-04 plan family
+0|HEAD|dd7faf09|Josh|(none)|docs(plans): ratify fleet-skill-reporting-2026-05-01 plan fa
+0|HEAD|cfc780be|Josh|(none)|docs(plans): ratify fleet-idle-2026-05-02 plan family
+0|HEAD|d1949933|Josh|(none)|docs(plans): ratify fleet-conductor-2026-05-04 plan family
+1|refs/heads/master|f763b774|Josh|(none)|docs(plans): ratify fleet-coherence-drift-detection-research
+0|refs/heads/master|d28b7fc3|Josh|(none)|docs(plans): ratify fleet-coherence-bead-graph-2026-05-01 pl
+0|refs/heads/master|309e64c9|Josh|(none)|docs(plans): ratify documentation-substrate-2026-05-01 plan 
+0|refs/heads/master|3ee78f14|Josh|(none)|docs(plans): ratify dispatch-enforcement-2026-05-01 plan fam
+0|refs/heads/master|cb60036e|Josh|(none)|docs(plans): ratify data-backed-deferral-guard-2026-05-01 pl
+1|HEAD|f763b774|Josh|(none)|docs(plans): ratify fleet-coherence-drift-detection-research
+0|HEAD|d28b7fc3|Josh|(none)|docs(plans): ratify fleet-coherence-bead-graph-2026-05-01 pl
+0|HEAD|309e64c9|Josh|(none)|docs(plans): ratify documentation-substrate-2026-05-01 plan 
+0|HEAD|3ee78f14|Josh|(none)|docs(plans): ratify dispatch-enforcement-2026-05-01 plan fam
+0|HEAD|cb60036e|Josh|(none)|docs(plans): ratify data-backed-deferral-guard-2026-05-01 pl
+1|refs/heads/master|07d29a69|Josh|(none)|docs(plans): ratify cross-pane-protocol-2026-05-01 plan fami
+0|refs/heads/master|1997f39c|Josh|(none)|docs(plans): ratify convergence-bead-plan-2026-05-01 plan fa
+0|refs/heads/master|4f8742ad|Josh|(none)|docs(plans): ratify codex-fleet-stuck-thinking-RCA-2026-05-0
+0|refs/heads/master|a74412f4|Josh|(none)|docs(plans): ratify bead-isolation-fix-2026-04-30 plan famil
+1|HEAD|07d29a69|Josh|(none)|docs(plans): ratify cross-pane-protocol-2026-05-01 plan fami
+0|HEAD|1997f39c|Josh|(none)|docs(plans): ratify convergence-bead-plan-2026-05-01 plan fa
+0|HEAD|4f8742ad|Josh|(none)|docs(plans): ratify codex-fleet-stuck-thinking-RCA-2026-05-0
+0|HEAD|a74412f4|Josh|(none)|docs(plans): ratify bead-isolation-fix-2026-04-30 plan famil
+1|refs/heads/master|d4eefaef|Josh|(none)|docs(plans): ratify autonomous-loop-2026-04-30 plan family
+1|HEAD|d4eefaef|Josh|(none)|docs(plans): ratify autonomous-loop-2026-04-30 plan family
+5|refs/heads/master|28d04260|Josh|(none)|docs(plans): ratify agent-security-controls-fleet-wide-2026-
+5|HEAD|28d04260|Josh|(none)|docs(plans): ratify agent-security-controls-fleet-wide-2026-
+0|refs/heads/master|e06a25f5|Josh|(none)|docs(plans): ratify accretive-fix-mobile-eats-dispatch-healt
+0|HEAD|e06a25f5|Josh|(none)|docs(plans): ratify accretive-fix-mobile-eats-dispatch-healt
+5|refs/heads/master|ffb3f593|Josh|(none)|feat(probe): land jeff-workaround-research-gate per audit ga
+5|HEAD|ffb3f593|Josh|(none)|feat(probe): land jeff-workaround-research-gate per audit ga
+4|refs/heads/master|b232e772|Josh|(none)|feat(probe): land doctrine-mechanism-coverage per audit gap 
+4|HEAD|b232e772|Josh|(none)|feat(probe): land doctrine-mechanism-coverage per audit gap 
+5|refs/heads/master|7ea39308|Josh|(none)|feat(doctrine): apply gap closure gap-11 — shared sqlite w
+5|HEAD|7ea39308|Josh|(none)|feat(doctrine): apply gap closure gap-11 — shared sqlite w
+0|HEAD|5f0aa06a|Josh|(none)|chore(beads): convert jeff-ecosystem master plan to 35 beads
