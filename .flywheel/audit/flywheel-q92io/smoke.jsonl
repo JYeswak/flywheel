@@ -1,0 +1,9 @@
+{"surface":"mission-lock-negative-invariants-validator","probe":"info","schema_version":"mission-lock-negative-invariants-validator/v1"}
+{"surface":"mission-lock-negative-invariants-validator","probe":"doctor","status":"todo","note":"TODO(canonical-cli-scaffold): fill in doctor checks"}
+{"surface":"mission-lock-negative-invariants-validator","probe":"schema","cmd":"schema"}
+{"surface":"mission-lock-readiness-doctor","probe":"info","schema_version":"mission-lock-readiness-doctor/v1"}
+{"surface":"mission-lock-readiness-doctor","probe":"doctor","status":"todo","note":"TODO(canonical-cli-scaffold): fill in doctor checks"}
+{"surface":"mission-lock-readiness-doctor","probe":"schema","cmd":"schema"}
+{"surface":"mission-lock-scaffold-validator","probe":"info","schema_version":"mission-lock-scaffold-validator/v1"}
+{"surface":"mission-lock-scaffold-validator","probe":"doctor","status":"todo","note":"TODO(canonical-cli-scaffold): fill in doctor checks"}
+{"surface":"mission-lock-scaffold-validator","probe":"schema","cmd":"schema"}
