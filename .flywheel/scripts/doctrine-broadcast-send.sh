@@ -22,6 +22,13 @@ fi
 SCAFFOLD_SCHEMA_VERSION="doctrine-broadcast-send/v1"
 SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/doctrine-broadcast-send-runs.jsonl}"
 
+# Module-load env vars (also re-resolved in cmd_run for backward compat).
+# These must be visible to the canonical-cli stubs (doctor/health/repair/etc.)
+# which run BEFORE cmd_run is dispatched.
+STATE_DIR="${STATE_DIR:-${FLYWHEEL_DOCTRINE_BROADCAST_STATE:-$HOME/.local/state/flywheel/doctrine-broadcasts}}"
+RECEIPT_DIR="${RECEIPT_DIR:-${FLYWHEEL_DOCTRINE_BROADCAST_RECEIPTS:-/Users/josh/Developer/flywheel/.flywheel/receipts/doctrine-broadcasts}}"
+SOURCE_ORCH="${SOURCE_ORCH:-${FLYWHEEL_SOURCE_ORCH:-flywheel}}"
+
 scaffold_usage() {
   cat <<'USG'
 usage: doctrine-broadcast-send.sh [SUBCOMMAND] [OPTIONS]
@@ -124,23 +131,88 @@ scaffold_emit_completion() {
 # ---------- canonical-cli stubs (TODO markers preserved) ----------
 
 scaffold_cmd_doctor() {
-  # TODO(canonical-cli-scaffold): probe substrate this script depends on
-  # (env vars, paths, external tools) and emit per-check status.
-  # Canonical pattern (per L4 lint rule — NEVER use `[[ ]] && X || Y`
-  # as the last expression of a helper; use if/then/else/fi):
-  #   if [[ -d "$ROOT/.flywheel" ]]; then
-  #     printf '{"check":"flywheel-dir","status":"pass"}\n'
-  #   else
-  #     printf '{"check":"flywheel-dir","status":"fail"}\n'
-  #   fi
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"doctor",ts:$ts,status:"todo",checks:[],note:"TODO(canonical-cli-scaffold): fill in doctor checks"}'
+  # Probe doctrine-broadcast-send substrate: state dir, receipt dir,
+  # rg dependency, source orch identity, recent inbox writability.
+  local checks
+  checks="$(jq -cs '.' <(
+    if [[ -d "$STATE_DIR" ]]; then
+      jq -nc --arg p "$STATE_DIR" '{check:"state_dir",path:$p,status:"pass"}'
+    else
+      jq -nc --arg p "$STATE_DIR" '{check:"state_dir",path:$p,status:"warn",reason:"missing — repair --scope state will create"}'
+    fi
+    if [[ -d "$RECEIPT_DIR" ]]; then
+      jq -nc --arg p "$RECEIPT_DIR" '{check:"receipt_dir",path:$p,status:"pass"}'
+    else
+      jq -nc --arg p "$RECEIPT_DIR" '{check:"receipt_dir",path:$p,status:"warn",reason:"missing — repair --scope state will create"}'
+    fi
+    if command -v rg >/dev/null 2>&1; then
+      jq -nc '{check:"rg",status:"pass",dependency:"forbidden_reference_scan"}'
+    else
+      jq -nc '{check:"rg",status:"fail",reason:"rg required for forbidden-reference scan"}'
+    fi
+    if command -v jq >/dev/null 2>&1 && command -v shasum >/dev/null 2>&1; then
+      jq -nc '{check:"core_deps",status:"pass",found:["jq","shasum"]}'
+    else
+      jq -nc '{check:"core_deps",status:"fail",reason:"jq+shasum required"}'
+    fi
+    if [[ -n "$SOURCE_ORCH" ]]; then
+      jq -nc --arg orch "$SOURCE_ORCH" '{check:"source_orch",value:$orch,status:"pass"}'
+    else
+      jq -nc '{check:"source_orch",status:"warn",reason:"FLYWHEEL_SOURCE_ORCH unset"}'
+    fi
+  ))"
+  local fails warns
+  fails="$(jq -r '[.[] | select(.status=="fail")] | length' <<<"$checks")"
+  warns="$(jq -r '[.[] | select(.status=="warn")] | length' <<<"$checks")"
+  local status
+  if [[ "$fails" -gt 0 ]]; then
+    status="fail"
+  elif [[ "$warns" -gt 0 ]]; then
+    status="warn"
+  else
+    status="pass"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --arg status "$status" \
+    --argjson checks "$checks" \
+    '{schema_version:$sv,command:"doctor",ts:$ts,status:$status,checks:$checks}'
 }
 
 scaffold_cmd_health() {
-  # TODO(canonical-cli-scaffold): summarize last-run state from audit log.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"health",ts:$ts,status:"todo",note:"TODO(canonical-cli-scaffold): fill in health probe from audit log"}'
+  # Health: count inbox files + most-recent receipt timestamp + total broadcasts.
+  local inbox_count receipt_count latest_receipt latest_ts status
+  inbox_count=0
+  receipt_count=0
+  latest_receipt=""
+  latest_ts=""
+  if [[ -d "$STATE_DIR" ]]; then
+    inbox_count="$(find "$STATE_DIR" -maxdepth 1 -name 'inbox-*.jsonl' -type f 2>/dev/null | wc -l | tr -d ' ')"
+  fi
+  if [[ -d "$RECEIPT_DIR" ]]; then
+    receipt_count="$(find "$RECEIPT_DIR" -maxdepth 1 -name '*.json' -type f 2>/dev/null | wc -l | tr -d ' ')"
+    latest_receipt="$(find "$RECEIPT_DIR" -maxdepth 1 -name '*.json' -type f 2>/dev/null | sort | tail -1)"
+    if [[ -n "$latest_receipt" && -r "$latest_receipt" ]]; then
+      latest_ts="$(jq -r '.ts // empty' "$latest_receipt" 2>/dev/null)"
+    fi
+  fi
+  if [[ "$receipt_count" -gt 0 ]]; then
+    status="ok"
+  elif [[ ! -d "$STATE_DIR" || ! -d "$RECEIPT_DIR" ]]; then
+    status="not_initialized"
+  else
+    status="empty"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --arg status "$status" \
+    --arg latest_receipt "$latest_receipt" \
+    --arg latest_ts "$latest_ts" \
+    --argjson inbox_count "$inbox_count" \
+    --argjson receipt_count "$receipt_count" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,inbox_count:$inbox_count,receipt_count:$receipt_count,latest_receipt:(if $latest_receipt=="" then null else $latest_receipt end),latest_broadcast_ts:(if $latest_ts=="" then null else $latest_ts end)}'
 }
 
 scaffold_cmd_repair() {
@@ -166,21 +238,113 @@ scaffold_cmd_repair() {
       exit 3
     fi
   fi
-  # TODO(canonical-cli-scaffold): per-scope repair actions go here.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
-    '{schema_version:$sv,command:"repair",status:"todo",mode:$mode,scope:$scope,idempotency_key:$idem,note:"TODO(canonical-cli-scaffold): fill in repair scope actions"}'
+  # repair --scope state: ensure STATE_DIR + RECEIPT_DIR exist with 0755.
+  local planned applied
+  planned="$(jq -cs '.' <(
+    if [[ "$scope" != "state" ]]; then
+      jq -nc --arg s "$scope" '{action:"none",reason:"unsupported scope (state only)",scope:$s}'
+    else
+      if [[ ! -d "$STATE_DIR" ]]; then
+        jq -nc --arg p "$STATE_DIR" '{action:"mkdir",path:$p,mode:"0755"}'
+      fi
+      if [[ ! -d "$RECEIPT_DIR" ]]; then
+        jq -nc --arg p "$RECEIPT_DIR" '{action:"mkdir",path:$p,mode:"0755"}'
+      fi
+    fi
+  ))"
+  applied='[]'
+  if [[ "$mode" == "apply" && "$scope" == "state" ]]; then
+    local applied_rows=()
+    if [[ ! -d "$STATE_DIR" ]]; then
+      mkdir -p "$STATE_DIR" && chmod 755 "$STATE_DIR" 2>/dev/null
+      applied_rows+=("$(jq -nc --arg p "$STATE_DIR" --arg key "$idem_key" '{action:"mkdir",path:$p,mode:"0755",idempotency_key:$key}')")
+    fi
+    if [[ ! -d "$RECEIPT_DIR" ]]; then
+      mkdir -p "$RECEIPT_DIR" && chmod 755 "$RECEIPT_DIR" 2>/dev/null
+      applied_rows+=("$(jq -nc --arg p "$RECEIPT_DIR" --arg key "$idem_key" '{action:"mkdir",path:$p,mode:"0755",idempotency_key:$key}')")
+    fi
+    if [[ "${#applied_rows[@]}" -eq 0 ]]; then
+      applied='[]'
+    else
+      applied="$(printf '%s\n' "${applied_rows[@]}" | jq -cs '.')"
+    fi
+    if command -v cli_audit_append >/dev/null; then
+      cli_audit_append "$SCAFFOLD_AUDIT_LOG" "repair_state_apply" "ok" \
+        "$(jq -nc --arg key "$idem_key" --argjson actions "$applied" '{idempotency_key:$key,actions:$actions}')"
+    fi
+  fi
+  local status
+  if [[ "$mode" == "apply" ]]; then
+    status="applied"
+  else
+    status="dry_run"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg scope "$scope" \
+    --arg mode "$mode" \
+    --arg idem "$idem_key" \
+    --arg status "$status" \
+    --argjson planned "$planned" \
+    --argjson applied "$applied" \
+    '{schema_version:$sv,command:"repair",status:$status,mode:$mode,scope:$scope,idempotency_key:$idem,planned_actions:$planned,applied_actions:$applied}'
 }
 
 scaffold_cmd_validate() {
-  # TODO(canonical-cli-scaffold): document validation subjects + contracts.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
-    '{schema_version:$sv,command:"validate",status:"todo",note:"TODO(canonical-cli-scaffold): fill in per-subject validation"}'
+  local subject="${1:-receipt}"
+  if [[ "$subject" == "-h" || "$subject" == "--help" ]]; then
+    scaffold_emit_topic_help validate
+    return 0
+  fi
+  shift 2>/dev/null || true
+  local results
+  case "$subject" in
+    receipt)
+      # Validate every receipt JSON has the canonical broadcast envelope.
+      # Schema: {ts, schema_version, target_project, sent, inbox_path,
+      #          receipt_path, row:{ts,source_orch,target_project,subject,
+      #                             body_path,doctrine_version,importance,
+      #                             ack_required,broadcast_id}}
+      if [[ ! -d "$RECEIPT_DIR" ]]; then
+        results='[]'
+      else
+        results="$(find "$RECEIPT_DIR" -maxdepth 1 -name '*.json' -type f 2>/dev/null \
+          | while read -r f; do
+              if jq -e 'has("ts") and has("target_project") and has("row") and (.row | has("source_orch") and has("subject") and has("doctrine_version") and has("broadcast_id"))' "$f" >/dev/null 2>&1; then
+                jq -nc --arg p "$f" '{path:$p,status:"pass"}'
+              else
+                jq -nc --arg p "$f" '{path:$p,status:"fail",reason:"missing required broadcast envelope or row field(s)"}'
+              fi
+            done | jq -cs '.')"
+        if [[ -z "$results" ]]; then results='[]'; fi
+      fi
+      ;;
+    *)
+      results="$(jq -nc --arg s "$subject" '[{status:"unsupported",subject:$s,supported:["receipt"]}]')"
+      ;;
+  esac
+  local status fails
+  fails="$(jq -r '[.[] | select(.status=="fail")] | length' <<<"$results")"
+  if [[ "$fails" -gt 0 ]]; then
+    status="fail"
+  else
+    status="pass"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg subject "$subject" \
+    --arg status "$status" \
+    --argjson results "$results" \
+    '{schema_version:$sv,command:"validate",subject:$subject,status:$status,results:$results}'
 }
 
 scaffold_cmd_audit() {
-  # TODO(canonical-cli-scaffold): tail audit log; emit recent rows.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
-    '{schema_version:$sv,command:"audit",audit_log:$log,status:"todo",note:"TODO(canonical-cli-scaffold): fill in audit tail"}'
+  if command -v cli_emit_audit_tail >/dev/null; then
+    cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" 20
+  else
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
+      '{schema_version:$sv,command:"audit",audit_log:$log,status:"helper_lib_missing"}'
+  fi
 }
 
 scaffold_cmd_why() {
@@ -188,9 +352,22 @@ scaffold_cmd_why() {
   if [[ -z "$id" ]]; then
     printf 'ERR: why requires <id> argument\n' >&2; return 64
   fi
-  # TODO(canonical-cli-scaffold): explain why <id> is/isn't in scope.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
-    '{schema_version:$sv,command:"why",id:$id,status:"todo",note:"TODO(canonical-cli-scaffold): fill in why-id semantics"}'
+  # <id> is a broadcast receipt id (format: doctrine-<16-hex>).
+  local receipt="$RECEIPT_DIR/$id.json"
+  if [[ -r "$receipt" ]]; then
+    jq -nc \
+      --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+      --arg id "$id" \
+      --arg path "$receipt" \
+      --argjson body "$(cat "$receipt")" \
+      '{schema_version:$sv,command:"why",id:$id,status:"found",receipt_path:$path,broadcast:$body}'
+  else
+    jq -nc \
+      --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+      --arg id "$id" \
+      --arg dir "$RECEIPT_DIR" \
+      '{schema_version:$sv,command:"why",id:$id,status:"not_found",receipt_dir:$dir,note:"id not present in receipt dir"}'
+  fi
 }
 
 # ---------- scaffolded main dispatcher ----------
