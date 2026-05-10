@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info emits canonical envelope
+PASS --schema emits canonical envelope
+PASS --examples emits canonical envelope
+PASS doctor emits canonical envelope
+PASS health emits canonical envelope
+PASS repair --scope log_dir --dry-run emits canonical envelope
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate without subject refuses with rc=64 (canonical contract)
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS doctor returns >=5 named checks with valid statuses
+PASS doctor probes flock_available (load-bearing for sync lock discipline)
+PASS validate config rejects missing config with rc=1 + reason (concrete contract, not 'todo')
+PASS repair --scope log_dir --apply emits concrete action (log_dir_exists_noop)
+PASS why <id> returns canonical state: not_found
+PASS schema doctor returns concrete shape (fields + thresholds)
+SUMMARY pass=19 fail=0

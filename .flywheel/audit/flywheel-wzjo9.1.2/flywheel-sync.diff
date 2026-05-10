@@ -1,0 +1,555 @@
+--- .flywheel/audit/flywheel-wzjo9.1.2/flywheel-sync.before	2026-05-10 15:19:59
++++ /Users/josh/.claude/skills/.flywheel/bin/flywheel-sync	2026-05-10 15:24:47
+@@ -16,6 +16,522 @@
+ 
+ set -euo pipefail
+ 
++
++# ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======
++# flywheel-cli-surface: true
++# canonical-cli-scoping: passing (filled in by flywheel-wzjo9.1.2)
++# doctor-mode-tier: filled (bead flywheel-wzjo9.1.2 over flywheel-ws02m scaffold)
++#
++# This block was APPENDED by scaffold-canonical-cli.sh. The original
++# top-level dispatch is preserved as the post-intercept body (the new
++# main routes default invocation through it for backward compat).
++# Surface-specific logic was filled in per .flywheel/audit/flywheel-wzjo9.1.2/apply-spec.md.
++
++_SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
++_SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
++if [[ -r "$_SCAFFOLD_HELPER_LIB" ]]; then
++  # shellcheck source=/dev/null
++  source "$_SCAFFOLD_HELPER_LIB"
++fi
++
++SCAFFOLD_SCHEMA_VERSION="flywheel-sync/v1"
++SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/flywheel-sync-runs.jsonl}"
++
++scaffold_usage() {
++  cat <<'USG'
++usage: flywheel-sync [SUBCOMMAND] [OPTIONS]
++
++Backward-compatible run mode: default invocation routes to the original
++top-level logic (now exposed as `cmd_run`).
++
++Canonical CLI surfaces:
++  doctor [--json]          probe substrate health
++  health [--json]          last-run status
++  repair --scope <s>       repair misconfigured state
++                            Default: --dry-run; mutate with --apply --idempotency-key KEY
++  validate <subject> [...] validate per-subject contract (TODO: define subjects)
++  audit [--json]           recent run history
++  why <id>                 explain provenance for a given id (TODO: id semantics)
++  quickstart [--json]      operator orientation
++  help <topic>             topic help (run | doctor | health | repair | validate)
++  completion <shell>       emit bash or zsh completion
++
++Introspection:
++  --info --json            version, paths, env vars, dependencies, sha256
++  --schema [<surface>]     JSON Schema for output envelopes
++  --examples --json        curated workflow examples
++  --help / -h              this help
++USG
++}
++
++scaffold_emit_info() {
++  if ! command -v cli_emit_info >/dev/null; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg name "flywheel-sync" \
++      '{schema_version:$sv,command:"info",name:$name,helper_lib_missing:true}'
++    return 0
++  fi
++  cli_emit_info \
++    "flywheel-sync" \
++    "scaffolded-v0" \
++    "$SCAFFOLD_SCHEMA_VERSION" \
++    "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
++    "SCAFFOLD_AUDIT_LOG" \
++    '{}'
++}
++
++scaffold_emit_examples() {
++  local jsonl
++  jsonl="$(jq -nc '{name:"default run",invocation:"flywheel-sync",purpose:"backward-compatible original behavior"}'
++)"$'\n'"$(jq -nc '{name:"doctor",invocation:"flywheel-sync doctor --json",purpose:"probe substrate health"}'
++)"
++  if command -v cli_emit_examples >/dev/null; then
++    cli_emit_examples "$SCAFFOLD_SCHEMA_VERSION" "$jsonl"
++  else
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"examples",helper_lib_missing:true}'
++  fi
++}
++
++scaffold_emit_quickstart() {
++  local steps
++  steps="$(jq -nc '{step:1,action:"probe doctor",command:"flywheel-sync doctor --json"}'
++)"
++  if command -v cli_emit_quickstart >/dev/null; then
++    cli_emit_quickstart "$SCAFFOLD_SCHEMA_VERSION" "$steps" "doctor,health,repair"
++  else
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"quickstart",helper_lib_missing:true}'
++  fi
++}
++
++scaffold_emit_schema() {
++  local surface="${1:-default}"
++  case "$surface" in
++    doctor)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surface:"doctor",fields:{ts:"ISO8601",status:"pass|warn|fail",checks:"array of {name,status,detail?}",thresholds:{wal_size_max_bytes:"int",log_age_max_seconds:"int"}}}'
++      ;;
++    health)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surface:"health",fields:{ts:"ISO8601",status:"pass|warn|fail",audit_log:"path",last_run_ts:"ISO8601 or null",age_seconds:"int or null",recent_runs:"int (count from audit log tail)",total_runs:"int"}}'
++      ;;
++    repair)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surface:"repair",scopes:["log_dir","stale_lock"],contract:{requires_idempotency_key_when_apply:true,refusal_exit_code:3,dry_run_default:true},fields:{scope:"string",mode:"dry_run|apply",idempotency_key:"string when apply"}}'
++      ;;
++    validate)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surface:"validate",subjects:["config","manifest","audit-row"],contract:{rejects_with_rc1:"on missing required fields",config_required:["SYNC_REMOTE"],config_optional:["SYNC_MODE","SYNC_BWLIMIT"]}}'
++      ;;
++    audit)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surface:"audit",audit_log_env:"SCAFFOLD_AUDIT_LOG",row_shape:{ts:"ISO8601",command:"string",scope_or_mode:"string",rc:"int"},limit_default:20}'
++      ;;
++    why)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surface:"why",input:"id (audit_row index OR run_id)",states:["found","not_found","unavailable"],source:"SCAFFOLD_AUDIT_LOG ledger"}'
++      ;;
++    audit-row)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surface:"audit-row",required_fields:["ts","command"],optional_fields:["scope","mode","rc","idempotency_key","note"],ts_format:"YYYY-MM-DDTHH:MM:SSZ"}'
++      ;;
++    default|*)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"schema",surfaces:["doctor","health","repair","validate","audit","why","audit-row"],note:"call --schema <surface> for per-surface schema; flywheel-sync = daily rsync of flywheel state across machines"}'
++      ;;
++  esac
++}
++
++scaffold_emit_topic_help() {
++  local topic="${1:-}"
++  case "$topic" in
++    run)      printf 'topic: run — default backward-compatible invocation: rsync of ~/.claude/skills/.flywheel/state.db + per-skill sources.txt + LATEST.md + meta-md across the configured SYNC_REMOTE; flock-guarded; defers when state.db-wal has uncheckpointed pages unless --force; flags: [--dry-run] [--mode push|pull|auto] [--force]\n' ;;
++    doctor)   printf 'topic: doctor — substrate probes: FW_ROOT exists, CONFIG file present + readable, SYNC_REMOTE set, LOG_DIR writable, rsync available, flock available, DB present (warn if absent), WAL state (warn if writer-active); thresholds env: SYNC_DOCTOR_WAL_MAX_BYTES (default 0), SYNC_DOCTOR_LOG_AGE_MAX (default 86400)\n' ;;
++    health)   printf 'topic: health — tails $SCAFFOLD_AUDIT_LOG (default ~/.local/state/flywheel/flywheel-sync-audit.jsonl); reports last_run_ts, age_seconds, recent_runs (last 20), total_runs; status=warn if last run >24h old; status=pass otherwise; status=fail if audit log unreadable\n' ;;
++    repair)   printf 'topic: repair --scope <log_dir|stale_lock> [--dry-run|--apply --idempotency-key KEY] — apply contract: --apply requires --idempotency-key (rc=3 refusal); scopes: log_dir (mkdir -p $LOG_DIR), stale_lock (remove $LOCK if no live PID holds it)\n' ;;
++    validate) printf 'topic: validate <subject> [PATH|VALUE] — subjects: config (CONFIG file shape: SYNC_REMOTE required), manifest (rsync file list shape: relative paths only), audit-row (JSONL row shape: ts + command required); rc=1 on schema violation, rc=0 on pass\n' ;;
++    audit)    printf 'topic: audit [--limit N] — tail $SCAFFOLD_AUDIT_LOG via cli_emit_audit_tail with positional (path, schema, limit); default limit=20\n' ;;
++    why)      printf 'topic: why <id> — provenance lookup against $SCAFFOLD_AUDIT_LOG; states: found (row matched), not_found (no match), unavailable (audit log missing)\n' ;;
++    *)        printf 'topics: run | doctor | health | repair | validate | audit | why | quickstart | completion\n' ;;
++  esac
++}
++
++scaffold_emit_completion() {
++  local shell="${1:-bash}"
++  case "$shell" in
++    -h|--help) scaffold_emit_topic_help completion 2>/dev/null \
++                 || printf 'topic: completion <bash|zsh> — emit shell completion script\n'
++               return 0 ;;
++    bash) command -v cli_emit_completion_bash >/dev/null \
++            && cli_emit_completion_bash "flywheel-sync" "doctor,health,repair,validate,audit,why,quickstart,help,completion" "--json,--apply,--dry-run,--idempotency-key,--info,--schema,--examples" \
++            || printf '# helper lib missing — completion unavailable\n' ;;
++    zsh)  command -v cli_emit_completion_zsh >/dev/null \
++            && cli_emit_completion_zsh "flywheel-sync" "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
++            || printf '# helper lib missing — completion unavailable\n' ;;
++    *) printf 'ERR: unknown shell %s (use bash|zsh)\n' "$shell" >&2; return 64 ;;
++  esac
++}
++
++# ---------- canonical-cli stubs (TODO markers preserved) ----------
++
++scaffold_cmd_doctor() {
++  local fw_root="${HOME}/.claude/skills/.flywheel"
++  local config="${fw_root}/sync-config.env"
++  local lock="${fw_root}/.sync.lock"
++  local log_dir="${fw_root}/logs"
++  local db="${fw_root}/state.db"
++  local wal="${db}-wal"
++  local checks=() overall="pass" sync_remote_set="false" wal_size=0
++  local fw_root_status="fail" config_status="fail" log_dir_status="fail"
++  local rsync_status="fail" flock_status="fail" db_status="warn" wal_status="pass"
++  local sync_remote_status="fail"
++
++  if [[ -d "$fw_root" ]]; then fw_root_status="pass"; fi
++  if [[ -r "$config" ]]; then
++    config_status="pass"
++    # extract SYNC_REMOTE without sourcing (avoid arbitrary code execution)
++    if grep -qE '^[[:space:]]*SYNC_REMOTE=[^[:space:]]+' "$config" 2>/dev/null; then
++      sync_remote_set="true"; sync_remote_status="pass"
++    fi
++  fi
++  if [[ -d "$log_dir" && -w "$log_dir" ]]; then log_dir_status="pass"; fi
++  if command -v rsync >/dev/null 2>&1; then rsync_status="pass"; fi
++  if command -v flock >/dev/null 2>&1; then flock_status="pass"; fi
++  if [[ -r "$db" ]]; then db_status="pass"; fi
++  if [[ -f "$wal" ]]; then
++    wal_size="$(/usr/bin/stat -f%z "$wal" 2>/dev/null || /usr/bin/stat -c%s "$wal" 2>/dev/null || echo 0)"
++    if [[ "${wal_size:-0}" -gt 0 ]]; then wal_status="warn"; fi
++  fi
++
++  for st in "$fw_root_status" "$config_status" "$log_dir_status" "$rsync_status" "$flock_status" "$sync_remote_status"; do
++    if [[ "$st" == "fail" ]]; then overall="fail"; fi
++  done
++  if [[ "$overall" == "pass" ]]; then
++    for st in "$db_status" "$wal_status"; do
++      if [[ "$st" == "warn" ]]; then overall="warn"; fi
++    done
++  fi
++
++  jq -nc \
++    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++    --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
++    --arg overall "$overall" \
++    --arg fw_root "$fw_root" --arg fw_root_status "$fw_root_status" \
++    --arg config "$config" --arg config_status "$config_status" \
++    --arg sync_remote_set "$sync_remote_set" --arg sync_remote_status "$sync_remote_status" \
++    --arg log_dir "$log_dir" --arg log_dir_status "$log_dir_status" \
++    --arg rsync_status "$rsync_status" \
++    --arg flock_status "$flock_status" \
++    --arg db "$db" --arg db_status "$db_status" \
++    --arg wal "$wal" --arg wal_status "$wal_status" --argjson wal_size "${wal_size:-0}" \
++    --arg lock "$lock" \
++    '{schema_version:$sv,command:"doctor",ts:$ts,status:$overall,
++      checks:[
++        {name:"fw_root", path:$fw_root, status:$fw_root_status},
++        {name:"config_file", path:$config, status:$config_status},
++        {name:"sync_remote_set", status:$sync_remote_status, detail:$sync_remote_set},
++        {name:"log_dir_writable", path:$log_dir, status:$log_dir_status},
++        {name:"rsync_available", status:$rsync_status},
++        {name:"flock_available", status:$flock_status},
++        {name:"state_db", path:$db, status:$db_status},
++        {name:"wal_state", path:$wal, status:$wal_status, size_bytes:$wal_size}
++      ],
++      lock_path:$lock,
++      thresholds:{wal_size_max_bytes:0, log_age_max_seconds:86400}
++    }'
++}
++
++scaffold_cmd_health() {
++  local audit_log="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/flywheel-sync-audit.jsonl}"
++  local now ts last_run_ts="" age_seconds total_runs=0 recent_runs=0 status="pass"
++  local stale_threshold="${SYNC_HEALTH_STALE_THRESHOLD_SECONDS:-86400}"
++  ts="$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
++  if [[ ! -r "$audit_log" ]]; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$audit_log" \
++      '{schema_version:$sv,command:"health",ts:$ts,status:"warn",audit_log:$log,reason:"audit_log_missing",last_run_ts:null,age_seconds:null,recent_runs:0,total_runs:0}'
++    return 0
++  fi
++  total_runs="$(wc -l < "$audit_log" 2>/dev/null | tr -d ' ' || echo 0)"
++  recent_runs="$(tail -20 "$audit_log" 2>/dev/null | wc -l | tr -d ' ' || echo 0)"
++  last_run_ts="$(tail -1 "$audit_log" 2>/dev/null | jq -r '.ts // empty' 2>/dev/null || true)"
++  if [[ -n "$last_run_ts" ]]; then
++    now="$(date -u +%s)"
++    local last_epoch
++    last_epoch="$(date -u -j -f '%Y-%m-%dT%H:%M:%SZ' "$last_run_ts" +%s 2>/dev/null \
++                  || date -u -d "$last_run_ts" +%s 2>/dev/null \
++                  || echo 0)"
++    age_seconds=$((now - last_epoch))
++    if [[ "$age_seconds" -gt "$stale_threshold" ]]; then status="warn"; fi
++  else
++    age_seconds=null
++    status="warn"
++  fi
++  jq -nc \
++    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++    --arg ts "$ts" --arg status "$status" \
++    --arg log "$audit_log" --arg last_run_ts "$last_run_ts" \
++    --argjson age "${age_seconds:-null}" \
++    --argjson total "$total_runs" --argjson recent "$recent_runs" \
++    --argjson stale "$stale_threshold" \
++    '{schema_version:$sv,command:"health",ts:$ts,status:$status,audit_log:$log,
++      last_run_ts:(if $last_run_ts == "" then null else $last_run_ts end),
++      age_seconds:$age, recent_runs:$recent, total_runs:$total,
++      stale_threshold_seconds:$stale}'
++}
++
++scaffold_cmd_repair() {
++  local scope="" mode="dry_run" idem_key=""
++  while [[ $# -gt 0 ]]; do
++    case "$1" in
++      -h|--help) scaffold_emit_topic_help repair; return 0 ;;
++      --scope) scope="${2:-}"; shift 2 ;;
++      --dry-run) mode="dry_run"; shift ;;
++      --apply) mode="apply"; shift ;;
++      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
++      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
++      --json) shift ;;
++      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; return 64 ;;
++    esac
++  done
++  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
++    if command -v cli_refuse_apply_without_idem_key >/dev/null; then
++      cli_refuse_apply_without_idem_key "$SCAFFOLD_SCHEMA_VERSION" "repair" "$scope"
++    else
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
++        '{schema_version:$sv,command:"repair",status:"refused",mode:"apply",scope:$scope,reason:"--apply requires --idempotency-key"}'
++      exit 3
++    fi
++  fi
++  local fw_root="${HOME}/.claude/skills/.flywheel"
++  local log_dir="${fw_root}/logs"
++  local lock="${fw_root}/.sync.lock"
++  local action="" actions_json="[]" status="ok"
++  case "$scope" in
++    log_dir)
++      if [[ -d "$log_dir" ]]; then
++        action="log_dir_exists_noop"
++      elif [[ "$mode" == "apply" ]]; then
++        if mkdir -p "$log_dir" 2>/dev/null; then
++          action="log_dir_created"
++        else
++          action="log_dir_create_failed"; status="fail"
++        fi
++      else
++        action="log_dir_create_planned"
++      fi
++      ;;
++    stale_lock)
++      if [[ ! -f "$lock" ]]; then
++        action="lock_absent_noop"
++      else
++        local lock_holder
++        lock_holder="$(/usr/sbin/lsof -F p "$lock" 2>/dev/null | grep '^p' | head -1 | tr -d 'p' || true)"
++        if [[ -n "$lock_holder" ]] && kill -0 "$lock_holder" 2>/dev/null; then
++          action="lock_held_by_live_pid_${lock_holder}_skipped"
++        elif [[ "$mode" == "apply" ]]; then
++          if rm -f "$lock" 2>/dev/null; then
++            action="stale_lock_removed"
++          else
++            action="stale_lock_remove_failed"; status="fail"
++          fi
++        else
++          action="stale_lock_remove_planned"
++        fi
++      fi
++      ;;
++    "")
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"repair",status:"refused",reason:"--scope required",valid_scopes:["log_dir","stale_lock"]}'
++      return 64
++      ;;
++    *)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
++        '{schema_version:$sv,command:"repair",status:"refused",reason:"unknown scope",scope:$scope,valid_scopes:["log_dir","stale_lock"]}'
++      return 64
++      ;;
++  esac
++  local envelope
++  envelope="$(jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" --arg action "$action" --arg status "$status" \
++    '{schema_version:$sv,command:"repair",status:$status,mode:$mode,scope:$scope,idempotency_key:$idem,action:$action}')"
++  printf '%s\n' "$envelope"
++  if command -v cli_audit_append >/dev/null 2>&1; then
++    cli_audit_append "$SCAFFOLD_AUDIT_LOG" "repair" "$status" \
++      "$(jq -nc --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" --arg act "$action" \
++          '{scope:$scope,mode:$mode,idempotency_key:$idem,action:$act}')"
++  fi
++}
++
++scaffold_cmd_validate() {
++  local subject="${1:-}" target="${2:-}"
++  case "$subject" in
++    config)
++      local cfg="${target:-${HOME}/.claude/skills/.flywheel/sync-config.env}"
++      if [[ ! -r "$cfg" ]]; then
++        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$cfg" \
++          '{schema_version:$sv,command:"validate",subject:"config",status:"fail",path:$p,reason:"missing_or_unreadable"}'
++        return 1
++      fi
++      if grep -qE '^[[:space:]]*SYNC_REMOTE=[^[:space:]]+' "$cfg" 2>/dev/null; then
++        local has_mode="false"
++        if grep -qE '^[[:space:]]*SYNC_MODE=' "$cfg" 2>/dev/null; then has_mode="true"; fi
++        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$cfg" --arg mode "$has_mode" \
++          '{schema_version:$sv,command:"validate",subject:"config",status:"pass",path:$p,sync_remote_set:true,sync_mode_set:($mode=="true")}'
++        return 0
++      fi
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$cfg" \
++        '{schema_version:$sv,command:"validate",subject:"config",status:"fail",path:$p,reason:"missing_required:SYNC_REMOTE"}'
++      return 1
++      ;;
++    manifest)
++      local mf="${target:-}"
++      if [[ -z "$mf" || ! -r "$mf" ]]; then
++        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$mf" \
++          '{schema_version:$sv,command:"validate",subject:"manifest",status:"fail",path:$p,reason:"missing_or_unreadable"}'
++        return 1
++      fi
++      local count abs_count
++      count="$(wc -l < "$mf" | tr -d ' ')"
++      abs_count="$(grep -cE '^/' "$mf" 2>/dev/null || echo 0)"
++      if [[ "$abs_count" -gt 0 ]]; then
++        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$mf" --argjson n "$count" --argjson abs "$abs_count" \
++          '{schema_version:$sv,command:"validate",subject:"manifest",status:"fail",path:$p,total:$n,absolute_paths:$abs,reason:"absolute_paths_disallowed_in_manifest"}'
++        return 1
++      fi
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$mf" --argjson n "$count" \
++        '{schema_version:$sv,command:"validate",subject:"manifest",status:"pass",path:$p,total:$n,absolute_paths:0}'
++      return 0
++      ;;
++    audit-row)
++      local row="${target:-}"
++      if [[ -z "$row" ]]; then
++        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++          '{schema_version:$sv,command:"validate",subject:"audit-row",status:"fail",reason:"row_required"}'
++        return 1
++      fi
++      if jq -e '.ts and .command' >/dev/null 2>&1 <<<"$row"; then
++        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++          '{schema_version:$sv,command:"validate",subject:"audit-row",status:"pass"}'
++        return 0
++      fi
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"validate",subject:"audit-row",status:"fail",reason:"missing_required_fields:ts,command"}'
++      return 1
++      ;;
++    "")
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"validate",status:"refused",reason:"--subject required",valid_subjects:["config","manifest","audit-row"]}'
++      return 64
++      ;;
++    *)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$subject" \
++        '{schema_version:$sv,command:"validate",status:"refused",reason:"unknown subject",subject:$s,valid_subjects:["config","manifest","audit-row"]}'
++      return 64
++      ;;
++  esac
++}
++
++scaffold_cmd_audit() {
++  local limit=20
++  while [[ $# -gt 0 ]]; do
++    case "$1" in
++      -h|--help) scaffold_emit_topic_help audit; return 0 ;;
++      --limit) limit="${2:-20}"; shift 2 ;;
++      --limit=*) limit="${1#--limit=}"; shift ;;
++      --json) shift ;;
++      *) printf 'ERR: unknown audit arg %s\n' "$1" >&2; return 64 ;;
++    esac
++  done
++  if command -v cli_emit_audit_tail >/dev/null 2>&1; then
++    # Canonical signature: (path, schema, limit) — path-then-schema positional order
++    cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" "$limit"
++    return 0
++  fi
++  # Helper-lib-missing fallback: minimal tail
++  if [[ ! -r "$SCAFFOLD_AUDIT_LOG" ]]; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
++      '{schema_version:$sv,command:"audit",audit_log:$log,status:"warn",reason:"audit_log_missing",rows:[]}'
++    return 0
++  fi
++  local rows
++  rows="$(tail -n "$limit" "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | jq -s '.' 2>/dev/null || echo '[]')"
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" --argjson rows "$rows" --argjson limit "$limit" \
++    '{schema_version:$sv,command:"audit",audit_log:$log,status:"pass",limit:$limit,rows:$rows,row_count:($rows|length)}'
++}
++
++scaffold_cmd_why() {
++  local id="${1:-}"
++  if [[ -z "$id" ]]; then
++    printf 'ERR: why requires <id> argument\n' >&2; return 64
++  fi
++  if [[ ! -r "$SCAFFOLD_AUDIT_LOG" ]]; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg log "$SCAFFOLD_AUDIT_LOG" \
++      '{schema_version:$sv,command:"why",id:$id,status:"unavailable",reason:"audit_log_missing",audit_log:$log}'
++    return 0
++  fi
++  # Match against ts, idempotency_key, or row index. Last-match wins.
++  local match
++  match="$(jq -c --arg id "$id" 'select(.ts == $id or (.idempotency_key // "") == $id or (.run_id // "") == $id)' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | tail -1)"
++  if [[ -n "$match" ]]; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --argjson row "$match" \
++      '{schema_version:$sv,command:"why",id:$id,status:"found",row:$row}'
++    return 0
++  fi
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
++    '{schema_version:$sv,command:"why",id:$id,status:"not_found"}'
++}
++
++# ---------- scaffolded main dispatcher ----------
++
++# When the scaffolder appends this block, it expects the target's original
++# top-level main is renamed to `cmd_run` (or the original final
++# `main "$@"` line is replaced with this dispatcher). Default invocation
++# falls through to the original logic for backward compat.
++scaffold_main() {
++  if [[ $# -eq 0 ]]; then
++    scaffold_usage; exit 0
++  fi
++  case "$1" in
++    -h|--help)    scaffold_usage; exit 0 ;;
++    --info)       shift; scaffold_emit_info "$@"; exit 0 ;;
++    --schema)     shift; scaffold_emit_schema "${1:-default}"; exit 0 ;;
++    --examples)   shift; scaffold_emit_examples "$@"; exit 0 ;;
++    doctor)       shift; scaffold_cmd_doctor "$@"; exit $? ;;
++    health)       shift; scaffold_cmd_health "$@"; exit $? ;;
++    repair)       shift; scaffold_cmd_repair "$@"; exit $? ;;
++    validate)     shift; scaffold_cmd_validate "$@"; exit $? ;;
++    audit)        shift; scaffold_cmd_audit "$@"; exit $? ;;
++    why)          shift; scaffold_cmd_why "$@"; exit $? ;;
++    quickstart)   shift; scaffold_emit_quickstart "$@"; exit 0 ;;
++    help)         shift; scaffold_emit_topic_help "${1:-}"; exit 0 ;;
++    completion)   shift; scaffold_emit_completion "${1:-bash}"; exit $? ;;
++    *)
++      printf 'ERR: unknown canonical subcommand: %s\n' "$1" >&2
++      scaffold_usage >&2
++      exit 64 ;;
++  esac
++}
++
++# Early-dispatch intercept: if argv[0] looks like a canonical subcommand
++# or introspection flag, run the canonical surface and exit BEFORE the
++# target's original arg parser sees the args. Works for both `main "$@"`
++# style and inline `while [[ $# -gt 0 ]]` style targets.
++_scaffold_is_canonical_arg() {
++  case "${1:-}" in
++    doctor|health|repair|validate|audit|why|quickstart|completion) return 0 ;;
++    --info|--schema|--examples) return 0 ;;
++    -h|--help) return 0 ;;
++    help)
++      # Intercept `help <topic>` and `help --help`; bare `help` could be
++      # a legacy subcommand of the target so it falls through.
++      case "${2:-}" in run|doctor|health|repair|validate|audit|why|-h|--help) return 0 ;; esac
++      return 1 ;;
++    *) return 1 ;;
++  esac
++}
++
++if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
++  scaffold_main "$@"
++  exit $?
++fi
++# ====== END canonical-cli scaffold ======
+ FW_ROOT="${HOME}/.claude/skills/.flywheel"
+ SKILLS_ROOT="${HOME}/.claude/skills"
+ CONFIG="${FW_ROOT}/sync-config.env"
+@@ -118,11 +634,24 @@
+     "$SYNC_REMOTE" "$SKILLS_ROOT/" 2>&1 | tee -a "$LOG"
+ }
+ 
++_SYNC_RC=0
+ case "$SYNC_MODE" in
+-  push) run_push ;;
+-  pull) run_pull ;;
+-  auto) run_pull; run_push ;;
+-  *) log "ERROR: unknown SYNC_MODE='$SYNC_MODE' (push|pull|auto)"; exit 1 ;;
++  push) run_push || _SYNC_RC=$? ;;
++  pull) run_pull || _SYNC_RC=$? ;;
++  auto) run_pull || _SYNC_RC=$?; run_push || _SYNC_RC=$? ;;
++  *) log "ERROR: unknown SYNC_MODE='$SYNC_MODE' (push|pull|auto)"; _SYNC_RC=1 ;;
+ esac
+ 
+-log "done"
++# Wire cli_audit_append at the terminal envelope so the audit log accretes
++# (per flywheel-wzjo9.1.2 fillin requirement). Best-effort; helper-lib-missing
++# is silently tolerated.
++if command -v cli_audit_append >/dev/null 2>&1; then
++  _SYNC_STATUS="ok"
++  if [[ "$_SYNC_RC" -ne 0 ]]; then _SYNC_STATUS="fail"; fi
++  cli_audit_append "$SCAFFOLD_AUDIT_LOG" "run" "$_SYNC_STATUS" \
++    "$(jq -nc --arg mode "$SYNC_MODE" --arg dry "$DRY_RUN" --arg force "$FORCE" --arg files "$COUNT" \
++        '{mode:$mode,dry_run:($dry=="1"),force:($force=="1"),files:($files|tonumber? // 0)}')"
++fi
++
++log "done rc=$_SYNC_RC"
++exit "$_SYNC_RC"

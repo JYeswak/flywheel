@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+# flywheel-sync — daily rsync of flywheel state across machines.
+#
+# Syncs:
+#   - ~/.claude/skills/.flywheel/state.db (SQLite, ephemeral on satellites)
+#   - ~/.claude/skills/*/data/sources.txt (skill source feeds)
+#   - ~/.claude/skills/*/LATEST.md         (cached digest renders)
+#   - ~/.claude/skills/.flywheel/{DASHBOARD,STATE,WORK,GOAL}.md
+#
+# Config: ~/.claude/skills/.flywheel/sync-config.env (SYNC_REMOTE, SYNC_MODE).
+# Lock:   ~/.claude/skills/.flywheel/.sync.lock (flock, prevents concurrent runs).
+# Defer:  if state.db-wal > 0 bytes, refuse to sync (writer active).
+# Logs:   ~/.claude/skills/.flywheel/logs/sync-YYYYMMDD.log
+#
+# Usage: flywheel-sync [--dry-run] [--mode push|pull|auto] [--force]
+
+set -euo pipefail
+
+FW_ROOT="${HOME}/.claude/skills/.flywheel"
+SKILLS_ROOT="${HOME}/.claude/skills"
+CONFIG="${FW_ROOT}/sync-config.env"
+LOCK="${FW_ROOT}/.sync.lock"
+LOG_DIR="${FW_ROOT}/logs"
+LOG="${LOG_DIR}/sync-$(date -u +%Y%m%d).log"
+DB="${FW_ROOT}/state.db"
+WAL="${DB}-wal"
+
+DRY_RUN=0
+FORCE=0
+MODE_OVERRIDE=""
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --dry-run) DRY_RUN=1; shift ;;
+    --force)   FORCE=1;   shift ;;
+    --mode)    MODE_OVERRIDE="$2"; shift 2 ;;
+    -h|--help)
+      sed -n '2,18p' "$0"; exit 0 ;;
+    *) echo "unknown arg: $1" >&2; exit 2 ;;
+  esac
+done
+
+mkdir -p "$LOG_DIR"
+
+log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*" | tee -a "$LOG"; }
+
+if [ ! -f "$CONFIG" ]; then
+  log "ERROR: missing $CONFIG (copy sync-config.env.example and configure SYNC_REMOTE)"
+  exit 1
+fi
+
+# shellcheck disable=SC1090
+. "$CONFIG"
+SYNC_MODE="${MODE_OVERRIDE:-${SYNC_MODE:-pull}}"
+
+if [ -z "${SYNC_REMOTE:-}" ]; then
+  log "ERROR: SYNC_REMOTE unset in $CONFIG"
+  exit 1
+fi
+
+# Acquire flock (non-blocking; exit if another sync is running).
+exec 9>"$LOCK"
+if ! flock -n 9; then
+  log "another flywheel-sync holds the lock; exiting"
+  exit 0
+fi
+
+# Defer if SQLite writer active (WAL has uncheckpointed pages).
+if [ -f "$WAL" ]; then
+  WAL_SIZE=$(/usr/bin/stat -f%z "$WAL" 2>/dev/null || /usr/bin/stat -c%s "$WAL" 2>/dev/null || echo 0)
+  if [ "$WAL_SIZE" -gt 0 ] && [ "$FORCE" -ne 1 ]; then
+    log "DEFER: state.db-wal size=$WAL_SIZE (writer active). Use --force to override."
+    exit 0
+  fi
+fi
+
+# Quiesce WAL: best-effort checkpoint so the .db file is self-contained.
+if command -v sqlite3 >/dev/null 2>&1 && [ -f "$DB" ]; then
+  sqlite3 "$DB" "PRAGMA wal_checkpoint(TRUNCATE);" >/dev/null 2>&1 || true
+fi
+
+RSYNC_OPTS=(-az --partial --human-readable --itemize-changes --timeout=60)
+[ "$DRY_RUN" -eq 1 ] && RSYNC_OPTS+=(--dry-run)
+[ -n "${SYNC_BWLIMIT:-}" ] && RSYNC_OPTS+=(--bwlimit="${SYNC_BWLIMIT}")
+
+# Build a manifest of files to sync. We use a relative-from root so the same
+# tree is reproduced on the remote.
+MANIFEST="$(mktemp -t flywheel-sync.XXXXXX)"
+trap 'rm -f "$MANIFEST"' EXIT
+
+{
+  # Flywheel SQLite + meta markdown
+  echo ".flywheel/state.db"
+  for f in DASHBOARD.md STATE.md WORK.md GOAL.md SCAFFOLD-CONTEXT.md; do
+    [ -f "${FW_ROOT}/${f}" ] && echo ".flywheel/${f}"
+  done
+  # Per-skill sources.txt and LATEST.md
+  ( cd "$SKILLS_ROOT" && \
+    /usr/bin/find . -maxdepth 3 \( -name 'sources.txt' -o -name 'LATEST.md' \) \
+      -not -path './.flywheel/*' 2>/dev/null \
+      | sed 's|^\./||' )
+} > "$MANIFEST"
+
+COUNT=$(wc -l < "$MANIFEST" | tr -d ' ')
+log "mode=$SYNC_MODE remote=$SYNC_REMOTE files=$COUNT dry_run=$DRY_RUN"
+
+run_push() {
+  log "PUSH $SKILLS_ROOT/  -->  $SYNC_REMOTE"
+  rsync "${RSYNC_OPTS[@]}" --files-from="$MANIFEST" \
+    "$SKILLS_ROOT/" "$SYNC_REMOTE" 2>&1 | tee -a "$LOG"
+}
+
+run_pull() {
+  log "PULL $SYNC_REMOTE  -->  $SKILLS_ROOT/"
+  # On pull, remote is authoritative for the manifest paths. Use --update so we
+  # don't clobber a locally-newer file (last-write-wins by mtime).
+  rsync "${RSYNC_OPTS[@]}" --update --files-from="$MANIFEST" \
+    "$SYNC_REMOTE" "$SKILLS_ROOT/" 2>&1 | tee -a "$LOG"
+}
+
+case "$SYNC_MODE" in
+  push) run_push ;;
+  pull) run_pull ;;
+  auto) run_pull; run_push ;;
+  *) log "ERROR: unknown SYNC_MODE='$SYNC_MODE' (push|pull|auto)"; exit 1 ;;
+esac
+
+log "done"
