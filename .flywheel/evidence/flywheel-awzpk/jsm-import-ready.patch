@@ -1,0 +1,24 @@
+# JSM-import-ready patch for flywheel-awzpk (skill-grader second-person FP suppression)
+# Skill: ~/.claude/skills/skill-autoresearch/ (unmanaged by JSM; lives outside repo)
+# Date: 2026-05-09
+
+## Changeset summary
+
+### File 1 (edit): ~/.claude/skills/skill-autoresearch/scripts/skill-grader.py
+
+Extended count_second_person() to strip three citation contexts before
+running the second-person regex, so the grader does not penalize SKILL.md
+files that DOCUMENT the rule (citing 'you should' in tables/examples is
+not the same as USING it as instruction):
+
+1. Fenced code blocks (multiline)
+2. Double-quoted citations on a single line
+3. Inline backtick citations on a single line
+
+Net change: +12 lines (3 sub statements + comment block + revised docstring)
+Genuine instructional 'you should' / 'you must' / etc. still caught.
+
+=== POST-FIX FUNCTION BODY ===
+def count_second_person(content: str) -> list[str]:
+    """Find second-person voice instances in content.
+
