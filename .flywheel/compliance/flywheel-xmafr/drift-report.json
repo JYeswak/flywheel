@@ -1,0 +1,32 @@
+{
+  "schema_version": "cross-orch-drift-detector/v1",
+  "flywheel_orch": "flywheel:1",
+  "flywheel_surface": "flywheel-loop",
+  "flywheel_score": 5,
+  "skillos_orch": "skillos:1",
+  "skillos_surface": "skillos",
+  "skillos_score": 13,
+  "score_delta": 8,
+  "drift_count": 0,
+  "pass_pass_count": 5,
+  "shared_pass_dims": [
+    "doctor_health_repair_triad",
+    "validate_audit_why_subsidiary",
+    "info_examples_quickstart_help_completion",
+    "json_everywhere",
+    "dry_run_explain_on_mutating_ops"
+  ],
+  "shared_na_dims": [
+    "per_adapter_scoping",
+    "upstream_report"
+  ],
+  "flywheel_pending_calibration_dims": [
+    "exit_code_taxonomy",
+    "format_text_json_toon",
+    "cross_repo_resolvable",
+    "deps_buildable_graceful_failure",
+    "errJSON_exit_pair",
+    "doctor_namespace_named_subsystems"
+  ],
+  "verdict": "drift_count_zero_pre_calibration_baseline_5_of_13_within_expected_4_to_6_band"
+}
