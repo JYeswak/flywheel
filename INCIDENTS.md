@@ -6137,6 +6137,97 @@ Evidence (sub-class):
   `flywheel-pjfqw`.
 - Bead: `flywheel-ovd29` (this dispatch).
 
+### Sibling Sub-Class: worker-pane-not-waiting-integrate-blocker (4th synonym — 2026-05-10 merge)
+
+Sub-class: `worker-pane-not-waiting-integrate-blocker` — fourth
+synonym in the integrate_worker_active family. Same shape as the
+parent + the earlier two sibling sub-classes
+(integrate_worker_not_waiting + worker_capacity_gate_failed):
+INTEGRATE prelude correctly refuses to reap callbacks while
+worker pane is THINKING / not-WAITING. Filed as `flywheel-1kdfk`
+by `doctrine-ladder-promote.sh` after 6 rows on 2026-05-04.
+
+Event Count: 6 events on 2026-05-04 01:15:18Z–01:40:13Z (~25min
+burst), all `mobile-eats:0.1` (`agent=claude`, `commit_sha=e7c7228`),
+all `severity=low`, `what_attempted=[]`, `what_worked=[]`.
+`fuckup-log.jsonl` lines 399, 401, 403, 407, 410, 414. The
+`what_happened` strings split into:
+- 5 rows: "INTEGRATE prelude blocked because pane 2 was not
+  WAITING while Nango Railway worker continued"
+- 1 row: "INTEGRATE prelude blocked because pane 2 was THINKING
+  on Nango Railway deploy and no callback was available"
+
+The "Nango Railway worker / deploy" context is incidental — the
+synonym is the trauma_class STRING the probe emitted, not the
+work pane 2 was doing. Behavior matches parent.
+
+Family roster (all 4 synonyms now consolidated under
+`integrate_worker_active` parent):
+
+| Synonym | Events | Date range | Source bead |
+|---|---|---|---|
+| `integrate_worker_active` (parent) | 3 | 2026-05-04 02:56-03:16Z | filed via flywheel-2ljj close (2026-05-08 doctrine ladder) |
+| `integrate_worker_not_waiting` | 4 | 2026-05-03 21:42-22:13Z | flywheel-6grpt (earlier today) |
+| `worker_capacity_gate_failed` | 12 | 2026-05-03 19:11-20:07Z | flywheel-ovd29 (earlier today) |
+| **`worker-pane-not-waiting-integrate-blocker`** | **6** | **2026-05-04 01:15-01:40Z** | **flywheel-1kdfk (this merge)** |
+
+All 4 synonyms cluster on the SAME fleet pane (mobile-eats:0.1).
+The synonym divergence is naming discipline in the emitting
+probe code paths, not behavior divergence.
+
+Cost: identical to parent — INTEGRATE tick correctly deferred
+callback reaping; canonical-safe; no worker file mutation, no
+substrate damage. The 6 rows added ~30s pivot time each (read
+the prelude refusal, log the attempt) but no user-visible
+substrate cost.
+
+Root Cause (extends parent + the earlier 2 sub-classes):
+**four** synonymous trauma-class names emitted by overlapping
+code paths on the same fleet pane during 2026-05-03 to
+2026-05-04. The L56 ladder treats each name as a distinct
+class and re-promotes per name. The behavior is identical and
+canonical-safe; the divergence is naming discipline.
+
+Forever-Rule (parent applies; sub-class extension): every
+"INTEGRATE prelude refuses on non-WAITING pane" event,
+regardless of which synonym name the emitting probe uses,
+routes to the parent class's wait/observe contract (L91/L95
+path). The synonym-unification follow-up
+(`flywheel-pjfqw`, filed by flywheel-6grpt earlier today)
+ALREADY covers all four synonyms — extending its scope to
+include this fourth name is one rename addition, not a new
+follow-up bead.
+
+Synonym-unification scope extension (no new bead): when
+`flywheel-pjfqw` is dispatched, the worker should rename
+emit-sites for ALL FOUR synonyms (integrate_worker_active,
+integrate_worker_not_waiting, worker_capacity_gate_failed,
+worker-pane-not-waiting-integrate-blocker) to the canonical
+parent name. The 4-name roster above is the complete current
+list; new emit-sites discovered during the rename must also be
+captured.
+
+Fix Applied/Status: Path A merge — no source-code change, no
+new top-level INCIDENTS section, no probe edit, no new
+follow-up bead (extends `flywheel-pjfqw`'s existing scope).
+Sub-class block makes the L56 ladder probe see synonym
+coverage and skip re-firing on the 6-row precedent cluster.
+
+Evidence (sub-class):
+- Trauma rows: `~/.local/state/flywheel/fuckup-log.jsonl` lines
+  399, 401, 403, 407, 410, 414 on 2026-05-04 01:15:18Z–01:40:13Z;
+  all `mobile-eats:0.1`, `commit_sha=e7c7228`,
+  `git_repo=/Users/josh/Developer/mobile-eats`, all
+  `severity=low`, `what_attempted=[]`, `what_worked=[]`.
+- Parent class: `## integrate_worker_active` above.
+- Synonym sibling A: `### Sibling Sub-Class: integrate_worker_not_waiting`
+  (2026-05-09 merge).
+- Synonym sibling B: `### Sibling Sub-Class: worker_capacity_gate_failed`
+  (2026-05-09 merge with ERROR-state escalation gap).
+- Synonym-unification follow-up bead (covers all 4 names):
+  `flywheel-pjfqw` (scope extended, not re-filed).
+- Bead: `flywheel-1kdfk` (this dispatch).
+
 ## worker-evidence-file-write-before-reservation
 
 Date: 2026-05-08
