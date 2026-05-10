@@ -200,6 +200,44 @@ is_already_scaffolded() {
   grep -q '^# flywheel-cli-surface: true' "$target" 2>/dev/null
 }
 
+# ---------- shebang guard (flywheel-e4lfb) ----------
+
+# is_non_bash_shebang <target> — return 0 (true) when the target's
+# shebang names a non-bash interpreter. Catches Python/Perl/Node/Ruby
+# scripts that carry a misleading .sh extension. The bash scaffold
+# corrupts these because it appends bash-syntax boilerplate.
+#
+# Recognized bash variants: bash, sh (POSIX shell), env bash.
+# Returns 1 (false) when shebang is missing or names a bash variant.
+is_non_bash_shebang() {
+  local target="$1"
+  local shebang
+  shebang="$(head -1 "$target" 2>/dev/null)"
+  case "$shebang" in
+    "#!"*bash|"#!"*bash" "*|"#!"*"/sh"|"#!"*"/sh "*|"#!/usr/bin/env bash"*|"#!/usr/bin/env sh"*)
+      return 1 ;;
+    "#!"*)
+      return 0 ;;
+    *)
+      return 1 ;;
+  esac
+}
+
+# Echo the recognized interpreter name for diagnostic output.
+detect_shebang_interpreter() {
+  local target="$1"
+  local shebang
+  shebang="$(head -1 "$target" 2>/dev/null)"
+  case "$shebang" in
+    *python3*) echo "python3" ;;
+    *python*)  echo "python" ;;
+    *perl*)    echo "perl" ;;
+    *node*)    echo "node" ;;
+    *ruby*)    echo "ruby" ;;
+    *)         echo "${shebang#"#!"}" ;;
+  esac
+}
+
 # ---------- scaffolder body ----------
 
 # emit the canonical-cli block as a single heredoc, with the target name
@@ -582,6 +620,30 @@ scaffold_target() {
   # Refusal: jeff-stack
   if is_jeff_stack_path "$target_abs"; then
     refuse_envelope "jeff_stack_target" "$target_rel"
+    exit 66
+  fi
+
+  # Refusal: non-bash shebang (e.g. .sh extension on a Python script).
+  # See flywheel-e4lfb — the bash scaffold corrupts non-bash interpreters
+  # by appending bash-syntax boilerplate.
+  if is_non_bash_shebang "$target_abs"; then
+    local interp ext_hint
+    interp="$(detect_shebang_interpreter "$target_abs")"
+    case "$interp" in
+      python*) ext_hint="py" ;;
+      perl)    ext_hint="pl" ;;
+      node)    ext_hint="js" ;;
+      ruby)    ext_hint="rb" ;;
+      *)       ext_hint="${interp//[^A-Za-z]/}" ;;
+    esac
+    err "$target_rel is a $interp script (not bash). Use a $interp-aware scaffolder or rename the file with a .$ext_hint extension."
+    jq -nc \
+      --arg sv "$SCHEMA_VERSION" \
+      --arg reason "non_bash_shebang" \
+      --arg target "$target_rel" \
+      --arg interpreter "$interp" \
+      --arg suggested_extension "$ext_hint" \
+      '{schema_version:$sv,command:"scaffold",status:"refused",reason:$reason,target:$target,interpreter:$interpreter,suggested_extension:$suggested_extension}'
     exit 66
   fi
 
