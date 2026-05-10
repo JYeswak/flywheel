@@ -1,0 +1,21 @@
+PASS syntax
+PASS --info schema_version matches <surface>/v1
+PASS --schema verify envelope
+PASS --examples envelope
+PASS doctor envelope
+PASS health envelope
+PASS repair --dry-run envelope
+PASS repair --apply without idempotency-key returns rc=3
+PASS validate envelope
+PASS audit envelope
+PASS why envelope
+PASS help topic
+PASS quickstart envelope
+PASS doctor returns >=5 concrete checks
+PASS doctor probes git_available
+PASS validate head-state emits head+branch+parent
+PASS integration: verify pass on matching branch (rc=0)
+PASS integration: verify branch mismatch returns rc=1
+PASS integration: verify parent mismatch returns rc=2
+PASS integration: substrate failure on non-git returns rc=3
+SUMMARY pass=20 fail=0

@@ -1,0 +1,1 @@
+{"schema_version":"cross-pane-git-probe/v1","command":"validate","subject":"worktree-count","status":"pass","repo":"/Users/josh/Developer/flywheel","worktree_count":2,"notable_threshold":3,"beadclass_threshold":5,"paths":["/Users/josh/Developer/flywheel","/Users/josh/Developer/flywheel-fk2r-worktree"]}

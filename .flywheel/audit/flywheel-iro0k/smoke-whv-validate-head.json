@@ -1,0 +1,1 @@
+{"schema_version":"worker-head-verify/v1","command":"validate","subject":"head-state","status":"pass","repo":"/Users/josh/Developer/flywheel","head":"f620bab1a147de04f32ee740405dbb8e4739db44","branch":"master","parent":"189ef0a095bba702af4c914c39862a3e964ddad8"}

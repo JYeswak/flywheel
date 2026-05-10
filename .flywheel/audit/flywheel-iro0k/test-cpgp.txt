@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info schema_version matches <surface>/v1
+PASS --schema run envelope
+PASS --examples envelope
+PASS doctor envelope
+PASS health envelope
+PASS repair --dry-run envelope
+PASS repair --apply without idempotency-key returns rc=3
+PASS validate envelope
+PASS audit envelope
+PASS why envelope
+PASS help topic
+PASS quickstart envelope
+PASS doctor returns >=5 concrete checks
+PASS doctor probes git_available
+PASS validate worktree-count returns count+verdict
+PASS validate reflog-window returns violation_count+window
+PASS default run emits 3-probe composite envelope
+PASS integration: probe on fixture repo writes audit-log row
+SUMMARY pass=19 fail=0
