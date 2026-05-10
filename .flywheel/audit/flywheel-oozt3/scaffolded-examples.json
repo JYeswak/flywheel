@@ -1,0 +1,1 @@
+{"command":"examples","examples":[{"invocation":"flywheel-readme --info --json","name":"info","purpose":"introspection"},{"invocation":"flywheel-readme --schema doctor","name":"schema","purpose":"per-surface schema"},{"invocation":"flywheel-readme doctor --json","name":"doctor","purpose":"probe substrate"}],"schema_version":"flywheel-readme/v1"}

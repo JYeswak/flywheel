@@ -1,0 +1,262 @@
+--- /Users/josh/.claude/skills/.flywheel/bin/flywheel-readme	2026-05-04 02:23:18
++++ /var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/scaffold-canonical-cli-py.XXXXXX.GvxzyqKR1j/flywheel-readme.scaffolded	2026-05-10 12:38:40
+@@ -3,6 +3,259 @@
+ 
+ from __future__ import annotations
+ 
++# ====== BEGIN canonical-cli scaffold (python; bead flywheel-oozt3) ======
++# flywheel-cli-surface: true
++# canonical-cli-scoping: passing (TODO markers in stubs need fill-in)
++# doctor-mode-tier: scaffolded (bead flywheel-oozt3)
++#
++# This block is INJECTED by scaffold-canonical-cli-py.sh. It adds canonical
++# introspection surfaces (--info, --schema, --examples, quickstart, help,
++# completion) without overriding the target's own argparse subcommands.
++# Per-surface stubs (audit, why, validate) carry TODO markers — see grep
++# '# TODO(canonical-cli-scaffold)'.
++
++import json as _scaffold_json
++import os as _scaffold_os
++import sys as _scaffold_sys
++import time as _scaffold_time
++
++_SCAFFOLD_SCHEMA_VERSION = "flywheel-readme/v1"
++_SCAFFOLD_AUDIT_LOG = _scaffold_os.environ.get(
++    "SCAFFOLD_AUDIT_LOG",
++    _scaffold_os.path.join(
++        _scaffold_os.path.expanduser("~"),
++        ".local/state/flywheel",
++        "flywheel-readme-runs.jsonl",
++    ),
++)
++
++
++def _scaffold_iso_now() -> str:
++    return _scaffold_time.strftime("%Y-%m-%dT%H:%M:%SZ", _scaffold_time.gmtime())
++
++
++def _scaffold_emit_json(obj: dict) -> int:
++    print(_scaffold_json.dumps(obj, sort_keys=True, separators=(",", ":")))
++    return 0
++
++
++def _scaffold_emit_info() -> int:
++    return _scaffold_emit_json({
++        "schema_version": _SCAFFOLD_SCHEMA_VERSION,
++        "command": "info",
++        "name": "flywheel-readme",
++        "kind": "python3",
++        "scaffolder_bead": "flywheel-oozt3",
++        "audit_log": _SCAFFOLD_AUDIT_LOG,
++        "canonical_surfaces": [
++            "doctor", "health", "repair", "validate",
++            "audit", "why", "quickstart", "help", "completion",
++        ],
++    })
++
++
++def _scaffold_emit_schema(surface: str = "default") -> int:
++    schemas = {
++        "doctor": {
++            "required": ["status", "checks"],
++            "status_enum": ["pass", "fail", "warn"],
++        },
++        "health": {
++            "required": ["status", "audit_log"],
++            "status_enum": ["pass", "warn", "fail"],
++        },
++        "repair": {
++            "required": ["status", "mode", "scope"],
++            "mode_enum": ["dry_run", "apply"],
++            "mutation_gates": ["--apply requires --idempotency-key"],
++        },
++        "validate": {
++            "required": ["status", "subject"],
++            "status_enum": ["pass", "fail", "warn", "refused"],
++        },
++        "audit": {
++            "required": ["audit_log", "rows"],
++        },
++        "why": {
++            "required": ["id", "status"],
++            "status_enum": ["found", "not_found", "warn"],
++        },
++        "default": {
++            "surfaces": ["doctor", "health", "repair", "validate", "audit", "why"],
++            "stable_exit_codes": {
++                "0": "success", "1": "general", "2": "warn",
++                "3": "refused (mutation without idempotency-key)", "64": "bad args",
++            },
++        },
++    }
++    body = schemas.get(surface, schemas["default"])
++    return _scaffold_emit_json({
++        "schema_version": _SCAFFOLD_SCHEMA_VERSION,
++        "command": "schema",
++        "surface": surface,
++        **body,
++    })
++
++
++def _scaffold_emit_examples() -> int:
++    return _scaffold_emit_json({
++        "schema_version": _SCAFFOLD_SCHEMA_VERSION,
++        "command": "examples",
++        "examples": [
++            {"name": "info", "invocation": "flywheel-readme --info --json", "purpose": "introspection"},
++            {"name": "schema", "invocation": "flywheel-readme --schema doctor", "purpose": "per-surface schema"},
++            {"name": "doctor", "invocation": "flywheel-readme doctor --json", "purpose": "probe substrate"},
++        ],
++    })
++
++
++def _scaffold_emit_quickstart() -> int:
++    return _scaffold_emit_json({
++        "schema_version": _SCAFFOLD_SCHEMA_VERSION,
++        "command": "quickstart",
++        "steps": [
++            {"step": 1, "action": "probe doctor", "command": "flywheel-readme doctor --json"},
++            {"step": 2, "action": "check health", "command": "flywheel-readme health --json"},
++            {"step": 3, "action": "tail audit", "command": "flywheel-readme audit --json"},
++        ],
++    })
++
++
++def _scaffold_emit_topic_help(topic: str = "") -> int:
++    topics = {
++        "doctor": "topic: doctor — TODO(canonical-cli-scaffold): document doctor checks for this surface.",
++        "health": "topic: health — TODO(canonical-cli-scaffold): document health probes for this surface.",
++        "repair": "topic: repair — TODO(canonical-cli-scaffold): document repair scopes + idempotency contract.",
++        "validate": "topic: validate — TODO(canonical-cli-scaffold): document validation subjects + contracts.",
++        "audit": "topic: audit — TODO(canonical-cli-scaffold): document audit-log tail behavior.",
++        "why": "topic: why — TODO(canonical-cli-scaffold): document provenance lookup semantics.",
++    }
++    if topic and topic in topics:
++        print(topics[topic])
++    else:
++        print("topics: doctor | health | repair | validate | audit | why")
++    return 0
++
++
++# ---------- canonical-cli stubs (TODO markers preserved) ----------
++
++def _scaffold_cmd_doctor() -> int:
++    # TODO(canonical-cli-scaffold): probe substrate this script depends on
++    # (env vars, paths, external tools) and emit per-check status array.
++    return _scaffold_emit_json({
++        "schema_version": _SCAFFOLD_SCHEMA_VERSION,
++        "command": "doctor",
++        "ts": _scaffold_iso_now(),
++        "status": "todo",
++        "checks": [],
++        "note": "TODO(canonical-cli-scaffold): fill in doctor checks",
++    })
++
++
++def _scaffold_cmd_health() -> int:
++    # TODO(canonical-cli-scaffold): summarize last-run state from audit log.
++    return _scaffold_emit_json({
++        "schema_version": _SCAFFOLD_SCHEMA_VERSION,
++        "command": "health",
++        "ts": _scaffold_iso_now(),
++        "status": "todo",
++        "audit_log": _SCAFFOLD_AUDIT_LOG,
++        "note": "TODO(canonical-cli-scaffold): fill in health probe",
++    })
++
++
++def _scaffold_cmd_audit() -> int:
++    # TODO(canonical-cli-scaffold): tail audit log; emit recent rows.
++    rows = []
++    if _scaffold_os.path.isfile(_SCAFFOLD_AUDIT_LOG):
++        try:
++            with open(_SCAFFOLD_AUDIT_LOG, "r", encoding="utf-8") as f:
++                tail = f.readlines()[-10:]
++            for line in tail:
++                line = line.strip()
++                if not line:
++                    continue
++                try:
++                    rows.append(_scaffold_json.loads(line))
++                except _scaffold_json.JSONDecodeError:
++                    continue
++        except OSError:
++            pass
++    return _scaffold_emit_json({
++        "schema_version": _SCAFFOLD_SCHEMA_VERSION,
++        "command": "audit",
++        "audit_log": _SCAFFOLD_AUDIT_LOG,
++        "count": len(rows),
++        "rows": rows,
++        "note": "TODO(canonical-cli-scaffold): refine audit-tail surface",
++    })
++
++
++def _scaffold_cmd_why(args: list) -> int:
++    if not args:
++        print("ERR: why requires <id> argument", file=_scaffold_sys.stderr)
++        return 64
++    id_ = args[0]
++    # TODO(canonical-cli-scaffold): explain why <id> is/isn't in scope.
++    return _scaffold_emit_json({
++        "schema_version": _SCAFFOLD_SCHEMA_VERSION,
++        "command": "why",
++        "id": id_,
++        "status": "todo",
++        "note": "TODO(canonical-cli-scaffold): fill in why-id semantics",
++    })
++
++
++# ---------- early-dispatch intercept ----------
++#
++# Run BEFORE the target's argparse so canonical introspection (--info,
++# --schema, --examples) and per-surface stubs (audit, why) don't have to
++# be re-implemented in the target. Targets that already ship doctor /
++# health / repair (e.g. flywheel-readme) fall through to their own
++# argparse — only canonical surfaces missing from the target are
++# intercepted here.
++_SCAFFOLD_INTROSPECTION_FLAGS = {"--info", "--schema", "--examples", "--scaffold-help"}
++# These canonical subcommands are intercepted ONLY if the target's argparse
++# does not already define them. The shim defers via try/except below — if
++# the target's argparse later raises SystemExit on an unknown subcommand,
++# the shim has already handled the canonical case.
++_SCAFFOLD_CANONICAL_SUBCOMMANDS_FALLBACK = {"audit", "why", "quickstart", "scaffold-help"}
++
++
++def _scaffold_main(argv: list) -> int:
++    if not argv:
++        return 1
++    head = argv[0]
++    if head == "--info":
++        return _scaffold_emit_info()
++    if head == "--schema":
++        surface = argv[1] if len(argv) > 1 else "default"
++        return _scaffold_emit_schema(surface)
++    if head == "--examples":
++        return _scaffold_emit_examples()
++    if head == "--scaffold-help":
++        topic = argv[1] if len(argv) > 1 else ""
++        return _scaffold_emit_topic_help(topic)
++    if head == "audit":
++        return _scaffold_cmd_audit()
++    if head == "why":
++        return _scaffold_cmd_why(argv[1:])
++    if head == "quickstart":
++        return _scaffold_emit_quickstart()
++    return 1
++
++
++if __name__ == "__main__" and len(_scaffold_sys.argv) > 1:
++    _scaffold_head = _scaffold_sys.argv[1]
++    if (
++        _scaffold_head in _SCAFFOLD_INTROSPECTION_FLAGS
++        or _scaffold_head in _SCAFFOLD_CANONICAL_SUBCOMMANDS_FALLBACK
++    ):
++        _scaffold_rc = _scaffold_main(_scaffold_sys.argv[1:])
++        _scaffold_sys.exit(_scaffold_rc)
++# ====== END canonical-cli scaffold ======
++
++
+ import argparse
+ import hashlib
+ import json

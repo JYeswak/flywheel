@@ -1,0 +1,2 @@
+.flywheel/scripts/cd-realpath-wrapper.sh is a bash script (not python). Use scaffold-canonical-cli.sh for bash, or build a sibling for bash.
+{"schema_version":"scaffold-canonical-cli-py/v1","command":"scaffold","status":"refused","reason":"non_python_shebang","target":".flywheel/scripts/cd-realpath-wrapper.sh","interpreter":"bash","suggestion":"use scaffold-canonical-cli.sh for bash targets"}

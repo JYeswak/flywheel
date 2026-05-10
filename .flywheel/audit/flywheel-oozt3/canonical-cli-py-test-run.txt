@@ -1,0 +1,11 @@
+PASS python ast parse (syntax)
+PASS --info emits canonical envelope
+PASS --schema doctor emits canonical envelope
+PASS --schema default emits canonical envelope
+PASS --examples emits canonical envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS quickstart emits canonical envelope
+PASS schema_version matches <surface>/v1 pattern
+PASS target default invocation rc <= 2 (no shim breakage)
+SUMMARY pass=10 fail=0
