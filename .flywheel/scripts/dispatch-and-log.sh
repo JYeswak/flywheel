@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -uo pipefail
+set -euo pipefail
 
 # ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======
 # flywheel-cli-surface: true
@@ -9,7 +9,7 @@ set -uo pipefail
 # This block is APPENDED by scaffold-canonical-cli.sh. The original
 # top-level dispatch is preserved as `cmd_run` (the new main routes
 # default invocation through cmd_run for backward compat). Surface-
-# specific logic stays as TODO markers — see grep '# TODO(canonical-cli-scaffold)'.
+# specific logic was filled in by flywheel-vc3zs (P3 sub-bead from flywheel-wgitr).
 
 _SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
 _SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
@@ -87,20 +87,41 @@ scaffold_emit_quickstart() {
 }
 
 scaffold_emit_schema() {
-  local surface="${1:-default}"
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
-    '{schema_version:$sv,command:"schema",surface:$surface,note:"TODO(canonical-cli-scaffold): per-surface schema fill-in"}'
+  local surface="${1:-dispatch-and-log}"
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" '{
+    schema_version:$sv,
+    command:"schema",
+    surface:$surface,
+    description:"dispatch a task to a worker pane, build canonical packet via build-dispatch-packet.sh, ntm assign+send, append row to dispatch-log.jsonl, update bead status",
+    inputs:{
+      pane:{type:"integer",required:true,description:"target worker pane index"},
+      task_file:{type:"path",required:true,description:"task body file (or generated dispatch packet path)"},
+      task_id:{type:"string",required:true,description:"unique task correlation id"},
+      bead:{type:"string",description:"optional beads-br ID; if present, packet is built + bead status moves to in_progress"},
+      callback_by:{type:"string",description:"+10m duration or absolute ISO8601 deadline"},
+      pipeline:{type:"string",description:"optional pipeline slug"},
+      lane:{type:"string",description:"optional lane slug"},
+      session:{type:"string",default:"flywheel"}
+    },
+    outputs:{
+      dispatch_log_row:{path:"$REPO/.flywheel/dispatch-log.jsonl",fields:["ts","session","task_id","pane","task_file","channel","native_send","canonical_packet","bead","callback_expected_by"]},
+      stdout_envelope:{fields:["ts","task_id","pane","ntm_sent","log_appended","bead_status","packet_path","native_send_success"]}
+    },
+    side_effects:["ntm assign","ntm send (delivers packet to pane)","appends row to dispatch-log.jsonl","br update <bead> --status=in_progress (when --bead given)"]
+  }'
 }
 
 scaffold_emit_topic_help() {
   local topic="${1:-}"
   case "$topic" in
-    run)      printf 'topic: run — default backward-compatible invocation routes to cmd_run.\n' ;;
-    doctor)   printf 'topic: doctor — TODO(canonical-cli-scaffold): document doctor checks specific to this surface.\n' ;;
-    health)   printf 'topic: health — TODO(canonical-cli-scaffold): document health probes specific to this surface.\n' ;;
-    repair)   printf 'topic: repair — TODO(canonical-cli-scaffold): document repair scopes + idempotency contract.\n' ;;
-    validate) printf 'topic: validate — TODO(canonical-cli-scaffold): document validation subjects + contracts.\n' ;;
-    *)        printf 'topics: run | doctor | health | repair | validate\n' ;;
+    run)      printf 'topic: run — dispatch a task to a worker pane. Builds canonical dispatch packet (when --bead given), runs ntm assign + ntm send, appends row to .flywheel/dispatch-log.jsonl, updates bead status to in_progress. Required: --pane=N --task-file=PATH --task-id=ID. Optional: --bead=<id>, --callback-by=<+duration|ISO>, --pipeline=<slug>, --lane=<slug>, --session=<name>.\n' ;;
+    doctor)   printf 'topic: doctor — probes substrate this script depends on: ntm binary executable, build-dispatch-packet.sh executable, dispatch-log.jsonl writable, repo path resolvable, br binary on PATH for bead status updates. Each check returns status pass|fail with reason. Use --json for machine-readable output.\n' ;;
+    health)   printf 'topic: health — summarizes the most recent dispatches from .flywheel/dispatch-log.jsonl: tail count of recent rows, success rate (rows where native_send.success=true), distinct sessions/panes touched, freshness (seconds since last dispatch). Use to detect dispatch-log staleness or send failures.\n' ;;
+    repair)   printf 'topic: repair — repair scopes: dispatch-log (deduplicate by task_id keeping latest), bead-claim (re-attempt br update for a bead). --apply requires --idempotency-key. --dry-run is the default; emits planned actions without mutation.\n' ;;
+    validate) printf 'topic: validate — validate a dispatch row against the canonical schema. Subjects: row (--row-json=JSON to validate one inline row), tail (--tail=N to validate last N rows), task-id (--task-id=ID to validate that ID is present). Reports per-row pass|fail and missing-field list.\n' ;;
+    audit)    printf 'topic: audit — tail recent rows from .flywheel/dispatch-log.jsonl. --tail=N (default 10) limits output. Each row is the canonical dispatch row written at run time.\n' ;;
+    why)      printf 'topic: why <id> — explains why a given task_id IS or ISN'\''T in the dispatch log. Looks up <id> in dispatch-log.jsonl. Returns the row + provenance (session, pane, bead, ts) if found, or status=not_found if absent.\n' ;;
+    *)        printf 'topics: run | doctor | health | repair | validate | audit | why\n' ;;
   esac
 }
 
@@ -123,16 +144,108 @@ scaffold_emit_completion() {
 # ---------- canonical-cli stubs (TODO markers preserved) ----------
 
 scaffold_cmd_doctor() {
-  # TODO(canonical-cli-scaffold): probe substrate this script depends on
-  # (env vars, paths, external tools) and emit per-check status.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"doctor",ts:$ts,status:"todo",checks:[],note:"TODO(canonical-cli-scaffold): fill in doctor checks"}'
+  # Probe substrate this script depends on. Returns per-check status array.
+  local ts script_dir ntm_bin packet_bin log_path repo_root checks=()
+  ts="$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+  ntm_bin="${FLYWHEEL_NTM_BIN:-${NTM:-/Users/josh/.local/bin/ntm}}"
+  packet_bin="${BUILD_DISPATCH_PACKET:-$script_dir/build-dispatch-packet.sh}"
+  log_path="${FLYWHEEL_DISPATCH_LOG:-/Users/josh/Developer/flywheel/.flywheel/dispatch-log.jsonl}"
+  repo_root="${FLYWHEEL_REPO:-$(cd "$script_dir/../.." 2>/dev/null && pwd -P)}"
+
+  local ntm_status="fail" ntm_reason=""
+  if [[ -x "$ntm_bin" ]]; then ntm_status="pass"
+  elif [[ -e "$ntm_bin" ]]; then ntm_reason="exists but not executable: $ntm_bin"
+  else ntm_reason="not found: $ntm_bin"; fi
+
+  local packet_status="fail" packet_reason=""
+  if [[ -x "$packet_bin" ]]; then packet_status="pass"
+  else packet_reason="not found or not executable: $packet_bin"; fi
+
+  local log_status="fail" log_reason=""
+  if [[ -f "$log_path" && -w "$log_path" ]]; then log_status="pass"
+  elif [[ -f "$log_path" ]]; then log_reason="exists but not writable: $log_path"
+  elif [[ -w "$(dirname "$log_path")" ]]; then log_status="pass"; log_reason="path absent but parent writable"
+  else log_reason="not writable: $log_path"; fi
+
+  local repo_status="fail" repo_reason=""
+  if [[ -d "$repo_root/.flywheel" ]]; then repo_status="pass"
+  else repo_reason="$repo_root is not a flywheel repo (no .flywheel/)"; fi
+
+  local br_status="fail" br_reason=""
+  if command -v br >/dev/null 2>&1; then br_status="pass"
+  else br_reason="br not on PATH"; fi
+
+  local overall="pass"
+  for s in "$ntm_status" "$packet_status" "$log_status" "$repo_status" "$br_status"; do
+    [[ "$s" == "fail" ]] && overall="fail"
+  done
+
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg overall "$overall" \
+    --arg ntm_bin "$ntm_bin" --arg ntm_status "$ntm_status" --arg ntm_reason "$ntm_reason" \
+    --arg packet_bin "$packet_bin" --arg packet_status "$packet_status" --arg packet_reason "$packet_reason" \
+    --arg log_path "$log_path" --arg log_status "$log_status" --arg log_reason "$log_reason" \
+    --arg repo_root "$repo_root" --arg repo_status "$repo_status" --arg repo_reason "$repo_reason" \
+    --arg br_status "$br_status" --arg br_reason "$br_reason" \
+    '{schema_version:$sv,command:"doctor",ts:$ts,status:$overall,checks:[
+      {name:"ntm_binary_executable",status:$ntm_status,path:$ntm_bin,reason:$ntm_reason},
+      {name:"build_dispatch_packet_executable",status:$packet_status,path:$packet_bin,reason:$packet_reason},
+      {name:"dispatch_log_writable",status:$log_status,path:$log_path,reason:$log_reason},
+      {name:"flywheel_repo_resolvable",status:$repo_status,path:$repo_root,reason:$repo_reason},
+      {name:"br_on_path",status:$br_status,reason:$br_reason}
+    ]}'
 }
 
 scaffold_cmd_health() {
-  # TODO(canonical-cli-scaffold): summarize last-run state from audit log.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"health",ts:$ts,status:"todo",note:"TODO(canonical-cli-scaffold): fill in health probe from audit log"}'
+  # Summarize last-run state from dispatch-log.jsonl: recent send success rate,
+  # freshness, distinct panes/sessions touched.
+  local ts log_path tail_count=20 tail_lines total sent_ok last_ts age_seconds distinct_sessions distinct_panes
+  ts="$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  log_path="${FLYWHEEL_DISPATCH_LOG:-/Users/josh/Developer/flywheel/.flywheel/dispatch-log.jsonl}"
+
+  if [[ ! -f "$log_path" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$log_path" \
+      '{schema_version:$sv,command:"health",ts:$ts,status:"warn",reason:"dispatch-log absent",log_path:$log,recent_count:0}'
+    return 0
+  fi
+
+  tail_lines="$(tail -n "$tail_count" "$log_path" 2>/dev/null)"
+  total="$(printf '%s\n' "$tail_lines" | grep -c . || echo 0)"
+  sent_ok="$(printf '%s\n' "$tail_lines" | jq -r 'select(.native_send.success == true) | .task_id' 2>/dev/null | wc -l | tr -d ' ')"
+  last_ts="$(printf '%s\n' "$tail_lines" | tail -1 | jq -r '.ts // ""' 2>/dev/null)"
+
+  if [[ -n "$last_ts" ]]; then
+    local now_epoch last_epoch
+    now_epoch="$(date -u +%s)"
+    last_epoch="$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$last_ts" +%s 2>/dev/null || echo "$now_epoch")"
+    age_seconds=$((now_epoch - last_epoch))
+  else
+    age_seconds=null
+  fi
+
+  distinct_sessions="$(printf '%s\n' "$tail_lines" | jq -r '.session // empty' 2>/dev/null | sort -u | tr '\n' ',' | sed 's/,$//')"
+  distinct_panes="$(printf '%s\n' "$tail_lines" | jq -r '.pane // empty' 2>/dev/null | sort -u | tr '\n' ',' | sed 's/,$//')"
+
+  local status="pass" reason=""
+  if [[ "$total" -eq 0 ]]; then
+    status="warn"; reason="empty tail"
+  elif [[ "$sent_ok" -lt "$total" ]]; then
+    local fail=$((total - sent_ok))
+    status="warn"; reason="$fail of $total recent rows have native_send.success != true"
+  fi
+
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg status "$status" --arg reason "$reason" \
+    --arg log "$log_path" \
+    --argjson total "$total" --argjson sent_ok "$sent_ok" \
+    --arg last_ts "$last_ts" \
+    --argjson age "${age_seconds:-null}" \
+    --arg sessions "$distinct_sessions" --arg panes "$distinct_panes" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,reason:(if $reason == "" then null else $reason end),
+      log_path:$log,recent_count:$total,recent_send_success:$sent_ok,
+      last_dispatch_ts:(if $last_ts == "" then null else $last_ts end),
+      last_dispatch_age_seconds:$age,
+      recent_sessions:($sessions | split(",") | map(select(length > 0))),
+      recent_panes:($panes | split(",") | map(select(length > 0)) | map(tonumber? // .))}'
 }
 
 scaffold_cmd_repair() {
@@ -158,21 +271,201 @@ scaffold_cmd_repair() {
       exit 3
     fi
   fi
-  # TODO(canonical-cli-scaffold): per-scope repair actions go here.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
-    '{schema_version:$sv,command:"repair",status:"todo",mode:$mode,scope:$scope,idempotency_key:$idem,note:"TODO(canonical-cli-scaffold): fill in repair scope actions"}'
+  # Per-scope repair actions. Default scopes: dispatch-log (deduplicate
+  # rows by task_id keeping latest), bead-claim (re-attempt br update for
+  # the latest unclaimed bead in the log).
+  local log_path planned actions=()
+  log_path="${FLYWHEEL_DISPATCH_LOG:-/Users/josh/Developer/flywheel/.flywheel/dispatch-log.jsonl}"
+
+  case "$scope" in
+    dispatch-log)
+      # Dedupe rows in-place by task_id, keeping the LAST occurrence.
+      if [[ ! -f "$log_path" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
+          '{schema_version:$sv,command:"repair",status:"warn",mode:"dispatch-log",scope:$scope,reason:"dispatch-log absent — nothing to dedupe"}'
+        return 0
+      fi
+      local before after dups
+      before="$(wc -l <"$log_path" | tr -d ' ')"
+      # Plan via reverse-tail-uniq-by-task_id, then forward-restore order
+      planned="$(tac "$log_path" 2>/dev/null | jq -c 'select(.task_id != null) | {task_id, ts}' | awk '!seen[$0]++' | wc -l | tr -d ' ')"
+      after="$planned"
+      dups=$((before - after))
+      if [[ "$mode" == "apply" ]]; then
+        local tmp
+        tmp="$(mktemp)"
+        # Collect last occurrence per task_id, preserving original order
+        awk 'NR==FNR{
+          if (match($0, /"task_id":"([^"]+)"/, m)) keep[m[1]] = NR
+          next
+        }
+        FNR <= NR {
+          if (match($0, /"task_id":"([^"]+)"/, m)) {
+            if (keep[m[1]] == FNR) print
+          } else {
+            print
+          }
+        }' "$log_path" "$log_path" > "$tmp"
+        mv "$tmp" "$log_path"
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg idem "$idem_key" \
+          --argjson before "$before" --argjson after "$after" --argjson dups "$dups" \
+          '{schema_version:$sv,command:"repair",status:"ok",mode:"apply",scope:$scope,idempotency_key:$idem,
+            before_lines:$before,after_lines:$after,duplicates_removed:$dups,note:"deduplicated dispatch-log by task_id (kept latest)"}'
+      else
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
+          --argjson before "$before" --argjson after "$after" --argjson dups "$dups" \
+          '{schema_version:$sv,command:"repair",status:"plan",mode:"dry_run",scope:$scope,
+            before_lines:$before,after_lines:$after,duplicates_to_remove:$dups,note:"dry-run: pass --apply --idempotency-key KEY to dedupe"}'
+      fi
+      ;;
+    bead-claim)
+      # Re-attempt br update for any in-log bead that's not yet in_progress.
+      # Read-only by default; --apply runs br update.
+      if ! command -v br >/dev/null 2>&1; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
+          '{schema_version:$sv,command:"repair",status:"fail",mode:$mode_,scope:$scope,reason:"br not on PATH"}' \
+          --arg mode_ "$mode"
+        return 0
+      fi
+      local recent_beads
+      recent_beads="$(tail -n 50 "$log_path" 2>/dev/null | jq -r '.bead // empty' | sort -u | grep -v '^$' || true)"
+      if [[ "$mode" == "apply" ]]; then
+        local fixed=0 attempts=0
+        for bid in $recent_beads; do
+          attempts=$((attempts + 1))
+          br update "$bid" --status=in_progress >/dev/null 2>&1 && fixed=$((fixed + 1)) || true
+        done
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg idem "$idem_key" \
+          --argjson attempts "$attempts" --argjson fixed "$fixed" \
+          '{schema_version:$sv,command:"repair",status:"ok",mode:"apply",scope:$scope,idempotency_key:$idem,attempts:$attempts,beads_re_claimed:$fixed}'
+      else
+        local count
+        count="$(echo "$recent_beads" | grep -c . || echo 0)"
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --argjson count "$count" \
+          '{schema_version:$sv,command:"repair",status:"plan",mode:"dry_run",scope:$scope,beads_to_re_claim:$count,note:"dry-run: pass --apply --idempotency-key KEY to re-attempt br update"}'
+      fi
+      ;;
+    ""|none)
+      # Canonical envelope shape: emit even when no scope chosen so callers
+      # exercising the surface get the structured response.
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg mode "$mode" --arg scope "$scope" \
+        '{schema_version:$sv,command:"repair",status:"info",mode:$mode,scope:$scope,reason:"no scope specified",valid_scopes:["dispatch-log","bead-claim"]}'
+      ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg mode "$mode" --arg scope "$scope" \
+        '{schema_version:$sv,command:"repair",status:"refused",mode:$mode,scope:$scope,reason:"unknown scope",valid_scopes:["dispatch-log","bead-claim"]}'
+      return 64
+      ;;
+  esac
 }
 
 scaffold_cmd_validate() {
-  # TODO(canonical-cli-scaffold): document validation subjects + contracts.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
-    '{schema_version:$sv,command:"validate",status:"todo",note:"TODO(canonical-cli-scaffold): fill in per-subject validation"}'
+  # Per-subject validation against the canonical dispatch row schema.
+  # Subjects: row (--row-json=JSON), tail (--tail=N), task-id (--task-id=ID).
+  local subject="" row_json="" tail_n="10" task_id_arg="" log_path
+  log_path="${FLYWHEEL_DISPATCH_LOG:-/Users/josh/Developer/flywheel/.flywheel/dispatch-log.jsonl}"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --row-json=*) row_json="${1#--row-json=}"; subject="row"; shift ;;
+      --tail=*) tail_n="${1#--tail=}"; subject="tail"; shift ;;
+      --task-id=*) task_id_arg="${1#--task-id=}"; subject="task-id"; shift ;;
+      --json) shift ;;
+      -h|--help) scaffold_emit_topic_help validate; return 0 ;;
+      *) printf 'ERR: unknown validate arg: %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+
+  # The canonical required fields a dispatch row MUST carry (per the run path
+  # at the bottom of this script that emits ROW).
+  local required='["ts","session","task_id","pane","task_file","channel","native_send","canonical_packet"]'
+
+  validate_one_row() {
+    local r="$1"
+    local missing
+    missing="$(echo "$r" | jq -c --argjson req "$required" '[$req[] | select(. as $f | ($r | has($f) | not))] // []' --argjson r "$r" 2>/dev/null || echo "[]")"
+    local valid
+    valid="$(echo "$r" | jq -e '. | type == "object"' >/dev/null 2>&1 && echo true || echo false)"
+    jq -nc --argjson valid "$valid" --argjson missing "$missing" --argjson r "$r" \
+      '{valid:($valid and ($missing | length == 0)),missing_fields:$missing,row:$r}'
+  }
+
+  case "$subject" in
+    row)
+      [[ -z "$row_json" ]] && { jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",status:"refused",reason:"--row-json=JSON required for subject=row"}'; return 64; }
+      local result
+      result="$(validate_one_row "$row_json")"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --argjson r "$result" \
+        '{schema_version:$sv,command:"validate",subject:"row",status:(if $r.valid then "pass" else "fail" end),result:$r}'
+      ;;
+    tail)
+      [[ -f "$log_path" ]] || { jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$log_path" '{schema_version:$sv,command:"validate",subject:"tail",status:"warn",reason:"dispatch-log absent",log_path:$log}'; return 0; }
+      local total=0 valid_count=0 results="[]"
+      while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        total=$((total + 1))
+        local result
+        result="$(validate_one_row "$line")"
+        if echo "$result" | jq -e '.valid' >/dev/null 2>&1; then
+          valid_count=$((valid_count + 1))
+        fi
+        results="$(echo "$results" | jq -c --argjson r "$result" '. + [$r]')"
+      done < <(tail -n "$tail_n" "$log_path")
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --argjson tail_n "$tail_n" \
+        --argjson total "$total" --argjson valid "$valid_count" --argjson results "$results" \
+        '{schema_version:$sv,command:"validate",subject:"tail",tail_n:$tail_n,
+          total_rows:$total,valid_rows:$valid,
+          status:(if $total == 0 then "warn" elif $valid == $total then "pass" else "fail" end),
+          per_row:$results}'
+      ;;
+    task-id)
+      [[ -z "$task_id_arg" ]] && { jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",status:"refused",reason:"--task-id=ID required for subject=task-id"}'; return 64; }
+      [[ -f "$log_path" ]] || { jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",subject:"task-id",status:"warn",reason:"dispatch-log absent"}'; return 0; }
+      local row
+      row="$(grep -F "\"task_id\":\"$task_id_arg\"" "$log_path" 2>/dev/null | tail -1 || true)"
+      if [[ -z "$row" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$task_id_arg" \
+          '{schema_version:$sv,command:"validate",subject:"task-id",task_id:$id,status:"fail",reason:"task_id not found in dispatch-log"}'
+      else
+        local result
+        result="$(validate_one_row "$row")"
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$task_id_arg" --argjson r "$result" \
+          '{schema_version:$sv,command:"validate",subject:"task-id",task_id:$id,status:(if $r.valid then "pass" else "fail" end),result:$r}'
+      fi
+      ;;
+    "")
+      # Canonical envelope shape: emit even when no subject chosen so callers
+      # exercising the surface get a structured response.
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"validate",status:"info",reason:"no subject specified",valid_subjects:["row","tail","task-id"]}'
+      ;;
+  esac
 }
 
 scaffold_cmd_audit() {
-  # TODO(canonical-cli-scaffold): tail audit log; emit recent rows.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
-    '{schema_version:$sv,command:"audit",audit_log:$log,status:"todo",note:"TODO(canonical-cli-scaffold): fill in audit tail"}'
+  # Tail dispatch-log.jsonl rows. Default tail=10. --tail=N overrides.
+  local log_path="${FLYWHEEL_DISPATCH_LOG:-/Users/josh/Developer/flywheel/.flywheel/dispatch-log.jsonl}"
+  local tail_n=10
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --tail=*) tail_n="${1#--tail=}"; shift ;;
+      --tail) tail_n="${2:-10}"; shift 2 ;;
+      --json) shift ;;
+      -h|--help) scaffold_emit_topic_help audit; return 0 ;;
+      *) printf 'ERR: unknown audit arg: %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+  if [[ ! -f "$log_path" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$log_path" \
+      '{schema_version:$sv,command:"audit",audit_log:$log,status:"warn",reason:"dispatch-log absent",rows:[]}'
+    return 0
+  fi
+  local rows
+  rows="$(tail -n "$tail_n" "$log_path" | jq -sc '.' 2>/dev/null || echo '[]')"
+  local count
+  count="$(echo "$rows" | jq 'length')"
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$log_path" \
+    --argjson tail_n "$tail_n" --argjson count "$count" --argjson rows "$rows" \
+    '{schema_version:$sv,command:"audit",audit_log:$log,tail_n:$tail_n,count:$count,rows:$rows}'
 }
 
 scaffold_cmd_why() {
@@ -180,9 +473,33 @@ scaffold_cmd_why() {
   if [[ -z "$id" ]]; then
     printf 'ERR: why requires <id> argument\n' >&2; return 64
   fi
-  # TODO(canonical-cli-scaffold): explain why <id> is/isn't in scope.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
-    '{schema_version:$sv,command:"why",id:$id,status:"todo",note:"TODO(canonical-cli-scaffold): fill in why-id semantics"}'
+  # Look up <id> in dispatch-log.jsonl and emit provenance.
+  local log_path="${FLYWHEEL_DISPATCH_LOG:-/Users/josh/Developer/flywheel/.flywheel/dispatch-log.jsonl}"
+  if [[ ! -f "$log_path" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
+      '{schema_version:$sv,command:"why",id:$id,status:"warn",reason:"dispatch-log absent"}'
+    return 0
+  fi
+  local row
+  row="$(grep -F "\"task_id\":\"$id\"" "$log_path" 2>/dev/null | tail -1 || true)"
+  if [[ -z "$row" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
+      '{schema_version:$sv,command:"why",id:$id,status:"not_found",reason:"task_id not in dispatch-log"}'
+    return 0
+  fi
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --argjson row "$row" \
+    '{schema_version:$sv,command:"why",id:$id,status:"found",
+      provenance:{
+        ts:$row.ts,
+        session:$row.session,
+        pane:$row.pane,
+        bead:$row.bead,
+        task_file:$row.task_file,
+        canonical_packet_path:$row.packet_path,
+        ntm_send_success:$row.native_send.success,
+        callback_expected_by:$row.callback_expected_by
+      },
+      row:$row}'
 }
 
 # ---------- scaffolded main dispatcher ----------
