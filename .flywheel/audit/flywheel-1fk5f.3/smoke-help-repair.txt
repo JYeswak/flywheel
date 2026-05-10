@@ -1,0 +1,1 @@
+topic: repair — read-only by default; mutate with --apply --idempotency-key KEY. Scopes: audit-log-rotate (rotate /Users/josh/.local/state/flywheel/dispatch-trigger-gated-precheck-runs.jsonl when >5MB) and audit-log-clear (truncate ledger for testing). Apply without --idempotency-key returns refused (rc 3).

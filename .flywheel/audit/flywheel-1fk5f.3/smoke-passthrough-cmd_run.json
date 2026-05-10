@@ -1,0 +1,1 @@
+{"schema_version":"dispatch-trigger-gated-precheck.v1","status":"not_trigger_gated","trigger_gated":false,"watchtower":"","watchtower_status":null,"reason_code":"no_external_trigger_watchtower_field","warnings":[],"prose_signals":[]}

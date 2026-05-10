@@ -1,0 +1,1 @@
+{"schema_version":"dispatch-trigger-gated-precheck/v1","command":"schema","surface":"audit-row","required":["ts","command","schema_version"],"optional":["bead","watchtower","watchtower_status","reason_code","status","trigger_gated"],"purpose":"row shape written to SCAFFOLD_AUDIT_LOG by cmd_run terminal envelopes"}

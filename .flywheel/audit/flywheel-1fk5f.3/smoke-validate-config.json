@@ -1,0 +1,1 @@
+{"schema_version":"dispatch-trigger-gated-precheck/v1","command":"validate","subject":"config","status":"pass","watchtower_bin":"/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-binary-version-watchtower.sh","br_bin":"br","audit_log":"/Users/josh/.local/state/flywheel/dispatch-trigger-gated-precheck-runs.jsonl","missing":[]}

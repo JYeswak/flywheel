@@ -1,0 +1,1 @@
+topic: validate — per-subject contract checks. Subjects: row (--row-json=JSON validates an audit-log row schema), schema (--surface=NAME re-emits the schema), config (env presence: WATCHTOWER_BIN, BR_BIN, audit-log-writable).

@@ -92,6 +92,38 @@ if "$SCRIPT" --schema 2>/dev/null | jq -e '.schema_version' >/dev/null; then
   pass "--schema envelope is well-formed JSON with schema_version"
 else fail "--schema well-formed"; fi
 
+# ===== fillin-specific assertions (flywheel-1fk5f.3) =====
+
+# Test 16: doctor returns >= 5 named substrate probes (not stub TODO)
+if "$SCRIPT" doctor --json 2>/dev/null \
+  | jq -e '.checks | length >= 5 and (any(.name == "watchtower_binary_executable")) and (any(.name == "br_binary_on_path"))' >/dev/null; then
+  pass "doctor: 5+ named substrate probes incl. watchtower_binary_executable + br_binary_on_path"
+else fail "doctor substrate probes"; fi
+
+# Test 17: repair scope is fillin-specific (audit-log-rotate or audit-log-clear), not 'todo'
+if "$SCRIPT" repair --scope audit-log-rotate --dry-run --json 2>/dev/null \
+  | jq -e '.command == "repair" and .scope == "audit-log-rotate" and (.status != "todo")' >/dev/null; then
+  pass "repair --scope audit-log-rotate emits non-stub envelope"
+else fail "repair scope-specific"; fi
+
+# Test 18: validate enforces row schema (not 'todo')
+if "$SCRIPT" validate --row-json='{"ts":"2026-05-10T00:00:00Z","command":"validate","schema_version":"x/v1"}' 2>/dev/null \
+  | jq -e '.command == "validate" and .subject == "row" and .status == "pass" and (.valid == true)' >/dev/null; then
+  pass "validate --row-json enforces row schema"
+else fail "validate row schema"; fi
+
+# Test 19: why <id> emits found|not_found|unavailable (not 'todo')
+if "$SCRIPT" why missing-test-id 2>/dev/null \
+  | jq -e '.command == "why" and (.status == "found" or .status == "not_found" or .status == "unavailable")' >/dev/null; then
+  pass "why <id> emits found|not_found|unavailable provenance status"
+else fail "why provenance status"; fi
+
+# Test 20: bead-id passthrough — scaffold yields to cmd_run when --bead-body-file present
+PASSTHROUGH_OUT="$("$SCRIPT" validate --bead-body-file /dev/null --json 2>&1 || true)"
+if echo "$PASSTHROUGH_OUT" | grep -qE 'reason_code|trigger_gated|dispatch-trigger-gated-precheck\.v1'; then
+  pass "bead-id passthrough — scaffold defers to cmd_run on --bead-id/--bead-body-file"
+else fail "bead-id passthrough"; fi
+
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2
