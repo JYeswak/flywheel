@@ -1,0 +1,1 @@
+{"schema_version":"fleet-comms-health-probe/v1","command":"validate","subject":"ledger-path","status":"pass","path":"/Users/josh/.local/state/flywheel/fleet-comms-health.jsonl","exists":false}
