@@ -1,0 +1,19 @@
+{
+  "hooks_keys": [
+    "PostToolUse",
+    "PreToolUse",
+    "SessionStart",
+    "Stop"
+  ],
+  "SessionStart": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "$HOME/.claude/skills/.flywheel/hooks/session-start.sh --session=$CLAUDE_SESSION_ID"
+        }
+      ]
+    }
+  ]
+}
