@@ -1,7 +1,7 @@
 {
   "canonical_index": ".flywheel/AGENTS-CANONICAL.md",
   "round_trip_command": "cat .flywheel/rules/L*.md | shasum -a 256",
-  "rule_count": 103,
+  "rule_count": 104,
   "rules": [
     {
       "id": "L48",
@@ -167,7 +167,7 @@
       "id": "L63",
       "order": 17,
       "path": ".flywheel/rules/L017-L63-jeff-intel-network-is-canonical-substrate-dependency.md",
-      "sha256": "c1949a9df8df571c07b1ee0ef6376616635ee436cdb20c74539dc138f97545d0",
+      "sha256": "c18bac43ac6ead44fec6a8f7ff815d884a1dfd417534c2146d25f3fc2884c966",
       "shipped": "2026-05-03",
       "status": "long_term",
       "title": "JEFF-INTEL-NETWORK-IS-CANONICAL-SUBSTRATE-DEPENDENCY",
@@ -607,7 +607,7 @@
       "id": "L107",
       "order": 61,
       "path": ".flywheel/rules/L061-L107-shared-surface-writes-must-reserve-across-panes.md",
-      "sha256": "e9748e97fc1eda9c2f77e6ecde7b68c56a25163746b199d1ad9a8c20fd135d4d",
+      "sha256": "a533d1908a137da8638c679a018ccada57b6e2fee6165d20333756fbb55b159e",
       "shipped": "2026-05-04",
       "status": "long_term",
       "title": "SHARED-SURFACE-WRITES-MUST-RESERVE-ACROSS-PANES",
@@ -1032,9 +1032,19 @@
       "status": "long_term",
       "title": "COORDINATOR-DAEMON-CANONICAL-DISPATCH",
       "trauma_class": "dispatch-substrate-drift"
+    },
+    {
+      "id": "L153",
+      "order": 104,
+      "path": ".flywheel/rules/L104-L153-capture-provenance-canonical.md",
+      "sha256": "819a0c52093fb6c602f64f7bade0dcf89f810b0981d32b64a8348479091c0102",
+      "shipped": "2026-05-10",
+      "status": "long_term",
+      "title": "CAPTURE-PROVENANCE-CANONICAL",
+      "trauma_class": "robot-mode-false-positive-poisoning"
     }
   ],
-  "rules_body_sha256": "892bd0707282b5f1ba2a7b2f246b86c5943d2c64dd2ec85f05e4794ac73a466f",
+  "rules_body_sha256": "11c6068d4000222f01d4f3a1380522d04e82ae177a93ed4a09addbd55a166b87",
   "schema_version": "agents-canonical-shards/v1",
   "source": "AGENTS.md"
 }

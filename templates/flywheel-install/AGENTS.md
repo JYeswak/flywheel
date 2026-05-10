@@ -137,6 +137,9 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 99 | L148 — PUBLIC-READY-DEFAULT | long_term | `.flywheel/rules/L099-L148-public-ready-default.md` |
 | 100 | L149 — PRE-COMMIT-GITLEAKS-MANDATORY | long_term | `.flywheel/rules/L100-L149-pre-commit-gitleaks-mandatory.md` |
 | 101 | L150 — SKILL-NAMING-CONSTRAINT | long_term | `.flywheel/rules/L101-L150-skill-naming-constraint.md` |
+| 102 | L151 — JEFFREY-COMMENT-RESPONSE-SLA | long_term | `.flywheel/rules/L102-L151-jeffrey-comment-response-sla.md` |
+| 103 | L152 — COORDINATOR-DAEMON-CANONICAL-DISPATCH | long_term | `.flywheel/rules/L103-L152-coordinator-daemon-canonical-dispatch.md` |
+| 104 | L153 — CAPTURE-PROVENANCE-CANONICAL | long_term | `.flywheel/rules/L104-L153-capture-provenance-canonical.md` |
 <!-- END-RULES-INDEX -->
 
 <!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->
