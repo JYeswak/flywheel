@@ -5,6 +5,20 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Executive Verdict](#1-executive-verdict)
+- [2. Layer-Leak Resolution Verification](#2-layer-leak-resolution-verification)
+- [3. Contract-Gap Closure Verification](#3-contract-gap-closure-verification)
+- [4. Naming-Collision Resolution](#4-naming-collision-resolution)
+- [5. Stock-Conflict Resolution](#5-stock-conflict-resolution)
+- [6. New Cross-Plan Findings](#6-new-cross-plan-findings)
+- [7. Three-Way Primitive Conflict Check](#7-three-way-primitive-conflict-check)
+- [8. Bead-DAG Cross-Plan-Edge Audit](#8-bead-dag-cross-plan-edge-audit)
+- [9. Mission Coverage `coverage_without_authority` Lens](#9-mission-coverage-coverage-without-authority-lens)
+- [10. Convergence Call Across All Three Plans](#10-convergence-call-across-all-three-plans)
+- [11. Callback Metrics](#11-callback-metrics)
+- [12. Carry-Forward Acceptance Ledger](#12-carry-forward-acceptance-ledger)
 # R2 Cross-Plan Audit - Manager Loop x Fleet Autonomy x Mission Coverage Compiler
 Artifact: `.flywheel/PLANS/02-AUDIT-r2-cross-plan.md`
 Task: `cross-plan-audit-r2-2026-05-05`

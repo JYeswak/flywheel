@@ -1,0 +1,65 @@
+--- /Users/josh/.claude/skills/beads-br/SKILL.md	2026-05-08 15:05:08
++++ /var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/flywheel-g9ews.XXXXXX.TJ7l0Gb3W3/preview/SKILL.md	2026-05-09 10:53:50
+@@ -1,11 +1,9 @@
+ ---
+ name: beads-br
+-description: >-
+-  Beads Rust issue tracker (br). Use when tracking tasks, managing dependencies,
+-  finding ready work, or syncing issues to git via JSONL.
++description: "Beads Rust issue tracker (br) for agent task graphs. Triggers: 'br create', 'br ready', 'br close', 'br update', 'br dep add', 'br dep cycles', 'br sync', 'br doctor', 'br list', 'br show', 'br skills sync-status', 'JSONL issue export', 'beads workflow', 'tracking tasks', 'managing dependencies', 'finding ready work'. NEVER run bare bv (TUI blocks); sync is EXPLICIT via --flush-only or --import-only; git is YOUR responsibility."
+ ---
+ 
+-<!-- TOC: Critical Rules | Quick Workflow | Essential Commands | bv Integration | References -->
++<!-- TOC: Critical Rules | THE EXACT PROMPT | Quick Workflow | Essential Commands | bv Integration | Anti-Patterns | References -->
+ 
+ # beads-br — Beads Rust Issue Tracker
+ 
+@@ -21,6 +19,29 @@
+ | **Git is YOUR job** | br only touches `.beads/` directory |
+ | **No cycles allowed** | `br dep cycles` must return empty |
+ 
++## THE EXACT PROMPT
++
++When starting work on a bead, paste this verbatim into the worker's session prompt to invoke the canonical br lifecycle:
++
++```
++You are working on bead <id>. Your contract:
++
++1. Confirm context: br show <id> --json && br dep tree <id>
++2. Claim: br update <id> --status in_progress
++3. Do the work named in the bead body. Edit only files named in scope.
++4. Validate: run the bead's verification command.
++5. Close BEFORE callback: br close <id> --reason "<one-line summary>"
++6. Sync: br sync --flush-only && git add .beads/ && git commit
++7. Send DONE callback per dispatch contract.
++
++Hard rules:
++- ALWAYS use --json for any br query you parse.
++- NEVER run bare bv — it launches an interactive TUI and blocks.
++- Sync is EXPLICIT — never automatic. Use --flush-only (DB → JSONL) before commit; --import-only (JSONL → DB) after pull.
++- No cycles. After any br dep add, run br dep cycles (must be empty).
++- Git is YOUR responsibility. br only writes .beads/.
++```
++
+ ## Quick Workflow
+ 
+ ```bash
+@@ -125,11 +146,13 @@
+ 
+ ## Anti-Patterns
+ 
+-- Running `br sync` without `--flush-only` or `--import-only`
+-- Forgetting sync before git commit
+-- Creating circular dependencies
+-- Running bare `bv`
+-- Assuming auto-commit behavior
++| Anti-Pattern | Why it fails | Fix |
++|---|---|---|
++| Running `br sync` without `--flush-only` or `--import-only` | Ambiguous direction can corrupt sync state between DB and JSONL | Always specify direction: `--flush-only` (DB → JSONL) or `--import-only` (JSONL → DB) |
++| Forgetting `br sync --flush-only` before `git commit` | DB and JSONL drift; commits show no `.beads/` changes despite real work | Run `br sync --flush-only && git add .beads/` as a unit before every commit |
++| Creating circular dependencies | `br dep cycles` non-empty breaks `br ready`/`br blocked` semantics | Always run `br dep cycles` after `br dep add`; halt and unwind if non-empty |
++| Running bare `bv` | Launches interactive TUI and blocks the session indefinitely | Use `bv --robot-next`, `bv --robot-triage`, `bv --robot-plan`, or `bv --robot-insights` exclusively |
++| Assuming auto-commit behavior | br is non-invasive by design — no git commands run automatically | Manual `git add .beads/ && git commit` after `br sync --flush-only` is YOUR responsibility |
+ 
+ ## Storage
+ 

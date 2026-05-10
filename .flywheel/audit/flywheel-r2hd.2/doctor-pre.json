@@ -1,0 +1,90 @@
+{
+  "schema_version": "publishability-bar/v1",
+  "status": "pass",
+  "success": true,
+  "publishability_bar_score": {
+    "score": 6,
+    "brand_voice_composite": 96,
+    "banned_words_count": 0,
+    "ungrounded_claims_count": 0,
+    "public_repo": false,
+    "proof_level": "scorecard_linked",
+    "scorecard_log": "`.planning/scorecard-log.jsonl`"
+  },
+  "publishability_bar_score_value": 6,
+  "max_score": 7,
+  "audit_path": "/Users/josh/Developer/zeststream-infra/.flywheel/PUBLISHABILITY-AUDIT.md",
+  "doctrine_path": "/Users/josh/Developer/zeststream-infra/.flywheel/PUBLISHABILITY-BAR.md",
+  "prompt_path": "/Users/josh/.claude/skills/.flywheel/prompts/three-judges-rubric.md",
+  "facets": [
+    {
+      "facet_id": "F1",
+      "facet": "README front-door",
+      "verdict": "YES",
+      "passed": true,
+      "evidence": "`README.md` names purpose, quickstart, scripts, docs, requirements, and operational surfaces. Public voice repair remains required."
+    },
+    {
+      "facet_id": "F2",
+      "facet": "Doctrine clarity",
+      "verdict": "YES",
+      "passed": true,
+      "evidence": "`.flywheel/MISSION.md`, `.flywheel/GOAL.md`, `.flywheel/STATE.md`, `PLAN-INFRA-V5.md`, and `PLAN-INFRA-V5.1.md` expose repo lineage, though mission copy is still placeholder."
+    },
+    {
+      "facet_id": "F3",
+      "facet": "Doctor / health / repair triad",
+      "verdict": "YES",
+      "passed": true,
+      "evidence": "`.flywheel/scripts/publishability-bar.sh --doctor --json --repo /Users/josh/Developer/zeststream-infra` emits the publishability doctor signal; lifecycle scripts expose health, audit, and runbook paths."
+    },
+    {
+      "facet_id": "F4",
+      "facet": "Executable tests",
+      "verdict": "YES",
+      "passed": true,
+      "evidence": "`scripts/self-test.sh`, `scripts/phase-gate.sh`, `scripts/lifecycle-audit.sh`, `scripts/lifecycle-audit-json.sh`, and `scripts/brand-audit.sh` provide validation surfaces. Existing self-test failures are tracked as repo health, not this voice audit."
+    },
+    {
+      "facet_id": "F5",
+      "facet": "Idempotent install + uninstall",
+      "verdict": "NO",
+      "passed": false,
+      "evidence": "`scripts/install.sh` exists, but this audit did not find a complete uninstall/reconcile proof for symlinks, registries, and external service state."
+    },
+    {
+      "facet_id": "F6",
+      "facet": "Code aesthetic",
+      "verdict": "YES",
+      "passed": true,
+      "evidence": "Shell and Python surfaces are named by lifecycle responsibility, docs/contracts describe interfaces, and state/templates/registry separation is legible."
+    },
+    {
+      "facet_id": "F7",
+      "facet": "Demo-ability",
+      "verdict": "YES",
+      "passed": true,
+      "evidence": "`scripts/project-inception.sh`, `scripts/self-test.sh`, `scripts/fleet-health-dashboard.sh`, and `docs/runbook.md` give a first-look operator path without oral handoff."
+    }
+  ],
+  "brand_voice": {
+    "public_repo": false,
+    "public_ready_default": true,
+    "exempt": false,
+    "exemption_class": null,
+    "proof_level": "scorecard_linked",
+    "brand_voice_composite": 96,
+    "banned_words_count": 0,
+    "banned_words": [],
+    "ungrounded_claims_count": 0,
+    "scorecard_log": "`.planning/scorecard-log.jsonl`",
+    "errors": [],
+    "warnings": []
+  },
+  "thresholds": {
+    "warn_below": 5,
+    "fail_below": 3
+  },
+  "warnings": [],
+  "errors": []
+}

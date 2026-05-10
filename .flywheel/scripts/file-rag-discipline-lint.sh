@@ -158,16 +158,19 @@ lint_md() {
     fi
   fi
 
-  # F3 — section anchors for long docs
+  # F3 — section anchors for long docs. Per filesystem-as-rag.md Rule 3,
+  # long sections may use either ## H2 headers OR <!-- AGENT-ANCHOR: ... -->
+  # comment markers. Count both toward the spacing requirement.
   if _rule_enabled F3 "$rules"; then
     if [[ "$lc" -gt 200 ]]; then
-      # count ## H2 lines
-      local h2_count
+      local h2_count anchor_count total_anchors
       h2_count=$(grep -c '^## ' "$f" || true)
+      anchor_count=$(grep -c '^<!-- AGENT-ANCHOR:' "$f" || true)
+      total_anchors=$((h2_count + anchor_count))
       local expected_min=$(( lc / 80 ))
       [[ "$expected_min" -lt 1 ]] && expected_min=1
-      if [[ "$h2_count" -lt "$expected_min" ]]; then
-        emit_v "$f" 1 F3 section-anchors-spacing warn "doc has $lc lines but only $h2_count H2 anchors (need ~$expected_min for ~80-line spacing)"
+      if [[ "$total_anchors" -lt "$expected_min" ]]; then
+        emit_v "$f" 1 F3 section-anchors-spacing warn "doc has $lc lines but only $total_anchors anchors (H2=$h2_count + AGENT-ANCHOR=$anchor_count); need ~$expected_min for ~80-line spacing"
       fi
     fi
   fi
@@ -236,10 +239,29 @@ lint_dir() {
     fi
   fi
 
-  # F4 — no committed .bak files
+  # F4 — no COMMITTED .bak files. Filter to git-tracked only so
+  # peer-pane working-tree scratch (e.g., *.bak.scaffold-*) doesn't
+  # surface as violations. Untracked .bak files are filesystem-only
+  # and covered by .gitignore patterns.
   if _rule_enabled F4 "$rules"; then
     while IFS= read -r bakfile; do
       [[ -z "$bakfile" ]] && continue
+      # Filter to git-tracked. If git not available, repo not initialized,
+      # OR FLYWHEEL_F4_NO_GIT_FILTER=1 (test mode), fall back to filesystem
+      # detection (legacy behavior).
+      if [[ "${FLYWHEEL_F4_NO_GIT_FILTER:-0}" != "1" ]] && \
+         command -v git >/dev/null 2>&1 && \
+         git -C "$REPO_ROOT" rev-parse --git-dir >/dev/null 2>&1; then
+        local rel="${bakfile#$REPO_ROOT/}"
+        # If bakfile is outside REPO_ROOT (e.g., test fixture in /tmp),
+        # ${bakfile#$REPO_ROOT/} returns the unchanged path. Detect that
+        # via leading slash and treat as "tracked" semantics for the test.
+        if [[ "$rel" == /* ]]; then
+          :  # outside repo root — flag (test-fixture friendly)
+        elif ! git -C "$REPO_ROOT" ls-files --error-unmatch "$rel" >/dev/null 2>&1; then
+          continue   # untracked inside repo — skip
+        fi
+      fi
       emit_v "$bakfile" 0 F4 no-bak-files error "committed backup file ($bakfile); use git history instead"
     done < <(find "$d" -maxdepth 6 -type f \( -name '*.bak' -o -name '*.bak.*' \) 2>/dev/null)
   fi

@@ -1,0 +1,5 @@
+# Skill-side INCIDENTS.md coverage proof (post-propagation)
+
+## agent-mail-identity-needs-registration
+Class: `agent-mail-identity-needs-registration`
+--promote agent-mail-identity-needs-registration`. The entry gives

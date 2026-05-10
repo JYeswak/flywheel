@@ -5,6 +5,27 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Executive Summary](#executive-summary)
+- [Source Read](#source-read)
+- [Deduplication Model](#deduplication-model)
+- [Unified Wave-0 Work List](#unified-wave-0-work-list)
+  - [Foundation Spine](#foundation-spine)
+  - [Quick-Fix Packages](#quick-fix-packages)
+  - [Close Packages](#close-packages)
+  - [Substrate Hygiene Instance Packages](#substrate-hygiene-instance-packages)
+  - [Doctrine Promotion Packages](#doctrine-promotion-packages)
+- [Sub-Wave Plan](#sub-wave-plan)
+  - [wave-0a Parallelizable Foundation Bead Writes](#wave-0a-parallelizable-foundation-bead-writes)
+  - [wave-0b Sequential Close Ops](#wave-0b-sequential-close-ops)
+  - [wave-0c Substrate Hygiene](#wave-0c-substrate-hygiene)
+  - [wave-0d Doctrine Promotions](#wave-0d-doctrine-promotions)
+- [Dispatch Packet Drafts For Foundation Beads](#dispatch-packet-drafts-for-foundation-beads)
+- [Risk Register](#risk-register)
+- [wave.1.readiness Verdict](#wave-1-readiness-verdict)
+- [Total Estimated Time-To-Wave-1](#total-estimated-time-to-wave-1)
+- [Closeout Metrics](#closeout-metrics)
 # WAVE-0 UNIFIED PLAN 2026-05-05
 
 Mode: plan-space only.
@@ -560,6 +581,7 @@ effort_estimate: 10m.
 blocks-which-wave-1-bead: none hard; protects future dedupe work.
 evidence: `.flywheel/PLANS/INFRA-GAP-SCAN-2026-05-05.md:799-803`.
 
+<!-- AGENT-ANCHOR: section-1 -->
 W0-D12.
 item_id: `W0-D12`.
 source_lane: infra doctrine candidate.

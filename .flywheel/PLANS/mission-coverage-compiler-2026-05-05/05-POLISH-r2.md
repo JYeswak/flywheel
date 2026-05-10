@@ -5,6 +5,31 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [0. Dispatch Receipt](#0-dispatch-receipt)
+- [1. Scoring Dimensions](#1-scoring-dimensions)
+- [2. Per-Bead R2 Scorecard](#2-per-bead-r2-scorecard)
+- [3. Composite Per-Bead R2 Score](#3-composite-per-bead-r2-score)
+- [4. Per-Bead Review Detail: `flywheel-2r7l3`](#4-per-bead-review-detail-flywheel-2r7l3)
+- [5. Per-Bead Review Detail: `flywheel-gwbvf`](#5-per-bead-review-detail-flywheel-gwbvf)
+- [6. Per-Bead Review Detail: `flywheel-4ggh2`](#6-per-bead-review-detail-flywheel-4ggh2)
+- [7. Per-Bead Review Detail: `flywheel-wg2e4`](#7-per-bead-review-detail-flywheel-wg2e4)
+- [8. Per-Bead Review Detail: `flywheel-b1059`](#8-per-bead-review-detail-flywheel-b1059)
+- [9. Per-Bead Review Detail: `flywheel-2c0pq`](#9-per-bead-review-detail-flywheel-2c0pq)
+- [10. Per-Bead Review Detail: `flywheel-29329`](#10-per-bead-review-detail-flywheel-29329)
+- [11. Per-Bead Review Detail: `flywheel-1c3ha`](#11-per-bead-review-detail-flywheel-1c3ha)
+- [12. Per-Bead Review Detail: `flywheel-2j6ot`](#12-per-bead-review-detail-flywheel-2j6ot)
+- [13. Per-Bead Review Detail: `flywheel-2nx01`](#13-per-bead-review-detail-flywheel-2nx01)
+- [14. R0-to-R1-to-R2 Delta Table](#14-r0-to-r1-to-r2-delta-table)
+- [15. R1 Edit Verification](#15-r1-edit-verification)
+- [16. R1 Systemic Fix Verification](#16-r1-systemic-fix-verification)
+- [17. `flywheel-2j6ot` Deep-Revise Verification](#17-flywheel-2j6ot-deep-revise-verification)
+- [18. Cross-Plan Edge Re-Check](#18-cross-plan-edge-re-check)
+- [19. New Edits Identified In R2](#19-new-edits-identified-in-r2)
+- [20. Convergence Assessment](#20-convergence-assessment)
+- [21. Read-Only Verification Ledger](#21-read-only-verification-ledger)
+- [22. Final R2 Receipt](#22-final-r2-receipt)
 # 05-POLISH-r2: mission coverage compiler review
 
 ## 0. Dispatch Receipt

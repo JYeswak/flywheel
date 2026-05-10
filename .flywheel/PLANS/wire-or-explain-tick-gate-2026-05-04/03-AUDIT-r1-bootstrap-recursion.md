@@ -5,6 +5,30 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Scope](#scope)
+- [Findings Table](#findings-table)
+- [Finding BR-F1 — Missing First Bootstrap Authority](#finding-br-f1-missing-first-bootstrap-authority)
+- [Finding BR-F2 — First Wired-Detector Proof Can Still Be Circular](#finding-br-f2-first-wired-detector-proof-can-still-be-circular)
+- [Finding BR-F3 — Bootstrap Override and General Bypass Must Be Different States](#finding-br-f3-bootstrap-override-and-general-bypass-must-be-different-states)
+- [Finding BR-F4 — L109 First Deployment Needs Existing Sync Proof](#finding-br-f4-l109-first-deployment-needs-existing-sync-proof)
+- [Finding BR-F5 — First Side-Branch Dispatch Needs a Legacy Bootstrap Path](#finding-br-f5-first-side-branch-dispatch-needs-a-legacy-bootstrap-path)
+- [Finding BR-F6 — Cross-Orch First Rollout Needs Leader/Follower Phases](#finding-br-f6-cross-orch-first-rollout-needs-leader-follower-phases)
+- [Bootstrap Order Map](#bootstrap-order-map)
+- [First-Event Scenarios](#first-event-scenarios)
+  - [1. B3 Wired Detector](#1-b3-wired-detector)
+  - [2. FM5 Bootstrap State](#2-fm5-bootstrap-state)
+  - [3. B7 Override Mechanism](#3-b7-override-mechanism)
+  - [4. B6 Tick-Close Gate Self-Evaluation](#4-b6-tick-close-gate-self-evaluation)
+  - [5. B14 DCG Core.git Rule](#5-b14-dcg-core-git-rule)
+  - [6. B13 Worker Side-Branch Contract](#6-b13-worker-side-branch-contract)
+  - [7. B15 Memory Promotion](#7-b15-memory-promotion)
+  - [8. B12 Cross-Orch Fleet Rollout](#8-b12-cross-orch-fleet-rollout)
+  - [9. B10 L109 Doctrine Deployment](#9-b10-l109-doctrine-deployment)
+- [TRUE Blocker Class Evaluation](#true-blocker-class-evaluation)
+- [Composite Score](#composite-score)
+- [Audit Ledger](#audit-ledger)
 # Phase 3 AUDIT r1 — Bootstrap Recursion
 
 Plan: `wire-or-explain-tick-gate-2026-05-04`

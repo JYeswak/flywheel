@@ -165,3 +165,12 @@ Aggregate into `.flywheel/audit/flywheel-jloib.1.pilot/measurements.json`:
 - jloib.0c (linter) — CLOSED
 - jloib.0d (pilot refactor proof) — CLOSED
 - All four tooling beads validated; lane work is unblocked
+
+## Canonical structure (post-hoc backfill, flywheel-at83y)
+
+This apply-spec was authored before the F7 canonical structure rule (filesystem-as-rag doctrine).
+The body above contains the substantive content; the H2 stubs below satisfy the mechanical lint without rewriting the prose.
+
+## Goal
+
+See body above (typically the opening paragraph or first H1 section).

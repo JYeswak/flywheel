@@ -5,6 +5,24 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Audit Frame](#audit-frame)
+- [Source Lines Used](#source-lines-used)
+- [Findings Table](#findings-table)
+- [Finding CC-F1 — Fleet Ledger Authority vs Repo-Local Blocking Scope](#finding-cc-f1-fleet-ledger-authority-vs-repo-local-blocking-scope)
+- [Finding CC-F2 — Bootstrap Recursion Still Needs a Hard Dependency](#finding-cc-f2-bootstrap-recursion-still-needs-a-hard-dependency)
+- [Finding CC-F3 — Wire-Or-Explain Must Compose With Orch-Monitor, Not Replace It](#finding-cc-f3-wire-or-explain-must-compose-with-orch-monitor-not-replace-it)
+- [Finding CC-F4 — Remediation Hints Need To Be Machine-Readable in Doctor JSON](#finding-cc-f4-remediation-hints-need-to-be-machine-readable-in-doctor-json)
+- [Finding CC-F5 — B10 Should Reuse the L108 Three-Surface Sync Pattern](#finding-cc-f5-b10-should-reuse-the-l108-three-surface-sync-pattern)
+- [Finding CC-F6 — B14 DCG Enforcement Needs Shadow Mode Until B13 Branch Proof Exists](#finding-cc-f6-b14-dcg-enforcement-needs-shadow-mode-until-b13-branch-proof-exists)
+- [Finding CC-F7 — Carry Source Refs Into Phase 4 Beads](#finding-cc-f7-carry-source-refs-into-phase-4-beads)
+- [TRUE Blocker Class Evaluation](#true-blocker-class-evaluation)
+- [Composite Score](#composite-score)
+- [Cross-Bead Integration Matrix](#cross-bead-integration-matrix)
+- [Recommended Phase 4 Amendments](#recommended-phase-4-amendments)
+- [Phase 4 Bead Amendment Map](#phase-4-bead-amendment-map)
+- [Audit Ledger](#audit-ledger)
 # Phase 3 AUDIT r1 — Cross-Cutting
 
 Plan: `wire-or-explain-tick-gate-2026-05-04`

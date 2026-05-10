@@ -6,5 +6,5 @@ flywheel        f2e7ac0dabb300204d67e9c6e99163bf15f67350
 ~/.claude       98238858ea3f01371afa13f415544290986467c4
 
 # Post-commit SHAs:
-# flywheel       <fill after `git commit`>
+flywheel        c266e39
 ~/.claude       f105825fdeb9c486185bf2be0c79598f81168df7

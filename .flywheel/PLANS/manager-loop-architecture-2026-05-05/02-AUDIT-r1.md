@@ -5,6 +5,26 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Executive Verdict](#1-executive-verdict)
+- [2. Critical Findings](#2-critical-findings)
+- [3. High Findings](#3-high-findings)
+- [4. Medium Findings](#4-medium-findings)
+- [5. Low Findings](#5-low-findings)
+- [6. Blunder-Hunt - Categorical Errors](#6-blunder-hunt-categorical-errors)
+- [7. Convergence Call](#7-convergence-call)
+- [8. Open Questions Promoted From Integrate-Revisions](#8-open-questions-promoted-from-integrate-revisions)
+- [9. R2 Checklist](#9-r2-checklist)
+- [10. Summary](#10-summary)
+- [11. R2 Evidence Ledger](#11-r2-evidence-ledger)
+  - [11.1 High-Finding Close Criteria](#11-1-high-finding-close-criteria)
+  - [11.2 Medium-Finding Close Criteria](#11-2-medium-finding-close-criteria)
+  - [11.3 Low-Finding Close Criteria](#11-3-low-finding-close-criteria)
+  - [11.4 Blunder-Hunt Recheck](#11-4-blunder-hunt-recheck)
+  - [11.5 Open-Question Resolution Receipts](#11-5-open-question-resolution-receipts)
+  - [11.6 R2 Verdict Formula](#11-6-r2-verdict-formula)
+- [12. Audit Closeout](#12-audit-closeout)
 # 02-AUDIT-r1 - Manager Loop Architecture
 
 ## 1. Executive Verdict

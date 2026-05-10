@@ -1,0 +1,10 @@
+PASS T1 --help exits 0
+PASS T2 --info emits JSON with schema_version
+PASS T3a --schema flag exits 0 (was failing pre-fix)
+PASS T3b --schema emits canonical schema_version
+PASS T4 --schema flag and schema subcommand parity (both emit frozen-pane-detector-fleet.v1)
+PASS T5 --examples still exits 0 (no regression)
+PASS T6 --doctor --json still exits 0 (no regression)
+
+=== test-frozen-pane-detector-fleet-introspection.sh ===
+pass=7 fail=0

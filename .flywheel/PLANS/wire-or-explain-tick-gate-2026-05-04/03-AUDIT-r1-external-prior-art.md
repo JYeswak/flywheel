@@ -5,6 +5,25 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [0. Executive Verdict](#0-executive-verdict)
+- [1. Inputs Read](#1-inputs-read)
+- [2. Research Procedure](#2-research-procedure)
+- [3. Sources Cited](#3-sources-cited)
+- [4. Query Bundle 1: Artifact Lifecycle Gates](#4-query-bundle-1-artifact-lifecycle-gates)
+- [5. Query Bundle 2: Agentic Observability Prior Art](#5-query-bundle-2-agentic-observability-prior-art)
+- [6. Query Bundle 3: Industry Standards To Compose With](#6-query-bundle-3-industry-standards-to-compose-with)
+- [7. Query Bundle 4: Failure Mode Prior Art](#7-query-bundle-4-failure-mode-prior-art)
+- [8. Convergence](#8-convergence)
+- [9. Divergence](#9-divergence)
+- [10. Vocabulary Recommendations](#10-vocabulary-recommendations)
+- [11. Risk Map](#11-risk-map)
+- [12. Greenfield Confirmation](#12-greenfield-confirmation)
+- [13. Phase 4 B1-B15 Modifications](#13-phase-4-b1-b15-modifications)
+- [14. Acceptance-Gate Cross-References](#14-acceptance-gate-cross-references)
+- [15. Composite Score](#15-composite-score)
+- [16. Final Recommendation](#16-final-recommendation)
 # External Prior-Art Audit: Wire-Or-Explain Tick Gate
 plan: wire-or-explain-tick-gate-2026-05-04
 task_id: woe-research-triad-external-05dd33

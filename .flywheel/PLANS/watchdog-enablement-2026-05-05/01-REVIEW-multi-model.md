@@ -5,6 +5,37 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Executive Finding](#1-executive-finding)
+- [2. Required Prompt Applied](#2-required-prompt-applied)
+- [3. Scorecard](#3-scorecard)
+- [4. Evidence Ledger From Plan](#4-evidence-ledger-from-plan)
+- [5. Evidence Ledger From Code And Socraticode](#5-evidence-ledger-from-code-and-socraticode)
+- [6. Consensus Triangulation](#6-consensus-triangulation)
+- [7. Divergence Triangulation](#7-divergence-triangulation)
+- [8. Proposed Change R01 - Add A W0 Eligibility Preflight](#8-proposed-change-r01-add-a-w0-eligibility-preflight)
+- [9. Proposed Change R02 - Split Detect Threshold And Action Threshold](#9-proposed-change-r02-split-detect-threshold-and-action-threshold)
+- [10. Proposed Change R03 - Name The Fleet Apply Handoff](#10-proposed-change-r03-name-the-fleet-apply-handoff)
+- [11. Proposed Change R04 - Promote Watchdog Self-Health To Required State](#11-proposed-change-r04-promote-watchdog-self-health-to-required-state)
+- [12. Proposed Change R05 - Add A Recovery State Machine](#12-proposed-change-r05-add-a-recovery-state-machine)
+- [13. Proposed Change R06 - Add A Notify-Fast Non-Mutation Branch](#13-proposed-change-r06-add-a-notify-fast-non-mutation-branch)
+- [14. Proposed Change R07 - Define Resume Prompt Source](#14-proposed-change-r07-define-resume-prompt-source)
+- [15. Proposed Change R08 - Require Canary Evidence Before Threshold Tightening](#15-proposed-change-r08-require-canary-evidence-before-threshold-tightening)
+- [16. Proposed Change R09 - Add Explicit Rollback Test](#16-proposed-change-r09-add-explicit-rollback-test)
+- [17. Proposed Change R10 - Route Rate Limits To Wait, Not Recovery](#17-proposed-change-r10-route-rate-limits-to-wait-not-recovery)
+- [18. Proposed Change R11 - Add L60 Preflight To In-Scope List](#18-proposed-change-r11-add-l60-preflight-to-in-scope-list)
+- [19. Proposed Change R12 - Add Manager-Loop Consumer Contract](#19-proposed-change-r12-add-manager-loop-consumer-contract)
+- [20. Proposed Change R13 - Separate Worker And Peer-Orch Lanes In Rollout](#20-proposed-change-r13-separate-worker-and-peer-orch-lanes-in-rollout)
+- [21. Proposed Change R14 - Add Fixture-Based Acceptance Before Live Apply](#21-proposed-change-r14-add-fixture-based-acceptance-before-live-apply)
+- [22. Proposed Change R15 - Add A Positive No-Action Receipt Requirement](#22-proposed-change-r15-add-a-positive-no-action-receipt-requirement)
+- [23. Proposed Change R16 - Add Apply Identity And Version Fields](#23-proposed-change-r16-add-apply-identity-and-version-fields)
+- [24. Proposed Change R17 - Add Degraded Truth Stop Condition To Green/Yellow/Red](#24-proposed-change-r17-add-degraded-truth-stop-condition-to-green-yellow-red)
+- [25. Proposed Change R18 - Add A Seven-Day Before/After Chart Definition](#25-proposed-change-r18-add-a-seven-day-before-after-chart-definition)
+- [26. Risk Register](#26-risk-register)
+- [27. Acceptance Checklist](#27-acceptance-checklist)
+- [28. Recommended Revised Ship Order](#28-recommended-revised-ship-order)
+- [29. Final Multi-Model Verdict](#29-final-multi-model-verdict)
 # 01-REVIEW-multi-model - Watchdog Enablement
 
 Date: 2026-05-05

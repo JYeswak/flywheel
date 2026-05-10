@@ -1,0 +1,4 @@
+total_jsm_managed: 111
+has_scripts/: 41 (missing: 70)
+has_scripts/validate.sh: 3 (missing: 108)
+has_scripts/audit.sh: 0 (missing: 111)

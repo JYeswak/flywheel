@@ -5,6 +5,45 @@ created: 2026-05-04
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Executive Summary](#executive-summary)
+- [Evidence Index](#evidence-index)
+- [1. Inventory - Jeff Session Durability Surface](#1-inventory-jeff-session-durability-surface)
+  - [1.1 NTM](#1-1-ntm)
+  - [1.2 Cross-Agent Session Resumer (CASR)](#1-2-cross-agent-session-resumer-casr)
+  - [1.3 MCP Agent Mail](#1-3-mcp-agent-mail)
+  - [1.4 beads_rust / br](#1-4-beads-rust-br)
+  - [1.5 FrankenSQLite](#1-5-frankensqlite)
+  - [1.6 Asupersync](#1-6-asupersync)
+  - [1.7 Agentic Coding Flywheel Setup (ACFS)](#1-7-agentic-coding-flywheel-setup-acfs)
+  - [1.8 DCG](#1-8-dcg)
+  - [1.9 vibe_cockpit as Observability Reference](#1-9-vibe-cockpit-as-observability-reference)
+- [2. Cross-Pattern Synthesis](#2-cross-pattern-synthesis)
+- [3. Convergence Audit Findings](#3-convergence-audit-findings)
+  - [Lens 01 - Security](#lens-01-security)
+  - [Lens 02 - Idempotency](#lens-02-idempotency)
+  - [Lens 03 - Race Conditions](#lens-03-race-conditions)
+  - [Lens 04 - Error Handling](#lens-04-error-handling)
+  - [Lens 05 - Observability](#lens-05-observability)
+  - [Lens 06 - Performance](#lens-06-performance)
+  - [Lens 07 - Compliance / Data Exposure](#lens-07-compliance-data-exposure)
+  - [Lens 08 - Cross-Platform](#lens-08-cross-platform)
+  - [Lens 09 - Versioning](#lens-09-versioning)
+  - [Lens 10 - Retention](#lens-10-retention)
+  - [Lens 11 - Dry-Run Discipline](#lens-11-dry-run-discipline)
+  - [Lens 12 - Audit Log](#lens-12-audit-log)
+  - [Lens 13 - Rollback](#lens-13-rollback)
+  - [Lens 14 - Naming Collisions](#lens-14-naming-collisions)
+  - [Lens 15 - Disk Pressure](#lens-15-disk-pressure)
+  - [Lens 16 - Jeff Alignment](#lens-16-jeff-alignment)
+- [4. Gap Analysis - State Layers Jeff Does Not Solve](#4-gap-analysis-state-layers-jeff-does-not-solve)
+- [5. Adoption Recommendations](#5-adoption-recommendations)
+- [6. Open Upstream Issues Check](#6-open-upstream-issues-check)
+- [7. Proposed Flywheel Recovery Shape](#7-proposed-flywheel-recovery-shape)
+- [8. Conflicts to Flag Explicitly](#8-conflicts-to-flag-explicitly)
+- [9. Validation Ladder](#9-validation-ladder)
+- [10. Bottom-Line Recommendation](#10-bottom-line-recommendation)
 # /flywheel:recovery Lane B - Jeff Recovery Pattern Audit
 
 task_id: recovery_lane_b_jeff_patterns
@@ -484,6 +523,7 @@ Adoption posture:
 
 Audited paths:
 
+<!-- AGENT-ANCHOR: section-1 -->
 1. `/Users/josh/Developer/destructive_command_guard/README.md`
 2. `/Users/josh/.claude/skills/dcg/SKILL.md`
 3. `/Users/josh/Developer/destructive_command_guard` git HEAD `b6aaa23 2026-02-01`
@@ -809,6 +849,7 @@ Mitigation: move recovery-critical logs to `~/.local/state/flywheel/recovery/`.
 F16 MED: Full scrollback snapshots across 8 sessions can be large.
 Mitigation: cap scrollback lines per pane and store full capture only on explicit deep checkpoint.
 
+<!-- AGENT-ANCHOR: section-2 -->
 F17 MED: `ntm checkpoint list --json` can emit huge payloads.
 Mitigation: use per-session list for doctor, not global full dump.
 

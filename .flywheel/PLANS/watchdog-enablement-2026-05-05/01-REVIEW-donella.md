@@ -5,6 +5,29 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Systems Verdict](#1-systems-verdict)
+- [2. Highest Leverage Diagnosis](#2-highest-leverage-diagnosis)
+- [3. Primary Stocks](#3-primary-stocks)
+- [4. Flow Audit For W1 - Detector / Classifier](#4-flow-audit-for-w1-detector-classifier)
+- [5. Flow Audit For W2 - Permit Gate](#5-flow-audit-for-w2-permit-gate)
+- [6. Flow Audit For W3 - Threshold / Debounce](#6-flow-audit-for-w3-threshold-debounce)
+- [7. Flow Audit For W4 - Execution And Prompt Re-Injection](#7-flow-audit-for-w4-execution-and-prompt-re-injection)
+- [8. Flow Audit For W5 - Receipt / Learning Loop](#8-flow-audit-for-w5-receipt-learning-loop)
+- [9. Flow Audit For W6 - Backoff / Storm Control](#9-flow-audit-for-w6-backoff-storm-control)
+- [10. Flow Audit For W7 - Escalation And Watcher Self-Health](#10-flow-audit-for-w7-escalation-and-watcher-self-health)
+- [11. Feedback Loop Topology](#11-feedback-loop-topology)
+- [12. Invisible Structure The Plan Misses](#12-invisible-structure-the-plan-misses)
+- [13. Watcher-Governance Stock And Flow Model](#13-watcher-governance-stock-and-flow-model)
+- [14. Leverage Point Mapping Per Primitive](#14-leverage-point-mapping-per-primitive)
+- [15. Anti-Patterns Avoided](#15-anti-patterns-avoided)
+- [16. Anti-Patterns Still At Risk](#16-anti-patterns-still-at-risk)
+- [17. Recommended Plan Revisions](#17-recommended-plan-revisions)
+- [18. Diff-Style Inserts](#18-diff-style-inserts)
+- [19. Measurement Loop Requirements](#19-measurement-loop-requirements)
+- [20. Revised Verdict Thresholds](#20-revised-verdict-thresholds)
+- [21. Donella Close](#21-donella-close)
 # 01-REVIEW-donella - Watchdog Enablement
 
 Date: 2026-05-05

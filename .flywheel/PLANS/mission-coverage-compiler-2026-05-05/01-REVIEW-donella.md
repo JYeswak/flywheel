@@ -5,6 +5,40 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [0. Source Grounding](#0-source-grounding)
+- [1. Verdict In One Sentence](#1-verdict-in-one-sentence)
+- [2. System Boundary](#2-system-boundary)
+- [3. Stock And Flow Audit - Whole Plan](#3-stock-and-flow-audit-whole-plan)
+- [4. Primitive C0 - Freeze And Repo Reality Snapshot](#4-primitive-c0-freeze-and-repo-reality-snapshot)
+- [5. Primitive C1 - Mission Coverage Matrix Compiler](#5-primitive-c1-mission-coverage-matrix-compiler)
+- [6. Primitive C2 - Closed-Bead Claim Auditor](#6-primitive-c2-closed-bead-claim-auditor)
+- [7. Primitive C3 - Failure Ledger Miner](#7-primitive-c3-failure-ledger-miner)
+- [8. Primitive C4 - Planning And Bead Regeneration Input](#8-primitive-c4-planning-and-bead-regeneration-input)
+- [9. Primitive C5 - Dispatch Contract And Loop Reenable Gate](#9-primitive-c5-dispatch-contract-and-loop-reenable-gate)
+- [10. Loop Topology](#10-loop-topology)
+- [11. Leverage Hierarchy Applied](#11-leverage-hierarchy-applied)
+- [12. The Invisible Structure This Plan Misses](#12-the-invisible-structure-this-plan-misses)
+- [13. Anti-Pattern Audit](#13-anti-pattern-audit)
+- [14. Open Questions - My Answers](#14-open-questions-my-answers)
+- [15. Specific Revisions Required](#15-specific-revisions-required)
+- [16. Proposed Donella Diff](#16-proposed-donella-diff)
+- [17. Measurement Loop Requirements](#17-measurement-loop-requirements)
+- [18. Relationship To Manager-Loop](#18-relationship-to-manager-loop)
+- [19. Relationship To Fleet-Autonomy](#19-relationship-to-fleet-autonomy)
+- [20. Relationship To Closed-Bead Audit](#20-relationship-to-closed-bead-audit)
+- [21. Relationship To Docs](#21-relationship-to-docs)
+- [22. Relationship To Beads](#22-relationship-to-beads)
+- [23. Success Criteria Revision](#23-success-criteria-revision)
+- [24. Revised Verdict Thresholds](#24-revised-verdict-thresholds)
+- [25. What I Would Keep](#25-what-i-would-keep)
+- [26. What I Would Change](#26-what-i-would-change)
+- [27. What I Would Not Build](#27-what-i-would-not-build)
+- [28. Final Donella Score](#28-final-donella-score)
+- [29. Review-Lane Callback Values](#29-review-lane-callback-values)
+- [30. Appendix - Line Citations For Contested Changes](#30-appendix-line-citations-for-contested-changes)
+- [31. Closing](#31-closing)
 # 01-REVIEW-donella - Mission Coverage Compiler
 
 ## 0. Source Grounding

@@ -5,6 +5,28 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Method](#1-method)
+- [2. Per-Bead Scorecard](#2-per-bead-scorecard)
+- [3. Bead Review Details](#3-bead-review-details)
+  - [`flywheel-njf5c` - P01 canonical CLI namespace matrix](#flywheel-njf5c-p01-canonical-cli-namespace-matrix)
+  - [`flywheel-2dywy` - P02 replay fixture golden outputs](#flywheel-2dywy-p02-replay-fixture-golden-outputs)
+  - [`flywheel-3g75v` - P03 freeze bv robot command contract](#flywheel-3g75v-p03-freeze-bv-robot-command-contract)
+  - [`flywheel-2s5pv` - A0 manager state read model](#flywheel-2s5pv-a0-manager-state-read-model)
+  - [`flywheel-3t1e7` - A2 scoring governor top-N queue](#flywheel-3t1e7-a2-scoring-governor-top-n-queue)
+  - [`flywheel-27vu5` - A4 shared surface renderer](#flywheel-27vu5-a4-shared-surface-renderer)
+  - [`flywheel-maosi` - A1 ops-log compatibility mirror](#flywheel-maosi-a1-ops-log-compatibility-mirror)
+  - [`flywheel-gvs12` - A5 migration callback cutover governor](#flywheel-gvs12-a5-migration-callback-cutover-governor)
+  - [`flywheel-2i4j9` - A3 manager tick driver](#flywheel-2i4j9-a3-manager-tick-driver)
+- [4. Cross-Bead Patterns](#4-cross-bead-patterns)
+- [5. Top 5 High-Impact Recommendations](#5-top-5-high-impact-recommendations)
+- [6. Edits-As-Patch Table](#6-edits-as-patch-table)
+- [7. Dependency Wiring Assessment](#7-dependency-wiring-assessment)
+- [8. Convergence Assessment](#8-convergence-assessment)
+- [9. Read-Only Receipt](#9-read-only-receipt)
+- [10. Callback Values](#10-callback-values)
+- [11. r1 Measurement Plan](#11-r1-measurement-plan)
 # Manager Loop Phase 5 Polish Review - r0
 Artifact: `.flywheel/PLANS/manager-loop-architecture-2026-05-05/05-POLISH-r0.md`
 Task: `polish-review-manager-loop-2026-05-05`

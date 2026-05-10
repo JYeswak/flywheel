@@ -20,6 +20,25 @@ primitives_deprecated: 2
 plan_space_only: true
 ---
 
+## Contents
+
+- [1. Why This Plan Exists](#1-why-this-plan-exists)
+- [2. Final Primitives](#2-final-primitives)
+  - [P1 - RETAINED: `bv` Selector Contract](#p1-retained-bv-selector-contract)
+  - [P2 - RETAINED: Retry-After-State-Change Suppression](#p2-retained-retry-after-state-change-suppression)
+  - [P3 - DEPRECATED AS INDEPENDENT CONTROLLER](#p3-deprecated-as-independent-controller)
+  - [M - DEPRECATED AS PRIMARY MEASUREMENT](#m-deprecated-as-primary-measurement)
+  - [P4 - RETAINED AS MEASURED FOLLOW-UP: Reservation Lease Enforcement](#p4-retained-as-measured-follow-up-reservation-lease-enforcement)
+  - [P5 - RETAINED AS MEASURED FOLLOW-UP: Pane Freeze Recovery](#p5-retained-as-measured-follow-up-pane-freeze-recovery)
+  - [P6 - RETAINED AS MEASURED FOLLOW-UP: Repair-Bead Aging](#p6-retained-as-measured-follow-up-repair-bead-aging)
+- [3. Cross-Orch Evidence Integration](#3-cross-orch-evidence-integration)
+- [4. Ship Order](#4-ship-order)
+- [5. Changes Integrated](#5-changes-integrated)
+  - [Wholeheartedly Agree](#wholeheartedly-agree)
+  - [Somewhat Agree](#somewhat-agree)
+  - [Disagree](#disagree)
+- [6. Open Questions Punted To Convergence Audit](#6-open-questions-punted-to-convergence-audit)
+- [7. Verdict Thresholds And Measurement Loops](#7-verdict-thresholds-and-measurement-loops)
 # Fleet Autonomy v1 - Integrated Plan
 
 001. This is the converged plan after integrating the multi-model, Donella, Jeff, skillos, mobile-eats, and manager-loop review inputs.
@@ -396,6 +415,7 @@ plan_space_only: true
 348. Deferral rule: P5 cannot ship before P1/P2 and manager-loop state reduce ambiguity between bad dispatch, missing callback, and actual freeze.
 349. P5 final verdict: somewhat agree; retain measured recovery class, route through ntm.
 
+<!-- AGENT-ANCHOR: section-1 -->
 ### P6 - RETAINED AS MEASURED FOLLOW-UP: Repair-Bead Aging
 
 350. Status: RETAINED, DEFERRED from MVP mutation.
@@ -631,6 +651,7 @@ plan_space_only: true
 568. Leverage point: #5 rules.
 569. Stock: safe control-plane migration.
 
+<!-- AGENT-ANCHOR: section-2 -->
 ### Somewhat Agree
 
 570. Somewhat 1: Full P3 status remains valuable.

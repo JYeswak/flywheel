@@ -5,6 +5,27 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Jeff Read](#1-jeff-read)
+- [2. Counter-Thesis](#2-counter-thesis)
+- [3. Per-Agent CLI Counter-Thesis](#3-per-agent-cli-counter-thesis)
+- [4. Socraticode Survey Receipt](#4-socraticode-survey-receipt)
+- [5. Ntm Substrate Findings](#5-ntm-substrate-findings)
+- [6. Flywheel Substrate Findings](#6-flywheel-substrate-findings)
+- [7. Compose-Not-New Map](#7-compose-not-new-map)
+- [8. Planning-Workflow Critique](#8-planning-workflow-critique)
+- [9. Issue-Chain Discipline](#9-issue-chain-discipline)
+- [10. What I Would Change In The Plan](#10-what-i-would-change-in-the-plan)
+- [11. Blunder Hunt](#11-blunder-hunt)
+- [12. Convergence Audit](#12-convergence-audit)
+- [13. Canonical CLI Scoping Check](#13-canonical-cli-scoping-check)
+- [14. Worker-Tick Readiness](#14-worker-tick-readiness)
+- [15. What Not To Do](#15-what-not-to-do)
+- [16. Final Jeff Verdict](#16-final-jeff-verdict)
+- [17. Implementation Slice For Later Non-Plan Work](#17-implementation-slice-for-later-non-plan-work)
+- [18. Tests I Would Require Later](#18-tests-i-would-require-later)
+- [19. Review Questions Answered](#19-review-questions-answered)
 # 01-REVIEW-jeff - Watchdog Enablement
 
 Date: 2026-05-05

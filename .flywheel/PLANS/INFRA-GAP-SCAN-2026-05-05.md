@@ -5,6 +5,34 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Executive Summary](#executive-summary)
+- [Method](#method)
+- [Dimension 1: Loop Drivers](#dimension-1-loop-drivers)
+- [Dimension 2: Dispatch-Log Freshness](#dimension-2-dispatch-log-freshness)
+- [Dimension 3: Fuckup-Log Signal](#dimension-3-fuckup-log-signal)
+- [Dimension 4: Session Topology Drift](#dimension-4-session-topology-drift)
+- [Dimension 5: br/bv Health](#dimension-5-br-bv-health)
+- [Dimension 6: Stale /tmp Dispatch Files](#dimension-6-stale-tmp-dispatch-files)
+- [Dimension 7: Dirty-Tree Gaps](#dimension-7-dirty-tree-gaps)
+- [Dimension 8: INCIDENTS Log Adds](#dimension-8-incidents-log-adds)
+- [Cross-Dimension Pattern Table](#cross-dimension-pattern-table)
+- [Wave-0 Candidate List](#wave-0-candidate-list)
+- [Quick-Fix List](#quick-fix-list)
+- [Long-Tail List](#long-tail-list)
+- [Pattern to Doctrine Candidates](#pattern-to-doctrine-candidates)
+- [Gap Register](#gap-register)
+- [Evidence Appendix: Loop Drivers](#evidence-appendix-loop-drivers)
+- [Evidence Appendix: Dispatch Log](#evidence-appendix-dispatch-log)
+- [Evidence Appendix: Fuckup Log](#evidence-appendix-fuckup-log)
+- [Evidence Appendix: Topology and Agent Mail](#evidence-appendix-topology-and-agent-mail)
+- [Evidence Appendix: br/bv](#evidence-appendix-br-bv)
+- [Evidence Appendix: /tmp and Dirty Tree](#evidence-appendix-tmp-and-dirty-tree)
+- [Close-Order Detail](#close-order-detail)
+- [Non-Goals](#non-goals)
+- [Callback Metrics](#callback-metrics)
+- [L112 Readiness](#l112-readiness)
 # INFRA GAP SCAN 2026-05-05
 
 Scan time: 2026-05-05T19:30Z.

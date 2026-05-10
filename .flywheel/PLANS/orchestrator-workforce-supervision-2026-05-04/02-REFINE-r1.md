@@ -5,6 +5,33 @@ created: 2026-05-04
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Executive Summary](#1-executive-summary)
+- [2. Stocks, Flows, and Leverage](#2-stocks-flows-and-leverage)
+- [3. Workforce State Taxonomy](#3-workforce-state-taxonomy)
+  - [Availability](#availability)
+  - [Progress](#progress)
+  - [Capture And Text](#capture-and-text)
+  - [Callback](#callback)
+  - [Identity And Substrate](#identity-and-substrate)
+- [4. Failure-Mode Catalog](#4-failure-mode-catalog)
+- [5. Architecture - Supervision Mesh Layers](#5-architecture-supervision-mesh-layers)
+  - [Layer 1 - Signal Collection](#layer-1-signal-collection)
+  - [Layer 2 - State Aggregation](#layer-2-state-aggregation)
+  - [Layer 3 - Failure Classification](#layer-3-failure-classification)
+  - [Layer 4 - Auto-Recovery](#layer-4-auto-recovery)
+  - [Layer 5 - Escalate And Learn](#layer-5-escalate-and-learn)
+- [6. `/flywheel:supervisor` Canonical CLI](#6-flywheel-supervisor-canonical-cli)
+- [7. Substrate Dependencies](#7-substrate-dependencies)
+  - [Jeff / Upstream Substrates](#jeff-upstream-substrates)
+  - [Flywheel-Built Layers](#flywheel-built-layers)
+- [8. Phase Decomposition](#8-phase-decomposition)
+- [9. Three-Judges Score](#9-three-judges-score)
+- [10. Open Questions for Joshua-Disposes](#10-open-questions-for-joshua-disposes)
+- [Convergence Notes](#convergence-notes)
+- [Three-Q Audit](#three-q-audit)
+- [Closeout](#closeout)
 # Phase 2 REFINE r1 - Orchestrator Workforce Supervision
 
 Plan: `orchestrator-workforce-supervision-2026-05-04`

@@ -5,6 +5,35 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [0. Position](#0-position)
+- [1. Socraticode Ledger](#1-socraticode-ledger)
+- [2. The 5-Line Fix That Should Already Be Deployed](#2-the-5-line-fix-that-should-already-be-deployed)
+- [3. Canonical CLI Scoping Audit - Overview](#3-canonical-cli-scoping-audit-overview)
+- [4. P1 Audit - Replace Watcher `br ready` With `bv --robot-next`](#4-p1-audit-replace-watcher-br-ready-with-bv-robot-next)
+- [5. P2 Audit - Divergent Loop Self-Assert And Cooldown](#5-p2-audit-divergent-loop-self-assert-and-cooldown)
+- [6. P3 Audit - `flywheel-loop status`](#6-p3-audit-flywheel-loop-status)
+- [7. P4 Audit - Cross-Orchestrator Reservation TTL](#7-p4-audit-cross-orchestrator-reservation-ttl)
+- [8. P5 Audit - Pane Freeze Auto-Respawn](#8-p5-audit-pane-freeze-auto-respawn)
+- [9. P6 Audit - Repair-Bead Aging](#9-p6-audit-repair-bead-aging)
+- [10. M Audit - Morning Ritual Artifact](#10-m-audit-morning-ritual-artifact)
+- [11. Substrate Ownership Review](#11-substrate-ownership-review)
+- [12. Upstream Issue Draft - `bv --robot-next` Exclusions](#12-upstream-issue-draft-bv-robot-next-exclusions)
+- [13. Upstream Issue Draft - `br ready` Status Semantics](#13-upstream-issue-draft-br-ready-status-semantics)
+- [14. Upstream Issue Draft - ntm Send Receipt Primitive](#14-upstream-issue-draft-ntm-send-receipt-primitive)
+- [15. Working-Sibling Diff](#15-working-sibling-diff)
+- [16. Atomic Write And Contract Audit](#16-atomic-write-and-contract-audit)
+- [17. Specific Revisions - Git-Diff Style Change 01](#17-specific-revisions-git-diff-style-change-01)
+- [18. Specific Revisions - Git-Diff Style Change 02](#18-specific-revisions-git-diff-style-change-02)
+- [19. Specific Revisions - Git-Diff Style Change 03](#19-specific-revisions-git-diff-style-change-03)
+- [20. Specific Revisions - Git-Diff Style Change 04](#20-specific-revisions-git-diff-style-change-04)
+- [21. Specific Revisions - Git-Diff Style Change 05](#21-specific-revisions-git-diff-style-change-05)
+- [22. Specific Revisions - Git-Diff Style Change 06](#22-specific-revisions-git-diff-style-change-06)
+- [23. Specific Revisions - Git-Diff Style Change 07](#23-specific-revisions-git-diff-style-change-07)
+- [24. Specific Revisions - Git-Diff Style Change 08](#24-specific-revisions-git-diff-style-change-08)
+- [25. Minimum Viable Cut](#25-minimum-viable-cut)
+- [26. Verdict](#26-verdict)
 ```diff
 diff --git a/.flywheel/scripts/idle-state-probe.sh b/.flywheel/scripts/idle-state-probe.sh
 @@

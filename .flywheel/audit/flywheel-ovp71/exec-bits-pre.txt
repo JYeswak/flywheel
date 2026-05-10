@@ -1,0 +1,23 @@
+# Pre-fix executable inventory
+## nango-integrations
+-rwxr-xr-x@ 1 josh  staff   4211 May  5 15:44 /Users/josh/.claude/skills/nango-integrations/scripts/_nango_common.sh
+-rwxr-xr-x@ 1 josh  staff   4620 May  5 14:12 /Users/josh/.claude/skills/nango-integrations/scripts/migrate-integrations-between-envs.sh
+-rwxr-xr-x@ 1 josh  staff   1446 May  3 19:59 /Users/josh/.claude/skills/nango-integrations/scripts/nango_image_sanity.sh
+-rwxr-xr-x@ 1 josh  staff   1533 May  3 19:59 /Users/josh/.claude/skills/nango-integrations/scripts/nango_prepare_env_bundle.sh
+-rwxr-xr-x@ 1 josh  staff   2025 May  3 19:59 /Users/josh/.claude/skills/nango-integrations/scripts/nango_probe_public_health.sh
+-rwxr-xr-x@ 1 josh  staff   2009 May  3 19:59 /Users/josh/.claude/skills/nango-integrations/scripts/nango_probe_topology.sh
+-rwxr-xr-x@ 1 josh  staff   3083 May  5 14:39 /Users/josh/.claude/skills/nango-integrations/scripts/nango_railway_env_audit.sh
+-rwxr-xr-x@ 1 josh  staff   1685 May  3 19:59 /Users/josh/.claude/skills/nango-integrations/scripts/nango_receipt_emit.sh
+-rwxr-xr-x@ 1 josh  staff   1716 May  3 19:59 /Users/josh/.claude/skills/nango-integrations/scripts/nango_verify_callback_matrix.sh
+-rwxr-xr-x@ 1 josh  staff     98 May  3 19:59 /Users/josh/.claude/skills/nango-integrations/scripts/nango-image-sanity.sh
+-rwxr-xr-x@ 1 josh  staff   8961 May  5 15:44 /Users/josh/.claude/skills/nango-integrations/scripts/nango-substrate-doctor.sh
+-rwxr-xr-x@ 1 josh  staff   2680 May  5 14:11 /Users/josh/.claude/skills/nango-integrations/scripts/probe-nango-env-divergence.sh
+-rwxr-xr-x@ 1 josh  staff   3593 May  5 14:12 /Users/josh/.claude/skills/nango-integrations/scripts/probe-smtp-resend-rotation-drift.sh
+-rwxr-xr-x@ 1 josh  staff  19237 May  6 20:05 /Users/josh/.claude/skills/nango-integrations/scripts/provider-oauth-doctor.sh
+-rwxr-xr-x@ 1 josh  staff   2913 May  3 19:59 /Users/josh/.claude/skills/nango-integrations/scripts/quick-check.sh
+-rwxr-xr-x@ 1 josh  staff   3775 May  3 19:59 /Users/josh/.claude/skills/nango-integrations/scripts/repair-run.sh
+-rwxr-xr-x@ 1 josh  staff   2505 May  3 19:59 /Users/josh/.claude/skills/nango-integrations/scripts/verify-infisical-keyset.sh
+-rwxr-xr-x@ 1 josh  staff   2396 May  3 19:59 /Users/josh/.claude/skills/nango-integrations/scripts/verify-railway-custom-domain.sh
+
+## railway-api
+-rwxr-xr-x@ 1 josh  staff  22298 May  6 20:04 /Users/josh/.claude/skills/railway-api/scripts/railway-substrate-doctor.sh

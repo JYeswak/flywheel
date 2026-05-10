@@ -5,6 +5,16 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Executive Verdict](#1-executive-verdict)
+- [2. Joshua Override Consistency Check](#2-joshua-override-consistency-check)
+- [3. Watcher_governance_loop Structural Verification](#3-watcher-governance-loop-structural-verification)
+- [4. Truly-Dead Detection Criteria Audit](#4-truly-dead-detection-criteria-audit)
+- [5. Permit-Gate Default-Deny Verification](#5-permit-gate-default-deny-verification)
+- [6. Cross-Plan Layering Verification](#6-cross-plan-layering-verification)
+- [7. Blunder-Hunt 12-Class Checklist](#7-blunder-hunt-12-class-checklist)
+- [8. Convergence Call](#8-convergence-call)
 # 02-AUDIT-r1 - Watchdog Enablement
 
 Date: 2026-05-05

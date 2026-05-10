@@ -16,6 +16,24 @@ callback_cutover_policy: parity-gated
 plan_space_only: true
 ---
 
+## Contents
+
+- [1. Why This Plan Exists](#1-why-this-plan-exists)
+- [2. Atomic Primitives](#2-atomic-primitives)
+  - [A0 - Manager-State Read Model](#a0-manager-state-read-model)
+  - [A1 - Ops-Log Compatibility Mirror And Index](#a1-ops-log-compatibility-mirror-and-index)
+  - [A2 - Scoring Governor And Top-N Leverage Queue](#a2-scoring-governor-and-top-n-leverage-queue)
+  - [A3 - Manager Tick Driver And Decision Receipts](#a3-manager-tick-driver-and-decision-receipts)
+  - [A4 - Shared Surface Renderer](#a4-shared-surface-renderer)
+  - [A5 - Migration And Callback Cutover Governor](#a5-migration-and-callback-cutover-governor)
+- [3. Ship Order](#3-ship-order)
+- [4. Cross-Plan Reconciliation](#4-cross-plan-reconciliation)
+- [5. Changes Integrated](#5-changes-integrated)
+  - [Wholeheartedly Agree](#wholeheartedly-agree)
+  - [Somewhat Agree](#somewhat-agree)
+  - [Disagree](#disagree)
+- [6. Open Questions Punted To Convergence Audit](#6-open-questions-punted-to-convergence-audit)
+- [7. Verdict Thresholds And Measurement Loops](#7-verdict-thresholds-and-measurement-loops)
 # Manager-Loop Architecture For Orchestrators
 
 001. This plan replaces conversational orchestration with a manager loop.
@@ -387,6 +405,7 @@ plan_space_only: true
 352. Citation: `01-REVIEW-donella.md:70-86`.
 353. Exit criterion: scorer can explain each rank, each skipped candidate, and each outcome update without hidden arithmetic.
 
+<!-- AGENT-ANCHOR: section-1 -->
 ### A3 - Manager Tick Driver And Decision Receipts
 
 354. Primitive id: A3-manager-tick-driver.
@@ -500,6 +519,7 @@ plan_space_only: true
 462. Citation: `01-REVIEW-donella.md:121-128`.
 463. Exit criterion: every tick either moves a named stock, protects a named stock, or emits a validated no-op reason.
 
+<!-- AGENT-ANCHOR: section-2 -->
 ### A4 - Shared Surface Renderer
 
 464. Primitive id: A4-shared-surface-renderer.
@@ -659,6 +679,7 @@ plan_space_only: true
 615. Citation: `01-REVIEW-donella.md:34-52`.
 616. Exit criterion: callbacks are removed only by a recorded cutover permit that can be audited and rolled back.
 
+<!-- AGENT-ANCHOR: section-3 -->
 ## 3. Ship Order
 
 617. Ship order is final for this integrated plan.
@@ -824,6 +845,7 @@ plan_space_only: true
 768. Tag: leverage point #8; stock validated behavior; loop learning feedback.
 769. Citation: `01-REVIEW-multi-model.md:696-704`.
 
+<!-- AGENT-ANCHOR: section-4 -->
 ### Somewhat Agree
 
 770. Somewhat agree 01: keep the `ops-log` name.

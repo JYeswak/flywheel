@@ -5,6 +5,34 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Verdict](#verdict)
+- [Scope](#scope)
+- [Skills Applied](#skills-applied)
+- [Socraticode Preflight](#socraticode-preflight)
+- [Source Map](#source-map)
+- [Findings Table](#findings-table)
+- [SEC-F1 - Ledger Write Authority](#sec-f1-ledger-write-authority)
+- [SEC-F2 - Override Actor Separation](#sec-f2-override-actor-separation)
+- [SEC-F3 - Repo-Root and Evidence Boundaries](#sec-f3-repo-root-and-evidence-boundaries)
+- [SEC-F4 - Evidence and Memory Secret Scrub](#sec-f4-evidence-and-memory-secret-scrub)
+- [SEC-F5 - Side-Branch Metadata and Proof Semantics](#sec-f5-side-branch-metadata-and-proof-semantics)
+- [SEC-F6 - DCG Reset Blocker Recovery Path](#sec-f6-dcg-reset-blocker-recovery-path)
+- [SEC-F7 - Slow Consumer Discovery DoS](#sec-f7-slow-consumer-discovery-dos)
+- [Cross-Bead Findings](#cross-bead-findings)
+- [Threat Scenarios](#threat-scenarios)
+  - [Scenario 1 - Spoofed Wired Row](#scenario-1-spoofed-wired-row)
+  - [Scenario 2 - Self-Issued Bypass](#scenario-2-self-issued-bypass)
+  - [Scenario 3 - Repo Root Poisoning](#scenario-3-repo-root-poisoning)
+  - [Scenario 4 - Secret Echo Into Evidence](#scenario-4-secret-echo-into-evidence)
+  - [Scenario 5 - Slow Consumer Scan DoS](#scenario-5-slow-consumer-scan-dos)
+- [TRUE-Blocker Class Evaluation](#true-blocker-class-evaluation)
+- [Mission-License Alignment](#mission-license-alignment)
+- [Composite Score](#composite-score)
+- [Required Phase 4 Amendments](#required-phase-4-amendments)
+- [Audit Metrics](#audit-metrics)
+- [Callback Line](#callback-line)
 # Phase 3 AUDIT r1 - Security
 
 Plan: `wire-or-explain-tick-gate-2026-05-04`

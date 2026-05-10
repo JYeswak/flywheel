@@ -5,6 +5,31 @@ created: 2026-05-04
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Summary](#summary)
+- [Concern 1 - Install Re-Run Safety](#concern-1-install-re-run-safety)
+- [Concern 2 - Snapshot During Active Worker Generation](#concern-2-snapshot-during-active-worker-generation)
+- [Concern 3 - Simultaneous Restore Of Same Session](#concern-3-simultaneous-restore-of-same-session)
+- [Concern 4 - Launchd Watcher Fires During Snapshot](#concern-4-launchd-watcher-fires-during-snapshot)
+- [Concern 5 - Retention Prune While Snapshot Writes](#concern-5-retention-prune-while-snapshot-writes)
+- [Concern 6 - Atomic Write Contract Per Mutation](#concern-6-atomic-write-contract-per-mutation)
+- [Concern 7 - Idempotency Key Semantics](#concern-7-idempotency-key-semantics)
+- [Concern 8 - Partial Install Failure After 5/8 Plists](#concern-8-partial-install-failure-after-5-8-plists)
+- [Concern 9 - Crash Mid-Install And Resume](#concern-9-crash-mid-install-and-resume)
+- [Concern 10 - Lock File Discipline And Stale Locks](#concern-10-lock-file-discipline-and-stale-locks)
+- [Concern 11 - Phase Ordering Invariants](#concern-11-phase-ordering-invariants)
+- [Concern 12 - Checkpoint Name Collision](#concern-12-checkpoint-name-collision)
+- [Concern 13 - Watcher Restart Loop](#concern-13-watcher-restart-loop)
+- [Concern 14 - Fuckup-Log Append Race](#concern-14-fuckup-log-append-race)
+- [Concern 15 - Beads DB During Restore](#concern-15-beads-db-during-restore)
+- [Concern 16 - Schedule Cron Payload Uniqueness](#concern-16-schedule-cron-payload-uniqueness)
+- [Critical Race Conditions For Joshua Decision](#critical-race-conditions-for-joshua-decision)
+- [Common Patterns In Gaps](#common-patterns-in-gaps)
+- [Lock-File Inventory](#lock-file-inventory)
+- [Test-Plan Implications](#test-plan-implications)
+- [Bead Acceptance Additions](#bead-acceptance-additions)
+- [Validation Ladder](#validation-ladder)
 # Recovery r1 Audit - Idempotency + Race Conditions
 
 Task: `recovery_audit_idempotency`

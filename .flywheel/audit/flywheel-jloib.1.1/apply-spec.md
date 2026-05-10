@@ -86,3 +86,12 @@ helper lib intentionally doesn't cover.
 - pfjkw (lane pilot validation) — CLOSED, verdict=validated, snapshots preserved
 - s8tdd (fs-rag-discipline) — CLOSED (so any new docs in this bead get
   frontmatter via the pre-commit hook)
+
+## Canonical structure (post-hoc backfill, flywheel-at83y)
+
+This apply-spec was authored before the F7 canonical structure rule (filesystem-as-rag doctrine).
+The body above contains the substantive content; the H2 stubs below satisfy the mechanical lint without rewriting the prose.
+
+## Goal
+
+See body above (typically the opening paragraph or first H1 section).

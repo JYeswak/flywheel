@@ -5,6 +5,44 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Inputs Absorbed](#inputs-absorbed)
+- [Socraticode Survey](#socraticode-survey)
+- [Mission-Lock Skill Template Extension (SKILL.md Draft)](#mission-lock-skill-template-extension-skill-md-draft)
+  - [Section X - Negative Invariants](#section-x-negative-invariants)
+  - [Section Y - Trap-Class Cross-References](#section-y-trap-class-cross-references)
+  - [Section Z - Skill-Arsenal-By-Surface Mapping](#section-z-skill-arsenal-by-surface-mapping)
+  - [Section W - Data-Lifecycle Invariants](#section-w-data-lifecycle-invariants)
+  - [Section V - Failure-Mode Audit Per Substrate](#section-v-failure-mode-audit-per-substrate)
+  - [Section U - Substrate Scaffolding Requirement](#section-u-substrate-scaffolding-requirement)
+- [Scaffold-Validator Script Design](#scaffold-validator-script-design)
+  - [Purpose](#purpose)
+  - [Canonical CLI Surface](#canonical-cli-surface)
+  - [Probe Set](#probe-set)
+  - [JSON Output Schema](#json-output-schema)
+  - [Init-Time Failure Policy](#init-time-failure-policy)
+- [Lock-Time-Audit Script Design](#lock-time-audit-script-design)
+  - [Purpose](#purpose)
+  - [Canonical CLI Surface](#canonical-cli-surface)
+  - [Audit Dimensions](#audit-dimensions)
+  - [JSON Output Schema](#json-output-schema)
+  - [Backfill Policy](#backfill-policy)
+- [Preliminary Bead DAG For Phases 4-5 Implementation](#preliminary-bead-dag-for-phases-4-5-implementation)
+  - [Wave A - Foundation](#wave-a-foundation)
+  - [Wave B - Integration](#wave-b-integration)
+  - [Wave C - Polish](#wave-c-polish)
+  - [Wave D - Propagation](#wave-d-propagation)
+  - [Mermaid DAG](#mermaid-dag)
+- [Open Questions For Phase 2 Refinement](#open-questions-for-phase-2-refinement)
+- [Sibling-Shape References](#sibling-shape-references)
+  - [`mission-anchor-init`](#mission-anchor-init)
+  - [`flywheel-loop doctor` JSON Contract](#flywheel-loop-doctor-json-contract)
+  - [`watcher-isomorphic-probe.sh`](#watcher-isomorphic-probe-sh)
+  - [`quality-bar-close-gate.sh`](#quality-bar-close-gate-sh)
+  - [`templates/flywheel-install/MISSION.md.tmpl`](#templates-flywheel-install-mission-md-tmpl)
+- [Donella Design Read](#donella-design-read)
+- [Lane C Conclusion](#lane-c-conclusion)
 # Research C - Implementation Design
 
 Plan arc: `mission-lock-paradigm-extension-2026-05-06`
@@ -526,6 +564,7 @@ and `blocking=true|false`.
 }
 ```
 
+<!-- AGENT-ANCHOR: section-1 -->
 ### Init-Time Failure Policy
 
 - `fail`: blocking artifact missing and not beaded.

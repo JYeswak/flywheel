@@ -5,6 +5,36 @@ created: 2026-05-04
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Evidence Ledger](#evidence-ledger)
+- [Skills Best-Practices Matches](#skills-best-practices-matches)
+- [Design Stance](#design-stance)
+- [C.1 SKILL.md Draft For Canonical Security Control](#c-1-skill-md-draft-for-canonical-security-control)
+- [Canonical Contract](#canonical-contract)
+- [Canonical Settings Deny Block](#canonical-settings-deny-block)
+- [Override Pattern](#override-pattern)
+- [Path Conventions](#path-conventions)
+- [Required Commands](#required-commands)
+- [Tests](#tests)
+- [C.2 Phase Decomposition And Preliminary Bead DAG](#c-2-phase-decomposition-and-preliminary-bead-dag)
+  - [Wave 1 — Contract And Canonical Inputs](#wave-1-contract-and-canonical-inputs)
+  - [Wave 2 — Propagation And Sandbox Rollout](#wave-2-propagation-and-sandbox-rollout)
+  - [Wave 3 — Doctor Signals And Promotion](#wave-3-doctor-signals-and-promotion)
+  - [Wave 4 — Runtime Hygiene Controls](#wave-4-runtime-hygiene-controls)
+  - [Wave 5 — Conformance, Docs, Final Rollout Gate](#wave-5-conformance-docs-final-rollout-gate)
+- [Wave Summary](#wave-summary)
+- [C.3 Test Plan](#c-3-test-plan)
+  - [Wave 1 Tests](#wave-1-tests)
+  - [Wave 2 Tests](#wave-2-tests)
+  - [Wave 3 Tests](#wave-3-tests)
+  - [Wave 4 Tests](#wave-4-tests)
+  - [Wave 5 Tests](#wave-5-tests)
+- [C.4 Migration And Rollout](#c-4-migration-and-rollout)
+- [C.5 Companion Bead Candidates](#c-5-companion-bead-candidates)
+- [C.6 Open Questions For Phase 3 Audit](#c-6-open-questions-for-phase-3-audit)
+- [C.7 Three-Q Audit](#c-7-three-q-audit)
+- [C.8 Ladder Check](#c-8-ladder-check)
 # Lane C — Implementation Design: agent-security-controls-fleet-wide
 
 Plan: `agent-security-controls-fleet-wide-2026-05-04`

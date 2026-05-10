@@ -5,6 +5,28 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. R2 Executive Decision](#1-r2-executive-decision)
+- [2. Audit-Finding Integration](#2-audit-finding-integration)
+- [3. Cross-Plan Delta Integration](#3-cross-plan-delta-integration)
+- [4. R2 Primitive Map](#4-r2-primitive-map)
+- [5. Contract Freeze G0](#5-contract-freeze-g0)
+- [6. P1 - `bv --robot-next` Selector Contract](#6-p1-bv-robot-next-selector-contract)
+- [7. `selector_receipt/v1`](#7-selector-receipt-v1)
+- [8. P2 - Same-Candidate Suppression Contract](#8-p2-same-candidate-suppression-contract)
+- [9. `retry_state_receipt/v1`](#9-retry-state-receipt-v1)
+- [10. Deprecated Primitive Carry-Forward Table](#10-deprecated-primitive-carry-forward-table)
+- [11. Minimal Mission Anchor Contract](#11-minimal-mission-anchor-contract)
+- [12. P4, P5, and P6 Baseline Gate](#12-p4-p5-and-p6-baseline-gate)
+- [13. Measurement Loops and Stock Boundaries](#13-measurement-loops-and-stock-boundaries)
+- [14. Open Questions Closed](#14-open-questions-closed)
+- [15. Global Ship Sequence](#15-global-ship-sequence)
+- [16. Bead Shaping Rules After R2 Audit](#16-bead-shaping-rules-after-r2-audit)
+- [17. R2 Audit Probes](#17-r2-audit-probes)
+- [18. Residual Risks for R2 Audit](#18-residual-risks-for-r2-audit)
+- [19. Self-Grade](#19-self-grade)
+- [20. R2 Closeout](#20-r2-closeout)
 # Fleet Autonomy v1 - R2 Integrated Plan
 
 ---

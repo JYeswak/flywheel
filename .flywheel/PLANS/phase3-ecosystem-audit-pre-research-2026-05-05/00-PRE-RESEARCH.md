@@ -5,6 +5,25 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Executive Verdict](#executive-verdict)
+- [System Frame](#system-frame)
+- [1. Per-Repo Inventory](#1-per-repo-inventory)
+  - [alpsinsurance](#alpsinsurance)
+  - [skillos](#skillos)
+  - [swarm-daemon](#swarm-daemon)
+  - [mobile-eats](#mobile-eats)
+  - [vrtx](#vrtx)
+- [2. Surface Discovery Per Repo](#2-surface-discovery-per-repo)
+- [3. Pre-Known Gaps From Cross-Repo Wiring Map](#3-pre-known-gaps-from-cross-repo-wiring-map)
+- [4. Audit Run-Mode Design](#4-audit-run-mode-design)
+- [5. Cross-Repo Coordination Protocol](#5-cross-repo-coordination-protocol)
+- [6. Sequencing](#6-sequencing)
+- [7. Risks and Mitigations](#7-risks-and-mitigations)
+- [8. Phase 3 Trigger Conditions](#8-phase-3-trigger-conditions)
+- [9. Bead Decomposition](#9-bead-decomposition)
+- [10. success criteria](#10-success-criteria)
 # Phase 3 Ecosystem Audit Pre-Research
 
 date: 2026-05-05

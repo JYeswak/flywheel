@@ -5,6 +5,26 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Purpose](#1-purpose)
+- [2. Source Anchors](#2-source-anchors)
+- [3. Bead Placeholder Register](#3-bead-placeholder-register)
+- [4. Mermaid Graph](#4-mermaid-graph)
+- [5. Internal Dependency Ledger](#5-internal-dependency-ledger)
+- [6. Cross-Plan Edges](#6-cross-plan-edges)
+- [7. Wave Plan](#7-wave-plan)
+  - [Wave 0 - Evidence and authority ledger foundations](#wave-0-evidence-and-authority-ledger-foundations)
+  - [Wave 1 - Matrix and reason-code core](#wave-1-matrix-and-reason-code-core)
+  - [Wave 2 - First authority grant](#wave-2-first-authority-grant)
+  - [Wave 3 - Advisory consumer projections](#wave-3-advisory-consumer-projections)
+  - [Wave 4 - Deterministic rendering](#wave-4-deterministic-rendering)
+  - [Wave 5 - Replay and burn-in](#wave-5-replay-and-burn-in)
+- [8. Cross-Plan-Audit-R2 Mitigation Map](#8-cross-plan-audit-r2-mitigation-map)
+- [9. Bead Body Summaries](#9-bead-body-summaries)
+- [10. Decompose.Create.Runbook](#10-decompose-create-runbook)
+- [11. Quality Gate](#11-quality-gate)
+- [12. Callback Facts](#12-callback-facts)
 # 04-BEADS-DAG - Mission Coverage Compiler
 
 Task: mission-coverage-dag-doc-2026-05-05

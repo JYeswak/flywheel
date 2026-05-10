@@ -5,6 +5,25 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Verdict](#1-verdict)
+- [2. Evidence Read](#2-evidence-read)
+- [3. Audit Frame](#3-audit-frame)
+- [4. Finding Summary](#4-finding-summary)
+- [5. CC-1 - L110 Is Not Absorbed](#5-cc-1-l110-is-not-absorbed)
+- [6. CC-2 - Bead Cap Risk Is High](#6-cc-2-bead-cap-risk-is-high)
+- [7. CC-3 - Lane B Primitive Traceability Is Too Coarse](#7-cc-3-lane-b-primitive-traceability-is-too-coarse)
+- [8. CC-4 - Agent Mail Beads Need Post-Repair Reframe](#8-cc-4-agent-mail-beads-need-post-repair-reframe)
+- [9. CC-5 - WOE Overlap Ownership Is Resolved, But Contract Fields Are Missing](#9-cc-5-woe-overlap-ownership-is-resolved-but-contract-fields-are-missing)
+- [10. CC-6 - Peer-Orch Scope Needs One Decision Table](#10-cc-6-peer-orch-scope-needs-one-decision-table)
+- [11. CC-7 - Canonical CLI Surface Is Underspecified](#11-cc-7-canonical-cli-surface-is-underspecified)
+- [12. TRUE Blocker Class Evaluation](#12-true-blocker-class-evaluation)
+- [13. L110 Absorption Decision](#13-l110-absorption-decision)
+- [14. Cap Split Recommendation](#14-cap-split-recommendation)
+- [15. Cross-Plan Coordination Verdict](#15-cross-plan-coordination-verdict)
+- [16. Required Phase 4 Edits](#16-required-phase-4-edits)
+- [17. Final Callback Values](#17-final-callback-values)
 # Phase 3 Audit R1 - Cross-Cutting
 
 ```text

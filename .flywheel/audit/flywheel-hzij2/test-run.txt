@@ -1,0 +1,14 @@
+PASS T1 --help exits 0
+PASS T2a --info emits JSON with tool=tmp-aggressive-prune
+PASS T2b --info includes schema_version field
+PASS T2c --info lists 4+ introspection surfaces
+PASS T2d --info lists safety_gates (apply gating, mutex, deny-list)
+PASS T3a --schema emits canonical schema_version
+PASS T3b --schema describes both dry-run and apply output modes
+PASS T3c --schema documents stable exit codes 0/1/2
+PASS T4 --examples emits non-empty output with tool name
+PASS T5 --dry-run --root=/tmp still exits 0 (no regression)
+PASS T6 unknown args still exit 2 (validation failure)
+
+=== test-tmp-aggressive-prune-introspection.sh ===
+pass=11 fail=0

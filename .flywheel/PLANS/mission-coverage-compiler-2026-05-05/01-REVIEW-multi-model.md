@@ -5,6 +5,39 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [0. Execution Note](#0-execution-note)
+- [1. Exact Prompt Application](#1-exact-prompt-application)
+- [2. Executive Verdict](#2-executive-verdict)
+- [3. Triangulated Lens A - Planning Workflow](#3-triangulated-lens-a-planning-workflow)
+- [4. Triangulated Lens B - Systems Architecture](#4-triangulated-lens-b-systems-architecture)
+- [5. Triangulated Lens C - Joshua Taste](#5-triangulated-lens-c-joshua-taste)
+- [6. Triangulated Lens D - Operator Substrate](#6-triangulated-lens-d-operator-substrate)
+- [7. High-Confidence Consensus](#7-high-confidence-consensus)
+- [8. Disagreements Worth Resolving](#8-disagreements-worth-resolving)
+- [9. Proposed Change 1 - State The Thin-Compositor Paradigm](#9-proposed-change-1-state-the-thin-compositor-paradigm)
+- [10. Proposed Change 2 - Split Compiler And Consumers](#10-proposed-change-2-split-compiler-and-consumers)
+- [11. Proposed Change 3 - Freeze Row Schema In Revision](#11-proposed-change-3-freeze-row-schema-in-revision)
+- [12. Proposed Change 4 - Dirty State Is A Cap, Not A Blackout](#12-proposed-change-4-dirty-state-is-a-cap-not-a-blackout)
+- [13. Proposed Change 5 - Make C2 Reuse Existing Closed-Bead Scan](#13-proposed-change-5-make-c2-reuse-existing-closed-bead-scan)
+- [14. Proposed Change 6 - Convert C3 Into Normalization](#14-proposed-change-6-convert-c3-into-normalization)
+- [15. Proposed Change 7 - Rename C4](#15-proposed-change-7-rename-c4)
+- [16. Proposed Change 8 - C5 Emits Contracts, Not Actions](#16-proposed-change-8-c5-emits-contracts-not-actions)
+- [17. Proposed Change 9 - Add Scoring Formula](#17-proposed-change-9-add-scoring-formula)
+- [18. Proposed Change 10 - Add Freshness Policy](#18-proposed-change-10-add-freshness-policy)
+- [19. Proposed Change 11 - Answer Open Questions By Default](#19-proposed-change-11-answer-open-questions-by-default)
+- [20. Proposed Change 12 - Expand Canonical CLI Contract](#20-proposed-change-12-expand-canonical-cli-contract)
+- [21. Proposed Change 13 - Add Replay Fixture](#21-proposed-change-13-add-replay-fixture)
+- [22. Proposed Change 14 - Make Markdown A Renderer](#22-proposed-change-14-make-markdown-a-renderer)
+- [23. Proposed Change 15 - Add Explicit Non-Goals](#23-proposed-change-15-add-explicit-non-goals)
+- [24. Architecture After Revisions](#24-architecture-after-revisions)
+- [25. Publishability Review](#25-publishability-review)
+- [26. Joshua-Taste Review](#26-joshua-taste-review)
+- [27. Risk Register](#27-risk-register)
+- [28. Revised Ship Order](#28-revised-ship-order)
+- [29. Final Scorecard](#29-final-scorecard)
+- [30. Appendix - Socraticode And Skill Evidence](#30-appendix-socraticode-and-skill-evidence)
 # 01-REVIEW-multi-model - Mission Coverage Compiler
 
 ## 0. Execution Note

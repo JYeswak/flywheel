@@ -5,6 +5,25 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Executive Verdict](#executive-verdict)
+- [Layer-Leak Findings](#layer-leak-findings)
+- [Contract Gaps](#contract-gaps)
+- [Naming Collisions](#naming-collisions)
+- [Dependency Analysis](#dependency-analysis)
+- [Stock And Loop Conflicts](#stock-and-loop-conflicts)
+- [Loop Topology Review](#loop-topology-review)
+- [Global Ship Sequence](#global-ship-sequence)
+- [Skillos Integration Contract](#skillos-integration-contract)
+- [Mobile-Eats Mission-Coverage Compiler Placement](#mobile-eats-mission-coverage-compiler-placement)
+- [Canonical CLI Scoping Cross-Check](#canonical-cli-scoping-cross-check)
+- [Finding Severity Table](#finding-severity-table)
+- [Convergence Call](#convergence-call)
+- [Compact DAG](#compact-dag)
+- [Interface Contract Recommendations](#interface-contract-recommendations)
+- [Final Decision](#final-decision)
+- [Callback Metrics](#callback-metrics)
 # R1 Cross-Plan Audit: Manager-Loop x Fleet-Autonomy
 
 A001. Executive verdict: contradictions-found-revise.

@@ -5,6 +5,35 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Executive Finding](#executive-finding)
+- [Evidence Inventory](#evidence-inventory)
+- [Scoring Method](#scoring-method)
+- [Per-Bead R2 Scorecard](#per-bead-r2-scorecard)
+  - [Row 01 - flywheel-181e5](#row-01-flywheel-181e5)
+  - [Row 02 - flywheel-3ctlx](#row-02-flywheel-3ctlx)
+  - [Row 03 - flywheel-2j1dw](#row-03-flywheel-2j1dw)
+  - [Row 04 - flywheel-2bxry](#row-04-flywheel-2bxry)
+  - [Row 05 - flywheel-12k9o](#row-05-flywheel-12k9o)
+  - [Row 06 - flywheel-3lslr](#row-06-flywheel-3lslr)
+  - [Row 07 - flywheel-iaws7](#row-07-flywheel-iaws7)
+  - [Row 08 - flywheel-3nf8t](#row-08-flywheel-3nf8t)
+  - [Row 09 - flywheel-3q54j](#row-09-flywheel-3q54j)
+  - [Row 10 - flywheel-1ctd2](#row-10-flywheel-1ctd2)
+  - [Row 11 - flywheel-3lslr tombstone overlay](#row-11-flywheel-3lslr-tombstone-overlay)
+  - [Row 12 - flywheel-iaws7 tombstone overlay](#row-12-flywheel-iaws7-tombstone-overlay)
+- [Composite Per-Bead R2 Score](#composite-per-bead-r2-score)
+- [r0-to-r1-to-r2 Delta Table](#r0-to-r1-to-r2-delta-table)
+- [r1.edit.verification](#r1-edit-verification)
+- [R1 Systemic Fix Verification](#r1-systemic-fix-verification)
+- [flywheel-3lslr Deep-Revised Verification](#flywheel-3lslr-deep-revised-verification)
+- [Cross-Plan Edge Re-Check](#cross-plan-edge-re-check)
+- [Tombstone Re-Check](#tombstone-re-check)
+- [New Edits Identified In R2](#new-edits-identified-in-r2)
+- [Convergence Assessment](#convergence-assessment)
+- [Callback Metrics](#callback-metrics)
+- [Final R2 Verdict](#final-r2-verdict)
 # Fleet Autonomy Polish R2 Review
 date: 2026-05-05
 mode: read-only polish convergence review

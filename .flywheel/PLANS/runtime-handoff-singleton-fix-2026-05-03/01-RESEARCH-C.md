@@ -5,6 +5,47 @@ created: 2026-05-04
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Lane status](#lane-status)
+- [Local-only patch strategy](#local-only-patch-strategy)
+- [Current source facts](#current-source-facts)
+- [Phase decomposition](#phase-decomposition)
+  - [Phase 1: verify partial-migration evidence](#phase-1-verify-partial-migration-evidence)
+  - [Phase 2: clone + branch local ntm](#phase-2-clone-branch-local-ntm)
+  - [Phase 3: schema migration](#phase-3-schema-migration)
+  - [Phase 4: Go-side write-path patches](#phase-4-go-side-write-path-patches)
+  - [Phase 5: Go-side read/delete path patches](#phase-5-go-side-read-delete-path-patches)
+  - [Phase 6: producer/caller scope propagation](#phase-6-producer-caller-scope-propagation)
+  - [Phase 7: test harness](#phase-7-test-harness)
+  - [Phase 8: flywheel-loop doctor probe](#phase-8-flywheel-loop-doctor-probe)
+  - [Phase 9: integration test against real local ntm binary](#phase-9-integration-test-against-real-local-ntm-binary)
+  - [Phase 10: optional Jeff issue contribution](#phase-10-optional-jeff-issue-contribution)
+  - [Phase 11: doctrine update](#phase-11-doctrine-update)
+- [Preliminary bead DAG](#preliminary-bead-dag)
+- [Bead D1](#bead-d1)
+- [Bead D2](#bead-d2)
+- [Bead D3](#bead-d3)
+- [Bead D4](#bead-d4)
+- [Bead D5](#bead-d5)
+- [Bead D6](#bead-d6)
+- [Bead D7](#bead-d7)
+- [Bead D8](#bead-d8)
+- [Bead D9](#bead-d9)
+- [Bead D10](#bead-d10)
+- [Bead D11](#bead-d11)
+- [Test plan](#test-plan)
+  - [Unit-level](#unit-level)
+  - [Integration-level](#integration-level)
+  - [Regression detection in tick](#regression-detection-in-tick)
+- [SKILL.md draft decision](#skill-md-draft-decision)
+- [When to use](#when-to-use)
+- [Rules](#rules)
+- [Checklist](#checklist)
+- [Open follow-ups for Phase 2 synthesis](#open-follow-ups-for-phase-2-synthesis)
+- [Skills citations](#skills-citations)
+- [Recommended Phase 2 synthesis stance](#recommended-phase-2-synthesis-stance)
+- [Ladder assessment](#ladder-assessment)
 # Lane C: Implementation design - runtime-handoff-singleton-fix
 
 ## Lane status

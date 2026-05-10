@@ -5,6 +5,24 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Evidence Ledger](#evidence-ledger)
+- [Skill Citations](#skill-citations)
+- [The Composition](#the-composition)
+- [M1 Audit: Canonical ops-log](#m1-audit-canonical-ops-log)
+- [M2 Audit: Tick-Driven Orchestrator Loop](#m2-audit-tick-driven-orchestrator-loop)
+- [M3 Audit: Top-10 Leverage Queue](#m3-audit-top-10-leverage-queue)
+- [M4 Audit: Joshua-Readable Shared Surface](#m4-audit-joshua-readable-shared-surface)
+- [Substrate Ownership Review](#substrate-ownership-review)
+- [Working-Sibling Diffs](#working-sibling-diffs)
+- [Atomic Write and Ledger Receipt Audit](#atomic-write-and-ledger-receipt-audit)
+- [Counter-Thesis Evaluation](#counter-thesis-evaluation)
+- [Specific Revisions](#specific-revisions)
+- [Minimum Viable Cut](#minimum-viable-cut)
+- [Upstream Issue Drafts](#upstream-issue-drafts)
+- [Canonical CLI Surface Required Before Ship](#canonical-cli-surface-required-before-ship)
+- [Final Verdict](#final-verdict)
 doctor_json="$(flywheel-loop doctor --json)"
 triage_json="$(bv --robot-triage --limit 20)"
 attention_json="$(ntm robot-attention --profile=operator --json)"

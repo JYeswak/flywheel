@@ -1,0 +1,14 @@
+OK:   SKILL.md exists
+OK: name=beads-br
+OK: description length=2
+OK: description under 500 publish cap
+OK: trigger phrases (approx): 0
+FAIL: only ~0 trigger phrases in first 400 chars (need >=10)
+FAIL: missing '## THE EXACT PROMPT' section in SKILL.md
+FAIL: Anti-Patterns section present but no Markdown table within 30 lines
+FAIL: missing scripts/ directory
+OK:   references/ has 4 .md file(s)
+OK:   SKILL.md line count: 166 (< 500)
+OK:   SELF-TEST.md present
+
+FAIL: validate-skill: 4 hard check(s) failed for /Users/josh/.claude/skills/beads-br

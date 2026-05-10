@@ -5,6 +5,32 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Why This Plan Exists](#1-why-this-plan-exists)
+- [2. Hard Evidence](#2-hard-evidence)
+- [3. Paradigm Shift](#3-paradigm-shift)
+- [4. Atomic Primitives](#4-atomic-primitives)
+  - [P0 - Source Snapshot Adapter (COMPOSITION-not-NEW)](#p0-source-snapshot-adapter-composition-not-new)
+  - [P1 - Coverage Matrix Schema and Compiler Core (NEW)](#p1-coverage-matrix-schema-and-compiler-core-new)
+  - [P2 - Claim and Failure Normalizer (COMPOSITION-not-NEW)](#p2-claim-and-failure-normalizer-composition-not-new)
+  - [P3 - Consumer Projection Layer (COMPOSITION-not-NEW)](#p3-consumer-projection-layer-composition-not-new)
+  - [P4 - Deterministic Renderer and Replay Harness (NEW)](#p4-deterministic-renderer-and-replay-harness-new)
+- [5. Donella Lens Applied](#5-donella-lens-applied)
+- [6. Jeff Lens Applied](#6-jeff-lens-applied)
+- [7. Per-Change Disposition Table](#7-per-change-disposition-table)
+- [8. Cross-Plan Relationships](#8-cross-plan-relationships)
+- [9. Cross-Orch Input Integration](#9-cross-orch-input-integration)
+- [10. Success Criteria](#10-success-criteria)
+- [11. In Scope And Out Of Scope](#11-in-scope-and-out-of-scope)
+- [12. Constraints](#12-constraints)
+- [13. Open Questions For R1 Audit](#13-open-questions-for-r1-audit)
+- [14. Ship Order](#14-ship-order)
+- [15. Verdict Thresholds](#15-verdict-thresholds)
+- [Appendix A - Review Citation Index](#appendix-a-review-citation-index)
+- [Appendix B - Existing Primitive Evidence](#appendix-b-existing-primitive-evidence)
+- [Appendix C - Socraticode Survey Receipt](#appendix-c-socraticode-survey-receipt)
+- [Appendix D - Callback Values](#appendix-d-callback-values)
 # 00-PLAN - Mission Coverage Compiler
 
 Date: 2026-05-05

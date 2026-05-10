@@ -5,6 +5,23 @@ created: 2026-05-04
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Intent](#intent)
+- [Verified Existing Primitives](#verified-existing-primitives)
+- [Substrate Topology](#substrate-topology)
+- [Component 1: README Pointer Enforcement](#component-1-readme-pointer-enforcement)
+- [Component 2: README Freshness Tracker](#component-2-readme-freshness-tracker)
+- [Component 3: Auto-Detection Hook](#component-3-auto-detection-hook)
+- [Component 4: Validation Command Engine](#component-4-validation-command-engine)
+- [Component 5: Mermaid Requirement Matrix](#component-5-mermaid-requirement-matrix)
+- [Component 6: Senior-Dev Validation Gate](#component-6-senior-dev-validation-gate)
+- [Doctor JSON Contract](#doctor-json-contract)
+- [Storage Paths](#storage-paths)
+- [Substrate Registry Entry](#substrate-registry-entry)
+- [Skill Integration Map](#skill-integration-map)
+- [Anti-Patterns Explicitly Avoided](#anti-patterns-explicitly-avoided)
+- [Validation Ladder](#validation-ladder)
 # Documentation Substrate Design - Lane 2
 
 Date: 2026-05-01

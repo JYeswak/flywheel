@@ -1,0 +1,14 @@
+OK:   SKILL.md exists
+OK: name=beads-br
+OK: description length=431
+OK: description under 500 publish cap
+OK: trigger phrases (approx): 16
+OK: >=10 trigger phrases
+OK:   EXACT PROMPT section present
+OK:   Anti-Patterns table present
+FAIL: missing scripts/ directory
+OK:   references/ has 4 .md file(s)
+OK:   SKILL.md line count: 189 (< 500)
+OK:   SELF-TEST.md present
+
+FAIL: validate-skill: 1 hard check(s) failed for /var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/flywheel-g9ews.XXXXXX.TJ7l0Gb3W3/preview

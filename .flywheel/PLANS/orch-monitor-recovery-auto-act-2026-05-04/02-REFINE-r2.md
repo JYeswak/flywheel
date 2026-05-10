@@ -5,6 +5,26 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Verdict](#1-verdict)
+- [2. Problem Statement](#2-problem-statement)
+- [3. Mechanism](#3-mechanism)
+- [4. Failure Mode Taxonomy](#4-failure-mode-taxonomy)
+- [5. Substrate Inventory](#5-substrate-inventory)
+- [6. Bead Count Resolution](#6-bead-count-resolution)
+  - [Core Supervision Beads](#core-supervision-beads)
+  - [Watcher Propagation Beads](#watcher-propagation-beads)
+  - [Beads-DB Maintenance Beads](#beads-db-maintenance-beads)
+  - [Agent Mail Registration Beads](#agent-mail-registration-beads)
+- [7. Bead-To-Source Mapping](#7-bead-to-source-mapping)
+- [8. Cross-Plan Coordination With Wire-Or-Explain](#8-cross-plan-coordination-with-wire-or-explain)
+- [9. Phase 4 DAG Preview](#9-phase-4-dag-preview)
+- [10. Phase 3 Audit Lens Recommendation](#10-phase-3-audit-lens-recommendation)
+- [11. Source Claim Ledger](#11-source-claim-ledger)
+- [12. Convergence Notes](#12-convergence-notes)
+- [13. Metrics](#13-metrics)
+- [Callback Line](#callback-line)
 # Phase 2 REFINE r2 - orch-monitor-recovery-auto-act-2026-05-04
 
 Generated: 2026-05-04

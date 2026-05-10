@@ -5,6 +5,15 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Where I Disagree With The Framing](#1-where-i-disagree-with-the-framing)
+- [2. Stocks And Flows Audit Per M1-M4](#2-stocks-and-flows-audit-per-m1-m4)
+- [3. Loop Topology](#3-loop-topology)
+- [4. Leverage Points Hierarchy Applied](#4-leverage-points-hierarchy-applied)
+- [5. The Thing The Plan Does Not See](#5-the-thing-the-plan-does-not-see)
+- [6. Specific Revisions In Her Voice](#6-specific-revisions-in-her-voice)
+- [7. Blunt Verdict](#7-blunt-verdict)
 # Donella Review: Manager-Loop Architecture
 
 001. SYSTEM: flywheel orchestration across workers, watchers, validators, doctors, integrators, and Joshua.
@@ -416,6 +425,7 @@ frontmatter_source: scaffold-doc-frontmatter
 399. M3 DONELLA NOTE: leverage is a hypothesis about structure.
 400. M3 DONELLA NOTE: hypotheses must meet outcomes.
 
+<!-- AGENT-ANCHOR: section-1 -->
 401. M4 BOUNDARY: Joshua and peer agents reading manager state.
 402. M4 INTENDED STOCK: shared situational awareness.
 403. M4 CURRENT STOCK: Joshua's private top-10, pane scrollback, morning ritual, scattered status files.
@@ -493,6 +503,7 @@ frontmatter_source: scaffold-doc-frontmatter
 472. LOOP A WEAKNESS: callback count can fall because signal is lost.
 473. LOOP A BETTER TEST: callback count falls while closure rate and validation visibility rise.
 
+<!-- AGENT-ANCHOR: section-2 -->
 474. LOOP B NAME: manager correction balancing loop.
 475. LOOP B STOCK: decision debt.
 476. LOOP B GOAL: decision debt in safe range while mission closure increases.
@@ -723,6 +734,7 @@ frontmatter_source: scaffold-doc-frontmatter
 689. LEVERAGE VERDICT: "This plan is the answer" should become "This plan tests the manager-loop hypothesis."
 690. LEVERAGE VERDICT: that phrase alone would improve the plan's epistemic hygiene.
 
+<!-- AGENT-ANCHOR: section-3 -->
 ## 5. The Thing The Plan Does Not See
 
 691. The plan sees the conversational orchestrator.
@@ -816,6 +828,7 @@ frontmatter_source: scaffold-doc-frontmatter
 779. It should block implementation until each governor has a contract.
 780. That is the plan-space correction.
 
+<!-- AGENT-ANCHOR: section-4 -->
 ## 6. Specific Revisions In Her Voice
 
 781. REVISION 1: replace the claimed goal.

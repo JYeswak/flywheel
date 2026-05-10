@@ -5,6 +5,42 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [00. Executive verdict](#00-executive-verdict)
+- [01. Audit scope](#01-audit-scope)
+- [02. Pre-flight and substrate](#02-pre-flight-and-substrate)
+- [03. Source ledger](#03-source-ledger)
+- [04. Dependency graph observed](#04-dependency-graph-observed)
+- [05. Active dependent counts from read-only database query](#05-active-dependent-counts-from-read-only-database-query)
+- [06. Existing implementation reality](#06-existing-implementation-reality)
+- [07. Current-plan replacement map](#07-current-plan-replacement-map)
+- [08. Classification summary](#08-classification-summary)
+- [09. Finding A - flywheel-hww is foundation, not duplicate](#09-finding-a-flywheel-hww-is-foundation-not-duplicate)
+- [10. Finding B - flywheel-247 is old lifecycle, not current foundation](#10-finding-b-flywheel-247-is-old-lifecycle-not-current-foundation)
+- [11. Finding C - flywheel-3eo should redirect to Manager A0/A4](#11-finding-c-flywheel-3eo-should-redirect-to-manager-a0-a4)
+- [12. Finding D - flywheel-1fh is the immediate leaf](#12-finding-d-flywheel-1fh-is-the-immediate-leaf)
+- [13. Finding E - flywheel-1m2 and flywheel-bkc are not noise](#13-finding-e-flywheel-1m2-and-flywheel-bkc-are-not-noise)
+- [14. Context-only rows](#14-context-only-rows)
+- [15. Cascade chains identified](#15-cascade-chains-identified)
+- [16. Recommended updated close order](#16-recommended-updated-close-order)
+- [17. What changed from the prior close plan](#17-what-changed-from-the-prior-close-plan)
+- [18. Risk register](#18-risk-register)
+- [19. Acceptance criteria for redirecting hww](#19-acceptance-criteria-for-redirecting-hww)
+- [20. Acceptance criteria for closing the old scanner spine](#20-acceptance-criteria-for-closing-the-old-scanner-spine)
+- [21. Detailed per-bead notes](#21-detailed-per-bead-notes)
+- [22. Direct answers to dispatch questions](#22-direct-answers-to-dispatch-questions)
+- [23. Plan-space only close packets to author next](#23-plan-space-only-close-packets-to-author-next)
+- [24. Why not foundation-ship-first for all of fleet-coherence](#24-why-not-foundation-ship-first-for-all-of-fleet-coherence)
+- [25. Why not cascade-close-all](#25-why-not-cascade-close-all)
+- [26. Fleet-coherence verdict](#26-fleet-coherence-verdict)
+- [27. Callback metrics](#27-callback-metrics)
+- [28. L112 self-check text](#28-l112-self-check-text)
+- [29. Final recommendation](#29-final-recommendation)
+- [30. Appendix - normalized close sequence if replacements are accepted](#30-appendix-normalized-close-sequence-if-replacements-are-accepted)
+- [31. Appendix - audit invariants](#31-appendix-audit-invariants)
+- [32. Evidence notes](#32-evidence-notes)
+- [33. Closing statement](#33-closing-statement)
 # DEPENDENTS-AUDIT-2026-05-05
 
 dispatch: /tmp/dispatch_dependents-audit-2026-05-05.md

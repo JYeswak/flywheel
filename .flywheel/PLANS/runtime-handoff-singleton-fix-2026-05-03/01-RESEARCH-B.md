@@ -5,6 +5,43 @@ created: 2026-05-04
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Jeff-stack intent inventory](#jeff-stack-intent-inventory)
+  - [ntm runtime_handoff: actual upstream WIP state](#ntm-runtime-handoff-actual-upstream-wip-state)
+- [Sister tables in ntm with singleton shape](#sister-tables-in-ntm-with-singleton-shape)
+  - [Search result: singleton enforcement](#search-result-singleton-enforcement)
+  - [Table checked: runtime_sessions](#table-checked-runtime-sessions)
+  - [Table checked: runtime_agents](#table-checked-runtime-agents)
+  - [Table checked: runtime_work](#table-checked-runtime-work)
+  - [Table checked: runtime_coordination](#table-checked-runtime-coordination)
+  - [Table checked: runtime_quota](#table-checked-runtime-quota)
+  - [Table checked: source_health](#table-checked-source-health)
+  - [Sister-table conclusion](#sister-table-conclusion)
+- [beads_rust analogous patterns](#beads-rust-analogous-patterns)
+  - [Search result: singleton-vs-scoped tension](#search-result-singleton-vs-scoped-tension)
+  - [Multi-repo scoping pattern](#multi-repo-scoping-pattern)
+- [ADOPT / EXTEND / AVOID per primitive](#adopt-extend-avoid-per-primitive)
+- [Cross-cutting findings](#cross-cutting-findings)
+  - [File-handling concerns](#file-handling-concerns)
+  - [Concurrency concerns](#concurrency-concerns)
+  - [Backward-compat concerns](#backward-compat-concerns)
+  - [Operational concerns](#operational-concerns)
+  - [Documentation drift concern](#documentation-drift-concern)
+- [Decision: file Jeff issue or local-only?](#decision-file-jeff-issue-or-local-only)
+  - [Step 1: git log evidence](#step-1-git-log-evidence)
+  - [Step 2: most recent relevant commit message](#step-2-most-recent-relevant-commit-message)
+  - [Step 3: CHANGELOG/BREAKING grep](#step-3-changelog-breaking-grep)
+  - [Step 4: idiomatic-migration check](#step-4-idiomatic-migration-check)
+  - [Recommendation](#recommendation)
+- [Skills citations](#skills-citations)
+  - [ADOPT: dicklesworthstone-stack](#adopt-dicklesworthstone-stack)
+  - [ADOPT: jeff-issue-chain](#adopt-jeff-issue-chain)
+  - [ADOPT: jeff-convergence-audit](#adopt-jeff-convergence-audit)
+  - [EVALUATE: safe-migrations](#evaluate-safe-migrations)
+  - [EVALUATE: state-truth-recovery](#evaluate-state-truth-recovery)
+  - [REFERENCE: beads-br](#reference-beads-br)
+- [Ladder assessment](#ladder-assessment)
 # Lane B: Ecosystem audit — runtime_handoff-class state isolation
 
 ## Jeff-stack intent inventory

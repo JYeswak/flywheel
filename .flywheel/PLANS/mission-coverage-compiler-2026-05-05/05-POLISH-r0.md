@@ -5,6 +5,33 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Executive Verdict](#1-executive-verdict)
+- [2. Review Inputs And Method](#2-review-inputs-and-method)
+- [3. Rubric](#3-rubric)
+- [4. Per-Bead Polish Scorecard](#4-per-bead-polish-scorecard)
+- [5. Per-Bead Review Notes](#5-per-bead-review-notes)
+  - [flywheel-2r7l3 - Freeze cross-plan coverage authority ledger](#flywheel-2r7l3-freeze-cross-plan-coverage-authority-ledger)
+  - [flywheel-gwbvf - P0 existing source reader harness](#flywheel-gwbvf-p0-existing-source-reader-harness)
+  - [flywheel-4ggh2 - P1 repo reality normalizer](#flywheel-4ggh2-p1-repo-reality-normalizer)
+  - [flywheel-wg2e4 - P2 coverage matrix schema and compiler core](#flywheel-wg2e4-p2-coverage-matrix-schema-and-compiler-core)
+  - [flywheel-b1059 - P3 claim and failure normalizer fixtures](#flywheel-b1059-p3-claim-and-failure-normalizer-fixtures)
+  - [flywheel-2c0pq - P4 authority grant schema and dispatch advisory](#flywheel-2c0pq-p4-authority-grant-schema-and-dispatch-advisory)
+  - [flywheel-29329 - P4 manager-loop advisory projection](#flywheel-29329-p4-manager-loop-advisory-projection)
+  - [flywheel-1c3ha - P4 fleet and docs advisory projection guards](#flywheel-1c3ha-p4-fleet-and-docs-advisory-projection-guards)
+  - [flywheel-2j6ot - P5 deterministic renderer outputs](#flywheel-2j6ot-p5-deterministic-renderer-outputs)
+  - [flywheel-2nx01 - P5 replay harness and consumer burn-in](#flywheel-2nx01-p5-replay-harness-and-consumer-burn-in)
+- [6. Cross-Bead Patterns](#6-cross-bead-patterns)
+- [7. Cross-Plan-Edge Integrity Report](#7-cross-plan-edge-integrity-report)
+- [8. Top 5 High-Impact Recommendations](#8-top-5-high-impact-recommendations)
+- [9. Edits-As-Patch Table](#9-edits-as-patch-table)
+- [10. Convergence Assessment](#10-convergence-assessment)
+- [11. Dispatchability By Wave](#11-dispatchability-by-wave)
+- [12. No-Bead Finding Disposition](#12-no-bead-finding-disposition)
+- [13. L112 Probe](#13-l112-probe)
+- [14. Callback Facts](#14-callback-facts)
+- [15. R0 Close](#15-r0-close)
 # 05-POLISH-r0 - Mission Coverage Compiler Bead Review
 
 Task: polish-review-mission-coverage-2026-05-05

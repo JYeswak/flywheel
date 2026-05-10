@@ -5,6 +5,41 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Receipt](#receipt)
+- [Source Anchors](#source-anchors)
+- [Mermaid Graph](#mermaid-graph)
+- [Bead Table](#bead-table)
+- [Dependency Edge Ledger](#dependency-edge-ledger)
+- [Wave Plan](#wave-plan)
+  - [Wave 0: Freeze Audit Partial Contracts](#wave-0-freeze-audit-partial-contracts)
+  - [Wave 1: P1 Selector Contract](#wave-1-p1-selector-contract)
+  - [Wave 2: P2 Same-Candidate Suppression](#wave-2-p2-same-candidate-suppression)
+  - [Wave 3: Cross-Plan Tombstones](#wave-3-cross-plan-tombstones)
+  - [Wave 4: Repair Baseline Gates](#wave-4-repair-baseline-gates)
+- [Audit-R2 Partial Map](#audit-r2-partial-map)
+  - [PARTIAL-1](#partial-1)
+  - [PARTIAL-2](#partial-2)
+  - [PARTIAL-3](#partial-3)
+- [Deprecation Tombstone Register](#deprecation-tombstone-register)
+  - [Tombstone 1: Fleet P3 Status Brain](#tombstone-1-fleet-p3-status-brain)
+  - [Tombstone 2: Fleet M Measurement Surface](#tombstone-2-fleet-m-measurement-surface)
+- [Cross-Plan Dependency Edges](#cross-plan-dependency-edges)
+- [Bead Detail: flywheel-181e5](#bead-detail-flywheel-181e5)
+- [Bead Detail: flywheel-3ctlx](#bead-detail-flywheel-3ctlx)
+- [Bead Detail: flywheel-2j1dw](#bead-detail-flywheel-2j1dw)
+- [Bead Detail: flywheel-2bxry](#bead-detail-flywheel-2bxry)
+- [Bead Detail: flywheel-12k9o](#bead-detail-flywheel-12k9o)
+- [Bead Detail: flywheel-3lslr](#bead-detail-flywheel-3lslr)
+- [Bead Detail: flywheel-iaws7](#bead-detail-flywheel-iaws7)
+- [Bead Detail: flywheel-3nf8t](#bead-detail-flywheel-3nf8t)
+- [Bead Detail: flywheel-3q54j](#bead-detail-flywheel-3q54j)
+- [Bead Detail: flywheel-1ctd2](#bead-detail-flywheel-1ctd2)
+- [Implementation Notes](#implementation-notes)
+- [Total Beads And Cycle Check](#total-beads-and-cycle-check)
+- [Callback Metrics](#callback-metrics)
+- [Handoff](#handoff)
 # Fleet Autonomy V1 Beads DAG
 ## Receipt
 - plan: fleet-autonomy-v1-2026-05-05

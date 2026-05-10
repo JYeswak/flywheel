@@ -27,6 +27,29 @@ callback_cutover_policy: parity-gated
 plan_space_only: true
 ---
 
+## Contents
+
+- [0. R2 Header](#0-r2-header)
+- [1. Revised Why This Plan Exists](#1-revised-why-this-plan-exists)
+- [2. Final Primitives (Post-R2)](#2-final-primitives-post-r2)
+  - [A0 - Manager-State Read Model](#a0-manager-state-read-model)
+  - [A1 - Ops-Log Compatibility Mirror And Index](#a1-ops-log-compatibility-mirror-and-index)
+  - [A2 - Scoring Governor And Top-N Leverage Queue](#a2-scoring-governor-and-top-n-leverage-queue)
+  - [A3 - Manager Tick Driver And Decision Receipts](#a3-manager-tick-driver-and-decision-receipts)
+  - [A4 - Shared Surface Renderer](#a4-shared-surface-renderer)
+  - [A5 - Migration And Callback Cutover Governor](#a5-migration-and-callback-cutover-governor)
+- [3. Ship Order](#3-ship-order)
+- [4. Cross-Plan Reconciliation](#4-cross-plan-reconciliation)
+- [5. Changes Integrated](#5-changes-integrated)
+  - [Wholeheartedly Agree](#wholeheartedly-agree)
+  - [Somewhat Agree](#somewhat-agree)
+  - [Disagree](#disagree)
+- [6. Open Questions For R2 Audit](#6-open-questions-for-r2-audit)
+- [7. Verdict Thresholds And Measurement Loops](#7-verdict-thresholds-and-measurement-loops)
+- [8. Audit-Finding Integration Table](#8-audit-finding-integration-table)
+- [9. Cross-Plan Reconciliation Deltas](#9-cross-plan-reconciliation-deltas)
+- [10. R2 Glossary](#10-r2-glossary)
+- [11. R2 Verdict Thresholds And Measurement Revisions](#11-r2-verdict-thresholds-and-measurement-revisions)
 # Manager-Loop Architecture For Orchestrators
 
 ## 0. R2 Header
@@ -453,6 +476,7 @@ R2-A1-057. R2 citation: `02-AUDIT-r1.md:193-198`.
 258. Citation: `01-REVIEW-donella.md:148-155`.
 259. Exit criterion: mirror proves zero material divergence for the configured parity window.
 
+<!-- AGENT-ANCHOR: section-1 -->
 ### A2 - Scoring Governor And Top-N Leverage Queue
 
 260. Primitive id: A2-scoring-governor-top-n-queue.
@@ -590,6 +614,7 @@ R2-A2-040. R2 citation: `02-AUDIT-r1-cross-plan.md:236-241`.
 352. Citation: `01-REVIEW-donella.md:70-86`.
 353. Exit criterion: scorer can explain each rank, each skipped candidate, and each outcome update without hidden arithmetic.
 
+<!-- AGENT-ANCHOR: section-2 -->
 ### A3 - Manager Tick Driver And Decision Receipts
 
 354. Primitive id: A3-manager-tick-driver.
@@ -727,6 +752,7 @@ R2-A3-024. R2 citation: `02-AUDIT-r1.md:217-221`.
 462. Citation: `01-REVIEW-donella.md:121-128`.
 463. Exit criterion: every tick either moves a named stock, protects a named stock, or emits a validated no-op reason.
 
+<!-- AGENT-ANCHOR: section-3 -->
 ### A4 - Shared Surface Renderer
 
 464. Primitive id: A4-shared-surface-renderer.
@@ -920,6 +946,7 @@ R2-A5-018. R2 citation: `02-AUDIT-r1.md:181-186`.
 615. Citation: `01-REVIEW-donella.md:34-52`.
 616. Exit criterion: callbacks are removed only by a recorded cutover permit that can be audited and rolled back.
 
+<!-- AGENT-ANCHOR: section-4 -->
 ## 3. Ship Order
 
 617. Ship order is final for this integrated plan after R2 fold-back.
@@ -1126,6 +1153,7 @@ R2-XP-026. R2 citation: `02-AUDIT-r1-cross-plan.md:325-332`.
 768. Tag: leverage point #8; stock validated behavior; loop learning feedback.
 769. Citation: `01-REVIEW-multi-model.md:696-704`.
 
+<!-- AGENT-ANCHOR: section-5 -->
 ### Somewhat Agree
 
 770. Somewhat agree 01: keep the `ops-log` name.
@@ -1313,6 +1341,7 @@ R2-XP-026. R2 citation: `02-AUDIT-r1-cross-plan.md:325-332`.
 943. Final preserved primitives: `bv` selection, retry-after-state-change, status schema fields, driver proof, dispatch delivery receipt, Agent Mail reservation safety, ntm pane actuation boundary, mission-anchor licensing.
 944. L112 expected string: OK_reintegrate_r2_manager_loop.
 
+<!-- AGENT-ANCHOR: section-6 -->
 ## 8. Audit-Finding Integration Table
 
 | ID | Category | Disposition | Audit citation | R2 location |

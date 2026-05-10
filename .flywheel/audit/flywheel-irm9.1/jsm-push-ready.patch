@@ -1,0 +1,21 @@
+--- a/scripts/validate.sh
++++ b/scripts/validate.sh
+@@ -23,8 +23,16 @@ echo "✓ cass found: $(command -v cass)"
+
+ # Check cass status
+ echo
+ echo "Checking cass status..."
+-if ! STATUS=$(cass status --robot-format json 2>/dev/null); then
++# Try --json first (cass >= 0.2.0); fall back to --robot-format json for
++# older cass builds (< 0.2.0). flywheel-irm9.1 fix: cass 0.2.0 emits
++# "Could not parse arguments" for --robot-format json; --json is the
++# current canonical robot-output flag.
++if STATUS=$(cass status --json 2>/dev/null); then
++    :
++elif STATUS=$(cass status --robot-format json 2>/dev/null); then
++    :
++else
+     echo "ERROR: cass status failed"
+     echo "FIX: Run 'cass doctor' to repair"
+     exit 2
+ fi

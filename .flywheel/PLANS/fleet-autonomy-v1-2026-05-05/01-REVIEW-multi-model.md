@@ -5,6 +5,23 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Executive verdict](#executive-verdict)
+- [Evidence used](#evidence-used)
+- [Per-primitive review](#per-primitive-review)
+  - [P1: Watcher uses `bv --robot-next`](#p1-watcher-uses-bv-robot-next)
+  - [P2: Watcher self-asserts on divergent loops](#p2-watcher-self-asserts-on-divergent-loops)
+  - [P3: `flywheel-loop status` primitive with computed verdict](#p3-flywheel-loop-status-primitive-with-computed-verdict)
+  - [P4: Cross-orch reservation TTL enforcement](#p4-cross-orch-reservation-ttl-enforcement)
+  - [P5: Pane freeze auto-respawn permit-gate](#p5-pane-freeze-auto-respawn-permit-gate)
+  - [P6: Repair-bead-aging escalation pipeline](#p6-repair-bead-aging-escalation-pipeline)
+  - [M: Morning ritual artifact](#m-morning-ritual-artifact)
+- [Missing primitives](#missing-primitives)
+- [Sequencing](#sequencing)
+- [Acceptance gates](#acceptance-gates)
+- [Multi-model-triangulation](#multi-model-triangulation)
+- [Final recommendation](#final-recommendation)
 # Fleet Autonomy v1 Review - GPT-5.5 /planning-workflow exact-prompt
 
 Review date: 2026-05-05  

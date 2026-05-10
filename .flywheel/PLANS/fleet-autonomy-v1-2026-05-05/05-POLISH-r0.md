@@ -5,6 +5,31 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [0. Read-Only Receipt](#0-read-only-receipt)
+- [1. Per-Bead Polish Scorecard](#1-per-bead-polish-scorecard)
+  - [Row 1 - `flywheel-181e5`](#row-1-flywheel-181e5)
+  - [Row 2 - `flywheel-3ctlx`](#row-2-flywheel-3ctlx)
+  - [Row 3 - `flywheel-2j1dw`](#row-3-flywheel-2j1dw)
+  - [Row 4 - `flywheel-2bxry`](#row-4-flywheel-2bxry)
+  - [Row 5 - `flywheel-12k9o`](#row-5-flywheel-12k9o)
+  - [Row 6 - `flywheel-3lslr`](#row-6-flywheel-3lslr)
+  - [Row 7 - `flywheel-iaws7`](#row-7-flywheel-iaws7)
+  - [Row 8 - `flywheel-3nf8t`](#row-8-flywheel-3nf8t)
+  - [Row 9 - `flywheel-3q54j`](#row-9-flywheel-3q54j)
+  - [Row 10 - `flywheel-1ctd2`](#row-10-flywheel-1ctd2)
+  - [Row 11 - `flywheel-3lslr` Tombstone Overlay](#row-11-flywheel-3lslr-tombstone-overlay)
+  - [Row 12 - `flywheel-iaws7` Tombstone Overlay](#row-12-flywheel-iaws7-tombstone-overlay)
+- [2. Composite Per-Bead Score](#2-composite-per-bead-score)
+- [3. Cross-Bead Patterns](#3-cross-bead-patterns)
+- [4. Top 5 High-Impact Recommendations](#4-top-5-high-impact-recommendations)
+- [5. Edits-As-Patch Table](#5-edits-as-patch-table)
+- [6. Cross-Plan-Edge Integrity Report](#6-cross-plan-edge-integrity-report)
+- [7. Deprecation Tombstone Audit](#7-deprecation-tombstone-audit)
+- [8. Convergence Assessment](#8-convergence-assessment)
+- [9. Evidence Appendix](#9-evidence-appendix)
+- [10. Callback Metrics](#10-callback-metrics)
 # 05-POLISH-r0 - Fleet Autonomy Bead Dispatchability Review
 
 Task ID: polish-review-fleet-autonomy-2026-05-05

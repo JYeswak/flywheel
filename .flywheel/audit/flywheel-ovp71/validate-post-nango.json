@@ -1,0 +1,17 @@
+{
+  "success": true,
+  "path": "/Users/josh/.claude/skills/nango-integrations",
+  "mode": "skill",
+  "skill_name": "nango-integrations",
+  "errors": [],
+  "warnings": [
+    {
+      "code": "POSSIBLE_SECRET",
+      "message": "Possible secret pattern 'access_token' found in scripts/provider-oauth-doctor.sh: review before publishing"
+    },
+    {
+      "code": "POSSIBLE_SECRET",
+      "message": "Possible secret pattern 'api_key' found in scripts/probe-nango-env-divergence.sh: review before publishing"
+    }
+  ]
+}

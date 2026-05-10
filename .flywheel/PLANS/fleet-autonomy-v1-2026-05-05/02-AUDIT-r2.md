@@ -5,6 +5,16 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Executive verdict](#1-executive-verdict)
+- [2. Convergence test result](#2-convergence-test-result)
+- [3. NEW critical findings](#3-new-critical-findings)
+- [4. PERSISTING findings](#4-persisting-findings)
+- [5. PARTIALLY resolved](#5-partially-resolved)
+- [6. REGRESSIONS](#6-regressions)
+- [7. Blunder-hunt second pass](#7-blunder-hunt-second-pass)
+- [8. Convergence call](#8-convergence-call)
 # Fleet Autonomy v1 - R2 Convergence Audit
 
 ---

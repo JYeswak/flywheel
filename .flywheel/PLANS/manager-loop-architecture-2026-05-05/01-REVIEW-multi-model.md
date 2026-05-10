@@ -5,6 +5,18 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [0. Execution Note](#0-execution-note)
+- [1. Executive Verdict](#1-executive-verdict)
+- [2. Plan-vs-Prior-Plan Reconciliation](#2-plan-vs-prior-plan-reconciliation)
+- [3. Architecture Critique](#3-architecture-critique)
+- [4. Schema Audit](#4-schema-audit)
+- [5. Tick Interval Analysis](#5-tick-interval-analysis)
+- [6. Migration Risk Register](#6-migration-risk-register)
+- [7. Specific Revisions](#7-specific-revisions)
+- [8. Cross-Orch Evidence Integration](#8-cross-orch-evidence-integration)
+- [9. Open Questions For Human Decision](#9-open-questions-for-human-decision)
 # 01-REVIEW-multi-model - Manager Loop Architecture
 
 ## 0. Execution Note

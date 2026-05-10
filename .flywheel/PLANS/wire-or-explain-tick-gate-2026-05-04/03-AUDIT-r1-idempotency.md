@@ -5,6 +5,31 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Scope](#1-scope)
+- [2. Verdict](#2-verdict)
+- [3. Findings Table](#3-findings-table)
+- [4. Detailed Findings](#4-detailed-findings)
+  - [IDEMP-01 - Stable event identity is not yet mechanical](#idemp-01-stable-event-identity-is-not-yet-mechanical)
+  - [IDEMP-02 - Append-only writer needs crash-tail semantics](#idemp-02-append-only-writer-needs-crash-tail-semantics)
+  - [IDEMP-03 - Evidence hashes need canonicalization](#idemp-03-evidence-hashes-need-canonicalization)
+  - [IDEMP-04 - Cross-orch writes need owner and merge rules](#idemp-04-cross-orch-writes-need-owner-and-merge-rules)
+  - [IDEMP-05 - Tick-close retry key is missing](#idemp-05-tick-close-retry-key-is-missing)
+  - [IDEMP-06 - Override boundary is undefined](#idemp-06-override-boundary-is-undefined)
+  - [IDEMP-07 - Dogfood import needs crash-resume proof](#idemp-07-dogfood-import-needs-crash-resume-proof)
+  - [IDEMP-08 - Replay reducer must be single and deterministic](#idemp-08-replay-reducer-must-be-single-and-deterministic)
+  - [IDEMP-09 - Bootstrap state must survive session reset](#idemp-09-bootstrap-state-must-survive-session-reset)
+  - [IDEMP-10 - DCG reset blocker needs duplicate suppression](#idemp-10-dcg-reset-blocker-needs-duplicate-suppression)
+  - [IDEMP-11 - Path-line proof is evidence, not identity](#idemp-11-path-line-proof-is-evidence-not-identity)
+  - [IDEMP-12 - Plan round identity ambiguity](#idemp-12-plan-round-identity-ambiguity)
+- [5. TRUE-Blocker Class Evaluation](#5-true-blocker-class-evaluation)
+- [6. Cross-Bead Findings](#6-cross-bead-findings)
+- [7. Replay-Test Scenarios](#7-replay-test-scenarios)
+- [8. Score Rationale](#8-score-rationale)
+- [9. Phase 4 Mapping](#9-phase-4-mapping)
+- [10. Systems Reading](#10-systems-reading)
+- [11. Final Decision](#11-final-decision)
 # Phase 3 AUDIT r1 - Idempotency Lens
 
 Plan: `wire-or-explain-tick-gate-2026-05-04`

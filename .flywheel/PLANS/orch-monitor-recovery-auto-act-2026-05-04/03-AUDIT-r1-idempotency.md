@@ -5,6 +5,39 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Verdict](#1-verdict)
+- [2. Evidence Read](#2-evidence-read)
+- [3. Audit Frame](#3-audit-frame)
+- [4. Findings Table](#4-findings-table)
+- [5. Detailed Findings](#5-detailed-findings)
+  - [IDEMP-OM-01 - Stable observation/action identity is underspecified](#idemp-om-01-stable-observation-action-identity-is-underspecified)
+  - [IDEMP-OM-02 - Notify dedupe semantics are not mechanical yet](#idemp-om-02-notify-dedupe-semantics-are-not-mechanical-yet)
+  - [IDEMP-OM-03 - Recovery rehearsal and apply need target-generation leases](#idemp-om-03-recovery-rehearsal-and-apply-need-target-generation-leases)
+  - [IDEMP-OM-04 - Peer mesh claims need explicit CAS semantics](#idemp-om-04-peer-mesh-claims-need-explicit-cas-semantics)
+  - [IDEMP-OM-05 - Freshness windows can duplicate observations](#idemp-om-05-freshness-windows-can-duplicate-observations)
+  - [IDEMP-OM-06 - Mission-licensed actions can duplicate dispatch](#idemp-om-06-mission-licensed-actions-can-duplicate-dispatch)
+  - [IDEMP-OM-07 - L60 signal dedupe is unspecified](#idemp-om-07-l60-signal-dedupe-is-unspecified)
+  - [IDEMP-OM-08 - Doctor/status must be pure derived views](#idemp-om-08-doctor-status-must-be-pure-derived-views)
+  - [IDEMP-OM-09 - B12 replay fixture coverage must be explicit](#idemp-om-09-b12-replay-fixture-coverage-must-be-explicit)
+  - [IDEMP-OM-10 - Launchd safety net needs shared tick identity](#idemp-om-10-launchd-safety-net-needs-shared-tick-identity)
+  - [IDEMP-OM-11 - Three-surface doctrine must cite reducer semantics](#idemp-om-11-three-surface-doctrine-must-cite-reducer-semantics)
+- [6. Cross-Bead Findings](#6-cross-bead-findings)
+- [7. TRUE-Blocker Class Evaluation](#7-true-blocker-class-evaluation)
+- [8. Replay-Test Scenarios](#8-replay-test-scenarios)
+  - [RTS-1 - Double tick in one cadence window](#rts-1-double-tick-in-one-cadence-window)
+  - [RTS-2 - Protected-session notify repeated](#rts-2-protected-session-notify-repeated)
+  - [RTS-3 - Recovery rehearsal no side effects](#rts-3-recovery-rehearsal-no-side-effects)
+  - [RTS-4 - Peer first-responder race](#rts-4-peer-first-responder-race)
+  - [RTS-5 - Mission-licensed dispatch retry](#rts-5-mission-licensed-dispatch-retry)
+  - [RTS-6 - L60 duplicate signal rows](#rts-6-l60-duplicate-signal-rows)
+  - [RTS-7 - Doctor/status repeated reads](#rts-7-doctor-status-repeated-reads)
+  - [RTS-8 - L110 B28/B29 replay](#rts-8-l110-b28-b29-replay)
+- [9. L110 Idempotency Check](#9-l110-idempotency-check)
+- [10. Composite Score](#10-composite-score)
+- [11. Phase 4 Required Mitigation Mapping](#11-phase-4-required-mitigation-mapping)
+- [12. Callback Metrics](#12-callback-metrics)
 # Phase 3 Audit R1 - Idempotency Lens
 
 ```text

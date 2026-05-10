@@ -6,6 +6,19 @@ bead: flywheel-install
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Executive Verdict](#executive-verdict)
+- [System Frame](#system-frame)
+- [1. Current-State Inventory of `templates/flywheel-install/`](#1-current-state-inventory-of-templates-flywheel-install)
+- [2. 5-Skill Polish Gate as Install-Time Check Design](#2-5-skill-polish-gate-as-install-time-check-design)
+- [3. Surface-Discovery Problem](#3-surface-discovery-problem)
+- [4. Cross-Repo Coordination](#4-cross-repo-coordination)
+- [5. Scope-Aware-Rename Interaction](#5-scope-aware-rename-interaction)
+- [6. Phase 3 Trigger Conditions](#6-phase-3-trigger-conditions)
+- [7. Bead Decomposition and DAG Sketch](#7-bead-decomposition-and-dag-sketch)
+- [8. Risks and Mitigations](#8-risks-and-mitigations)
+- [9. success criteria](#9-success-criteria)
 # Phase 2 Flywheel-Install 5-Skill Polish Gate Plan
 
 date: 2026-05-05

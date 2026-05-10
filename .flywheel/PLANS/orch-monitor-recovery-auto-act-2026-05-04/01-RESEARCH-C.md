@@ -5,6 +5,40 @@ created: 2026-05-04
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Executive summary](#1-executive-summary)
+  - [Architecture diagram](#architecture-diagram)
+- [2. Core design principles](#2-core-design-principles)
+- [3. Proposed tick handler and supervisor CLI](#3-proposed-tick-handler-and-supervisor-cli)
+- [4. Tick handler algorithm](#4-tick-handler-algorithm)
+- [5. Ledger schema](#5-ledger-schema)
+- [6. Action table](#6-action-table)
+  - [6.1 frozen-worker](#6-1-frozen-worker)
+  - [6.2 frozen-orchestrator](#6-2-frozen-orchestrator)
+  - [6.3 protected-session-frozen](#6-3-protected-session-frozen)
+  - [6.4 dead-codex](#6-4-dead-codex)
+  - [6.5 queued-not-submitted](#6-5-queued-not-submitted)
+  - [6.6 idle-with-work-available](#6-6-idle-with-work-available)
+  - [6.7 blocker-stuck-flywheel-class](#6-7-blocker-stuck-flywheel-class)
+  - [6.8 true-josh-blocker](#6-8-true-josh-blocker)
+  - [6.9 phantom-joshua-blocker](#6-9-phantom-joshua-blocker)
+  - [6.10 stale-ledger-misread-as-current](#6-10-stale-ledger-misread-as-current)
+  - [6.11 no-tick-3d](#6-11-no-tick-3d)
+  - [6.12 fleet-comms-silent](#6-12-fleet-comms-silent)
+  - [6.13 substrate-corrupt](#6-13-substrate-corrupt)
+  - [6.14 multi-session-storm](#6-14-multi-session-storm)
+  - [6.15 passive-ledger-keeper-tick](#6-15-passive-ledger-keeper-tick)
+- [7. Joshua-notify gate spec](#7-joshua-notify-gate-spec)
+- [8. launchd safety-net design](#8-launchd-safety-net-design)
+- [9. Calling-in-sick mesh failover](#9-calling-in-sick-mesh-failover)
+- [10. Fault-injection self-test design](#10-fault-injection-self-test-design)
+- [11. Phase 4 bead DAG](#11-phase-4-bead-dag)
+- [12. CoralRaven asks as bead candidates](#12-coralraven-asks-as-bead-candidates)
+- [13. Open questions for Joshua](#13-open-questions-for-joshua)
+- [14. Risks](#14-risks)
+- [15. Skills library cited](#15-skills-library-cited)
+- [16. Acceptance summary](#16-acceptance-summary)
 # 01-RESEARCH-C - Lane C Implementation Design
 
 Plan: `orch-monitor-recovery-auto-act-2026-05-04`
@@ -511,6 +545,7 @@ Action sequence:
 5. If active dispatch exists, inject resume prompt with callback contract.
 6. Verify four-state dispatch receipt if a prompt is resent.
 
+<!-- AGENT-ANCHOR: section-1 -->
 Idempotency key:
 
 ```text
@@ -847,6 +882,7 @@ Joshua-notify trigger:
 
 - Only if the session is client-critical and the driver cannot be repaired.
 
+<!-- AGENT-ANCHOR: section-2 -->
 Doctor field:
 
 ```text
@@ -1196,6 +1232,7 @@ Draft:
 </plist>
 ```
 
+<!-- AGENT-ANCHOR: section-3 -->
 Install command design:
 
 ```bash

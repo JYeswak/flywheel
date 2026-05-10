@@ -22,6 +22,20 @@ socraticode_queries: 4
 indexed_chunks_observed: 40
 ---
 
+## Contents
+
+- [1. Executive Verdict](#1-executive-verdict)
+- [2. Critical Findings](#2-critical-findings)
+- [3. High Findings](#3-high-findings)
+- [4. Medium Findings](#4-medium-findings)
+- [5. Low Findings](#5-low-findings)
+- [6. Blunder-Hunt - Categorical Errors](#6-blunder-hunt-categorical-errors)
+- [7. Convergence Call](#7-convergence-call)
+- [8. Open Questions Promoted From Integrate-Revisions](#8-open-questions-promoted-from-integrate-revisions)
+- [9. Cross-Plan Coherence Audit](#9-cross-plan-coherence-audit)
+- [10. Required Plan Patch Checklist For R2](#10-required-plan-patch-checklist-for-r2)
+- [11. R2 Acceptance Probe](#11-r2-acceptance-probe)
+- [12. Final Audit Receipt](#12-final-audit-receipt)
 # Fleet Autonomy v1 - R1 Convergence Audit
 
 ## 1. Executive Verdict

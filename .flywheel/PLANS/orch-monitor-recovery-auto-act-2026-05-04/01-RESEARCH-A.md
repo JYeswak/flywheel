@@ -5,6 +5,21 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Executive Summary](#executive-summary)
+- [Scope And Evidence](#scope-and-evidence)
+- [Skills Adopted And Evaluated](#skills-adopted-and-evaluated)
+- [Protected Session Policy](#protected-session-policy)
+- [Per-Class Taxonomy](#per-class-taxonomy)
+- [Today’s Failure Mapping](#today-s-failure-mapping)
+  - [skillos:1 frozen for 13 minutes](#skillos-1-frozen-for-13-minutes)
+  - [alps:1 Vercel deploy blocker uncommunicated](#alps-1-vercel-deploy-blocker-uncommunicated)
+  - [Two flywheel Codex workers idle while peer orch was down](#two-flywheel-codex-workers-idle-while-peer-orch-was-down)
+- [Cross-Cutting Findings](#cross-cutting-findings)
+- [Recommendations For Lane B/C](#recommendations-for-lane-b-c)
+- [Lane A Metrics](#lane-a-metrics)
+- [Ladder Check](#ladder-check)
 # Lane A: Problem-Space Failure-Class Taxonomy — orch-monitor-recovery-auto-act
 
 ## Executive Summary

@@ -5,6 +5,38 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Source Grounding](#source-grounding)
+- [1. Where I Disagree With The Framing](#1-where-i-disagree-with-the-framing)
+- [2. Stocks And Flows Audit - P1](#2-stocks-and-flows-audit-p1)
+- [2. Stocks And Flows Audit - P2](#2-stocks-and-flows-audit-p2)
+- [2. Stocks And Flows Audit - P3](#2-stocks-and-flows-audit-p3)
+- [2. Stocks And Flows Audit - P4](#2-stocks-and-flows-audit-p4)
+- [2. Stocks And Flows Audit - P5](#2-stocks-and-flows-audit-p5)
+- [2. Stocks And Flows Audit - P6](#2-stocks-and-flows-audit-p6)
+- [2. Stocks And Flows Audit - M](#2-stocks-and-flows-audit-m)
+- [3. Loop Topology](#3-loop-topology)
+- [4. Leverage Points - P1](#4-leverage-points-p1)
+- [4. Leverage Points - P2](#4-leverage-points-p2)
+- [4. Leverage Points - P3](#4-leverage-points-p3)
+- [4. Leverage Points - P4](#4-leverage-points-p4)
+- [4. Leverage Points - P5](#4-leverage-points-p5)
+- [4. Leverage Points - P6](#4-leverage-points-p6)
+- [4. Leverage Points - M](#4-leverage-points-m)
+- [5. The Thing The Plan Does Not See](#5-the-thing-the-plan-does-not-see)
+- [6. Specific Revisions In My Voice](#6-specific-revisions-in-my-voice)
+  - [Revision 1 - Rename The Goal Stock](#revision-1-rename-the-goal-stock)
+  - [Revision 2 - Add Mission-Anchor Delta To P3 Before Morning Report](#revision-2-add-mission-anchor-delta-to-p3-before-morning-report)
+  - [Revision 3 - Replace Cooldown With State-Change Eligibility](#revision-3-replace-cooldown-with-state-change-eligibility)
+  - [Revision 4 - Make `bv` A Single Observation](#revision-4-make-bv-a-single-observation)
+  - [Revision 5 - Move P4 Release Authority Out Of The Watcher](#revision-5-move-p4-release-authority-out-of-the-watcher)
+  - [Revision 6 - Add Night-Time Controller Actions To M](#revision-6-add-night-time-controller-actions-to-m)
+  - [Revision 7 - Add Custody Loop Primitive](#revision-7-add-custody-loop-primitive)
+  - [Revision 8 - Make Repair Priority Flow Into `bv`, Not Around It](#revision-8-make-repair-priority-flow-into-bv-not-around-it)
+  - [Revision 9 - Add Value Failure To Verdict Thresholds](#revision-9-add-value-failure-to-verdict-thresholds)
+  - [Revision 10 - Change Out Of Scope](#revision-10-change-out-of-scope)
+- [7. The Blunt Verdict](#7-the-blunt-verdict)
 # Donella Lens Review - Fleet Autonomy v1
 
 Task: `fleet-autonomy-v1-lane-donella-2026-05-05`

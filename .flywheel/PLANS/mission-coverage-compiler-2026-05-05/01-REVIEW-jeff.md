@@ -5,6 +5,47 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [0. Position](#0-position)
+- [1. Evidence Ledger](#1-evidence-ledger)
+- [2. Socraticode Ledger](#2-socraticode-ledger)
+- [3. What Is Already Shipped](#3-what-is-already-shipped)
+- [4. Counter-Thesis](#4-counter-thesis)
+- [5. Main Critique](#5-main-critique)
+- [6. C0 Critique](#6-c0-critique)
+- [7. C1 Critique](#7-c1-critique)
+- [8. C2 Critique](#8-c2-critique)
+- [9. C3 Critique](#9-c3-critique)
+- [10. C4 Critique](#10-c4-critique)
+- [11. C5 Critique](#11-c5-critique)
+- [12. Canonical CLI Audit](#12-canonical-cli-audit)
+- [13. Exit Codes](#13-exit-codes)
+- [14. JSON Schema](#14-json-schema)
+- [15. Markdown Renderer](#15-markdown-renderer)
+- [16. Replay Fixture](#16-replay-fixture)
+- [17. Scoring](#17-scoring)
+- [18. Open Questions - Stop Leaving Defaults Blank](#18-open-questions-stop-leaving-defaults-blank)
+- [19. Ship Order Fix](#19-ship-order-fix)
+- [20. Proposed Diff - Thin Compositor](#20-proposed-diff-thin-compositor)
+- [21. Proposed Diff - C3 Narrowing](#21-proposed-diff-c3-narrowing)
+- [22. Proposed Diff - C5 Ownership](#22-proposed-diff-c5-ownership)
+- [23. Proposed Diff - CLI Surface](#23-proposed-diff-cli-surface)
+- [24. Proposed Diff - Score](#24-proposed-diff-score)
+- [25. Jeff-Style Acceptance Gates](#25-jeff-style-acceptance-gates)
+- [26. What I Would File Later, Not Now](#26-what-i-would-file-later-not-now)
+- [27. What I Would Not File](#27-what-i-would-not-file)
+- [28. Upstream And Jeff Repo Boundary](#28-upstream-and-jeff-repo-boundary)
+- [29. Compatibility With Donella Lens](#29-compatibility-with-donella-lens)
+- [30. Compatibility With Multi-Model Lane](#30-compatibility-with-multi-model-lane)
+- [31. Joshua Taste](#31-joshua-taste)
+- [32. Final Recommendations](#32-final-recommendations)
+- [33. Revised Plan Skeleton](#33-revised-plan-skeleton)
+- [34. Scorecard](#34-scorecard)
+- [35. Callback Values](#35-callback-values)
+- [36. Appendix - Contested Plan Citations](#36-appendix-contested-plan-citations)
+- [37. Appendix - Jeff-Corpus Pattern Citations](#37-appendix-jeff-corpus-pattern-citations)
+- [38. Closing](#38-closing)
 # 01-REVIEW-jeff - Mission Coverage Compiler
 
 ## 0. Position

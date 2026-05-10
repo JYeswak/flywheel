@@ -5,6 +5,39 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Problem Statement](#1-problem-statement)
+- [2. Mechanism](#2-mechanism)
+- [3. Failure Mode Taxonomy](#3-failure-mode-taxonomy)
+- [4. Bead Count](#4-bead-count)
+- [5. Today-Wired Baseline](#5-today-wired-baseline)
+- [6. Three-Layer Fix Integration for Finding 9](#6-three-layer-fix-integration-for-finding-9)
+- [7. Phase 4 Bead DAG Preview](#7-phase-4-bead-dag-preview)
+- [8. Phase 3 AUDIT Lens Recommendation](#8-phase-3-audit-lens-recommendation)
+- [9. Preliminary Bead Acceptance Sketches](#9-preliminary-bead-acceptance-sketches)
+  - [B1 — ledger schema + writer](#b1-ledger-schema-writer)
+  - [B2 — ship-event classifier](#b2-ship-event-classifier)
+  - [B3 — wired detector](#b3-wired-detector)
+  - [B4 — wire-priority-ranker](#b4-wire-priority-ranker)
+  - [B5 — doctor fields](#b5-doctor-fields)
+  - [B6 — tick-close gate](#b6-tick-close-gate)
+  - [B7 — shadow/enforce/override](#b7-shadow-enforce-override)
+  - [B8 — dogfood import](#b8-dogfood-import)
+  - [B9 — fault-injection tests](#b9-fault-injection-tests)
+  - [B10 — L109 doctrine](#b10-l109-doctrine)
+  - [B11 — `/flywheel:wire-status`](#b11-flywheel-wire-status)
+  - [B12 — cross-orch rollout](#b12-cross-orch-rollout)
+  - [B13 — worker side-branch enforcement](#b13-worker-side-branch-enforcement)
+  - [B14 — DCG orphan reset blocker](#b14-dcg-orphan-reset-blocker)
+  - [B15 — substrate-loss memory + learn promotion](#b15-substrate-loss-memory-learn-promotion)
+- [10. Doctor and CLI Surface Contract](#10-doctor-and-cli-surface-contract)
+- [11. Rollout State Machine](#11-rollout-state-machine)
+- [12. Phase 3 Questions to Audit, Not Decide Here](#12-phase-3-questions-to-audit-not-decide-here)
+- [13. Source Claim Ledger](#13-source-claim-ledger)
+- [14. Convergence Metric](#14-convergence-metric)
+- [15. Ladder Check](#15-ladder-check)
+- [16. REFINE r2 Convergence Delta](#16-refine-r2-convergence-delta)
 # Phase 2 REFINE r1 — wire-or-explain-tick-gate-2026-05-04
 
 Generated: 2026-05-04T22:34Z

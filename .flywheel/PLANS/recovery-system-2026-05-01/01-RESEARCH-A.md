@@ -5,6 +5,83 @@ created: 2026-05-04
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Executive Summary](#executive-summary)
+- [Evidence Commands](#evidence-commands)
+- [Active Fleet Snapshot](#active-fleet-snapshot)
+- [1. Active State Taxonomy](#1-active-state-taxonomy)
+  - [Layer 1 - NTM/tmux session process state](#layer-1-ntm-tmux-session-process-state)
+  - [Layer 2 - Pane layout, pane title, active pane, pane command](#layer-2-pane-layout-pane-title-active-pane-pane-command)
+  - [Layer 3 - Agent CLI process state](#layer-3-agent-cli-process-state)
+  - [Layer 4 - Claude Code transcripts](#layer-4-claude-code-transcripts)
+  - [Layer 5 - Codex session state](#layer-5-codex-session-state)
+  - [Layer 6 - Gemini state](#layer-6-gemini-state)
+  - [Layer 7 - CASS cache / PreCompact context](#layer-7-cass-cache-precompact-context)
+  - [Layer 8 - Beads databases](#layer-8-beads-databases)
+  - [Layer 9 - Dirty repo worktrees](#layer-9-dirty-repo-worktrees)
+  - [Layer 10 - Agent Mail service state](#layer-10-agent-mail-service-state)
+  - [Layer 11 - Substrate registry](#layer-11-substrate-registry)
+  - [Layer 12 - Locked repo docs](#layer-12-locked-repo-docs)
+  - [Layer 13 - Fuckup-log](#layer-13-fuckup-log)
+  - [Layer 14 - Session topology](#layer-14-session-topology)
+  - [Layer 15 - Team roster / pulse state](#layer-15-team-roster-pulse-state)
+  - [Layer 16 - NTM fleet health daemon state](#layer-16-ntm-fleet-health-daemon-state)
+  - [Layer 17 - Loop state](#layer-17-loop-state)
+  - [Layer 18 - Tick receipts and flywheel logs](#layer-18-tick-receipts-and-flywheel-logs)
+  - [Layer 19 - In-flight dispatch context](#layer-19-in-flight-dispatch-context)
+  - [Layer 20 - Substrate-tentacle plans from this session](#layer-20-substrate-tentacle-plans-from-this-session)
+  - [Layer 21 - Project memory](#layer-21-project-memory)
+- [2. Reboot Survival Matrix](#2-reboot-survival-matrix)
+- [3. Existing Primitives Audit](#3-existing-primitives-audit)
+  - [Primitive A - `ntm checkpoint save`](#primitive-a-ntm-checkpoint-save)
+  - [Primitive B - `ntm checkpoint list`](#primitive-b-ntm-checkpoint-list)
+  - [Primitive C - `ntm checkpoint restore`](#primitive-c-ntm-checkpoint-restore)
+  - [Primitive D - `ntm checkpoint export`](#primitive-d-ntm-checkpoint-export)
+  - [Primitive E - `ntm-launchd.sh install <session>`](#primitive-e-ntm-launchd-sh-install-session)
+  - [Primitive F - `ntm save`](#primitive-f-ntm-save)
+  - [Primitive G - `ntm adopt`](#primitive-g-ntm-adopt)
+  - [Primitive H - `casr` / cross-agent-session-resumer](#primitive-h-casr-cross-agent-session-resumer)
+  - [Primitive I - `/flywheel:handoff`](#primitive-i-flywheel-handoff)
+- [4. Gap Analysis](#4-gap-analysis)
+  - [Gap 1 - No session watcher plists](#gap-1-no-session-watcher-plists)
+  - [Gap 2 - Watcher does not recreate missing sessions](#gap-2-watcher-does-not-recreate-missing-sessions)
+  - [Gap 3 - Stale `session_paths`](#gap-3-stale-session-paths)
+  - [Gap 4 - No exact checkpoint for core sessions](#gap-4-no-exact-checkpoint-for-core-sessions)
+  - [Gap 5 - Dirty worktree ownership not captured](#gap-5-dirty-worktree-ownership-not-captured)
+  - [Gap 6 - In-flight dispatches can orphan](#gap-6-in-flight-dispatches-can-orphan)
+  - [Gap 7 - Per-agent resume pointers missing](#gap-7-per-agent-resume-pointers-missing)
+  - [Gap 8 - Agent Mail service can be green but wedged](#gap-8-agent-mail-service-can-be-green-but-wedged)
+  - [Gap 9 - Team pulse missing](#gap-9-team-pulse-missing)
+  - [Gap 10 - Tentacle plans are in `/tmp`](#gap-10-tentacle-plans-are-in-tmp)
+  - [Gap 11 - CASR binary absent / provider mapping mismatch](#gap-11-casr-binary-absent-provider-mapping-mismatch)
+  - [Gap 12 - Recovery does not know boot readiness](#gap-12-recovery-does-not-know-boot-readiness)
+- [5. Failure Modes to Design Against](#5-failure-modes-to-design-against)
+  - [F1 - Reboot mid-worker-generation](#f1-reboot-mid-worker-generation)
+  - [F2 - Reboot during `ntm checkpoint save`](#f2-reboot-during-ntm-checkpoint-save)
+  - [F3 - Reboot with dirty git state](#f3-reboot-with-dirty-git-state)
+  - [F4 - Reboot with active Agent Mail FD leak](#f4-reboot-with-active-agent-mail-fd-leak)
+  - [F5 - Reboot during dispatch send](#f5-reboot-during-dispatch-send)
+  - [F6 - Launchd watcher fires before user login readiness](#f6-launchd-watcher-fires-before-user-login-readiness)
+  - [F7 - Two watchers race on same session](#f7-two-watchers-race-on-same-session)
+  - [F8 - Stale `session_paths` causes silent wrong repo](#f8-stale-session-paths-causes-silent-wrong-repo)
+  - [F9 - Agent CLI updates between crash and restore](#f9-agent-cli-updates-between-crash-and-restore)
+  - [F10 - Disk pressure prevents checkpoint write](#f10-disk-pressure-prevents-checkpoint-write)
+  - [F11 - Beads DB WAL or lock corruption](#f11-beads-db-wal-or-lock-corruption)
+  - [F12 - Locked `STATE.md` drift after reboot](#f12-locked-state-md-drift-after-reboot)
+  - [F13 - `/tmp` artifacts disappear](#f13-tmp-artifacts-disappear)
+  - [F14 - CASR provider path mismatch](#f14-casr-provider-path-mismatch)
+  - [F15 - Fleet health daemon reports success but sessions are absent](#f15-fleet-health-daemon-reports-success-but-sessions-are-absent)
+  - [F16 - Callback pane registry stale](#f16-callback-pane-registry-stale)
+- [6. References and Verified Paths](#6-references-and-verified-paths)
+  - [NTM command references](#ntm-command-references)
+  - [NTM launchd references](#ntm-launchd-references)
+  - [Skills](#skills)
+  - [State paths](#state-paths)
+  - [Agent Mail references](#agent-mail-references)
+  - [Active repo references](#active-repo-references)
+- [7. Recommended Recovery Architecture for Later Lanes](#7-recommended-recovery-architecture-for-later-lanes)
+- [8. Validation Ladder](#8-validation-ladder)
 # /flywheel:recovery Lane A - State Inventory + Reboot Surface Mapping
 
 Task: `recovery_lane_a_state_inventory`
@@ -267,6 +344,7 @@ Evidence:
 - Fuckup-log classes include `ntm-codex-queued-not-submitted` and
   `ntm-codex-submit-assurance-narrow-scope`.
 
+<!-- AGENT-ANCHOR: section-1 -->
 ### Layer 6 - Gemini state
 
 Storage location:
@@ -408,6 +486,7 @@ Reboot survival status today:
 
 Restoration cost/risk:
 
+<!-- AGENT-ANCHOR: section-2 -->
 - HIGH for dispatch coordination when workers rely on mail/file reservations.
 - FD leak or DB lock state can return as a wedge if not diagnosed.
 
@@ -551,6 +630,7 @@ Restoration cost/risk:
 - Roster helps identify repo/session ownership, but without pulse it cannot
   confirm recency.
 
+<!-- AGENT-ANCHOR: section-3 -->
 Evidence:
 
 - `team-roster.jsonl` exists, 6.6K.
@@ -702,6 +782,7 @@ Evidence:
   - `/tmp/pi_tentacle_substrate_plan.md`
   - `/tmp/vc_tentacle_substrate_plan.md`
 
+<!-- AGENT-ANCHOR: section-4 -->
 ### Layer 21 - Project memory
 
 Storage location:
@@ -837,6 +918,7 @@ Observed active-session checkpoint status:
 | `zeststream-v2` | 10 | 2026-02-06 | missing old desktop path |
 | `zesttube` | 10 | 2026-04-24 | `/Users/josh/Developer/zesttube` |
 
+<!-- AGENT-ANCHOR: section-5 -->
 Gap relative to full reboot survival:
 
 - Needs a "latest valid checkpoint for current active canonical session" view,
@@ -979,6 +1061,7 @@ What it captures/changes:
 
 What it does not capture:
 
+<!-- AGENT-ANCHOR: section-6 -->
 - It does not persist a reboot contract.
 - It does not save checkpoints.
 - It does not install watcher plists.
@@ -1123,6 +1206,7 @@ Almost-working primitive:
 
 Smallest closing primitive:
 
+<!-- AGENT-ANCHOR: section-7 -->
 - `recovery path-audit` that compares `ntm list`, team roster,
   session topology, checkpoint working dirs, and actual repo dirs.
 
@@ -1266,6 +1350,7 @@ Smallest closing primitive:
 - `recovery artifact-promote` copies named `/tmp` mission artifacts into a
   repo plan directory and records pointers in handoff.
 
+<!-- AGENT-ANCHOR: section-8 -->
 Complexity:
 
 - S.
@@ -1411,6 +1496,7 @@ Mitigation sketch:
   checkpoint working dir.
 - Any mismatch blocks restore until canonical path is selected.
 
+<!-- AGENT-ANCHOR: section-9 -->
 ### F9 - Agent CLI updates between crash and restore
 
 Scenario:

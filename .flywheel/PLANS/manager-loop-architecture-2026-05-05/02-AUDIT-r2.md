@@ -5,6 +5,25 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Executive Verdict](#1-executive-verdict)
+- [2. Convergence Test Result](#2-convergence-test-result)
+- [3. NEW Critical Findings](#3-new-critical-findings)
+- [4. PERSISTING Findings](#4-persisting-findings)
+- [5. PARTIALLY Resolved](#5-partially-resolved)
+- [6. REGRESSIONS](#6-regressions)
+- [7. Blunder-Hunt Second Pass](#7-blunder-hunt-second-pass)
+- [8. Convergence Call](#8-convergence-call)
+- [9. R1 Finding Closure Ledger](#9-r1-finding-closure-ledger)
+- [10. Cross-Plan Closure Ledger](#10-cross-plan-closure-ledger)
+- [11. Severity Accounting](#11-severity-accounting)
+- [12. R2 Audit Closeout](#12-r2-audit-closeout)
+- [13. Callback Fields](#13-callback-fields)
+- [14. Padding-Free Evidence Index](#14-padding-free-evidence-index)
+- [15. R3 Trigger Conditions](#15-r3-trigger-conditions)
+- [16. Beads-Workflow Handoff Notes](#16-beads-workflow-handoff-notes)
+- [17. Final Lines](#17-final-lines)
 # 02-AUDIT-r2 - Manager Loop Architecture
 
 ## 1. Executive Verdict

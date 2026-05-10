@@ -5,6 +5,19 @@ created: 2026-05-04
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [0. Source Decomposition Outputs](#0-source-decomposition-outputs)
+- [1. Unified Bead Spec Table](#1-unified-bead-spec-table)
+- [2. Cross-DAG Dependency Edges](#2-cross-dag-dependency-edges)
+- [3. Cycle Detection](#3-cycle-detection)
+- [4. CAP Enforcement](#4-cap-enforcement)
+- [5. Mermaid DAG (Unified)](#5-mermaid-dag-unified)
+- [6. Severity-Mapped Audit-Finding Coverage Matrix](#6-severity-mapped-audit-finding-coverage-matrix)
+- [7. Phase 5 Polish Targets](#7-phase-5-polish-targets)
+- [8. Self-Grade](#8-self-grade)
+- [9. Open Routing Decisions](#9-open-routing-decisions)
+- [10. Closeout](#10-closeout)
 # Phase 4 Unified Bead DAG - validator-v2-three-outcome-and-stock-backpressure-2026-05-04
 
 task_id: phase4-merge-synthesis-2026-05-04

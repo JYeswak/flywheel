@@ -5,6 +5,36 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Why This Plan Exists](#1-why-this-plan-exists)
+- [2. Hard Evidence](#2-hard-evidence)
+- [3. Paradigm Shift](#3-paradigm-shift)
+- [4. Atomic Primitives](#4-atomic-primitives)
+  - [W0 - Eligibility Preflight](#w0-eligibility-preflight)
+  - [W1 - Detector / Classifier](#w1-detector-classifier)
+  - [W2 - Permit Gate](#w2-permit-gate)
+  - [W3 - Threshold / Debounce](#w3-threshold-debounce)
+  - [W4 - Execution And Prompt Re-Injection](#w4-execution-and-prompt-re-injection)
+  - [W5 - Receipt / Learning Loop](#w5-receipt-learning-loop)
+  - [W6 - Backoff / Storm Control](#w6-backoff-storm-control)
+  - [W7 - Escalation And Notify-Fast](#w7-escalation-and-notify-fast)
+  - [W8 - Watcher Governance Loop](#w8-watcher-governance-loop)
+- [5. Donella Lens Applied](#5-donella-lens-applied)
+- [6. Jeff Lens Applied](#6-jeff-lens-applied)
+- [7. Per-Change Disposition Table](#7-per-change-disposition-table)
+- [8. Cross-Plan Relationships](#8-cross-plan-relationships)
+- [9. Cross-Research Input Integration](#9-cross-research-input-integration)
+- [10. Success Criteria](#10-success-criteria)
+- [11. In Scope / Out Of Scope](#11-in-scope-out-of-scope)
+- [12. Constraints](#12-constraints)
+- [13. Open Questions For r1 Audit](#13-open-questions-for-r1-audit)
+- [14. Ship Order](#14-ship-order)
+- [15. Verdict Thresholds](#15-verdict-thresholds)
+- [Appendix A - Review Citations](#appendix-a-review-citations)
+- [Appendix B - Socraticode And Skill Survey](#appendix-b-socraticode-and-skill-survey)
+- [Appendix C - Convergence Notes](#appendix-c-convergence-notes)
+- [Appendix D - Change Disposition Totals](#appendix-d-change-disposition-totals)
 # 00-PLAN - Watchdog Enablement r1
 
 Date: 2026-05-05

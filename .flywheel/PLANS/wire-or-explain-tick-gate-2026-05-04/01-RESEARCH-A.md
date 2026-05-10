@@ -5,6 +5,67 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Executive Summary](#executive-summary)
+- [Artifact-Class Taxonomy](#artifact-class-taxonomy)
+  - [1. Shell-script (`.sh` files in `.flywheel/scripts/`)](#1-shell-script-sh-files-in-flywheel-scripts)
+  - [2. Python-script (`.py` files, usually in `.flywheel/scripts/`)](#2-python-script-py-files-usually-in-flywheel-scripts)
+  - [3. Doctor-field (JSON field exposed by flywheel-loop doctor `--json` output)](#3-doctor-field-json-field-exposed-by-flywheel-loop-doctor-json-output)
+  - [4. AGENTS.md L-rule (doctrinal rule, registered in AGENTS-CANONICAL.md)](#4-agents-md-l-rule-doctrinal-rule-registered-in-agents-canonical-md)
+  - [5. Doctrine-feedback-md file (narrative memory file in `~/.claude/projects/*/memory/`)](#5-doctrine-feedback-md-file-narrative-memory-file-in-claude-projects-memory)
+  - [6. Slash-command (`/flywheel:status`, `/flywheel:fleet-observatory`, etc.)](#6-slash-command-flywheel-status-flywheel-fleet-observatory-etc)
+  - [7. Skill (in `~/.claude/skills/`)](#7-skill-in-claude-skills)
+  - [8. Launchd-plist (in `~/Library/LaunchAgents/` or `.flywheel/launchd/`)](#8-launchd-plist-in-library-launchagents-or-flywheel-launchd)
+  - [9. Hook (cc-hooks or post-commit, in `.git/hooks/` or `.claude/settings.json`)](#9-hook-cc-hooks-or-post-commit-in-git-hooks-or-claude-settings-json)
+  - [10. MCP-server (in `~/.claude/mcp-servers/` or third-party)](#10-mcp-server-in-claude-mcp-servers-or-third-party)
+  - [11. Post-commit-hook (in `.git/hooks/post-commit`)](#11-post-commit-hook-in-git-hooks-post-commit)
+  - [12. Dispatch-template (in `~/.flywheel/templates/` or `~/.claude/skills/*/dispatch*.md`)](#12-dispatch-template-in-flywheel-templates-or-claude-skills-dispatch-md)
+  - [13. Ledger-schema (in `~/.local/state/flywheel/` or `.flywheel/ledger-schema/`)](#13-ledger-schema-in-local-state-flywheel-or-flywheel-ledger-schema)
+  - [14. Test-file (in `tests/` or `.flywheel/tests/`)](#14-test-file-in-tests-or-flywheel-tests)
+  - [15. README-section (in `README.md` or skill `README.md`, documenting an artifact)](#15-readme-section-in-readme-md-or-skill-readme-md-documenting-an-artifact)
+  - [16. Three-surface AGENTS chunk (in AGENTS.md, AGENTS-CANONICAL.md, and skill README)](#16-three-surface-agents-chunk-in-agents-md-agents-canonical-md-and-skill-readme)
+- [Wiring Mechanisms: The Tick-Handler Chain](#wiring-mechanisms-the-tick-handler-chain)
+  - [Mechanism 1: Tick Handler in `flywheel-loop` (primary consumer)](#mechanism-1-tick-handler-in-flywheel-loop-primary-consumer)
+  - [Mechanism 2: Launchd Plists (background scheduler)](#mechanism-2-launchd-plists-background-scheduler)
+  - [Mechanism 3: Runtime Probes Emitting Doctor Fields](#mechanism-3-runtime-probes-emitting-doctor-fields)
+  - [Mechanism 4: Hooks (commit-time, dispatch-time, pre-compact)](#mechanism-4-hooks-commit-time-dispatch-time-pre-compact)
+  - [Mechanism 5: Dispatch Templates (task routing)](#mechanism-5-dispatch-templates-task-routing)
+- [Today's Unwired Artifacts Audit](#today-s-unwired-artifacts-audit)
+  - [Artifact Inventory (git log since 2026-05-04 00:00:00)](#artifact-inventory-git-log-since-2026-05-04-00-00-00)
+  - [Wiring Status: Each Artifact](#wiring-status-each-artifact)
+- [Cross-Cutting Findings](#cross-cutting-findings)
+  - [1. Measurement >> Action (Observation-to-Action Gap)](#1-measurement-action-observation-to-action-gap)
+  - [2. Doctrine-Only Artifacts (L-rules) Have No Programmatic Consumer](#2-doctrine-only-artifacts-l-rules-have-no-programmatic-consumer)
+  - [3. Three-Surface Consistency Exists, Enforcement Does Not](#3-three-surface-consistency-exists-enforcement-does-not)
+  - [4. Test Files Exist but Are Not Invoked](#4-test-files-exist-but-are-not-invoked)
+  - [5. Applied Scripts Without Scheduled Invocation](#5-applied-scripts-without-scheduled-invocation)
+- [Anti-Patterns Observed Today](#anti-patterns-observed-today)
+  - [Anti-Pattern 1: Cite-Without-Consume](#anti-pattern-1-cite-without-consume)
+  - [Anti-Pattern 2: Doctor-Field-Without-Reader](#anti-pattern-2-doctor-field-without-reader)
+  - [Anti-Pattern 3: L-Rule-Without-Enforcer](#anti-pattern-3-l-rule-without-enforcer)
+  - [Anti-Pattern 4: Apply-Mode-Without-Trigger](#anti-pattern-4-apply-mode-without-trigger)
+  - [Anti-Pattern 5: Test-Without-CI](#anti-pattern-5-test-without-ci)
+  - [Anti-Pattern 6: Plist-Not-Loaded](#anti-pattern-6-plist-not-loaded)
+- [Sibling Plan Cross-Reference: Lane A Findings from `orch-monitor-recovery-auto-act`](#sibling-plan-cross-reference-lane-a-findings-from-orch-monitor-recovery-auto-act)
+- [Meadows Leverage Point #4: Self-Organization](#meadows-leverage-point-4-self-organization)
+- [Recommendations for Lane B & C](#recommendations-for-lane-b-c)
+  - [For Lane B (Ecosystem Audit):](#for-lane-b-ecosystem-audit)
+  - [For Lane C (Implementation Design):](#for-lane-c-implementation-design)
+- [Ladder Confirmation](#ladder-confirmation)
+- [Lane A Metrics](#lane-a-metrics)
+- [Lane A — Evidence-Based Corrections (second pass, 2026-05-04 ~22:50Z)](#lane-a-evidence-based-corrections-second-pass-2026-05-04-22-50z)
+  - [Correction 1: Today's probes ARE probe-side wired (not just fallback)](#correction-1-today-s-probes-are-probe-side-wired-not-just-fallback)
+  - [Correction 2: L101-L108 ARE 3-surface present](#correction-2-l101-l108-are-3-surface-present)
+  - [Correction 3: Tick handler `.flywheel/flywheel-loop-tick` reads ONE field, no actions](#correction-3-tick-handler-flywheel-flywheel-loop-tick-reads-one-field-no-actions)
+  - [Correction 4: Today's slash command is dispatched](#correction-4-today-s-slash-command-is-dispatched)
+  - [Correction 5: `~/.flywheel/canonical-meta-rules/sync.sh` is the only end-to-end-wired today artifact](#correction-5-flywheel-canonical-meta-rules-sync-sh-is-the-only-end-to-end-wired-today-artifact)
+  - [Correction 6: launchd plist for any of today's 6 probes — ABSENT](#correction-6-launchd-plist-for-any-of-today-s-6-probes-absent)
+  - [Refined today corpus classification](#refined-today-corpus-classification)
+  - [Top-3 cross-cutting findings (refined)](#top-3-cross-cutting-findings-refined)
+  - [Smallest-set consumer-types (refined)](#smallest-set-consumer-types-refined)
+  - [Failure modes (refined)](#failure-modes-refined)
+  - [Final JSON summary](#final-json-summary)
 # Lane A: Artifact-Class Taxonomy & Wiring Evidence — wire-or-explain-tick-gate
 
 **Status:** RESEARCH COMPLETE  
@@ -576,6 +637,7 @@ Eight L-rules (L101-L108) added to AGENTS.md. L102 exists in AGENTS-CANONICAL.md
 
 ---
 
+<!-- AGENT-ANCHOR: section-1 -->
 ## Wiring Mechanisms: The Tick-Handler Chain
 
 Today's flywheel codebase has **five observable wiring mechanisms** that consume artifacts:

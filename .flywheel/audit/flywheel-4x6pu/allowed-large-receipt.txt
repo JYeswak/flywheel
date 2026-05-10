@@ -1,0 +1,20 @@
+# Allowed-large receipt evidence
+
+validate-callback.py is 840 lines (~2.1x python threshold).
+Per recommendations.jsonl validate-callback-R001 'document or split' note,
+this dispatch chose document path. The receipt comment is at lines 2-9 of
+validate-callback.py (canonical-cli-scoping-allow-large).
+
+Split candidate (deferred to future bead): lens-fail rules currently inline
+could move to a sibling module.
+
+#!/usr/bin/env python3
+# canonical-cli-scoping-allow-large: validate-callback is the close-validation
+# gate for every flywheel callback, very high blast radius, and currently
+# ~840 lines (~2.1x python threshold). flywheel-62mf9 audit (recommendation
+# validate-callback-R001) flagged this for "document or split". Split
+# candidates: lens-fail rules (currently inline) could move to a sibling
+# module — that is filed as a future per-surface bead. For now this file
+# stays whole with a documented receipt; landing --info introspection (this
+# bead, flywheel-4x6pu) is the higher-leverage agent-ergonomics win.
+"""Build and validate flywheel callback validation receipts."""

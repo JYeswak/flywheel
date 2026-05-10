@@ -16,6 +16,34 @@ actual_composite: 9.68
 artifact_class: revised_plan
 ---
 
+## Contents
+
+- [00. R2 Contract](#00-r2-contract)
+- [01. Executive R2 Verdict](#01-executive-r2-verdict)
+- [02. Evidence Base](#02-evidence-base)
+- [03. Socraticode And Skill Baseline](#03-socraticode-and-skill-baseline)
+- [04. R2 Primitive Graph](#04-r2-primitive-graph)
+- [05. P0 Existing Source Reader Harness](#05-p0-existing-source-reader-harness)
+- [06. P1 Repo Reality Normalizer](#06-p1-repo-reality-normalizer)
+- [07. P2 Coverage Matrix Schema And Compiler Core](#07-p2-coverage-matrix-schema-and-compiler-core)
+- [08. P3 Claim And Failure Normalizer](#08-p3-claim-and-failure-normalizer)
+- [09. P4 Authority Grant And Consumer Projection Contracts](#09-p4-authority-grant-and-consumer-projection-contracts)
+- [10. P5 Renderer And Replay Harness](#10-p5-renderer-and-replay-harness)
+- [11. Finding Dispositions](#11-finding-dispositions)
+- [12. Disposition Corrections From Audit Table](#12-disposition-corrections-from-audit-table)
+- [13. Cross-Plan Reconciliation](#13-cross-plan-reconciliation)
+- [14. Authority Model](#14-authority-model)
+- [15. Counter.Thesis Resolution](#15-counter-thesis-resolution)
+- [16. CLI Scope](#16-cli-scope)
+- [17. Success Criteria](#17-success-criteria)
+- [18. Failure Conditions](#18-failure-conditions)
+- [19. Ship Order](#19-ship-order)
+- [20. Implementation Boundaries](#20-implementation-boundaries)
+- [21. Open Questions Closed In Plan-Space](#21-open-questions-closed-in-plan-space)
+- [22. R2 Change Log](#22-r2-change-log)
+- [23. Review Rubric](#23-review-rubric)
+- [24. Final R2 Decision](#24-final-r2-decision)
+- [25. Callback Facts](#25-callback-facts)
 # Mission Coverage Compiler R2 Plan
 
 ## 00. R2 Contract

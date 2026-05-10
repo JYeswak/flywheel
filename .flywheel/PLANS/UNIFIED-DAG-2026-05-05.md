@@ -5,6 +5,46 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Executive Summary](#1-executive-summary)
+- [2. Source Evidence](#2-source-evidence)
+- [3. Unified Bead Register](#3-unified-bead-register)
+- [4. Unified Mermaid Graph](#4-unified-mermaid-graph)
+- [5. Cross-Plan Edge Ledger](#5-cross-plan-edge-ledger)
+- [6. Unified Wave Dispatch Plan](#6-unified-wave-dispatch-plan)
+  - [Wave 1 - Ship-First Contract Freeze](#wave-1-ship-first-contract-freeze)
+  - [Wave 2 - A0 And Remaining Foundations](#wave-2-a0-and-remaining-foundations)
+  - [Wave 3 - First Runtime Contracts](#wave-3-first-runtime-contracts)
+  - [Wave 4 - Shared Surface And Suppression](#wave-4-shared-surface-and-suppression)
+  - [Wave 5 - Tombstones And First Mission Authority Grant](#wave-5-tombstones-and-first-mission-authority-grant)
+  - [Wave 6 - Mirror And Repair Baselines](#wave-6-mirror-and-repair-baselines)
+  - [Wave 7 - Cutover Governor And Fleet/Docs Advisory Projection](#wave-7-cutover-governor-and-fleet-docs-advisory-projection)
+  - [Wave 8 - Tick Driver, Manager Projection, Renderer](#wave-8-tick-driver-manager-projection-renderer)
+  - [Wave 9 - Mission Replay And Burn-In](#wave-9-mission-replay-and-burn-in)
+- [7. Acceptance Gates Per Wave](#7-acceptance-gates-per-wave)
+- [8. Outstanding Plan-Space Work That Does Not Block Wave 1](#8-outstanding-plan-space-work-that-does-not-block-wave-1)
+- [9. TRUE Joshua-Blocker Class Identification](#9-true-joshua-blocker-class-identification)
+- [10. First-Wave Dispatch Packets](#10-first-wave-dispatch-packets)
+  - [Packet 1 - flywheel-njf5c](#packet-1-flywheel-njf5c)
+  - [Packet 2 - flywheel-2dywy](#packet-2-flywheel-2dywy)
+  - [Packet 3 - flywheel-3g75v](#packet-3-flywheel-3g75v)
+  - [Packet 4 - flywheel-181e5](#packet-4-flywheel-181e5)
+  - [Packet 5 - flywheel-3ctlx](#packet-5-flywheel-3ctlx)
+- [11. Risk Register](#11-risk-register)
+- [12. Ship Decision](#12-ship-decision)
+- [13. Dispatch Control Appendix](#13-dispatch-control-appendix)
+  - [Wave 1 Control Ledger](#wave-1-control-ledger)
+  - [Wave 2 Control Ledger](#wave-2-control-ledger)
+  - [Wave 3 Control Ledger](#wave-3-control-ledger)
+  - [Wave 4 Control Ledger](#wave-4-control-ledger)
+  - [Wave 5 Control Ledger](#wave-5-control-ledger)
+  - [Wave 6 Control Ledger](#wave-6-control-ledger)
+  - [Wave 7 Control Ledger](#wave-7-control-ledger)
+  - [Wave 8 Control Ledger](#wave-8-control-ledger)
+  - [Wave 9 Control Ledger](#wave-9-control-ledger)
+  - [Operator Guardrails](#operator-guardrails)
+- [14. Rollup Validation](#14-rollup-validation)
 # Unified 29-Bead DAG Rollup And Ship Decision
 Artifact: `.flywheel/PLANS/UNIFIED-DAG-2026-05-05.md`
 Task: `unified-dag-rollup-2026-05-05`

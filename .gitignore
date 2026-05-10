@@ -51,6 +51,9 @@ __pycache__/
 /state.db
 /storage.sqlite3
 
+# Beads compliance audit dir (managed by /beads-compliance-and-completion-verification skill)
+/beads_compliance_audit/
+
 # Sediment + backups (archive under .git-archive/, never commit)
 AGENTS.md.bak.*
 .beads.bak.*
@@ -69,3 +72,10 @@ AGENTS.md.bak.*
 # Recovery scratch
 .flywheel/.STATE.md.preview.*
 .flywheel/.reconcile-*.diff
+
+# F4 (filesystem-as-RAG): no committed .bak files (per flywheel-at83y, sister flywheel-s8tdd doctrine)
+# Peer-pane scratch backups (.bak.scaffold-*, .bak.b56fix*, .bak.<ISO>) are working-tree only
+*.bak
+*.bak.*
+.flywheel/**/*.bak
+.flywheel/**/*.bak.*

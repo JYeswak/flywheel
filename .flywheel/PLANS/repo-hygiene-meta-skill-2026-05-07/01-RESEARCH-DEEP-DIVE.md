@@ -5,6 +5,31 @@ created: 2026-05-07
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Method](#method)
+- [Socraticode Ledger](#socraticode-ledger)
+- [Section 1 - Per-Repo Trauma Classes](#section-1-per-repo-trauma-classes)
+  - [flywheel](#flywheel)
+  - [mobile-eats](#mobile-eats)
+  - [alpsinsurance](#alpsinsurance)
+  - [zesttube](#zesttube)
+  - [skillos](#skillos)
+- [Section 2 - Cross-Repo Patterns](#section-2-cross-repo-patterns)
+- [Section 3 - Per-Tooling Residue](#section-3-per-tooling-residue)
+- [Section 4 - .gitignore Coverage Gaps](#section-4-gitignore-coverage-gaps)
+- [Section 5 - Existing Prior Art](#section-5-existing-prior-art)
+- [Section 6 - Proposed `hygiene-targets.yaml` Schema Draft](#section-6-proposed-hygiene-targets-yaml-schema-draft)
+  - [flywheel draft targets](#flywheel-draft-targets)
+  - [mobile-eats draft targets](#mobile-eats-draft-targets)
+  - [alpsinsurance draft targets](#alpsinsurance-draft-targets)
+  - [zesttube draft targets](#zesttube-draft-targets)
+  - [skillos draft targets](#skillos-draft-targets)
+- [Section 7 - Proposed Bead DAG (Preliminary)](#section-7-proposed-bead-dag-preliminary)
+- [Section 8 - Inline Skill Composition Inventory and Universal Prompt Template](#section-8-inline-skill-composition-inventory-and-universal-prompt-template)
+  - [Universal prompt template](#universal-prompt-template)
+- [Measurement Summary](#measurement-summary)
+- [Recommendation](#recommendation)
 # Repo Hygiene Meta-Skill Phase 1 Research Deep Dive
 
 Generated: 2026-05-07T20:03:00Z

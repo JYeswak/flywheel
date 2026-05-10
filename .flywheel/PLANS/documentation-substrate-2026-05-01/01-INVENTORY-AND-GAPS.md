@@ -5,6 +5,21 @@ created: 2026-05-04
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [Survey Inputs](#survey-inputs)
+- [Totals](#totals)
+  - [Rows By Kind](#rows-by-kind)
+- [Proposed README Schema](#proposed-readme-schema)
+- [Top-20 Priority Backfill List](#top-20-priority-backfill-list)
+- [Cross-Cutting Gap Themes](#cross-cutting-gap-themes)
+  - [Theme A — Systemic Category Gaps](#theme-a-systemic-category-gaps)
+  - [Theme B — Repeated README Blocks](#theme-b-repeated-readme-blocks)
+  - [Theme C — Stale Existing Docs](#theme-c-stale-existing-docs)
+  - [Theme D — Best-Fit Existing Skills](#theme-d-best-fit-existing-skills)
+  - [Theme E — Mermaid Placement](#theme-e-mermaid-placement)
+- [Validation Ladder](#validation-ladder)
+- [Full Inventory Matrix](#full-inventory-matrix)
 # Documentation Substrate Inventory and Gap Matrix
 
 Lane 1 inventory only. This document does not implement docs substrate, hooks, doctor checks, or process changes.

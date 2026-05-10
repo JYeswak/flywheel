@@ -1,0 +1,233 @@
+{
+  "skill_name": "skill-autoresearch",
+  "skill_path": "/Users/josh/.claude/skills/skill-autoresearch",
+  "skill_type": "domain",
+  "gate_scores": [
+    {
+      "gate_name": "structure",
+      "gate_number": 1,
+      "score": 9.0,
+      "max_score": 10.0,
+      "evidence": [
+        {
+          "description": "SKILL.md exists",
+          "value": "true",
+          "impact": "positive"
+        },
+        {
+          "description": "Has frontmatter",
+          "value": "true",
+          "impact": "positive"
+        },
+        {
+          "description": "Has name field",
+          "value": "skill-autoresearch",
+          "impact": "positive"
+        },
+        {
+          "description": "Has description field",
+          "value": "present",
+          "impact": "positive"
+        },
+        {
+          "description": "Line count in acceptable range",
+          "value": "288",
+          "impact": "neutral"
+        },
+        {
+          "description": "references/ exists",
+          "value": "4 files",
+          "impact": "positive"
+        },
+        {
+          "description": "scripts/ exists",
+          "value": "3 files",
+          "impact": "positive"
+        },
+        {
+          "description": "examples/ exists",
+          "value": "2 files",
+          "impact": "positive"
+        }
+      ],
+      "remediation": [
+        "Adjust SKILL.md to 200-250 lines (currently 288)"
+      ]
+    },
+    {
+      "gate_name": "trigger_quality",
+      "gate_number": 2,
+      "score": 8.0,
+      "max_score": 10.0,
+      "evidence": [
+        {
+          "description": "Trigger phrases",
+          "value": "16",
+          "impact": "positive"
+        },
+        {
+          "description": "Second-person voice",
+          "value": "2 instances",
+          "impact": "neutral"
+        }
+      ],
+      "remediation": [
+        "Remove 2 second-person phrases (you should/need/can)"
+      ]
+    },
+    {
+      "gate_name": "progressive_disclosure",
+      "gate_number": 3,
+      "score": 8.0,
+      "max_score": 10.0,
+      "evidence": [
+        {
+          "description": "Reference files",
+          "value": "4",
+          "impact": "positive"
+        },
+        {
+          "description": "Cross-references in SKILL.md",
+          "value": "3",
+          "impact": "positive"
+        },
+        {
+          "description": "SKILL.md length (disclosure)",
+          "value": "288",
+          "impact": "neutral"
+        }
+      ],
+      "remediation": [
+        "Move detail sections to references/ to reduce from 288 to 200-250 lines"
+      ]
+    },
+    {
+      "gate_name": "actionability",
+      "gate_number": 4,
+      "score": 8.0,
+      "max_score": 10.0,
+      "evidence": [
+        {
+          "description": "Markdown tables",
+          "value": "7",
+          "impact": "positive"
+        },
+        {
+          "description": "Checklist items",
+          "value": "0",
+          "impact": "negative"
+        },
+        {
+          "description": "Code blocks/formulas",
+          "value": "8",
+          "impact": "positive"
+        },
+        {
+          "description": "Decision framework",
+          "value": "present",
+          "impact": "positive"
+        }
+      ],
+      "remediation": [
+        "Add implementation checklist with - [ ] items"
+      ]
+    },
+    {
+      "gate_name": "anti_patterns",
+      "gate_number": 5,
+      "score": 10.0,
+      "max_score": 10.0,
+      "evidence": [
+        {
+          "description": "Anti-Patterns section",
+          "value": "present",
+          "impact": "positive"
+        },
+        {
+          "description": "Anti-pattern entries",
+          "value": "10",
+          "impact": "positive"
+        },
+        {
+          "description": "Fix/remedy column",
+          "value": "present",
+          "impact": "positive"
+        }
+      ],
+      "remediation": []
+    },
+    {
+      "gate_name": "operational_tooling",
+      "gate_number": 6,
+      "score": 10.0,
+      "max_score": 10.0,
+      "evidence": [
+        {
+          "description": "Main script",
+          "value": "skill-grader.py",
+          "impact": "positive"
+        },
+        {
+          "description": "Script line count",
+          "value": "1398",
+          "impact": "positive"
+        },
+        {
+          "description": "Uses dataclasses",
+          "value": "true",
+          "impact": "positive"
+        },
+        {
+          "description": "Uses argparse",
+          "value": "true",
+          "impact": "positive"
+        },
+        {
+          "description": "JSON output mode",
+          "value": "true",
+          "impact": "positive"
+        },
+        {
+          "description": "--config flag",
+          "value": "true",
+          "impact": "positive"
+        },
+        {
+          "description": "__main__ guard",
+          "value": "true",
+          "impact": "positive"
+        }
+      ],
+      "remediation": []
+    },
+    {
+      "gate_name": "sources",
+      "gate_number": 7,
+      "score": 10.0,
+      "max_score": 10.0,
+      "evidence": [
+        {
+          "description": "sources.md",
+          "value": "found",
+          "impact": "positive"
+        },
+        {
+          "description": "Reference count",
+          "value": "26",
+          "impact": "positive"
+        },
+        {
+          "description": "Categorized references",
+          "value": "true",
+          "impact": "positive"
+        }
+      ],
+      "remediation": []
+    }
+  ],
+  "composite_score": 9.0,
+  "verdict": "PASS",
+  "weakest_gate": "trigger_quality",
+  "weakest_score": 8.0,
+  "errors": []
+}

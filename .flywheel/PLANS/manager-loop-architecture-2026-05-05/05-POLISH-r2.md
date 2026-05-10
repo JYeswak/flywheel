@@ -5,6 +5,31 @@ created: 2026-05-06
 frontmatter_source: scaffold-doc-frontmatter
 ---
 
+## Contents
+
+- [1. Method](#1-method)
+- [2. Per-Bead r2 Scorecard](#2-per-bead-r2-scorecard)
+- [3. Bead Details](#3-bead-details)
+  - [`flywheel-njf5c` - P01 canonical CLI namespace matrix](#flywheel-njf5c-p01-canonical-cli-namespace-matrix)
+  - [`flywheel-2dywy` - P02 replay fixture golden outputs](#flywheel-2dywy-p02-replay-fixture-golden-outputs)
+  - [`flywheel-3g75v` - P03 freeze bv robot command contract](#flywheel-3g75v-p03-freeze-bv-robot-command-contract)
+  - [`flywheel-2s5pv` - A0 manager state read model](#flywheel-2s5pv-a0-manager-state-read-model)
+  - [`flywheel-3t1e7` - A2 scoring governor top-N queue](#flywheel-3t1e7-a2-scoring-governor-top-n-queue)
+  - [`flywheel-27vu5` - A4 shared surface renderer](#flywheel-27vu5-a4-shared-surface-renderer)
+  - [`flywheel-maosi` - A1 ops-log compatibility mirror](#flywheel-maosi-a1-ops-log-compatibility-mirror)
+  - [`flywheel-gvs12` - A5 migration callback cutover governor](#flywheel-gvs12-a5-migration-callback-cutover-governor)
+  - [`flywheel-2i4j9` - A3 manager tick driver](#flywheel-2i4j9-a3-manager-tick-driver)
+- [4. r0 -> r1 -> r2 Delta Table](#4-r0-r1-r2-delta-table)
+- [5. r1 Edit Verification](#5-r1-edit-verification)
+- [6. Systemic Gap Re-Check](#6-systemic-gap-re-check)
+- [7. NEW Edits Identified In r2](#7-new-edits-identified-in-r2)
+- [8. Convergence Assessment](#8-convergence-assessment)
+- [9. Read-Only Receipt](#9-read-only-receipt)
+- [10. Callback Values](#10-callback-values)
+- [11. Final Verdict](#11-final-verdict)
+- [12. Required Excerpt Samples](#12-required-excerpt-samples)
+- [13. Dependency and Wave Re-Check](#13-dependency-and-wave-re-check)
+- [14. Implementation Dispatch Readiness Notes](#14-implementation-dispatch-readiness-notes)
 # Manager Loop Phase 5 Polish Review - r2
 
 Artifact: `.flywheel/PLANS/manager-loop-architecture-2026-05-05/05-POLISH-r2.md`
