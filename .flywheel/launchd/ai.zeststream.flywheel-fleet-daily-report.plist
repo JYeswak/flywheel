@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.zeststream.flywheel-fleet-daily-report</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/josh/Developer/flywheel/.flywheel/scripts/daily-report-enabled-repos.sh</string>
+    <string>--no-notify</string>
+    <string>--json</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key>
+    <integer>8</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+  <key>RunAtLoad</key>
+  <false/>
+  <key>KeepAlive</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>/Users/josh/.local/state/flywheel/flywheel-fleet-daily-report.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/josh/.local/state/flywheel/flywheel-fleet-daily-report.err.log</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key>
+    <string>/Users/josh</string>
+    <key>PATH</key>
+    <string>/Users/josh/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+</dict>
+</plist>
