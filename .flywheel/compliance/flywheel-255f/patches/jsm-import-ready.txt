@@ -1,0 +1,15 @@
+# jsm-import-ready patch for flywheel-255f
+# Source files (not git-tracked, JSM-unmanaged as of 2026-05-10):
+#   /Users/josh/.claude/skills/.flywheel/lib/misc.d/part-04-doctor_check_pane_work_signal-to-selected_incident_slugs.sh
+#   /Users/josh/.claude/skills/.flywheel/lib/portable/core.d/part-02-portable_doctor.sh
+#   /Users/josh/.claude/commands/flywheel/_shared/dispatch-template.md
+
+## CHANGE 1: misc.d/part-04 — added doctor_check_pane_capture function before doctor_check_pane_work_signal
+## (full function body in the live file; SHA below)
+b39be2c7ae98e99345ba2df90c390b98f5679cd846afaeb3fb2d7852d63fce47  /Users/josh/.claude/skills/.flywheel/lib/misc.d/part-04-doctor_check_pane_work_signal-to-selected_incident_slugs.sh
+
+## CHANGE 2: portable/core.d/part-02 — added pane_capture variables, computation, and packet hook
+0df315615a8268e9ee8775f02ca418f4e36ef8668b6479fa3cc4734493625b41  /Users/josh/.claude/skills/.flywheel/lib/portable/core.d/part-02-portable_doctor.sh
+
+## CHANGE 3: commands/flywheel/_shared/dispatch-template.md — added CAPTURE-PROVENANCE ASSERTION block before VALIDATION BLOCK
+bbd70598fca3ab488a78bc35c48dc3706e4ace808286ba80ae85916d5ad951cb  /Users/josh/.claude/commands/flywheel/_shared/dispatch-template.md
