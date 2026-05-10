@@ -1,0 +1,87 @@
+{
+  "task_id": "flywheel-tvd9q",
+  "dispatch_id": "flywheel-tvd9q-59d699",
+  "identity_name": "CloudyMill",
+  "pane": "flywheel:0.2",
+  "callback_pane": "flywheel:1",
+  "title": "[agentmail-fd-pressure] daemon FD exhaustion under reservation traffic — reproducer + plist ulimit bump",
+  "did": "4/4",
+  "compliance_score": 920,
+  "compliance_max": 1000,
+  "four_lens": {
+    "brand": 9,
+    "sniff": 9,
+    "jeff": 9,
+    "public": 9
+  },
+  "score_components": {
+    "fix_correctness_canonical_probe_implemented": 200,
+    "AG2_baselines_5_series_plus_heavy_stress": 180,
+    "AG3_decision_tree_outcome_benign_data_driven": 150,
+    "AG4_doctor_invariant_implemented_and_passes": 130,
+    "canonical_cli_scoping_full_triad": 100,
+    "evidence_md_with_mechanism_explanation": 80,
+    "L61_ecosystem_touch_handled": 30,
+    "scope_discipline_NO_unwarranted_ulimit_bump": 50,
+    "subtotal": 920,
+    "total": 920
+  },
+  "did_gates": [
+    {
+      "gate": "AG1: build agentmail-fd-pressure-probe.sh with concurrent reservation traffic + lsof FD sampling",
+      "status": "done",
+      "evidence": ".flywheel/scripts/agentmail-fd-pressure-probe.sh — 367-line script with --info/--schema/--examples/--probe/--baselines/--doctor canonical CLI triad"
+    },
+    {
+      "gate": "AG2: sample idle/single/burst4/burst8/sustained baselines + capture peak/headroom",
+      "status": "done",
+      "evidence": "baselines.json: 5 series all peaking at 14 FDs (0.34% of soft limit); heavy-stress.json: 16-worker × 10s also peaks at 14 FDs"
+    },
+    {
+      "gate": "AG3: route per decision tree (>70 bump / 40-70 monitor / <40 benign)",
+      "status": "done",
+      "evidence": "Worst-case peak = 0.34%, far below 40% threshold; verdict=benign_no_action; verdict_route=none (NO route to skillos:1, ulimit bump unnecessary)"
+    },
+    {
+      "gate": "AG4: doctor invariant agentmail_fd_count_under_pressure",
+      "status": "done",
+      "evidence": "doctor.json: invariant=agentmail_fd_count_under_pressure, status=pass, threshold_pct=85, fd_pct=0.34; --doctor mode in same probe binary"
+    }
+  ],
+  "files_touched": [
+    ".flywheel/scripts/agentmail-fd-pressure-probe.sh",
+    ".flywheel/receipts/flywheel-tvd9q/audit/evidence.md",
+    ".flywheel/receipts/flywheel-tvd9q/audit/baselines.json",
+    ".flywheel/receipts/flywheel-tvd9q/audit/heavy-stress.json",
+    ".flywheel/receipts/flywheel-tvd9q/audit/doctor.json",
+    ".flywheel/receipts/flywheel-tvd9q/audit/info.json",
+    ".flywheel/receipts/flywheel-tvd9q/audit/schema.json",
+    ".flywheel/receipts/flywheel-tvd9q/audit/pinned-shas.txt",
+    ".flywheel/receipts/flywheel-tvd9q/audit/compliance-pack.json"
+  ],
+  "beads_filed": [],
+  "beads_updated": ["flywheel-tvd9q"],
+  "no_bead_reason": "AG3 decision tree returned benign_no_action; no follow-up work warranted; doctor invariant in place to catch future regressions",
+  "fuckups_logged": [],
+  "skill_auto_routes": {
+    "canonical-cli-scoping": "yes",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "L61_ecosystem_touch": {
+    "agents_md_updated": "no",
+    "readme_updated": "not_applicable",
+    "no_touch_reason": "probe + doctor invariant; canonical decision-tree thresholds (70/40/85%) live in --info decision_thresholds, not in canonical doctrine. Doctor invariant promotion to canonical surface is a separate Petal-9 decision."
+  },
+  "L107_reservations": {
+    "files": ["/Users/josh/Developer/flywheel/.flywheel/scripts/agentmail-fd-pressure-probe.sh"],
+    "release_required": true
+  },
+  "L112_probe": {
+    "command": "/Users/josh/Developer/flywheel/.flywheel/scripts/agentmail-fd-pressure-probe.sh --doctor --json | jq -e '.status == \"pass\" and .invariant == \"agentmail_fd_count_under_pressure\"'",
+    "expected": "literal:true"
+  },
+  "mission_fitness": "adjacent",
+  "mission_rationale": "Closes the cross-orch storage-FD-blocker question with measurement; replaces speculation with a probe + decision tree + doctor invariant. Removes a false blocker from cross-orch coordination flow and leaves a doctor invariant for future regression detection. Serves continuous-orchestrator-uptime by clearing one active cross-orch blocker and grounding future decisions in data."
+}

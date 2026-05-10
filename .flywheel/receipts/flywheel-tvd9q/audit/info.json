@@ -1,0 +1,1 @@
+{"schema_version":"agentmail-fd-pressure-probe/v1","binary_sha256":"677e8959721d93d87cee348937090d9111f46c407026d0e8391422152a63de0b","soft_limit_default":4096,"decision_thresholds":{"ulimit_bump_justified_min_pct":70,"marginal_monitor_min_pct":40,"doctor_fail_pct":85}}

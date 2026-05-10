@@ -1,0 +1,7 @@
+branch: master
+head-pre: f1c6eb1c61bdb20aa4d8fd26ab3f859052a3842f
+probe-bytes:    14114
+probe-sha256: 677e8959721d93d87cee348937090d9111f46c407026d0e8391422152a63de0b
+daemon-pid-at-probe: 33104
+plist-soft-limit: 4096
+plist-hard-limit: 65536

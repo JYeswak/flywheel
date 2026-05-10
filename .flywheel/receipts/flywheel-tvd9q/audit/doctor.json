@@ -1,0 +1,1 @@
+{"schema_version":"agentmail-fd-pressure-probe/v1","timestamp":"2026-05-10T02:08:49Z","mode":"doctor","invariant":"agentmail_fd_count_under_pressure","daemon_pid":33104,"soft_limit":4096,"fd_count":14,"fd_pct":0.34,"threshold_pct":85,"status":"pass","verdict":"doctor_pass"}
