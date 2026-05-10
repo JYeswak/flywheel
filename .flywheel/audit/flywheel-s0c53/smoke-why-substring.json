@@ -1,0 +1,1 @@
+{"schema_version":"storage-headroom-watcher/v1","command":"why","id":"applied","status":"pass","match_count":1,"matches":[{"ts":"2026-05-10T17:10:32Z","action":"repair","status":"applied","sha256":"19b39ab2b66776c1486c0985ca3ab51ecbabadce524deae9ed0c07ac6aed750d","scope":"audit_log_dir","idempotency_key":"s0c53-evidence"}]}

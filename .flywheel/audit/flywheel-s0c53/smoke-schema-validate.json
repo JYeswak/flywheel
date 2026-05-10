@@ -1,0 +1,1 @@
+{"schema_version":"storage-headroom-watcher/v1","command":"schema","surface":"validate","fields":{"schema_version":"string","command":"\"validate\"","subject":"\"ledger-row\"|\"probe-binary\"","status":"\"pass\"|\"fail\"|\"refused\"","detail":"object"}}

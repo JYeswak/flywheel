@@ -1,0 +1,1 @@
+{"schema_version":"storage-headroom-watcher/v1","command":"validate","subject":"ledger-row","status":"fail","reason":"row is not valid JSON"}

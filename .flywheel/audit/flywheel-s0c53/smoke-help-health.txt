@@ -1,0 +1,1 @@
+topic: health — summarizes last 50 runs from $SCAFFOLD_AUDIT_LOG. Reports total_runs, last_run_ts, last_status, pass_rate, window. status=empty when log absent.
