@@ -1,0 +1,1 @@
+{"schema_version":"ntm-coordinator-shadow/v1","command":"validate","subject":"config","status":"pass","audit_log":"/Users/josh/.local/state/flywheel/ntm-coordinator-shadow-runs.jsonl","helper_lib":"/Users/josh/Developer/flywheel/.flywheel/lib/canonical-cli-helpers.sh","missing":[]}

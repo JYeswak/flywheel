@@ -1,0 +1,1 @@
+topic: repair — read-only by default; mutate with --apply --idempotency-key KEY. Scopes: audit-log-dir (ensure /Users/josh/.local/state/flywheel/ntm-coordinator-shadow-runs.jsonl parent exists), audit-log-truncate (clear ledger for testing), none (info default). Apply without --idempotency-key returns refused (rc 3). Daemon enable remains blocked by ntm#124 regardless.

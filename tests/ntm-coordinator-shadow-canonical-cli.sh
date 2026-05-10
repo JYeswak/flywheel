@@ -92,6 +92,44 @@ if "$SCRIPT" --schema 2>/dev/null | jq -e '.schema_version' >/dev/null; then
   pass "--schema envelope is well-formed JSON with schema_version"
 else fail "--schema well-formed"; fi
 
+# ===== fillin-specific assertions (flywheel-1fk5f.6) =====
+
+# Test 16: doctor returns >= 5 named substrate probes (not stub TODO) + ntm124 block context
+if "$SCRIPT" doctor --json 2>/dev/null \
+  | jq -e '.checks | length >= 5 and (any(.name == "ntm124_shadow_block_intact")) and (any(.name == "audit_log_writable"))' >/dev/null; then
+  pass "doctor: 5+ named substrate probes incl. ntm124_shadow_block_intact + audit_log_writable"
+else fail "doctor substrate probes"; fi
+
+# Test 17: repair scope is fillin-specific (audit-log-dir or audit-log-truncate), not 'todo';
+# preserves daemon_enable_blocked_until_ntm124_closes invariant
+if "$SCRIPT" repair --scope audit-log-truncate --dry-run --json 2>/dev/null \
+  | jq -e '.command == "repair" and .scope == "audit-log-truncate" and (.status != "todo") and (.daemon_enable_blocked_until_ntm124_closes == true)' >/dev/null; then
+  pass "repair --scope audit-log-truncate emits non-stub envelope + preserves ntm124 block"
+else fail "repair scope-specific"; fi
+
+# Test 18: validate enforces row schema (not 'todo')
+if "$SCRIPT" validate --row-json='{"ts":"2026-05-10T00:00:00Z","command":"check","schema_version":"x/v1"}' 2>/dev/null \
+  | jq -e '.command == "validate" and .subject == "row" and .status == "pass" and (.valid == true)' >/dev/null; then
+  pass "validate --row-json enforces row schema"
+else fail "validate row schema"; fi
+
+# Test 19: why <id> emits found|not_found|unavailable (not 'todo')
+if "$SCRIPT" why missing-test-id 2>/dev/null \
+  | jq -e '.command == "why" and (.status == "found" or .status == "not_found" or .status == "unavailable")' >/dev/null; then
+  pass "why <id> emits found|not_found|unavailable provenance status"
+else fail "why provenance status"; fi
+
+# Test 20: cmd_run check path still works + audit accretion wiring
+TEST_RECEIPT="$(mktemp)"
+trap 'rm -f "$TEST_RECEIPT"' EXIT
+cat > "$TEST_RECEIPT" <<'JSON'
+{"quota_status":"pass","metrics_status":"pass","eventstream_status":"pass","safety_status":"pass","approval_status":"pass","ready_bead_count":3,"idle_worker_count":2}
+JSON
+if "$SCRIPT" check --input "$TEST_RECEIPT" --json 2>/dev/null \
+  | jq -e '.status == "pass" and .decision == "recommend_dispatch" and (.daemon_enable_blocked_until_ntm124_closes == true)' >/dev/null; then
+  pass "cmd_run check --input passes through (not hijacked by scaffold) + ntm124 invariant intact"
+else fail "cmd_run check passthrough"; fi
+
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2

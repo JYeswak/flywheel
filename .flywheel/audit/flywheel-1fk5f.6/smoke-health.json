@@ -1,0 +1,1 @@
+{"schema_version":"ntm-coordinator-shadow/v1","command":"health","ts":"2026-05-10T18:57:23Z","status":"pass","reason":null,"audit_log":"/Users/josh/.local/state/flywheel/ntm-coordinator-shadow-runs.jsonl","recent_runs":2,"last_run_ts":"2026-05-10T18:57:05Z","last_run_age_seconds":18,"recent_decisions":["recommend_dispatch"],"recent_sessions":["flywheel"]}

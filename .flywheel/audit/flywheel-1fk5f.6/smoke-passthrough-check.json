@@ -1,0 +1,51 @@
+{
+  "status": "pass",
+  "decision": "recommend_dispatch",
+  "failure_class": "none",
+  "message": "shadow recommendation: dispatch capacity exists; daemon remains blocked",
+  "session": "flywheel",
+  "mode": "shadow",
+  "would_dispatch": true,
+  "actual_dispatch_performed": false,
+  "mutation_applied": false,
+  "auto_assign_enabled": false,
+  "daemon_enable_blocked_until_ntm124_closes": true,
+  "ntm124": "https://github.com/Dicklesworthstone/ntm/issues/124",
+  "command_not_run": "ntm assign --repo /Users/josh/Developer/flywheel --watch --auto",
+  "upstream_receipts": {
+    "quota": "pass",
+    "metrics": "pass",
+    "eventstream": "pass",
+    "safety": "pass",
+    "approval": "pass",
+    "ready_bead_count": 3,
+    "idle_worker_count": 2
+  },
+  "blockers": [
+    ""
+  ],
+  "idempotency_token": "e7256453d31805ee4f925b5ceece9ce9bd339e7cb483a7f998a6df95ea495b48",
+  "dry_run": true,
+  "apply": false,
+  "native_surface": "ntm coordinator assign",
+  "wrapper_surface": "ntm-coordinator-shadow",
+  "ttl_native": "single_shadow_snapshot",
+  "ttl_wrapper": "shadow_receipt_lifetime",
+  "ttl_decision": "recompute_before_dispatch",
+  "native_wrapper_delta": "coordinator_recommendation_only_daemon_blocked_ntm124",
+  "authorized_operations": [
+    "read_receipts",
+    "compute_shadow_recommendation",
+    "emit_shadow_receipt",
+    "preserve_ntm124_block"
+  ],
+  "forbidden_operations": [
+    "enable_daemon",
+    "run_ntm_assign_watch_auto",
+    "dispatch_without_approval",
+    "mutate_coordinator_config"
+  ],
+  "secret_scan_before_callback": "yes",
+  "quality_bar_passed": "yes",
+  "L112": "OK_ntm_migrate_W3aC"
+}
