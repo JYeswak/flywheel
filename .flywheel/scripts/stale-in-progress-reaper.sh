@@ -15,6 +15,17 @@ from pathlib import Path
 SCHEMA_VERSION = "stale-in-progress-reaper.v1"
 DEFAULT_REASON = "stale-in-progress-reaped (last 7d zero signal)"
 
+# Bead flywheel-8ht5f — label-based carve-outs. Beads with any of these
+# labels are NEVER auto-closed by the reaper, regardless of activity
+# signals. They mark intentionally-async work (upstream trackers,
+# cross-orch coordination, Joshua-gated decisions, defer-gated waits).
+DEFAULT_CARVE_OUT_LABELS = (
+    "upstream-tracker",
+    "cross-orch-active",
+    "joshua-gated",
+    "defer-gated",
+)
+
 
 def parse_ts(value):
     if not value:
@@ -93,6 +104,14 @@ class Config:
         self.jsonl_lib = Path(os.environ.get("FLYWHEEL_JSONL_APPEND_LIB", Path.home() / ".local/share/flywheel-watchers/lib/jsonl-append.sh")).expanduser()
         self.apply = args.apply
         self.dry_run = args.dry_run or not args.apply
+        # bead flywheel-8ht5f: label-based carve-outs (additive to
+        # existing assignee/commit/callback ACTIVE classification).
+        self.db_path = Path(os.environ.get("STALE_REAPER_DB", self.repo / ".beads/beads.db")).expanduser()
+        env_carve = os.environ.get("STALE_REAPER_CARVE_OUTS")
+        if env_carve:
+            self.carve_out_labels = tuple(s.strip() for s in env_carve.split(",") if s.strip())
+        else:
+            self.carve_out_labels = DEFAULT_CARVE_OUT_LABELS
 
 
 def issues_from_br(cfg):
@@ -151,8 +170,57 @@ def title_class(title):
     return " ".join(words[:3])[:80] if words else "untitled"
 
 
-def classify(cfg, row):
+def fetch_label_map(cfg):
+    """Bead flywheel-8ht5f: pull label sets from beads.db once.
+
+    Returns {bead_id: [label, ...]}. Empty if DB unreachable.
+    """
+    if not cfg.db_path.exists():
+        return {}
+    proc = run(
+        [
+            "sqlite3",
+            str(cfg.db_path),
+            "SELECT issue_id, GROUP_CONCAT(label, ',') FROM labels GROUP BY issue_id",
+        ],
+        cfg.repo,
+        timeout=10,
+    )
+    if proc.returncode != 0:
+        return {}
+    out = {}
+    for line in proc.stdout.splitlines():
+        if "|" not in line:
+            continue
+        bead_id, csv = line.split("|", 1)
+        labels = [s.strip() for s in csv.split(",") if s.strip()]
+        if labels:
+            out[bead_id.strip()] = labels
+    return out
+
+
+def classify(cfg, row, label_map=None):
+    label_map = label_map or {}
     bead_id = str(row.get("id") or "")
+    labels = label_map.get(bead_id, [])
+    # Bead flywheel-8ht5f: label-based carve-out check happens FIRST.
+    # Carved-out beads are protected even if no commit/callback/assignee
+    # activity exists — the labels themselves carry intent.
+    matched_carve = [lbl for lbl in labels if lbl in cfg.carve_out_labels]
+    if matched_carve:
+        return {
+            "bead_id": bead_id,
+            "classification": "CARVED_OUT",
+            "title": row.get("title") or "",
+            "priority": row.get("priority"),
+            "assignee": row.get("assignee"),
+            "updated_at": row.get("updated_at"),
+            "title_class": title_class(row.get("title")),
+            "labels": labels,
+            "carve_out_labels_matched": matched_carve,
+            "last_signal": {"kind": "carve_out_label", "value": matched_carve[0]},
+            "recommended_action": "keep",
+        }
     commit = recent_commit(cfg, bead_id)
     callback = recent_callback(cfg, bead_id)
     updated = parse_ts(row.get("updated_at") or row.get("updated") or row.get("modified_at"))
@@ -174,6 +242,7 @@ def classify(cfg, row):
         "assignee": row.get("assignee"),
         "updated_at": row.get("updated_at"),
         "title_class": title_class(row.get("title")),
+        "labels": labels,
         "last_signal": signal,
         "recommended_action": "close" if klass == "STALE" else "keep",
     }
@@ -186,10 +255,12 @@ def top_classes(stale):
 
 def scan(cfg):
     issues = issues_from_br(cfg)
-    classified = [classify(cfg, row) for row in issues]
+    label_map = fetch_label_map(cfg)
+    classified = [classify(cfg, row, label_map) for row in issues]
     stale = [x for x in classified if x["classification"] == "STALE"]
     active = [x for x in classified if x["classification"] == "ACTIVE"]
     recent = [x for x in classified if x["classification"] == "RECENTLY_TOUCHED"]
+    carved = [x for x in classified if x["classification"] == "CARVED_OUT"]
     status = "fail" if len(stale) > 5 else "pass"
     return {
         "schema_version": SCHEMA_VERSION,
@@ -203,9 +274,15 @@ def scan(cfg):
         "stale_count": len(stale),
         "active_count": len(active),
         "recently_touched_count": len(recent),
+        "carved_out_count": len(carved),
+        "carve_out_labels": list(cfg.carve_out_labels),
         "stale_in_progress_count_24h": len(stale),
         "stale_in_progress_top_classes": top_classes(stale),
         "candidates": stale,
+        "carved_out_preview": [
+            {"bead_id": x["bead_id"], "title": x["title"], "carve_out_labels_matched": x.get("carve_out_labels_matched", [])}
+            for x in carved
+        ],
         "classified": classified,
         "planned_actions": [{"bead_id": item["bead_id"], "action": "br close", "reason": DEFAULT_REASON} for item in stale],
         "ledger": str(cfg.ledger),

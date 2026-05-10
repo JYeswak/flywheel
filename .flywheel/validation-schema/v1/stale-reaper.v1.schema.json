@@ -1,0 +1,119 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "flywheel.stale-in-progress-reaper.v1",
+  "title": "Stale in-progress reaper scan envelope",
+  "description": "Output of .flywheel/scripts/stale-in-progress-reaper.sh --json. Donella leverage point #4 self-organization scan over in_progress beads. Bead flywheel-8ht5f.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "scan_ts",
+    "repo",
+    "window_days",
+    "status",
+    "dry_run",
+    "total_in_progress",
+    "stale_count",
+    "active_count",
+    "recently_touched_count",
+    "carved_out_count",
+    "carve_out_labels",
+    "candidates"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version":          {"type": "string", "enum": ["stale-in-progress-reaper.v1"]},
+    "scan_ts":                 {"type": "string", "format": "date-time"},
+    "repo":                    {"type": "string"},
+    "window_days":             {"type": "integer", "minimum": 1},
+    "status":                  {"type": "string", "enum": ["pass", "fail", "applied", "apply_failed"]},
+    "dry_run":                 {"type": "boolean"},
+    "apply":                   {"type": "boolean"},
+    "total_in_progress":       {"type": "integer", "minimum": 0},
+    "stale_count":             {"type": "integer", "minimum": 0},
+    "active_count":            {"type": "integer", "minimum": 0},
+    "recently_touched_count":  {"type": "integer", "minimum": 0},
+    "carved_out_count":        {"type": "integer", "minimum": 0},
+    "carve_out_labels":        {"type": "array",   "items": {"type": "string"}},
+    "stale_in_progress_count_24h": {"type": "integer", "minimum": 0},
+    "stale_in_progress_top_classes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["class", "count"],
+        "properties": {
+          "class": {"type": "string"},
+          "count": {"type": "integer", "minimum": 1}
+        }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/classified_bead"}
+    },
+    "carved_out_preview": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["bead_id", "carve_out_labels_matched"],
+        "properties": {
+          "bead_id":                  {"type": "string"},
+          "title":                    {"type": "string"},
+          "carve_out_labels_matched": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "classified": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/classified_bead"}
+    },
+    "planned_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["bead_id", "action", "reason"],
+        "properties": {
+          "bead_id": {"type": "string"},
+          "action":  {"type": "string", "enum": ["br close"]},
+          "reason":  {"type": "string"}
+        }
+      }
+    },
+    "actual_actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["bead_id", "action", "exit_code"],
+        "properties": {
+          "bead_id":                {"type": "string"},
+          "action":                 {"type": "string"},
+          "reason":                 {"type": "string"},
+          "exit_code":              {"type": "integer"},
+          "stdout":                 {"type": "string"},
+          "stderr":                 {"type": "string"},
+          "ledger_append_exit_code":{"type": "integer"},
+          "ledger_append_stderr":   {"type": "string"}
+        }
+      }
+    },
+    "ledger": {"type": "string"}
+  },
+  "definitions": {
+    "classified_bead": {
+      "type": "object",
+      "required": ["bead_id", "classification", "title", "recommended_action"],
+      "properties": {
+        "bead_id":              {"type": "string"},
+        "classification":       {"type": "string", "enum": ["STALE", "ACTIVE", "RECENTLY_TOUCHED", "CARVED_OUT"]},
+        "title":                {"type": "string"},
+        "priority":             {"type": ["integer", "null"]},
+        "assignee":             {"type": ["string", "null"]},
+        "updated_at":           {"type": ["string", "null"]},
+        "title_class":          {"type": "string"},
+        "labels":               {"type": "array", "items": {"type": "string"}},
+        "carve_out_labels_matched": {"type": "array", "items": {"type": "string"}},
+        "last_signal":          {"type": ["object", "null"]},
+        "recommended_action":   {"type": "string", "enum": ["close", "keep"]}
+      }
+    }
+  }
+}
