@@ -3,7 +3,7 @@
 **Task:** [validation-e2e-l70-chain-fixture] B12 smoke fails on orch-no-punt-chain jq argjson
 **Identity:** MagentaPond (codex-pane on flywheel:0.3)
 **Repo head pre:** post-flywheel-h17x-redispatch; post: this commit
-**Status:** done — bead's named premise (B12_AG6 jq error) FIXED by upstream; 3 NEW B12 failures filed as followups
+**Status:** BLOCKED-on-dep — work done (3/4 ACs met + 3 followups filed); bead structurally un-closeable per `br close` due to dep-block on parent `flywheel-1z65` (in_progress)
 **Mission fitness:** infrastructure — calibration win + L52-compliant gap surfacing.
 
 ## Verdict
@@ -145,3 +145,20 @@ Pack path: `.flywheel/evidence/flywheel-9ijf/`.
 - Sister disposition class today (calibration with followups): `flywheel-dn3d2` (also calibrate-to-upstream-migration shape)
 - Memory cross-refs: `feedback_calibrate_test_to_actual_contract_before_filing_upstream.md`, `feedback_dcg_prose_trigger_strip_dangerous_substrings.md` (used /tmp file pattern for 3 followup bodies to avoid DCG)
 - L-rules cited: L70 (no-punt — same-tick disposition), L71 (validate-and-redispatch discipline — preserved via followups), L52 (3 followups filed; not silent absorption), L120 (close before callback)
+
+---
+
+## Dep-block discovered post-close-attempt
+
+`br close flywheel-9ijf` returned: `Warning: Skipped flywheel-9ijf: blocked by: flywheel-1z65`. The bead has a `blocks` dependency edge on parent `flywheel-1z65` (status=in_progress, P1). Per beads-br semantics, 9ijf cannot close until 1z65 closes first.
+
+**Adjusted disposition: BLOCKED-on-dep, NOT DONE.** All my worker-side work IS done (calibration verified, 3 followups filed, evidence + journey entry committed). The bead is structurally un-closeable in this tick due to the dep edge.
+
+Orch action: either (a) close `flywheel-1z65` first then re-attempt `br close flywheel-9ijf`, or (b) remove/restructure the dep edge if it's a false-block (since 9ijf surfaced the failures while 1z65 is still doing the upstream validate-callback work — the dep direction may be wrong).
+
+`br_close_executed=failed` (not `not_applicable`) — close was attempted, br exited non-zero with explicit dep-block message.
+
+`blocker_type=flywheel_class blocker_class=dep_blocked_on_parent_in_progress`.
+
+This adds a 7th distinct disposition shape today: **dep-blocked-after-work-complete-class** — when worker-side work is done but the bead can't close because of a `blocks` dep edge to an in-progress parent. Not BLOCKED-on-incomplete-work (work is done); not DONE (close fails). Sister to today's other "precondition decides which gate fires" patterns, but the precondition is at the bead-graph layer rather than the data/cohort/cadence/external layer.
+
