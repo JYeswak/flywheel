@@ -1,0 +1,9 @@
+flywheel-summarize
+flywheel-sync
+flywheel-trauma-check
+flywheel-verdict
+flywheel.bak-2026-04-28-pre-substrate-intake
+flywheel-anchor
+flywheel-loop
+flywheel-friday-digest
+flywheel-codex-orient

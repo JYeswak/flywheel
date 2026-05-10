@@ -1,0 +1,9 @@
+flywheel-cass-correlate
+flywheel-digest
+flywheel-domain-spec-validate
+flywheel-pattern
+flywheel-quality
+flywheel-quality-gate
+flywheel-stale
+tick-skill-version-check.sh
+validate-skill-discovery-callback.sh
