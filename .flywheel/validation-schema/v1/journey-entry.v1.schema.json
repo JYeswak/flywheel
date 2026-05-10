@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/journey-entry/v1/journey-entry.v1.schema.json",
+  "title": "Per-bead journey entry v1",
+  "description": "Layer 1 of the per-bead narrative substrate (flywheel-o4b4h Layer 1, dispatched as flywheel-r0rox). Captures the worker's prose narrative for the bead at close-time so that downstream layers (post-merge auto-doc, daily-report rollup, session synthesis) have a structured input. Stored at <repo>/.flywheel/journal/<bead-id>.md as the prose body with a YAML frontmatter envelope conforming to this schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "bead_id",
+    "task_id",
+    "worker_identity",
+    "prose",
+    "ts",
+    "mission_fitness",
+    "commit_sha"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "journey-entry/v1",
+      "description": "Frozen schema name + version. Workers MUST emit this literal."
+    },
+    "bead_id": {
+      "type": "string",
+      "pattern": "^[a-z]+-[a-z0-9.]+$",
+      "minLength": 5,
+      "description": "The bead this entry narrates (e.g., flywheel-r0rox)."
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^[a-z]+-[a-z0-9.]+-[0-9a-f]{4,}$",
+      "minLength": 12,
+      "description": "Dispatch task id (bead-id + dispatch hash, e.g., flywheel-r0rox-6c5256)."
+    },
+    "worker_identity": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z]{3,}[A-Z][A-Za-z]+$",
+      "description": "Locked worker identity (e.g., MagentaPond) that owned this bead at close-time."
+    },
+    "prose": {
+      "type": "string",
+      "minLength": 250,
+      "maxLength": 1500,
+      "description": "Worker's prose narrative of what shipped, why, and what surprised. Target 50-200 words; bytes ~250-1500 (English ≈5-7 bytes/word). NOT a copy of the bead body or report.md — it is the SUBJECTIVE worker voice that downstream synthesis layers compose against."
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$",
+      "description": "ISO8601 timestamp at close-time (UTC, Z-suffix, second-precision)."
+    },
+    "mission_fitness": {
+      "enum": ["direct", "adjacent", "infrastructure", "drift"],
+      "description": "Mission-fitness class echoed from the dispatch packet (must match the value in the DONE/BLOCKED callback)."
+    },
+    "commit_sha": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{7,40}$",
+      "description": "Short or full git SHA of the commit that landed this bead's work. For BLOCKED dispositions, the SHA of the evidence-only commit."
+    },
+    "linked_incidents": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "description": "Optional. INCIDENTS.md anchor names (e.g., 'clobbered_doctrine_docs') referenced or surfaced by this bead. Used by the daily-report rollup to track incident churn."
+    },
+    "linked_l_rules": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^L[0-9]+$"
+      },
+      "uniqueItems": true,
+      "description": "Optional. L-rule numbers (e.g., 'L107', 'L70') promoted, exercised, or contested by this bead. Used by fleet-l-rule-lag probe to track promotion churn."
+    },
+    "linked_skills": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true,
+      "description": "Optional. Skill names (e.g., 'canonical-cli-scoping', 'beads-br') consulted, authored, or amended by this bead. Used by skill-autoresearch and skill-grader."
+    },
+    "narrative_tags": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]+$",
+        "minLength": 3,
+        "maxLength": 60
+      },
+      "uniqueItems": true,
+      "description": "Optional. Free-form lowercase-kebab tags for narrative clustering (e.g., 'recovery-primitive', 'calibrate-to-upstream', 'multi-actor-experiment'). Tags should match emerging skill_discovery sd_ids where applicable."
+    }
+  },
+  "examples": [
+    {
+      "schema_version": "journey-entry/v1",
+      "bead_id": "flywheel-r0rox",
+      "task_id": "flywheel-r0rox-6c5256",
+      "worker_identity": "MagentaPond",
+      "prose": "Authored the journey-entry/v1 schema as Layer 1 of the per-bead narrative substrate. Schema captures bead_id, task_id, worker_identity, prose (250-1500 bytes, ~50-200 words), ts, mission_fitness, commit_sha as required; linked_incidents, linked_l_rules, linked_skills, narrative_tags as optional. Extended mission-fitness-callback-validator.sh to require journey_entry_path and refuse decision=accept when absent. Updated dispatch-template.md callback contract to name the new field. Regression test covers both pass-with and reject-without paths. Layers 2-4 (post-merge auto-doc, daily rollup, session synthesis) sequence after this foundation.",
+      "ts": "2026-05-10T02:50:00Z",
+      "mission_fitness": "infrastructure",
+      "commit_sha": "abcd1234",
+      "linked_l_rules": ["L107", "L70", "L52", "L120"],
+      "linked_skills": ["canonical-cli-scoping"],
+      "narrative_tags": ["journey-entry-foundation", "callback-envelope-extension"]
+    }
+  ]
+}

@@ -80,7 +80,7 @@ info() {
     --arg log "$LOG_PATH" \
     --arg dispatch_log "$DISPATCH_LOG" \
     --arg alert_log "$ALERT_LOG" \
-    '{schema_version:$schema,command:$command,name:$name,version:$version,repo:$repo,paths:{validation_log:$log,dispatch_log:$dispatch_log,drift_alert_log:$alert_log},required_callback_fields:["task_id","mission_fitness","mission_fitness_evidence"],valid_mission_fitness:["direct","adjacent","infrastructure","drift"]}'
+    '{schema_version:$schema,command:$command,name:$name,version:$version,repo:$repo,paths:{validation_log:$log,dispatch_log:$dispatch_log,drift_alert_log:$alert_log},required_callback_fields:["task_id","mission_fitness","mission_fitness_evidence","journey_entry_path"],valid_mission_fitness:["direct","adjacent","infrastructure","drift"]}'
 }
 
 schema_json() {
@@ -247,11 +247,23 @@ build_decision() {
   task_id="$(field_value task_id "$text" || true)"
   fitness="$(field_value mission_fitness "$text" || true)"
   evidence="$(field_value mission_fitness_evidence "$text" || true)"
+  journey_entry_path="$(field_value journey_entry_path "$text" || true)"
+  br_close="$(field_value br_close_executed "$text" || true)"
   [[ -n "$task_id" ]] || missing+=("task_id")
   [[ -n "$fitness" ]] || missing+=("mission_fitness")
   [[ -n "$evidence" ]] || missing+=("mission_fitness_evidence")
   if [[ -n "$fitness" && ! "$fitness" =~ ^(direct|adjacent|infrastructure|drift)$ ]]; then
     missing+=("mission_fitness_valid_value")
+  fi
+  # journey_entry_path is required on DONE callbacks (br_close_executed=yes).
+  # BLOCKED/DECLINED callbacks set br_close_executed=not_applicable and are
+  # exempt — the bead remains open and the journey entry will be authored at
+  # the eventual DONE close.
+  if [[ "$br_close" == "yes" ]]; then
+    [[ -n "$journey_entry_path" ]] || missing+=("journey_entry_path")
+    if [[ -n "$journey_entry_path" && ! "$journey_entry_path" =~ \.flywheel/journal/.+\.md$ ]]; then
+      missing+=("journey_entry_path_canonical_form")
+    fi
   fi
   eclass="$(evidence_class "$evidence")"
   if [[ "${#missing[@]}" -gt 0 ]]; then
