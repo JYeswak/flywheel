@@ -39,10 +39,12 @@ ROOTS=()
 MODE="check"
 JSON_OUT=0
 EXPLICIT_ROOTS=0
+IDEMPOTENCY_KEY=""
+SCHEMA_VERSION="sync-canonical-doctrine-receipt/v1"
 
 usage() {
   cat <<'EOF'
-usage: sync-canonical-doctrine.sh [--dry-run|--apply] [--json] [--source PATH] [--root PATH ...]
+usage: sync-canonical-doctrine.sh [--dry-run|--apply [--idempotency-key KEY]] [--json] [--source PATH] [--root PATH ...]
 
 Synchronizes doctrine surfaces for each flywheel-installed repo:
   1. .flywheel/rules/L*.md is the canonical L-rule source.
@@ -72,9 +74,18 @@ source AGENTS.md inside itself. The global orchestrator-validation-discipline
 skill is reported by hash so skill drift is visible in the sync receipt.
 
 Exit codes:
-  0  all targets in sync, or apply completed successfully
+  0  all targets in sync, or apply completed successfully, or apply replayed (no-op)
   1  drift detected in dry-run/check mode
   2  usage/configuration error
+  3  --apply without --idempotency-key (canonical refusal contract)
+
+Idempotency:
+  --apply requires --idempotency-key KEY. If a prior ledger row with the
+  same key has status=synced, the surface replays (no-op exit 0). This
+  makes retry-after-partial-failure safe across this surface's wide
+  blast radius (writes to AGENTS.md mirrors, validation schemas, doctrine
+  docs, allowlisted scripts, launchd templates, .claude/settings.json,
+  and the doctrine-sync ledger across every flywheel-installed repo).
 
 Environment:
   SYNC_CANONICAL_SOURCE=/path/to/AGENTS.md
@@ -127,7 +138,7 @@ emit_info() {
       orch_validation_skill_source: $orch_validation_skill_source,
       shared_script_allowlist: ($shared_script_allowlist | split(" ") | map(select(length > 0))),
       modes: ["check","apply"],
-      flags: ["--dry-run","--check","--apply","--json","--source PATH","--root PATH","--info","--schema","--examples","--help","-h"],
+      flags: ["--dry-run","--check","--apply","--idempotency-key KEY","--json","--source PATH","--root PATH","--info","--schema","--examples","--help","-h"],
       env_vars: [
         "SYNC_CANONICAL_SOURCE","SYNC_AGENTS_MD_GENERATOR","SYNC_GENERATED_MIRRORS_DISABLE",
         "SYNC_CANONICAL_INDEX_TARGET","SYNC_CANONICAL_TEMPLATE_TARGET",
@@ -138,9 +149,9 @@ emit_info() {
         "SYNC_ORCH_VALIDATION_SKILL_SOURCE","SYNC_CANONICAL_ROOTS","SYNC_CANONICAL_LOOPS_DIR",
         "SYNC_CANONICAL_LEDGER","SYNC_CANONICAL_LEDGER_DISABLE","SYNC_CANONICAL_NOW"
       ],
-      mutates: "--apply writes to AGENTS.md mirrors, validation schemas, doctrine docs, allowlisted scripts, launchd templates, .claude/settings.json security deny rules, and the doctrine-sync ledger; backups before write",
+      mutates: "--apply writes to AGENTS.md mirrors, validation schemas, doctrine docs, allowlisted scripts, launchd templates, .claude/settings.json security deny rules, and the doctrine-sync ledger; backups before write; --apply requires --idempotency-key (canonical refusal exits rc=3); ledger-replay no-ops re-runs with the same key",
       default_mode: "check",
-      exit_codes: {"0":"in-sync or apply-succeeded","1":"drift-detected (check mode)","2":"usage/configuration error"},
+      exit_codes: {"0":"in-sync, apply-succeeded, or apply-replayed","1":"drift-detected (check mode)","2":"usage/configuration error","3":"--apply without --idempotency-key (canonical refusal)"},
       receipt_schema: "sync-canonical-doctrine-receipt/v1",
       oversized_receipt: {
         line_count: $oversized_line_count,
@@ -170,6 +181,7 @@ emit_schema() {
         source: {type:"string"},
         ledger_path: {type:"string"},
         source_hash: {type:"string", pattern:"^[0-9a-f]{64}$"},
+        idempotency_key: {type:"string", description:"--idempotency-key value; empty in check mode; required in apply mode"},
         target_count: {type:"integer", minimum:0},
         drifted_count: {type:"integer", minimum:0},
         synced_count: {type:"integer", minimum:0},
@@ -204,8 +216,12 @@ sync-canonical-doctrine.sh
 # Machine-readable check (same shape as --apply --json receipt)
 sync-canonical-doctrine.sh --check --json
 
-# Apply mode (writes the canonical block + mirrors with backup-before-write)
-sync-canonical-doctrine.sh --apply --json
+# Apply mode (requires --idempotency-key; writes canonical block + mirrors with backup-before-write)
+sync-canonical-doctrine.sh --apply --idempotency-key=$(date -u +%Y%m%d-%H%M%S) --json
+
+# Safe-retry: re-run with the SAME idempotency key replays (no-op) if the prior
+# attempt already landed a status=synced row in the ledger.
+sync-canonical-doctrine.sh --apply --idempotency-key=my-rollout-2026-05-10 --json
 
 # Override the canonical AGENTS.md source
 sync-canonical-doctrine.sh --check --json \
@@ -239,6 +255,16 @@ while [[ $# -gt 0 ]]; do
       ;;
     --apply)
       MODE="apply"
+      shift
+      ;;
+    --idempotency-key)
+      [[ -n "${2:-}" ]] || { echo "ERR: --idempotency-key requires VALUE" >&2; exit 2; }
+      IDEMPOTENCY_KEY="$2"
+      shift 2
+      ;;
+    --idempotency-key=*)
+      IDEMPOTENCY_KEY="${1#--idempotency-key=}"
+      [[ -n "$IDEMPOTENCY_KEY" ]] || { echo "ERR: --idempotency-key requires VALUE" >&2; exit 2; }
       shift
       ;;
     --json)
@@ -279,6 +305,37 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+# Mutation gate (7axmt P0 fix): --apply requires --idempotency-key.
+# Fires BEFORE any side-effect (hoqq8 invariant from sister flywheel-m12ji).
+if [[ "$MODE" == "apply" && -z "$IDEMPOTENCY_KEY" ]]; then
+  jq -nc \
+    --arg sv "$SCHEMA_VERSION" \
+    '{schema_version:$sv,command:"sync-canonical-doctrine",status:"refused",mode:"apply",reason:"--apply requires --idempotency-key"}' >&2
+  exit 3
+fi
+
+# Replay-check (7axmt P0 bonus): if the ledger already has a successful
+# row carrying this idempotency_key (status in {ok, synced, in_sync}),
+# no-op early-exit with the recorded receipt. Safe-retry semantics:
+# a worker that retries after a partial failure with the SAME key
+# will not re-write files.
+if [[ "$MODE" == "apply" && -n "$IDEMPOTENCY_KEY" && -r "$SYNC_LEDGER" ]]; then
+  # --raw-input + fromjson? is tolerant of historical ledger corruption
+  # (rows that pre-date validation hygiene may have malformed JSON;
+  # those rows are skipped rather than failing the entire replay-check).
+  REPLAY_ROW="$(jq -Rc --arg k "$IDEMPOTENCY_KEY" \
+    'fromjson? | select((.idempotency_key // "") == $k and ((.status // "") | IN("ok","synced","in_sync")))' \
+    "$SYNC_LEDGER" 2>/dev/null | tail -n 1 || true)"
+  if [[ -n "$REPLAY_ROW" ]]; then
+    if [[ "$JSON_OUT" -eq 1 ]]; then
+      jq -c --arg k "$IDEMPOTENCY_KEY" '. + {replay:true,replay_for_idempotency_key:$k}' <<<"$REPLAY_ROW"
+    else
+      printf 'mode=apply status=replay idempotency_key=%s — prior successful row found in ledger, no-op\n' "$IDEMPOTENCY_KEY"
+    fi
+    exit 0
+  fi
+fi
 
 expand_path() {
   case "$1" in
@@ -1142,6 +1199,7 @@ RESULT="$(jq -nc \
   --arg source "$SOURCE" \
   --arg ledger_path "$SYNC_LEDGER" \
   --arg source_hash "$SOURCE_HASH" \
+  --arg idempotency_key "$IDEMPOTENCY_KEY" \
   --argjson target_count "$TARGET_COUNT" \
   --argjson drifted_count "$DRIFTED_COUNT" \
   --argjson synced_count "$SYNCED_COUNT" \
@@ -1205,6 +1263,7 @@ RESULT="$(jq -nc \
     source:$source,
     ledger_path:$ledger_path,
     source_hash:$source_hash,
+    idempotency_key:$idempotency_key,
     target_count:$target_count,
     drifted_count:$drifted_count,
     synced_count:$synced_count,
