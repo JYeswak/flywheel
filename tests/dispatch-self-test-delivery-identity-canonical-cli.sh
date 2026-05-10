@@ -92,6 +92,33 @@ if "$SCRIPT" --schema 2>/dev/null | jq -e '.schema_version' >/dev/null; then
   pass "--schema envelope is well-formed JSON with schema_version"
 else fail "--schema well-formed"; fi
 
+# Per-surface assertions (flywheel-1fk5f.1 fillin).
+
+# Test 16: doctor returns >=5 named substrate probes (not status:todo)
+if "$SCRIPT" doctor --json 2>/dev/null | jq -e '
+  .status != "todo" and (.checks | length) >= 5
+  and ([.checks[].check] | (any(. == "jq") and any(. == "python3") and any(. == "dispatch_log") and any(. == "delivery_ledger_dir") and any(. == "lock_dir")))' >/dev/null; then
+  pass "doctor returns 5 named substrate probes"
+else fail "doctor checks"; fi
+
+# Test 17: health envelope has total_rows + delivery-ledger fields + canonical status
+if "$SCRIPT" health --json 2>/dev/null | jq -e '
+  has("total_rows") and has("delivery_ledger_path")
+  and (.status | IN("ok","empty","not_initialized"))' >/dev/null; then
+  pass "health envelope has delivery-ledger counts + canonical status"
+else fail "health envelope"; fi
+
+# Test 18: validate delivery-row emits per-row results array
+if "$SCRIPT" validate delivery-row --json 2>/dev/null | jq -e '
+  .subject == "delivery-row" and has("pass") and has("fail") and (.results | type == "array")' >/dev/null; then
+  pass "validate delivery-row emits results array"
+else fail "validate delivery-row"; fi
+
+# Test 19: why distinguishes found|not_found|unavailable for fake id
+if "$SCRIPT" why "definitely-not-a-real-key" --json 2>/dev/null | jq -e '
+  .id == "definitely-not-a-real-key" and (.status | IN("found","not_found","unavailable"))' >/dev/null; then
+  pass "why <id> emits found|not_found|unavailable"
+else fail "why id"; fi
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2

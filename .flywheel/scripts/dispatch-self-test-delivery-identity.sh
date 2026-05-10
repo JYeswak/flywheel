@@ -4,13 +4,14 @@ set -euo pipefail
 
 # ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======
 # flywheel-cli-surface: true
-# canonical-cli-scoping: passing (TODO markers in stubs need fill-in)
-# doctor-mode-tier: scaffolded (bead flywheel-ws02m)
+# canonical-cli-scoping: passing
+# doctor-mode-tier: filled (bead flywheel-1fk5f.1)
 #
-# This block is APPENDED by scaffold-canonical-cli.sh. The original
-# top-level dispatch is preserved as `cmd_run` (the new main routes
-# default invocation through cmd_run for backward compat). Surface-
-# specific logic stays as TODO markers — see grep '# TODO(canonical-cli-scaffold)'.
+# Filled by flywheel-1fk5f.1: doctor probes the cmd_run substrate
+# (jq/python3/dispatch_log/delivery_ledger_dir/lock_dir); health/audit/
+# why bind to the live delivery ledger written by `mark-delivered`;
+# validate enforces delivery-row schema; repair manages ledger_dir +
+# lock_dir scopes.
 
 _SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
 _SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
@@ -21,6 +22,13 @@ fi
 
 SCAFFOLD_SCHEMA_VERSION="dispatch-self-test-delivery-identity/v1"
 SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/dispatch-self-test-delivery-identity-runs.jsonl}"
+# Module-scope lift of cmd_run state paths so canonical-cli stubs
+# (which exit before the original parser runs) can resolve the real
+# delivery ledger written by `mark-delivered`. Defaults track the
+# original cmd_run definitions further down.
+SCAFFOLD_DELIVERY_LEDGER="${DISPATCH_SELF_TEST_DELIVERY_LEDGER:-$HOME/.local/state/flywheel/dispatch-self-test-delivery-identity.jsonl}"
+SCAFFOLD_DISPATCH_LOG="${DISPATCH_SELF_TEST_DISPATCH_LOG:-$_SCAFFOLD_REPO_ROOT/.flywheel/dispatch-log.jsonl}"
+SCAFFOLD_LOCK_DIR="${DISPATCH_SELF_TEST_LOCK_DIR:-$HOME/.local/state/flywheel/dispatch-self-test-locks}"
 
 scaffold_usage() {
   cat <<'USG'
@@ -89,19 +97,47 @@ scaffold_emit_quickstart() {
 
 scaffold_emit_schema() {
   local surface="${1:-default}"
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
-    '{schema_version:$sv,command:"schema",surface:$surface,note:"TODO(canonical-cli-scaffold): per-surface schema fill-in"}'
+  case "$surface" in
+    delivery-row|default)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_DELIVERY_LEDGER" \
+        '{schema_version:$sv,command:"schema",surface:"delivery-row",
+          format:"jsonl",path:$log,
+          required_fields:["schema_version","event","ts","idempotency_key","callback_delivery_verified"],
+          event_enum:["delivery_confirmed"],
+          idempotency_key_pattern:"^sha256:[0-9a-f]{64}$",
+          appended_by:"cmd_run mark-delivered subcommand"}' ;;
+    run)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"schema",surface:"run",
+          subcommands:["pretest","verify-identity","mark-delivered"],
+          verdict_enum:["proceed","refuse_duplicate","refuse_complete","refuse_in_flight"],
+          terminal_envelope_fields:["schema_version","ts","idempotency_key","verdict","prior_dispatch","reason"]}' ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,status:"unknown_surface",known_surfaces:["delivery-row","run"]}' ;;
+  esac
 }
 
 scaffold_emit_topic_help() {
   local topic="${1:-}"
+  # Single-printf per topic (gl7om SIGPIPE/pipefail discipline).
   case "$topic" in
-    run)      printf 'topic: run — default backward-compatible invocation routes to cmd_run.\n' ;;
-    doctor)   printf 'topic: doctor — TODO(canonical-cli-scaffold): document doctor checks specific to this surface.\n' ;;
-    health)   printf 'topic: health — TODO(canonical-cli-scaffold): document health probes specific to this surface.\n' ;;
-    repair)   printf 'topic: repair — TODO(canonical-cli-scaffold): document repair scopes + idempotency contract.\n' ;;
-    validate) printf 'topic: validate — TODO(canonical-cli-scaffold): document validation subjects + contracts.\n' ;;
-    *)        printf 'topics: run | doctor | health | repair | validate\n' ;;
+    run)
+      printf 'topic: run — `dispatch-self-test-delivery-identity.sh {pretest|verify-identity|mark-delivered} ...` enforces dispatch identity discipline. pretest probes the dispatch packet; verify-identity checks dispatch_log for prior delivery; mark-delivered appends a delivery_confirmed row to %s. Verdicts: proceed | refuse_duplicate | refuse_complete | refuse_in_flight.\n' "$SCAFFOLD_DELIVERY_LEDGER"
+      ;;
+    doctor)
+      printf 'topic: doctor — probes the substrate this delivery-identity gate depends on: jq, python3, dispatch_log readability, delivery_ledger directory writability, lock_dir writability. Emits {checks:[{check,status:ok|fail|warn,detail}],status}.\n'
+      ;;
+    health)
+      printf 'topic: health — summarizes the delivery ledger: total_rows, delivery_confirmed_count, last_event, last_ts, freshness_seconds. status: ok | empty | not_initialized.\n'
+      ;;
+    repair)
+      printf 'topic: repair — scopes: ledger_dir (ensure delivery_ledger directory exists), lock_dir (ensure lock_dir exists), none (no-op probe). Default --dry-run; --apply requires --idempotency-key. Dry-run emits planned_actions; apply emits applied_actions + idempotent_no_op flag.\n'
+      ;;
+    validate)
+      printf 'topic: validate — subjects: delivery-row (each row has schema_version, event=delivery_confirmed, ts ISO8601, idempotency_key matching ^sha256:[0-9a-f]{64}$, callback_delivery_verified=true).\n'
+      ;;
+    *) printf 'topics: run | doctor | health | repair | validate\n' ;;
   esac
 }
 
@@ -124,16 +160,118 @@ scaffold_emit_completion() {
 # ---------- canonical-cli stubs (TODO markers preserved) ----------
 
 scaffold_cmd_doctor() {
-  # TODO(canonical-cli-scaffold): probe substrate this script depends on
-  # (env vars, paths, external tools) and emit per-check status.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"doctor",ts:$ts,status:"todo",checks:[],note:"TODO(canonical-cli-scaffold): fill in doctor checks"}'
+  local checks_jsonl="" overall="ok"
+  local emit_check
+  emit_check() {
+    local name="$1" status="$2" detail="$3"
+    if [[ "$status" == "fail" ]]; then overall="fail"; fi
+    jq -nc --arg c "$name" --arg s "$status" --arg d "$detail" '{check:$c,status:$s,detail:$d}'
+  }
+
+  # 1. jq
+  if command -v jq >/dev/null 2>&1; then
+    checks_jsonl+="$(emit_check jq ok "$(command -v jq)")"$'\n'
+  else
+    checks_jsonl+="$(emit_check jq fail "jq not on PATH")"$'\n'
+  fi
+
+  # 2. python3 (cmd_run depends on it)
+  if command -v python3 >/dev/null 2>&1; then
+    checks_jsonl+="$(emit_check python3 ok "$(command -v python3)")"$'\n'
+  else
+    checks_jsonl+="$(emit_check python3 fail "python3 not on PATH (required by cmd_run)")"$'\n'
+  fi
+
+  # 3. dispatch_log readable when present (absent-ok on fresh installs)
+  if [[ -f "$SCAFFOLD_DISPATCH_LOG" ]]; then
+    if [[ -r "$SCAFFOLD_DISPATCH_LOG" ]]; then
+      checks_jsonl+="$(emit_check dispatch_log ok "readable: $SCAFFOLD_DISPATCH_LOG")"$'\n'
+    else
+      checks_jsonl+="$(emit_check dispatch_log fail "exists but not readable: $SCAFFOLD_DISPATCH_LOG")"$'\n'
+    fi
+  else
+    checks_jsonl+="$(emit_check dispatch_log warn "absent (verify-identity will fail-open): $SCAFFOLD_DISPATCH_LOG")"$'\n'
+  fi
+
+  # 4. delivery_ledger directory writable / absent-creatable
+  local ledger_dir
+  ledger_dir="$(dirname -- "$SCAFFOLD_DELIVERY_LEDGER")"
+  if [[ -d "$ledger_dir" && -w "$ledger_dir" ]]; then
+    checks_jsonl+="$(emit_check delivery_ledger_dir ok "$ledger_dir")"$'\n'
+  elif [[ ! -e "$ledger_dir" ]]; then
+    checks_jsonl+="$(emit_check delivery_ledger_dir warn "absent (mark-delivered will create): $ledger_dir")"$'\n'
+  else
+    checks_jsonl+="$(emit_check delivery_ledger_dir fail "exists but not writable: $ledger_dir")"$'\n'
+  fi
+
+  # 5. lock_dir writable / absent-creatable
+  if [[ -d "$SCAFFOLD_LOCK_DIR" && -w "$SCAFFOLD_LOCK_DIR" ]]; then
+    checks_jsonl+="$(emit_check lock_dir ok "$SCAFFOLD_LOCK_DIR")"$'\n'
+  elif [[ ! -e "$SCAFFOLD_LOCK_DIR" ]]; then
+    checks_jsonl+="$(emit_check lock_dir warn "absent (created on first lock acquisition): $SCAFFOLD_LOCK_DIR")"$'\n'
+  else
+    checks_jsonl+="$(emit_check lock_dir fail "exists but not writable: $SCAFFOLD_LOCK_DIR")"$'\n'
+  fi
+
+  local ts
+  ts="$(cli_iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  printf '%s' "$checks_jsonl" | jq -sc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg status "$overall" \
+    '{schema_version:$sv,command:"doctor",ts:$ts,status:$status,checks:.}'
 }
 
 scaffold_cmd_health() {
-  # TODO(canonical-cli-scaffold): summarize last-run state from audit log.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"health",ts:$ts,status:"todo",note:"TODO(canonical-cli-scaffold): fill in health probe from audit log"}'
+  local ts now_epoch
+  ts="$(cli_iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  now_epoch="$(date -u +%s)"
+
+  if [[ ! -e "$SCAFFOLD_DELIVERY_LEDGER" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg path "$SCAFFOLD_DELIVERY_LEDGER" \
+      '{schema_version:$sv,command:"health",ts:$ts,status:"not_initialized",delivery_ledger_path:$path,total_rows:0}'
+    return 0
+  fi
+
+  local total_rows
+  total_rows="$(wc -l <"$SCAFFOLD_DELIVERY_LEDGER" 2>/dev/null | tr -d ' ' || printf '0')"
+  total_rows="${total_rows:-0}"
+
+  if [[ "$total_rows" -eq 0 ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg path "$SCAFFOLD_DELIVERY_LEDGER" \
+      '{schema_version:$sv,command:"health",ts:$ts,status:"empty",delivery_ledger_path:$path,total_rows:0}'
+    return 0
+  fi
+
+  local last_row last_ts last_event delivery_confirmed_count last_epoch freshness_seconds
+  last_row="$(tail -n1 "$SCAFFOLD_DELIVERY_LEDGER" 2>/dev/null || printf '')"
+  last_ts="$(printf '%s' "$last_row" | jq -r '.ts // ""' 2>/dev/null || printf '')"
+  last_event="$(printf '%s' "$last_row" | jq -r '.event // ""' 2>/dev/null || printf '')"
+  delivery_confirmed_count="$({ grep -c '"event":"delivery_confirmed"' "$SCAFFOLD_DELIVERY_LEDGER" 2>/dev/null || true; } | tr -d ' \n')"
+  delivery_confirmed_count="${delivery_confirmed_count:-0}"
+
+  if [[ -n "$last_ts" ]]; then
+    last_epoch="$(date -u -j -f '%Y-%m-%dT%H:%M:%SZ' "$last_ts" '+%s' 2>/dev/null || date -u -d "$last_ts" '+%s' 2>/dev/null || printf '0')"
+    if [[ "$last_epoch" -gt 0 ]]; then
+      freshness_seconds=$((now_epoch - last_epoch))
+    else
+      freshness_seconds=-1
+    fi
+  else
+    freshness_seconds=-1
+  fi
+
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg ts "$ts" \
+    --arg status "ok" \
+    --arg path "$SCAFFOLD_DELIVERY_LEDGER" \
+    --argjson total_rows "$total_rows" \
+    --argjson delivery_confirmed_count "$delivery_confirmed_count" \
+    --arg last_event "$last_event" \
+    --arg last_ts "$last_ts" \
+    --argjson freshness_seconds "$freshness_seconds" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,delivery_ledger_path:$path,
+      total_rows:$total_rows,delivery_confirmed_count:$delivery_confirmed_count,
+      last_event:$last_event,last_ts:$last_ts,freshness_seconds:$freshness_seconds}'
 }
 
 scaffold_cmd_repair() {
@@ -159,31 +297,209 @@ scaffold_cmd_repair() {
       exit 3
     fi
   fi
-  # TODO(canonical-cli-scaffold): per-scope repair actions go here.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
-    '{schema_version:$sv,command:"repair",status:"todo",mode:$mode,scope:$scope,idempotency_key:$idem,note:"TODO(canonical-cli-scaffold): fill in repair scope actions"}'
+
+  local ts ledger_dir
+  ts="$(cli_iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  ledger_dir="$(dirname -- "$SCAFFOLD_DELIVERY_LEDGER")"
+
+  case "$scope" in
+    ledger_dir|lock_dir)
+      local target_dir
+      if [[ "$scope" == "ledger_dir" ]]; then target_dir="$ledger_dir"; else target_dir="$SCAFFOLD_LOCK_DIR"; fi
+      if [[ "$mode" == "dry_run" ]]; then
+        local actions_jsonl=""
+        if [[ ! -d "$target_dir" ]]; then
+          actions_jsonl+="$(jq -nc --arg p "$target_dir" --arg s "$scope" '{action:"mkdir_p",path:$p,scope:$s,reason:"directory absent"}')"$'\n'
+        fi
+        if [[ -z "$actions_jsonl" ]]; then
+          jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg scope "$scope" \
+            '{schema_version:$sv,command:"repair",ts:$ts,status:"dry_run",mode:"dry_run",scope:$scope,planned_actions:[],idempotent_no_op:true}'
+        else
+          printf '%s' "$actions_jsonl" | jq -sc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg scope "$scope" \
+            '{schema_version:$sv,command:"repair",ts:$ts,status:"dry_run",mode:"dry_run",scope:$scope,planned_actions:.,idempotent_no_op:false}'
+        fi
+        return 0
+      fi
+      # apply
+      local applied_jsonl="" idempotent_no_op=true
+      if [[ ! -d "$target_dir" ]]; then
+        if mkdir -p "$target_dir" 2>/dev/null; then
+          applied_jsonl+="$(jq -nc --arg p "$target_dir" '{action:"mkdir_p",path:$p,result:"created"}')"$'\n'
+          idempotent_no_op=false
+        else
+          jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg scope "$scope" --arg dir "$target_dir" --arg idem "$idem_key" \
+            '{schema_version:$sv,command:"repair",ts:$ts,status:"failed",mode:"apply",scope:$scope,idempotency_key:$idem,error:"mkdir_p failed",path:$dir}'
+          return 1
+        fi
+      fi
+      if [[ -z "$applied_jsonl" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg scope "$scope" --arg idem "$idem_key" \
+          '{schema_version:$sv,command:"repair",ts:$ts,status:"applied",mode:"apply",scope:$scope,idempotency_key:$idem,applied_actions:[],idempotent_no_op:true}'
+      else
+        printf '%s' "$applied_jsonl" | jq -sc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg scope "$scope" --arg idem "$idem_key" --argjson noop "$idempotent_no_op" \
+          '{schema_version:$sv,command:"repair",ts:$ts,status:"applied",mode:"apply",scope:$scope,idempotency_key:$idem,applied_actions:.,idempotent_no_op:$noop}'
+      fi
+      ;;
+    none)
+      if [[ "$mode" == "dry_run" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg scope "$scope" \
+          '{schema_version:$sv,command:"repair",ts:$ts,status:"dry_run",mode:"dry_run",scope:$scope,planned_actions:[],idempotent_no_op:true}'
+      else
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg scope "$scope" --arg idem "$idem_key" \
+          '{schema_version:$sv,command:"repair",ts:$ts,status:"applied",mode:"apply",scope:$scope,idempotency_key:$idem,applied_actions:[],idempotent_no_op:true,note:"no-op scope"}'
+      fi
+      ;;
+    "")
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg mode "$mode" \
+        '{schema_version:$sv,command:"repair",ts:$ts,status:"refused",mode:$mode,reason:"--scope <ledger_dir|lock_dir|none> required"}'
+      return 64
+      ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg scope "$scope" --arg mode "$mode" \
+        '{schema_version:$sv,command:"repair",ts:$ts,status:"refused",mode:$mode,scope:$scope,reason:"unknown scope",known_scopes:["ledger_dir","lock_dir","none"]}'
+      return 64
+      ;;
+  esac
 }
 
 scaffold_cmd_validate() {
-  # TODO(canonical-cli-scaffold): document validation subjects + contracts.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
-    '{schema_version:$sv,command:"validate",status:"todo",note:"TODO(canonical-cli-scaffold): fill in per-subject validation"}'
+  local subject=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --json) shift ;;
+      -h|--help) scaffold_emit_topic_help validate; return 0 ;;
+      --*) shift ;;
+      *) if [[ -z "$subject" ]]; then subject="$1"; fi; shift ;;
+    esac
+  done
+  local ts
+  ts="$(cli_iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+  case "$subject" in
+    delivery-row|"")
+      subject="delivery-row"
+      if [[ ! -e "$SCAFFOLD_DELIVERY_LEDGER" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg subject "$subject" --arg path "$SCAFFOLD_DELIVERY_LEDGER" \
+          '{schema_version:$sv,command:"validate",ts:$ts,subject:$subject,delivery_ledger_path:$path,status:"empty",results:[],pass:0,fail:0}'
+        return 0
+      fi
+      local lineno=0 pass=0 fail=0 results_jsonl="" row_pass row_offending line
+      while IFS= read -r line || [[ -n "$line" ]]; do
+        lineno=$((lineno + 1))
+        [[ -z "$line" ]] && continue
+        row_pass=true
+        row_offending="none"
+        if printf '%s' "$line" | jq -e '
+          (has("schema_version") and (.schema_version | type == "string"))
+          and (has("event") and (.event | type == "string"))
+          and (has("ts") and (.ts | type == "string") and (.ts | test("^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$")))
+          and (has("idempotency_key") and (.idempotency_key | type == "string") and (.idempotency_key | test("^sha256:[0-9a-f]{64}$")))
+          and (has("callback_delivery_verified") and (.callback_delivery_verified == true))
+        ' >/dev/null 2>&1; then
+          # Cross-field invariant: delivery_confirmed event implies callback_delivery_verified=true.
+          if ! printf '%s' "$line" | jq -e 'if .event == "delivery_confirmed" then (.callback_delivery_verified == true) else true end' >/dev/null 2>&1; then
+            row_pass=false
+            row_offending="delivery_confirmed_without_verified_flag"
+          fi
+        else
+          row_pass=false
+          row_offending="missing_or_malformed_required_field"
+        fi
+        if $row_pass; then pass=$((pass + 1)); else fail=$((fail + 1)); fi
+        results_jsonl+="$(jq -nc --argjson lineno "$lineno" --arg pass "$row_pass" --arg offending "$row_offending" \
+          '{lineno:$lineno,pass:($pass=="true"),offending_field:$offending}')"$'\n'
+      done <"$SCAFFOLD_DELIVERY_LEDGER"
+
+      local status="ok"
+      if [[ "$fail" -gt 0 ]]; then status="fail"; fi
+      printf '%s' "$results_jsonl" | jq -sc \
+        --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg subject "$subject" --arg path "$SCAFFOLD_DELIVERY_LEDGER" \
+        --arg status "$status" --argjson pass "$pass" --argjson fail "$fail" \
+        '{schema_version:$sv,command:"validate",ts:$ts,subject:$subject,delivery_ledger_path:$path,status:$status,pass:$pass,fail:$fail,results:.}'
+      ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg subject "$subject" \
+        '{schema_version:$sv,command:"validate",ts:$ts,subject:$subject,status:"unknown_subject",known_subjects:["delivery-row"]}'
+      return 64
+      ;;
+  esac
 }
 
 scaffold_cmd_audit() {
-  # TODO(canonical-cli-scaffold): tail audit log; emit recent rows.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
-    '{schema_version:$sv,command:"audit",audit_log:$log,status:"todo",note:"TODO(canonical-cli-scaffold): fill in audit tail"}'
+  local tail_n=20
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --tail) tail_n="${2:-20}"; shift 2 ;;
+      --tail=*) tail_n="${1#--tail=}"; shift ;;
+      --json) shift ;;
+      -h|--help) scaffold_emit_topic_help audit 2>/dev/null || printf 'topic: audit — tail delivery ledger\n'; return 0 ;;
+      *) shift ;;
+    esac
+  done
+
+  if command -v cli_emit_audit_tail >/dev/null 2>&1; then
+    # helper signature: cli_emit_audit_tail <log_path> <schema_version> [<limit>]
+    cli_emit_audit_tail "$SCAFFOLD_DELIVERY_LEDGER" "$SCAFFOLD_SCHEMA_VERSION" "$tail_n"
+    return 0
+  fi
+
+  local ts
+  ts="$(cli_iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  if [[ ! -e "$SCAFFOLD_DELIVERY_LEDGER" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$SCAFFOLD_DELIVERY_LEDGER" --argjson tail_n "$tail_n" \
+      '{schema_version:$sv,command:"audit",ts:$ts,audit_log:$log,status:"not_initialized",tail_n:$tail_n,rows:[]}'
+    return 0
+  fi
+  local rows_jsonl
+  rows_jsonl="$(tail -n "$tail_n" "$SCAFFOLD_DELIVERY_LEDGER" 2>/dev/null || printf '')"
+  if [[ -z "$rows_jsonl" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$SCAFFOLD_DELIVERY_LEDGER" --argjson tail_n "$tail_n" \
+      '{schema_version:$sv,command:"audit",ts:$ts,audit_log:$log,status:"empty",tail_n:$tail_n,rows:[]}'
+  else
+    printf '%s\n' "$rows_jsonl" | jq -sc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$SCAFFOLD_DELIVERY_LEDGER" --argjson tail_n "$tail_n" \
+      '{schema_version:$sv,command:"audit",ts:$ts,audit_log:$log,status:"ok",tail_n:$tail_n,row_count:length,rows:.}'
+  fi
 }
 
 scaffold_cmd_why() {
   local id="${1:-}"
   if [[ -z "$id" ]]; then
-    printf 'ERR: why requires <id> argument\n' >&2; return 64
+    printf 'ERR: why requires <id> argument (idempotency_key like sha256:<64-hex>, or delivery row ts, or 1-based row index)\n' >&2
+    return 64
   fi
-  # TODO(canonical-cli-scaffold): explain why <id> is/isn't in scope.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
-    '{schema_version:$sv,command:"why",id:$id,status:"todo",note:"TODO(canonical-cli-scaffold): fill in why-id semantics"}'
+  local ts
+  ts="$(cli_iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+  if [[ ! -e "$SCAFFOLD_DELIVERY_LEDGER" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg id "$id" --arg log "$SCAFFOLD_DELIVERY_LEDGER" \
+      '{schema_version:$sv,command:"why",ts:$ts,id:$id,status:"unavailable",delivery_ledger_path:$log,reason:"delivery ledger absent (no deliveries recorded yet)"}'
+    return 0
+  fi
+
+  # Resolution order: numeric row index → idempotency_key exact → ts exact.
+  local row="" resolution=""
+  if [[ "$id" =~ ^[0-9]+$ ]]; then
+    row="$(sed -n "${id}p" "$SCAFFOLD_DELIVERY_LEDGER" 2>/dev/null || true)"
+    [[ -n "$row" ]] && resolution="row_index"
+  fi
+  if [[ -z "$row" ]]; then
+    row="$(jq -c --arg id "$id" 'select(.idempotency_key == $id)' "$SCAFFOLD_DELIVERY_LEDGER" 2>/dev/null | head -n1 || true)"
+    [[ -n "$row" ]] && resolution="idempotency_key_exact"
+  fi
+  if [[ -z "$row" ]]; then
+    row="$(jq -c --arg id "$id" 'select(.ts == $id)' "$SCAFFOLD_DELIVERY_LEDGER" 2>/dev/null | head -n1 || true)"
+    [[ -n "$row" ]] && resolution="ts_exact"
+  fi
+
+  if [[ -n "$row" ]]; then
+    printf '%s' "$row" | jq -c \
+      --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg id "$id" --arg log "$SCAFFOLD_DELIVERY_LEDGER" --arg resolution "$resolution" \
+      '{schema_version:$sv,command:"why",ts:$ts,id:$id,status:"found",delivery_ledger_path:$log,resolution:$resolution,row:.,
+        provenance:{event:.event,idempotency_key:.idempotency_key,callback_delivery_verified:.callback_delivery_verified}}'
+  else
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg id "$id" --arg log "$SCAFFOLD_DELIVERY_LEDGER" \
+      '{schema_version:$sv,command:"why",ts:$ts,id:$id,status:"not_found",delivery_ledger_path:$log,reason:"no delivery row matched by row-index, idempotency_key, or ts"}'
+  fi
 }
 
 # ---------- scaffolded main dispatcher ----------
