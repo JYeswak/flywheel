@@ -1,0 +1,1 @@
+{"schema_version":"dispatch-author-contract-probe/v1","command":"repair","status":"refused","mode":"dry_run","scope":"unknown_scope","reason":"unknown scope","valid_scopes":["audit_log_dir","audit_log_truncate"]}

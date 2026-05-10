@@ -1,0 +1,1 @@
+topic: why — given <id>, look up audit-log rows. id = dispatch_path substring OR row index (1-based, negative = from end). Emits provenance row(s).

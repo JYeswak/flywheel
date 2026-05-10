@@ -1,0 +1,1 @@
+{"schema_version":"dispatch-author-contract-probe/v1","command":"health","status":"warn","ts":"2026-05-10T16:34:58Z","total_runs":4,"last_run_ts":"2026-05-10T16:34:30Z","last_verdict":"fail","pass_rate":0.0000,"window":4}

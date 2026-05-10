@@ -1,0 +1,1 @@
+{"schema_version":"dispatch-author-contract-probe/v1","command":"schema","surface":"repair","fields":{"schema_version":"string","command":"\"repair\"","status":"\"dry_run\"|\"applied\"|\"refused\"","mode":"\"dry_run\"|\"apply\"","scope":"\"audit_log_dir\"|\"audit_log_truncate\"","idempotency_key":"string|null","planned_actions":"[obj]","applied_actions":"[obj]"}}

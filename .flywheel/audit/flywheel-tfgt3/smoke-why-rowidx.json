@@ -1,0 +1,1 @@
+{"schema_version":"dispatch-author-contract-probe/v1","command":"why","id":"-1","status":"pass","match_count":1,"matches":[{"ts":"2026-05-10T16:34:58Z","action":"probe","status":"fail","sha256":"96dc3053c68e0d8dbb448d285933454a87d0fa7f7dbbb814a9cc7ba309bfe038","dispatch_path":"/tmp/dispatch_flywheel-tfgt3-1632a2.md","verdict":"fail","violation_count":6}]}

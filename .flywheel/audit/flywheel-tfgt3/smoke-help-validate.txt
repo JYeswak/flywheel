@@ -1,0 +1,1 @@
+topic: validate — subjects: dispatch-packet PATH (run probe in dry mode and report verdict), audit-row JSONL_LINE (verify schema_version + required fields).
