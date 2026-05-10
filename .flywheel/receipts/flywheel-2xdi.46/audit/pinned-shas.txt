@@ -1,0 +1,7 @@
+branch: master
+head-pre: 493297ca39fb5ae2ddb3487e34639c69173e0fa4
+target-script: /Users/josh/.claude/skills/.flywheel/data/skill-packs/customer-growth-ops-pack/validate.sh
+target-script-sha256: c030656fdda68ec1b73dd5989428f5ad41b485b6acf2f9409eef2a26d4105deb
+gap-hunt-probe-sha256: 9ffdf08c7c4eceeacc8b39e3f5b1c5c6b3d453d06bc161772c1c41b3a4579d4c
+upstream-fix-1: flywheel-2fw7v (substrate-registry on-demand allowlist + skill-packs glob fallback)
+upstream-fix-2: flywheel-8vw0o (cross-repo umbrella + runtime-sourced library detection, commit 2a3c130)

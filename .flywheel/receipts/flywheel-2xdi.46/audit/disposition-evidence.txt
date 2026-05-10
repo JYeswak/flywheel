@@ -1,0 +1,9 @@
+=== Target script ===
+-rwxr-xr-x  1 josh  staff  2496 Apr 29 14:36 /Users/josh/.claude/skills/.flywheel/data/skill-packs/customer-growth-ops-pack/validate.sh
+
+=== Current gap-hunt-probe wired-but-cold probe (excerpt; jq filter for customer-growth-ops-pack) ===
+(empty = NOT flagged ✓)
+
+=== On-demand allowlist coverage check ===
+target_in_allowlist: True
+allowlist_size: 50

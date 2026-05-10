@@ -1,0 +1,58 @@
+{
+  "task_id": "flywheel-2xdi.46",
+  "dispatch_id": "flywheel-2xdi.46-8fdfe0",
+  "identity_name": "CloudyMill",
+  "pane": "flywheel:0.2",
+  "callback_pane": "flywheel:1",
+  "title": "[gap-wired-but-cold] .claude/skills/.flywheel/data/skill-packs/customer-growth-ops-pack/validate.sh",
+  "did": "4/4",
+  "compliance_score": 800,
+  "compliance_max": 1000,
+  "four_lens": {
+    "brand": 8,
+    "sniff": 8,
+    "jeff": 8,
+    "public": 8
+  },
+  "disposition": "false_positive_resolved_by_upstream",
+  "score_components": {
+    "verify_bead_is_stale_false_positive": 150,
+    "confirm_current_probe_does_not_flag": 150,
+    "confirm_script_is_allowlisted": 150,
+    "cite_upstream_fixes_2fw7v_8vw0o": 150,
+    "scope_discipline_no_code_edits": 100,
+    "evidence_md_with_disposition_table": 80,
+    "subtotal": 780,
+    "polish_bonus_python_replication_independent_path": 20,
+    "total": 800
+  },
+  "did_gates": [
+    {"gate": "Verify bead is stale false-positive", "status": "done", "evidence": "Script exists (2496B); is a skill-pack validator (canonical on-demand class)"},
+    {"gate": "Confirm current probe does NOT flag this script", "status": "done", "evidence": "gap-hunt-probe --dry-run --json filtered for customer-growth-ops-pack returns empty"},
+    {"gate": "Confirm script IS in current on-demand allowlist", "status": "done", "evidence": "Python replication of on_demand_script_allowlist() returns target_in_allowlist=True via pack-glob fallback"},
+    {"gate": "Document upstream fix that resolved the false-positive class", "status": "done", "evidence": "Cited flywheel-2fw7v + flywheel-8vw0o (commit 2a3c130) as resolving fixes"}
+  ],
+  "files_touched": [
+    ".flywheel/receipts/flywheel-2xdi.46/audit/evidence.md",
+    ".flywheel/receipts/flywheel-2xdi.46/audit/disposition-evidence.txt",
+    ".flywheel/receipts/flywheel-2xdi.46/audit/pinned-shas.txt",
+    ".flywheel/receipts/flywheel-2xdi.46/audit/compliance-pack.json"
+  ],
+  "beads_filed": [],
+  "beads_updated": ["flywheel-2xdi.46"],
+  "no_bead_reason": "false-positive resolved by upstream gap-hunt-probe enhancements (flywheel-2fw7v + flywheel-8vw0o); current probe correctly recognizes the script as on-demand-allowlisted; no follow-up action required",
+  "fuckups_logged": [],
+  "skill_auto_routes": {"canonical-cli-scoping": "n/a", "rust-best-practices": "n/a", "python-best-practices": "n/a", "readme-writing": "n/a"},
+  "L61_ecosystem_touch": {
+    "agents_md_updated": "not_applicable",
+    "readme_updated": "not_applicable",
+    "no_touch_reason": "false-positive sweep close; no doctrine/INCIDENTS/canonical-L-rule/skill surface touched; no code edits made"
+  },
+  "L107_reservations": {"files": [], "release_required": false, "files_reserved_value": "NONE_NO_EDITS"},
+  "L112_probe": {
+    "command": "/Users/josh/Developer/flywheel/.flywheel/scripts/gap-hunt-probe.sh --dry-run --json | jq -r '[.gap_ids[]? | select(test(\"customer-growth-ops-pack\"))] | length'",
+    "expected": "literal:0"
+  },
+  "mission_fitness": "adjacent",
+  "mission_rationale": "Closing stale false-positive auto-beads tightens orchestrator triage signal. Each unclosed false-positive consumes attention; closing with explicit upstream-fix citations is the canonical sweep pattern. Serves continuous-orchestrator-uptime by reducing noise."
+}
