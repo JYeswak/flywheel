@@ -1,0 +1,382 @@
+# shellcheck shell=bash
+# canonical-cli-helpers.sh — drop-in helper library for canonical-CLI emitters.
+#
+# Source this from any flywheel script that wants the canonical-cli-scoping
+# triad without inlining ~150 lines of boilerplate per surface:
+#
+#   source "$REPO/.flywheel/lib/canonical-cli-helpers.sh"
+#
+# The lib carries its own schema version `canonical-cli-helpers/v1`. Helpers
+# emit envelopes carrying the *caller's* schema versions; the lib never
+# overrides a caller's `<surface>.<command>/v1` schema.
+#
+# Source bead: flywheel-tiugg (apply spec
+# .flywheel/audit/flywheel-jloib.0a/apply-spec.md). Pilot reference dab051e.
+#
+# Boundary:
+#   - READ caller env (no globals owned by the lib except CANONICAL_CLI_HELPERS_VERSION).
+#   - WRITE only to paths the caller passes in. Never assume an audit-log path.
+#   - DO NOT replace per-surface doctor / repair / validate logic.
+#   - ZERO external deps beyond bash, jq, date, shasum.
+#
+# Bug-prevention defaults (see README "Caveats"):
+#   1. Helpers do not assume `set -euo pipefail` is on, but stay robust either way.
+#   2. `local` declarations split — one var per `local` line when the second
+#      reads the first.
+#   3. Enumerator-style helpers end with explicit `return 0`.
+#   4. Default braces use `${N:-}` then `[[ -n "$x" ]] || x='{}'` (NEVER `${N:-{}}`).
+#   5. Conditional returns use `if/then/elif/fi`, NEVER `[[ ]] && X || Y`.
+
+CANONICAL_CLI_HELPERS_VERSION="canonical-cli-helpers/v1"
+
+# ---------- time + script identity ----------
+
+# cli_iso_now — echo a UTC ISO-8601 timestamp.
+cli_iso_now() {
+  date -u +'%Y-%m-%dT%H:%M:%SZ'
+}
+
+# cli_sha_self <script_path> — echo sha256 of caller script.
+# Prints empty string on failure so callers can substitute "" without error.
+cli_sha_self() {
+  local script_path
+  script_path="${1:-}"
+  if [[ -z "$script_path" || ! -r "$script_path" ]]; then
+    printf '\n'
+    return 0
+  fi
+  shasum -a 256 "$script_path" 2>/dev/null | awk '{print $1}'
+  return 0
+}
+
+# ---------- audit log primitive ----------
+
+# cli_audit_append <log_path> <action> <status> [<extra_json>]
+#
+# Appends one canonical JSONL row:
+#   {ts, action, status, sha256, ...extra}
+#
+# Args:
+#   log_path    — JSONL audit log path (created with parent dirs if missing)
+#   action      — short action name (e.g., "run", "repair_apply")
+#   status      — "ok" | "fail" | "refused" | <freeform>
+#   extra_json  — optional JSON object string; merged into row. Bad JSON
+#                 falls back to "{}" silently so the row is always valid.
+#
+# Silent on append failure (audit logging never blocks foreground work).
+cli_audit_append() {
+  local log_path
+  local action
+  local status
+  local extra_json
+  log_path="${1:-}"
+  action="${2:-}"
+  status="${3:-}"
+  extra_json="${4:-}"
+  if [[ -z "$extra_json" ]]; then
+    extra_json='{}'
+  fi
+  if ! printf '%s' "$extra_json" | jq -e . >/dev/null 2>&1; then
+    extra_json='{}'
+  fi
+  if [[ -z "$log_path" ]]; then
+    return 0
+  fi
+  mkdir -p "$(dirname "$log_path")" 2>/dev/null || true
+  local sha
+  sha="$(cli_sha_self "${BASH_SOURCE[1]:-$0}")"
+  jq -nc \
+    --arg ts "$(cli_iso_now)" \
+    --arg action "$action" \
+    --arg status "$status" \
+    --arg sha "$sha" \
+    --argjson extra "$extra_json" \
+    '{ts:$ts,action:$action,status:$status,sha256:$sha} + $extra' \
+    >>"$log_path" 2>/dev/null || true
+  return 0
+}
+
+# ---------- refusal envelope ----------
+
+# cli_refuse_apply_without_idem_key <schema_version> <command> <scope>
+#
+# Emits the canonical refusal envelope on stdout and exits 3. Use in repair
+# subcommands when --apply was passed without --idempotency-key.
+#
+# Envelope shape:
+#   {schema_version, command, status:"refused", mode:"apply", scope,
+#    reason:"--apply requires --idempotency-key"}
+cli_refuse_apply_without_idem_key() {
+  local schema_version
+  local command
+  local scope
+  schema_version="${1:-canonical-cli-helpers/v1}"
+  command="${2:-repair}"
+  scope="${3:-}"
+  jq -nc \
+    --arg sv "$schema_version" \
+    --arg cmd "$command" \
+    --arg scope "$scope" \
+    '{schema_version:$sv,command:$cmd,status:"refused",mode:"apply",scope:$scope,reason:"--apply requires --idempotency-key"}'
+  exit 3
+}
+
+# ---------- subcommand --help routing ----------
+
+# cli_dispatch_subcommand_help <topic_help_function> <args...>
+#
+# If first arg is --help or -h, calls topic_help_function with remaining args
+# and exits 0. Otherwise returns 0 (caller proceeds with normal dispatch).
+#
+# Usage in a subcommand parser:
+#   cli_dispatch_subcommand_help cmd_repair_help "$@"
+cli_dispatch_subcommand_help() {
+  local topic_help_fn
+  topic_help_fn="${1:-}"
+  shift || true
+  if [[ -z "$topic_help_fn" ]]; then
+    return 0
+  fi
+  local first
+  first="${1:-}"
+  if [[ "$first" == "--help" || "$first" == "-h" ]]; then
+    shift || true
+    "$topic_help_fn" "$@"
+    exit 0
+  fi
+  return 0
+}
+
+# ---------- --info envelope generator ----------
+
+# cli_emit_info <name> <version> <schema_version> <subcommands_csv> <env_vars_csv> [<extra_paths_json>]
+#
+# Emits the canonical --info envelope on stdout:
+#   {schema_version, command:"info", name, version, sha256, paths,
+#    env_vars, subcommands, dependencies, mutation_requires,
+#    canonical_cli_surfaces}
+#
+# Args:
+#   name              — script basename (e.g., "daily-report-enabled-repos.sh")
+#   version           — caller-owned semantic version string
+#   schema_version    — caller's surface schema (e.g., "<surface>.info/v1")
+#   subcommands_csv   — comma-separated subcommand list
+#   env_vars_csv      — comma-separated env var names
+#   extra_paths_json  — optional JSON object {key:path} to merge into .paths
+cli_emit_info() {
+  local name
+  local version
+  local schema_version
+  local subcommands_csv
+  local env_vars_csv
+  local extra_paths_json
+  name="${1:-}"
+  version="${2:-}"
+  schema_version="${3:-canonical-cli-helpers/v1}"
+  subcommands_csv="${4:-}"
+  env_vars_csv="${5:-}"
+  extra_paths_json="${6:-}"
+  if [[ -z "$extra_paths_json" ]]; then
+    extra_paths_json='{}'
+  fi
+  if ! printf '%s' "$extra_paths_json" | jq -e . >/dev/null 2>&1; then
+    extra_paths_json='{}'
+  fi
+  local sha
+  sha="$(cli_sha_self "${BASH_SOURCE[1]:-$0}")"
+  jq -nc \
+    --arg sv "$schema_version" \
+    --arg name "$name" \
+    --arg version "$version" \
+    --arg sha "$sha" \
+    --arg subs "$subcommands_csv" \
+    --arg envs "$env_vars_csv" \
+    --argjson extra_paths "$extra_paths_json" \
+    '{
+      schema_version: $sv,
+      command: "info",
+      name: $name,
+      version: $version,
+      sha256: $sha,
+      paths: $extra_paths,
+      env_vars: ($envs | split(",") | map(select(length>0))),
+      subcommands: ($subs | split(",") | map(select(length>0))),
+      dependencies: ["bash","jq","date","shasum"],
+      mutation_requires: "--apply --idempotency-key (or default --json output)",
+      canonical_cli_surfaces: [
+        "doctor","health","repair","validate","audit","why",
+        "quickstart","help","completion","--info","--schema","--examples"
+      ]
+    }'
+  return 0
+}
+
+# ---------- --examples envelope generator ----------
+
+# cli_emit_examples <schema_version> <examples_jsonl_string>
+#
+# examples_jsonl_string: newline-delimited JSON, each
+#   {name, invocation, purpose}
+#
+# Wraps into:
+#   {schema_version, command:"examples", examples:[...]}
+cli_emit_examples() {
+  local schema_version
+  local examples_jsonl
+  schema_version="${1:-canonical-cli-helpers/v1}"
+  examples_jsonl="${2:-}"
+  local examples_array
+  if [[ -z "$examples_jsonl" ]]; then
+    examples_array='[]'
+  else
+    examples_array="$(printf '%s' "$examples_jsonl" | jq -cs '.' 2>/dev/null)"
+    if [[ -z "$examples_array" ]]; then
+      examples_array='[]'
+    fi
+  fi
+  jq -nc \
+    --arg sv "$schema_version" \
+    --argjson examples "$examples_array" \
+    '{schema_version:$sv,command:"examples",examples:$examples}'
+  return 0
+}
+
+# ---------- quickstart envelope generator ----------
+
+# cli_emit_quickstart <schema_version> <steps_jsonl_string> [<next_actions_csv>]
+#
+# steps_jsonl_string: newline-delimited JSON, each {step, action, command}
+# next_actions_csv: comma-separated list (optional)
+cli_emit_quickstart() {
+  local schema_version
+  local steps_jsonl
+  local next_actions_csv
+  schema_version="${1:-canonical-cli-helpers/v1}"
+  steps_jsonl="${2:-}"
+  next_actions_csv="${3:-}"
+  local steps_array
+  if [[ -z "$steps_jsonl" ]]; then
+    steps_array='[]'
+  else
+    steps_array="$(printf '%s' "$steps_jsonl" | jq -cs '.' 2>/dev/null)"
+    if [[ -z "$steps_array" ]]; then
+      steps_array='[]'
+    fi
+  fi
+  jq -nc \
+    --arg sv "$schema_version" \
+    --arg actions "$next_actions_csv" \
+    --argjson steps "$steps_array" \
+    '{
+      schema_version:$sv,
+      command:"quickstart",
+      status:"ok",
+      steps:$steps,
+      next_actions:($actions | split(",") | map(select(length>0)))
+    }'
+  return 0
+}
+
+# ---------- completion generators ----------
+
+# cli_emit_completion_bash <command_name> <subcommands_csv> <flags_csv>
+#
+# Emits a bash completion script bound to <command_name> on stdout.
+cli_emit_completion_bash() {
+  local cmd
+  local subs
+  local flags
+  cmd="${1:-}"
+  subs="${2:-}"
+  flags="${3:-}"
+  if [[ -z "$cmd" ]]; then
+    return 0
+  fi
+  local fn_name
+  fn_name="_${cmd//[^A-Za-z0-9_]/_}_completion"
+  cat <<EOF
+${fn_name}() {
+  local cur subs flags opts
+  COMPREPLY=()
+  cur="\${COMP_WORDS[COMP_CWORD]}"
+  subs="$(printf '%s' "$subs" | tr ',' ' ')"
+  flags="$(printf '%s' "$flags" | tr ',' ' ')"
+  if [[ \${COMP_CWORD} -eq 1 ]]; then
+    opts="\$subs \$flags"
+    COMPREPLY=( \$(compgen -W "\$opts" -- "\$cur") )
+    return 0
+  fi
+  COMPREPLY=( \$(compgen -W "\$flags" -- "\$cur") )
+  return 0
+}
+complete -F ${fn_name} ${cmd}
+EOF
+  return 0
+}
+
+# cli_emit_completion_zsh <command_name> <subcommands_csv>
+#
+# Emits a zsh completion script bound to <command_name> on stdout.
+cli_emit_completion_zsh() {
+  local cmd
+  local subs
+  cmd="${1:-}"
+  subs="${2:-}"
+  if [[ -z "$cmd" ]]; then
+    return 0
+  fi
+  local fn_name
+  fn_name="_${cmd//[^A-Za-z0-9_]/_}"
+  local subs_space
+  subs_space="$(printf '%s' "$subs" | tr ',' ' ')"
+  cat <<EOF
+#compdef ${cmd}
+${fn_name}() {
+  local -a subs
+  subs=(${subs_space})
+  _arguments \\
+    '1: :->sub' \\
+    '*: :->args'
+  case \$state in
+    sub) compadd -- \$subs --info --schema --examples --help --json --dry-run ;;
+  esac
+}
+compdef ${fn_name} ${cmd}
+EOF
+  return 0
+}
+
+# ---------- topic help dispatcher ----------
+
+# cli_emit_topic_help <topic> <topic_map_file>
+#
+# topic_map_file: JSON {<topic>:"<help text>", ...}
+#
+# Empty topic shows the topic list. Unknown topic prints the topic list and
+# exits 0 (so callers can route help <bad-topic> without crashing).
+cli_emit_topic_help() {
+  local topic
+  local topic_map_file
+  topic="${1:-}"
+  topic_map_file="${2:-}"
+  if [[ -z "$topic_map_file" || ! -r "$topic_map_file" ]]; then
+    printf 'ERR: topic map missing or unreadable: %s\n' "$topic_map_file" >&2
+    return 64
+  fi
+  if ! jq -e . "$topic_map_file" >/dev/null 2>&1; then
+    printf 'ERR: topic map is not valid JSON: %s\n' "$topic_map_file" >&2
+    return 64
+  fi
+  if [[ -z "$topic" ]]; then
+    jq -r 'keys | join(" | ") | "Topics: " + .' "$topic_map_file"
+    return 0
+  fi
+  local body
+  body="$(jq -r --arg t "$topic" '.[$t] // empty' "$topic_map_file")"
+  if [[ -z "$body" ]]; then
+    jq -r 'keys | join(" | ") | "Unknown topic. Topics: " + .' "$topic_map_file"
+    return 0
+  fi
+  printf '%s\n' "$body"
+  return 0
+}
