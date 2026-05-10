@@ -1,0 +1,1 @@
+topic: doctor — probes substrate (ntm binary, jsonl-append lib, topology file, out file dir, lock file dir, jq/mktemp deps, audit log dir, repo root, helper-lib). Pass = wrapper ready; warn = recoverable; fail = blocked.

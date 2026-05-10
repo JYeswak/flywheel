@@ -1,0 +1,1 @@
+{"schema_version":"ntm-fleet-health/v1","command":"validate","subject":"ntm-bin","status":"pass","path":"/Users/josh/.local/bin/ntm","exec_ok":true,"health_subcommand_ok":true,"missing":[]}

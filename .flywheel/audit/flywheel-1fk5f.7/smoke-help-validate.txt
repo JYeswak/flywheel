@@ -1,0 +1,1 @@
+topic: validate — subjects: ntm-bin (verify ntm executable + ntm health subcommand recognized); audit-row JSONL_LINE (verify ts/status fields).

@@ -1,0 +1,1 @@
+{"schema_version":"ntm-fleet-health/v1","command":"why","id":"-1","status":"pass","match_count":1,"matches":[{"ts":"2026-05-10T19:02:39Z","action":"repair","status":"applied","sha256":"f3764d69b65060435feef0343fc127a2ba7c0d900b7d4d613bae16785f38e12b","scope":"audit_log_dir","idempotency_key":"1fk5f7-evidence"}]}
