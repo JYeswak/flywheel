@@ -274,9 +274,9 @@ Root Cause: The negative-cache design treated repeated doctor failures as a reas
 
 Forever-Rule: Loops diagnose and repair. Never skip a failing repo without first attempting bounded, idempotent repair. Negative cache is a last resort after repair fails, not a first response.
 
-Fix Applied/Status: Bead 1, `autoloop-diagnose-repair`, rewrites autoloop behavior toward diagnose-then-repair before cache/skip decisions.
+Fix Applied/Status: Implementing bead `flywheel-zbs8` (`[convergence-autoloop-diagnose-repair] repair before negative-cache skip`, P0, in_progress as of 2026-05-10) rewrites autoloop behavior toward diagnose-then-repair before cache/skip decisions. Promoted to incident-level doctrine via `flywheel-ahlv` 2026-05-10.
 
-Evidence: `~/.local/state/flywheel/fuckup-log.jsonl#L57`.
+Evidence: `~/.local/state/flywheel/fuckup-log.jsonl#L57` (1 structural event, processed=true via bulk_test_data_cleanup).
 
 ## agent-fighting-gate
 
@@ -296,7 +296,7 @@ Root Cause: Agents treated hook denials as transient execution failures. They re
 
 Forever-Rule: After one gate denial, parse the reason and change strategy before retrying. After two denials on the same class, stop and report the gate name, exact command shape, denial reason, and proposed repair. Never retry a denied command verbatim.
 
-Fix Applied/Status: UPDATE draft from fuckup-log triage. Existing incident refreshed with current event count, line evidence, and a stricter two-denial stop rule.
+Fix Applied/Status: Implementing bead `flywheel-mli7` (`[convergence-dispatch-gate-narrow] reduce false-positive transport denials`, P1, closed 2026-05-07; commit narrowed the dispatch-transport gate's segment-level matching to remove the false-positive class that drove most repeat-retry behavior). The two-denial stop rule remains a worker-side discipline; promoted to incident-level doctrine via `flywheel-ahlv` 2026-05-10. Triage state: 5 rows processed=true via bulk_test_data_cleanup.
 
 Evidence:
 - `~/.local/state/flywheel/fuckup-log.jsonl#L34`: readiness gate denied the same dispatch prompt twice.
@@ -322,7 +322,7 @@ Root Cause: The dispatch transport gate matched forbidden transport tokens too b
 
 Forever-Rule: Dispatch transport enforcement must parse command segments and only deny raw pane-dispatch actions in the segment that performs dispatch. Canonical `ntm send` must be allowed even when the payload mentions forbidden examples.
 
-Fix Applied/Status: UPDATE draft from fuckup-log triage. Existing incident refreshed to separate true-positive raw dispatch blocks from false-positive quoted-payload and compound-command blocks.
+Fix Applied/Status: Implementing bead `flywheel-mli7` (`[convergence-dispatch-gate-narrow] reduce false-positive transport denials`, P1, closed 2026-05-07). Closure tests: `gate1` (raw dispatch with dispatch tokens denied), `gate2` (cancel+ntm allowed), `gate3` (ntm with tmux mention in body allowed), `gate4` (`ntm assign --auto --watch` denied) — `true_positive=2 false_positive=0`. Promoted to incident-level doctrine via `flywheel-ahlv` 2026-05-10. Triage state: 25 rows processed=true via bulk_test_data_cleanup.
 
 Evidence:
 - `~/.local/state/flywheel/fuckup-log.jsonl#L5`: raw transport send pattern denied in a compound command.
