@@ -1,0 +1,144 @@
+{
+  "schema_version": "validation-receipt/v1",
+  "dispatch_id": "flywheel-3o76p-5ebaf4",
+  "callback_ref": {
+    "transport": "ntm",
+    "session": "flywheel",
+    "pane": 1,
+    "kind": "BLOCKED",
+    "received_at": "2026-05-09T04:37:40Z",
+    "raw_ref": "pending-send-from-codex-pane"
+  },
+  "status": "fail",
+  "failure_class": "persistent",
+  "retry_policy": "manual",
+  "recovery_hint": "Wait for Dicklesworthstone/ntm issue 135 to close, then absorb the fixed NTM runtime_handoff contract locally before closing flywheel-3o76p.",
+  "failure_classes": [
+    "external_upstream_issue_open",
+    "runtime_handoff_singleton_contract_still_live"
+  ],
+  "evidence": [
+    {
+      "type": "path",
+      "ref": ".flywheel/receipts/flywheel-3o76p-5ebaf4-blocked-evidence.md"
+    },
+    {
+      "type": "path",
+      "ref": ".flywheel/audit/flywheel-3o76p/compliance.md"
+    },
+    {
+      "type": "command",
+      "ref": "gh issue view 135 --repo Dicklesworthstone/ntm --json state,closedAt | jq -e '.state == \"OPEN\" and .closedAt == null'"
+    },
+    {
+      "type": "command",
+      "ref": "NTM_STATE_DB=\"$HOME/.config/ntm/state.db\" bash tests/phase2-audit.sh"
+    },
+    {
+      "type": "fuckup_log",
+      "ref": "none-created-existing-tracking-bead-covers-external-upstream-blocker"
+    }
+  ],
+  "artifact_checks": [
+    {
+      "artifact_id": "prior_blocked_evidence",
+      "path": ".flywheel/receipts/flywheel-1o0i.1-53a838-blocked-evidence.md",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "prior_issue_body",
+      "path": ".flywheel/receipts/flywheel-1o0i.1-53a838-jeff-issue-body.md",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "current_blocked_evidence",
+      "path": ".flywheel/receipts/flywheel-3o76p-5ebaf4-blocked-evidence.md",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "validation_receipt",
+      "path": ".flywheel/audit/flywheel-3o76p/validation-receipt.json",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "l112_probe",
+      "path": ".flywheel/audit/flywheel-3o76p/l112-probe.sh",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "dispatch_packet",
+      "path": "/tmp/dispatch_flywheel-3o76p-5ebaf4.md",
+      "status": "exists"
+    }
+  ],
+  "runtime_context": {
+    "agent_context": {
+      "status": "responsive",
+      "probe_ref": "codex-pane executed dispatch commands and wrote this receipt",
+      "resolved_tools": [
+        "br",
+        "gh",
+        "jq",
+        "bash",
+        "socraticode"
+      ]
+    },
+    "orchestrator_shell_context": {
+      "status": "unknown",
+      "probe_ref": "orchestrator callback delivery verified after ntm send",
+      "resolved_tools": []
+    },
+    "timeout": false,
+    "timeout_seconds": 0,
+    "context_drift": false
+  },
+  "agent_mail": {
+    "agent_mail_thread": null,
+    "identity_name": "MistyCliff",
+    "files_reserved": [
+      ".flywheel/receipts/flywheel-3o76p-5ebaf4-blocked-evidence.md",
+      ".flywheel/audit/flywheel-3o76p/compliance.md",
+      ".flywheel/audit/flywheel-3o76p/validation-receipt.json",
+      ".flywheel/audit/flywheel-3o76p/l112-probe.sh"
+    ],
+    "files_released": [
+      ".flywheel/receipts/flywheel-3o76p-5ebaf4-blocked-evidence.md",
+      ".flywheel/audit/flywheel-3o76p/compliance.md",
+      ".flywheel/audit/flywheel-3o76p/validation-receipt.json",
+      ".flywheel/audit/flywheel-3o76p/l112-probe.sh"
+    ],
+    "reservation_conflicts": [
+      "agent-mail-unavailable:registration-token-required"
+    ],
+    "reservation_lifecycle": {
+      "state": "released",
+      "reason": "Shared-surface reservations were acquired and released; Agent Mail reservation was unavailable because this MCP session lacked MistyCliff registration token."
+    }
+  },
+  "evidence_redaction": {
+    "evidence_redacted": "n/a",
+    "required": false,
+    "evidence_paths": [
+      ".flywheel/receipts/flywheel-3o76p-5ebaf4-blocked-evidence.md",
+      ".flywheel/audit/flywheel-3o76p/compliance.md"
+    ],
+    "status": "pass",
+    "owner": "MistyCliff",
+    "remediation": "No secret material was captured in the evidence pack."
+  },
+  "bead_actions": [
+    {
+      "action": "no_bead_reason",
+      "reason": "Existing tracking bead flywheel-3o76p already represents the unresolved upstream issue and no distinct new gap was discovered."
+    }
+  ],
+  "learn_route": {
+    "route": "ignore",
+    "reason": "This is an expected external upstream blocker with an existing tracking bead."
+  },
+  "chain_blocker": {
+    "next_phase": "absorb-fixed-ntm-runtime-handoff-contract",
+    "capacity_available": false,
+    "chain_blocked_reason": "Upstream issue 135 remains open and no fixed NTM contract is available to absorb."
+  }
+}
