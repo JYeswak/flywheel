@@ -7,7 +7,7 @@
 # never executes the target scripts. Zero external deps beyond bash,
 # jq, grep, awk, sed.
 #
-# Rules (8 total):
+# Rules (9 total):
 #   L1 chained-local-set-u    — `local x="$1" y="$x/foo"` fails under set -u
 #   L2 missing-return-zero    — function ending in if/&&/|| returns last rc
 #   L3 brace-default-ambig    — `${3:-{}}` parses incorrectly
@@ -16,6 +16,11 @@
 #   L6 missing-magic-comment  — script with --apply lacks marker comment
 #   L7 apply-no-idem-key      — --apply path doesn't gate on idempotency-key
 #   L8 mutate-no-backup       — --apply writes to user-state without .bak
+#   L9 apply-side-effect-before-gate
+#                             — side-effect inside --apply block fires BEFORE
+#                                 apply-key gate refuses (hoqq8 trauma class:
+#                                 refused apply still leaves test scaffold
+#                                 behind). Hoist the gate above side-effects.
 #
 # Bead: flywheel-etp5n. Spec: .flywheel/audit/flywheel-jloib.0c/apply-spec.md.
 set -euo pipefail
@@ -62,7 +67,8 @@ emit_info() {
       {id:"L5",label:"missing-strict-mode"},
       {id:"L6",label:"missing-magic-comment"},
       {id:"L7",label:"apply-without-idempotency-key"},
-      {id:"L8",label:"mutate-without-backup"}
+      {id:"L8",label:"mutate-without-backup"},
+      {id:"L9",label:"apply-side-effect-before-gate"}
     ],
     exit_codes:{clean:0, violations:1, bad_args:2, not_found:3}
   }'
@@ -87,7 +93,7 @@ emit_schema() {
           properties:{
             file:{type:"string"},
             line:{type:"integer",minimum:1},
-            rule:{enum:["L1","L2","L3","L4","L5","L6","L7","L8"]},
+            rule:{enum:["L1","L2","L3","L4","L5","L6","L7","L8","L9"]},
             label:{type:"string"},
             message:{type:"string"},
             severity:{enum:["error","warn"]}
@@ -194,9 +200,107 @@ lint_file() {
   func_name=""
   func_body=""
 
+  # L9 line-set collection (apply-block openers, gate fires, side-effects).
+  # Cross-line check runs after the loop. Patterns adapted from m12ji's
+  # scanner.py and the hoqq8 fix-diff (canonical example).
+  #
+  # Function-scope-aware: gates only protect side-effects in the SAME
+  # function. The hoqq8 trauma was scaffold_target() having a gate at
+  # the bottom while side-effects ran at the top — but other functions
+  # (e.g., a separate repair handler) had their own gate that L9 must
+  # NOT credit toward scaffold_target's coverage.
+  local -a _l9_apply_block_lines=()
+  local -a _l9_apply_block_funcs=()
+  local -a _l9_gate_lines=()
+  local -a _l9_gate_funcs=()
+  local -a _l9_side_effect_lines=()
+  local -a _l9_side_effect_funcs=()
+  local -a _l9_side_effect_samples=()
+  local _l9_current_func=""
+  local _l9_brace_depth=0
+
   for line in "${lines[@]}"; do
     lineno=$((lineno + 1))
     local trimmed="${line#"${line%%[![:space:]]*}"}"
+
+    # L9 — line-set collection (skipped during analysis, used after loop).
+    # Only collect if rule is enabled to avoid wasted work when L9 is filtered out.
+    if _rule_enabled L9 "$rules_filter"; then
+      # Function-scope tracker for L9 (independent of L2/L4's tracker, which
+      # runs AFTER this block). Reset at function start; clear at closing `}`.
+      if [[ "$trimmed" =~ ^([a-zA-Z_][a-zA-Z0-9_]*)\(\)[[:space:]]*\{?[[:space:]]*$ ]] || \
+         [[ "$trimmed" =~ ^function[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*) ]]; then
+        _l9_current_func="${BASH_REMATCH[1]}"
+        _l9_brace_depth=1
+      elif [[ -n "$_l9_current_func" ]]; then
+        # Crude brace-depth tracking: count `{` and `}` on this line.
+        # Sufficient for the common shapes (one func per close-brace at col 0).
+        local _l9_opens="${trimmed//[^\{]/}"
+        local _l9_closes="${trimmed//[^\}]/}"
+        _l9_brace_depth=$((_l9_brace_depth + ${#_l9_opens} - ${#_l9_closes}))
+        if [[ "$_l9_brace_depth" -le 0 ]]; then
+          _l9_current_func=""
+          _l9_brace_depth=0
+        fi
+      fi
+
+      # Skip comments + blank lines
+      if [[ -n "$trimmed" ]] && [[ ! "$trimmed" =~ ^# ]]; then
+        # Apply-block openers (matches m12ji's APPLY_BLOCK_OPENER set).
+        # Pattern matches BARE `if [[ "$mode" == "apply" ]]` — NOT joint
+        # forms like `... && -z "$idem_key" ]]`. Joint gate-conditions are
+        # captured separately as gates (they refuse-and-exit).
+        if [[ "$line" =~ if[[:space:]]+\[\[[[:space:]]+\"\$mode\"[[:space:]]*==[[:space:]]*\"apply\"[[:space:]]*\]\] ]] || \
+           [[ "$line" =~ if[[:space:]]+\[\[[[:space:]]+\"\$\{mode:?-?\}\"[[:space:]]*==[[:space:]]*\"apply\"[[:space:]]*\]\] ]] || \
+           [[ "$line" =~ if[[:space:]]+\[\[[[:space:]]+\"\$apply_mode\"[[:space:]]*==[[:space:]]*true[[:space:]]*\]\] ]] || \
+           [[ "$line" =~ if[[:space:]]+\[\[[[:space:]]+\$\{?mode\}?[[:space:]]*==[[:space:]]*\"?apply\"?[[:space:]]*\]\] ]]; then
+          _l9_apply_block_lines+=("$lineno")
+          _l9_apply_block_funcs+=("$_l9_current_func")
+        fi
+        # Gate fires (matches m12ji's GATE_PATTERNS — looser than block opener)
+        if [[ "$line" =~ cli_refuse_apply_without_idem_key ]] || \
+           [[ "$line" =~ \"--apply[[:space:]]+requires[[:space:]]+--idempotency-key\" ]] || \
+           [[ "$line" =~ \"--apply\"[[:space:]]+requires[[:space:]]+\"--idempotency-key\" ]]; then
+          _l9_gate_lines+=("$lineno")
+          _l9_gate_funcs+=("$_l9_current_func")
+        fi
+        # Side-effects (mkdir/cp/mv/rm/sed -i/chmod/touch + git mutating + redirect to non-tmp).
+        # Patterns match anywhere on the line (not anchored to start) since
+        # mid-line shapes like `cmd > "$var"` and `emit_x > "$test_path"` were
+        # the canonical hoqq8 trauma example. Exclusion list filters tmp paths.
+        local _se_match=false
+        if [[ "$line" =~ (^|[^a-zA-Z_])(mkdir[[:space:]]+-p[[:space:]]) ]] || \
+           [[ "$line" =~ (^|[^a-zA-Z_])(cp[[:space:]]+(-[a-zA-Z]+[[:space:]]+)?[^-]) ]] || \
+           [[ "$line" =~ (^|[^a-zA-Z_])(mv[[:space:]]+) ]] || \
+           [[ "$line" =~ (^|[^a-zA-Z_])(rm[[:space:]]+-rf?[[:space:]]) ]] || \
+           [[ "$line" =~ (^|[^a-zA-Z_])(sed[[:space:]]+-i) ]] || \
+           [[ "$line" =~ (^|[^a-zA-Z_])(chmod[[:space:]]) ]] || \
+           [[ "$line" =~ (^|[^a-zA-Z_])(touch[[:space:]]+[^-]) ]] || \
+           [[ "$line" =~ (^|[^a-zA-Z_])(git[[:space:]]+(commit|push|reset[[:space:]]+--hard|rebase|cherry-pick)) ]] || \
+           [[ "$line" =~ \>\>?[[:space:]]*\"?\$HOME ]] || \
+           [[ "$line" =~ \>\>?[[:space:]]*\"?/Users/ ]] || \
+           [[ "$line" =~ \>\>?[[:space:]]*\"?\$\{?[a-zA-Z][a-zA-Z0-9_]* ]]; then
+          _se_match=true
+        fi
+        # Filter: tmp paths, .bak suffixes, /dev/null, stderr/stdout, here-doc
+        # token markers aren't production side-effects (per m12ji exclusion list).
+        if $_se_match; then
+          if [[ "$line" =~ \$tmp_|\$WORK_TMP|tmp_dir|/tmp/|/private/tmp/|TMPDIR|\.bak\.|/dev/null|\>\&[12]|\>[[:space:]]*\$\{?(stdout|stderr) ]]; then
+            _se_match=false
+          fi
+          # Also exclude redirect-to-fd (e.g. `2>&1`, `>&2`) and JSON > here strings (`<<<`, `<<EOF`)
+          # which shouldn't trip the redirect-to-var pattern.
+          if [[ "$line" =~ \<\<\< ]] || [[ "$line" =~ \<\<[A-Z] ]]; then
+            _se_match=false
+          fi
+        fi
+        if $_se_match; then
+          _l9_side_effect_lines+=("$lineno")
+          _l9_side_effect_samples+=("${trimmed:0:80}")
+          _l9_side_effect_funcs+=("$_l9_current_func")
+        fi
+      fi
+    fi
 
     # L1 — chained local with set -u risk
     # `local x="..." y="...$x..."` — bash regex lacks backreferences,
@@ -292,6 +396,61 @@ lint_file() {
       fi
     fi
   done
+
+  # L9 — apply-side-effect-before-gate (cross-line, post-pass).
+  # Trauma class: hoqq8 — refused --apply (no idempotency-key) still wrote
+  # tests/<name>-canonical-cli.sh because the test-scaffold side-effect ran
+  # BEFORE the apply-key gate. Per m12ji audit (95 surfaces, 0 violations),
+  # we want this STAY-clean preventively at author time.
+  #
+  # Violation shape: side-effect line is INSIDE an apply-block (after some
+  # apply-block opener) AND BEFORE the first apply-key gate. If gate is
+  # absent entirely, L7 catches it; L9 stays silent.
+  if _rule_enabled L9 "$rules_filter"; then
+    if [[ "${#_l9_apply_block_lines[@]}" -gt 0 ]] && [[ "${#_l9_side_effect_lines[@]}" -gt 0 ]]; then
+      local _l9_idx=0
+      for _l9_se_line in "${_l9_side_effect_lines[@]}"; do
+        local _l9_se_func="${_l9_side_effect_funcs[$_l9_idx]:-}"
+        # Find most recent apply-block opener strictly before this side-effect
+        # AND in the same function scope (or both top-level).
+        local _l9_most_recent_ab=0
+        local _l9_ab_idx=0
+        for _l9_ab in "${_l9_apply_block_lines[@]}"; do
+          local _l9_ab_func="${_l9_apply_block_funcs[$_l9_ab_idx]:-}"
+          if [[ "$_l9_ab" -lt "$_l9_se_line" ]] && [[ "$_l9_ab_func" == "$_l9_se_func" ]]; then
+            _l9_most_recent_ab="$_l9_ab"
+          fi
+          _l9_ab_idx=$((_l9_ab_idx + 1))
+        done
+        # Side-effect not inside any apply-block context in same function → skip
+        if [[ "$_l9_most_recent_ab" -eq 0 ]]; then
+          _l9_idx=$((_l9_idx + 1))
+          continue
+        fi
+        # Look for any gate BEFORE the side-effect in the SAME function.
+        # Function-scope is load-bearing: hoqq8 trauma was scaffold_target()
+        # missing its own gate while another function (repair scope) had
+        # one. Cross-function gates don't protect this SE.
+        local _l9_gated=false
+        local _l9_g_idx=0
+        for _l9_g in "${_l9_gate_lines[@]}"; do
+          local _l9_g_func="${_l9_gate_funcs[$_l9_g_idx]:-}"
+          if [[ "$_l9_g" -lt "$_l9_se_line" ]] && [[ "$_l9_g_func" == "$_l9_se_func" ]]; then
+            _l9_gated=true
+            break
+          fi
+          _l9_g_idx=$((_l9_g_idx + 1))
+        done
+        if ! $_l9_gated; then
+          local _l9_sample="${_l9_side_effect_samples[$_l9_idx]:-}"
+          local _l9_scope="${_l9_se_func:-<top-level>}"
+          emit_v "$_l9_se_line" L9 apply-side-effect-before-gate error "side-effect inside apply-block (opened L${_l9_most_recent_ab}, scope=${_l9_scope}) fires with no apply-key gate before it in same function — hoist 'cli_refuse_apply_without_idem_key' above side-effect per flywheel-hoqq8 trauma class. Sample: ${_l9_sample}"
+        fi
+        _l9_idx=$((_l9_idx + 1))
+      done
+    fi
+  fi
+
   return 0
 }
 
