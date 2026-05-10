@@ -1,0 +1,1 @@
+{"schema_version":"mission-lock-negative-invariants-validator/v1","command":"validate","subject":"audit-row","status":"fail","reason":"row is not valid JSON"}

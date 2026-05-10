@@ -1,0 +1,1 @@
+topic: doctor — probes substrate (MISSION.md present, jq/mktemp/grep on PATH, audit log dir writable, repo root resolved, helper-lib loaded). Pass = validator ready to run; warn = recoverable; fail = blocked.

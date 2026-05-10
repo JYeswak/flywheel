@@ -1,0 +1,1 @@
+{"schema_version":"mission-lock-negative-invariants-validator/v1","command":"why","id":"pass","status":"pass","match_count":1,"matches":[{"ts":"2026-05-10T17:44:06Z","action":"validate","status":"pass","sha256":"1f0dd3a259a0f8d5a9f4b7306c421ff85dcbbfbdc3612c61117e1b19c1f2a5b8","mission_path":"/Users/josh/Developer/flywheel/.flywheel/MISSION.md","missing_invariants":[]}]}
