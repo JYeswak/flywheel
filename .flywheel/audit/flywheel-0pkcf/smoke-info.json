@@ -1,0 +1,1 @@
+{"audit_log":"/Users/josh/.local/state/flywheel/caam-auto-rotate-on-usage-limit.sh-runs.jsonl","canonical_surfaces":["doctor","health","repair","validate","audit","why","quickstart","help","completion"],"command":"info","kind":"python3","name":"caam-auto-rotate-on-usage-limit.sh","scaffolder_bead":"flywheel-oozt3","schema_version":"caam-auto-rotate-on-usage-limit/v1"}
