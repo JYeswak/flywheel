@@ -1,0 +1,85 @@
+{
+  "run": {
+    "schema_version": "daily-report-enabled-repos/v1",
+    "command": "run",
+    "title": "Daily report fan-out result v1",
+    "type": "object",
+    "required": ["schema_version","generated","skipped","failed","repos"],
+    "properties": {
+      "schema_version": {"const": "daily-report-enabled-repos/v1"},
+      "generated": {"type": "integer", "minimum": 0},
+      "skipped": {"type": "integer", "minimum": 0},
+      "failed": {"type": "integer", "minimum": 0},
+      "repos": {"type": "array", "items": {"type": "object", "required": ["repo","status"]}}
+    }
+  },
+  "doctor": {
+    "schema_version": "daily-report-enabled-repos.doctor/v1",
+    "command": "doctor",
+    "type": "object",
+    "required": ["status","checks","enabled_repos","generator_executable"],
+    "properties": {
+      "status": {"enum": ["pass","warn","fail"]},
+      "enabled_repos": {"type": "array", "items": {"type": "string"}},
+      "generator_executable": {"type": "boolean"},
+      "checks": {"type": "array", "items": {"type": "object", "required": ["name","status"]}}
+    }
+  },
+  "health": {
+    "schema_version": "daily-report-enabled-repos.health/v1",
+    "command": "health",
+    "type": "object",
+    "required": ["status","repos"],
+    "properties": {
+      "status": {"enum": ["pass","warn","fail"]},
+      "repos": {"type": "array"}
+    }
+  },
+  "repair": {
+    "schema_version": "daily-report-enabled-repos.repair/v1",
+    "command": "repair",
+    "type": "object",
+    "required": ["status","scope","mode","planned_actions"],
+    "properties": {
+      "status": {"enum": ["dry_run","applied","refused"]},
+      "mode": {"enum": ["dry_run","apply"]},
+      "scope": {"enum": ["state","configs"]},
+      "idempotency_key": {"type": ["string","null"]},
+      "planned_actions": {"type": "array"},
+      "applied_actions": {"type": "array"}
+    }
+  },
+  "validate": {
+    "schema_version": "daily-report-enabled-repos.validate/v1",
+    "command": "validate",
+    "type": "object",
+    "required": ["status","results"],
+    "properties": {
+      "status": {"enum": ["pass","warn","fail"]},
+      "results": {"type": "array"}
+    }
+  },
+  "audit": {
+    "schema_version": "daily-report-enabled-repos.audit/v1",
+    "command": "audit",
+    "type": "object",
+    "required": ["status","row_count","recent"],
+    "properties": {
+      "status": {"enum": ["pass","empty","missing"]},
+      "row_count": {"type": "integer"},
+      "recent": {"type": "array"}
+    }
+  },
+  "why": {
+    "schema_version": "daily-report-enabled-repos.why/v1",
+    "command": "why",
+    "type": "object",
+    "required": ["repo","enabled","reason"]
+  },
+  "quickstart": {
+    "schema_version": "daily-report-enabled-repos.quickstart/v1",
+    "command": "quickstart",
+    "type": "object",
+    "required": ["status","steps"]
+  }
+}

@@ -114,104 +114,7 @@ emit_info() {
 }
 
 emit_schema() {
-  local surface="${1:-default}"
-  case "$surface" in
-    default|run)
-      jq -nc --arg sv "$SCHEMA_VERSION" '{
-        schema_version: $sv,
-        command: "run",
-        title: "Daily report fan-out result v1",
-        type: "object",
-        required: ["schema_version","generated","skipped","failed","repos"],
-        properties: {
-          schema_version: {const: $sv},
-          generated: {type: "integer", minimum: 0},
-          skipped: {type: "integer", minimum: 0},
-          failed: {type: "integer", minimum: 0},
-          repos: {type: "array", items: {type: "object", required: ["repo","status"]}}
-        }
-      }' ;;
-    doctor)
-      jq -nc '{
-        schema_version: "daily-report-enabled-repos.doctor/v1",
-        command: "doctor",
-        type: "object",
-        required: ["status","checks","enabled_repos","generator_executable"],
-        properties: {
-          status: {enum: ["pass","warn","fail"]},
-          enabled_repos: {type: "array", items: {type: "string"}},
-          generator_executable: {type: "boolean"},
-          checks: {type: "array", items: {type: "object", required: ["name","status"]}}
-        }
-      }' ;;
-    health)
-      jq -nc '{
-        schema_version: "daily-report-enabled-repos.health/v1",
-        command: "health",
-        type: "object",
-        required: ["status","repos"],
-        properties: {
-          status: {enum: ["pass","warn","fail"]},
-          repos: {type: "array"}
-        }
-      }' ;;
-    repair)
-      jq -nc '{
-        schema_version: "daily-report-enabled-repos.repair/v1",
-        command: "repair",
-        type: "object",
-        required: ["status","scope","mode","planned_actions"],
-        properties: {
-          status: {enum: ["dry_run","applied","refused"]},
-          mode: {enum: ["dry_run","apply"]},
-          scope: {enum: ["state","configs"]},
-          idempotency_key: {type: ["string","null"]},
-          planned_actions: {type: "array"},
-          applied_actions: {type: "array"}
-        }
-      }' ;;
-    validate)
-      jq -nc '{
-        schema_version: "daily-report-enabled-repos.validate/v1",
-        command: "validate",
-        type: "object",
-        required: ["status","results"],
-        properties: {
-          status: {enum: ["pass","warn","fail"]},
-          results: {type: "array"}
-        }
-      }' ;;
-    audit)
-      jq -nc '{
-        schema_version: "daily-report-enabled-repos.audit/v1",
-        command: "audit",
-        type: "object",
-        required: ["status","row_count","recent"],
-        properties: {
-          status: {enum: ["pass","empty","missing"]},
-          row_count: {type: "integer"},
-          recent: {type: "array"}
-        }
-      }' ;;
-    why)
-      jq -nc '{
-        schema_version: "daily-report-enabled-repos.why/v1",
-        command: "why",
-        type: "object",
-        required: ["repo","enabled","reason"]
-      }' ;;
-    quickstart)
-      jq -nc '{
-        schema_version: "daily-report-enabled-repos.quickstart/v1",
-        command: "quickstart",
-        type: "object",
-        required: ["status","steps"]
-      }' ;;
-    *)
-      echo "ERR: unknown schema surface: $surface" >&2
-      return 64
-      ;;
-  esac
+  cli_emit_schema_dispatch "${1:-default}" "$ROOT/.flywheel/schemas/daily-report-enabled-repos.json"
 }
 
 emit_examples() {
@@ -576,23 +479,7 @@ cmd_validate_config() {
 }
 
 cmd_audit() {
-  if [[ ! -f "$AUDIT_LOG" ]]; then
-    jq -nc --arg sv "daily-report-enabled-repos.audit/v1" \
-      '{schema_version:$sv,command:"audit",status:"missing",row_count:0,recent:[]}'
-    return 0
-  fi
-  local row_count; row_count="$(wc -l <"$AUDIT_LOG" | tr -d ' ')"
-  if [[ "$row_count" -eq 0 ]]; then
-    jq -nc --arg sv "daily-report-enabled-repos.audit/v1" \
-      '{schema_version:$sv,command:"audit",status:"empty",row_count:0,recent:[]}'
-    return 0
-  fi
-  local recent; recent="$(tail -20 "$AUDIT_LOG" | jq -cs '.')"
-  jq -nc \
-    --arg sv "daily-report-enabled-repos.audit/v1" \
-    --argjson rc "$row_count" \
-    --argjson recent "$recent" \
-    '{schema_version:$sv,command:"audit",status:"pass",row_count:$rc,recent:$recent}'
+  cli_emit_audit_tail "$AUDIT_LOG" "daily-report-enabled-repos.audit/v1" 20
 }
 
 cmd_why() {
@@ -656,34 +543,34 @@ main() {
       emit_examples; exit 0 ;;
 
     run) shift
-      case "${1:-}" in --help|-h) emit_topic_help run; exit 0 ;; esac
+      cli_route_command_help run emit_topic_help "$@"
       cmd_run "$@"; exit $? ;;
     doctor) shift
-      case "${1:-}" in --help|-h) emit_topic_help doctor; exit 0 ;; esac
+      cli_route_command_help doctor emit_topic_help "$@"
       while [[ $# -gt 0 ]]; do case "$1" in --json) shift;; *) echo "ERR: unknown doctor arg $1" >&2; exit 64;; esac; done
       cmd_doctor; exit $? ;;
     health) shift
-      case "${1:-}" in --help|-h) emit_topic_help health; exit 0 ;; esac
+      cli_route_command_help health emit_topic_help "$@"
       while [[ $# -gt 0 ]]; do case "$1" in --json) shift;; *) echo "ERR: unknown health arg $1" >&2; exit 64;; esac; done
       cmd_health; exit $? ;;
     repair) shift
-      case "${1:-}" in --help|-h) emit_topic_help repair; exit 0 ;; esac
+      cli_route_command_help repair emit_topic_help "$@"
       cmd_repair "$@"; exit $? ;;
     validate)
       shift
+      cli_route_command_help validate emit_topic_help "$@"
       case "${1:-}" in
-        --help|-h) emit_topic_help validate; exit 0 ;;
         config) shift
-                case "${1:-}" in --help|-h) emit_topic_help validate; exit 0 ;; esac
+                cli_route_command_help validate emit_topic_help "$@"
                 cmd_validate_config "$@"; exit $? ;;
         *) echo "ERR: validate requires 'config'" >&2; exit 64 ;;
       esac ;;
     audit) shift
-      case "${1:-}" in --help|-h) emit_topic_help audit; exit 0 ;; esac
+      cli_route_command_help audit emit_topic_help "$@"
       while [[ $# -gt 0 ]]; do case "$1" in --json) shift;; *) echo "ERR: unknown audit arg $1" >&2; exit 64;; esac; done
       cmd_audit; exit $? ;;
     why) shift
-      case "${1:-}" in --help|-h) emit_topic_help why; exit 0 ;; esac
+      cli_route_command_help why emit_topic_help "$@"
       cmd_why "$@"; exit $? ;;
     quickstart) shift
       case "${1:-}" in --help|-h) emit_topic_help quickstart 2>/dev/null || usage; exit 0 ;; esac

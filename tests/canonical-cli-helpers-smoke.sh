@@ -180,9 +180,93 @@ echo "$unknown_out" | grep -q "Unknown topic" \
   || report_fail 16 "unknown-topic output missing fallback prefix: $unknown_out"
 pass 16 "cli_emit_topic_help unknown topic falls back"
 
+# --- jloib.0d-followup helpers (b9dfv) ---
+
+# (17) cli_emit_schema_dispatch known surface
+schema_map="$TMP/schema-map.json"
+cat > "$schema_map" <<'JSON'
+{
+  "run": {"schema_version":"smoke.run/v1","command":"run","required":["x"]},
+  "doctor": {"schema_version":"smoke.doctor/v1","command":"doctor","required":["status"]}
+}
+JSON
+out_run="$(cli_emit_schema_dispatch run "$schema_map")"
+echo "$out_run" | jq -e '.schema_version == "smoke.run/v1" and .command == "run"' >/dev/null \
+  || report_fail 17 "schema dispatch run: $out_run"
+pass 17 "cli_emit_schema_dispatch run"
+
+# (18) cli_emit_schema_dispatch default falls back to run
+out_default="$(cli_emit_schema_dispatch default "$schema_map")"
+echo "$out_default" | jq -e '.command == "run"' >/dev/null \
+  || report_fail 18 "schema dispatch default fallback: $out_default"
+pass 18 "cli_emit_schema_dispatch default→run fallback"
+
+# (19) cli_emit_schema_dispatch unknown returns 64
+set +e
+err_out="$(cli_emit_schema_dispatch unknown_surface "$schema_map" 2>&1)"
+err_rc=$?
+set -e
+[[ "$err_rc" -eq 64 ]] || report_fail 19 "expected rc=64 for unknown surface, got $err_rc"
+pass 19 "cli_emit_schema_dispatch unknown rc=64"
+
+# (20) cli_emit_schema_dispatch missing map returns 64
+set +e
+miss_out="$(cli_emit_schema_dispatch run "$TMP/no-such-file.json" 2>&1)"
+miss_rc=$?
+set -e
+[[ "$miss_rc" -eq 64 ]] || report_fail 20 "expected rc=64 for missing map, got $miss_rc"
+pass 20 "cli_emit_schema_dispatch missing-map rc=64"
+
+# (21) cli_route_command_help fires on --help
+fired_marker_b="$TMP/route-fired"
+set +e
+route_out="$(bash -c "source '$LIB'; topic_help() { touch '$fired_marker_b'; printf 'topic %s\n' \"\$1\"; }; cli_route_command_help doctor topic_help --help; printf 'after\n'")"
+route_rc=$?
+set -e
+[[ "$route_rc" -eq 0 ]] || report_fail 21 "route_command_help --help rc=$route_rc"
+[[ -f "$fired_marker_b" ]] || report_fail 21 "topic help did not fire"
+echo "$route_out" | grep -q "topic doctor" || report_fail 21 "topic help did not get command name"
+echo "$route_out" | grep -q "after" && report_fail 21 "route did not exit 0; 'after' printed"
+pass 21 "cli_route_command_help fired with command name + exited"
+
+# (22) cli_route_command_help no --help returns 0
+no_marker="$TMP/no-route-fired"
+set +e
+nr_out="$(bash -c "source '$LIB'; topic_help() { touch '$no_marker'; }; cli_route_command_help doctor topic_help --json arg; printf 'after\n'")"
+nr_rc=$?
+set -e
+[[ "$nr_rc" -eq 0 ]] || report_fail 22 "no-help path rc=$nr_rc"
+[[ -f "$no_marker" ]] && report_fail 22 "topic fn fired when it should not have"
+echo "$nr_out" | grep -q "after" || report_fail 22 "caller did not proceed"
+pass 22 "cli_route_command_help non-help returns"
+
+# (23) cli_emit_audit_tail with rows
+audit_log_b="$TMP/audit-tail.jsonl"
+for i in 1 2 3 4 5; do
+  jq -nc --arg i "$i" '{ts:"2026-05-10T00:00:0\($i)Z",action:"x",status:"ok",sha256:"deadbeef"}' >> "$audit_log_b"
+done
+audit_out="$(cli_emit_audit_tail "$audit_log_b" "smoke.audit/v1" 3)"
+echo "$audit_out" | jq -e '.status == "pass" and .row_count == 5 and (.recent | length == 3)' >/dev/null \
+  || report_fail 23 "audit_tail with rows: $audit_out"
+pass 23 "cli_emit_audit_tail returns last N rows + total count"
+
+# (24) cli_emit_audit_tail empty file
+audit_empty="$TMP/audit-empty.jsonl"
+: > "$audit_empty"
+empty_out="$(cli_emit_audit_tail "$audit_empty" "smoke.audit/v1" 5)"
+echo "$empty_out" | jq -e '.status == "empty" and .row_count == 0 and (.recent | length == 0)' >/dev/null \
+  || report_fail 24 "audit_tail empty file: $empty_out"
+pass 24 "cli_emit_audit_tail empty file"
+
+# (25) cli_emit_audit_tail missing file
+missing_out="$(cli_emit_audit_tail "$TMP/no-such-audit.jsonl" "smoke.audit/v1" 5)"
+echo "$missing_out" | jq -e '.status == "missing" and .row_count == 0' >/dev/null \
+  || report_fail 25 "audit_tail missing file: $missing_out"
+pass 25 "cli_emit_audit_tail missing file"
+
 if [[ "$fail" -gt 0 ]]; then
   echo "FAIL: $fail assertion(s) failed" >&2
   exit 1
 fi
-echo "PASS canonical-cli-helpers-smoke (16 assertions)"
+echo "PASS canonical-cli-helpers-smoke (25 assertions)"
 exit 0

@@ -346,6 +346,127 @@ EOF
   return 0
 }
 
+# ---------- schema dispatcher (jloib.0d-followup #1) ----------
+
+# cli_emit_schema_dispatch <surface> <schema_map_file>
+#
+# JSON-driven schema dispatch. Replaces the per-script `case "$surface" in
+# default|run) ;; doctor) ;; ...` block.
+#
+# schema_map_file: JSON {<surface>: <schema-body-object>, ...}.
+# The body object is emitted as-is (it already carries its own
+# `schema_version`, `command`, `required`, `properties`, etc.).
+#
+# Surface "default" is honored as an alias for "run" when no exact match.
+#
+# Exit codes:
+#   0  matched + emitted
+#   64 schema map missing/unreadable/malformed, or surface unknown
+cli_emit_schema_dispatch() {
+  local surface
+  local schema_map_file
+  surface="${1:-default}"
+  schema_map_file="${2:-}"
+  if [[ -z "$schema_map_file" || ! -r "$schema_map_file" ]]; then
+    printf 'ERR: schema map missing or unreadable: %s\n' "$schema_map_file" >&2
+    return 64
+  fi
+  if ! jq -e . "$schema_map_file" >/dev/null 2>&1; then
+    printf 'ERR: schema map is not valid JSON: %s\n' "$schema_map_file" >&2
+    return 64
+  fi
+  local body
+  body="$(jq -c --arg s "$surface" '.[$s] // empty' "$schema_map_file")"
+  if [[ -z "$body" && "$surface" == "default" ]]; then
+    body="$(jq -c '.run // empty' "$schema_map_file")"
+  fi
+  if [[ -z "$body" ]]; then
+    printf 'ERR: unknown schema surface: %s\n' "$surface" >&2
+    return 64
+  fi
+  printf '%s\n' "$body"
+  return 0
+}
+
+# ---------- per-command help routing (jloib.0d-followup #2) ----------
+
+# cli_route_command_help <command> <topic_help_function> <args...>
+#
+# Routes when the FIRST ARG is `--help` or `-h` — i.e., the user typed
+# `<cli> <command> --help`. Calls the topic help function with <command>
+# as its single argument and exits 0.
+#
+# This complements `cli_dispatch_subcommand_help` (which fires after the
+# subcommand parser has stripped the subcommand) by hoisting the route
+# decision to the dispatch case statement:
+#
+#   doctor)  shift; cli_route_command_help doctor cmd_topic_help "$@"
+#            cmd_doctor "$@"; exit $? ;;
+#
+# Bare invocation without --help returns 0 and the caller proceeds.
+cli_route_command_help() {
+  local command
+  local topic_help_fn
+  command="${1:-}"
+  topic_help_fn="${2:-}"
+  shift 2 || true
+  if [[ -z "$command" || -z "$topic_help_fn" ]]; then
+    return 0
+  fi
+  local first
+  first="${1:-}"
+  if [[ "$first" == "--help" || "$first" == "-h" ]]; then
+    "$topic_help_fn" "$command"
+    exit 0
+  fi
+  return 0
+}
+
+# ---------- audit log tail (jloib.0d-followup #3) ----------
+
+# cli_emit_audit_tail <audit_log_path> <schema_version> [<limit>]
+#
+# Emits the canonical `audit` envelope:
+#   {schema_version, command:"audit", status, row_count, recent:[...]}
+#
+# status enum:
+#   "pass"   — audit log present + at least one row
+#   "empty"  — file exists but no rows
+#   "missing"— file does not exist
+#
+# Default limit: 20.
+cli_emit_audit_tail() {
+  local audit_log
+  local schema_version
+  local limit
+  audit_log="${1:-}"
+  schema_version="${2:-canonical-cli-helpers.audit/v1}"
+  limit="${3:-20}"
+  if [[ -z "$audit_log" || ! -r "$audit_log" ]]; then
+    jq -nc --arg sv "$schema_version" \
+      '{schema_version:$sv,command:"audit",status:"missing",row_count:0,recent:[]}'
+    return 0
+  fi
+  local row_count
+  row_count="$(wc -l <"$audit_log" 2>/dev/null | tr -d ' ')"
+  if [[ -z "$row_count" || "$row_count" == "0" ]]; then
+    jq -nc --arg sv "$schema_version" \
+      '{schema_version:$sv,command:"audit",status:"empty",row_count:0,recent:[]}'
+    return 0
+  fi
+  local recent
+  recent="$(tail -n "$limit" "$audit_log" 2>/dev/null | jq -cs '.' 2>/dev/null)"
+  if [[ -z "$recent" ]]; then
+    recent='[]'
+  fi
+  jq -nc \
+    --arg sv "$schema_version" \
+    --argjson rc "$row_count" \
+    --argjson rows "$recent" \
+    '{schema_version:$sv,command:"audit",status:"pass",row_count:$rc,recent:$rows}'
+  return 0
+}
+
 # ---------- topic help dispatcher ----------
 
 # cli_emit_topic_help <topic> <topic_map_file>
