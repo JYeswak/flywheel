@@ -1,0 +1,1 @@
+{"schema_version":"dispatch-surface-conflict-probe/v1","command":"validate","subject":"audit-row","status":"pass","row":{"ts":"2026-05-10T22:00:00Z","status":"pass","action":"probe"}}

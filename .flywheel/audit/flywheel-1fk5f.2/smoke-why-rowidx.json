@@ -1,0 +1,1 @@
+{"schema_version":"dispatch-surface-conflict-probe/v1","command":"why","id":"-1","status":"pass","match_count":1,"matches":[{"ts":"2026-05-10T18:44:26Z","action":"repair","status":"applied","sha256":"8b00152d9988d8c0eb92efd0e5eb52e5f3b0ab2d1cfc0f9b2635ef492fe36faa","scope":"audit_log_dir","idempotency_key":"1fk5f2-evidence"}]}

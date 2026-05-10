@@ -1,0 +1,1 @@
+topic: doctor — probes substrate (dispatch-log present, jq/grep/awk/mktemp deps, audit log dir, repo root, helper-lib, surface-pattern regex valid). Pass = probe ready; warn = recoverable; fail = blocked.

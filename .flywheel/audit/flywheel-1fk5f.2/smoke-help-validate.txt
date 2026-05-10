@@ -1,0 +1,1 @@
+topic: validate — subjects: candidate-packet PATH (run probe on a candidate dispatch packet, report conflict_count + conflicting_tasks); audit-row JSONL_LINE (verify ts/status fields).
