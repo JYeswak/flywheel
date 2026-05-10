@@ -82,9 +82,45 @@ if "$SCRIPT" quickstart 2>/dev/null | jq -e '.command == "quickstart"' >/dev/nul
   pass "quickstart emits canonical envelope"
 else fail "quickstart envelope"; fi
 
-# TODO(canonical-cli-scaffold): add per-surface assertions here.
-# Examples: doctor checks specific data; repair --apply with key
-# performs expected mutation; validate enforces a known schema.
+# Per-surface assertions (flywheel-gl7om fillin).
+
+# Test 14: doctor returns >=5 substantive named checks (not status:todo)
+if "$SCRIPT" doctor --json 2>/dev/null | jq -e '
+  .status != "todo" and (.checks | length) >= 5
+  and ([.checks[].check] | (any(. == "jq") and any(. == "python3") and any(. == "repo_root") and any(. == "mission_md") and any(. == "audit_log_dir")))' >/dev/null; then
+  pass "doctor returns 5 named substrate probes"
+else fail "doctor checks"; fi
+
+# Test 15: health envelope has total_rows + ready/incomplete/blocked counts + canonical status
+if "$SCRIPT" health --json 2>/dev/null | jq -e '
+  has("total_rows") and has("ready_count") and has("incomplete_count") and has("blocked_count")
+  and (.status | IN("ok","empty","not_initialized"))' >/dev/null; then
+  pass "health envelope has run-history counts + canonical status"
+else fail "health envelope"; fi
+
+# Test 16: repair --scope audit_log_truncate --dry-run emits planned_actions
+if "$SCRIPT" repair --scope audit_log_truncate --dry-run --json 2>/dev/null | jq -e '
+  .status == "dry_run" and has("planned_actions")' >/dev/null; then
+  pass "repair audit_log_truncate --dry-run emits planned_actions"
+else fail "repair dry-run"; fi
+
+# Test 17: validate audit-row emits per-row results array
+if "$SCRIPT" validate audit-row --json 2>/dev/null | jq -e '
+  .subject == "audit-row" and has("pass") and has("fail") and (.results | type == "array")' >/dev/null; then
+  pass "validate audit-row emits results array"
+else fail "validate audit-row"; fi
+
+# Test 18: validate mission-lock-scaffold emits verdict + blockers (re-runs cmd_run probe)
+if "$SCRIPT" validate mission-lock-scaffold --json 2>/dev/null | jq -e '
+  .subject == "mission-lock-scaffold" and has("verdict") and has("blockers")' >/dev/null; then
+  pass "validate mission-lock-scaffold emits verdict + blockers"
+else fail "validate mission-lock-scaffold"; fi
+
+# Test 19: why <ts> distinguishes found|not_found|unavailable
+if "$SCRIPT" why "1999-01-01T00:00:00Z" --json 2>/dev/null | jq -e '
+  .id == "1999-01-01T00:00:00Z" and (.status | IN("found","not_found","unavailable"))' >/dev/null; then
+  pass "why <ts> emits found|not_found|unavailable"
+else fail "why id"; fi
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2
