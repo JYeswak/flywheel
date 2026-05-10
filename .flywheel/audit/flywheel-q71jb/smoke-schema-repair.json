@@ -1,0 +1,1 @@
+{"schema_version":"build-dispatch-packet/v1","command":"schema","surface":"repair","required":["status","mode","scope"],"mode_enum":["dry_run","apply"],"valid_scopes":["runs-log-rotate","template-cache-prime"],"mutation_gates":["--apply requires --idempotency-key"]}

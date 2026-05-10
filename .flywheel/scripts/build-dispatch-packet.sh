@@ -90,19 +90,119 @@ scaffold_emit_quickstart() {
 
 scaffold_emit_schema() {
   local surface="${1:-default}"
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
-    '{schema_version:$sv,command:"schema",surface:$surface,note:"TODO(canonical-cli-scaffold): per-surface schema fill-in"}'
+  case "$surface" in
+    doctor)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,
+          required:["status","checks"],
+          checks_item:["name","status","reason"],
+          status_enum:["pass","fail","warn"]}'
+      ;;
+    health)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,
+          required:["status","audit_log","recent_runs"],
+          status_enum:["pass","warn","fail"]}'
+      ;;
+    repair)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,
+          required:["status","mode","scope"],
+          mode_enum:["dry_run","apply"],
+          valid_scopes:["runs-log-rotate","template-cache-prime"],
+          mutation_gates:["--apply requires --idempotency-key"]}'
+      ;;
+    validate)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,
+          required:["status","subject"],
+          valid_subjects:["packet","bead-id","config"],
+          status_enum:["pass","fail","warn","refused","info"]}'
+      ;;
+    audit)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,
+          required:["audit_log","tail_n","count","rows"]}'
+      ;;
+    why)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,
+          required:["id","status"],
+          status_enum:["found","not_found","warn"],
+          provenance_fields:["ts","bead","pane","task_file","packet_path"]}'
+      ;;
+    default|*)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,
+          surfaces:["doctor","health","repair","validate","audit","why","default"],
+          purpose:"materialize a dispatch packet for a target session/pane",
+          stable_exit_codes:{"0":"success","1":"general error","2":"warn (e.g. dispatch-log missing)","3":"refused (apply without idempotency-key)","64":"bad args"}}'
+      ;;
+  esac
 }
 
 scaffold_emit_topic_help() {
   local topic="${1:-}"
+  # Resolve substrate paths locally so this function does not depend on
+  # variables defined in the original cmd_run scope (which is not loaded
+  # when the early-dispatch intercept fires).
+  local _tpl="${HOME}/.claude/commands/flywheel/_shared/dispatch-template.md"
+  local _runs="${SCAFFOLD_AUDIT_LOG:-${HOME}/.local/state/flywheel/build-dispatch-packet-runs.jsonl}"
+  local _outdir="/tmp"
   case "$topic" in
-    run)      printf 'topic: run — default backward-compatible invocation routes to cmd_run.\n' ;;
-    doctor)   printf 'topic: doctor — TODO(canonical-cli-scaffold): document doctor checks specific to this surface.\n' ;;
-    health)   printf 'topic: health — TODO(canonical-cli-scaffold): document health probes specific to this surface.\n' ;;
-    repair)   printf 'topic: repair — TODO(canonical-cli-scaffold): document repair scopes + idempotency contract.\n' ;;
-    validate) printf 'topic: validate — TODO(canonical-cli-scaffold): document validation subjects + contracts.\n' ;;
-    *)        printf 'topics: run | doctor | health | repair | validate\n' ;;
+    run)
+      printf '%s\n' \
+        "topic: run — default backward-compatible invocation routes to cmd_run." \
+        "  Required: --bead-id <id> --target-pane <n> --target-session <name>" \
+        "  Default mode: --dry-run (emit packet preview); --apply to materialize + log." \
+        "  Output: ${_outdir}/dispatch_<bead-id>-<sha-short>.md (or as redirected by --output-dir)."
+      ;;
+    doctor)
+      printf '%s\n' \
+        "topic: doctor — probe substrate this materializer depends on." \
+        "  Checks: dispatch-template.md (${_tpl}) readable; ntm executable;" \
+        "  jq on PATH; topology + identity-dir present; runs ledger writable." \
+        "  Exit 0 with status:pass; non-zero only on bad args (64)."
+      ;;
+    health)
+      printf '%s\n' \
+        "topic: health — recent run summary from ${_runs}." \
+        "  Reports recent_count, last_run_ts, age_seconds, distinct beads/sessions." \
+        "  status=warn when ledger absent, empty, or stale (>24h)."
+      ;;
+    repair)
+      printf '%s\n' \
+        "topic: repair — read-only by default; mutate with --apply --idempotency-key KEY." \
+        "  Scopes:" \
+        "    runs-log-rotate    rotate ${_runs} when >5MB" \
+        "    template-cache-prime  re-read ${_tpl}; report sha + line count (read-only)" \
+        "  Apply without --idempotency-key returns refused (rc 3)."
+      ;;
+    validate)
+      printf '%s\n' \
+        "topic: validate — per-subject contract checks." \
+        "  Subjects:" \
+        "    --packet=<path>   run dispatch-template-audit against an emitted packet" \
+        "    --bead-id=<id>    confirm bead present + open in local Beads DB" \
+        "    --config          confirm required env paths resolve (TOPOLOGY/IDENTITY_DIR/TEMPLATE_FILE/NTM)"
+      ;;
+    audit)
+      printf '%s\n' \
+        "topic: audit — tail ${_runs} (default --tail=10)." \
+        "  Returns rows[] with ts, bead, packet_path, target session/pane, mode."
+      ;;
+    why)
+      printf '%s\n' \
+        "topic: why <task_id> — provenance lookup by task_id." \
+        "  Searches the live dispatch-log.jsonl + the per-run ledger for the task_id" \
+        "  and emits ts, bead, packet_path, target session/pane, ntm send success."
+      ;;
+    completion)
+      printf 'topic: completion <bash|zsh> — emit shell completion script.\n'
+      ;;
+    *)
+      printf 'topics: run | doctor | health | repair | validate | audit | why | completion\n'
+      ;;
   esac
 }
 
@@ -125,16 +225,127 @@ scaffold_emit_completion() {
 # ---------- canonical-cli stubs (TODO markers preserved) ----------
 
 scaffold_cmd_doctor() {
-  # TODO(canonical-cli-scaffold): probe substrate this script depends on
-  # (env vars, paths, external tools) and emit per-check status.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"doctor",ts:$ts,status:"todo",checks:[],note:"TODO(canonical-cli-scaffold): fill in doctor checks"}'
+  # Probe substrate this materializer depends on. Each check returns
+  # name/status/path/reason. Status: pass | fail | warn.
+  local ts script_dir repo_root template_file topology identity_dir ntm_bin runs_log
+  ts="$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+  repo_root="${FLYWHEEL_REPO:-$(cd "$script_dir/../.." 2>/dev/null && pwd -P)}"
+  template_file="${HOME}/.claude/commands/flywheel/_shared/dispatch-template.md"
+  topology="${FLYWHEEL_TOPOLOGY:-$HOME/.local/state/flywheel/session-topology.jsonl}"
+  identity_dir="${FLYWHEEL_IDENTITY_DIR:-$HOME/.local/state/flywheel/orch-worker-identity}"
+  ntm_bin="${FLYWHEEL_NTM_BIN:-/Users/josh/.local/bin/ntm}"
+  runs_log="$SCAFFOLD_AUDIT_LOG"
+
+  local template_status="fail" template_reason=""
+  if [[ -r "$template_file" ]]; then template_status="pass"
+  else template_reason="not readable: $template_file"; fi
+
+  local ntm_status="fail" ntm_reason=""
+  if [[ -x "$ntm_bin" ]]; then ntm_status="pass"
+  elif [[ -e "$ntm_bin" ]]; then ntm_reason="exists but not executable: $ntm_bin"
+  else ntm_reason="not found: $ntm_bin"; fi
+
+  local jq_status="fail" jq_reason=""
+  if command -v jq >/dev/null 2>&1; then jq_status="pass"
+  else jq_reason="jq not on PATH (required for packet construction)"; fi
+
+  local topology_status="fail" topology_reason=""
+  if [[ -r "$topology" ]]; then topology_status="pass"
+  elif [[ -d "$(dirname "$topology")" ]]; then topology_status="warn"; topology_reason="topology absent but parent present (callback_pane will default to 1)"
+  else topology_reason="topology parent missing: $(dirname "$topology")"; fi
+
+  local identity_status="fail" identity_reason=""
+  if [[ -d "$identity_dir" ]]; then identity_status="pass"
+  else identity_reason="identity dir missing: $identity_dir"; fi
+
+  local runs_status="fail" runs_reason=""
+  if [[ -f "$runs_log" && -w "$runs_log" ]]; then runs_status="pass"
+  elif [[ -d "$(dirname "$runs_log")" && -w "$(dirname "$runs_log")" ]]; then runs_status="pass"; runs_reason="path absent but parent writable"
+  else runs_reason="not writable: $runs_log"; fi
+
+  local repo_status="fail" repo_reason=""
+  if [[ -d "$repo_root/.flywheel" ]]; then repo_status="pass"
+  else repo_reason="$repo_root is not a flywheel repo (no .flywheel/)"; fi
+
+  local overall="pass" s
+  for s in "$template_status" "$ntm_status" "$jq_status" "$identity_status" "$repo_status"; do
+    if [[ "$s" == "fail" ]]; then overall="fail"; fi
+  done
+  if [[ "$overall" == "pass" && ( "$topology_status" == "warn" || "$runs_status" == "warn" ) ]]; then
+    overall="warn"
+  fi
+
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg overall "$overall" \
+    --arg template_file "$template_file" --arg template_status "$template_status" --arg template_reason "$template_reason" \
+    --arg ntm_bin "$ntm_bin" --arg ntm_status "$ntm_status" --arg ntm_reason "$ntm_reason" \
+    --arg jq_status "$jq_status" --arg jq_reason "$jq_reason" \
+    --arg topology "$topology" --arg topology_status "$topology_status" --arg topology_reason "$topology_reason" \
+    --arg identity_dir "$identity_dir" --arg identity_status "$identity_status" --arg identity_reason "$identity_reason" \
+    --arg runs_log "$runs_log" --arg runs_status "$runs_status" --arg runs_reason "$runs_reason" \
+    --arg repo_root "$repo_root" --arg repo_status "$repo_status" --arg repo_reason "$repo_reason" \
+    '{schema_version:$sv,command:"doctor",ts:$ts,status:$overall,checks:[
+      {name:"dispatch_template_readable",status:$template_status,path:$template_file,reason:$template_reason},
+      {name:"ntm_binary_executable",status:$ntm_status,path:$ntm_bin,reason:$ntm_reason},
+      {name:"jq_on_path",status:$jq_status,reason:$jq_reason},
+      {name:"session_topology_readable",status:$topology_status,path:$topology,reason:$topology_reason},
+      {name:"identity_dir_present",status:$identity_status,path:$identity_dir,reason:$identity_reason},
+      {name:"runs_log_writable",status:$runs_status,path:$runs_log,reason:$runs_reason},
+      {name:"flywheel_repo_resolvable",status:$repo_status,path:$repo_root,reason:$repo_reason}
+    ]}'
 }
 
 scaffold_cmd_health() {
-  # TODO(canonical-cli-scaffold): summarize last-run state from audit log.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"health",ts:$ts,status:"todo",note:"TODO(canonical-cli-scaffold): fill in health probe from audit log"}'
+  # Summarize recent run state from $SCAFFOLD_AUDIT_LOG (per-run ledger).
+  # Reports recent_count, last_run_ts, age_seconds, distinct beads/sessions.
+  # Status warn when ledger absent, empty, or stale (>24h).
+  local ts log_path tail_n=20 tail_lines total last_ts age_seconds distinct_beads distinct_sessions
+  ts="$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  log_path="$SCAFFOLD_AUDIT_LOG"
+
+  if [[ ! -f "$log_path" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$log_path" \
+      '{schema_version:$sv,command:"health",ts:$ts,status:"warn",reason:"runs ledger absent (no historical runs yet)",audit_log:$log,recent_runs:0}'
+    return 0
+  fi
+
+  tail_lines="$(tail -n "$tail_n" "$log_path" 2>/dev/null)"
+  total="$(printf '%s\n' "$tail_lines" | grep -c . || true)"
+  if [[ -z "$total" ]]; then total=0; fi
+  set +e
+  last_ts="$(printf '%s\n' "$tail_lines" | tail -1 | jq -r '.ts // ""' 2>/dev/null)"
+  distinct_beads="$(printf '%s\n' "$tail_lines" | jq -r '.bead // .bead_id // empty' 2>/dev/null | sort -u | tr '\n' ',' | sed 's/,$//')"
+  distinct_sessions="$(printf '%s\n' "$tail_lines" | jq -r '.target_session // .session // empty' 2>/dev/null | sort -u | tr '\n' ',' | sed 's/,$//')"
+  set -e
+
+  if [[ -n "$last_ts" ]]; then
+    local now_epoch last_epoch
+    now_epoch="$(date -u +%s)"
+    last_epoch="$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$last_ts" +%s 2>/dev/null || echo "$now_epoch")"
+    age_seconds=$((now_epoch - last_epoch))
+  else
+    age_seconds=null
+  fi
+
+  local status="pass" reason=""
+  if [[ "$total" -eq 0 ]]; then
+    status="warn"; reason="empty tail"
+  elif [[ "$age_seconds" != "null" && "$age_seconds" -gt 86400 ]]; then
+    status="warn"; reason="last run >24h ago (stale)"
+  fi
+
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg status "$status" --arg reason "$reason" \
+    --arg log "$log_path" \
+    --argjson total "${total:-0}" \
+    --arg last_ts "$last_ts" \
+    --argjson age "${age_seconds:-null}" \
+    --arg beads "$distinct_beads" --arg sessions "$distinct_sessions" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,reason:(if $reason == "" then null else $reason end),
+      audit_log:$log,recent_runs:$total,
+      last_run_ts:(if $last_ts == "" then null else $last_ts end),
+      last_run_age_seconds:$age,
+      recent_beads:($beads | split(",") | map(select(length > 0))),
+      recent_sessions:($sessions | split(",") | map(select(length > 0)))}'
 }
 
 scaffold_cmd_repair() {
@@ -160,21 +371,208 @@ scaffold_cmd_repair() {
       exit 3
     fi
   fi
-  # TODO(canonical-cli-scaffold): per-scope repair actions go here.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
-    '{schema_version:$sv,command:"repair",status:"todo",mode:$mode,scope:$scope,idempotency_key:$idem,note:"TODO(canonical-cli-scaffold): fill in repair scope actions"}'
+  # Per-scope repair actions. Default scopes: runs-log-rotate (rotate
+  # SCAFFOLD_AUDIT_LOG when >5MB), template-cache-prime (re-read
+  # dispatch-template + report sha; read-only).
+  local log_path template_file
+  log_path="$SCAFFOLD_AUDIT_LOG"
+  template_file="${HOME}/.claude/commands/flywheel/_shared/dispatch-template.md"
+
+  case "$scope" in
+    runs-log-rotate)
+      if [[ ! -f "$log_path" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg log "$log_path" \
+          '{schema_version:$sv,command:"repair",status:"warn",mode:"dry_run",scope:$scope,reason:"runs ledger absent — nothing to rotate",log_path:$log}'
+        return 0
+      fi
+      local size threshold=5242880 lines
+      size="$(stat -f%z "$log_path" 2>/dev/null || stat -c%s "$log_path" 2>/dev/null || echo 0)"
+      lines="$(wc -l <"$log_path" | tr -d ' ')"
+      if [[ "$mode" == "apply" ]]; then
+        if [[ "$size" -lt "$threshold" ]]; then
+          jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg idem "$idem_key" \
+            --argjson size "$size" --argjson threshold "$threshold" --argjson lines "$lines" \
+            '{schema_version:$sv,command:"repair",status:"noop",mode:"apply",scope:$scope,idempotency_key:$idem,
+              size_bytes:$size,threshold_bytes:$threshold,lines:$lines,note:"under threshold — no rotation needed"}'
+        else
+          local rotated="${log_path%.jsonl}.$(date -u +%Y%m%dT%H%M%SZ).jsonl"
+          mv "$log_path" "$rotated"
+          : > "$log_path"
+          jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg idem "$idem_key" \
+            --arg rotated "$rotated" --argjson size "$size" --argjson threshold "$threshold" --argjson lines "$lines" \
+            '{schema_version:$sv,command:"repair",status:"ok",mode:"apply",scope:$scope,idempotency_key:$idem,
+              rotated_to:$rotated,size_bytes:$size,threshold_bytes:$threshold,lines:$lines}'
+        fi
+      else
+        local will_rotate="false"
+        if [[ "$size" -ge "$threshold" ]]; then will_rotate="true"; fi
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
+          --argjson size "$size" --argjson threshold "$threshold" --argjson lines "$lines" \
+          --argjson will "$will_rotate" \
+          '{schema_version:$sv,command:"repair",status:"plan",mode:"dry_run",scope:$scope,
+            size_bytes:$size,threshold_bytes:$threshold,lines:$lines,will_rotate:$will,
+            note:"dry-run: pass --apply --idempotency-key KEY to rotate when over threshold"}'
+      fi
+      ;;
+    template-cache-prime)
+      # Read-only health probe of the materialization template.
+      if [[ ! -r "$template_file" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg path "$template_file" \
+          '{schema_version:$sv,command:"repair",status:"fail",mode:"read_only",scope:$scope,
+            template_path:$path,reason:"dispatch-template.md not readable"}'
+        return 0
+      fi
+      local sha tlines tsize
+      sha="$(shasum -a 256 "$template_file" 2>/dev/null | awk '{print $1}')"
+      if [[ -z "$sha" ]]; then sha="$(sha256sum "$template_file" 2>/dev/null | awk '{print $1}')"; fi
+      tlines="$(wc -l <"$template_file" | tr -d ' ')"
+      tsize="$(stat -f%z "$template_file" 2>/dev/null || stat -c%s "$template_file" 2>/dev/null || echo 0)"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        --arg path "$template_file" --arg sha "$sha" \
+        --argjson lines "$tlines" --argjson size "$tsize" \
+        '{schema_version:$sv,command:"repair",status:"ok",mode:"read_only",scope:$scope,
+          template_path:$path,template_sha256:$sha,template_lines:$lines,template_size_bytes:$size,
+          note:"read-only template-cache-prime — verifies template is loadable; --apply has no mutation in this scope"}'
+      ;;
+    ""|none)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg mode "$mode" --arg scope "$scope" \
+        '{schema_version:$sv,command:"repair",status:"info",mode:$mode,scope:$scope,reason:"no scope specified",valid_scopes:["runs-log-rotate","template-cache-prime"]}'
+      ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg mode "$mode" --arg scope "$scope" \
+        '{schema_version:$sv,command:"repair",status:"refused",mode:$mode,scope:$scope,reason:"unknown scope",valid_scopes:["runs-log-rotate","template-cache-prime"]}'
+      return 64
+      ;;
+  esac
 }
 
 scaffold_cmd_validate() {
-  # TODO(canonical-cli-scaffold): document validation subjects + contracts.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
-    '{schema_version:$sv,command:"validate",status:"todo",note:"TODO(canonical-cli-scaffold): fill in per-subject validation"}'
+  # Per-subject contract checks. Subjects: packet, bead-id, config.
+  local subject="" packet_path="" bead_id_arg=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --packet=*) packet_path="${1#--packet=}"; subject="packet"; shift ;;
+      --packet) packet_path="${2:-}"; subject="packet"; shift 2 ;;
+      --bead-id=*) bead_id_arg="${1#--bead-id=}"; subject="bead-id"; shift ;;
+      --bead-id) bead_id_arg="${2:-}"; subject="bead-id"; shift 2 ;;
+      --config) subject="config"; shift ;;
+      --json) shift ;;
+      -h|--help) scaffold_emit_topic_help validate; return 0 ;;
+      *) printf 'ERR: unknown validate arg: %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+
+  case "$subject" in
+    packet)
+      if [[ -z "$packet_path" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",status:"refused",reason:"--packet=PATH required for subject=packet"}'
+        return 64
+      fi
+      if [[ ! -r "$packet_path" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$packet_path" \
+          '{schema_version:$sv,command:"validate",subject:"packet",status:"fail",reason:"packet not readable",path:$p}'
+        return 0
+      fi
+      local audit_script audit_rc audit_out
+      audit_script="${FLYWHEEL_REPO_ROOT:-/Users/josh/Developer/flywheel}/.flywheel/validation-schema/v1/dispatch-template-audit.sh"
+      if [[ ! -x "$audit_script" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$audit_script" \
+          '{schema_version:$sv,command:"validate",subject:"packet",status:"warn",reason:"dispatch-template-audit.sh not executable",auditor:$s}'
+        return 0
+      fi
+      set +e
+      audit_out="$(bash "$audit_script" "$packet_path" 2>&1)"
+      audit_rc=$?
+      set -e
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$packet_path" --argjson rc "$audit_rc" \
+        --arg out "$(printf '%s' "$audit_out" | head -c 2048)" \
+        '{schema_version:$sv,command:"validate",subject:"packet",path:$p,
+          status:(if $rc == 0 then "pass" else "fail" end),
+          auditor_rc:$rc,auditor_output_preview:$out}'
+      ;;
+    bead-id)
+      if [[ -z "$bead_id_arg" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",status:"refused",reason:"--bead-id=ID required for subject=bead-id"}'
+        return 64
+      fi
+      if ! command -v br >/dev/null 2>&1; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$bead_id_arg" \
+          '{schema_version:$sv,command:"validate",subject:"bead-id",bead_id:$id,status:"warn",reason:"br not on PATH"}'
+        return 0
+      fi
+      set +e
+      local bead_json status_field
+      bead_json="$(br show "$bead_id_arg" --json 2>/dev/null)"
+      set -e
+      if [[ -z "$bead_json" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$bead_id_arg" \
+          '{schema_version:$sv,command:"validate",subject:"bead-id",bead_id:$id,status:"fail",reason:"bead not found in local Beads DB"}'
+        return 0
+      fi
+      status_field="$(printf '%s' "$bead_json" | jq -r '.[0].status // ""' 2>/dev/null)"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$bead_id_arg" --arg bs "$status_field" \
+        '{schema_version:$sv,command:"validate",subject:"bead-id",bead_id:$id,bead_status:$bs,
+          status:(if ($bs == "open" or $bs == "in_progress" or $bs == "ready") then "pass" else "fail" end),
+          dispatchable:(($bs == "open" or $bs == "in_progress" or $bs == "ready"))}'
+      ;;
+    config)
+      local template_file topology identity_dir ntm_bin
+      template_file="${HOME}/.claude/commands/flywheel/_shared/dispatch-template.md"
+      topology="${FLYWHEEL_TOPOLOGY:-$HOME/.local/state/flywheel/session-topology.jsonl}"
+      identity_dir="${FLYWHEEL_IDENTITY_DIR:-$HOME/.local/state/flywheel/orch-worker-identity}"
+      ntm_bin="${FLYWHEEL_NTM_BIN:-/Users/josh/.local/bin/ntm}"
+      local missing=()
+      [[ -r "$template_file" ]] || missing+=("template_file:$template_file")
+      [[ -d "$identity_dir" ]] || missing+=("identity_dir:$identity_dir")
+      [[ -x "$ntm_bin" ]] || missing+=("ntm_bin:$ntm_bin")
+      local missing_json
+      if [[ ${#missing[@]} -eq 0 ]]; then
+        missing_json='[]'
+      else
+        missing_json="$(printf '%s\n' "${missing[@]}" | jq -R . | jq -sc .)"
+      fi
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        --arg tf "$template_file" --arg topo "$topology" --arg idd "$identity_dir" --arg ntm "$ntm_bin" \
+        --argjson missing "$missing_json" \
+        '{schema_version:$sv,command:"validate",subject:"config",
+          status:(if ($missing | length) == 0 then "pass" else "fail" end),
+          template_file:$tf,topology:$topo,identity_dir:$idd,ntm_bin:$ntm,
+          missing:$missing}'
+      ;;
+    "")
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"validate",status:"info",reason:"no subject specified",valid_subjects:["packet","bead-id","config"]}'
+      ;;
+  esac
 }
 
 scaffold_cmd_audit() {
-  # TODO(canonical-cli-scaffold): tail audit log; emit recent rows.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
-    '{schema_version:$sv,command:"audit",audit_log:$log,status:"todo",note:"TODO(canonical-cli-scaffold): fill in audit tail"}'
+  # Tail SCAFFOLD_AUDIT_LOG (per-run ledger). Default --tail=10.
+  local log_path="$SCAFFOLD_AUDIT_LOG"
+  local tail_n=10
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --tail=*) tail_n="${1#--tail=}"; shift ;;
+      --tail) tail_n="${2:-10}"; shift 2 ;;
+      --json) shift ;;
+      -h|--help) scaffold_emit_topic_help audit; return 0 ;;
+      *) printf 'ERR: unknown audit arg: %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+  if [[ ! -f "$log_path" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$log_path" --argjson tail_n "$tail_n" \
+      '{schema_version:$sv,command:"audit",audit_log:$log,tail_n:$tail_n,status:"warn",reason:"runs ledger absent (no historical runs yet)",rows:[],count:0}'
+    return 0
+  fi
+  local rows count
+  set +e
+  rows="$(tail -n "$tail_n" "$log_path" 2>/dev/null | jq -sc '.' 2>/dev/null)"
+  set -e
+  if [[ -z "$rows" ]]; then rows='[]'; fi
+  count="$(echo "$rows" | jq 'length' 2>/dev/null || echo 0)"
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$log_path" \
+    --argjson tail_n "$tail_n" --argjson count "$count" --argjson rows "$rows" \
+    '{schema_version:$sv,command:"audit",audit_log:$log,tail_n:$tail_n,count:$count,rows:$rows}'
 }
 
 scaffold_cmd_why() {
@@ -182,9 +580,46 @@ scaffold_cmd_why() {
   if [[ -z "$id" ]]; then
     printf 'ERR: why requires <id> argument\n' >&2; return 64
   fi
-  # TODO(canonical-cli-scaffold): explain why <id> is/isn't in scope.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
-    '{schema_version:$sv,command:"why",id:$id,status:"todo",note:"TODO(canonical-cli-scaffold): fill in why-id semantics"}'
+  # Look up <id> in the per-run ledger first, then fall back to the live
+  # dispatch-log.jsonl (since this materializer's row may also surface
+  # there once apply succeeded).
+  local runs_log="$SCAFFOLD_AUDIT_LOG"
+  local dispatch_log="${FLYWHEEL_DISPATCH_LOG:-/Users/josh/Developer/flywheel/.flywheel/dispatch-log.jsonl}"
+  local row="" source_log=""
+  if [[ -f "$runs_log" ]]; then
+    row="$(grep -F "\"task_id\":\"$id\"" "$runs_log" 2>/dev/null | tail -1 || true)"
+    if [[ -n "$row" ]]; then source_log="$runs_log"; fi
+  fi
+  if [[ -z "$row" && -f "$dispatch_log" ]]; then
+    row="$(grep -F "\"task_id\":\"$id\"" "$dispatch_log" 2>/dev/null | tail -1 || true)"
+    if [[ -n "$row" ]]; then source_log="$dispatch_log"; fi
+  fi
+  if [[ -z "$row" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
+      --arg runs "$runs_log" --arg dl "$dispatch_log" \
+      '{schema_version:$sv,command:"why",id:$id,status:"not_found",
+        searched:[$runs,$dl],reason:"task_id not in runs ledger or dispatch-log"}'
+    return 0
+  fi
+  if ! printf '%s' "$row" | jq -e . >/dev/null 2>&1; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg src "$source_log" \
+      --arg raw "$(printf '%s' "$row" | head -c 512)" \
+      '{schema_version:$sv,command:"why",id:$id,status:"warn",reason:"matched row is not valid JSON",source_log:$src,raw_preview:$raw}'
+    return 0
+  fi
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg src "$source_log" --argjson row "$row" \
+    '{schema_version:$sv,command:"why",id:$id,status:"found",source_log:$src,
+      provenance:{
+        ts:($row.ts // null),
+        bead:($row.bead // $row.bead_id // null),
+        target_session:($row.target_session // $row.session // null),
+        target_pane:($row.target_pane // $row.pane // null),
+        task_file:($row.task_file // $row.packet_path // null),
+        packet_path:($row.packet_path // null),
+        mode:($row.mode // null),
+        ntm_send_success:(($row.native_send // {}).success // null)
+      },
+      row:$row}'
 }
 
 # ---------- scaffolded main dispatcher ----------

@@ -1,0 +1,1 @@
+{"schema_version":"build-dispatch-packet/v1","command":"validate","subject":"config","status":"pass","template_file":"/Users/josh/.claude/commands/flywheel/_shared/dispatch-template.md","topology":"/Users/josh/.local/state/flywheel/session-topology.jsonl","identity_dir":"/Users/josh/.local/state/flywheel/orch-worker-identity","ntm_bin":"/Users/josh/.local/bin/ntm","missing":[]}

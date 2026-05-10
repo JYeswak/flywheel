@@ -1,0 +1,5 @@
+topic: repair — read-only by default; mutate with --apply --idempotency-key KEY.
+  Scopes:
+    runs-log-rotate    rotate /Users/josh/.local/state/flywheel/build-dispatch-packet-runs.jsonl when >5MB
+    template-cache-prime  re-read /Users/josh/.claude/commands/flywheel/_shared/dispatch-template.md; report sha + line count (read-only)
+  Apply without --idempotency-key returns refused (rc 3).
