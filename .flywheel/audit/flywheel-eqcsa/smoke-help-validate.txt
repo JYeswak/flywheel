@@ -1,0 +1,1 @@
+topic: validate — subjects: target-dir PATH (run probe on a directory, report discovery_method/walk_up_distance/cross_tree); audit-row JSONL_LINE (verify ts/status fields).
