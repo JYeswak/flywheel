@@ -1,0 +1,1 @@
+{"schema_version":"skillos-template-handshake/v1","command":"why","id":"some-key","status":"not_found","reason":"id not in audit ledger or coord-ledger","searched":["/Users/josh/.local/state/flywheel/skillos-template-handshake-runs.jsonl","/Users/josh/.local/state/flywheel/cross-orch-coordination.jsonl"]}
