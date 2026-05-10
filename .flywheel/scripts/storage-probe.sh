@@ -23,6 +23,11 @@ fi
 SCAFFOLD_SCHEMA_VERSION="storage-probe/v1"
 SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/storage-probe-runs.jsonl}"
 
+# Module-load env vars (also re-resolved in cmd_run for backward compat).
+# Visible to canonical-cli stubs which run BEFORE cmd_run dispatches.
+DISK_PATH="${DISK_PATH:-/}"
+HISTORY="${HISTORY:-${FLYWHEEL_STORAGE_HISTORY:-$HOME/.local/state/flywheel/storage-history.jsonl}}"
+
 scaffold_usage() {
   cat <<'USG'
 usage: storage-probe.sh [SUBCOMMAND] [OPTIONS]
@@ -125,23 +130,91 @@ scaffold_emit_completion() {
 # ---------- canonical-cli stubs (TODO markers preserved) ----------
 
 scaffold_cmd_doctor() {
-  # TODO(canonical-cli-scaffold): probe substrate this script depends on
-  # (env vars, paths, external tools) and emit per-check status.
-  # Canonical pattern (per L4 lint rule — NEVER use `[[ ]] && X || Y`
-  # as the last expression of a helper; use if/then/else/fi):
-  #   if [[ -d "$ROOT/.flywheel" ]]; then
-  #     printf '{"check":"flywheel-dir","status":"pass"}\n'
-  #   else
-  #     printf '{"check":"flywheel-dir","status":"fail"}\n'
-  #   fi
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"doctor",ts:$ts,status:"todo",checks:[],note:"TODO(canonical-cli-scaffold): fill in doctor checks"}'
+  # Probe storage-probe substrate: df + jq + JSONL append lib + history file + disk path.
+  local checks
+  checks="$(jq -cs '.' <(
+    if command -v df >/dev/null 2>&1; then
+      jq -nc '{check:"df",status:"pass",dependency:"disk-space-probe"}'
+    else
+      jq -nc '{check:"df",status:"fail",reason:"df required for storage probe"}'
+    fi
+    if command -v jq >/dev/null 2>&1; then
+      jq -nc '{check:"jq",status:"pass"}'
+    else
+      jq -nc '{check:"jq",status:"fail",reason:"jq required"}'
+    fi
+    if [[ -d "$DISK_PATH" ]]; then
+      jq -nc --arg p "$DISK_PATH" '{check:"disk_path",path:$p,status:"pass"}'
+    else
+      jq -nc --arg p "$DISK_PATH" '{check:"disk_path",path:$p,status:"fail",reason:"disk path not a directory"}'
+    fi
+    local hist_dir
+    hist_dir="$(dirname "$HISTORY")"
+    if [[ -d "$hist_dir" ]]; then
+      jq -nc --arg p "$hist_dir" '{check:"history_dir",path:$p,status:"pass"}'
+    else
+      jq -nc --arg p "$hist_dir" '{check:"history_dir",path:$p,status:"warn",reason:"missing — repair --scope state will create"}'
+    fi
+    if [[ -f "$HISTORY" ]]; then
+      local row_count
+      row_count="$(wc -l <"$HISTORY" 2>/dev/null | tr -d ' ')"
+      jq -nc --arg p "$HISTORY" --argjson n "${row_count:-0}" '{check:"history_file",path:$p,status:"pass",row_count:$n}'
+    else
+      jq -nc --arg p "$HISTORY" '{check:"history_file",path:$p,status:"warn",reason:"history not yet written"}'
+    fi
+  ))"
+  local fails warns
+  fails="$(jq -r '[.[] | select(.status=="fail")] | length' <<<"$checks")"
+  warns="$(jq -r '[.[] | select(.status=="warn")] | length' <<<"$checks")"
+  local status
+  if [[ "$fails" -gt 0 ]]; then
+    status="fail"
+  elif [[ "$warns" -gt 0 ]]; then
+    status="warn"
+  else
+    status="pass"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --arg status "$status" \
+    --argjson checks "$checks" \
+    '{schema_version:$sv,command:"doctor",ts:$ts,status:$status,checks:$checks}'
 }
 
 scaffold_cmd_health() {
-  # TODO(canonical-cli-scaffold): summarize last-run state from audit log.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"health",ts:$ts,status:"todo",note:"TODO(canonical-cli-scaffold): fill in health probe from audit log"}'
+  # Health: tail history; report most-recent free_pct + age + run count.
+  local row_count=0 latest_ts="" latest_free_pct=null age_seconds=null status="empty"
+  if [[ -r "$HISTORY" ]]; then
+    row_count="$(wc -l <"$HISTORY" 2>/dev/null | tr -d ' ')"
+    if [[ "${row_count:-0}" -gt 0 ]]; then
+      local last_row
+      last_row="$(tail -1 "$HISTORY" 2>/dev/null)"
+      latest_ts="$(jq -r '.ts // .timestamp // empty' <<<"$last_row" 2>/dev/null)"
+      latest_free_pct="$(jq -r '.free_pct // .disk.free_pct // empty' <<<"$last_row" 2>/dev/null)"
+      [[ -z "$latest_free_pct" ]] && latest_free_pct=null
+      if [[ -n "$latest_ts" ]]; then
+        local now_epoch last_epoch
+        now_epoch="$(date -u +%s 2>/dev/null)"
+        last_epoch="$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$latest_ts" +%s 2>/dev/null || date -u -d "$latest_ts" +%s 2>/dev/null || echo "")"
+        if [[ -n "$now_epoch" && -n "$last_epoch" ]]; then
+          age_seconds=$((now_epoch - last_epoch))
+        fi
+      fi
+      status="ok"
+    fi
+  else
+    status="not_initialized"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --arg status "$status" \
+    --arg latest_ts "$latest_ts" \
+    --argjson row_count "$row_count" \
+    --argjson latest_free_pct "$latest_free_pct" \
+    --argjson age_seconds "${age_seconds:-null}" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,history_row_count:$row_count,latest_history_ts:(if $latest_ts=="" then null else $latest_ts end),latest_free_pct:$latest_free_pct,latest_history_age_seconds:$age_seconds}'
 }
 
 scaffold_cmd_repair() {
@@ -167,21 +240,126 @@ scaffold_cmd_repair() {
       exit 3
     fi
   fi
-  # TODO(canonical-cli-scaffold): per-scope repair actions go here.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
-    '{schema_version:$sv,command:"repair",status:"todo",mode:$mode,scope:$scope,idempotency_key:$idem,note:"TODO(canonical-cli-scaffold): fill in repair scope actions"}'
+  # repair --scope state: ensure HISTORY parent dir + audit log dir exist.
+  local hist_dir audit_dir planned applied
+  hist_dir="$(dirname "$HISTORY")"
+  audit_dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
+  planned="$(jq -cs '.' <(
+    if [[ "$scope" != "state" ]]; then
+      jq -nc --arg s "$scope" '{action:"none",reason:"unsupported scope (state only)",scope:$s}'
+    else
+      if [[ ! -d "$hist_dir" ]]; then
+        jq -nc --arg p "$hist_dir" '{action:"mkdir",path:$p,mode:"0755"}'
+      fi
+      if [[ ! -d "$audit_dir" ]]; then
+        jq -nc --arg p "$audit_dir" '{action:"mkdir",path:$p,mode:"0755"}'
+      fi
+    fi
+  ))"
+  applied='[]'
+  if [[ "$mode" == "apply" && "$scope" == "state" ]]; then
+    local applied_rows=()
+    if [[ ! -d "$hist_dir" ]]; then
+      mkdir -p "$hist_dir" && chmod 755 "$hist_dir" 2>/dev/null
+      applied_rows+=("$(jq -nc --arg p "$hist_dir" --arg key "$idem_key" '{action:"mkdir",path:$p,mode:"0755",idempotency_key:$key}')")
+    fi
+    if [[ ! -d "$audit_dir" ]]; then
+      mkdir -p "$audit_dir" && chmod 755 "$audit_dir" 2>/dev/null
+      applied_rows+=("$(jq -nc --arg p "$audit_dir" --arg key "$idem_key" '{action:"mkdir",path:$p,mode:"0755",idempotency_key:$key}')")
+    fi
+    if [[ "${#applied_rows[@]}" -eq 0 ]]; then
+      applied='[]'
+    else
+      applied="$(printf '%s\n' "${applied_rows[@]}" | jq -cs '.')"
+    fi
+    if command -v cli_audit_append >/dev/null; then
+      cli_audit_append "$SCAFFOLD_AUDIT_LOG" "repair_state_apply" "ok" \
+        "$(jq -nc --arg key "$idem_key" --argjson actions "$applied" '{idempotency_key:$key,actions:$actions}')"
+    fi
+  fi
+  local status
+  if [[ "$mode" == "apply" ]]; then
+    status="applied"
+  else
+    status="dry_run"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg scope "$scope" \
+    --arg mode "$mode" \
+    --arg idem "$idem_key" \
+    --arg status "$status" \
+    --argjson planned "$planned" \
+    --argjson applied "$applied" \
+    '{schema_version:$sv,command:"repair",status:$status,mode:$mode,scope:$scope,idempotency_key:$idem,planned_actions:$planned,applied_actions:$applied}'
 }
 
 scaffold_cmd_validate() {
-  # TODO(canonical-cli-scaffold): document validation subjects + contracts.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
-    '{schema_version:$sv,command:"validate",status:"todo",note:"TODO(canonical-cli-scaffold): fill in per-subject validation"}'
+  local subject="${1:-history}"
+  if [[ "$subject" == "-h" || "$subject" == "--help" ]]; then
+    scaffold_emit_topic_help validate
+    return 0
+  fi
+  shift 2>/dev/null || true
+  local results status
+  case "$subject" in
+    history)
+      # Validate every row of HISTORY has a timestamp + free percentage.
+      # Accepts ts|timestamp for time and disk_free_pct|free_pct|disk.free_pct
+      # for the free percentage (production rows use disk_free_pct).
+      if [[ ! -f "$HISTORY" ]]; then
+        results="$(jq -nc '[{check:"present",status:"pass",note:"history not yet written"}]')"
+      else
+        local total_rows malformed_rows schema_pass schema_fail
+        total_rows="$(wc -l <"$HISTORY" 2>/dev/null | tr -d ' ')"
+        total_rows="${total_rows:-0}"
+        set +o pipefail
+        malformed_rows="$(grep -c -v '^{' "$HISTORY" 2>/dev/null || true)"
+        schema_pass="$(jq -s '[.[] | select((.ts? // .timestamp? // null) != null and (.disk_free_pct? // .free_pct? // .disk.free_pct? // null) != null)] | length' "$HISTORY" 2>/dev/null || echo 0)"
+        set -o pipefail
+        malformed_rows="${malformed_rows:-0}"
+        schema_pass="${schema_pass:-0}"
+        schema_fail=$(( total_rows - schema_pass ))
+        results="$(jq -nc \
+          --arg p "$HISTORY" \
+          --argjson total "$total_rows" \
+          --argjson malformed "$malformed_rows" \
+          --argjson sp "$schema_pass" \
+          --argjson sf "$schema_fail" \
+          '[
+            {check:"present",path:$p,status:"pass"},
+            {check:"row_count",total:$total,status:(if $total > 0 then "pass" else "warn" end)},
+            {check:"malformed_lines",count:$malformed,status:(if $malformed == 0 then "pass" else "fail" end)},
+            {check:"schema_conformance",total:$total,passing:$sp,failing:$sf,status:(if $sf == 0 then "pass" else "fail" end)}
+          ]')"
+      fi
+      ;;
+    *)
+      results="$(jq -nc --arg s "$subject" '[{status:"unsupported",subject:$s,supported:["history"]}]')"
+      ;;
+  esac
+  local fails
+  fails="$(jq -r '[.[] | select(.status=="fail")] | length' <<<"$results")"
+  if [[ "$fails" -gt 0 ]]; then
+    status="fail"
+  else
+    status="pass"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg subject "$subject" \
+    --arg status "$status" \
+    --argjson results "$results" \
+    '{schema_version:$sv,command:"validate",subject:$subject,status:$status,results:$results}'
 }
 
 scaffold_cmd_audit() {
-  # TODO(canonical-cli-scaffold): tail audit log; emit recent rows.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
-    '{schema_version:$sv,command:"audit",audit_log:$log,status:"todo",note:"TODO(canonical-cli-scaffold): fill in audit tail"}'
+  if command -v cli_emit_audit_tail >/dev/null; then
+    cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" 20
+  else
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
+      '{schema_version:$sv,command:"audit",audit_log:$log,status:"helper_lib_missing"}'
+  fi
 }
 
 scaffold_cmd_why() {
@@ -189,9 +367,22 @@ scaffold_cmd_why() {
   if [[ -z "$id" ]]; then
     printf 'ERR: why requires <id> argument\n' >&2; return 64
   fi
-  # TODO(canonical-cli-scaffold): explain why <id> is/isn't in scope.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
-    '{schema_version:$sv,command:"why",id:$id,status:"todo",note:"TODO(canonical-cli-scaffold): fill in why-id semantics"}'
+  # <id> is a history-row timestamp (e.g. "2026-05-10T16:00:00Z"). Look up
+  # the matching row by ts/timestamp field.
+  if [[ ! -r "$HISTORY" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg p "$HISTORY" \
+      '{schema_version:$sv,command:"why",id:$id,status:"unavailable",reason:"history not yet written",path:$p}'
+    return 0
+  fi
+  local hit
+  hit="$(jq -c --arg id "$id" 'select((.ts // .timestamp // "") == $id)' "$HISTORY" 2>/dev/null | head -1)"
+  if [[ -n "$hit" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg p "$HISTORY" --argjson row "$hit" \
+      '{schema_version:$sv,command:"why",id:$id,status:"found",path:$p,row:$row}'
+  else
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg p "$HISTORY" \
+      '{schema_version:$sv,command:"why",id:$id,status:"not_found",path:$p,note:"timestamp not present in history"}'
+  fi
 }
 
 # ---------- scaffolded main dispatcher ----------
@@ -573,6 +764,7 @@ parse_args() {
       *) printf 'ERROR: unknown argument: %s\n' "$1" >&2; exit 2 ;;
     esac
   done
+  return 0
 }
 
 main() {
