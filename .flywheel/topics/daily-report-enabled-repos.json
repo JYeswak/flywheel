@@ -1,0 +1,9 @@
+{
+  "run": "run — Default mode. Fans out daily-report.sh to every repo with a\n.flywheel/daily-report-config.json with .enabled=true, plus the flywheel\nrepo itself (always enabled). Skipped repos are reported with reason\n'daily_report_disabled'. Failures do not halt the fan-out; per-repo errors\nare captured in the result envelope, and the overall exit code is 1 if\nany repo failed.",
+  "doctor": "doctor — Reports substrate health WITHOUT mutating state. Checks:\n  - generator script exists + is executable\n  - audit log directory exists (warn if missing; repair scope=state fixes)\n  - REPO_ROOTS resolves to readable directories\n  - each enabled repo has a readable config.json\n  - schema validity per config\nStatus: pass | warn | fail",
+  "health": "health — Per-repo last-run status from the audit log. Returns warn if\nany enabled repo lacks a successful run within the last 36h, fail if any\nrepo has had ≥3 consecutive failures.",
+  "repair": "repair — Default: --dry-run plans actions without mutating state.\nScopes:\n  --scope state    Create audit log directory if missing.\n  --scope configs  Propose template config.json for repos with .flywheel/\n                   but no daily-report-config.json.\nMutation requires --apply --idempotency-key <KEY>. Bare --apply refuses with\nexit 3. Idempotency key is appended to the audit log alongside the action.",
+  "validate": "validate config — Reads every enabled repo's daily-report-config.json,\nvalidates against the schema fragment {enabled: boolean, optional: ...},\nreturns per-repo pass/warn/fail.",
+  "audit": "audit — Reads the audit log JSONL and emits the most recent 20 rows\nplus aggregate counts (generated/skipped/failed by date).",
+  "why": "why <repo> — Explain why a specific repo is or is not in the enabled set.\nResolves the absolute path, checks for .flywheel/, checks for\ndaily-report-config.json, and reports the gating decision."
+}

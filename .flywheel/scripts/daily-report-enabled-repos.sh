@@ -12,17 +12,39 @@
 # audit, why, quickstart, help, completion, plus --info/--schema/--examples.
 set -euo pipefail
 
-SCRIPT_VERSION="2026-05-10.1"
+SCRIPT_VERSION="2026-05-10.2"
 SCHEMA_VERSION="daily-report-enabled-repos/v1"
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+# Resolve symlinks so the lib source path works whether invoked directly or
+# through a PATH symlink (the canonical-cli-scoping checker installs a symlink
+# in $TMP/bin/).
+__SELF_PATH="${BASH_SOURCE[0]}"
+while [[ -L "$__SELF_PATH" ]]; do
+  __SELF_LINK="$(readlink "$__SELF_PATH")"
+  if [[ "$__SELF_LINK" == /* ]]; then
+    __SELF_PATH="$__SELF_LINK"
+  else
+    __SELF_PATH="$(cd "$(dirname "$__SELF_PATH")" && pwd -P)/$__SELF_LINK"
+  fi
+done
+ROOT="$(cd "$(dirname "$__SELF_PATH")/../.." && pwd -P)"
+unset __SELF_PATH __SELF_LINK
+# canonical-cli-helpers.sh provides cli_iso_now, cli_sha_self, cli_audit_append,
+# cli_emit_info, cli_emit_examples, cli_emit_quickstart, cli_emit_completion_*,
+# cli_refuse_apply_without_idem_key, cli_dispatch_subcommand_help,
+# cli_emit_topic_help. Per-surface logic (cmd_*) stays inline.
+# shellcheck source=/dev/null
+source "$ROOT/.flywheel/lib/canonical-cli-helpers.sh"
+
 GENERATOR="${FLYWHEEL_DAILY_REPORT_GENERATOR:-$ROOT/.flywheel/scripts/daily-report.sh}"
 REPO_ROOTS="${FLYWHEEL_DAILY_REPORT_REPO_ROOTS:-$HOME/Developer}"
 AUDIT_LOG="${FLYWHEEL_DAILY_REPORT_AUDIT_LOG:-$HOME/.local/state/flywheel/daily-report-enabled-runs.jsonl}"
 STATE_DIR="${FLYWHEEL_DAILY_REPORT_STATE_DIR:-$HOME/.local/state/flywheel}"
 
-iso_now() { date -u +'%Y-%m-%dT%H:%M:%SZ'; }
-sha_self() { shasum -a 256 "${BASH_SOURCE[0]}" | awk '{print $1}'; }
+# Thin wrappers preserved for any internal callsites; new code should call the
+# cli_* helpers directly.
+iso_now() { cli_iso_now; }
+sha_self() { cli_sha_self "${BASH_SOURCE[0]}"; }
 
 # ---------- canonical-cli-scoping surfaces ----------
 
@@ -75,38 +97,20 @@ EOF
 }
 
 emit_info() {
-  jq -nc \
-    --arg schema_version "$SCHEMA_VERSION" \
-    --arg name "daily-report-enabled-repos.sh" \
-    --arg version "$SCRIPT_VERSION" \
-    --arg sha256 "$(sha_self)" \
+  local extra_paths
+  extra_paths="$(jq -nc \
     --arg generator "$GENERATOR" \
-    --arg repo_roots "$REPO_ROOTS" \
     --arg audit_log "$AUDIT_LOG" \
     --arg state_dir "$STATE_DIR" \
-    '{
-      schema_version: $schema_version,
-      command: "info",
-      name: $name,
-      version: $version,
-      sha256: $sha256,
-      paths: {
-        generator: $generator,
-        audit_log: $audit_log,
-        state_dir: $state_dir
-      },
-      env_vars: [
-        "FLYWHEEL_DAILY_REPORT_GENERATOR",
-        "FLYWHEEL_DAILY_REPORT_REPO_ROOTS",
-        "FLYWHEEL_DAILY_REPORT_AUDIT_LOG",
-        "FLYWHEEL_DAILY_REPORT_STATE_DIR"
-      ],
-      repo_roots: ($repo_roots | split(":")),
-      dependencies: ["jq", "find", "shasum"],
-      subcommands: ["run","doctor","health","repair","validate","audit","why","quickstart","help","completion"],
-      mutation_requires: "--apply --idempotency-key (or default run mode --json output)",
-      canonical_cli_surfaces: ["doctor","health","repair","validate","audit","why","quickstart","help","completion","--info","--schema","--examples"]
-    }'
+    --arg repo_roots "$REPO_ROOTS" \
+    '{generator:$generator,audit_log:$audit_log,state_dir:$state_dir,repo_roots:($repo_roots | split(":"))}')"
+  cli_emit_info \
+    "daily-report-enabled-repos.sh" \
+    "$SCRIPT_VERSION" \
+    "$SCHEMA_VERSION" \
+    "run,doctor,health,repair,validate,audit,why,quickstart,help,completion" \
+    "FLYWHEEL_DAILY_REPORT_GENERATOR,FLYWHEEL_DAILY_REPORT_REPO_ROOTS,FLYWHEEL_DAILY_REPORT_AUDIT_LOG,FLYWHEEL_DAILY_REPORT_STATE_DIR" \
+    "$extra_paths"
 }
 
 emit_schema() {
@@ -211,146 +215,44 @@ emit_schema() {
 }
 
 emit_examples() {
-  jq -nc '{
-    schema_version: "daily-report-enabled-repos.examples/v1",
-    command: "examples",
-    examples: [
-      {name:"daily_run", invocation:"daily-report-enabled-repos.sh --json", purpose:"Generate today reports for all enabled repos."},
-      {name:"daily_dry_run", invocation:"daily-report-enabled-repos.sh --dry-run --json", purpose:"List repos that would be processed without invoking the generator."},
-      {name:"doctor_substrate", invocation:"daily-report-enabled-repos.sh doctor --json", purpose:"Probe substrate health: generator path, repo roots, per-repo configs."},
-      {name:"health_recent", invocation:"daily-report-enabled-repos.sh health --json", purpose:"Show last-run status from audit log per enabled repo."},
-      {name:"repair_configs_dry_run", invocation:"daily-report-enabled-repos.sh repair --scope configs --dry-run --json", purpose:"Plan config-template propagation to repos missing daily-report-config.json."},
-      {name:"repair_state_apply", invocation:"daily-report-enabled-repos.sh repair --scope state --apply --idempotency-key statedir-2026-05-10 --json", purpose:"Create the audit log directory if missing."},
-      {name:"validate_config", invocation:"daily-report-enabled-repos.sh validate config --json", purpose:"Validate every enabled repo daily-report-config.json against schema."},
-      {name:"why_skip", invocation:"daily-report-enabled-repos.sh why ~/Developer/zesttube", purpose:"Explain why a specific repo is or is not enabled."},
-      {name:"audit_recent", invocation:"daily-report-enabled-repos.sh audit --json", purpose:"Show recent run history from audit log."}
-    ]
-  }'
+  cli_emit_examples "daily-report-enabled-repos.examples/v1" \
+'{"name":"daily_run","invocation":"daily-report-enabled-repos.sh --json","purpose":"Generate today reports for all enabled repos."}
+{"name":"daily_dry_run","invocation":"daily-report-enabled-repos.sh --dry-run --json","purpose":"List repos that would be processed without invoking the generator."}
+{"name":"doctor_substrate","invocation":"daily-report-enabled-repos.sh doctor --json","purpose":"Probe substrate health: generator path, repo roots, per-repo configs."}
+{"name":"health_recent","invocation":"daily-report-enabled-repos.sh health --json","purpose":"Show last-run status from audit log per enabled repo."}
+{"name":"repair_configs_dry_run","invocation":"daily-report-enabled-repos.sh repair --scope configs --dry-run --json","purpose":"Plan config-template propagation to repos missing daily-report-config.json."}
+{"name":"repair_state_apply","invocation":"daily-report-enabled-repos.sh repair --scope state --apply --idempotency-key statedir-2026-05-10 --json","purpose":"Create the audit log directory if missing."}
+{"name":"validate_config","invocation":"daily-report-enabled-repos.sh validate config --json","purpose":"Validate every enabled repo daily-report-config.json against schema."}
+{"name":"why_skip","invocation":"daily-report-enabled-repos.sh why ~/Developer/zesttube","purpose":"Explain why a specific repo is or is not enabled."}
+{"name":"audit_recent","invocation":"daily-report-enabled-repos.sh audit --json","purpose":"Show recent run history from audit log."}'
 }
 
 emit_quickstart() {
-  jq -nc '{
-    schema_version: "daily-report-enabled-repos.quickstart/v1",
-    command: "quickstart",
-    status: "ok",
-    steps: [
-      {step: 1, action: "Probe substrate", command: "daily-report-enabled-repos.sh doctor --json"},
-      {step: 2, action: "Validate per-repo configs", command: "daily-report-enabled-repos.sh validate config --json"},
-      {step: 3, action: "Dry-run a fan-out", command: "daily-report-enabled-repos.sh --dry-run --json"},
-      {step: 4, action: "Real fan-out", command: "daily-report-enabled-repos.sh --json"},
-      {step: 5, action: "Inspect history", command: "daily-report-enabled-repos.sh audit --json"},
-      {step: 6, action: "Repair drift if needed", command: "daily-report-enabled-repos.sh repair --scope configs --dry-run --json"}
-    ],
-    next_actions: [
-      "If any check fails, run repair --scope <s> --dry-run before --apply --idempotency-key.",
-      "Audit log lives at ~/.local/state/flywheel/daily-report-enabled-runs.jsonl."
-    ]
-  }'
+  cli_emit_quickstart "daily-report-enabled-repos.quickstart/v1" \
+'{"step":1,"action":"Probe substrate","command":"daily-report-enabled-repos.sh doctor --json"}
+{"step":2,"action":"Validate per-repo configs","command":"daily-report-enabled-repos.sh validate config --json"}
+{"step":3,"action":"Dry-run a fan-out","command":"daily-report-enabled-repos.sh --dry-run --json"}
+{"step":4,"action":"Real fan-out","command":"daily-report-enabled-repos.sh --json"}
+{"step":5,"action":"Inspect history","command":"daily-report-enabled-repos.sh audit --json"}
+{"step":6,"action":"Repair drift if needed","command":"daily-report-enabled-repos.sh repair --scope configs --dry-run --json"}' \
+"If any check fails run repair --scope <s> --dry-run before --apply --idempotency-key,Audit log lives at ~/.local/state/flywheel/daily-report-enabled-runs.jsonl"
 }
 
 emit_topic_help() {
-  local topic="${1:-}"
-  case "$topic" in
-    run) cat <<'EOF'
-run — Default mode. Fans out daily-report.sh to every repo with a
-.flywheel/daily-report-config.json with .enabled=true, plus the flywheel
-repo itself (always enabled). Skipped repos are reported with reason
-'daily_report_disabled'. Failures do not halt the fan-out; per-repo errors
-are captured in the result envelope, and the overall exit code is 1 if
-any repo failed.
-EOF
-      ;;
-    doctor) cat <<'EOF'
-doctor — Reports substrate health WITHOUT mutating state. Checks:
-  - generator script exists + is executable
-  - audit log directory exists (warn if missing; repair scope=state fixes)
-  - REPO_ROOTS resolves to readable directories
-  - each enabled repo has a readable config.json
-  - schema validity per config
-Status: pass | warn | fail
-EOF
-      ;;
-    health) cat <<'EOF'
-health — Per-repo last-run status from the audit log. Returns warn if
-any enabled repo lacks a successful run within the last 36h, fail if any
-repo has had ≥3 consecutive failures.
-EOF
-      ;;
-    repair) cat <<'EOF'
-repair — Default: --dry-run plans actions without mutating state.
-Scopes:
-  --scope state    Create audit log directory if missing.
-  --scope configs  Propose template config.json for repos with .flywheel/
-                   but no daily-report-config.json.
-Mutation requires --apply --idempotency-key <KEY>. Bare --apply refuses with
-exit 3. Idempotency key is appended to the audit log alongside the action.
-EOF
-      ;;
-    validate) cat <<'EOF'
-validate config — Reads every enabled repo's daily-report-config.json,
-validates against the schema fragment {enabled: boolean, optional: ...},
-returns per-repo pass/warn/fail.
-EOF
-      ;;
-    audit) cat <<'EOF'
-audit — Reads the audit log JSONL and emits the most recent 20 rows
-plus aggregate counts (generated/skipped/failed by date).
-EOF
-      ;;
-    why) cat <<'EOF'
-why <repo> — Explain why a specific repo is or is not in the enabled set.
-Resolves the absolute path, checks for .flywheel/, checks for
-daily-report-config.json, and reports the gating decision.
-EOF
-      ;;
-    *) cat <<'EOF'
-Topics: run | doctor | health | repair | validate | audit | why
-Run: daily-report-enabled-repos.sh help <topic>
-EOF
-      ;;
-  esac
+  cli_emit_topic_help "${1:-}" "$ROOT/.flywheel/topics/daily-report-enabled-repos.json"
 }
 
 emit_completion() {
   local shell="${1:-bash}"
   case "$shell" in
-    bash) cat <<'EOF'
-_daily_report_enabled_repos_completion() {
-  local cur prev opts subs
-  COMPREPLY=()
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  prev="${COMP_WORDS[COMP_CWORD-1]}"
-  subs="run doctor health repair validate audit why quickstart help completion"
-  if [[ ${COMP_CWORD} -eq 1 ]]; then
-    opts="$subs --info --schema --examples --help --json --dry-run --date --no-notify"
-    COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
-    return 0
-  fi
-  case "${COMP_WORDS[1]}" in
-    repair) COMPREPLY=( $(compgen -W "--scope --dry-run --apply --idempotency-key --json" -- "$cur") );;
-    validate) COMPREPLY=( $(compgen -W "config --json" -- "$cur") );;
-    help) COMPREPLY=( $(compgen -W "run doctor health repair validate audit why" -- "$cur") );;
-    completion) COMPREPLY=( $(compgen -W "bash zsh" -- "$cur") );;
-  esac
-  return 0
-}
-complete -F _daily_report_enabled_repos_completion daily-report-enabled-repos.sh
-EOF
+    bash)
+      cli_emit_completion_bash "daily-report-enabled-repos.sh" \
+        "run,doctor,health,repair,validate,audit,why,quickstart,help,completion" \
+        "--info,--schema,--examples,--help,--json,--dry-run,--date,--no-notify"
       ;;
-    zsh) cat <<'EOF'
-#compdef daily-report-enabled-repos.sh
-_daily_report_enabled_repos() {
-  local -a subs
-  subs=(run doctor health repair validate audit why quickstart help completion)
-  _arguments \
-    '1: :->sub' \
-    '*: :->args'
-  case $state in
-    sub) compadd -- $subs --info --schema --examples --help --json --dry-run --date --no-notify ;;
-  esac
-}
-compdef _daily_report_enabled_repos daily-report-enabled-repos.sh
-EOF
+    zsh)
+      cli_emit_completion_zsh "daily-report-enabled-repos.sh" \
+        "run,doctor,health,repair,validate,audit,why,quickstart,help,completion"
       ;;
     *)
       echo "ERR: completion shell must be bash or zsh" >&2
@@ -391,18 +293,7 @@ list_enabled_repos() {
 }
 
 audit_append() {
-  local action="$1" status="$2"
-  local extra_json="${3:-}"
-  [[ -n "$extra_json" ]] || extra_json='{}'
-  mkdir -p "$(dirname "$AUDIT_LOG")" 2>/dev/null || true
-  jq -nc \
-    --arg ts "$(iso_now)" \
-    --arg action "$action" \
-    --arg status "$status" \
-    --arg sha "$(sha_self)" \
-    --argjson extra "$extra_json" \
-    '{ts:$ts,action:$action,status:$status,sha256:$sha} + $extra' \
-    >>"$AUDIT_LOG" 2>/dev/null || true
+  cli_audit_append "$AUDIT_LOG" "$1" "$2" "${3:-}"
 }
 
 # ---------- subcommands ----------
@@ -587,9 +478,7 @@ cmd_repair() {
     *) echo "ERR: --scope must be state|configs" >&2; exit 64 ;;
   esac
   if [[ "$MODE" == "apply" && -z "$IDEM_KEY" ]]; then
-    jq -nc --arg sv "daily-report-enabled-repos.repair/v1" --arg scope "$SCOPE" \
-      '{schema_version:$sv,command:"repair",status:"refused",mode:"apply",scope:$scope,reason:"--apply requires --idempotency-key"}'
-    exit 3
+    cli_refuse_apply_without_idem_key "daily-report-enabled-repos.repair/v1" "repair" "$SCOPE"
   fi
 
   local planned_tmp applied_tmp

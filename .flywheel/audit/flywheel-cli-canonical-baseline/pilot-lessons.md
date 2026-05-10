@@ -216,3 +216,96 @@ Bead 3 (`flywheel-oxzyr`) on this pilot would add:
 
 **With tooling, bead 3 per-surface effort drops to ~1-2 hours
 (WCDM verify-* helpers reused).**
+
+---
+
+## flywheel-jloib.0d measurements (2026-05-10)
+
+Replaces the bead-2 estimates above with measured deltas from refactoring
+the pilot script (`daily-report-enabled-repos.sh`) to source the helper
+lib (`canonical-cli-helpers.sh` from jloib.0a).
+
+| Metric | Value |
+|---|---|
+| Pilot before refactor | 817 lines |
+| Pilot after refactor | 706 lines |
+| Helper lib (jloib.0a) | 382 lines |
+| Topic-map JSON sidecar | 9 lines |
+| **Net delta per script** | **111 lines saved** |
+| % saved | 13.6% |
+| Projected savings × 234 P0 surfaces | 25,974 lines |
+| Regression test | 22/22 PASS, zero test modifications |
+| canonical-cli-lint.sh | 0 violations |
+
+### Verdict
+
+Net delta = **111 lines/script**, in the 100-149 band. The spec's two
+thresholds disagree on this band:
+
+- **Absolute lines bar (>=150 → validated):** missed.
+- **Percentage bar (>=30% → validated):** missed (13.6%).
+
+Both thresholds say "lib needs further work before bead 2.x lane work."
+A lib-revision followup bead has been filed naming three concrete
+extraction targets that would push savings past 150/script:
+
+1. **`cli_emit_schema_dispatch <surface_map>`** — replace the 80-line
+   `case "$surface" in default|run) ;; doctor) ;; ...` schema dispatcher
+   with a JSON-driven helper. Expected savings: ~60-80 lines/script.
+2. **`cli_dispatch_help <topic_help_fn>`** — extend the existing
+   `cli_dispatch_subcommand_help` to also intercept `<cmd> --help`
+   requests, removing the per-cmd `--help` boilerplate. Expected
+   savings: ~10-20 lines/script.
+3. **`cli_emit_audit_tail <audit_log> <limit>`** — extract the
+   `tail -n N | jq -s ...` pattern from the per-surface `audit`
+   subcommand. Expected savings: ~15-25 lines/script.
+
+Combined target: 196-236 lines/script saved (24-29% of pilot baseline),
+which clears both thresholds.
+
+### What worked (kept in jloib.0a)
+
+- Time + identity: `cli_iso_now`, `cli_sha_self` — clean drop-in.
+- Audit primitive: `cli_audit_append` — handles dirname creation,
+  bad-JSON fallback, sha256 attribution. Replaces ~12 lines with one
+  call.
+- Refusal envelope: `cli_refuse_apply_without_idem_key` — exits 3 with
+  canonical envelope; replaces 5-line block with 1-line call.
+- Info / examples / quickstart envelope generators: substantial
+  savings on emit blocks (~16 / ~5 / ~10 lines respectively).
+- Completion generators: bash + zsh in one helper each; replaces ~45
+  lines with 2 case branches calling helpers.
+- Topic-map JSON sidecar: replaces 62-line `case` statement with 1-line
+  `cli_emit_topic_help` call + 9-line JSON file.
+
+### What didn't work / wasn't extracted
+
+- Schema dispatcher (`emit_schema`) — per-surface schemas are too
+  caller-specific to move into the lib without hurting clarity.
+  Punted to followup-bead Recommendation #1 (a JSON-driven dispatcher
+  helper would resolve this).
+- Per-surface `usage()` — every script has its own help body;
+  shouldn't be in the lib.
+- Subcommand --help dispatch (`cli_dispatch_subcommand_help`) — the
+  helper exists in jloib.0a but isn't widely consumed in this pilot
+  because the script's help routing happens at top-level case rather
+  than per-subcommand. Followup-bead Recommendation #2 closes this
+  gap.
+
+### Pilot lessons → bead 2.x lane work
+
+- Sourcing the lib via symlinked invocation (the canonical-cli-scoping
+  checker installs symlinks in `$TMP/bin/`) requires a `readlink`
+  resolver in the caller before computing `ROOT`. Documented in the
+  pilot script and should be part of the helper-lib sourcing
+  boilerplate going forward.
+- The 22/22 regression test passing UNCHANGED is the hard gate; any
+  helper that breaks behavioral equivalence under the regression test
+  is rejected.
+- The lib's `canonical-cli-helpers/v1` schema version is correct —
+  callers continue to emit their own `<surface>.<command>/v1` and the
+  lib never overrides.
+
+Source bead: `flywheel-3wxzi`. Apply spec:
+`.flywheel/audit/flywheel-jloib.0d/apply-spec.md`. Pilot reference:
+`dab051e`.
