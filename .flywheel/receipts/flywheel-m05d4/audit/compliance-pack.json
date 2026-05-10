@@ -1,0 +1,79 @@
+{
+  "task_id": "flywheel-m05d4",
+  "dispatch_id": "flywheel-m05d4-3c4aa6",
+  "identity_name": "CloudyMill",
+  "pane": "flywheel:0.2",
+  "callback_pane": "flywheel:1",
+  "title": "[skillos-gap] state/kernel.json missing or empty (blocks structural_validation_command)",
+  "did": "3/3",
+  "compliance_score": 880,
+  "compliance_max": 1000,
+  "four_lens": {
+    "brand": 9,
+    "sniff": 9,
+    "jeff": 9,
+    "public": 9
+  },
+  "score_components": {
+    "fix_correctness_file_exists_non_empty": 200,
+    "schema_shape_matches_architecture_md_doctrine": 180,
+    "honest_loop_status_bootstrap_no_lie": 100,
+    "exit_1_to_exit_2_clean_blocker_ladder": 120,
+    "evidence_md_with_before_after": 80,
+    "next_blocker_tracked_at_flywheel_4n16r_no_duplicate": 60,
+    "L61_ecosystem_touch_handled": 40,
+    "scope_discipline_intentional_out_of_scope_section": 50,
+    "subtotal": 830,
+    "polish_bonus_donella_5_to_6_substrate_seed": 50,
+    "total": 880
+  },
+  "did_gates": [
+    {
+      "gate": "state/kernel.json exists",
+      "status": "done",
+      "evidence": "2156 bytes; sha256 9c91157dee402a9a50a6aacc2622dea246c996295f208ae79ba44de8f2f33636"
+    },
+    {
+      "gate": "state/kernel.json is non-empty AND schema-shaped",
+      "status": "done",
+      "evidence": "jq probe: schema_version=skillos.kernel.v1 cap_total=40 tracks=bandit_track,mandate_track,task_track"
+    },
+    {
+      "gate": "structural_validation_command no longer exits 1 (file-missing-or-empty)",
+      "status": "done",
+      "evidence": "Now exits 2 (next blocker = flywheel-loop doctor not ready_for_tick, tracked at flywheel-4n16r). Clean blocker-ladder."
+    }
+  ],
+  "files_touched": [
+    "/Users/josh/Developer/skillos/state/kernel.json",
+    ".flywheel/receipts/flywheel-m05d4/audit/evidence.md",
+    ".flywheel/receipts/flywheel-m05d4/audit/pinned-shas.txt",
+    ".flywheel/receipts/flywheel-m05d4/audit/validation-run-output.txt",
+    ".flywheel/receipts/flywheel-m05d4/audit/compliance-pack.json"
+  ],
+  "beads_filed": [],
+  "beads_updated": ["flywheel-m05d4"],
+  "no_bead_reason": "next_blocker_already_tracked_at_flywheel-4n16r",
+  "fuckups_logged": [],
+  "skill_auto_routes": {
+    "canonical-cli-scoping": "n/a",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "L61_ecosystem_touch": {
+    "agents_md_updated": "not_applicable",
+    "readme_updated": "not_applicable",
+    "no_touch_reason": "JSON state file authorship in skillos/state/; no doctrine/skill/canonical-L-rule surface touched in flywheel repo"
+  },
+  "L107_reservations": {
+    "files": ["/Users/josh/Developer/skillos/state/kernel.json"],
+    "release_required": true
+  },
+  "L112_probe": {
+    "command": "[ -s /Users/josh/Developer/skillos/state/kernel.json ] && jq -e '.schema_version == \"skillos.kernel.v1\" and .cap_total == 40' /Users/josh/Developer/skillos/state/kernel.json && echo PASS_FILE_EXISTS_GATE",
+    "expected": "grep:PASS_FILE_EXISTS_GATE"
+  },
+  "mission_fitness": "adjacent",
+  "mission_rationale": "Removes the file-existence structural blocker keeping skillos from passing its .flywheel/loop.json validation gate; serves continuous-orchestrator-uptime by clearing one of two structural blockers preventing skillos from entering the normal flywheel-loop tick rotation."
+}

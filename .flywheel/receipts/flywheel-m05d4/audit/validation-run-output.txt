@@ -1,0 +1,15 @@
+=== AFTER: full structural_validation_command ===
+FAIL: flywheel-loop doctor not ready_for_tick
+validation-rc=2
+
+=== file-existence gate (exit-1 path the bead owns) ===
+OK: .flywheel/MISSION.md present non-empty (    9835 bytes)
+OK: .flywheel/GOAL.md present non-empty (    3016 bytes)
+OK: .flywheel/STATE.md present non-empty (   90816 bytes)
+OK: state/kernel.json present non-empty (    2156 bytes)
+
+=== kernel.json schema check ===
+schema_version=skillos.kernel.v1 cap_total=40 tracks=bandit_track,mandate_track,task_track
+
+=== next blocker (out-of-scope, tracked at flywheel-4n16r) ===
+exit=2 reason=flywheel-loop doctor action=split_flywheel_loop_dispatcher (separate bead flywheel-4n16r)

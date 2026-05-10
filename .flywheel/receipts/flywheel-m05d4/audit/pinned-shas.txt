@@ -1,0 +1,6 @@
+branch: main
+head-pre-edit: bf551ee8a18394d8946765e0498358ea82deb8ff
+kernel-bytes:     2156
+kernel-sha256: 9c91157dee402a9a50a6aacc2622dea246c996295f208ae79ba44de8f2f33636
+loop.json-sha256: 9ea467edd81755871129d80dca2106f2cc14e6132f9d722448bdef3d01445aa0
+skillos-commit-sha: ecbb213545c89acc45294dd91fb02c3f8ab20d53
