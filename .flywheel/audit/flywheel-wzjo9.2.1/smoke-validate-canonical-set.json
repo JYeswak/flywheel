@@ -1,0 +1,1 @@
+{"schema_version":"clobber-recovery/v1","command":"validate","subject":"canonical-set","status":"pass","present":["MISSION.md","STATE.md","GOAL.md","AGENTS.md","INCIDENTS.md"]}

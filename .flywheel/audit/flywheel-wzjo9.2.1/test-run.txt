@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info emits canonical envelope
+PASS --schema emits canonical envelope
+PASS --examples emits canonical envelope
+PASS doctor emits canonical envelope
+PASS health emits canonical envelope
+PASS repair --scope log_dir --dry-run emits canonical envelope
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate without subject refuses with rc=64 (canonical contract)
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS doctor returns >=5 named checks with valid statuses
+PASS doctor probes in_git_repo + head_content_nonempty (load-bearing for restore safety)
+PASS validate canonical-set returns concrete status (not 'todo')
+PASS validate doctrine-path rejects non-canonical path with rc=1 + reason
+PASS repair --scope log_dir --apply emits concrete action (all_log_dirs_exist_noop)
+PASS schema doctor returns concrete shape (fields + thresholds)
+SUMMARY pass=19 fail=0
