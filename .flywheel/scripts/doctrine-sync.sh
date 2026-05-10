@@ -22,6 +22,11 @@ fi
 SCAFFOLD_SCHEMA_VERSION="doctrine-sync/v1"
 SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/doctrine-sync-runs.jsonl}"
 
+# Module-load env vars (also re-resolved in cmd_run for backward compat).
+# Visible to canonical-cli stubs which run BEFORE cmd_run dispatches.
+FLYWHEEL_ROOT="${FLYWHEEL_ROOT:-/Users/josh/Developer/flywheel}"
+CANONICAL_SOURCE="${CANONICAL_SOURCE:-${FLYWHEEL_DOCTRINE_CANONICAL_SOURCE:-$FLYWHEEL_ROOT/templates/flywheel-install/AGENTS.md}}"
+
 scaffold_usage() {
   cat <<'USG'
 usage: doctrine-sync.sh [SUBCOMMAND] [OPTIONS]
@@ -124,23 +129,92 @@ scaffold_emit_completion() {
 # ---------- canonical-cli stubs (TODO markers preserved) ----------
 
 scaffold_cmd_doctor() {
-  # TODO(canonical-cli-scaffold): probe substrate this script depends on
-  # (env vars, paths, external tools) and emit per-check status.
-  # Canonical pattern (per L4 lint rule — NEVER use `[[ ]] && X || Y`
-  # as the last expression of a helper; use if/then/else/fi):
-  #   if [[ -d "$ROOT/.flywheel" ]]; then
-  #     printf '{"check":"flywheel-dir","status":"pass"}\n'
-  #   else
-  #     printf '{"check":"flywheel-dir","status":"fail"}\n'
-  #   fi
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"doctor",ts:$ts,status:"todo",checks:[],note:"TODO(canonical-cli-scaffold): fill in doctor checks"}'
+  # Probe doctrine-sync substrate: canonical source + flywheel root + deps.
+  local checks
+  checks="$(jq -cs '.' <(
+    if [[ -f "$CANONICAL_SOURCE" ]]; then
+      jq -nc --arg p "$CANONICAL_SOURCE" '{check:"canonical_source",path:$p,status:"pass"}'
+    else
+      jq -nc --arg p "$CANONICAL_SOURCE" '{check:"canonical_source",path:$p,status:"fail",reason:"canonical AGENTS template missing"}'
+    fi
+    if [[ -d "$FLYWHEEL_ROOT/.flywheel" ]]; then
+      jq -nc --arg p "$FLYWHEEL_ROOT/.flywheel" '{check:"flywheel_root",path:$p,status:"pass"}'
+    else
+      jq -nc --arg p "$FLYWHEEL_ROOT/.flywheel" '{check:"flywheel_root",path:$p,status:"fail",reason:"FLYWHEEL_ROOT not a flywheel-installed repo"}'
+    fi
+    if [[ -d "$FLYWHEEL_ROOT/.flywheel/rules" ]]; then
+      local rule_count
+      rule_count="$(find "$FLYWHEEL_ROOT/.flywheel/rules" -maxdepth 1 -name 'L*.md' 2>/dev/null | wc -l | tr -d ' ')"
+      jq -nc --argjson n "$rule_count" '{check:"rules_dir",rule_count:$n,status:"pass"}'
+    else
+      jq -nc '{check:"rules_dir",status:"warn",reason:"rules dir absent — canonical L-rules unavailable"}'
+    fi
+    if command -v jq >/dev/null 2>&1; then
+      jq -nc '{check:"core_deps",status:"pass",found:["jq"]}'
+    else
+      jq -nc '{check:"core_deps",status:"fail",reason:"jq required"}'
+    fi
+    if command -v rg >/dev/null 2>&1 || command -v grep >/dev/null 2>&1; then
+      jq -nc '{check:"text_search",status:"pass"}'
+    else
+      jq -nc '{check:"text_search",status:"fail",reason:"rg or grep required"}'
+    fi
+  ))"
+  local fails warns
+  fails="$(jq -r '[.[] | select(.status=="fail")] | length' <<<"$checks")"
+  warns="$(jq -r '[.[] | select(.status=="warn")] | length' <<<"$checks")"
+  local status
+  if [[ "$fails" -gt 0 ]]; then
+    status="fail"
+  elif [[ "$warns" -gt 0 ]]; then
+    status="warn"
+  else
+    status="pass"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --arg status "$status" \
+    --argjson checks "$checks" \
+    '{schema_version:$sv,command:"doctor",ts:$ts,status:$status,checks:$checks}'
 }
 
 scaffold_cmd_health() {
-  # TODO(canonical-cli-scaffold): summarize last-run state from audit log.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"health",ts:$ts,status:"todo",note:"TODO(canonical-cli-scaffold): fill in health probe from audit log"}'
+  # Health: tail audit log; report last-run age + last status.
+  local last_ts="" last_status="" age_seconds=null status="empty" row_count=0
+  if [[ -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+    row_count="$(wc -l <"$SCAFFOLD_AUDIT_LOG" 2>/dev/null | tr -d ' ')"
+    if [[ "${row_count:-0}" -gt 0 ]]; then
+      last_ts="$(tail -1 "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | jq -r '.ts // empty' 2>/dev/null)"
+      last_status="$(tail -1 "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | jq -r '.status // empty' 2>/dev/null)"
+      if [[ -n "$last_ts" ]]; then
+        local now_epoch last_epoch
+        now_epoch="$(date -u +%s 2>/dev/null)"
+        last_epoch="$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$last_ts" +%s 2>/dev/null || date -u -d "$last_ts" +%s 2>/dev/null || echo "")"
+        if [[ -n "$now_epoch" && -n "$last_epoch" ]]; then
+          age_seconds=$((now_epoch - last_epoch))
+        fi
+      fi
+      if [[ "$last_status" == "ok" || "$last_status" == "pass" || "$last_status" == "applied" ]]; then
+        status="ok"
+      elif [[ -n "$last_status" ]]; then
+        status="degraded"
+      else
+        status="malformed"
+      fi
+    fi
+  else
+    status="not_initialized"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --arg status "$status" \
+    --arg last_ts "$last_ts" \
+    --arg last_status "$last_status" \
+    --argjson row_count "$row_count" \
+    --argjson age_seconds "${age_seconds:-null}" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,row_count:$row_count,last_run_ts:(if $last_ts=="" then null else $last_ts end),last_run_status:(if $last_status=="" then null else $last_status end),last_run_age_seconds:$age_seconds}'
 }
 
 scaffold_cmd_repair() {
@@ -166,21 +240,111 @@ scaffold_cmd_repair() {
       exit 3
     fi
   fi
-  # TODO(canonical-cli-scaffold): per-scope repair actions go here.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
-    '{schema_version:$sv,command:"repair",status:"todo",mode:$mode,scope:$scope,idempotency_key:$idem,note:"TODO(canonical-cli-scaffold): fill in repair scope actions"}'
+  # repair --scope state: ensure SCAFFOLD_AUDIT_LOG parent dir exists.
+  local audit_dir planned applied
+  audit_dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
+  planned="$(jq -cs '.' <(
+    if [[ "$scope" != "state" ]]; then
+      jq -nc --arg s "$scope" '{action:"none",reason:"unsupported scope (state only)",scope:$s}'
+    else
+      if [[ ! -d "$audit_dir" ]]; then
+        jq -nc --arg p "$audit_dir" '{action:"mkdir",path:$p,mode:"0755"}'
+      fi
+    fi
+  ))"
+  applied='[]'
+  if [[ "$mode" == "apply" && "$scope" == "state" ]]; then
+    local applied_rows=()
+    if [[ ! -d "$audit_dir" ]]; then
+      mkdir -p "$audit_dir" && chmod 755 "$audit_dir" 2>/dev/null
+      applied_rows+=("$(jq -nc --arg p "$audit_dir" --arg key "$idem_key" '{action:"mkdir",path:$p,mode:"0755",idempotency_key:$key}')")
+    fi
+    if [[ "${#applied_rows[@]}" -eq 0 ]]; then
+      applied='[]'
+    else
+      applied="$(printf '%s\n' "${applied_rows[@]}" | jq -cs '.')"
+    fi
+    if command -v cli_audit_append >/dev/null; then
+      cli_audit_append "$SCAFFOLD_AUDIT_LOG" "repair_state_apply" "ok" \
+        "$(jq -nc --arg key "$idem_key" --argjson actions "$applied" '{idempotency_key:$key,actions:$actions}')"
+    fi
+  fi
+  local status
+  if [[ "$mode" == "apply" ]]; then
+    status="applied"
+  else
+    status="dry_run"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg scope "$scope" \
+    --arg mode "$mode" \
+    --arg idem "$idem_key" \
+    --arg status "$status" \
+    --argjson planned "$planned" \
+    --argjson applied "$applied" \
+    '{schema_version:$sv,command:"repair",status:$status,mode:$mode,scope:$scope,idempotency_key:$idem,planned_actions:$planned,applied_actions:$applied}'
 }
 
 scaffold_cmd_validate() {
-  # TODO(canonical-cli-scaffold): document validation subjects + contracts.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
-    '{schema_version:$sv,command:"validate",status:"todo",note:"TODO(canonical-cli-scaffold): fill in per-subject validation"}'
+  local subject="${1:-canonical_source}"
+  if [[ "$subject" == "-h" || "$subject" == "--help" ]]; then
+    scaffold_emit_topic_help validate
+    return 0
+  fi
+  shift 2>/dev/null || true
+  local results status
+  case "$subject" in
+    canonical_source)
+      # Validate the canonical AGENTS template is well-formed: file exists,
+      # contains BEGIN/END canonical block markers, and at least one L-rule entry.
+      if [[ ! -f "$CANONICAL_SOURCE" ]]; then
+        results="$(jq -nc --arg p "$CANONICAL_SOURCE" '[{check:"file_exists",path:$p,status:"fail",reason:"canonical source missing"}]')"
+      else
+        local has_begin has_end has_rules
+        has_begin="false"; has_end="false"; has_rules="false"
+        if grep -q "BEGIN-CANONICAL-FLYWHEEL-DOCTRINE" "$CANONICAL_SOURCE" 2>/dev/null; then has_begin="true"; fi
+        if grep -q "END-CANONICAL-FLYWHEEL-DOCTRINE" "$CANONICAL_SOURCE" 2>/dev/null; then has_end="true"; fi
+        if grep -qE "L[0-9]+ — " "$CANONICAL_SOURCE" 2>/dev/null; then has_rules="true"; fi
+        results="$(jq -nc \
+          --arg p "$CANONICAL_SOURCE" \
+          --argjson hb "$has_begin" \
+          --argjson he "$has_end" \
+          --argjson hr "$has_rules" \
+          '[
+            {check:"file_exists",path:$p,status:"pass"},
+            {check:"begin_marker",status:(if $hb then "pass" else "fail" end)},
+            {check:"end_marker",status:(if $he then "pass" else "fail" end)},
+            {check:"l_rule_entries",status:(if $hr then "pass" else "fail" end)}
+          ]')"
+      fi
+      ;;
+    *)
+      results="$(jq -nc --arg s "$subject" '[{status:"unsupported",subject:$s,supported:["canonical_source"]}]')"
+      ;;
+  esac
+  local fails
+  fails="$(jq -r '[.[] | select(.status=="fail")] | length' <<<"$results")"
+  if [[ "$fails" -gt 0 ]]; then
+    status="fail"
+  else
+    status="pass"
+  fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg subject "$subject" \
+    --arg status "$status" \
+    --argjson results "$results" \
+    '{schema_version:$sv,command:"validate",subject:$subject,status:$status,results:$results}'
 }
 
 scaffold_cmd_audit() {
-  # TODO(canonical-cli-scaffold): tail audit log; emit recent rows.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
-    '{schema_version:$sv,command:"audit",audit_log:$log,status:"todo",note:"TODO(canonical-cli-scaffold): fill in audit tail"}'
+  if command -v cli_emit_audit_tail >/dev/null; then
+    cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" 20
+  else
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
+      '{schema_version:$sv,command:"audit",audit_log:$log,status:"helper_lib_missing"}'
+  fi
 }
 
 scaffold_cmd_why() {
@@ -188,9 +352,25 @@ scaffold_cmd_why() {
   if [[ -z "$id" ]]; then
     printf 'ERR: why requires <id> argument\n' >&2; return 64
   fi
-  # TODO(canonical-cli-scaffold): explain why <id> is/isn't in scope.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
-    '{schema_version:$sv,command:"why",id:$id,status:"todo",note:"TODO(canonical-cli-scaffold): fill in why-id semantics"}'
+  # <id> is an L-rule id (e.g., "L48", "L153"). Look up canonical body.
+  if [[ ! -f "$CANONICAL_SOURCE" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg src "$CANONICAL_SOURCE" \
+      '{schema_version:$sv,command:"why",id:$id,status:"unavailable",reason:"canonical source missing",source:$src}'
+    return 0
+  fi
+  local heading=""
+  # Match either "## L48 — TITLE" body heading or "| 1 | L48 — TITLE | ..." index row.
+  heading="$( { grep -E "^## ${id} (—|--)" "$CANONICAL_SOURCE" 2>/dev/null || true; } | head -1)"
+  if [[ -z "$heading" ]]; then
+    heading="$( { grep -E "^\| [0-9]+ \| ${id} (—|--)" "$CANONICAL_SOURCE" 2>/dev/null || true; } | head -1)"
+  fi
+  if [[ -n "$heading" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg src "$CANONICAL_SOURCE" --arg heading "$heading" \
+      '{schema_version:$sv,command:"why",id:$id,status:"found",source:$src,heading:$heading}'
+  else
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg src "$CANONICAL_SOURCE" \
+      '{schema_version:$sv,command:"why",id:$id,status:"not_found",source:$src,note:"L-rule id not found in canonical AGENTS template"}'
+  fi
 }
 
 # ---------- scaffolded main dispatcher ----------
