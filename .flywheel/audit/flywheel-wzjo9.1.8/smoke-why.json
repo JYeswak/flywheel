@@ -1,0 +1,1 @@
+{"schema_version":"flywheel-friday-digest/v1","command":"why","id":"some-sha","status":"unavailable","reason":"audit ledger absent","audit_log":"/Users/josh/.local/state/flywheel/flywheel-friday-digest-runs.jsonl"}
