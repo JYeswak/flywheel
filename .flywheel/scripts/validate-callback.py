@@ -113,6 +113,135 @@ TAXONOMY_RULES: tuple[tuple[set[str], str, str, str], ...] = (
 )
 
 
+# Shape A canonical invertibility registry per audit-machinery-hygiene-discipline
+# (.flywheel/doctrine/audit-machinery-hygiene-discipline.md, ratification 2026-05-11).
+# Each entry maps a failure code (rule_id) → premise (why it fires) + source
+# (where in this file the code is emitted) + inversion (how an operator verifies
+# on real state). Use `validate-callback --why-code <code>` to print one entry.
+#
+# Bead: flywheel-5svdg (Shape A wire-in for high-blast-radius validators).
+FAILURE_CODE_REGISTRY: dict[str, dict[str, str]] = {
+    "evidence_redaction_missing": {
+        "premise": "Callback envelope omits the evidence_redacted field entirely.",
+        "source": "evidence_redaction_status() (~line 189)",
+        "inversion": "Inspect callback string for `evidence_redacted=<yes|no|n/a>` token; field is required by the canonical callback contract.",
+    },
+    "evidence_redaction_invalid": {
+        "premise": "Callback envelope has evidence_redacted=<value> where value is not yes|no|n/a.",
+        "source": "evidence_redaction_status() (~line 189)",
+        "inversion": "Inspect callback for evidence_redacted=<value>; valid values are exactly yes|no|n/a.",
+    },
+    "evidence_redaction_declared_no": {
+        "premise": "Worker declared evidence_redacted=no, which is rejected — evidence MUST be redacted before close.",
+        "source": "evidence_redaction_status() (~line 191)",
+        "inversion": "Run gitleaks --no-git --piped on evidence files, regenerate redacted evidence, resend callback with evidence_redacted=yes.",
+    },
+    "evidence_redaction_required": {
+        "premise": "Files matching evidence-class patterns were touched but evidence_redacted != yes.",
+        "source": "evidence_redaction_status() (~line 193)",
+        "inversion": "Cross-reference files_reserved against EVIDENCE_REDACTION_PATH_PATTERNS; for any match, evidence_redacted MUST equal yes.",
+    },
+    "evidence_redaction_na_on_evidence": {
+        "premise": "Worker declared evidence_redacted=n/a but evidence-class files appear in files_reserved.",
+        "source": "evidence_redaction_status() (~line 195)",
+        "inversion": "n/a is only valid when no evidence-class files were touched; check files_reserved for */evidence/*, */validation/*, */secrets/*, */.flywheel/*-evidence.md patterns.",
+    },
+    "reservation_expired": {
+        "premise": "An Agent Mail file reservation expired before the worker released it.",
+        "source": "reservation_status() (~line 242)",
+        "inversion": "Check Agent Mail reservation TTL vs callback delivery time; reservations should be released or renewed BEFORE expiry.",
+    },
+    "reservation_conflict": {
+        "premise": "Another worker already held a reservation on a file this worker tried to reserve.",
+        "source": "reservation_status() (~line 246)",
+        "inversion": "Inspect files_reserved for CONFLICT / UNAVAILABLE:conflict markers; coordinate file-edit ordering via Agent Mail.",
+    },
+    "reservation_missing_release": {
+        "premise": "Worker reserved files but did not release them before sending the callback.",
+        "source": "reservation_status() (~line 255)",
+        "inversion": "Files in files_reserved that aren't in files_released indicate missed release calls; release after commit or before BLOCKED/DECLINED.",
+    },
+    "validation_receipt_schema_invalid": {
+        "premise": "The validation receipt itself did not satisfy validation-receipt/v1 schema.",
+        "source": "build_receipt() (~line 484)",
+        "inversion": "Re-run validate-callback --schema and compare actual receipt against the schema; fix the producer that emitted the invalid receipt.",
+    },
+    "dispatch_missing_josh_request_id": {
+        "premise": "Dispatch packet text did not contain a josh_request_id field.",
+        "source": "build_receipt() (~line 504)",
+        "inversion": "Inspect /tmp/dispatch_*.md for the JOSH REQUEST LINKAGE BLOCK; must include josh_request_id=<value-or-null>.",
+    },
+    "callback_missing_josh_request_id": {
+        "premise": "Callback envelope did not echo a josh_request_id field.",
+        "source": "build_receipt() (~line 506)",
+        "inversion": "Worker callback string MUST include josh_request_id=<same-value-as-dispatch>; check for the literal substring.",
+    },
+    "callback_josh_request_id_mismatch": {
+        "premise": "Callback's josh_request_id did not match the dispatch's josh_request_id.",
+        "source": "build_receipt() (~line 508)",
+        "inversion": "Compare grep 'josh_request_id' in dispatch vs callback; values must match verbatim (including 'null' literal).",
+    },
+    "runtime_unresponsive": {
+        "premise": "Runtime probe (worker pane) did not respond to the validation probe in the bounded window.",
+        "source": "build_receipt() (~line 564 + ~line 568)",
+        "inversion": "Re-probe the worker pane (`ntm capture-pane`); if still unresponsive, escalate to respawn via flywheel-loop tick.",
+    },
+    "context_drift": {
+        "premise": "Orchestrator's understanding of the worker state diverges from the worker's reported state.",
+        "source": "build_receipt() (~line 571)",
+        "inversion": "Probe BOTH contexts (orch + worker); name the specific divergence (e.g., bead state, file reservation, last commit) before summarizing.",
+    },
+    "callback_validation_failed": {
+        "premise": "Generic callback validation failure (catch-all when more specific code didn't fire).",
+        "source": "build_receipt() (~line 575)",
+        "inversion": "Re-run validate-callback with the same dispatch + callback; check failure_classes for the more-specific code that should have fired.",
+    },
+    "artifact_missing": {
+        "premise": "An artifact_checks entry pointed at a file that doesn't exist on disk.",
+        "source": "build_receipt() (~line 578)",
+        "inversion": "Verify each artifact_checks path independently (`test -e $path`); restore or regenerate missing artifact, then re-validate.",
+    },
+    "callback_malformed": {
+        "premise": "Callback envelope failed structural parse (missing required tokens, invalid escape, etc).",
+        "source": "build_receipt() (~line 581)",
+        "inversion": "Inspect callback string for the canonical DONE/BLOCKED/DECLINED prefix + all required fields; common cause is unescaped quotes or missing spaces.",
+    },
+    "blocked_without_fuckup_log": {
+        "premise": "Worker sent BLOCKED but did not include fuckups_logged= field (L53 violation).",
+        "source": "build_receipt() (~line 584)",
+        "inversion": "BLOCKED callbacks MUST include fuckups_logged=<classes>; the class names indicate the worker's failure modes (per L53).",
+    },
+    "evidence_missing": {
+        "premise": "Callback envelope had evidence=<path> but the path doesn't exist on disk.",
+        "source": "build_receipt() (~line 587)",
+        "inversion": "Verify evidence path exists; if missing, regenerate evidence + resend callback. If path was a placeholder, fill it in.",
+    },
+    "remediation_missing": {
+        "premise": "Callback envelope's failure required a remediation_status= field but the field was omitted.",
+        "source": "build_receipt() (~line 594)",
+        "inversion": "Check the failure_class taxonomy: for non-pass status, remediation_status is required (the operator needs to know what was tried).",
+    },
+    "orch_callback_missing_l61_fields": {
+        "premise": "L61 ecosystem-touch detected (doctrine/INCIDENTS/canonical/L-rule/skill touched) but agents_md_updated + readme_updated fields missing.",
+        "source": "build_receipt() (~line 499)",
+        "inversion": "Check task_description for L61 keywords; if any match, both agents_md_updated and readme_updated fields are required.",
+    },
+}
+
+
+def lookup_failure_code(code: str) -> dict[str, str | None]:
+    """Return registry entry for a failure code, or status:not_found envelope."""
+    entry = FAILURE_CODE_REGISTRY.get(code)
+    if entry is None:
+        return {
+            "status": "not_found",
+            "code": code,
+            "registry_size": str(len(FAILURE_CODE_REGISTRY)),
+            "hint": "Run `validate-callback --why-code <code> --json` with a known code; available codes printed by `--why-code list`.",
+        }
+    return {"status": "found", "code": code, **entry}
+
+
 def utc_now() -> str:
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
@@ -793,6 +922,8 @@ def main() -> int:
     parser.add_argument("--info", action="store_true",
                         help="emit descriptive tool metadata (flywheel-4x6pu / agent-ergo R001)")
     parser.add_argument("--why")
+    parser.add_argument("--why-code",
+                        help="print FAILURE_CODE_REGISTRY entry for a failure code (Shape A invertibility per flywheel-5svdg); use --why-code list to enumerate all known codes")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
@@ -812,6 +943,18 @@ def main() -> int:
         payload = why_receipt(expand_path(repo, args.why))
         print(json.dumps(payload, indent=None if args.json else 2, sort_keys=True))
         return 0 if payload["status"] == "pass" else 1
+    if args.why_code:
+        if args.why_code == "list":
+            payload = {
+                "status": "found",
+                "code": "list",
+                "registry_size": len(FAILURE_CODE_REGISTRY),
+                "codes": sorted(FAILURE_CODE_REGISTRY.keys()),
+            }
+        else:
+            payload = lookup_failure_code(args.why_code)
+        print(json.dumps(payload, indent=None if args.json else 2, sort_keys=True))
+        return 0 if payload["status"] == "found" else 1
     if not args.dispatch_id or not args.callback_ref:
         parser.error("--dispatch-id and --callback-ref are required unless --schema, --examples, or --why is used")
 
