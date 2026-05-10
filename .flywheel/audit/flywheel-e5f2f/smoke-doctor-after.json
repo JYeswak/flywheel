@@ -1,0 +1,1 @@
+{"status":"fail","identity_registry_drift":0,"identity_registry_status":"pass","identity_registry_total":20,"identity_registry_errors":[],"top_level_fail_codes":["active_marker_project_label_not_loaded","beads_db_health_failed","loop_driver_missing_driver","memory_health_failed","validation_receipts_schema_invalid_count"],"identity_in_top_fail_codes":false}

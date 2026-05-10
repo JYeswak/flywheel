@@ -1,0 +1,12 @@
+{
+  "comment": "Reproduced via bash -c 'source agent.sh; agent_mail_identity_registry_doctor_json' BEFORE the probe-path fix at agent.sh:141. The function shelled into '$0 identity --doctor --json' which returned invalid JSON when $0 != flywheel-loop, falling through to the synth-fail JSON below.",
+  "schema_version": "agent-mail-identity-registry-doctor/v1",
+  "status": "fail",
+  "total_registered": 0,
+  "drift_count": 1,
+  "identity_registry_drift": 1,
+  "orphan_token_count": 0,
+  "identity_token_orphan": 0,
+  "rows": [],
+  "errors": [{"code": "identity_registry_doctor_invalid_json"}]
+}
