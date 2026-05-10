@@ -356,11 +356,44 @@ extract_root_block() {
   ' "$file" >"$out"
 }
 
+# flywheel-fmnv2: SOURCE AGENTS.md contains its own ROOT_BLOCK_BEGIN/END markers
+# wrapping the canonical doctrine. When render_root_agents_with_block embeds the
+# whole SOURCE inside outer BEGIN/END in the target, the inner markers from
+# SOURCE end up nested inside the outer block. extract_root_block toggles on
+# the first BEGIN it finds (outer) and off on the first END it finds (inner) —
+# so post-write extract returns the SOURCE bytes MINUS the two inner marker
+# lines. SOURCE_HASH (raw whole-file hash) then never matches post-write
+# extract hash, triggering root_block_post_write_mismatch.
+#
+# Fix: compute SOURCE_HASH over the SAME shape extract_root_block produces.
+# When SOURCE itself has BEGIN/END markers, hash over markers-stripped content
+# (inner-content only). When SOURCE has no markers, hash over the whole file.
+# Per flywheel-fmnv2 (filed by flywheel-eh4x worker recommendation).
+canonicalize_source_for_hash() {
+  local source="$1" out="$2"
+  if grep -qF -- "$ROOT_BLOCK_BEGIN" "$source" && grep -qF -- "$ROOT_BLOCK_END" "$source"; then
+    # SOURCE has its own markers; strip them and the lines they bracket-out
+    # via the same extract logic. Result is the inner-content the source
+    # canonically represents — the same shape post-write extract returns.
+    extract_root_block "$source" "$out"
+  else
+    # SOURCE has no markers; copy whole-file content for hashing.
+    cp "$source" "$out"
+  fi
+}
+
 render_root_agents_with_block() {
-  local source="$1" target="$2" out="$3" input
+  local source="$1" target="$2" out="$3" input source_for_emit
   input="$target"
   [[ -f "$input" ]] || input="/dev/null"
-  awk -v begin="$ROOT_BLOCK_BEGIN" -v end="$ROOT_BLOCK_END" -v source="$source" '
+  # flywheel-fmnv2: emit ONLY source's inner content (markers stripped) so that
+  # extract_root_block(rendered) returns the same bytes as the source content
+  # we hashed into SOURCE_HASH (also markers-stripped per
+  # canonicalize_source_for_hash). Without this, source's own BEGIN/END
+  # markers nest inside the outer block and confuse extract_root_block.
+  source_for_emit="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-source-emit.XXXXXX")"
+  canonicalize_source_for_hash "$source" "$source_for_emit"
+  awk -v begin="$ROOT_BLOCK_BEGIN" -v end="$ROOT_BLOCK_END" -v source="$source_for_emit" '
     function emit_source() {
       while ((getline line < source) > 0) print line
       close(source)
@@ -388,6 +421,7 @@ render_root_agents_with_block() {
       }
     }
   ' "$input" >"$out"
+  rm -f "$source_for_emit"
 }
 
 json_string_array_from_file() {
@@ -712,7 +746,10 @@ collect_targets "$TARGETS_FILE"
 : >"$REPOS_FILE"
 extract_l_rules "$SOURCE" >"$SOURCE_RULES_FILE"
 
-SOURCE_HASH="$(sha256_file "$SOURCE")"
+SOURCE_HASH_INPUT="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-source-hash-input.XXXXXX")"
+canonicalize_source_for_hash "$SOURCE" "$SOURCE_HASH_INPUT"
+SOURCE_HASH="$(sha256_file "$SOURCE_HASH_INPUT")"
+rm -f "$SOURCE_HASH_INPUT"
 SOURCE_REPO="$(canonicalize_dir "$(dirname "$SOURCE")")"
 if [[ -z "${SYNC_DOCTRINE_DOCS_SOURCE_DIR:-}" ]]; then
 DOCTRINE_DOCS_SOURCE_DIR="$SOURCE_REPO/.flywheel/doctrine"
