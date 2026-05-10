@@ -454,8 +454,102 @@ def command_text() -> str:
     return "\n".join(read_text(p, 1_000_000) for p in files)
 
 
+_ON_DEMAND_VALIDATOR_KINDS = {
+    "validator",
+    "scaffold-test",
+    "self-test",
+    "audit",
+    "scaffold",
+}
+
+
+def _expand_registry_path(raw: str) -> Path | None:
+    """Resolve a substrate-registry `where:` path string to an absolute Path."""
+    if not isinstance(raw, str) or not raw:
+        return None
+    expanded = os.path.expanduser(raw)
+    try:
+        return Path(expanded).resolve()
+    except Exception:
+        return None
+
+
+def _walk_for_validator_paths(node, sink: set[Path]) -> None:
+    """Recursively scan substrate-registry JSON for kind=validator-class rows.
+
+    Any dict with `kind` in `_ON_DEMAND_VALIDATOR_KINDS` and a `where:` string
+    contributes its resolved absolute path to `sink`. We recurse into the JSON
+    rather than relying on a fixed schema layout because the registry nests
+    pack components under `substrates[].components[]` and similar.
+    """
+    if isinstance(node, dict):
+        kind = node.get("kind")
+        where = node.get("where")
+        if isinstance(kind, str) and kind in _ON_DEMAND_VALIDATOR_KINDS and where:
+            resolved = _expand_registry_path(where)
+            if resolved is not None:
+                sink.add(resolved)
+        for value in node.values():
+            _walk_for_validator_paths(value, sink)
+    elif isinstance(node, list):
+        for item in node:
+            _walk_for_validator_paths(item, sink)
+
+
+def on_demand_script_allowlist() -> set[Path]:
+    """Build the set of script paths that are intentionally on-demand.
+
+    Two sources, combined for robustness:
+      1. substrate-registry.json (canonical, single-source-of-truth): every
+         row with `kind` in `_ON_DEMAND_VALIDATOR_KINDS` contributes its
+         `where:` path. Recursive walk so nested pack-component entries are
+         picked up regardless of registry schema layout.
+      2. Path glob fallback: `skill-packs/*/validate.sh` under the canonical
+         skills root. Catches future packs not yet registered + is a safety
+         net if the registry is missing or malformed.
+
+    Configurable via env var `GAP_HUNT_SUBSTRATE_REGISTRY`. Default:
+    `~/.claude/skills/.flywheel/data/substrate-registry.json`.
+
+    Filed under flywheel-2fw7v as the fix for the wired-but-cold detector
+    flagging on-demand pack validators (filed_by=flywheel-2xdi.44 + 17
+    sibling beads expected from gap-hunt-probe rotation).
+    """
+    allowlist: set[Path] = set()
+    registry_raw = os.environ.get(
+        "GAP_HUNT_SUBSTRATE_REGISTRY",
+        str(CLAUDE_ROOT / "skills" / ".flywheel" / "data" / "substrate-registry.json"),
+    )
+    registry_path = Path(registry_raw)
+    if registry_path.is_file():
+        try:
+            data = json.loads(registry_path.read_text(errors="replace"))
+            _walk_for_validator_paths(data, allowlist)
+        except Exception as exc:
+            warn(f"could not parse substrate registry {registry_path}: {exc}")
+    else:
+        warn(f"substrate registry missing: {registry_path}")
+
+    pack_glob = CLAUDE_ROOT / "skills" / ".flywheel" / "data" / "skill-packs"
+    if pack_glob.is_dir():
+        try:
+            for validator in pack_glob.glob("*/validate.sh"):
+                resolved = _expand_registry_path(str(validator))
+                if resolved is not None:
+                    allowlist.add(resolved)
+            for self_test in pack_glob.glob("*/self-test.sh"):
+                resolved = _expand_registry_path(str(self_test))
+                if resolved is not None:
+                    allowlist.add(resolved)
+        except Exception as exc:
+            warn(f"pack-glob fallback failed: {exc}")
+
+    return allowlist
+
+
 def probe_wired_but_cold() -> list[dict]:
     ledger_text = recent_ledger_text()
+    on_demand = on_demand_script_allowlist()
     scripts = []
     scripts.extend(safe_iter_files(CLAUDE_ROOT / "skills", "*.sh", 3000))
     scripts.extend(safe_iter_files(REPO_ROOT / ".flywheel/scripts", "*.sh", 300))
@@ -463,6 +557,12 @@ def probe_wired_but_cold() -> list[dict]:
     for script in sorted(set(scripts)):
         name = script.name
         if name in {"gap-hunt-probe.sh"}:
+            continue
+        try:
+            resolved = script.resolve()
+        except Exception:
+            resolved = script
+        if resolved in on_demand:
             continue
         if name not in ledger_text and script.stem not in ledger_text:
             try:
