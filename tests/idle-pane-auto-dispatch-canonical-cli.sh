@@ -92,6 +92,33 @@ if "$SCRIPT" --schema 2>/dev/null | jq -e '.schema_version' >/dev/null; then
   pass "--schema envelope is well-formed JSON with schema_version"
 else fail "--schema well-formed"; fi
 
+# Per-surface assertions (flywheel-1fk5f.4 fillin).
+
+# Test 16: doctor returns >=5 named substrate probes (not status:todo)
+if "$SCRIPT" doctor --json 2>/dev/null | jq -e '
+  .status != "todo" and (.checks | length) >= 5
+  and ([.checks[].check] | (any(. == "jq") and any(. == "ntm") and any(. == "surface_probe") and any(. == "repo_root") and any(. == "audit_log_dir")))' >/dev/null; then
+  pass "doctor returns 5 named substrate probes"
+else fail "doctor checks"; fi
+
+# Test 17: health envelope has total_rows + run-history fields + canonical status
+if "$SCRIPT" health --json 2>/dev/null | jq -e '
+  has("total_rows") and has("audit_log_path")
+  and (.status | IN("ok","empty","not_initialized"))' >/dev/null; then
+  pass "health envelope has run-history counts + canonical status"
+else fail "health envelope"; fi
+
+# Test 18: validate audit-row emits per-row results array
+if "$SCRIPT" validate audit-row --json 2>/dev/null | jq -e '
+  .subject == "audit-row" and has("pass") and has("fail") and (.results | type == "array")' >/dev/null; then
+  pass "validate audit-row emits results array"
+else fail "validate audit-row"; fi
+
+# Test 19: why distinguishes found|not_found|unavailable for fake id
+if "$SCRIPT" why "definitely-not-a-real-id-xyz" --json 2>/dev/null | jq -e '
+  .id == "definitely-not-a-real-id-xyz" and (.status | IN("found","not_found","unavailable"))' >/dev/null; then
+  pass "why <id> emits found|not_found|unavailable"
+else fail "why id"; fi
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2
