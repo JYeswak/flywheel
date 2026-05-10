@@ -1,0 +1,12 @@
+PASS feedback_beads_rust_dep_add_post_rebuild_openread.md starts with YAML frontmatter delimiter
+PASS feedback_evidence_pack_replaces_four_lens.md starts with YAML frontmatter delimiter
+PASS feedback_regression_test_must_exercise_production_close_path.md starts with YAML frontmatter delimiter
+PASS feedback_beads_rust_dep_add_post_rebuild_openread.md has all 3 required keys (name, description, type)
+PASS feedback_evidence_pack_replaces_four_lens.md has all 3 required keys (name, description, type)
+PASS feedback_regression_test_must_exercise_production_close_path.md has all 3 required keys (name, description, type)
+PASS mem memory doctor: -Users-josh-Developer-flywheel status=WARN (not FAIL)
+PASS archive directory exists at .archive-pre-v1-schema/
+PASS archive README cites flywheel-zh43y as origin
+PASS active dir has 0 schema-invalid receipts (was 8 before fix; pass=6)
+PASS all 8 specific archived receipts preserved in .archive-pre-v1-schema/
+SUMMARY pass=11 fail=0
