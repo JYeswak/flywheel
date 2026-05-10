@@ -64,30 +64,48 @@ else
   fail "live skill script not readable at $SKILL_HOOK"
 fi
 
-# Test 4: patched copy passes bash -n
+# Tests 4-5: patched-shape verification.
+# Behavior depends on live skill state (per flywheel-2z7b8 patch landing 2026-05-09):
+#   - Pre-patch live (xargs -d): apply patch to a copy + verify canonical post-patch shape
+#   - Post-patch live (xargs -0): verify the live skill already carries the canonical
+#     post-patch shape (apply-and-compare would reverse the already-applied patch)
 if [[ -r "$PATCH" ]]; then
   mkdir -p "$TMP/verify/scripts"
-  cp "$SKILL_HOOK" "$TMP/verify/scripts/inventory-beads.sh"
-  if (cd "$TMP/verify" && patch --silent -p1 < "$PATCH" 2>/dev/null) \
-    && bash -n "$TMP/verify/scripts/inventory-beads.sh"; then
-    pass "patched copy applies cleanly and passes bash -n"
+  if grep -q "xargs -d '\\\\n'" "$SKILL_HOOK"; then
+    # Pre-patch live state: apply patch to a fresh copy + verify
+    cp "$SKILL_HOOK" "$TMP/verify/scripts/inventory-beads.sh"
+    if (cd "$TMP/verify" && patch --silent -p1 < "$PATCH" 2>/dev/null) \
+      && bash -n "$TMP/verify/scripts/inventory-beads.sh"; then
+      pass "patched copy applies cleanly and passes bash -n (live still pre-patch)"
+    else
+      fail "patched copy failed to apply or bash -n (live still pre-patch)"
+    fi
+    if [[ -r "$TMP/verify/scripts/inventory-beads.sh" ]]; then
+      if grep -q "xargs -0 -P" "$TMP/verify/scripts/inventory-beads.sh" \
+        && ! grep -q "xargs -d" "$TMP/verify/scripts/inventory-beads.sh"; then
+        pass "patched copy uses xargs -0 and drops xargs -d"
+      else
+        fail "patched copy did not migrate to xargs -0"
+      fi
+    else
+      fail "patched copy not produced at $TMP/verify/scripts/inventory-beads.sh"
+    fi
   else
-    fail "patched copy failed to apply or bash -n"
+    # Post-patch live state: verify live carries canonical post-patch shape
+    if bash -n "$SKILL_HOOK"; then
+      pass "live skill (post-patch) passes bash -n"
+    else
+      fail "live skill (post-patch) failed bash -n"
+    fi
+    if grep -q "xargs -0 -P" "$SKILL_HOOK" \
+      && ! grep -q "xargs -d" "$SKILL_HOOK"; then
+      pass "live skill (post-patch) carries xargs -0 and drops xargs -d (canonical post-patch shape)"
+    else
+      fail "live skill in unexpected state — neither pre-patch nor canonical post-patch shape"
+    fi
   fi
 else
   fail "jsm-push-ready patch not readable at $PATCH"
-fi
-
-# Test 5: patched copy uses xargs -0 (proves the substantive change landed)
-if [[ -r "$TMP/verify/scripts/inventory-beads.sh" ]]; then
-  if grep -q "xargs -0 -P" "$TMP/verify/scripts/inventory-beads.sh" \
-    && ! grep -q "xargs -d" "$TMP/verify/scripts/inventory-beads.sh"; then
-    pass "patched copy uses xargs -0 and drops xargs -d"
-  else
-    fail "patched copy did not migrate to xargs -0"
-  fi
-else
-  fail "patched copy not produced at $TMP/verify/scripts/inventory-beads.sh"
 fi
 
 if [[ "$fail_count" -gt 0 ]]; then
