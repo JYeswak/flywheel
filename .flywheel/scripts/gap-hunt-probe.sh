@@ -781,11 +781,37 @@ def probe_substrate_without_version_probe(receivers_text: str) -> list[dict]:
     return gaps
 
 
+def known_silos() -> set[str]:
+    """Load the allowlist of self-instrumentation/operational ledgers that are
+    intentionally not referenced by doctrine surfaces. Per flywheel-gui5f
+    (filed by flywheel-2xdi.40); allowlist file is `.flywheel/gap-hunt-known-silos.jsonl`,
+    one row per ledger with `{name, class, writer, rationale}`. The probe
+    skips any ledger whose basename matches a row's `name` field."""
+    allowlist_path = REPO_ROOT / ".flywheel/gap-hunt-known-silos.jsonl"
+    names: set[str] = {"gap-hunt.jsonl", "gap-hunt-false-positives.jsonl"}
+    try:
+        for line in allowlist_path.read_text(errors="replace").splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                row = json.loads(line)
+            except Exception:
+                continue
+            n = row.get("name")
+            if isinstance(n, str) and n:
+                names.add(n)
+    except Exception:
+        pass
+    return names
+
+
 def probe_cross_source_silos(receivers_text: str) -> list[dict]:
     gaps = []
+    skip = known_silos()
     for path in sorted(STATE_DIR.glob("*.jsonl")):
         name = path.name
-        if name in {"gap-hunt.jsonl", "gap-hunt-false-positives.jsonl"}:
+        if name in skip:
             continue
         if name not in receivers_text and path.stem not in receivers_text:
             gaps.append(gap("cross-source-silos", name, f"{path} ledger exists but is not referenced by sampled tick/status/synth/doctrine surfaces"))
