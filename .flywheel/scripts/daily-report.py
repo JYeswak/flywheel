@@ -3,14 +3,17 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import os
+import re
+import statistics
 import subprocess
 import sys
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Sequence
 
 
 VERSION = "daily-report.v1"
@@ -264,6 +267,216 @@ def notify_if_needed(notify_bin: str, report_path: Path, hard_blockers: list[str
         return False
 
 
+_DISPOSITION_RE = re.compile(r"^(DONE|BLOCKED|DECLINED|ESCALATE|ESCALATED)\b", re.IGNORECASE)
+_KV_RE = re.compile(r"(?P<key>[a-z][a-z0-9_]*)=(?P<val>[^\s]+)")
+_FOUR_LENS_RE = re.compile(r"four_lens=(?P<spec>[a-z0-9:_,\-\.]+)", re.IGNORECASE)
+_COMPLIANCE_RE = re.compile(r"compliance_score=(?P<n>\d+)\s*/\s*1000")
+
+
+def parse_callback_envelope(text: str) -> dict[str, Any]:
+    """Extract grading-relevant fields from a callback envelope.
+
+    Returns a dict with disposition (DONE|BLOCKED|DECLINED|ESCALATE|None),
+    identity_name, mission_fitness, compliance_score (int|None), and
+    four_lens (dict[str,int]|None).
+    """
+    text = (text or "").strip()
+    fields: dict[str, Any] = {
+        "disposition": None,
+        "identity_name": None,
+        "mission_fitness": None,
+        "compliance_score": None,
+        "four_lens": None,
+    }
+    if not text:
+        return fields
+    head = _DISPOSITION_RE.match(text)
+    if head:
+        fields["disposition"] = head.group(1).upper().replace("ESCALATED", "ESCALATE")
+    for match in _KV_RE.finditer(text):
+        key = match.group("key")
+        val = match.group("val")
+        if key == "identity_name" and not fields["identity_name"]:
+            fields["identity_name"] = val
+        elif key == "mission_fitness" and not fields["mission_fitness"]:
+            fields["mission_fitness"] = val
+    cm = _COMPLIANCE_RE.search(text)
+    if cm:
+        try:
+            fields["compliance_score"] = int(cm.group("n"))
+        except ValueError:
+            pass
+    fl = _FOUR_LENS_RE.search(text)
+    if fl:
+        spec = fl.group("spec")
+        axis: dict[str, int] = {}
+        for token in spec.split(","):
+            if ":" not in token:
+                continue
+            name, value = token.split(":", 1)
+            try:
+                axis[name.strip().lower()] = int(value.strip())
+            except ValueError:
+                continue
+        if axis:
+            fields["four_lens"] = axis
+    return fields
+
+
+def quartiles(values: Sequence[float]) -> dict[str, Any]:
+    """Return avg/median/p25/p75 for a non-empty sample. None fields when n<1."""
+    if not values:
+        return {"n": 0, "avg": None, "median": None, "p25": None, "p75": None, "min": None, "max": None}
+    sorted_vals = sorted(values)
+    n = len(sorted_vals)
+    avg = sum(sorted_vals) / n
+    median = statistics.median(sorted_vals)
+
+    def pick(p: float) -> float:
+        if n == 1:
+            return float(sorted_vals[0])
+        idx = max(0, min(n - 1, round(p * (n - 1))))
+        return float(sorted_vals[idx])
+
+    return {
+        "n": n,
+        "avg": round(avg, 1),
+        "median": float(median),
+        "p25": pick(0.25),
+        "p75": pick(0.75),
+        "min": float(sorted_vals[0]),
+        "max": float(sorted_vals[-1]),
+    }
+
+
+def quality_grade(callback_log: Path, date_text: str) -> dict[str, Any]:
+    """Read callback-validation-log.jsonl rows for date_text and grade them.
+
+    Output:
+      callback_count: total rows for the date
+      compliance_distribution: {n,avg,median,p25,p75,min,max}
+      four_lens_distribution: per-axis {avg, count_lt_8, samples}
+      mission_fitness_counts: {direct,adjacent,infrastructure,drift,unknown}
+      disposition_counts: {DONE,BLOCKED,DECLINED,ESCALATE,unknown}
+      blocked_escalate_rate: float ratio of (BLOCKED+ESCALATE)/total
+      identity_attribution: list of {identity, closes, avg_compliance}
+      red_flags: list of {code, detail}
+    """
+    rows = read_jsonl(callback_log, 5000)
+    todays_envelopes: list[dict[str, Any]] = []
+    for row in rows:
+        ts = parse_ts(row.get("ts") or row.get("created_at"))
+        if not same_utc_date(ts, date_text):
+            continue
+        encoded = row.get("callback_b64") or ""
+        if not encoded:
+            continue
+        try:
+            text = base64.b64decode(encoded).decode("utf-8", errors="replace")
+        except Exception:
+            continue
+        envelope = parse_callback_envelope(text)
+        if envelope["disposition"] is None:
+            continue
+        todays_envelopes.append(envelope)
+
+    callback_count = len(todays_envelopes)
+    compliance_values = [
+        env["compliance_score"]
+        for env in todays_envelopes
+        if isinstance(env["compliance_score"], int)
+    ]
+    compliance_dist = quartiles(compliance_values)
+
+    axes = ("brand", "sniff", "jeff", "public")
+    axis_samples: dict[str, list[int]] = {a: [] for a in axes}
+    for env in todays_envelopes:
+        fl = env.get("four_lens")
+        if not isinstance(fl, dict):
+            continue
+        for axis in axes:
+            if axis in fl and isinstance(fl[axis], int):
+                axis_samples[axis].append(fl[axis])
+    four_lens_dist = {
+        axis: {
+            "n": len(samples),
+            "avg": round(sum(samples) / len(samples), 2) if samples else None,
+            "count_lt_8": sum(1 for v in samples if v < 8),
+        }
+        for axis, samples in axis_samples.items()
+    }
+
+    fitness_counter: Counter[str] = Counter()
+    for env in todays_envelopes:
+        fitness_counter[env.get("mission_fitness") or "unknown"] += 1
+
+    disposition_counter: Counter[str] = Counter()
+    for env in todays_envelopes:
+        disposition_counter[env.get("disposition") or "unknown"] += 1
+
+    blocked_plus_escalate = disposition_counter.get("BLOCKED", 0) + disposition_counter.get("ESCALATE", 0)
+    blocked_escalate_rate = (
+        round(blocked_plus_escalate / callback_count, 3) if callback_count else 0.0
+    )
+
+    identity_compliance: dict[str, list[int]] = defaultdict(list)
+    identity_closes: Counter[str] = Counter()
+    for env in todays_envelopes:
+        ident = env.get("identity_name") or "unknown"
+        identity_closes[ident] += 1
+        score = env.get("compliance_score")
+        if isinstance(score, int):
+            identity_compliance[ident].append(score)
+    identity_rows: list[dict[str, Any]] = []
+    for ident, closes in identity_closes.items():
+        scores = identity_compliance.get(ident) or []
+        avg_compliance: float | None = (
+            round(sum(scores) / len(scores), 1) if scores else None
+        )
+        identity_rows.append(
+            {"identity": ident, "closes": int(closes), "avg_compliance": avg_compliance}
+        )
+    identity_attribution = sorted(
+        identity_rows,
+        key=lambda r: (-int(r["closes"]), str(r["identity"])),
+    )
+
+    red_flags: list[dict[str, str]] = []
+    median_compliance = compliance_dist.get("median")
+    if isinstance(median_compliance, (int, float)) and median_compliance < 850:
+        red_flags.append({"code": "median_compliance_below_850", "detail": f"median={median_compliance}"})
+    if blocked_escalate_rate > 0.20 and callback_count >= 5:
+        red_flags.append(
+            {"code": "blocked_escalate_rate_above_20pct", "detail": f"rate={blocked_escalate_rate}"}
+        )
+    if (fitness_counter.get("drift") or 0) > 5:
+        red_flags.append(
+            {"code": "mission_fitness_drift_above_5", "detail": f"drift_count={fitness_counter['drift']}"}
+        )
+    for row in identity_attribution:
+        avg = row.get("avg_compliance")
+        closes_value = int(row.get("closes") or 0)
+        if isinstance(avg, (int, float)) and avg < 800 and closes_value >= 3:
+            red_flags.append(
+                {
+                    "code": "worker_avg_compliance_below_800",
+                    "detail": f"identity={row['identity']} avg={avg} closes={closes_value}",
+                }
+            )
+
+    return {
+        "schema_version": "daily-report-quality-grade.v1",
+        "callback_count": callback_count,
+        "compliance_distribution": compliance_dist,
+        "four_lens_distribution": four_lens_dist,
+        "mission_fitness_counts": dict(fitness_counter),
+        "disposition_counts": dict(disposition_counter),
+        "blocked_escalate_rate": blocked_escalate_rate,
+        "identity_attribution": identity_attribution,
+        "red_flags": red_flags,
+    }
+
+
 def security_summary(doc: dict[str, Any]) -> dict[str, Any]:
     security = doc.get("security")
     if not isinstance(security, dict):
@@ -389,6 +602,7 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
     state_miner = state_md_miner_json(repo)
     state_md_unmined_count = int(state_miner.get("state_md_unmined_count") or 0)
     jeff_projection = jeff_storage_projection_json(Path(args.jeff_storage_projection).expanduser())
+    quality = quality_grade(resolve_input(args.callback_log), date_text)
 
     hard_blockers: list[str] = []
     if str(doc.get("status") or "").lower() == "fail":
@@ -493,6 +707,32 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
             "No cross-orch coordination rows found for today.",
         ),
         "",
+        "## Quality grading",
+        f"- callback_count: {quality['callback_count']}",
+        f"- compliance: avg={quality['compliance_distribution'].get('avg')} median={quality['compliance_distribution'].get('median')} p25={quality['compliance_distribution'].get('p25')} p75={quality['compliance_distribution'].get('p75')} (n={quality['compliance_distribution'].get('n')})",
+        "- four_lens: " + ", ".join(
+            f"{a}: avg={d.get('avg')} <8={d.get('count_lt_8')} (n={d.get('n')})"
+            for a, d in quality["four_lens_distribution"].items()
+        ),
+        "- mission_fitness: " + ", ".join(
+            f"{k}={v}" for k, v in sorted(quality["mission_fitness_counts"].items())
+        ),
+        "- disposition: " + ", ".join(
+            f"{k}={v}" for k, v in sorted(quality["disposition_counts"].items())
+        ),
+        f"- blocked_escalate_rate: {quality['blocked_escalate_rate']}",
+        *line_items(
+            [
+                f"{row['identity']}: closes={row['closes']} avg_compliance={row['avg_compliance']}"
+                for row in quality["identity_attribution"]
+            ],
+            "No identity-attributed callbacks today.",
+        ),
+        *line_items(
+            [f"{flag['code']}: {flag['detail']}" for flag in quality["red_flags"]],
+            "No quality red flags raised.",
+        ),
+        "",
         "## Source receipts",
         f"- dispatch_log: {args.dispatch_log}",
         f"- fuckup_log: {args.fuckup_log}",
@@ -520,6 +760,7 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
         "security_summary": security,
         "l70_punt_phrase_report": punt_report,
         "jeff_corpus_storage_projection": jeff_projection,
+        "quality_grade": quality,
         "sections": [
             "what_shipped",
             "what_did_we_learn",
@@ -527,6 +768,7 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
             "whats_stuck",
             "whats_next",
             "cross_orch_state",
+            "quality_grading",
         ],
     }
 
@@ -557,6 +799,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--br-bin", default=os.environ.get("BR_BIN", "br"))
     parser.add_argument("--memory-dir", default=os.environ.get("FLYWHEEL_MEMORY_DIR", str(Path.home() / ".claude/projects/-Users-josh-Developer-flywheel/memory")))
     parser.add_argument("--dispatch-log", default=os.environ.get("FLYWHEEL_DISPATCH_LOG", ".flywheel/dispatch-log.jsonl"))
+    parser.add_argument("--callback-log", default=os.environ.get("FLYWHEEL_CALLBACK_LOG", ".flywheel/callback-validation-log.jsonl"))
     parser.add_argument("--fuckup-log", default=os.environ.get("FLYWHEEL_FUCKUP_LOG", str(Path.home() / ".local/state/flywheel/fuckup-log.jsonl")))
     parser.add_argument("--cross-orch-log", default=os.environ.get("FLYWHEEL_CROSS_ORCH_LOG", str(Path.home() / ".local/state/flywheel/cross-orch-coordination.jsonl")))
     parser.add_argument("--jeff-digest", default=os.environ.get("FLYWHEEL_JEFF_DIGEST", str(Path.home() / ".local/state/jeff-intel/digest.jsonl")))
