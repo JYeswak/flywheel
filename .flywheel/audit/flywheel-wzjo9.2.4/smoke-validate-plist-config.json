@@ -1,0 +1,1 @@
+{"schema_version":"recovery-install-plist-alpsinsurance/v1","command":"validate","subject":"plist-config","status":"pass","label":"com.zeststream.alpsinsurance.watcher","plist_path":"/Users/josh/Library/LaunchAgents/com.zeststream.alpsinsurance.watcher.plist","plist_exists":true}
