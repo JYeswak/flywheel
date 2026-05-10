@@ -1,0 +1,1 @@
+topic: doctor — probes substrate (ntm binary, jq/mktemp deps, audit log dir, repo root, wrapper-name-space assertion, helper-lib). Pass = wrapper ready; warn = recoverable; fail = blocked.

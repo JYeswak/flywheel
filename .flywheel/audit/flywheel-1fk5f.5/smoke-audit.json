@@ -1,0 +1,1 @@
+{"schema_version":"ntm-approve-human-gates/v1","command":"audit","status":"pass","row_count":1,"recent":[{"ts":"2026-05-10T18:53:54Z","action":"repair","status":"applied","sha256":"9ee7072c9486d4c867c030872bd92eeab9b6bbb219e31f0c86657b5fabffad3d","scope":"audit_log_dir","idempotency_key":"1fk5f5-evidence"}]}

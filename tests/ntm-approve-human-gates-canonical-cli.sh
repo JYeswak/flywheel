@@ -92,6 +92,38 @@ if "$SCRIPT" --schema 2>/dev/null | jq -e '.schema_version' >/dev/null; then
   pass "--schema envelope is well-formed JSON with schema_version"
 else fail "--schema well-formed"; fi
 
+# ---- Per-surface fillin assertions (added by flywheel-1fk5f.5) ----
+
+# Test 16: doctor returns concrete checks (>=5 named probes per AG5)
+if "$SCRIPT" doctor --json 2>/dev/null \
+    | jq -e '(.command == "doctor") and (.status | IN("pass","warn","fail"))
+             and (.checks | length >= 5)
+             and (.checks | all(.name and (.status | IN("pass","warn","fail"))))' >/dev/null; then
+  pass "doctor returns >=5 concrete checks with valid statuses"
+else fail "doctor concrete checks"; fi
+
+# Test 17: doctor probes the wrapper-namespace assertion check
+if "$SCRIPT" doctor --json 2>/dev/null \
+    | jq -e '.checks | any(.name == "wrapper_namespace_assertion")' >/dev/null; then
+  pass "doctor probes wrapper_namespace_assertion"
+else fail "doctor wrapper_namespace_assertion check missing"; fi
+
+# Test 18: repair --apply --idempotency-key K mutates and writes audit-log row (isolated TMP)
+TEST_LOG_DIR="$(mktemp -d)"
+TEST_LOG="$TEST_LOG_DIR/test-runs.jsonl"
+SCAFFOLD_AUDIT_LOG="$TEST_LOG" "$SCRIPT" repair --scope audit_log_dir --apply --idempotency-key 1fk5f5-test --json >/dev/null 2>&1
+SCAFFOLD_AUDIT_LOG="$TEST_LOG" "$SCRIPT" repair --scope audit_log_truncate --apply --idempotency-key 1fk5f5-test2 --json >/dev/null 2>&1
+if [[ -f "$TEST_LOG" ]] && grep -q '"action":"repair"' "$TEST_LOG" && grep -q '"status":"applied"' "$TEST_LOG"; then
+  pass "repair --apply --idempotency-key writes audit-log row"
+else fail "repair --apply audit-log row"; fi
+rm -rf "$TEST_LOG_DIR"
+
+# Test 19: validate audit-row accepts well-formed row
+if "$SCRIPT" validate audit-row '{"ts":"2026-05-10T22:30:00Z","status":"pass","action":"check"}' 2>/dev/null \
+    | jq -e '(.command == "validate") and (.subject == "audit-row") and (.status == "pass")' >/dev/null; then
+  pass "validate audit-row accepts well-formed row"
+else fail "validate audit-row well-formed"; fi
+
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2

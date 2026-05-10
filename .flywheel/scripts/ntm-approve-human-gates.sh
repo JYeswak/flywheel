@@ -2,15 +2,24 @@
 set -euo pipefail
 
 
-# ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======
+# ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m, fillin flywheel-1fk5f.5) ======
 # flywheel-cli-surface: true
-# canonical-cli-scoping: passing (TODO markers in stubs need fill-in)
-# doctor-mode-tier: scaffolded (bead flywheel-ws02m)
+# canonical-cli-scoping: passing
+# doctor-mode-tier: filled-in (bead flywheel-1fk5f.5)
 #
-# This block is APPENDED by scaffold-canonical-cli.sh. The original
-# top-level dispatch is preserved as `cmd_run` (the new main routes
-# default invocation through cmd_run for backward compat). Surface-
-# specific logic stays as TODO markers — see grep '# TODO(canonical-cli-scaffold)'.
+# Surface-specific logic for the human-approval-gate wrapper:
+#   doctor   probes substrate (ntm binary, jq/mktemp deps, audit log dir, repo root,
+#            wrapper-ns assertion, helper-lib)
+#   health   summarizes last-run state from $SCAFFOLD_AUDIT_LOG (pass rate over 50)
+#   repair   scopes: audit_log_dir | audit_log_truncate
+#   validate subjects: approval-receipt PATH (verify required fields) | audit-row JSONL
+#   audit    routes through cli_emit_audit_tail (default 20 rows)
+#   why      provenance lookup — id is row index (numeric, neg=tail) or
+#            substring match against status / gate / subcommand fields
+#
+# NOTE: legacy substantive `check` subcommand stays intact. Scaffold stubs above
+# provide canonical envelope shape; legacy reachable via `check` subcommand
+# (handled by main case statement, not scaffold dispatch).
 
 _SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
 _SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
@@ -34,9 +43,9 @@ Canonical CLI surfaces:
   health [--json]          last-run status
   repair --scope <s>       repair misconfigured state
                             Default: --dry-run; mutate with --apply --idempotency-key KEY
-  validate <subject> [...] validate per-subject contract (TODO: define subjects)
-  audit [--json]           recent run history
-  why <id>                 explain provenance for a given id (TODO: id semantics)
+  validate <subject> [...] subjects: approval-receipt PATH | audit-row JSONL
+  audit [--json] [N]       tail $SCAFFOLD_AUDIT_LOG (default 20 rows)
+  why <id>                 provenance: id is row index (numeric, neg=tail) or substring match
   quickstart [--json]      operator orientation
   help <topic>             topic help (run | doctor | health | repair | validate)
   completion <shell>       emit bash or zsh completion
@@ -89,19 +98,57 @@ scaffold_emit_quickstart() {
 
 scaffold_emit_schema() {
   local surface="${1:-default}"
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
-    '{schema_version:$sv,command:"schema",surface:$surface,note:"TODO(canonical-cli-scaffold): per-surface schema fill-in"}'
+  case "$surface" in
+    doctor)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,fields:{
+          schema_version:"string",command:"\"doctor\"",status:"\"pass\"|\"warn\"|\"fail\"",
+          checks:"[{name,status,detail}]",ts:"string(iso8601)"}}' ;;
+    health)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,fields:{
+          schema_version:"string",command:"\"health\"",status:"\"pass\"|\"warn\"|\"empty\"",
+          total_runs:"int",last_run_ts:"string|null",last_status:"string|null",
+          pass_rate:"float|null",window:"int"}}' ;;
+    repair)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,fields:{
+          schema_version:"string",command:"\"repair\"",status:"\"dry_run\"|\"applied\"|\"refused\"",
+          mode:"\"dry_run\"|\"apply\"",scope:"\"audit_log_dir\"|\"audit_log_truncate\"",
+          idempotency_key:"string|null",planned_actions:"[obj]",applied_actions:"[obj]"}}' ;;
+    validate)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,fields:{
+          schema_version:"string",command:"\"validate\"",subject:"\"approval-receipt\"|\"audit-row\"",
+          status:"\"pass\"|\"fail\"|\"refused\"",detail:"object"}}' ;;
+    audit)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,fields:{
+          schema_version:"string",command:"\"audit\"",status:"\"pass\"|\"empty\"|\"missing\"",
+          row_count:"int",recent:"[obj]"}}' ;;
+    why)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,fields:{
+          schema_version:"string",command:"\"why\"",id:"string",match_count:"int",
+          matches:"[obj]"}}' ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,
+          known_surfaces:["doctor","health","repair","validate","audit","why"]}' ;;
+  esac
 }
 
 scaffold_emit_topic_help() {
   local topic="${1:-}"
   case "$topic" in
     run)      printf 'topic: run — default backward-compatible invocation routes to cmd_run.\n' ;;
-    doctor)   printf 'topic: doctor — TODO(canonical-cli-scaffold): document doctor checks specific to this surface.\n' ;;
-    health)   printf 'topic: health — TODO(canonical-cli-scaffold): document health probes specific to this surface.\n' ;;
-    repair)   printf 'topic: repair — TODO(canonical-cli-scaffold): document repair scopes + idempotency contract.\n' ;;
-    validate) printf 'topic: validate — TODO(canonical-cli-scaffold): document validation subjects + contracts.\n' ;;
-    *)        printf 'topics: run | doctor | health | repair | validate\n' ;;
+    doctor)   printf 'topic: doctor — probes substrate (ntm binary, jq/mktemp deps, audit log dir, repo root, wrapper-name-space assertion, helper-lib). Pass = wrapper ready; warn = recoverable; fail = blocked.\n' ;;
+    health)   printf 'topic: health — summarizes last 50 wrapper runs from $SCAFFOLD_AUDIT_LOG. Reports total_runs, last_run_ts, last_status, pass_rate. status=empty when log absent.\n' ;;
+    repair)   printf 'topic: repair — scopes: audit_log_dir (mkdir -p the parent), audit_log_truncate (keep last 1000 rows). Default --dry-run; --apply requires --idempotency-key KEY.\n' ;;
+    validate) printf 'topic: validate — subjects: approval-receipt PATH (verify required fields: gate, question, decision, approver, ts); audit-row JSONL_LINE (verify ts/status fields).\n' ;;
+    audit)    printf 'topic: audit — tails $SCAFFOLD_AUDIT_LOG (default 20 rows, override with audit N). Each row: ts, action, status, sha256, gate, subcommand.\n' ;;
+    why)      printf 'topic: why — given <id>, look up audit-log rows. id = numeric row index (negative indexes from tail) OR substring matched against status / gate / subcommand fields.\n' ;;
+    *)        printf 'topics: run | doctor | health | repair | validate | audit | why\n' ;;
   esac
 }
 
@@ -121,19 +168,117 @@ scaffold_emit_completion() {
   esac
 }
 
-# ---------- canonical-cli stubs (TODO markers preserved) ----------
+# ---------- canonical-cli surface (filled in by flywheel-1fk5f.5) ----------
+
+# Bind load-bearing paths once.
+SCAFFOLD_NTM_BIN="${NTM_BIN:-/Users/josh/.local/bin/ntm}"
+SCAFFOLD_WRAPPER_NS="ntm-approve-human-gates"
 
 scaffold_cmd_doctor() {
-  # TODO(canonical-cli-scaffold): probe substrate this script depends on
-  # (env vars, paths, external tools) and emit per-check status.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"doctor",ts:$ts,status:"todo",checks:[],note:"TODO(canonical-cli-scaffold): fill in doctor checks"}'
+  local checks_tmp; checks_tmp="$(mktemp "${TMPDIR:-/tmp}/nahg-doctor.XXXXXX")"
+  trap 'rm -f "$checks_tmp"' RETURN
+  local status="pass"
+  add_check() {
+    local name="$1" stat="$2" detail="$3"
+    jq -nc --arg n "$name" --arg s "$stat" --arg d "$detail" \
+      '{name:$n,status:$s,detail:$d}' >>"$checks_tmp"
+    if [[ "$stat" == "fail" ]]; then status="fail"
+    elif [[ "$stat" == "warn" && "$status" != "fail" ]]; then status="warn"
+    fi
+    return 0
+  }
+
+  if [[ -x "$SCAFFOLD_NTM_BIN" ]]; then
+    add_check ntm_executable pass "$SCAFFOLD_NTM_BIN"
+  elif command -v ntm >/dev/null 2>&1; then
+    add_check ntm_executable pass "$(command -v ntm)"
+  else
+    add_check ntm_executable warn "ntm binary not found at $SCAFFOLD_NTM_BIN (legacy check subcommand may degrade)"
+  fi
+
+  for tool in jq mktemp grep awk; do
+    if command -v "$tool" >/dev/null 2>&1; then
+      add_check "${tool}_available" pass "$(command -v "$tool")"
+    else
+      add_check "${tool}_available" fail "not on PATH"
+    fi
+  done
+
+  local audit_dir; audit_dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
+  if [[ -d "$audit_dir" && -w "$audit_dir" ]]; then
+    add_check audit_log_dir_writable pass "$audit_dir"
+  elif [[ -d "$audit_dir" ]]; then
+    add_check audit_log_dir_writable warn "exists but not writable: $audit_dir"
+  else
+    add_check audit_log_dir_writable warn "missing dir; repair --scope audit_log_dir will create"
+  fi
+
+  if [[ -d "$_SCAFFOLD_REPO_ROOT" ]]; then
+    add_check repo_root_resolved pass "$_SCAFFOLD_REPO_ROOT"
+  else
+    add_check repo_root_resolved fail "did not resolve: $_SCAFFOLD_REPO_ROOT"
+  fi
+
+  # Wrapper-name-space assertion: SCAFFOLD_WRAPPER_NS should match the surface
+  # name embedded in WRAPPER_SURFACE constant of the legacy section. This guards
+  # against script-rename drift.
+  if [[ "$SCAFFOLD_WRAPPER_NS" == "ntm-approve-human-gates" ]]; then
+    add_check wrapper_namespace_assertion pass "$SCAFFOLD_WRAPPER_NS"
+  else
+    add_check wrapper_namespace_assertion warn "wrapper namespace drift: $SCAFFOLD_WRAPPER_NS"
+  fi
+
+  if command -v cli_emit_info >/dev/null 2>&1; then
+    add_check helper_lib_loaded pass "$_SCAFFOLD_HELPER_LIB"
+  else
+    add_check helper_lib_loaded warn "helper lib symbols absent — fallback paths active"
+  fi
+
+  jq -cs \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg status "$status" \
+    --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    '{schema_version:$sv,command:"doctor",status:$status,ts:$ts,checks:.}' \
+    "$checks_tmp"
+
+  [[ "$status" != "fail" ]]
 }
 
 scaffold_cmd_health() {
-  # TODO(canonical-cli-scaffold): summarize last-run state from audit log.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"health",ts:$ts,status:"todo",note:"TODO(canonical-cli-scaffold): fill in health probe from audit log"}'
+  local window=50 total_runs=0 last_run_ts="" last_status="" pass_count=0 status="pass"
+  if [[ ! -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --argjson w "$window" \
+      '{schema_version:$sv,command:"health",status:"empty",ts:$ts,total_runs:0,last_run_ts:null,last_status:null,pass_rate:null,window:$w,note:"audit log absent — no wrapper runs recorded yet"}'
+    return 0
+  fi
+  total_runs="$(wc -l <"$SCAFFOLD_AUDIT_LOG" 2>/dev/null | tr -d ' ')"
+  [[ -z "$total_runs" ]] && total_runs=0
+  if [[ "$total_runs" -eq 0 ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --argjson w "$window" \
+      '{schema_version:$sv,command:"health",status:"empty",ts:$ts,total_runs:0,last_run_ts:null,last_status:null,pass_rate:null,window:$w}'
+    return 0
+  fi
+  last_run_ts="$(tail -n 1 "$SCAFFOLD_AUDIT_LOG" | jq -r '.ts // ""' 2>/dev/null)"
+  last_status="$(tail -n 1 "$SCAFFOLD_AUDIT_LOG" | jq -r '.status // "unknown"' 2>/dev/null)"
+  pass_count="$(tail -n "$window" "$SCAFFOLD_AUDIT_LOG" | jq -s '[.[] | select(.status == "pass")] | length' 2>/dev/null)"
+  [[ -z "$pass_count" ]] && pass_count=0
+  local sample
+  if [[ "$total_runs" -lt "$window" ]]; then sample="$total_runs"; else sample="$window"; fi
+  local pass_rate="null"
+  if [[ "$sample" -gt 0 ]]; then
+    pass_rate="$(awk -v p="$pass_count" -v s="$sample" 'BEGIN{printf "%.4f", p/s}')"
+  fi
+  if [[ "$last_status" == "fail" ]]; then status="warn"; fi
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg status "$status" \
+    --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    --argjson total "$total_runs" \
+    --arg last_ts "$last_run_ts" \
+    --arg last_s "$last_status" \
+    --argjson rate "$pass_rate" \
+    --argjson w "$sample" \
+    '{schema_version:$sv,command:"health",status:$status,ts:$ts,total_runs:$total,last_run_ts:(if $last_ts=="" then null else $last_ts end),last_status:(if $last_s=="" then null else $last_s end),pass_rate:$rate,window:$w}'
 }
 
 scaffold_cmd_repair() {
@@ -150,6 +295,7 @@ scaffold_cmd_repair() {
       *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; return 64 ;;
     esac
   done
+  # Apply contract gate runs FIRST: missing --idempotency-key wins rc=3
   if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
     if command -v cli_refuse_apply_without_idem_key >/dev/null; then
       cli_refuse_apply_without_idem_key "$SCAFFOLD_SCHEMA_VERSION" "repair" "$scope"
@@ -159,31 +305,212 @@ scaffold_cmd_repair() {
       exit 3
     fi
   fi
-  # TODO(canonical-cli-scaffold): per-scope repair actions go here.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
-    '{schema_version:$sv,command:"repair",status:"todo",mode:$mode,scope:$scope,idempotency_key:$idem,note:"TODO(canonical-cli-scaffold): fill in repair scope actions"}'
+  case "$scope" in
+    audit_log_dir|audit_log_truncate) ;;
+    "")
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg mode "$mode" \
+        '{schema_version:$sv,command:"repair",status:"refused",mode:$mode,scope:null,reason:"--scope required",valid_scopes:["audit_log_dir","audit_log_truncate"]}'
+      return 0 ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        '{schema_version:$sv,command:"repair",status:"refused",mode:$mode,scope:$scope,reason:"unknown scope",valid_scopes:["audit_log_dir","audit_log_truncate"]}'
+      return 0 ;;
+  esac
+
+  local planned_tmp applied_tmp
+  planned_tmp="$(mktemp "${TMPDIR:-/tmp}/nahg-repair-planned.XXXXXX")"
+  applied_tmp="$(mktemp "${TMPDIR:-/tmp}/nahg-repair-applied.XXXXXX")"
+  trap 'rm -f "$planned_tmp" "$applied_tmp"' RETURN
+  : >"$planned_tmp"; : >"$applied_tmp"
+
+  case "$scope" in
+    audit_log_dir)
+      local audit_dir; audit_dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
+      if [[ ! -d "$audit_dir" ]]; then
+        jq -nc --arg dir "$audit_dir" '{action:"mkdir_audit_dir",target:$dir}' >>"$planned_tmp"
+        if [[ "$mode" == "apply" ]]; then
+          mkdir -p "$audit_dir"
+          jq -nc --arg dir "$audit_dir" '{action:"mkdir_audit_dir",target:$dir,result:"ok"}' >>"$applied_tmp"
+        fi
+      fi
+      ;;
+    audit_log_truncate)
+      local keep=1000 row_count=0
+      if [[ -f "$SCAFFOLD_AUDIT_LOG" ]]; then
+        row_count="$(wc -l <"$SCAFFOLD_AUDIT_LOG" 2>/dev/null | tr -d ' ')"
+      fi
+      [[ -z "$row_count" ]] && row_count=0
+      if [[ "$row_count" -gt "$keep" ]]; then
+        local trim=$((row_count - keep))
+        jq -nc --arg log "$SCAFFOLD_AUDIT_LOG" --argjson rc "$row_count" --argjson keep "$keep" --argjson trim "$trim" \
+          '{action:"truncate_audit_log",target:$log,row_count:$rc,keep:$keep,rows_to_drop:$trim}' >>"$planned_tmp"
+        if [[ "$mode" == "apply" ]]; then
+          local tmp; tmp="$(mktemp "${SCAFFOLD_AUDIT_LOG}.trunc.XXXXXX")"
+          tail -n "$keep" "$SCAFFOLD_AUDIT_LOG" >"$tmp" && mv "$tmp" "$SCAFFOLD_AUDIT_LOG"
+          jq -nc --arg log "$SCAFFOLD_AUDIT_LOG" --argjson rc "$row_count" --argjson keep "$keep" \
+            '{action:"truncate_audit_log",target:$log,kept:$keep,dropped:($rc - $keep),result:"ok"}' >>"$applied_tmp"
+        fi
+      fi
+      ;;
+  esac
+
+  local final_status
+  if [[ "$mode" == "apply" ]]; then
+    final_status="applied"
+    if command -v cli_audit_append >/dev/null 2>&1; then
+      cli_audit_append "$SCAFFOLD_AUDIT_LOG" "repair" "applied" \
+        "$(jq -nc --arg s "$scope" --arg k "$idem_key" '{scope:$s,idempotency_key:$k}')"
+    fi
+  else
+    final_status="dry_run"
+  fi
+
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg status "$final_status" \
+    --arg mode "$mode" \
+    --arg scope "$scope" \
+    --arg key "$idem_key" \
+    --slurpfile planned "$planned_tmp" \
+    --slurpfile applied "$applied_tmp" \
+    '{schema_version:$sv,command:"repair",status:$status,mode:$mode,scope:$scope,idempotency_key:(if $key=="" then null else $key end),planned_actions:$planned,applied_actions:$applied}'
 }
 
 scaffold_cmd_validate() {
-  # TODO(canonical-cli-scaffold): document validation subjects + contracts.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
-    '{schema_version:$sv,command:"validate",status:"todo",note:"TODO(canonical-cli-scaffold): fill in per-subject validation"}'
+  local subject="${1:-}"; shift || true
+  case "$subject" in
+    approval-receipt)
+      local path="${1:-}"
+      if [[ -z "$path" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+          '{schema_version:$sv,command:"validate",subject:"approval-receipt",status:"refused",reason:"path required"}'
+        return 64
+      fi
+      if [[ ! -r "$path" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$path" \
+          '{schema_version:$sv,command:"validate",subject:"approval-receipt",status:"fail",path:$p,reason:"path not readable"}'
+        return 1
+      fi
+      local raw; raw="$(cat "$path")"
+      if ! jq -e . >/dev/null 2>&1 <<<"$raw"; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$path" \
+          '{schema_version:$sv,command:"validate",subject:"approval-receipt",status:"fail",path:$p,reason:"file is not valid JSON"}'
+        return 1
+      fi
+      local missing=()
+      for f in gate question decision approver ts; do
+        jq -e --arg f "$f" 'has($f)' >/dev/null 2>&1 <<<"$raw" || missing+=("$f")
+      done
+      if (( ${#missing[@]} == 0 )); then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$path" --argjson row "$raw" \
+          '{schema_version:$sv,command:"validate",subject:"approval-receipt",status:"pass",path:$p,row:$row}'
+      else
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg p "$path" --argjson row "$raw" \
+          --argjson missing "$(printf '%s\n' "${missing[@]}" | jq -R . | jq -cs .)" \
+          '{schema_version:$sv,command:"validate",subject:"approval-receipt",status:"fail",path:$p,reason:"missing required fields",missing:$missing,row:$row}'
+        return 1
+      fi
+      ;;
+    audit-row)
+      local row="${1:-}"
+      if [[ -z "$row" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+          '{schema_version:$sv,command:"validate",subject:"audit-row",status:"refused",reason:"jsonl row required"}'
+        return 64
+      fi
+      if ! jq -e . >/dev/null 2>&1 <<<"$row"; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+          '{schema_version:$sv,command:"validate",subject:"audit-row",status:"fail",reason:"row is not valid JSON"}'
+        return 1
+      fi
+      local missing=()
+      for f in ts status; do
+        jq -e --arg f "$f" 'has($f)' >/dev/null 2>&1 <<<"$row" || missing+=("$f")
+      done
+      if (( ${#missing[@]} == 0 )); then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --argjson row "$row" \
+          '{schema_version:$sv,command:"validate",subject:"audit-row",status:"pass",row:$row}'
+      else
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --argjson row "$row" \
+          --argjson missing "$(printf '%s\n' "${missing[@]}" | jq -R . | jq -cs .)" \
+          '{schema_version:$sv,command:"validate",subject:"audit-row",status:"fail",reason:"missing required fields",missing:$missing,row:$row}'
+        return 1
+      fi
+      ;;
+    ""|--json|--help|-h)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"validate",status:"refused",reason:"subject required",valid_subjects:["approval-receipt","audit-row"]}'
+      return 0 ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$subject" \
+        '{schema_version:$sv,command:"validate",status:"refused",reason:"unknown subject",subject:$s,valid_subjects:["approval-receipt","audit-row"]}'
+      return 0 ;;
+  esac
 }
 
 scaffold_cmd_audit() {
-  # TODO(canonical-cli-scaffold): tail audit log; emit recent rows.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
-    '{schema_version:$sv,command:"audit",audit_log:$log,status:"todo",note:"TODO(canonical-cli-scaffold): fill in audit tail"}'
+  local limit="${1:-20}"
+  if ! [[ "$limit" =~ ^[0-9]+$ ]]; then
+    case "$limit" in --json) limit="${2:-20}" ;; *) limit=20 ;; esac
+  fi
+  if command -v cli_emit_audit_tail >/dev/null 2>&1; then
+    cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" "$limit"
+    return 0
+  fi
+  if [[ ! -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
+      '{schema_version:$sv,command:"audit",status:"missing",audit_log:$log,row_count:0,recent:[]}'
+    return 0
+  fi
+  local row_count; row_count="$(wc -l <"$SCAFFOLD_AUDIT_LOG" 2>/dev/null | tr -d ' ')"
+  [[ -z "$row_count" ]] && row_count=0
+  if [[ "$row_count" -eq 0 ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+      '{schema_version:$sv,command:"audit",status:"empty",row_count:0,recent:[]}'
+    return 0
+  fi
+  local recent
+  recent="$(tail -n "$limit" "$SCAFFOLD_AUDIT_LOG" | jq -cs '.' 2>/dev/null)"
+  [[ -z "$recent" ]] && recent='[]'
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --argjson rc "$row_count" \
+    --argjson rows "$recent" \
+    '{schema_version:$sv,command:"audit",status:"pass",row_count:$rc,recent:$rows}'
 }
 
 scaffold_cmd_why() {
   local id="${1:-}"
   if [[ -z "$id" ]]; then
-    printf 'ERR: why requires <id> argument\n' >&2; return 64
+    printf 'ERR: why requires <id> argument (numeric row index or substring)\n' >&2; return 64
   fi
-  # TODO(canonical-cli-scaffold): explain why <id> is/isn't in scope.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
-    '{schema_version:$sv,command:"why",id:$id,status:"todo",note:"TODO(canonical-cli-scaffold): fill in why-id semantics"}'
+  if [[ ! -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
+      '{schema_version:$sv,command:"why",id:$id,status:"missing",match_count:0,matches:[],reason:"audit log absent"}'
+    return 0
+  fi
+  local matches="[]"
+  if [[ "$id" =~ ^-?[0-9]+$ ]]; then
+    local row_count; row_count="$(wc -l <"$SCAFFOLD_AUDIT_LOG" 2>/dev/null | tr -d ' ')"
+    [[ -z "$row_count" ]] && row_count=0
+    local idx="$id"
+    if [[ "$idx" -lt 0 ]]; then idx=$((row_count + idx + 1)); fi
+    if [[ "$idx" -ge 1 && "$idx" -le "$row_count" ]]; then
+      matches="$(sed -n "${idx}p" "$SCAFFOLD_AUDIT_LOG" | jq -cs '.' 2>/dev/null)"
+    fi
+  else
+    matches="$(jq -cs --arg id "$id" '[.[] | select(((.status // "") | contains($id)) or ((.gate // "") | contains($id)) or ((.subcommand // "") | contains($id)))]' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null)"
+  fi
+  [[ -z "$matches" ]] && matches='[]'
+  local count; count="$(jq 'length' <<<"$matches" 2>/dev/null)"
+  [[ -z "$count" ]] && count=0
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    --arg id "$id" \
+    --argjson matches "$matches" \
+    --argjson c "$count" \
+    '{schema_version:$sv,command:"why",id:$id,status:(if $c>0 then "pass" else "miss" end),match_count:$c,matches:$matches}'
+  return 0
 }
 
 # ---------- scaffolded main dispatcher ----------
@@ -322,6 +649,13 @@ emit_json() {
       exit_code: $exit_code,
       L112: "OK_ntm_migrate_W2A"
     }'
+  # Append run record to scaffold audit log so canonical audit/health/why have data.
+  # Best-effort; never fail the wrapper because of telemetry.
+  if command -v cli_audit_append >/dev/null 2>&1; then
+    cli_audit_append "$SCAFFOLD_AUDIT_LOG" "$subcommand" "$status" \
+      "$(jq -nc --arg g "$gate" --arg s "$subcommand" --arg d "$decision" \
+         '{gate:$g,subcommand:$s,decision:$d}')" 2>/dev/null || true
+  fi
   return "$exit_code"
 }
 

@@ -1,0 +1,1 @@
+topic: validate — subjects: approval-receipt PATH (verify required fields: gate, question, decision, approver, ts); audit-row JSONL_LINE (verify ts/status fields).
