@@ -238,6 +238,56 @@ detect_shebang_interpreter() {
   esac
 }
 
+# ---------- verb-collision detection (flywheel-sacan) ----------
+#
+# When the target has its own case-statement handling canonical verbs
+# (validate|why|doctor|health|repair|audit), the scaffold's intercept
+# would hijack those verbs. The fix is a flag-based bypass: scan argv
+# for per-target flags, and if any are present, defer to cmd_run.
+#
+# Surfaced by 1fk5f.3 (dispatch-trigger-gated-precheck) and 1fk5f.6
+# (ntm-coordinator-shadow) where I hand-edited the intercept post-scaffold.
+# This makes the fix automatic at scaffold time.
+
+# Returns the list of canonical verbs the target's case-statement already
+# handles (newline-separated). Empty if no collision.
+detect_colliding_verbs() {
+  local target="$1"
+  # Match `^<whitespace>VERB)` in the target source (case-arm pattern).
+  # Strip whitespace + trailing paren. Filter to canonical verbs.
+  local verb canonical=("validate" "why" "doctor" "health" "repair" "audit" "quickstart")
+  local found=()
+  for verb in "${canonical[@]}"; do
+    if grep -qE "^[[:space:]]*${verb}\)" "$target" 2>/dev/null; then
+      found+=("$verb")
+    fi
+  done
+  printf '%s\n' "${found[@]}"
+}
+
+# Returns the list of per-target --flags found in the target source that
+# are NOT in the canonical scaffold flag set (newline-separated). The
+# canonical flag set excludes scaffold-introspection flags. The returned
+# list is the candidate "bypass flag" list. Returns 0 even when no flags
+# are found (do not let `set -e` propagate grep's "no match" rc=1).
+detect_per_target_flags() {
+  local target="$1"
+  local canonical_flags="--apply,--dry-run,--idempotency-key,--info,--schema,--examples,--help,--scope,--json,--rule,--root,--force,--allow-uninventoried,--no-test-scaffold,--inventory,--helper-lib,--runs-log,--tail,--tests-dir,--row-json,--surface,--config,--scan-all"
+  local jq_noise="--arg,--argjson,--rawfile,--slurpfile,--null-input"
+  local skip="$canonical_flags,$jq_noise"
+  local raw flag
+  # `|| true` keeps the pipeline rc=0 when grep finds no matches.
+  raw="$(grep -ohE -- '--[a-z][a-z0-9-]+' "$target" 2>/dev/null | sort -u || true)"
+  while IFS= read -r flag; do
+    [[ -z "$flag" ]] && continue
+    case ",$skip," in
+      *",$flag,"*) continue ;;
+    esac
+    printf '%s\n' "$flag"
+  done <<<"$raw"
+  return 0
+}
+
 # ---------- scaffolder body ----------
 
 # emit the canonical-cli block as a single heredoc, with the target name
@@ -254,6 +304,20 @@ detect_shebang_interpreter() {
 emit_canonical_block() {
   local target_basename="$1"
   local schema_prefix="${target_basename%.sh}"
+  # flywheel-sacan: comma-separated list of per-target flags that should
+  # cause the scaffold intercept to defer to cmd_run. Empty when no verb
+  # collision is detected.
+  local bypass_flags="${2:-}"
+  # Pre-compute bypass injection text outside the heredoc so we can
+  # interpolate as a single substitution. Nested `${var//pat/repl}` inside
+  # the heredoc confuses bash's parser; do it here instead.
+  local _bypass_header=""
+  local _bypass_loop=""
+  if [[ -n "$bypass_flags" ]]; then
+    _bypass_header=$'\n#\n# VERB COLLISION BYPASS (flywheel-sacan): the target\'s own argparse\n# already handles canonical verbs (doctor|health|repair|validate|...).\n# When any of the per-target flags below are present in argv, the\n# intercept yields and cmd_run handles the per-bead path unchanged.\n# Per-target bypass flags: '"$bypass_flags"
+    local _bypass_pattern="${bypass_flags//,/|}"
+    _bypass_loop=$'\n  local _a\n  for _a in "$@"; do\n    case "$_a" in '"$_bypass_pattern"$') return 1 ;; esac\n  done'
+  fi
   cat <<EOF
 
 # ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======
@@ -481,8 +545,8 @@ scaffold_main() {
 # Early-dispatch intercept: if argv[0] looks like a canonical subcommand
 # or introspection flag, run the canonical surface and exit BEFORE the
 # target's original arg parser sees the args. Works for both \`main "\$@"\`
-# style and inline \`while [[ \$# -gt 0 ]]\` style targets.
-_scaffold_is_canonical_arg() {
+# style and inline \`while [[ \$# -gt 0 ]]\` style targets.${_bypass_header}
+_scaffold_is_canonical_arg() {${_bypass_loop}
   case "\${1:-}" in
     doctor|health|repair|validate|audit|why|quickstart|completion) return 0 ;;
     --info|--schema|--examples) return 0 ;;
@@ -691,9 +755,28 @@ scaffold_target() {
   tmp_diff="$tmp_dir/${target_basename}.diff"
   tmp_block="$tmp_dir/${target_basename}.canonical-block"
 
-  # 1. Build the canonical-cli block once (used in both top-injection and
+  # 1a. Verb-collision detection (flywheel-sacan). If the target's own
+  #    case-statement already handles canonical verbs, we need a flag-based
+  #    bypass so the scaffold intercept defers to cmd_run when per-target
+  #    flags are present in argv.
+  local colliding_verbs_str bypass_flags_str verb_collision_detected
+  colliding_verbs_str="$(detect_colliding_verbs "$target_abs" | tr '\n' ',' | sed 's/,$//')"
+  if [[ -n "$colliding_verbs_str" ]]; then
+    verb_collision_detected=true
+    # Build bypass-flag list from the target's per-target --flags.
+    # Heuristic: only emit bypass for flags we actually detect; operator
+    # may extend the list manually if a per-target flag is missed.
+    bypass_flags_str="$(detect_per_target_flags "$target_abs" | tr '\n' ',' | sed 's/,$//')"
+  else
+    verb_collision_detected=false
+    bypass_flags_str=""
+  fi
+
+  # 1b. Build the canonical-cli block (used in both top-injection and
   #    the early-dispatch shim). Emits the scaffold block as a heredoc.
-  emit_canonical_block "$target_basename" > "$tmp_block"
+  #    When verb collision detected, the emitted intercept includes a
+  #    flag-based bypass that defers to cmd_run.
+  emit_canonical_block "$target_basename" "$bypass_flags_str" > "$tmp_block"
 
   # 2. Decide injection point. Strategy: inject AFTER the shebang and any
   #    initial `set -*` lines, BEFORE the original script body. The block
@@ -820,6 +903,9 @@ scaffold_target() {
     --argjson test_scaffolded "$test_scaffolded" \
     --arg test_path "$test_path" \
     --arg tmp_diff "$tmp_diff" \
+    --argjson verb_collision "$verb_collision_detected" \
+    --arg colliding_verbs "$colliding_verbs_str" \
+    --arg bypass_flags "$bypass_flags_str" \
     '{
       ts:$ts,
       target:$target,
@@ -835,6 +921,9 @@ scaffold_target() {
       unified_diff_path:$tmp_diff,
       helper_lib_sha:$helper_sha,
       scaffolder_sha:$scaffolder_sha,
+      verb_collision_detected:$verb_collision,
+      colliding_verbs:($colliding_verbs | split(",") | map(select(length > 0))),
+      bypass_flags:($bypass_flags | split(",") | map(select(length > 0))),
       status: ($mode + "_ok"),
       schema_version:"scaffold-canonical-cli/v1"
     }')"

@@ -1,0 +1,12 @@
+{
+  "verb_collision_detected": true,
+  "colliding_verbs": [
+    "validate",
+    "doctor",
+    "repair",
+    "audit"
+  ],
+  "bypass_flags": [
+    "--bead-id"
+  ]
+}
