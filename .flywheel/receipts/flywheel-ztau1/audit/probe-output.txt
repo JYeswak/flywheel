@@ -1,0 +1,20 @@
+=== BEFORE ===
+DB count source_repo='.': 98
+JSONL distinct source_repo: 98 .
+
+=== AFTER ===
+DB count source_repo='.': 0
+DB count source_repo='/Users/josh/Developer/cfs-expo': 98
+JSONL distinct source_repo:
+  98 /Users/josh/Developer/cfs-expo
+
+=== br sync status ===
+Sync Status:
+  Dirty issues: 0
+  Last export: 2026-05-10T01:41:14.450350+00:00
+  Last import: 2026-05-04T08:41:01.687347+00:00
+  JSONL exists: true
+  Status: In sync
+
+=== Verify count drops to 0 (the gate) ===
+rows_with_dot: 0 (target: 0)

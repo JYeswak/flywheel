@@ -1,0 +1,89 @@
+{
+  "task_id": "flywheel-ztau1",
+  "dispatch_id": "flywheel-ztau1-216eb1",
+  "identity_name": "CloudyMill",
+  "pane": "flywheel:0.2",
+  "callback_pane": "flywheel:1",
+  "title": "[source-repo-backfill] cfs-expo source_repo='.' rows (98) need backfill to absolute path",
+  "did": "4/4",
+  "compliance_score": 900,
+  "compliance_max": 1000,
+  "four_lens": {
+    "brand": 9,
+    "sniff": 9,
+    "jeff": 9,
+    "public": 9
+  },
+  "score_components": {
+    "fix_correctness_98_to_98_canonical_path": 200,
+    "br_sync_force_flush_db_to_jsonl_aligned": 150,
+    "verify_count_drops_to_0_in_db_AND_jsonl": 150,
+    "L107_reservation_taken_on_db_and_jsonl": 100,
+    "backup_to_work_tmp_before_update": 80,
+    "picoz_scope_only_issues_jsonl_committed": 80,
+    "evidence_md_with_before_after_counts": 80,
+    "L61_ecosystem_touch_handled": 30,
+    "scope_discipline_jeff_cohort_exclusion_cited": 50,
+    "subtotal": 920,
+    "deduct_force_flag_required_due_to_direct_sql_dirty_track_bypass": -20,
+    "total": 900
+  },
+  "did_gates": [
+    {
+      "gate": "SQL UPDATE backfills source_repo='.' to '/Users/josh/Developer/cfs-expo' in DB",
+      "status": "done",
+      "evidence": "sqlite3 .beads/beads.db 'UPDATE issues SET source_repo=...' ran inside cfs-expo cwd"
+    },
+    {
+      "gate": "br sync re-aligns JSONL with DB",
+      "status": "done",
+      "evidence": "br sync --flush-only --force exported 98 issues + 54 dependencies; br sync --status returns Status: In sync"
+    },
+    {
+      "gate": "Count drops to 0 in DB",
+      "status": "done",
+      "evidence": "SELECT count(*) FROM issues WHERE source_repo='.' returns 0 (was 98); SELECT count(*) WHERE source_repo='/Users/josh/Developer/cfs-expo' returns 98"
+    },
+    {
+      "gate": "Commit lands the JSONL change",
+      "status": "done",
+      "evidence": "cfs-expo commit 83019af8 on branch main; PICOZ-scoped to only .beads/issues.jsonl"
+    }
+  ],
+  "files_touched": [
+    "/Users/josh/Developer/cfs-expo/.beads/issues.jsonl",
+    "/Users/josh/Developer/cfs-expo/.beads/beads.db",
+    ".flywheel/receipts/flywheel-ztau1/audit/evidence.md",
+    ".flywheel/receipts/flywheel-ztau1/audit/pinned-shas.txt",
+    ".flywheel/receipts/flywheel-ztau1/audit/probe-output.txt",
+    ".flywheel/receipts/flywheel-ztau1/audit/compliance-pack.json"
+  ],
+  "beads_filed": [],
+  "beads_updated": ["flywheel-ztau1"],
+  "no_bead_reason": "Jeff-owned repos (frankenterm/vibe_cockpit/ntm) excluded per bead body and memory rule feedback_no_push_ntm_br; T2.3 owner decides whether to file a separate dispatch for the Jeff cohort",
+  "fuckups_logged": [],
+  "skill_auto_routes": {
+    "canonical-cli-scoping": "n/a",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "L61_ecosystem_touch": {
+    "agents_md_updated": "not_applicable",
+    "readme_updated": "not_applicable",
+    "no_touch_reason": "metadata backfill in cfs-expo .beads; no doctrine/INCIDENTS/canonical-L-rule/skill surface touched in flywheel repo"
+  },
+  "L107_reservations": {
+    "files": [
+      "/Users/josh/Developer/cfs-expo/.beads/beads.db",
+      "/Users/josh/Developer/cfs-expo/.beads/issues.jsonl"
+    ],
+    "release_required": true
+  },
+  "L112_probe": {
+    "command": "sqlite3 /Users/josh/Developer/cfs-expo/.beads/beads.db \"SELECT count(*) FROM issues WHERE source_repo='.';\"",
+    "expected": "literal:0"
+  },
+  "mission_fitness": "adjacent",
+  "mission_rationale": "Backfills source_repo metadata so fleet-wide audits attribute cfs-expo issues to canonical absolute path; tightens fleet-attribution accuracy that drives orchestrator triage and bead-routing decisions. Removes one of three remaining source_repo='.' cohorts blocking T2.3 of parent flywheel-8x2le."
+}

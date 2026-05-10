@@ -1,0 +1,8 @@
+cfs-expo-branch: main
+cfs-expo-head-pre: 71ada75634f78f3d1c9a91256e8d97ed7fcdb4b6
+cfs-expo-head-post: 83019af8430f78eecae77857715cc9674b116164
+cfs-expo-jsonl-bytes:   117473
+cfs-expo-jsonl-sha256: e3ac9304c64c497a40753e0feebe75bc6bfa703c4b924c38f191882f82d58aec
+cfs-expo-db-sha256-post: fb3725e17bfea65e018882132de830c6569d9805873e8198d62b22c098ef1f80
+flywheel-head-pre: 597f6c5e89ba0a82e2a7204f95c7e5fd7ec343cb
+backup-pre-backfill: /var/folders/d0/.../flywheel-ztau1.XXX/{beads.db,issues.jsonl}.pre-backfill (will be removed at WORK_TMP cleanup; durable evidence here)
