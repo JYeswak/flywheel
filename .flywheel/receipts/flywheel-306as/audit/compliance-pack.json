@@ -1,0 +1,78 @@
+{
+  "task_id": "flywheel-306as",
+  "dispatch_id": "flywheel-306as-50b10b",
+  "identity_name": "CloudyMill",
+  "pane": "flywheel:0.2",
+  "callback_pane": "flywheel:1",
+  "title": "[alps] author .flywheel/PUBLISHABILITY-AUDIT.md OR exemption doc per flywheel-ywhdu finding",
+  "did": "3/3",
+  "compliance_score": 880,
+  "compliance_max": 1000,
+  "four_lens": {
+    "brand": 9,
+    "sniff": 9,
+    "jeff": 9,
+    "public": 9
+  },
+  "score_components": {
+    "fix_correctness_audit_authored": 200,
+    "exempt_client_owned_correct_disposition": 180,
+    "probe_success_true_errors_empty": 150,
+    "matches_publishability_bar_contract_header_field_lookup": 100,
+    "follows_clutterfreespaces_precedent_shape": 80,
+    "evidence_md_with_before_after_probe": 80,
+    "L61_ecosystem_touch_handled": 40,
+    "scope_discipline_intentional_out_of_scope_section": 50,
+    "subtotal": 880,
+    "total": 880
+  },
+  "did_gates": [
+    {
+      "gate": ".flywheel/PUBLISHABILITY-AUDIT.md exists in alpsinsurance",
+      "status": "done",
+      "evidence": "File authored at /Users/josh/Developer/alpsinsurance/.flywheel/PUBLISHABILITY-AUDIT.md; sha256 captured in pinned-shas.txt"
+    },
+    {
+      "gate": "Probe no longer reports publishability_audit_missing",
+      "status": "done",
+      "evidence": "publishability-bar.sh --doctor --json returns errors:[] (was: errors=[{code:publishability_audit_missing}])"
+    },
+    {
+      "gate": "Exemption honored — success:true + exempt:true",
+      "status": "done",
+      "evidence": "Probe JSON: success=true, exempt=true, exemption_class=EXEMPT_CLIENT_OWNED, proof_level=exempt_client_owned, brand_voice_composite=100"
+    }
+  ],
+  "files_touched": [
+    "/Users/josh/Developer/alpsinsurance/.flywheel/PUBLISHABILITY-AUDIT.md",
+    ".flywheel/receipts/flywheel-306as/audit/evidence.md",
+    ".flywheel/receipts/flywheel-306as/audit/pinned-shas.txt",
+    ".flywheel/receipts/flywheel-306as/audit/probe-output.txt",
+    ".flywheel/receipts/flywheel-306as/audit/compliance-pack.json"
+  ],
+  "beads_filed": [],
+  "beads_updated": ["flywheel-306as"],
+  "no_bead_reason": "audit covers all 7 facets with explicit no-bead receipts for NOT_APPLICABLE facets per PUBLISHABILITY-BAR.md canonical doctrine",
+  "fuckups_logged": [],
+  "skill_auto_routes": {
+    "canonical-cli-scoping": "n/a",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "n/a",
+    "readme-writing": "n/a"
+  },
+  "L61_ecosystem_touch": {
+    "agents_md_updated": "not_applicable",
+    "readme_updated": "not_applicable",
+    "no_touch_reason": "client-engagement repo audit; no flywheel/canonical L-rule/skill change in flywheel repo"
+  },
+  "L107_reservations": {
+    "files": ["/Users/josh/Developer/alpsinsurance/.flywheel/PUBLISHABILITY-AUDIT.md"],
+    "release_required": true
+  },
+  "L112_probe": {
+    "command": "bash /Users/josh/Developer/alpsinsurance/.flywheel/scripts/publishability-bar.sh --doctor --json --repo /Users/josh/Developer/alpsinsurance | jq -e '.success == true and .brand_voice.exempt == true and .brand_voice.exemption_class == \"EXEMPT_CLIENT_OWNED\" and (.errors | length) == 0'",
+    "expected": "literal:true"
+  },
+  "mission_fitness": "adjacent",
+  "mission_rationale": "Closes the ALPS T4 publishability-audit-md-missing surface_mismatch (cross-orch signal that was bouncing between flywheel and ALPS); serves continuous-orchestrator-uptime by removing one of the recurring fleet-wide doctor errors that was filing duplicate cross-references."
+}

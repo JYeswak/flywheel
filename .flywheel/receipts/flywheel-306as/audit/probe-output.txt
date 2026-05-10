@@ -1,0 +1,96 @@
+=== AFTER: publishability-bar.sh --doctor --json (canonical) ===
+{
+  "schema_version": "publishability-bar/v1",
+  "status": "warn",
+  "success": true,
+  "publishability_bar_score": {
+    "score": 4,
+    "brand_voice_composite": 100,
+    "banned_words_count": 0,
+    "ungrounded_claims_count": 0,
+    "public_repo": false,
+    "proof_level": "exempt_client_owned",
+    "scorecard_log": null
+  },
+  "publishability_bar_score_value": 4,
+  "max_score": 7,
+  "audit_path": "/Users/josh/Developer/alpsinsurance/.flywheel/PUBLISHABILITY-AUDIT.md",
+  "doctrine_path": "/Users/josh/Developer/alpsinsurance/.flywheel/PUBLISHABILITY-BAR.md",
+  "prompt_path": "/Users/josh/.claude/skills/.flywheel/prompts/three-judges-rubric.md",
+  "facets": [
+    {
+      "facet_id": "F1",
+      "facet": "README front-door",
+      "verdict": "NOT_APPLICABLE",
+      "passed": false,
+      "evidence": "Client-engagement repos are not held to a public README front-door bar; the repo's day-to-day entry surfaces are `.flywheel/MISSION.md` (mission lock §14), `.continue-here.md` (handoff state), and the daily Mike-loop reports under `reports/mike-daily/`."
+    },
+    {
+      "facet_id": "F2",
+      "facet": "Doctrine clarity",
+      "verdict": "YES",
+      "passed": true,
+      "evidence": "`.flywheel/MISSION.md` (locked, 14/14 sections complete), `.flywheel/GOAL.md`, `.flywheel/STATE.md`, `.flywheel/AGENTS-CANONICAL.md`, and `.flywheel/INCIDENTS.md` expose operating rules and engagement scope."
+    },
+    {
+      "facet_id": "F3",
+      "facet": "Doctor/health/repair triad",
+      "verdict": "YES",
+      "passed": true,
+      "evidence": "`.flywheel/scripts/publishability-bar.sh --doctor --json --repo /Users/josh/Developer/alpsinsurance` is installed (commit `8k94v` propagation) and surfaces JSON. Repo-level doctor triad routes through `flywheel-loop doctor --repo /Users/josh/Developer/alpsinsurance --json`."
+    },
+    {
+      "facet_id": "F4",
+      "facet": "Executable tests",
+      "verdict": "YES",
+      "passed": true,
+      "evidence": "Repo has `pytest` + `pyproject.toml` test config with extensive backend coverage; `.benchmarks/` records perf runs; ALPS-specific bead acceptance probes exercise client-engagement contracts."
+    },
+    {
+      "facet_id": "F5",
+      "facet": "Idempotent install + uninstall",
+      "verdict": "NOT_APPLICABLE",
+      "passed": false,
+      "evidence": "Client-engagement artifact, not a packaged installable surface. Deployment lifecycle is HubSpot CRM portal + Vercel/Railway internal services, governed by client-deployment runbooks rather than a packaged install/uninstall contract."
+    },
+    {
+      "facet_id": "F6",
+      "facet": "Code aesthetic",
+      "verdict": "YES",
+      "passed": true,
+      "evidence": "Backend code is FastAPI + SQLAlchemy 2.0 async + Pydantic v2 + Alembic + dbt + Soda + GE per mission lock Q4-Q5; structure follows the locked tech stack with documented per-scope rationale."
+    },
+    {
+      "facet_id": "F7",
+      "facet": "Demo-ability",
+      "verdict": "NOT_APPLICABLE",
+      "passed": false,
+      "evidence": "Client-engagement artifact has no public-demo surface. Engagement deliverables are exposed through the HubSpot CRM portal + daily Mike-loop reports under `reports/mike-daily/`, both of which are client-private surfaces."
+    }
+  ],
+  "brand_voice": {
+    "public_repo": false,
+    "public_ready_default": true,
+    "exempt": true,
+    "exemption_class": "EXEMPT_CLIENT_OWNED",
+    "proof_level": "exempt_client_owned",
+    "brand_voice_composite": 100,
+    "banned_words_count": 0,
+    "banned_words": [],
+    "ungrounded_claims_count": 0,
+    "scorecard_log": null,
+    "errors": [],
+    "warnings": []
+  },
+  "thresholds": {
+    "warn_below": 5,
+    "fail_below": 3
+  },
+  "warnings": [
+    {
+      "code": "publishability_bar_score_warn",
+      "message": "publishability bar score below warning threshold: 4/7"
+    }
+  ],
+  "errors": []
+}
