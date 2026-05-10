@@ -130,6 +130,42 @@ def merge_compliance(samples: list[float]) -> dict[str, Any]:
     }
 
 
+def fs_rag_for_repo(repo_path: str) -> dict[str, Any]:
+    """Read latest fs-rag-baseline-<date>.json from <repo>/.flywheel/audit/.
+
+    Returns {present, baseline_path, violations_total} for a single repo.
+    Surfaced into the fleet rollup as the at-rest discipline drift signal
+    (per flywheel-hi4e6 leverage point #6 information flow).
+    """
+    audit_dir = Path(repo_path) / ".flywheel" / "audit"
+    if not audit_dir.is_dir():
+        return {"present": False, "baseline_path": None, "violations_total": 0}
+    baselines = sorted(audit_dir.glob("fs-rag-baseline-*.json"))
+    if not baselines:
+        return {"present": False, "baseline_path": None, "violations_total": 0}
+    latest = baselines[-1]
+    payload = read_json_file(latest)
+    if not isinstance(payload, dict):
+        return {"present": True, "baseline_path": str(latest), "violations_total": 0}
+    violations_total = int(
+        payload.get("violations_total")
+        or len(payload.get("violations") or [])
+        or 0
+    )
+    return {
+        "present": True,
+        "baseline_path": str(latest),
+        "violations_total": violations_total,
+    }
+
+
+def read_json_file(path: Path) -> Any:
+    try:
+        return json.loads(path.read_text(errors="replace"))
+    except Exception:
+        return None
+
+
 def aggregate(per_repo: list[dict[str, Any]]) -> dict[str, Any]:
     """Aggregate quality_grade across per-repo daily-report.py results."""
     fleet_compliance: list[float] = []
@@ -169,6 +205,8 @@ def aggregate(per_repo: list[dict[str, Any]]) -> dict[str, Any]:
         blocked = int(disp_counts.get("BLOCKED") or 0) + int(disp_counts.get("ESCALATE") or 0)
         fleet_blockers += blocked
 
+        fs_rag = fs_rag_for_repo(str(repo_row.get("repo") or ""))
+
         repo_summaries.append(
             {
                 "repo": repo_row.get("repo"),
@@ -179,10 +217,24 @@ def aggregate(per_repo: list[dict[str, Any]]) -> dict[str, Any]:
                 "blocked_escalate_rate": grade.get("blocked_escalate_rate"),
                 "mission_fitness_counts": grade.get("mission_fitness_counts") or {},
                 "red_flags": grade.get("red_flags") or [],
+                "fs_rag": fs_rag,
             }
         )
 
     fleet_compliance_dist = merge_compliance(fleet_compliance)
+
+    fs_rag_present = [r for r in repo_summaries if r.get("fs_rag", {}).get("present")]
+    fs_rag_violations = [int(r["fs_rag"]["violations_total"] or 0) for r in fs_rag_present]
+    fs_rag_total = sum(fs_rag_violations)
+    fs_rag_avg = round(fs_rag_total / len(fs_rag_violations), 1) if fs_rag_violations else 0.0
+    fs_rag_max_repo = None
+    fs_rag_max_count = 0
+    for r in fs_rag_present:
+        v = int(r["fs_rag"]["violations_total"] or 0)
+        if v > fs_rag_max_count:
+            fs_rag_max_count = v
+            fs_rag_max_repo = r.get("repo")
+
     fleet_summary = {
         "callbacks": fleet_callbacks,
         "blocked_escalate_count": fleet_blockers,
@@ -195,6 +247,13 @@ def aggregate(per_repo: list[dict[str, Any]]) -> dict[str, Any]:
         "active_repos": sum(1 for r in repo_summaries if r["status"] == "generated"),
         "skipped_repos": sum(1 for r in repo_summaries if r["status"] == "skipped"),
         "failed_repos": sum(1 for r in repo_summaries if r["status"] == "failed"),
+        "fs_rag_discipline": {
+            "repos_with_baseline": len(fs_rag_present),
+            "violations_total": fs_rag_total,
+            "violations_avg_per_repo": fs_rag_avg,
+            "violations_max_count": fs_rag_max_count,
+            "violations_max_repo": fs_rag_max_repo,
+        },
     }
     worker_table = sorted(
         (
@@ -259,6 +318,26 @@ def detect_red_flags(aggregated: dict[str, Any]) -> list[dict[str, str]]:
                     "detail": f"identity={worker_row['identity']} avg={avg} closes={closes_value}",
                 }
             )
+    fs_rag_summary = fleet_summary.get("fs_rag_discipline") or {}
+    fs_rag_avg = fs_rag_summary.get("violations_avg_per_repo") or 0
+    fs_rag_max = fs_rag_summary.get("violations_max_count") or 0
+    fs_rag_max_repo = fs_rag_summary.get("violations_max_repo")
+    if fs_rag_avg > 0 and isinstance(fs_rag_max, (int, float)) and fs_rag_max > 2 * fs_rag_avg:
+        flags.append(
+            {
+                "code": "fs_rag_repo_violations_exceeds_2x_fleet_avg",
+                "detail": f"repo={fs_rag_max_repo} count={fs_rag_max} fleet_avg={fs_rag_avg}",
+            }
+        )
+    for repo_row in aggregated["per_repo"]:
+        rag = repo_row.get("fs_rag") or {}
+        if rag.get("present") and int(rag.get("violations_total") or 0) >= 100:
+            flags.append(
+                {
+                    "code": "fs_rag_repo_violations_above_100",
+                    "detail": f"repo={repo_row.get('repo')} count={rag.get('violations_total')}",
+                }
+            )
     return flags
 
 
@@ -303,6 +382,13 @@ def render_markdown(date_text: str, aggregated: dict[str, Any], red_flags: list[
     dispositions = fleet_summary.get("disposition_counts") or {}
     if dispositions:
         lines.append("- disposition: " + ", ".join(f"{k}={v}" for k, v in sorted(dispositions.items())))
+    fs_rag = fleet_summary.get("fs_rag_discipline") or {}
+    if fs_rag.get("repos_with_baseline"):
+        lines.append(
+            f"- fs_rag_discipline: avg={fs_rag.get('violations_avg_per_repo')} "
+            f"fleet_max={fs_rag.get('violations_max_count')}@{fs_rag.get('violations_max_repo')} "
+            f"baseline_repos={fs_rag.get('repos_with_baseline')}"
+        )
     lines.append("")
 
     lines.append("## Per-repo")
