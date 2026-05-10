@@ -1,0 +1,717 @@
+{
+  "bead": "flywheel-7axmt",
+  "rows": [
+    {
+      "path": ".flywheel/scripts/agentmail-fd-pressure-probe.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=2"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/agents-md-shard-extract.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=2",
+        "mutation_lines=1",
+        "idempotent_hints=4"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/apply-tmux-tuning.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=7",
+        "mutation_lines=13",
+        "idempotent_hints=11"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/auto-l112-gate.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=2",
+        "mutation_lines=10",
+        "idempotent_hints=10"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/apply-substrate-tuning.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=9",
+        "mutation_lines=13",
+        "idempotent_hints=10"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/autoloop-target-selector.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=6",
+        "idempotent_hints=5"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/bead-evidence-indexer.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=3",
+        "idempotent_hints=8"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/auto-refill-decision-log.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=1",
+        "mutation_lines=1",
+        "idempotent_hints=8"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/bcv-task-harness.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=4",
+        "mutation_lines=17",
+        "idempotent_hints=7"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/bleed-ledger-watch.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=3",
+        "idempotent_hints=2"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/caam-auto-rotate-on-usage-limit.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=2",
+        "idempotent_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/callback-spool-reap.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=3",
+        "mutation_lines=13",
+        "idempotent_hints=7"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/capacity-halt-auto-continue-primitive.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=4",
+        "idempotent_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/codex-budget-watchdog.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=2",
+        "mutation_lines=2",
+        "idempotent_hints=2"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/check-trauma-class-substrate.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=1",
+        "mutation_lines=1",
+        "idempotent_hints=4",
+        "other_gate_hints=3"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/cleanup-scratch.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=4"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/codex-budget-probe.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=3",
+        "mutation_lines=1",
+        "idempotent_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/codex-queued-not-submitted-bare-enter-primitive.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=3",
+        "idempotent_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/codex-death-event-classifier.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=5",
+        "mutation_lines=2",
+        "idempotent_hints=3"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/codex-template-stuck-detector.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=4",
+        "mutation_lines=2",
+        "idempotent_hints=5"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/coordinator-daemon-health.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=2"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/cross-session-worker-borrow.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=5",
+        "mutation_lines=3",
+        "idempotent_hints=5"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/cost-telemetry-token-burn-probe.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=2",
+        "mutation_lines=3",
+        "idempotent_hints=8"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/customer-facing-observability-probe.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=2",
+        "mutation_lines=3",
+        "idempotent_hints=4"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/dcg-prose-trigger-strip-gate.sh",
+      "verdict": "APPLY_HAS_OTHER_GATE",
+      "evidence": [
+        "apply_flag_lines=4",
+        "mutation_lines=2",
+        "other_gate_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/cross-time-synthesis-probe.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=2",
+        "mutation_lines=3",
+        "idempotent_hints=4"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/daily-jeff-ingest.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=1",
+        "mutation_lines=45",
+        "idempotent_hints=16"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/dispatch-log-schema-validator.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=7",
+        "mutation_lines=4",
+        "idempotent_hints=7"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/dispatch-log-fitness-invariant.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=5",
+        "mutation_lines=2"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/fleet-conformance-probe.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=4",
+        "mutation_lines=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/fleet-coherence-launchd.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=4",
+        "mutation_lines=10",
+        "idempotent_hints=4"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/fleet-comms-health-probe.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=5",
+        "idempotent_hints=14"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/fleet-rotate-all-sessions.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=8"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/flywheel-codex-stuck-detector-install.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=3",
+        "mutation_lines=3",
+        "idempotent_hints=2"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/fleet-rotate-on-caam-swap.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=2",
+        "idempotent_hints=3",
+        "other_gate_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/frozen-pane-backtest.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=4",
+        "mutation_lines=13",
+        "idempotent_hints=8"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/headless-browser-reap.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=2",
+        "idempotent_hints=11"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/jeff-binary-version-watchtower.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=5",
+        "mutation_lines=3",
+        "idempotent_hints=2"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/hub-blocker-detect.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=5",
+        "mutation_lines=3"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/jeff-intel-digest-actionable.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=5",
+        "mutation_lines=7",
+        "idempotent_hints=8"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/integrate-stall-escalator.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=9",
+        "mutation_lines=1",
+        "idempotent_hints=6"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/jeff-bead-285-divergence-capture.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=10",
+        "mutation_lines=5",
+        "idempotent_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/jeff-daily-corpus-diff-render.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=6",
+        "mutation_lines=2",
+        "idempotent_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/jeff-corpus-delta-reindex.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=3",
+        "mutation_lines=2",
+        "idempotent_hints=3"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/jeff-intel-scheduled-runner.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=1",
+        "mutation_lines=11",
+        "idempotent_hints=19"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/jeff-daily-corpus-diff.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=8",
+        "mutation_lines=11",
+        "idempotent_hints=5"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/jeff-shadow-socraticode.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=7",
+        "mutation_lines=10",
+        "idempotent_hints=4"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/jeff-philosophy-mine.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=1",
+        "mutation_lines=1",
+        "idempotent_hints=25"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/jeffrey-comment-watchtower.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=5",
+        "mutation_lines=5",
+        "idempotent_hints=5"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/mission-fitness-doctor.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=3",
+        "apply_no_op_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/ntm-quota-proactive-probe.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=2"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/mobile-eats-end-user-health-probe.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=2",
+        "mutation_lines=3",
+        "idempotent_hints=4"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/ntm-serve-eventstream-bridge.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=2",
+        "mutation_lines=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/ntm-metrics-doctor-probe.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=2"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/peer-orch-respawn-permit.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=5",
+        "mutation_lines=5",
+        "idempotent_hints=11",
+        "other_gate_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/polish-preflight-quality-gate.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=4",
+        "mutation_lines=14",
+        "idempotent_hints=6"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/orch-worker-identity-manifest.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=3",
+        "mutation_lines=1",
+        "idempotent_hints=4"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/peer-orch-blocker-watch.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=2",
+        "mutation_lines=2"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/quality-bar-close-gate.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=10",
+        "mutation_lines=2",
+        "idempotent_hints=11"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/peer-orch-freeze-monitor.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=6",
+        "mutation_lines=5",
+        "idempotent_hints=10",
+        "other_gate_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/public-artifact-pipeline-probe.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=2",
+        "mutation_lines=3",
+        "idempotent_hints=4"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/promotion-candidate-stale-fire-reaper.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=5"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/regenerate-dicklesworthstone-sources.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=3",
+        "mutation_lines=8",
+        "idempotent_hints=3"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/security-precommit-installer.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=8",
+        "mutation_lines=3",
+        "idempotent_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/stale-in-progress-reaper.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=5",
+        "mutation_lines=1",
+        "idempotent_hints=9"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/rule-hint-lifecycle.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=4",
+        "idempotent_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/skill-discoveries-aggregator.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=6",
+        "mutation_lines=2",
+        "idempotent_hints=7"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/sync-four-lens-validator.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=2",
+        "mutation_lines=3",
+        "idempotent_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/tentacle-inventory-bump.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=8",
+        "idempotent_hints=4"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/state-md-miner.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=2",
+        "mutation_lines=1",
+        "idempotent_hints=7"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/stale-error-auto-ping.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=3",
+        "mutation_lines=3"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/state-store-authority-probe.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=6",
+        "mutation_lines=2",
+        "idempotent_hints=2"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/sync-canonical-doctrine.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=9",
+        "mutation_lines=108",
+        "idempotent_hints=19"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/tentacle-drift-sweep.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=4",
+        "mutation_lines=8",
+        "idempotent_hints=19"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/test-sync-stamped-repos-coverage.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=3",
+        "mutation_lines=2",
+        "idempotent_hints=4"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/worker-stall-alert-probe.sh",
+      "verdict": "APPLY_IS_IDEMPOTENT",
+      "evidence": [
+        "apply_flag_lines=3",
+        "mutation_lines=2",
+        "idempotent_hints=1"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/topology-tick-refresh.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=1",
+        "idempotent_hints=6",
+        "other_gate_hints=2"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/validate-callback-before-close.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=5",
+        "mutation_lines=8"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/validation-e2e-smoke.sh",
+      "verdict": "APPLY_NEEDS_KEY",
+      "evidence": [
+        "apply_flag_lines=3",
+        "mutation_lines=27",
+        "idempotent_hints=11"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/verify-watcher-launchd-active.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=1",
+        "idempotent_hints=2"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/watcher-isomorphic-probe.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=1",
+        "idempotent_hints=23"
+      ]
+    },
+    {
+      "path": ".flywheel/scripts/worker-tick-jsm-outcomes.sh",
+      "verdict": "APPLY_IS_READ_ONLY",
+      "evidence": [
+        "apply_flag_lines=1"
+      ]
+    }
+  ],
+  "counts": {
+    "APPLY_IS_READ_ONLY": 23,
+    "APPLY_IS_IDEMPOTENT": 39,
+    "APPLY_NEEDS_KEY": 19,
+    "APPLY_HAS_OTHER_GATE": 1
+  },
+  "total": 82
+}

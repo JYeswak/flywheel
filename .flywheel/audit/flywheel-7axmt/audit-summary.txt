@@ -1,0 +1,27 @@
+=== flywheel-7axmt audit summary ===
+
+Scanner verdicts (v2):
+  APPLY_IS_IDEMPOTENT = 39
+  APPLY_IS_READ_ONLY = 23
+  APPLY_NEEDS_KEY = 19
+  APPLY_HAS_OTHER_GATE = 1
+  TOTAL = 82
+
+Manual triage applied:
+  3 surfaces reclassified NEEDS_KEY -> READ_ONLY (explicit no-apply or smoke-only)
+  9 surfaces reclassified NEEDS_KEY -> IDEMPOTENT (write_if_changed / atomic-replace / overwrite-stable)
+
+Final post-triage counts:
+  APPLY_IS_IDEMPOTENT = 48
+  APPLY_IS_READ_ONLY = 26
+  APPLY_HAS_OTHER_GATE = 1
+  APPLY_NEEDS_KEY_genuine = 7
+
+=== 7 Tier-1 surfaces (priority order) ===
+  P0  .flywheel/scripts/sync-canonical-doctrine.sh -- cross-fleet doctrine sync (writes to AGENTS.md, validation schemas, doctrine docs, launchd templates, .claude/settings.json across all flywheel-installed repos)
+  P1  .flywheel/scripts/stale-error-auto-ping.sh -- ntm send ping to other panes (external state, non-idempotent)
+  P1  .flywheel/scripts/security-precommit-installer.sh -- git commit + push (installs precommit hooks)
+  P1  .flywheel/scripts/regenerate-dicklesworthstone-sources.sh -- regenerate Jeff source-repo copies (rm + clone + integrate)
+  P2  .flywheel/scripts/hub-blocker-detect.sh -- br set priority=0 on detected hub blockers (beads JSONL mutation)
+  P2  .flywheel/scripts/bcv-task-harness.sh -- task harness execution (BCV — bead-callback-validation)
+  P3  .flywheel/scripts/jeff-bead-285-divergence-capture.sh -- beads-related capture writes

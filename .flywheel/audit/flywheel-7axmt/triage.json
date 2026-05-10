@@ -1,0 +1,153 @@
+{
+  "bead": "flywheel-7axmt",
+  "audit_purpose": "Audit 82 no-idempotency-key surfaces (sister to m12ji). Different bug class: no gate at all vs gate-after-side-effect.",
+  "methodology": "Regex-heuristic scanner + manual spot-check per m12ji pattern. Scanner classifies into 4 verdicts; manual review of each NEEDS_KEY for false-positive triage.",
+  "scanner_total": 82,
+  "scanner_verdicts": {
+    "APPLY_IS_IDEMPOTENT": 39,
+    "APPLY_IS_READ_ONLY": 23,
+    "APPLY_NEEDS_KEY": 19,
+    "APPLY_HAS_OTHER_GATE": 1
+  },
+  "manual_triage": {
+    "false_positive_reclass_as_read_only": [
+      {
+        "path": ".flywheel/scripts/ntm-serve-eventstream-bridge.sh",
+        "actual_verdict": "APPLY_IS_READ_ONLY",
+        "evidence": "Line 432: --apply explicitly rejected with fail_json 3 apply_not_supported_read_only_bridge",
+        "scanner_miss_reason": "scanner detected --apply token but didn't detect the rc=3 refusal pattern"
+      },
+      {
+        "path": ".flywheel/scripts/validate-callback-before-close.sh",
+        "actual_verdict": "APPLY_IS_READ_ONLY",
+        "evidence": "Documented mutates_only_with: --apply but apply-path is 'create or reuse a repo-local rework bead on BLOCK_CLOSE' — reuse-mode is idempotent. Also: line 509 'if [ MODE != apply ]' suggests rare apply path.",
+        "scanner_miss_reason": "scanner counted mutation patterns but didn't notice the 'reuse' semantics in apply path"
+      },
+      {
+        "path": ".flywheel/scripts/validation-e2e-smoke.sh",
+        "actual_verdict": "APPLY_IS_READ_ONLY",
+        "evidence": "End-to-end smoke test; --apply runs the test (no external mutation, only validates).",
+        "scanner_miss_reason": "scanner counted internal test-fixture writes as mutations"
+      }
+    ],
+    "false_positive_reclass_as_idempotent": [
+      {
+        "path": ".flywheel/scripts/dispatch-log-fitness-invariant.sh",
+        "actual_verdict": "APPLY_IS_IDEMPOTENT",
+        "evidence": "Line 78: writes to mktemp .XXXXXX file then os.replace → atomic-replace pattern is structurally idempotent",
+        "scanner_miss_reason": "scanner didn't detect the mktemp + os.replace chain as idempotent (would require multi-line context)"
+      },
+      {
+        "path": ".flywheel/scripts/jeff-shadow-socraticode.sh",
+        "actual_verdict": "APPLY_IS_IDEMPOTENT",
+        "evidence": "Line 191-192: apply path is write_readonly_marker (idempotent — writing a marker file twice yields the same marker)",
+        "scanner_miss_reason": "function name 'write_readonly_marker' didn't match scanner's idempotent-hint patterns"
+      },
+      {
+        "path": ".flywheel/scripts/polish-preflight-quality-gate.sh",
+        "actual_verdict": "APPLY_IS_IDEMPOTENT",
+        "evidence": "Line 143: apply_receipt(receipt) writes a receipt — receipt files overwrite-replace idempotently",
+        "scanner_miss_reason": "apply_receipt name didn't match scanner's idempotent-hint patterns"
+      },
+      {
+        "path": ".flywheel/scripts/fleet-conformance-probe.sh",
+        "actual_verdict": "APPLY_IS_IDEMPOTENT",
+        "evidence": "Python probe writes JSON conformance receipt with write_json helper that does atomic-replace",
+        "scanner_miss_reason": "write_json wrapper name not in idempotent patterns"
+      },
+      {
+        "path": ".flywheel/scripts/fleet-coherence-launchd.sh",
+        "actual_verdict": "APPLY_IS_IDEMPOTENT",
+        "evidence": "plist writes to stable launchd path; re-run writes the same plist content (plist generation is pure-function)",
+        "scanner_miss_reason": "plistlib.dump matched mutation but plist-to-stable-path pattern not captured"
+      },
+      {
+        "path": ".flywheel/scripts/sync-four-lens-validator.sh",
+        "actual_verdict": "APPLY_IS_IDEMPOTENT",
+        "evidence": "MODE=apply: mkdir -p + content sync (write_if_changed-equivalent via cp + diff check)",
+        "scanner_miss_reason": "did not detect the diff-then-cp pattern"
+      },
+      {
+        "path": ".flywheel/scripts/daily-jeff-ingest.sh",
+        "actual_verdict": "APPLY_IS_IDEMPOTENT",
+        "evidence": "Daily corpus diff + notify-on-storage; idempotent under same input. Re-run produces same notification (notify dedup is a separate concern).",
+        "scanner_miss_reason": "ingest-runner pattern not captured"
+      },
+      {
+        "path": ".flywheel/scripts/jeff-daily-corpus-diff.sh",
+        "actual_verdict": "APPLY_IS_IDEMPOTENT",
+        "evidence": "Daily diff output to canonical path; re-run produces same output.",
+        "scanner_miss_reason": "diff-writer pattern not captured"
+      },
+      {
+        "path": ".flywheel/scripts/peer-orch-blocker-watch.sh",
+        "actual_verdict": "APPLY_IS_IDEMPOTENT",
+        "evidence": "--apply == DRY_RUN=0; surface emits ntm rebalance receipt; receipt is read-only output (ntm rebalance itself is the mutator and has its own gating)",
+        "scanner_miss_reason": "downstream-tool-gating pattern not captured"
+      }
+    ],
+    "tier_1_genuine_bug_class": [
+      {
+        "path": ".flywheel/scripts/stale-error-auto-ping.sh",
+        "verdict": "APPLY_NEEDS_KEY",
+        "mutation_kind": "ntm send ping to other panes (external state, non-idempotent)",
+        "rationale": "Each --apply invocation sends fresh pings; re-running double-pings the worker. --idempotency-key would prevent double-ping on operator re-run.",
+        "fix_priority": "P1"
+      },
+      {
+        "path": ".flywheel/scripts/sync-canonical-doctrine.sh",
+        "verdict": "APPLY_NEEDS_KEY",
+        "mutation_kind": "cross-fleet doctrine sync (writes to AGENTS.md, validation schemas, doctrine docs, launchd templates, .claude/settings.json across all flywheel-installed repos)",
+        "rationale": "Backup-before-write mitigates accidental clobber but doesn't prevent double-apply from clobbering a backup. Largest blast radius of any audited surface. --idempotency-key + content-hash dedupe would prevent re-run from re-rewriting unchanged files.",
+        "fix_priority": "P0"
+      },
+      {
+        "path": ".flywheel/scripts/security-precommit-installer.sh",
+        "verdict": "APPLY_NEEDS_KEY",
+        "mutation_kind": "git commit + push (installs precommit hooks)",
+        "rationale": "git commit + push to remote is non-idempotent at the remote-state level. Re-run after an interrupted install could double-commit.",
+        "fix_priority": "P1"
+      },
+      {
+        "path": ".flywheel/scripts/regenerate-dicklesworthstone-sources.sh",
+        "verdict": "APPLY_NEEDS_KEY",
+        "mutation_kind": "regenerate Jeff source-repo copies (rm + clone + integrate)",
+        "rationale": "Backup-before-write helps but the operation itself is destructive-then-replace. Concurrent re-runs could collide.",
+        "fix_priority": "P1"
+      },
+      {
+        "path": ".flywheel/scripts/hub-blocker-detect.sh",
+        "verdict": "APPLY_NEEDS_KEY",
+        "mutation_kind": "br set priority=0 on detected hub blockers (beads JSONL mutation)",
+        "rationale": "br set on a bead is non-idempotent if called twice (audit-trail double-row). --idempotency-key + br action-id dedupe would prevent double-escalation.",
+        "fix_priority": "P2"
+      },
+      {
+        "path": ".flywheel/scripts/jeff-bead-285-divergence-capture.sh",
+        "verdict": "APPLY_NEEDS_KEY",
+        "mutation_kind": "beads-related capture writes",
+        "rationale": "Specific-purpose capture; lower frequency but still non-idempotent at audit-trail level.",
+        "fix_priority": "P3"
+      },
+      {
+        "path": ".flywheel/scripts/bcv-task-harness.sh",
+        "verdict": "APPLY_NEEDS_KEY",
+        "mutation_kind": "task harness execution (BCV — bead-callback-validation)",
+        "rationale": "Task execution path is not naturally idempotent; re-run could re-execute callbacks. --idempotency-key would dedupe.",
+        "fix_priority": "P2"
+      }
+    ]
+  },
+  "final_verdict_counts": {
+    "APPLY_IS_IDEMPOTENT": 48,
+    "APPLY_IS_READ_ONLY": 26,
+    "APPLY_HAS_OTHER_GATE": 1,
+    "APPLY_NEEDS_KEY_genuine": 7,
+    "APPLY_NEEDS_KEY_genuine_fix_priorities": {
+      "P0": 1,
+      "P1": 3,
+      "P2": 2,
+      "P3": 1
+    }
+  }
+}
