@@ -1,0 +1,1 @@
+{"schema_version":"dispatch-log-v2-violations-doctor/v1","command":"repair","status":"dry_run","mode":"dry_run","scope":"audit_log_truncate","idempotency_key":null,"planned_actions":[],"applied_actions":[]}

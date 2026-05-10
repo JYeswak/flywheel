@@ -1,0 +1,1 @@
+topic: validate — subjects: dispatch-log PATH (run validator, report violation count); audit-row JSONL_LINE (verify ts/status fields).
