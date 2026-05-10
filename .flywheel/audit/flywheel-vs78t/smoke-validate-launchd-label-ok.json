@@ -1,0 +1,1 @@
+{"schema_version":"verify-watcher-launchd-active/v1","command":"validate","subject":"launchd-label","ts":"2026-05-10T23:31:59Z","status":"ok","value":"ai.zeststream.flywheel-coordinator-daemon"}

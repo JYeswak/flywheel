@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info emits canonical envelope
+PASS --schema emits canonical envelope
+PASS --examples emits canonical envelope
+PASS doctor emits canonical envelope
+PASS health emits canonical envelope
+PASS repair --dry-run emits canonical envelope (real scope)
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate (bare) refuses with rc=64 + missing_subject envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS doctor probes launchctl_available (load-bearing for launchd verification)
+PASS validate launchd-label accepts canonical ai.zeststream.* label
+PASS validate launchd-label rejects non-canonical with rc=1
+PASS validate session-name accepts lowercase-hyphen
+PASS validate session-name rejects uppercase with rc=1
+PASS repair refuses unknown scope with rc=64 + unknown_scope envelope
+SUMMARY pass=19 fail=0
