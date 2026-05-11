@@ -1,0 +1,1 @@
+topic: repair --scope <audit_log_dir|docs_anchor> [--dry-run|--apply --idempotency-key KEY] — apply contract: --apply requires --idempotency-key (rc=3 refusal); scopes: audit_log_dir (mkdir -p dirname of $SCAFFOLD_AUDIT_LOG), docs_anchor (ensure .flywheel/ exists under $REPO). Unknown scope = rc=64.

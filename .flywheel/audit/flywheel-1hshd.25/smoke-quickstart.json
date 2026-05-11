@@ -1,0 +1,1 @@
+{"schema_version":"docs-validation-probe/v1","command":"quickstart","status":"ok","steps":[{"step":1,"action":"probe doctor","command":"docs-validation-probe.sh doctor --json"}],"next_actions":["doctor","health","repair"]}

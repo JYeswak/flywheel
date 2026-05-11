@@ -1,0 +1,1 @@
+{"schema_version":"docs-validation-probe/v1","command":"validate","subject":"validation-status","ts":"2026-05-11T05:25:37Z","status":"reject","value":"phantom","reason":"not_in_enum","valid_states":["validated","pending","failed","self_validated"],"source":"native --schema .metadata_fields"}

@@ -1,0 +1,1 @@
+{"schema_version":"docs-validation-probe/v1","command":"examples","examples":[{"name":"default run","invocation":"docs-validation-probe.sh","purpose":"backward-compatible original behavior"},{"name":"doctor","invocation":"docs-validation-probe.sh doctor --json","purpose":"probe substrate health"}]}
