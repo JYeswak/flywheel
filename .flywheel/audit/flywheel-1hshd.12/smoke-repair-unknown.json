@@ -1,0 +1,1 @@
+{"schema_version":"check-trauma-class-substrate/v1","command":"repair","status":"refused","scope":"bogus","reason":"unknown_scope","valid_scopes":["audit_log_dir","registry_path"]}

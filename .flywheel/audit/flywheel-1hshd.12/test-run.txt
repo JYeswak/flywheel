@@ -1,0 +1,27 @@
+PASS AG3.1 --info has name+version+capabilities
+PASS AG3.2 --schema has input/output schemas
+PASS AG3.3 --examples has >=3 entries
+PASS AG3.4 doctor has >=5 checks
+PASS doctor includes PlistBuddy probe (load-bearing)
+PASS health binds audit_log + stale_threshold
+PASS repair --dry-run audit_log_dir
+PASS repair --apply without key refused rc=3
+PASS repair refused has status=refused
+PASS repair registry_path REPORT-ONLY
+PASS repair unknown_scope rc=64 rc=64
+PASS validate root-path absolute OK
+PASS validate root-path relative rc=1 rc=1
+PASS validate root-path reject reason
+PASS validate class-name silent-write OK
+PASS validate class-name destructive-default OK
+PASS validate class-name unregistered-process OK
+PASS validate class-name unknown rc=1 rc=1
+PASS validate unknown_subject rc=64 rc=64
+PASS audit empty/missing
+PASS audit with row pass
+PASS why found
+PASS why not_found
+PASS why unavailable
+PASS quickstart steps
+PASS backward-compat: bare --json native scanner emits []
+SUMMARY pass=26 fail=0

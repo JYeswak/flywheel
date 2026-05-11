@@ -1,0 +1,1 @@
+{"schema_version":"check-trauma-class-substrate/v1","command":"validate","subject":"class-name","ts":"2026-05-11T04:07:00Z","status":"reject","value":"bogus","reason":"unknown_class","valid_classes":["silent-write","destructive-default","unregistered-process"]}

@@ -1,0 +1,1 @@
+{"schema_version":"check-trauma-class-substrate/v1","command":"audit","status":"pass","row_count":1,"recent":[{"ts":"2026-05-11T04:07:16Z","action":"smoke","class":"silent-write","run_id":"smoke-001"}]}

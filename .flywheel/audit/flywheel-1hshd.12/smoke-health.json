@@ -1,0 +1,1 @@
+{"schema_version":"check-trauma-class-substrate/v1","command":"health","ts":"2026-05-11T04:07:00Z","status":"warn","audit_log":"/tmp/flywheel-1hshd.12-tcs-audit.jsonl","reason":"audit_log_missing","last_run_ts":null,"age_seconds":null,"recent_runs":0,"total_runs":0,"stale_threshold_seconds":86400}

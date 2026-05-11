@@ -1,0 +1,1 @@
+{"schema_version":"check-trauma-class-substrate/v1","command":"why","ts":"2026-05-11T04:07:16Z","id":"2026-05-11T04:07:16Z","status":"found","audit_log":"/tmp/flywheel-1hshd.12-tcs-audit.jsonl","row":{"ts":"2026-05-11T04:07:16Z","action":"smoke","class":"silent-write","run_id":"smoke-001"}}
