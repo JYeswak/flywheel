@@ -1,0 +1,4 @@
+before: 20 probe-without-receiver gaps total (public-artifact-pipeline flagged)
+after: 16 probe-without-receiver gaps total (this + cascading drops)
+new receiver: tests/public-artifact-pipeline-probe-canonical-cli.sh (10/10 PASS)
+
