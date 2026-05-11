@@ -461,7 +461,19 @@ def recent_ledger_text(days: int = 30, max_bytes: int = 4_000_000) -> str:
 
     candidates: list[tuple[float, Path]] = []
     for path in STATE_DIR.glob("*.jsonl"):
-        if path.name == LEDGER.name:
+        # flywheel-ugali: skip ANY gap-hunt-* ledger (main + false-positives +
+        # self-calibration-runs + future siblings). MagentaPond's flywheel-ugali
+        # hypothesized that gap-hunt.jsonl entries self-clear flagged scripts.
+        # Empirical probe showed the main LEDGER is already skipped here, AND
+        # the current sister ledgers (gap-hunt-false-positives.jsonl,
+        # gap-hunt-self-calibration-runs.jsonl) don't carry script names today.
+        # BUT: future schema changes could introduce script-name fields into
+        # sister ledgers and reintroduce the self-clearance vulnerability.
+        # Mirroring known_silos() (cross-source-silos class hardening) which
+        # already allowlists gap-hunt.jsonl + gap-hunt-false-positives.jsonl;
+        # generalize via prefix-skip so new gap-hunt-* siblings are covered
+        # by default. Defense-in-depth.
+        if path.name == LEDGER.name or path.name.startswith("gap-hunt"):
             continue
         try:
             mtime = path.stat().st_mtime
@@ -1589,7 +1601,10 @@ def known_silos() -> set[str]:
     one row per ledger with `{name, class, writer, rationale}`. The probe
     skips any ledger whose basename matches a row's `name` field."""
     allowlist_path = REPO_ROOT / ".flywheel/gap-hunt-known-silos.jsonl"
-    names: set[str] = {"gap-hunt.jsonl", "gap-hunt-false-positives.jsonl"}
+    # flywheel-ugali: extend default set to include gap-hunt-self-calibration-runs.jsonl
+    # (added 2026-05-11 by faqj2 self-calibration loop). Symmetric with
+    # recent_ledger_text() prefix-skip hardening.
+    names: set[str] = {"gap-hunt.jsonl", "gap-hunt-false-positives.jsonl", "gap-hunt-self-calibration-runs.jsonl"}
     try:
         for line in allowlist_path.read_text(errors="replace").splitlines():
             line = line.strip()
