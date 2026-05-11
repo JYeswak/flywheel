@@ -96,6 +96,92 @@ bead_has_opt_out() {
   return 1
 }
 
+# Classify the substrate boundary class for a `[gap-wired-but-cold] .claude/skills/<X>/...`
+# bead title. Echoes one of:
+#   jeff-premium      — `jsm show <X>` returns "Jeffrey's Premium Skill" (Class 3)
+#   joshua-domain     — `jsm show <X>` returns "Skill '<X>' not found" (jsm-unmanaged; Class 1)
+#   skillos-managed   — `jsm show <X>` returns a skill not authored by Jeffrey (Class 2)
+#   not-skill-path    — title doesn't match `.claude/skills/<X>/` shape
+#   unknown           — jsm unavailable or unparseable output
+# Per flywheel-kjli4: N=3 trigger fires Jeff-Premium auto-route in cmd_run.
+classify_substrate_class() {
+  local title="$1"
+  # Extract skill name from path-like subject in title
+  local skill=""
+  if [[ "$title" =~ \.claude/skills/([A-Za-z0-9._-]+)/ ]]; then
+    skill="${BASH_REMATCH[1]}"
+  else
+    printf 'not-skill-path\n'
+    return 0
+  fi
+  local jsm_bin="${JSM_BIN:-/Users/josh/.local/bin/jsm}"
+  if [[ ! -x "$jsm_bin" ]]; then
+    printf 'unknown\n'
+    return 0
+  fi
+  local out; out="$("$jsm_bin" show "$skill" 2>&1)"
+  if printf '%s' "$out" | grep -q "Jeffrey's Premium Skill"; then
+    printf 'jeff-premium\n'
+  elif printf '%s' "$out" | grep -qE "Skill '$skill' not found"; then
+    printf 'joshua-domain\n'
+  elif printf '%s' "$out" | grep -qE 'Author:\s+Joshua'; then
+    printf 'joshua-domain\n'
+  elif printf '%s' "$out" | grep -qE '^[[:space:]]*ID:'; then
+    # jsm-managed but not Jeff-Premium-badged + not Joshua-authored
+    printf 'skillos-managed\n'
+  else
+    printf 'unknown\n'
+  fi
+}
+
+# Synthesize a minimal audit-only evidence pack for an auto-closed Jeff Premium bead.
+synthesize_jeff_audit_pack() {
+  local bid="$1"
+  local title="$2"
+  local skill="$3"
+  local ts="$4"
+  local commit_sha="$5"
+  local audit_dir="$REPO_ROOT/.flywheel/audit/$bid"
+  mkdir -p "$audit_dir"
+  cat > "$audit_dir/evidence.md" <<EVD
+# $bid — auto-closed by orch-tick-stale-auto-bead-close.sh (Jeff Premium AUDIT-ONLY)
+
+Bead: $bid
+Auto-classified by: orch-tick-stale-auto-bead-close.sh (flywheel-mvzri + flywheel-kjli4 extension)
+Substrate class: 3 (Jeff Premium per \`jsm show $skill\`)
+Disposition: audit-only-jeff-substrate-class-3
+Clearing commit: $commit_sha
+Auto-close ts: $ts
+
+## Why AUDIT-ONLY
+
+This skill is a Jeffrey Emanuel Premium JSM package. Per Jeff-substrate
+doctrine (\`feedback_no_push_ntm_br\` + \`feedback_jeff_issue_chain\` +
+\`feedback_jeff_issue_requires_full_workaround_research_first\` + JSM
+discipline forbids direct mutation under jsm-managed Jeff skills),
+P3 gap-bead wired-but-cold dispositions for Jeff Premium skills are
+AUDIT-ONLY by canonical convention.
+
+## Precedent (N=3 trigger fired in flywheel-kjli4)
+
+| # | Bead | Skill |
+|---|---|---|
+| 1 | flywheel-2xdi.97  | asupersync-mega-skill |
+| 2 | flywheel-2xdi.130 | rg-optimized |
+| 3 | flywheel-2xdi.138 | testing-fuzzing |
+| - | **\$bid** | **$skill** ← THIS auto-closure |
+
+## Verification
+
+\`\`\`bash
+jsm show $skill | grep -q "Jeffrey's Premium Skill" && echo confirmed
+\`\`\`
+
+Per kjli4 acceptance: auto-classification + auto-close with synthesized
+audit pack. Direct mutation FORBIDDEN; Jeff-issue chain DEFERRED.
+EVD
+}
+
 # Probe whether the gap is still active. Returns 0 if STILL flagged (don't close), 1 if MOOT (safe to close).
 gap_still_flagged() {
   local cls="$1"
@@ -187,6 +273,11 @@ print(json.dumps(result))
   local skip_flagged_count=0
   local skip_opt_out_count=0
   local processed_count=0
+  # flywheel-kjli4: per-class counters for Jeff-Premium auto-close + still-flagged sub-classes
+  local jeff_premium_count=0
+  local joshua_domain_count=0
+  local skillos_managed_count=0
+  local unknown_class_count=0
 
   # Use python for the per-bead loop (cleanest jq-free path)
   local result_json
@@ -207,10 +298,36 @@ probe_data = json.loads(open('/dev/stdin').read() if False else sys.argv[1] if l
     fi
     # Check whether the gap subject is still flagged
     if gap_still_flagged "$bclass" "$bbase" "$probe_json"; then
-      skipped_still_flagged+=("$bid|$btitle")
-      skip_flagged_count=$((skip_flagged_count+1))
+      # flywheel-kjli4: still-flagged path — classify substrate boundary
+      # to decide whether to AUDIT-ONLY-auto-close (Jeff Premium, Class 3)
+      # or skip-still-flagged (Class 1 Joshua-domain or Class 2 Skillos-managed)
+      local subst_class
+      subst_class="$(classify_substrate_class "$btitle")"
+      case "$subst_class" in
+        jeff-premium)
+          planned_closes+=("$bid|$btitle|$bclass|$bbase|audit-only-jeff-substrate-class-3")
+          close_count=$((close_count+1))
+          jeff_premium_count=$((jeff_premium_count+1))
+          ;;
+        joshua-domain)
+          skipped_still_flagged+=("$bid|$btitle|joshua-domain")
+          skip_flagged_count=$((skip_flagged_count+1))
+          joshua_domain_count=$((joshua_domain_count+1))
+          ;;
+        skillos-managed)
+          skipped_still_flagged+=("$bid|$btitle|skillos-managed")
+          skip_flagged_count=$((skip_flagged_count+1))
+          skillos_managed_count=$((skillos_managed_count+1))
+          ;;
+        *)
+          # not-skill-path or unknown — leave open as before
+          skipped_still_flagged+=("$bid|$btitle|unknown")
+          skip_flagged_count=$((skip_flagged_count+1))
+          unknown_class_count=$((unknown_class_count+1))
+          ;;
+      esac
     else
-      planned_closes+=("$bid|$btitle|$bclass|$bbase")
+      planned_closes+=("$bid|$btitle|$bclass|$bbase|moot-by-current-probe-clearance")
       close_count=$((close_count+1))
     fi
   done < <(printf '%s' "$triage_json" | /usr/bin/python3 -c "
@@ -227,7 +344,15 @@ for c in candidates:
     local commit_sha; commit_sha="$(cd "$REPO_ROOT" && /usr/bin/git rev-parse HEAD 2>/dev/null || echo unknown)"
     mkdir -p "$(dirname "$LEDGER")"
     for entry in "${planned_closes[@]}"; do
-      IFS='|' read -r bid btitle bclass bbase <<< "$entry"
+      IFS='|' read -r bid btitle bclass bbase bdisp <<< "$entry"
+      # flywheel-kjli4: synthesize audit pack for Jeff-Premium auto-closures BEFORE br close
+      if [[ "$bdisp" == "audit-only-jeff-substrate-class-3" ]]; then
+        local skill=""
+        if [[ "$btitle" =~ \.claude/skills/([A-Za-z0-9._-]+)/ ]]; then
+          skill="${BASH_REMATCH[1]}"
+        fi
+        synthesize_jeff_audit_pack "$bid" "$btitle" "$skill" "$ts" "$commit_sha"
+      fi
       if "$BR_BIN" close "$bid" >/dev/null 2>&1; then
         closed_ids+=("$bid")
         /usr/bin/python3 -c "
@@ -240,7 +365,7 @@ print(json.dumps({
   'title': '''$btitle'''.replace(chr(10),' '),
   'class': '$bclass',
   'basename': '$bbase',
-  'disposition': 'moot-by-current-probe-clearance',
+  'disposition': '$bdisp',
   'clearing_commit': '$commit_sha',
   'idempotency_key': '$idem_key',
 }))" >> "$LEDGER"
@@ -262,6 +387,12 @@ print(json.dumps({
   'closed': len([1 for x in '''${closed_ids[@]}'''.split() if x]),
   'skipped_still_flagged': $skip_flagged_count,
   'skipped_opt_out': $skip_opt_out_count,
+  'per_class_counts': {
+    'jeff_premium_auto_audit_only': $jeff_premium_count,
+    'joshua_domain_skip': $joshua_domain_count,
+    'skillos_managed_skip': $skillos_managed_count,
+    'unknown_or_non_skill_skip': $unknown_class_count,
+  },
   'planned_close_ids': '''${planned_closes[@]+${planned_closes[@]}}'''.split() if '''${planned_closes[@]+set}''' == 'set' else [],
   'ledger': '$LEDGER',
   'idempotency_key': '$idem_key',
@@ -270,11 +401,13 @@ print(json.dumps({
   else
     printf 'mode=%s processed=%d planned_closes=%d closed=%d skipped_still_flagged=%d skipped_opt_out=%d\n' \
       "$mode" "$processed_count" "$close_count" "${#closed_ids[@]}" "$skip_flagged_count" "$skip_opt_out_count"
+    printf 'per_class: jeff_premium_auto_audit=%d joshua_domain=%d skillos_managed=%d unknown=%d\n' \
+      "$jeff_premium_count" "$joshua_domain_count" "$skillos_managed_count" "$unknown_class_count"
     if (( close_count > 0 )); then
       printf 'planned closes:\n'
       for entry in "${planned_closes[@]}"; do
-        IFS='|' read -r bid btitle bclass bbase <<< "$entry"
-        printf '  %s [%s] %s\n' "$bid" "$bclass" "$btitle"
+        IFS='|' read -r bid btitle bclass bbase bdisp <<< "$entry"
+        printf '  %s [%s] [%s] %s\n' "$bid" "$bclass" "$bdisp" "$btitle"
       done
     fi
   fi

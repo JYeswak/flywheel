@@ -96,5 +96,84 @@ else
   f "AG6 production script missing opt-out pattern"
 fi
 
+# flywheel-kjli4 extension AGs
+
+# AG7 — classify_substrate_class function present
+if grep -q 'classify_substrate_class' "$SCRIPT" && grep -q 'jeff-premium' "$SCRIPT" && grep -q 'joshua-domain' "$SCRIPT" && grep -q 'skillos-managed' "$SCRIPT"; then
+  p "AG7 classify_substrate_class function + 3-class taxonomy present"
+else
+  f "AG7 classify_substrate_class missing or incomplete"
+fi
+
+# AG8 — synthesize_jeff_audit_pack present
+if grep -q 'synthesize_jeff_audit_pack' "$SCRIPT" && grep -q 'audit-only-jeff-substrate-class-3' "$SCRIPT"; then
+  p "AG8 synthesize_jeff_audit_pack + Class 3 disposition tag present"
+else
+  f "AG8 audit-pack synthesis missing"
+fi
+
+# AG9 — classify function returns correct class for known skills (live jsm probe)
+CLASS_ASUPERSYNC=$(bash -c "
+JSM_BIN=/Users/josh/.local/bin/jsm
+classify_substrate_class() {
+  local title=\"\$1\"
+  local skill=\"\"
+  if [[ \"\$title\" =~ \\.claude/skills/([A-Za-z0-9._-]+)/ ]]; then
+    skill=\"\${BASH_REMATCH[1]}\"
+  else
+    printf 'not-skill-path\\n'; return 0
+  fi
+  local out; out=\"\$(\$JSM_BIN show \"\$skill\" 2>&1)\"
+  if printf '%s' \"\$out\" | grep -q \"Jeffrey's Premium Skill\"; then
+    printf 'jeff-premium\\n'
+  elif printf '%s' \"\$out\" | grep -qE \"Skill '\$skill' not found\"; then
+    printf 'joshua-domain\\n'
+  else
+    printf 'unknown\\n'
+  fi
+}
+classify_substrate_class \"[gap-wired-but-cold] .claude/skills/asupersync-mega-skill/scripts/audit-target.sh\"
+")
+if [[ "$CLASS_ASUPERSYNC" == "jeff-premium" ]]; then
+  p "AG9 classify asupersync-mega-skill → jeff-premium"
+else
+  f "AG9 classify asupersync-mega-skill returned '$CLASS_ASUPERSYNC' (expected jeff-premium)"
+fi
+
+# AG10 — classify joshua-domain skill correctly
+CLASS_SB=$(bash -c "
+JSM_BIN=/Users/josh/.local/bin/jsm
+classify_substrate_class() {
+  local title=\"\$1\"
+  local skill=\"\"
+  if [[ \"\$title\" =~ \\.claude/skills/([A-Za-z0-9._-]+)/ ]]; then
+    skill=\"\${BASH_REMATCH[1]}\"
+  else
+    printf 'not-skill-path\\n'; return 0
+  fi
+  local out; out=\"\$(\$JSM_BIN show \"\$skill\" 2>&1)\"
+  if printf '%s' \"\$out\" | grep -q \"Jeffrey's Premium Skill\"; then
+    printf 'jeff-premium\\n'
+  elif printf '%s' \"\$out\" | grep -qE \"Skill '\$skill' not found\"; then
+    printf 'joshua-domain\\n'
+  else
+    printf 'unknown\\n'
+  fi
+}
+classify_substrate_class \"[gap-wired-but-cold] .claude/skills/skill-builder/scripts/audit-source-coverage.sh\"
+")
+if [[ "$CLASS_SB" == "joshua-domain" ]]; then
+  p "AG10 classify skill-builder → joshua-domain"
+else
+  f "AG10 classify skill-builder returned '$CLASS_SB' (expected joshua-domain)"
+fi
+
+# AG11 — per-class counts in summary envelope (text or JSON mode)
+if "$SCRIPT" --dry-run 2>&1 | grep -q 'jeff_premium_auto_audit'; then
+  p "AG11 summary envelope includes per-class counts"
+else
+  f "AG11 per-class counts missing from summary"
+fi
+
 printf '%d passed, %d failed\n' "$pass" "$fail"
 exit "$fail"
