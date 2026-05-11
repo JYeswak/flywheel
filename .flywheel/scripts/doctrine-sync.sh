@@ -482,21 +482,35 @@ from pathlib import Path
 
 source = Path(sys.argv[1]).expanduser()
 root = Path(sys.argv[2]).expanduser()
-text = source.read_text(encoding="utf-8")
 rules = []
-for match in re.finditer(r"(?m)^## (L(\d+))\b.*$", text):
-    start = match.start()
-    nxt = re.search(r"(?m)^## L\d+\b.*$", text[match.end():])
-    end = match.end() + nxt.start() if nxt else len(text)
-    body = text[start:end]
-    shipped = re.search(r"(?m)^shipped:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})\s*$", body)
-    rules.append((int(match.group(2)), match.group(1), shipped.group(1) if shipped else "unknown"))
+source_mode = "inline"
+text = source.read_text(encoding="utf-8") if source.exists() else ""
+inline_matches = list(re.finditer(r"(?m)^## (L(\d+))\b.*$", text))
+if inline_matches:
+    for match in inline_matches:
+        start = match.start()
+        nxt = re.search(r"(?m)^## L\d+\b.*$", text[match.end():])
+        end = match.end() + nxt.start() if nxt else len(text)
+        body = text[start:end]
+        shipped = re.search(r"(?m)^shipped:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})\s*$", body)
+        rules.append((int(match.group(2)), match.group(1), shipped.group(1) if shipped else "unknown"))
+else:
+    shards_dir = root / ".flywheel" / "rules"
+    if shards_dir.is_dir():
+        source_mode = "shards"
+        for shard_path in sorted(shards_dir.glob("L*.md")):
+            shard_text = shard_path.read_text(encoding="utf-8", errors="ignore")
+            m = re.match(r"(?m)^## (L(\d+))\b.*$", shard_text)
+            if not m:
+                continue
+            shipped = re.search(r"(?m)^shipped:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})\s*$", shard_text)
+            rules.append((int(m.group(2)), m.group(1), shipped.group(1) if shipped else "unknown"))
 highest = max(rules, default=(0, "L0", "unknown"))
 try:
     sha = subprocess.check_output(["git", "-C", str(root), "rev-parse", "--short", "HEAD"], text=True).strip()
 except Exception:
     sha = "unknown"
-print(json.dumps({"doctrine_version": f"{highest[2]}.{highest[1]}", "highest_l_rule": highest[1], "shipped": highest[2], "canonical_source": str(source), "canonical_sha": sha}, sort_keys=True))
+print(json.dumps({"doctrine_version": f"{highest[2]}.{highest[1]}", "highest_l_rule": highest[1], "shipped": highest[2], "canonical_source": str(source), "canonical_sha": sha, "source_mode": source_mode, "rule_count": len(rules)}, sort_keys=True))
 PY
       exit 0 ;;
     -h|--help)
@@ -573,9 +587,44 @@ def parse_rules(path):
         }
     return rules, text
 
+def parse_rules_from_shards(shards_dir):
+    rules = {}
+    for shard_path in sorted(shards_dir.glob("L*.md")):
+        shard_text = shard_path.read_text(encoding="utf-8", errors="ignore")
+        m = re.match(r"(?m)^## (L(\d+))\b.*$", shard_text)
+        if not m:
+            continue
+        body = shard_text.rstrip() + "\n"
+        heading = m.group(0)
+        shipped = re.search(r"(?m)^shipped:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})\s*$", body)
+        rid = m.group(1)
+        if rid in rules:
+            # Duplicate L-rule id across shards — surface deterministically;
+            # keep the later (sorted) shard so any rename takes precedence.
+            pass
+        rules[rid] = {
+            "id": rid,
+            "number": int(m.group(2)),
+            "heading": heading,
+            "title": re.sub(r"^##\s+", "", heading),
+            "shipped": shipped.group(1) if shipped else None,
+            "body": body,
+            "shard_path": str(shard_path),
+        }
+    return rules
+
+# Load canonical L-rules. Pre-shard layout (commit < a42e050e) kept all L-rules
+# inline in templates/flywheel-install/AGENTS.md. Post-shard layout keeps a
+# stub AGENTS.md and one file per rule under .flywheel/rules/L*.md. Try inline
+# first for backward compat, then fall back to shards.
 canonical_rules, _ = parse_rules(canonical_source)
+canonical_mode = "inline"
+shards_dir_canonical = root / ".flywheel" / "rules"
+if not canonical_rules and shards_dir_canonical.is_dir():
+    canonical_rules = parse_rules_from_shards(shards_dir_canonical)
+    canonical_mode = "shards"
 if not canonical_rules:
-    raise SystemExit("ERR: canonical source has no L-rule headings")
+    raise SystemExit("ERR: canonical source has no L-rule headings (checked inline + shards)")
 
 errors = []
 requested_l_rules = []
@@ -605,7 +654,10 @@ version_date = highest["shipped"] or datetime.now(timezone.utc).strftime("%Y-%m-
 doctrine_version = f"{version_date}.{highest['id']}"
 sha = git_sha()
 ts = utc_now()
-provenance = f"# Pulled from flywheel/templates/flywheel-install/AGENTS.md@{sha}"
+if canonical_mode == "shards":
+    provenance = f"# Pulled from flywheel/.flywheel/rules/L*.md@{sha} (sharded canonical layout)"
+else:
+    provenance = f"# Pulled from flywheel/templates/flywheel-install/AGENTS.md@{sha}"
 
 surfaces = [
     ("agents_md", target / "AGENTS.md"),
@@ -713,6 +765,8 @@ payload = {
     "apply": apply,
     "target_repo": str(target),
     "canonical_source": str(canonical_source),
+    "canonical_source_mode": canonical_mode,
+    "canonical_rule_count": len(canonical_rules),
     "canonical_sha": sha,
     "highest_l_rule": highest["id"],
     "proposed_doctrine_version": doctrine_version,
