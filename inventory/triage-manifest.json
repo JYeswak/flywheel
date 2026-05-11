@@ -6,8 +6,8 @@
   "license_default": "MIT (approved per bead body)",
   "total_repos": 70,
   "triage_counts": {
-    "ARCHIVE": 32,
-    "KEEP-and-LIFT": 36,
+    "KEEP-and-LIFT": 38,
+    "ARCHIVE": 30,
     "JEFF-AUDIT-ONLY": 2
   },
   "classification_legend": {
@@ -18,8 +18,8 @@
   "repos": [
     {
       "name": "100-minds-research",
-      "triage": "ARCHIVE",
-      "rationale": "101d stale. 264KB. Research catalog.",
+      "triage": "KEEP-and-LIFT",
+      "rationale": "101d stale. 264KB. Research catalog. [Joshua-correction 2026-05-11T23:35Z: \"I want 100minds brought up to par/up to speed\" \u2014 overrides worker-recommended ARCHIVE]",
       "visibility": "PRIVATE",
       "size_kb": 264,
       "primary_lang": "Shell",
@@ -27,12 +27,12 @@
       "has_readme": false,
       "has_license": false,
       "license_name": null,
-      "license_action_required": "NONE_PRE_RETIRE"
+      "license_action_required": "ADD_MIT"
     },
     {
       "name": "100minds-ai",
-      "triage": "ARCHIVE",
-      "rationale": "101d stale. 265KB. Abandoned. Note: 100minds-mcp is the active successor (KEEP-and-LIFT).",
+      "triage": "KEEP-and-LIFT",
+      "rationale": "101d stale. 265KB. Abandoned. Note: 100minds-mcp is the active successor (KEEP-and-LIFT). [Joshua-correction 2026-05-11T23:35Z: \"I want 100minds brought up to par/up to speed\" \u2014 overrides worker-recommended ARCHIVE]",
       "visibility": "PRIVATE",
       "size_kb": 265,
       "primary_lang": "TypeScript",
@@ -40,7 +40,7 @@
       "has_readme": true,
       "has_license": false,
       "license_name": null,
-      "license_action_required": "NONE_PRE_RETIRE"
+      "license_action_required": "ADD_MIT"
     },
     {
       "name": "100minds-mcp",
@@ -925,6 +925,16 @@
       "has_license": false,
       "license_name": null,
       "license_action_required": "ADD_MIT (default approved per bead)"
+    }
+  ],
+  "joshua_corrections_applied": [
+    {
+      "ts": "2026-05-11T23:35Z+executed-on-approve-all",
+      "directive": "100minds family up to par",
+      "repos": [
+        "100-minds-research",
+        "100minds-ai"
+      ]
     }
   ]
 }
