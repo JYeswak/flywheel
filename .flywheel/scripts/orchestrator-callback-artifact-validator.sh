@@ -1,5 +1,312 @@
 #!/usr/bin/env bash
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (partial -> passing per bead flywheel-k8gcv.25)
 set -euo pipefail
+
+VERSION="orchestrator-callback-artifact-validator.v1.1.0"
+SCHEMA_VERSION_INFO="orchestrator-callback-artifact-validator/v1"
+SCHEMA_VERSION_DECISION="orchestrator-callback-artifact-decision/v1"
+LEDGER="${ORCH_CALLBACK_ARTIFACT_LEDGER:-$HOME/.local/state/flywheel/orchestrator-callback-artifact-validator-ledger.jsonl}"
+
+now_iso_top() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+
+emit_info_full() {
+  jq -nc --arg sv "$SCHEMA_VERSION_INFO" --arg version "$VERSION" --arg ledger "$LEDGER" \
+    '{
+      schema_version:$sv,
+      command:"info",
+      name:"orchestrator-callback-artifact-validator.sh",
+      version:$version,
+      ledger:$ledger,
+      purpose:"validate dispatch Required artifacts paths and shapes before forwarding DONE callbacks to summary",
+      subcommands:["doctor","health","validate","audit","why","repair","quickstart","check"],
+      canonical_flags:["--info","--schema","--examples","--json","--apply","--dry-run","--idempotency-key","--callback-text","--callback-stdin","--callback-file","--dispatch-file","--repo"],
+      capabilities:[
+        "dispatch-required-artifacts-extraction",
+        "per-artifact-byte-threshold-check",
+        "extension-aware-min-byte-table",
+        "fail-closed-on-missing-shape-mismatch",
+        "fail-open-on-callback-parse-error",
+        "fix-bead-opener-integration"
+      ],
+      apply_supported:false,
+      dry_run_supported:false,
+      idempotency_key_required_for_apply:false,
+      mutates_state:true,
+      env_vars:["ORCH_CALLBACK_ARTIFACT_LEDGER","ORCH_CALLBACK_ARTIFACT_FIX_BEAD_OPENER","ORCH_CALLBACK_ARTIFACT_MIN_SCRIPT_BYTES","ORCH_CALLBACK_ARTIFACT_MIN_TEST_BYTES","ORCH_CALLBACK_ARTIFACT_MIN_SCHEMA_BYTES","ORCH_CALLBACK_ARTIFACT_MIN_MD_BYTES","ORCH_CALLBACK_ARTIFACT_MIN_JSON_BYTES","ORCH_CALLBACK_ARTIFACT_MIN_FILE_BYTES"],
+      exit_codes:{"0":"PASS","1":"REFUSE fail-closed","2":"UNVERIFIABLE fail-open parse error"},
+      min_bytes:{script:100,test:200,schema:300,markdown:500,json:2,file:1}
+    }'
+}
+
+emit_schema() {
+  jq -nc --arg sv "$SCHEMA_VERSION_DECISION" '{
+    schema_version:$sv,
+    command:"schema",
+    input_schema:{
+      type:"object",
+      required:["callback","dispatch_file"],
+      properties:{
+        callback_text:{type:"string",description:"raw worker callback text containing evidence=<paths>"},
+        callback_stdin:{type:"boolean",description:"read callback from stdin instead of --callback-text"},
+        callback_file:{type:"string",description:"read callback from file"},
+        dispatch_file:{type:"string",description:"path to dispatch packet whose Required artifacts section drives validation"},
+        repo:{type:"string"}
+      }
+    },
+    output_schema:{
+      type:"object",
+      required:["schema_version","decision","task_id"],
+      properties:{
+        schema_version:{const:"orchestrator-callback-artifact-decision/v1"},
+        decision:{enum:["PASS","REFUSE","UNVERIFIABLE"]},
+        task_id:{type:"string"},
+        reason:{type:"string"},
+        missing_artifacts:{type:"array",items:{type:"string"}},
+        subthreshold_artifacts:{type:"array"},
+        fix_bead_id:{type:"string"}
+      }
+    },
+    exit_codes:{"0":"PASS","1":"REFUSE fail-closed","2":"UNVERIFIABLE fail-open parse error"}
+  }'
+}
+
+emit_examples_json() {
+  jq -nc --arg sv "$SCHEMA_VERSION_INFO" '{
+    schema_version:$sv,
+    command:"examples",
+    examples:[
+      {name:"check-callback-text",invocation:"orchestrator-callback-artifact-validator.sh check --callback-text DONE_task-a_evidence=.flywheel/scripts/a.sh --dispatch-file /tmp/dispatch.md --json",purpose:"validate a worker callback containing evidence= path list against the dispatch packets Required artifacts section"},
+      {name:"check-stdin",invocation:"printf DONE_task-a_evidence=a.sh | orchestrator-callback-artifact-validator.sh check --callback-stdin --dispatch-file /tmp/dispatch.md --json",purpose:"read callback from stdin (useful for ntm send piped output)"},
+      {name:"doctor",invocation:"orchestrator-callback-artifact-validator.sh doctor --json",purpose:"canonical doctor envelope"},
+      {name:"audit",invocation:"orchestrator-callback-artifact-validator.sh audit --json",purpose:"tail recent validation decisions"}
+    ]
+  }'
+}
+
+emit_canonical_doctor() {
+  local ts; ts="$(now_iso_top)"
+  local jq_status="pass"; command -v jq >/dev/null 2>&1 || jq_status="fail"
+  local py_status="pass"; command -v python3 >/dev/null 2>&1 || py_status="fail"
+  local ledger_dir; ledger_dir="$(dirname "$LEDGER")"
+  local ledger_status="pass"
+  if [[ -e "$LEDGER" ]]; then
+    [[ -w "$LEDGER" ]] || ledger_status="fail"
+  else
+    [[ -d "$ledger_dir" ]] || ledger_status="warn"
+  fi
+  local opener_path="${ORCH_CALLBACK_ARTIFACT_FIX_BEAD_OPENER:-}"
+  local opener_status="pass"
+  if [[ -n "$opener_path" ]]; then
+    [[ -x "$opener_path" ]] || opener_status="warn"
+  else
+    opener_status="warn"
+  fi
+  local overall="pass"
+  for s in "$jq_status" "$py_status" "$ledger_status" "$opener_status"; do
+    case "$s" in
+      fail) overall="fail" ;;
+      warn) [[ "$overall" == "pass" ]] && overall="warn" ;;
+    esac
+  done
+  jq -nc --arg sv "$SCHEMA_VERSION_INFO.doctor" --arg ts "$ts" --arg overall "$overall" \
+    --arg jq_s "$jq_status" --arg py_s "$py_status" \
+    --arg ledger_s "$ledger_status" --arg ledger "$LEDGER" \
+    --arg opener_s "$opener_status" --arg opener "$opener_path" \
+    '{
+      schema_version:$sv,
+      command:"doctor",
+      ts:$ts,
+      status:$overall,
+      checks:[
+        {name:"jq",status:$jq_s,detail:"jq required for envelope emission"},
+        {name:"python3",status:$py_s,detail:"python3 required for validation logic"},
+        {name:"ledger_writable",status:$ledger_s,path:$ledger,detail:"append-only decision ledger"},
+        {name:"fix_bead_opener",status:$opener_s,path:$opener,detail:"ORCH_CALLBACK_ARTIFACT_FIX_BEAD_OPENER env points to orchestrator-callback-artifact-fix-bead.sh (warn if unset — REFUSE decisions wont auto-open fix beads)"}
+      ]
+    }'
+}
+
+emit_health() {
+  local ts; ts="$(now_iso_top)"
+  local row_count=0
+  [[ -r "$LEDGER" ]] && row_count="$(wc -l <"$LEDGER" 2>/dev/null | tr -d ' ')"
+  [[ -z "$row_count" ]] && row_count=0
+  jq -nc --arg sv "$SCHEMA_VERSION_INFO.health" --arg ts "$ts" \
+    --arg ledger "$LEDGER" --argjson row_count "$row_count" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:"pass",ledger:$ledger,ledger_row_count:$row_count}'
+}
+
+emit_canonical_validate() {
+  local ts; ts="$(now_iso_top)"
+  local rows=0 invalid=0
+  if [[ -r "$LEDGER" ]]; then
+    rows="$(wc -l <"$LEDGER" 2>/dev/null | tr -d ' ')"
+    [[ -z "$rows" ]] && rows=0
+    if [[ "$rows" -gt 0 ]]; then
+      invalid="$(jq -c 'select((.schema_version // "") == "" or (.decision // "") == "")' "$LEDGER" 2>/dev/null | wc -l | tr -d ' ')"
+      [[ -z "$invalid" ]] && invalid=0
+    fi
+  fi
+  local status="pass"
+  [[ "$invalid" -gt 0 ]] && status="violations"
+  jq -nc --arg sv "$SCHEMA_VERSION_INFO.validate" --arg ts "$ts" --arg status "$status" \
+    --argjson rows "${rows:-0}" --argjson invalid "${invalid:-0}" --arg ledger "$LEDGER" \
+    '{schema_version:$sv,command:"validate",ts:$ts,status:$status,ledger:$ledger,row_count:$rows,invalid_row_count:$invalid,check:"every decision row has non-empty schema_version + decision"}'
+}
+
+emit_audit() {
+  local limit="${1:-20}"
+  local ts; ts="$(now_iso_top)"
+  if [[ ! -r "$LEDGER" ]]; then
+    jq -nc --arg sv "$SCHEMA_VERSION_INFO.audit" --arg ts "$ts" --arg ledger "$LEDGER" \
+      '{schema_version:$sv,command:"audit",ts:$ts,status:"missing",ledger:$ledger,row_count:0,recent:[]}'
+    return 0
+  fi
+  local row_count
+  row_count="$(wc -l <"$LEDGER" 2>/dev/null | tr -d ' ')"
+  [[ -z "$row_count" ]] && row_count=0
+  local recent='[]'
+  if [[ "$row_count" -gt 0 ]]; then
+    recent="$(tail -n "$limit" "$LEDGER" 2>/dev/null | jq -cs '.' 2>/dev/null || printf '%s' '[]')"
+    [[ -z "$recent" ]] && recent='[]'
+  fi
+  local status="pass"
+  [[ "$row_count" -eq 0 ]] && status="empty"
+  jq -nc --arg sv "$SCHEMA_VERSION_INFO.audit" --arg ts "$ts" --arg status "$status" \
+    --arg ledger "$LEDGER" --argjson row_count "$row_count" --argjson recent "$recent" \
+    '{schema_version:$sv,command:"audit",ts:$ts,status:$status,ledger:$ledger,row_count:$row_count,recent:$recent}'
+}
+
+emit_why() {
+  local topic="${1:-}"
+  local body=""
+  case "$topic" in
+    ""|fail-closed-vs-fail-open)
+      body='REFUSE (exit 1, fail-closed): worker callback claims artifacts that are missing, malformed, or subthreshold relative to the dispatch packets Required artifacts section. UNVERIFIABLE (exit 2, fail-open): callback parse error OR dispatch packet not parseable. PASS (exit 0): every required artifact exists + meets its min-byte threshold per extension (script:100, test:200, schema:300, markdown:500, json:2, file:1).'
+      ;;
+    extension-byte-thresholds)
+      body='Per-extension min-byte thresholds catch trivial-empty-file submissions: .sh requires 100 bytes (lone shebang fails), .md requires 500 bytes (one-liner fails), .schema.json requires 300 bytes, *test* requires 200 bytes, .json requires 2 bytes (just []), everything else requires 1 byte. Thresholds overridable via ORCH_CALLBACK_ARTIFACT_MIN_*_BYTES env vars for fixture testing.'
+      ;;
+    fix-bead-opener-integration)
+      body='When validator decides REFUSE, it can auto-open a fix bead via ORCH_CALLBACK_ARTIFACT_FIX_BEAD_OPENER (companion script k8gcv.24 — orchestrator-callback-artifact-fix-bead.sh). Env var points to the opener binary; if unset, REFUSE decisions log but do not file beads. Sister-orch pattern: validator decides, opener files.'
+      ;;
+    *)
+      body="unknown topic: $topic. known: fail-closed-vs-fail-open, extension-byte-thresholds, fix-bead-opener-integration"
+      ;;
+  esac
+  jq -nc --arg sv "$SCHEMA_VERSION_INFO" --arg topic "${topic:-fail-closed-vs-fail-open}" --arg body "$body" \
+    '{schema_version:$sv,command:"why",topic:$topic,body:$body}'
+}
+
+emit_quickstart() {
+  jq -nc --arg sv "$SCHEMA_VERSION_INFO" '{
+    schema_version:$sv,
+    command:"quickstart",
+    status:"ok",
+    steps:[
+      {step:1,action:"check-doctor",command:"orchestrator-callback-artifact-validator.sh doctor --json"},
+      {step:2,action:"wire-fix-bead-opener",command:"export ORCH_CALLBACK_ARTIFACT_FIX_BEAD_OPENER=.flywheel/scripts/orchestrator-callback-artifact-fix-bead.sh"},
+      {step:3,action:"validate-a-callback",command:"orchestrator-callback-artifact-validator.sh check --callback-text DONE_task-x_evidence=a.sh --dispatch-file /tmp/d.md --json"},
+      {step:4,action:"audit",command:"orchestrator-callback-artifact-validator.sh audit --json"}
+    ],
+    next_actions:["wire-to-summary-step","pair-with-callback-receipt-validator"]
+  }'
+}
+
+emit_repair() {
+  local scope="" mode="dry_run" idem_key=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --scope) scope="${2:-}"; shift 2 ;;
+      --dry-run) mode="dry_run"; shift ;;
+      --apply) mode="apply"; shift ;;
+      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
+      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
+      --json) shift ;;
+      --help|-h) printf 'repair --scope <ledger-prime> [--dry-run|--apply --idempotency-key KEY]\n'; exit 0 ;;
+      "") shift ;;
+      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; exit 2 ;;
+    esac
+  done
+  if [[ -z "$scope" ]]; then
+    printf '{"schema_version":"%s.repair","status":"refused","reason":"--scope required (ledger-prime)","exit_code":2}\n' "$SCHEMA_VERSION_INFO"
+    exit 2
+  fi
+  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
+    printf '{"schema_version":"%s.repair","status":"refused","mode":"apply","scope":"%s","reason":"--apply requires --idempotency-key","exit_code":3}\n' "$SCHEMA_VERSION_INFO" "$scope"
+    exit 3
+  fi
+  local ts; ts="$(now_iso_top)"
+  case "$scope" in
+    ledger-prime)
+      local ledger_dir present_before present_after
+      ledger_dir="$(dirname "$LEDGER")"
+      present_before="$([[ -f "$LEDGER" ]] && printf true || printf false)"
+      if [[ "$mode" == "apply" ]]; then
+        mkdir -p "$ledger_dir" 2>/dev/null || true
+        [[ -f "$LEDGER" ]] || : > "$LEDGER"
+      fi
+      present_after="$([[ -f "$LEDGER" ]] && printf true || printf false)"
+      jq -nc --arg sv "$SCHEMA_VERSION_INFO.repair" --arg ts "$ts" --arg scope "$scope" --arg mode "$mode" \
+        --arg ledger "$LEDGER" --arg key "$idem_key" \
+        --argjson before "$present_before" --argjson after "$present_after" \
+        '{schema_version:$sv,command:"repair",ts:$ts,status:"pass",scope:$scope,mode:$mode,idempotency_key:$key,ledger:$ledger,ledger_present_before:$before,ledger_present_after:$after}'
+      ;;
+    *)
+      printf '{"schema_version":"%s.repair","status":"refused","scope":"%s","reason":"unknown scope; known: ledger-prime","exit_code":2}\n' "$SCHEMA_VERSION_INFO" "$scope"
+      exit 2
+      ;;
+  esac
+}
+
+# Canonical no-dash subcommand intercept BEFORE python dispatch.
+case "${1:-}" in
+  --schema) emit_schema; exit 0 ;;
+  --info)
+    # Override Python info() to emit the AG3-compliant envelope.
+    emit_info_full
+    exit 0
+    ;;
+  --examples)
+    shift
+    if [[ "${1:-}" == "--json" ]]; then emit_examples_json; exit 0; fi
+    # Fall through to Python's text-mode examples
+    set -- --examples "$@"
+    ;;
+  doctor) shift; emit_canonical_doctor; exit 0 ;;
+  health) shift; emit_health; exit 0 ;;
+  validate) shift; emit_canonical_validate; exit 0 ;;
+  audit)
+    shift
+    LIMIT=20
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --limit) LIMIT="${2:-20}"; shift 2 ;;
+        --json) shift ;;
+        "") shift ;;
+        *) shift ;;
+      esac
+    done
+    emit_audit "$LIMIT"
+    exit 0
+    ;;
+  why)
+    shift
+    TOPIC=""
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --json) shift ;;
+        "") shift ;;
+        *) [[ -z "$TOPIC" ]] && TOPIC="$1"; shift ;;
+      esac
+    done
+    emit_why "$TOPIC"
+    exit 0
+    ;;
+  quickstart) shift; emit_quickstart; exit 0 ;;
+  repair) shift; emit_repair "$@"; exit 0 ;;
+esac
 
 tmp_callback=""
 cleanup() {
