@@ -1,0 +1,96 @@
+--- .flywheel/audit/flywheel-n4gt1/patches/SKILL.md.original	2026-05-11 08:41:12
++++ .flywheel/audit/flywheel-n4gt1/patches/SKILL.md.proposed	2026-05-11 08:42:24
+@@ -784,6 +784,7 @@
+ | T6 | `railway` without `--project --service` flags | `railway up --detach` / `railway logs -e staging` (relies on linked context) | `railway up --detach --service "$RAILWAY_SERVICE_ID" --environment "$RAILWAY_ENVIRONMENT_ID"`; `railway logs --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID"` | `railway link` state is per-cwd and survives across shells; CI runners and worker panes inherit STALE link from prior sessions; deploys land in unintended targets silently | `scripts/deploy-staging.sh:246` (`railway up --detach`) and `:282` (`railway logs -e staging` no `--service`); `scripts/deploy-production.sh:347,393` (`railway up`, `railway run --` no project/service) |
+ | T7 | Codex chevron `/review` template traps the callback | Worker prints clean shipping summary → `/review` template renders in chevron → operator types ntm callback, it lands inside `/review` template | After printing shipping summary, the IMMEDIATE next pane action MUST be the ntm callback (`agent-mail send` or equivalent). Don't pause. Don't render the chevron template. Validate post-callback via `--robot-activity` that pane returned to clean state | Chevron templates auto-render on idle; once rendered, next-keystroke is captured into the template input slot, not the agent prompt. Looks like callback succeeded; orphans land at flywheel:1 invisibly | 2 orphan-callback events this session (pairs with `feedback-callback-target-must-be-explicit-not-flywheel-default.md`) |
+ | T8 | `infisical secrets set NAME "$VALUE"` argv leak | `infisical secrets set ALPS_HUBSPOT_PAT "$TOKEN" --env production` | `printf '%s' "$TOKEN" \| infisical-set ALPS_HUBSPOT_PAT --sensitive` (stdin-only); for upstream `infisical secrets set` use `--from-stdin` if available or wrap via the `infisical-secrets` skill helper | argv values appear in `ps auxf`, shell history, process exporters, and any tracing/strace capture. `set` looks like a config command; it's actually a secret write | `scripts/deploy-staging.sh:200-216`, `scripts/deploy-production.sh:201-242` (35+ `infisical secrets set NAME "$VALUE"` invocations across both deploy scripts) |
++| T9 | bash `=~` regex with `{N,M}` quantifier in `validate <subject>` arms | `[[ "$arg" =~ ^[A-Za-z0-9._/#:-]{4,256}$ ]]` (length-range inside the regex) | Two-check form: `local len=${#arg}; if (( len >= 4 && len <= 256 )) && [[ "$arg" =~ ^[A-Za-z0-9._/#:-]+$ ]]; then …` (length gate AND char-class regex, separated by `&&`). Include `observed_length:$len` in the reject envelope. | bash `=~` uses POSIX ERE which lacks `{N,M}` repetition; runtime error is `bash: invalid repetition count(s)`. Trap confuses operators coming from PCRE / `grep -P` / Python `re` where `{N,M}` is standard. Failure is RUNTIME, not parse-time — a script with this regex passes `bash -n` and only blows up when a value reaches the broken arm. | `feedback_bash_regex_no_brace_repetition.md` (META-RULE 2026-05-11); origin `.flywheel/audit/flywheel-1hshd.37/evidence.md` (`validate receipt-ref` discovery); production reference `.flywheel/scripts/idempotency-replay-guard.sh:280` (canonical two-check form in use) |
+ 
+ ### Stdin-only secret writes (canonical)
+ 
+@@ -867,7 +868,76 @@
+ When a worker prints a clean shipping summary, the **immediate next pane action MUST be the ntm callback or `agent-mail send`** — not a thinking pause, not a "let me also document this" detour. Once the chevron `/review` template auto-renders, the next keystroke is captured into the template input slot, not the agent prompt. The callback orphan lands at the default `flywheel:1` target and is invisible to the alpsinsurance orchestrator (pairs with `feedback-callback-target-must-be-explicit-not-flywheel-default.md`).
+ 
+ Operator discipline: after callback emit, run `ntm --robot-activity` to confirm the pane returned to a clean prompt state. Chevron-template-trapped panes show `codex_chevron_prompt` immediately after a "completed" log line — that pattern means the callback DID NOT land.
++
++### Bash regex `=~` no `{N,M}` repetition (canonical two-check form)
++
++Bash's `[[ … =~ … ]]` operator uses POSIX ERE, which **does not** support
++the `{N,M}` repetition quantifier. A `validate <subject>` arm whose input
++has both a length-range constraint AND a character-class constraint cannot
++encode both inside one regex:
++
++```bash
++# FORBIDDEN — bash =~ does NOT support {N,M}; runtime error: bash: invalid repetition count(s)
++if [[ "$arg" =~ ^[A-Za-z0-9._/#:-]{4,256}$ ]]; then …
++
++# CANONICAL — split the length gate from the char-class regex
++local len="${#arg}"
++if (( len >= 4 && len <= 256 )) && [[ "$arg" =~ ^[A-Za-z0-9._/#:-]+$ ]]; then
++  # ok envelope
++  jq -nc --arg v "$arg" '{status:"ok", value:$v}'
++else
++  # reject envelope — include observed_length so callers see WHY
++  jq -nc --arg v "$arg" --argjson len "$len" \
++    '{status:"reject", value:$v, reason:"pattern_or_length_mismatch",
++      pattern:"^[A-Za-z0-9._/#:-]+$", length_range:"[4, 256]",
++      observed_length:$len}'
++fi
++```
++
++**Why operators step on this trap:**
++
++- Failure is RUNTIME (`bash: invalid repetition count(s)`), not parse-time.
++  `bash -n script.sh` passes; the broken arm only blows up when a value
++  reaches it. Test coverage that omits the validate path ships the bug.
++- PCRE, `grep -P`, Python `re`, JavaScript regex, and Rust `regex` crate
++  all support `{N,M}` — operators coming from those languages assume bash
++  does too.
++- `[[:digit:]]{N,M}` looks identical to a POSIX character class with
++  repetition; it's not. Bash's ERE has POSIX bracket classes (the
++  `[[:digit:]]` part), but no `{N,M}` quantifier.
+ 
++**Canonical reject envelope shape** (mirrors `idempotency-replay-guard.sh:280`
++production use):
++
++```json
++{
++  "schema_version": "<surface>.v1",
++  "command": "validate",
++  "subject": "<subject>",
++  "ts": "<iso>",
++  "status": "reject",
++  "value": "<received>",
++  "reason": "pattern_or_length_mismatch",
++  "pattern": "^[A-Za-z0-9._/#:-]+$",
++  "length_range": "[4, 256]",
++  "observed_length": <int>
++}
++```
++
++The `observed_length` field is mandatory — without it, an operator
++debugging a rejected value can't tell whether the failure was length-side
++or char-class-side.
++
++**Discovery and references:**
++
++- META-RULE memory: `feedback_bash_regex_no_brace_repetition.md`
++  (2026-05-11, surfaced via flywheel-1hshd.37 receipt-ref discovery)
++- Production reference (load-bearing today):
++  `.flywheel/scripts/idempotency-replay-guard.sh:280` uses the canonical
++  two-check form for the `validate receipt-ref` subject
++- Cross-link bead: flywheel-898ji audit at
++  `.flywheel/audit/flywheel-898ji/evidence.md`
++
+ ### `br create` body discipline
+ 
+ ```bash
+@@ -917,7 +987,7 @@
+ ```markdown
+ ## Required skills (load before coding)
+ 
+-- `canonical-cli-scoping` — universal-class default; covers ntm queued-not-submitted (T1), infisical table-format leak (T2), stdout-pipeline secret capture (T3), gh-secret name-only false-confidence (T4), br create body discipline (T5), railway scope flags (T6), codex chevron callback trap (T7), argv secret writes (T8). Load FIRST before any other skill.
++- `canonical-cli-scoping` — universal-class default; covers ntm queued-not-submitted (T1), infisical table-format leak (T2), stdout-pipeline secret capture (T3), gh-secret name-only false-confidence (T4), br create body discipline (T5), railway scope flags (T6), codex chevron callback trap (T7), argv secret writes (T8), bash `=~` `{N,M}` runtime trap (T9). Load FIRST before any other skill.
+ - `<bead-class skill 1>` — <why>
+ - `<bead-class skill 2>` — <why>
+ ```

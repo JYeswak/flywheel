@@ -1,0 +1,1110 @@
+---
+name: canonical-cli-scoping
+description: "Use when authoring/extending any CLI, especially adapter-based aggregators (mem/ntm/br/cm). Triggers: 'new CLI', 'doctor command', 'repair command', 'adapter scoping', 'health check', 'CLI standard', 'console_script', 'pyproject scripts', 'help topic', 'upstream-bug surfacing', 'aggregator CLI', 'multi-substrate CLI', 'B1.5/cm-CLI/list-shadow'. Doctor+health+repair triad + validate+audit+why + per-adapter scoping + upstream-report. Apply BEFORE any CLI bead."
+license: MIT
+distribution: forbidden
+version: 0.4.0
+status: universal-class
+---
+
+# Canonical CLI Scoping — the standard for all CLI/adapter projects
+
+> **Core Principle:** Every CLI we build is operated by humans under stress. Every CLI must be inspectable (doctor), healable (repair), explainable (help/why), and observable (--watch/--json) — by default, not as a future epic.
+>
+> **Reference exemplars:** `ntm` (70+ subcommands), `br`/beads (doctor + repair + schema), `cm` (validate + audit + provenance + self-documentation).
+
+## Core Commands
+
+The standard mandates these command names on EVERY CLI:
+
+| Command | Purpose | Mandatory |
+|---|---|---|
+| `<cli> doctor [--fix] [--scope <subsystem>]` | Diagnose all subsystems, optionally repair | YES |
+| `<cli> health [--watch -i N] [--json]` | Single-shot status, monitoring loop | YES |
+| `<cli> repair --scope <subsystem> [--dry-run] [--apply]` | Idempotent fix for known failures | YES |
+| `<cli> validate <thing>` | Pure-read verification | If state-handling |
+| `<cli> audit` | Show recent mutations with provenance | If state-handling |
+| `<cli> why <id>` | Provenance trace for one object | If state-handling |
+| `<cli> --info` | Version + paths + env + deps dump | YES |
+| `<cli> --examples` (or `examples`) | Curated workflow examples | YES |
+| `<cli> quickstart` | Self-documentation for new operators | YES |
+| `<cli> help <topic>` | Topic-based manual | YES |
+| `<cli> completion <shell>` | Shell completion script | YES |
+| `<cli> upstream-report <adapter>` | Draft upstream issue (if wraps upstream) | If aggregator |
+| `<cli> doctor <adapter>` | Per-adapter scoped diagnosis | If aggregator |
+
+## Quick Start
+
+```bash
+# Verify a candidate CLI follows the standard
+bash ~/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh ntm    # PASS reference
+bash ~/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh br     # PARTIAL reference; expected to flag gaps
+
+# CI gate a candidate CLI against the v0.2 checklist
+bash ~/.claude/skills/canonical-cli-scoping/scripts/ci-gate-cli-scoping.sh <cli>
+
+# Score a candidate CLI against the phase 2-4 990+ bar
+bash ~/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh \
+  score <cli> --domain-exit-codes --json
+
+# Prove this skill's own scorer/regression ladder is above the close bar
+bash ~/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh \
+  skill-score canonical-cli-scoping --json
+
+# In a new CLI bead, copy the §"Implementation checklist" into the bead body as the acceptance gate
+# Workers MUST report each gate's PASS/FAIL in the callback contract
+
+# Before a fourth implementation dispatch on a repeated shadowing class, run from the affected repo
+THIRD_STRIKE_REPO_ROOT=/path/to/affected/repo bash ~/.claude/skills/canonical-cli-scoping/scripts/check-third-strike.sh <bead-id> list-shadow-after-third-strike
+```
+
+## Phase 2-4 Scorer And Regression Ladder
+
+The phase 1 checker answers "does this CLI expose the expected surface?" The
+phase 2-4 scorer answers "is the surface strong enough for a stressed operator
+or fresh worker to use without guessing?"
+
+Run:
+
+```bash
+bash ~/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh \
+  score <cli> --domain-exit-codes --json
+
+bash ~/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh \
+  regression-ladder --json
+
+bash ~/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh \
+  fresh-agent-simulation --json
+```
+
+The scorer emits a `canonical-cli-scorecard.result/v1` envelope and a
+`composite_score` from 0-1000. A candidate CLI is 990+ only when these dimensions
+all clear the bar:
+
+| Dimension | Contract |
+|---|---|
+| `doctor_health_repair_contract` | `doctor`, `health`, `repair`, and `repair --dry-run` are present and mechanically probed. |
+| `self_doc_content_minimums` | `--info`, `--examples`, `quickstart`, `help <topic>`, and `completion` have substantive content, not empty stubs. |
+| `dry_run_json_fixture` | `repair --dry-run --json` returns JSON, marks dry-run/planned/noop state, and reports zero actual actions. |
+| `domain_exit_code_validator` | Opt-in validator checks `help exit-codes` or `--exit-codes` for success, usage, transient/retry, and domain-class semantics. |
+| `regression_ladder` | Golden good fixture, wrong-but-legible corpus, and single-rule mutation fixtures are present. |
+| `phase4_asymptote` | Intent inference, self-application exemplar, cross-skill consistency, and fresh-agent simulation are documented and executable. |
+
+### R-002 reviewer workflow
+
+`canonical-cli-scorecard.sh score <cli> --json` is the reviewer workflow. It
+wraps `check-cli-scoping.sh`, adds content floors, and returns dimension-level
+evidence so a reviewer can say exactly why a candidate scores below 990. This is
+the local equivalent of a validator subagent when a pane cannot spawn
+subagents.
+
+### R-005/R-006/R-008 hardening
+
+- R-005 self-doc minimums: every self-documentation surface must contain enough
+  words and the right operator terms to distinguish a real manual from a flag
+  stub.
+- R-006 dry-run JSON fixture: mutating CLIs must make `repair --dry-run --json`
+  parseable and prove that `actual_actions` is empty during dry-run.
+- R-008 domain exit-code validator: candidates opt in with
+  `--domain-exit-codes`; the scorer then requires a documented domain table.
+
+### Regression resistance
+
+The regression ladder is pinned by
+`tests/test_canonical_cli_scorecard.sh`:
+
+- golden fixture scores 990+;
+- wrong-but-legible fixture fails below 990;
+- single-rule drift in dry-run JSON or exit-code docs is caught;
+- `regression-ladder`, `fresh-agent-simulation`, `skill-score`, and
+  `audit-top-skills` modes emit pass envelopes.
+
+### Phase 4 asymptote
+
+The fresh-agent simulation is intentionally concrete. A new worker who has only
+this skill can run `score <cli> --json`, inspect dimensions below 990, repair or
+bead the gap, then rerun `skill-score canonical-cli-scoping --json`. Cross-skill
+consistency is checked against `agent-ergonomics-cli`, `readme-writing`, and
+`testing-conformance-harnesses`: those skills should route CLI authoring back to
+this scorer instead of minting separate standards.
+
+### Top-10 fleet skill audit
+
+After this skill scores 990+, rerun:
+
+```bash
+bash ~/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh \
+  audit-top-skills --json
+```
+
+The audit records the top ten routing surfaces and verifies non-CLI skills route
+operator-command authoring back to canonical-cli-scoping.
+
+## File-Length Thresholds
+
+Canonical CLI work includes file shape, not only command shape. Files that grow
+beyond these thresholds must be split before the CLI surface is considered
+maintainable operator substrate:
+
+| Language / artifact | Threshold | Routing when exceeded |
+|---|---:|---|
+| Bash / shell | 500 lines | Extract sourced libraries under `lib/` or per-subcommand helpers; leave the executable as a thin dispatcher. |
+| Python | 400 lines | Apply `python-best-practices` module/package structure, typed boundaries, and fixture-backed tests. |
+| Rust | 500 lines | Apply `rust-best-practices` module boundaries, typed domain errors, and `cargo test`/`clippy` gates. |
+| Markdown doctrine/docs | 1500 lines | Split by audience or lifecycle stage unless it is a deliberate canonical doctrine archive. |
+
+Legitimate exceptions require an in-file receipt:
+
+```text
+# canonical-cli-scoping-allow-large: <reason>
+```
+
+Accepted reasons include generated code, append-only canonical doctrine, and
+reviewed migration archives. The exception is not silent: `flywheel-loop doctor
+--json` still reports it under `file_length.allowed_oversized_files`.
+
+## v0.2 hardening modules
+
+For implementation details that would bloat this trigger skill, load
+[references/V0.2-HARDENING.md](references/V0.2-HARDENING.md) when the task
+involves:
+
+- renaming a colliding `console_script` with rollback or compatibility shim;
+- Rust, Node, or Python CLI implementation examples;
+- CI checklist gates;
+- frankentui-style latency/showcase invariants;
+- telemetry commands (`metrics`, `logs`, `trace`), streaming NDJSON, plugins,
+  daemon/server mode, idempotency keys, or dry-run diff discipline.
+
+## THE EXACT PROMPT
+
+When dispatching a CLI/adapter bead to a worker, paste this verbatim into the dispatch packet's BEAD-ANATOMY section:
+
+```
+This bead delivers a CLI surface. Per ~/.claude/skills/canonical-cli-scoping/SKILL.md, your callback MUST report PASS/FAIL for every gate in §"Implementation checklist":
+  - doctor / health / repair triad
+  - validate / audit / why subsidiary
+  - --info / --examples / quickstart / help <topic> / completion
+  - --json everywhere + universal exit codes
+  - --dry-run + --explain on mutating ops
+  - per-adapter scoping (if aggregator)
+  - upstream-report <adapter> (if wraps upstream)
+
+Use `bash ~/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh` as a quick sanity probe. Reference exemplars: ntm, br, cm, gh.
+
+NAME-COLLISION PRECHECK (mandatory): before claiming any console_script entrypoint name N, run `which N` AND verify it returns nothing OR a clearly different binary you own. The B1.5/cm session-2026-05-01 trauma class is fully captured at SKILL.md §"Anti-pattern from session 2026-05-01" — don't repeat it.
+
+THIRD-STRIKE PRECHECK (mandatory after repeated callback drift): before dispatching another implementation bead on a list-shadow/name-shadow/function-object class, run `~/.claude/skills/canonical-cli-scoping/scripts/check-third-strike.sh <bead-id> <trauma-class>` from the affected implementation repo, or set `THIRD_STRIKE_REPO_ROOT=/path/to/affected/repo`. If it blocks, run `/planning-workflow`, freeze evidence, and make the next implementation bead depend on the planning artifact.
+
+Use ultrathink before authoring the dispatch contract.
+```
+
+## When to apply
+
+EVERY new CLI or significant CLI extension. EVERY adapter-based aggregator (where the CLI proxies to N upstream substrates). EVERY operator-facing tool that runs in production.
+
+If you're tempted to ship a CLI without the triad below, file a bead instead and use the standard. Do not ship a partial-scoping CLI.
+
+## The 3+3+1 triad doctrine
+
+### Mandatory triad (every CLI)
+
+| Command | Purpose | Output | Exit codes |
+|---|---|---|---|
+| `<cli> doctor` | Run diagnostics across ALL subsystems. Optionally repair (`--fix`). Default: report-only. | Per-subsystem PASS/WARN/FAIL with stack snippet on FAIL. `--json` machine-readable. | 0=all green, 1=at least one FAIL, 2=usage error |
+| `<cli> health` | Single-shot status of the running system. Lighter than doctor. Suitable for monitoring loops. | Aggregate health + per-subsystem one-liner. `--json` + `--watch -i N`. | 0=green, 1=degraded, 3=critical |
+| `<cli> repair [--scope <subsystem>]` | Idempotent fix for known failure modes. Reads doctor's failure-class taxonomy. `--dry-run` mandatory. | Per-action: PLANNED → APPLIED or SKIPPED + reason. | 0=no-op or success, 1=at least one repair failed |
+
+### Subsidiary triad (every CLI handling state)
+
+**State-handling trigger:** a CLI is state-handling when it reads, writes, or
+derives operator decisions from a file, database, remote API, queue, daemon,
+cache, lock, credential store, or other substrate outside its own process-local
+memory. If the CLI can leave durable residue, mutate shared state, or answer
+"why did this object/status/config become this way?", it needs the subsidiary
+triad. If the CLI is a pure calculator/formatter that consumes stdin/argv and
+emits stdout without consulting external state, document that exemption in
+`--info` or root help.
+
+| Command | Purpose |
+|---|---|
+| `<cli> validate <thing>` | Verify config/spec/input WITHOUT executing. Pure read. |
+| `<cli> audit` | Show recent state mutations with provenance (who, when, why, sha). |
+| `<cli> why <id>` | Provenance trace for a single object: where it came from, what changed, evidence. |
+
+See [references/STATE-HANDLING-EXAMPLES.md](references/STATE-HANDLING-EXAMPLES.md)
+for worked yes/no examples and a small classification corpus to pin the trigger
+against worker drift.
+
+### Self-documentation (every CLI)
+
+| Command/flag | Purpose |
+|---|---|
+| `<cli> --info` | Version, config paths, env vars, dependencies, runtime sha. One-shot diagnostic dump. |
+| `<cli> --examples` (or `<cli> examples`) | Curated workflow examples. Not the same as `--help`. Use cases, not flags. |
+| `<cli> quickstart` | "Explain this system to a new agent/operator." Self-documentation as a command. |
+| `<cli> help <topic>` | Topic-based operator manual. Per-subsystem when applicable. NOT the same as `--help`. |
+| `<cli> completion <shell>` | Generate completion script. Mandatory; no excuses. |
+
+## Shape Calibration v1 (ratified 2026-05-10 cross-orch P1 CONTRACT)
+
+**Spec edit:** the canonical-cli-scoping checker recognizes EITHER flag-style OR subcommand-style as canonical for 7 of the 13 dimensions. The motivation: clap-derive Rust CLIs (e.g., `beads_rust`) and similar idioms ship the same surface under subcommands rather than flags. Both shapes deliver the spec's intent; the checker should not punish style.
+
+**Authority:** ratified bilaterally between flywheel:1 + skillos:1 under cross-orch-anti-divergence-v1.0.0 P1 CONTRACT class on 2026-05-10T18:15Z. Ledger entry at `~/.local/state/cross-orch-protocols/registry.jsonl` 2026-05-10T18:15:00Z.
+
+### 13-dimension calibration table
+
+| # | Dimension | Flag-style (literal) | Subcommand-style (calibrated equivalent) | Notes |
+|---|---|---|---|---|
+| 1 | doctor | `<cli> doctor` | same | no calibration |
+| 2 | health | `<cli> health` | `<cli> doctor` (with health-class checks emitted in JSON envelope) OR `<cli> doctor --filter=health` | doctor that returns health-class results in its envelope satisfies the dim |
+| 3 | repair | `<cli> repair` | `<cli> doctor --apply` OR `<cli> doctor repair` | doctor surface admits repair via documented flag/subcommand |
+| 4 | repair --dry-run | `<cli> repair --dry-run` | dry-run discipline exists somewhere on the mutating surface | refined: NOT `--dry-run --apply` (oxymoronic combo); MUST exist on `repair` OR `doctor` OR global flag |
+| 5 | validate | `<cli> validate <thing>` | `<cli> lint`, `<cli> check <thing>` | semantic equivalence; verify-without-mutating is the gate |
+| 6 | audit | `<cli> audit` | same | no calibration |
+| 7 | why | `<cli> why <id>` | `<cli> show <id>` (with provenance: created/updated/source/deps) OR `<cli> trace <id>` | functional equivalence; "why does this object exist" is the gate |
+| 8 | --json | global `--json` flag | global `--json` flag OR `--format json` (multi-format support is SUPERSET) | accept superset |
+| 9 | --info | `<cli> --info` flag | `<cli> info` SUBCOMMAND emitting same envelope shape (version, config_paths, env, deps, runtime_sha) | functional equivalence; envelope content is gate |
+| 10 | examples | `<cli> --examples` flag OR `<cli> examples` subcommand | OR via documented artifact path (`agent_baseline/`, `EXAMPLES.md`) | discoverability calibration; curated workflows must be DISCOVERABLE |
+| 11 | quickstart | `<cli> quickstart` | same — MANDATORY, no calibration | every CLI provides operator onboarding surface |
+| 12 | help <topic> | `<cli> help <topic>` (topic-mode, NOT subcommand-help) | NO calibration — topic-help and subcommand-help are distinct surfaces | mandatory; topic-help covers concepts, subcommand-help covers usage |
+| 13 | completion | `<cli> completion <shell>` | `<cli> completions <shell>` (plural) + clap_complete unstable-dynamic | refined: also requires emitted script parses under `<shell> -n -` |
+
+### Refinements ratified within v1 calibration
+
+**Dim 4 safety refinement:** `--dry-run --apply` combination is oxymoronic and explicitly REJECTED. Acceptable shapes: `<cli> repair --dry-run`, `<cli> doctor --dry-run` (no concurrent --apply), `<cli> <mutating-cmd> --dry-run`, or global `<cli> --dry-run` flag.
+
+**Dim 13 validity refinement:** completion subcommand exists AND emitted completion script parses validly under target shell. Test command: `<cli> completion bash | bash -n -` exits 0. Catches the failure class where `completion bash` emits broken syntax (silent fail in production).
+
+### Subcommand-style detection probe
+
+```bash
+# For each calibrated dim, check both shapes:
+# Flag form:
+<cli> --info >/dev/null 2>&1 && PASS_LITERAL=1
+# Subcommand form:
+<cli> info --help >/dev/null 2>&1 && PASS_CALIBRATED=1
+# Either passes → dim PASS
+```
+
+### What this calibration is NOT
+
+- NOT a relaxation of the spec. The 13 dimensions stay 13. The intent stays.
+- NOT a free pass for poor implementations. Dim 11 (quickstart), Dim 12 (help-topic), and Dim 4 (dry-run safety) remain mandatory and uncalibrated.
+- NOT contingent on language. Both bash and Rust (and TS, etc.) impls that satisfy EITHER shape pass.
+
+### Implementation reference
+
+- Receipt schema (cross-orch P2): `~/.local/state/canonical-cli-scoping/schema/receipt.schema.json`
+- Receipt emitter (flywheel-bash): `.flywheel/lib/canonical-cli-helpers.sh` `cli_emit_canonical_receipt`
+- Receipt emitter (skillos-TS): `@zeststream/cli-kit` `emitCanonicalReceipt`
+- Shared receipts dir: `~/.local/state/canonical-cli-scoping/receipts/<orch>/<surface>-<ts>.json`
+- Drift detector (cross-impl drift signal): `.flywheel/scripts/canonical-cli-drift-detector.sh` (bash) + `~/Developer/skillos/scripts/canonical-cli-drift-detector.mjs` (node), schema `cross-orch-canonical-cli-drift-run/v1`
+
+### beads_rust audit (2026-05-10T17:33Z, motivating case)
+
+Audit `flywheel-97xm3` evaluated `beads_rust` against pre-calibration checker:
+- 4/13 LITERAL pass
+- 9/13 functionally present under clap-subcommand style
+- 3 truly missing: quickstart, --examples surface, repair --dry-run
+
+Post-calibration expected score: 10/13. The 3 truly-missing surfaces become substrate-rewrite-rust-v1 P3 acceptance criteria (Rust migration P3 filing target T+144h = 2026-05-16T17:00Z).
+
+## Adapter-scoping (for aggregator CLIs)
+
+**Rule:** If the CLI proxies to N upstream substrates (e.g., `mem` aggregating from `cm + cass + ks + memory + cards`), the doctor/health/repair triad MUST be ALSO scoped per-adapter.
+
+```
+mem doctor              # Aggregate report across all 5 adapters
+mem doctor cass         # Just the cass adapter
+mem doctor --adapter cass --fix
+mem health              # Aggregate
+mem health cm --json    # Single adapter, JSON
+mem repair --scope cards --dry-run
+```
+
+Per-adapter contract:
+1. `mem doctor <adapter>` MUST exit cleanly (0 or 1) even if the adapter is dead — never crash on probe.
+2. `mem doctor <adapter>` MUST distinguish: `OK | DEGRADED | DOWN | NOT_CONFIGURED | UPSTREAM_BUG`.
+3. `UPSTREAM_BUG` triggers `<cli> upstream-report <adapter>` (next section).
+
+## Upstream-bug surfacing (for adapter aggregators)
+
+When an adapter wraps an upstream tool (e.g., mem.adapters.cm wraps Jeff's `cm` binary), the CLI MUST be capable of generating an upstream-issue draft:
+
+```
+mem upstream-report cm              # Generates .planning/upstream-issues/cm-<sha>.md
+mem upstream-report cm --apply      # Files the issue (requires APPROVE=yes)
+```
+
+The draft includes: reproduction steps, exact error captured, version of upstream tool, our wrapper version, suggested fix or workaround. Never auto-file without `--apply`. Always review.
+
+This is how we stay aligned with upstream maintainers (Jeff, etc.) instead of accumulating local hacks.
+
+## Output discipline (every command)
+
+**Mandatory flags:**
+- `--json` everywhere. Machine-readable mode is not optional.
+- `--no-color` and `--no-emoji` for log/CI capture.
+- `--width <n>` for non-TTY environments.
+
+**Mandatory schema discipline:**
+- Every JSON output validates against a published schema.
+- `<cli> schema <command>` emits the schema for that command's output.
+- (Reference: `br schema` does this.)
+
+**Exit codes (universal):**
+| Code | Meaning |
+|---|---|
+| 0 | Success. |
+| 1 | Failure (domain-specific; expected failure mode). |
+| 2 | Usage error (bad args, missing required, conflicting flags). |
+| 3 | Transient/upstream/network failure (caller may retry). |
+| 4 | Blocked by gate (e.g., `--allow-secret`, `APPROVE=yes`). |
+| 5+ | Domain-specific. Document in --help. |
+
+**errJSONFailure pattern (Jeff ntm#125, 2026-05-08):** when a CLI emits a JSON
+failure envelope, `success:false` MUST be paired with a non-zero exit code. JSON
+is the machine-readable error surface; the exit code is the shell-callable gate.
+Both fire together; never JSON-XOR-exit. Stderr decoration such as `Error: ...`
+is suppressed when a JSON envelope is present — the caller chooses the surface.
+Shell wrappers must gate on exit code first and read the JSON envelope only for
+detail.
+
+## Jeff Delta: Domain-Grouped Exit Codes
+
+> **Delta source:** `/Users/josh/Developer/jeff-corpus/beads_rust/src/error/structured.rs:203-256` (`impl ErrorCode { pub const fn exit_code(&self) -> i32 }`). Pinning tests at `structured.rs:1013-1020` and `error/mod.rs:362-382`.
+>
+> **Why:** the universal table above tells operators *that* a CLI failed; Jeff's substrate adds **per-domain integer codes** so shell scripts can branch on the failure class without parsing JSON, CI gates can ratchet on a single domain, and agents can choose retry-vs-report-vs-escalate from `$?` alone.
+
+Beyond the `0/1/2/3/4` universal codes, Jeff's `beads_rust` exits with one integer per domain:
+
+| Exit | Domain | Sample variants |
+|---:|---|---|
+| 1 | Internal / unknown | `INTERNAL_ERROR` |
+| 2 | Database (and clap usage error, by convention) | `DATABASE_NOT_FOUND`, `DATABASE_LOCKED`, `SCHEMA_MISMATCH`, `NOT_INITIALIZED` |
+| 3 | Issue / operational lookup | `ISSUE_NOT_FOUND`, `AMBIGUOUS_ID`, `ID_COLLISION`, `NOTHING_TO_DO` |
+| 4 | Validation | `VALIDATION_FAILED`, `INVALID_STATUS`, `REQUIRED_FIELD` |
+| 5 | Dependency graph | `CYCLE_DETECTED`, `DEPENDENCY_NOT_FOUND`, `HAS_DEPENDENTS` |
+| 6 | Sync / JSONL | `JSONL_PARSE_ERROR`, `SYNC_CONFLICT`, `CONFLICT_MARKERS`, `PATH_TRAVERSAL` |
+| 7 | Config | `CONFIG_ERROR`, `CONFIG_NOT_FOUND`, `CONFIG_PARSE_ERROR` |
+| 8 | I/O / serialization | `IO_ERROR`, `JSON_ERROR`, `YAML_ERROR` |
+
+**Adoption rules:**
+
+1. Pick domains from your CLI's actual failure classes — the pattern is "one integer per domain", not "exactly these eight".
+2. Reserve `2` for usage errors regardless (clap/git/ssh convention; Jeff folds DB into `2` because there is no usage-error class beyond clap's default).
+3. Reserve `3` for transient/upstream/network failures when your CLI has a remote subsystem (host §"Output discipline" universal row 3).
+4. Single source of truth: a `const fn exit_code(&self) -> i32` on the error enum, exhaustively matched. The same value powers `$?` and the `--json` `code` field.
+5. Pin every variant with a unit test (`assert_eq!(ErrorCode::Foo.exit_code(), N)`); without the test the table drifts on the next variant.
+6. Document the domain table in `<cli> help exit-codes` (topic-help) and in `--help`.
+7. Pair this with Jeff's `is_retryable` companion (`structured.rs:189-201`) so agents know which domains are safe to auto-retry.
+
+**Full reference + adoption checklist + anti-patterns:** [references/JEFF-EXIT-CODES.md](references/JEFF-EXIT-CODES.md).
+
+## Jeff Delta: doctor as Namespace
+
+> **Delta source:** `/Users/josh/Developer/jeff-corpus/beads_rust/src/cli/commands/doctor.rs` (named `check_*` probe functions) + `/Users/josh/Developer/jeff-corpus/beads_rust/src/cli/mod.rs:2481-2491` (`DoctorArgs`).
+>
+> **Why:** the §"Mandatory triad" doctor command is a single entrypoint. Jeff's substrate shows that for any CLI with ≥2 internal subsystems (not just aggregator CLIs), `doctor` is best authored as a **namespace of subsystem-scoped probes**, each implemented as a named `check_<subsystem>` function pushing onto a shared `Vec<CheckResult>`. Operators read a labeled per-subsystem report; `repair --scope <subsystem>` maps 1:1 to the named check; subsystem failures map to the domain-grouped exit codes above.
+
+The pattern restated:
+
+```
+<cli> doctor                        # All subsystems, aggregated PASS|WARN|FAIL report
+<cli> doctor <subsystem>            # One subsystem only
+<cli> doctor <subsystem> --json     # Machine-readable, single subsystem
+<cli> doctor --repair               # All subsystems, attempt repair on FAIL rows
+<cli> repair --scope <subsystem>    # Repair one subsystem (matches doctor's name)
+```
+
+**Implementation contract:**
+
+1. **One named `check_<subsystem>` function per subsystem.** Pure-probe — no mutation, no exit. Pushes one or more structured `CheckResult { name, status, message, findings }` records.
+2. **Closed status enum, not free strings.** Jeff uses `enum CheckStatus { Pass, Warn, Fail }` (`doctor.rs:31-36`). For aggregator CLIs, expand to the host taxonomy `OK|DEGRADED|DOWN|NOT_CONFIGURED|UPSTREAM_BUG`; the closed-enum invariant stays.
+3. **Subsystem identifier is shared between doctor and repair.** `<cli> repair --scope foo` repairs the failures surfaced by `<cli> doctor foo`. Names match exactly — agents pivot from diagnosis to repair by string.
+4. **Subsystem names are operator-readable, not module-named.** Pick names a stressed human can map to a Slack message (`integrity`, `jsonl`, `sync_metadata`), not your crate layout.
+5. **Aggregate `doctor` exits `1` if any subsystem fails** (host §"Output discipline"). When `doctor <subsystem>` is the entry point and that subsystem fails, exit with the domain code from §"Jeff Delta: Domain-Grouped Exit Codes".
+6. **Classification stays separate from probing.** Jeff isolates `append_*_anomalies` helpers (`doctor.rs:334-525`) from the `check_*` probes; this lets the same probe data drive both the human report and the repair planner.
+
+**Reference exemplar:** Jeff's `beads_rust doctor` decomposes into `check_integrity`, `check_recoverable_anomalies`, `check_null_defaults`, `check_issue_write_probe`, `check_sqlite_cli_integrity`, `check_merge_artifacts`, `check_root_gitignore`, `check_jsonl`, `check_db_count`, `check_sync_jsonl_path`, `check_sync_conflict_markers`, `check_sync_metadata`, `check_database_sidecars`, `check_recovery_artifacts` — fourteen subsystems behind one `doctor` surface, each addressable by name.
+
+**Full reference + per-subsystem table with file:line cites + anti-patterns:** [references/JEFF-DOCTOR-NAMESPACE.md](references/JEFF-DOCTOR-NAMESPACE.md).
+
+## Jeff Delta: TOON as JSON Peer
+
+> **Delta source:** `/Users/josh/Developer/jeff-corpus/beads_rust/src/cli/mod.rs:1275-1317` (`OutputFormat { Text, Json, Csv, Toon }` + `from_env()` precedence resolver).
+> **Skillos overlay anchor:** `.flywheel/CODEX-CORE-DOCTRINE-v1.md` §3.1.
+>
+> **Why:** §"Output discipline" mandates `--json` everywhere. That rule was authored before TOON (Token-Optimized Object Notation) shipped as a peer encoding in Jeff's `beads_rust`, in mcp-agent-mail's server prompt, and across this fleet. When the primary consumer is an LLM agent (per §"Robot mode"), JSON-only emits pay the JSON token tax for no human-readability gain. TOON belongs at JSON's level, not as a future flag.
+
+Every output-bearing CLI authored under skillos ownership SHALL expose a single closed enum:
+
+```
+--format text|json|toon              # basic enum (no CSV)
+--format text|json|csv|toon          # full enum (when CSV applies)
+```
+
+**Adoption rules:**
+
+1. **Closed enum, not free-string.** `clap::ValueEnum` (Rust), `Literal[...]` + `argparse choices=` (Python), `oneof` (TypeScript). Free-string `--format` flags drift.
+2. **`Text` is the `#[default]` variant.** Humans get readable output without `--format`; agents and scripts opt in.
+3. **TOON is a peer, not a flag.** Do NOT ship `--json` AND `--toon` as separate boolean flags — the single enum is the doctrine.
+4. **CSV is optional.** Surfaces that don't list rows use the basic enum; conversion paths exist between basic and full enums (Jeff's `From<OutputFormatBasic> for OutputFormat`).
+5. **Env precedence chain (when `--format` is unset):** `<CLI>_OUTPUT_FORMAT > TOON_DEFAULT_FORMAT > text`. Per-CLI env beats fleet env; unknown values fall through; never panic on bad env. Implementation mirrors Jeff's `from_env()` (`mod.rs:1289-1306`).
+6. **Document the chain in `<cli> help format` (topic-help) and in `<cli> --info`.** `--info` reports the resolved format AND which precedence step resolved it.
+7. **Schema emission covers TOON.** `<cli> schema <command>` describes the TOON shape, not just JSON — otherwise agents fall back to scraping and defeat the token-saving purpose.
+
+**Full reference + adoption checklist + anti-patterns:** [references/TOON-PEER.md](references/TOON-PEER.md).
+
+## Jeff Delta: Env Counterpart for Every Persistent Flag
+
+> **Delta source:** `/Users/josh/Developer/jeff-corpus/beads_rust/src/cli/mod.rs:1289-1316` (`OutputFormat::from_env()` is the canonical exemplar; the same env-resolver pattern recurs across `beads_rust` for path/db/sync overrides).
+> **Skillos generalization:** the TOON env precedence chain is one instance of a broader Jeff doctrine — every persistent CLI flag (one whose value an operator wants to set once and forget) MUST have an env counterpart with a documented precedence order.
+
+For any flag whose value is (a) operator-pane-scoped or fleet-default-shaped, AND (b) non-secret, AND (c) sensible to leave set across many invocations: ship an env counterpart named `<CLI>_<FLAG>` (uppercase, underscored).
+
+| Flag | Env counterpart |
+|---|---|
+| `--format` | `<CLI>_OUTPUT_FORMAT` (e.g. `BR_OUTPUT_FORMAT`) |
+| `--no-color` | `<CLI>_NO_COLOR` (also honor ecosystem `NO_COLOR` when present) |
+| `--width` | `<CLI>_WIDTH` |
+| `--scope` (default scope for repair/doctor) | `<CLI>_DEFAULT_SCOPE` |
+| `--db` / `--config` path overrides | `<CLI>_DB`, `<CLI>_CONFIG` |
+| `--apply` / `--force` / `--yes` / `--allow-secret` | NOT covered (mutation gate; never default-on via env) |
+| `--idempotency-key` | NOT covered (per-mutation; never persistent) |
+
+**Canonical precedence chain (every flag with both surfaces):**
+
+```
+1. Explicit --flag on CLI invocation               # always wins
+2. <CLI>_<FLAG> env variable                       # CLI-specific override
+3. <FLEET>_<FLAG> env variable (when applicable)   # fleet-wide default (e.g. TOON_DEFAULT_FORMAT, NO_COLOR)
+4. Built-in default                                # documented; never panics on unset
+```
+
+**Adoption rules:**
+
+1. **CLI flag always wins** — operators must override env from the command line without `unset`.
+2. **Per-CLI env beats fleet env** — tune one tool without flipping the fleet.
+3. **Fleet env is optional.** Don't invent `<FLEET>_<FLAG>` without ≥2 CLIs sharing the default.
+4. **Built-in default is hard-coded.** Unset env → fall through; never abort.
+5. **Resolver shape mirrors Jeff's `from_env()`** — pure read; returns `Option<T>`; per-step `if let Ok(value) = env::var(...)` blocks in precedence order; lowercased+trimmed parser; unknown values return `None`, never panic.
+6. **NEVER for secrets, mutation gates, or per-mutation values.** Pane bleed-through silently turns mutations live or leaks tokens to subprocesses.
+7. **Document in `<cli> help env` AND `<cli> --info`.** `--info` reports the resolved value AND the precedence step that resolved it. Doctor probe verifies envs parse; mis-set env is WARN, not FAIL.
+
+**Full reference + adoption checklist + anti-patterns:** [references/ENV-COUNTERPART.md](references/ENV-COUNTERPART.md).
+
+## Jeff Delta: Per-Subcommand Robot Allow-List
+
+> **Delta source:** `/Users/josh/Developer/jeff-corpus/beads_rust/src/cli/mod.rs:1357-1374` (`pub const fn command_requests_robot_json(cmd: &Commands) -> bool`) + per-subcommand `pub robot: bool` flags (`mod.rs:2012, 2024, 2095, 2123, 2164, 2192, 2208, 2341, 2432, 2527, 2547`); consumed at `src/output/context.rs:328`.
+>
+> **Why:** §"Robot mode" mandates a `robot/<query>` namespace; §"Output discipline" mandates `--json` everywhere. Neither answers: when only a *subset* of subcommands accept `--robot`, which ones are robot-aware? The wrong answer is "all of them, implicitly" (a global `--robot` flag silently includes future subcommands that haven't been audited). The Jeff answer is a closed, exhaustive match-arm allow-list — robot eligibility is a per-subcommand contract, audited at compile time.
+
+The pattern, restated:
+
+```rust
+#[must_use]
+pub const fn command_requests_robot_json(cmd: &Commands) -> bool {
+    match cmd {
+        Commands::Close(args)    => args.robot,
+        Commands::Reopen(args)   => args.robot,
+        Commands::Ready(args)    => args.robot,
+        // ...one arm per robot-eligible subcommand...
+        _                         => false,   // wildcard: silence is NOT robot
+    }
+}
+```
+
+**Adoption rules:**
+
+1. **Allow-list, not deny-list.** Enumerate which subcommands are robot-aware by name. Wildcard `_ => false` is the safe default.
+2. **One central `pub const fn` predicate.** Pure, total, statically callable from the output-mode resolver. No ambient mutation, no scattered `if args.robot` branches.
+3. **Per-subcommand `--robot` flag, not a global switch.** A top-level `--robot` flag that applies to every subcommand is the deny-list anti-pattern. Reject.
+4. **Wildcard returns `false`.** Adding a new subcommand never silently flips it into robot mode. Robot eligibility is reviewed at PR time.
+5. **The predicate composes with the global `--json` flag, never replaces it.** `args.json || command_requests_robot_json(&args.command)` — both surfaces converge into one boolean for the output-mode resolver.
+6. **Document the eligible subcommand list in `<cli> help robot` and `<cli> robot/capabilities`.** Operators and dispatching agents need to know which subcommands are robot-aware without reading source.
+7. **Pin with a unit test** that asserts the predicate returns `true` for expected variants and `false` for at least one negative case.
+8. **Convergence with `<cli> robot/capabilities`** (host §"Robot contract"): the capabilities listing SHOULD derive mechanically from the same predicate, so operators and the contract cannot disagree.
+
+**Full reference + adoption checklist + anti-patterns:** [references/ROBOT-ALLOW-LIST.md](references/ROBOT-ALLOW-LIST.md).
+
+## Jeff Delta: Repair Only When Reversible
+
+> **Delta source:** `/Users/josh/Developer/jeff-corpus/beads_rust/src/cli/commands/doctor.rs:113-116` (the `Cannot repair: ...` refusal constants), `:1091-1113` (`--allow-repeated-repair` evidence-preservation gate), `:1339-1380` (`.verification-failed.json` audit trail), `:2232-2264` (rollback-only write probe). Companion: `cli/mod.rs:2486-2490` (`--repair` and `--allow-repeated-repair` flags on `DoctorArgs`).
+>
+> **Why:** §"Mandatory triad" requires `repair` to be "idempotent fix for known failure modes." §"Mutation discipline" requires `--dry-run`, `--explain`, idempotency, and audit emission. Both are correct floors. Jeff's substrate adds the ceiling: **`repair` MUST refuse to act when the action is not reversible. Refusal is a first-class outcome; "applied successfully" is not always the safe outcome.** A repair that destroys evidence of the original failure cannot be debugged when it itself fails. A repair that runs without first verifying rollback is possible turns one failure into two.
+
+Three load-bearing patterns from `beads_rust doctor --repair`:
+
+1. **Refuse to repair when authority is unsafe.** When the source-of-truth used by repair (JSONL ledger, snapshot, replica) is itself corrupt, has merge conflict markers, or contains invalid records, repair refuses with a structured error starting `"Cannot repair: ..."` and a remediation hint. State is unchanged. Exit non-zero.
+2. **Refuse to repeat a repair that previously failed verification.** When a prior `repair` run left `.verification-failed.<ts>.json` evidence on disk, the next attempt is refused until the operator explicitly opts in via `--allow-repeated-repair`. **Evidence preservation > convenience.**
+3. **Probe reversibility before mutating.** For DB repairs: `BEGIN`, write a sentinel, `ROLLBACK`, verify. For filesystem repairs: snapshot affected paths before mutation. For network repairs: there is no reversibility — refuse to call repair anything that reaches outside the local trust boundary.
+
+**Adoption rules:**
+
+1. **Refusal is a first-class outcome.** `Cannot repair: <reason>` errors exit non-zero with a structured `--json` envelope (`{success: false, code: <DOMAIN>, reason: "..."}`); pairs with the domain exit codes from §"Jeff Delta: Domain-Grouped Exit Codes".
+2. **Validate the source-of-truth before reading from it.** If repair reconstructs state, validate the source first; refuse on validation failure.
+3. **Preserve evidence on failure; never overwrite.** Failed repair attempts write a `.verification-failed.<ts>.json` (or equivalent) artifact; presence on disk gates the next run.
+4. **Probe reversibility before mutating** (transaction + ROLLBACK; filesystem snapshot; or refuse if external).
+5. **Backups are not optional** for DB-mutating repair (per `.flywheel/CODEX-CORE-DOCTRINE-v1.md` §3.2 storage triple-backup rule); audit log references backup paths + sha.
+6. **Audit emits the refusal AND the reasoning.** `phase`, `outcome=refused`, `reason`, validator findings, preserved-evidence paths.
+7. **`--allow-repeated-repair` (or equivalent) is the only override.** No env var. No config flag. No `--force`. Operator types it on the command line after reviewing evidence.
+8. **Document the refusal taxonomy in `<cli> help repair`.**
+
+**Full reference + adoption checklist + anti-patterns:** [references/REPAIR-REVERSIBLE.md](references/REPAIR-REVERSIBLE.md).
+
+## Jeff Delta: NO_COLOR Over `--no-color`
+
+> **Delta source:** `/Users/josh/Developer/jeff-corpus/beads_rust/src/config/mod.rs:3690-3705` (canonical `should_use_color` resolver) + `src/main.rs:986-996` (compound predicate consults flag AND env presence) + `src/output/context.rs:275-355, 328-341` (every renderer honors both surfaces) + `src/main.rs:1096-1130` (`human_error_color_respects_no_color_precedence` test pins both).
+> **External standard:** <https://no-color.org> — any non-empty (and per the standard, *any*-presence) value of the `NO_COLOR` environment variable disables ANSI color output, across all conformant tools.
+>
+> **Why:** §"Output discipline" mandates a `--no-color` flag. §"Jeff Delta: Env Counterpart for Every Persistent Flag" mandates env counterparts with the canonical "CLI flag > per-CLI env > fleet env > default" precedence. Color has one extra rule that breaks the canonical chain: **`NO_COLOR` is an external ecosystem standard. It is honored unconditionally — even when the operator did not pass `--no-color`, even when no per-CLI env counterpart exists, and even when a per-CLI counterpart is set to "use color".** This is the one documented exception to "per-CLI env beats fleet env" — fleet/ecosystem env wins for color, because users opt into color-free environments globally and expect every CLI to respect that opt-in without per-tool configuration.
+
+**Effective precedence chain (color-specific):**
+
+```
+1. Explicit CLI flag override:  --no-color  (force off)  /  --color=always  (force on)
+2. Config file color setting:   display.color = true|false  (if shipped)
+3. NO_COLOR env presence:       any value → force off  (per https://no-color.org)
+4. Per-CLI counterpart (rare):  e.g. BR_NO_COLOR  (lower precedence than NO_COLOR; usually not shipped)
+5. Stdout/stderr is-terminal:   non-terminal → force off  (CI/log capture safety)
+6. Built-in default:            color on
+```
+
+**Adoption rules:**
+
+1. **Ship `--no-color` AND honor `NO_COLOR` env.** Both surfaces. Either alone disables color. Never one without the other.
+2. **Presence is sufficient.** `env::var_os("NO_COLOR").is_some()` (Rust) / `os.environ.get("NO_COLOR") is not None` (Python) / `process.env.NO_COLOR !== undefined` (TS). Do NOT parse the value; do NOT special-case `NO_COLOR=0`/`false` — the <https://no-color.org> standard is presence-only.
+3. **Centralize the predicate** in one `should_use_color()` helper. Every code path that emits ANSI consults it. Do not scatter `if cli.no_color` checks.
+4. **The compound check goes in the helper, not the call sites.** Two renderers must never disagree on whether to colorize.
+5. **Don't ship a per-CLI `<CLI>_NO_COLOR` env counterpart unless cross-tool conflict requires it.** If shipped, it MUST be lower precedence than `NO_COLOR`, contrary to the canonical "per-CLI env beats fleet env" rule. Document the inversion explicitly.
+6. **`--json` and robot mode bypass color regardless.** Color is for human-readable output only; structured outputs never carry ANSI.
+7. **Pin with a unit test:** `--no-color` alone disables, `NO_COLOR` env alone disables, non-terminal disables, and the three combine without contradiction.
+8. **Document in `<cli> help format` (or `<cli> help color`) and `<cli> --info`.** `--info` reports the resolved color decision AND which surface decided.
+
+**Full reference + adoption checklist + anti-patterns:** [references/NO_COLOR-ENV.md](references/NO_COLOR-ENV.md).
+
+## Mutation discipline
+
+ANY command that mutates state MUST support:
+- `--dry-run`: print what would happen, exit 0.
+- `--explain`: print rationale (the "why" trace) before executing.
+- Idempotency: re-running with same inputs is a no-op.
+- Audit-log emission: every mutation appends to `<cli> audit`.
+
+ANY command that mutates SHARED state (cross-tree, cross-process) MUST support:
+- File reservation via Agent Mail (or equivalent locking).
+- Atomic write contract (temp file + fsync + os.replace).
+- Backup-before-mutate with restore path documented.
+
+### Dry-run output contract
+
+`--dry-run --json` MUST distinguish planned and actual effects. Before
+`--apply`, output only `planned_actions`, `would_write`, `would_delete`,
+`would_call_external`, and `blocked_by`. After apply, output `actual_actions`,
+`writes`, `deletes`, `external_calls`, and `audit_ids`. Never mix hypothetical
+and executed effects in one key.
+
+### Idempotency keys
+
+Any mutating command that can be retried by an agent or CI MUST accept an
+idempotency key (`--idempotency-key <key>` or a documented equivalent). Reusing
+the key returns the original audit result instead of repeating the mutation.
+
+## Jeff Delta: Append-Only Audit And Lineage
+
+> **Delta source:** flywheel Jeff-pattern matrix
+> `.flywheel/jeff-corpus/v1/learnings/06-skill-enhancement-matrix.md`, rank 1
+> for `canonical-cli-scoping`; adopted patterns:
+> `append-only-audit-log`, `callback-envelope-shape`,
+> `doctor-health-repair-triad`, `frontmatter-validation`,
+> `idempotency-key-fail-closed`, `lock-file-convention`,
+> `schema-version-migration`, and `testing-fixture-conventions`.
+
+State-changing CLI surfaces MUST leave an append-only lineage trail. The audit
+log is not a debug log; it is the authoritative mutation ledger that lets
+operators answer: what changed, who/what initiated it, which idempotency key
+deduped it, which files or upstream resources were touched, and which receipt
+proves the post-check.
+
+Adoption rules:
+
+1. **Append-only by default.** Mutations append JSONL rows to a documented audit
+   ledger. Do not rewrite, truncate, or "compact" the primary ledger in normal
+   operation. If compaction becomes necessary, write a migration row first and
+   preserve the source ledger path and checksum.
+2. **Every audit row carries lineage.** Required fields:
+   `schema_version`, `ts`, `command`, `actor`, `operation`, `idempotency_key`,
+   `dry_run`, `apply`, `input_hash`, `planned_actions`, `actual_actions`,
+   `touched_paths`, `external_targets`, `receipt_path`, `post_check`,
+   `result`, and `failure_class`.
+3. **Fail closed on ambiguous idempotency.** If a mutating command accepts an
+   idempotency key but cannot read the previous audit row for that key, it MUST
+   refuse instead of replaying side effects. Refusal exits non-zero and emits a
+   JSON failure envelope.
+4. **Lock rows are lineage rows.** Cross-process mutation locks must have
+   acquire/release audit rows with `lock_path`, `holder`, `ttl`, and
+   `stale_lock_policy`. A lock file without audit lineage is an orphaned
+   operator state.
+5. **Schema migrations are ledgered.** Any audit schema bump writes a
+   `schema_migration` row with `from_schema`, `to_schema`, compatibility notes,
+   and the validator command. Readers must tolerate prior minor versions or
+   fail with a migration hint, not a parser traceback.
+6. **Callbacks remain local-contract aware.** If the CLI is used by flywheel
+   workers, receipt envelopes may add lineage fields, but MUST NOT replace
+   DID/DIDNT/GAPS, `mission_fitness`, `br_close_executed`, or callback delivery
+   verification fields required by dispatch packets.
+7. **Pin with fixture replay.** Every append-only ledger surface needs at least
+   one fixture replay that proves: dry-run creates no mutation row, apply
+   appends exactly one row, replay with the same idempotency key returns the
+   original row, and a schema-version fixture remains readable.
+
+Minimal audit row shape:
+
+```json
+{
+  "schema_version": "mycli.audit/v1",
+  "ts": "2026-05-08T00:00:00Z",
+  "command": "mycli repair --scope db --apply",
+  "actor": "codex",
+  "operation": "repair",
+  "idempotency_key": "repair-db-20260508",
+  "dry_run": false,
+  "apply": true,
+  "input_hash": "sha256:...",
+  "planned_actions": ["vacuum db"],
+  "actual_actions": ["vacuum db"],
+  "touched_paths": [".mycli/state.db"],
+  "external_targets": [],
+  "receipt_path": ".mycli/receipts/repair-db-20260508.json",
+  "post_check": {"status": "pass"},
+  "result": "applied",
+  "failure_class": null
+}
+```
+
+## Observability and long-running output
+
+CLIs that run background work, remote operations, or multi-step repairs MUST
+provide:
+
+| Command | Purpose |
+|---|---|
+| `<cli> metrics [--json]` | Counters, timings, queue depth, failure classes |
+| `<cli> logs [--since <dur>] [--json]` | Structured recent operator log |
+| `<cli> trace <op>` | One operation's span/provenance trace |
+
+Long-running commands MUST support NDJSON progress events on stdout:
+`started`, `progress`, `warning`, `blocked`, `completed`, `failed`. Human
+pretty output is allowed, but CI/agents need deterministic event streams.
+
+## Extension and server-mode boundaries
+
+Only add plugins when there is a stable extension contract and at least two
+real downstream adapters. Plugin APIs must version their manifest schema and
+provide `plugin validate`. Otherwise, keep adapters in-tree.
+
+Server or daemon mode follows the same standard:
+`<cli> serve`, `<cli> daemon status`, `<cli> daemon stop`, and `<cli> health`
+must agree on process identity, socket/port, config path, and readiness.
+
+## Discoverability for large surfaces (>20 subcommands)
+
+Once a CLI grows past 20 subcommands, three additional surfaces become mandatory:
+
+1. **Palette/dashboard** — interactive command picker (`ntm palette`, `ntm dashboard`).
+2. **Activity/changes** — "what's happening right now" view (`ntm activity`, `ntm changes`).
+3. **Triage** — "what should I do next" advisory (`bv --robot-next`, `ntm assign`).
+
+Below 20 subcommands, --help + topic-help is enough. Above 20, humans need a UI.
+
+## Robot mode (for CLIs operated by agents, not just humans)
+
+> **Doctrine:** When a CLI's primary consumer is an LLM agent or another CLI rather than a human, the canonical surface is not `--help` + scrollback — it is a `robot/<query>` namespace returning stable JSON envelopes. Agents must not scrape help text or grep terminal output to determine system state; they must call canonical state queries with versioned schemas.
+>
+> **Reference exemplar:** `ntm` exposes 135 `--robot-*` commands (`internal/robot/capabilities.go`, registry doctrine at `docs/robot-command-registry.md`). Validated catalog of 11 high-leverage commands at `~/.claude/skills/.flywheel/...` (cataloged 2026-05-02 by pane 3 dispatch `ntm_robot_refactor_recs_2026_05_02`).
+
+### When to add a robot namespace
+
+EVERY CLI that meets ANY of these conditions:
+- Primary consumer is an agent (orchestrator, dispatcher, scheduler, monitor)
+- State queries get scraped from `--help` or scrollback by ≥2 downstream consumers
+- Hand-rolled regex parsers exist anywhere in your fleet for the CLI's output
+- The CLI manages live processes/sessions/agents (any "is X working?" question)
+
+### The robot contract
+
+Every `robot/<query>` command MUST:
+
+| Requirement | Why |
+|---|---|
+| Emit `{success: bool, timestamp, version, output_format, ...}` envelope | Agents need stable framing to parse confidently |
+| Publish a JSON schema retrievable via `<cli> robot/schema=<query>` | Parser contracts decouple agent code from CLI version churn |
+| Maintain backward-compat schemas across CLI minor versions | Breaking schemas across point releases breaks all downstream agents |
+| Use semantic state values (`WAITING|THINKING|GENERATING|ERROR|...`), never UI strings | Activity classifiers should drive state, not regex over animated spinners |
+| Provide a `<cli> robot/capabilities` command that lists all robot queries with their schemas | Discovery without scraping `--help` |
+| Probe live state, not stale scrollback | Agents querying state need ground truth, not what was last shown to a human |
+
+### Mandatory robot triad (for agent-operated CLIs)
+
+| Command | Solves | Notes |
+|---|---|---|
+| `<cli> robot/activity` | "What is each managed entity doing right now?" | The PRIMARY truth for capacity/idle/working decisions |
+| `<cli> robot/diagnose` | "Why is entity X stuck?" | Returns `overall_health`, classified problems, suggested fix commands |
+| `<cli> robot/tail` | "Show me the recent output of entity X" | Replaces raw multiplexer captures or scrollback regex |
+
+### Convergence rule (CRITICAL)
+
+If a CLI exposes multiple robot queries that *should* agree (e.g., `robot/is-working` and `robot/activity` both reporting on pane state), they MUST share a classifier. **Disagreement is a contract violation.** File upstream issue immediately. Downstream consumers should pick ONE as authoritative and document why.
+
+> **Trauma class:** session 2026-05-02 caught `ntm --robot-activity` reporting `THINKING` while `ntm --robot-is-working` reported `SAFE_TO_RESTART` for the same Codex pane. Activity is correct (uses 15-line live thinking window per `internal/robot/activity.go:19`); is-working consumes stale state. Filed as ntm follow-up. **Don't repeat: validate convergence between any pair of robot queries before declaring either authoritative.**
+
+### Migration anti-pattern
+
+Hand-rolled scrollback parsers (`tmux capture-pane | grep`, `ntm save | grep spinner_re`) are the single largest source of fleet-wide false positives. Every UI tweak in the upstream CLI breaks every downstream consumer simultaneously, silently. **Replace with robot mode the moment it ships.**
+
+The session 2026-05-02 audit found 15 hand-rolled detectors in our flywheel substrate that should have been `--robot-activity` calls — they were responsible for self-reflection-paradox and 13hr phantom-trajectory loops.
+
+## ALPS 2026-05-06 Trap Classes (universal-class default for every dispatch)
+
+> **Status:** This skill is referenced as the **universal-class default** in every ZestStream dispatch packet (per `~/.claude/projects/-Users-josh-Developer-alpsinsurance/memory/feedback-bead-dispatches-must-inject-relevant-skills.md`). The traps below were each cost-paid in ALPS-Insurance work the week of 2026-05-05. None are speculative; each pins to either a memory file or a real shell invocation in the ALPS repo.
+>
+> **Why universal-class:** these trap classes are CLI-shape problems on operator-facing CLIs (ntm, infisical, cf-secret, gh, railway, br). Any worker invoking a shell verb in a dispatch packet inherits exposure unless the packet carries this skill.
+
+### Trap class table
+
+| # | Trap | Violating pattern | Canonical-compliant pattern | Why non-obvious | Evidence |
+|---|---|---|---|---|---|
+| T1 | `ntm send` queued-not-submitted | `ntm send <session> --pane=N "<prompt>"` and trust "Sent to pane" stdout | After every `ntm send`, sleep 5s then `ntm --robot-activity=<session> --panes=N` and verify `state == THINKING`; if `WAITING + codex_chevron_prompt`, re-send empty `""` to deliver Enter | "Sent to pane" reports buffer-landing, NOT submission. Codex panes have a documented queued-not-submitted bug; success stdout decouples from agent-state | `feedback-ntm-send-post-dispatch-validation-required.md` (5+ recurrences this session, 30+ min invisible stalls) |
+| T2 | `infisical secrets` table-format leak | `infisical secrets ... \| awk -F= '/PATTERN/ {print $1}'` | `infisical secrets ... --format dotenv-export \| awk -F= '/^export / {print $1}'` OR `--format json \| jq -r '.[].name'` | Default output is Unicode vertical-bar table, NOT k=v. `awk -F=` parses each row as one field and silently passes ALL VALUES through. `--silent` suppresses progress not table; `2>/dev/null` doesn't help (table is on stdout) | `feedback-infisical-table-format-leaks-secrets.md` (1 rotation cost: VERCEL_API_TOKEN, VERCEL_TOKEN, VERCEL_PROTECTION_BYPASS, VERCEL_ORG_ID, VERCEL_PROJECT_ID leaked across 2 projects × 3 envs) |
+| T3 | Stdout-pipeline secret leak via codex capture | `curl ... \| jq -r '.data.var.SECRET' \| python3 -c '...sanitize...'` | `curl ... > /dev/shm/sec.$$ && trap "shred -u /dev/shm/sec.$$" EXIT; python3 -c '...' < /dev/shm/sec.$$` | Codex captures the FULL stdout of `curl\|jq` into pane scrollback BEFORE the python sanitizer ever runs. Sanitized python output is moot — bare value already lives in transcript | `feedback-stdout-pipeline-leaks-secret-via-codex-capture.md` (DATABASE_URL leak during H2 diagnosis 2026-05-05T~12:00Z) |
+| T4 | `gh secret list` name-only validation false-confidence | `gh secret list \| grep VERCEL_TOKEN && echo "rotation done"` | After write: (1) `gh secret list` for presence, (2) grep ALL consumers (`rg "secrets\.(LEGACY\|MODERN)" .github/workflows`), (3) **runtime probe** (`vercel projects ls` / `curl -H "Bearer $TOKEN"`) to confirm the consumer reaches the modern value | Name-presence ≠ value-correct ≠ consumer-switched. When BOTH legacy + modern names exist, `secrets.LEGACY_NAME` resolves silently to wrong token — no missing-secret error, just wrong outcomes | `feedback-token-shadowing-rotation-not-complete-without-consumer-switch.md` (3 dispatches over multiple sessions to find Vercel staging vca_/legacy split) |
+| T5 | `br create` heredoc / argv multi-line body | `br create -p 1 -t task -d "Fix \`thing\` with \\n newlines and special chars"` | Write body to `/tmp/bead-$$.md`, then `br create -p 1 -t task -d "$(cat /tmp/bead-$$.md)"` — file-mediated ALWAYS for bodies with backticks/newlines | zsh parses backticks in `-d "..."` argv as command-substitution; embedded newlines truncate; no error message — just a malformed bead body | `.planning/wave-3/dispatch-log/audit-report-codex.md:106-110` — examples of long single-line `-d` invocations that work; multi-line variants caused 1 dispatch failure this session |
+| T6 | `railway` without `--project --service` flags | `railway up --detach` / `railway logs -e staging` (relies on linked context) | `railway up --detach --service "$RAILWAY_SERVICE_ID" --environment "$RAILWAY_ENVIRONMENT_ID"`; `railway logs --project "$RAILWAY_PROJECT_ID" --service "$RAILWAY_SERVICE_ID"` | `railway link` state is per-cwd and survives across shells; CI runners and worker panes inherit STALE link from prior sessions; deploys land in unintended targets silently | `scripts/deploy-staging.sh:246` (`railway up --detach`) and `:282` (`railway logs -e staging` no `--service`); `scripts/deploy-production.sh:347,393` (`railway up`, `railway run --` no project/service) |
+| T7 | Codex chevron `/review` template traps the callback | Worker prints clean shipping summary → `/review` template renders in chevron → operator types ntm callback, it lands inside `/review` template | After printing shipping summary, the IMMEDIATE next pane action MUST be the ntm callback (`agent-mail send` or equivalent). Don't pause. Don't render the chevron template. Validate post-callback via `--robot-activity` that pane returned to clean state | Chevron templates auto-render on idle; once rendered, next-keystroke is captured into the template input slot, not the agent prompt. Looks like callback succeeded; orphans land at flywheel:1 invisibly | 2 orphan-callback events this session (pairs with `feedback-callback-target-must-be-explicit-not-flywheel-default.md`) |
+| T8 | `infisical secrets set NAME "$VALUE"` argv leak | `infisical secrets set ALPS_HUBSPOT_PAT "$TOKEN" --env production` | `printf '%s' "$TOKEN" \| infisical-set ALPS_HUBSPOT_PAT --sensitive` (stdin-only); for upstream `infisical secrets set` use `--from-stdin` if available or wrap via the `infisical-secrets` skill helper | argv values appear in `ps auxf`, shell history, process exporters, and any tracing/strace capture. `set` looks like a config command; it's actually a secret write | `scripts/deploy-staging.sh:200-216`, `scripts/deploy-production.sh:201-242` (35+ `infisical secrets set NAME "$VALUE"` invocations across both deploy scripts) |
+| T9 | bash `=~` regex with `{N,M}` quantifier in `validate <subject>` arms | `[[ "$arg" =~ ^[A-Za-z0-9._/#:-]{4,256}$ ]]` (length-range inside the regex) | Two-check form: `local len=${#arg}; if (( len >= 4 && len <= 256 )) && [[ "$arg" =~ ^[A-Za-z0-9._/#:-]+$ ]]; then …` (length gate AND char-class regex, separated by `&&`). Include `observed_length:$len` in the reject envelope. | bash `=~` uses POSIX ERE which lacks `{N,M}` repetition; runtime error is `bash: invalid repetition count(s)`. Trap confuses operators coming from PCRE / `grep -P` / Python `re` where `{N,M}` is standard. Failure is RUNTIME, not parse-time — a script with this regex passes `bash -n` and only blows up when a value reaches the broken arm. | `feedback_bash_regex_no_brace_repetition.md` (META-RULE 2026-05-11); origin `.flywheel/audit/flywheel-1hshd.37/evidence.md` (`validate receipt-ref` discovery); production reference `.flywheel/scripts/idempotency-replay-guard.sh:280` (canonical two-check form in use) |
+
+### Stdin-only secret writes (canonical)
+
+The argv-vs-stdin distinction is not optional for secret writes. Argv is process-table-visible across the whole host; stdin is private to the parent-child pipe.
+
+```bash
+# CANONICAL (every secret write)
+printf '%s' "$VALUE" | infisical-set NAME --sensitive
+
+# CANONICAL (with cf-secret / gh secret / railway variables)
+printf '%s' "$VALUE" | gh secret set NAME --body -      # gh accepts --body -
+printf '%s' "$VALUE" | railway variables --set NAME=- < /dev/stdin  # service-scoped
+
+# FORBIDDEN
+infisical secrets set NAME "$VALUE"                      # argv leak (T8)
+gh secret set NAME --body "$VALUE"                       # argv leak
+echo "$VALUE" | infisical-set NAME                       # echo leaks via builtin trace
+```
+
+### File-mediated secret reads (canonical)
+
+When a worker MUST introspect a secret value (URL parsing, length check, hash compare):
+
+```bash
+# CANONICAL — secret never crosses pane stdout
+umask 077
+cf-secret DATABASE_URL > /dev/shm/sec.$$
+trap "shred -u /dev/shm/sec.$$ 2>/dev/null || rm -f /dev/shm/sec.$$" EXIT
+python3 -c 'import sys; v=open("/dev/shm/sec.'"$$"'").read(); print(len(v))' < /dev/null
+
+# BETTER — use server-side metadata (length/hash) so bare value never reaches worker
+cf-secret DATABASE_URL | shasum -a 256 | cut -c1-16    # only digest in scrollback
+
+# FORBIDDEN — codex captures stdout of curl|jq before python ever runs
+curl ... | jq -r '.data.var.SECRET' | python3 -c '...'   # T3
+cf-secret X | curl --data-binary @- ...                  # T3 (pipe-through-pane)
+```
+
+### Format-flag discipline (LLM-readable contexts)
+
+When the consumer is an LLM (any dispatch packet, any worker pane, any orchestrator readback):
+
+```bash
+# CANONICAL — explicit format + key-only filter
+infisical secrets --silent --domain ... --projectId ... --env <env> --format dotenv-export 2>/dev/null \
+  | awk -F= '/^export / {print $1}' | sort -u
+infisical secrets ... --format json | jq -r '.[].name'
+
+# FORBIDDEN — default table format
+infisical secrets ... | awk -F= '...'                    # T2: silently passes values through
+infisical secrets ... | head -20                         # truncates display, values still in stream
+infisical secrets ... 2>/dev/null                        # table is stdout, /dev/null is stderr
+```
+
+### Post-dispatch verification (`ntm send` discipline)
+
+```bash
+# CANONICAL — every ntm send is a 2-step transaction
+ntm send "$SESSION" --pane="$N" "$PROMPT"
+sleep 5
+state=$(ntm --robot-activity="$SESSION" --panes="$N" --json | jq -r '.agents[0].state')
+case "$state" in
+  THINKING|WORKING) echo "submitted" ;;
+  WAITING)
+    # queued-not-submitted; deliver Enter
+    ntm send "$SESSION" --pane="$N" ""
+    sleep 5
+    state2=$(ntm --robot-activity="$SESSION" --panes="$N" --json | jq -r '.agents[0].state')
+    [[ "$state2" == "WAITING" ]] && { echo "BLOCKED: pane $N not submitting after 2 attempts"; exit 1; }
+    ;;
+esac
+
+# FORBIDDEN — trust ntm stdout
+ntm send "$SESSION" --pane="$N" "$PROMPT" && echo "dispatched"   # T1
+```
+
+For batched dispatches (3+ panes simultaneous): validate ALL panes after the batch, BEFORE sending standby/heartbeat-receive. Skipping this for "speed" reliably costs 30+ minutes of invisible idle.
+
+### Codex chevron-template trap
+
+When a worker prints a clean shipping summary, the **immediate next pane action MUST be the ntm callback or `agent-mail send`** — not a thinking pause, not a "let me also document this" detour. Once the chevron `/review` template auto-renders, the next keystroke is captured into the template input slot, not the agent prompt. The callback orphan lands at the default `flywheel:1` target and is invisible to the alpsinsurance orchestrator (pairs with `feedback-callback-target-must-be-explicit-not-flywheel-default.md`).
+
+Operator discipline: after callback emit, run `ntm --robot-activity` to confirm the pane returned to a clean prompt state. Chevron-template-trapped panes show `codex_chevron_prompt` immediately after a "completed" log line — that pattern means the callback DID NOT land.
+
+### Bash regex `=~` no `{N,M}` repetition (canonical two-check form)
+
+Bash's `[[ … =~ … ]]` operator uses POSIX ERE, which **does not** support
+the `{N,M}` repetition quantifier. A `validate <subject>` arm whose input
+has both a length-range constraint AND a character-class constraint cannot
+encode both inside one regex:
+
+```bash
+# FORBIDDEN — bash =~ does NOT support {N,M}; runtime error: bash: invalid repetition count(s)
+if [[ "$arg" =~ ^[A-Za-z0-9._/#:-]{4,256}$ ]]; then …
+
+# CANONICAL — split the length gate from the char-class regex
+local len="${#arg}"
+if (( len >= 4 && len <= 256 )) && [[ "$arg" =~ ^[A-Za-z0-9._/#:-]+$ ]]; then
+  # ok envelope
+  jq -nc --arg v "$arg" '{status:"ok", value:$v}'
+else
+  # reject envelope — include observed_length so callers see WHY
+  jq -nc --arg v "$arg" --argjson len "$len" \
+    '{status:"reject", value:$v, reason:"pattern_or_length_mismatch",
+      pattern:"^[A-Za-z0-9._/#:-]+$", length_range:"[4, 256]",
+      observed_length:$len}'
+fi
+```
+
+**Why operators step on this trap:**
+
+- Failure is RUNTIME (`bash: invalid repetition count(s)`), not parse-time.
+  `bash -n script.sh` passes; the broken arm only blows up when a value
+  reaches it. Test coverage that omits the validate path ships the bug.
+- PCRE, `grep -P`, Python `re`, JavaScript regex, and Rust `regex` crate
+  all support `{N,M}` — operators coming from those languages assume bash
+  does too.
+- `[[:digit:]]{N,M}` looks identical to a POSIX character class with
+  repetition; it's not. Bash's ERE has POSIX bracket classes (the
+  `[[:digit:]]` part), but no `{N,M}` quantifier.
+
+**Canonical reject envelope shape** (mirrors `idempotency-replay-guard.sh:280`
+production use):
+
+```json
+{
+  "schema_version": "<surface>.v1",
+  "command": "validate",
+  "subject": "<subject>",
+  "ts": "<iso>",
+  "status": "reject",
+  "value": "<received>",
+  "reason": "pattern_or_length_mismatch",
+  "pattern": "^[A-Za-z0-9._/#:-]+$",
+  "length_range": "[4, 256]",
+  "observed_length": <int>
+}
+```
+
+The `observed_length` field is mandatory — without it, an operator
+debugging a rejected value can't tell whether the failure was length-side
+or char-class-side.
+
+**Discovery and references:**
+
+- META-RULE memory: `feedback_bash_regex_no_brace_repetition.md`
+  (2026-05-11, surfaced via flywheel-1hshd.37 receipt-ref discovery)
+- Production reference (load-bearing today):
+  `.flywheel/scripts/idempotency-replay-guard.sh:280` uses the canonical
+  two-check form for the `validate receipt-ref` subject
+- Cross-link bead: flywheel-898ji audit at
+  `.flywheel/audit/flywheel-898ji/evidence.md`
+
+### `br create` body discipline
+
+```bash
+# CANONICAL — file-mediated body for anything multi-line or with shell-special chars
+cat > /tmp/bead-$$.md <<'BODY'
+Title line
+
+Detailed body with `backticks`, "quotes", $variables, and
+multiple lines.
+BODY
+br create -p 1 -t task -d "$(cat /tmp/bead-$$.md)"
+rm -f /tmp/bead-$$.md
+
+# FORBIDDEN — heredoc'd argv with shell-special chars
+br create -p 1 -t task -d "Fix \`thing\` with \"quotes\" and
+multiple lines"   # zsh parse-error class; backticks executed; \n truncates
+```
+
+### Railway scope flags (canonical)
+
+```bash
+# CANONICAL — every railway invocation carries explicit project + service + environment
+railway up --detach \
+  --service "$RAILWAY_SERVICE_ID" \
+  --environment "$RAILWAY_ENVIRONMENT_ID"
+railway logs \
+  --project "$RAILWAY_PROJECT_ID" \
+  --service "$RAILWAY_SERVICE_ID" \
+  --environment "$RAILWAY_ENVIRONMENT_ID"
+railway run \
+  --service "$RAILWAY_SERVICE_ID" \
+  --environment "$RAILWAY_ENVIRONMENT_ID" \
+  -- python3 -c '...'
+
+# FORBIDDEN — relies on `railway link` state of the cwd
+railway up --detach                  # T6 — silently deploys to whatever was last linked
+railway logs -e staging              # T6 — service unspecified
+railway run -- python3 -c '...'      # T6 — no service/env scope
+```
+
+The same scope-discipline applies to every multi-substrate CLI: `vercel --token --scope`, `gh --repo`, `kubectl --context --namespace`, `aws --profile --region`, `supabase --project-ref`. If the CLI has a "linked context" mode, the canonical pattern is **always-explicit-flags-in-scripts**; reserve `link` state for human REPL use only.
+
+### Universal-class application
+
+Every ZestStream dispatch packet authored after 2026-05-06 carries this skill in its `Required skills (load before coding)` block:
+
+```markdown
+## Required skills (load before coding)
+
+- `canonical-cli-scoping` — universal-class default; covers ntm queued-not-submitted (T1), infisical table-format leak (T2), stdout-pipeline secret capture (T3), gh-secret name-only false-confidence (T4), br create body discipline (T5), railway scope flags (T6), codex chevron callback trap (T7), argv secret writes (T8), bash `=~` `{N,M}` runtime trap (T9). Load FIRST before any other skill.
+- `<bead-class skill 1>` — <why>
+- `<bead-class skill 2>` — <why>
+```
+
+Rationale: the 8 traps above are CLI-shape, operator-pane-shape, and dispatch-shape concerns that cross-cut every bead class. Skipping the load is not a savings — it's a deferred trauma.
+
+## Anti-Patterns
+
+| Anti-Pattern | Why it fails | Fix |
+|---|---|---|
+| Ship CLI without `doctor` | Operators can't diagnose; everything becomes "ssh in and grep" | Doctor is mandatory before v0.1 |
+| `doctor` that crashes when subsystem is dead | Defeats the purpose — operator can't even see what's wrong | Wrap each probe in try/except, classify as DOWN, never crash |
+| `repair` without `--dry-run` | Operators can't preview; one bad invocation destroys state | --dry-run is mandatory; default to dry-run if --apply absent |
+| Console_script that name-collides with upstream binary (`cm` collision in pyproject.toml when Jeff's `cm` is already in PATH) | Silent breakage when venv shadows global | Always pick distinct names; verify with `which <name>` before claiming the entrypoint |
+| `--json` on some commands but not others | Brittle automation, partial adoption | --json everywhere or nowhere |
+| Per-adapter status hidden in aggregate output | Can't fix individual adapter; no upstream-bug attribution | Per-adapter scope mandatory for aggregator CLIs |
+| `repair` that mutates without audit | No forensic trail when fix-the-fix fix breaks | Every repair appends to audit log |
+| Custom error messages without exit codes | Scripting impossible | Standard exit code table mandatory |
+| Help text without examples | Users don't know which flag combos work | Every --help has an Examples section with 3-5 real invocations |
+| Agents scraping --help or scrollback for state | Every UI tweak silently breaks all downstream agents | If primary consumer is an agent: add a `robot/<query>` namespace with stable JSON schemas |
+| Two robot queries that disagree on the same state | Downstream consumers can't trust either; trauma class accumulates silently | Robot queries that report on overlapping state MUST share a classifier; disagreement = contract violation, file upstream |
+| Trust `ntm send` "Sent to pane" stdout as proof-of-submit (T1) | Codex queued-not-submitted bug strands prompts in input buffer; "success" decouples from agent state | Always sleep 5s + `--robot-activity` poll + re-send `""` if WAITING |
+| `infisical secrets ... \| awk -F=` (T2) | Default Unicode-table format silently passes ALL values through | Explicit `--format dotenv-export` or `--format json` + key-only filter |
+| `curl \| jq \| python3 sanitize` for secret introspection (T3) | Codex captures pre-sanitize stdout into pane scrollback | File-mediate via `/dev/shm/sec.$$` with `umask 077` + `shred -u` trap |
+| `gh secret list \| grep NAME && echo done` (T4) | Name-presence ≠ value-correct ≠ consumer-switched; legacy+modern names both resolve | 3-step rotation: write / consumer-switch / runtime-probe |
+| `br create -d "...multiline with \`backticks\`..."` (T5) | zsh executes backticks; newlines truncate; no error | File-mediate body: `br create -d "$(cat /tmp/bead-$$.md)"` |
+| `railway up` / `railway logs` / `railway run` without `--service --project --environment` (T6) | Per-cwd `railway link` state survives across shells; CI inherits stale link | Always-explicit-flags-in-scripts; reserve `link` for human REPL |
+| Worker emits clean shipping summary then pauses (T7) | Codex chevron `/review` template auto-renders; next keystroke captured into template not callback | Callback MUST be the immediate next action after summary; verify post-callback via `--robot-activity` |
+| `infisical secrets set NAME "$VALUE"` (T8) | argv visible in `ps`, history, exporters, strace | Stdin-only: `printf '%s' "$VALUE" \| infisical-set NAME --sensitive` |
+
+## Implementation checklist (use as bead acceptance gate)
+
+Copy this to any new CLI/adapter bead:
+
+```
+DOCTOR/HEALTH/REPAIR TRIAD:
+  [ ] <cli> doctor exits 0/1, --json works, never crashes
+  [ ] <cli> doctor --fix idempotent, dry-run default if --apply absent
+  [ ] <cli> health single-shot, --watch -i N, --json
+  [ ] <cli> repair --scope <subsystem> --dry-run mandatory
+
+VALIDATE/AUDIT/WHY:
+  [ ] <cli> validate <thing> pure-read, no side effects
+  [ ] <cli> audit emits structured log of mutations with provenance
+  [ ] <cli> why <id> shows full provenance trace
+
+SELF-DOC:
+  [ ] <cli> --info dumps version + paths + env + deps
+  [ ] <cli> --examples (or examples cmd) has 5+ curated workflows
+  [ ] <cli> quickstart written for new operators
+  [ ] <cli> help <topic> for each major topic
+  [ ] <cli> completion <shell> generates valid completions
+
+ADAPTER SCOPE (if aggregator):
+  [ ] doctor/health/repair scoped per-adapter
+  [ ] adapter status taxonomy: OK|DEGRADED|DOWN|NOT_CONFIGURED|UPSTREAM_BUG
+  [ ] <cli> upstream-report <adapter> generates draft, --apply gated
+
+OUTPUT:
+  [ ] --json on every command
+  [ ] --no-color, --no-emoji, --width
+  [ ] schema emission for every JSON output
+  [ ] standard exit code table documented in --help
+
+MUTATION:
+  [ ] --dry-run + --explain on every state-changing command
+  [ ] idempotent re-run
+  [ ] audit log emission
+  [ ] append-only audit ledger documented and schema-versioned
+  [ ] audit rows include actor, idempotency_key, touched_paths, receipt_path, post_check, result
+  [ ] same idempotency key returns the original audit row instead of repeating side effects
+  [ ] ambiguous idempotency/audit read failure refuses mutation with structured JSON failure
+  [ ] schema migration fixture proves prior audit row versions remain readable or fail with migration hint
+
+THIRD-STRIKE PLANNING GATE:
+  [ ] repeated shadowing class checked with check-third-strike.sh before another implementation dispatch
+  [ ] planning artifact exists before implementation resumes when threshold is met
+
+DISCOVERABILITY (if >20 subcommands):
+  [ ] palette/dashboard
+  [ ] activity/changes view
+  [ ] triage/assign advisory
+
+ROBOT MODE (if agent-operated):
+  [ ] robot/activity, robot/diagnose, robot/tail triad present
+  [ ] robot/capabilities lists all robot queries with schemas
+  [ ] robot/schema=<query> returns JSON schema for each
+  [ ] every robot query emits {success, timestamp, version, output_format} envelope
+  [ ] semantic state values (no UI strings); state classifier shared across queries
+  [ ] convergence verified: any two robot queries that should agree DO agree (live probe)
+  [ ] backward-compat schemas across CLI minor versions
+```
+
+## Reference exemplars (read these before authoring a new CLI)
+
+| CLI | Strength | Path |
+|---|---|---|
+| `ntm` | Largest reference surface (70+ subcommands), exemplary --help, palette, dashboard, watch modes | `ntm --help` + `ntm <subcmd> --help` |
+| `br` (beads) | Doctor + repair, schema emission, JSON envelopes, search, lint | `br --help` |
+| `cm` (Jeff's) | Validate/audit/why/undo provenance, --info/--examples self-doc, doctor with --fix | `cm --help` |
+| `gh` (GitHub) | Topic-based help, completion, alias system, scriptable JSON | `gh --help` |
+| `kubectl` | Resource scoping, dry-run, explain, get -o json discipline | (industry standard) |
+
+## Anti-pattern from session 2026-05-01
+
+The B1.5/B1.5.5 traumas in CASS v2 close-loop demonstrated three of the anti-patterns above:
+1. **Console_script name collision** — pyproject.toml proposed `cm = "mem.cli:cli"` while `~/.local/bin/cm` (Jeff's upstream Bun binary) was already in PATH. The correct name is `mem`, matching the package's own docstring (`Usage: mem health, mem search, ...`).
+2. **No doctor command** — when adapters failed (list-shadowing in mem.adapters.*), the operator had no way to see "which adapter is failing and why" without diving into Python tracebacks.
+3. **No upstream-report path** — bugs in adapters couldn't be classified as local-vs-upstream, so the team had no forcing function to file Jeff issues.
+
+The recovery (file the cm-audit recovery epic) MUST adhere to this skill's standard. Any new CLI work that doesn't is rejected at bead-review.
+
+## Cross-references
+
+- `~/.claude/skills/anthropic-cli-patterns/` — Anthropic-specific CLI patterns
+- `~/.claude/skills/gh-cli/` — GitHub CLI authoring patterns
+- `~/.claude/skills/saas-cli-auth-flow/` — auth flows for SaaS CLIs
+- `~/.claude/skills/rust-cli-with-sqlite/` — Rust CLI with SQLite (br-style)
+- `~/.claude/references/claude-md-ntm.md` — NTM orchestration overview
+- Beads-workflow doctrine §"Reject-and-revert is healthy" — applies when a CLI bead reveals deeper substrate rot (B1.5 trauma class)
