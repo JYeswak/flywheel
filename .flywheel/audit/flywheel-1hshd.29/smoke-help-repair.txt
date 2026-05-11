@@ -1,0 +1,1 @@
+topic: repair --scope <audit_log_dir|fs_rag_backfill_receipt_dir|flywheel_dir> [--dry-run|--apply --idempotency-key KEY] — apply contract: --apply requires --idempotency-key (rc=3 refusal); scopes: audit_log_dir (mkdir -p dirname of $SCAFFOLD_AUDIT_LOG), fs_rag_backfill_receipt_dir (mkdir -p $REPO/.flywheel/audit/), flywheel_dir (mkdir -p $REPO/.flywheel/). Unknown = rc=64.

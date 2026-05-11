@@ -1,0 +1,1 @@
+{"schema_version":"flywheel-adopt/v1","command":"validate","status":"refused","reason":"missing_subject","valid_subjects":["repo-path","adoption-mode","idempotency-key"]}

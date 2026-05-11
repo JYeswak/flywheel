@@ -1,0 +1,1 @@
+{"schema_version":"flywheel-adopt/v1","command":"validate","subject":"repo-path","ts":"2026-05-11T05:41:32Z","status":"ok","value":"/Users/josh/Developer/flywheel","note":"directory exists; adoption can proceed"}

@@ -1,0 +1,1 @@
+{"schema_version":"flywheel-adopt/v1","command":"examples","examples":[{"name":"default run","invocation":"flywheel-adopt.sh","purpose":"backward-compatible original behavior"},{"name":"doctor","invocation":"flywheel-adopt.sh doctor --json","purpose":"probe substrate health"}]}

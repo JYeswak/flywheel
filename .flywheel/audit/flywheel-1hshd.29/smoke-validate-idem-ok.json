@@ -1,0 +1,1 @@
+{"schema_version":"flywheel-adopt/v1","command":"validate","subject":"idempotency-key","ts":"2026-05-11T05:41:32Z","status":"ok","value":"flywheel-1hshd.29-f2749f","note":"matches native --idempotency-key flag shape"}
