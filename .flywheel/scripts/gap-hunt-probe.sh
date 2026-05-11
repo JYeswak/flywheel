@@ -739,9 +739,19 @@ def test_files_corpus(max_bytes: int = 1_500_000) -> str:
     regression fixtures). Without this corpus, the receiver-check misses
     test-consumed probes.
 
+    Per flywheel-2xdi.88 (canonical-cli-test-naming extension): tests
+    authored under the canonical-cli-scoping convention use the suffix
+    `*-canonical-cli.sh` (no `test-` / `test_` prefix), e.g.
+    `tests/mobile-eats-end-user-health-probe-canonical-cli.sh`. The
+    flywheel.git tests/ tree has 278+ such files; 23 of them reference a
+    `-probe.sh` script and are valid receivers of that probe. The pre-2xdi.88
+    glob (test-* / test_* only) silently misses this entire class. Same
+    META-RULE shape as 2xdi.47/48/49/50/54/58/69 + e7lxv + kckw8: fix the
+    corpus property, not the per-script allowlist.
+
     Surfaces scanned:
-      - .flywheel/tests/test-*.sh and .flywheel/tests/test_*.sh
-      - tests/test-*.sh and tests/test_*.sh (top-level)
+      - .flywheel/tests/test-*.sh, .flywheel/tests/test_*.sh, .flywheel/tests/*-canonical-cli*.sh
+      - tests/test-*.sh, tests/test_*.sh, tests/*-canonical-cli*.sh (top-level)
     """
     global _TEST_FILES_CORPUS
     if _TEST_FILES_CORPUS is not None:
@@ -756,7 +766,7 @@ def test_files_corpus(max_bytes: int = 1_500_000) -> str:
     for root in test_roots:
         if not root.is_dir():
             continue
-        for pattern in ("test-*.sh", "test_*.sh"):
+        for pattern in ("test-*.sh", "test_*.sh", "*-canonical-cli*.sh"):
             try:
                 candidates.extend(sorted(root.glob(pattern)))
             except Exception:
