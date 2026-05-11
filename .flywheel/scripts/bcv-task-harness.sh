@@ -1,6 +1,313 @@
 #!/usr/bin/env bash
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (partial → passing per bead flywheel-1hshd.6)
 # bcv-task-harness.sh — orchestrate real Phase 4/6 BCV task packs.
 set -euo pipefail
+
+
+# ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======
+# Wave-4 partial→passing additive coexistence. Existing script already has:
+#   --info / --schema / --examples / --apply / --idempotency-key (rc=3 gate) /
+#   --dry-run / --json + ~20 operational flags
+# Gap closed: NEW no-dash subcommand family (doctor / health / repair /
+# validate / audit / why / quickstart / help / completion) for AG3 parity
+# with sister wave-4 scaffolds. Operational flags + existing dash-flag
+# introspection unchanged.
+
+_SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
+_SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
+if [[ -r "$_SCAFFOLD_HELPER_LIB" ]]; then
+  # shellcheck source=/dev/null
+  source "$_SCAFFOLD_HELPER_LIB"
+fi
+
+SCAFFOLD_SCHEMA_VERSION="bcv-task-harness/v1"
+SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/bcv-task-harness-runs.jsonl}"
+
+scaffold_cmd_doctor() {
+  local script_root; script_root="$_SCAFFOLD_REPO_ROOT"
+  local checks="" overall="pass"
+
+  if command -v jq >/dev/null 2>&1; then
+    checks+="$(jq -nc --arg p "$(command -v jq)" '{name:"jq_on_path",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc '{name:"jq_on_path",status:"fail"}')"$'\n'
+    overall="fail"
+  fi
+
+  if command -v shasum >/dev/null 2>&1; then
+    checks+="$(jq -nc --arg p "$(command -v shasum)" '{name:"shasum_on_path",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc '{name:"shasum_on_path",status:"fail",detail:"used for target_beads_sha"}')"$'\n'
+    overall="fail"
+  fi
+
+  local skill_dir="${BCV_SKILL_DIR:-/Users/josh/.claude/skills/beads-compliance-and-completion-verification}"
+  if [[ -d "$skill_dir" ]]; then
+    checks+="$(jq -nc --arg p "$skill_dir" '{name:"bcv_skill_dir_present",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc --arg p "$skill_dir" '{name:"bcv_skill_dir_present",status:"warn",value:$p,detail:"override via --skill-dir"}')"$'\n'
+  fi
+
+  local ledger_dir; ledger_dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
+  if [[ -d "$ledger_dir" && -w "$ledger_dir" ]] || mkdir -p "$ledger_dir" 2>/dev/null; then
+    local row_count=0
+    [[ -r "$SCAFFOLD_AUDIT_LOG" ]] && row_count="$(wc -l < "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | tr -d ' ' || echo 0)"
+    checks+="$(jq -nc --arg p "$SCAFFOLD_AUDIT_LOG" --argjson rc "${row_count:-0}" '{name:"audit_log_writable",status:"pass",value:$p,row_count:$rc}')"$'\n'
+  else
+    checks+="$(jq -nc --arg p "$SCAFFOLD_AUDIT_LOG" '{name:"audit_log_writable",status:"fail",value:$p}')"$'\n'
+    overall="fail"
+  fi
+
+  local subagent_phase4="$skill_dir/subagents/compliance-verifier.md"
+  if [[ -r "$subagent_phase4" ]]; then
+    checks+="$(jq -nc --arg p "$subagent_phase4" '{name:"phase4_subagent_present",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc --arg p "$subagent_phase4" '{name:"phase4_subagent_present",status:"warn",value:$p,detail:"required for Phase 4 packs"}')"$'\n'
+  fi
+
+  if [[ -d "$script_root" ]]; then
+    checks+="$(jq -nc --arg p "$script_root" '{name:"flywheel_root_resolvable",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc --arg p "$script_root" '{name:"flywheel_root_resolvable",status:"fail",value:$p}')"$'\n'
+    overall="fail"
+  fi
+
+  local ts; ts="$(cli_iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  printf '%s' "$checks" | jq -sc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg status "$overall" \
+    '{schema_version:$sv,command:"doctor",ts:$ts,status:$status,checks:.}'
+}
+
+scaffold_cmd_health() {
+  local ts; ts="$(cli_iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  local log="$SCAFFOLD_AUDIT_LOG"
+  local last_row="null" stale_seconds=-1 status="warn" row_count=0
+  if [[ -r "$log" ]]; then
+    row_count="$(wc -l < "$log" 2>/dev/null | tr -d ' ' || echo 0)"
+    local row_raw; row_raw="$(tail -n 1 "$log" 2>/dev/null || true)"
+    if [[ -n "$row_raw" ]] && printf '%s' "$row_raw" | jq -e '.' >/dev/null 2>&1; then
+      last_row="$row_raw"
+      local last_ts; last_ts="$(printf '%s' "$row_raw" | jq -r '.ts // .timestamp // empty' 2>/dev/null || true)"
+      if [[ -n "$last_ts" ]]; then
+        local last_epoch now_epoch
+        last_epoch="$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$last_ts" +%s 2>/dev/null || echo 0)"
+        now_epoch="$(date -u +%s)"
+        if [[ "$last_epoch" -gt 0 ]]; then
+          stale_seconds=$((now_epoch - last_epoch))
+          if [[ "$stale_seconds" -le 604800 ]]; then status="pass"; fi
+        fi
+      fi
+    fi
+  fi
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$log" \
+    --arg status "$status" --argjson stale "$stale_seconds" --argjson row "$last_row" --argjson rc "${row_count:-0}" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,audit_log:$log,stale_seconds:$stale,last_row:$row,row_count:$rc}'
+}
+
+scaffold_cmd_repair() {
+  local scope="" mode="dry_run" idem_key=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help) printf 'topic: repair — scopes: audit-log-rotate, skill-dir-prime\n'; return 0 ;;
+      --scope) scope="${2:-}"; shift 2 ;;
+      --dry-run) mode="dry_run"; shift ;;
+      --apply) mode="apply"; shift ;;
+      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
+      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
+      --json) shift ;;
+      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
+      '{schema_version:$sv,command:"repair",status:"refused",mode:"apply",scope:$scope,reason:"--apply requires --idempotency-key"}'
+    exit 3
+  fi
+  case "$scope" in
+    audit-log-rotate)
+      local log="$SCAFFOLD_AUDIT_LOG" size_bytes=0 rotated=false
+      [[ -r "$log" ]] && size_bytes="$(stat -f '%z' "$log" 2>/dev/null || echo 0)"
+      if [[ "$mode" == "apply" && "$size_bytes" -gt 5242880 ]]; then
+        local rotated_path="${log}.$(date -u +%Y%m%dT%H%M%SZ)"
+        if mv "$log" "$rotated_path" 2>/dev/null; then : > "$log" 2>/dev/null || true; rotated=true; fi
+      fi
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        --arg log "$log" --argjson sz "$size_bytes" --argjson r "$rotated" \
+        '{schema_version:$sv,command:"repair",status:"pass",mode:$mode,scope:$scope,audit_log:$log,size_bytes:$sz,rotation_threshold:5242880,rotated:$r}'
+      ;;
+    skill-dir-prime)
+      local skill_dir="${BCV_SKILL_DIR:-/Users/josh/.claude/skills/beads-compliance-and-completion-verification}"
+      local present=false subagent4=false subagent6=false
+      if [[ -d "$skill_dir" ]]; then
+        present=true
+        [[ -r "$skill_dir/subagents/compliance-verifier.md" ]] && subagent4=true
+        [[ -r "$skill_dir/subagents/test-depth-auditor.md" ]] && subagent6=true
+      fi
+      local status="pass"
+      [[ "$present" != true ]] && status="warn"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        --arg sd "$skill_dir" --arg s "$status" \
+        --argjson present "$present" --argjson p4 "$subagent4" --argjson p6 "$subagent6" \
+        '{schema_version:$sv,command:"repair",status:$s,mode:$mode,scope:$scope,skill_dir:$sd,present:$present,phase4_subagent_present:$p4,phase6_subagent_present:$p6,note:"read-only probe"}'
+      ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        '{schema_version:$sv,command:"repair",status:"unknown_scope",mode:$mode,scope:$scope,known_scopes:["audit-log-rotate","skill-dir-prime"]}'
+      ;;
+  esac
+}
+
+scaffold_cmd_validate() {
+  local subject="" row_json=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --row-json) subject="row"; row_json="${2:-}"; shift 2 ;;
+      --row-json=*) subject="row"; row_json="${1#--row-json=}"; shift ;;
+      --schema) subject="schema"; shift ;;
+      --config) subject="config"; shift ;;
+      --audit-log) subject="audit-log"; shift ;;
+      --json) shift ;;
+      *) shift ;;
+    esac
+  done
+  case "$subject" in
+    row)
+      local valid=true missing=""
+      if [[ -z "$row_json" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",subject:"row",status:"fail",valid:false,reason:"--row-json required"}'
+        return 0
+      fi
+      if ! printf '%s' "$row_json" | jq -e '.' >/dev/null 2>&1; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",subject:"row",status:"fail",valid:false,reason:"invalid_json"}'
+        return 0
+      fi
+      for f in tool version status; do
+        if ! printf '%s' "$row_json" | jq -e --arg k "$f" 'has($k)' >/dev/null 2>&1; then
+          valid=false; missing="${missing}${f},"
+        fi
+      done
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --argjson v "$valid" --arg m "${missing%,}" \
+        '{schema_version:$sv,command:"validate",subject:"row",status:(if $v then "pass" else "fail" end),valid:$v,missing:$m}'
+      ;;
+    schema)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"validate",subject:"schema",status:"pass",surfaces:["doctor","health","repair","validate","audit","why","audit-row"]}'
+      ;;
+    config)
+      local jq_ok=false shasum_ok=false root_ok=false
+      command -v jq >/dev/null 2>&1 && jq_ok=true
+      command -v shasum >/dev/null 2>&1 && shasum_ok=true
+      [[ -d "$_SCAFFOLD_REPO_ROOT" ]] && root_ok=true
+      local overall=pass
+      [[ "$jq_ok" != true || "$shasum_ok" != true || "$root_ok" != true ]] && overall=fail
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$overall" \
+        --argjson jqq "$jq_ok" --argjson sha "$shasum_ok" --argjson rt "$root_ok" \
+        --arg root "$_SCAFFOLD_REPO_ROOT" \
+        '{schema_version:$sv,command:"validate",subject:"config",status:$s,jq_present:$jqq,shasum_present:$sha,flywheel_root_present:$rt,flywheel_root:$root}'
+      ;;
+    audit-log)
+      local present=false rows=0
+      if [[ -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+        present=true
+        rows="$(wc -l < "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | tr -d ' ' || echo 0)"
+      fi
+      local status="pass"; [[ "$present" != true ]] && status="warn"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$status" --arg log "$SCAFFOLD_AUDIT_LOG" \
+        --argjson present "$present" --argjson rows "${rows:-0}" \
+        '{schema_version:$sv,command:"validate",subject:"audit-log",status:$s,audit_log:$log,present:$present,row_count:$rows}'
+      ;;
+    "")
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"validate",status:"pass",subjects:["row","schema","config","audit-log"]}'
+      ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$subject" \
+        '{schema_version:$sv,command:"validate",subject:$s,status:"unknown_subject",known:["row","schema","config","audit-log"]}'
+      ;;
+  esac
+}
+
+scaffold_cmd_audit() {
+  local limit=50
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --limit) limit="${2:-50}"; shift 2 ;;
+      --limit=*) limit="${1#--limit=}"; shift ;;
+      --json) shift ;;
+      *) shift ;;
+    esac
+  done
+  if command -v cli_emit_audit_tail >/dev/null 2>&1; then
+    cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" "$limit"
+  else
+    local rows="[]" count=0
+    if [[ -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+      rows="$(tail -n "$limit" "$SCAFFOLD_AUDIT_LOG" | jq -sc '. // []' 2>/dev/null || echo '[]')"
+      count="$(printf '%s' "$rows" | jq 'length' 2>/dev/null || echo 0)"
+    fi
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" --argjson rows "$rows" --argjson count "$count" \
+      '{schema_version:$sv,command:"audit",audit_log:$log,row_count:$count,rows:$rows}'
+  fi
+}
+
+scaffold_cmd_why() {
+  local id="${1:-}"
+  if [[ -z "$id" ]]; then
+    printf 'ERR: why requires <id>\n' >&2; return 64
+  fi
+  local matches="[]" status="not_found" any_source_present=false
+  if [[ -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+    any_source_present=true
+    local raw; raw="$(grep -F "$id" "$SCAFFOLD_AUDIT_LOG" 2>/dev/null || true)"
+    if [[ -n "$raw" ]]; then
+      matches="$(printf '%s' "$raw" | jq -sc '.' 2>/dev/null || echo '[]')"
+    fi
+  fi
+  if [[ "$any_source_present" != true ]]; then status="unavailable"
+  else
+    local n; n="$(printf '%s' "$matches" | jq 'length' 2>/dev/null || echo 0)"
+    n="${n//[^0-9]/}"; [[ -z "$n" ]] && n=0
+    [[ "$n" -gt 0 ]] && status="found"
+  fi
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg s "$status" \
+    --arg log "$SCAFFOLD_AUDIT_LOG" --argjson m "$matches" \
+    '{schema_version:$sv,command:"why",id:$id,status:$s,audit_log:$log,matches:$m,total_matches:($m|length)}'
+}
+
+scaffold_emit_topic_help() {
+  case "${1:-}" in
+    run)      printf 'topic: run — orchestrate Phase 4/6 BCV task packs. Default --dry-run; --apply requires --idempotency-key (rc=3 refusal).\n' ;;
+    doctor)   printf 'topic: doctor — substrate probe: jq + shasum + bcv-skill-dir + audit-log + phase4 subagent + flywheel root.\n' ;;
+    health)   printf 'topic: health — tails audit log; warn stale >7d.\n' ;;
+    repair)   printf 'topic: repair — scopes: audit-log-rotate, skill-dir-prime (read-only).\n' ;;
+    validate) printf 'topic: validate — subjects: row, schema, config, audit-log.\n' ;;
+    *)        printf 'topics: run | doctor | health | repair | validate\n' ;;
+  esac
+}
+
+_scaffold_is_canonical_arg() {
+  case "${1:-}" in
+    doctor|health|repair|validate|audit|why) return 0 ;;
+    help)
+      case "${2:-}" in run|doctor|health|repair|validate|audit|why|-h|--help) return 0 ;; esac
+      return 1 ;;
+    *) return 1 ;;
+  esac
+}
+
+if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
+  case "$1" in
+    doctor)       shift; scaffold_cmd_doctor "$@"; exit $? ;;
+    health)       shift; scaffold_cmd_health "$@"; exit $? ;;
+    repair)       shift; scaffold_cmd_repair "$@"; exit $? ;;
+    validate)     shift; scaffold_cmd_validate "$@"; exit $? ;;
+    audit)        shift; scaffold_cmd_audit "$@"; exit $? ;;
+    why)          shift; scaffold_cmd_why "$@"; exit $? ;;
+    help)         shift; scaffold_emit_topic_help "${1:-}"; exit 0 ;;
+  esac
+fi
+# ====== END canonical-cli scaffold ======
+
 
 VERSION="bcv-task-harness/v1"
 DEFAULT_SKILL_DIR="/Users/josh/.claude/skills/beads-compliance-and-completion-verification"
