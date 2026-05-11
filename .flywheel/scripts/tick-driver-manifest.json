@@ -34,6 +34,15 @@
       "timeout_sec": 60
     },
     {
+      "name": "orch-tick-stale-auto-bead-close",
+      "path": ".flywheel/scripts/orch-tick-stale-auto-bead-close.sh",
+      "args": ["--apply", "--idempotency-key", "tick-driver-stale-auto-close", "--json"],
+      "timeout_sec": 90,
+      "purpose": "Auto-close open auto-filed gap beads ([gap-wired-but-cold], [gap-memory-without-cross-link], etc.) whose subject is no longer flagged by current gap-hunt-probe state. N=4 MOOT_BY_CURRENT_PROBE_CLEARANCE trigger fired (2xdi.108/.113/.114/.117 + N=5 confirmation in 2xdi.115). Reclaims ~3 worker ticks/hour at observed 60-80% audit-only disposition rate. Opt-out marker `do-not-auto-close` or `disposition=open-genuine-gap` in bead description preserves open status.",
+      "source_bead": "flywheel-mvzri",
+      "doctrine": "moot-by-current-probe-clearance disposition; sister to MagentaPond 2xdi.114 mechanization evidence"
+    },
+    {
       "name": "topology-tick-refresh",
       "path": ".flywheel/scripts/topology-tick-refresh.sh",
       "args": ["--apply", "--json"],
