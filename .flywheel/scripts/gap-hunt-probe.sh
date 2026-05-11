@@ -1081,6 +1081,24 @@ def command_text() -> str:
     # orchestrates.
     for cmd_path in safe_iter_files(CLAUDE_ROOT / "commands/flywheel", "*.md", 200):
         pieces.append(read_text(cmd_path, 1_000_000))
+    # flywheel-2xdi.106: extend receivers corpus with canonical-CLI tests +
+    # prefix-style regression tests. Per canonical-cli-scoping convention,
+    # `tests/<surface>-canonical-cli.sh` is the stable executable spec for
+    # each scaffolded canonical-CLI surface. The test cites the producer
+    # script by exact basename (e.g., `SCRIPT="$ROOT/.flywheel/scripts/
+    # ntm-approve-human-gates.sh"`), which IS receiver-evidence under nq5ns's
+    # producer-stem fallback. Without this corpus, 12+ ledgers (out of 18
+    # cross-source-silos flags in same run) whose producer has a canonical-CLI
+    # test are falsely flagged. Globs mirror 2xdi.88 + 2xdi.58 (test_files_corpus
+    # adopted these three shapes for the probe-without-receiver class). Same
+    # META-RULE shape: extend the recognizer corpus, not per-ledger allowlist.
+    test_roots = [REPO_ROOT / ".flywheel" / "tests", REPO_ROOT / "tests"]
+    for test_root in test_roots:
+        if not test_root.is_dir():
+            continue
+        for pattern in ("test-*.sh", "test_*.sh", "*-canonical-cli*.sh"):
+            for test_path in safe_iter_files(test_root, pattern, 600):
+                pieces.append(read_text(test_path, 50_000))
     return "\n".join(pieces)
 
 
