@@ -1,0 +1,31 @@
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -628,6 +628,28 @@
+ | `scripts/sw-self-audit.sh` | Self-audit any Claude Code skill against the agent-ergonomics methodology |
+ | `scripts/measure-help-readtime.sh` | Estimate agent reading time for `--help` (lines + tokens + structural signals) |
+ | `scripts/audit-readme-vs-help.sh` | Detect README → `--help` drift (commands documented but missing; or vice versa) |
++| `scripts/preview.sh` | 30-second preview of what an audit would target (inventory + language detection without scaffolding) |
++| `scripts/estimate.sh` | Pre-pass cost/time estimator (quick inventory dry-run + full-pass projection) |
++| `scripts/archetype-calibrate.sh` | Validate that CLI archetypes are meaningful — within- vs between-archetype variance |
++| `scripts/rubric-calibrate.sh` | Validate the 11-dim rubric against expert judgment (per-dim ρ + verdict) |
++| `scripts/rubric-fitness.sh` | Single-number rubric quality metric derived from `rubric-calibrate.sh` outputs |
++| `scripts/scorer-prompt-fitness.sh` | Test the scorer prompt against known-good golden surfaces |
++| `scripts/dryrun-llm.sh` | End-to-end LLM scorer dry-run harness (the long-missing "actually invoke the LLM" entry point) |
++| `scripts/dryrun-verify.sh` | Post-condition checker for `dryrun-llm.sh` output |
++| `scripts/stub-scorer.sh` | Deterministic non-LLM scorer for harness testing (single JSONL line conforming to `subagents/scorer.md` schema) |
++| `scripts/diff_test.sh` | Differential idempotency test — run a deterministic phase chain twice and assert identical output |
++| `scripts/dirty-surfaces.sh` | Phase 6 helper — compute which surfaces need re-scoring (avoid wasteful re-runs across all surfaces) |
++| `scripts/cluster-recommendations.sh` | Phase 4 dedup — cluster near-duplicate recommendations (companion to `synthesize_recommendations.mjs`) |
++| `scripts/render_scorecard_html.sh` | Render `agent_surfaces.jsonl` → self-contained HTML scorecard (sortable per-surface table; no external CSS/JS) |
++| `scripts/audit-replay.sh` | Replay an old `audit/applied_changes.jsonl`'s recs against current source |
++| `scripts/migrate-scores.sh` | Migrate scores across rubric_version bumps (rebases prior `agent_surfaces.jsonl` to the new rubric) |
++| `scripts/validate-artifacts-strict.sh` | Formal JSON Schema validation of every artifact in `<sibling>/audit/` |
++| `scripts/verify-non-tty-discipline.sh` | Verify NO_COLOR / CI=true / TERM=dumb / piped-stdout discipline (no prompts in non-TTY) |
++| `scripts/skill-self-test.sh` | Run the skill against the adversarial fixture; assert detection rate vs ground-truth anti-pattern table |
++| `scripts/log-provenance.sh` | Append a provenance record (called by subagents/applier when artifacts are produced) |
++| `scripts/log-telemetry.sh` | Append a telemetry record to `audit/telemetry.jsonl` (subagents + phase scripts log completion data) |
++| `scripts/watch.sh` | Re-score on every file save — live feedback loop while iterating on a recommendation |
++| `scripts/workspace-gc.sh` | Workspace garbage collection — prunes `audit/partial/` after 5+ passes accumulate |
+ 
+ Each script either writes its documented phase artifact or emits documented stdout for redirection. JSON-only behavior is called out per script. All scripts honor `NO_COLOR`, exit 0 on success, ≥1 on failure with a stderr error message naming the next remediation step. The skill practices what it preaches.
+ 
