@@ -1,0 +1,9 @@
+{
+  "_note": "Captured post-fix: archetype-calibrate.sh no longer flagged wired-but-cold",
+  "live_probe_filter": "[.gaps[] | select(.class==\"wired-but-cold\" and (.where | test(\"archetype-calibrate\")))] | length",
+  "live_probe_result": 0,
+  "total_wired_but_cold_filter": "[.gaps[] | select(.class==\"wired-but-cold\")] | length",
+  "total_wired_but_cold_result": 0,
+  "regression_test": "tests/gap-hunt-probe-exec-sh-corpus.sh",
+  "regression_summary": "pass=5 fail=0"
+}
