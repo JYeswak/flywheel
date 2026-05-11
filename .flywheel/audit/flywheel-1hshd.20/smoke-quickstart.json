@@ -1,0 +1,1 @@
+{"schema_version":"cost-telemetry-token-burn-probe/v1","command":"quickstart","status":"ok","steps":[{"step":1,"action":"probe doctor","command":"cost-telemetry-token-burn-probe.sh doctor --json"}],"next_actions":["doctor","health","repair"]}

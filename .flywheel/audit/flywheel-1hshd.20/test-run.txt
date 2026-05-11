@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info emits native PASSTHRU envelope (cost-telemetry-token-burn/v1)
+PASS --schema emits native PASSTHRU with .ledger_row_required_fields
+PASS --examples emits scaffold envelope (NOT bypassed — native errors)
+PASS doctor emits scaffold envelope with >=5 checks
+PASS health emits scaffold envelope
+PASS repair --dry-run emits scaffold envelope (real scope ledger_dir)
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate (bare) refuses with rc=64 + missing_subject envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS script annotates NUANCED-PARTIAL-BYPASS variant (5th application)
+PASS native --doctor FLAG bypassed (mode=doctor + cost-telemetry-token-burn/v1)
+PASS validate hours-back accepts boundary + default (1/24/168 — 1h to 1wk window)
+PASS validate hours-back rejects 200 (above [1,168] week-cap) with rc=1
+PASS lint-idiom-fix preserved (3rd application — sister to 5ke66.15 + 1hshd.14)
+PASS 4-DIRECTION routing: native --info + native --schema + scaffold --examples + scaffold doctor (sister to 1hshd.13 pattern)
+SUMMARY pass=19 fail=0
