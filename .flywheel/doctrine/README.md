@@ -8,9 +8,10 @@ bead: flywheel-s8tdd
 update_bead: flywheel-kk08x
 parent: filesystem-as-rag
 inventory_as_of: 2026-05-11
-total_doctrines: 89
-canonical_doctrines: 80
+total_doctrines: 90
+canonical_doctrines: 81
 cross_reference_stubs: 9
+last_added: cross-repo-write-path-discipline (flywheel-16b53.3 P0 trauma-mitigation-C)
 ---
 
 # `.flywheel/doctrine/`
