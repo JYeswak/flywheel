@@ -1,0 +1,7 @@
+{
+  "project": "alps",
+  "active": false,
+  "driver_pid": null,
+  "last_dispatch_ts": null,
+  "_TODO": "pass-2: doctor --fix demotes active=false when no driver+no dispatch"
+}

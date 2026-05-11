@@ -1,0 +1,6 @@
+{
+  "project": "alps",
+  "active": true,
+  "_deprecated_legacy_field": "x",
+  "_TODO": "pass-2: v0 schema corrupt fixture from ~user/.flywheel/loops"
+}

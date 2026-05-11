@@ -1,0 +1,6 @@
+{
+  "project": "alps",
+  "active": true,
+  "schema_version": "loop-config/v1",
+  "_TODO": "pass-2: fix migrates to v1, adds schema_version anchor, removes legacy fields, atomic rename + receipt"
+}
