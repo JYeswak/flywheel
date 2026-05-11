@@ -1,0 +1,1 @@
+{"schema_version":"gap-hunt-probe/v1","command":"repair","status":"refused","mode":"apply","scope":"audit_log_dir","reason":"--apply requires --idempotency-key","exit_code":3}
