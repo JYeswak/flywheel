@@ -58,17 +58,51 @@ fi
 echo "PASS AG2 wired-but-cold distribution field present (count=$cold_count)"
 
 # AG3: confirm the new corpus function is defined in the script
-if ! grep -q 'flywheel_script_bodies_corpus' "$SCRIPT"; then
-  echo "FAIL flywheel_script_bodies_corpus function not present in gap-hunt-probe.sh" >&2
+# (flywheel-2xdi.158 refactor: function renamed from flywheel_script_bodies_corpus
+# to flywheel_script_bodies_index when adding self-match exclusion at check time)
+if ! grep -q 'flywheel_script_bodies_index' "$SCRIPT"; then
+  echo "FAIL flywheel_script_bodies_index function not present in gap-hunt-probe.sh" >&2
   exit 1
 fi
-echo "PASS AG3 flywheel_script_bodies_corpus function present"
+echo "PASS AG3 flywheel_script_bodies_index function present"
 
-# AG4: confirm it is wired into probe_wired_but_cold (8th corpus check)
-if ! grep -q 'in_script_bodies' "$SCRIPT"; then
-  echo "FAIL in_script_bodies variable not present in probe_wired_but_cold" >&2
+# AG4: confirm it is wired into probe_wired_but_cold (8th corpus check via
+# the dedicated is_referenced_in_other_flywheel_scripts helper)
+if ! grep -q 'is_referenced_in_other_flywheel_scripts' "$SCRIPT"; then
+  echo "FAIL is_referenced_in_other_flywheel_scripts helper not present in probe_wired_but_cold" >&2
   exit 1
 fi
-echo "PASS AG4 in_script_bodies wired into probe_wired_but_cold"
+echo "PASS AG4 is_referenced_in_other_flywheel_scripts wired into probe_wired_but_cold"
 
-echo "PASS gap-hunt-probe-subprocess-validator-callsite (4/4)"
+# AG5 (added by flywheel-2xdi.158): confirm self-match exclusion is honored —
+# if a script's name appears ONLY in its own body, it must NOT be classified
+# as warm via the 8th corpus. Pre-fix-2xdi.158 the corpus included the
+# script-being-checked's own body, producing trivial self-match on every
+# script's own usage strings + version literals. The corrected helper
+# `is_referenced_in_other_flywheel_scripts` excludes the script-being-checked
+# at search time.
+#
+# Verify by picking a still-cold .flywheel/scripts script (one of several that
+# remain flagged) and confirming it's still flagged. If self-match exclusion
+# regresses, all .flywheel/scripts/*.sh would silently mark warm.
+self_match_canaries=(
+  "security-posture-probe.sh"
+  "tentacle-launchd-matrix.sh"
+  "tentacle-source-presence-audit.sh"
+  "worker-deep-liveness-probe-launchd-install.sh"
+)
+canary_hits=0
+for canary in "${self_match_canaries[@]}"; do
+  hit_count="$(jq -r '.gap_ids[]?' "$TMP/gaps.json" | grep -c "$canary" || true)"
+  if [[ "$hit_count" -gt 0 ]]; then
+    canary_hits=$((canary_hits + 1))
+  fi
+done
+if [[ "$canary_hits" == "0" ]]; then
+  echo "FAIL no self-match canary script flagged — self-match exclusion likely regressed" >&2
+  echo "  Probed canaries: ${self_match_canaries[*]}" >&2
+  exit 1
+fi
+echo "PASS AG5 self-match exclusion honored ($canary_hits/4 canary scripts still flagged)"
+
+echo "PASS gap-hunt-probe-subprocess-validator-callsite (5/5)"

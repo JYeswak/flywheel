@@ -518,7 +518,7 @@ _SKILL_MD_CORPUS: str | None = None
 _LAUNCHD_CORPUS: str | None = None
 _FLYWHEEL_SCRIPT_CALLERS_CORPUS: str | None = None
 _TEST_FILES_CORPUS: str | None = None
-_FLYWHEEL_SCRIPT_BODIES_CORPUS: str | None = None
+_FLYWHEEL_SCRIPT_BODIES_INDEX: dict[str, str] | None = None
 
 
 def skill_md_corpus(max_bytes: int = 1_500_000) -> str:
@@ -793,8 +793,8 @@ def flywheel_script_callers_corpus(max_bytes: int = 3_000_000) -> str:
     return _FLYWHEEL_SCRIPT_CALLERS_CORPUS
 
 
-def flywheel_script_bodies_corpus(max_bytes: int = 3_000_000) -> str:
-    """Build a corpus of ALL .flywheel/scripts/*.sh bodies (including *-probe.sh).
+def flywheel_script_bodies_index(max_bytes: int = 3_000_000) -> dict[str, str]:
+    """Build a dict {basename: body} of .flywheel/scripts/*.sh files.
 
     Per flywheel-2xdi.164: wired-but-cold detector previously consulted 7
     corpora but none scanned in-repo .flywheel/scripts/ bodies for subprocess
@@ -809,49 +809,78 @@ def flywheel_script_bodies_corpus(max_bytes: int = 3_000_000) -> str:
     output is JSON-consumed in-memory. No JSONL ledger trace produced.
     Previous 7-corpus check declared cold; this 8th corpus catches the case.
 
-    Excludes gap-hunt-probe.sh itself (to avoid self-reference noise from
-    usage strings + schema_version literals; legitimate cross-probe calls
-    happen FROM gap-hunt-probe.sh outward to OTHER scripts which is exactly
-    what this corpus measures).
+    Returns a dict keyed by basename so the caller can exclude the script
+    being checked (avoid self-match false positive — every script's own body
+    contains its own name in usage strings + version literals). Includes
+    gap-hunt-probe.sh body so subprocess.run callsites from gap-hunt-probe to
+    OTHER scripts (e.g., loop-integrity-signals.sh:2072) count as warm
+    evidence; gap-hunt-probe.sh is never itself checked by probe_wired_but_cold
+    (filtered out at the top of the per-script loop), so including its body in
+    the corpus produces no self-match risk.
+
+    Per-script size cap (max_bytes / len(candidates)) prevents one large
+    script from monopolizing the budget; total cap defaults to 3 MB.
     """
-    global _FLYWHEEL_SCRIPT_BODIES_CORPUS
-    if _FLYWHEEL_SCRIPT_BODIES_CORPUS is not None:
-        return _FLYWHEEL_SCRIPT_BODIES_CORPUS
+    global _FLYWHEEL_SCRIPT_BODIES_INDEX
+    if _FLYWHEEL_SCRIPT_BODIES_INDEX is not None:
+        return _FLYWHEEL_SCRIPT_BODIES_INDEX
 
     root = REPO_ROOT / ".flywheel" / "scripts"
     if not root.is_dir():
-        _FLYWHEEL_SCRIPT_BODIES_CORPUS = ""
-        return _FLYWHEEL_SCRIPT_BODIES_CORPUS
+        _FLYWHEEL_SCRIPT_BODIES_INDEX = {}
+        return _FLYWHEEL_SCRIPT_BODIES_INDEX
 
     try:
-        # Include ALL *.sh in .flywheel/scripts/ EXCEPT gap-hunt-probe.sh
-        # (self-exclusion avoids matching the script's own name in its
-        # usage strings, error messages, and schema literals).
-        candidates = sorted(
-            p for p in root.glob("*.sh")
-            if p.name != "gap-hunt-probe.sh"
-        )
+        # Include ALL .flywheel/scripts/*.sh — gap-hunt-probe.sh's outbound
+        # subprocess callsites for sibling scripts (e.g., loop-integrity-
+        # signals.sh) are legitimate wiring signal. Self-match risk is
+        # neutralized by check-time exclusion in
+        # is_referenced_in_other_flywheel_scripts.
+        candidates = sorted(root.glob("*.sh"))
     except Exception:
-        _FLYWHEEL_SCRIPT_BODIES_CORPUS = ""
-        return _FLYWHEEL_SCRIPT_BODIES_CORPUS
+        _FLYWHEEL_SCRIPT_BODIES_INDEX = {}
+        return _FLYWHEEL_SCRIPT_BODIES_INDEX
 
-    pieces: list[str] = []
+    if not candidates:
+        _FLYWHEEL_SCRIPT_BODIES_INDEX = {}
+        return _FLYWHEEL_SCRIPT_BODIES_INDEX
+
+    per_script_cap = max(8_000, max_bytes // max(1, len(candidates)))
+    index: dict[str, str] = {}
     used = 0
-    pieces.append("\n".join(p.name for p in candidates))
-    used += sum(len(p.name) + 1 for p in candidates)
     for path in candidates:
         if used >= max_bytes:
             break
         try:
-            text = read_text(path, max(0, max_bytes - used))
+            text = read_text(path, per_script_cap)
         except Exception:
             continue
         if not text:
             continue
-        pieces.append(text)
+        index[path.name] = text
         used += len(text)
-    _FLYWHEEL_SCRIPT_BODIES_CORPUS = "\n".join(pieces)
-    return _FLYWHEEL_SCRIPT_BODIES_CORPUS
+    _FLYWHEEL_SCRIPT_BODIES_INDEX = index
+    return _FLYWHEEL_SCRIPT_BODIES_INDEX
+
+
+def is_referenced_in_other_flywheel_scripts(name: str, stem: str, bodies_index: dict[str, str]) -> bool:
+    """Check if `name` or `stem` appears in ANY .flywheel/scripts/*.sh body
+    OTHER than the script with that basename itself.
+
+    Self-exclusion at check time prevents the false-positive case where every
+    script self-matches via its own usage strings, version literals, and
+    schema_version fields.
+    """
+    if not bodies_index:
+        return False
+    for caller_name, body in bodies_index.items():
+        if caller_name == name:
+            continue
+        if not body:
+            continue
+        if name in body or stem in body:
+            return True
+    return False
 
 
 def test_files_corpus(max_bytes: int = 1_500_000) -> str:
@@ -1330,9 +1359,12 @@ def probe_wired_but_cold() -> list[dict]:
     # flywheel_script_callers_corpus by design). Concrete case: gap-hunt-probe
     # invokes loop-integrity-signals.sh via subprocess.run; the callee never
     # writes a JSONL ledger entry so the 7-corpus check fired a false positive
-    # (flywheel-2xdi.157). Self-exclusion of gap-hunt-probe.sh inside the
-    # corpus function prevents self-reference noise.
-    flywheel_script_bodies_text = flywheel_script_bodies_corpus()
+    # (flywheel-2xdi.157). Built as an index (dict[basename, body]) so callers
+    # can exclude the script-being-checked at search time — necessary because
+    # every script's own body contains its own name in usage strings + version
+    # literals, which would otherwise produce a self-match false-positive
+    # (flywheel-2xdi.158 discovery).
+    flywheel_script_bodies = flywheel_script_bodies_index()
     on_demand = on_demand_script_allowlist()
     scripts = []
     scripts.extend(safe_iter_files(CLAUDE_ROOT / "skills", "*.sh", 3000))
@@ -1390,12 +1422,16 @@ def probe_wired_but_cold() -> list[dict]:
         # extension + symmetric with skill_md_corpus for .claude/skills)
         in_flywheel_doctrine = bool(flywheel_doctrine_text) and (name in flywheel_doctrine_text or script.stem in flywheel_doctrine_text)
         in_test_files = bool(test_files_text) and (name in test_files_text or script.stem in test_files_text)
-        # flywheel-2xdi.164: 8th corpus — subprocess callsites in
+        # flywheel-2xdi.164 + 2xdi.158: 8th corpus — subprocess callsites in
         # .flywheel/scripts/*.sh (incl. *-probe.sh, excluding gap-hunt-probe
         # to avoid self-reference). Catches scripts invoked via subprocess.run
         # from sibling probes whose output is consumed in-memory rather than
-        # written to a JSONL ledger.
-        in_script_bodies = bool(flywheel_script_bodies_text) and (name in flywheel_script_bodies_text or script.stem in flywheel_script_bodies_text)
+        # written to a JSONL ledger. Self-exclusion at check time (target's own
+        # body skipped) prevents the trivial-self-match false positive — every
+        # script's own body contains its own name in usage strings + version
+        # literals, which would otherwise mark every script warm regardless
+        # of actual wiring.
+        in_script_bodies = is_referenced_in_other_flywheel_scripts(name, script.stem, flywheel_script_bodies)
         if not (in_local or in_sibling or in_source or in_skill_md or in_launchd or in_flywheel_doctrine or in_test_files or in_script_bodies):
             try:
                 rel = str(script.relative_to(Path.home()))
