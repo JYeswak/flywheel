@@ -208,9 +208,18 @@ def callback_source(repo: Path, args: argparse.Namespace, agent: dict[str, Any],
         status = "fail"
         failures.append("agent_probe_failed")
 
+    # flywheel-fmik0 (2026-05-11) calibration: upstream validate-callback.py taxonomy
+    # evolved to require `evidence_redacted` field in callback envelopes. B11 fixture
+    # parity probes do NOT touch evidence-class files (artifact_paths=[], no
+    # files_reserved), so the semantically-correct value is `n/a`. Without this
+    # field the validator returns failure_classes=["evidence_redaction_missing"],
+    # which the probe then surfaces as top-level status=fail and rc=1. Same
+    # calibration class as flywheel-uijqq (B12_AG2). Memory rule:
+    # feedback_calibrate_test_to_actual_contract_before_filing_upstream.
     raw = {
         "status": status,
         "failure_classes": failures,
+        "evidence_redacted": "n/a",
         "callback_ref": {
             "transport": "ntm" if args.runtime == "codex" else "manual_fixture",
             "session": args.session,
