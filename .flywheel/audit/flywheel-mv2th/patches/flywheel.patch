@@ -1,0 +1,217 @@
+--- a/flywheel
++++ b/flywheel
+@@ -38,8 +38,9 @@
+   validate <subject> [...] validate per-subject contract (TODO: define subjects)
+   audit [--json]           recent run history
+   why <id>                 explain provenance for a given id (TODO: id semantics)
++  docs <subcommand>        documentation scaffold (init: detect project type)
+   quickstart [--json]      operator orientation
+-  help <topic>             topic help (run | doctor | health | repair | validate)
++  help <topic>             topic help (run | doctor | health | repair | validate | docs)
+   completion <shell>       emit bash or zsh completion
+ 
+ Introspection:
+@@ -185,6 +186,186 @@
+   # TODO(canonical-cli-scaffold): explain why <id> is/isn't in scope.
+   jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
+     '{schema_version:$sv,command:"why",id:$id,status:"todo",note:"TODO(canonical-cli-scaffold): fill in why-id semantics"}'
++}
++
++# ---------- docs subcommand (flywheel-mv2th Phase 1 of 38u3d) ----------
++#
++# `flywheel docs init` — detect project type + prepare Nextra scaffold.
++#
++# Phase 1 scope: subcommand + project-type detection only. Phase 2
++# (flywheel-ti46c) wires the actual scaffold invocation via Jeff-skill
++# `documentation-website-for-software-project/scripts/scaffold-nextra.sh`
++# (Class 3 READ-ONLY consumer per cross-repo-consumer-vs-mutator-boundary
++# doctrine).
++#
++# Project-type taxonomy (5 archetypes per bead body):
++#   rust-lib       — Cargo.toml + src/lib.rs OR [lib] in Cargo.toml
++#   python-lib     — pyproject.toml or setup.py without web-framework deps
++#   ts-lib         — package.json with main/exports, no SPA/backend deps
++#   frontend-spa   — package.json with React/Vue/Svelte/Next/Astro/Vite dep
++#   backend-service — package.json with Express/Fastify/Koa OR python web
++#                      framework (Django/Flask/FastAPI) OR manage.py
++#
++# Falls back to `unknown` when no archetype matches; operator should
++# expand the heuristics or set --archetype explicitly.
++
++scaffold_docs_detect_project_type() {
++  local target="${1:-.}"
++  local archetype=""
++  local reasons=()
++
++  if [[ ! -d "$target" ]]; then
++    printf 'unknown\n'
++    return 0
++  fi
++
++  # Rust lib
++  if [[ -f "$target/Cargo.toml" ]]; then
++    if [[ -f "$target/src/lib.rs" ]] || grep -qE '^\[lib\]' "$target/Cargo.toml" 2>/dev/null; then
++      archetype="rust-lib"
++      reasons+=("Cargo.toml present" "src/lib.rs or [lib] section")
++    fi
++  fi
++
++  # Python lib (must NOT be a web framework)
++  if [[ -z "$archetype" && ( -f "$target/pyproject.toml" || -f "$target/setup.py" ) ]]; then
++    local has_web=0
++    if grep -qE '(django|flask|fastapi|starlette|tornado|aiohttp)' "$target/pyproject.toml" "$target/setup.py" "$target/requirements.txt" 2>/dev/null; then
++      has_web=1
++    fi
++    if [[ -f "$target/manage.py" ]]; then
++      has_web=1
++    fi
++    if [[ "$has_web" -eq 0 ]]; then
++      archetype="python-lib"
++      reasons+=("pyproject.toml or setup.py present" "no web framework deps")
++    fi
++  fi
++
++  # package.json heuristics (must come AFTER Rust + Python detection)
++  if [[ -z "$archetype" && -f "$target/package.json" ]]; then
++    local pkg
++    pkg="$(cat "$target/package.json" 2>/dev/null)"
++    # Frontend SPA
++    if printf '%s' "$pkg" | grep -qE '"(react|vue|svelte|next|astro|vite|@vue/cli|@angular/core)"'; then
++      archetype="frontend-spa"
++      reasons+=("package.json has frontend framework dep")
++    # Backend service
++    elif printf '%s' "$pkg" | grep -qE '"(express|fastify|koa|hapi|nestjs|@nestjs/core)"'; then
++      archetype="backend-service"
++      reasons+=("package.json has backend framework dep")
++    # TS lib (has main/exports, no SPA/backend deps)
++    elif printf '%s' "$pkg" | grep -qE '"(main|exports)"[[:space:]]*:'; then
++      archetype="ts-lib"
++      reasons+=("package.json has main/exports without framework deps")
++    fi
++  fi
++
++  # Python web (no package.json, has manage.py or web framework)
++  if [[ -z "$archetype" && ( -f "$target/manage.py" || -f "$target/wsgi.py" || -f "$target/asgi.py" ) ]]; then
++    archetype="backend-service"
++    reasons+=("Python web framework markers present (manage.py/wsgi.py/asgi.py)")
++  fi
++
++  if [[ -z "$archetype" ]]; then
++    archetype="unknown"
++    reasons+=("no archetype matched; expand heuristics or pass --archetype")
++  fi
++
++  printf '%s\n' "$archetype"
++}
++
++scaffold_docs_usage() {
++  cat <<'USG'
++usage: flywheel docs <subcommand> [OPTIONS]
++
++Subcommands:
++  init [--target DIR] [--archetype NAME] [--json]
++       Detect project type + prepare Nextra docs scaffold.
++       (Phase 1: detection only. Phase 2 wires actual scaffold-nextra.sh.)
++
++Detection archetypes (per bead body):
++  rust-lib | python-lib | ts-lib | frontend-spa | backend-service | unknown
++
++Flags:
++  --target DIR        target directory (default: $PWD)
++  --archetype NAME    skip detection; force archetype
++  --json              machine-readable output (default for `init`)
++  -h | --help         this help
++
++Cross-refs:
++  Jeff-skill: ~/.claude/skills/documentation-website-for-software-project
++  Doctrine:   .flywheel/doctrine/substrate-boundary-three-class-taxonomy.md
++              .flywheel/doctrine/cross-repo-consumer-vs-mutator-boundary.md
++  Bead chain: flywheel-mv2th (Phase 1, this) -> ti46c (Phase 2 dogfood)
++              -> sjr9e (Phase 3 alps+mobile-eats) -> ll107 (Phase 4)
++USG
++}
++
++scaffold_cmd_docs_init() {
++  local target="$PWD"
++  local archetype_override=""
++  local json_out=1  # default --json for `init`
++
++  while [[ $# -gt 0 ]]; do
++    case "$1" in
++      -h|--help)        scaffold_docs_usage; return 0 ;;
++      --target)         target="${2:-}"; shift 2 ;;
++      --archetype)      archetype_override="${2:-}"; shift 2 ;;
++      --json)           json_out=1; shift ;;
++      *)
++        printf 'ERR: unknown docs init arg: %s\n' "$1" >&2
++        scaffold_docs_usage >&2
++        return 64 ;;
++    esac
++  done
++
++  local archetype
++  if [[ -n "$archetype_override" ]]; then
++    archetype="$archetype_override"
++  else
++    archetype="$(scaffold_docs_detect_project_type "$target")"
++  fi
++
++  jq -nc \
++    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++    --arg target "$target" \
++    --arg archetype "$archetype" \
++    --arg jeff_skill "~/.claude/skills/documentation-website-for-software-project" \
++    --arg scaffold_script "scripts/scaffold-nextra.sh" \
++    --arg phase "1-detection-only" \
++    --arg phase_bead "flywheel-mv2th" \
++    --arg parent_bead "flywheel-38u3d" \
++    '{
++      schema_version: $sv,
++      command: "docs",
++      subcommand: "init",
++      target: $target,
++      archetype: $archetype,
++      jeff_skill_consumer: $jeff_skill,
++      scaffold_script: $scaffold_script,
++      phase: $phase,
++      phase_bead: $phase_bead,
++      parent_bead: $parent_bead,
++      next_phase: "flywheel-ti46c-dogfood",
++      mutates_state: false
++    }'
++  return 0
++}
++
++scaffold_cmd_docs() {
++  if [[ $# -eq 0 ]]; then
++    scaffold_docs_usage
++    return 64
++  fi
++  case "$1" in
++    -h|--help)  scaffold_docs_usage; return 0 ;;
++    init)       shift; scaffold_cmd_docs_init "$@"; return $? ;;
++    *)
++      printf 'ERR: unknown docs subcommand: %s\n' "$1" >&2
++      scaffold_docs_usage >&2
++      return 64 ;;
++  esac
+ }
+ 
+ # ---------- scaffolded main dispatcher ----------
+@@ -208,6 +389,7 @@
+     validate)     shift; scaffold_cmd_validate "$@"; exit $? ;;
+     audit)        shift; scaffold_cmd_audit "$@"; exit $? ;;
+     why)          shift; scaffold_cmd_why "$@"; exit $? ;;
++    docs)         shift; scaffold_cmd_docs "$@"; exit $? ;;
+     quickstart)   shift; scaffold_emit_quickstart "$@"; exit 0 ;;
+     help)         shift; scaffold_emit_topic_help "${1:-}"; exit 0 ;;
+     completion)   shift; scaffold_emit_completion "${1:-bash}"; exit $? ;;
+@@ -224,7 +406,7 @@
+ # style and inline `while [[ $# -gt 0 ]]` style targets.
+ _scaffold_is_canonical_arg() {
+   case "${1:-}" in
+-    doctor|health|repair|validate|audit|why|quickstart|completion) return 0 ;;
++    doctor|health|repair|validate|audit|why|docs|quickstart|completion) return 0 ;;
+     --info|--schema|--examples) return 0 ;;
+     -h|--help) return 0 ;;
+     help)
