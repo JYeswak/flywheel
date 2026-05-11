@@ -573,7 +573,17 @@ def skill_md_corpus(max_bytes: int = 1_500_000) -> str:
     skill_md_per_file_cap = 256 * 1024  # 256 KB; agent-ergonomics SKILL.md is 72 KB; largest observed 137 KB
     references_md_per_file_cap = 128 * 1024  # 128 KB; largest observed references/*.md is 116 KB (tax-return)
     other_md_per_file_cap = 4_096
-    overall_cap = max(max_bytes, 32_000_000)
+    # flywheel-2xdi.112 (calibration of 2xdi.98): raise overall_cap from 32 MB
+    # to 64 MB. Empirical: at 32 MB cap, alphabetically-late skills (e.g.,
+    # `infisical-secrets/`, position 3116/3221 in references/*.md iteration)
+    # were budget-starved out — Pass 2 hit 24.9 MB before reaching the target
+    # while infisical-secrets/references/COMMANDS.md needed +0.7 MB more
+    # budget to be read. references/*.md natural total is 26 MB; SKILL.md is
+    # ~6 MB; other-md is ~7 MB → 39 MB total. 64 MB gives 25 MB headroom for
+    # growth without sacrificing per-file fidelity. Same META-RULE shape as
+    # 2xdi.66 (SKILL.md cap raise) and 2xdi.98 (references cap raise) — fix
+    # the corpus budget, not the per-script allowlist.
+    overall_cap = max(max_bytes, 64_000_000)
     skill_md_paths = [p for p in candidates if p.name == "SKILL.md"]
     # references_md: any *.md whose parent dir name is "references" (handles
     # both immediate-child references/*.md and nested references/**/*.md)
