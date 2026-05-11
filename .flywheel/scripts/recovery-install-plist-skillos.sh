@@ -20,6 +20,15 @@ fi
 SCAFFOLD_SCHEMA_VERSION="recovery-install-plist-skillos/v1"
 SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/recovery-install-plist-skillos-runs.jsonl}"
 
+# flywheel-mbt3z: source shared canonical-cli helper for this family.
+# Provides 6 identical-across-the-family functions:
+#   scaffold_usage, scaffold_emit_info, scaffold_emit_examples,
+#   scaffold_emit_quickstart, scaffold_emit_completion, scaffold_main
+# Per-client divergent functions (doctor/health/repair/validate/audit/why
+# + emit_schema + emit_topic_help) stay inline below.
+SCAFFOLD_BASENAME="recovery-install-plist-skillos.sh"
+source "$_SCAFFOLD_REPO_ROOT/.flywheel/lib/recovery-install-plist-canonical-cli.sh"
+
 # Module-scope substrate (skillos variant of install-plist family; adds jsm + skills_flywheel).
 RIPS_SESSION="skillos"
 RIPS_LABEL="com.zeststream.skillos.watcher"
@@ -37,71 +46,6 @@ RIPS_LOG_DIR="${RIPS_LOG_DIR:-$HOME/.local/state/flywheel/logs}"
 RIPS_JSM_BIN="${RIPS_JSM_BIN:-/Users/josh/.local/bin/jsm}"
 RIPS_SKILLS_FLYWHEEL="${RIPS_SKILLS_FLYWHEEL:-$HOME/.claude/skills/.flywheel}"
 RIPS_CONFIDENCE_MIN="${RIPS_CONFIDENCE_MIN:-60}"
-
-scaffold_usage() {
-  cat <<'USG'
-usage: recovery-install-plist-skillos.sh [SUBCOMMAND] [OPTIONS]
-
-Backward-compatible run mode: default invocation routes to the original
-top-level logic (now exposed as `cmd_run`).
-
-Canonical CLI surfaces:
-  doctor [--json]          probe substrate health
-  health [--json]          last-run status
-  repair --scope <s>       repair misconfigured state
-                            Default: --dry-run; mutate with --apply --idempotency-key KEY
-  validate <subject> [...] validate per-subject contract (TODO: define subjects)
-  audit [--json]           recent run history
-  why <id>                 explain provenance for a given id (TODO: id semantics)
-  quickstart [--json]      operator orientation
-  help <topic>             topic help (run | doctor | health | repair | validate)
-  completion <shell>       emit bash or zsh completion
-
-Introspection:
-  --info --json            version, paths, env vars, dependencies, sha256
-  --schema [<surface>]     JSON Schema for output envelopes
-  --examples --json        curated workflow examples
-  --help / -h              this help
-USG
-}
-
-scaffold_emit_info() {
-  if ! command -v cli_emit_info >/dev/null; then
-    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg name "recovery-install-plist-skillos.sh" \
-      '{schema_version:$sv,command:"info",name:$name,helper_lib_missing:true}'
-    return 0
-  fi
-  cli_emit_info \
-    "recovery-install-plist-skillos.sh" \
-    "scaffolded-v0" \
-    "$SCAFFOLD_SCHEMA_VERSION" \
-    "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
-    "SCAFFOLD_AUDIT_LOG" \
-    '{}'
-}
-
-scaffold_emit_examples() {
-  local jsonl
-  jsonl="$(jq -nc '{name:"default run",invocation:"recovery-install-plist-skillos.sh",purpose:"backward-compatible original behavior"}'
-)"$'\n'"$(jq -nc '{name:"doctor",invocation:"recovery-install-plist-skillos.sh doctor --json",purpose:"probe substrate health"}'
-)"
-  if command -v cli_emit_examples >/dev/null; then
-    cli_emit_examples "$SCAFFOLD_SCHEMA_VERSION" "$jsonl"
-  else
-    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"examples",helper_lib_missing:true}'
-  fi
-}
-
-scaffold_emit_quickstart() {
-  local steps
-  steps="$(jq -nc '{step:1,action:"probe doctor",command:"recovery-install-plist-skillos.sh doctor --json"}'
-)"
-  if command -v cli_emit_quickstart >/dev/null; then
-    cli_emit_quickstart "$SCAFFOLD_SCHEMA_VERSION" "$steps" "doctor,health,repair"
-  else
-    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"quickstart",helper_lib_missing:true}'
-  fi
-}
 
 scaffold_emit_schema() {
   local surface="${1:-default}"
@@ -156,22 +100,6 @@ scaffold_emit_topic_help() {
     audit)    printf 'topic: audit — tails recent invocations from SCAFFOLD_AUDIT_LOG (~/.local/state/flywheel/recovery-install-plist-skillos-runs.jsonl).\n' ;;
     why)      printf 'topic: why — explains ids: label, audit, dry_run_pass, repo, watcher_race, install_flow, skillos_management (jsm + skills_flywheel readiness).\n' ;;
     *)        printf 'topics: run | doctor | health | repair | validate | audit | why\n' ;;
-  esac
-}
-
-scaffold_emit_completion() {
-  local shell="${1:-bash}"
-  case "$shell" in
-    -h|--help) scaffold_emit_topic_help completion 2>/dev/null \
-                 || printf 'topic: completion <bash|zsh> — emit shell completion script\n'
-               return 0 ;;
-    bash) command -v cli_emit_completion_bash >/dev/null \
-            && cli_emit_completion_bash "recovery-install-plist-skillos" "doctor,health,repair,validate,audit,why,quickstart,help,completion" "--json,--apply,--dry-run,--idempotency-key,--info,--schema,--examples" \
-            || printf '# helper lib missing — completion unavailable\n' ;;
-    zsh)  command -v cli_emit_completion_zsh >/dev/null \
-            && cli_emit_completion_zsh "recovery-install-plist-skillos" "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
-            || printf '# helper lib missing — completion unavailable\n' ;;
-    *) printf 'ERR: unknown shell %s (use bash|zsh)\n' "$shell" >&2; return 64 ;;
   esac
 }
 
@@ -486,31 +414,6 @@ scaffold_cmd_why() {
 # top-level main is renamed to `cmd_run` (or the original final
 # `main "$@"` line is replaced with this dispatcher). Default invocation
 # falls through to the original logic for backward compat.
-scaffold_main() {
-  if [[ $# -eq 0 ]]; then
-    scaffold_usage; exit 0
-  fi
-  case "$1" in
-    -h|--help)    scaffold_usage; exit 0 ;;
-    --info)       shift; scaffold_emit_info "$@"; exit 0 ;;
-    --schema)     shift; scaffold_emit_schema "${1:-default}"; exit 0 ;;
-    --examples)   shift; scaffold_emit_examples "$@"; exit 0 ;;
-    doctor)       shift; scaffold_cmd_doctor "$@"; exit $? ;;
-    health)       shift; scaffold_cmd_health "$@"; exit $? ;;
-    repair)       shift; scaffold_cmd_repair "$@"; exit $? ;;
-    validate)     shift; scaffold_cmd_validate "$@"; exit $? ;;
-    audit)        shift; scaffold_cmd_audit "$@"; exit $? ;;
-    why)          shift; scaffold_cmd_why "$@"; exit $? ;;
-    quickstart)   shift; scaffold_emit_quickstart "$@"; exit 0 ;;
-    help)         shift; scaffold_emit_topic_help "${1:-}"; exit 0 ;;
-    completion)   shift; scaffold_emit_completion "${1:-bash}"; exit $? ;;
-    *)
-      printf 'ERR: unknown canonical subcommand: %s\n' "$1" >&2
-      scaffold_usage >&2
-      exit 64 ;;
-  esac
-}
-
 # Early-dispatch intercept: if argv[0] looks like a canonical subcommand
 # or introspection flag, run the canonical surface and exit BEFORE the
 # target's original arg parser sees the args. Works for both `main "$@"`
