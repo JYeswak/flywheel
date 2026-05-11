@@ -1,0 +1,6 @@
+PASS probe defines for_in_re for for-loop header capture
+PASS probe tracks multi-line for-loop continuation
+PASS live probe reports 0 wired-but-cold gaps (was ≥1 with reconcile.sh pre-fix)
+PYOK
+PASS synthetic fixture: for-loop header capture finds reconcile + tentacle + doctor module names
+SUMMARY pass=4 fail=0

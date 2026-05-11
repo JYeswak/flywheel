@@ -525,6 +525,15 @@ def runtime_source_corpus() -> str:
     candidates.update(safe_iter_files(CLAUDE_ROOT / "skills", "*.sh", 5000))
     candidates.update(safe_iter_files(REPO_ROOT / ".flywheel/scripts", "*.sh", 500))
     candidates.update(safe_iter_files(CLAUDE_ROOT / "skills", "*.bash", 500))
+    # flywheel-2xdi.48: include extension-less bash wrappers under `bin/`
+    # (e.g., `skills/.flywheel/bin/flywheel-loop`). These are the source-DRIVERS
+    # for the for-loop indirect-source pattern; without this branch the
+    # for-loop module list never enters the corpus, and every loop-driven
+    # library module gets falsely flagged wired-but-cold even though
+    # `bin/flywheel-loop` sources it on every tick.
+    for cand in safe_iter_files(CLAUDE_ROOT / "skills", "bin/*", 500):
+        if cand.is_file() and not cand.suffix:
+            candidates.add(cand)
     # Match lines that source a file directly (`source X`, `. X`) AND lines
     # that reference a `*.d/` module-glob directory. The .d/ pattern catches
     # variable-indirected glob sources like
@@ -532,18 +541,39 @@ def runtime_source_corpus() -> str:
     #   for m in "${_dir}"/*.sh; do source "$m"; done
     # where the literal basename (part-01-...sh) never appears in any
     # `source` line, but `doctor.d` does in the assigning line.
+    #
+    # Per flywheel-2xdi.47: also capture `for <var> in <module-list>` headers
+    # that drive variable-indirected sources like
+    #   for module in misc parse repo ... reconcile ... ; do
+    #     source "$LIB/$module.sh"
+    #   done
+    # Without this, every loop-driven lib module is invisible to the source
+    # corpus check even though it's loaded on every flywheel-loop invocation.
     dot_d_re = re.compile(r"[A-Za-z0-9_-]+\.d(?=[/\"'\s]|$)")
+    for_in_re = re.compile(r"^\s*for\s+\w+\s+in\b")
     for f in candidates:
         try:
             text = read_text(f, 200_000)
         except Exception:
             continue
+        in_for_continuation = False
         for line in text.splitlines():
             stripped = line.strip()
             if stripped.startswith("source ") or stripped.startswith(". "):
                 pieces.append(stripped)
-            elif dot_d_re.search(line):
+                in_for_continuation = False
+                continue
+            if dot_d_re.search(line):
                 pieces.append(line.rstrip())
+                continue
+            if for_in_re.match(line):
+                pieces.append(stripped)
+                # Multi-line continuation (`\` line-end) — keep capturing.
+                in_for_continuation = stripped.endswith("\\")
+                continue
+            if in_for_continuation:
+                pieces.append(stripped)
+                in_for_continuation = stripped.endswith("\\")
     _RUNTIME_SOURCE_CORPUS = "\n".join(pieces)
     return _RUNTIME_SOURCE_CORPUS
 
