@@ -222,6 +222,8 @@ forward-link-doctrine-doc-recipe.md sub-pattern table).
 - Source fuckup row: `~/.local/state/flywheel/fuckup-log.jsonl` ts=2026-05-11T22:30:00Z class=outbox-discipline-missed-when-codifying-doctrine-same-session
 - Sister recipes: `.flywheel/doctrine/forward-link-doctrine-doc-recipe.md` (pmg3c), `.flywheel/doctrine/operator-library-recipe.md` (vbk3h)
 - Skillos doctrine shipped silently (trauma origin): hook-chain-extend-vs-replace.md (skillos repo)
+- **L-rule promotion: L157 — OUTBOX-DISCIPLINE-CROSS-ORCH-SHIP-NOTIFICATION** (shard at `.flywheel/rules/L108-L157-outbox-discipline-cross-orch-ship-notification.md`; promotion bead `flywheel-jzj45`; SHIPPED 2026-05-11). Final member of v38e1 4-rule cohort L-canonicalization (L154+L155+L156+L157 all SHIPPED).
+- Sister L-rule: L156 (inbox-discipline-0th-probe) is the bilateral-protocol INCOMING half
 
 ## Publishability Bar Self-Grade
 
