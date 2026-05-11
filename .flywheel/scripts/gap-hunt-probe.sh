@@ -547,13 +547,14 @@ def skill_md_corpus(max_bytes: int = 1_500_000) -> str:
     # doesn't starve the recognizer.
     pieces.append("\n".join(p.name for p in candidates))
     used += sum(len(p.name) + 1 for p in candidates)
-    # flywheel-2xdi.66: per-file cap (16 KB) prevents one giant CHANGELOG/STATE
-    # from devouring the whole budget at the front of iteration order. Total
-    # budget 8 MB. Script-name mentions are short prose patterns; 16 KB per
-    # file is enough to capture references in introduction + use-cases without
-    # over-collecting.
-    per_file_cap = 16_384
-    overall_cap = max(max_bytes, 8_000_000)
+    # flywheel-2xdi.66: per-file cap (4 KB) + larger overall budget (32 MB).
+    # The cap prevents one giant CHANGELOG/STATE/WORK file from devouring the
+    # whole budget at the front of iteration order. 4 KB per file is enough to
+    # capture the top of each doc (script-name mentions usually live in
+    # frontmatter, intro, or first use-case section). With ~5500 *.md files
+    # in a real skills tree at 4 KB each = ~22 MB max — well under 32 MB cap.
+    per_file_cap = 4_096
+    overall_cap = max(max_bytes, 32_000_000)
     for path in candidates:
         if used >= overall_cap:
             break
@@ -622,44 +623,72 @@ def launchd_plist_corpus(max_bytes: int = 1_500_000) -> str:
     return _LAUNCHD_CORPUS
 
 
-def flywheel_script_callers_corpus(max_bytes: int = 2_000_000) -> str:
-    """Build a corpus from .flywheel/scripts/*.sh content, EXCLUDING *-probe.sh.
+def flywheel_script_callers_corpus(max_bytes: int = 3_000_000) -> str:
+    """Build a corpus from non-probe script callers across flywheel-orchestration surfaces.
 
-    Per flywheel-kckw8 (probe-without-receiver class extension): in-repo
-    flywheel scripts frequently invoke probes via env-var-defaulted patterns
-    like idle-pane-auto-dispatch.sh:28 SCAFFOLD_SURFACE_PROBE that defaults
-    to .flywheel/scripts/dispatch-surface-conflict-probe.sh. Without this
-    corpus, probe-without-receiver flags probes that ARE consumed by sister
-    scripts in the same scripts/ dir but not referenced from tick.md or
-    last_tick_*.json receipts.
+    Per flywheel-kckw8 (initial extension) + flywheel-6n1v1 (skill-substrate
+    lib extension): probes are invoked by callers across THREE script surfaces:
 
-    CRITICAL: excludes *-probe.sh files from the corpus. A probe's own
-    self-reference (in usage strings, schema_version, etc.) is NOT a
-    receiver. Sister-probe documentation comments (e.g., gap-hunt-probe.sh
-    mentioning dispatch-surface-conflict-probe in doctrine prose) are also
+      1. REPO_ROOT/.flywheel/scripts/*.sh — in-repo flywheel scripts that
+         invoke probes via env-var-defaulted patterns like
+         idle-pane-auto-dispatch.sh:28 SCAFFOLD_SURFACE_PROBE
+      2. ~/.claude/skills/.flywheel/lib/*.sh — top-level skill-substrate lib
+         modules sourced by flywheel-loop
+      3. ~/.claude/skills/.flywheel/lib/*.d/*.sh — modular skill-substrate lib
+         dirs (doctor.d/fleet.d/misc.d/...) sourced by flywheel-loop via
+         for-loop indirect-source. Per flywheel-2xdi.75: file-length-probe.sh
+         is invoked by misc.d/part-01-auto_respawn_before_tick-...sh:264-278
+         file_length_doctor_json() defined here.
+
+    Without all three corpora, probe-without-receiver flags probes that ARE
+    consumed by sister scripts or skill-lib orchestrator modules but not
+    referenced from tick.md or last_tick_*.json receipts.
+
+    CRITICAL: excludes *-probe.sh files from the corpus across ALL three
+    surfaces. A probe's own self-reference (in usage strings, schema_version,
+    etc.) is NOT a receiver. Sister-probe documentation comments are also
     NOT receivers — they're just docs. Real receivers are non-probe scripts
     that actually invoke the probe.
 
-    Surface scanned: .flywheel/scripts/*.sh EXCEPT *-probe.sh.
-    Recognition: any reference to the probe's basename or stem in any
-    non-probe script body counts as a wired consumer.
+    Surfaces scanned (excluding *-probe.sh):
+      - REPO_ROOT/.flywheel/scripts/*.sh
+      - ~/.claude/skills/.flywheel/lib/*.sh
+      - ~/.claude/skills/.flywheel/lib/*.d/*.sh
     """
     global _FLYWHEEL_SCRIPT_CALLERS_CORPUS
     if _FLYWHEEL_SCRIPT_CALLERS_CORPUS is not None:
         return _FLYWHEEL_SCRIPT_CALLERS_CORPUS
-    scripts_dir = REPO_ROOT / ".flywheel" / "scripts"
-    if not scripts_dir.is_dir():
-        _FLYWHEEL_SCRIPT_CALLERS_CORPUS = ""
-        return _FLYWHEEL_SCRIPT_CALLERS_CORPUS
+
+    # Three orchestration surfaces — collect candidate .sh files from each.
+    candidate_roots: list[tuple[Path, str]] = []
+    candidate_roots.append((REPO_ROOT / ".flywheel" / "scripts", "*.sh"))
+    skill_lib = CLAUDE_ROOT / "skills" / ".flywheel" / "lib"
+    if skill_lib.is_dir():
+        # Top-level lib/*.sh
+        candidate_roots.append((skill_lib, "*.sh"))
+        # Modular lib/*.d/*.sh — enumerate the *.d dirs first
+        try:
+            for sub in skill_lib.iterdir():
+                if sub.is_dir() and sub.name.endswith(".d"):
+                    candidate_roots.append((sub, "*.sh"))
+        except Exception:
+            pass
+
+    candidates: list[Path] = []
+    for root, pattern in candidate_roots:
+        if not root.is_dir():
+            continue
+        try:
+            # Exclude *-probe.sh from the consumer corpus — probes aren't receivers
+            # of each other; documentation cross-references between probes don't
+            # count as wired invocation.
+            candidates.extend(p for p in root.glob(pattern) if not p.name.endswith("-probe.sh"))
+        except Exception:
+            continue
+    candidates = sorted(set(candidates))
+
     pieces: list[str] = []
     used = 0
-    try:
-        # Exclude *-probe.sh from the consumer corpus — probes aren't receivers
-        # of each other; documentation cross-references between probes don't
-        # count as wired invocation.
-        candidates = sorted(p for p in scripts_dir.glob("*.sh") if not p.name.endswith("-probe.sh"))
-    except Exception:
-        candidates = []
     pieces.append("\n".join(p.name for p in candidates))
     used += sum(len(p.name) + 1 for p in candidates)
     for path in candidates:

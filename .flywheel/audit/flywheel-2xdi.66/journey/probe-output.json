@@ -1,0 +1,17 @@
+{
+  "_note": "Captured post-fix via .gap_ids (the REAL probe field, not the vacuous .gaps).",
+  "live_probe_filters": {
+    "cluster-recommendations": "[.gap_ids[] | select(test(\"cluster-recommendations\"))] | length",
+    "archetype-calibrate": "[.gap_ids[] | select(test(\"archetype-calibrate\"))] | length",
+    "protected-session-recovery": "[.gap_ids[] | select(test(\"protected-session-recovery\"))] | length"
+  },
+  "live_probe_results": {
+    "cluster-recommendations": 0,
+    "archetype-calibrate": 0,
+    "protected-session-recovery": 0
+  },
+  "wired_but_cold_remaining_total": 20,
+  "_remaining_note": "The probe caps gaps[] at 20; remaining flags are unrelated scripts that will surface as their own beads via the gap-hunter cron loop. 2xdi.66 narrowly addresses cluster-recommendations.sh.",
+  "regression_test": "tests/gap-hunt-probe-skill-tree-md-corpus.sh",
+  "regression_summary": "pass=6 fail=0"
+}
