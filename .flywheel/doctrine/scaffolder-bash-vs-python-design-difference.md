@@ -2,11 +2,17 @@
 name: scaffolder-bash-vs-python-design-difference
 type: doctrine
 created: 2026-05-11
+updated: 2026-05-11
 authors:
   - flywheel-eyqo7-40b98a (MagentaPond / flywheel:0.3) — initial doctrine fold-in
+  - flywheel-vyzza (MagentaPond / flywheel:0.3) — rename arc closeout (2026-05-11)
 parent_beads:
   - flywheel-0pkcf (PYTHON variant exemplar; first surface that hit the bash-scaffolder refusal)
   - flywheel-oozt3 (scaffold-canonical-cli-py.sh introduction; closes the refused_python_shebang gap)
+  - flywheel-eyqo7.1 (mass-rename arc meta-bead — decomposed to per-file sub-beads per META-RULE 2026-05-10)
+  - flywheel-eyqo7.1.1 / flywheel-023hs (caam-auto-rotate .sh → .py rename)
+  - flywheel-eyqo7.1.2 / flywheel-oyxd8 (jeff-issue .sh → .py rename)
+  - flywheel-eyqo7.1.3 / flywheel-49c6i (fleet-rotate-on-caam-swap .sh → .py rename)
 sister_doctrines:
   - canonical-cli-scoping
   - audit-machinery-hygiene-discipline
@@ -54,24 +60,50 @@ The py scaffolder's `_SCAFFOLD_CANONICAL_SUBCOMMANDS_FALLBACK` originally only i
 
 **Operational guidance for new py targets:** verify `--info` / `--schema` / `--examples` / `doctor --json` / `health --json` all reach the canonical envelope after scaffolding. Don't assume the scaffolder's fallback dispatch covers a verb just because the doctrine lists it as canonical.
 
-## File-extension convention (current state vs target state)
+## File-extension convention (rename arc shipped 2026-05-11)
 
-Current state (2026-05-11): the flywheel repo has 3 scripts with `#!/usr/bin/env python3` shebangs but `.sh` file extensions:
+The flywheel repo previously had 3 scripts with `#!/usr/bin/env python3` shebangs but `.sh` file extensions. The mismatch was a HISTORICAL artifact — these scripts were originally bash, then rewritten in Python during canonical-CLI scaffold work, but the `.sh` extension was preserved to avoid breaking the 108 total cross-references (audit trails, doctrine docs, dispatch logs, etc.).
 
-- `.flywheel/scripts/caam-auto-rotate-on-usage-limit.sh` (49 cross-references)
-- `.flywheel/scripts/jeff-issue.sh` (24 cross-references)
-- `.flywheel/scripts/fleet-rotate-on-caam-swap.sh` (35 cross-references)
+**Current state (post-2026-05-11):** all three scripts renamed to `.py` extension, LIVE refs updated, HISTORICAL refs preserved:
 
-The mismatched extensions are a HISTORICAL artifact — these scripts were originally bash, then rewritten in Python during canonical-CLI scaffold work, but the `.sh` extension was preserved to avoid breaking the 108 total cross-references (audit trails, doctrine docs, dispatch logs, etc.).
+- `.flywheel/scripts/caam-auto-rotate-on-usage-limit.py` (was `.sh`, renamed `flywheel-eyqo7.1.1` / `flywheel-023hs`, commit `3e6b0f6`)
+- `.flywheel/scripts/jeff-issue.py` (was `.sh`, renamed `flywheel-eyqo7.1.2` / `flywheel-oyxd8`, commit `1a59236`)
+- `.flywheel/scripts/fleet-rotate-on-caam-swap.py` (was `.sh`, renamed `flywheel-eyqo7.1.3` / `flywheel-49c6i`, commit `852600c`)
 
-**Target state:** rename all three to `.py` extension AND update the live cross-references (NOT the historical audit trail entries — those are immutable evidence).
+### Rename arc completion (2026-05-11)
 
-**Why this isn't done yet:** mass-rename requires carefully partitioning the 108 references into:
-- LIVE references (active scripts, configs, watchers, launchd jobs, hooks): MUST be updated atomically with the rename
-- HISTORICAL references (JSONL audit logs, dispatch-log rows, journal entries, evidence packs): MUST NOT be rewritten (they're immutable evidence of past activity)
-- DOCTRINE references (PLANS/, runbooks): can be updated but their value is partly as historical record
+Parent meta-bead `flywheel-eyqo7.1` decomposed to 4 sub-beads per META-RULE 2026-05-10 (decompose-by-natural-unit-not-bundle). Reference graph + LIVE/HISTORICAL/DOCTRINE partitioning at `.flywheel/audit/flywheel-eyqo7.1/evidence.md`.
 
-A safe mass-rename is itself a multi-tick orchestration arc. The current `flywheel-eyqo7` worker tick documents the design difference (this file) and files a follow-on bead with the migration plan + reference graph for the actual rename.
+Per-sub-bead evidence packs:
+- `.flywheel/audit/flywheel-eyqo7.1.1/evidence.md` — caam-auto-rotate (16 LIVE-ref updates; canonical-CLI test 14/14 PASS; 1 gap bead filed `flywheel-vzrs6` for pre-existing test 02 stale-assertion class, META-RULE 2026-05-09)
+- `.flywheel/audit/flywheel-eyqo7.1.2/evidence.md` — jeff-issue (19 LIVE-ref updates; tests 16/16 + 26/26 PASS; argv[0]-grep calibration applied proactively)
+- `.flywheel/audit/flywheel-eyqo7.1.3/evidence.md` — fleet-rotate-on-caam-swap (16 LIVE-ref updates incl 5 sister-script sites with 2 LOAD-BEARING path vars verified resolving)
+
+### Reference partitioning (immutable post-rename)
+
+Per audit-machinery-hygiene-discipline doctrine:
+- **LIVE references** (active scripts, configs, watchers, launchd jobs, hooks, tests, NTM-SURFACE-INVENTORY, doctrine): UPDATED atomically with each rename
+- **HISTORICAL references** (JSONL audit logs, dispatch-log rows, journal entries, evidence packs from prior beads, prompts/, checkpoints/, summaries/, rollback-receipts.jsonl, scaffold-runs.jsonl, `.beads/issues.jsonl`): NOT rewritten — immutable evidence of past activity
+- **DOCTRINE references** (PLANS/, this doctrine, sister doctrines): updated to reflect post-rename state where load-bearing; historical value preserved otherwise
+
+### Design decisions baked into the rename arc
+
+1. **Ledger filename strings** (e.g. `outputs[]` arrays in script `--info`) updated `.sh-runs.jsonl` → `.py-runs.jsonl` (string-only; no on-disk file existed)
+2. **Test filenames embedding unit-under-test extension** DO rename (e.g. `tests/<basename>.sh-canonical-cli-py.sh` → `.py-canonical-cli-py.sh` — canonical-CLI test convention `<script-basename-with-extension>-canonical-cli-py.sh`)
+3. **Schema/result version names** KEEP suffix (e.g. `caam-auto-rotate-on-usage-limit.result.v1` — content-version, not filename)
+4. **`--help`-output substring greps** in tests update to `.py` (Python script's `--help` emits `argv[0]` basename, which becomes `.py` post-rename)
+5. **Doctrine close-out is post-renames**, not pre-renames intent (this sub-bead `flywheel-vyzza` blocks-on the 3 rename sub-beads)
+6. **Slash-command names** (e.g. `$HOME/.claude/commands/flywheel/jeff-issue.md`) KEEP — slash command name has no extension to update
+7. **Pre-scaffold `.bak.scaffold-py-...` files** UNTOUCHED — historical evidence of bash-version-before-scaffolding per audit-machinery-hygiene-discipline
+
+### Test files NOT renamed
+
+Per Design Decision #2, test filenames that embed the unit-under-test extension DO rename. But test filenames whose `.sh` reflects the TEST INTERPRETER (not unit-under-test) do NOT rename:
+
+- `tests/jeff-issue.sh` — KEPT (`.sh` is the test interpreter; test exercises `.py` script via bash)
+- `tests/jeff-issue-canonical-cli.sh` — KEPT (same reasoning)
+- `tests/caam-auto-rotate-on-usage-limit-canonical-cli.sh` — KEPT (wrapper test, no `.sh-` infix)
+- `tests/fleet-rotate-on-caam-swap-canonical-cli.sh` — KEPT (same reasoning)
 
 ## Decision rule — which scaffolder to use
 
@@ -88,12 +120,18 @@ The bash scaffolder's refusal envelope (`status:refused reason:non_bash_shebang 
 ## Operational guidance for new scripts
 
 - **New bash script:** use `.sh` extension + bash shebang + `scaffold-canonical-cli.sh` to add canonical-CLI surfaces.
-- **New python script:** use `.py` extension + `#!/usr/bin/env python3` shebang + `scaffold-canonical-cli-py.sh`. **Do NOT use `.sh` extension** for new Python scripts — the historical mismatch class is bounded to the 3 legacy files above; new scripts should match extension to interpreter from day 1.
-- **Refactoring a `.sh` to Python:** if the script lives in flywheel repo's authored set, file a refactor bead that includes the rename + reference-graph update; do not preserve the `.sh` extension as a side effect of "minimum churn".
+- **New python script:** use `.py` extension + `#!/usr/bin/env python3` shebang + `scaffold-canonical-cli-py.sh`. **Do NOT use `.sh` extension** for new Python scripts — the historical mismatch class is now CLOSED (all 3 legacy files renamed in the flywheel-eyqo7.1 arc, 2026-05-11); new scripts must match extension to interpreter from day 1.
+- **Refactoring a `.sh` to Python:** if the script lives in flywheel repo's authored set, file a refactor bead that includes the rename + reference-graph update; do not preserve the `.sh` extension as a side effect of "minimum churn". Reference: flywheel-eyqo7.1 evidence pack documents the canonical partitioning approach (LIVE / HISTORICAL / DOCTRINE) for this class of refactor.
 
 ## Cross-references
 
-- `flywheel-0pkcf` — first PYTHON variant exemplar (caam-auto-rotate-on-usage-limit.sh canonical-CLI scaffold)
+- `flywheel-0pkcf` — first PYTHON variant exemplar (caam-auto-rotate-on-usage-limit.py canonical-CLI scaffold)
 - `flywheel-oozt3` — scaffold-canonical-cli-py.sh introduction (closes the refused_python_shebang gap)
 - `flywheel-eyqo7` — this doctrine fold-in + follow-on rename bead filing
+- `flywheel-eyqo7.1` — rename arc meta-bead; decomposed to 4 sub-beads per META-RULE 2026-05-10 (evidence: `.flywheel/audit/flywheel-eyqo7.1/evidence.md`)
+- `flywheel-eyqo7.1.1` / `flywheel-023hs` — caam-auto-rotate rename (commit `3e6b0f6`; gap bead `flywheel-vzrs6` filed for pre-existing test 02 stale assertion)
+- `flywheel-eyqo7.1.2` / `flywheel-oyxd8` — jeff-issue rename (commit `1a59236`; both test suites green; argv[0]-grep calibration applied proactively)
+- `flywheel-eyqo7.1.3` / `flywheel-49c6i` — fleet-rotate-on-caam-swap rename (commit `852600c`; sister script load-bearing path resolution verified)
+- `flywheel-vyzza` — this doctrine close-out (deps `eyqo7.1.{1,2,3}` all closed)
 - canonical-cli-scoping skill — the rubric both scaffolders satisfy
+- audit-machinery-hygiene-discipline doctrine — the LIVE/HISTORICAL/DOCTRINE partitioning principle applied per rename
