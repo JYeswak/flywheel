@@ -1241,8 +1241,19 @@ def probe_without_receiver(receivers_text: str) -> list[dict]:
         launchd_text + "\n" +
         test_files_text
     )
+    # flywheel-2xdi.60.1: respect substrate-registry on-demand allowlist
+    # (same mechanism probe_wired_but_cold uses). Probes with kind in
+    # _ON_DEMAND_VALIDATOR_KINDS are intentionally on-demand diagnostics;
+    # they should be excluded from probe-without-receiver too.
+    on_demand = on_demand_script_allowlist()
     gaps = []
     for path in sorted(set(files)):
+        try:
+            resolved = path.resolve()
+        except Exception:
+            resolved = path
+        if resolved in on_demand:
+            continue
         if path.name in combined or path.stem in combined:
             continue
         gaps.append(gap("probe-without-receiver", path.name, f"{path} emits probe output but no tick/status/last_tick receiver reference was found"))
