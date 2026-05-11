@@ -1,0 +1,1 @@
+{"schema_version":"picoz-archive-and-fresh-2026-05-07/v1","command":"schema","surface":"doctor","fields":{"ts":"ISO8601","status":"pass|warn|fail","checks":"array of {name,status,detail?}"}}

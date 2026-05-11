@@ -1,0 +1,1 @@
+{"schema_version":"picoz-archive-and-fresh-2026-05-07/v1","command":"quickstart","status":"ok","steps":[{"step":1,"action":"probe doctor","command":"picoz-archive-and-fresh-2026-05-07.sh doctor --json"}],"next_actions":["doctor","health","repair"]}

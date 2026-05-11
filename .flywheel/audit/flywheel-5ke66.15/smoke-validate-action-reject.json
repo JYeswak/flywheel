@@ -1,0 +1,2 @@
+{"schema_version":"picoz-archive-and-fresh-2026-05-07/v1","command":"validate","subject":"action-name","ts":"2026-05-11T01:48:46Z","status":"reject","value":"unknown_action","reason":"not_in_enum","valid_actions":["start","abort","phase_1_ok","phase_2_skipped","phase_2_ok","phase_3_ok","phase_4_ok","phase_5_ok","phase_6_ok","phase_7_ok","phase_8_ok","phase_9_ok","phase_10_done"]}
+rc=1
