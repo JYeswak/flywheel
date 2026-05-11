@@ -1,0 +1,22 @@
+PASS script_syntax
+PASS alert_fixture_jsonl_valid
+PASS info_surface
+PASS schema_surface
+PASS doctor_surface
+PASS health_surface
+PASS validate_surface
+PASS audit_surface
+PASS why_surface
+PASS repair_refuses
+PASS success_pairing_complete
+PASS success_event_row_l61_complete
+PASS mail_failure_degrades_ntm_only
+PASS ntm_failure_degrades_mail_only
+PASS resend_suppressed_does_not_send_channels
+PASS resend_suppressed_receipt
+PASS stale_callback_degrades
+PASS alert_ledger_jsonl_valid
+PASS ledger_carries_event_id_and_dedupe
+PASS generated_event_rows_jsonl_valid
+PASS generated_event_rows_match_v2_smoke
+SUMMARY pass=21 fail=0
