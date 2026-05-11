@@ -158,5 +158,20 @@ if grep -q '"action":"record"' "$audit_log" 2>/dev/null; then pass "cli_audit_ap
 "$BIN" schema audit-row --json >"$TMP/schema-audit-row.json"
 assert_jq "$TMP/schema-audit-row.json" '.schema_version == "flywheel-verdict.canonical.v1" and .command == "audit-row" and (.required | type == "array")' "schema_audit_row"
 
+# ===== Wave-3 AG3 strict assertions (flywheel-k8gcv.26) =====
+
+# AG3.1: --info has name + version + capabilities (canonical 4-gate)
+assert_jq "$TMP/info-2.json" '.name == "flywheel-verdict" and (.version | type) == "string" and (.capabilities | type) == "array" and (.capabilities | length) >= 5 and (.subcommands | type) == "array"' "AG3_info_name_version_capabilities"
+
+# AG3.2: --schema has input_schema + output_schema (canonical 4-gate)
+"$BIN" --schema --json >"$TMP/schema-default.json"
+assert_jq "$TMP/schema-default.json" '.input_schema and .output_schema and (.input_schema | type) == "object" and (.output_schema | type) == "object"' "AG3_schema_input_output"
+
+# AG3.3: --examples emits length > 0 (canonical 4-gate)
+assert_jq "$TMP/examples.json" '(.examples | length) > 0' "AG3_examples_length_gt_0"
+
+# AG3.4: doctor has .checks array (canonical 4-gate)
+assert_jq "$TMP/doctor.json" '.checks and (.checks | type) == "array" and (.checks | length) > 0' "AG3_doctor_checks_array"
+
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]
