@@ -1,0 +1,1 @@
+{"exit_codes":{"0":"pass or warn","1":"bleed rows observed","2":"usage"},"fields":["bleed_event_count_24h","bleed_session_top","bleed_repo_top","bleed_warnings"],"schema_version":"bleed-ledger-watch/v1"}
