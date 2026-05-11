@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (partial -> passing per bead flywheel-k8gcv.15)
 set -euo pipefail
 
-VERSION="jeff-intel-network.v1"
+VERSION="jeff-intel-network.v1.1.0"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 RUNNER="${JEFF_INTEL_RUNNER:-$ROOT/.flywheel/scripts/jeff-intel-scheduled-runner.sh}"
 DAILY="${JEFF_INTEL_DAILY_SCRIPT:-$ROOT/.flywheel/scripts/daily-jeff-ingest.sh}"
@@ -62,14 +64,68 @@ info_json() {
     --arg daily "$DAILY" \
     --arg state_dir "$STATE_DIR" \
     --arg flywheel_state_dir "$FLYWHEEL_STATE_DIR" \
-    '{schema_version:$schema_version,version:$version,root:$root,runner:$runner,daily_ingest:$daily,state_dir:$state_dir,flywheel_state_dir:$flywheel_state_dir,mutating_commands:["pull --apply","x-poll --apply","repair --apply"],default_mutation_mode:"dry-run"}'
+    '{
+      schema_version:$schema_version,
+      command:"info",
+      name:"jeff-intel-network.sh",
+      version:$version,
+      root:$root,
+      runner:$runner,
+      daily_ingest:$daily,
+      state_dir:$state_dir,
+      flywheel_state_dir:$flywheel_state_dir,
+      mutating_commands:["pull --apply","x-poll --apply","repair --apply"],
+      default_mutation_mode:"dry-run",
+      subcommands:["doctor","health","repair","validate","audit","why","quickstart","pull","x-poll","completion","help","schema"],
+      canonical_flags:["--info","--schema","--examples","--json","--apply","--dry-run","--idempotency-key","--scope","--explain","--version"],
+      capabilities:[
+        "five-source-daily-ingest-via-jeff-corpus",
+        "x-poll-hourly-cadence",
+        "monthly-deep-mine-philosophy",
+        "tentacle-drift-weekly-readonly-sweep",
+        "scheduled-runner-launchd-aware",
+        "doctor-aggregates-runner-plus-daily-ingest",
+        "fixture-driven-x-poll-testing",
+        "idempotent-receipts-via-key-or-mode"
+      ],
+      apply_supported:true,
+      dry_run_supported:true,
+      idempotency_key_required_for_apply:true,
+      mutates_state:true,
+      env_vars:["JEFF_INTEL_RUNNER","JEFF_INTEL_DAILY_SCRIPT","JEFF_INTEL_STATE_DIR","FLYWHEEL_STATE_DIR","JEFF_INTEL_X_FIXTURE"],
+      exit_codes:{"0":"success","1":"doctor-fail-or-command-error","2":"bad-args","3":"refused-apply-without-idempotency-key"}
+    }'
 }
 
 schema_json() {
   command_name="${1:-doctor}"
   jq -nc --arg schema_version "jeff-intel-network/schema/v1" --arg command "$command_name" '{
     schema_version:$schema_version,
-    command:$command,
+    command:"schema",
+    target_command:$command,
+    input_schema:{
+      type:"object",
+      properties:{
+        scope:{enum:["state"],description:"repair scope"},
+        dry_run:{type:"boolean"},
+        apply:{type:"boolean"},
+        idempotency_key:{type:"string",description:"required with --apply on pull, x-poll, repair"},
+        explain:{type:"boolean"}
+      }
+    },
+    output_schema:{
+      type:"object",
+      required:["schema_version","mode","status"],
+      properties:{
+        schema_version:{type:"string"},
+        mode:{type:"string"},
+        status:{enum:["pass","fail","warn","ok"]},
+        success:{type:"boolean"},
+        version:{type:"string"},
+        paths:{type:"object"},
+        deps:{type:"array"}
+      }
+    },
     required:["schema_version","mode","status"],
     source_cadence:{github_git:"daily",website_rss:"daily",x:"hourly plus daily",jsm:"daily",mirror:"daily"},
     canonical_paths:{
@@ -78,7 +134,8 @@ schema_json() {
       schedule_ledger:"~/.local/state/jeff-intel/scheduled-runs.jsonl",
       x_poll_ledger:"~/.local/state/jeff-intel/x-poll.jsonl",
       daily_ledger:"~/.local/state/flywheel/daily-jeff-ingest.jsonl"
-    }
+    },
+    exit_codes:{"0":"success","1":"doctor-fail-or-command-error","2":"bad-args","3":"refused-apply-without-idempotency-key"}
   }'
 }
 
@@ -135,7 +192,7 @@ doctor() {
     --argjson daily "$daily" \
     --argjson schedule_rc "$schedule_rc" \
     --argjson daily_rc "$daily_rc" \
-    '{schema_version:$schema_version,mode:$mode,status:$status,success:($status=="pass"),version:$version,paths:{helper:$helper,slash:$slash,sources_file:($daily.paths.sources_file // null),state_dir:($daily.paths.state_dir // null),schedule_ledger:($schedule.receipt_paths.schedule // null)},deps:($daily.deps // []),sources_file:($daily.paths.sources_file // null),scheduled_runner:$schedule,daily_ingest:$daily,exit_codes:{scheduled_runner:$schedule_rc,daily_ingest:$daily_rc}}'
+    '{schema_version:$schema_version,command:"doctor",mode:$mode,status:$status,success:($status=="pass"),version:$version,paths:{helper:$helper,slash:$slash,sources_file:($daily.paths.sources_file // null),state_dir:($daily.paths.state_dir // null),schedule_ledger:($schedule.receipt_paths.schedule // null)},checks:($daily.deps // []),deps:($daily.deps // []),sources_file:($daily.paths.sources_file // null),scheduled_runner:$schedule,daily_ingest:$daily,exit_codes:{scheduled_runner:$schedule_rc,daily_ingest:$daily_rc}}'
   [[ "$status" == "pass" ]]
 }
 
