@@ -1312,6 +1312,28 @@ def probe_without_receiver(receivers_text: str) -> list[dict]:
     """
     files = safe_iter_files(REPO_ROOT, "*-probe.sh", 500)
     files.extend(safe_iter_files(CLAUDE_ROOT / "skills", "*-probe.sh", 1000))
+    # flywheel-dnxjb: exclude test-tree paths. The probe-finder's rglob picks
+    # up test files named like `<probe-name>.sh` (sister test convention used
+    # in pre-2xdi.101 codebase). Those files are RECEIVERS for the real probe,
+    # not probes themselves. The probe canonical location is .flywheel/scripts/
+    # or ~/.claude/skills/<x>/scripts/. test trees are tests/ and .flywheel/tests/.
+    # 2xdi.101 surfaced the FP via state-store-authority-probe.sh appearing in
+    # both .flywheel/scripts/ AND tests/ — only the former is a real probe.
+    test_tree_parts = {"tests", ".flywheel/tests"}
+    def _is_in_test_tree(p: Path) -> bool:
+        # Check if path traverses through any test tree component after REPO_ROOT
+        try:
+            rel = p.relative_to(REPO_ROOT)
+        except ValueError:
+            return False
+        parts = rel.parts
+        # tests/ at top level, OR .flywheel/tests/ nested
+        if parts and parts[0] == "tests":
+            return True
+        if len(parts) >= 2 and parts[0] == ".flywheel" and parts[1] == "tests":
+            return True
+        return False
+    files = [p for p in files if not _is_in_test_tree(p)]
     receipt_text = ""
     for path in safe_iter_files(Path.home() / ".local/state/flywheel-loop", "last_tick_*.json", 200):
         receipt_text += "\n" + read_text(path, 200_000)
