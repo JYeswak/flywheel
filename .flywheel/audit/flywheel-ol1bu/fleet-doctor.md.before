@@ -1,0 +1,62 @@
+---
+description: Read-only fleet onboarding doctor digest across fleet-roster repos.
+allowed-tools: Bash, Read
+---
+
+# /flywheel:fleet-doctor
+
+## Args
+
+`$ARGUMENTS` supports:
+
+```text
+/flywheel:fleet-doctor
+/flywheel:fleet-doctor --json
+/flywheel:fleet-doctor --help
+```
+
+## Behavior
+
+Read `~/.local/state/flywheel/fleet-roster.json`, then run the canonical
+onboarding doctor in dry-run mode for each repo:
+
+```bash
+ROSTER="$HOME/.local/state/flywheel/fleet-roster.json"
+jq -r '
+  if type == "array" then .[]? | (.repo // .path // empty)
+  elif (.repos? | type == "array") then .repos[]? | (.repo // .path // empty)
+  else empty end
+' "$ROSTER" 2>/dev/null | sort -u | while IFS= read -r repo; do
+  [ -n "$repo" ] || continue
+  /Users/josh/Developer/flywheel/.flywheel/scripts/flywheel-onboard.sh \
+    --repo "$repo" \
+    --dry-run \
+    --doctor \
+    --json
+done | jq -s '{checked_repos:length, rows:.}'
+```
+
+Do not run `--stamp`, `--sync`, or `--upgrade` from this command. Those are
+Joshua-approved mutation paths only.
+
+## Output
+
+JSON mode returns:
+
+```json
+{
+  "command": "flywheel:fleet-doctor",
+  "checked_repos": 0,
+  "status": "HEALTHY|PARTIAL|UNKNOWN",
+  "limping_repos": [],
+  "missing_repos": [],
+  "warnings": []
+}
+```
+
+## Validation
+
+This command is the operator surface for `/flywheel:tick` fields
+`fleet_onboard`, `fleet_onboard_status`, `fleet_onboard_checked_repos`,
+`fleet_onboard_limping_repos`, `fleet_onboard_missing_repos`, and
+`fleet_onboard_warnings`.
