@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (partial → passing per bead flywheel-1hshd.5)
 set -euo pipefail
 VERSION="auto-l112-gate.v1.0.0"
 SCHEMA_VERSION="auto-l112-gate/v1"
@@ -19,6 +21,8 @@ WHY_ID=""
 SCHEMA_TOPIC="gate"
 COMPLETION_SHELL=""
 PROBE_SANDBOX_MODE="unknown"
+# NEW (flywheel-1hshd.5): --idempotency-key for canonical apply contract (L7).
+IDEMPOTENCY_KEY=""
 usage() {
   cat <<'EOF'
 usage:
@@ -47,8 +51,15 @@ emit_json_or_text() {
   return "$rc"
 }
 info_json() {
+  # flywheel-1hshd.5: added .subcommands + .canonical_flags + .command for AG3.
   jq -nc --arg version "$VERSION" --arg schema_version "$SCHEMA_VERSION" --arg ledger "$LEDGER" --arg repo "$REPO_ROOT" --arg jsonl_append_lib "$JSONL_APPEND_LIB" \
-    '{name:"auto-l112-gate.sh",version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,jsonl_append_lib:$jsonl_append_lib,exit_codes:{"0":"probe matched expected assertion","1":"probe ran but assertion failed","2":"malformed envelope or usage","3":"timeout or sandbox refusal"},sandbox:{network:"token-denylist plus sandbox-exec deny network when available",writes:"sandbox-exec restricts probe writes to scratch when available; HOME/TMPDIR always scratch",repo:"read-only under sandbox-exec"},required_envelope_fields:["l112_probe_command","l112_probe_expected","l112_probe_timeout_sec","skill_auto_routes_addressed"]}'
+    '{command:"info",name:"auto-l112-gate.sh",version:$version,schema_version:$schema_version,repo:$repo,ledger:$ledger,jsonl_append_lib:$jsonl_append_lib,
+      subcommands:["gate","doctor","health","repair","validate","audit","why","schema","examples","quickstart","help","completion"],
+      canonical_flags:["--info","--schema","--examples","--json","--apply","--dry-run","--idempotency-key","--task-id","--callback-envelope-file","--watch","--interval","--scope"],
+      apply_supported:true,dry_run_supported:true,idempotency_key_required_for_apply:true,
+      exit_codes:{"0":"probe matched expected assertion","1":"probe ran but assertion failed","2":"malformed envelope or usage","3":"timeout or sandbox refusal or apply contract refusal"},
+      sandbox:{network:"token-denylist plus sandbox-exec deny network when available",writes:"sandbox-exec restricts probe writes to scratch when available; HOME/TMPDIR always scratch",repo:"read-only under sandbox-exec"},
+      required_envelope_fields:["l112_probe_command","l112_probe_expected","l112_probe_timeout_sec","skill_auto_routes_addressed"]}'
 }
 examples() {
   cat <<'EOF'
@@ -391,6 +402,7 @@ run_health() {
     [[ "$WATCH" -eq 1 ]] || break
     sleep "$WATCH_INTERVAL"
   done
+  return 0
 }
 run_repair() {
   local planned action payload
@@ -465,6 +477,14 @@ while [[ $# -gt 0 ]]; do
     quickstart) quickstart; exit 0 ;;
     completion) MODE="completion"; COMPLETION_SHELL="${2:-}"; shift 2 ;;
     schema) MODE="schema"; SCHEMA_TOPIC="${2:-gate}"; shift 2 ;;
+    # NEW (flywheel-1hshd.5): --schema dash form + --idempotency-key.
+    --schema)
+      MODE="schema"
+      if [[ $# -gt 1 && "${2:-}" != --* ]]; then SCHEMA_TOPIC="$2"; shift 2; else SCHEMA_TOPIC="gate"; shift; fi
+      ;;
+    --schema=*) MODE="schema"; SCHEMA_TOPIC="${1#*=}"; shift ;;
+    --idempotency-key) IDEMPOTENCY_KEY="${2:?--idempotency-key requires KEY}"; shift 2 ;;
+    --idempotency-key=*) IDEMPOTENCY_KEY="${1#*=}"; shift ;;
     audit) MODE="audit"; shift ;;
     why) MODE="why"; WHY_ID="${2:-}"; shift 2 ;;
     validate)
@@ -481,6 +501,12 @@ while [[ $# -gt 0 ]]; do
 done
 if [[ -z "$MODE" && -n "$TASK_ID" && -n "$CALLBACK_ENVELOPE_FILE" ]]; then
   MODE="gate"
+fi
+# NEW (flywheel-1hshd.5): canonical apply contract — repair --apply requires
+# --idempotency-key (canonical-cli L7 rule + rc=3 refusal).
+if [[ "$MODE" == "repair" && "$REPAIR_APPLY" == "1" && -z "$IDEMPOTENCY_KEY" ]]; then
+  printf '{"schema_version":"%s","status":"refused","mode":"apply","reason":"--apply requires --idempotency-key KEY (canonical apply contract)","exit_code":3}\n' "$SCHEMA_VERSION"
+  exit 3
 fi
 case "$MODE" in
   gate) run_gate ;;
