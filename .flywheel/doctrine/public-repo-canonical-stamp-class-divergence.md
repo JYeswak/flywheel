@@ -66,6 +66,7 @@ This preserves the fleet contract without polluting the public repo with fleet-j
 - [ ] AGENTS.md (if needed) follows the SPLIT pattern
 - [ ] SECURITY.md (if PUBLIC) includes SLA + coordinated-disclosure section
 - [ ] CONTRIBUTING.md (if PUBLIC) sets contribution scope explicitly
+- [ ] **NAMED-CLIENT-CONSENT check** (added 2026-05-11 post-flywheel-8wuqk fuckup capture): No client name appears in any public surface without explicit per-surface consent. Grep audit: `grep -nE 'Blackfoot|ALPS|TerraTitle|Elektrafi|<other-named-clients>' README.md ARCHITECTURE.md ROADMAP.md CONTRIBUTING.md AGENTS.md SECURITY.md` must return EMPTY for repos without explicit per-client-per-surface consent on record. Industry-only descriptions ("a telecom client", "an insurance client", "a title-company client") are the default substitute. **Repo NAMES themselves are a public surface** — repos named after clients (e.g. `alps-insurance`, `blackfoot-tooling`) leak identity even with no README content; surface as Joshua-decision before stamping pass completes.
 
 ## Sub-pattern: SPLIT-vs-FLEET-TWIN-SYNC for AGENTS.md
 
