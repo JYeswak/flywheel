@@ -1,0 +1,39 @@
+{
+  "schema_version": "x1jdj-receipt/v1",
+  "repo": "chatbot",
+  "ts_start": "2026-05-11T23:02:26Z",
+  "ts_end": "2026-05-11T23:02:30Z",
+  "action": "archived",
+  "method": "gh api PATCH archived=true",
+  "pre_state": {
+    "archived": false,
+    "created_at": "2025-08-10T20:46:32Z",
+    "default_branch": "main",
+    "forks": 0,
+    "full_name": "JYeswak/chatbot",
+    "html_url": "https://github.com/JYeswak/chatbot",
+    "license": null,
+    "name": "chatbot",
+    "open_issues": 5,
+    "primary_lang": "Python",
+    "pushed_at": "2026-01-30T19:55:29Z",
+    "size_kb": 3334,
+    "stars": 0,
+    "updated_at": "2026-01-30T19:55:33Z",
+    "visibility": "private"
+  },
+  "post_state": {
+    "archived": true,
+    "default_branch": "main",
+    "forks": 0,
+    "full_name": "JYeswak/chatbot",
+    "name": "chatbot",
+    "pushed_at": "2026-01-30T19:55:29Z",
+    "stars": 0,
+    "updated_at": "2026-05-11T23:02:27Z",
+    "visibility": "private"
+  },
+  "reversal_command": "gh api -X PATCH repos/JYeswak/chatbot -f archived=false",
+  "verified_pre_false": true,
+  "verified_post_true": true
+}

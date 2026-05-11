@@ -1,0 +1,39 @@
+{
+  "schema_version": "x1jdj-receipt/v1",
+  "repo": "agent-improvement-meta",
+  "ts_start": "2026-05-11T23:00:50Z",
+  "ts_end": "2026-05-11T23:00:52Z",
+  "action": "archived",
+  "method": "gh api PATCH archived=true",
+  "pre_state": {
+    "archived": false,
+    "created_at": "2026-01-29T21:51:42Z",
+    "default_branch": "main",
+    "forks": 0,
+    "full_name": "JYeswak/agent-improvement-meta",
+    "html_url": "https://github.com/JYeswak/agent-improvement-meta",
+    "license": null,
+    "name": "agent-improvement-meta",
+    "open_issues": 0,
+    "primary_lang": null,
+    "pushed_at": "2026-01-30T12:40:10Z",
+    "size_kb": 32,
+    "stars": 0,
+    "updated_at": "2026-01-30T12:40:13Z",
+    "visibility": "private"
+  },
+  "post_state": {
+    "archived": true,
+    "default_branch": "main",
+    "forks": 0,
+    "full_name": "JYeswak/agent-improvement-meta",
+    "name": "agent-improvement-meta",
+    "pushed_at": "2026-01-30T12:40:10Z",
+    "stars": 0,
+    "updated_at": "2026-05-11T23:00:51Z",
+    "visibility": "private"
+  },
+  "reversal_command": "gh api -X PATCH repos/JYeswak/agent-improvement-meta -f archived=false",
+  "verified_pre_false": true,
+  "verified_post_true": true
+}

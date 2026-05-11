@@ -1,0 +1,39 @@
+{
+  "schema_version": "x1jdj-receipt/v1",
+  "repo": "aider-test3",
+  "ts_start": "2026-05-11T23:02:00Z",
+  "ts_end": "2026-05-11T23:02:03Z",
+  "action": "archived",
+  "method": "gh api PATCH archived=true",
+  "pre_state": {
+    "archived": false,
+    "created_at": "2026-05-09T21:54:41Z",
+    "default_branch": "main",
+    "forks": 0,
+    "full_name": "JYeswak/aider-test3",
+    "html_url": "https://github.com/JYeswak/aider-test3",
+    "license": null,
+    "name": "aider-test3",
+    "open_issues": 0,
+    "primary_lang": "Python",
+    "pushed_at": "2026-05-09T21:54:46Z",
+    "size_kb": 1,
+    "stars": 0,
+    "updated_at": "2026-05-09T21:54:50Z",
+    "visibility": "private"
+  },
+  "post_state": {
+    "archived": true,
+    "default_branch": "main",
+    "forks": 0,
+    "full_name": "JYeswak/aider-test3",
+    "name": "aider-test3",
+    "pushed_at": "2026-05-09T21:54:46Z",
+    "stars": 0,
+    "updated_at": "2026-05-11T23:02:01Z",
+    "visibility": "private"
+  },
+  "reversal_command": "gh api -X PATCH repos/JYeswak/aider-test3 -f archived=false",
+  "verified_pre_false": true,
+  "verified_post_true": true
+}

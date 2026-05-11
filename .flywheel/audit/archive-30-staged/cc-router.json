@@ -1,0 +1,39 @@
+{
+  "schema_version": "x1jdj-receipt/v1",
+  "repo": "cc-router",
+  "ts_start": "2026-05-11T23:02:07Z",
+  "ts_end": "2026-05-11T23:02:11Z",
+  "action": "archived",
+  "method": "gh api PATCH archived=true",
+  "pre_state": {
+    "archived": false,
+    "created_at": "2026-05-09T21:54:58Z",
+    "default_branch": "main",
+    "forks": 0,
+    "full_name": "JYeswak/cc-router",
+    "html_url": "https://github.com/JYeswak/cc-router",
+    "license": null,
+    "name": "cc-router",
+    "open_issues": 0,
+    "primary_lang": null,
+    "pushed_at": "2026-05-09T21:55:03Z",
+    "size_kb": 76,
+    "stars": 0,
+    "updated_at": "2026-05-09T21:55:08Z",
+    "visibility": "private"
+  },
+  "post_state": {
+    "archived": true,
+    "default_branch": "main",
+    "forks": 0,
+    "full_name": "JYeswak/cc-router",
+    "name": "cc-router",
+    "pushed_at": "2026-05-09T21:55:03Z",
+    "stars": 0,
+    "updated_at": "2026-05-11T23:02:08Z",
+    "visibility": "private"
+  },
+  "reversal_command": "gh api -X PATCH repos/JYeswak/cc-router -f archived=false",
+  "verified_pre_false": true,
+  "verified_post_true": true
+}

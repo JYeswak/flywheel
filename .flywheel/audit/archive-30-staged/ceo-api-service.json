@@ -1,0 +1,39 @@
+{
+  "schema_version": "x1jdj-receipt/v1",
+  "repo": "ceo-api-service",
+  "ts_start": "2026-05-11T23:02:11Z",
+  "ts_end": "2026-05-11T23:02:14Z",
+  "action": "archived",
+  "method": "gh api PATCH archived=true",
+  "pre_state": {
+    "archived": false,
+    "created_at": "2026-01-29T21:51:57Z",
+    "default_branch": "main",
+    "forks": 0,
+    "full_name": "JYeswak/ceo-api-service",
+    "html_url": "https://github.com/JYeswak/ceo-api-service",
+    "license": null,
+    "name": "ceo-api-service",
+    "open_issues": 0,
+    "primary_lang": "Python",
+    "pushed_at": "2026-01-30T12:02:17Z",
+    "size_kb": 37,
+    "stars": 0,
+    "updated_at": "2026-01-30T12:02:20Z",
+    "visibility": "private"
+  },
+  "post_state": {
+    "archived": true,
+    "default_branch": "main",
+    "forks": 0,
+    "full_name": "JYeswak/ceo-api-service",
+    "name": "ceo-api-service",
+    "pushed_at": "2026-01-30T12:02:17Z",
+    "stars": 0,
+    "updated_at": "2026-05-11T23:02:12Z",
+    "visibility": "private"
+  },
+  "reversal_command": "gh api -X PATCH repos/JYeswak/ceo-api-service -f archived=false",
+  "verified_pre_false": true,
+  "verified_post_true": true
+}

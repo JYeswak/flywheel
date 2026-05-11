@@ -1,0 +1,39 @@
+{
+  "schema_version": "x1jdj-receipt/v1",
+  "repo": "swarm-daemon",
+  "ts_start": "2026-05-11T23:03:21Z",
+  "ts_end": "2026-05-11T23:03:24Z",
+  "action": "archived",
+  "method": "gh api PATCH archived=true",
+  "pre_state": {
+    "archived": false,
+    "created_at": "2026-01-24T06:22:33Z",
+    "default_branch": "main",
+    "forks": 0,
+    "full_name": "JYeswak/swarm-daemon",
+    "html_url": "https://github.com/JYeswak/swarm-daemon",
+    "license": null,
+    "name": "swarm-daemon",
+    "open_issues": 165,
+    "primary_lang": "Rust",
+    "pushed_at": "2026-02-14T15:37:48Z",
+    "size_kb": 178570,
+    "stars": 0,
+    "updated_at": "2026-02-14T15:37:29Z",
+    "visibility": "private"
+  },
+  "post_state": {
+    "archived": true,
+    "default_branch": "main",
+    "forks": 0,
+    "full_name": "JYeswak/swarm-daemon",
+    "name": "swarm-daemon",
+    "pushed_at": "2026-02-14T15:37:48Z",
+    "stars": 0,
+    "updated_at": "2026-05-11T23:03:21Z",
+    "visibility": "private"
+  },
+  "reversal_command": "gh api -X PATCH repos/JYeswak/swarm-daemon -f archived=false",
+  "verified_pre_false": true,
+  "verified_post_true": true
+}

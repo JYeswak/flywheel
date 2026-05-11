@@ -1,0 +1,39 @@
+{
+  "schema_version": "x1jdj-receipt/v1",
+  "repo": "ai-benchmark-research",
+  "ts_start": "2026-05-11T23:00:52Z",
+  "ts_end": "2026-05-11T23:00:53Z",
+  "action": "archived",
+  "method": "gh api PATCH archived=true",
+  "pre_state": {
+    "archived": false,
+    "created_at": "2026-05-09T21:56:29Z",
+    "default_branch": "main",
+    "forks": 0,
+    "full_name": "JYeswak/ai-benchmark-research",
+    "html_url": "https://github.com/JYeswak/ai-benchmark-research",
+    "license": null,
+    "name": "ai-benchmark-research",
+    "open_issues": 0,
+    "primary_lang": "Python",
+    "pushed_at": "2026-05-09T21:56:33Z",
+    "size_kb": 2,
+    "stars": 0,
+    "updated_at": "2026-05-09T21:56:37Z",
+    "visibility": "private"
+  },
+  "post_state": {
+    "archived": true,
+    "default_branch": "main",
+    "forks": 0,
+    "full_name": "JYeswak/ai-benchmark-research",
+    "name": "ai-benchmark-research",
+    "pushed_at": "2026-05-09T21:56:33Z",
+    "stars": 0,
+    "updated_at": "2026-05-11T23:00:53Z",
+    "visibility": "private"
+  },
+  "reversal_command": "gh api -X PATCH repos/JYeswak/ai-benchmark-research -f archived=false",
+  "verified_pre_false": true,
+  "verified_post_true": true
+}
