@@ -1,0 +1,35 @@
+---
+title: Substrate Boundary — 3-Class Taxonomy
+description: Joshua/Skillos/Jeff-Premium substrate boundaries
+---
+
+# Substrate Boundary — 3-Class Taxonomy
+
+Imported from `.flywheel/doctrine/substrate-boundary-three-class-taxonomy.md`
+(ti46c, Phase 2 of 38u3d). Stub summary only — see the upstream doctrine doc
+for canonical text.
+
+## Rule (one line)
+
+Every substrate file lives in exactly one of three classes:
+
+1. **Class 1 — Joshua-unmanaged**: direct edits + paired patches OK
+2. **Class 2 — Skillos-managed**: edits via `jsm` only; never direct
+3. **Class 3 — Jeff-Premium**: READ-ONLY consumer; mutations are AUDIT-ONLY
+
+## When to apply
+
+- Before any edit to a path under `~/.claude/skills/`
+- Before any edit to a path under `~/.local/share/mcp_agent_mail/`
+- Before scaffolding into a managed surface
+
+## Why it exists
+
+Class confusion is the leading cause of substrate drift. A worker who edits a
+Class-3 path directly bypasses Jeff's audit trail and produces a divergence
+that the fleet cannot reconcile.
+
+## See also
+
+- Cross-Repo Consumer-vs-Mutator Boundary (this folder)
+- Cluster Maintainer Pattern (this folder)

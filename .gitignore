@@ -79,3 +79,8 @@ AGENTS.md.bak.*
 *.bak.*
 .flywheel/**/*.bak
 .flywheel/**/*.bak.*
+
+# flywheel-ti46c (Phase 2 of 38u3d): docs scaffold site artifacts
+flywheel__nextra_documentation_site/node_modules/
+flywheel__nextra_documentation_site/.next/
+flywheel__nextra_documentation_site/out/

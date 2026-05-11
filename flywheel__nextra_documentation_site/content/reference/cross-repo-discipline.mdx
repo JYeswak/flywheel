@@ -1,0 +1,32 @@
+---
+title: Cross-Repo Consumer-vs-Mutator Boundary
+description: Worker discipline for editing across repos
+---
+
+# Cross-Repo Consumer-vs-Mutator Boundary
+
+Imported from `.flywheel/doctrine/cross-repo-consumer-vs-mutator-boundary.md`
+(ti46c, Phase 2 of 38u3d). Stub summary only — see the upstream doctrine doc
+for canonical text.
+
+## Rule (one line)
+
+Every cross-repo touch is either a CONSUMER read (no write) or a MUTATOR write
+(reserved + paired patch + audit trail). Workers must classify before editing.
+
+## When to apply
+
+- A bead names a substrate path outside the current repo
+- A skill scaffolds files into a managed surface
+- A test harness reads from a peer repo's evidence
+
+## Why it exists
+
+Class-3 (Jeff-substrate) repos are READ-ONLY consumers for the fleet. Mutating
+them silently produces a phantom-substrate-of-doctrine failure: the fleet
+diverges from upstream truth without an audit trail.
+
+## See also
+
+- Substrate Boundary — 3-Class Taxonomy (this folder)
+- Cluster Maintainer Pattern (this folder)
