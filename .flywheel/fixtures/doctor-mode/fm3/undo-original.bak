@@ -1,0 +1,8 @@
+{
+  "ts": "2026-05-10T12:00:00Z",
+  "error_class": "callback_delivery_failed",
+  "error_age_seconds": 122400,
+  "preflight_block_threshold_seconds": 86400,
+  "preflight_action": "ALLOW",
+  "blocker_class": "stale_error_should_have_blocked"
+}
