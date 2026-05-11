@@ -1,0 +1,1 @@
+{"schema_version":"flywheel-codex-stuck-detector-install/v1","command":"schema","surfaces":["doctor","health","repair","validate","audit","why"],"variant":"NO-BYPASS","note":"native --apply/--dry-run/--json flags fall through to cmd_run; scaffold owns all canonical surfaces"}

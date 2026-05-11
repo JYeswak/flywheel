@@ -1,0 +1,1 @@
+{"schema_version":"flywheel-codex-stuck-detector-install/v1","command":"validate","subject":"label","ts":"2026-05-11T05:46:17Z","status":"reject","value":"com.example.foo","reason":"pattern_mismatch","pattern":"^ai\\.zeststream\\.[a-z][a-z0-9_-]*$"}

@@ -1,0 +1,1 @@
+{"schema_version":"flywheel-codex-stuck-detector-install/v1","command":"quickstart","status":"ok","steps":[{"step":1,"action":"probe doctor","command":"flywheel-codex-stuck-detector-install.sh doctor --json"}],"next_actions":["doctor","health","repair"]}

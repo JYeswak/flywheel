@@ -1,0 +1,1 @@
+{"schema_version":"flywheel-codex-stuck-detector-install/v1","command":"validate","status":"refused","reason":"missing_subject","valid_subjects":["label","plist-path","install-mode"]}

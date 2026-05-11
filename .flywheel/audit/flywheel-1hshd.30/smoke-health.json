@@ -1,0 +1,1 @@
+{"schema_version":"flywheel-codex-stuck-detector-install/v1","command":"health","ts":"2026-05-11T05:46:17Z","status":"ok","label":"ai.zeststream.flywheel-codex-stuck-detector","loaded":true,"last_run_ts":null,"audit_log":"/Users/josh/.local/state/flywheel/flywheel-codex-stuck-detector-install-runs.jsonl","binds_audit_log":true}
