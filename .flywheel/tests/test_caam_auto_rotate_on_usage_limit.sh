@@ -64,9 +64,16 @@ run_case() {
 }
 
 check "01 python syntax" python3 -m py_compile "$SCRIPT"
-"$SCRIPT" --schema --json >"$TMP/schema.json"
-LAST_OUT="$TMP/schema.json"; export LAST_OUT
-check "02 schema/help surface" bash -c 'jq_ok ".schema==\"caam-auto-rotate-on-usage-limit.result.v1\" and .native_surface==\"ntm rotate\" and .caam_vault_only==true and .ttl_native==\"3600s\" and .ttl_wrapper==\"24h_historical_receipt\" and (.native_wrapper_delta|test(\"native_ntm_rotate_owns_account_swap\")) and (.authorized_operations|index(\"ntm_rotate_preserve_context\"))"'
+# Test 02 calibration (flywheel-vzrs6): asserts wrapper-result-schema fields
+# emit()-side. Previously called `$SCRIPT --schema --json`, but the canonical-
+# CLI scaffolder (flywheel-0pkcf) repurposed --schema to emit canonical-CLI
+# introspection (command/schema_version/stable_exit_codes/surface/surfaces).
+# Sister calibration to flywheel-bgtv8; META-RULE 2026-05-09 (calibrate-test-
+# to-actual-contract-before-filing-upstream). The wrapper-result envelope is
+# the correct surface for these field assertions — sourced from a real
+# rotate run via run_case (same pattern as tests 03/04).
+run_case current-alt ok d02
+check "02 wrapper-result schema fields (caam-auto-rotate-on-usage-limit.result.v1)" bash -c 'jq_ok ".schema==\"caam-auto-rotate-on-usage-limit.result.v1\" and .native_surface==\"ntm rotate\" and .caam_vault_only==true and .ttl_native==\"3600s\" and .ttl_wrapper==\"24h_historical_receipt\" and (.native_wrapper_delta|test(\"native_ntm_rotate_owns_account_swap\")) and (.authorized_operations|index(\"ntm_rotate_preserve_context\"))"'
 run_case current-alt ok d03
 check "03 default dry-run delegates to ntm rotate without mutation" bash -c '[[ "$LAST_RC" == 0 ]] && jq -e ".status==\"dry_run\" and .would_rotate==true and .selected_profile==\"codex-backup\" and .ntm_rotate_subprocess_rc==0 and .native_surface==\"ntm rotate\" and .caam_vault_only==true and .ttl_decision==\"native_lease_for_active_operation_wrapper_receipt_records_prior_next_selector\"" "$LAST_OUT" >/dev/null && rg -- "--dry-run" "$CASE_NTM_LOG" >/dev/null && [[ "$(log_count "$CASE_NTM_LOG")" == 1 ]]'
 run_case current-alt ok d04 --apply
