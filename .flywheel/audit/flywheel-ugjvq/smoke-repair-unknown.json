@@ -1,0 +1,2 @@
+{"schema_version":"jeff-philosophy-mine/v1","command":"repair","status":"refused","scope":"unknown","reason":"unknown_scope","valid_scopes":["state_dir","audit_log_dir"]}
+rc=64

@@ -1,0 +1,1 @@
+{"schema_version":"jeff-philosophy-mine/v1","command":"repair","status":"ok","ts":"2026-05-11T00:06:04Z","mode":"dry_run","scope":"state_dir","idempotency_key":"","target":"/Users/josh/.local/state/jeff-philosophy","daily_snapshot_dir":"/Users/josh/.local/state/jeff-philosophy/daily-snapshots","existed_before":true}
