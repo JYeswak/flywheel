@@ -1,16 +1,296 @@
 #!/usr/bin/env bash
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (partial -> passing per bead flywheel-k8gcv.3)
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-VERSION="capacity-halt-auto-continue-primitive.v1.0.0"
+VERSION="capacity-halt-auto-continue-primitive.v1.1.0"
+SCHEMA_VERSION="capacity-halt-auto-continue/v1"
 LEASE_BIN="${CAPACITY_HALT_AUTO_CONTINUE_LEASE:-$SCRIPT_DIR/capacity-halt-lease-primitive.sh}"
 NTM_BIN="${CAPACITY_HALT_AUTO_CONTINUE_NTM_BIN:-/Users/josh/.local/bin/ntm}"
 SUCCESS_BIN="${CAPACITY_HALT_AUTO_CONTINUE_SUCCESS_MEASUREMENT:-$SCRIPT_DIR/capacity-halt-success-measurement.sh}"
 AUTH_BIN="${CAPACITY_HALT_AUTO_CONTINUE_AUTHORIZATION:-$SCRIPT_DIR/capacity-halt-pane-authorization.sh}"
 BUDGET_BIN="${CAPACITY_HALT_AUTO_CONTINUE_BUDGET:-$SCRIPT_DIR/capacity-halt-burst-budget.sh}"
-NOTIFY_BIN="${CAPACITY_HALT_AUTO_CONTINUE_NOTIFY_BIN:-/Users/josh/.local/bin/notify}"; FALLBACK_LEDGER="${CAPACITY_HALT_AUTO_CONTINUE_FALLBACK_LEDGER:-$HOME/.local/state/flywheel/capacity-halt-budget-fallback.jsonl}"
+NOTIFY_BIN="${CAPACITY_HALT_AUTO_CONTINUE_NOTIFY_BIN:-/Users/josh/.local/bin/notify}"
+FALLBACK_LEDGER="${CAPACITY_HALT_AUTO_CONTINUE_FALLBACK_LEDGER:-$HOME/.local/state/flywheel/capacity-halt-budget-fallback.jsonl}"
 TIMEOUT_SECONDS="${CAPACITY_HALT_AUTO_CONTINUE_TIMEOUT_SECONDS:-8}"
 MEASUREMENT_DELAYS="${CAPACITY_HALT_AUTO_CONTINUE_SUCCESS_DELAYS:-3,6,10}"
+
+# ---------- canonical-cli bash-side emitters (added by flywheel-k8gcv.3) ----------
+
+emit_schema() {
+  jq -nc --arg sv "$SCHEMA_VERSION" '{
+    schema_version:$sv,
+    command:"schema",
+    input_schema:{
+      type:"object",
+      required:["session","pane"],
+      properties:{
+        session:{type:"string",description:"tmux session (e.g., flywheel)"},
+        pane:{type:"string",pattern:"^[0-9]+$",description:"numeric pane id"},
+        digest:{type:"string",pattern:"^[0-9a-f]{64}$",description:"sha256 of last 30 scrollback lines"},
+        scrollback_file:{type:"string",description:"path to scrollback dump; alternative to --digest"},
+        ttl:{type:"integer",minimum:1,description:"lease ttl seconds"},
+        timeout_seconds:{type:"integer",minimum:1,description:"transport timeout for ntm send continue"}
+      }
+    },
+    output_schema:{
+      type:"object",
+      required:["schema_version","status","session","pane"],
+      properties:{
+        schema_version:{type:"string"},
+        status:{enum:["dry_run","malformed","authorization_refused","budget_exhausted","lease_held_skipped","transport_timeout","fired_success","fired_failed"]},
+        session:{type:"string"},
+        pane:{type:"string"},
+        digest:{type:"string"},
+        fired:{type:"boolean"},
+        attempted:{type:"boolean"},
+        sent:{type:"boolean"},
+        recovered:{type:"boolean"},
+        dry_run:{type:"boolean"},
+        apply:{type:"boolean"}
+      }
+    },
+    exit_codes:{
+      "0":"fired-success-or-dry-run-ok",
+      "1":"fired-but-failed-recovery",
+      "2":"lease-held-skipped",
+      "3":"malformed",
+      "4":"transport-timeout",
+      "5":"protected-refusal",
+      "6":"unknown-pane",
+      "7":"topology-stale",
+      "8":"budget-exhausted"
+    }
+  }'
+}
+
+emit_doctor() {
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  local jq_status="pass"; command -v jq >/dev/null 2>&1 || jq_status="fail"
+  local py_status="pass"; command -v python3 >/dev/null 2>&1 || py_status="fail"
+  local lease_status="pass"; [[ -x "$LEASE_BIN" ]] || lease_status="fail"
+  local ntm_status="pass"; [[ -x "$NTM_BIN" ]] || ntm_status="warn"
+  local success_status="pass"; [[ -x "$SUCCESS_BIN" ]] || success_status="warn"
+  local auth_status="pass"; [[ -x "$AUTH_BIN" ]] || auth_status="warn"
+  local budget_status="pass"; [[ -x "$BUDGET_BIN" ]] || budget_status="warn"
+  local ledger_dir; ledger_dir="$(dirname "$FALLBACK_LEDGER")"
+  local ledger_status="pass"
+  if [[ -e "$FALLBACK_LEDGER" ]]; then
+    [[ -w "$FALLBACK_LEDGER" ]] || ledger_status="fail"
+  else
+    [[ -d "$ledger_dir" ]] || ledger_status="warn"
+  fi
+  local overall="pass"
+  for s in "$jq_status" "$py_status" "$lease_status" "$ntm_status" "$success_status" "$auth_status" "$budget_status" "$ledger_status"; do
+    case "$s" in
+      fail) overall="fail" ;;
+      warn) [[ "$overall" == "pass" ]] && overall="warn" ;;
+    esac
+  done
+  jq -nc --arg sv "$SCHEMA_VERSION.doctor" --arg ts "$ts" --arg overall "$overall" \
+    --arg jq_s "$jq_status" --arg py_s "$py_status" \
+    --arg lease_s "$lease_status" --arg lease_path "$LEASE_BIN" \
+    --arg ntm_s "$ntm_status" --arg ntm_path "$NTM_BIN" \
+    --arg success_s "$success_status" --arg success_path "$SUCCESS_BIN" \
+    --arg auth_s "$auth_status" --arg auth_path "$AUTH_BIN" \
+    --arg budget_s "$budget_status" --arg budget_path "$BUDGET_BIN" \
+    --arg ledger_s "$ledger_status" --arg ledger_path "$FALLBACK_LEDGER" \
+    '{
+      schema_version:$sv,
+      command:"doctor",
+      ts:$ts,
+      status:$overall,
+      checks:[
+        {name:"jq",status:$jq_s,detail:"jq required for envelope emission"},
+        {name:"python3",status:$py_s,detail:"python3 required for primary apply path"},
+        {name:"lease_bin",status:$lease_s,path:$lease_path,detail:"capacity-halt-lease-primitive.sh — required for apply mode"},
+        {name:"ntm_bin",status:$ntm_s,path:$ntm_path,detail:"ntm binary for transport (warn if missing — apply will fail)"},
+        {name:"success_bin",status:$success_s,path:$success_path,detail:"capacity-halt-success-measurement.sh — required for verdict capture"},
+        {name:"auth_bin",status:$auth_s,path:$auth_path,detail:"capacity-halt-pane-authorization.sh — required for pre-fire authorization"},
+        {name:"budget_bin",status:$budget_s,path:$budget_path,detail:"capacity-halt-burst-budget.sh — required for burst-budget check"},
+        {name:"fallback_ledger",status:$ledger_s,path:$ledger_path,detail:"budget-exhausted fallback signal ledger"}
+      ]
+    }'
+}
+
+emit_health() {
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  local row_count=0
+  local last_class=""
+  if [[ -r "$FALLBACK_LEDGER" ]]; then
+    row_count="$(wc -l <"$FALLBACK_LEDGER" 2>/dev/null | tr -d ' ')"
+    [[ -z "$row_count" ]] && row_count=0
+    if [[ "$row_count" -gt 0 ]]; then
+      last_class="$(tail -n 1 "$FALLBACK_LEDGER" 2>/dev/null | jq -r '.class // empty' 2>/dev/null || true)"
+    fi
+  fi
+  local status="pass"
+  [[ "$row_count" -gt 100 ]] && status="warn"
+  jq -nc --arg sv "$SCHEMA_VERSION.health" --arg ts "$ts" --arg status "$status" \
+    --arg ledger "$FALLBACK_LEDGER" --argjson row_count "${row_count:-0}" --arg last_class "${last_class:-}" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,fallback_ledger:$ledger,fallback_row_count:$row_count,last_signal_class:$last_class}'
+}
+
+emit_validate() {
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  local rows=0 invalid=0
+  if [[ -r "$FALLBACK_LEDGER" ]]; then
+    rows="$(wc -l <"$FALLBACK_LEDGER" 2>/dev/null | tr -d ' ')"
+    [[ -z "$rows" ]] && rows=0
+    if [[ "$rows" -gt 0 ]]; then
+      invalid="$(jq -c 'select((.class // "") == "" or (.session // "") == "" or (.pane // null) == null)' "$FALLBACK_LEDGER" 2>/dev/null | wc -l | tr -d ' ')"
+      [[ -z "$invalid" ]] && invalid=0
+    fi
+  fi
+  local status="pass"
+  [[ "$invalid" -gt 0 ]] && status="violations"
+  jq -nc --arg sv "$SCHEMA_VERSION.validate" --arg ts "$ts" --arg status "$status" \
+    --argjson rows "${rows:-0}" --argjson invalid "${invalid:-0}" --arg ledger "$FALLBACK_LEDGER" \
+    '{schema_version:$sv,command:"validate",ts:$ts,status:$status,fallback_ledger:$ledger,row_count:$rows,invalid_row_count:$invalid,check:"every row has class + session + numeric pane"}'
+}
+
+emit_audit() {
+  local limit="${1:-20}"
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  if [[ ! -r "$FALLBACK_LEDGER" ]]; then
+    jq -nc --arg sv "$SCHEMA_VERSION.audit" --arg ts "$ts" --arg ledger "$FALLBACK_LEDGER" \
+      '{schema_version:$sv,command:"audit",ts:$ts,status:"missing",fallback_ledger:$ledger,row_count:0,recent:[]}'
+    return 0
+  fi
+  local row_count
+  row_count="$(wc -l <"$FALLBACK_LEDGER" 2>/dev/null | tr -d ' ')"
+  [[ -z "$row_count" ]] && row_count=0
+  local recent='[]'
+  if [[ "$row_count" -gt 0 ]]; then
+    recent="$(tail -n "$limit" "$FALLBACK_LEDGER" 2>/dev/null | jq -cs '.' 2>/dev/null || printf '%s' '[]')"
+    [[ -z "$recent" ]] && recent='[]'
+  fi
+  local status="pass"
+  [[ "$row_count" -eq 0 ]] && status="empty"
+  jq -nc --arg sv "$SCHEMA_VERSION.audit" --arg ts "$ts" --arg status "$status" \
+    --arg ledger "$FALLBACK_LEDGER" --argjson row_count "$row_count" --argjson recent "$recent" \
+    '{schema_version:$sv,command:"audit",ts:$ts,status:$status,fallback_ledger:$ledger,row_count:$row_count,recent:$recent}'
+}
+
+emit_why() {
+  local topic="${1:-}"
+  local body=""
+  case "$topic" in
+    ""|bounded-auto-continue)
+      body='Capacity-halt auto-continue sends a single "continue" to a halted codex pane WITH bounded discipline: pre-fire authorization, burst-budget check, lease acquisition, transport with timeout, and post-fire success measurement. Dry-run is the default to enforce explicit --apply.'
+      ;;
+    apply-vs-dry-run)
+      body='--dry-run is the default and emits status=dry_run with would_send=true. --apply requires --session, numeric --pane, and either --digest <sha256> or --scrollback-file. Without --apply the script never sends transport.'
+      ;;
+    budget-exhausted)
+      body='Burst-budget protects the fleet from runaway continue floods. When budget_outcome=ledger_read_error or count exceeds the window, fallback_signal writes a row to fallback-ledger and notifies the operator. Status=budget_exhausted, exit code 8.'
+      ;;
+    *)
+      body="unknown topic: $topic. known: bounded-auto-continue, apply-vs-dry-run, budget-exhausted"
+      ;;
+  esac
+  jq -nc --arg sv "$SCHEMA_VERSION" --arg topic "${topic:-bounded-auto-continue}" --arg body "$body" \
+    '{schema_version:$sv,command:"why",topic:$topic,body:$body}'
+}
+
+emit_quickstart() {
+  jq -nc --arg sv "$SCHEMA_VERSION" '{
+    schema_version:$sv,
+    command:"quickstart",
+    status:"ok",
+    steps:[
+      {step:1,action:"check-doctor",command:"capacity-halt-auto-continue-primitive.sh doctor --json"},
+      {step:2,action:"compute-digest-from-pane",command:"ntm grep . flywheel --cc -n 30 | shasum -a 256"},
+      {step:3,action:"dry-run",command:"capacity-halt-auto-continue-primitive.sh --session flywheel --pane 3 --digest <sha256> --dry-run --json"},
+      {step:4,action:"apply",command:"capacity-halt-auto-continue-primitive.sh --session flywheel --pane 3 --digest <sha256> --apply --json"}
+    ],
+    next_actions:["measure-success-via-capacity-halt-success-measurement.sh","tail-fallback-ledger"]
+  }'
+}
+
+emit_repair() {
+  local scope="" mode="dry_run" idem_key=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --scope) scope="${2:-}"; shift 2 ;;
+      --dry-run) mode="dry_run"; shift ;;
+      --apply) mode="apply"; shift ;;
+      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
+      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
+      --json) shift ;;
+      --help|-h) printf 'repair --scope <fallback-ledger-prime> [--dry-run|--apply --idempotency-key KEY]\n'; exit 0 ;;
+      "") shift ;;
+      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; exit 2 ;;
+    esac
+  done
+  if [[ -z "$scope" ]]; then
+    printf '{"schema_version":"%s.repair","status":"refused","reason":"--scope required (fallback-ledger-prime)","exit_code":2}\n' "$SCHEMA_VERSION"
+    exit 2
+  fi
+  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
+    printf '{"schema_version":"%s.repair","status":"refused","mode":"apply","scope":"%s","reason":"--apply requires --idempotency-key","exit_code":3}\n' "$SCHEMA_VERSION" "$scope"
+    exit 3
+  fi
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  case "$scope" in
+    fallback-ledger-prime)
+      local ledger_dir present_before present_after
+      ledger_dir="$(dirname "$FALLBACK_LEDGER")"
+      present_before="$([[ -f "$FALLBACK_LEDGER" ]] && printf true || printf false)"
+      if [[ "$mode" == "apply" ]]; then
+        mkdir -p "$ledger_dir" 2>/dev/null || true
+        [[ -f "$FALLBACK_LEDGER" ]] || : > "$FALLBACK_LEDGER"
+      fi
+      present_after="$([[ -f "$FALLBACK_LEDGER" ]] && printf true || printf false)"
+      jq -nc --arg sv "$SCHEMA_VERSION.repair" --arg ts "$ts" --arg scope "$scope" --arg mode "$mode" \
+        --arg ledger "$FALLBACK_LEDGER" --arg key "$idem_key" \
+        --argjson before "$present_before" --argjson after "$present_after" \
+        '{schema_version:$sv,command:"repair",ts:$ts,status:"pass",scope:$scope,mode:$mode,idempotency_key:$key,fallback_ledger:$ledger,ledger_present_before:$before,ledger_present_after:$after}'
+      ;;
+    *)
+      printf '{"schema_version":"%s.repair","status":"refused","scope":"%s","reason":"unknown scope; known: fallback-ledger-prime","exit_code":2}\n' "$SCHEMA_VERSION" "$scope"
+      exit 2
+      ;;
+  esac
+}
+
+# Canonical no-dash subcommand intercept BEFORE python dispatch.
+case "${1:-}" in
+  --schema) emit_schema; exit 0 ;;
+  doctor) shift; emit_doctor; exit 0 ;;
+  health) shift; emit_health; exit 0 ;;
+  validate) shift; emit_validate; exit 0 ;;
+  audit)
+    shift
+    LIMIT=20
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --limit) LIMIT="${2:-20}"; shift 2 ;;
+        --json) shift ;;
+        "") shift ;;
+        *) shift ;;
+      esac
+    done
+    emit_audit "$LIMIT"
+    exit 0
+    ;;
+  why)
+    shift
+    TOPIC=""
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --json) shift ;;
+        "") shift ;;
+        *) [[ -z "$TOPIC" ]] && TOPIC="$1"; shift ;;
+      esac
+    done
+    emit_why "$TOPIC"
+    exit 0
+    ;;
+  quickstart) shift; emit_quickstart; exit 0 ;;
+  repair) shift; emit_repair "$@"; exit 0 ;;
+esac
 
 python3 - "$VERSION" "$LEASE_BIN" "$NTM_BIN" "$SUCCESS_BIN" "$AUTH_BIN" "$BUDGET_BIN" "$NOTIFY_BIN" "$FALLBACK_LEDGER" "$TIMEOUT_SECONDS" "$MEASUREMENT_DELAYS" "$@" <<'PY'
 import argparse, hashlib, json, os, re, subprocess, sys
@@ -151,6 +431,7 @@ def measure_success(args, digest):
 def info(args):
     emit(args, {
         "schema_version": "capacity-halt-auto-continue.info.v1",
+        "command": "info",
         "name": "capacity-halt-auto-continue-primitive",
         "version": VERSION,
         "lease_bin": args.lease_bin,
@@ -161,17 +442,45 @@ def info(args):
         "notify_bin": args.notify_bin,
         "fallback_ledger": args.fallback_ledger,
         "default_timeout_seconds": int(TIMEOUT_RAW),
-        "verbs": ["--info", "--help", "--examples", "--json", "--session", "--pane", "--dry-run", "--apply"],
+        "verbs": ["--info", "--schema", "--help", "--examples", "--json", "--session", "--pane", "--dry-run", "--apply"],
+        "subcommands": ["doctor", "health", "validate", "audit", "why", "repair", "quickstart"],
+        "capabilities": [
+            "bounded-auto-continue",
+            "pre-fire-authorization",
+            "burst-budget-gate",
+            "lease-acquire-release",
+            "transport-with-timeout",
+            "post-fire-success-measurement",
+            "budget-exhausted-fallback-signal"
+        ],
+        "apply_supported": True,
+        "dry_run_supported": True,
+        "idempotency_key_required_for_apply": False,
+        "mutates_state": True,
+        "env_vars": [
+            "CAPACITY_HALT_AUTO_CONTINUE_LEASE",
+            "CAPACITY_HALT_AUTO_CONTINUE_NTM_BIN",
+            "CAPACITY_HALT_AUTO_CONTINUE_SUCCESS_MEASUREMENT",
+            "CAPACITY_HALT_AUTO_CONTINUE_AUTHORIZATION",
+            "CAPACITY_HALT_AUTO_CONTINUE_BUDGET",
+            "CAPACITY_HALT_AUTO_CONTINUE_NOTIFY_BIN",
+            "CAPACITY_HALT_AUTO_CONTINUE_FALLBACK_LEDGER",
+            "CAPACITY_HALT_AUTO_CONTINUE_TIMEOUT_SECONDS",
+            "CAPACITY_HALT_AUTO_CONTINUE_SUCCESS_DELAYS",
+        ],
         "exit_codes": {"0": "fired-success-or-dry-run-ok", "1": "fired-but-failed-recovery", "2": "lease-held-skipped", "3": "malformed", "4": "transport-timeout", "5": "protected-refusal", "6": "unknown-pane", "7": "topology-stale", "8": "budget-exhausted"},
     }, 0)
 
 def examples(args):
     emit(args, {
         "schema_version": "capacity-halt-auto-continue.examples.v1",
+        "command": "examples",
         "examples": [
-            {"name": "dry_run", "command": "capacity-halt-auto-continue-primitive.sh --session flywheel --pane 3 --digest <sha256> --dry-run --json"},
-            {"name": "apply", "command": "capacity-halt-auto-continue-primitive.sh --session flywheel --pane 3 --digest <sha256> --apply --json"},
-            {"name": "scrollback_file", "command": "capacity-halt-auto-continue-primitive.sh --session flywheel --pane 3 --scrollback-file /tmp/pane.txt --apply --json"},
+            {"name": "dry_run", "command": "capacity-halt-auto-continue-primitive.sh --session flywheel --pane 3 --digest <sha256> --dry-run --json", "purpose": "default dry-run probe; emits would_send=true without transport"},
+            {"name": "apply", "command": "capacity-halt-auto-continue-primitive.sh --session flywheel --pane 3 --digest <sha256> --apply --json", "purpose": "fire bounded auto-continue: authorize, budget, lease, transport, measure"},
+            {"name": "scrollback_file", "command": "capacity-halt-auto-continue-primitive.sh --session flywheel --pane 3 --scrollback-file /tmp/pane.txt --apply --json", "purpose": "compute digest from a saved scrollback dump instead of --digest"},
+            {"name": "doctor", "command": "capacity-halt-auto-continue-primitive.sh doctor --json", "purpose": "verify jq, python3, lease/ntm/success/auth/budget binaries, fallback ledger writable"},
+            {"name": "audit", "command": "capacity-halt-auto-continue-primitive.sh audit --json", "purpose": "tail recent budget-exhausted fallback signals"},
         ],
     }, 0)
 
