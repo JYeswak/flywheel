@@ -1,7 +1,7 @@
 {
   "canonical_index": ".flywheel/AGENTS-CANONICAL.md",
   "round_trip_command": "cat .flywheel/rules/L*.md | shasum -a 256",
-  "rule_count": 105,
+  "rule_count": 106,
   "rules": [
     {
       "id": "L48",
@@ -1052,6 +1052,16 @@
       "status": "long_term",
       "title": "CLOSURE-EVIDENCE-CONTRACT-VERSION-ANCHOR",
       "trauma_class": "closure-evidence-missing-contract-version"
+    },
+    {
+      "id": "L155",
+      "order": 106,
+      "path": ".flywheel/rules/L106-L155-closure-evidence-public-lens-anchor.md",
+      "sha256": "9fc11a794073ca0f4e361ac4c6b43c0d6effcc141224b0aea92f64c7a804329a",
+      "shipped": "2026-05-11",
+      "status": "long_term",
+      "title": "CLOSURE-EVIDENCE-PUBLIC-LENS-ANCHOR",
+      "trauma_class": "closure-evidence-missing-public-lens-anchor"
     }
   ],
   "rules_body_sha256": "11c6068d4000222f01d4f3a1380522d04e82ae177a93ed4a09addbd55a166b87",
