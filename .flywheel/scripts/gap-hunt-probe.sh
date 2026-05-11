@@ -1015,9 +1015,6 @@ def previous_ledger_ids() -> set[str]:
 
 def command_text() -> str:
     files = [
-        CLAUDE_ROOT / "commands/flywheel/tick.md",
-        CLAUDE_ROOT / "commands/flywheel/status.md",
-        CLAUDE_ROOT / "commands/flywheel/synth.md",
         REPO_ROOT / "AGENTS.md",
         REPO_ROOT / "INCIDENTS.md",
         REPO_ROOT / "README.md",
@@ -1030,6 +1027,20 @@ def command_text() -> str:
     # Memories anchored in doctrine files were falsely flagged as not-cross-linked.
     for doctrine_path in safe_iter_files(REPO_ROOT / ".flywheel/doctrine", "*.md", 200):
         pieces.append(read_text(doctrine_path, 200_000))
+    # flywheel-2f4br: include .flywheel/rules/*.md (L-rules) as canonical
+    # anchor surface. L-rules are SIBLING to doctrine/ — both are canonical
+    # operational discipline. Without this sample, ledgers/probes cited only
+    # in L-rules (e.g., fleet-canonical-rule-freshness-probe in L056-L102)
+    # appear cross-source-siloed even when L-rule canonically references them.
+    for rule_path in safe_iter_files(REPO_ROOT / ".flywheel/rules", "*.md", 500):
+        pieces.append(read_text(rule_path, 200_000))
+    # flywheel-2f4br: extend slash-command sample from hardcoded {tick,status,
+    # synth}.md to ALL ~/.claude/commands/flywheel/*.md. Previously hardcoded
+    # 3 commands missed fleet-doctor.md, onboard.md, jeff-*.md, etc. Each
+    # slash command is a canonical receiver surface for the substrate it
+    # orchestrates.
+    for cmd_path in safe_iter_files(CLAUDE_ROOT / "commands/flywheel", "*.md", 200):
+        pieces.append(read_text(cmd_path, 1_000_000))
     return "\n".join(pieces)
 
 
