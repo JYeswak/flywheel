@@ -1,0 +1,47 @@
+{
+  "patch_target": "/Users/josh/.claude/skills/.flywheel/data/substrate-registry.json",
+  "patch_kind": "jsm-import-ready",
+  "patch_operation": "append_to_substrates_array",
+  "patch_source_bead": "flywheel-2xdi.144",
+  "parent_bead": "flywheel-2xdi",
+  "sister_beads": "flywheel-2xdi.60.1, 2xdi.72.1, 2xdi.132, 2xdi.135, 2xdi.137 (registry-allowlist arc; 6th-instance now)",
+  "patch_rationale": "Add canonical-cli-lint-precommit-installer.sh to substrate-registry on-demand allowlist (kind=scaffold). Script IS heavily wired (runtime via .flywheel/hooks/pre-commit-chain.sh + tested via tests/canonical-cli-lint-precommit.sh) but probe's runtime_source_corpus doesn't scan .flywheel/hooks/ or tests/ directories. Header marks 'flywheel-cli-surface: true' and 'Bead: flywheel-f0e77 (ldp0a follow-up)'. This is the 6th registry-allowlist bead this session.",
+  "design_notes": [
+    "where field is STRING per flywheel-2xdi.60.1 Design Decision 3",
+    "kind=scaffold per 2xdi.72.1 precedent for installer-class scripts",
+    "lifecycle_state=active (installer is operator-on-demand AND wired in hooks chain)",
+    "consumers field lists BOTH runtime (.flywheel/hooks/pre-commit-chain.sh) AND test (tests/canonical-cli-lint-precommit.sh) — demonstrates the script is NOT orphan; probe's corpus 3 just doesn't see these paths",
+    "Sister harvest candidate (per faqj2 substrate-self-improving loop): extend runtime_source_corpus to scan .flywheel/hooks/*.sh + tests/*.sh. N=2 visible flagged scripts that are actually wired via tests/hooks (canonical-cli-lint-precommit-installer + fleet-coherence-classifiers); threshold N=4 not met yet"
+  ],
+  "new_entry": {
+    "name": "canonical-cli-lint-precommit-installer",
+    "kind": "scaffold",
+    "scope": "local",
+    "version": "1.0.0",
+    "source": "zeststream",
+    "sourceUrl": "flywheel:flywheel-2xdi.144",
+    "installedAt": "2026-05-11T17:00:00Z",
+    "session_added": "2026-05-11T17:00:00Z",
+    "added_by": "flywheel-2xdi.144",
+    "valid_from": "2026-05-11T17:00:00Z",
+    "valid_to": null,
+    "effect": "pre_commit_hook_installer_wired_via_flywheel_hooks_chain",
+    "lifecycle_state": "active",
+    "lifecycle_stage": "on-demand-installer",
+    "where": "/Users/josh/Developer/flywheel/.flywheel/scripts/canonical-cli-lint-precommit-installer.sh",
+    "owner": "flywheel-cli-surface",
+    "validator": "flywheel-2xdi.144",
+    "validation_command": "test -f /Users/josh/Developer/flywheel/.flywheel/scripts/canonical-cli-lint-precommit-installer.sh",
+    "consumers": [
+      "/Users/josh/Developer/flywheel/.flywheel/hooks/pre-commit-chain.sh (runtime; chained from security-precommit dispatcher)",
+      "/Users/josh/Developer/flywheel/tests/canonical-cli-lint-precommit.sh (test)"
+    ],
+    "mutates_live_state": false
+  },
+  "verification_post_import": {
+    "registry_substrates_count_expected": 49,
+    "registry_substrates_count_before": 48,
+    "updatedAt_expected": "2026-05-11T17:00:00Z",
+    "gap_hunt_probe_post_apply": "wired-but-cold flag cleared via on_demand_script_allowlist; underlying probe-corpus-too-narrow issue persists (4 other scripts still flagged similarly — faqj2 next-tick harvest candidate)"
+  }
+}
