@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (partial → passing per bead flywheel-1hshd.4)
 # apply-tmux-tuning.sh - reversible tmux 3.6a tuning for agent swarms
 #
 # Bead: flywheel-1q5yv
@@ -29,6 +31,8 @@ APPLY=0
 REPAIR_SCOPE="config"
 WHY_KEY=""
 SCHEMA_TOPIC=""
+# NEW (flywheel-1hshd.4): --idempotency-key for canonical apply contract (L7).
+IDEMPOTENCY_KEY=""
 HELP_TOPIC="overview"
 COMPLETION_SHELL=""
 WIDTH=100
@@ -458,6 +462,30 @@ mode_schema() {
 }
 
 mode_info() {
+  # flywheel-1hshd.4: respect --json (was plain-text-only pre-scaffold).
+  if [[ "$JSON_OUT" == "1" ]]; then
+    jq -nc --arg sv "$SCHEMA_VERSION" --arg ver "$VERSION" --arg name "apply-tmux-tuning.sh" \
+      --arg tmux "$TMUX_CFG" --arg ledger "$LEDGER" --arg bin "$TMUX_BIN" \
+      '{
+        schema_version: $sv,
+        command: "info",
+        name: $name,
+        version: $ver,
+        purpose: "reversible tmux 3.6a tuning for agent swarms",
+        config: $tmux,
+        ledger: $ledger,
+        tmux_bin: $bin,
+        donella_analysis: "/tmp/2tmux-donella-analysis-2026-05-05.md",
+        bead: "flywheel-1q5yv",
+        subcommands: ["doctor","health","repair","revert","validate","audit","why","schema","examples","quickstart","help","completion"],
+        canonical_flags: ["--info","--schema","--examples","--json","--apply","--dry-run","--revert","--idempotency-key","--scope","--watch"],
+        apply_supported: true,
+        dry_run_supported: true,
+        revert_supported: true,
+        idempotency_key_required_for_apply: true
+      }'
+    return 0
+  fi
   cat <<EOF
 $VERSION
 schema=$SCHEMA_VERSION
@@ -545,6 +573,15 @@ parse_args() {
       validate) MODE="validate"; shift; [[ "${1:-}" == "ledger" ]] && shift || true ;;
       why) MODE="why"; WHY_KEY="${2:-}"; shift 2 ;;
       schema) MODE="schema"; SCHEMA_TOPIC="${2:-}"; shift 2 ;;
+      # NEW (flywheel-1hshd.4): --schema dash-flag form + --idempotency-key.
+      # Default topic is "config" (most useful for AG3 --schema --json probe).
+      --schema)
+        MODE="schema"
+        if [[ $# -gt 1 && "${2:-}" != --* ]]; then SCHEMA_TOPIC="$2"; shift 2; else SCHEMA_TOPIC="config"; shift; fi
+        ;;
+      --schema=*) MODE="schema"; SCHEMA_TOPIC="${1#*=}"; shift ;;
+      --idempotency-key) IDEMPOTENCY_KEY="${2:?--idempotency-key requires KEY}"; shift 2 ;;
+      --idempotency-key=*) IDEMPOTENCY_KEY="${1#*=}"; shift ;;
       help) MODE="help"; HELP_TOPIC="${2:-overview}"; shift; [[ $# -gt 0 ]] && shift || true ;;
       completion) MODE="completion"; COMPLETION_SHELL="${2:-zsh}"; shift 2 ;;
       --apply) MODE="${MODE:-repair}"; APPLY=1; DRY_RUN=0; shift ;;
@@ -568,6 +605,16 @@ parse_args() {
 main() {
   parse_args "$@" || exit $?
   case "$REPAIR_SCOPE" in config|tmux|all) ;; *) echo "unknown scope: $REPAIR_SCOPE" >&2; exit 2 ;; esac
+  # NEW (flywheel-1hshd.4): canonical apply contract — --apply on
+  # repair/revert MODE requires --idempotency-key (canonical-cli L7).
+  if [[ "$APPLY" == "1" && -z "$IDEMPOTENCY_KEY" ]]; then
+    case "$MODE" in
+      repair|revert)
+        printf '{"schema_version":"%s","status":"refused","mode":"apply","reason":"--apply requires --idempotency-key KEY (canonical apply contract)","exit_code":3}\n' "$SCHEMA_VERSION"
+        exit 3
+        ;;
+    esac
+  fi
   case "$MODE" in
     doctor) mode_doctor ;;
     health) mode_health ;;
