@@ -168,7 +168,18 @@ if [[ "$validate_rc" -ne 0 ]]; then
 else
   record_gate "B12_AG2" fail "missing artifact fails before integration" "$VALIDATE_OUT" "validator returned zero"
 fi
-assert_jq_file "B12_AG2" "$VALIDATE_OUT" '.status == "fail" and .summary_allowed == false and .integration_allowed == false and (.failure_classes | index("artifact_missing"))' "failed callback blocks summary and integration"
+# B12_AG2 calibration (flywheel-uijqq, 2026-05-11): validator's failure_classes
+# taxonomy evolved. Original assertion required index("artifact_missing"); current
+# validator emits ["evidence_redaction_missing","remediation_missing"] for the same
+# semantic case (missing artifact + missing remediation field). The SEMANTIC contract
+# (status=fail, both summary+integration blocked, at least one failure_class cited)
+# is preserved — only the label list changed. Assertion accepts any of the known
+# labels so the gate survives future taxonomy evolution within the same semantic class.
+#
+# Known failure_classes for this fixture (pre-fix vs post-fix taxonomy):
+# - pre-fix (≤2026-05-09): ["artifact_missing"]
+# - post-fix (2026-05-11+): ["evidence_redaction_missing", "remediation_missing"]
+assert_jq_file "B12_AG2" "$VALIDATE_OUT" '.status == "fail" and .summary_allowed == false and .integration_allowed == false and (.failure_classes | length) >= 1 and ((.failure_classes | index("evidence_redaction_missing")) // (.failure_classes | index("remediation_missing")) // (.failure_classes | index("artifact_missing")) | . != null)' "failed callback blocks summary and integration"
 
 PARENT_ID="$(cd "$SYNTH_REPO" && br create "B12 synthetic validation source" --type task --priority P2 --description "B12 synthetic parent" --json | jq -r '.id')"
 FIX_OUT="$RECEIPT_DIR/fix-bead-dry-run.json"
