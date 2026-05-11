@@ -602,6 +602,14 @@ def runtime_source_corpus() -> str:
     # corpus check even though it's loaded on every flywheel-loop invocation.
     dot_d_re = re.compile(r"[A-Za-z0-9_-]+\.d(?=[/\"'\s]|$)")
     for_in_re = re.compile(r"^\s*for\s+\w+\s+in\b")
+    # flywheel-2xdi.50: capture variable-assignment lines that resolve to a
+    # `.sh` path (e.g. `COMMON="${SUBSTRATE_DOCTOR_COMMON:-$HOME/.../foo.sh}"`).
+    # These drive variable-indirected sources like `source "$COMMON"` where
+    # the literal script basename never appears in any `source` line. The
+    # corpus check then sees the basename in the assignment line and treats
+    # the script as wired. The pattern matches: var-name + `=` + anything +
+    # `.sh` + word boundary.
+    var_assign_sh_re = re.compile(r"\b[A-Za-z_][A-Za-z0-9_]*=.*\.sh\b")
     for f in candidates:
         try:
             text = read_text(f, 200_000)
@@ -615,6 +623,9 @@ def runtime_source_corpus() -> str:
                 in_for_continuation = False
                 continue
             if dot_d_re.search(line):
+                pieces.append(line.rstrip())
+                continue
+            if var_assign_sh_re.search(line):
                 pieces.append(line.rstrip())
                 continue
             if for_in_re.match(line):

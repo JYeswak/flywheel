@@ -1,0 +1,6 @@
+PASS probe defines skill_md_corpus + _SKILL_MD_CORPUS cache
+PASS probe_wired_but_cold checks in_skill_md as fourth corpus
+PASS live probe: protected-session-recovery.sh no longer flagged wired-but-cold
+PASS live probe: 0 wired-but-cold gaps total (combined 2xdi.47 for-loop fix + 2xdi.49 SKILL.md fix)
+PASS synthetic fixture: SKILL.md mention of myskill-stub.sh is captured by corpus collector
+SUMMARY pass=5 fail=0
