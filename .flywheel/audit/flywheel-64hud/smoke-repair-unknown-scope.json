@@ -1,0 +1,2 @@
+{"schema_version":"jeff-issue-response-poll/v1","command":"repair","status":"refused","scope":"nope","reason":"unknown_scope","valid_scopes":["registry_dir","audit_log_dir"]}
+rc=64
