@@ -1,6 +1,26 @@
 #!/usr/bin/env bash
 # canonical-cli-scoping-allow-large: canonical operator CLI with embedded parser, doctor, repair, and audit surfaces.
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (partial → passing per bead flywheel-1hshd.7)
 set -euo pipefail
+
+# NEW (flywheel-1hshd.7): --schema dash-flag form — parity with existing
+# `schema <topic>` positional subcommand. Bash translates --schema [topic]
+# into the positional form BEFORE the python heredoc parses argv, so the
+# existing python `mode == "schema"` dispatch handler serves it unchanged.
+# Skip when "schema" already appears as a positional (idempotent).
+if [[ $# -gt 0 ]] && { [[ "$1" == "--schema" ]] || [[ "$1" == --schema=* ]]; }; then
+  _topic="envelope"
+  if [[ "$1" == --schema=* ]]; then
+    _topic="${1#*=}"
+    shift
+  else
+    shift
+    if [[ $# -gt 0 && "${1:-}" != --* ]]; then _topic="$1"; shift; fi
+  fi
+  set -- schema "$_topic" "$@"
+  unset _topic
+fi
 
 exec python3 - "$0" "$@" <<'PY'
 import argparse
