@@ -1,0 +1,4 @@
+# Per-bead OWNED_WRITE_ROOTS for flywheel-3ppb5
+# (n8n-deploy-kit Phase-1.1 canonical-stamp)
+/Users/josh/Developer/flywheel
+/Users/josh/Developer/n8n-deploy-kit
