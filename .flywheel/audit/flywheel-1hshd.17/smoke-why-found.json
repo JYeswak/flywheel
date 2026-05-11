@@ -1,0 +1,1 @@
+{"schema_version":"codex-template-stuck-detector/v1","command":"why","ts":"2026-05-11T04:32:08Z","id":"2026-05-11T04:32:08Z","status":"found","audit_log":"/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/tmp.aCctqI480O","row":{"ts":"2026-05-11T04:32:08Z","session":"flywheel","subclass":"alive","hash_t1":"abc"}}

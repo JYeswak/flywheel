@@ -1,0 +1,1 @@
+{"schema_version":"codex-template-stuck-detector/v1","command":"validate","subject":"subclass","ts":"2026-05-11T04:32:08Z","status":"reject","value":"bogus","reason":"unknown_subclass","valid_subclasses":["alive","background_terminal_stuck","model_at_capacity_halt","post_completion","input_deaf","buffer_stuck"]}

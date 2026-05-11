@@ -1,0 +1,1 @@
+{"schema_version":"codex-template-stuck-detector/v1","command":"repair","status":"refused","scope":"bogus","reason":"unknown_scope","valid_scopes":["audit_log_dir","caam_rotate_path"]}
