@@ -1,7 +1,7 @@
 {
   "canonical_index": ".flywheel/AGENTS-CANONICAL.md",
   "round_trip_command": "cat .flywheel/rules/L*.md | shasum -a 256",
-  "rule_count": 106,
+  "rule_count": 107,
   "rules": [
     {
       "id": "L48",
@@ -1062,6 +1062,16 @@
       "status": "long_term",
       "title": "CLOSURE-EVIDENCE-PUBLIC-LENS-ANCHOR",
       "trauma_class": "closure-evidence-missing-public-lens-anchor"
+    },
+    {
+      "id": "L156",
+      "order": 107,
+      "path": ".flywheel/rules/L107-L156-inbox-discipline-0th-probe.md",
+      "sha256": "4a961f6170ed8ad37d731d00235f385f14f9320d8b9b8c67856f057bfcf2266f",
+      "shipped": "2026-05-11",
+      "status": "long_term",
+      "title": "INBOX-DISCIPLINE-0TH-PROBE",
+      "trauma_class": "inbox-discipline-missed-during-deep-burndown-motion"
     }
   ],
   "rules_body_sha256": "11c6068d4000222f01d4f3a1380522d04e82ae177a93ed4a09addbd55a166b87",

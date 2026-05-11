@@ -142,6 +142,7 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 104 | L153 — CAPTURE-PROVENANCE-CANONICAL | long_term | `.flywheel/rules/L104-L153-capture-provenance-canonical.md` |
 | 105 | L154 — CLOSURE-EVIDENCE-CONTRACT-VERSION-ANCHOR | long_term | `.flywheel/rules/L105-L154-closure-evidence-contract-version-anchor.md` |
 | 106 | L155 — CLOSURE-EVIDENCE-PUBLIC-LENS-ANCHOR | long_term | `.flywheel/rules/L106-L155-closure-evidence-public-lens-anchor.md` |
+| 107 | L156 — INBOX-DISCIPLINE-0TH-PROBE | long_term | `.flywheel/rules/L107-L156-inbox-discipline-0th-probe.md` |
 <!-- END-RULES-INDEX -->
 
 <!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->
