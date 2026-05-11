@@ -1,0 +1,2 @@
+{"schema_version":"state-md-miner/v1","command":"validate","subject":"repo-path","ts":"2026-05-11T03:46:42Z","status":"reject","value":"relative/path","reason":"not_absolute_path","contract":"--repo arg must be an absolute path"}
+rc=1

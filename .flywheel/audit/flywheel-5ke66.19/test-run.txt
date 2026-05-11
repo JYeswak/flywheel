@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info emits native PASSTHRU envelope (state-md-miner/v1 + .default_roster)
+PASS --schema emits native JSON-Schema (.title == state-md-miner result)
+PASS --examples emits native PASSTHRU example invocations
+PASS doctor emits scaffold envelope with >=5 checks
+PASS health emits scaffold envelope
+PASS repair --dry-run emits scaffold envelope (real scope state_dir)
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate (bare) refuses with rc=64 + missing_subject envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS script annotates WZJO9.1.7 PARTIAL-BYPASS variant (discoverable via grep)
+PASS PARTIAL bypass dual-direction: --info goes native (no .command), doctor goes scaffold (.command=doctor)
+PASS validate repo-path rejects relative path with rc=1 + not_absolute_path
+PASS validate stale-days accepts default 14 (matches --stale-days arg default)
+PASS validate stale-days rejects 999 (out of [1,365]) with rc=1
+PASS doctor probes python3 + roster + state_dir (load-bearing for state-md mining)
+SUMMARY pass=19 fail=0

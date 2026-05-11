@@ -1,0 +1,1 @@
+{"schema_version":"state-md-miner/v1","command":"health","ts":"2026-05-11T03:46:42Z","status":"warn","audit_log":"/Users/josh/.local/state/flywheel/state-md-miner-runs.jsonl","reason":"audit_log_missing","last_run_ts":null,"age_seconds":null,"recent_runs":0,"total_runs":0}

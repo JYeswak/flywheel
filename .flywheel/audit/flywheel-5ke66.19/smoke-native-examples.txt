@@ -1,0 +1,3 @@
+.flywheel/scripts/state-md-miner.sh --json
+.flywheel/scripts/state-md-miner.sh --repo /Users/josh/Developer/flywheel --dry-run --json
+.flywheel/scripts/state-md-miner.sh --apply --max-beads-per-repo 5 --json

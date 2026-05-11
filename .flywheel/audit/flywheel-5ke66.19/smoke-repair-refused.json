@@ -1,0 +1,2 @@
+{"schema_version":"state-md-miner/v1","command":"repair","status":"refused","mode":"apply","scope":"state_dir","reason":"--apply requires --idempotency-key"}
+rc=3
