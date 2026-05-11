@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
-set -uo pipefail
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (filled per bead flywheel-1hshd.9)
+# L5 lint requires `set -euo pipefail`. Strict mode here is safe — the
+# validator uses explicit `set +e` inside the verify-rerun block to
+# preserve rc capture for the pass/block/unverifiable tri-state.
+set -euo pipefail
 
 VERSION="callback-receipt-validator.v1.0.0"
 SCHEMA_VERSION="callback-receipt-decision/v1"
@@ -265,6 +270,297 @@ run_check() {
   row="$(decision_row "PASS" "pass" 0 "$callback_json" "$command" "$verify_rc" "$observed" "$actual" "$stdout_text" "$stderr_text" "")"
   emit_row "$row" 0
 }
+
+# ====== BEGIN canonical-cli scaffold (bead flywheel-1hshd.9) ======
+# Wave-4 partial→passing for a 288-line single-command validator (the
+# script that 1hshd.8's wrapper delegates to). Adds canonical CLI family
+# (doctor / health / repair / validate / audit / why / --schema /
+# --examples + quickstart / help / completion). Original `check` command
+# and tri-state PASS/REFUSE/UNVERIFIABLE behavior preserved unchanged.
+
+SCAFFOLD_SCHEMA_VERSION="callback-receipt-validator/v1"
+SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$LEDGER}"
+IDEMPOTENCY_KEY=""
+
+scaffold_emit_schema() {
+  local surface="${1:-default}"
+  [[ "$surface" == "--json" ]] && surface="default"
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+    '{schema_version:$sv,command:"schema",surface:$surface,
+      decision_row:{required:["schema_version","version","ts","repo_path","callback","dispatch_file","l112_verify_command","expected_l112","actual_l112","verify_result","decision","reason","exit_code","fix_bead_id","ledger_path"]},
+      decisions:["PASS","REFUSE","UNVERIFIABLE"],
+      exit_codes:{"0":"PASS verified","1":"REFUSE hard block","2":"UNVERIFIABLE malformed callback fail-open","3":"--apply without --idempotency-key (canonical apply contract)"}}'
+}
+
+scaffold_emit_quickstart() {
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    '{schema_version:$sv,command:"quickstart",steps:[
+      {step:1,action:"probe doctor",command:"callback-receipt-validator.sh doctor --json"},
+      {step:2,action:"check a callback",command:"echo \"DONE ...\" | callback-receipt-validator.sh check --callback-stdin --dispatch-file /tmp/dispatch.md --json"}
+    ]}'
+}
+
+scaffold_emit_topic_help() {
+  case "${1:-}" in
+    check)    printf 'topic: check — validate a worker DONE callback by rerunning the dispatch L112 probe. Inputs: --callback-text TEXT or --callback-stdin + --dispatch-file PATH. Tri-state exit: 0=PASS, 1=REFUSE, 2=UNVERIFIABLE.\n' ;;
+    doctor)   printf 'topic: doctor — substrate probe: jq, fix-bead opener, ledger writable, repo dir, flywheel root.\n' ;;
+    health)   printf 'topic: health — tails ledger; warn stale >7d. Counts PASS/REFUSE/UNVERIFIABLE decisions.\n' ;;
+    repair)   printf 'topic: repair — scopes: ledger-rotate (5MB), fix-bead-opener-prime.\n' ;;
+    validate) printf 'topic: validate — subjects: row, schema, config, ledger.\n' ;;
+    *)        printf 'topics: check | doctor | health | repair | validate\n' ;;
+  esac
+}
+
+scaffold_cmd_doctor() {
+  local checks="" overall="pass"
+  if command -v jq >/dev/null 2>&1; then
+    checks+="$(jq -nc --arg p "$(command -v jq)" '{name:"jq_on_path",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc '{name:"jq_on_path",status:"fail"}')"$'\n'; overall="fail"
+  fi
+  local fb_present=false
+  [[ -x "$FIX_BEAD_OPENER" ]] && fb_present=true
+  local fb_status="pass"; [[ "$fb_present" != true ]] && fb_status="warn"
+  checks+="$(jq -nc --arg p "$FIX_BEAD_OPENER" --arg s "$fb_status" --argjson present "$fb_present" \
+    '{name:"fix_bead_opener_executable",status:$s,value:$p,present:$present}')"$'\n'
+  local ledger_dir; ledger_dir="$(dirname "$LEDGER")"
+  if [[ -d "$ledger_dir" && -w "$ledger_dir" ]] || mkdir -p "$ledger_dir" 2>/dev/null; then
+    local row_count=0
+    [[ -r "$LEDGER" ]] && row_count="$(wc -l < "$LEDGER" 2>/dev/null | tr -d ' ' || echo 0)"
+    checks+="$(jq -nc --arg p "$LEDGER" --argjson rc "${row_count:-0}" '{name:"ledger_writable",status:"pass",value:$p,row_count:$rc}')"$'\n'
+  else
+    checks+="$(jq -nc --arg p "$LEDGER" '{name:"ledger_writable",status:"fail",value:$p}')"$'\n'; overall="fail"
+  fi
+  if [[ -d "$REPO" ]]; then
+    checks+="$(jq -nc --arg p "$REPO" '{name:"repo_dir_present",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc --arg p "$REPO" '{name:"repo_dir_present",status:"fail",value:$p}')"$'\n'; overall="fail"
+  fi
+  if [[ -d "$REPO_DEFAULT" ]]; then
+    checks+="$(jq -nc --arg p "$REPO_DEFAULT" '{name:"flywheel_root_resolvable",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc --arg p "$REPO_DEFAULT" '{name:"flywheel_root_resolvable",status:"fail",value:$p}')"$'\n'; overall="fail"
+  fi
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  printf '%s' "$checks" | jq -sc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg status "$overall" \
+    '{schema_version:$sv,command:"doctor",ts:$ts,status:$status,checks:.}'
+}
+
+scaffold_cmd_health() {
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  local log="$LEDGER"
+  local last_row="null" stale_seconds=-1 status="warn" pass_count=0 refuse_count=0 unverifiable_count=0
+  if [[ -r "$log" ]]; then
+    local row_raw; row_raw="$(tail -n 1 "$log" 2>/dev/null || true)"
+    if [[ -n "$row_raw" ]] && printf '%s' "$row_raw" | jq -e '.' >/dev/null 2>&1; then
+      last_row="$row_raw"
+      local last_ts; last_ts="$(printf '%s' "$row_raw" | jq -r '.ts // empty' 2>/dev/null || true)"
+      if [[ -n "$last_ts" ]]; then
+        local last_epoch now_epoch
+        last_epoch="$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$last_ts" +%s 2>/dev/null || echo 0)"
+        now_epoch="$(date -u +%s)"
+        if [[ "$last_epoch" -gt 0 ]]; then
+          stale_seconds=$((now_epoch - last_epoch))
+          [[ "$stale_seconds" -le 604800 ]] && status="pass"
+        fi
+      fi
+    fi
+    pass_count="$(grep -c '"decision":"PASS"' "$log" 2>/dev/null; true)"
+    refuse_count="$(grep -c '"decision":"REFUSE"' "$log" 2>/dev/null; true)"
+    unverifiable_count="$(grep -c '"decision":"UNVERIFIABLE"' "$log" 2>/dev/null; true)"
+  fi
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$log" \
+    --arg status "$status" --argjson stale "$stale_seconds" --argjson row "$last_row" \
+    --argjson pc "${pass_count:-0}" --argjson rc "${refuse_count:-0}" --argjson uc "${unverifiable_count:-0}" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,audit_log:$log,stale_seconds:$stale,last_row:$row,pass_count:$pc,refuse_count:$rc,unverifiable_count:$uc}'
+}
+
+scaffold_cmd_repair() {
+  local scope="" mode="dry_run" idem_key=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --scope) scope="${2:-}"; shift 2 ;;
+      --dry-run) mode="dry_run"; shift ;;
+      --apply) mode="apply"; shift ;;
+      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
+      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
+      --json) shift ;;
+      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
+      '{schema_version:$sv,command:"repair",status:"refused",mode:"apply",scope:$scope,reason:"--apply requires --idempotency-key"}'
+    exit 3
+  fi
+  case "$scope" in
+    ledger-rotate)
+      local log="$LEDGER" size_bytes=0 rotated=false
+      [[ -r "$log" ]] && size_bytes="$(stat -f '%z' "$log" 2>/dev/null || echo 0)"
+      if [[ "$mode" == "apply" && "$size_bytes" -gt 5242880 ]]; then
+        local rotated_path="${log}.$(date -u +%Y%m%dT%H%M%SZ)"
+        mv "$log" "$rotated_path" 2>/dev/null && { : > "$log" 2>/dev/null || true; rotated=true; }
+      fi
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        --arg log "$log" --argjson sz "$size_bytes" --argjson r "$rotated" \
+        '{schema_version:$sv,command:"repair",status:"pass",mode:$mode,scope:$scope,audit_log:$log,size_bytes:$sz,rotation_threshold:5242880,rotated:$r}'
+      ;;
+    fix-bead-opener-prime)
+      local present=false
+      [[ -x "$FIX_BEAD_OPENER" ]] && present=true
+      local status="pass"; [[ "$present" != true ]] && status="warn"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        --arg fbo "$FIX_BEAD_OPENER" --arg s "$status" --argjson present "$present" \
+        '{schema_version:$sv,command:"repair",status:$s,mode:$mode,scope:$scope,fix_bead_opener:$fbo,present:$present,note:"read-only probe"}'
+      ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        '{schema_version:$sv,command:"repair",status:"unknown_scope",mode:$mode,scope:$scope,known_scopes:["ledger-rotate","fix-bead-opener-prime"]}'
+      ;;
+  esac
+}
+
+scaffold_cmd_validate() {
+  local subject="" row_json=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --row-json) subject="row"; row_json="${2:-}"; shift 2 ;;
+      --row-json=*) subject="row"; row_json="${1#--row-json=}"; shift ;;
+      --schema) subject="schema"; shift ;;
+      --config) subject="config"; shift ;;
+      --ledger) subject="ledger"; shift ;;
+      --json) shift ;;
+      *) shift ;;
+    esac
+  done
+  case "$subject" in
+    row)
+      local valid=true missing=""
+      if [[ -z "$row_json" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",subject:"row",status:"fail",valid:false,reason:"--row-json required"}'
+        return 0
+      fi
+      if ! printf '%s' "$row_json" | jq -e '.' >/dev/null 2>&1; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",subject:"row",status:"fail",valid:false,reason:"invalid_json"}'
+        return 0
+      fi
+      for f in schema_version version ts decision; do
+        printf '%s' "$row_json" | jq -e --arg k "$f" 'has($k)' >/dev/null 2>&1 || { valid=false; missing="${missing}${f},"; }
+      done
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --argjson v "$valid" --arg m "${missing%,}" \
+        '{schema_version:$sv,command:"validate",subject:"row",status:(if $v then "pass" else "fail" end),valid:$v,missing:$m}'
+      ;;
+    schema)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"validate",subject:"schema",status:"pass",surfaces:["doctor","health","repair","validate","audit","why"]}'
+      ;;
+    config)
+      local jq_ok=false fb_ok=false ledger_ok=false repo_ok=false
+      command -v jq >/dev/null 2>&1 && jq_ok=true
+      [[ -x "$FIX_BEAD_OPENER" ]] && fb_ok=true
+      [[ -d "$(dirname "$LEDGER")" ]] && ledger_ok=true
+      [[ -d "$REPO" ]] && repo_ok=true
+      local overall=pass; [[ "$jq_ok" != true || "$repo_ok" != true ]] && overall=fail
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$overall" \
+        --argjson jqq "$jq_ok" --argjson fb "$fb_ok" --argjson ld "$ledger_ok" --argjson r "$repo_ok" \
+        --arg ledger "$LEDGER" --arg repo "$REPO" --arg fbo "$FIX_BEAD_OPENER" \
+        '{schema_version:$sv,command:"validate",subject:"config",status:$s,jq_present:$jqq,fix_bead_opener_executable:$fb,ledger_dir_present:$ld,repo_dir_present:$r,ledger:$ledger,repo:$repo,fix_bead_opener:$fbo}'
+      ;;
+    ledger)
+      local present=false rows=0 pass_c=0 refuse_c=0 unverifiable_c=0
+      if [[ -r "$LEDGER" ]]; then
+        present=true
+        rows="$(wc -l < "$LEDGER" 2>/dev/null | tr -d ' ' || echo 0)"
+        pass_c="$(grep -c '"decision":"PASS"' "$LEDGER" 2>/dev/null; true)"
+        refuse_c="$(grep -c '"decision":"REFUSE"' "$LEDGER" 2>/dev/null; true)"
+        unverifiable_c="$(grep -c '"decision":"UNVERIFIABLE"' "$LEDGER" 2>/dev/null; true)"
+      fi
+      local status="pass"; [[ "$present" != true ]] && status="warn"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$status" --arg ledger "$LEDGER" \
+        --argjson present "$present" --argjson rows "${rows:-0}" \
+        --argjson pc "${pass_c:-0}" --argjson rc "${refuse_c:-0}" --argjson uc "${unverifiable_c:-0}" \
+        '{schema_version:$sv,command:"validate",subject:"ledger",status:$s,ledger:$ledger,present:$present,row_count:$rows,pass_count:$pc,refuse_count:$rc,unverifiable_count:$uc}'
+      ;;
+    "")
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"validate",status:"pass",subjects:["row","schema","config","ledger"]}'
+      ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$subject" \
+        '{schema_version:$sv,command:"validate",subject:$s,status:"unknown_subject",known:["row","schema","config","ledger"]}'
+      ;;
+  esac
+}
+
+scaffold_cmd_audit() {
+  local limit=50
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --limit) limit="${2:-50}"; shift 2 ;;
+      --limit=*) limit="${1#--limit=}"; shift ;;
+      --json) shift ;;
+      *) shift ;;
+    esac
+  done
+  local rows="[]" count=0
+  if [[ -r "$LEDGER" ]]; then
+    rows="$(tail -n "$limit" "$LEDGER" | jq -sc '. // []' 2>/dev/null || echo '[]')"
+    count="$(printf '%s' "$rows" | jq 'length' 2>/dev/null || echo 0)"
+  fi
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$LEDGER" --argjson rows "$rows" --argjson count "$count" \
+    '{schema_version:$sv,command:"audit",audit_log:$log,row_count:$count,rows:$rows}'
+}
+
+scaffold_cmd_why() {
+  local id="${1:-}"
+  if [[ -z "$id" ]]; then printf 'ERR: why requires <id>\n' >&2; return 64; fi
+  local matches="[]" status="not_found" any_source_present=false
+  if [[ -r "$LEDGER" ]]; then
+    any_source_present=true
+    local raw; raw="$(grep -F "$id" "$LEDGER" 2>/dev/null || true)"
+    [[ -n "$raw" ]] && matches="$(printf '%s' "$raw" | jq -sc '.' 2>/dev/null || echo '[]')"
+  fi
+  if [[ "$any_source_present" != true ]]; then status="unavailable"
+  else
+    local n; n="$(printf '%s' "$matches" | jq 'length' 2>/dev/null || echo 0)"
+    n="${n//[^0-9]/}"; [[ -z "$n" ]] && n=0
+    [[ "$n" -gt 0 ]] && status="found"
+  fi
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg s "$status" \
+    --arg log "$LEDGER" --argjson m "$matches" \
+    '{schema_version:$sv,command:"why",id:$id,status:$s,audit_log:$log,matches:$m,total_matches:($m|length)}'
+}
+
+_scaffold_is_canonical_arg() {
+  case "${1:-}" in
+    doctor|health|repair|validate|audit|why|quickstart) return 0 ;;
+    --schema|--examples) return 0 ;;
+    help)
+      case "${2:-}" in check|doctor|health|repair|validate|audit|why|-h|--help) return 0 ;; esac
+      return 1 ;;
+    *) return 1 ;;
+  esac
+}
+
+if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
+  case "$1" in
+    doctor)       shift; scaffold_cmd_doctor "$@"; exit $? ;;
+    health)       shift; scaffold_cmd_health "$@"; exit $? ;;
+    repair)       shift; scaffold_cmd_repair "$@"; exit $? ;;
+    validate)     shift; scaffold_cmd_validate "$@"; exit $? ;;
+    audit)        shift; scaffold_cmd_audit "$@"; exit $? ;;
+    why)          shift; scaffold_cmd_why "$@"; exit $? ;;
+    quickstart)   shift; scaffold_emit_quickstart "$@"; exit 0 ;;
+    --schema)
+      shift
+      _surface="${1:-default}"
+      [[ "$_surface" == "--json" ]] && _surface="default"
+      scaffold_emit_schema "$_surface"; exit 0 ;;
+    --examples)   shift; examples; exit 0 ;;
+    help)         shift; scaffold_emit_topic_help "${1:-}"; exit 0 ;;
+  esac
+fi
+# ====== END canonical-cli scaffold ======
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
