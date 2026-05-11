@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (partial -> passing per bead flywheel-k8gcv.6)
 set -euo pipefail
 
-VERSION="halt-disease-watchdog 1.1.0"
+VERSION="halt-disease-watchdog 1.2.0"
+SCHEMA_VERSION="halt-disease-watchdog/v1"
 SESSIONS="flywheel,skillos,mobile-eats,clutterfreespaces"
 WINDOW_MINUTES=30
 JSON_OUT=0
@@ -17,8 +20,344 @@ NOW_ISO="${FLYWHEEL_HALT_WATCHDOG_NOW_ISO:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
 TIMEOUT_BIN="${TIMEOUT_BIN:-$(command -v timeout || true)}"
 
 usage() {
-  printf '%s\n' "usage: halt-disease-watchdog.sh [--sessions a,b] [--repo-map a=/repo,b=/repo] [--window-minutes N] [--json] [--quiet]"
+  cat <<'EOF'
+usage:
+  halt-disease-watchdog.sh [--sessions a,b] [--repo-map a=/repo,b=/repo] [--window-minutes N] [--json] [--quiet]
+  halt-disease-watchdog.sh --info --json
+  halt-disease-watchdog.sh --schema --json
+  halt-disease-watchdog.sh --examples [--json]
+  halt-disease-watchdog.sh doctor --json
+  halt-disease-watchdog.sh health --json
+  halt-disease-watchdog.sh validate --json
+  halt-disease-watchdog.sh audit --json [--limit N]
+  halt-disease-watchdog.sh why [topic] [--json]
+  halt-disease-watchdog.sh quickstart [--json]
+  halt-disease-watchdog.sh repair --scope <ledger-prime> [--dry-run|--apply --idempotency-key KEY] [--json]
+  halt-disease-watchdog.sh --help|-h|--version
+EOF
 }
+
+# ---------- canonical-cli emitters (added by flywheel-k8gcv.6) ----------
+
+emit_info() {
+  jq -nc --arg sv "$SCHEMA_VERSION" --arg name "halt-disease-watchdog.sh" --arg version "$VERSION" \
+    --arg ledger "$LEDGER" --arg ntm_bin "$NTM_BIN" --arg flywheel_loop "$FLYWHEEL_LOOP" \
+    --arg sessions "$SESSIONS" --argjson window "$WINDOW_MINUTES" \
+    '{
+      schema_version:$sv,
+      command:"info",
+      name:$name,
+      version:$version,
+      ledger:$ledger,
+      ntm_bin:$ntm_bin,
+      flywheel_loop:$flywheel_loop,
+      default_sessions:($sessions | split(",")),
+      default_window_minutes:$window,
+      purpose:"Probe fleet for halt-disease (fleet idle while ready work exists, yellow-without-permitted-work, red ignored, dispatch storms during doctor-yellow). Append signal to ledger and emit dashboard line.",
+      subcommands:["doctor","health","validate","audit","why","repair","quickstart"],
+      canonical_flags:["--info","--schema","--examples","--json","--apply","--dry-run","--idempotency-key","--sessions","--repo-map","--window-minutes","--quiet"],
+      capabilities:["fleet-idle-with-ready-work-probe","yellow-contract-validation","red-ignored-detection","ntm-watch-and-grep-native","ledger-append","dashboard-line-emission"],
+      apply_supported:true,
+      dry_run_supported:true,
+      idempotency_key_required_for_apply:true,
+      mutates_state:true,
+      env_vars:["FLYWHEEL_HALT_DISEASE_WATCHDOG_LEDGER","NTM_BIN","FLYWHEEL_LOOP","FLYWHEEL_HALT_WATCHDOG_TIMEOUT_SECONDS","FLYWHEEL_HALT_WATCHDOG_WATCH_TIMEOUT_SECONDS","FLYWHEEL_HALT_WATCHDOG_NOW_EPOCH","FLYWHEEL_HALT_WATCHDOG_NOW_ISO","TIMEOUT_BIN"],
+      exit_codes:{"0":"healthy","1":"high-severity-violations","2":"critical-violations-or-error","3":"refused-apply-without-idempotency-key","64":"bad-args"}
+    }'
+}
+
+emit_schema() {
+  jq -nc --arg sv "$SCHEMA_VERSION" '{
+    schema_version:$sv,
+    command:"schema",
+    input_schema:{
+      type:"object",
+      properties:{
+        sessions:{type:"string",description:"comma-separated session names"},
+        repo_map:{type:"string",description:"comma-separated session=/repo entries"},
+        window_minutes:{type:"integer",minimum:1,description:"idle-detection window"},
+        json:{type:"boolean"},
+        quiet:{type:"boolean"}
+      }
+    },
+    output_schema:{
+      type:"object",
+      required:["schema_version","ts","status","session_rows","violations"],
+      properties:{
+        schema_version:{type:"string"},
+        ts:{type:"string",format:"date-time"},
+        status:{enum:["healthy","high","critical"]},
+        fleet_idle_with_ready_work_count:{type:"integer"},
+        joshua_mornings_with_idle_fleet_count:{type:"integer"},
+        yellow_without_permitted_work_count:{type:"integer"},
+        red_ignored_count:{type:"integer"},
+        joshua_mornings_with_idle_fleet_risk:{type:"boolean"},
+        session_rows:{type:"object"},
+        violations:{type:"array"},
+        dashboard_line:{type:"string"}
+      }
+    },
+    exit_codes:{
+      "0":"healthy",
+      "1":"high-severity-violations",
+      "2":"critical-violations-or-error",
+      "3":"refused-apply-without-idempotency-key",
+      "64":"bad-args"
+    }
+  }'
+}
+
+emit_examples() {
+  if [[ "${1:-}" == "--json" ]]; then
+    jq -nc --arg sv "$SCHEMA_VERSION" '{
+      schema_version:$sv,
+      command:"examples",
+      examples:[
+        {name:"default-fleet-probe",invocation:"halt-disease-watchdog.sh --json",purpose:"probe default sessions (flywheel,skillos,mobile-eats,clutterfreespaces) for halt-disease signals"},
+        {name:"custom-sessions",invocation:"halt-disease-watchdog.sh --sessions flywheel,skillos --window-minutes 15 --json",purpose:"probe a custom session list with a tighter idle window"},
+        {name:"quiet-mode",invocation:"halt-disease-watchdog.sh --quiet",purpose:"emit nothing on stdout; use exit code (0=healthy,1=high,2=critical) — for cron"},
+        {name:"doctor",invocation:"halt-disease-watchdog.sh doctor --json",purpose:"verify jq, ntm, flywheel-loop, ledger writable"},
+        {name:"audit",invocation:"halt-disease-watchdog.sh audit --json",purpose:"tail recent halt-disease watchdog rows"}
+      ]
+    }'
+  else
+    cat <<'EOF'
+examples:
+  halt-disease-watchdog.sh --json
+  halt-disease-watchdog.sh --sessions flywheel,skillos --window-minutes 15 --json
+  halt-disease-watchdog.sh --quiet
+  halt-disease-watchdog.sh doctor --json
+  halt-disease-watchdog.sh audit --json
+EOF
+  fi
+}
+
+emit_doctor() {
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  local jq_status="pass"; command -v jq >/dev/null 2>&1 || jq_status="fail"
+  local ntm_status="pass"; [[ -x "$NTM_BIN" ]] || ntm_status="warn"
+  local loop_status="pass"; [[ -x "$FLYWHEEL_LOOP" ]] || loop_status="warn"
+  local ledger_dir; ledger_dir="$(dirname "$LEDGER")"
+  local ledger_status="pass"
+  if [[ -e "$LEDGER" ]]; then
+    [[ -w "$LEDGER" ]] || ledger_status="fail"
+  else
+    [[ -d "$ledger_dir" ]] || ledger_status="warn"
+  fi
+  local timeout_status="pass"; [[ -n "$TIMEOUT_BIN" ]] || timeout_status="warn"
+  local overall="pass"
+  for s in "$jq_status" "$ntm_status" "$loop_status" "$ledger_status" "$timeout_status"; do
+    case "$s" in
+      fail) overall="fail" ;;
+      warn) [[ "$overall" == "pass" ]] && overall="warn" ;;
+    esac
+  done
+  jq -nc --arg sv "$SCHEMA_VERSION.doctor" --arg ts "$ts" --arg overall "$overall" \
+    --arg jq_s "$jq_status" --arg ntm_s "$ntm_status" --arg ntm_path "$NTM_BIN" \
+    --arg loop_s "$loop_status" --arg loop_path "$FLYWHEEL_LOOP" \
+    --arg ledger_s "$ledger_status" --arg ledger "$LEDGER" \
+    --arg timeout_s "$timeout_status" --arg timeout_path "${TIMEOUT_BIN:-}" \
+    '{
+      schema_version:$sv,
+      command:"doctor",
+      ts:$ts,
+      status:$overall,
+      checks:[
+        {name:"jq",status:$jq_s,detail:"jq required for envelope emission"},
+        {name:"ntm_bin",status:$ntm_s,path:$ntm_path,detail:"ntm binary for watch/grep/robot-activity probes"},
+        {name:"flywheel_loop",status:$loop_s,path:$loop_path,detail:"flywheel-loop doctor probe (warn if missing)"},
+        {name:"ledger_writable",status:$ledger_s,path:$ledger,detail:"append-only watchdog ledger"},
+        {name:"timeout_bin",status:$timeout_s,path:$timeout_path,detail:"timeout binary for bounded child invocations (warn if missing — child commands run unbounded)"}
+      ]
+    }'
+}
+
+emit_health() {
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  local row_count=0
+  local last_status=""
+  local last_ts=""
+  if [[ -r "$LEDGER" ]]; then
+    row_count="$(wc -l <"$LEDGER" 2>/dev/null | tr -d ' ')"
+    [[ -z "$row_count" ]] && row_count=0
+    if [[ "$row_count" -gt 0 ]]; then
+      last_status="$(tail -n 1 "$LEDGER" 2>/dev/null | jq -r '.status // empty' 2>/dev/null || true)"
+      last_ts="$(tail -n 1 "$LEDGER" 2>/dev/null | jq -r '.ts // empty' 2>/dev/null || true)"
+    fi
+  fi
+  local status="pass"
+  case "$last_status" in
+    critical) status="fail" ;;
+    high) status="warn" ;;
+  esac
+  jq -nc --arg sv "$SCHEMA_VERSION.health" --arg ts "$ts" --arg status "$status" \
+    --arg ledger "$LEDGER" --argjson row_count "${row_count:-0}" \
+    --arg last_status "${last_status:-}" --arg last_ts "${last_ts:-}" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,ledger:$ledger,ledger_row_count:$row_count,last_status:$last_status,last_audit_ts:$last_ts}'
+}
+
+emit_validate() {
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  local rows=0 invalid=0
+  if [[ -r "$LEDGER" ]]; then
+    rows="$(wc -l <"$LEDGER" 2>/dev/null | tr -d ' ')"
+    [[ -z "$rows" ]] && rows=0
+    if [[ "$rows" -gt 0 ]]; then
+      invalid="$(jq -c 'select((.schema_version // "") != "halt-disease-watchdog/v1" or (.status // "") == "")' "$LEDGER" 2>/dev/null | wc -l | tr -d ' ')"
+      [[ -z "$invalid" ]] && invalid=0
+    fi
+  fi
+  local status="pass"
+  [[ "$invalid" -gt 0 ]] && status="violations"
+  jq -nc --arg sv "$SCHEMA_VERSION.validate" --arg ts "$ts" --arg status "$status" \
+    --argjson rows "${rows:-0}" --argjson invalid "${invalid:-0}" --arg ledger "$LEDGER" \
+    '{schema_version:$sv,command:"validate",ts:$ts,status:$status,ledger:$ledger,row_count:$rows,invalid_row_count:$invalid,check:"every row has schema_version=halt-disease-watchdog/v1 and non-empty status"}'
+}
+
+emit_audit() {
+  local limit="${1:-20}"
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  if [[ ! -r "$LEDGER" ]]; then
+    jq -nc --arg sv "$SCHEMA_VERSION.audit" --arg ts "$ts" --arg ledger "$LEDGER" \
+      '{schema_version:$sv,command:"audit",ts:$ts,status:"missing",ledger:$ledger,row_count:0,recent:[]}'
+    return 0
+  fi
+  local row_count
+  row_count="$(wc -l <"$LEDGER" 2>/dev/null | tr -d ' ')"
+  [[ -z "$row_count" ]] && row_count=0
+  local recent='[]'
+  if [[ "$row_count" -gt 0 ]]; then
+    recent="$(tail -n "$limit" "$LEDGER" 2>/dev/null | jq -cs '.' 2>/dev/null || printf '%s' '[]')"
+    [[ -z "$recent" ]] && recent='[]'
+  fi
+  local status="pass"
+  [[ "$row_count" -eq 0 ]] && status="empty"
+  jq -nc --arg sv "$SCHEMA_VERSION.audit" --arg ts "$ts" --arg status "$status" \
+    --arg ledger "$LEDGER" --argjson row_count "$row_count" --argjson recent "$recent" \
+    '{schema_version:$sv,command:"audit",ts:$ts,status:$status,ledger:$ledger,row_count:$row_count,recent:$recent}'
+}
+
+emit_why() {
+  local topic="${1:-}"
+  local body=""
+  case "$topic" in
+    ""|halt-disease)
+      body='Halt-disease is the class where the fleet shows green/healthy doctor status but actually stops dispatching work — joshua wakes up to ready beads + idle agents. The watchdog probes (idle_with_ready_work, yellow_without_permitted_work, red_ignored) catch this before joshua does.'
+      ;;
+    fleet-idle-with-ready-work)
+      body='Critical signal: ready_count > 0 AND ≥1 agent has been WAITING/IDLE for >= window-minutes. The fleet is starving while work is in queue — this is the joshua-morning incident class. Emit critical severity, permitted_action=dispatch.ready_bead.'
+      ;;
+    yellow-without-permitted-work)
+      body='Yellow doctor halt-contract MUST list permitted_actions OR no_safe_work_reason. If neither, the orchestrator has no graceful degradation path — the fleet idles instead of running safe plan/validate work. High severity.'
+      ;;
+    red-ignored)
+      body='Red doctor halt-contract + recent dispatches > 0 in last 10min = orchestrator is dispatching despite a red halt. Critical severity: an orchestrator is ignoring a red contract and probably writing through a closed circuit breaker.'
+      ;;
+    *)
+      body="unknown topic: $topic. known: halt-disease, fleet-idle-with-ready-work, yellow-without-permitted-work, red-ignored"
+      ;;
+  esac
+  jq -nc --arg sv "$SCHEMA_VERSION" --arg topic "${topic:-halt-disease}" --arg body "$body" \
+    '{schema_version:$sv,command:"why",topic:$topic,body:$body}'
+}
+
+emit_quickstart() {
+  jq -nc --arg sv "$SCHEMA_VERSION" '{
+    schema_version:$sv,
+    command:"quickstart",
+    status:"ok",
+    steps:[
+      {step:1,action:"check-doctor",command:"halt-disease-watchdog.sh doctor --json"},
+      {step:2,action:"probe-default-fleet",command:"halt-disease-watchdog.sh --json"},
+      {step:3,action:"tail-recent-signals",command:"halt-disease-watchdog.sh audit --json"},
+      {step:4,action:"why-on-fleet-idle",command:"halt-disease-watchdog.sh why fleet-idle-with-ready-work --json"}
+    ],
+    next_actions:["wire-to-launchd-cron-every-5m","escalate-on-fleet-idle-with-ready-work"]
+  }'
+}
+
+emit_repair() {
+  local scope="" mode="dry_run" idem_key=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --scope) scope="${2:-}"; shift 2 ;;
+      --dry-run) mode="dry_run"; shift ;;
+      --apply) mode="apply"; shift ;;
+      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
+      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
+      --json) shift ;;
+      --help|-h) printf 'repair --scope <ledger-prime> [--dry-run|--apply --idempotency-key KEY]\n'; exit 0 ;;
+      "") shift ;;
+      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; exit 2 ;;
+    esac
+  done
+  if [[ -z "$scope" ]]; then
+    printf '{"schema_version":"%s.repair","status":"refused","reason":"--scope required (ledger-prime)","exit_code":2}\n' "$SCHEMA_VERSION"
+    exit 2
+  fi
+  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
+    printf '{"schema_version":"%s.repair","status":"refused","mode":"apply","scope":"%s","reason":"--apply requires --idempotency-key","exit_code":3}\n' "$SCHEMA_VERSION" "$scope"
+    exit 3
+  fi
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  case "$scope" in
+    ledger-prime)
+      local ledger_dir present_before present_after
+      ledger_dir="$(dirname "$LEDGER")"
+      present_before="$([[ -f "$LEDGER" ]] && printf true || printf false)"
+      if [[ "$mode" == "apply" ]]; then
+        mkdir -p "$ledger_dir" 2>/dev/null || true
+        [[ -f "$LEDGER" ]] || : > "$LEDGER"
+      fi
+      present_after="$([[ -f "$LEDGER" ]] && printf true || printf false)"
+      jq -nc --arg sv "$SCHEMA_VERSION.repair" --arg ts "$ts" --arg scope "$scope" --arg mode "$mode" \
+        --arg ledger "$LEDGER" --arg key "$idem_key" \
+        --argjson before "$present_before" --argjson after "$present_after" \
+        '{schema_version:$sv,command:"repair",ts:$ts,status:"pass",scope:$scope,mode:$mode,idempotency_key:$key,ledger:$ledger,ledger_present_before:$before,ledger_present_after:$after}'
+      ;;
+    *)
+      printf '{"schema_version":"%s.repair","status":"refused","scope":"%s","reason":"unknown scope; known: ledger-prime","exit_code":2}\n' "$SCHEMA_VERSION" "$scope"
+      exit 2
+      ;;
+  esac
+}
+
+# Canonical no-dash subcommand intercept BEFORE main watchdog body.
+case "${1:-}" in
+  --schema) emit_schema; exit 0 ;;
+  doctor) shift; emit_doctor; exit 0 ;;
+  health) shift; emit_health; exit 0 ;;
+  validate) shift; emit_validate; exit 0 ;;
+  audit)
+    shift
+    LIMIT=20
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --limit) LIMIT="${2:-20}"; shift 2 ;;
+        --json) shift ;;
+        "") shift ;;
+        *) shift ;;
+      esac
+    done
+    emit_audit "$LIMIT"
+    exit 0
+    ;;
+  why)
+    shift
+    TOPIC=""
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --json) shift ;;
+        "") shift ;;
+        *) [[ -z "$TOPIC" ]] && TOPIC="$1"; shift ;;
+      esac
+    done
+    emit_why "$TOPIC"
+    exit 0
+    ;;
+  quickstart) shift; emit_quickstart; exit 0 ;;
+  repair) shift; emit_repair "$@"; exit 0 ;;
+esac
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -28,6 +367,8 @@ while [[ $# -gt 0 ]]; do
     --json) JSON_OUT=1; shift ;;
     --quiet) QUIET=1; shift ;;
     --once) shift ;;
+    --info) emit_info; exit 0 ;;
+    --examples) shift; emit_examples "${1:-}"; exit 0 ;;
     --help|-h) usage; exit 0 ;;
     --version) printf '%s\n' "$VERSION"; exit 0 ;;
     *) printf 'ERR: unknown argument: %s\n' "$1" >&2; usage >&2; exit 64 ;;
