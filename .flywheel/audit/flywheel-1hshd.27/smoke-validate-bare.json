@@ -1,0 +1,1 @@
+{"schema_version":"fleet-coherence-launchd/v1","command":"validate","status":"refused","reason":"missing_subject","valid_subjects":["label","cadence-seconds","state-dir"],"bypassed_to_native":["plist"]}

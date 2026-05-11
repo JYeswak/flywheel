@@ -1,0 +1,1 @@
+{"schema_version":"fleet-coherence-launchd/v1","command":"examples","examples":[{"name":"default run","invocation":"fleet-coherence-launchd.sh","purpose":"backward-compatible original behavior"},{"name":"doctor","invocation":"fleet-coherence-launchd.sh doctor --json","purpose":"probe substrate health"}]}

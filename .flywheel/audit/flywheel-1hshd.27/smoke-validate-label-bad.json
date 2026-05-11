@@ -1,0 +1,1 @@
+{"schema_version":"fleet-coherence-launchd/v1","command":"validate","subject":"label","ts":"2026-05-11T05:31:24Z","status":"reject","value":"com.example.foo","reason":"pattern_mismatch","pattern":"^com\\.zeststream\\.flywheel\\.[a-z][a-z0-9_-]*$"}

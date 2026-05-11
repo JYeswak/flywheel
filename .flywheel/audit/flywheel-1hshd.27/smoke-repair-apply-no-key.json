@@ -1,0 +1,1 @@
+{"schema_version":"fleet-coherence-launchd/v1","command":"repair","status":"refused","mode":"apply","scope":"state_dir","reason":"--apply requires --idempotency-key"}
