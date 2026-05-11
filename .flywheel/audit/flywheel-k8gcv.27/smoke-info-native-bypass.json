@@ -1,0 +1,1 @@
+{"schema_version":"frozen-pane-backtest.v1","success":true,"mode":"info","fixtures":["frozen-1","frozen-2","frozen-3","frozen-4","frozen-5","healthy","false-error"],"goal_metrics":["true_freezes_caught","known_false_error_suppressed","detection_latency_p95_seconds","false_recovery_count","unknown_auto_recovery_count","l60_signals_present_count"]}

@@ -1,0 +1,1 @@
+{"schema_version":"frozen-pane-backtest/v1","command":"validate","status":"refused","reason":"missing_subject","valid_subjects":["fixture-name","metric-name","run-mode"]}

@@ -1,0 +1,1 @@
+{"schema_version":"frozen-pane-backtest/v1","command":"examples","examples":[{"name":"default run","invocation":"frozen-pane-backtest.sh","purpose":"backward-compatible original behavior"},{"name":"doctor","invocation":"frozen-pane-backtest.sh doctor --json","purpose":"probe substrate health"}]}

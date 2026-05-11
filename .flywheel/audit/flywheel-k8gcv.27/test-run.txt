@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info emits canonical envelope (native PARTIAL-BYPASS — v1 + fixtures + goal_metrics)
+PASS --schema emits canonical envelope (native PARTIAL-BYPASS — v1 + properties)
+PASS --examples emits canonical envelope
+PASS doctor emits canonical envelope
+PASS health emits canonical envelope
+PASS repair --dry-run emits canonical envelope (real scope audit_log_dir)
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate (bare) refuses with rc=64 + missing_subject envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS doctor probes detector_script (load-bearing) + fixture_set + audit_log_dir
+PASS validate fixture-name full-enum sweep (7 accept + 1 reject; cross-source native --info .fixtures[])
+PASS validate metric-name full-enum sweep (6 accept; cross-source native --info .goal_metrics[])
+PASS validate run-mode full-enum sweep (2 accept; cross-source native --apply/--dry-run)
+PASS PARTIAL-BYPASS: native --doctor + --health both preserved (legacy v1 envelopes)
+PASS 4-direction fidelity (native --info/--schema bypassed; scaffold --examples + doctor verb active) — PARTIAL-BYPASS intact
+SUMMARY pass=19 fail=0
