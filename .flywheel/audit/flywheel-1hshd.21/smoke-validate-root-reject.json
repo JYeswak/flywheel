@@ -1,0 +1,2 @@
+{"schema_version":"cross-repo-trauma-aggregator/v1","command":"validate","subject":"root-path","ts":"2026-05-11T04:56:36Z","status":"reject","value":"relative/path","reason":"not_absolute_path","contract":"--root arg must be absolute path; 5th occurrence of fleet-wide absolute-path validator pattern"}
+rc=1
