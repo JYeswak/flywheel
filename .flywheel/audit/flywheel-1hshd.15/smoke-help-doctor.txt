@@ -1,0 +1,1 @@
+topic: doctor — substrate probes: jq, shasum, br_bin, evidence_dir_readable, ledger_dir_writable; pending+total_receipts+ledger_rows summary; emits .checks array (canonical AG3.4)

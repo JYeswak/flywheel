@@ -1,0 +1,11 @@
+{
+  "schema_version": "codex-death-event-classifier.v1",
+  "mode": "apply",
+  "evidence_dir": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/tmp.qY4L9KqqfG/evidence",
+  "ledger": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/tmp.pnPTAEZ0aJ/ledger.jsonl",
+  "processed": 0,
+  "new_classified": 0,
+  "beads_filed": 0,
+  "errors": 0,
+  "rows": []
+}
