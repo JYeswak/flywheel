@@ -1,0 +1,851 @@
+---
+name: cubcloud-ops
+description: Complete operational framework for CubCloud GPU inference infrastructure (10.10.20.x). Provides seamless documentation updates, automated team access provisioning, authentication emergency recovery, and comprehensive troubleshooting. Use when user mentions 'CubCloud', 'GPU server', 'H200', 'RTX PRO', 'bwservermanager', 'bifrost', 'sglang', 'zesty-worker', 'prometheus', 'grafana', 'langfuse', 'infisical', 'bookstack', 'coolify', or needs to deploy, monitor, benchmark, troubleshoot services, provision team access, or update documentation on the CubCloud stack.
+---
+
+# CubCloud Operations
+
+Complete operational framework for CubCloud GPU inference infrastructure.
+
+**ENTRY:** SSH access to CubCloud network via FortiClient VPN or Tailscale
+**SUCCESS:** Services deployed, monitored, and performing at target SLA
+**EXIT:** Clean shutdown preserving state, data, and configurations
+**INVERSION:** If components fail, others continue with graceful degradation
+**BOUNDS:** 4x H200 NVL (564GB) + 4x RTX PRO 6000 (384GB) = 948GB total VRAM
+
+## Network Architecture
+
+### Host Layout
+| Host | IP | Purpose | Access |
+|------|----|---------|---------|
+| Gateway | 10.10.20.1 | Firewall/Router | Network admin |
+| BMC/IPMI | 10.10.20.2 | Hardware management | IPMI console |
+| **bwservermanager** | 10.10.20.10 | **Management + Services** | `ssh cubby@10.10.20.10` |
+| H100 | 10.10.20.11 | Client GPU access | External clients |
+| **bwh200server** | 10.10.20.12 | **8x GPU inference** | `ssh cubby@10.10.20.12` |
+
+### Access Patterns
+```bash
+# Primary access methods (choose one):
+# 1. FortiClient VPN → SSH
+# 2. Tailscale (100.66.94.26) → SSH
+
+# Standard entry point
+ssh cubby@10.10.20.10
+```
+
+## Service Stack (bwservermanager:10.10.20.10)
+
+### Core Services
+| Port | Service | Status Check | Purpose |
+|------|---------|--------------|---------|
+| **8990** | **zesty-worker-service** | `curl http://10.10.20.10:8990/health` | FastAPI single-shot inference via Bifrost |
+| **8002** | **cw-worker** | `curl http://10.10.20.10:8002/health` | Agentic cc-mirror worker (LangGraph callable) |
+| **8081** | **CubDen Backend** | `curl http://10.10.20.10:8081/api/v1/health` | Rust/Axum chat API (Coolify-managed) |
+| **8989** | **Bifrost Gateway v1.4.4** | `curl http://10.10.20.10:8989/health` | AI model routing |
+| **5433** | **CubDen PostgreSQL** | `psql -h 10.10.20.10 -p 5433 -U cubden_app -d cubden` | Chat database (forced RLS) |
+| 3200 | Langfuse v3 | `curl http://10.10.20.10:3200` | Observability/tracing |
+| 9009 | Mimir | `curl http://10.10.20.10:9009/ready` | Metrics store (Prometheus-compatible) |
+| 3500 | Grafana | `curl http://10.10.20.10:3500/api/health` | Dashboards (LGTM stack) |
+| 3100 | Loki | `curl http://10.10.20.10:3100/ready` | Log aggregation |
+| 12345 | Alloy | N/A | Metrics scraper → Mimir |
+| 8000 | Coolify | `curl http://10.10.20.10:8000` | Deployment platform |
+| 6875 | BookStack | `curl http://10.10.20.10:6875` | Documentation ("CCAI Brain Drain") |
+| 8443 | Infisical | `curl http://10.10.20.10:8443` | Secrets management |
+
+### CubCloud Worker Offerings (3 Distinct Projects)
+
+| Project | Port | Type | Benchmark | Gitea Repo | Coolify |
+|---------|------|------|-----------|------------|---------|
+| **zesty-worker-service** | :8990 | HTTP single-shot LLM | 8% (Qwen3-Coder) | jzest/zesty-worker-service | Yes |
+| **cw-worker** | :8002 | Full agentic cc-mirror | 92.3% (250 runs) | jzest/cw-worker | Yes |
+| **cubcode** | N/A | CLI installer for team | N/A | jzest/cubcode | N/A |
+
+**zesty-worker-service** — Lightweight HTTP API. Sends single LLM call through Bifrost, returns structured response. Good for simple completions, embeddings, classification. OpenAI-compatible.
+
+**cw-worker** — Full Claude Code CLI (cc-mirror) in a Docker container. Spawns autonomous agent that writes files, runs pytest, iterates on failures. Returns code + test results. Called by LangGraph bears as a tool. 30min timeout per task.
+
+**cubcode** — CLI distribution package. Team members clone from Gitea, run install.sh, get full Claude Code environment pointing at CubCloud GPUs via cc-router + Bifrost.
+
+### Service Discovery
+```bash
+# Find all services
+ssh cubby@10.10.20.10 "netstat -tlnp | grep -E '(8990|8002|8989|3200|9090|3000)'"
+
+# Container inspection
+ssh cubby@10.10.20.10 "docker ps --format 'table {{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}'"
+
+# Check both worker services
+curl http://10.10.20.10:8990/health  # zesty-worker-service
+curl http://10.10.20.10:8002/health  # cw-worker
+```
+
+## GPU Layout (bwh200server:10.10.20.12)
+
+### Physical Configuration: 948GB Total VRAM
+```
+GPU 0,1 (H200 NVL TP=2): sglang-coding — Qwen3-Coder-Next-FP8 :30000 [systemd]
+GPU 2 (H200 NVL):         sglang-vl-quality — Qwen2.5-VL-72B-Instruct-FP8 :30004 [systemd]
+GPU 3 (H200 NVL):         sglang-general — Llama-3.1-70B-Instruct-FP8 :30006 [systemd]
+GPU 4 (RTX PRO):          sglang-coder2 — Qwen2.5-Coder-32B-Instruct :30007 [systemd]
+GPU 5 (RTX PRO):          sglang-chat — Qwen2.5-7B-Instruct :30002 [systemd]
+GPU 6 (RTX PRO):          sglang-embedding — Qwen3-Embedding-8B :30003 [systemd] + kokoro-tts :8880 [docker]
+GPU 7 (RTX PRO):          sglang-vl-fast — Qwen3-VL-30B-A3B :30005 [systemd]
+```
+All 7 sglang services now managed via systemd. Only kokoro-tts remains Docker-only.
+Restart any service: `ssh cubby@10.10.20.12 "sudo systemctl restart sglang-<name>"`
+
+### Model Health Check
+```bash
+# Check all SGLang instances (7 sglang services)
+for port in 30000 30002 30003 30004 30005 30006 30007; do
+  curl -s http://10.10.20.12:$port/health || echo "Port $port down"
+done
+```
+
+
+### Gitea Internal Access (for Coolify)
+
+Grizit (Gitea) has static IP `10.0.1.200` on the coolify Docker network. Coolify requires special git URL handling for deployments.
+
+**URL Format Rules:**
+- NEVER use `ssh://` prefix
+- NEVER use plain HTTP URLs
+- ALWAYS use SCP-style format: `git@10.0.1.200:org/repo.git`
+
+**Deploy Key Workflow (3 steps):**
+1. Create deploy key via Coolify API:
+   ```bash
+   curl -X POST "http://10.10.20.10:8000/api/v1/applications/APP_ID/deploy-keys" \
+     -H "Authorization: Bearer $COOLIFY_TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{"name": "github.com", "key": "PUBLIC_KEY", "writeAccess": false}'
+   ```
+2. Copy the deploy key ID and public key from response
+3. Register the key in Gitea via admin panel or API
+
+**Admin Token (for Coolify Gitea API):**
+`045aab213eaa8f1559b7c6a39ddabdd1bec08509`
+
+## Authentication & Credential Management
+
+### Critical Infrastructure Chain
+**Authentication flows through 4 layers that MUST all work:**
+1. **Machine Identity** → Infisical Universal Auth (auto-renewal every 55min via systemd timer)
+2. **Infisical Secrets** → Bifrost virtual keys + service tokens
+3. **Bifrost Gateway** → Virtual key → provider routing + rate limiting
+4. **SGLang Services** → Direct inference on GPU hosts
+
+### Infisical Access (Phase 18 — deployed 2026-02-26)
+
+**Infisical URL:** `http://10.100.0.1:8443` (accessed via WireGuard mesh between servers)
+
+**CRITICAL: Local machine (Josh's Mac) is NOT on WireGuard.**
+All Infisical operations MUST go through SSH to a server. Do NOT try to hit
+`10.100.0.1:8443` or `10.10.20.10:8443` directly from the local machine — it will timeout.
+The `~/.config/infisical/cubcloud.env` file has credentials but they only work when
+used FROM the servers (via SSH), not from the local machine.
+
+**On mgmt-server (.10):**
+- Machine identity credentials: `/etc/.env.infisical`
+- Token helper: `/usr/local/bin/infisical-token-helper`
+- Cached token: `/etc/infisical-cache/current-token`
+- Auto-renewal: `infisical-token-renewal.timer` (every 55min)
+- Legacy helper: `/tmp/cubcloud-secrets-fixed` (still works, same interface)
+- Infisical compose: `/home/cubby/infisical/docker-compose.yml`
+
+**On gpu-server (.12) — NEW (Phase 18):**
+- Machine identity credentials: `/etc/.env.infisical` (deployed by Ansible)
+- Token helper: `/usr/local/bin/infisical-token-helper` (same script as .10)
+- Cached token: `/etc/infisical-cache/current-token`
+- Auto-renewal: `infisical-token-renewal.timer` (every 55min)
+
+**Getting secrets (ALWAYS via SSH):**
+```bash
+# On gpu-server (.12) — passwordless sudo
+ssh cubby@10.10.20.12 "sudo /usr/local/bin/infisical-token-helper get-secret bifrost/BIFROST_INTERNAL_KEY"
+
+# On mgmt-server (.10) — needs password
+ssh cubby@10.10.20.10 "echo 'broadway102' | sudo -S /usr/local/bin/infisical-token-helper get-secret bifrost/BIFROST_INTERNAL_KEY"
+
+# Setting secrets (ALWAYS via SSH)
+ssh cubby@10.10.20.10 "echo 'broadway102' | sudo -S /usr/local/bin/infisical-token-helper set-secret coolify/COOLIFY_API_TOKEN 'TOKEN_VALUE'"
+
+# Check timer status on either server
+ssh cubby@10.10.20.12 "systemctl list-timers | grep infisical"
+```
+
+**Token helper commands:**
+- `get-token` — Authenticate and cache access token
+- `renew` — Renew cached token
+- `get-secret FOLDER/KEY [PROJECT_ID]` — Get secret value (defaults to CUBCLOUD_PROJECT_ID)
+- `set-secret FOLDER/KEY VALUE [PROJECT_ID]` — Create or update secret
+
+**NOTE:** Token helper may fail silently if cached token is stale. If `get-secret` returns empty,
+clear the cache and re-auth: `rm -f /etc/infisical-cache/current-token && infisical-token-helper get-token`
+
+**Projects in Infisical:**
+| Project | ID | Purpose |
+|---------|-----|---------|
+| CubCloud | `f4eed99d-7f8a-4259-a738-0c21b1e720be` | GPU infra, Bifrost, Coolify, services |
+| CubChat | `9c3851f2-d23d-40c4-836a-bd8e5fa2d703` | CubDen backend secrets |
+
+**Secret folders in CubCloud project (prod env):**
+| Folder | Secrets |
+|--------|---------|
+| `/gpu-services` | BIFROST_KEY, ZESTY_WORKER_TOKEN |
+| `/bifrost` | BIFROST_INTERNAL_KEY |
+| `/coolify` | COOLIFY_API_TOKEN |
+| `/langfuse` | LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY |
+
+**If Infisical returns 500 errors:**
+The database container (`infisical-db`) may have disappeared. See COOLIFY_GITEA_ECOSYSTEM.md
+"Infisical DB Missing" recovery section. Quick fix:
+```bash
+ssh cubby@10.10.20.10 "cd /home/cubby/infisical && docker compose up -d infisical-db && sleep 5 && docker restart infisical-backend"
+```
+
+**Ansible playbook (re-deploy if broken):**
+```bash
+cd /Users/josh/Desktop/Projects/gpu-optimization
+ansible-playbook -i infrastructure/ansible/inventory/hosts.yml \
+  infrastructure/ansible/playbooks/phase-18-01-infisical-renewal.yml
+```
+
+### Emergency Fixes (Use when auth broken)
+```bash
+# 1. Machine Identity Recovery (Ansible — deploys to both servers)
+cd /Users/josh/Desktop/Projects/gpu-optimization
+ansible-playbook -i infrastructure/ansible/inventory/hosts.yml \
+  infrastructure/ansible/playbooks/phase-18-01-infisical-renewal.yml
+
+# 2. Fix UFW Firewall (blocks SGLang ports)
+ssh cubby@10.10.20.12 "sudo bash -c '
+for port in 30000 30002 30003 30004 30005 30006 30007; do
+  ufw allow from 10.10.20.10 to any port \$port
+done'"
+
+# 3. Bifrost Provider Restore
+cd /Users/josh/Desktop/Projects/gpu-optimization
+./scripts/restore-bifrost.sh --full
+
+# 4. Virtual Key Recreation
+cd /Users/josh/Desktop/Projects/gpu-optimization
+./scripts/create-virtual-keys.sh
+
+# 5. Update Infisical with new internal key
+ssh cubby@10.10.20.10 "echo 'broadway102' | sudo -S /usr/local/bin/infisical-token-helper get-secret bifrost/BIFROST_INTERNAL_KEY"
+# Then update via Infisical UI at http://10.100.0.1:8443
+```
+
+### Team Access Provisioning
+
+**CubCode Token Management (LOCAL SCRIPTS):**
+```bash
+# Issue a new Bifrost virtual key for a team member
+cubcode-issue-token <username>    # e.g. cubcode-issue-token justin
+
+# List all active virtual keys
+cubcode-list-tokens
+
+# Revoke a team member's key
+cubcode-revoke-token <username>   # e.g. cubcode-revoke-token justin
+```
+
+Scripts installed at `~/.local/bin/cubcode-{issue,list,revoke}-token`.
+Source in CubCode repo: `scripts/cubcode-{issue,list,revoke}-token`.
+
+**How it works:** Scripts SSH to cubby@10.10.20.10, copy Bifrost's SQLite DB
+(`bifrost-gateway:/app/data/config.db`), insert/query/update the
+`governance_virtual_keys` table, and copy the DB back.
+
+**NOTE:** Scripts currently copy entire `/app/data/` dir (slow due to logs.db).
+TODO: Change to copy only `config.db`.
+
+**After issuing a token**, give the team member:
+1. Clone CubCode: `git clone http://10.10.20.10:3001/cubby/cubcode.git`
+2. Run `./install.sh` and paste their token when prompted
+3. Add `cubcode` to PATH
+
+**Legacy Server-Side Provisioning:**
+```bash
+ssh cubby@10.10.20.10
+cd ~/scripts
+./provision-team-access.sh pro "Team Member Name"
+```
+
+**Virtual Key Tiers:**
+- **Internal** (`BIFROST_INTERNAL_KEY`): All models, unlimited rate, for Zesty workers
+- **Enterprise**: All 8 models, 200 RPM / 1M TPM, for engineering team
+- **Pro**: 7 models (no qwen3-coder), 60 RPM / 200K TPM, for power users
+- **Starter**: 4 basic models, 20 RPM / 50K TPM, for testing/demos
+- **Team (cubcode-issue-token)**: Uses starter rate limits by default
+
+**Provisioning Script Features:**
+- ✅ Health check verification
+- ✅ Automatic key discovery/creation
+- ✅ API functionality testing
+- ✅ Copy/paste formatted output for team members
+- ✅ Complete setup instructions included
+
+### Emergency Authentication Recovery
+
+# 1. Generate fresh virtual keys (creates all 4 tiers)
+./scripts/create-virtual-keys.sh
+
+# 2. Extract specific tier key for user
+curl -s http://10.10.20.10:8989/api/governance/virtual-keys | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+for key in data.get('data', []):
+    if key.get('name') == 'enterprise-template':  # or pro-template, starter-template
+        print(f'Team Access Key: {key.get(\"value\", \"\")}')
+        break
+"
+
+# 3. Test the key works
+curl -H "Authorization: Bearer sk-bf-NEW_KEY" \
+  http://10.10.20.10:8989/v1/models
+
+# 4. Provide to team member with endpoint
+echo "Bifrost Endpoint: http://10.10.20.10:8989"
+echo "Your API Key: sk-bf-NEW_KEY"
+echo "Usage: curl -H 'Authorization: Bearer sk-bf-NEW_KEY' http://10.10.20.10:8989/v1/chat/completions -d '{...}'"
+```
+
+### Authentication Debugging
+```bash
+# Verify full auth chain
+cd /Users/josh/Desktop/Projects/gpu-optimization
+
+# 1. Machine identity working? (check BOTH servers)
+ssh cubby@10.10.20.12 "sudo /usr/local/bin/infisical-token-helper get-token | head -c 50"
+ssh cubby@10.10.20.10 "echo 'broadway102' | sudo -S /usr/local/bin/infisical-token-helper get-token | head -c 50"
+
+# 2. Can get Bifrost key from Infisical?
+ssh cubby@10.10.20.10 "echo 'broadway102' | sudo -S /usr/local/bin/infisical-token-helper get-secret bifrost/BIFROST_INTERNAL_KEY"
+
+# 3. Bifrost responsive?
+curl -s http://10.10.20.10:8989/health | jq .
+
+# 4. Virtual key has correct permissions?
+curl -s http://10.10.20.10:8989/api/governance/virtual-keys | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+for key in data.get('data', []):
+    if 'internal' in key.get('name', ''):
+        print(f'Models: {len(key.get(\"allowed_models\", []))} allowed')
+        break
+"
+
+# 5. SGLang connectivity from management server?
+ssh cubby@10.10.20.10 "curl -sf http://10.10.20.12:30002/health --connect-timeout 5"
+
+# 6. End-to-end inference test
+BIFROST_KEY=$(ssh cubby@10.10.20.10 "echo 'broadway102' | sudo -S /tmp/cubcloud-secrets-fixed get bifrost/BIFROST_INTERNAL_KEY")
+curl -H "Authorization: Bearer $BIFROST_KEY" \
+  -H "Content-Type: application/json" \
+  http://10.10.20.10:8989/v1/chat/completions \
+  -d '{"model": "qwen25-coder-32b/qwen25-coder-32b", "messages": [{"role": "user", "content": "Hello"}], "max_tokens": 10}'
+
+# 7. Fix outdated service Bifrost key (if 403 errors)
+# Check if service is using old key
+SERVICE_KEY=$(ssh cubby@10.10.20.10 "echo 'broadway102' | sudo -S /tmp/cubcloud-secrets-fixed get gpu-services/BIFROST_KEY")
+INTERNAL_KEY=$(ssh cubby@10.10.20.10 "echo 'broadway102' | sudo -S /tmp/cubcloud-secrets-fixed get bifrost/BIFROST_INTERNAL_KEY")
+if [ "$SERVICE_KEY" != "$INTERNAL_KEY" ]; then
+  echo "Updating service key with current internal key..."
+  ssh cubby@10.10.20.10 "echo 'broadway102' | sudo -S /tmp/cubcloud-secrets-fixed set gpu-services/BIFROST_KEY=\"$INTERNAL_KEY\""
+  ssh cubby@10.10.20.10 "docker restart \$(docker ps | grep 8990 | cut -d' ' -f1)"
+fi
+```
+
+### Secret Management Patterns
+**NEVER expose actual secrets in chat.** Reference patterns only.
+
+```bash
+# Pattern 1: Machine identity authentication (auto-renewal via systemd timer)
+# Both servers now have infisical-token-helper + timer (Phase 18)
+ssh cubby@10.10.20.12 "systemctl status infisical-token-renewal.timer"  # gpu-server
+ssh cubby@10.10.20.10 "echo 'broadway102' | sudo -S systemctl status infisical-token-renewal.timer"  # mgmt-server
+
+# Pattern 2: Get secrets via token helper (preferred — works on both servers)
+ssh cubby@10.10.20.12 "sudo /usr/local/bin/infisical-token-helper get-secret FOLDER/SECRET_NAME"
+ssh cubby@10.10.20.10 "echo 'broadway102' | sudo -S /usr/local/bin/infisical-token-helper get-secret FOLDER/SECRET_NAME"
+
+# Pattern 3: Legacy helper (mgmt-server only — still works)
+ssh cubby@10.10.20.10 "echo 'broadway102' | sudo -S /tmp/cubcloud-secrets-fixed get FOLDER/SECRET_NAME"
+
+# Pattern 4: Direct Bifrost API access
+curl -H "Authorization: Bearer VIRTUAL_KEY" http://10.10.20.10:8989/api/governance/virtual-keys
+
+# Pattern 5: Container environment (read-only discovery)
+ssh cubby@10.10.20.10 "docker exec CONTAINER_ID env | grep TOKEN"
+```
+
+### Authentication Flow Verification
+```bash
+# Full stack health check
+cd /Users/josh/Desktop/Projects/gpu-optimization
+BIFROST_KEY=GET_FROM_INFISICAL ./scripts/bifrost-smoke-test.sh
+
+# Expected output: Multiple [PASS] lines for:
+# - Health endpoint accessible
+# - Auth enforcement working
+# - All 8 model providers routing correctly
+# - Rate limiting functional
+```
+
+## Deployment Architecture
+
+### **Coolify-Managed Services**
+
+Both worker services deploy through Coolify via Gitea webhooks:
+
+| Service | Coolify UUID | Gitea Repo | Port | Deploy Key |
+|---------|-------------|------------|------|------------|
+| zesty-worker-service | x4gkgo40g884ccoo0w44o0co | jzest/zesty-worker-service | 8990 | zesty-worker-deploy |
+| cw-worker | gosoc0w4808kgc004w8s0cw8 | jzest/cw-worker | 8002 | cw-worker-deploy |
+
+**PIPELINE**: `git push origin main` → **Gitea** → **Coolify Webhook** → **Container Deploy**
+
+### **cw-worker Deployment**
+- **Coolify UUID**: `gosoc0w4808kgc004w8s0cw8`
+- **Repository**: `git@10.10.20.10:2222/jzest/cw-worker.git`
+- **Deploy Key**: `/home/cubby/.ssh/cw-worker-deploy` (Coolify key: `igcc8o40wskog80o0k0s04g0`)
+- **Network**: `--network host` (needs localhost:3456 for cc-router)
+- **Env vars**: `BIFROST_KEY` (from Infisical), `UVICORN_PORT=8000`
+- **Internal port**: 8000 (Dockerfile EXPOSE), mapped to 8002 externally
+
+```bash
+# Deploy cw-worker
+cd /path/to/cw-worker && git push origin main
+# → Coolify auto-deploys
+
+# Manual restart
+COOLIFY_TOKEN=$(ssh cubby@10.10.20.10 "echo 'broadway102' | sudo -S /tmp/cubcloud-secrets-fixed get coolify/COOLIFY_API_TOKEN")
+curl -s -X POST "http://10.10.20.10:8000/api/v1/applications/gosoc0w4808kgc004w8s0cw8/restart" \
+  -H "Authorization: Bearer $COOLIFY_TOKEN"
+
+# Test cw-worker
+curl http://10.10.20.10:8002/health
+curl -X POST http://10.10.20.10:8002/v1/agent/completions \
+  -H "Content-Type: application/json" \
+  -d '{"task": "Write a Python function that adds two numbers with tests"}'
+```
+
+### **Zesty-Worker-Service Deployment**
+
+**Container Details**:
+- **Coolify UUID**: `x4gkgo40g884ccoo0w44o0co`
+- **Resource Name**: `zesty-worker-service`
+- **Repository**: `gitea-zesty:jzest/zesty-worker-service.git`
+
+### **CubDen Backend (Coolify-Managed)**
+
+**Container Details**:
+- **Coolify UUID**: `toow4so84w8s00oo8gcso0s0`
+- **Repository**: `cubcloud-gitea:jzest/cubden-backend.git`
+- **Port**: 8081 (Rust/Axum)
+- **API**: `/api/v1/*` (auth, conversations, messages, reactions, AI, presence, search)
+- **Database**: PostgreSQL on port 5433, user `cubden_app`, database `cubden`
+
+**Deployment Pipeline**:
+```bash
+# Standard: git push triggers auto-deploy via Coolify webhook
+git push origin main
+# → Coolify rebuilds container (~3min) → deploys
+
+# Manual deployment
+COOLIFY_TOKEN=$(ssh cubby@10.10.20.10 "echo 'broadway102' | sudo -S /tmp/cubcloud-secrets-fixed get coolify/COOLIFY_API_TOKEN")
+curl -4 -s -X POST "http://10.10.20.10:8000/api/v1/deploy?uuid=toow4so84w8s00oo8gcso0s0&force=true" \
+  -H "Authorization: Bearer $COOLIFY_TOKEN"
+
+# Verify deployment
+curl -4 http://10.10.20.10:8081/api/v1/health
+```
+
+**CRITICAL: Forced RLS Tables**
+The following tables have强制 RLS (Row Level Security) enabled and require `TenantTx`:
+- `conversation_participants`
+- `messages`
+- `message_reactions`
+- `message_edits`
+
+**NEVER use `pool` directly** - always use `TenantTx::begin(&state.pool, claims.org, claims.sub)` to establish tenant context.
+
+**Test Accounts**:
+- `alice@test.com` / `CubDenAlice2026xQ9m`
+- `bob@test.com` / `CubDenBob2026yR4n`
+
+**Organization ID**: `fa232966-a651-4caf-b936-12da0333f08a`
+
+**Network Note**: Always use `curl -4` to force IPv4 (IPv6 issues with Docker networking).
+
+### **Standard Deployment**
+```bash
+# 1. Normal development workflow
+git add . && git commit -m "feat: description"
+git push origin main
+# → CI runs tests → Triggers Coolify deployment
+
+# 2. Verify deployment
+docker ps --filter label=coolify.resourceName=zesty-worker-service
+curl http://10.10.20.10:8990/health
+
+# 3. Container management (if needed)
+CONTAINER="x4gkgo40g884ccoo0w44o0co-150651429736"
+docker start $CONTAINER     # If stopped
+docker restart $CONTAINER   # Force restart
+docker logs $CONTAINER --tail 50
+```
+
+### **Emergency Procedures**
+```bash
+# If manual container exists (WRONG):
+docker stop zesty-worker-final && docker rm zesty-worker-final
+
+# Restart proper Coolify container:
+docker start x4gkgo40g884ccoo0w44o0co-150651429736
+
+# Manual deployment (last resort):
+cd local-agents/zesty-worker-service
+git pull origin main
+docker build -t zesty-worker-emergency .
+docker run -d --name zesty-worker-emergency --network host zesty-worker-emergency
+```
+
+### **CI/CD Configuration**
+- **Workflow**: `.gitea/workflows/ci.yaml`
+- **Tests**: `pytest tests/` (must pass before deploy)
+- **Webhook**: Coolify API triggered on main branch success
+- **Secrets**: `COOLIFY_WEBHOOK_URL`, `COOLIFY_TOKEN` in Gitea
+
+### **Gitea Actions Runner**
+
+The self-hosted runner picks up workflows from `.gitea/workflows/*.yml` in any repository.
+
+**Container Details**:
+- **Container**: `forgejo-runner` on 10.10.20.10
+- **act_runner version**: v0.3.0
+- **Labels**: `ubuntu-latest` (node:20-bookworm), `ubuntu-22.04` (ubuntu:22.04)
+- **Network**: host mode
+- **Restart**: `docker restart forgejo-runner`
+- **Logs**: `docker logs forgejo-runner --tail 50`
+
+**USE `ubuntu-latest` for CI** - has git+node+apt pre-installed. The `ubuntu-22.04` label is a minimal base image.
+
+**Checking Status**:
+```bash
+# View logs
+docker logs forgejo-runner --tail 50
+
+# Check process
+docker exec forgejo-runner ps aux
+
+# Restart
+docker restart forgejo-runner
+```
+
+**Workflow Example** (`.gitea/workflows/smoke-tests.yml`):
+```yaml
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  smoke-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: cd tests/smoke && bash run-all.sh
+```
+
+**Network Note**: The runner is on the LAN (10.10.20.10) and can reach internal services via LAN addresses. Use `curl -4` to avoid IPv6 issues.
+
+## Monitoring & Observability (LGTM Stack — deployed 2026-02-26)
+
+### Stack Overview
+| Service | Port | Container | Purpose |
+|---------|------|-----------|---------|
+| **Grafana** | 3500 | grafana | Dashboards (--network host) |
+| **Alloy** | 12345 | alloy | Metrics scraper (replaces Prometheus) |
+| **Mimir** | 9009 | mimir | Prometheus-compatible metrics store |
+| **Loki** | 3100 | loki | Log aggregation |
+| **Promtail** | 9080 | promtail | Docker log shipper → Loki |
+| **MinIO** | 9000 | minio-obs | Object storage for Mimir/Loki |
+| Langfuse | 3200 | langfuse | Traces, prompts, sessions |
+
+**NOTE:** Old Prometheus (:9090) and Grafana (:3000) are NOT in use. The current stack is LGTM.
+
+### Grafana Access
+```bash
+# From local machine (port not open externally yet):
+ssh -L 3500:localhost:3500 cubby@10.10.20.10
+# Then open http://localhost:3500
+
+# Credentials in Infisical: GRAFANA_ADMIN_PASSWORD (CubCloud project, dev env)
+# Default: admin / cubcloud2026
+```
+
+**Dashboard:** "Bifrost Gateway — CubCloud" (UID: `e776c831-4419-4203-b72d-c2d600b2ed4d`)
+- 12 panels: request rate, token rates, total tokens/requests/error rate stats
+- Latency p50/p95/p99, TTFT, inter-token latency
+- Pie charts by virtual key and model
+- Template variables: `virtual_key` and `model` dropdowns
+
+### Health Monitoring
+```bash
+# System status check
+ssh cubby@10.10.20.10 "
+curl -s http://localhost:8990/health | jq .   # zesty-worker-service
+curl -s http://localhost:8002/health           # cw-worker
+curl -s http://localhost:8989/health | jq .    # Bifrost gateway
+curl -s http://localhost:3500/api/health       # Grafana
+"
+
+# Container health (all services)
+ssh cubby@10.10.20.10 "docker ps --format 'table {{.Names}}\t{{.Status}}' | grep -E 'bifrost|grafana|alloy|mimir|loki|promtail'"
+```
+
+### Bifrost Prometheus Metrics
+Bifrost exposes rich `/metrics` endpoint scraped by Alloy every 15s → pushed to Mimir.
+
+```bash
+# Raw metrics from Bifrost
+ssh cubby@10.10.20.10 "curl -s http://localhost:8989/metrics | head -50"
+
+# Query via Mimir (Prometheus-compatible API)
+ssh cubby@10.10.20.10 'curl -s "http://localhost:9009/prometheus/api/v1/query?query=bifrost_input_tokens_total" | python3 -m json.tool'
+```
+
+**Key Bifrost metrics:**
+| Metric | Labels | Description |
+|--------|--------|-------------|
+| `bifrost_input_tokens_total` | virtual_key, model | Total input tokens by key/model |
+| `bifrost_output_tokens_total` | virtual_key, model | Total output tokens by key/model |
+| `bifrost_success_requests_total` | virtual_key, model | Successful requests |
+| `bifrost_error_requests_total` | virtual_key, model, error_type | Failed requests |
+| `bifrost_upstream_request_duration_seconds` | virtual_key, model | Full request latency histogram |
+| `bifrost_time_to_first_token_seconds` | virtual_key, model | TTFT histogram (streaming) |
+| `bifrost_inter_token_latency_seconds` | virtual_key, model | Inter-token latency histogram |
+
+### Per-Key Token Usage
+```bash
+# Total tokens per virtual key
+ssh cubby@10.10.20.10 'curl -s "http://localhost:9009/prometheus/api/v1/query?query=bifrost_input_tokens_total" | python3 -c "
+import json, sys
+data = json.load(sys.stdin)
+for r in data.get(\"data\",{}).get(\"result\",[]):
+    print(f\"{r[\"metric\"].get(\"virtual_key\",\"unknown\"):30s} {float(r[\"value\"][1]):>15,.0f} input tokens\")
+"'
+```
+
+### Log Access (Loki)
+```bash
+# Bifrost container logs via Loki (query in Grafana or via API)
+ssh cubby@10.10.20.10 'curl -s "http://localhost:3100/loki/api/v1/query_range" \
+  --data-urlencode "query={container_name=\"bifrost-gateway\"}" \
+  --data-urlencode "limit=10" | python3 -m json.tool'
+```
+
+**NOTE:** Bifrost SQLite logging is DISABLED (`logs_store.enabled: false`).
+Request metadata goes to stdout → Promtail → Loki. Content bodies are NOT logged (`disable_content_logging: true`).
+
+## Documentation Access
+
+### BookStack Documentation Platform
+- **URL:** http://10.10.20.10:6875 ("CCAI Brain Drain")
+- **Status:** ✅ SEAMLESS UPDATES AVAILABLE
+- **Workflow:** Edit markdown → Run script → Live in 8 seconds
+- **Complete Guide:** See `references/BOOKSTACK.md`
+
+#### Seamless Documentation Updates
+```bash
+cd /Users/josh/Desktop/Projects/gpu-optimization/bookstack
+
+# Quick update (team access, auth fixes, troubleshooting) - 8s
+./publish-workflow.sh
+
+# Full documentation refresh - all 37 pages
+./publish-workflow.sh all
+
+# Check status and recent changes
+./publish-workflow.sh check
+```
+
+#### Development Integration
+**Your workflow:** Build tool → Update markdown → `./publish-workflow.sh` → Team has docs
+
+**Content Structure:** 7 books covering complete CubCloud operations:
+- **Getting Started:** Platform overview, SSH access, first API calls
+- **Operations:** Health checks, virtual keys, team access provisioning
+- **Troubleshooting:** Auth failures, model issues, escalation procedures
+- **Architecture & Reference:** System design, ports, services, glossary
+- **Model Management:** Model catalog, swaps, cost analysis
+- **Stack Needs:** Future infrastructure plans, alerting, capacity
+- **CubCode:** CLI product launch plan, billing, portal, filters
+
+### Infisical (Self-hosted)
+- **URL:** http://10.10.20.10:8443
+- **Projects:** Multiple environments (prod, staging, dev)
+- **CLI Access:** Requires configured client credentials
+
+## Troubleshooting Procedures
+
+### Service Issues
+| Issue | Symptoms | Resolution |
+|-------|----------|------------|
+| SGLang Service Down | Connection refused on sglang port | `ssh cubby@10.10.20.12 "sudo systemctl restart sglang-<name>"` |
+| Service Down (.10) | Connection refused on mgmt port | `docker restart CONTAINER_ID` |
+| HTTP 401 | Invalid token errors | Verify ZESTY_WORKER_TOKEN from secure source |
+| **Bifrost 403 Forbidden** | **"Client error '403 Forbidden'" from chat completions** | **Update `gpu-services/BIFROST_KEY` with current internal key, restart container** |
+| **Bifrost 403 Model Blocked** | **"Model not allowed for virtual key"** | **Run `./scripts/create-virtual-keys.sh`, update Infisical** |
+| **Machine Identity Failed** | **Infisical auth errors, token expired** | **Run machine-identity.yml Ansible playbook** |
+| **UFW Blocks SGLang** | **Bifrost can't reach .12 ports** | **Add UFW rules: `ufw allow from 10.10.20.10 to any port 30000:30007`** |
+| **CubDen 500 errors** | **Internal server error on chat endpoints** | **Check forced RLS — handler likely uses `&state.pool` instead of `TenantTx`. Fix: use `TenantTx::begin(&state.pool, claims.org, claims.sub)`** |
+| **CubDen rate limited** | **429 Too Many Requests on login** | **Wait 60s for rate limit window to clear. Tests should cache tokens, not re-login per module.** |
+| Bifrost Unreachable | bifrost_reachable: false | Check port 8989, restart if needed |
+| GPU OOM | CUDA out of memory | Check sglang instance health, restart affected GPU |
+| Container Missing | docker ps shows no 8990 | Check Coolify deployment, trigger redeploy |
+| cw-worker Down | No response on :8002 | `curl -X POST "http://10.10.20.10:8000/api/v1/applications/gosoc0w4808kgc004w8s0cw8/restart" -H "Authorization: Bearer $COOLIFY_TOKEN"` |
+| cw-worker Health Fails During Task | Expected — single-threaded uvicorn blocks during 30min task execution | Normal behavior, not an error |
+
+| Coolify deploy SSH fail | Permission denied on SSH | Check URL format (must be SCP-style `git@10.0.1.200:org/repo.git`), verify deploy key registered in Gitea, use Coolify API to create deploy keys |
+| Coolify DecryptException | payload invalid or decryption failed | Raw key in DB — delete deploy key via API and recreate via Coolify UI |
+| Port conflict | address already in use | Reserved ports: 5432 (default PostgreSQL), 5433 (CubDen PostgreSQL), 8081 (CubDen Backend) |
+| CI workflow fails instantly | Runner starts but exits immediately | Runner image issue — ensure using `ubuntu-latest` label which has git+node+apt pre-installed |
+### Common Diagnostics
+```bash
+# Container logs
+ssh cubby@10.10.20.10 "docker logs CONTAINER_ID --tail 50"
+
+# Resource usage
+ssh cubby@10.10.20.10 "docker stats CONTAINER_ID --no-stream"
+
+# Network connectivity
+ssh cubby@10.10.20.10 "netstat -tlnp | grep 8990"
+
+# GPU status
+ssh cubby@10.10.20.12 "nvidia-smi"
+```
+
+### Recovery Procedures
+```bash
+# 1. Service restart
+ssh cubby@10.10.20.10 "docker restart \$(docker ps | grep 8990 | cut -d' ' -f1)"
+
+# 2. Full redeploy via Coolify
+# Access http://10.10.20.10:8000, find deployment, click "Deploy"
+
+# 3. Manual container rebuild
+ssh cubby@10.10.20.10 "
+cd ~/workspace/zesty-worker-service
+git pull
+docker build -t zesty-worker-local .
+docker run -d --name zesty-worker-manual -p 8990:8990 --env-file .env zesty-worker-local
+"
+```
+
+### **CubDen Smoke Tests**
+
+**Location**: `tests/smoke/` in `cubden-backend` repo
+
+**Test Modules**:
+- `01-auth.sh` - Authentication and session management
+- `02-conversations.sh` - Conversation CRUD operations
+- `03-messages.sh` - Message send, list, edit, delete
+- `04-reactions.sh` - Message reactions (emoji)
+- `05-realtime.sh` - Pusher WebSocket events
+- `06-ai.sh` - AI conversation endpoints
+- `07-org-admin.sh` - Organization administration
+- `08-compliance.sh` - Audit log and compliance features
+
+**Test Status**: 76/78 passing, 0 failures, 2 skipped
+
+**CI Workflow**: `.gitea/workflows/smoke-tests.yml`
+- Triggers: push to main, PR to main, daily at 06:00 UTC
+- Runs on: self-hosted runner (LAN only)
+- Output: Summary in `$GITHUB_STEP_SUMMARY`
+
+**Manual Run**:
+```bash
+cd tests/smoke
+bash run-all.sh
+```
+
+**Requirements**:
+- LAN access (self-hosted runner only)
+- DB credentials in `SMOKE_DB_PASSWORD` secret
+- Base URL: `http://10.10.20.10:8081/api/v1`
+
+**Note**: The smoke tests use test accounts `alice@test.com` and `bob@test.com` for authentication testing.
+
+## Performance Benchmarks
+
+### Benchmark Infrastructure Requirements
+- Python environment with psycopg2, tabulate, requests
+- PostgreSQL access for result storage
+- Benchmark task definitions and scoring system
+
+### Execution Pattern
+```bash
+# 1. Verify service health
+curl http://10.10.20.10:8990/health
+
+# 2. Set up benchmark environment
+ssh cubby@10.10.20.10 "mkdir -p ~/benchmarks && cd ~/benchmarks"
+
+# 3. Transfer benchmark infrastructure
+scp -r benchmarks/ scripts/ cubby@10.10.20.10:~/benchmarks/
+
+# 4. Execute with proper credentials
+ssh cubby@10.10.20.10 "
+export ZESTY_WORKER_TOKEN=\$(secure-token-source)
+export ZESTY_SERVICE_URL=http://localhost:8990
+cd ~/benchmarks
+./scripts/run-optimization-cycle.sh 1
+"
+
+# 5. Results analysis
+ssh cubby@10.10.20.10 "cat ~/benchmarks/output/phase-3.1-report.md"
+```
+
+## Security Considerations
+
+### Network Security
+- FortiClient VPN or Tailscale required for external access
+- Physical LAN (10.10.20.x) for direct service communication
+- WireGuard mesh (10.100.0.0/24) active between servers — port 51820
+  - mgmt-server: 10.100.0.1, gpu-server: 10.100.0.2
+  - Brandon (CTO): 10.100.0.50 (reserved)
+  - Infisical accessed via WireGuard: http://10.100.0.1:8443
+- No direct internet exposure of GPU services
+
+### Credential Security
+- Secrets stored in Infisical at http://10.100.0.1:8443 (self-hosted, Docker on mgmt-server)
+- Machine identity: `/etc/.env.infisical` on both servers (deployed by Ansible)
+- Token auto-renewal: `infisical-token-renewal.timer` on both servers (55min cycle)
+- Token cache: `/etc/infisical-cache/current-token` (root-only, 0600)
+- No hardcoded credentials in source code
+- Rotate tokens via Infisical UI or `infisical-token-helper`
+
+### Access Control
+- SSH key authentication only (ed25519)
+- cubby user: needs password (`broadway102`) for sudo on .10, passwordless sudo on .12
+- brandon user: sudo on both servers (created Phase 18 onboarding)
+- All 7 sglang services managed via systemd (restart: `systemctl restart sglang-*`)
+- Service-specific authentication tokens via Bifrost virtual keys
+
+## References
+
+See bundled references for detailed procedures:
+- **Deployment**: [DEPLOYMENT.md](references/DEPLOYMENT.md) - **Complete CI/CD pipeline and container management**
+- **Architecture**: [ARCHITECTURE.md](references/ARCHITECTURE.md) - Detailed system design
+- **Troubleshooting**: [TROUBLESHOOTING.md](references/TROUBLESHOOTING.md) - Common issues and solutions
+- **Security**: [SECURITY.md](references/SECURITY.md) - Security protocols and procedures
+- **BookStack Documentation**: [BOOKSTACK.md](references/BOOKSTACK.md) - Seamless documentation workflow
+- **Virtual Keys**: [VIRTUAL_KEYS.md](references/VIRTUAL_KEYS.md) - Team access management
+- **cw-worker Ecosystem**: [CW_WORKER_ECOSYSTEM.md](references/CW_WORKER_ECOSYSTEM.md) - Agentic worker operations
+- **PostgreSQL**: [POSTGRESQL.md](references/POSTGRESQL.md) - Database inventory, connection patterns, and troubleshooting
