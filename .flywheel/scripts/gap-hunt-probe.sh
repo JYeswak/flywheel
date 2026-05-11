@@ -1434,6 +1434,52 @@ def probe_skill_without_jsm_publish() -> list[dict]:
 
 
 def probe_memory_without_cross_link() -> list[dict]:
+    """Detect memory files not cited by name in canonical anchor surfaces.
+
+    Class taxonomy (flywheel-kwjja decision — Option D, 2026-05-11):
+
+    This probe is NAME-GREP-ONLY by design. It scans for the memory filename
+    (or stem) in: AGENTS.md, INCIDENTS.md, README.md, .flywheel/doctrine/*.md,
+    .flywheel/rules/*.md, .flywheel/PLANS/*.md. If the filename appears in
+    NONE of those, the memory is flagged.
+
+    KNOWN FALSE-POSITIVE RATE (xbsd8 + 2xdi.117 findings):
+    Memories whose discipline is SEMANTICALLY EMBEDDED in runtime artifacts
+    (e.g., dispatch-template.md's VERIFY-CALLBACK BLOCK enforces
+    callback_delivery_verified — the very contract feedback_dispatch_post_
+    send_verify_for_silent_deaf.md documents) get flagged here even though
+    their discipline is load-bearing in practice.
+
+    DECISION (flywheel-kwjja, 2026-05-11): ACCEPT the FP rate (Option D).
+    Rationale:
+    1. The canonical resolution path is "forward-link doctrine doc" recipe
+       (flywheel-2xdi.93, .109, .116, .118, .127 — N=5 empirically stable).
+       Each doctrine doc takes ~15min to ship and produces independent
+       artifact value (canonical write-up + Jeff-precedent quotes + sister
+       cross-refs + conformance checklist).
+    2. Only ~20% of the FP cases (1 of 5 in the N=5 sample) would have been
+       avoided by widening the corpus to dispatch templates (Option B).
+       The other ~80% required novel doctrine writing anyway.
+    3. The probe is "working as intended" — it correctly identifies memories
+       that lack canonical doctrine cross-links. The fix is to create the
+       cross-link, not to weaken the probe.
+    4. Adding semantic tokenization (Options A/C) would introduce
+       false-NEGATIVES (load-bearing memories incorrectly recognized as
+       cross-linked via accidental token overlap with unrelated content).
+
+    WHEN TO REVISIT:
+    - If N>=10 memory-without-cross-link beads in a single tick (cost too high)
+    - If doctrine-doc-shipping rate slows because the recipe gets repetitive
+      without adding new doctrine content (diminishing returns)
+    - If a specific corpus surface (e.g., dispatch templates) generates >=3
+      same-class FPs in one week — then surgical Option B for that surface
+
+    SISTER FINDINGS preserved as open beads:
+    - flywheel-xbsd8 (semantic-cross-link awareness)
+    - flywheel-2xdi.117 (memory-proposes-future-class)
+
+    Both stay open as evidence for the eventual revisit; don't close them.
+    """
     memory_root = CLAUDE_ROOT / "projects/-Users-josh-Developer-flywheel/memory"
     refs = command_text()
     # flywheel-aic04: canonical PLANS/ uppercase for Linux portability;
