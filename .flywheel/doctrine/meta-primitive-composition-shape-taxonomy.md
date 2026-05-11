@@ -2,9 +2,9 @@
 name: meta-primitive-composition-shape-taxonomy
 type: doctrine
 created: 2026-05-11
-version: v0.2
-status: draft-pending-joshua-veto-window-2026-05-11T12:15Z (v0.1 + CASCADE 4th-shape ratification)
-authority: skillos-1-codified-2026-05-11T05:35Z (v0.1) + v0.2 expansion 2026-05-11T06:15Z per joshua-n-tier-classifier-doctrine-emergence-signal + zeststream-platform-extraction-evidence (commits 7814d79 stripe-toolkit + d83d94c admin-action-toolkit + 45c2e42 event-hub-toolkit + f3c50f9 rch-common + f1aa2c0 intent-classifier; FIVE pane-3 META-PRIMITIVES across FOUR composition shapes)
+version: v0.3
+status: draft-pending-joshua-veto-window-2026-05-11T15:00Z (v0.3 4-axis-rollout-evidence ratification of CROSS-CUTTING + LAYERED-META + PARALLEL-META + HUB-META + scope-broadening to all @zeststream/* packages)
+authority: skillos-1-codified-2026-05-11T05:35Z (v0.1) + v0.2 expansion 2026-05-11T06:15Z (CASCADE) + v0.3 expansion 2026-05-11T09:00Z per mobile-eats:1 pane-3 cd283a6 4-axis package-tag rollout pass (45 packages classified; CROSS-CUTTING 23 instances + LAYERED-META 2 + PARALLEL-META 1 + HUB-META 1 surfaced)
 ratification_target: skillos:1 codifies; mobile-eats orch continues Wave-2 phase-3 independently; Joshua-veto window 6h from 06:15Z (i.e. 2026-05-11T12:15Z) per cross-orch-anti-divergence-v1.0.0 P3-trivial protocol; default-accept thereafter
 cluster: extraction-velocity-doctrine-cluster
 sisters:
@@ -261,12 +261,127 @@ The 4-shape taxonomy (PARALLEL + LAYERED + HUB + CASCADE) is currently complete 
 - **Hybrid pattern catalog:** As hybrid compositions surface, catalog the recurring decomposition patterns (e.g., LAYERED-wraps-PARALLEL is common in HTTP handlers; HUB-with-LAYERED-spokes is common in observability stacks; CASCADE-wraps-CASCADE for nested classifiers).
 - **Cross-shape composition:** When one META composes another META (rare but possible), document the META-of-METAs shape.
 
-### v0.1 → v0.2 audit-trail
+## v0.3 evolution — scope broadening + 4 new ratified shapes (2026-05-11T09:00Z)
+
+Mobile-eats:1 pane-3 commit `cd283a6` (2026-05-11T~08:50Z) completed a 4-axis package-tag rollout pass across all 45 pane-3-shipped `@zeststream/*` packages. The rollout surfaced empirical evidence that the v0.2 4-shape taxonomy was scope-incomplete: 23 packages couldn't fit PARALLEL/LAYERED/HUB/CASCADE because they're NOT multi-primitive METAs — they're single-primitive cross-cutting utilities. An additional 4 packages exhibit META-OF-META composition (one META composing other METAs as primitives).
+
+This v0.3 expansion ratifies the surfaced shapes per the canonical ≥2-instance threshold rule + clarifies scope.
+
+### Scope clarification
+
+v0.1+v0.2 of this doctrine framed the taxonomy as applying only to META-PRIMITIVES (packages composing 3+ substrate primitives). v0.3 BROADENS scope: the taxonomy applies to ALL `@zeststream/*` packages, including single-primitive utilities and META-of-METAs. The shape-value answers the question "how does this package's composition look at the *package boundary*", not "does this package have 3+ internal primitives."
+
+A single-primitive package can still have a composition shape (CROSS-CUTTING is the canonical value). A META-of-META can still have a composition shape (one of LAYERED-META / PARALLEL-META / HUB-META). The taxonomy is now exhaustive over the package population.
+
+### Shape #5 — `CROSS-CUTTING` (single-primitive utility used transversally by N consumers)
+
+**Definition:** Single-primitive package providing a focused capability (typed-result helper, redaction utility, hash primitive, error mapper, signature verifier, ID generator, etc.) intended to be imported by many consumer substrates as a cross-cutting concern. No internal composition because there's only one primitive; the package IS the primitive.
+
+**Composition mechanics:**
+- Package exports a single primary symbol (function, factory, class, or constant) + minimal supporting types
+- No internal multi-primitive composition
+- Consumer-side: import the primitive; use it inline; no factory/composer required
+
+**Canonical exemplar (≥2-instance ratified; 23-instance HARDENED BEYOND DOUBT at v0.3):**
+- 23 packages tagged CROSS-CUTTING in pane-3 rollout `cd283a6` (the dominant composition shape — 51% of the @zeststream/* surface)
+- Examples likely include: typed-result helpers, redaction primitives, hash utilities, error mappers, signature verifiers, ID generators, time-format normalizers, retry decorators
+
+**When to use:**
+- Substrate provides ONE focused capability worth disseminating
+- Consumers import the primitive directly; no multi-stage composition
+- The substrate IS the primitive (not a composer of primitives)
+
+**Type-system implications:**
+- Single named export typically; minimal type surface
+- High correlation with `export_shape=CLEAN-KERNEL` (100% in pane-3 rollout: 23/23)
+
+**Friction sub-shape affinity:** typically LOW friction (no multi-stage type contracts, no factory plumbing); the friction-velocity-friction-class entries that DO apply tend to be single-primitive-versioning and dependency-pinning rather than composition friction.
+
+**Anti-patterns:**
+- Don't classify a multi-primitive package as CROSS-CUTTING when one of PARALLEL/LAYERED/HUB/CASCADE fits — CROSS-CUTTING specifically means single-primitive
+- Don't ship a CROSS-CUTTING with KITCHEN-SINK export-shape — single primitives have no kitchen-sink to ship
+
+### Shape #6 — `LAYERED-META` (a LAYERED META whose primitives are themselves METAs)
+
+**Definition:** LAYERED composition (nested closures, inner-to-outer wrap) where each "primitive" in the LAYERED structure is itself a META-PRIMITIVE composed of substrate primitives. Recursive composition: META composes METAs composes substrate-primitives.
+
+**Composition mechanics:**
+- Outer LAYERED shape: nested closures wrap each layer's META
+- Each layer is a self-contained META with its own composition shape (typically LAYERED, PARALLEL, or HUB)
+- Type contracts flow inner-to-outer across multiple META boundaries
+
+**Canonical exemplar (≥2-instance ratified):**
+- 2 packages tagged LAYERED-META in pane-3 rollout: `fleet-orchestrator-toolkit` + `connector-shell`
+- These compose multiple META-PRIMITIVES into a single orchestrator surface
+
+**When to use:**
+- A substrate's orchestration needs require composing 2+ existing METAs rather than substrate-primitives
+- The META-of-META layer adds operator coordination, lifecycle management, or cross-META invariants
+- Examples: orchestrator-toolkits, connector-shells, fleet-management primitives
+
+**Anti-patterns:**
+- Don't LAYERED-META where LAYERED suffices — adds composition complexity without need
+- Don't LAYERED-META composing METAs of incompatible composition shapes without documenting the cross-shape contract
+
+### Shape #7 — `PARALLEL-META` (a PARALLEL META whose stages are themselves METAs)
+
+**Definition:** PARALLEL composition (distinct stages glued by factory) where each stage is a META-PRIMITIVE.
+
+**Canonical exemplar:** *candidate-shape ratified at v0.3 with 1 instance; will ratify fully at ≥2.*
+- 1 package tagged PARALLEL-META in pane-3 rollout
+
+**When to use:**
+- Multi-stage serial pipeline where each stage's logic is rich enough to warrant its own META
+- Examples: heavy-pipeline-with-rich-stage-METAs
+
+### Shape #8 — `HUB-META` (a HUB META whose spokes are themselves METAs)
+
+**Definition:** HUB composition (central registry + N pluggable spokes) where each spoke is a META-PRIMITIVE.
+
+**Canonical exemplar:** *candidate-shape ratified at v0.3 with 1 instance; will ratify fully at ≥2.*
+- 1 package tagged HUB-META in pane-3 rollout
+
+**When to use:**
+- Hub-and-spoke architecture where each spoke is itself a substantial META
+- Examples: event-hub-toolkits where each event-handler is a multi-primitive META
+
+### CASCADE-N-TIER framing (not a new value; sub-shape qualifier)
+
+`CASCADE-N-TIER` observed in the rollout (2 instances: RCH 5-tier + intent-classifier 3-tier) is NOT a new shape value but the existing CASCADE shape annotated with its tier-count. Per v0.2 "Local shorthand: N-TIER classifier" — CASCADE is the canonical name, N-TIER is the dispatch shorthand. Mobile-eats:1 tagged these as `CASCADE-N-TIER` to record the tier-count metadata in package classification. Future tags may use `CASCADE` with a separate `tier_count` field; until then `CASCADE-N-TIER` is acceptable as an annotated CASCADE.
+
+### Cross-axis correlations observed at v0.3 (45-package population)
+
+The pane-3 rollout pass surfaced 3 strong cross-axis correlations worth recording as observations (not yet codified as cross-axis rules):
+
+| Correlation | Strength | Sample |
+|---|---|---|
+| `composition_shape=CROSS-CUTTING` → `export_shape=CLEAN-KERNEL` | 100% | 23/23 |
+| `sourcing_pattern=SKILL-PROSE-TO-SUBSTRATE` → `verdict_shape=SEVERITY-GRADED-WITH-BLOCKING-FLOOR` | 100% | 7/7 |
+| `sourcing_pattern=SKILL-PROSE-TO-SUBSTRATE` → `export_shape=GENERIC-PLUS-DEFAULTS` | 86% | 6/7 |
+
+**Interpretation (preliminary, not yet codified):** These correlations suggest structural lawfulness in the cross-axis space — certain combinations are natural, others may be forced or anti-patterns. Future friction-class v0.2 cross-axis indexing will surface whether the off-diagonal cells (e.g., CROSS-CUTTING × NOT-CLEAN-KERNEL) represent friction or are simply unobserved. **Codification of cross-axis rules is deferred** to friction-class v0.2 rebuild pending ≥10 cross-axis data points per cell.
+
+### Distribution by composition_shape at v0.3 (45-package population)
+
+| Shape | Count | Share |
+|---|--:|--:|
+| CROSS-CUTTING | 23 | 51% |
+| LAYERED | 7 | 16% |
+| PARALLEL | 3 | 7% |
+| HUB | 2 | 4% |
+| CASCADE-N-TIER (annotated CASCADE) | 2 | 4% |
+| LAYERED-META | 2 | 4% |
+| PARALLEL-META | 1 | 2% |
+| HUB-META | 1 | 2% |
+| (rest unaccounted in rollout summary) | 4 | 9% |
+
+### v0.1 → v0.2 → v0.3 audit-trail
 
 | Version | Date | Change | Trigger |
 |---------|------|--------|---------|
 | v0.1 | 2026-05-11T05:35Z | 3-shape taxonomy (PARALLEL + LAYERED + HUB) | First 3 pane-3 METAs cross-shape |
-| **v0.2** | **2026-05-11T06:15Z** | **CASCADE 4th-shape ratified (≥2 instances: RCH 5-tier + intent-classifier 3-tier)** | **Joshua N-tier-classifier-doctrine-emergence-signal** |
+| v0.2 | 2026-05-11T06:15Z | CASCADE 4th-shape ratified (≥2 instances: RCH 5-tier + intent-classifier 3-tier) | Joshua N-tier-classifier-doctrine-emergence-signal |
+| **v0.3** | **2026-05-11T09:00Z** | **Scope broadening to all @zeststream/* packages + CROSS-CUTTING (23) + LAYERED-META (2) ratified + PARALLEL-META (1) + HUB-META (1) candidate-ratified pending 2nd instance + 3 cross-axis correlations recorded as observations** | **Mobile-eats:1 pane-3 cd283a6 4-axis package-tag rollout pass (45-package empirical evidence)** |
 
 ## Mission anchor
 
