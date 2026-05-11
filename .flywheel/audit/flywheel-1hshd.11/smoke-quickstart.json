@@ -1,0 +1,1 @@
+{"schema_version":"canonical-root-drift-fleet-check/v1","command":"quickstart","status":"ok","steps":[{"step":1,"action":"probe doctor","command":"canonical-root-drift-fleet-check.sh doctor --json"}],"next_actions":["doctor","health","repair"]}

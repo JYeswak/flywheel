@@ -1,0 +1,2 @@
+{"schema_version":"canonical-root-drift-fleet-check/v1","command":"validate","subject":"timeout-seconds","ts":"2026-05-11T03:56:05Z","status":"reject","value":"999","reason":"out_of_range_or_not_integer","valid_range":"[1, 300]","default":10}
+rc=1
