@@ -1,0 +1,9 @@
+script	classification	rationale_short	migration_short
+private-tmp-prune.sh	SUPERSEDED	SBH scan+clean stricter scoring/vetoes/multi-volume	retire after shadow-mode parity
+storage-headroom-watcher.sh	SUPERSEDED	SBH continuous EWMA+PID vs reactive watcher	subscribe orch to sbh status --json
+storage-pause-auto-resume.sh	COMPLEMENT	flywheel-fleet pause contract; SBH only signals	consume sbh status; drop bespoke probe
+jeff-corpus-storage-projection.sh	STILL_NEEDED	corpus growth forecast (different shape)	add .sbh-protect markers; keep script
+beads-mem-tmp-cleanup.py	COMPLEMENT	pattern-bound; can wire SBH config glob	A=retire-post-config or B=keep-narrow-safety
+promotion-candidate-stale-fire-reaper.sh	STILL_NEEDED	bead-DB hygiene; out-of-SBH-domain	none
+session-residue-prune.sh	COMPLEMENT	flywheel-repo scoped; strict safety contract	keep contract; consider SBH sanity layer
+stale-in-progress-reaper.sh	STILL_NEEDED	bead-DB hygiene; out-of-SBH-domain	none
