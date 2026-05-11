@@ -1,0 +1,2 @@
+{"schema_version":"fleet-canonical-rule-freshness-probe/v1","command":"repair","status":"refused","scope":"nope","reason":"unknown_scope","valid_scopes":["canonical_index_dir","audit_log_dir"]}
+rc=64

@@ -1,0 +1,1 @@
+{"schema_version":"fleet-canonical-rule-freshness-probe/v1","command":"repair","status":"ok","ts":"2026-05-11T01:19:21Z","mode":"dry_run","scope":"canonical_index_dir","idempotency_key":"","target":"/Users/josh/.flywheel/canonical-meta-rules","existed_before":true,"note":"INDEX.md must be populated separately; this scope only ensures the dir exists"}

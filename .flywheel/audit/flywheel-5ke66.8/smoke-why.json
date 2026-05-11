@@ -1,0 +1,1 @@
+{"schema_version":"fleet-canonical-rule-freshness-probe/v1","command":"why","ts":"2026-05-11T01:19:21Z","id":"nonexistent","status":"unavailable","reason":"audit_log_missing","audit_log":"/Users/josh/.local/state/flywheel/fleet-canonical-rule-freshness-probe-runs.jsonl"}

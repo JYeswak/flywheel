@@ -1,0 +1,4 @@
+fleet-canonical-rule-freshness-probe: per-session META-RULE-CACHE.md staleness probe.
+For each fleet session, computes mtime of <repo>/.flywheel/META-RULE-CACHE.md, compares
+to canonical /Users/josh/.flywheel/canonical-meta-rules/INDEX.md. Emits JSON line per session.
+Status: fresh|stale|missing.

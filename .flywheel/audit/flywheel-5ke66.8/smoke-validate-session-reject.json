@@ -1,0 +1,2 @@
+{"schema_version":"fleet-canonical-rule-freshness-probe/v1","command":"validate","subject":"session-name","ts":"2026-05-11T01:19:21Z","status":"reject","value":"Flywheel","reason":"pattern_mismatch","pattern":"^[a-z][a-z0-9_-]*$"}
+rc=1

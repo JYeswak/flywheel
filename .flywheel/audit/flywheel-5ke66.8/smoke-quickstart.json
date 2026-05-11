@@ -1,0 +1,1 @@
+{"schema_version":"fleet-canonical-rule-freshness-probe/v1","command":"quickstart","status":"ok","steps":[{"step":1,"action":"probe doctor","command":"fleet-canonical-rule-freshness-probe.sh doctor --json"}],"next_actions":["doctor","health","repair"]}

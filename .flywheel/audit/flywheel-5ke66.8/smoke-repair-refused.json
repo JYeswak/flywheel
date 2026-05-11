@@ -1,0 +1,2 @@
+{"schema_version":"fleet-canonical-rule-freshness-probe/v1","command":"repair","status":"refused","mode":"apply","scope":"canonical_index_dir","reason":"--apply requires --idempotency-key"}
+rc=3

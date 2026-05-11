@@ -1,0 +1,2 @@
+{"schema_version":"fleet-canonical-rule-freshness-probe/v1","command":"validate","subject":"status-value","ts":"2026-05-11T01:19:21Z","status":"reject","value":"expired","reason":"not_in_enum","valid_statuses":["fresh","stale","missing"],"source":"native --schema enum"}
+rc=1
