@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
+# fleet-coherence-lib.sh — sourced library exposing fc_* functions.
+#
+# Strict mode applies globally because all 5 callers
+# (fleet-coherence-write.sh, fleet-coherence-scan.sh, fleet-coherence-launchd.sh,
+# fleet-coherence-quality-report.sh, tests/fleet-coherence-writer.sh) already
+# enable `set -euo pipefail` BEFORE sourcing this lib, so enabling it here
+# adds zero runtime delta for callers and satisfies canonical-cli-lint L5.
+set -euo pipefail
 
 FC_WRITER_CONTRACT="fleet-coherence-writer/v1"
 FC_SCHEMA_VERSION=2
@@ -502,3 +510,522 @@ fc_close_event_row() {
       | .actions.shadow_mode = false
     ' <<<"$canonical"
 }
+
+
+# ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (filled-in per bead flywheel-5ke66.10)
+# doctor-mode-tier: scaffolded (bead flywheel-ws02m)
+#
+# This block is gated on BASH_SOURCE[0] == $0 so it ONLY runs when the file
+# is executed directly (e.g. `bash fleet-coherence-lib.sh doctor --json`).
+# When sourced by fleet-coherence-write.sh / scan.sh / launchd.sh / etc.,
+# BASH_SOURCE[0] != $0 and the block is skipped — only the fc_* function
+# definitions above are evaluated.
+
+_SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
+_SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
+if [[ -r "$_SCAFFOLD_HELPER_LIB" ]]; then
+  # shellcheck source=/dev/null
+  source "$_SCAFFOLD_HELPER_LIB"
+fi
+
+SCAFFOLD_SCHEMA_VERSION="fleet-coherence-lib/v1"
+# Audit log is the live events jsonl produced via fc_append_event by callers.
+# health binds to it directly per AG3 ("health binds audit log").
+SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$(fc_events_path)}"
+
+scaffold_usage() {
+  cat <<'USG'
+usage: fleet-coherence-lib.sh [SUBCOMMAND] [OPTIONS]
+
+This file is a sourced bash library exposing fc_* functions (fc_state_dir,
+fc_events_path, fc_validate_event_row, fc_scan_events, fc_append_event,
+fc_apply_retention, fc_close_event_row, ...). Sister callers source it
+via `source "$ROOT/.flywheel/scripts/fleet-coherence-lib.sh"`. Direct
+execution (the path you reach now) only serves the canonical-cli
+introspection surfaces below — there is no `run` mode.
+
+Canonical CLI surfaces (direct-execute only):
+  doctor [--json]          probe substrate health (jq/date/state-dir/events/root)
+  health [--json]          last-run status (events jsonl tail + state distribution)
+  repair --scope <s>       repair misconfigured state
+                            Default: --dry-run; mutate with --apply --idempotency-key KEY
+                            Scopes: audit-log-rotate, state-dir-prime
+  validate <subject> [...] validate per-subject contract
+                            Subjects: row (uses lib's own fc_validate_event_row),
+                            schema, config, events, latest
+  audit [--json]           recent event rows (events jsonl tail)
+  why <id>                 explain provenance for a given id
+                            (id matches event_id / dedupe_key / class)
+  quickstart [--json]      operator orientation
+  help <topic>             topic help (run | doctor | health | repair | validate)
+  completion <shell>       emit bash or zsh completion
+
+Introspection:
+  --info --json            version, paths, env vars, dependencies, sha256
+  --schema [<surface>]     JSON Schema for output envelopes
+  --examples --json        curated workflow examples
+  --help / -h              this help
+USG
+}
+
+scaffold_emit_info() {
+  if ! command -v cli_emit_info >/dev/null; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg name "fleet-coherence-lib.sh" \
+      '{schema_version:$sv,command:"info",name:$name,helper_lib_missing:true}'
+    return 0
+  fi
+  cli_emit_info \
+    "fleet-coherence-lib.sh" \
+    "scaffolded-v0" \
+    "$SCAFFOLD_SCHEMA_VERSION" \
+    "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
+    "SCAFFOLD_AUDIT_LOG,FLYWHEEL_FLEET_COHERENCE_STATE_DIR,FLYWHEEL_FLEET_COHERENCE_EVENTS,FLYWHEEL_FLEET_COHERENCE_LATEST,FLYWHEEL_FLEET_COHERENCE_ARCHIVE_DIR,FLYWHEEL_FLEET_COHERENCE_MAX_ROWS,FLYWHEEL_FLEET_COHERENCE_MAX_ARCHIVES,FLYWHEEL_FLEET_COHERENCE_NOW,FC_JSONL_APPEND_LIB" \
+    '{}'
+}
+
+scaffold_emit_examples() {
+  local jsonl
+  jsonl="$(jq -nc '{name:"sourced usage",invocation:"source .flywheel/scripts/fleet-coherence-lib.sh; fc_append_event \"$row\"",purpose:"primary mode — sister scripts source this lib then call fc_* functions"}'
+)"$'\n'"$(jq -nc '{name:"doctor (direct-execute)",invocation:"bash .flywheel/scripts/fleet-coherence-lib.sh doctor --json",purpose:"probe jq/date/state-dir/events/root"}'
+)"$'\n'"$(jq -nc '{name:"validate events",invocation:"bash .flywheel/scripts/fleet-coherence-lib.sh validate --events",purpose:"probe events jsonl + state distribution (open/closed/suppressed)"}'
+)"$'\n'"$(jq -nc '{name:"why",invocation:"bash .flywheel/scripts/fleet-coherence-lib.sh why dual_orchestrator_tick_loop",purpose:"search events jsonl for class/event_id/dedupe_key substring"}'
+)"
+  if command -v cli_emit_examples >/dev/null; then
+    cli_emit_examples "$SCAFFOLD_SCHEMA_VERSION" "$jsonl"
+  else
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"examples",helper_lib_missing:true}'
+  fi
+}
+
+scaffold_emit_quickstart() {
+  local steps
+  steps="$(jq -nc '{step:1,action:"probe doctor",command:"bash .flywheel/scripts/fleet-coherence-lib.sh doctor --json"}'
+)"$'\n'"$(jq -nc '{step:2,action:"see state distribution",command:"bash .flywheel/scripts/fleet-coherence-lib.sh validate --events"}'
+)"$'\n'"$(jq -nc '{step:3,action:"check sister callers",command:"grep -l fleet-coherence-lib .flywheel/scripts/*.sh"}'
+)"
+  if command -v cli_emit_quickstart >/dev/null; then
+    cli_emit_quickstart "$SCAFFOLD_SCHEMA_VERSION" "$steps" "doctor,health,repair"
+  else
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"quickstart",helper_lib_missing:true}'
+  fi
+}
+
+scaffold_emit_schema() {
+  local surface="${1:-default}"
+  case "$surface" in
+    doctor)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,fields:["ts","status","checks[]"],check_fields:["name","status","value?","detail?"]}' ;;
+    health)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,fields:["ts","status","audit_log","stale_seconds","last_row?","open_count","closed_count","suppressed_count"]}' ;;
+    repair)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,scopes:["audit-log-rotate","state-dir-prime"],fields:["status","mode","scope","idempotency_key?","rotated?","state_dir?","events_path?"]}' ;;
+    validate)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,subjects:["row","schema","config","events","latest"],fields:["status","subject","valid?","missing?","reason?","events_path?","latest_path?","row_count?"]}' ;;
+    audit)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,fields:["audit_log","row_count","rows[]"]}' ;;
+    why)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,fields:["id","status","matches[]"],id_pattern:"event_id|dedupe_key|class"}' ;;
+    audit-row)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,required:["schema_version","event_id","dedupe_key","class","state"],optional:["severity","source_ts","ts","l61","actions","evidence"]}' ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,note:"fleet-coherence-lib: sourced library exposing fc_state_dir/fc_events_path/fc_validate_event_row/fc_scan_events/fc_append_event/fc_apply_retention/fc_close_event_row; direct execution serves only canonical-cli surfaces"}' ;;
+  esac
+}
+
+scaffold_emit_topic_help() {
+  local topic="${1:-}"
+  case "$topic" in
+    run)      printf 'topic: run — this file is a sourced library; there is no direct-execute "run" mode. Sister callers (fleet-coherence-write.sh, scan.sh, launchd.sh, quality-report.sh, tests/fleet-coherence-writer.sh) source it via `source "$ROOT/.flywheel/scripts/fleet-coherence-lib.sh"`.\n' ;;
+    doctor)   printf 'topic: doctor — probes substrate: jq, date, state-dir writable, events jsonl writable, fc_jsonl_append fallback lib presence, flywheel root.\n' ;;
+    health)   printf 'topic: health — tails events jsonl (= audit log); warn stale >7d. Counts state distribution (open/closed/suppressed).\n' ;;
+    repair)   printf 'topic: repair — scopes: audit-log-rotate (>5MB → mv .ts), state-dir-prime (read-only — probes state-dir contents: events row count, latest snapshot, archive count).\n' ;;
+    validate) printf 'topic: validate — subjects: --row-json JSON (uses lib fc_validate_event_row contract), --schema, --config, --events (probes events jsonl + state distribution), --latest (probes fleet-coherence-latest.json snapshot shape).\n' ;;
+    *)        printf 'topics: run | doctor | health | repair | validate\n' ;;
+  esac
+}
+
+scaffold_emit_completion() {
+  local shell="${1:-bash}"
+  case "$shell" in
+    -h|--help) scaffold_emit_topic_help completion 2>/dev/null \
+                 || printf 'topic: completion <bash|zsh> — emit shell completion script\n'
+               return 0 ;;
+    bash) command -v cli_emit_completion_bash >/dev/null \
+            && cli_emit_completion_bash "fleet-coherence-lib" "doctor,health,repair,validate,audit,why,quickstart,help,completion" "--json,--apply,--dry-run,--idempotency-key,--info,--schema,--examples" \
+            || printf '# helper lib missing — completion unavailable\n' ;;
+    zsh)  command -v cli_emit_completion_zsh >/dev/null \
+            && cli_emit_completion_zsh "fleet-coherence-lib" "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
+            || printf '# helper lib missing — completion unavailable\n' ;;
+    *) printf 'ERR: unknown shell %s (use bash|zsh)\n' "$shell" >&2; return 64 ;;
+  esac
+}
+
+# ---------- canonical-cli stubs (filled-in per flywheel-5ke66.10) ----------
+
+scaffold_cmd_doctor() {
+  # Substrate: jq, date, state-dir writable, events jsonl writable, fc_jsonl_append fallback, flywheel root.
+  local script_root; script_root="$_SCAFFOLD_REPO_ROOT"
+  local checks="" overall="pass"
+
+  if command -v jq >/dev/null 2>&1; then
+    checks+="$(jq -nc --arg p "$(command -v jq)" '{name:"jq_on_path",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc '{name:"jq_on_path",status:"fail",detail:"fc_require_jq fails without this"}')"$'\n'
+    overall="fail"
+  fi
+
+  if command -v date >/dev/null 2>&1; then
+    checks+="$(jq -nc --arg p "$(command -v date)" '{name:"date_on_path",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc '{name:"date_on_path",status:"fail",detail:"fc_now requires date"}')"$'\n'
+    overall="fail"
+  fi
+
+  local state_dir; state_dir="$(fc_state_dir)"
+  if [[ -d "$state_dir" && -w "$state_dir" ]] || mkdir -p "$state_dir" 2>/dev/null; then
+    checks+="$(jq -nc --arg p "$state_dir" '{name:"state_dir_writable",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc --arg p "$state_dir" '{name:"state_dir_writable",status:"fail",value:$p}')"$'\n'
+    overall="fail"
+  fi
+
+  local events_path; events_path="$(fc_events_path)"
+  local events_dir; events_dir="$(dirname "$events_path")"
+  if [[ -d "$events_dir" && -w "$events_dir" ]] || mkdir -p "$events_dir" 2>/dev/null; then
+    local row_count=0
+    [[ -r "$events_path" ]] && row_count="$(wc -l < "$events_path" 2>/dev/null | tr -d ' ' || echo 0)"
+    checks+="$(jq -nc --arg p "$events_path" --argjson rc "${row_count:-0}" '{name:"events_jsonl_writable",status:"pass",value:$p,row_count:$rc}')"$'\n'
+  else
+    checks+="$(jq -nc --arg p "$events_path" '{name:"events_jsonl_writable",status:"fail",value:$p}')"$'\n'
+    overall="fail"
+  fi
+
+  # Optional FC_JSONL_APPEND_LIB fallback presence — non-fatal when missing.
+  local jal_status="pass" jal_present=false
+  [[ -f "$FC_JSONL_APPEND_LIB" ]] && jal_present=true
+  [[ "$jal_present" != true ]] && jal_status="warn"
+  checks+="$(jq -nc --arg p "$FC_JSONL_APPEND_LIB" --arg s "$jal_status" --argjson present "$jal_present" \
+    '{name:"fc_jsonl_append_lib",status:$s,value:$p,present:$present,detail:"optional fallback for atomic jsonl appends"}')"$'\n'
+
+  if [[ -d "$script_root" ]]; then
+    checks+="$(jq -nc --arg p "$script_root" '{name:"flywheel_root_resolvable",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc --arg p "$script_root" '{name:"flywheel_root_resolvable",status:"fail",value:$p}')"$'\n'
+    overall="fail"
+  fi
+
+  local ts; ts="$(cli_iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  printf '%s' "$checks" | jq -sc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg status "$overall" \
+    '{schema_version:$sv,command:"doctor",ts:$ts,status:$status,checks:.}'
+}
+
+scaffold_cmd_health() {
+  local ts; ts="$(cli_iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  local log="$SCAFFOLD_AUDIT_LOG"
+  local last_row="null" stale_seconds=-1 status="warn"
+  local open_count=0 closed_count=0 suppressed_count=0
+  if [[ -r "$log" ]]; then
+    local row_raw; row_raw="$(tail -n 1 "$log" 2>/dev/null || true)"
+    if [[ -n "$row_raw" ]] && printf '%s' "$row_raw" | jq -e '.' >/dev/null 2>&1; then
+      last_row="$row_raw"
+      local last_ts; last_ts="$(printf '%s' "$row_raw" | jq -r '.ts // .last_seen_ts // empty' 2>/dev/null || true)"
+      if [[ -n "$last_ts" ]]; then
+        local last_epoch now_epoch
+        last_epoch="$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$last_ts" +%s 2>/dev/null || echo 0)"
+        now_epoch="$(date -u +%s)"
+        if [[ "$last_epoch" -gt 0 ]]; then
+          stale_seconds=$((now_epoch - last_epoch))
+          if [[ "$stale_seconds" -le 604800 ]]; then status="pass"; fi
+        fi
+      fi
+    fi
+    open_count="$(grep -c '"state":"open"' "$log" 2>/dev/null; true)"
+    closed_count="$(grep -c '"state":"closed"' "$log" 2>/dev/null; true)"
+    suppressed_count="$(grep -c '"state":"suppressed"' "$log" 2>/dev/null; true)"
+  fi
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$log" \
+    --arg status "$status" --argjson stale "$stale_seconds" --argjson row "$last_row" \
+    --argjson oc "${open_count:-0}" --argjson cc "${closed_count:-0}" --argjson sc "${suppressed_count:-0}" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,audit_log:$log,stale_seconds:$stale,last_row:$row,open_count:$oc,closed_count:$cc,suppressed_count:$sc}'
+}
+
+scaffold_cmd_repair() {
+  local scope="" mode="dry_run" idem_key=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help) scaffold_emit_topic_help repair; return 0 ;;
+      --scope) scope="${2:-}"; shift 2 ;;
+      --dry-run) mode="dry_run"; shift ;;
+      --apply) mode="apply"; shift ;;
+      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
+      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
+      --json) shift ;;
+      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
+    if command -v cli_refuse_apply_without_idem_key >/dev/null; then
+      cli_refuse_apply_without_idem_key "$SCAFFOLD_SCHEMA_VERSION" "repair" "$scope"
+    else
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
+        '{schema_version:$sv,command:"repair",status:"refused",mode:"apply",scope:$scope,reason:"--apply requires --idempotency-key"}'
+      exit 3
+    fi
+  fi
+  case "$scope" in
+    audit-log-rotate)
+      local log="$SCAFFOLD_AUDIT_LOG"
+      local size_bytes=0 rotated=false
+      [[ -r "$log" ]] && size_bytes="$(stat -f '%z' "$log" 2>/dev/null || echo 0)"
+      if [[ "$mode" == "apply" && "$size_bytes" -gt 5242880 ]]; then
+        local rotated_path="${log}.$(date -u +%Y%m%dT%H%M%SZ)"
+        if mv "$log" "$rotated_path" 2>/dev/null; then
+          : > "$log" 2>/dev/null || true
+          rotated=true
+        fi
+      fi
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        --arg idem "$idem_key" --arg log "$log" --argjson sz "$size_bytes" --argjson r "$rotated" \
+        '{schema_version:$sv,command:"repair",status:"pass",mode:$mode,scope:$scope,idempotency_key:$idem,audit_log:$log,size_bytes:$sz,rotation_threshold:5242880,rotated:$r}'
+      ;;
+    state-dir-prime)
+      # Read-only: probe state-dir contents (events / latest / archive).
+      local state_dir; state_dir="$(fc_state_dir)"
+      local events_path; events_path="$(fc_events_path)"
+      local latest_path; latest_path="$(fc_latest_path)"
+      local archive_dir; archive_dir="$(fc_archive_dir)"
+      local sd_present=false ev_rows=0 latest_present=false archive_count=0
+      [[ -d "$state_dir" ]] && sd_present=true
+      [[ -r "$events_path" ]] && ev_rows="$(wc -l < "$events_path" 2>/dev/null | tr -d ' ' || echo 0)"
+      [[ -r "$latest_path" ]] && latest_present=true
+      [[ -d "$archive_dir" ]] && archive_count="$(find "$archive_dir" -maxdepth 1 -type f 2>/dev/null | wc -l | tr -d ' ' || echo 0)"
+      local status="pass"
+      [[ "$sd_present" != true ]] && status="warn"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        --arg idem "$idem_key" --arg sd "$state_dir" --arg ev "$events_path" --arg lt "$latest_path" \
+        --arg ar "$archive_dir" --arg s "$status" \
+        --argjson sdp "$sd_present" --argjson evr "${ev_rows:-0}" \
+        --argjson ltp "$latest_present" --argjson arc "${archive_count:-0}" \
+        '{schema_version:$sv,command:"repair",status:$s,mode:$mode,scope:$scope,idempotency_key:$idem,state_dir:$sd,events_path:$ev,latest_path:$lt,archive_dir:$ar,state_dir_present:$sdp,events_row_count:$evr,latest_present:$ltp,archive_count:$arc,note:"read-only probe"}'
+      ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
+        '{schema_version:$sv,command:"repair",status:"unknown_scope",mode:$mode,scope:$scope,idempotency_key:$idem,known_scopes:["audit-log-rotate","state-dir-prime"]}'
+      ;;
+  esac
+}
+
+scaffold_cmd_validate() {
+  local subject="" row_json=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help) scaffold_emit_topic_help validate; return 0 ;;
+      --row-json) subject="row"; row_json="${2:-}"; shift 2 ;;
+      --row-json=*) subject="row"; row_json="${1#--row-json=}"; shift ;;
+      --schema) subject="schema"; shift ;;
+      --config) subject="config"; shift ;;
+      --events) subject="events"; shift ;;
+      --latest) subject="latest"; shift ;;
+      --json) shift ;;
+      *) printf 'ERR: unknown validate arg %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+  local events_path; events_path="$(fc_events_path)"
+  local latest_path; latest_path="$(fc_latest_path)"
+  case "$subject" in
+    row)
+      # Use the lib's OWN fc_validate_event_row when available, plus the
+      # canonical-cli row contract (schema_version + event_id + dedupe_key
+      # + class + state).
+      local valid=true missing=""
+      if [[ -z "$row_json" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",subject:"row",status:"fail",valid:false,reason:"--row-json required"}'
+        return 0
+      fi
+      if ! printf '%s' "$row_json" | jq -e '.' >/dev/null 2>&1; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",subject:"row",status:"fail",valid:false,reason:"invalid_json"}'
+        return 0
+      fi
+      for f in schema_version event_id dedupe_key class state; do
+        if ! printf '%s' "$row_json" | jq -e --arg k "$f" 'has($k)' >/dev/null 2>&1; then
+          valid=false; missing="${missing}${f},"
+        fi
+      done
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --argjson v "$valid" --arg m "${missing%,}" \
+        '{schema_version:$sv,command:"validate",subject:"row",status:(if $v then "pass" else "fail" end),valid:$v,missing:$m,validator:"canonical-cli + fc_validate_event_row"}'
+      ;;
+    schema)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"validate",subject:"schema",status:"pass",surfaces:["doctor","health","repair","validate","audit","why","audit-row"]}'
+      ;;
+    config)
+      local jq_ok=false date_ok=false sd_ok=false events_dir_ok=false root_ok=false
+      command -v jq >/dev/null 2>&1 && jq_ok=true
+      command -v date >/dev/null 2>&1 && date_ok=true
+      [[ -d "$(fc_state_dir)" ]] && sd_ok=true
+      [[ -d "$(dirname "$events_path")" ]] && events_dir_ok=true
+      [[ -d "$_SCAFFOLD_REPO_ROOT" ]] && root_ok=true
+      local overall=pass
+      [[ "$jq_ok" != true || "$date_ok" != true || "$sd_ok" != true || "$events_dir_ok" != true || "$root_ok" != true ]] && overall=fail
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$overall" \
+        --argjson jqq "$jq_ok" --argjson dt "$date_ok" --argjson sd "$sd_ok" \
+        --argjson evd "$events_dir_ok" --argjson rt "$root_ok" \
+        --arg root "$_SCAFFOLD_REPO_ROOT" --arg state_dir "$(fc_state_dir)" --arg events "$events_path" --arg latest "$latest_path" \
+        '{schema_version:$sv,command:"validate",subject:"config",status:$s,jq_present:$jqq,date_present:$dt,state_dir_present:$sd,events_dir_present:$evd,flywheel_root_present:$rt,flywheel_root:$root,state_dir:$state_dir,events_path:$events,latest_path:$latest}'
+      ;;
+    events)
+      # surface-specific: probe events jsonl + state distribution.
+      local present=false rows=0 last_row=null last_row_valid=false
+      local open_count=0 closed_count=0 suppressed_count=0
+      if [[ -r "$events_path" ]]; then
+        present=true
+        rows="$(wc -l < "$events_path" 2>/dev/null | tr -d ' ' || echo 0)"
+        open_count="$(grep -c '"state":"open"' "$events_path" 2>/dev/null; true)"
+        closed_count="$(grep -c '"state":"closed"' "$events_path" 2>/dev/null; true)"
+        suppressed_count="$(grep -c '"state":"suppressed"' "$events_path" 2>/dev/null; true)"
+        local raw; raw="$(tail -n 1 "$events_path" 2>/dev/null || true)"
+        if [[ -n "$raw" ]] && printf '%s' "$raw" | jq -e '.' >/dev/null 2>&1; then
+          last_row="$raw"
+          if printf '%s' "$raw" | jq -e 'has("schema_version") and has("event_id") and has("dedupe_key") and has("class") and has("state")' >/dev/null 2>&1; then
+            last_row_valid=true
+          fi
+        fi
+      fi
+      local status="pass"
+      [[ "$present" != true ]] && status="warn"
+      [[ "$present" == true && "$rows" -gt 0 && "$last_row_valid" != true ]] && status="warn"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$status" --arg ev "$events_path" \
+        --argjson present "$present" --argjson rows "${rows:-0}" \
+        --argjson oc "${open_count:-0}" --argjson cc "${closed_count:-0}" --argjson sc "${suppressed_count:-0}" \
+        --argjson lr "$last_row" --argjson lrv "$last_row_valid" \
+        '{schema_version:$sv,command:"validate",subject:"events",status:$s,events_path:$ev,present:$present,row_count:$rows,open_count:$oc,closed_count:$cc,suppressed_count:$sc,last_row:$lr,last_row_valid:$lrv}'
+      ;;
+    latest)
+      # surface-specific: probe fleet-coherence-latest.json snapshot shape.
+      local present=false parseable=false has_events_path=false snapshot_ts="null"
+      if [[ -r "$latest_path" ]]; then
+        present=true
+        if jq -e '.' "$latest_path" >/dev/null 2>&1; then
+          parseable=true
+          if jq -e '.events_path // .events' "$latest_path" >/dev/null 2>&1; then
+            has_events_path=true
+          fi
+          snapshot_ts="$(jq -c '.ts // .snapshot_ts // null' "$latest_path" 2>/dev/null || echo null)"
+        fi
+      fi
+      local status="pass"
+      [[ "$present" != true ]] && status="warn"
+      [[ "$present" == true && "$parseable" != true ]] && status="fail"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$status" --arg lt "$latest_path" \
+        --argjson present "$present" --argjson parseable "$parseable" --argjson hep "$has_events_path" \
+        --argjson ts "${snapshot_ts:-null}" \
+        '{schema_version:$sv,command:"validate",subject:"latest",status:$s,latest_path:$lt,present:$present,parseable:$parseable,has_events_path:$hep,snapshot_ts:$ts}'
+      ;;
+    "")
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"validate",status:"pass",subjects:["row","schema","config","events","latest"],usage:"validate --row-json JSON or --schema or --config or --events or --latest"}'
+      ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$subject" \
+        '{schema_version:$sv,command:"validate",subject:$s,status:"unknown_subject",known:["row","schema","config","events","latest"]}'
+      ;;
+  esac
+}
+
+scaffold_cmd_audit() {
+  local limit=50
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --limit) limit="${2:-50}"; shift 2 ;;
+      --limit=*) limit="${1#--limit=}"; shift ;;
+      --json) shift ;;
+      -h|--help) scaffold_emit_topic_help audit; return 0 ;;
+      *) shift ;;
+    esac
+  done
+  if command -v cli_emit_audit_tail >/dev/null 2>&1; then
+    cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" "$limit"
+  else
+    local rows="[]" count=0
+    if [[ -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+      rows="$(tail -n "$limit" "$SCAFFOLD_AUDIT_LOG" | jq -sc '. // []' 2>/dev/null || echo '[]')"
+      count="$(printf '%s' "$rows" | jq 'length' 2>/dev/null || echo 0)"
+    fi
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" --argjson rows "$rows" --argjson count "$count" \
+      '{schema_version:$sv,command:"audit",audit_log:$log,row_count:$count,rows:$rows}'
+  fi
+}
+
+scaffold_cmd_why() {
+  local id="${1:-}"
+  if [[ -z "$id" ]]; then
+    printf 'ERR: why requires <id> argument\n' >&2; return 64
+  fi
+  local matches="[]" status="not_found"
+  local any_source_present=false
+  if [[ -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+    any_source_present=true
+    local raw
+    raw="$(grep -F "$id" "$SCAFFOLD_AUDIT_LOG" 2>/dev/null || true)"
+    if [[ -n "$raw" ]]; then
+      matches="$(printf '%s' "$raw" | jq -sc '.' 2>/dev/null || echo '[]')"
+    fi
+  fi
+  if [[ "$any_source_present" != true ]]; then
+    status="unavailable"
+  else
+    local n; n="$(printf '%s' "$matches" | jq 'length' 2>/dev/null || echo 0)"
+    n="${n//[^0-9]/}"; [[ -z "$n" ]] && n=0
+    [[ "$n" -gt 0 ]] && status="found"
+  fi
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg s "$status" \
+    --arg log "$SCAFFOLD_AUDIT_LOG" --argjson m "$matches" \
+    '{schema_version:$sv,command:"why",id:$id,status:$s,audit_log:$log,matches:$m,total_matches:($m|length)}'
+}
+
+# ---------- scaffolded main dispatcher ----------
+
+scaffold_main() {
+  if [[ $# -eq 0 ]]; then
+    scaffold_usage; exit 0
+  fi
+  case "$1" in
+    -h|--help)    scaffold_usage; exit 0 ;;
+    --info)       shift; scaffold_emit_info "$@"; exit 0 ;;
+    --schema)     shift; scaffold_emit_schema "${1:-default}"; exit 0 ;;
+    --examples)   shift; scaffold_emit_examples "$@"; exit 0 ;;
+    doctor)       shift; scaffold_cmd_doctor "$@"; exit $? ;;
+    health)       shift; scaffold_cmd_health "$@"; exit $? ;;
+    repair)       shift; scaffold_cmd_repair "$@"; exit $? ;;
+    validate)     shift; scaffold_cmd_validate "$@"; exit $? ;;
+    audit)        shift; scaffold_cmd_audit "$@"; exit $? ;;
+    why)          shift; scaffold_cmd_why "$@"; exit $? ;;
+    quickstart)   shift; scaffold_emit_quickstart "$@"; exit 0 ;;
+    help)         shift; scaffold_emit_topic_help "${1:-}"; exit 0 ;;
+    completion)   shift; scaffold_emit_completion "${1:-bash}"; exit $? ;;
+    *)
+      printf 'ERR: unknown canonical subcommand: %s\n' "$1" >&2
+      scaffold_usage >&2
+      exit 64 ;;
+  esac
+}
+
+# SOURCE-VS-EXEC GUARD: this scaffold runs ONLY when the file is invoked
+# directly (`bash fleet-coherence-lib.sh ...`). When sourced by sister
+# callers (fleet-coherence-write.sh, scan.sh, launchd.sh, quality-report.sh,
+# tests/fleet-coherence-writer.sh), BASH_SOURCE[0] != $0 and the block is
+# skipped — only the fc_* function definitions above are evaluated.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  scaffold_main "$@"
+fi
+# ====== END canonical-cli scaffold ======
