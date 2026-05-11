@@ -1,0 +1,1 @@
+{"schema_version":"continuous-productivity-detector/v1","command":"repair","status":"report","ts":"2026-05-11T04:42:47Z","mode":"dry_run","scope":"topology_path","idempotency_key":"","target":"/Users/josh/.local/state/flywheel/session-topology.jsonl","existed":true,"readable":true,"note":"REPORT-ONLY — topology rows owned by topology-tick-refresh.sh, not this surface"}

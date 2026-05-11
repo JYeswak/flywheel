@@ -1,0 +1,1 @@
+{"examples": ["continuous-productivity-detector.sh --json", "continuous-productivity-detector.sh --session skillos --json", "CPD_ACTIVITY_DIR=/tmp/activity continuous-productivity-detector.sh --topology /tmp/topology.jsonl --json"]}

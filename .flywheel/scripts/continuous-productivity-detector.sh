@@ -1,5 +1,365 @@
 #!/usr/bin/env bash
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (partial → passing per bead flywheel-1hshd.19)
+# doctor-mode-tier: scaffolded
+#
+# IDEMPOTENT-BY-CONSTRUCTION: this surface is read-only (read_only=true,
+# peer_repo_writes=false). Default invocation classifies peer-orchestrator
+# productivity state and emits planned actions but does not mutate state.
+# --idempotency-key flag is accepted (parses + flows through) but not
+# strictly required since the python core has no mutation path.
 set -euo pipefail
+
+# ====== BEGIN canonical-cli scaffold (bead flywheel-1hshd.19) ======
+# SURGICAL DASH-FLAG SCAFFOLD variant (sister 5ke66.17 / 1hshd.{15,17}).
+# Native python3 heredoc owns argparse for --info, --examples, --json,
+# --quiet, --session, threshold flags, fixture flags. Two regression suites
+# assert specific shapes:
+#   - .flywheel/tests/test_continuous_productivity_detector.sh:
+#     `--info --json` must have .read_only==true, .peer_repo_writes==false,
+#     .canonical_cli contains "--quiet", .joshua_notify_allowlist contains
+#     "substrate-corrupt"
+#   - same suite: `--examples --json` must have .examples|length>=3
+#
+# Bash scaffold intercepts BEFORE python heredoc fires:
+#   - --schema (NEW; not in python argparse — would error)
+#   - NEW verbs: doctor, health, repair, validate, audit, why, quickstart
+#   - help <topic> (python argparse has --help, not `help <topic>`)
+#
+# All other invocations (including --info, --examples, default classifier)
+# fall through to python verbatim. Native python info() is augmented
+# in-place to add .version + .capabilities (AG3.1) while preserving
+# .read_only / .peer_repo_writes / .canonical_cli / .joshua_notify_allowlist
+# (regression contract).
+
+_SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
+_SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
+if [[ -r "$_SCAFFOLD_HELPER_LIB" ]]; then
+  # shellcheck source=/dev/null
+  source "$_SCAFFOLD_HELPER_LIB"
+fi
+SCAFFOLD_SCHEMA_VERSION="continuous-productivity-detector/v1"
+SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-${CPD_AUDIT_LOG:-$HOME/.local/state/flywheel/continuous-productivity-detector-runs.jsonl}}"
+
+scaffold_emit_schema() {
+  local surface="${1:-default}"
+  case "$surface" in
+    doctor)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"schema",surface:"doctor",fields:{ts:"ISO8601",status:"pass|warn|fail",checks:"array of {name,status,detail?,path?}"}}'
+      ;;
+    health)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"schema",surface:"health",fields:{ts:"ISO8601",status:"pass|warn|fail",audit_log:"path",last_run_ts:"ISO8601 or null",age_seconds:"int|null",recent_runs:"int (last 20)",total_runs:"int",stale_threshold_seconds:"int"}}'
+      ;;
+    repair)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"schema",surface:"repair",scopes:["audit_log_dir","topology_path"],contract:{requires_idempotency_key_when_apply:true,refusal_exit_code:3,dry_run_default:true},env:{audit_log:"SCAFFOLD_AUDIT_LOG",topology:"CPD_TOPOLOGY"}}'
+      ;;
+    validate)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"schema",surface:"validate",subjects:["session-name","threshold-seconds","allowlist-class"],contract:{rejects_with_rc1:"on schema violation",threshold_seconds_min:1,threshold_seconds_max:86400,allowlist_classes:["substrate-corrupt","security","phi","paradigm","destructive"]}}'
+      ;;
+    report|default|*)
+      local input_schema output_schema
+      input_schema='{"type":"object","properties":{"topology":{"type":"string"},"loops_dir":{"type":"string"},"activity_dir":{"type":"string"},"ready_dir":{"type":"string"},"doctor_dir":{"type":"string"},"session":{"type":"string"},"threshold_seconds":{"type":"integer"},"now_epoch":{"type":"number"}}}'
+      output_schema='{"type":"object","required":["schema_version","checked_at","threshold_seconds","sessions_checked","action_required_count","sessions"],"properties":{"schema_version":{"const":"continuous-productivity-detector/v1"},"checked_at":{"type":"string"},"threshold_seconds":{"type":"integer"},"sessions_checked":{"type":"integer"},"idle_with_work_available_count":{"type":"integer"},"josh_notify_allowlisted_count":{"type":"integer"},"action_required_count":{"type":"integer"},"sessions":{"type":"array"},"parse_errors":{"type":"array"},"probe_errors":{"type":"array"}}}'
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        --argjson in "$input_schema" --argjson out "$output_schema" \
+        '{schema_version:$sv,command:"schema",surfaces:["doctor","health","repair","validate","audit","why","report"],input_schema:$in,output_schema:$out,note:"Default surface = report. Native python emits report shape from default invocation; scaffold owns NEW verbs."}'
+      ;;
+  esac
+}
+
+scaffold_emit_quickstart() {
+  local steps
+  steps="$(jq -nc '{step:1,action:"probe substrate",command:"continuous-productivity-detector.sh doctor --json"}'
+)"$'\n'"$(jq -nc '{step:2,action:"detect across all peers",command:"continuous-productivity-detector.sh --json"}'
+)"$'\n'"$(jq -nc '{step:3,action:"single-session probe",command:"continuous-productivity-detector.sh --session skillos --json"}'
+)"
+  if command -v cli_emit_quickstart >/dev/null; then
+    cli_emit_quickstart "$SCAFFOLD_SCHEMA_VERSION" "$steps" "doctor,validate,audit"
+  else
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"quickstart",helper_lib_missing:true}'
+  fi
+}
+
+scaffold_emit_topic_help() {
+  local topic="${1:-}"
+  case "$topic" in
+    run|detect)  printf 'topic: detect (default) — read $CPD_TOPOLOGY + $CPD_LOOPS_DIR; for each peer-orch session, probe ntm activity + ready beads + doctor doc; classify productivity_state ∈ {productive, idle_with_work_available, josh_notify_allowlisted}; emit planned_actions; rc 0=no-escalation, 1=escalation-emitted, 2=parse-error, 3=probe-error\n' ;;
+    doctor)      printf 'topic: doctor — substrate probes: bash, jq, python3, ntm, topology_readable, loops_dir_present, audit_log_dir_writable\n' ;;
+    health)      printf 'topic: health — tail $SCAFFOLD_AUDIT_LOG; report last_run_ts, age_seconds, recent_runs, total_runs; status=warn at >24h stale\n' ;;
+    repair)      printf 'topic: repair --scope <audit_log_dir|topology_path> [--dry-run|--apply --idempotency-key KEY] — apply contract: --apply requires --idempotency-key (rc=3 refusal); scopes: audit_log_dir (mkdir -p), topology_path (REPORT-ONLY — verifies $CPD_TOPOLOGY readable; topology rows owned by topology-tick-refresh.sh)\n' ;;
+    validate)    printf 'topic: validate <subject> [VALUE] — subjects: session-name (non-empty), threshold-seconds (integer in [1, 86400]; matches CPD_THRESHOLD_SECONDS env), allowlist-class (must be one of substrate-corrupt|security|phi|paradigm|destructive); rc=1 on schema violation\n' ;;
+    audit)       printf 'topic: audit [--limit N] — tail $SCAFFOLD_AUDIT_LOG via cli_emit_audit_tail; default limit=20\n' ;;
+    why)         printf 'topic: why <id> — provenance lookup against $SCAFFOLD_AUDIT_LOG; matches against ts/session/productivity_state; states: found / not_found / unavailable\n' ;;
+    *)           printf 'topics: detect | doctor | health | repair | validate | audit | why | quickstart (SURGICAL DASH-FLAG SCAFFOLD: --schema + new verbs route to bash scaffold; --info/--examples/default classifier route to python with augmented info envelope)\n' ;;
+  esac
+}
+
+scaffold_cmd_doctor() {
+  local audit_log_dir; audit_log_dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
+  local topology="${CPD_TOPOLOGY:-$HOME/.local/state/flywheel/session-topology.jsonl}"
+  local loops_dir="${CPD_LOOPS_DIR:-$HOME/.flywheel/loops}"
+  local ntm_bin="${CPD_NTM:-/Users/josh/.local/bin/ntm}"
+  local bash_s=fail jq_s=fail py_s=fail ntm_s=warn topo_s=warn loops_s=warn audit_s=fail
+  command -v bash >/dev/null 2>&1 && bash_s=pass
+  command -v jq >/dev/null 2>&1 && jq_s=pass
+  command -v python3 >/dev/null 2>&1 && py_s=pass
+  [[ -x "$ntm_bin" ]] && ntm_s=pass
+  [[ -r "$topology" ]] && topo_s=pass
+  [[ -d "$loops_dir" ]] && loops_s=pass
+  [[ -d "$audit_log_dir" && -w "$audit_log_dir" ]] && audit_s=pass
+  local overall=pass
+  for st in "$bash_s" "$jq_s" "$py_s"; do [[ "$st" == fail ]] && overall=fail; done
+  if [[ "$overall" == pass ]]; then
+    for st in "$ntm_s" "$topo_s" "$loops_s" "$audit_s"; do
+      [[ "$st" == warn || "$st" == fail ]] && overall=warn
+    done
+  fi
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg overall "$overall" \
+    --arg bash_s "$bash_s" --arg jq_s "$jq_s" --arg py_s "$py_s" --arg ntm_s "$ntm_s" \
+    --arg topo_s "$topo_s" --arg loops_s "$loops_s" --arg audit_s "$audit_s" \
+    --arg ntm "$ntm_bin" --arg topo "$topology" --arg loops "$loops_dir" --arg audit "$audit_log_dir" \
+    '{schema_version:$sv,command:"doctor",ts:$ts,status:$overall,
+      checks:[
+        {name:"bash_available",status:$bash_s},
+        {name:"jq_available",status:$jq_s},
+        {name:"python3_available",status:$py_s,detail:"load-bearing — script body is python3 heredoc"},
+        {name:"ntm_executable",status:$ntm_s,path:$ntm,detail:"used for live --robot-activity probes"},
+        {name:"topology_readable",status:$topo_s,path:$topo},
+        {name:"loops_dir_present",status:$loops_s,path:$loops},
+        {name:"audit_log_dir_writable",status:$audit_s,path:$audit}
+      ]}'
+}
+
+scaffold_cmd_health() {
+  local audit_log="$SCAFFOLD_AUDIT_LOG"
+  local ts last_run_ts="" age_seconds total_runs=0 recent_runs=0 status="pass"
+  local stale_threshold="${CPD_HEALTH_STALE_THRESHOLD_SECONDS:-86400}"
+  ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  if [[ ! -r "$audit_log" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$audit_log" --argjson stale "$stale_threshold" \
+      '{schema_version:$sv,command:"health",ts:$ts,status:"warn",audit_log:$log,reason:"audit_log_missing",last_run_ts:null,age_seconds:null,recent_runs:0,total_runs:0,stale_threshold_seconds:$stale}'
+    return 0
+  fi
+  total_runs="$(wc -l < "$audit_log" 2>/dev/null | tr -d ' ' || echo 0)"
+  recent_runs="$(tail -20 "$audit_log" 2>/dev/null | wc -l | tr -d ' ' || echo 0)"
+  last_run_ts="$(tail -1 "$audit_log" 2>/dev/null | jq -r '.ts // empty' 2>/dev/null || true)"
+  if [[ -n "$last_run_ts" ]]; then
+    local now last_epoch
+    now="$(date -u +%s)"
+    last_epoch="$(date -u -j -f '%Y-%m-%dT%H:%M:%SZ' "$last_run_ts" +%s 2>/dev/null \
+                  || date -u -d "$last_run_ts" +%s 2>/dev/null || echo 0)"
+    age_seconds=$((now - last_epoch))
+    [[ "$age_seconds" -gt "$stale_threshold" ]] && status="warn"
+  else
+    age_seconds=null; status="warn"
+  fi
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg status "$status" \
+    --arg log "$audit_log" --arg last_run_ts "$last_run_ts" \
+    --argjson age "${age_seconds:-null}" --argjson total "$total_runs" --argjson recent "$recent_runs" \
+    --argjson stale "$stale_threshold" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,audit_log:$log,
+      last_run_ts:(if $last_run_ts == "" then null else $last_run_ts end),
+      age_seconds:$age,recent_runs:$recent,total_runs:$total,stale_threshold_seconds:$stale}'
+}
+
+scaffold_cmd_repair() {
+  local scope="" mode="dry_run" idem_key=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help) scaffold_emit_topic_help repair; return 0 ;;
+      --scope) scope="${2:-}"; shift 2 ;;
+      --scope=*) scope="${1#--scope=}"; shift ;;
+      --dry-run) mode="dry_run"; shift ;;
+      --apply) mode="apply"; shift ;;
+      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
+      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
+      --json) shift ;;
+      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
+    if command -v cli_refuse_apply_without_idem_key >/dev/null; then
+      cli_refuse_apply_without_idem_key "$SCAFFOLD_SCHEMA_VERSION" "repair" "$scope"
+    else
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
+        '{schema_version:$sv,command:"repair",status:"refused",mode:"apply",scope:$scope,reason:"--apply requires --idempotency-key",exit_code:3}'
+      exit 3
+    fi
+  fi
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  case "$scope" in
+    audit_log_dir)
+      local target; target="$(dirname "$SCAFFOLD_AUDIT_LOG")"
+      local existed="true"; [[ ! -d "$target" ]] && existed="false"
+      [[ "$mode" == "apply" ]] && mkdir -p "$target"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg mode "$mode" \
+        --arg scope "$scope" --arg idem "$idem_key" --arg target "$target" --arg existed "$existed" \
+        '{schema_version:$sv,command:"repair",status:"ok",ts:$ts,mode:$mode,scope:$scope,idempotency_key:$idem,target:$target,existed_before:($existed == "true")}'
+      ;;
+    topology_path)
+      # REPORT-ONLY scope — topology rows are owned by topology-tick-refresh.sh.
+      local target="${CPD_TOPOLOGY:-$HOME/.local/state/flywheel/session-topology.jsonl}"
+      local existed="false" readable="false"
+      [[ -f "$target" ]] && existed="true"
+      [[ -r "$target" ]] && readable="true"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg mode "$mode" \
+        --arg scope "$scope" --arg idem "$idem_key" --arg target "$target" \
+        --arg existed "$existed" --arg readable "$readable" \
+        '{schema_version:$sv,command:"repair",status:"report",ts:$ts,mode:$mode,scope:$scope,idempotency_key:$idem,target:$target,existed:($existed == "true"),readable:($readable == "true"),note:"REPORT-ONLY — topology rows owned by topology-tick-refresh.sh, not this surface"}'
+      ;;
+    "")
+      printf 'ERR: repair requires --scope <audit_log_dir|topology_path>\n' >&2; return 64 ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
+        '{schema_version:$sv,command:"repair",status:"refused",scope:$scope,reason:"unknown_scope",valid_scopes:["audit_log_dir","topology_path"]}'
+      return 64 ;;
+  esac
+}
+
+scaffold_cmd_validate() {
+  local subject="${1:-}"; shift || true
+  local arg="${1:-}"
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  case "$subject" in
+    session-name)
+      if [[ -n "$arg" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg s "$arg" \
+          '{schema_version:$sv,command:"validate",subject:"session-name",ts:$ts,status:"ok",value:$s}'
+        return 0
+      fi
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" \
+        '{schema_version:$sv,command:"validate",subject:"session-name",ts:$ts,status:"reject",reason:"empty_session_name"}'
+      return 1 ;;
+    threshold-seconds)
+      [[ -z "$arg" ]] && { printf 'ERR: validate threshold-seconds requires VALUE\n' >&2; return 64; }
+      if [[ "$arg" =~ ^[0-9]+$ ]] && (( arg >= 1 && arg <= 86400 )); then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --argjson v "$arg" \
+          '{schema_version:$sv,command:"validate",subject:"threshold-seconds",ts:$ts,status:"ok",value:$v}'
+        return 0
+      fi
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg v "$arg" \
+        '{schema_version:$sv,command:"validate",subject:"threshold-seconds",ts:$ts,status:"reject",value:$v,reason:"out_of_range_or_not_integer",valid_range:"[1, 86400]",default:300}'
+      return 1 ;;
+    allowlist-class)
+      [[ -z "$arg" ]] && { printf 'ERR: validate allowlist-class requires VALUE\n' >&2; return 64; }
+      case "$arg" in
+        substrate-corrupt|security|phi|paradigm|destructive)
+          jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg c "$arg" \
+            '{schema_version:$sv,command:"validate",subject:"allowlist-class",ts:$ts,status:"ok",value:$c}'
+          return 0 ;;
+        *)
+          jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg c "$arg" \
+            '{schema_version:$sv,command:"validate",subject:"allowlist-class",ts:$ts,status:"reject",value:$c,reason:"unknown_class",valid_classes:["substrate-corrupt","security","phi","paradigm","destructive"]}'
+          return 1 ;;
+      esac ;;
+    "")
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"validate",status:"refused",reason:"missing_subject",valid_subjects:["session-name","threshold-seconds","allowlist-class"]}'
+      return 64 ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg subj "$subject" \
+        '{schema_version:$sv,command:"validate",status:"refused",subject:$subj,reason:"unknown_subject",valid_subjects:["session-name","threshold-seconds","allowlist-class"]}'
+      return 64 ;;
+  esac
+}
+
+scaffold_cmd_audit() {
+  local limit=20
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help) scaffold_emit_topic_help audit; return 0 ;;
+      --limit) limit="${2:-20}"; shift 2 ;;
+      --limit=*) limit="${1#--limit=}"; shift ;;
+      --json) shift ;;
+      *) printf 'ERR: unknown audit arg %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+  if command -v cli_emit_audit_tail >/dev/null; then
+    cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" "$limit"
+    return 0
+  fi
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  if [[ ! -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$SCAFFOLD_AUDIT_LOG" \
+      '{schema_version:$sv,command:"audit",ts:$ts,status:"empty",audit_log:$log,rows:[]}'
+    return 0
+  fi
+  local rows; rows="$(tail -n "$limit" "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | jq -s . 2>/dev/null || echo '[]')"
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$SCAFFOLD_AUDIT_LOG" \
+    --argjson rows "$rows" --argjson limit "$limit" \
+    '{schema_version:$sv,command:"audit",ts:$ts,status:"ok",audit_log:$log,limit:$limit,rows:$rows}'
+}
+
+scaffold_cmd_why() {
+  local id="${1:-}"
+  [[ -z "$id" ]] && { printf 'ERR: why requires <id>\n' >&2; return 64; }
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  if [[ ! -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg id "$id" --arg log "$SCAFFOLD_AUDIT_LOG" \
+      '{schema_version:$sv,command:"why",ts:$ts,id:$id,status:"unavailable",reason:"audit_log_missing",audit_log:$log}'
+    return 0
+  fi
+  local match
+  match="$(jq -c --arg id "$id" 'select(.ts == $id or (.session // "") == $id or (.productivity_state // "") == $id)' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | head -1 || true)"
+  if [[ -z "$match" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg id "$id" --arg log "$SCAFFOLD_AUDIT_LOG" \
+      '{schema_version:$sv,command:"why",ts:$ts,id:$id,status:"not_found",audit_log:$log,searched_keys:["ts","session","productivity_state"]}'
+    return 0
+  fi
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg id "$id" --arg log "$SCAFFOLD_AUDIT_LOG" --argjson row "$match" \
+    '{schema_version:$sv,command:"why",ts:$ts,id:$id,status:"found",audit_log:$log,row:$row}'
+}
+
+scaffold_main() {
+  case "$1" in
+    --schema)
+      shift
+      local surface="${1:-default}"
+      [[ "$surface" == "--json" ]] && surface="default"
+      scaffold_emit_schema "$surface"; exit 0 ;;
+    quickstart) shift; scaffold_emit_quickstart "$@"; exit 0 ;;
+    doctor)     shift; scaffold_cmd_doctor "$@"; exit $? ;;
+    health)     shift; scaffold_cmd_health "$@"; exit $? ;;
+    repair)     shift; scaffold_cmd_repair "$@"; exit $? ;;
+    validate)   shift; scaffold_cmd_validate "$@"; exit $? ;;
+    audit)      shift; scaffold_cmd_audit "$@"; exit $? ;;
+    why)        shift; scaffold_cmd_why "$@"; exit $? ;;
+    help)       shift; scaffold_emit_topic_help "${1:-}"; exit 0 ;;
+    *)
+      printf 'ERR: scaffold_main called with non-canonical arg: %s\n' "$1" >&2; exit 64 ;;
+  esac
+}
+
+# SURGICAL DASH-FLAG match — intercept ONLY --schema + new verbs +
+# `help <topic>`. Native --info / --examples / --json / --quiet / --session /
+# default classifier all fall through to python (regression-test contract
+# preserved by augmenting native python info() in-place below).
+_scaffold_is_canonical_arg() {
+  case "${1:-}" in
+    --schema) return 0 ;;
+    quickstart|doctor|health|repair|validate|audit|why) return 0 ;;
+    help)
+      case "${2:-}" in detect|run|doctor|health|repair|validate|audit|why|quickstart|-h|--help) return 0 ;; esac
+      return 1 ;;
+    *) return 1 ;;
+  esac
+}
+
+# IDEMPOTENT-BY-CONSTRUCTION: read-only surface (peer_repo_writes=false in
+# native --info envelope). --idempotency-key flag accepted by scaffold for
+# `repair --apply` only; default classifier path has no mutation.
+
+if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
+  scaffold_main "$@"
+  exit $?
+fi
+# ====== END canonical-cli scaffold ======
+
 python3 - "$@" <<'PY'
 import argparse
 import json
@@ -40,14 +400,28 @@ def parse_args():
     p.add_argument("--activity-timeout", type=int, default=int(os.environ.get("CPD_ACTIVITY_TIMEOUT", "5")))
     return p.parse_args()
 def info():
+    # AG3.1 (bead flywheel-1hshd.19) requires .name + .version + .capabilities.
+    # Pre-existing regression contract requires .read_only==True,
+    # .peer_repo_writes==False, .canonical_cli contains "--quiet",
+    # .joshua_notify_allowlist contains "substrate-corrupt" — all preserved.
     return {
         "schema_version": SCHEMA,
         "name": "continuous-productivity-detector.sh",
+        "version": "scaffolded-v1",
+        "capabilities": [
+            "peer-orch-idle-with-work-detector",
+            "5min-default-threshold",
+            "joshua-notify-allowlist-5-classes",
+            "fixture-or-live-input",
+            "read-only-no-peer-repo-writes",
+            "xpane-escalation-message-builder",
+        ],
         "purpose": "Detect peer orchestrators idle past threshold while workers wait and findings exist.",
         "canonical_cli": ["--info", "--help", "--examples", "--json", "--quiet"],
         "exit_codes": {"0": "no-escalation-needed", "1": "escalation-emitted", "2": "malformed-state", "3": "probe-error"},
         "read_only": True,
         "peer_repo_writes": False,
+        "mutates_state": False,
         "joshua_notify_allowlist": sorted(ALLOWLIST),
         "memory": MEMORY,
     }

@@ -1,0 +1,33 @@
+PASS AG3.1 --info name+version+capabilities
+PASS regression --info contract preserved
+PASS AG3.2 --schema input/output
+PASS AG3.3 --examples >= 3
+PASS AG3.4 doctor .checks >= 5
+PASS doctor includes load-bearing python3+ntm+topology probes
+PASS --schema doctor
+PASS --schema repair contract
+PASS health binds audit_log
+PASS repair --dry-run audit_log_dir
+PASS repair --apply no-key refused rc=3
+PASS repair refused status
+PASS repair topology_path REPORT-ONLY
+PASS repair unknown rc=64 rc=64
+PASS validate session-name OK
+PASS validate threshold-seconds in-range
+PASS validate threshold-seconds out-of-range rc=1 rc=1
+PASS validate allowlist-class substrate-corrupt
+PASS validate allowlist-class security
+PASS validate allowlist-class phi
+PASS validate allowlist-class paradigm
+PASS validate allowlist-class destructive
+PASS validate allowlist-class unknown rc=1 rc=1
+PASS validate unknown_subject rc=64 rc=64
+PASS audit empty/missing
+PASS audit with row
+PASS why found
+PASS why not_found
+PASS why unavailable
+PASS quickstart steps
+PASS help doctor topic
+PASS native default classifier back-compat
+SUMMARY pass=32 fail=0
