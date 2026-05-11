@@ -67,6 +67,40 @@ This preserves the fleet contract without polluting the public repo with fleet-j
 - [ ] SECURITY.md (if PUBLIC) includes SLA + coordinated-disclosure section
 - [ ] CONTRIBUTING.md (if PUBLIC) sets contribution scope explicitly
 
+## Sub-pattern: SPLIT-vs-FLEET-TWIN-SYNC for AGENTS.md
+
+**Skill discovery** (2026-05-11, flywheel-4be4o BV AGENTS.md SPLIT pattern shipped):
+`split_pattern_diverges_from_fleet_twin_sync_for_public_repos`
+
+### The fleet-twin-sync pattern (PRIVATE-ALPHA → PRIVATE-ALPHA)
+
+Internal flywheel repos sync canonical doctrine bidirectionally via `doctrine-sync.sh`. The full L-rule + trauma-class + fleet-orch text mirrors to `.flywheel/AGENTS-CANONICAL.md` + `.flywheel/rules/` shards in every fleet-onboarded repo. Workers in any pane see the same canonical reference.
+
+### Why fleet-twin-sync BREAKS for public repos
+
+If `doctrine-sync.sh` ran against a public repo top-level `AGENTS.md`, internal fleet-orch jargon (L-rule numbers, trauma-class taxonomy, peer-orch coordination protocol references) would land in a file that external readers see. Two failure modes:
+1. **Audience-mismatch**: external readers don't have context for "L57 loop-state-marker-not-driver" — the doc becomes opaque
+2. **Information leak**: peer-orch coordination details aren't catastrophic to expose but aren't a public asset either
+
+### The SPLIT resolution
+
+Top-level `AGENTS.md` is a **thin public-safe pointer** (~30 lines). It says "Internal contributors: see `.flywheel/AGENTS-CANONICAL.md`. External contributors: see CONTRIBUTING.md."
+
+`.flywheel/AGENTS-CANONICAL.md` holds the full doctrine. It IS fleet-twin-synced via `doctrine-sync.sh` (consistent with the post-shard `.flywheel/rules/` layout per flywheel-rhdcq.1 fix 2026-05-11).
+
+`.flywheel/rules/` shards (104 in the BV exemplar) are byte-exact mirrors of the canonical shard library.
+
+### Audit signal
+
+A public repo with a top-level `AGENTS.md` containing any of `L\d+`, `trauma-class`, `peer-orch`, `fleet-mail` strings is broken. Lint rule candidate: `grep -E '(L[0-9]+|trauma-class|peer-orch|fleet-mail)' AGENTS.md` should return EMPTY for public-MIT repos.
+
+### Sister sync surfaces
+
+Beyond AGENTS.md, the same SPLIT discipline applies to any file where canonical-doctrine content would otherwise sync to a public surface:
+- `.flywheel/META-RULE-CACHE.md` — SHOULD NOT sync to public; keep .flywheel/-internal
+- `.flywheel/rules/` shards — sync to `.flywheel/` (under public-safe top-level pointer) but NOT mirrored to top-level
+- Future fleet-canonical surfaces — apply the same shape: thin public-safe top-level + full canonical in `.flywheel/`
+
 ## Memory cross-references
 
 - `feedback_class_divergence_public_mit_vs_private_alpha.md` — the META-RULE
