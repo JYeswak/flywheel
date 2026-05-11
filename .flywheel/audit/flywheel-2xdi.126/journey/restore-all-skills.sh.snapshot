@@ -1,0 +1,10 @@
+#!/bin/bash
+# Restore all disabled skills
+cd ~/.opencode/skills
+if [ -d "_disabled" ]; then
+  mv _disabled/* . 2>/dev/null
+  rmdir _disabled 2>/dev/null
+  echo "All skills restored"
+else
+  echo "No disabled skills to restore"
+fi
