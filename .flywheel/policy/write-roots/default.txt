@@ -1,0 +1,2 @@
+# default write-roots — current repo only
+/Users/josh/Developer/flywheel

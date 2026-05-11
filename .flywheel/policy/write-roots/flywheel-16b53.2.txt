@@ -1,0 +1,9 @@
+# Per-bead OWNED_WRITE_ROOTS for flywheel-16b53.2
+# (P0 trauma-class mitigation; authoring guard + helper + worker-tick.md note)
+#
+# Standard root:
+/Users/josh/Developer/flywheel
+#
+# Joshua-domain skill territory for the worker-tick.md doc edit
+# (per 3-class substrate-boundary taxonomy 2xdi.149 + 2xdi.60.1 precedent):
+/Users/josh/.claude/commands/flywheel

@@ -653,3 +653,50 @@ cli_emit_topic_help() {
   printf '%s\n' "$body"
   return 0
 }
+
+# ----------------------------------------------------------------------
+# cli_pre_write_check — Layer-1 PREVENTION wrapper around the
+# pre-write-path-guard.sh primitive (bead flywheel-16b53.2).
+#
+# Caller pattern (wrap any absolute-path write before the Write tool runs):
+#
+#   cli_pre_write_check "$abs_path" "$FLYWHEEL_CURRENT_BEAD" || return $?
+#
+# Returns:
+#   0 — allow (proposed path is under the bead's OWNED_WRITE_ROOTS allowlist)
+#   1 — deny  (caller MUST abort the write)
+#   2 — usage / arg error
+#   3 — missing or malformed policy
+#   4 — realpath failed
+#
+# Bypass for testing/CI: set FLYWHEEL_PRE_WRITE_CHECK_DISABLED=1 (never use
+# in production; the guard exists precisely because workers have drifted into
+# peer-canonical paths before — see flywheel-16b53 trauma evidence).
+#
+# Sister primitives:
+#   - .flywheel/scripts/cd-realpath-wrapper.sh (cd-time prevention)
+#   - .flywheel/scripts/clobber-recovery.sh    (post-clobber recovery)
+# ----------------------------------------------------------------------
+cli_pre_write_check() {
+  local path
+  local bead
+  path="${1:-}"
+  bead="${2:-${FLYWHEEL_CURRENT_BEAD:-unknown}}"
+  if [[ -z "$path" ]]; then
+    printf 'ERR: cli_pre_write_check requires PATH as first arg\n' >&2
+    return 2
+  fi
+  if [[ "${FLYWHEEL_PRE_WRITE_CHECK_DISABLED:-0}" == "1" ]]; then
+    return 0
+  fi
+  local guard
+  guard="${PRE_WRITE_PATH_GUARD:-/Users/josh/Developer/flywheel/.flywheel/scripts/pre-write-path-guard.sh}"
+  if [[ ! -x "$guard" ]]; then
+    # Guard missing is itself a policy failure — refuse the write rather than
+    # silently allow.
+    printf 'ERR: pre-write-path-guard.sh not executable at %s\n' "$guard" >&2
+    return 3
+  fi
+  bash "$guard" --path "$path" --bead "$bead" --apply --json >/dev/null
+  return $?
+}
