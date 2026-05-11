@@ -1,0 +1,3 @@
+.flywheel/scripts/continuous-productivity-detector-install.sh --dry-run --json
+.flywheel/scripts/continuous-productivity-detector-install.sh --apply --json
+.flywheel/scripts/continuous-productivity-detector-install.sh --run-once --json

@@ -1,0 +1,2 @@
+{"schema_version":"continuous-productivity-detector-install/v1","command":"validate","subject":"launchd-label","ts":"2026-05-11T04:34:35Z","status":"reject","value":"com.apple.invalid","reason":"pattern_mismatch","pattern":"^ai\\.zeststream\\.[a-z0-9-]+$"}
+rc=1

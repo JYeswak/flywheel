@@ -1,0 +1,2 @@
+{"schema_version":"continuous-productivity-detector-install/v1","command":"repair","status":"refused","scope":"nope","reason":"unknown_scope","valid_scopes":["launch_agents_dir","ledger_dir","audit_log_dir"]}
+rc=64

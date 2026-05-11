@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info emits native PASSTHRU envelope (continuous-productivity-detector-install/v1 + .label)
+PASS --schema emits scaffold envelope (NOT bypassed — native errors)
+PASS --examples emits native PASSTHRU example invocations
+PASS doctor emits scaffold envelope with >=5 checks
+PASS health emits scaffold envelope
+PASS repair --dry-run emits scaffold envelope (real scope launch_agents_dir)
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate (bare) refuses with rc=64 + missing_subject envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS script annotates NUANCED-PARTIAL-BYPASS variant (4th application)
+PASS doctor probes python3 + launchctl + detector (load-bearing for plist install + launchd bootstrap)
+PASS validate launchd-label accepts canonical ai.zeststream.* (matches $CPD_LABEL default)
+PASS validate launchd-label rejects non-canonical with rc=1 (5th occurrence of label-pattern check, sister to vs78t)
+PASS validate interval-seconds accepts boundary + default values (30/300/3600)
+PASS validate interval-seconds rejects 10 (below [30,3600] range) with rc=1
+SUMMARY pass=19 fail=0

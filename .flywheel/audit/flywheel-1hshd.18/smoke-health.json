@@ -1,0 +1,1 @@
+{"schema_version":"continuous-productivity-detector-install/v1","command":"health","ts":"2026-05-11T04:34:35Z","status":"warn","audit_log":"/Users/josh/.local/state/flywheel/continuous-productivity-detector-install-runs.jsonl","reason":"audit_log_missing","last_run_ts":null,"age_seconds":null,"recent_runs":0,"total_runs":0}

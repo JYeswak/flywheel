@@ -1,0 +1,2 @@
+{"schema_version":"continuous-productivity-detector-install/v1","command":"repair","status":"refused","mode":"apply","scope":"launch_agents_dir","reason":"--apply requires --idempotency-key"}
+rc=3
