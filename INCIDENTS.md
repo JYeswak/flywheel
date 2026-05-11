@@ -8599,3 +8599,38 @@ Evidence:
 - Memory cross-refs: `feedback_dcg_prose_trigger_strip_dangerous_substrings.md`
   (DCG context for why `git checkout` is replaced with `git show > file`).
 
+
+
+## `.beads/` authority drift: br-authority-probe.sh on-demand diagnostic (2026-05-11)
+
+Bead: `flywheel-2xdi.61` (canonical receiver-surface citation for the
+gap-hunt-probe `probe-without-receiver` rule).
+
+`.flywheel/scripts/br-authority-probe.sh` is the flywheel-side diagnostic
+equivalent of the upstream `br authority` command sketched in
+`bead-isolation-fix-2026-04-30.md` Change 4.3 (filed at beads_rust#289).
+It is an **operator-on-demand diagnostic**, not a tick-loop probe.
+
+When to invoke (operator-driven):
+- After `br sync` reports merge conflicts or `force-jsonl` was used.
+- When a bead's `source_repo` field doesn't match the current `.beads/`
+  parent (canonical absolute path mismatch — see beads_rust#289).
+- When debugging cross-repo bead leakage (per `project_bead_isolation_plan`).
+
+What it reports:
+- DB path, mutability, discovery method (PWD vs BEADS_DIR vs walk-up).
+- `source_repo` (last-touched) for the active DB.
+- Walk-up status (which parent dir owns the canonical `.beads/`).
+
+Canonical CLI surfaces (per canonical-cli-scoping, filled-in by
+flywheel-eqcsa): `doctor / health / repair / validate / audit / why /
+quickstart / help / completion / --info / --schema / --examples`.
+
+Boundary: **read-only** against the local `br` install + current
+working directory's `.beads/` resolution path. NEVER writes to any
+beads DB.
+
+Cross-refs:
+- Upstream issue: https://github.com/Dicklesworthstone/beads_rust/issues/289
+- Sister diagnostic: `flywheel-bead-isolation-fix-2026-04-30.md`
+- Test: `tests/br-authority-probe-canonical-cli.sh`
