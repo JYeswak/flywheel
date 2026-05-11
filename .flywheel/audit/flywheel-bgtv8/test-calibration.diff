@@ -1,0 +1,33 @@
+diff --git a/tests/auto-l112-gate-orch-adoption-test.sh b/tests/auto-l112-gate-orch-adoption-test.sh
+index 5af4bcd..6386759 100755
+--- a/tests/auto-l112-gate-orch-adoption-test.sh
++++ b/tests/auto-l112-gate-orch-adoption-test.sh
+@@ -18,11 +18,28 @@ fail() { printf 'FAIL %s\n' "$1" >&2; fail_count=$((fail_count + 1)); }
+ 
+ write_envelope() {
+   local file="$1" command="$2" expected="$3" timeout="${4:-5}"
++  # bead flywheel-bgtv8 (META-RULE 2026-05-09 calibrate-test-to-actual-contract):
++  # br-close-with-gate.sh now invokes callback-envelope-schema-validator which
++  # requires 8 quality-bar fields (quality_bar_passed, composite_score,
++  # jeff_score, donella_score, joshua_score, rust/python_clean, cli_canonical,
++  # readme_quality). The validator was added/extended after this test was
++  # written; envelopes that omit these fields fail with
++  # `failure_class=callback_envelope_schema_failed`. Write default-pass values
++  # so the gate exercise probes the L112 probe (the unit-under-test) rather
++  # than the schema-completeness gate (which is a separate concern).
+   {
+     printf 'l112_probe_command=%s\n' "$command"
+     printf 'l112_probe_expected=%s\n' "$expected"
+     printf 'l112_probe_timeout_sec=%s\n' "$timeout"
+     printf 'skill_auto_routes_addressed=%s\n' "$SKILL_ROUTES"
++    printf 'quality_bar_passed=yes\n'
++    printf 'composite_score=9.5\n'
++    printf 'jeff_score=9.5\n'
++    printf 'donella_score=9.5\n'
++    printf 'joshua_score=9.5\n'
++    printf 'rust/python_clean=n/a\n'
++    printf 'cli_canonical=yes\n'
++    printf 'readme_quality=n/a\n'
+   } >"$file"
+ }
+ 
