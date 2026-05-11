@@ -1,0 +1,72 @@
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -208,3 +208,69 @@
+ - `scripts/perf-bench.sh` — Pass-1 baseline profiling harness for the `research` CLI (`where|who|search|triangulate|--help`) and `spend-ledger.py status|log` across 5 representative queries. Pure stdlib + bash; portable millisecond timer via python3. Emits `data/derived-2026-04-29/PERF-BASELINE-2026-04-29.md` for diff-against-future-passes. Invoke when shipping CLI optimizations (Rust binary swaps, query-template rewrites) to capture before/after latency receipts. Operator-on-demand only; do not auto-run.
+ 
+ Add other operator scripts to this section as they ship so SKILL.md is the discovery surface (not just the `scripts/` directory listing).
++
++### Scripts inventory (canonical)
++
++The complete `scripts/` inventory, grouped by capability cluster. Each entry is operator-on-demand unless noted; check the script header for usage detail and exit-code semantics.
++
++**Spend-ledger + cost accounting:**
++
++| Script | Purpose |
++|---|---|
++| `scripts/spend-ledger.py` | Cost-aware accounting wrapper for X API (and any pay-per-use API). Authoritative spend-ledger writer. |
++| `scripts/spend-ledger-fast.sh` | Opt-in fast wrapper for `spend-ledger log` — bypasses python startup overhead for hot-path logging. |
++| `scripts/spend-summary.py` | Daily / weekly / MTD / reconciliation summary of `spend-ledger.jsonl`. |
++| `scripts/spend-ledger-test.py` | Unit tests for spend-ledger. |
++| `scripts/weekly-reconcile.sh` | Enforces SPEND-LEDGER-CONTRACT (d) Weekly Reconciliation. |
++
++**Axis pollers + research-axis maintenance:**
++
++| Script | Purpose |
++|---|---|
++| `scripts/arxiv-poll.sh` | Fetch arxiv RSS feeds listed in `data/sources.txt`; save as `*.cur` snapshots. |
++| `scripts/arxiv-rerank.py` | BM25-lite re-rank over arxiv triangulate results. |
++| `scripts/reddit-poll.sh` | Fetch 10 subreddit RSS feeds; normalize to JSONL. |
++| `scripts/reddit-poll-json.sh` | Fetch `/hot/.json` + `/top/.json` for 10 subreddits; normalize to JSONL. |
++| `scripts/research-axis-poll-all.sh` | Manual "all axes refresh" — invokes each axis poller in sequence. |
++| `scripts/research-axis-status.sh` | Status snapshot for daily research-axis pollers. |
++
++**Native build + Rust query path:**
++
++| Script | Purpose |
++|---|---|
++| `scripts/build-rust-query.sh` | Build native `research-query` Rust binary; install to `~/.local/bin`. |
++| `scripts/install-research-cron.sh` | Idempotent loader for research-triad launchd plists. |
++
++**Calibration + validation:**
++
++| Script | Purpose |
++|---|---|
++| `scripts/rubric-check.sh` | Green/red dashboard for the 11 quantitative invariants. |
++| `scripts/snr-eval.py` | Compute nDCG@k, MRR, slop-penalty, and composite SNR for graded results. |
++| `scripts/self-test.sh` | research-triad SELF-TEST runner. |
++| `scripts/research-query-route-fix-test.sh` | Verifies the `cmd_index` rebuild guard for the research-query routing fix. |
++| `scripts/x-capability-probe.sh` | Verify `X-ECOSYSTEM-CAPABILITY-MAP-2026-04-29.md` claims live against the X API. |
++| `scripts/perf-profile-python.py` | Pass-1 cProfile harness for research-triad. |
++
++**Trauma / incident-archive surfaces:**
++
++| Script | Purpose |
++|---|---|
++| `scripts/trauma-ingest.sh` | Canonical entry point for landing trauma artifacts in the corpus. |
++| `scripts/trauma-ingest-test.sh` | Hermetic proof for `trauma-ingest.sh`. |
++
++**X follow-graph + cluster mining:**
++
++| Script | Purpose |
++|---|---|
++| `scripts/A2-cluster-reverse-index.py` | A2 Track topic-cluster reverse index — reads frozen 2nd-degree follow-graph corpus; produces ranked top-20 handles per cluster. |
++| `scripts/A3-convergence-digest.py` | A3 convergence digest — pure offline mining of the frozen X follow-graph. |
++| `scripts/score-candidates.py` | Load `second-degree.tsv`; apply ZestStream-relevance scoring; emit ranked review markdown. |
++| `scripts/wave2-follows.sh` | Wave 2 follow batch (2026-04-29 cut). |
++| `scripts/weekly-reconcile.sh` (already listed above) | (cross-listed: also a SPEND-LEDGER artifact) |
++
++**Local-grep + socraticode adapter:**
++
++| Script | Purpose |
++|---|---|
++| `scripts/research-socraticode-query.py` | Local-grep adapter for the 4 socraticode collections. |
