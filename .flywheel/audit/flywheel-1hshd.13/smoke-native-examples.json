@@ -1,0 +1,1 @@
+{"schema_version":"scratch-cleanup/v1","command":"examples","examples":["cleanup-scratch.sh --dry-run --json /tmp/flywheel-demo.abc123","cleanup-scratch.sh --apply --json /tmp/flywheel-demo.abc123","cleanup-scratch.sh validate /var/folders/x/y/T/flywheel-demo.abc123 --json","cleanup-scratch.sh why path-policy --json"]}

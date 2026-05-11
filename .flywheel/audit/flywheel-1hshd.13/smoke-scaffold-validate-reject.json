@@ -1,0 +1,2 @@
+{"schema_version":"cleanup-scratch/v1","command":"validate","subject":"scratch-path","ts":"2026-05-11T04:05:33Z","status":"reject","value":"relative","reason":"not_absolute_path","contract":"ABSOLUTE_PATH arg must start with /"}
+rc=1

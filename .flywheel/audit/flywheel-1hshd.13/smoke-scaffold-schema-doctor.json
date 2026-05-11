@@ -1,0 +1,1 @@
+{"schema_version":"cleanup-scratch/v1","command":"schema","surface":"doctor","note":"BYPASSED to native — see native `doctor` subcommand for authoritative envelope (subsystems.script + .python + .jq)"}

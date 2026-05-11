@@ -1,0 +1,2 @@
+{"schema_version":"cleanup-scratch/v1","command":"validate","subject":"mode-name","ts":"2026-05-11T04:05:33Z","status":"reject","value":"fast","reason":"not_in_enum","valid_modes":["dry-run","apply"]}
+rc=1

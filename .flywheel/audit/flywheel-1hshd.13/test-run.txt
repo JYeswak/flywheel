@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info emits native PASSTHRU envelope (scratch-cleanup/v1 + .name)
+PASS --schema emits scaffold envelope (NOT bypassed — native treats as path arg)
+PASS --examples emits scaffold envelope (NOT bypassed — native treats as path arg)
+PASS doctor BYPASSED to native (subsystems.script + .python + .jq)
+PASS health BYPASSED to native (.command=health)
+PASS repair --dry-run emits scaffold envelope (real scope audit_log_dir)
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate (bare) refuses with rc=64 + missing_subject envelope
+PASS audit emits canonical envelope
+PASS why BYPASSED to native (.command=why + .subject=path-policy)
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS script annotates SELECTIVE-VERB-BYPASS variant (NEW; discoverable via grep)
+PASS SELECTIVE 4-direction routing: native doctor + scaffold repair + native --info + scaffold --schema all correct
+PASS validate scratch-path rejects relative path with rc=1 (4th occurrence of absolute-only pattern)
+PASS validate mode-name accepts both canonical values (dry-run + apply matching --dry-run|--apply flags)
+PASS validate mode-name rejects 'fast' with rc=1 + valid_modes enumeration
+PASS schema BYPASSED to native (mutation_modes + stable_exit_codes documented)
+SUMMARY pass=19 fail=0
