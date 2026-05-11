@@ -1,0 +1,3 @@
+2026-05-11T21:59:50Z pane=fm8-fixture:0.2 chevron-detected
+2026-05-11T22:00:00Z pane=fm8-fixture:0.2 dispatch-sent task=flywheel-fm8fix-d3ad
+2026-05-11T22:00:30Z pane=fm8-fixture:0.2 chevron-still-visible no-input-ack

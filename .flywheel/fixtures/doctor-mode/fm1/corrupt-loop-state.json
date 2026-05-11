@@ -1,0 +1,9 @@
+{
+  "project": "fm1-fixture",
+  "repo": "{{user_home}}/Developer/fm1-fixture",
+  "active": true,
+  "tier": "active_normal",
+  "interval": "30m",
+  "started_at": "2026-05-01T00:00:00Z",
+  "session": "fm1-fixture"
+}

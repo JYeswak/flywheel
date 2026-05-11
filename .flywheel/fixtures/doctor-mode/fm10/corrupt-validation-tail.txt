@@ -1,0 +1,4 @@
+2026-05-11T21:59:00Z pane=fm10-fixture:0.3 WORKING
+2026-05-11T21:59:30Z pane=fm10-fixture:0.3 THINKING tokens=4500
+2026-05-11T22:00:00Z pane=fm10-fixture:0.3 user-prompt-submit-hook fired
+2026-05-11T22:00:01Z pane=fm10-fixture:0.3 chevron-still-visible-but-pane-alive
