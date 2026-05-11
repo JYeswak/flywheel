@@ -1,0 +1,2 @@
+{"schema_version":"jeff-verdict-heuristic/v1","command":"repair","status":"refused","scope":"nope","reason":"unknown_scope","valid_scopes":["state_dir","audit_log_dir"]}
+rc=64
