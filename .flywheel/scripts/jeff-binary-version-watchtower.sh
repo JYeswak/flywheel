@@ -22,6 +22,14 @@ frankenterm_candidates="${FRANKENTERM_RELEASE_CANDIDATES:-frankenterm franken-te
 homebrew_sbh_repo="${HOMEBREW_SBH_REPO:-Dicklesworthstone/homebrew-sbh}"
 homebrew_sbh_fixture="${HOMEBREW_SBH_FORMULA_FIXTURE:-}"
 
+# flywheel-90k49.3: sbh binary version probe + upstream release watch.
+# Gated on `command -v sbh` per "no memory edit before load-bearing" doctrine
+# (the function emits status=not_installed until install happens).
+sbh_binary_repo="${SBH_BINARY_REPO:-Dicklesworthstone/storage_ballast_helper}"
+sbh_version_fixture="${SBH_VERSION_FIXTURE:-}"
+sbh_release_fixture="${SBH_RELEASE_FIXTURE:-}"
+sbh_bin="${SBH_BIN:-sbh}"
+
 # ---------- canonical-cli emitters (added by flywheel-k8gcv.10) ----------
 
 emit_info() {
@@ -575,6 +583,90 @@ homebrew_sbh_formula_watch() {
   fi
 }
 
+# flywheel-90k49.3: sbh binary version probe + upstream release watch.
+#
+# Pattern parallels ntm canonical-binary-version probing (run sbh --version,
+# fetch latest release tag, compute relation). Differs in two ways:
+#   1. Gated on `command -v sbh` — SBH may not be installed yet (90k49.1 gates
+#      install on homebrew Formula publication). When uninstalled the function
+#      emits status=not_installed and skips drift promotion.
+#   2. Upstream source is `gh api repos/<sbh_binary_repo>/releases/latest`
+#      (Jeff publishes tags, not an `upgrade --check` CLI subcommand).
+#
+# Status taxonomy:
+#   - not_installed: command -v sbh fails; pre-90k49.1 install state
+#   - current: installed == latest
+#   - behind: installed < latest (drift bead promotion candidate)
+#   - ahead: installed > latest (e.g., cargo-installed from main)
+#   - unknown: gh unavailable or installed version unparsable
+#
+# Fixture support:
+#   SBH_VERSION_FIXTURE=/path/json — overrides `sbh --version` output
+#   SBH_RELEASE_FIXTURE=/path/json — overrides `gh api .../releases/latest`
+sbh_binary_version_watch() {
+  local installed latest relation status release_raw version_raw
+  # version probe
+  if [[ -n "$sbh_version_fixture" ]]; then
+    version_raw="$(cat "$sbh_version_fixture" 2>/dev/null || echo '')"
+  elif command -v "$sbh_bin" >/dev/null 2>&1; then
+    version_raw="$("$sbh_bin" --version 2>/dev/null || echo '')"
+  else
+    version_raw=""
+  fi
+  installed="$(normalize_version "$version_raw")"
+  # release probe
+  if [[ -n "$sbh_release_fixture" ]]; then
+    release_raw="$(cat "$sbh_release_fixture" 2>/dev/null || echo '{}')"
+  elif command -v gh >/dev/null 2>&1; then
+    release_raw="$(gh api "repos/${sbh_binary_repo}/releases/latest" 2>/dev/null || echo '{}')"
+  else
+    release_raw='{}'
+  fi
+  latest="$(jq -er '.tag_name // empty' <<<"$release_raw" 2>/dev/null | sed -E 's/^v//' || true)"
+  # status logic
+  if [[ -z "$version_raw" ]]; then
+    status="not_installed"
+    relation="not_installed"
+  elif [[ -z "$installed" ]]; then
+    status="unknown"
+    relation="unknown"
+  else
+    relation="$(relation "$installed" "$latest")"
+    case "$relation" in
+      current) status="ok" ;;
+      behind)  status="stale" ;;
+      ahead)   status="ahead" ;;
+      *)       status="unknown" ;;
+    esac
+  fi
+  jq -nc \
+    --arg repo "$sbh_binary_repo" \
+    --arg bin "$sbh_bin" \
+    --arg binary_path "$(command -v "$sbh_bin" 2>/dev/null || true)" \
+    --arg installed_version "${installed:-}" \
+    --arg latest_version "${latest:-}" \
+    --arg relation "$relation" \
+    --arg status "$status" '
+      {
+        name: "sbh",
+        repo: $repo,
+        url: ("https://github.com/" + $repo),
+        binary: $bin,
+        binary_path: $binary_path,
+        installed_version: (if $installed_version == "" then null else $installed_version end),
+        latest_version: (if $latest_version == "" then null else $latest_version end),
+        latest_source: "gh api releases/latest",
+        relation: $relation,
+        status: $status,
+        recommended_command: (
+          if $status == "stale" then "brew upgrade sbh"
+          elif $status == "not_installed" then "brew tap Dicklesworthstone/sbh && brew install sbh"
+          else null end),
+        gating_bead: "flywheel-90k49.1",
+        source_bead: "flywheel-90k49.3"
+      }'
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     doctor|health|run) command="$1" ;;
@@ -585,8 +677,11 @@ while [[ $# -gt 0 ]]; do
     --repo-root|--fixture|--developer-root) shift ;;
     --frankenterm-release-fixture) frankenterm_fixture="$2"; shift ;;
     --codex-release-fixture) codex_fixture="$2"; shift ;;
+    --sbh-version-fixture) sbh_version_fixture="$2"; shift ;;
+    --sbh-release-fixture) sbh_release_fixture="$2"; shift ;;
     --br-bin) br_bin="$2"; shift ;;
     --ntm-bin) ntm_bin="$2"; shift ;;
+    --sbh-bin) sbh_bin="$2"; shift ;;
     --now) shift ;;
     --no-fetch) ;;
     --help|-h|help) usage; exit 0 ;;
@@ -623,8 +718,10 @@ frankenterm_watch="$(frankenterm_release_watch)"
 codex_watch="$(codex_release_watch)"
 # flywheel-90k49.1: homebrew-sbh Formula publication watch.
 homebrew_sbh_watch="$(homebrew_sbh_formula_watch)"
+# flywheel-90k49.3: sbh canonical-binary version probe (gated on install).
+sbh_binary_watch="$(sbh_binary_version_watch)"
 
-result="$(jq -nc --arg schema "$VERSION" --arg checked_at "$checked_at" --arg status "$status" --arg installed "$installed" --arg latest "$latest" --arg relation "$rel" --arg state_dir "$state_dir" --arg binary_path "$(command -v "$ntm_bin" 2>/dev/null || true)" --argjson promotions "$promotions" --argjson frankenterm_watch "$frankenterm_watch" --argjson codex_watch "$codex_watch" --argjson homebrew_sbh_watch "$homebrew_sbh_watch" '{schema_version:$schema,checked_at:$checked_at,status:$status,cadence:"hourly",canonical_binary_count:1,release_watch_count:(($frankenterm_watch | length) + 2),stale_count:(if $relation == "behind" then 1 else 0 end),unknown_count:(if $relation == "unknown" then 1 else 0 end),highest_priority:(if $relation == "behind" then "P1" else null end),rows:[{name:"ntm",repo:"ntm",binary_path:$binary_path,installed_version:$installed,latest_version:$latest,latest_source:"ntm upgrade --check",relation:$relation,status:(if $relation == "behind" then "stale" elif $relation == "unknown" then "unknown" else "ok" end),recommended_command:(if $relation == "behind" then "ntm upgrade --yes" else null end),upgrade_mutation_invoked:false}],watchlists:{frankenterm_release:{cadence:"daily",candidates:($frankenterm_watch | map(.candidate)),public_count:($frankenterm_watch | map(select(.repo_public == true)) | length),release_count:($frankenterm_watch | map(select(.latest_release != null)) | length),status:(if ($frankenterm_watch | map(select(.latest_release != null)) | length) > 0 then "released" elif ($frankenterm_watch | map(select(.repo_public == true)) | length) > 0 then "public_no_release" else "not_found" end),rows:$frankenterm_watch},codex_release:{cadence:"daily",repo:$codex_watch.repo,hold_version:$codex_watch.hold_version,target_version:$codex_watch.target_version,latest_release:$codex_watch.latest_release,status:$codex_watch.status,recanary_recommended:$codex_watch.recanary_recommended,source_bead:"flywheel-mspmr",row:$codex_watch},homebrew_sbh_formula:{cadence:"daily",repo:$homebrew_sbh_watch.repo,tap_name:$homebrew_sbh_watch.tap_name,formula_dir:$homebrew_sbh_watch.formula_dir,rb_file_count:$homebrew_sbh_watch.rb_file_count,status:$homebrew_sbh_watch.status,installation_recommended:$homebrew_sbh_watch.installation_recommended,recommended_command:$homebrew_sbh_watch.recommended_command,source_bead:"flywheel-90k49.1",row:$homebrew_sbh_watch}},stale:(if $relation == "behind" then [{name:"ntm",repo:"ntm",installed_version:$installed,latest_version:$latest,relation:$relation,status:"stale"}] else [] end),promotions:$promotions,warnings:[],state_dir:$state_dir}')"
+result="$(jq -nc --arg schema "$VERSION" --arg checked_at "$checked_at" --arg status "$status" --arg installed "$installed" --arg latest "$latest" --arg relation "$rel" --arg state_dir "$state_dir" --arg binary_path "$(command -v "$ntm_bin" 2>/dev/null || true)" --argjson promotions "$promotions" --argjson frankenterm_watch "$frankenterm_watch" --argjson codex_watch "$codex_watch" --argjson homebrew_sbh_watch "$homebrew_sbh_watch" --argjson sbh_binary_watch "$sbh_binary_watch" '{schema_version:$schema,checked_at:$checked_at,status:$status,cadence:"hourly",canonical_binary_count:(if $sbh_binary_watch.status == "not_installed" then 1 else 2 end),release_watch_count:(($frankenterm_watch | length) + 2),stale_count:(if $relation == "behind" then 1 else 0 end) + (if $sbh_binary_watch.status == "stale" then 1 else 0 end),unknown_count:(if $relation == "unknown" then 1 else 0 end) + (if $sbh_binary_watch.status == "unknown" then 1 else 0 end),highest_priority:(if $relation == "behind" or $sbh_binary_watch.status == "stale" then "P1" else null end),rows:([{name:"ntm",repo:"ntm",binary_path:$binary_path,installed_version:$installed,latest_version:$latest,latest_source:"ntm upgrade --check",relation:$relation,status:(if $relation == "behind" then "stale" elif $relation == "unknown" then "unknown" else "ok" end),recommended_command:(if $relation == "behind" then "ntm upgrade --yes" else null end),upgrade_mutation_invoked:false}] + (if $sbh_binary_watch.status == "not_installed" then [] else [{name:"sbh",repo:$sbh_binary_watch.repo,binary_path:$sbh_binary_watch.binary_path,installed_version:$sbh_binary_watch.installed_version,latest_version:$sbh_binary_watch.latest_version,latest_source:$sbh_binary_watch.latest_source,relation:$sbh_binary_watch.relation,status:$sbh_binary_watch.status,recommended_command:$sbh_binary_watch.recommended_command,upgrade_mutation_invoked:false,source_bead:"flywheel-90k49.3"}] end)),watchlists:{frankenterm_release:{cadence:"daily",candidates:($frankenterm_watch | map(.candidate)),public_count:($frankenterm_watch | map(select(.repo_public == true)) | length),release_count:($frankenterm_watch | map(select(.latest_release != null)) | length),status:(if ($frankenterm_watch | map(select(.latest_release != null)) | length) > 0 then "released" elif ($frankenterm_watch | map(select(.repo_public == true)) | length) > 0 then "public_no_release" else "not_found" end),rows:$frankenterm_watch},codex_release:{cadence:"daily",repo:$codex_watch.repo,hold_version:$codex_watch.hold_version,target_version:$codex_watch.target_version,latest_release:$codex_watch.latest_release,status:$codex_watch.status,recanary_recommended:$codex_watch.recanary_recommended,source_bead:"flywheel-mspmr",row:$codex_watch},homebrew_sbh_formula:{cadence:"daily",repo:$homebrew_sbh_watch.repo,tap_name:$homebrew_sbh_watch.tap_name,formula_dir:$homebrew_sbh_watch.formula_dir,rb_file_count:$homebrew_sbh_watch.rb_file_count,status:$homebrew_sbh_watch.status,installation_recommended:$homebrew_sbh_watch.installation_recommended,recommended_command:$homebrew_sbh_watch.recommended_command,source_bead:"flywheel-90k49.1",row:$homebrew_sbh_watch},sbh_binary_release:{cadence:"daily",repo:$sbh_binary_watch.repo,installed_version:$sbh_binary_watch.installed_version,latest_version:$sbh_binary_watch.latest_version,relation:$sbh_binary_watch.relation,status:$sbh_binary_watch.status,recommended_command:$sbh_binary_watch.recommended_command,gating_bead:$sbh_binary_watch.gating_bead,source_bead:"flywheel-90k49.3",row:$sbh_binary_watch}},stale:(if $relation == "behind" then [{name:"ntm",repo:"ntm",installed_version:$installed,latest_version:$latest,relation:$relation,status:"stale"}] else [] end) + (if $sbh_binary_watch.status == "stale" then [{name:"sbh",repo:$sbh_binary_watch.repo,installed_version:$sbh_binary_watch.installed_version,latest_version:$sbh_binary_watch.latest_version,relation:$sbh_binary_watch.relation,status:"stale"}] else [] end),promotions:$promotions,warnings:[],state_dir:$state_dir}')"
 
 if [[ "$apply" == "1" ]]; then
   mkdir -p "$state_dir"
