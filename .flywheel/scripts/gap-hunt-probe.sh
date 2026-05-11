@@ -1507,14 +1507,44 @@ def known_silos() -> set[str]:
 
 
 def probe_cross_source_silos(receivers_text: str) -> list[dict]:
+    """Detect *.jsonl ledgers under STATE_DIR with no cite in receivers_text.
+
+    Per flywheel-nq5ns: scaffold-canonical-CLI ledgers follow the
+    `<producer-script-stem>-runs.jsonl` naming convention (canonical-cli-
+    scoping doctrine). Doctrine/INCIDENTS references typically cite the
+    producer SCRIPT (e.g., `<name>.sh`), not the ledger basename.
+    Without producer-script-name fallback, the probe flags ledgers whose
+    producer IS doctrine-cited as cross-source-silos (false positive).
+
+    Sister-class precedent: flywheel-zsk2d (SKILL.md 4KB cap regression
+    → 256KB priority cap). Same Meadows #5 leverage shape: fix the
+    property (name-match form), not the proxy (per-ledger allowlist).
+
+    Producer-script-name match logic:
+      - For ledgers named `<X>-runs.jsonl`, also check `<X>` (stem
+        without `-runs` suffix) in receivers_text.
+      - This catches the canonical scaffold naming where the producer
+        script is `<X>.sh` and references in doctrine cite `<X>.sh` —
+        the `<X>` portion is shared.
+    """
     gaps = []
     skip = known_silos()
     for path in sorted(STATE_DIR.glob("*.jsonl")):
         name = path.name
         if name in skip:
             continue
-        if name not in receivers_text and path.stem not in receivers_text:
-            gaps.append(gap("cross-source-silos", name, f"{path} ledger exists but is not referenced by sampled tick/status/synth/doctrine surfaces"))
+        # flywheel-nq5ns: 3-form name match — full basename, stem,
+        # producer-script-stem (stem with `-runs` suffix stripped).
+        producer_stem = path.stem
+        if producer_stem.endswith("-runs"):
+            producer_stem = producer_stem[: -len("-runs")]
+        if (
+            name in receivers_text
+            or path.stem in receivers_text
+            or (producer_stem != path.stem and producer_stem in receivers_text)
+        ):
+            continue
+        gaps.append(gap("cross-source-silos", name, f"{path} ledger exists but is not referenced by sampled tick/status/synth/doctrine surfaces"))
         if len(gaps) >= 20:
             break
     return gaps
