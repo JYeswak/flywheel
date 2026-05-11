@@ -1,0 +1,6 @@
+PASS script defines SOURCE_RAW_HASH (raw whole-file hash for cp+verify path)
+PASS in_sync detection compares raw target hash against SOURCE_RAW_HASH
+PASS post-cp verify compares raw target hash against SOURCE_RAW_HASH
+PASS root_block check still uses canonicalized SOURCE_HASH (extract_root_block path preserved)
+PASS end-to-end: scoped --check against alpsinsurance reports 0 canonical errors + 0 canonical_drifted (was 145 errors pre-fix)
+SUMMARY pass=5 fail=0

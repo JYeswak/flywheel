@@ -807,16 +807,6 @@ SOURCE_HASH_INPUT="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-source-hash-input.XX
 canonicalize_source_for_hash "$SOURCE" "$SOURCE_HASH_INPUT"
 SOURCE_HASH="$(sha256_file "$SOURCE_HASH_INPUT")"
 rm -f "$SOURCE_HASH_INPUT"
-# SOURCE_HASH (above) is over the MARKERS-STRIPPED inner content — correct for
-# the root-block extract path (extract_root_block runs over the target before
-# hashing in render_root_agents_with_block + the post-write root_block check).
-#
-# SOURCE_RAW_HASH (below) is over the RAW whole-file bytes — correct for the
-# canonical-sync path which does plain `cp source → target` + raw sha256 check.
-# Without this, copy_managed_file's post-cp verify compares raw-target-sha256
-# against canonicalized-source-sha256 and triggers post_copy_hash_mismatch
-# even though the file is bit-for-bit correctly synced (flywheel-o40x0).
-SOURCE_RAW_HASH="$(sha256_file "$SOURCE")"
 SOURCE_REPO="$(canonicalize_dir "$(dirname "$SOURCE")")"
 if [[ -z "${SYNC_DOCTRINE_DOCS_SOURCE_DIR:-}" ]]; then
 DOCTRINE_DOCS_SOURCE_DIR="$SOURCE_REPO/.flywheel/doctrine"
@@ -870,12 +860,7 @@ while IFS= read -r target; do
   repo="$(canonicalize_dir "$repo")"
   printf '%s\n' "$repo" >>"$REPOS_FILE"
 
-  # flywheel-o40x0: this loop sync's full raw-file copies of SOURCE → target,
-  # so we compare against SOURCE_RAW_HASH (raw whole-file sha256) rather than
-  # SOURCE_HASH (canonicalized/markers-stripped). The latter is the domain
-  # for the root_block extract path; mixing them here false-positives every
-  # marker-bearing target as drifted + post_copy_hash_mismatch.
-  if [[ "$target_hash" == "$SOURCE_RAW_HASH" ]]; then
+  if [[ "$target_hash" == "$SOURCE_HASH" ]]; then
     jq -cn --arg repo "$repo" --arg target "$target" --arg hash "$target_hash" \
       '{repo:$repo,target:$target,status:"in_sync",hash:$hash}' >>"$DETAILS_FILE"
     continue
@@ -888,7 +873,7 @@ while IFS= read -r target; do
       backup_file "$target"
       if mv "$tmp" "$target"; then
       new_hash="$(sha256_file "$target")"
-      if [[ "$new_hash" == "$SOURCE_RAW_HASH" ]]; then
+      if [[ "$new_hash" == "$SOURCE_HASH" ]]; then
         CANONICAL_SYNCED_COUNT=$((CANONICAL_SYNCED_COUNT + 1))
         jq -cn --arg repo "$repo" --arg target "$target" --arg prior_hash "$target_hash" --arg new_hash "$new_hash" \
           '{repo:$repo,target:$target,status:"synced",prior_hash:$prior_hash,new_hash:$new_hash}' >>"$DETAILS_FILE"
