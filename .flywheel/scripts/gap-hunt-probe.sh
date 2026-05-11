@@ -775,7 +775,15 @@ def command_text() -> str:
         REPO_ROOT / "INCIDENTS.md",
         REPO_ROOT / "README.md",
     ]
-    return "\n".join(read_text(p, 1_000_000) for p in files)
+    pieces = [read_text(p, 1_000_000) for p in files]
+    # flywheel-2xdi.54: include .flywheel/doctrine/*.md as canonical anchor
+    # surface. The probe's evidence message claims it checks "doctrine, incidents,
+    # or recent plan files" but the implementation only scanned command-md +
+    # AGENTS/INCIDENTS/README + PLANS — missing the actual doctrine/ directory.
+    # Memories anchored in doctrine files were falsely flagged as not-cross-linked.
+    for doctrine_path in safe_iter_files(REPO_ROOT / ".flywheel/doctrine", "*.md", 200):
+        pieces.append(read_text(doctrine_path, 200_000))
+    return "\n".join(pieces)
 
 
 _ON_DEMAND_VALIDATOR_KINDS = {
