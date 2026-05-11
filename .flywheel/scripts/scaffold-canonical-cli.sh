@@ -265,6 +265,46 @@ detect_colliding_verbs() {
   printf '%s\n' "${found[@]}"
 }
 
+# Returns the list of canonical introspection flags the target's own
+# case-statement already handles (newline-separated). When the target has
+# its own `--info`, `--schema`, or `--examples` case-arm, the scaffold's
+# intercept at line 552 would hijack it. The flag-collision detection
+# lets the scaffold-emit step omit those flags from the intercept so
+# the target's handler still runs.
+#
+# Surfaced by flywheel-wzjo9.1.7 (flywheel-loop wave-2.0a-g) where the
+# target had its own `--info` emitting a different envelope shape. The
+# verb-collision detection (above) caught the verbs but missed the flags.
+#
+# Bead: flywheel-efojs
+#
+# Match policy: the canonical flag must appear in a case-arm context —
+# either as a standalone arm pattern (`--info)`) or as one alternative
+# in a combined arm (`-h|--info)` or `--info|--json)`). Prose mentions
+# (e.g., "Run --info | jq") are NOT case-arms and must not trigger a
+# false-positive.
+detect_colliding_flags() {
+  local target="$1"
+  # Canonical introspection flags the scaffold's intercept unconditionally
+  # claims. `--help` / `-h` are intentionally EXCLUDED — every target script
+  # already handles them with a usage-printer; that's not a semantic conflict
+  # because the scaffold's `--help` also prints a usage block. The semantic
+  # conflict is METADATA-EMITTERS (`--info`, `--schema`, `--examples`):
+  # target emits one shape, scaffold emits a different shape.
+  local canonical_flags=("--info" "--schema" "--examples")
+  local flag found=()
+  for flag in "${canonical_flags[@]}"; do
+    # Anchor to case-arm contexts only. Two acceptable shapes:
+    #   1) start-of-line / leading whitespace + `--flag` + optional space + `)` or `|`
+    #   2) `|--flag` + optional space + `)` or `|`  (mid-arm alternative)
+    # The trailing `[)|]` requirement is what discriminates case-arm from prose.
+    if grep -qE -- "(^[[:space:]]*${flag}[[:space:]]*[)|]|\\|${flag}[[:space:]]*[)|])" "$target" 2>/dev/null; then
+      found+=("$flag")
+    fi
+  done
+  printf '%s\n' "${found[@]}"
+}
+
 # Returns the list of per-target --flags found in the target source that
 # are NOT in the canonical scaffold flag set (newline-separated). The
 # canonical flag set excludes scaffold-introspection flags. The returned
@@ -308,6 +348,11 @@ emit_canonical_block() {
   # cause the scaffold intercept to defer to cmd_run. Empty when no verb
   # collision is detected.
   local bypass_flags="${2:-}"
+  # flywheel-efojs: comma-separated list of canonical introspection flags
+  # the TARGET already handles (`--info`, `--schema`, `--examples`).
+  # When set, those flags are OMITTED from the scaffold intercept so the
+  # target's own handler runs instead of the scaffold's metadata emitter.
+  local colliding_flags="${3:-}"
   # Pre-compute bypass injection text outside the heredoc so we can
   # interpolate as a single substitution. Nested `${var//pat/repl}` inside
   # the heredoc confuses bash's parser; do it here instead.
@@ -317,6 +362,34 @@ emit_canonical_block() {
     _bypass_header=$'\n#\n# VERB COLLISION BYPASS (flywheel-sacan): the target\'s own argparse\n# already handles canonical verbs (doctor|health|repair|validate|...).\n# When any of the per-target flags below are present in argv, the\n# intercept yields and cmd_run handles the per-bead path unchanged.\n# Per-target bypass flags: '"$bypass_flags"
     local _bypass_pattern="${bypass_flags//,/|}"
     _bypass_loop=$'\n  local _a\n  for _a in "$@"; do\n    case "$_a" in '"$_bypass_pattern"$') return 1 ;; esac\n  done'
+  fi
+  # flywheel-efojs: build the canonical-introspection case-arm pattern.
+  # Default = `--info|--schema|--examples`. When the target has a colliding
+  # arm for one of these flags, drop it from the intercept so target's
+  # handler runs. The trailing `)` is appended by the heredoc.
+  #
+  # _intro_flags_line is the FULL `    <arm>) return 0 ;;` line — empty
+  # when all three flags collide (case-arm omitted entirely so we never
+  # emit `) return 0 ;;` which is a bash syntax error).
+  local _intro_flags_arm="--info|--schema|--examples"
+  local _intro_flags_line="    --info|--schema|--examples) return 0 ;;"
+  local _flag_collision_header=""
+  if [[ -n "$colliding_flags" ]]; then
+    local _cf
+    IFS=',' read -ra _cf_arr <<<"$colliding_flags"
+    for _cf in "${_cf_arr[@]}"; do
+      # Strip the colliding flag from the alternation. Three positions:
+      # `--info|...` (leading), `...|--info|...` (middle), `...|--info` (trailing).
+      _intro_flags_arm="${_intro_flags_arm//${_cf}\|/}"
+      _intro_flags_arm="${_intro_flags_arm//\|${_cf}/}"
+      _intro_flags_arm="${_intro_flags_arm//${_cf}/}"
+    done
+    if [[ -n "$_intro_flags_arm" ]]; then
+      _intro_flags_line="    ${_intro_flags_arm}) return 0 ;;"
+    else
+      _intro_flags_line=""
+    fi
+    _flag_collision_header=$'\n#\n# FLAG COLLISION BYPASS (flywheel-efojs): target has its own handler\n# for canonical introspection flag(s) ['"$colliding_flags"$']. The scaffold\n# intercept OMITS those flags so the target\'s handler runs instead of\n# the scaffold\'s metadata emitter. Per flywheel-wzjo9.1.7 worker note.'
   fi
   cat <<EOF
 
@@ -545,11 +618,11 @@ scaffold_main() {
 # Early-dispatch intercept: if argv[0] looks like a canonical subcommand
 # or introspection flag, run the canonical surface and exit BEFORE the
 # target's original arg parser sees the args. Works for both \`main "\$@"\`
-# style and inline \`while [[ \$# -gt 0 ]]\` style targets.${_bypass_header}
+# style and inline \`while [[ \$# -gt 0 ]]\` style targets.${_bypass_header}${_flag_collision_header}
 _scaffold_is_canonical_arg() {${_bypass_loop}
   case "\${1:-}" in
     doctor|health|repair|validate|audit|why|quickstart|completion) return 0 ;;
-    --info|--schema|--examples) return 0 ;;
+${_intro_flags_line}
     -h|--help) return 0 ;;
     help)
       # Intercept \`help <topic>\` and \`help --help\`; bare \`help\` could be
@@ -772,11 +845,27 @@ scaffold_target() {
     bypass_flags_str=""
   fi
 
+  # 1a'. Flag-collision detection (flywheel-efojs). The scaffold's intercept
+  #     unconditionally claims `--info|--schema|--examples`. If the target
+  #     has its OWN handler for any of those flags (e.g., flywheel-loop's
+  #     `--info` emitting a different envelope), the scaffold hijacks the
+  #     target's handler. Omit colliding flags from the intercept so the
+  #     target's handler runs.
+  local colliding_flags_str flag_collision_detected
+  colliding_flags_str="$(detect_colliding_flags "$target_abs" | tr '\n' ',' | sed 's/,$//')"
+  if [[ -n "$colliding_flags_str" ]]; then
+    flag_collision_detected=true
+  else
+    flag_collision_detected=false
+  fi
+
   # 1b. Build the canonical-cli block (used in both top-injection and
   #    the early-dispatch shim). Emits the scaffold block as a heredoc.
   #    When verb collision detected, the emitted intercept includes a
-  #    flag-based bypass that defers to cmd_run.
-  emit_canonical_block "$target_basename" "$bypass_flags_str" > "$tmp_block"
+  #    flag-based bypass that defers to cmd_run. When flag collision
+  #    detected, the colliding canonical flags are OMITTED from the
+  #    intercept's claim-list so the target's handler still runs.
+  emit_canonical_block "$target_basename" "$bypass_flags_str" "$colliding_flags_str" > "$tmp_block"
 
   # 2. Decide injection point. Strategy: inject AFTER the shebang and any
   #    initial `set -*` lines, BEFORE the original script body. The block
@@ -906,6 +995,8 @@ scaffold_target() {
     --argjson verb_collision "$verb_collision_detected" \
     --arg colliding_verbs "$colliding_verbs_str" \
     --arg bypass_flags "$bypass_flags_str" \
+    --argjson flag_collision "$flag_collision_detected" \
+    --arg colliding_flags "$colliding_flags_str" \
     '{
       ts:$ts,
       target:$target,
@@ -924,6 +1015,8 @@ scaffold_target() {
       verb_collision_detected:$verb_collision,
       colliding_verbs:($colliding_verbs | split(",") | map(select(length > 0))),
       bypass_flags:($bypass_flags | split(",") | map(select(length > 0))),
+      flag_collision_detected:$flag_collision,
+      colliding_flags:($colliding_flags | split(",") | map(select(length > 0))),
       status: ($mode + "_ok"),
       schema_version:"scaffold-canonical-cli/v1"
     }')"
