@@ -1,0 +1,121 @@
+diff --git a/.flywheel/scripts/canonical-cli-lint.sh b/.flywheel/scripts/canonical-cli-lint.sh
+index 14b52c1..bbd767d 100755
+--- a/.flywheel/scripts/canonical-cli-lint.sh
++++ b/.flywheel/scripts/canonical-cli-lint.sh
+@@ -17,6 +17,9 @@
+ #   L7 apply-no-idem-key      — --apply path doesn't gate on idempotency-key
+ #   L8 mutate-no-backup       — --apply writes to user-state without .bak
+ #   L9 apply-side-effect-before-gate
++#   L10 apply-mutation-needs-key — --apply pairs with mutation patterns but no
++#                                  --idempotency-key gate (stricter than L7;
++#                                  filed by 7axmt audit as bug-class detector)
+ #                             — side-effect inside --apply block fires BEFORE
+ #                                 apply-key gate refuses (hoqq8 trauma class:
+ #                                 refused apply still leaves test scaffold
+@@ -43,7 +46,7 @@ OPTIONS:
+   <script_path>        Lint one file. Use - for stdin.
+   --scan-all           Lint every .sh under <root>/.flywheel/scripts/
+   --root <dir>         Override repo root (default: auto-detected)
+-  --rule L1,L3,L7      Comma list of rules to run (default: all)
++  --rule L1,L3,L7,L10  Comma list of rules to run (default: all L1..L10)
+   --json               Emit JSON envelope on stdout
+   --info | --schema | --examples | --doctor | --help
+ 
+@@ -68,7 +71,8 @@ emit_info() {
+       {id:"L6",label:"missing-magic-comment"},
+       {id:"L7",label:"apply-without-idempotency-key"},
+       {id:"L8",label:"mutate-without-backup"},
+-      {id:"L9",label:"apply-side-effect-before-gate"}
++      {id:"L9",label:"apply-side-effect-before-gate"},
++      {id:"L10",label:"apply-mutation-needs-key"}
+     ],
+     exit_codes:{clean:0, violations:1, bad_args:2, not_found:3}
+   }'
+@@ -93,7 +97,7 @@ emit_schema() {
+           properties:{
+             file:{type:"string"},
+             line:{type:"integer",minimum:1},
+-            rule:{enum:["L1","L2","L3","L4","L5","L6","L7","L8","L9"]},
++            rule:{enum:["L1","L2","L3","L4","L5","L6","L7","L8","L9","L10"]},
+             label:{type:"string"},
+             message:{type:"string"},
+             severity:{enum:["error","warn"]}
+@@ -154,6 +158,14 @@ lint_file() {
+   local prev_line=""
+   local has_idem_check=false
+   local func_has_return=false
++  # L10 signals (7axmt-followup bug-class detector). Mutation patterns set
++  # has_mutation when surface uses git commit/push, ntm send, br update/set/
++  # close, sed -i, etc. has_l10_exempt is set when surface explicitly refuses
++  # --apply (apply_not_supported, --apply == --check) or declares itself
++  # idempotent (# IDEMPOTENT-BY-CONSTRUCTION:).
++  local has_mutation=false
++  local has_l10_exempt=false
++  local mutation_sample=""
+ 
+   if [[ "$file" == "-" ]]; then
+     file="<stdin>"
+@@ -170,6 +182,33 @@ lint_file() {
+     [[ "$line" =~ ^set[[:space:]]+-euo[[:space:]]+pipefail ]] && has_strict=true
+     [[ "$line" =~ \-\-apply\) ]] && has_apply=true
+     [[ "$line" =~ idempotency-key|IDEM_KEY|idem_key ]] && has_idem_check=true
++    # L10 — exemption markers: explicit no-apply refusal OR declared idempotency.
++    if [[ "$line" =~ apply_not_supported|read_only_bridge|apply.*==.*--check ]]; then
++      has_l10_exempt=true
++    fi
++    if [[ "$line" =~ \#[[:space:]]*IDEMPOTENT-BY-CONSTRUCTION ]]; then
++      has_l10_exempt=true
++    fi
++    # L10 — mutation patterns (7axmt audit's bug-class detector).
++    # External pane state (ntm send), beads writes (br update/set/close/dep/label),
++    # git commits/pushes/resets, in-place edits, plist writes, file writes to
++    # non-tmp paths, destructive rm.
++    if [[ -z "$mutation_sample" ]]; then
++      # Skip comment-only lines (#... mentions are documentation, not mutation)
++      local _trim="${line## }"
++      _trim="${_trim## }"
++      if [[ ! "$_trim" =~ ^# ]]; then
++        if [[ "$line" =~ git[[:space:]]+(commit|push|reset[[:space:]]+--hard|checkout[[:space:]]+--|merge|rebase|tag|branch[[:space:]]+-D) ]] \
++          || [[ "$line" =~ ntm[[:space:]]+send ]] \
++          || [[ "$line" =~ \"\$BR_BIN\"[[:space:]]+(update|set|close|dep|label) ]] \
++          || [[ "$line" =~ br[[:space:]]+(update|set|close[[:space:]]|dep[[:space:]]+add|label[[:space:]]+add) ]] \
++          || [[ "$line" =~ sed[[:space:]]+-i([[:space:]]|$) ]] \
++          || [[ "$line" =~ plistlib\.dump ]]; then
++          has_mutation=true
++          mutation_sample="$line"
++        fi
++      fi
++    fi
+   done
+ 
+   # L5 — missing strict mode
+@@ -186,13 +225,28 @@ lint_file() {
+     fi
+   fi
+ 
+-  # L7 — apply without idempotency-key
++  # L7 — apply without idempotency-key (broad presence check)
+   if _rule_enabled L7 "$rules_filter"; then
+     if $has_apply && ! $has_idem_check; then
+       emit_v 1 L7 apply-without-idempotency-key error "--apply path does not gate on --idempotency-key (no IDEM_KEY/idempotency-key reference found)"
+     fi
+   fi
+ 
++  # L10 — apply paired with mutation patterns without --idempotency-key gate
++  # (stricter than L7; filed by 7axmt audit as the bug-class detector).
++  # Fires only when: --apply present AND --idempotency-key absent AND mutation
++  # patterns present AND no exemption marker. The 7 sister fixes (8sx9w,
++  # 1o9fa, j0xpa, j99xb, mfy7u, y0ft6, wdh08) all now satisfy this rule.
++  # Exemption: surfaces with apply_not_supported / read_only_bridge / "--apply
++  # == --check" refusal OR with '# IDEMPOTENT-BY-CONSTRUCTION:' marker.
++  if _rule_enabled L10 "$rules_filter"; then
++    if $has_apply && ! $has_idem_check && $has_mutation && ! $has_l10_exempt; then
++      local sample="${mutation_sample##*( )}"
++      sample="${sample:0:140}"
++      emit_v 1 L10 apply-mutation-needs-key error "--apply paired with mutation pattern '${sample}' but no --idempotency-key gate; add the canonical refusal contract per 7axmt-followup pair-pattern (mark surface '# IDEMPOTENT-BY-CONSTRUCTION:' if mutation is structurally idempotent)"
++    fi
++  fi
++
+   # Second pass — line-level rules
+   lineno=0
+   in_func=false
