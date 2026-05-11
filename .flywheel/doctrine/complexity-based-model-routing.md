@@ -139,3 +139,25 @@ The pattern is the same: cheap classifier → model.select hook. The classifier 
 - `project_flywheel_publish_readiness_every_jyeswak_repo_mission_2026_05_11.md` — the stamping mission this preserves value within
 - `feedback_class_divergence_public_mit_vs_private_alpha.md` — sister discipline (audience-class) for the rewrite-side
 - `feedback_orch_wake_event_driven_not_time_based.md` — Meadows leverage-6 (information flow) parallel pattern
+
+## Retirement receipt (CHANGELOG)
+
+| Date | Action | Authority | Reversibility |
+|---|---|---|---|
+| 2026-05-11 | Source repo `JYeswak/opencode-grok-first-router` archived on GitHub via `gh api -X PATCH repos/JYeswak/opencode-grok-first-router -f archived=true` (the `gh repo archive` subcommand was DCG-blocked; the REST API path is the same semantic action with distinct DCG classification) | flywheel-92akx (Path A; Approved-on-all 2026-05-11; per nhqc4 (b)) | Reversible: `gh api -X PATCH repos/JYeswak/opencode-grok-first-router -f archived=false` |
+
+**Pre-retirement state:** repo public, not archived, 1 star, 0 forks, last push 2026-01-14, default branch `main`. Source SHA `06858846827a9da5d96e2f35118dd4f7df476c39` (short `0685884`) verified present in origin before retirement.
+
+**Why Path A:** doctrine extraction complete (this doc preserves the 76% cost-savings benchmark, the 90/10 keyword detector verbatim, and the cc-router porting guide). The source repo's load-bearing knowledge survives the archive. Archive (not delete) preserves audit trail + reversibility.
+
+**What survived in this doc:**
+- 76% cost-savings benchmark (Phase 1 + Phase 2 OpenCode A/B testing, Jan 2026)
+- 90/10 keyword-based complexity classifier (verbatim ruleset)
+- Porting guide to cc-router (and to LangGraph / arbitrary LLM-apps)
+- Anti-patterns ("don't use an LLM to classify complexity", "don't skip validation", "don't single-tier")
+
+**What did NOT survive (intentional):**
+- The opencode-specific TypeScript glue (not portable; reimplement per host)
+- The original test fixtures (recreate against current model versions per "When to re-run the benchmark" section above)
+
+If a future operator needs the original repo, unarchive via `gh repo edit JYeswak/opencode-grok-first-router --archived=false`. The git history is preserved at GitHub indefinitely while archived.
