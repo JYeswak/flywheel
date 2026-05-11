@@ -547,18 +547,42 @@ def skill_md_corpus(max_bytes: int = 1_500_000) -> str:
     # doesn't starve the recognizer.
     pieces.append("\n".join(p.name for p in candidates))
     used += sum(len(p.name) + 1 for p in candidates)
-    # flywheel-2xdi.66: per-file cap (4 KB) + larger overall budget (32 MB).
-    # The cap prevents one giant CHANGELOG/STATE/WORK file from devouring the
-    # whole budget at the front of iteration order. 4 KB per file is enough to
-    # capture the top of each doc (script-name mentions usually live in
-    # frontmatter, intro, or first use-case section). With ~5500 *.md files
-    # in a real skills tree at 4 KB each = ~22 MB max — well under 32 MB cap.
-    per_file_cap = 4_096
+    # flywheel-2xdi.66 (initial): per-file cap (4 KB) + larger overall
+    # budget (32 MB) to fit ~5500 *.md files. Trade-off: large SKILL.md
+    # files get truncated and scripts referenced past byte 4096 appear
+    # falsely wired-but-cold (e.g., agent-ergonomics SKILL.md Scripts
+    # table starts at byte ~60K; 7+ scripts flagged falsely).
+    # flywheel-zsk2d (this fix): 2-pass scan with priority for SKILL.md.
+    # SKILL.md is the canonical entry-point doc; treat it as privileged
+    # (256 KB per-file cap, big enough for all observed real SKILL.md
+    # files — largest in fleet is 137 KB). Other *.md keeps 4 KB cap.
+    # Pass 1 (SKILL.md) runs FIRST so SKILL.md gets budget before
+    # potentially-larger sibling docs (CHANGELOG, STATE, WORK) consume it.
+    skill_md_per_file_cap = 256 * 1024  # 256 KB; agent-ergonomics SKILL.md is 72 KB; largest observed 137 KB
+    other_md_per_file_cap = 4_096
     overall_cap = max(max_bytes, 32_000_000)
-    for path in candidates:
+    skill_md_paths = [p for p in candidates if p.name == "SKILL.md"]
+    other_md_paths = [p for p in candidates if p.name != "SKILL.md"]
+    # Pass 1: SKILL.md files (priority + larger per-file cap)
+    for path in skill_md_paths:
         if used >= overall_cap:
             break
-        cap = min(per_file_cap, overall_cap - used)
+        cap = min(skill_md_per_file_cap, overall_cap - used)
+        if cap <= 0:
+            break
+        try:
+            text = read_text(path, cap)
+        except Exception:
+            continue
+        if not text:
+            continue
+        pieces.append(text)
+        used += len(text)
+    # Pass 2: all other *.md (references/**, assets/**, etc.) with 4 KB cap
+    for path in other_md_paths:
+        if used >= overall_cap:
+            break
+        cap = min(other_md_per_file_cap, overall_cap - used)
         if cap <= 0:
             break
         try:
