@@ -438,20 +438,37 @@ scaffold_cmd_validate() {
       return 0
       ;;
     reflog-window)
+      # flywheel-a33xj: emit classified violations + violation_classes summary.
+      # Verdict downgrades to "pass" when all violations are benign_serialized_pair
+      # (the Option 1 filter from flywheel-03aca triage), and stays "warn" only when
+      # candidate_race rows remain.
       local violations_json window="$SCAFFOLD_RACE_WINDOW_SEC"
       violations_json="$(_cpgp_reflog_window "$SCAFFOLD_TARGET_REPO" "$window")"
       local count; count="$(printf '%s' "$violations_json" | jq 'length')"
       [[ -z "$count" ]] && count=0
+      local benign_count same_author_count candidate_count
+      benign_count="$(printf '%s' "$violations_json" | jq '[.[] | select(.classification == "benign_serialized_pair")] | length')"
+      same_author_count="$(printf '%s' "$violations_json" | jq '[.[] | select(.classification == "same_author_serialized")] | length')"
+      candidate_count="$(printf '%s' "$violations_json" | jq '[.[] | select(.classification == "candidate_race")] | length')"
+      [[ -z "$benign_count" ]] && benign_count=0
+      [[ -z "$same_author_count" ]] && same_author_count=0
+      [[ -z "$candidate_count" ]] && candidate_count=0
+      # Only candidate_race drives WARN — single-author serialized writes can't race
+      # against themselves (git index.lock + single git config identity, verified
+      # by flywheel-03aca via 4 entanglement signals).
       local verdict="pass"
-      if [[ "$count" -gt 0 ]]; then verdict="warn"; fi
+      if [[ "$candidate_count" -gt 0 ]]; then verdict="warn"; fi
       jq -nc \
         --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
         --arg repo "$SCAFFOLD_TARGET_REPO" \
         --arg verdict "$verdict" \
         --argjson window "$window" \
         --argjson count "$count" \
+        --argjson benign "$benign_count" \
+        --argjson same_author "$same_author_count" \
+        --argjson candidate "$candidate_count" \
         --argjson violations "$violations_json" \
-        '{schema_version:$sv,command:"validate",subject:"reflog-window",status:$verdict,repo:$repo,window_sec:$window,violation_count:$count,violations:$violations}'
+        '{schema_version:$sv,command:"validate",subject:"reflog-window",status:$verdict,repo:$repo,window_sec:$window,violation_count:$count,violation_classes:{benign_serialized_pair:$benign,same_author_serialized:$same_author,candidate_race:$candidate},violations:$violations}'
       # Always rc=0 — envelope is the contract; warn is informative not a process failure
       return 0
       ;;
@@ -561,7 +578,17 @@ scaffold_cmd_why() {
 
 # _cpgp_reflog_window REPO WINDOW_SEC
 # Scan reflog for HEAD movements within WINDOW_SEC of each other on the same ref.
-# Emits a JSON array of violations: [{ref, delta_sec, old_sha, new_sha}].
+# Emits a JSON array of violations: [{ref, delta_sec, old_sha, new_sha, old_author,
+# old_subject, new_author, new_subject, classification}].
+#
+# flywheel-a33xj: Option 1 filter wired in. Each violation is classified:
+#   - "benign_serialized_pair" — same-author + delta<=1s + chore(journal)↔feat()/fix()/docs() pair
+#     (the worker+auto-hook chain — definitely not a race per flywheel-03aca triage)
+#   - "candidate_race" — anything else; needs further inspection
+#
+# Per cross-pane-git-discipline doctrine Shape C: REFINE the rule, don't suppress.
+# This refinement adds CLASSIFICATION (not suppression); benign rows are kept in
+# the emit but tagged so consumers can filter.
 _cpgp_reflog_window() {
   local repo="$1" window="$2"
   local raw
@@ -570,9 +597,11 @@ _cpgp_reflog_window() {
     printf '[]\n'
     return 0
   fi
-  printf '%s\n' "$raw" | awk -v window="$window" '
+
+  # First pass: emit raw violations (ref|delta|old_sha|new_sha) per original logic.
+  local raw_violations
+  raw_violations="$(printf '%s\n' "$raw" | awk -v window="$window" '
     {
-      # %gD = ref, %H = sha, %ct = unix time
       ref = $1
       gsub(/@\{[0-9]+\}/, "", ref)
       sha = $3
@@ -582,14 +611,86 @@ _cpgp_reflog_window() {
         delta = last_ts[key] - ts
         if (delta < 0) delta = -delta
         if (delta <= window) {
-          # Report the pair
           printf "%s\t%d\t%s\t%s\n", key, delta, last_sha[key], sha
         }
       }
       last_ts[key] = ts
       last_sha[key] = sha
     }
-  ' | jq -R 'split("\t") | {ref:.[0],delta_sec:(.[1]|tonumber),old_sha:.[2],new_sha:.[3]}' | jq -cs '.'
+  ')"
+
+  if [[ -z "$raw_violations" ]]; then
+    printf '[]\n'
+    return 0
+  fi
+
+  # Collect unique SHAs and fetch author + subject for each (single git log call).
+  # awk -v can't handle multi-line strings; use a temp file pre-loaded via getline.
+  local unique_shas meta_file
+  unique_shas="$(printf '%s\n' "$raw_violations" | awk -F'\t' '{print $3; print $4}' | sort -u | tr '\n' ' ')"
+  meta_file="$(mktemp -t cpgp-meta.XXXXXX)"
+  # shellcheck disable=SC2086
+  git -C "$repo" log --no-walk $unique_shas --format='%H|%an|%s' 2>/dev/null > "$meta_file" || true
+
+  # Second pass: classify each violation per Option 1 from flywheel-03aca triage.
+  printf '%s\n' "$raw_violations" | awk -F'\t' \
+    -v meta_file="$meta_file" '
+    BEGIN {
+      while ((getline line < meta_file) > 0) {
+        m = split(line, parts, "|")
+        if (m >= 2) {
+          author[parts[1]] = parts[2]
+          # Rejoin subject parts (subjects may contain | literals though rare).
+          subj = parts[3]
+          for (j=4; j<=m; j++) subj = subj "|" parts[j]
+          subject[parts[1]] = subj
+        }
+      }
+      close(meta_file)
+    }
+    function starts_with(s, prefix) { return substr(s, 1, length(prefix)) == prefix }
+    function is_journal(s)          { return starts_with(s, "chore(journal)") }
+    # Widened from Option 1 spec to catch all observed worker prefixes in the
+    # fleet (the original spec listed feat/fix/docs; live triage showed
+    # chore(beads), chore(rework), test, refactor, perf, build, audit also
+    # pair with auto-hook journal entries — all benign per same-author + delta
+    # <= 1s + journal-pair check).
+    function is_worker(s) {
+      return starts_with(s, "feat(") || starts_with(s, "fix(") ||
+             starts_with(s, "docs(") || starts_with(s, "chore(") ||
+             starts_with(s, "test(") || starts_with(s, "refactor(") ||
+             starts_with(s, "perf(") || starts_with(s, "build(") ||
+             starts_with(s, "audit(")
+    }
+    {
+      ref = $1; delta = $2; old_sha = $3; new_sha = $4
+      oa = (old_sha in author) ? author[old_sha] : ""
+      os = (old_sha in subject) ? subject[old_sha] : ""
+      na = (new_sha in author) ? author[new_sha] : ""
+      ns = (new_sha in subject) ? subject[new_sha] : ""
+
+      # 3-class scheme per flywheel-a33xj live triage refinement:
+      # 1. benign_serialized_pair  — same-author + delta<=1s + journal↔worker pair
+      #                              (the original Option 1 spec; most confident)
+      # 2. same_author_serialized  — any same-author within window
+      #                              (single-author cannot race against itself —
+      #                              git index.lock + single git config identity;
+      #                              03aca verified via 4 entanglement signals)
+      # 3. candidate_race          — multi-author OR ambiguous; needs operator
+      #                              inspection (the only class that drives WARN)
+      cls = "candidate_race"
+      if (oa != "" && oa == na) {
+        if (delta+0 <= 1 && ((is_journal(os) && is_worker(ns)) || (is_journal(ns) && is_worker(os)))) {
+          cls = "benign_serialized_pair"
+        } else {
+          cls = "same_author_serialized"
+        }
+      }
+
+      printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n", ref, delta, old_sha, new_sha, oa, os, na, ns, cls
+    }
+  ' | jq -R 'split("\t") | {ref:.[0], delta_sec:(.[1]|tonumber), old_sha:.[2], new_sha:.[3], old_author:.[4], old_subject:.[5], new_author:.[6], new_subject:.[7], classification:.[8]}' | jq -cs '.'
+  rm -f "$meta_file"
 }
 
 # ---------- scaffolded main dispatcher ----------
@@ -650,11 +751,23 @@ cpgp_run() {
   local stale_verdict; stale_verdict=$([[ "$stale_count" -gt 0 ]] && echo "stale-detected" || echo "ok")
 
   # Probe 3: concurrent commit window
+  # flywheel-a33xj: window_verdict now driven by candidate_race count only;
+  # benign_serialized_pair + same_author_serialized rows are documented but
+  # don't trigger the verdict downgrade (single-author serialized commits
+  # can't race against themselves — verified by flywheel-03aca via 4
+  # entanglement signals).
   local violations_json viol_count window_verdict
+  local benign_count same_author_count candidate_count
   violations_json="$(_cpgp_reflog_window "$repo" "$SCAFFOLD_RACE_WINDOW_SEC")"
   viol_count="$(printf '%s' "$violations_json" | jq 'length')"
+  benign_count="$(printf '%s' "$violations_json" | jq '[.[] | select(.classification == "benign_serialized_pair")] | length')"
+  same_author_count="$(printf '%s' "$violations_json" | jq '[.[] | select(.classification == "same_author_serialized")] | length')"
+  candidate_count="$(printf '%s' "$violations_json" | jq '[.[] | select(.classification == "candidate_race")] | length')"
   [[ -z "$viol_count" ]] && viol_count=0
-  window_verdict=$([[ "$viol_count" -gt 0 ]] && echo "race-candidate" || echo "ok")
+  [[ -z "$benign_count" ]] && benign_count=0
+  [[ -z "$same_author_count" ]] && same_author_count=0
+  [[ -z "$candidate_count" ]] && candidate_count=0
+  window_verdict=$([[ "$candidate_count" -gt 0 ]] && echo "race-candidate" || echo "ok")
 
   # Composite status: warn if any probe non-ok; fail reserved for substrate failure
   local status="pass"
@@ -677,13 +790,16 @@ cpgp_run() {
     --arg stale_verdict "$stale_verdict" \
     --argjson window "$SCAFFOLD_RACE_WINDOW_SEC" \
     --argjson viol_count "$viol_count" \
+    --argjson benign_count "$benign_count" \
+    --argjson same_author_count "$same_author_count" \
+    --argjson candidate_count "$candidate_count" \
     --argjson violations "$violations_json" \
     --arg window_verdict "$window_verdict" \
     '{
       schema_version:$sv, command:"run", ts:$ts, repo:$repo, status:$status,
       worktree_census:{count:$count, paths:$paths, notable_threshold:$notable, beadclass_threshold:$bead, verdict:$census_verdict},
       stale_worktree:{count:$stale_count, verdict:$stale_verdict},
-      concurrent_commit_window:{window_sec:$window, violation_count:$viol_count, violations:$violations, verdict:$window_verdict}
+      concurrent_commit_window:{window_sec:$window, violation_count:$viol_count, violation_classes:{benign_serialized_pair:$benign_count, same_author_serialized:$same_author_count, candidate_race:$candidate_count}, violations:$violations, verdict:$window_verdict}
     }')"
 
   if [[ "$json_out" -eq 1 ]]; then
