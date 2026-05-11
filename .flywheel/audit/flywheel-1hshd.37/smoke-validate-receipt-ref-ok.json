@@ -1,0 +1,1 @@
+{"schema_version":"idempotency-replay-guard/v1","command":"validate","subject":"receipt-ref","ts":"2026-05-11T06:11:56Z","status":"ok","value":".beads/issues.jsonl#L1","note":"matches --receipt-ref shape (file#L lines, URIs, etc)"}

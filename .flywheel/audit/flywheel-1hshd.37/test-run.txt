@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info emits canonical envelope (native PARTIAL-BYPASS — info/v1 + statuses array + output_schema)
+PASS --schema emits canonical envelope (SCAFFOLD owns — native lacked)
+PASS --examples emits canonical envelope (native PARTIAL-BYPASS — examples/v1)
+PASS doctor emits canonical envelope
+PASS health emits canonical envelope
+PASS repair --dry-run emits canonical envelope (real scope audit_log_dir)
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate (bare) refuses with rc=64 + missing_subject envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS doctor probes sha256_hasher (load-bearing) + ledger_dir + lock_dir + audit_log_dir
+PASS validate status full-enum sweep (4 accept + 1 reject; cross-source native --info .statuses[])
+PASS validate receipt-ref accepts file#L pattern (.beads/issues.jsonl#L1)
+PASS validate receipt-ref rejects too-short value with rc=1 + pattern_or_length_mismatch
+PASS validate input-mode full-enum sweep (3 accept; cross-source native --input/--input-file flags)
+PASS 4-direction fidelity (native --info+--examples both preserved + scaffold --schema/doctor active) — PARTIAL-BYPASS intact
+SUMMARY pass=19 fail=0

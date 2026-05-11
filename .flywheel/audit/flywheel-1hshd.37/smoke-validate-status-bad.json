@@ -1,0 +1,1 @@
+{"schema_version":"idempotency-replay-guard/v1","command":"validate","subject":"status","ts":"2026-05-11T06:11:56Z","status":"reject","value":"phantom","reason":"not_in_enum","valid_states":["already_completed","in_flight","not_seen","completed"],"source":"native --info .statuses[]"}
