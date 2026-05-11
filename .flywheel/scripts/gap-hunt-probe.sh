@@ -504,6 +504,8 @@ _RUNTIME_SOURCE_CORPUS: str | None = None
 _SIBLING_LEDGER_CORPUS: str | None = None
 _SKILL_MD_CORPUS: str | None = None
 _LAUNCHD_CORPUS: str | None = None
+_FLYWHEEL_SCRIPT_CALLERS_CORPUS: str | None = None
+_TEST_FILES_CORPUS: str | None = None
 
 
 def skill_md_corpus(max_bytes: int = 1_500_000) -> str:
@@ -606,6 +608,109 @@ def launchd_plist_corpus(max_bytes: int = 1_500_000) -> str:
     return _LAUNCHD_CORPUS
 
 
+def flywheel_script_callers_corpus(max_bytes: int = 2_000_000) -> str:
+    """Build a corpus from .flywheel/scripts/*.sh content, EXCLUDING *-probe.sh.
+
+    Per flywheel-kckw8 (probe-without-receiver class extension): in-repo
+    flywheel scripts frequently invoke probes via env-var-defaulted patterns
+    like idle-pane-auto-dispatch.sh:28 SCAFFOLD_SURFACE_PROBE that defaults
+    to .flywheel/scripts/dispatch-surface-conflict-probe.sh. Without this
+    corpus, probe-without-receiver flags probes that ARE consumed by sister
+    scripts in the same scripts/ dir but not referenced from tick.md or
+    last_tick_*.json receipts.
+
+    CRITICAL: excludes *-probe.sh files from the corpus. A probe's own
+    self-reference (in usage strings, schema_version, etc.) is NOT a
+    receiver. Sister-probe documentation comments (e.g., gap-hunt-probe.sh
+    mentioning dispatch-surface-conflict-probe in doctrine prose) are also
+    NOT receivers — they're just docs. Real receivers are non-probe scripts
+    that actually invoke the probe.
+
+    Surface scanned: .flywheel/scripts/*.sh EXCEPT *-probe.sh.
+    Recognition: any reference to the probe's basename or stem in any
+    non-probe script body counts as a wired consumer.
+    """
+    global _FLYWHEEL_SCRIPT_CALLERS_CORPUS
+    if _FLYWHEEL_SCRIPT_CALLERS_CORPUS is not None:
+        return _FLYWHEEL_SCRIPT_CALLERS_CORPUS
+    scripts_dir = REPO_ROOT / ".flywheel" / "scripts"
+    if not scripts_dir.is_dir():
+        _FLYWHEEL_SCRIPT_CALLERS_CORPUS = ""
+        return _FLYWHEEL_SCRIPT_CALLERS_CORPUS
+    pieces: list[str] = []
+    used = 0
+    try:
+        # Exclude *-probe.sh from the consumer corpus — probes aren't receivers
+        # of each other; documentation cross-references between probes don't
+        # count as wired invocation.
+        candidates = sorted(p for p in scripts_dir.glob("*.sh") if not p.name.endswith("-probe.sh"))
+    except Exception:
+        candidates = []
+    pieces.append("\n".join(p.name for p in candidates))
+    used += sum(len(p.name) + 1 for p in candidates)
+    for path in candidates:
+        if used >= max_bytes:
+            break
+        try:
+            text = read_text(path, max(0, max_bytes - used))
+        except Exception:
+            continue
+        if not text:
+            continue
+        pieces.append(text)
+        used += len(text)
+    _FLYWHEEL_SCRIPT_CALLERS_CORPUS = "\n".join(pieces)
+    return _FLYWHEEL_SCRIPT_CALLERS_CORPUS
+
+
+def test_files_corpus(max_bytes: int = 1_500_000) -> str:
+    """Build a corpus from test files under .flywheel/tests/ and tests/.
+
+    Per flywheel-kckw8 (probe-without-receiver class extension): dedicated
+    test files like .flywheel/tests/test-dispatch-surface-conflict-probe.sh
+    are valid consumers of the probe under test (they invoke it as part of
+    regression fixtures). Without this corpus, the receiver-check misses
+    test-consumed probes.
+
+    Surfaces scanned:
+      - .flywheel/tests/test-*.sh and .flywheel/tests/test_*.sh
+      - tests/test-*.sh and tests/test_*.sh (top-level)
+    """
+    global _TEST_FILES_CORPUS
+    if _TEST_FILES_CORPUS is not None:
+        return _TEST_FILES_CORPUS
+    pieces: list[str] = []
+    used = 0
+    candidates: list[Path] = []
+    test_roots = [
+        REPO_ROOT / ".flywheel" / "tests",
+        REPO_ROOT / "tests",
+    ]
+    for root in test_roots:
+        if not root.is_dir():
+            continue
+        for pattern in ("test-*.sh", "test_*.sh"):
+            try:
+                candidates.extend(sorted(root.glob(pattern)))
+            except Exception:
+                pass
+    pieces.append("\n".join(p.name for p in candidates))
+    used += sum(len(p.name) + 1 for p in candidates)
+    for path in candidates:
+        if used >= max_bytes:
+            break
+        try:
+            text = read_text(path, max(0, max_bytes - used))
+        except Exception:
+            continue
+        if not text:
+            continue
+        pieces.append(text)
+        used += len(text)
+    _TEST_FILES_CORPUS = "\n".join(pieces)
+    return _TEST_FILES_CORPUS
+
+
 def runtime_source_corpus() -> str:
     """Build a corpus of `source <path>` references from .sh files in scope.
 
@@ -661,6 +766,17 @@ def runtime_source_corpus() -> str:
     # the script as wired. The pattern matches: var-name + `=` + anything +
     # `.sh` + word boundary.
     var_assign_sh_re = re.compile(r"\b[A-Za-z_][A-Za-z0-9_]*=.*\.sh\b")
+    # flywheel-2xdi.64: capture direct-exec invocations of sibling scripts
+    # from bin/ wrappers like `bin/aerg`:
+    #   run "$SKILL_ROOT/scripts/archetype-calibrate.sh" "$@"
+    #   exec "$SKILL_ROOT/scripts/foo.sh"
+    #   bash "$SKILL_ROOT/scripts/foo.sh"
+    # The wrapper doesn't `source` the target; it execs it. Without this
+    # branch the target's basename never enters the corpus and gap-hunt
+    # flags it as wired-but-cold even though every `aerg <verb>` calls it.
+    # Pattern: exec-class keyword followed (within the same line) by a path
+    # ending in `.sh`.
+    exec_sh_re = re.compile(r"\b(?:run|exec|bash|sh)\s+\S*?\.sh\b")
     for f in candidates:
         try:
             text = read_text(f, 200_000)
@@ -677,6 +793,9 @@ def runtime_source_corpus() -> str:
                 pieces.append(line.rstrip())
                 continue
             if var_assign_sh_re.search(line):
+                pieces.append(line.rstrip())
+                continue
+            if exec_sh_re.search(line):
                 pieces.append(line.rstrip())
                 continue
             if for_in_re.match(line):
@@ -1044,12 +1163,41 @@ def probe_doctrine_without_measurement(tick_text: str) -> list[dict]:
 
 
 def probe_without_receiver(receivers_text: str) -> list[dict]:
+    """Detect *-probe.sh files with no receiver consuming their output.
+
+    Per flywheel-kckw8 (sister of flywheel-e7lxv launchd corpus extension
+    for wired-but-cold class): probe receivers come in 5 shapes:
+      1. receivers_text — tick.md + status files (the original 2-corpus check)
+      2. last_tick_*.json receipts — last tick state (the original)
+      3. In-repo executable callers under .flywheel/scripts/*.sh — catches
+         env-var-defaulted invocation (e.g., idle-pane-auto-dispatch.sh:28
+         SCAFFOLD_SURFACE_PROBE → dispatch-surface-conflict-probe.sh)
+      4. Launchd plists under ~/Library/LaunchAgents/*.plist — catches
+         2-hop wiring chains where launchd → wrapper → probe
+      5. Test files under .flywheel/tests/test-*.sh and tests/test-*.sh —
+         catches single-hop test consumers (dedicated regression tests)
+
+    A probe is probe-without-receiver iff its basename or stem is absent
+    from ALL FIVE corpora. Same META-RULE shape as flywheel-2xdi.47 +
+    flywheel-2xdi.49 + flywheel-e7lxv: fix the property (corpus
+    coverage), not the proxy (per-script allowlist).
+    """
     files = safe_iter_files(REPO_ROOT, "*-probe.sh", 500)
     files.extend(safe_iter_files(CLAUDE_ROOT / "skills", "*-probe.sh", 1000))
     receipt_text = ""
     for path in safe_iter_files(Path.home() / ".local/state/flywheel-loop", "last_tick_*.json", 200):
         receipt_text += "\n" + read_text(path, 200_000)
-    combined = receivers_text + "\n" + receipt_text
+    # flywheel-kckw8: 3 additional corpora for indirect-invocation routes
+    script_callers_text = flywheel_script_callers_corpus()
+    launchd_text = launchd_plist_corpus()
+    test_files_text = test_files_corpus()
+    combined = (
+        receivers_text + "\n" +
+        receipt_text + "\n" +
+        script_callers_text + "\n" +
+        launchd_text + "\n" +
+        test_files_text
+    )
     gaps = []
     for path in sorted(set(files)):
         if path.name in combined or path.stem in combined:
