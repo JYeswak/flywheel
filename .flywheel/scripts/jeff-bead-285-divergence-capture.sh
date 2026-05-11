@@ -34,12 +34,13 @@ DEFAULT_LOCK_TIMEOUT_MS="${DEFAULT_LOCK_TIMEOUT_MS:-10000}"
 
 BEAD_ID=""
 MODE="dry-run"
-JSON_OUT=0
+IDEMPOTENCY_KEY=""
+AUDIT_LOG="${JEFF_285_AUDIT_LOG:-$HOME/.local/state/flywheel/jeff-bead-285-divergence-capture-runs.jsonl}"
 
 usage() {
   cat <<'EOF'
 usage:
-  jeff-bead-285-divergence-capture.sh <bead-id> [--apply|--dry-run] [--json]
+  jeff-bead-285-divergence-capture.sh <bead-id> [--apply --idempotency-key KEY | --dry-run] [--json]
   jeff-bead-285-divergence-capture.sh --info|--schema|--examples|--help [--json]
 
 Captures the two artifacts Jeffrey requested on
@@ -64,7 +65,8 @@ info_json() {
     --arg br_bin "$BR_BIN" \
     --arg capture_root_default "$CAPTURE_ROOT_DEFAULT" \
     --argjson default_lock_timeout_ms "$DEFAULT_LOCK_TIMEOUT_MS" \
-    --argjson exit_codes '{"0":"capture complete or dry-run preview emitted","1":"capture failed","2":"usage error","3":"prerequisite missing"}' \
+    --arg audit_log "$AUDIT_LOG" \
+    --argjson exit_codes '{"0":"capture complete, replay-no-op, or dry-run preview emitted","1":"capture failed","2":"usage error","3":"prerequisite missing or --apply without --idempotency-key (canonical refusal)"}' \
     --argjson trace_targets '["br::storage::sqlite=trace","br::cli::commands::close=trace"]' \
     '{
       schema_version: "tool-info/v1",
@@ -77,10 +79,12 @@ info_json() {
       default_lock_timeout_ms: $default_lock_timeout_ms,
       modes: ["dry-run", "apply"],
       default_mode: "dry-run",
-      flags: ["--apply", "--dry-run", "--json", "--info", "--schema", "--examples", "--help"],
-      env_vars: ["BR_BIN", "DEFAULT_LOCK_TIMEOUT_MS", "CAPTURE_ROOT", "RUST_LOG"],
+      flags: ["--apply", "--dry-run", "--idempotency-key", "--json", "--info", "--schema", "--examples", "--help"],
+      env_vars: ["BR_BIN", "DEFAULT_LOCK_TIMEOUT_MS", "CAPTURE_ROOT", "RUST_LOG", "JEFF_285_AUDIT_LOG"],
       mutates: true,
-      mutation_requires: ["--apply"],
+      mutation_requires: ["--apply", "--idempotency-key"],
+      apply_requires: "--idempotency-key",
+      audit_log: $audit_log,
       rust_log_targets: $trace_targets,
       exit_codes: $exit_codes,
       receipt_schema: "jeff-bead-285-capture-receipt/v1",
@@ -128,7 +132,7 @@ Examples:
   .flywheel/scripts/jeff-bead-285-divergence-capture.sh sandbox-fixture-001
 
   # Live capture (mutating; only use on safe bead-ids)
-  .flywheel/scripts/jeff-bead-285-divergence-capture.sh sandbox-fixture-001 --apply
+  .flywheel/scripts/jeff-bead-285-divergence-capture.sh sandbox-fixture-001 --apply --idempotency-key=capture-001
 
   # Override the capture root
   CAPTURE_ROOT=/tmp/jeff-285 .flywheel/scripts/jeff-bead-285-divergence-capture.sh \
@@ -148,6 +152,8 @@ while [[ $# -gt 0 ]]; do
     -h|--help)  usage; exit 0 ;;
     --apply)    MODE="apply"; shift ;;
     --dry-run)  MODE="dry-run"; shift ;;
+    --idempotency-key) [[ -n "${2:-}" ]] || { printf 'error: --idempotency-key requires VALUE\n' >&2; exit 2; }; IDEMPOTENCY_KEY="$2"; shift 2 ;;
+    --idempotency-key=*) IDEMPOTENCY_KEY="${1#--idempotency-key=}"; [[ -n "$IDEMPOTENCY_KEY" ]] || { printf 'error: --idempotency-key requires VALUE\n' >&2; exit 2; }; shift ;;
     --json)     JSON_OUT=1; shift ;;
     --*)        printf 'unknown flag: %s\n' "$1" >&2; usage >&2; exit 2 ;;
     *)
@@ -237,6 +243,45 @@ if [[ "$MODE" == "dry-run" ]]; then
   exit 0
 fi
 
+# Mutation gate (7axmt P3 fix, sister j0xpa per-target-scope variant). Scope=bead_id.
+# Fires BEFORE the destructive br close trace creates the capture dir (hoqq8 invariant).
+if [[ -z "$IDEMPOTENCY_KEY" ]]; then
+  jq -nc \
+    --arg sv "jeff-bead-285-capture-receipt/v1" \
+    --arg bead_id "$BEAD_ID" \
+    '{schema_version:$sv,command:"jeff-bead-285-divergence-capture",status:"refused",mode:"apply",bead_id:$bead_id,reason:"--apply requires --idempotency-key"}' >&2
+  exit 3
+fi
+
+# Replay-check (tolerant-parse per sister 8sx9w skill discovery). Match on
+# (idempotency_key, bead_id) tuple — same key + same bead_id → no-op. Different
+# bead_ids under the same key apply (per-target scope).
+replay_prior_capture() {
+  if [[ -z "$IDEMPOTENCY_KEY" || ! -r "$AUDIT_LOG" ]]; then
+    printf ''
+    return 0
+  fi
+  jq -Rc --arg k "$IDEMPOTENCY_KEY" --arg b "$BEAD_ID" \
+    'fromjson? | select((.idempotency_key // "") == $k and (.bead_id // "") == $b and ((.status // "") | IN("captured","replay")))' \
+    "$AUDIT_LOG" 2>/dev/null | tail -n 1 || true
+}
+
+audit_append_capture() {
+  local row="$1"
+  mkdir -p "$(dirname "$AUDIT_LOG")" 2>/dev/null || true
+  printf '%s\n' "$row" >>"$AUDIT_LOG"
+}
+
+REPLAY_ROW="$(replay_prior_capture)"
+if [[ -n "$REPLAY_ROW" ]]; then
+  if [[ "$JSON_OUT" -eq 1 ]]; then
+    jq -c --arg k "$IDEMPOTENCY_KEY" '. + {replay:true,replay_for_idempotency_key:$k,status:"replay"}' <<<"$REPLAY_ROW"
+  else
+    printf 'jeff-bead-285-divergence-capture: replay idempotency_key=%s bead_id=%s — prior capture found, no-op\n' "$IDEMPOTENCY_KEY" "$BEAD_ID"
+  fi
+  exit 0
+fi
+
 mkdir -p "$CAPTURE_DIR" || { printf 'error: cannot create %s\n' "$CAPTURE_DIR" >&2; exit 3; }
 
 # 1. Pre-close doctor snapshot (baseline)
@@ -264,6 +309,21 @@ fi
 
 # 5. Manifest with all metadata
 emit_receipt "apply" "$CLOSE_RC" "$PRE_STATUS" "$POST_STATUS" "$DIVERGENCE_OBSERVED" >"$MANIFEST"
+
+# 6. Audit-log row carrying per-(key, bead_id) provenance for sister-pattern replay.
+audit_append_capture "$(jq -nc \
+  --arg sv "jeff-bead-285-capture-receipt/v1" \
+  --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  --arg status "captured" \
+  --arg bead_id "$BEAD_ID" \
+  --arg idempotency_key "$IDEMPOTENCY_KEY" \
+  --arg capture_dir "$CAPTURE_DIR" \
+  --arg manifest "$MANIFEST" \
+  --arg pre_status "$PRE_STATUS" \
+  --arg post_status "$POST_STATUS" \
+  --argjson close_exit_code "${CLOSE_RC:-null}" \
+  --argjson divergence_observed "$DIVERGENCE_OBSERVED" \
+  '{schema_version:$sv,ts:$ts,status:$status,bead_id:$bead_id,idempotency_key:$idempotency_key,capture_dir:$capture_dir,manifest:$manifest,close_exit_code:$close_exit_code,pre_status:$pre_status,post_status:$post_status,divergence_observed:$divergence_observed}')"
 
 if [[ "$JSON_OUT" -eq 1 ]]; then
   cat "$MANIFEST"
