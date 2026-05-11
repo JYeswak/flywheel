@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (partial -> passing per bead flywheel-k8gcv.19)
 set -euo pipefail
 
-VERSION="jeff-shadow-socraticode.v1"
+VERSION="jeff-shadow-socraticode.v1.1.0"
+SCHEMA_VERSION_INFO="jeff-shadow-socraticode/info/v1"
 SHADOW_ROOT="${JEFF_SHADOW_ROOT:-$HOME/Developer/jeff-shadow}"
 STATE_DIR="${JEFF_SHADOW_STATE_DIR:-$HOME/.local/state/jeff-intel}"
 INDEX_LEDGER="${JEFF_SHADOW_INDEX_LEDGER:-$STATE_DIR/jeff-shadow-socraticode-index.jsonl}"
 REFRESH_RECEIPT="${JEFF_SHADOW_REFRESH_RECEIPT:-$STATE_DIR/jeff-shadow-refresh.json}"
+IDEMPOTENCY_KEY=""
 MODE="doctor"
 APPLY=0
 RECORD_REPO=""
@@ -110,6 +114,7 @@ status_json() {
     | (if $last_refresh then (((now - ($last_refresh | fromdateiso8601)) / 3600) * 10 | floor / 10) else null end) as $age
     | {
         schema_version:$schema_version,
+        command:"status",
         version:$version,
         mode:"status",
         status:(if $repo_count > 0 and $indexed == $repo_count then "pass" else "warn" end),
@@ -126,6 +131,7 @@ status_json() {
         last_indexed_at:$last_indexed,
         repos:$repos,
         canonical_repos:($specs | map(.repo)),
+        checks:[$repos[] | {name:.repo,status:(if .index_status == "indexed" then "pass" elif .exists then "warn" else "fail" end),path:.path,detail:("shadow clone exists=" + (.exists|tostring) + " index_status=" + .index_status)}],
         dashboard_line:("jeff-shadow: " + ($indexed|tostring) + "/" + ($repo_count|tostring) + " repos indexed, last refresh " + (if $age == null then "unknown" else (($age|tostring) + "h") end) + " ago")
       }'
 }
@@ -221,15 +227,89 @@ why_json() {
 }
 
 info_json() {
-  jq -nc --arg version "$VERSION" --arg shadow_root "$SHADOW_ROOT" --arg state_dir "$STATE_DIR" --arg index_ledger "$INDEX_LEDGER" --arg refresh_receipt "$REFRESH_RECEIPT" '{schema_version:"jeff-shadow-socraticode/info/v1",version:$version,shadow_root:$shadow_root,state_dir:$state_dir,index_ledger:$index_ledger,refresh_receipt:$refresh_receipt,canonical_repos:["ntm","beads_rust","destructive_command_guard","cass_memory_system","meta_skill","mcp_agent_mail","mcp_agent_mail_rust","frankensqlite"],mutating_commands:["refresh --apply","repair --apply","record-index"],default_mutation_mode:"dry-run"}'
+  jq -nc --arg sv "$SCHEMA_VERSION_INFO" --arg version "$VERSION" --arg shadow_root "$SHADOW_ROOT" --arg state_dir "$STATE_DIR" --arg index_ledger "$INDEX_LEDGER" --arg refresh_receipt "$REFRESH_RECEIPT" \
+    '{
+      schema_version:$sv,
+      command:"info",
+      name:"jeff-shadow-socraticode.sh",
+      version:$version,
+      shadow_root:$shadow_root,
+      state_dir:$state_dir,
+      index_ledger:$index_ledger,
+      refresh_receipt:$refresh_receipt,
+      canonical_repos:["ntm","beads_rust","destructive_command_guard","cass_memory_system","meta_skill","mcp_agent_mail","mcp_agent_mail_rust","frankensqlite"],
+      mutating_commands:["refresh --apply","repair --apply","record-index"],
+      default_mutation_mode:"dry-run",
+      subcommands:["doctor","health","status","refresh","repair","validate","audit","why","record-index","quickstart"],
+      canonical_flags:["--info","--schema","--examples","--json","--apply","--dry-run","--idempotency-key","--repo","--status","--chunks"],
+      capabilities:[
+        "8-canonical-jeff-repo-shadow",
+        "git-clone-or-fetch-refresh",
+        "socraticode-index-receipt-per-repo",
+        "refresh-receipt-json-state-file",
+        "indexed-chunk-count-tracking",
+        "dashboard-line-emission",
+        "repo-alias-resolution-ntm-br-dcg-etc"
+      ],
+      apply_supported:true,
+      dry_run_supported:true,
+      idempotency_key_required_for_apply:true,
+      mutates_state:true,
+      env_vars:["JEFF_SHADOW_ROOT","JEFF_SHADOW_STATE_DIR","JEFF_SHADOW_INDEX_LEDGER","JEFF_SHADOW_REFRESH_RECEIPT"],
+      exit_codes:{"0":"pass","1":"refresh-or-index-fail","2":"bad-args","3":"refused-apply-without-idempotency-key"}
+    }'
 }
 
 schema_json() {
-  jq -nc '{schema_version:"jeff-shadow-socraticode/schema/v1",required_status_fields:["repo_count","indexed_count","last_refresh_age_hours","dashboard_line"],required_refresh_fields:["cloned_count","refreshed_count","failed_count"],required_index_receipt_fields:["repo","status","indexed_at","path"]}'
+  jq -nc '{
+    schema_version:"jeff-shadow-socraticode/schema/v1",
+    command:"schema",
+    input_schema:{
+      type:"object",
+      properties:{
+        apply:{type:"boolean"},
+        dry_run:{type:"boolean"},
+        idempotency_key:{type:"string",description:"required with --apply on refresh/repair/record-index"},
+        repo:{type:"string",description:"canonical repo or alias for record-index"},
+        status:{enum:["indexed","failed","pending"]},
+        chunks:{type:"integer",minimum:0}
+      }
+    },
+    output_schema:{
+      type:"object",
+      required:["schema_version","mode","status"],
+      properties:{
+        schema_version:{type:"string"},
+        mode:{enum:["doctor","health","status","refresh","repair","validate","audit","why","record-index","info","schema","examples","quickstart","help","completion"]},
+        status:{enum:["pass","fail","warn"]},
+        repo_count:{type:"integer"},
+        indexed_count:{type:"integer"},
+        last_refresh_age_hours:{type:"number"},
+        dashboard_line:{type:"string"},
+        cloned_count:{type:"integer"},
+        refreshed_count:{type:"integer"},
+        failed_count:{type:"integer"}
+      }
+    },
+    required_status_fields:["repo_count","indexed_count","last_refresh_age_hours","dashboard_line"],
+    required_refresh_fields:["cloned_count","refreshed_count","failed_count"],
+    required_index_receipt_fields:["repo","status","indexed_at","path"],
+    exit_codes:{"0":"pass","1":"refresh-or-index-fail","2":"bad-args","3":"refused-apply-without-idempotency-key"}
+  }'
 }
 
 examples_json() {
-  jq -nc '{schema_version:"jeff-shadow-socraticode/examples/v1",examples:[{name:"status",command:"jeff-shadow-socraticode.sh status --json"},{name:"refresh dry run",command:"jeff-shadow-socraticode.sh refresh --dry-run --json"},{name:"record MCP index",command:"jeff-shadow-socraticode.sh record-index --repo ntm --chunks 120 --json"}]}'
+  jq -nc '{
+    schema_version:"jeff-shadow-socraticode/examples/v1",
+    command:"examples",
+    examples:[
+      {name:"status",command:"jeff-shadow-socraticode.sh status --json",purpose:"current shadow state: 8/8 repos indexed, last refresh age, dashboard line"},
+      {name:"refresh dry run",command:"jeff-shadow-socraticode.sh refresh --dry-run --json",purpose:"preview which repos would be cloned/fetched"},
+      {name:"refresh apply",command:"jeff-shadow-socraticode.sh refresh --apply --idempotency-key jss-2026-05-11 --json",purpose:"clone/fetch canonical repos under ~/Developer/jeff-shadow"},
+      {name:"record MCP index",command:"jeff-shadow-socraticode.sh record-index --repo ntm --chunks 120 --json",purpose:"record completion of MCP socraticode indexing for a shadow repo"},
+      {name:"doctor",command:"jeff-shadow-socraticode.sh doctor --json",purpose:"canonical doctor envelope"}
+    ]
+  }'
 }
 
 quickstart() {
@@ -267,6 +347,8 @@ while [ "$#" -gt 0 ]; do
     --json) shift ;;
     --dry-run) APPLY=0; shift ;;
     --apply) APPLY=1; shift ;;
+    --idempotency-key) IDEMPOTENCY_KEY="${2:-}"; shift 2 ;;
+    --idempotency-key=*) IDEMPOTENCY_KEY="${1#--idempotency-key=}"; shift ;;
     --repo) RECORD_REPO="${2:-}"; shift 2 ;;
     --status) RECORD_STATUS="${2:-}"; shift 2 ;;
     --chunks) RECORD_CHUNKS="${2:-}"; shift 2 ;;
@@ -274,6 +356,16 @@ while [ "$#" -gt 0 ]; do
     *) POSITIONAL="${POSITIONAL:+$POSITIONAL }$1"; shift ;;
   esac
 done
+
+# Canonical apply contract: --apply on refresh/repair/record-index requires --idempotency-key.
+if [[ "$APPLY" -eq 1 && -z "$IDEMPOTENCY_KEY" ]]; then
+  case "$MODE" in
+    refresh|repair|record-index)
+      printf '{"schema_version":"%s","status":"refused","mode":"apply","reason":"--apply requires --idempotency-key","exit_code":3}\n' "$SCHEMA_VERSION_INFO"
+      exit 3
+      ;;
+  esac
+fi
 
 case "$MODE" in
   doctor|health|status) status_json ;;
