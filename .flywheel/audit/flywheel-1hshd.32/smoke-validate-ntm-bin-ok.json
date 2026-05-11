@@ -1,0 +1,1 @@
+{"schema_version":"frozen-pane-detector/v1","command":"validate","subject":"ntm-bin","ts":"2026-05-11T05:51:35Z","status":"ok","value":"/Users/josh/.local/bin/ntm","note":"executable; detector can wrap ntm surfaces"}

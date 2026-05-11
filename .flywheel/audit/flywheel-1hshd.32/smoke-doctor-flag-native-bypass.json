@@ -1,0 +1,1 @@
+{"schema_version":"frozen-pane-detector.v2","success":true,"mode":"doctor","source_health":{"status":"healthy"},"native_surface":["ntm grep --json","ntm errors --json","ntm activity --json","ntm wait --json"],"ntm_bin":"/Users/josh/.local/bin/ntm"}

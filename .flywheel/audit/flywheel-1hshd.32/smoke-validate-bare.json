@@ -1,0 +1,1 @@
+{"schema_version":"frozen-pane-detector/v1","command":"validate","status":"refused","reason":"missing_subject","valid_subjects":["session-name","recovery-mode","ntm-bin"]}
