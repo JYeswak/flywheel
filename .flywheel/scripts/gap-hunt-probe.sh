@@ -502,6 +502,57 @@ def recent_ledger_text(days: int = 30, max_bytes: int = 4_000_000) -> str:
 
 _RUNTIME_SOURCE_CORPUS: str | None = None
 _SIBLING_LEDGER_CORPUS: str | None = None
+_SKILL_MD_CORPUS: str | None = None
+
+
+def skill_md_corpus(max_bytes: int = 1_500_000) -> str:
+    """Build a corpus from all SKILL.md files under ~/.claude/skills/.
+
+    Per flywheel-2xdi.49: SKILL.md is the canonical documentation surface
+    where each skill explains its scripts and entry points. When a SKILL.md
+    documents a script as a stable invocation path (e.g., "The compatibility
+    wrapper is also available at ~/.claude/skills/.flywheel/scripts/X.sh"),
+    that documentation IS the wiring — humans and skill-aware agents follow
+    those paths. Treating SKILL.md content as evidence of "wired" eliminates
+    false-positive cold flags on documented compat wrappers + skill entry
+    points whose name only appears in SKILL.md prose, not in any ledger or
+    `source` line.
+
+    Same META-rule shape as the for-loop indirect-source fix (flywheel-2xdi.47):
+    fix the probe's corpus blind spot, not register each affected script
+    individually.
+    """
+    global _SKILL_MD_CORPUS
+    if _SKILL_MD_CORPUS is not None:
+        return _SKILL_MD_CORPUS
+    skills_root = CLAUDE_ROOT / "skills"
+    if not skills_root.is_dir():
+        _SKILL_MD_CORPUS = ""
+        return _SKILL_MD_CORPUS
+    pieces: list[str] = []
+    used = 0
+    # Walk all SKILL.md files; budget total content.
+    try:
+        candidates = list(safe_iter_files(skills_root, "SKILL.md", 1000))
+    except Exception:
+        candidates = []
+    # Names corpus first (always complete) so very-large SKILL.md content
+    # doesn't starve the recognizer.
+    pieces.append("\n".join(p.name for p in candidates))
+    used += sum(len(p.name) + 1 for p in candidates)
+    for path in candidates:
+        if used >= max_bytes:
+            break
+        try:
+            text = read_text(path, max(0, max_bytes - used))
+        except Exception:
+            continue
+        if not text:
+            continue
+        pieces.append(text)
+        used += len(text)
+    _SKILL_MD_CORPUS = "\n".join(pieces)
+    return _SKILL_MD_CORPUS
 
 
 def runtime_source_corpus() -> str:
@@ -813,6 +864,7 @@ def probe_wired_but_cold() -> list[dict]:
     ledger_text = recent_ledger_text()
     sibling_text = sibling_repo_ledger_corpus()
     source_text = runtime_source_corpus()
+    skill_md_text = skill_md_corpus()
     on_demand = on_demand_script_allowlist()
     scripts = []
     scripts.extend(safe_iter_files(CLAUDE_ROOT / "skills", "*.sh", 3000))
@@ -828,12 +880,16 @@ def probe_wired_but_cold() -> list[dict]:
             resolved = script
         if resolved in on_demand:
             continue
-        # flywheel-8vw0o: cold = absent from ALL THREE corpora
+        # flywheel-8vw0o + flywheel-2xdi.49: cold = absent from ALL FOUR corpora
         # (1) primary flywheel state-dir ledgers (recent_ledger_text)
         # (2) sibling-repo dispatch-logs (sibling_repo_ledger_corpus) — catches
         #     cross-repo umbrella refs e.g. tick_guard.sh in skillos tests
         # (3) runtime source-line corpus (runtime_source_corpus) — catches
-        #     doctor.d/* modules sourced by doctor.sh and similar
+        #     doctor.d/* modules sourced by doctor.sh + for-loop indirect-sourced
+        #     lib/* modules (flywheel-2xdi.47)
+        # (4) SKILL.md documentation corpus (skill_md_corpus) — catches
+        #     compat wrappers + skill entry points documented in SKILL.md prose
+        #     whose names only appear in docs, not in any ledger or source line
         in_local = name in ledger_text or script.stem in ledger_text
         in_sibling = bool(sibling_text) and (name in sibling_text or script.stem in sibling_text)
         # source corpus: name + stem + parent-dir-name (catches glob-sourced
@@ -854,7 +910,8 @@ def probe_wired_but_cold() -> list[dict]:
                 # dirs would be too noisy a signal.
                 if parent_name.endswith(".d") and parent_name in source_text:
                     in_source = True
-        if not (in_local or in_sibling or in_source):
+        in_skill_md = bool(skill_md_text) and (name in skill_md_text or script.stem in skill_md_text)
+        if not (in_local or in_sibling or in_source or in_skill_md):
             try:
                 rel = str(script.relative_to(Path.home()))
             except Exception:
