@@ -2,10 +2,10 @@
 name: meta-primitive-composition-shape-taxonomy
 type: doctrine
 created: 2026-05-11
-version: v0.1
-status: draft-pending-joshua-veto-window-2026-05-11T11:35Z
-authority: skillos-1-codified-2026-05-11T05:35Z-from-joshua-meta-primitive-doctrine-complete-signal + zeststream-platform-extraction-evidence (commits 7814d79 stripe-toolkit + d83d94c admin-action-toolkit + 45c2e42 event-hub-toolkit; THREE pane-3 META-PRIMITIVES proving cross-shape doctrine)
-ratification_target: skillos:1 codifies; mobile-eats orch continues Wave-2 deep-scan independently; Joshua-veto window 6h from 05:35Z (i.e. 2026-05-11T11:35Z) per cross-orch-anti-divergence-v1.0.0 P3-trivial protocol; default-accept thereafter
+version: v0.2
+status: draft-pending-joshua-veto-window-2026-05-11T12:15Z (v0.1 + CASCADE 4th-shape ratification)
+authority: skillos-1-codified-2026-05-11T05:35Z (v0.1) + v0.2 expansion 2026-05-11T06:15Z per joshua-n-tier-classifier-doctrine-emergence-signal + zeststream-platform-extraction-evidence (commits 7814d79 stripe-toolkit + d83d94c admin-action-toolkit + 45c2e42 event-hub-toolkit + f3c50f9 rch-common + f1aa2c0 intent-classifier; FIVE pane-3 META-PRIMITIVES across FOUR composition shapes)
+ratification_target: skillos:1 codifies; mobile-eats orch continues Wave-2 phase-3 independently; Joshua-veto window 6h from 06:15Z (i.e. 2026-05-11T12:15Z) per cross-orch-anti-divergence-v1.0.0 P3-trivial protocol; default-accept thereafter
 cluster: extraction-velocity-doctrine-cluster
 sisters:
   - meta-primitive-extraction-friction-class.md (SISTER — friction catalog applies per-shape; this doctrine defines the shape taxonomy that friction is indexed against)
@@ -19,11 +19,11 @@ sub_shape_under: META-EXTRACTION-DRIFT trauma class parent (Joshua-ratified 2026
 
 ## Paradigm — META-PRIMITIVES compose substrate in one of three canonical shapes
 
-A META-PRIMITIVE is a higher-order package that composes 3+ substrate primitives into a single consumer-facing surface. Across the Library Accretion Mission Phase 4 Wave-1 pane-3 extractions (3 METAs shipped in ~90 minutes), three distinct composition topologies emerged. These three shapes cover the canonical communication patterns; future METAs will fall into one of these shapes or a documented hybrid that decomposes to these primitives.
+A META-PRIMITIVE is a higher-order package that composes 3+ substrate primitives into a single consumer-facing surface. Across the Library Accretion Mission Phase 4 Wave-1+2 pane-3 extractions, **four** distinct composition topologies have emerged. These four shapes cover the canonical communication patterns; future METAs will fall into one of these shapes or a documented hybrid that decomposes to these primitives.
 
 The Meadows-lens leverage point: **#5 rules of the system** (the shape taxonomy is a rule-of-the-meta-extraction-system; without it, each new META is a one-off pattern; with it, the extractor reaches for a canonical shape that already has documented mechanics, friction-mitigations, and consumer expectations), and **#6 information flow** (consumers immediately recognize which shape a META takes from its surface, accelerating adoption).
 
-The three shapes — **PARALLEL**, **LAYERED**, **HUB** — emerged from three META extractions in a single 90-minute window: enough variation to characterize the topology space, enough commonality to abstract the canonical mechanics per shape.
+The four shapes — **PARALLEL**, **LAYERED**, **HUB**, **CASCADE** — emerged from five META extractions across pane-3 + Wave-2 phases: enough variation to characterize the topology space, enough commonality to abstract the canonical mechanics per shape. CASCADE was ratified as the 4th canonical shape on 2026-05-11T06:15Z after the 2-instance threshold was met (RCH 5-tier shell command classifier + intent-classifier 3-tier intent classifier).
 
 ## Mandate
 
@@ -134,6 +134,53 @@ Every META-PRIMITIVE extraction MUST:
 - MEDIUM: `workspace-pre-build` (3-5 substrate deps)
 - HIGH: `fake-timer-lifecycle` (idempotency spoke has TTLs; metrics spoke has time-bucketed counters)
 
+### Shape #4 — `CASCADE` (tiered cascading attempt; first-match wins)
+
+**Definition (canonical 1999-style — naming-discipline preserves dispatch-shorthand):**
+N substrate primitives, each an evaluator at a distinct cost/precision tier. The META invokes evaluators in sequence against the SAME input; the first tier to produce a successful result returns; later tiers are not invoked. Correction tier (when present) has absolute precedence — short-circuits all downstream tiers including LLM-cost paths.
+
+**Local shorthand:** N-TIER classifier. Per the canonical 1999-numbering discipline, CASCADE is the canonical name; N-TIER is the dispatch shorthand observed in extraction commits.
+
+**Composition mechanics:**
+- Each primitive owns one evaluator tier
+- Tiers ordered by ascending cost OR descending precision (e.g., regex < LLM < default)
+- First successful evaluation returns; remaining tiers short-circuited
+- Correction tier (optional) has absolute precedence (recognizes operator overrides before any auto-classification)
+- Pluggable taxonomy + per-tier registry let callers inject custom rules
+
+**Canonical exemplars:**
+
+| META | Tiers | Commit | Tier descriptions |
+|------|------:|--------|-------------------|
+| `rch-common` shell command classifier | 5 | `zeststream-platform@f3c50f9` | T0 instant_reject (empty/whitespace) → T1 structure_analysis (multi-cmd/pipes/redirects) → T2 keyword_filter (cargo/rustc substring) → T3 never_intercept (cargo install/publish) → T4 full_classification (pattern match → kind+confidence). 99% rejected at T0-T2 (cheap path). |
+| `@zeststream/intent-classifier` | 3 | `zeststream-platform@f1aa2c0` | T1 pre-classify (anchored regex; ~0ms) → T2 LLM classify (semantic; ~200ms) → T3 fallback (fuzzy regex; when LLM null/throws). Plus correction-tier with ABSOLUTE precedence. |
+
+**When to use:**
+- Substrate has classification-or-resolution semantics (input → label / decision / category)
+- Multiple evaluators with distinct cost (cheap regex vs expensive LLM) need to be ordered
+- First-match-wins semantics are correct (later tiers must NOT override earlier successes)
+- Explicit precedence ordering matters (corrections > heuristics > LLM > fallback)
+- Examples: command classifiers, intent classifiers, MIME-type detectors, error-class routers, scoring tiers with thresholds
+
+**Type-system implications:**
+- Each tier's evaluator has the same input type and returns `Result<TLabel> | null`
+- META factory returns a single `classify(input) → result` function that walks tiers
+- Pluggable taxonomy via `buildClassifier({tiers: [...], correction: optional, fallback: optional})`
+- Per-tier registry (`tiers: TierEvaluator<TInput, TLabel>[]`) lets callers replace or extend
+- Correction tier (when present) is a pre-evaluator; runs before tier-0
+
+**Friction sub-shape affinity:**
+- HIGH: `TS-inline-handler-implicit-any` (per-tier evaluators are inline handler shapes; sub-shape #3 bites in tier-builder declarations)
+- HIGH: `re-export-split` (multiple tier evaluators + correction-tier + fallback all need consumer-friendly entry points)
+- MEDIUM: `workspace-pre-build` (substrate deps per tier)
+- LOW-MEDIUM: `fake-timer-lifecycle` (only if any tier is time-gated; uncommon in classifiers)
+
+**Correction-tier-precedence sub-pattern:**
+Most CASCADE METAs benefit from an optional correction tier that detects operator overrides ("that should be X" / "i meant Y") and short-circuits ALL downstream tiers including LLM-cost paths. Codified as canonical CASCADE sub-pattern; document presence in extraction commit body.
+
+**META-EXTRACTION-DRIFT promotion note:**
+CASCADE was ratified as the 4th canonical shape on 2026-05-11T06:15Z after the 2-instance threshold was met. v0.1 of this doctrine pre-declared the 4th-shape ratification mechanism; this is the first canonical exercise of that mechanism (sub-shape promotion via cumulative observed instances).
+
 ## Shape-selection decision table
 
 | Substrate communication pattern | Recommended shape |
@@ -141,11 +188,14 @@ Every META-PRIMITIVE extraction MUST:
 | Linear pipeline (parse → validate → transform → dispatch) | **PARALLEL** |
 | Nested concerns with short-circuit (cors → auth → step-up → handler) | **LAYERED** |
 | Dynamic pub/sub (1 emit → N handlers) | **HUB** |
+| Classification / resolution with tiered cost/precision (regex < LLM < fallback) | **CASCADE** |
 | Request/response with progressive enrichment | LAYERED |
 | Batch processor with stage-by-stage data flow | PARALLEL |
 | Plugin system with dynamic registration | HUB |
 | Middleware stack | LAYERED |
 | Workflow with cross-cutting concerns | HUB (if dispatch-heavy) or LAYERED (if order-heavy) |
+| First-match-wins routing (input → label) | **CASCADE** |
+| Operator-correction-override-auto-classification | **CASCADE** (correction tier mandatory) |
 
 ## Hybrid composition
 
@@ -204,11 +254,19 @@ This doctrine follows the same byte-identical mirror pattern as `audit-machinery
 
 ## Future evolution (v0.2+ candidates)
 
-The 3-shape taxonomy is currently complete per the Phase 4 Wave-1 evidence. Future evolution paths:
+The 4-shape taxonomy (PARALLEL + LAYERED + HUB + CASCADE) is currently complete per the Phase 4 Wave-1+2 evidence (5 METAs across 4 shapes). Future evolution paths:
 
-- **4th-shape ratification:** If a new META extraction doesn't fit any of PARALLEL/LAYERED/HUB AND ≥1 other extraction surfaces the same novel shape (≥2-instance threshold), file ratification request. Candidates that have been hypothesized but not observed: PIPELINE-WITH-BRANCHING, BIDIRECTIONAL-CHANNEL, STATE-MACHINE.
-- **Hybrid pattern catalog:** As hybrid compositions surface, catalog the recurring decomposition patterns (e.g., LAYERED-wraps-PARALLEL is common in HTTP handlers; HUB-with-LAYERED-spokes is common in observability stacks).
+- **5th-shape ratification:** Same ≥2-instance threshold as the 4th-shape ratification mechanism that promoted CASCADE. Candidates that have been hypothesized but not observed at ≥2 instances yet: PIPELINE-WITH-BRANCHING (conditional routing in serial pipeline), BIDIRECTIONAL-CHANNEL (consumer↔META protocol with back-pressure), STATE-MACHINE (composed primitives form an explicit state graph).
+- **CASCADE sub-shape catalog:** With CASCADE now canonical, document recurring CASCADE-specific sub-shapes: correction-tier-precedence (recurred from RCH + intent-classifier), tier-count-determines-cost-tier-ratio, pluggable-taxonomy-via-registry. Each surfaces as ≥2-instance pattern across future CASCADE METAs.
+- **Hybrid pattern catalog:** As hybrid compositions surface, catalog the recurring decomposition patterns (e.g., LAYERED-wraps-PARALLEL is common in HTTP handlers; HUB-with-LAYERED-spokes is common in observability stacks; CASCADE-wraps-CASCADE for nested classifiers).
 - **Cross-shape composition:** When one META composes another META (rare but possible), document the META-of-METAs shape.
+
+### v0.1 → v0.2 audit-trail
+
+| Version | Date | Change | Trigger |
+|---------|------|--------|---------|
+| v0.1 | 2026-05-11T05:35Z | 3-shape taxonomy (PARALLEL + LAYERED + HUB) | First 3 pane-3 METAs cross-shape |
+| **v0.2** | **2026-05-11T06:15Z** | **CASCADE 4th-shape ratified (≥2 instances: RCH 5-tier + intent-classifier 3-tier)** | **Joshua N-tier-classifier-doctrine-emergence-signal** |
 
 ## Mission anchor
 
