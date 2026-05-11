@@ -1,0 +1,29 @@
+=== tests/gap-hunt-probe-for-loop-source-corpus.sh ===
+PASS probe defines for_in_re for for-loop header capture
+PASS probe tracks multi-line for-loop continuation
+PASS live probe: reconcile.sh no longer flagged wired-but-cold (REAL .gap_ids filter)
+PASS synthetic fixture: for-loop header capture finds reconcile + tentacle + doctor module names
+SUMMARY pass=4 fail=0
+
+=== tests/gap-hunt-probe-skill-md-corpus.sh ===
+PASS probe defines skill_md_corpus + _SKILL_MD_CORPUS cache
+PASS probe_wired_but_cold checks in_skill_md as fourth corpus
+PASS live probe: protected-session-recovery.sh no longer flagged wired-but-cold (REAL .gap_ids filter)
+PASS synthetic fixture: SKILL.md mention of myskill-stub.sh is captured by corpus collector
+SUMMARY pass=4 fail=0
+
+=== tests/gap-hunt-probe-exec-sh-corpus.sh ===
+PASS probe defines exec_sh_re regex
+PASS exec_sh_re wired into runtime_source_corpus line scan
+PASS live probe: archetype-calibrate.sh no longer flagged wired-but-cold (REAL .gap_ids filter)
+PASS synthetic: exec_sh_re catches run/exec/bash/sh verbs and skips negatives
+SUMMARY pass=4 fail=0
+
+=== tests/gap-hunt-probe-skill-tree-md-corpus.sh ===
+PASS probe skill_md_corpus walks *.md (not just SKILL.md)
+PASS probe skill_md_corpus uses per-file cap (prevents starvation)
+PASS live probe: cluster-recommendations.sh no longer flagged wired-but-cold
+PASS sister fix still holds: archetype-calibrate unflagged
+PASS sister fix still holds: protected-session-recovery unflagged
+PASS synthetic: references/README.md mention is captured ONLY by broadened *.md corpus
+SUMMARY pass=6 fail=0

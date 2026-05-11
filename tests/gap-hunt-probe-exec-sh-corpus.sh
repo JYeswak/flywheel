@@ -36,29 +36,25 @@ else
   fail "exec_sh_re defined but not wired into the for-line loop"
 fi
 
-# Test 3: live probe → archetype-calibrate.sh no longer flagged
+# Test 3: live probe → archetype-calibrate.sh no longer flagged.
+# flywheel-f1s2x: filter uses .gap_ids (the REAL probe JSON field) — prior
+# version used `.gaps // []` which is always null in probe output and made
+# the assertion vacuously true.
 out="$TMP/probe.json"
 if timeout 180 "$PROBE" --json --dry-run >"$out" 2>"$TMP/probe.err"; then
-  matched=$(jq -r '[.gaps // [] | .[] | select(.class == "wired-but-cold" and (.where | test("archetype-calibrate")))] | length' "$out" 2>/dev/null || echo "?")
+  matched=$(jq -r '[.gap_ids // [] | .[] | select(startswith("wired-but-cold:") and contains("archetype-calibrate"))] | length' "$out" 2>/dev/null || echo "?")
   if [[ "$matched" == "0" ]]; then
-    pass "live probe: archetype-calibrate.sh no longer flagged wired-but-cold"
+    pass "live probe: archetype-calibrate.sh no longer flagged wired-but-cold (REAL .gap_ids filter)"
   else
     fail "live probe: archetype-calibrate.sh still flagged ($matched gaps)"
   fi
 else
   fail "probe failed to run"
 fi
-
-# Test 4: live probe → 0 wired-but-cold gaps total
-# (combined effect of 2xdi.47 for-loop fix + 2xdi.49 SKILL.md fix + 2xdi.64 exec_sh fix)
-if [[ -f "$out" ]]; then
-  total=$(jq -r '[.gaps // [] | .[] | select(.class == "wired-but-cold")] | length' "$out" 2>/dev/null || echo "?")
-  if [[ "$total" == "0" ]]; then
-    pass "live probe: 0 wired-but-cold gaps total (combined 47+49+64 corpus extensions)"
-  else
-    fail "live probe: still $total wired-but-cold gaps"
-  fi
-fi
+# Note: prior version asserted "0 wired-but-cold gaps total" but that was
+# vacuously true under the `.gaps // []` filter. The real cluster has many
+# remaining cold candidates unrelated to 2xdi.64; per-script targeting is the
+# meaningful regression check.
 
 # Test 5: synthetic — exec_sh_re catches each of the 4 verbs (run/exec/bash/sh)
 PY_OUT=$(python3 - <<'PY'

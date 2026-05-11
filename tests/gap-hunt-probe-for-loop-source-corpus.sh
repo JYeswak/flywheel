@@ -41,15 +41,19 @@ else
   fail "for-loop continuation tracking missing"
 fi
 
-# Test 3: live probe → 0 wired-but-cold gaps total (was ≥1 with reconcile.sh pre-fix)
+# Test 3: live probe → reconcile.sh no longer flagged wired-but-cold.
+# flywheel-f1s2x: filter uses .gap_ids (the REAL probe JSON field) — prior
+# version used `.gaps // []` which is always null in probe output and made
+# the assertion vacuously true. The "0 total wired-but-cold" assertion was
+# also dropped because the cluster has many remaining real cold candidates
+# unrelated to 2xdi.47; per-script targeting is the meaningful check.
 out="$TMP/probe.json"
 if timeout 180 "$PROBE" --json --dry-run >"$out" 2>"$TMP/probe.err"; then
-  cold_count=$(jq -r '[.gaps // [] | .[] | select(.class == "wired-but-cold")] | length' "$out" 2>/dev/null || echo "?")
-  reconcile_count=$(jq -r '[.gaps // [] | .[] | select(.class == "wired-but-cold" and (.where | test("reconcile")))] | length' "$out" 2>/dev/null || echo "?")
-  if [[ "$cold_count" == "0" && "$reconcile_count" == "0" ]]; then
-    pass "live probe reports 0 wired-but-cold gaps (was ≥1 with reconcile.sh pre-fix)"
+  reconcile_count=$(jq -r '[.gap_ids // [] | .[] | select(startswith("wired-but-cold:") and contains("reconcile"))] | length' "$out" 2>/dev/null || echo "?")
+  if [[ "$reconcile_count" == "0" ]]; then
+    pass "live probe: reconcile.sh no longer flagged wired-but-cold (REAL .gap_ids filter)"
   else
-    fail "live probe still reports wired-but-cold (total=$cold_count reconcile=$reconcile_count)"
+    fail "live probe: reconcile.sh still flagged ($reconcile_count gaps)"
   fi
 else
   fail "probe failed to run; cannot verify end-to-end"

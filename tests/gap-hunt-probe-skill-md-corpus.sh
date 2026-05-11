@@ -35,28 +35,25 @@ else
   fail "probe_wired_but_cold doesn't check skill_md corpus"
 fi
 
-# Test 3: live probe → protected-session-recovery.sh no longer flagged
+# Test 3: live probe → protected-session-recovery.sh no longer flagged.
+# flywheel-f1s2x: filter uses .gap_ids (the REAL probe JSON field) — prior
+# version used `.gaps // []` which is always null in probe output and made
+# the assertion vacuously true.
 out="$TMP/probe.json"
 if timeout 180 "$PROBE" --json --dry-run >"$out" 2>"$TMP/probe.err"; then
-  matched=$(jq -r '[.gaps // [] | .[] | select(.class == "wired-but-cold" and (.where | test("protected-session-recovery")))] | length' "$out" 2>/dev/null || echo "?")
+  matched=$(jq -r '[.gap_ids // [] | .[] | select(startswith("wired-but-cold:") and contains("protected-session-recovery"))] | length' "$out" 2>/dev/null || echo "?")
   if [[ "$matched" == "0" ]]; then
-    pass "live probe: protected-session-recovery.sh no longer flagged wired-but-cold"
+    pass "live probe: protected-session-recovery.sh no longer flagged wired-but-cold (REAL .gap_ids filter)"
   else
     fail "live probe: protected-session-recovery.sh still flagged ($matched gaps)"
   fi
 else
   fail "probe failed to run"
 fi
-
-# Test 4: live probe → 0 wired-but-cold gaps total (combined effect of 2xdi.47 + .49)
-if [[ -f "$out" ]]; then
-  total=$(jq -r '[.gaps // [] | .[] | select(.class == "wired-but-cold")] | length' "$out" 2>/dev/null || echo "?")
-  if [[ "$total" == "0" ]]; then
-    pass "live probe: 0 wired-but-cold gaps total (combined 2xdi.47 for-loop fix + 2xdi.49 SKILL.md fix)"
-  else
-    fail "live probe: still $total wired-but-cold gaps"
-  fi
-fi
+# Note: prior version asserted "0 wired-but-cold gaps total" but that was
+# vacuously true under the `.gaps // []` filter. The real cluster has many
+# remaining cold candidates unrelated to 2xdi.49; per-script targeting is the
+# meaningful regression check.
 
 # Test 5: synthetic fixture — fake SKILL.md mentions a script; probe sees it
 fake_skills_root="$TMP/fake-skills"

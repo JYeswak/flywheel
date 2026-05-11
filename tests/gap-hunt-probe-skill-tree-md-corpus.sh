@@ -17,7 +17,9 @@
 #
 # IMPORTANT: this test uses .gap_class_distribution and .gap_ids (the REAL
 # probe JSON fields) instead of the vacuous .gaps filter that prior sister
-# tests used. See the related gap bead filed alongside this fix.
+# tests used. See flywheel-f1s2x — sister tests (for-loop, skill-md, exec-sh)
+# have now been migrated to the same .gap_ids filter shape so all four 2xdi
+# corpus regression tests verify their per-script assertions legitimately.
 
 set -uo pipefail
 
