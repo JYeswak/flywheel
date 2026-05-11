@@ -1,0 +1,169 @@
+diff --git a/.flywheel/scripts/bcv-task-harness.sh b/.flywheel/scripts/bcv-task-harness.sh
+index ea4b170..ff7e0ed 100755
+--- a/.flywheel/scripts/bcv-task-harness.sh
++++ b/.flywheel/scripts/bcv-task-harness.sh
+@@ -22,7 +22,8 @@ Options:
+   --skill-dir PATH            BCV skill dir
+   --wait-timeout-seconds N    Timeout for each Task-tool wait phase (default: 600)
+   --poll-seconds N            Poll interval while waiting (default: 2)
+-  --apply                     Create pass and wait for real packs
++  --apply                     Create pass and wait for real packs (requires --idempotency-key)
++  --idempotency-key KEY       Required under --apply. Per-(key, target_beads_sha) replay no-ops.
+   --dry-run                   Print plan only (default)
+   --json                      Emit JSON receipt
+   --help                      Show this help
+@@ -30,6 +31,12 @@ Options:
+ This harness stops the deterministic BCV flow after Phase 3, emits Task-tool
+ prompt files for Phase 4 and Phase 6, waits for non-stub packs, then runs
+ Phase 5, validation, scoring, and master-report generation.
++
++Exit codes:
++  0  dry-run succeeded, complete with banner, complete with validation, or replay-no-op
++  1  validation failed or banner unexpectedly present
++  2  usage or substrate error
++  3  --apply without --idempotency-key (canonical refusal contract)
+ USAGE
+ }
+ 
+@@ -39,17 +46,22 @@ json_escape() {
+ 
+ emit_info() {
+   if [ "$JSON_OUT" = "1" ]; then
+-    jq -n --arg version "$VERSION" --arg skill_dir "$SKILL_DIR" '{
++    jq -n --arg version "$VERSION" --arg skill_dir "$SKILL_DIR" --arg audit_log "$AUDIT_LOG" '{
+       tool: "bcv-task-harness.sh",
+       version: $version,
+       purpose: "Run BCV Phase 0.5-3 deterministically, delegate Phase 4/6 to Task-tool subagents, then validate/score/report non-stub packs.",
+       skill_dir: $skill_dir,
++      apply_requires: "--idempotency-key",
++      audit_log: $audit_log,
+       required_phase4_executor: "subagents/compliance-verifier.md",
+-      required_phase6_auditor: "subagents/test-depth-auditor.md"
++      required_phase6_auditor: "subagents/test-depth-auditor.md",
++      exit_codes: {"0":"success or replay-no-op","1":"validation failed","2":"usage error","3":"--apply without --idempotency-key"}
+     }'
+   else
+     printf '%s\n' "$VERSION"
+     printf 'skill_dir=%s\n' "$SKILL_DIR"
++    printf 'audit_log=%s\n' "$AUDIT_LOG"
++    printf 'apply_requires=--idempotency-key\n'
+     printf 'phase4_executor=subagents/compliance-verifier.md\n'
+     printf 'phase6_auditor=subagents/test-depth-auditor.md\n'
+   fi
+@@ -81,8 +93,10 @@ emit_examples() {
+ # Plan only:
+ .flywheel/scripts/bcv-task-harness.sh --repo "$PWD" --beads bd-123,bd-456 --json
+ 
+-# Real run, waiting up to 15 minutes for Task-tool output packs:
+-.flywheel/scripts/bcv-task-harness.sh --repo "$PWD" --beads bd-123,bd-456 --apply --wait-timeout-seconds 900 --json
++# Real run with idempotency key (requires --idempotency-key; per-(key, target_beads_sha) replay):
++.flywheel/scripts/bcv-task-harness.sh --repo "$PWD" --beads bd-123,bd-456 --apply --idempotency-key="bcv-$(date -u +%Y%m%d)" --wait-timeout-seconds 900 --json
++
++# Same key + same target beads → replay-no-op. Different beads → fresh run.
+ EXAMPLES
+ }
+ 
+@@ -397,6 +411,8 @@ JSON_OUT="0"
+ INFO="0"
+ SCHEMA="0"
+ EXAMPLES="0"
++IDEMPOTENCY_KEY=""
++AUDIT_LOG="${BCV_TASK_HARNESS_AUDIT_LOG:-$HOME/.local/state/flywheel/bcv-task-harness-runs.jsonl}"
+ 
+ while [ "$#" -gt 0 ]; do
+   case "$1" in
+@@ -412,6 +428,8 @@ while [ "$#" -gt 0 ]; do
+     --poll-seconds) POLL_SECONDS="${2:?--poll-seconds requires value}"; shift 2 ;;
+     --apply) APPLY="1"; shift ;;
+     --dry-run) APPLY="0"; shift ;;
++    --idempotency-key) [ -n "${2:-}" ] || die "--idempotency-key requires VALUE"; IDEMPOTENCY_KEY="$2"; shift 2 ;;
++    --idempotency-key=*) IDEMPOTENCY_KEY="${1#--idempotency-key=}"; [ -n "$IDEMPOTENCY_KEY" ] || die "--idempotency-key requires VALUE"; shift ;;
+     --json) JSON_OUT="1"; shift ;;
+     --info) INFO="1"; shift ;;
+     --schema) SCHEMA="1"; shift ;;
+@@ -457,6 +475,49 @@ if [ "$APPLY" != "1" ]; then
+   exit 0
+ fi
+ 
++# Mutation gate (7axmt P2 fix, sister j0xpa whole-run-scoped-per-target-set variant).
++# Scope identifier: sha256 of sorted TARGET_BEADS — same set of beads + same key → replay.
++# Fires AFTER load_targets so we know which beads we'd process; BEFORE bootstrap-audit
++# creates the pass dir (hoqq8 invariant — gate before side-effect).
++if [ -z "$IDEMPOTENCY_KEY" ]; then
++  jq -nc \
++    --arg version "$VERSION" \
++    --arg repo "$REPO" \
++    '{tool:"bcv-task-harness.sh",version:$version,status:"refused",mode:"apply",repo:$repo,reason:"--apply requires --idempotency-key"}' >&2
++  exit 3
++fi
++
++# Compute target_beads_sha (sorted set hash) for per-target-set replay scope.
++TARGET_BEADS_SHA="$(printf '%s\n' "${TARGET_BEADS[@]}" | sort | shasum -a 256 | awk '{print $1}')"
++
++# Replay-check (tolerant-parse per sister 8sx9w skill discovery). Match on
++# (idempotency_key, target_beads_sha) tuple — same key + same target set → no-op.
++replay_prior_bcv_run() {
++  if [ -z "$IDEMPOTENCY_KEY" ] || [ ! -r "$AUDIT_LOG" ]; then
++    printf ''
++    return 0
++  fi
++  jq -Rc --arg k "$IDEMPOTENCY_KEY" --arg sha "$TARGET_BEADS_SHA" \
++    'fromjson? | select((.idempotency_key // "") == $k and (.target_beads_sha // "") == $sha and ((.status // "") | IN("complete","replay")))' \
++    "$AUDIT_LOG" 2>/dev/null | tail -n 1 || true
++}
++
++audit_append_bcv() {
++  local row="$1"
++  mkdir -p "$(dirname "$AUDIT_LOG")" 2>/dev/null || true
++  printf '%s\n' "$row" >>"$AUDIT_LOG"
++}
++
++REPLAY_ROW="$(replay_prior_bcv_run)"
++if [ -n "$REPLAY_ROW" ]; then
++  if [ "$JSON_OUT" = "1" ]; then
++    jq -c --arg k "$IDEMPOTENCY_KEY" '. + {replay:true,replay_for_idempotency_key:$k,status:"replay"}' <<<"$REPLAY_ROW"
++  else
++    printf 'bcv-task-harness: replay idempotency_key=%s target_beads_sha=%s — prior row found, no-op\n' "$IDEMPOTENCY_KEY" "$TARGET_BEADS_SHA"
++  fi
++  exit 0
++fi
++
+ if [ -n "$AUDIT_DIR" ]; then
+   PASS_DIR="$(AUDIT_DIR_OVERRIDE="$AUDIT_DIR" run_step bash "$SCRIPTS_DIR/bootstrap-audit.sh" "$REPO" "$THRESHOLD" "$MODE" "$POLICY" | tail -1)"
+ else
+@@ -527,13 +588,35 @@ if grep -Fq "DETERMINISTIC-ONLY PASS" "$REPORT_PATH"; then
+   BANNER_PRESENT=true
+ fi
+ 
++# Audit-append at terminal: row carries idempotency_key + target_beads_sha + outcome.
++# Sister 8sx9w + j0xpa pattern: row format includes the original report_path so a
++# replay no-op can emit the prior receipt with the same content.
++audit_terminal_row() {
++  local status="$1" validation="$2" banner="$3" report_path="$4"
++  audit_append_bcv "$(jq -nc \
++    --arg version "$VERSION" \
++    --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
++    --arg status "$status" \
++    --arg repo "$REPO" \
++    --arg idempotency_key "$IDEMPOTENCY_KEY" \
++    --arg target_beads_sha "$TARGET_BEADS_SHA" \
++    --arg report_path "$report_path" \
++    --argjson validation_passed "$validation" \
++    --argjson deterministic_banner_present "$banner" \
++    --argjson target_beads "$(target_json_array)" \
++    '{tool:"bcv-task-harness.sh",version:$version,ts:$ts,status:$status,repo:$repo,idempotency_key:$idempotency_key,target_beads_sha:$target_beads_sha,target_beads:$target_beads,validation_passed:$validation_passed,deterministic_banner_present:$deterministic_banner_present,report_path:$report_path}')"
++}
++
+ if [ "$VALIDATION_PASSED" != "true" ]; then
++  audit_terminal_row "complete" "false" "$BANNER_PRESENT" "$REPORT_PATH"
+   emit_receipt "complete" "false" "$BANNER_PRESENT" "$REPORT_PATH"
+   exit 1
+ fi
+ if [ "$BANNER_PRESENT" = "true" ]; then
++  audit_terminal_row "complete" "true" "true" "$REPORT_PATH"
+   emit_receipt "complete" "true" "true" "$REPORT_PATH"
+   exit 1
+ fi
+ 
++audit_terminal_row "complete" "true" "false" "$REPORT_PATH"
+ emit_receipt "complete" "true" "false" "$REPORT_PATH"
