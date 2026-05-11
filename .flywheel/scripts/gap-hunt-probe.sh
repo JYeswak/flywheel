@@ -552,17 +552,40 @@ def skill_md_corpus(max_bytes: int = 1_500_000) -> str:
     # files get truncated and scripts referenced past byte 4096 appear
     # falsely wired-but-cold (e.g., agent-ergonomics SKILL.md Scripts
     # table starts at byte ~60K; 7+ scripts flagged falsely).
-    # flywheel-zsk2d (this fix): 2-pass scan with priority for SKILL.md.
+    # flywheel-zsk2d (initial 2-pass fix): 2-pass scan with priority for SKILL.md.
     # SKILL.md is the canonical entry-point doc; treat it as privileged
     # (256 KB per-file cap, big enough for all observed real SKILL.md
     # files — largest in fleet is 137 KB). Other *.md keeps 4 KB cap.
     # Pass 1 (SKILL.md) runs FIRST so SKILL.md gets budget before
     # potentially-larger sibling docs (CHANGELOG, STATE, WORK) consume it.
+    #
+    # flywheel-2xdi.98 (this fix): 3-pass scan adds `references/*.md` as a
+    # privileged tier (128 KB per-file cap) between SKILL.md and other-md.
+    # Reason: skill `references/` is the canonical deeper-docs surface where
+    # operators document specific script invocation paths (e.g.,
+    # cubcloud-ops/references/LITELLM-MODEL-SPEC.md:299 documents the
+    # exact `ssh alps1 'bash /tmp/litellm-deep-probe.sh' ...` invocation).
+    # First references to flagged scripts are observed at byte 4591-89124
+    # across 5 skills — beyond the previous 4 KB cap. Largest observed
+    # references/*.md is 116 KB; 128 KB cap covers all observed values.
+    # Same META-RULE shape as 2xdi.66 (SKILL.md cap raise): fix the corpus
+    # per-file budget, not per-script allowlist.
     skill_md_per_file_cap = 256 * 1024  # 256 KB; agent-ergonomics SKILL.md is 72 KB; largest observed 137 KB
+    references_md_per_file_cap = 128 * 1024  # 128 KB; largest observed references/*.md is 116 KB (tax-return)
     other_md_per_file_cap = 4_096
     overall_cap = max(max_bytes, 32_000_000)
     skill_md_paths = [p for p in candidates if p.name == "SKILL.md"]
-    other_md_paths = [p for p in candidates if p.name != "SKILL.md"]
+    # references_md: any *.md whose parent dir name is "references" (handles
+    # both immediate-child references/*.md and nested references/**/*.md)
+    references_md_paths = [
+        p for p in candidates
+        if p.name != "SKILL.md" and any(part == "references" for part in p.parts)
+    ]
+    references_md_set = set(references_md_paths)
+    other_md_paths = [
+        p for p in candidates
+        if p.name != "SKILL.md" and p not in references_md_set
+    ]
     # Pass 1: SKILL.md files (priority + larger per-file cap)
     for path in skill_md_paths:
         if used >= overall_cap:
@@ -578,7 +601,24 @@ def skill_md_corpus(max_bytes: int = 1_500_000) -> str:
             continue
         pieces.append(text)
         used += len(text)
-    # Pass 2: all other *.md (references/**, assets/**, etc.) with 4 KB cap
+    # Pass 2 (flywheel-2xdi.98): references/**/*.md with 128 KB per-file cap.
+    # Operators document script invocation paths in references/ deeper docs;
+    # 4 KB cap silently misses references beyond byte 4096.
+    for path in references_md_paths:
+        if used >= overall_cap:
+            break
+        cap = min(references_md_per_file_cap, overall_cap - used)
+        if cap <= 0:
+            break
+        try:
+            text = read_text(path, cap)
+        except Exception:
+            continue
+        if not text:
+            continue
+        pieces.append(text)
+        used += len(text)
+    # Pass 3: all other *.md (assets/**, examples/**, sibling docs) with 4 KB cap
     for path in other_md_paths:
         if used >= overall_cap:
             break
@@ -1932,7 +1972,57 @@ def probe_loop_integrity() -> list[dict]:
     return gaps
 
 
-def create_bead(item: dict) -> str | None:
+def open_bead_titles() -> dict:
+    """Return {title: bead_id} for all open + in_progress beads.
+
+    flywheel-9a3k1: auto-bead-filer dedup cache. Built once per gap-hunt-probe
+    main() invocation so create_bead() can skip duplicate-title filings against
+    already-open beads. Without this, two gap_ids with same basename + same
+    class (e.g., probe-finder picks up <name>.sh in both .flywheel/scripts/ AND
+    tests/) file two beads with identical titles.
+    """
+    if not BR_BIN.exists():
+        return {}
+    try:
+        result = subprocess.run(
+            [str(BR_BIN), "list",
+             "--status", "open",
+             "--status", "in_progress",
+             "--limit", "5000",
+             "--json"],
+            cwd=str(REPO_ROOT), text=True, capture_output=True, timeout=20, check=False,
+        )
+    except Exception as exc:
+        warn(f"open_bead_titles: br list failed: {exc}")
+        return {}
+    if result.returncode != 0:
+        warn(f"open_bead_titles: br list rc={result.returncode}")
+        return {}
+    try:
+        payload = json.loads(result.stdout)
+    except Exception as exc:
+        warn(f"open_bead_titles: br list json parse failed: {exc}")
+        return {}
+    issues = payload.get("issues") if isinstance(payload, dict) else None
+    if not isinstance(issues, list):
+        return {}
+    titles: dict = {}
+    for row in issues:
+        if not isinstance(row, dict):
+            continue
+        title = row.get("title")
+        bead_id = row.get("id")
+        if not isinstance(title, str) or not isinstance(bead_id, str):
+            continue
+        # First-seen wins so dedup is deterministic. br list returns
+        # newest-first; we want OLDEST open bead to "own" the title so
+        # subsequent gaps append rather than displace.
+        if title not in titles:
+            titles[title] = bead_id
+    return titles
+
+
+def create_bead(item: dict, open_titles: dict | None = None) -> str | None:
     if DRY_RUN:
         return None
     if not BR_BIN.exists():
@@ -1940,6 +2030,14 @@ def create_bead(item: dict) -> str | None:
         return None
     cls = item["id"].split(":", 1)[0]
     title = f"[gap-{cls}] {item['name']}"[:180]
+    # flywheel-9a3k1: dedup against open/in_progress beads with same title.
+    # The basename-only stable_id can collide across paths (probe-finder
+    # picks up <name>.sh in scripts/ AND tests/), so the title check is the
+    # safety net against duplicate-looking bead pairs in the queue.
+    if open_titles is not None and title in open_titles:
+        existing = open_titles[title]
+        warn(f"dedup: open bead {existing} matches title; skipping duplicate file for gap_id={item['id']}")
+        return None
     description = (
         f"Auto-filed by gap-hunt-probe. Parent={PARENT_BEAD}.\\n\\n"
         f"Class: {cls}\\n"
@@ -1998,11 +2096,21 @@ def main() -> None:
     current_ids = [item["id"] for rows in gaps_by_class.values() for item in rows]
     prior_ids = previous_ledger_ids()
     new_items = [item for rows in gaps_by_class.values() for item in rows if item["id"] not in prior_ids]
+    # flywheel-9a3k1: build open-bead title cache once before the auto-bead
+    # loop so each create_bead() call can dedup against the same snapshot.
+    # Local dedup within this loop run (in case two same-title gaps both fire
+    # in the same tick) is handled by mutating the cache as we go.
+    open_titles = open_bead_titles() if not DRY_RUN else {}
     auto_beads: list[str] = []
     for item in new_items[:AUTO_BEAD_CAP]:
-        bead_id = create_bead(item)
+        bead_id = create_bead(item, open_titles=open_titles)
         if bead_id:
             auto_beads.append(bead_id)
+            # Add the newly-filed bead's title to the cache so a subsequent
+            # same-title gap in the same run dedups against this new bead too.
+            cls = item["id"].split(":", 1)[0]
+            new_title = f"[gap-{cls}] {item['name']}"[:180]
+            open_titles[new_title] = bead_id
 
     distribution = {cls: len(rows) for cls, rows in gaps_by_class.items()}
     payload = {
