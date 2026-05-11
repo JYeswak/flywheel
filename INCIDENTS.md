@@ -8634,3 +8634,35 @@ Cross-refs:
 - Upstream issue: https://github.com/Dicklesworthstone/beads_rust/issues/289
 - Sister diagnostic: `flywheel-bead-isolation-fix-2026-04-30.md`
 - Test: `tests/br-authority-probe-canonical-cli.sh`
+
+## Unified cross-repo batch handoff pattern (2026-05-11)
+
+Source bead: `flywheel-08xe2` (chore, closed 2026-05-11).
+Deliverable: `.flywheel/handoffs/20260511T1446Z-from-flywheel-1-to-skillos-1-unified-cross-repo-batch-2026-05-11.md`.
+
+When N≥5 cross-repo mutation artifacts (patches + tombstones) target the
+same upstream owner (e.g., skillos:1) within a single session window,
+package them as a single canonical handoff doc rather than file N
+individual handoffs. The natural unit is the batch — N individual
+handoffs would force the peer to triage atomically anyway.
+
+Batch sections:
+- Per-artifact subsection with patch path + target + apply state +
+  upstream blocker (if any)
+- Distinguish jsm-managed (push-blocked-on-upstream) vs jsm-unmanaged
+  (direct mutation already applied; paired patch artifact present)
+- Tombstones (deletions in jsm-unmanaged trees) get their own subsection
+  pointing at `.flywheel/audit/<bead>/patches/deletion-tombstone.md`
+
+Anti-pattern guarded against: `feedback_decompose_by_natural_unit_not_bundle`
+warns against premature bundling. The unified-batch handoff is justified
+ONLY when all artifacts share the same upstream owner AND timeframe.
+Otherwise file individual handoffs.
+
+Cross-refs:
+- Doctrine: `.flywheel/doctrine/cross-repo-consumer-vs-mutator-boundary.md`
+- Memory: `feedback_cross_repo_consumer_vs_mutator_distinction.md`
+- Sister artifact classes shipped in this session: xhevf (jsm-managed
+  patch), b6p1m (jsm-managed patch), n4gt1 (jsm-unmanaged direct +
+  paired patch), myfak.1 (jsm-unmanaged direct + paired patch), d6zk1.1
+  (jsm-unmanaged deletion tombstone)
