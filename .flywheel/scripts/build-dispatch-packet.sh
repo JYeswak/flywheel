@@ -936,6 +936,11 @@ fi
 if [[ -x "$SCRIPT_DIR/inject-forward-link-recipe.sh" ]] && "$SCRIPT_DIR/inject-forward-link-recipe.sh" "$AUGMENTED_BODY" "$TASK_ID" "$REPO_ROOT" >"${AUGMENTED_BODY}.fwdlink" 2>/dev/null; then
   AUGMENTED_BODY="${AUGMENTED_BODY}.fwdlink"
 fi
+# flywheel-vbk3h: operator-library auto-route for doc-authoring beads
+# ([doctrine], [skill-md], [skill-promotion], [client-doc-*], [readme])
+if [[ -x "$SCRIPT_DIR/inject-operator-library-recipe.sh" ]] && "$SCRIPT_DIR/inject-operator-library-recipe.sh" "$AUGMENTED_BODY" "$TASK_ID" "$REPO_ROOT" >"${AUGMENTED_BODY}.oplib" 2>/dev/null; then
+  AUGMENTED_BODY="${AUGMENTED_BODY}.oplib"
+fi
 
 MEMORY_HITS="$(grep -c '^- ' "$AUGMENTED_BODY" 2>/dev/null | tr -d '\n' || echo 0)"
 SKILL_ROUTES="$(grep -Ec '^skill_auto_routes=[0-9]+' "$AUGMENTED_BODY" 2>/dev/null | tr -d '\n' || echo 0)"
