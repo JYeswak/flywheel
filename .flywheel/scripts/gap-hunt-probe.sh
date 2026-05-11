@@ -1245,6 +1245,24 @@ def probe_wired_but_cold() -> list[dict]:
     source_text = runtime_source_corpus()
     skill_md_text = skill_md_corpus()
     launchd_text = launchd_plist_corpus()
+    # flywheel-2xdi.140: extend wired-but-cold corpora with two more
+    # canonical receiver sources to cover in-flywheel-repo `.flywheel/scripts/`:
+    # (a) flywheel_doctrine_text = command_text() — already scans
+    #     .flywheel/doctrine/*.md + .flywheel/rules/*.md + AGENTS/INCIDENTS/
+    #     README + ~/.claude/commands/flywheel/*.md (canonical doctrine
+    #     surfaces for in-flywheel-repo scripts; symmetric with how
+    #     skill_md_corpus scans ~/.claude/skills/*.md for skill-substrate
+    #     scripts).
+    # (b) test_files_text = test_files_corpus() — already used by
+    #     probe-without-receiver per 2xdi.88; canonical-cli tests cite
+    #     the scripts they exercise by exact basename.
+    # Root cause: autoloop-target-selector.sh has 2 doctrine refs + a
+    # canonical-cli test + 1349 hits in doctrine-sync-ledger.jsonl, but
+    # the latter is 280 MB and recent_ledger_text's 4 MB cap is hit
+    # before those refs appear. Same META-RULE shape as 2xdi.88 + 2xdi.98
+    # + 2xdi.106: extend recognizer corpus rather than per-script allowlist.
+    flywheel_doctrine_text = command_text()
+    test_files_text = test_files_corpus()
     on_demand = on_demand_script_allowlist()
     scripts = []
     scripts.extend(safe_iter_files(CLAUDE_ROOT / "skills", "*.sh", 3000))
@@ -1298,7 +1316,11 @@ def probe_wired_but_cold() -> list[dict]:
                     in_source = True
         in_skill_md = bool(skill_md_text) and (name in skill_md_text or script.stem in skill_md_text)
         in_launchd = bool(launchd_text) and (name in launchd_text or script.stem in launchd_text)
-        if not (in_local or in_sibling or in_source or in_skill_md or in_launchd):
+        # flywheel-2xdi.140: 2 new corpora (sister to 2xdi.88 test_files
+        # extension + symmetric with skill_md_corpus for .claude/skills)
+        in_flywheel_doctrine = bool(flywheel_doctrine_text) and (name in flywheel_doctrine_text or script.stem in flywheel_doctrine_text)
+        in_test_files = bool(test_files_text) and (name in test_files_text or script.stem in test_files_text)
+        if not (in_local or in_sibling or in_source or in_skill_md or in_launchd or in_flywheel_doctrine or in_test_files):
             try:
                 rel = str(script.relative_to(Path.home()))
             except Exception:
