@@ -1,0 +1,1 @@
+{"schema_version":"fuckup-coverage-join/v1","command":"validate","subject":"join-layer","ts":"2026-05-11T05:56:39Z","status":"reject","value":"phantom","reason":"not_in_enum","valid_layers":["memory","incident","canonical_l_rule","probe","dashboard"],"source":"native --schema .joins[]"}
