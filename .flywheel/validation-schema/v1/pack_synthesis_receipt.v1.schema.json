@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flywheel/.flywheel/validation-schema/v1/pack_synthesis_receipt.v1.schema.json",
+  "title": "pack_synthesis_receipt.v1 (byte-identical mirror of skillos canonical)",
+  "description": "Mirrored from skillos commits 974fb36 + 7f938ba per cross-orch-anti-divergence-v1.0.0 (handoff 20260511T0438Z). Canonical owner: skillos:1. Flywheel:1 maintains this file as a byte-identical mirror so any future flywheel-side mission-claim ingestion adopts the same supersede semantics.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema_version", "pack_name", "ts"],
+  "properties": {
+    "schema_version": {"const": "skillos.pack_synthesis_receipt.v1"},
+    "pack_name": {"type": "string", "minLength": 1},
+    "pack_version_after": {"type": "string"},
+    "applied": {"type": "boolean"},
+    "idempotency_key": {"type": "string"},
+    "lock_hash": {"type": "string"},
+    "mission_anchor_hash": {"type": "string"},
+    "source_bead_id": {"type": "string"},
+    "source_finding_id": {"type": "string"},
+    "source_paths": {"type": "array", "items": {"type": "string"}},
+    "ts": {"type": "string", "format": "date-time"},
+    "synthesis_target_verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gap_type", "verified_targets"],
+      "properties": {
+        "gap_type": {"type": "string", "minLength": 1},
+        "target_gap_hashes": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Specific gap_hash values this receipt claims to address. When present, supersede only fires for findings whose gap_hash is in the list. Absent = broad-coverage (legacy compatibility)."
+        },
+        "verified_targets": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["target_kind", "target_ref"],
+            "properties": {
+              "target_kind": {
+                "type": "string",
+                "enum": ["ci_script", "dispatch_packet_field", "doctor_invariant", "wire_or_explain_row"]
+              },
+              "target_ref": {"type": "string", "minLength": 1},
+              "named_skill": {"type": "string"}
+            }
+          }
+        }
+      }
+    }
+  }
+}
