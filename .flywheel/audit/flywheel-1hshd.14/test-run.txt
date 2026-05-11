@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info emits canonical envelope
+PASS --schema emits canonical envelope
+PASS --examples emits canonical envelope
+PASS doctor emits canonical envelope
+PASS health emits canonical envelope
+PASS repair --dry-run emits canonical envelope (real scope state_dir)
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate (bare) refuses with rc=64 + missing_subject envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS doctor probes tmux + grep + tail (load-bearing for codex-tui.log scanning)
+PASS validate session-name accepts canonical session (matches --session arg semantic)
+PASS validate threshold-pct accepts boundary values 0/10/100 (matches --threshold arg [0,100] range)
+PASS validate threshold-pct rejects 150 (out of [0,100]) with rc=1
+PASS validate fleet-state accepts all 3 canonical values (ready + draining + limit_hit per script docstring L11-L20)
+PASS lint-idiom-fix preserved: 'set -euo pipefail' + immediate 'set +e' (sister to 5ke66.15 pattern)
+SUMMARY pass=19 fail=0

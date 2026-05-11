@@ -1,0 +1,2 @@
+{"schema_version":"codex-budget-probe/v1","command":"validate","subject":"fleet-state","ts":"2026-05-11T04:16:04Z","status":"reject","value":"unknown","reason":"not_in_enum","valid_states":["ready","draining","limit_hit"]}
+rc=1
