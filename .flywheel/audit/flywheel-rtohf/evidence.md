@@ -91,9 +91,9 @@ readme_quality=n/a
 Command:
 ```bash
 test -f /Users/josh/Developer/flywheel/.flywheel/audit/flywheel-rtohf/recommendation.md && \
-  grep -c '^## ' /Users/josh/Developer/flywheel/.flywheel/audit/flywheel-rtohf/recommendation.md
+  grep -cE '^## [0-9]+\. ' /Users/josh/Developer/flywheel/.flywheel/audit/flywheel-rtohf/recommendation.md
 ```
-Expected: `literal:8` (8 top-level sections: TL;DR + 7 numbered)
+Expected: `literal:8` (8 numbered top-level sections: §1-§8)
 Timeout: 5 seconds.
 
 ## Four-Lens Self-Grade
