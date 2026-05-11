@@ -15,7 +15,7 @@
 #      (skips human_pane / orchestrator_pane / callback_pane per topology)
 #   3. Prints a per-session summary
 #
-# Wraps fleet-rotate-on-caam-swap.sh — adds the per-session loop.
+# Wraps fleet-rotate-on-caam-swap.py — adds the per-session loop.
 
 set -euo pipefail
 set +e  # script intentionally tolerates non-zero exits in domain logic; lint-idiom-fix
@@ -109,7 +109,7 @@ scaffold_emit_quickstart() {
 scaffold_emit_schema() {
   local surface="${1:-default}"
   case "$surface" in
-    doctor)   jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"schema",surface:"doctor",emits:{schema_version:"string",command:"\"doctor\"",ts:"iso8601",status:"string",checks:"array<{name,status,note?}>"},notes:"probes ntm_executable (load-bearing — script orchestrates fleet rotation via ntm sessions), jq, sister scripts (fleet-rotate-on-caam-swap.sh), audit_log_dir"}' ;;
+    doctor)   jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"schema",surface:"doctor",emits:{schema_version:"string",command:"\"doctor\"",ts:"iso8601",status:"string",checks:"array<{name,status,note?}>"},notes:"probes ntm_executable (load-bearing — script orchestrates fleet rotation via ntm sessions), jq, sister scripts (fleet-rotate-on-caam-swap.py), audit_log_dir"}' ;;
     health)   jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"schema",surface:"health",emits:{schema_version:"string",command:"\"health\"",ts:"iso8601",status:"string",last_run_ts:"iso8601|null",audit_log:"path"},binds_audit_log:true}' ;;
     repair)   jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"schema",surface:"repair",valid_scopes:["audit_log_dir","ntm_state_dir"],apply_contract:"--apply requires --idempotency-key (rc=3 refusal)",unknown_scope:"rc=64",emits:{schema_version:"string",command:"\"repair\"",ts:"iso8601",mode:"\"dry_run\"|\"apply\"",scope:"string",status:"\"ok\"|\"refused\""}}' ;;
     validate) jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"schema",surface:"validate",valid_subjects:["session-name","profile-name","exclude-list"],cross_source:"--profile and --exclude semantics from native flag contract",emits:{schema_version:"string",command:"\"validate\"",subject:"string",ts:"iso8601",status:"\"ok\"|\"reject\"|\"refused\"",value:"any",reason:"string?"}}' ;;
@@ -123,7 +123,7 @@ scaffold_emit_topic_help() {
   local topic="${1:-}"
   case "$topic" in
     run)      printf 'topic: run — native owns; bare invocation enumerates ntm sessions + rotates them (default dry-run; --apply to commit). Flags: --apply, --profile NAME, --exclude S1,S2.\n' ;;
-    doctor)   printf 'topic: doctor — probes ntm_executable (load-bearing — script orchestrates fleet rotation via ntm), jq, sister fleet-rotate-on-caam-swap.sh, audit_log_dir.\n' ;;
+    doctor)   printf 'topic: doctor — probes ntm_executable (load-bearing — script orchestrates fleet rotation via ntm), jq, sister fleet-rotate-on-caam-swap.py, audit_log_dir.\n' ;;
     health)   printf 'topic: health — emits last_run_ts from audit log; status=ok|degraded based on doctor parity.\n' ;;
     repair)   printf 'topic: repair --scope <audit_log_dir|ntm_state_dir> [--dry-run|--apply --idempotency-key KEY] — apply contract: --apply requires --idempotency-key (rc=3 refusal); scopes: audit_log_dir (mkdir -p dirname of $SCAFFOLD_AUDIT_LOG), ntm_state_dir (mkdir -p ~/.local/state/ntm). Unknown = rc=64.\n' ;;
     validate) printf 'topic: validate <session-name|profile-name|exclude-list> VALUE — session-name shape ^[a-z][a-z0-9_-]*$; profile-name shape ^[a-z][a-z0-9_-]*$ (caam profile); exclude-list comma-separated session names. Bare validate refuses rc=64.\n' ;;
@@ -155,7 +155,7 @@ scaffold_cmd_doctor() {
   local ts; ts="$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
   local checks=()
   local ntm_bin="${NTM_BIN:-/Users/josh/.local/bin/ntm}"
-  local sister="/Users/josh/Developer/flywheel/.flywheel/scripts/fleet-rotate-on-caam-swap.sh"
+  local sister="/Users/josh/Developer/flywheel/.flywheel/scripts/fleet-rotate-on-caam-swap.py"
   if command -v bash >/dev/null 2>&1; then
     checks+=('{"name":"bash_available","status":"pass"}')
   else
@@ -430,7 +430,7 @@ fi
 APPLY=0
 PROFILE=""
 EXCLUDE_SESSIONS="${EXCLUDE_SESSIONS:-}"  # comma-separated, e.g. "skillos,vrtx"
-ROTATOR="$HOME/Developer/flywheel/.flywheel/scripts/fleet-rotate-on-caam-swap.sh"
+ROTATOR="$HOME/Developer/flywheel/.flywheel/scripts/fleet-rotate-on-caam-swap.py"
 
 usage() {
   cat <<EOF

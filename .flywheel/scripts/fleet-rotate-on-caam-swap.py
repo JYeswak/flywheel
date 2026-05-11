@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-fleet-rotate-on-caam-swap.sh — canonical fleet-wide codex rotation primitive.
+fleet-rotate-on-caam-swap.py — canonical fleet-wide codex rotation primitive.
 
 Doctrine (locked 2026-05-06 after ntm-rotate-stdin-contamination incident):
   - ntm rotate has a tmux-stdin-contamination bug: running it from operator shell
@@ -58,7 +58,7 @@ _SCAFFOLD_AUDIT_LOG = _scaffold_os.environ.get(
     _scaffold_os.path.join(
         _scaffold_os.path.expanduser("~"),
         ".local/state/flywheel",
-        "fleet-rotate-on-caam-swap.sh-runs.jsonl",
+        "fleet-rotate-on-caam-swap.py-runs.jsonl",
     ),
 )
 
@@ -76,7 +76,7 @@ def _scaffold_emit_info() -> int:
     return _scaffold_emit_json({
         "schema_version": _SCAFFOLD_SCHEMA_VERSION,
         "command": "info",
-        "name": "fleet-rotate-on-caam-swap.sh",
+        "name": "fleet-rotate-on-caam-swap.py",
         "kind": "python3",
         "scaffolder_bead": "flywheel-oozt3",
         "audit_log": _SCAFFOLD_AUDIT_LOG,
@@ -135,9 +135,9 @@ def _scaffold_emit_examples() -> int:
         "schema_version": _SCAFFOLD_SCHEMA_VERSION,
         "command": "examples",
         "examples": [
-            {"name": "info", "invocation": "fleet-rotate-on-caam-swap.sh --info --json", "purpose": "introspection"},
-            {"name": "schema", "invocation": "fleet-rotate-on-caam-swap.sh --schema doctor", "purpose": "per-surface schema"},
-            {"name": "doctor", "invocation": "fleet-rotate-on-caam-swap.sh doctor --json", "purpose": "probe substrate"},
+            {"name": "info", "invocation": "fleet-rotate-on-caam-swap.py --info --json", "purpose": "introspection"},
+            {"name": "schema", "invocation": "fleet-rotate-on-caam-swap.py --schema doctor", "purpose": "per-surface schema"},
+            {"name": "doctor", "invocation": "fleet-rotate-on-caam-swap.py doctor --json", "purpose": "probe substrate"},
         ],
     })
 
@@ -147,9 +147,9 @@ def _scaffold_emit_quickstart() -> int:
         "schema_version": _SCAFFOLD_SCHEMA_VERSION,
         "command": "quickstart",
         "steps": [
-            {"step": 1, "action": "probe doctor", "command": "fleet-rotate-on-caam-swap.sh doctor --json"},
-            {"step": 2, "action": "check health", "command": "fleet-rotate-on-caam-swap.sh health --json"},
-            {"step": 3, "action": "tail audit", "command": "fleet-rotate-on-caam-swap.sh audit --json"},
+            {"step": 1, "action": "probe doctor", "command": "fleet-rotate-on-caam-swap.py doctor --json"},
+            {"step": 2, "action": "check health", "command": "fleet-rotate-on-caam-swap.py health --json"},
+            {"step": 3, "action": "tail audit", "command": "fleet-rotate-on-caam-swap.py audit --json"},
         ],
     })
 
@@ -158,8 +158,8 @@ def _scaffold_emit_topic_help(topic: str = "") -> int:
     topics = {
         "doctor": "topic: doctor — substrate probes: ntm executable, caam executable, topology JSONL readable, ledger dir writable, python3 version >=3.8, audit log dir writable; load-bearing for fleet-wide codex rotation across all sessions on a caam profile swap event",
         "health": "topic: health — tails $SCAFFOLD_AUDIT_LOG (default ~/.local/state/flywheel/fleet-rotate-on-caam-swap-runs.jsonl); reports last_run_ts, age_seconds, recent_runs (last 20), total_runs; status=warn if last run >24h old; status=warn if log unreadable",
-        "repair": "topic: repair — handled by the target's original argparse (the rotation execution path). Use `fleet-rotate-on-caam-swap.sh --apply --idempotency-key KEY` for canonical mutation; --dry-run for read-only preview",
-        "validate": "topic: validate — handled by the target's original argparse (--dry-run mode); use `fleet-rotate-on-caam-swap.sh --dry-run` to preview which sessions would receive a rotate without mutation",
+        "repair": "topic: repair — handled by the target's original argparse (the rotation execution path). Use `fleet-rotate-on-caam-swap.py --apply --idempotency-key KEY` for canonical mutation; --dry-run for read-only preview",
+        "validate": "topic: validate — handled by the target's original argparse (--dry-run mode); use `fleet-rotate-on-caam-swap.py --dry-run` to preview which sessions would receive a rotate without mutation",
         "audit": "topic: audit — tails $SCAFFOLD_AUDIT_LOG (last 20 rows by default); rows are recovery_class=fleet_rotation receipts emitted by the rotation path; LEDGER ($HOME/.local/state/flywheel/fleet-rotate-on-caam-swap.jsonl) is the per-rotation receipt ledger (different from $SCAFFOLD_AUDIT_LOG)",
         "why": "topic: why <id> — provenance lookup against $SCAFFOLD_AUDIT_LOG; matches against ts/profile/run_id; states: found / not_found / unavailable",
     }

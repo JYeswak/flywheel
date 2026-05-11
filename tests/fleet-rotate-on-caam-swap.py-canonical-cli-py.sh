@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# tests/fleet-rotate-on-caam-swap.sh-canonical-cli-py.sh
-# Canonical-cli surface tests for .flywheel/scripts/fleet-rotate-on-caam-swap.sh (scaffolded by
-# bead flywheel-oozt3 / scaffold-canonical-cli-py.sh).
+# tests/fleet-rotate-on-caam-swap.py-canonical-cli-py.sh
+# Canonical-cli surface tests for .flywheel/scripts/fleet-rotate-on-caam-swap.py (scaffolded by
+# bead flywheel-oozt3 / scaffold-canonical-cli-py.sh; renamed .sh→.py by flywheel-eyqo7.1.3 2026-05-11).
 #
 # Verifies the python shim exposes canonical introspection without breaking
 # the target's existing argparse subcommands.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/fleet-rotate-on-caam-swap.sh"
+SCRIPT="$ROOT/.flywheel/scripts/fleet-rotate-on-caam-swap.py"
 
 pass_count=0
 fail_count=0
