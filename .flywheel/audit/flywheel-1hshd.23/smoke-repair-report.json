@@ -1,0 +1,1 @@
+{"schema_version":"cross-time-synthesis-probe/v1","command":"repair","status":"report","ts":"2026-05-11T05:19:30Z","mode":"dry_run","scope":"handoff_dir_path","idempotency_key":"","target":"/Users/josh/Developer/flywheel/.flywheel/handoffs","existed":true,"readable":true,"note":"REPORT-ONLY — handoff_dir is owned by /flywheel:handoff, not this surface"}

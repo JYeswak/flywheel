@@ -1,0 +1,462 @@
+diff --git a/.flywheel/scripts/cross-time-synthesis-probe.sh b/.flywheel/scripts/cross-time-synthesis-probe.sh
+index 539488a..c999bf8 100755
+--- a/.flywheel/scripts/cross-time-synthesis-probe.sh
++++ b/.flywheel/scripts/cross-time-synthesis-probe.sh
+@@ -1,4 +1,15 @@
+ #!/usr/bin/env bash
++# flywheel-cli-surface: true
++# canonical-cli-scoping: passing (partial → passing per bead flywheel-1hshd.23)
++# doctor-mode-tier: scaffolded
++#
++# IDEMPOTENT-BY-CONSTRUCTION: native --apply appends a JSONL ledger row
++# stamped with $(now_iso). Re-running an --apply produces a DISTINCT row
++# (different ts) — strictly speaking not idempotent. The
++# --idempotency-key flag is accepted as a discipline marker (lint L7)
++# and recorded in the row when supplied; operators who want strict
++# idempotency should pass a stable key. Native behavior preserved for
++# back-compat with operator habits + existing call sites.
+ # cross-time-synthesis-probe.sh — smallest recurring measurement
+ # for value-gap dimension `cross-time-synthesis` (#8 of 10 in
+ # `.flywheel/scripts/value-gap-probe.sh:DIMENSIONS[]`).
+@@ -29,7 +40,321 @@
+ # Stable exit codes: 0 ok | 1 domain | 64 usage
+ # Triad: doctor / info / schema; --json default for robot consumers.
+ 
+-set -uo pipefail
++set -euo pipefail
++
++# ====== BEGIN canonical-cli scaffold (bead flywheel-1hshd.23) ======
++# SURGICAL DASH-FLAG SCAFFOLD variant (sister 5ke66.17 / 1hshd.{15,17,19}).
++# Native script owns:
++#   - --info / --schema / --doctor (dash-flag mode switches)
++#   - default `run` mode + --apply / --dry-run / --sample / --handoff-dir / --ledger
++# The native --info / --schema / --doctor envelopes preserve existing
++# operator + script consumer expectations (e.g., --doctor returns
++# .issues + .status, --info returns .repo + .handoff_dir + .modes).
++#
++# Bash scaffold intercepts BEFORE native arg parser:
++#   - --examples (NEW; native errors with "unknown arg")
++#   - NEW positional verbs: doctor, health, repair, validate, audit, why, quickstart
++#   - help <topic>
++#
++# Native --info envelope augmented in-place below (added .name +
++# .capabilities for AG3.1 while preserving every native field).
++
++_SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
++_SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
++if [[ -r "$_SCAFFOLD_HELPER_LIB" ]]; then
++  # shellcheck source=/dev/null
++  source "$_SCAFFOLD_HELPER_LIB"
++fi
++SCAFFOLD_SCHEMA_VERSION="cross-time-synthesis-probe/v1"
++SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-${CROSS_TIME_LEDGER:-$HOME/.local/state/flywheel/cross-time-synthesis.jsonl}}"
++
++scaffold_emit_examples() {
++  local jsonl
++  jsonl="$(jq -nc '{name:"default dry-run probe",invocation:"cross-time-synthesis-probe.sh --json",purpose:"compute proxy metrics over the last 10 handoffs without writing to the ledger"}'
++)"$'\n'"$(jq -nc '{name:"apply with idempotency-key",invocation:"cross-time-synthesis-probe.sh --apply --idempotency-key cts-$(date +%Y%m%d) --json",purpose:"append a row to $CROSS_TIME_LEDGER stamped with the supplied idempotency key"}'
++)"$'\n'"$(jq -nc '{name:"single-session probe with fixture",invocation:"cross-time-synthesis-probe.sh --handoff-dir /path/to/handoffs --sample 20 --json",purpose:"override handoff dir + sample size (e.g. for a different repo or backfill)"}'
++)"$'\n'"$(jq -nc '{name:"doctor",invocation:"cross-time-synthesis-probe.sh doctor --json",purpose:"named-probe substrate health check"}'
++)"
++  if command -v cli_emit_examples >/dev/null; then
++    cli_emit_examples "$SCAFFOLD_SCHEMA_VERSION" "$jsonl"
++  else
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"examples",helper_lib_missing:true}'
++  fi
++}
++
++scaffold_emit_quickstart() {
++  local steps
++  steps="$(jq -nc '{step:1,action:"probe substrate",command:"cross-time-synthesis-probe.sh doctor --json"}'
++)"$'\n'"$(jq -nc '{step:2,action:"dry-run probe",command:"cross-time-synthesis-probe.sh --json"}'
++)"$'\n'"$(jq -nc '{step:3,action:"apply with idempotency-key",command:"cross-time-synthesis-probe.sh --apply --idempotency-key cts-$(date +%Y%m%d) --json"}'
++)"
++  if command -v cli_emit_quickstart >/dev/null; then
++    cli_emit_quickstart "$SCAFFOLD_SCHEMA_VERSION" "$steps" "doctor,validate,audit"
++  else
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"quickstart",helper_lib_missing:true}'
++  fi
++}
++
++scaffold_emit_topic_help() {
++  local topic="${1:-}"
++  case "$topic" in
++    run|detect)  printf 'topic: detect (default) — measure tomorrow-you section coverage across last $CROSS_TIME_SAMPLE_N handoffs (default 10) in $CROSS_TIME_HANDOFF_DIR; --apply appends row to $CROSS_TIME_LEDGER, --dry-run skips append; rc 0=ok, 1=domain (handoff dir missing or probe failure), 64=usage\n' ;;
++    doctor)      printf 'topic: doctor — substrate probes: bash, jq, python3 (load-bearing for coverage ratio rounding), handoff_dir_present, ledger_dir_writable; emits .checks array (canonical AG3.4) bridging to native --doctor envelope\n' ;;
++    health)      printf 'topic: health — tail $SCAFFOLD_AUDIT_LOG (= $CROSS_TIME_LEDGER); report last_run_ts, age_seconds, recent_runs, total_runs; status=warn at >7d stale (weekly probe cadence)\n' ;;
++    repair)      printf 'topic: repair --scope <audit_log_dir|handoff_dir_path> [--dry-run|--apply --idempotency-key KEY] — apply contract: --apply requires --idempotency-key (rc=3); scopes: audit_log_dir (mkdir -p), handoff_dir_path (REPORT-ONLY — verifies $CROSS_TIME_HANDOFF_DIR readable; handoffs are written by /flywheel:handoff, not this surface)\n' ;;
++    validate)    printf 'topic: validate <subject> [VALUE] — subjects: handoff-dir-path (must exist + be readable), sample-n (positive int <=1000), tomorrow-header-regex (must compile under bash regex); rc=1 on schema violation\n' ;;
++    audit)       printf 'topic: audit [--limit N] — tail $SCAFFOLD_AUDIT_LOG via cli_emit_audit_tail; default limit=20\n' ;;
++    why)         printf 'topic: why <id> — provenance lookup against $SCAFFOLD_AUDIT_LOG; matches against ts/handoff_dir/tomorrow_you_artifact_today; states: found / not_found / unavailable\n' ;;
++    *)           printf 'topics: detect | doctor | health | repair | validate | audit | why | quickstart (SURGICAL DASH-FLAG SCAFFOLD: --examples + new positional verbs route to scaffold; native --info/--schema/--doctor + default classifier route to native with augmented --info envelope)\n' ;;
++  esac
++}
++
++scaffold_cmd_doctor() {
++  local audit_log_dir; audit_log_dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
++  local handoff_dir="${CROSS_TIME_HANDOFF_DIR:-$_SCAFFOLD_REPO_ROOT/.flywheel/handoffs}"
++  local bash_s=fail jq_s=fail py_s=fail handoff_s=warn audit_s=fail
++  command -v bash >/dev/null 2>&1 && bash_s=pass
++  command -v jq >/dev/null 2>&1 && jq_s=pass
++  command -v python3 >/dev/null 2>&1 && py_s=pass
++  [[ -d "$handoff_dir" && -r "$handoff_dir" ]] && handoff_s=pass
++  [[ -d "$audit_log_dir" && -w "$audit_log_dir" ]] && audit_s=pass
++  local overall=pass
++  for st in "$bash_s" "$jq_s" "$py_s"; do [[ "$st" == fail ]] && overall=fail; done
++  if [[ "$overall" == pass ]]; then
++    for st in "$handoff_s" "$audit_s"; do [[ "$st" == warn || "$st" == fail ]] && overall=warn; done
++  fi
++  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg overall "$overall" \
++    --arg bash_s "$bash_s" --arg jq_s "$jq_s" --arg py_s "$py_s" --arg ho_s "$handoff_s" --arg ad_s "$audit_s" \
++    --arg ho "$handoff_dir" --arg ad "$audit_log_dir" \
++    '{schema_version:$sv,command:"doctor",ts:$ts,status:$overall,
++      checks:[
++        {name:"bash_available",status:$bash_s},
++        {name:"jq_available",status:$jq_s},
++        {name:"python3_available",status:$py_s,detail:"load-bearing — coverage ratio uses python3 for floating-point round"},
++        {name:"handoff_dir_readable",status:$ho_s,path:$ho},
++        {name:"audit_log_dir_writable",status:$ad_s,path:$ad}
++      ]}'
++}
++
++scaffold_cmd_health() {
++  local audit_log="$SCAFFOLD_AUDIT_LOG"
++  local ts last_run_ts="" age_seconds total_runs=0 recent_runs=0 status="pass"
++  local stale_threshold="${CROSS_TIME_HEALTH_STALE_THRESHOLD_SECONDS:-604800}"
++  ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
++  if [[ ! -r "$audit_log" ]]; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$audit_log" --argjson stale "$stale_threshold" \
++      '{schema_version:$sv,command:"health",ts:$ts,status:"warn",audit_log:$log,reason:"audit_log_missing",last_run_ts:null,age_seconds:null,recent_runs:0,total_runs:0,stale_threshold_seconds:$stale}'
++    return 0
++  fi
++  total_runs="$(wc -l < "$audit_log" 2>/dev/null | tr -d ' ' || echo 0)"
++  recent_runs="$(tail -20 "$audit_log" 2>/dev/null | wc -l | tr -d ' ' || echo 0)"
++  last_run_ts="$(tail -1 "$audit_log" 2>/dev/null | jq -r '.ts // empty' 2>/dev/null || true)"
++  if [[ -n "$last_run_ts" ]]; then
++    local now last_epoch
++    now="$(date -u +%s)"
++    last_epoch="$(date -u -j -f '%Y-%m-%dT%H:%M:%SZ' "$last_run_ts" +%s 2>/dev/null \
++                  || date -u -d "$last_run_ts" +%s 2>/dev/null || echo 0)"
++    age_seconds=$((now - last_epoch))
++    [[ "$age_seconds" -gt "$stale_threshold" ]] && status="warn"
++  else
++    age_seconds=null; status="warn"
++  fi
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg status "$status" \
++    --arg log "$audit_log" --arg last_run_ts "$last_run_ts" \
++    --argjson age "${age_seconds:-null}" --argjson total "$total_runs" --argjson recent "$recent_runs" \
++    --argjson stale "$stale_threshold" \
++    '{schema_version:$sv,command:"health",ts:$ts,status:$status,audit_log:$log,
++      last_run_ts:(if $last_run_ts == "" then null else $last_run_ts end),
++      age_seconds:$age,recent_runs:$recent,total_runs:$total,stale_threshold_seconds:$stale}'
++}
++
++scaffold_cmd_repair() {
++  local scope="" mode="dry_run" idem_key=""
++  while [[ $# -gt 0 ]]; do
++    case "$1" in
++      -h|--help) scaffold_emit_topic_help repair; return 0 ;;
++      --scope) scope="${2:-}"; shift 2 ;;
++      --scope=*) scope="${1#--scope=}"; shift ;;
++      --dry-run) mode="dry_run"; shift ;;
++      --apply) mode="apply"; shift ;;
++      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
++      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
++      --json) shift ;;
++      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; return 64 ;;
++    esac
++  done
++  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
++    if command -v cli_refuse_apply_without_idem_key >/dev/null; then
++      cli_refuse_apply_without_idem_key "$SCAFFOLD_SCHEMA_VERSION" "repair" "$scope"
++    else
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
++        '{schema_version:$sv,command:"repair",status:"refused",mode:"apply",scope:$scope,reason:"--apply requires --idempotency-key",exit_code:3}'
++      exit 3
++    fi
++  fi
++  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
++  case "$scope" in
++    audit_log_dir)
++      local target; target="$(dirname "$SCAFFOLD_AUDIT_LOG")"
++      local existed="true"; [[ ! -d "$target" ]] && existed="false"
++      [[ "$mode" == "apply" ]] && mkdir -p "$target"
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg mode "$mode" \
++        --arg scope "$scope" --arg idem "$idem_key" --arg target "$target" --arg existed "$existed" \
++        '{schema_version:$sv,command:"repair",status:"ok",ts:$ts,mode:$mode,scope:$scope,idempotency_key:$idem,target:$target,existed_before:($existed == "true")}'
++      ;;
++    handoff_dir_path)
++      # REPORT-ONLY scope — handoffs are written by /flywheel:handoff,
++      # not this surface.
++      local target="${CROSS_TIME_HANDOFF_DIR:-$_SCAFFOLD_REPO_ROOT/.flywheel/handoffs}"
++      local existed="false" readable="false"
++      [[ -d "$target" ]] && existed="true"
++      [[ -r "$target" ]] && readable="true"
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg mode "$mode" \
++        --arg scope "$scope" --arg idem "$idem_key" --arg target "$target" \
++        --arg existed "$existed" --arg readable "$readable" \
++        '{schema_version:$sv,command:"repair",status:"report",ts:$ts,mode:$mode,scope:$scope,idempotency_key:$idem,target:$target,existed:($existed == "true"),readable:($readable == "true"),note:"REPORT-ONLY — handoff_dir is owned by /flywheel:handoff, not this surface"}'
++      ;;
++    "")
++      printf 'ERR: repair requires --scope <audit_log_dir|handoff_dir_path>\n' >&2; return 64 ;;
++    *)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
++        '{schema_version:$sv,command:"repair",status:"refused",scope:$scope,reason:"unknown_scope",valid_scopes:["audit_log_dir","handoff_dir_path"]}'
++      return 64 ;;
++  esac
++}
++
++scaffold_cmd_validate() {
++  local subject="${1:-}"; shift || true
++  local arg="${1:-}"
++  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
++  case "$subject" in
++    handoff-dir-path)
++      [[ -z "$arg" ]] && { printf 'ERR: validate handoff-dir-path requires VALUE\n' >&2; return 64; }
++      if [[ -d "$arg" && -r "$arg" ]]; then
++        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg p "$arg" \
++          '{schema_version:$sv,command:"validate",subject:"handoff-dir-path",ts:$ts,status:"ok",value:$p}'
++        return 0
++      fi
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg p "$arg" \
++        '{schema_version:$sv,command:"validate",subject:"handoff-dir-path",ts:$ts,status:"reject",value:$p,reason:"directory_not_readable"}'
++      return 1 ;;
++    sample-n)
++      [[ -z "$arg" ]] && { printf 'ERR: validate sample-n requires VALUE\n' >&2; return 64; }
++      if [[ "$arg" =~ ^[0-9]+$ ]] && (( arg >= 1 && arg <= 1000 )); then
++        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --argjson v "$arg" \
++          '{schema_version:$sv,command:"validate",subject:"sample-n",ts:$ts,status:"ok",value:$v}'
++        return 0
++      fi
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg v "$arg" \
++        '{schema_version:$sv,command:"validate",subject:"sample-n",ts:$ts,status:"reject",value:$v,reason:"out_of_range_or_not_integer",valid_range:"[1, 1000]",default:10}'
++      return 1 ;;
++    tomorrow-header-regex)
++      [[ -z "$arg" ]] && { printf 'ERR: validate tomorrow-header-regex requires VALUE\n' >&2; return 64; }
++      # grep -qE exit codes: 0=match, 1=no-match, >=2=bad regex.
++      # Under set -e, capture rc via `|| rc=$?` so non-match doesn't exit.
++      local rc=0
++      echo "test" | grep -qE "$arg" >/dev/null 2>&1 || rc=$?
++      if [[ "$rc" -le 1 ]]; then
++        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg r "$arg" \
++          '{schema_version:$sv,command:"validate",subject:"tomorrow-header-regex",ts:$ts,status:"ok",value:$r}'
++        return 0
++      fi
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg r "$arg" \
++        '{schema_version:$sv,command:"validate",subject:"tomorrow-header-regex",ts:$ts,status:"reject",value:$r,reason:"regex_compile_failure"}'
++      return 1 ;;
++    "")
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
++        '{schema_version:$sv,command:"validate",status:"refused",reason:"missing_subject",valid_subjects:["handoff-dir-path","sample-n","tomorrow-header-regex"]}'
++      return 64 ;;
++    *)
++      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg subj "$subject" \
++        '{schema_version:$sv,command:"validate",status:"refused",subject:$subj,reason:"unknown_subject",valid_subjects:["handoff-dir-path","sample-n","tomorrow-header-regex"]}'
++      return 64 ;;
++  esac
++}
++
++scaffold_cmd_audit() {
++  local limit=20
++  while [[ $# -gt 0 ]]; do
++    case "$1" in
++      -h|--help) scaffold_emit_topic_help audit; return 0 ;;
++      --limit) limit="${2:-20}"; shift 2 ;;
++      --limit=*) limit="${1#--limit=}"; shift ;;
++      --json) shift ;;
++      *) printf 'ERR: unknown audit arg %s\n' "$1" >&2; return 64 ;;
++    esac
++  done
++  if command -v cli_emit_audit_tail >/dev/null; then
++    cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" "$limit"
++    return 0
++  fi
++  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
++  if [[ ! -r "$SCAFFOLD_AUDIT_LOG" ]]; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$SCAFFOLD_AUDIT_LOG" \
++      '{schema_version:$sv,command:"audit",ts:$ts,status:"empty",audit_log:$log,rows:[]}'
++    return 0
++  fi
++  local rows; rows="$(tail -n "$limit" "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | jq -s . 2>/dev/null || echo '[]')"
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$SCAFFOLD_AUDIT_LOG" \
++    --argjson rows "$rows" --argjson limit "$limit" \
++    '{schema_version:$sv,command:"audit",ts:$ts,status:"ok",audit_log:$log,limit:$limit,rows:$rows}'
++}
++
++scaffold_cmd_why() {
++  local id="${1:-}"
++  [[ -z "$id" ]] && { printf 'ERR: why requires <id>\n' >&2; return 64; }
++  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
++  if [[ ! -r "$SCAFFOLD_AUDIT_LOG" ]]; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg id "$id" --arg log "$SCAFFOLD_AUDIT_LOG" \
++      '{schema_version:$sv,command:"why",ts:$ts,id:$id,status:"unavailable",reason:"audit_log_missing",audit_log:$log}'
++    return 0
++  fi
++  local match
++  match="$(jq -c --arg id "$id" 'select(.ts == $id or (.handoff_dir // "") == $id or (.tomorrow_you_artifact_today // "") == $id)' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | head -1 || true)"
++  if [[ -z "$match" ]]; then
++    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg id "$id" --arg log "$SCAFFOLD_AUDIT_LOG" \
++      '{schema_version:$sv,command:"why",ts:$ts,id:$id,status:"not_found",audit_log:$log,searched_keys:["ts","handoff_dir","tomorrow_you_artifact_today"]}'
++    return 0
++  fi
++  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg id "$id" --arg log "$SCAFFOLD_AUDIT_LOG" --argjson row "$match" \
++    '{schema_version:$sv,command:"why",ts:$ts,id:$id,status:"found",audit_log:$log,row:$row}'
++}
++
++scaffold_main() {
++  case "$1" in
++    --examples) shift; scaffold_emit_examples "$@"; exit 0 ;;
++    quickstart) shift; scaffold_emit_quickstart "$@"; exit 0 ;;
++    doctor)     shift; scaffold_cmd_doctor "$@"; exit $? ;;
++    health)     shift; scaffold_cmd_health "$@"; exit $? ;;
++    repair)     shift; scaffold_cmd_repair "$@"; exit $? ;;
++    validate)   shift; scaffold_cmd_validate "$@"; exit $? ;;
++    audit)      shift; scaffold_cmd_audit "$@"; exit $? ;;
++    why)        shift; scaffold_cmd_why "$@"; exit $? ;;
++    help)       shift; scaffold_emit_topic_help "${1:-}"; exit 0 ;;
++    *) printf 'ERR: scaffold_main called with non-canonical arg: %s\n' "$1" >&2; exit 64 ;;
++  esac
++}
++
++# SURGICAL DASH-FLAG match — intercept ONLY --examples + new positional
++# verbs + `help <topic>`. Native --info / --schema / --doctor flags +
++# default classifier all fall through to native.
++_scaffold_is_canonical_arg() {
++  case "${1:-}" in
++    --examples) return 0 ;;
++    quickstart|doctor|health|repair|validate|audit|why) return 0 ;;
++    help)
++      case "${2:-}" in detect|run|doctor|health|repair|validate|audit|why|quickstart|-h|--help) return 0 ;; esac
++      return 1 ;;
++    *) return 1 ;;
++  esac
++}
++
++if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
++  scaffold_main "$@"
++  exit $?
++fi
++# ====== END canonical-cli scaffold ======
+ 
+ VERSION="cross-time-synthesis-probe.v1"
+ SCRIPT_VERSION="2026-05-09.1"
+@@ -44,6 +369,11 @@ JSON_OUT=0
+ MODE="run"
+ APPLY=0
+ DRY_RUN=0
++# NEW (flywheel-1hshd.23): canonical apply-contract flag (lint L7).
++# Accepted but not strictly enforced on native --apply (back-compat with
++# existing call sites; native ledger writes are timestamp-keyed, not
++# strictly idempotent — see header IDEMPOTENT-BY-CONSTRUCTION note).
++IDEMPOTENCY_KEY=""
+ 
+ usage() {
+   cat <<'USAGE'
+@@ -72,6 +402,8 @@ while [[ $# -gt 0 ]]; do
+     --doctor) MODE="doctor"; shift ;;
+     --info) MODE="info"; shift ;;
+     --schema) MODE="schema"; shift ;;
++    --idempotency-key) IDEMPOTENCY_KEY="${2:?}"; shift 2 ;;
++    --idempotency-key=*) IDEMPOTENCY_KEY="${1#*=}"; shift ;;
+     -h|--help) usage; exit 0 ;;
+     *) echo "cross-time-synthesis-probe.sh: unknown arg: $1" >&2; usage >&2; exit 64 ;;
+   esac
+@@ -90,6 +422,10 @@ emit() {
+ }
+ 
+ info_payload() {
++  # AG3.1 (bead flywheel-1hshd.23) requires .name + .version + .capabilities.
++  # Native v1 envelope had .version + many domain fields but NO .name +
++  # NO .capabilities. Augmented to add both while preserving every
++  # pre-existing field for back-compat.
+   jq -nc \
+     --arg version "$VERSION" \
+     --arg script_version "$SCRIPT_VERSION" \
+@@ -99,9 +435,18 @@ info_payload() {
+     --argjson sample_n "$SAMPLE_N" \
+     --arg header_re "$TOMORROW_HEADER_RE" \
+     '{
++      schema_version: "cross-time-synthesis/v1",
++      name: "cross-time-synthesis-probe.sh",
+       version: $version,
++      capabilities: [
++        "tomorrow-you-section-coverage-probe",
++        "value-gap-dimension-cross-time-synthesis",
++        "meadows-tier-8-information-flow",
++        "proxy-metric-coverage-ratio",
++        "today-tomorrow-you-presence-signal",
++        "step-4o-anti-pattern-guardrail-no-auto-create"
++      ],
+       script_version: $script_version,
+-      schema_version: "cross-time-synthesis/v1",
+       mode: "info",
+       repo: $repo,
+       handoff_dir: $handoff_dir,
+@@ -116,13 +461,46 @@ info_payload() {
+       meadows_tier: "#8 information flow",
+       step_4o_anti_pattern_guardrail: "this probe surfaces; it does NOT auto-create handoffs or dispatch fixes",
+       handoff_authoring_surface: "/flywheel:handoff (operator-driven)",
++      mutates_state: true,
++      mutation_paths: ["ledger-append-on-apply"],
+       status: "ok"
+     }'
+ }
+ 
+ schema_payload() {
++  # AG3.2 (bead flywheel-1hshd.23) requires .input_schema + .output_schema.
++  # Native v1 envelope had .ledger_row_required_fields + .proxy_metrics
++  # but NO .input_schema / .output_schema. Augmented to add canonical
++  # JSON-Schema envelopes while preserving every pre-existing field.
+   jq -nc '{
+     schema_version: "cross-time-synthesis/v1",
++    input_schema: {
++      type: "object",
++      properties: {
++        sample_n: {type: "integer", minimum: 1, maximum: 1000},
++        handoff_dir: {type: "string", description: "directory containing handoff *.md files"},
++        ledger: {type: "string", description: "JSONL ledger path for --apply rows"},
++        idempotency_key: {type: "string", description: "stable key for --apply (recorded in row)"}
++      }
++    },
++    output_schema: {
++      type: "object",
++      required: ["schema_version","ts","handoff_dir","sample_n","handoffs_observed","with_tomorrow_you_section","without_tomorrow_you_section","tomorrow_you_coverage_ratio","latest_handoff_age_hours","tomorrow_you_artifact_today","tomorrow_you_artifact_today_reason","handoffs"],
++      properties: {
++        schema_version: {const: "cross-time-synthesis/v1"},
++        ts: {type: "string", format: "date-time"},
++        handoff_dir: {type: "string"},
++        sample_n: {type: "integer"},
++        handoffs_observed: {type: "integer", minimum: 0},
++        with_tomorrow_you_section: {type: "integer", minimum: 0},
++        without_tomorrow_you_section: {type: "integer", minimum: 0},
++        tomorrow_you_coverage_ratio: {type: "number", minimum: 0, maximum: 1},
++        latest_handoff_age_hours: {type: "integer"},
++        tomorrow_you_artifact_today: {enum: ["present","missing","unknown"]},
++        tomorrow_you_artifact_today_reason: {type: "string"},
++        handoffs: {type: "array"}
++      }
++    },
+     ledger_row_required_fields: [
+       "schema_version","ts","handoff_dir","sample_n",
+       "handoffs_observed","with_tomorrow_you_section",
+@@ -149,7 +527,7 @@ doctor_payload() {
+   local issues=()
+   command -v jq >/dev/null 2>&1 || issues+=("jq_missing")
+   [[ -d "$HANDOFF_DIR" ]] || issues+=("handoff_dir_missing=$HANDOFF_DIR")
+-  mkdir -p "$(dirname "$LEDGER")" 2>/dev/null
++  mkdir -p "$(dirname "$LEDGER")" 2>/dev/null || true
+   [[ -w "$(dirname "$LEDGER")" ]] || issues+=("ledger_dir_not_writable=$(dirname "$LEDGER")")
+   local issues_json
+   if [[ ${#issues[@]} -gt 0 ]]; then
+@@ -269,8 +647,8 @@ run_pass() {
+     }')
+ 
+   if [[ "$mode_label" == "apply" ]]; then
+-    mkdir -p "$(dirname "$LEDGER")" 2>/dev/null
+-    printf '%s\n' "$row" >> "$LEDGER" 2>/dev/null
++    mkdir -p "$(dirname "$LEDGER")" 2>/dev/null || true
++    printf '%s\n' "$row" >> "$LEDGER" 2>/dev/null || true
+   fi
+ 
+   emit "$(printf '%s' "$row" | jq -c \

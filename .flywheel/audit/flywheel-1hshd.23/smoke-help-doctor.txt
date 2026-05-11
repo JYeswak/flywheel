@@ -1,0 +1,1 @@
+topic: doctor — substrate probes: bash, jq, python3 (load-bearing for coverage ratio rounding), handoff_dir_present, ledger_dir_writable; emits .checks array (canonical AG3.4) bridging to native --doctor envelope
