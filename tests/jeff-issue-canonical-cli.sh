@@ -4,7 +4,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/jeff-issue.sh"
+SCRIPT="$ROOT/.flywheel/scripts/jeff-issue.py"
 
 pass_count=0
 fail_count=0

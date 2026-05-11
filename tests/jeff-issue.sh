@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-CLI="$ROOT/.flywheel/scripts/jeff-issue.sh"
+CLI="$ROOT/.flywheel/scripts/jeff-issue.py"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/jeff-issue.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -25,7 +25,7 @@ assert_jq() {
 state="$TMP/state"
 
 python3 -m py_compile "$CLI" && pass "script syntax" || fail "script syntax"
-"$CLI" --help | grep -q 'jeff-issue.sh doctor' && pass "help shows command surface" || fail "help shows command surface"
+"$CLI" --help | grep -q 'jeff-issue.py doctor' && pass "help shows command surface" || fail "help shows command surface"
 
 "$CLI" --info --json --state-dir "$state" >"$TMP/info.json"
 assert_jq "$TMP/info.json" '.mode == "info" and (.submit_requires | index("--idempotency-key"))' "info exposes submit gates"
@@ -129,7 +129,7 @@ assert_jq "$TMP/audit.json" '.rows >= 2' "audit reads mutations"
 "$CLI" why draft-fixture --json --state-dir "$state" >"$TMP/why.json"
 assert_jq "$TMP/why.json" '.matches | length >= 1' "why traces idempotency key"
 
-"$CLI" completion bash | grep -q 'jeff-issue.sh' && pass "completion emits shell hook" || fail "completion emits shell hook"
+"$CLI" completion bash | grep -q 'jeff-issue.py' && pass "completion emits shell hook" || fail "completion emits shell hook"
 test -f "$HOME/.claude/commands/flywheel/jeff-issue.md" && pass "slash wrapper exists" || fail "slash wrapper exists"
 test -f "$HOME/.claude/commands/flywheel/file-jeff.md" && pass "file-jeff slash wrapper exists" || fail "file-jeff slash wrapper exists"
 grep -q -- '--dry-run' "$HOME/.claude/commands/flywheel/file-jeff.md" && pass "file-jeff command generation dry-run default" || fail "file-jeff command generation dry-run default"

@@ -113,21 +113,21 @@ def run(cmd: list[str], cwd: Path | None = None) -> tuple[int, str, str]:
 
 def usage() -> str:
     return """Usage:
-  jeff-issue.sh doctor [--json]
-  jeff-issue.sh health [--json]
-  jeff-issue.sh repair --scope state [--dry-run|--apply --idempotency-key KEY] [--json]
-  jeff-issue.sh validate source --repo Dicklesworthstone/<repo> [--keywords TEXT] [--online] [--json]
-  jeff-issue.sh draft --repo Dicklesworthstone/<repo> --title TITLE --tracking-bead flywheel-XXXX [--observed TEXT] [--expected TEXT] [--repro TEXT] [--source-ref file:line] [--dry-run|--apply --idempotency-key KEY] [--json]
-  jeff-issue.sh rubric --draft PATH [--json]
-  jeff-issue.sh submit --draft PATH --repo Dicklesworthstone/<repo> --title TITLE --tracking-bead flywheel-XXXX [--dry-run|--apply --joshua-approval approved --idempotency-key KEY] [--json]
-  jeff-issue.sh audit [--json]
-  jeff-issue.sh why <ledger-id> [--json]
-  jeff-issue.sh schema [command] [--json]
-  jeff-issue.sh --info [--json]
-  jeff-issue.sh --examples [--json]
-  jeff-issue.sh quickstart [--json]
-  jeff-issue.sh help <topic> [--json]
-  jeff-issue.sh completion <shell>
+  jeff-issue.py doctor [--json]
+  jeff-issue.py health [--json]
+  jeff-issue.py repair --scope state [--dry-run|--apply --idempotency-key KEY] [--json]
+  jeff-issue.py validate source --repo Dicklesworthstone/<repo> [--keywords TEXT] [--online] [--json]
+  jeff-issue.py draft --repo Dicklesworthstone/<repo> --title TITLE --tracking-bead flywheel-XXXX [--observed TEXT] [--expected TEXT] [--repro TEXT] [--source-ref file:line] [--dry-run|--apply --idempotency-key KEY] [--json]
+  jeff-issue.py rubric --draft PATH [--json]
+  jeff-issue.py submit --draft PATH --repo Dicklesworthstone/<repo> --title TITLE --tracking-bead flywheel-XXXX [--dry-run|--apply --joshua-approval approved --idempotency-key KEY] [--json]
+  jeff-issue.py audit [--json]
+  jeff-issue.py why <ledger-id> [--json]
+  jeff-issue.py schema [command] [--json]
+  jeff-issue.py --info [--json]
+  jeff-issue.py --examples [--json]
+  jeff-issue.py quickstart [--json]
+  jeff-issue.py help <topic> [--json]
+  jeff-issue.py completion <shell>
 
 Submit is blocked unless --apply, --joshua-approval approved, and
 --idempotency-key are all present. Draft/apply writes only local ledgers and
@@ -141,7 +141,7 @@ def info(args: list[str]) -> int:
         {
             "schema_version": VERSION,
             "command": "info",
-            "name": "jeff-issue.sh",
+            "name": "jeff-issue.py",
             "version": VERSION,
             "mode": "info",
             "root": str(ROOT),
@@ -180,10 +180,10 @@ def examples(args: list[str]) -> int:
         "schema_version": VERSION,
         "mode": "examples",
         "examples": [
-            "jeff-issue.sh validate source --repo Dicklesworthstone/ntm --keywords 'runtime handoff singleton' --json",
-            "jeff-issue.sh draft --repo Dicklesworthstone/ntm --title 'Runtime handoff scope leaks across projects' --tracking-bead flywheel-abcd --observed '...' --expected '...' --repro '...' --source-ref 'src/main.rs:42' --dry-run --json",
-            "jeff-issue.sh rubric --draft /tmp/jeff-issue-runtime-handoff-singleton.md --json",
-            "jeff-issue.sh submit --draft /tmp/jeff-issue-runtime-handoff-singleton.md --repo Dicklesworthstone/ntm --title 'Runtime handoff scope leaks across projects' --tracking-bead flywheel-abcd --dry-run --json",
+            "jeff-issue.py validate source --repo Dicklesworthstone/ntm --keywords 'runtime handoff singleton' --json",
+            "jeff-issue.py draft --repo Dicklesworthstone/ntm --title 'Runtime handoff scope leaks across projects' --tracking-bead flywheel-abcd --observed '...' --expected '...' --repro '...' --source-ref 'src/main.rs:42' --dry-run --json",
+            "jeff-issue.py rubric --draft /tmp/jeff-issue-runtime-handoff-singleton.md --json",
+            "jeff-issue.py submit --draft /tmp/jeff-issue-runtime-handoff-singleton.md --repo Dicklesworthstone/ntm --title 'Runtime handoff scope leaks across projects' --tracking-bead flywheel-abcd --dry-run --json",
         ],
         "exit_code": 0,
     }
@@ -268,7 +268,7 @@ def help_topic(args: list[str]) -> int:
 
 def completion(args: list[str]) -> int:
     shell = args[1] if len(args) > 1 else "bash"
-    print(f"complete -W 'doctor health repair validate draft rubric submit audit why schema quickstart help completion --info --examples --json' jeff-issue.sh # {shell}")
+    print(f"complete -W 'doctor health repair validate draft rubric submit audit why schema quickstart help completion --info --examples --json' jeff-issue.py # {shell}")
     return 0
 
 
@@ -305,7 +305,7 @@ def doctor(args: list[str]) -> int:
         "signals": [
             {
                 "name": "jeff_issue_phase_gate_status",
-                "producer": ".flywheel/scripts/jeff-issue.sh doctor --json",
+                "producer": ".flywheel/scripts/jeff-issue.py doctor --json",
                 "measurement": "dependency and state readiness for L66 phased outbound Jeff issue gate",
                 "consumer": "/flywheel:jeff-issue and worker pre-submit checks",
                 "threshold": "status != fail",
