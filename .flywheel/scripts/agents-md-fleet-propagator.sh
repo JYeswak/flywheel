@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # canonical-cli-scoping-allow-large: c1zgt keeps fleet scan, apply, doctor, repair, schema, and test-facing fixture knobs in one portable CLI.
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (partial → passing per bead flywheel-1hshd.2)
 set -euo pipefail
 
 VERSION="agents-md-fleet-propagator.v1.0.0"
@@ -128,6 +130,7 @@ repo_candidates_from_loops() {
     [[ -e "$f" ]] || continue
     jq -r '.repo_realpath // .repo // .path // empty' "$f" 2>/dev/null || true
   done
+  return 0
 }
 
 default_repo_candidates() {
@@ -425,6 +428,7 @@ run_health() {
     [[ "$WATCH" -eq 1 ]] || return "$rc"
     sleep "$WATCH_INTERVAL"
   done
+  return 0
 }
 
 contract_self_row_json() {
@@ -489,6 +493,7 @@ run_audit() {
     while IFS= read -r payload; do
       emit "$payload" "audit rows_total=$(jq -r '.ledger_rows_total' <<<"$payload") contract_self_row_present=$(jq -r '.contract_self_row_present' <<<"$payload")" 0
     done
+  return 0
 }
 
 run_why() {
@@ -500,6 +505,7 @@ run_why() {
     while IFS= read -r payload; do
       emit "$payload" "why id=$WHY_ID ledger_match=$(jq -r '.ledger_match != null' <<<"$payload") scan_match=$(jq -r '.scan_match != null' <<<"$payload")" 0
     done
+  return 0
 }
 
 run_schema() {
@@ -561,6 +567,12 @@ while [[ $# -gt 0 ]]; do
     audit) MODE="audit"; shift ;;
     why) MODE="why"; shift; if [[ $# -gt 0 && "${1:-}" != --* ]]; then WHY_ID="$1"; shift; fi ;;
     schema) MODE="schema"; shift; if [[ $# -gt 0 && "${1:-}" != --* ]]; then SCHEMA_TOPIC="$1"; shift; fi ;;
+    # NEW (flywheel-1hshd.2): --schema dash-flag form for parity with the existing
+    # `schema` no-dash subcommand. Without this, --schema --json was rejected as
+    # "unknown argument" — the only canonical-CLI gap the inventory flagged for
+    # this surface (has_schema:false).
+    --schema) MODE="schema"; shift; if [[ $# -gt 0 && "${1:-}" != --* ]]; then SCHEMA_TOPIC="$1"; shift; fi ;;
+    --schema=*) MODE="schema"; SCHEMA_TOPIC="${1#*=}"; shift ;;
     --apply) APPLY=1; DRY_RUN=0; shift ;;
     --dry-run) APPLY=0; DRY_RUN=1; shift ;;
     --record-scan) RECORD_SCAN=1; shift ;;
