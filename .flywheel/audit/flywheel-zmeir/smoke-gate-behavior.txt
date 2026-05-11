@@ -1,0 +1,3 @@
+Smoke: no_capture_live_panes gate behavior
+When --robot-activity probe returns no live+WAITING panes, watcher emits no_capture_live_panes status:
+(Verified by tests/idle-pane-auto-dispatch-validated-write-test.sh — first run without --robot-activity mock showed status=no_capture_live_panes.)

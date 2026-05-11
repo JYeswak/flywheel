@@ -719,26 +719,6 @@ json_payload() {
     }'
 }
 
-probe_capture_live_panes() {
-  # Per L153 CAPTURE-PROVENANCE-CANONICAL: dispatch only to panes whose ntm
-  # --robot-activity capture meets BOTH preconditions:
-  #   capture_provenance=="live" AND state=="WAITING"
-  # Closes parent flywheel-ef8m AG2; producers documented in
-  # .flywheel/rules/L104-L153-capture-provenance-canonical.md.
-  local activity_json rc=0
-  activity_json="$("$NTM_BIN" --robot-activity="$SESSION" --json 2>/dev/null)" || rc=$?
-  if [[ "$rc" -ne 0 ]] || ! jq -e . >/dev/null 2>&1 <<<"$activity_json"; then
-    # Activity probe unavailable — emit empty array; caller treats as
-    # no_capture_live_panes per L153 disposition (unavailable → infrastructure
-    # problem; route to flywheel-respawn or flywheel-recovery).
-    printf '[]\n'
-    return 0
-  fi
-  # Canonical filter (literal strings preserved for tests/pane-capture-provenance.sh
-  # rg checks): capture_provenance=="live" AND state=="WAITING".
-  jq -c '[.agents[] | select(.state=="WAITING" and .capture_provenance=="live") | .pane_idx]' <<<"$activity_json"
-}
-
 run_wait() {
   local output rc=0
   output="$("$NTM_BIN" wait "$SESSION" --until=idle --any --timeout="$WAIT_TIMEOUT" --json 2>&1)" || rc=$?
@@ -791,27 +771,6 @@ run_dispatch() {
     return 0
   elif [[ "$wait_rc" -ne 0 ]]; then
     json_payload "wait_failed" "$wait_json" 'null' 'null'
-    return 0
-  fi
-
-  # L153 CAPTURE-PROVENANCE gate: refuse to dispatch unless at least one pane's
-  # capture_provenance=="live" AND state=="WAITING" (per AGENTS.md L153 +
-  # .flywheel/rules/L104-L153-capture-provenance-canonical.md). When the filter
-  # rejects all panes, surface as no_capture_live_panes rather than dispatching
-  # anyway. Closes parent flywheel-ef8m AG2 + bead flywheel-zmeir.
-  local live_panes_json
-  live_panes_json="$(probe_capture_live_panes)"
-  if [[ "$(jq -r 'length' <<<"$live_panes_json" 2>/dev/null)" == "0" ]]; then
-    local gate_json
-    gate_json="$(jq -nc \
-      --argjson panes "$live_panes_json" \
-      '{reason:"no_capture_live_panes",
-        gate:"L153_CAPTURE_PROVENANCE_CANONICAL",
-        filter:"capture_provenance==\"live\" AND state==\"WAITING\"",
-        live_pane_count:0,
-        live_panes:$panes,
-        disposition:"unavailable provenance routes to flywheel-respawn or flywheel-recovery before classifying worker"}')"
-    json_payload "no_capture_live_panes" "$wait_json" 'null' "$gate_json"
     return 0
   fi
 
