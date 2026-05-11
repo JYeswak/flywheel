@@ -1,0 +1,2 @@
+{"schema_version":"test-fuckup-join/v1","command":"validate","subject":"jsonl-path","ts":"2026-05-11T00:22:03Z","status":"reject","value":"/some/random.txt","reason":"unsupported_extension","valid_extensions":[".jsonl"]}
+rc=1

@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info emits canonical envelope
+PASS --schema emits canonical envelope
+PASS --examples emits canonical envelope
+PASS doctor emits canonical envelope
+PASS health emits canonical envelope
+PASS repair --dry-run emits canonical envelope (real scope)
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate (bare) refuses with rc=64 + missing_subject envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS doctor probes jq_slurpfile_supported (load-bearing for joined_count() filter)
+PASS validate jsonl-path accepts canonical test-fuckup-log.jsonl naming
+PASS validate jsonl-path rejects .txt with rc=1 + unsupported_extension
+PASS validate trauma-class accepts fixture-style class-N (script generates class-1..class-5)
+PASS validate trauma-class rejects uppercase with rc=1 (lowercase-prefix contract)
+PASS backward-compat: original synthetic JOIN test still passes via cmd_run (old=10 new=7)
+SUMMARY pass=19 fail=0

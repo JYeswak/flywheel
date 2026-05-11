@@ -1,0 +1,1 @@
+{"schema_version":"test-fuckup-join/v1","command":"quickstart","status":"ok","steps":[{"step":1,"action":"probe doctor","command":"test-fuckup-join.sh doctor --json"}],"next_actions":["doctor","health","repair"]}
