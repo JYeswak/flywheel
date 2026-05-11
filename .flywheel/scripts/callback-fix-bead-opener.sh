@@ -389,6 +389,38 @@ run_open() {
   local safe_task title desc dedupe existing output rc fix_id action row hash
   [[ -n "$TASK_ID" ]] || fail_usage "missing --task-id"
   [[ -n "$REASON" ]] || fail_usage "missing --reason"
+  # flywheel-0u9ch + flywheel-j3dbv defensive guard: refuse to write prod beads
+  # when (a) REPO resolves to this script's own owning repo (the live prod
+  # flywheel repo) AND (b) --bead matches a known test-fixture sentinel name.
+  #
+  # Test-pollution class: the validator's open_fix_bead() side-effect was
+  # creating phantom prod beads (`fix-t-1-l112-mismatch`,
+  # `fix-test-1-l112-mismatch`) from tests that piped fake DONE callbacks
+  # through `$VALIDATOR check` without isolating REPO or overriding
+  # CALLBACK_RECEIPT_FIX_BEAD_OPENER. Tests SHOULD set the opener env var to
+  # /bin/true (preferred) or pass --repo /tmp/fixture-repo.
+  #
+  # The two-axis check (prod-REPO AND sentinel-bead) means properly-isolated
+  # tests (--repo /tmp/fixture) bypass the guard regardless of bead name —
+  # the canonical-cli regression test (legacy run_open + idempotent) uses
+  # --bead flywheel-x with --repo /tmp/* and is unaffected.
+  local _resolved_repo
+  _resolved_repo="$(cd "$REPO" 2>/dev/null && pwd -P || printf '%s' "$REPO")"
+  if [[ "$_resolved_repo" == "$REPO_DEFAULT" ]]; then
+    case "$BEAD" in
+      flywheel-test|flywheel-parent|flywheel-x|flywheel-fixture)
+        emit "$(jq -nc \
+          --arg sv "$SCHEMA_VERSION" \
+          --arg ts "$(now_iso)" \
+          --arg task "$TASK_ID" \
+          --arg bead "$BEAD" \
+          --arg reason "$REASON" \
+          --arg repo "$_resolved_repo" \
+          '{schema_version:$sv,ts:$ts,status:"refused",action:"refused_test_fixture_bead",task_id:$task,bead:$bead,reason:$reason,repo:$repo,refusal:"caller-supplied --bead matches known test-fixture sentinel AND --repo points at the live prod flywheel repo; set CALLBACK_RECEIPT_FIX_BEAD_OPENER=/bin/true in test, or pass --repo /tmp/fixture-repo, or use a non-sentinel --bead value"}')"
+        return 0
+        ;;
+    esac
+  fi
   safe_task="$(safe_id_part "$TASK_ID")"
   [[ -n "$safe_task" ]] || safe_task="unknown"
   title="fix-${safe_task}-l112-mismatch"
