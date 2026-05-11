@@ -1,0 +1,48 @@
+{
+  "patch_target": "/Users/josh/.claude/skills/.flywheel/data/substrate-registry.json",
+  "patch_kind": "jsm-import-ready",
+  "patch_operation": "append_to_substrates_array",
+  "patch_source_bead": "flywheel-2xdi.132",
+  "parent_bead": "flywheel-2xdi",
+  "sister_bead": "flywheel-2xdi.72.1 (render_scorecard_html + migrate-scores; 6 entries)",
+  "patch_rationale": "Add skill-evolution-weekly.sh to substrate-registry on-demand allowlist (kind=scaffold). Script is planned weekly orchestrator (Health Check → Deploy → Summary) documented in SKILL-EVOLUTION-PLAN.md but launchd plist never deployed. Adding to allowlist clears gap-hunt-probe wired-but-cold flag while preserving lifecycle_state=planned for orch triage on activation/removal.",
+  "design_notes": [
+    "where field is STRING per flywheel-2xdi.60.1 Design Decision 3 (gap-hunt-probe _expand_registry_path expects str)",
+    "kind=scaffold is in _ON_DEMAND_VALIDATOR_KINDS = {validator, scaffold-test, self-test, audit, scaffold}",
+    "lifecycle_state=planned (not active/deployed) — distinguishes from CI/runtime-active scaffolds",
+    "effect=planned_weekly_orchestrator_not_yet_launchd_scheduled captures the NUANCE: script EXISTS + DOCUMENTED in SKILL-EVOLUTION-PLAN.md + planned launchd config in plan doc + actual launchd plist NOT YET DEPLOYED",
+    "Joshua authorization NOT required (read-only registry edit, no system-level scheduling activated)",
+    "Sister to flywheel-2xdi.72.1 (6 entries) and flywheel-2xdi.60.1 (1 entry; kind=audit) — same registry-allowlist pattern"
+  ],
+  "new_entry": {
+    "name": "skill-evolution-weekly-orchestrator",
+    "kind": "scaffold",
+    "scope": "local",
+    "version": "1.0.0",
+    "source": "zeststream",
+    "sourceUrl": "flywheel:flywheel-2xdi.132",
+    "installedAt": "2026-05-11T16:42:00Z",
+    "session_added": "2026-05-11T16:42:00Z",
+    "added_by": "flywheel-2xdi.132",
+    "valid_from": "2026-05-11T16:42:00Z",
+    "valid_to": null,
+    "effect": "planned_weekly_orchestrator_not_yet_launchd_scheduled",
+    "lifecycle_state": "planned",
+    "lifecycle_stage": "on-demand-planned-not-deployed",
+    "where": "/Users/josh/.claude/skills/scripts/skill-evolution-weekly.sh",
+    "owner": "skill-evolution-plan",
+    "validator": "flywheel-2xdi.132",
+    "validation_command": "test -f /Users/josh/.claude/skills/scripts/skill-evolution-weekly.sh",
+    "consumers": [
+      "SKILL-EVOLUTION-PLAN.md doc (planned launchd ai.zeststream.skill-evolution-weekly; not yet deployed)"
+    ],
+    "mutates_live_state": false
+  },
+  "verification_post_import": {
+    "registry_substrates_count_expected": 46,
+    "registry_substrates_count_before": 45,
+    "updatedAt_expected": "2026-05-11T16:42:00Z",
+    "gap_hunt_probe_post_apply": "script should be in on_demand_script_allowlist; future probe runs will not flag wired-but-cold"
+  },
+  "follow_up_question_for_orchestrator": "Should this planned orchestrator be (A) activated (deploy launchd plist + ai.zeststream.skill-evolution-weekly), (B) removed (delete script + remove from plan doc), or (C) preserved as planned-only (this patch's status quo)? Decision needs Joshua-side input on whether SKILL-EVOLUTION-PLAN.md is still active doctrine or legacy."
+}
