@@ -1,6 +1,488 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+
+# ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (filled-in per bead flywheel-5ke66.18)
+# doctor-mode-tier: scaffolded (bead flywheel-ws02m)
+#
+# CRITICAL coexistence design: this IS the L107 reservation tool used by
+# every other wave-2 surface during scaffold work. The script's operational
+# surfaces (--check / --reserve / --release / --list / --doctor / --health)
+# MUST keep working unchanged. Existing tests/shared-surface-reservation-check.sh
+# asserts:
+#   --info:   .schema_version=="shared-surface-reservation/v1"
+#              AND (.mutating_commands | index("--reserve"))
+#   --schema: .exit_codes."1"=="reserved by another pane"
+#              AND (.commands | index("--check <path>"))
+#
+# Strategy: bash early-dispatch ONLY intercepts canonical no-dash subcommand
+# forms (`doctor`, `health`, `repair`, `validate`, `audit`, `why`, `quickstart`,
+# `help`, `completion`) plus `--examples` (NEW). The dash-flag forms
+# (--check / --reserve / --release / --list / --doctor / --health / --info /
+# --schema) fall through to python so:
+#   - --reserve / --release / --check / --list operational paths unchanged
+#   - --info / --schema python output unchanged (backward-compat 100%)
+#   - --doctor / --health python output unchanged
+# The bash scaffold adds NEW no-dash subcommands as AG3-compliant surfaces
+# alongside python's existing dash-flag surfaces. Two distinct surface
+# families coexist.
+
+_SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
+_SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
+if [[ -r "$_SCAFFOLD_HELPER_LIB" ]]; then
+  # shellcheck source=/dev/null
+  source "$_SCAFFOLD_HELPER_LIB"
+fi
+
+SCAFFOLD_SCHEMA_VERSION="shared-surface-reservation/v1"
+SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$HOME/.local/state/flywheel/file-reservations.jsonl}"
+SCAFFOLD_FUCKUP_LOG="${SCAFFOLD_FUCKUP_LOG:-$HOME/.local/state/flywheel/fuckup-log.jsonl}"
+
+scaffold_usage() {
+  cat <<'USG'
+usage: shared-surface-reservation-check.sh [SUBCOMMAND|FLAG] [OPTIONS]
+
+This script blocks cross-pane git-add collisions on shared flywheel
+surfaces before staging.
+
+Operational dash-flag surfaces (python — UNCHANGED; load-bearing for L107):
+  --check PATH                       check if a path is reserved
+  --reserve PATH --pane=N --task-id  reserve a path for a pane
+  --release PATH --pane=N            release a reserved path
+  --list                             list all current reservations
+  --doctor                           python doctor output
+  --health                           python health output
+  --info --json                      python --info envelope (test:33 asserts)
+  --schema --json                    python --schema envelope (test:36 asserts)
+
+Canonical CLI surfaces (bash scaffold — NEW; coexists with dash-flags):
+  doctor [--json]                    canonical AG3 doctor envelope
+                                     (distinct from python's --doctor surface)
+  health [--json]                    canonical AG3 health envelope
+                                     (distinct from python's --health surface)
+  repair --scope <s>                 repair misconfigured state
+                                     Default: --dry-run; mutate with --apply --idempotency-key KEY
+                                     Scopes: audit-log-rotate, ledger-prime
+  validate <subject> [...]           subjects: row, schema, config, ledger, fuckup-log
+  audit [--json]                     recent ledger rows
+  why <id>                           explain provenance (pane | task_id | path-substring)
+  quickstart [--json]                operator orientation
+  help <topic>                       topic help
+  completion <shell>                 emit shell completion
+
+Introspection (NEW):
+  --examples --json                  canonical examples envelope
+                                     (python has no --examples today)
+USG
+}
+
+scaffold_emit_examples() {
+  jq -nc \
+    --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    '{
+      schema_version: $sv,
+      command: "examples",
+      examples: [
+        "shared-surface-reservation-check.sh --reserve /path/to/file --pane=3 --task-id=t1 --json",
+        "shared-surface-reservation-check.sh --release /path/to/file --pane=3 --json",
+        "shared-surface-reservation-check.sh --check /path/to/file --pane=3 --json",
+        "shared-surface-reservation-check.sh --list --json",
+        "shared-surface-reservation-check.sh doctor --json",
+        "shared-surface-reservation-check.sh validate --ledger --json"
+      ]
+    }'
+}
+
+scaffold_emit_quickstart() {
+  local steps
+  steps="$(jq -nc '{step:1,action:"probe canonical doctor",command:"shared-surface-reservation-check.sh doctor --json"}'
+)"$'\n'"$(jq -nc '{step:2,action:"see active reservations",command:"shared-surface-reservation-check.sh --list --json"}'
+)"$'\n'"$(jq -nc '{step:3,action:"reserve a path",command:"shared-surface-reservation-check.sh --reserve /path --pane=3 --task-id=mytask --json"}'
+)"
+  if command -v cli_emit_quickstart >/dev/null; then
+    cli_emit_quickstart "$SCAFFOLD_SCHEMA_VERSION" "$steps" "doctor,health,repair"
+  else
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"quickstart",helper_lib_missing:true}'
+  fi
+}
+
+scaffold_emit_topic_help() {
+  local topic="${1:-}"
+  case "$topic" in
+    run)      printf 'topic: run — load-bearing L107 reservation tool. Use --reserve/--release dash-flag forms for the actual reservation API; bash doctor/health/etc. subcommands are separate canonical introspection surfaces.\n' ;;
+    doctor)   printf 'topic: doctor — canonical doctor (substrate probes). For python doctor-output use `--doctor` (with dash).\n' ;;
+    health)   printf 'topic: health — canonical health (audit-log freshness). For python health-output use `--health` (with dash).\n' ;;
+    repair)   printf 'topic: repair — scopes: audit-log-rotate (>5MB → mv .ts), ledger-prime (read-only — probes file-reservations.jsonl row count).\n' ;;
+    validate) printf 'topic: validate — subjects: --row-json JSON (reservation row schema), --schema, --config, --ledger (probes file-reservations.jsonl), --fuckup-log (probes coordination-collision fuckup rows).\n' ;;
+    *)        printf 'topics: run | doctor | health | repair | validate\n' ;;
+  esac
+}
+
+scaffold_emit_completion() {
+  local shell="${1:-bash}"
+  case "$shell" in
+    -h|--help) scaffold_emit_topic_help completion 2>/dev/null \
+                 || printf 'topic: completion <bash|zsh>\n'
+               return 0 ;;
+    bash) command -v cli_emit_completion_bash >/dev/null \
+            && cli_emit_completion_bash "shared-surface-reservation-check" "doctor,health,repair,validate,audit,why,quickstart,help,completion" "--json,--apply,--dry-run,--idempotency-key,--examples,--check,--reserve,--release,--list,--info,--schema,--pane,--session,--task-id" \
+            || printf '# helper lib missing — completion unavailable\n' ;;
+    zsh)  command -v cli_emit_completion_zsh >/dev/null \
+            && cli_emit_completion_zsh "shared-surface-reservation-check" "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
+            || printf '# helper lib missing — completion unavailable\n' ;;
+    *) printf 'ERR: unknown shell %s (use bash|zsh)\n' "$shell" >&2; return 64 ;;
+  esac
+}
+
+scaffold_cmd_doctor() {
+  local script_root; script_root="$_SCAFFOLD_REPO_ROOT"
+  local checks="" overall="pass"
+
+  if command -v python3 >/dev/null 2>&1; then
+    checks+="$(jq -nc --arg p "$(command -v python3)" '{name:"python3_on_path",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc '{name:"python3_on_path",status:"fail"}')"$'\n'
+    overall="fail"
+  fi
+
+  if command -v jq >/dev/null 2>&1; then
+    checks+="$(jq -nc --arg p "$(command -v jq)" '{name:"jq_on_path",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc '{name:"jq_on_path",status:"fail"}')"$'\n'
+    overall="fail"
+  fi
+
+  local ledger_dir; ledger_dir="$(dirname "$SCAFFOLD_AUDIT_LOG")"
+  if [[ -d "$ledger_dir" && -w "$ledger_dir" ]] || mkdir -p "$ledger_dir" 2>/dev/null; then
+    local row_count=0
+    [[ -r "$SCAFFOLD_AUDIT_LOG" ]] && row_count="$(wc -l < "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | tr -d ' ' || echo 0)"
+    checks+="$(jq -nc --arg p "$SCAFFOLD_AUDIT_LOG" --argjson rc "${row_count:-0}" '{name:"ledger_writable",status:"pass",value:$p,row_count:$rc}')"$'\n'
+  else
+    checks+="$(jq -nc --arg p "$SCAFFOLD_AUDIT_LOG" '{name:"ledger_writable",status:"fail",value:$p}')"$'\n'
+    overall="fail"
+  fi
+
+  local fl_present=false fl_rows=0
+  if [[ -r "$SCAFFOLD_FUCKUP_LOG" ]]; then
+    fl_present=true
+    fl_rows="$(wc -l < "$SCAFFOLD_FUCKUP_LOG" 2>/dev/null | tr -d ' ' || echo 0)"
+  fi
+  local fl_status="pass"; [[ "$fl_present" != true ]] && fl_status="warn"
+  checks+="$(jq -nc --arg p "$SCAFFOLD_FUCKUP_LOG" --arg s "$fl_status" --argjson present "$fl_present" --argjson rows "${fl_rows:-0}" \
+    '{name:"fuckup_log_present",status:$s,value:$p,present:$present,row_count:$rows}')"$'\n'
+
+  # ntm bin probe (used by --check for ntm conflicts native surface).
+  local ntm_bin="/Users/josh/.local/bin/ntm"
+  if [[ -x "$ntm_bin" ]]; then
+    checks+="$(jq -nc --arg p "$ntm_bin" '{name:"ntm_bin_executable",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc --arg p "$ntm_bin" '{name:"ntm_bin_executable",status:"warn",value:$p,detail:"used by --check for ntm conflicts probe"}')"$'\n'
+  fi
+
+  if [[ -d "$script_root" ]]; then
+    checks+="$(jq -nc --arg p "$script_root" '{name:"flywheel_root_resolvable",status:"pass",value:$p}')"$'\n'
+  else
+    checks+="$(jq -nc --arg p "$script_root" '{name:"flywheel_root_resolvable",status:"fail",value:$p}')"$'\n'
+    overall="fail"
+  fi
+
+  local ts; ts="$(cli_iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  printf '%s' "$checks" | jq -sc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg status "$overall" \
+    '{schema_version:$sv,command:"doctor",ts:$ts,status:$status,checks:.}'
+}
+
+scaffold_cmd_health() {
+  local ts; ts="$(cli_iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
+  local log="$SCAFFOLD_AUDIT_LOG"
+  local last_row="null" stale_seconds=-1 status="warn"
+  local active_reservations=0 release_count=0 collision_count=0
+  if [[ -r "$log" ]]; then
+    local row_raw; row_raw="$(tail -n 1 "$log" 2>/dev/null || true)"
+    if [[ -n "$row_raw" ]] && printf '%s' "$row_raw" | jq -e '.' >/dev/null 2>&1; then
+      last_row="$row_raw"
+      local last_ts; last_ts="$(printf '%s' "$row_raw" | jq -r '.ts // empty' 2>/dev/null || true)"
+      if [[ -n "$last_ts" ]]; then
+        local last_epoch now_epoch
+        last_epoch="$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$last_ts" +%s 2>/dev/null || echo 0)"
+        now_epoch="$(date -u +%s)"
+        if [[ "$last_epoch" -gt 0 ]]; then
+          stale_seconds=$((now_epoch - last_epoch))
+          if [[ "$stale_seconds" -le 604800 ]]; then status="pass"; fi
+        fi
+      fi
+    fi
+    active_reservations="$(grep -c '"action":"reserve"' "$log" 2>/dev/null; true)"
+    release_count="$(grep -c '"action":"release"' "$log" 2>/dev/null; true)"
+  fi
+  [[ -r "$SCAFFOLD_FUCKUP_LOG" ]] && collision_count="$(grep -c '"trauma_class":"coordination-collision-detected"' "$SCAFFOLD_FUCKUP_LOG" 2>/dev/null; true)"
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" --arg log "$log" \
+    --arg status "$status" --argjson stale "$stale_seconds" --argjson row "$last_row" \
+    --argjson ar "${active_reservations:-0}" --argjson rc "${release_count:-0}" --argjson cc "${collision_count:-0}" \
+    --arg fuckup "$SCAFFOLD_FUCKUP_LOG" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,audit_log:$log,stale_seconds:$stale,last_row:$row,reserve_count:$ar,release_count:$rc,fuckup_log:$fuckup,collision_count:$cc}'
+}
+
+scaffold_cmd_repair() {
+  local scope="" mode="dry_run" idem_key=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help) scaffold_emit_topic_help repair; return 0 ;;
+      --scope) scope="${2:-}"; shift 2 ;;
+      --dry-run) mode="dry_run"; shift ;;
+      --apply) mode="apply"; shift ;;
+      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
+      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
+      --json) shift ;;
+      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
+    if command -v cli_refuse_apply_without_idem_key >/dev/null; then
+      cli_refuse_apply_without_idem_key "$SCAFFOLD_SCHEMA_VERSION" "repair" "$scope"
+    else
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" \
+        '{schema_version:$sv,command:"repair",status:"refused",mode:"apply",scope:$scope,reason:"--apply requires --idempotency-key"}'
+      exit 3
+    fi
+  fi
+  case "$scope" in
+    audit-log-rotate)
+      local log="$SCAFFOLD_AUDIT_LOG"
+      local size_bytes=0 rotated=false
+      [[ -r "$log" ]] && size_bytes="$(stat -f '%z' "$log" 2>/dev/null || echo 0)"
+      if [[ "$mode" == "apply" && "$size_bytes" -gt 5242880 ]]; then
+        local rotated_path="${log}.$(date -u +%Y%m%dT%H%M%SZ)"
+        if mv "$log" "$rotated_path" 2>/dev/null; then
+          : > "$log" 2>/dev/null || true
+          rotated=true
+        fi
+      fi
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        --arg idem "$idem_key" --arg log "$log" --argjson sz "$size_bytes" --argjson r "$rotated" \
+        '{schema_version:$sv,command:"repair",status:"pass",mode:$mode,scope:$scope,idempotency_key:$idem,audit_log:$log,size_bytes:$sz,rotation_threshold:5242880,rotated:$r}'
+      ;;
+    ledger-prime)
+      local present=false rows=0 reserves=0 releases=0
+      if [[ -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+        present=true
+        rows="$(wc -l < "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | tr -d ' ' || echo 0)"
+        reserves="$(grep -c '"action":"reserve"' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null; true)"
+        releases="$(grep -c '"action":"release"' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null; true)"
+      fi
+      local status="pass"
+      [[ "$present" != true ]] && status="warn"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        --arg idem "$idem_key" --arg log "$SCAFFOLD_AUDIT_LOG" --arg s "$status" \
+        --argjson present "$present" --argjson rows "${rows:-0}" \
+        --argjson reserves "${reserves:-0}" --argjson releases "${releases:-0}" \
+        '{schema_version:$sv,command:"repair",status:$s,mode:$mode,scope:$scope,idempotency_key:$idem,ledger:$log,present:$present,row_count:$rows,reserve_count:$reserves,release_count:$releases,note:"read-only probe"}'
+      ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
+        '{schema_version:$sv,command:"repair",status:"unknown_scope",mode:$mode,scope:$scope,idempotency_key:$idem,known_scopes:["audit-log-rotate","ledger-prime"]}'
+      ;;
+  esac
+}
+
+scaffold_cmd_validate() {
+  local subject="" row_json=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      -h|--help) scaffold_emit_topic_help validate; return 0 ;;
+      --row-json) subject="row"; row_json="${2:-}"; shift 2 ;;
+      --row-json=*) subject="row"; row_json="${1#--row-json=}"; shift ;;
+      --schema) subject="schema"; shift ;;
+      --config) subject="config"; shift ;;
+      --ledger) subject="ledger"; shift ;;
+      --fuckup-log) subject="fuckup-log"; shift ;;
+      --json) shift ;;
+      *) printf 'ERR: unknown validate arg %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+  case "$subject" in
+    row)
+      local valid=true missing=""
+      if [[ -z "$row_json" ]]; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",subject:"row",status:"fail",valid:false,reason:"--row-json required"}'
+        return 0
+      fi
+      if ! printf '%s' "$row_json" | jq -e '.' >/dev/null 2>&1; then
+        jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"validate",subject:"row",status:"fail",valid:false,reason:"invalid_json"}'
+        return 0
+      fi
+      # Reservation row schema from python's --schema ledger_row.
+      for f in action pane path session task_id ts; do
+        if ! printf '%s' "$row_json" | jq -e --arg k "$f" 'has($k)' >/dev/null 2>&1; then
+          valid=false; missing="${missing}${f},"
+        fi
+      done
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --argjson v "$valid" --arg m "${missing%,}" \
+        '{schema_version:$sv,command:"validate",subject:"row",status:(if $v then "pass" else "fail" end),valid:$v,missing:$m}'
+      ;;
+    schema)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"validate",subject:"schema",status:"pass",surfaces:["doctor","health","repair","validate","audit","why","audit-row"]}'
+      ;;
+    config)
+      local py_ok=false jq_ok=false ledger_dir_ok=false fuckup_ok=false root_ok=false
+      command -v python3 >/dev/null 2>&1 && py_ok=true
+      command -v jq >/dev/null 2>&1 && jq_ok=true
+      [[ -d "$(dirname "$SCAFFOLD_AUDIT_LOG")" ]] && ledger_dir_ok=true
+      [[ -r "$SCAFFOLD_FUCKUP_LOG" ]] && fuckup_ok=true
+      [[ -d "$_SCAFFOLD_REPO_ROOT" ]] && root_ok=true
+      local overall=pass
+      [[ "$py_ok" != true || "$jq_ok" != true || "$root_ok" != true ]] && overall=fail
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$overall" \
+        --argjson py "$py_ok" --argjson jqq "$jq_ok" \
+        --argjson ld "$ledger_dir_ok" --argjson fl "$fuckup_ok" --argjson rt "$root_ok" \
+        --arg root "$_SCAFFOLD_REPO_ROOT" --arg log "$SCAFFOLD_AUDIT_LOG" --arg fuckup "$SCAFFOLD_FUCKUP_LOG" \
+        '{schema_version:$sv,command:"validate",subject:"config",status:$s,python3_present:$py,jq_present:$jqq,ledger_dir_present:$ld,fuckup_log_present:$fl,flywheel_root_present:$rt,flywheel_root:$root,ledger:$log,fuckup_log:$fuckup}'
+      ;;
+    ledger)
+      local present=false rows=0 reserves=0 releases=0 last_row=null last_row_valid=false
+      if [[ -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+        present=true
+        rows="$(wc -l < "$SCAFFOLD_AUDIT_LOG" 2>/dev/null | tr -d ' ' || echo 0)"
+        reserves="$(grep -c '"action":"reserve"' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null; true)"
+        releases="$(grep -c '"action":"release"' "$SCAFFOLD_AUDIT_LOG" 2>/dev/null; true)"
+        local raw; raw="$(tail -n 1 "$SCAFFOLD_AUDIT_LOG" 2>/dev/null || true)"
+        if [[ -n "$raw" ]] && printf '%s' "$raw" | jq -e '.' >/dev/null 2>&1; then
+          last_row="$raw"
+          if printf '%s' "$raw" | jq -e 'has("action") and has("pane") and has("path") and has("ts")' >/dev/null 2>&1; then
+            last_row_valid=true
+          fi
+        fi
+      fi
+      local status="pass"
+      [[ "$present" != true ]] && status="warn"
+      [[ "$present" == true && "$rows" -gt 0 && "$last_row_valid" != true ]] && status="warn"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$status" --arg log "$SCAFFOLD_AUDIT_LOG" \
+        --argjson present "$present" --argjson rows "${rows:-0}" \
+        --argjson reserves "${reserves:-0}" --argjson releases "${releases:-0}" \
+        --argjson lr "$last_row" --argjson lrv "$last_row_valid" \
+        '{schema_version:$sv,command:"validate",subject:"ledger",status:$s,ledger:$log,present:$present,row_count:$rows,reserve_count:$reserves,release_count:$releases,last_row:$lr,last_row_valid:$lrv}'
+      ;;
+    fuckup-log)
+      local present=false rows=0 collisions=0
+      if [[ -r "$SCAFFOLD_FUCKUP_LOG" ]]; then
+        present=true
+        rows="$(wc -l < "$SCAFFOLD_FUCKUP_LOG" 2>/dev/null | tr -d ' ' || echo 0)"
+        collisions="$(grep -c '"trauma_class":"coordination-collision-detected"' "$SCAFFOLD_FUCKUP_LOG" 2>/dev/null; true)"
+      fi
+      local status="pass"
+      [[ "$present" != true ]] && status="warn"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$status" --arg fl "$SCAFFOLD_FUCKUP_LOG" \
+        --argjson present "$present" --argjson rows "${rows:-0}" --argjson collisions "${collisions:-0}" \
+        '{schema_version:$sv,command:"validate",subject:"fuckup-log",status:$s,fuckup_log:$fl,present:$present,row_count:$rows,collision_count:$collisions}'
+      ;;
+    "")
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+        '{schema_version:$sv,command:"validate",status:"pass",subjects:["row","schema","config","ledger","fuckup-log"],usage:"validate --row-json JSON or --schema or --config or --ledger or --fuckup-log"}'
+      ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg s "$subject" \
+        '{schema_version:$sv,command:"validate",subject:$s,status:"unknown_subject",known:["row","schema","config","ledger","fuckup-log"]}'
+      ;;
+  esac
+}
+
+scaffold_cmd_audit() {
+  local limit=50
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --limit) limit="${2:-50}"; shift 2 ;;
+      --limit=*) limit="${1#--limit=}"; shift ;;
+      --json) shift ;;
+      -h|--help) scaffold_emit_topic_help audit; return 0 ;;
+      *) shift ;;
+    esac
+  done
+  if command -v cli_emit_audit_tail >/dev/null 2>&1; then
+    cli_emit_audit_tail "$SCAFFOLD_AUDIT_LOG" "$SCAFFOLD_SCHEMA_VERSION" "$limit"
+  else
+    local rows="[]" count=0
+    if [[ -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+      rows="$(tail -n "$limit" "$SCAFFOLD_AUDIT_LOG" | jq -sc '. // []' 2>/dev/null || echo '[]')"
+      count="$(printf '%s' "$rows" | jq 'length' 2>/dev/null || echo 0)"
+    fi
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" --argjson rows "$rows" --argjson count "$count" \
+      '{schema_version:$sv,command:"audit",audit_log:$log,row_count:$count,rows:$rows}'
+  fi
+}
+
+scaffold_cmd_why() {
+  local id="${1:-}"
+  if [[ -z "$id" ]]; then
+    printf 'ERR: why requires <id> argument\n' >&2; return 64
+  fi
+  local matches="[]" status="not_found"
+  local any_source_present=false
+  if [[ -r "$SCAFFOLD_AUDIT_LOG" ]]; then
+    any_source_present=true
+    local raw
+    raw="$(grep -F "$id" "$SCAFFOLD_AUDIT_LOG" 2>/dev/null || true)"
+    if [[ -n "$raw" ]]; then
+      matches="$(printf '%s' "$raw" | jq -sc '.' 2>/dev/null || echo '[]')"
+    fi
+  fi
+  if [[ "$any_source_present" != true ]]; then
+    status="unavailable"
+  else
+    local n; n="$(printf '%s' "$matches" | jq 'length' 2>/dev/null || echo 0)"
+    n="${n//[^0-9]/}"; [[ -z "$n" ]] && n=0
+    [[ "$n" -gt 0 ]] && status="found"
+  fi
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg s "$status" \
+    --arg log "$SCAFFOLD_AUDIT_LOG" --argjson m "$matches" \
+    '{schema_version:$sv,command:"why",id:$id,status:$s,audit_log:$log,matches:$m,total_matches:($m|length)}'
+}
+
+scaffold_main() {
+  if [[ $# -eq 0 ]]; then
+    scaffold_usage; exit 0
+  fi
+  case "$1" in
+    --examples)   shift; scaffold_emit_examples "$@"; exit 0 ;;
+    doctor)       shift; scaffold_cmd_doctor "$@"; exit $? ;;
+    health)       shift; scaffold_cmd_health "$@"; exit $? ;;
+    repair)       shift; scaffold_cmd_repair "$@"; exit $? ;;
+    validate)     shift; scaffold_cmd_validate "$@"; exit $? ;;
+    audit)        shift; scaffold_cmd_audit "$@"; exit $? ;;
+    why)          shift; scaffold_cmd_why "$@"; exit $? ;;
+    quickstart)   shift; scaffold_emit_quickstart "$@"; exit 0 ;;
+    help)         shift; scaffold_emit_topic_help "${1:-}"; exit 0 ;;
+    completion)   shift; scaffold_emit_completion "${1:-bash}"; exit $? ;;
+    *)
+      printf 'ERR: unknown canonical subcommand: %s\n' "$1" >&2
+      scaffold_usage >&2
+      exit 64 ;;
+  esac
+}
+
+# IMPORTANT: this matcher does NOT include --info / --schema / -h / --help
+# because the python heredoc owns those dash-flag forms and existing
+# tests/shared-surface-reservation-check.sh asserts on their exact shape.
+# Only no-dash subcommand forms + --examples (which python doesn't have)
+# are intercepted.
+_scaffold_is_canonical_arg() {
+  case "${1:-}" in
+    doctor|health|repair|validate|audit|why|quickstart|completion) return 0 ;;
+    --examples) return 0 ;;
+    help)
+      case "${2:-}" in run|doctor|health|repair|validate|audit|why|-h|--help) return 0 ;; esac
+      return 1 ;;
+    *) return 1 ;;
+  esac
+}
+
+if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
+  scaffold_main "$@"
+  exit $?
+fi
+# ====== END canonical-cli scaffold ======
+
 python3 - "$@" <<'PY'
 from __future__ import annotations
 
