@@ -1,0 +1,1 @@
+{"schema_version":"fleet-rotate-all-sessions/v1","command":"validate","subject":"profile-name","ts":"2026-05-11T05:36:54Z","status":"ok","value":"chiefzester","note":"matches caam profile-name shape (cross-source: native --profile flag)"}

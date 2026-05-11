@@ -1,0 +1,1 @@
+{"schema_version":"fleet-rotate-all-sessions/v1","command":"validate","subject":"exclude-list","ts":"2026-05-11T05:36:54Z","status":"reject","value":"flywheel,9bad","reason":"invalid_session_name_in_list","bad_member":"9bad","pattern":"^[a-z][a-z0-9_-]*$"}

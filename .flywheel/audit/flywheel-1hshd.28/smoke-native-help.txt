@@ -1,0 +1,22 @@
+usage: fleet-rotate-all-sessions.sh [SUBCOMMAND] [OPTIONS]
+
+Backward-compatible run mode: default invocation routes to the original
+top-level logic (now exposed as `cmd_run`).
+
+Canonical CLI surfaces:
+  doctor [--json]          probe substrate health
+  health [--json]          last-run status
+  repair --scope <s>       repair misconfigured state
+                            Default: --dry-run; mutate with --apply --idempotency-key KEY
+  validate <subject> [...] validate per-subject contract (TODO: define subjects)
+  audit [--json]           recent run history
+  why <id>                 explain provenance for a given id (TODO: id semantics)
+  quickstart [--json]      operator orientation
+  help <topic>             topic help (run | doctor | health | repair | validate)
+  completion <shell>       emit bash or zsh completion
+
+Introspection:
+  --info --json            version, paths, env vars, dependencies, sha256
+  --schema [<surface>]     JSON Schema for output envelopes
+  --examples --json        curated workflow examples
+  --help / -h              this help

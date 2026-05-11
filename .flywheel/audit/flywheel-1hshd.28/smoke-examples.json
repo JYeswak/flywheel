@@ -1,0 +1,1 @@
+{"schema_version":"fleet-rotate-all-sessions/v1","command":"examples","examples":[{"name":"default run","invocation":"fleet-rotate-all-sessions.sh","purpose":"backward-compatible original behavior"},{"name":"doctor","invocation":"fleet-rotate-all-sessions.sh doctor --json","purpose":"probe substrate health"}]}

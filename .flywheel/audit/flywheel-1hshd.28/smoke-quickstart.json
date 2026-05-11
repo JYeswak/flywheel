@@ -1,0 +1,1 @@
+{"schema_version":"fleet-rotate-all-sessions/v1","command":"quickstart","status":"ok","steps":[{"step":1,"action":"probe doctor","command":"fleet-rotate-all-sessions.sh doctor --json"}],"next_actions":["doctor","health","repair"]}

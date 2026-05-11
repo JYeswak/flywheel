@@ -1,0 +1,1 @@
+{"schema_version":"fleet-rotate-all-sessions/v1","command":"validate","subject":"session-name","ts":"2026-05-11T05:36:54Z","status":"ok","value":"flywheel","note":"matches ntm session-naming convention"}
