@@ -202,7 +202,7 @@ def schema(args: list[str]) -> int:
             "properties": {
                 "repo": {"type": "string", "pattern": "^Dicklesworthstone/.+", "description": "GitHub repo (must be Dicklesworthstone/*)"},
                 "title": {"type": "string"},
-                "tracking_bead": {"type": "string", "pattern": "^flywheel-[a-z0-9.]+$"},
+                "tracking_bead": {"type": "string", "pattern": "^flywheel-[a-z0-9]+(\\.[0-9]+)*$"},
                 "observed": {"type": "string"},
                 "expected": {"type": "string"},
                 "repro": {"type": "string"},
@@ -396,7 +396,13 @@ def template_checks(repo: str, title: str, tracking: str, observed: str, expecte
         {"name": "repo_is_dicklesworthstone", "passed": repo.startswith("Dicklesworthstone/")},
         {"name": "title_present", "passed": bool(title.strip())},
         {"name": "title_length_lte_72", "passed": len(title) <= 72},
-        {"name": "tracking_bead", "passed": bool(re.match(r"^flywheel-[a-z0-9]+$", tracking))},
+        # flywheel-n2b6j: canonical bead-id pattern (matches lrdum). The
+        # previous `^flywheel-[a-z0-9]+$` rejected dotted sub-bead form
+        # (flywheel-X.N.M), producing a false-negative for legitimate
+        # tracking refs like `flywheel-tlclp.1`. The matching input_schema
+        # pattern (line ~205) accepts dotted form; the prior mismatch let
+        # dotted IDs pass schema validation but fail this template check.
+        {"name": "tracking_bead", "passed": bool(re.match(r"^flywheel-[a-z0-9]+(\.[0-9]+)*$", tracking))},
         {"name": "observed_present", "passed": bool(observed.strip())},
         {"name": "expected_present", "passed": bool(expected.strip())},
         {"name": "repro_present", "passed": bool(repro.strip())},
