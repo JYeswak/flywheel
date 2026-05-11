@@ -509,21 +509,22 @@ _TEST_FILES_CORPUS: str | None = None
 
 
 def skill_md_corpus(max_bytes: int = 1_500_000) -> str:
-    """Build a corpus from all SKILL.md files under ~/.claude/skills/.
+    """Build a corpus from all *.md files under ~/.claude/skills/.
 
-    Per flywheel-2xdi.49: SKILL.md is the canonical documentation surface
-    where each skill explains its scripts and entry points. When a SKILL.md
-    documents a script as a stable invocation path (e.g., "The compatibility
-    wrapper is also available at ~/.claude/skills/.flywheel/scripts/X.sh"),
-    that documentation IS the wiring — humans and skill-aware agents follow
-    those paths. Treating SKILL.md content as evidence of "wired" eliminates
-    false-positive cold flags on documented compat wrappers + skill entry
-    points whose name only appears in SKILL.md prose, not in any ledger or
+    Per flywheel-2xdi.49 + flywheel-2xdi.66: skill-tree markdown is the
+    canonical documentation surface where each skill explains its scripts and
+    entry points. SKILL.md (root) AND tree-internal docs like
+    references/**/README.md both serve as "wired" evidence: when a doc
+    documents a script as a stable invocation path or use case, that
+    documentation IS the wiring — humans and skill-aware agents follow those
+    paths. Treating skill-tree markdown content as evidence of "wired"
+    eliminates false-positive cold flags on documented compat wrappers + skill
+    entry points whose names only appear in docs prose, not in any ledger or
     `source` line.
 
-    Same META-rule shape as the for-loop indirect-source fix (flywheel-2xdi.47):
-    fix the probe's corpus blind spot, not register each affected script
-    individually.
+    Same META-rule shape as 2xdi.47 (for-loop indirect-source) and 2xdi.64
+    (direct-exec wrappers): fix the probe's corpus blind spot, not register
+    each affected script individually.
     """
     global _SKILL_MD_CORPUS
     if _SKILL_MD_CORPUS is not None:
@@ -534,20 +535,33 @@ def skill_md_corpus(max_bytes: int = 1_500_000) -> str:
         return _SKILL_MD_CORPUS
     pieces: list[str] = []
     used = 0
-    # Walk all SKILL.md files; budget total content.
+    # Walk all *.md files under skills/; budget total content.
+    # flywheel-2xdi.66: broadened from SKILL.md only to all *.md so that
+    # references/**/README.md (use-case documentation), assets/**/*.md, and
+    # other in-tree docs count as wiring evidence.
     try:
-        candidates = list(safe_iter_files(skills_root, "SKILL.md", 1000))
+        candidates = list(safe_iter_files(skills_root, "*.md", 6000))
     except Exception:
         candidates = []
-    # Names corpus first (always complete) so very-large SKILL.md content
+    # Names corpus first (always complete) so very-large doc content
     # doesn't starve the recognizer.
     pieces.append("\n".join(p.name for p in candidates))
     used += sum(len(p.name) + 1 for p in candidates)
+    # flywheel-2xdi.66: per-file cap (16 KB) prevents one giant CHANGELOG/STATE
+    # from devouring the whole budget at the front of iteration order. Total
+    # budget 8 MB. Script-name mentions are short prose patterns; 16 KB per
+    # file is enough to capture references in introduction + use-cases without
+    # over-collecting.
+    per_file_cap = 16_384
+    overall_cap = max(max_bytes, 8_000_000)
     for path in candidates:
-        if used >= max_bytes:
+        if used >= overall_cap:
+            break
+        cap = min(per_file_cap, overall_cap - used)
+        if cap <= 0:
             break
         try:
-            text = read_text(path, max(0, max_bytes - used))
+            text = read_text(path, cap)
         except Exception:
             continue
         if not text:
@@ -1325,6 +1339,20 @@ def bead_followup_false_positive_reason(row: dict) -> str | None:
                 "[upstream-issue]",
                 "comment-on-114",
                 "joshua signoff",
+            ],
+        ),
+        (
+            # 2026-05-11 (flywheel-2xdi.69): phantom beads are test-pollution
+            # artifacts (a test invoking the real bead-opener writes a live
+            # .beads/ row; the close note documents the pollution + isolates
+            # the test). They never represent real doctrine/canonical/promotion
+            # work and have nothing to cite in INCIDENTS.md. Example: flywheel-0u9ch
+            # close_reason contains "phantom bead — test-pollution artifact from
+            # callback-receipt-validator-canonical-cli.sh".
+            "phantom-bead-test-pollution",
+            [
+                "phantom bead",
+                "test-pollution",
             ],
         ),
     ]
