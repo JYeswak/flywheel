@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info emits canonical envelope (native .mode shape, NUANCED-PARTIAL-BYPASS)
+PASS --schema emits canonical envelope (native .mode shape, NUANCED-PARTIAL-BYPASS)
+PASS --examples emits canonical envelope
+PASS doctor emits canonical envelope
+PASS health emits canonical envelope
+PASS repair --dry-run emits canonical envelope (real scope roster_dir)
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate (bare) refuses with rc=64 + missing_subject envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS doctor probes ntm_executable + ledger dirs + audit log (load-bearing for borrow protocol)
+PASS --schema state_machine.states enumerates all 10 borrow states
+PASS validate borrow-state full-enum sweep (10 accept + 1 reject; cross-source with --schema)
+PASS validate ttl-minutes accepts default 60 (matches --ttl-minutes contract)
+PASS validate ttl-minutes rejects 9999 with rc=1 + out_of_range
+PASS 4-direction fidelity (native --info bypassed; scaffold doctor active) — NUANCED-PARTIAL-BYPASS variant intact
+SUMMARY pass=19 fail=0

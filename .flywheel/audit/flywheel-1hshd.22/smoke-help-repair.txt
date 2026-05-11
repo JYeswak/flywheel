@@ -1,0 +1,1 @@
+topic: repair --scope <roster_dir|ledger_dir|audit_log_dir> [--dry-run|--apply --idempotency-key KEY] — apply contract: --apply requires --idempotency-key (rc=3 refusal); scopes: roster_dir (mkdir -p dirname of $BORROW_ROSTER_LEDGER), ledger_dir (mkdir -p dirname of $BORROW_LEDGER), audit_log_dir

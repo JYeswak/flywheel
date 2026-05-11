@@ -1,0 +1,1 @@
+{"schema_version":"cross-session-worker-borrow/v1","command":"repair","status":"ok","ts":"2026-05-11T05:10:27Z","mode":"dry_run","scope":"roster_dir","idempotency_key":"","target":"/Users/josh/.local/state/flywheel","existed_before":true}

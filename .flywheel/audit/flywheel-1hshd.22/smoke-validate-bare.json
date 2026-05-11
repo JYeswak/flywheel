@@ -1,0 +1,1 @@
+{"schema_version":"cross-session-worker-borrow/v1","command":"validate","status":"refused","reason":"missing_subject","valid_subjects":["session-name","borrow-state","ttl-minutes","audit-row"]}

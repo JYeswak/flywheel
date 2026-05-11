@@ -1,0 +1,1 @@
+{"schema_version":"cross-session-worker-borrow/v1","command":"health","ts":"2026-05-11T05:10:27Z","status":"warn","audit_log":"/Users/josh/.local/state/flywheel/cross-session-worker-borrow-runs.jsonl","reason":"audit_log_missing","last_run_ts":null,"age_seconds":null,"recent_runs":0,"total_runs":0}

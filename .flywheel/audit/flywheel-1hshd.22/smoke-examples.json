@@ -1,0 +1,1 @@
+{"schema_version":"cross-session-worker-borrow/v1","command":"examples","examples":[{"name":"default run","invocation":"cross-session-worker-borrow.sh","purpose":"backward-compatible original behavior"},{"name":"doctor","invocation":"cross-session-worker-borrow.sh doctor --json","purpose":"probe substrate health"}]}

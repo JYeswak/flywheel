@@ -1,0 +1,1 @@
+{"schema_version":"cross-session-worker-borrow/v1","command":"repair","status":"refused","mode":"apply","scope":"roster_dir","reason":"--apply requires --idempotency-key"}
