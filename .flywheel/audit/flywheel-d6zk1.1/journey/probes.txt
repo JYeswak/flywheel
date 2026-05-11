@@ -1,0 +1,25 @@
+Pre-delete state:
+  ls -la ~/.claude/skills/.flywheel/bin/flywheel.bak-2026-04-28-pre-*
+    -rwxr-xr-x  127278  2026-04-28 12:40  flywheel.bak-2026-04-28-pre-3fail-fix
+    -rwxr-xr-x  129540  2026-04-28 14:04  flywheel.bak-2026-04-28-pre-substrate-intake
+
+  shasum -a 256:
+    faa53b7118b66e60114c41e5290655e65c9d08f0ab96b274e8adb8b611788cf7  pre-substrate-intake
+    9bbbf2719e8494676a70a6555b1684bce50628292adb3667df76c5db286e4bb9  pre-3fail-fix
+
+  git ls-files: empty (both UNTRACKED)
+  JSM status: unmanaged
+  Parent audit (d6zk1): zero active-code refs, 10 doc-class only
+
+Joshua directive (AskUserQuestion 2026-05-11):
+  Question: "Two stale backup files in ~/.claude/skills/.flywheel/bin/ ... Which path?"
+  Answer:   "REMOVE both (Recommended)"
+
+Execution:
+  rm ~/.claude/skills/.flywheel/bin/flywheel.bak-2026-04-28-pre-substrate-intake
+  rm ~/.claude/skills/.flywheel/bin/flywheel.bak-2026-04-28-pre-3fail-fix
+
+Post-delete verification:
+  ls -la ... → "No such file or directory" for both (expected)
+
+Total reclaimed: 256818 bytes (~251KB)
