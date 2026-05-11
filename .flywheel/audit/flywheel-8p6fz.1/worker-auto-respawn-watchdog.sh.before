@@ -240,7 +240,7 @@ if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
   exit $?
 fi
 # ====== END canonical-cli scaffold ======
-VERSION="worker-auto-respawn-watchdog.v2.1.0"
+VERSION="worker-auto-respawn-watchdog.v2.0.0"
 SCHEMA="worker-auto-respawn-watchdog.v2"
 STATE_DIR="${WORKER_AUTO_RESPAWN_STATE_DIR:-$HOME/.local/state/flywheel}"
 TOPOLOGY="${WORKER_AUTO_RESPAWN_TOPOLOGY:-$STATE_DIR/session-topology.jsonl}"
@@ -248,11 +248,6 @@ ATTEMPTS="${WORKER_AUTO_RESPAWN_ATTEMPTS:-$STATE_DIR/auto-respawn-attempts.jsonl
 NTM="${WORKER_AUTO_RESPAWN_NTM_BIN:-/Users/josh/.local/bin/ntm}"
 MAX="${WORKER_AUTO_RESPAWN_MAX_ATTEMPTS_PER_HOUR:-3}"
 TIMEOUT="${WORKER_AUTO_RESPAWN_WAIT_TIMEOUT:-1s}"
-# flywheel-8p6fz.1: deep-liveness probe wire-in. Watchdog now consults the
-# probe per tick to catch hung-but-running panes (stdout-stale; ntm wait
-# wouldn't catch these because the pane process IS alive).
-DEEP_LIVENESS_PROBE="${WORKER_AUTO_RESPAWN_DEEP_LIVENESS_PROBE:-$HOME/.claude/skills/.flywheel/scripts/worker-deep-liveness-probe.sh}"
-DEEP_LIVENESS_FIXTURE="${WORKER_AUTO_RESPAWN_DEEP_LIVENESS_FIXTURE:-}"
 SESSION=""; PANE=""; APPLY=false; JSON=false; QUIET=false
 
 usage() { printf 'usage: worker-auto-respawn-watchdog.sh [--dry-run|--apply] [--json] [--session NAME] [--pane N]\n'; }
@@ -273,9 +268,7 @@ while [[ $# -gt 0 ]]; do
     --topology) TOPOLOGY="${2:?}"; shift 2 ;;
     --attempts) ATTEMPTS="${2:?}"; shift 2 ;;
     --ntm-bin) NTM="${2:?}"; shift 2 ;;
-    --deep-liveness-probe) DEEP_LIVENESS_PROBE="${2:?}"; shift 2 ;;
-    --deep-liveness-fixture) DEEP_LIVENESS_FIXTURE="${2:?}"; shift 2 ;;
-    --info) jq -nc --arg s "$SCHEMA" --arg v "$VERSION" --arg t "$TOPOLOGY" --arg a "$ATTEMPTS" --arg n "$NTM" --arg dl "$DEEP_LIVENESS_PROBE" --argjson m "$MAX" '{schema_version:$s,mode:"info",version:$v,worker_scope_only:true,native_commands:["ntm wait --condition=DEAD","ntm respawn"],topology_file:$t,attempts_file:$a,ntm_bin:$n,deep_liveness_probe:$dl,respawn_triggers:["native_ntm_wait_dead","deep_liveness_hung"],budget:{max_attempts_per_hour:$m},canonical_cli:{doctor_health_repair:"n/a wrapper delegates to ntm",validate_audit_why:"n/a wrapper emits receipts",json:true,dry_run_apply:true},source_bead:"flywheel-8p6fz.1"}'; exit 0 ;;
+    --info) jq -nc --arg s "$SCHEMA" --arg v "$VERSION" --arg t "$TOPOLOGY" --arg a "$ATTEMPTS" --arg n "$NTM" --argjson m "$MAX" '{schema_version:$s,mode:"info",version:$v,worker_scope_only:true,native_commands:["ntm wait --condition=DEAD","ntm respawn"],topology_file:$t,attempts_file:$a,ntm_bin:$n,budget:{max_attempts_per_hour:$m},canonical_cli:{doctor_health_repair:"n/a wrapper delegates to ntm",validate_audit_why:"n/a wrapper emits receipts",json:true,dry_run_apply:true}}'; exit 0 ;;
     --examples) printf '%s\n' 'worker-auto-respawn-watchdog.sh --dry-run --json' 'worker-auto-respawn-watchdog.sh --apply --json --session flywheel --pane 2'; exit 0 ;;
     -h|--help|help) usage; exit 0 ;;
     *) printf 'unknown arg: %s\n' "$1" >&2; usage >&2; exit 64 ;;
@@ -310,36 +303,6 @@ wait_dead() {
 
 respawn() { "$NTM" respawn "$1" --panes="$2" --json >/dev/null; }
 
-# flywheel-8p6fz.1: deep-liveness probe wire-in.
-# Invoke the probe once per watchdog run, cache JSON, then query per-pane.
-# Probe lives in skill substrate (~/.claude/skills/.flywheel/scripts/);
-# cross-repo consumer pattern (sister to flywheel-loop sourcing skill lib).
-# WORKER_AUTO_RESPAWN_DEEP_LIVENESS_FIXTURE env-var overrides probe invocation
-# for testing (fixture = path to a JSON file matching the probe's output shape).
-deep_liveness_snapshot() {
-  if [[ -n "$DEEP_LIVENESS_FIXTURE" && -r "$DEEP_LIVENESS_FIXTURE" ]]; then
-    cat "$DEEP_LIVENESS_FIXTURE"
-    return 0
-  fi
-  if [[ ! -x "$DEEP_LIVENESS_PROBE" ]]; then
-    # Probe missing — emit empty envelope (graceful degradation).
-    jq -nc '{status:"deep_liveness_probe_missing",worker_deep_liveness:[],hung_count:0,unknown_count:0}'
-    return 0
-  fi
-  local out rc
-  set +e; out="$("$DEEP_LIVENESS_PROBE" --json 2>/dev/null)"; rc=$?; set -e
-  if [[ -z "$out" ]] || ! jq -e . >/dev/null 2>&1 <<<"$out"; then
-    jq -nc --argjson rc "$rc" '{status:"deep_liveness_probe_invalid",rc:$rc,worker_deep_liveness:[],hung_count:0,unknown_count:0}'
-    return 0
-  fi
-  printf '%s' "$out"
-}
-
-deep_liveness_state_for() {
-  # $1=snapshot_json, $2=session, $3=pane
-  jq -r --arg s "$2" --arg p "$3" 'first(.worker_deep_liveness[]? | select((.session // "")==$s and (.pane | tostring)==$p) | .deep_liveness_state) // "unknown"' <<<"$1"
-}
-
 tmp="$(mktemp)"; trap 'rm -f "$tmp"' EXIT
 set +e; targets="$(target_lines)"; target_rc=$?; set -e
 if [[ "$target_rc" -ne 0 ]]; then
@@ -347,22 +310,14 @@ if [[ "$target_rc" -ne 0 ]]; then
   exit 3
 fi
 
-# flywheel-8p6fz.1: snapshot deep-liveness state once per run.
-dl_snapshot="$(deep_liveness_snapshot)"
-
 while IFS=$'\t' read -r session pane role; do
   [[ -n "${session:-}" ]] || continue
   wait_json="$(wait_dead "$session" "$pane")"; dead="$(jq -r '.dead' <<<"$wait_json")"; count="$(attempts "$session" "$pane")"
-  # flywheel-8p6fz.1: deep-liveness signal per-pane
-  hung_state="$(deep_liveness_state_for "$dl_snapshot" "$session" "$pane")"
-  trigger=""
-  if [[ "$dead" == true ]]; then trigger="native_ntm_wait_dead"; fi
-  if [[ -z "$trigger" && "$hung_state" == "hung" ]]; then trigger="deep_liveness_hung"; fi
   action="none"; reason="not_dead"; rc=0
-  if [[ -n "$trigger" && "$count" -ge "$MAX" ]]; then action="notify_fallback"; reason="auto_respawn_budget_exhausted_via_${trigger}"; fi
-  if [[ -n "$trigger" && "$count" -lt "$MAX" && "$APPLY" == true ]]; then action="auto_respawn_fired"; reason="$trigger"; append_attempt "$session" "$pane" "$((count + 1))"; respawn "$session" "$pane" || rc=$?; fi
-  if [[ -n "$trigger" && "$count" -lt "$MAX" && "$APPLY" == false ]]; then action="would_auto_respawn"; reason="$trigger"; fi
-  jq -nc --arg s "$session" --arg p "$pane" --arg r "$role" --arg a "$action" --arg y "$reason" --arg h "$hung_state" --argjson c "$count" --argjson rc "$rc" --argjson w "$wait_json" '{session:$s,pane:($p|tonumber? // $p),role:$r,action:$a,reason:$y,attempts_last_hour:$c,action_rc:$rc,wait:$w,deep_liveness_state:$h}' >>"$tmp"
+  if [[ "$dead" == true && "$count" -ge "$MAX" ]]; then action="notify_fallback"; reason="auto_respawn_budget_exhausted"; fi
+  if [[ "$dead" == true && "$count" -lt "$MAX" && "$APPLY" == true ]]; then action="auto_respawn_fired"; reason="native_ntm_wait_dead"; append_attempt "$session" "$pane" "$((count + 1))"; respawn "$session" "$pane" || rc=$?; fi
+  if [[ "$dead" == true && "$count" -lt "$MAX" && "$APPLY" == false ]]; then action="would_auto_respawn"; reason="native_ntm_wait_dead"; fi
+  jq -nc --arg s "$session" --arg p "$pane" --arg r "$role" --arg a "$action" --arg y "$reason" --argjson c "$count" --argjson rc "$rc" --argjson w "$wait_json" '{session:$s,pane:($p|tonumber? // $p),role:$r,action:$a,reason:$y,attempts_last_hour:$c,action_rc:$rc,wait:$w}' >>"$tmp"
 done <<<"$targets"
 
 payload="$(jq -s --arg s "$SCHEMA" --arg v "$VERSION" --arg t "$TOPOLOGY" --arg a "$ATTEMPTS" --argjson apply "$APPLY" '{schema_version:$s,version:$v,success:true,status:(if any(.[];.action=="auto_respawn_fired") then "auto_respawn_fired" elif any(.[];.action=="would_auto_respawn") then "dry_run_actions_planned" elif any(.[];.action=="notify_fallback") then "notify_fallback" else "no_action_needed" end),dry_run:($apply|not),apply:$apply,topology_file:$t,attempts_file:$a,targets_checked:length,workers_checked:length,auto_respawns_fired:([.[]|select(.action=="auto_respawn_fired")]|length),would_auto_respawns:([.[]|select(.action=="would_auto_respawn")]|length),notify_fallbacks_fired:([.[]|select(.action=="notify_fallback")]|length),results:.}' "$tmp")"
