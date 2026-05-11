@@ -1328,7 +1328,60 @@ def probe_wired_but_cold() -> list[dict]:
             gaps.append(gap("wired-but-cold", rel, "script not referenced by recent flywheel jsonl ledgers modified in last 30d"))
         if len(gaps) >= 20:
             break
-    return gaps
+    return cluster_wired_but_cold(gaps)
+
+
+def cluster_wired_but_cold(gaps: list[dict]) -> list[dict]:
+    """flywheel-xn5bm: cluster-detection for wired-but-cold gaps.
+
+    When N>=2 wired-but-cold gaps share the same .claude/skills/<x>/ substrate,
+    replace those N individual gaps with ONE cluster-maintainer gap. Sister
+    doctrine: .flywheel/doctrine/cluster-maintainer-pattern.md (N=3 canonical
+    promotion from flywheel-r9pri; exemplars 03yaj research-triad / xhevf
+    agent-ergonomics-cli-max / plue9 skill-builder).
+
+    Per kwjja Option D precedent: cheapest mechanization that moves substrate
+    forward (one SKILL.md mutation vs N individual single-script doc-fix beads).
+
+    Clustering rule:
+      - Parse gap["name"] for `.claude/skills/<skill-name>/` prefix
+      - Group by <skill-name>
+      - If group size >= 2, replace group with single cluster gap
+      - Non-skill-substrate gaps (e.g., Developer/flywheel/.flywheel/scripts/*)
+        pass through unchanged
+
+    Negative case: 2 gaps in DIFFERENT skills emit 2 individual gaps (no
+    false clustering across substrates).
+    """
+    skill_groups: dict[str, list[dict]] = {}
+    non_skill_gaps: list[dict] = []
+    skill_prefix_re = re.compile(r"\.?claude/skills/([^/]+)/")
+    for g in gaps:
+        name = g.get("name", "")
+        m = skill_prefix_re.search(name)
+        if m:
+            skill_name = m.group(1)
+            skill_groups.setdefault(skill_name, []).append(g)
+        else:
+            non_skill_gaps.append(g)
+    result: list[dict] = list(non_skill_gaps)
+    for skill_name, group in skill_groups.items():
+        if len(group) >= 2:
+            paths = sorted(g.get("name", "") for g in group)
+            script_basenames = [p.rsplit("/", 1)[-1] for p in paths]
+            preview = ", ".join(script_basenames[:8])
+            if len(script_basenames) > 8:
+                preview += f", +{len(script_basenames) - 8} more"
+            cluster_subject = f".claude/skills/{skill_name}-cluster"
+            evidence = (
+                f"{len(group)} wired-but-cold scripts in .claude/skills/{skill_name}/; "
+                f"cluster-maintainer pattern per .flywheel/doctrine/cluster-maintainer-pattern.md; "
+                f"scripts: {preview}"
+            )
+            result.append(gap("wired-but-cold-cluster", cluster_subject, evidence))
+        else:
+            result.extend(group)
+    return result
 
 
 def probe_doctrine_without_measurement(tick_text: str) -> list[dict]:
