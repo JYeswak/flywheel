@@ -1,6 +1,175 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+
+# ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (filled-in per bead flywheel-5ke66.17)
+# doctor-mode-tier: scaffolded (bead flywheel-ws02m)
+#
+# SURGICAL coexistence design: this script's python heredoc ALREADY
+# implements all canonical subcommands as POSITIONAL args
+# `{analyze,doctor,health,repair,validate,audit,why,schema,examples,
+# quickstart,completion}` and tests/rule-hint-lifecycle.sh asserts shapes
+# on `schema`, `why`, default analyze, and apply. Python subcommands stay
+# untouched.
+#
+# What's missing per AG3: DASH-FLAG introspection (--info / --schema /
+# --examples / -h / --help) which python rejects today. The bash scaffold
+# adds ONLY those dash flags plus canonical `help <topic>`. All positional
+# args fall through to python verbatim.
+
+_SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
+_SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
+if [[ -r "$_SCAFFOLD_HELPER_LIB" ]]; then
+  # shellcheck source=/dev/null
+  source "$_SCAFFOLD_HELPER_LIB"
+fi
+
+SCAFFOLD_SCHEMA_VERSION="rule-hint-lifecycle/v1"
+
+scaffold_usage() {
+  cat <<'USG'
+usage: rule-hint-lifecycle.sh [SUBCOMMAND|FLAGS] [OPTIONS]
+
+This script's primary surface is the python heredoc below. All canonical
+subcommands are positional and implemented in python:
+
+Subcommands (python — unchanged):
+  analyze [--apply]        analyze L-rule hint usage (default action)
+  doctor [--json]          probe rules + usage rows; emits candidates list
+  health [--json]          last-run analysis snapshot
+  repair --rule-id ID      remediate a single rule's lifecycle status
+  validate [--json]        validate ruleset shape
+  audit [--json]           recent run history
+  why --rule-id ID         explain decision (.action="why" + .rule.count + .decision.action)
+  schema [--json]          enumerate {commands, exit_codes, fields, schema_version}
+  examples [--json]        curated invocations
+  quickstart [--json]      operator orientation
+  completion <shell>       emit shell completion script
+
+Introspection (bash scaffold — NEW dash-flag surfaces python rejects):
+  --info --json            version, paths, env vars, dependencies, sha256
+  --schema [<surface>]     JSON Schema for output envelopes
+                            (note: positional `schema` keeps its own shape
+                             with .commands array for backward-compat)
+  --examples --json        canonical examples envelope (additive)
+  --help / -h              merged usage (this text)
+  help <topic>             topic help (analyze | doctor | health | repair | validate | why | schema)
+USG
+}
+
+scaffold_emit_info() {
+  if ! command -v cli_emit_info >/dev/null; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg name "rule-hint-lifecycle.sh" \
+      '{schema_version:$sv,command:"info",name:$name,helper_lib_missing:true}'
+    return 0
+  fi
+  cli_emit_info \
+    "rule-hint-lifecycle.sh" \
+    "scaffolded-v0" \
+    "$SCAFFOLD_SCHEMA_VERSION" \
+    "analyze,doctor,health,repair,validate,audit,why,schema,examples,quickstart,completion" \
+    "" \
+    '{}'
+}
+
+scaffold_emit_examples() {
+  local jsonl
+  jsonl="$(jq -nc '{name:"analyze dry-run",invocation:"rule-hint-lifecycle.sh --json",purpose:"propose demote/promote candidates from L-rule usage log"}'
+)"$'\n'"$(jq -nc '{name:"apply (file proposal beads)",invocation:"rule-hint-lifecycle.sh --apply --json",purpose:"actually br create the Joshua-approved lifecycle proposal beads"}'
+)"$'\n'"$(jq -nc '{name:"why for single rule",invocation:"rule-hint-lifecycle.sh why --rule-id L20 --json",purpose:"explain promote/demote decision for one rule"}'
+)"$'\n'"$(jq -nc '{name:"positional doctor (python)",invocation:"rule-hint-lifecycle.sh doctor --json",purpose:"python doctor surface — emits candidate_count + candidates[]"}'
+)"$'\n'"$(jq -nc '{name:"positional schema (python)",invocation:"rule-hint-lifecycle.sh schema --json",purpose:"python schema surface — emits .commands array + .exit_codes"}'
+)"
+  if command -v cli_emit_examples >/dev/null; then
+    cli_emit_examples "$SCAFFOLD_SCHEMA_VERSION" "$jsonl"
+  else
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" '{schema_version:$sv,command:"examples",helper_lib_missing:true}'
+  fi
+}
+
+scaffold_emit_schema() {
+  local surface="${1:-default}"
+  case "$surface" in
+    doctor)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,fields:["action","candidate_count","candidates[]"],note:"python-implemented doctor surface"}' ;;
+    health|repair|validate|audit|why|analyze)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{schema_version:$sv,command:"schema",surface:$surface,note:"python-implemented; see `rule-hint-lifecycle.sh <surface> --json` for shape"}' ;;
+    *)
+      # Default — canonical AG3 envelope. The python positional
+      # `schema --json` keeps its own backward-compat shape with
+      # .commands array; this --schema flag is a distinct surface.
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
+        '{
+          schema_version:$sv,
+          command:"schema",
+          surface:$surface,
+          subcommands:["analyze","doctor","health","repair","validate","audit","why","schema","examples","quickstart","completion"],
+          intro_flags:["--info","--schema","--examples","-h","--help"],
+          note:"rule-hint-lifecycle: bash scaffold adds dash-flag introspection. Positional `schema --json` is python-implemented and emits .commands array."
+        }' ;;
+  esac
+}
+
+scaffold_emit_topic_help() {
+  local topic="${1:-}"
+  case "$topic" in
+    analyze)  printf 'topic: analyze — default python action; reads L-rule usage log, emits demote/promote candidates. --apply creates proposal beads via br.\n' ;;
+    doctor)   printf 'topic: doctor — python `doctor --json`; emits action=doctor + candidate_count + candidates[] (rule_id + count + action + marker).\n' ;;
+    health)   printf 'topic: health — python `health --json`; same shape as analyze but read-only.\n' ;;
+    repair)   printf 'topic: repair — python `repair --rule-id ID --apply`; remediates a single rule. Joshua approval gate preserved.\n' ;;
+    validate) printf 'topic: validate — python `validate --json`; validates ruleset shape.\n' ;;
+    why)      printf 'topic: why — python `why --rule-id ID --json`; emits .action="why" + .rule.count + .decision.action.\n' ;;
+    schema)   printf 'topic: schema — python `schema --json` (NOT --schema flag); emits .commands + .exit_codes + .fields + .schema_version.\n' ;;
+    *)        printf 'topics: analyze | doctor | health | repair | validate | why | schema\n' ;;
+  esac
+}
+
+scaffold_main() {
+  if [[ $# -eq 0 ]]; then
+    scaffold_usage; exit 0
+  fi
+  case "$1" in
+    -h|--help)    scaffold_usage; exit 0 ;;
+    --info)       shift; scaffold_emit_info "$@"; exit 0 ;;
+    --schema)
+      shift
+      # Skip --json flag if it's the next arg (canonical-cli treats --json as
+      # output-mode rather than as the surface selector).
+      local _surface="${1:-default}"
+      [[ "$_surface" == "--json" ]] && _surface="default"
+      scaffold_emit_schema "$_surface"; exit 0 ;;
+    --examples)   shift; scaffold_emit_examples "$@"; exit 0 ;;
+    help)         shift; scaffold_emit_topic_help "${1:-}"; exit 0 ;;
+    *)
+      printf 'ERR: unknown canonical flag: %s\n' "$1" >&2
+      scaffold_usage >&2
+      exit 64 ;;
+  esac
+}
+
+# Early-dispatch intercept: ONLY dash-flag introspection + `help <topic>`.
+# Positional subcommands fall through to python so existing tests keep passing.
+_scaffold_is_canonical_arg() {
+  case "${1:-}" in
+    --info|--schema|--examples) return 0 ;;
+    -h|--help) return 0 ;;
+    help)
+      case "${2:-}" in analyze|doctor|health|repair|validate|audit|why|schema|-h|--help) return 0 ;; esac
+      return 1 ;;
+    *) return 1 ;;
+  esac
+}
+
+if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
+  scaffold_main "$@"
+  exit $?
+fi
+# ====== END canonical-cli scaffold ======
+
 python3 - "$@" <<'PY'
 from __future__ import annotations
 
