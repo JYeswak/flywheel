@@ -1,0 +1,27 @@
+PASS B05_AG1 tick script syntax includes VALIDATE
+PASS B05_AG1 phase order includes VALIDATE
+PASS i8rd tick schema exposes detector v2 consumer fields
+PASS 3mmp tick schema exposes contract registry fields
+PASS kaqr tick schema exposes Phase A receipt fields
+PASS B05_AG2 pending callback routes to VALIDATE and counts unvalidated
+PASS B05_AG3 failed validation blocks INTEGRATE without remediation
+PASS B05_AG4 runtime timeout maps to VALIDATE unknown
+PASS B05_AG5 clean validation proceeds to INTEGRATE with receipt ref
+PASS B05_AG6 dry-run records planned VALIDATE action without live send
+PASS B05_AG7 tick receipt includes doctor/learn validation summary fields
+PASS vnsw tick receipt includes scheduled probe fields
+PASS 3mmp tick receipt includes tick-contract registry fields
+PASS kaqr tick receipt includes Phase A checks, SOFT mode, and hold reason
+PASS kaqr unread autoloop receipt emits substrate-read SOFT violation
+PASS kaqr three unprocessed fuckups without review emits learn-review violation
+PASS kaqr raw transport evidence emits NTM discipline violation class
+PASS kaqr bounded runtime reports tick budget exceeded with handoff receipt
+PASS 3mmp graduation fixture 0 rows computes SOFT
+PASS 3mmp graduation fixture 3 rows computes WARN
+PASS 3mmp graduation fixture 6 rows computes HALT
+PASS wxth tick receipt includes leverage ceiling measurement fields
+PASS i8rd tick receipt includes detector v2 stale/unknown/recovery-suppressed counts and L60 5-signal check
+PASS i8rd frozen detector blocks dispatch while preserving detector counts
+PASS i8rd unknown detector state blocks dispatch and surfaces missing L60 signal
+
+Summary: 25 passed, 0 failed
