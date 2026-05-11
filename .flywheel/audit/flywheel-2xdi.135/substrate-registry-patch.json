@@ -1,0 +1,44 @@
+{
+  "patch_target": "/Users/josh/.claude/skills/.flywheel/data/substrate-registry.json",
+  "patch_kind": "jsm-import-ready",
+  "patch_operation": "append_to_substrates_array",
+  "patch_source_bead": "flywheel-2xdi.135",
+  "parent_bead": "flywheel-2xdi",
+  "sister_beads": "flywheel-2xdi.60.1 (active/audit) + flywheel-2xdi.72.1 (active/scaffold) + flywheel-2xdi.132 (planned/scaffold)",
+  "patch_rationale": "Add smoke-test-phase1.sh to substrate-registry on-demand allowlist (kind=scaffold-test). Script is operator-on-demand smoke test of the slack→mattermost Phase 1 extraction pipeline (raw→enriched→import-ready). Owning skill 'slack-migration-to-mattermost-phase-1-extraction' is JSM-managed — direct SKILL.md mutation forbidden — so primary fix is registry allowlist edit (.flywheel substrate is unmanaged) plus paired jsm-push-ready patch artifact for the SKILL.md citation.",
+  "design_notes": [
+    "where field is STRING per flywheel-2xdi.60.1 Design Decision 3",
+    "kind=scaffold-test is in _ON_DEMAND_VALIDATOR_KINDS = {validator, scaffold-test, self-test, audit, scaffold}",
+    "lifecycle_state=active (script exists + ready for operator invocation; no planned/legacy nuance here)",
+    "Sister to 2xdi.60.1 (audit) + 2xdi.72.1 (scaffold) + 2xdi.132 (planned/scaffold)",
+    "JSM discipline observed: slack-migration skill IS in jsm list (managed). Direct mutation forbidden. Primary fix in unmanaged .flywheel substrate; paired jsm-push-ready artifact written for SKILL.md citation update via JSM flow."
+  ],
+  "new_entry": {
+    "name": "smoke-test-phase1-slack-migration-mattermost",
+    "kind": "scaffold-test",
+    "scope": "local",
+    "version": "1.0.0",
+    "source": "zeststream",
+    "sourceUrl": "flywheel:flywheel-2xdi.135",
+    "installedAt": "2026-05-11T16:50:00Z",
+    "session_added": "2026-05-11T16:50:00Z",
+    "added_by": "flywheel-2xdi.135",
+    "valid_from": "2026-05-11T16:50:00Z",
+    "valid_to": null,
+    "effect": "on_demand_smoke_test_phase1_extraction_pipeline",
+    "lifecycle_state": "active",
+    "lifecycle_stage": "on-demand-smoke-test",
+    "where": "/Users/josh/.claude/skills/slack-migration-to-mattermost-phase-1-extraction/scripts/smoke-test-phase1.sh",
+    "owner": "slack-migration-to-mattermost-phase-1-extraction",
+    "validator": "flywheel-2xdi.135",
+    "validation_command": "test -f /Users/josh/.claude/skills/slack-migration-to-mattermost-phase-1-extraction/scripts/smoke-test-phase1.sh",
+    "consumers": ["operator on-demand smoke-test of the slack→mattermost Phase 1 extraction pipeline (raw→enriched→import-ready)"],
+    "mutates_live_state": false
+  },
+  "verification_post_import": {
+    "registry_substrates_count_expected": 47,
+    "registry_substrates_count_before": 46,
+    "updatedAt_expected": "2026-05-11T16:50:00Z",
+    "gap_hunt_probe_post_apply": "wired-but-cold flag cleared via on_demand_script_allowlist"
+  }
+}
