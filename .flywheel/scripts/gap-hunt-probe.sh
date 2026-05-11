@@ -503,6 +503,7 @@ def recent_ledger_text(days: int = 30, max_bytes: int = 4_000_000) -> str:
 _RUNTIME_SOURCE_CORPUS: str | None = None
 _SIBLING_LEDGER_CORPUS: str | None = None
 _SKILL_MD_CORPUS: str | None = None
+_LAUNCHD_CORPUS: str | None = None
 
 
 def skill_md_corpus(max_bytes: int = 1_500_000) -> str:
@@ -553,6 +554,56 @@ def skill_md_corpus(max_bytes: int = 1_500_000) -> str:
         used += len(text)
     _SKILL_MD_CORPUS = "\n".join(pieces)
     return _SKILL_MD_CORPUS
+
+
+def launchd_plist_corpus(max_bytes: int = 1_500_000) -> str:
+    """Build a corpus from all ~/Library/LaunchAgents/*.plist ProgramArguments.
+
+    Per flywheel-e7lxv (sister of flywheel-2xdi.47 for-loop blind-spot fix):
+    skill-substrate scripts under ~/.claude/skills/ are frequently wired via
+    launchd plists rather than .flywheel/ jsonl ledgers. Without this corpus,
+    the wired-but-cold detector flags zeststream-doctor-heartbeat.sh (and
+    similar daily launchd-invoked scripts) as cold even though their plist
+    invokes them on a schedule.
+
+    Surface scanned: ~/Library/LaunchAgents/*.plist (XML).
+    Recognition: any string-valued ProgramArguments entry containing the
+    script's basename or stem counts as wired-via-launchd.
+
+    Note: this corpus complements but does NOT replace the existing 4 corpora
+    (recent_ledger_text, sibling_repo_ledger_corpus, runtime_source_corpus,
+    skill_md_corpus). A script is wired-but-cold iff it's absent from ALL FIVE.
+    """
+    global _LAUNCHD_CORPUS
+    if _LAUNCHD_CORPUS is not None:
+        return _LAUNCHD_CORPUS
+    launch_agents_dir = Path.home() / "Library" / "LaunchAgents"
+    if not launch_agents_dir.is_dir():
+        _LAUNCHD_CORPUS = ""
+        return _LAUNCHD_CORPUS
+    pieces: list[str] = []
+    used = 0
+    try:
+        candidates = sorted(launch_agents_dir.glob("*.plist"))
+    except Exception:
+        candidates = []
+    # Names corpus first (always complete) so very-large plist bodies don't
+    # starve the recognizer.
+    pieces.append("\n".join(p.name for p in candidates))
+    used += sum(len(p.name) + 1 for p in candidates)
+    for path in candidates:
+        if used >= max_bytes:
+            break
+        try:
+            text = read_text(path, max(0, max_bytes - used))
+        except Exception:
+            continue
+        if not text:
+            continue
+        pieces.append(text)
+        used += len(text)
+    _LAUNCHD_CORPUS = "\n".join(pieces)
+    return _LAUNCHD_CORPUS
 
 
 def runtime_source_corpus() -> str:
@@ -876,6 +927,28 @@ def on_demand_script_allowlist() -> set[Path]:
         except Exception as exc:
             warn(f"pack-glob fallback failed: {exc}")
 
+    # flywheel-2xdi.58: auto-allowlist any *.sh file under a `tests/` directory.
+    # Unix convention: tests/test_*.sh are run by a test-harness (CI / manual /
+    # run-tests.sh) on-demand, NOT continuously by a tick driver. The
+    # wired-but-cold detector would otherwise flag them because their names
+    # don't appear in flywheel-loop ledgers (which is correct — they're not
+    # in continuous wiring; they ARE in tests/ which is the on-demand surface).
+    # Mirrors how skill-packs/*/validate.sh + self-test.sh are auto-allowlisted.
+    for tests_root in (CLAUDE_ROOT / "skills", REPO_ROOT):
+        for test_script in safe_iter_files(tests_root, "tests/**/test_*.sh", 1000):
+            try:
+                allowlist.add(test_script.resolve())
+            except Exception:
+                allowlist.add(test_script)
+        # Also include the harness driver (`tests/run-tests.sh`) if present —
+        # it's the wrapper that invokes test_*.sh files via glob and is itself
+        # on-demand (CI / manual operator).
+        for harness in safe_iter_files(tests_root, "tests/run-tests.sh", 100):
+            try:
+                allowlist.add(harness.resolve())
+            except Exception:
+                allowlist.add(harness)
+
     return allowlist
 
 
@@ -884,6 +957,7 @@ def probe_wired_but_cold() -> list[dict]:
     sibling_text = sibling_repo_ledger_corpus()
     source_text = runtime_source_corpus()
     skill_md_text = skill_md_corpus()
+    launchd_text = launchd_plist_corpus()
     on_demand = on_demand_script_allowlist()
     scripts = []
     scripts.extend(safe_iter_files(CLAUDE_ROOT / "skills", "*.sh", 3000))
@@ -899,7 +973,7 @@ def probe_wired_but_cold() -> list[dict]:
             resolved = script
         if resolved in on_demand:
             continue
-        # flywheel-8vw0o + flywheel-2xdi.49: cold = absent from ALL FOUR corpora
+        # flywheel-8vw0o + flywheel-2xdi.49 + flywheel-e7lxv: cold = absent from ALL FIVE corpora
         # (1) primary flywheel state-dir ledgers (recent_ledger_text)
         # (2) sibling-repo dispatch-logs (sibling_repo_ledger_corpus) — catches
         #     cross-repo umbrella refs e.g. tick_guard.sh in skillos tests
@@ -909,6 +983,12 @@ def probe_wired_but_cold() -> list[dict]:
         # (4) SKILL.md documentation corpus (skill_md_corpus) — catches
         #     compat wrappers + skill entry points documented in SKILL.md prose
         #     whose names only appear in docs, not in any ledger or source line
+        # (5) launchd plist corpus (launchd_plist_corpus) — flywheel-e7lxv:
+        #     catches scripts wired via ~/Library/LaunchAgents/*.plist
+        #     ProgramArguments (e.g., zeststream-doctor-heartbeat.sh invoked
+        #     daily by com.zeststream.substrate-doctor.plist). Skill-substrate
+        #     scripts under ~/.claude/skills/ frequently don't write to
+        #     .flywheel/ ledgers, so launchd is their only "wired" evidence.
         in_local = name in ledger_text or script.stem in ledger_text
         in_sibling = bool(sibling_text) and (name in sibling_text or script.stem in sibling_text)
         # source corpus: name + stem + parent-dir-name (catches glob-sourced
@@ -930,7 +1010,8 @@ def probe_wired_but_cold() -> list[dict]:
                 if parent_name.endswith(".d") and parent_name in source_text:
                     in_source = True
         in_skill_md = bool(skill_md_text) and (name in skill_md_text or script.stem in skill_md_text)
-        if not (in_local or in_sibling or in_source or in_skill_md):
+        in_launchd = bool(launchd_text) and (name in launchd_text or script.stem in launchd_text)
+        if not (in_local or in_sibling or in_source or in_skill_md or in_launchd):
             try:
                 rel = str(script.relative_to(Path.home()))
             except Exception:
