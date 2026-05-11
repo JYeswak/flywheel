@@ -111,7 +111,7 @@ For every row: **Decision** ∈ {USE, ISSUE, WRAP, EXCLUDED}. **Action** = exact
 | 74 | `resume` | Resume work from handoff | **USE** | WIRE-IT-QUEUED - wave-2 P1/P2 TBD | Queue wire-in bead (wave-2 P1/P2 TBD); Companion to #36. |
 | 75 | `review-queue` | List idle agents + suggest review | **ISSUE** | ISSUE-CANDIDATE - research/Jeff issue path | **Different abstraction from `idle-state-probe.sh`.** Flywheel's idle classifier emits an L85-doctrine taxonomy (`dispatching/cooldown/light_queue/saturated/disabled_class`) that `ntm review-queue` doesn't model. **File Jeff issue: extend `ntm review-queue` to expose L85-class taxonomy, or expose a structured idle-state schema.** Then USE. |
 | 76 | `rollback` | Restore session to checkpoint | **WRAP** (alias) | RECLASSIFIED-WRAP-ALIAS - .flywheel/scripts/ntm-checkpoint-rollback-guard.sh:18-43 defines rollback receipt schema and authorized rollback validation operations | Already consumed by wrapper: .flywheel/scripts/ntm-checkpoint-rollback-guard.sh:18-43 defines rollback receipt schema and authorized rollback validation operations. Update inventory as WRAP alias, not direct unverified USE. |
-| 77 | `rotate` | Rotate to different account | **USE** (today's W0A wrapper) | VERIFIED-USE - .flywheel/scripts/caam-auto-rotate-on-usage-limit.sh:31 | W0A wrapper exists because flywheel needs CAAM profile selection layer + idempotency-receipt. **WRAP-territory.** Native does the actual rotate. Verification: 10 callsites; top .flywheel/scripts/caam-auto-rotate-on-usage-limit.sh:31. |
+| 77 | `rotate` | Rotate to different account | **USE** (today's W0A wrapper) | VERIFIED-USE - .flywheel/scripts/caam-auto-rotate-on-usage-limit.py:31 | W0A wrapper exists because flywheel needs CAAM profile selection layer + idempotency-receipt. **WRAP-territory.** Native does the actual rotate. Verification: 10 callsites; top .flywheel/scripts/caam-auto-rotate-on-usage-limit.py:31. |
 | 78 | `safety` | Destructive command protection | **USE** (today's W2D wrapper, advisory) | LATENT-USE - monitor; focused regression probe | Native is advisory. **DCG retains authority** — that's flywheel-territory because it's a defense-in-depth doctrine layer. **WRAP-territory.** LATENT: 1 callsite(s); add focused regression probe. |
 | 79 | `save` | Save pane outputs to files | **USE** | WIRE-IT-QUEUED - wave-2 P1/P2 TBD | Queue wire-in bead (wave-2 P1/P2 TBD); Replace hand-rolled tail-capture. |
 | 80 | `scale` | Scale agents to target counts | **USE** | WIRE-IT-QUEUED - wave-2 P1/P2 TBD | Queue wire-in bead (wave-2 P1/P2 TBD); Replace flywheel worker-slot-ledger hand-roll. |
@@ -169,7 +169,7 @@ These wrappers exist because **flywheel-specific evidence/contracts/doctrine** r
 
 | # | Wrapper | Why WRAP (what it adds beyond ntm) |
 |---|---|---|
-| W0A | `caam-auto-rotate-on-usage-limit.sh` | CAAM profile selection + idempotency-receipt + rotation ledger |
+| W0A | `caam-auto-rotate-on-usage-limit.py` | CAAM profile selection + idempotency-receipt + rotation ledger |
 | W1Q | `ntm-quota-proactive-probe.sh` | Threshold-classification + unknown-provider warn semantics |
 | W1M | `ntm-metrics-doctor-probe.sh` | Metric→gate-action mapping (flywheel-doctor-specific) |
 | W1S | `ntm-serve-eventstream-bridge.sh` | Redacted payloads + loopback-bind defaults (security envelope) |

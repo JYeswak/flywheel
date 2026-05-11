@@ -24,7 +24,7 @@ _SCAFFOLD_AUDIT_LOG = _scaffold_os.environ.get(
     _scaffold_os.path.join(
         _scaffold_os.path.expanduser("~"),
         ".local/state/flywheel",
-        "caam-auto-rotate-on-usage-limit.sh-runs.jsonl",
+        "caam-auto-rotate-on-usage-limit.py-runs.jsonl",
     ),
 )
 
@@ -42,7 +42,7 @@ def _scaffold_emit_info() -> int:
     return _scaffold_emit_json({
         "schema_version": _SCAFFOLD_SCHEMA_VERSION,
         "command": "info",
-        "name": "caam-auto-rotate-on-usage-limit.sh",
+        "name": "caam-auto-rotate-on-usage-limit.py",
         "kind": "python3",
         "scaffolder_bead": "flywheel-oozt3",
         "audit_log": _SCAFFOLD_AUDIT_LOG,
@@ -101,9 +101,9 @@ def _scaffold_emit_examples() -> int:
         "schema_version": _SCAFFOLD_SCHEMA_VERSION,
         "command": "examples",
         "examples": [
-            {"name": "info", "invocation": "caam-auto-rotate-on-usage-limit.sh --info --json", "purpose": "introspection"},
-            {"name": "schema", "invocation": "caam-auto-rotate-on-usage-limit.sh --schema doctor", "purpose": "per-surface schema"},
-            {"name": "doctor", "invocation": "caam-auto-rotate-on-usage-limit.sh doctor --json", "purpose": "probe substrate"},
+            {"name": "info", "invocation": "caam-auto-rotate-on-usage-limit.py --info --json", "purpose": "introspection"},
+            {"name": "schema", "invocation": "caam-auto-rotate-on-usage-limit.py --schema doctor", "purpose": "per-surface schema"},
+            {"name": "doctor", "invocation": "caam-auto-rotate-on-usage-limit.py doctor --json", "purpose": "probe substrate"},
         ],
     })
 
@@ -113,19 +113,19 @@ def _scaffold_emit_quickstart() -> int:
         "schema_version": _SCAFFOLD_SCHEMA_VERSION,
         "command": "quickstart",
         "steps": [
-            {"step": 1, "action": "probe doctor", "command": "caam-auto-rotate-on-usage-limit.sh doctor --json"},
-            {"step": 2, "action": "check health", "command": "caam-auto-rotate-on-usage-limit.sh health --json"},
-            {"step": 3, "action": "tail audit", "command": "caam-auto-rotate-on-usage-limit.sh audit --json"},
+            {"step": 1, "action": "probe doctor", "command": "caam-auto-rotate-on-usage-limit.py doctor --json"},
+            {"step": 2, "action": "check health", "command": "caam-auto-rotate-on-usage-limit.py health --json"},
+            {"step": 3, "action": "tail audit", "command": "caam-auto-rotate-on-usage-limit.py audit --json"},
         ],
     })
 
 
 def _scaffold_emit_topic_help(topic: str = "") -> int:
     topics = {
-        "doctor": "topic: doctor — substrate probes: ntm executable, caam vault dir present, recovery ledger writable, jq available, python3 version >=3.8; native rotate handled by `caam-auto-rotate-on-usage-limit.sh rotate ...` (original argparse)",
+        "doctor": "topic: doctor — substrate probes: ntm executable, caam vault dir present, recovery ledger writable, jq available, python3 version >=3.8; native rotate handled by `caam-auto-rotate-on-usage-limit.py rotate ...` (original argparse)",
         "health": "topic: health — tails $SCAFFOLD_AUDIT_LOG (default ~/.local/state/flywheel/caam-auto-rotate-on-usage-limit-runs.jsonl); reports last_run_ts, age_seconds, recent_runs (last 20), total_runs; status=warn if last run >24h old; status=warn if log unreadable",
-        "repair": "topic: repair — handled by the target's original argparse (caam profile repair). Use `caam-auto-rotate-on-usage-limit.sh rotate --tool ntm --session NAME --pane N --apply` for the canonical mutation path. Apply contract enforced via --apply requires --idempotency-key (or equivalent caam-side gate)",
-        "validate": "topic: validate — handled by the target's original argparse (caam profile validation). Use `caam-auto-rotate-on-usage-limit.sh --tool ntm --session NAME --pane N --dry-run` for read-only validation",
+        "repair": "topic: repair — handled by the target's original argparse (caam profile repair). Use `caam-auto-rotate-on-usage-limit.py rotate --tool ntm --session NAME --pane N --apply` for the canonical mutation path. Apply contract enforced via --apply requires --idempotency-key (or equivalent caam-side gate)",
+        "validate": "topic: validate — handled by the target's original argparse (caam profile validation). Use `caam-auto-rotate-on-usage-limit.py --tool ntm --session NAME --pane N --dry-run` for read-only validation",
         "audit": "topic: audit — tails $SCAFFOLD_AUDIT_LOG (last 10 rows by default); rows are recovery_class=credential_rotation receipts emitted by the rotate path",
         "why": "topic: why <id> — provenance lookup against $SCAFFOLD_AUDIT_LOG; matches against ts/digest/run_id; states: found / not_found / unavailable",
     }
@@ -520,7 +520,7 @@ def main():
         doc = {"schema": SCHEMA, "native_surface": "ntm rotate", "caam_vault_only": True, "ttl_native": "3600s", "ttl_wrapper": TTL_WRAPPER,
                "ttl_decision": TTL_DECISION, "native_wrapper_delta": NATIVE_WRAPPER_DELTA,
                "authorized_operations": AUTH_OPS, "forbidden_operations": FORBIDDEN_OPS,
-               "examples": [".flywheel/scripts/caam-auto-rotate-on-usage-limit.sh --session flywheel --pane 2 --digest <sha256> --dry-run --json", ".flywheel/scripts/caam-auto-rotate-on-usage-limit.sh --session flywheel --pane 2 --digest <sha256> --apply --json"]}
+               "examples": [".flywheel/scripts/caam-auto-rotate-on-usage-limit.py --session flywheel --pane 2 --digest <sha256> --dry-run --json", ".flywheel/scripts/caam-auto-rotate-on-usage-limit.py --session flywheel --pane 2 --digest <sha256> --apply --json"]}
         print(json.dumps(doc, sort_keys=True, indent=2) if a.json or a.schema else "\n".join(doc["examples"])); return
     if a.apply and a.dry_run: emit(a, "malformed", 3, failure_class="conflicting_modes")
     if a.tool != "codex": emit(a, "malformed", 3, failure_class="unsupported_tool")

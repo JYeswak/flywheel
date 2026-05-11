@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# tests/caam-auto-rotate-on-usage-limit.sh-canonical-cli-py.sh
-# Canonical-cli surface tests for .flywheel/scripts/caam-auto-rotate-on-usage-limit.sh (scaffolded by
-# bead flywheel-oozt3 / scaffold-canonical-cli-py.sh).
+# tests/caam-auto-rotate-on-usage-limit.py-canonical-cli-py.sh
+# Canonical-cli surface tests for .flywheel/scripts/caam-auto-rotate-on-usage-limit.py (scaffolded by
+# bead flywheel-oozt3 / scaffold-canonical-cli-py.sh; renamed .sh→.py by flywheel-eyqo7.1.1 2026-05-11).
 #
 # Verifies the python shim exposes canonical introspection without breaking
 # the target's existing argparse subcommands.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/caam-auto-rotate-on-usage-limit.sh"
+SCRIPT="$ROOT/.flywheel/scripts/caam-auto-rotate-on-usage-limit.py"
 
 pass_count=0
 fail_count=0
