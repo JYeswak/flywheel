@@ -1,0 +1,159 @@
+{
+  "schema_version": "doctrine-polish-bar-scorecard/v1",
+  "cohort_source": "skillos-1 promotion-ready handoff 2026-05-12T00:00Z",
+  "cohort_size": 8,
+  "ts": "2026-05-11T18:18:00Z",
+  "aggregate": {
+    "total_dimension_passes": 29,
+    "max_dimension_passes": 64,
+    "avg_overall_score": 0.4531
+  },
+  "per_dimension_pass_rate": {
+    "orientation": 0,
+    "motivation": 7,
+    "mental_model": 0,
+    "narrative_flow": 7,
+    "concrete_example": 0,
+    "pitfalls": 6,
+    "tips_tricks": 8,
+    "cross_links": 1
+  },
+  "per_doc": [
+    {
+      "name": "substrate-layer-shape-mismatch",
+      "path": "/Users/josh/Developer/skillos/.flywheel/doctrine/substrate-layer-shape-mismatch.md",
+      "overall_score": 0.5,
+      "pass_count": 4,
+      "dimensions": {
+        "orientation": false,
+        "motivation": true,
+        "mental_model": false,
+        "narrative_flow": true,
+        "concrete_example": false,
+        "pitfalls": true,
+        "tips_tricks": true,
+        "cross_links": false
+      },
+      "size_bytes": 7588
+    },
+    {
+      "name": "source-project-aggregation-from-n-repos",
+      "path": "/Users/josh/Developer/skillos/.flywheel/doctrine/source-project-aggregation-from-n-repos.md",
+      "overall_score": 0.5,
+      "pass_count": 4,
+      "dimensions": {
+        "orientation": false,
+        "motivation": true,
+        "mental_model": false,
+        "narrative_flow": true,
+        "concrete_example": false,
+        "pitfalls": true,
+        "tips_tricks": true,
+        "cross_links": false
+      },
+      "size_bytes": 8621
+    },
+    {
+      "name": "dispatch-expectation-vs-audit-verdict-divergence",
+      "path": "/Users/josh/Developer/skillos/.flywheel/doctrine/dispatch-expectation-vs-audit-verdict-divergence.md",
+      "overall_score": 0.5,
+      "pass_count": 4,
+      "dimensions": {
+        "orientation": false,
+        "motivation": true,
+        "mental_model": false,
+        "narrative_flow": true,
+        "concrete_example": false,
+        "pitfalls": true,
+        "tips_tricks": true,
+        "cross_links": false
+      },
+      "size_bytes": 7138
+    },
+    {
+      "name": "additive-v0.0.2-expansion-after-v0.0.1-under-extraction",
+      "path": "/Users/josh/Developer/skillos/.flywheel/doctrine/additive-v0.0.2-expansion-after-v0.0.1-under-extraction.md",
+      "overall_score": 0.375,
+      "pass_count": 3,
+      "dimensions": {
+        "orientation": false,
+        "motivation": true,
+        "mental_model": false,
+        "narrative_flow": true,
+        "concrete_example": false,
+        "pitfalls": false,
+        "tips_tricks": true,
+        "cross_links": false
+      },
+      "size_bytes": 8404
+    },
+    {
+      "name": "dispatch-assumes-fresh-extraction-but-package-preexists",
+      "path": "/Users/josh/Developer/skillos/.flywheel/doctrine/dispatch-assumes-fresh-extraction-but-package-preexists.md",
+      "overall_score": 0.5,
+      "pass_count": 4,
+      "dimensions": {
+        "orientation": false,
+        "motivation": true,
+        "mental_model": false,
+        "narrative_flow": true,
+        "concrete_example": false,
+        "pitfalls": true,
+        "tips_tricks": true,
+        "cross_links": false
+      },
+      "size_bytes": 7954
+    },
+    {
+      "name": "depth-axis-mismatch",
+      "path": "/Users/josh/Developer/skillos/.flywheel/doctrine/depth-axis-mismatch.md",
+      "overall_score": 0.5,
+      "pass_count": 4,
+      "dimensions": {
+        "orientation": false,
+        "motivation": true,
+        "mental_model": false,
+        "narrative_flow": true,
+        "concrete_example": false,
+        "pitfalls": true,
+        "tips_tricks": true,
+        "cross_links": false
+      },
+      "size_bytes": 7794
+    },
+    {
+      "name": "cross-language-audit-as-cousin-scout",
+      "path": "/Users/josh/Developer/skillos/.flywheel/doctrine/cross-language-audit-as-cousin-scout.md",
+      "overall_score": 0.5,
+      "pass_count": 4,
+      "dimensions": {
+        "orientation": false,
+        "motivation": true,
+        "mental_model": false,
+        "narrative_flow": true,
+        "concrete_example": false,
+        "pitfalls": true,
+        "tips_tricks": true,
+        "cross_links": false
+      },
+      "size_bytes": 10940
+    },
+    {
+      "name": "meta-aggregation-family",
+      "path": "/Users/josh/Developer/flywheel/.flywheel/doctrine/meta-aggregation-family.md",
+      "overall_score": 0.25,
+      "pass_count": 2,
+      "dimensions": {
+        "orientation": false,
+        "motivation": false,
+        "mental_model": false,
+        "narrative_flow": false,
+        "concrete_example": false,
+        "pitfalls": false,
+        "tips_tricks": true,
+        "cross_links": true
+      },
+      "size_bytes": 1952
+    }
+  ]
+}
