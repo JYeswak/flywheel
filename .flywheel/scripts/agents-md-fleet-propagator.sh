@@ -6,6 +6,35 @@ set -euo pipefail
 
 VERSION="agents-md-fleet-propagator.v1.0.0"
 SCHEMA_VERSION="agents-md-fleet-propagation/v1"
+
+# flywheel-94nzk: jq arglist-too-long mitigation. When ledger grows past
+# ARG_MAX (~1MB on macOS), `--argjson rows "$rows"` crashes jq with
+# "Argument list too long". Helper reads rows from stdin into a tmpfile,
+# invokes jq with `--slurpfile rows <path>`, then deletes the tmpfile.
+# In the jq filter, unwrap with `($rows[0]) as $rows` (slurpfile wraps the
+# file's JSON value in an outer array).
+#
+# Reproduced empirically with a 5000-row synthetic ledger (~1.9MB serialized)
+# against doctor / audit / why surfaces — all crashed pre-fix.
+#
+# The wrapper-style (rather than caller-managed-tmpfile) avoids the subshell-
+# scope problem: each callsite is itself invoked via $(...) command
+# substitution, so an outer EXIT trap registered in the parent shell never
+# fires for the subshell's tmpfile. Inline cleanup inside this wrapper
+# keeps the tmpfile lifecycle local to the same shell that created it.
+#
+# Usage:
+#   ledger_rows_json | fw_jq_with_rows <jq-args>... '<filter>'
+fw_jq_with_rows() {
+  local rows_file
+  rows_file="$(mktemp -t fleet-prop-rows.XXXXXX)"
+  cat >"$rows_file"
+  jq -nc --slurpfile rows "$rows_file" "$@"
+  local rc=$?
+  rm -f "$rows_file"
+  return $rc
+}
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_ROOT_DEFAULT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
 REPO_ROOT="${AGENTS_MD_FLEET_REPO:-$REPO_ROOT_DEFAULT}"
@@ -271,10 +300,10 @@ ledger_rows_json() {
 }
 
 last_apply_json() {
-  local rows
-  rows="$(ledger_rows_json)"
-  jq -nc --argjson rows "$rows" '
-    $rows
+  # flywheel-94nzk: rows passed via fw_jq_with_rows (slurpfile + tmpfile cleanup).
+  ledger_rows_json | fw_jq_with_rows '
+    ($rows[0]) as $rows
+    | $rows
     | map(select((.schema_version // "") | startswith("agents-md-fleet-propagation")))
     | map(select((.action // "") == "propagate"))
     | last // null
@@ -386,11 +415,14 @@ run_scan() {
 }
 
 doctor_json() {
-  local scan last rows
+  # flywheel-94nzk: rows passed via fw_jq_with_rows (slurpfile + tmpfile cleanup).
+  # scan + last are bounded (repos ≤ 50, last is a single row) so stay on --argjson.
+  local scan last
   scan="$(scan_payload_json)"
   last="$(last_apply_json)"
-  rows="$(ledger_rows_json)"
-  jq -nc --arg schema_version "$SCHEMA_VERSION.doctor" --argjson scan "$scan" --argjson last "$last" --argjson rows "$rows" '
+  ledger_rows_json | fw_jq_with_rows --arg schema_version "$SCHEMA_VERSION.doctor" --argjson scan "$scan" --argjson last "$last" '
+    ($rows[0]) as $rows
+    |
     ($last == null or ($last.success // false) == true) as $last_ok
     | ($last.ts // null) as $last_ts
     | ($rows | map(select(((.ts // "") | tostring | length) > 0)) | sort_by(.ts) | last | .ts // null) as $last_fired
@@ -469,10 +501,10 @@ run_repair() {
 }
 
 validate_ledger_json() {
-  local rows
-  rows="$(ledger_rows_json)"
-  jq -nc --arg schema_version "$SCHEMA_VERSION.validate" --arg target "$VALIDATE_TARGET" --argjson rows "$rows" '
-    ($rows | map(select(((.schema_version // "") | startswith("agents-md-fleet-propagation") | not) or ((.action // "") | IN("propagate","scan") | not) or ((.repo // "") == "") or (((.action // "") == "propagate") and (((.success | type) != "boolean") or ((.status // "") | IN("succeeded","failed") | not)))))) as $bad
+  # flywheel-94nzk: rows passed via fw_jq_with_rows (slurpfile + tmpfile cleanup).
+  ledger_rows_json | fw_jq_with_rows --arg schema_version "$SCHEMA_VERSION.validate" --arg target "$VALIDATE_TARGET" '
+    ($rows[0]) as $rows
+    | ($rows | map(select(((.schema_version // "") | startswith("agents-md-fleet-propagation") | not) or ((.action // "") | IN("propagate","scan") | not) or ((.repo // "") == "") or (((.action // "") == "propagate") and (((.success | type) != "boolean") or ((.status // "") | IN("succeeded","failed") | not)))))) as $bad
     | {schema_version:$schema_version,target:$target,status:(if ($bad | length) == 0 then "pass" else "fail" end),rows_checked:($rows | length),invalid_rows:($bad | length)}'
 }
 
@@ -485,11 +517,14 @@ run_validate() {
 }
 
 run_audit() {
-  local rows doctor contract_present
-  rows="$(ledger_rows_json)"
+  # flywheel-94nzk: rows passed via fw_jq_with_rows (slurpfile + tmpfile cleanup).
+  # doctor envelope is bounded (no inlined rows) so stays on --argjson.
+  local doctor contract_present
   doctor="$(doctor_json)"
   if contract_self_row_present; then contract_present=true; else contract_present=false; fi
-  jq -nc --arg schema_version "$SCHEMA_VERSION.audit" --argjson rows "$rows" --argjson doctor "$doctor" --argjson contract_present "$contract_present" '{schema_version:$schema_version,ledger_rows_total:($rows|length),recent_rows:($rows[-10:]),doctor:$doctor,contract_self_row_present:$contract_present}' |
+  ledger_rows_json | fw_jq_with_rows --arg schema_version "$SCHEMA_VERSION.audit" --argjson doctor "$doctor" --argjson contract_present "$contract_present" '
+    ($rows[0]) as $rows
+    | {schema_version:$schema_version,ledger_rows_total:($rows|length),recent_rows:($rows[-10:]),doctor:$doctor,contract_self_row_present:$contract_present}' |
     while IFS= read -r payload; do
       emit "$payload" "audit rows_total=$(jq -r '.ledger_rows_total' <<<"$payload") contract_self_row_present=$(jq -r '.contract_self_row_present' <<<"$payload")" 0
     done
@@ -498,10 +533,13 @@ run_audit() {
 
 run_why() {
   [[ -n "$WHY_ID" ]] || { echo "ERR: why requires ID" >&2; return 2; }
-  local rows scan
-  rows="$(ledger_rows_json)"
+  # flywheel-94nzk: rows passed via fw_jq_with_rows (slurpfile + tmpfile cleanup).
+  # scan envelope is bounded by fleet repo count, stays on --argjson.
+  local scan
   scan="$(scan_payload_json)"
-  jq -nc --arg schema_version "$SCHEMA_VERSION.why" --arg id "$WHY_ID" --argjson rows "$rows" --argjson scan "$scan" '{schema_version:$schema_version,id:$id,ledger_match:($rows | map(select((.repo // "") == $id or (.ts // "") == $id)) | last // null),scan_match:($scan.repos | map(select((.repo // "") == $id or (.reason // "") == $id)) | .[0] // null)}' |
+  ledger_rows_json | fw_jq_with_rows --arg schema_version "$SCHEMA_VERSION.why" --arg id "$WHY_ID" --argjson scan "$scan" '
+    ($rows[0]) as $rows
+    | {schema_version:$schema_version,id:$id,ledger_match:($rows | map(select((.repo // "") == $id or (.ts // "") == $id)) | last // null),scan_match:($scan.repos | map(select((.repo // "") == $id or (.reason // "") == $id)) | .[0] // null)}' |
     while IFS= read -r payload; do
       emit "$payload" "why id=$WHY_ID ledger_match=$(jq -r '.ledger_match != null' <<<"$payload") scan_match=$(jq -r '.scan_match != null' <<<"$payload")" 0
     done

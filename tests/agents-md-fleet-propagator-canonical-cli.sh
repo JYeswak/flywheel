@@ -58,11 +58,12 @@ if "$SCRIPT" schema propagation 2>/dev/null | jq -e '.schema_version' >/dev/null
   pass "positional schema propagation works"
 else fail "positional schema with topic"; fi
 
-# Test 10: legacy --doctor dispatched (KNOWN PRE-EXISTING jq-arglist bug
-# — bug present in .bak.scaffold-* pre-scaffold version)
+# Test 10: legacy --doctor dispatched. flywheel-94nzk fixed the pre-existing
+# jq-arglist-too-long bug; assertion tightened to require envelope strictly
+# (previously accepted EITHER envelope OR the bug error).
 out="$("$SCRIPT" --doctor --json 2>&1 || true)"
-if printf '%s' "$out" | grep -qE '\{|jq:.*Argument list too long'; then
-  pass "--doctor dispatched (legacy; envelope OR known jq-arglist-too-long bug)"
+if printf '%s' "$out" | grep -qE '"schema_version"' && ! printf '%s' "$out" | grep -qE 'jq:.*Argument list too long'; then
+  pass "--doctor dispatched (legacy; envelope strict, no jq-arglist bug)"
 else fail "--doctor dispatch"; fi
 
 # Test 11: -h / --help shows usage
@@ -90,25 +91,23 @@ if "$SCRIPT" repair --scope substrate-contract --dry-run --json 2>/dev/null | jq
   pass "repair --scope substrate-contract --dry-run reachable"
 else fail "repair substrate-contract"; fi
 
-# Test 15-17: KNOWN PRE-EXISTING BUG (jq Argument list too long when ledger is
-# large). Bug exists in .bak.scaffold-* pre-scaffold version, NOT caused by
-# 1hshd.2. Dispatch reachability verified by checking the error originates
-# inside the surface handler (e.g. line 474 = run_validate, 276/393 = run_audit,
-# 504 = run_why) — NOT a "unknown argument" dispatch error.
-# Wrap output to escape pipefail so non-zero script rc doesn't sink the test.
-out="$("$SCRIPT" validate ledger 2>&1 || true)"
-if printf '%s' "$out" | grep -qE '"schema_version"|jq:.*Argument list too long'; then
-  pass "validate ledger dispatched (envelope OR known jq-arglist-too-long bug)"
+# Test 15-17: jq-arglist-too-long bug is FIXED by flywheel-94nzk (rows passed
+# via --slurpfile + tmpfile instead of --argjson; tmpfile cleanup via EXIT trap).
+# Assertions tightened to require envelope strictly + assert no jq-arglist error.
+# Tests pass --json so text-mode output doesn't mask the envelope match.
+out="$("$SCRIPT" validate ledger --json 2>&1 || true)"
+if printf '%s' "$out" | grep -qE '"schema_version"' && ! printf '%s' "$out" | grep -qE 'jq:.*Argument list too long'; then
+  pass "validate ledger dispatched (envelope strict, no jq-arglist bug)"
 else fail "validate ledger dispatch"; fi
 
 out="$("$SCRIPT" audit --json 2>&1 || true)"
-if printf '%s' "$out" | grep -qE '"schema_version"|jq:.*Argument list too long'; then
-  pass "audit dispatched (envelope OR known jq-arglist-too-long bug)"
+if printf '%s' "$out" | grep -qE '"schema_version"' && ! printf '%s' "$out" | grep -qE 'jq:.*Argument list too long'; then
+  pass "audit dispatched (envelope strict, no jq-arglist bug)"
 else fail "audit dispatch"; fi
 
-out="$("$SCRIPT" why some-id 2>&1 || true)"
-if printf '%s' "$out" | grep -qE '"schema_version"|jq:.*Argument list too long'; then
-  pass "why <id> dispatched (envelope OR known jq-arglist-too-long bug)"
+out="$("$SCRIPT" why some-id --json 2>&1 || true)"
+if printf '%s' "$out" | grep -qE '"schema_version"' && ! printf '%s' "$out" | grep -qE 'jq:.*Argument list too long'; then
+  pass "why <id> dispatched (envelope strict, no jq-arglist bug)"
 else fail "why <id> dispatch"; fi
 
 # Test 18: quickstart reachable
