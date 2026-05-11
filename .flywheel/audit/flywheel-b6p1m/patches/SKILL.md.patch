@@ -1,0 +1,19 @@
+--- a/SKILL.md
++++ b/SKILL.md
+@@ -642,6 +642,16 @@
+ | `tools/compute_surface_id.sh <kind> [<subtree>] <name>` | Compute deterministic surface_id from descriptor (used by validators) |
+ | `tools/validate_scorecard.sh <agent_surfaces.jsonl>` | Reject scorecards with > 700 scores lacking evidence; also enforces `score_confidence` + `scored_at` per IO-CONTRACTS |
+ | `tools/flip_applied.sh <RECOMMENDATION_ID> [<COMMIT_SHA>] [<sibling>]` | Flip a recommendation's `applied` to `true` in `audit/recommendations.jsonl` (concurrent-safe via flock); used by `applier.md` Step 8 |
++| `tools/audit-doctor.sh [sibling-dir]` | Diagnose audit workspace issues + suggest fixes (broken/missing artifacts, stale manifest, partial scorers) |
++| `tools/audit-compare.sh <workspace-a> <workspace-b>` | Compare two audit workspaces side-by-side (per-surface deltas, recommendation overlap, score divergence) |
++| `tools/audit-narrative.sh [sibling-dir]` | Auto-generate the multi-pass narrative — walks manifest + recommendations + applied_changes; emits a chronological pass-by-pass story |
++| `tools/explain-score.sh <surface_id> [sibling-dir]` | Debugger view for one surface's scores (per-dim breakdown + evidence + scorer-prompt trace) |
++| `tools/explain-rec.sh <RECOMMENDATION_ID> [sibling-dir]` | Debugger view for one recommendation (source surfaces, diff sketch, applier reasoning) |
++| `tools/reconcile-scores.sh [sibling-dir]` | Detect scorer disagreements across passes/runs; emit per-surface action plan |
++| `tools/provenance-query.sh <artifact-id\|recommendation-id>` | Query the provenance ledger (who/when/which scorer produced each artifact) |
++| `tools/telemetry-summary.sh [sibling-dir]` | Aggregate `audit/telemetry.jsonl` into per-phase + per-subagent cost/duration summary |
++| `tools/cost-cap.sh [sibling-dir]` | Runtime budget check for an in-flight audit (warn/halt when burn rate exceeds policy) |
++| `tools/generate-pr-comment.sh [sibling-dir]` | Reviewer-facing PR comment from an audit — summary + top recommendations + how-to-replay |
+ 
+ ---
+ 
