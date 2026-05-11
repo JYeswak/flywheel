@@ -1,0 +1,200 @@
+---
+name: research-triad
+description: "Use when 'research <topic>', 'validate <claim>', 'find papers on', 'state of art', 'is there research on', 'before we ship', 'before we propose', 'triangulate', 'prior art', 'live code search', 'background research', 'cross-source validation', 'due diligence', 'builder pulse', 'trauma ingest', 'incident archive', 'postmortem search', or 'archived failure'. Triangulates arxiv, X, GitHub, web, and local trauma corpus via ~/.local/bin/research. Cite source id + fetch timestamp."
+allowed-tools: Bash(~/.local/bin/research *), Bash(research *), Bash(jq *), Bash(sed *), Bash(grep *), Read
+tier: critical
+---
+
+# research-triad — unified research CLI + skill stack
+
+**PURPOSE:** 4 research primitives (arxiv + x-cli + gh search + WebFetch) become ONE composable surface. The wrapper IS the substrate.
+
+**Doctrine:** see `references/TRIANGULATION-DOCTRINE.md`, `references/QUERY-PATTERNS.md`, `references/CITATION-FORMAT.md`, `references/DEGRADATION-PLAYBOOK.md`, `references/COMPOSES-WITH-CATALOG.md`, `references/PROJECT-TUNING-PROTOCOL.md`.
+
+**🆕 First time using triad on a new project / new domain?** Read
+`references/PROJECT-TUNING-PROTOCOL.md` FIRST. It is the difference between
+load-bearing evidence and zero-result fan-fiction. Skipping the protocol on
+project N+1 is the highest-EV mistake the triad surface allows.
+
+---
+
+## 🚧 v0.2 IN-FLIGHT — READ THIS FIRST WHEN SKILL FIRES (2026-04-29)
+
+**Major architecture shift in flight.** When this skill is invoked, the orchestrator MUST surface this status block before answering any research query.
+
+### What changed
+- X PPU is live as @ZestStream (id `2001487703674884096`), $100 credits funded.
+- **🚨 BUDGET POSTURE: $72.94 of $100 PPU credits spent. Joshua can buy more — the constraint is NOT total spend, it is SURPRISE spend.** Approval-gate doctrine: any operation potentially >$5 must paste the cost-line (`pages × max_results × $0.01`) and wait for explicit "approved". Stream rules currently DELETED, daemon DEAD, STREAM_DISABLED touched. **Do not re-enable read-heavy operations until spend-ledger ships first.**
+- **📦 PAID-FOR CORPUS — see `DATA-INVENTORY-2026-04-29.md` first.** Track A (offline mining of 7,191-candidate graph + probe receipts + stream samples) extracts new value at $0/call. Don't re-pull what we already have.
+- **Filtered Stream architecture is built but PAUSED** — 10 rules were registered (now deleted as precaution). `scripts/x-stream-consumer.sh` daemon ready, just turned off.
+- **Writes ARE alive at PPU** (cap-map's "Apr 20 2026 removal" claim falsified live). Follow/unfollow loop is back on the table — and writes are CHEAP.
+- **2nd-degree follow-graph walked + PRESERVED** — 7,191 candidates captured. **DO NOT RE-WALK; corpus frozen at `data/graph-FROZEN-2026-04-29/` (read-only)**, tarball backup on Desktop + iCloud. Walk scripts renamed `*.DISABLED-2026-04-29-DO-NOT-RUN`. Restore via `scripts/restore-graph-from-frozen.sh`.
+- **Tier 1 (5)** auto-followed: @steipete @claudeai @AnthropicAI @bcherny @trq212.
+- **AAA webhooks enrolled** (3 subscriptions provisioned, $0 test cost) but webhook URL registration shape still TBD.
+
+### 🚨 COST DOCTRINE — INTERNALIZE BEFORE ANY READ OP
+
+X PPU bills **per-user-returned**, not per-call, on user-list endpoints (`/following`, `/followers`, etc). One `?max_results=100` call returning 100 user objects = **$1.00**, not $0.01. The graph walk burned $70 in 30 minutes.
+
+**Cheap surfaces (~$0.001-0.005 each):** owned bookmarks, owned tweets, search/recent, single-tweet GET, write ops (follow/unfollow ~$0.01 each).
+
+**Expensive surfaces (per-user-billed):** /following, /followers, /retweeted_by, /liked_by, /lists/:id/members, any endpoint returning user object lists. **NEVER paginate these without an explicit cost-line approval.**
+
+**Stream cost is generally fine** — only delivered tweets count (~$0.005 each). 89 tweets captured before kill = ~$0.45.
+
+### Load-bearing artifacts (read these before answering meta-questions about state)
+| File | Purpose |
+|---|---|
+| `UPGRADE-PLAN-2026-04-29-v2.md` | The current 9-phase plan (v1 superseded) |
+| `X-ECOSYSTEM-CAPABILITY-MAP-2026-04-29.md` | Endpoint cost matrix (cap-map; **6 claims falsified by probe — see findings**) |
+| `data/x-capability-probe-FINDINGS-2026-04-29.md` | Receipts that override cap-map |
+| `DEVELOPER-PROJECTS-SURFACE-2026-04-29-v2.md` | 53 indexed projects → 12 topic clusters → stream rule shapes |
+| `data/graph/second-degree.tsv` | 7,191 candidates ranked by trust convergence |
+| `data/graph/REVIEW-2026-04-29.md` | Joshua-readable digest of top candidates by tier |
+| `data/stream-rules-add-response-2026-04-29.json` | cluster_tag → rule_id mapping |
+
+### Current pending tasks (resume here)
+- **C1** Re-mint OAuth: `x-cli auth login` (fixes Lists 403; Joshua-side keystroke)
+- **A2** launchd plist for `scripts/x-stream-consumer.sh` (durable supervision)
+- **A3** Flywheel `sources` upsert per-author from delivered tweets
+- **A4** 24-hr soak + per-cluster volume measurement → tune budget
+- **B1** Score function (recency × authority × cluster-relevance)
+- **B2** Author candidate posterior accumulator (Beta α/β per author)
+- **B3** First Sunday digest dry-run
+- **AAA registration** Find correct webhook-add path; register CF Worker as receiver
+- **Wave 2 follows** Watch stream for 7d → follow Tier 2 candidates whose tweets actually score high
+
+### Budget posture (Joshua 2026-04-29)
+- **Target: $100-200/mo** for stream + writes + 2nd-degree refresh + LLM rerank
+- **Hard cap baked in: 8000 tweets/day** (~$40/mo ceiling for stream)
+- **Knob to add: `~/.config/research/budget.toml`** with `monthly_budget_usd` that watchdog reads
+
+### Signal-to-noise architecture (the 4-layer filter)
+1. L1 — Stream rule operators at X edge (`-is:retweet`, `has:links`, `from:` chains)
+2. L2 — Author allow/block (graph filter): drop below follower floor, promote follow-graph
+3. L3 — Score function (TF-IDF + recency + authority + cross-cluster bonus)
+4. L4 — LLM rerank on top-50 candidates (Voyage embed + Claude/Grok)
+
+### When user says "research <topic>" while v0.2 is in flight
+1. Acknowledge in-flight state at start of response (one sentence)
+2. Run `research triangulate "<topic>"` per usual
+3. Note any axis whose substrate has shifted (e.g., "X axis now stream-fed; checking JSONL sinks too")
+
+---
+
+## FOREVER-RULE
+
+> Before any "how do I X" architecture question, before any axiom proposal, before any "state of art on Y" claim: run `research triangulate "<query>"`. Single-source claims are phantom-substrate of doctrine — they pass surface inspection ("I read it somewhere") but fail substrate probe ("which source, fetched when, what's the consensus?"). Cite source-id + fetch-ts in every proposal that depends on external claims. Pattern P22 strike-1.
+
+---
+
+## Trigger Phrases
+
+- research <topic>
+- validate <claim>
+- find papers on <topic>
+- what's the state of art on <topic>
+- is there research on <topic>
+- before we ship <feature>
+- before we propose <axiom>
+- triangulate <topic>
+- is anyone else doing <pattern>
+- find live code for <pattern>
+- search arxiv x-cli github
+- background research
+- academic and industry view on <topic>
+- cross-source validation
+- due diligence on <decision>
+- survey the literature on <topic>
+- check prior art for <pattern>
+- find existing implementations of <pattern>
+- builder pulse on <topic>
+- who else is shipping <pattern>
+- trauma ingest
+- incident archive
+- postmortem search
+- archived failure
+
+(24 triggers; tier=critical requires ≥15.)
+
+---
+
+## THE EXACT PROMPT
+
+```
+Use research-triad for <topic>. Run:
+research triangulate "<topic>" --no-cache --json
+
+Then summarize only claims backed by source id + fetch timestamp. If one source
+leg returns zero results, say which leg degraded and do not overstate consensus.
+```
+
+---
+
+## Quick Start
+
+```bash
+# Single-source (thin wrappers)
+research arxiv search "tool retrieval RAG" --max 5
+research gh repos "vector database" --stars 100 --limit 10
+research gh code "tool retrieval" --lang python
+research x search "agentic flywheel" --max 20
+research web https://www.anthropic.com/engineering/some-post
+
+# The killer subcommand — all 4 in parallel, deduped, cached 24h
+research triangulate "RAG tool retrieval"
+research triangulate "<topic>" --cascade        # arxiv-seed → gh+x narrowed
+research triangulate "<topic>" --no-cache --json | jq .results
+```
+
+Cache: `~/.local/state/research/cache/`, TTL via `RESEARCH_CACHE_TTL_HOURS` (default 24).
+Substrate truth: `research --version` (axiom-12 probe of arxiv/x-cli/gh).
+
+---
+
+## Workflow
+
+1. **Identify the question type:**
+   - architecture / state-of-art / live-code / discourse / canonical-doc
+2. **Pick subcommand:**
+   - academic → `research arxiv search`
+   - live code / "is anyone shipping this?" → `research gh code` + `research gh repos`
+   - discourse / builder pulse → `research x search`
+   - canonical doc / blog post → `research web <url>`
+   - multi-axis (default) → `research triangulate`
+3. **Triangulate when claim is load-bearing.** Default parallel; `--cascade` when arxiv titles should narrow gh+x queries.
+4. **Cite findings** in any downstream proposal — see `references/CITATION-FORMAT.md`.
+5. **Cache-aware:** trust 24h cache for stable topics; `--no-cache` for time-sensitive.
+
+---
+
+## Composes With
+
+- **multi-model-triangulation** — synthesis ACROSS models AFTER research-triad gathers source evidence. Triad = data; multi-model = consensus.
+- **idea-wizard** — brainstorm input fed BY triad findings (not from cold-start).
+- **dueling-idea-wizards** — adversarial review using cited triad findings as ground truth.
+- **skill-autoresearch** — self-reflection on what skills SHOULD exist; uses triad to scout prior art before proposing.
+- **research-software** — code-side research (codebase archaeology); sibling, not parent. Triad covers *external* substrate; research-software covers *internal*.
+- **research-delegate** — when to delegate research to a sub-agent vs run inline. Triad CLI is cheap enough to run inline; delegate when results need synthesis.
+
+Decision tree + data flows: `references/COMPOSES-WITH-CATALOG.md`.
+
+---
+
+## Anti-Patterns
+
+| Anti-Pattern | Why It Fails | Fix |
+|---|---|---|
+| **Single-source state-of-art claims.** Citing one arxiv paper, blog post, or repo as "the state of the art" feels grounded but still leaves the claim hanging from one surface. | This creates phantom substrate: the proposal looks researched, but there is no cross-source agreement and no degradation note when a source leg is empty. | Run `research triangulate "<topic>"`, then cite source id + fetch timestamp. If a leg returns zero results, say so explicitly. |
+| **Discourse-as-evidence.** Pasting a tweet or X thread as load-bearing evidence imports a hot take into doctrine without checking whether papers or shipping code agree. | Builder discourse is useful for pulse, but it is not enough to justify architecture, security, or skill standards by itself. | Pair X results with arxiv and GitHub results before making a durable claim. |
+| **Manual fanout drift.** Running four separate commands by hand is easy to start and easy to forget halfway through. | The final answer quietly privileges whichever source was easiest to query, which defeats the purpose of a research triad. | Use `research triangulate` as the default; drop to individual subcommands only for focused follow-up. |
+
+---
+
+## Substrate
+
+- CLI: `~/.local/bin/research` (Layer A, this ship)
+- Skill: `~/.claude/skills/research-triad/` (Layer B, this ship)
+- Hooks: Layer C — sibling agent ships UserPromptSubmit auto-surface. Not modified here.
+
+See `LATEST.md` for phase status + drift probe; `SELF-TEST.md` for verification.
