@@ -1,0 +1,1746 @@
+---
+description: Doctrine tick — the heartbeat of the flywheel agentic pulse. Reads autoloop receipts, checks orchestrator invariants, reaps callbacks, dispatches work. Invoked by /flywheel:loop at the project's tier interval.
+allowed-tools: Bash, Read, Edit, Write, Skill, ScheduleWakeup
+---
+
+<!-- skill_version: 2 — design ref: ~/.local/state/flywheel/joint-deepdive-2026-05-01/orch-tick-bead-discipline-design.md -->
+<!-- Validator: tick-skill-version-check.sh — refuses run if loaded version != design ref -->
+
+# /flywheel:tick
+
+> Meadows framing: this is the balancing feedback loop's decision function.
+> The autoloop (launchd) observes the stock. This tick converts observations
+> into decisions. Each tick reads, checks, decides, acts, writes a receipt.
+
+## Args
+
+`$ARGUMENTS` = optional flags:
+
+```
+/flywheel:tick                 — run one tick for cwd project
+/flywheel:tick --dry-run       — run checks, emit decisions, write no state
+/flywheel:tick --help          — show this help
+```
+
+If `$ARGUMENTS` is `--help`, show this help and exit.
+
+## Help Tiers
+
+```bash
+/flywheel:tick --help           # compact tick menu
+/flywheel:tick --help-long      # full phase contract and receipt schema
+/flywheel:tick --help-best-for  # choose tick for one orchestrator decision
+```
+
+`--help-best-for` should say: use `/flywheel:tick` when the loop is already
+active and you need one decision pass over current repo state. Use
+`/flywheel:loop` to activate or inspect cadence, `/flywheel:worker-tick` inside
+a worker dispatch, and `/flywheel:cron` for non-agentic launchd jobs.
+
+## Codex equivalent
+
+Codex runs the portable tick driver:
+
+```bash
+/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop tick --repo "$PWD" --json
+/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop tick --repo "$PWD" --dry-run --json
+```
+
+The receipt fields that must remain equivalent with Claude `/flywheel:tick` are
+`mode`, `checks_run`, `violations`, `dispatch_status`, `hold_reason`, `decision`,
+`action`, and `receipt`.
+
+## Phase Order
+
+The tick driver phase order is:
+
+`INIT -> RESEARCH -> PLAN -> BEADS -> DISPATCH -> VALIDATE -> INTEGRATE -> LEARN`
+
+`VALIDATE` is first-class. DISPATCH callback reap routes through VALIDATE before
+INTEGRATE, and the tick receipt must preserve `validation_summary` for doctor
+signals and `/flywheel:learn` routing. A callback with no validation receipt,
+failed validation, or runtime-unresponsive `unknown` status must not be treated
+as INTEGRATE-ready.
+
+## Pre-flight
+
+1. **Resolve project.** Derive from `$PWD` matching `/Users/josh/Developer/<project>`.
+   If no `.flywheel/` directory, abort: "not flywheel-initialized".
+2. **Read loop state.** Load `~/.flywheel/loops/<project>.json`. If `active=false`,
+   abort: "loop not active — run `/flywheel:loop start` first".
+3. **Read last tick.** Load `~/.local/state/flywheel-loop/last_tick_<project>.json`
+   if exists. Extract `last_tick_ts` for delta queries.
+
+## Tick Steps (Phase A.1 — orchestrator checks, SOFT mode)
+
+Every tick receipt must expose the Phase A contract as machine-readable fields:
+
+- `mode` — current enforcement mode, `SOFT` for Phase A.
+- `checks_run` — check ids executed this tick.
+- `violations` — SOFT violation rows with `check_id`, `failure_class`, `mode`, and logging status.
+- `phase_a` — full check detail object for doctor and L56 consumers.
+- `dispatch_status` — transport/hold outcome.
+- `hold_reason` — concrete reason when no worker bead is dispatched.
+
+### Step 1: Read autoloop receipts since last tick
+
+```bash
+# Find receipts since last tick timestamp
+LAST_TS="<from last_tick file, or 24h ago if first tick>"
+grep -c '"event":"tick_complete"' ~/.claude/skills/.flywheel/logs/autoloop-$(date -u +%Y%m%d).jsonl
+```
+
+Read `~/.local/state/flywheel-autoloop/last_run.json` for latest autoloop state.
+Report: `autoloop_receipts_since_last_tick=<N>`, `last_autoloop_status=<status>`,
+`last_autoloop_repo=<repo>`.
+
+If no receipts found and last tick was >20min ago, log SOFT violation:
+`orch_skipped_substrate_read`.
+
+### Step 1a: Awareness check (NEW 2026-05-01 — see `~/.local/state/flywheel/joint-deepdive-2026-05-01/orch-tick-bead-discipline-design.md`)
+
+Before any Step 5 dispatch decision, orient to mission/goal/state and recent
+tick deltas:
+
+```bash
+PROJECT_ROOT="/Users/josh/Developer/flywheel"
+for doc in MISSION.md GOAL.md STATE.md; do test -s "$PROJECT_ROOT/.flywheel/$doc" || echo "missing:$doc"; done
+grep -nE '^(status:|repo_realpath:|## Mission Source|## Mission Anchor|## Current Goal|## Next Actions|## Resume Context)' "$PROJECT_ROOT"/.flywheel/{MISSION,GOAL,STATE}.md 2>/dev/null
+ls -t ~/.local/state/flywheel-loop/last_tick_flywheel*.json 2>/dev/null | head -3 | xargs -r jq -r '{ts,decision,violations,refill_deferred_reason}'
+
+# Doctrine drift is read-only in tick. Do not auto-apply here; surface the gap
+# so the orchestrator can decide whether to run flywheel-doctrine-sync.
+/Users/josh/.local/bin/flywheel-doctrine-sync \
+  --target-repo "$PROJECT_ROOT" \
+  --dry-run \
+  --json \
+  | jq -r '"doctrine_version: current=\(.current_doctrine_version // "null") proposed=\(.proposed_doctrine_version) missing_l_rules=\(.missing_l_rules_count) soft=\(.soft_violation // "none")"'
+```
+
+Receipt: `awareness_check.{mission_anchor_read,goal_state,state_freshness_hours,last_3_receipts_read,delta_flags,doctrine_version_current,doctrine_version_proposed,doctrine_missing_l_rules_count}`.
+SOFT: `orch_awareness_missing_mission_anchor`, `orch_awareness_goal_state_drift`,
+`orch_awareness_state_stale`, `orch_awareness_receipt_delta_repeated_idle`,
+`doctrine_behind_canonical`, and `orch_skipped_awareness` if Step 1a is skipped
+before Step 5.
+
+### Step 1b: Coordinator digest (NEW 2026-05-07 — NTM canonical work substrate)
+
+Pull the canonical NTM coordinator digest BEFORE Step 2 fuckup parsing so the
+tick orients on substrate truth, not just learning ledgers.
+
+```bash
+SESSION="${FLYWHEEL_SESSION:-flywheel}"
+DIGEST_RAW="$(/Users/josh/.local/bin/ntm-coordinator-pinned --session="$SESSION" digest --json 2>/dev/null || echo '{}')"
+echo "$DIGEST_RAW" | jq -r '"coordinator_digest: agents=\(.agent_count // 0) active=\(.active_count // 0) idle=\(.idle_count // 0) error=\(.error_count // 0) pending_tasks=\(.work_summary.pending_tasks // 0) in_progress=\(.work_summary.in_progress_tasks // 0) completed_today=\(.work_summary.completed_today // 0) blocked=\(.work_summary.blocked_tasks // 0) alerts=\(.alerts // [] | length)"'
+```
+
+Surface the digest line verbatim in the tick output (one row). If `ntm coordinator digest`
+is unavailable or returns empty, log SOFT violation `orch_skipped_coordinator_digest`
+and continue — never block the tick on this. Receipt:
+`coordinator_digest.{agents,active,idle,error,pending,in_progress,completed_today,blocked,alerts}`.
+This replaces ad-hoc work-summary calculation in `flywheel-loop` and
+`peer-orch-productivity-watch.sh` (deletion-agent owns those removals).
+
+### Step 2: Read fuckup-log since last tick
+
+```bash
+# Count unprocessed fuckup events without mutating raw evidence rows.
+FUCKUP_LOG="${FUCKUP_LOG:-$HOME/.local/state/flywheel/fuckup-log.jsonl}"
+FUCKUP_PROCESSED="${FUCKUP_PROCESSED:-$HOME/.local/state/flywheel/fuckup-processed.jsonl}"
+test -f "$FUCKUP_PROCESSED" || FUCKUP_PROCESSED=/dev/null
+jq -s --slurpfile processed "$FUCKUP_PROCESSED" '
+  def processed_lines:
+    [$processed[]?
+      | .fuckup_log_lines[]?
+      | tonumber?];
+  def processed_ids:
+    [$processed[]?
+      | (.fuckup_log_ids[]?, .fuckup_log_id?, .id?)
+      | select(. != null)
+      | tostring];
+  def processed_ts:
+    [$processed[]?
+      | (.fuckup_ts?, .fuckup_log_ts?)
+      | select(. != null)
+      | tostring];
+  [
+    to_entries[]
+    | (.key + 1) as $line
+    | .value as $row
+    | (($row.id // $row.event_id // "") | tostring) as $id
+    | (($row.ts // "") | tostring) as $ts
+    | select(($row.processed // false) != true)
+    | select(($row.processed_at // null) == null)
+    | select(($row.processed_into // null) == null)
+    | select((processed_lines | index($line)) | not)
+    | select(($id == "" or ((processed_ids | index($id)) | not)))
+    | select($ts == "" or ((processed_ts | index($ts)) | not))
+  ] | length
+' "$FUCKUP_LOG" 2>/dev/null || echo 0
+```
+
+If >=3 unprocessed events, flag: "learn-review recommended" (SOFT).
+If >=3 and `--dry-run` not set, invoke `/flywheel:learn --review` inline.
+
+Log SOFT violation `orch_skipped_learn_review` if >=3 unprocessed AND
+learn-review was not run (e.g. due to error).
+
+### Step 2b: Agent Mail inbox check (NEW 2026-05-01 — see `~/.local/state/flywheel/joint-deepdive-2026-05-01/orch-tick-bead-discipline-design.md`)
+
+Gracefully no-op until `flywheel-1e8` and `flywheel-bpd` provide registered
+per-pane Agent Mail identity and token plumbing. First locate the current
+orchestrator identity:
+
+```bash
+SESSION="${SESSION:-flywheel}"
+ORCH_PANE=$(jq -sr --arg s "$SESSION" 'map(select(.session == $s)) | sort_by(.effective_at) | last | .orchestrator_pane // .callback_pane // 1' ~/.local/state/flywheel/session-topology.jsonl)
+/Users/josh/Developer/flywheel/.flywheel/scripts/lookup-pane-identity.sh "$SESSION" "$ORCH_PANE" 2>/dev/null || true
+```
+
+If no registered identity/token is available, set
+`inbox_skipped_reason=no_identity_token`, record
+`no_identity_registered_for_pane` or `agent_mail_identity_unregistered`, and
+proceed. When active, fetch unread inbox messages, handle ACK/reply/dispatch/bead
+actions, then mark or acknowledge each handled message.
+
+Receipt: `inbox_messages_handled`, `beads_filed_from_inbox`,
+`dispatches_from_inbox`, `inbox_skipped_reason`,
+`no_identity_registered_for_pane`, `agent_mail_identity_unregistered`.
+SOFT: `orch_inbox_identity_missing`, `orch_inbox_identity_local_stub_only`,
+`orch_inbox_mcp_fetch_failed`, `orch_inbox_ack_required_unhandled`.
+
+### Step 2b.1: Sister-orch `[ESCALATE]` plan consumer
+
+Flywheel-orch owns the receiving side of the two-blocker-tick META-RULE. In the
+same tick as the Agent Mail inbox fetch, scan handled/unread fleet-mail messages
+for subject `ESCALATE blocker survived 2 ticks` or `[ESCALATE] blocker survived
+2 ticks`. Valid consumer capsules must carry this body contract:
+
+```text
+blocker_id: <stable-id>
+tick_count: <integer >= 2>
+sister_session: <skillos|mobile-eats|cfs|alps|picoz|...>
+blocker_class: <reason-class>
+affected_beads: <comma-separated bead ids>
+hypothesis: <what the sister orch thinks is wrong>
+evidence_paths: <comma-separated durable paths>
+```
+
+Run the scanner against the fetched inbox payload:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/escalate-capsule-plan-consumer.sh \
+  scan \
+  --repo /Users/josh/Developer/flywheel \
+  --inbox-json "$INBOX_JSON" \
+  --json
+```
+
+On valid arrival, the consumer opens
+`.flywheel/plans/accretive-fix-<blocker_id>/00-INTENT.md` with the full capsule
+body as INTENT input, writes `STATE.json`, and records the command
+`/flywheel:plan accretive-fix-<blocker_id>`. That is the 1-tick SLA: capsule
+arrival becomes an opened plan in the same tick.
+
+The consumer also appends a fleet-mail reply row with `plan_opened=<slug>` for
+the sister session. At each plan round/phase transition, report progress with:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/escalate-capsule-plan-consumer.sh \
+  report-progress \
+  --repo /Users/josh/Developer/flywheel \
+  --slug "<slug>" \
+  --sister-session "<sister_session>" \
+  --json
+```
+
+Progress replies carry `plan_phase=<phase>` and `round_count=<N>` and are
+deduped by slug+phase+round so every round is reported once.
+
+Receipt:
+`sister_orch_escalation_capsules_seen`,
+`sister_orch_escalation_plans_opened`,
+`sister_orch_escalation_plan_replies`, and
+`sister_orch_escalation_progress_replies`.
+SOFT: `sister_orch_escalation_scan_skipped` if inbox fetch succeeded but this
+scan did not run.
+
+### Step 2c: Fuckup-to-bead decisions (NEW 2026-05-01 — see `~/.local/state/flywheel/joint-deepdive-2026-05-01/orch-tick-bead-discipline-design.md`)
+
+Every unprocessed fuckup since the last tick must get one durable decision:
+existing bead, new bead, or explicit no-bead reason.
+
+```bash
+FUCKUP_LOG="${FUCKUP_LOG:-$HOME/.local/state/flywheel/fuckup-log.jsonl}"
+FUCKUP_PROCESSED="${FUCKUP_PROCESSED:-$HOME/.local/state/flywheel/fuckup-processed.jsonl}"
+test -f "$FUCKUP_PROCESSED" || FUCKUP_PROCESSED=/dev/null
+jq -c -s --slurpfile processed "$FUCKUP_PROCESSED" '
+  def processed_lines:
+    [$processed[]?
+      | .fuckup_log_lines[]?
+      | tonumber?];
+  def processed_ids:
+    [$processed[]?
+      | (.fuckup_log_ids[]?, .fuckup_log_id?, .id?)
+      | select(. != null)
+      | tostring];
+  def processed_ts:
+    [$processed[]?
+      | (.fuckup_ts?, .fuckup_log_ts?)
+      | select(. != null)
+      | tostring];
+  to_entries[]
+  | (.key + 1) as $line
+  | .value as $row
+  | (($row.id // $row.event_id // "") | tostring) as $id
+  | (($row.ts // "") | tostring) as $ts
+  | select(($row.processed // false) != true)
+  | select(($row.processed_at // null) == null)
+  | select(($row.processed_into // null) == null)
+  | select((processed_lines | index($line)) | not)
+  | select(($id == "" or ((processed_ids | index($id)) | not)))
+  | select($ts == "" or ((processed_ts | index($ts)) | not))
+  | $row + {fuckup_log_line:$line}
+' "$FUCKUP_LOG" > /tmp/flywheel-unprocessed-fuckups.jsonl 2>/dev/null || : > /tmp/flywheel-unprocessed-fuckups.jsonl
+br list --json > /tmp/flywheel-beads.json 2>/dev/null || echo '[]' > /tmp/flywheel-beads.json
+while IFS= read -r row; do
+  id=$(printf '%s' "$row" | jq -r '.id // .fuckup_log_line // .line // .ts')
+  class=$(printf '%s' "$row" | jq -r '.class // .trauma_class // "unknown"')
+  jq --arg id "$id" --arg class "$class" '.[] | select((.id|tostring)==("fuckup_"+$id) or (.title // "" | test($class; "i")))' /tmp/flywheel-beads.json | head -1
+done < /tmp/flywheel-unprocessed-fuckups.jsonl
+```
+
+If no matching bead exists, file a small bead with `origin=fuckup_<id>` or write
+a `no_bead_reason` row to `~/.local/state/flywheel/fuckup-processed.jsonl`.
+Do not mark a fuckup processed until the bead/no-bead decision is durable.
+
+Receipt: `fuckups_to_beads`, `fuckups_no_bead_reason`, `fuckups_skipped`,
+`fuckup_bead_decisions`. SOFT: `orch_skipped_fuckup_decision` when
+`fuckups_skipped > 0`.
+
+After the fuckup decisions are durable, subscribe to skillos routing decisions
+and surface them in the tick receipt:
+
+```bash
+SKILLOS_ROUTED_JSON="$(
+  ~/Developer/flywheel/.flywheel/scripts/skillos-routed-tail.sh --json 2>/tmp/skillos-routed-tail.err || true
+)"
+skillos_routed_count="$(printf '%s' "$SKILLOS_ROUTED_JSON" | jq -r '.count // 0' 2>/dev/null || echo 0)"
+printf '%s' "$SKILLOS_ROUTED_JSON" | jq -c '.rows[]? | select(.decision == "new-skill" and (.target_skill_id // "") != "")' \
+  > /tmp/flywheel-skillos-new-skill-decisions.jsonl 2>/dev/null || : > /tmp/flywheel-skillos-new-skill-decisions.jsonl
+```
+
+If `/tmp/flywheel-skillos-new-skill-decisions.jsonl` has rows that correspond
+to this session's pending candidates, mark them `RESOLVED` in the tick action
+log. Flywheel reads `skillos-routed.jsonl` only through the helper; skillos owns
+all routed-file writes.
+
+### Step 3: Verify worker pane states before any dispatch
+
+Run `ntm health <session> --json` first. It remains the topology/status source:
+pane list, agent kind, process health, errors, and non-Codex activity.
+
+For each `agent_type=="cod"` pane, also run:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/pane-work-signal.sh "$SESSION" "$PANE" --lines 80
+```
+
+Use `pane-work-signal` as the dispatch-capacity activity truth source for Codex
+panes. If `ntm health` says idle/error while `pane-work-signal` says working:
+- Capacity is false for that pane; PWS wins.
+- Log SOFT violation `pane_work_signal_disagrees_with_ntm_health` with `pane_idx`.
+- Add receipt fields `pane_work_signal_sampled`, `pane_work_signal_by_pane`,
+  `pane_work_signal_disagreements`, and `idle_capacity_source`.
+
+For non-Codex panes (`cc`, `claude`, `gemini`, shell/user panes), keep
+`ntm health` as the canonical activity source unless a future bead promotes a
+new truth source.
+
+Dispatch capacity is:
+- Codex pane: `pane-work-signal.truth_state == idle`
+- Claude/non-Codex worker pane: `ntm health` activity is idle/waiting and status is ok
+- User pane: never auto-dispatch unless explicitly allowed by topology role
+
+Rollback controls:
+- `FLYWHEEL_PANE_WORK_SIGNAL_DISABLE=1` falls back to `ntm health` and records
+  `pane_work_signal_disabled_reason="pws_disabled_via_env"`.
+- `.flywheel/disable-pane-work-signal` falls back to `ntm health` and records
+  `pane_work_signal_disabled_reason="pws_disabled_via_file"`.
+
+If dispatching and pane state was NOT checked first, log SOFT violation:
+`orch_dispatched_blind`.
+
+If pane state was reported using a legacy table, pane parser, or
+`--robot-is-working` instead of `--robot-activity`, log SOFT violation:
+`orch_misreported_pane_state`.
+
+### Step 3a: Frozen-pane detector + auto-recovery (NEW 2026-05-03 — see fuckup-log class `frozen-codex-spinner-misclassified-as-thinking`, bead `flywheel-m964`, Joshua directive 2026-05-03)
+
+`--robot-activity` LIES on stuck Codex spinners — it reports `state=THINKING` with `codex_working` pattern even when the agent CLI is hung with no progress. Joshua flagged this 3+ times in one session 2026-05-03; manual respawn each time.
+
+For EVERY pane in `state=THINKING|GENERATING` from Step 3, also check scrollback-byte-delta:
+
+Production implementation source of truth:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/frozen-pane-detector.sh --session="$SESSION" --json
+```
+
+If the detector reports `frozen_panes_detected > 0`, run recovery mode:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/frozen-pane-detector.sh --session="$SESSION" --auto-recover --json
+```
+
+```bash
+# For each THINKING pane, get state_since age + scrollback byte count
+for SESSION_PANE in <thinking-panes>; do
+  SESSION="${SESSION_PANE%%:*}"
+  PANE="${SESSION_PANE##*:}"
+  STATE_SINCE=$(/Users/josh/.local/bin/ntm --robot-activity="$SESSION" --activity-type=codex,claude 2>/dev/null | jq -r --arg p "$PANE" '.agents[]|select(.pane_idx|tostring==$p)|.state_since')
+  AGE_SEC=$(( $(date -u +%s) - $(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$STATE_SINCE" +%s 2>/dev/null || echo $(date -u +%s)) ))
+  # Compare scrollback bytes now vs cache from last tick
+  CACHE_PATH="$HOME/.local/state/flywheel-loop/scrollback_cache_${SESSION}_${PANE}.txt"
+  CURRENT_BYTES=$(/Users/josh/.local/bin/ntm --robot-tail="$SESSION" --pane="$PANE" --lines=20 2>/dev/null | wc -c)
+  PRIOR_BYTES=$(test -f "$CACHE_PATH" && wc -c < "$CACHE_PATH" || echo 0)
+  DELTA=$(( CURRENT_BYTES - PRIOR_BYTES ))
+  /Users/josh/.local/bin/ntm --robot-tail="$SESSION" --pane="$PANE" --lines=20 > "$CACHE_PATH" 2>/dev/null
+  # Frozen iff THINKING for >5min AND scrollback grew <100 bytes (slack for spinner refresh)
+  if [[ "$AGE_SEC" -gt 300 && "$DELTA" -lt 100 ]]; then
+    echo "FROZEN: $SESSION:$PANE (age=${AGE_SEC}s delta=${DELTA}B)"
+  fi
+done
+```
+
+For EACH frozen pane detected:
+
+1. **Snapshot scrollback** to `/tmp/frozen-pane-${SESSION}-${PANE}-${TS}.txt` (forensic preservation)
+2. **Log fuckup-log row** with class=`frozen-codex-spinner-misclassified-as-thinking`, severity=high, evidence=snapshot path
+3. **Auto-respawn** via `ntm --robot-restart-pane=<session> --pane=<N> --hard-kill`
+4. **Wait 8s** for shell to stabilize
+5. **Auto-relaunch agent CLI** per `feedback_ntm_respawn_relaunches_shell_only`:
+   - Codex pane: `ntm send <session> --pane=<N> "codex --dangerously-bypass-approvals-and-sandbox"`
+   - CC pane: `ntm send <session> --pane=<N> "cc"`
+6. **Wait 6s** for agent to come up
+7. **Auto-poke** with liveness check + bounded resume work (read pending inbox / re-fetch active bead)
+8. **File research bead** if `frozen-codex-spinner-*` class crossed 3 strikes in 7d:
+   - `br create --priority 1 --type research --title "[research] root-cause Codex CLI hang state — 3+ strikes" --description "Investigate via socraticode + Jeff issue search + repro matrix. Strike count {N} since {first_seen}. See fuckup-log class frozen-codex-spinner-misclassified-as-thinking."`
+   - Auto-dispatch to first idle codex worker via `/flywheel:dispatch <pane> <bead>` if capacity exists
+9. **Update doctor probe `frozen_pane_count`** in tick receipt for trend tracking
+
+Receipt fields: `frozen_panes_detected`, `frozen_panes_respawned`, `frozen_panes_relaunched`, `frozen_research_bead_filed` (id or null), `frozen_strike_count_7d`.
+
+SOFT violations:
+- `orch_skipped_frozen_detector` — Step 3a not run when THINKING panes exist
+- `orch_frozen_pane_unhandled` — frozen detected but no respawn fired
+- `orch_frozen_pane_relaunch_skipped` — respawn fired but agent CLI not relaunched (will leave bare zsh)
+- `orch_frozen_pane_research_skipped` — 3+ strikes but no research bead filed
+
+**Doctrine cross-references:**
+- `feedback_pane_state_ntm_health` — ntm activity is truth for state classification, but scrollback delta is truth for liveness
+- `feedback_ntm_respawn_relaunches_shell_only` — respawn drops to bare zsh; agent CLI must be manually relaunched
+- `feedback_two_truth_sources_before_decide` — cross-check before any state-changing dispatch
+
+### Step 3b: Codex template/input stuck detector
+
+Run the Codex stuck detector once per tick across topology-declared Codex worker
+panes, skipping human, orchestrator, and callback panes:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/codex-template-stuck-detector.sh \
+  --session all \
+  --worker-panes-from-topology \
+  --apply \
+  --json
+```
+
+Default tick mode writes the detector ledger only. Do not pass
+`--auto-recover` from the tick hook. The detector uses two captures separated by
+the configured window and requires BOTH hash stability and a Codex template or
+Working timer signal before classification. Subclasses route as:
+
+- `buffer_stuck` → one Enter-newline retry is allowed only when an orchestrator
+  explicitly runs `--auto-recover --apply`.
+- `input_deaf` → `/flywheel:respawn` escalation; redispatch cannot fix it.
+- `post_completion` → snapshot evidence, then `/flywheel:respawn` escalation.
+
+Receipt fields: `codex_template_stuck_count_24h`,
+`codex_stuck_subclass_top`, `codex_stuck_top_session`, and
+`codex_stuck_recovery_success_pct`.
+
+SOFT violations:
+- `orch_skipped_codex_stuck_detector` — Step 3b not run during tick.
+- `orch_auto_recovered_codex_input_deaf` — any tick path tries to recover
+  `input_deaf` without respawn/operator gating.
+- `orch_autorespawned_codex_stuck_detector` — detector calls respawn directly.
+
+### Step 4: Fleet self-diagnosis (doctrine tier only)
+
+Run `flywheel-loop fleet --root ~/Developer --json` and check:
+
+**4a. Monoculture detection.** Parse the autoloop log for the last 6 ticks.
+If the same repo was selected >=4 consecutive times, flag:
+`fleet_monoculture_detected repo=<name> consecutive=<N>`.
+
+**4b. Doctor-fail rate.** Count `doctor_failed` events in today's autoloop log.
+If >50% of ticks resulted in doctor_failed, flag:
+`fleet_doctor_fail_rate_high rate=<N>/<total>`.
+
+**4c. Self-tickability.** Check if the flywheel repo itself appears in the fleet
+scan as status=ready. If status=fail, flag:
+`fleet_self_not_tickable action=<required_action>`.
+Auto-fix if the action is `fill_repo_local_mission_goal_state` — create
+the missing root docs and re-verify.
+
+**4d. Fleet coverage.** Count repos by status. If <25% of opted-in repos are
+status=ready, flag: `fleet_coverage_low ready=<N>/<opted_in>`.
+
+**4e. Stale overrides.** Check all repos for `next_tick_override` files older
+than 4h. Flag each: `fleet_stale_override repo=<name> age=<hours>h`.
+
+**4f. Auto-bead on findings.** For each P1/P2 flag raised in 4a-4e:
+- If idle workers exist AND no existing bead covers this issue:
+  write a dispatch file to `/tmp/dispatch_<hash>.md`, send via `ntm send`,
+  log to `dispatch-log.jsonl`
+- If no idle workers: append to tick receipt `deferred_beads` array
+
+This step is what prevents Joshua from having to surface autoloop health
+issues manually. The tick observes, the tick acts.
+
+**Step 4g: Bead graph PageRank (NEW 2026-05-01 — see `~/.local/state/flywheel/joint-deepdive-2026-05-01/orch-tick-bead-discipline-design.md`).**
+
+Run every 12 ticks OR when `idle_workers > 0` and Step 5 would otherwise choose
+`DOCTRINE_HUNT`. Rank open beads by dependency graph so foundational blockers
+beat vibe-based doctrine hunting.
+
+```bash
+br list --status open --json > /tmp/flywheel-open-beads.json
+jq -r '.[].id' /tmp/flywheel-open-beads.json | while read -r id; do br dep list "$id" --json 2>/dev/null || true; done > /tmp/flywheel-deps.jsonl
+python3 - <<'PY'
+import json
+from pathlib import Path
+nodes=[b["id"] for b in json.loads(Path("/tmp/flywheel-open-beads.json").read_text() or "[]") if b.get("id")]
+edges={n:set() for n in nodes}
+for row in [json.loads(l) for l in Path("/tmp/flywheel-deps.jsonl").read_text().splitlines() if l.strip()]:
+    child=row.get("id") or row.get("bead_id") or row.get("issue_id")
+    for p in row.get("depends_on") or row.get("dependencies") or []:
+        pid=p.get("id") if isinstance(p,dict) else p
+        if child in edges and pid in edges: edges[child].add(pid)
+n=len(nodes); rank={x:1/n for x in nodes} if n else {}
+for _ in range(20): rank={y:(1-.85)/n+sum(.85*rank[x]/len(edges[x] or nodes) for x in nodes if y in (edges[x] or nodes)) for y in nodes} if n else {}
+print(json.dumps({"top_5":[x for x,_ in sorted(rank.items(), key=lambda i:i[1], reverse=True)[:5]]}))
+PY
+```
+
+Receipt: `pagerank_computed_at`, `pagerank_top_5_blockers`,
+`dispatched_from_pagerank`. SOFT: `orch_pagerank_failed`,
+`orch_pagerank_too_slow`, `orch_pagerank_candidate_not_dispatchable`,
+`orch_skipped_pagerank`.
+
+**Step 4h: L61 communication audit (NEW 2026-05-01 — see `~/.local/state/flywheel/joint-deepdive-2026-05-01/orch-tick-bead-discipline-design.md`).**
+
+Audit recent cross-session coordination messages for dual-channel pairing:
+Agent Mail durable message plus NTM real-time poke to the recipient pane.
+
+```bash
+LAST_TS="<from last_tick file, or 24h ago if first tick>"
+jq -c --arg since "$LAST_TS" 'select((.event=="coord_message" or .task_id) and (.ts // "" >= $since))' /Users/josh/Developer/flywheel/.flywheel/dispatch-log.jsonl 2>/dev/null > /tmp/flywheel-coord-messages.jsonl
+jq -s '{cross_session_messages:length, ntm_only:map(select(.channel=="ntm" and (.agent_mail_message_id == null)))|length, mail_only:map(select(.channel=="agent_mail" and (.ntm_poke_ts == null)))|length}' /tmp/flywheel-coord-messages.jsonl
+```
+
+Receipt: `cross_session_messages`, `dual_channel_pct`, `l61_counter_examples`.
+SOFT: `orch_l61_violation_ntm_only`, `orch_l61_violation_mail_only`.
+
+**Step 4i: Fleet-coherence receipt/action consumer (NEW 2026-05-08 — see beads `flywheel-2y4` Phase 3a and `flywheel-1fh` Phase 3b).**
+
+Read the cached fleet-coherence event ledger and add read-only receipt decisions
+to the tick receipt. Default mode remains Phase 3a observation only: it must not
+file Beads, finalize `no_bead_reason`, or dispatch `FLEET_REPAIR`.
+
+Phase 3b action mode is explicit:
+
+```bash
+FLYWHEEL_FLEET_COHERENCE_EVENTS="${FLYWHEEL_FLEET_COHERENCE_EVENTS:-$HOME/.local/state/flywheel/fleet-coherence.jsonl}"
+FLYWHEEL_FLEET_COHERENCE_LATEST="${FLYWHEEL_FLEET_COHERENCE_LATEST:-$HOME/.local/state/flywheel/fleet-coherence-latest.json}"
+FLYWHEEL_FLEET_COHERENCE_SUPPRESSIONS="${FLYWHEEL_FLEET_COHERENCE_SUPPRESSIONS:-$PWD/.flywheel/fixtures/fleet-coherence-suppressions-v2.jsonl}"
+FLYWHEEL_FLEET_COHERENCE_STEP4I_MODE=actions
+FLYWHEEL_FLEET_COHERENCE_ACTION_APPLY=1   # ignored when tick runs --dry-run
+```
+
+Receipt fields:
+- `fleet_coherence_step4i.status`
+- `fleet_coherence_step4i.receipt_decisions[]`
+- `fleet_coherence_step4i.receipt_event_ids[]`
+- `fleet_coherence_step4i.open_decision_count`
+- `fleet_coherence_step4i.dedupe_duplicate_count`
+- `fleet_coherence_step4i.suppressed_count`
+- `fleet_coherence_step4i.closed_count`
+- `fleet_coherence_step4i.malformed_rows`
+- `fleet_coherence_step4i.latest_stale`
+- `fleet_coherence_step4i.action_decisions[]`
+- `fleet_coherence_step4i.bead_decision_count`
+- `fleet_coherence_step4i.no_bead_reason_count`
+- `fleet_coherence_step4i.repair_receipts[]`
+- `fleet_coherence_step4i.fleet_repair_dispatch_count`
+- `fleet_coherence_step4i.l62_callback_violation_count`
+- `fleet_coherence_step4i.missing_drill_ids_count`
+- `fleet_coherence_step4i.protected_client_guard_count`
+- `fleet_coherence_step4i.mutation_apply`
+
+SOFT: `orch_fleet_coherence_step4i_degraded`,
+`orch_fleet_coherence_step4i_latest_stale`,
+`orch_fleet_coherence_step4i_malformed_rows`,
+`orch_fleet_coherence_l62_callback_violation`,
+`orch_fleet_coherence_missing_drill_ids`,
+`orch_fleet_coherence_protected_client_guard`.
+
+Action rules:
+- Every actionable open event resolves to exactly one `bead_id` or
+  `no_bead_reason` decision.
+- `FLEET_REPAIR` receipts require callback fields `sd_count` and `sd_ids`;
+  missing fields emit `l62_callback_violation` and a failed repair receipt.
+- Recovery actions requiring drills need five green `recovery_drill_ids`.
+- Protected-client sessions refuse unsafe kill/spawn/restart actions unless the
+  event carries an approved recovery pathway.
+
+**Step 4i.1: Vibe Cockpit observability probe (NEW 2026-05-03 — see bead `flywheel-tbp`, paired with `flywheel-m964` canonical CLI scoping pattern; L65 measurement hook).**
+
+`vc` is a PATH-collision-prone surface: bare `vc` may resolve to Vercel CLI, not
+Vibe Cockpit. This step is the canonical tick-time measurement for **L65 —
+CLI-IDENTITY-BEATS-COMMAND-NAME** (`.flywheel/rules/L019-L65-cli-identity-beats-command-name.md`).
+The probe wrapper records `command -v vc` + `realpath` + `vc --help` semantic
+identity check before trusting output. Tick must use the wrapper, never bare
+`vc`:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/vc-observability-probe.sh --doctor --json
+```
+
+Record the probe result in the tick receipt:
+- `vc_status` from `.vc_status` (`ok|degraded|unavailable`)
+- `vc_alerts_count` from `.vc_alerts_count`
+- `vc_digest_summary` from `.vc_digest_summary`
+- `vc_collector_health` from `.vc_collector_health` (`X/16` latest collector successes)
+- `vc_repo_coverage` from `.vc_repo_coverage` (`N/8` target fleet repos visible)
+- `vc_ledger_growth_per_cycle` from `.vc_ledger_growth_per_cycle`
+- Optional: `vc_version`, `vc_bin`, `vc_observability_warnings`
+
+The probe is fail-open. If Vibe Cockpit is missing, locked, unhealthy, or its
+JSON shape changes, append SOFT violation `orch_vc_observability_degraded`,
+record the warning fields, and continue the tick. This is observability for
+doctrine awareness, not a dispatch hard gate.
+
+**Step 4j: Mission-lock age probe (NEW 2026-05-03 — see bead `flywheel-2xmq.1`, completes the `flywheel-m964`/`flywheel-tbp` doctrine observability trio).**
+
+Run the canonical mission-lock probe for the current repo:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/mission-lock-age-probe.sh --repo <repo> --doctor --json
+```
+
+Add these fields to the tick receipt:
+- `mission_lock_age_hours`
+- `mission_lock_status` (`fresh|stale-warn|stale-error|unlocked|missing`)
+- `mission_lock_id`
+- `lock_hash_matches_lock_log`
+
+If `mission_lock_status=stale-error`, append SOFT violation
+`orch_mission_lock_stale_error` and surface it as a fleet flag for cross-repo
+synthesis. If `lock_hash_matches_lock_log=false`, append SOFT violation
+`orch_mission_lock_log_mismatch`. The probe is read-only and must never relock
+MISSION.md or mutate `lock-log.jsonl`.
+
+**Step 4l: Leverage-ceiling probe (NEW 2026-05-03 — see dispatch `leverage-ceiling-probe-build-2026_05_03`, bitter-lesson infographic `~/Downloads/IMG_2A1C3D62DDB5-1.jpeg`, and `donella-meadows-systems-thinking`).**
+
+Run the canonical leverage-ceiling probe:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/leverage-ceiling-probe.sh --doctor --json
+```
+
+Add these fields to the tick receipt:
+- `leverage_ceiling_score`
+- `leverage_ceiling_binding_constraint`
+- `leverage_ceiling_warnings`
+
+If the probe emits warnings, exits non-zero, returns invalid JSON, or cannot
+observe one of the three leverage stocks (accounts, worker panes, token budget),
+append SOFT violation `orch_leverage_ceiling_observability_degraded`, preserve
+the warning fields, and continue the tick. This is Meadows #6 information flow,
+#9 delay shortening, and #8 negative feedback loop strength for the bitter-lesson
+triple: accounts, machines/panes, and tokens.
+
+**Step 4m: Dicklesworthstone signal extraction gate (NEW 2026-05-09 -- see bead `flywheel-xyrq`, skill `dicklesworthstone-stack`, and the 4-state Jeff signal gate).**
+
+Run the canonical signal-gate helper once per tick-day:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/dicklesworthstone-signal-gate.py \
+  tick --repo /Users/josh/Developer/flywheel --apply --auto-file-beads --json
+```
+
+The helper reads `~/.local/state/dicklesworthstone-stack/signal-ledger.jsonl`
+and `signal-outcomes.jsonl` and enforces daily extraction discipline:
+
+- If `active_signal_count` (`seen` + `noted`) is greater than 3, file exactly
+  one P2 ranked-promotion bead so a worker picks one signal for
+  extract/archive disposition.
+- If no signal advanced today, append one
+  `daily_no_advance` row with `no_advance_reason` to
+  `~/.local/state/flywheel/dicklesworthstone-signal-gate.jsonl`.
+- If 7+ days pass with zero extractions across all sources, file one P1
+  doctrine-drift bead.
+
+Receipt fields:
+- `dicklesworthstone_signal_active_count`
+- `dicklesworthstone_signal_advanced_today_count`
+- `dicklesworthstone_signal_no_advance_reason`
+- `dicklesworthstone_signal_ranked_promotion_bead`
+- `dicklesworthstone_signal_doctrine_drift_bead`
+- `dicklesworthstone_signal_beads_filed_count`
+
+SOFT violations:
+- `orch_skipped_dicklesworthstone_signal_gate` when Step 4m did not run.
+- `orch_dicklesworthstone_signal_gate_degraded` when the helper cannot read
+  the ledger or emits invalid JSON.
+- `orch_dicklesworthstone_signal_no_daily_decision` when neither
+  `advanced_today_count >= 1` nor `no_advance_reason` is present.
+
+**Step 4n: Constant gap-hunt probe (NEW 2026-05-03 — see bead `flywheel-2xdi`, dispatch `b10-constant-gap-hunter-build-2026_05_03`, and `donella-meadows-systems-thinking`).**
+
+Run the canonical gap-hunt probe:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/gap-hunt-probe.sh --doctor --json
+```
+
+Add these fields to the tick receipt:
+- `gaps_total`
+- `gaps_new_this_tick`
+- `gap_class_distribution`
+- `gap_warnings`
+
+If the probe emits warnings, exits non-zero, returns invalid JSON, or cannot
+observe one of the eight configured gap classes, append SOFT violation
+`orch_gap_hunt_probe_degraded`, preserve the warning fields, and continue the
+tick. This is Meadows #4 self-organization: the tick continuously discovers
+missing measurement, routing, publishing, follow-up, and synthesis loops instead
+of waiting for Joshua to rediscover them manually.
+
+**Step 4o: Value-gap hunter (NEW 2026-05-04 -- see bead `flywheel-1rmp`, Joshua directive "what else can we add value to that we're not thinking of currently").**
+
+Run the canonical value-gap probe. This is not a normal health probe. It asks
+which high-leverage measurement the flywheel is not asking for yet, rotates
+through ten dimensions, and files at most one low-priority bead per real tick.
+It must never dispatch directly from the finding.
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/value-gap-probe.sh --json
+```
+
+Initial dimensions:
+1. Cross-repo failure-mode harvester
+2. Skill bandit auto-experiments
+3. Customer-facing observability
+4. Cost telemetry / token burn rate per dispatch
+5. Cross-skill dependency graph
+6. Mobile-eats end-user health
+7. Operator fatigue gate
+8. Cross-time synthesis
+9. Adversarial/red-team orchestrator self-audit
+10. Public artifact pipeline
+
+Add these fields to the tick receipt:
+- `value_gap_dimension_scanned`
+- `value_gap_finding`
+- `bead_filed_id`
+- `value_gap`
+
+Guardrails:
+- Lower priority than FLEET_REPAIR, DISPATCH_BEAD, VALIDATE, and callback reap.
+- File a bead, do not dispatch it directly.
+- Cap one value-gap bead per tick.
+- Dry-run mode must not mutate bead state or the value-gap ledger.
+
+**Dimension-1 measurement: cross-repo-failure-mode-harvester** (bead
+`flywheel-1rmp.2`). Read-only aggregator over memory feedback files'
+`trauma_class:` field + per-repo `INCIDENTS.md` `## ` headers. Surfaces
+trauma classes appearing in N+ sources (default N=2) BEFORE the third
+rediscovery, so the orchestrator can decide on doctrine promotion before
+a class becomes load-bearing in three places.
+
+```bash
+.flywheel/scripts/cross-repo-failure-mode-harvester.sh --json
+```
+
+Self-logs to `~/.local/state/flywheel/cross-repo-failure-mode-harvester.jsonl`
+on every run. Per Step 4o anti-pattern guardrail: SURFACES candidates
+only — does NOT auto-file beads or auto-dispatch. The orchestrator
+consumes the JSONL ledger or invokes the script live to decide whether
+a recurring class should escalate (memory promotion to INCIDENTS,
+INCIDENTS promotion to AGENTS L-rule, or fleet-wide bead).
+
+**Dimension-3 measurement: customer-facing-observability** (bead
+`flywheel-1rmp.4`). Read-only per-client aggregator over each client
+repo's `.beads/issues.jsonl` (bead state aggregates, ready/stale/
+closed-last-7d counts), `.flywheel/last_closeout_receipt.json` (last
+shipped close age), `.flywheel/dispatch-log.jsonl` (recent activity),
+and `INCIDENTS.md` (open trauma surface count). Default client roster
+is `alpsinsurance terratitle` (Blackfoot Telecom runs on external
+substrate, so no flywheel-managed repo to probe).
+
+```bash
+.flywheel/scripts/customer-facing-observability.sh --json
+```
+
+Self-logs to `~/.local/state/flywheel/customer-facing-observability.jsonl`
+on every run. Per Step 4o anti-pattern guardrail: SURFACES per-client
+risk_signals and value_signals only — does NOT auto-dispatch client
+work. The orchestrator (or Joshua) decides when a customer-visible
+risk signal warrants action.
+
+**Dimension-9 measurement: adversarial-orchestrator-self-audit** (bead
+`flywheel-1rmp.10` shipped, `flywheel-myfak` wired, `flywheel-myfak.1`
+executed). Read-only adversarial sweep of orchestrator behavior:
+punt_phrase_count + mission_drift_count + unaddressed_skill_routes +
+recent_closed_beads_without_evidence.
+
+```bash
+.flywheel/scripts/adversarial-orch-self-audit-probe.sh --json
+```
+
+Self-logs to `~/.local/state/flywheel/adversarial-orch-self-audit-probe-runs.jsonl`
+on every run. Per Step 4o anti-pattern guardrail: SURFACES findings only —
+does NOT auto-file beads, does NOT auto-dispatch, does NOT mutate state.
+Read-only by design (br/ntm/gh/git/agent-mail untouched per probe header
+contract).
+
+**Step 4p: Jeff issue status probe (NEW 2026-05-03 -- see bead `flywheel-vnsw`, L63, and ntm#117 dogfood loop).**
+
+Run the canonical Jeff issue status probe:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-issues-status-probe.sh doctor --json
+```
+
+Add these fields to the tick receipt:
+- `jeff_status`
+- `jeff_status_stale_open_count`
+- `jeff_tracked_issue_count`
+
+If the probe emits warnings, exits non-zero, returns invalid JSON, or cannot
+read tracked issue state, append SOFT violation
+`orch_jeff_issue_status_degraded`, preserve raw status fields, and continue.
+This probe is read-only and fail-open; it must not post GitHub comments or edit
+issue state during tick.
+
+**Step 4p.1: Jeff fixes pull probe (NEW 2026-05-03 -- see bead `flywheel-vnsw` and Jeff upstream-response dogfood loop).**
+
+Run the dry-run Jeff fixes pull probe:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-fixes-pull-probe.sh --dry-run --json
+```
+
+Add these fields to the tick receipt:
+- `jeff_fixes`
+- `jeff_fixes_status`
+
+If the puller is missing, exits non-zero, returns invalid JSON, or detects a
+candidate update that cannot be verified, append SOFT violation
+`orch_jeff_fixes_pull_probe_missing`, preserve probe fields, and continue.
+This is an observability probe only; tick must not pull, merge, or apply Jeff
+fixes from this step.
+
+**Step 4q: STATE.md latent opportunity miner (NEW 2026-05-04 -- see bead `flywheel-b6zk`, `/flywheel:learn --mine-state`, and AGENTS.md L62).**
+
+Run the canonical STATE.md miner in doctor mode:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/state-md-miner.sh --doctor --json
+```
+
+The miner scans fleet `.flywheel/STATE.md` and root `STATE.md` files for five
+classes: unresolved, stale, pattern, recurring, and orphaned. Each applied
+discovery must become a bead, an existing-bead reference, or an explicit
+`no_bead_reason`; automatic bead creation is capped at 5 per day per repo.
+
+Add these fields to the tick receipt:
+- `state_md_unmined_count`
+- `state_md_last_run_age_hours`
+- `state_md_class_counts`
+- `state_md_top_findings`
+
+If the probe emits warnings, exits non-zero, returns invalid JSON, or cannot
+read fleet state, append SOFT violation `orch_state_md_miner_degraded`, preserve
+warning fields, and continue. If `state_md_unmined_count > 0`, the tick should
+prefer `run_state_md_mining` after higher-priority VALIDATE and callback work.
+
+**Step 4r: Agent Mail FD doctor (NEW 2026-05-03 -- see bead `flywheel-vnsw`, shipped probe `agent-mail-fd-doctor.sh`).**
+
+Run the canonical Agent Mail FD doctor:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/agent-mail-fd-doctor.sh --doctor --json
+```
+
+Add these fields to the tick receipt:
+- `agent_mail_fd_status`
+- `agent_mail_fd_total_fds`
+- `agent_mail_fd_lock_fd_count`
+- `agent_mail_fd_exit_code`
+- `agent_mail_fd_warnings`
+
+If the probe emits warnings, exits non-zero, returns invalid JSON, or cannot
+locate the Agent Mail launchd child process, append SOFT violation
+`orch_agent_mail_fd_doctor_degraded`, preserve warning/check fields, and
+continue. This is a pressure signal, not a hard dispatch gate.
+
+**Step 4s: Mobile-eats receipt bridge health (NEW 2026-05-03 -- see bead `flywheel-vnsw`, sibling receipt bridge Path A).**
+
+Run the canonical mobile-eats receipt bridge in doctor mode:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/mobile-eats-receipt-bridge.sh --doctor --json
+```
+
+Add these fields to the tick receipt:
+- `mobile_eats_receipt_status`
+- `mobile_eats_last_run_ts`
+- `mobile_eats_latest_tick_decision`
+- `mobile_eats_closed_beads_since`
+- `mobile_eats_bridge_warnings`
+
+If the bridge emits warnings, exits non-zero, returns invalid JSON, or cannot
+find the mobile-eats loop receipts, append SOFT violation
+`orch_mobile_eats_receipt_bridge_degraded`, preserve warning fields, and
+continue. The bridge is read-only; it must not edit the mobile-eats driver.
+
+**Step 4s.1: Skillos loop receipt health (NEW 2026-05-03 -- see bead `flywheel-vnsw` and L57 loop-driver receipts).**
+
+Read the canonical skillos loop receipt:
+
+```bash
+jq . /Users/josh/.local/state/flywheel-loop/last_tick_skillos.json
+```
+
+Add this field to the tick receipt:
+- `skillos_loop`
+
+If the receipt is missing, stale, invalid JSON, or lacks `ts`/`task_id`, append
+SOFT violation `orch_skillos_loop_receipt_degraded`, preserve the receipt path
+and warning fields, and continue. This is a read-only receipt bridge; it must
+not start, stop, or repair the skillos loop.
+
+**Step 4t: Codex watchtower doctor (NEW 2026-05-03 -- see bead `flywheel-ezyf`, skill `codex-cli-tracker`, upstream #12645, and frozen-pane-detector v2 commit `e493cca`).**
+
+Run the Codex watchtower summary and tracker doctor. This check is read-only in
+tick; the scheduled daily ingest owns GitHub pulls and ledgers.
+
+```bash
+/Users/josh/.local/bin/codex-watchtower-daily.sh --summary --json
+/Users/josh/.claude/skills/codex-cli-tracker/scripts/codex-tracker-probe.sh --doctor --json
+/Users/josh/Developer/flywheel/.flywheel/scripts/frozen-pane-detector.sh --session="$SESSION" --json
+```
+
+Add these fields to the tick receipt:
+- `codex_watchtower_status`
+- `codex_new_issues_24h`
+- `codex_relevant_issues`
+- `codex_pinned_version`
+- `codex_warnings`
+
+If watchtower, tracker probe, or detector v2 emits warnings, exits non-zero,
+returns invalid JSON, or reports `schema_version` other than
+`frozen-pane-detector.v2`, append SOFT violation
+`orch_codex_watchtower_degraded`, preserve warning fields, and continue.
+
+When `codex_relevant_issues` includes `#12645` and frozen-pane-detector v2
+reports `frozen_strike_count_7d >= 3`, auto-file or update a bead linking the
+upstream issue, fuckup class `frozen-codex-spinner-misclassified-as-thinking`,
+and recovery primitive:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/frozen-pane-detector.sh --session="$SESSION" --auto-recover --json
+```
+
+The recovery primitive is detector v2, not bare Enter. v2 separates UNKNOWN
+from FROZEN and uses idempotency leases, so Ctrl-C/relaunch can be applied
+without double recovery after an interrupted tick.
+
+**Step 4u: Daily Jeff ingest doctor (NEW 2026-05-03 -- see L63 and bead `flywheel-vnsw`).**
+
+Run the canonical Jeff intel network doctor only:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-intel-network.sh doctor --json
+```
+
+Add these fields to the tick receipt:
+- `daily_jeff_ingest_status`
+- `daily_jeff_ingest_sources_file`
+- `daily_jeff_ingest_deps_missing`
+- `daily_jeff_ingest_warnings`
+
+If the doctor reports missing dependencies, exits non-zero, returns invalid
+JSON, or cannot find the source list, append SOFT violation
+`orch_daily_jeff_ingest_degraded`, preserve dependency fields, and continue.
+Do not run the ingest mutation path from tick; scheduled ingest owns snapshots,
+mirrors, and bead filing.
+
+**Step 4v: Fleet onboarding doctor (NEW 2026-05-03 -- see bead `flywheel-vhl5.1` and `flywheel-vnsw`).**
+
+Run the canonical onboarding doctor in dry-run mode for each fleet-roster repo:
+
+```bash
+ROSTER="$HOME/.local/state/flywheel/fleet-roster.json"
+jq -r '
+  if type == "array" then .[]? | (.repo // .path // empty)
+  elif (.repos? | type == "array") then .repos[]? | (.repo // .path // empty)
+  else empty end
+' "$ROSTER" 2>/dev/null | sort -u | while IFS= read -r repo; do
+  [ -n "$repo" ] || continue
+  /Users/josh/Developer/flywheel/.flywheel/scripts/flywheel-onboard.sh --repo "$repo" --dry-run --doctor --json
+done | jq -s '{checked_repos:length, rows:.}'
+```
+
+Add these fields to the tick receipt:
+- `fleet_onboard_status`
+- `fleet_onboard_checked_repos`
+- `fleet_onboard_limping_repos`
+- `fleet_onboard_missing_repos`
+- `fleet_onboard_warnings`
+
+**Step 4w: Agent Mail inbox pre-tick (NEW 2026-05-03 -- see bead `flywheel-2b6`, L58, and L61).**
+
+Run the read-only inbox check for the current orchestrator identity:
+
+```bash
+SESSION="$SESSION" ORCH_PANE="$TARGET_PANE" /Users/josh/Developer/flywheel/.flywheel/scripts/inbox-check-tick-step.sh
+```
+
+The helper only fires for `SESSION=flywheel`, where the orchestrator inbox
+identity is `RubyCreek`. Peer sessions return `{"action":"noop","reason":"not_flywheel_session"}`.
+
+Add these fields to the tick receipt when available:
+- `inbox_check_action`
+- `inbox_unread_count`
+- `inbox_identity`
+- `inbox_auto_reply`
+- `inbox_messages`
+
+If unread messages are present, include an `## Inbox pre-tick (<identity>)`
+block in the tick prompt with message ids, senders, subjects, and excerpts.
+The script MUST NOT auto-reply, mark messages read, or acknowledge messages.
+The orchestrator decides each reply manually via Agent Mail `reply_message`;
+when it replies, it also sends a paired `ntm send` notification to the sender's
+session/pane per L61. Token files are existence-checked only and token values
+must never be printed.
+
+If any repo reports `LIMPING`, `MISSING`, `STALE`, `BLOCKED`, invalid JSON, or
+the roster cannot be read, append SOFT violation
+`orch_fleet_onboard_probe_degraded`, preserve per-repo rows, and continue.
+Stamp/sync/upgrade modes remain Joshua-approved mutation paths and must not be
+triggered by tick.
+
+**Step 4x: Jeff philosophy doctor (NEW 2026-05-05 -- see bead `flywheel-k5yp`, L64, and `/flywheel:jeff-philosophy`).**
+
+Run the read-only Jeff philosophy doctor:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-philosophy-mine.sh doctor --json
+```
+
+Add these fields to the tick receipt:
+- `jeff_philosophy_status`
+- `jeff_philosophy_pattern_count`
+- `jeff_philosophy_complete_pattern_count`
+- `jeff_philosophy_latest_snapshot_path`
+- `jeff_philosophy_patterns_jsonl_exists`
+
+Tick must not run `--deep-mine`, `--daily-snapshot`, `repair --apply`, or any
+other mutation path. Scheduled jobs and explicit `/flywheel:jeff-philosophy`
+operator calls own those writes. If doctor fails or patterns are absent, append
+SOFT violation `orch_jeff_philosophy_degraded`, preserve the read-only fields,
+and continue.
+
+**Step 4y: Coordinator bleed ledger watch (NEW 2026-05-08 -- see bead `flywheel-ks8m` and pinned coordinator bleed guard).**
+
+Run the bleed-ledger doctor:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/bleed-ledger-watch.sh --doctor --json
+```
+
+Add these fields to the tick receipt:
+- `bleed_event_count_24h`
+- `bleed_session_top`
+- `bleed_repo_top`
+- `bleed_warnings`
+- `bleed_fix_bead_action`
+
+If `bleed_event_count_24h > 0`, auto-file the structural repair bead in the
+same tick:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/bleed-ledger-watch.sh --doctor --apply --json
+```
+
+This is fail-open for tick continuity but must append SOFT violation
+`orch_coordinator_bleed_detected` when any bleed row is observed. Malformed
+ledger rows append SOFT violation `orch_coordinator_bleed_ledger_malformed` and
+do not create a fix bead unless valid bleed rows are also present.
+
+**Step 4z: Coordinator daemon health (NEW 2026-05-08 -- see bead `flywheel-0lxh` and the T2A launchd plist).**
+
+Run the read-only coordinator daemon doctor:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/coordinator-daemon-health.sh --doctor --json
+```
+
+Add these fields to the tick receipt:
+- `coordinator_daemon_alive`
+- `coordinator_daemon_pid`
+- `coordinator_daemon_uptime_seconds`
+- `coordinator_daemon_log_lines_5m`
+- `coordinator_daemon_launchctl_alive`
+- `coordinator_daemon_auto_assign_enabled`
+- `coordinator_daemon_soft_violations`
+
+This check is fail-open for maintenance and tick continuity. If
+`coordinator_daemon_alive=false` while `auto_assign=true`, preserve the doctor
+fields and append SOFT violation `orch_coordinator_daemon_down`. If the daemon
+is intentionally stopped, run the probe with `--maintenance` or create
+`~/.local/state/flywheel/coordinator-daemon-maintenance`; the tick records
+`maintenance_reason=intentional_maintenance` and continues without dispatch
+halt.
+
+**Step 4z.1: Dispatch-log v2 schema validator (NEW 2026-05-09 -- see bead `flywheel-yu8g`, validator `.flywheel/scripts/dispatch-log-schema-validator.sh`, schema `.flywheel/validation-schema/v1/dispatch-log-entry-v2.schema.json`).**
+
+Run the bounded read-only doctor wrapper that validates only the most recent
+N rows of `.flywheel/dispatch-log.jsonl` against the v2 schema:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/dispatch-log-v2-violations-doctor.sh \
+  doctor --repo "$PWD" --tail "${FLYWHEEL_DISPATCH_LOG_V2_TAIL:-100}" --json
+```
+
+Parse the JSON packet and add these fields to the tick receipt:
+- `dispatch_log_v2_violations_count`
+- `dispatch_log_v2_total_rows_checked`
+- `dispatch_log_v2_malformed_count`
+- `dispatch_log_v2_missing_fitness_class_count`
+- `dispatch_log_v2_missing_fitness_claim_count`
+
+The wrapper exits `0` on PASS (count == 0) and `1` on FAIL (count > 0). When
+count > 0, append a SOFT violation `dispatch_log_v2_violations_present
+count=<N> tail=<N>` to the tick receipt and prefer Decision = HOLD over a
+fresh dispatch — workers must stop emitting v2-non-conformant rows before
+substrate-tier orchestrator decisions absorb the drift. Fail-closed is
+intentional: dispatch-log is the only ledger that tracks dispatch->callback
+fanout; bad rows there silently break callback reap, idle-worker refill, and
+mission-fitness audit. The doctor surface (`flywheel-loop doctor --json`) also
+exposes `dispatch_log_v2_violations_count` so peer orchestrators and the
+fleet-coherence latest probe see the same number.
+
+This step is fail-open for tick continuity if the validator script is
+missing or the log file is absent: the wrapper emits `status=warn` with a
+typed warning code and the tick continues. Missing validator is a substrate
+gap the orchestrator should auto-bead; missing log is a fresh repo signal.
+
+### Step 5: Decision
+
+Based on steps 1-4, emit one of:
+
+| Decision | When | Action |
+|----------|------|--------|
+| `IDLE_CLEAN` | No work needed, all healthy, fleet healthy, and (`tier != doctrine` OR `idle_workers == 0`) | Write receipt, no dispatch |
+| `LEARN_REVIEW` | >=3 unprocessed fuckups | Run `/flywheel:learn --review` |
+| `DISPATCH_BEAD` | Ready beads exist + idle workers | Pick highest-priority bead, dispatch |
+| `DOCTRINE_HUNT` | Doctrine tier + fleet healthy + idle workers > 0 + no higher-priority decision | Scan for value-adding work and dispatch |
+| `SUBSTRATE_WARN` | Autoloop unhealthy or missing | Surface warning, no dispatch |
+| `CROSS_REPO_SYNTH` | Doctrine tier + multiple repos ticked | Run `/flywheel:synth` |
+| `FLEET_REPAIR` | Step 4 raised P1/P2 flags | Auto-dispatch fixes to idle workers |
+
+Priority: `FLEET_REPAIR` > `LEARN_REVIEW` > `DISPATCH_BEAD` > `DOCTRINE_HUNT` > `CROSS_REPO_SYNTH` > `IDLE_CLEAN`.
+`SUBSTRATE_WARN` overrides all if autoloop is down.
+
+For `doctrine` tier (flywheel repo), prefer `FLEET_REPAIR`, `DOCTRINE_HUNT`, or `CROSS_REPO_SYNTH`.
+`IDLE_CLEAN` is forbidden for doctrine tier while any worker is idle unless the
+`DOCTRINE_HUNT` checklist below found no dispatchable work and the receipt
+documents each miss.
+For `active_*` tiers, prefer `DISPATCH_BEAD` if work exists.
+
+#### DOCTRINE_HUNT checklist
+
+When `tier=doctrine`, fleet health has no higher-priority repair, and
+`idle_workers > 0`, scan these checks in order and dispatch the first hit:
+
+1. **Stale STATE.md files.** Find flywheel-initialized repos whose
+   `.flywheel/STATE.md` or root `STATE.md` has not been updated in >48h.
+2. **Repos not autoloop-ticked.** Find opted-in repos whose latest autoloop tick
+   receipt or tick log entry is older than 24h.
+3. **Undispatched flywheel next actions.** Read the flywheel repo's
+   `.flywheel/STATE.md` next actions and compare against `.flywheel/dispatch-log.jsonl`;
+   dispatch the first actionable item without a live or completed dispatch.
+4. **Cross-repo doctrine drift.** Compare each repo's `AGENTS.md` doctrine hash
+   against the current `AGENTS-CANONICAL.md`/flywheel `AGENTS.md` hash and dispatch
+   a drift repair when they mismatch.
+5. **Skill gaps from recent fuckups.** Inspect recent classes in
+   `~/.local/state/flywheel/fuckup-log.jsonl`; if a class lacks
+   `should_become=skill` coverage or no matching skill exists under
+   `~/.claude/skills/`, dispatch skill-gap analysis.
+
+If all checks miss, the tick receipt must record `decision=IDLE_CLEAN`,
+`idle_workers`, and a concrete `doctrine_hunt_misses` array explaining why no
+dispatchable work existed.
+
+### Step 6: Write tick receipt
+
+Write to `~/.local/state/flywheel-loop/last_tick_<project>.json`:
+
+```json
+{
+  "ts": "<UTC ISO>",
+  "project": "<project>",
+  "tier": "<tier>",
+  "decision": "<IDLE_CLEAN|LEARN_REVIEW|DISPATCH_BEAD|DOCTRINE_HUNT|FLEET_REPAIR|...>",
+  "autoloop_receipts_read": <N>,
+  "fuckup_events_unprocessed": <N>,
+  "panes_checked": true,
+  "fleet_flags": ["<flag1>", "..."],
+  "dispatches_sent": <N>,
+  "callbacks_reaped": <N>,
+  "refilled_beads": ["<bead id dispatched after callback reap>"],
+  "refill_deferred_reason": "<reason or null>",
+  "deferred_beads": ["<issue if no idle workers>"],
+  "awareness_check": {"mission_anchor_read": true, "goal_state": "<locked|drift>", "state_freshness_hours": <number or null>, "last_3_receipts_read": <N>, "delta_flags": []},
+  "inbox_messages_handled": <N>,
+  "beads_filed_from_inbox": <N>,
+  "dispatches_from_inbox": <N>,
+  "inbox_skipped_reason": "<reason or null>",
+  "fuckups_to_beads": <N>,
+  "fuckups_no_bead_reason": <N>,
+  "fuckups_skipped": <N>,
+  "skillos_routed_count": <N>,
+  "skillos_routed_decisions": [{"decision": "<decision>", "target_skill_id": "<skill or null>", "count": <N>}],
+  "pagerank_top_5_blockers": [],
+  "dispatched_from_pagerank": "<bead id or null>",
+  "dual_channel_pct": <number or null>,
+  "l61_counter_examples": [],
+  "vc_status": "<ok|degraded|unavailable|null>",
+  "vc_alerts_count": <number or null>,
+  "vc_digest_summary": "<summary or null>",
+  "vc_collector_health": "<X/16|null>",
+  "vc_repo_coverage": "<N/8|null>",
+  "vc_ledger_growth_per_cycle": <number or null>,
+  "mission_lock_age_hours": <number or null>,
+  "mission_lock_status": "<fresh|stale-warn|stale-error|unlocked|missing|null>",
+  "mission_lock_id": "<id or null>",
+  "lock_hash_matches_lock_log": <boolean or null>,
+  "leverage_ceiling_score": <number or null>,
+  "leverage_ceiling_binding_constraint": "<accounts|machines|tokens|none|unknown|null>",
+  "leverage_ceiling_warnings": [],
+  "gaps_total": <number or null>,
+  "gaps_new_this_tick": <number or null>,
+  "gap_class_distribution": {},
+  "gap_warnings": [],
+  "state_md_unmined_count": <number or null>,
+  "state_md_last_run_age_hours": <number or null>,
+  "state_md_class_counts": {},
+  "state_md_top_findings": [],
+  "agent_mail_fd_status": "<PASS|WARN|FAIL|null>",
+  "agent_mail_fd_total_fds": <number or null>,
+  "agent_mail_fd_lock_fd_count": <number or null>,
+  "agent_mail_fd_exit_code": <number or null>,
+  "agent_mail_fd_warnings": [],
+  "mobile_eats_receipt_status": "<ok|warn|null>",
+  "mobile_eats_last_run_ts": "<UTC ISO or null>",
+  "mobile_eats_latest_tick_decision": "<decision or null>",
+  "mobile_eats_closed_beads_since": <number or null>,
+  "mobile_eats_bridge_warnings": [],
+  "codex_watchtower_status": "<CONFIRMED_CHANGED|CONFIRMED_UNCHANGED|UNKNOWN_UNHEALTHY|ok|warn|null>",
+  "codex_new_issues_24h": <number or null>,
+  "codex_relevant_issues": [],
+  "codex_pinned_version": "<version or null>",
+  "codex_warnings": [],
+  "daily_jeff_ingest_status": "<ok|degraded|null>",
+  "daily_jeff_ingest_sources_file": "<path or null>",
+  "daily_jeff_ingest_deps_missing": [],
+  "daily_jeff_ingest_warnings": [],
+  "fleet_onboard_status": "<HEALTHY|PARTIAL|LIMPING|MISSING|STALE|UNKNOWN|BLOCKED|null>",
+  "fleet_onboard_checked_repos": <number or null>,
+  "fleet_onboard_limping_repos": [],
+  "fleet_onboard_missing_repos": [],
+  "fleet_onboard_warnings": [],
+  "inbox_check_action": "<noop|surfaced|error|null>",
+  "inbox_unread_count": <number or null>,
+  "inbox_identity": "<agent-name|null>",
+  "inbox_auto_reply": false,
+  "inbox_messages": [],
+  "jeff_philosophy_status": "<pass|fail|null>",
+  "jeff_philosophy_pattern_count": <number>,
+  "jeff_philosophy_complete_pattern_count": <number>,
+  "jeff_philosophy_latest_snapshot_path": "<path or null>",
+  "jeff_philosophy_patterns_jsonl_exists": <boolean>,
+  "violations": [],
+  "action_taken": "<description or null>",
+  "next_tick_at": "<UTC ISO of next expected tick>"
+}
+```
+
+`panes_checked: true` means Step 3 successfully probed
+`/Users/josh/.local/bin/ntm --robot-activity` and interpreted the robot JSON.
+The core receipt JSON schema stays backward-compatible; optional observability
+fields such as `vc_status`, `vc_alerts_count`, `vc_digest_summary`,
+`vc_collector_health`, `vc_repo_coverage`, `vc_ledger_growth_per_cycle`,
+`mission_lock_age_hours`, `mission_lock_status`, `mission_lock_id`, and
+`lock_hash_matches_lock_log`, `leverage_ceiling_score`,
+`leverage_ceiling_binding_constraint`, `leverage_ceiling_warnings`,
+`gaps_total`, `gaps_new_this_tick`, `gap_class_distribution`, and
+`gap_warnings`, `state_md_unmined_count`, `state_md_last_run_age_hours`,
+`state_md_class_counts`, `state_md_top_findings`, `agent_mail_fd_status`, `agent_mail_fd_total_fds`,
+`agent_mail_fd_lock_fd_count`, `agent_mail_fd_exit_code`,
+`agent_mail_fd_warnings`, `mobile_eats_receipt_status`,
+`mobile_eats_last_run_ts`, `mobile_eats_latest_tick_decision`,
+`mobile_eats_closed_beads_since`, `mobile_eats_bridge_warnings`,
+`codex_watchtower_status`, `codex_new_issues_24h`,
+`codex_relevant_issues`, `codex_pinned_version`, `codex_warnings`,
+`daily_jeff_ingest_status`, `daily_jeff_ingest_sources_file`,
+`daily_jeff_ingest_deps_missing`, `daily_jeff_ingest_warnings`,
+`fleet_onboard_status`, `fleet_onboard_checked_repos`,
+`fleet_onboard_limping_repos`, `fleet_onboard_missing_repos`, and
+`fleet_onboard_warnings`, `inbox_check_action`, `inbox_unread_count`,
+`inbox_identity`, `inbox_auto_reply`, and `inbox_messages` may be absent in
+older receipts.
+
+All fields added after 2026-05-01 are optional for older readers. Missing
+optional fields mean unknown, not failure.
+
+### Step 7: Reap callbacks from prior dispatches
+
+Check for completed dispatch results:
+- Read `dispatch-log.jsonl` for entries with `callback_received_at=null`
+  and `callback_expected_by` in the past
+- For each, check if the output file exists (e.g. `/tmp/autoloop_fix_*.md`)
+- If output exists, update `callback_received_at` in dispatch-log
+- If overdue (>2× expected window), flag: `dispatch_callback_overdue`
+- Before summary, integration, bead closeout, or learn routing, pass the
+  dispatch task body/summary into `validate-callback`. If the task body matches
+  `(doctrine|INCIDENTS|canonical|L-rule|skill ship)` and the callback lacks
+  `agents_md_updated=yes|no`, `readme_updated=yes|no`, or required
+  `no_touch_reason=<reason>`, flag SOFT violation
+  `orch_callback_missing_l61_fields` and keep the callback in VALIDATE.
+
+### Step 7b: Refill idle workers after callback reap
+
+If Step 7 reaped any callback, immediately re-run Step 3 pane availability
+using `--robot-activity` before scheduling the next tick. Pick refill targets
+only from panes whose robot state is `WAITING`; `summary.by_state.WAITING` is
+the refill capacity count.
+
+Refill invariant:
+- If any worker pane is `WAITING` AND safe bead-backed work remains, immediately
+  dispatch the next bead via `/flywheel:dispatch` (which uses `ntm send`) in
+  the same tick.
+- Safe bead-backed work means repo-local ready work whose dependencies are met,
+  whose scope is agent-executable, and whose dispatch will include the callback
+  contract.
+- Only wait for the next scheduled tick if no worker pane is `WAITING` OR no safe
+  bead-backed work remains.
+- If no refill dispatch is sent, record the reason in the tick receipt:
+  `refill_deferred_reason="no_idle_worker|no_safe_work|pane_state_unhealthy|dispatch_blocked|dry_run"`.
+- If a refill dispatch is sent, increment `dispatches_sent`, append the bead id
+  to `refilled_beads`, and do not classify the tick as idle-clean.
+
+This closes the loop immediately after a worker frees capacity. Leaving a
+`WAITING` worker for the next scheduled tick while safe work remains is a SOFT
+violation: `orch_failed_to_refill_idle_worker`.
+
+#### Hot-pane refill after callback reap
+
+After callback reap, validation, close, and dispatch-log update, evaluate every
+pane whose callback was reaped before returning to the `/loop` wake-cycle:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/auto-refill-decision-log.sh \
+  --repo "$PROJECT_ROOT" \
+  --session "$SESSION" \
+  --pane "$PANE_THAT_RETURNED_CALLBACK" \
+  --role "$PANE_ROLE" \
+  --callback-task-id "$CALLBACK_TASK_ID" \
+  --apply \
+  --json
+```
+
+The refill path is:
+
+1. Re-check the pane with `/Users/josh/.local/bin/ntm --robot-activity="$SESSION"`.
+2. Continue only when the pane state is `WAITING`; a stale callback row is not
+   enough.
+3. Check fleet capacity before inspecting ready work.
+4. Read ready work with `~/.cargo/bin/br ready --json`.
+5. Pick the first unblocked bead matching the pane role/capability.
+6. Dispatch in the same tick through `/flywheel:dispatch <pane> <bead>`.
+7. Append a dispatch-log row with `event="auto_refill_after_reap"`.
+
+Capacity gate:
+
+```bash
+CAPACITY_FILE="${FLYWHEEL_FLEET_CAPACITY:-$HOME/.local/state/flywheel/fleet-capacity.json}"
+if [[ -s "$CAPACITY_FILE" ]]; then
+  MAX_IN_FLIGHT="$(jq -r '.max_in_flight_dispatches // .max_in_flight // .dispatch_budget // 4' "$CAPACITY_FILE")"
+else
+  MAX_IN_FLIGHT=4
+fi
+CURRENT_IN_FLIGHT="$(jq -sr '[.[] | select((.event=="dispatch_sent" or .event=="auto_refill_after_reap") and (.callback_received_at // null) == null)] | length' "$PROJECT_ROOT/.flywheel/dispatch-log.jsonl")"
+test "$CURRENT_IN_FLIGHT" -lt "$MAX_IN_FLIGHT"
+```
+
+`~/.local/state/flywheel/fleet-capacity.json` is the operator override. If it is
+missing, malformed, or omits a budget field, the default budget is 4 in-flight
+dispatches. The gate is fail-closed: at or above budget, write
+`reason="capacity_exceeded"` to the refill ledger and do not dispatch.
+
+If dispatch does not happen, record a skip row before scheduling the next tick.
+Allowed skip reasons are:
+`pane_busy_robot_activity_disagreed`, `capacity_exceeded`,
+`no_ready_beads_for_role`, and `joshua_blocker_class_X`.
+
+The tick receipt must include:
+
+```json
+{
+  "callbacks_reaped": 1,
+  "refilled_beads": ["flywheel-abc123"],
+  "auto_refill_after_reap": [
+    {
+      "pane": 4,
+      "decision": "dispatched",
+      "reason": null,
+      "next_bead_id": "flywheel-abc123"
+    }
+  ]
+}
+```
+
+### Step 8: Schedule next tick (if loop still active)
+
+Re-read `~/.flywheel/loops/<project>.json`. If `active=true`, schedule
+the next wakeup at the tier's interval via `ScheduleWakeup`.
+
+Interval mapping:
+- `doctrine` → 3600s (1h tick checks, 12h is the human-facing cadence but
+  we tick hourly to catch cross-repo state changes; IDLE_CLEAN is only valid
+  when no doctrine hunt work exists or no worker is idle)
+- `active_high` → 300s (5m)
+- `active_normal` → 1800s (30m)
+
+### Step 8b: L70 ticks-punted counter
+
+At tick close, after dispatch/refill decisions and before returning control to
+the loop driver, run this command and preserve the JSON receipt. This is a
+mandatory pre-return hook; prose acknowledgement is not evidence that the hook
+fired.
+
+```bash
+TICK_ID="<stable tick id from the receipt, e.g. ${project}-${ts}>"
+/Users/josh/Developer/flywheel/.flywheel/scripts/l70-ticks-punted-counter.sh \
+  --tick-id "$TICK_ID" \
+  --apply \
+  --json
+```
+
+This appends `~/.local/state/flywheel/l70-ticks-punted.jsonl` only at tick
+close. Omit `--apply` during dry-run ticks.
+
+**Audit twin (read-only).** The companion diagnostic
+`.flywheel/scripts/ticks-punted-probe.sh --json` reads the same
+`.flywheel/dispatch-log.jsonl` and reports `ticks_punted_count` plus a
+`malformed_rows[]` list. Run it when investigating a counter mismatch or
+a sudden change in the L70 trend — malformed-row count rising means the
+dispatch-log JSONL is being polluted by something other than the
+canonical writer, and the counter's input has silent corruption. The
+probe is read-only and safe to invoke from any pane:
+
+```bash
+.flywheel/scripts/ticks-punted-probe.sh --repo "$REPO" --json
+```
+
+### Step 8c: AGENTS.md fleet propagation advisory scan
+
+At tick close, after dispatch/refill decisions and before returning control to
+the loop driver, run the AGENTS.md fleet propagation probe in dry-run mode:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/agents-md-fleet-propagator.sh \
+  --record-scan \
+  --json
+```
+
+This reports `fleet_doctrine_drift_count` and `fleet_doctrine_drift_repos`
+without mutating any installed repo. Add `--apply` only for an explicit
+propagation repair tick.
+
+### Step 8d: Storage headroom watcher
+
+At tick close, after dispatch/refill decisions and before returning control to
+the loop driver, run the storage headroom watcher with the auto threshold:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/storage-headroom-watcher.sh \
+  --trigger tick \
+  --auto \
+  --json
+```
+
+The watcher defaults to dry-run behavior. `--auto` switches to `--apply` only
+when `disk_free_gb < 50.0`, uses a 55GB buffer, and stops pruning once it
+reaches 60GB or exhausts the safe category list. During dry-run ticks, omit
+`--auto`.
+
+### Step 8e: Tick-hook firing verifier
+
+Before a tick-close primitive can claim `tick_hook_wired=yes`, L116 requires it
+to be registered in the real process manifest:
+
+```bash
+jq -e '.schema_version == "tick-driver-manifest.v1" and (.primitives | length > 0)' \
+  /Users/josh/Developer/flywheel/.flywheel/scripts/tick-driver-manifest.json
+```
+
+The recurring process is `/Users/josh/.local/bin/flywheel-tick-driver`, loaded
+by `/Users/josh/Library/LaunchAgents/com.flywheel.tick.plist`. `tick.md` is the
+decision function; the driver is the process that makes registered primitives
+fire without a human/agent rereading this document.
+
+After all tick-close hooks above, run the verifier so tick receipts distinguish
+"no events" from "hook never fired":
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/tick-hook-firing-verifier.sh \
+  --apply \
+  --json
+```
+
+If any primitive is `invisibly_broken`, keep the tick open long enough to file
+or update the corresponding repair bead; do not report `tick_hook_wired=yes`
+from script presence alone.
+
+### Step 8f: Peer orchestrator drift probe
+
+At tick close, after all other tick-close hooks, run the peer-orch drift probe
+to detect mission-alignment drift across all fleet sessions:
+
+```bash
+DRIFT_JSON="$(
+  /Users/josh/Developer/flywheel/.flywheel/scripts/peer-orch-drift-probe.sh \
+    --json 2>/dev/null
+)" || DRIFT_EXIT=$?
+DRIFT_EXIT="${DRIFT_EXIT:-0}"
+```
+
+Parse the result:
+- If exit code 0: all sessions <20% drift — record
+  `peer_orch_drift_status=ok` and `peer_orch_drift_max_pct` in tick receipt.
+- If exit code 1 (20-40%): record `peer_orch_drift_status=warn`. Do NOT halt
+  the tick; the probe writes its own alert to
+  `~/.local/state/flywheel/peer-orch-drift-alerts.jsonl`.
+- If exit code 2 (>=40%): record `peer_orch_drift_status=critical`. Flag for
+  escalation in SOFT: `peer_orch_drift_critical`.
+
+Tick receipt fields from `$DRIFT_JSON`:
+- `peer_orch_drift_aligned_count` = `.aligned_session_count`
+- `peer_orch_drift_total_count` = `.total_session_count`
+- `peer_orch_drift_max_pct` = `.max_drift_pct`
+- `peer_orch_drift_dashboard_line` = `.dashboard_line`
+
+If `--dry-run`, pass `--dry-run` to the probe so no alerts are written.
+
+SOFT violation: `peer_orch_drift_probe_skipped` if Step 8f is absent from the
+tick receipt.
+
+Note: agent-mail delivery of ALIGNMENT WARNING messages is handled by the probe
+itself (via `~/.local/bin/agent-mail` if available, else JSONL-only). The tick
+need not re-send.
+
+## Dispatch Callback Contract
+
+Every dispatch from this tick MUST include callback instructions in the
+dispatch file. Workers cannot close the feedback loop if they don't know
+how to report back. The dispatch boilerplate must include:
+
+```markdown
+## Callback (REQUIRED)
+When done, send your results back to the orchestrator:
+1. Write results to /tmp/<output_file>.md
+2. Look up the callback_pane from ~/.local/state/flywheel/session-topology.jsonl for the target session:
+   `CALLBACK_PANE=$(jq -sr --arg s "<session>" 'map(select(.session == $s)) | sort_by(.effective_at) | last | .callback_pane // .orchestrator_pane' ~/.local/state/flywheel/session-topology.jsonl)`
+3. Send callback: ntm send <session> --pane="$CALLBACK_PANE" "Callback: task_id=<TASK_ID> status=done output=/tmp/<output_file>.md evidence_redacted=<yes|no|n/a>"
+If you hit a blocker: ntm send <session> --pane="$CALLBACK_PANE" "Callback: task_id=<TASK_ID> status=blocked reason=<one-line> evidence_redacted=<yes|no|n/a>"
+```
+
+## L61 Pairing (NEW 2026-05-01 — see flywheel-2yf)
+
+Every fleet-mail send (`mcp__mcp-agent-mail__send_message`) MUST be paired with
+an `ntm send` to the same recipient's session+pane containing the `message_id`
+and `project_key`, so the receiver fetches immediately. Async-only fleet-mail
+without ntm-poke is effectively dropped because orchestrators don't auto-poll
+inbox between explicit triggers.
+
+Without this, dispatched work is fire-and-forget — the orchestrator has to
+poll for results instead of being notified. This is the information flow
+that closes the Meadows feedback loop.
+
+## Output
+
+```
+TICK: <project> @ <tier> — <UTC ISO>
+
+  Autoloop: <N> receipts since last tick, last status=<status>
+  Fuckup-log: <N> unprocessed events
+  Awareness: mission=<read|missing>, goal=<locked|drift>, state_age=<hours|null>
+  Inbox: <N> handled, <N> dispatches, <N> beads
+  Fuckups: <N> beaded, <N> no-bead, <N> skipped
+  Skillos routed: <N> decisions surfaced
+  Panes: <idle-count> idle, <working-count> working
+  Fleet: <ready>/<opted_in> ready, flags: [<list>]
+  Bead graph: top blockers [<ids>], dispatched=<id|null>
+  L61: <cross-session N> messages, dual-channel=<pct|null>
+  VC: status=<ok|degraded|unavailable>, alerts=<N>, digest=<summary|null>
+  Mission lock: status=<fresh|stale-warn|stale-error|unlocked|missing>, age_hours=<N|null>, id=<id|null>
+  Leverage: score=<N|null>/1000, binding=<accounts|machines|tokens|none|unknown|null>, warnings=<N>
+  Gaps: total=<N|null>, new=<N|null>, top_class=<class|null>, warnings=<N>
+  Decision: <DECISION>
+  Action: <what was done, or "none">
+  Dispatches: <N> sent, <N> callbacks pending
+  Refill: <sent bead-id|deferred reason|not applicable>
+  Violations: <list or "none">
+
+  Next tick: <ISO timestamp>
+  Receipt: ~/.local/state/flywheel-loop/last_tick_<project>.json
+```
+
+## Constraints
+
+- **Phase A.1 scope.** 8 tick steps plus refill invariant: autoloop receipts,
+  fuckup-log, pane states, fleet self-diagnosis, decision, receipt, callback
+  reap, idle-worker refill, schedule next.
+- **SOFT mode only.** All violations are logged, none halt. Graduation to
+  WARN/HALT comes in Phase B when the L56 ladder query is wired up.
+- **No worker ticks.** `/flywheel:worker-tick` is a separate Phase B command.
+- **Doctrine tier special behavior.** When tier=doctrine, the tick focuses on
+  fleet health, cross-repo synthesis, and doctrine custodianship.
+- **No report-then-die.** When `tier=doctrine` and `idle_workers > 0`,
+  `IDLE_CLEAN` is a SOFT violation: `orch_idle_with_capacity`. The tick MUST
+  find work through `DOCTRINE_HUNT` or explicitly document why every hunt check
+  found no dispatchable work.
+- **Idempotent.** Running tick twice in quick succession produces the same
+  receipt (the second tick sees "last tick was <1min ago" and emits IDLE_CLEAN
+  only if the doctrine idle-worker guard is satisfied).
+- **Callback-first dispatch.** Every dispatch includes `ntm send` callback
+  instructions. Fire-and-forget dispatch is a SOFT violation:
+  `orch_dispatched_without_callback`.
+- **Awareness step required before dispatch decisions.** Step 1a must precede
+  any decision in Step 5. SOFT violation: `orch_skipped_awareness`.
+- **Inbox check graceful degrade.** Step 2b is conditional on `flywheel-1e8`
+  and `flywheel-bpd`. Until those land, log
+  `inbox_skipped_reason=no_identity_token` and proceed.
+- **Fuckup-bead-or-no-reason enforced.** Step 2c MUST decide each unprocessed
+  fuckup. SOFT violation: `orch_skipped_fuckup_decision`.
+- **Skillos routed decisions are read-only from flywheel.** Step 2c may read
+  `~/.local/state/flywheel/skillos-routed.jsonl` only through
+  `~/Developer/flywheel/.flywheel/scripts/skillos-routed-tail.sh`; routed-file
+  writes are skillos-owned.
+- **PageRank cadence.** Step 4g runs every 12 ticks OR on `DOCTRINE_HUNT` with
+  idle workers. Skipping when conditions are met is a SOFT violation:
+  `orch_skipped_pagerank`.
+- **L61 pairing enforced.** Step 4h audits last K cross-session messages.
+  Counter-example = SOFT violation `orch_l61_violation_ntm_only` or
+  `orch_l61_violation_mail_only`.
+- **Fleet-coherence consumer.** Step 4i is fail-open. Default mode is read-only:
+  it may write receipt fields, but must not run `br create`, finalize
+  `no_bead_reason`, or dispatch `FLEET_REPAIR`. Action mode requires explicit
+  `FLYWHEEL_FLEET_COHERENCE_STEP4I_MODE=actions`,
+  `FLYWHEEL_FLEET_COHERENCE_ACTION_APPLY=1`, and a non-`--dry-run` tick.
+- **Vibe Cockpit probe graceful degrade.** Step 4i.1 is fail-open. If the canonical
+  Vibe Cockpit CLI is missing or degraded, append
+  `orch_vc_observability_degraded`, preserve the warning in the receipt, and
+  continue.
+- **Mission-lock age probe is read-only.** Step 4j may warn on stale, unlocked,
+  missing, or lock-log-mismatched MISSION.md state, but it must not relock or
+  write mission files during tick.
+- **Leverage-ceiling probe graceful degrade.** Step 4l is fail-open. If the
+  canonical leverage probe is missing, degraded, or cannot observe an input
+  stock, append `orch_leverage_ceiling_observability_degraded`, preserve the
+  warning in the receipt, and continue.
+- **Gap-hunt probe graceful degrade.** Step 4n is fail-open. If the canonical
+  gap-hunt probe is missing, degraded, or cannot observe a gap class, append
+  `orch_gap_hunt_probe_degraded`, preserve the warning in the receipt, and
+  continue.
+- **Value-gap hunter lower priority.** Step 4o is a paradigm-tier scan for
+  missing measurements, not a health gate. It may file at most one P2/P3 bead
+  per real tick and never dispatches directly. Dry-run ticks must keep it
+  read-only.
+- **Agent Mail FD doctor graceful degrade.** Step 4r is fail-open. FD pressure,
+  missing launchd child process, or schema drift append
+  `orch_agent_mail_fd_doctor_degraded`, preserve probe checks, and continue.
+- **Mobile-eats receipt bridge graceful degrade.** Step 4s is fail-open and
+  read-only. Missing flagship receipts append
+  `orch_mobile_eats_receipt_bridge_degraded`, preserve bridge warnings, and
+  continue.
+- **Codex watchtower doctor-only in tick.** Step 4t never runs the GitHub ingest
+  mutation path. It reads the latest watchtower summary, verifies the pinned
+  Codex tracker, and cross-references frozen-pane-detector v2 strikes. Missing
+  ledgers, invalid JSON, stale pin, or detector schema drift append
+  `orch_codex_watchtower_degraded` and preserve `codex_warnings`.
+- **Daily Jeff ingest doctor-only in tick.** Step 4u never runs the ingest
+  mutation path. Missing dependencies append `orch_daily_jeff_ingest_degraded`
+  and scheduled ingest owns snapshots, mirrors, and bead filing.
+- **Fleet onboarding doctor dry-run only.** Step 4v may inspect fleet member
+  health but must not stamp, sync, or upgrade repos from tick. Non-healthy rows
+  append `orch_fleet_onboard_probe_degraded`, preserve per-repo rows, and
+  continue.
+- **Inbox check is surface-only.** Step 4w may read RubyCreek unread messages
+  and place excerpts in the prompt. It must not reply, mark read, ack, or touch
+  peer-orch identities. Replies require orchestrator decision plus paired L61
+  `ntm send` notification.
+- **Jeff philosophy is doctor-only in tick.** Step 4x reads the current pattern
+  catalog and latest daily snapshot path. It never runs deep-mine or
+  daily-snapshot mutation from tick; absent patterns append
+  `orch_jeff_philosophy_degraded`.
+
+## Cross-references
+
+- Architecture plan: `.flywheel/PLANS/flywheel-loop-tick-contracts-validation-architecture-2026-04-30.md` §3
+- Loop command: `/flywheel:loop` (activates/stops the pulse that calls this)
+- Autoloop: `~/.claude/skills/.flywheel/bin/flywheel-autoloop` (L0 substrate scan)
+- Learn command: `/flywheel:learn` (invoked by tick when fuckups accumulate)
+
+## Observability Hooks (doctrine-to-measurement map)
+
+Tick steps measure named doctrine rules so `gap-hunt-probe.sh`'s
+`doctrine-without-measurement` class stays clean. When a rule is added to
+AGENTS.md, mirror it here with the step that proves it.
+
+- **L60 — LOOP-INTEGRITY-5-SIGNAL-CONTRACT**
+  (`.flywheel/rules/L014-L60-loop-integrity-5-signal-contract.md`).
+  Five signals — ledger writes, pane state change, receipt files,
+  callback received, fuckup decisions — must all fire within the loop
+  interval for HEALTHY.
+  - Step 1 reads autoloop receipts (signals 1, 3) — `last_tick_<project>.json`
+    mtime within interval and `<repo>/.flywheel/ticks/*.json` count.
+  - Step 2 reads fuckup-log decisions since last tick (signal 5).
+  - Step 3 verifies worker pane states with `state_since` age (signal 2).
+  - Step 7 reaps callbacks from `<repo>/.flywheel/dispatch-log.jsonl`
+    (signal 4) within 2*interval.
+  - Step 5 (decision) emits HEALTHY/LIMPING/DEAD verdict against the
+    5-signal AND-not-OR rule.
+
+## SEE ALSO
+
+- `/flywheel:loop` for activating or inspecting cadence.
+- `/flywheel:worker-tick` for dispatched worker execution.
+- `/flywheel:deep-audit` for doctrine-tier violation review.
