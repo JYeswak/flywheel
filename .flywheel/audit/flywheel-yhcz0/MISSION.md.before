@@ -37,7 +37,7 @@ provenance_note: Backfilled from the flywheel legacy compact live mission withou
   Expected: literal `ok`. Failure means the orientation marker, lock-hash, source SHA, or content body has drifted (the `wc -l >= 100` floor proves the locked body was not truncated to a stub).
 - **Provenance.** Source path and SHA are pinned in the metadata block above (`source_path`, `source_sha256`, `template_hash`). Mission anchor extension on 2026-05-04 is named in the body. Lock-log integrity is the canonical "did anyone touch this" signal — check via `git log -p /Users/josh/Developer/flywheel/.flywheel/MISSION.md | head -200` for any commit that does not name a `## Mission anchor extension locked` section.
 - **Stale signals.**
-  - `lock_hash` drift without a paired entry in any flywheel session note under `/Users/josh/Developer/flywheel/.flywheel/handoffs/`.
+  - `lock_hash` drift without a paired entry in any flywheel handoff under `/Users/josh/Developer/flywheel/.flywheel/handoffs/`.
   - `## Mission Source` heading appearing twice with empty content between them (current state, intentional, preserved during backfill — do not collapse without owner sign-off).
   - Any "Mission anchor extension" claim that does not include `locked YYYY-MM-DD` in the heading.
   - References to `/Users/josh/Desktop/Projects/clients/alps-insurance` (legacy stale path; canonical is `/Users/josh/Developer/alpsinsurance`).

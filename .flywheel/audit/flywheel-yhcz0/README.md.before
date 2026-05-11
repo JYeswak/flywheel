@@ -237,7 +237,7 @@ surface when validating from shell.
 | `/flywheel:beads` | Repo-scoped Beads view. |
 | `/flywheel:learn` | Route failures and doctrine signals to the right substrate. |
 | `/flywheel:dispatch` | Send worker work through NTM with callback expectations. |
-| `/flywheel:file-jeff` | Generate the Jeff filing ladder drafts without submitting upstream issues. |
+| `/flywheel:file-jeff` | Generate the Jeff filing ladder artifacts without submitting upstream issues. |
 | `/flywheel:research` | Split research across workers and synthesize findings. |
 | `/flywheel:plan` | Run plan-space convergence before implementation. |
 | `/flywheel:bead-new` | Create a repo-local Bead through the safe path. |
