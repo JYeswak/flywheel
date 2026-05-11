@@ -1,0 +1,88 @@
+{
+  "schema_version": "frozen-pane-detector-fleet.v1",
+  "title": "Frozen pane detector fleet wrapper output",
+  "required": [
+    "schema_version",
+    "mode",
+    "success"
+  ],
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "session": {
+        "type": "string"
+      },
+      "pane": {
+        "type": [
+          "string",
+          "integer"
+        ]
+      },
+      "apply": {
+        "type": "boolean"
+      },
+      "dry_run": {
+        "type": "boolean"
+      },
+      "json": {
+        "type": "boolean"
+      }
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "required": [
+      "schema_version",
+      "mode",
+      "success"
+    ],
+    "properties": {
+      "schema_version": {
+        "const": "frozen-pane-detector-fleet.v1"
+      },
+      "mode": {
+        "enum": [
+          "doctor",
+          "health",
+          "install",
+          "uninstall",
+          "cycle",
+          "repair",
+          "validate",
+          "audit",
+          "why",
+          "info",
+          "schema",
+          "examples",
+          "quickstart",
+          "completion"
+        ]
+      },
+      "success": {
+        "type": "boolean"
+      },
+      "status": {
+        "enum": [
+          "PASS",
+          "WARN",
+          "FAIL"
+        ]
+      },
+      "daemon_installed": {
+        "type": "boolean"
+      },
+      "daemon_loaded": {
+        "type": "boolean"
+      },
+      "cadence_seconds": {
+        "type": "integer"
+      },
+      "warnings": {
+        "type": "array"
+      },
+      "errors": {
+        "type": "array"
+      }
+    }
+  }
+}

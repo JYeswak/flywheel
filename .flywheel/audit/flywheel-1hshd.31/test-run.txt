@@ -1,0 +1,18 @@
+PASS AG3.1 --info name+version+capabilities
+PASS regression .commands preserved
+PASS AG3.2 --schema input/output
+PASS regression .title/.required preserved
+PASS AG3.3 --examples >= 3
+PASS examples text-mode back-compat
+PASS AG3.4 doctor .checks >= 5
+PASS doctor includes load-bearing launchctl+plutil+detector probes
+PASS --doctor flag preserves regression contract + adds .checks
+PASS doctor native fields preserved
+PASS native audit verb back-compat
+PASS native why gate topic
+PASS native quickstart verb
+PASS native completion verb
+PASS native validate budgets back-compat
+PASS install --dry-run back-compat
+PASS --info default-mode emits JSON (native behavior preserved)
+SUMMARY pass=17 fail=0

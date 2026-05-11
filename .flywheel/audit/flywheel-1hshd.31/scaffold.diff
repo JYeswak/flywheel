@@ -1,0 +1,132 @@
+diff --git a/.flywheel/scripts/frozen-pane-detector-fleet.sh b/.flywheel/scripts/frozen-pane-detector-fleet.sh
+index c370100..731617f 100755
+--- a/.flywheel/scripts/frozen-pane-detector-fleet.sh
++++ b/.flywheel/scripts/frozen-pane-detector-fleet.sh
+@@ -1,4 +1,7 @@
+ #!/usr/bin/env bash
++# flywheel-cli-surface: true
++# canonical-cli-scoping: passing (partial → passing per bead flywheel-1hshd.31)
++# doctor-mode-tier: scaffolded
+ # shellcheck disable=SC2034,SC2221,SC2222
+ # Fleet launchd wrapper for frozen-pane-detector.sh. Conservative by design:
+ # scheduled cycles observe and record; recovery requires explicit --apply and
+@@ -395,6 +398,11 @@ audit_json() {
+ }
+ 
+ info_json() {
++  # AG3.1 (bead flywheel-1hshd.31) requires .name + .version + .capabilities.
++  # Augmented to add .name + .capabilities while preserving every native field
++  # (.version, .commands, .label, .detector, .plist, .state_dir) — the
++  # regression test asserts `.commands | index("doctor") and index("repair")
++  # and ...` which remains satisfied.
+   jq -n \
+     --arg schema_version "$SCHEMA_VERSION" \
+     --arg version "$VERSION" \
+@@ -402,14 +410,65 @@ info_json() {
+     --arg detector "$DETECTOR" \
+     --arg plist "$PLIST" \
+     --arg state_dir "$STATE_DIR" \
+-    '{schema_version:$schema_version,mode:"info",success:true,version:$version,label:$label,detector:$detector,plist:$plist,state_dir:$state_dir,commands:["doctor","health","install","uninstall","cycle","repair","validate","audit","why","schema","quickstart","completion"]}'
++    '{schema_version:$schema_version,mode:"info",success:true,name:"frozen-pane-detector-fleet.sh",version:$version,capabilities:["fleet-launchd-wrapper","disabled-by-default-install","l60-l67-degraded-truth-block","global-and-per-pane-budget","stop-and-fatal-file-honor","reversible-uninstall"],mutates_state:true,mutation_paths:["plist-write-on-install","event-jsonl-append","budget-state-update"],label:$label,detector:$detector,plist:$plist,state_dir:$state_dir,commands:["doctor","health","install","uninstall","cycle","repair","validate","audit","why","schema","quickstart","completion"]}'
+ }
+ 
+ schema_json() {
+-  jq -n --arg schema_version "$SCHEMA_VERSION" '{schema_version:$schema_version,title:"Frozen pane detector fleet wrapper output",required:["schema_version","mode","success"]}'
++  # AG3.2 (bead flywheel-1hshd.31) requires .input_schema + .output_schema.
++  # Augmented to add canonical JSON-Schema envelopes while preserving native
++  # .title + .required for back-compat.
++  jq -n --arg schema_version "$SCHEMA_VERSION" '{
++    schema_version:$schema_version,
++    title:"Frozen pane detector fleet wrapper output",
++    required:["schema_version","mode","success"],
++    input_schema:{
++      type:"object",
++      properties:{
++        session:{type:"string"},
++        pane:{type:["string","integer"]},
++        apply:{type:"boolean"},
++        dry_run:{type:"boolean"},
++        json:{type:"boolean"}
++      }
++    },
++    output_schema:{
++      type:"object",
++      required:["schema_version","mode","success"],
++      properties:{
++        schema_version:{const:"frozen-pane-detector-fleet.v1"},
++        mode:{enum:["doctor","health","install","uninstall","cycle","repair","validate","audit","why","info","schema","examples","quickstart","completion"]},
++        success:{type:"boolean"},
++        status:{enum:["PASS","WARN","FAIL"]},
++        daemon_installed:{type:"boolean"},
++        daemon_loaded:{type:"boolean"},
++        cadence_seconds:{type:"integer"},
++        warnings:{type:"array"},
++        errors:{type:"array"}
++      }
++    }
++  }'
+ }
+ 
+ examples() {
++  # AG3.3 (bead flywheel-1hshd.31) requires --examples --json | jq -e
++  # '.examples | length > 0'. When --json was passed (JSON_OUT==1) emit
++  # canonical envelope; otherwise preserve native text mode for back-compat
++  # with the regression test (`"$SCRIPT" --examples >/dev/null` checks rc only).
++  if [[ "${JSON_OUT:-0}" == "1" ]]; then
++    jq -n --arg sv "$SCHEMA_VERSION" '{
++      schema_version:$sv,
++      mode:"examples",
++      success:true,
++      examples:[
++        {name:"doctor probe",invocation:"frozen-pane-detector-fleet.sh --doctor --json",purpose:"check fleet daemon installed + disabled-by-default contract"},
++        {name:"install dry-run",invocation:"frozen-pane-detector-fleet.sh install --dry-run --json",purpose:"preview LaunchAgent write without mutating"},
++        {name:"install apply",invocation:"frozen-pane-detector-fleet.sh install --apply --json",purpose:"write disabled-by-default LaunchAgent (load/kickstart is a separate human decision)"},
++        {name:"cycle all sessions",invocation:"frozen-pane-detector-fleet.sh cycle --session all --json",purpose:"observe detector state across the fleet (degraded truth blocks recovery by design)"},
++        {name:"validate budgets",invocation:"frozen-pane-detector-fleet.sh validate budgets --json",purpose:"check global + per-pane hourly recovery budgets"}
++      ]
++    }'
++    return 0
++  fi
+   cat <<'EXAMPLES'
+ frozen-pane-detector-fleet.sh --doctor --json
+ frozen-pane-detector-fleet.sh install --dry-run --json
+@@ -479,8 +538,38 @@ while [[ $# -gt 0 ]]; do
+   esac
+ done
+ 
++# AG3.4 (bead flywheel-1hshd.31) requires `doctor --json | jq -e '.checks'`.
++# Augment doctor output to add a .checks array (canonical named-probe
++# shape) while preserving every native field (.status, .daemon_installed,
++# .cadence_seconds, .warnings, .errors) — the regression test asserts
++# `.status == "WARN" and .daemon_installed == false and warnings code` +
++# `.status == "PASS" and .cadence_seconds == 30` which remain satisfied.
++augmented_doctor_json() {
++  local raw bash_s=fail jq_s=fail launchctl_s=warn plutil_s=warn detector_s=warn plist_dir_s=fail
++  command -v bash >/dev/null 2>&1 && bash_s=pass
++  command -v jq >/dev/null 2>&1 && jq_s=pass
++  command -v launchctl >/dev/null 2>&1 && launchctl_s=pass
++  command -v plutil >/dev/null 2>&1 && plutil_s=pass
++  [[ -x "${DETECTOR:-}" ]] && detector_s=pass
++  local _plist_dir; _plist_dir="$(dirname "${PLIST:-/}")"
++  [[ -d "$_plist_dir" && -w "$_plist_dir" ]] && plist_dir_s=pass
++  raw="$(doctor_json)"
++  printf '%s\n' "$raw" | jq -c \
++    --arg bash_s "$bash_s" --arg jq_s "$jq_s" --arg lc_s "$launchctl_s" \
++    --arg pu_s "$plutil_s" --arg det_s "$detector_s" --arg pd_s "$plist_dir_s" \
++    --arg det "${DETECTOR:-}" --arg pd "$_plist_dir" \
++    '. + {checks:[
++      {name:"bash_available",status:$bash_s},
++      {name:"jq_available",status:$jq_s},
++      {name:"launchctl_available",status:$lc_s,detail:"load-bearing — used to probe LaunchAgent loaded state"},
++      {name:"plutil_available",status:$pu_s,detail:"load-bearing — used to read plist fields"},
++      {name:"detector_executable",status:$det_s,path:$det,detail:"load-bearing — base frozen-pane-detector.sh"},
++      {name:"plist_dir_writable",status:$pd_s,path:$pd}
++    ]}'
++}
++
+ case "$MODE" in
+-  doctor|health) emit_json "$(doctor_json)" ;;
++  doctor|health) emit_json "$(augmented_doctor_json)" ;;
+   install) emit_json "$(install_json)" ;;
+   uninstall) emit_json "$(uninstall_json)" ;;
+   cycle) emit_json "$(cycle_json)" ;;

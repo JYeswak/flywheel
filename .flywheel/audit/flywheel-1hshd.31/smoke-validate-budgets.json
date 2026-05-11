@@ -1,0 +1,17 @@
+{
+  "schema_version": "frozen-pane-detector-fleet.v1",
+  "mode": "validate",
+  "thing": "budgets",
+  "success": true,
+  "budget": {
+    "ok": true,
+    "global": {
+      "used_last_hour": 0,
+      "limit_per_hour": 4
+    },
+    "pane": {
+      "used_last_hour": 0,
+      "limit_per_hour": 1
+    }
+  }
+}
