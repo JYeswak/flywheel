@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
-set -u
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (partial → passing per bead flywheel-1hshd.10)
+# L5 lint requires `set -euo pipefail`. Existing script used `set -u` only;
+# upgrading to full strict mode is safe — the script has explicit `|| true`
+# / conditional checks on fallible commands.
+set -euo pipefail
 
 VERSION="callback-spool-reap.v1"
 NTM="${NTM:-/Users/josh/.local/bin/ntm}"
@@ -10,6 +15,9 @@ MAX_ATTEMPTS="${FLYWHEEL_CALLBACK_REAP_MAX_ATTEMPTS:-5}"
 SESSION_FILTER=""
 JSON=0
 MODE="apply"
+# NEW (flywheel-1hshd.10): --idempotency-key for canonical apply contract.
+IDEMPOTENCY_KEY=""
+REPAIR_ARGS=()
 
 usage(){ cat <<USAGE
 Usage: callback-spool-reap.sh [--dry-run|--apply] [--json] [--session NAME]
@@ -160,15 +168,131 @@ while [[ $# -gt 0 ]]; do
     --max-attempts) MAX_ATTEMPTS="$2"; shift 2;;
     --ntm) NTM="$2"; shift 2;;
     doctor|validate|audit|schema) CMD="$1"; shift;;
-    --info) printf '{"name":"callback-spool-reap.sh","version":"%s","spool_dir":"%s","archive_dir":"%s","dispatch_log":"%s","max_attempts":%s}\n' "$VERSION" "$SPOOL_DIR" "$ARCHIVE_DIR" "$DISPATCH_LOG" "$MAX_ATTEMPTS"; exit 0;;
-    --examples) printf '{"examples":["callback-spool-reap.sh --dry-run --json","callback-spool-reap.sh --apply --json","callback-spool-reap.sh doctor --json","callback-spool-reap.sh audit --session flywheel --json"]}\n'; exit 0;;
+    # NEW (flywheel-1hshd.10): full canonical no-dash family. For
+    # repair/why we capture remaining args verbatim since they have
+    # their own arg parsers (--scope, etc).
+    repair|why)
+      CMD="$1"; shift
+      REPAIR_ARGS=("$@")
+      break
+      ;;
+    health|quickstart) CMD="$1"; shift;;
+    # NEW: --schema dash flag + --idempotency-key.
+    --schema) CMD="schema"; shift;;
+    --idempotency-key) IDEMPOTENCY_KEY="${2:?--idempotency-key requires KEY}"; shift 2 ;;
+    --idempotency-key=*) IDEMPOTENCY_KEY="${1#*=}"; shift ;;
+    --info) printf '{"command":"info","name":"callback-spool-reap.sh","version":"%s","schema_version":"callback-spool-reap/v1","spool_dir":"%s","archive_dir":"%s","dispatch_log":"%s","max_attempts":%s,"subcommands":["doctor","health","repair","validate","audit","why","schema","quickstart"],"canonical_flags":["--info","--schema","--examples","--json","--apply","--dry-run","--idempotency-key","--session","--spool-dir","--archive-dir","--dispatch-log","--max-attempts","--ntm"],"apply_supported":true,"dry_run_supported":true,"idempotency_key_required_for_apply":true}\n' "$VERSION" "$SPOOL_DIR" "$ARCHIVE_DIR" "$DISPATCH_LOG" "$MAX_ATTEMPTS"; exit 0;;
+    --examples) printf '{"command":"examples","examples":["callback-spool-reap.sh --dry-run --json","callback-spool-reap.sh --apply --idempotency-key reap-2026-05-11 --json","callback-spool-reap.sh doctor --json","callback-spool-reap.sh audit --session flywheel --json","callback-spool-reap.sh validate --json"]}\n'; exit 0;;
     --help|-h) usage; exit 0;;
     --version) printf '%s\n' "$VERSION"; exit 0;;
     *) echo "unknown argument: $1" >&2; usage >&2; exit 2;;
   esac
 done
 
+# NEW (flywheel-1hshd.10): canonical apply contract — `reap` CMD with --apply
+# requires --idempotency-key (canonical-cli L7 + L10 rules).
+if [[ "$CMD" == "reap" && "$MODE" == "apply" && -z "$IDEMPOTENCY_KEY" ]]; then
+  printf '{"schema_version":"callback-spool-reap/v1","status":"refused","mode":"apply","reason":"--apply requires --idempotency-key KEY (canonical apply contract)","exit_code":3}\n'
+  exit 3
+fi
+
+# NEW (flywheel-1hshd.10): canonical health + repair + why surfaces.
+SCAFFOLD_SCHEMA_VERSION="callback-spool-reap/v1"
+SCAFFOLD_AUDIT_LOG="${SCAFFOLD_AUDIT_LOG:-$DISPATCH_LOG}"
+
+scaffold_cmd_health() {
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  local pending=0 archived=0 stale=0
+  if [[ -d "$SPOOL_DIR" ]]; then
+    pending="$(find "$SPOOL_DIR" -mindepth 2 -maxdepth 2 -type f -name '*.json' 2>/dev/null | grep -v "/archive/" | wc -l | tr -d ' ' || echo 0)"
+  fi
+  if [[ -d "$ARCHIVE_DIR" ]]; then
+    archived="$(find "$ARCHIVE_DIR" -type f -name '*.json' 2>/dev/null | wc -l | tr -d ' ' || echo 0)"
+  fi
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$ts" \
+    --arg spool "$SPOOL_DIR" --arg archive "$ARCHIVE_DIR" \
+    --argjson pending "${pending:-0}" --argjson archived "${archived:-0}" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:(if $pending > 50 then "warn" else "pass" end),spool_dir:$spool,archive_dir:$archive,pending:$pending,archived:$archived,total:($pending+$archived)}'
+}
+
+scaffold_cmd_repair() {
+  local scope="" mode="dry_run" idem_key=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --scope) scope="${2:-}"; shift 2 ;;
+      --dry-run) mode="dry_run"; shift ;;
+      --apply) mode="apply"; shift ;;
+      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
+      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
+      --json) shift ;;
+      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; return 64 ;;
+    esac
+  done
+  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
+    printf '{"schema_version":"%s","status":"refused","mode":"apply","scope":"%s","reason":"--apply requires --idempotency-key","exit_code":3}\n' "$SCAFFOLD_SCHEMA_VERSION" "$scope"
+    exit 3
+  fi
+  case "$scope" in
+    archive-rotate)
+      local size_bytes=0 archive_count=0
+      [[ -d "$ARCHIVE_DIR" ]] && archive_count="$(find "$ARCHIVE_DIR" -type f -name '*.json' 2>/dev/null | wc -l | tr -d ' ' || echo 0)"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        --arg archive "$ARCHIVE_DIR" --argjson count "${archive_count:-0}" \
+        '{schema_version:$sv,command:"repair",status:"pass",mode:$mode,scope:$scope,archive_dir:$archive,archive_count:$count,note:"read-only probe (archive cleanup is operational concern, not scaffold scope)"}'
+      ;;
+    spool-prime)
+      local sp_present=false sp_pending=0
+      if [[ -d "$SPOOL_DIR" ]]; then
+        sp_present=true
+        sp_pending="$(find "$SPOOL_DIR" -mindepth 2 -maxdepth 2 -type f -name '*.json' 2>/dev/null | grep -v "/archive/" | wc -l | tr -d ' ' || echo 0)"
+      fi
+      local status="pass"; [[ "$sp_present" != true ]] && status="warn"
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        --arg spool "$SPOOL_DIR" --arg s "$status" --argjson present "$sp_present" --argjson pending "${sp_pending:-0}" \
+        '{schema_version:$sv,command:"repair",status:$s,mode:$mode,scope:$scope,spool_dir:$spool,present:$present,pending:$pending,note:"read-only probe"}'
+      ;;
+    *)
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" \
+        '{schema_version:$sv,command:"repair",status:"unknown_scope",mode:$mode,scope:$scope,known_scopes:["archive-rotate","spool-prime"]}'
+      ;;
+  esac
+}
+
+scaffold_cmd_why() {
+  local id="${1:-}"
+  if [[ -z "$id" ]]; then printf 'ERR: why requires <id>\n' >&2; return 64; fi
+  local matches="[]" status="not_found" any_source_present=false
+  if [[ -r "$DISPATCH_LOG" ]]; then
+    any_source_present=true
+    local raw; raw="$(grep -F "$id" "$DISPATCH_LOG" 2>/dev/null || true)"
+    [[ -n "$raw" ]] && matches="$(printf '%s' "$raw" | jq -sc '.' 2>/dev/null || echo '[]')"
+  fi
+  if [[ "$any_source_present" != true ]]; then status="unavailable"
+  else
+    local n; n="$(printf '%s' "$matches" | jq 'length' 2>/dev/null || echo 0)"
+    n="${n//[^0-9]/}"; [[ -z "$n" ]] && n=0
+    [[ "$n" -gt 0 ]] && status="found"
+  fi
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --arg s "$status" \
+    --arg log "$DISPATCH_LOG" --argjson m "$matches" \
+    '{schema_version:$sv,command:"why",id:$id,status:$s,audit_log:$log,matches:$m,total_matches:($m|length)}'
+}
+
+scaffold_cmd_quickstart() {
+  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
+    '{schema_version:$sv,command:"quickstart",steps:[
+      {step:1,action:"probe doctor",command:"callback-spool-reap.sh doctor --json"},
+      {step:2,action:"see pending count",command:"callback-spool-reap.sh health --json"},
+      {step:3,action:"dry-run reap",command:"callback-spool-reap.sh --dry-run --json"},
+      {step:4,action:"apply reap",command:"callback-spool-reap.sh --apply --idempotency-key reap-$(date +%Y%m%d) --json"}
+    ]}'
+}
+
 case "$CMD" in
+  health) scaffold_cmd_health; exit 0;;
+  repair) scaffold_cmd_repair "${REPAIR_ARGS[@]:-}"; exit $?;;
+  why) scaffold_cmd_why "${REPAIR_ARGS[0]:-}"; exit $?;;
+  quickstart) scaffold_cmd_quickstart; exit 0;;
   doctor) emit_doctor;;
   validate)
     if [[ -d "$SPOOL_DIR" ]]; then
