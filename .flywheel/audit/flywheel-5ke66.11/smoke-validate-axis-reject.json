@@ -1,0 +1,2 @@
+{"schema_version":"fleet-conformance-probe/v1","command":"validate","subject":"conformance-axis","ts":"2026-05-11T01:28:51Z","status":"reject","value":"unknown_axis","reason":"not_in_enum","valid_axes":["canonical_l_rule_coverage","doctor_status","identity_drift","meta_rule_cache_freshness","mission_lock_age","agents_mtime_age"],"source":"native --info axes field"}
+rc=1

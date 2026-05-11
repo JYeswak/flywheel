@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info emits native PASSTHRU envelope (.schema_version observatory/v1 + 6 axes)
+PASS --schema emits native JSON-Schema (.type=object + .properties.fleet_conformance)
+PASS --examples emits native PASSTHRU example invocations
+PASS doctor emits scaffold envelope with >=5 checks
+PASS health emits scaffold envelope
+PASS repair --dry-run emits scaffold envelope (real scope cache_dir)
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate (bare) refuses with rc=64 + missing_subject envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS script annotates WZJO9.1.7 PARTIAL-BYPASS variant (discoverable via grep)
+PASS PARTIAL bypass dual-direction: --info goes native (observatory/v1), doctor goes scaffold (probe/v1)
+PASS validate conformance-axis accepts all 6 native axes (full-enum sweep)
+PASS validate conformance-axis rejects unknown_axis with rc=1 + valid_axes enumeration
+PASS doctor probes python3 + loops_dir + canonical_agents (load-bearing for conformance scoring)
+PASS cross-source consistency: native --info .axes == scaffold validate .valid_axes (agents_mtime_age,canonical_l_rule_coverage,doctor_status,identity_drift,meta_rule_cache_freshness,mission_lock_age)
+SUMMARY pass=19 fail=0
