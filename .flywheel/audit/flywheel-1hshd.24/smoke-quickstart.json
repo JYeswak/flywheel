@@ -1,0 +1,1 @@
+{"schema_version":"customer-facing-observability-probe/v1","command":"quickstart","status":"ok","steps":[{"step":1,"action":"probe doctor","command":"customer-facing-observability-probe.sh doctor --json"}],"next_actions":["doctor","health","repair"]}

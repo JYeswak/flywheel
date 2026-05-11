@@ -1,0 +1,1 @@
+{"schema_version":"customer-facing-observability-probe/v1","command":"validate","subject":"observability-state","ts":"2026-05-11T05:19:10Z","status":"reject","value":"phantom","reason":"not_in_enum","valid_states":["no_aggregation_pipeline_yet","draft","wired"],"source":"native --schema .customer_observability_state_enum"}
