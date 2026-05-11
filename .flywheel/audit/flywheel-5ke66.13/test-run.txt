@@ -1,0 +1,20 @@
+PASS syntax
+PASS --info emits canonical envelope
+PASS --schema emits canonical envelope
+PASS --examples emits canonical envelope
+PASS doctor emits canonical envelope
+PASS health emits canonical envelope
+PASS repair --dry-run emits canonical envelope (real scope out_dir)
+PASS repair --apply without --idempotency-key returns rc=3 (canonical refusal)
+PASS validate (bare) refuses with rc=64 + missing_subject envelope
+PASS audit emits canonical envelope
+PASS why <id> emits canonical envelope
+PASS help repair returns topic header
+PASS quickstart emits canonical envelope
+PASS doctor probes product_tick + bridge + jsonl_append_lib (load-bearing for receipt mirror)
+PASS validate receipt-event accepts both canonical events (receipt_mirrored + receipt_mirror_failed)
+PASS validate receipt-event rejects unknown_event with rc=1 + valid_events enumeration
+PASS validate exit-code accepts both range boundaries (0 and 255)
+PASS validate exit-code rejects 256 (out of [0,255]) with rc=1
+PASS repair has 3 distinct scopes (out_dir + log_dir + audit_log_dir per dual-state-+-event-log pattern)
+SUMMARY pass=19 fail=0

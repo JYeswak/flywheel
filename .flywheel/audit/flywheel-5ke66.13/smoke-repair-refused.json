@@ -1,0 +1,2 @@
+{"schema_version":"mobile-eats-loop-with-receipt-mirror/v1","command":"repair","status":"refused","mode":"apply","scope":"out_dir","reason":"--apply requires --idempotency-key"}
+rc=3

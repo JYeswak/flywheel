@@ -1,0 +1,1 @@
+{"schema_version":"mobile-eats-loop-with-receipt-mirror/v1","command":"quickstart","status":"ok","steps":[{"step":1,"action":"probe doctor","command":"mobile-eats-loop-with-receipt-mirror.sh doctor --json"}],"next_actions":["doctor","health","repair"]}
