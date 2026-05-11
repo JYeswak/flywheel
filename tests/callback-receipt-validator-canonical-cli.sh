@@ -36,12 +36,20 @@ if bash -n "$SCRIPT" 2>/dev/null; then pass "syntax"; else fail "syntax"; fi
 # Backward-compat: --info preserved
 "$SCRIPT" --info --json 2>/dev/null | jq -e '.name == "callback-receipt-validator.sh" and has("exit_codes")' >/dev/null && pass "BACKWARD-COMPAT --info preserved" || fail "--info backward-compat"
 
-# Backward-compat: check command still works (the wrapper depends on this)
-out="$(echo "DONE flywheel-test l112_observed=foo task_id=t-1 josh_request_id=null mission_fitness=adjacent mission_fitness_evidence=test br_close_executed=yes git_committed=yes callback_delivery_verified=true" | "$SCRIPT" check --callback-stdin --dispatch-file /tmp/dispatch_nonexistent.md --json 2>&1 || true)"
+# Backward-compat: check command still works (the wrapper depends on this).
+# flywheel-0u9ch: isolate from prod beads. Without CALLBACK_RECEIPT_FIX_BEAD_OPENER=/bin/true
+# the validator's open_fix_bead() auto-invokes the real callback-fix-bead-opener.sh
+# against the live REPO and writes a test-fixture bead (e.g., fix-t-1-l112-mismatch)
+# into the prod .beads/issues.jsonl. /bin/true is executable + a no-op; the validator
+# sees it as present and the output parse falls through to "created_unparsed" without
+# touching the prod DB.
+out="$(echo "DONE flywheel-test l112_observed=foo task_id=t-1 josh_request_id=null mission_fitness=adjacent mission_fitness_evidence=test br_close_executed=yes git_committed=yes callback_delivery_verified=true" | CALLBACK_RECEIPT_FIX_BEAD_OPENER=/bin/true "$SCRIPT" check --callback-stdin --dispatch-file /tmp/dispatch_nonexistent.md --json 2>&1 || true)"
 printf '%s' "$out" | head -1 | jq -e '.schema_version == "callback-receipt-decision/v1" and has("decision")' >/dev/null && pass "BACKWARD-COMPAT check command tri-state output" || fail "check command"
 
-# Wrapper integration test — pipe a malformed callback through wrapper → validator
-out="$(echo "DONE bad" | /Users/josh/.claude/commands/flywheel/_shared/callback-receipt-validator-wrapper.sh --dispatch-file /tmp/dispatch_test.md --json 2>&1 || true)"
+# Wrapper integration test — pipe a malformed callback through wrapper → validator.
+# Same isolation: wrapper invokes the validator; without the env override the
+# validator's open_fix_bead would write another prod bead from "DONE bad".
+out="$(echo "DONE bad" | CALLBACK_RECEIPT_FIX_BEAD_OPENER=/bin/true /Users/josh/.claude/commands/flywheel/_shared/callback-receipt-validator-wrapper.sh --dispatch-file /tmp/dispatch_test.md --json 2>&1 || true)"
 printf '%s' "$out" | grep -qE 'UNVERIFIABLE|REFUSE|decision|schema_version' && pass "BACKWARD-COMPAT wrapper→validator chain intact" || fail "wrapper-validator chain"
 
 # Magic comment + lint
