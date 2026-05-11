@@ -518,6 +518,7 @@ _SKILL_MD_CORPUS: str | None = None
 _LAUNCHD_CORPUS: str | None = None
 _FLYWHEEL_SCRIPT_CALLERS_CORPUS: str | None = None
 _TEST_FILES_CORPUS: str | None = None
+_FLYWHEEL_SCRIPT_BODIES_CORPUS: str | None = None
 
 
 def skill_md_corpus(max_bytes: int = 1_500_000) -> str:
@@ -790,6 +791,67 @@ def flywheel_script_callers_corpus(max_bytes: int = 3_000_000) -> str:
         used += len(text)
     _FLYWHEEL_SCRIPT_CALLERS_CORPUS = "\n".join(pieces)
     return _FLYWHEEL_SCRIPT_CALLERS_CORPUS
+
+
+def flywheel_script_bodies_corpus(max_bytes: int = 3_000_000) -> str:
+    """Build a corpus of ALL .flywheel/scripts/*.sh bodies (including *-probe.sh).
+
+    Per flywheel-2xdi.164: wired-but-cold detector previously consulted 7
+    corpora but none scanned in-repo .flywheel/scripts/ bodies for subprocess
+    callsites. The existing flywheel_script_callers_corpus EXCLUDES *-probe.sh
+    by design (probe→probe doc cross-refs aren't receivers for the
+    probe-without-receiver detector). But for wired-but-cold specifically, a
+    probe calling another script via subprocess.run() IS a real wiring — the
+    callee gets exercised every time the caller probe runs.
+
+    Concrete case (flywheel-2xdi.157): gap-hunt-probe.sh:2072 invokes
+    .flywheel/scripts/loop-integrity-signals.sh via subprocess.run(); script
+    output is JSON-consumed in-memory. No JSONL ledger trace produced.
+    Previous 7-corpus check declared cold; this 8th corpus catches the case.
+
+    Excludes gap-hunt-probe.sh itself (to avoid self-reference noise from
+    usage strings + schema_version literals; legitimate cross-probe calls
+    happen FROM gap-hunt-probe.sh outward to OTHER scripts which is exactly
+    what this corpus measures).
+    """
+    global _FLYWHEEL_SCRIPT_BODIES_CORPUS
+    if _FLYWHEEL_SCRIPT_BODIES_CORPUS is not None:
+        return _FLYWHEEL_SCRIPT_BODIES_CORPUS
+
+    root = REPO_ROOT / ".flywheel" / "scripts"
+    if not root.is_dir():
+        _FLYWHEEL_SCRIPT_BODIES_CORPUS = ""
+        return _FLYWHEEL_SCRIPT_BODIES_CORPUS
+
+    try:
+        # Include ALL *.sh in .flywheel/scripts/ EXCEPT gap-hunt-probe.sh
+        # (self-exclusion avoids matching the script's own name in its
+        # usage strings, error messages, and schema literals).
+        candidates = sorted(
+            p for p in root.glob("*.sh")
+            if p.name != "gap-hunt-probe.sh"
+        )
+    except Exception:
+        _FLYWHEEL_SCRIPT_BODIES_CORPUS = ""
+        return _FLYWHEEL_SCRIPT_BODIES_CORPUS
+
+    pieces: list[str] = []
+    used = 0
+    pieces.append("\n".join(p.name for p in candidates))
+    used += sum(len(p.name) + 1 for p in candidates)
+    for path in candidates:
+        if used >= max_bytes:
+            break
+        try:
+            text = read_text(path, max(0, max_bytes - used))
+        except Exception:
+            continue
+        if not text:
+            continue
+        pieces.append(text)
+        used += len(text)
+    _FLYWHEEL_SCRIPT_BODIES_CORPUS = "\n".join(pieces)
+    return _FLYWHEEL_SCRIPT_BODIES_CORPUS
 
 
 def test_files_corpus(max_bytes: int = 1_500_000) -> str:
@@ -1263,6 +1325,14 @@ def probe_wired_but_cold() -> list[dict]:
     # + 2xdi.106: extend recognizer corpus rather than per-script allowlist.
     flywheel_doctrine_text = command_text()
     test_files_text = test_files_corpus()
+    # flywheel-2xdi.164: 8th corpus catches subprocess-validator-pattern scripts
+    # whose only callsite is another *-probe.sh (which is excluded from the
+    # flywheel_script_callers_corpus by design). Concrete case: gap-hunt-probe
+    # invokes loop-integrity-signals.sh via subprocess.run; the callee never
+    # writes a JSONL ledger entry so the 7-corpus check fired a false positive
+    # (flywheel-2xdi.157). Self-exclusion of gap-hunt-probe.sh inside the
+    # corpus function prevents self-reference noise.
+    flywheel_script_bodies_text = flywheel_script_bodies_corpus()
     on_demand = on_demand_script_allowlist()
     scripts = []
     scripts.extend(safe_iter_files(CLAUDE_ROOT / "skills", "*.sh", 3000))
@@ -1320,7 +1390,13 @@ def probe_wired_but_cold() -> list[dict]:
         # extension + symmetric with skill_md_corpus for .claude/skills)
         in_flywheel_doctrine = bool(flywheel_doctrine_text) and (name in flywheel_doctrine_text or script.stem in flywheel_doctrine_text)
         in_test_files = bool(test_files_text) and (name in test_files_text or script.stem in test_files_text)
-        if not (in_local or in_sibling or in_source or in_skill_md or in_launchd or in_flywheel_doctrine or in_test_files):
+        # flywheel-2xdi.164: 8th corpus — subprocess callsites in
+        # .flywheel/scripts/*.sh (incl. *-probe.sh, excluding gap-hunt-probe
+        # to avoid self-reference). Catches scripts invoked via subprocess.run
+        # from sibling probes whose output is consumed in-memory rather than
+        # written to a JSONL ledger.
+        in_script_bodies = bool(flywheel_script_bodies_text) and (name in flywheel_script_bodies_text or script.stem in flywheel_script_bodies_text)
+        if not (in_local or in_sibling or in_source or in_skill_md or in_launchd or in_flywheel_doctrine or in_test_files or in_script_bodies):
             try:
                 rel = str(script.relative_to(Path.home()))
             except Exception:
