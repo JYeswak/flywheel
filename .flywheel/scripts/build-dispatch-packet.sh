@@ -933,6 +933,9 @@ fi
 if [[ -x "$SCRIPT_DIR/inject-l-rule-hints.sh" ]] && "$SCRIPT_DIR/inject-l-rule-hints.sh" "$AUGMENTED_BODY" "$TASK_ID" "$REPO_ROOT" >"${AUGMENTED_BODY}.lrules" 2>/dev/null; then
   AUGMENTED_BODY="${AUGMENTED_BODY}.lrules"
 fi
+if [[ -x "$SCRIPT_DIR/inject-forward-link-recipe.sh" ]] && "$SCRIPT_DIR/inject-forward-link-recipe.sh" "$AUGMENTED_BODY" "$TASK_ID" "$REPO_ROOT" >"${AUGMENTED_BODY}.fwdlink" 2>/dev/null; then
+  AUGMENTED_BODY="${AUGMENTED_BODY}.fwdlink"
+fi
 
 MEMORY_HITS="$(grep -c '^- ' "$AUGMENTED_BODY" 2>/dev/null | tr -d '\n' || echo 0)"
 SKILL_ROUTES="$(grep -Ec '^skill_auto_routes=[0-9]+' "$AUGMENTED_BODY" 2>/dev/null | tr -d '\n' || echo 0)"
