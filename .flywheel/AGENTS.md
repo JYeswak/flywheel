@@ -92,3 +92,31 @@ probe `.flywheel/scripts/bead-quality-mining.sh`; tests
 **Companion rules:** L52 (beads or no-bead receipt), L53 (fuckups reported in
 callbacks), L56 (promotion ladder), L60 (doctor signal contract), L70
 (same-tick chain-forward), and L71 (validate-and-redispatch discipline).
+
+## Doctrine catalog (inventory snapshot 2026-05-11)
+
+The fleet doctrine catalog lives at `.flywheel/doctrine/` — see
+`./doctrine/README.md` for the live inventory.
+
+**Inventory (2026-05-11):**
+- 89 total doctrine files
+- 80 canonical (flywheel-authored or fleet-promoted)
+- 9 cross-reference stubs (skillos-canonical pointer, `type: doctrine-cross-reference-stub`)
+
+**Recent additions (2026-05-11 cohort wave — see `./doctrine/README.md` for full table):**
+
+6 canonical doctrines from v38e1 / cluster-promotion arc:
+
+- `closure-evidence-contract-version-anchor.md` (flywheel-v38e1.1)
+- `closure-evidence-public-lens-anchor-discipline.md` (flywheel-v38e1.2)
+- `inbox-discipline-missed-during-deep-burndown-motion.md` (flywheel-v38e1.3)
+- `outbox-discipline-cross-orch-ship-notification.md` (flywheel-v38e1.4)
+- `option-e-cross-orch-fuckup-log-fold-up.md` (flywheel-nk0r0)
+- `single-axis-reframe-of-multi-axis-data-trauma-class.md` (flywheel-0mw8v)
+
+9 cross-reference stubs to skillos-canonical META-doctrines (managed per
+`./doctrine/cross-repo-consumer-vs-mutator-boundary.md` read-only consumer
+discipline; canonical bodies at skillos canonical-locator path).
+
+Catalog sweep maintained by `flywheel-kk08x` (inventory + xref-skillos
+sync). Live count: `ls -1 .flywheel/doctrine/*.md | wc -l`.

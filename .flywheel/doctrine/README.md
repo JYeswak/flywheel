@@ -2,9 +2,15 @@
 title: Flywheel doctrine catalog
 type: readme
 created: 2026-05-10
+updated: 2026-05-11
 auto_generated: true
 bead: flywheel-s8tdd
+update_bead: flywheel-kk08x
 parent: filesystem-as-rag
+inventory_as_of: 2026-05-11
+total_doctrines: 89
+canonical_doctrines: 80
+cross_reference_stubs: 9
 ---
 
 # `.flywheel/doctrine/`
@@ -34,6 +40,55 @@ Notable load-bearing doctrines (as of 2026-05-10):
 - `dispatch-author-skill-routing-contract.md` — orch dispatch path
 - `skill-autoresearch-tooling-preference-class.md` — skill-target routing
 
+## Inventory snapshot (2026-05-11)
+
+- Total doctrine files: **89**
+- Canonical (flywheel-authored or fleet-promoted): **80**
+- Cross-reference stubs (skillos-canonical pointer, `type: doctrine-cross-reference-stub`): **9**
+
+Live counts:
+
+```bash
+# Total
+ls -1 .flywheel/doctrine/*.md | wc -l
+
+# Stubs only
+for f in .flywheel/doctrine/*.md; do
+  head -10 "$f" | grep -q "type: doctrine-cross-reference-stub" && echo "$f"
+done | wc -l
+
+# Canonical only (= total minus stubs)
+```
+
+## Recent additions (2026-05-11 wave)
+
+6 new canonical doctrines shipped in the v38e1 cohort + cluster-promotion arc:
+
+| File | Source bead | Class |
+|------|-------------|-------|
+| `closure-evidence-contract-version-anchor.md` | flywheel-v38e1.1 | cross-orch closure-evidence discipline |
+| `closure-evidence-public-lens-anchor-discipline.md` | flywheel-v38e1.2 | cross-orch closure-evidence discipline |
+| `inbox-discipline-missed-during-deep-burndown-motion.md` | flywheel-v38e1.3 | cross-orch bilateral protocol (0th probe) |
+| `outbox-discipline-cross-orch-ship-notification.md` | flywheel-v38e1.4 | cross-orch bilateral protocol (outgoing) |
+| `option-e-cross-orch-fuckup-log-fold-up.md` | flywheel-nk0r0 | mechanization-axis META-pattern |
+| `single-axis-reframe-of-multi-axis-data-trauma-class.md` | flywheel-0mw8v | META-EXTRACTION-DRIFT trauma class |
+
+9 cross-reference stubs to skillos-canonical META-doctrines (`type: doctrine-cross-reference-stub`):
+
+| File | Skillos canonical authority |
+|------|----------------------------|
+| `additive-v0.0.2-expansion-after-v0.0.1-under-extraction.md` | skillos:1 |
+| `cross-language-audit-as-cousin-scout.md` | skillos:1 |
+| `depth-axis-mismatch.md` | skillos:1 |
+| `dispatch-assumes-fresh-extraction-but-package-preexists.md` | skillos:1 |
+| `dispatch-expectation-vs-audit-verdict-divergence.md` | skillos:1 |
+| `dispatch-premise-mismatch.md` | skillos:1 |
+| `meta-aggregation-family.md` (v0.3) | skillos:1 (mobile-eats:1 authored, skillos canonical-locator) |
+| `source-project-aggregation-from-n-repos.md` | skillos:1 |
+| `substrate-layer-shape-mismatch.md` | skillos:1 |
+
+Stubs follow `cross-repo-consumer-vs-mutator-boundary.md` discipline: read-only consumer pattern at flywheel side; canonical body lives at skillos canonical-locator path. Verify byte-equality via `sha256` anchor in the stub frontmatter when ratifying.
+
 ## Lifecycle
 
 - **active** — currently load-bearing
@@ -55,3 +110,6 @@ being moved to `_archive/`.
 
 - Linter: `.flywheel/scripts/file-rag-discipline-lint.sh`
 - Doctrine source rule: `.flywheel/doctrine/filesystem-as-rag.md`
+- AGENTS.md (canonical operational doctrine): `../../AGENTS.md`
+- AGENTS.md (repo-local snapshot): `../AGENTS.md`
+- Cross-orch discipline: `cross-repo-consumer-vs-mutator-boundary.md`, `substrate-boundary-three-class-taxonomy.md`
