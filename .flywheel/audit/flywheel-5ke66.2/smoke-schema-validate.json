@@ -1,0 +1,1 @@
+{"schema_version":"append-safe-write/v1","command":"schema","surface":"validate","subjects":["target-path","lease-ms","audit-row"],"contract":{"rejects_with_rc1":"on schema violation","target_path_must_be_absolute":true,"lease_ms_min_inclusive":1,"lease_ms_max_inclusive":60000}}

@@ -1,0 +1,1 @@
+{"schema_version":"append-safe-write/v1","command":"repair","status":"ok","ts":"2026-05-11T00:51:38Z","mode":"dry_run","scope":"scratch_dir","idempotency_key":"","target":"/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/","existed_before":true}

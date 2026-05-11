@@ -1,0 +1,2 @@
+{"schema_version":"append-safe-write/v1","command":"validate","subject":"lease-ms","ts":"2026-05-11T00:51:37Z","status":"reject","value":"abc","reason":"out_of_range_or_not_integer","valid_range":"[1, 60000]"}
+rc=1
