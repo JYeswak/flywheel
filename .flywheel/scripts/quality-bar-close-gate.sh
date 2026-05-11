@@ -1433,26 +1433,51 @@ run_audit() {
   emit "$payload" "audit_rows=$(jq -r '.rows | length' <<<"$payload")" 0
 }
 
+# flywheel-bg06b: Shape A canonical invertibility per audit-machinery-hygiene-discipline.
+# `why list` enumerates all known codes; `why <code>` returns explanation envelope.
+# Each known code maps to (explanation, source location, inversion path). Source
+# locations are file:approx-line indicators showing where the code is emitted.
 run_why() {
-  local text payload
+  local text payload source inversion
   case "$WHY_ID" in
-    quality_bar_passed_missing) text="STATE.json lacks quality_bar_passed; Phase 5 close stays pending until the quality bar evidence is written." ;;
-    compliance_pack_path_missing) text="STATE.json schema v4 lacks quality_bar_evidence[].compliance_pack_path; Phase 5 close stays pending until the beads-compliance evidence pack is cited." ;;
-    compliance_pack_missing|compliance_pack_incomplete) text="The cited beads-compliance pack is missing or incomplete; close requires spec/evidence/compliance/theater/test-depth/scorecard/report files." ;;
-    compliance_score_below_700) text="The beads-compliance score is below the 700/1000 close threshold." ;;
-    convergence_streak_below_2|convergence_streak_missing) text="The compliance pack has not shown two consecutive zero-finding rounds; close stays blocked until convergence_streak >= 2." ;;
-    ev_anchor_unresolved) text="A plan artifact cites an EV anchor that is missing from the compliance pack evidence array." ;;
-    refute_contradiction_unresolved) text="A still-active finding has refuting evidence in the compliance pack; close requires resolving that contradiction first." ;;
-    evidence_excerpt_mismatch) text="A compliance-pack evidence excerpt does not exactly match its cited source line." ;;
-    ev_evidence_schema_invalid) text="A compliance-pack evidence row has an invalid EV id, relation, or target finding id." ;;
-    convergence_telemetry_unstable) text="Complex plans require two consecutive stable polish telemetry rounds where kills_gte_adds=true and no_new_deltas=true." ;;
-    prediction_lock_post_hoc_amendment) text="A locked prediction no longer matches its pre-execution hash; close is blocked until the plan records the amendment as a failed lock." ;;
-    prediction_lock_post_hoc_addition) text="A prediction row was timestamped after the plan lock boundary; close is blocked because the receipt was amended after convergence." ;;
-    audit_findings_missing) text="03-AUDIT-FINDINGS.md is missing; close-time gate cannot verify the 3-judges audit evidence." ;;
-    *_below_*|critical_findings_present|quality_bar_passed_false) text="The quality bar explicitly fails; do not auto-close the plan." ;;
-    *) text="Inspect the plan validation JSON for the exact reason list." ;;
+    list)
+      # Enumerate all known codes as a structured JSON array — Shape A
+      # invertibility surface: operators see what's auditable without grepping.
+      payload="$(jq -nc '{
+        command:"why",
+        id:"list",
+        schema_version:"quality-bar-close-gate.why-list.v1",
+        registry_size:15,
+        codes:[
+          "quality_bar_passed_missing","compliance_pack_path_missing","compliance_pack_missing",
+          "compliance_pack_incomplete","compliance_score_below_700","convergence_streak_below_2",
+          "convergence_streak_missing","ev_anchor_unresolved","refute_contradiction_unresolved",
+          "evidence_excerpt_mismatch","ev_evidence_schema_invalid","convergence_telemetry_unstable",
+          "prediction_lock_post_hoc_amendment","prediction_lock_post_hoc_addition","audit_findings_missing"
+        ],
+        wildcard_patterns:["*_below_*","critical_findings_present","quality_bar_passed_false"],
+        catchall:"Inspect the plan validation JSON for the exact reason list."
+      }')"
+      emit "$payload" "why list: 15 codes + 3 wildcard patterns registered" 0
+      return
+      ;;
+    quality_bar_passed_missing) text="STATE.json lacks quality_bar_passed; Phase 5 close stays pending until the quality bar evidence is written." ; source="run_validate state JSON parse (~line 992-1100)" ; inversion="Check STATE.json under .plans/<slug>/ for quality_bar_passed field" ;;
+    compliance_pack_path_missing) text="STATE.json schema v4 lacks quality_bar_evidence[].compliance_pack_path; Phase 5 close stays pending until the beads-compliance evidence pack is cited." ; source="run_validate state JSON parse (~line 992-1100)" ; inversion="Check STATE.json quality_bar_evidence[] array for compliance_pack_path entries" ;;
+    compliance_pack_missing|compliance_pack_incomplete) text="The cited beads-compliance pack is missing or incomplete; close requires spec/evidence/compliance/theater/test-depth/scorecard/report files." ; source="evidence_pack_resolver invocation (~line 270-310)" ; inversion="Run evidence-pack-resolve.sh on the compliance_pack_path; check for the 7 required pack files" ;;
+    compliance_score_below_700) text="The beads-compliance score is below the 700/1000 close threshold." ; source="run_validate state JSON parse + threshold check" ; inversion="Verify STATE.json compliance_score >= 700; rerun beads-compliance audit if score is stale" ;;
+    convergence_streak_below_2|convergence_streak_missing) text="The compliance pack has not shown two consecutive zero-finding rounds; close stays blocked until convergence_streak >= 2." ; source="run_validate state JSON parse" ; inversion="Check STATE.json convergence_streak field; needs >=2 consecutive zero-finding polish rounds" ;;
+    ev_anchor_unresolved) text="A plan artifact cites an EV anchor that is missing from the compliance pack evidence array." ; source="run_validate EV anchor resolver (~line 480-570)" ; inversion="Grep plan artifacts for EV-NNN references; verify each is in compliance_pack evidence[]" ;;
+    refute_contradiction_unresolved) text="A still-active finding has refuting evidence in the compliance pack; close requires resolving that contradiction first." ; source="run_validate refute-relation resolver" ; inversion="Inspect compliance_pack evidence[] for relation=refutes rows pointing at active findings" ;;
+    evidence_excerpt_mismatch) text="A compliance-pack evidence excerpt does not exactly match its cited source line." ; source="run_validate evidence-excerpt match check" ; inversion="Compare each evidence[i].excerpt against the cited source_line; mismatches need re-extraction" ;;
+    ev_evidence_schema_invalid) text="A compliance-pack evidence row has an invalid EV id, relation, or target finding id." ; source="run_validate EV evidence schema check" ; inversion="Validate each evidence[] row: ev_id format, relation in {supports,refutes}, target_finding_id valid" ;;
+    convergence_telemetry_unstable) text="Complex plans require two consecutive stable polish telemetry rounds where kills_gte_adds=true and no_new_deltas=true." ; source="run_validate convergence telemetry check" ; inversion="Inspect 05-POLISH-rN.json files for the last 2 rounds; both must show kills_gte_adds=true + no_new_deltas=true" ;;
+    prediction_lock_post_hoc_amendment) text="A locked prediction no longer matches its pre-execution hash; close is blocked until the plan records the amendment as a failed lock." ; source="run_validate prediction-lock resolver (~line 730-770)" ; inversion="Compare locked prediction's current hash against its lock-time hash in 04-PREDICTION-LOCK.json" ;;
+    prediction_lock_post_hoc_addition) text="A prediction row was timestamped after the plan lock boundary; close is blocked because the receipt was amended after convergence." ; source="run_validate prediction-lock resolver" ; inversion="Verify each prediction's timestamp predates the convergence lock boundary in 04-PREDICTION-LOCK.json" ;;
+    audit_findings_missing) text="03-AUDIT-FINDINGS.md is missing; close-time gate cannot verify the 3-judges audit evidence." ; source="run_validate audit-text read (~line 994-1000)" ; inversion="Check .plans/<slug>/03-AUDIT-FINDINGS.md exists and contains 3-judges audit content" ;;
+    *_below_*|critical_findings_present|quality_bar_passed_false) text="The quality bar explicitly fails; do not auto-close the plan." ; source="run_validate threshold-comparison emit" ; inversion="Inspect STATE.json + plan validation JSON for the specific threshold below the minimum" ;;
+    *) text="Inspect the plan validation JSON for the exact reason list." ; source="run_why catchall" ; inversion="Run validate --plan-slug <slug> --json and inspect .errors[]" ;;
   esac
-  payload="$(jq -nc --arg id "$WHY_ID" --arg text "$text" '{command:"why",id:$id,explanation:$text}')"
+  payload="$(jq -nc --arg id "$WHY_ID" --arg text "$text" --arg src "$source" --arg inv "$inversion" '{command:"why",id:$id,explanation:$text,source:$src,inversion:$inv}')"
   emit "$payload" "$text" 0
 }
 
