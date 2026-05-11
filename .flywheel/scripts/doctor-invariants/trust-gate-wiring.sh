@@ -13,9 +13,19 @@
 # Emits canonical .checks shape envelope for AG3 + canonical-cli-lint.
 set -euo pipefail
 
-VERSION="trust-gate-wiring.v1.0.0"
+VERSION="trust-gate-wiring.v1.1.0"
 SCHEMA_VERSION="trust-gate-wiring/v1"
-SKILLS_ROOT="${SKILLS_ROOT:-$HOME/.claude/skills}"
+# FLYWHEEL_TARGET_REPO_ROOT mirrors skillos's SKILLOS_TARGET_REPO_ROOT
+# (skillos commit d19c747, retraction 2026-05-11T04:58Z).
+# When set, probe the consumer repo's skills directory rather than the
+# orchestrator's own — trust-gate-wiring must verify the actual consumer's
+# wiring, not the orchestrator's. Falls back to ~/.claude/skills when unset.
+FLYWHEEL_TARGET_REPO_ROOT="${FLYWHEEL_TARGET_REPO_ROOT:-}"
+if [[ -n "$FLYWHEEL_TARGET_REPO_ROOT" ]]; then
+  SKILLS_ROOT="${SKILLS_ROOT:-$FLYWHEEL_TARGET_REPO_ROOT/.claude/skills}"
+else
+  SKILLS_ROOT="${SKILLS_ROOT:-$HOME/.claude/skills}"
+fi
 NAMED_SKILLS=("gate-truth-separation" "agent-sandboxing" "slb")
 
 usage() {
