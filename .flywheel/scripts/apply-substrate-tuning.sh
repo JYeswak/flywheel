@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (partial → passing per bead flywheel-1hshd.3)
 # apply-substrate-tuning.sh — wezterm + tmux substrate tuning for codex swarm freeze prevention
 #
 # Bead: flywheel-3099j (P0 wire-or-explain)
@@ -32,6 +34,9 @@ REPAIR_SCOPE="all"
 SCHEMA_TOPIC=""
 WHY_KEY=""
 COMPLETION_SHELL=""
+# NEW (flywheel-1hshd.3): --idempotency-key for canonical apply contract
+# (L7 lint rule). Apply-mode refuses with rc=3 when key absent.
+IDEMPOTENCY_KEY=""
 
 usage() {
   cat <<'EOF'
@@ -427,6 +432,32 @@ mode_schema() {
 }
 
 mode_info() {
+  # flywheel-1hshd.3: respect --json (was plain-text-only pre-scaffold).
+  # AG3 introspection requires JSON envelope with name/version/subcommands.
+  if [[ "$JSON_OUT" == "1" ]]; then
+    jq -nc --arg sv "$SCHEMA_VERSION" --arg ver "$VERSION" --arg name "apply-substrate-tuning.sh" \
+      --arg wezterm "$WEZTERM_CFG" --arg tmux "$TMUX_CFG" --arg ledger "$LEDGER" \
+      '{
+        schema_version: $sv,
+        command: "info",
+        name: $name,
+        version: $ver,
+        purpose: "wezterm + tmux substrate tuning for codex swarm freeze prevention",
+        targets: { wezterm: $wezterm, tmux: $tmux },
+        ledger: $ledger,
+        profile: "512GB (Mac Studio)",
+        doctrine: "~/.claude/skills/wezterm/references/PERFORMANCE-TUNING.md",
+        donella_analysis: "/tmp/3099j-donella-analysis-2026-05-05.md",
+        bead: "flywheel-3099j",
+        subcommands: ["doctor","health","repair","revert","validate","audit","why","schema","examples","quickstart","help","completion"],
+        canonical_flags: ["--info","--schema","--examples","--json","--apply","--dry-run","--revert","--idempotency-key"],
+        apply_supported: true,
+        dry_run_supported: true,
+        revert_supported: true,
+        idempotency_key_required_for_apply: true
+      }'
+    return 0
+  fi
   cat <<EOF
 $VERSION
 Schema: $SCHEMA_VERSION
@@ -547,10 +578,34 @@ while [[ $# -gt 0 ]]; do
     audit) MODE="audit"; shift;;
     why) MODE="why"; WHY_KEY="${2:-}"; shift 2 || shift;;
     schema) MODE="schema"; SCHEMA_TOPIC="${2:-receipt}"; shift 2 || shift;;
+    # NEW (flywheel-1hshd.3): --schema dash-flag form for AG3 introspection
+    # parity with existing `schema <topic>` positional. Defaults topic to
+    # "receipt"; supports --schema=<topic>= form. Note: --schema --json
+    # treats "--json" as not-a-topic via the prefix check.
+    --schema)
+      MODE="schema"
+      if [[ $# -gt 1 && "${2:-}" != --* ]]; then SCHEMA_TOPIC="$2"; shift 2; else SCHEMA_TOPIC="receipt"; shift; fi
+      ;;
+    --schema=*) MODE="schema"; SCHEMA_TOPIC="${1#*=}"; shift;;
+    # NEW (flywheel-1hshd.3): --idempotency-key for AG3 apply contract.
+    --idempotency-key) IDEMPOTENCY_KEY="${2:?--idempotency-key requires KEY}"; shift 2;;
+    --idempotency-key=*) IDEMPOTENCY_KEY="${1#*=}"; shift;;
     -h|--help) usage; exit 0;;
     *) echo "unknown arg: $1" >&2; usage; exit 2;;
   esac
 done
+
+# NEW (flywheel-1hshd.3): apply-contract gate. When MODE is repair/revert
+# AND --apply was given, --idempotency-key is required (canonical-cli L7 rule
+# + AG3 apply contract rc=3). Default --dry-run path is unaffected.
+if [[ "$APPLY" == "1" && -z "$IDEMPOTENCY_KEY" ]]; then
+  case "$MODE" in
+    repair|revert)
+      printf '{"schema_version":"%s","status":"refused","mode":"apply","reason":"--apply requires --idempotency-key KEY (canonical apply contract)","exit_code":3}\n' "$SCHEMA_VERSION"
+      exit 3
+      ;;
+  esac
+fi
 
 case "$MODE" in
   doctor) mode_doctor;;
