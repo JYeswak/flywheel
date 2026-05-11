@@ -1,0 +1,1 @@
+{"schema_version":"headless-browser-reap/v1","command":"examples","examples":[{"name":"default run","invocation":"headless-browser-reap.sh","purpose":"backward-compatible original behavior"},{"name":"doctor","invocation":"headless-browser-reap.sh doctor --json","purpose":"probe substrate health"}]}

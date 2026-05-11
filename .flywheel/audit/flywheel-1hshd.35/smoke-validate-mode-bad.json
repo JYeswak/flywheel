@@ -1,0 +1,1 @@
+{"schema_version":"headless-browser-reap/v1","command":"validate","subject":"reap-mode","ts":"2026-05-11T06:01:04Z","status":"reject","value":"phantom","reason":"not_in_enum","valid_modes":["dry_run","apply"]}
