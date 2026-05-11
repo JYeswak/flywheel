@@ -1,7 +1,7 @@
 {
   "canonical_index": ".flywheel/AGENTS-CANONICAL.md",
   "round_trip_command": "cat .flywheel/rules/L*.md | shasum -a 256",
-  "rule_count": 104,
+  "rule_count": 105,
   "rules": [
     {
       "id": "L48",
@@ -1042,6 +1042,16 @@
       "status": "long_term",
       "title": "CAPTURE-PROVENANCE-CANONICAL",
       "trauma_class": "robot-mode-false-positive-poisoning"
+    },
+    {
+      "id": "L154",
+      "order": 105,
+      "path": ".flywheel/rules/L105-L154-closure-evidence-contract-version-anchor.md",
+      "sha256": "7b45d79130b691cc7683972141917d6053fe40305de0de81369f3ba81f574687",
+      "shipped": "2026-05-11",
+      "status": "long_term",
+      "title": "CLOSURE-EVIDENCE-CONTRACT-VERSION-ANCHOR",
+      "trauma_class": "closure-evidence-missing-contract-version"
     }
   ],
   "rules_body_sha256": "11c6068d4000222f01d4f3a1380522d04e82ae177a93ed4a09addbd55a166b87",

@@ -140,6 +140,7 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 102 | L151 — JEFFREY-COMMENT-RESPONSE-SLA | long_term | `.flywheel/rules/L102-L151-jeffrey-comment-response-sla.md` |
 | 103 | L152 — COORDINATOR-DAEMON-CANONICAL-DISPATCH | long_term | `.flywheel/rules/L103-L152-coordinator-daemon-canonical-dispatch.md` |
 | 104 | L153 — CAPTURE-PROVENANCE-CANONICAL | long_term | `.flywheel/rules/L104-L153-capture-provenance-canonical.md` |
+| 105 | L154 — CLOSURE-EVIDENCE-CONTRACT-VERSION-ANCHOR | long_term | `.flywheel/rules/L105-L154-closure-evidence-contract-version-anchor.md` |
 <!-- END-RULES-INDEX -->
 
 <!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->
