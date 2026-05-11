@@ -17,6 +17,10 @@ ntm_bin="${NTM_BIN:-ntm}"
 br_bin="${BR_BIN:-br}"
 frankenterm_fixture="${FRANKENTERM_RELEASE_FIXTURE:-}"
 frankenterm_candidates="${FRANKENTERM_RELEASE_CANDIDATES:-frankenterm franken-term terminal}"
+# flywheel-90k49.1: homebrew-sbh Formula/ watch. Triggers install signal when
+# Jeff publishes the first .rb formula at Dicklesworthstone/homebrew-sbh/Formula/.
+homebrew_sbh_repo="${HOMEBREW_SBH_REPO:-Dicklesworthstone/homebrew-sbh}"
+homebrew_sbh_fixture="${HOMEBREW_SBH_FORMULA_FIXTURE:-}"
 
 # ---------- canonical-cli emitters (added by flywheel-k8gcv.10) ----------
 
@@ -506,6 +510,71 @@ codex_release_watch() {
   fi
 }
 
+# flywheel-90k49.1: homebrew-sbh Formula publication watch. Polls
+# Dicklesworthstone/homebrew-sbh/Formula/ contents and counts .rb files.
+# The tap was initialized 2026-05-10 with empty Formula/ (only .gitkeep);
+# this watch surfaces the moment Jeff publishes the first formula, at which
+# point flywheel can `brew tap Dicklesworthstone/sbh && brew install sbh`.
+#
+# Status taxonomy:
+#   - tap_initialized_no_formula: Formula/ exists but contains no .rb files
+#     (only .gitkeep or similar placeholder); current observed state
+#   - formula_published: ≥1 .rb file present — installation_recommended=true,
+#     operator/orch should run `brew tap Dicklesworthstone/sbh && brew install sbh`
+#   - unknown: gh unavailable, repo private, or path missing
+#
+# Fixture support: HOMEBREW_SBH_FORMULA_FIXTURE=/path/to/json overrides probe
+# (used by regression test to exercise both branches without hitting GH).
+homebrew_sbh_formula_watch() {
+  if [[ -n "$homebrew_sbh_fixture" ]]; then
+    jq -c . "$homebrew_sbh_fixture"
+    return 0
+  fi
+  # tap shortname: strip the github-user prefix AND the `homebrew-` repo prefix
+  # per homebrew tap convention. So `Dicklesworthstone/homebrew-sbh` → tap `sbh`,
+  # invoked as `brew tap Dicklesworthstone/sbh && brew install sbh`.
+  local raw rb_count tap_short
+  tap_short="$(printf '%s' "$homebrew_sbh_repo" | sed -E 's|^Dicklesworthstone/homebrew-||')"
+  if command -v gh >/dev/null 2>&1 && raw="$(gh api "repos/${homebrew_sbh_repo}/contents/Formula" 2>/dev/null)"; then
+    rb_count="$(printf '%s' "$raw" | jq '[.[] | select(.type == "file" and (.name | endswith(".rb")))] | length' 2>/dev/null || echo 0)"
+    jq -nc \
+      --arg repo "$homebrew_sbh_repo" \
+      --arg tap "$tap_short" \
+      --argjson rb_count "$rb_count" \
+      --argjson raw "$raw" '
+        {
+          repo: $repo,
+          url: ("https://github.com/" + $repo),
+          tap_name: ("Dicklesworthstone/" + $tap),
+          formula_dir: "Formula",
+          rb_file_count: $rb_count,
+          rb_files: ($raw | map(select(.type == "file" and (.name | endswith(".rb"))) | .name)),
+          status: (if $rb_count > 0 then "formula_published" else "tap_initialized_no_formula" end),
+          installation_recommended: ($rb_count > 0),
+          recommended_command: (if $rb_count > 0 then ("brew tap Dicklesworthstone/" + $tap + " && brew install " + $tap) else null end),
+          sister_repo: "Dicklesworthstone/storage_ballast_helper",
+          parent_bead: "flywheel-90k49.1"
+        }'
+  else
+    jq -nc \
+      --arg repo "$homebrew_sbh_repo" \
+      --arg tap "$tap" '
+        {
+          repo: $repo,
+          url: ("https://github.com/" + $repo),
+          tap_name: ("Dicklesworthstone/" + $tap),
+          formula_dir: "Formula",
+          rb_file_count: null,
+          rb_files: null,
+          status: "unknown",
+          installation_recommended: false,
+          recommended_command: null,
+          sister_repo: "Dicklesworthstone/storage_ballast_helper",
+          parent_bead: "flywheel-90k49.1"
+        }'
+  fi
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     doctor|health|run) command="$1" ;;
@@ -552,8 +621,10 @@ status="$([[ "$rel" == behind ]] && echo fail || { [[ "$rel" == unknown ]] && ec
 promotions="$(promote "$rel" "$installed" "$latest")"
 frankenterm_watch="$(frankenterm_release_watch)"
 codex_watch="$(codex_release_watch)"
+# flywheel-90k49.1: homebrew-sbh Formula publication watch.
+homebrew_sbh_watch="$(homebrew_sbh_formula_watch)"
 
-result="$(jq -nc --arg schema "$VERSION" --arg checked_at "$checked_at" --arg status "$status" --arg installed "$installed" --arg latest "$latest" --arg relation "$rel" --arg state_dir "$state_dir" --arg binary_path "$(command -v "$ntm_bin" 2>/dev/null || true)" --argjson promotions "$promotions" --argjson frankenterm_watch "$frankenterm_watch" --argjson codex_watch "$codex_watch" '{schema_version:$schema,checked_at:$checked_at,status:$status,cadence:"hourly",canonical_binary_count:1,release_watch_count:(($frankenterm_watch | length) + 1),stale_count:(if $relation == "behind" then 1 else 0 end),unknown_count:(if $relation == "unknown" then 1 else 0 end),highest_priority:(if $relation == "behind" then "P1" else null end),rows:[{name:"ntm",repo:"ntm",binary_path:$binary_path,installed_version:$installed,latest_version:$latest,latest_source:"ntm upgrade --check",relation:$relation,status:(if $relation == "behind" then "stale" elif $relation == "unknown" then "unknown" else "ok" end),recommended_command:(if $relation == "behind" then "ntm upgrade --yes" else null end),upgrade_mutation_invoked:false}],watchlists:{frankenterm_release:{cadence:"daily",candidates:($frankenterm_watch | map(.candidate)),public_count:($frankenterm_watch | map(select(.repo_public == true)) | length),release_count:($frankenterm_watch | map(select(.latest_release != null)) | length),status:(if ($frankenterm_watch | map(select(.latest_release != null)) | length) > 0 then "released" elif ($frankenterm_watch | map(select(.repo_public == true)) | length) > 0 then "public_no_release" else "not_found" end),rows:$frankenterm_watch},codex_release:{cadence:"daily",repo:$codex_watch.repo,hold_version:$codex_watch.hold_version,target_version:$codex_watch.target_version,latest_release:$codex_watch.latest_release,status:$codex_watch.status,recanary_recommended:$codex_watch.recanary_recommended,source_bead:"flywheel-mspmr",row:$codex_watch}},stale:(if $relation == "behind" then [{name:"ntm",repo:"ntm",installed_version:$installed,latest_version:$latest,relation:$relation,status:"stale"}] else [] end),promotions:$promotions,warnings:[],state_dir:$state_dir}')"
+result="$(jq -nc --arg schema "$VERSION" --arg checked_at "$checked_at" --arg status "$status" --arg installed "$installed" --arg latest "$latest" --arg relation "$rel" --arg state_dir "$state_dir" --arg binary_path "$(command -v "$ntm_bin" 2>/dev/null || true)" --argjson promotions "$promotions" --argjson frankenterm_watch "$frankenterm_watch" --argjson codex_watch "$codex_watch" --argjson homebrew_sbh_watch "$homebrew_sbh_watch" '{schema_version:$schema,checked_at:$checked_at,status:$status,cadence:"hourly",canonical_binary_count:1,release_watch_count:(($frankenterm_watch | length) + 2),stale_count:(if $relation == "behind" then 1 else 0 end),unknown_count:(if $relation == "unknown" then 1 else 0 end),highest_priority:(if $relation == "behind" then "P1" else null end),rows:[{name:"ntm",repo:"ntm",binary_path:$binary_path,installed_version:$installed,latest_version:$latest,latest_source:"ntm upgrade --check",relation:$relation,status:(if $relation == "behind" then "stale" elif $relation == "unknown" then "unknown" else "ok" end),recommended_command:(if $relation == "behind" then "ntm upgrade --yes" else null end),upgrade_mutation_invoked:false}],watchlists:{frankenterm_release:{cadence:"daily",candidates:($frankenterm_watch | map(.candidate)),public_count:($frankenterm_watch | map(select(.repo_public == true)) | length),release_count:($frankenterm_watch | map(select(.latest_release != null)) | length),status:(if ($frankenterm_watch | map(select(.latest_release != null)) | length) > 0 then "released" elif ($frankenterm_watch | map(select(.repo_public == true)) | length) > 0 then "public_no_release" else "not_found" end),rows:$frankenterm_watch},codex_release:{cadence:"daily",repo:$codex_watch.repo,hold_version:$codex_watch.hold_version,target_version:$codex_watch.target_version,latest_release:$codex_watch.latest_release,status:$codex_watch.status,recanary_recommended:$codex_watch.recanary_recommended,source_bead:"flywheel-mspmr",row:$codex_watch},homebrew_sbh_formula:{cadence:"daily",repo:$homebrew_sbh_watch.repo,tap_name:$homebrew_sbh_watch.tap_name,formula_dir:$homebrew_sbh_watch.formula_dir,rb_file_count:$homebrew_sbh_watch.rb_file_count,status:$homebrew_sbh_watch.status,installation_recommended:$homebrew_sbh_watch.installation_recommended,recommended_command:$homebrew_sbh_watch.recommended_command,source_bead:"flywheel-90k49.1",row:$homebrew_sbh_watch}},stale:(if $relation == "behind" then [{name:"ntm",repo:"ntm",installed_version:$installed,latest_version:$latest,relation:$relation,status:"stale"}] else [] end),promotions:$promotions,warnings:[],state_dir:$state_dir}')"
 
 if [[ "$apply" == "1" ]]; then
   mkdir -p "$state_dir"
