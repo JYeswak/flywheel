@@ -1,0 +1,194 @@
+---
+name: skill-builder
+description: "Use when 'create new skill', 'scaffold skill', 'build skill from scratch', 'skill flywheel', 'new claude skill', 'author skill', 'skill template', 'skill bootstrap', 'validate skill', 'grade skill', 'register skill', 'skill house style', 'operationalize knowledge', 'skill quality gate', 'skill self-test', 'skill SKILL.md'. Scaffold, validate, grade, and register Claude Code skills with Joshua house style, wrangler-pattern support, current publish caps, and executable self-tests."
+allowed-tools: Bash(./scripts/*), Bash(bash *), Bash(python3 *), Bash(jq *), Bash(grep *), Bash(wc *), Bash(ls *), Bash(mkdir *), Bash(cp *), Bash(chmod *), Read, Write, Edit, Grep, Glob
+---
+
+<!-- TOC: Hard Rules | THE EXACT PROMPT | Build Process | Validation | Anti-Patterns | References | Scripts | Sources -->
+
+# skill-builder — The Skill That Builds Skills
+
+> **Core Insight:** Skills are the highest-leverage artifact in the agentic flywheel (Petal 9). A skill used 50× compounds far beyond a one-off script. But ad-hoc skills rot: trigger phrases under-saturate, descriptions exceed publish caps, scripts lack `set -euo pipefail`, anti-patterns are bullet lists instead of narrative tables. This skill enforces house style, validates structure, grades content, and feeds lessons-learned back into its own templates so each build is sharper than the last. **Run `scripts/validate-skill.sh <skill-path>` BEFORE shipping any skill, including this one.**
+
+## Hard Rules (violation = the skill won't fire or won't compound)
+
+1. **Never ship a skill with <10 trigger phrases in `description`.** Sub-saturation = skill never auto-invokes. Joshua's house style is 10-20 quoted triggers up front.
+2. **Never exceed 500 characters in `description` for publishable skills.** Anthropic's public guidance rewards concise routing descriptions, and current JSM validation rejects longer descriptions. Put depth in SKILL.md and `references/`.
+3. **Never exceed ~500 lines in `SKILL.md`.** Past that = auto-compact eats the tail. Push detail to `references/`.
+4. **Never write docs-only skills.** A skill without an executable script in `scripts/` cannot enforce its own discipline. Docs rot, scripts run.
+5. **Never use bullet-list anti-patterns.** Use narrative cells in a Markdown table — paragraph per anti-pattern explaining failure mode AND fix. Bullets erase the war story; narrative cells make the lesson stick.
+6. **Never skip the EXACT PROMPT section.** A skill without a copy-pasteable invocation prompt forces the user to assemble one each time. Bake it in.
+7. **Never register a skill that fails `validate-skill.sh`.** Self-test or it doesn't ship.
+8. **Never edit JSM-managed skills directly.** Fork or `jsm create`. See §12b of CLAUDE.md.
+
+---
+
+## THE EXACT PROMPT — Build a New Skill
+
+```
+I want to create a new Claude Code skill named <NAME> covering <SCOPE>.
+
+Use ${CLAUDE_SKILL_DIR}/scripts/bootstrap-skill.sh <NAME> "<one-line>"
+to scaffold the directory. Then:
+
+1. Read references/RESEARCH-PROCESS.md and run the research loop:
+   KS first → official docs → SDK source → GitHub issues for gotchas.
+2. Read references/JOSH-HOUSE-STYLE.md and references/ANTHROPIC-AUTHORING.md.
+3. Fill SKILL.md using templates/SKILL.md.template:
+   - frontmatter: name, description (10-20 trigger phrases, <=500 chars), allowed-tools
+   - Hard Rules, THE EXACT PROMPT, Decision Tree, Anti-Patterns table (narrative cells)
+   - References + Scripts + Sources tables
+4. Author 3+ reference docs in references/ (each 100-300 lines, one concern each).
+5. Author at least one executable script in scripts/ (set -euo pipefail, usage block, error handling).
+6. Author SELF-TEST.md per references/VALIDATION-CRITERIA.md.
+7. Run ${CLAUDE_SKILL_DIR}/scripts/validate-skill.sh <skill-path>. Exit 0 = pass.
+8. Run ${CLAUDE_SKILL_DIR}/scripts/autoresearch-and-grade.sh <skill-path>. Grade ≥80 = ship.
+9. Run ${CLAUDE_SKILL_DIR}/scripts/register-skill.sh <skill-path>.
+10. Capture any rough edges back into templates/ — close the flywheel.
+
+Use ultrathink for trigger-phrase saturation and anti-pattern selection.
+```
+
+## THE EXACT PROMPT — Wrangler-Pattern Submode
+
+For operational/CLI-wrapper skills (storage, docker, deploy CLIs, observability),
+use the wrangler-pattern submode — strict structural archetype with `data/sources.txt`,
+`references/INCIDENTS.md`, weekly flywheel refresh, and a stricter validator.
+Promoted 2026-04-27 after 5+ successful applications (docker-storage-ops,
+apfs-snapshot-ops, dev-cache-janitor, orbstack-migration, disk-observer).
+
+Read `references/WRANGLER-PATTERN.md` for the spec and decision tree.
+Paste-ready prompt: `templates/wrangler-prompt.md.template`.
+Validator: `scripts/validate-wrangler-pattern.sh <skill-path>`.
+
+## THE EXACT PROMPT — Quick Version
+
+```
+${CLAUDE_SKILL_DIR}/scripts/bootstrap-skill.sh <NAME> "<one-line>"
+# fill SKILL.md, references/, scripts/
+${CLAUDE_SKILL_DIR}/scripts/validate-skill.sh ~/.claude/skills/<NAME>
+${CLAUDE_SKILL_DIR}/scripts/autoresearch-and-grade.sh ~/.claude/skills/<NAME>
+${CLAUDE_SKILL_DIR}/scripts/register-skill.sh ~/.claude/skills/<NAME>
+```
+
+---
+
+## Build Process — The Flywheel
+
+```
+/skill-builder <name> <scope>
+   ↓
+1. RESEARCH    — KS + official docs + SDK source + GH issues
+2. SCAFFOLD    — bootstrap-skill.sh creates dir, copies templates, fills frontmatter
+3. AUTHOR      — fill SKILL.md, references/, scripts/, SELF-TEST.md
+4. VALIDATE    — validate-skill.sh asserts structure (frontmatter, triggers, anti-patterns)
+5. GRADE       — autoresearch-and-grade.sh invokes /skill-autoresearch (target ≥80)
+6. REGISTER    — register-skill.sh adds to CLAUDE.md §22, smoke tests
+7. SHIP        — git commit, jsm push if applicable
+8. LEARN       — capture lessons in templates/ + references/, sharpen for next build
+```
+
+Each cycle improves the templates feeding the next cycle. Petal 9 made executable.
+
+---
+
+## Auto-Invocation Triggers
+
+Fires when user says any of: "create a new skill", "scaffold a skill", "build a skill from scratch", "I want to operationalize this", "turn this into a skill", "validate my skill", "grade my skill", "register a skill", "skill quality gate", "skill house style", "skill template".
+
+If the request is to MODIFY an existing JSM-managed skill, defer to `/jsm` first; this skill builds NEW skills under `~/.claude/skills/<name>/`.
+
+## Substrate intake
+
+When a skill introduces durable substrate beyond its own `SKILL.md` - hooks, doctor invariants, state writers, policy registries, or skill-pack manifests - invoke `install-substrate` first. Register a bundle row, not one row per file. For skill-pack manifests, keep pack membership in the domain manifest and point the global substrate registry at that manifest plus its validator.
+
+---
+
+## Decision Tree
+
+```
+What are you doing?
+├─ Brand new skill, no scaffold yet → bootstrap-skill.sh + templates/
+├─ Skill scaffolded, filling content → references/JOSH-HOUSE-STYLE.md + ANTHROPIC-AUTHORING.md
+├─ Filled but unsure about structure → references/STRUCTURAL-REFERENCE.md (cloudflare-api walkthrough)
+├─ Researching the domain → references/RESEARCH-PROCESS.md
+├─ Done authoring, want to ship → scripts/validate-skill.sh → grade → register
+├─ Validate fails with cryptic reason → re-read templates/frontmatter-checklist.md
+├─ Description >500 chars → trim outcome paragraph; never trim trigger phrases
+├─ <10 triggers → references/JOSH-HOUSE-STYLE.md "Trigger Saturation"
+├─ No anti-patterns yet → templates/anti-pattern-table.md (narrative cell format)
+└─ Want to understand the flywheel → references/FLYWHEEL.md
+```
+
+---
+
+## Scripts
+
+Executable surface under `scripts/`. Each script is shell-runnable from any
+skill-build dispatch; `validate-frontmatter-extension.py` is the lone Python
+helper invoked internally by `validate-skill.sh`.
+
+| Script | Purpose |
+|---|---|
+| `scripts/bootstrap-skill.sh` | Scaffold a new skill from templates (`bootstrap-skill.sh <NAME> "<one-line>"`). Creates `~/.claude/skills/<NAME>/` with SKILL.md/references/scripts/templates/data/examples stubs. |
+| `scripts/validate-skill.sh` | Validate skill against Anthropic + Joshua house style (frontmatter shape, trigger saturation, anti-pattern table, ≤500-line SKILL.md, scripts/ present). Exit 0 = pass. Mandatory before grade/register. |
+| `scripts/validate-frontmatter-extension.py` | Python helper invoked internally by `validate-skill.sh` for deeper YAML frontmatter checks (description char-cap, allowed-tools whitelist, declared `lifecycle_stage` flagged as advisory-only). |
+| `scripts/validate-wrangler-pattern.sh` | Assert a skill conforms to the wrangler-pattern submode (manifest + per-action SKILL.md handle). Exit codes 0/1/2 per submode contract. |
+| `scripts/autoresearch-and-grade.sh` | Invoke `/skill-autoresearch` and parse the grade. ≥80 = shippable; ≤80 = back to AUTHOR/REFINE. Subject to `skill-autoresearch-tooling-preference-class` (shell-first targets are forbidden from autoresearch as primary evaluator). |
+| `scripts/register-skill.sh` | Validate-then-register a skill in `CLAUDE.md §22` after grade pass. Refuses to register skills below validate threshold. |
+| `scripts/refresh-skill-from-sources.sh` | Universal skill refresh: walks `<skill>/data/sources.txt`, fetches each URL, snapshots to `data/snapshots/`. Per-skill operator-invoked or scheduled. |
+| `scripts/refresh-all-skills.sh` | Fleet refresh: walks every `~/.claude/skills/*/` that has `data/sources.txt` and runs `refresh-skill-from-sources.sh` on each. Writes summary index. Operator-invoked or scheduled (not continuous-tick). |
+| `scripts/audit-source-coverage.sh` | Meta-audit: list skills with/without `data/sources.txt`. Helps identify the next batch of skills to wire into the dynamic-learning system. Modes: `--missing-only` / `--with-only` / `--summary`. |
+| `scripts/skillmd-pre-edit-backup.sh` | Snapshot `SKILL.md` before agent edits — defense against doc-clobber during refactor. Sister of the agent-edit-isolation L107 discipline. |
+
+**Doc-completeness gate:** any new script under `scripts/` requires a row in this
+table. Per flywheel-plue9 cluster fix (sister to flywheel-03yaj research-triad
+cluster, flywheel-xhevf agent-ergonomics cluster), wired-but-cold flagging from
+gap-hunt-probe is a fast-feedback signal that this gate was bypassed.
+
+---
+
+
+## Anti-Patterns
+
+| Anti-Pattern | Why It Fails | Fix |
+|---|---|---|
+| **Trigger-light descriptions.** A skill with only a few generic phrases rarely auto-invokes because the matcher never sees the wording users actually type. | The skill exists on disk but stays invisible in normal work. | Use 10-20 quoted trigger phrases in the frontmatter and validate before shipping. |
+| **Putting the whole manual in SKILL.md.** Long bodies burn activation context and bury the operational command the agent needed first. | The agent loads too much, misses late sections, or loses the important rule during compaction. | Keep SKILL.md under 500 lines and move detail to `references/`. |
+| **Docs-only skills.** Narrative guidance without a script cannot prove the workflow still works. | The skill looks complete but rots when CLIs, APIs, or local paths change. | Add a probe, validator, or scaffold script and wire it into SELF-TEST.md. |
+
+## Extended Reference
+
+Detailed sections (starting with `Anti-Patterns`) live in [references/extracted-detail.md](references/extracted-detail.md) to keep this SKILL.md within the per-activation context budget.
+
+---
+
+## Telemetry-Driven Maturity (Jeff doctrine)
+
+> Mission anchor: rev 7 lock_hash `80a15c4368187483a6ba91a904248e10266233fb4d14f301b277f9a6c1a12d0a`. Doctrine: `~/Developer/skillos/.flywheel/CODEX-CORE-DOCTRINE-v1.md` §3.2 row #6 (e2e_bd-<ticket>.sh + telemetry-driven maturity, mining doc #8/#9) and §3.3 (frontmatter-minimal — maturity is computed, not author-declared).
+
+**Rule (Meadows paradigm #2):** a skill's `lifecycle_stage` is **COMPUTED from telemetry, not author-declared**. Any `lifecycle_stage` value in frontmatter is advisory only; the runtime authority is the computed maturity per the formula in [references/MATURITY-FORMULA.md](references/MATURITY-FORMULA.md), driven by per-skill telemetry conforming to [schemas/skill-telemetry-v1.schema.json](schemas/skill-telemetry-v1.schema.json) (`schema_version` const `"skillos.skill_telemetry.v1"`, additionalProperties:false).
+
+**Formula (verbatim, see [references/MATURITY-FORMULA.md](references/MATURITY-FORMULA.md) for derivation, fixtures, and worked examples):**
+
+```
+effective_score = sum(helpful_i * exp(-age_days_i / 90))
+                  - 4 * sum(harmful_j * exp(-age_days_j / 90))
+```
+
+| Computed stage | Threshold |
+|---|---|
+| `candidate` | `effective_score < 5` |
+| `established` | `5 <= effective_score < 20` |
+| `proven` | `effective_score >= 20` |
+| `deprecated` (override) | recent harmful events `>= 3` AND harmful/total ratio `> 25%` (overrides `proven` regardless of score) |
+
+**Override semantics:** when computed maturity disagrees with author-declared `lifecycle_stage`, the computed value wins at every gate (5 grade, 6 register, 7 publish). Author declarations are kept for backward compatibility but never gate-loadbearing — Jeff's doctrine is that maturity is an emergent telemetry fact, not a self-assessment.
+
+**Operational pointers:**
+- Telemetry fixtures driving the four stages live in `tests/fixtures/telemetry-{candidate,established,proven,deprecated}.json` (sub-bead A, commit `1cb67fc`).
+- `tests/test_maturity_formula.py` enforces the formula + override invariants; run it before any change to gates 5-7 logic.
+- A skill with no telemetry events defaults to `candidate` (empty-events invariant).
+- Recency decay constant is 90 days; do NOT tune without re-fixturing all four stage fixtures.
+
+**Why this section exists in skill-builder:** the skill that builds skills must enforce the rule that the skills it builds cannot self-promote past `candidate` by editing frontmatter. Promotion is a telemetry event, not a markdown edit.
