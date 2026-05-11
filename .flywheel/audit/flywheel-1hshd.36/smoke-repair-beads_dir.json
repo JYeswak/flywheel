@@ -1,0 +1,1 @@
+{"schema_version":"hub-blocker-detect/v1","command":"repair","status":"ok","ts":"2026-05-11T06:06:29Z","mode":"dry_run","scope":"beads_dir","idempotency_key":"","target":"/Users/josh/Developer/flywheel/.beads","existed_before":true}
