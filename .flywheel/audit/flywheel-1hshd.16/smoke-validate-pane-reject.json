@@ -1,0 +1,2 @@
+{"schema_version":"codex-queued-not-submitted-bare-enter-primitive/v1","command":"validate","subject":"pane-index","ts":"2026-05-11T04:25:03Z","status":"reject","value":"100","reason":"out_of_range_or_not_integer","valid_range":"[0, 99]"}
+rc=1

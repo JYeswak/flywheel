@@ -1,0 +1,1 @@
+{"schema_version":"codex-queued-not-submitted-bare-enter-primitive/v1","command":"quickstart","status":"ok","steps":[{"step":1,"action":"probe doctor","command":"codex-queued-not-submitted-bare-enter-primitive.sh doctor --json"}],"next_actions":["doctor","health","repair"]}
