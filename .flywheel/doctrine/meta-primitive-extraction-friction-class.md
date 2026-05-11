@@ -2,9 +2,9 @@
 name: meta-primitive-extraction-friction-class
 type: doctrine
 created: 2026-05-11
-version: v0.1
-status: draft-pending-joshua-veto-window-2026-05-11T11:20Z
-authority: skillos-1-codified-2026-05-11T05:20Z-from-joshua-friction-recurrence-signal + zeststream-platform-extraction-evidence (commits 31434b3 http-client + 7814d79 stripe-toolkit + d83d94c admin-action-toolkit)
+version: v0.1.1
+status: draft-pending-joshua-veto-window-2026-05-11T11:20Z (v0.1 + TS-inline-handler-implicit-any multi-instance promotion)
+authority: skillos-1-codified-2026-05-11T05:20Z-from-joshua-friction-recurrence-signal + v0.1.1 promotion 2026-05-11T05:35Z per joshua-multi-instance-signal + zeststream-platform-extraction-evidence (commits 31434b3 http-client + 7814d79 stripe-toolkit + d83d94c admin-action-toolkit + 45c2e42 event-hub-toolkit)
 ratification_target: skillos:1 codifies; mobile-eats orch continues parallel extraction; Joshua-veto window 6h from 05:20Z (i.e. 2026-05-11T11:20Z) per cross-orch-anti-divergence-v1.0.0 P3-trivial protocol; default-accept thereafter
 cluster: extraction-velocity-doctrine-cluster
 sisters:
@@ -64,18 +64,22 @@ Every META-PRIMITIVE extraction in flywheel-installed substrate MUST:
 
 **Severity:** WARN — extraction proceeds; first-run friction only; subsequent runs cached.
 
-### Sub-shape #3 — `TS-inline-handler-implicit-any` (≥1 instance + signal recurrence)
+### Sub-shape #3 — `TS-inline-handler-implicit-any` (≥3 instances; PROMOTED to canonical sub-shape 2026-05-11T05:35Z)
 
-**Pattern:** When a META-PRIMITIVE composes LAYERED primitives (one wrapping another), inline async handler signatures inside the composition chain are subject to TypeScript implicit-`any` inference failures. The fix is to declare the inner handler as a typed `const` first, then pass it to the outer wrapper.
+**Pattern:** When a META-PRIMITIVE composes substrate where inline handler signatures appear inside composition chains (LAYERED nesting, HUB registry literals, or PARALLEL pipeline glue with closure captures), inline async handler signatures inside the composition chain are subject to TypeScript implicit-`any` inference failures. The fix is to declare the inner handler as a typed `const` with explicit handler-shape type FROM the substrate package, then pass it to the outer wrapper / registry / pipeline stage.
 
-**Exemplars:**
-| META | Commit | Friction citation |
-|------|--------|-------------------|
-| `@zeststream/admin-action-toolkit` v0.0.1 | `zeststream-platform@d83d94c` | "TS implicit-any in inline async (input, ctx) handler inside protectedActionWrap — fix by declaring stepUpWrappedHandler as typed ProtectedActionHandler const first. NEW pattern: LAYERED METAs need explicit type anchors for inner handlers." |
+**Exemplars (≥3 instances; promoted across all 3 composition shapes):**
+| META | Shape | Commit | Friction citation |
+|------|-------|--------|-------------------|
+| `@zeststream/admin-action-toolkit` v0.0.1 | LAYERED | `zeststream-platform@d83d94c` | "TS implicit-any in inline async (input, ctx) handler inside protectedActionWrap — fix by declaring stepUpWrappedHandler as typed ProtectedActionHandler const first." |
+| `@zeststream/event-hub-toolkit` v0.0.1 | HUB | `zeststream-platform@45c2e42` | "EventDefinition<Payload> generic doesn't flow through inline registry literals when building inline cacheInvalidator. Recurrence of the TS-inline-handler-implicit-any pattern from #26." |
+| Cache-invalidation tests (substrate #18) | PARALLEL | (prior wave) | TS-inline-handler-implicit-any pattern observed earlier in cache-invalidation test substrate authoring; pattern recurs across composition shapes |
 
-**Canonical resolution:** For LAYERED-composition METAs (vs PARALLEL-composition), declare each layer's inner handler as a typed `const` with an explicit handler-shape type from the substrate package before passing it to the outer wrapper. Inline arrow handlers `(input, ctx) => ...` inside `outerWrap(...)` will lose type inference; the explicit-const pattern preserves it.
+**Canonical resolution:** For ANY composition shape (LAYERED + HUB + PARALLEL with closure captures), declare each composition surface's inner handler as a typed `const` with explicit handler-shape type from the substrate package BEFORE passing it to the outer wrapper, registry, or pipeline stage. Inline arrow handlers `(input, ctx) => ...` inside composition surfaces will lose type inference; the explicit-const pattern preserves it. Type the const from the substrate package's exported handler type (e.g. `ProtectedActionHandler`, `EventHandler<P>`, `PipelineStage<I,O>`).
 
-**Severity:** INFO — extraction proceeds with the canonical resolution; one-line refactor; no semantic change.
+**Severity:** WARN (promoted from INFO 2026-05-11T05:35Z) — pattern is now confirmed multi-instance across all 3 composition shapes; extracting workers MUST anchor types via explicit `const` rather than rely on inline inference.
+
+**v0.1 → v0.1.1 promotion rationale:** Initially documented as 1-instance + signal recurrence; Joshua's 2026-05-11T05:32Z META-PRIMITIVE-DOCTRINE-COMPLETE-SIGNAL confirmed ≥2 instance threshold met across all 3 META extractions (PARALLEL + LAYERED + HUB). Pattern is shape-agnostic — wherever inline handlers appear inside composition surfaces, type inference fails. Promotion from "candidate" to "canonical" is the canonical operator response to multi-instance confirmation.
 
 ### Sub-shape #4 — `fake-timer-lifecycle` (≥1 instance + signal recurrence)
 
