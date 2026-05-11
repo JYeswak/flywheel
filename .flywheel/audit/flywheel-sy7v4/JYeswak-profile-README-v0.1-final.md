@@ -55,7 +55,6 @@ fleet that runs a consulting business without me touching every keystroke.
 |:-----|:----:|:--------|:------:|
 | **[zeststream-skillos](https://github.com/JYeswak/zeststream-skillos)** | Python / Shell | Skills Operating System — capability control plane for AI-native pods | 🟡 alpha |
 | **[flywheel](https://github.com/JYeswak/flywheel)** | Shell / TypeScript | Multi-orch fleet operator: tick / dispatch / learn cycle across 4-8 sessions | 🟡 alpha |
-| **[alps-insurance](https://github.com/JYeswak/alps-insurance)** | Python | ALPS title/insurance reference implementation built ON the flywheel | 🟡 alpha |
 | **[zesttube](https://github.com/JYeswak/zesttube)** | Python | Agentic media pipeline (research-triangulate + brand-voice + multi-stage edit) | 🟡 alpha |
 | **[ZestStream-v2](https://github.com/JYeswak/ZestStream-v2)** | TypeScript | Commercial site v2 + AI Assessment delivery surface | 🟡 alpha |
 
@@ -71,11 +70,15 @@ Status legend: ✅ shipped · 🟡 alpha · 🚧 design
 
 ## Clients
 
-Real engagements, signed scope:
+Real engagements under signed scope across three domains:
 
-- **Blackfoot Telecom** — ISP operations + provisioning automation, network-data integration
-- **ALPS Corporation** — title-company workflow modernization
-- **TerraTitle** — title-company tooling + AI-assisted workflows
+- **Telecom** — ISP operations + provisioning automation + network-data integration
+- **Insurance** — title/insurance workflow modernization
+- **Title** — title-company tooling + AI-assisted workflows
+
+(Client names withheld until each engagement has shipped public deliverables
+they want to associate with. Receipts over promises applies to client
+attribution too.)
 
 The pattern: I bring the agentic-coding flywheel to a domain expert + their
 existing legacy substrate, and ship vertical automation that the client's
@@ -94,7 +97,6 @@ team can actually run after I'm gone.
 |:--------|:-------------|
 | **[zeststream-skillos](https://github.com/JYeswak/zeststream-skillos)** | Skills OS rev-8: prove the alpha engine spins under real load + measure finding-to-pack-update cadence in hours |
 | **[flywheel](https://github.com/JYeswak/flywheel)** | Continuous-orchestrator-uptime substrate: 4-8 NTM sessions × 2-4 codex workers, self-sustaining |
-| **[alps-insurance](https://github.com/JYeswak/alps-insurance)** | Reference impl of running a real domain (insurance/title work) through the flywheel |
 | **[zesttube](https://github.com/JYeswak/zesttube)** | Agentic media pipeline (research-triangulate + brand-voice + multi-stage edit) |
 | **AI Assessment** | Commercial north star: $999 lead-in → $3-10K upsell ladder (planned, not yet a separate public repo) |
 
@@ -111,10 +113,11 @@ team can actually run after I'm gone.
 
 ### Domain Verticals
 
-| Project | Description |
-|:--|:--|
-| **[alps-insurance](https://github.com/JYeswak/alps-insurance)** | Insurance/title-company workflow reference impl on the flywheel |
-| **[zesttube](https://github.com/JYeswak/zesttube)** | Agentic media pipeline |
+Vertical-specific implementations (insurance, title, telecom) are PRIVATE
+repos kept under client-discretion until the engagement ships public
+deliverables the client wants associated with. The public-facing pattern
+across all verticals lives in the [flywheel](https://github.com/JYeswak/flywheel)
+substrate.
 
 ### Brand + Tooling
 
@@ -125,9 +128,9 @@ team can actually run after I'm gone.
 
 > [!NOTE]
 > Several substrate repos referenced here are still in alpha. Repos like an
-> AI-assessment delivery system, a flywheel-stamp idempotent applicator, a
-> Blackfoot ISP tooling repo, and a published skill-arsenal library are on
-> the [roadmap but not yet public](https://github.com/JYeswak/flywheel).
+> AI-assessment delivery system, a flywheel-stamp idempotent applicator, an
+> ISP-tooling vertical, and a published skill-arsenal library are on the
+> [roadmap but not yet public](https://github.com/JYeswak/flywheel).
 > Star counts intentionally not displayed — receipts over promises.
 
 ---
@@ -202,9 +205,9 @@ Recurring threads:
 ZestStream is in alpha and the recognition section is intentionally honest:
 
 - Currently: no public press, no Hacker News front pages, no podcast features
-- What exists: signed scope with Blackfoot Telecom, ALPS, TerraTitle —
-  receipts that will become testimonials when those engagements ship public
-  deliverables
+- What exists: signed scope with three clients (telecom, insurance, title
+  verticals) — receipts that will become testimonials when those engagements
+  ship public deliverables the client wants to associate with
 
 This section gets populated with real quotes from real clients, never fabricated.
 
@@ -225,7 +228,7 @@ This section gets populated with real quotes from real clients, never fabricated
 - 12 years at ZIRKEL (energy / commercial real estate; managing director)
 - MBA
 - Left ElektraFi 2025-12-31 (ISP that I ran the AI/automation side of) to focus 100% on ZestStream
-- Living in Montana, working with clients across telecom (Blackfoot),
-  insurance (ALPS), and title (TerraTitle)
+- Living in Montana, working with clients across telecom, insurance, and
+  title verticals
 - Founded ZestStream 2025; locked the Agentic Coding Flywheel doctrine
   in October 2025
