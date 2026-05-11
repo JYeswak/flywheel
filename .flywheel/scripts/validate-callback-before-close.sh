@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-set -uo pipefail
+# flywheel-cli-surface: true
+# canonical-cli-scoping: passing (partial -> passing per bead flywheel-k8gcv.9)
+set -euo pipefail
 
-VERSION="validate-callback-before-close.v1.2.1"
+VERSION="validate-callback-before-close.v1.3.0"
+SCHEMA_VERSION="four-lens-close-validator/v1"
+LEDGER="${VALIDATE_CALLBACK_LEDGER:-$HOME/.local/state/flywheel/validate-callback-before-close.jsonl}"
 REPO="$PWD"
 NTM_BIN="${NTM_BIN:-/Users/josh/.local/bin/ntm}"
 NTM_SESSION="${NTM_SESSION:-flywheel}"
@@ -11,6 +15,9 @@ ENVELOPE=""
 STRICT=0
 JSON_OUT=0
 MODE="dry-run"
+IDEMPOTENCY_KEY=""
+
+now_iso() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 
 usage() {
   cat <<'EOF'
@@ -36,15 +43,78 @@ EOF
 }
 
 info() {
-  cat <<EOF
-name: validate-callback-before-close.sh
-version: $VERSION
-schema_version: four-lens-close-validator/v1
-read_only_default: true
-mutates_only_with: --apply
-purpose: gate br close on evidence receipts plus brand/sniff/Jeff/public lens checks
-structural_gate: did=N/M with N<M blocks close even when all lenses pass
-EOF
+  jq -nc --arg sv "$SCHEMA_VERSION" --arg version "$VERSION" --arg ledger "$LEDGER" \
+    '{
+      schema_version:$sv,
+      command:"info",
+      name:"validate-callback-before-close.sh",
+      version:$version,
+      ledger:$ledger,
+      read_only_default:true,
+      mutates_only_with:"--apply",
+      purpose:"gate br close on evidence receipts plus brand/sniff/Jeff/public lens checks",
+      structural_gate:"did=N/M with N<M blocks close even when all lenses pass",
+      subcommands:["doctor","health","validate","audit","why","repair","quickstart"],
+      canonical_flags:["--info","--schema","--examples","--json","--apply","--dry-run","--idempotency-key","--strict","--repo","--bead","--evidence","--envelope"],
+      capabilities:[
+        "evidence-presence-check",
+        "envelope-structural-validation",
+        "did-n-of-m-gate",
+        "four-lens-grading-brand-sniff-jeff-public",
+        "rework-bead-auto-file-on-block-close",
+        "ledger-append-via-apply-mode",
+        "strict-mode-warnings-as-blockers"
+      ],
+      apply_supported:true,
+      dry_run_supported:true,
+      idempotency_key_required_for_apply:true,
+      mutates_state:true,
+      env_vars:["VALIDATE_CALLBACK_LEDGER","NTM_BIN","NTM_SESSION"],
+      exit_codes:{"0":"close-allowed","1":"block-close","2":"usage","3":"refused-apply-without-idempotency-key"}
+    }'
+}
+
+emit_schema() {
+  jq -nc --arg sv "$SCHEMA_VERSION" '{
+    schema_version:$sv,
+    command:"schema",
+    input_schema:{
+      type:"object",
+      required:["bead","evidence"],
+      properties:{
+        repo:{type:"string"},
+        bead:{type:"string",pattern:"^[a-z][a-z0-9_-]*-[a-z0-9]+(\\.[0-9]+)*$",description:"bead id"},
+        evidence:{type:"string",description:"path to worker evidence file"},
+        envelope:{type:"string",description:"callback envelope text (e.g., DONE ... did=N/M)"},
+        strict:{type:"boolean"},
+        apply:{type:"boolean"},
+        idempotency_key:{type:"string",description:"required with --apply"}
+      }
+    },
+    output_schema:{
+      type:"object",
+      required:["schema_version","verdict","bead"],
+      properties:{
+        schema_version:{type:"string"},
+        verdict:{enum:["close_allowed","block_close","unknown"]},
+        bead:{type:"string"},
+        evidence_present:{type:"boolean"},
+        did_n:{type:"integer"},
+        did_total:{type:"integer"},
+        rework_bead_id:{type:"string"},
+        four_lens:{
+          type:"object",
+          properties:{
+            brand:{type:"integer"},
+            sniff:{type:"integer"},
+            jeff:{type:"integer"},
+            public:{type:"integer"}
+          }
+        }
+      }
+    },
+    exit_codes:{"0":"close-allowed","1":"block-close","2":"usage","3":"refused-apply-without-idempotency-key"}
+  }'
 }
 
 examples() {
@@ -52,9 +122,238 @@ examples() {
 validate-callback-before-close.sh flywheel-123a /tmp/flywheel-123a-evidence.md --strict
 validate-callback-before-close.sh --repo /Users/josh/Developer/flywheel --bead flywheel-123a --evidence /tmp/flywheel-123a-evidence.md --json
 validate-callback-before-close.sh --repo . --bead flywheel-123a --evidence /tmp/flywheel-123a-evidence.md --envelope "DONE flywheel-123a did=5/9 didnt=4 gaps=flywheel-abcd" --json
-validate-callback-before-close.sh --repo . --bead flywheel-123a --evidence /tmp/flywheel-123a-evidence.md --apply --json
+validate-callback-before-close.sh --repo . --bead flywheel-123a --evidence /tmp/flywheel-123a-evidence.md --apply --idempotency-key vcbc-2026-05-11 --json
 EOF
 }
+
+examples_json() {
+  jq -nc --arg sv "$SCHEMA_VERSION" '{
+    schema_version:$sv,
+    command:"examples",
+    examples:[
+      {name:"positional-strict",invocation:"validate-callback-before-close.sh flywheel-123a /tmp/evidence.md --strict",purpose:"positional bead+evidence with strict mode"},
+      {name:"flag-form-dry-run",invocation:"validate-callback-before-close.sh --bead flywheel-123a --evidence /tmp/ev.md --json",purpose:"default dry-run JSON envelope"},
+      {name:"with-envelope-did-gate",invocation:"validate-callback-before-close.sh --bead flywheel-123a --evidence /tmp/ev.md --envelope \"DONE flywheel-123a did=5/9 didnt=4 gaps=flywheel-abcd\" --json",purpose:"structurally validate did=N/M gate (N<M blocks close)"},
+      {name:"apply-with-idem-key",invocation:"validate-callback-before-close.sh --bead flywheel-123a --evidence /tmp/ev.md --apply --idempotency-key vcbc-2026-05-11 --json",purpose:"apply mode: file rework bead if BLOCK_CLOSE; requires --idempotency-key"},
+      {name:"doctor",invocation:"validate-callback-before-close.sh doctor --json",purpose:"canonical doctor envelope: jq, br_bin, evidence_dir_resolvable, ledger_writable"}
+    ]
+  }'
+}
+
+emit_canonical_doctor() {
+  local ts; ts="$(now_iso)"
+  local jq_status="pass"; command -v jq >/dev/null 2>&1 || jq_status="fail"
+  local br_status="pass"; command -v br >/dev/null 2>&1 || br_status="warn"
+  local ntm_status="pass"; [[ -x "$NTM_BIN" ]] || ntm_status="warn"
+  local ledger_dir; ledger_dir="$(dirname "$LEDGER")"
+  local ledger_status="pass"
+  if [[ -e "$LEDGER" ]]; then
+    [[ -w "$LEDGER" ]] || ledger_status="fail"
+  else
+    [[ -d "$ledger_dir" ]] || ledger_status="warn"
+  fi
+  local overall="pass"
+  for s in "$jq_status" "$br_status" "$ntm_status" "$ledger_status"; do
+    case "$s" in
+      fail) overall="fail" ;;
+      warn) [[ "$overall" == "pass" ]] && overall="warn" ;;
+    esac
+  done
+  jq -nc --arg sv "$SCHEMA_VERSION.doctor" --arg ts "$ts" --arg overall "$overall" \
+    --arg jq_s "$jq_status" --arg br_s "$br_status" \
+    --arg ntm_s "$ntm_status" --arg ntm_path "$NTM_BIN" \
+    --arg ledger_s "$ledger_status" --arg ledger "$LEDGER" \
+    '{
+      schema_version:$sv,
+      command:"doctor",
+      ts:$ts,
+      status:$overall,
+      checks:[
+        {name:"jq",status:$jq_s,detail:"jq required for envelope emission"},
+        {name:"br_binary",status:$br_s,detail:"br CLI for rework-bead creation in apply mode (warn if missing — apply path will fail)"},
+        {name:"ntm_bin",status:$ntm_s,path:$ntm_path,detail:"ntm binary for callback transport (warn if missing)"},
+        {name:"ledger_writable",status:$ledger_s,path:$ledger,detail:"append-only verdict ledger"}
+      ]
+    }'
+}
+
+emit_health() {
+  local ts; ts="$(now_iso)"
+  local row_count=0
+  local last_verdict=""
+  if [[ -r "$LEDGER" ]]; then
+    row_count="$(wc -l <"$LEDGER" 2>/dev/null | tr -d ' ')"
+    [[ -z "$row_count" ]] && row_count=0
+    if [[ "$row_count" -gt 0 ]]; then
+      last_verdict="$(tail -n 1 "$LEDGER" 2>/dev/null | jq -r '.verdict // empty' 2>/dev/null || true)"
+    fi
+  fi
+  local status="pass"
+  [[ "$last_verdict" == "block_close" ]] && status="warn"
+  jq -nc --arg sv "$SCHEMA_VERSION.health" --arg ts "$ts" --arg status "$status" \
+    --arg ledger "$LEDGER" --argjson row_count "${row_count:-0}" --arg last_verdict "${last_verdict:-}" \
+    '{schema_version:$sv,command:"health",ts:$ts,status:$status,ledger:$ledger,ledger_row_count:$row_count,last_verdict:$last_verdict}'
+}
+
+emit_canonical_validate() {
+  local ts; ts="$(now_iso)"
+  local rows=0 invalid=0
+  if [[ -r "$LEDGER" ]]; then
+    rows="$(wc -l <"$LEDGER" 2>/dev/null | tr -d ' ')"
+    [[ -z "$rows" ]] && rows=0
+    if [[ "$rows" -gt 0 ]]; then
+      invalid="$(jq -c 'select((.schema_version // "") == "" or (.verdict // "") == "")' "$LEDGER" 2>/dev/null | wc -l | tr -d ' ')"
+      [[ -z "$invalid" ]] && invalid=0
+    fi
+  fi
+  local status="pass"
+  [[ "$invalid" -gt 0 ]] && status="violations"
+  jq -nc --arg sv "$SCHEMA_VERSION.validate" --arg ts "$ts" --arg status "$status" \
+    --argjson rows "${rows:-0}" --argjson invalid "${invalid:-0}" --arg ledger "$LEDGER" \
+    '{schema_version:$sv,command:"validate",ts:$ts,status:$status,ledger:$ledger,row_count:$rows,invalid_row_count:$invalid,check:"every verdict row has non-empty schema_version + verdict"}'
+}
+
+emit_audit() {
+  local limit="${1:-20}"
+  local ts; ts="$(now_iso)"
+  if [[ ! -r "$LEDGER" ]]; then
+    jq -nc --arg sv "$SCHEMA_VERSION.audit" --arg ts "$ts" --arg ledger "$LEDGER" \
+      '{schema_version:$sv,command:"audit",ts:$ts,status:"missing",ledger:$ledger,row_count:0,recent:[]}'
+    return 0
+  fi
+  local row_count
+  row_count="$(wc -l <"$LEDGER" 2>/dev/null | tr -d ' ')"
+  [[ -z "$row_count" ]] && row_count=0
+  local recent='[]'
+  if [[ "$row_count" -gt 0 ]]; then
+    recent="$(tail -n "$limit" "$LEDGER" 2>/dev/null | jq -cs '.' 2>/dev/null || printf '%s' '[]')"
+    [[ -z "$recent" ]] && recent='[]'
+  fi
+  local status="pass"
+  [[ "$row_count" -eq 0 ]] && status="empty"
+  jq -nc --arg sv "$SCHEMA_VERSION.audit" --arg ts "$ts" --arg status "$status" \
+    --arg ledger "$LEDGER" --argjson row_count "$row_count" --argjson recent "$recent" \
+    '{schema_version:$sv,command:"audit",ts:$ts,status:$status,ledger:$ledger,row_count:$row_count,recent:$recent}'
+}
+
+emit_why() {
+  local topic="${1:-}"
+  local body=""
+  case "$topic" in
+    ""|four-lens-gate)
+      body='Four lenses: brand (Joshua taste), sniff (mechanical evidence), jeff (Jeff Emanuel-style convergence), public (Three Judges: skeptical operator + maintainer + future worker). Each lens scores 1-10. Default pass threshold is per-lens >=7 unless --strict overrides.'
+      ;;
+    did-n-of-m-gate)
+      body='Worker envelope MUST include did=N/M field. If N<M, the close is BLOCKED regardless of lens scores — the worker reported incomplete coverage. This catches "5/9 done, claiming close" bugs. The 4 missing pieces become a rework bead in --apply mode.'
+      ;;
+    rework-bead-class)
+      body='When verdict=block_close and --apply, a child bead is filed under the parent listing the gaps. Idempotent: same (parent_bead, gap_set) reuses the existing rework bead via dedupe lookup against the parent ledger.'
+      ;;
+    *)
+      body="unknown topic: $topic. known: four-lens-gate, did-n-of-m-gate, rework-bead-class"
+      ;;
+  esac
+  jq -nc --arg sv "$SCHEMA_VERSION" --arg topic "${topic:-four-lens-gate}" --arg body "$body" \
+    '{schema_version:$sv,command:"why",topic:$topic,body:$body}'
+}
+
+emit_quickstart() {
+  jq -nc --arg sv "$SCHEMA_VERSION" '{
+    schema_version:$sv,
+    command:"quickstart",
+    status:"ok",
+    steps:[
+      {step:1,action:"check-doctor",command:"validate-callback-before-close.sh doctor --json"},
+      {step:2,action:"dry-run-validate",command:"validate-callback-before-close.sh --bead flywheel-123a --evidence /tmp/ev.md --json"},
+      {step:3,action:"apply-with-idem-key",command:"validate-callback-before-close.sh --bead flywheel-123a --evidence /tmp/ev.md --apply --idempotency-key vcbc-$(date +%Y%m%d) --json"},
+      {step:4,action:"tail-recent-verdicts",command:"validate-callback-before-close.sh audit --json"}
+    ],
+    next_actions:["wire-to-pre-close-hook","escalate-block-close-via-rework-bead"]
+  }'
+}
+
+emit_repair() {
+  local scope="" mode="dry_run" idem_key=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --scope) scope="${2:-}"; shift 2 ;;
+      --dry-run) mode="dry_run"; shift ;;
+      --apply) mode="apply"; shift ;;
+      --idempotency-key) idem_key="${2:-}"; shift 2 ;;
+      --idempotency-key=*) idem_key="${1#--idempotency-key=}"; shift ;;
+      --json) shift ;;
+      --help|-h) printf 'repair --scope <ledger-prime> [--dry-run|--apply --idempotency-key KEY]\n'; exit 0 ;;
+      "") shift ;;
+      *) printf 'ERR: unknown repair arg %s\n' "$1" >&2; exit 2 ;;
+    esac
+  done
+  if [[ -z "$scope" ]]; then
+    printf '{"schema_version":"%s.repair","status":"refused","reason":"--scope required (ledger-prime)","exit_code":2}\n' "$SCHEMA_VERSION"
+    exit 2
+  fi
+  if [[ "$mode" == "apply" && -z "$idem_key" ]]; then
+    printf '{"schema_version":"%s.repair","status":"refused","mode":"apply","scope":"%s","reason":"--apply requires --idempotency-key","exit_code":3}\n' "$SCHEMA_VERSION" "$scope"
+    exit 3
+  fi
+  local ts; ts="$(now_iso)"
+  case "$scope" in
+    ledger-prime)
+      local ledger_dir present_before present_after
+      ledger_dir="$(dirname "$LEDGER")"
+      present_before="$([[ -f "$LEDGER" ]] && printf true || printf false)"
+      if [[ "$mode" == "apply" ]]; then
+        mkdir -p "$ledger_dir" 2>/dev/null || true
+        [[ -f "$LEDGER" ]] || : > "$LEDGER"
+      fi
+      present_after="$([[ -f "$LEDGER" ]] && printf true || printf false)"
+      jq -nc --arg sv "$SCHEMA_VERSION.repair" --arg ts "$ts" --arg scope "$scope" --arg mode "$mode" \
+        --arg ledger "$LEDGER" --arg key "$idem_key" \
+        --argjson before "$present_before" --argjson after "$present_after" \
+        '{schema_version:$sv,command:"repair",ts:$ts,status:"pass",scope:$scope,mode:$mode,idempotency_key:$key,ledger:$ledger,ledger_present_before:$before,ledger_present_after:$after}'
+      ;;
+    *)
+      printf '{"schema_version":"%s.repair","status":"refused","scope":"%s","reason":"unknown scope; known: ledger-prime","exit_code":2}\n' "$SCHEMA_VERSION" "$scope"
+      exit 2
+      ;;
+  esac
+}
+
+# Canonical no-dash subcommand intercept BEFORE main arg parser.
+case "${1:-}" in
+  --schema) emit_schema; exit 0 ;;
+  doctor) shift; emit_canonical_doctor; exit 0 ;;
+  health) shift; emit_health; exit 0 ;;
+  validate) shift; emit_canonical_validate; exit 0 ;;
+  audit)
+    shift
+    LIMIT=20
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --limit) LIMIT="${2:-20}"; shift 2 ;;
+        --json) shift ;;
+        "") shift ;;
+        *) shift ;;
+      esac
+    done
+    emit_audit "$LIMIT"
+    exit 0
+    ;;
+  why)
+    shift
+    TOPIC=""
+    while [[ $# -gt 0 ]]; do
+      case "$1" in
+        --json) shift ;;
+        "") shift ;;
+        *) [[ -z "$TOPIC" ]] && TOPIC="$1"; shift ;;
+      esac
+    done
+    emit_why "$TOPIC"
+    exit 0
+    ;;
+  quickstart) shift; emit_quickstart; exit 0 ;;
+  repair) shift; emit_repair "$@"; exit 0 ;;
+esac
 
 fail_usage() {
   echo "ERR: $1" >&2
@@ -100,6 +399,14 @@ while [ "$#" -gt 0 ]; do
       MODE="apply"
       shift
       ;;
+    --idempotency-key)
+      IDEMPOTENCY_KEY="${2:-}"
+      shift 2
+      ;;
+    --idempotency-key=*)
+      IDEMPOTENCY_KEY="${1#--idempotency-key=}"
+      shift
+      ;;
     --help|-h)
       usage
       exit 0
@@ -108,8 +415,13 @@ while [ "$#" -gt 0 ]; do
       info
       exit 0
       ;;
+    --schema)
+      emit_schema
+      exit 0
+      ;;
     --examples)
-      examples
+      shift
+      if [[ "${1:-}" == "--json" ]]; then examples_json; else examples; fi
       exit 0
       ;;
     --version)
@@ -131,6 +443,12 @@ while [ "$#" -gt 0 ]; do
       ;;
   esac
 done
+
+# Canonical apply contract: --apply requires --idempotency-key.
+if [ "$MODE" = "apply" ] && [ -z "$IDEMPOTENCY_KEY" ]; then
+  printf '{"schema_version":"%s","status":"refused","mode":"apply","reason":"--apply requires --idempotency-key","exit_code":3}\n' "$SCHEMA_VERSION"
+  exit 3
+fi
 
 [ -n "$BEAD" ] || fail_usage "missing --bead"
 [ -n "$EVIDENCE" ] || fail_usage "missing --evidence"
