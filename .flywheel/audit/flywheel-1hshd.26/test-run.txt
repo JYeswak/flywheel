@@ -1,0 +1,33 @@
+PASS AG3.1 --info name+version+capabilities
+PASS AG3.2 --schema input/output
+PASS AG3.3 --examples >= 3
+PASS AG3.4 doctor .checks >= 5
+PASS doctor includes load-bearing find+repo probes
+PASS --schema doctor
+PASS --schema repair contract
+PASS quickstart
+PASS health binds audit_log
+PASS repair --dry-run audit_log_dir
+PASS repair --apply no-key refused rc=3
+PASS repair repo_path REPORT-ONLY
+PASS repair unknown rc=64 rc=64
+PASS validate repo-path OK
+PASS validate repo-path missing rc=1 rc=1
+PASS validate language-name bash
+PASS validate language-name python
+PASS validate language-name rust
+PASS validate language-name markdown
+PASS validate language-name unknown rc=1 rc=1
+PASS validate threshold in-range
+PASS validate threshold out-of-range rc=1 rc=1
+PASS validate unknown_subject rc=64 rc=64
+PASS audit empty/missing
+PASS audit with row
+PASS why found
+PASS why not_found
+PASS why unavailable
+PASS help doctor topic
+PASS native --repo --json scanner back-compat
+PASS native --doctor flag back-compat
+PASS self-exclusion: probe does not self-surface as oversized
+SUMMARY pass=32 fail=0
