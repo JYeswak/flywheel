@@ -140,6 +140,20 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 102 | L151 — JEFFREY-COMMENT-RESPONSE-SLA | long_term | `.flywheel/rules/L102-L151-jeffrey-comment-response-sla.md` |
 | 103 | L152 — COORDINATOR-DAEMON-CANONICAL-DISPATCH | long_term | `.flywheel/rules/L103-L152-coordinator-daemon-canonical-dispatch.md` |
 | 104 | L153 — CAPTURE-PROVENANCE-CANONICAL | long_term | `.flywheel/rules/L104-L153-capture-provenance-canonical.md` |
+| 105 | L168 — EVERY-CONSUMER-REPO-MUST-DECLARE-ZS-TENANT-YAML-AT-ROOT | long_term | `.flywheel/rules/L109-L168-every-consumer-repo-must-declare-zs-tenant-yaml-at-root.md` |
 <!-- END-RULES-INDEX -->
+
+<!-- BMBUB-PENDING (template held behind canonical for L154-L167; backfill on next propagator-class-aware-ownership-gate ship) -->
+
+## Tenant routing (Hard Rule — L168)
+
+Every consumer repo MUST declare its tenant routing at the repo root via `.zs-tenant.yaml`. Run `/zs:project-bootstrap <slug>` to generate the declaration + CI wiring.
+
+Required hooks once bootstrapped:
+- `pnpm secrets:doctor` (or equivalent) MUST pass in CI BEFORE deploy
+- DB migrations MUST gate on `zs-verify-supabase-tenant` against the declared Supabase ref
+- Deploy fails with: `"Run /zs:project-bootstrap <slug> to declare tenant routing for this repo."` if `.zs-tenant.yaml` is absent
+
+Origin: cross-Infisical-Supabase tenant collision (mobile-eats:1 TIER-3 2026-05-12T05:00Z; 66 migrations almost ran against ALPS production). Joshua-directive PROMOTED-IMMEDIATE.
 
 <!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->
