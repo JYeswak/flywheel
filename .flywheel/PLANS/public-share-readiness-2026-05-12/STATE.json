@@ -1,0 +1,186 @@
+{
+  "slug": "public-share-readiness",
+  "topic": "Extract the flywheel engine to a properly publishable form \u2014 github.com/JYeswak/flywheel for developers; flywheel.zeststream.ai for SMB clients; both build trust in Joshua, ZestStream brand, and the work.",
+  "started_at": "2026-05-12T17:30:00Z",
+  "current_phase": "paused",
+  "dispatch_mode": "agent-subagents",
+  "dispatch_mode_resolved_at": "2026-05-12T17:30:00Z",
+  "dispatch_mode_resolution_reason": "codex_worker_panes_unknown_state_in_session_using_Agent_subagents_as_alternative_transport_same_lane_shape",
+  "dispatch_mode_timing_overrun_warned": false,
+  "phase_started_at": "2026-05-12T18:30:00Z",
+  "rounds_in_current_phase": 0,
+  "convergence_streak": 0,
+  "expected_polish_rounds": 0,
+  "polish_round": 4,
+  "in_flight_dispatches": [],
+  "joshua_decision_pending": true,
+  "joshua_decision_at": null,
+  "audit_disposition": "blocker_class_destructive-irreversible-on-shared-state",
+  "audit_blocker_class": "destructive-irreversible-on-shared-state",
+  "audit_blocker_classes": [
+    "destructive-irreversible-on-shared-state",
+    "paradigm-conflict-with-active-mission",
+    "legal-or-compliance-decision"
+  ],
+  "audit_blocker_reason": "3 TRUE-blocker-class findings: live-state artifact denylist absent (Class 5), halted propagator scripts disposal unspecified (Class 6), H3 case-study consent workflow unspecified (Class 4). 4 proposed remediations need Joshua-ratification before Phase 4 fires.",
+  "audit_findings_count": 39,
+  "audit_findings_by_severity": {
+    "critical": 1,
+    "high": 10,
+    "medium": 19,
+    "low": 9
+  },
+  "total_beads_in_dag": 0,
+  "beads_created": [],
+  "abort_reason": null,
+  "quality_bar_passed": false,
+  "quality_bar_evidence": [],
+  "convergence_telemetry": {
+    "required_for_complex_plans": true,
+    "stable_rounds_required": 2,
+    "latest_artifact": null
+  },
+  "hypothesis_slate": [
+    {
+      "id": "H1",
+      "strategy": "Aggressive extraction (maximal engine): extract 70-80% of current substrate as engine, spend 40-60h on de-personalization, ship comprehensive v0.2 covering doctrine + L-rules + memory + scripts + hooks + templates + skills.",
+      "kill_condition": "Any single substrate category exceeds 30 worker-hours of extraction effort, OR any de-personalization sweep produces an artifact that fails Joshua's 'would I direct a developer to this?' judged review.",
+      "is_third_alternative": false
+    },
+    {
+      "id": "H2",
+      "strategy": "Minimal extraction (thin engine): extract only the ~11 pure-pattern memory rules + ~25 engine-class doctrines + 4 canonical hooks + install scaffold, ship minimal but solid v0.2, iterate to v0.3/v0.4 as adopters request expansion.",
+      "kill_condition": "Adopters' first-week feedback says 'this doesn't have enough substance to be useful' OR Joshua reviews and says 'this isn't proud-worthy yet.'",
+      "is_third_alternative": false
+    },
+    {
+      "id": "H3",
+      "strategy": "Engine + redacted-overlay-as-case-study (both-and): publish the engine at developer-ready depth (~40 engine doctrines + 70 L-rules + 4 canonical hooks + ~80 scripts + ~30 memory rules + install scaffold) AND publish a redacted-but-real version of Joshua's overlay as the flagship case study on flywheel.zeststream.ai/case-studies. Engine builds developer trust; case study builds SMB trust.",
+      "kill_condition": "The redaction sweep on the overlay-as-case-study reveals so much real client data that even with redaction it can't ship without per-client consent we don't have time to collect, AND the engine-without-case-study fails the SMB-trust bar (no named outcomes on the webpage).",
+      "is_third_alternative": true
+    }
+  ],
+  "schema_version": 5,
+  "_notes": [
+    "Dispatch transport: Agent() sub-agents (general-purpose) instead of codex worker panes. Pane state UNKNOWN in this session; pane-dispatch unsafe without verified WAITING state.",
+    "Convergence test unchanged: all 3 lanes A/B/C required for Phase 2 entry.",
+    "v0.1-rough-drafts/ in this dir is informative reference, not canonical; demoted from premature public-share/ by 346f2ec."
+  ],
+  "_phase1_summary": {
+    "lane_a_lines": 552,
+    "lane_a_finding": "94 doctrines, 109 L-rules, 183 memory rules; ~50% of scripts hardcode /Users/josh; 64% of doctrines name a client; 69% of memory rules name Joshua; sweep effort 40-60 hours",
+    "lane_b_finding": "PAI is the closest reference; flywheel ahead on coordination + atomicity; must close on one-liner install + onboarding ritual + named case studies for SMB trust",
+    "lane_c_finding": "4-phase extraction pipeline; bash installer with staging-dir-rename atomicity; Next.js webpage on Vercel; 15-bead DAG with critical path B1\u2192B2\u2192...\u2192B15; 12 open design questions",
+    "convergence_test_passed": true,
+    "completed_at": "2026-05-12T17:50:00Z"
+  },
+  "_phase2_round1_summary": {
+    "artifact": "02-REFINE-r1.md",
+    "completed_at": "2026-05-12T18:30:00Z",
+    "hypothesis_slate_size": 3,
+    "third_alternative_id": "H3",
+    "recommended_hypothesis": "H3",
+    "bead_dag_size": 31,
+    "open_questions_with_defaults": 12,
+    "joshua_decision_required_items": [
+      "case_study_consent_item_9",
+      "skill_boundary_with_skillos_item_12"
+    ]
+  },
+  "_phase2_r2_summary": {
+    "artifact": "02-REFINE-r2.md",
+    "completed_at": "2026-05-12T19:15:00Z",
+    "lines_r1": 502,
+    "lines_r2": 577,
+    "delta_pct": 14.9,
+    "structural_change": false,
+    "hypothesis_slate_changed": false,
+    "bead_dag_structural_change": true,
+    "bead_dag_size": 33,
+    "convergence_recommendation": "run_r3_as_new_baseline",
+    "key_refinements": [
+      "H4 (repo-only) and H5 (webpage-first) evaluated and rejected with cited reasons; working slate H1/H2/H3 unchanged",
+      "Added B1.5 (build de-personalization codemod) - was implicit in R1, now its own M-effort bead",
+      "Added B17 (pre-launch smoke test on fresh laptop) - specified in section 5.5 with 8-step script and <=30 min budget",
+      "Sharpened section 10.7 with observable acceptance criteria for every P0 bead (grep-able, exit-code-able, not 'looks good')",
+      "Specified section 7.6 CI workflows (ci.yml + installer-smoke.yml + release.yml) with triggers, jobs, time budgets",
+      "Resolved section 9 item #1 to JYeswak/flywheel (rejecting zeststream-flywheel) and flagged Joshua-decision",
+      "Resolved section 9 item #7 to DCO with Signed-off-by + PR template checkbox (default; Joshua-flippable)",
+      "Added section 9.1 first-adopter strategy: meta-case-study at v0.2; recruit external adopter post-launch for v0.2.1",
+      "De-slop pass: removed 'comprehensive solution' / 'robust' / 'seamless' clusters, tightened em-dash density, replaced vague gestures with specific counts"
+    ]
+  },
+  "_phase2_r3_summary": {
+    "artifact": "02-REFINE-r3.md",
+    "completed_at": "2026-05-12T19:45:00Z",
+    "lines_r2": 577,
+    "lines_r3": 594,
+    "delta_pct": 18.72,
+    "lines_added": 65,
+    "lines_removed": 43,
+    "structural_change": false,
+    "hypothesis_slate_changed": false,
+    "bead_dag_size": 33,
+    "bead_dag_structural_change": false,
+    "convergence_recommendation": "run_r4_as_new_baseline",
+    "key_refinements": [
+      "10.7 acceptance table extended from 7 to 22 rows: every P0 bead now has an observable, single-axis acceptance criterion (script/grep/exit-code verifiable)",
+      "B15 compound acceptance split into single-axis form; B17 acceptance reduced to single exit-code check; B0 acceptance pinned to git-trailer marker not narrative 'ratification logged'",
+      "De-slopify pass: replaced 'only 11 of 183' with '11 of 183'; replaced filler 'That arithmetic is what makes...realistic' / 'The arithmetic checks out at' with action-bearing variants; tightened hedging ('many adopters'/'some adopters' to 'most adopters'/Joshua's-fleet specific)",
+      "Technical-writing pass: backticked LICENSE/CONTRIBUTING/CODE_OF_CONDUCT/SECURITY filenames in section 2; replaced 'Detection time-budget' with 'Detection budget'; replaced ambiguous 'doubles maintenance' with 'double maintenance burden'",
+      "Lane A fact-check: 94 doctrines / 109 L-rules / 183 memory rules / 11 pure-pattern / 394 scripts / 50% /Users/josh hardcoding / 64% client-naming all confirmed against 01-RESEARCH-A.md \u00a70 and \u00a71.1-1.3"
+    ]
+  },
+  "_phase2_r4_summary": {
+    "artifact": "02-REFINE-r4.md",
+    "completed_at": "2026-05-12T20:00:00Z",
+    "lines_r3": 594,
+    "lines_r4": 594,
+    "lines_added": 43,
+    "lines_removed": 34,
+    "delta_pct": 1.51,
+    "delta_pct_note": "Net line count unchanged (594\u2192594). Content delta is 9 lines net; 'removed=34/added=43' double-counts each modified line. Net-changes / base = 9/594 = 1.51%. Diff-lines / base = 77/594 = 12.96% but inflated by pair-counting.",
+    "structural_change": false,
+    "hypothesis_slate_changed": false,
+    "bead_dag_size": 33,
+    "bead_dag_structural_change": false,
+    "convergence_streak_after": 1,
+    "convergence_recommendation": "advance_to_phase_3_audit",
+    "tightening_moves_applied": [
+      "Backticked CHARTER.md/README/CONTRIBUTING.md/CHANGELOG.md/LICENSE/CLAUDE.md/STATE.json/SKILL.md across \u00a75.3, \u00a75.5, \u00a78.2, \u00a78.4, \u00a79 items 11+12, \u00a710.5, \u00a710.6 DAG table, \u00a710.7 B15, \u00a711 risks 7+9+10, \u00a712.1, \u00a713, \u00a714",
+      "Backticked CLI verbs: shellcheck/ruff/markdownlint in \u00a77.6 CI workflow table",
+      "Backticked docs paths: docs/getting-started, docs/concepts, docs/reference in \u00a710.3 and \u00a710.6 DAG table",
+      "Hedge removed in \u00a79 item #5: 'if there is demonstrated demand' -> 'if demand is demonstrated'",
+      "Header/footer version bumps: title R3->R4, baseline ref, status line, footer hand-off line, \u00a713 'round 4'->'round 5 if needed', \u00a714 closing line"
+    ],
+    "tightening_moves_count": 5
+  },
+  "_phase2_complete": {
+    "rounds": 4,
+    "final_lines": 594,
+    "convergence_path": "R1=502 \u2192 R2=577 (+14.9%) \u2192 R3\u2248599 (+18.7%, completed acceptance audit) \u2192 R4=594 (1.5%, pure tightening = stable)",
+    "canonical_plan": "00-PLAN.md (copy of 02-REFINE-r4.md)",
+    "hypothesis_recommended": "H3 \u2014 Engine + redacted-overlay-as-case-study",
+    "bead_dag_size": 33,
+    "completed_at": "2026-05-12T18:30:00Z"
+  },
+  "_phase3_complete": {
+    "lenses_run": [
+      "trust-bar",
+      "feasibility",
+      "completeness"
+    ],
+    "trust_bar_verdict": "Mostly proud-bar-clearable (20-25% gap; no TRUE-blocker class within lens)",
+    "feasibility_verdict": "Shippable with adjustments (~100-140h actual envelope; skillos SLA gap; case-study redaction class-leak risk)",
+    "completeness_verdict": "Complete with MATERIAL gaps (4 HIGH map to TRUE-blocker classes)",
+    "findings_aggregated_at": "03-AUDIT-FINDINGS.md",
+    "proposed_remediations": 4,
+    "joshua_decisions_required": [
+      "Class 5: ratify B0.5 live-state denylist",
+      "Class 6 (a): halted propagator disposal (exclude vs ship-with-warning)",
+      "Class 6 (b): case-study positioning (drop / external-adopter / methodology-reframe / hybrid)",
+      "Class 4: ratify B11.5.0 consent workflow + fallback"
+    ],
+    "completed_at": "2026-05-12T18:55:00Z"
+  }
+}
