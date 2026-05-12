@@ -32,10 +32,11 @@ fi
 "$SCRIPT" --dry-run --self-test --json >"$TMP/self-test.json"
 
 assert_jq "$TMP/self-test.json" '.schema_version == "frozen-pane-detector.v2"' "schema version emitted"
-assert_jq "$TMP/self-test.json" '.self_test.status == "pass" and .self_test.fixtures_total >= 6 and .self_test.fixtures_passed >= 6' "six fixture self-test passes"
-assert_jq "$TMP/self-test.json" '(["A_age_only_miss","B_stale_tail","C_post_respawn_residue","D_stale_template_prompt","E_missing_l60_signal","F_queued_not_submitted"] - [.fixture_cases[].fixture_id]) | length == 0' "classes A-F covered"
+assert_jq "$TMP/self-test.json" '.self_test.status == "pass" and .self_test.fixtures_total >= 7 and .self_test.fixtures_passed >= 7' "seven fixture self-test passes"
+assert_jq "$TMP/self-test.json" '(["A_age_only_miss","B_stale_tail","C_post_respawn_residue","D_stale_template_prompt","E_missing_l60_signal","F_queued_not_submitted","G_post_completion_buffer_no_autosubmit"] - [.fixture_cases[].fixture_id]) | length == 0' "classes A-G covered"
 assert_jq "$TMP/self-test.json" 'all(.fixture_cases[]; .status == "pass") and all(.fixture_cases[] | select(.fixture_id != "F_queued_not_submitted"); .recovery_allowed == false)' "non-queued fixtures do not allow recovery"
 assert_jq "$TMP/self-test.json" '.queued_fixture.verdict == "QUEUED_NOT_SUBMITTED" and .queued_fixture.recovery_kind == "queued_bare_enter" and .queued_not_submitted_count == 1' "queued-not-submitted fixture is first-class"
+assert_jq "$TMP/self-test.json" 'any(.fixture_cases[]; .fixture_id == "G_post_completion_buffer_no_autosubmit" and .recovery_allowed == false and .durable_receipt_required == true)' "post-completion buffer fixture is first-class"
 assert_jq "$TMP/self-test.json" 'any(.recoveries[]; .recovery_kind == "queued_bare_enter" and .would_send_empty_enter == true)' "queued fixture plans bare-enter recovery"
 assert_jq "$TMP/self-test.json" '.unknown_auto_recovery_count == 0' "unknown never auto-recovers"
 assert_jq "$TMP/self-test.json" 'any(.durable_receipts[]; .status == "UNKNOWN") and any(.durable_receipts[]; .status == "UNHEALTHY")' "unknown and unhealthy durable receipts present"
@@ -102,7 +103,7 @@ FROZEN_PANE_RESPAWN_SLEEP=0 \
 FROZEN_PANE_RELAUNCH_SLEEP=0 \
 FROZEN_PANE_REPROBE_SLEEP=0 \
 FROZEN_PANE_NOW_EPOCH="$NOW_EPOCH" \
-  "$SCRIPT" --session flywheel --auto-recover --json --sample-interval-seconds 0 --idempotency-key recovery-key >"$TMP/recovery.json"
+  "$SCRIPT" --session flywheel --auto-recover --apply --json --sample-interval-seconds 0 --idempotency-key recovery-key >"$TMP/recovery.json"
 
 assert_jq "$TMP/recovery.json" '.frozen_panes_detected == 1 and .recoveries[0].respawned == true and .recoveries[0].relaunched == true and .recoveries[0].idempotency_key == "recovery-key" and .recoveries[0].ledger_event_written == true and .recoveries[0].re_probe.success == true' "auto recovery writes restart, relaunch, ledger and re-probe"
 assert_jq "$TMP/recovery-ledger.jsonl" '.event == "recovery" and .idempotency_key == "recovery-key" and .re_probe.success == true' "recovery ledger records idempotency key and re-probe"
@@ -143,7 +144,7 @@ FROZEN_PANE_STRIKE_FILE="$TMP/idempotency-strikes.jsonl" \
 FROZEN_PANE_METRICS_FILE="$TMP/idempotency-metrics.jsonl" \
 FROZEN_PANE_RESPAWN_SUPPRESSION_SECONDS=0 \
 FROZEN_PANE_NOW_EPOCH="$NOW_EPOCH" \
-  "$SCRIPT" --session flywheel --auto-recover --json --sample-interval-seconds 0 --idempotency-key same-key >"$TMP/idempotency.json"
+  "$SCRIPT" --session flywheel --auto-recover --apply --json --sample-interval-seconds 0 --idempotency-key same-key >"$TMP/idempotency.json"
 assert_jq "$TMP/idempotency.json" '.recoveries[0].suppressed == true and .recoveries[0].suppression_reason == "idempotency_replay"' "idempotency replay suppresses duplicate recovery"
 
 restart_state="$TMP/restart-state"
@@ -160,7 +161,7 @@ FROZEN_PANE_STRIKE_FILE="$TMP/restart-strikes.jsonl" \
 FROZEN_PANE_METRICS_FILE="$TMP/restart-metrics.jsonl" \
 FROZEN_PANE_RESPAWN_SUPPRESSION_SECONDS=0 \
 FROZEN_PANE_NOW_EPOCH="$NOW_EPOCH" \
-  "$SCRIPT" --session flywheel --auto-recover --json --sample-interval-seconds 0 --idempotency-key new-key >"$TMP/restart-loop.json"
+  "$SCRIPT" --session flywheel --auto-recover --apply --json --sample-interval-seconds 0 --idempotency-key new-key >"$TMP/restart-loop.json"
 assert_jq "$TMP/restart-loop.json" '.recoveries[0].suppressed == true and .recoveries[0].suppression_reason == "restart_loop_suppressed"' "restart-loop suppression prevents duplicate storms"
 
 dryrun_state="$TMP/dryrun-state"

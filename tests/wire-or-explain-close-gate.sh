@@ -25,6 +25,7 @@ assert_jq() {
 
 write_row() {
   local ledger="$1" id="$2" state="$3" session="$4" owning="$5" repo="$6" scope="$7" artifact="$8" consumer="$9"
+  local trust_domain="${10:-repo:flywheel}"
   jq -nc \
     --arg id "$id" \
     --arg state "$state" \
@@ -34,6 +35,7 @@ write_row() {
     --arg scope "$scope" \
     --arg artifact "$artifact" \
     --arg consumer "$consumer" \
+    --arg trust_domain "$trust_domain" \
     '{
       schema_name:"flywheel.wire-or-explain.v1",
       schema_version:"wire-or-explain-ledger/v1",
@@ -49,6 +51,7 @@ write_row() {
       producer:"fixture",
       owner:(if $artifact == "skill_candidate" then "skillos" else $owning end),
       consumer:$consumer,
+      trust_domain:$trust_domain,
       blocking_scope:$scope,
       owning_orch:$owning,
       ship_repo:$repo,
@@ -108,8 +111,8 @@ bash -n "$ROOT/.flywheel/scripts/wire-or-explain-close-gate.sh" && pass "shim_sy
 jq empty "$SCHEMA" && pass "schema_json"
 jq -e '.title == "Wire Or Explain Override Receipt"' "$OVERRIDE_SCHEMA" >/dev/null && pass "override_schema_json"
 python3 "$BIN" --help >/dev/null && pass "help_exits"
-python3 "$BIN" --info --json | jq -e '.surface == "Tick Close Permit Gate" and .exit_codes["1"]' >/dev/null && pass "info_json"
-python3 "$BIN" --examples --json | jq -e '(.examples | length) >= 5' >/dev/null && pass "examples_json"
+python3 "$BIN" --info --json | jq -e '.surface == "Tick Close Permit Gate" and .exit_codes["1"] and (.rollout_states | sort == ["deferred","disabled","enforce","shadow"])' >/dev/null && pass "info_json"
+python3 "$BIN" --examples --json | jq -e '(.examples | length) >= 5 and any(.examples[]; .name == "rollback")' >/dev/null && pass "examples_json"
 python3 "$BIN" quickstart --json | jq -e '(.steps | length) >= 5' >/dev/null && pass "quickstart_json"
 python3 "$BIN" completion bash | rg -q 'wire-or-explain-close-gate.py' && pass "completion_bash"
 python3 "$BIN" --schema | jq -e '.title == "Tick Close Permit Gate Receipt"' >/dev/null && pass "schema_cli"
@@ -132,6 +135,11 @@ run_gate enforce 1 --ledger "$enforce" --mode enforce
 assert_jq "$TMP/enforce.json" '.allowed == false and .exit_code == 1 and .receipt_written == true and .local_unresolved_count == 1' "enforce_blocks_with_receipt"
 test -f "$(jq -r '.receipt_path' "$TMP/enforce.json")" && pass "enforce_receipt_exists"
 pass "fixture_2_enforce_blocks"
+
+fleet_owned="$TMP/fleet-owned.jsonl"
+write_row "$fleet_owned" fleet-owned unwired flywheel flywheel:pane-1 "$ROOT" fleet finding doctor repo:flywheel
+run_gate fleet_owned 4 --ledger "$fleet_owned" --mode enforce
+assert_jq "$TMP/fleet_owned.json" '.allowed == false and .exit_code == 4 and .reason_code == "fleet_owned_unresolved_rows" and .local_unresolved_count == 1' "fleet_owned_blocks_with_fleet_exit"
 
 valid_override="$TMP/valid-override.json"
 write_override "$valid_override" "2026-05-05T01:00:00Z" "bounded override ghp_aaaaaaaaaaaaaaaaaaaa for local-hard" false "" false
@@ -166,14 +174,58 @@ assert_jq "$TMP/bootstrap_consumed.json" '.allowed == false and .reason_code == 
 pass "fixture_5_bootstrap_one_shot"
 
 cross="$TMP/cross.jsonl"
-write_row "$cross" cross-row unwired alpsinsurance alpsinsurance:pane-1 /Users/josh/Developer/alpsinsurance fleet finding peer-orch
+write_row "$cross" cross-row unwired alpsinsurance alpsinsurance:pane-1 /Users/josh/Developer/alpsinsurance fleet finding peer-orch repo:alpsinsurance
 run_gate cross 0 --ledger "$cross" --mode enforce
 assert_jq "$TMP/cross.json" '.allowed == true and .cross_orch_unresolved_count == 1 and any(.warnings[]; .code == "cross_orch_unresolved_rows")' "cross_orch_warn_only"
+
+owned_elsewhere="$TMP/owned-elsewhere.jsonl"
+write_row "$owned_elsewhere" owned-elsewhere unwired flywheel alpsinsurance:pane-1 "$ROOT" tick finding peer-orch repo:alpsinsurance
+run_gate owned_elsewhere 0 --ledger "$owned_elsewhere" --mode enforce
+assert_jq "$TMP/owned_elsewhere.json" '.allowed == true and .cross_orch_unresolved_count == 1 and .local_unresolved_count == 0 and any(.warnings[]; .code == "cross_orch_unresolved_rows")' "owned_elsewhere_warns_not_blocks"
 
 skill="$TMP/skill.jsonl"
 write_row "$skill" skill-backlog unwired flywheel flywheel:pane-1 "$ROOT" skill_triage skill_candidate skillos
 run_gate skill 0 --ledger "$skill" --mode shadow
 assert_jq "$TMP/skill.json" '.skill_candidate_count == 1 and any(.top_actions[]; .route.action == "route_to_skillos" and .next_action == "route_skill_candidate_rows_to_skillos_or_record_deferral")' "skill_candidate_routes_to_skillos"
+
+fleet_config="$TMP/fleet-rollout.json"
+jq -n --arg root "$ROOT" '{
+  schema_version:"wire-or-explain-rollout/v1",
+  default_state:"shadow",
+  repos:[
+    {repo:$root,session:"flywheel",trust_domain:"repo:flywheel",owning_orch:"flywheel:pane-1",state:"enforce",leader:"flywheel",followers:["skillos","alpsinsurance"],rollback_state:"shadow"},
+    {repo:"/Users/josh/Developer/skillos",session:"skillos",trust_domain:"repo:skillos",owning_orch:"skillos:pane-1",state:"shadow",leader:"flywheel",followers:[],rollback_state:"disabled"},
+    {repo:"/Users/josh/Desktop/Projects/clients/alps-insurance",session:"alpsinsurance",trust_domain:"client:alpsinsurance",owning_orch:"alpsinsurance:pane-1",state:"deferred",leader:"flywheel",followers:[],rollback_state:"disabled"},
+    {repo:"/Users/josh/Developer/vrtx",session:"vrtx",trust_domain:"repo:vrtx",owning_orch:"vrtx:pane-1",state:"disabled",leader:"flywheel",followers:[],rollback_state:"disabled"}
+  ],
+  rollback:{preserve_ledger_history:true,allowed_target_states:["shadow","disabled"]}
+}' >"$fleet_config"
+
+python3 "$BIN" rollout-status --repo "$ROOT" --session flywheel --fleet-config "$fleet_config" --json >"$TMP/rollout-status.json"
+assert_jq "$TMP/rollout-status.json" '.mode == "enforce" and .fleet_rollout.entry.trust_domain == "repo:flywheel"' "rollout_status_uses_fleet_config"
+
+fleet_smoke="$TMP/fleet-smoke.jsonl"
+write_row "$fleet_smoke" flywheel-local unwired flywheel flywheel:pane-1 "$ROOT" tick finding doctor repo:flywheel
+write_row "$fleet_smoke" skillos-peer unwired skillos skillos:pane-1 /Users/josh/Developer/skillos tick finding peer-orch repo:skillos
+write_row "$fleet_smoke" alps-peer unwired alpsinsurance alpsinsurance:pane-1 /Users/josh/Desktop/Projects/clients/alps-insurance tick finding peer-orch client:alpsinsurance
+run_gate fleet_smoke 1 --ledger "$fleet_smoke" --fleet-config "$fleet_config"
+assert_jq "$TMP/fleet_smoke.json" '.mode == "enforce" and .local_unresolved_count == 1 and .cross_orch_unresolved_count == 2 and .allowed == false and any(.top_actions[]; .trust_domain == "repo:flywheel")' "fleet_smoke_blocks_only_flywheel"
+
+deferred_config="$TMP/deferred-rollout.json"
+jq '.repos[0].state = "deferred"' "$fleet_config" >"$deferred_config"
+run_gate rollout_deferred 0 --ledger "$fleet_smoke" --fleet-config "$deferred_config"
+assert_jq "$TMP/rollout_deferred.json" '.mode == "deferred" and .allowed == true and .would_block == false and .reason_code == "rollout_deferred"' "rollout_deferred_does_not_halt"
+
+disabled_config="$TMP/disabled-rollout.json"
+jq '.repos[0].state = "disabled"' "$fleet_config" >"$disabled_config"
+run_gate rollout_disabled 0 --ledger "$fleet_smoke" --fleet-config "$disabled_config"
+assert_jq "$TMP/rollout_disabled.json" '.mode == "disabled" and .allowed == true and .would_block == false and .reason_code == "rollout_disabled"' "rollout_disabled_does_not_halt"
+
+python3 "$BIN" rollback --repo "$ROOT" --session flywheel --fleet-config "$fleet_config" --target-state shadow --dry-run --json >"$TMP/rollback-dry-run.json"
+assert_jq "$TMP/rollback-dry-run.json" '.new_state == "shadow" and .written == false and .ledger_history_deleted == false and .planned_config.repos[0].state == "shadow"' "rollback_dry_run_preserves_ledger_history"
+python3 "$BIN" rollback --repo "$ROOT" --session flywheel --fleet-config "$fleet_config" --target-state disabled --apply --json >"$TMP/rollback-apply.json"
+assert_jq "$TMP/rollback-apply.json" '.new_state == "disabled" and .written == true and .ledger_history_deleted == false' "rollback_apply_writes_disabled"
+jq -e '.repos[0].state == "disabled"' "$fleet_config" >/dev/null && pass "rollback_apply_updates_config" || fail "rollback_apply_updates_config"
 
 python3 "$BIN" why skill-backlog --ledger "$skill" --repo "$ROOT" --json | jq -e '.command == "why" and .found.route.action == "route_to_skillos" and (.rows | has("skill-backlog"))' >/dev/null && pass "why_json"
 python3 "$BIN" --why --ledger "$skill" --repo "$ROOT" --json | jq -e '.command == "why" and (.rows | has("skill-backlog"))' >/dev/null && pass "why_flag_json"

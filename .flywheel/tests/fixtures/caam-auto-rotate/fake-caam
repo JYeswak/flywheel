@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+import json, os, sys
+from pathlib import Path
+
+base = Path(os.environ.get("FAKE_CAAM_FIXTURE_DIR", Path(__file__).parent))
+mode = os.environ.get("FAKE_CAAM_MODE", "current-alt")
+log = Path(os.environ.get("FAKE_CAAM_LOG", "/tmp/fake-caam.log"))
+state = Path(os.environ.get("FAKE_CAAM_STATE", "/tmp/fake-caam.state"))
+
+def load(name):
+    return json.loads((base / name).read_text())
+
+def dump(obj):
+    print(json.dumps(obj, sort_keys=True))
+
+def profiles():
+    if mode == "no-alternate":
+        data = load("profiles-no-alternate.json")
+    elif mode == "critical-alt":
+        data = load("profiles-critical-alt.json")
+    elif mode == "unknown-fields":
+        data = load("profiles-unknown-fields.json")
+    else:
+        data = load("profiles-current-alt.json")
+    forced = os.environ.get("FAKE_CAAM_FORCE_CURRENT")
+    if forced:
+        for item in data.get("profiles", []):
+            item["active"] = item.get("name") == forced
+    return data
+
+def active_status():
+    if mode == "post-mismatch":
+        return load("status-current.json")
+    if state.exists():
+        return {"active_profile": state.read_text().strip(), "tool": "codex"}
+    forced = os.environ.get("FAKE_CAAM_FORCE_CURRENT")
+    return {"active_profile": forced, "tool": "codex"} if forced else load("status-current.json")
+
+args = sys.argv[1:]
+if len(args) < 2:
+    print("usage: fake-caam <cmd> <tool>", file=sys.stderr)
+    sys.exit(64)
+cmd, tool = args[0], args[1]
+if tool != "codex":
+    print("unsupported tool", file=sys.stderr)
+    sys.exit(65)
+if cmd == "list":
+    if mode == "list-fails-ls-succeeds":
+        print("list unavailable", file=sys.stderr)
+        sys.exit(9)
+    dump(profiles())
+elif cmd == "ls":
+    dump(profiles())
+elif cmd == "status":
+    dump(active_status())
+elif cmd == "activate":
+    selected = args[2] if len(args) > 2 else ""
+    log.parent.mkdir(parents=True, exist_ok=True)
+    with log.open("a") as fh:
+        fh.write(f"activate {tool} {selected}\n")
+    if mode == "activate-fails":
+        dump(load("activate-failure.json"))
+        sys.exit(8)
+    state.write_text(selected)
+    dump(load("activate-success.json"))
+else:
+    print("unknown command", file=sys.stderr)
+    sys.exit(66)

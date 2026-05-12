@@ -106,8 +106,8 @@ set +e
 "$SCRIPT" --fixture "$TMP/chevron-alone.json" --json >"$TMP/chevron-alone.out"
 chevron_alone_rc=$?
 set -e
-[[ "$chevron_alone_rc" -eq 2 ]] && pass "chevron_alone_unknown_rc2" || fail "chevron_alone_unknown_rc2"
-assert_jq "$TMP/chevron-alone.out" '.panes[0].subclass != "model_at_capacity_halt" and .panes[0].subclass == "unknown_stable"' "chevron_alone_not_capacity"
+[[ "$chevron_alone_rc" -eq 0 ]] && pass "chevron_alone_alive_rc0" || fail "chevron_alone_alive_rc0"
+assert_jq "$TMP/chevron-alone.out" '.panes[0].subclass != "model_at_capacity_halt" and .panes[0].subclass == "alive" and .panes[0].recommended_recovery == "none"' "chevron_alone_alive_not_capacity"
 
 fixture "$TMP/post.json" "flywheel" 2 $'Working (14m 08s • esc to interrupt)\nfinished output' $'Working (14m 08s • esc to interrupt)\nfinished output'
 set +e

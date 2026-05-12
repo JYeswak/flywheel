@@ -25,6 +25,8 @@ assert_jq() {
 mkdir -p "$TMP/loops" "$TMP/agent-mail/sessions" "$TMP/agent-mail/tokens" "$TMP/activity"
 chmod +x "$SCRIPT"
 bash -n "$SCRIPT" && pass "script syntax" || fail "script syntax"
+grep -F -- "f\"--pane={action['target_pane']}\", \"--no-cass-check\", body" "$SCRIPT" >/dev/null \
+  && pass "comms_ping_no_cass_check_argv_order" || fail "comms_ping_no_cass_check_argv_order"
 
 NOW="2026-05-04T20:00:00Z"
 NOW_EPOCH="$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$NOW" +%s)"
@@ -140,6 +142,7 @@ NTM_LOG="$TMP/ntm.log" "$SCRIPT" "${base_args[@]}" --apply --no-notify --json --
 assert_jq "$TMP/apply.json" '(.planned_actions | map(.type) | index("xpane_comms_ping")) and (.planned_actions | map(.type) | index("log_false_positive_classifier"))' "apply dry-run packet shape exposes planned actions"
 assert_jq "$TMP/apply.json" '(.actual_actions | map(.type) | index("xpane_comms_ping")) and (.actual_actions | map(.type) | index("log_false_positive_classifier"))' "apply records comms ping and false-positive log"
 grep -q 'COMMS_HEALTH_PING' "$TMP/ntm.log" && pass "fake ntm received comms ping" || fail "fake ntm received comms ping"
+grep -F -- '--no-cass-check' "$TMP/ntm.log" >/dev/null && pass "fake ntm comms ping bypasses cass" || fail "fake ntm comms ping bypasses cass"
 assert_jq "$TMP/fleet-comms-ledger.jsonl" 'select(.event == "fleet_comms_false_positive_classifier" and .session == "false-positive")' "ledger records false positive classifier"
 
 if [[ "$fail_count" -gt 0 ]]; then

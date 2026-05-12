@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+import json, os, sys
+from pathlib import Path
+
+mode = os.environ.get("FAKE_NTM_MODE", "ok")
+log = Path(os.environ.get("FAKE_NTM_LOG", "/tmp/fake-ntm.log"))
+args = sys.argv[1:]
+log.parent.mkdir(parents=True, exist_ok=True)
+log.open("a").write(" ".join(args) + "\n")
+account = next((a.split("=", 1)[1] for a in args if a.startswith("--account=")), "")
+pane = next((a.split("=", 1)[1] for a in args if a.startswith("--pane=")), "")
+dry = "--dry-run" in args
+preserve = "--preserve-context" in args
+if len(args) < 2 or args[0] != "rotate":
+    print(json.dumps({"status": "bad_command"}))
+    sys.exit(64)
+if mode == "rotate-fails":
+    print(json.dumps({"status": "failed", "account": account, "pane": pane}))
+    sys.exit(8)
+print(json.dumps({"status": "dry_run" if dry else "rotated", "account": account, "pane": pane, "preserve_context": preserve}))

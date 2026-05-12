@@ -1,0 +1,31 @@
+{
+  "fixture": "L122-ledger-current-state-required-allow",
+  "source_ref": "~/.local/state/flywheel/fuckup-log.jsonl#L122",
+  "case_id": "L122",
+  "class": "ledger-write-without-reading-current-state",
+  "session": "flywheel",
+  "pane": 1,
+  "idle_worker_count": 1,
+  "ready_bead_count": 1,
+  "prior_wave_points_one_way": true,
+  "action_in_doctrine": true,
+  "evidence_missing": "current_ledger_state_before_append",
+  "suggested_action": "read the current ledger before writing handshake rows",
+  "draft_question": "May I append handshake rows after evidence_missing=current_ledger_state_before_append is resolved?",
+  "draft_text": "The current ledger has not been read yet. evidence_missing=current_ledger_state_before_append. May I append handshake rows after evidence_missing=current_ledger_state_before_append is resolved?",
+  "signals": {
+    "idle_worker_count": 1,
+    "ready_bead_count": 1,
+    "prior_wave_points_one_way": true,
+    "action_in_doctrine": true,
+    "evidence_missing": "current_ledger_state_before_append"
+  },
+  "expected": {
+    "violation": false,
+    "status": "ok",
+    "allowed_reason": "evidence_missing",
+    "override_reason": "evidence_missing",
+    "gate_passes": true,
+    "receipt": "override"
+  }
+}

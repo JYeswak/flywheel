@@ -38,7 +38,7 @@ required = [
     "schema_name", "schema_version", "identity_key", "timestamp", "session_id",
     "event_type", "actor", "target", "payload", "metadata", "prev_hash",
     "checksum", "sequence_num", "state", "producer", "owner", "consumer",
-    "blocking_scope", "owning_orch", "ship_repo", "ship_actor",
+    "trust_domain", "blocking_scope", "owning_orch", "ship_repo", "ship_actor",
     "artifact_class", "subject", "predicate", "branch_ref", "git_ref",
     "reset_intent_hash", "deferral_owner", "deferral_until",
     "auto_fire_trigger", "drain_receipt_shape", "verification_probe",

@@ -20,6 +20,7 @@
   "producer": "worker",
   "owner": "orchestrator",
   "consumer": "orchestrator",
+  "trust_domain": "repo:flywheel",
   "blocking_scope": "tick",
   "owning_orch": "flywheel:pane-1",
   "ship_repo": "/Users/josh/Developer/flywheel",

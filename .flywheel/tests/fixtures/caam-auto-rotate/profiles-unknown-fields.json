@@ -1,0 +1,6 @@
+{
+  "profiles": [
+    {"name": "codex-main", "active": true, "system": false, "health": "healthy", "access_token": "x", "auth_url": "https://example.invalid/auth"},
+    {"name": "codex-backup", "active": false, "system": false, "health": "healthy", "refresh_token": "x", "bearer": "x"}
+  ]
+}

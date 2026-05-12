@@ -1,0 +1,6 @@
+{
+  "profiles": [
+    {"name": "codex-main", "active": true, "system": false, "health": "healthy"},
+    {"name": "codex-system", "active": false, "system": true, "health": "healthy"}
+  ]
+}

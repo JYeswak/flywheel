@@ -1,0 +1,7 @@
+# fixture: 06-non-codex-ntm-canonical
+# truth_state: idle
+# ntm_health: idle
+# pws_truth: advisory
+# is_codex: false
+# description: Non-Codex pane where ntm health is canonical and PWS is advisory
+josh@macstudio flywheel % 

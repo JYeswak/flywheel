@@ -1,0 +1,31 @@
+{
+  "fixture": "L115-pane-state-contradiction-allow",
+  "source_ref": "~/.local/state/flywheel/fuckup-log.jsonl#L115",
+  "case_id": "L115",
+  "class": "meat-puppet-pane-state-misread",
+  "session": "flywheel",
+  "pane": 1,
+  "idle_worker_count": 1,
+  "ready_bead_count": 2,
+  "prior_wave_points_one_way": true,
+  "action_in_doctrine": true,
+  "evidence_missing": "pane_scrollback_conflicts_with_ntm_health",
+  "suggested_action": "ask for or perform a second-source pane-state check before dispatch",
+  "draft_question": "Can I dispatch after resolving evidence_missing=pane_scrollback_conflicts_with_ntm_health?",
+  "draft_text": "ntm health reports an idle worker, but pane scrollback shows active work. evidence_missing=pane_scrollback_conflicts_with_ntm_health. Can I dispatch after resolving evidence_missing=pane_scrollback_conflicts_with_ntm_health?",
+  "signals": {
+    "idle_worker_count": 1,
+    "ready_bead_count": 2,
+    "prior_wave_points_one_way": true,
+    "action_in_doctrine": true,
+    "evidence_missing": "pane_scrollback_conflicts_with_ntm_health"
+  },
+  "expected": {
+    "violation": false,
+    "status": "ok",
+    "allowed_reason": "evidence_missing",
+    "override_reason": "evidence_missing",
+    "gate_passes": true,
+    "receipt": "override"
+  }
+}

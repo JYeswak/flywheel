@@ -1,0 +1,31 @@
+{
+  "fixture": "L121-stdout-truncation-ledger-violation",
+  "source_ref": "~/.local/state/flywheel/fuckup-log.jsonl#L121",
+  "case_id": "L121",
+  "class": "stdout-truncation-misread-led-to-false-completion",
+  "session": "flywheel",
+  "pane": 1,
+  "idle_worker_count": 1,
+  "ready_bead_count": 1,
+  "prior_wave_points_one_way": true,
+  "action_in_doctrine": true,
+  "pagerank_pick": "read-ledger-before-relay-status",
+  "suggested_action": "read the relay ledger and report the 13 relay_sent rows instead of asking",
+  "draft_question": "Should I ask Joshua if only one relay was sent?",
+  "draft_text": "stdout was truncated, but the relay ledger has 13 relay_sent rows. Should I ask Joshua if only one relay was sent?",
+  "signals": {
+    "idle_worker_count": 1,
+    "ready_bead_count": 1,
+    "prior_wave_points_one_way": true,
+    "action_in_doctrine": true,
+    "pagerank_pick": "read-ledger-before-relay-status",
+    "ledger_relay_sent_count": 13
+  },
+  "expected": {
+    "violation": true,
+    "status": "violation",
+    "code": "orch_question_when_data_clear",
+    "gate_passes": true,
+    "receipt": "save"
+  }
+}

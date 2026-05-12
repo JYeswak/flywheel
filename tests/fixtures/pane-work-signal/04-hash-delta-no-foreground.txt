@@ -1,0 +1,7 @@
+# fixture: 04-hash-delta-no-foreground
+# truth_state: working
+# ntm_health: idle
+# pws_truth: working
+# hash_delta: true
+# description: Fresh hash-delta sample without visible foreground Working text
+$

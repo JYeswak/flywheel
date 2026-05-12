@@ -30,10 +30,11 @@ assert_jq() {
 
 run_auth() {
   local name="$1" expected_rc="$2" topo="$3" session="$4" pane="$5" out rc
+  shift 5
   out="$TMP/$name.out"
   set +e
   CAPACITY_HALT_AUTH_TOPOLOGY="$topo" CAPACITY_HALT_AUTH_NOW_EPOCH=1778037000 \
-    bash "$AUTH" --session "$session" --pane "$pane" --json >"$out" 2>"$TMP/$name.err"
+    bash "$AUTH" --session "$session" --pane "$pane" --json "$@" >"$out" 2>"$TMP/$name.err"
   rc=$?
   set -e
   if [[ "$rc" -eq "$expected_rc" ]]; then
@@ -105,8 +106,8 @@ jq -nc '{session:"fixture",worker_panes:[2,3],worker_kinds:{"2":"codex","3":"cod
 
 bash -n "$AUTH" && pass "auth_syntax" || fail "auth_syntax"
 bash -n "$AUTO" && pass "auto_syntax" || fail "auto_syntax"
-"$AUTH" --info --json | jq -e '.name=="capacity-halt-pane-authorization" and (.verbs == ["--info","--help","--examples","--json","--session","--pane","--quiet"]) and .exit_codes."5"=="protected-refusal"' >/dev/null && pass "info_json" || fail "info_json"
-"$AUTH" --examples --json | jq -e '.examples | length == 2' >/dev/null && pass "examples_json" || fail "examples_json"
+"$AUTH" --info --json | jq -e '.name=="capacity-halt-pane-authorization" and (.verbs|index("--recovery-class")) and (.verbs|index("--tool")) and (.credential_rotation.authorized_operations|index("caam_activate_existing_profile")) and (.credential_rotation.forbidden_operations|index("vault_write")) and .exit_codes."5"=="protected-refusal"' >/dev/null && pass "info_json" || fail "info_json"
+"$AUTH" --examples --json | jq -e '(.examples | length) >= 3 and any(.examples[]; .name=="credential_rotation")' >/dev/null && pass "examples_json" || fail "examples_json"
 
 before_hash="$(shasum -a 256 "$topology" | awk '{print $1}')"
 run_auth worker_authorized 0 "$topology" fixture 2
@@ -136,6 +137,23 @@ assert_jq "$RUN_OUT" '.authorized==false and .role=="unknown" and .authorization
 run_auth stale_refused 7 "$stale_topology" fixture 2
 assert_jq "$RUN_OUT" '.authorized==false and .role=="unknown" and .authorization_outcome=="topology_stale" and .topology_age_sec > 3600' "stale_refused_payload"
 
+run_auth stale_credential_rotation_authorized 0 "$stale_topology" fixture 2 --tool codex --recovery-class credential_rotation
+assert_jq "$RUN_OUT" '.authorized==true and .role=="worker_pane" and .recovery_class=="credential_rotation" and .tool=="codex" and .primitive=="caam-auto-rotate-on-usage-limit" and .stale_topology_allowed==true and .credential_secret_values_observed==0 and (.authorized_operations|index("caam_activate_existing_profile")) and (.authorized_operations|index("caam_status_post_check")) and (.authorized_operations|index("append_recovery_ledger")) and (.forbidden_operations|index("pane_mutation")) and (.forbidden_operations|index("respawn")) and (.forbidden_operations|index("launchctl")) and (.forbidden_operations|index("new_credential_creation")) and (.forbidden_operations|index("token_rotation")) and (.forbidden_operations|index("oauth_refresh")) and (.forbidden_operations|index("vault_write"))' "stale_credential_rotation_authorized_payload"
+
+run_auth stale_credential_rotation_protected_pane_refused 5 "$stale_topology" fixture 1 --tool codex --recovery-class credential_rotation
+assert_jq "$RUN_OUT" '.authorized==false and .role=="orchestrator_pane" and .authorization_outcome=="protected_refusal" and .stale_topology_allowed==true' "stale_credential_rotation_protected_pane_refused_payload"
+
+run_auth credential_rotation_unsupported_tool 3 "$stale_topology" fixture 2 --tool claude --recovery-class credential_rotation
+assert_jq "$RUN_OUT" '.authorized==false and .authorization_outcome=="malformed" and .refusal_reason=="unsupported_tool_for_credential_rotation"' "credential_rotation_unsupported_tool_payload"
+
+run_auth credential_rotation_unsupported_primitive 3 "$stale_topology" fixture 2 --tool codex --recovery-class credential_rotation --primitive other-primitive
+assert_jq "$RUN_OUT" '.authorized==false and .authorization_outcome=="malformed" and .refusal_reason=="unsupported_credential_rotation_primitive"' "credential_rotation_unsupported_primitive_payload"
+
+for op in pane_mutation respawn launchctl new_credential_creation token_rotation oauth_refresh vault_write; do
+  run_auth "credential_rotation_forbidden_${op}" 5 "$stale_topology" fixture 2 --tool codex --recovery-class credential_rotation --operation "$op"
+  assert_jq "$RUN_OUT" ".authorized==false and .authorization_outcome==\"protected_refusal\" and .refusal_reason==\"forbidden_operation\" and .operation==\"$op\" and (.forbidden_operations|index(\"$op\"))" "credential_rotation_forbidden_${op}_payload"
+done
+
 run_auth malformed_input 3 "$topology" fixture not-a-pane
 assert_jq "$RUN_OUT" '.status=="malformed" and .role=="unknown" and .authorized==false' "malformed_payload"
 
@@ -158,4 +176,4 @@ assert_jq "$RUN_OUT" '.status=="topology_stale" and .pane_role=="unknown" and .a
 [[ ! -e "$TMP/integration_stale.ntm.log" && ! -e "$RUN_LEDGER" ]] && pass "integration_stale_no_send_or_lease" || fail "integration_stale_no_send_or_lease"
 
 printf 'Summary: %s cases, %s passed, %s failed\n' "$case_count" "$pass_count" "$fail_count"
-[[ "$case_count" -eq 8 && "$fail_count" -eq 0 ]]
+[[ "$case_count" -eq 19 && "$fail_count" -eq 0 ]]

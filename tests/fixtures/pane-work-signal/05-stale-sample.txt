@@ -1,0 +1,9 @@
+# fixture: 05-stale-sample
+# truth_state: stale
+# ntm_health: idle
+# pws_truth: stale
+# age_seconds: 360
+# description: Stale sample older than 5 minutes — truth is stale not working
+> ntm activity
+Last activity: 6 minutes ago
+$

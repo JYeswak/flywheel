@@ -75,6 +75,52 @@ make_state() {
     }' >"$repo/.flywheel/plans/$slug/STATE.json"
 }
 
+make_compliance_pack() {
+  local repo="$1" slug="$2" score="$3"
+  local pack="$repo/.flywheel/plans/$slug/compliance-packs/$slug"
+  mkdir -p "$pack"
+  jq -nc --arg slug "$slug" '{bead_id:$slug,acceptance_criteria:[]}' >"$pack/spec.json"
+  jq -nc '{evidence_items:[{path:"fixture",claim:"fixture compliance evidence"}]}' >"$pack/evidence.json"
+  jq -nc --argjson score "$score" '{compliance_score:$score,findings:[]}' >"$pack/compliance.json"
+  jq -nc '{theater_signals:[]}' >"$pack/theater.json"
+  jq -nc '{test_depth:"fixture"}' >"$pack/test_depth.json"
+  jq -nc '{convergence:{streak:2}}' >"$pack/manifest.json"
+  printf '# Scorecard\n\n**Score: %s/1000**\n' "$score" >"$pack/scorecard.md"
+  printf '# Compliance Report\n\nFixture pack.\n' >"$pack/REPORT.md"
+  printf '%s\n' "$pack"
+}
+
+make_state_v4() {
+  local repo="$1" slug="$2" phase="$3" score="$4" critical="$5" convergence="$6"
+  local pack
+  mkdir -p "$repo/.flywheel/plans/$slug"
+  pack="$(make_compliance_pack "$repo" "$slug" "$score")"
+  jq -nc \
+    --arg slug "$slug" \
+    --arg phase "$phase" \
+    --arg pack "$pack" \
+    --argjson score "$score" \
+    --argjson critical "$critical" \
+    --argjson convergence "$convergence" \
+    '{
+      slug:$slug,
+      current_phase:$phase,
+      audit_disposition:"auto_advance",
+      quality_bar_passed:false,
+      convergence_streak:$convergence,
+      audit_findings_by_severity:{critical:$critical,high:0,medium:0,low:0},
+      quality_bar_evidence:[{
+        artifact:"fixture",
+        compliance_pack_path:$pack,
+        compliance_score:$score,
+        compliance_threshold:700,
+        convergence_streak:$convergence,
+        graded_at:"2026-05-07T19:45:00Z"
+      }],
+      schema_version:4
+    }' >"$repo/.flywheel/plans/$slug/STATE.json"
+}
+
 write_audit() {
   local repo="$1" slug="$2" jeff="$3" donella="$4" joshua="$5" composite="$6" critical="$7"
   cat >"$repo/.flywheel/plans/$slug/03-AUDIT-FINDINGS.md" <<EOF
@@ -119,6 +165,23 @@ write_audit "$repo" critical-plan 9.6 9.6 9.6 9.6 1
 expect_rc critical_plan 1 env QUALITY_BAR_CLOSE_GATE_CONTRACT_LEDGER="$contract" "$SCRIPT" --repo "$repo" --ledger "$ledger" --plan-slug critical-plan --json
 assert_jq "$TMP/critical_plan.out" '.decision == "fail" and (.reasons | index("critical_findings_present"))' "synthetic_fail_critical_finding"
 
+make_state_v4 "$repo" compliance-pass-plan polish 742 0 2
+expect_rc compliance_pass_plan 0 env QUALITY_BAR_CLOSE_GATE_CONTRACT_LEDGER="$contract" "$SCRIPT" --repo "$repo" --ledger "$ledger" --plan-slug compliance-pass-plan --json
+assert_jq "$TMP/compliance_pass_plan.out" '.decision == "pass" and .quality_bar_mode == "compliance_pack" and .compliance_score == 742 and .convergence_streak == 2' "synthetic_compliance_pass_plan"
+
+make_state_v4 "$repo" compliance-low-score-plan polish 699 0 2
+expect_rc compliance_low_score_plan 1 env QUALITY_BAR_CLOSE_GATE_CONTRACT_LEDGER="$contract" "$SCRIPT" --repo "$repo" --ledger "$ledger" --plan-slug compliance-low-score-plan --json
+assert_jq "$TMP/compliance_low_score_plan.out" '.decision == "fail" and (.reasons | index("compliance_score_below_700"))' "synthetic_compliance_fail_low_score"
+
+make_state_v4 "$repo" compliance-low-convergence-plan polish 742 0 1
+expect_rc compliance_low_convergence_plan 1 env QUALITY_BAR_CLOSE_GATE_CONTRACT_LEDGER="$contract" "$SCRIPT" --repo "$repo" --ledger "$ledger" --plan-slug compliance-low-convergence-plan --json
+assert_jq "$TMP/compliance_low_convergence_plan.out" '.decision == "fail" and (.reasons | index("convergence_streak_below_2"))' "synthetic_compliance_fail_low_convergence"
+
+make_state_v4 "$repo" compliance-missing-pack-plan polish 742 0 2
+rm -rf "$repo/.flywheel/plans/compliance-missing-pack-plan/compliance-packs"
+expect_rc compliance_missing_pack_plan 1 env QUALITY_BAR_CLOSE_GATE_CONTRACT_LEDGER="$contract" "$SCRIPT" --repo "$repo" --ledger "$ledger" --plan-slug compliance-missing-pack-plan --json
+assert_jq "$TMP/compliance_missing_pack_plan.out" '.decision == "fail" and (.reasons | index("compliance_pack_missing"))' "synthetic_compliance_fail_missing_pack"
+
 state_hash_before="$(shasum -a 256 "$repo/.flywheel/plans/pass-plan/STATE.json" | awk '{print $1}')"
 expect_rc dry_run 0 env QUALITY_BAR_CLOSE_GATE_CONTRACT_LEDGER="$contract" "$SCRIPT" --repo "$repo" --ledger "$ledger" --plan-slug pass-plan --dry-run --json
 state_hash_after="$(shasum -a 256 "$repo/.flywheel/plans/pass-plan/STATE.json" | awk '{print $1}')"
@@ -133,7 +196,7 @@ expect_rc apply_pass 0 env QUALITY_BAR_CLOSE_GATE_CONTRACT_LEDGER="$contract" "$
 state_hash_after_apply="$(shasum -a 256 "$repo/.flywheel/plans/pass-plan/STATE.json" | awk '{print $1}')"
 jq -e 'select(.schema_version == "quality-bar-close-gate.ledger.v1" and .plan_slug == "pass-plan" and .decision == "pass")' "$ledger" >/dev/null
 "$SCRIPT" --repo "$repo" --ledger "$ledger" --contract-ledger "$contract" --doctor --json >"$TMP/doctor.out"
-jq -e '.schema_version == "quality-bar-close-gate.doctor.v1" and .plan_state_quality_bar_pending_count == 1 and .plan_state_quality_bar_failed_count == 2 and .plan_state_quality_bar_passed_count >= 1' "$TMP/doctor.out" >/dev/null
+jq -e '.schema_version == "quality-bar-close-gate.doctor.v1" and .plan_state_quality_bar_pending_count == 1 and .plan_state_quality_bar_failed_count == 5 and .plan_state_quality_bar_passed_count >= 1' "$TMP/doctor.out" >/dev/null
 jq -e 'select(.primitive_name == "quality-bar-close-gate" and .schema_version == "substrate-loop-contract.v1")' "$contract" >/dev/null
 if [[ "$state_hash_before" == "$state_hash_after_apply" ]]; then
   pass "apply_writes_ledger_and_contract_not_state"
@@ -147,4 +210,4 @@ if [[ "$fail_count" -gt 0 ]]; then
   exit 1
 fi
 
-printf 'OK quality-bar-close-gate tests pass=%s/6\n' "$pass_count"
+printf 'OK quality-bar-close-gate tests pass=%s/10\n' "$pass_count"

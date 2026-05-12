@@ -1,12 +1,36 @@
 {
   "fixture": "ambiguous-tie-allow",
+  "source_ref": "plan-section-4-override-tie_between",
+  "case_id": "tie_between",
+  "class": "legitimate-ask-escape-hatch",
   "session": "flywheel",
   "pane": 1,
   "idle_worker_count": 1,
   "ready_bead_count": 2,
   "prior_wave_points_one_way": false,
   "action_in_doctrine": true,
-  "tie_between": ["flywheel-alpha", "flywheel-beta"],
+  "tie_between": [
+    "flywheel-alpha",
+    "flywheel-beta"
+  ],
   "suggested_action": "ask for tie break after naming the tied beads",
-  "draft_text": "Both beads are P0, both have clean validation paths, and neither has stronger PageRank support. tie_between=flywheel-alpha,flywheel-beta. Which bead should take the only idle pane?"
+  "draft_question": "Which bead should take the only idle pane?",
+  "draft_text": "Both beads are P0, both have clean validation paths, and neither has stronger PageRank support. tie_between=flywheel-alpha,flywheel-beta. Which bead should take the only idle pane?",
+  "signals": {
+    "idle_worker_count": 1,
+    "ready_bead_count": 2,
+    "prior_wave_points_one_way": false,
+    "action_in_doctrine": true,
+    "tie_between": [
+      "flywheel-alpha",
+      "flywheel-beta"
+    ]
+  },
+  "expected": {
+    "violation": false,
+    "status": "ok",
+    "allowed_reason": "tie_between",
+    "override_reason": "tie_between",
+    "gate_passes": false
+  }
 }

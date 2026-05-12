@@ -60,12 +60,18 @@ base_callback = {
 }
 missing = {
     "status": "fail",
+    "failure_class": "missing_artifact",
+    "retry_policy": "manual",
+    "recovery_hint": "Restore or regenerate the referenced evidence artifact, then rerun validation with the same evidence path.",
     "failure_classes": ["artifact_missing", "remediation_missing"],
     "validation_receipt": {
         "schema_version": "validation-receipt/v1",
         "dispatch_id": "dispatch-missing",
         "callback_ref": base_callback,
         "status": "fail",
+        "failure_class": "missing_artifact",
+        "retry_policy": "manual",
+        "recovery_hint": "Restore or regenerate the referenced evidence artifact, then rerun validation with the same evidence path.",
         "failure_classes": ["artifact_missing", "remediation_missing"],
         "evidence": [],
         "artifact_checks": [{"artifact_id": "callback_evidence", "path": str(tmp / "missing.md"), "status": "missing"}],
@@ -75,12 +81,18 @@ missing = {
 }
 missing_callback = {
     "status": "fail",
+    "failure_class": "invalid_callback",
+    "retry_policy": "manual",
+    "recovery_hint": "Resend or regenerate the callback with required fields, evidence, and durable bead/no-bead routing.",
     "failure_classes": ["evidence_missing", "remediation_missing"],
     "validation_receipt": {
         "schema_version": "validation-receipt/v1",
         "dispatch_id": "dispatch-no-evidence",
         "callback_ref": {**base_callback, "raw_ref": "DONE fixture"},
         "status": "fail",
+        "failure_class": "invalid_callback",
+        "retry_policy": "manual",
+        "recovery_hint": "Resend or regenerate the callback with required fields, evidence, and durable bead/no-bead routing.",
         "failure_classes": ["evidence_missing", "remediation_missing"],
         "evidence": [],
         "artifact_checks": [],
@@ -90,12 +102,18 @@ missing_callback = {
 }
 runtime = {
     "status": "unknown",
+    "failure_class": "transient",
+    "retry_policy": "exponential",
+    "recovery_hint": "Rerun the bounded probe once; if it repeats, promote to persistent with the timeout source attached.",
     "failure_classes": ["runtime_unresponsive"],
     "validation_receipt": {
         "schema_version": "validation-receipt/v1",
         "dispatch_id": "dispatch-timeout",
         "callback_ref": {**base_callback, "kind": "TIMEOUT", "raw_ref": "TIMEOUT dispatch-timeout"},
         "status": "unknown",
+        "failure_class": "transient",
+        "retry_policy": "exponential",
+        "recovery_hint": "Rerun the bounded probe once; if it repeats, promote to persistent with the timeout source attached.",
         "failure_classes": ["runtime_unresponsive"],
         "evidence": [{"type": "path", "ref": str(proof)}],
         "artifact_checks": [],

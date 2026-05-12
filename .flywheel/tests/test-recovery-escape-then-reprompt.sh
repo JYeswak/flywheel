@@ -33,6 +33,10 @@ run_case() {
 }
 
 bash -n "$SCRIPT" && pass "script_syntax" || fail "script_syntax"
+grep -F -- '"$NTM_BIN" send "$SESSION" "--pane=$PANE" --no-cass-check --enter=false' "$SCRIPT" >/dev/null \
+  && pass "escape_fallback_no_cass_check_argv_order" || fail "escape_fallback_no_cass_check_argv_order"
+grep -F -- '"$NTM_BIN" send "$SESSION" "--pane=$PANE" --no-cass-check --file "$prompt_path"' "$SCRIPT" >/dev/null \
+  && pass "prompt_resend_no_cass_check_argv_order" || fail "prompt_resend_no_cass_check_argv_order"
 jq -e '.["$schema"] == "https://json-schema.org/draft/2020-12/schema" and .properties.schema_version.const == "recovery-receipt.v1"' "$SCHEMA" >/dev/null \
   && pass "schema_declares_json_schema_2020_12" || fail "schema_declares_json_schema_2020_12"
 

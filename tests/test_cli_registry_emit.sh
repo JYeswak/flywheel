@@ -49,9 +49,13 @@ assert_jq "$REGISTRY" '
   and (.surfaces | length) >= 8
   and all(.surfaces[];
     (.name | length > 0)
+    and (.path | length > 0)
+    and (.lane | length > 0)
+    and (.usage | length > 0)
     and (.summary | length > 0)
     and (.schema_id | length > 0)
     and (.owner | length > 0)
+    and ((.exit_codes | type) == "object")
     and ((.args | type) == "array")
     and ((.examples | type) == "array")
     and ((.notes | type) == "array")
@@ -67,6 +71,17 @@ while IFS= read -r path; do
     fail "registry_path_exists/$path"
   fi
 done < <(jq -r '.surfaces[].path' "$REGISTRY")
+
+while IFS= read -r path; do
+  [ -n "$path" ] || continue
+  basename="$(basename "$path")"
+  if jq -e --arg path "$path" --arg basename "$basename" \
+    '.surfaces[] | select(.path == $path or .name == $basename)' "$REGISTRY" >/dev/null; then
+    pass "marked_cli_registered/$path"
+  else
+    fail "marked_cli_registered/$path"
+  fi
+done < <(rg -l '^# flywheel-cli-surface: true$' "$ROOT/.flywheel/scripts" | sed "s#^$ROOT/##" | sort)
 
 "$EMIT" tmp-prune.sh --mode help >"$TMP/emit-help.txt"
 "$ROOT/.flywheel/scripts/tmp-prune.sh" --help >"$TMP/tmp-prune-help.txt"
@@ -96,7 +111,18 @@ assert_jq "$TMP/schema.json" '
   .schema_version == "flywheel-cli-registry.emit/v1"
   and (.required_registry_fields | index("args"))
   and (.required_registry_fields | index("examples"))
+  and (.required_registry_fields | index("lane"))
+  and (.required_registry_fields | index("exit_codes"))
 ' "schema_contract"
+
+"$EMIT" tmp-prune.sh --mode version --json >"$TMP/version.json"
+assert_jq "$TMP/version.json" '
+  .schema_version == "flywheel-cli-registry.version/v1"
+  and .name == "tmp-prune.sh"
+  and .registry_schema_version == "flywheel-cli-registry/v1"
+  and .registry_version == "1.0.0"
+  and .surface_schema_id == "tmp-prune/v1"
+' "version_json_contract"
 
 if "$EMIT" not-registered.sh --mode help >"$TMP/missing.out" 2>"$TMP/missing.err"; then
   fail "missing_surface_blocks"

@@ -1,0 +1,32 @@
+{
+  "fixture": "require-confirm-allow",
+  "source_ref": "plan-section-4-override-require_confirm",
+  "case_id": "requires_joshua_decision",
+  "class": "legitimate-ask-escape-hatch",
+  "session": "flywheel",
+  "pane": 1,
+  "idle_worker_count": 1,
+  "ready_bead_count": 1,
+  "prior_wave_points_one_way": true,
+  "action_in_doctrine": true,
+  "requires_joshua_decision": true,
+  "require_confirm": true,
+  "suggested_action": "ask for explicit confirmation because the dispatch metadata requires Joshua",
+  "draft_question": "Proceed with the operator-confirmed action?",
+  "draft_text": "This dispatch metadata has requires_joshua_decision=true. Proceed with the operator-confirmed action?",
+  "signals": {
+    "idle_worker_count": 1,
+    "ready_bead_count": 1,
+    "prior_wave_points_one_way": true,
+    "action_in_doctrine": true,
+    "requires_joshua_decision": true
+  },
+  "expected": {
+    "violation": false,
+    "status": "ok",
+    "allowed_reason": "require_confirm",
+    "override_reason": "require_confirm",
+    "gate_passes": true,
+    "receipt": "override"
+  }
+}

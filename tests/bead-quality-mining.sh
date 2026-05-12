@@ -28,6 +28,7 @@ create_closed_bead() {
 repo="$TMP/repo"
 mkdir -p "$repo/.flywheel" "$repo/tests"
 cd "$repo"
+repo="$(pwd -P)"
 git init -q
 br init --prefix bq --json >/dev/null
 
@@ -63,6 +64,10 @@ jq -e '.warnings[] | select(.code=="ag_without_testable_verb")' "$TMP/noverb.jso
 
 wrapper_id="$("$WRAPPER" --title "validated wrapper fixture" --type task --priority 1 --description-file "$valid_body" --json | jq -r '.id // .issue.id')"
 [[ -n "$wrapper_id" && "$wrapper_id" != "null" ]] || fail "validated wrapper did not create bead"
+wrapper_src="$(sqlite3 "$repo/.beads/beads.db" "SELECT source_repo FROM issues WHERE id='$wrapper_id';")"
+[[ "$wrapper_src" == "$repo" ]] || fail "validated wrapper did not canonicalize source_repo: got=$wrapper_src expected=$repo"
+wrapper_jsonl_src="$(jq -r --arg id "$wrapper_id" 'select(.id == $id) | .source_repo' "$repo/.beads/issues.jsonl" | tail -1)"
+[[ "$wrapper_jsonl_src" == "$repo" ]] || fail "validated wrapper did not export canonical source_repo to JSONL: got=$wrapper_jsonl_src expected=$repo"
 "$WRAPPER" --title "blocked nested wrapper fixture" --type task --priority 1 --description-file "$nested_body" --json >"$TMP/wrapper-blocked.json" 2>/dev/null && wrapper_block_rc=0 || wrapper_block_rc=$?
 [[ "$wrapper_block_rc" -eq 1 ]] || fail "validated wrapper did not block nested AG body"
 

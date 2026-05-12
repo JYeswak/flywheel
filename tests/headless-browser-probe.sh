@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2015,SC2016
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
@@ -74,10 +75,11 @@ assert_jq "$TMP/primary.json" '.headless_agent_browser_count == 1 and (.agent_br
 history="$TMP/reaps.jsonl"
 "$REAP" --fixture "$over" --history "$history" --dry-run --json >"$TMP/reap.json"
 assert_jq "$TMP/reap.json" '.dry_run == true and .candidate_count == 6 and (.killed_pids | length) == 0' "reap_dry_run_lists_candidates"
-if [[ -s "$history" ]] && jq -e '.version == "headless-browser-reap.v1"' "$history" >/dev/null; then
-  pass "reap_history_append"
+"$REAP" --fixture "$over" --history "$history" --apply --json >"$TMP/reap-apply.json"
+if [[ -s "$history" ]] && jq -e '.version == "headless-browser-reap.v1" and .apply == true' "$history" >/dev/null; then
+  pass "reap_history_append_apply_only"
 else
-  fail "reap_history_append"
+  fail "reap_history_append_apply_only"
 fi
 
 fake_br="$TMP/br"

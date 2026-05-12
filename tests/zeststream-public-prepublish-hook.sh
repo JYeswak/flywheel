@@ -33,8 +33,22 @@ make_repo() {
 bash -n "$HOOK"
 "$HOOK" --help >/dev/null
 
-make_repo "$TMP/private" no 100 0 0
-"$HOOK" origin git@example.com:repo.git --repo "$TMP/private" --json | jq -e '.status == "pass" and .skipped == true' >/dev/null
+make_repo "$TMP/private-origin" no 100 0 0
+"$HOOK" origin git@example.com:repo.git --repo "$TMP/private-origin" --json | jq -e '.status == "pass" and .skipped == true' >/dev/null
+
+make_repo "$TMP/private-public" no 96 0 0
+"$HOOK" public git@example.com:public.git --repo "$TMP/private-public" --json | jq -e '.status == "pass" and .brand_voice.public_ready_default == true and .brand_voice.exempt == false and .brand_voice.public_repo == false' >/dev/null
+
+make_repo "$TMP/private-low-score" no 89 0 0
+if "$HOOK" public git@example.com:public.git --repo "$TMP/private-low-score" --json > "$TMP/private-low-score.json"; then
+    printf 'expected private low-score public push to fail\n' >&2
+    exit 1
+fi
+jq -e '.status == "fail" and (.errors[]?.code == "brand_voice_composite_low") and .brand_voice.public_repo == false' "$TMP/private-low-score.json" >/dev/null
+
+make_repo "$TMP/client-exempt" no 0 0 0
+printf 'Exemption: EXEMPT_CLIENT_OWNED\n' >> "$TMP/client-exempt/.flywheel/PUBLISHABILITY-AUDIT.md"
+"$HOOK" public git@example.com:public.git --repo "$TMP/client-exempt" --json | jq -e '.status == "pass" and .brand_voice.exempt == true and .brand_voice.exemption_class == "EXEMPT_CLIENT_OWNED"' >/dev/null
 
 make_repo "$TMP/pass" yes 96 0 0
 "$HOOK" public git@example.com:public.git --repo "$TMP/pass" --json | jq -e '.status == "pass" and .publishability_bar_score.brand_voice_composite == 96' >/dev/null

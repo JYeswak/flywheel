@@ -1,0 +1,1 @@
+{"fixture":"lock-held","lock_name":"topology.jsonl.topology-refresh.lock","expected_status":"lock_held","expected_exit_nonzero":true}

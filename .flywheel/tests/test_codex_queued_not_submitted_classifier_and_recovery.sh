@@ -83,7 +83,8 @@ topology="$TMP/topology.jsonl"
 jq -nc '{session:"fixture",worker_panes:[2,3],worker_kinds:{"2":"codex","3":"codex"},orchestrator_pane:1,human_pane:0,callback_pane:4,effective_at:"2026-05-06T12:00:00Z"}' >"$topology"
 
 make_fixture() {
-  local name="$1" text="$2" path="$TMP/$name.json"
+  local name="$1" text="$2" path
+  path="$TMP/$name.json"
   jq -nc --arg session fixture --argjson pane 2 --arg t0 "$text" --arg t1 "$text" \
     '{schema_version:"codex-stuck-detector.fixture.v1",session:$session,pane:$pane,t0:$t0,t1:$t1}' >"$path"
   printf '%s\n' "$path"

@@ -1,0 +1,30 @@
+{
+  "fixture": "L95-wave12-idle-pane-violation",
+  "source_ref": "~/.local/state/flywheel/fuckup-log.jsonl#L95",
+  "case_id": "L95",
+  "class": "use-data-not-meat-puppet",
+  "session": "flywheel",
+  "pane": 1,
+  "idle_worker_count": 1,
+  "ready_bead_count": 3,
+  "prior_wave_points_one_way": true,
+  "action_in_doctrine": true,
+  "pagerank_pick": "wave12-adversarial-lane-bc",
+  "suggested_action": "dispatch Wave 12 adversarial Lane B/C while Lane A v6 amendment proceeds",
+  "draft_question": "Should I leave pane 3 idle until you confirm Wave 12?",
+  "draft_text": "Wave 11 Lens 2 returned zero gaps and pane 3 is idle. Should I leave pane 3 idle until you confirm Wave 12?",
+  "signals": {
+    "idle_worker_count": 1,
+    "ready_bead_count": 3,
+    "prior_wave_points_one_way": true,
+    "action_in_doctrine": true,
+    "pagerank_pick": "wave12-adversarial-lane-bc"
+  },
+  "expected": {
+    "violation": true,
+    "status": "violation",
+    "code": "orch_question_when_data_clear",
+    "gate_passes": true,
+    "receipt": "save"
+  }
+}

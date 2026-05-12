@@ -1,5 +1,8 @@
 {
   "fixture": "missing-datum-allow",
+  "source_ref": "plan-section-4-override-evidence_missing",
+  "case_id": "evidence_missing",
+  "class": "legitimate-ask-escape-hatch",
   "session": "flywheel",
   "pane": 1,
   "idle_worker_count": 1,
@@ -8,5 +11,21 @@
   "action_in_doctrine": false,
   "evidence_missing": "cost_exposure_for_paid_compute",
   "suggested_action": "ask for one missing cost datum before dispatch",
-  "draft_text": "The next bead would start paid compute and cost exposure is unknown. evidence_missing=cost_exposure_for_paid_compute. May I proceed once the spend limit is confirmed?"
+  "draft_question": "May I proceed once the spend limit is confirmed?",
+  "draft_text": "The next bead would start paid compute and cost exposure is unknown. evidence_missing=cost_exposure_for_paid_compute. May I proceed once the spend limit is confirmed?",
+  "signals": {
+    "idle_worker_count": 1,
+    "ready_bead_count": 1,
+    "prior_wave_points_one_way": true,
+    "action_in_doctrine": false,
+    "evidence_missing": "cost_exposure_for_paid_compute"
+  },
+  "expected": {
+    "violation": false,
+    "status": "ok",
+    "allowed_reason": "evidence_missing",
+    "override_reason": "evidence_missing",
+    "gate_passes": false,
+    "receipt": "override"
+  }
 }

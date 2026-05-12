@@ -1,0 +1,8 @@
+# fixture: 03-false-idle-ntm-idle-pws-working
+# truth_state: working
+# ntm_health: idle
+# pws_truth: working
+# description: ntm health reports idle but Working (...) visible — false-idle case
+> flywheel-loop doctor --json
+Checking session topology...
+Working (47s) | running fleet doctor

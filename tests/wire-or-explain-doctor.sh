@@ -20,6 +20,12 @@ run_doctor() {
   env "$@" FLYWHEEL_WIRE_OR_EXPLAIN_LEDGER="$ledger" "$BIN" doctor --repo "$ROOT" --scope wire-or-explain --json >"$out"
 }
 
+run_wire_status() {
+  local ledger="$1" out="$2"
+  shift 2
+  env "$@" FLYWHEEL_WIRE_OR_EXPLAIN_LEDGER="$ledger" "$BIN" wire-status --repo "$ROOT" --json >"$out"
+}
+
 assert_jq() {
   local file="$1" filter="$2" label="$3"
   if jq -e "$filter" "$file" >/dev/null; then
@@ -32,6 +38,7 @@ assert_jq() {
 
 bash -n "$BIN" && pass "flywheel_loop_syntax"
 bash -n "$PROMOTE" && pass "promotion_syntax"
+bash -n "$HOME/.claude/skills/.flywheel/lib/wire.sh" && pass "wire_lib_syntax"
 
 set +e
 env FLYWHEEL_WIRE_OR_EXPLAIN_MODE=bootstrap FLYWHEEL_WIRE_OR_EXPLAIN_LEDGER="$TMP/missing.jsonl" \
@@ -50,6 +57,21 @@ run_doctor "$FIXTURES/base.jsonl" "$TMP/base.json" FLYWHEEL_WIRE_OR_EXPLAIN_OVER
 assert_jq "$TMP/base.json" '.counts_by_state.unwired == 1 and .counts_by_state.questionably_wired == 1 and .unresolved_count == 2 and .questionably_wired_count == 1' "counts_by_state_and_unresolved"
 assert_jq "$TMP/base.json" '.top_actions | length == 2 and all(.[]; has("payload") | not) and all(.[]; has("metadata") | not)' "top_actions_redacted_shape"
 assert_jq "$TMP/base.json" '.signals.unresolved_count.producer and .signals.overdue_count.measurement and .signals.skill_relay.consumer' "signals_have_producer_measurement_consumer"
+run_wire_status "$FIXTURES/base.jsonl" "$TMP/wire-status-base.json" FLYWHEEL_WIRE_OR_EXPLAIN_OVERDUE_HOURS=99999
+jq -n --slurpfile doctor "$TMP/base.json" --slurpfile status "$TMP/wire-status-base.json" '
+  $doctor[0].counts_by_state == $status[0].counts_by_state
+  and $doctor[0].unresolved_count == $status[0].unresolved_count
+  and $doctor[0].overdue_count == $status[0].overdue_count
+  and $doctor[0].top_actions == $status[0].top_actions
+' >/dev/null && pass "wire_status_json_matches_doctor_counts_and_actions" || fail "wire_status_json_matches_doctor_counts_and_actions"
+env FLYWHEEL_WIRE_OR_EXPLAIN_LEDGER="$FIXTURES/base.jsonl" FLYWHEEL_WIRE_OR_EXPLAIN_OVERDUE_HOURS=99999 \
+  "$BIN" wire-status --repo "$ROOT" >"$TMP/wire-status-human.txt"
+if [ "$(wc -l <"$TMP/wire-status-human.txt" | tr -d ' ')" -le 50 ]; then
+  pass "wire_status_human_under_50_lines"
+else
+  fail "wire_status_human_under_50_lines"
+  cat "$TMP/wire-status-human.txt" >&2
+fi
 
 set +e
 run_doctor "$FIXTURES/overdue.jsonl" "$TMP/overdue.json" FLYWHEEL_WIRE_OR_EXPLAIN_OVERDUE_HOURS=0
@@ -68,6 +90,30 @@ if [ "$skill_success_rc" -eq 0 ]; then pass "skill_relay_success_rc_warn"; else 
 if [ "$skill_failure_rc" -ne 0 ]; then pass "skill_relay_failure_rc_error"; else fail "skill_relay_failure_rc_error"; fi
 assert_jq "$TMP/skill-success.json" '.skill_candidate_backlog_count == 1 and .skill_candidate_unrelayed_count == 0 and any(.actions[]; .kind == "skill_relay" and .status == "pass")' "skill_relay_success_metrics"
 assert_jq "$TMP/skill-failure.json" '.skill_candidate_relay_failure_count == 1 and any(.actions[]; .kind == "skill_relay" and .status == "error")' "skill_relay_failure_metrics"
+run_wire_status "$FIXTURES/skill-relay-success.jsonl" "$TMP/wire-status-skill.json" FLYWHEEL_WIRE_OR_EXPLAIN_OVERDUE_HOURS=99999
+assert_jq "$TMP/wire-status-skill.json" 'any(.top_actions[]; .artifact_class == "skill_candidate" and .relay_status == "sent" and .owner == "skillos") and any(.actions[]; .kind == "skill_relay")' "wire_status_skill_relay_first_class_action"
+"$BIN" wire-status --schema --json >"$TMP/wire-status-schema.json"
+assert_jq "$TMP/wire-status-schema.json" '.command == "wire-status" and .read_only_default == true and (.mutation_subcommands | index("defer")) and (.exit_codes."1" | test("doctor.*error"))' "wire_status_schema_and_exit_codes"
+"$BIN" wire-status --info --json >"$TMP/wire-status-info.json"
+assert_jq "$TMP/wire-status-info.json" '.command == "wire-status" and .mutation.default_read_only == true' "wire_status_info"
+"$BIN" wire-status --examples --json >"$TMP/wire-status-examples.json"
+assert_jq "$TMP/wire-status-examples.json" '.command == "wire-status" and (.examples | length) >= 5' "wire_status_examples"
+"$BIN" wire-status help --json >"$TMP/wire-status-help.json"
+assert_jq "$TMP/wire-status-help.json" '.command == "help" and (.text | test("Exit codes"))' "wire_status_help"
+"$BIN" wire-status completion bash >"$TMP/wire-status-completion.bash"
+rg -q '_flywheel_loop_wire_status_completion' "$TMP/wire-status-completion.bash" \
+  && pass "wire_status_completion" || fail "wire_status_completion"
+env FLYWHEEL_WIRE_OR_EXPLAIN_LEDGER="$FIXTURES/base.jsonl" FLYWHEEL_WIRE_OR_EXPLAIN_OVERDUE_HOURS=99999 \
+  "$BIN" --explain wire-status --repo "$ROOT" --json >"$TMP/wire-status-explain.json"
+assert_jq "$TMP/wire-status-explain.json" '.command == "wire-status" and .explain == true' "wire_status_explain"
+"$BIN" wire-status validate --repo "$ROOT" --json >"$TMP/wire-status-validate.json"
+assert_jq "$TMP/wire-status-validate.json" '.command == "validate" and .scope == "wire-or-explain"' "wire_status_validate"
+"$BIN" wire-status audit --repo "$ROOT" --json >"$TMP/wire-status-audit.json"
+assert_jq "$TMP/wire-status-audit.json" '.command == "wire-status" and .read_only_default == true and .raw_evidence_payloads_printed == false' "wire_status_audit"
+"$BIN" wire-status why actions --repo "$ROOT" --json >"$TMP/wire-status-why.json"
+assert_jq "$TMP/wire-status-why.json" '.command == "why" and .scope == "wire-or-explain" and .field == "actions"' "wire_status_why"
+"$BIN" wire-status defer fixture-row --repo "$ROOT" --dry-run --json >"$TMP/wire-status-defer.json"
+assert_jq "$TMP/wire-status-defer.json" '.command == "wire-status" and .subcommand == "defer" and .status == "dry_run" and .would_mutate == false' "wire_status_defer_dry_run"
 
 run_doctor "$FIXTURES/secret-redaction.jsonl" "$TMP/secret.json" FLYWHEEL_WIRE_OR_EXPLAIN_OVERDUE_HOURS=99999
 if ! rg -q 'SECRET_FIXTURE_SHOULD_NOT_APPEAR|RAW_PAYLOAD_SHOULD_NOT_APPEAR|raw_payload_excerpt|fixture_secret_value' "$TMP/secret.json"; then

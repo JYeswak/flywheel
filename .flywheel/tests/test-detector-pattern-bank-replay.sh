@@ -22,6 +22,21 @@ assert_jq() {
   fi
 }
 
+first_glob() {
+  compgen -G "$1" | grep -v '\.detector\.json$' | sort | tail -1 || true
+}
+
+first_stale_spinner_glob() {
+  local path
+  while IFS= read -r path; do
+    if jq -r '.panes["2"].lines[]?' "$path" 2>/dev/null | rg -q 'Working \(|Waiting for background terminal'; then
+      printf '%s\n' "$path"
+      return 0
+    fi
+  done < <(compgen -G "$1" | grep -v '\.detector\.json$' | sort -r)
+  return 1
+}
+
 run_detector_allow_stuck() {
   local fixture="$1" out="$2" rc
   set +e
@@ -52,14 +67,38 @@ bash -n "$SCRIPT" && pass "detector_syntax" || fail "detector_syntax"
 
 pane4="/tmp/golden-artifact-pane4-post-callback-reminder-stale-spinner-2026-05-05T23-19Z.json"
 pane2="/tmp/golden-artifact-pane2-post-callback-reminder-stale-spinner-2026-05-05T23-30Z.json"
+live_pane2="/tmp/flywheel-pane2-snapshot.20260505T235808Z.json"
+live_pane3="/tmp/flywheel-pane3-snapshot.20260505T205900Z.json"
+live_pane2_20260506="$(first_stale_spinner_glob '/tmp/flywheel-pane2-snapshot.20260506T*.json' || true)"
+mobile_pane2_20260506="$(first_glob '/tmp/mobile-eats-pane2-snapshot.20260506T*.json')"
 test -f "$pane4" && pass "pane4_fixture_present" || fail "pane4_fixture_present"
 test -f "$pane2" && pass "pane2_fixture_present" || fail "pane2_fixture_present"
+test -f "$live_pane2" && pass "live_pane2_snapshot_present" || fail "live_pane2_snapshot_present"
+test -f "$live_pane3" && pass "live_pane3_snapshot_present" || fail "live_pane3_snapshot_present"
+[[ -n "$live_pane2_20260506" ]] && pass "live_pane2_20260506_snapshot_present" || pass "live_pane2_20260506_snapshot_absent"
+[[ -n "$mobile_pane2_20260506" ]] && pass "mobile_pane2_20260506_snapshot_present" || pass "mobile_pane2_20260506_snapshot_absent"
 
 if run_detector_allow_stuck "$pane4" "$TMP/pane4.out"; then pass "pane4_returns_stuck"; else fail "pane4_returns_stuck"; fi
 assert_jq "$TMP/pane4.out" '.panes[0].subclass != "unknown_stable" and .panes[0].subclass == "post_callback_reminder_template_with_stale_spinner" and .panes[0].auto_recover == true and .panes[0].recommended_recovery == "escape_then_reprompt_or_respawn" and .panes[0].buffer_signal == "stale_background_spinner_with_reminder_template"' "pane4_classified_post_callback_spinner"
 
 if run_detector_allow_stuck "$pane2" "$TMP/pane2.out"; then pass "pane2_returns_stuck"; else fail "pane2_returns_stuck"; fi
 assert_jq "$TMP/pane2.out" '.panes[0].subclass != "unknown_stable" and .panes[0].subclass == "post_callback_reminder_template_with_stale_spinner" and .panes[0].auto_recover == true and .panes[0].recommended_recovery == "escape_then_reprompt_or_respawn" and .panes[0].buffer_signal == "stale_background_spinner_with_reminder_template"' "pane2_classified_post_callback_spinner"
+
+if run_detector_allow_stuck "$live_pane2" "$TMP/live-pane2.out"; then pass "live_pane2_returns_stuck"; else fail "live_pane2_returns_stuck"; fi
+assert_jq "$TMP/live-pane2.out" '.panes[0].subclass == "post_callback_reminder_template_with_stale_spinner" and .panes[0].buffer_signal == "stale_background_spinner_with_reminder_template"' "live_pane2_truncated_spinner_classified"
+
+if run_detector_allow_stuck "$live_pane3" "$TMP/live-pane3.out"; then pass "live_pane3_returns_stuck"; else fail "live_pane3_returns_stuck"; fi
+assert_jq "$TMP/live-pane3.out" '.panes[0].subclass == "codex_queued_not_submitted" and .panes[0].recommended_recovery == "bare_enter" and .panes[0].buffer_signal == "stale_background_spinner_with_reminder_template"' "live_pane3_current_review_classified"
+
+if [[ -n "$live_pane2_20260506" ]]; then
+  if run_detector_allow_stuck "$live_pane2_20260506" "$TMP/live-pane2-20260506.out"; then pass "live_pane2_20260506_returns_stuck"; else fail "live_pane2_20260506_returns_stuck"; fi
+  assert_jq "$TMP/live-pane2-20260506.out" '.panes[0].subclass == "post_callback_reminder_template_with_stale_spinner" and .panes[0].buffer_signal == "stale_background_spinner_with_reminder_template"' "live_pane2_20260506_classified"
+fi
+
+if [[ -n "$mobile_pane2_20260506" ]]; then
+  if run_detector_allow_stuck "$mobile_pane2_20260506" "$TMP/mobile-pane2-20260506.out"; then pass "mobile_pane2_20260506_returns_stuck"; else fail "mobile_pane2_20260506_returns_stuck"; fi
+  assert_jq "$TMP/mobile-pane2-20260506.out" '.panes[0].subclass == "codex_queued_not_submitted" and .panes[0].recommended_recovery == "bare_enter" and .panes[0].buffer_signal == "stale_background_spinner_with_reminder_template"' "mobile_pane2_20260506_classified"
+fi
 
 fixture "$TMP/buffer.json" $'› Implement {feature}\n  gpt-5.5 xhigh' $'› Implement {feature}\n  gpt-5.5 xhigh'
 if run_detector_allow_stuck "$TMP/buffer.json" "$TMP/buffer.out"; then pass "buffer_returns_stuck"; else fail "buffer_returns_stuck"; fi
@@ -85,15 +124,23 @@ CODEX_STUCK_DETECTOR_LEDGER="$TMP/detector.jsonl" "$SCRIPT" --fixture "$TMP/aliv
 assert_jq "$TMP/alive.out" '.panes[0].subclass == "alive" and .stuck_count == 0' "existing_alive_classified"
 
 fixture "$TMP/unknown.json" "stable but no known signal" "stable but no known signal"
+set +e
 CODEX_STUCK_DETECTOR_LEDGER="$TMP/detector.jsonl" "$SCRIPT" --fixture "$TMP/unknown.json" --json >"$TMP/unknown.out"
-assert_jq "$TMP/unknown.out" '.panes[0].subclass == "unknown_stable" and .stuck_count == 0' "existing_unknown_stable_preserved"
+unknown_rc=$?
+set -e
+[[ "$unknown_rc" -eq 2 && -s "$TMP/unknown.out" ]] && pass "unknown_stable_returns_2_with_json" || fail "unknown_stable_returns_2_with_json"
+assert_jq "$TMP/unknown.out" '.status == "unknown_stable" and .panes[0].subclass == "unknown_stable" and .stuck_count == 0 and .unknown_stable_count == 1' "existing_unknown_stable_preserved"
 
+set +e
 CODEX_STUCK_DETECTOR_LEDGER="$TMP/unknown-ledger.jsonl" \
 CODEX_STUCK_DETECTOR_CONTRACT_LEDGER="$TMP/unknown-contract.jsonl" \
 CODEX_STUCK_DETECTOR_FUCKUP_LOG="$TMP/unknown-fuckup.jsonl" \
 CODEX_STUCK_DETECTOR_SNAPSHOT_DIR="$TMP/snapshots" \
   "$SCRIPT" --fixture "$TMP/unknown.json" --apply --json >"$TMP/unknown-apply.out"
-assert_jq "$TMP/unknown-fuckup.jsonl" '.class == "detector-pattern-bank-gap" and .bead == "flywheel-2h3vs" and (.pane_capture_path | length > 0)' "unknown_stable_logs_pattern_bank_gap"
+unknown_apply_rc=$?
+set -e
+[[ "$unknown_apply_rc" -eq 2 && -s "$TMP/unknown-apply.out" ]] && pass "unknown_apply_returns_2_with_json" || fail "unknown_apply_returns_2_with_json"
+assert_jq "$TMP/unknown-fuckup.jsonl" '.class == "detector_silent_exit2" and .bead == "flywheel-detector-silent-exit2-166f" and .parent_bead == "flywheel-2h3vs" and (.pane_capture_path | length > 0)' "unknown_stable_logs_detector_silent_exit2"
 snapshot_path="$(jq -r '.pane_capture_path' "$TMP/unknown-fuckup.jsonl")"
 test -f "$snapshot_path" && pass "unknown_stable_snapshot_written" || fail "unknown_stable_snapshot_written"
 

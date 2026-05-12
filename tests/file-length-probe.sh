@@ -80,7 +80,7 @@ fake_br="$TMP/br"
 printf '%s\n' \
   '#!/usr/bin/env bash' \
   'case "$1" in' \
-  '  list) printf "{\"issues\":[]}\\n" ;;' \
+  '  list) printf "[]\\n" ;;' \
   '  show) printf "[]\\n" ;;' \
   '  create) printf "{\"id\":\"flywheel-monolith-fixture\"}\\n" ;;' \
   '  update) printf "{\"id\":\"updated\"}\\n" ;;' \

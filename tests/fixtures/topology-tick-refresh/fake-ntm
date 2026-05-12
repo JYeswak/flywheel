@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mode="${TOPOLOGY_REFRESH_FAKE_MODE:-unchanged}"
+log="${TOPOLOGY_REFRESH_FAKE_LOG:-}"
+[[ -z "$log" ]] || printf '%s\n' "$*" >>"$log"
+
+session_json() {
+  local name="$1" pane_count="$2"
+  jq -nc --arg name "$name" --argjson pane_count "$pane_count" '{name:$name,pane_count:$pane_count}'
+}
+
+agents_json() {
+  jq -nc "$1"
+}
+
+case "${1:-}" in
+  list)
+    case "$mode" in
+      missing_live_session) jq -nc '{sessions:[{name:"other",pane_count:1}]}' ;;
+      no_topology_row) jq -nc '{sessions:[{name:"orphan",pane_count:2}]}' ;;
+      shape_changed) jq -nc '{sessions:[{name:"flywheel",pane_count:6}]}' ;;
+      extra_agent) jq -nc '{sessions:[{name:"flywheel",pane_count:6}]}' ;;
+      *) jq -nc '{sessions:[{name:"flywheel",pane_count:5}]}' ;;
+    esac
+    ;;
+  --robot-activity=*)
+    session="${1#*=}"
+    case "$mode:$session" in
+      no_topology_row:orphan)
+        agents_json '{agents:[{pane_idx:1,agent_type:"codex"}]}'
+        ;;
+      missing_worker:flywheel)
+        agents_json '{agents:[{pane_idx:1,agent_type:"claude"},{pane_idx:2,agent_type:"codex"},{pane_idx:4,agent_type:"codex"}]}'
+        ;;
+      worker_kind_changed:flywheel)
+        agents_json '{agents:[{pane_idx:1,agent_type:"claude"},{pane_idx:2,agent_type:"claude"},{pane_idx:3,agent_type:"codex"},{pane_idx:4,agent_type:"codex"}]}'
+        ;;
+      extra_agent:flywheel)
+        agents_json '{agents:[{pane_idx:1,agent_type:"claude"},{pane_idx:2,agent_type:"codex"},{pane_idx:3,agent_type:"codex"},{pane_idx:4,agent_type:"codex"},{pane_idx:5,agent_type:"codex"}]}'
+        ;;
+      *:flywheel)
+        agents_json '{agents:[{pane_idx:1,agent_type:"claude"},{pane_idx:2,agent_type:"codex"},{pane_idx:3,agent_type:"codex"},{pane_idx:4,agent_type:"codex"}]}'
+        ;;
+      *)
+        printf 'unexpected fake ntm activity session: %s\n' "$session" >&2
+        exit 2
+        ;;
+    esac
+    ;;
+  *)
+    printf 'unexpected fake ntm call: %s\n' "$*" >&2
+    exit 2
+    ;;
+esac

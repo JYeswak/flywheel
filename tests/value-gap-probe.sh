@@ -62,6 +62,12 @@ assert_jq "$TMP/apply.json" '.bead_action == "created" and (.bead_filed_id | sta
 "$PROBE" --repo "$repo" --state-dir "$state" --apply --dimension 0 --parent "$parent" --idempotency-key test-1 --json >"$TMP/apply-again.json"
 assert_jq "$TMP/apply-again.json" '.bead_action == "existing" and .bead_filed_id != null' "apply is idempotent by title"
 
+for n in $(seq 1 55); do
+  (cd "$repo" && br create "higher priority filler $n" --priority P0 --type task --description fixture --json >/dev/null)
+done
+"$PROBE" --repo "$repo" --state-dir "$state" --apply --dimension 0 --parent "$parent" --idempotency-key test-1 --json >"$TMP/apply-after-limit.json"
+assert_jq "$TMP/apply-after-limit.json" '.bead_action == "existing" and .bead_filed_id != null' "apply finds existing beyond default list limit"
+
 "$PROBE" audit --repo "$repo" --state-dir "$state" --json >"$TMP/audit.json"
 assert_jq "$TMP/audit.json" '.rows >= 2' "audit reads ledger"
 

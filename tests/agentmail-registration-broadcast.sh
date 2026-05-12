@@ -84,20 +84,23 @@ if [[ "${1:-}" == "health" ]]; then
       ;;
   esac
 fi
-if [[ "${1:-}" == "send" ]]; then
-  session="${2:-}"
-  pane=""
+if [[ "${1:-}" == "message" && "${2:-}" == "--broadcast" ]]; then
+  recipients=""
   file=""
+  subject=""
+  no_raw_tokens=false
   shift 2
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --pane=*) pane="${1#--pane=}" ; shift ;;
-      --pane) pane="${2:-}" ; shift 2 ;;
+      --to) recipients="${2:-}" ; shift 2 ;;
       --file) file="${2:-}" ; shift 2 ;;
+      --subject) subject="${2:-}" ; shift 2 ;;
+      --no-raw-tokens) no_raw_tokens=true ; shift ;;
       *) shift ;;
     esac
   done
-  jq -n --arg session "$session" --arg pane "$pane" --arg file "$file" '{session:$session,pane:$pane,file:$file}' >>"${SEND_LOG:?}"
+  jq -n --arg recipients "$recipients" --arg file "$file" --arg subject "$subject" --argjson no_raw_tokens "$no_raw_tokens" \
+    '{command:["message","--broadcast"],recipients:$recipients,file:$file,subject:$subject,no_raw_tokens:$no_raw_tokens}' >>"${SEND_LOG:?}"
   exit 0
 fi
 exit 1
@@ -121,8 +124,9 @@ zsh -n "$LOOP" && pass "flywheel_loop_syntax" || fail "flywheel_loop_syntax"
 
 "$SCRIPT" "${broadcast_args[@]}" >"$TMP/first.json"
 assert_jq "$TMP/first.json" '.sent_count == 2 and .dead_count == 2 and .deferred_dead_count == 1 and (.results[] | select(.session=="live").action) == "sent" and (.results[] | select(.session=="mixed").action) == "sent"' "live_rows_broadcast_once"
-test "$(jq -s 'length' "$SEND_LOG")" = "2" && pass "ntm_send_called_once_per_live_row" || fail "ntm_send_called_once_per_live_row"
-if ! grep -q 'token=' "$TMP"/agentmail-registration-live-*.txt 2>/dev/null; then
+test "$(jq -s 'length' "$SEND_LOG")" = "1" && pass "ntm_message_broadcast_called_once" || fail "ntm_message_broadcast_called_once"
+assert_jq "$SEND_LOG" '.command == ["message","--broadcast"] and .recipients == "live:1,mixed:2" and .no_raw_tokens == true' "ntm_message_broadcast_expands_recipients"
+if ! grep -q 'token=' "$TMP"/agentmail-registration-broadcast-*.txt 2>/dev/null; then
   pass "request_omits_raw_token_shape"
 else
   fail "request_omits_raw_token_shape"
@@ -130,7 +134,7 @@ fi
 
 "$SCRIPT" "${broadcast_args[@]}" >"$TMP/second.json"
 assert_jq "$TMP/second.json" '.sent_count == 0 and .deduped_count == 2 and (.results[] | select(.session=="live").action) == "deduped_recent_send" and (.results[] | select(.session=="mixed").action) == "deduped_recent_send"' "repeat_within_window_dedupes"
-test "$(jq -s 'length' "$SEND_LOG")" = "2" && pass "dedupe_suppresses_second_send" || fail "dedupe_suppresses_second_send"
+test "$(jq -s 'length' "$SEND_LOG")" = "1" && pass "dedupe_suppresses_second_send" || fail "dedupe_suppresses_second_send"
 
 "$SCRIPT" "${broadcast_args[@]}" --doctor >"$TMP/doctor.json"
 assert_jq "$TMP/doctor.json" '.status == "pass" and .agentmail_pending_registration_broadcasts_count == 0 and .deferred_dead_count == 1' "doctor_passes_when_only_dead_deferred_or_deduped"
@@ -139,6 +143,7 @@ rm -f "$COORD" "$SEND_LOG"
 "$SCRIPT" "${broadcast_args[@]}" --session mixed --pane 2 --no-raw-tokens >"$TMP/scoped.json"
 assert_jq "$TMP/scoped.json" '.sent_count == 1 and .rows_checked == 1 and .session_filter == "mixed" and .pane_filter == 2 and .no_raw_tokens == true and (.results[] | select(.session=="mixed").action) == "sent"' "scoped_broadcast_sends_target_only"
 test "$(jq -s 'length' "$SEND_LOG")" = "1" && pass "scoped_broadcast_ntm_send_once" || fail "scoped_broadcast_ntm_send_once"
+assert_jq "$SEND_LOG" '.recipients == "mixed:2"' "scoped_broadcast_recipient_expansion"
 
 rm -f "$COORD" "$SEND_LOG"
 "$SCRIPT" "${broadcast_args[@]}" --dry-run >"$TMP/dry.json"

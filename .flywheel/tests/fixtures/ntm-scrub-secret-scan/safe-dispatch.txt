@@ -1,0 +1,3 @@
+DONE flywheel-safe task_id=safe evidence=/tmp/evidence.md secret_classes=github_token,bearer_token tests=PASS
+Vault path only: infisical://prod/ANTHROPIC_API_KEY
+Agent Mail registration token class is named, no value is present.

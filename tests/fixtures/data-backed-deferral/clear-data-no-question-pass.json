@@ -1,0 +1,29 @@
+{
+  "fixture": "clear-data-no-question-pass",
+  "source_ref": "plan-section-2-data-already-implies-action",
+  "case_id": "clear-data-no-question",
+  "class": "positive-control",
+  "session": "flywheel",
+  "pane": 1,
+  "idle_worker_count": 1,
+  "ready_bead_count": 2,
+  "prior_wave_points_one_way": true,
+  "action_in_doctrine": true,
+  "pagerank_pick": "flywheel-next-ready",
+  "suggested_action": "dispatch flywheel-next-ready to the idle worker",
+  "draft_question": "Action taken: dispatch flywheel-next-ready to the idle worker.",
+  "draft_text": "Action taken: dispatch flywheel-next-ready to the idle worker.\nSignals aligned: idle worker, ready work, prior wave, doctrine-safe action.",
+  "signals": {
+    "idle_worker_count": 1,
+    "ready_bead_count": 2,
+    "prior_wave_points_one_way": true,
+    "action_in_doctrine": true,
+    "pagerank_pick": "flywheel-next-ready"
+  },
+  "expected": {
+    "violation": false,
+    "status": "ok",
+    "gate_passes": true,
+    "no_violation_reason": "clear_data_reported_action_without_question"
+  }
+}

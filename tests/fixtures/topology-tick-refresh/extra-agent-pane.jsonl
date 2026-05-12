@@ -1,0 +1,1 @@
+{"session":"flywheel","orchestrator_pane":1,"orchestrator_kind":"claude","callback_pane":1,"worker_panes":[2,3,4],"worker_kinds":{"2":"codex","3":"codex","4":"codex"},"shell_panes":[0],"human_pane":0,"expected_pane_count":6,"effective_at":"2026-05-06T20:00:00Z","registered_by":"fixture"}

@@ -128,4 +128,4 @@ PY
 
 jq -e '.artifact_class=="skill_candidate" and .event_type=="feedback_fuckup_finding"' "$FIXTURES/valid-skill-candidate.json" >/dev/null
 
-echo OK_wire_or_explain_ledger_tests
+echo OK_wire_or_explain_ledger

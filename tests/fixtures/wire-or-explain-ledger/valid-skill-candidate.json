@@ -21,6 +21,7 @@
   "producer": "worker",
   "owner": "skillos",
   "consumer": "skillos",
+  "trust_domain": "repo:flywheel",
   "blocking_scope": "skill_triage",
   "owning_orch": "flywheel:pane-1",
   "ship_repo": "/Users/josh/Developer/flywheel",

@@ -87,6 +87,16 @@ touch -t 202001010101 "$repo/.beads.bak.old"
 "$PRUNE" --repo "$repo" --days 7 --dry-run --json >"$TMP/prune.out"
 assert_jq "$TMP/prune.out" '.planned.stale_bak_dirs >= 1 and .docker_volumes_pruned == false' "storage_prune_dry_run_plans_only"
 
+substrate_repo="$TMP/substrate-repo"
+mkdir -p "$substrate_repo/.beads/.br_recovery" "$substrate_repo/.flywheel/jeff-corpus/old-entry"
+printf 'recovery\n' >"$substrate_repo/.beads/.br_recovery/blob"
+printf 'sidecar\n' >"$substrate_repo/.beads/issues.jsonl.bak.old"
+touch -t 202001010101 "$substrate_repo/.beads/issues.jsonl.bak.old" "$substrate_repo/.flywheel/jeff-corpus/old-entry"
+FLYWHEEL_STORAGE_PRUNE_BR_RECOVERY_MAX_MB=0 \
+  "$PRUNE" --repo "$substrate_repo" --days 7 --dry-run --json >"$TMP/prune-substrate.out"
+assert_jq "$TMP/prune-substrate.out" '.planned.br_recovery_archives == 1 and .planned.stale_beads_sidecars == 1 and .planned.jeff_corpus_archives == 1' "storage_prune_substrate_pressure_plan"
+test -d "$substrate_repo/.beads/.br_recovery" && test -f "$substrate_repo/.beads/issues.jsonl.bak.old" && pass "storage_prune_substrate_dry_run_no_mutation" || fail "storage_prune_substrate_dry_run_no_mutation"
+
 fake_br="$TMP/br"
 printf '%s\n' \
   '#!/usr/bin/env bash' \

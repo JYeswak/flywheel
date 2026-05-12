@@ -40,6 +40,9 @@ base = {
         "raw_ref": "DONE kscr fixture",
     },
     "status": "pass",
+    "failure_class": None,
+    "retry_policy": "none",
+    "recovery_hint": "No recovery needed; validation passed.",
     "failure_classes": [],
     "evidence": [{"type": "path", "ref": "evidence.md"}],
     "artifact_checks": [{"artifact_id": "evidence", "path": "evidence.md", "status": "exists"}],
@@ -57,10 +60,17 @@ base = {
 def write(name, data):
     (receipts / name).write_text(json.dumps(data, sort_keys=True))
 
+def apply_taxonomy(data, failure_class, retry_policy, recovery_hint):
+    data["failure_class"] = failure_class
+    data["retry_policy"] = retry_policy
+    data["recovery_hint"] = recovery_hint
+    return data
+
 failed = dict(base)
 failed["dispatch_id"] = "kscr-failed"
 failed["status"] = "fail"
 failed["failure_classes"] = ["artifact_missing"]
+apply_taxonomy(failed, "missing_artifact", "manual", "Restore or regenerate the referenced evidence artifact, then rerun validation with the same evidence path.")
 failed["artifact_checks"] = [{"artifact_id": "missing", "path": "missing.md", "status": "missing"}]
 failed["learn_route"] = {"route": "review", "reason": "failed validation needs review", "dedupe_key": "kscr-failed"}
 write("01-failed-review.json", failed)
@@ -74,6 +84,7 @@ skill = dict(base)
 skill["dispatch_id"] = "kscr-skill"
 skill["status"] = "fail"
 skill["failure_classes"] = ["validation_skill_gap"]
+apply_taxonomy(skill, "unknown", "manual", "Preserve the raw failure classes, add a taxonomy alias or migration-tested class, then rerun validation.")
 skill["learn_route"] = {"route": "skill_extend", "reason": "failure needs skill extension", "dedupe_key": "kscr-skill"}
 write("03-skill-extend.json", skill)
 
@@ -81,6 +92,7 @@ promote = dict(base)
 promote["dispatch_id"] = "kscr-promote"
 promote["status"] = "fail"
 promote["failure_classes"] = ["callback_validation_skipped"]
+apply_taxonomy(promote, "invalid_callback", "manual", "Resend or regenerate the callback with required fields, evidence, and durable bead/no-bead routing.")
 promote["learn_route"] = {"route": "promote", "reason": "recurring failure follows L56 ladder", "dedupe_key": "kscr-promote"}
 write("04-promote.json", promote)
 
