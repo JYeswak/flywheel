@@ -2,16 +2,16 @@
   "slug": "public-share-readiness",
   "topic": "Extract the flywheel engine to a properly publishable form \u2014 github.com/JYeswak/flywheel for developers; flywheel.zeststream.ai for SMB clients; both build trust in Joshua, ZestStream brand, and the work.",
   "started_at": "2026-05-12T17:30:00Z",
-  "current_phase": "decompose",
+  "current_phase": "polish",
   "dispatch_mode": "agent-subagents",
   "dispatch_mode_resolved_at": "2026-05-12T17:30:00Z",
   "dispatch_mode_resolution_reason": "codex_worker_panes_unknown_state_in_session_using_Agent_subagents_as_alternative_transport_same_lane_shape",
   "dispatch_mode_timing_overrun_warned": false,
-  "phase_started_at": "2026-05-12T19:30:00Z",
+  "phase_started_at": "2026-05-12T19:00:00Z",
   "rounds_in_current_phase": 0,
   "convergence_streak": 0,
-  "expected_polish_rounds": 0,
-  "polish_round": 4,
+  "expected_polish_rounds": 4,
+  "polish_round": 0,
   "in_flight_dispatches": [],
   "joshua_decision_pending": false,
   "joshua_decision_at": "2026-05-12T19:30:00Z",
@@ -30,7 +30,7 @@
     "medium": 19,
     "low": 9
   },
-  "total_beads_in_dag": 0,
+  "total_beads_in_dag": 36,
   "beads_created": [],
   "abort_reason": null,
   "quality_bar_passed": false,
@@ -207,5 +207,29 @@
       "Plan \u00a78 webpage architecture \u2014 replace /case-studies with /methodology per Class-6b ratification"
     ],
     "expected_final_count": 36
+  },
+  "_phase4_complete": {
+    "bead_count": 36,
+    "p0_count": 23,
+    "p1_count": 13,
+    "critical_path_length": 15,
+    "critical_path": "B0 \u2192 B0.5 \u2192 B1 \u2192 B1.5 \u2192 B2 \u2192 B3.4 \u2192 B4 \u2192 B5 \u2192 B6 \u2192 B7 \u2192 B10 \u2192 B11 \u2192 B11.6 \u2192 B17 \u2192 B15",
+    "effort_envelope_hours": "180-240 (consensus 224h)",
+    "top_risks": [
+      "B3.4 long pole (script sweep 394 files) \u2014 Phase 5 should hunt for further decomposition",
+      "H3 likely collapses to /methodology in practice (consent calendar tight)",
+      "B15 launch bead is 17-dep fan-in; needs P1-to-P2 downgrade escape valves"
+    ],
+    "dag_artifact": "04-BEADS-DAG.md",
+    "completed_at": "2026-05-12T18:00:00Z"
+  },
+  "_jsm_ratification": {
+    "ratified_at": "2026-05-12T18:59:00Z",
+    "l169_promoted": "JSM-FIRST-SEARCH-BEFORE-HAND-ROLLING-MANDATORY",
+    "doctrine_canonical": "skillos:.flywheel/doctrine/jsm-ingestion-flywheel.md",
+    "receipt_schema_v3_refinement": "added replaces_pending_count + enhances_pending_count to skillos's 4-field proposal",
+    "engine_overlay_confirmed": "pipeline at canonical-engine; classifications at overlay",
+    "v0_2_scope": "deferred per skillos framing pending 48h+ soak evidence",
+    "handoff": ".flywheel/handoffs/20260512T185900Z-from-flywheel-1-to-skillos-1-JSM-INGESTION-v0.1-RATIFICATION.md"
   }
 }
