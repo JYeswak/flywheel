@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "repo": "/Users/josh/Developer/skillos",
+  "repo_realpath": "/Users/josh/Developer/skillos",
+  "git_root": "/Users/josh/Developer/skillos",
+  "created_at": "20260509T134915Z",
+  "installed_from": "/Users/josh/Developer/flywheel/templates/flywheel-install",
+  "template_version": "0.1.0",
+  "docs": {
+    "mission": ".flywheel/MISSION.md",
+    "goal": ".flywheel/GOAL.md",
+    "state": ".flywheel/STATE.md"
+  },
+  "doctor_strict_command": "flywheel-loop doctor --strict --repo /Users/josh/Developer/skillos --json",
+  "structural_validation_command": "set -euo pipefail; cd /Users/josh/Developer/skillos; for f in .flywheel/MISSION.md .flywheel/GOAL.md .flywheel/STATE.md state/kernel.json; do [ -s \"$f\" ] || { echo \"FAIL: $f missing or empty\" >&2; exit 1; }; done; flywheel-loop doctor --repo /Users/josh/Developer/skillos --json | jq -e '.status == \"ok\" and .action == \"ready_for_tick\"' >/dev/null || { echo \"FAIL: flywheel-loop doctor not ready_for_tick\" >&2; exit 2; }; echo \"OK: structural validation passed\"",
+  "structural_validation_files": [
+    ".flywheel/MISSION.md",
+    ".flywheel/GOAL.md",
+    ".flywheel/STATE.md",
+    "state/kernel.json"
+  ],
+  "source_mutation_allowed_when": "Only after strict doctor returns ok and a loop tick selects a bounded patch.",
+  "project": "skillos"
+}

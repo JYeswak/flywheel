@@ -1,0 +1,1 @@
+{"command": "status", "label": "com.zeststream.storage-prune", "launchctl_loaded": false, "launchctl_probe": {"ok": true, "rc": 0}, "plist_exists": false, "plist_path": "/Users/josh/Library/LaunchAgents/com.zeststream.storage-prune.plist", "registered": false, "registry_row": null, "schema_version": "flywheel-cron/v1"}

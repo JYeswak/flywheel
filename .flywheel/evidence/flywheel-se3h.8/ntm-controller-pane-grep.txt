@@ -1,0 +1,6 @@
+internal/cli/controller.go:81:		Description: "Launch a dedicated controller agent in pane 1",
+internal/cli/controller.go:139:		Short: "Launch a dedicated controller agent in pane 1",
+internal/cli/controller.go:140:		Long: `Launch a controller agent in pane 1 of an existing session.
+internal/cli/controller.go:314:		// Create a new pane which will become the controller pane
+internal/cli/controller.go:317:			return nil, fmt.Errorf("creating controller pane: %w", err)
+internal/cli/get_all_session_text.go:28:- Controller pane (pane 1) last message and status

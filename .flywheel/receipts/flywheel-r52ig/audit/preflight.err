@@ -1,0 +1,20 @@
+OK    target is a directory
+OK    git installed
+OK    jq installed
+FAIL  flock installed — apt install util-linux (already installed on every Linux distro; missing on bare BSD)
+OK    node installed
+OK    awk installed
+OK    find installed
+OK    sed installed
+OK    timeout installed
+OK    target is a git repo
+OK    /agent-mail skill (optional)
+OK    /br (Beads tracker) (optional)
+OK    /bv skill (optional)
+OK    /cass skill (optional)
+OK    /multi-model-triangulation skill (optional)
+OK    /ubs skill (optional)
+OK    shellcheck (optional)
+WARN  could not auto-detect target binary name; user must specify at intake
+
+preflight: 1 hard requirement(s) FAILED, 1 warning(s)

@@ -1,0 +1,3 @@
+115:`feedback_orchestrator_must_finish_p0_before_filing_more.md` (Joshua's
+120:`orchestrator-buries-old-p0-under-new-work`; measurement at
+27:- L-rule: `.flywheel/rules/L024-L70-orch-no-punt-next-actionable-runs-same-tick-not-next-tick.md` — this memory is wired into L70's Companion rules block alongside other orchestrator-discipline memories (`feedback_meat_puppet_gate_at_phase_complete.md`, `feedback_orchestrator_must_dispatch.md`, `feedback_donella_first_no_stop_to_ask.md`).

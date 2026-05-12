@@ -1,0 +1,1 @@
+PASS: symlink-bleed isolation regression — cross-tree symlink refused, clean parent ok

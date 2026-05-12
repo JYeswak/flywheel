@@ -1,0 +1,10 @@
+=== bar named ===
+3
+=== AG addressing ===
+7
+=== version pins ===
+10
+=== upstream-state probe ===
+CLOSED
+=== four-lens line ===
+four_lens=brand:9,sniff:9,jeff:9,public:9 — **4/4 PASS**

@@ -1,0 +1,1 @@
+PASS: team-roster-watch — fresh/stale-warn/stale-error/missing/malformed classified, watch+non-TTY refused, missing roster handled

@@ -1,0 +1,23 @@
+17:/flywheel:plan <topic> --sequential       # Phase 1 dispatches lanes A→B→C on one pane (default: parallel on 3 panes)
+18:/flywheel:plan <topic> --parallel         # Force parallel mode even when 1 idle pane (refuses if <3 idle)
+59:**Entry:** `<topic>` provided + dispatch_mode resolved (see Phase 1 dispatch-mode resolution below)
+60:**Primitive:** 3 lane dispatches (A=problem-space, B=ecosystem-audit, C=implementation-design) — parallel across 3 panes (default) OR sequential A→B→C on one pane (`--sequential`)
+61:**Convergence test:** all 3 callbacks landed + ladder_passed=yes (or ladder=no with explicit caveat per Lane C 2026-05-01 precedent). **Convergence requires all 3 lanes regardless of mode** — sequential cannot short-circuit the 3-lane gate.
+62:**Exit artifact:** `.flywheel/plans/<slug>/01-RESEARCH-{A,B,C}.md` + `STATE.json` advanced to phase=2 with `dispatch_mode` recorded.
+66:The `dispatch_mode` field on `STATE.json` is set when Phase 1 begins and is one of:
+68:- **`sequential`** — 3 lanes dispatched serially A → B → C on a single idle codex worker pane. Each lane callback gates the next dispatch. Total wall-clock ≈ Σ(lane times).
+72:| User flag | Idle worker panes | Resolved `dispatch_mode` |
+75:| (none) | 1 or 2 | `sequential` (auto-fallback with warning) |
+76:| (none) | 0 | refuse with `dispatch_mode_unresolvable_no_idle_workers` |
+77:| `--parallel` | ≥3 | `parallel` |
+78:| `--parallel` | <3 | refuse with `dispatch_mode_parallel_requires_3_idle_workers` |
+79:| `--sequential` | ≥1 | `sequential` |
+80:| `--sequential` | 0 | refuse with `dispatch_mode_sequential_requires_1_idle_worker` |
+82:Skill MUST emit a timing warning when `dispatch_mode=sequential` whose expected wall-clock exceeds the parallel baseline by ≥5 minutes:
+85:WARN flywheel-plan-sequential-timing-overrun: sequential adds ~Nm vs parallel baseline.
+86:expected_sequential_wall_clock=<X>m, parallel_baseline=<Y>m, overrun=<X-Y>m, threshold=5m.
+359:- Total cap 15 beads per plan; if more needed, split into sequential plans
+421:  "dispatch_mode": "parallel|sequential",
+422:  "dispatch_mode_resolved_at": "<iso>",
+423:  "dispatch_mode_resolution_reason": "user_flag|auto_3_idle|auto_fallback_lt_3_idle",
+424:  "dispatch_mode_timing_overrun_warned": false,

@@ -1,0 +1,1 @@
+{"schema_version":"team-roster-watch.v1","success":true,"mode":"doctor","roster_path":"/Users/josh/.local/state/flywheel/team-roster.jsonl","pulse_path":"/Users/josh/.local/state/flywheel/team-pulse.jsonl","roster_present":true,"pulse_present":true,"reads_only":true,"mutates_state":false,"coordination_authority":false}

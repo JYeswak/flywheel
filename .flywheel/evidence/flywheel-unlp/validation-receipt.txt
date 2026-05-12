@@ -1,0 +1,12 @@
+=== bar named ===
+2
+=== AG addressing ===
+17
+=== open-child documented ===
+3
+=== matrix mechanical check ===
+matrix-rows=471
+matrix-sections=4
+new-sibling-staging=5
+=== four-lens line ===
+four_lens=brand:9,sniff:9,jeff:9,public:9 — **4/4 PASS**

@@ -1,0 +1,107 @@
+gui/501/com.zeststream.storage-prune = {
+	active count = 1
+	path = /Users/josh/Library/LaunchAgents/com.zeststream.storage-prune.plist
+	type = LaunchAgent
+	state = xpcproxy
+
+	program = /Users/josh/Developer/flywheel/.flywheel/scripts/storage-prune.sh
+	arguments = {
+		/Users/josh/Developer/flywheel/.flywheel/scripts/storage-prune.sh
+		--repo
+		/Users/josh/Developer/flywheel
+		--apply
+		--idempotency-key
+		Thu May  7 20:11:38 MDT 2026 nightly
+		--json
+	}
+
+	working directory = /Users/josh/Developer/flywheel
+
+	stdout path = /Users/josh/.local/state/flywheel/logs/com.zeststream.storage-prune.stdout.log
+	stderr path = /Users/josh/.local/state/flywheel/logs/com.zeststream.storage-prune.stderr.log
+	inherited environment = {
+		SSH_AUTH_SOCK => /private/tmp/com.apple.launchd.tBQULDo3wu/Listeners
+	}
+
+	default environment = {
+		PATH => /usr/bin:/bin:/usr/sbin:/sbin
+	}
+
+	environment = {
+		OSLogRateLimit => 64
+		FLYWHEEL_CRON_OWNER => flywheel
+		FLYWHEEL_CRON_LABEL => com.zeststream.storage-prune
+		PATH => /Users/josh/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+		FLYWHEEL_CRON_STOP => /Users/josh/.flywheel/STOP-com.zeststream.storage-prune
+		HOME => /Users/josh
+		XPC_SERVICE_NAME => com.zeststream.storage-prune
+	}
+
+	domain = gui/501 [100024]
+	asid = 100024
+	minimum runtime = 10
+	exit timeout = 5
+	runs = 1
+	pid = 91549
+	immediate reason = speculative
+	forks = 0
+	execs = 0
+	initialized = 0
+	trampolined = 0
+	started suspended = 0
+	proxy started suspended = 0
+	checked allocations = 0 (queried = 0)
+	checked allocations reason = no host
+	checked allocations flags = 0x0
+	last exit code = (never exited)
+
+	event triggers = {
+		com.zeststream.storage-prune.268435614 => {
+			keepalive = 0
+			service = com.zeststream.storage-prune
+			stream = com.apple.launchd.calendarinterval
+			monitor = com.apple.UserEventAgent-Aqua
+			descriptor = {
+				"Minute" => 0
+				"Hour" => 3
+			}
+		}
+	}
+
+	event channels = {
+		"com.apple.launchd.calendarinterval" = {
+			port = 0x713b7
+			active = 0
+			managed = 1
+			reset = 0
+			hide = 0
+			watching = 0
+		}
+	}
+
+	resource coalition = {
+		ID = 71088
+		type = resource
+		state = active
+		active count = 1
+		name = com.zeststream.storage-prune
+	}
+
+	jetsam coalition = {
+		ID = 71089
+		type = jetsam
+		state = active
+		active count = 1
+		name = com.zeststream.storage-prune
+	}
+
+	spawn type = daemon (3)
+	jetsam priority = 40
+	jetsam memory limit (active) = (unlimited)
+	jetsam memory limit (inactive) = (unlimited)
+	jetsamproperties category = daemon
+	jetsam thread limit = 32
+	cpumon = default
+
+	properties = runatload | inferred program
+}

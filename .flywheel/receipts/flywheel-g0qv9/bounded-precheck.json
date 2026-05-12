@@ -1,0 +1,1 @@
+{"schema_version":"canonical-root-drift-fleet-check/v1","version":"canonical-root-drift-fleet-check.v1.0.0","status":"error","classification":"sync_helper_timeout","timed_out":true,"timeout_seconds":20,"sync_helper":"/Users/josh/Developer/flywheel/.flywheel/scripts/sync-canonical-doctrine.sh","canonical_source":"/Users/josh/Developer/flywheel/AGENTS.md","stderr":""}

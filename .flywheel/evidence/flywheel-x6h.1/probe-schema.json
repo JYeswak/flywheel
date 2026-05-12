@@ -1,0 +1,1 @@
+{"schema_version":"dispatch-surface-conflict-probe.v1","properties":{"verdict":{"enum":["ok","conflict"]},"candidate_task_file":{"type":["string","null"]},"candidate_bead_id":{"type":["string","null"]},"candidate_surfaces":{"type":"array"},"in_flight_count":{"type":"integer"},"conflicts":{"type":"array"}}}

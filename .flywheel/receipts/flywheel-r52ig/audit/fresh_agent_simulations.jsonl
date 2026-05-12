@@ -1,0 +1,4 @@
+{"simulation":"fresh-agent-first-try","tool":"dispatch-and-verify","command":".flywheel/scripts/dispatch-and-verify.sh --info --json","status":"pass","round_trips":1}
+{"simulation":"fresh-agent-first-try","tool":"build-dispatch-packet","command":".flywheel/scripts/build-dispatch-packet.sh --schema","status":"pass","round_trips":1}
+{"simulation":"fresh-agent-first-try","tool":"flywheel-loop","command":"/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop --info --json","status":"pass","round_trips":1}
+{"simulation":"fresh-agent-first-try","tool":"sync-canonical-doctrine","command":".flywheel/scripts/sync-canonical-doctrine.sh --help","status":"pass","round_trips":1}

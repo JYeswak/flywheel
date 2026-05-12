@@ -1,0 +1,13 @@
+{
+  "schema_version": "mobile-eats-source-repo-normalization-proof/v1",
+  "repo": "/Users/josh/Developer/mobile-eats",
+  "db": "/Users/josh/Developer/mobile-eats/.beads/beads.db",
+  "integrity": "ok",
+  "backup_sha256": "853dd377873fcfb869303aca645b235086a61d8372a0d8c2546dc2333271c1bd",
+  "dot_leaks": 0,
+  "empty_leaks": 0,
+  "null_leaks": 0,
+  "basename_leaks": 0,
+  "canonical_rows": 742,
+  "pass": true
+}

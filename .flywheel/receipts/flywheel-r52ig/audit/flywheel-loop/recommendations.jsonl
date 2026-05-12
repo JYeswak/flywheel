@@ -1,0 +1,1 @@
+{"recommendation_id":"flywheel-loop-R001","tool":"flywheel-loop","mode":"audit","rank":1,"operator":"📜 Self-Describing + 📐 Schema-Pin","blast_radius":"low","status":"applied_or_already_present","summary":"Expose or preserve --help/--info/--examples/schema JSON introspection so agents can discover contracts before mutation.","applied_change":"already present; no patch applied"}

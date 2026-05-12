@@ -1,0 +1,12 @@
+{
+  "session": "picoz",
+  "pane": 3,
+  "role": "archived",
+  "status": "inactive",
+  "identity_resolved": false,
+  "agent_mail_ready": false,
+  "archival_reason": "session_pane_absent_from_latest_topology",
+  "archived_ts": "2026-05-04T19:09:50Z",
+  "predecessor_identity": null,
+  "fleet_mail_project_key": "/Users/josh/Developer/polymarket-pico-z"
+}

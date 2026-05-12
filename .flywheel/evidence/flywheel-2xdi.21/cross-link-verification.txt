@@ -1,0 +1,2 @@
+105:`feedback_meat_puppet_gate_at_phase_complete.md` (Joshua's 2026-05-03T16:48Z
+32:- L-rule: `.flywheel/rules/L024-L70-orch-no-punt-next-actionable-runs-same-tick-not-next-tick.md` — this memory is the genesis incident L70 was distilled from (Joshua's 2026-05-03T16:48Z callout). L70 names the forbidden phrase catalog ("should I", "want me to", "let me know if", etc.) and the same-tick chain rule that forecloses the meat-puppet-gate behavior.

@@ -1,0 +1,1 @@
+{"schema_version":"codex-deathtrap-launcher.v1","success":true,"mode":"doctor","codex_bin":"/Users/josh/.local/bin/codex","codex_bin_present":true,"evidence_dir":"/Users/josh/.local/state/flywheel/codex-death-evidence","captures":["stderr_tee","exit_code","last_history_cmd","parent_pane_id"]}

@@ -1,0 +1,13 @@
+  event carries an approved recovery pathway.
+
+**Step 4i.1: Vibe Cockpit observability probe (NEW 2026-05-03 — see bead `flywheel-tbp`, paired with `flywheel-m964` canonical CLI scoping pattern; L65 measurement hook).**
+
+`vc` is a PATH-collision-prone surface: bare `vc` may resolve to Vercel CLI, not
+Vibe Cockpit. This step is the canonical tick-time measurement for **L65 —
+CLI-IDENTITY-BEATS-COMMAND-NAME** (`.flywheel/rules/L019-L65-cli-identity-beats-command-name.md`).
+The probe wrapper records `command -v vc` + `realpath` + `vc --help` semantic
+identity check before trusting output. Tick must use the wrapper, never bare
+`vc`:
+
+```bash
+/Users/josh/Developer/flywheel/.flywheel/scripts/vc-observability-probe.sh --doctor --json

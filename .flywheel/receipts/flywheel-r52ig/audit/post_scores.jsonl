@@ -1,0 +1,4 @@
+{"tool":"dispatch-and-verify","pre_score":610,"post_score":735,"delta":125,"change":"--help now exits 0; --info --json, --examples --json, and --schema added","evidence":"tests/dispatch-and-verify.sh"}
+{"tool":"flywheel-loop","pre_score":820,"post_score":820,"delta":0,"change":"no code change; high-blast mature canonical surface","evidence":"tests/flywheel-loop-canonical-cli.sh"}
+{"tool":"build-dispatch-packet","pre_score":780,"post_score":780,"delta":0,"change":"no code change; already has --info/--examples/--schema and stable exit codes","evidence":".flywheel/scripts/build-dispatch-packet.sh --schema"}
+{"tool":"sync-canonical-doctrine","pre_score":690,"post_score":690,"delta":0,"change":"no code change; high-blast fleet propagation surface deferred","evidence":".flywheel/scripts/sync-canonical-doctrine.sh --help"}

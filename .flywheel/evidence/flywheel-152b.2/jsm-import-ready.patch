@@ -1,0 +1,49 @@
+--- a/scripts/check-dicklesworthstone-updates.sh
++++ b/scripts/check-dicklesworthstone-updates.sh
+@@ -23,8 +23,9 @@
+ echo "Current total repos: $current_count" | tee -a "$OUTPUT_LOG"
+
+ # 3. Check for repos with activity in last 7 days
+-recent=$(jq '[.[] | select((now - ((.updated | fromdate) | todate | mktime)) < 604800)] | length' /tmp/dickleworthstone_current.json)
++# fromdateiso8601 returns epoch seconds directly; the prior fromdate->todate->mktime
++# chain failed on macOS jq because mktime expects a broken-down array, not an ISO string.
++recent=$(jq '[.[] | select((now - (.updated | fromdateiso8601)) < 604800)] | length' /tmp/dickleworthstone_current.json)
+ echo "Repos updated in last 7 days: $recent" | tee -a "$OUTPUT_LOG"
+
+@@ -49,8 +50,17 @@
+ echo "" | tee -a "$OUTPUT_LOG"
+ echo "Inventory freshness check:" | tee -a "$OUTPUT_LOG"
+ inventory_date=$(head -3 "$INVENTORY_FILE" | grep "Snapshot" | grep -oE "[0-9]{4}-[0-9]{2}-[0-9]{2}" || echo "unknown")
+-days_stale=$(( ($(date +%s) - $(date -d "$inventory_date" +%s)) / 86400 ))
+-if [ "$days_stale" -gt 30 ]; then
++# macOS BSD date uses -j -f; GNU date uses -d. Fall back across both so the
++# script runs cleanly on macOS (bash 3.2) and Linux without env-specific tweaks.
++inventory_epoch=$(date -j -f "%Y-%m-%d" "$inventory_date" +%s 2>/dev/null \
++                 || date -d "$inventory_date" +%s 2>/dev/null \
++                 || echo "")
++if [ -n "$inventory_epoch" ]; then
++  days_stale=$(( ($(date +%s) - inventory_epoch) / 86400 ))
++else
++  days_stale="unknown"
++fi
++if [ "$days_stale" = "unknown" ]; then
++  echo "WARN: could not parse Inventory snapshot date '$inventory_date'." | tee -a "$OUTPUT_LOG"
++elif [ "$days_stale" -gt 30 ]; then
+   echo "WARNING: INVENTORY.md is $days_stale days old. Run petal-9 refresh." | tee -a "$OUTPUT_LOG"
+ else
+   echo "OK: Inventory updated $days_stale days ago." | tee -a "$OUTPUT_LOG"
+
+# Provenance:
+# - Source bead: flywheel-152b.2 (parent flywheel-152b)
+# - Skill management state: dicklesworthstone-stack reported managed:false by
+#   .flywheel/scripts/skill-enhance-jsm-discipline.sh on 2026-05-09 - direct
+#   live mutation allowed; this artifact is paired for future JSM import.
+# - 3 fixes applied:
+#     1. jq date math: fromdate->todate->mktime -> fromdateiso8601 (macOS jq's
+#        mktime expects array, not ISO string).
+#     2. inventory date parse: date -d (GNU) -> BSD -j -f with GNU fallback.
+#     3. chmod +x - file was non-executable despite the cron-style usage comment.
+# - Live verification 2026-05-09T13:43Z: rc=1 (intended high-activity soft flag,
+#   recent=78 > 3), zero parser/runtime failures, "Repos updated in last 7
+#   days: 78", "OK: Inventory updated 6 days ago".
+# - Also: chmod 755 on the script after edits.

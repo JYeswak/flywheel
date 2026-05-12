@@ -1,0 +1,1 @@
+{"schema_version":"cross-skill-dependency-probe.v1","success":true,"mode":"doctor","skills_dir":"/Users/josh/.claude/skills","dir_present":true,"reads_only":true,"auto_dispatch":false,"surfaces":["tick receipt consumer","dashboard tile","doctor signal candidate"],"step_4o_compliance":"preserved"}

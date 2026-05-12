@@ -1,0 +1,9 @@
+=== outcome-verb count (lhi4 acceptance: reframe activity->outcomes) ===
+13
+=== bar named (count) ===
+8
+=== mechanical AG check ===
+skill-drafts=5
+candidate-l-rules.md=exists
+=== four-lens line ===
+four_lens=brand:9,sniff:9,jeff:9,public:9 — **4/4 PASS**

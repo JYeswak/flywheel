@@ -1,0 +1,2 @@
+55:- `feedback_workers_read_not_mint_identity.md` — Joshua's 2026-05-04 callout
+24:- Canonical L-rule: `.flywheel/rules/L038-L84-locked-worker-identities-canonical.md` — this memory is the genesis incident L84 was distilled from. L84's `Forbidden outputs` section ("Registering a fresh worker Agent Mail identity because the pane lost context") and its mechanical preallocation flow (`agent-mail-pre-allocate-worker-identities.sh --apply --json` from `session-topology.jsonl`) are the deterministic implementation of this memory's "read, never mint" rule.

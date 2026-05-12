@@ -1,0 +1,1 @@
+{"schema_version":"skill-bandit-measurement-probe.v1","success":true,"mode":"doctor","dispatch_log":"/Users/josh/Developer/flywheel/.flywheel/dispatch-log.jsonl","log_present":true,"reads_only":true,"auto_dispatch":false,"surfaces":["tick receipt consumer","dashboard tile","doctor signal candidate"],"anti_pattern_step_4o":"preserved"}

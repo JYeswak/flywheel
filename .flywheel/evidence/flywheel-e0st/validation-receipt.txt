@@ -1,0 +1,11 @@
+=== rg proposed L69|L70 ===
+/Users/josh/Developer/flywheel/.flywheel/PLANS/doctrine-propagation-2026-05-07/01-VERIFY-PASS.json:1
+/Users/josh/Developer/flywheel/.flywheel/PLANS/cross-pane-protocol-2026-05-01/04-XPANE-SYNTHESIS.md:1
+=== L-rule uniqueness ===
+(no output = 0 duplicates)
+=== bar named (count) ===
+6
+=== AG addressing (count) ===
+5
+=== four-lens line ===
+four_lens=brand:9,sniff:9,jeff:9,public:9 — **4/4 PASS**

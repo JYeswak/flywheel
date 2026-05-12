@@ -1,0 +1,2 @@
+FAIL: state/kernel.json missing or empty
+validation-rc=1

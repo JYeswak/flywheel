@@ -1,0 +1,1 @@
+PASS: sync-canonical-doctrine.sh discovers + writes all 6 stamped repos (incl. terratitle, zeststream-infra)
