@@ -2,20 +2,20 @@
   "slug": "public-share-readiness",
   "topic": "Extract the flywheel engine to a properly publishable form \u2014 github.com/JYeswak/flywheel for developers; flywheel.zeststream.ai for SMB clients; both build trust in Joshua, ZestStream brand, and the work.",
   "started_at": "2026-05-12T17:30:00Z",
-  "current_phase": "paused",
+  "current_phase": "decompose",
   "dispatch_mode": "agent-subagents",
   "dispatch_mode_resolved_at": "2026-05-12T17:30:00Z",
   "dispatch_mode_resolution_reason": "codex_worker_panes_unknown_state_in_session_using_Agent_subagents_as_alternative_transport_same_lane_shape",
   "dispatch_mode_timing_overrun_warned": false,
-  "phase_started_at": "2026-05-12T18:30:00Z",
+  "phase_started_at": "2026-05-12T19:30:00Z",
   "rounds_in_current_phase": 0,
   "convergence_streak": 0,
   "expected_polish_rounds": 0,
   "polish_round": 4,
   "in_flight_dispatches": [],
-  "joshua_decision_pending": true,
-  "joshua_decision_at": null,
-  "audit_disposition": "blocker_class_destructive-irreversible-on-shared-state",
+  "joshua_decision_pending": false,
+  "joshua_decision_at": "2026-05-12T19:30:00Z",
+  "audit_disposition": "auto_advance_post_ratification",
   "audit_blocker_class": "destructive-irreversible-on-shared-state",
   "audit_blocker_classes": [
     "destructive-irreversible-on-shared-state",
@@ -182,5 +182,30 @@
       "Class 4: ratify B11.5.0 consent workflow + fallback"
     ],
     "completed_at": "2026-05-12T18:55:00Z"
+  },
+  "_phase3_ratifications": {
+    "ratified_by": "Joshua",
+    "ratified_at": "2026-05-12T19:30:00Z",
+    "ratified_via": "blanket-agreement: 'I agree with all of your feedback here - lets remove the gruff and make it shine as a proper company with proper image'",
+    "decisions": {
+      "class_5_live_state_denylist": "RATIFIED \u2014 add B0.5 extraction-codemod-refuses-denylist-paths",
+      "class_6a_halted_propagator_disposal": "OPTION A \u2014 exclude from extraction entirely (cleaner; 'remove the gruff' interpretation)",
+      "class_6b_case_study_positioning": "OPTION C \u2014 reframe as /methodology/how-we-built-this (honest meta-application; 'shine as proper company' interpretation \u2014 no self-referential case-study)",
+      "class_4_consent_workflow": "RATIFIED \u2014 add B11.5.0 consent template + per-named-entity matrix + Joshua+counsel sign-off + fallback to /methodology if consent not granted in time"
+    }
+  },
+  "_phase4_entry": {
+    "starting_bead_count": 33,
+    "new_beads_to_add": [
+      "B0.5 \u2014 Live-state artifact denylist (P0; S effort; blocks B11)",
+      "B11.5.0 \u2014 H3 case-study consent workflow + redaction class-leak audit (P0; M effort; blocks B11.5)",
+      "B11.6 \u2014 External-developer README review (P0; S effort; blocks B15)"
+    ],
+    "beads_to_modify": [
+      "B16 (skillos coordination) \u2014 add 14-day SLA + zero-skills-v0.2 fallback",
+      "B11.5 (case-study redaction) \u2014 reframe to /methodology/how-we-built-this; remove self-referential case-study claim",
+      "Plan \u00a78 webpage architecture \u2014 replace /case-studies with /methodology per Class-6b ratification"
+    ],
+    "expected_final_count": 36
   }
 }
