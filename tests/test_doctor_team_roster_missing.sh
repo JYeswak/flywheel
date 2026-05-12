@@ -27,10 +27,11 @@ TEAM_ROSTER="$TMP/roster.jsonl" \
 SESSION_TOPOLOGY="$TMP/topology.jsonl" \
 FLYWHEEL_TEAM_PULSE="$TMP/pulse.jsonl" \
 FLYWHEEL_TEAM_ROSTER_NTM_BIN="$TMP/ntm" \
+FLYWHEEL_TEAM_ROSTER_NTM_TIMEOUT_SECONDS=2 \
 FLYWHEEL_TEAM_ROSTER_NOW="2026-05-07T00:10:00Z" \
   bash -lc 'source "$HOME/.claude/skills/.flywheel/lib/session.sh"; doctor_check_team_roster_freshness' >"$TMP/out.json"
 
-assert_jq "$TMP/out.json" '.status == "fail"' "missing_roster_fails"
+assert_jq "$TMP/out.json" '.status == "warn"' "missing_roster_warns"
 assert_jq "$TMP/out.json" '.status_per_session.alpha == "GHOST"' "missing_roster_ghost"
 assert_jq "$TMP/out.json" '.sessions[] | select(.session=="alpha" and .reason=="team_roster_row_missing")' "missing_roster_reason"
 assert_jq "$TMP/out.json" '.team_roster_ghost_count == 1' "ghost_count"
