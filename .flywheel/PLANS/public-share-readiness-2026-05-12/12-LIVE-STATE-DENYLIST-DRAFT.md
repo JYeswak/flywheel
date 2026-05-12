@@ -138,6 +138,31 @@ The human-facing error should include:
 
 It should not print file contents.
 
+## Implementation Probe Notes
+
+`scripts/depersonalize.py --probe-denylist` now implements the first guarded
+path scan against `state/live-state-denylist.yaml`. It is intentionally
+path-only in this phase and emits JSON without reading or printing file
+contents.
+
+The first full-repo probe surfaced a substrate gap that should be folded into
+SkillOS publication controls: broad credential path rules such as `**/*token*`
+and `**/*cookie*` are useful for local runtime state, but they create false
+positives in dependency/package trees (`node_modules`, Next compiled cookie
+modules, tokenizer internals) and in public tests. The scanner now ignores
+dependency/cache/build directories by default and exposes
+`--include-ignored-dirs` for deep audits. SkillOS should treat this as a typed
+classification issue, not as a one-off exception: public extraction needs
+separate classes for source/runtime state, generated dependency trees, and test
+fixtures.
+
+Current focused proof:
+
+```bash
+bash tests/live-state-denylist.sh
+# SUMMARY pass=8 fail=0
+```
+
 ## Manual-Review Receipt
 
 Manual-review rows should require a JSONL receipt shaped like:

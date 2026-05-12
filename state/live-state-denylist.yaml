@@ -1,0 +1,163 @@
+schema_version: flywheel.live_state_denylist.v0
+rows:
+  - id: repo-ntm-runtime
+    class: live-runtime-state
+    pattern: ".ntm/**"
+    decision: deny
+    reason_code: private_pane_runtime
+    public_replacement: "document NTM install and detection, not local runtime state"
+    probe_fixture: fixtures/denylist/ntm-runtime-tree
+  - id: repo-flywheel-runtime
+    class: live-runtime-state
+    pattern: ".flywheel/runtime/**"
+    decision: deny
+    reason_code: private_flywheel_runtime
+    public_replacement: "generate runtime directories during public init"
+    probe_fixture: fixtures/denylist/flywheel-runtime-tree
+  - id: repo-local-private-receipts
+    class: live-runtime-state
+    pattern: ".flywheel/receipts/private/**"
+    decision: deny
+    reason_code: private_receipt_state
+    public_replacement: "publish scrubbed example receipts only"
+    probe_fixture: fixtures/denylist/private-receipts
+  - id: repo-dispatch-ledger
+    class: live-runtime-state
+    pattern: ".flywheel/dispatch-log.jsonl"
+    decision: manual-review
+    reason_code: private_dispatch_ledger
+    public_replacement: "publish schema and synthetic rows"
+    probe_fixture: fixtures/denylist/dispatch-ledger
+  - id: repo-handoffs
+    class: client-evidence-state
+    pattern: ".flywheel/handoffs/**"
+    decision: manual-review
+    reason_code: private_handoff_state
+    public_replacement: "publish generalized handoff templates"
+    probe_fixture: fixtures/denylist/handoffs
+  - id: repo-private-reports
+    class: client-evidence-state
+    pattern: ".flywheel/reports/**"
+    decision: manual-review
+    reason_code: private_report_state
+    public_replacement: "publish depersonalized metrics or fixtures"
+    probe_fixture: fixtures/denylist/private-reports
+  - id: repo-research-private
+    class: private-memory-state
+    pattern: ".flywheel/research/**"
+    decision: manual-review
+    reason_code: private_research_state
+    public_replacement: "publish methodology summaries, not raw research ledgers"
+    probe_fixture: fixtures/denylist/private-research
+  - id: agent-mail-archive
+    class: private-identity-state
+    pattern: "**/agent_mail*/**"
+    decision: deny
+    reason_code: private_agent_identity_state
+    public_replacement: "publish setup docs and empty fixtures"
+    probe_fixture: fixtures/denylist/agent-mail-archive
+  - id: mcp-agent-mail-archive
+    class: private-identity-state
+    pattern: "**/mcp_agent_mail*/**"
+    decision: deny
+    reason_code: private_agent_identity_state
+    public_replacement: "publish setup docs and empty fixtures"
+    probe_fixture: fixtures/denylist/agent-mail-archive
+  - id: cass-state
+    class: private-memory-state
+    pattern: "**/cass*/**"
+    decision: deny
+    reason_code: private_memory_state
+    public_replacement: "publish CASS-style setup docs"
+    probe_fixture: fixtures/denylist/memory-indexes
+  - id: jsm-state
+    class: private-memory-state
+    pattern: "**/jsm*/**"
+    decision: deny
+    reason_code: private_memory_state
+    public_replacement: "publish SkillOS capability-control-plane docs"
+    probe_fixture: fixtures/denylist/memory-indexes
+  - id: socraticode-index
+    class: private-memory-state
+    pattern: "**/socraticode*/**"
+    decision: deny
+    reason_code: private_memory_state
+    public_replacement: "publish MCP setup docs and fresh local index command"
+    probe_fixture: fixtures/denylist/memory-indexes
+  - id: qdrant-index
+    class: private-memory-state
+    pattern: "**/qdrant/**"
+    decision: deny
+    reason_code: private_memory_state
+    public_replacement: "publish MCP setup docs and fresh local index command"
+    probe_fixture: fixtures/denylist/memory-indexes
+  - id: tmux-pane-captures
+    class: live-runtime-state
+    pattern: "**/*pane*capture*"
+    decision: deny
+    reason_code: private_pane_capture
+    public_replacement: "publish NTM command examples without saved live text"
+    probe_fixture: fixtures/denylist/pane-captures
+  - id: tmux-scrollback
+    class: live-runtime-state
+    pattern: "**/*scrollback*"
+    decision: deny
+    reason_code: private_pane_capture
+    public_replacement: "publish NTM command examples without saved live text"
+    probe_fixture: fixtures/denylist/pane-captures
+  - id: env-files
+    class: credential-state
+    pattern: ".env*"
+    decision: deny
+    reason_code: credential_state_path
+    public_replacement: "publish redacted examples with synthetic markers"
+    probe_fixture: fixtures/denylist/env-secret-shapes
+  - id: pem-files
+    class: credential-state
+    pattern: "**/*.pem"
+    decision: deny
+    reason_code: credential_state_path
+    public_replacement: "publish redacted examples with synthetic markers"
+    probe_fixture: fixtures/denylist/env-secret-shapes
+  - id: key-files
+    class: credential-state
+    pattern: "**/*.key"
+    decision: deny
+    reason_code: credential_state_path
+    public_replacement: "publish redacted examples with synthetic markers"
+    probe_fixture: fixtures/denylist/env-secret-shapes
+  - id: token-paths
+    class: credential-state
+    pattern: "**/*token*"
+    decision: deny
+    reason_code: credential_state_path
+    public_replacement: "publish redacted examples with synthetic markers"
+    probe_fixture: fixtures/denylist/env-secret-shapes
+  - id: cookie-paths
+    class: credential-state
+    pattern: "**/*cookie*"
+    decision: deny
+    reason_code: credential_state_path
+    public_replacement: "publish redacted examples with synthetic markers"
+    probe_fixture: fixtures/denylist/env-secret-shapes
+  - id: halted-propagator-canonical-doctrine-sync
+    class: live-runtime-state
+    pattern: "**/canonical-doctrine-sync.sh"
+    decision: deny
+    reason_code: halted_propagator
+    public_replacement: "publish bounded doctrine sync docs, not halted clobber-capable tools"
+    probe_fixture: fixtures/denylist/halted-propagators
+  - id: halted-propagator-sync-canonical-doctrine
+    class: live-runtime-state
+    pattern: "**/sync-canonical-doctrine.sh"
+    decision: deny
+    reason_code: halted_propagator
+    public_replacement: "publish bounded doctrine sync docs, not halted clobber-capable tools"
+    probe_fixture: fixtures/denylist/halted-propagators
+  - id: halted-propagator-agents-md-fleet
+    class: live-runtime-state
+    pattern: "**/agents-md-fleet-propagator.sh"
+    decision: deny
+    reason_code: halted_propagator
+    public_replacement: "publish bounded doctrine sync docs, not halted clobber-capable tools"
+    probe_fixture: fixtures/denylist/halted-propagators
