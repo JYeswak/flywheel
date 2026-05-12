@@ -128,22 +128,27 @@ git commit -m "chore(journey-bootstrap): declare 3 user journeys per L170"
 
 Fleet audit at `.flywheel/audit/fleet-tenant-and-journey-compliance-audit-2026-05-12.csv` (combined with L168 tenant audit per packet request):
 
-| Repo | Has `.zs-tenant.yaml` (L168) | Has `.zs-journeys.yaml` (L170) | Priority |
-|---|---|---|---|
-| mobile-eats | ❌ | ❌ → first bootstrap candidate | **P0** (origin incident) |
-| alps-insurance | ❌ | ❌ | **P0** (regulatory) |
-| terratitle | ❌ | ❌ | **P0** (legal data) |
-| vrtx | ❌ | ❌ | P1 |
-| zeststream-v2-fresh | ❌ | ❌ | P1 |
-| zeststream-platform | ❌ | ❌ | P1 |
-| zesttube | ❌ | ❌ | P2 |
-| agent-ui | ❌ | ❌ | P2 |
-| flywheel_gateway | ❌ | n/a (api-only; no UI) | P2 |
-| blackfoot-telecom | n/a (not-cloned) | n/a | P0-when-cloned |
-| clutterfreespaces | n/a (not-cloned) | n/a | P1-when-cloned |
-| picoz | n/a (not-cloned) | n/a | P2-when-cloned |
+| Repo | Has `.zs-tenant.yaml` (L168) | Has `.zs-journeys.yaml` (L170) | L170 applicable | Priority |
+|---|---|---|---|---|
+| mobile-eats | ✅ (shipped 2026-05-12) | ❌ → first bootstrap candidate | YES | **P0** (origin incident) |
+| alpsinsurance | ❌ | ❌ | YES | **P0** (regulatory) |
+| terratitle | ❌ | ❌ | YES | **P0** (legal data) |
+| blackfoot-telecom | n/a (not-cloned) | n/a (not-cloned) | YES | **P0**-when-cloned (ISP portal) |
+| zeststream-v2-fresh | ❌ | ❌ | YES | P1 (Next.js consumer surface) |
+| vrtx | ❌ | n/a | NO (n8n workflow factory; no UI) | P1 (L168 only) |
+| clutterfreespaces | ❌ | ❌ | YES | P1 (needs `git init` first) |
+| agent-ui | ❌ | ❌ | YES (internal-operator users) | P2 |
+| zeststream-platform | ❌ | n/a | NO (substrate; no UI) | P2 (L168 only) |
+| zesttube | ❌ | n/a | NO (video pipeline; internal) | P2 (L168 only) |
+| flywheel_gateway | ❌ | n/a | NO (api-only) | P2 (L168 only) |
+| picoz | ❌ | unknown | unknown (classify) | P3 (investigate) |
 
-**9 confirmed repos in fleet; 0 currently compliant with L170 (or L168). 3 not present locally.**
+**Empirical state 2026-05-12 (per audit CSV):**
+- 11 repos cloned locally + 3 not cloned (blackfoot-telecom + zeststream-no-suffix + flywheel-gateway-alt)
+- L168 compliance: **1/11** (mobile-eats shipped via `/zs:project-bootstrap` 2026-05-12)
+- L170 compliance: **0/11**
+- L170-applicable repos: 7 (6 cloned + 1 not-cloned) + 2 needing investigation
+- `alps-insurance/` is a symlink to `alpsinsurance/` — treat as one repo
 
 ## Sister rule connections
 

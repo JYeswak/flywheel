@@ -1,0 +1,15 @@
+repo_path,repo_type,primary_lang,ui_framework,has_zs_tenant_l168,has_zs_journeys_l170,l170_applicability,priority,proposed_starter_journey_count,client_facing,status,notes
+~/Developer/mobile-eats,consumer-app,unknown,custom,yes,no,required,P0,5,yes,partial-compliance,L168 compliant (shipped 2026-05-12 via /zs:project-bootstrap). L170 gap. Origin incident; first L170 bootstrap candidate.
+~/Developer/alpsinsurance,consumer-app,multi,unknown,no,no,required,P0,5,yes,non-compliant,Regulatory class — insurance customer surfaces. Symlinked from alps-insurance/. Worker-branch HEAD detected.
+~/Developer/terratitle,consumer-app,unknown,unknown,no,no,required,P0,5,yes,non-compliant,Montana property intelligence platform — 33.4M+ records; title pros + clerks + attorneys. Legal workflows; high stakes.
+~/Developer/vrtx,workflow-automation,unknown,n8n,no,no,n/a,P1,0,internal,non-compliant,n8n workflow factory for VRTX Gym (Missoula). No traditional UI surfaces; L170 not applicable. L168 still required for tenant routing.
+~/Developer/zeststream-v2-fresh,consumer-app,node,next,no,no,required,P1,3,yes,non-compliant,Next.js consumer-facing surface. ZestStream brand front-end.
+~/Developer/zeststream-platform,platform-substrate,node,none,no,no,n/a,P1,0,no,non-compliant,Shared substrate (observability + billing + security). No direct user-facing UI. L168 may apply for routing; L170 n/a.
+~/Developer/zesttube,pipeline,python,none,no,no,n/a,P2,0,no,non-compliant,Video processing pipeline (Zest Feed). Internal-only; no user surfaces. L170 not applicable.
+~/Developer/agent-ui,internal-tool,node,next,no,no,required,P2,3,internal,non-compliant,Next.js admin/internal tool. Journeys recommended for internal operators (still has user-facing surfaces).
+~/Developer/flywheel_gateway,api-only,node,none,no,no,n/a,P2,0,no,non-compliant,API service; no client-rendered UI. L168 may apply for tenant scope; L170 not applicable.
+~/Developer/clutterfreespaces,consumer-app,node,unknown,no,no,required,P1,3,yes,non-compliant-not-git,Joshua client (Missoula storage business). Not currently a git repo — needs git init before bootstrap.
+~/Developer/picoz,unknown,python,none,no,no,unknown,P2,0,unknown,non-compliant,Type/purpose unclear; investigate before classifying L170 applicability.
+~/Developer/blackfoot-telecom,consumer-app,unknown,unknown,n/a,n/a,required,P0,5,yes,not-cloned,ISP customer portal — P0 client (Joshua-named). Clone + bootstrap when ready.
+~/Developer/zeststream,unknown,unknown,unknown,n/a,n/a,unknown,P1,0,unknown,not-cloned,Possible original ZestStream repo (pre v2-fresh). Investigate vs v2-fresh canonicalization.
+~/Developer/flywheel-gateway,api-only,unknown,unknown,n/a,n/a,n/a,P3,0,no,not-cloned,Possible alt-name for flywheel_gateway (canonical uses underscore). Likely no-op.
