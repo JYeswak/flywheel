@@ -1,0 +1,265 @@
+{
+  "schema_version": "tick-contract-registry/v1",
+  "contract_id": "tick-contract-core",
+  "source_bead": "flywheel-3mmp",
+  "plan_source": ".flywheel/PLANS/flywheel-loop-tick-contracts-validation-architecture-2026-04-30.md",
+  "cadence_tiers": {
+    "doctrine": {
+      "interval": "12h",
+      "interval_seconds": 43200,
+      "applies_to": "deep doctrine and ecosystem audit ticks"
+    },
+    "active_high": {
+      "interval": "5m",
+      "interval_seconds": 300,
+      "applies_to": "high-activity orchestrator ticks"
+    },
+    "active_normal": {
+      "interval": "30m",
+      "interval_seconds": 1800,
+      "applies_to": "normal orchestrator and worker ticks"
+    },
+    "inactive": {
+      "interval": "manual",
+      "interval_seconds": null,
+      "applies_to": "inactive repos with no standing loop driver"
+    }
+  },
+  "graduation": {
+    "schema_version": "tick-contract-graduation/v1",
+    "evidence_window": "7d",
+    "evidence_window_seconds": 604800,
+    "thresholds": {
+      "SOFT": {
+        "min_events": 0,
+        "max_events": 2,
+        "action": "log fuckup-log row and continue"
+      },
+      "WARN": {
+        "min_events": 3,
+        "max_events": 5,
+        "action": "log row and surface visible warning"
+      },
+      "HALT": {
+        "min_events": 6,
+        "max_events": null,
+        "action": "log row and halt worker or orchestrator"
+      }
+    },
+    "critical_override": {
+      "severity_values": ["critical"],
+      "mode": "HALT"
+    },
+    "source_rule": "L56"
+  },
+  "checks": [
+    {
+      "id": "autoloop-receipts-read",
+      "owner_class": "orchestrator",
+      "phase": "A",
+      "cadence_tier": "active_high",
+      "source_rule": "spine-integration",
+      "default_mode": "SOFT",
+      "failure_class": "orch_skipped_substrate_read",
+      "producer": "flywheel-autoloop logs",
+      "measurement": "autoloop receipts read since last tick",
+      "consumer": "orchestrator tick receipt and doctor",
+      "promotion_path": "fuckup-log -> INCIDENTS -> L-rule via L56"
+    },
+    {
+      "id": "learn-review-when-unprocessed",
+      "owner_class": "orchestrator",
+      "phase": "A",
+      "cadence_tier": "active_high",
+      "source_rule": "L56 ladder",
+      "default_mode": "SOFT",
+      "failure_class": "orch_skipped_learn_review",
+      "producer": "fuckup-log triage",
+      "measurement": "learn review triggered when unprocessed fuckups >= 3",
+      "consumer": "flywheel-loop doctor and learn-review",
+      "promotion_path": "fuckup-log frequency triage"
+    },
+    {
+      "id": "worker-pane-state-verified",
+      "owner_class": "orchestrator",
+      "phase": "A",
+      "cadence_tier": "active_high",
+      "source_rule": "L48 substrate-exhaustion",
+      "default_mode": "SOFT",
+      "failure_class": "orch_dispatched_blind",
+      "producer": "ntm health and pane capture probes",
+      "measurement": "worker pane state verified before dispatch",
+      "consumer": "dispatch capacity gate",
+      "promotion_path": "L48 probe ledger -> fuckup-log -> doctor invariant"
+    },
+    {
+      "id": "all-dispatches-via-ntm",
+      "owner_class": "orchestrator",
+      "phase": "future",
+      "cadence_tier": "active_high",
+      "source_rule": "L29 NTM-only",
+      "default_mode": "WARN",
+      "failure_class": "orch_used_raw_tmux",
+      "producer": "dispatch transport gate",
+      "measurement": "dispatch transport command source",
+      "consumer": "dispatch log and callback validator",
+      "promotion_path": "transport violation fuckup row -> canonical L29 audit"
+    },
+    {
+      "id": "substrate-registry-entry-for-new-substrate",
+      "owner_class": "orchestrator",
+      "phase": "future",
+      "cadence_tier": "doctrine",
+      "source_rule": "L48 install-contract",
+      "default_mode": "WARN",
+      "failure_class": "orch_unregistered_substrate",
+      "producer": "substrate registry audit",
+      "measurement": "new launchd or cron substrate has registry row",
+      "consumer": "doctor substrate registry surface",
+      "promotion_path": "registry drift -> repair bead -> L56 promotion"
+    },
+    {
+      "id": "callbacks-contain-worker-contract-fields",
+      "owner_class": "orchestrator",
+      "phase": "future",
+      "cadence_tier": "active_high",
+      "source_rule": "L50/L51/L54",
+      "default_mode": "SOFT",
+      "failure_class": "orch_accepted_incomplete_callback",
+      "producer": "callback validation reaper",
+      "measurement": "callbacks include socraticode_queries, skills_consulted, and files_released",
+      "consumer": "callback validator and validation-learn",
+      "promotion_path": "callback validation receipt -> learn-review -> L56"
+    },
+    {
+      "id": "tick-survives-compact",
+      "owner_class": "orchestrator",
+      "phase": "future",
+      "cadence_tier": "active_normal",
+      "source_rule": "resilience",
+      "default_mode": "SOFT",
+      "failure_class": "orch_dropped_post_compact_tick",
+      "producer": "loop driver and pane evidence",
+      "measurement": "post-compact queued tick fires and writes receipt",
+      "consumer": "loop driver doctor",
+      "promotion_path": "driver stale evidence -> L57 audit -> L56"
+    },
+    {
+      "id": "modified-files-have-agent-mail-reservations",
+      "owner_class": "worker",
+      "phase": "B",
+      "cadence_tier": "active_normal",
+      "source_rule": "L51 file reservations",
+      "default_mode": "WARN",
+      "failure_class": "worker_unreserved_edit",
+      "producer": "Agent Mail reservation ledger",
+      "measurement": "modified files intersect active worker reservation set",
+      "consumer": "worker-tick receipt and commit gate",
+      "promotion_path": "reservation conflict -> fuckup-log -> L51 repair"
+    },
+    {
+      "id": "socraticode-k-at-least-10",
+      "owner_class": "worker",
+      "phase": "B",
+      "cadence_tier": "active_normal",
+      "source_rule": "Axiom 9 / L50",
+      "default_mode": "SOFT",
+      "failure_class": "worker_low_socraticode_K",
+      "producer": "worker callback and MCP transcript",
+      "measurement": "Socraticode query count since dispatch is at least 10 for non-trivial work",
+      "consumer": "worker-tick receipt and dispatch validator",
+      "promotion_path": "callback field gap -> L50 redispatch -> L56"
+    },
+    {
+      "id": "commits-l52-formatted",
+      "owner_class": "worker",
+      "phase": "B",
+      "cadence_tier": "active_normal",
+      "source_rule": "L52 callback contract",
+      "default_mode": "SOFT",
+      "failure_class": "worker_malformed_commit",
+      "producer": "git log scanner",
+      "measurement": "commit message carries PROBLEM/FIX/TEST/COMMIT/SKILLS/CRITERION/AUTONOMY fields",
+      "consumer": "commit review and worker-tick receipt",
+      "promotion_path": "malformed commit row -> bead/update/no-bead receipt"
+    },
+    {
+      "id": "worker-files-env-set",
+      "owner_class": "worker",
+      "phase": "future",
+      "cadence_tier": "active_normal",
+      "source_rule": "bd-rqrsq pathspec gate",
+      "default_mode": "WARN",
+      "failure_class": "worker_no_pathspec_env",
+      "producer": "pre-commit and worker env probe",
+      "measurement": "PICOZ_WORKER_FILES or equivalent pathspec env present on every commit",
+      "consumer": "worker close gate",
+      "promotion_path": "pathspec omission -> fuckup-log -> pre-commit repair"
+    },
+    {
+      "id": "skills-consulted-min1",
+      "owner_class": "worker",
+      "phase": "future",
+      "cadence_tier": "active_normal",
+      "source_rule": "L48/L54",
+      "default_mode": "SOFT",
+      "failure_class": "worker_skipped_skill_lookup",
+      "producer": "worker callback and transcript",
+      "measurement": "at least one relevant skill consulted or NONE_FOUND reported",
+      "consumer": "worker callback validator",
+      "promotion_path": "skill lookup miss -> skillos candidate via L55"
+    },
+    {
+      "id": "research-triad-on-new-topic",
+      "owner_class": "worker",
+      "phase": "future",
+      "cadence_tier": "active_normal",
+      "source_rule": "Axiom 22 candidate",
+      "default_mode": "SOFT",
+      "failure_class": "worker_skipped_research_triad",
+      "producer": "CASS similarity and research-triad receipt",
+      "measurement": "research triad runs for new topic when similarity is low",
+      "consumer": "worker-tick receipt",
+      "promotion_path": "new-topic miss -> research discipline bead"
+    },
+    {
+      "id": "callbacks-via-ntm-with-enter",
+      "owner_class": "worker",
+      "phase": "future",
+      "cadence_tier": "active_normal",
+      "source_rule": "L29 + Codex submit-glitch",
+      "default_mode": "WARN",
+      "failure_class": "worker_callback_no_enter_or_raw_tmux",
+      "producer": "callback delivery validator",
+      "measurement": "callback delivered through ntm send with submit semantics",
+      "consumer": "orchestrator callback reaper",
+      "promotion_path": "delivery miss -> transport repair bead"
+    },
+    {
+      "id": "context-bar-threshold",
+      "owner_class": "worker",
+      "phase": "future",
+      "cadence_tier": "active_normal",
+      "source_rule": "context discipline",
+      "default_mode": "WARN",
+      "failure_class": "worker_context_ignored",
+      "producer": "worker runtime context gauge",
+      "measurement": "context usage below warn/halt thresholds",
+      "consumer": "worker tick and handoff gate",
+      "promotion_path": "context breach -> handoff receipt invariant"
+    },
+    {
+      "id": "no-no-verify",
+      "owner_class": "worker",
+      "phase": "future",
+      "cadence_tier": "active_normal",
+      "source_rule": "git safety",
+      "default_mode": "HALT",
+      "failure_class": "worker_bypassed_hooks",
+      "producer": "git command ledger",
+      "measurement": "no commit bypasses hooks with --no-verify",
+      "consumer": "pre-commit and worker close gate",
+      "promotion_path": "hook bypass -> immediate halt and paired repair bead"
+    }
+  ]
+}

@@ -389,6 +389,7 @@ Layer-specific anti-patterns:
 - Chosen rule: the meeting packet emits routes and receipts; existing primitives drain those routes. Evidence: `/Users/josh/Developer/flywheel/.flywheel/research/fleet-ops-meeting-approved-method-2026-05-05/LANE-A-donella.md:52` and `/Users/josh/Developer/flywheel/.flywheel/research/fleet-ops-meeting-approved-method-2026-05-05/LANE-D-joshua.md:657-668`.
 - Rejected alternative: a command center that directly restarts or controls panes from the meeting. Evidence: `/Users/josh/Developer/flywheel/.flywheel/research/fleet-ops-meeting-approved-method-2026-05-05/LANE-B-jeff.md:153-159`.
 
+<!-- AGENT-ANCHOR: section-1 -->
 ### 4.2 Lane C vs Lane D on agent-fleet-management
 
 - Disagreement: Lane C emphasizes skill/axiom/9-petal design and Anthropic coordination patterns; Lane D emphasizes already-shipped flywheel commands, scripts, ledgers, launchd, and L-rules. Evidence: `/Users/josh/Developer/flywheel/.flywheel/research/fleet-ops-meeting-approved-method-2026-05-05/LANE-C-anthropic.md:22-88` and `/Users/josh/Developer/flywheel/.flywheel/research/fleet-ops-meeting-approved-method-2026-05-05/LANE-D-joshua.md:74-197`.
@@ -582,6 +583,7 @@ Layer-specific anti-patterns:
 - The detector must be paired with a drain receipt, not just a warning, because Lane A rejects digest-only output and L110-style doctrine rejects orphan observables. Evidence: `/Users/josh/Developer/flywheel/.flywheel/research/fleet-ops-meeting-approved-method-2026-05-05/LANE-A-donella.md:142-148`; Socraticode result for L110 via `mcp__socraticode__.codebase_search query="cross layer cascade detector product research moat knowledge depth" projectPath=/Users/josh/Developer/flywheel limit=10`.
 - The first detector set should include the 5 selected cascades in Section 3, chosen from Lane F's 10. Evidence: `/Users/josh/Developer/flywheel/.flywheel/research/fleet-ops-meeting-approved-method-2026-05-05/LANE-F-product-research.md:309-395`.
 
+<!-- AGENT-ANCHOR: section-2 -->
 ### 5.9 Per-orch specialization slot schema
 
 ```json
@@ -771,6 +773,7 @@ Layer-specific anti-patterns:
 
 ### 8.4 Risks
 
+<!-- AGENT-ANCHOR: section-3 -->
 - Risk: packet scope grows until it becomes another dashboard. Guard: one strategic number, route-first cards, and omitted raw rows. Evidence: `/Users/josh/Developer/flywheel/.flywheel/research/fleet-ops-meeting-approved-method-2026-05-05/LANE-A-donella.md:142-148` and `/Users/josh/Developer/flywheel/.flywheel/research/fleet-ops-meeting-approved-method-2026-05-05/LANE-C-anthropic.md:153-158`.
 - Risk: Layer 5 product metrics become generic and erase repo-specific outcomes. Guard: mandatory per-orch specialization slots. Evidence: `/Users/josh/Developer/flywheel/.flywheel/research/fleet-ops-meeting-approved-method-2026-05-05/LANE-F-product-research.md:450` and `/Users/josh/Developer/flywheel/.flywheel/research/fleet-ops-meeting-approved-method-2026-05-05/LANE-F-product-research.md:463-524`.
 - Risk: Layer 6 research becomes volume instead of moat. Guard: research-to-action adoption receipts. Evidence: `/Users/josh/Developer/flywheel/.flywheel/research/fleet-ops-meeting-approved-method-2026-05-05/LANE-F-product-research.md:452-454` and `/Users/josh/Developer/flywheel/.flywheel/research/fleet-ops-meeting-approved-method-2026-05-05/LANE-F-product-research.md:682-688`.

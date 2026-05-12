@@ -1,0 +1,101 @@
+{
+  "schema_version": "validation-receipt/v1",
+  "dispatch_id": "flywheel-o4b4h-030866",
+  "callback_ref": {
+    "transport": "ntm",
+    "session": "flywheel",
+    "pane": 1,
+    "kind": "BLOCKED",
+    "received_at": "2026-05-09T01:34:12Z",
+    "raw_ref": "pending-callback"
+  },
+  "status": "fail",
+  "failure_class": "persistent",
+  "retry_policy": "manual",
+  "recovery_hint": "Decompose flywheel-o4b4h into separate implementation beads for schema, dispatch callback gate, post-merge doc hook, daily-report rollup, session synthesis skill/command, and adopt/onboard wiring.",
+  "failure_classes": [
+    "proposal_requires_bead_decomposition",
+    "acceptance_scope_too_broad"
+  ],
+  "evidence": [
+    {
+      "type": "path",
+      "ref": ".flywheel/receipts/flywheel-o4b4h-blocked-evidence.md"
+    },
+    {
+      "type": "command",
+      "ref": "br show flywheel-o4b4h"
+    },
+    {
+      "type": "fuckup_log",
+      "ref": "~/.local/state/flywheel/fuckup-log.jsonl#proposal-bead-too-broad-for-worker-dispatch@2026-05-09T01:34:06Z"
+    }
+  ],
+  "artifact_checks": [
+    {
+      "artifact_id": "blocked-evidence",
+      "path": ".flywheel/receipts/flywheel-o4b4h-blocked-evidence.md",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "journey-schema",
+      "path": ".flywheel/validation-schema/v1/journey-entry.v1.schema.json",
+      "status": "missing",
+      "expected": "AG1 follow-up implementation bead"
+    }
+  ],
+  "runtime_context": {
+    "agent_context": {
+      "status": "responsive",
+      "probe_ref": "codex-pane active",
+      "resolved_tools": [
+        "exec_command",
+        "apply_patch",
+        "socraticode"
+      ]
+    },
+    "orchestrator_shell_context": {
+      "status": "responsive",
+      "probe_ref": "dispatch-template-audit valid=true",
+      "resolved_tools": [
+        "ntm"
+      ]
+    },
+    "timeout": false,
+    "timeout_seconds": 0,
+    "context_drift": false
+  },
+  "agent_mail": {
+    "agent_mail_thread": null,
+    "identity_name": "MagentaPond",
+    "files_reserved": [
+      ".flywheel/receipts/flywheel-o4b4h-blocked-evidence.md",
+      ".flywheel/validation-receipts/flywheel-o4b4h-030866.json"
+    ],
+    "files_released": [
+      ".flywheel/receipts/flywheel-o4b4h-blocked-evidence.md",
+      ".flywheel/validation-receipts/flywheel-o4b4h-030866.json"
+    ],
+    "reservation_conflicts": [],
+    "reservation_lifecycle": {
+      "state": "released",
+      "reason": "L107 evidence reservations released before BLOCKED callback."
+    }
+  },
+  "bead_actions": [
+    {
+      "action": "no_bead_reason",
+      "reason": "Blocked existing bead needs decomposition; no separate defect was discovered.",
+      "evidence_ref": ".flywheel/receipts/flywheel-o4b4h-blocked-evidence.md"
+    }
+  ],
+  "learn_route": {
+    "route": "ignore",
+    "reason": "Blocker logged to fuckup-log as proposal-bead-too-broad-for-worker-dispatch."
+  },
+  "chain_blocker": {
+    "next_phase": null,
+    "capacity_available": false,
+    "chain_blocked_reason": "No safe same-turn chain target until orchestrator decomposes the proposal bead."
+  }
+}

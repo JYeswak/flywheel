@@ -1,0 +1,69 @@
+{
+  "default_state": "shadow",
+  "repos": [
+    {
+      "followers": [
+        "skillos",
+        "alpsinsurance",
+        "mobile-eats",
+        "vrtx"
+      ],
+      "leader": "flywheel",
+      "owning_orch": "flywheel:pane-1",
+      "repo": "/Users/josh/Developer/flywheel",
+      "rollback_state": "shadow",
+      "session": "flywheel",
+      "state": "enforce",
+      "trust_domain": "repo:flywheel"
+    },
+    {
+      "followers": [],
+      "leader": "flywheel",
+      "owning_orch": "skillos:pane-1",
+      "repo": "/Users/josh/Developer/skillos",
+      "rollback_state": "disabled",
+      "session": "skillos",
+      "state": "shadow",
+      "trust_domain": "repo:skillos"
+    },
+    {
+      "followers": [],
+      "leader": "flywheel",
+      "owning_orch": "alpsinsurance:pane-1",
+      "repo": "/Users/josh/Desktop/Projects/clients/alps-insurance",
+      "rollback_state": "disabled",
+      "session": "alpsinsurance",
+      "state": "deferred",
+      "trust_domain": "client:alpsinsurance"
+    },
+    {
+      "followers": [],
+      "leader": "flywheel",
+      "owning_orch": "mobile-eats:pane-1",
+      "repo": "/Users/josh/Developer/mobile-eats",
+      "rollback_state": "disabled",
+      "session": "mobile-eats",
+      "state": "disabled",
+      "trust_domain": "repo:mobile-eats"
+    },
+    {
+      "followers": [],
+      "leader": "flywheel",
+      "owning_orch": "vrtx:pane-1",
+      "repo": "/Users/josh/Developer/vrtx",
+      "rollback_state": "disabled",
+      "session": "vrtx",
+      "state": "disabled",
+      "trust_domain": "repo:vrtx"
+    }
+  ],
+  "rollback": {
+    "allowed_target_states": [
+      "shadow",
+      "disabled"
+    ],
+    "command": ".flywheel/scripts/wire-or-explain-close-gate.py rollback --target-state shadow|disabled --apply --json",
+    "preserve_ledger_history": true
+  },
+  "schema_version": "wire-or-explain-rollout/v1"
+}

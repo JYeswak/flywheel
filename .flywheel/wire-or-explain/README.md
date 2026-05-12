@@ -138,4 +138,19 @@ The detector should not silently pass an artifact because a doc says it is wired
 The stock is "rows needing consumer proof"; the outflow is mechanical evidence,
 explicit deferral, explicit not-required proof, or a bypass with owner.
 
+## Fleet Rollout
+
+Fleet rollout state lives in `.flywheel/wire-or-explain/fleet-rollout.json`.
+Each repo/session entry declares `state`, `trust_domain`, `owning_orch`, and
+rollback target. Supported states are `disabled`, `shadow`, `enforce`, and
+`deferred`.
+
+`wire-or-explain-close-gate.py rollout-status --json` reports the effective
+state. `rollback --target-state shadow|disabled --apply --json` moves the local
+entry back without deleting ledger history.
+
+In enforce mode, unresolved rows block only the owning orchestrator. Rows owned
+by another session or another trust domain remain visible as warnings so
+unrelated ticks do not halt.
+
 Part of the Yuzu Method framework by ZestStream.
