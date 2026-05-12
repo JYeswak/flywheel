@@ -1,0 +1,60 @@
+# Gitleaks config — substrate-class-aware allowlist v0.1
+# Authored: 2026-05-12 (Meadows L2 paradigm bridge until fold/two-layer-2026-05-11 lands)
+# Documented: .flywheel/doctrine/substrate-class-classifier.md
+# Mirrors path declarations from: .flywheel/security/v1/substrate-class-manifest.json
+#
+# WHY: gitleaks pre-commit hook scans every commit for AKID/PAT/JWT/etc shapes.
+# Test fixtures and detector corpora MUST contain shape-matches by design (they
+# exercise the detector). Without this allowlist, the substrate-class paradigm
+# fix itself cannot commit — the manifest contains the synthetic AKID sentinel
+# AKIA0FAKE0FAKE0FAKE0 that's the canonical exemplar.
+#
+# This file's substrate_class = protection (per the manifest).
+# It is self-listed in path allowlist below (recursion terminator).
+#
+# When fold/two-layer-2026-05-11 lands the canonical TWO-LAYER template,
+# replace this file with the canonical and merge allowlist additions.
+
+# Inherit gitleaks default rules; add allowlist below.
+useDefault = true
+
+[allowlist]
+description = "Substrate-class manifest-mirrored allowlist for protection/test-fixture/audit-ledger paths"
+
+paths = [
+  # protection paths (substrate_class=protection — self-exempt by paradigm)
+  '''^\.flywheel/security/v1/substrate-class-manifest\.json$''',
+  '''^\.flywheel/security/v1/secret-patterns\.json$''',
+  '''^\.gitleaks\.toml$''',
+
+  # test-fixture paths (substrate_class=test-fixture — synthetic by design)
+  '''^tests/test_[a-z0-9_-]+\.sh$''',
+  '''^tests/[a-z0-9_-]+-canonical-cli\.sh$''',
+  '''^\.flywheel/tests/[a-z0-9_-]+\.sh$''',
+
+  # audit-ledger paths (substrate_class=audit-ledger — append-only logs may
+  # historically contain leak-shape data; cannot rewrite history retroactively)
+  '''^\.flywheel/dispatch-log\.jsonl$''',
+  '''^\.flywheel/lock-log\.jsonl$''',
+  '''^\.flywheel/secret-leak-fp-exempt-ledger\.jsonl$''',
+
+  # self-documentation paths (substrate_class=self-documentation — describes
+  # detector patterns; the patterns it documents are not embodiments)
+  '''^\.flywheel/doctrine/substrate-class-classifier\.md$''',
+  '''^\.flywheel/doctrine/cross-repo-write-path-discipline\.md$''',
+]
+
+stopwords = [
+  # Canonical synthetic AKID sentinel (declared in substrate-class manifest)
+  "AKIA0FAKE0FAKE0FAKE0",
+  # Stripe synthetic
+  "sk_test_4eC39HqLyjWDarjtT1zdp7dc",
+  # Marker substrings that signal synthetic content
+  "FAKE",
+  "PLACEHOLDER",
+  "SYNTHETIC",
+  "synthetic-key",
+  "canonical-fake",
+  "obvious-fake",
+  "for unit test",
+]

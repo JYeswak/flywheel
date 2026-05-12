@@ -1,0 +1,99 @@
+{
+  "schema_version": "flywheel.substrate-class-manifest/v1",
+  "repo": "/Users/josh/Developer/flywheel",
+  "produced_at": "2026-05-12T00:00:00Z",
+  "produced_by": "flywheel-1",
+  "source_phase": "git-hygiene-paradigm-phase-0-meadows-l2",
+  "inputs_hash": "sha256:meadows-l2-substrate-class-paradigm-2026-05-12",
+  "_doctrine_ref": ".flywheel/doctrine/substrate-class-classifier.md",
+  "_l_rule_candidate": "L162-SUBSTRATE-CLASS-CLASSIFIER-BEFORE-PROTECTION-HALT-MANDATORY",
+  "_promotion_threshold": "3-strike (current N=2 on AKID-fixture-trip; standard cadence; NOT secrets-class exemption)",
+
+  "substrate_classes": {
+    "production": {
+      "description": "Load-bearing user-facing content, AaaS artifacts, doctrine published to clients, worker output landing in canonical paths",
+      "protection_behavior": "full_protection"
+    },
+    "protection": {
+      "description": "Detector/hook/gate code itself; the mechanism that protects production",
+      "protection_behavior": "self_exempt_protection_cannot_trip_on_itself"
+    },
+    "test-fixture": {
+      "description": "Synthetic content exercising protection code; must match the SHAPE of real secrets to test detectors, but contains canonical-fake markers",
+      "protection_behavior": "path_or_marker_allowlist_emit_suppressed_match_event_continue"
+    },
+    "self-documentation": {
+      "description": "Doctrine documenting protection mechanisms; describes patterns it does not embody",
+      "protection_behavior": "read_only_protection_cannot_be_propagated_as_canonical_to_peer"
+    },
+    "audit-ledger": {
+      "description": "Receipts of protection firing, dispatch logs, fuckup logs, leak ledgers — append-only stocks",
+      "protection_behavior": "self_exempt_logging_own_writes_does_not_recurse"
+    }
+  },
+
+  "test_fixture_paths": [
+    "tests/test_ntm_coordinator_wire.sh",
+    "tests/test_*.sh",
+    "tests/*-canonical-cli.sh",
+    ".flywheel/tests/test_*.sh",
+    ".flywheel/tests/*.sh",
+    ".flywheel/security/v1/secret-patterns.json"
+  ],
+
+  "protection_paths": [
+    "~/.claude/hooks/posttooluse-bash-secret-redact.sh",
+    "~/.claude/hooks/pretooluse-bash-secret-guard.sh",
+    ".flywheel/security/v1/secret-patterns.json",
+    ".flywheel/security/v1/substrate-class-manifest.json"
+  ],
+
+  "audit_ledger_paths": [
+    "~/.claude/secret-leak-ledger.jsonl",
+    "~/.claude/secret-leak-fp-exempt-ledger.jsonl",
+    "~/.local/state/flywheel/fuckup-log.jsonl",
+    ".flywheel/dispatch-log.jsonl",
+    ".flywheel/lock-log.jsonl",
+    ".flywheel/last_closeout_receipt.json"
+  ],
+
+  "self_documentation_paths": [
+    ".flywheel/doctrine/substrate-class-classifier.md",
+    ".flywheel/doctrine/cross-repo-write-path-discipline.md",
+    ".flywheel/doctrine/cli-version-flag-mismatch-output-format-switch.md"
+  ],
+
+  "synthetic_sentinels": {
+    "aws_akid": [
+      "AKIA0FAKE0FAKE0FAKE0"
+    ],
+    "stripe_test": [
+      "sk_test_4eC39HqLyjWDarjtT1zdp7dc"
+    ],
+    "_marker_substring_policy": "If the matched secret value contains any of these substrings, treat as synthetic regardless of path",
+    "marker_substrings": [
+      "FAKE",
+      "PLACEHOLDER",
+      "SYNTHETIC",
+      "EXAMPLE_TOKEN",
+      "fixture_secret",
+      "_synthetic",
+      "_good_envelope",
+      "_test_fixture",
+      "TEST_TOKEN_",
+      "synthetic-key",
+      "for unit test",
+      "canonical-fake",
+      "obvious-fake"
+    ]
+  },
+
+  "_paradigm_notes": [
+    "Meadows L2 paradigm primitive: every artifact has a substrate_class.",
+    "Protection mechanisms (hooks, gates, detectors) MUST consult this manifest before halting on a shape-match.",
+    "Self-referential substrate (this manifest, protection paths, audit ledgers) is self-exempt by design — the system can now see itself.",
+    "This manifest itself has substrate_class=protection and is path-listed in protection_paths above (recursion terminator by paradigm design).",
+    "Donella mirror-stage check: every new mechanism must declare substrate_class at creation, not retrofit later.",
+    "N=3 SATURATION propagator gate + L160 AKID fixture trip + cobbler's-children dirty-tree all dissolve once substrate_class is paradigm-primary."
+  ]
+}
