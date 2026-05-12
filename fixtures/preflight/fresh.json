@@ -1,0 +1,32 @@
+{
+  "schema_version": "flywheel.preflight.fixture.v0",
+  "name": "fresh",
+  "host": {
+    "os": "linux",
+    "arch": "x86_64"
+  },
+  "commands": {
+    "git --version": {"exit_code": 127, "stdout": "", "stderr": "git: command not found"},
+    "sh -c 'echo ok'": {"exit_code": 0, "stdout": "ok\n", "stderr": ""},
+    "bash --version": {"exit_code": 127, "stdout": "", "stderr": "bash: command not found"},
+    "jq --version": {"exit_code": 127, "stdout": "", "stderr": "jq: command not found"},
+    "sqlite3 --version": {"exit_code": 127, "stdout": "", "stderr": "sqlite3: command not found"},
+    "br --version": {"exit_code": 127, "stdout": "", "stderr": "br: command not found"},
+    "test -f fixtures/preflight/reduced.json": {"exit_code": 0, "stdout": "", "stderr": ""},
+    "python3 --version": {"exit_code": 127, "stdout": "", "stderr": "python3: command not found"},
+    "node --version": {"exit_code": 127, "stdout": "", "stderr": "node: command not found"},
+    "cargo --version": {"exit_code": 127, "stdout": "", "stderr": "cargo: command not found"},
+    "tmux -V": {"exit_code": 127, "stdout": "", "stderr": "tmux: command not found"},
+    "ntm --version": {"exit_code": 127, "stdout": "", "stderr": "ntm: command not found"},
+    "python3 -c 'import mcp_agent_mail'": {"exit_code": 127, "stdout": "", "stderr": "python3: command not found"},
+    "dcg --version": {"exit_code": 127, "stdout": "", "stderr": "dcg: command not found"},
+    "socraticode --help": {"exit_code": 127, "stdout": "", "stderr": "socraticode: command not found"},
+    "go version": {"exit_code": 127, "stdout": "", "stderr": "go: command not found"},
+    "cass --help": {"exit_code": 127, "stdout": "", "stderr": "cass: command not found"},
+    "beads_viewer --version": {"exit_code": 127, "stdout": "", "stderr": "beads_viewer: command not found"},
+    "claude --version": {"exit_code": 127, "stdout": "", "stderr": "claude: command not found"},
+    "codex --version": {"exit_code": 127, "stdout": "", "stderr": "codex: command not found"},
+    "openclaw --version": {"exit_code": 127, "stdout": "", "stderr": "openclaw: command not found"},
+    "gemini --version": {"exit_code": 127, "stdout": "", "stderr": "gemini: command not found"}
+  }
+}
