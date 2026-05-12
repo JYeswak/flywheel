@@ -44,8 +44,16 @@
   "protection_paths": [
     "~/.claude/hooks/posttooluse-bash-secret-redact.sh",
     "~/.claude/hooks/pretooluse-bash-secret-guard.sh",
+    "~/.claude/hooks/pretooluse-write-edit-cross-repo-guard.sh",
+    "~/.claude/hooks/pretooluse-bash-cross-repo-guard.sh",
     ".flywheel/security/v1/secret-patterns.json",
-    ".flywheel/security/v1/substrate-class-manifest.json"
+    ".flywheel/security/v1/substrate-class-manifest.json",
+    ".flywheel/security/v1/claude-settings-deny.json",
+    ".flywheel/security/v1/container-isolation.md",
+    ".gitleaks.toml",
+    ".git/hooks/pre-commit",
+    "scripts/gitleaks-pre-commit.sh",
+    ".flywheel/scripts/pre-write-path-guard.sh"
   ],
 
   "audit_ledger_paths": [

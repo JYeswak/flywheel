@@ -83,3 +83,30 @@ AGENTS.md.bak.*
 # flywheel-ti46c (Phase 2 of 38u3d): docs scaffold site — entire sibling project
 # (broadened from per-subdir 2026-05-12 during git-hygiene paradigm phase 0)
 flywheel__nextra_documentation_site/
+
+# === @zeststream/security-hygiene canonical .env guard ===
+# Canonical @zeststream/security-hygiene gitignore env block — v0.0.1
+#
+# Append this block to a repo's .gitignore to enforce the
+# "never-commit-real-secrets; only-template-files-commit" policy.
+#
+# Hardened across 3 ratifications:
+#   - terratitle b15qk (commit e33d1dc) — initial fold
+#   - josh-ops htv0d (commit 6bd3423)   — second fold
+#   - alpsinsurance (pre-existing)      — independent convergence
+#
+# Behavior:
+#   - .env / .env.* matches all environment variants (.env.prod,
+#     .env.staging, .env.dev, .env.local, future variants)
+#   - !.env.example / !.env.local.example bang-overrides re-allow
+#     template files at any depth
+#   - **/.env.example / **/.env.local.example explicit-depth variants
+#     cover sub-directory templates (frontend/.env.example etc.)
+
+# Environment — never commit real secrets; only .env.example variants
+.env
+.env.*
+!.env.example
+!.env.local.example
+!**/.env.example
+!**/.env.local.example
