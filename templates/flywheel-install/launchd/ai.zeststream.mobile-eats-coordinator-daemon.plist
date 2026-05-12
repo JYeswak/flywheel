@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "https://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.zeststream.mobile-eats-coordinator-daemon</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>exec /Users/josh/.local/bin/ntm-coordinator-pinned --session=mobile-eats assign --auto --strategy=dependency --watch --watch-interval=30s --cod-only --template=custom --template-file="$HOME/.config/ntm/templates/flywheel-worker-tick.txt"</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>HOME</key>
+    <string>/Users/josh</string>
+    <key>PATH</key>
+    <string>/Users/josh/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/tmp/ntm-watcher-mobile-eats.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/ntm-watcher-mobile-eats.err.log</string>
+</dict>
+</plist>

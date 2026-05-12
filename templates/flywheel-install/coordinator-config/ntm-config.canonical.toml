@@ -1,0 +1,54 @@
+# NTM Coordinator — Canonical Config (schema_version=1)
+#
+# Source of truth for `[coordinator]` settings across every machine in the
+# ZestStream / flywheel fleet. Installed via:
+#
+#     bash templates/flywheel-install/coordinator-config/install-ntm-config.sh --apply
+#
+# Mission anchor: continuous-orchestrator-uptime-self-sustaining-fleet
+# Mission test:  (1) wires substrate? (2) removes drift? (3) isomorphic?  YES x3.
+#
+# Drift report (2026-05-07): 5 keys diverged from this canonical on josh@local.
+# See /Users/josh/.flywheel/refactor/coordinator-config-canon-2026-05-07/01-current/canonical-design.md
+#
+# DO NOT EDIT BY HAND on a managed machine. Edit the canonical in the repo and
+# re-run the install script. Per-machine emergency overrides go in
+# `~/.config/ntm/config.local.toml` (not yet wired — TODO).
+
+[coordinator]
+# Schema version of THIS canonical block. Install script gates on this.
+schema_version = 1
+
+# Seconds without output before a worker is considered "idle" and assignable.
+# 300s matches idle-state-probe.sh; avoids thrashing on between-tool-call pauses.
+idle_threshold = 300
+
+# How often the coordinator polls every pane's status.
+# 30s aligns with autoloop tick cadence; 5s (built-in default) flooded the mac.
+poll_interval = "30s"
+
+# How often the coordinator emits a fleet digest (one per tick).
+digest_interval = "30m"
+
+# Only assign work to a pane that the coordinator marks idle.
+# Required so we don't preempt a worker mid-tool-call.
+assign_only_idle = true
+
+# Master toggle for auto-assignment. ENABLED 2026-05-07 after pinned-wrapper bleed validation 4/4 CWDs identical.
+auto_assign = true
+
+# Defaults applied to every session unless overridden in
+# [coordinator.session.<name>] below. Reserved namespace; NTM may not honor
+# this layer in older builds — global block above is the load-bearing one.
+[coordinator.session_default]
+auto_assign = true
+send_digests = true
+conflict_notify = true
+conflict_negotiate = true
+
+# Per-session overrides. Empty by default. Add blocks like:
+#
+#   [coordinator.session.flywheel]
+#   idle_threshold = 180
+#
+# only when a session has a documented reason to deviate.

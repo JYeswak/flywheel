@@ -13,5 +13,49 @@
     "state": ".flywheel/STATE.md"
   },
   "doctor_strict_command": "{{doctor_strict_command}}",
-  "source_mutation_allowed_when": "{{source_mutation_allowed_when}}"
+  "source_mutation_allowed_when": "{{source_mutation_allowed_when}}",
+  "polish_gate": {
+    "version": "1",
+    "mode": "bootstrap",
+    "scope": "repo_local_flywheel",
+    "legacy_bootstrap_policy": "warn_until_touched",
+    "blocking_when": [
+      "new_surface",
+      "touched_required_surface",
+      "malformed_gate",
+      "expired_waiver"
+    ],
+    "grade_storage": ".flywheel/polish-gate/grades.jsonl",
+    "latest_summary": ".flywheel/polish-gate/latest.json"
+  },
+  "dispatch_mode": "launchd_prompt",
+  "driver": null,
+  "driver_status": "MISSING_DRIVER",
+  "driver_writeback_schema": "loop-driver-writeback.v1",
+  "plist": null,
+  "plist_label": null,
+  "tick_script": null,
+  "last_tick": null,
+  "last_tick_source": null,
+  "last_run_id": null,
+  "last_run_status": null,
+  "last_run_exit_code": null,
+  "last_run_ledger": null,
+  "last_run_ledger_line": null,
+  "last_run_duration_ms": null,
+  "writeback_updated_at": null,
+  "driver_contract": {
+    "required_first_tick_fields": [
+      "driver",
+      "driver_status",
+      "plist",
+      "plist_label",
+      "tick_script",
+      "last_tick",
+      "last_run_ledger",
+      "last_run_exit_code"
+    ],
+    "freshness_seconds": 300,
+    "doctor_scope": "loop-driver-writeback"
+  }
 }

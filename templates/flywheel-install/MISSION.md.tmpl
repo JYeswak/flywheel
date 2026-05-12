@@ -17,6 +17,11 @@ source_path: {{source_path}}
 source_sha256: {{source_sha256}}
 source_section: {{source_section}}
 provenance_note: {{provenance_note}}
+polish_gate_mode: bootstrap
+polish_gate_scope: repo_local_flywheel
+polish_gate_legacy_policy: warn_until_touched
+polish_gate_grade_storage: .flywheel/polish-gate/grades.jsonl
+polish_gate_latest_summary: .flywheel/polish-gate/latest.json
 
 ## 1. Why Now
 
@@ -64,6 +69,14 @@ Source evidence:
 ## 11. Flywheel Loop Policy
 
 {{flywheel_loop_policy}}
+
+## Polish Gate
+
+polish_gate_mode: bootstrap            # bootstrap | audit_only | blocking
+polish_gate_scope: repo_local_flywheel # new | touched | repo_local_flywheel | all_declared
+polish_gate_legacy_policy: warn_until_touched
+polish_gate_grade_storage: .flywheel/polish-gate/grades.jsonl
+polish_gate_latest_summary: .flywheel/polish-gate/latest.json
 
 ## 12. Doctrine Compliance
 

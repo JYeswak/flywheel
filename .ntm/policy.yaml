@@ -1,0 +1,39 @@
+# W3bP NTM policy contract. Parsed by .flywheel/scripts/ntm-policy-contracts.sh.
+schema_version: ntm-policy-contracts.v1
+mission_anchor: continuous-orchestrator-uptime-self-sustaining-fleet
+plan_slug: ntm-surface-utilization-migration-2026-05-06
+wave: W3b
+short_id: W3bP
+mode: warn_only
+default_decision: deny
+policy_as_gate_enabled: false
+native_surface: ntm policy
+wrapper_surface: flywheel ntm policy contracts
+l112_observed: OK_ntm_migrate_W3bP
+ttl_native: native_ntm_policy_contract_runtime
+ttl_wrapper: policy_contract_receipt_30d
+ttl_decision: revalidate_policy_before_privileged_or_mutating_ntm_operation
+native_wrapper_delta: native_ntm_policy_controls_runtime_enforcement_when_enabled;wrapper_validates_contracts_blocks_privilege_escalation_and_keeps_policy_as_warn_only
+rollback: disable_policy_as_gate_and_run_policy_validate_warn_only
+quality_bar_passed: true
+allowed_sessions:
+  - flywheel
+authorized_operations:
+  - policy.validate
+  - policy.audit
+  - policy.why
+  - policy.dry_run
+forbidden_operations:
+  - auto_push
+  - force_release
+  - auto_commit
+  - credential_rotation
+  - raw_pane_io
+  - source_ledger_mutation
+escalation_blocklist:
+  - auto_push
+  - force_release
+  - auto_commit
+mutation_requires:
+  - --apply
+  - --idempotency-key

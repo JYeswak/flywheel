@@ -17,6 +17,7 @@ need() {
 
 need git
 need jq
+need python3
 [[ -x "$RENDER" ]] || fail "render.sh is not executable"
 [[ -x "$FLYWHEEL_LOOP_BIN" ]] || fail "flywheel-loop not executable: $FLYWHEEL_LOOP_BIN"
 [[ -r "$FRONTMATTER_SH" ]] || fail "frontmatter helper not readable: $FRONTMATTER_SH"
@@ -205,6 +206,23 @@ josh_requests_fixture="$tmp/josh-requests.jsonl"
 
 jq -e '.schema_version == 1 and .template_version == "0.1.0" and .docs.mission == ".flywheel/MISSION.md"' "$tmp/.flywheel/loop.json" >/dev/null \
     || fail "loop.json render does not satisfy expected shape"
+jq -e '.polish_gate.version == "1" and .polish_gate.mode == "bootstrap" and .polish_gate.scope == "repo_local_flywheel" and (.polish_gate.blocking_when | index("expired_waiver"))' "$tmp/.flywheel/loop.json" >/dev/null \
+    || fail "loop.json polish_gate object missing expected defaults"
+python3 -c 'import json, sys; import jsonschema; from jsonschema import Draft202012Validator; loop=json.load(open(sys.argv[1], encoding="utf-8")); schema=json.load(open(sys.argv[2], encoding="utf-8")); Draft202012Validator.check_schema(schema); Draft202012Validator(schema, format_checker=Draft202012Validator.FORMAT_CHECKER).validate(loop["polish_gate"])' "$tmp/.flywheel/loop.json" "$ROOT/polish-gate/v1/manifest.schema.json" \
+    || fail "rendered loop.json polish_gate object does not validate against manifest schema"
+
+grep -q '## Polish Gate' "$tmp/.flywheel/MISSION.md" \
+    || fail "MISSION template missing Polish Gate section"
+grep -q 'polish_gate_mode: bootstrap' "$tmp/.flywheel/MISSION.md" \
+    || fail "MISSION template missing polish_gate_mode"
+grep -q 'polish_gate_latest_summary: .flywheel/polish-gate/latest.json' "$tmp/.flywheel/MISSION.md" \
+    || fail "MISSION template missing polish_gate_latest_summary"
+grep -q '## Polish Gate runtime' "$tmp/.flywheel/STATE.md" \
+    || fail "STATE template missing Polish Gate runtime section"
+grep -q 'polish_gate_surfaces_graded_count: 0' "$tmp/.flywheel/STATE.md" \
+    || fail "STATE template missing polish_gate_surfaces_graded_count"
+grep -q 'polish_gate_min_composite_surface: null' "$tmp/.flywheel/STATE.md" \
+    || fail "STATE template missing polish_gate_min_composite_surface"
 
 set +e
 doctor_json="$(FLYWHEEL_STORAGE_PROBE_FIXTURE="$storage_fixture" FLYWHEEL_SESSION_TOPOLOGY="$topology_fixture" FLYWHEEL_JOSH_REQUESTS_LOG="$josh_requests_fixture" FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 FLYWHEEL_CANONICAL_DOCTRINE_PATH="$repo_realpath/AGENTS.md" "$FLYWHEEL_LOOP_BIN" doctor --strict --repo "$tmp" --json)"

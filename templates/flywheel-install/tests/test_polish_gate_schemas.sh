@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-python3 -c '
+python3 - "$ROOT" <<'PY'
 import copy
 import json
 import sys
@@ -11,23 +11,11 @@ from pathlib import Path
 
 import jsonschema
 from jsonschema import Draft202012Validator
+from jsonschema.exceptions import SchemaError
 
 root = Path(sys.argv[1])
 schema_dir = root / "polish-gate" / "v1"
 fixture_dir = root / "polish-gate" / "fixtures"
-
-schema_paths = [
-    schema_dir / "manifest.schema.json",
-    schema_dir / "grade-receipt.schema.json",
-    schema_dir / "latest-summary.schema.json",
-]
-schemas = {}
-
-for path in schema_paths:
-    with path.open(encoding="utf-8") as handle:
-        schema = json.load(handle)
-    Draft202012Validator.check_schema(schema)
-    schemas[path.name] = schema
 
 with (root / "schema.json").open(encoding="utf-8") as handle:
     template_schema = json.load(handle)
@@ -53,6 +41,23 @@ if missing_from_manifest or missing_on_disk:
         f"missing_from_manifest={missing_from_manifest} "
         f"missing_on_disk={missing_on_disk}"
     )
+
+schemas = {}
+for rel in declared_schemas:
+    path = root / rel
+    try:
+        with path.open(encoding="utf-8") as handle:
+            schema = json.load(handle)
+        if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
+            raise AssertionError(
+                f"{rel}: expected $schema draft 2020-12, got {schema.get('$schema')!r}"
+            )
+        Draft202012Validator.check_schema(schema)
+    except json.JSONDecodeError as exc:
+        raise AssertionError(f"{rel}: invalid JSON at line {exc.lineno} column {exc.colno}: {exc.msg}") from exc
+    except SchemaError as exc:
+        raise AssertionError(f"{rel}: invalid JSON-Schema 2020-12: {exc.message}") from exc
+    schemas[path.name] = schema
 
 manifest_validator = Draft202012Validator(
     schemas["manifest.schema.json"],
@@ -121,5 +126,5 @@ summary_validator.validate({
     "audit_summary_path": ".flywheel/polish-gate/latest-audit.md",
 })
 
-print("PASS: polish gate schemas and fixtures")
-' "$ROOT"
+print(f"PASS: polish gate schemas and fixtures ({len(declared_schemas)} aggregate schemas)")
+PY
