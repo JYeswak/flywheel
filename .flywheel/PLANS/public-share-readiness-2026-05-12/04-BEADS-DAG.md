@@ -13,6 +13,8 @@
 
 Under working hypothesis **H3 (engine + methodology-reframed-case-study)**, this 36-bead DAG ships at the v0.2.0 tag: a public MIT-licensed engine at `github.com/JYeswak/flywheel` (extracted via classification + de-personalization codemod + per-substrate sweeps + assembly + verification) AND a six-page SMB-facing site at `flywheel.zeststream.ai` whose case-study slot reframes to `/methodology/how-we-built-this` (Joshua Class 6b ratification, option C, no self-referential case study). The DAG carries three Joshua-ratified additions over the 33-bead R4 baseline: **B0.5** live-state-artifact denylist (Class 5; extraction codemod halts on contact), **B11.5.0** consent workflow + per-named-entity matrix (Class 4; fallback drops case-study to `/methodology`), **B11.6** external developer README review (F3 trust-bar; blocks B15). Halted propagator scripts (`canonical-doctrine-sync.sh`, `sync-canonical-doctrine.sh`, `agents-md-fleet-propagator.sh`) are excluded from extraction entirely (Class 6a, option A). B11.5 is reframed; B16 carries a 14-day SLA fallback. Acceptance criteria are single-axis and script-verifiable for every P0 bead.
 
+**Phase 5 installability amendment (2026-05-12T20:47Z, pane 2):** `05-INSTALLABILITY-COVERAGE-AUDIT.md` found that the 36-bead DAG is a strong extraction/publication plan but not yet a complete first-run operator journey. Phase 5 must preserve the 36-bead shape until a later split is justified, while tightening B6, B12.1, B13.3, B16, B17, and B15 around dependency preflight, harness support tiers, reduced local mode, SkillOS capability-control-plane boundaries, and Mobile Eats L170 journey semantics. Red Hat/SMB positioning is a proof surface; SkillOS remains the capability control plane.
+
 ---
 
 ## 2. Critical path
@@ -121,7 +123,7 @@ graph LR
 |---|---|---|---|---|---|---|
 | B0 | Author `CHARTER.md` draft for Joshua review | P0 | M | 0 | — | `CHARTER.md` exists at repo root and its head commit contains a `Reviewed-by: Joshua Nowak <chiefzester@gmail.com>` trailer |
 | B0.5 | Live-state artifact denylist — extractor refuses to copy these paths | P0 | S | 0 | B0 | `state/live-state-denylist.yaml` exists and `scripts/depersonalize.py --probe-denylist` against a synthetic denylist-path-bearing tree exits non-zero with documented error code |
-| B16 | Skillos cross-orch coordination handoff with 14-day SLA fallback | P0 | S | 0 | B0 | agent-mail topic `flywheel-skill-boundary-v0.2` has either a non-null `acknowledged_at` OR an `auto_locked_at` set ≥14 days after `created_at` (zero-skills v0.2 lock) |
+| B16 | SkillOS capability-control-plane boundary handoff with 14-day SLA fallback | P0 | S | 0 | B0 | agent-mail topic `flywheel-skill-boundary-v0.2` has either a non-null `acknowledged_at` OR an `auto_locked_at` set ≥14 days after `created_at`, and the body distinguishes Flywheel installability/loop ownership from SkillOS capability-loop substrate ownership |
 | B1 | Author `de-personalization-table.yaml` (master mapping; private) | P0 | M | 1 | B0, B0.5 | `de-personalization-table.yaml` validates against `scripts/de-personalization-table.schema.json` with exit code 0 |
 | B1.5 | Build the de-personalization codemod (`scripts/depersonalize.py`) | P0 | M | 1 | B1 | `scripts/depersonalize.py --dry-run` on the source monorepo emits a diff whose post-apply `grep` of any value in the table's left column returns zero matches |
 | B2 | Implement classification pass (`scripts/classify.py`) | P0 | M | 1 | B1 | `scripts/classify.py` emits `classification.jsonl` containing one row per scanned file and zero rows with `class: null` |
@@ -132,7 +134,7 @@ graph LR
 | B3.5 | Skill + template sweep (~6 skills + 62 templates) | P0 | M | 2 | B1, B1.5, B2 | `grep -rE` of the de-personalization regex set against the skill+template extraction tree returns zero matches |
 | B4 | Implement assembly pass (`scripts/assemble.py`) | P0 | M | 3 | B3.1, B3.2, B3.3, B3.4, B3.5 | `scripts/assemble.py` produces `.flywheel/extraction/staging/` AND `git -C <source> status --porcelain` reports zero modified paths |
 | B5 | Author the engine CLI (`flywheel` bash entrypoint + subcommands) | P0 | L | 3 | B4 | `flywheel --help` returns exit 0 with usage text on a fresh staging-tree install |
-| B6 | Author the installer (`install.sh` with 3-branch pre-state detection) | P0 | L | 3 | B5 | `installer-smoke.yml` legs on `macos-14` + `ubuntu-22.04` for `install → doctor → uninstall → byte-equality` both pass on a probe PR |
+| B6 | Author installer + dependency preflight (`install.sh` with fresh/partial/existing detection and reduced-mode resolver) | P0 | L | 3 | B5 | `installer-smoke.yml` legs on `macos-14` + `ubuntu-22.04` prove `preflight → install → doctor → uninstall → byte-equality`, and preflight emits status rows for Git, shell, Python, Node, Rust/Cargo, Go, SQLite, tmux, Agent Mail, Beads/`br`, NTM, DCG, CASS-style memory, and Socraticode |
 | B7 | Author the uninstaller (`uninstall.sh --confirm`) | P0 | M | 4 | B6 | `uninstall.sh --confirm` on a freshly-installed staging tree leaves `git status --porcelain` empty |
 | B8 | Author `release.yml` (tag-triggered release with SHA256 + `gh attest`) | P0 | M | 4 | B6 | A probe tag push produces a github release whose tarball SHA256 byte-matches the published `install.sh.sha256` |
 | B9 | Author `ci.yml` + `installer-smoke.yml` workflows | P0 | M | 4 | B6, B7 | Both workflows green on a probe PR against `main` |
@@ -142,19 +144,19 @@ graph LR
 | B11.5 | Run methodology-reframed redaction pass (case-study slot becomes `/methodology/how-we-built-this`) | P0 | L | 5 | B11.5.0 | `grep -wFf <(yq '.clients[].canonical_name' de-personalization-table.yaml) methodology-draft.md` returns zero matches |
 | B11.6 | External-developer README review (2 reviewers, neither Joshua nor flywheel:1) | P0 | S | 5 | B11 | `review-log.jsonl` contains exactly 2 rows with distinct `reviewer_id` values and each row's `verdict` field ∈ `{approved, approved_with_followups}` |
 | B14.5 | Author `CHANGELOG.md` initial v0.2.0 entry | P0 | S | 5 | B11 | `CHANGELOG.md` contains a `## [0.2.0] - <date>` section AND `keepachangelog-lint CHANGELOG.md` exits 0 |
-| B12.1 | `docs/getting-started` + `docs/architecture` | P1 | M | 6 | B10, B11 | `markdownlint docs/getting-started/ docs/architecture/` exits 0 |
+| B12.1 | `docs/getting-started` + `docs/architecture` + first-run operator journey | P1 | M | 6 | B10, B11 | `markdownlint docs/getting-started/ docs/architecture/` exits 0 AND `docs/getting-started` names persona, first value, return loop, guardrail, harness support tiers, reduced mode, and post-run inspection commands |
 | B12.2 | `docs/concepts` (5 pages: plan-bead-code, trauma-promotion, substrate-classes, cross-orch-protocol, doctor-health-repair) | P1 | M | 6 | B10, B11 | `find docs/concepts -name '*.mdx' \| wc -l` returns 5 AND `markdownlint docs/concepts/` exits 0 |
 | B12.3 | `docs/reference` + `docs/guides` + `docs/about` | P1 | M | 6 | B10, B11 | `markdownlint docs/reference/ docs/guides/ docs/about/` exits 0 |
 | B13.1 | Webpage `/` landing | P1 | M | 6 | B11 | Built page passes `pa11y http://localhost:3000/` with zero error-level violations |
 | B13.2 | Webpage `/what-is-flywheel` | P1 | M | 6 | B11 | Built page passes `pa11y http://localhost:3000/what-is-flywheel` with zero error-level violations |
-| B13.3 | Webpage `/for-developers` | P1 | S | 6 | B11 | Built page contains a link with `href` equal to the canonical `github.com/JYeswak/flywheel` URL (HTML fixture grep returns 1) |
+| B13.3 | Webpage `/for-developers` | P1 | S | 6 | B11 | Built page contains a link with `href` equal to the canonical `github.com/JYeswak/flywheel` URL (HTML fixture grep returns 1) AND names support tiers honestly for Claude, Codex, OpenClaw, Gemini, and reduced local mode |
 | B13.4 | Webpage `/methodology/how-we-built-this` (Class 6b option C reframe of former `/case-studies`) | P1 | M | 6 | B11.5 | Built page exists at route `/methodology/how-we-built-this` AND contains at least one named numeric metric (regex `[0-9]+\s+(hours\|beads\|rules\|files\|incidents)`) AND `grep -wFf <(yq '.clients[].canonical_name' de-personalization-table.yaml) <built-html>` returns zero matches |
 | B13.5 | Webpage `/about` (Joshua photo + bio + direct email) | P1 | M | 6 | B11 | Built page contains `chiefzester@gmail.com` as an `href="mailto:"` link AND an `<img>` with `alt` referencing Joshua |
 | B13.6 | Webpage `/contact` + intake-form-routing | P1 | M | 6 | B11 | Form submission to `chiefzester@gmail.com` from a test browser session delivers a message with subject prefix `[flywheel-contact]` within 60 seconds |
 | B13.7 | Webpage deploy + DNS + Cloudflare-Worker for `install.sh` | P1 | M | 6 | B13.1, B13.2, B13.3, B13.4, B13.5, B13.6 | `curl -fsSL https://flywheel.zeststream.ai/install.sh \| sha256sum` matches the released `install.sh.sha256` byte-for-byte |
 | B14 | Wire webpage↔github cross-references | P1 | S | 6 | B12.1, B12.2, B12.3, B13.7 | `lychee --no-progress https://flywheel.zeststream.ai https://github.com/JYeswak/flywheel` reports zero broken links |
-| B17 | Pre-launch smoke test on fresh laptop (8-step script per §5.5) | P0 | S | 6 | B11, B13.7 | The 8-step smoke-test script (`§5.5`) returns exit code 0 on a fresh `macos-14` environment |
-| B15 | Publish v0.2.0 release + Joshua sign-off | P0 | M | 7 | B8, B9, B10, B11, B11.6, B12.1, B12.2, B12.3, B13.1, B13.2, B13.3, B13.5, B13.6, B13.7, B14, B14.5, B17 | The git tag `v0.2.0` exists, the github release at that tag is published, and `gh api /repos/JYeswak/flywheel/commits/v0.2.0/check-runs --jq '.check_runs[] \| select(.conclusion!="success")'` returns empty |
+| B17 | Pre-launch journey smoke test on fresh laptop (installability receipt) | P0 | S | 6 | B11, B13.7 | The journey smoke emits a JSON receipt with `preflight`, `init`, `doctor`, `tick`, `dispatch_or_simulate`, `closeout`, and `inspect_next_action` all `pass` for either `mode=full` or explicitly documented `mode=reduced` on fresh `macos-14` |
+| B15 | Publish v0.2.0 release + Joshua sign-off | P0 | M | 7 | B8, B9, B10, B11, B11.6, B12.1, B12.2, B12.3, B13.1, B13.2, B13.3, B13.5, B13.6, B13.7, B14, B14.5, B17 | The git tag `v0.2.0` exists, the github release at that tag is published, `gh api /repos/JYeswak/flywheel/commits/v0.2.0/check-runs --jq '.check_runs[] \| select(.conclusion!="success")'` returns empty, and Joshua signs off on repo, website, and first-run journey |
 
 **Total: 36 beads.** P0 count: 23. P1 count: 13. Effort sum (midpoints): S=8 × 1.5h = 12h; M=20 × 5h = 100h; L=8 × 14h = 112h. **Total envelope: ~224h.** This matches the Phase 3 feasibility finding F1 (revised envelope ~100-140h substrate sweep + ~80-100h infra/docs/webpage = ~180-240h total).
 
@@ -168,7 +170,7 @@ Waves run sequentially; beads within a wave dispatch in parallel.
 
 - **B0** Author `CHARTER.md` draft
 - **B0.5** Live-state denylist (requires B0 because charter declares engine/overlay boundary)
-- **B16** Skillos coord handoff with 14d SLA
+- **B16** SkillOS capability-control-plane boundary handoff with 14d SLA
 
 ### Wave 1 — Extraction tooling
 
@@ -188,7 +190,7 @@ Waves run sequentially; beads within a wave dispatch in parallel.
 
 - **B4** assembly pass
 - **B5** engine CLI
-- **B6** installer
+- **B6** installer + dependency preflight + reduced-mode resolver
 
 ### Wave 4 — Installer + verification
 
@@ -211,7 +213,7 @@ Waves run sequentially; beads within a wave dispatch in parallel.
 - **B13.1-B13.6** webpage pages (parallel; B13.4 depends on B11.5)
 - **B13.7** webpage deploy + DNS + install-proxy Worker
 - **B14** webpage↔github cross-references
-- **B17** fresh-laptop smoke test
+- **B17** fresh-laptop journey smoke test
 
 ### Wave 7 — Launch
 
@@ -251,13 +253,22 @@ Per `/flywheel:plan` spec, Phase 5 polishes until telemetry steady-state. Minimu
 | Round | Goal | Tools / skills |
 |---|---|---|
 | P1 | Assign canonical `flywheel-<id>` IDs via `br create`; persist dependency graph via `br dep add`; verify zero cycles via `bvg` | `beads-workflow`, `beads-br`, `bvp`/`bvg` |
-| P2 | Sharpen acceptance criteria: every single-axis check converts to a literal shell command stored in each bead's `acceptance_script` field | `canonical-cli-scoping`, `world-class-doctor-mode-for-cli-tools` |
+| P2 | Sharpen acceptance criteria: every single-axis check converts to a literal shell command stored in each bead's `acceptance_script` field; B6/B12.1/B13.3/B16/B17/B15 must preserve the installability coverage audit requirements | `canonical-cli-scoping`, `world-class-doctor-mode-for-cli-tools` |
 | P3 | Effort recalibration: per-bead worker-hour estimate against historical NTM telemetry from analogous beads in `dispatch-log.jsonl`; flag any L-bead >16h for further split | `beads-workflow`, `extreme-software-optimization` |
 | P4 | Dispatch packet authoring: every P0 bead has a Phase-8-ready prompt body that names skills, MUST/MUST-NOT lists, evidence-pack format, and ntm-callback template | `dispatch-tool-contracts`, `mcp-server-design` |
 | P5 | Compliance scoring: run each bead through the 10-dim rubric for its category (doctrine / script / webpage / installer); reject beads <700/1000; rewrite and re-score | `agent-ergonomics-cli`, `de-slopify`, `ubs` |
 | P6 | Convergence check: P5 vs P6 bead-body line-delta <3%; acceptance scripts unchanged; dispatch packets unchanged → Phase 6 (BEAD-CREATE) fires | `plan-space-convergence` |
 
 If P6 fails convergence, P7+ runs until steady-state. The trigger is `delta_pct < 3 AND stable_rounds >= 2`.
+
+### 7.1 Installability coverage gate before `br create`
+
+Before P1 creates canonical beads, the Phase 5 operator must review `05-INSTALLABILITY-COVERAGE-AUDIT.md` and choose one of two paths:
+
+1. **Acceptance rewrite path:** keep the DAG at 36 beads and treat the B6/B12.1/B13.3/B16/B17/B15 rewrites above as sufficient coverage.
+2. **Split path:** add focused beads before `br create` if any existing bead would exceed L effort or mix unrelated owners. Likely additions: `B6.5` public dependency preflight matrix, `B12.0` first-run journey/support-tier docs, and `B17.5` reduced-mode/harness compatibility receipt.
+
+This gate prevents Phase 5 from rubber-stamping an extraction-only DAG as a public-installability plan. A green command smoke is necessary evidence, but Mobile Eats L170 semantics require journey-grade value evidence: persona, first value, return loop, and guardrail.
 
 ---
 
