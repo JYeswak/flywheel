@@ -31,7 +31,7 @@ surfaces exist and have journey receipts:
 | `flywheel dispatch --simulate` | implemented for reduced mode |
 | `flywheel validate-receipt` | implemented for reduced-mode simulator receipts |
 | `flywheel inspect` | implemented for reduced-mode simulator receipts |
-| `scripts/journey-smoke.sh` | planned harness evidence runner |
+| `scripts/journey-smoke.sh` | implemented as dry-run matrix; reduced mode is runtime-proven, agent CLI lanes remain registry-valid until harness smoke runs |
 
 Do not treat this page as release proof until those rows are implemented and
 linked to a passing journey receipt.
@@ -126,15 +126,16 @@ Flywheel reports harness support from evidence, not optimism.
 | OpenClaw | compatibility target until daemon or gateway smoke proves it |
 | Reduced local mode | required fallback path |
 
-The planned journey-smoke command will gate public copy:
+The journey-smoke command gates public support copy:
 
 ```bash
 scripts/journey-smoke.sh --matrix claude,codex,gemini,openclaw,reduced --dry-run --json
 ```
 
-Until that command exists and reports a lane as `runtime_proven`, keep Gemini
-and OpenClaw as compatibility targets and keep Claude/Codex support tied to
-explicit journey evidence.
+Until that command reports a lane as `runtime_proven`, keep Gemini and OpenClaw
+as compatibility targets and keep Claude/Codex support tied to explicit journey
+evidence. The reduced lane must stay runtime-proven because it is the public
+fallback when full substrate is absent.
 
 ## 4. Initialize A Target Repo
 
