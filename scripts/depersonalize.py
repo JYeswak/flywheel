@@ -4,9 +4,11 @@
 from __future__ import annotations
 
 import argparse
+import difflib
 import fnmatch
 import json
 import os
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,8 +16,10 @@ from typing import Iterable
 
 SCHEMA_VERSION = "flywheel.depersonalize.v0"
 DENYLIST_SCHEMA_VERSION = "flywheel.live_state_denylist.v0"
+TABLE_SCHEMA_VERSION = "flywheel.depersonalization_table.v0"
 DEFAULT_DENYLIST = "state/live-state-denylist.yaml"
-REQUIRED_ROW_FIELDS = {
+DEFAULT_TABLE = "de-personalization-table.yaml"
+REQUIRED_DENY_ROW_FIELDS = {
     "id",
     "class",
     "pattern",
@@ -28,6 +32,7 @@ EXIT_DENY = 30
 EXIT_MANUAL_REVIEW = 31
 EXIT_CREDENTIAL = 32
 EXIT_SCHEMA = 33
+EXIT_RESIDUAL = 40
 DEFAULT_IGNORED_DIR_NAMES = {
     ".git",
     ".next",
@@ -39,6 +44,27 @@ DEFAULT_IGNORED_DIR_NAMES = {
     "dist",
     "node_modules",
     "venv",
+}
+TEXT_FILE_SUFFIXES = {
+    "",
+    ".bash",
+    ".css",
+    ".env",
+    ".html",
+    ".js",
+    ".json",
+    ".jsonl",
+    ".md",
+    ".mdx",
+    ".py",
+    ".rs",
+    ".sh",
+    ".toml",
+    ".ts",
+    ".tsx",
+    ".txt",
+    ".yaml",
+    ".yml",
 }
 
 
@@ -53,12 +79,24 @@ class DenyRow:
     probe_fixture: str
 
 
+@dataclass(frozen=True)
+class ReplacementRow:
+    id: str
+    kind: str
+    private_value: str
+    match_type: str
+    action: str
+    public_value: str
+
+
 def repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
 
-def strip_yaml_value(value: str) -> str:
+def strip_yaml_value(value: str) -> object:
     value = value.strip()
+    if value in {"true", "false"}:
+        return value == "true"
     if (value.startswith('"') and value.endswith('"')) or (
         value.startswith("'") and value.endswith("'")
     ):
@@ -66,11 +104,11 @@ def strip_yaml_value(value: str) -> str:
     return value
 
 
-def load_denylist(path: Path) -> list[DenyRow]:
+def load_simple_yaml(path: Path) -> tuple[str, list[dict[str, object]]]:
     if not path.exists():
-        raise ValueError(f"denylist not found: {path}")
-    rows: list[dict[str, str]] = []
-    current: dict[str, str] | None = None
+        raise ValueError(f"yaml file not found: {path}")
+    rows: list[dict[str, object]] = []
+    current: dict[str, object] | None = None
     schema_version = ""
     in_rows = False
     for raw_line in path.read_text(encoding="utf-8").splitlines():
@@ -101,29 +139,63 @@ def load_denylist(path: Path) -> list[DenyRow]:
         current[key.strip()] = strip_yaml_value(value)
     if current is not None:
         rows.append(current)
+    return schema_version, rows
+
+
+def load_denylist(path: Path) -> list[DenyRow]:
+    schema_version, rows = load_simple_yaml(path)
     if schema_version != DENYLIST_SCHEMA_VERSION:
         raise ValueError(f"unsupported denylist schema_version: {schema_version}")
     parsed: list[DenyRow] = []
     for row in rows:
-        missing = sorted(REQUIRED_ROW_FIELDS - set(row))
+        missing = sorted(REQUIRED_DENY_ROW_FIELDS - set(row))
         if missing:
             raise ValueError(f"denylist row {row.get('id', '<unknown>')} missing {missing}")
         if row["decision"] not in {"deny", "manual-review", "fixture-only"}:
             raise ValueError(f"denylist row {row['id']} has invalid decision")
         parsed.append(
             DenyRow(
-                id=row["id"],
-                kind=row["class"],
-                pattern=row["pattern"],
-                decision=row["decision"],
-                reason_code=row["reason_code"],
-                public_replacement=row["public_replacement"],
-                probe_fixture=row["probe_fixture"],
+                id=str(row["id"]),
+                kind=str(row["class"]),
+                pattern=str(row["pattern"]),
+                decision=str(row["decision"]),
+                reason_code=str(row["reason_code"]),
+                public_replacement=str(row["public_replacement"]),
+                probe_fixture=str(row["probe_fixture"]),
             )
         )
     if not parsed:
         raise ValueError("denylist has no rows")
     return parsed
+
+
+def load_replacement_table(path: Path) -> list[ReplacementRow]:
+    schema_version, rows = load_simple_yaml(path)
+    if schema_version != TABLE_SCHEMA_VERSION:
+        raise ValueError(f"unsupported table schema_version: {schema_version}")
+    parsed: list[ReplacementRow] = []
+    for row in rows:
+        required = {"id", "class", "private_value", "match_type", "action", "public_value"}
+        missing = sorted(required - set(row))
+        if missing:
+            raise ValueError(f"table row {row.get('id', '<unknown>')} missing {missing}")
+        parsed.append(
+            ReplacementRow(
+                id=str(row["id"]),
+                kind=str(row["class"]),
+                private_value=str(row["private_value"]),
+                match_type=str(row["match_type"]),
+                action=str(row["action"]),
+                public_value=str(row["public_value"]),
+            )
+        )
+    if not parsed:
+        raise ValueError("replacement table has no rows")
+    return sorted(
+        parsed,
+        key=lambda row: (row.match_type == "regex", len(row.private_value)),
+        reverse=True,
+    )
 
 
 def iter_paths(root: Path, ignored_dir_names: set[str]) -> Iterable[str]:
@@ -132,6 +204,16 @@ def iter_paths(root: Path, ignored_dir_names: set[str]) -> Iterable[str]:
         for name in sorted(dirnames + filenames):
             path = Path(dirpath, name)
             yield path.relative_to(root).as_posix()
+
+
+def iter_text_files(root: Path, ignored_dir_names: set[str]) -> Iterable[tuple[str, Path]]:
+    for relpath in iter_paths(root, ignored_dir_names):
+        path = root / relpath
+        if not path.is_file():
+            continue
+        if path.suffix not in TEXT_FILE_SUFFIXES:
+            continue
+        yield relpath, path
 
 
 def row_matches(row: DenyRow, relpath: str) -> bool:
@@ -163,6 +245,131 @@ def scan(
     return findings
 
 
+def replacement_for(row: ReplacementRow) -> str:
+    if row.action == "drop":
+        return ""
+    if row.action == "redact":
+        return row.public_value or "[REDACTED]"
+    return row.public_value
+
+
+def row_pattern(row: ReplacementRow) -> re.Pattern[str]:
+    if row.match_type in {"literal", "path-prefix", "glob"}:
+        if row.match_type == "glob":
+            return re.compile(fnmatch.translate(row.private_value))
+        return re.compile(re.escape(row.private_value))
+    if row.match_type == "regex":
+        return re.compile(row.private_value)
+    raise ValueError(f"table row {row.id} has unsupported match_type {row.match_type}")
+
+
+def public_value_masks(rows: list[ReplacementRow]) -> list[tuple[str, str]]:
+    values = sorted(
+        {replacement_for(row) for row in rows if replacement_for(row)},
+        key=len,
+        reverse=True,
+    )
+    return [(value, f"@@FW_PUBLIC_VALUE_{index}@@") for index, value in enumerate(values)]
+
+
+def mask_public_values(text: str, masks: list[tuple[str, str]]) -> str:
+    masked = text
+    for value, sentinel in masks:
+        masked = masked.replace(value, sentinel)
+    return masked
+
+
+def unmask_public_values(text: str, masks: list[tuple[str, str]]) -> str:
+    unmasked = text
+    for value, sentinel in reversed(masks):
+        unmasked = unmasked.replace(sentinel, value)
+    return unmasked
+
+
+def transform_text(text: str, rows: list[ReplacementRow]) -> tuple[str, list[str]]:
+    changed_ids: list[str] = []
+    transformed = text
+    masks = public_value_masks(rows)
+    for row in rows:
+        pattern = row_pattern(row)
+        protected = mask_public_values(transformed, masks)
+        updated, count = pattern.subn(replacement_for(row), protected)
+        if count:
+            if row.id not in changed_ids:
+                changed_ids.append(row.id)
+            transformed = unmask_public_values(updated, masks)
+    return transformed, changed_ids
+
+
+def scan_table_values(
+    root: Path, rows: list[ReplacementRow], ignored_dir_names: set[str]
+) -> list[dict[str, object]]:
+    findings: list[dict[str, object]] = []
+    compiled = [(row, row_pattern(row)) for row in rows]
+    masks = public_value_masks(rows)
+    for relpath, path in iter_text_files(root, ignored_dir_names):
+        try:
+            text = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        for line_no, line in enumerate(text.splitlines(), start=1):
+            protected = mask_public_values(line, masks)
+            matched_ids = [
+                row.id for row, pattern in compiled if pattern.search(protected)
+            ]
+            if matched_ids:
+                findings.append(
+                    {
+                        "path": relpath,
+                        "line": line_no,
+                        "row_ids": matched_ids,
+                    }
+                )
+    return findings
+
+
+def table_changes(
+    root: Path, rows: list[ReplacementRow], ignored_dir_names: set[str]
+) -> tuple[list[dict[str, object]], str]:
+    changes: list[dict[str, object]] = []
+    diff_parts: list[str] = []
+    for relpath, path in iter_text_files(root, ignored_dir_names):
+        try:
+            original = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        transformed, row_ids = transform_text(original, rows)
+        if transformed == original:
+            continue
+        changes.append({"path": relpath, "row_ids": row_ids})
+        diff_parts.extend(
+            difflib.unified_diff(
+                original.splitlines(keepends=True),
+                transformed.splitlines(keepends=True),
+                fromfile=f"a/{relpath}",
+                tofile=f"b/{relpath}",
+            )
+        )
+    return changes, "".join(diff_parts)
+
+
+def apply_table_changes(
+    root: Path, rows: list[ReplacementRow], ignored_dir_names: set[str]
+) -> list[dict[str, object]]:
+    changes: list[dict[str, object]] = []
+    for relpath, path in iter_text_files(root, ignored_dir_names):
+        try:
+            original = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        transformed, row_ids = transform_text(original, rows)
+        if transformed == original:
+            continue
+        path.write_text(transformed, encoding="utf-8")
+        changes.append({"path": relpath, "row_ids": row_ids})
+    return changes
+
+
 def status_for(findings: list[dict[str, str]]) -> tuple[str, int]:
     if not findings:
         return "pass", 0
@@ -188,6 +395,20 @@ def emit(payload: dict[str, object], json_out: bool) -> None:
             f"id={finding['id']} decision={finding['decision']} "
             f"reason_code={finding['reason_code']} path={finding['path']}"
         )
+
+
+def load_common_inputs(
+    args: argparse.Namespace,
+) -> tuple[Path, list[DenyRow], list[ReplacementRow], set[str]]:
+    root = Path(args.root).resolve()
+    denylist = Path(args.denylist)
+    table = Path(args.table)
+    if not denylist.is_absolute():
+        denylist = repo_root() / denylist
+    if not table.is_absolute():
+        table = repo_root() / table
+    ignored_dir_names = set() if args.include_ignored_dirs else DEFAULT_IGNORED_DIR_NAMES
+    return root, load_denylist(denylist), load_replacement_table(table), ignored_dir_names
 
 
 def probe_denylist(args: argparse.Namespace) -> int:
@@ -224,21 +445,185 @@ def probe_denylist(args: argparse.Namespace) -> int:
     return exit_code
 
 
+def table_guard_findings(
+    root: Path, rows: list[DenyRow], ignored_dir_names: set[str]
+) -> tuple[str, int, list[dict[str, str]]]:
+    findings = scan(root, rows, ignored_dir_names)
+    status, exit_code = status_for(findings)
+    return status, exit_code, findings
+
+
+def scan_table(args: argparse.Namespace) -> int:
+    try:
+        root, deny_rows, table_rows, ignored_dir_names = load_common_inputs(args)
+    except ValueError as exc:
+        emit(
+            {
+                "schema_version": SCHEMA_VERSION,
+                "command": "scan-table",
+                "status": "fail",
+                "exit_code": EXIT_SCHEMA,
+                "error": str(exc),
+            },
+            args.json,
+        )
+        return EXIT_SCHEMA
+    deny_status, deny_exit, deny_findings = table_guard_findings(
+        root, deny_rows, ignored_dir_names
+    )
+    if deny_status != "pass":
+        emit(
+            {
+                "schema_version": SCHEMA_VERSION,
+                "command": "scan-table",
+                "status": deny_status,
+                "exit_code": deny_exit,
+                "root": str(root),
+                "findings": deny_findings,
+            },
+            args.json,
+        )
+        return deny_exit
+    findings = scan_table_values(root, table_rows, ignored_dir_names)
+    status = "fail" if findings else "pass"
+    exit_code = EXIT_RESIDUAL if findings else 0
+    emit(
+        {
+            "schema_version": SCHEMA_VERSION,
+            "command": "scan-table",
+            "status": status,
+            "exit_code": exit_code,
+            "root": str(root),
+            "findings": findings,
+        },
+        args.json,
+    )
+    return exit_code
+
+
+def dry_run(args: argparse.Namespace) -> int:
+    try:
+        root, deny_rows, table_rows, ignored_dir_names = load_common_inputs(args)
+    except ValueError as exc:
+        emit(
+            {
+                "schema_version": SCHEMA_VERSION,
+                "command": "dry-run",
+                "status": "fail",
+                "exit_code": EXIT_SCHEMA,
+                "error": str(exc),
+            },
+            args.json,
+        )
+        return EXIT_SCHEMA
+    deny_status, deny_exit, deny_findings = table_guard_findings(
+        root, deny_rows, ignored_dir_names
+    )
+    if deny_status != "pass":
+        emit(
+            {
+                "schema_version": SCHEMA_VERSION,
+                "command": "dry-run",
+                "status": deny_status,
+                "exit_code": deny_exit,
+                "root": str(root),
+                "findings": deny_findings,
+            },
+            args.json,
+        )
+        return deny_exit
+    changes, diff = table_changes(root, table_rows, ignored_dir_names)
+    payload = {
+        "schema_version": SCHEMA_VERSION,
+        "command": "dry-run",
+        "status": "pass",
+        "exit_code": 0,
+        "root": str(root),
+        "changes": changes,
+        "changed_files": len(changes),
+    }
+    if args.json:
+        payload["diff"] = diff
+        print(json.dumps(payload, sort_keys=True))
+        return 0
+    print(diff, end="")
+    return 0
+
+
+def apply_changes(args: argparse.Namespace) -> int:
+    try:
+        root, deny_rows, table_rows, ignored_dir_names = load_common_inputs(args)
+    except ValueError as exc:
+        emit(
+            {
+                "schema_version": SCHEMA_VERSION,
+                "command": "apply",
+                "status": "fail",
+                "exit_code": EXIT_SCHEMA,
+                "error": str(exc),
+            },
+            args.json,
+        )
+        return EXIT_SCHEMA
+    deny_status, deny_exit, deny_findings = table_guard_findings(
+        root, deny_rows, ignored_dir_names
+    )
+    if deny_status != "pass":
+        emit(
+            {
+                "schema_version": SCHEMA_VERSION,
+                "command": "apply",
+                "status": deny_status,
+                "exit_code": deny_exit,
+                "root": str(root),
+                "findings": deny_findings,
+            },
+            args.json,
+        )
+        return deny_exit
+    changes = apply_table_changes(root, table_rows, ignored_dir_names)
+    emit(
+        {
+            "schema_version": SCHEMA_VERSION,
+            "command": "apply",
+            "status": "pass",
+            "exit_code": 0,
+            "root": str(root),
+            "changes": changes,
+            "changed_files": len(changes),
+            "findings": [],
+        },
+        args.json,
+    )
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--denylist", default=DEFAULT_DENYLIST)
+    parser.add_argument("--table", default=DEFAULT_TABLE)
     parser.add_argument("--root", default=".")
     parser.add_argument("--probe-denylist", action="store_true")
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--scan-table", action="store_true")
     parser.add_argument(
         "--include-ignored-dirs",
         action="store_true",
         help="scan dependency/cache/build directories that are skipped by default",
     )
     args = parser.parse_args(argv)
-    if not args.probe_denylist:
-        parser.error("only --probe-denylist is implemented")
-    return probe_denylist(args)
+    selected = [args.probe_denylist, args.dry_run, args.apply, args.scan_table]
+    if sum(1 for item in selected if item) != 1:
+        parser.error("select exactly one of --probe-denylist, --dry-run, --apply, --scan-table")
+    if args.probe_denylist:
+        return probe_denylist(args)
+    if args.dry_run:
+        return dry_run(args)
+    if args.apply:
+        return apply_changes(args)
+    return scan_table(args)
 
 
 if __name__ == "__main__":
