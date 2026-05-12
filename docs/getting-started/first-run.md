@@ -25,11 +25,12 @@ surfaces exist and have journey receipts:
 | Surface | Current status |
 |---|---|
 | `scripts/preflight.sh` | implemented with fixture-backed full, reduced, blocked, and misconfigured modes |
-| `flywheel init` | planned public CLI surface |
-| `flywheel doctor` | planned public CLI surface; internal loop doctors already exist |
-| `flywheel tick` | planned public CLI surface; internal loop tick already exists |
-| `flywheel dispatch --simulate` | planned reduced-mode public surface |
-| `flywheel validate-receipt` | planned public wrapper over existing closeout validation |
+| `flywheel init` | implemented for reduced mode |
+| `flywheel doctor` | implemented for reduced mode; full internal loop doctors still separate |
+| `flywheel tick --dry-run` | implemented for reduced mode |
+| `flywheel dispatch --simulate` | implemented for reduced mode |
+| `flywheel validate-receipt` | implemented for reduced-mode simulator receipts |
+| `flywheel inspect` | implemented for reduced-mode simulator receipts |
 | `scripts/journey-smoke.sh` | planned harness evidence runner |
 
 Do not treat this page as release proof until those rows are implemented and
@@ -145,8 +146,6 @@ cd /tmp/flywheel-first-run-target
 git init
 ```
 
-The planned public init command is:
-
 ```bash
 /path/to/flywheel/flywheel init --repo "$PWD" --json > init.json
 jq '{status, created_paths, private_state_scan}' init.json
@@ -158,8 +157,6 @@ home-directory paths, stop and treat that as a failed public release gate.
 
 ## 5. Run Doctor
 
-Planned command:
-
 ```bash
 flywheel doctor --repo "$PWD" --json > doctor.json
 jq '{status, stable_codes, next_action}' doctor.json
@@ -169,8 +166,6 @@ Doctor should either say the repo can tick or name stable failure codes. Do not
 continue by guessing.
 
 ## 6. Run Tick
-
-Planned command:
 
 ```bash
 flywheel tick --repo "$PWD" --dry-run --json > tick.json
@@ -183,8 +178,6 @@ Dry-run tick should choose the next safe action without mutating live harnesses.
 
 Full mode may dispatch through a real harness. Reduced mode uses the simulator.
 
-Planned reduced-mode command:
-
 ```bash
 flywheel dispatch --repo "$PWD" --simulate --json > dispatch.json
 jq '{status, real_dispatch, callback_contract}' dispatch.json
@@ -194,8 +187,6 @@ Reduced mode must not claim NTM panes, Agent Mail reservations, shared inboxes,
 or cross-session memory.
 
 ## 8. Validate Closeout
-
-Planned command:
 
 ```bash
 flywheel validate-receipt --repo "$PWD" --file .flywheel/last_closeout_receipt.json --json \

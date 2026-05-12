@@ -64,6 +64,19 @@ else
   fail "installed doctor"
 fi
 
+repo="$TMP/repo"
+mkdir -p "$repo"
+git -C "$repo" init -q
+if "$PREFIX/bin/flywheel" init --repo "$repo" --json >/dev/null \
+  && "$PREFIX/bin/flywheel" tick --repo "$repo" --dry-run --json >/dev/null \
+  && "$PREFIX/bin/flywheel" dispatch --repo "$repo" --simulate --json >/dev/null \
+  && "$PREFIX/bin/flywheel" validate-receipt --repo "$repo" --file .flywheel/last_closeout_receipt.json --json >/dev/null \
+  && "$PREFIX/bin/flywheel" inspect --repo "$repo" --json | jq -e '.status == "pass"' >/dev/null; then
+  pass "installed reduced first-run"
+else
+  fail "installed reduced first-run"
+fi
+
 if "$ROOT/install.sh" --prefix "$PREFIX" --json | jq -e '.status == "installed"' >/dev/null; then
   pass "idempotent reinstall"
 else
