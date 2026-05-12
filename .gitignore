@@ -80,7 +80,6 @@ AGENTS.md.bak.*
 .flywheel/**/*.bak
 .flywheel/**/*.bak.*
 
-# flywheel-ti46c (Phase 2 of 38u3d): docs scaffold site artifacts
-flywheel__nextra_documentation_site/node_modules/
-flywheel__nextra_documentation_site/.next/
-flywheel__nextra_documentation_site/out/
+# flywheel-ti46c (Phase 2 of 38u3d): docs scaffold site — entire sibling project
+# (broadened from per-subdir 2026-05-12 during git-hygiene paradigm phase 0)
+flywheel__nextra_documentation_site/
