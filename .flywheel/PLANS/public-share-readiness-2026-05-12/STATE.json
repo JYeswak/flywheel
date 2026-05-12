@@ -209,19 +209,48 @@
     "expected_final_count": 36
   },
   "_phase4_complete": {
-    "bead_count": 36,
-    "p0_count": 23,
+    "bead_count": 39,
+    "p0_count": 26,
     "p1_count": 13,
-    "critical_path_length": 15,
-    "critical_path": "B0 \u2192 B0.5 \u2192 B1 \u2192 B1.5 \u2192 B2 \u2192 B3.4 \u2192 B4 \u2192 B5 \u2192 B6 \u2192 B7 \u2192 B10 \u2192 B11 \u2192 B11.6 \u2192 B17 \u2192 B15",
-    "effort_envelope_hours": "180-240 (consensus 224h)",
+    "critical_path_length": 16,
+    "critical_path": "B0 \u2192 B0.5 \u2192 B1 \u2192 B1.5 \u2192 B2 \u2192 B3.4 \u2192 B4 \u2192 B5 \u2192 B6 \u2192 B6.5 \u2192 B10 \u2192 B11 \u2192 B12.0 \u2192 B17.5 \u2192 B17 \u2192 B15",
+    "effort_envelope_hours": "180-240 (consensus revised to 232h after Phase 5 installability split)",
     "top_risks": [
       "B3.4 long pole (script sweep 394 files) \u2014 Phase 5 should hunt for further decomposition",
       "H3 likely collapses to /methodology in practice (consent calendar tight)",
       "B15 launch bead is 17-dep fan-in; needs P1-to-P2 downgrade escape valves"
     ],
     "dag_artifact": "04-BEADS-DAG.md",
-    "completed_at": "2026-05-12T18:00:00Z"
+    "completed_at": "2026-05-12T18:00:00Z",
+    "phase5_split_decision": {
+      "decided_at": "2026-05-12T20:52:00Z",
+      "decision": "split_path",
+      "source_artifact": "05-INSTALLABILITY-COVERAGE-AUDIT.md",
+      "new_beads": [
+        "B6.5 \u2014 Public dependency preflight matrix + reduced-mode resolver fixture",
+        "B12.0 \u2014 First-run journey narrative + harness support-tier matrix",
+        "B17.5 \u2014 Reduced-mode + harness compatibility receipt"
+      ],
+      "reason": "Public installability, support-tier documentation, and reduced-mode verification are distinct owner surfaces; treating them as acceptance text inside B6/B12.1/B17 would hide required work before br create."
+    },
+    "cross_lane_updates": {
+      "mobile_eats_l170_runtime_evidence": {
+        "received_at": "2026-05-12T20:53:00Z",
+        "journey_registry_count": 19,
+        "validation": "pnpm journeys:validate PASS; pnpm journeys:compile PASS; pnpm typecheck PASS",
+        "browser_run": "8 pass / 10 fail / 1 skip; single corrected R5 spec passes",
+        "phase5_implication": "Distinguish registry-valid journeys from runtime-proven journeys; fixture/data blockers remain product evidence, not cross-repo doctrine."
+      },
+      "skillos_control_plane_gate": {
+        "received_at": "2026-05-12T20:53:00Z",
+        "commits": [
+          "389aed4 doctor: repair socraticode and trauma promotion gates",
+          "d63018d chore: untrack preexisting sharpening report"
+        ],
+        "validation": "skillos doctor --scope socraticode OK; skillos doctor --scope trauma-to-skill-promotion OK; focused deterministic tests passed",
+        "phase5_implication": "Remaining red gates claude-state-pressure, file-length, and jsm-marker are next-phase skillos work, not blockers to Flywheel Phase 5 DAG convergence."
+      }
+    }
   },
   "_jsm_ratification": {
     "ratified_at": "2026-05-12T18:59:00Z",
