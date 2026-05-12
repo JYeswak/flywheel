@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+ENGINE_ROOT="$(cd "$SELF_DIR/.." && pwd -P)"
+PREFLIGHT="$ENGINE_ROOT/scripts/preflight.sh"
+VERSION="flywheel-public-spine/v0"
+
+usage() {
+  cat <<'EOF'
+usage:
+  flywheel preflight [args...]
+  flywheel doctor --json
+  flywheel health --json
+  flywheel --info
+
+Planned commands that are not public-release-ready yet:
+  flywheel init
+  flywheel tick
+  flywheel dispatch
+  flywheel validate-receipt
+EOF
+}
+
+source_gap() {
+  local command="$1"
+  jq -nc --arg command "$command" '{
+    schema_version:"flywheel.cli.v0",
+    command:$command,
+    status:"source_gap",
+    exit_code:30,
+    message:"This public CLI surface is planned but not release-ready yet."
+  }'
+  exit 30
+}
+
+case "${1:-}" in
+  preflight)
+    shift
+    exec "$PREFLIGHT" "$@"
+    ;;
+  doctor)
+    shift
+    exec "$PREFLIGHT" doctor "$@"
+    ;;
+  health)
+    shift
+    exec "$PREFLIGHT" health "$@"
+    ;;
+  init|tick|dispatch|validate-receipt)
+    cmd="$1"
+    source_gap "$cmd"
+    ;;
+  --info)
+    jq -nc --arg version "$VERSION" --arg engine "$ENGINE_ROOT" '{
+      schema_version:"flywheel.cli.v0",
+      command:"info",
+      version:$version,
+      engine_root:$engine,
+      implemented:["preflight","doctor","health"],
+      planned:["init","tick","dispatch","validate-receipt"]
+    }'
+    ;;
+  -h|--help|help|"")
+    usage
+    ;;
+  *)
+    printf 'ERROR: unknown command: %s\n' "$1" >&2
+    usage >&2
+    exit 64
+    ;;
+esac
