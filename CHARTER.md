@@ -3,9 +3,17 @@
 Flywheel exists to make AI-assisted software work compound across sessions,
 repos, tools, and operators.
 
-The public project should be useful to a developer who finds it without knowing
-Joshua Nowak, ZestStream's private fleet, or the local pane history that produced
-it. That developer should be able to understand what Flywheel is, install or
+The public project should be useful to a business owner, technical lead, or
+developer who finds it without knowing Joshua Nowak, ZestStream's private fleet,
+or the local pane history that produced it.
+
+A business owner may arrive from social media with a practical problem: five
+systems that do not talk to one another, too much manual work, and no clear way
+to judge whether an AI operator knows what they are doing. That person may not
+need the deep implementation path. They do need enough of the curtain pulled
+back to trust the method, the evidence, and the operating discipline.
+
+A developer should be able to go deeper: understand what Flywheel is, install or
 detect its substrate, initialize it in their own repo, run a first loop, inspect
 the resulting work state, and adapt the system without inheriting private state.
 
@@ -16,14 +24,36 @@ operational memory instead of one-off chat sessions.
 
 The first public audience is:
 
+- an SMB owner evaluating whether ZestStream can connect fragmented systems,
+  reduce manual work, and show credible proof of execution;
 - a solo developer running one agent and wanting a safer loop;
 - a technical lead coordinating several agent lanes across a repo;
-- an SMB operator who needs repeatable AI-native delivery without hiding the
+- an operator who needs repeatable AI-native delivery without hiding the
   evidence trail;
 - a contributor deciding whether this repo is coherent enough to extend.
 
 Multi-pane orchestration is an advanced path. A single-pane or reduced local
 mode must still teach the core loop.
+
+## Commercial Story
+
+Flywheel is both an engine and a proof surface.
+
+The business-facing story is not that an SMB owner should become an agentic
+coding expert. It is that ZestStream has taken a fast-moving, advanced AI coding
+ecosystem, adopted the latest useful substrate, and wrapped it in a safer,
+inspectable operating loop. Each project leaves behind lessons, receipts,
+guards, and patterns that make the next project stronger.
+
+The relationship is similar to a network platform making it easy to get a phone:
+the platform does not need to manufacture every device to make the experience
+work. Flywheel does not claim to have invented every upstream component. It
+assembles, verifies, teaches, and operationalizes the substrate so real projects
+can use it.
+
+For a non-technical buyer, the public repo should answer: "Do these people know
+how to run this kind of AI work safely?" For a technical reader, it should
+answer: "Can I inspect, install, test, and improve the loop myself?"
 
 ## Public Promise
 
@@ -79,6 +109,10 @@ into onboarding and smoke tests; it does not own Mobile Eats product meaning.
 Red Hat/SMB positioning is a commercial proof surface. It can explain who this
 helps and how ZestStream may support it, but it is not the whole mission.
 
+ZestTube and future public project repos are example proof surfaces. They can
+show the kinds of systems Flywheel helps ship, but they should not redefine the
+Flywheel engine or leak private project state back into it.
+
 ## Excluded State
 
 The public package must not depend on, copy, or imply access to:
@@ -102,6 +136,13 @@ plainly. Jeff Emanuel's NTM, Beads, Agent Mail, CASS-style memory, destructive
 command guard patterns, and related setup processes are upstream inspiration and
 operational dependencies, not anonymous internals.
 
+Jeff's ecosystem evolves quickly and contains unusually advanced agentic coding
+ideas. Flywheel's public opportunity is to show how those ideas are implemented
+inside a working operating system: commentable, inspectable, tested, and tied to
+project outcomes. When upstream improves, Flywheel should adopt the useful
+change, verify it in the local substrate, and lock in the lesson so future
+projects inherit it.
+
 Public install docs should prefer detection and guided setup over silent
 assumption. When the full substrate is unavailable, reduced local mode should
 still show the operator the shape of the loop without pretending to provide
@@ -122,6 +163,8 @@ The bar is:
 - every release can show a journey receipt from preflight through inspection;
 - public copy reads like ZestStream work: specific, grounded, and free of
   generic agency voice.
+- business-facing copy explains the practical value without pretending the
+  reader needs to operate the whole substrate themselves.
 
 Passing tests are not enough if they do not cover the public promise above.
 
@@ -134,7 +177,7 @@ keeps the release honest.
 
 The B0 acceptance gate for public-share readiness is explicit: the landing
 commit that introduces or materially changes this charter must include a
-`Reviewed-by: Joshua Nowak <chiefzester@gmail.com>` trailer, or the equivalent
+`Reviewed-by: Joshua Nowak <joshua@zeststream.ai>` trailer, or the equivalent
 trailer from an explicitly authorized delegate.
 
 ## Contribution Direction

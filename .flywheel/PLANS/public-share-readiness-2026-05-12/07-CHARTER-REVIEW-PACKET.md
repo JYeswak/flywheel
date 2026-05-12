@@ -11,7 +11,7 @@ Status: ready for Joshua or explicitly authorized delegate review; not approved.
 B0 acceptance requires the landing commit for `CHARTER.md` to include:
 
 ```text
-Reviewed-by: Joshua Nowak <chiefzester@gmail.com>
+Reviewed-by: Joshua Nowak <joshua@zeststream.ai>
 ```
 
 or an equivalent trailer from an explicitly authorized delegate.
@@ -29,9 +29,11 @@ the dependent public-share beads remain blocked by design.
 
 | B0 requirement | Evidence in `CHARTER.md` |
 |---|---|
-| Audience | `## Audience` names solo developer, technical lead, SMB operator, and contributor. |
+| Audience | `## Audience` names SMB owner, solo developer, technical lead, operator, and contributor. |
+| Business-owner trust path | Opening section and `## Commercial Story` explain the social-media-to-GitHub buyer path, fragmented SMB systems, manual work, and why the repo should build confidence without requiring a deep technical dive. |
 | Owned surfaces | `## Owned Surfaces` names repo templates, doctrine, Beads, Agent Mail, Socraticode, doctor/tick/dispatch-or-simulate/closeout/inspection, installer, docs, and website. |
 | Excluded Joshua-local state | `## Excluded State` blocks local paths, pane scrollback, client work, secrets, private ledgers, halted propagators, and private SkillOS/Mobile Eats/ZestStream state. |
+| Upstream substrate story | `## Substrate Attribution` names Jeff Emanuel's substrate and states that Flywheel adopts, verifies, teaches, and operationalizes upstream improvements. |
 | Publishability bar | `## Publishability Bar` requires first-read/first-command credibility, executable receipts, mechanical private-state exclusion, idempotent install/uninstall, journey receipts, and grounded ZestStream voice. |
 | Review trailer | `## Governance` states the exact `Reviewed-by` requirement before B0 can close. |
 
@@ -49,6 +51,8 @@ the dependent public-share beads remain blocked by design.
 | Adapt without Joshua-specific state | Excluded State and Publishability Bar require mechanical private-state exclusion before public extraction. |
 | SkillOS capability control plane | Boundaries section states SkillOS owns capability-loop substrate, skill governance, Jeff-stack capability ingestion, research-triad signal, and self-improving skill loops. |
 | Red Hat/SMB and Mobile Eats proof surfaces | Boundaries section limits Red Hat/SMB to commercial proof surface and Mobile Eats to product/journey proof surface. |
+| SMB trust / proof of competence | Commercial Story states the repo should answer whether ZestStream can run AI work safely and visibly for a buyer who does not need to operate the full substrate. |
+| ZestTube and future public projects | Boundaries section names ZestTube and future public repos as proof surfaces that demonstrate project types without redefining or contaminating the engine. |
 
 ## Non-Approval Findings
 
