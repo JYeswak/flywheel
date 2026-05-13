@@ -347,11 +347,23 @@ def unmask_public_values(text: str, masks: list[tuple[str, str]]) -> str:
     return unmasked
 
 
-def transform_text(text: str, rows: list[ReplacementRow]) -> tuple[str, list[str]]:
+TESTS_ONLY_RUNTIME_ROWS = {"iso-timestamp", "bead-id", "pane-number"}
+
+
+def transform_rows_for_path(rows: list[ReplacementRow], relpath: str) -> list[ReplacementRow]:
+    if relpath == "tests" or relpath.startswith("tests/"):
+        return [row for row in rows if row.id not in TESTS_ONLY_RUNTIME_ROWS]
+    return rows
+
+
+def transform_text(
+    text: str, rows: list[ReplacementRow], relpath: str = ""
+) -> tuple[str, list[str]]:
     changed_ids: list[str] = []
     transformed = text
-    masks = public_value_masks(rows)
-    for row in rows:
+    effective_rows = transform_rows_for_path(rows, relpath)
+    masks = public_value_masks(effective_rows)
+    for row in effective_rows:
         pattern = row_pattern(row)
         protected = mask_public_values(transformed, masks)
         updated, count = pattern.subn(replacement_for(row), protected)
@@ -399,7 +411,7 @@ def table_changes(
             original = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
-        transformed, row_ids = transform_text(original, rows)
+        transformed, row_ids = transform_text(original, rows, relpath)
         if transformed == original:
             continue
         changes.append({"path": relpath, "row_ids": row_ids})
@@ -423,7 +435,7 @@ def apply_table_changes(
             original = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
-        transformed, row_ids = transform_text(original, rows)
+        transformed, row_ids = transform_text(original, rows, relpath)
         if transformed == original:
             continue
         path.write_text(transformed, encoding="utf-8")

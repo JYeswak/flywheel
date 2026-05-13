@@ -44,7 +44,7 @@ for rel in \
   about/index.html \
   contact/index.html \
   styles.css \
-  design-tokens.css \
+  visual-system.css \
   assets/operating-room-map.svg \
   assets/loop-map.svg; do
   require_file "$rel"
@@ -67,8 +67,8 @@ require_literal "index.html" "A slice is one bounded workflow improvement" "land
 require_literal "index.html" "Blocked is better than bluffing" "landing names blocked-over-bluffing trust stance"
 require_literal "index.html" "operating-hero" "landing uses operating-room visual section"
 require_literal "index.html" "Proof states" "landing includes proof states"
-require_literal "design-tokens.css" "--zs-lime: #d4f34a" "design token exposes yuzu lime"
-require_literal "design-tokens.css" "--zs-yuzu: #f2c94c" "design token exposes yuzu gold"
+require_literal "visual-system.css" "--zs-lime: #d4f34a" "visual system exposes yuzu lime"
+require_literal "visual-system.css" "--zs-yuzu: #f2c94c" "visual system exposes yuzu gold"
 require_literal "assets/operating-room-map.svg" "SELECTED WORKFLOW SLICE" "operating map names selected slice"
 require_literal "assets/operating-room-map.svg" "PROOF RAIL" "operating map names proof rail"
 require_literal "../docs/runbooks/public-site-smb-journey-wireframe.md" "OperatingRoomHero" "wireframe defines reusable OperatingRoomHero primitive"

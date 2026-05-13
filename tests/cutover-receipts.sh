@@ -68,7 +68,7 @@ JSON
 JSON
   printf 'HTTP/2 200\n' >"$dir/website-head.txt"
   jq -nc '{schema_version:"flywheel.live_site_probe.v0",status:"pass",source_count:6,probe_count:14,pass_count:14,failure_count:0,skipped_external_count:6,failures:[]}' >"$dir/live-site-probe.json"
-  jq -nc '{url:"https://flywheel.zeststream.ai/",status_code:200,body_text:"Flywheel",body_sha256:"unused"}' >"$dir/website-probe.json"
+  jq -nc '{url:"https://flywheel.zeststream.ai/",status_code:200,body_text:"Flywheel. Your business already has the data. I help SMB owners buy their time back. The Yuzu Method starts with one workflow slice.",body_sha256:"unused"}' >"$dir/website-probe.json"
   jq -nc --arg hash "$install_hash" '{url:"https://flywheel.zeststream.ai/install.sh",status_code:200,body_sha256:$hash,body_text:"install-body"}' >"$dir/install-probe.json"
   jq -nc --arg hash "$install_hash" '{url:"https://flywheel.zeststream.ai/install.sh.sha256",status_code:200,body_sha256:"unused",body_text:($hash + "  install.sh\n")}' >"$dir/install-sha256-probe.json"
   printf '%s\n' "$install_hash" >"$dir/install-sha256.actual"

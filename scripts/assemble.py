@@ -166,7 +166,7 @@ def copy_and_rewrite(
             requested_row_ids = set(row.get("rewrite_required", []))
             requested_rows = [row for row in table_rows if row.id in requested_row_ids]
             if requested_rows:
-                transformed, rewrite_rows = transform_text(text, requested_rows)
+                transformed, rewrite_rows = transform_text(text, requested_rows, relpath)
                 if transformed != text:
                     dst.write_text(transformed, encoding="utf-8")
         copied.append(

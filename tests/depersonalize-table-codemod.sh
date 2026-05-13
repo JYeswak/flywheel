@@ -163,6 +163,24 @@ else
   fail "reviewed runtime fixtures are root scoped tests_rc=${tests_fixtures_rc} not_tests_rc=${not_tests_fixtures_rc}"
 fi
 
+mkdir -p "$TMP/apply-tests/tests" "$TMP/apply-tests/docs"
+printf '%s %s %s\n' "$fixture_timestamp" "$fixture_bead" "$fixture_pane" >"$TMP/apply-tests/tests/fixture.md"
+printf '%s %s %s\n' "$fixture_timestamp" "$fixture_bead" "$fixture_pane" >"$TMP/apply-tests/docs/fixture.md"
+run_capture "$TMP/apply-tests.out" "$TMP/apply-tests.err" \
+  python3 "$SCRIPT" --apply --root "$TMP/apply-tests" --json
+apply_tests_rc=$?
+if [[ "$apply_tests_rc" -eq 0 ]] \
+  && rg -qF "$fixture_timestamp" "$TMP/apply-tests/tests/fixture.md" \
+  && rg -qF "$fixture_bead" "$TMP/apply-tests/tests/fixture.md" \
+  && rg -qF "$fixture_pane" "$TMP/apply-tests/tests/fixture.md" \
+  && rg -qF "<timestamp>" "$TMP/apply-tests/docs/fixture.md" \
+  && rg -qF "{bead-id}" "$TMP/apply-tests/docs/fixture.md" \
+  && rg -qF "<pane-id>" "$TMP/apply-tests/docs/fixture.md"; then
+  pass "apply preserves reviewed runtime test fixtures"
+else
+  fail "apply preserves reviewed runtime test fixtures rc=${apply_tests_rc}"
+fi
+
 mkdir -p "$TMP/claude-slug"
 printf '%s\n' "\$HOME/.claude/projects/-Users-josh-Developer-flywheel/memory/example.md" >"$TMP/claude-slug/path.md"
 printf '%s\n' "\$HOME/.claude/projects/-Users-josh-Developer-{session}/memory/example.md" >>"$TMP/claude-slug/path.md"

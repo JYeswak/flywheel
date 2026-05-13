@@ -113,17 +113,29 @@ rows:
     row_id: tmux-pane-captures
     reason: "Reviewed regression test filename intentionally exercises raw pane-capture denylist coverage."
   - id: tests-fixture-iso-timestamps
-    root_pattern: "**/tests"
-    path_pattern: "**/*"
+    path_pattern: "tests/**"
     row_id: iso-timestamp
     reason: "Reviewed tests-only synthetic runtime timestamps; docs/scripts/templates still fail if this row appears there."
   - id: tests-fixture-bead-ids
-    root_pattern: "**/tests"
-    path_pattern: "**/*"
+    path_pattern: "tests/**"
     row_id: bead-id
     reason: "Reviewed tests-only synthetic Bead IDs in historical receipts and fixtures; public surfaces remain blocked."
   - id: tests-fixture-pane-numbers
+    path_pattern: "tests/**"
+    row_id: pane-number
+    reason: "Reviewed tests-only synthetic pane numbers in shell fixtures; public surfaces remain blocked."
+  - id: tests-root-fixture-iso-timestamps
+    root_pattern: "**/tests"
+    path_pattern: "**/*"
+    row_id: iso-timestamp
+    reason: "Reviewed tests-only synthetic runtime timestamps when the scan root is the tests directory."
+  - id: tests-root-fixture-bead-ids
+    root_pattern: "**/tests"
+    path_pattern: "**/*"
+    row_id: bead-id
+    reason: "Reviewed tests-only synthetic Bead IDs when the scan root is the tests directory."
+  - id: tests-root-fixture-pane-numbers
     root_pattern: "**/tests"
     path_pattern: "**/*"
     row_id: pane-number
-    reason: "Reviewed tests-only synthetic pane numbers in shell fixtures; public surfaces remain blocked."
+    reason: "Reviewed tests-only synthetic pane numbers when the scan root is the tests directory."

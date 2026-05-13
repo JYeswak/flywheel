@@ -35,9 +35,9 @@ The current end-to-end status is:
 Do not claim agent runtime support from this page alone. Public support copy
 must follow `scripts/isolated-agent-lane-smoke.sh --live-adapters` and
 `scripts/agent-lane-probe.sh --receipt-dir state/isolated-agent-lanes --json`.
-Current local receipts prove Claude Code and Gemini CLI in isolated mode; Codex
-CLI remains blocked on isolated auth, and OpenClaw remains blocked on isolated
-agent/session configuration.
+Current local receipts prove Claude Code and Gemini CLI in isolated mode. Codex
+CLI has an `auth_required` receipt, and OpenClaw has an
+`adapter_config_required` receipt.
 
 ## Journey Contract
 
