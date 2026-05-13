@@ -5,12 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flywheel | ZestStream</title>
     <meta name="description" content="Flywheel shows how Joshua Nowak brings AI into SMB workflows one bounded improvement at a time.">
+    <link rel="stylesheet" href="./design-tokens.css">
     <link rel="stylesheet" href="./styles.css">
   </head>
   <body>
     <header class="topbar">
       <nav class="shell nav" aria-label="Main navigation">
-        <a class="brand" href="./index.html">Flywheel</a>
+        <a class="brand" href="./index.html" aria-label="Flywheel home">
+          <span class="brand-mark">F</span>
+          <span>Flywheel</span>
+        </a>
         <div class="links">
           <a href="./what-is/index.html">What Is It</a>
           <a href="./for-developers/index.html">Developers</a>
@@ -21,57 +25,136 @@
       </nav>
     </header>
     <main>
-      <section class="hero">
-        <div class="shell hero-grid">
-          <div>
-            <div class="eyebrow">The Yuzu Method by ZestStream</div>
-            <h1>Your business already has the data.</h1>
-            <p class="lead">It is just trapped in tools that do not talk: email, CRM, calendars, invoices, documents, and the manual steps between them.</p>
-            <p>I help SMB owners buy their time back. Flywheel is the public version of how I bring AI into that mess without turning the business into a lab: map the work, pick one bounded workflow slice, prove what changed, and keep the lesson for the next build.</p>
+      <section class="operating-hero" aria-labelledby="hero-title">
+        <img class="hero-map" src="./assets/operating-room-map.svg" alt="ZestStream operating room map showing disconnected SMB systems, one highlighted workflow slice, and a proof rail">
+        <div class="hero-overlay shell">
+          <div class="hero-copy">
+            <div class="status-pill">The Yuzu Method ® by ZestStream</div>
+            <h1 id="hero-title">Your business already has the data. The work is just hidden between tools.</h1>
+            <p class="lead">Email, CRM, calendars, invoices, documents, and reports all hold part of the truth. The manual work between them is where time disappears.</p>
+            <p>I help SMB owners buy their time back. Flywheel is the visible method I use to map the work, cut one bounded workflow slice, prove what changed, and keep the lesson for the next build.</p>
             <div class="actions">
               <a class="button" href="./contact/index.html">Map my workflow</a>
-              <a class="button secondary" href="./methodology/index.html">See the safeguards</a>
+              <a class="button secondary" href="#proof-path">Inspect the proof</a>
             </div>
           </div>
-          <img class="visual" src="./assets/loop-map.svg" alt="Flywheel loop from disconnected systems to agent work, doctor checks, receipts, lessons, and next actions">
         </div>
       </section>
-      <section class="band alt">
-        <div class="shell grid">
-          <article class="panel"><h2>Map First</h2><p>I name the systems, manual steps, exceptions, and owner decisions before any automation gets built.</p></article>
-          <article class="panel"><h2>One Workable Slice</h2><p>A slice is one bounded workflow improvement: useful enough to feel, small enough to inspect, and reversible enough to trust.</p></article>
-          <article class="panel"><h2>Lessons Compound</h2><p>Every checked workflow leaves behind reusable runbooks, tests, and safety gates for the next project.</p></article>
+
+      <section class="story-band tight">
+        <div class="shell split">
+          <div>
+            <p class="kicker">The real problem</p>
+            <h2>The mess has a shape.</h2>
+          </div>
+          <p class="section-lead">Most SMB AI pitches skip the workflow and start with the tool. That is backwards. The first useful work is seeing where the handoffs, re-entry, screenshots, and memory-based decisions already live.</p>
+        </div>
+        <div class="shell route-board" aria-label="Common SMB workflow route">
+          <div class="route-node"><span>Email</span><small>request starts</small></div>
+          <div class="route-step">manual copy</div>
+          <div class="route-node"><span>CRM</span><small>status changes</small></div>
+          <div class="route-step">owner checks</div>
+          <div class="route-node"><span>Calendar</span><small>date moves</small></div>
+          <div class="route-step">follow-up waits</div>
+          <div class="route-node"><span>Invoice</span><small>next task hides</small></div>
         </div>
       </section>
-      <section class="band">
+
+      <section class="slice-stage" aria-labelledby="slice-title">
         <div class="shell">
-          <h2>What Owners Are Right To Worry About</h2>
-          <div class="grid">
-            <article class="panel"><h3>AI can make a mess</h3><p>That is why the first move is a workflow map, not a bot. I need to see how the work moves before I wire anything into it.</p></article>
-            <article class="panel"><h3>AI can sound right and be wrong</h3><p>If a claim is not proven, it stays blocked. The work stays inspectable, so confidence comes from evidence instead of polish.</p></article>
-            <article class="panel"><h3>You should not need to become an AI expert</h3><p>You approve the slice, the risk boundary, and the proof. I manage the machinery behind it.</p></article>
+          <div class="slice-layout">
+            <div class="slice-copy">
+              <p class="kicker">One slice first</p>
+              <h2 id="slice-title">A slice is one bounded workflow improvement.</h2>
+              <p>Useful enough to feel, small enough to inspect, and clear enough to stop if the proof is not there.</p>
+              <p>A first slice might route an email request into the right follow-up list, update the place the owner already checks when an appointment changes, or create the checklist item the team would have made by hand.</p>
+            </div>
+            <div class="workbench" aria-label="Workflow slice workbench">
+              <div class="bench-col">
+                <span class="bench-label">Before</span>
+                <p>Five tools hold five versions of the same job.</p>
+              </div>
+              <div class="bench-col active">
+                <span class="bench-label">Slice</span>
+                <p>One route gets mapped, built, reviewed, and measured.</p>
+              </div>
+              <div class="bench-col">
+                <span class="bench-label">Proof</span>
+                <p>Passed, blocked, private, or skipped with a reason.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
-      <section class="band">
-        <div class="shell">
-          <h2>The Yuzu Method</h2>
-          <p>The Yuzu Method is how I bring AI into an operating business without turning the business into a lab. I peel one useful workflow slice at a time, prove it in the open, keep private work private, and turn every lesson into reusable operating knowledge.</p>
-          <div class="grid">
-            <article class="panel"><h3>Private work stays private</h3><p>Public proof is redacted, consented, or replaced with Flywheel-on-Flywheel evidence before it becomes part of the story.</p></article>
-            <article class="panel"><h3>Blocked is better than bluffing</h3><p>If a claim is not proven, it stays blocked. The method treats visible uncertainty as a safety feature.</p></article>
-            <article class="panel"><h3>You approve the slice</h3><p>You do not need to become an AI expert. You need a clear next workflow, a risk boundary, and proof you can inspect.</p></article>
+
+      <section class="yuzu-band" aria-labelledby="yuzu-title">
+        <div class="shell yuzu-grid">
+          <div>
+            <p class="kicker">Peel. Press. Pour.™</p>
+            <h2 id="yuzu-title">The first slice is small on purpose.</h2>
+            <p>The Yuzu Method ® is how I bring AI into an operating business without turning the business into a lab.</p>
+          </div>
+          <ol class="method-rail" aria-label="Yuzu Method steps">
+            <li><strong>Peel</strong><span>Map the work before touching the business.</span></li>
+            <li><strong>Press</strong><span>Build and verify one useful slice.</span></li>
+            <li><strong>Pour</strong><span>Keep the lesson so the next build starts smarter.</span></li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="control-room" aria-labelledby="control-title">
+        <div class="shell control-grid">
+          <div>
+            <p class="kicker">Advanced AI, controlled loop</p>
+            <h2 id="control-title">Blocked is better than bluffing.</h2>
+            <p>I use current AI coding systems, including work influenced by Jeff Emanuel's public agent tooling, but the owner does not need to run the machinery. The work goes through a visible loop: map, build, test, review, reuse.</p>
+          </div>
+          <div class="proof-stack" id="proof-path" aria-label="Proof states">
+            <div class="proof-row"><span class="proof-dot good"></span><strong>Private work stays private.</strong><em>Redacted, consented, or replaced before public proof.</em></div>
+            <div class="proof-row"><span class="proof-dot warn"></span><strong>The work stays inspectable.</strong><em>Each claim has a state and a path to evidence.</em></div>
+            <div class="proof-row"><span class="proof-dot stop"></span><strong>Unsupported stays blocked.</strong><em>No polish upgrades a claim that has not earned proof.</em></div>
           </div>
         </div>
       </section>
-      <section class="band">
+
+      <section class="worry-band" aria-labelledby="worry-title">
         <div class="shell">
-          <h2>Developer Path</h2>
+          <div class="split">
+            <div>
+              <p class="kicker">What owners are right to worry about</p>
+              <h2 id="worry-title">Trust comes from controls you can see.</h2>
+            </div>
+            <p class="section-lead">Privacy, accuracy, cost, integration, and training concerns are not objections to dismiss. They are the design brief.</p>
+          </div>
+          <div class="worry-matrix">
+            <div><span>AI will make a mess.</span><strong>I map the work before I automate it.</strong></div>
+            <div><span>My data will leak.</span><strong>Private work stays private.</strong></div>
+            <div><span>It will sound right and be wrong.</span><strong>If a claim is not proven, it stays blocked.</strong></div>
+            <div><span>I do not want to become an AI expert.</span><strong>You approve the slice; I manage the machinery.</strong></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="technical-path" aria-labelledby="technical-title">
+        <div class="shell technical-grid">
+          <div>
+            <p class="kicker">For reviewers</p>
+            <h2 id="technical-title">The proof gets deeper on demand.</h2>
+            <p>Business owners should not need GitHub depth to understand the offer. Technical reviewers can still inspect the reduced local path and the current blockers.</p>
+          </div>
           <pre><code>git clone https://github.com/JYeswak/flywheel.git
 cd flywheel
 scripts/preflight.sh --json
 scripts/journey-smoke.sh --matrix reduced --dry-run --json</code></pre>
-          <p>Reduced local mode is the required public fallback. Claude, Codex, Gemini, and OpenClaw are compatibility targets until their runtime receipts mark them proven.</p>
+        </div>
+      </section>
+
+      <section class="cta-band">
+        <div class="shell cta-wrap">
+          <p class="kicker">Start safely</p>
+          <h2>Map one workflow before you buy another tool.</h2>
+          <p>Send a redacted example of the work that keeps getting copied, checked, or chased. Do not send secrets or raw customer data.</p>
+          <a class="button" href="./contact/index.html">Map my workflow</a>
         </div>
       </section>
     </main>

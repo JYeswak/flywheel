@@ -20,7 +20,7 @@ require_file() {
 
 require_literal() {
   local rel="$1" literal="$2" label="$3"
-  if rg -qF "$literal" "$SITE/$rel"; then
+  if rg -qF -- "$literal" "$SITE/$rel"; then
     pass "$label"
   else
     fail "$label"
@@ -29,7 +29,7 @@ require_literal() {
 
 reject_literal() {
   local literal="$1" label="$2"
-  if rg -qF "$literal" "$SITE"; then
+  if rg -qF -- "$literal" "$SITE"; then
     fail "$label"
   else
     pass "$label"
@@ -44,6 +44,8 @@ for rel in \
   about/index.html \
   contact/index.html \
   styles.css \
+  design-tokens.css \
+  assets/operating-room-map.svg \
   assets/loop-map.svg; do
   require_file "$rel"
 done
@@ -57,11 +59,22 @@ done < <(find "$SITE" -name '*.html' -print0 | sort -z)
 
 require_literal "index.html" "scripts/journey-smoke.sh --matrix reduced --dry-run --json" "landing has reduced first run"
 require_literal "index.html" "https://github.com/JYeswak/flywheel" "landing links github"
-require_literal "index.html" "Your business already has the data." "landing leads with SMB owner problem"
-require_literal "index.html" "The Yuzu Method" "landing names Yuzu Method"
+require_literal "index.html" "Your business already has the data. The work is just hidden between tools." "landing leads with SMB owner problem"
+require_literal "index.html" "The Yuzu Method ®" "landing names Yuzu Method with trademark"
+require_literal "index.html" "Peel. Press. Pour.™" "landing names Yuzu motto"
 require_literal "index.html" "I help SMB owners buy their time back." "landing carries ZestStream canon line"
 require_literal "index.html" "A slice is one bounded workflow improvement" "landing defines workflow slice"
 require_literal "index.html" "Blocked is better than bluffing" "landing names blocked-over-bluffing trust stance"
+require_literal "index.html" "operating-hero" "landing uses operating-room visual section"
+require_literal "index.html" "Proof states" "landing includes proof states"
+require_literal "design-tokens.css" "--zs-lime: #d4f34a" "design token exposes yuzu lime"
+require_literal "design-tokens.css" "--zs-yuzu: #f2c94c" "design token exposes yuzu gold"
+require_literal "assets/operating-room-map.svg" "SELECTED WORKFLOW SLICE" "operating map names selected slice"
+require_literal "assets/operating-room-map.svg" "PROOF RAIL" "operating map names proof rail"
+require_literal "../docs/runbooks/public-site-smb-journey-wireframe.md" "OperatingRoomHero" "wireframe defines reusable OperatingRoomHero primitive"
+require_literal "../docs/runbooks/public-site-smb-journey-wireframe.md" "WorkflowMap" "wireframe defines reusable WorkflowMap primitive"
+require_literal "../docs/runbooks/public-site-smb-journey-wireframe.md" "SliceWorkbench" "wireframe defines reusable SliceWorkbench primitive"
+require_literal "../docs/runbooks/public-site-smb-journey-wireframe.md" "ProofRail" "wireframe defines reusable ProofRail primitive"
 require_literal "what-is/index.html" "SkillOS is a capability control plane integration point" "what-is names SkillOS boundary"
 require_literal "for-developers/index.html" "Claude Code" "developer page names Claude"
 require_literal "for-developers/index.html" "Codex CLI" "developer page names Codex"

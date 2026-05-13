@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="980" viewBox="0 0 1400 980" role="img" aria-labelledby="title desc">
+  <title id="title">ZestStream operating room map</title>
+  <desc id="desc">A workflow map showing disconnected SMB tools, a highlighted manual route, one bounded yuzu workflow slice, and a proof rail.</desc>
+  <defs>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="28" stdDeviation="28" flood-color="#151816" flood-opacity="0.18"/>
+    </filter>
+    <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse">
+      <path d="M 42 0 L 0 0 0 42" fill="none" stroke="#151816" stroke-opacity="0.08" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1400" height="980" fill="#fbfaf4"/>
+  <rect x="0" y="0" width="1400" height="980" fill="url(#grid)"/>
+  <path d="M92 170 C246 72 408 96 560 202 C725 318 879 301 1021 205 C1156 113 1261 123 1336 178" fill="none" stroke="#151816" stroke-opacity="0.12" stroke-width="2"/>
+  <path d="M95 635 C218 518 356 525 495 652 C636 781 816 772 976 637 C1113 521 1235 519 1330 619" fill="none" stroke="#151816" stroke-opacity="0.12" stroke-width="2"/>
+
+  <g filter="url(#softShadow)">
+    <rect x="96" y="122" width="1208" height="710" rx="22" fill="#fffdf7" stroke="#151816" stroke-opacity="0.22" stroke-width="2"/>
+    <rect x="126" y="152" width="1148" height="650" rx="14" fill="#f7f1e5" stroke="#151816" stroke-opacity="0.16"/>
+  </g>
+
+  <g font-family="Inter, Arial, sans-serif" fill="#151816">
+    <text x="150" y="198" font-size="18" font-weight="800" letter-spacing="3">ZESTSTREAM OPERATING ROOM</text>
+    <text x="150" y="226" font-size="14" fill="#64706a">One owner-visible workflow under inspection</text>
+    <text x="1052" y="198" font-size="14" font-weight="800" fill="#1f8f5f">PROOF RAIL: ACTIVE</text>
+  </g>
+
+  <g font-family="Inter, Arial, sans-serif" font-size="15" font-weight="800">
+    <g transform="translate(178 338)">
+      <rect width="154" height="82" rx="10" fill="#ffffff" stroke="#151816" stroke-opacity="0.28"/>
+      <circle cx="35" cy="41" r="19" fill="#2a6fbb"/>
+      <text x="68" y="35" fill="#151816">Email</text>
+      <text x="68" y="56" fill="#64706a" font-size="12">request starts</text>
+    </g>
+    <g transform="translate(402 238)">
+      <rect width="154" height="82" rx="10" fill="#ffffff" stroke="#151816" stroke-opacity="0.28"/>
+      <circle cx="35" cy="41" r="19" fill="#1f9a9a"/>
+      <text x="68" y="35" fill="#151816">CRM</text>
+      <text x="68" y="56" fill="#64706a" font-size="12">status lives</text>
+    </g>
+    <g transform="translate(654 348)">
+      <rect width="154" height="82" rx="10" fill="#ffffff" stroke="#151816" stroke-opacity="0.28"/>
+      <circle cx="35" cy="41" r="19" fill="#6c4ab6"/>
+      <text x="68" y="35" fill="#151816">Calendar</text>
+      <text x="68" y="56" fill="#64706a" font-size="12">time changes</text>
+    </g>
+    <g transform="translate(880 250)">
+      <rect width="154" height="82" rx="10" fill="#ffffff" stroke="#151816" stroke-opacity="0.28"/>
+      <circle cx="35" cy="41" r="19" fill="#df5b46"/>
+      <text x="68" y="35" fill="#151816">Invoices</text>
+      <text x="68" y="56" fill="#64706a" font-size="12">next task waits</text>
+    </g>
+    <g transform="translate(1088 386)">
+      <rect width="154" height="82" rx="10" fill="#ffffff" stroke="#151816" stroke-opacity="0.28"/>
+      <circle cx="35" cy="41" r="19" fill="#f2c94c"/>
+      <text x="68" y="35" fill="#151816">Docs</text>
+      <text x="68" y="56" fill="#64706a" font-size="12">proof arrives</text>
+    </g>
+    <g transform="translate(520 604)">
+      <rect width="180" height="82" rx="10" fill="#ffffff" stroke="#151816" stroke-opacity="0.28"/>
+      <circle cx="35" cy="41" r="19" fill="#151816"/>
+      <text x="68" y="35" fill="#151816">Reports</text>
+      <text x="68" y="56" fill="#64706a" font-size="12">memory fills gaps</text>
+    </g>
+  </g>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M332 379 C370 348 392 320 402 285" stroke="#151816" stroke-opacity="0.3" stroke-width="4" stroke-dasharray="9 13"/>
+    <path d="M556 280 C598 302 631 330 654 374" stroke="#151816" stroke-opacity="0.3" stroke-width="4" stroke-dasharray="9 13"/>
+    <path d="M808 384 C842 349 870 319 880 290" stroke="#151816" stroke-opacity="0.3" stroke-width="4" stroke-dasharray="9 13"/>
+    <path d="M1034 300 C1060 325 1077 356 1088 421" stroke="#151816" stroke-opacity="0.3" stroke-width="4" stroke-dasharray="9 13"/>
+    <path d="M1164 468 C1030 604 865 686 700 645" stroke="#151816" stroke-opacity="0.3" stroke-width="4" stroke-dasharray="9 13"/>
+  </g>
+
+  <g>
+    <path d="M254 379 C371 299 479 285 688 389 C826 458 949 430 1164 427" fill="none" stroke="#f2c94c" stroke-width="18" stroke-linecap="round" stroke-opacity="0.86"/>
+    <path d="M254 379 C371 299 479 285 688 389 C826 458 949 430 1164 427" fill="none" stroke="#151816" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 17" stroke-opacity="0.42"/>
+  </g>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <rect x="486" y="452" width="420" height="116" rx="14" fill="#151816"/>
+    <path d="M498 452 L906 452 L876 568 L528 568 Z" fill="#d4f34a" opacity="0.92"/>
+    <text x="532" y="493" fill="#151816" font-size="17" font-weight="900" letter-spacing="2">SELECTED WORKFLOW SLICE</text>
+    <text x="532" y="523" fill="#151816" font-size="15">One bounded improvement, proof first.</text>
+    <text x="532" y="548" fill="#2e3632" font-size="13">Useful enough to feel. Small enough to inspect.</text>
+  </g>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <rect x="984" y="552" width="258" height="194" rx="14" fill="#ffffff" stroke="#151816" stroke-opacity="0.24"/>
+    <text x="1010" y="590" fill="#151816" font-size="15" font-weight="900" letter-spacing="2">PROOF RAIL</text>
+    <circle cx="1022" cy="626" r="7" fill="#1f8f5f"/>
+    <text x="1042" y="631" fill="#151816" font-size="14" font-weight="700">Mapped before build</text>
+    <circle cx="1022" cy="662" r="7" fill="#f2c94c"/>
+    <text x="1042" y="667" fill="#151816" font-size="14" font-weight="700">Human review required</text>
+    <circle cx="1022" cy="698" r="7" fill="#df5b46"/>
+    <text x="1042" y="703" fill="#151816" font-size="14" font-weight="700">Unsupported stays blocked</text>
+  </g>
+
+  <g font-family="Inter, Arial, sans-serif">
+    <text x="150" y="764" fill="#64706a" font-size="13" font-weight="800" letter-spacing="2">PEEL. PRESS. POUR.™</text>
+    <text x="150" y="790" fill="#151816" font-size="15">Map the work. Prove one slice. Keep the lesson.</text>
+  </g>
+</svg>
