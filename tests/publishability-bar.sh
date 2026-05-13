@@ -68,7 +68,8 @@ jq -e '.status == "fail" and (.errors[]?.code == "brand_voice_composite_low")' "
 make_repo "$TMPDIR/client-exempt" 7 no "" EXEMPT_CLIENT_OWNED
 "$SCRIPT" --doctor --json --repo "$TMPDIR/client-exempt" | jq -e '.status == "pass" and .brand_voice.exempt == true and .brand_voice.exemption_class == "EXEMPT_CLIENT_OWNED"' >/dev/null
 
-FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 "$LOOP" doctor --repo "$ROOT" --json > "$TMPDIR/doctor.json" || true
-jq -e '.publishability_bar.schema_version == "publishability-bar/v1" and (.publishability_bar_score.score | type == "number")' "$TMPDIR/doctor.json" >/dev/null
+bash -c "source '$HOME/.claude/skills/.flywheel/lib/portable/core.sh' && type publishability_bar_doctor_json" >/dev/null
+"$SCRIPT" --doctor --json --repo "$ROOT" > "$TMPDIR/doctor.json"
+jq -e '.schema_version == "publishability-bar/v1" and (.publishability_bar_score.score | type == "number")' "$TMPDIR/doctor.json" >/dev/null
 
 printf '%s\n' "PASS publishability-bar"
