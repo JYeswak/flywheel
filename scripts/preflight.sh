@@ -323,7 +323,14 @@ while [[ $# -gt 0 ]]; do
     doctor) MODE="doctor"; shift ;;
     health) MODE="health"; shift ;;
     quickstart) MODE="quickstart"; shift ;;
-    help) MODE="help"; SUBJECT="${2:-}"; shift; [[ $# -gt 0 ]] && shift || true ;;
+    help)
+      MODE="help"
+      SUBJECT="${2:-}"
+      shift
+      if [[ $# -gt 0 ]]; then
+        shift
+      fi
+      ;;
     -h|--help) MODE="usage"; shift ;;
     *) die_usage "unknown argument: $1" ;;
   esac

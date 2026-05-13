@@ -28,10 +28,11 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y jq shellcheck
+          sudo apt-get install -y jq ripgrep shellcheck
           python3 -m pip install --user ruff
           npm install -g markdownlint-cli@0.43.0
           printf '%s/.local/bin\n' "$HOME" >>"$GITHUB_PATH"
+          printf '%s/bin\n' "$(npm prefix -g)" >>"$GITHUB_PATH"
 
       - name: Contract tests
         run: |
@@ -66,6 +67,7 @@ jobs:
             install.sh \
             uninstall.sh \
             scripts/preflight.sh \
+            scripts/local-actions-preflight.sh \
             scripts/journey-smoke.sh \
             scripts/agent-lane-probe.sh \
             tests/installer-smoke.sh \
@@ -127,9 +129,11 @@ jobs:
             docs/runbooks/public-release-runbook.md \
             docs/runbooks/release-cutover-authorization.md \
             docs/runbooks/context-and-model-routing.md \
+            docs/runbooks/local-actions-preflight.md \
             docs/runbooks/agent-lane-compatibility.md \
             docs/runbooks/upstream-substrate-adoption.md \
             docs/runbooks/public-user-journey-pack.md \
+            docs/runbooks/public-site-smb-journey-wireframe.md \
             docs/stories/public-journey-and-redaction.md \
             docs/evidence/publication-evidence.md \
             docs/concepts/*.md \

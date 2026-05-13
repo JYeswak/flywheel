@@ -57,6 +57,11 @@ done < <(find "$SITE" -name '*.html' -print0 | sort -z)
 
 require_literal "index.html" "scripts/journey-smoke.sh --matrix reduced --dry-run --json" "landing has reduced first run"
 require_literal "index.html" "https://github.com/JYeswak/flywheel" "landing links github"
+require_literal "index.html" "Your business already has the data." "landing leads with SMB owner problem"
+require_literal "index.html" "The Yuzu Method" "landing names Yuzu Method"
+require_literal "index.html" "I help SMB owners buy their time back." "landing carries ZestStream canon line"
+require_literal "index.html" "A slice is one bounded workflow improvement" "landing defines workflow slice"
+require_literal "index.html" "Blocked is better than bluffing" "landing names blocked-over-bluffing trust stance"
 require_literal "what-is/index.html" "SkillOS is a capability control plane integration point" "what-is names SkillOS boundary"
 require_literal "for-developers/index.html" "Claude Code" "developer page names Claude"
 require_literal "for-developers/index.html" "Codex CLI" "developer page names Codex"
@@ -64,6 +69,11 @@ require_literal "for-developers/index.html" "Gemini CLI" "developer page names G
 require_literal "for-developers/index.html" "OpenClaw" "developer page names OpenClaw"
 require_literal "for-developers/index.html" "Reduced local mode" "developer page names reduced mode"
 require_literal "methodology/index.html" "fully redacted, explicitly consented, or replaced" "methodology names consent fallback"
+require_literal "methodology/index.html" "AI adoption without operational chaos." "methodology names AI chaos concern"
+require_literal "methodology/index.html" "What Owners Are Right To Worry About" "methodology names owner objections"
+require_literal "methodology/index.html" "The first slice is small on purpose." "methodology names safe slice"
+require_literal "methodology/index.html" "If a claim is not proven, it stays blocked." "methodology names blocked claim stance"
+require_literal "methodology/index.html" "The Compounding Loop" "methodology names reusable learning loop"
 require_literal "about/index.html" "joshua@zeststream.ai" "about includes public contact"
 require_literal "about/index.html" 'alt="Joshua Nowak and ZestStream operating map for Flywheel"' "about image alt text"
 require_literal "contact/index.html" "%5BFlywheel%5D%20Public%20site%20inquiry" "contact uses required subject prefix"
@@ -78,6 +88,14 @@ if rg -q '<img [^>]*alt=""' "$SITE"; then
   fail "no empty image alt text"
 else
   pass "no empty image alt text"
+fi
+
+if rg -qF "Private Work Stays Private" "$SITE/methodology/index.html" \
+  && rg -qF "One Workable Slice First" "$SITE/methodology/index.html" \
+  && rg -qF "Proof Gets Deeper On Demand" "$SITE/methodology/index.html"; then
+  pass "methodology translates proof into SMB-facing value"
+else
+  fail "methodology translates proof into SMB-facing value"
 fi
 
 if ROOT="$ROOT" python3 <<'PY'
@@ -99,13 +117,13 @@ if not evidence_match:
     sys.exit(1)
 classified, copied, _excluded, manual_review = evidence_match.groups()
 for value in (classified, copied, manual_review):
-    if value not in methodology:
+    if value in methodology:
         sys.exit(1)
 PY
 then
-  pass "methodology metrics match publication evidence"
+  pass "methodology keeps audit counts out of SMB copy"
 else
-  fail "methodology metrics match publication evidence"
+  fail "methodology keeps audit counts out of SMB copy"
 fi
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"

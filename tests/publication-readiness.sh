@@ -328,19 +328,19 @@ jq -nc '{url:"https://flywheel.zeststream.ai/",status_code:200,body_text:"Flywhe
 jq -nc --arg hash "$install_hash" '{url:"https://flywheel.zeststream.ai/install.sh",status_code:200,body_sha256:$hash,body_text:"install-body"}' >"$TMP/install-ok.json"
 jq -nc --arg hash "$install_hash" '{url:"https://flywheel.zeststream.ai/install.sh.sha256",status_code:200,body_sha256:"unused",body_text:($hash + "  install.sh\n")}' >"$TMP/install-sha-ok.json"
 cat >"$TMP/signoff.json" <<'JSON'
-{"schema_version":"flywheel.release_signoff.v0","status":"approved","approver":"Joshua Nowak","tag":"v0.2.0","remote":"JYeswak/flywheel","signed_at":"20260513T000000Z"}
+{"schema_version":"flywheel.release_signoff.v0","status":"approved","approver":"Joshua Nowak","tag":"v0.2.0","remote":"JYeswak/flywheel","signed_at":"2026-05-13T00:00:00Z"}
 JSON
 cat >"$TMP/signoff-pending.json" <<'JSON'
 {"schema_version":"flywheel.release_signoff.v0","status":"pending","approver":"Joshua Nowak","tag":"v0.2.0","remote":"JYeswak/flywheel","signed_at":""}
 JSON
 cat >"$TMP/signoff-alias.json" <<'JSON'
-{"schema_version":"flywheel.release_signoff.v0","status":"approved","approver":"Josh","tag":"v0.2.0","remote":"JYeswak/flywheel","signed_at":"20260513T000000Z"}
+{"schema_version":"flywheel.release_signoff.v0","status":"approved","approver":"Josh","tag":"v0.2.0","remote":"JYeswak/flywheel","signed_at":"2026-05-13T00:00:00Z"}
 JSON
 cat >"$TMP/signoff-bad-ts.json" <<'JSON'
 {"schema_version":"flywheel.release_signoff.v0","status":"approved","approver":"Joshua Nowak","tag":"v0.2.0","remote":"JYeswak/flywheel","signed_at":"not-a-timestamp"}
 JSON
 cat >"$TMP/signoff-missing-schema.json" <<'JSON'
-{"status":"approved","approver":"Joshua Nowak","tag":"v0.2.0","remote":"JYeswak/flywheel","signed_at":"20260513T000000Z"}
+{"status":"approved","approver":"Joshua Nowak","tag":"v0.2.0","remote":"JYeswak/flywheel","signed_at":"2026-05-13T00:00:00Z"}
 JSON
 cat >"$TMP/review-pass.json" <<'JSON'
 {"schema_version":"flywheel.external_review_gate.v0","status":"pass","valid_review_count":2,"distinct_reviewer_count":2,"errors":[]}

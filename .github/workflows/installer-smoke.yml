@@ -34,9 +34,9 @@ jobs:
           set -euo pipefail
           if [[ "${{ runner.os }}" == "Linux" ]]; then
             sudo apt-get update
-            sudo apt-get install -y jq
+            sudo apt-get install -y jq ripgrep
           elif [[ "${{ runner.os }}" == "macOS" ]]; then
-            brew install jq bash
+            brew install jq bash ripgrep
             printf '/opt/homebrew/bin\n' >>"$GITHUB_PATH"
           fi
 

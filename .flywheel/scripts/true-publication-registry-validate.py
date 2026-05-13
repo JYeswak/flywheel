@@ -21,6 +21,9 @@ ID_RE = re.compile(r"^TP-\d{3}$")
 VALID_SEVERITIES = {"P0", "P1", "P2", "P3"}
 VALID_STATUSES = {"open", "in_progress", "closed", "deferred", "non_release"}
 COVERAGE_HEADER = "| Readiness blocker code | Registry rows | Coverage status |"
+READINESS_BLOCKER_ALIASES = {
+    "remote_repo_unavailable": "remote_repo_private",
+}
 
 
 def parse_rows(path: Path) -> list[dict[str, str]]:
@@ -185,7 +188,12 @@ def live_readiness_blockers(repo: Path, script: Path) -> tuple[set[str], list[di
     blockers = payload.get("blockers")
     if not isinstance(blockers, list):
         return set(), [{"code": "readiness_script_missing_blockers", "path": str(script)}]
-    codes = {str(row.get("code", "")).strip() for row in blockers if isinstance(row, dict) and row.get("code")}
+    codes = {
+        READINESS_BLOCKER_ALIASES.get(code, code)
+        for row in blockers
+        if isinstance(row, dict) and row.get("code")
+        for code in [str(row.get("code", "")).strip()]
+    }
     return codes, []
 
 

@@ -20,7 +20,7 @@ require_file() {
 
 require_literal() {
   local rel="$1" literal="$2" label="$3"
-  if rg -qF "$literal" "$ROOT/$rel"; then
+  if rg -qF -- "$literal" "$ROOT/$rel"; then
     pass "$label"
   else
     fail "$label"
@@ -105,6 +105,7 @@ for rel in \
   docs/runbooks/release-cutover-authorization.md \
   docs/runbooks/public-user-journey-pack.md \
   docs/runbooks/public-site-smb-journey-wireframe.md \
+  docs/runbooks/local-actions-preflight.md \
   docs/runbooks/upstream-substrate-adoption.md \
   docs/runbooks/agent-lane-compatibility.md \
   docs/reference/commands.md \
@@ -169,9 +170,32 @@ require_literal "docs/runbooks/public-user-journey-pack.md" "PRIVATE_STATE_LEAK"
 require_literal "docs/runbooks/public-user-journey-pack.md" "CLAIM_WITHOUT_EVIDENCE" "user journey pack names evidence failure code"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "flywheel.public_site_smb_journey_wireframe.v0" "SMB wireframe names schema"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Do not lead with receipt machinery" "SMB wireframe blocks receipt-led hero"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Do not show raw publication audit counts as SMB persuasion." "SMB wireframe blocks raw audit counts"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "private work stays private" "SMB wireframe translates proof to owner value"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Your business already has the data. It is just trapped in five systems" "SMB wireframe leads with owner problem"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "SMB Trust Objections To Answer" "SMB wireframe names trust objections"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "AI will make a mess in my business." "SMB wireframe names AI chaos objection"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "A workflow slice is one bounded improvement" "SMB wireframe defines workflow slice"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Next.js Storytelling Build Target" "SMB wireframe names Next.js storytelling target"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Server Components and Suspense" "SMB wireframe maps progressive proof to Next.js"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "If a claim is not proven, it stays blocked." "SMB wireframe names blocked claim stance"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "The Yuzu Method is how ZestStream brings AI into an operating business" "SMB wireframe defines Yuzu Method"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Map my workflow" "SMB wireframe names primary CTA"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Implementation should not be accepted if the page can pass tests while still failing this journey." "SMB wireframe prevents tests-only acceptance"
+require_literal "docs/runbooks/local-actions-preflight.md" "GitHub Actions as the final hosted-runner approval surface" "local actions runbook preserves GitHub final approval boundary"
+require_literal "docs/runbooks/local-actions-preflight.md" "brew install act actionlint" "local actions runbook names global open-source tools"
+require_literal "docs/runbooks/local-actions-preflight.md" "docker context use orbstack" "local actions runbook uses OrbStack"
+require_literal "docs/runbooks/local-actions-preflight.md" "flywheel-actions-gate" "local actions runbook names global gate"
+require_literal "docs/runbooks/local-actions-preflight.md" "--artifact-server-addr 127.0.0.1" "local actions runbook binds artifact server locally"
+require_literal "docs/runbooks/local-actions-preflight.md" "--cache-server-addr 127.0.0.1" "local actions runbook binds cache server locally"
+# shellcheck disable=SC2088
+require_literal "docs/runbooks/local-actions-preflight.md" "~/Developer/skillos" "local actions runbook stamps SkillOS"
+# shellcheck disable=SC2088
+require_literal "docs/runbooks/local-actions-preflight.md" "~/Developer/mobile-eats" "local actions runbook stamps Mobile Eats"
+# shellcheck disable=SC2088
+require_literal "docs/runbooks/local-actions-preflight.md" "~/Developer/clutterfreespaces" "local actions runbook stamps ClutterFreeSpaces"
+# shellcheck disable=SC2088
+require_literal "docs/runbooks/local-actions-preflight.md" "~/Desktop/Projects/clients/alps-insurance" "local actions runbook stamps ALPS"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/cutover-receipts.sh" "release runbook includes cutover receipt gate"
 require_literal "docs/runbooks/public-release-runbook.md" "docs/runbooks/public-user-journey-pack.md\` maps every public asset" "release runbook includes user journey pack gate"
 require_literal "docs/runbooks/public-release-runbook.md" "user-journey-pack-validation.json" "release runbook captures user journey validation receipt"
@@ -189,6 +213,7 @@ require_literal "docs/runbooks/agent-lane-compatibility.md" "exactly one \`journ
 require_literal "docs/runbooks/agent-lane-compatibility.md" "no \`private_state_scan.findings\` rows" "agent lane runbook rejects private-state findings"
 require_literal "docs/reference/commands.md" "flywheel validate-receipt" "command reference includes receipt validation"
 require_literal "docs/reference/commands.md" "scripts/agent-lane-probe.sh --receipt-dir receipts/agent-lanes --json" "command reference includes agent-lane receipt probe"
+require_literal "docs/reference/commands.md" "scripts/local-actions-preflight.sh" "command reference includes local actions preflight"
 require_literal "docs/reference/commands.md" "scripts/live_site_probe.py" "command reference includes live site probe"
 require_literal "docs/reference/commands.md" "scripts/validate_cutover_receipts.py" "command reference includes cutover receipt validation"
 require_literal "docs/reference/commands.md" "scripts/validate_user_journey_pack.py" "command reference includes user journey validation"

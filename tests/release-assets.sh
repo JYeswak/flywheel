@@ -77,8 +77,10 @@ else
   fail "checksum manifests use artifact-relative filenames"
 fi
 
-if tar -tzf "$dist/flywheel-${tag}.tar.gz" | rg -q '(^|/)README\.md$' \
-  && tar -tzf "$dist/flywheel-${tag}.tar.gz" | rg -q '(^|/)install\.sh$'; then
+tar_listing="$TMP/tar-list.txt"
+tar -tzf "$dist/flywheel-${tag}.tar.gz" >"$tar_listing"
+if rg -q '(^|/)README\.md$' "$tar_listing" \
+  && rg -q '(^|/)install\.sh$' "$tar_listing"; then
   pass "tarball contains README.md and install.sh"
 else
   fail "tarball contains README.md and install.sh"

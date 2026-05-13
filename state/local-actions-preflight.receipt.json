@@ -1,0 +1,22 @@
+{
+  "schema_version": "skillos.local_actions_preflight_receipt.v1",
+  "receipt_id": "flywheel-local-actions-preflight-20260513T202119Z",
+  "repo": "/Users/josh/Developer/flywheel",
+  "status": "pass",
+  "source_pack_id": "local-actions-preflight-pack",
+  "verified_at": "2026-05-13T20:21:19Z",
+  "github_final_approval_required": true,
+  "local_pass_is_pre_github_spend_gate_only": true,
+  "act_artifact_server_addr": "127.0.0.1",
+  "act_cache_server_addr": "127.0.0.1",
+  "docker_context": "orbstack",
+  "evidence_refs": [
+    "scripts/local-actions-preflight.sh --skip-tests",
+    "SUMMARY local_actions_preflight=pass act=run docker_context=orbstack",
+    "docs/runbooks/local-actions-preflight.md",
+    "tests/github-workflows.sh",
+    "tests/public-docs.sh",
+    "tests/website-static.sh",
+    "tests/public-user-journey-pack.sh"
+  ]
+}

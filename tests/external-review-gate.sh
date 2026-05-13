@@ -20,8 +20,8 @@ else
 fi
 
 cat >"$TMP/pass.jsonl" <<'JSONL'
-{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-a","reviewer_kind":"external_agent","reviewed_at":"20260513T000000Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[],"comments":["clear first-run path"]}
-{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-b","reviewer_kind":"external_human","reviewed_at":"20260513T000000Z","verdict":"approved_with_followups","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[],"comments":["followups are non-blocking"]}
+{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-a","reviewer_kind":"external_agent","reviewed_at":"2026-05-13T00:00:00Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[],"comments":["clear first-run path"]}
+{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-b","reviewer_kind":"external_human","reviewed_at":"2026-05-13T00:00:00Z","verdict":"approved_with_followups","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[],"comments":["followups are non-blocking"]}
 JSONL
 
 if python3 "$SCRIPT" --log "$TMP/pass.jsonl" --release --json >"$TMP/pass.out"; then
@@ -35,8 +35,8 @@ else
 fi
 
 cat >"$TMP/duplicate.jsonl" <<'JSONL'
-{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-a","reviewer_kind":"external_agent","reviewed_at":"20260513T000000Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
-{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-a","reviewer_kind":"external_agent","reviewed_at":"20260513T000000Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
+{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-a","reviewer_kind":"external_agent","reviewed_at":"2026-05-13T00:00:00Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
+{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-a","reviewer_kind":"external_agent","reviewed_at":"2026-05-13T00:00:00Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
 JSONL
 
 if python3 "$SCRIPT" --log "$TMP/duplicate.jsonl" --release --json >"$TMP/duplicate.out"; then
@@ -50,8 +50,8 @@ else
 fi
 
 cat >"$TMP/blocked-reviewer.jsonl" <<'JSONL'
-{"schema_version":"flywheel.external_review.v0","reviewer_id":"joshua","reviewer_kind":"external_human","reviewed_at":"20260513T000000Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
-{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-b","reviewer_kind":"external_agent","reviewed_at":"20260513T000000Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
+{"schema_version":"flywheel.external_review.v0","reviewer_id":"joshua","reviewer_kind":"external_human","reviewed_at":"2026-05-13T00:00:00Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
+{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-b","reviewer_kind":"external_agent","reviewed_at":"2026-05-13T00:00:00Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
 JSONL
 
 if python3 "$SCRIPT" --log "$TMP/blocked-reviewer.jsonl" --release --json >"$TMP/blocked-reviewer.out"; then
@@ -65,8 +65,8 @@ else
 fi
 
 cat >"$TMP/missing-surface.jsonl" <<'JSONL'
-{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-a","reviewer_kind":"external_agent","reviewed_at":"20260513T000000Z","verdict":"approved","reviewed_surfaces":["README.md"],"blocking_findings":[]}
-{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-b","reviewer_kind":"external_agent","reviewed_at":"20260513T000000Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
+{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-a","reviewer_kind":"external_agent","reviewed_at":"2026-05-13T00:00:00Z","verdict":"approved","reviewed_surfaces":["README.md"],"blocking_findings":[]}
+{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-b","reviewer_kind":"external_agent","reviewed_at":"2026-05-13T00:00:00Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
 JSONL
 
 if python3 "$SCRIPT" --log "$TMP/missing-surface.jsonl" --release --json >"$TMP/missing-surface.out"; then
@@ -81,7 +81,7 @@ fi
 
 cat >"$TMP/bad-reviewed-at.jsonl" <<'JSONL'
 {"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-a","reviewer_kind":"external_agent","reviewed_at":"not-a-time","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
-{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-b","reviewer_kind":"external_agent","reviewed_at":"20260513T000000Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
+{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-b","reviewer_kind":"external_agent","reviewed_at":"2026-05-13T00:00:00Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
 JSONL
 
 if python3 "$SCRIPT" --log "$TMP/bad-reviewed-at.jsonl" --release --json >"$TMP/bad-reviewed-at.out"; then
@@ -95,8 +95,8 @@ else
 fi
 
 cat >"$TMP/bad-kind.jsonl" <<'JSONL'
-{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-a","reviewer_kind":"friend","reviewed_at":"20260513T000000Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
-{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-b","reviewer_kind":"external_agent","reviewed_at":"20260513T000000Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
+{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-a","reviewer_kind":"friend","reviewed_at":"2026-05-13T00:00:00Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
+{"schema_version":"flywheel.external_review.v0","reviewer_id":"outside-reader-b","reviewer_kind":"external_agent","reviewed_at":"2026-05-13T00:00:00Z","verdict":"approved","reviewed_surfaces":["README.md","CHARTER.md","docs/getting-started/first-run.md","docs/evidence/publication-evidence.md","docs/evidence/publication-blocker-coverage.md","docs/runbooks/release-cutover-authorization.md","docs/runbooks/public-release-runbook.md"],"blocking_findings":[]}
 JSONL
 
 if python3 "$SCRIPT" --log "$TMP/bad-kind.jsonl" --release --json >"$TMP/bad-kind.out"; then
