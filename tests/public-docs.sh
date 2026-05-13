@@ -202,6 +202,7 @@ require_literal "docs/runbooks/isolated-agent-lane-testing.md" "creates a dispos
 require_literal "docs/runbooks/isolated-agent-lane-testing.md" "HOME" "isolated lane runbook isolates HOME"
 require_literal "docs/runbooks/isolated-agent-lane-testing.md" "support_scope=isolated" "isolated lane runbook requires isolated support scope"
 require_literal "docs/runbooks/isolated-agent-lane-testing.md" "private_state_scan.status=pass" "isolated lane runbook requires private-state scan"
+require_literal "docs/runbooks/isolated-agent-lane-testing.md" "--live-adapters" "isolated lane runbook documents live adapter proof"
 require_literal "docs/runbooks/isolated-agent-lane-testing.md" "--require-runtime" "isolated lane runbook documents strict blocker mode"
 require_literal "docs/runbooks/isolated-agent-lane-testing.md" "bash tests/isolated-agent-lane-smoke.sh" "isolated lane runbook names contract test"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/cutover-receipts.sh" "release runbook includes cutover receipt gate"

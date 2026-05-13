@@ -10,10 +10,12 @@ KEEP_TEMP=0
 REQUIRE_RUNTIME=0
 SKIP_ASSEMBLE=0
 SOURCE="$ROOT"
+LIVE_ADAPTERS=0
+ADAPTER_TIMEOUT=45
 
 usage() {
   cat <<'EOF'
-usage: scripts/isolated-agent-lane-smoke.sh [--lanes claude,codex,gemini,openclaw] [--receipt-dir DIR] [--skip-assemble] [--require-runtime] --json
+usage: scripts/isolated-agent-lane-smoke.sh [--lanes claude,codex,gemini,openclaw] [--receipt-dir DIR] [--skip-assemble] [--live-adapters] [--adapter-timeout SECONDS] [--require-runtime] --json
 
 Creates an isolated HOME, XDG config/cache, install prefix, public export, and
 target repo. It proves the public reduced path end to end, then writes one
@@ -21,6 +23,8 @@ runtime or blocker receipt per requested agent lane.
 
 Without a lane-specific live adapter, installed CLIs are treated as setup
 evidence only and the lane receives an isolated_runtime_receipt_missing blocker.
+With --live-adapters, each installed CLI must respond in the isolated repo before
+the lane receives support-copy runtime proof.
 EOF
 }
 
@@ -71,6 +75,155 @@ run_capture() {
   return 0
 }
 
+run_capture_timeout() {
+  local out="$1" err="$2" timeout_seconds="$3"
+  shift 3
+  set +e
+  python3 - "$out" "$err" "$timeout_seconds" "$@" <<'PY'
+import subprocess
+import sys
+
+out_path, err_path, timeout_text, *cmd = sys.argv[1:]
+timeout = float(timeout_text)
+try:
+    completed = subprocess.run(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        timeout=timeout,
+        check=False,
+    )
+    with open(out_path, "w", encoding="utf-8") as out_file:
+        out_file.write(completed.stdout)
+    with open(err_path, "w", encoding="utf-8") as err_file:
+        err_file.write(completed.stderr)
+    sys.exit(completed.returncode)
+except subprocess.TimeoutExpired as exc:
+    with open(out_path, "w", encoding="utf-8") as out_file:
+        out_file.write(exc.stdout or "")
+    with open(err_path, "w", encoding="utf-8") as err_file:
+        err_file.write((exc.stderr or "") + f"\nTIMEOUT after {timeout:g}s\n")
+    sys.exit(124)
+PY
+  RUN_CAPTURE_RC=$?
+  set -e
+  return 0
+}
+
+safe_excerpt_file() {
+  local file="$1"
+  if [[ ! -s "$file" ]]; then
+    printf ''
+    return 0
+  fi
+  head -c 1200 "$file" \
+    | tr '\n\r' '  ' \
+    | sed -E 's#/Users/[^ ]+#<home>#g; s#sk-[A-Za-z0-9_-]{12,}#<secret>#g; s#ghp_[A-Za-z0-9_]{20,}#<secret>#g; s#AGENT_MAIL_[A-Z_]*=[^ ]+#AGENT_MAIL_<redacted>#g' \
+    | cut -c 1-360
+}
+
+classify_adapter_blocker() {
+  local lane="$1" rc="$2" out="$3" err="$4"
+  local text
+  text="$(cat "$out" "$err" 2>/dev/null | tr '[:upper:]' '[:lower:]' || true)"
+  if [[ "$text" =~ (auth|login|log\ in|api[[:space:]_-]*key|unauthorized|forbidden|not[[:space:]_-]*authenticated|credential|token) ]]; then
+    printf 'auth_required'
+  elif [[ "$lane" == "openclaw" && "$text" =~ (daemon|gateway|connection[[:space:]_-]*refused|econnrefused|not[[:space:]_-]*running) ]]; then
+    printf 'daemon_unavailable'
+  elif [[ "$rc" -eq 124 ]]; then
+    printf 'daemon_unavailable'
+  else
+    printf 'isolated_runtime_receipt_missing'
+  fi
+}
+
+blocker_reason_for_class() {
+  local lane="$1" blocker_class="$2" command_name="$3"
+  local display
+  display="$(lane_display "$lane")"
+  case "$blocker_class" in
+    install_required)
+      printf "%s command '%s' is not installed in PATH for this isolated run." "$display" "$command_name"
+      ;;
+    auth_required)
+      printf "%s live adapter was present, but the isolated environment did not have usable authentication." "$display"
+      ;;
+    daemon_unavailable)
+      printf "%s live adapter did not complete before timeout or its local daemon/gateway was unavailable." "$display"
+      ;;
+    *)
+      printf "%s is installed, but Flywheel does not yet have an isolated live adapter receipt proving the full first-run journey through that lane." "$display"
+      ;;
+  esac
+}
+
+blocker_next_action_for_class() {
+  local lane="$1" blocker_class="$2"
+  local display
+  display="$(lane_display "$lane")"
+  case "$blocker_class" in
+    install_required)
+      printf "Install %s, re-run this isolated lane smoke with --live-adapters, then replace this blocker only if every runtime stage passes." "$display"
+      ;;
+    auth_required)
+      printf "Provide %s credentials to the isolated environment, re-run with --live-adapters, and keep this blocker until the live adapter returns a passing runtime receipt." "$display"
+      ;;
+    daemon_unavailable)
+      printf "Start or configure the %s local gateway/daemon, re-run with --live-adapters, and keep this blocker until the live adapter returns a passing runtime receipt." "$display"
+      ;;
+    *)
+      printf "Run the %s lane in an isolated public export with --live-adapters and replace this blocker only if preflight, init, doctor, tick, dispatch_or_simulate, closeout, inspect_next_action, and private_state_scan all pass." "$display"
+      ;;
+  esac
+}
+
+adapter_prompt() {
+  printf 'You are running a Flywheel isolated lane smoke test. Reply exactly FLYWHEEL_LANE_OK and do not modify files.'
+}
+
+run_live_adapter() {
+  local lane="$1" out="$2" err="$3"
+  local prompt codex_last openclaw_state
+  prompt="$(adapter_prompt)"
+  case "$lane" in
+    claude)
+      run_capture_timeout "$out" "$err" "$ADAPTER_TIMEOUT" \
+        env HOME="$home" XDG_CONFIG_HOME="$xdg_config" XDG_CACHE_HOME="$xdg_cache" \
+        claude --bare --print --no-session-persistence --permission-mode plan --tools "" \
+          --output-format json --max-budget-usd 0.05 "$prompt"
+      ;;
+    codex)
+      codex_last="$artifacts/codex-last-message.txt"
+      run_capture_timeout "$out" "$err" "$ADAPTER_TIMEOUT" \
+        env HOME="$home" XDG_CONFIG_HOME="$xdg_config" XDG_CACHE_HOME="$xdg_cache" CODEX_HOME="$home/.codex" \
+        codex exec --ignore-user-config --ignore-rules --ephemeral --sandbox read-only --cd "$repo" \
+          --output-last-message "$codex_last" "$prompt"
+      if [[ -s "$codex_last" ]]; then
+        printf '\n%s\n' "$(safe_excerpt_file "$codex_last")" >>"$out"
+      fi
+      ;;
+    gemini)
+      run_capture_timeout "$out" "$err" "$ADAPTER_TIMEOUT" \
+        env HOME="$home" XDG_CONFIG_HOME="$xdg_config" XDG_CACHE_HOME="$xdg_cache" \
+        gemini --prompt "$prompt" --approval-mode plan --output-format json --include-directories "$repo"
+      ;;
+    openclaw)
+      openclaw_state="$home/.openclaw-isolated"
+      mkdir -p "$openclaw_state"
+      run_capture_timeout "$out" "$err" "$ADAPTER_TIMEOUT" \
+        env HOME="$home" XDG_CONFIG_HOME="$xdg_config" XDG_CACHE_HOME="$xdg_cache" \
+          OPENCLAW_STATE_DIR="$openclaw_state" OPENCLAW_CONFIG_PATH="$openclaw_state/config.json" \
+        openclaw agent --local --message "$prompt" --json --timeout "$ADAPTER_TIMEOUT"
+      ;;
+    *)
+      RUN_CAPTURE_RC=64
+      printf 'unknown lane: %s\n' "$lane" >"$err"
+      : >"$out"
+      ;;
+  esac
+}
+
 private_state_scan_json() {
   local dir="$1"
   local findings_file="$2"
@@ -98,19 +251,15 @@ stage_json() {
 
 write_blocker_receipt() {
   local lane="$1" receipt="$2" generated="$3" command_name="$4" cli_present="$5" private_scan="$6"
+  local class_override="${7:-}"
   local display blocker_class reason next_action scan_status
   display="$(lane_display "$lane")"
-  blocker_class="isolated_runtime_receipt_missing"
-  if [[ "$cli_present" != "true" ]]; then
+  blocker_class="${class_override:-isolated_runtime_receipt_missing}"
+  if [[ "$cli_present" != "true" && -z "$class_override" ]]; then
     blocker_class="install_required"
   fi
-  if [[ "$blocker_class" == "install_required" ]]; then
-    reason="$display command '$command_name' is not installed in PATH for this isolated run."
-    next_action="Install $display, re-run this isolated lane smoke, then replace this blocker only if every runtime stage passes."
-  else
-    reason="$display is installed, but Flywheel does not yet have an isolated live adapter receipt proving the full first-run journey through that lane."
-    next_action="Run the $display lane in an isolated public export with a live adapter and replace this blocker only if preflight, init, doctor, tick, dispatch_or_simulate, closeout, inspect_next_action, and private_state_scan all pass."
-  fi
+  reason="$(blocker_reason_for_class "$lane" "$blocker_class" "$command_name")"
+  next_action="$(blocker_next_action_for_class "$lane" "$blocker_class")"
   scan_status="$(jq -r '.status' <<<"$private_scan")"
   if [[ "$scan_status" == "pass" ]]; then
     scan_status="not_run"
@@ -137,6 +286,47 @@ write_blocker_receipt() {
     }' >"$receipt"
 }
 
+adapter_json() {
+  local lane="$1" mode="$2" rc="$3" out="$4" err="$5" blocker_class="$6"
+  local stdout_excerpt stderr_excerpt
+  stdout_excerpt="$(safe_excerpt_file "$out")"
+  stderr_excerpt="$(safe_excerpt_file "$err")"
+  jq -nc \
+    --arg lane "$lane" --arg mode "$mode" --argjson rc "$rc" \
+    --arg stdout_excerpt "$stdout_excerpt" --arg stderr_excerpt "$stderr_excerpt" \
+    --arg blocker_class "$blocker_class" '{
+      lane:$lane,
+      mode:$mode,
+      exit_code:$rc,
+      expected_marker:"FLYWHEEL_LANE_OK",
+      stdout_excerpt:$stdout_excerpt,
+      stderr_excerpt:$stderr_excerpt,
+      blocker_class:(if $blocker_class == "" then null else $blocker_class end)
+    }'
+}
+
+write_runtime_receipt() {
+  local lane="$1" receipt="$2" generated="$3" private_scan="$4" adapter="$5"
+  local display
+  display="$(lane_display "$lane")"
+  jq -nc \
+    --arg id "$lane" --arg agent "$display" --arg generated_at "$generated" \
+    --argjson stages "$stage_rows" --argjson private_scan "$private_scan" --argjson adapter "$adapter" '{
+      schema_version:"flywheel.agent_lane_runtime_receipt.v0",
+      id:$id,
+      agent:$agent,
+      generated_at:$generated_at,
+      status:"pass",
+      runtime_proven:true,
+      support_copy_allowed:true,
+      support_scope:"isolated",
+      command:"scripts/journey-smoke.sh --reduced --live-adapters --json",
+      adapter:$adapter,
+      journey_stages:$stages,
+      private_state_scan:$private_scan
+    }' >"$receipt"
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --lanes) [[ $# -ge 2 ]] || die_usage "--lanes requires comma-separated lanes"; LANES="$2"; shift 2 ;;
@@ -146,6 +336,9 @@ while [[ $# -gt 0 ]]; do
     --source) [[ $# -ge 2 ]] || die_usage "--source requires DIR"; SOURCE="$2"; shift 2 ;;
     --source=*) SOURCE="${1#*=}"; shift ;;
     --skip-assemble) SKIP_ASSEMBLE=1; shift ;;
+    --live-adapters) LIVE_ADAPTERS=1; shift ;;
+    --adapter-timeout) [[ $# -ge 2 ]] || die_usage "--adapter-timeout requires SECONDS"; ADAPTER_TIMEOUT="$2"; shift 2 ;;
+    --adapter-timeout=*) ADAPTER_TIMEOUT="${1#*=}"; shift ;;
     --require-runtime) REQUIRE_RUNTIME=1; shift ;;
     --keep-temp) KEEP_TEMP=1; shift ;;
     --json) JSON_OUT=1; shift ;;
@@ -158,6 +351,9 @@ done
 need git
 need jq
 need rg
+if [[ "$LIVE_ADAPTERS" -eq 1 ]]; then
+  need python3
+fi
 
 tmp="$(mktemp -d "${TMPDIR:-/tmp}/flywheel-isolated-agent-lane.XXXXXX")"
 if [[ "$KEEP_TEMP" -eq 0 ]]; then
@@ -267,11 +463,34 @@ for raw_lane in "${lane_array[@]}"; do
     fi
   fi
   receipt="$receipts/$lane.json"
-  write_blocker_receipt "$lane" "$receipt" "$generated" "$command_name" "$cli_present" "$private_scan"
+  runtime_proven=false
+  evidence="blocker_receipt"
+  adapter="null"
+  blocker_class=""
+  adapter_rc=0
+  adapter_out="$artifacts/${lane}-adapter.out"
+  adapter_err="$artifacts/${lane}-adapter.err"
+  if [[ "$cli_present" == "true" && "$LIVE_ADAPTERS" -eq 1 && "$reduced_pass" == "true" ]]; then
+    run_live_adapter "$lane" "$adapter_out" "$adapter_err"
+    adapter_rc=$RUN_CAPTURE_RC
+    if [[ "$adapter_rc" -eq 0 ]] && rg -q 'FLYWHEEL_LANE_OK' "$adapter_out" "$adapter_err"; then
+      adapter="$(adapter_json "$lane" "live_adapter" "$adapter_rc" "$adapter_out" "$adapter_err" "")"
+      write_runtime_receipt "$lane" "$receipt" "$generated" "$private_scan" "$adapter"
+      runtime_proven=true
+      evidence="runtime_receipt"
+    else
+      blocker_class="$(classify_adapter_blocker "$lane" "$adapter_rc" "$adapter_out" "$adapter_err")"
+      adapter="$(adapter_json "$lane" "live_adapter" "$adapter_rc" "$adapter_out" "$adapter_err" "$blocker_class")"
+      write_blocker_receipt "$lane" "$receipt" "$generated" "$command_name" "$cli_present" "$private_scan" "$blocker_class"
+    fi
+  else
+    write_blocker_receipt "$lane" "$receipt" "$generated" "$command_name" "$cli_present" "$private_scan"
+  fi
   jq -nc \
     --arg id "$lane" --arg display "$display" --arg command "$command_name" \
     --arg command_path "$command_path" --arg receipt "$receipt" --arg version_excerpt "$version_excerpt" \
-    --argjson cli_present "$cli_present" --argjson version_rc "$version_rc" '{
+    --arg evidence "$evidence" --argjson cli_present "$cli_present" --argjson version_rc "$version_rc" \
+    --argjson runtime_proven "$runtime_proven" --argjson adapter "$adapter" '{
       id:$id,
       display_name:$display,
       command:$command,
@@ -279,9 +498,10 @@ for raw_lane in "${lane_array[@]}"; do
       cli_present:$cli_present,
       version_exit_code:$version_rc,
       version_excerpt:$version_excerpt,
-      runtime_proven:false,
+      runtime_proven:$runtime_proven,
       receipt:$receipt,
-      evidence:"blocker_receipt"
+      evidence:$evidence,
+      adapter:$adapter
     }' >>"$lane_rows_file"
 done
 lane_rows="$(jq -s '.' "$lane_rows_file")"
@@ -340,7 +560,11 @@ payload="$(
         gemini_supported:($probe.rows[]? | select(.id == "gemini") | .support_copy_allowed) // false,
         openclaw_supported:($probe.rows[]? | select(.id == "openclaw") | .support_copy_allowed) // false
       },
-      blockers:($probe.rows // [] | map(select(.support_copy_allowed == false) | {id, evidence, blocker_class:.blocker.blocker_class, blocker_reason:.blocker.blocker_reason, next_action:.blocker.next_action}))
+      blockers:(($lanes | map(.id)) as $requested_lane_ids
+        | $probe.rows // []
+        | map(select(.id as $id | $requested_lane_ids | index($id))
+          | select(.support_copy_allowed == false)
+          | {id, evidence, blocker_class:.blocker.blocker_class, blocker_reason:.blocker.blocker_reason, next_action:.blocker.next_action}))
     }'
 )"
 

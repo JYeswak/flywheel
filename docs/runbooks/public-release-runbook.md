@@ -129,6 +129,11 @@ jq '{status, rows: [.rows[] | {id, cli_present, public_status, support_copy_allo
 scripts/agent-lane-probe.sh --receipt-dir receipts/agent-lanes --json > agent-lanes-with-receipts.json
 ```
 
+Use `--live-adapters` on `isolated-agent-lane-smoke.sh` only for credentialed
+local proof of Claude, Codex, Gemini, or OpenClaw lanes. Without that flag,
+installed CLIs remain setup evidence and receive explicit blocker receipts
+instead of support-copy proof.
+
 Expected public interpretation:
 
 | Row condition | Copy allowed |
@@ -266,6 +271,7 @@ Expected results:
 | Public link checker | `SUMMARY pass=3 fail=0` and JSON `failure_count=0` for public docs/site links. |
 | Installer smoke | `SUMMARY pass=10 fail=0` against a temporary prefix. |
 | Journey smoke | `SUMMARY pass=7 fail=0` with reduced mode runtime-proven and agent lanes receipt-bound. |
+| Isolated agent lane smoke | `SUMMARY pass=8 fail=0` with live-adapter promotion covered by fakes and unproven real agent lanes receipt-bound. |
 | Preflight fixtures | Fixture-backed full, reduced, blocked, docs-only, and misconfigured modes pass. |
 | Contact routing | Public mailto route uses `joshua@zeststream.ai` and subject `[Flywheel] Public site inquiry`; this proves routing, not delivery. |
 | Upstream substrate adoption | Asupersync remains `gated-evaluation` until promotion gates and repo-local POC evidence pass. |

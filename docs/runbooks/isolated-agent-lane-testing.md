@@ -35,6 +35,22 @@ jq '{status, reduced:.reduced_journey.runtime_proven, support_copy_gate}' \
 `reduced` must be `true`. Claude, Codex, Gemini, and OpenClaw stay `false`
 until each lane has its own live adapter receipt.
 
+Live-adapter proof is opt-in because it may spend provider tokens or require
+local credentials:
+
+```bash
+scripts/isolated-agent-lane-smoke.sh \
+  --lanes claude,codex,gemini,openclaw \
+  --receipt-dir state/isolated-agent-lanes \
+  --live-adapters \
+  --adapter-timeout 45 \
+  --json > state/isolated-agent-lane-smoke.receipt.json
+```
+
+The live adapter must respond inside the disposable repo. The receipt still has
+to pass the reduced journey and private-state scan before support copy can move
+from `compatibility-target` to `supported`.
+
 ## Runtime Promotion Rule
 
 A lane can move from compatibility target to supported only when the receipt in
@@ -60,6 +76,15 @@ scripts/agent-lane-probe.sh --receipt-dir receipts/agent-lanes --json
 
 If `support_copy_allowed` is not `true`, public copy must stay
 `compatibility-target`.
+
+Adapter blockers are explicit:
+
+| Class | Meaning |
+|---|---|
+| `install_required` | The CLI is not installed in the current PATH. |
+| `auth_required` | The CLI exists, but isolated credentials are missing or unusable. |
+| `daemon_unavailable` | The CLI or local gateway timed out or was not running. |
+| `isolated_runtime_receipt_missing` | The CLI exists, but no passing live runtime proof exists yet. |
 
 ## Strict Blocker Mode
 
@@ -102,5 +127,5 @@ harness keeps local proof cheap and catches overclaims before that spend.
 
 As of the current publication lane, reduced mode is runtime-proven. Claude Code,
 Codex CLI, Gemini CLI, and OpenClaw are compatibility targets because the public
-engine does not yet include lane-specific live adapters that can prove the full
-first-run path without private state.
+engine still needs real credentialed `--live-adapters` receipts before any of
+those lanes can be advertised as fully supported.

@@ -83,6 +83,46 @@ else
   fail "require-runtime blocks unproven lanes rc=${require_rc}"
 fi
 
+mkdir -p "$TMP/fake-bin"
+cat >"$TMP/fake-bin/claude" <<'SH'
+#!/usr/bin/env bash
+if [[ "${1:-}" == "--version" ]]; then
+  printf 'claude test-adapter\n'
+  exit 0
+fi
+printf '{"result":"FLYWHEEL_LANE_OK"}\n'
+SH
+chmod +x "$TMP/fake-bin/claude"
+
+run_capture "$TMP/live-claude.json" "$TMP/live-claude.err" \
+  env PATH="$TMP/fake-bin:$PATH" "$SCRIPT" --skip-assemble --live-adapters --lanes claude --receipt-dir "$TMP/live-receipts" --json
+live_claude_rc=$?
+if [[ "$live_claude_rc" -eq 0 ]] && jq -e '
+  .status == "pass"
+  and .support_copy_gate.claude_supported == true
+  and .lanes[0].runtime_proven == true
+  and .lanes[0].evidence == "runtime_receipt"
+  and .lanes[0].adapter.mode == "live_adapter"
+  and (.blockers | length == 0)
+' "$TMP/live-claude.json" >/dev/null; then
+  pass "live adapter promotes proven lane"
+else
+  fail "live adapter promotes proven lane rc=${live_claude_rc}"
+fi
+
+run_capture "$TMP/live-probe.json" "$TMP/live-probe.err" \
+  "$ROOT/scripts/agent-lane-probe.sh" --receipt-dir "$TMP/live-receipts" --json
+live_probe_rc=$?
+if [[ "$live_probe_rc" -eq 0 ]] && jq -e '
+  .status == "pass"
+  and .summary.runtime_proven == 1
+  and .rows[0].support_copy_allowed == true
+' "$TMP/live-probe.json" >/dev/null; then
+  pass "live runtime receipt validates"
+else
+  fail "live runtime receipt validates rc=${live_probe_rc}"
+fi
+
 if ! rg -n '/Users/josh|AGENT_MAIL_[A-Z_]*=|sk-[A-Za-z0-9_-]{12,}|ghp_[A-Za-z0-9_]{20,}' "$TMP/smoke.json" "$TMP/receipts" >/dev/null; then
   pass "outputs avoid private markers"
 else
