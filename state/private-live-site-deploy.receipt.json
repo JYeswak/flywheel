@@ -1,13 +1,13 @@
 {
   "schema_version": "flywheel.private_live_site_deploy_receipt.v0",
-  "receipt_id": "flywheel-private-live-site-deploy-20260513T2032Z",
+  "receipt_id": "flywheel-private-live-site-redesign-deploy-20260513T2103Z",
   "status": "pass",
-  "deployed_at": "2026-05-13T20:32:00Z",
+  "deployed_at": "2026-05-13T21:03:00Z",
   "host": "flywheel.zeststream.ai",
   "provider": "vercel",
-  "deployment_url": "https://flywheel-35raoxpyf-joshuas-projects-96d49291.vercel.app",
+  "deployment_url": "https://flywheel-itpdfcq6q-joshuas-projects-96d49291.vercel.app",
   "production_alias": "https://flywheel.zeststream.ai",
-  "source_commit": "aeba6971",
+  "source_commit": "3923d48f",
   "deployed_bundle_scope": [
     "site/",
     "install.sh",
@@ -17,11 +17,31 @@
   ],
   "public_ready_claim": false,
   "github_final_approval_required": true,
+  "story_reset": {
+    "rejected_placeholder_scrapped": true,
+    "wireframe_ref": "docs/runbooks/public-site-smb-journey-wireframe.md",
+    "journey_pack_ref": "docs/runbooks/public-user-journey-pack.md",
+    "visual_primitives": [
+      "OperatingRoomHero",
+      "WorkflowMap",
+      "SliceWorkbench",
+      "ProofRail",
+      "TrustWorryMatrix",
+      "YuzuMethodRail",
+      "TechnicalDrawer",
+      "OperatorSignature"
+    ]
+  },
   "verification": {
     "homepage_markers_present": true,
     "live_site_probe_status": "pass",
     "live_site_probe_failure_count": 0,
     "install_proxy_checksum_match": true,
+    "screenshot_checks": {
+      "desktop": "/tmp/flywheel-site-shots/flywheel-desktop-v3.png",
+      "mobile": "/tmp/flywheel-site-shots/flywheel-mobile-v3.png",
+      "nonblank_pixel_variance": true
+    },
     "publication_readiness_status": "blocked",
     "remaining_blockers": [
       "remote_repo_private",
