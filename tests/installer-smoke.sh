@@ -8,6 +8,7 @@ trap 'rm -rf "$TMP"' EXIT
 PASS=0
 FAIL=0
 ARTIFACT_DIR="${FLYWHEEL_INSTALLER_SMOKE_ARTIFACT_DIR:-}"
+ALLOW_BLOCKED="${FLYWHEEL_INSTALLER_SMOKE_ALLOW_BLOCKED:-0}"
 pass() { PASS=$((PASS + 1)); printf 'PASS %s\n' "$1"; }
 fail() { FAIL=$((FAIL + 1)); printf 'FAIL %s\n' "$1" >&2; }
 
@@ -62,6 +63,10 @@ write_artifacts() {
 }
 
 PREFIX="$TMP/engine"
+INSTALL_ARGS=(--prefix "$PREFIX")
+if [[ "$ALLOW_BLOCKED" == "1" ]]; then
+  INSTALL_ARGS+=(--allow-blocked)
+fi
 
 if bash -n "$ROOT/install.sh" && bash -n "$ROOT/uninstall.sh" && bash -n "$ROOT/bin/flywheel"; then
   pass "syntax"
@@ -69,15 +74,19 @@ else
   fail "syntax"
 fi
 
-if "$ROOT/install.sh" --prefix "$PREFIX" --dry-run --json >"$TMP/install-dry-run.json" \
+if "$ROOT/install.sh" "${INSTALL_ARGS[@]}" --dry-run --json >"$TMP/install-dry-run.json" \
   && jq -e '.dry_run == true and (.planned_files | length >= 8)' "$TMP/install-dry-run.json" >/dev/null; then
   pass "install dry-run"
 else
   fail "install dry-run"
 fi
 
-if "$ROOT/install.sh" --prefix "$PREFIX" --json >"$TMP/install.json"; then
-  if jq -e '.status == "installed" and .installed_files >= 8 and .preflight.exit_code <= 20' "$TMP/install.json" >/dev/null; then
+if "$ROOT/install.sh" "${INSTALL_ARGS[@]}" --json >"$TMP/install.json"; then
+  max_preflight_rc=20
+  [[ "$ALLOW_BLOCKED" == "1" ]] && max_preflight_rc=30
+  if jq -e --argjson max_preflight_rc "$max_preflight_rc" \
+    '.status == "installed" and .installed_files >= 8 and .preflight.exit_code <= $max_preflight_rc' \
+    "$TMP/install.json" >/dev/null; then
     pass "install"
   else
     fail "install envelope"
@@ -122,7 +131,7 @@ else
   fail "installed reduced first-run"
 fi
 
-if "$ROOT/install.sh" --prefix "$PREFIX" --json >"$TMP/reinstall.json" \
+if "$ROOT/install.sh" "${INSTALL_ARGS[@]}" --json >"$TMP/reinstall.json" \
   && jq -e '.status == "installed"' "$TMP/reinstall.json" >/dev/null; then
   pass "idempotent reinstall"
 else

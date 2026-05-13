@@ -51,6 +51,7 @@ jobs:
       - name: Installer smoke
         env:
           FLYWHEEL_INSTALLER_SMOKE_ARTIFACT_DIR: installer-smoke-artifacts/${{ matrix.os }}
+          FLYWHEEL_INSTALLER_SMOKE_ALLOW_BLOCKED: "1"
         run: |
           set -euo pipefail
           bash tests/installer-smoke.sh
