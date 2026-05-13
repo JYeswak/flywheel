@@ -81,6 +81,37 @@ def read_jsonl(path: Path) -> list[dict[str, Any]]:
     return rows
 
 
+def read_json(path: Path) -> dict[str, Any] | None:
+    if not path.exists():
+        return None
+    try:
+        data = json.loads(path.read_text(errors="replace"))
+    except json.JSONDecodeError:
+        return None
+    return data if isinstance(data, dict) else None
+
+
+def user_prompt_submit_hook_registered(settings: dict[str, Any] | None) -> bool:
+    if not settings:
+        return False
+    hooks = settings.get("hooks")
+    if not isinstance(hooks, dict):
+        return False
+    groups = hooks.get("UserPromptSubmit")
+    if not isinstance(groups, list):
+        return False
+    for group in groups:
+        if not isinstance(group, dict):
+            continue
+        for hook in group.get("hooks") or []:
+            if not isinstance(hook, dict):
+                continue
+            command = str(hook.get("command") or "")
+            if "josh-request-capture.sh" in command:
+                return True
+    return False
+
+
 def latest_topology_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     latest: dict[str, dict[str, Any]] = {}
     for row in rows:
@@ -229,6 +260,63 @@ def latest_capture_ts(rows: list[dict[str, Any]]) -> datetime | None:
     return max(values) if values else None
 
 
+def capture_substrate_payload(
+    *,
+    settings_path: Path,
+    request_path: Path,
+    request_rows: list[dict[str, Any]],
+    now: datetime,
+    stale_cutoff: datetime,
+) -> dict[str, Any]:
+    settings = read_json(settings_path)
+    latest_ts = latest_capture_ts(request_rows)
+    warnings: list[dict[str, Any]] = []
+    hook_registered = user_prompt_submit_hook_registered(settings)
+    if not hook_registered:
+        warnings.append(
+            {
+                "code": "claude_user_prompt_submit_capture_hook_missing",
+                "message": "Claude UserPromptSubmit hook does not include josh-request-capture.sh",
+            }
+        )
+    if not request_path.exists():
+        warnings.append(
+            {
+                "code": "josh_requests_log_missing",
+                "message": "canonical josh-requests JSONL log is missing",
+            }
+        )
+    elif latest_ts is None:
+        warnings.append(
+            {
+                "code": "josh_requests_log_empty_or_unparseable",
+                "message": "canonical josh-requests JSONL log has no parseable capture timestamps",
+            }
+        )
+    elif latest_ts < stale_cutoff:
+        warnings.append(
+            {
+                "code": "josh_requests_log_stale",
+                "message": "canonical josh-requests JSONL log has no fresh capture row",
+            }
+        )
+    latest_age_hours = None
+    if latest_ts is not None:
+        latest_age_hours = round((now - latest_ts).total_seconds() / 3600, 3)
+    return {
+        "status": "warn" if warnings else "pass",
+        "claude_settings_path": str(settings_path),
+        "claude_settings_exists": settings_path.exists(),
+        "claude_user_prompt_submit_hook_registered": hook_registered,
+        "josh_requests_path": str(request_path),
+        "josh_requests_log_exists": request_path.exists(),
+        "latest_capture_ts": ts_text(latest_ts),
+        "latest_capture_age_hours": latest_age_hours,
+        "stale_after_hours": round((now - stale_cutoff).total_seconds() / 3600, 3),
+        "warnings": warnings,
+    }
+
+
 def evidence_for_capture(path: Path, rows: list[dict[str, Any]]) -> list[str]:
     refs = []
     for row in rows[-3:]:
@@ -359,6 +447,7 @@ def main() -> int:
     parser.add_argument("--josh-requests", default=os.environ.get("FLYWHEEL_JOSH_REQUESTS_LOG", "~/.local/state/flywheel/josh-requests.jsonl"))
     parser.add_argument("--coordination-log", default=os.environ.get("FLYWHEEL_CROSS_ORCH_COORDINATION_LOG", "~/.local/state/flywheel/cross-orch-coordination.jsonl"))
     parser.add_argument("--team-roster", default=os.environ.get("TEAM_ROSTER", "~/.local/state/flywheel/team-roster.jsonl"))
+    parser.add_argument("--claude-settings", default=os.environ.get("FLYWHEEL_CLAUDE_SETTINGS", "~/.claude/settings.json"))
     parser.add_argument("--stale-hours", type=float, default=float(os.environ.get("FLYWHEEL_ORCH_CAPTURE_STALE_HOURS", "24")))
     parser.add_argument("--now")
     parser.add_argument("--doctor", action="store_true")
@@ -379,12 +468,14 @@ def main() -> int:
     request_path = Path(os.path.expanduser(args.josh_requests)).resolve()
     coord_path = Path(os.path.expanduser(args.coordination_log)).resolve()
     team_roster_path = Path(os.path.expanduser(args.team_roster)).resolve()
+    claude_settings_path = Path(os.path.expanduser(args.claude_settings)).resolve()
     now = parse_ts(args.now) if args.now else utc_now()
     assert now is not None
     stale_cutoff = now - timedelta(hours=args.stale_hours)
 
     topology_rows = latest_topology_rows(read_jsonl(topology_path))
-    requests_by_session = capture_rows_by_session(read_jsonl(request_path))
+    request_rows = read_jsonl(request_path)
+    requests_by_session = capture_rows_by_session(request_rows)
     coord_seen = coord_ts_by_session(read_jsonl(coord_path))
     roster_by_session = latest_team_roster_rows(read_jsonl(team_roster_path))
     rows = [
@@ -400,6 +491,14 @@ def main() -> int:
         for topo in topology_rows
     ]
     gap_rows = [row for row in rows if row["participation_state"] in {"capture_gap", "stale_capture"}]
+    capture_substrate = capture_substrate_payload(
+        settings_path=claude_settings_path,
+        request_path=request_path,
+        request_rows=request_rows,
+        now=now,
+        stale_cutoff=stale_cutoff,
+    )
+    substrate_warning = capture_substrate["status"] != "pass"
     payload = {
         "schema_version": SCHEMA_VERSION,
         "generated_at": ts_text(now),
@@ -407,10 +506,12 @@ def main() -> int:
         "josh_requests_path": str(request_path),
         "coordination_log_path": str(coord_path),
         "team_roster_path": str(team_roster_path),
+        "claude_settings_path": str(claude_settings_path),
+        "capture_substrate": capture_substrate,
         "checked_orchestrators_count": len(rows),
         "orchs_with_capture_gap_count": len(gap_rows),
         "rows": rows,
-        "status": "warn" if gap_rows else "pass",
+        "status": "warn" if gap_rows or substrate_warning else "pass",
         "threshold": ">=1",
         "gate_behavior": "warn normally; fail under --strict or hard L71 rollout",
         "duplicate_capture_policy": "prompt_hash or source_message_id is the dedupe key; repeated prompts must link to the existing row, not create duplicates",
@@ -421,7 +522,7 @@ def main() -> int:
         "doctor": args.doctor,
     }
     print(json.dumps(payload, sort_keys=True, separators=(",", ":") if args.json else None))
-    if args.strict and gap_rows:
+    if args.strict and (gap_rows or substrate_warning):
         return 1
     return 0
 

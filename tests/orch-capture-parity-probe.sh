@@ -46,6 +46,9 @@ EOF
   cat >"$dir/team-roster.jsonl" <<'EOF'
 {"ts":"2026-05-03T23:55:00Z","event":"session_dormant","session":"dormant-codex","orchestrator":{"kind":"codex","pane":2}}
 EOF
+  cat >"$dir/settings.json" <<'EOF'
+{"hooks":{"UserPromptSubmit":[{"matcher":"*","hooks":[{"type":"command","command":"$HOME/.claude/hooks/josh-request-capture.sh"}]}]}}
+EOF
 }
 
 write_duplicate_fixture() {
@@ -76,6 +79,7 @@ make_repo() {
 
 fixture="$TMP/fixture"
 write_fixture "$fixture"
+export FLYWHEEL_CLAUDE_SETTINGS="$fixture/settings.json"
 
 schema_out="$TMP/schema.json"
 python3 "$PROBE" --schema --json >"$schema_out"
@@ -105,6 +109,21 @@ assert_jq "$probe_out" '.rows[] | select(.session == "dormant-codex" and .partic
 assert_jq "$probe_out" '.rows[] | select(.session == "stale-codex" and .participation_state == "stale_capture" and .gap_reason == "stale_capture_row")' "B13_AG2 stale capture fixture"
 assert_jq "$probe_out" '.rows[] | select(.session == "scrollback-codex" and .gap_reason == "pane_scrollback_not_canonical_capture")' "B13_AG4 pane scrollback alone rejected"
 assert_jq "$probe_out" '.approved_remediation_tracks | length == 3 and any(.[]; .track == "primary_agent_mail_cross_orch_route") and any(.[]; .track == "secondary_ntm_send_wrapper_capture") and any(.[]; .track == "tertiary_pane_tail_poller" and has("fragility_note"))' "B13_AG5 dry-run remediation tracks"
+assert_jq "$probe_out" '.capture_substrate.status == "pass" and .capture_substrate.claude_user_prompt_submit_hook_registered == true and .capture_substrate.latest_capture_ts == "2026-05-03T23:30:00Z"' "B13_AG9 capture substrate reports hook and log freshness"
+
+missing_hook="$TMP/missing-hook-settings.json"
+printf '{"hooks":{"UserPromptSubmit":[]}}\n' >"$missing_hook"
+missing_hook_out="$TMP/missing-hook.json"
+python3 "$PROBE" \
+  --topology "$fixture/topology.jsonl" \
+  --josh-requests "$fixture/josh-requests.jsonl" \
+  --coordination-log "$fixture/coordination.jsonl" \
+  --team-roster "$fixture/team-roster.jsonl" \
+  --claude-settings "$missing_hook" \
+  --now "2026-05-04T00:00:00Z" \
+  --stale-hours 24 \
+  --json >"$missing_hook_out"
+assert_jq "$missing_hook_out" '.status == "warn" and .capture_substrate.status == "warn" and any(.capture_substrate.warnings[]; .code == "claude_user_prompt_submit_capture_hook_missing")' "B13_AG9 missing hook is surfaced mechanically"
 
 all_clear="$TMP/all-clear"
 mkdir -p "$all_clear"
