@@ -133,10 +133,12 @@ def has_assignee(row):
     return value not in {"", "unassigned", "none", "null"}
 
 
-def recent_commit(cfg, bead_id):
-    proc = run(["git", "log", "--all", "--format=%H%x00%ct%x00%s", "--grep", bead_id], cfg.repo, timeout=10)
+def recent_commit_map(cfg, bead_ids):
+    wanted = set(bead_ids)
+    found = {}
+    proc = run(["git", "log", "--all", f"--since={iso(cfg.cutoff)}", "--format=%H%x00%ct%x00%s"], cfg.repo, timeout=10)
     if proc.returncode != 0:
-        return None
+        return found
     for line in proc.stdout.splitlines():
         parts = line.split("\x00", 2)
         if len(parts) != 3:
@@ -145,20 +147,29 @@ def recent_commit(cfg, bead_id):
             ts = datetime.fromtimestamp(int(parts[1]), timezone.utc)
         except Exception:
             continue
-        if ts >= cfg.cutoff:
-            return {"kind": "commit", "sha": parts[0], "ts": iso(ts), "subject": parts[2][:180]}
-    return None
+        if ts < cfg.cutoff:
+            continue
+        subject = parts[2]
+        for bead_id in wanted:
+            if bead_id in found or bead_id not in subject:
+                continue
+            found[bead_id] = {"kind": "commit", "sha": parts[0], "ts": iso(ts), "subject": subject[:180]}
+    return found
 
 
-def recent_callback(cfg, bead_id):
+def recent_callback_map(cfg, bead_ids):
+    wanted = set(bead_ids)
+    found = {}
     for row in reversed(load_jsonl(cfg.dispatch_log)):
         material = json.dumps(row, sort_keys=True, default=str)
-        if bead_id not in material:
-            continue
         ts = parse_ts(row.get("ts") or row.get("created_at") or row.get("created_ts"))
-        if ts and ts >= cfg.cutoff:
-            return {"kind": "callback", "ts": iso(ts), "event": row.get("event")}
-    return None
+        if not ts or ts < cfg.cutoff:
+            continue
+        for bead_id in wanted:
+            if bead_id in found or bead_id not in material:
+                continue
+            found[bead_id] = {"kind": "callback", "ts": iso(ts), "event": row.get("event")}
+    return found
 
 
 def title_class(title):
@@ -199,8 +210,10 @@ def fetch_label_map(cfg):
     return out
 
 
-def classify(cfg, row, label_map=None):
+def classify(cfg, row, label_map=None, commit_map=None, callback_map=None):
     label_map = label_map or {}
+    commit_map = commit_map or {}
+    callback_map = callback_map or {}
     bead_id = str(row.get("id") or "")
     labels = label_map.get(bead_id, [])
     # Bead flywheel-8ht5f: label-based carve-out check happens FIRST.
@@ -221,8 +234,8 @@ def classify(cfg, row, label_map=None):
             "last_signal": {"kind": "carve_out_label", "value": matched_carve[0]},
             "recommended_action": "keep",
         }
-    commit = recent_commit(cfg, bead_id)
-    callback = recent_callback(cfg, bead_id)
+    commit = commit_map.get(bead_id)
+    callback = callback_map.get(bead_id)
     updated = parse_ts(row.get("updated_at") or row.get("updated") or row.get("modified_at"))
     if has_assignee(row):
         klass, signal = "ACTIVE", {"kind": "assignee", "value": row.get("assignee")}
@@ -256,7 +269,10 @@ def top_classes(stale):
 def scan(cfg):
     issues = issues_from_br(cfg)
     label_map = fetch_label_map(cfg)
-    classified = [classify(cfg, row, label_map) for row in issues]
+    bead_ids = [str(row.get("id") or "") for row in issues if row.get("id")]
+    commit_map = recent_commit_map(cfg, bead_ids)
+    callback_map = recent_callback_map(cfg, bead_ids)
+    classified = [classify(cfg, row, label_map, commit_map, callback_map) for row in issues]
     stale = [x for x in classified if x["classification"] == "STALE"]
     active = [x for x in classified if x["classification"] == "ACTIVE"]
     recent = [x for x in classified if x["classification"] == "RECENTLY_TOUCHED"]
