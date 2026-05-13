@@ -1,0 +1,35 @@
+{
+  "schema_version": "flywheel.private_live_site_deploy_receipt.v0",
+  "receipt_id": "flywheel-private-live-site-deploy-20260513T2032Z",
+  "status": "pass",
+  "deployed_at": "2026-05-13T20:32:00Z",
+  "host": "flywheel.zeststream.ai",
+  "provider": "vercel",
+  "deployment_url": "https://flywheel-35raoxpyf-joshuas-projects-96d49291.vercel.app",
+  "production_alias": "https://flywheel.zeststream.ai",
+  "source_commit": "aeba6971",
+  "deployed_bundle_scope": [
+    "site/",
+    "install.sh",
+    "install.sh.sha256",
+    "CNAME",
+    "site-deploy-manifest.json"
+  ],
+  "public_ready_claim": false,
+  "github_final_approval_required": true,
+  "verification": {
+    "homepage_markers_present": true,
+    "live_site_probe_status": "pass",
+    "live_site_probe_failure_count": 0,
+    "install_proxy_checksum_match": true,
+    "publication_readiness_status": "blocked",
+    "remaining_blockers": [
+      "remote_repo_private",
+      "remote_workflows_missing",
+      "remote_green_runs_missing",
+      "github_release_missing_or_draft",
+      "github_release_assets_missing",
+      "joshua_release_signoff_missing"
+    ]
+  }
+}

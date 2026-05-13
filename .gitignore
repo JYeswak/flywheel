@@ -111,3 +111,5 @@ flywheel__nextra_documentation_site/
 !.env.local.example
 !**/.env.example
 !**/.env.local.example
+.vercel
+.env*.local
