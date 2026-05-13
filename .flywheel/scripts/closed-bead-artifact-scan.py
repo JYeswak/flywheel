@@ -115,7 +115,10 @@ def split_claims(text: str) -> list[tuple[str, str]]:
         if "=" not in part:
             continue
         key, raw = part.split("=", 1)
-        key = key.strip().strip(":,;").lower().replace("-", "_")
+        raw_key = key.strip().strip(":,;")
+        if raw_key == "PATH":
+            continue
+        key = raw_key.lower().replace("-", "_")
         value = raw.strip().strip(",;")
         if not key or not value or value.startswith(IGNORE_PREFIXES):
             continue
