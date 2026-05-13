@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# tests/recovery-install-plist-alpsinsurance-canonical-cli.sh
-# Canonical-cli surface tests for .flywheel/scripts/recovery-install-plist-alpsinsurance.sh (scaffolded by
+# tests/recovery-install-plist-{session}-canonical-cli.sh
+# Canonical-cli surface tests for .flywheel/scripts/recovery-install-plist-{session}.sh (scaffolded by
 # bead flywheel-ws02m / scaffold-canonical-cli.sh).
 #
 # 13/13 PASS = canonical-cli-scoping checker green. TODO markers
@@ -8,7 +8,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/recovery-install-plist-alpsinsurance.sh"
+SCRIPT="$ROOT/.flywheel/scripts/recovery-install-plist-{session}.sh"
 
 pass_count=0
 fail_count=0
@@ -100,10 +100,10 @@ if "$SCRIPT" doctor --json 2>/dev/null \
   pass "doctor probes plist_label_valid + launchctl_available (load-bearing for install safety)"
 else fail "doctor missing plist_label_valid or launchctl_available checks"; fi
 
-# Test 16 (load-bearing): doctor reports session=alpsinsurance (per-client identity)
-if "$SCRIPT" doctor --json 2>/dev/null | jq -e '.session == "alpsinsurance"' >/dev/null; then
-  pass "doctor reports session=alpsinsurance (per-client identity preserved)"
-else fail "doctor missing session=alpsinsurance"; fi
+# Test 16 (load-bearing): doctor reports session={session} (per-client identity)
+if "$SCRIPT" doctor --json 2>/dev/null | jq -e '.session == "{session}"' >/dev/null; then
+  pass "doctor reports session={session} (per-client identity preserved)"
+else fail "doctor missing session={session}"; fi
 
 # Test 17 (load-bearing): validate plist-config returns concrete pass/fail with label
 if "$SCRIPT" validate plist-config 2>/dev/null \

@@ -144,6 +144,7 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 106 | L155 — CLOSURE-EVIDENCE-PUBLIC-LENS-ANCHOR | long_term | `.flywheel/rules/L106-L155-closure-evidence-public-lens-anchor.md` |
 | 107 | L156 — INBOX-DISCIPLINE-0TH-PROBE | long_term | `.flywheel/rules/L107-L156-inbox-discipline-0th-probe.md` |
 | 108 | L157 — OUTBOX-DISCIPLINE-CROSS-ORCH-SHIP-NOTIFICATION | long_term | `.flywheel/rules/L108-L157-outbox-discipline-cross-orch-ship-notification.md` |
+| 109 | L168 — EVERY-CONSUMER-REPO-MUST-DECLARE-ZS-TENANT-YAML-AT-ROOT | long_term | `.flywheel/rules/L109-L168-every-consumer-repo-must-declare-zs-tenant-yaml-at-root.md` |
 <!-- END-RULES-INDEX -->
 
 <!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->

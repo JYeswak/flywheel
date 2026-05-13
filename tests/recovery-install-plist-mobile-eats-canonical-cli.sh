@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# tests/recovery-install-plist-mobile-eats-canonical-cli.sh
-# Canonical-cli surface tests for .flywheel/scripts/recovery-install-plist-mobile-eats.sh (scaffolded by
+# tests/recovery-install-plist-{proof-product}-canonical-cli.sh
+# Canonical-cli surface tests for .flywheel/scripts/recovery-install-plist-{proof-product}.sh (scaffolded by
 # bead flywheel-ws02m / scaffold-canonical-cli.sh).
 #
 # 13/13 PASS = canonical-cli-scoping checker green. TODO markers
@@ -8,7 +8,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/recovery-install-plist-mobile-eats.sh"
+SCRIPT="$ROOT/.flywheel/scripts/recovery-install-plist-{proof-product}.sh"
 
 pass_count=0
 fail_count=0
@@ -83,13 +83,13 @@ if "$SCRIPT" quickstart 2>/dev/null | jq -e '.command == "quickstart"' >/dev/nul
 else fail "quickstart envelope"; fi
 
 # Test 14: --info schema_version matches <surface>/v1
-if "$SCRIPT" --info --json 2>/dev/null | jq -e '.schema_version | test("^recovery-install-plist-mobile-eats/v[0-9]+$")' >/dev/null; then
-  pass "--info schema_version matches recovery-install-plist-mobile-eats/v1 pattern"
+if "$SCRIPT" --info --json 2>/dev/null | jq -e '.schema_version | test("^recovery-install-plist-{proof-product}/v[0-9]+$")' >/dev/null; then
+  pass "--info schema_version matches recovery-install-plist-{proof-product}/v1 pattern"
 else fail "--info schema_version pattern"; fi
 
 # Test 15: --schema envelope well-formed + carries client + label fields
-if "$SCRIPT" --schema 2>/dev/null | jq -e '.schema_version and .client == "mobile-eats" and (.label | test("mobile-eats"))' >/dev/null; then
-  pass "--schema envelope well-formed + carries client=mobile-eats + label"
+if "$SCRIPT" --schema 2>/dev/null | jq -e '.schema_version and .client == "{proof-product}" and (.label | test("{proof-product}"))' >/dev/null; then
+  pass "--schema envelope well-formed + carries client={proof-product} + label"
 else fail "--schema client/label fields"; fi
 
 # ===== fillin-specific assertions (flywheel-wzjo9.2.6) =====
@@ -102,13 +102,13 @@ else fail "doctor substrate probes"; fi
 
 # Test 17: doctor envelope carries client + label fields (install-plist-specific)
 if "$SCRIPT" doctor --json 2>/dev/null \
-  | jq -e '.client == "mobile-eats" and (.label | test("mobile-eats"))' >/dev/null; then
-  pass "doctor envelope carries client=mobile-eats + matching label"
+  | jq -e '.client == "{proof-product}" and (.label | test("{proof-product}"))' >/dev/null; then
+  pass "doctor envelope carries client={proof-product} + matching label"
 else fail "doctor client/label"; fi
 
 # Test 18: validate --plist probes ~/Library/LaunchAgents/<label>.plist (install-plist-specific subject)
 if "$SCRIPT" validate --plist 2>/dev/null \
-  | jq -e '.command == "validate" and .subject == "plist" and (.status == "pass" or .status == "warn") and (.label | test("mobile-eats"))' >/dev/null; then
+  | jq -e '.command == "validate" and .subject == "plist" and (.status == "pass" or .status == "warn") and (.label | test("{proof-product}"))' >/dev/null; then
   pass "validate --plist probes launchd plist (install-plist-specific subject)"
 else fail "validate plist subject"; fi
 

@@ -135,7 +135,7 @@ else fail "validate fleet-state full-enum sweep"; fi
 # Test 19: lint-idiom-fix preserved — script has BOTH `set -euo pipefail`
 # (satisfies L5 lint) AND immediately-following `set +e` (preserves
 # author's runtime semantic of leaving -e off for tmux/grep tolerance).
-# Sister to 5ke66.15 picoz-archive lint-idiom-fix application.
+# Sister to 5ke66.15 {session}-archive lint-idiom-fix application.
 if grep -E '^set -euo pipefail$' "$SCRIPT" >/dev/null \
    && grep -E '^set \+e' "$SCRIPT" >/dev/null; then
   pass "lint-idiom-fix preserved: 'set -euo pipefail' + immediate 'set +e' (sister to 5ke66.15 pattern)"

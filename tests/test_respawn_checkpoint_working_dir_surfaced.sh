@@ -3,7 +3,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-RESPAWN_DOC="/Users/josh/.claude/commands/flywheel/respawn.md"
+RESPAWN_DOC="$HOME/.claude/commands/flywheel/respawn.md"
 TMP="$(mktemp -d -t respawn-checkpoint.XXXXXX)"
 trap 'find "$TMP" -mindepth 1 -maxdepth 1 -delete; rmdir "$TMP"' EXIT
 
@@ -46,10 +46,10 @@ cat > "$TMP/matched.json" <<'JSON'
 {
   "session": "flywheel",
   "panes": [4],
-  "working_dir": "/Users/josh/Developer/flywheel",
+  "working_dir": "<flywheel-repo>",
   "checkpoint": {
     "loaded_from": "/tmp/ntm/checkpoints/flywheel-pane4.json",
-    "working_dir": "/Users/josh/Developer/flywheel"
+    "working_dir": "<flywheel-repo>"
   }
 }
 JSON
@@ -68,10 +68,10 @@ cat > "$TMP/mismatch.json" <<'JSON'
 {
   "session": "flywheel",
   "panes": [4],
-  "working_dir": "/Users/josh/Developer/flywheel",
+  "working_dir": "<flywheel-repo>",
   "checkpoint": {
     "loaded_from": "/tmp/ntm/checkpoints/wrong-repo.json",
-    "working_dir": "/Users/josh/Developer/other"
+    "working_dir": "$HOME/Developer/other"
   }
 }
 JSON
@@ -81,14 +81,14 @@ legacy_out="$(render_checkpoint "$TMP/legacy.json")"
 mismatch_out="$(render_checkpoint "$TMP/mismatch.json")"
 
 grep -q "loaded_from: /tmp/ntm/checkpoints/flywheel-pane4.json" <<<"$matched_out"
-grep -q "working_dir: /Users/josh/Developer/flywheel" <<<"$matched_out"
+grep -q "working_dir: <flywheel-repo>" <<<"$matched_out"
 grep -q "gating_decision: matched" <<<"$matched_out"
 
 grep -q "loaded_from: /tmp/ntm/checkpoints/legacy.json" <<<"$legacy_out"
 grep -q "working_dir: legacy_empty" <<<"$legacy_out"
 grep -q "gating_decision: legacy_either_empty" <<<"$legacy_out"
 
-grep -q "working_dir: /Users/josh/Developer/other" <<<"$mismatch_out"
+grep -q "working_dir: $HOME/Developer/other" <<<"$mismatch_out"
 grep -q "gating_decision: rejected_mismatch" <<<"$mismatch_out"
 
 echo "respawn checkpoint working_dir surfaced; legacy envelope compatible"

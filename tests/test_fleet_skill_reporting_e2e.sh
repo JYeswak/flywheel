@@ -3,8 +3,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 LOOP="${FLYWHEEL_LOOP_BIN:-$HOME/.claude/skills/.flywheel/bin/flywheel-loop}"
-COORDINATOR="$ROOT/.flywheel/scripts/skillos-discovery-coordinator.py"
-NOTIFY="$ROOT/.flywheel/scripts/skillos-notify.py"
+COORDINATOR="$ROOT/.flywheel/scripts/{capability-control-plane}-discovery-coordinator.py"
+NOTIFY="$ROOT/.flywheel/scripts/{capability-control-plane}-notify.py"
 CALLBACK_VALIDATOR="$ROOT/.flywheel/scripts/validate-skill-discovery-callback.sh"
 BR_BIN="${BR_BIN:-$HOME/.cargo/bin/br}"
 TMP="$(mktemp -d -t 5hnh.XXXXXX)"
@@ -81,7 +81,7 @@ FLYWHEEL_SKILL_DISCOVERY_DISPATCH_LOG="$dispatch_log" \
   "$LOOP" doctor --repo "$repo" --json >"$TMP/doctor.json" 2>/dev/null || true
 assert_jq "$TMP/doctor.json" '.fleet_skill_discovery.schema_version == "fleet-skill-discovery-doctor/v1" and .fleet_skill_discovery.last_24h_discoveries >= 1 and .fleet_skill_discovery.total_discoveries == 1' "doctor_exposes_fleet_skill_discovery_json"
 
-jq -nc '{session:"skillos",effective_at:"2026-05-08T00:00:00Z",orchestrator_pane:4,repo_path:"/Users/josh/Developer/skillos"}' >"$topology"
+jq -nc '{session:"{capability-control-plane}",effective_at:"2026-05-08T00:00:00Z",orchestrator_pane:4,repo_path:"$HOME/Developer/{capability-control-plane}"}' >"$topology"
 tail -n 1 "$ledger" >"$TMP/discovery.json"
 "$NOTIFY" \
   --discovery-json "$TMP/discovery.json" \
@@ -89,7 +89,7 @@ tail -n 1 "$ledger" >"$TMP/discovery.json"
   --thread-state "$threads" \
   --dry-run \
   --json >"$TMP/notify.json"
-assert_jq "$TMP/notify.json" '.status == "dry_run" and .target.session == "skillos" and .target.pane == 4 and .agent_mail_thread.thread_key == "[skill-discovery] reusable-fixture-skill" and .mutations.ntm_sent == false' "skillos_notify_dry_run_targets_skillos"
+assert_jq "$TMP/notify.json" '.status == "dry_run" and .target.session == "{capability-control-plane}" and .target.pane == 4 and .agent_mail_thread.thread_key == "[skill-discovery] reusable-fixture-skill" and .mutations.ntm_sent == false' "{capability-control-plane}_notify_dry_run_targets_{capability-control-plane}"
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]

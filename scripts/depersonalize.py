@@ -9,7 +9,6 @@ import fnmatch
 import json
 import os
 import re
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
@@ -19,6 +18,7 @@ DENYLIST_SCHEMA_VERSION = "flywheel.live_state_denylist.v0"
 TABLE_SCHEMA_VERSION = "flywheel.depersonalization_table.v0"
 DEFAULT_DENYLIST = "state/live-state-denylist.yaml"
 DEFAULT_TABLE = "de-personalization-table.yaml"
+DEFAULT_ALLOWLIST = "state/depersonalization-scan-allowlist.yaml"
 REQUIRED_DENY_ROW_FIELDS = {
     "id",
     "class",
@@ -59,9 +59,11 @@ TEXT_FILE_SUFFIXES = {
     ".py",
     ".rs",
     ".sh",
+    ".svg",
     ".toml",
     ".ts",
     ".tsx",
+    ".tmpl",
     ".txt",
     ".yaml",
     ".yml",
@@ -87,6 +89,15 @@ class ReplacementRow:
     match_type: str
     action: str
     public_value: str
+
+
+@dataclass(frozen=True)
+class AllowRow:
+    id: str
+    root_pattern: str | None
+    path_pattern: str
+    row_id: str
+    reason: str
 
 
 def repo_root() -> Path:
@@ -198,7 +209,34 @@ def load_replacement_table(path: Path) -> list[ReplacementRow]:
     )
 
 
+def load_allowlist(path: Path) -> list[AllowRow]:
+    if not path.exists():
+        return []
+    schema_version, rows = load_simple_yaml(path)
+    if schema_version != "flywheel.depersonalization_scan_allowlist.v0":
+        raise ValueError(f"unsupported allowlist schema_version: {schema_version}")
+    parsed: list[AllowRow] = []
+    for row in rows:
+        required = {"id", "path_pattern", "row_id", "reason"}
+        missing = sorted(required - set(row))
+        if missing:
+            raise ValueError(f"allowlist row {row.get('id', '<unknown>')} missing {missing}")
+        parsed.append(
+            AllowRow(
+                id=str(row["id"]),
+                root_pattern=str(row["root_pattern"]) if "root_pattern" in row else None,
+                path_pattern=str(row["path_pattern"]),
+                row_id=str(row["row_id"]),
+                reason=str(row["reason"]),
+            )
+        )
+    return parsed
+
+
 def iter_paths(root: Path, ignored_dir_names: set[str]) -> Iterable[str]:
+    if root.is_file():
+        yield root.name
+        return
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = sorted(d for d in dirnames if d not in ignored_dir_names)
         for name in sorted(dirnames + filenames):
@@ -207,6 +245,10 @@ def iter_paths(root: Path, ignored_dir_names: set[str]) -> Iterable[str]:
 
 
 def iter_text_files(root: Path, ignored_dir_names: set[str]) -> Iterable[tuple[str, Path]]:
+    if root.is_file():
+        if root.suffix in TEXT_FILE_SUFFIXES:
+            yield root.name, root
+        return
     for relpath in iter_paths(root, ignored_dir_names):
         path = root / relpath
         if not path.is_file():
@@ -223,6 +265,25 @@ def row_matches(row: DenyRow, relpath: str) -> bool:
     if pattern.startswith("**/") and fnmatch.fnmatchcase(relpath, pattern[3:]):
         return True
     return False
+
+
+def path_pattern_matches(pattern: str, relpath: str) -> bool:
+    if fnmatch.fnmatchcase(relpath, pattern):
+        return True
+    if pattern.startswith("**/") and fnmatch.fnmatchcase(relpath, pattern[3:]):
+        return True
+    return False
+
+
+def is_allowed_finding(
+    root: Path, relpath: str, row_id: str, allowlist: list[AllowRow]
+) -> bool:
+    return any(
+        row.row_id == row_id
+        and (row.root_pattern is None or path_pattern_matches(row.root_pattern, root.as_posix()))
+        and path_pattern_matches(row.path_pattern, relpath)
+        for row in allowlist
+    )
 
 
 def scan(
@@ -399,16 +460,32 @@ def emit(payload: dict[str, object], json_out: bool) -> None:
 
 def load_common_inputs(
     args: argparse.Namespace,
-) -> tuple[Path, list[DenyRow], list[ReplacementRow], set[str]]:
+) -> tuple[Path, list[DenyRow], list[ReplacementRow], list[AllowRow], set[str]]:
     root = Path(args.root).resolve()
     denylist = Path(args.denylist)
     table = Path(args.table)
+    allowlist = Path(args.allowlist)
     if not denylist.is_absolute():
         denylist = repo_root() / denylist
     if not table.is_absolute():
         table = repo_root() / table
+    if not allowlist.is_absolute():
+        allowlist = repo_root() / allowlist
     ignored_dir_names = set() if args.include_ignored_dirs else DEFAULT_IGNORED_DIR_NAMES
-    return root, load_denylist(denylist), load_replacement_table(table), ignored_dir_names
+    table_rows = load_replacement_table(table)
+    selected_row_ids = set(args.row_id or [])
+    if selected_row_ids:
+        table_rows = [row for row in table_rows if row.id in selected_row_ids]
+        missing = sorted(selected_row_ids - {row.id for row in table_rows})
+        if missing:
+            raise ValueError(f"unknown depersonalization row_id(s): {', '.join(missing)}")
+    return (
+        root,
+        load_denylist(denylist),
+        table_rows,
+        load_allowlist(allowlist),
+        ignored_dir_names,
+    )
 
 
 def probe_denylist(args: argparse.Namespace) -> int:
@@ -453,9 +530,21 @@ def table_guard_findings(
     return status, exit_code, findings
 
 
+def filter_allowed_guard_findings(
+    root: Path, findings: list[dict[str, str]], allowlist: list[AllowRow]
+) -> tuple[str, int, list[dict[str, str]]]:
+    filtered = [
+        finding
+        for finding in findings
+        if not is_allowed_finding(root, str(finding["path"]), str(finding["id"]), allowlist)
+    ]
+    status, exit_code = status_for(filtered)
+    return status, exit_code, filtered
+
+
 def scan_table(args: argparse.Namespace) -> int:
     try:
-        root, deny_rows, table_rows, ignored_dir_names = load_common_inputs(args)
+        root, deny_rows, table_rows, allowlist, ignored_dir_names = load_common_inputs(args)
     except ValueError as exc:
         emit(
             {
@@ -471,6 +560,9 @@ def scan_table(args: argparse.Namespace) -> int:
     deny_status, deny_exit, deny_findings = table_guard_findings(
         root, deny_rows, ignored_dir_names
     )
+    deny_status, deny_exit, deny_findings = filter_allowed_guard_findings(
+        root, deny_findings, allowlist
+    )
     if deny_status != "pass":
         emit(
             {
@@ -485,6 +577,14 @@ def scan_table(args: argparse.Namespace) -> int:
         )
         return deny_exit
     findings = scan_table_values(root, table_rows, ignored_dir_names)
+    findings = [
+        finding
+        for finding in findings
+        if not all(
+            is_allowed_finding(root, str(finding["path"]), row_id, allowlist)
+            for row_id in finding["row_ids"]
+        )
+    ]
     status = "fail" if findings else "pass"
     exit_code = EXIT_RESIDUAL if findings else 0
     emit(
@@ -503,7 +603,7 @@ def scan_table(args: argparse.Namespace) -> int:
 
 def dry_run(args: argparse.Namespace) -> int:
     try:
-        root, deny_rows, table_rows, ignored_dir_names = load_common_inputs(args)
+        root, deny_rows, table_rows, allowlist, ignored_dir_names = load_common_inputs(args)
     except ValueError as exc:
         emit(
             {
@@ -518,6 +618,9 @@ def dry_run(args: argparse.Namespace) -> int:
         return EXIT_SCHEMA
     deny_status, deny_exit, deny_findings = table_guard_findings(
         root, deny_rows, ignored_dir_names
+    )
+    deny_status, deny_exit, deny_findings = filter_allowed_guard_findings(
+        root, deny_findings, allowlist
     )
     if deny_status != "pass":
         emit(
@@ -552,7 +655,7 @@ def dry_run(args: argparse.Namespace) -> int:
 
 def apply_changes(args: argparse.Namespace) -> int:
     try:
-        root, deny_rows, table_rows, ignored_dir_names = load_common_inputs(args)
+        root, deny_rows, table_rows, allowlist, ignored_dir_names = load_common_inputs(args)
     except ValueError as exc:
         emit(
             {
@@ -567,6 +670,9 @@ def apply_changes(args: argparse.Namespace) -> int:
         return EXIT_SCHEMA
     deny_status, deny_exit, deny_findings = table_guard_findings(
         root, deny_rows, ignored_dir_names
+    )
+    deny_status, deny_exit, deny_findings = filter_allowed_guard_findings(
+        root, deny_findings, allowlist
     )
     if deny_status != "pass":
         emit(
@@ -603,6 +709,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--denylist", default=DEFAULT_DENYLIST)
     parser.add_argument("--table", default=DEFAULT_TABLE)
+    parser.add_argument("--allowlist", default=DEFAULT_ALLOWLIST)
+    parser.add_argument(
+        "--row-id",
+        action="append",
+        help="limit replacement-table scanning/codemod to a row id; may be repeated",
+    )
     parser.add_argument("--root", default=".")
     parser.add_argument("--probe-denylist", action="store_true")
     parser.add_argument("--dry-run", action="store_true")

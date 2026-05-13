@@ -1,7 +1,7 @@
 # NTM Coordinator — Canonical Config (schema_version=1)
 #
 # Source of truth for `[coordinator]` settings across every machine in the
-# ZestStream / flywheel fleet. Installed via:
+# {operator-company} / flywheel fleet. Installed via:
 #
 #     bash templates/flywheel-install/coordinator-config/install-ntm-config.sh --apply
 #
@@ -9,7 +9,7 @@
 # Mission test:  (1) wires substrate? (2) removes drift? (3) isomorphic?  YES x3.
 #
 # Drift report (2026-05-07): 5 keys diverged from this canonical on josh@local.
-# See /Users/josh/.flywheel/refactor/coordinator-config-canon-2026-05-07/01-current/canonical-design.md
+# See $HOME/.flywheel/refactor/coordinator-config-canon-2026-05-07/01-current/canonical-design.md
 #
 # DO NOT EDIT BY HAND on a managed machine. Edit the canonical in the repo and
 # re-run the install script. Per-machine emergency overrides go in

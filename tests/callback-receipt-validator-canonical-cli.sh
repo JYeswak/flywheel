@@ -49,7 +49,7 @@ printf '%s' "$out" | head -1 | jq -e '.schema_version == "callback-receipt-decis
 # Wrapper integration test — pipe a malformed callback through wrapper → validator.
 # Same isolation: wrapper invokes the validator; without the env override the
 # validator's open_fix_bead would write another prod bead from "DONE bad".
-out="$(echo "DONE bad" | CALLBACK_RECEIPT_FIX_BEAD_OPENER=/bin/true /Users/josh/.claude/commands/flywheel/_shared/callback-receipt-validator-wrapper.sh --dispatch-file /tmp/dispatch_test.md --json 2>&1 || true)"
+out="$(echo "DONE bad" | CALLBACK_RECEIPT_FIX_BEAD_OPENER=/bin/true $HOME/.claude/commands/flywheel/_shared/callback-receipt-validator-wrapper.sh --dispatch-file /tmp/dispatch_test.md --json 2>&1 || true)"
 printf '%s' "$out" | grep -qE 'UNVERIFIABLE|REFUSE|decision|schema_version' && pass "BACKWARD-COMPAT wrapper→validator chain intact" || fail "wrapper-validator chain"
 
 # Magic comment + lint

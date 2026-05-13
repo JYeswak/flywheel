@@ -53,6 +53,20 @@ Use this hierarchy when writing README, docs, website copy, and release notes:
 | Substrate | Jeff/Dicklesworthstone and adjacent tools are attributed directly. |
 | Proof surfaces | ZestTube and future public repos show outcomes. |
 
+## Canonical Public Endpoints
+
+| Surface | Canonical name |
+|---|---|
+| Public repository | `github.com/JYeswak/flywheel` |
+| CLI/package namespace | `flywheel` |
+| SMB-facing site | `flywheel.zeststream.ai` |
+| Documentation site | `docs.flywheel.zeststream.ai` |
+| Install endpoint | `flywheel.zeststream.ai/install.sh` |
+
+Do not rename public commands, package paths, or release artifacts to `yuzu`.
+The Yuzu Method names the operating philosophy; Flywheel remains the engine and
+CLI namespace.
+
 ## Rename Gate
 
 Do not perform a broad naming sweep until a plan names:

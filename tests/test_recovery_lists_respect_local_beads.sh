@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-NTM_REPO="${NTM_REPO:-/Users/josh/Developer/ntm}"
+NTM_REPO="${NTM_REPO:-$HOME/Developer/ntm}"
 TMPDIR="$(mktemp -d -t recovery-lists.XXXXXX)"
 PARENT="$TMPDIR/parent"
 CHILD="$PARENT/child"

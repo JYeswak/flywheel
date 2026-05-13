@@ -19,7 +19,7 @@ read-only receipt the orchestrator can compare across ticks.
 - Default mode is dry-run.
 - Do not delete, move, compress, rewrite, or chmod files.
 - Do not use `--apply`.
-- Any future apply path requires Joshua review plus `--idempotency-key`.
+- Any future apply path requires {operator} review plus `--idempotency-key`.
 - Refuse tracked-file targets. Verify candidates with `git ls-files`.
 - Evidence classes marked `never-delete-only-document` are report-only unless an
   explicit archive receipt is already present.
@@ -40,7 +40,7 @@ Validate:
 python3 - <<'PY'
 import json, sys, yaml
 from jsonschema import Draft202012Validator
-schema_path = "/Users/josh/Developer/flywheel/templates/flywheel-install/hygiene-targets.schema.json"
+schema_path = "<flywheel-repo>/templates/flywheel-install/hygiene-targets.schema.json"
 yaml_path = "<repo-path>/.flywheel/hygiene-targets.yaml"
 with open(schema_path, encoding="utf-8") as f:
     schema = json.load(f)

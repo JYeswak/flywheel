@@ -33,8 +33,8 @@ need() {
 lane_registry_row() {
   local lane="$1"
   case "$lane" in
-    claude) printf '%s\t%s\t%s\t%s\n' "$lane" "supported-first" "Claude Code" "requires runtime journey proof before public support claim" ;;
-    codex) printf '%s\t%s\t%s\t%s\n' "$lane" "supported-first" "Codex CLI" "requires runtime journey proof before public support claim" ;;
+    claude) printf '%s\t%s\t%s\t%s\n' "$lane" "compatibility-target" "Claude Code" "compatibility target until journey smoke is runtime-proven" ;;
+    codex) printf '%s\t%s\t%s\t%s\n' "$lane" "compatibility-target" "Codex CLI" "compatibility target until journey smoke is runtime-proven" ;;
     openclaw) printf '%s\t%s\t%s\t%s\n' "$lane" "compatibility-target" "OpenClaw" "compatibility target until daemon or gateway smoke is runtime-proven" ;;
     gemini) printf '%s\t%s\t%s\t%s\n' "$lane" "compatibility-target" "Gemini CLI" "compatibility target until journey smoke is runtime-proven" ;;
     reduced) printf '%s\t%s\t%s\t%s\n' "$lane" "required-fallback" "Reduced local mode" "runtime-proven fallback path without private fleet substrate" ;;

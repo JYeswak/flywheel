@@ -3,8 +3,8 @@ name: blocker-discipline
 type: doctrine
 created: 2026-05-10
 status: active
-authority: skillos-1-blocker-closure-with-live-probe-evidence-2026-05-10T20:12Z + flywheel-1-fold-in-2026-05-10T20:20Z
-ratified: 2026-05-10T20:30Z (P3-trivial cross-orch via cross-orch-anti-divergence-v1.0.0)
+authority: {capability-control-plane}-1-blocker-closure-with-live-probe-evidence-<timestamp> + {bead-id}-fold-in-<timestamp>
+ratified: <timestamp> (P3-trivial cross-orch via cross-orch-anti-divergence-v1.0.0)
 cluster: substrate-hygiene-doctrine-cluster
 sisters:
   - git-stash-discipline.md
@@ -25,7 +25,7 @@ Both rely on per-tick orch verification + worker-time discipline + named trauma 
 
 A blocker is a **CLAIM that conditions prevent forward motion.** Claims must be verified — repeatedly, with live probes, against current state. The Meadows-lens leverage point at play: **#6 strong information flow.** When information flow is weak (a blocker references a stale string field that nobody re-evaluates), the system continues believing a claim that is no longer true.
 
-**Trauma surfaced today (skillos:1 dogfood 2026-05-10T20:08Z):** a blocker referenced `2026-05-09T19:48:40Z plan response handoff` as the unblock action. The handoff path was a string field. Nobody verified the path existed at the referenced timestamp. 24+ hours unverified. When Joshua-direct intervention forced a live probe, conditions had cleared — the blocker was already false.
+**Trauma surfaced today ({capability-control-plane}:1 dogfood <timestamp>):** a blocker referenced `<timestamp> plan response handoff` as the unblock action. The handoff path was a string field. Nobody verified the path existed at the referenced timestamp. 24+ hours unverified. When {operator}-direct intervention forced a live probe, conditions had cleared — the blocker was already false.
 
 The fix is not "better blocker hygiene." It's **structurally surface every blocker for re-evaluation**, with verifiable AC and verified-path discipline.
 
@@ -37,7 +37,7 @@ When filing a blocker, MUST include:
 
 2. **`verification_path`** — a runnable command or path that, when re-evaluated, returns true if the blocker is still real. Examples:
    - `df -h /Volumes/foo | awk 'NR==2 {print $5}' | tr -d '%' | awk '$1>=90 {exit 1}'`
-   - `[[ -f /Users/josh/.local/state/foo/heartbeat.json ]]`
+   - `[[ -f $HOME/.local/state/foo/heartbeat.json ]]`
    - `bash .flywheel/scripts/storage-headroom-watcher.sh doctor --json | jq -e '.score < 0.8'`
    - The point: a deterministic predicate that can be re-run from clean state.
 
@@ -55,13 +55,13 @@ Per-tick blocker audit:
    - Read `last_verified_at`
    - If >24h old: AUTO-ESCALATE
      - Surface in tick output with WARN
-     - Send Agent Mail letter to Joshua naming the blocker + stale duration
+     - Send Agent Mail letter to {operator} naming the blocker + stale duration
      - Stale-blocker IS the silent-defer trauma class
 
 2. **AC re-evaluation cadence.** Every Nth tick (where N defaults to 4 or per-blocker `ac_check_interval_ticks` override):
    - Run the blocker's `acceptance_condition` command
    - If AC passes: auto-close blocker with live-probe evidence
-   - If AC fails Nth time consecutively: escalate to Joshua
+   - If AC fails Nth time consecutively: escalate to {operator}
 
 3. **Path verification on every plan-response reference.** When a blocker body references a path-shaped string (matches `[/~][a-zA-Z0-9_./-]+`), orch tick MUST verify the path exists. If the path doesn't exist or the timestamp doesn't match: flag as `string-field-not-verified-path` trauma class violation; auto-escalate.
 
@@ -75,9 +75,9 @@ Per-tick blocker audit:
 
 ## Named trauma classes
 
-### `silent-defer` (skillos-credit, 2026-05-10T20:08Z)
+### `silent-defer` ({capability-control-plane}-credit, <timestamp>)
 
-**Symptom:** blocker referenced unverified condition for 24h+; orch never re-probed; Joshua intervention required to surface staleness.
+**Symptom:** blocker referenced unverified condition for 24h+; orch never re-probed; {operator} intervention required to surface staleness.
 
 **Root cause:** delay 9 (unbounded blocker recheck) + balancing loop 8 (weak signal propagation) interact to produce information stagnation. The orch tick reads the blocker's STRING field and treats it as truth without verification.
 
@@ -85,7 +85,7 @@ Per-tick blocker audit:
 
 **Detection:** orch tick scans open blockers for `last_verified_at` field; flags any older than 24h.
 
-### `string-field-not-verified-path` (skillos-credit, 2026-05-10T20:08Z)
+### `string-field-not-verified-path` ({capability-control-plane}-credit, <timestamp>)
 
 **Symptom:** plan-response references a path/artifact in a string field but orch never verified the path resolves; blocker stays open referencing nonexistent or stale path.
 
@@ -130,9 +130,9 @@ This is gate-condition stricter than "blocker count under N" because even one si
 
 - `.flywheel/doctrine/git-stash-discipline.md` — sister doctrine in substrate-hygiene cluster
 - `~/.claude/skills/git-stash-janitor/SKILL.md` — adjacent triage flow for stash accumulation
-- skillos memory `feedback_no_silent_defer_flywheel_substrate_memory_rule` — substrate-discovery source
+- {capability-control-plane} memory `feedback_no_silent_defer_flywheel_substrate_memory_rule` — substrate-discovery source
 - L57 (loop-state-marker-not-driver) — adjacent class
-- Cross-orch P1 ratification 2026-05-10T20:30Z (this doctrine)
+- Cross-orch P1 ratification <timestamp> (this doctrine)
 
 ## Implementation status
 

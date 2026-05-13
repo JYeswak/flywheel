@@ -88,6 +88,28 @@ rows:
     residual_risk: low
     review_required: false
     notes: "Do not publish local Codex configuration state."
+  - id: claude-project-slug
+    class: path-identifier
+    private_value: "-Users-josh-Developer-flywheel"
+    match_type: literal
+    action: replace
+    public_value: "<claude-project-slug>"
+    risk: quasi_identifier
+    utility_impact: low
+    residual_risk: low
+    review_required: false
+    notes: "Claude project cache slug derived from a local absolute path; public exports should keep the path shape generic."
+  - id: claude-project-prefix
+    class: path-identifier
+    private_value: "-Users-josh-Developer-"
+    match_type: literal
+    action: replace
+    public_value: "<claude-project-prefix>-"
+    risk: quasi_identifier
+    utility_impact: low
+    residual_risk: low
+    review_required: false
+    notes: "Templated Claude project cache prefixes should not preserve the local operator username."
   - id: zeststream-company
     class: organization-identifier
     private_value: "ZestStream"
@@ -121,6 +143,28 @@ rows:
     residual_risk: medium
     review_required: true
     notes: "Named-client use requires consent matrix coverage."
+  - id: alps-client-acronym
+    class: client-identifier
+    private_value: "ALPS"
+    match_type: literal
+    action: generalize
+    public_value: "{insurance-client}"
+    risk: client_confidentiality
+    utility_impact: medium
+    residual_risk: medium
+    review_required: true
+    notes: "Client acronym use requires the same consent matrix coverage as the full legal name."
+  - id: alps-client-slug
+    class: client-identifier
+    private_value: "alps-insurance"
+    match_type: literal
+    action: generalize
+    public_value: "{insurance-client}"
+    risk: client_confidentiality
+    utility_impact: medium
+    residual_risk: medium
+    review_required: true
+    notes: "Lowercase client slugs are direct enough to require the same consent matrix coverage as named-client text."
   - id: terratitle-client
     class: client-identifier
     private_value: "TerraTitle"
@@ -176,6 +220,39 @@ rows:
     residual_risk: low
     review_required: true
     notes: "Session labels can reveal client work."
+  - id: alps-session-label-colon
+    class: session-identifier
+    private_value: "alps:"
+    match_type: literal
+    action: replace
+    public_value: "{session}:"
+    risk: client_confidentiality
+    utility_impact: low
+    residual_risk: low
+    review_required: true
+    notes: "Peer-orchestrator labels can reveal client work."
+  - id: alps-session-path-fragment
+    class: session-identifier
+    private_value: "alps/"
+    match_type: literal
+    action: replace
+    public_value: "{session}/"
+    risk: client_confidentiality
+    utility_impact: low
+    residual_risk: low
+    review_required: true
+    notes: "Path and fleet-list fragments can reveal client work."
+  - id: alps-session-standalone
+    class: session-identifier
+    private_value: "(?<![A-Za-z0-9_-])alps(?![A-Za-z0-9_-])"
+    match_type: regex
+    action: replace
+    public_value: "{session}"
+    risk: client_confidentiality
+    utility_impact: low
+    residual_risk: low
+    review_required: true
+    notes: "Standalone lowercase session aliases are direct client residue; scoped to avoid mutating shell/Python identifiers such as alps_fixture."
   - id: picoz-session-name
     class: session-identifier
     private_value: "picoz"
@@ -200,7 +277,7 @@ rows:
     notes: "Pane numbers are local runtime coordinates."
   - id: bead-id
     class: runtime-identifier
-    private_value: "flywheel-[a-z0-9.]+"
+    private_value: '\bflywheel-[a-z0-9]*[0-9][a-z0-9]*(?:\.[0-9]+)?\b'
     match_type: regex
     action: replace
     public_value: "{bead-id}"

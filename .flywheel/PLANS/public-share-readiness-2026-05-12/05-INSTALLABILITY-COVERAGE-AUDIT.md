@@ -145,8 +145,8 @@ The public plan must not imply equal support for all harnesses until verified.
 
 | Harness | Current evidence | Phase 5 support label |
 |---|---|---|
-| Claude | Strong internal evidence: hooks/templates/skills assume Claude Code | `supported-first` if config dry-run + doctor smoke lands |
-| Codex | Strong internal worker evidence; MCP/resource assumptions differ | `supported-first` if AGENTS/MCP setup + doctor smoke lands |
+| Claude | Strong internal evidence: hooks/templates/skills assume Claude Code | `compatibility-target` until strict runtime receipt proves the public lane |
+| Codex | Strong internal worker evidence; MCP/resource assumptions differ | `compatibility-target` until strict runtime receipt proves the public lane |
 | OpenClaw | No current artifact found in Flywheel search | `compatibility-target` until probed |
 | Gemini | Mentioned as multi-model source, not operator harness | `compatibility-target` until probed |
 | none/reduced | Objective requires it; current DAG missing | `required-v0.2` reduced mode |

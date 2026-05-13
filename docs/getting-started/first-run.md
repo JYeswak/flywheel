@@ -121,8 +121,8 @@ Flywheel reports harness support from evidence, not optimism.
 
 | Lane | First-run stance |
 |---|---|
-| Claude Code | first supported target after journey smoke proves it |
-| Codex CLI | first supported target after journey smoke proves it |
+| Claude Code | compatibility target until isolated journey smoke proves it |
+| Codex CLI | compatibility target until isolated journey smoke proves it |
 | Gemini CLI | compatibility target until journey smoke proves it |
 | OpenClaw | compatibility target until daemon or gateway smoke proves it |
 | Reduced local mode | required fallback path |
@@ -133,10 +133,14 @@ The journey-smoke command gates public support copy:
 scripts/journey-smoke.sh --matrix claude,codex,gemini,openclaw,reduced --dry-run --json
 ```
 
-Until that command reports a lane as `runtime_proven`, keep Gemini and OpenClaw
-as compatibility targets and keep Claude/Codex support tied to explicit journey
-evidence. The reduced lane must stay runtime-proven because it is the public
-fallback when full substrate is absent.
+Until that command reports a lane as `runtime_proven`, keep Claude, Codex,
+Gemini, and OpenClaw as compatibility targets. Use
+[`../runbooks/agent-lane-compatibility.md`](../runbooks/agent-lane-compatibility.md)
+to verify that command presence is not treated as support proof. A lane receipt
+must prove preflight, init, doctor, tick, dispatch-or-simulate, closeout,
+inspect-next-action, and a passing private-state scan before public copy may
+call that lane supported. The reduced lane must stay runtime-proven because it
+is the public fallback when full substrate is absent.
 
 ## 4. Initialize A Target Repo
 
@@ -217,7 +221,7 @@ and the journey receipt explains the mode you are in.
 | Pitfall | Fix |
 |---|---|
 | Treating reduced mode as failure | Reduced mode is the required fallback when full substrate is absent. |
-| Claiming Gemini or OpenClaw support before smoke | Keep them compatibility targets until `runtime_proven`. |
+| Claiming harness support before smoke | Keep Claude, Codex, Gemini, and OpenClaw compatibility targets until `runtime_proven`. |
 | Copying local fleet state into a public repo | Public init must generate state from scratch. |
 | Reading pane scrollback as proof | Use NTM, receipt, and doctor truth surfaces, not stale raw captures. |
 | Skipping closeout | Validated closeout is part of the first value, not an optional polish step. |
@@ -232,3 +236,8 @@ and the journey receipt explains the mode you are in.
 - If a row is source-gap, treat that lane as a target, not a supported path.
 - If the next action is clear, open the relevant Bead or receipt and continue
   from there.
+
+For release verification, use
+[`../runbooks/public-release-runbook.md`](../runbooks/public-release-runbook.md).
+For the business-owner story and consent boundary, use
+[`../stories/public-journey-and-redaction.md`](../stories/public-journey-and-redaction.md).

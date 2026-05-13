@@ -4,7 +4,7 @@
 # invariant on flywheel-loop doctor.
 #
 # Trauma class research-health-prelude-fail (4 events on 2026-05-02,
-# all mobile-eats:0.1) recorded "status=fail with empty errors/warnings",
+# all {proof-product}:0.1) recorded "status=fail with empty errors/warnings",
 # meaning the RESEARCH worker correctly aborted the tick but had nothing
 # to route to an owner. Filed flywheel-q53pp (P3) for the doctor-emit
 # substrate fix.

@@ -1,7 +1,7 @@
 {
   "version": "1",
-  "profile_name": "alps",
-  "domain": "healthcare-insurance-financial",
+  "profile_name": "strict-client",
+  "domain": "regulated-client-domain",
   "allowlist_paths": [".flywheel/"],
   "blocklist_paths": [
     "AGENTS.md",
@@ -49,5 +49,5 @@
     "PII"
   ],
   "requires_word_boundary": true,
-  "rationale": "ALPS root is active healthcare, insurance, financial, CRM, and integration domain; only repo-local .flywheel substrate is in scope."
+  "rationale": "Strict-client root content is active domain/customer territory; only repo-local .flywheel substrate is in scope."
 }

@@ -29,7 +29,7 @@ cat >"$TMP/repo/.flywheel/dispatch-log.jsonl" <<'JSONL'
 {"ts":"2026-05-04T19:00:00Z","session":"flywheel","pane":2,"task_id":"t1","task_summary":"doctrine L98 probe skill"}
 {"ts":"2026-05-04T19:04:00Z","event":"callback_received","session":"flywheel","pane":2,"task_id":"t1","callback_status":"done","skills_consulted":"observability-platform"}
 {"ts":"2026-05-04T19:10:00Z","session":"flywheel","pane":3,"task_id":"t2","task_summary":"threshold fixture test"}
-{"ts":"2026-05-04T19:20:00Z","session":"skillos","pane":2,"task_id":"t3","task_summary":"coord cross-orch probe"}
+{"ts":"2026-05-04T19:20:00Z","session":"{capability-control-plane}","pane":2,"task_id":"t3","task_summary":"coord cross-orch probe"}
 JSONL
 
 cat >"$TMP/repo/.flywheel/validation-receipts/t1.json" <<'JSON'

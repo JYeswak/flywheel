@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "profile_name": "mobile-eats",
+  "profile_name": "proof-product",
   "domain": "product-app",
   "allowlist_paths": [".flywheel/"],
   "blocklist_paths": [
@@ -27,5 +27,5 @@
     "vendor"
   ],
   "requires_word_boundary": true,
-  "rationale": "Mobile Eats audit defaults to repo-local flywheel substrate; product app code remains excluded until the owner expands scope."
+  "rationale": "Proof-product audits default to repo-local flywheel substrate; product app code remains excluded until the owner expands scope."
 }

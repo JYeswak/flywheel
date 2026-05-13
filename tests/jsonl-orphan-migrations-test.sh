@@ -208,7 +208,7 @@ test_fleet() {
 }
 
 test_mobile() {
-  local script="$ROOT/.flywheel/scripts/mobile-eats-loop-with-receipt-mirror.sh" log="$TMP/mobile.jsonl" out_dir="$TMP/mobile-out"
+  local script="$ROOT/.flywheel/scripts/{proof-product}-loop-with-receipt-mirror.sh" log="$TMP/mobile.jsonl" out_dir="$TMP/mobile-out"
   write_mobile_tools
   PATH="$TMP/bin:$PATH" MOBILE_EATS_PRODUCT_TICK="$TMP/product-tick" MOBILE_EATS_RECEIPT_BRIDGE="$TMP/receipt-bridge" \
   MOBILE_EATS_LOOP_OUT_DIR="$out_dir" MOBILE_EATS_RECEIPT_MIRROR_LOG="$log" FLYWHEEL_JSONL_APPEND_LIB="$LIB" \
@@ -220,8 +220,8 @@ test_mobile() {
   bridge_rc=$?
   set -e
   local expected_success expected_error
-  expected_success="$(jq -nc --arg ts "2026-05-05T00:00:00Z" --arg out "$out_dir/last_tick_mobile-eats.json" --argjson tick_rc 0 '{ts:$ts,event:"receipt_mirrored",path:$out,tick_exit:$tick_rc}')"
-  expected_error="$(jq -nc --arg ts "2026-05-05T00:00:00Z" --arg out "$out_dir/last_tick_mobile-eats.json" --argjson tick_rc 0 --argjson bridge_rc 7 '{ts:$ts,event:"receipt_mirror_failed",path:$out,tick_exit:$tick_rc,bridge_exit:$bridge_rc}')"
+  expected_success="$(jq -nc --arg ts "2026-05-05T00:00:00Z" --arg out "$out_dir/last_tick_{proof-product}.json" --argjson tick_rc 0 '{ts:$ts,event:"receipt_mirrored",path:$out,tick_exit:$tick_rc}')"
+  expected_error="$(jq -nc --arg ts "2026-05-05T00:00:00Z" --arg out "$out_dir/last_tick_{proof-product}.json" --argjson tick_rc 0 --argjson bridge_rc 7 '{ts:$ts,event:"receipt_mirror_failed",path:$out,tick_exit:$tick_rc,bridge_exit:$bridge_rc}')"
   if [[ "$bridge_rc" == "7" ]] && [[ "$(sed -n '1p' "$log")" == "$expected_success" ]] && [[ "$(sed -n '2p' "$log")" == "$expected_error" ]]; then
     pass "mobile valid append readback"
   else

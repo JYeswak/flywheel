@@ -1,0 +1,1 @@
+Synthetic live pane state fixture for overlay classification.

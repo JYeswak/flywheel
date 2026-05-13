@@ -87,7 +87,7 @@ run_fixture jeff_corpus
 assert_jq "$TMP/jeff_corpus.out" '.row.artifact_class == "finding" and .row.metadata.classifier_artifact_class == "jeff_corpus_consumer_path" and .row.consumer == "socraticode://jeff-corpus"' "jeff_consumer_path_classified"
 
 run_fixture skill_candidate
-assert_jq "$TMP/skill_candidate.out" '.row.artifact_class == "skill_candidate" and .row.state == "unwired" and .row.metadata.classifier_artifact_class == "skill_candidate" and (.row.consumer | test("skillos"))' "skill_candidate_routes_to_skillos"
+assert_jq "$TMP/skill_candidate.out" '.row.artifact_class == "skill_candidate" and .row.state == "unwired" and .row.metadata.classifier_artifact_class == "skill_candidate" and (.row.consumer | test("{capability-control-plane}"))' "skill_candidate_routes_to_{capability-control-plane}"
 
 run_fixture no_wire_required
 assert_jq "$TMP/no_wire_required.out" '.row.artifact_class == "finding" and .row.metadata.classifier_artifact_class == "no_wire_required" and .row.state == "not_required" and .row.consumer != "NONE"' "no_wire_required_proof_classified"
@@ -123,7 +123,7 @@ else
   pass "live_f03_schema_deferred_pending"
 fi
 
-tail -n 1 "$ROOT/.flywheel/wire-or-explain-classifier/README.md" | grep -qx 'Part of the Yuzu Method framework by ZestStream.' \
+tail -n 1 "$ROOT/.flywheel/wire-or-explain-classifier/README.md" | grep -qx 'Part of the Yuzu Method framework by {operator-company}.' \
   && pass "readme_yuzu_footer" || fail "readme_yuzu_footer"
 
 if [[ "$fail_count" -gt 0 ]]; then

@@ -26,7 +26,7 @@
 
 - [ ] Jeff lens pass
 - [ ] Donella lens pass
-- [ ] Joshua lens pass
+- [ ] {operator} lens pass
 - [ ] Receipt path:
 
 ## Tests

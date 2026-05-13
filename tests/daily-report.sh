@@ -129,7 +129,7 @@ printf '%s\n' "{\"ts\":\"${date_today}T09:00:00Z\",\"event\":\"dispatch_sent\",\
 fuckup_log="$TMP/fuckup.jsonl"
 printf '%s\n' "{\"ts\":\"${date_today}T09:00:00Z\",\"trauma_class\":\"fixture-trauma\",\"severity\":\"medium\"}" >"$fuckup_log"
 cross_log="$TMP/cross.jsonl"
-printf '%s\n' "{\"ts\":\"${date_today}T09:00:00Z\",\"session\":\"mobile-eats\",\"event\":\"ack\"}" >"$cross_log"
+printf '%s\n' "{\"ts\":\"${date_today}T09:00:00Z\",\"session\":\"{proof-product}\",\"event\":\"ack\"}" >"$cross_log"
 jeff_log="$TMP/jeff.jsonl"
 printf '%s\n' "{\"ts\":\"${date_today}T09:00:00Z\",\"title\":\"Jeff fixture release\"}" >"$jeff_log"
 jeff_projection="$TMP/jeff-storage-projection.json"

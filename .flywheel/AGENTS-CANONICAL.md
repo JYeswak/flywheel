@@ -145,17 +145,6 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 107 | L156 — INBOX-DISCIPLINE-0TH-PROBE | long_term | `.flywheel/rules/L107-L156-inbox-discipline-0th-probe.md` |
 | 108 | L157 — OUTBOX-DISCIPLINE-CROSS-ORCH-SHIP-NOTIFICATION | long_term | `.flywheel/rules/L108-L157-outbox-discipline-cross-orch-ship-notification.md` |
 | 109 | L168 — EVERY-CONSUMER-REPO-MUST-DECLARE-ZS-TENANT-YAML-AT-ROOT | long_term | `.flywheel/rules/L109-L168-every-consumer-repo-must-declare-zs-tenant-yaml-at-root.md` |
-| 110 | L169 — JSM-FIRST-SEARCH-BEFORE-HAND-ROLLING-MANDATORY | long_term | `.flywheel/rules/L110-L169-jsm-first-search-before-hand-rolling-mandatory.md` |
-| 111 | L170 — EVERY-CONSUMER-REPO-MUST-DECLARE-3-USER-JOURNEYS-MINIMUM | long_term | `.flywheel/rules/L111-L170-every-consumer-repo-must-declare-3-user-journeys-minimum.md` |
 <!-- END-RULES-INDEX -->
-
-<!-- BMBUB-PENDING-INDEX (sister-shard authoring HELD until flywheel-bmbub class-aware-ownership-gate ships; cross-ref skillos canonical paths) -->
-<!-- L158 CLI-VERSION-FLAG-MISMATCH-OUTPUT-FORMAT-SWITCH-LEAKS (skillos canonical) -->
-<!-- L159 PROPAGATOR-CANONICAL-OWNERSHIP-CLASS-AWARE-GATE-MANDATORY (flywheel-source; HOOK-LAYER LIVE; shell-layer HELD bmbub) -->
-<!-- L160 AGENTIC-LOOP-HALT-VIA-POSTTOOLUSE-HOOK-WHEN-LEAK-DETECTED (skillos canonical) -->
-<!-- L161 OPERATOR-DIRECTED-MISSION-CONTINUATION-AFTER-LEAK (skillos canonical) -->
-<!-- L162 SUBSTRATE-CLASS-CLASSIFIER-BEFORE-PROTECTION-HALT-MANDATORY (flywheel-source; RESERVED N=2; HOLD until N=3 OR Joshua-directive) -->
-<!-- L163-L167 CROSS-INFISICAL/TENANT-VERIFICATION cohort (skillos canonical; ratified 2026-05-12T05:27Z) -->
-<!-- END-BMBUB-PENDING-INDEX -->
 
 <!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->

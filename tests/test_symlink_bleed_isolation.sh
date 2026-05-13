@@ -7,10 +7,10 @@
 #   (2) verify-bead-authority refuses to operate on the symlinked child.
 #   (3) BEADS_STRICT_LOCAL=1 routing causes discovery_method=strict-error.
 #
-# Fixture-only — never touches /Users/josh/Developer or live beads DBs.
+# Fixture-only — never touches $HOME/Developer or live beads DBs.
 set -euo pipefail
 
-ROOT="/Users/josh/Developer/flywheel"
+ROOT="<flywheel-repo>"
 PROBE="$ROOT/.flywheel/scripts/br-authority-probe.sh"
 VERIFY="$ROOT/.flywheel/scripts/verify-bead-authority.sh"
 

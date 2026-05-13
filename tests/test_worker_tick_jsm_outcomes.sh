@@ -41,7 +41,7 @@ write_receipt() {
       session:"flywheel",
       pane:3,
       task_id:"flywheel-0x9f-fixture",
-      repo:"/Users/josh/Developer/flywheel",
+      repo:"<flywheel-repo>",
       violations:$violations,
       check_results:[
         {

@@ -5,7 +5,7 @@
 # (OUTSIDE this repo).
 set -uo pipefail
 
-SCRIPT="/Users/josh/.claude/commands/flywheel/_shared/callback-receipt-validator-wrapper.sh"
+SCRIPT="$HOME/.claude/commands/flywheel/_shared/callback-receipt-validator-wrapper.sh"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 
 pass_count=0

@@ -94,7 +94,7 @@ if "$SCRIPT" doctor --json 2>/dev/null \
 else fail "doctor missing default roots/output_dir probes"; fi
 
 # Test 15: validate root-path accepts absolute path (5th occurrence of pattern)
-if "$SCRIPT" validate root-path "/Users/josh/Developer" 2>/dev/null \
+if "$SCRIPT" validate root-path "$HOME/Developer" 2>/dev/null \
    | jq -e '.subject == "root-path" and .status == "ok"' >/dev/null; then
   pass "validate root-path accepts absolute (5th occurrence of fleet absolute-path validator pattern)"
 else fail "validate root-path absolute accept"; fi

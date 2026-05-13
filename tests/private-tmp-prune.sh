@@ -18,23 +18,23 @@ assert_jq() {
 mkdir -p \
   "$TMP/bin" \
   "$TMP/target/jsm-auth-isolation.old" \
-  "$TMP/target/mobile-eats-L4-validate" \
-  "$TMP/target/mobile-eats-next-stale-3u48-negative-test" \
-  "$TMP/target/mobile-eats-e12-build-faeee5f.19kFkX" \
-  "$TMP/target/mobile-eats-3dpx27-check" \
-  "$TMP/target/mobile-eats-active-validate" \
+  "$TMP/target/{proof-product}-L4-validate" \
+  "$TMP/target/{proof-product}-next-stale-3u48-negative-test" \
+  "$TMP/target/{proof-product}-e12-build-faeee5f.19kFkX" \
+  "$TMP/target/{proof-product}-3dpx27-check" \
+  "$TMP/target/{proof-product}-active-validate" \
   "$TMP/target/ordinary-dir"
 printf 'x\n' >"$TMP/target/jsm-auth-isolation.old/payload"
-printf 'x\n' >"$TMP/target/mobile-eats-L4-validate/payload"
-printf 'x\n' >"$TMP/target/mobile-eats-next-stale-3u48-negative-test/payload"
-printf 'x\n' >"$TMP/target/mobile-eats-e12-build-faeee5f.19kFkX/payload"
-printf 'x\n' >"$TMP/target/mobile-eats-3dpx27-check/payload"
+printf 'x\n' >"$TMP/target/{proof-product}-L4-validate/payload"
+printf 'x\n' >"$TMP/target/{proof-product}-next-stale-3u48-negative-test/payload"
+printf 'x\n' >"$TMP/target/{proof-product}-e12-build-faeee5f.19kFkX/payload"
+printf 'x\n' >"$TMP/target/{proof-product}-3dpx27-check/payload"
 touch -t 202001010101 \
   "$TMP/target/jsm-auth-isolation.old" \
-  "$TMP/target/mobile-eats-L4-validate" \
-  "$TMP/target/mobile-eats-next-stale-3u48-negative-test" \
-  "$TMP/target/mobile-eats-e12-build-faeee5f.19kFkX" \
-  "$TMP/target/mobile-eats-3dpx27-check"
+  "$TMP/target/{proof-product}-L4-validate" \
+  "$TMP/target/{proof-product}-next-stale-3u48-negative-test" \
+  "$TMP/target/{proof-product}-e12-build-faeee5f.19kFkX" \
+  "$TMP/target/{proof-product}-3dpx27-check"
 
 cat >"$TMP/bin/ntm" <<'SH'
 #!/usr/bin/env bash
@@ -54,10 +54,10 @@ bash -n "$SCRIPT" && pass "script syntax" || fail "script syntax"
 
 PATH="$TMP/bin:$PATH" "$SCRIPT" --dry-run --json --target "$TMP/target" --min-age-hours 1 >"$TMP/dry.json"
 assert_jq "$TMP/dry.json" '.schema_version == "private-tmp-prune.v2" and .split_contract.ntm_temp_cleanup == "ntm cleanup"' "schema records split cleanup contract"
-assert_jq "$TMP/dry.json" '.ntm_cleanup.total_files == 1 and .flywheel_candidates_count == 5 and any(.flywheel_candidates[]; .path | test("mobile-eats-L4-validate")) and any(.flywheel_candidates[]; .path | test("mobile-eats-next-stale")) and any(.flywheel_candidates[]; .path | test("mobile-eats-e12-build")) and any(.flywheel_candidates[]; .path | test("mobile-eats-3dpx27-check")) and any(.flywheel_candidates[]; .path | test("jsm-auth-isolation"))' "dry-run includes targeted mobile-eats validation roots"
+assert_jq "$TMP/dry.json" '.ntm_cleanup.total_files == 1 and .flywheel_candidates_count == 5 and any(.flywheel_candidates[]; .path | test("{proof-product}-L4-validate")) and any(.flywheel_candidates[]; .path | test("{proof-product}-next-stale")) and any(.flywheel_candidates[]; .path | test("{proof-product}-e12-build")) and any(.flywheel_candidates[]; .path | test("{proof-product}-3dpx27-check")) and any(.flywheel_candidates[]; .path | test("jsm-auth-isolation"))' "dry-run includes targeted {proof-product} validation roots"
 grep -qx 'cleanup --dry-run --max-age 1 --json' "$NTM_CALLS" && pass "dry-run delegates ntm cleanup" || fail "dry-run delegates ntm cleanup"
 test -d "$TMP/target/jsm-auth-isolation.old" && pass "dry-run does not delete flywheel candidate" || fail "dry-run does not delete flywheel candidate"
-test -d "$TMP/target/mobile-eats-active-validate" && pass "dry-run leaves too-young mobile-eats candidate" || fail "dry-run leaves too-young mobile-eats candidate"
+test -d "$TMP/target/{proof-product}-active-validate" && pass "dry-run leaves too-young {proof-product} candidate" || fail "dry-run leaves too-young {proof-product} candidate"
 
 set +e
 PATH="$TMP/bin:$PATH" "$SCRIPT" --apply --json --target "$TMP/target" --min-age-hours 1 >"$TMP/apply-no-key.json" 2>"$TMP/apply-no-key.err"
@@ -69,10 +69,10 @@ PATH="$TMP/bin:$PATH" "$SCRIPT" --apply --idempotency-key test-private-tmp --jso
 assert_jq "$TMP/apply.json" '.ntm_cleanup.dry_run == false and .apply == true' "apply calls mutating ntm cleanup path"
 grep -qx 'cleanup --max-age 1 --json' "$NTM_CALLS" && pass "apply delegates mutating ntm cleanup" || fail "apply delegates mutating ntm cleanup"
 test ! -e "$TMP/target/jsm-auth-isolation.old" && pass "apply removes flywheel allowlisted candidate" || fail "apply removes flywheel allowlisted candidate"
-test ! -e "$TMP/target/mobile-eats-L4-validate" && pass "apply removes mobile-eats validation candidate" || fail "apply removes mobile-eats validation candidate"
-test ! -e "$TMP/target/mobile-eats-next-stale-3u48-negative-test" && pass "apply removes mobile-eats stale candidate" || fail "apply removes mobile-eats stale candidate"
+test ! -e "$TMP/target/{proof-product}-L4-validate" && pass "apply removes {proof-product} validation candidate" || fail "apply removes {proof-product} validation candidate"
+test ! -e "$TMP/target/{proof-product}-next-stale-3u48-negative-test" && pass "apply removes {proof-product} stale candidate" || fail "apply removes {proof-product} stale candidate"
 test -d "$TMP/target/ordinary-dir" && pass "apply leaves non-allowlisted dir" || fail "apply leaves non-allowlisted dir"
-test -d "$TMP/target/mobile-eats-active-validate" && pass "apply leaves too-young mobile-eats candidate" || fail "apply leaves too-young mobile-eats candidate"
+test -d "$TMP/target/{proof-product}-active-validate" && pass "apply leaves too-young {proof-product} candidate" || fail "apply leaves too-young {proof-product} candidate"
 
 if [ "$fail_count" -gt 0 ]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2

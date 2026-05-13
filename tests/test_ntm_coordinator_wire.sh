@@ -17,8 +17,8 @@
 
 set -uo pipefail
 
-NTM_BIN="${NTM_BIN:-/Users/josh/.local/bin/ntm}"
-PINNED_BIN="${PINNED_BIN:-/Users/josh/.local/bin/ntm-coordinator-pinned}"
+NTM_BIN="${NTM_BIN:-$HOME/.local/bin/ntm}"
+PINNED_BIN="${PINNED_BIN:-$HOME/.local/bin/ntm-coordinator-pinned}"
 SESSION="${FLYWHEEL_SESSION:-flywheel}"
 STATUS_MD="${HOME}/.claude/commands/flywheel/status.md"
 TICK_MD="${HOME}/.claude/commands/flywheel/tick.md"

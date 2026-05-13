@@ -91,7 +91,7 @@ if [ "$skill_failure_rc" -ne 0 ]; then pass "skill_relay_failure_rc_error"; else
 assert_jq "$TMP/skill-success.json" '.skill_candidate_backlog_count == 1 and .skill_candidate_unrelayed_count == 0 and any(.actions[]; .kind == "skill_relay" and .status == "pass")' "skill_relay_success_metrics"
 assert_jq "$TMP/skill-failure.json" '.skill_candidate_relay_failure_count == 1 and any(.actions[]; .kind == "skill_relay" and .status == "error")' "skill_relay_failure_metrics"
 run_wire_status "$FIXTURES/skill-relay-success.jsonl" "$TMP/wire-status-skill.json" FLYWHEEL_WIRE_OR_EXPLAIN_OVERDUE_HOURS=99999
-assert_jq "$TMP/wire-status-skill.json" 'any(.top_actions[]; .artifact_class == "skill_candidate" and .relay_status == "sent" and .owner == "skillos") and any(.actions[]; .kind == "skill_relay")' "wire_status_skill_relay_first_class_action"
+assert_jq "$TMP/wire-status-skill.json" 'any(.top_actions[]; .artifact_class == "skill_candidate" and .relay_status == "sent" and .owner == "{capability-control-plane}") and any(.actions[]; .kind == "skill_relay")' "wire_status_skill_relay_first_class_action"
 "$BIN" wire-status --schema --json >"$TMP/wire-status-schema.json"
 assert_jq "$TMP/wire-status-schema.json" '.command == "wire-status" and .read_only_default == true and (.mutation_subcommands | index("defer")) and (.exit_codes."1" | test("doctor.*error"))' "wire_status_schema_and_exit_codes"
 "$BIN" wire-status --info --json >"$TMP/wire-status-info.json"
@@ -152,7 +152,7 @@ else
   cat "$TMP/full-doctor.json" >&2 || true
 fi
 
-tail -n 1 "$ROOT/.flywheel/wire-or-explain-doctor/README.md" | grep -qx 'Part of the Yuzu Method framework by ZestStream.' \
+tail -n 1 "$ROOT/.flywheel/wire-or-explain-doctor/README.md" | grep -qx 'Part of the Yuzu Method framework by {operator-company}.' \
   && pass "doctor_readme_yuzu_footer" || fail "doctor_readme_yuzu_footer"
 
 printf '\nSummary: %s passed, %s failed\n' "$pass_count" "$fail_count"

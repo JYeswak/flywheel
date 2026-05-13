@@ -86,7 +86,7 @@ The top-level output should be one matrix receipt:
 ```
 
 `public_copy_gate` is intentionally stricter than row validation. A lane can be
-`registry_valid` and still not be promotable as supported-first.
+`registry_valid` and still not be promotable as supported.
 
 ## Lane Row Schema
 
@@ -95,7 +95,7 @@ Each lane row should satisfy:
 ```json
 {
   "lane": "codex",
-  "support_label": "supported-first|supported-docs|compatibility-target|reduced-required|unsupported",
+  "support_label": "supported-by-receipt|supported-docs|compatibility-target|reduced-required|unsupported",
   "evidence_state": "registry_valid|runtime_proven|fixture_blocked|source_gap|unsupported",
   "auth_state": "present|missing|not_required|unknown",
   "install_detected": true,
@@ -216,7 +216,7 @@ Minimum assertions:
 Docs and website copy may promote:
 
 - reduced local mode when its row is `runtime_proven`;
-- Claude or Codex as supported-first only when the row is `runtime_proven` or
+- Claude or Codex as supported only when a strict runtime receipt is valid, or
   explicitly blocked by an auth/account condition the public docs name;
 - Gemini and OpenClaw only as compatibility targets until runtime proof exists.
 

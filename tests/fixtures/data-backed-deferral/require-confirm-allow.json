@@ -11,7 +11,7 @@
   "action_in_doctrine": true,
   "requires_joshua_decision": true,
   "require_confirm": true,
-  "suggested_action": "ask for explicit confirmation because the dispatch metadata requires Joshua",
+  "suggested_action": "ask for explicit confirmation because the dispatch metadata requires {operator}",
   "draft_question": "Proceed with the operator-confirmed action?",
   "draft_text": "This dispatch metadata has requires_joshua_decision=true. Proceed with the operator-confirmed action?",
   "signals": {

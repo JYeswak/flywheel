@@ -4,7 +4,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 GATE="$REPO_ROOT/.flywheel/scripts/auto-l112-gate.sh"
 REAL_HOME="$(dscl . -read "/Users/$(id -un)" NFSHomeDirectory 2>/dev/null | awk '{print $2}' || true)"
-REAL_HOME="${REAL_HOME:-/Users/josh}"
+REAL_HOME="${REAL_HOME:-$HOME}"
 TMPDIR_TEST="$(mktemp -d /tmp/auto-l112-gate-test.XXXXXX)"
 LEDGER="$TMPDIR_TEST/ledger.jsonl"
 BR_LOG="$TMPDIR_TEST/br-create.log"

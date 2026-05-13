@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/flywheel-codex-snapshot-canonical-cli.sh
-# Canonical-cli surface tests for /Users/josh/.claude/skills/.flywheel/bin/flywheel-codex-snapshot (scaffolded by
+# Canonical-cli surface tests for <flywheel-state>/bin/flywheel-codex-snapshot (scaffolded by
 # bead flywheel-ws02m / scaffold-canonical-cli.sh).
 #
 # 13/13 PASS = canonical-cli-scoping checker green. TODO markers
@@ -8,7 +8,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="/Users/josh/.claude/skills/.flywheel/bin/flywheel-codex-snapshot"
+SCRIPT="<flywheel-state>/bin/flywheel-codex-snapshot"
 
 pass_count=0
 fail_count=0

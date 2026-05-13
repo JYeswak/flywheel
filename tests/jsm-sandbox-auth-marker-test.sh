@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 VALIDATOR="$ROOT/.flywheel/scripts/validate-jsm-sandbox-auth-marker.sh"
-FLYWHEEL_LOOP_BIN="${FLYWHEEL_LOOP_BIN:-/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop}"
+FLYWHEEL_LOOP_BIN="${FLYWHEEL_LOOP_BIN:-<flywheel-state>/bin/flywheel-loop}"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/jsm-sandbox-auth-marker-test.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -61,8 +61,8 @@ write_marker() {
   local tmp_payload="$TMP/payload.json" canonical hmac
   jq -n \
     --arg ts "$(iso_offset 0)" \
-    --arg writer "skillos-guarded-runner" \
-    --arg writer_session "skillos" \
+    --arg writer "{capability-control-plane}-guarded-runner" \
+    --arg writer_session "{capability-control-plane}" \
     --argjson writer_pane 1 \
     --arg what_was_proven "guarded runner verified sandbox auth without live probe side effects" \
     --arg proof_artifact_sha256 "$proof_sha" \

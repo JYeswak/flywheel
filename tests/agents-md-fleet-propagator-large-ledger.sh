@@ -31,7 +31,7 @@ for i in range(5000):
     row = {
         'ts': f'2026-05-11T07:{i//60:02d}:{i%60:02d}Z',
         'action': 'propagate',
-        'repo': f'/Users/josh/Developer/sample-flywheel-fleet-repo-with-longer-path-name-{i:06d}',
+        'repo': f'$HOME/Developer/sample-flywheel-fleet-repo-with-longer-path-name-{i:06d}',
         'success': True,
         'status': 'succeeded',
         'schema_version': 'agents-md-fleet-propagation/v1',
@@ -80,7 +80,7 @@ else
 fi
 
 # Test 4: why <id> --json with large ledger (search for a known ledger repo)
-out="$(AGENTS_MD_FLEET_LEDGER="$LEDGER" "$SCRIPT" why "/Users/josh/Developer/sample-flywheel-fleet-repo-with-longer-path-name-002500" --json 2>&1)"
+out="$(AGENTS_MD_FLEET_LEDGER="$LEDGER" "$SCRIPT" why "$HOME/Developer/sample-flywheel-fleet-repo-with-longer-path-name-002500" --json 2>&1)"
 if printf '%s' "$out" | grep -qE '"schema_version".*"agents-md-fleet-propagation/v1.why"' \
    && ! printf '%s' "$out" | grep -qE 'jq:.*Argument list too long'; then
   pass "why <id> --json envelope under large ledger; no jq-arglist error"

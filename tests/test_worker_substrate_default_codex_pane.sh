@@ -3,8 +3,8 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/.flywheel/scripts/dispatch-worker-substrate-gate.sh"
-DISPATCH_DOC="/Users/josh/.claude/commands/flywheel/dispatch.md"
-TEMPLATE_DOC="/Users/josh/.claude/commands/flywheel/_shared/dispatch-template.md"
+DISPATCH_DOC="$HOME/.claude/commands/flywheel/dispatch.md"
+TEMPLATE_DOC="$HOME/.claude/commands/flywheel/_shared/dispatch-template.md"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/worker-substrate-default.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 

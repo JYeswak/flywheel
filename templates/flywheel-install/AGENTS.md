@@ -44,7 +44,7 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 6 | L52 — ISSUES-TO-BEADS-OR-EXPLICIT-NO-BEAD-RECEIPT (no observed gap is absorbed silently) | long_term | `.flywheel/rules/L006-L52-issues-to-beads-or-explicit-no-bead-receipt-no-observed-gap-is-absorbe.md` |
 | 7 | L53 — FUCKUPS-REPORTED-IN-CALLBACK (every blocker / trauma / gap surfaces as a fuckup-log row) | long_term | `.flywheel/rules/L007-L53-fuckups-reported-in-callback-every-blocker-trauma-gap-surfaces-as-a-fu.md` |
 | 8 | L54 — SKILL-DEEP-DIVE-ON-BLOCKERS (workers climb the skill tree before declaring a wall) | long_term | `.flywheel/rules/L008-L54-skill-deep-dive-on-blockers-workers-climb-the-skill-tree-before-declar.md` |
-| 9 | L55 — SKILLOS-ESCALATION-FOR-MISSING-SKILLS (when no skill exists for a trauma class, route to skillos) | long_term | `.flywheel/rules/L009-L55-skillos-escalation-for-missing-skills-when-no-skill-exists-for-a-traum.md` |
+| 9 | L55 — CAPABILITY-CONTROL-PLANE-ESCALATION-FOR-MISSING-SKILLS (when no skill exists for a trauma class, route to capability-control-plane) | long_term | `.flywheel/rules/L009-L55-capability-control-plane-escalation-for-missing-skills-when-no-skill-exists-for-a-traum.md` |
 | 10 | L56 — FUCKUP-LOG → INCIDENTS → CANONICAL-L-RULE PROMOTION LADDER | long_term | `.flywheel/rules/L010-L56-fuckup-log-incidents-canonical-l-rule-promotion-ladder.md` |
 | 11 | L57 — LOOP-STATE-MARKER-NOT-DRIVER | long_term | `.flywheel/rules/L011-L57-loop-state-marker-not-driver.md` |
 | 12 | L58 — SECRET-MATERIAL-NEVER-IN-PANE-TEXT | long_term | `.flywheel/rules/L012-L58-secret-material-never-in-pane-text.md` |
@@ -140,7 +140,11 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 102 | L151 — JEFFREY-COMMENT-RESPONSE-SLA | long_term | `.flywheel/rules/L102-L151-jeffrey-comment-response-sla.md` |
 | 103 | L152 — COORDINATOR-DAEMON-CANONICAL-DISPATCH | long_term | `.flywheel/rules/L103-L152-coordinator-daemon-canonical-dispatch.md` |
 | 104 | L153 — CAPTURE-PROVENANCE-CANONICAL | long_term | `.flywheel/rules/L104-L153-capture-provenance-canonical.md` |
-| 105 | L168 — EVERY-CONSUMER-REPO-MUST-DECLARE-ZS-TENANT-YAML-AT-ROOT | long_term | `.flywheel/rules/L109-L168-every-consumer-repo-must-declare-zs-tenant-yaml-at-root.md` |
+| 105 | L154 — CLOSURE-EVIDENCE-CONTRACT-VERSION-ANCHOR | long_term | `.flywheel/rules/L105-L154-closure-evidence-contract-version-anchor.md` |
+| 106 | L155 — CLOSURE-EVIDENCE-PUBLIC-LENS-ANCHOR | long_term | `.flywheel/rules/L106-L155-closure-evidence-public-lens-anchor.md` |
+| 107 | L156 — INBOX-DISCIPLINE-0TH-PROBE | long_term | `.flywheel/rules/L107-L156-inbox-discipline-0th-probe.md` |
+| 108 | L157 — OUTBOX-DISCIPLINE-CROSS-ORCH-SHIP-NOTIFICATION | long_term | `.flywheel/rules/L108-L157-outbox-discipline-cross-orch-ship-notification.md` |
+| 109 | L168 — EVERY-CONSUMER-REPO-MUST-DECLARE-ZS-TENANT-YAML-AT-ROOT | long_term | `.flywheel/rules/L109-L168-every-consumer-repo-must-declare-zs-tenant-yaml-at-root.md` |
 <!-- END-RULES-INDEX -->
 
 <!-- BMBUB-PENDING (template held behind canonical for L154-L167; backfill on next propagator-class-aware-ownership-gate ship) -->
@@ -154,6 +158,6 @@ Required hooks once bootstrapped:
 - DB migrations MUST gate on `zs-verify-supabase-tenant` against the declared Supabase ref
 - Deploy fails with: `"Run /zs:project-bootstrap <slug> to declare tenant routing for this repo."` if `.zs-tenant.yaml` is absent
 
-Origin: cross-Infisical-Supabase tenant collision (mobile-eats:1 TIER-3 2026-05-12T05:00Z; 66 migrations almost ran against ALPS production). Joshua-directive PROMOTED-IMMEDIATE.
+Origin: cross-Infisical-Supabase tenant collision (proof-product:1 TIER-3 <timestamp>; 66 migrations almost ran against {insurance-client} production). {operator}-directive PROMOTED-IMMEDIATE.
 
 <!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->

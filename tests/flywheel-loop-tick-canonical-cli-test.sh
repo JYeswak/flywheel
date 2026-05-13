@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-TICK="${TICK:-/Users/josh/Developer/flywheel/.flywheel/flywheel-loop-tick}"
+TICK="${TICK:-<flywheel-repo>/.flywheel/flywheel-loop-tick}"
 
 [[ -x "$TICK" ]] || { echo "FAIL tick driver missing or not executable: $TICK" >&2; exit 1; }
 

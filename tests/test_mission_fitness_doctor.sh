@@ -59,7 +59,7 @@ schema_version: 1
 anchor: continuous-orchestrator-uptime-self-sustaining-fleet
 
 ## Mission
-Flywheel is the orchestration repo for ZestStream's agentic coding infrastructure.
+Flywheel is the orchestration repo for {operator-company}'s agentic coding infrastructure.
 It coordinates bead-based task graphs, dispatches work to ntm workers, and keeps
 the agent fleet continuously productive, observable, and self-sustaining.
 MISSION

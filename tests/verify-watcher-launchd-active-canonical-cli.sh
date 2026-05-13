@@ -108,7 +108,7 @@ else fail "validate launchd-label reject rc=$rc"; fi
 rm -f /tmp/vs78t-test16.json
 
 # Test 17: validate session-name accepts lowercase-hyphen pattern
-if "$SCRIPT" validate session-name "alpsinsurance" 2>/dev/null \
+if "$SCRIPT" validate session-name "{session}" 2>/dev/null \
    | jq -e '.subject == "session-name" and .status == "ok"' >/dev/null; then
   pass "validate session-name accepts lowercase-hyphen"
 else fail "validate session-name accept"; fi

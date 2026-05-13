@@ -1,8 +1,8 @@
 {
   "schema_version": "flywheel-loop-doctor/v1",
-  "fixture": "incident-2026-05-04/mobile-eats-doctor",
-  "session": "mobile-eats",
-  "repo": "/Users/josh/Developer/mobile-eats",
+  "fixture": "incident-2026-05-04/{proof-product}-doctor",
+  "session": "{proof-product}",
+  "repo": "$HOME/Developer/{proof-product}",
   "observed_at": "2026-05-04T05:50:00Z",
   "status": "fail",
   "errors": [
@@ -17,7 +17,7 @@
       "code": "daily_report_missing",
       "severity": "soft",
       "daily_report_age_hours": null,
-      "message": "no daily report exists for mobile-eats"
+      "message": "no daily report exists for {proof-product}"
     }
   ],
   "warnings": [
@@ -29,12 +29,12 @@
     }
   ],
   "affected_beads": [
-    "mobile-eats-nq5",
-    "mobile-eats-u7f",
-    "mobile-eats-vu8",
-    "mobile-eats-s6p"
+    "{proof-product}-nq5",
+    "{proof-product}-u7f",
+    "{proof-product}-vu8",
+    "{proof-product}-s6p"
   ],
-  "evidence_path": "/Users/josh/Developer/flywheel/.flywheel/plans/accretive-fix-mobile-eats-dispatch-health-gate-substrate-2026-05-04/00-INTENT.md",
+  "evidence_path": "<flywheel-repo>/.flywheel/plans/accretive-fix-{proof-product}-dispatch-health-gate-substrate-2026-05-04/00-INTENT.md",
   "legacy_outcome": {
     "ticks_survived": 3,
     "escalation_receipt_count": 1,

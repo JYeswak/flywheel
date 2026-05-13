@@ -14,7 +14,7 @@
 #   9. Dispatch-template.md callback contract names journey_entry_path
 set -euo pipefail
 
-REPO="${REPO:-/Users/josh/Developer/flywheel}"
+REPO="${REPO:-<flywheel-repo>}"
 SCHEMA="$REPO/.flywheel/validation-schema/v1/journey-entry.v1.schema.json"
 VALIDATOR="$REPO/.flywheel/scripts/mission-fitness-callback-validator.sh"
 DISPATCH_TEMPLATE="${DISPATCH_TEMPLATE:-$HOME/.claude/commands/flywheel/_shared/dispatch-template.md}"

@@ -1,0 +1,69 @@
+name: Installer Smoke
+
+on:
+  pull_request:
+  schedule:
+    - cron: "0 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: installer-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  install-doctor-uninstall:
+    name: Install Doctor Uninstall (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+
+      - name: Install prerequisites
+        run: |
+          set -euo pipefail
+          if [[ "${{ runner.os }}" == "Linux" ]]; then
+            sudo apt-get update
+            sudo apt-get install -y jq
+          elif [[ "${{ runner.os }}" == "macOS" ]]; then
+            brew install jq bash
+            printf '/opt/homebrew/bin\n' >>"$GITHUB_PATH"
+          fi
+
+      - name: Syntax check installer
+        run: |
+          set -euo pipefail
+          bash -n install.sh
+          bash -n uninstall.sh
+          bash -n bin/flywheel
+          bash -n tests/installer-smoke.sh
+
+      - name: Installer smoke
+        env:
+          FLYWHEEL_INSTALLER_SMOKE_ARTIFACT_DIR: installer-smoke-artifacts/${{ matrix.os }}
+        run: |
+          set -euo pipefail
+          bash tests/installer-smoke.sh
+
+      - name: Upload installer smoke receipts
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: installer-smoke-${{ matrix.os }}
+          path: installer-smoke-artifacts/${{ matrix.os }}
+          if-no-files-found: error
+
+      - name: Reduced journey smoke
+        run: |
+          set -euo pipefail
+          bash tests/journey-smoke.sh

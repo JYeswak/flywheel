@@ -1,21 +1,35 @@
 # Contributing
 
-This is a private ZestStream control-plane repo. Contributions are limited to
-authorized operators and dispatched workers.
+Flywheel is early public infrastructure. Good contributions make the agentic
+workflow loop easier to install, easier to inspect, or safer to adapt without
+copying private operator state.
 
 ## Before Work
 
-1. Read the bead body with `br show <id>`.
-2. Survey existing substrate with Socraticode against the canonical path
-   `/Users/josh/Developer/flywheel`.
-3. Read the relevant skill before inventing a workflow.
-4. Reserve owned paths through Agent Mail before editing.
-5. Confirm the task does not overlap current pane reservations or concurrency
-   notes.
+1. Read `README.md`, `CHARTER.md`, and `ARCHITECTURE.md`.
+2. Pick or file a Bead for non-trivial work, then read it with `br show <id>`.
+3. Survey the existing implementation before editing. Use Socraticode when it
+   is available; otherwise use `rg`, tests, and nearby code.
+4. Reserve owned paths through Agent Mail when working with other agents.
+5. Keep reduced mode honest: if NTM, Agent Mail, Beads, or Socraticode are not
+   installed, docs and code must say what still works instead of pretending the
+   full substrate exists.
+
+## Developer Certificate Of Origin
+
+This project uses the Developer Certificate of Origin instead of a contributor
+license agreement. Every commit must include a DCO trailer:
+
+```text
+Signed-off-by: Your Name <you@example.com>
+```
+
+Use `git commit -s` to add it automatically. By signing off, you certify that
+you have the right to submit the contribution under this repository's license.
 
 ## Beads Workflow
 
-Use Beads for non-trivial work:
+Use Beads for multi-file or behavior-changing work:
 
 ```bash
 br ready --json
@@ -23,68 +37,39 @@ br show <id>
 br update <id> --status in_progress
 ```
 
-File new beads only when the task asks for it or when L52 requires a finding to
-be captured. Otherwise, report `no_bead_reason` in the callback.
-
-Do not mutate active `.beads/` files directly. `br` owns the database and the
+Do not edit `.beads/issues.jsonl` directly. `br` owns the task database and its
 JSONL migration surface.
 
-## Slash Command Surface
+## Pull Requests
 
-The operator path is `/flywheel:*`:
+Keep pull requests small enough to review. Include:
 
-| Command | Use |
-|---|---|
-| `/flywheel:tick` | One orchestration tick: reap callbacks, route work, refill hot panes. |
-| `/flywheel:dispatch` | Build worker packets with dispatch-log rows and callback grammar. |
-| `/flywheel:status` | Read fleet health, readiness, and callback state. |
-| `/flywheel:loop` | Repeated event-driven loop execution. |
-| `/flywheel:respawn` | Pane recovery with receipts. |
-| `/flywheel:README` | Repo orientation and polish surface. |
+- the Bead id or a short `no_bead_reason`;
+- the mode affected: reduced, full, or both;
+- validation commands and relevant receipt paths;
+- any known follow-up that should remain open, including its TP row or Bead id.
 
-## Dispatch Contract
-
-L120-L128 are not optional. A DONE callback must include the required close,
-evidence, Socraticode, file-reservation, DID/DIDNT/GAPS, compliance, and numeric
-fields. Worker dispatches use `/flywheel:dispatch` so the dispatch ledger exists
-before work starts.
-
-Pane-state truth comes from:
-
-- `ntm health <session>` for state truth
-- `ntm copy <session>:<pane> -l <N>` for scrollback
-- `ntm grep <session> <pattern>` for content search
-- `ntm save <session>:<pane> <path>` for persistence
-
-## DCG Discipline
-
-Destructive Command Guard is part of the control plane. Keep commands and docs
-DCG-clean:
-
-- stage and commit with explicit paths
-- use explicit-path delete patterns when removing files
-- avoid force-style flags unless the task explicitly owns the destructive path
-- keep risky shell snippets out of prose when a safer paraphrase works
-- do not print secrets, token fragments, raw env output, or Agent Mail tokens
-
-If DCG blocks a command, change the command shape. Do not retry the same blocked
-shape.
-
-## Commits
-
-Use Conventional Commits with the bead id in the subject or body when the change
-belongs to a bead:
+Use Conventional Commits when practical:
 
 ```text
-docs(repo): polish flywheel public surfaces [flywheel-wyxzx]
+docs(repo): polish public contribution path [<bead-id>]
 ```
 
-Commit only owned paths. In a dirty tree, review `git status --short` and stage
-the exact files for this task. Do not sweep unrelated worker changes into your
-commit.
+## Safety
+
+Do not include secrets, token fragments, raw environment output, private pane
+scrollback, client data, or local operator state. Prefer synthetic fixtures and
+redacted evidence. Destructive changes must use explicit paths and a clear
+rollback story.
 
 ## Validation
 
-Run the narrowest command that proves the acceptance gates. Prefer shell tests
-under `tests/` for substrate changes and JSON validation for receipts. If a test
-cannot run, say why in the callback and leave the evidence path.
+Run the narrowest command that proves the change. For public-surface changes,
+also run:
+
+```bash
+bash tests/public-top-level-files.sh
+```
+
+If a validation command cannot run, say why and leave enough evidence for the
+next contributor to reproduce the issue.

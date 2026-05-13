@@ -2,8 +2,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/recovery-install-plist-skillos.sh"
-TMP="$(mktemp -d "${TMPDIR:-/tmp}/recovery-install-skillos.XXXXXX")"
+SCRIPT="$ROOT/.flywheel/scripts/recovery-install-plist-{capability-control-plane}.sh"
+TMP="$(mktemp -d "${TMPDIR:-/tmp}/recovery-install-{capability-control-plane}.XXXXXX")"
 export TMP
 trap 'python3 -c "import os, shutil; shutil.rmtree(os.environ[\"TMP\"], ignore_errors=True)"' EXIT
 
@@ -23,14 +23,14 @@ assert_jq() {
   fi
 }
 
-mkdir -p "$TMP/bin" "$TMP/skillos" "$TMP/skills/.flywheel" "$TMP/logs"
+mkdir -p "$TMP/bin" "$TMP/{capability-control-plane}" "$TMP/skills/.flywheel" "$TMP/logs"
 ntm="$TMP/bin/ntm"
 jsm="$TMP/bin/jsm"
 audit="$TMP/bin/audit"
 launchctl="$TMP/bin/launchctl"
-plist="$TMP/LaunchAgents/com.zeststream.skillos.watcher.plist"
+plist="$TMP/LaunchAgents/com.zeststream.{capability-control-plane}.watcher.plist"
 status="$TMP/status.json"
-audit_receipt="$TMP/preinstall-skillos.json"
+audit_receipt="$TMP/preinstall-{capability-control-plane}.json"
 config="$TMP/ntm.toml"
 
 printf '#!/usr/bin/env bash\nexit 0\n' >"$ntm"
@@ -45,7 +45,7 @@ while [[ "$#" -gt 0 ]]; do
     *) shift ;;
   esac
 done
-jq -nc '{schema_version:"recovery-preinstall-audit/v1",source_plan:".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md",confidence_per_session:{skillos:80},sessions:[{session:"skillos",confidence:80,low_confidence:false}]}'>"$out"
+jq -nc '{schema_version:"recovery-preinstall-audit/v1",source_plan:".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md",confidence_per_session:{{capability-control-plane}:80},sessions:[{session:"{capability-control-plane}",confidence:80,low_confidence:false}]}'>"$out"
 cat "$out"
 SH
 cat >"$launchctl" <<'SH'
@@ -56,7 +56,7 @@ if [[ "${1:-}" == "list" ]]; then
 fi
 SH
 chmod +x "$ntm" "$jsm" "$audit" "$launchctl"
-printf '[session_paths]\nskillos = "%s/skillos"\n' "$TMP" >"$config"
+printf '[session_paths]\n{capability-control-plane} = "%s/{capability-control-plane}"\n' "$TMP" >"$config"
 
 chmod +x "$SCRIPT"
 if bash -n "$SCRIPT"; then
@@ -70,7 +70,7 @@ fi
   --audit-receipt "$audit_receipt" \
   --plist "$plist" \
   --status "$status" \
-  --repo "$TMP/skillos" \
+  --repo "$TMP/{capability-control-plane}" \
   --ntm-bin "$ntm" \
   --ntm-config "$config" \
   --launchctl-bin "$launchctl" \
@@ -94,9 +94,9 @@ if jq empty "$status"; then
 else
   fail "04_status_json_valid"
 fi
-assert_jq "$status" '.source_plan==".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md" and .label=="com.zeststream.skillos.watcher" and .dry_run_pass==true and .exactly_one_label==true and .reboot_recovery_claimed==false' "05_status_required_fields"
-assert_jq "$status" '.skill_authoring_health.ok==true and (.audit_receipt_path|endswith("preinstall-skillos.json"))' "06_skill_authoring_health_and_audit_receipt"
-assert_jq "$status" '(.program_arguments[0]|endswith("/ntm")) and .program_arguments[3]=="watch" and .program_arguments[4]=="skillos"' "07_program_arguments_resolved"
+assert_jq "$status" '.source_plan==".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md" and .label=="com.zeststream.{capability-control-plane}.watcher" and .dry_run_pass==true and .exactly_one_label==true and .reboot_recovery_claimed==false' "05_status_required_fields"
+assert_jq "$status" '.skill_authoring_health.ok==true and (.audit_receipt_path|endswith("preinstall-{capability-control-plane}.json"))' "06_skill_authoring_health_and_audit_receipt"
+assert_jq "$status" '(.program_arguments[0]|endswith("/ntm")) and .program_arguments[3]=="watch" and .program_arguments[4]=="{capability-control-plane}"' "07_program_arguments_resolved"
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"
 [[ "$pass_count" -eq 7 && "$fail_count" -eq 0 ]]

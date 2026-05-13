@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# tests/skillos-template-handshake-canonical-cli.sh
-# Canonical-cli surface tests for .flywheel/scripts/skillos-template-handshake.sh (scaffolded by
+# tests/{capability-control-plane}-template-handshake-canonical-cli.sh
+# Canonical-cli surface tests for .flywheel/scripts/{capability-control-plane}-template-handshake.sh (scaffolded by
 # bead flywheel-ws02m / scaffold-canonical-cli.sh).
 #
 # 13/13 PASS = canonical-cli-scoping checker green. TODO markers
@@ -8,7 +8,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/skillos-template-handshake.sh"
+SCRIPT="$ROOT/.flywheel/scripts/{capability-control-plane}-template-handshake.sh"
 
 pass_count=0
 fail_count=0
@@ -83,8 +83,8 @@ if "$SCRIPT" quickstart 2>/dev/null | jq -e '.command == "quickstart"' >/dev/nul
 else fail "quickstart envelope"; fi
 
 # Test 14: --info schema_version matches <surface>/v1
-if "$SCRIPT" --info --json 2>/dev/null | jq -e '.schema_version | test("^skillos-template-handshake/v[0-9]+$")' >/dev/null; then
-  pass "--info schema_version matches skillos-template-handshake/v1 pattern"
+if "$SCRIPT" --info --json 2>/dev/null | jq -e '.schema_version | test("^{capability-control-plane}-template-handshake/v[0-9]+$")' >/dev/null; then
+  pass "--info schema_version matches {capability-control-plane}-template-handshake/v1 pattern"
 else fail "--info schema_version pattern"; fi
 
 # Test 15: --schema envelope well-formed

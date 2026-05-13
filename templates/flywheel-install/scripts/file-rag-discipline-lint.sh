@@ -6,13 +6,17 @@
 # Pairs with scaffold-doc-frontmatter.sh (auto-fix for F1) and
 # file-rag-discipline-pre-commit.sh (deny-on-error gate).
 #
-# Bead: flywheel-s8tdd. Spec: .flywheel/audit/flywheel-fs-rag-discipline/apply-spec.md.
+# Bead: {bead-id}. Spec: .flywheel/audit/flywheel-fs-rag-discipline/apply-spec.md.
 set -euo pipefail
 
 SCHEMA_VERSION="file-rag-discipline-lint/v1"
 VERSION="0.1.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
+if [[ "$(basename "$(dirname "$SCRIPT_DIR")")" == ".flywheel" ]]; then
+  REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
+else
+  REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+fi
 
 usage() {
   cat <<'USAGE'
@@ -315,7 +319,8 @@ for t in "${TARGETS[@]}"; do
   if [[ -f "$t" ]]; then
     SCANNED=$((SCANNED + 1))
   else
-    md_count=$(find "$t" -type f -name '*.md' 2>/dev/null | grep -vE '/(node_modules|venv|\.git|target/)/' | wc -l | tr -d ' ')
+    md_count=$(find "$t" -type f -name '*.md' 2>/dev/null | grep -vE '/(node_modules|venv|\.git|target/)/' || true)
+    md_count=$(printf '%s\n' "$md_count" | sed '/^$/d' | wc -l | tr -d ' ')
     SCANNED=$((SCANNED + md_count))
   fi
 done

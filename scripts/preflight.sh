@@ -6,6 +6,9 @@ FIXTURE_SCHEMA_VERSION="flywheel.preflight.fixture.v0"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 FIXTURE_DIR="$ROOT/fixtures/preflight"
 MODE="run"
+# Accepted for CLI compatibility; current preflight output is JSON in all
+# machine-readable modes.
+# shellcheck disable=SC2034
 JSON_OUT=0
 FIXTURE=""
 SUBJECT=""
@@ -61,8 +64,8 @@ socraticode	substrate	full-mode	socraticode --help	MCP setup docs	non-trivial ed
 go	runtime	enhanced	go version	Homebrew, apt, tarball, or ACFS phase 5	skip Go build path
 cass	substrate	enhanced	cass --help	CASS-style memory service	no cross-session memory claims
 beads-viewer	substrate	enhanced	beads_viewer --version	go install or source build	CLI-only Beads inspection
-claude	harness	supported-first	claude --version	ACFS phase 6 or official Claude Code install	use another harness or reduced mode
-codex	harness	supported-first	codex --version	ACFS phase 6 or official Codex CLI install	use another harness or reduced mode
+claude	harness	compatibility-target	claude --version	ACFS phase 6 or official Claude Code install	label compatibility-target until receipt-proven
+codex	harness	compatibility-target	codex --version	ACFS phase 6 or official Codex CLI install	label compatibility-target until receipt-proven
 openclaw	harness	compatibility-target	openclaw --version	OpenClaw install docs after smoke proof	label compatibility-target until smoke-proven
 gemini	harness	compatibility-target	gemini --version	ACFS phase 6 or official Gemini CLI install	label compatibility-target until smoke-proven
 EOF
@@ -122,7 +125,7 @@ EOF
 
 validate_fixture() {
   local fixture="$1"
-  local label="${fixture#$ROOT/}"
+  local label="${fixture#"$ROOT"/}"
   [[ -f "$fixture" ]] || {
     printf 'ERROR: fixture not found: %s\nSuggested action: pass --fixture fixtures/preflight/<name>.json\n' "$label" >&2
     return 40
@@ -150,7 +153,7 @@ validate_fixture() {
     printf 'ERROR: fixture names an unknown command: %s\nSuggested action: align fixture commands with the dependency matrix.\n' "$label" >&2
     return 40
   }
-  if rg -n '/Users/josh|sk-[A-Za-z0-9_-]{12,}|ghp_[A-Za-z0-9_]{20,}' "$fixture" >/dev/null 2>&1; then
+  if rg -n '/Users/[^/]+|sk-[A-Za-z0-9_-]{12,}|ghp_[A-Za-z0-9_]{20,}' "$fixture" >/dev/null 2>&1; then
     printf 'ERROR: fixture contains private path or secret-shaped material: %s\nSuggested action: replace with synthetic fixture values.\n' "$label" >&2
     return 40
   fi
@@ -325,6 +328,8 @@ while [[ $# -gt 0 ]]; do
     *) die_usage "unknown argument: $1" ;;
   esac
 done
+
+: "$JSON_OUT"
 
 case "$MODE" in
   usage) usage; exit 0 ;;

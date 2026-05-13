@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BIN="${FLYWHEEL_AUTOLOOP_BIN:-/Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop}"
-CHECKER="${CANONICAL_CLI_CHECKER:-/Users/josh/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh}"
+BIN="${FLYWHEEL_AUTOLOOP_BIN:-<flywheel-state>/bin/flywheel-autoloop}"
+CHECKER="${CANONICAL_CLI_CHECKER:-<skills-root>/canonical-cli-scoping/scripts/check-cli-scoping.sh}"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"; rm -f /tmp/flywheel-autoloop-fixture-dispatch-90.md' EXIT
 

@@ -89,7 +89,7 @@ raise SystemExit("expected invalid fixture to fail schema validation")
 }
 
 write_substitutions() {
-  local path="$1" repo="$2" now="2026-05-05T00:00:00Z"
+  local path="$1" repo="$2" now="<timestamp>"
   {
     printf 'schema_version=1\n'
     printf 'status=locked\n'
@@ -136,7 +136,7 @@ write_substitutions() {
     printf 'out_of_scope=Changing render.sh or polish-gate production behavior.\n'
     printf 'success_definition=Rendered substrate validates and discovers only flywheel-local surfaces.\n'
     printf 'resume_context=Continue from P2-06 integration fixture.\n'
-    printf 'active_work_in_flight=flywheel-1oruh P2-06 template integration test.\n'
+    printf 'active_work_in_flight={bead-id} P2-06 template integration test.\n'
     printf 'confirmed_failure_modes=Malformed fixture detection must fail closed.\n'
     printf 'current_decisions=Repo-local flywheel scope remains the fresh-install default.\n'
     printf 'next_actions=Run cross-test invariant after integration assertions.\n'
@@ -289,7 +289,7 @@ assert_file "$repo/.flywheel/polish-gate/v1/scope-allowlist.schema.json"
 assert_file "$repo/.flywheel/polish-gate/fixtures/bootstrap-mode.json"
 assert_file "$repo/.flywheel/polish-gate/fixtures/audit-only-mode.json"
 assert_file "$repo/.flywheel/polish-gate/fixtures/blocking-mode.json"
-assert_file "$repo/.flywheel/polish-gate/fixtures/scope-allowlist/alps.json"
+assert_file "$repo/.flywheel/polish-gate/fixtures/scope-allowlist/strict-client.json"
 assert_file "$repo/.flywheel/polish-gate/fixtures/scope-allowlist/default.json"
 assert_file "$repo/.flywheel/polish-gate/fixtures/scope-allowlist/malformed-no-allowlist.json"
 assert_executable "$repo/.flywheel/polish-gate/discover-surfaces.py"

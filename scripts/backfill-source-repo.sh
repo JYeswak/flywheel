@@ -7,12 +7,13 @@ set -euo pipefail
 DRY_RUN=0
 JSON_OUT=0
 REPO_FILTER=""
+REPO_SCAN_ROOT="${FLYWHEEL_REPO_SCAN_ROOT:-$HOME/Developer}"
 
 usage() {
     cat <<'EOF'
 usage: scripts/backfill-source-repo.sh [--repo PATH] [--dry-run] [--json]
 
-Without --repo, scans /Users/josh/Developer/*/.beads. With --repo, scopes the
+Without --repo, scans ${FLYWHEEL_REPO_SCAN_ROOT:-$HOME/Developer}/*/.beads. With --repo, scopes the
 backfill to that one repository.
 EOF
 }
@@ -31,7 +32,7 @@ repo_rows() {
         repo_abs="$(canonical_dir "$REPO_FILTER")"
         printf '%s/.beads\n' "$repo_abs"
     else
-        find /Users/josh/Developer -maxdepth 2 -name ".beads" -type d 2>/dev/null | sort
+        find "$REPO_SCAN_ROOT" -maxdepth 2 -name ".beads" -type d 2>/dev/null | sort
     fi
 }
 

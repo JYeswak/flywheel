@@ -22,7 +22,7 @@ with schema_path.open(encoding="utf-8") as handle:
 Draft202012Validator.check_schema(schema)
 validator = Draft202012Validator(schema)
 
-valid_names = ["alps", "skillos", "swarm-daemon", "mobile-eats", "vrtx", "default"]
+valid_names = ["strict-client", "capability-control-plane", "swarm-daemon", "proof-product", "vrtx", "default"]
 fixtures = {}
 for name in valid_names:
     path = fixture_dir / f"{name}.json"
@@ -58,17 +58,17 @@ def allowed(profile, rel):
         return False
     return any(match(pattern, rel) for pattern in profile["allowlist_paths"])
 
-alps = fixtures["alps"]
-assert alps["allowlist_paths"] == [".flywheel/"], alps["allowlist_paths"]
-assert len(alps["blocklist_paths"]) >= 10
+strict_client = fixtures["strict-client"]
+assert strict_client["allowlist_paths"] == [".flywheel/"], strict_client["allowlist_paths"]
+assert len(strict_client["blocklist_paths"]) >= 10
 
 required_terms = {"doctor", "ledger", "worker", "dispatch", "tick", "router"}
-terms = set(alps["domain_collision_terms"])
+terms = set(strict_client["domain_collision_terms"])
 assert required_terms <= terms, terms
-assert len(alps["domain_collision_terms"]) >= 6
-assert alps["requires_word_boundary"] is True
+assert len(strict_client["domain_collision_terms"]) >= 6
+assert strict_client["requires_word_boundary"] is True
 
-alps_root_samples = [
+strict_client_root_samples = [
     "AGENTS.md",
     "README.md",
     "backend/audit_middleware.py",
@@ -82,18 +82,18 @@ alps_root_samples = [
     "docs/compliance/glba.md",
     "supabase/migrations/001_ledger.sql",
 ]
-for rel in alps_root_samples:
-    assert blocked(alps, rel), rel
-    assert not allowed(alps, rel), rel
-assert allowed(alps, ".flywheel/STATE.md")
-assert allowed(alps, ".flywheel/wire-or-explain-ledger/writer.py")
+for rel in strict_client_root_samples:
+    assert blocked(strict_client, rel), rel
+    assert not allowed(strict_client, rel), rel
+assert allowed(strict_client, ".flywheel/STATE.md")
+assert allowed(strict_client, ".flywheel/wire-or-explain-ledger/writer.py")
 
 for term in required_terms:
     regex = re.compile(rf"\b{re.escape(term)}\b")
-    domain_text = f"ALPS root domain mentions {term} in a client workflow."
+    domain_text = f"Strict-client root domain mentions {term} in a customer workflow."
     assert regex.search(domain_text), term
-    assert not regex.search(f"alps{term}domain"), term
-    assert not allowed(alps, f"src/insurance-policies/{term}_fixture.py"), term
+    assert not regex.search(f"strictclient{term}domain"), term
+    assert not allowed(strict_client, f"src/insurance-policies/{term}_fixture.py"), term
 
 swarm = fixtures["swarm-daemon"]
 assert swarm["allowlist_paths"] == ["**/*"]
@@ -102,17 +102,17 @@ for rel in ["src/daemon/tick.rs", "tests/cli_dispatch_status.rs", "README.md"]:
     assert allowed(swarm, rel), rel
 
 for name, root_sample in [
-    ("skillos", "src/domain_model.py"),
-    ("mobile-eats", "next-app/app/page.tsx"),
+    ("capability-control-plane", "src/domain_model.py"),
+    ("proof-product", "next-app/app/page.tsx"),
     ("vrtx", "workflows/client-router.json"),
 ]:
     profile = fixtures[name]
     assert allowed(profile, ".flywheel/STATE.md"), name
     assert not allowed(profile, root_sample), (name, root_sample)
 
-assert allowed(fixtures["skillos"], "scripts/validate_skill.py")
-assert allowed(fixtures["skillos"], "tests/test_skill.py")
-assert not allowed(fixtures["mobile-eats"], "app/router.ts")
+assert allowed(fixtures["capability-control-plane"], "scripts/validate_skill.py")
+assert allowed(fixtures["capability-control-plane"], "tests/test_skill.py")
+assert not allowed(fixtures["proof-product"], "app/router.ts")
 assert not allowed(fixtures["vrtx"], "workers/dispatch.ts")
 
 print("PASS: polish gate scope allowlist schema and fixtures")

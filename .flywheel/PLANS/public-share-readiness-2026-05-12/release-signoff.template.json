@@ -1,0 +1,21 @@
+{
+  "schema_version": "flywheel.release_signoff.v0",
+  "status": "pending",
+  "approver": "Joshua Nowak",
+  "remote": "JYeswak/flywheel",
+  "tag": "v0.2.0",
+  "signed_at": "",
+  "evidence": {
+    "publication_readiness_command": "python3 scripts/publication_readiness.py --release --json",
+    "github_release_url": "",
+    "website_url": "https://flywheel.zeststream.ai/",
+    "install_url": "https://flywheel.zeststream.ai/install.sh",
+    "install_sha256_url": "https://flywheel.zeststream.ai/install.sh.sha256",
+    "external_review_log": ".flywheel/PLANS/public-share-readiness-2026-05-12/review-log.jsonl"
+  },
+  "notes": [
+    "Copy this file to release-signoff.json only after the real remote, release assets, website, install checksum, and external-review gates pass.",
+    "Set status to approved only with Joshua approval.",
+    "Keep approver exactly Joshua Nowak and signed_at as an ISO-8601 UTC timestamp ending in Z."
+  ]
+}

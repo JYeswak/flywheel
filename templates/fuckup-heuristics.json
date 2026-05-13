@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-04-30T21:41:19Z",
+  "generated_at": "<timestamp>",
   "description": "Static trauma_class recommendation table for flywheel-loop doctor fuckup_triage.",
   "default": {
     "pattern": "<unknown>",
@@ -55,13 +55,13 @@
       "pattern": "cf-secret-keyname-probe-passthrough",
       "match": "exact",
       "should_become": "tool-patch",
-      "recommended_action": "L56 ladder: (1) tighten DCG regex in ~/.claude/hooks/pretooluse-bash-secret-guard.sh — remove --probe from generic SAFE_SINK_RE and replace cf-secret negative-lookahead with explicit safe-sink-only allowlist; (2) append INCIDENTS row to ~/.claude/skills/infisical-secrets/references/INCIDENTS.md; (3) file upstream cf-secret CLI bead to reject KEYNAME --probe with error; (4) update infisical-secrets SKILL.md anti-patterns table; (5) reset L125 7-day clean-leak counter. Pattern observed 2026-05-08 mobile-eats:1 leaked SUPABASE_ACCESS_TOKEN via cf-secret KEYNAME --probe; previous DCG regex trusted any trailing --probe as safe sink."
+      "recommended_action": "L56 ladder: (1) tighten DCG regex in ~/.claude/hooks/pretooluse-bash-secret-guard.sh — remove --probe from generic SAFE_SINK_RE and replace cf-secret negative-lookahead with explicit safe-sink-only allowlist; (2) append INCIDENTS row to ~/.claude/skills/infisical-secrets/references/INCIDENTS.md; (3) file upstream cf-secret CLI bead to reject KEYNAME --probe with error; (4) update infisical-secrets SKILL.md anti-patterns table; (5) reset L125 7-day clean-leak counter. Pattern observed 2026-05-08 {proof-product}:1 leaked SUPABASE_ACCESS_TOKEN via cf-secret KEYNAME --probe; previous DCG regex trusted any trailing --probe as safe sink."
     },
     {
       "pattern": "secret-emission-via-management-api-body-with-auto-print-probe-script",
       "match": "exact",
       "should_become": "tool-patch",
-      "recommended_action": "L56 ladder for class observed 2026-05-08 mobile-eats:1: probe script auto-printed Supabase pgsodium root_key from 79-byte 200 response. (1) Add DCG patterns: deny auth-bearing curl to known-secret-bearing API endpoints (api.supabase.com/v1/projects/X/pgsodium and analogs), deny bare-GET without -o file-redirect opt-in, deny curl-then-cat-respfile in same shell command. (2) Skill FOREVER-RULE: probe scripts emit metadata-only (HTTP code, size, content-type, jq top-level field NAMES) regardless of body size. (3) Operator opt-in per-endpoint after confirming endpoint cannot return secrets. (4) Audit parallel substrates (Nango, Stripe, etc.) for same auto-print pattern. Pattern is shape-equivalent to cf-secret-keyname-probe-passthrough: allowlist via implicit assumption rather than denylist via explicit secret patterns. mobile-i58d clean-leak counter resets to day 0."
+      "recommended_action": "L56 ladder for class observed 2026-05-08 {proof-product}:1: probe script auto-printed Supabase pgsodium root_key from 79-byte 200 response. (1) Add DCG patterns: deny auth-bearing curl to known-secret-bearing API endpoints (api.supabase.com/v1/projects/X/pgsodium and analogs), deny bare-GET without -o file-redirect opt-in, deny curl-then-cat-respfile in same shell command. (2) Skill FOREVER-RULE: probe scripts emit metadata-only (HTTP code, size, content-type, jq top-level field NAMES) regardless of body size. (3) Operator opt-in per-endpoint after confirming endpoint cannot return secrets. (4) Audit parallel substrates (Nango, Stripe, etc.) for same auto-print pattern. Pattern is shape-equivalent to cf-secret-keyname-probe-passthrough: allowlist via implicit assumption rather than denylist via explicit secret patterns. mobile-i58d clean-leak counter resets to day 0."
     }
   ]
 }

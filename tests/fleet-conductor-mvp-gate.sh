@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-CLI="/Users/josh/.claude/skills/.flywheel/bin/flywheel-conductor"
+CLI="<flywheel-state>/bin/flywheel-conductor"
 VALIDATOR="$ROOT/.flywheel/scripts/validate-callback-before-close.sh"
 TMP_ROOT="${TMPDIR:-/tmp}/flywheel-conductor-test.$$"
 STATE_DIR="$TMP_ROOT/state"

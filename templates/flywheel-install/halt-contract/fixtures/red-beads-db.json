@@ -18,6 +18,6 @@
     "beads.snapshot"
   ],
   "owner": "repo_orch",
-  "expires_at": "2026-05-04T20:55:00Z",
+  "expires_at": "<timestamp>",
   "reason": "repo-local Beads DB write path failed; stop mutations but keep read-only work"
 }

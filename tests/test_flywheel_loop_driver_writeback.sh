@@ -201,7 +201,7 @@ assert_jq "$TMP/repair-idempotent.json" '.status == "pass"' "repair_idempotent"
 env "${env_base[@]}" "$BIN" doctor --orch gamma --json >"$TMP/doctor-gamma.json" || true
 assert_jq "$TMP/doctor-gamma.json" '[.violations[].class] | index("loop_plist_missing") and index("loop_plist_not_loaded") and index("loop_last_tick_stale_or_missing")' "doctor_all_three_disagree"
 
-jq -e '.primitives[] | select(.name=="loop-driver-writeback" and .path=="/Users/josh/.local/bin/flywheel-loop-driver-writeback")' "$REPO/.flywheel/scripts/tick-driver-manifest.json" >/dev/null \
+jq -e '.primitives[] | select(.name=="loop-driver-writeback" and .path=="$HOME/.local/bin/flywheel-loop-driver-writeback")' "$REPO/.flywheel/scripts/tick-driver-manifest.json" >/dev/null \
   && pass "tick_driver_manifest_registration" || fail "tick_driver_manifest_registration"
 
 if [[ "$fail_count" -eq 0 ]]; then

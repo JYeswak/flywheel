@@ -3,7 +3,7 @@
 # Regression test for flywheel-zh43y: doctor non-identity failures.
 # Verifies the 2 of 5 fixes that this bead actually shipped.
 # (#1+#3 loop-driver and #2 beads leakage are filed as separate beads
-# because they require Joshua-directive decisions.)
+# because they require {operator}-directive decisions.)
 #
 # What this test covers:
 #   FIX A (#4 memory_health): 3 memory files in flywheel project that were
@@ -12,13 +12,13 @@
 #     receipts archived to .archive-pre-v1-schema/; active dir count = 0.
 #
 # What this test does NOT cover:
-#   #1+#3 loop-driver: filed as flywheel-kmf4z (needs Joshua directive)
+#   #1+#3 loop-driver: filed as flywheel-kmf4z (needs {operator} directive)
 #   #2 beads source_repo basename: filed as flywheel-wz5rh (subset of
 #     project_bead_isolation_plan; needs canonical bulk-update path)
 
 set -uo pipefail
 
-REPO_ROOT="${FLYWHEEL_REPO:-/Users/josh/Developer/flywheel}"
+REPO_ROOT="${FLYWHEEL_REPO:-<flywheel-repo>}"
 MEM_DIR="${FLYWHEEL_MEMORY_DIR:-$HOME/.claude/projects/-Users-josh-Developer-flywheel/memory}"
 ARCHIVE_DIR="$REPO_ROOT/.flywheel/validation-receipts/.archive-pre-v1-schema"
 ACTIVE_DIR="$REPO_ROOT/.flywheel/validation-receipts"
@@ -116,7 +116,7 @@ EXPECTED_ARCHIVED=(
   flywheel_loop_20260504T043410Z-done-0ecf0cde2d4b.json
   flywheel-4vfa-onboarding-proof.json
   flywheel-ggld7-1a2b3b.json
-  no-bead-cross-session-callback-closure-skillos-20260504T0400Z.json
+  no-bead-cross-session-callback-closure-{capability-control-plane}-20260504T0400Z.json
   no-bead-flywheel_loop_20260504T005757Z.json
   no-bead-flywheel_loop_20260504T012826Z.json
   no-bead-flywheel_loop_20260504T015853Z.json

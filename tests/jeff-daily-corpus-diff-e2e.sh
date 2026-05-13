@@ -18,7 +18,7 @@ trap 'rm -rf "$TMPDIR"' EXIT
 
 # Isolate test state dir so the e2e doesn't clobber the canonical
 # .flywheel/state/jeff-corpus-activity-<date>.json snapshot that
-# launchd / Joshua's daily review reads.
+# launchd / {operator}'s daily review reads.
 export JEFF_DIFF_STATE_DIR="$TMPDIR/state"
 mkdir -p "$JEFF_DIFF_STATE_DIR"
 # Seed an isolated repo cache (single repo for the smoke target)

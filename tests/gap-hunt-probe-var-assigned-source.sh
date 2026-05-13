@@ -75,7 +75,7 @@ fi
 # Test 4: ensure the 3 substrate-doctor-*-test.sh files DO source common.sh via the
 # variable-assignment pattern (proves the fixture pattern is real)
 for f in substrate-doctor-critical-gaps-test.sh substrate-doctor-infisical-test.sh substrate-doctor-vercel-test.sh; do
-  full="/Users/josh/.claude/skills/.flywheel/scripts/$f"
+  full="<flywheel-state>/scripts/$f"
   if [[ -f "$full" ]] && grep -qE '^[A-Z_]+=.*\.sh' "$full"; then
     pass "T4: $f uses var-assignment-sh pattern (real-world driver of the bug)"
   else

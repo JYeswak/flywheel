@@ -6,7 +6,7 @@
   "actor": "codex",
   "target": ".flywheel/prompts/dispatch-template.md",
   "changed_paths": [".flywheel/prompts/dispatch-template.md"],
-  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_repo": "<flywheel-repo>",
   "ship_actor": "codex",
   "git_ref": "fed789",
   "action_ledger_pointer": ".flywheel/dispatch-log.jsonl#L12",

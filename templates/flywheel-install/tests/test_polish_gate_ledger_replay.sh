@@ -91,7 +91,8 @@ python3 "$REPLAY" --source "$TMP/grades.jsonl" --target-ledger "$target" --apply
 after_sha="$(shasum -a 256 "$target" | awk '{print $1}')"
 run_case idempotent_apply bash -c 'test "$0" = "$1" && jq -e ".rows_translated == 0 and .rows_skipped.dup == 5" "$2" >/dev/null' "$before_sha" "$after_sha" "$TMP/idempotent.json"
 
-python3 "$REPLAY" --source "$TMP/grades.jsonl" --target-ledger "$TMP/from-ledger.jsonl" --from-ts "2026-05-05T00:02:00Z" --dry-run --json --explain >"$TMP/from.json"
+from_ts="$(sed -n '3p' "$TMP/grades.jsonl" | jq -r '.ts')"
+python3 "$REPLAY" --source "$TMP/grades.jsonl" --target-ledger "$TMP/from-ledger.jsonl" --from-ts "$from_ts" --dry-run --json --explain >"$TMP/from.json"
 run_case from_ts_filters_strictly_after bash -c 'jq -e ".rows_translated == 2 and .rows_skipped[\"pre-from-ts\"] == 3" "$0" >/dev/null' "$TMP/from.json"
 
 corrupt="$TMP/corrupt-live.jsonl"
@@ -105,7 +106,8 @@ set -e
 run_case apply_to_live_refuses_corrupt_prestate bash -c 'test "$0" -eq 1 && jq -e ".exit_code == 1 and .chain_verify_pre == \"FAIL\" and .chain_verify_post == \"N/A\"" "$1" >/dev/null' "$corrupt_rc" "$TMP/corrupt.json"
 
 cp "$TMP/grades.jsonl" "$TMP/schema-fail.jsonl"
-jq -nc '{"schema_version":"polish-gate/grade-receipt/v1","ts":"2026-05-05T00:06:00Z","surface_path":".flywheel/bad.md"}' >>"$TMP/schema-fail.jsonl"
+bad_ts="$(sed -n '5p' "$TMP/grades.jsonl" | jq -r '.ts')"
+jq -nc --arg ts "$bad_ts" '{"schema_version":"polish-gate/grade-receipt/v1","ts":$ts,"surface_path":".flywheel/bad.md"}' >>"$TMP/schema-fail.jsonl"
 python3 "$REPLAY" --source "$TMP/schema-fail.jsonl" --target-ledger "$TMP/schema-fail-ledger.jsonl" --dry-run --json >"$TMP/schema-fail.json"
 run_case schema_fail_row_skipped bash -c 'jq -e ".exit_code == 0 and .rows_loaded == 6 and .rows_translated == 5 and .rows_skipped[\"schema-fail\"] == 1" "$0" >/dev/null' "$TMP/schema-fail.json"
 

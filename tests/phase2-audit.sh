@@ -23,8 +23,8 @@ note() {
 
 check_t21() {
   local label="T2.1 global vault tombstone + stale IDs closed"
-  local tombstone="/Users/josh/Developer/.beads-tombstone"
-  local global_beads="/Users/josh/Developer/.beads"
+  local tombstone="$HOME/Developer/.beads-tombstone"
+  local global_beads="$HOME/Developer/.beads"
   local stale_ids=(fc-27i fc-2pm fc-1q9 fc-1sr fc-7xm fc-hci fc-y3w fc-135 fc-d9s fc-3fv fc-2m7)
 
   if [[ ! -e "$tombstone" ]]; then
@@ -67,12 +67,12 @@ check_t21() {
 check_t22() {
   local label="T2.2 spot-check active repos have .beads/beads.db"
   local repos=(
-    "/Users/josh/Developer/flywheel"
-    "/Users/josh/Developer/zesttube"
-    "/Users/josh/Developer/polymarket-pico-z"
-    "/Users/josh/Developer/cubcloud-aaas"
-    "/Users/josh/Developer/agent-bench"
-    "/Users/josh/Developer/josh-ops"
+    "<flywheel-repo>"
+    "$HOME/Developer/zesttube"
+    "$HOME/Developer/polymarket-pico-z"
+    "$HOME/Developer/cubcloud-aaas"
+    "$HOME/Developer/agent-bench"
+    "$HOME/Developer/josh-ops"
   )
 
   local missing=0
@@ -131,7 +131,7 @@ check_t23() {
       note "$db -> source_repo='.' count=$count"
       any_bad=1
     fi
-  done < <(find /Users/josh/Developer -maxdepth 2 -name '.beads' -type d 2>/dev/null)
+  done < <(find $HOME/Developer -maxdepth 2 -name '.beads' -type d 2>/dev/null)
 
   note "checked DBs: $checked"
   note "skipped non-DB/non-issues dirs: $skipped"
@@ -213,20 +213,20 @@ check_t24() {
 check_t25() {
   local label="T2.5 br where from flywheel resolves local DB"
   local out
-  if ! out=$(cd /Users/josh/Developer/flywheel && ~/.cargo/bin/br where 2>/dev/null); then
+  if ! out=$(cd <flywheel-repo> && ~/.cargo/bin/br where 2>/dev/null); then
     fail "$label"
     note "br where command failed"
     return
   fi
 
-  if ! printf '%s' "$out" | grep -q "/Users/josh/Developer/flywheel/.beads"; then
+  if ! printf '%s' "$out" | grep -q "<flywheel-repo>/.beads"; then
     fail "$label"
     note "br where did not resolve flywheel local .beads"
     note "$out"
     return
   fi
 
-  if printf '%s' "$out" | grep -q "/Users/josh/Developer/.beads"; then
+  if printf '%s' "$out" | grep -q "$HOME/Developer/.beads"; then
     fail "$label"
     note "br where resolved global vault unexpectedly"
     note "$out"
@@ -260,7 +260,7 @@ check_t26() {
 check_t27() {
   local label="T2.7 RunBrReal not called in ntm/internal"
   local out
-  out=$(grep -R --line-number --fixed-strings "RunBrReal" /Users/josh/Developer/ntm/internal/ 2>/dev/null || true)
+  out=$(grep -R --line-number --fixed-strings "RunBrReal" $HOME/Developer/ntm/internal/ 2>/dev/null || true)
   if [[ -n "$out" ]]; then
     fail "$label"
     note "$out"

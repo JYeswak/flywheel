@@ -77,8 +77,8 @@ The first-run docs may only promote a lane as supported when the row is
 
 | Lane | Initial journey expectation | Dispatch behavior |
 |---|---|---|
-| Claude Code | supported-first target after smoke | Real dispatch may use Claude-specific docs, but cannot require Joshua hooks. |
-| Codex CLI | supported-first target after smoke | Real dispatch must respect Codex MCP/AGENTS.md differences. |
+| Claude Code | compatibility-target until receipt | Real dispatch may use Claude-specific docs, but cannot require Joshua hooks. |
+| Codex CLI | compatibility-target until receipt | Real dispatch must respect Codex MCP/AGENTS.md differences. |
 | Gemini CLI | compatibility-target until smoke | May be registry-valid before runtime proof; public copy must say so. |
 | OpenClaw | compatibility-target until smoke | Must account for daemon/gateway shape; do not model it as a generic terminal clone. |
 | Reduced local mode | reduced-required | Always available when required basics exist; no multi-agent claims. |
@@ -94,7 +94,7 @@ B17.5 should emit one JSON document per lane:
   "repo": "/absolute/path/to/target",
   "mode": "full|reduced|blocked|docs-only",
   "harness": "claude|codex|gemini|openclaw|none",
-  "support_label": "supported-first|supported-docs|compatibility-target|reduced-required|unsupported",
+  "support_label": "supported-by-receipt|supported-docs|compatibility-target|reduced-required|unsupported",
   "evidence_state": "registry_valid|runtime_proven|fixture_blocked|source_gap|unsupported",
   "persona": "solo-developer|technical-lead|smb-operator|contributor",
   "first_value": "repo initialized with passing/explained doctor and visible next action",

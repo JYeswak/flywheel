@@ -8,10 +8,10 @@ status: shipped
 shipped_at: 2026-05-03
 ---
 
-# Joshua Request Schema
+# {operator} Request Schema
 
 Schema v2 is the audit-grade contract for capturing, triaging, tracking, and
-closing Joshua-originated requests across flywheel sessions. It replaces v1's
+closing {operator}-originated requests across flywheel sessions. It replaces v1's
 single free-text status/closure shape with stable provenance, lifecycle,
 ownership, duplicate handling, and typed closure evidence.
 
@@ -41,11 +41,11 @@ before mutation.
 
 ## 2. MISSION.md Section Header Contract
 
-Each flywheel-managed repo that receives Joshua request capture must include
+Each flywheel-managed repo that receives {operator} request capture must include
 this exact section in repo-local `.flywheel/MISSION.md`:
 
 ```markdown
-## Joshua Requests
+## {operator} Requests
 
 <!-- AUTO-MAINTAINED by ~/.claude/hooks/josh-request-capture.sh + ~/.local/bin/josh-requests
      APPEND-ONLY for entries; lifecycle fields are mutable by schema-aware tools.
@@ -63,23 +63,23 @@ automation.
 
 ```markdown
 ### jr-<iso-utc-without-colons>-<3digit-counter>
-- **id:** jr-2026-05-03T210000Z-001
-- **captured_at:** 2026-05-03T21:00:00Z
+- **id:** jr-<timestamp>-001
+- **captured_at:** <timestamp>
 - **source_session:** flywheel
 - **source_pane:** 1
-- **transcript_path:** /Users/josh/.claude/projects/<project>/...jsonl|null
+- **transcript_path:** $HOME/.claude/projects/<project>/...jsonl|null
 - **source_message_id:** <message-id|null>
 - **prompt_hash:** sha256:<hex>|null
 - **request_text_hash:** sha256:<hex>
-- **sanitized_excerpt:** "<scrubbed Joshua message text, <=500 chars>"
+- **sanitized_excerpt:** "<scrubbed {operator} message text, <=500 chars>"
 - **inferred_action:** <orch interpretation|null>
 - **state:** needs_triage|acknowledged|in_progress|blocked|waiting_on_external|done|deferred|wont_do
 - **owner:** RubyCreek
 - **priority:** P0|P1|P2|P3
 - **scope:** single-repo|cross-session|fleet-wide
-- **last_updated_at:** 2026-05-03T21:00:00Z
+- **last_updated_at:** <timestamp>
 - **closure_actor:** <agent-or-human|null>
-- **linked_bead_ids:** [flywheel-abc1, flywheel-def2]
+- **linked_bead_ids:** [{bead-id}, {bead-id}]
 - **duplicate_of:** <jr-id|null>
 - **supersedes:** <jr-id|null>
 - **stale_after:** 24
@@ -92,7 +92,7 @@ automation.
 |---|---|---:|---|
 | `id` | string | yes | `jr-<iso-utc-without-colons>-<3digit-counter>`. Immutable. |
 | `captured_at` | ISO UTC string | yes | Time the request was first captured. Immutable. |
-| `source_session` | string | yes | Repo/session basename, e.g. `flywheel`, `mobile-eats`, `skillos`. |
+| `source_session` | string | yes | Repo/session basename, e.g. `flywheel`, `{proof-product}`, `{capability-control-plane}`. |
 | `source_pane` | int or null | yes | Pane number when known; `null` if unavailable. |
 | `transcript_path` | string or null | yes | Claude project JSONL transcript path when available; `null` for substrates without transcript access. |
 | `source_message_id` | string or null | conditional | Required when the source substrate provides a stable message id. Mutually allowed with `prompt_hash`; at least one must be non-null. |
@@ -106,7 +106,7 @@ automation.
 | `scope` | enum | yes | `single-repo`, `cross-session`, or `fleet-wide`. |
 | `last_updated_at` | ISO UTC string | yes | Mutates on every state or evidence change. |
 | `closure_actor` | string or null | yes | Who marked a terminal state. Required for `done`, `deferred`, and `wont_do`. |
-| `linked_bead_ids` | array[string] | yes | Zero or more bead ids. Multiple beads may serve one request. Required non-empty before `in_progress` unless the request is closed by direct transcript/Joshua evidence. |
+| `linked_bead_ids` | array[string] | yes | Zero or more bead ids. Multiple beads may serve one request. Required non-empty before `in_progress` unless the request is closed by direct transcript/{operator} evidence. |
 | `duplicate_of` | string or null | yes | `jr-id` of canonical request if this row is a duplicate. |
 | `supersedes` | string or null | yes | `jr-id` of prior request replaced by this request. |
 | `stale_after` | number | yes | Hours before resurfacing. Default `24`; may be adjusted by scope. |
@@ -125,10 +125,10 @@ Allowed states:
 | `acknowledged` | Owner has read the request and populated `inferred_action`. |
 | `in_progress` | Work has started; linked beads or dispatch evidence exists. |
 | `blocked` | Work is blocked on an internal recoverable issue and has a note. |
-| `waiting_on_external` | Work waits on Joshua, Jeff, vendor, client, or another external actor and has a note. |
+| `waiting_on_external` | Work waits on {operator}, Jeff, vendor, client, or another external actor and has a note. |
 | `done` | Request is closed with typed evidence. |
 | `deferred` | Request is explicitly delayed with a note of at least 20 characters and will resurface after `stale_after`. |
-| `wont_do` | Joshua explicitly confirmed that the request should not be done. |
+| `wont_do` | {operator} explicitly confirmed that the request should not be done. |
 
 Allowed transitions:
 
@@ -163,7 +163,7 @@ any -> wont_do
 
 Rules:
 
-- `done`, `deferred`, and `wont_do` are terminal unless Joshua explicitly reopens
+- `done`, `deferred`, and `wont_do` are terminal unless {operator} explicitly reopens
   or supersedes the request.
 - `needs_triage` is the only valid initial captured state.
 - `wont_do` is never an autonomous orchestrator decision.
@@ -207,7 +207,7 @@ Capture hooks and backfill tools must scrub secrets before writing
 text to prove scrub happened without preserving the token.
 
 The canonical scrub list is owned by the hook implementation bead
-`flywheel-l6j2`; this schema names the classes and requires consumers to follow
+`{bead-id}`; this schema names the classes and requires consumers to follow
 that spec. The current required classes are:
 
 | Class | Examples / pattern family |
@@ -226,7 +226,7 @@ that spec. The current required classes are:
 | `contextual_hex_secret` | Long hex near `token`, `secret`, `key`, `password`, or `authorization` |
 
 Tests must use synthetic tokens only. The hook implements exact regexes and
-negative tests so non-secret Joshua requests remain usable.
+negative tests so non-secret {operator} requests remain usable.
 
 ## 8. ID Generation
 
@@ -239,7 +239,7 @@ jr-<iso-utc-without-colons>-<3digit-counter>
 Example:
 
 ```text
-jr-2026-05-03T210000Z-001
+jr-<timestamp>-001
 ```
 
 Where:
@@ -271,16 +271,16 @@ Plan and review:
 
 Downstream consumers:
 
-- Hook: `~/.claude/hooks/josh-request-capture.sh` (`flywheel-l6j2`)
+- Hook: `~/.claude/hooks/josh-request-capture.sh` (`{bead-id}`)
 - CLI: `~/.local/bin/josh-requests` (`flywheel-iaak`)
-- JSONL mirror: `~/.local/state/flywheel/josh-requests.jsonl` (`flywheel-j9fq`)
-- Tick consumer: `~/Developer/flywheel/.flywheel/scripts/josh-request-tick-promote.sh` (`flywheel-a6ax`)
-- MISSION canon: `.flywheel/MISSION.md` `## Joshua Requests`
-- Doctrine-sync propagation: `flywheel-cg9w`
+- JSONL mirror: `~/.local/state/flywheel/josh-requests.jsonl` (`{bead-id}`)
+- Tick consumer: `~/Developer/flywheel/.flywheel/scripts/josh-request-tick-promote.sh` (`{bead-id}`)
+- MISSION canon: `.flywheel/MISSION.md` `## {operator} Requests`
+- Doctrine-sync propagation: `{bead-id}`
 - Peer MISSION bootstrap: `flywheel-iyex`
-- Flywheel MISSION bootstrap: `flywheel-2ps2`
-- Dispatch-template gate: `flywheel-sur0`
-- Status dashboard surface: `flywheel-3tzo`
+- Flywheel MISSION bootstrap: `{bead-id}`
+- Dispatch-template gate: `{bead-id}`
+- Status dashboard surface: `{bead-id}`
 
 Doctrine references:
 

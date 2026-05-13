@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# tests/o4b4h-skillos-journey-alignment-receipt.sh
+# tests/o4b4h-{capability-control-plane}-journey-alignment-receipt.sh
 # Bead flywheel-o4b4h: alignment-receipt regression for the
-# skillos:1 / BrightLake cross-orch journey-writing 4-layer
+# {capability-control-plane}:1 / BrightLake cross-orch journey-writing 4-layer
 # architecture proposal.
 #
 # Bead body explicitly states "No action required this tick —
@@ -112,10 +112,10 @@ else
   fail "bead body does not frame as alignment-only — risk of scope drift"
 fi
 
-# Test 9: Layer 4 prototype reference (skillos session-2026-05-08-flywheel-spin.md) is cited
+# Test 9: Layer 4 prototype reference ({capability-control-plane} session-2026-05-08-flywheel-spin.md) is cited
 # in the bead body cross-references
 if grep -qE 'session-2026-05-08-flywheel-spin' <<<"$BEAD_BODY"; then
-  pass "bead body cites Layer 4 prototype (skillos session-2026-05-08-flywheel-spin.md) — cross-reference trail intact"
+  pass "bead body cites Layer 4 prototype ({capability-control-plane} session-2026-05-08-flywheel-spin.md) — cross-reference trail intact"
 else
   fail "bead body missing Layer 4 prototype citation"
 fi

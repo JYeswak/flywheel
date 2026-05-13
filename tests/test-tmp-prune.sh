@@ -48,12 +48,12 @@ mkdir -p "$fixture" "$receipts"
 
 for name in \
   "alps.fixture" \
-  "alpsinsurance-fixture" \
+  "{session}-fixture" \
   "flywheel-fixture" \
   "beads.fixture" \
   "beads_fixture" \
   "claude-skills-sync" \
-  "mobile-eats-fixture" \
+  "{proof-product}-fixture" \
   "br-fixture"
 do
   make_old_dir "$fixture/$name"
@@ -68,7 +68,7 @@ FLYWHEEL_TMP_PRUNE_RECEIPT_DIR="$receipts" \
 
 assert_jq "$TMP/dry.json" '.schema_version == "tmp-prune/v1" and .dry_run == true and .apply == false and .status == "dry_run"' "dry_run_contract"
 assert_jq "$TMP/dry.json" '.paths_to_prune_count == 8' "allowlisted_old_count"
-assert_jq "$TMP/dry.json" '[.paths_to_prune[].basename] | sort == ["alps.fixture","alpsinsurance-fixture","beads.fixture","beads_fixture","br-fixture","claude-skills-sync","flywheel-fixture","mobile-eats-fixture"]' "dry_run_exact_manifest"
+assert_jq "$TMP/dry.json" '[.paths_to_prune[].basename] | sort == ["alps.fixture","{session}-fixture","beads.fixture","beads_fixture","br-fixture","claude-skills-sync","flywheel-fixture","{proof-product}-fixture"]' "dry_run_exact_manifest"
 assert_jq "$TMP/dry.json" '.bytes_to_prune > 0 and (.paths_to_prune[] | has("bytes") and has("mtime_epoch"))' "bytes_and_mtime_recorded"
 assert_jq "$TMP/dry.json" '.excluded.forbidden_prefix_count == 2 and .excluded.unknown_prefix_count == 1' "forbidden_and_unknown_excluded"
 assert_jq "$TMP/dry.json" '[.paths_to_prune[].basename] | index("com.apple.fixture") == null and index("launchd-fixture") == null and index("random-fixture") == null and index("alps.new") == null' "dcg_allowlist_excludes_forbidden_unknown_and_new"
@@ -81,7 +81,7 @@ else
   grep -q -- "--apply requires --idempotency-key" "$TMP/apply-without-key.err" && pass "apply_requires_key" || fail "apply_requires_key"
 fi
 
-assert_jq "$TMP/dry.json" '.allowlist_prefixes == ["alps.*","alpsinsurance*","flywheel-*","beads.*","beads_*","claude-skills-sync","mobile-eats-*","br-*"]' "allowlist_shape"
+assert_jq "$TMP/dry.json" '.allowlist_prefixes == ["alps.*","{session}*","flywheel-*","beads.*","beads_*","claude-skills-sync","{proof-product}-*","br-*"]' "allowlist_shape"
 
 if [ "$fail_count" -ne 0 ]; then
   printf 'FAIL: %s failures, %s passes\n' "$fail_count" "$pass_count" >&2

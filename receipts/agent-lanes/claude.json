@@ -1,0 +1,17 @@
+{
+  "schema_version": "flywheel.agent_lane_blocker_receipt.v0",
+  "id": "claude",
+  "agent": "Claude Code",
+  "generated_at": "public-preview-v0.2-blocker",
+  "status": "blocked",
+  "runtime_proven": false,
+  "support_copy_allowed": false,
+  "support_scope": "blocked",
+  "command": "scripts/agent-lane-probe.sh --receipt-dir receipts/agent-lanes --json",
+  "blocker_class": "isolated_runtime_receipt_missing",
+  "blocker_reason": "Claude Code is a compatibility target, but no isolated public first-run receipt proves the full journey without private state.",
+  "next_action": "Run the Claude lane in an isolated public export and replace this blocker with a runtime receipt only if preflight, init, doctor, tick, dispatch_or_simulate, closeout, inspect_next_action, and private_state_scan all pass.",
+  "private_state_scan": {
+    "status": "not_run"
+  }
+}

@@ -36,7 +36,7 @@ Local source checks:
 
 | Label | Meaning | Public copy rule |
 |---|---|---|
-| supported-first | Flywheel v0.2 docs and smoke prove this lane through first-run journey. | May appear in install quickstart. |
+| supported-by-receipt | Flywheel docs and strict runtime receipts prove this lane through the first-run journey. | May appear in install quickstart only after receipt validation. |
 | supported-docs | Docs explain setup and verification, but full journey smoke is not green. | Must say "docs-supported, not journey-proven." |
 | compatibility-target | Flywheel intends support but has not verified the full lane. | Must not be presented as working. |
 | reduced-required | Required no-harness fallback path. | Must be available when full-mode tools are missing. |
@@ -46,8 +46,8 @@ Local source checks:
 
 | Lane | Initial label | Public install source | Detect command | Minimum v0.2 evidence | Notes |
 |---|---|---|---|---|---|
-| Claude Code | supported-first target | Official Anthropic setup; ACFS phase 6 | `claude --version` | B12.0 docs + B17.5 smoke row reaches `runtime_proven` or explicitly records auth/account blocker | Strongest existing internal usage, but public docs must not depend on Joshua's Claude hooks. |
-| Codex CLI | supported-first target | Official OpenAI Codex CLI docs; ACFS phase 6 | `codex --version` | B12.0 docs + B17.5 smoke row reaches `runtime_proven` or explicitly records auth/account blocker | Current lane is Codex, so setup can be made concrete; must preserve MCP/AGENTS.md differences from Claude. |
+| Claude Code | compatibility-target until receipt | Official Anthropic setup; ACFS phase 6 | `claude --version` | Strict `flywheel.agent_lane_runtime_receipt.v0` row reaches `runtime_proven`, or the lane stays compatibility-target with an explicit auth/account blocker | Strongest existing internal usage, but public docs must not depend on Joshua's Claude hooks. |
+| Codex CLI | compatibility-target until receipt | Official OpenAI Codex CLI docs; ACFS phase 6 | `codex --version` | Strict `flywheel.agent_lane_runtime_receipt.v0` row reaches `runtime_proven`, or the lane stays compatibility-target with an explicit auth/account blocker | Current lane is Codex, so setup can be made concrete; must preserve MCP/AGENTS.md differences from Claude. |
 | Gemini CLI | compatibility-target until smoke | Official Google Gemini CLI docs; ACFS phase 6 | `gemini --version` | Support-tier row plus smoke or clear `registry_valid` only status | Install path is known, but Flywheel has not proven dispatch/closeout semantics through Gemini. |
 | OpenClaw | compatibility-target until smoke | OpenClaw installer/docs | `openclaw --version`; `openclaw doctor`; `openclaw gateway status` | Support-tier row plus smoke or explicit unsupported reason | OpenClaw is an agent platform with daemon/gateway shape, not just a terminal coding CLI; Flywheel must avoid pretending it is equivalent to Claude/Codex. |
 | Reduced local mode | reduced-required | Flywheel-owned docs and fixtures | `flywheel doctor --mode reduced` or equivalent once B5 exists | B17.5 reduced row reaches `dispatch_or_simulate: pass`; B17 fresh-laptop receipt passes in reduced mode if full mode absent | This is mandatory for public installability. It teaches the loop without NTM panes, Agent Mail, or cross-session memory. |
@@ -75,7 +75,7 @@ Each B17.5 row should emit:
 ```json
 {
   "lane": "codex",
-  "support_label": "supported-first",
+  "support_label": "supported-by-receipt",
   "evidence_state": "runtime_proven",
   "install_detected": true,
   "auth_state": "present|missing|not_required|unknown",
@@ -92,8 +92,8 @@ Each B17.5 row should emit:
 
 ## Public Copy Constraints
 
-- Do not claim OpenClaw support as supported-first until B17.5 proves it.
-- Do not claim Gemini support as supported-first until B17.5 proves it.
+- Do not claim OpenClaw support until a strict runtime receipt proves it.
+- Do not claim Gemini support until a strict runtime receipt proves it.
 - Claude and Codex may be marketed as first targets only after smoke rows exist.
 - Reduced local mode is not a degraded apology; it is the honest fallback that
   makes the public system teachable without full fleet substrate.

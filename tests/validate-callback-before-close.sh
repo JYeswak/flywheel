@@ -48,7 +48,7 @@ bash tests/validate-callback-before-close.sh
 \`\`\`
 
 Contract version: four-lens-close-validator/v1
-Four-Lens Self-Grade: brand voice pass; Joshua sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
+Four-Lens Self-Grade: brand voice pass; {operator} sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
 Outcome: shipped validator proof reduces false closes and prevents unreviewed bead closeout.
 Result: close path stays blocked until the evidence is specific, executable, and public-grade.
 EOF
@@ -143,7 +143,7 @@ bash tests/validate-callback-before-close.sh
 \`\`\`
 
 Contract version: four-lens-close-validator/v1.
-Four-Lens Self-Grade: brand voice pass; Joshua sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
+Four-Lens Self-Grade: brand voice pass; {operator} sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
 Outcome: fixture proves missing scratch cleanup blocks close.
 Result: close path refuses tmp_dir_not_released before stale scratch accumulates.
 EOF
@@ -173,7 +173,7 @@ bash tests/validate-callback-before-close.sh
 \`\`\`
 
 Contract version: four-lens-close-validator/v1.
-Four-Lens Self-Grade: brand voice pass; Joshua sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
+Four-Lens Self-Grade: brand voice pass; {operator} sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
 Outcome: fixture proves bare task-shaped private tmp evidence paths block close.
 Result: workers must use a mktemp directory, not loose /private/tmp artifacts.
 EOF

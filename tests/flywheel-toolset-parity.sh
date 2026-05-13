@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BIN="${FLYWHEEL_TOOLSET_PARITY_BIN:-/Users/josh/.local/bin/flywheel-toolset-parity}"
-CHECKER="${CANONICAL_CLI_CHECKER:-/Users/josh/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh}"
+BIN="${FLYWHEEL_TOOLSET_PARITY_BIN:-$HOME/.local/bin/flywheel-toolset-parity}"
+CHECKER="${CANONICAL_CLI_CHECKER:-<skills-root>/canonical-cli-scoping/scripts/check-cli-scoping.sh}"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/toolset-parity.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 

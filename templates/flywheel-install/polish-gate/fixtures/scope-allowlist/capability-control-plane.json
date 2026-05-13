@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "profile_name": "skillos",
+  "profile_name": "capability-control-plane",
   "domain": "skill-substrate",
   "allowlist_paths": [
     ".flywheel/",
@@ -30,5 +30,5 @@
     "state"
   ],
   "requires_word_boundary": false,
-  "rationale": "Skillos is a control-plane repo; active flywheel, script, test, state, and root doctrine surfaces are valid audit substrate."
+  "rationale": "Capability control-plane repos can declare active flywheel, script, test, state, and root doctrine surfaces as valid audit substrate."
 }

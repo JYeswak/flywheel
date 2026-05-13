@@ -172,7 +172,7 @@ run_case "B05_AG7 tick receipt includes doctor/learn validation summary fields" 
   '.validation_summary | has("callbacks_unvalidated_count") and has("failure_classes") and has("receipt_path") and has("integration_allowed")'
 
 run_case "vnsw tick receipt includes scheduled probe fields" "DONE task-pending evidence=evidence.md evidence_redacted=n/a beads_updated=task-pending" "INTEGRATE" \
-  'has("jeff_status") and has("jeff_fixes") and has("agent_mail_fd") and has("mobile_eats_receipt") and has("skillos_loop") and has("daily_jeff_ingest") and has("fleet_onboard") and has("fleet_stash_bloat") and has("fleet_stash_bloat_detected") and has("fleet_stash_bloat_repo_count") and has("agent_mail_fd_status") and has("mobile_eats_receipt_status") and has("daily_jeff_ingest_status") and has("fleet_onboard_status")'
+  'has("jeff_status") and has("jeff_fixes") and has("agent_mail_fd") and has("mobile_eats_receipt") and has("{capability-control-plane}_loop") and has("daily_jeff_ingest") and has("fleet_onboard") and has("fleet_stash_bloat") and has("fleet_stash_bloat_detected") and has("fleet_stash_bloat_repo_count") and has("agent_mail_fd_status") and has("mobile_eats_receipt_status") and has("daily_jeff_ingest_status") and has("fleet_onboard_status")'
 
 run_case "3mmp tick receipt includes tick-contract registry fields" "DONE task-pending evidence=evidence.md evidence_redacted=n/a beads_updated=task-pending" "INTEGRATE" \
   'has("tick_contract") and has("tick_contract_checks") and has("tick_contract_graduation") and .tick_contract.contract_id == "tick-contract-core" and (.tick_contract.receipt_fields | index("tick_contract_graduation")) and (.tick_contract_checks | length) >= 16'

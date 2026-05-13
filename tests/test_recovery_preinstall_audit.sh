@@ -29,7 +29,7 @@ make_fake_ntm() {
     '#!/usr/bin/env bash' \
     'set -euo pipefail' \
     'case "$*" in' \
-    '  "list --json") jq -nc '"'"'{sessions:[{name:"flywheel"},{name:"skillos"}]}'"'"' ;;' \
+    '  "list --json") jq -nc '"'"'{sessions:[{name:"flywheel"},{name:"{capability-control-plane}"}]}'"'"' ;;' \
     '  *) printf "unsupported fake ntm: %s\n" "$*" >&2; exit 2 ;;' \
     'esac' >"$path"
   chmod +x "$path"
@@ -62,7 +62,7 @@ write_identity() {
   chmod 600 "$TMP/agent-mail/tokens/${identity}.token"
 }
 
-mkdir -p "$TMP/repos/flywheel/.flywheel" "$TMP/repos/flywheel/.beads" "$TMP/repos/skillos/.flywheel" "$TMP/repos/lost"
+mkdir -p "$TMP/repos/flywheel/.flywheel" "$TMP/repos/flywheel/.beads" "$TMP/repos/{capability-control-plane}/.flywheel" "$TMP/repos/lost"
 git -C "$TMP/repos/flywheel" init -q
 printf 'dirty\n' >"$TMP/repos/flywheel/dirty.txt"
 if command -v sqlite3 >/dev/null 2>&1; then
@@ -79,17 +79,17 @@ config="$TMP/ntm.toml"
 cat >"$config" <<TOML
 [session_paths]
 flywheel = "$TMP/repos/flywheel"
-skillos = "$TMP/repos/skillos"
+{capability-control-plane} = "$TMP/repos/{capability-control-plane}"
 lost = "$TMP/repos/lost"
 TOML
 
 topology="$TMP/topology.jsonl"
 jq -nc --arg repo "$TMP/repos/flywheel" '{session:"flywheel",effective_at:"2026-05-07T20:00:00Z",repo_path:$repo}' >"$topology"
-jq -nc --arg repo "$TMP/repos/skillos" '{session:"skillos",effective_at:"2026-05-07T20:00:00Z",repo_path:$repo}' >>"$topology"
+jq -nc --arg repo "$TMP/repos/{capability-control-plane}" '{session:"{capability-control-plane}",effective_at:"2026-05-07T20:00:00Z",repo_path:$repo}' >>"$topology"
 
 roster="$TMP/roster.jsonl"
 jq -nc --arg repo "$TMP/repos/flywheel" '{session:"flywheel",ts:"2026-05-07T20:00:00Z",repo_path:$repo,workers:[{pane:2,kind:"codex"}]}' >"$roster"
-jq -nc --arg repo "$TMP/repos/skillos" '{session:"skillos",ts:"2026-05-07T20:00:00Z",repo_path:$repo,workers:[{pane:1,kind:"codex"}]}' >>"$roster"
+jq -nc --arg repo "$TMP/repos/{capability-control-plane}" '{session:"{capability-control-plane}",ts:"2026-05-07T20:00:00Z",repo_path:$repo,workers:[{pane:1,kind:"codex"}]}' >>"$roster"
 
 loops="$TMP/loops"
 mkdir -p "$loops"

@@ -50,9 +50,9 @@ jq -nc '{
 }' >"$storage"
 
 cat >"$top" <<'EOF'
-332G	/Users/josh/Developer
-3.5G	/Users/josh/.knowledge
-669M	/Users/josh/.socraticode/qdrant-data
+332G	$HOME/Developer
+3.5G	$HOME/.knowledge
+669M	$HOME/.socraticode/qdrant-data
 EOF
 
 jq -nc '{
@@ -77,7 +77,7 @@ set -e
 
 if [ "$doctor_rc" -ne 0 ]; then pass "low_storage_exits_nonzero"; else fail "low_storage_exits_nonzero"; fi
 assert_jq "$TMP/low.out" '.schema_version == "storage-pressure-doctor/v1" and .status == "fail"' "low_status_fail"
-assert_jq "$TMP/low.out" '.top_consumers[0].path == "/Users/josh/Developer" and .top_consumers[0].size_gib == 332' "top_consumer_parsed"
+assert_jq "$TMP/low.out" '.top_consumers[0].path == "$HOME/Developer" and .top_consumers[0].size_gib == 332' "top_consumer_parsed"
 assert_jq "$TMP/low.out" '.snapshots.tm_local_snapshot_count == 1 and .snapshots.sealed_system_snapshot_count == 1' "snapshot_counts"
 assert_jq "$TMP/low.out" '.private_tmp.ledger_exists == true and .private_tmp.last_run.deleted_count == 12 and .private_tmp.private_tmp_total_gib == 86' "tmp_ledger_read"
 assert_jq "$TMP/low.out" 'any(.recommendations[]; .code == "storage_pressure_active") and any(.recommendations[]; .code == "tm_snapshots_present_under_pressure") and any(.recommendations[]; .code == "private_tmp_large")' "recommendations_include_storage_snapshots_and_tmp"

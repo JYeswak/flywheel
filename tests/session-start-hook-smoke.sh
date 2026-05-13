@@ -7,7 +7,7 @@
 #
 # This file removes the "cold" classification by giving the
 # gap-hunt-probe a flywheel-jsonl-adjacent reference to the hook path.
-# Canonical functional coverage stays in skillos
+# Canonical functional coverage stays in {capability-control-plane}
 # (tests/unit/test_flywheel_session_start_hook.bats).
 #
 # Bead: flywheel-2xdi.30
@@ -30,7 +30,7 @@ pass "hook exists and is executable"
 INFO_OUT="$("$HOOK" --info 2>/dev/null)"
 INFO_RC="$?"
 if [[ "$INFO_RC" -eq 0 ]] \
-  && grep -q "skillos.context_upgrade_packet.session_start.v1" <<<"$INFO_OUT" \
+  && grep -q "{capability-control-plane}.context_upgrade_packet.session_start.v1" <<<"$INFO_OUT" \
   && grep -q "80a15c4368187483a6ba91a904248e10266233fb4d14f301b277f9a6c1a12d0a" <<<"$INFO_OUT"; then
   pass "--info exposes schema + mission lock hash"
 else

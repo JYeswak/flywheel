@@ -14,10 +14,73 @@ rows:
     reason_code: private_flywheel_runtime
     public_replacement: "generate runtime directories during public init"
     probe_fixture: fixtures/denylist/flywheel-runtime-tree
+  - id: repo-flywheel-sqlite-state
+    class: live-runtime-state
+    pattern: "**/state.db*"
+    decision: deny
+    reason_code: private_sqlite_state
+    public_replacement: "initialize fresh local state during public install"
+    probe_fixture: fixtures/denylist/sqlite-state
+  - id: repo-beads-db-state
+    class: live-runtime-state
+    pattern: "**/beads.db*"
+    decision: deny
+    reason_code: private_beads_state
+    public_replacement: "initialize a fresh public Beads graph or fixture"
+    probe_fixture: fixtures/denylist/beads-state
+  - id: repo-beads-issues-ledger
+    class: live-runtime-state
+    pattern: ".beads/issues.jsonl"
+    decision: deny
+    reason_code: private_beads_ledger
+    public_replacement: "publish empty fixture graph or schema-only examples"
+    probe_fixture: fixtures/denylist/beads-state
+  - id: closed-bead-compat-artifacts
+    class: private-memory-state
+    pattern: "AGENTS/README/**"
+    decision: deny
+    reason_code: private_memory_path
+    public_replacement: "publish current AGENTS.md and public docs, not closed-bead compatibility artifacts"
+    probe_fixture: fixtures/denylist/private-memory-path
+  - id: client-specific-insurance-paths
+    class: client-evidence-state
+    pattern: "**/*alps*"
+    decision: deny
+    reason_code: private_client_path
+    public_replacement: "publish generalized client fixtures and templates, not named-client filenames"
+    probe_fixture: fixtures/denylist/client-specific-paths
+  - id: repo-flywheel-plans
+    class: private-memory-state
+    pattern: ".flywheel/PLANS/**"
+    decision: manual-review
+    reason_code: private_plan_state
+    public_replacement: "publish curated runbooks and plan templates, not raw plan arcs"
+    probe_fixture: fixtures/denylist/private-plans
+  - id: repo-flywheel-audit
+    class: client-evidence-state
+    pattern: ".flywheel/audit/**"
+    decision: manual-review
+    reason_code: private_audit_state
+    public_replacement: "publish scrubbed audit summaries and synthetic evidence"
+    probe_fixture: fixtures/denylist/private-audit
+  - id: repo-flywheel-evidence
+    class: client-evidence-state
+    pattern: ".flywheel/evidence/**"
+    decision: manual-review
+    reason_code: private_evidence_state
+    public_replacement: "publish synthetic evidence fixtures only"
+    probe_fixture: fixtures/denylist/private-evidence
   - id: repo-local-private-receipts
     class: live-runtime-state
     pattern: ".flywheel/receipts/private/**"
     decision: deny
+    reason_code: private_receipt_state
+    public_replacement: "publish scrubbed example receipts only"
+    probe_fixture: fixtures/denylist/private-receipts
+  - id: repo-flywheel-receipts
+    class: live-runtime-state
+    pattern: ".flywheel/receipts/**"
+    decision: manual-review
     reason_code: private_receipt_state
     public_replacement: "publish scrubbed example receipts only"
     probe_fixture: fixtures/denylist/private-receipts
@@ -139,6 +202,13 @@ rows:
     decision: deny
     reason_code: credential_state_path
     public_replacement: "publish redacted examples with synthetic markers"
+    probe_fixture: fixtures/denylist/env-secret-shapes
+  - id: secret-leak-ledger
+    class: credential-state
+    pattern: "**/secret-leak-ledger.jsonl"
+    decision: deny
+    reason_code: credential_state_path
+    public_replacement: "publish scanner schema and synthetic redaction fixtures"
     probe_fixture: fixtures/denylist/env-secret-shapes
   - id: halted-propagator-canonical-doctrine-sync
     class: live-runtime-state

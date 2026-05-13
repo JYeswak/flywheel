@@ -1,0 +1,57 @@
+{
+  "schema_version": "flywheel.asupersync_poc_receipt.v0",
+  "status": "blocked",
+  "generated_at": "<UTC timestamp>",
+  "executor": {
+    "name": "<human or tool lane>",
+    "class": "human-or-non-restricted",
+    "codex_or_claude_operated": false,
+    "license_rider_disposition": "<why this executor is cleared for upstream source testing>"
+  },
+  "upstream": {
+    "repo": "https://github.com/Dicklesworthstone/asupersync",
+    "tag_or_commit": "<evaluated tag or commit>",
+    "crate_version": "0.3.1",
+    "website_version_observed": "V0.2.6",
+    "actions_status": "<green|queued|failed|mixed>",
+    "open_high_impact_issues": [
+      "#35"
+    ]
+  },
+  "platform": {
+    "os": "<name and version>",
+    "arch": "<arch>",
+    "apple_silicon_path": "<release-asset|source-build|not-applicable>"
+  },
+  "commands": [
+    {
+      "command": "cargo check",
+      "status": "not_run",
+      "exit_code": null,
+      "output_receipt": "<path or summary>"
+    },
+    {
+      "command": "cargo test --workspace --lib",
+      "status": "not_run",
+      "exit_code": null,
+      "output_receipt": "<path or summary>"
+    },
+    {
+      "command": "<repo-local POC deterministic cancellation test>",
+      "status": "not_run",
+      "exit_code": null,
+      "output_receipt": "<path or summary>"
+    }
+  ],
+  "poc_semantics": {
+    "explicit_cx": false,
+    "owned_regions": false,
+    "cancellation_tested": false,
+    "deterministic_test_used": false,
+    "no_flywheel_runtime_dependency": true
+  },
+  "promotion_decision": {
+    "status": "not_promoted",
+    "reason": "Template only. Replace with a real receipt after a cleared executor runs the POC."
+  }
+}

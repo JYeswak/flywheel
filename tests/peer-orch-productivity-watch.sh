@@ -28,56 +28,56 @@ bash -n "$SCRIPT" && pass "script syntax" || fail "script syntax"
 grep -F -- "f\"--pane={row['orchestrator_pane']}\", \"--no-cass-check\", row[\"escalation_packet\"]" "$SCRIPT" >/dev/null \
   && pass "productivity_escalation_no_cass_check_argv_order" || fail "productivity_escalation_no_cass_check_argv_order"
 
-cat >"$TMP/loops/skillos.json" <<'JSON'
-{"session":"skillos","active":true,"repo":"/tmp/skillos","orchestrator_pane":1}
+cat >"$TMP/loops/{capability-control-plane}.json" <<'JSON'
+{"session":"{capability-control-plane}","active":true,"repo":"/tmp/{capability-control-plane}","orchestrator_pane":1}
 JSON
-cat >"$TMP/loops/mobile-eats.json" <<'JSON'
-{"session":"mobile-eats","active":true,"repo":"/tmp/mobile-eats","orchestrator_pane":1}
+cat >"$TMP/loops/{proof-product}.json" <<'JSON'
+{"session":"{proof-product}","active":true,"repo":"/tmp/{proof-product}","orchestrator_pane":1}
 JSON
-cat >"$TMP/loops/alpsinsurance.json" <<'JSON'
-{"session":"alpsinsurance","active":true,"repo":"/tmp/alpsinsurance","orchestrator_pane":1}
+cat >"$TMP/loops/{session}.json" <<'JSON'
+{"session":"{session}","active":true,"repo":"/tmp/{session}","orchestrator_pane":1}
 JSON
 cat >"$TMP/topology.jsonl" <<'JSONL'
-{"session":"skillos","effective_at":"2026-05-04T20:00:00Z","orchestrator_pane":1,"worker_panes":[2,3]}
-{"session":"mobile-eats","effective_at":"2026-05-04T20:00:00Z","orchestrator_pane":1,"worker_panes":[2,3]}
-{"session":"alpsinsurance","effective_at":"2026-05-04T20:00:00Z","orchestrator_pane":1,"worker_panes":[2]}
+{"session":"{capability-control-plane}","effective_at":"2026-05-04T20:00:00Z","orchestrator_pane":1,"worker_panes":[2,3]}
+{"session":"{proof-product}","effective_at":"2026-05-04T20:00:00Z","orchestrator_pane":1,"worker_panes":[2,3]}
+{"session":"{session}","effective_at":"2026-05-04T20:00:00Z","orchestrator_pane":1,"worker_panes":[2]}
 JSONL
 
-cat >"$TMP/activity/skillos.json" <<'JSON'
+cat >"$TMP/activity/{capability-control-plane}.json" <<'JSON'
 {"agents":[
   {"pane_idx":2,"state":"WAITING","capture_provenance":"live","state_since_epoch":100},
   {"pane_idx":3,"state":"WAITING","capture_provenance":"live","state_since_epoch":100}
 ]}
 JSON
-cat >"$TMP/ready/skillos.json" <<'JSON'
+cat >"$TMP/ready/{capability-control-plane}.json" <<'JSON'
 []
 JSON
-cat >"$TMP/doctor/skillos.json" <<'JSON'
+cat >"$TMP/doctor/{capability-control-plane}.json" <<'JSON'
 {"fuckup_triage":{"candidates":[{"trauma_class":"audit-findings-unfiled"}]},"closed_bead_audit_pending_count":2}
 JSON
-printf 'orch is quiet\n' >"$TMP/capture/skillos.txt"
+printf 'orch is quiet\n' >"$TMP/capture/{capability-control-plane}.txt"
 
-cat >"$TMP/activity/mobile-eats.json" <<'JSON'
+cat >"$TMP/activity/{proof-product}.json" <<'JSON'
 {"agents":[{"pane_idx":2,"state":"THINKING","capture_provenance":"live","state_since_epoch":1000}]}
 JSON
-cat >"$TMP/ready/mobile-eats.json" <<'JSON'
+cat >"$TMP/ready/{proof-product}.json" <<'JSON'
 [{"id":"me-a","priority":1,"title":"Ready work"}]
 JSON
-cat >"$TMP/doctor/mobile-eats.json" <<'JSON'
+cat >"$TMP/doctor/{proof-product}.json" <<'JSON'
 {}
 JSON
-printf 'dispatching\n' >"$TMP/capture/mobile-eats.txt"
+printf 'dispatching\n' >"$TMP/capture/{proof-product}.txt"
 
-cat >"$TMP/activity/alpsinsurance.json" <<'JSON'
+cat >"$TMP/activity/{session}.json" <<'JSON'
 {"agents":[{"pane_idx":2,"state":"WAITING","capture_provenance":"live","state_since_epoch":100}]}
 JSON
-cat >"$TMP/ready/alpsinsurance.json" <<'JSON'
+cat >"$TMP/ready/{session}.json" <<'JSON'
 []
 JSON
-cat >"$TMP/doctor/alpsinsurance.json" <<'JSON'
-{"errors":[{"code":"joshua_required_security_decision","message":"TRUE Josh-blocker requires Joshua action"}]}
+cat >"$TMP/doctor/{session}.json" <<'JSON'
+{"errors":[{"code":"joshua_required_security_decision","message":"TRUE Josh-blocker requires {operator} action"}]}
 JSON
-printf 'TRUE Josh-blocker requires Joshua action\n' >"$TMP/capture/alpsinsurance.txt"
+printf 'TRUE Josh-blocker requires {operator} action\n' >"$TMP/capture/{session}.txt"
 
 cat >"$TMP/ntm-coordinator-pinned" <<'SH'
 #!/usr/bin/env bash
@@ -88,13 +88,13 @@ for arg in "$@"; do
   esac
 done
 case "$session" in
-  skillos)
+  {capability-control-plane})
     printf '{"work_summary":{"pending_tasks":2,"in_progress_tasks":1,"completed_today":0,"blocked_tasks":1}}\n'
     ;;
-  mobile-eats)
+  {proof-product})
     printf '{"work_summary":{"pending_tasks":0,"in_progress_tasks":1,"completed_today":0,"blocked_tasks":0}}\n'
     ;;
-  alpsinsurance)
+  {session})
     exit 3
     ;;
   *)
@@ -126,10 +126,10 @@ assert_jq "$TMP/schema.json" '(.canonical_cli_flags | index("--session=<name>"))
 
 "$SCRIPT" "${base_args[@]}" --json >"$TMP/report.json"
 assert_jq "$TMP/report.json" '.peer_orch_idle_with_work_available_count == 1 and .true_josh_blocker_count == 1 and .productive_count == 1' "fleet counts productivity states"
-assert_jq "$TMP/report.json" '.sessions[] | select(.session == "skillos") | .productivity_state == "idle_with_work_available" and (.escalation_packet | contains("audit-findings-unfiled"))' "idle session gets escalation packet"
-assert_jq "$TMP/report.json" '.sessions[] | select(.session == "skillos") | .coordinator_pending_tasks == 2 and .coordinator_in_progress == 1 and .coordinator_blocked == 1 and (.work_sources[] | select(.source | contains("Coordinator digest work_summary")))' "coordinator digest drives work summary"
-assert_jq "$TMP/report.json" '.sessions[] | select(.session == "alpsinsurance") | .productivity_state == "true_josh_blocker"' "explicit Josh blocker classified"
-assert_jq "$TMP/report.json" '.sessions[] | select(.session == "alpsinsurance") | .coordinator_digest_available == false and .coordinator_digest_error == "coordinator_nonzero"' "coordinator failure is fail-open"
+assert_jq "$TMP/report.json" '.sessions[] | select(.session == "{capability-control-plane}") | .productivity_state == "idle_with_work_available" and (.escalation_packet | contains("audit-findings-unfiled"))' "idle session gets escalation packet"
+assert_jq "$TMP/report.json" '.sessions[] | select(.session == "{capability-control-plane}") | .coordinator_pending_tasks == 2 and .coordinator_in_progress == 1 and .coordinator_blocked == 1 and (.work_sources[] | select(.source | contains("Coordinator digest work_summary")))' "coordinator digest drives work summary"
+assert_jq "$TMP/report.json" '.sessions[] | select(.session == "{session}") | .productivity_state == "true_josh_blocker"' "explicit Josh blocker classified"
+assert_jq "$TMP/report.json" '.sessions[] | select(.session == "{session}") | .coordinator_digest_available == false and .coordinator_digest_error == "coordinator_nonzero"' "coordinator failure is fail-open"
 [[ ! -f "$TMP/state/productivity.jsonl" ]] && pass "dry-run writes no ledger" || fail "dry-run writes no ledger"
 
 cat >"$TMP/ntm" <<'SH'
@@ -141,9 +141,9 @@ chmod +x "$TMP/ntm"
 NTM_LOG="$TMP/ntm.log" "$SCRIPT" "${base_args[@]}" --apply --no-notify --json --ntm "$TMP/ntm" >"$TMP/apply.json"
 assert_jq "$TMP/apply.json" '(.actual_actions | map(.type) | index("xpane_productivity_escalation"))' "apply sends productivity escalation"
 assert_jq "$TMP/apply.json" '(.actual_actions | map(.type) | index("josh_notify_true_blocker"))' "apply records true blocker notify action"
-grep -q 'skillos' "$TMP/ntm.log" && pass "fake ntm received skillos send" || fail "fake ntm received skillos send"
+grep -q '{capability-control-plane}' "$TMP/ntm.log" && pass "fake ntm received {capability-control-plane} send" || fail "fake ntm received {capability-control-plane} send"
 grep -F -- '--no-cass-check' "$TMP/ntm.log" >/dev/null && pass "fake ntm productivity escalation bypasses cass" || fail "fake ntm productivity escalation bypasses cass"
-assert_jq "$TMP/state/productivity.jsonl" 'select(.event == "productivity_escalation_sent" and .session == "skillos")' "apply writes cross-orch ledger row"
+assert_jq "$TMP/state/productivity.jsonl" 'select(.event == "productivity_escalation_sent" and .session == "{capability-control-plane}")' "apply writes cross-orch ledger row"
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2

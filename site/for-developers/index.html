@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Flywheel For Developers | ZestStream</title>
+    <link rel="stylesheet" href="../styles.css">
+  </head>
+  <body>
+    <header class="topbar"><nav class="shell nav" aria-label="Main navigation"><a class="brand" href="../index.html">Flywheel</a><div class="links"><a href="../what-is/index.html">What Is It</a><a href="../methodology/index.html">Methodology</a><a href="../about/index.html">About</a><a href="../contact/index.html">Contact</a></div></nav></header>
+    <main>
+      <section class="hero">
+        <div class="shell">
+          <div class="eyebrow">Developer path</div>
+          <h1>Run it before you trust it.</h1>
+          <p class="lead">Start with reduced mode, inspect the receipts, then decide whether to wire full-mode substrate.</p>
+          <pre><code>git clone https://github.com/JYeswak/flywheel.git
+cd flywheel
+scripts/preflight.sh --json
+scripts/journey-smoke.sh --matrix claude,codex,gemini,openclaw,reduced --dry-run --json</code></pre>
+        </div>
+      </section>
+      <section class="band alt">
+        <div class="shell">
+          <h2>Support Tiers</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Lane</th><th>Public status</th></tr></thead>
+              <tbody>
+                <tr><td>Reduced local mode</td><td>Required public fallback path.</td></tr>
+                <tr><td>Claude Code</td><td>Compatibility target until isolated runtime proof exists.</td></tr>
+                <tr><td>Codex CLI</td><td>Compatibility target until isolated runtime proof exists.</td></tr>
+                <tr><td>Gemini CLI</td><td>Compatibility target until isolated runtime proof exists.</td></tr>
+                <tr><td>OpenClaw</td><td>Compatibility target until daemon or gateway smoke proves runtime behavior.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="footer"><div class="shell">Repository: <a href="https://github.com/JYeswak/flywheel">github.com/JYeswak/flywheel</a>.</div></footer>
+  </body>
+</html>

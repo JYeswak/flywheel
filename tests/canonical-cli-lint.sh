@@ -7,7 +7,7 @@
 # and --json schema validity.
 set -euo pipefail
 
-REPO="${REPO:-/Users/josh/Developer/flywheel}"
+REPO="${REPO:-<flywheel-repo>}"
 LINTER="${LINTER:-$REPO/.flywheel/scripts/canonical-cli-lint.sh}"
 PILOT="${PILOT:-$REPO/.flywheel/scripts/daily-report-enabled-repos.sh}"
 

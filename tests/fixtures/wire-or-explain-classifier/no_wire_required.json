@@ -5,7 +5,7 @@
   "event_type": "proof",
   "actor": "codex",
   "target": "/tmp/worker-private-note.md",
-  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_repo": "<flywheel-repo>",
   "ship_actor": "codex",
   "git_ref": "642bdf",
   "wire_required": false,

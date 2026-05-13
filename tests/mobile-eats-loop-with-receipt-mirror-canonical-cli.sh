@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# tests/mobile-eats-loop-with-receipt-mirror-canonical-cli.sh
-# Canonical-cli surface tests for .flywheel/scripts/mobile-eats-loop-with-receipt-mirror.sh (scaffolded by
+# tests/{proof-product}-loop-with-receipt-mirror-canonical-cli.sh
+# Canonical-cli surface tests for .flywheel/scripts/{proof-product}-loop-with-receipt-mirror.sh (scaffolded by
 # bead flywheel-ws02m / scaffold-canonical-cli.sh).
 #
 # 13/13 PASS = canonical-cli-scoping checker green. TODO markers
@@ -8,7 +8,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/mobile-eats-loop-with-receipt-mirror.sh"
+SCRIPT="$ROOT/.flywheel/scripts/{proof-product}-loop-with-receipt-mirror.sh"
 
 pass_count=0
 fail_count=0

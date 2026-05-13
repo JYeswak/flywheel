@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/flywheel-readme-canonical-cli-py.sh
-# Canonical-cli surface tests for /Users/josh/.claude/skills/.flywheel/bin/flywheel-readme (scaffolded by
+# Canonical-cli surface tests for <flywheel-state>/bin/flywheel-readme (scaffolded by
 # bead flywheel-oozt3 / scaffold-canonical-cli-py.sh).
 #
 # Verifies the python shim exposes canonical introspection without breaking
@@ -8,7 +8,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="/Users/josh/.claude/skills/.flywheel/bin/flywheel-readme"
+SCRIPT="<flywheel-state>/bin/flywheel-readme"
 
 pass_count=0
 fail_count=0

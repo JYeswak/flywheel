@@ -2,8 +2,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BIN="/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop"
-LIB="/Users/josh/.claude/skills/.flywheel/lib/drift-status.sh"
+BIN="<flywheel-state>/bin/flywheel-loop"
+LIB="<flywheel-state>/lib/drift-status.sh"
 FIXTURE="$ROOT/.flywheel/fixtures/fleet-coherence-latest-v2.json"
 TMP="$(mktemp -d -t drift-status.XXXXXX)"
 trap 'rm -r "$TMP"' EXIT

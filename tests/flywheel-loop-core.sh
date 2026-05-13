@@ -139,20 +139,20 @@ check_doctor_strict_lock_drift() {
 check_fleet_scan_flywheel_ready() {
   local label="T3.2 fleet scan reports flywheel docs ready"
   local out status docs_state
-  out=$("$FLYWHEEL_LOOP_BIN" fleet --root /Users/josh/Developer --json 2>/dev/null)
+  out=$("$FLYWHEEL_LOOP_BIN" fleet --root $HOME/Developer --json 2>/dev/null)
   if [[ $? -ne 0 || -z "$out" ]]; then
     fail "$label"
     note "flywheel-loop fleet failed"
     return
   fi
 
-  status=$(printf '%s' "$out" | jq -r '.repos[]? | select(.repo=="/Users/josh/Developer/flywheel") | .status' 2>/dev/null)
-  docs_state=$(printf '%s' "$out" | jq -r '.repos[]? | select(.repo=="/Users/josh/Developer/flywheel") | .repo_docs_state' 2>/dev/null)
+  status=$(printf '%s' "$out" | jq -r '.repos[]? | select(.repo=="<flywheel-repo>") | .status' 2>/dev/null)
+  docs_state=$(printf '%s' "$out" | jq -r '.repos[]? | select(.repo=="<flywheel-repo>") | .repo_docs_state' 2>/dev/null)
   if [[ "$docs_state" == "ready" ]]; then
     pass "$label"
   else
     fail "$label"
-    note "expected /Users/josh/Developer/flywheel repo_docs_state=ready"
+    note "expected <flywheel-repo> repo_docs_state=ready"
     note "status=${status:-missing} repo_docs_state=${docs_state:-missing}"
   fi
 }

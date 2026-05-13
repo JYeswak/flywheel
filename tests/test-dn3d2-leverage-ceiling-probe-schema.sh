@@ -13,7 +13,7 @@
 # accepted up to a fixed cap; any new occurrence (>6) is a regression.
 set -euo pipefail
 
-REPO="${REPO:-/Users/josh/Developer/flywheel}"
+REPO="${REPO:-<flywheel-repo>}"
 PROBE="${PROBE:-$REPO/.flywheel/scripts/leverage-ceiling-probe.sh}"
 LEDGER="${LEDGER:-$HOME/.local/state/flywheel/leverage-ceiling.jsonl}"
 HISTORICAL_BROKEN_CAP="${HISTORICAL_BROKEN_CAP:-6}"

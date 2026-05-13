@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/.flywheel/scripts/beads-db-recover.sh"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/beads-db-recover-test.XXXXXX")"
-BR_BIN="${BEADS_DB_RECOVER_BR_BIN:-$(command -v br || printf '/Users/josh/.cargo/bin/br')}"
+BR_BIN="${BEADS_DB_RECOVER_BR_BIN:-$(command -v br || printf '$HOME/.cargo/bin/br')}"
 trap 'rm -rf "$TMP"' EXIT
 
 pass_count=0

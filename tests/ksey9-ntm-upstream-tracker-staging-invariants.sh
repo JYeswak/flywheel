@@ -2,9 +2,9 @@
 # tests/ksey9-ntm-upstream-tracker-staging-invariants.sh
 # Bead flywheel-ksey9: tracking-bead regression that asserts the staged
 # ntm controller-pane wording proposal stays staged-only (no upstream
-# push without Joshua approval per parent flywheel-se3h.8 gate 5).
+# push without {operator} approval per parent flywheel-se3h.8 gate 5).
 #
-# When Joshua approves the upstream push, the orchestrator should follow
+# When {operator} approves the upstream push, the orchestrator should follow
 # jeff-issue-chain v1.3 Phase 1 contract from the staged proposal. Until
 # then, this regression fires the moment any invariant drifts.
 set -euo pipefail
@@ -21,7 +21,7 @@ fail() { fail_count=$((fail_count + 1)); printf 'FAIL %s\n' "$1" >&2; }
 
 # Test 1: staged proposal exists with required boundary + DRAFT markers
 if [[ -f "$PROPOSAL" ]] \
-  && grep -qE 'local-only.*no upstream push without explicit Joshua approval|no upstream push' "$PROPOSAL" \
+  && grep -qE 'local-only.*no upstream push without explicit {operator} approval|no upstream push' "$PROPOSAL" \
   && grep -q "DRAFT" "$PROPOSAL" \
   && grep -q "Dicklesworthstone/ntm" "$PROPOSAL"; then
   pass "staged proposal exists with local-only / DRAFT / upstream-target markers"
@@ -54,17 +54,17 @@ else
   fail "proposal missing surface citations: ${missing_surfaces[*]}"
 fi
 
-# Test 4: counterexamples ledger exists + carries alpsinsurance:0 + mobile-eats:2 rows
+# Test 4: counterexamples ledger exists + carries {session}:0 + {proof-product}:2 rows
 if [[ -f "$COUNTEREXAMPLES" ]] \
   && jq -es '
-    map(select(.session == "alpsinsurance" and .orchestrator_pane == 0)) | length > 0
+    map(select(.session == "{session}" and .orchestrator_pane == 0)) | length > 0
   ' >/dev/null 2>&1 <"$COUNTEREXAMPLES" \
   && jq -es '
-    map(select(.session == "mobile-eats" and .orchestrator_pane == 2)) | length > 0
+    map(select(.session == "{proof-product}" and .orchestrator_pane == 2)) | length > 0
   ' >/dev/null 2>&1 <"$COUNTEREXAMPLES"; then
-  pass "topology-counterexamples.jsonl carries alps:0 + mobile-eats:2 evidence rows"
+  pass "topology-counterexamples.jsonl carries alps:0 + {proof-product}:2 evidence rows"
 else
-  fail "counterexamples missing required rows; expected alpsinsurance:orchestrator_pane=0 + mobile-eats:orchestrator_pane=2"
+  fail "counterexamples missing required rows; expected {session}:orchestrator_pane=0 + {proof-product}:orchestrator_pane=2"
 fi
 
 # Test 5: parent bead flywheel-se3h.8 is closed (gate-5 path is the canonical handoff)
@@ -74,17 +74,17 @@ else
   fail "parent bead flywheel-se3h.8 not CLOSED — staged proposal lifecycle drift"
 fi
 
-# Test 6: no upstream push artifact exists in this repo (Joshua-restraint
+# Test 6: no upstream push artifact exists in this repo ({operator}-restraint
 # invariant — the proposal must NOT have been pushed). gh issue create
 # would leave a URL trace in the proposal or a PR-link-class artifact.
 if grep -qE 'github\.com/Dicklesworthstone/ntm/(issues|pull)/[0-9]+' "$PROPOSAL"; then
   fail "proposal contains a Dicklesworthstone/ntm issue or pull URL — looks like upstream push happened"
 else
-  pass "proposal carries no upstream issue/pull URL — Joshua-restraint preserved"
+  pass "proposal carries no upstream issue/pull URL — {operator}-restraint preserved"
 fi
 
 # Test 7: proposal cites jeff-issue-chain v1.3 Phase 1 contract for the
-# canonical handoff path when Joshua approves
+# canonical handoff path when {operator} approves
 if grep -qE 'jeff-issue-chain (v1\.3|version 1\.3)' "$PROPOSAL" \
   || grep -qE 'Phase 1' "$PROPOSAL"; then
   pass "proposal references jeff-issue-chain v1.3 Phase 1 handoff path"

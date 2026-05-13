@@ -28,8 +28,8 @@ write_fixture() {
   mkdir -p "$dir"
   cat >"$dir/topology.jsonl" <<'EOF'
 {"session":"flywheel","orchestrator_pane":1,"orchestrator_kind":"claude","effective_at":"2026-05-03T23:00:00Z"}
-{"session":"mobile-eats","orchestrator_pane":1,"orchestrator_kind":"codex","effective_at":"2026-05-03T23:00:00Z"}
-{"session":"skillos","orchestrator_pane":1,"orchestrator_kind":"codex","capture_path":"agent-mail","capture_evidence_refs":["agent_context_callback:/tmp/skillos-capture.json"],"effective_at":"2026-05-03T23:00:00Z"}
+{"session":"{proof-product}","orchestrator_pane":1,"orchestrator_kind":"codex","effective_at":"2026-05-03T23:00:00Z"}
+{"session":"{capability-control-plane}","orchestrator_pane":1,"orchestrator_kind":"codex","capture_path":"agent-mail","capture_evidence_refs":["agent_context_callback:/tmp/{capability-control-plane}-capture.json"],"effective_at":"2026-05-03T23:00:00Z"}
 {"session":"legacy-shell","orchestrator_pane":4,"orchestrator_kind":"shell","capture_participation":"non_participating","capture_non_participation_reason":"not an orchestrator owner runtime","effective_at":"2026-05-03T23:00:00Z"}
 {"session":"stale-codex","orchestrator_pane":2,"orchestrator_kind":"codex","effective_at":"2026-05-03T23:00:00Z"}
 {"session":"scrollback-codex","orchestrator_pane":3,"orchestrator_kind":"codex","capture_path":"pane_scrollback","effective_at":"2026-05-03T23:00:00Z"}
@@ -39,8 +39,8 @@ EOF
 {"schema_version":2,"id":"jr-stale-001","captured_at":"2026-05-01T00:00:00Z","source_session":"stale-codex","source_pane":2,"prompt_hash":"sha256:stale-001","source_message_id":"codex-message-stale","sanitized_excerpt":"fixture stale request"}
 EOF
   cat >"$dir/coordination.jsonl" <<'EOF'
-{"ts":"2026-05-03T23:45:00Z","event":"mobile_eats_orch_ack","session":"mobile-eats"}
-{"ts":"2026-05-03T23:50:00Z","event":"skillos_agent_mail","source_session":"skillos"}
+{"ts":"2026-05-03T23:45:00Z","event":"mobile_eats_orch_ack","session":"{proof-product}"}
+{"ts":"2026-05-03T23:50:00Z","event":"{capability-control-plane}_agent_mail","source_session":"{capability-control-plane}"}
 EOF
 }
 
@@ -92,8 +92,8 @@ python3 "$PROBE" \
 
 assert_jq "$probe_out" '(.rows | length == 6) and all(.rows[]; has("session") and has("pane") and has("runtime") and has("participation_state") and has("capture_path") and has("last_capture_ts") and has("last_josh_input_seen_ts") and has("gap_reason") and has("evidence_refs"))' "B13_AG1 probe emits required row fields"
 assert_jq "$probe_out" '.rows[] | select(.session == "flywheel" and .runtime == "claude" and .participation_state == "captured")' "B13_AG2 Claude hook capture present fixture"
-assert_jq "$probe_out" '.rows[] | select(.session == "mobile-eats" and .runtime == "codex" and .participation_state == "capture_gap" and .gap_reason == "missing_canonical_capture")' "B13_AG2 Codex capture missing fixture"
-assert_jq "$probe_out" '.rows[] | select(.session == "skillos" and .runtime == "codex" and .participation_state == "captured" and (.evidence_refs[0] | test("agent_context_callback")))' "B13_AG2 Codex agent-context capture fixture"
+assert_jq "$probe_out" '.rows[] | select(.session == "{proof-product}" and .runtime == "codex" and .participation_state == "capture_gap" and .gap_reason == "missing_canonical_capture")' "B13_AG2 Codex capture missing fixture"
+assert_jq "$probe_out" '.rows[] | select(.session == "{capability-control-plane}" and .runtime == "codex" and .participation_state == "captured" and (.evidence_refs[0] | test("agent_context_callback")))' "B13_AG2 Codex agent-context capture fixture"
 assert_jq "$probe_out" '.rows[] | select(.session == "legacy-shell" and .participation_state == "non_participating")' "B13_AG2 explicit non-participating runtime fixture"
 assert_jq "$probe_out" '.rows[] | select(.session == "stale-codex" and .participation_state == "stale_capture" and .gap_reason == "stale_capture_row")' "B13_AG2 stale capture fixture"
 assert_jq "$probe_out" '.rows[] | select(.session == "scrollback-codex" and .gap_reason == "pane_scrollback_not_canonical_capture")' "B13_AG4 pane scrollback alone rejected"
@@ -103,7 +103,7 @@ all_clear="$TMP/all-clear"
 mkdir -p "$all_clear"
 cat >"$all_clear/topology.jsonl" <<'EOF'
 {"session":"flywheel","orchestrator_pane":1,"orchestrator_kind":"claude","effective_at":"2026-05-03T23:00:00Z"}
-{"session":"skillos","orchestrator_pane":1,"orchestrator_kind":"codex","capture_path":"agent-mail","capture_evidence_refs":["agent_context_callback:/tmp/skillos-capture.json"],"effective_at":"2026-05-03T23:00:00Z"}
+{"session":"{capability-control-plane}","orchestrator_pane":1,"orchestrator_kind":"codex","capture_path":"agent-mail","capture_evidence_refs":["agent_context_callback:/tmp/{capability-control-plane}-capture.json"],"effective_at":"2026-05-03T23:00:00Z"}
 EOF
 cat >"$all_clear/josh-requests.jsonl" <<'EOF'
 {"schema_version":2,"id":"jr-flywheel-001","captured_at":"2026-05-03T23:30:00Z","source_session":"flywheel","source_pane":1,"prompt_hash":"sha256:flywheel-001","source_message_id":"claude-message-1","sanitized_excerpt":"fixture claude request"}

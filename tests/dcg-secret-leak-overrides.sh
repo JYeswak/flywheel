@@ -30,6 +30,6 @@ expect_block "run" infisical run -- printenv
 expect_block "export" infisical export --env=prod
 expect_block "jwt literal" printf eyJabcdefghijklmnopqrstuvwxyzABCDE.eyJpayload.signature
 expect_block "supabase ref literal" printf https://abcdefghijklmnopqrst.supabase.co
-expect_allow "safe wrapper list" /Users/josh/.flywheel/bin/infisical-safe secrets list --silent --output=json '| jq -r ".[].secretKey"'
+expect_allow "safe wrapper list" $HOME/.flywheel/bin/infisical-safe secrets list --silent --output=json '| jq -r ".[].secretKey"'
 
 printf 'dcg secret-leak overrides passed: blocked=%s allowed=%s\n' "$blocked" "$allowed"

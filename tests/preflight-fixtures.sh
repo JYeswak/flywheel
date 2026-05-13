@@ -41,7 +41,8 @@ TMP="$(mktemp -d "${TMPDIR:-/tmp}/flywheel-preflight-test.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 
 check_mode() {
-  local fixture="$1" expected_mode="$2" expected_exit="$3" out="$TMP/${fixture}.out" err="$TMP/${fixture}.err" rc
+  local fixture="$1" expected_mode="$2" expected_exit="$3" rc
+  local out="$TMP/${fixture}.out" err="$TMP/${fixture}.err"
   run_capture "$out" "$err" "$SCRIPT" --fixture "fixtures/preflight/${fixture}.json" --json
   rc=$?
   if [[ "$rc" -eq "$expected_exit" ]] && jq -e --arg mode "$expected_mode" --argjson exit_code "$expected_exit" '.mode == $mode and .exit_code == $exit_code' "$out" >/dev/null; then
@@ -72,6 +73,16 @@ else
   fail "fixture mode uses fixture evidence"
 fi
 
+if jq -e '
+  [.harnesses[] | select(.id == "claude" or .id == "codex" or .id == "gemini" or .id == "openclaw")]
+  | length == 4
+  and all(.[]; .tier == "compatibility-target")
+' "$TMP/partial-evidence.out" >/dev/null; then
+  pass "harness tiers remain receipt-bound compatibility targets"
+else
+  fail "harness tiers remain receipt-bound compatibility targets"
+fi
+
 if "$SCRIPT" --examples --json | jq -e '.command == "examples" and ([.examples[].name] | index("docs-only")) and .exit_codes["20"]' >/dev/null; then
   pass "examples"
 else
@@ -90,7 +101,7 @@ else
   fail "doctor reports fixture health"
 fi
 
-if ! rg -n '/Users/josh|sk-[A-Za-z0-9_-]{12,}|ghp_[A-Za-z0-9_]{20,}' "$FIXTURES" "$TMP" >/dev/null; then
+if ! rg -n '$HOME|sk-[A-Za-z0-9_-]{12,}|ghp_[A-Za-z0-9_]{20,}' "$FIXTURES" "$TMP" >/dev/null; then
   pass "no private paths or secret-shaped fixture material"
 else
   fail "private paths or secret-shaped fixture material"

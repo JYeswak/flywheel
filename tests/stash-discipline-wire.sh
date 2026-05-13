@@ -169,7 +169,7 @@ if printf '%s' "$DEC" | jq -e '(.stash_count == -1 or .stash_count == null) and 
 else fail "BLOCKED callback incorrectly stash-checked: $(printf '%s' "$DEC" | jq -c '{decision, stash_count}')"; fi
 
 # Test 17: flywheel-loop doctor exposes stash_count for current repo
-DOC="$(/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo "$ROOT" --json 2>/dev/null)"
+DOC="$(<flywheel-state>/bin/flywheel-loop doctor --repo "$ROOT" --json 2>/dev/null)"
 if printf '%s' "$DOC" | jq -e 'has("stash_count") and has("stash_class") and has("stash_halt") and has("stash_thresholds")' >/dev/null; then
   pass "flywheel-loop doctor includes stash fields"
 else fail "flywheel-loop doctor stash fields"; fi

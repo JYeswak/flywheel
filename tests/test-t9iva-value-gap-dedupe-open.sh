@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-REPO="${REPO:-/Users/josh/Developer/flywheel}"
+REPO="${REPO:-<flywheel-repo>}"
 PROBE="${PROBE:-$REPO/.flywheel/scripts/value-gap-probe.sh}"
 [[ -x "$PROBE" ]] || { echo "FAIL probe missing: $PROBE" >&2; exit 1; }
 

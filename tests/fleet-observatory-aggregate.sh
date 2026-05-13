@@ -59,9 +59,9 @@ cat >"$TMP/red.json" <<'JSON'
   "peer_orch_productivity_total_count":5,
   "fleet_conformance_min_score":45,
   "fleet_conformance_yellow_count":1,
-  "fleet_conformance_worst_session":"picoz",
+  "fleet_conformance_worst_session":"{session}",
   "fleet_comms_min_score":50,
-  "fleet_comms_worst_session":"skillos",
+  "fleet_comms_worst_session":"{capability-control-plane}",
   "fleet_comms_silent_session_count":2,
   "fleet_comms_token_stale_count":1,
   "fleet_process_open_gap_count":7,
@@ -100,7 +100,7 @@ assert_jq "$TMP/green-out.json" '.spines_aggregated == 8 and (.spines | length) 
 
 "$SCRIPT" --doctor-json "$TMP/red.json" --json >"$TMP/red-out.json" || true
 assert_jq "$TMP/red-out.json" '.fleet_overall_health_score < 60 and .status == "red"' "known-red fixture is red"
-assert_jq "$TMP/red-out.json" '.worst_session == "picoz" and .worst_spine == "architecture"' "worst session and spine selected"
+assert_jq "$TMP/red-out.json" '.worst_session == "{session}" and .worst_spine == "architecture"' "worst session and spine selected"
 assert_jq "$TMP/red-out.json" '.top_process_gaps == ["sticky_doctor_error","fleet_identity_drift","watcher_hole"]' "top three process gaps surfaced"
 assert_jq "$TMP/red-out.json" '.recommended_action | contains("rework")' "recommended action follows worst spine"
 

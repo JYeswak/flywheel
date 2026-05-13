@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 LOOP="${FLYWHEEL_LOOP_BIN:-$HOME/.claude/skills/.flywheel/bin/flywheel-loop}"
-NOTIFY="$ROOT/.flywheel/scripts/skillos-notify.py"
+NOTIFY="$ROOT/.flywheel/scripts/{capability-control-plane}-notify.py"
 TMP="$(mktemp -d -t 5hnh.XXXXXX)"
 export TMP
 trap 'python3 -c "import os, shutil; shutil.rmtree(os.environ[\"TMP\"], ignore_errors=True)"' EXIT
@@ -54,7 +54,7 @@ else
   pass "raw_synthetic_token_absent_from_storage"
 fi
 
-jq -nc '{session:"skillos",effective_at:"2026-05-08T00:00:00Z",orchestrator_pane:4,repo_path:"/Users/josh/Developer/skillos"}' >"$topology"
+jq -nc '{session:"{capability-control-plane}",effective_at:"2026-05-08T00:00:00Z",orchestrator_pane:4,repo_path:"$HOME/Developer/{capability-control-plane}"}' >"$topology"
 "$NOTIFY" \
   --topology "$topology" \
   --thread-state "$threads" \

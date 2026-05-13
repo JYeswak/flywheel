@@ -45,7 +45,7 @@ assert_jq "$TMP/schema.json" \
 "$PROBE" --examples --json >"$TMP/examples.json"
 jq -c '.rows[]' "$TMP/examples.json" >"$TMP/bootstrap.jsonl"
 assert_jq "$TMP/examples.json" \
-  '([.rows[].session] | sort) == (["alpsinsurance","clutterfreespaces","flywheel","picoz","skillos","vrtx","zeststream-v2","zesttube"] | sort)' \
+  '([.rows[].session] | sort) == (["{session}","clutterfreespaces","flywheel","{session}","{capability-control-plane}","vrtx","zeststream-v2","zesttube"] | sort)' \
   "bootstrap fixture covers plan sessions"
 
 "$PROBE" --topology "$TMP/bootstrap.jsonl" --strict --json >"$TMP/bootstrap-probe.json"

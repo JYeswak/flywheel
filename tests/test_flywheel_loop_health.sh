@@ -2,7 +2,7 @@
 set -euo pipefail
 
 BIN="${FLYWHEEL_LOOP_BIN:-$HOME/.claude/skills/.flywheel/bin/flywheel-loop}"
-REPO="${FLYWHEEL_LOOP_HEALTH_REPO:-/Users/josh/Developer/flywheel}"
+REPO="${FLYWHEEL_LOOP_HEALTH_REPO:-<flywheel-repo>}"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/flywheel-loop-health.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 

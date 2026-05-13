@@ -2,7 +2,7 @@
   "schema_version": "flywheel-beads-db-incident/v1",
   "fixture": "incident-2026-05-04/flywheel-beads-db",
   "session": "flywheel",
-  "repo": "/Users/josh/Developer/flywheel",
+  "repo": "<flywheel-repo>",
   "observed_at": "2026-05-04T06:05:00Z",
   "signals": [
     {

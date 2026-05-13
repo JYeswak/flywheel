@@ -8,8 +8,8 @@ trap 'rm -rf "$TMPDIR"' EXIT
 "$BIN" --info --json \
   | jq -e '.command=="info" and .binary and .flywheel_home' >/dev/null
 
-"$BIN" --no-color --no-emoji --width 100 health --repo /Users/josh/Developer/flywheel --json \
-  | jq -e '.command=="health" and .repo=="/Users/josh/Developer/flywheel"' >/dev/null
+"$BIN" --no-color --no-emoji --width 100 health --repo <flywheel-repo> --json \
+  | jq -e '.command=="health" and .repo=="<flywheel-repo>"' >/dev/null
 
 "$BIN" --examples --json \
   | jq -e '.command=="examples" and (.examples|length)>=5 and all(.examples[]; has("name") and has("command"))' >/dev/null
@@ -29,10 +29,10 @@ rg -q 'complete -F _flywheel_loop_completion flywheel-loop' "$TMPDIR/bash"
 "$BIN" completion zsh >"$TMPDIR/zsh"
 rg -q '^compadd ' "$TMPDIR/zsh"
 
-"$BIN" --explain --idempotency-key hxzw-test repair --scope doctrine --repo /Users/josh/Developer/flywheel --dry-run --json \
+"$BIN" --explain --idempotency-key hxzw-test repair --scope doctrine --repo <flywheel-repo> --dry-run --json \
   | jq -e '.command=="repair" and .dry_run==true and .explain==true and .idempotency_key=="hxzw-test" and (.audit_log|test("flywheel-loop-repair.jsonl")) and (.planned_actions|length)>=1 and (.would_write|length)==0 and (.would_delete|length)==0 and (.would_call_external|length)==0 and (.blocked_by|length)==0 and (has("actions")|not) and (has("actual_actions")|not)' >/dev/null
 
-"$BIN" audit --repo /Users/josh/Developer/flywheel --json \
+"$BIN" audit --repo <flywheel-repo> --json \
   | jq -e '.command=="audit" and .writes_are_repo_local==true' >/dev/null
 
 "$BIN" why flywheel-hxzw --json \
@@ -47,7 +47,7 @@ rg -q 'Summary: [1-9][0-9]* pass, 0 fail' "$TMPDIR/check-cli-scoping"
 
 # Native colliding-verb regression guard: doctor reaches portable_doctor
 # (returns loop-driver-doctor schema, NOT scaffold-meta-doctor)
-"$BIN" doctor --repo /Users/josh/Developer/flywheel --scope loop-driver --json \
+"$BIN" doctor --repo <flywheel-repo> --scope loop-driver --json \
   | jq -e '.schema_version=="loop-driver-doctor/v1"' >/dev/null
 
 # Scaffold intercept fully bypassed: --info has native shape (.binary, .flywheel_home)

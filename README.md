@@ -25,9 +25,22 @@ architecture details live in [`ARCHITECTURE.md`](./ARCHITECTURE.md); the
 operating workflow lives in [`CONTRIBUTING.md`](./CONTRIBUTING.md). The slash
 surface is `/flywheel:README`.
 
+## Why flywheel
+
+The trust claim is measurable: in the latest public-extraction run, Flywheel
+classified 14,682 source files, copied 10,200 public-safe files, excluded
+4,040 denylisted private/manual-review paths, and reduced a 7,434-row manual
+review queue to signed evidence in the same release lane. The point is not raw
+volume. The point is that the system can turn a private working substrate into
+an inspectable public engine with receipts instead of memory. The public
+evidence map is
+[`docs/evidence/publication-evidence.md`](docs/evidence/publication-evidence.md).
+
 ## Public First Run
 
-Start with the public journey:
+Start here if you are evaluating Flywheel from GitHub. This path does not need
+NTM panes, Agent Mail archives, private `.flywheel` state, or the operator's local
+skill library.
 
 ```bash
 scripts/preflight.sh --json
@@ -40,13 +53,29 @@ state, runs doctor and tick, simulates dispatch, validates closeout, and shows
 the next action without claiming private NTM panes, Agent Mail archives, or
 cross-session memory.
 
-## Operator Quickstart
+For release or operator verification, use the exact command runbook in
+[`docs/runbooks/public-release-runbook.md`](docs/runbooks/public-release-runbook.md).
+For the final public cutover boundary, use
+[`docs/runbooks/release-cutover-authorization.md`](docs/runbooks/release-cutover-authorization.md);
+it names the live readiness codes, operator commands, stop conditions, and
+signoff rules.
+For context discipline, prompt-cache-friendly work, and tiered model routing,
+use [`docs/runbooks/context-and-model-routing.md`](docs/runbooks/context-and-model-routing.md).
+For agent-lane support claims across Claude, Codex, Gemini, and OpenClaw, use
+[`docs/runbooks/agent-lane-compatibility.md`](docs/runbooks/agent-lane-compatibility.md).
+For the business-owner and redaction boundary, read
+[`docs/stories/public-journey-and-redaction.md`](docs/stories/public-journey-and-redaction.md).
+
+## Full-Substrate Operator Quickstart
+
+This section is for maintainers running the full local substrate. It is not
+required for the public first run above.
 
 For the orchestrator:
 
 ```bash
-/Users/josh/.local/bin/ntm health flywheel
-~/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json
+$HOME/.local/bin/ntm health flywheel
+~/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo <flywheel-repo> --json
 br ready --json
 ```
 
@@ -54,7 +83,7 @@ For a worker:
 
 ```bash
 ~/.cargo/bin/br show <bead-id>
-~/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json
+~/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo <flywheel-repo> --json
 ```
 
 Then read the task packet, reserve owned paths, use Socraticode before edits,
@@ -90,7 +119,7 @@ Before editing:
 2. Survey existing substrate with Socraticode for any non-trivial change:
 
    ```text
-   mcp__socraticode__codebase_search projectPath="/Users/josh/Developer/flywheel" query="<domain>" limit=10
+   mcp__socraticode__codebase_search projectPath="<flywheel-repo>" query="<domain>" limit=10
    ```
 
 3. Read the matching skill when the task names a domain, especially
@@ -107,13 +136,13 @@ Before editing:
 4. Reserve files through Agent Mail before editing:
 
    ```text
-   project_key=/Users/josh/Developer/flywheel
+   project_key=<flywheel-repo>
    reserve only the files you will touch
    release on DONE or BLOCKED
    ```
 
 5. Keep Beads repo-local. From this repo, `br where` must resolve to
-   `/Users/josh/Developer/flywheel/.beads`.
+   `<flywheel-repo>/.beads`.
 
 6. Validate with the smallest relevant command before callback.
 
@@ -227,7 +256,7 @@ names a wrapper.
 | `~/.claude/skills/.flywheel/bin/flywheel-loop init --reconcile --repo PATH --json` | Preview or apply migration of older repo-local docs. |
 | `~/.claude/skills/.flywheel/bin/flywheel-loop tick --repo PATH --dry-run --json` | Emit one bounded repo-local loop decision. |
 | `~/.claude/skills/.flywheel/bin/flywheel-loop validate-receipt --repo PATH --file FILE --json` | Validate a v2 closeout receipt. |
-| `~/.claude/skills/.flywheel/bin/flywheel-loop fleet --root /Users/josh/Developer --json` | Scan flywheel-installed repos. |
+| `~/.claude/skills/.flywheel/bin/flywheel-loop fleet --root $HOME/Developer --json` | Scan flywheel-installed repos. |
 | `~/.claude/skills/.flywheel/bin/flywheel-loop fuckup log/list/triage/harvest` | Capture and promote recurring failure signals. |
 | `~/.flywheel/canonical-meta-rules/sync.sh --check-three-surface --target PATH --json` | Verify AGENTS.md, `.flywheel/AGENTS-CANONICAL.md`, and template doctrine convergence. |
 | `.flywheel/scripts/wire-or-explain-close-gate.sh --json` | L109 flow gate for tick close; `flywheel-loop doctor --repo PATH --json` exposes the `.wire_or_explain` field for unresolved count, overdue count, skill-candidate backlog, relay failures, and next action. |
@@ -302,12 +331,12 @@ Shipped detector evidence comes from the
 (`.flywheel/PLANS/codex-fleet-stuck-thinking-RCA-2026-05-03/04-BEADS-DAG.md`):
 
 - **Lane A** — stuck-THINKING audit → detector v2 core (`flywheel-mugq` closed)
-  + self-tests/SOFT violations (`flywheel-g6ln` closed) + tick consumer
-  (`flywheel-i8rd` closed).
+  and self-tests/SOFT violations (`{bead-id}` closed) plus tick consumer
+  (`{bead-id}` closed).
 - **Lane B** — post-pkill ERROR + ntm robot-tail provenance upstream
-  (`flywheel-rca-c8`, fed into `flywheel-6pns` recovery ledger, closed).
+  (`flywheel-rca-c8`, fed into `{bead-id}` recovery ledger, closed).
 - **Lane C** — stale-tail / DB+driver blockers cleared first
-  (`flywheel-u2m8` beads-DB health, `flywheel-emyk` loop-driver marker, closed).
+  (`{bead-id}` beads-DB health, `flywheel-emyk` loop-driver marker, closed).
 
 The usual flow is:
 
@@ -327,8 +356,8 @@ Repo-local loop work must close with a v2 receipt at
 
 ```bash
 ~/.claude/skills/.flywheel/bin/flywheel-loop validate-receipt \
-  --repo /Users/josh/Developer/flywheel \
-  --file /Users/josh/Developer/flywheel/.flywheel/last_closeout_receipt.json \
+  --repo <flywheel-repo> \
+  --file <flywheel-repo>/.flywheel/last_closeout_receipt.json \
   --json
 ```
 
@@ -339,10 +368,10 @@ Every non-trivial worker dispatch in this repo should include:
 | Field | Requirement |
 |---|---|
 | Bead | A repo-local Bead ID and priority. |
-| Socraticode | 3 to 5 required searches, using `/Users/josh/Developer/flywheel` as canonical path. |
+| Socraticode | 3 to 5 required searches, using `<flywheel-repo>` as canonical path. |
 | File reservation | Agent Mail reservation for every file that will be edited. |
 | Skills | Named skills to consult before work. |
-| Skill discovery | Workers append reusable pattern findings to `~/.local/state/flywheel/skill-discoveries.jsonl` and callback with `skill_discoveries=<N> sd_ids=<list|none>`. |
+| Skill discovery | Workers append reusable pattern findings to `~/.local/state/flywheel/skill-discoveries.jsonl` and callback with `skill_discoveries=N sd_ids=list-or-none`. |
 | Output | A durable report path, usually `/tmp/<task>_findings.md` for research or an edited repo file for implementation. |
 | Callback | `ntm send flywheel --pane="$CALLBACK_PANE" "Callback: task_id=<id> status=done ..."` |
 | Receipts | `socraticode_queries=N`, reservation release, Bead update or `no_bead_reason`, and fuckup rows for blockers. |
@@ -355,7 +384,7 @@ aliases and upstream issues for overlong third-party skill names.
 Doctor JSON exposes `.fleet_skill_discovery` for the skill-discovery reporting
 loop. It reads `~/.local/state/flywheel/skill-discoveries.jsonl`, reports
 `last_24h_discoveries`, malformed-row counts, top candidates by sightings, and
-pending skillos coordinator actions. It warns when a candidate reaches the
+pending {capability-control-plane} coordinator actions. It warns when a candidate reaches the
 3-sighting skill-builder threshold or when 3 consecutive worker callbacks over
 2 hours report `skill_discoveries=0 sd_ids=none` without an explicit legal
 no-discovery reason. `doctor-signal-bead-promotion.sh` promotes those warnings
@@ -369,25 +398,25 @@ Fleet skill discovery is a four-step operator chain:
   --candidate-skill-name <kebab-skill-name> \
   --discovery-kind pattern-emerged \
   --session flywheel \
-  --worker-pane 4 \
+  --worker-<pane-id> \
   --worker-kind codex \
   --task-context "<task summary>" \
   --evidence-json '{"source":"synthetic-or-redacted-evidence"}' \
   --json
 
 # coordinate
-.flywheel/scripts/skillos-discovery-coordinator.py \
+.flywheel/scripts/{capability-control-plane}-discovery-coordinator.py \
   --discoveries ~/.local/state/flywheel/skill-discoveries.jsonl \
   --dry-run \
   --json
 
 # inspect
 ~/.claude/skills/.flywheel/bin/flywheel-loop doctor \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --json | jq '.fleet_skill_discovery'
 
-# notify skillos without sending
-.flywheel/scripts/skillos-notify.py \
+# notify {capability-control-plane} without sending
+.flywheel/scripts/{capability-control-plane}-notify.py \
   --discovery-json <single-discovery-row.json> \
   --dry-run \
   --json
@@ -403,11 +432,11 @@ not permission to put token-shaped material into storage.
 
 No new L-rule is added for this close-out. The fleet-skill-reporting chain is an
 E2E wire-in of existing doctrine: L50 makes skill/Socraticode survey mandatory,
-L55 routes missing-skill classes to skillos, L56 defines the promotion ladder,
+L55 routes missing-skill classes to {capability-control-plane}, L56 defines the promotion ladder,
 L61 requires README/canonical-path wire-in, and L71 requires validation before
 redispatch or close. The already-landed skill-discovery callback rule supplies
-the callback field contract, so `flywheel-5hnh` closes the documentation and
-smoke-test gap rather than minting duplicate doctrine.
+the callback field contract, so `{bead-id}` closes the documentation and
+smoke-test coverage rather than minting duplicate doctrine.
 
 Dispatch-log v2 migration is dry-run first:
 `.flywheel/scripts/dispatch-log-backfill-v2.sh --repo "$PWD" --dry-run --json`
@@ -434,14 +463,14 @@ CALLBACK_PANE="$(jq -sr --arg s "flywheel" \
 Topology ledger conformance is checked by:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/topology-gap-probe.sh --json
-bash /Users/josh/Developer/flywheel/tests/session-topology-ledger.sh
+<flywheel-repo>/.flywheel/scripts/topology-gap-probe.sh --json
+bash <flywheel-repo>/tests/session-topology-ledger.sh
 ```
 
 The probe validates the append-only
 `~/.local/state/flywheel/session-topology.jsonl` ledger, latest-wins semantics,
 required row fields, and the original eight-session bootstrap fixture from the
-`flywheel-31p` all-in-one implementation.
+`{bead-id}` all-in-one implementation.
 
 ## Canonical CLI Scoping
 
@@ -467,7 +496,8 @@ prefer extending existing canonical surfaces (`flywheel-loop`, `flywheel`,
 AGENTS.md L82 makes this mandatory for flywheel CLIs. A CLI is not treated as
 real operator substrate until doctor/health/repair, validate/audit/why,
 self-documentation, JSON/schema output, canonical exit codes, and mutation
-dry-run/idempotency/audit discipline are present or explicitly covered by a gap
+dry-run/idempotency/audit discipline are present or explicitly covered by a
+tracked Bead
 bead.
 
 ## Load-Bearing Docs
@@ -481,12 +511,12 @@ effects, error modes, and See Also links.
 The authoring worker cannot be the final validator. Gate 2 review must happen
 from a separate pane using `flywheel-readme` or the cross-pane protocol in
 `.flywheel/plans/cross-pane-protocol-2026-05-01/04-XPANE-SYNTHESIS.md`.
-Live submit/reject and Joshua-reject signoff require
+Live submit/reject and {operator}-reject signoff require
 `FLYWHEEL_README_ALLOW_TRANSPORT=1`; they send through `ntm`, queue a durable
 Agent Mail outbox row, and append `.flywheel/dispatch-log.jsonl`, while dry-run
 remains no-op.
 Repeated README failures follow reject-and-revert: reject the shape, rewrite,
-and file the missing validation primitive when the checklist itself is unclear.
+and file the absent validation primitive when the checklist itself is unclear.
 
 ## Templates And Install
 
@@ -507,8 +537,8 @@ Portable install templates live in `templates/flywheel-install/`.
 After template edits, run:
 
 ```bash
-bash /Users/josh/Developer/flywheel/templates/flywheel-install/tests/test_render.sh
-shasum -a 256 /Users/josh/Developer/flywheel/templates/flywheel-install/*.tmpl
+bash <flywheel-repo>/templates/flywheel-install/tests/test_render.sh
+shasum -a 256 <flywheel-repo>/templates/flywheel-install/*.tmpl
 ```
 
 Update `templates/flywheel-install/README.md` hashes in the same patch when
@@ -524,7 +554,7 @@ Common current scripts:
 | Script | Purpose |
 |---|---|
 | `flywheel-onboard.sh` | Fleet onboarding doctor/dry-run surface; exposes `hygiene_targets_present` and `hygiene_targets_valid` for repo hygiene readiness. |
-| `topology-gap-probe.sh` | Session topology ledger schema/latest-wins/bootstrap conformance probe for the `flywheel-31p` registry. |
+| `topology-gap-probe.sh` | Session topology ledger schema/latest-wins/bootstrap conformance probe for the `{bead-id}` registry. |
 | `pane-work-signal.sh` | Pane work-signal probe. |
 | `frozen-pane-detector.sh` | Frozen-pane detection input. |
 | `frozen-pane-detector-fleet.sh` | Disabled-by-default launchd wrapper for fleet-wide frozen-pane observation with STOP/FATAL and recovery-budget gates. |
@@ -541,7 +571,7 @@ Common current scripts:
 | `mission-lock-age-probe.sh` | Mission-lock age probe. |
 | `agent-mail-fd-doctor.sh` | Agent Mail file-descriptor pressure doctor. |
 | `agent-mail-restart.sh` | Dry-run-first Agent Mail LaunchAgent restart helper with bootout/bootstrap/kickstart recovery. |
-| `mobile-eats-receipt-bridge.sh` | Product receipt to canonical tick-shaped JSON bridge. |
+| `{proof-product}-receipt-bridge.sh` | Product receipt to canonical tick-shaped JSON bridge. |
 | `validate-callback.py` | Builds B01 validation receipts from worker callback claims before integration; enforces L61 ecosystem-touch callback fields and Phase 4 `evidence_redacted` gates for evidence-class paths. |
 | `validation-fix-bead.py` | Plans or applies repo-local fix beads for failed validation receipts. |
 | `closed-bead-artifact-scan.py` | Detects closed beads whose shipped artifact evidence fails mechanical probes and can reopen them explicitly. |
@@ -571,15 +601,15 @@ available before wiring a script into a loop, doctor, or slash command.
 Architecture-health rollups are generated with:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/architecture-health-rollup.sh \
+<flywheel-repo>/.flywheel/scripts/architecture-health-rollup.sh \
   --period all \
   --write \
   --json
 
 jq '.fleet_metrics,.candidate_l_rules,.candidate_probe_additions' \
-  /Users/josh/.flywheel/fleet-perf/7d.json
+  $HOME/.flywheel/fleet-perf/7d.json
 
-bash /Users/josh/Developer/flywheel/tests/architecture-health-rollup.sh
+bash <flywheel-repo>/tests/architecture-health-rollup.sh
 ```
 
 Rollups measure system architecture health, not individual agent performance.
@@ -599,43 +629,43 @@ Useful checks from this repo:
 ```bash
 ~/.claude/skills/.flywheel/bin/flywheel-loop doctor \
   --strict \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --json
 
-bash /Users/josh/Developer/flywheel/tests/phase2-audit.sh
+bash <flywheel-repo>/tests/phase2-audit.sh
 
-bash /Users/josh/Developer/flywheel/tests/flywheel-loop-core.sh
+bash <flywheel-repo>/tests/flywheel-loop-core.sh
 
-bash /Users/josh/Developer/flywheel/tests/test_install_contract_step10.sh
+bash <flywheel-repo>/tests/test_install_contract_step10.sh
 
-bash /Users/josh/Developer/flywheel/templates/flywheel-install/tests/test_render.sh
+bash <flywheel-repo>/templates/flywheel-install/tests/test_render.sh
 
-bash /Users/josh/Developer/flywheel/tests/validate-callback.sh
+bash <flywheel-repo>/tests/validate-callback.sh
 
-bash /Users/josh/Developer/flywheel/tests/validation-fix-bead.sh
+bash <flywheel-repo>/tests/validation-fix-bead.sh
 
-bash /Users/josh/Developer/flywheel/tests/closed-bead-artifact-scan.sh
+bash <flywheel-repo>/tests/closed-bead-artifact-scan.sh
 
-bash /Users/josh/Developer/flywheel/tests/verify-callback-delivery.sh
+bash <flywheel-repo>/tests/verify-callback-delivery.sh
 
-bash /Users/josh/Developer/flywheel/tests/validate-callback-before-close.sh
+bash <flywheel-repo>/tests/validate-callback-before-close.sh
 
-bash /Users/josh/Developer/flywheel/tests/fleet-conductor-mvp-gate.sh
+bash <flywheel-repo>/tests/fleet-conductor-mvp-gate.sh
 
-bash /Users/josh/Developer/flywheel/tests/sync-four-lens-validator.sh
+bash <flywheel-repo>/tests/sync-four-lens-validator.sh
 
-bash /Users/josh/Developer/flywheel/tests/value-gap-probe.sh
+bash <flywheel-repo>/tests/value-gap-probe.sh
 
-bash /Users/josh/Developer/flywheel/tests/validation-e2e.sh
+bash <flywheel-repo>/tests/validation-e2e.sh
 
-bash /Users/josh/Developer/flywheel/tests/three-q-surface-audit.sh
+bash <flywheel-repo>/tests/three-q-surface-audit.sh
 ```
 
 Callback validation uses:
 
 ```bash
 ~/.claude/skills/.flywheel/bin/flywheel-loop validate-callback \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --dispatch-id <task-id> \
   --callback-ref <callback-json-or-raw-line> \
   --json
@@ -662,8 +692,8 @@ doctor JSON should route on `failure_class` without ANSI/prose parsing.
 Failed callback validation can be routed to a fix bead with:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/validation-fix-bead.py \
-  --repo /Users/josh/Developer/flywheel \
+<flywheel-repo>/.flywheel/scripts/validation-fix-bead.py \
+  --repo <flywheel-repo> \
   --receipt <failed-validation-receipt-json> \
   --parent <source-bead-id> \
   --dry-run \
@@ -679,8 +709,8 @@ the repo-local `.beads` directory before touching bead state.
 Closed beads with shipped artifact claims can be scanned with:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/closed-bead-artifact-scan.py \
-  --repo /Users/josh/Developer/flywheel \
+<flywheel-repo>/.flywheel/scripts/closed-bead-artifact-scan.py \
+  --repo <flywheel-repo> \
   --dry-run \
   --json
 ```
@@ -696,9 +726,9 @@ audit row, and uses repo-local `br reopen` plus a comment.
 Worker callback delivery verification uses:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/verify-callback-delivery.sh \
+<flywheel-repo>/.flywheel/scripts/verify-callback-delivery.sh \
   --session flywheel \
-  --pane 1 \
+  --<pane-id> \
   --task-id <task-id> \
   --message "DONE <task-id> evidence=<path> callback_delivery_verified=pending" \
   --json
@@ -712,7 +742,7 @@ delivery failures.
 Auto-L112 close gating uses callback envelope fields:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/auto-l112-gate.sh \
+<flywheel-repo>/.flywheel/scripts/auto-l112-gate.sh \
   --task-id <task-id> \
   --callback-envelope-file <callback-envelope-file> \
   --json
@@ -724,7 +754,7 @@ assertion mismatch with a fix bead filed, `2` on malformed envelope, and `3` on
 timeout or sandbox refusal. Doctor output is available with:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/auto-l112-gate.sh --doctor --json
+<flywheel-repo>/.flywheel/scripts/auto-l112-gate.sh --doctor --json
 ```
 
 L126 replaces worker self-grades with beads-compliance evidence packs for new
@@ -737,15 +767,15 @@ historical receipts for already-issued dispatches.
 Agent-context parity validation uses:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/agent-context-parity-probe.py \
-  --repo /Users/josh/Developer/flywheel \
+<flywheel-repo>/.flywheel/scripts/agent-context-parity-probe.py \
+  --repo <flywheel-repo> \
   --runtime codex \
   --session flywheel \
   --pane <worker-pane> \
   --command <tool> \
   --json
 
-bash /Users/josh/Developer/flywheel/tests/agent-context-parity-probe.sh
+bash <flywheel-repo>/tests/agent-context-parity-probe.sh
 ```
 
 For Codex, the probe sends through `ntm send` and validates the callback; for
@@ -755,10 +785,10 @@ success plus agent failure is `context_drift`, not a pass.
 The validate-and-redispatch discipline is the repo-wide rule for treating
 callbacks, close reasons, and changed surfaces as claims until mechanically
 validated. Use skill
-`/Users/josh/.claude/skills/orchestrator-validation-discipline/SKILL.md` when
+`<skills-root>/orchestrator-validation-discipline/SKILL.md` when
 you are validating work before summary or integration. Canonical doctrine lives
 in AGENTS.md L71, memory lives at
-`~/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_validate_redispatch_foundational_discipline.md`,
+`~/.claude/projects/<claude-project-slug>/memory/feedback_validate_redispatch_foundational_discipline.md`,
 and the core command surfaces are `validate-callback.py`,
 `validation-fix-bead.py`, `closed-bead-artifact-scan.py`, and
 `verify-callback-delivery.sh`.
@@ -766,7 +796,7 @@ and the core command surfaces are `validate-callback.py`,
 The final validate-and-redispatch smoke harness is:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/validation-e2e-smoke.sh \
+<flywheel-repo>/.flywheel/scripts/validation-e2e-smoke.sh \
   --receipt-dir /tmp/flywheel-validation-e2e \
   --json
 ```
@@ -780,12 +810,12 @@ Validation receipts route into the learn pipeline with:
 
 ```bash
 ~/.claude/skills/.flywheel/bin/flywheel-loop validation-learn \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --review \
   --json
 
 ~/.claude/skills/.flywheel/bin/flywheel-loop validation-learn \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --receipt <validation-receipt-json> \
   --apply \
   --json
@@ -799,8 +829,8 @@ of the fuckup log, and `skill_extend` routes become skill candidates.
 STATE.md opportunity mining uses:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/state-md-miner.sh --json
-/Users/josh/Developer/flywheel/.flywheel/scripts/state-md-miner.sh --apply --json
+<flywheel-repo>/.flywheel/scripts/state-md-miner.sh --json
+<flywheel-repo>/.flywheel/scripts/state-md-miner.sh --apply --json
 ```
 
 It scans fleet `.flywheel/STATE.md` and root `STATE.md` files for unresolved,
@@ -809,42 +839,42 @@ decision: new bead, existing bead reference, or explicit `no_bead_reason`.
 Doctor and daily-report surfaces expose `state_md_unmined_count`,
 `state_md_last_run_age_hours`, and class counts.
 
-Orchestrator Joshua-input capture parity uses:
+Orchestrator {operator}-input capture parity uses:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/orch-capture-parity-probe.py \
+<flywheel-repo>/.flywheel/scripts/orch-capture-parity-probe.py \
   --json
 
 FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
   ~/.claude/skills/.flywheel/bin/flywheel-loop doctor \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --json \
   | jq '.orchs_with_capture_gap_count, .orch_capture_parity.rows'
 
-bash /Users/josh/Developer/flywheel/tests/orch-capture-parity-probe.sh
+bash <flywheel-repo>/tests/orch-capture-parity-probe.sh
 ```
 
 The probe compares canonical session topology with
 `~/.local/state/flywheel/josh-requests.jsonl`. A Claude hook row, a canonical
 Codex capture row, or Codex agent-context callback evidence can satisfy
-capture; raw pane scrollback alone is always a gap. B13 only defines the
-rule/signal contract. `flywheel-xap2` owns the concrete Codex capture mechanism
+capture; raw pane scrollback alone is always invalid evidence. B13 only defines the
+rule/signal contract. `{bead-id}` owns the concrete Codex capture mechanism
 track.
 
 Three-Q surface registry auditing uses:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/three-q-surface-audit.py \
-  --repo /Users/josh/Developer/flywheel \
+<flywheel-repo>/.flywheel/scripts/three-q-surface-audit.py \
+  --repo <flywheel-repo> \
   --json
 
-/Users/josh/Developer/flywheel/.flywheel/scripts/three-q-surface-audit.py \
-  --repo /Users/josh/Developer/flywheel \
+<flywheel-repo>/.flywheel/scripts/three-q-surface-audit.py \
+  --repo <flywheel-repo> \
   --strict \
   --write-receipt \
   --json
 
-bash /Users/josh/Developer/flywheel/tests/three-q-surface-audit.sh
+bash <flywheel-repo>/tests/three-q-surface-audit.sh
 ```
 
 The registry lives at
@@ -857,17 +887,17 @@ Codex-required surface. Doctor JSON exposes `three_q_unaudited_count`,
 Storage discipline is a doctor-backed gate for growth-heavy work:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/storage-probe.sh --json
+<flywheel-repo>/.flywheel/scripts/storage-probe.sh --json
 
 FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
   ~/.claude/skills/.flywheel/bin/flywheel-loop doctor \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --json \
   | jq '.storage'
 
-bash /Users/josh/Developer/flywheel/tests/storage-probe.sh
+bash <flywheel-repo>/tests/storage-probe.sh
 
-bash /Users/josh/Developer/flywheel/tests/storage-override.sh
+bash <flywheel-repo>/tests/storage-override.sh
 ```
 
 Doctor JSON exposes `.storage` with disk, Developer, local-state, stale backup,
@@ -882,17 +912,17 @@ Substrate-discipline auto-ops extend that storage gate for Beads recovery:
 ```bash
 ~/.claude/skills/.flywheel/bin/flywheel doctor
 
-/Users/josh/Developer/flywheel/.flywheel/scripts/storage-prune.sh \
-  --repo /Users/josh/Developer/flywheel \
+<flywheel-repo>/.flywheel/scripts/storage-prune.sh \
+  --repo <flywheel-repo> \
   --dry-run \
   --json
 
 ~/.claude/skills/.flywheel/scripts/beads-auto-rebuild-from-jsonl.sh \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --dry-run \
   --json
 
-bash /Users/josh/Developer/flywheel/tests/substrate-discipline-primitives.sh
+bash <flywheel-repo>/tests/substrate-discipline-primitives.sh
 ```
 
 `flywheel doctor` exposes `beads.jsonl.write_discipline`,
@@ -904,7 +934,7 @@ is a substrate breaker and `<5%` is emergency serialization/cleanup territory;
 broader `/private/tmp`, cache, ballast, and growth-admission work belongs to the
 storage-health layer, not this repo-local prune primitive.
 
-Joshua-disposed storage overrides use
+{operator}-disposed storage overrides use
 `.flywheel/validation-schema/v1/storage-override.schema.json` and receipts under
 `~/.local/state/flywheel/storage-overrides/`. `flywheel-loop doctor` honors
 `--storage-min-free-pct`, `FLYWHEEL_STORAGE_MIN_FREE_PCT`, and active
@@ -915,38 +945,38 @@ threshold, doctor appends a `STORAGE-CLEARED` event and reverts to the base gate
 Jeff corpus ingestion is maintained as an accretive storage surface:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/regenerate-dicklesworthstone-sources.sh \
+<flywheel-repo>/.flywheel/scripts/regenerate-dicklesworthstone-sources.sh \
   --apply \
   --json
 
-/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-intel-scheduled-runner.sh \
+<flywheel-repo>/.flywheel/scripts/jeff-intel-scheduled-runner.sh \
   --mode doctor \
   --json
 
-/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-corpus-freeze-baseline.sh \
+<flywheel-repo>/.flywheel/scripts/jeff-corpus-freeze-baseline.sh \
   --json
 
-/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-corpus-diff-watcher.sh \
+<flywheel-repo>/.flywheel/scripts/jeff-corpus-diff-watcher.sh \
   --json
 
-/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-corpus-delta-reindex.sh \
+<flywheel-repo>/.flywheel/scripts/jeff-corpus-delta-reindex.sh \
   --dry-run \
   --json
 
-/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-corpus-compact.sh \
+<flywheel-repo>/.flywheel/scripts/jeff-corpus-compact.sh \
   --dry-run \
   --json
 
 FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
   ~/.claude/skills/.flywheel/bin/flywheel-loop doctor \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --json \
   | jq '.jeff_corpus_storage_health, .jeff_corpus.jeff_corpus_local_storage_mb, .jeff_corpus_v1_total_mb'
 
-bash /Users/josh/Developer/flywheel/tests/jeff-corpus-accretive.sh
-bash /Users/josh/Developer/flywheel/tests/regenerate-dicklesworthstone-sources.sh
-bash /Users/josh/Developer/flywheel/tests/jeff-intel-schedule.sh
-bash /Users/josh/Developer/flywheel/tests/jeff-intel-network.sh
+bash <flywheel-repo>/tests/jeff-corpus-accretive.sh
+bash <flywheel-repo>/tests/regenerate-dicklesworthstone-sources.sh
+bash <flywheel-repo>/tests/jeff-intel-schedule.sh
+bash <flywheel-repo>/tests/jeff-intel-network.sh
 ```
 
 The baseline manifest lives at `.flywheel/jeff-corpus/v1/manifest.json`.
@@ -976,20 +1006,20 @@ append audit rows under `~/.local/state/jeff-philosophy/audit.jsonl`.
 Jeff philosophy mining is the learning layer on top of that corpus:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-philosophy-mine.sh \
+<flywheel-repo>/.flywheel/scripts/jeff-philosophy-mine.sh \
   --deep-mine \
   --json
 
-/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-philosophy-mine.sh \
+<flywheel-repo>/.flywheel/scripts/jeff-philosophy-mine.sh \
   --daily-snapshot \
   --skip-fetch \
   --json
 
-/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-philosophy-mine.sh \
+<flywheel-repo>/.flywheel/scripts/jeff-philosophy-mine.sh \
   doctor \
   --json
 
-bash /Users/josh/Developer/flywheel/tests/jeff-philosophy-mine.sh
+bash <flywheel-repo>/tests/jeff-philosophy-mine.sh
 ```
 
 The deep mine writes `~/.local/state/jeff-philosophy/patterns.jsonl` and
@@ -1008,17 +1038,17 @@ doctor JSON, validators, and Beads routing.
 Daily reporting is a doctor-backed learning surface:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/daily-report.sh \
-  --repo /Users/josh/Developer/flywheel \
+<flywheel-repo>/.flywheel/scripts/daily-report.sh \
+  --repo <flywheel-repo> \
   --json
 
 FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
   ~/.claude/skills/.flywheel/bin/flywheel-loop doctor \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --json \
   | jq '.daily_report_age_hours, .daily_report.latest_report'
 
-bash /Users/josh/Developer/flywheel/tests/daily-report.sh
+bash <flywheel-repo>/tests/daily-report.sh
 ```
 
 The report lands at `.flywheel/reports/daily-YYYY-MM-DD.md`. Doctor fails when
@@ -1029,20 +1059,20 @@ Headless browser leak detection is a doctor-backed gate for Chrome singleton
 lock incidents:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/headless-browser-probe.sh \
+<flywheel-repo>/.flywheel/scripts/headless-browser-probe.sh \
   --json
 
-/Users/josh/Developer/flywheel/.flywheel/scripts/headless-browser-reap.sh \
+<flywheel-repo>/.flywheel/scripts/headless-browser-reap.sh \
   --dry-run \
   --json
 
 FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
   ~/.claude/skills/.flywheel/bin/flywheel-loop doctor \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --json \
   | jq '.agent_browser_leak'
 
-bash /Users/josh/Developer/flywheel/tests/headless-browser-probe.sh
+bash <flywheel-repo>/tests/headless-browser-probe.sh
 ```
 
 Doctor JSON exposes `.agent_browser_leak` and
@@ -1057,26 +1087,26 @@ Agent Mail identity resolution is canonical and durable:
 ```bash
 ~/.claude/skills/.flywheel/bin/flywheel-loop identity \
   --session flywheel \
-  --pane 1 \
+  --<pane-id> \
   --json
 
 ~/.claude/skills/.flywheel/bin/flywheel-loop identity \
   --migrate-existing \
   --json
 
-/Users/josh/Developer/flywheel/.flywheel/scripts/agent-mail-pre-allocate-worker-identities.sh \
+<flywheel-repo>/.flywheel/scripts/agent-mail-pre-allocate-worker-identities.sh \
   --session flywheel \
   --apply \
   --json
 
 FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
   ~/.claude/skills/.flywheel/bin/flywheel-loop doctor \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --json \
   | jq '.identity_registry'
 
-bash /Users/josh/Developer/flywheel/tests/agent-mail-identity-registry.sh
-bash /Users/josh/Developer/flywheel/tests/locked-worker-identities.sh
+bash <flywheel-repo>/tests/agent-mail-identity-registry.sh
+bash <flywheel-repo>/tests/locked-worker-identities.sh
 ```
 
 Registry rows live in
@@ -1110,29 +1140,29 @@ from identity work that still needs registration.
 Identity history for churn diagnosis:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/identity-history.sh \
+<flywheel-repo>/.flywheel/scripts/identity-history.sh \
   --session flywheel \
-  --pane 2 \
+  --<pane-id> \
   --json
 
-/Users/josh/Developer/flywheel/.flywheel/scripts/identity-history.sh doctor --json
+<flywheel-repo>/.flywheel/scripts/identity-history.sh doctor --json
 ```
 
 Registration broadcast uses:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/agentmail-registration-broadcast.sh \
+<flywheel-repo>/.flywheel/scripts/agentmail-registration-broadcast.sh \
   --doctor \
   --json
 
-bash /Users/josh/Developer/flywheel/tests/agentmail-registration-broadcast.sh
+bash <flywheel-repo>/tests/agentmail-registration-broadcast.sh
 ```
 
 The broadcaster sends only coordination packets to live orchestrator panes,
 dedupes each session:pane for 60 minutes, and honors active deferral receipts
 for dead sessions.
 
-Intra-fleet orchestrator handshakes are not Joshua approval gates. Agent Mail
+Intra-fleet orchestrator handshakes are not {operator} approval gates. Agent Mail
 contact approvals, peer-orch trust, and fleet-mail trust grants should use
 auto-trust or a file-based sidechannel when both sides are flywheel-owned. The
 advisory Stop hook lives at
@@ -1140,43 +1170,43 @@ advisory Stop hook lives at
 the repo gate and regression here:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/orch-handshakes-never-gate-on-joshua-gate.sh \
-  --check-text "Agent Mail contact approval fallback Option C: ask Joshua" \
+<flywheel-repo>/.flywheel/scripts/orch-handshakes-never-gate-on-joshua-gate.sh \
+  --check-text "Agent Mail contact approval fallback Option C: ask {operator}" \
   --json
 
-bash /Users/josh/Developer/flywheel/.flywheel/tests/test-orch-handshakes-never-gate-on-joshua.sh
+bash <flywheel-repo>/.flywheel/tests/test-orch-handshakes-never-gate-on-joshua.sh
 ```
 
 Fleet comms health uses:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/fleet-comms-health-probe.sh \
+<flywheel-repo>/.flywheel/scripts/fleet-comms-health-probe.sh \
   --fleet \
   --json
 
-bash /Users/josh/Developer/flywheel/tests/fleet-comms-health-probe.sh
+bash <flywheel-repo>/tests/fleet-comms-health-probe.sh
 ```
 
 `--apply` sends `COMMS_HEALTH_PING` packets to silent sessions and logs
-`false_positive_classifier` mismatches. It only notifies Joshua for token
+`false_positive_classifier` mismatches. It only notifies {operator} for token
 expiry beyond the recovery window.
 
 Shared-surface commits use an append-only pane reservation ledger:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/shared-surface-reservation-check.sh \
+<flywheel-repo>/.flywheel/scripts/shared-surface-reservation-check.sh \
   --reserve AGENTS.md --pane=3 --task-id=<task> --json
-/Users/josh/Developer/flywheel/.flywheel/scripts/shared-surface-reservation-check.sh \
+<flywheel-repo>/.flywheel/scripts/shared-surface-reservation-check.sh \
   --check AGENTS.md --pane=3 --json
-/Users/josh/Developer/flywheel/.flywheel/scripts/shared-surface-reservation-check.sh \
+<flywheel-repo>/.flywheel/scripts/shared-surface-reservation-check.sh \
   --release AGENTS.md --pane=3 --task-id=<task> --json
 
 ~/.claude/skills/.flywheel/bin/flywheel-loop doctor \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --json \
   | jq '.coordination_collision_count_24h, .shared_surface_reservation'
 
-bash /Users/josh/Developer/flywheel/tests/shared-surface-reservation-check.sh
+bash <flywheel-repo>/tests/shared-surface-reservation-check.sh
 ```
 
 The ledger lives at `~/.local/state/flywheel/file-reservations.jsonl`.
@@ -1186,18 +1216,18 @@ staging until the holder releases or coordinates.
 Jeff issue drafts must pass the 7-axis rubric before posting:
 
 ```bash
-/Users/josh/Developer/flywheel/.flywheel/scripts/jeff-issue-rubric.py \
+<flywheel-repo>/.flywheel/scripts/jeff-issue-rubric.py \
   --draft /tmp/jeff-issue-runtime-handoff-singleton.md \
   --write-receipt \
   --json
 
 FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
   ~/.claude/skills/.flywheel/bin/flywheel-loop doctor \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --json \
   | jq '.jeff_drafts_unrubricd_count, .jeff_issue_rubric.rows'
 
-bash /Users/josh/Developer/flywheel/tests/jeff-issue-rubric.sh
+bash <flywheel-repo>/tests/jeff-issue-rubric.sh
 ```
 
 The rubric requires high marks on bug reality, duplicate search, source trace,
@@ -1227,7 +1257,7 @@ logic:
 ```bash
 .flywheel/scripts/idle-state-probe.sh --json
 ~/.claude/skills/.flywheel/bin/flywheel-loop doctor \
-  --repo /Users/josh/Developer/flywheel \
+  --repo <flywheel-repo> \
   --json \
   | jq '.idle_state_summary, .idle_state_class'
 
@@ -1246,13 +1276,13 @@ Upstream `ntm` resolved this on 2026-05-04 via commit `4c176e92` (issue
 [#118](https://github.com/Dicklesworthstone/ntm/issues/118),
 `fix(robot/activity): debounce CategoryError to live-window when an idle
 prompt is present`). The fix is present in the local `ntm` clone at
-`/Users/josh/Developer/ntm` (HEAD includes `4c176e92`), but the installed
-binary at `/Users/josh/.local/bin/ntm` reports `version=dev commit=none
+`$HOME/Developer/ntm` (HEAD includes `4c176e92`), but the installed
+binary at `$HOME/.local/bin/ntm` reports `version=dev commit=none
 built=unknown` — binary metadata cannot prove the fix is compiled in.
 Until a properly version-stamped rebuild (`make build` from the local
 clone) is installed and the fixture below is re-run against it, the
 dry-run-first recovery layer remains as fallback (see L87 in
-`.flywheel/rules/` and `flywheel-vkw88` audit pack for the sunset
+`.flywheel/rules/` and `{bead-id}` audit pack for the sunset
 checklist):
 
 ```bash
@@ -1268,10 +1298,10 @@ agent binary/config without changing the fleet pin:
 ```bash
 .flywheel/scripts/ntm-pane-sidecar-respawn.sh \
   --session flywheel \
-  --pane 2 \
+  --<pane-id> \
   --command-path /opt/homebrew/bin/codex \
   --command-arg --dangerously-bypass-approvals-and-sandbox \
-  --cwd /Users/josh/Developer/flywheel \
+  --cwd <flywheel-repo> \
   --env CODEX_HOME=/tmp/codex-sidecar-home \
   --config-override 'model="gpt-5.5"' \
   --dry-run \
@@ -1279,7 +1309,7 @@ agent binary/config without changing the fleet pin:
 
 .flywheel/scripts/ntm-pane-sidecar-respawn.sh \
   --session flywheel \
-  --pane 2 \
+  --<pane-id> \
   --rollback \
   --apply \
   --json
@@ -1303,14 +1333,14 @@ for persistence. Dispatch rows record `pane_state_source`; valid values are
 
 Codex dispatch capacity has an additional defense-in-depth truth source:
 Pane Work Signal. The rollout proof lives in `tests/test_pws_integration_proof.sh`
-and writes `/tmp/flywheel-5ktd-final-receipt.md`. PWS owns per-pane Codex truth
-after a session is known; `flywheel-3bk` owns dynamic session coverage and
+and writes `/tmp/{bead-id}-final-receipt.md`. PWS owns per-pane Codex truth
+after a session is known; `{bead-id}` owns dynamic session coverage and
 session-level freshness.
 
 For README-only edits, a practical smoke check is:
 
 ```bash
-rg -n "flywheel-loop|flywheel-autoloop|/flywheel:|ntm|br " /Users/josh/Developer/flywheel/README.md
+rg -n "flywheel-loop|flywheel-autoloop|/flywheel:|ntm|br " <flywheel-repo>/README.md
 ```
 
 ## Operating Boundaries
@@ -1324,7 +1354,7 @@ rg -n "flywheel-loop|flywheel-autoloop|/flywheel:|ntm|br " /Users/josh/Developer
 - Keep Beads repo-local; do not reintroduce global Beads fallback or silent
   `.beads` walk-up behavior.
 - Do not use cached loop markers as proof of liveness; verify the driver.
-- Do not rotate secrets or tokens unless Joshua explicitly asks.
+- Do not rotate secrets or tokens unless {operator} explicitly asks.
 - Do not edit JSM-managed skills directly; use the owning sync/push workflow.
 - Skill-enhance dispatches must run the JSM discipline gate before touching
   `~/.claude/skills`: managed skills get `jsm-push-ready` patch artifacts,

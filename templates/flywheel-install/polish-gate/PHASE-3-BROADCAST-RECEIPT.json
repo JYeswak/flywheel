@@ -1,6 +1,6 @@
 {
   "schema_version": "phase3-fleet-broadcast-receipt.v1",
-  "broadcast_ts": "2026-05-06T01:53:15Z",
+  "broadcast_ts": "<timestamp>",
   "broadcast_id": "phase3-fleet-broadcast-2026-05-06",
   "dispatcher_pane": "flywheel:3",
   "dispatcher_orch": "codex",
@@ -16,7 +16,7 @@
     "phase2_quorum_source": "/tmp/phase3-fleet-broadcast-quorum-2026-05-06.json",
     "phase2_green_light": "templates/flywheel-install/polish-gate/v1/phase-2-audit-verdict.json"
   },
-  "coordination_log": "/Users/josh/.local/state/flywheel/cross-orch-coordination.jsonl",
+  "coordination_log": "$HOME/.local/state/flywheel/cross-orch-coordination.jsonl",
   "coordination_rows": {
     "capsule_rows": [
       117,
@@ -41,22 +41,22 @@
   },
   "peer_repos": [
     {
-      "name": "alps",
-      "capsule_path": "/tmp/phase3-fleet-broadcast-capsules-2026-05-05/alps.json",
+      "name": "strict-client",
+      "capsule_path": "/tmp/phase3-fleet-broadcast-capsules-2026-05-05/strict-client.json",
       "dispatch_status": "sent",
       "ack_state": "ack_pending",
-      "owner": "alpsinsurance:1",
-      "to_session": "alpsinsurance",
+      "owner": "{session}:1",
+      "to_session": "{session}",
       "to_pane": 1,
       "delivery_transport": "ntm_send"
     },
     {
-      "name": "skillos",
-      "capsule_path": "/tmp/phase3-fleet-broadcast-capsules-2026-05-05/skillos.json",
+      "name": "capability-control-plane",
+      "capsule_path": "/tmp/phase3-fleet-broadcast-capsules-2026-05-05/capability-control-plane.json",
       "dispatch_status": "sent",
       "ack_state": "ack_pending",
-      "owner": "skillos:1",
-      "to_session": "skillos",
+      "owner": "capability-control-plane:1",
+      "to_session": "capability-control-plane",
       "to_pane": 1,
       "delivery_transport": "ntm_send"
     },
@@ -71,12 +71,12 @@
       "delivery_transport": "ntm_send"
     },
     {
-      "name": "mobile-eats",
-      "capsule_path": "/tmp/phase3-fleet-broadcast-capsules-2026-05-05/mobile-eats.json",
+      "name": "proof-product",
+      "capsule_path": "/tmp/phase3-fleet-broadcast-capsules-2026-05-05/proof-product.json",
       "dispatch_status": "sent",
       "ack_state": "ack_pending",
-      "owner": "mobile-eats:1",
-      "to_session": "mobile-eats",
+      "owner": "proof-product:1",
+      "to_session": "proof-product",
       "to_pane": 1,
       "delivery_transport": "ntm_send"
     },

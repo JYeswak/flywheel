@@ -7,7 +7,7 @@ set -euo pipefail
 # L9 must flag the side-effects.
 mode="${1:-dry-run}"
 idem_key="${2:-}"
-target="/Users/josh/Developer/flywheel/.flywheel/state/foo"
+target="<flywheel-repo>/.flywheel/state/foo"
 
 if [[ "$mode" == "apply" ]]; then
   # SIDE EFFECT 1 — mkdir to user-state path

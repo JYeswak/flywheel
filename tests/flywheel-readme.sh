@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BIN="/Users/josh/.claude/skills/.flywheel/bin/flywheel-readme"
+BIN="<flywheel-state>/bin/flywheel-readme"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -154,4 +154,4 @@ env "${transport_env[@]}" "$BIN" signoff "$review_readme" --signed-by joshua --r
 "$BIN" why "$review_readme" --json | jq -e '.event_count >= 0' >/dev/null
 "$BIN" trace "$review_readme" --json | jq -e '.status == "ok"' >/dev/null
 
-bash /Users/josh/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh "$BIN" >/dev/null
+bash <skills-root>/canonical-cli-scoping/scripts/check-cli-scoping.sh "$BIN" >/dev/null

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-BIN="/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop"
+BIN="<flywheel-state>/bin/flywheel-loop"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/fleet-coherence-step4i-actions.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -43,7 +43,7 @@ cat >"$TMP/events.jsonl" <<'JSONL'
 {"schema_version":"fleet-coherence-event/v2","event_id":"fc-no-bead","ts":"2026-05-08T11:51:00Z","class":"observation_only","severity":"warn","state":"open","session":"flywheel","pane":3,"dedupe_key":"observation_only:flywheel:pane3","l62":{"repair_callback_required":false,"sd_count":0,"sd_ids":[]},"l63":{"recovery_action_requires_drill":false,"recovery_drill_ids":[]},"actions":{"receipt_required":true,"would_bead":false,"would_no_bead_reason":"operator_pause_no_action"}}
 {"schema_version":"fleet-coherence-event/v2","event_id":"fc-l62-missing","ts":"2026-05-08T11:52:00Z","class":"l62_missing","severity":"error","state":"open","session":"flywheel","pane":4,"dedupe_key":"l62_missing:flywheel:pane4","l62":{"repair_callback_required":true,"sd_count":0,"sd_ids":[]},"l63":{"recovery_action_requires_drill":true,"recovery_drill_ids":["drill-1","drill-2","drill-3","drill-4","drill-5"]},"actions":{"receipt_required":true,"would_bead":true,"fleet_repair":true,"repair_action":"restart_worker"}}
 {"schema_version":"fleet-coherence-event/v2","event_id":"fc-missing-drills","ts":"2026-05-08T11:53:00Z","class":"missing_drills","severity":"error","state":"open","session":"flywheel","pane":5,"dedupe_key":"missing_drills:flywheel:pane5","l62":{"repair_callback_required":false,"sd_count":0,"sd_ids":[]},"l63":{"recovery_action_requires_drill":true,"recovery_drill_ids":["drill-1"]},"actions":{"receipt_required":true,"would_bead":true,"fleet_repair":true,"repair_action":"restart_worker"}}
-{"schema_version":"fleet-coherence-event/v2","event_id":"fc-protected-client","ts":"2026-05-08T11:54:00Z","class":"protected_client","severity":"error","state":"open","session":"alpsinsurance","pane":1,"dedupe_key":"protected_client:alpsinsurance:pane1","l62":{"repair_callback_required":false,"sd_count":0,"sd_ids":[]},"l63":{"recovery_action_requires_drill":true,"recovery_drill_ids":["drill-1","drill-2","drill-3","drill-4","drill-5"]},"actions":{"receipt_required":true,"would_bead":true,"fleet_repair":true,"repair_action":"kill_and_respawn"}}
+{"schema_version":"fleet-coherence-event/v2","event_id":"fc-protected-client","ts":"2026-05-08T11:54:00Z","class":"protected_client","severity":"error","state":"open","session":"{session}","pane":1,"dedupe_key":"protected_client:{session}:pane1","l62":{"repair_callback_required":false,"sd_count":0,"sd_ids":[]},"l63":{"recovery_action_requires_drill":true,"recovery_drill_ids":["drill-1","drill-2","drill-3","drill-4","drill-5"]},"actions":{"receipt_required":true,"would_bead":true,"fleet_repair":true,"repair_action":"kill_and_respawn"}}
 JSONL
 
 env_base=(

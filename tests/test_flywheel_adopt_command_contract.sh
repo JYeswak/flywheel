@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-CMD="/Users/josh/.claude/commands/flywheel/adopt.md"
+CMD="$HOME/.claude/commands/flywheel/adopt.md"
 HELPER="$ROOT/.flywheel/scripts/flywheel-adopt.sh"
 TMPDIR="$(mktemp -d -t zih9.XXXXXX)"
 trap 'rm -rf "$TMPDIR"' EXIT

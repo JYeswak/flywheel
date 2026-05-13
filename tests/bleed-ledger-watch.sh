@@ -41,16 +41,16 @@ empty="$TMP/empty.jsonl"
 assert_jq "$TMP/empty.json" '.status == "pass" and .bleed_event_count_24h == 0 and .bleed_session_top == null and .fix_bead_action.action == "noop"' "empty_ledger_passes"
 
 rows="$TMP/rows.jsonl"
-write_row "$rows" "2026-05-08T21:30:00Z" flywheel /Users/josh/Developer/flywheel flywheel-alpha
-write_row "$rows" "2026-05-08T21:40:00Z" flywheel /Users/josh/Developer/flywheel flywheel-beta
-write_row "$rows" "2026-05-08T21:45:00Z" skillos /Users/josh/Developer/skillos skillos-alpha
-write_row "$rows" "2026-05-06T21:45:00Z" old /Users/josh/Developer/old old-alpha
+write_row "$rows" "2026-05-08T21:30:00Z" flywheel <flywheel-repo> flywheel-alpha
+write_row "$rows" "2026-05-08T21:40:00Z" flywheel <flywheel-repo> flywheel-beta
+write_row "$rows" "2026-05-08T21:45:00Z" {capability-control-plane} $HOME/Developer/{capability-control-plane} {capability-control-plane}-alpha
+write_row "$rows" "2026-05-06T21:45:00Z" old $HOME/Developer/old old-alpha
 set +e
 "$SCRIPT" --doctor --json --ledger "$rows" --now "2026-05-08T22:00:00Z" >"$TMP/rows.json"
 rc=$?
 set -e
 [[ "$rc" -eq 1 ]] && pass "n_row_ledger_exits_1" || fail "n_row_ledger_exits_1 rc=$rc"
-assert_jq "$TMP/rows.json" '.status == "fail" and .bleed_event_count_24h == 3 and .bleed_session_top.value == "flywheel" and .bleed_session_top.count == 2 and .bleed_repo_top.value == "/Users/josh/Developer/flywheel" and .fix_bead_action.action == "would_create"' "n_row_ledger_counts_and_top"
+assert_jq "$TMP/rows.json" '.status == "fail" and .bleed_event_count_24h == 3 and .bleed_session_top.value == "flywheel" and .bleed_session_top.count == 2 and .bleed_repo_top.value == "<flywheel-repo>" and .fix_bead_action.action == "would_create"' "n_row_ledger_counts_and_top"
 
 malformed="$TMP/malformed.jsonl"
 printf '%s\n' 'not-json' >>"$malformed"

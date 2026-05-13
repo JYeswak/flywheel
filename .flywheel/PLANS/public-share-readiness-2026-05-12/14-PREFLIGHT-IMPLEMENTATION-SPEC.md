@@ -99,7 +99,7 @@ Each row should extend the inventory contract:
 {
   "id": "ntm",
   "kind": "substrate|runtime|harness|enhancement",
-  "tier": "required|full-mode|enhanced|optional|supported-first|compatibility-target",
+  "tier": "required|full-mode|enhanced|optional|supported-by-receipt|compatibility-target",
   "status": "present|missing|misconfigured|unknown",
   "mode_effect": "full|reduced|blocked|docs-only",
   "detect_command": "ntm --version",

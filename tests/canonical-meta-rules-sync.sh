@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SYNC="/Users/josh/.flywheel/canonical-meta-rules/sync.sh"
+SYNC="$HOME/.flywheel/canonical-meta-rules/sync.sh"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/canonical-meta-rules-sync.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 

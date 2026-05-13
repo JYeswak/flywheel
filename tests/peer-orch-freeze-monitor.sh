@@ -29,7 +29,7 @@ fw_jsonl_append_validated() {
 SH
 
 cat > "$TMP/kill-recover-drill.sh" <<'SH'
-PROTECTED_SESSIONS=(alpsinsurance picoz terra-title)
+PROTECTED_SESSIONS=({session} {session} terra-title)
 SH
 
 cat > "$TMP/fake-respawn.sh" <<'SH'
@@ -41,18 +41,18 @@ chmod +x "$TMP/fake-respawn.sh"
 mkdir -p "$TMP/fixtures"
 cat > "$TMP/topology.jsonl" <<'JSONL'
 {"session":"flywheel","orchestrator_pane":1,"human_pane":0,"callback_pane":4,"effective_at":"2026-05-05T00:00:00Z"}
-{"session":"skillos","orchestrator_pane":1,"human_pane":0,"callback_pane":4,"effective_at":"2026-05-05T00:00:00Z"}
-{"session":"alpsinsurance","orchestrator_pane":1,"human_pane":0,"callback_pane":4,"effective_at":"2026-05-05T00:00:00Z"}
-{"session":"mobile-eats","orchestrator_pane":1,"human_pane":0,"callback_pane":4,"effective_at":"2026-05-05T00:00:00Z"}
+{"session":"{capability-control-plane}","orchestrator_pane":1,"human_pane":0,"callback_pane":4,"effective_at":"2026-05-05T00:00:00Z"}
+{"session":"{session}","orchestrator_pane":1,"human_pane":0,"callback_pane":4,"effective_at":"2026-05-05T00:00:00Z"}
+{"session":"{proof-product}","orchestrator_pane":1,"human_pane":0,"callback_pane":4,"effective_at":"2026-05-05T00:00:00Z"}
 JSONL
 
-cat > "$TMP/fixtures/skillos-1.json" <<'JSON'
+cat > "$TMP/fixtures/{capability-control-plane}-1.json" <<'JSON'
 {"t0":"› Implement {feature}\n","t1":"› Implement {feature}\n","timestamp":"2026-05-05T00:00:01Z"}
 JSON
-cat > "$TMP/fixtures/alpsinsurance-1.json" <<'JSON'
+cat > "$TMP/fixtures/{session}-1.json" <<'JSON'
 {"t0":"› Implement {feature}\n","t1":"› Implement {feature}\n","timestamp":"2026-05-05T00:00:01Z"}
 JSON
-cat > "$TMP/fixtures/mobile-eats-1.json" <<'JSON'
+cat > "$TMP/fixtures/{proof-product}-1.json" <<'JSON'
 {"t0":"thinking...\nline 1\n","t1":"thinking...\nline 2\n","timestamp":"2026-05-05T00:00:01Z"}
 JSON
 
@@ -79,13 +79,13 @@ printf 'preflight - canonical cli surfaces\n'
 rm -f "$TMP/respawn.log" "$TMP/monitor.jsonl" "$TMP/permit.jsonl"
 PEER_ORCH_AUTO_RESPAWN=1 "$SCRIPT" cycle --apply --json | jq -e '
   .recoveries_count==1 and
-  any(.target_results[]; .session=="skillos" and .permit_decision=="permit" and .recovery_applied==true)
+  any(.target_results[]; .session=="{capability-control-plane}" and .permit_decision=="permit" and .recovery_applied==true)
 ' >/dev/null || fail "permit grant recovery"
-grep -q '^skillos:1$' "$TMP/respawn.log" || fail "fake respawn missing"
+grep -q '^{capability-control-plane}:1$' "$TMP/respawn.log" || fail "fake respawn missing"
 ok "synthetic frozen peer orch recovers only after permit grant"
 
 "$SCRIPT" cycle --json | jq -e '
-  any(.target_results[]; .session=="mobile-eats" and .stuck==false and .recovery_applied==false)
+  any(.target_results[]; .session=="{proof-product}" and .stuck==false and .recovery_applied==false)
 ' >/dev/null || fail "alive pane false positive"
 ok "alive pane hash movement is not recovered"
 
@@ -95,14 +95,14 @@ ok "alive pane hash movement is not recovered"
 ok "flywheel self orchestrator is refused"
 
 "$SCRIPT" cycle --json | jq -e '
-  any(.target_results[]; .session=="alpsinsurance" and .permit_invoked==true and .permit_decision=="refuse" and .permit_reason=="protected_session_refused" and .recovery_applied==false)
+  any(.target_results[]; .session=="{session}" and .permit_invoked==true and .permit_decision=="refuse" and .permit_reason=="protected_session_refused" and .recovery_applied==false)
 ' >/dev/null || fail "protected refusal"
 ok "protected peer orch permit refusal blocks recovery"
 
 rm -f "$TMP/respawn.log"
 PEER_ORCH_AUTO_RESPAWN=0 "$SCRIPT" cycle --apply --json | jq -e '
   .recoveries_count==0 and
-  any(.target_results[]; .session=="skillos" and .permit_decision=="permit" and .recovery_blocked_reason=="auto_respawn_disabled")
+  any(.target_results[]; .session=="{capability-control-plane}" and .permit_decision=="permit" and .recovery_blocked_reason=="auto_respawn_disabled")
 ' >/dev/null || fail "auto disabled"
 [[ ! -s "$TMP/respawn.log" ]] || fail "respawn ran while auto disabled"
 ok "auto-respawn default remains disabled"

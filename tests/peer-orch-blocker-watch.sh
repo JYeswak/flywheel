@@ -27,7 +27,7 @@ bash -n "$SCRIPT" && pass "script syntax" || fail "script syntax"
 
 stale="$TMP/stale.jsonl"
 cat >"$stale" <<'JSONL'
-{"ts":"2026-05-04T00:00:00Z","event":"peer_blocker_reported","sender":"mobile-eats:1","blocker_type":"flywheel_class","blocker_class":"canonical_doctrine_drift_local","requested_owner":"flywheel:1","proposed_action":"sync canonical doctrine"}
+{"ts":"2026-05-04T00:00:00Z","event":"peer_blocker_reported","sender":"{proof-product}:1","blocker_type":"flywheel_class","blocker_class":"canonical_doctrine_drift_local","requested_owner":"flywheel:1","proposed_action":"sync canonical doctrine"}
 JSONL
 "$SCRIPT" --ledger "$stale" --now 2026-05-04T00:06:00Z --json >"$TMP/stale.out"
 assert_jq "$TMP/stale.out" '.status == "fail" and .stale_blockers_count == 1 and .peer_orch_blocker_age_seconds == 360' "stale flywheel blocker trips"
@@ -35,15 +35,15 @@ assert_jq "$TMP/stale.out" '.stale_blockers[0].blocker_type == "flywheel_class"'
 
 acked="$TMP/acked.jsonl"
 cat >"$acked" <<'JSONL'
-{"ts":"2026-05-04T00:00:00Z","event":"peer_blocker_reported","sender":"skillos:1","blocker_type":"flywheel_class","blocker_class":"missing doctor signal","requested_owner":"flywheel:1"}
-{"ts":"2026-05-04T00:01:00Z","event":"xpane_response","from":"flywheel:1","to":"skillos:1","reason":"ack and working"}
+{"ts":"2026-05-04T00:00:00Z","event":"peer_blocker_reported","sender":"{capability-control-plane}:1","blocker_type":"flywheel_class","blocker_class":"missing doctor signal","requested_owner":"flywheel:1"}
+{"ts":"2026-05-04T00:01:00Z","event":"xpane_response","from":"flywheel:1","to":"{capability-control-plane}:1","reason":"ack and working"}
 JSONL
 "$SCRIPT" --ledger "$acked" --now 2026-05-04T00:06:00Z --json >"$TMP/acked.out"
 assert_jq "$TMP/acked.out" '.status == "pass" and .stale_blockers_count == 0 and .blockers[0].acked == true' "flywheel ack clears stale blocker"
 
 inferred="$TMP/inferred.jsonl"
 cat >"$inferred" <<'JSONL'
-{"ts":"2026-05-04T00:00:00Z","event":"mobile_eats_blocker_received","sender":"mobile-eats:1","doctor_error":"canonical_doctrine_drift_local","proposed_action":"restore canonical doctrine snapshot"}
+{"ts":"2026-05-04T00:00:00Z","event":"mobile_eats_blocker_received","sender":"{proof-product}:1","doctor_error":"canonical_doctrine_drift_local","proposed_action":"restore canonical doctrine snapshot"}
 JSONL
 "$SCRIPT" --ledger "$inferred" --now 2026-05-04T00:06:00Z --json >"$TMP/inferred.out"
 assert_jq "$TMP/inferred.out" '.status == "fail" and .blockers[0].blocker_type == "flywheel_class"' "legacy row infers flywheel_class"
@@ -51,7 +51,7 @@ assert_jq "$TMP/inferred.out" '.status == "fail" and .blockers[0].blocker_type =
 malformed="$TMP/malformed.jsonl"
 cat >"$malformed" <<'JSONL'
 not json
-{"ts":"2026-05-04T00:00:00Z","event":"peer_blocker_reported","sender":"mobile-eats:1","blocker_type":"peer_class"}
+{"ts":"2026-05-04T00:00:00Z","event":"peer_blocker_reported","sender":"{proof-product}:1","blocker_type":"peer_class"}
 JSONL
 "$SCRIPT" --ledger "$malformed" --now 2026-05-04T00:01:00Z --json >"$TMP/malformed.out"
 assert_jq "$TMP/malformed.out" '.status == "warn" and .malformed_rows_count == 1' "malformed rows warn not crash"

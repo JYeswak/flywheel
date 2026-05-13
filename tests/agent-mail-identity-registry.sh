@@ -28,12 +28,12 @@ export FLYWHEEL_LEGACY_AGENT_MAIL_TOKEN_DIR="$TMP/legacy-tokens"
 export FLYWHEEL_SESSION_TOPOLOGY="$TMP/session-topology.jsonl"
 mkdir -p "$FLYWHEEL_AGENT_MAIL_STATE_DIR" "$FLYWHEEL_LEGACY_AGENT_MAIL_TOKEN_DIR"
 
-jq -nc '{agent_name:"RubyCreek",project_key:"/Users/josh/Developer/flywheel",registration_token:"ruby-token"}' >"$FLYWHEEL_LEGACY_AGENT_MAIL_TOKEN_DIR/rubycreek.json"
-jq -nc '{identity_id:108,name:"FoggyBear",project_key:"/Users/josh/.local/state/flywheel/fleet-mail-project",token:"foggy-token"}' >"$FLYWHEEL_LEGACY_AGENT_MAIL_TOKEN_DIR/foggybear.json"
-jq -nc '{agent_name:"LavenderGlen",project_key:"/Users/josh/.local/state/flywheel/fleet-mail-project",registration_token:"lavender-token"}' >"$FLYWHEEL_LEGACY_AGENT_MAIL_TOKEN_DIR/lavenderglen.json"
+jq -nc '{agent_name:"RubyCreek",project_key:"<flywheel-repo>",registration_token:"ruby-token"}' >"$FLYWHEEL_LEGACY_AGENT_MAIL_TOKEN_DIR/rubycreek.json"
+jq -nc '{identity_id:108,name:"FoggyBear",project_key:"$HOME/.local/state/flywheel/fleet-mail-project",token:"foggy-token"}' >"$FLYWHEEL_LEGACY_AGENT_MAIL_TOKEN_DIR/foggybear.json"
+jq -nc '{agent_name:"LavenderGlen",project_key:"$HOME/.local/state/flywheel/fleet-mail-project",registration_token:"lavender-token"}' >"$FLYWHEEL_LEGACY_AGENT_MAIL_TOKEN_DIR/lavenderglen.json"
 
 jq -nc '{session:"flywheel",orchestrator_pane:1,effective_at:"2026-05-04T00:00:00Z"}' >>"$FLYWHEEL_SESSION_TOPOLOGY"
-jq -nc '{session:"mobile-eats",orchestrator_pane:1,effective_at:"2026-05-04T00:00:00Z"}' >>"$FLYWHEEL_SESSION_TOPOLOGY"
+jq -nc '{session:"{proof-product}",orchestrator_pane:1,effective_at:"2026-05-04T00:00:00Z"}' >>"$FLYWHEEL_SESSION_TOPOLOGY"
 
 zsh -n "$LOOP" && pass "flywheel_loop_syntax" || fail "flywheel_loop_syntax"
 jq empty "$ROOT/.flywheel/validation-schema/v1/agent-mail-identity-registry.schema.json" && pass "schema_json_valid" || fail "schema_json_valid"
@@ -47,14 +47,14 @@ assert_jq "$TMP/resolve.json" '.status == "active" and .identity_name == "RubyCr
 token="$TMP/new.token"
 printf '%s\n' 'new-token' >"$token"
 chmod 600 "$token"
-"$LOOP" identity --session flywheel --pane 3 --register --identity CyanBadger --token-path "$token" --project-key /Users/josh/Developer/flywheel --json >"$TMP/register.json"
+"$LOOP" identity --session flywheel --pane 3 --register --identity CyanBadger --token-path "$token" --project-key <flywheel-repo> --json >"$TMP/register.json"
 assert_jq "$TMP/register.json" '.status == "active" and .identity_name == "CyanBadger"' "register_identity"
 
 rotated="$TMP/rotated.token"
 printf '%s\n' 'rotated-token' >"$rotated"
 chmod 600 "$rotated"
-"$LOOP" identity --session skillos --pane 1 --register --identity BrightLake --token-path "$rotated" --project-key /Users/josh/Developer/skillos --predecessor-identity FoggyBear --rotation-reason compaction --json >"$TMP/rotate.json"
-assert_jq "$TMP/rotate.json" '.predecessor_identity == "FoggyBear" and .rotation_reason == "compaction-continuity" and (.predecessor_identity_chain | index("FoggyBear")) and .identity_primary_key.session == "skillos" and .identity_primary_key.pane == 1 and .identity_primary_key.fleet_mail_project_key == "/Users/josh/Developer/skillos" and .status == "active"' "rotation_records_tuple_predecessor_chain"
+"$LOOP" identity --session {capability-control-plane} --pane 1 --register --identity BrightLake --token-path "$rotated" --project-key $HOME/Developer/{capability-control-plane} --predecessor-identity FoggyBear --rotation-reason compaction --json >"$TMP/rotate.json"
+assert_jq "$TMP/rotate.json" '.predecessor_identity == "FoggyBear" and .rotation_reason == "compaction-continuity" and (.predecessor_identity_chain | index("FoggyBear")) and .identity_primary_key.session == "{capability-control-plane}" and .identity_primary_key.pane == 1 and .identity_primary_key.fleet_mail_project_key == "$HOME/Developer/{capability-control-plane}" and .status == "active"' "rotation_records_tuple_predecessor_chain"
 
 trigger_index=0
 for trigger in agent-mail-name-policy resolver-mcp-generated-identity compaction-continuity missing-token-recovery path-canonicalization strict-mode-preallocation; do

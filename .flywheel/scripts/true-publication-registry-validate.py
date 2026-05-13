@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -19,6 +20,7 @@ DEFAULT_REGISTRY = (
 ID_RE = re.compile(r"^TP-\d{3}$")
 VALID_SEVERITIES = {"P0", "P1", "P2", "P3"}
 VALID_STATUSES = {"open", "in_progress", "closed", "deferred", "non_release"}
+COVERAGE_HEADER = "| Readiness blocker code | Registry rows | Coverage status |"
 
 
 def parse_rows(path: Path) -> list[dict[str, str]]:
@@ -46,7 +48,47 @@ def parse_rows(path: Path) -> list[dict[str, str]]:
     return rows
 
 
-def validate(rows: list[dict[str, str]], release: bool) -> tuple[list[dict], list[dict]]:
+def clean_cell(value: str) -> str:
+    return value.strip().strip("`")
+
+
+def parse_blocker_coverage(path: Path) -> list[dict[str, str]]:
+    coverage: list[dict[str, str]] = []
+    in_table = False
+    for line_no, line in enumerate(path.read_text().splitlines(), start=1):
+        stripped = line.strip()
+        if stripped == COVERAGE_HEADER:
+            in_table = True
+            continue
+        if not in_table:
+            continue
+        if not stripped.startswith("|"):
+            break
+        cells = [cell.strip() for cell in stripped.strip("|").split("|")]
+        if len(cells) != 3:
+            coverage.append({"line": str(line_no), "parse_error": f"expected 3 cells, got {len(cells)}"})
+            continue
+        if set(cells[0].replace(":", "").strip()) <= {"-"}:
+            continue
+        code = clean_cell(cells[0])
+        registry_rows = ",".join(clean_cell(part) for part in cells[1].split(",") if clean_cell(part))
+        coverage.append(
+            {
+                "line": str(line_no),
+                "code": code,
+                "registry_rows": registry_rows,
+                "status": clean_cell(cells[2]),
+            }
+        )
+    return coverage
+
+
+def validate(
+    rows: list[dict[str, str]],
+    coverage: list[dict[str, str]],
+    expected_blockers: set[str],
+    release: bool,
+) -> tuple[list[dict], list[dict]]:
     errors: list[dict] = []
     warnings: list[dict] = []
     seen: dict[str, int] = {}
@@ -79,12 +121,82 @@ def validate(rows: list[dict[str, str]], release: bool) -> tuple[list[dict], lis
     if not rows:
         errors.append({"code": "registry_empty", "message": "no TP-* rows found"})
 
+    row_by_id = {row["id"]: row for row in rows if row.get("id")}
+    coverage_codes = {row.get("code", "") for row in coverage if row.get("code")}
+    missing_coverage = sorted(expected_blockers - coverage_codes)
+    unknown_coverage = sorted(coverage_codes - expected_blockers)
+    for code in missing_coverage:
+        errors.append({"code": "missing_readiness_blocker_coverage", "blocker_code": code})
+    for code in unknown_coverage:
+        errors.append({"code": "unknown_readiness_blocker_coverage", "blocker_code": code})
+    for coverage_row in coverage:
+        line = coverage_row.get("line")
+        if coverage_row.get("parse_error"):
+            errors.append({"code": "coverage_parse_error", "line": line, "detail": coverage_row["parse_error"]})
+            continue
+        if not coverage_row.get("registry_rows"):
+            errors.append({"code": "coverage_missing_registry_rows", "line": line, "blocker_code": coverage_row.get("code")})
+            continue
+        for row_id in coverage_row["registry_rows"].split(","):
+            registry_row = row_by_id.get(row_id)
+            if registry_row is None:
+                errors.append(
+                    {
+                        "code": "coverage_unknown_registry_row",
+                        "line": line,
+                        "blocker_code": coverage_row.get("code"),
+                        "registry_row": row_id,
+                    }
+                )
+            elif coverage_row.get("status") == "open" and registry_row.get("status") not in {"open", "in_progress"}:
+                errors.append(
+                    {
+                        "code": "coverage_row_not_open",
+                        "line": line,
+                        "blocker_code": coverage_row.get("code"),
+                        "registry_row": row_id,
+                        "registry_status": registry_row.get("status"),
+                    }
+                )
+
     return errors, warnings
+
+
+def live_readiness_blockers(repo: Path, script: Path) -> tuple[set[str], list[dict]]:
+    if not script.exists():
+        return set(), [{"code": "readiness_script_missing", "path": str(script)}]
+    try:
+        proc = subprocess.run(
+            [sys.executable, str(script), "--repo", str(repo), "--json"],
+            cwd=repo,
+            text=True,
+            capture_output=True,
+            timeout=60,
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        return set(), [{"code": "readiness_script_timeout", "path": str(script)}]
+
+    try:
+        payload = json.loads(proc.stdout)
+    except json.JSONDecodeError as exc:
+        return set(), [{"code": "readiness_script_invalid_json", "path": str(script), "detail": str(exc)}]
+
+    blockers = payload.get("blockers")
+    if not isinstance(blockers, list):
+        return set(), [{"code": "readiness_script_missing_blockers", "path": str(script)}]
+    codes = {str(row.get("code", "")).strip() for row in blockers if isinstance(row, dict) and row.get("code")}
+    return codes, []
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--registry", default=str(DEFAULT_REGISTRY))
+    parser.add_argument("--repo", default=str(Path(__file__).resolve().parents[2]))
+    parser.add_argument(
+        "--readiness-script",
+        default=str(Path(__file__).resolve().parents[2] / "scripts" / "publication_readiness.py"),
+    )
     parser.add_argument("--release", action="store_true", help="fail if any registry row remains open")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
@@ -103,7 +215,10 @@ def main() -> int:
         return 1
 
     rows = parse_rows(registry)
-    errors, warnings = validate(rows, args.release)
+    coverage = parse_blocker_coverage(registry)
+    expected_blockers, readiness_errors = live_readiness_blockers(Path(args.repo).resolve(), Path(args.readiness_script).resolve())
+    errors, warnings = validate(rows, coverage, expected_blockers, args.release)
+    errors.extend(readiness_errors)
     open_rows = [row for row in rows if row.get("status") in {"open", "in_progress"}]
     payload = {
         "schema_version": "true-publication-registry/v1",
@@ -112,6 +227,9 @@ def main() -> int:
         "registry": str(registry),
         "row_count": len(rows),
         "open_count": len(open_rows),
+        "open_rows": open_rows,
+        "expected_readiness_blockers": sorted(expected_blockers),
+        "readiness_blocker_coverage": coverage,
         "ids": [row.get("id") for row in rows if row.get("id")],
         "errors": errors,
         "warnings": warnings,

@@ -5,13 +5,13 @@ doc_type: mission
 status: locked
 repo: /tmp/pre
 repo_realpath: /tmp/pre
-installed_from: /Users/josh/Developer/flywheel/templates/flywheel-install
+installed_from: <flywheel-repo>/templates/flywheel-install
 template_version: "0.1.0"
 template_hash: fixture
-rendered_at: 2026-05-05T00:00:00Z
+rendered_at: <timestamp>
 rendered_by: fixture
 lock_hash: fixture
-locked_at: 2026-05-05T00:00:00Z
+locked_at: <timestamp>
 locked_by: fixture
 source_path: /tmp/source.md
 source_sha256: fixture

@@ -67,16 +67,16 @@ else
   fail "AGENTS.md row path does not resolve; row_path=$ROW_PATH"
 fi
 
-# Test 6: rule body cites Joshua's 2026-05-09 directive (the load-bearing reason)
+# Test 6: rule body cites {operator}'s 2026-05-09 directive (the load-bearing reason)
 # Use grep -z (null-separated) to match across line breaks since the
-# Joshua quote spans multiple lines.
+# {operator} quote spans multiple lines.
 if grep -q "2026-05-09" "$RULE_FILE" \
-  && grep -qz "Joshua directive" "$RULE_FILE" \
+  && grep -qz "{operator} directive" "$RULE_FILE" \
   && grep -q "EVERY" "$RULE_FILE" \
   && grep -q "JEFFREY_COMMENT_NEW" "$RULE_FILE"; then
-  pass "rule body cites Joshua 2026-05-09 directive + JEFFREY_COMMENT_NEW signal"
+  pass "rule body cites {operator} 2026-05-09 directive + JEFFREY_COMMENT_NEW signal"
 else
-  fail "rule body missing Joshua directive or JEFFREY_COMMENT_NEW signal"
+  fail "rule body missing {operator} directive or JEFFREY_COMMENT_NEW signal"
 fi
 
 # Test 7: rule body cross-links L70 (orch-no-punt — dispatch on receipt, not next tick)

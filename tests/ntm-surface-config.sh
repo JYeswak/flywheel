@@ -21,6 +21,6 @@ chmod +x "$TMP/ntm"
 out="$(NTM_BIN="$TMP/ntm" "$SCRIPT" config --json)"
 jq -e '.surface == "config" and (.native_calls | length) == 3 and .validate.valid == true and (.diff.drifts | length) == 0' <<<"$out" >/dev/null
 
-callsites="$(rg -n 'ntm config|config show|config validate|config diff' "$SCRIPT" "$0" /Users/josh/.claude/skills/.flywheel/bin/flywheel | wc -l | tr -d ' ')"
+callsites="$(rg -n 'ntm config|config show|config validate|config diff' "$SCRIPT" "$0" <flywheel-state>/bin/flywheel | wc -l | tr -d ' ')"
 [[ "$callsites" -ge 3 ]]
 echo "ntm-surface-config PASS callsites=$callsites"

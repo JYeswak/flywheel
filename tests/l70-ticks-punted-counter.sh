@@ -120,7 +120,7 @@ write_case \
   joshua_blocker \
   '{"agents":[{"pane_idx":2,"state":"WAITING"}]}' \
   '{"issues":[{"id":"flywheel-p0","status":"open","priority":0}]}' \
-  '{"tick_id":"joshua_blocker","message":"ask Joshua","true_joshua_blocker":true}'
+  '{"tick_id":"joshua_blocker","message":"ask {operator}","true_joshua_blocker":true}'
 run_case joshua_blocker false
 assert_jq "$TMP/joshua_blocker.out" '.reason == "true_joshua_blocker_recorded"' "joshua blocker reason"
 

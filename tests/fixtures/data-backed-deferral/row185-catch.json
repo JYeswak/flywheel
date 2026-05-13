@@ -14,7 +14,7 @@
   "pagerank_pick": "dispatch-audit-lanes",
   "suggested_action": "declare the five decisions data-ratified and dispatch the next audit/refine lanes",
   "draft_question": "Want me to approve all five and proceed?",
-  "draft_text": "Phase 2 REFINE r1 surfaced 5 Joshua-disposes and every lane recommends yes.\nWant me to approve all five and proceed?",
+  "draft_text": "Phase 2 REFINE r1 surfaced 5 {operator}-disposes and every lane recommends yes.\nWant me to approve all five and proceed?",
   "signals": {
     "idle_worker_count": 2,
     "ready_bead_count": 5,

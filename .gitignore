@@ -25,6 +25,7 @@
 /.flywheel/.STATE.md.preview.*
 /.flywheel/*.md.preview.*
 /.flywheel/.reconcile-*.diff
+/.flywheel/extraction/
 /.flywheel/scripts/*.bak.*
 /.flywheel/validation-schema/v1/*.bak.*
 /.flywheel/PLANS/**/*.bak.*

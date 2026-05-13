@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# tests/test-skillos-bridge-canonical-cli.sh
-# Canonical-cli surface tests for .flywheel/scripts/test-skillos-bridge.sh (scaffolded by
+# tests/test-{capability-control-plane}-bridge-canonical-cli.sh
+# Canonical-cli surface tests for .flywheel/scripts/test-{capability-control-plane}-bridge.sh (scaffolded by
 # bead flywheel-ws02m / scaffold-canonical-cli.sh).
 #
 # 13/13 PASS = canonical-cli-scoping checker green. TODO markers
@@ -8,7 +8,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/test-skillos-bridge.sh"
+SCRIPT="$ROOT/.flywheel/scripts/test-{capability-control-plane}-bridge.sh"
 
 pass_count=0
 fail_count=0
@@ -83,7 +83,7 @@ if "$SCRIPT" quickstart 2>/dev/null | jq -e '.command == "quickstart"' >/dev/nul
 else fail "quickstart envelope"; fi
 
 # Test 14: --info envelope carries surface-specific schema_version (jloib.2.2 fillin)
-if "$SCRIPT" --info --json 2>/dev/null | jq -e '.schema_version | test("^test-skillos-bridge/v[0-9]+$$")' >/dev/null; then
+if "$SCRIPT" --info --json 2>/dev/null | jq -e '.schema_version | test("^test-{capability-control-plane}-bridge/v[0-9]+$$")' >/dev/null; then
   pass "--info schema_version matches <surface>/v1 pattern"
 else fail "--info schema_version pattern"; fi
 

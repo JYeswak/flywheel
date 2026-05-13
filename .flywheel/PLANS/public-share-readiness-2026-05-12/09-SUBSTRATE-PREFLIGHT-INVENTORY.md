@@ -68,8 +68,8 @@ coordination, shared inboxes, or cross-session memory.
 | CASS-style memory | enhanced | cross-session memory and retrieval | HTTP health endpoint once configured | upstream `cass_memory_system` Node service after live probe | no cross-session memory claims |
 | Socraticode | full-mode | codebase semantic search before non-trivial edits | MCP health/about probe; local CLI if exposed | MCP setup docs to be authored by B12.x | non-trivial repo edits unsupported; docs-only or manual search |
 | `beads_viewer` | enhanced | graph visualization and PageRank triage | `beads_viewer --version` or `--help` | `go install` or source build after live probe | CLI-only Beads inspection |
-| Claude Code | supported-first harness | first-class operator harness | `claude --version` | ACFS phase 6 or official install docs | use another harness or reduced mode |
-| Codex CLI | supported-first harness | first-class operator harness | `codex --version` | ACFS phase 6 or official install docs | use another harness or reduced mode |
+| Claude Code | compatibility-target harness | first-class operator harness candidate | `claude --version` | ACFS phase 6 or official install docs | label compatibility-target until receipt-proven |
+| Codex CLI | compatibility-target harness | first-class operator harness candidate | `codex --version` | ACFS phase 6 or official install docs | label compatibility-target until receipt-proven |
 | OpenClaw | compatibility-target harness | named by objective; support must be honest | command name unresolved until B6.5 live probe | no install hint until probe | label compatibility-target or unsupported, not supported |
 | Gemini CLI | compatibility-target harness | alternative operator harness | `gemini --version` if CLI exists | ACFS phase 6 or official install docs after probe | label compatibility-target unless smoke-proven |
 

@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/.flywheel/scripts/publishability-bar.sh"
-LOOP="/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop"
+LOOP="<flywheel-state>/bin/flywheel-loop"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -25,9 +25,9 @@ make_repo() {
             printf '| F%s | Facet %s | %s | fixture |\n' "$i" "$i" "$verdict"
         done
         if [[ -n "$score" ]]; then
-            printf '\n## ZestStream Voice Gate\n\n'
+            printf '\n## {operator-company} Voice Gate\n\n'
             printf '%s\n' "| field | value |" "|---|---|"
-            printf '| ZestStream voice score | %s |\n' "$score"
+            printf '| {operator-company} voice score | %s |\n' "$score"
             printf '| Banned words count | 0 |\n'
             printf '| Ungrounded claims count | 0 |\n'
             printf '| Scorecard log | `.planning/scorecard-log.jsonl` |\n'

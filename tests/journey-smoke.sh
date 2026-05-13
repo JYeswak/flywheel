@@ -59,12 +59,12 @@ else
 fi
 
 if jq -e '
-  [.rows[] | select(.id != "reduced" and .registry_valid == true and .runtime_proven == false and .dispatch_or_simulate == "not_run")]
+  [.rows[] | select(.id != "reduced" and .support_tier == "compatibility-target" and .registry_valid == true and .runtime_proven == false and .dispatch_or_simulate == "not_run")]
   | length == 4
 ' "$TMP/matrix.json" >/dev/null; then
-  pass "agent lanes remain registry-only"
+  pass "agent lanes remain compatibility targets"
 else
-  fail "agent lanes remain registry-only"
+  fail "agent lanes remain compatibility targets"
 fi
 
 run_capture "$TMP/reduced.json" "$TMP/reduced.err" "$SCRIPT" --matrix reduced --dry-run --json
@@ -83,7 +83,7 @@ else
   fail "unknown lane rejected rc=${unknown_rc}"
 fi
 
-if ! rg -n '/Users/josh|TOKEN|CANARY|secret' "$TMP"/*.json >/dev/null; then
+if ! rg -n '$HOME|TOKEN|CANARY|secret' "$TMP"/*.json >/dev/null; then
   pass "outputs avoid private markers"
 else
   fail "outputs avoid private markers"

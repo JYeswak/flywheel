@@ -21,7 +21,7 @@ json_bool() {
 
 is_allowed_base() {
   case "$1" in
-    alps.*|alpsinsurance*|flywheel-*|beads.*|beads_*|claude-skills-sync|mobile-eats-*|br-*) return 0 ;;
+    {session}*|flywheel-*|beads.*|beads_*|claude-skills-sync|{proof-product}-*|br-*) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -49,7 +49,7 @@ validate_root() {
 
 candidate_find() {
   find "$ROOT_PATH" -mindepth 1 -maxdepth 1 \
-    \( -name 'alps.*' -o -name 'alpsinsurance*' -o -name 'flywheel-*' -o -name 'beads.*' -o -name 'beads_*' -o -name 'claude-skills-sync' -o -name 'mobile-eats-*' -o -name 'br-*' \) \
+    \( -name '{session}*' -o -name 'flywheel-*' -o -name 'beads.*' -o -name 'beads_*' -o -name 'claude-skills-sync' -o -name '{proof-product}-*' -o -name 'br-*' \) \
     -mtime "+$DAYS" -print 2>/dev/null | sort
 }
 
@@ -59,7 +59,7 @@ forbidden_find() {
 
 unknown_find() {
   find "$ROOT_PATH" -mindepth 1 -maxdepth 1 \
-    ! \( -name 'alps.*' -o -name 'alpsinsurance*' -o -name 'flywheel-*' -o -name 'beads.*' -o -name 'beads_*' -o -name 'claude-skills-sync' -o -name 'mobile-eats-*' -o -name 'br-*' -o -name 'com.apple.*' -o -name 'launchd-*' \) \
+    ! \( -name '{session}*' -o -name 'flywheel-*' -o -name 'beads.*' -o -name 'beads_*' -o -name 'claude-skills-sync' -o -name '{proof-product}-*' -o -name 'br-*' -o -name 'com.apple.*' -o -name 'launchd-*' \) \
     -mtime "+$DAYS" -print 2>/dev/null | sort
 }
 
@@ -127,7 +127,7 @@ write_receipt() {
       older_than_mtime_days:$days,
       idempotency_key:$idempotency_key,
       receipt_path:$receipt_path,
-      allowlist_prefixes:["alps.*","alpsinsurance*","flywheel-*","beads.*","beads_*","claude-skills-sync","mobile-eats-*","br-*"],
+      allowlist_prefixes:["{session}*","flywheel-*","beads.*","beads_*","claude-skills-sync","{proof-product}-*","br-*"],
       forbidden_prefixes:["com.apple.*","launchd-*"],
       paths_to_prune:$paths,
       paths_to_prune_count:($paths | length),

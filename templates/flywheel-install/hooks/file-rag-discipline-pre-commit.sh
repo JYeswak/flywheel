@@ -8,7 +8,7 @@
 # Wire-up: ln -s ../../.flywheel/hooks/file-rag-discipline-pre-commit.sh \
 #                .git/hooks/pre-commit
 #
-# Bead: flywheel-s8tdd. Spec: .flywheel/audit/flywheel-fs-rag-discipline/apply-spec.md.
+# Bead: {bead-id}. Spec: .flywheel/audit/flywheel-fs-rag-discipline/apply-spec.md.
 set -euo pipefail
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo .)"

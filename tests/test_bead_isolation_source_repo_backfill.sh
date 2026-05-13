@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/scripts/backfill-source-repo.sh"
 WRAPPER="$ROOT/.flywheel/scripts/br-create-validated.sh"
-BR_BIN="${BR_BIN:-/Users/josh/.cargo/bin/br}"
+BR_BIN="${BR_BIN:-$HOME/.cargo/bin/br}"
 TMP="$(mktemp -d -t ejw94-source-repo.XXXXXX)"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -23,7 +23,7 @@ id_basename="$(cd "$repo" && "$BR_BIN" create "basename source_repo fixture" --t
 id_other="$(cd "$repo" && "$BR_BIN" create "foreign source_repo fixture" --type task --priority P2 --description fixture --json | jq -r '.id')"
 
 sqlite3 "$repo/.beads/beads.db" "UPDATE issues SET source_repo = 'flywheel' WHERE id = '$id_basename';"
-sqlite3 "$repo/.beads/beads.db" "UPDATE issues SET source_repo = '/Users/josh/Developer/alpsinsurance' WHERE id = '$id_other';"
+sqlite3 "$repo/.beads/beads.db" "UPDATE issues SET source_repo = '$HOME/Developer/{session}' WHERE id = '$id_other';"
 
 dry="$TMP/dry.json"
 "$SCRIPT" --repo "$repo" --dry-run --json >"$dry"
@@ -40,7 +40,7 @@ jq -e '.dry_run == false and .scanned == 1 and .databases_needing_update == 1 an
   fail "apply did not leave only true foreign leak"
 }
 [[ "$(sqlite3 "$repo/.beads/beads.db" "SELECT COUNT(*) FROM issues WHERE id = '$id_basename' AND source_repo = '$repo';")" == "1" ]] || fail "basename row not canonicalized"
-[[ "$(sqlite3 "$repo/.beads/beads.db" "SELECT COUNT(*) FROM issues WHERE source_repo='/Users/josh/Developer/alpsinsurance';")" == "1" ]] || fail "foreign row should remain for doctor leakage"
+[[ "$(sqlite3 "$repo/.beads/beads.db" "SELECT COUNT(*) FROM issues WHERE source_repo='$HOME/Developer/{session}';")" == "1" ]] || fail "foreign row should remain for doctor leakage"
 
 wrapper_body="$TMP/wrapper-body.md"
 cat >"$wrapper_body" <<'EOF'

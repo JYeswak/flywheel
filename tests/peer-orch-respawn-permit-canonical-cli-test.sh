@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-TOOL="${TOOL:-/Users/josh/Developer/flywheel/.flywheel/scripts/peer-orch-respawn-permit.sh}"
+TOOL="${TOOL:-<flywheel-repo>/.flywheel/scripts/peer-orch-respawn-permit.sh}"
 
 [[ -x "$TOOL" ]] || { echo "FAIL tool missing or not executable: $TOOL" >&2; exit 1; }
 

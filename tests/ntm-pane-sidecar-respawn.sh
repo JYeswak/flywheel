@@ -68,7 +68,7 @@ bash -n "$SCRIPT"
   --pane 2 \
   --command-path /tmp/codex-sidecar \
   --command-arg --dangerously-bypass-approvals-and-sandbox \
-  --cwd /Users/josh/Developer/flywheel \
+  --cwd <flywheel-repo> \
   --env CODEX_HOME=/tmp/codex-sidecar-home \
   --config-override 'model="gpt-5.5"' \
   --dry-run \
@@ -80,7 +80,7 @@ jq -e '
   and .target.session == "flywheel"
   and .target.pane == 2
   and .command.path == "/tmp/codex-sidecar"
-  and .cwd == "/Users/josh/Developer/flywheel"
+  and .cwd == "<flywheel-repo>"
   and .env_overrides[0].name == "CODEX_HOME"
   and .env_overrides[0].value_redacted == "<redacted>"
   and .config_overrides[0] == "model=\"gpt-5.5\""
@@ -99,7 +99,7 @@ jq -e '
   --pane 2 \
   --command-path /tmp/codex-sidecar \
   --command-arg --dangerously-bypass-approvals-and-sandbox \
-  --cwd /Users/josh/Developer/flywheel \
+  --cwd <flywheel-repo> \
   --env CODEX_HOME=/tmp/codex-sidecar-home \
   --config-override 'model="gpt-5.5"' \
   --apply \

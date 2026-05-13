@@ -16,7 +16,7 @@ assert_jq() {
   if jq -e "$filter" "$file" >/dev/null; then pass "$label"; else fail "$label"; jq . "$file" >&2 || true; fi
 }
 
-sessions=(flywheel alpsinsurance clutterfreespaces picoz skillos vrtx zeststream-v2 mobile-eats)
+sessions=(flywheel {session} clutterfreespaces {session} {capability-control-plane} vrtx zeststream-v2 {proof-product})
 mkdir -p "$TMP/repos" "$TMP/state" "$TMP/snaps" "$TMP/launch"
 repo_json="$TMP/repo-map.json"; jq -nc '{}' >"$repo_json"
 printf '[session_paths]\n' >"$TMP/ntm.toml"

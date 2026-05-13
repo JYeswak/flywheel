@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-PLIST="/Users/josh/Library/LaunchAgents/com.zeststream.recovery.nightly-snapshot.plist"
+PLIST="$HOME/Library/LaunchAgents/com.zeststream.recovery.nightly-snapshot.plist"
 pass_count=0
 fail_count=0
 pass() { printf 'PASS %s\n' "$1"; pass_count=$((pass_count + 1)); }
@@ -15,11 +15,11 @@ import plistlib, sys
 with open(sys.argv[1], "rb") as fh:
     p = plistlib.load(fh)
 assert p["Label"] == "com.zeststream.recovery.nightly-snapshot"
-assert p["ProgramArguments"][0] == "/Users/josh/Developer/flywheel/.flywheel/scripts/recovery-baseline-snapshot.sh"
+assert p["ProgramArguments"][0] == "<flywheel-repo>/.flywheel/scripts/recovery-baseline-snapshot.sh"
 assert p["ProgramArguments"][1:4] == ["--trigger", "nightly", "--json"]
 assert p["StartCalendarInterval"] == {"Hour": 3, "Minute": 0}
-assert p["StandardOutPath"] == "/Users/josh/.local/state/flywheel/logs/recovery-nightly.stdout.log"
-assert p["StandardErrorPath"] == "/Users/josh/.local/state/flywheel/logs/recovery-nightly.stderr.log"
+assert p["StandardOutPath"] == "$HOME/.local/state/flywheel/logs/recovery-nightly.stdout.log"
+assert p["StandardErrorPath"] == "$HOME/.local/state/flywheel/logs/recovery-nightly.stderr.log"
 print("ok")
 PY
 pass "plist_shape"

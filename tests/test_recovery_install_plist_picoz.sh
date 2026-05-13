@@ -2,8 +2,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-PLIST="/Users/josh/Library/LaunchAgents/com.zeststream.picoz.watcher.plist"
-STATUS="$ROOT/.flywheel/receipts/recovery-install-picoz-status.json"
+PLIST="$HOME/Library/LaunchAgents/com.zeststream.{session}.watcher.plist"
+STATUS="$ROOT/.flywheel/receipts/recovery-install-{session}-status.json"
 
 pass_count=0
 fail_count=0
@@ -27,14 +27,14 @@ plutil -lint "$PLIST" >/dev/null && pass "plist_lint" || fail "plist_lint"
 assert_jq "$STATUS" \
   '.schema_version == "recovery-session-watcher-install/v1"
    and .source_plan == ".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md"
-   and .label == "com.zeststream.picoz.watcher"
-   and .plist_path == "/Users/josh/Library/LaunchAgents/com.zeststream.picoz.watcher.plist"
-   and .audit_receipt_path == "/tmp/preinstall-picoz.json"
+   and .label == "com.zeststream.{session}.watcher"
+   and .plist_path == "$HOME/Library/LaunchAgents/com.zeststream.{session}.watcher.plist"
+   and .audit_receipt_path == "/tmp/preinstall-{session}.json"
    and .dry_run_pass == true
    and .exactly_one_label == true
    and .reboot_recovery_claimed == false
    and .launchctl_load_attempted == false
-   and .picoz_repo_path_validated == true' \
+   and .{session}_repo_path_validated == true' \
   "status_shape"
 
 assert_jq "$STATUS" \

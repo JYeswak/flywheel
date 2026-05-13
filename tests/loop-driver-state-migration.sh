@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # tests/loop-driver-state-migration.sh
 # Regression test for flywheel-kmf4z: loop-driver state migration to cc_skill_loop.
-# Per Joshua directive 2026-05-08 (memory: feedback_orch_wake_event_driven_not_time_based),
+# Per {operator} directive 2026-05-08 (memory: feedback_orch_wake_event_driven_not_time_based),
 # /loop dynamic mode uses Skill("loop") inside Claude Code (cc_skill_loop), not launchd.
 #
 # What this test verifies:
 #   1. Both source-of-truth files have dispatch_mode=cc_skill_loop:
-#      - /Users/josh/Developer/flywheel/.flywheel/config.toml (committed)
-#      - /Users/josh/.flywheel/loops/flywheel.json (filesystem marker)
+#      - <flywheel-repo>/.flywheel/config.toml (committed)
+#      - $HOME/.flywheel/loops/flywheel.json (filesystem marker)
 #   2. config.toml driver_kind also = cc_skill_loop
 #   3. The string `cc_skill_loop` IS in the probe-recognized set at
 #      lib/loop.d/loop_driver_doctor_json.py:167
@@ -18,11 +18,11 @@
 
 set -uo pipefail
 
-CONFIG_TOML="${FLYWHEEL_CONFIG_TOML:-/Users/josh/Developer/flywheel/.flywheel/config.toml}"
-MARKER="${FLYWHEEL_LOOP_MARKER:-/Users/josh/.flywheel/loops/flywheel.json}"
+CONFIG_TOML="${FLYWHEEL_CONFIG_TOML:-<flywheel-repo>/.flywheel/config.toml}"
+MARKER="${FLYWHEEL_LOOP_MARKER:-$HOME/.flywheel/loops/flywheel.json}"
 PROBE_SOURCE="${FLYWHEEL_LOOP_DRIVER_PROBE_SOURCE:-$HOME/.claude/skills/.flywheel/lib/loop.d/loop_driver_doctor_json.py}"
 FLYWHEEL_LOOP_BIN="${FLYWHEEL_LOOP_BIN:-$HOME/.claude/skills/.flywheel/bin/flywheel-loop}"
-AUDIT_DIR="${FLYWHEEL_AUDIT_DIR:-/Users/josh/Developer/flywheel/.flywheel/audit/flywheel-kmf4z}"
+AUDIT_DIR="${FLYWHEEL_AUDIT_DIR:-<flywheel-repo>/.flywheel/audit/flywheel-kmf4z}"
 
 pass_count=0
 fail_count=0
@@ -59,7 +59,7 @@ fi
 
 # Test 4: probe-precedence verification — even when marker dispatch_mode
 # differs from config, the probe must return the config.toml value.
-PROBE_DM="$("$FLYWHEEL_LOOP_BIN" doctor --repo /Users/josh/Developer/flywheel --scope loop-driver --json 2>/dev/null | jq -r '.loop_driver.dispatch_mode')"
+PROBE_DM="$("$FLYWHEEL_LOOP_BIN" doctor --repo <flywheel-repo> --scope loop-driver --json 2>/dev/null | jq -r '.loop_driver.dispatch_mode')"
 if [[ "$PROBE_DM" == "cc_skill_loop" ]]; then
   pass "probe resolves dispatch_mode=cc_skill_loop (config.toml precedence holds)"
 else
@@ -76,7 +76,7 @@ fi
 
 # Test 6 (load-bearing): live probe driver_status=NOT_APPLICABLE_CC
 if [[ -x "$FLYWHEEL_LOOP_BIN" ]]; then
-  PROBE_OUT="$("$FLYWHEEL_LOOP_BIN" doctor --repo /Users/josh/Developer/flywheel --scope loop-driver --json 2>/dev/null)"
+  PROBE_OUT="$("$FLYWHEEL_LOOP_BIN" doctor --repo <flywheel-repo> --scope loop-driver --json 2>/dev/null)"
   DRIVER_STATUS="$(jq -r '.loop_driver.driver_status' <<<"$PROBE_OUT" 2>/dev/null)"
   if [[ "$DRIVER_STATUS" == "NOT_APPLICABLE_CC" ]]; then
     pass "live probe: driver_status=NOT_APPLICABLE_CC"
@@ -89,7 +89,7 @@ fi
 
 # Test 7 (load-bearing AC): live probe status NOT fail
 if [[ -x "$FLYWHEEL_LOOP_BIN" ]]; then
-  PROBE_OUT="$("$FLYWHEEL_LOOP_BIN" doctor --repo /Users/josh/Developer/flywheel --scope loop-driver --json 2>/dev/null)"
+  PROBE_OUT="$("$FLYWHEEL_LOOP_BIN" doctor --repo <flywheel-repo> --scope loop-driver --json 2>/dev/null)"
   STATUS="$(jq -r '.status' <<<"$PROBE_OUT" 2>/dev/null)"
   ERR_COUNT="$(jq -r '.errors | length' <<<"$PROBE_OUT" 2>/dev/null)"
   if [[ "$STATUS" != "fail" && "$ERR_COUNT" == "0" ]]; then

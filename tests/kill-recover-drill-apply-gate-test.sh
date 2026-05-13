@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT="/Users/josh/.claude/skills/.flywheel/scripts/kill-recover-drill.sh"
-LIB="${FLYWHEEL_JSONL_APPEND_LIB:-/Users/josh/.local/share/flywheel-watchers/lib/jsonl-append.sh}"
+SCRIPT="<flywheel-state>/scripts/kill-recover-drill.sh"
+LIB="${FLYWHEEL_JSONL_APPEND_LIB:-$HOME/.local/share/flywheel-watchers/lib/jsonl-append.sh}"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/kill-recover-drill-apply-gate.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 

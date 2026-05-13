@@ -2,8 +2,8 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/handoff-skill-to-skillos.sh"
-TMP="$(mktemp -d "${TMPDIR:-/tmp}/handoff-skill-to-skillos.XXXXXX")"
+SCRIPT="$ROOT/.flywheel/scripts/handoff-skill-to-{capability-control-plane}.sh"
+TMP="$(mktemp -d "${TMPDIR:-/tmp}/handoff-skill-to-{capability-control-plane}.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 
 pass_count=0
@@ -22,7 +22,7 @@ assert_jq() {
   fi
 }
 
-mkdir -p "$TMP/bin" "$TMP/home/.claude/skills/local-skill" "$TMP/skillos-state"
+mkdir -p "$TMP/bin" "$TMP/home/.claude/skills/local-skill" "$TMP/{capability-control-plane}-state"
 cat >"$TMP/home/.claude/skills/local-skill/SKILL.md" <<'EOF'
 ---
 name: local-skill
@@ -61,7 +61,7 @@ env_base=(
   "HOME=$TMP/home"
   "PATH=$TMP/bin:$PATH"
   "HANDOFF_SKILL_TO_SKILLOS_SKILL_ROOTS=$TMP/home/.claude/skills"
-  "HANDOFF_SKILL_TO_SKILLOS_SKILLOS_STATE_DIR=$TMP/skillos-state"
+  "HANDOFF_SKILL_TO_SKILLOS_SKILLOS_STATE_DIR=$TMP/{capability-control-plane}-state"
   "HANDOFF_SKILL_TO_SKILLOS_DISPATCH_LOG=$TMP/dispatch-log.jsonl"
   "HANDOFF_SKILL_TO_SKILLOS_CURL=$TMP/bin/curl"
   "HANDOFF_SKILL_TO_SKILLOS_JSM=$TMP/bin/jsm"
@@ -80,7 +80,7 @@ else
   fail "dry-run mutated send or dispatch log"
 fi
 
-touch "$TMP/skillos-state/local-skill-v1.2-20260505.json"
+touch "$TMP/{capability-control-plane}-state/local-skill-v1.2-20260505.json"
 set +e
 env "${env_base[@]}" "$SCRIPT" local-skill 1.2.3 >"$TMP/duplicate.json"
 duplicate_rc=$?
@@ -95,10 +95,10 @@ set -e
 if [[ "$forbidden_rc" == "3" ]]; then pass "forbidden exit code"; else fail "forbidden exit code rc=$forbidden_rc"; fi
 assert_jq "$TMP/forbidden.json" '.action == "forbidden" and .ownership == "upstream" and .reason == "ownership_forbidden"' "forbidden json"
 
-rm -f "$TMP/skillos-state/local-skill-v1.2-20260505.json" "$TMP/dispatch-log.jsonl" "$TMP/curl-payloads.jsonl"
+rm -f "$TMP/{capability-control-plane}-state/local-skill-v1.2-20260505.json" "$TMP/dispatch-log.jsonl" "$TMP/curl-payloads.jsonl"
 env "${env_base[@]}" "$SCRIPT" local-skill 1.2.3 >"$TMP/sent.json"
 assert_jq "$TMP/sent.json" '.action == "sent" and .message_id == 123 and .ownership == "local"' "send json"
-assert_jq "$TMP/dispatch-log.jsonl" '.event == "skillos_handoff_sent" and .skill == "local-skill" and .version == "1.2.3" and .message_id == 123 and .project_key == "/Users/josh/.local/state/flywheel/fleet-mail-project" and .skillos_handoff_skipped_reason == null' "dispatch log sent row"
+assert_jq "$TMP/dispatch-log.jsonl" '.event == "{capability-control-plane}_handoff_sent" and .skill == "local-skill" and .version == "1.2.3" and .message_id == 123 and .project_key == "$HOME/.local/state/flywheel/fleet-mail-project" and .{capability-control-plane}_handoff_skipped_reason == null' "dispatch log sent row"
 assert_jq "$TMP/curl-payloads.jsonl" '.params.name == "send_message" and .params.arguments.sender_name == "LavenderGlen" and .params.arguments.to[0] == "FoggyBear" and (.params.arguments.subject | test("local-skill v1.2.3"))' "curl payload"
 
 printf 'RESULT pass=%s fail=%s\n' "$pass_count" "$fail_count"

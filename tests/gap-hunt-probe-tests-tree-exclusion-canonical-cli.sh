@@ -89,7 +89,7 @@ fi
 python_test=$(python3 <<'PY'
 from pathlib import Path
 
-REPO_ROOT = Path("/Users/josh/Developer/flywheel")
+REPO_ROOT = Path("<flywheel-repo>")
 
 def _is_in_test_tree(p: Path) -> bool:
     try:

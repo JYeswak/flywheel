@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-LOOP="${FLYWHEEL_LOOP_BIN:-/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop}"
+LOOP="${FLYWHEEL_LOOP_BIN:-<flywheel-state>/bin/flywheel-loop}"
 TMP="$(mktemp -d -t 4vg3.XXXXXX)"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -24,15 +24,15 @@ assert_jq() {
 write_roster() {
   local path="$1"
   {
-    jq -nc '{ts:"2026-05-08T00:00:00Z",event:"session_active",session:"flywheel",agent_mail_project:"/Users/josh/.local/state/flywheel/fleet-mail-project",agent_mail_identity:"LavenderGlen"}'
-    jq -nc '{ts:"2026-05-08T00:00:00Z",event:"session_active",session:"alpsinsurance",agent_mail_project:"/Users/josh/Developer/alpsinsurance",agent_mail_identity:"CoralRaven"}'
-    jq -nc '{ts:"2026-05-08T00:00:00Z",event:"session_active",session:"missing-id",agent_mail_project:"/Users/josh/Developer/missing-id",agent_mail_identity:null}'
+    jq -nc '{ts:"2026-05-08T00:00:00Z",event:"session_active",session:"flywheel",agent_mail_project:"$HOME/.local/state/flywheel/fleet-mail-project",agent_mail_identity:"LavenderGlen"}'
+    jq -nc '{ts:"2026-05-08T00:00:00Z",event:"session_active",session:"{session}",agent_mail_project:"$HOME/Developer/{session}",agent_mail_identity:"CoralRaven"}'
+    jq -nc '{ts:"2026-05-08T00:00:00Z",event:"session_active",session:"missing-id",agent_mail_project:"$HOME/Developer/missing-id",agent_mail_identity:null}'
   } >"$path"
 }
 
 write_pulse() {
   local path="$1" alive="${2:-true}"
-  jq -nc --argjson alive "$alive" '{ts:"2026-05-08T00:01:00Z",session:"alpsinsurance",orch_pane_alive:$alive}' >"$path"
+  jq -nc --argjson alive "$alive" '{ts:"2026-05-08T00:01:00Z",session:"{session}",orch_pane_alive:$alive}' >"$path"
   jq -nc '{ts:"2026-05-08T00:01:00Z",session:"missing-id",orch_pane_alive:true}' >>"$path"
 }
 
@@ -46,7 +46,7 @@ run_notify() {
 }
 
 if bash -n "$LOOP"; then pass "dispatcher_syntax"; else fail "dispatcher_syntax"; fi
-if bash -n /Users/josh/.claude/skills/.flywheel/lib/portable/notify.sh; then pass "notify_module_syntax"; else fail "notify_module_syntax"; fi
+if bash -n <flywheel-state>/lib/portable/notify.sh; then pass "notify_module_syntax"; else fail "notify_module_syntax"; fi
 
 roster="$TMP/team-roster.jsonl"
 pulse="$TMP/team-pulse.jsonl"
@@ -54,9 +54,9 @@ audit="$TMP/coordination-audit.jsonl"
 write_roster "$roster"
 write_pulse "$pulse" true
 
-active_out="$(run_notify active --to alpsinsurance --from flywheel --subject "handoff ready" --body "ready" --roster "$roster" --pulse "$pulse" --audit-log "$audit" --json)"
-assert_jq "$active_out" '.status == "sent" and .delivery_result == "sent" and .resolved_destination.agent_mail_project == "/Users/josh/Developer/alpsinsurance" and .resolved_destination.agent_mail_identity == "CoralRaven" and .audit_row_appended == true' "active_destination_routes_and_sends"
-assert_jq "$audit" '.schema_version == "flywheel-loop-notify-audit/v1" and .dest_session == "alpsinsurance" and .dest_identity == "CoralRaven" and (.subject_hash | type == "string") and (.subject? == null) and (.body? == null)' "audit_row_shape_has_hash_not_text"
+active_out="$(run_notify active --to {session} --from flywheel --subject "handoff ready" --body "ready" --roster "$roster" --pulse "$pulse" --audit-log "$audit" --json)"
+assert_jq "$active_out" '.status == "sent" and .delivery_result == "sent" and .resolved_destination.agent_mail_project == "$HOME/Developer/{session}" and .resolved_destination.agent_mail_identity == "CoralRaven" and .audit_row_appended == true' "active_destination_routes_and_sends"
+assert_jq "$audit" '.schema_version == "flywheel-loop-notify-audit/v1" and .dest_session == "{session}" and .dest_identity == "CoralRaven" and (.subject_hash | type == "string") and (.subject? == null) and (.body? == null)' "audit_row_shape_has_hash_not_text"
 
 missing_out="$(run_notify missing --to unknown --from flywheel --subject "ping" --body "body" --roster "$roster" --pulse "$pulse" --audit-log "$TMP/missing-audit.jsonl" --json)"
 [[ "$(cat "$TMP/missing.rc")" == "2" ]] && pass "missing_roster_exit_code" || fail "missing_roster_exit_code"
@@ -64,7 +64,7 @@ assert_jq "$missing_out" '.status == "refused" and .failure_class == "missing_ro
 
 dead_pulse="$TMP/dead-pulse.jsonl"
 write_pulse "$dead_pulse" false
-dead_out="$(run_notify dead --to alpsinsurance --from flywheel --subject "ping" --body "body" --roster "$roster" --pulse "$dead_pulse" --audit-log "$TMP/dead-audit.jsonl" --json)"
+dead_out="$(run_notify dead --to {session} --from flywheel --subject "ping" --body "body" --roster "$roster" --pulse "$dead_pulse" --audit-log "$TMP/dead-audit.jsonl" --json)"
 [[ "$(cat "$TMP/dead.rc")" == "2" ]] && pass "dead_destination_exit_code" || fail "dead_destination_exit_code"
 assert_jq "$dead_out" '.status == "refused" and .failure_class == "destination_dead"' "dead_destination_refused"
 
@@ -73,7 +73,7 @@ missing_id_out="$(run_notify missing-id --to missing-id --from flywheel --subjec
 assert_jq "$missing_id_out" '.status == "refused" and .failure_class == "missing_identity"' "missing_identity_refused"
 
 token_audit="$TMP/token-audit.jsonl"
-token_out="$(run_notify token --to alpsinsurance --from flywheel --subject "Bearer aa.bb-cc" --body "registration_token=abcdefghijklmnopqrstuvwxyz123456" --roster "$roster" --pulse "$pulse" --audit-log "$token_audit" --json)"
+token_out="$(run_notify token --to {session} --from flywheel --subject "Bearer aa.bb-cc" --body "registration_token=abcdefghijklmnopqrstuvwxyz123456" --roster "$roster" --pulse "$pulse" --audit-log "$token_audit" --json)"
 assert_jq "$token_out" '.status == "sent" and .token_safety.raw_token_patterns_found >= 2 and .token_safety.agent_mail_token_echo == false' "token_patterns_scrubbed"
 if grep -E 'aa\.bb-cc|abcdefghijklmnopqrstuvwxyz123456|Bearer ' "$token_out" "$token_audit" >/dev/null; then
   fail "no_raw_token_in_output_or_audit"

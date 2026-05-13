@@ -2,7 +2,7 @@
 title: Filesystem-as-RAG discipline
 type: doctrine
 created: 2026-05-10
-bead: flywheel-s8tdd
+bead: {bead-id}
 parent: doctor-mode-integration
 tags:
   - doctrine
@@ -16,7 +16,7 @@ status: active
 
 > "Treat our filesystems like a RAG in and of itself; every repo we touch
 > needs to be built and organized as if we were presenting it to the world."
-> — Joshua, 2026-05-10
+> — {operator}, 2026-05-10
 
 The filesystem **is** the retrieval substrate. Agents and humans alike
 discover content by browsing directories, reading frontmatter, scanning
@@ -150,7 +150,7 @@ and enforcement cannot drift.
 ### 9. Cross-repo Propagation
 
 Doctrine ships in flywheel **first**. Propagation to sister repos
-(alps, mobile-eats, skillos, vrtx, picoz, zesttube) files as separate
+({insurance-client}, {proof-product}, {capability-control-plane}, vrtx, {session}, zesttube) files as separate
 followup beads — each is a per-repo lift of ~1h (copy linter +
 scaffolder, run baseline, backfill).
 
@@ -175,7 +175,7 @@ scaffolder, run baseline, backfill).
 
 ### When the pre-commit hook refuses
 
-Either fix the violation (preferred) or pass `--no-verify` (Joshua's
+Either fix the violation (preferred) or pass `--no-verify` ({operator}'s
 prerogative; document the reason in the commit message).
 
 ## Cross-references
@@ -188,13 +188,13 @@ prerogative; document the reason in the commit message).
 - Sibling discipline: `canonical-cli-scoping`
   (`~/.claude/skills/canonical-cli-scoping/SKILL.md`)
 - Sibling linter: `.flywheel/scripts/canonical-cli-lint.sh`
-  (flywheel-etp5n)
+  ({bead-id})
 
 ## Why this matters
 
-Joshua's signoff names the load-bearing claim: "every repo we touch needs
+{operator}'s signoff names the load-bearing claim: "every repo we touch needs
 to be built and organized as if we were presenting it to the world." The
-audience is not just the future Joshua — it is every autonomous agent
+audience is not just the future {operator} — it is every autonomous agent
 that browses the tree, every operator who hits the codebase cold, and
 every retrieval pipeline that indexes the artifacts. The filesystem is
 the first contact surface; structural discipline at this layer

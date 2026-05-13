@@ -78,8 +78,8 @@ MISSION TIE-IN
       removes the per-machine config drift that left it half-configured.
     - removes drift: 5 keys were drifted from declared values on
       josh@local 2026-05-07; this script makes drift detectable + fixable.
-    - isomorphic: identical config across flywheel, alpsinsurance, skillos,
-      mobile-eats, vrtx, clutterfreespaces.
+    - isomorphic: identical config across flywheel, {session}, {capability-control-plane},
+      {proof-product}, vrtx, clutterfreespaces.
 EOF
 }
 
@@ -96,7 +96,7 @@ EXAMPLES
     install-ntm-config.sh --apply
 
     # Explicit repo path (CI/cron usage).
-    install-ntm-config.sh --repo /Users/josh/Developer/flywheel --apply
+    install-ntm-config.sh --repo <flywheel-repo> --apply
 EOF
 }
 

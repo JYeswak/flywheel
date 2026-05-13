@@ -1,12 +1,21 @@
 #!/usr/bin/env bash
 # tests/file-rag-discipline-lint.sh — regression test for file-rag-discipline-lint.sh
-# AG5 of flywheel-s8tdd.
+# AG5 of {bead-id}.
 set -euo pipefail
 
-REPO="${REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
+REPO="${REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)}"
 LINTER="${LINTER:-$REPO/.flywheel/scripts/file-rag-discipline-lint.sh}"
 SCAFFOLDER="${SCAFFOLDER:-$REPO/.flywheel/scripts/scaffold-doc-frontmatter.sh}"
 DOCTRINE="${DOCTRINE:-$REPO/.flywheel/doctrine/filesystem-as-rag.md}"
+if [[ ! -e "$LINTER" && -e "$REPO/scripts/file-rag-discipline-lint.sh" ]]; then
+  LINTER="$REPO/scripts/file-rag-discipline-lint.sh"
+fi
+if [[ ! -e "$SCAFFOLDER" && -e "$REPO/scripts/scaffold-doc-frontmatter.sh" ]]; then
+  SCAFFOLDER="$REPO/scripts/scaffold-doc-frontmatter.sh"
+fi
+if [[ ! -e "$DOCTRINE" && -e "$REPO/doctrine/filesystem-as-rag.md" ]]; then
+  DOCTRINE="$REPO/doctrine/filesystem-as-rag.md"
+fi
 
 [[ -x "$LINTER" ]] || { echo "FAIL linter missing: $LINTER" >&2; exit 1; }
 [[ -x "$SCAFFOLDER" ]] || { echo "FAIL scaffolder missing: $SCAFFOLDER" >&2; exit 1; }
@@ -17,6 +26,7 @@ fail(){ printf 'FAIL %s\n' "$1" >&2; exit 1; }
 
 WORK_TMP="$(mktemp -d -t s8tdd-test.XXXXXX)"
 trap 'rm -rf "$WORK_TMP"' EXIT
+export RUN_LOG="$WORK_TMP/scaffold-doc-frontmatter-runs.jsonl"
 
 # 1. linter syntax-clean
 bash -n "$LINTER" || fail "linter bash -n"
@@ -230,4 +240,4 @@ echo "$SCAN" | jq -e '.schema_version == "file-rag-discipline-lint/v1" and (.fil
   || fail "--scan-all envelope malformed"
 pass "--scan-all --json: canonical envelope (files_scanned=$(echo "$SCAN" | jq -r '.files_scanned'))"
 
-printf 'flywheel-s8tdd file-rag-discipline-lint test passed (20 assertions)\n'
+printf '{bead-id} file-rag-discipline-lint test passed (20 assertions)\n'

@@ -58,10 +58,10 @@ from pathlib import Path
 path = Path(sys.argv[1])
 rows = [
     ("fixture-alpha", "flywheel", 1),
-    ("fixture-alpha", "picoz", 2),
-    ("fixture-alpha", "skillos", 3),
-    ("fixture-beta", "alpsinsurance", 4),
-    ("fixture-beta", "mobile-eats", 5),
+    ("fixture-alpha", "{session}", 2),
+    ("fixture-alpha", "{capability-control-plane}", 3),
+    ("fixture-beta", "{session}", 4),
+    ("fixture-beta", "{proof-product}", 5),
     ("fixture-gamma", "zesttube", 6),
     ("fixture-delta", "vrtx", 7),
 ]

@@ -46,4 +46,4 @@ shasum -a 256 templates/flywheel-install/*.tmpl
 
 Rendered files should carry the hash of the specific template used in `template_hash`.
 
-Part of the Yuzu Method framework by ZestStream.
+Part of the Yuzu Method framework by {operator-company}.

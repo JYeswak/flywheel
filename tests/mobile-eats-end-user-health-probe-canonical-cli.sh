@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# tests/mobile-eats-end-user-health-probe-canonical-cli.sh
+# tests/{proof-product}-end-user-health-probe-canonical-cli.sh
 # flywheel-k8gcv.8 (wave-3-08).
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/mobile-eats-end-user-health-probe.sh"
+SCRIPT="$ROOT/.flywheel/scripts/{proof-product}-end-user-health-probe.sh"
 
 pass_count=0
 fail_count=0
@@ -36,7 +36,7 @@ if bash -n "$SCRIPT" 2>/dev/null; then pass "syntax"; else fail "syntax"; fi
 # Apply WITH idem-key emits probe row
 TMP_LEDGER="$(mktemp -t k8gcv8-led.XXXXXX)"
 MOBILE_EATS_HEALTH_LEDGER="$TMP_LEDGER" "$SCRIPT" --apply --idempotency-key meu-test-2026-05-11 --json 2>/dev/null \
-  | jq -e '.schema_version == "mobile-eats-end-user-health/v1" and has("freshness_status") and has("kpi_surfaces_present_count")' >/dev/null \
+  | jq -e '.schema_version == "{proof-product}-end-user-health/v1" and has("freshness_status") and has("kpi_surfaces_present_count")' >/dev/null \
   && pass "--apply --idempotency-key writes probe row" || fail "--apply with idem-key"
 # Verify ledger row exists
 [[ -s "$TMP_LEDGER" ]] && pass "apply mode appended to ledger" || fail "ledger not written"
@@ -48,15 +48,15 @@ grep -q '# flywheel-cli-surface: true' "$SCRIPT" && pass "L6 magic comment prese
 [[ "$rc" -eq 0 ]] && pass "canonical-cli-lint RC=0 (was RC=1 with 3 violations: L5+L6+L7)" || fail "lint RC=$rc"
 
 # Backward compat
-"$SCRIPT" --doctor --json 2>/dev/null | jq -e '.schema_version == "mobile-eats-end-user-health/v1" and .mode == "doctor"' >/dev/null && pass "legacy --doctor flag preserved (different shape from canonical doctor subcommand)" || fail "legacy --doctor"
+"$SCRIPT" --doctor --json 2>/dev/null | jq -e '.schema_version == "{proof-product}-end-user-health/v1" and .mode == "doctor"' >/dev/null && pass "legacy --doctor flag preserved (different shape from canonical doctor subcommand)" || fail "legacy --doctor"
 "$SCRIPT" --info --json 2>/dev/null | jq -e '.kpi_surfaces and .freshness_budget_hours and .owns' >/dev/null && pass "legacy --info fields preserved (kpi_surfaces+freshness_budget+owns)" || fail "legacy --info fields"
 "$SCRIPT" --schema --json 2>/dev/null | jq -e '.ledger_row_required_fields and .proxy_metrics' >/dev/null && pass "legacy --schema fields preserved (ledger_row_required_fields+proxy_metrics)" || fail "legacy --schema fields"
-"$SCRIPT" --help 2>&1 | head -3 | grep -qE 'Usage|mobile-eats' && pass "--help shows usage" || fail "--help"
+"$SCRIPT" --help 2>&1 | head -3 | grep -qE 'Usage|{proof-product}' && pass "--help shows usage" || fail "--help"
 "$SCRIPT" --bogus >/dev/null 2>&1; rc=$?
 [[ "$rc" -eq 64 ]] && pass "unknown arg rc=64 (preserved)" || fail "unknown arg rc=$rc"
 
 # --examples without --json emits text
-"$SCRIPT" --examples 2>&1 | grep -q 'mobile-eats-end-user-health' && pass "--examples text-mode preserved" || fail "--examples text"
+"$SCRIPT" --examples 2>&1 | grep -q '{proof-product}-end-user-health' && pass "--examples text-mode preserved" || fail "--examples text"
 
 # Dry-run default (no --apply, no --dry-run) emits probe row without writing ledger
 TMP_LEDGER2="$(mktemp -t k8gcv8-led2.XXXXXX)"
