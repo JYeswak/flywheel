@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+SOURCE="${BASH_SOURCE[0]}"
+while [[ -L "$SOURCE" ]]; do
+  SOURCE_DIR="$(cd "$(dirname "$SOURCE")" && pwd -P)"
+  TARGET="$(readlink "$SOURCE")"
+  [[ "$TARGET" == /* ]] && SOURCE="$TARGET" || SOURCE="$SOURCE_DIR/$TARGET"
+done
+SCRIPT_ROOT="$(cd "$(dirname "$SOURCE")/.." && pwd -P)"
+ROOT="$(
+  git -C "$PWD" rev-parse --show-toplevel 2>/dev/null || pwd -P
+)"
 EVENT_NAME="pull_request"
 RUN_ACT=1
 ACT_DRYRUN=0
@@ -9,6 +18,7 @@ STRICT=1
 SKIP_TESTS=0
 ACT_PLATFORM="ubuntu-22.04=catthehacker/ubuntu:act-22.04"
 ACT_SERVER_ADDR="${ACT_SERVER_ADDR:-127.0.0.1}"
+ACT_SERVER_PORT="${ACT_SERVER_PORT:-0}"
 
 usage() {
   cat <<'EOF'
@@ -83,15 +93,34 @@ if [[ "$RUN_ACT" -eq 1 ]]; then
 fi
 
 if [[ "$SKIP_TESTS" -eq 0 ]]; then
-  run bash "$ROOT/tests/github-workflows.sh"
+  if [[ -x "$ROOT/tests/github-workflows.sh" || -f "$ROOT/tests/github-workflows.sh" ]]; then
+    run bash "$ROOT/tests/github-workflows.sh"
+  else
+    printf 'SKIP repo_contract reason=missing-tests-github-workflows-sh repo=%s\n' "$ROOT"
+  fi
 fi
 
-run actionlint "$ROOT"/.github/workflows/*.yml
+workflow_files=()
+if [[ -d "$ROOT/.github/workflows" ]]; then
+  for workflow in "$ROOT"/.github/workflows/*.yml "$ROOT"/.github/workflows/*.yaml; do
+    [[ -f "$workflow" ]] && workflow_files+=("$workflow")
+  done
+fi
+
+if [[ "${#workflow_files[@]}" -eq 0 ]]; then
+  printf 'SKIP local_actions_preflight reason=no-github-workflows repo=%s\n' "$ROOT"
+  printf 'SUMMARY local_actions_preflight=skipped reason=no-github-workflows\n'
+  exit 0
+fi
+
+run actionlint "${workflow_files[@]}"
 
 if [[ "$RUN_ACT" -eq 0 ]]; then
   printf 'SUMMARY local_actions_preflight=pass act=skipped\n'
   exit 0
 fi
+
+repo_key="$(printf '%s' "$ROOT" | cksum | awk '{print $1}')"
 
 act_args=(
   "$EVENT_NAME"
@@ -99,8 +128,10 @@ act_args=(
   --container-architecture linux/amd64
   --platform "$ACT_PLATFORM"
   --artifact-server-addr "$ACT_SERVER_ADDR"
-  --artifact-server-path "${TMPDIR:-/tmp}/flywheel-act-artifacts"
+  --artifact-server-port "$ACT_SERVER_PORT"
+  --artifact-server-path "${TMPDIR:-/tmp}/flywheel-act-artifacts/$repo_key"
   --cache-server-addr "$ACT_SERVER_ADDR"
+  --cache-server-port "$ACT_SERVER_PORT"
 )
 
 if [[ "$STRICT" -eq 1 ]]; then
@@ -111,32 +142,46 @@ if [[ "$ACT_DRYRUN" -eq 1 ]]; then
   act_args+=(--dryrun)
 fi
 
-run act "${act_args[@]}" --workflows "$ROOT/.github/workflows/ci.yml" --job public-surface
-run act "${act_args[@]}" --workflows "$ROOT/.github/workflows/installer-smoke.yml" --job install-doctor-uninstall --matrix os:ubuntu-22.04
+if [[ "$ROOT" == "$SCRIPT_ROOT" ]]; then
+  run act "${act_args[@]}" --workflows "$ROOT/.github/workflows/ci.yml" --job public-surface
+  run act "${act_args[@]}" --workflows "$ROOT/.github/workflows/installer-smoke.yml" --job install-doctor-uninstall --matrix os:ubuntu-22.04
 
-run act workflow_dispatch \
-  --directory "$ROOT" \
-  --container-architecture linux/amd64 \
-  --platform "$ACT_PLATFORM" \
-  --artifact-server-addr "$ACT_SERVER_ADDR" \
-  --cache-server-addr "$ACT_SERVER_ADDR" \
-  --strict \
-  --dryrun \
-  --input tag=v0.2.0 \
-  --workflows "$ROOT/.github/workflows/release.yml" \
-  --job package
+  run act workflow_dispatch \
+    --directory "$ROOT" \
+    --container-architecture linux/amd64 \
+    --platform "$ACT_PLATFORM" \
+    --artifact-server-addr "$ACT_SERVER_ADDR" \
+    --artifact-server-port "$ACT_SERVER_PORT" \
+    --cache-server-addr "$ACT_SERVER_ADDR" \
+    --cache-server-port "$ACT_SERVER_PORT" \
+    --strict \
+    --dryrun \
+    --input tag=v0.2.0 \
+    --workflows "$ROOT/.github/workflows/release.yml" \
+    --job package
 
-run act workflow_dispatch \
-  --directory "$ROOT" \
-  --container-architecture linux/amd64 \
-  --platform "$ACT_PLATFORM" \
-  --artifact-server-addr "$ACT_SERVER_ADDR" \
-  --cache-server-addr "$ACT_SERVER_ADDR" \
-  --strict \
-  --dryrun \
-  --input tag=v0.2.0 \
-  --workflows "$ROOT/.github/workflows/site.yml" \
-  --job deploy
+  run act workflow_dispatch \
+    --directory "$ROOT" \
+    --container-architecture linux/amd64 \
+    --platform "$ACT_PLATFORM" \
+    --artifact-server-addr "$ACT_SERVER_ADDR" \
+    --artifact-server-port "$ACT_SERVER_PORT" \
+    --cache-server-addr "$ACT_SERVER_ADDR" \
+    --cache-server-port "$ACT_SERVER_PORT" \
+    --strict \
+    --dryrun \
+    --input tag=v0.2.0 \
+    --workflows "$ROOT/.github/workflows/site.yml" \
+    --job deploy
+else
+  for workflow in "${workflow_files[@]}"; do
+    if ! grep -Eq '^[[:space:]]*pull_request:' "$workflow"; then
+      printf 'SKIP act_workflow reason=no-pull-request-trigger workflow=%s\n' "$workflow"
+      continue
+    fi
+    run act "${act_args[@]}" --workflows "$workflow"
+  done
+fi
 
 printf 'SUMMARY local_actions_preflight=pass act=%s docker_context=%s\n' \
   "$([[ "$ACT_DRYRUN" -eq 1 ]] && printf dryrun || printf run)" \
