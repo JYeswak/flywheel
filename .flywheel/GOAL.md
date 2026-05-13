@@ -10,7 +10,7 @@ template_version: "0.1.0"
 template_hash: 43d3b3f39af636be079de8e8d2728360fced885e6438c26afd88f5e461a17ebf
 rendered_at: 20260501T052023Z
 rendered_by: flywheel-loop-reconcile
-lock_hash: 073c77b8ebb7a70a4c75c2587f89d00aecd34339ce123f6af3558bdf0ca40178
+lock_hash: bbf8b1f38c88c96028528e9f505336b66830a7274cc300d1bb8c748fe8ba3a8b
 locked_at: 2026-05-01T01:25:43Z
 locked_by: template-live-doc-backfill
 source_path: /Users/josh/Developer/flywheel/.flywheel/GOAL.md
@@ -38,6 +38,12 @@ the receipts that prove the system behaves across supported agent surfaces.
 The claim is not publishable until every supported path has an isolated proof,
 not just local macOS evidence.
 
+Every TODO, gap item, audit finding, doctor warning, unproven support claim,
+private-overlay dependency, and release-blocking ambiguity must be either
+closed with an executable receipt or carried in a named release-blocker registry
+with owner, evidence, next action, and disposition. No informal "later" bucket is
+allowed for this goal.
+
 ## Required Workstreams
 
 1. Rename the ecosystem surfaces so public names, package names, CLI names,
@@ -58,6 +64,9 @@ not just local macOS evidence.
    publication validation path that becomes materially slow.
 7. Coordinate with SkillOS and adjacent repos when a missing skill, public
    boundary, or reusable substrate gap is discovered.
+8. Maintain a release-blocker registry that accounts for every TODO/gap item
+   found during publication work until it is closed, deferred with an explicit
+   non-release disposition, or promoted into a tracked issue/bead.
 
 ## Measured Acceptance Criteria
 
@@ -79,6 +88,8 @@ not just local macOS evidence.
   next action; no warning is allowed to be waved through without classification.
 - The release surface is actually published or staged in the exact public
   location named by the release plan.
+- The release-blocker registry has zero unowned rows and no open `release_blocker`
+  rows at final publication time.
 
 ## Validation Commands
 
@@ -90,6 +101,8 @@ not just local macOS evidence.
 - `/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json`
 - To be added: isolated install/run receipts for Claude, Codex, Gemini, OpenClaw,
   and reduced local mode.
+- To be added: release-blocker registry validation proving every TODO/gap item
+  is owned, evidenced, and dispositioned.
 
 ## Current Blockers
 
