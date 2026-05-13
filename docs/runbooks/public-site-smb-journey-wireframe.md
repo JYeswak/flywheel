@@ -50,6 +50,25 @@ What not to copy:
 - a dark mono-palette that would make ZestStream feel like a clone;
 - "AI infrastructure" language that does not speak to owners.
 
+### Visual Source Receipt
+
+Local Playwright review on 2026-05-13 captured the current reference surfaces
+into `/tmp/flywheel-site-research/`. The takeaway is not "make a darker SaaS
+site." The takeaway is that the page must feel like the reader has stepped into
+a real operating system for the work.
+
+| Reference | Observable move | Flywheel requirement |
+|---|---|---|
+| `asupersync.com` | Oversized named premise with instrument-like proof around it. | The hero must show the operating room and one selected slice before asking the owner to trust the method. |
+| `frankentui.com` | A live-feeling interface that makes the product feel tangible before the prose explains it. | Workflow maps, proof rails, and blocked states should be on-screen objects, not claims in paragraph copy. |
+| `jeffreyemanuel.com` | Personal accountability is close to the technical depth. | Joshua's owner-facing promise and public email stay visible without turning the page into a resume. |
+| `agent-flywheel.com` | The system language is memorable because the visual world reinforces it. | `slice`, `proof rail`, `blocked`, and `Peel. Press. Pour.™` must become repeated visual grammar across Flywheel and later ZestStream pages. |
+
+The ZestStream translation must be brighter, more practical, and less
+developer-dense than the references. The reader should leave thinking: "he sees
+my workflow mess, he has controls for AI risk, and I can start with one small
+piece."
+
 ## SMB Trust Research
 
 The story must address what owners actually worry about. 2025 SMB research

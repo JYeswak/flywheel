@@ -26,16 +26,32 @@
     </header>
     <main>
       <section class="operating-hero" aria-labelledby="hero-title">
-        <img class="hero-map" src="./assets/operating-room-map.svg" alt="ZestStream operating room map showing disconnected SMB systems, one highlighted workflow slice, and a proof rail">
-        <div class="hero-overlay shell">
+        <div class="hero-scanline" aria-hidden="true"></div>
+        <div class="shell hero-grid">
           <div class="hero-copy">
-            <div class="status-pill">The Yuzu Method ® by ZestStream</div>
-            <h1 id="hero-title">Your business already has the data. The work is just hidden between tools.</h1>
+            <div class="hero-status-row" aria-label="Flywheel status">
+              <span class="status-pill">The Yuzu Method ® by ZestStream</span>
+              <span class="status-chip">SMB lane</span>
+              <span class="status-chip proof">Proof first</span>
+            </div>
+            <h1 id="hero-title" aria-label="Your business already has the data. The work is just hidden between tools.">Your business already has the data. <span>The work is just hidden between tools.</span></h1>
             <p class="lead">Email, CRM, calendars, invoices, documents, and reports all hold part of the truth. The manual work between them is where time disappears.</p>
-            <p>I help SMB owners buy their time back. Flywheel is the visible method I use to map the work, cut one bounded workflow slice, prove what changed, and keep the lesson for the next build.</p>
+            <p class="operator-line">I help SMB owners buy their time back. Flywheel is the visible method I use to map the work, cut one bounded workflow slice, prove what changed, and keep the lesson for the next build.</p>
             <div class="actions">
               <a class="button" href="./contact/index.html">Map my workflow</a>
               <a class="button secondary" href="#proof-path">Inspect the proof</a>
+            </div>
+          </div>
+          <div class="hero-instrument" aria-label="ZestStream operating room">
+            <div class="instrument-topline">
+              <span>OPERATING ROOM</span>
+              <span>Proof states: active</span>
+            </div>
+            <img class="hero-map" src="./assets/operating-room-map.svg" alt="ZestStream operating room map showing disconnected SMB systems, one highlighted workflow slice, and a proof rail">
+            <div class="instrument-footer" aria-label="Peel. Press. Pour.™">
+              <span>Peel</span>
+              <span>Press</span>
+              <span>Pour</span>
             </div>
           </div>
         </div>
@@ -47,7 +63,7 @@
             <p class="kicker">The real problem</p>
             <h2>The mess has a shape.</h2>
           </div>
-          <p class="section-lead">Most SMB AI pitches skip the workflow and start with the tool. That is backwards. The first useful work is seeing where the handoffs, re-entry, screenshots, and memory-based decisions already live.</p>
+          <p class="section-lead">Owners are not wrong to be cautious. The useful work starts by naming the handoffs, re-entry, screenshots, and memory-based decisions already living in the business.</p>
         </div>
         <div class="shell route-board" aria-label="Common SMB workflow route">
           <div class="route-node"><span>Email</span><small>request starts</small></div>
@@ -107,7 +123,7 @@
           <div>
             <p class="kicker">Advanced AI, controlled loop</p>
             <h2 id="control-title">Blocked is better than bluffing.</h2>
-            <p>I use current AI coding systems, including work influenced by Jeff Emanuel's public agent tooling, but the owner does not need to run the machinery. The work goes through a visible loop: map, build, test, review, reuse.</p>
+            <p>I study current AI coding systems, including Jeff Emanuel's public agent tooling, but the owner does not need to run the machinery. The work goes through a visible loop: map, build, test, review, reuse.</p>
           </div>
           <div class="proof-stack" id="proof-path" aria-label="Proof states">
             <div class="proof-row"><span class="proof-dot good"></span><strong>Private work stays private.</strong><em>Redacted, consented, or replaced before public proof.</em></div>
@@ -140,7 +156,7 @@
           <div>
             <p class="kicker">For reviewers</p>
             <h2 id="technical-title">The proof gets deeper on demand.</h2>
-            <p>Business owners should not need GitHub depth to understand the offer. Technical reviewers can still inspect the reduced local path and the current blockers.</p>
+            <p>Business owners should not need GitHub depth to understand the offer. Technical reviewers can still inspect the reduced local path, the current blockers, and the public repository when Joshua approves the cutover.</p>
           </div>
           <pre><code>git clone https://github.com/JYeswak/flywheel.git
 cd flywheel
