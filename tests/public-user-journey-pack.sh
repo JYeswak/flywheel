@@ -33,7 +33,7 @@ else
 fi
 
 cp "$PACK" "$TMP/no-visual.md"
-perl -0pi -e 's/Loop-map hero image/ /' "$TMP/no-visual.md"
+perl -0pi -e 's/Full-bleed dark operating-map hero with SMB systems, Flywheel core, and receipt stack/ /' "$TMP/no-visual.md"
 if python3 "$SCRIPT" --pack "$TMP/no-visual.md" --json >"$TMP/no-visual.json"; then
   fail "missing visual cue fails"
 elif jq -e '.status == "fail" and any(.errors[]?; .code == "STEP_VISUAL_CUE_MISSING")' "$TMP/no-visual.json" >/dev/null; then

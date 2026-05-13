@@ -104,6 +104,7 @@ for rel in \
   docs/evidence/external-review-log.jsonl \
   docs/runbooks/release-cutover-authorization.md \
   docs/runbooks/public-user-journey-pack.md \
+  docs/runbooks/public-site-smb-journey-wireframe.md \
   docs/runbooks/upstream-substrate-adoption.md \
   docs/runbooks/agent-lane-compatibility.md \
   docs/reference/commands.md \
@@ -144,6 +145,7 @@ require_literal "README.md" "docs/runbooks/release-cutover-authorization.md" "RE
 require_literal "docs/runbooks/release-cutover-authorization.md" "Agents must not make the" "release cutover runbook states agent boundary"
 require_literal "docs/runbooks/upstream-substrate-adoption.md" "Status: \`gated-evaluation\`." "upstream substrate runbook gates Asupersync"
 require_literal "docs/runbooks/public-user-journey-pack.md" "flywheel.public_user_journey_pack.v0" "user journey pack names schema"
+require_literal "docs/runbooks/public-user-journey-pack.md" "docs/runbooks/public-site-smb-journey-wireframe.md" "user journey pack links SMB wireframe"
 require_literal "docs/runbooks/public-user-journey-pack.md" "source_pack_id=user-journey-wireframe-pack" "user journey pack fixes source pack id"
 require_literal "docs/runbooks/public-user-journey-pack.md" "asset_id" "user journey pack requires asset id"
 require_literal "docs/runbooks/public-user-journey-pack.md" "persona_lane" "user journey pack requires persona lane"
@@ -165,6 +167,11 @@ require_literal "docs/runbooks/public-user-journey-pack.md" "STEP_VISUAL_CUE_MIS
 require_literal "docs/runbooks/public-user-journey-pack.md" "E2E_MAPPING_MISSING" "user journey pack names e2e failure code"
 require_literal "docs/runbooks/public-user-journey-pack.md" "PRIVATE_STATE_LEAK" "user journey pack names private leak failure code"
 require_literal "docs/runbooks/public-user-journey-pack.md" "CLAIM_WITHOUT_EVIDENCE" "user journey pack names evidence failure code"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "flywheel.public_site_smb_journey_wireframe.v0" "SMB wireframe names schema"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Do not lead with receipt machinery" "SMB wireframe blocks receipt-led hero"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Your business already has the data. It is just trapped in five systems" "SMB wireframe leads with owner problem"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Map my workflow" "SMB wireframe names primary CTA"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Implementation should not be accepted if the page can pass tests while still failing this journey." "SMB wireframe prevents tests-only acceptance"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/cutover-receipts.sh" "release runbook includes cutover receipt gate"
 require_literal "docs/runbooks/public-release-runbook.md" "docs/runbooks/public-user-journey-pack.md\` maps every public asset" "release runbook includes user journey pack gate"
 require_literal "docs/runbooks/public-release-runbook.md" "user-journey-pack-validation.json" "release runbook captures user journey validation receipt"

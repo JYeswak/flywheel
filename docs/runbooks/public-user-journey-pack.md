@@ -9,6 +9,11 @@ SkillOS, Flywheel, reviewers, and Joshua can evaluate the same publication
 surface before any final signoff. It is not a marketing plan; it is the journey
 contract for what a real visitor should see, trust, run, and verify.
 
+The SMB-facing site story is controlled by
+`docs/runbooks/public-site-smb-journey-wireframe.md`. The machine-readable rows
+in this pack are the validator surface behind that story, not a substitute for
+the visitor journey.
+
 ## Pack Rules
 
 - Every public claim must point to a proof asset, receipt, test, or live gate.
@@ -51,7 +56,7 @@ The validator aligns with SkillOS failure codes:
 
 | Asset | Audience | Promise | Required proof | Call to action | Signoff status |
 |---|---|---|---|---|---|
-| `site/index.html` | SMB owner | Flywheel makes AI-assisted work visible and accountable. | Reduced-mode command, evidence link, blocker honesty. | View GitHub or run the first loop. | Needs live-site review. |
+| `site/index.html` | SMB owner | Flywheel makes AI-assisted work visible and accountable for messy SMB systems. | Reduced-mode command, evidence link, blocker honesty, reusable ZestStream design-token layer. | Talk through your systems or inspect private GitHub. | Needs live-site review. |
 | `site/what-is/index.html` | SMB owner, technical buyer | Flywheel separates engine, capability control plane, and proof surfaces. | SkillOS boundary, support-tier language. | Continue to methodology. | Needs live-site review. |
 | `site/for-developers/index.html` | Developer | Developers can run reduced mode while agent lanes remain receipt-bound. | Harness compatibility wording and first-run link. | Open the repo and run commands. | Needs live-site review. |
 | `site/methodology/index.html` | Technical buyer | The method compounds lessons without exposing private customer state. | Publication metrics, consent fallback, evidence index. | Inspect publication evidence. | Needs live-site review. |
@@ -61,10 +66,12 @@ The validator aligns with SkillOS failure codes:
 | `CHARTER.md` | All readers | The mission, boundaries, and audience are explicit. | Objective, first-run bar, non-overclaiming rules. | Continue to persona-specific path. | Needs repo-copy review. |
 | `docs/getting-started/first-run.md` | Developer, operator | A first run is complete only with state, doctor, closeout, and next action. | `tests/installer-smoke.sh`, `tests/journey-smoke.sh`. | Run reduced first-run. | Needs repo-copy review. |
 | `docs/runbooks/public-release-runbook.md` | Operator | Publication can be replayed from commands and receipts. | `scripts/publication_readiness.py`, cutover receipt replay. | Produce the release bundle. | Needs operator review. |
+| `docs/runbooks/public-site-smb-journey-wireframe.md` | SMB owner, designer, reviewer | The public site must walk an SMB owner from problem recognition to trust before technical proof. | `tests/public-docs.sh`, Joshua review, website static/accessibility checks after implementation. | Approve the journey before rebuilding pages. | Needs Joshua journey review. |
 | `docs/evidence/publication-evidence.md` | Buyer, developer, reviewer | Trust claims are mapped to evidence and live blockers. | Current test counts and live blocker table. | Verify blockers before signoff. | Needs final refresh. |
 | `docs/evidence/publication-blocker-coverage.md` | Reviewer | Every live blocker has owner and closure proof. | Registry validator and readiness blocker coverage. | Keep open blockers visible. | Needs final refresh. |
 | Release assets | Operator, developer | Install script, checksum, and archive come from the same artifact set. | GitHub release assets and install proxy checksum. | Install from the public endpoint. | Blocked until release. |
 | `flywheel.zeststream.ai` | SMB owner, technical buyer | The public story is navigable without GitHub depth. | Website static/accessibility/link checks and live HEAD. | Contact or inspect evidence. | Approved for private/live staging; not final signoff. |
+| `site/design-tokens.css` | Designer, operator | Public pages share reusable ZestStream visual tokens instead of one-off page styling. | Token literals enforced by `tests/website-static.sh`. | Reuse tokens in the broader site rewrite. | Needs live-site review. |
 
 ## Machine-Readable Journey Rows
 
@@ -75,7 +82,7 @@ CTA mapping, signoff status, and blocker-or-skip receipt refs are mandatory.
 
 | asset_id | persona_lane | journey_stage | entrypoint | visible_wording | visual_cue | primary_cta | required_proof_refs | signoff_status | blocker_or_skip_receipt_ref | source_pack_id |
 |---|---|---|---|---|---|---|---|---|---|---|
-| site-home | SMB owner | trigger | site/index.html | Flywheel | Loop-map hero image | View GitHub | tests/website-static.sh; tests/website-accessibility.sh | needs-live-site-review | docs/evidence/publication-blocker-coverage.md | user-journey-wireframe-pack |
+| site-home | SMB owner | trigger | site/index.html | Connect the messy work. Keep the proof visible. | Full-bleed dark operating-map hero with SMB systems, Flywheel core, and receipt stack | Talk through your systems | tests/website-static.sh; tests/website-accessibility.sh | needs-live-site-review | docs/evidence/publication-blocker-coverage.md | user-journey-wireframe-pack |
 | site-what-is | SMB owner | orient | site/what-is/index.html | SkillOS is a capability control plane integration point | Boundary section | Continue to methodology | tests/website-static.sh; docs/concepts/skillos-boundary.md | needs-live-site-review | docs/evidence/publication-blocker-coverage.md | user-journey-wireframe-pack |
 | site-developers | Developer | orient | site/for-developers/index.html | Reduced local mode | Support-tier table | Run the first loop | tests/website-static.sh; tests/journey-smoke.sh | needs-live-site-review | receipts/agent-lanes/claude.json | user-journey-wireframe-pack |
 | site-methodology | Technical buyer | decide | site/methodology/index.html | fully redacted, explicitly consented, or replaced | Methodology metrics block | Inspect publication evidence | tests/website-static.sh; docs/evidence/publication-evidence.md | needs-live-site-review | docs/evidence/publication-blocker-coverage.md | user-journey-wireframe-pack |
@@ -85,10 +92,12 @@ CTA mapping, signoff status, and blocker-or-skip receipt refs are mandatory.
 | charter | Signoff reviewer | orient | CHARTER.md | Public project should be useful to a business owner | Audience section | Continue to journey pack | tests/public-top-level-files.sh; tests/public-docs.sh | needs-repo-copy-review | docs/evidence/publication-blocker-coverage.md | user-journey-wireframe-pack |
 | first-run | Developer | act | docs/getting-started/first-run.md | You are done with the first run when | Journey checklist | Run reduced first-run | tests/installer-smoke.sh; tests/journey-smoke.sh | needs-repo-copy-review | docs/evidence/publication-blocker-coverage.md | user-journey-wireframe-pack |
 | release-runbook | Operator | act | docs/runbooks/public-release-runbook.md | Final Publication Readiness And Signoff | Required evidence table | Produce the release receipt bundle | tests/publication-readiness.sh; tests/cutover-receipts.sh | needs-operator-review | docs/runbooks/release-cutover-authorization.md | user-journey-wireframe-pack |
+| smb-journey-wireframe | SMB owner | orient | docs/runbooks/public-site-smb-journey-wireframe.md | Your business already has the data. It is just trapped in five systems that do not talk to each other. | Primary page journey table | Approve the journey before rebuilding pages | tests/public-docs.sh | needs-joshua-journey-review | docs/evidence/publication-blocker-coverage.md | user-journey-wireframe-pack |
 | publication-evidence | Technical buyer | decide | docs/evidence/publication-evidence.md | Live Evidence Still Required | Local evidence table | Verify blockers before signoff | tests/public-docs.sh; tests/true-publication-registry-validate.sh | needs-final-refresh | docs/evidence/publication-blocker-coverage.md | user-journey-wireframe-pack |
 | blocker-coverage | Signoff reviewer | recover | docs/evidence/publication-blocker-coverage.md | The public release is not complete while any row above remains blocked. | Blocker coverage table | Keep open blockers visible | tests/true-publication-registry-validate.sh | needs-final-refresh | docs/evidence/publication-blocker-coverage.md | user-journey-wireframe-pack |
 | release-assets | Operator | act | release-assets | Required release assets are uploaded, non-empty, and expose sha256 digests. | Release asset checklist | Install from public endpoint | tests/release-assets.sh; scripts/publication_readiness.py | blocked-until-release | docs/evidence/publication-blocker-coverage.md | user-journey-wireframe-pack |
 | live-site | SMB owner | retain | flywheel.zeststream.ai | The public story is navigable without GitHub depth. | Live site navigation | Contact or inspect evidence | tests/public-links.sh; tests/website-static.sh | private-live-staging-approved-not-final | docs/evidence/publication-blocker-coverage.md | user-journey-wireframe-pack |
+| site-design-tokens | Designer | retain | site/design-tokens.css | --zs-lime: #d4f34a | Shared CSS custom-property token layer imported by every page | Reuse tokens in the broader ZestStream rewrite | tests/website-static.sh | needs-live-site-review | docs/evidence/publication-blocker-coverage.md | user-journey-wireframe-pack |
 | api-contract-pack | Operator | recover | docs/runbooks/public-user-journey-pack.md | API-facing repos require OpenAPI and drift gates. | Skip receipt row | File bead or skip receipt | docs/evidence/publication-blocker-coverage.md | skipped-not-api-facing | docs/evidence/publication-blocker-coverage.md | user-journey-wireframe-pack |
 | ui-contract-pack | Operator | retain | docs/runbooks/public-user-journey-pack.md | UI-facing repos require Playwright and screenshot mapping. | Skip receipt row | File bead or skip receipt | tests/website-static.sh; tests/website-accessibility.sh | partially-applicable-static-site | docs/evidence/publication-blocker-coverage.md | user-journey-wireframe-pack |
 
