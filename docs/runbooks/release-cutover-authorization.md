@@ -23,7 +23,20 @@ Before cutover, the expected status is `blocked`. The release is complete only
 when release mode returns `status=pass` with zero blockers against real remote,
 release, website, install-proxy, external-review, and signoff surfaces.
 
-## Cutover Decisions
+Current blocker set before public cutover:
+
+- `remote_repo_private`
+- `remote_workflows_missing`
+- `remote_green_runs_missing`
+- `github_release_missing_or_draft`
+- `github_release_assets_missing`
+- `joshua_release_signoff_missing`
+
+Website, install proxy, and external review can already be green on a private
+staging surface. Revalidate them during cutover; do not treat their private
+staging pass as public-release completion.
+
+## Open Cutover Decisions
 
 | Decision | Blocker code | Operator command | Required verification |
 |---|---|---|---|
@@ -32,11 +45,16 @@ release, website, install-proxy, external-review, and signoff surfaces.
 | Run remote CI and installer smoke to green. | `remote_green_runs_missing` | Trigger or wait for Actions on the public default branch. | `gh run list --repo JYeswak/flywheel --limit 20 --json workflowName,status,conclusion,headBranch` shows successful `CI` and `Installer Smoke` runs on the default branch. |
 | Create the public release tag and release after gates pass. | `github_release_missing_or_draft` | `git tag v0.2.0 && git push origin v0.2.0`, then publish the GitHub release from the release workflow. | `gh release view v0.2.0 --repo JYeswak/flywheel --json tagName,isDraft,isPrerelease,url` reports `isDraft=false` and `isPrerelease=false`. |
 | Attach and verify required release assets. | `github_release_assets_missing` | Run the release workflow for `v0.2.0`. | Release assets include `install.sh`, `install.sh.sha256`, `SHA256SUMS`, `flywheel-v0.2.0.tar.gz`, and `flywheel-v0.2.0.tar.gz.sha256`; each required asset is uploaded, non-empty, and exposes `sha256:` digest metadata. |
-| Deploy the public website. | `website_unavailable` | Run the site workflow and configure `flywheel.zeststream.ai` DNS if needed. | `curl -fsSI https://flywheel.zeststream.ai/` returns a successful status. |
-| Confirm deployed site copy is current. | `website_content_stale` release blocker code | Deploy the reviewed SMB/Yuzu site build. | `publication_readiness.py --release --json` reports `website_content_current` and no `website_content_stale` blocker. |
-| Publish matching install proxy assets. | `install_proxy_checksum_mismatch` | Publish `install.sh` and `install.sh.sha256` from the same release artifact set. | `curl -fsSL https://flywheel.zeststream.ai/install.sh \| shasum -a 256` matches the checksum served at `https://flywheel.zeststream.ai/install.sh.sha256`. |
-| Refresh external review for the current public trust surface. | `external_review_gate_blocked` | Collect two distinct independent review rows covering README, charter, first-run, public release, cutover, publication evidence, and blocker-coverage evidence docs. | `python3 scripts/validate_external_review.py --release --json` returns `status=pass`. |
 | Create final Joshua signoff after all real checks pass. | `joshua_release_signoff_missing` | Copy the release signoff template to `release-signoff.json` and set approved fields. | `publication_readiness.py --release --json` returns `status=pass` with zero blockers. |
+
+## Revalidation Checks
+
+| Surface | Former blocker code | Required cutover proof |
+|---|---|---|
+| Public website reachable | `website_unavailable` | `curl -fsSI https://flywheel.zeststream.ai/` returns a successful status. |
+| Public website copy current | `website_content_stale` | `publication_readiness.py --release --json` reports `website_content_current` and no `website_content_stale` blocker. |
+| Install proxy checksum parity | `install_proxy_checksum_mismatch` | `curl -fsSL https://flywheel.zeststream.ai/install.sh \| shasum -a 256` matches the checksum served at `https://flywheel.zeststream.ai/install.sh.sha256`. |
+| External review current | `external_review_gate_blocked` | `python3 scripts/validate_external_review.py --release --json` returns `status=pass`. |
 
 ## Signoff Boundary
 

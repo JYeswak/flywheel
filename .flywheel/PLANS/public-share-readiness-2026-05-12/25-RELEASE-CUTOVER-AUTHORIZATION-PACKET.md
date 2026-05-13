@@ -1,6 +1,6 @@
 # Release Cutover Authorization Packet
 
-Generated: 2026-05-13T06:41Z
+Generated: 2026-05-13T22:32Z
 Status: awaiting explicit Joshua authorization
 
 This packet is the human authorization surface for the remaining public
@@ -25,7 +25,20 @@ python3 scripts/publication_readiness.py --release --json
 
 Current expected status before cutover: `blocked`.
 
-## Required Authorization Decisions
+Current live blocker set:
+
+- `remote_repo_private`
+- `remote_workflows_missing`
+- `remote_green_runs_missing`
+- `github_release_missing_or_draft`
+- `github_release_assets_missing`
+- `joshua_release_signoff_missing`
+
+Previously open website, install proxy, and external-review blockers are now
+green for the private-live staging surface, but they remain revalidation checks
+during the final cutover.
+
+## Required Authorization Decisions Still Open
 
 | Decision | Current blocker | Operator command | Required verification |
 |---|---|---|---|
@@ -34,11 +47,21 @@ Current expected status before cutover: `blocked`.
 | Run remote CI and installer smoke to green. | `remote_green_runs_missing` | Trigger or wait for Actions on the public default branch. | `gh run list --repo JYeswak/flywheel --limit 20 --json workflowName,status,conclusion,headBranch` shows successful `CI` and `Installer Smoke` runs on the default branch. |
 | Create the public release tag and release only after gates pass. | `github_release_missing_or_draft` | `git tag v0.2.0 && git push origin v0.2.0`, then publish the GitHub release from the release workflow. | `gh release view v0.2.0 --repo JYeswak/flywheel --json tagName,isDraft,isPrerelease,url` reports `isDraft=false` and `isPrerelease=false`. |
 | Attach and verify required release assets. | `github_release_assets_missing` | Run the release workflow for `v0.2.0`. | Release assets include `install.sh`, `install.sh.sha256`, `SHA256SUMS`, `flywheel-v0.2.0.tar.gz`, and `flywheel-v0.2.0.tar.gz.sha256`; each required asset is uploaded, non-empty, and exposes `sha256:` digest metadata. |
-| Deploy the public website. | `website_unavailable` | Run the site workflow and configure `flywheel.zeststream.ai` DNS if needed. | `curl -fsSI https://flywheel.zeststream.ai/` returns a successful status. |
-| Confirm deployed site copy is current. | `website_content_stale` | Deploy the reviewed SMB/Yuzu site build. | `publication_readiness.py --release --json` reports `website_content_current` and no `website_content_stale` blocker. |
-| Publish matching install proxy assets. | `install_proxy_checksum_mismatch` | Publish `install.sh` and `install.sh.sha256` from the same release artifact set. | `curl -fsSL https://flywheel.zeststream.ai/install.sh \| shasum -a 256` matches `https://flywheel.zeststream.ai/install.sh.sha256`. |
-| Refresh external review for the current public trust surface. | `external_review_gate_blocked` | Collect two distinct independent review rows covering README, charter, first-run, public release, cutover, publication evidence, and blocker-coverage evidence docs. | `python3 scripts/validate_external_review.py --release --json` returns `status=pass`. |
 | Create final Joshua signoff after all real checks pass. | `joshua_release_signoff_missing` | Copy `release-signoff.template.json` to `release-signoff.json` and set approved fields. | `publication_readiness.py --release --json` returns `status=pass` with zero blockers. |
+
+## Preconditions Already Passing Locally Or On Private-Live Staging
+
+These are not permission to publish. They are evidence Joshua can review before
+authorizing the remaining public cutover steps.
+
+| Surface | Former blocker code | Current evidence | Revalidate during cutover |
+|---|---|---|---|
+| Private-live website reachable | `website_unavailable` | `https://flywheel.zeststream.ai/` returns HTTP 200 and the live-site probe passes. | `curl -fsSI https://flywheel.zeststream.ai/`; `python3 scripts/live_site_probe.py --base-url https://flywheel.zeststream.ai/ --json`. |
+| Private-live website copy current | `website_content_stale` | The live site serves the reviewed SMB/Yuzu journey markers. | `publication_readiness.py --release --json` reports `website_content_current` and no `website_content_stale` blocker. |
+| Install proxy checksum | `install_proxy_checksum_mismatch` | Live `install.sh` hash matches served `install.sh.sha256` for the private staging tag. | Re-run the checksum comparison after the `v0.2.0` release/site workflow publishes final assets. |
+| External review | `external_review_gate_blocked` | `docs/evidence/external-review-log.jsonl` validates with two distinct current reviewer rows. | `python3 scripts/validate_external_review.py --release --json`. |
+| Agent lanes | n/a | Claude Code, Codex CLI, Gemini CLI, and OpenClaw have isolated runtime receipts with `runtime_proven=4` and `blocked_receipts=0`. | `scripts/agent-lane-probe.sh --receipt-dir state/isolated-agent-lanes --json`. |
+| Public export | n/a | `codex-public-export-20260513T2230Z` staged the sanitized public tree with zero depersonalization findings. | Re-run `scripts/assemble.py` and staged gates if any public surface changes before cutover. |
 
 ## Signoff Boundary
 
