@@ -45,7 +45,15 @@ not a disposition.
 | TP-017 | ci-workflows | P0 | open | Flywheel | Current file check: `.github/workflows/installer-smoke.yml` and `ci.yml` missing | CI and installer-smoke workflows exist and pass on supported OS matrix. |
 | TP-018 | release-signoff | P0 | open | Joshua + Flywheel | B15 | Git tag, GitHub release, checks, website, install proxy, and Joshua signoff all present. |
 | TP-019 | doctor-warning-disposition | P1 | open | Flywheel | Latest full doctor warning classes: callbacks, L-rule lag, oversized files, watcher fleet, unwired surfaces, closed-bead backlog, plan quality | Each warning fixed or classified as non-release with evidence; no release-blocking doctor error remains. |
-| TP-020 | todo-gap-scanner | P1 | open | Flywheel | `rg TODO/FIXME/gap/blocker/missing/unproven` finds public-surface rows | Add validation that fails release when TODO/gap rows lack registry, Bead, or explicit non-release disposition. |
+| TP-020 | todo-gap-scanner | P1 | in_progress | Flywheel | `rg TODO/FIXME/gap/blocker/missing/unproven` finds public-surface rows | Add validation that fails release when TODO/gap rows lack registry, Bead, or explicit non-release disposition. |
+
+## Progress Log
+
+- 2026-05-13: Added `.flywheel/scripts/true-publication-registry-validate.py`
+  and `tests/true-publication-registry-validate.sh`. The validator now proves
+  registry row shape, unique IDs, required fields, and release-mode failure when
+  rows remain open. TP-020 stays `in_progress` until TODO/gap scan coverage is
+  tied to this registry or linked Beads.
 
 ## Immediate Next Actions
 
@@ -55,4 +63,3 @@ not a disposition.
    receipt paths; open rows need owner and next action.
 3. Start critical path at TP-001/TP-002/TP-003 because isolated install proof is
    meaningless until public extraction cannot leak private substrate.
-

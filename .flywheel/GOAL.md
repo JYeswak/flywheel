@@ -10,7 +10,7 @@ template_version: "0.1.0"
 template_hash: 43d3b3f39af636be079de8e8d2728360fced885e6438c26afd88f5e461a17ebf
 rendered_at: 20260501T052023Z
 rendered_by: flywheel-loop-reconcile
-lock_hash: bbf8b1f38c88c96028528e9f505336b66830a7274cc300d1bb8c748fe8ba3a8b
+lock_hash: cbd102c6ac4aa4e65cafc0dae9b90f1d6d686cecf11af930e4322cf3dac348bc
 locked_at: 2026-05-01T01:25:43Z
 locked_by: template-live-doc-backfill
 source_path: /Users/josh/Developer/flywheel/.flywheel/GOAL.md
@@ -98,11 +98,12 @@ allowed for this goal.
 - `/Users/josh/Developer/flywheel/tests/zeststream-public-prepublish-hook.sh`
 - `/Users/josh/Developer/flywheel/tests/installer-smoke.sh`
 - `/Users/josh/Developer/flywheel/tests/journey-smoke.sh`
+- `/Users/josh/Developer/flywheel/tests/true-publication-registry-validate.sh`
 - `/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json`
 - To be added: isolated install/run receipts for Claude, Codex, Gemini, OpenClaw,
   and reduced local mode.
-- To be added: release-blocker registry validation proving every TODO/gap item
-  is owned, evidenced, and dispositioned.
+- To be completed: TODO/gap scan coverage proving every discovered row is
+  linked to the registry, a Bead, or a non-release disposition.
 
 ## Current Blockers
 
