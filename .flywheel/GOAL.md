@@ -10,8 +10,8 @@ template_version: "0.1.0"
 template_hash: 43d3b3f39af636be079de8e8d2728360fced885e6438c26afd88f5e461a17ebf
 rendered_at: 20260501T052023Z
 rendered_by: flywheel-loop-reconcile
-lock_hash: cbd102c6ac4aa4e65cafc0dae9b90f1d6d686cecf11af930e4322cf3dac348bc
-locked_at: 2026-05-01T01:25:43Z
+lock_hash: 4f90a45d22b52c0e1ad6f1a251618cc921de8e471c3ea35b7fba07872be8904d
+locked_at: 2026-05-13T22:58:13Z
 locked_by: template-live-doc-backfill
 source_path: /Users/josh/Developer/flywheel/.flywheel/GOAL.md
 source_sha256: 576e5bb5975e223e3fb10e498a9d405f0d38ee56df7352dbaa3513af9d91fc03
@@ -100,28 +100,36 @@ allowed for this goal.
 - `/Users/josh/Developer/flywheel/tests/journey-smoke.sh`
 - `/Users/josh/Developer/flywheel/tests/true-publication-registry-validate.sh`
 - `/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json`
-- To be added: isolated install/run receipts for Claude, Codex, Gemini, OpenClaw,
-  and reduced local mode.
-- To be completed: TODO/gap scan coverage proving every discovered row is
-  linked to the registry, a Bead, or a non-release disposition.
+- `/Users/josh/Developer/flywheel/tests/isolated-agent-lane-smoke.sh`
+- `/Users/josh/Developer/flywheel/tests/agent-lane-probe.sh`
+- `/Users/josh/Developer/flywheel/tests/public-surface-gap-scanner.sh`
+- `/Users/josh/Developer/flywheel/tests/publication-readiness.sh`
+- Current isolated agent receipts cover Claude, Codex, Gemini, OpenClaw, and
+  reduced local mode; final release still depends on the live remote, workflow,
+  release-asset, and signoff blockers reported by `publication_readiness.py`.
+- TODO/gap scan coverage is executable and release-bound through
+  `public-surface-gap-scanner.sh`, the true-publication registry, Beads, and
+  explicit non-release dispositions.
 
 ## Current Blockers
 
-- Public-preview readiness exists, but true publishability has not been proven
-  in isolated environments across Claude, Codex, Gemini, and OpenClaw.
-- Engine/overlay extraction is not yet complete enough to guarantee a stranger
-  can install without private local assumptions.
-- Final public naming, package/repo release surfaces, and published locations
-  are not yet locked.
-- Runbooks and public journey stories are incomplete for the stronger release
-  claim.
+- The repository/export path is not yet public.
+- Public GitHub Actions workflows have not yet run green on the public default
+  branch.
+- The `v0.2.0` GitHub release and required checksum-bearing assets are not yet
+  published.
+- Joshua's release signoff receipt is intentionally pending until the real
+  public remote, workflow, release, website, install proxy, external-review,
+  and signoff surfaces pass.
+- Private-live site and install proxy evidence can support review, but it is
+  not a substitute for the final public cutover proof.
 
 ## Safe Next Action
 
-Create the true-publication release plan from the existing
-`.flywheel/PLANS/public-share-readiness-2026-05-12/` evidence, then turn each
-unproven supported agent path into an isolated install/run receipt before any
-public claim says "guaranteed end to end."
+Keep the six live release blockers visible, refresh any stale public-readiness
+wording that conflicts with current receipts, and do not promote the public repo
+or release until the cutover receipt bundle and Joshua signoff pass against the
+actual public surfaces.
 
 ## Out Of Scope
 

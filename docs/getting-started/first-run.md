@@ -227,7 +227,7 @@ and the journey receipt explains the mode you are in.
 | Pitfall | Fix |
 |---|---|
 | Treating reduced mode as failure | Reduced mode is the required fallback when full substrate is absent. |
-| Claiming harness support before smoke | Keep Claude, Codex, Gemini, and OpenClaw compatibility targets until `runtime_proven`. |
+| Treating command presence as harness support | Use runtime receipts; a lane is supported only when `support_copy_allowed=true`. |
 | Copying local fleet state into a public repo | Public init must generate state from scratch. |
 | Reading pane scrollback as proof | Use NTM, receipt, and doctor truth surfaces, not stale raw captures. |
 | Skipping closeout | Validated closeout is part of the first value, not an optional polish step. |
@@ -238,8 +238,9 @@ and the journey receipt explains the mode you are in.
 - If reduced mode worked, continue only through implemented reduced-mode
   commands.
 - If a harness row is fixture-blocked, add auth or account setup and rerun the
-  matrix after the journey-smoke runner exists.
-- If a row is source-gap, treat that lane as a target, not a supported path.
+  matrix.
+- If a row is source-gap or lacks a passing runtime receipt, treat that lane as
+  a target, not a supported path.
 - If the next action is clear, open the relevant Bead or receipt and continue
   from there.
 

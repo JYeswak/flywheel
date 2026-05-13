@@ -112,7 +112,8 @@ Before Joshua signoff, the reviewer must confirm:
 3. The operator path can collect publication readiness and cutover receipts.
 4. The evidence path names every live blocker without relying on private state.
 5. SkillOS appears only as capability control plane, not copied private state.
-6. Agent harnesses stay compatibility targets until runtime receipts exist.
+6. Agent harness support copy must match runtime receipts; any lane without a
+   current passing receipt stays a compatibility target.
 7. Release assets and final install proxy checksum parity are reviewed before
    public install copy is promoted.
 8. The GitHub repository remains private until Joshua approves the repo and site
