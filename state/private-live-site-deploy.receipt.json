@@ -1,13 +1,13 @@
 {
   "schema_version": "flywheel.private_live_site_deploy_receipt.v0",
-  "receipt_id": "flywheel-private-live-site-redesign-deploy-20260513T2103Z",
+  "receipt_id": "flywheel-private-live-site-operating-room-deploy-20260513T2343Z",
   "status": "pass",
-  "deployed_at": "2026-05-13T21:03:00Z",
+  "deployed_at": "2026-05-13T23:43:20Z",
   "host": "flywheel.zeststream.ai",
   "provider": "vercel",
-  "deployment_url": "https://flywheel-itpdfcq6q-joshuas-projects-96d49291.vercel.app",
+  "deployment_url": "https://flywheel-tq5l6k83o-joshuas-projects-96d49291.vercel.app",
   "production_alias": "https://flywheel.zeststream.ai",
-  "source_commit": "3923d48f",
+  "source_commit": "b6e36e0d",
   "deployed_bundle_scope": [
     "site/",
     "install.sh",
@@ -35,11 +35,15 @@
   "verification": {
     "homepage_markers_present": true,
     "live_site_probe_status": "pass",
+    "live_site_probe_source_count": 6,
+    "live_site_probe_probe_count": 17,
+    "live_site_probe_pass_count": 17,
     "live_site_probe_failure_count": 0,
     "install_proxy_checksum_match": true,
+    "install_sha256": "a4e04cd1e08f13110d74dca34c38018a5b93c9a173cca2db63a91458efe6f364",
     "screenshot_checks": {
-      "desktop": "/tmp/flywheel-site-shots/flywheel-desktop-v3.png",
-      "mobile": "/tmp/flywheel-site-shots/flywheel-mobile-v3.png",
+      "desktop": "/tmp/flywheel-site-shots/flywheel-desktop-b6e36e0d.png",
+      "mobile": "/tmp/flywheel-site-shots/flywheel-mobile-b6e36e0d.png",
       "nonblank_pixel_variance": true
     },
     "publication_readiness_status": "blocked",
