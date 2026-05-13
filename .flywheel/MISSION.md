@@ -4,7 +4,7 @@ schema_version: 1
 doc_type: mission
 status: locked
 locked_at: 2026-05-07T04:07:55Z
-lock_hash: 96db8f2f0805f846f8578d2254fd0dcade0cefedd4b91a7a360dd0bacf53648f
+lock_hash: d473c983e641881b38cbcff31d8a55343563cf358e9716151e25f391fec99528
 repo: /Users/josh/Developer/flywheel
 repo_realpath: /Users/josh/Developer/flywheel
 installed_from: /Users/josh/Developer/flywheel/templates/flywheel-install

@@ -10,17 +10,16 @@ This guide is for a solo developer, technical lead, or SMB technical operator
 trying Flywheel in one repo. Multi-pane orchestration can come later. The first
 value is an inspectable loop state and one credible next action.
 
-## Current Release Status
+## Current Public-Preview Status
 
-The public first-run journey is still under construction. The preflight command
-exists now:
+The public first-run journey is implemented for reduced local mode and honest
+about the harness lanes that still need runtime proof. Start with:
 
 ```bash
 scripts/preflight.sh --json
 ```
 
-The remaining end-to-end commands are still release gates until their public
-surfaces exist and have journey receipts:
+The current end-to-end status is:
 
 | Surface | Current status |
 |---|---|
@@ -33,8 +32,10 @@ surfaces exist and have journey receipts:
 | `flywheel inspect` | implemented for reduced-mode simulator receipts |
 | `scripts/journey-smoke.sh` | implemented as dry-run matrix; reduced mode is runtime-proven, agent CLI lanes remain registry-valid until harness smoke runs |
 
-Do not treat this page as release proof until those rows are implemented and
-linked to a passing journey receipt.
+Do not claim full Claude, Codex, Gemini, or OpenClaw runtime support from this
+page alone. Public support copy should follow `scripts/journey-smoke.sh`: reduced
+mode is runtime-proven; agent harness lanes are support targets until their
+runtime receipts exist.
 
 ## Journey Contract
 

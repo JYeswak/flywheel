@@ -2,22 +2,45 @@
 
 > **Mission anchor (locked):** *continuous-orchestrator-uptime-self-sustaining-fleet*
 
-Flywheel is the source repo for Joshua Nowak's agentic coding control plane. It
-does not contain product code. It holds the repo-local doctrine, templates,
-scripts, audits, tests, and command contracts that keep NTM sessions, Beads,
-Agent Mail, Socraticode, flywheel loops, and skill updates coordinated across
-ZestStream's active repos.
+Flywheel is ZestStream's public engine for making AI-assisted software work
+inspectable, repeatable, and safer to operate across projects. It is built for a
+practical problem most SMB owners already recognize: too many disconnected
+systems, too much manual work, and no easy way to judge whether an AI operator
+can run the work with discipline.
 
-I build this repo to keep the fleet moving when nobody is watching the panes:
-workers dispatched, callbacks reaped, recovery paths installed, evidence
-captured, and drift converted into beads before it becomes another lost day.
+The promise is not that every business owner needs to learn the entire agentic
+coding stack. The promise is that ZestStream can show the operating method: use
+advanced coding agents, adopt fast-moving upstream substrate honestly, verify it
+with doctors and receipts, and preserve lessons from each project so the next
+project starts smarter.
+
+Technically, this repo holds the installable Flywheel engine: repo-local
+doctrine, templates, scripts, audits, tests, command contracts, first-run docs,
+and reduced-mode fallbacks. Full mode integrates with NTM, Beads, Agent Mail,
+Socraticode, CASS-style memory, DCG, and agent harnesses when they are present.
+Reduced mode still works when that fleet substrate is absent.
 
 Treat this README as the first map. Treat `AGENTS.md` as the authority. The
 architecture details live in [`ARCHITECTURE.md`](./ARCHITECTURE.md); the
 operating workflow lives in [`CONTRIBUTING.md`](./CONTRIBUTING.md). The slash
 surface is `/flywheel:README`.
 
-## Quickstart
+## Public First Run
+
+Start with the public journey:
+
+```bash
+scripts/preflight.sh --json
+scripts/journey-smoke.sh --matrix claude,codex,openclaw,gemini,reduced --dry-run --json
+```
+
+Then follow [`docs/getting-started/first-run.md`](docs/getting-started/first-run.md).
+The reduced lane is the required public fallback: it initializes repo-local
+state, runs doctor and tick, simulates dispatch, validates closeout, and shows
+the next action without claiming private NTM panes, Agent Mail archives, or
+cross-session memory.
+
+## Operator Quickstart
 
 For the orchestrator:
 
