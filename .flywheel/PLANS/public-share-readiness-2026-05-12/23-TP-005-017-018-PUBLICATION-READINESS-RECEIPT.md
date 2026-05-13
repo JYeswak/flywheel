@@ -10,20 +10,20 @@ blockers:
 - TP-017 CI workflows
 - TP-018 release signoff
 
-Local packaging, workflow, and static website source files exist. Manual
-Release and Site Deploy dispatches checkout the resolved tag before packaging or
-publishing install assets. Release and site checksum manifests use
+Local packaging, workflow, static website source files, private-live website,
+install proxy, external review, and strict agent-lane runtime receipts exist.
+Manual Release and Site Deploy dispatches checkout the resolved tag before
+packaging or publishing install assets. Release and site checksum manifests use
 artifact-relative filenames so downloaded assets can be verified from their own
 directory. The remote repository is still private and has no visible GitHub
-Actions workflows or runs. The release, asset, live website, install-proxy, and
-Joshua-signoff surfaces are also verified explicitly; none can close from local
-tests alone.
+Actions workflows or runs. The release, asset, and Joshua-signoff surfaces are
+also verified explicitly; none can close from local tests alone.
 
-Latest public-export evidence: assembly run `codex-public-export-20260513T1645Z`
-classified 14,677 files, copied 10,195 public-safe files, excluded 4,040
+Latest public-export evidence: assembly run `codex-public-export-20260513T2236Z`
+classified 14,700 files, copied 10,218 public-safe files, excluded 4,040
 denylisted paths, preserved source git status, passed staged readiness,
-public-doc, public-link, upstream-substrate, denylist, and scan-table probes,
-and retained 7,432 manual-review rows.
+public-doc, public-link, release-asset, cutover, blocker-coverage, agent-lane,
+journey-smoke, and scan-table probes, and retained 7,444 manual-review rows.
 This run uses the optimized classifier path that excludes generated
 `.flywheel/extraction/**` artifacts before assembly, keeping classification
 counts aligned with the staged public export instead of counting prior generated
@@ -60,18 +60,13 @@ requires those surfaces. Mobile Eats and Gemini CLI returned current
 seven-surface rows with empty `blocking_findings`, and both the private working
 log and sanitized public evidence copy validate in release mode.
 
-Latest local evidence refresh: `2026-05-13T16:40Z`. Source gates passed
-`tests/upstream-substrate-adoption.sh` 57/0, `tests/public-docs.sh` 65/0,
-`tests/public-links.sh` 3/0, `tests/public-surface-gap-scanner.sh` 14/0, and
-`tests/publication-readiness.sh` 65/0. Staged public export
-`codex-public-export-20260513T1645Z` passed
-`tests/upstream-substrate-adoption.sh` 57/0, `tests/public-docs.sh` 65/0,
-`tests/publication-readiness.sh` 52/0,
-`tests/public-surface-gap-scanner.sh` 14/0,
-`tests/true-publication-registry-validate.sh` 9/0,
-`tests/release-assets.sh` 12/0, `tests/cutover-receipts.sh` 15/0, and
-depersonalization scan 0 findings.
-The link checker now reports `source_count=35`, `checked_count=58`, and
+Latest local evidence refresh: `2026-05-13T22:36Z`. Source gates passed
+`tests/public-docs.sh` 144/0, `tests/publication-readiness.sh` 72/0,
+`tests/cutover-receipts.sh` 23/0, `tests/public-top-level-files.sh` 21/0, and
+`tests/agent-lane-probe.sh` 10/0. Staged public export
+`codex-public-export-20260513T2236Z` passed `tests/public-docs.sh` 144/0,
+`tests/publication-readiness.sh` 58/0, and depersonalization scan 0 findings.
+The link checker reports `source_count=36`, `checked_count=62`, and
 `failure_count=0`.
 
 Cutover authorization evidence:
@@ -103,8 +98,6 @@ Expected current live state before publication:
 - blocker `remote_green_runs_missing`
 - blocker `github_release_missing_or_draft`
 - blocker `github_release_assets_missing`
-- blocker `website_unavailable`
-- blocker `install_proxy_checksum_mismatch`
 - blocker `joshua_release_signoff_missing`
 
 TP-015 external review is closed for the current seven-surface public trust set.
@@ -113,6 +106,13 @@ The review log contains two distinct current external-agent rows covering
 sanitized evidence copy at `docs/evidence/external-review-log.jsonl`; the
 release workflow validates that public path explicitly instead of relying on
 private `.flywheel/PLANS` state.
+
+Private-live website and install-proxy checks are currently green but remain
+revalidation checks during public cutover. The private-live site returns HTTP
+200, the live-site probe passes, and `install.sh` hash matches served
+`install.sh.sha256`. These facts are not a public release claim because the real
+remote, remote workflows, remote runs, GitHub release, release assets, and final
+signoff are still absent.
 
 Closure requires the release-mode command to return exit 0 against the real
 remote and public web surfaces, not a fixture. If future edits invalidate the
@@ -133,9 +133,10 @@ The pending template lives at
 `.flywheel/PLANS/public-share-readiness-2026-05-12/release-signoff.template.json`;
 `tests/publication-readiness.sh` proves a pending template cannot satisfy the
 gate.
-The final readiness command still calls the TP-015 external-review gate, so any
-future edit that invalidates `review-log.jsonl` will reintroduce
-`external_review_gate_blocked`.
+The final readiness command still calls the TP-015 external-review gate and
+website/install proxy probes, so any future edit that invalidates
+`review-log.jsonl`, website content, or checksum parity will reintroduce the
+corresponding blocker.
 
 The local website source gate covers `site/index.html`,
 `site/what-is/index.html`, `site/for-developers/index.html`,
@@ -149,5 +150,5 @@ specific action SHAs for `actions/configure-pages`,
 manual dispatch; checks out the resolved tag; builds `site-dist`; copies
 `install.sh`; writes `install.sh.sha256` from inside `site-dist`; writes the
 `flywheel.zeststream.ai` CNAME; and emits `site-deploy-manifest.json`. Final
-readiness still requires the remote `Site Deploy` workflow to exist and the live
-website/install endpoints to pass.
+readiness still requires the remote `Site Deploy` workflow to exist and the
+website/install endpoints to pass against the final `v0.2.0` release assets.

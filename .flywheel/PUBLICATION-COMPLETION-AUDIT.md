@@ -98,7 +98,7 @@ handoff evidence independently.
 - `github_release_assets_missing`
 - `joshua_release_signoff_missing`
 
-Latest public-export evidence is `codex-public-export-20260513T2230Z`:
+Latest public-export evidence is `codex-public-export-20260513T2236Z`:
 14,700 files classified, 10,218 copied into the staged public tree, 4,040
 denylisted paths excluded, 7,444 manual-review rows retained, and
 `source_git_status_unchanged=true`. Staged replay passed publication readiness

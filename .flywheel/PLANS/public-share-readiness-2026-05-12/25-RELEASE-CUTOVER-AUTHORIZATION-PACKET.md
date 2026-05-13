@@ -61,7 +61,7 @@ authorizing the remaining public cutover steps.
 | Install proxy checksum | `install_proxy_checksum_mismatch` | Live `install.sh` hash matches served `install.sh.sha256` for the private staging tag. | Re-run the checksum comparison after the `v0.2.0` release/site workflow publishes final assets. |
 | External review | `external_review_gate_blocked` | `docs/evidence/external-review-log.jsonl` validates with two distinct current reviewer rows. | `python3 scripts/validate_external_review.py --release --json`. |
 | Agent lanes | n/a | Claude Code, Codex CLI, Gemini CLI, and OpenClaw have isolated runtime receipts with `runtime_proven=4` and `blocked_receipts=0`. | `scripts/agent-lane-probe.sh --receipt-dir state/isolated-agent-lanes --json`. |
-| Public export | n/a | `codex-public-export-20260513T2230Z` staged the sanitized public tree with zero depersonalization findings. | Re-run `scripts/assemble.py` and staged gates if any public surface changes before cutover. |
+| Public export | n/a | `codex-public-export-20260513T2236Z` staged the sanitized public tree with zero depersonalization findings. | Re-run `scripts/assemble.py` and staged gates if any public surface changes before cutover. |
 
 ## Signoff Boundary
 
