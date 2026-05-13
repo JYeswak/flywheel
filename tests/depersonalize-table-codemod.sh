@@ -181,6 +181,22 @@ else
   fail "apply preserves reviewed runtime test fixtures rc=${apply_tests_rc}"
 fi
 
+mkdir -p "$TMP/public-review/docs/evidence"
+printf '{"reviewed_at":"%s"}\n' "$fixture_timestamp" >"$TMP/public-review/docs/evidence/external-review-log.jsonl"
+run_capture "$TMP/public-review.out" "$TMP/public-review.err" \
+  python3 "$SCRIPT" --apply --root "$TMP/public-review" --json
+public_review_rc=$?
+run_capture "$TMP/public-review-scan.out" "$TMP/public-review-scan.err" \
+  python3 "$SCRIPT" --scan-table --root "$TMP/public-review" --json
+public_review_scan_rc=$?
+if [[ "$public_review_rc" -eq 0 ]] && [[ "$public_review_scan_rc" -eq 0 ]] \
+  && rg -qF "$fixture_timestamp" "$TMP/public-review/docs/evidence/external-review-log.jsonl" \
+  && jq -e '.status == "pass" and (.findings | length == 0)' "$TMP/public-review-scan.out" >/dev/null; then
+  pass "apply preserves public review evidence timestamps"
+else
+  fail "apply preserves public review evidence timestamps apply_rc=${public_review_rc} scan_rc=${public_review_scan_rc}"
+fi
+
 mkdir -p "$TMP/claude-slug"
 printf '%s\n' "\$HOME/.claude/projects/-Users-josh-Developer-flywheel/memory/example.md" >"$TMP/claude-slug/path.md"
 printf '%s\n' "\$HOME/.claude/projects/-Users-josh-Developer-{session}/memory/example.md" >>"$TMP/claude-slug/path.md"

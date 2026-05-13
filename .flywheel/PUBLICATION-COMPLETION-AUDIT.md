@@ -40,7 +40,7 @@ not treated as completion by itself.
 | Every project improves reusable substrate | `CHARTER.md`, `README.md`, `.flywheel/PUBLISHABILITY-AUDIT.md` | Charter states lessons, receipts, guards, and patterns compound. README now repeats the operating method at the front door. | covered |
 | Public first-run journey | `docs/getting-started/first-run.md`, `scripts/journey-smoke.sh`, `tests/journey-smoke.sh` | Reduced mode is runtime-proven through init, doctor, tick, dispatch-or-simulate, closeout validation, and inspect. | covered |
 | NTM and non-NTM workflows | `docs/getting-started/first-run.md`, `scripts/preflight.sh`, `scripts/journey-smoke.sh`, `bin/flywheel` | Preflight detects full substrate including NTM/Agent Mail and selects reduced mode when absent. Journey smoke keeps harness lanes registry-valid until runtime proof. | covered |
-| Claude/Codex/Gemini/OpenClaw support tiers | `scripts/isolated-agent-lane-smoke.sh --live-adapters`, `scripts/agent-lane-probe.sh --receipt-dir state/isolated-agent-lanes --json`, `state/agent-lane-runtime-audit.receipt.json` | Reduced mode is runtime-proven. Claude Code and Gemini CLI have valid isolated runtime receipts with `support_copy_allowed=true`. Codex CLI remains blocked on `auth_required` in isolated `CODEX_HOME`; OpenClaw remains blocked on `adapter_config_required` for isolated agent/session configuration. | partially covered; Codex/OpenClaw still open |
+| Claude/Codex/Gemini/OpenClaw support tiers | `scripts/isolated-agent-lane-smoke.sh --live-adapters`, `scripts/agent-lane-probe.sh --receipt-dir state/isolated-agent-lanes --json`, `state/agent-lane-runtime-audit.receipt.json` | Reduced mode is runtime-proven. Claude Code, Codex CLI, Gemini CLI, and OpenClaw all have valid isolated runtime receipts with `support_copy_allowed=true`. Codex reads auth from explicit `FLYWHEEL_CODEX_HOME` while `HOME`, XDG paths, and the target repo stay isolated; OpenClaw creates a disposable isolated agent before the smoke turn. | covered locally |
 | Yuzu naming plan | `docs/brand/naming-conventions.md`, `tests/naming-conventions.sh` | Canonical terms and rename gate are documented; test checks core terms and doctrine references. | covered |
 | Doctor hard blockers cleared | `flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json` | Final doctor status is `warn` with `errors=[]` and `repo_docs_state=ready` after lock repair; publishability, repo-local CLI floor, NTM spawn templates, memory health, Agent Mail FD pressure, and Jeff corpus local storage are passing. | covered |
 | Frozen pane / watcher system runs as designed | `.flywheel/scripts/frozen-pane-detector.sh`, watcher tests | Detector self-test covers classes A-G, preview-only recovery, apply gates, and watcher local/fleet probes. | covered |
@@ -98,9 +98,9 @@ handoff evidence independently.
 - `github_release_assets_missing`
 - `joshua_release_signoff_missing`
 
-Latest public-export evidence is `codex-public-export-20260513T215949Z`:
+Latest public-export evidence is `codex-public-export-20260513T2222Z`:
 14,700 files classified, 10,218 copied into the staged public tree, 4,040
-denylisted paths excluded, 7,446 manual-review rows retained, and
+denylisted paths excluded, 7,444 manual-review rows retained, and
 `source_git_status_unchanged=true`. Staged replay passed publication readiness
 58/0, public surface scan 14/0, public docs 144/0, website static 72/0, user
 journey pack 8/0, public links 3/0, release assets 12/0, cutover receipts 23/0,
@@ -110,11 +110,11 @@ agent-lane probe 10/0, journey smoke 7/0, true-publication blocker coverage
 ## Completion Decision
 
 The goal is not complete. The repo is materially closer to public-preview
-readiness: reduced local mode is executable and runtime-proven; Claude Code and
-Gemini CLI now have isolated runtime receipts; Codex and OpenClaw have explicit
-blocker receipts instead of vague compatibility copy. Final publication still
+readiness: reduced local mode is executable and runtime-proven; Claude Code,
+Codex CLI, Gemini CLI, and OpenClaw now have isolated runtime receipts instead
+of vague compatibility copy. Final publication still
 requires the real public remote, hosted workflow proof, GitHub release/assets,
 and Joshua's exact release signoff.
 
-Do not claim "fully supported Codex/OpenClaw runtime", "public release
-complete", or "fleet-wide strict doctor green" from this audit.
+Do not claim "public release complete" or "fleet-wide strict doctor green" from
+this audit.

@@ -13,7 +13,8 @@ value is an inspectable loop state and one credible next action.
 ## Current Public-Preview Status
 
 The public first-run journey is implemented for reduced local mode and honest
-about the harness lanes that still need runtime proof. Start with:
+about agent lanes: a lane is supported only when its isolated runtime receipt
+passes. Start with:
 
 ```bash
 scripts/preflight.sh --json
@@ -36,8 +37,8 @@ Do not claim agent runtime support from this page alone. Public support copy
 must follow `scripts/isolated-agent-lane-smoke.sh --live-adapters` and
 `scripts/agent-lane-probe.sh --receipt-dir state/isolated-agent-lanes --json`.
 Current local receipts prove Claude Code and Gemini CLI in isolated mode. Codex
-CLI has an `auth_required` receipt, and OpenClaw has an
-`adapter_config_required` receipt.
+CLI is proven when `FLYWHEEL_CODEX_HOME` points at an authenticated Codex home,
+and OpenClaw is proven through a disposable isolated OpenClaw agent.
 
 ## Journey Contract
 
@@ -124,16 +125,17 @@ Flywheel reports harness support from evidence, not optimism.
 | Lane | First-run stance |
 |---|---|
 | Claude Code | isolated runtime receipt present; support copy allowed when the same receipt gate passes locally |
-| Codex CLI | compatibility target; current blocker is `auth_required` in isolated mode |
+| Codex CLI | isolated runtime receipt present; support copy allowed when `FLYWHEEL_CODEX_HOME` points at an authenticated Codex home |
 | Gemini CLI | isolated runtime receipt present; support copy allowed when the same receipt gate passes locally |
-| OpenClaw | compatibility target; current blocker is `adapter_config_required` in isolated mode |
+| OpenClaw | isolated runtime receipt present; support copy allowed through a disposable isolated OpenClaw agent |
 | Reduced local mode | required fallback path |
 
 The journey-smoke and isolated receipt commands gate public support copy:
 
 ```bash
 scripts/journey-smoke.sh --matrix claude,codex,gemini,openclaw,reduced --dry-run --json
-scripts/isolated-agent-lane-smoke.sh --receipt-dir state/isolated-agent-lanes --live-adapters --json
+FLYWHEEL_CODEX_HOME="$HOME/.codex" scripts/isolated-agent-lane-smoke.sh \
+  --receipt-dir state/isolated-agent-lanes --live-adapters --json
 scripts/agent-lane-probe.sh --receipt-dir state/isolated-agent-lanes --json
 ```
 

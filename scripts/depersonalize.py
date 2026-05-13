@@ -348,12 +348,18 @@ def unmask_public_values(text: str, masks: list[tuple[str, str]]) -> str:
 
 
 TESTS_ONLY_RUNTIME_ROWS = {"iso-timestamp", "bead-id", "pane-number"}
+PATH_RUNTIME_PRESERVE_ROWS = {
+    "docs/evidence/external-review-log.jsonl": {"iso-timestamp"},
+}
 
 
 def transform_rows_for_path(rows: list[ReplacementRow], relpath: str) -> list[ReplacementRow]:
+    path_preserve_rows = PATH_RUNTIME_PRESERVE_ROWS.get(relpath, set())
     if relpath == "tests" or relpath.startswith("tests/"):
-        return [row for row in rows if row.id not in TESTS_ONLY_RUNTIME_ROWS]
-    return rows
+        path_preserve_rows = path_preserve_rows | TESTS_ONLY_RUNTIME_ROWS
+    if not path_preserve_rows:
+        return rows
+    return [row for row in rows if row.id not in path_preserve_rows]
 
 
 def transform_text(
@@ -378,13 +384,14 @@ def scan_table_values(
     root: Path, rows: list[ReplacementRow], ignored_dir_names: set[str]
 ) -> list[dict[str, object]]:
     findings: list[dict[str, object]] = []
-    compiled = [(row, row_pattern(row)) for row in rows]
-    masks = public_value_masks(rows)
     for relpath, path in iter_text_files(root, ignored_dir_names):
         try:
             text = path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
             continue
+        effective_rows = transform_rows_for_path(rows, relpath)
+        compiled = [(row, row_pattern(row)) for row in effective_rows]
+        masks = public_value_masks(effective_rows)
         for line_no, line in enumerate(text.splitlines(), start=1):
             protected = mask_public_values(line, masks)
             matched_ids = [

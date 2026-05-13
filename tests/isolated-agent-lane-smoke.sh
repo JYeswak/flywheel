@@ -99,10 +99,43 @@ if [[ "${1:-}" == "--version" ]]; then
   printf 'openclaw test-adapter\n'
   exit 0
 fi
-printf 'Error: Unknown agent id "flywheel-lane-smoke". Use "openclaw agents list" to see configured agents.\n' >&2
+if [[ "${1:-}" == "agents" && "${2:-}" == "add" ]]; then
+  printf '{"agentId":"flywheel-lane-smoke"}\n'
+  exit 0
+fi
+if [[ "${1:-}" == "agent" ]]; then
+  printf '{"payloads":[{"text":"FLYWHEEL_LANE_OK"}]}\n'
+  exit 0
+fi
+printf 'Error: unknown openclaw fake command\n' >&2
 exit 1
 SH
 chmod +x "$TMP/fake-bin/openclaw"
+cat >"$TMP/fake-bin/codex" <<'SH'
+#!/usr/bin/env bash
+if [[ "${1:-}" == "--version" ]]; then
+  printf 'codex test-adapter\n'
+  exit 0
+fi
+if [[ "${EXPECT_CODEX_HOME:-}" != "" && "${CODEX_HOME:-}" != "$EXPECT_CODEX_HOME" ]]; then
+  printf 'expected CODEX_HOME=%s got %s\n' "$EXPECT_CODEX_HOME" "${CODEX_HOME:-}" >&2
+  exit 2
+fi
+last=""
+while [[ $# -gt 0 ]]; do
+  if [[ "$1" == "--output-last-message" ]]; then
+    last="$2"
+    shift 2
+    continue
+  fi
+  shift
+done
+if [[ -n "$last" ]]; then
+  printf 'FLYWHEEL_LANE_OK\n' >"$last"
+fi
+printf 'FLYWHEEL_LANE_OK\n'
+SH
+chmod +x "$TMP/fake-bin/codex"
 
 run_capture "$TMP/live-claude.json" "$TMP/live-claude.err" \
   env PATH="$TMP/fake-bin:$PATH" "$SCRIPT" --skip-assemble --live-adapters --lanes claude --receipt-dir "$TMP/live-receipts" --json
@@ -133,18 +166,38 @@ else
   fail "live runtime receipt validates rc=${live_probe_rc}"
 fi
 
+mkdir -p "$TMP/codex-home"
+run_capture "$TMP/live-codex.json" "$TMP/live-codex.err" \
+  env PATH="$TMP/fake-bin:$PATH" FLYWHEEL_CODEX_HOME="$TMP/codex-home" EXPECT_CODEX_HOME="$TMP/codex-home" \
+    "$SCRIPT" --skip-assemble --live-adapters --lanes codex --receipt-dir "$TMP/codex-receipts" --json
+live_codex_rc=$?
+if [[ "$live_codex_rc" -eq 0 ]] && jq -e '
+  .status == "pass"
+  and .support_copy_gate.codex_supported == true
+  and .lanes[0].runtime_proven == true
+  and .lanes[0].evidence == "runtime_receipt"
+  and .lanes[0].adapter.credential_scope == "operator-provided-codex-home"
+  and (.blockers | length == 0)
+' "$TMP/live-codex.json" >/dev/null; then
+  pass "codex adapter can use explicit auth home"
+else
+  fail "codex adapter can use explicit auth home rc=${live_codex_rc}"
+fi
+
 run_capture "$TMP/live-openclaw.json" "$TMP/live-openclaw.err" \
   env PATH="$TMP/fake-bin:$PATH" "$SCRIPT" --skip-assemble --live-adapters --lanes openclaw --receipt-dir "$TMP/openclaw-receipts" --json
 live_openclaw_rc=$?
 if [[ "$live_openclaw_rc" -eq 0 ]] && jq -e '
   .status == "pass"
-  and .support_copy_gate.openclaw_supported == false
-  and .blockers[0].id == "openclaw"
-  and .blockers[0].blocker_class == "adapter_config_required"
+  and .support_copy_gate.openclaw_supported == true
+  and .lanes[0].runtime_proven == true
+  and .lanes[0].evidence == "runtime_receipt"
+  and .lanes[0].adapter.credential_scope == "isolated-openclaw-agent"
+  and (.blockers | length == 0)
 ' "$TMP/live-openclaw.json" >/dev/null; then
-  pass "live adapter classifies missing config"
+  pass "openclaw adapter creates isolated agent"
 else
-  fail "live adapter classifies missing config rc=${live_openclaw_rc}"
+  fail "openclaw adapter creates isolated agent rc=${live_openclaw_rc}"
 fi
 
 if ! rg -n '/Users/josh|AGENT_MAIL_[A-Z_]*=|sk-[A-Za-z0-9_-]{12,}|ghp_[A-Za-z0-9_]{20,}' "$TMP/smoke.json" "$TMP/receipts" >/dev/null; then

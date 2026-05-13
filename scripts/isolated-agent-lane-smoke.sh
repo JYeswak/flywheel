@@ -12,6 +12,9 @@ SKIP_ASSEMBLE=0
 SOURCE="$ROOT"
 LIVE_ADAPTERS=0
 ADAPTER_TIMEOUT=45
+CODEX_AUTH_HOME="${FLYWHEEL_CODEX_HOME:-}"
+OPENCLAW_MODEL="${FLYWHEEL_OPENCLAW_MODEL:-}"
+OPENCLAW_AGENT_ID="${FLYWHEEL_OPENCLAW_AGENT_ID:-flywheel-lane-smoke}"
 
 usage() {
   cat <<'EOF'
@@ -25,6 +28,11 @@ Without a lane-specific live adapter, installed CLIs are treated as setup
 evidence only and the lane receives an isolated_runtime_receipt_missing blocker.
 With --live-adapters, each installed CLI must respond in the isolated repo before
 the lane receives support-copy runtime proof.
+
+Optional environment:
+  FLYWHEEL_CODEX_HOME=/path/to/.codex      read Codex auth from this directory
+  FLYWHEEL_OPENCLAW_MODEL=<model-id>       model for the disposable OpenClaw agent
+  FLYWHEEL_OPENCLAW_AGENT_ID=<agent-id>    agent id for the disposable OpenClaw agent
 EOF
 }
 
@@ -192,7 +200,9 @@ adapter_prompt() {
 
 run_live_adapter() {
   local lane="$1" out="$2" err="$3"
-  local prompt codex_last openclaw_state
+  local prompt codex_last codex_home openclaw_state openclaw_agent_dir
+  local codex_credential_scope openclaw_add_out openclaw_add_err openclaw_add_rc
+  local -a openclaw_add_args
   prompt="$(adapter_prompt)"
   case "$lane" in
     claude)
@@ -203,14 +213,22 @@ run_live_adapter() {
       ;;
     codex)
       codex_last="$artifacts/codex-last-message.txt"
-      mkdir -p "$home/.codex"
+      codex_home="$home/.codex"
+      codex_credential_scope="isolated-empty-codex-home"
+      if [[ -n "$CODEX_AUTH_HOME" ]]; then
+        codex_home="$CODEX_AUTH_HOME"
+        codex_credential_scope="operator-provided-codex-home"
+      else
+        mkdir -p "$codex_home"
+      fi
       run_capture_timeout "$out" "$err" "$ADAPTER_TIMEOUT" \
-        env HOME="$home" XDG_CONFIG_HOME="$xdg_config" XDG_CACHE_HOME="$xdg_cache" CODEX_HOME="$home/.codex" \
+        env HOME="$home" XDG_CONFIG_HOME="$xdg_config" XDG_CACHE_HOME="$xdg_cache" CODEX_HOME="$codex_home" \
         codex exec --ignore-user-config --ignore-rules --ephemeral --sandbox read-only --cd "$repo" \
           --output-last-message "$codex_last" "$prompt"
       if [[ -s "$codex_last" ]]; then
         printf '\n%s\n' "$(safe_excerpt_file "$codex_last")" >>"$out"
       fi
+      printf '\ncredential_scope=%s\n' "$codex_credential_scope" >>"$out"
       ;;
     gemini)
       run_capture_timeout "$out" "$err" "$ADAPTER_TIMEOUT" \
@@ -219,11 +237,30 @@ run_live_adapter() {
       ;;
     openclaw)
       openclaw_state="$home/.openclaw-isolated"
+      openclaw_agent_dir="$openclaw_state/agents/$OPENCLAW_AGENT_ID/agent"
+      openclaw_add_out="$artifacts/openclaw-agent-add.out"
+      openclaw_add_err="$artifacts/openclaw-agent-add.err"
       mkdir -p "$openclaw_state"
+      openclaw_add_args=(openclaw agents add "$OPENCLAW_AGENT_ID" --non-interactive --workspace "$repo" --agent-dir "$openclaw_agent_dir" --json)
+      if [[ -n "$OPENCLAW_MODEL" ]]; then
+        openclaw_add_args+=(--model "$OPENCLAW_MODEL")
+      fi
+      run_capture_timeout "$openclaw_add_out" "$openclaw_add_err" "$ADAPTER_TIMEOUT" \
+        env HOME="$home" XDG_CONFIG_HOME="$xdg_config" XDG_CACHE_HOME="$xdg_cache" \
+          OPENCLAW_STATE_DIR="$openclaw_state" OPENCLAW_CONFIG_PATH="$openclaw_state/config.json" \
+        "${openclaw_add_args[@]}"
+      openclaw_add_rc=$RUN_CAPTURE_RC
+      if [[ "$openclaw_add_rc" -ne 0 ]]; then
+        cat "$openclaw_add_out" >"$out"
+        cat "$openclaw_add_err" >"$err"
+        RUN_CAPTURE_RC=$openclaw_add_rc
+        return 0
+      fi
       run_capture_timeout "$out" "$err" "$ADAPTER_TIMEOUT" \
         env HOME="$home" XDG_CONFIG_HOME="$xdg_config" XDG_CACHE_HOME="$xdg_cache" \
           OPENCLAW_STATE_DIR="$openclaw_state" OPENCLAW_CONFIG_PATH="$openclaw_state/config.json" \
-        openclaw agent --local --agent flywheel-lane-smoke --message "$prompt" --json --timeout "$ADAPTER_TIMEOUT"
+        openclaw agent --local --agent "$OPENCLAW_AGENT_ID" --message "$prompt" --json --timeout "$ADAPTER_TIMEOUT"
+      printf '\ncredential_scope=isolated-openclaw-agent\n' >>"$out"
       ;;
     *)
       RUN_CAPTURE_RC=64
@@ -296,20 +333,21 @@ write_blocker_receipt() {
 }
 
 adapter_json() {
-  local lane="$1" mode="$2" rc="$3" out="$4" err="$5" blocker_class="$6"
+  local lane="$1" mode="$2" rc="$3" out="$4" err="$5" blocker_class="$6" credential_scope="${7:-}"
   local stdout_excerpt stderr_excerpt
   stdout_excerpt="$(safe_excerpt_file "$out")"
   stderr_excerpt="$(safe_excerpt_file "$err")"
   jq -nc \
     --arg lane "$lane" --arg mode "$mode" --argjson rc "$rc" \
     --arg stdout_excerpt "$stdout_excerpt" --arg stderr_excerpt "$stderr_excerpt" \
-    --arg blocker_class "$blocker_class" '{
+    --arg blocker_class "$blocker_class" --arg credential_scope "$credential_scope" '{
       lane:$lane,
       mode:$mode,
       exit_code:$rc,
       expected_marker:"FLYWHEEL_LANE_OK",
       stdout_excerpt:$stdout_excerpt,
       stderr_excerpt:$stderr_excerpt,
+      credential_scope:(if $credential_scope == "" then null else $credential_scope end),
       blocker_class:(if $blocker_class == "" then null else $blocker_class end)
     }'
 }
@@ -476,20 +514,27 @@ for raw_lane in "${lane_array[@]}"; do
   evidence="blocker_receipt"
   adapter="null"
   blocker_class=""
+  credential_scope=""
   adapter_rc=0
   adapter_out="$artifacts/${lane}-adapter.out"
   adapter_err="$artifacts/${lane}-adapter.err"
   if [[ "$cli_present" == "true" && "$LIVE_ADAPTERS" -eq 1 && "$reduced_pass" == "true" ]]; then
     run_live_adapter "$lane" "$adapter_out" "$adapter_err"
     adapter_rc=$RUN_CAPTURE_RC
+    credential_scope=""
+    if [[ "$lane" == "codex" && -n "$CODEX_AUTH_HOME" ]]; then
+      credential_scope="operator-provided-codex-home"
+    elif [[ "$lane" == "openclaw" ]]; then
+      credential_scope="isolated-openclaw-agent"
+    fi
     if [[ "$adapter_rc" -eq 0 ]] && rg -q 'FLYWHEEL_LANE_OK' "$adapter_out" "$adapter_err"; then
-      adapter="$(adapter_json "$lane" "live_adapter" "$adapter_rc" "$adapter_out" "$adapter_err" "")"
+      adapter="$(adapter_json "$lane" "live_adapter" "$adapter_rc" "$adapter_out" "$adapter_err" "" "$credential_scope")"
       write_runtime_receipt "$lane" "$receipt" "$generated" "$private_scan" "$adapter"
       runtime_proven=true
       evidence="runtime_receipt"
     else
       blocker_class="$(classify_adapter_blocker "$lane" "$adapter_rc" "$adapter_out" "$adapter_err")"
-      adapter="$(adapter_json "$lane" "live_adapter" "$adapter_rc" "$adapter_out" "$adapter_err" "$blocker_class")"
+      adapter="$(adapter_json "$lane" "live_adapter" "$adapter_rc" "$adapter_out" "$adapter_err" "$blocker_class" "$credential_scope")"
       write_blocker_receipt "$lane" "$receipt" "$generated" "$command_name" "$cli_present" "$private_scan" "$blocker_class"
     fi
   else

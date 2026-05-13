@@ -40,6 +40,7 @@ Live-adapter proof is opt-in because it may spend provider tokens or require
 local credentials:
 
 ```bash
+export FLYWHEEL_CODEX_HOME="$HOME/.codex"
 scripts/isolated-agent-lane-smoke.sh \
   --lanes claude,codex,gemini,openclaw \
   --receipt-dir state/isolated-agent-lanes \
@@ -51,6 +52,12 @@ scripts/isolated-agent-lane-smoke.sh \
 The live adapter must respond inside the disposable repo. The receipt still has
 to pass the reduced journey and private-state scan before support copy can move
 from `compatibility-target` to `supported`.
+
+Codex keeps `HOME`, XDG paths, and the target repo isolated, but reads
+authentication from `FLYWHEEL_CODEX_HOME` when that variable is set. OpenClaw
+creates a disposable isolated agent in the temporary OpenClaw state directory
+before running the marker prompt. Set `FLYWHEEL_OPENCLAW_MODEL` only when the
+installed OpenClaw model registry already knows that model id.
 
 ## Runtime Promotion Rule
 
@@ -118,7 +125,8 @@ Full local proof before publication work:
 ```bash
 bash tests/github-workflows.sh
 scripts/local-actions-preflight.sh --dry-run
-scripts/isolated-agent-lane-smoke.sh --receipt-dir state/isolated-agent-lanes --json \
+FLYWHEEL_CODEX_HOME="$HOME/.codex" scripts/isolated-agent-lane-smoke.sh \
+  --receipt-dir state/isolated-agent-lanes --live-adapters --require-runtime --json \
   > state/isolated-agent-lane-smoke.receipt.json
 ```
 
@@ -128,5 +136,6 @@ harness keeps local proof cheap and catches overclaims before that spend.
 ## Current Interpretation
 
 As of the current publication lane, reduced mode is runtime-proven. Claude Code
-and Gemini CLI have isolated live-adapter receipts. Codex CLI remains blocked on
-`auth_required`, and OpenClaw remains blocked on `adapter_config_required`.
+Codex CLI, Gemini CLI, and OpenClaw have isolated live-adapter receipts.
+`scripts/agent-lane-probe.sh --receipt-dir state/isolated-agent-lanes --json`
+reports four runtime-proven lanes and zero blocker receipts.

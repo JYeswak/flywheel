@@ -14,9 +14,9 @@ receipt locations.
 | Reduced local mode | Required public path | Flywheel can initialize repo-local state, run doctor and tick, simulate dispatch, validate closeout, and show next action without private fleet substrate. |
 | Full local substrate | Supported when installed | Flywheel can detect and use Beads, Agent Mail, NTM, Socraticode, DCG, and related substrate without silently assuming they exist. |
 | Claude Code | Supported by current isolated receipt | `flywheel.agent_lane_runtime_receipt.v0` proves the reduced journey, live adapter response, and private-state scan. |
-| Codex CLI | Compatibility target | Current blocker receipt is `auth_required` in isolated mode. |
+| Codex CLI | Supported by current isolated receipt | `FLYWHEEL_CODEX_HOME` provides auth while the target repo and `HOME` stay isolated. |
 | Gemini CLI | Supported by current isolated receipt | `flywheel.agent_lane_runtime_receipt.v0` proves the reduced journey, live adapter response, and private-state scan. |
-| OpenClaw | Compatibility target | Current blocker receipt is `adapter_config_required` in isolated mode. |
+| OpenClaw | Supported by current isolated receipt | The harness creates a disposable isolated OpenClaw agent before the live marker turn. |
 
 Do not upgrade a compatibility target to supported copy from docs alone. The
 source of truth is `scripts/journey-smoke.sh`.
@@ -271,7 +271,7 @@ Expected results:
 | Public link checker | `SUMMARY pass=3 fail=0` and JSON `failure_count=0` for public docs/site links. |
 | Installer smoke | `SUMMARY pass=10 fail=0` against a temporary prefix. |
 | Journey smoke | `SUMMARY pass=7 fail=0` with reduced mode runtime-proven and agent lanes receipt-bound. |
-| Isolated agent lane smoke | `SUMMARY pass=9 fail=0` with live-adapter promotion covered by fakes, missing adapter configuration classified, and unproven real agent lanes receipt-bound. |
+| Isolated agent lane smoke | `SUMMARY pass=10 fail=0` with live-adapter promotion covered by fakes, explicit Codex auth-home wiring, disposable OpenClaw agent setup, and unproven lanes receipt-bound. |
 | Preflight fixtures | Fixture-backed full, reduced, blocked, docs-only, and misconfigured modes pass. |
 | Contact routing | Public mailto route uses `joshua@zeststream.ai` and subject `[Flywheel] Public site inquiry`; this proves routing, not delivery. |
 | Upstream substrate adoption | Asupersync remains `gated-evaluation` until promotion gates and repo-local POC evidence pass. |
