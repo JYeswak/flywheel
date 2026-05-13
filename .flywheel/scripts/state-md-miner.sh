@@ -897,6 +897,40 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     return payload
 
 
+def finding_decision_key(row: dict[str, Any]) -> tuple[str, str, str, str, str]:
+    return (
+        str(row.get("repo") or ""),
+        str(row.get("state_path") or ""),
+        str(row.get("line") or ""),
+        str(row.get("class") or ""),
+        str(row.get("text") or ""),
+    )
+
+
+def decision_is_mined(row: dict[str, Any]) -> bool:
+    decision = str(row.get("decision") or "")
+    if decision == "existing_bead_reference":
+        return bool(row.get("bead_id") or row.get("no_bead_reason"))
+    if decision == "bead_filed_or_existing":
+        return bool(row.get("bead_id"))
+    if decision == "no_bead_reason":
+        return str(row.get("no_bead_reason") or "") not in {"", "br_create_failed"}
+    return False
+
+
+def mined_decision_keys(latest: dict[str, Any] | None) -> set[tuple[str, str, str, str, str]]:
+    if not isinstance(latest, dict):
+        return set()
+    decisions = latest.get("decisions")
+    if not isinstance(decisions, list):
+        return set()
+    return {
+        finding_decision_key(row)
+        for row in decisions
+        if isinstance(row, dict) and decision_is_mined(row)
+    }
+
+
 def doctor(args: argparse.Namespace) -> dict[str, Any]:
     args.dry_run = True
     args.apply = False
@@ -913,13 +947,20 @@ def doctor(args: argparse.Namespace) -> dict[str, Any]:
         warnings.append({"code": "state_md_miner_never_applied", "message": "no applied STATE.md mine receipt found"})
     elif last_run_age_hours > 24:
         warnings.append({"code": "state_md_miner_stale", "message": f"last applied STATE.md mine age {last_run_age_hours}h exceeds 24h"})
+    mined_keys = mined_decision_keys(latest if isinstance(latest, dict) else None)
+    unmined_findings = [
+        finding for finding in payload["findings"]
+        if finding_decision_key(finding) not in mined_keys
+    ]
     return {
         "schema_version": SCHEMA_VERSION,
-        "status": "warn" if payload["findings_count"] or warnings else "pass",
-        "state_md_unmined_count": payload["findings_count"],
+        "status": "warn" if unmined_findings or warnings else "pass",
+        "state_md_unmined_count": len(unmined_findings),
+        "state_md_findings_count": payload["findings_count"],
+        "state_md_mined_count": payload["findings_count"] - len(unmined_findings),
         "state_md_last_run_age_hours": last_run_age_hours,
         "state_md_class_counts": payload["class_counts"],
-        "state_md_top_findings": payload["findings"][:5],
+        "state_md_top_findings": unmined_findings[:5],
         "repos_checked": payload["repos_checked"],
         "warnings": warnings,
         "errors": [],

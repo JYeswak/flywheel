@@ -81,6 +81,7 @@ test -s "$TMP/state/latest.json" || fail "latest digest missing"
 
 doctor="$TMP/doctor.json"
 "$SCRIPT" --roster "$roster" --state-dir "$TMP/state" --now 2026-05-04T00:10:00Z --doctor --json >"$doctor"
-jq -e '.state_md_unmined_count >= 5 and .state_md_last_run_age_hours == 0.08' "$doctor" >/dev/null || fail "doctor signal missing latest run age"
+jq -e '.state_md_findings_count >= 5 and .state_md_unmined_count == 0 and .state_md_mined_count == .state_md_findings_count and .state_md_last_run_age_hours == 0.08' "$doctor" >/dev/null || fail "doctor signal missing mined decision accounting"
+jq -e '.status == "pass"' "$doctor" >/dev/null || fail "doctor should pass when all current findings have applied decisions"
 
 echo "PASS state-md-miner dry-run apply cap existing-bead pattern stale doctor"
