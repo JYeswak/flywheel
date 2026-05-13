@@ -19,7 +19,7 @@ directory. The remote repository is still private and has no visible GitHub
 Actions workflows or runs. The release, asset, and Joshua-signoff surfaces are
 also verified explicitly; none can close from local tests alone.
 
-Latest public-export evidence: assembly run `codex-public-export-20260513T2236Z`
+Latest public-export evidence: assembly run `codex-public-export-20260513T2252Z`
 classified 14,700 files, copied 10,218 public-safe files, excluded 4,040
 denylisted paths, preserved source git status, passed staged readiness,
 public-doc, public-link, release-asset, cutover, blocker-coverage, agent-lane,
@@ -60,11 +60,11 @@ requires those surfaces. Mobile Eats and Gemini CLI returned current
 seven-surface rows with empty `blocking_findings`, and both the private working
 log and sanitized public evidence copy validate in release mode.
 
-Latest local evidence refresh: `2026-05-13T22:36Z`. Source gates passed
+Latest local evidence refresh: `2026-05-13T22:52Z`. Source gates passed
 `tests/public-docs.sh` 144/0, `tests/publication-readiness.sh` 72/0,
 `tests/cutover-receipts.sh` 23/0, `tests/public-top-level-files.sh` 21/0, and
 `tests/agent-lane-probe.sh` 10/0. Staged public export
-`codex-public-export-20260513T2236Z` passed `tests/public-docs.sh` 144/0,
+`codex-public-export-20260513T2252Z` passed `tests/public-docs.sh` 144/0,
 `tests/publication-readiness.sh` 58/0, and depersonalization scan 0 findings.
 The link checker reports `source_count=36`, `checked_count=62`, and
 `failure_count=0`.
