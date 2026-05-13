@@ -33,7 +33,8 @@ jq '{status, reduced:.reduced_journey.runtime_proven, support_copy_gate}' \
 ```
 
 `reduced` must be `true`. Claude, Codex, Gemini, and OpenClaw stay `false`
-until each lane has its own live adapter receipt.
+until each lane has its own live adapter receipt; a passing receipt can promote
+one lane while other lanes remain blocked.
 
 Live-adapter proof is opt-in because it may spend provider tokens or require
 local credentials:
@@ -83,6 +84,7 @@ Adapter blockers are explicit:
 |---|---|
 | `install_required` | The CLI is not installed in the current PATH. |
 | `auth_required` | The CLI exists, but isolated credentials are missing or unusable. |
+| `adapter_config_required` | The CLI exists, but the isolated agent/session configuration is missing. |
 | `daemon_unavailable` | The CLI or local gateway timed out or was not running. |
 | `isolated_runtime_receipt_missing` | The CLI exists, but no passing live runtime proof exists yet. |
 
@@ -125,7 +127,6 @@ harness keeps local proof cheap and catches overclaims before that spend.
 
 ## Current Interpretation
 
-As of the current publication lane, reduced mode is runtime-proven. Claude Code,
-Codex CLI, Gemini CLI, and OpenClaw are compatibility targets because the public
-engine still needs real credentialed `--live-adapters` receipts before any of
-those lanes can be advertised as fully supported.
+As of the current publication lane, reduced mode is runtime-proven. Claude Code
+and Gemini CLI have isolated live-adapter receipts. Codex CLI remains blocked on
+`auth_required`, and OpenClaw remains blocked on `adapter_config_required`.

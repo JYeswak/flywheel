@@ -93,6 +93,16 @@ fi
 printf '{"result":"FLYWHEEL_LANE_OK"}\n'
 SH
 chmod +x "$TMP/fake-bin/claude"
+cat >"$TMP/fake-bin/openclaw" <<'SH'
+#!/usr/bin/env bash
+if [[ "${1:-}" == "--version" ]]; then
+  printf 'openclaw test-adapter\n'
+  exit 0
+fi
+printf 'Error: Unknown agent id "flywheel-lane-smoke". Use "openclaw agents list" to see configured agents.\n' >&2
+exit 1
+SH
+chmod +x "$TMP/fake-bin/openclaw"
 
 run_capture "$TMP/live-claude.json" "$TMP/live-claude.err" \
   env PATH="$TMP/fake-bin:$PATH" "$SCRIPT" --skip-assemble --live-adapters --lanes claude --receipt-dir "$TMP/live-receipts" --json
@@ -121,6 +131,20 @@ if [[ "$live_probe_rc" -eq 0 ]] && jq -e '
   pass "live runtime receipt validates"
 else
   fail "live runtime receipt validates rc=${live_probe_rc}"
+fi
+
+run_capture "$TMP/live-openclaw.json" "$TMP/live-openclaw.err" \
+  env PATH="$TMP/fake-bin:$PATH" "$SCRIPT" --skip-assemble --live-adapters --lanes openclaw --receipt-dir "$TMP/openclaw-receipts" --json
+live_openclaw_rc=$?
+if [[ "$live_openclaw_rc" -eq 0 ]] && jq -e '
+  .status == "pass"
+  and .support_copy_gate.openclaw_supported == false
+  and .blockers[0].id == "openclaw"
+  and .blockers[0].blocker_class == "adapter_config_required"
+' "$TMP/live-openclaw.json" >/dev/null; then
+  pass "live adapter classifies missing config"
+else
+  fail "live adapter classifies missing config rc=${live_openclaw_rc}"
 fi
 
 if ! rg -n '/Users/josh|AGENT_MAIL_[A-Z_]*=|sk-[A-Za-z0-9_-]{12,}|ghp_[A-Za-z0-9_]{20,}' "$TMP/smoke.json" "$TMP/receipts" >/dev/null; then

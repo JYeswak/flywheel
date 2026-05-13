@@ -30,12 +30,14 @@ The current end-to-end status is:
 | `flywheel dispatch --simulate` | implemented for reduced mode |
 | `flywheel validate-receipt` | implemented for reduced-mode simulator receipts |
 | `flywheel inspect` | implemented for reduced-mode simulator receipts |
-| `scripts/journey-smoke.sh` | implemented as dry-run matrix; reduced mode is runtime-proven, agent CLI lanes remain registry-valid until harness smoke runs |
+| `scripts/journey-smoke.sh` | implemented as dry-run matrix; reduced mode is runtime-proven, agent CLI support follows isolated lane receipts |
 
-Do not claim full Claude, Codex, Gemini, or OpenClaw runtime support from this
-page alone. Public support copy should follow `scripts/journey-smoke.sh`: reduced
-mode is runtime-proven; agent harness lanes are support targets until their
-runtime receipts exist.
+Do not claim agent runtime support from this page alone. Public support copy
+must follow `scripts/isolated-agent-lane-smoke.sh --live-adapters` and
+`scripts/agent-lane-probe.sh --receipt-dir state/isolated-agent-lanes --json`.
+Current local receipts prove Claude Code and Gemini CLI in isolated mode; Codex
+CLI remains blocked on isolated auth, and OpenClaw remains blocked on isolated
+agent/session configuration.
 
 ## Journey Contract
 
@@ -121,20 +123,22 @@ Flywheel reports harness support from evidence, not optimism.
 
 | Lane | First-run stance |
 |---|---|
-| Claude Code | compatibility target until isolated journey smoke proves it |
-| Codex CLI | compatibility target until isolated journey smoke proves it |
-| Gemini CLI | compatibility target until journey smoke proves it |
-| OpenClaw | compatibility target until daemon or gateway smoke proves it |
+| Claude Code | isolated runtime receipt present; support copy allowed when the same receipt gate passes locally |
+| Codex CLI | compatibility target; current blocker is `auth_required` in isolated mode |
+| Gemini CLI | isolated runtime receipt present; support copy allowed when the same receipt gate passes locally |
+| OpenClaw | compatibility target; current blocker is `adapter_config_required` in isolated mode |
 | Reduced local mode | required fallback path |
 
-The journey-smoke command gates public support copy:
+The journey-smoke and isolated receipt commands gate public support copy:
 
 ```bash
 scripts/journey-smoke.sh --matrix claude,codex,gemini,openclaw,reduced --dry-run --json
+scripts/isolated-agent-lane-smoke.sh --receipt-dir state/isolated-agent-lanes --live-adapters --json
+scripts/agent-lane-probe.sh --receipt-dir state/isolated-agent-lanes --json
 ```
 
-Until that command reports a lane as `runtime_proven`, keep Claude, Codex,
-Gemini, and OpenClaw as compatibility targets. Use
+Until the receipt probe reports a lane as `support_copy_allowed=true`, keep that
+lane as a compatibility target. Use
 [`../runbooks/agent-lane-compatibility.md`](../runbooks/agent-lane-compatibility.md)
 to verify that command presence is not treated as support proof. A lane receipt
 must prove preflight, init, doctor, tick, dispatch-or-simulate, closeout,

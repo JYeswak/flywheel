@@ -2,8 +2,10 @@
 
 Flywheel is designed to run with different coding agents, but public support
 copy has to follow evidence. The reduced local lane is the required fallback.
-Claude, Codex, Gemini, and OpenClaw are compatibility targets until their own
-isolated runtime receipts exist.
+Agent lanes are compatibility targets until their own isolated runtime receipts
+exist. Current local receipts prove Claude Code and Gemini CLI; Codex CLI is
+blocked on isolated auth, and OpenClaw is blocked on isolated agent/session
+configuration.
 
 Use this command to inspect the agent-lane surface:
 

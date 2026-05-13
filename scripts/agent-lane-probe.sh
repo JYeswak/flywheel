@@ -77,6 +77,7 @@ blocker_receipt_json() {
       and (.command | type == "string" and contains("agent-lane-probe.sh"))
       and (.blocker_class | IN(
         "auth_required",
+        "adapter_config_required",
         "install_required",
         "daemon_unavailable",
         "public_release_pending",

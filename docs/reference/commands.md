@@ -12,7 +12,7 @@ The public CLI starts with reduced-mode commands.
 | `flywheel validate-receipt --repo "$PWD" --file .flywheel/last_closeout_receipt.json --json` | Validate the closeout receipt. |
 | `flywheel inspect --repo "$PWD" --json` | Read the next actionable step. |
 | `flywheel quickstart --json` | Print the first-run command sequence. |
-| `scripts/agent-lane-probe.sh --json` | Report Claude, Codex, Gemini, and OpenClaw as compatibility targets until strict runtime receipts exist. |
+| `scripts/agent-lane-probe.sh --json` | Report default lane registry status without treating command presence as support proof. |
 | `scripts/agent-lane-probe.sh --receipt-dir receipts/agent-lanes --json` | Recheck agent lanes against runtime or blocker receipts before changing support copy. |
 | `scripts/isolated-agent-lane-smoke.sh --receipt-dir state/isolated-agent-lanes --json` | Create a disposable HOME, public export, install prefix, and target repo before writing per-lane runtime or blocker receipts. Add `--live-adapters` only when credentialed agent CLIs should spend a real runtime proof. |
 | `scripts/local-actions-preflight.sh` | Run the local GitHub Actions gate with `actionlint` and `act` before spending hosted runner minutes. |

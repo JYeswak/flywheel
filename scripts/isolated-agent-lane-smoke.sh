@@ -129,6 +129,8 @@ classify_adapter_blocker() {
   text="$(cat "$out" "$err" 2>/dev/null | tr '[:upper:]' '[:lower:]' || true)"
   if [[ "$text" =~ (auth|login|log\ in|api[[:space:]_-]*key|unauthorized|forbidden|not[[:space:]_-]*authenticated|credential|token) ]]; then
     printf 'auth_required'
+  elif [[ "$text" =~ (unknown[[:space:]_-]*agent|agent[[:space:]_-]*id|configured[[:space:]_-]*agents|config|configuration) ]]; then
+    printf 'adapter_config_required'
   elif [[ "$lane" == "openclaw" && "$text" =~ (daemon|gateway|connection[[:space:]_-]*refused|econnrefused|not[[:space:]_-]*running) ]]; then
     printf 'daemon_unavailable'
   elif [[ "$rc" -eq 124 ]]; then
@@ -149,6 +151,9 @@ blocker_reason_for_class() {
     auth_required)
       printf "%s live adapter was present, but the isolated environment did not have usable authentication." "$display"
       ;;
+    adapter_config_required)
+      printf "%s live adapter was present, but the isolated environment did not have the required agent/session configuration." "$display"
+      ;;
     daemon_unavailable)
       printf "%s live adapter did not complete before timeout or its local daemon/gateway was unavailable." "$display"
       ;;
@@ -168,6 +173,9 @@ blocker_next_action_for_class() {
       ;;
     auth_required)
       printf "Provide %s credentials to the isolated environment, re-run with --live-adapters, and keep this blocker until the live adapter returns a passing runtime receipt." "$display"
+      ;;
+    adapter_config_required)
+      printf "Configure the %s agent/session in the isolated environment, re-run with --live-adapters, and keep this blocker until the live adapter returns a passing runtime receipt." "$display"
       ;;
     daemon_unavailable)
       printf "Start or configure the %s local gateway/daemon, re-run with --live-adapters, and keep this blocker until the live adapter returns a passing runtime receipt." "$display"
@@ -195,6 +203,7 @@ run_live_adapter() {
       ;;
     codex)
       codex_last="$artifacts/codex-last-message.txt"
+      mkdir -p "$home/.codex"
       run_capture_timeout "$out" "$err" "$ADAPTER_TIMEOUT" \
         env HOME="$home" XDG_CONFIG_HOME="$xdg_config" XDG_CACHE_HOME="$xdg_cache" CODEX_HOME="$home/.codex" \
         codex exec --ignore-user-config --ignore-rules --ephemeral --sandbox read-only --cd "$repo" \
@@ -214,7 +223,7 @@ run_live_adapter() {
       run_capture_timeout "$out" "$err" "$ADAPTER_TIMEOUT" \
         env HOME="$home" XDG_CONFIG_HOME="$xdg_config" XDG_CACHE_HOME="$xdg_cache" \
           OPENCLAW_STATE_DIR="$openclaw_state" OPENCLAW_CONFIG_PATH="$openclaw_state/config.json" \
-        openclaw agent --local --message "$prompt" --json --timeout "$ADAPTER_TIMEOUT"
+        openclaw agent --local --agent flywheel-lane-smoke --message "$prompt" --json --timeout "$ADAPTER_TIMEOUT"
       ;;
     *)
       RUN_CAPTURE_RC=64

@@ -13,10 +13,10 @@ receipt locations.
 |---|---|---|
 | Reduced local mode | Required public path | Flywheel can initialize repo-local state, run doctor and tick, simulate dispatch, validate closeout, and show next action without private fleet substrate. |
 | Full local substrate | Supported when installed | Flywheel can detect and use Beads, Agent Mail, NTM, Socraticode, DCG, and related substrate without silently assuming they exist. |
-| Claude Code | Compatibility target | Registry-valid until a `flywheel.agent_lane_runtime_receipt.v0` receipt proves the isolated journey and private-state scan. |
-| Codex CLI | Compatibility target | Registry-valid until a `flywheel.agent_lane_runtime_receipt.v0` receipt proves the isolated journey and private-state scan. |
-| Gemini CLI | Compatibility target | Registry-valid until a `flywheel.agent_lane_runtime_receipt.v0` receipt proves the isolated journey and private-state scan. |
-| OpenClaw | Compatibility target | Registry-valid until a `flywheel.agent_lane_runtime_receipt.v0` receipt proves the isolated journey and private-state scan. |
+| Claude Code | Supported by current isolated receipt | `flywheel.agent_lane_runtime_receipt.v0` proves the reduced journey, live adapter response, and private-state scan. |
+| Codex CLI | Compatibility target | Current blocker receipt is `auth_required` in isolated mode. |
+| Gemini CLI | Supported by current isolated receipt | `flywheel.agent_lane_runtime_receipt.v0` proves the reduced journey, live adapter response, and private-state scan. |
+| OpenClaw | Compatibility target | Current blocker receipt is `adapter_config_required` in isolated mode. |
 
 Do not upgrade a compatibility target to supported copy from docs alone. The
 source of truth is `scripts/journey-smoke.sh`.
