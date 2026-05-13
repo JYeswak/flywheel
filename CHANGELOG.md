@@ -20,8 +20,8 @@ public release line.
   reporting, support path, code of conduct, and changelog.
 - Support-tier language that marks reduced mode as the required public path,
   full mode as substrate-dependent, and Claude, Codex, Gemini, and OpenClaw as
-  compatibility targets until a strict agent-lane runtime receipt proves the
-  isolated journey and private-state scan.
+  supported only when strict agent-lane runtime receipts prove the isolated
+  journey and private-state scan.
 - Public release cutover authorization runbook covering live readiness codes,
   operator commands, stop conditions, release assets, website/install
   checksum verification, and final signoff boundaries.

@@ -52,8 +52,9 @@ scripts/preflight.sh --json
 scripts/journey-smoke.sh --matrix reduced --dry-run --json
 ```
 
-Full mode remains substrate-dependent. Claude, Codex, Gemini, and OpenClaw
-lanes stay compatibility targets until their isolated receipts exist.
+Full mode remains substrate-dependent. Claude, Codex, Gemini, and OpenClaw can
+be named as supported only when their isolated receipts stay current and pass
+the private-state scan.
 
 ## Case-Study Boundary
 
