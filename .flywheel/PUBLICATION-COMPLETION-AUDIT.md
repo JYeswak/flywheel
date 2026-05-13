@@ -40,11 +40,11 @@ not treated as completion by itself.
 | NTM and non-NTM workflows | `docs/getting-started/first-run.md`, `scripts/preflight.sh`, `scripts/journey-smoke.sh`, `bin/flywheel` | Preflight detects full substrate including NTM/Agent Mail and selects reduced mode when absent. Journey smoke keeps harness lanes registry-valid until runtime proof. | covered |
 | Claude/Codex/Gemini/OpenClaw support tiers | `scripts/journey-smoke.sh` | Claude/Codex are `supported-first`; Gemini/OpenClaw are `compatibility-target`; reduced mode is `required-fallback`. | covered |
 | Yuzu naming plan | `docs/brand/naming-conventions.md`, `tests/naming-conventions.sh` | Canonical terms and rename gate are documented; test checks core terms and doctrine references. | covered |
-| Doctor hard blockers cleared | `flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json` | Final doctor status is `warn` with `errors=[]` and `repo_docs_state=ready` after lock repair; publishability, repo-local CLI floor, watcher, and Agent Mail FD pressure are passing. | covered |
+| Doctor hard blockers cleared | `flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json` | Final doctor status is `warn` with `errors=[]` and `repo_docs_state=ready` after lock repair; publishability, repo-local CLI floor, NTM spawn templates, memory health, Agent Mail FD pressure, and Jeff corpus local storage are passing. | covered |
 | Frozen pane / watcher system runs as designed | `.flywheel/scripts/frozen-pane-detector.sh`, watcher tests | Detector self-test covers classes A-G, preview-only recovery, apply gates, and watcher local/fleet probes. | covered |
 | Install and uninstall trust | `install.sh`, `uninstall.sh`, `tests/installer-smoke.sh` | Installer smoke validates dry-run, install, reduced first-run, idempotent reinstall, uninstall, and empty-prefix removal. | covered |
-| Speed on long checks | `tests/publishability-bar.sh` | Replaced full-doctor proxy assertion with source-wiring plus direct packet proof; runtime dropped from 17.15s to about 1.2s. | covered |
-| SkillOS coordination | Agent Mail contact request to SkillOS bridge, `tests/o4b4h-skillos-journey-alignment-receipt.sh` | Fresh Agent Mail message to `JadeFinch` is blocked by contact approval policy and has a pending request. Local SkillOS journey-alignment test was repaired after finding lifecycle drift; it now proves the Layer-1 journey-entry schema and journal substrate landed. | covered_with_live_ack_pending |
+| Speed on long checks | `tests/publishability-bar.sh`, `tests/jeff-corpus-accretive.sh`, `tests/jeff-corpus-doctor-scoping.sh` | Publishability bar now runs in about 1.1s. Jeff corpus scoping dropped from about 42s to 0.26s and accretive coverage dropped from about 16s to 1.38s by testing the Jeff doctor helper directly instead of paying for unrelated full-doctor probes. | covered |
+| SkillOS coordination | SkillOS handoff from `JadeFinch`, `tests/o4b4h-skillos-journey-alignment-receipt.sh` | SkillOS created `/Users/josh/Developer/skillos/.flywheel/handoffs/20260513T0038Z-from-skillos-to-flywheel-mobile-eats-side-effect-and-stale-spec-substrate.md` and `/Users/josh/Developer/skillos/state/skillos-mobile-eats-side-effect-and-stale-spec-substrate-20260513T0038Z.md`; local SkillOS journey-alignment test proves the Layer-1 journey-entry schema and journal substrate landed. | covered |
 | Mobile Eats journey semantics | `CHARTER.md`, `scripts/journey-smoke.sh`, `tests/o4b4h-skillos-journey-alignment-receipt.sh` | Charter keeps Mobile Eats as journey proof input, not Flywheel product meaning. Journey smoke implements persona/first value/return loop/guardrail shape. SkillOS/Mobile Eats alignment receipt test passes after inversion for shipped journey-entry substrate. | covered |
 | Publication audit trail | `.flywheel/PUBLISHABILITY-AUDIT.md`, this file | Publishability audit is updated with current doctor/speed evidence; this file maps explicit prompt requirements to artifacts. | covered |
 
@@ -58,12 +58,16 @@ Current residual warning classes are fleet/backlog hygiene:
 - oversized legacy files;
 - callback and validation backlog;
 - closed-bead artifact and reopen-candidate backlog;
-- plan-state quality warnings;
-- Jeff corpus storage yellow.
+- plan-state quality warnings.
 
 These are tracked as operational hygiene, not blockers for publishing the
 current public-preview Flywheel surface. Strict full-fleet green remains a later
 hardening goal.
+
+The former Jeff corpus storage warning was a false conflation of represented
+source corpus size (`jeff_corpus_v1_total_mb=3783.3`) with local storage use
+(`jeff_corpus_local_storage_mb=70.8`). The doctor now gates on actual local
+storage and reports `jeff_corpus_storage_health=GREEN`.
 
 Repo-doc lock drift was found during this audit and repaired with
 `flywheel-lock-repair --apply --idempotency-key publication-lock-repair-20260512`;
@@ -71,11 +75,14 @@ the follow-up doctor reports `repo_docs_state=ready`.
 
 ## Live Coordination Note
 
-An Agent Mail contact request to the active SkillOS bridge (`JadeFinch`) is
-pending. Contact policy prevents direct delivery from this new Codex identity
-until the recipient approves. Local SkillOS-boundary and journey-alignment
-evidence is present and passing; a live SkillOS acknowledgement should be
-recorded as follow-up evidence when contact approval completes.
+SkillOS supplied live handoff evidence while this audit was active. The
+JadeFinch handoff records two Mobile Eats-derived substrate rules for Flywheel:
+durable primary writes must not be downgraded by non-critical side effects, and
+generated journey compilers must remove stale specs while enforcing one-to-one
+YAML/spec registry matching. A separate BlackGlen -> JadeFinch Agent Mail
+contact request remains pending because the recipient contact policy requires
+target approval; that does not block this audit now that SkillOS produced the
+handoff evidence independently.
 
 ## Completion Decision
 

@@ -28,7 +28,7 @@ Score: 7/7
 | command | status | evidence |
 |---|---|---|
 | `.flywheel/scripts/publishability-bar.sh --doctor --json --repo /Users/josh/Developer/flywheel` | PASS | `status=pass`, `publishability_bar_score.score=5`, `brand_voice_composite=96`, `banned_words_count=0`, `ungrounded_claims_count=0`. |
-| `FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 FLYWHEEL_DOCTOR_CACHE_DISABLE=1 FLYWHEEL_TEAM_ROSTER_NTM_TIMEOUT_SECONDS=0 /Users/josh/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json` | WARN_NO_ERRORS | `status=warn`, `errors=[]`, `repo_docs_state=ready`, `action=inspect_memory_health`, `agent_mail_fd_pressure.status=ok`, `publishability_bar.status=pass`, `watcher_isomorphic.status=pass`; remaining warnings are fleet/backlog hygiene. |
+| `FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 FLYWHEEL_DOCTOR_CACHE_DISABLE=1 FLYWHEEL_TEAM_ROSTER_NTM_TIMEOUT_SECONDS=0 /Users/josh/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json` | WARN_NO_ERRORS | `status=warn`, `errors=[]`, `repo_docs_state=ready`, `action=inspect_monolithic_file_debt`, `memory_health.status=OK`, `ntm_spawn_templates_versioned.status=pass`, `jeff_corpus_storage_health=GREEN`, `publishability_bar.status=pass`; remaining warnings are fleet/backlog hygiene. |
 | `bash tests/publishability-bar.sh` | PASS | Validates probe schema, thresholds, Flywheel source wiring, and direct publishability JSON in 1.19s. |
 | `bash tests/installer-smoke.sh` | PASS | `SUMMARY pass=10 fail=0`; install/uninstall proof includes installed reduced first-run and empty prefix after uninstall. |
 | `bash tests/journey-smoke.sh` | PASS | `SUMMARY pass=7 fail=0`; dry-run matrix validates Claude, Codex, OpenClaw, Gemini, and reduced lanes. |

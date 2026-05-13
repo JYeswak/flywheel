@@ -941,7 +941,7 @@ FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
   ~/.claude/skills/.flywheel/bin/flywheel-loop doctor \
   --repo /Users/josh/Developer/flywheel \
   --json \
-  | jq '.jeff_corpus_storage_health, .jeff_corpus_v1_total_mb'
+  | jq '.jeff_corpus_storage_health, .jeff_corpus.jeff_corpus_local_storage_mb, .jeff_corpus_v1_total_mb'
 
 bash /Users/josh/Developer/flywheel/tests/jeff-corpus-accretive.sh
 bash /Users/josh/Developer/flywheel/tests/regenerate-dicklesworthstone-sources.sh
@@ -950,11 +950,14 @@ bash /Users/josh/Developer/flywheel/tests/jeff-intel-network.sh
 ```
 
 The baseline manifest lives at `.flywheel/jeff-corpus/v1/manifest.json`.
+`jeff_corpus_v1_total_mb` is the represented source corpus size;
+`jeff_corpus_local_storage_mb` is the actual local `.flywheel/jeff-corpus`
+footprint used for storage health.
 Daily 03:00Z diff watching writes `.flywheel/jeff-corpus/pending-reindex.jsonl`;
 delta indexing writes append-only v2 rows; Sunday 04:00Z compaction rolls v1+v2
-into v3. Doctor JSON exposes `jeff_corpus_v1_total_mb` and
-`jeff_corpus_storage_health` (`GREEN|YELLOW|RED`), and RED blocks new ingestion
-until compaction runs.
+into v3. Doctor JSON exposes represented corpus size plus local corpus storage;
+`jeff_corpus_storage_health` (`GREEN|YELLOW|RED`) blocks new ingestion only when
+the local `.flywheel/jeff-corpus` footprint crosses the RED threshold.
 `regenerate-dicklesworthstone-sources.sh` is the documented pre-ingest runner
 for `~/.claude/skills/dicklesworthstone-stack/data/sources.txt`: run it before
 daily Jeff ingest so live GitHub repo feeds use exact-case names, real default
