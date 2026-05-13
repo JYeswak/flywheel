@@ -221,11 +221,6 @@ def classify_row(
         gap_reason = str(topo.get("capture_non_participation_reason") or "explicit_non_participating")
         capture_path = None
         evidence_refs = [str(topo.get("capture_evidence_ref") or "topology:capture_participation=non_participating")]
-    elif duplicate_rows:
-        state = "capture_gap"
-        gap_reason = "duplicate_capture_rows"
-        capture_path = str(request_path)
-        evidence_refs = evidence_for_capture(request_path, capture_rows)
     elif capture_rows:
         state = "captured"
         capture_path = str(request_path)
@@ -233,6 +228,8 @@ def classify_row(
         if capture_ts is not None and capture_ts < stale_cutoff:
             state = "stale_capture"
             gap_reason = "stale_capture_row"
+        elif duplicate_rows:
+            gap_reason = "duplicate_capture_rows_non_blocking"
     elif runtime == "codex" and has_agent_context_evidence(topo):
         state = "captured"
         capture_path = str(topo.get("capture_path") or "agent_context_callback")

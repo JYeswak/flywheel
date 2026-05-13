@@ -118,7 +118,7 @@ dup="$TMP/duplicate"
 write_duplicate_fixture "$dup"
 dup_out="$TMP/duplicate.json"
 python3 "$PROBE" --topology "$dup/topology.jsonl" --josh-requests "$dup/josh-requests.jsonl" --coordination-log "$dup/coordination.jsonl" --now "2026-05-04T00:00:00Z" --json >"$dup_out"
-assert_jq "$dup_out" '(.duplicate_capture_policy | test("prompt_hash")) and .rows[0].gap_reason == "duplicate_capture_rows" and (.rows[0].duplicate_capture_groups[0].count == 2)' "B13_AG6 duplicate capture prevention is specified and detected"
+assert_jq "$dup_out" '(.duplicate_capture_policy | test("prompt_hash")) and .status == "pass" and .orchs_with_capture_gap_count == 0 and .rows[0].participation_state == "captured" and .rows[0].gap_reason == "duplicate_capture_rows_non_blocking" and (.rows[0].duplicate_capture_groups[0].count == 2)' "B13_AG6 duplicate capture history is detected but non-blocking when capture exists"
 
 repo="$(make_repo)"
 doctor_out="$TMP/doctor.json"
