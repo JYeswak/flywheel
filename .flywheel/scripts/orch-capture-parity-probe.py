@@ -95,12 +95,53 @@ def latest_topology_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [latest[key] for key in sorted(latest)]
 
 
-def runtime_for(row: dict[str, Any]) -> str:
-    return str(row.get("orchestrator_kind") or row.get("runtime") or row.get("kind") or "unknown")
+def latest_team_roster_rows(rows: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    latest: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        session = str(row.get("session") or "").strip()
+        if not session:
+            continue
+        previous = latest.get(session)
+        row_ts = parse_ts(row.get("ts") or row.get("effective_at"))
+        prev_ts = parse_ts(previous.get("ts") or previous.get("effective_at")) if previous else None
+        if previous is None or (row_ts or datetime.min.replace(tzinfo=timezone.utc)) >= (prev_ts or datetime.min.replace(tzinfo=timezone.utc)):
+            latest[session] = row
+    return latest
 
 
-def pane_for(row: dict[str, Any]) -> int | None:
+def roster_orchestrator_value(row: dict[str, Any] | None, key: str) -> Any:
+    if not row:
+        return None
+    orchestrator = row.get("orchestrator")
+    if isinstance(orchestrator, dict):
+        return orchestrator.get(key)
+    return None
+
+
+def roster_event(row: dict[str, Any] | None) -> str | None:
+    if not row:
+        return None
+    value = row.get("event") or row.get("status")
+    return str(value) if value else None
+
+
+def roster_participation(row: dict[str, Any] | None) -> str:
+    event = str(roster_event(row) or "").lower()
+    if event in {"session_dormant", "dormant"}:
+        return "dormant"
+    if event in {"session_active", "active"}:
+        return "active"
+    return "unknown"
+
+
+def runtime_for(row: dict[str, Any], roster_row: dict[str, Any] | None = None) -> str:
+    return str(row.get("orchestrator_kind") or row.get("runtime") or row.get("kind") or roster_orchestrator_value(roster_row, "kind") or "unknown")
+
+
+def pane_for(row: dict[str, Any], roster_row: dict[str, Any] | None = None) -> int | None:
     pane = row.get("orchestrator_pane")
+    if pane is None:
+        pane = roster_orchestrator_value(roster_row, "pane")
     try:
         return int(pane)
     except Exception:
@@ -201,13 +242,17 @@ def classify_row(
     topo: dict[str, Any],
     *,
     request_path: Path,
+    team_roster_path: Path,
+    team_roster_row: dict[str, Any] | None,
     capture_rows: list[dict[str, Any]],
     coord_seen_ts: datetime | None,
     stale_cutoff: datetime,
 ) -> dict[str, Any]:
     session = str(topo.get("session"))
-    runtime = runtime_for(topo)
-    pane = pane_for(topo)
+    runtime = runtime_for(topo, team_roster_row)
+    pane = pane_for(topo, team_roster_row)
+    team_roster_event = roster_event(team_roster_row)
+    team_roster_participation = roster_participation(team_roster_row)
     capture_ts = latest_capture_ts(capture_rows)
     duplicate_rows = duplicate_groups(capture_rows)
     last_seen = max([ts for ts in [capture_ts, coord_seen_ts] if ts is not None], default=None)
@@ -216,7 +261,12 @@ def classify_row(
     state = "captured"
     gap_reason: str | None = None
 
-    if explicit_non_participating(topo):
+    if team_roster_participation == "dormant":
+        state = "non_participating"
+        gap_reason = "team_roster_session_dormant"
+        capture_path = None
+        evidence_refs = [f"{team_roster_path}:session={session};event={team_roster_event}"]
+    elif explicit_non_participating(topo):
         state = "non_participating"
         gap_reason = str(topo.get("capture_non_participation_reason") or "explicit_non_participating")
         capture_path = None
@@ -255,6 +305,8 @@ def classify_row(
         "gap_reason": gap_reason,
         "evidence_refs": evidence_refs,
         "duplicate_capture_groups": duplicate_rows,
+        "team_roster_event": team_roster_event,
+        "team_roster_participation": team_roster_participation,
         "remediation_options": APPROVED_REMEDIATION_TRACKS if state in {"capture_gap", "stale_capture"} else [],
     }
 
@@ -272,6 +324,8 @@ def schema_payload() -> dict[str, Any]:
             "last_josh_input_seen_ts",
             "gap_reason",
             "evidence_refs",
+            "team_roster_event",
+            "team_roster_participation",
         ],
         "participation_state_enum": ["captured", "capture_gap", "stale_capture", "non_participating"],
         "gap_reason_examples": [
@@ -279,6 +333,7 @@ def schema_payload() -> dict[str, Any]:
             "pane_scrollback_not_canonical_capture",
             "stale_capture_row",
             "duplicate_capture_rows",
+            "team_roster_session_dormant",
         ],
     }
 
@@ -303,6 +358,7 @@ def main() -> int:
     parser.add_argument("--topology", default=os.environ.get("FLYWHEEL_SESSION_TOPOLOGY", "~/.local/state/flywheel/session-topology.jsonl"))
     parser.add_argument("--josh-requests", default=os.environ.get("FLYWHEEL_JOSH_REQUESTS_LOG", "~/.local/state/flywheel/josh-requests.jsonl"))
     parser.add_argument("--coordination-log", default=os.environ.get("FLYWHEEL_CROSS_ORCH_COORDINATION_LOG", "~/.local/state/flywheel/cross-orch-coordination.jsonl"))
+    parser.add_argument("--team-roster", default=os.environ.get("TEAM_ROSTER", "~/.local/state/flywheel/team-roster.jsonl"))
     parser.add_argument("--stale-hours", type=float, default=float(os.environ.get("FLYWHEEL_ORCH_CAPTURE_STALE_HOURS", "24")))
     parser.add_argument("--now")
     parser.add_argument("--doctor", action="store_true")
@@ -322,6 +378,7 @@ def main() -> int:
     topology_path = Path(os.path.expanduser(args.topology)).resolve()
     request_path = Path(os.path.expanduser(args.josh_requests)).resolve()
     coord_path = Path(os.path.expanduser(args.coordination_log)).resolve()
+    team_roster_path = Path(os.path.expanduser(args.team_roster)).resolve()
     now = parse_ts(args.now) if args.now else utc_now()
     assert now is not None
     stale_cutoff = now - timedelta(hours=args.stale_hours)
@@ -329,10 +386,13 @@ def main() -> int:
     topology_rows = latest_topology_rows(read_jsonl(topology_path))
     requests_by_session = capture_rows_by_session(read_jsonl(request_path))
     coord_seen = coord_ts_by_session(read_jsonl(coord_path))
+    roster_by_session = latest_team_roster_rows(read_jsonl(team_roster_path))
     rows = [
         classify_row(
             topo,
             request_path=request_path,
+            team_roster_path=team_roster_path,
+            team_roster_row=roster_by_session.get(str(topo.get("session"))),
             capture_rows=requests_by_session.get(str(topo.get("session")), []),
             coord_seen_ts=coord_seen.get(str(topo.get("session"))),
             stale_cutoff=stale_cutoff,
@@ -346,6 +406,7 @@ def main() -> int:
         "topology_path": str(topology_path),
         "josh_requests_path": str(request_path),
         "coordination_log_path": str(coord_path),
+        "team_roster_path": str(team_roster_path),
         "checked_orchestrators_count": len(rows),
         "orchs_with_capture_gap_count": len(gap_rows),
         "rows": rows,

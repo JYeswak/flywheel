@@ -33,6 +33,7 @@ write_fixture() {
 {"session":"legacy-shell","orchestrator_pane":4,"orchestrator_kind":"shell","capture_participation":"non_participating","capture_non_participation_reason":"not an orchestrator owner runtime","effective_at":"2026-05-03T23:00:00Z"}
 {"session":"stale-codex","orchestrator_pane":2,"orchestrator_kind":"codex","effective_at":"2026-05-03T23:00:00Z"}
 {"session":"scrollback-codex","orchestrator_pane":3,"orchestrator_kind":"codex","capture_path":"pane_scrollback","effective_at":"2026-05-03T23:00:00Z"}
+{"session":"dormant-codex","orchestrator_pane":2,"orchestrator_kind":"codex","effective_at":"2026-05-03T23:00:00Z"}
 EOF
   cat >"$dir/josh-requests.jsonl" <<'EOF'
 {"schema_version":2,"id":"jr-flywheel-001","captured_at":"2026-05-03T23:30:00Z","source_session":"flywheel","source_pane":1,"prompt_hash":"sha256:flywheel-001","source_message_id":"claude-message-1","sanitized_excerpt":"fixture claude request"}
@@ -41,6 +42,9 @@ EOF
   cat >"$dir/coordination.jsonl" <<'EOF'
 {"ts":"2026-05-03T23:45:00Z","event":"mobile_eats_orch_ack","session":"{proof-product}"}
 {"ts":"2026-05-03T23:50:00Z","event":"{capability-control-plane}_agent_mail","source_session":"{capability-control-plane}"}
+EOF
+  cat >"$dir/team-roster.jsonl" <<'EOF'
+{"ts":"2026-05-03T23:55:00Z","event":"session_dormant","session":"dormant-codex","orchestrator":{"kind":"codex","pane":2}}
 EOF
 }
 
@@ -86,16 +90,18 @@ python3 "$PROBE" \
   --topology "$fixture/topology.jsonl" \
   --josh-requests "$fixture/josh-requests.jsonl" \
   --coordination-log "$fixture/coordination.jsonl" \
+  --team-roster "$fixture/team-roster.jsonl" \
   --now "2026-05-04T00:00:00Z" \
   --stale-hours 24 \
   --json >"$probe_out"
 
-assert_jq "$probe_out" '(.rows | length == 6) and all(.rows[]; has("session") and has("pane") and has("runtime") and has("participation_state") and has("capture_path") and has("last_capture_ts") and has("last_josh_input_seen_ts") and has("gap_reason") and has("evidence_refs"))' "B13_AG1 probe emits required row fields"
+assert_jq "$probe_out" '(.rows | length == 7) and all(.rows[]; has("session") and has("pane") and has("runtime") and has("participation_state") and has("capture_path") and has("last_capture_ts") and has("last_josh_input_seen_ts") and has("gap_reason") and has("evidence_refs") and has("team_roster_event") and has("team_roster_participation"))' "B13_AG1 probe emits required row fields"
 assert_jq "$probe_out" '.rows[] | select(.session == "flywheel" and .runtime == "claude" and .participation_state == "captured")' "B13_AG2 Claude hook capture present fixture"
 assert_jq "$probe_out" '.active_owner_bead == "flywheel-vk9ox" and all(.approved_remediation_tracks[]; .owner_bead == "flywheel-vk9ox" and .supersedes_owner_bead == "flywheel-xap2")' "B13_AG7 remediation tracks route to active owner"
 assert_jq "$probe_out" '.rows[] | select(.session == "{proof-product}" and .runtime == "codex" and .participation_state == "capture_gap" and .gap_reason == "missing_canonical_capture")' "B13_AG2 Codex capture missing fixture"
 assert_jq "$probe_out" '.rows[] | select(.session == "{capability-control-plane}" and .runtime == "codex" and .participation_state == "captured" and (.evidence_refs[0] | test("agent_context_callback")))' "B13_AG2 Codex agent-context capture fixture"
 assert_jq "$probe_out" '.rows[] | select(.session == "legacy-shell" and .participation_state == "non_participating")' "B13_AG2 explicit non-participating runtime fixture"
+assert_jq "$probe_out" '.rows[] | select(.session == "dormant-codex" and .participation_state == "non_participating" and .gap_reason == "team_roster_session_dormant" and .team_roster_participation == "dormant")' "B13_AG2 dormant roster runtime fixture"
 assert_jq "$probe_out" '.rows[] | select(.session == "stale-codex" and .participation_state == "stale_capture" and .gap_reason == "stale_capture_row")' "B13_AG2 stale capture fixture"
 assert_jq "$probe_out" '.rows[] | select(.session == "scrollback-codex" and .gap_reason == "pane_scrollback_not_canonical_capture")' "B13_AG4 pane scrollback alone rejected"
 assert_jq "$probe_out" '.approved_remediation_tracks | length == 3 and any(.[]; .track == "primary_agent_mail_cross_orch_route") and any(.[]; .track == "secondary_ntm_send_wrapper_capture") and any(.[]; .track == "tertiary_pane_tail_poller" and has("fragility_note"))' "B13_AG5 dry-run remediation tracks"
@@ -126,11 +132,13 @@ strict_out="$TMP/doctor-strict.json"
 FLYWHEEL_SESSION_TOPOLOGY="$fixture/topology.jsonl" \
 FLYWHEEL_JOSH_REQUESTS_LOG="$fixture/josh-requests.jsonl" \
 FLYWHEEL_CROSS_ORCH_COORDINATION_LOG="$fixture/coordination.jsonl" \
+TEAM_ROSTER="$fixture/team-roster.jsonl" \
 FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
   "$BIN" doctor --repo "$repo" --json >"$doctor_out" 2>"$TMP/doctor.err" || true
 FLYWHEEL_SESSION_TOPOLOGY="$fixture/topology.jsonl" \
 FLYWHEEL_JOSH_REQUESTS_LOG="$fixture/josh-requests.jsonl" \
 FLYWHEEL_CROSS_ORCH_COORDINATION_LOG="$fixture/coordination.jsonl" \
+TEAM_ROSTER="$fixture/team-roster.jsonl" \
 FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
   "$BIN" doctor --strict --repo "$repo" --json >"$strict_out" 2>"$TMP/doctor-strict.err" && strict_rc=0 || strict_rc=$?
 
