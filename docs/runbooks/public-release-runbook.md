@@ -325,7 +325,7 @@ Expected closure state:
 | User journey pack | `docs/runbooks/public-user-journey-pack.md` maps every public asset to persona lane, journey stage, entrypoint, visible wording, visual cue, CTA, proof refs, signoff status, and blocker/skip receipt reference. |
 | GitHub release | `v0.2.0` exists and is neither draft nor prerelease. |
 | Release assets | `install.sh`, `install.sh.sha256`, `SHA256SUMS`, `flywheel-v0.2.0.tar.gz`, and `flywheel-v0.2.0.tar.gz.sha256` are uploaded, non-empty, and expose `sha256:` digest metadata. |
-| Website | `https://flywheel.zeststream.ai/` returns a successful status. |
+| Website | `https://flywheel.zeststream.ai/` returns a successful status and contains the reviewed SMB/Yuzu journey markers. |
 | Install proxy | `https://flywheel.zeststream.ai/install.sh` hashes to the value served at `https://flywheel.zeststream.ai/install.sh.sha256`. |
 | External review | Two distinct non-Joshua reviewers approve or approve with follow-ups and cover every current public trust surface. |
 | Joshua signoff | `.flywheel/PLANS/public-share-readiness-2026-05-12/release-signoff.json` exists and is approved. |
@@ -386,7 +386,9 @@ user-journey-pack-validation.json`; it must report `status=pass`, zero errors,
 and the expected `flywheel.public_user_journey_pack.v0` schema. Replay the saved
 deployed-site link proof with `python3 scripts/live_site_probe.py --base-url
 https://flywheel.zeststream.ai/ --json > live-site-probe.json`; it must report
-`status=pass` and `failure_count=0`. Replay the saved
+`status=pass` and `failure_count=0`. The saved `website-probe.json` must contain
+the reviewed SMB/Yuzu homepage markers so `publication_readiness.py` can report
+`website_content_current`. Replay the saved
 receipt bundle with `python3 scripts/publication_readiness.py --release --json --repo-view-json
 repo-view.json --workflows-json remote-workflows.json --runs-json
 remote-runs.json --release-json release-view.json --review-json

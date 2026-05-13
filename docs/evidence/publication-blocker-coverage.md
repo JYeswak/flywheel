@@ -18,7 +18,7 @@ Expected local state before cutover:
 - `publication_readiness.py` returns `status=blocked` with the blocker codes
   below;
 - the registry validator returns `status=pass`, `open_count=3`, and
-  `readiness_blocker_coverage` count `6`;
+  `readiness_blocker_coverage` count `7`;
 - the open registry rows are TP-005, TP-017, and TP-018.
 
 | Readiness blocker code | Owner | Public closure proof |
@@ -28,6 +28,7 @@ Expected local state before cutover:
 | `remote_green_runs_missing` | Flywheel | `CI` and `Installer Smoke` succeed on the public default branch. |
 | `github_release_missing_or_draft` | Flywheel | `v0.2.0` release exists and is neither draft nor prerelease. |
 | `github_release_assets_missing` | Flywheel | Required release assets are uploaded, non-empty, and expose `sha256:` digests. |
+| `website_content_stale` | Flywheel | The live homepage contains the reviewed SMB/Yuzu journey markers, including the canon line and workflow-slice wording. |
 | `joshua_release_signoff_missing` | Release approver | `release-signoff.json` validates after all real checks pass. |
 
 The public release is not complete while any row above remains blocked.

@@ -20,6 +20,7 @@ expected_codes=(
   remote_green_runs_missing
   remote_repo_private
   remote_workflows_missing
+  website_content_stale
 )
 
 if [[ ! -s "$REGISTRY" ]]; then
@@ -65,15 +66,16 @@ else
 fi
 
 if jq -e '
-  (.readiness_blocker_coverage | length) == 6
-  and (.expected_readiness_blockers | length) == 6
+  (.readiness_blocker_coverage | length) == 7
+  and (.expected_readiness_blockers | length) == 7
   and ([.readiness_blocker_coverage[]?.code] | sort) == [
     "github_release_assets_missing",
     "github_release_missing_or_draft",
     "joshua_release_signoff_missing",
     "remote_green_runs_missing",
     "remote_repo_private",
-    "remote_workflows_missing"
+    "remote_workflows_missing",
+    "website_content_stale"
   ]
   and ([.readiness_blocker_coverage[]?.code] | sort) == (.expected_readiness_blockers | sort)
   and all(.readiness_blocker_coverage[]?; .status == "open" and (.registry_rows | length) > 0)

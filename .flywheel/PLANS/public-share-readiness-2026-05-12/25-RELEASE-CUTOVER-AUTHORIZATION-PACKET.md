@@ -35,6 +35,7 @@ Current expected status before cutover: `blocked`.
 | Create the public release tag and release only after gates pass. | `github_release_missing_or_draft` | `git tag v0.2.0 && git push origin v0.2.0`, then publish the GitHub release from the release workflow. | `gh release view v0.2.0 --repo JYeswak/flywheel --json tagName,isDraft,isPrerelease,url` reports `isDraft=false` and `isPrerelease=false`. |
 | Attach and verify required release assets. | `github_release_assets_missing` | Run the release workflow for `v0.2.0`. | Release assets include `install.sh`, `install.sh.sha256`, `SHA256SUMS`, `flywheel-v0.2.0.tar.gz`, and `flywheel-v0.2.0.tar.gz.sha256`; each required asset is uploaded, non-empty, and exposes `sha256:` digest metadata. |
 | Deploy the public website. | `website_unavailable` | Run the site workflow and configure `flywheel.zeststream.ai` DNS if needed. | `curl -fsSI https://flywheel.zeststream.ai/` returns a successful status. |
+| Confirm deployed site copy is current. | `website_content_stale` | Deploy the reviewed SMB/Yuzu site build. | `publication_readiness.py --release --json` reports `website_content_current` and no `website_content_stale` blocker. |
 | Publish matching install proxy assets. | `install_proxy_checksum_mismatch` | Publish `install.sh` and `install.sh.sha256` from the same release artifact set. | `curl -fsSL https://flywheel.zeststream.ai/install.sh \| shasum -a 256` matches `https://flywheel.zeststream.ai/install.sh.sha256`. |
 | Refresh external review for the current public trust surface. | `external_review_gate_blocked` | Collect two distinct independent review rows covering README, charter, first-run, public release, cutover, publication evidence, and blocker-coverage evidence docs. | `python3 scripts/validate_external_review.py --release --json` returns `status=pass`. |
 | Create final Joshua signoff after all real checks pass. | `joshua_release_signoff_missing` | Copy `release-signoff.template.json` to `release-signoff.json` and set approved fields. | `publication_readiness.py --release --json` returns `status=pass` with zero blockers. |
@@ -68,6 +69,8 @@ external-review gate regresses, when any of these are true:
   the public remote;
 - the release exists but is a draft or lacks any required asset;
 - the website endpoint is unavailable;
+- the website is reachable but still serves stale copy that lacks the approved
+  SMB/Yuzu journey markers;
 - the install proxy checksum does not match;
 - the external-review log does not cover the current public trust surface;
 - Joshua has not explicitly approved release signoff.

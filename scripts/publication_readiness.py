@@ -116,6 +116,12 @@ REVIEW_LOG_PATH = "docs/evidence/external-review-log.jsonl"
 WEBSITE_URL = "https://flywheel.zeststream.ai/"
 INSTALL_URL = "https://flywheel.zeststream.ai/install.sh"
 INSTALL_SHA256_URL = "https://flywheel.zeststream.ai/install.sh.sha256"
+REQUIRED_WEBSITE_MARKERS = [
+    "Your business already has the data.",
+    "I help SMB owners buy their time back.",
+    "Yuzu Method",
+    "workflow slice",
+]
 
 
 def load_json(path: str | None) -> Any:
@@ -332,6 +338,13 @@ def ok_status(probe: Any) -> bool:
     return isinstance(probe, dict) and 200 <= int(probe.get("status_code") or 0) < 400
 
 
+def missing_website_markers(probe: Any) -> list[str]:
+    if not isinstance(probe, dict):
+        return REQUIRED_WEBSITE_MARKERS.copy()
+    body = str(probe.get("body_text") or "")
+    return [marker for marker in REQUIRED_WEBSITE_MARKERS if marker not in body]
+
+
 def sha256_from_probe(probe: Any) -> str:
     if not isinstance(probe, dict):
         return ""
@@ -423,6 +436,11 @@ ACTION_BY_CODE = {
         "owner": "Flywheel",
         "action": "Deploy the GitHub Pages site and verify the custom domain resolves.",
         "command": "curl -fsSI https://flywheel.zeststream.ai/",
+    },
+    "website_content_stale": {
+        "owner": "Flywheel",
+        "action": "Deploy the reviewed SMB/Yuzu site build before treating the live website as release-current.",
+        "command": "python3 scripts/publication_readiness.py --release --json",
     },
     "install_proxy_checksum_mismatch": {
         "owner": "Flywheel",
@@ -575,6 +593,11 @@ def payload(args: argparse.Namespace) -> dict[str, Any]:
 
         if ok_status(website_probe):
             checks.append({"id": "website_reachable", "status": "pass"})
+            missing_markers = missing_website_markers(website_probe)
+            if missing_markers:
+                blockers.append({"code": "website_content_stale", "missing": ",".join(missing_markers)})
+            else:
+                checks.append({"id": "website_content_current", "status": "pass"})
         else:
             blockers.append({"code": "website_unavailable", "url": args.website_url})
 

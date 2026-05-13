@@ -99,6 +99,7 @@ for blocker_code in \
   github_release_assets_missing \
   external_review_gate_blocked \
   website_unavailable \
+  website_content_stale \
   install_proxy_checksum_mismatch \
   joshua_release_signoff_missing; do
   if rg -qF "\`$blocker_code\`" "$PUBLIC_CUTOVER"; then
@@ -125,6 +126,7 @@ if [[ -f "$CUTOVER_PACKET" ]]; then
     github_release_assets_missing \
     external_review_gate_blocked \
     website_unavailable \
+    website_content_stale \
     install_proxy_checksum_mismatch \
     joshua_release_signoff_missing; do
     if rg -qF "\`$blocker_code\`" "$CUTOVER_PACKET"; then
@@ -324,7 +326,9 @@ jq -nc --arg tag "$release_tag" --arg tarball "$release_tarball" --arg digest "$
   ]
 }' >"$TMP/release-duplicate-asset.json"
 install_hash="$(printf 'install-body' | shasum -a 256 | awk '{print $1}')"
-jq -nc '{url:"https://flywheel.zeststream.ai/",status_code:200,body_text:"Flywheel",body_sha256:"unused"}' >"$TMP/website-ok.json"
+website_current_text='Your business already has the data. I help SMB owners buy their time back. The Yuzu Method starts with one workflow slice.'
+jq -nc --arg body "$website_current_text" '{url:"https://flywheel.zeststream.ai/",status_code:200,body_text:$body,body_sha256:"unused"}' >"$TMP/website-ok.json"
+jq -nc '{url:"https://flywheel.zeststream.ai/",status_code:200,body_text:"Old Flywheel placeholder",body_sha256:"unused"}' >"$TMP/website-stale.json"
 jq -nc --arg hash "$install_hash" '{url:"https://flywheel.zeststream.ai/install.sh",status_code:200,body_sha256:$hash,body_text:"install-body"}' >"$TMP/install-ok.json"
 jq -nc --arg hash "$install_hash" '{url:"https://flywheel.zeststream.ai/install.sh.sha256",status_code:200,body_sha256:"unused",body_text:($hash + "  install.sh\n")}' >"$TMP/install-sha-ok.json"
 cat >"$TMP/signoff.json" <<'JSON'
@@ -357,6 +361,16 @@ if python3 "$SCRIPT" --repo "$ROOT" --repo-view-json "$TMP/repo-public.json" --w
   fi
 else
   fail "public fixture command"
+fi
+
+set +e
+python3 "$SCRIPT" --repo "$ROOT" --repo-view-json "$TMP/repo-public.json" --workflows-json "$TMP/workflows.json" --runs-json "$TMP/runs-green.json" --release-json "$TMP/release.json" --review-json "$TMP/review-pass.json" --website-probe-json "$TMP/website-stale.json" --install-probe-json "$TMP/install-ok.json" --install-sha256-probe-json "$TMP/install-sha-ok.json" --signoff-json "$TMP/signoff.json" --release --json >"$TMP/stale-site.out"
+stale_site_rc=$?
+set -e
+if [[ "$stale_site_rc" -eq 1 ]] && jq -e '.status == "blocked" and any(.blockers[]?; .code == "website_content_stale" and (.missing | contains("I help SMB owners buy their time back.")))' "$TMP/stale-site.out" >/dev/null; then
+  pass "stale website fixture remains blocked"
+else
+  fail "stale website fixture remains blocked rc=${stale_site_rc}"
 fi
 
 set +e
