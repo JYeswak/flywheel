@@ -26,7 +26,7 @@ Publish Flywheel as a renamed, public-ready agentic workflow ecosystem where:
 | Requirement | Evidence | Current state |
 |---|---|---|
 | Renamed public surface | `docs/brand/naming-conventions.md`; `tests/naming-conventions.sh`; TP-016 | Closed. Canonical names are `flywheel`, `github.com/JYeswak/flywheel`, `flywheel.zeststream.ai`, and `docs.flywheel.zeststream.ai`; latest `bash tests/naming-conventions.sh` passed 63/0 and now guards publication plan support-tier wording against stale `supported-first` harness claims while accepting sanitized operator placeholders in public export. |
-| Private state excluded | `state/live-state-denylist.yaml`; `scripts/depersonalize.py`; `scripts/assemble.py`; TP-001/002/003/004; `flywheel-b99b2` | Closed for local extraction and scanner gates, including the bounded standalone lowercase client-session alias audit. Fresh assembly run `codex-public-export-20260513T2252Z` classified 14,700 files, copied 10,218 public-safe files, excluded 4,040 denylisted paths, retained 7,444 manual-review rows, preserved source git status, and kept the closed public external-review plus public user journey pack, user journey validator, live-site probe, Asupersync gated-adoption, Asupersync POC receipt template, Asupersync local POC receipt, and agent-lane runtime receipt evidence in the staged tree. Staged checks after this export passed publication-readiness 58/0, public-surface scan 14/0, public-docs 144/0, website-static 72/0, public-user-journey-pack 8/0, public-links 3/0, release-assets 12/0, cutover-receipts 23/0, true-publication public blocker coverage 7/0, agent-lane-probe 10/0, journey-smoke 7/0, and depersonalization scan `finding_count=0`. Closed-bead compatibility artifacts under `AGENTS/README/**` are denylisted, Claude project-cache slugs are rewritten to generic placeholders, uppercase client acronyms are depersonalized, client/session slug fragments and standalone lowercase session aliases are generalized without mutating identifiers, client-specific lowercase filename artifacts are denied from the public export, and `.tmpl` install templates are included so rendered-template tests can run from the public export. The classifier excludes generated `.flywheel/extraction/**` artifacts before assembly so raw classification counts stay aligned with public-export evidence. Public CSS variables now live in `site/visual-system.css` so reusable visual-system assets are not excluded by credential-token path guards. |
+| Private state excluded | `state/live-state-denylist.yaml`; `scripts/depersonalize.py`; `scripts/assemble.py`; TP-001/002/003/004; `flywheel-b99b2` | Closed for local extraction and scanner gates, including the bounded standalone lowercase client-session alias audit. Fresh assembly run `codex-public-export-20260513T2302Z` classified 14,700 files, copied 10,218 public-safe files, excluded 4,040 denylisted paths, retained 7,444 manual-review rows, preserved source git status, and kept the closed public external-review plus public user journey pack, user journey validator, live-site probe, Asupersync gated-adoption, Asupersync POC receipt template, Asupersync local POC receipt, and agent-lane runtime receipt evidence in the staged tree. Staged checks after this export passed publication-readiness 58/0, public-docs 144/0, website-static 72/0, public-user-journey-pack 8/0, public-links 3/0, public-top-level-files 21/0, release-assets 12/0, cutover-receipts 23/0, true-publication public blocker coverage 7/0, agent-lane-probe 10/0, journey-smoke 7/0, and depersonalization scan `finding_count=0`. Closed-bead compatibility artifacts under `AGENTS/README/**` are denylisted, Claude project-cache slugs are rewritten to generic placeholders, uppercase client acronyms are depersonalized, client/session slug fragments and standalone lowercase session aliases are generalized without mutating identifiers, client-specific lowercase filename artifacts are denied from the public export, and `.tmpl` install templates are included so rendered-template tests can run from the public export. The classifier excludes generated `.flywheel/extraction/**` artifacts before assembly so raw classification counts stay aligned with public-export evidence. Public CSS variables now live in `site/visual-system.css` so reusable visual-system assets are not excluded by credential-token path guards. |
 | Install/uninstall works locally | `install.sh`; `uninstall.sh`; `tests/installer-smoke.sh`; TP-006 | Closed for reduced local mode; latest `bash tests/installer-smoke.sh` passed 10/0. |
 | Doctor release posture | `21-TP-019-DOCTOR-WARNING-DISPOSITION.md`; doctor warning disposition; TP-019 | Closed for v0.2 release posture; remaining warnings are visible and classified non-release. Latest Agent Mail FD repair restored direct FD doctor to `PASS` with `total_fds=33`, `lock_fd_count=0`; Beads source repo normalization is clean with 2,112 canonical JSONL rows and DB `leakage_count=0`; full loop doctor reports `status=warn`, `errors=[]`, Beads `status=ok`, and no Agent Mail FD warning rows. |
 | Loop/reduced first run | `scripts/journey-smoke.sh`; `docs/getting-started/first-run.md`; `tests/journey-smoke.sh`; TP-006 | Closed for reduced local mode; latest `bash tests/journey-smoke.sh` passed 7/0 and `bash tests/preflight-fixtures.sh` passed 19/0. |
@@ -83,7 +83,7 @@ Current registry state:
 
 ## Latest Verifier Replay
 
-Replayed at 2026-05-13T22:52Z from the source tree. These commands are local
+Replayed at 2026-05-13T23:02Z from the source tree. These commands are local
 evidence only; they do not close remote/release/site/signoff blockers.
 
 | Surface | Command | Result |
@@ -117,14 +117,14 @@ evidence only; they do not close remote/release/site/signoff blockers.
 
 ## Latest Staged Public Export Replay
 
-Replayed at 2026-05-13T22:52Z from
+Replayed at 2026-05-13T23:02Z from
 `.flywheel/extraction/staging` after refreshing
-`codex-public-export-20260513T2252Z`. These commands verify the sanitized public
+`codex-public-export-20260513T2302Z`. These commands verify the sanitized public
 tree shape; they do not close remote/release/site/signoff blockers.
 
 | Surface | Command | Result |
 |---|---|---|
-| Assembly manifest | `python3 scripts/assemble.py --source . --run-id codex-public-export-20260513T2252Z --clean --json` | status=pass; classification=14,700; copied=10,218; denylist_excluded=4,040; manual_review=7,444; `source_git_status_unchanged=true` |
+| Assembly manifest | `python3 scripts/assemble.py --source . --run-id codex-public-export-20260513T2302Z --clean --json` | status=pass; classification=14,700; copied=10,218; denylist_excluded=4,040; manual_review=7,444; `source_git_status_unchanged=true` |
 | Staged public docs/evidence | `bash tests/public-docs.sh` | pass=144 fail=0 |
 | Staged publication readiness fixtures | `bash tests/publication-readiness.sh` | pass=58 fail=0; private cutover packet/readiness receipt omitted from public export by design |
 | Staged user journey pack | `bash tests/public-user-journey-pack.sh` | pass=8 fail=0 |

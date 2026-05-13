@@ -98,14 +98,14 @@ handoff evidence independently.
 - `github_release_assets_missing`
 - `joshua_release_signoff_missing`
 
-Latest public-export evidence is `codex-public-export-20260513T2252Z`:
+Latest public-export evidence is `codex-public-export-20260513T2302Z`:
 14,700 files classified, 10,218 copied into the staged public tree, 4,040
 denylisted paths excluded, 7,444 manual-review rows retained, and
 `source_git_status_unchanged=true`. Staged replay passed publication readiness
-58/0, public surface scan 14/0, public docs 144/0, website static 72/0, user
-journey pack 8/0, public links 3/0, release assets 12/0, cutover receipts 23/0,
-agent-lane probe 10/0, journey smoke 7/0, true-publication blocker coverage
-7/0, and depersonalization scan with zero findings.
+58/0, public docs 144/0, website static 72/0, user journey pack 8/0, public
+links 3/0, public top-level files 21/0, release assets 12/0, cutover receipts
+23/0, agent-lane probe 10/0, journey smoke 7/0, true-publication blocker
+coverage 7/0, and depersonalization scan with zero findings.
 
 ## Completion Decision
 
