@@ -13,22 +13,27 @@ from typing import Any
 
 
 SCHEMA_VERSION = "orch-capture-parity/v1"
+ACTIVE_CAPTURE_OWNER_BEAD = "flywheel-vk9ox"
+ORIGINAL_CAPTURE_MECHANISM_BEAD = "flywheel-xap2"
 APPROVED_REMEDIATION_TRACKS = [
     {
         "track": "primary_agent_mail_cross_orch_route",
-        "owner_bead": "flywheel-xap2",
+        "owner_bead": ACTIVE_CAPTURE_OWNER_BEAD,
+        "supersedes_owner_bead": ORIGINAL_CAPTURE_MECHANISM_BEAD,
         "mutates": False,
         "note": "Capture Joshua-originated cross-orch input as canonical josh-request rows through the durable coordination channel.",
     },
     {
         "track": "secondary_ntm_send_wrapper_capture",
-        "owner_bead": "flywheel-xap2",
+        "owner_bead": ACTIVE_CAPTURE_OWNER_BEAD,
+        "supersedes_owner_bead": ORIGINAL_CAPTURE_MECHANISM_BEAD,
         "mutates": False,
         "note": "Wrap dispatch sends so prompt_hash/source_session/source_pane are captured before pane delivery.",
     },
     {
         "track": "tertiary_pane_tail_poller",
-        "owner_bead": "flywheel-xap2",
+        "owner_bead": ACTIVE_CAPTURE_OWNER_BEAD,
+        "supersedes_owner_bead": ORIGINAL_CAPTURE_MECHANISM_BEAD,
         "mutates": False,
         "fragility_note": "Only acceptable with explicit fragility note; pane scrollback alone is not capture proof.",
     },
@@ -284,12 +289,15 @@ def schema_payload() -> dict[str, Any]:
 def examples_payload() -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
+        "active_owner_bead": ACTIVE_CAPTURE_OWNER_BEAD,
+        "original_mechanism_bead": ORIGINAL_CAPTURE_MECHANISM_BEAD,
         "examples": [
             "orch-capture-parity-probe.py --json",
             "orch-capture-parity-probe.py --topology fixtures/topology.jsonl --josh-requests fixtures/josh-requests.jsonl --doctor --json",
             "orch-capture-parity-probe.py --schema --json",
         ],
-        "xap2_boundary": "This probe defines the rule/signal contract; flywheel-xap2 owns capture mechanism implementation.",
+        "xap2_boundary": f"This probe defines the rule/signal contract; {ORIGINAL_CAPTURE_MECHANISM_BEAD} shipped the first capture mechanism.",
+        "active_owner_boundary": f"{ACTIVE_CAPTURE_OWNER_BEAD} owns live duplicate/missing capture cleanup until the probe is green.",
     }
 
 
@@ -349,7 +357,9 @@ def main() -> int:
         "gate_behavior": "warn normally; fail under --strict or hard L71 rollout",
         "duplicate_capture_policy": "prompt_hash or source_message_id is the dedupe key; repeated prompts must link to the existing row, not create duplicates",
         "approved_remediation_tracks": APPROVED_REMEDIATION_TRACKS,
-        "xap2_integration": "flywheel-erkx defines the rule/signal contract; flywheel-xap2 or children implement mechanism choice",
+        "xap2_integration": f"flywheel-erkx defines the rule/signal contract; {ORIGINAL_CAPTURE_MECHANISM_BEAD} shipped the first capture mechanism; {ACTIVE_CAPTURE_OWNER_BEAD} owns current live gap cleanup",
+        "active_owner_bead": ACTIVE_CAPTURE_OWNER_BEAD,
+        "original_mechanism_bead": ORIGINAL_CAPTURE_MECHANISM_BEAD,
         "doctor": args.doctor,
     }
     print(json.dumps(payload, sort_keys=True, separators=(",", ":") if args.json else None))

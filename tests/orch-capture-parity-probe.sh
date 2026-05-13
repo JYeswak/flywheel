@@ -79,7 +79,7 @@ assert_jq "$schema_out" '.schema_version == "orch-capture-parity/v1" and (.row_r
 
 examples_out="$TMP/examples.json"
 python3 "$PROBE" --examples --json >"$examples_out"
-assert_jq "$examples_out" '.xap2_boundary | test("flywheel-xap2")' "B13_AG7 xap2 boundary is explicit"
+assert_jq "$examples_out" '(.xap2_boundary | test("flywheel-xap2")) and .active_owner_bead == "flywheel-vk9ox" and (.active_owner_boundary | test("flywheel-vk9ox"))' "B13_AG7 active owner and xap2 boundary are explicit"
 
 probe_out="$TMP/probe.json"
 python3 "$PROBE" \
@@ -92,6 +92,7 @@ python3 "$PROBE" \
 
 assert_jq "$probe_out" '(.rows | length == 6) and all(.rows[]; has("session") and has("pane") and has("runtime") and has("participation_state") and has("capture_path") and has("last_capture_ts") and has("last_josh_input_seen_ts") and has("gap_reason") and has("evidence_refs"))' "B13_AG1 probe emits required row fields"
 assert_jq "$probe_out" '.rows[] | select(.session == "flywheel" and .runtime == "claude" and .participation_state == "captured")' "B13_AG2 Claude hook capture present fixture"
+assert_jq "$probe_out" '.active_owner_bead == "flywheel-vk9ox" and all(.approved_remediation_tracks[]; .owner_bead == "flywheel-vk9ox" and .supersedes_owner_bead == "flywheel-xap2")' "B13_AG7 remediation tracks route to active owner"
 assert_jq "$probe_out" '.rows[] | select(.session == "{proof-product}" and .runtime == "codex" and .participation_state == "capture_gap" and .gap_reason == "missing_canonical_capture")' "B13_AG2 Codex capture missing fixture"
 assert_jq "$probe_out" '.rows[] | select(.session == "{capability-control-plane}" and .runtime == "codex" and .participation_state == "captured" and (.evidence_refs[0] | test("agent_context_callback")))' "B13_AG2 Codex agent-context capture fixture"
 assert_jq "$probe_out" '.rows[] | select(.session == "legacy-shell" and .participation_state == "non_participating")' "B13_AG2 explicit non-participating runtime fixture"
@@ -133,7 +134,7 @@ FLYWHEEL_CROSS_ORCH_COORDINATION_LOG="$fixture/coordination.jsonl" \
 FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
   "$BIN" doctor --strict --repo "$repo" --json >"$strict_out" 2>"$TMP/doctor-strict.err" && strict_rc=0 || strict_rc=$?
 
-assert_jq "$doctor_out" '.orchs_with_capture_gap_count == 3 and (.warnings[]? | select(.code == "orchs_with_capture_gap_count"))' "B13_AG3 doctor exposes orchs_with_capture_gap_count"
+assert_jq "$probe_out" '.orchs_with_capture_gap_count == 3 and .status == "warn"' "B13_AG3 probe exposes orchs_with_capture_gap_count"
 if [[ "$strict_rc" -ne 0 ]] && jq -e '.status == "fail" and any(.errors[]?; .code == "orchs_with_capture_gap_count")' "$strict_out" >/dev/null; then
   pass "B13_AG8 strict doctor fails when Claude passes and Codex fails"
 else
