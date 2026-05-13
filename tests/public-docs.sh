@@ -106,6 +106,7 @@ for rel in \
   docs/runbooks/public-user-journey-pack.md \
   docs/runbooks/public-site-smb-journey-wireframe.md \
   docs/runbooks/local-actions-preflight.md \
+  docs/runbooks/isolated-agent-lane-testing.md \
   docs/runbooks/upstream-substrate-adoption.md \
   docs/runbooks/agent-lane-compatibility.md \
   docs/reference/commands.md \
@@ -197,6 +198,12 @@ require_literal "docs/runbooks/local-actions-preflight.md" "~/Developer/mobile-e
 require_literal "docs/runbooks/local-actions-preflight.md" "~/Developer/clutterfreespaces" "local actions runbook stamps ClutterFreeSpaces"
 # shellcheck disable=SC2088
 require_literal "docs/runbooks/local-actions-preflight.md" "~/Desktop/Projects/clients/alps-insurance" "local actions runbook stamps ALPS"
+require_literal "docs/runbooks/isolated-agent-lane-testing.md" "creates a disposable environment" "isolated lane runbook names disposable environment"
+require_literal "docs/runbooks/isolated-agent-lane-testing.md" "HOME" "isolated lane runbook isolates HOME"
+require_literal "docs/runbooks/isolated-agent-lane-testing.md" "support_scope=isolated" "isolated lane runbook requires isolated support scope"
+require_literal "docs/runbooks/isolated-agent-lane-testing.md" "private_state_scan.status=pass" "isolated lane runbook requires private-state scan"
+require_literal "docs/runbooks/isolated-agent-lane-testing.md" "--require-runtime" "isolated lane runbook documents strict blocker mode"
+require_literal "docs/runbooks/isolated-agent-lane-testing.md" "bash tests/isolated-agent-lane-smoke.sh" "isolated lane runbook names contract test"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/cutover-receipts.sh" "release runbook includes cutover receipt gate"
 require_literal "docs/runbooks/public-release-runbook.md" "docs/runbooks/public-user-journey-pack.md\` maps every public asset" "release runbook includes user journey pack gate"
 require_literal "docs/runbooks/public-release-runbook.md" "user-journey-pack-validation.json" "release runbook captures user journey validation receipt"
@@ -214,6 +221,7 @@ require_literal "docs/runbooks/agent-lane-compatibility.md" "exactly one \`journ
 require_literal "docs/runbooks/agent-lane-compatibility.md" "no \`private_state_scan.findings\` rows" "agent lane runbook rejects private-state findings"
 require_literal "docs/reference/commands.md" "flywheel validate-receipt" "command reference includes receipt validation"
 require_literal "docs/reference/commands.md" "scripts/agent-lane-probe.sh --receipt-dir receipts/agent-lanes --json" "command reference includes agent-lane receipt probe"
+require_literal "docs/reference/commands.md" "scripts/isolated-agent-lane-smoke.sh --receipt-dir state/isolated-agent-lanes --json" "command reference includes isolated lane smoke"
 require_literal "docs/reference/commands.md" "scripts/local-actions-preflight.sh" "command reference includes local actions preflight"
 require_literal "docs/reference/commands.md" "scripts/live_site_probe.py" "command reference includes live site probe"
 require_literal "docs/reference/commands.md" "scripts/validate_cutover_receipts.py" "command reference includes cutover receipt validation"
@@ -221,6 +229,8 @@ require_literal "docs/reference/commands.md" "scripts/validate_user_journey_pack
 require_literal "docs/reference/files.md" ".flywheel/last_closeout_receipt.json" "file reference includes closeout receipt"
 require_literal "docs/reference/files.md" "receipts/agent-lanes/<lane>.json" "file reference includes agent-lane receipts"
 require_literal "docs/reference/files.md" "flywheel.agent_lane_blocker_receipt.v0" "file reference includes blocked agent-lane receipt schema"
+require_literal "docs/reference/files.md" "scripts/isolated-agent-lane-smoke.sh" "file reference includes isolated lane smoke"
+require_literal "docs/reference/files.md" "docs/runbooks/isolated-agent-lane-testing.md" "file reference includes isolated lane runbook"
 require_literal "docs/reference/files.md" "scripts/live_site_probe.py" "file reference includes live site probe"
 require_literal "docs/reference/files.md" "scripts/validate_cutover_receipts.py" "file reference includes cutover receipt verifier"
 require_literal "docs/reference/files.md" "scripts/validate_user_journey_pack.py" "file reference includes user journey verifier"

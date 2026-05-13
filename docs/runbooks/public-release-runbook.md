@@ -122,6 +122,8 @@ Run:
 ```bash
 scripts/journey-smoke.sh --matrix claude,codex,gemini,openclaw,reduced --dry-run --json > journey-matrix.json
 jq '{status, rows: [.rows[] | {id, support_tier, registry_valid, runtime_proven, evidence}]}' journey-matrix.json
+scripts/isolated-agent-lane-smoke.sh --receipt-dir state/isolated-agent-lanes --json > isolated-agent-lane-smoke.json
+jq '{status, reduced:.reduced_journey.runtime_proven, support_copy_gate}' isolated-agent-lane-smoke.json
 scripts/agent-lane-probe.sh --json > agent-lanes.json
 jq '{status, rows: [.rows[] | {id, cli_present, public_status, support_copy_allowed, evidence}]}' agent-lanes.json
 scripts/agent-lane-probe.sh --receipt-dir receipts/agent-lanes --json > agent-lanes-with-receipts.json
@@ -147,6 +149,7 @@ conflicting stage statuses, or any private-state findings make the receipt
 insufficient.
 
 Receipt location: `journey-matrix.json`.
+Isolated lane receipt location: `isolated-agent-lane-smoke.json`.
 Agent-lane receipt location: `agent-lanes.json`.
 
 ## 4. Installed CLI Smoke

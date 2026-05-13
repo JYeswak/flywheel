@@ -14,6 +14,7 @@ The public CLI starts with reduced-mode commands.
 | `flywheel quickstart --json` | Print the first-run command sequence. |
 | `scripts/agent-lane-probe.sh --json` | Report Claude, Codex, Gemini, and OpenClaw as compatibility targets until strict runtime receipts exist. |
 | `scripts/agent-lane-probe.sh --receipt-dir receipts/agent-lanes --json` | Recheck agent lanes against runtime or blocker receipts before changing support copy. |
+| `scripts/isolated-agent-lane-smoke.sh --receipt-dir state/isolated-agent-lanes --json` | Create a disposable HOME, public export, install prefix, and target repo before writing per-lane runtime or blocker receipts. |
 | `scripts/local-actions-preflight.sh` | Run the local GitHub Actions gate with `actionlint` and `act` before spending hosted runner minutes. |
 | `python3 scripts/publication_readiness.py --release --json` | Check live publication readiness against the real remote and public web surfaces. |
 | `python3 scripts/live_site_probe.py --base-url https://flywheel.zeststream.ai/ --json` | Probe first-party pages and assets on the deployed site. |

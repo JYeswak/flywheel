@@ -44,6 +44,7 @@ jobs:
           bash tests/naming-conventions.sh
           bash tests/context-routing-discipline.sh
           bash tests/agent-lane-probe.sh
+          bash tests/isolated-agent-lane-smoke.sh
           bash tests/public-docs.sh
           bash tests/public-links.sh
           bash tests/website-static.sh
@@ -70,6 +71,7 @@ jobs:
             scripts/local-actions-preflight.sh \
             scripts/journey-smoke.sh \
             scripts/agent-lane-probe.sh \
+            scripts/isolated-agent-lane-smoke.sh \
             tests/installer-smoke.sh \
             tests/public-top-level-files.sh \
             tests/public-surface-gap-scanner.sh \
@@ -78,6 +80,7 @@ jobs:
             tests/naming-conventions.sh \
             tests/context-routing-discipline.sh \
             tests/agent-lane-probe.sh \
+            tests/isolated-agent-lane-smoke.sh \
             tests/public-docs.sh \
             tests/public-links.sh \
             tests/website-static.sh \
@@ -130,6 +133,7 @@ jobs:
             docs/runbooks/release-cutover-authorization.md \
             docs/runbooks/context-and-model-routing.md \
             docs/runbooks/local-actions-preflight.md \
+            docs/runbooks/isolated-agent-lane-testing.md \
             docs/runbooks/agent-lane-compatibility.md \
             docs/runbooks/upstream-substrate-adoption.md \
             docs/runbooks/public-user-journey-pack.md \

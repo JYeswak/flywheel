@@ -12,6 +12,7 @@ Flywheel keeps public state repo-local.
 | `scripts/preflight.sh` | Dependency and mode detector. |
 | `scripts/journey-smoke.sh` | First-run lane verifier. |
 | `scripts/agent-lane-probe.sh` | Agent-lane support-copy guard for Claude, Codex, Gemini, and OpenClaw. |
+| `scripts/isolated-agent-lane-smoke.sh` | Disposable public-export and clean-HOME lane smoke harness for per-lane receipts. |
 | `scripts/publication_readiness.py` | Final publication gate. |
 | `scripts/live_site_probe.py` | First-party deployed site page and asset probe. |
 | `scripts/validate_cutover_receipts.py` | Saved release cutover receipt bundle verifier. |
@@ -22,6 +23,7 @@ Flywheel keeps public state repo-local.
 | `docs/evidence/external-review-log.jsonl` | Sanitized external-review evidence used by the public release workflow. |
 | `docs/getting-started/first-run.md` | First-run guide. |
 | `docs/runbooks/public-user-journey-pack.md` | SkillOS-compatible public journey map requiring visible wording, visual cues, proof refs, signoff status, and blocker/skip receipt refs for each public asset. |
+| `docs/runbooks/isolated-agent-lane-testing.md` | Runbook for proving or blocking Claude, Codex, Gemini, and OpenClaw in isolated environments. |
 | `docs/runbooks/public-release-runbook.md` | Release operator runbook. |
 | `docs/runbooks/release-cutover-authorization.md` | Final public cutover checklist and stop conditions. |
 
