@@ -2,7 +2,7 @@
 
 Schema: `flywheel.publication_goal_completion_audit.v0`
 Status: `not-complete`
-Last audited: `2026-05-14T01:20:00Z`
+Last audited: `2026-05-14T01:50:00Z`
 
 This audit restates the active `/goal` as concrete deliverables, maps each
 deliverable to repo evidence, and names the remaining blockers. It is not a
@@ -46,7 +46,8 @@ Current verdict: `not complete`.
 | Claude Code, Codex CLI, Gemini CLI, OpenClaw end-to-end stance | `receipts/agent-lanes/<lane>.json`, `state/isolated-agent-lane-smoke.receipt.json`, support tier docs/site | `scripts/agent-lane-probe.sh --receipt-dir receipts/agent-lanes --json`; `scripts/isolated-agent-lane-smoke.sh --json` | Reduced lane proven; agent lanes governed by strict receipts/blockers. |
 | SkillOS integration boundary | `docs/concepts/skillos-boundary.md`, `docs/runbooks/public-user-journey-pack.md`, SkillOS-compatible schema | `bash tests/public-docs.sh`; `python3 scripts/validate_user_journey_pack.py --json` | Locally verified; public copy names SkillOS only as capability-control-plane integration point. |
 | Proof-product surfaces integrated without becoming mission ceiling | `docs/evidence/publication-evidence.md`, `docs/evidence/asupersync-gated-adoption.md`, proof-surface language in charter/site | `bash tests/upstream-substrate-adoption.sh`; `bash tests/public-docs.sh`; live site private review | Locally verified; Asupersync remains gated evaluation. |
-| SMB business-owner trust journey | `site/`, `docs/runbooks/public-site-smb-journey-wireframe.md`, `docs/runbooks/public-user-journey-pack.md` | Commit `da3e2db0`; `bash tests/website-static.sh`; `bash tests/website-accessibility.sh`; `python3 scripts/live_site_probe.py --base-url https://flywheel.zeststream.ai/ --json` | Private-live verified with the deep SMB operating-room site across all six pages, Joshua final site signoff still pending. |
+| SMB business-owner trust journey | `site/`, `docs/runbooks/public-site-smb-journey-wireframe.md`, `docs/runbooks/public-user-journey-pack.md` | Commit `fdb7f3ad`; `bash tests/website-static.sh`; `bash tests/website-accessibility.sh`; `python3 scripts/live_site_probe.py --base-url https://flywheel.zeststream.ai/ --json` | Private-live verified with the deep SMB operating-room site across all six pages, Joshua final site signoff still pending. |
+| Git-derived public story trajectory | `scripts/extract_git_story.py`, `docs/stories/flywheel-trajectory.md`, `docs/evidence/flywheel-trajectory.json`, `docs/runbooks/repo-trajectory-story-pack.md` | `bash tests/git-story-extract.sh`; `bash tests/public-docs.sh`; homepage TrajectoryRail on `https://flywheel.zeststream.ai/` | Locally verified and private-live verified as a reusable story mechanism; final site signoff still pending. |
 | External developer run path | `README.md`, `docs/getting-started/first-run.md`, `docs/reference/commands.md`, `docs/reference/files.md` | `bash tests/public-links.sh`; `bash tests/public-docs.sh`; `bash tests/installer-smoke.sh`; `bash tests/journey-smoke.sh` | Locally verified; public GitHub availability still blocked. |
 | Blocker/gap tracking to closure | `docs/evidence/publication-blocker-coverage.md`, `.flywheel/PLANS/public-share-readiness-2026-05-12/`, Beads | `python3 .flywheel/scripts/true-publication-registry-validate.py --json`; `bash tests/true-publication-registry-validate.sh` | Coverage verified; six release blockers remain open. |
 | Public GitHub repository availability | GitHub repo `JYeswak/flywheel` | `python3 scripts/publication_readiness.py --json` | Blocked: `remote_repo_private`. |
@@ -90,9 +91,9 @@ codex-public-export-20260514T0147Z --clean --json` passed with 14,707
 classified files, 10,225 copied public-safe files, 4,040 denylist exclusions,
 and 7,451 manual-review rows. Staged checks passed for publication readiness,
 public docs, this audit, website static/accessibility, user-journey pack,
-public links, top-level files, release assets, cutover receipts, agent lanes,
-isolated agent-lane smoke, journey smoke, public blocker coverage, and the
-depersonalization scan.
+git-story extraction, public links, top-level files, release assets, cutover
+receipts, agent lanes, isolated agent-lane smoke, journey smoke, public blocker
+coverage, and the depersonalization scan.
 
 ## Audit Closeout Rule
 

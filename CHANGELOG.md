@@ -28,6 +28,9 @@ public release line.
 - SkillOS-compatible public user journey pack and validator requiring every
   public asset to map persona lane, journey stage, visible wording, visual cue,
   CTA, proof refs, signoff status, and blocker/skip receipt refs before signoff.
+- Git-derived repo trajectory story pack, extractor, generated Flywheel
+  trajectory evidence, and homepage trajectory rail so public story copy is
+  grounded in commit history instead of one session's memory.
 - Publication goal completion audit and validator that map the active `/goal`
   to concrete artifacts while preserving the current not-complete verdict until
   live public readiness blockers clear.
@@ -50,6 +53,6 @@ public release line.
 
 - Public evidence index added at `docs/evidence/publication-evidence.md` to map
   v0.2 trust claims to local verifiers and live evidence still required.
-- Latest extraction evidence: 14,677 files classified, 10,195 public-safe
-  artifacts copied, 4,040 private/manual-review paths excluded, and 7,432
+- Latest extraction evidence: 14,707 files classified, 10,225 public-safe
+  artifacts copied, 4,040 private/manual-review paths excluded, and 7,451
   review rows signed in the v0.2 publication lane.
