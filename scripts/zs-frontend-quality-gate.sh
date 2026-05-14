@@ -411,9 +411,12 @@ fi
 if [[ "$CONTENT_QUALITY_NA" -eq 0 ]]; then
 
   # ── FQ-11 Meta-voice (copy that narrates the page, not the customer) ────
-  # A meta-voice sentence's SUBJECT is the page/site/story itself, or it leaks
-  # internal-doctrine vocabulary. Both are notes-to-self shipped as copy.
-  META_VOICE_PATTERN='[Tt]he page (is|should|does|stays|points|makes|must|will|speaks)|[Tt]his page |[Tt]he (public )?site should|[Tt]he (public )?story (stays|comes|shows|must)|should make the owner feel|should not shame|trust surface|trophy case|proof bait|mission ceiling|capability control plane|control plane integration|not a footnote|is part of the product, not|the public story|about the system|talks? about the page|page, story, or machinery'
+  # Only UNAMBIGUOUS meta-voice / internal-doctrine phrases. Generic patterns
+  # like "this page " or "the page is" false-positive on legitimate customer
+  # copy ("This page took a wrong turn", "this page is ready") — every phrase
+  # below appears ONLY as page-narration or doctrine leakage, never as copy
+  # addressed to the customer.
+  META_VOICE_PATTERN='trust surface|trophy case|proof bait|mission ceiling|capability control plane|control plane integration point|the public story (stays|comes|shows)|should make the owner feel|should not shame owners|is part of the product, not a footnote|page, story, or machinery|narrates the page|[Tt]he page is a (trust|proof)|is not a trophy'
   meta_hits=0
   meta_examples=""
   for f in "${META_COPY_FILES[@]}"; do
@@ -475,7 +478,7 @@ if [[ "$CONTENT_QUALITY_NA" -eq 0 ]]; then
 
   # ── FQ-14 Cross-page repetition (pages build, not restate) ──────────────
   # Same copy block repeated near-verbatim across pages = pages restate instead
-  # of progress. Counts 6-word shingles appearing in 3+ distinct public pages.
+  # of progress. Counts 10-word shingles appearing in 3+ distinct public pages.
   # <3 pages = not enough surface to judge — n/a-pass, not a failure.
   if [[ "${#PUBLIC_COPY_FILES[@]}" -lt 3 ]]; then
     check "FQ-14" "Cross-page repetition (pages build, not restate)" "pass" "n/a — fewer than 3 narrative pages to compare"
@@ -485,11 +488,15 @@ if [[ "$CONTENT_QUALITY_NA" -eq 0 ]]; then
         [[ -z "$f" ]] && continue
         # Strip <header>/<nav>/<footer> chrome first — shared nav across pages
         # is intentional, not body-copy repetition. Then strip remaining tags.
+        # Strip header/nav/footer chrome (shared nav is intentional, not
+        # restated copy). 10-word shingles, not 6: a tagline (~8 words) is
+        # brand consistency and may recur; only a copy-pasted ~10+-word run
+        # is genuine "pages restate instead of build." No hardcoded tagline
+        # string — the shingle length is the principled filter.
         sed '/<header/,/<\/header>/d; /<nav/,/<\/nav>/d; /<footer/,/<\/footer>/d' "$f" 2>/dev/null \
           | sed 's/<[^>]*>//g' \
-          | sed 's/I help SMB owners buy their time back//g' \
           | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' ' ' \
-          | awk -v fn="$f" '{for(i=1;i+5<=NF;i++) print fn"\t"$i" "$(i+1)" "$(i+2)" "$(i+3)" "$(i+4)" "$(i+5)}'
+          | awk -v fn="$f" '{for(i=1;i+9<=NF;i++){s=$i; for(j=1;j<=9;j++) s=s" "$(i+j); print fn"\t"s}}'
       done \
         | sort -u \
         | awk -F'\t' '{c[$2]++} END {for(s in c) if(c[s]>=3) print c[s]"\t"s}' \
@@ -497,7 +504,7 @@ if [[ "$CONTENT_QUALITY_NA" -eq 0 ]]; then
     )
     repeat_count=$(num "$(echo "$repeat_report" | grep -c . || true)")
     if [[ "$repeat_count" -eq 0 ]]; then
-      check "FQ-14" "Cross-page repetition (pages build, not restate)" "pass" "no 6-word phrase repeats across 3+ public pages"
+      check "FQ-14" "Cross-page repetition (pages build, not restate)" "pass" "no 10-word phrase repeats across 3+ public pages"
     else
       top_repeat=$(echo "$repeat_report" | head -1 | cut -f2)
       if [[ "$repeat_count" -ge 3 ]]; then
