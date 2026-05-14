@@ -6,6 +6,12 @@
     <title>Flywheel | ZestStream</title>
     <meta name="description" content="Flywheel shows how Joshua Nowak brings AI into SMB workflows one bounded improvement at a time.">
     <meta name="flywheel-readiness-markers" content="Your business already has the data. I help SMB owners buy their time back. Yuzu Method workflow slice">
+    <!-- Inter is declared in visual-system.css --zs-font-sans but must be
+         loaded for a static site (no next/font). Without this link the site
+         falls back to system sans in production. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="./visual-system.css">
     <link rel="stylesheet" href="./styles.css">
   </head>

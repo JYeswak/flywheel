@@ -122,6 +122,10 @@ check() {
 }
 
 # ── FQ-01 Font loading ─────────────────────────────────────────────────────
+# Next.js apps must use next/font. Static-HTML sites (no Next.js) must still
+# actually LOAD their font — via a <link> to a font service or @font-face —
+# not just declare a font-family stack. Updated 2026-05-14: a static marketing
+# site that loads its font properly passes; one that only declares it warns.
 if [[ -n "$NEXT_APP" ]]; then
   font_hits=$(num "$(count_matches "$NEXT_APP" "next/font" -name "*.ts" -o -name "*.tsx")")
   if [[ "$font_hits" -gt 0 ]]; then
@@ -130,7 +134,12 @@ if [[ -n "$NEXT_APP" ]]; then
     check "FQ-01" "Font loading via next/font" "fail" "No next/font imports found - system fallback (Arial) will render in production"
   fi
 else
-  check "FQ-01" "Font loading via next/font" "warn" "No Next.js app directory found at $REPO"
+  static_font=$(num "$(count_matches "$REPO" "fonts.googleapis|@font-face|fonts.bunny|fonts.gstatic" -name "*.html" -o -name "*.css")")
+  if [[ "$static_font" -gt 0 ]]; then
+    check "FQ-01" "Font loading (static site)" "pass" "${static_font} font-load reference(s) — static site loads its font, not just declares it"
+  else
+    check "FQ-01" "Font loading" "warn" "No Next.js app and no static font load (<link>/@font-face) - font-family stack declared but not loaded"
+  fi
 fi
 
 # ── FQ-02 Design tokens ────────────────────────────────────────────────────
@@ -171,15 +180,32 @@ fi
 if [[ "$motion_usage" -gt 0 ]]; then
   check "FQ-04" "Motion tokens wired to components" "pass" "${motion_usage} motion token reference(s)"
 elif [[ -z "$NEXT_APP" ]]; then
-  check "FQ-04" "Motion tokens wired to components" "warn" "No Next.js app directory found at $REPO"
+  # Static-HTML site: check for real CSS motion (keyframes / transitions /
+  # cubic-bezier easing), evaluated by static-site standards not React standards.
+  static_motion=$(num "$(count_matches "$REPO" "@keyframes|cubic-bezier|transition:|animation:|transition-timing" -name "*.css")")
+  if [[ "$static_motion" -gt 0 ]]; then
+    check "FQ-04" "Motion (static site)" "pass" "${static_motion} CSS motion reference(s) — keyframes/transitions present"
+  else
+    check "FQ-04" "Motion (static site)" "warn" "No CSS motion (keyframes/transitions) — site is fully static"
+  fi
 else
   check "FQ-04" "Motion tokens wired to components" "fail" "No motion token usage - @zeststream/motion exists but is unwired"
 fi
 
-# ── FQ-05 Brand voice (copy.ts single source) ─────────────────────────────
+# ── FQ-05 Brand voice (single-source copy) ────────────────────────────────
+# React apps centralize copy in copy.ts. Static-HTML sites have no module
+# system — their brand-voice anchor is story-system.json (the voice schema).
+# Updated 2026-05-14 to evaluate static sites by static-site standards.
 copy_file=$(find_first_file "$REPO" "copy.ts")
 if [[ -n "$copy_file" ]]; then
   check "FQ-05" "Brand voice copy.ts" "pass" "$copy_file"
+elif [[ -z "$NEXT_APP" ]]; then
+  story_anchor=$(find_first_file "$REPO" "story-system.json")
+  if [[ -n "$story_anchor" ]]; then
+    check "FQ-05" "Brand voice (static site)" "pass" "story-system.json present — brand voice schema anchors the static site"
+  else
+    check "FQ-05" "Brand voice (static site)" "warn" "No copy.ts and no story-system.json - brand voice not anchored"
+  fi
 else
   check "FQ-05" "Brand voice copy.ts" "warn" "No copy.ts - inline strings in components will drift from brand voice"
 fi
@@ -231,11 +257,18 @@ else
   fi
 fi
 
-# ── FQ-10 ZestStream packages declared ────────────────────────────────────
+# ── FQ-10 ZestStream packages declared OR hosted ──────────────────────────
+# A repo passes if it CONSUMES @zeststream/* packages (declared in package.json)
+# OR HOSTS them (packages/zeststream-* dirs). The monorepo that owns the
+# package source shouldn't warn for "not depending on" packages it contains.
+# Updated 2026-05-14 after flywheel false-warned despite hosting the packages.
 zs_pkg_file="${NEXT_APP:-$REPO}/package.json"
 zs_packages=$(num "$(grep -c "@zeststream" "$zs_pkg_file" 2>/dev/null || true)")
+zs_hosted=$(num "$(ls -d "$REPO"/packages/zeststream-* 2>/dev/null | wc -l)")
 if [[ "$zs_packages" -gt 0 ]]; then
-  check "FQ-10" "@zeststream/* packages declared" "pass" "${zs_packages} package(s)"
+  check "FQ-10" "@zeststream/* packages declared" "pass" "${zs_packages} package(s) consumed"
+elif [[ "$zs_hosted" -gt 0 ]]; then
+  check "FQ-10" "@zeststream/* packages declared" "pass" "${zs_hosted} package(s) hosted in packages/"
 else
   check "FQ-10" "@zeststream/* packages declared" "warn" "No @zeststream/* packages - no shared infrastructure"
 fi

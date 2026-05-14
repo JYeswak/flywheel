@@ -2055,3 +2055,61 @@ textarea {
 .zs-tel-sep {
   opacity: 0.3;
 }
+
+/* ── Motion layer — spring-eased micro-interactions.
+   Uses the same cubic-bezier(0.34, 1.56, 0.64, 1) as @zeststream/motion
+   springPresets (filterChip/pinSelect). The static marketing site should
+   feel alive on hover, not frozen. Reduced-motion safe.
+   Canonical motion source: packages/zeststream-motion/src/tokens.ts */
+a,
+.button,
+.brand,
+.links a,
+.scene-node,
+.proof-path {
+  transition:
+    transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 200ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+.button:hover {
+  transform: translateY(-2px);
+}
+.button:active {
+  transform: translateY(0) scale(0.98);
+}
+.links a:hover,
+.brand:hover {
+  transform: translateY(-1px);
+}
+.scene-node:hover {
+  transform: translateY(-3px) scale(1.02);
+}
+.proof-path:hover {
+  transform: translateY(-2px);
+}
+.zs-telemetry .zs-tel-val {
+  transition: opacity 160ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  a,
+  .button,
+  .brand,
+  .links a,
+  .scene-node,
+  .proof-path,
+  .zs-telemetry .zs-tel-val {
+    transition: none !important;
+  }
+  .button:hover,
+  .button:active,
+  .links a:hover,
+  .brand:hover,
+  .scene-node:hover,
+  .proof-path:hover {
+    transform: none !important;
+  }
+}
