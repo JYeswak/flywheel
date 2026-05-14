@@ -98,6 +98,7 @@ for rel in \
   docs/concepts/evidence-contracts.md \
   docs/evidence/publication-evidence.md \
   docs/evidence/publication-blocker-coverage.md \
+  docs/evidence/private-review-signoff-packet.md \
   docs/evidence/publication-goal-completion-audit.md \
   docs/evidence/flywheel-trajectory.json \
   docs/evidence/asupersync-gated-adoption.md \
@@ -134,6 +135,11 @@ require_literal "docs/evidence/publication-evidence.md" "sha256:" "publication e
 require_literal "docs/evidence/publication-evidence.md" "docs/evidence/publication-blocker-coverage.md" "publication evidence links blocker coverage"
 require_literal "docs/evidence/publication-evidence.md" "docs/evidence/publication-goal-completion-audit.md" "publication evidence links goal completion audit"
 require_literal "docs/evidence/publication-evidence.md" "docs/stories/flywheel-trajectory.md" "publication evidence links generated trajectory"
+require_literal "docs/evidence/private-review-signoff-packet.md" "private-review-ready-not-public-release" "private review packet blocks public release claim"
+require_literal "docs/evidence/private-review-signoff-packet.md" "https://flywheel.zeststream.ai/" "private review packet links private site"
+require_literal "docs/evidence/private-review-signoff-packet.md" "docs/stories/flywheel-trajectory.md" "private review packet links trajectory story"
+require_literal "docs/evidence/private-review-signoff-packet.md" "remote_repo_private" "private review packet names public blockers"
+require_literal "docs/evidence/private-review-signoff-packet.md" "Not granted by this packet" "private review packet separates private and public approval"
 require_literal "docs/evidence/flywheel-trajectory.json" "zeststream.repo_git_story.v0" "trajectory evidence names schema"
 require_literal "docs/evidence/flywheel-trajectory.json" "show proof, do not sell the dream" "trajectory evidence names copy rule"
 require_literal "docs/evidence/publication-blocker-coverage.md" "readiness_blocker_coverage" "blocker coverage names registry contract"

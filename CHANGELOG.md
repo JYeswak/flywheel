@@ -31,6 +31,9 @@ public release line.
 - Git-derived repo trajectory story pack, extractor, generated Flywheel
   trajectory evidence, and homepage trajectory rail so public story copy is
   grounded in commit history instead of one session's memory.
+- Private review signoff packet that gives the reviewer one map for the live
+  private site, story trajectory, journey contract, evidence, developer path,
+  agent-lane proof, and remaining public-release blockers.
 - Publication goal completion audit and validator that map the active `/goal`
   to concrete artifacts while preserving the current not-complete verdict until
   live public readiness blockers clear.
