@@ -35,8 +35,10 @@
 # Audit output — per-bead audit JSON is regenerable skill output, never commit.
 # Retention policy + the rule that output dirs are gitignored at creation:
 # .flywheel/doctrine/repo-hygiene-operational-protocol.md
-/.flywheel/audit/
+/.flywheel/audit/*
 !/.flywheel/audit/README.md
+# git-repo-janitor scratch workspace — regenerable skill output, never commit.
+/.repo_janitor_workspace/
 /.flywheel/scripts/*.bak.*
 /.flywheel/validation-schema/v1/*.bak.*
 /.flywheel/PLANS/**/*.bak.*
@@ -70,7 +72,6 @@ __pycache__/
 AGENTS.md.bak.*
 .beads.bak.*
 .beads.failed.*
-.git-archive/
 .git-archive/*
 !.git-archive/.gitkeep
 
@@ -92,6 +93,7 @@ node_modules/
 *.bak.*
 .flywheel/**/*.bak
 .flywheel/**/*.bak.*
+!.flywheel/fixtures/doctor-mode/**/undo-original.bak
 
 # flywheel-ti46c (Phase 2 of 38u3d): docs scaffold site — entire sibling project
 # (broadened from per-subdir 2026-05-12 during git-hygiene paradigm phase 0)
@@ -123,5 +125,6 @@ flywheel__nextra_documentation_site/
 !.env.local.example
 !**/.env.example
 !**/.env.local.example
+!tests/fixtures/security-env-test-runtime/synthetic/.env.test
 .vercel
 .env*.local

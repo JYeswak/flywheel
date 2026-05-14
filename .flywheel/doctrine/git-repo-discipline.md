@@ -6,6 +6,7 @@ status: active
 authority: joshua-direct-ask-2026-05-14T16:54Z
 cluster: substrate-hygiene-doctrine-cluster
 sisters:
+  - repo-hygiene-operational-protocol.md
   - git-stash-discipline.md
   - blocker-discipline.md
 ---
@@ -15,10 +16,14 @@ sisters:
 ## Substrate-hygiene doctrine cluster
 
 This doctrine is part of the substrate-hygiene doctrine cluster alongside
-`git-stash-discipline.md` and `blocker-discipline.md`.
+`repo-hygiene-operational-protocol.md`, `git-stash-discipline.md`, and
+`blocker-discipline.md`.
 
 - **git-repo-discipline.md** (this doctrine): dirty working trees are
   operational debt; every dirty file needs a responsible disposition.
+- **repo-hygiene-operational-protocol.md**: repo accretion and bloat are
+  preventable substrate failures; generated output and rebuildable substrate
+  must stay out of git and under retention policy.
 - **git-stash-discipline.md**: stash is 24h scratch, not durable storage.
 - **blocker-discipline.md**: blockers are live claims, not stale text.
 
@@ -84,8 +89,10 @@ plan.
 
 ## Orchestrator responsibilities
 
-1. Dispatch gate runs `repo-discipline-check.sh` before assigning new work.
-2. Daily report includes the repo-discipline class and required action.
+1. Dispatch gate runs `repo-discipline-check.sh` and
+   `repo-hygiene-check.sh` before assigning new work.
+2. Daily report includes both the dirty-tree class and the H-1..H-4
+   operational hygiene verdict.
 3. `janitor_triage_class` opens or reuses a cleanup bead and routes
    `/git-repo-janitor` in `triage-only` mode unless the dirt is already owned by
    an active cleanup branch.
@@ -99,9 +106,13 @@ plan.
 
 - `~/.claude/skills/git-repo-janitor/SKILL.md` - bundle-backed dirty repo
   triage, move, delete, and `.gitignore` flow.
+- `.flywheel/doctrine/repo-hygiene-operational-protocol.md` - accretion and
+  bloat prevention sister doctrine.
 - `.flywheel/doctrine/git-stash-discipline.md` - stash accumulation sister
   doctrine.
 - `.flywheel/doctrine/dispatch-author-skill-routing-contract.md` - routes
   dirty-tree language to `git-repo-janitor`.
 - `.flywheel/scripts/repo-discipline-check.sh` - read-only probe and
   threshold classifier.
+- `.flywheel/scripts/repo-hygiene-check.sh` - H-1..H-4 operational protocol
+  probe.
