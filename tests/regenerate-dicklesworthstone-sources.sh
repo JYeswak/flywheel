@@ -110,6 +110,7 @@ assert_contains "dry-run leaves source manual line intact" "$sources" 'MANUAL_ED
   --sources-file "$sources" \
   --now 2026-05-04T00:00:00Z \
   --apply \
+  --idempotency-key regen-test-apply \
   --json >"$apply_json"
 
 assert_jq "apply writes backup and changed true" "$apply_json" \
@@ -124,8 +125,9 @@ assert_contains "apply source has generated warning" "$sources" 'Manual edits in
   --sources-file "$sources" \
   --now 2026-05-04T00:00:00Z \
   --apply \
+  --idempotency-key regen-test-apply \
   --json >"$apply_again_json"
-assert_jq "second apply is idempotent" "$apply_again_json" '.changed == false'
+assert_jq "second apply replays idempotency key" "$apply_again_json" '.status == "replay" and .replay == true'
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'FAIL regenerate-dicklesworthstone-sources tests pass=%s fail=%s\n' "$pass_count" "$fail_count" >&2
