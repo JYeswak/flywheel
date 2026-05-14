@@ -238,7 +238,7 @@ framework.
 
 First use:
 
-> "The Yuzu Method ®"
+> "The Yuzu Method ™"
 
 Motto:
 
@@ -394,8 +394,9 @@ The implementation is not acceptable unless all of these are true:
 - the first viewport is an operating map, not a decorative card layout;
 - all six public site pages use the shared immersive hero or room system;
 - homepage-only visual updates fail the gate even if copy tests pass;
-- `The Yuzu Method ®` and `Peel. Press. Pour.™` appear with correct trademark
-  rendering;
+- `The Yuzu Method ™` and `Peel. Press. Pour.™` appear with correct trademark
+  rendering (™ pending, not ® — applications SN 99572208 / 99572228 are
+  pending, not registered);
 - `I help SMB owners buy their time back.` appears verbatim;
 - `A slice is one bounded workflow improvement` appears verbatim or as the
   first clause of a longer definition;
