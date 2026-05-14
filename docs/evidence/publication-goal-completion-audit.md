@@ -88,7 +88,7 @@ not substitutes for real public GitHub, release assets, hosted runs, and Joshua
 signoff.
 
 Latest public export evidence: `scripts/assemble.py --run-id
-codex-public-export-20260514T0159Z --clean --json` passed with 14,708
+codex-public-export-20260514T0203Z --clean --json` passed with 14,708
 classified files, 10,226 copied public-safe files, 4,040 denylist exclusions,
 and 7,452 manual-review rows. Staged checks passed for publication readiness,
 public docs, this audit, website static/accessibility, user-journey pack,
