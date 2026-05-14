@@ -56,6 +56,6 @@ public release line.
 
 - Public evidence index added at `docs/evidence/publication-evidence.md` to map
   v0.2 trust claims to local verifiers and live evidence still required.
-- Latest extraction evidence: 14,707 files classified, 10,225 public-safe
-  artifacts copied, 4,040 private/manual-review paths excluded, and 7,451
+- Latest extraction evidence: 14,708 files classified, 10,226 public-safe
+  artifacts copied, 4,040 private/manual-review paths excluded, and 7,452
   review rows signed in the v0.2 publication lane.
