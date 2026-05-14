@@ -17631,3 +17631,26 @@ auth, credential, PII, and customer-trust surfaces.
 - **supersedes:** null
 - **stale_after:** 24
 - **closure_evidence:** null
+
+### jr-2026-05-14T031225Z-345
+- **id:** jr-2026-05-14T031225Z-345
+- **captured_at:** 2026-05-14T03:12:25Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:26d687d382f0ccd7f5f296460ca71c7f696d433dcab92b6634b874e4501fc08e
+- **request_text_hash:** sha256:26d687d382f0ccd7f5f296460ca71c7f696d433dcab92b6634b874e4501fc08e
+- **sanitized_excerpt:** "lets get git commits cleaned up - that means 0 ahead, right?"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T03:12:25Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
