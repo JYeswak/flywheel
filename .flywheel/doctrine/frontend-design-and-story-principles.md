@@ -116,6 +116,16 @@ specific scene.** Never a category abstraction ("powerful," "enterprise-grade,"
 better. *Check [M]:* grep for adjectives/superlatives without an adjacent
 number or named thing. (Existing gate: FQ-13.)
 
+**II-2a. The story is the arc, not the stats.** A number from a single project
+is a data point; the *arc* is the throughline that data point sits on. Tell
+the underlying growth and compounding progress — then let specific numbers
+make the arc concrete (II-2). A pile of pinned project numbers without an arc
+is not a story; it does not tell the reader who is growing or where the work
+is going. *Why:* Joshua, 2026-05-14 — "the story isn't about the commits
+themselves, it's about the underlying growth and progress." *Check [E]:* can
+you state the arc — the direction of growth — in one sentence? If the section
+is only isolated stats, it has no arc.
+
 **II-3. Absolute numbers over percentages and ratios.** "5 companies merged
 into one" lands harder than "an 80% consolidation." *Why:* numerical-cognition
 research (Kansas State) — absolute frequencies are judged larger and more
