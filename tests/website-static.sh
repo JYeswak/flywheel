@@ -71,7 +71,7 @@ require_literal "index.html" "The software is not the problem. The job has no cl
 require_literal "index.html" "I had the operations scars before I had the AI tools." "landing answers why Joshua"
 require_literal "index.html" "six figures of student debt" "landing origin story includes struggle"
 require_literal "index.html" "Twenty minutes, one problem, no pitch at the end." "landing frames low-friction Peel session"
-require_literal "index.html" '$500 Peel Report.' "landing names public Peel Report price"
+require_literal "index.html" "\$500 Peel Report." "landing names public Peel Report price"
 require_literal "index.html" "Real work is easier to trust than promises." "landing answers proof-of-work objection"
 require_literal "index.html" "regional gym" "landing leads proof with anonymized gym story"
 require_literal "index.html" "regional insurance carrier" "landing leads proof with anonymized insurance story"
