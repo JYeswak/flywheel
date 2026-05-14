@@ -92,7 +92,7 @@ scaffold_emit_schema() {
     schema_version:$sv,
     command:"schema",
     surface:$surface,
-    description:"dispatch a task to a worker pane, build canonical packet via build-dispatch-packet.sh, ntm assign+send, append row to dispatch-log.jsonl, update bead status",
+    description:"dispatch a task to a worker pane, build canonical packet via build-dispatch-packet.sh, run ntm preflight, ntm assign+send, verify ntm wait generating, append row to dispatch-log.jsonl, update bead status",
     inputs:{
       pane:{type:"integer",required:true,description:"target worker pane index"},
       task_file:{type:"path",required:true,description:"task body file (or generated dispatch packet path)"},
@@ -107,7 +107,7 @@ scaffold_emit_schema() {
       dispatch_log_row:{path:"$REPO/.flywheel/dispatch-log.jsonl",fields:["ts","session","task_id","pane","task_file","channel","native_send","canonical_packet","bead","callback_expected_by"]},
       stdout_envelope:{fields:["ts","task_id","pane","ntm_sent","log_appended","bead_status","packet_path","native_send_success"]}
     },
-    side_effects:["ntm assign","ntm send (delivers packet to pane)","appends row to dispatch-log.jsonl","br update <bead> --status=in_progress (when --bead given)"]
+    side_effects:["ntm preflight --strict","ntm assign","ntm send (delivers packet to pane)","ntm wait --until=generating","appends row to dispatch-log.jsonl","br update <bead> --status=in_progress (when --bead given)"]
   }'
 }
 
@@ -145,7 +145,7 @@ scaffold_emit_completion() {
 
 scaffold_cmd_doctor() {
   # Probe substrate this script depends on. Returns per-check status array.
-  local ts script_dir ntm_bin packet_bin log_path repo_root checks=()
+  local ts script_dir ntm_bin packet_bin log_path repo_root
   ts="$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
   ntm_bin="${FLYWHEEL_NTM_BIN:-${NTM:-/Users/josh/.local/bin/ntm}}"
@@ -274,7 +274,7 @@ scaffold_cmd_repair() {
   # Per-scope repair actions. Default scopes: dispatch-log (deduplicate
   # rows by task_id keeping latest), bead-claim (re-attempt br update for
   # the latest unclaimed bead in the log).
-  local log_path planned actions=()
+  local log_path planned
   log_path="${FLYWHEEL_DISPATCH_LOG:-/Users/josh/Developer/flywheel/.flywheel/dispatch-log.jsonl}"
 
   case "$scope" in
@@ -553,6 +553,7 @@ _scaffold_is_canonical_arg() {
 
 if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
   scaffold_main "$@"
+  # shellcheck disable=SC2317
   exit $?
 fi
 # ====== END canonical-cli scaffold ======
@@ -562,7 +563,7 @@ NTM="${FLYWHEEL_NTM_BIN:-${NTM:-/Users/josh/.local/bin/ntm}}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="${FLYWHEEL_REPO:-$(cd "$SCRIPT_DIR/../.." && pwd -P)}"
 BUILD_DISPATCH_PACKET="${BUILD_DISPATCH_PACKET:-$SCRIPT_DIR/build-dispatch-packet.sh}"
-PANE=""; TASK_FILE=""; TASK_ID=""; BEAD=""; CALLBACK_BY=""; PIPELINE=""; LANE=""
+PANE=""; TASK_FILE=""; TASK_ID=""; BEAD=""; CALLBACK_BY=""; PIPELINE=""; LANE=""; PREFLIGHT_OVERRIDE_REASON=""
 iso_from_epoch() {
   date -u -r "$1" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null ||
     date -u -d "@$1" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null
@@ -612,6 +613,7 @@ while [[ $# -gt 0 ]]; do
     --pipeline=*) PIPELINE="${1#*=}" ;;
     --lane=*) LANE="${1#*=}" ;;
     --session=*) SESSION="${1#*=}" ;;
+    --preflight-override=*) PREFLIGHT_OVERRIDE_REASON="${1#*=}" ;;
     *) echo "unknown arg: $1" >&2; exit 2 ;;
   esac; shift
 done
@@ -623,6 +625,69 @@ fi
 TS_EPOCH="${FLYWHEEL_DISPATCH_AND_LOG_NOW_EPOCH:-$(date -u +%s)}"
 TS="$(iso_from_epoch "$TS_EPOCH")" || { echo "could not compute dispatch timestamp" >&2; exit 5; }
 CALLBACK_EXPECTED="$(callback_expected_json "$CALLBACK_BY" "$TS_EPOCH")"
+ntm_preflight_attempt() {
+  local file="$1" override_reason="${2:-}" raw rc parsed error_count warning_count status allowed
+  set +e
+  raw="$("$NTM" preflight --strict --json "$(cat "$file")" 2>&1)"
+  rc=$?
+  set -e
+
+  parsed="null"
+  error_count=0
+  warning_count=0
+  if jq -e . >/dev/null 2>&1 <<<"$raw"; then
+    parsed="$(jq -c . <<<"$raw")"
+    error_count="$(jq -r '(.error_count // ([.findings[]? | select((.severity // .level // "") == "error")] | length) // 0) | tonumber? // 0' <<<"$parsed")"
+    warning_count="$(jq -r '(.warning_count // ([.findings[]? | select((.severity // .level // "") == "warning")] | length) // 0) | tonumber? // 0' <<<"$parsed")"
+    if [[ -n "$override_reason" ]]; then
+      status="override"
+      allowed=true
+    elif [[ "$rc" -ne 0 || "$error_count" -gt 0 ]]; then
+      status="blocked"
+      allowed=false
+    else
+      status="clean"
+      allowed=true
+    fi
+  else
+    status="skipped"
+    allowed=true
+  fi
+
+  jq -nc \
+    --arg command "ntm preflight" \
+    --arg raw "$raw" \
+    --argjson rc "$rc" \
+    --argjson json "$parsed" \
+    --arg status "$status" \
+    --argjson allowed "$allowed" \
+    --argjson error_count "$error_count" \
+    --argjson warning_count "$warning_count" \
+    --arg override_reason "$override_reason" \
+    '{
+      command:$command,
+      rc:$rc,
+      json:$json,
+      raw:(if $json == null then $raw else null end),
+      status:$status,
+      dispatch_allowed:$allowed,
+      error_count:$error_count,
+      warning_count:$warning_count,
+      override_reason:(if $override_reason == "" then null else $override_reason end)
+    }'
+}
+
+wait_generating_ok() {
+  jq -e '
+    .success == true
+    and (
+      (.json | type) != "object"
+      or (((.json.status // .json.result // "ok") | ascii_downcase)
+        | test("^(generating|thinking|working|running|healthy|ok|pass|ready)$"))
+    )
+  ' >/dev/null
+}
+
 SEND_FILE="$TASK_FILE"
 PACKET_JSON="$(jq -nc '{status:"not_applicable",packet_path:null,packet_sha256:null,validation_status:null}')"
 if [[ -n "$BEAD" ]]; then
@@ -634,6 +699,12 @@ if [[ -n "$BEAD" ]]; then
   PACKET_JSON="$(jq -c . <<<"$PACKET_OUT")"
   SEND_FILE="$(jq -r '.packet_path' <<<"$PACKET_JSON")"
 fi
+PREFLIGHT_JSON="$(ntm_preflight_attempt "$SEND_FILE" "$PREFLIGHT_OVERRIDE_REASON")"
+if ! jq -e '.dispatch_allowed == true' >/dev/null <<<"$PREFLIGHT_JSON"; then
+  echo "ntm preflight blocked dispatch: errors=$(jq -r '.error_count' <<<"$PREFLIGHT_JSON") warnings=$(jq -r '.warning_count' <<<"$PREFLIGHT_JSON")" >&2
+  jq -c '.json.findings // []' <<<"$PREFLIGHT_JSON" >&2 || true
+  exit 8
+fi
 if [[ -n "$BEAD" ]]; then
   ASSIGN_JSON="$(json_attempt "ntm assign" "$NTM" assign "$SESSION" --repo "$REPO" --pane="$PANE" --beads="$BEAD" --prompt="$TASK_ID" --dry-run --json)"
 else
@@ -644,21 +715,31 @@ if ! jq -e '.success == true' >/dev/null <<<"$SEND_JSON"; then
   echo "ntm send failed: $(jq -r '.raw' <<<"$SEND_JSON")" >&2
   exit 4
 fi
+WAIT_GENERATING_JSON="$(json_attempt "ntm wait generating" "$NTM" wait "$SESSION" --pane="$PANE" --until=generating --timeout="${FLYWHEEL_DISPATCH_WAIT_GENERATING_TIMEOUT:-15s}" --json)"
+DISPATCH_STATUS="generating_verified"
+if ! wait_generating_ok <<<"$WAIT_GENERATING_JSON"; then
+  DISPATCH_STATUS="generating_wait_failed"
+fi
 HISTORY_JSON="$(json_attempt "ntm history" "$NTM" history --session="$SESSION" --search="$TASK_ID" --limit=5 --json)"
 HISTORY_COUNT="$(jq -r 'if .success and (.json|type) == "array" then (.json|length) elif .success then 1 else 0 end' <<<"$HISTORY_JSON")"
 ROW="$(jq -nc \
   --arg ts "$TS" --arg session "$SESSION" --arg task_id "$TASK_ID" --arg pane "$PANE" \
   --arg task_file "$TASK_FILE" --arg bead "$BEAD" --arg pipeline "$PIPELINE" --arg lane "$LANE" \
+  --arg dispatch_status "$DISPATCH_STATUS" \
   --argjson callback "$CALLBACK_EXPECTED" --argjson packet "$PACKET_JSON" \
-  --argjson assign "$ASSIGN_JSON" --argjson send "$SEND_JSON" --argjson history "$HISTORY_JSON" --argjson history_count "$HISTORY_COUNT" \
-  '{ts:$ts,session:$session,task_id:$task_id,pane:($pane|tonumber),task_file:$task_file,channel:"ntm",pane_state_source:"ntm_send",pane_state:"sent",native_assignment:$assign,native_send:$send,native_history:$history,history_entry_count:$history_count,canonical_packet:$packet,packet_path:$packet.packet_path,packet_sha256:$packet.packet_sha256,packet_validation_status:$packet.validation_status,bead:(if $bead == "" then null else $bead end),callback_expected_by:$callback.value,callback_expected_by_input:$callback.input,callback_expected_by_legacy_duration:$callback.legacy_duration,callback_expected_by_parse_status:$callback.parse_status,pipeline_slug:(if $pipeline == "" then null else $pipeline end),lane:(if $lane == "" then null else $lane end)}')"
+  --argjson preflight "$PREFLIGHT_JSON" --argjson assign "$ASSIGN_JSON" --argjson send "$SEND_JSON" --argjson wait_generating "$WAIT_GENERATING_JSON" --argjson history "$HISTORY_JSON" --argjson history_count "$HISTORY_COUNT" \
+  '{ts:$ts,session:$session,task_id:$task_id,pane:($pane|tonumber),task_file:$task_file,channel:"ntm",pane_state_source:"ntm_wait",pane_state:$dispatch_status,dispatch_status:$dispatch_status,native_preflight:$preflight,preflight_status:$preflight.status,preflight_errors:$preflight.error_count,preflight_warnings:$preflight.warning_count,native_assignment:$assign,native_send:$send,native_wait_generating:$wait_generating,wait_generating_success:($wait_generating.success == true),native_history:$history,history_entry_count:$history_count,canonical_packet:$packet,packet_path:$packet.packet_path,packet_sha256:$packet.packet_sha256,packet_validation_status:$packet.validation_status,bead:(if $bead == "" then null else $bead end),callback_expected_by:$callback.value,callback_expected_by_input:$callback.input,callback_expected_by_legacy_duration:$callback.legacy_duration,callback_expected_by_parse_status:$callback.parse_status,pipeline_slug:(if $pipeline == "" then null else $pipeline end),lane:(if $lane == "" then null else $lane end)}')"
 printf '%s\n' "$ROW" >>"$LOG"
+if [[ "$DISPATCH_STATUS" != "generating_verified" ]]; then
+  echo "ntm wait generating failed: $(jq -r '.raw // (.json | tostring)' <<<"$WAIT_GENERATING_JSON")" >&2
+  exit 9
+fi
 BEAD_RESULT="skipped"
 if [[ -n "$BEAD" ]]; then
   br update "$BEAD" --status=in_progress >/dev/null 2>&1 && BEAD_RESULT="in_progress" || BEAD_RESULT="claim_blocked"
 fi
 jq -nc \
   --arg ts "$TS" --arg task_id "$TASK_ID" --arg pane "$PANE" --arg bead_status "$BEAD_RESULT" \
-  --argjson packet "$PACKET_JSON" --argjson assign "$ASSIGN_JSON" --argjson send "$SEND_JSON" \
+  --argjson packet "$PACKET_JSON" --argjson preflight "$PREFLIGHT_JSON" --argjson assign "$ASSIGN_JSON" --argjson send "$SEND_JSON" --argjson wait_generating "$WAIT_GENERATING_JSON" \
   --argjson history "$HISTORY_JSON" --argjson history_count "$HISTORY_COUNT" \
-  '{ts:$ts,task_id:$task_id,pane:($pane|tonumber),ntm_sent:($send.success == true),log_appended:true,bead_status:$bead_status,packet_path:$packet.packet_path,packet_validation_status:$packet.validation_status,native_assign_success:($assign.success == true),native_send_success:($send.success == true),native_history_success:($history.success == true),history_entry_count:$history_count}'
+  '{ts:$ts,task_id:$task_id,pane:($pane|tonumber),ntm_sent:($send.success == true),log_appended:true,bead_status:$bead_status,packet_path:$packet.packet_path,packet_validation_status:$packet.validation_status,preflight_status:$preflight.status,preflight_errors:$preflight.error_count,preflight_warnings:$preflight.warning_count,native_assign_success:($assign.success == true),native_send_success:($send.success == true),native_wait_generating_success:($wait_generating.success == true),native_history_success:($history.success == true),history_entry_count:$history_count}'
