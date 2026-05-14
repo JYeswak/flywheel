@@ -22,6 +22,8 @@ Flywheel keeps public state repo-local.
 | `scripts/probe_repo_story_portability.py` | Portability probe for the git-history story, front-end payload, and owner-brief contract across Flywheel, ClutterFreeSpaces, Mobile Eats, and future repos. |
 | `scripts/render_repo_owner_brief.py` | Renderer that converts generated repo trajectory evidence into an SMB-owner story brief. |
 | `packages/zeststream-story-system/story-system.json` | Reusable owner-message, proof-state, visual-primitive, and blocked-phrase contract for ZestStream frontend surfaces. |
+| `packages/zeststream-story-system/story-system.mjs` | Browser-friendly root import for Next.js repos consuming the story-system contract. |
+| `packages/zeststream-story-system/story-system.d.ts` | TypeScript contract for story-system imports and proof-state vocabulary. |
 | `packages/zeststream-story-system/tokens.css` | Reusable CSS token package mirrored by `site/visual-system.css`. |
 | `packages/zeststream-ui/` | Reusable React component package for `ProofRail`, `WorkflowMap`, `TrustWorryMatrix`, and `TelemetryBar`. |
 | `packages/zeststream-motion/` | Reusable React motion package for `SpringChip`, `SpringSheet`, `ConfidenceBadge`, `StreamingText`, `SkeletonMatch`, and `@zeststream/motion/tokens`. |

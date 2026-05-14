@@ -22,6 +22,8 @@ Common evidence surfaces:
 | `scripts/render_repo_owner_brief.py --json` | Owner-facing brief renderer that turns generated repo trajectory JSON into a de-slopified SMB page brief with method steps, trust answers, page rooms, CTA, and proof refs. |
 | `docs/brand/naming-conventions.md` | Public naming contract separating company, method, engine, capability-control plane, upstream substrate, and proof surfaces. |
 | `packages/zeststream-story-system/story-system.json` | Shared public story grammar for Flywheel, ClutterFreeSpaces, Mobile Eats, and future frontend surfaces. |
+| `packages/zeststream-story-system/story-system.mjs` | Importable Next.js story-system module with runtime contract assertion. |
+| `packages/zeststream-story-system/story-system.d.ts` | TypeScript story-system contract for frontend package consumers. |
 | `packages/zeststream-story-system/tokens.css` | Shared visual tokens mirrored by the static Flywheel site and intended for Next.js package adoption. |
 | `packages/zeststream-ui/` | Shared React primitives for proof rails, workflow maps, trust-worry matrices, and telemetry texture. |
 | `packages/zeststream-motion/` | Shared React motion primitives and `@zeststream/motion/tokens` spring presets for living proof surfaces, with reduced-motion behavior documented. |

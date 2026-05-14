@@ -14,6 +14,8 @@ ROOT = Path(__file__).resolve().parents[1]
 PACKAGE_DIR = ROOT / "packages/zeststream-story-system"
 STORY_SYSTEM_PATH = PACKAGE_DIR / "story-system.json"
 PACKAGE_JSON_PATH = PACKAGE_DIR / "package.json"
+PACKAGE_MODULE_PATH = PACKAGE_DIR / "story-system.mjs"
+PACKAGE_TYPES_PATH = PACKAGE_DIR / "story-system.d.ts"
 PACKAGE_TOKENS_PATH = PACKAGE_DIR / "tokens.css"
 SITE_TOKENS_PATH = ROOT / "site/visual-system.css"
 TRAJECTORY_PATH = ROOT / "docs/evidence/flywheel-trajectory.json"
@@ -42,6 +44,18 @@ def validate() -> dict[str, Any]:
 
     if package_json.get("name") != "@zeststream/story-system":
         errors.append({"code": "PACKAGE_NAME_INVALID"})
+    exports = package_json.get("exports", {})
+    root_export = exports.get(".", {})
+    if root_export.get("default") != "./story-system.mjs":
+        errors.append({"code": "ROOT_EXPORT_MISSING"})
+    if root_export.get("types") != "./story-system.d.ts":
+        errors.append({"code": "TYPES_EXPORT_MISSING"})
+    if "./tokens.css" not in exports:
+        errors.append({"code": "TOKEN_EXPORT_MISSING"})
+    if not PACKAGE_MODULE_PATH.exists():
+        errors.append({"code": "PACKAGE_MODULE_MISSING"})
+    if not PACKAGE_TYPES_PATH.exists():
+        errors.append({"code": "PACKAGE_TYPES_MISSING"})
     if story_system.get("schema_version") != "zeststream.story_system_package.v0":
         errors.append({"code": "STORY_SYSTEM_SCHEMA_INVALID"})
     if story_system.get("source_message_schema") != "zeststream.repo_story_message.v0":
@@ -115,6 +129,8 @@ def validate() -> dict[str, Any]:
         "audience_truth_count": len(story_system.get("audience_truths", [])),
         "owner_objection_count": story_system.get("owner_objection_count"),
         "required_css_token_count": len(story_system.get("required_css_tokens", [])),
+        "root_export": root_export.get("default"),
+        "types_export": root_export.get("types"),
         "errors": errors,
     }
 

@@ -29,10 +29,17 @@ require_literal() {
 require_file "packages/zeststream-story-system/package.json"
 require_file "packages/zeststream-story-system/README.md"
 require_file "packages/zeststream-story-system/story-system.json"
+require_file "packages/zeststream-story-system/story-system.mjs"
+require_file "packages/zeststream-story-system/story-system.d.ts"
 require_file "packages/zeststream-story-system/tokens.css"
 require_file "scripts/validate_story_system_package.py"
 
 require_literal "packages/zeststream-story-system/package.json" "@zeststream/story-system" "package names shared story system"
+require_literal "packages/zeststream-story-system/package.json" "\".\":" "package exposes root import"
+require_literal "packages/zeststream-story-system/package.json" "story-system.d.ts" "package exposes typed contract"
+require_literal "packages/zeststream-story-system/story-system.mjs" "assertStorySystemContract" "package exposes runtime contract assertion"
+require_literal "packages/zeststream-story-system/story-system.d.ts" "StorySystemPackage" "package exposes TypeScript story contract"
+require_literal "packages/zeststream-story-system/README.md" "import storySystem" "package README shows typed import"
 require_literal "packages/zeststream-story-system/story-system.json" "zeststream.story_system_package.v0" "story system names schema"
 require_literal "packages/zeststream-story-system/story-system.json" "zeststream.repo_story_dossier.v0" "story system names dossier schema"
 require_literal "packages/zeststream-story-system/story-system.json" "zeststream.repo_frontend_story.v0" "story system names frontend schema"
@@ -44,6 +51,12 @@ require_literal "packages/zeststream-story-system/story-system.json" "first view
 require_literal "packages/zeststream-story-system/story-system.json" "AI will transform your business" "story system carries blocked hype phrase"
 require_literal "packages/zeststream-story-system/tokens.css" "--zs-yuzu: #f2c94c" "package exposes yuzu token"
 require_literal "packages/zeststream-story-system/tokens.css" "--zs-lime: #d4f34a" "package exposes lime token"
+
+if node --input-type=module -e 'import("./packages/zeststream-story-system/story-system.mjs").then((m) => { m.assertStorySystemContract(); if (!m.proofStates.includes("blocked")) process.exit(2); })' >/dev/null; then
+  pass "story system root module imports"
+else
+  fail "story system root module imports"
+fi
 
 if python3 "$ROOT/scripts/validate_story_system_package.py" --json >"$ROOT/.flywheel/tmp-story-system-validation.json"; then
   pass "story system package validator"

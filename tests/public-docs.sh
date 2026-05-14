@@ -122,6 +122,8 @@ for rel in \
   packages/zeststream-story-system/package.json \
   packages/zeststream-story-system/README.md \
   packages/zeststream-story-system/story-system.json \
+  packages/zeststream-story-system/story-system.mjs \
+  packages/zeststream-story-system/story-system.d.ts \
   packages/zeststream-story-system/tokens.css \
   packages/zeststream-ui/package.json \
   packages/zeststream-ui/README.md \
@@ -306,8 +308,8 @@ require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=20 fail=
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=6 fail=0" "release runbook names repo story portability count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=8 fail=0" "release runbook names repo owner brief count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=23 fail=0" "release runbook names current cutover verifier count"
-require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=18 fail=0" "release runbook names story package verifier count"
-require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=274 fail=0" "release runbook names current public docs count"
+require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=26 fail=0" "release runbook names story package verifier count"
+require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=278 fail=0" "release runbook names current public docs count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=95 fail=0" "release runbook names current website static count"
 require_literal "docs/runbooks/public-release-runbook.md" "docs/runbooks/public-user-journey-pack.md\` maps every public asset" "release runbook includes user journey pack gate"
 require_literal "docs/runbooks/public-release-runbook.md" "user-journey-pack-validation.json" "release runbook captures user journey validation receipt"
@@ -343,6 +345,8 @@ require_literal "docs/reference/commands.md" "flywheel:de-personalization-table.
 require_literal "docs/reference/files.md" ".flywheel/last_closeout_receipt.json" "file reference includes closeout receipt"
 require_literal "docs/reference/files.md" "docs/brand/naming-conventions.md" "file reference includes naming contract"
 require_literal "docs/reference/files.md" "packages/zeststream-story-system/story-system.json" "file reference includes story system package"
+require_literal "docs/reference/files.md" "packages/zeststream-story-system/story-system.mjs" "file reference includes story system root module"
+require_literal "docs/reference/files.md" "packages/zeststream-story-system/story-system.d.ts" "file reference includes story system type contract"
 require_literal "docs/reference/files.md" "packages/zeststream-ui/" "file reference includes UI package"
 require_literal "docs/reference/files.md" "packages/zeststream-motion/" "file reference includes motion package"
 require_literal "docs/reference/files.md" "scripts/zs-frontend-quality-gate.sh" "file reference includes frontend quality gate"

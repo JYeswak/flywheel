@@ -135,6 +135,8 @@ REQUIRED_LOCAL_FILES = [
     "packages/zeststream-story-system/package.json",
     "packages/zeststream-story-system/README.md",
     "packages/zeststream-story-system/story-system.json",
+    "packages/zeststream-story-system/story-system.mjs",
+    "packages/zeststream-story-system/story-system.d.ts",
     "packages/zeststream-story-system/tokens.css",
     "packages/zeststream-ui/package.json",
     "packages/zeststream-ui/README.md",

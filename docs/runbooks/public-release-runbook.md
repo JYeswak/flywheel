@@ -276,7 +276,7 @@ Expected results:
 | Gate | Expected result |
 |---|---|
 | Naming conventions | `SUMMARY pass=... fail=0` |
-| Public docs contract | `SUMMARY pass=274 fail=0` and coverage for story, user journey, cutover, evidence, frontend quality, and agent-lane surfaces. |
+| Public docs contract | `SUMMARY pass=278 fail=0` and coverage for story, user journey, cutover, evidence, frontend quality, and agent-lane surfaces. |
 | Public surface gap scanner | `SUMMARY pass=16 fail=0` |
 | ZestStream UI package | `SUMMARY pass=19 fail=0`; export targets, `TrustWorryMatrix`, shellcheck, owner-brief evidence enforcement, complete Next.js fixture, weak Next.js fixture rejection, and private extraction pruning are covered. |
 | ZestStream motion package | `SUMMARY pass=20 fail=0`; export targets, spring presets, reduced-motion docs, package typecheck, and frontend-gate recognition are covered. |
@@ -294,7 +294,7 @@ Expected results:
 | Upstream substrate adoption | Asupersync remains `gated-evaluation` until promotion gates and repo-local POC evidence pass. |
 | Registry validator | `SUMMARY pass=6 fail=0` while rows remain open; coverage is derived from live readiness blockers and currently expects open TP-005/TP-017/TP-018 until release cutover. |
 | Cutover receipt verifier | `SUMMARY pass=23 fail=0`; fixture proof shows saved receipt bundles replay, checksum drift is rejected, website/head failures are rejected, live-site/user-journey receipts are required, and stale signoff evidence is rejected. |
-| Story-system package | `SUMMARY pass=18 fail=0`; CI, Release, and Site Deploy all validate it before public packaging or publishing. |
+| Story-system package | `SUMMARY pass=26 fail=0`; CI, Release, and Site Deploy all validate the package JSON, typed root import, CSS tokens, and story-system contract before public packaging or publishing. |
 | Docs depersonalization | JSON status `pass` and zero findings. |
 
 Failure branches:

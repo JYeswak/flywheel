@@ -61,7 +61,7 @@ evidence_match = re.search(
     evidence,
     flags=re.S,
 )
-run_match = re.search(r"codex-public-export-\d{8}T\d{4}Z", evidence)
+run_match = re.search(r"codex-public-export-\d{8}T\d{6}Z", evidence)
 if not readme_match or not evidence_match or not run_match:
     sys.exit(1)
 readme_counts = tuple(int(value.replace(",", "")) for value in readme_match.groups())

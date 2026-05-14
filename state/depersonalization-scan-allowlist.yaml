@@ -8,6 +8,16 @@ rows:
     path_pattern: "README.md"
     row_id: zeststream-company
     reason: "Reviewed public package metadata intentionally names ZestStream as the engine operator."
+  - id: public-story-system-package-zeststream-metadata
+    root_pattern: "**/packages/zeststream-story-system"
+    path_pattern: "package.json"
+    row_id: zeststream-company
+    reason: "Reviewed public package metadata intentionally names the ZestStream story-system namespace."
+  - id: public-story-system-readme-zeststream-metadata
+    root_pattern: "**/packages/zeststream-story-system"
+    path_pattern: "README.md"
+    row_id: zeststream-company
+    reason: "Reviewed public package README intentionally names the ZestStream story-system namespace."
   - id: public-charter-zeststream-owner
     path_pattern: "CHARTER.md"
     row_id: zeststream-company
@@ -104,6 +114,11 @@ rows:
     path_pattern: "cost-telemetry-token-burn-probe-canonical-cli.sh"
     row_id: token-paths
     reason: "Reviewed regression test filename intentionally exercises credential-state denylist coverage."
+  - id: public-story-system-design-tokens
+    root_pattern: "**/packages/zeststream-story-system"
+    path_pattern: "tokens.css"
+    row_id: token-paths
+    reason: "Reviewed public CSS design-token file; these are visual design tokens, not credential tokens."
   - id: denylist-fixture-pane-capture-provenance
     path_pattern: "pane-capture-provenance.sh"
     row_id: tmux-pane-captures
