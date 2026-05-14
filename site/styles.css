@@ -961,7 +961,15 @@
   .operator-arc-visual {
     grid-template-columns: 1fr;
     gap: 14px;
-    padding: 70px 18px 18px;
+    padding: 82px 18px 18px;
+  }
+
+  .operator-arc-visual .overlay-chip {
+    position: relative;
+    z-index: 2;
+    justify-self: start;
+    margin-top: -54px;
+    background: var(--zs-ink);
   }
 
   .operator-board {
@@ -982,7 +990,7 @@
 
   .operator-arc-line {
     left: 44px;
-    top: 82px;
+    top: 118px;
     bottom: 42px;
     right: auto;
     width: 10px;
