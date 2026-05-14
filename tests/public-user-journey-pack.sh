@@ -52,6 +52,16 @@ else
   fail "missing evidence failure code"
 fi
 
+cp "$PACK" "$TMP/bad-proof-ref.md"
+perl -0pi -e 's#tests/website-static\.sh; tests/website-accessibility\.sh; docs/stories/flywheel-trajectory\.md; docs/evidence/flywheel-trajectory\.json#tests/website-static.sh; docs/evidence/not-a-real-proof.json#' "$TMP/bad-proof-ref.md"
+if python3 "$SCRIPT" --pack "$TMP/bad-proof-ref.md" --json >"$TMP/bad-proof-ref.json"; then
+  fail "missing proof ref file fails"
+elif jq -e '.status == "fail" and any(.errors[]?; .code == "CLAIM_WITHOUT_EVIDENCE" and .field == "required_proof_refs")' "$TMP/bad-proof-ref.json" >/dev/null; then
+  pass "missing proof ref file fails"
+else
+  fail "missing proof ref file failure code"
+fi
+
 cp "$PACK" "$TMP/no-mapping.md"
 perl -0pi -e 's#docs/evidence/publication-blocker-coverage\.md# #g' "$TMP/no-mapping.md"
 if python3 "$SCRIPT" --pack "$TMP/no-mapping.md" --json >"$TMP/no-mapping.json"; then
@@ -60,6 +70,16 @@ elif jq -e '.status == "fail" and any(.errors[]?; .code == "E2E_MAPPING_MISSING"
   pass "missing e2e mapping fails"
 else
   fail "missing e2e mapping failure code"
+fi
+
+cp "$PACK" "$TMP/bad-blocker-ref.md"
+perl -0pi -e 's#docs/evidence/publication-blocker-coverage\.md#docs/evidence/not-a-real-blocker.md#g' "$TMP/bad-blocker-ref.md"
+if python3 "$SCRIPT" --pack "$TMP/bad-blocker-ref.md" --json >"$TMP/bad-blocker-ref.json"; then
+  fail "missing blocker ref file fails"
+elif jq -e '.status == "fail" and any(.errors[]?; .code == "E2E_MAPPING_MISSING" and .field == "blocker_or_skip_receipt_ref")' "$TMP/bad-blocker-ref.json" >/dev/null; then
+  pass "missing blocker ref file fails"
+else
+  fail "missing blocker ref file failure code"
 fi
 
 cp "$PACK" "$TMP/wrong-source.md"

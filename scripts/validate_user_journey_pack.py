@@ -62,6 +62,22 @@ def add_error(
     errors.append(error)
 
 
+def split_refs(value: str) -> list[str]:
+    return [ref.strip() for ref in value.split(";") if ref.strip()]
+
+
+def ref_exists(repo_root: Path, ref: str) -> bool:
+    normalized = ref.strip()
+    if not normalized:
+        return False
+    if normalized.startswith(("http://", "https://", "mailto:")):
+        return True
+    if normalized.startswith("python3 "):
+        normalized = normalized.split(maxsplit=1)[1]
+    normalized = normalized.split()[0]
+    return (repo_root / normalized).exists()
+
+
 def parse_table(text: str, errors: list[dict[str, str]]) -> list[dict[str, str]]:
     lines = text.splitlines()
     try:
@@ -106,6 +122,7 @@ def parse_table(text: str, errors: list[dict[str, str]]) -> list[dict[str, str]]
 
 
 def validate(path: Path) -> dict[str, Any]:
+    repo_root = Path(__file__).resolve().parents[1]
     text = path.read_text(encoding="utf-8")
     errors: list[dict[str, str]] = []
 
@@ -142,6 +159,24 @@ def validate(path: Path) -> dict[str, Any]:
             add_error(errors, "JOURNEY_SPEC_MISSING", "invalid source_pack_id", row_id, "source_pack_id")
         if row.get("required_proof_refs", "").lower() in {"none", "n/a", "na"}:
             add_error(errors, "CLAIM_WITHOUT_EVIDENCE", "required_proof_refs cannot be empty", row_id, "required_proof_refs")
+        for proof_ref in split_refs(row.get("required_proof_refs", "")):
+            if not ref_exists(repo_root, proof_ref):
+                add_error(
+                    errors,
+                    "CLAIM_WITHOUT_EVIDENCE",
+                    f"required proof ref does not exist: {proof_ref}",
+                    row_id,
+                    "required_proof_refs",
+                )
+        blocker_ref = row.get("blocker_or_skip_receipt_ref", "")
+        if blocker_ref and not ref_exists(repo_root, blocker_ref):
+            add_error(
+                errors,
+                "E2E_MAPPING_MISSING",
+                f"blocker_or_skip_receipt_ref does not exist: {blocker_ref}",
+                row_id,
+                "blocker_or_skip_receipt_ref",
+            )
 
     return {
         "schema_version": SCHEMA_VERSION,

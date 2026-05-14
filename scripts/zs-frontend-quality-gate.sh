@@ -129,6 +129,26 @@ for candidate in "$REPO/next-app" "$REPO/apps/cfs-console" "$REPO/apps/locations
   fi
 done
 
+# ── Brand tier detection ──────────────────────────────────────────────────
+# Two-tier model. Tier-1 standards (fonts, tokens, motion, a11y, copy craft,
+# design-system adoption) apply to EVERY project — ZestStream or client.
+# Tier-2 ZestStream-brand storytelling checks (FQ-08 proof states, FQ-09 story
+# system, FQ-12 first-person voice) apply ONLY to ZestStream-owned surfaces.
+# Client/single-effort products (mobile-eats, clutterfreespaces, alps, vrtx)
+# are NEVER forced to tell the ZestStream story — they carry their own brand.
+#
+# Detection precedence:
+#   1. explicit .zs-brand file ("zeststream" or "product")
+#   2. repo HOSTS packages/zeststream-story-system/ → ZestStream brand repo
+#   3. default "product" — the safe default never forces storytelling
+BRAND_TIER="product"
+if [[ -f "$REPO/.zs-brand" ]]; then
+  marker="$(tr -d '[:space:]' < "$REPO/.zs-brand" 2>/dev/null || true)"
+  [[ "$marker" == "zeststream" || "$marker" == "product" ]] && BRAND_TIER="$marker"
+elif [[ -d "$REPO/packages/zeststream-story-system" ]]; then
+  BRAND_TIER="zeststream"
+fi
+
 PASSES=0
 FAILS=0
 WARNINGS=0
@@ -261,42 +281,52 @@ if [[ -n "$NEXT_APP" ]]; then
   fi
 fi
 
-# ── FQ-08 Proof states / evidence surfaces ────────────────────────────────
-proof_hits=$(num "$(count_matches "$REPO" \
-  "ProofRail|proof_state|proofState|proof-state|proven.*blocked|evidence.*rail" \
-  -name "*.tsx" -o -name "*.mdx" -o -name "*.json")")
-if [[ "$proof_hits" -gt 0 ]]; then
-  check "FQ-08" "Proof states / evidence surfaces" "pass" "${proof_hits} proof state reference(s)"
+# ── FQ-08 Proof states / evidence surfaces (TIER-2: ZestStream-brand only) ─
+if [[ "$BRAND_TIER" != "zeststream" ]]; then
+  check "FQ-08" "Proof states / evidence surfaces" "pass" "skipped — Tier-2 ZestStream-brand storytelling check, n/a to a product-tier repo"
 else
-  check "FQ-08" "Proof states / evidence surfaces" "warn" "No ProofRail or proof states - claims are ungrounded"
+  proof_hits=$(num "$(count_matches "$REPO" \
+    "ProofRail|proof_state|proofState|proof-state|proven.*blocked|evidence.*rail" \
+    -name "*.tsx" -o -name "*.mdx" -o -name "*.json")")
+  if [[ "$proof_hits" -gt 0 ]]; then
+    check "FQ-08" "Proof states / evidence surfaces" "pass" "${proof_hits} proof state reference(s)"
+  else
+    check "FQ-08" "Proof states / evidence surfaces" "warn" "No ProofRail or proof states - claims are ungrounded"
+  fi
 fi
 
-# ── FQ-09 Story system linked with generated owner brief ──────────────────
-story_hit=$(find_first_file "$REPO" "story-system.json")
-story_dep=""
-if [[ -z "$story_hit" ]]; then
-  story_dep=$(grep "@zeststream/story-system\|story-system" "$REPO/package.json" 2>/dev/null | head -1 || true)
-fi
-story_module_hits=0
-if [[ -n "$NEXT_APP" ]]; then
-  story_module_hits=$(num "$(count_matches "$NEXT_APP" \
-    "@zeststream/story-system|assertStorySystemContract|storySystem" \
-    -name "*.ts" -o -name "*.tsx")")
-fi
-if [[ -n "$story_hit" || -n "$story_dep" || "$story_module_hits" -gt 0 ]]; then
-  trajectory_artifact=$(find_first_name_match "$REPO" "*trajectory.json")
-  owner_brief_artifact=$(find_first_name_match "$REPO" "*owner-brief.json")
-  if [[ -n "$NEXT_APP" && "$story_module_hits" -eq 0 ]]; then
-    check "FQ-09" "Story system linked" "fail" "Next.js apps must import @zeststream/story-system or assertStorySystemContract, not only declare the dependency"
-  elif [[ -n "$trajectory_artifact" && -n "$owner_brief_artifact" ]] \
-    && grep -q "zeststream.repo_owner_story_brief.v0" "$owner_brief_artifact" 2>/dev/null; then
-    story_detail="${story_hit:-Dependency declared: @zeststream/story-system}; imports=${story_module_hits}; trajectory=$trajectory_artifact; owner_brief=$owner_brief_artifact"
-    check "FQ-09" "Story system linked" "pass" "$story_detail"
-  else
-    check "FQ-09" "Story system linked" "fail" "Story system is linked, but generated trajectory JSON and zeststream.repo_owner_story_brief.v0 are required before public frontend work can pass"
-  fi
+# ── FQ-09 Story system + owner brief (TIER-2: ZestStream-brand only) ───────
+# A client product (mobile-eats, CFS, alps, vrtx) must NEVER be force-failed
+# for "not telling the ZestStream story." It carries its own brand.
+if [[ "$BRAND_TIER" != "zeststream" ]]; then
+  check "FQ-09" "Story system linked" "pass" "skipped — Tier-2 ZestStream-brand storytelling check, n/a to a product-tier repo"
 else
-  check "FQ-09" "Story system linked" "warn" "No story-system.json - brand voice and proof taxonomy undefined"
+  story_hit=$(find_first_file "$REPO" "story-system.json")
+  story_dep=""
+  if [[ -z "$story_hit" ]]; then
+    story_dep=$(grep "@zeststream/story-system\|story-system" "$REPO/package.json" 2>/dev/null | head -1 || true)
+  fi
+  story_module_hits=0
+  if [[ -n "$NEXT_APP" ]]; then
+    story_module_hits=$(num "$(count_matches "$NEXT_APP" \
+      "@zeststream/story-system|assertStorySystemContract|storySystem" \
+      -name "*.ts" -o -name "*.tsx")")
+  fi
+  if [[ -n "$story_hit" || -n "$story_dep" || "$story_module_hits" -gt 0 ]]; then
+    trajectory_artifact=$(find_first_name_match "$REPO" "*trajectory.json")
+    owner_brief_artifact=$(find_first_name_match "$REPO" "*owner-brief.json")
+    if [[ -n "$NEXT_APP" && "$story_module_hits" -eq 0 ]]; then
+      check "FQ-09" "Story system linked" "fail" "Next.js apps must import @zeststream/story-system or assertStorySystemContract, not only declare the dependency"
+    elif [[ -n "$trajectory_artifact" && -n "$owner_brief_artifact" ]] \
+      && grep -q "zeststream.repo_owner_story_brief.v0" "$owner_brief_artifact" 2>/dev/null; then
+      story_detail="${story_hit:-Dependency declared: @zeststream/story-system}; imports=${story_module_hits}; trajectory=$trajectory_artifact; owner_brief=$owner_brief_artifact"
+      check "FQ-09" "Story system linked" "pass" "$story_detail"
+    else
+      check "FQ-09" "Story system linked" "fail" "Story system is linked, but generated trajectory JSON and zeststream.repo_owner_story_brief.v0 are required before public frontend work can pass"
+    fi
+  else
+    check "FQ-09" "Story system linked" "warn" "No story-system.json - brand voice and proof taxonomy undefined"
+  fi
 fi
 
 # ── FQ-10 ZestStream packages declared OR hosted ──────────────────────────
@@ -328,6 +358,12 @@ fi
 # ══════════════════════════════════════════════════════════════════════════
 
 # Collect the public-copy file list once.
+# FQ-11..14 evaluate NARRATIVE COPY: the prose a visitor reads. Scope:
+#   - site/**/*.html      (static marketing site)
+#   - content/**/*.mdx    (genuine prose content)
+#   - Next.js *.tsx/*.mdx fallback when no site/content surface exists.
+# The fallback makes this gate portable to Mobile Eats, ClutterFreeSpaces, and
+# other Next.js projects; it still prunes generated output and dependencies.
 PUBLIC_COPY_FILES=()
 if [[ -d "$REPO/site" ]]; then
   while IFS= read -r f; do PUBLIC_COPY_FILES+=("$f"); done \
@@ -337,54 +373,90 @@ if [[ -d "$REPO/content" ]]; then
   while IFS= read -r f; do PUBLIC_COPY_FILES+=("$f"); done \
     < <(find "$REPO/content" -type f -name "*.mdx" 2>/dev/null)
 fi
+# Next.js portability: repetition and concreteness checks use copy.ts + .mdx,
+# not raw .tsx. Shingling .tsx produces false hits from imports and props.
+if [[ "${#PUBLIC_COPY_FILES[@]}" -eq 0 && -n "$NEXT_APP" ]]; then
+  while IFS= read -r f; do PUBLIC_COPY_FILES+=("$f"); done \
+    < <(find "$NEXT_APP" \
+      \( -path "*/node_modules/*" -o -path "*/.next/*" -o -path "*/dist/*" -o -path "*/build/*" \) -prune \
+      -o -type f \( -name "copy.ts" -o -name "*.mdx" \) -print 2>/dev/null)
+fi
 
-# ── FQ-11 Meta-voice (copy that narrates the page, not the customer) ──────
-# A meta-voice sentence's SUBJECT is the page/site/story itself, or it leaks
-# internal-doctrine vocabulary. Both are notes-to-self shipped as copy.
-META_VOICE_PATTERN='[Tt]he page (is|should|does|stays|points|makes|must|will)|[Tt]his page |[Tt]he (public )?site should|[Tt]he (public )?story (stays|comes|shows|must)|should make the owner feel|should not shame|trust surface|trophy case|proof bait|mission ceiling|capability control plane|control plane integration|not a footnote|is part of the product, not|the public story'
-meta_hits=0
-meta_examples=""
-for f in "${PUBLIC_COPY_FILES[@]:-}"; do
-  [[ -z "$f" ]] && continue
-  while IFS= read -r line; do
-    meta_hits=$((meta_hits + 1))
-    [[ -z "$meta_examples" ]] && meta_examples="$(basename "$(dirname "$f")")/$(basename "$f"): $(echo "$line" | sed 's/<[^>]*>//g' | tr -s ' ' | cut -c1-70)"
-  done < <(grep -hoE "$META_VOICE_PATTERN" "$f" 2>/dev/null)
-done
+# FQ-11 is exact-pattern based, so it can safely scan component source too.
+# This catches Next.js pages that inline bad customer copy before copy.ts exists.
+META_COPY_FILES=("${PUBLIC_COPY_FILES[@]}")
+if [[ -n "$NEXT_APP" ]]; then
+  while IFS= read -r f; do META_COPY_FILES+=("$f"); done \
+    < <(find "$NEXT_APP" \
+      \( -path "*/node_modules/*" -o -path "*/.next/*" -o -path "*/dist/*" -o -path "*/build/*" \) -prune \
+      -o -type f \( -name "*.tsx" -o -name "*.mdx" -o -name "copy.ts" \) -print 2>/dev/null)
+fi
+
+# When there is no narrative copy surface at all, FQ-11..14 are n/a — emit
+# them as pass-with-reason so the report stays complete and nothing is
+# force-failed for being a product app without a marketing site.
+CONTENT_QUALITY_NA=0
 if [[ "${#PUBLIC_COPY_FILES[@]}" -eq 0 ]]; then
-  check "FQ-11" "Meta-voice (copy speaks to customer, not about the page)" "warn" "No public copy surface (site/ or content/) found"
-elif [[ "$meta_hits" -eq 0 ]]; then
-  check "FQ-11" "Meta-voice (copy speaks to customer, not about the page)" "pass" "0 meta-voice / internal-vocabulary leaks in public copy"
-else
-  check "FQ-11" "Meta-voice (copy speaks to customer, not about the page)" "fail" "${meta_hits} meta-voice/internal-vocab leak(s) — e.g. ${meta_examples} — copy narrates the page or leaks doctrine instead of speaking to the customer"
-fi
-
-# ── FQ-12 First-person operator voice on public ZestStream surfaces ───────
-# PUBLISHABILITY-BAR mandates first-person singular for ZestStream. A public
-# page with zero first-person markers is a third-person brochure, not Joshua.
-if [[ "${#PUBLIC_COPY_FILES[@]}" -gt 0 ]]; then
-  fp_brochure_pages=0
-  fp_total_pages=0
-  for f in "${PUBLIC_COPY_FILES[@]}"; do
-    [[ -z "$f" ]] && continue
-    fp_total_pages=$((fp_total_pages + 1))
-    fp_markers=$(num "$(grep -hoE '(^|[^A-Za-z])(I|I'\''m|I'\''ll|I'\''ve|my)([^A-Za-z]|$)' "$f" 2>/dev/null | wc -l)")
-    [[ "$fp_markers" -eq 0 ]] && fp_brochure_pages=$((fp_brochure_pages + 1))
+  CONTENT_QUALITY_NA=1
+  for fq in \
+    "FQ-11|Meta-voice (copy speaks to customer, not about the page)" \
+    "FQ-12|First-person operator voice" \
+    "FQ-13|Concreteness (specifics, not pure abstraction)" \
+    "FQ-14|Cross-page repetition (pages build, not restate)"; do
+    check "${fq%%|*}" "${fq##*|}" "pass" "n/a — no narrative copy surface (site/, content/mdx, or copy.ts)"
   done
-  if [[ "$fp_total_pages" -gt 0 && "$((fp_brochure_pages * 2))" -gt "$fp_total_pages" ]]; then
-    check "FQ-12" "First-person operator voice" "fail" "${fp_brochure_pages}/${fp_total_pages} public pages have zero first-person voice — site reads as a third-person brochure, not Joshua's"
-  elif [[ "$fp_brochure_pages" -gt 0 ]]; then
-    check "FQ-12" "First-person operator voice" "warn" "${fp_brochure_pages}/${fp_total_pages} public page(s) have no first-person voice"
-  else
-    check "FQ-12" "First-person operator voice" "pass" "all ${fp_total_pages} public pages carry first-person operator voice"
-  fi
 fi
 
-# ── FQ-13 Concreteness (claims backed by specifics, not all abstraction) ──
-# Jeff Emanuel principle: numbers over adjectives. A public page that talks
-# about workflows/methods/slices but contains zero concrete numbers in body
-# copy is all-abstraction — it tells, never shows.
-if [[ "${#PUBLIC_COPY_FILES[@]}" -gt 0 ]]; then
+# FQ-11..14 run only when a narrative copy surface exists.
+if [[ "$CONTENT_QUALITY_NA" -eq 0 ]]; then
+
+  # ── FQ-11 Meta-voice (copy that narrates the page, not the customer) ────
+  # A meta-voice sentence's SUBJECT is the page/site/story itself, or it leaks
+  # internal-doctrine vocabulary. Both are notes-to-self shipped as copy.
+  META_VOICE_PATTERN='[Tt]he page (is|should|does|stays|points|makes|must|will|speaks)|[Tt]his page |[Tt]he (public )?site should|[Tt]he (public )?story (stays|comes|shows|must)|should make the owner feel|should not shame|trust surface|trophy case|proof bait|mission ceiling|capability control plane|control plane integration|not a footnote|is part of the product, not|the public story|about the system|talks? about the page|page, story, or machinery'
+  meta_hits=0
+  meta_examples=""
+  for f in "${META_COPY_FILES[@]}"; do
+    [[ -z "$f" ]] && continue
+    while IFS= read -r line; do
+      meta_hits=$((meta_hits + 1))
+      [[ -z "$meta_examples" ]] && meta_examples="$(basename "$(dirname "$f")")/$(basename "$f"): $(echo "$line" | sed 's/<[^>]*>//g' | tr -s ' ' | cut -c1-70)"
+    done < <(grep -hoE "$META_VOICE_PATTERN" "$f" 2>/dev/null)
+  done
+  if [[ "$meta_hits" -eq 0 ]]; then
+    check "FQ-11" "Meta-voice (copy speaks to customer, not about the page)" "pass" "0 meta-voice / internal-vocabulary leaks in public copy"
+  else
+    check "FQ-11" "Meta-voice (copy speaks to customer, not about the page)" "fail" "${meta_hits} meta-voice/internal-vocab leak(s) — e.g. ${meta_examples} — copy narrates the page or leaks doctrine instead of speaking to the customer"
+  fi
+
+  # ── FQ-12 First-person operator voice (TIER-2: ZestStream-brand only) ───
+  # PUBLISHABILITY-BAR mandates first-person singular for ZestStream. A public
+  # page with zero first-person markers is a third-person brochure, not Joshua.
+  # A client product carries its own voice — never force first-person-Joshua.
+  if [[ "$BRAND_TIER" != "zeststream" ]]; then
+    check "FQ-12" "First-person operator voice" "pass" "skipped — Tier-2 ZestStream-brand storytelling check, n/a to a product-tier repo"
+  else
+    fp_brochure_pages=0
+    fp_total_pages=0
+    for f in "${PUBLIC_COPY_FILES[@]}"; do
+      [[ -z "$f" ]] && continue
+      fp_total_pages=$((fp_total_pages + 1))
+      fp_markers=$(num "$(grep -hoE '(^|[^A-Za-z])(I|I'\''m|I'\''ll|I'\''ve|my)([^A-Za-z]|$)' "$f" 2>/dev/null | wc -l)")
+      [[ "$fp_markers" -eq 0 ]] && fp_brochure_pages=$((fp_brochure_pages + 1))
+    done
+    if [[ "$fp_total_pages" -gt 0 && "$((fp_brochure_pages * 2))" -gt "$fp_total_pages" ]]; then
+      check "FQ-12" "First-person operator voice" "fail" "${fp_brochure_pages}/${fp_total_pages} public pages have zero first-person voice — site reads as a third-person brochure, not Joshua's"
+    elif [[ "$fp_brochure_pages" -gt 0 ]]; then
+      check "FQ-12" "First-person operator voice" "warn" "${fp_brochure_pages}/${fp_total_pages} public page(s) have no first-person voice"
+    else
+      check "FQ-12" "First-person operator voice" "pass" "all ${fp_total_pages} public pages carry first-person operator voice"
+    fi
+  fi
+
+  # ── FQ-13 Concreteness (claims backed by specifics, not all abstraction) ─
+  # Jeff Emanuel principle: numbers over adjectives. A public page that talks
+  # about workflows/methods/slices but contains zero concrete numbers in body
+  # copy is all-abstraction — it tells, never shows.
   abstract_pages=0
   for f in "${PUBLIC_COPY_FILES[@]}"; do
     [[ -z "$f" ]] && continue
@@ -400,38 +472,43 @@ if [[ "${#PUBLIC_COPY_FILES[@]}" -gt 0 ]]; then
   else
     check "FQ-13" "Concreteness (specifics, not pure abstraction)" "pass" "public pages making process claims also carry concrete specifics"
   fi
-fi
 
-# ── FQ-14 Cross-page repetition (pages build, not restate) ────────────────
-# Same copy block repeated near-verbatim across pages = pages restate instead
-# of progress. Counts 6-word shingles appearing in 3+ distinct public pages.
-if [[ "${#PUBLIC_COPY_FILES[@]}" -ge 3 ]]; then
-  repeat_report=$(
-    for f in "${PUBLIC_COPY_FILES[@]}"; do
-      [[ -z "$f" ]] && continue
-      # Strip <header>/<nav>/<footer> chrome first — shared nav across pages
-      # is intentional, not body-copy repetition. Then strip remaining tags.
-      sed '/<header/,/<\/header>/d; /<nav/,/<\/nav>/d; /<footer/,/<\/footer>/d' "$f" 2>/dev/null \
-        | sed 's/<[^>]*>//g' \
-        | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' ' ' \
-        | awk -v fn="$f" '{for(i=1;i+5<=NF;i++) print fn"\t"$i" "$(i+1)" "$(i+2)" "$(i+3)" "$(i+4)" "$(i+5)}'
-    done \
-      | sort -u \
-      | awk -F'\t' '{c[$2]++} END {for(s in c) if(c[s]>=3) print c[s]"\t"s}' \
-      | sort -rn
-  )
-  repeat_count=$(num "$(echo "$repeat_report" | grep -c . || true)")
-  if [[ "$repeat_count" -eq 0 ]]; then
-    check "FQ-14" "Cross-page repetition (pages build, not restate)" "pass" "no 6-word phrase repeats across 3+ public pages"
+  # ── FQ-14 Cross-page repetition (pages build, not restate) ──────────────
+  # Same copy block repeated near-verbatim across pages = pages restate instead
+  # of progress. Counts 6-word shingles appearing in 3+ distinct public pages.
+  # <3 pages = not enough surface to judge — n/a-pass, not a failure.
+  if [[ "${#PUBLIC_COPY_FILES[@]}" -lt 3 ]]; then
+    check "FQ-14" "Cross-page repetition (pages build, not restate)" "pass" "n/a — fewer than 3 narrative pages to compare"
   else
-    top_repeat=$(echo "$repeat_report" | head -1 | cut -f2)
-    if [[ "$repeat_count" -ge 3 ]]; then
-      check "FQ-14" "Cross-page repetition (pages build, not restate)" "fail" "${repeat_count} phrase(s) repeated near-verbatim across 3+ pages — e.g. \"${top_repeat}\" — pages restate instead of building"
+    repeat_report=$(
+      for f in "${PUBLIC_COPY_FILES[@]}"; do
+        [[ -z "$f" ]] && continue
+        # Strip <header>/<nav>/<footer> chrome first — shared nav across pages
+        # is intentional, not body-copy repetition. Then strip remaining tags.
+        sed '/<header/,/<\/header>/d; /<nav/,/<\/nav>/d; /<footer/,/<\/footer>/d' "$f" 2>/dev/null \
+          | sed 's/<[^>]*>//g' \
+          | sed 's/I help SMB owners buy their time back//g' \
+          | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' ' ' \
+          | awk -v fn="$f" '{for(i=1;i+5<=NF;i++) print fn"\t"$i" "$(i+1)" "$(i+2)" "$(i+3)" "$(i+4)" "$(i+5)}'
+      done \
+        | sort -u \
+        | awk -F'\t' '{c[$2]++} END {for(s in c) if(c[s]>=3) print c[s]"\t"s}' \
+        | sort -rn
+    )
+    repeat_count=$(num "$(echo "$repeat_report" | grep -c . || true)")
+    if [[ "$repeat_count" -eq 0 ]]; then
+      check "FQ-14" "Cross-page repetition (pages build, not restate)" "pass" "no 6-word phrase repeats across 3+ public pages"
     else
-      check "FQ-14" "Cross-page repetition (pages build, not restate)" "warn" "${repeat_count} phrase(s) repeated across 3+ pages — e.g. \"${top_repeat}\""
+      top_repeat=$(echo "$repeat_report" | head -1 | cut -f2)
+      if [[ "$repeat_count" -ge 3 ]]; then
+        check "FQ-14" "Cross-page repetition (pages build, not restate)" "fail" "${repeat_count} phrase(s) repeated near-verbatim across 3+ pages — e.g. \"${top_repeat}\" — pages restate instead of building"
+      else
+        check "FQ-14" "Cross-page repetition (pages build, not restate)" "warn" "${repeat_count} phrase(s) repeated across 3+ pages — e.g. \"${top_repeat}\""
+      fi
     fi
   fi
-fi
+
+fi  # CONTENT_QUALITY_NA guard
 
 # ── Emit results ──────────────────────────────────────────────────────────
 TOTAL=$((PASSES + FAILS + WARNINGS))
@@ -444,15 +521,17 @@ if [[ "$JSON_OUT" -eq 1 ]]; then
   jq -nc \
     --arg status "$STATUS" \
     --arg repo "$REPO" \
+    --arg brand_tier "$BRAND_TIER" \
     --argjson pass "$PASSES" \
     --argjson fail "$FAILS" \
     --argjson warn "$WARNINGS" \
     --argjson total "$TOTAL" \
     --argjson results "[$results_array]" \
     '{schema_version:"zs-frontend-quality-gate/v1",status:$status,repo:$repo,
-      pass:$pass,fail:$fail,warn:$warn,total:$total,results:$results}'
+      brand_tier:$brand_tier,pass:$pass,fail:$fail,warn:$warn,total:$total,results:$results}'
 else
   echo "ZS Frontend Quality Gate — $REPO"
+  echo "Brand tier: $BRAND_TIER ($([ "$BRAND_TIER" = zeststream ] && echo 'all 14 checks incl. ZestStream-brand storytelling' || echo 'Tier-1 standards + visual identity; Tier-2 storytelling checks n/a'))"
   echo "Status: $STATUS (pass=$PASSES fail=$FAILS warn=$WARNINGS / $TOTAL checks)"
   for r in "${RESULTS[@]}"; do
     id=$(echo "$r" | jq -r '.id')

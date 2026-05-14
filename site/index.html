@@ -4,11 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flywheel | ZestStream</title>
-    <meta name="description" content="Flywheel shows how Joshua Nowak brings AI into SMB workflows one bounded improvement at a time.">
+    <meta name="description" content="I help SMB owners buy their time back by mapping the work between tools, fixing one route, and proving what changed.">
     <meta name="flywheel-readiness-markers" content="Your business already has the data. I help SMB owners buy their time back. Yuzu Method workflow slice">
-    <!-- Inter is declared in visual-system.css --zs-font-sans but must be
-         loaded for a static site (no next/font). Without this link the site
-         falls back to system sans in production. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
@@ -30,18 +27,14 @@
           <a href="./contact/index.html">Contact</a>
         </div>
       </nav>
-      <!-- TelemetryBar — static port of @zeststream/ui TelemetryBar.
-           Canonical React source: packages/zeststream-ui/src/components/TelemetryBar.tsx
-           Jeff Emanuel design pattern C5: fake-but-coherent system status as
-           navigational texture (frankentui.com, asupersync.com). -->
-      <div class="shell zs-telemetry" role="status" aria-label="System status">
+      <div class="shell zs-telemetry" role="status" aria-label="Proof status">
         <span><span class="zs-tel-key">Method</span><span class="zs-tel-val success">THE YUZU METHOD ®</span></span>
         <span class="zs-tel-sep" aria-hidden="true">·</span>
-        <span><span class="zs-tel-key">Proof_states</span><span class="zs-tel-val neutral">proven / blocked / scoped / private</span></span>
+        <span><span class="zs-tel-key">Rule</span><span class="zs-tel-val neutral">blocked is better than bluffing</span></span>
         <span class="zs-tel-sep" aria-hidden="true">·</span>
-        <span><span class="zs-tel-key">Scope</span><span class="zs-tel-val success">ONE BOUNDED SLICE</span></span>
+        <span><span class="zs-tel-key">First step</span><span class="zs-tel-val success">MAP ONE ROUTE</span></span>
         <span class="zs-tel-sep" aria-hidden="true">·</span>
-        <span><span class="zs-tel-key">Control</span><span class="zs-tel-val warning">HUMAN-APPROVED</span></span>
+        <span><span class="zs-tel-key">Approval</span><span class="zs-tel-val warning">HUMAN-APPROVED</span></span>
       </div>
     </header>
     <main>
@@ -58,22 +51,22 @@
         <aside class="scene-proof" aria-label="Proof rail">
           <span>Proof states</span>
           <div class="proof-mini-row"><i class="scene-dot good"></i><strong>Mapped before build</strong></div>
-          <div class="proof-mini-row"><i class="scene-dot"></i><strong>Human review stays visible</strong></div>
-          <div class="proof-mini-row"><i class="scene-dot stop"></i><strong>Unsupported stays blocked</strong></div>
+          <div class="proof-mini-row"><i class="scene-dot"></i><strong>Reviewed by a person</strong></div>
+          <div class="proof-mini-row"><i class="scene-dot stop"></i><strong>Unproven stays blocked</strong></div>
         </aside>
         <div class="shell hero-story">
           <div class="hero-story-inner">
             <div class="hero-eyebrow" aria-label="Flywheel status">
-              <span class="hot">The Yuzu Method ™</span>
-              <span>SMB operating room</span>
-              <span>Proof first</span>
+              <span class="hot">Peel. Press. Pour.™</span>
+              <span>one route first</span>
+              <span>proof before access</span>
             </div>
-            <h1 id="hero-title" aria-label="Your business already has the data. The work is just hidden between tools.">Your business already has the data. <span>The work is just hidden between tools.</span></h1>
-            <p class="hero-plain">Email, CRM, calendars, invoices, documents, and reports all hold part of the truth. The costly work is the copying, checking, chasing, and remembering between them.</p>
-            <p class="operator-proof-line">I help SMB owners buy their time back. Flywheel is the visible method I use to map the work, cut one bounded workflow slice, prove what changed, and carry the lesson into the next build.</p>
+            <h1 id="hero-title">Your business already has the data. <span>The work is just trapped between tools.</span></h1>
+            <p class="hero-plain">Email, CRM, calendars, invoices, documents, and reports each know part of the job. The expensive part is the copy, check, chase, and remember work between them.</p>
+            <p class="operator-proof-line">I help SMB owners buy their time back. I start by mapping one route your team already walks, then I fix the smallest useful piece and show you what changed.</p>
             <div class="actions">
               <a class="button" href="./contact/index.html">Map my workflow</a>
-              <a class="button secondary" href="#proof-path">Inspect the proof</a>
+              <a class="button secondary" href="#worked-slice">See a worked slice</a>
             </div>
           </div>
         </div>
@@ -83,32 +76,32 @@
         <div class="shell">
           <div class="room-header">
             <div>
-              <p class="kicker">The real SMB problem</p>
-              <h2 id="mess-title">The mess has a shape.</h2>
+              <p class="kicker">The real problem</p>
+              <h2 id="mess-title">The tool is not usually the bottleneck. The route is.</h2>
             </div>
-            <p>Owners are not wrong to be cautious about AI. The useful work starts by naming the route people already walk every day: the handoffs, re-entry, screenshots, exceptions, and owner-memory decisions.</p>
+            <p>Most owners I talk to already bought the software. The pain is what happens between the software: a customer asks, someone checks three places, a date changes, the invoice state matters, and the owner still has to remember what comes next.</p>
           </div>
           <div class="manual-flow" aria-label="Common SMB workflow friction">
-            <div><span>01 Request</span><strong>Someone asks for help in email.</strong><p>The request is real, but it is not yet work the system can follow.</p></div>
-            <div><span>02 Status</span><strong>The CRM knows part of the story.</strong><p>The team checks it because the next step may not be obvious.</p></div>
-            <div><span>03 Schedule</span><strong>The date changes somewhere else.</strong><p>The follow-up work moves, but not every tool hears it.</p></div>
-            <div><span>04 Money</span><strong>Payment or invoice state creates the next task.</strong><p>Someone still has to notice, decide, and update the place people trust.</p></div>
-            <div><span>05 Memory</span><strong>The owner fills the gaps.</strong><p>That is expensive work, even when nobody calls it a workflow.</p></div>
+            <div><span>01 Ask</span><strong>The request lands in email.</strong><p>It is real work, but it is not yet work the team can track.</p></div>
+            <div><span>02 Check</span><strong>The CRM has half the answer.</strong><p>Someone opens it because the next step depends on status.</p></div>
+            <div><span>03 Change</span><strong>The calendar moves.</strong><p>The date updates in one place and silently creates work somewhere else.</p></div>
+            <div><span>04 Decide</span><strong>The invoice state changes the next move.</strong><p>Paid, unpaid, waiting, approved, ready: each one means something different.</p></div>
+            <div><span>05 Remember</span><strong>The owner fills the gaps.</strong><p>That memory work costs real time, even when it never appears on a report.</p></div>
           </div>
         </div>
       </section>
 
-      <section class="section-theater dark" aria-labelledby="slice-title">
+      <section class="section-theater dark" id="worked-slice" aria-labelledby="slice-title">
         <div class="shell slice-lab">
           <div>
-            <p class="kicker">One slice first</p>
-            <h2 id="slice-title" class="slice-definition">A slice is one bounded workflow improvement: <span>useful enough to feel, small enough to inspect, and clear enough to stop.</span></h2>
-            <p class="hero-plain">A first slice might route an email request into the right follow-up list, update the place the owner already checks when an appointment changes, or create the checklist item the team would have made by hand.</p>
+            <p class="kicker">A real slice, from this repo</p>
+            <h2 id="slice-title" class="slice-definition">Passing a checklist is not the same as earning trust.</h2>
+            <p class="hero-plain">This Flywheel site had an 8/8 frontend quality score and still failed review because the copy sounded like internal notes. I filed `flywheel-t20qk` to add an FQ-11 meta-voice check, and publication stays blocked until the copy speaks to the person buying the work, not the people maintaining the machinery.</p>
           </div>
           <div class="bench-stage" aria-label="Workflow slice workbench">
-            <div><strong>Before</strong><p>Five tools hold five versions of the same job, so people copy, check, and chase.</p></div>
-            <div><strong>Slice</strong><p>One route gets mapped, built, reviewed, and measured without pretending the whole business is automated.</p></div>
-            <div><strong>Proof</strong><p>The result is passed, blocked, private, or skipped with a reason. No claim moves forward just because it sounds good.</p></div>
+            <div><strong>Before</strong><p>8/8 gate score. Customer copy still read like a project brief.</p></div>
+            <div><strong>Slice</strong><p>One failure class: copy that explains my internal machinery instead of the owner's work.</p></div>
+            <div><strong>After</strong><p>One bead, one new gate target, and a rewrite that keeps approval blocked until Joshua signs off.</p></div>
           </div>
         </div>
       </section>
@@ -117,60 +110,15 @@
         <div class="shell">
           <div class="room-header">
             <div>
-              <p class="kicker">Peel. Press. Pour.™</p>
-              <h2 id="yuzu-title">The Yuzu Method ™ turns caution into a working adoption path.</h2>
+              <p class="kicker">The Yuzu Method ®</p>
+              <h2 id="yuzu-title">Peel. Press. Pour.™ No mystery box.</h2>
             </div>
-            <p>Jeff Emanuel's best public work makes advanced systems feel alive and inspectable. ZestStream translates that into a calmer SMB journey: map the work, prove one useful change, and keep the lesson without dragging the owner into the machinery.</p>
+            <p>I do not start by asking for secrets, admin access, or a giant AI mandate. I start with the route that is already eating your week.</p>
           </div>
           <div class="yuzu-cutline" aria-label="Yuzu Method rail">
-            <article><span>Peel</span><h3>Map before motion.</h3><p>Name the systems, people, exceptions, and stop conditions before AI touches the workflow.</p></article>
-            <article><span>Press</span><h3>Build one slice.</h3><p>Improve the smallest valuable route, then verify the behavior where the team already works.</p></article>
-            <article><span>Pour</span><h3>Keep the lesson.</h3><p>Turn what worked into runbooks, checks, skills, and reusable patterns for the next project.</p></article>
-          </div>
-        </div>
-      </section>
-
-      <section class="section-theater trajectory-room" aria-labelledby="trajectory-title">
-        <div class="shell">
-          <div class="room-header">
-            <div>
-              <p class="kicker">Git history, translated</p>
-              <h2 id="trajectory-title">Flywheel has a history, not just a homepage.</h2>
-            </div>
-            <p>Flywheel's history is the proof path: Joshua works close to the most advanced open-source AI infrastructure, isolates it behind receipts and gates, and turns it into owner-readable workflow gains. The buyer does not need to understand the machinery. The value is knowing the operator does.</p>
-          </div>
-          <div class="trajectory-stage" aria-label="Flywheel trajectory rail">
-            <article>
-              <span>Foundation</span>
-              <strong>Make the work visible.</strong>
-              <p>Before automation, the system exposes goals, state, checks, and the next action.</p>
-            </article>
-            <article class="friction">
-              <span>Friction</span>
-              <strong>Keep red evidence visible.</strong>
-              <p>Private residue, stale copy, and support claims without receipts become blocked controls instead of sales language.</p>
-            </article>
-            <article>
-              <span>Proof loop</span>
-              <strong>Close work with receipts.</strong>
-              <p>Tests, smoke runs, local gates, and reviewer paths decide what can be claimed.</p>
-            </article>
-            <article>
-              <span>Reuse</span>
-              <strong>Lock in the lesson.</strong>
-              <p>What survives becomes runbooks, scripts, visual primitives, or shared story grammar for the next build.</p>
-            </article>
-          </div>
-          <div class="lesson-ledger">
-            <div>
-              <span>Generated artifact</span>
-              <strong>docs/stories/flywheel-trajectory.md</strong>
-            </div>
-            <div>
-              <span>Reusable pack</span>
-              <strong>Repo Trajectory Story Pack</strong>
-            </div>
-            <a class="button secondary" href="https://github.com/JYeswak/flywheel/blob/main/docs/stories/flywheel-trajectory.md">Inspect the trajectory</a>
+            <article><span>Peel</span><h3>Map the route.</h3><p>What starts it, who touches it, where it stalls, and what should stop the work cold.</p></article>
+            <article><span>Press</span><h3>Fix one piece.</h3><p>Build the smallest change that gives you time back without pretending the whole company is automated.</p></article>
+            <article><span>Pour</span><h3>Keep the lesson.</h3><p>If the fix works, it becomes a runbook, check, or reusable part for the next build.</p></article>
           </div>
         </div>
       </section>
@@ -179,49 +127,62 @@
         <div class="shell">
           <div class="room-header">
             <div>
-              <p class="kicker">Advanced AI, controlled loop</p>
+              <p class="kicker">Trust controls</p>
               <h2 id="trust-title">Blocked is better than bluffing.</h2>
             </div>
-            <p>Joshua studies fast-moving AI coding systems, upstream open-source substrate, and the operational lessons coming out of them. You do not need to understand NTM, Agent Mail, Beads, SkillOS, Claude, Codex, Gemini, or OpenClaw. That is why you hire an operator who can turn the machinery into one bounded slice, one proof state, and one reusable lesson at a time.</p>
+            <p>You do not need to become an AI expert to use AI well. You need a clear route, a small first fix, and a way to see what is proven, blocked, private, or skipped with a reason.</p>
           </div>
           <div class="trust-console" aria-label="SMB owner trust controls">
-            <article><span>Privacy</span><strong>Private work stays private.</strong><p>Public proof is redacted, consented, or replaced before it leaves the operating room.</p></article>
-            <article><span>Accuracy</span><strong>AI can sound right and be wrong.</strong><p>If a claim is not proven, it stays blocked.</p></article>
-            <article><span>Integration</span><strong>Your tools already do not talk.</strong><p>The first slice connects one route instead of promising a full-system miracle.</p></article>
-            <article><span>Change</span><strong>AI changes too fast.</strong><p>New tools are isolated, tested, and promoted only when the evidence supports them.</p></article>
-            <article><span>Ownership</span><strong>You approve the slice.</strong><p>Joshua manages the machinery; the business owner keeps the operating judgment.</p></article>
+            <article><span>Privacy</span><strong>Private work stays private.</strong><p>Redacted examples are enough for the first map.</p></article>
+            <article><span>Accuracy</span><strong>AI can sound right and be wrong.</strong><p>If I cannot prove a claim, I do not ask you to trust it.</p></article>
+            <article><span>Access</span><strong>No broad access before the map.</strong><p>The first conversation is about workflow shape, not credentials.</p></article>
+            <article><span>Change</span><strong>Fast tools get slowed down on purpose.</strong><p>New AI tooling goes through local checks before it touches real work.</p></article>
+            <article><span>Ownership</span><strong>You approve the route.</strong><p>I wire the system. You keep the operating judgment.</p></article>
           </div>
         </div>
       </section>
 
-      <section class="section-theater" aria-labelledby="proof-title">
+      <section class="section-theater trajectory-room" aria-labelledby="trajectory-title">
         <div class="shell">
           <div class="room-header">
             <div>
-              <p class="kicker">Two proof paths</p>
-              <h2 id="proof-title">The story stays clear without hiding the machinery.</h2>
+              <p class="kicker">Proof path</p>
+              <h2 id="trajectory-title">I show the work that changed my mind.</h2>
             </div>
-            <p>Business owners should not need GitHub depth to understand the offer. Reviewers can still inspect reduced local runs, live blockers, release receipts, and the public repository after Joshua approves the cutover.</p>
+            <p>Flywheel has a public git history because trust should survive inspection. The useful part is not the commit count. The useful part is the path: what started rough, what broke, what stayed blocked, and what became reusable.</p>
           </div>
-          <div class="dual-proof-path">
-            <article class="proof-path">
-              <h3>Owner path</h3>
-              <ol>
-                <li>Recognize the trapped work between tools.</li>
-                <li>Pick one bounded slice worth improving.</li>
-                <li>See the proof state before the claim expands.</li>
-                <li>Start with a redacted workflow map.</li>
-              </ol>
+          <div class="trajectory-stage" aria-label="Flywheel trajectory rail">
+            <article>
+              <span>Map</span>
+              <strong>Make the work visible.</strong>
+              <p>Goals, state, checks, and next actions have to be readable before the work expands.</p>
             </article>
-            <article class="proof-path dark-path">
-              <h3>Reviewer path</h3>
-              <ol>
-                <li>Read the public user journey pack.</li>
-                <li>Inspect publication evidence and blockers.</li>
-                <li>Run reduced local mode before hosted CI.</li>
-                <li>Wait for Joshua signoff before public release claims.</li>
-              </ol>
+            <article class="friction">
+              <span>Block</span>
+              <strong>Let red evidence stop the claim.</strong>
+              <p>Unsupported copy, stale proof, and private residue do not get polished into promises.</p>
             </article>
+            <article>
+              <span>Verify</span>
+              <strong>Run it before you sell it.</strong>
+              <p>Local checks, screenshots, receipts, and reviews decide what can be said.</p>
+            </article>
+            <article>
+              <span>Reuse</span>
+              <strong>Keep what survived.</strong>
+              <p>Useful lessons become tests, runbooks, packages, and better first questions.</p>
+            </article>
+          </div>
+          <div class="lesson-ledger">
+            <div>
+              <span>Generated proof</span>
+              <strong>docs/stories/flywheel-trajectory.md</strong>
+            </div>
+            <div>
+              <span>Current blocker</span>
+              <strong>Joshua has not approved publication</strong>
+            </div>
+            <a class="button secondary" href="https://github.com/JYeswak/flywheel/blob/main/docs/stories/flywheel-trajectory.md">Inspect the trajectory</a>
           </div>
         </div>
       </section>
@@ -230,8 +191,8 @@
         <div class="shell technical-grid">
           <div>
             <p class="kicker">For reviewers</p>
-            <h2 id="technical-title">The proof gets deeper on demand.</h2>
-            <p>The public path starts with reduced local mode. Claude Code, Codex CLI, Gemini CLI, and OpenClaw now have isolated runtime receipts, so the site copy follows proof instead of stale compatibility placeholders.</p>
+            <h2 id="technical-title">The proof gets deeper if you want it.</h2>
+            <p>Business owners can stop at the workflow map. Technical reviewers can run the reduced local path before GitHub Actions becomes the final approval surface.</p>
           </div>
           <pre><code>git clone https://github.com/JYeswak/flywheel.git
 cd flywheel
@@ -244,7 +205,7 @@ scripts/journey-smoke.sh --matrix reduced --dry-run --json</code></pre>
         <div class="shell cta-wrap">
           <p class="kicker">Start safely</p>
           <h2>Map one workflow before you buy another tool.</h2>
-          <p>Send a redacted example of the work that keeps getting copied, checked, or chased. Do not send secrets or raw customer data.</p>
+          <p>Send the route that keeps getting copied, checked, or chased. Redacted examples are enough for the first pass.</p>
           <a class="button" href="./contact/index.html">Map my workflow</a>
         </div>
       </section>

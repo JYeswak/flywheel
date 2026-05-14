@@ -86,7 +86,7 @@ import { StoryPanel } from "../components/StoryPanel"
 const inter = Inter({ subsets: ["latin"] })
 
 export default function Page() {
-  return <main className={inter.className}><StoryPanel /></main>
+  return <main className={inter.className}><span>I help SMB owners buy their time back in 20 min.</span><StoryPanel /></main>
 }
 TS
 cat >"$GOOD/app/globals.css" <<'CSS'
@@ -106,6 +106,7 @@ assertStorySystemContract(storySystem)
 export function StoryPanel() {
   return (
     <section aria-label="Workflow proof room" data-motion={springPresets.proof}>
+      <p>I map 20 min of workflow before automation touches it.</p>
       <WorkflowMap
         nodes={[{ id: "email", label: "Email", role: "source" }, { id: "crm", label: "CRM", role: "sink" }]}
         edges={[{ from: "email", to: "crm", proofState: "proven" }]}
@@ -132,6 +133,7 @@ TS
 cat >"$GOOD/lib/copy.ts" <<'TS'
 export const copy = {
   cta: "Map my workflow",
+  proof: "I map 20 min of workflow before automation touches it.",
 }
 TS
 cat >"$GOOD/docs/evidence/repo-trajectory.json" <<'JSON'
@@ -147,11 +149,31 @@ cat >"$GOOD/docs/evidence/repo-owner-brief.json" <<'JSON'
 JSON
 
 if "$ROOT/scripts/zs-frontend-quality-gate.sh" --repo "$GOOD" --json >"$TMP/good.json" \
-  && jq -e '.status == "pass" and .pass == 10 and .fail == 0 and .warn == 0' "$TMP/good.json" >/dev/null; then
+  && jq -e '.status == "pass" and .pass == 14 and .fail == 0 and .warn == 0 and any(.results[]; .id == "FQ-11" and .verdict == "pass")' "$TMP/good.json" >/dev/null; then
   pass "frontend quality gate accepts complete Next fixture"
 else
   fail "frontend quality gate accepts complete Next fixture"
   cat "$TMP/good.json" >&2 || true
+fi
+
+META="$TMP/meta-next"
+cp -R "$GOOD" "$META"
+cat >"$META/components/MetaVoice.tsx" <<'TS'
+export function MetaVoice() {
+  return <p>The page speaks about the system instead of the owner.</p>
+}
+TS
+
+set +e
+"$ROOT/scripts/zs-frontend-quality-gate.sh" --repo "$META" --strict --json >"$TMP/meta.json"
+meta_rc=$?
+set -e
+if [[ "$meta_rc" -eq 1 ]] \
+  && jq -e '.status == "fail" and any(.results[]; .id == "FQ-11" and .verdict == "fail")' "$TMP/meta.json" >/dev/null; then
+  pass "frontend quality gate rejects meta voice"
+else
+  fail "frontend quality gate rejects meta voice"
+  cat "$TMP/meta.json" >&2 || true
 fi
 
 BAD="$TMP/bad-next"
