@@ -104,17 +104,18 @@ in their own environment, without Joshua. Framed by trust, not sales.
   then they are false claims (the home page has the same live bug — fix both
   when the repos flip).
 
-## Adjacent fixes dispatched alongside this page
+## Adjacent fixes — resolved (history kept for traceability)
 
-- **Home page proof block.** Joshua supplied grounded receipt copy: cache hit
-  rate 0.007% → 6.37%, a 910× improvement, via a 2-line regex normalizing one
-  billing header. This is real and matches brand-voice ground truth. It should
-  anchor the home page's proof section — and it is the kind of *real* receipt
-  that the three unverified "What I can show" examples still need to become.
-- **/about image.** `site/about/index.html` reuses `assets/loop-map.svg` — the
-  same generic operating-loop diagram as /what-is. A recycled generic diagram
-  on a page about Joshua is the wrong fit. Replace with a purpose-built visual
-  or remove it; do not reuse the what-is diagram.
+- **Home page proof block.** RESOLVED. The three "What I can show" examples
+  Joshua confirmed real (the work behind CFS / VRTX / ALPS); the home proof
+  section was rebuilt around three *anonymized* client stories — "a regional
+  gym," "a regional insurance carrier," "a five-system custom app." The 910×
+  cache receipt (0.007% → 6.37%, a 2-line regex) is real but wrong-audience for
+  an SMB owner — it was relocated to the developer page, where a technical
+  reader finds it compelling.
+- **/about image.** RESOLVED. The recycled `loop-map.svg` was replaced with a
+  purpose-built operator-arc visual on /about. `loop-map.svg` remains on
+  /what-is, where an operating-loop diagram is contextually correct.
 
 ## Methodology page — next, its own focused spine
 
