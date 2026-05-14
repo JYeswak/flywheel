@@ -69,12 +69,19 @@ Done 2026-05-14:
 - `.flywheel/audit/` gitignored + `git rm --cached` (3,061 files untracked) —
   H-1 and H-2 restored for that surface.
 - This protocol committed as doctrine.
+- `scripts/repo-hygiene-check.sh` — implements the H-1..H-4 checks.
+- `scripts/repo-hygiene-prune.sh` — the H-3 retention enforcement tool. Safe
+  by construction: allowlist-only, never deletes a git-tracked file, dry-run
+  by default. First run freed ~2.75 GB (node_modules, `.flywheel/extraction`,
+  `.git-archive` contents). Hygiene check now 4/4 pass.
 
-Next (the actual "wired in" work):
-1. `scripts/repo-hygiene-check.sh` — implements the H-1..H-4 checks.
-2. Wire the check into the flywheel tick/loop (alongside the other gates).
-3. Author per-surface retention policies for the accreting-surface register
-   (launchd/cron prune jobs) and fill the Retention column.
+Next (the remaining "wired in" work):
+1. Wire `repo-hygiene-check.sh` into the flywheel tick/loop (alongside the
+   other gates) so accretion is caught at the tick.
+2. Schedule `repo-hygiene-prune.sh` on a cadence (launchd/cron) so the
+   accreting surfaces are pruned automatically, not manually.
+3. Fill the Retention column of the accreting-surface register with each
+   surface's policy (max age / max size / keep-last-N).
 4. Connect to the `bszgl` git-hygiene enforcement beads — those were designed
    to enforce exactly this and never shipped; this protocol is their spec.
 
