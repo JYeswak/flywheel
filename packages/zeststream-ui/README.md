@@ -104,8 +104,7 @@ bash ~/.claude/skills/zs-frontend-quality-gate/scripts/zs-frontend-quality-gate.
 
 ## Companion packages
 
-- **`@zeststream/motion`** — motion primitives (SpringChip, SpringSheet, ConfidenceBadge, StreamingText, SkeletonMatch)
-- **`@zeststream/motion-tokens`** — raw spring presets + durations + easings
+- **`@zeststream/motion`** — motion primitives plus `@zeststream/motion/tokens` spring presets
 - **`@zeststream/story-system`** — brand voice schema + design tokens (`tokens.css`)
 
 ## Status
