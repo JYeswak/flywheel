@@ -17,13 +17,18 @@ Flywheel keeps public state repo-local.
 | `scripts/live_site_probe.py` | First-party deployed site page and asset probe. |
 | `scripts/validate_cutover_receipts.py` | Saved release cutover receipt bundle verifier. |
 | `scripts/validate_user_journey_pack.py` | Public user journey pack verifier. |
+| `scripts/extract_git_story.py` | Git-history trajectory extractor for public story evidence. |
 | `receipts/agent-lanes/<lane>.json` | Strict `flywheel.agent_lane_runtime_receipt.v0` proof before an agent lane can move from compatibility target to supported copy, or `flywheel.agent_lane_blocker_receipt.v0` evidence naming why the lane remains blocked. |
 | `docs/evidence/publication-evidence.md` | Public trust-claim evidence index. |
 | `docs/evidence/publication-blocker-coverage.md` | Public blocker-code ownership and closure-proof map. |
+| `docs/evidence/private-review-signoff-packet.md` | Human private-review packet that maps site, story, evidence, developer path, agent-lane proof, and remaining public blockers without granting public release approval. |
 | `docs/evidence/publication-goal-completion-audit.md` | Prompt-to-artifact audit for the active publication goal and remaining release blockers. |
+| `docs/evidence/flywheel-trajectory.json` | Machine-readable `zeststream.repo_git_story.v0` trajectory evidence generated from git history. |
 | `docs/evidence/external-review-log.jsonl` | Sanitized external-review evidence used by the public release workflow. |
+| `docs/stories/flywheel-trajectory.md` | Owner-readable generated trajectory story for reviewers and the public site. |
 | `docs/getting-started/first-run.md` | First-run guide. |
 | `docs/runbooks/public-user-journey-pack.md` | SkillOS-compatible public journey map requiring visible wording, visual cues, proof refs, signoff status, and blocker/skip receipt refs for each public asset. |
+| `docs/runbooks/repo-trajectory-story-pack.md` | Reusable contract for applying git-derived story extraction to other public repo surfaces. |
 | `docs/runbooks/isolated-agent-lane-testing.md` | Runbook for proving or blocking Claude, Codex, Gemini, and OpenClaw in isolated environments. |
 | `docs/runbooks/public-release-runbook.md` | Release operator runbook. |
 | `docs/runbooks/release-cutover-authorization.md` | Final public cutover checklist and stop conditions. |

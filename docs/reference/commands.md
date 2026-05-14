@@ -20,6 +20,7 @@ The public CLI starts with reduced-mode commands.
 | `python3 scripts/live_site_probe.py --base-url https://flywheel.zeststream.ai/ --json` | Probe first-party pages and assets on the deployed site. |
 | `python3 scripts/validate_cutover_receipts.py --receipt-dir <dir> --release --json` | Replay a saved cutover receipt bundle and return pass only when every required proof is present and current. |
 | `python3 scripts/validate_user_journey_pack.py --json` | Validate the SkillOS-compatible public user journey pack fields, visual cues, proof refs, signoff status, and blocker/skip receipt refs. |
+| `python3 scripts/extract_git_story.py --repo-label Flywheel --write-json docs/evidence/flywheel-trajectory.json --write-md docs/stories/flywheel-trajectory.md` | Regenerate the public trajectory story from git history instead of writing the journey from one session's memory. |
 
 Full-mode harness dispatch through NTM and Agent Mail is intentionally not
 claimed by the reduced public CLI.
