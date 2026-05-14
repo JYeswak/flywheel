@@ -216,7 +216,7 @@ def build_receipt() -> dict[str, Any]:
     skipped = [row for row in rows if row.get("status") == "skipped"]
     return {
         "schema_version": SCHEMA_VERSION,
-        "generated_date": dt.datetime.now(dt.UTC).date().isoformat(),
+        "generated_date": dt.datetime.now(dt.timezone.utc).date().isoformat(),
         "status": "fail" if failed else "pass",
         "required_story_schema": "zeststream.repo_git_story.v0",
         "required_message_schema": "zeststream.repo_story_message.v0",

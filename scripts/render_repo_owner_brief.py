@@ -124,7 +124,7 @@ def build_brief(story: dict[str, Any]) -> dict[str, Any]:
 
     brief = {
         "schema_version": SCHEMA_VERSION,
-        "generated_date": dt.datetime.now(dt.UTC).date().isoformat(),
+        "generated_date": dt.datetime.now(dt.timezone.utc).date().isoformat(),
         "repo_label": story["repo_label"],
         "source_story_schema": STORY_SCHEMA,
         "source_message_schema": MESSAGE_SCHEMA,

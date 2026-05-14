@@ -582,7 +582,7 @@ def build_story(repo: Path, repo_label: str, redaction_table: Path | None = None
     chapters = [chapter_payload(chapter, commits) for chapter in CHAPTERS]
     story = {
         "schema_version": SCHEMA_VERSION,
-        "generated_date": dt.datetime.now(dt.UTC).date().isoformat(),
+        "generated_date": dt.datetime.now(dt.timezone.utc).date().isoformat(),
         "repo_label": repo_label,
         "source": "git log --reverse --date=short --pretty=format:... --name-only HEAD",
         "redaction_table": redaction_table_ref(repo, table_path),
