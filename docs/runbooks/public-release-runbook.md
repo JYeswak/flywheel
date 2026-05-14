@@ -250,8 +250,12 @@ Run:
 
 ```bash
 bash tests/naming-conventions.sh
+bash tests/public-docs.sh
 bash tests/public-surface-gap-scanner.sh
 bash tests/public-links.sh
+bash tests/website-static.sh
+bash tests/website-accessibility.sh
+bash tests/live-site-probe.sh
 bash tests/installer-smoke.sh
 bash tests/journey-smoke.sh
 bash tests/preflight-fixtures.sh
@@ -259,6 +263,7 @@ bash tests/contact-routing.sh
 bash tests/upstream-substrate-adoption.sh
 bash tests/true-publication-registry-validate.sh
 bash tests/cutover-receipts.sh
+bash tests/story-system-package.sh
 python3 scripts/depersonalize.py --scan-table --root docs --json
 ```
 
@@ -267,8 +272,12 @@ Expected results:
 | Gate | Expected result |
 |---|---|
 | Naming conventions | `SUMMARY pass=... fail=0` |
+| Public docs contract | `SUMMARY pass=220 fail=0` and coverage for story, user journey, cutover, evidence, and agent-lane surfaces. |
 | Public surface gap scanner | `SUMMARY pass=14 fail=0` |
 | Public link checker | `SUMMARY pass=3 fail=0` and JSON `failure_count=0` for public docs/site links. |
+| Website static contract | `SUMMARY pass=95 fail=0` across the six-page private review site bundle. |
+| Website accessibility | Static accessibility script reports zero errors across public site pages. |
+| Live site probe harness | `SUMMARY pass=3 fail=0`; final cutover still requires a saved `live-site-probe.json` with `status=pass` and `failure_count=0`. |
 | Installer smoke | `SUMMARY pass=10 fail=0` against a temporary prefix. |
 | Journey smoke | `SUMMARY pass=7 fail=0` with reduced mode runtime-proven and agent lanes receipt-bound. |
 | Isolated agent lane smoke | `SUMMARY pass=10 fail=0` with live-adapter promotion covered by fakes, explicit Codex auth-home wiring, disposable OpenClaw agent setup, and unproven lanes receipt-bound. |
@@ -276,7 +285,8 @@ Expected results:
 | Contact routing | Public mailto route uses `joshua@zeststream.ai` and subject `[Flywheel] Public site inquiry`; this proves routing, not delivery. |
 | Upstream substrate adoption | Asupersync remains `gated-evaluation` until promotion gates and repo-local POC evidence pass. |
 | Registry validator | `SUMMARY pass=6 fail=0` while rows remain open; coverage is derived from live readiness blockers and currently expects open TP-005/TP-017/TP-018 until release cutover. |
-| Cutover receipt verifier | `SUMMARY pass=5 fail=0`; fixture proof shows saved receipt bundles replay, checksum drift is rejected, and stale signoff evidence is rejected. |
+| Cutover receipt verifier | `SUMMARY pass=23 fail=0`; fixture proof shows saved receipt bundles replay, checksum drift is rejected, website/head failures are rejected, live-site/user-journey receipts are required, and stale signoff evidence is rejected. |
+| Story-system package | `SUMMARY pass=13 fail=0`; CI, Release, and Site Deploy all validate it before public packaging or publishing. |
 | Docs depersonalization | JSON status `pass` and zero findings. |
 
 Failure branches:
