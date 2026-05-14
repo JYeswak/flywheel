@@ -26,7 +26,10 @@ from pathlib import Path
 
 data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 required_chapters = {"foundation", "proof-loop", "friction", "reuse", "story"}
+message_pack = data.get("message_pack", {})
 if data.get("schema_version") != "zeststream.repo_git_story.v0":
+    raise SystemExit(1)
+if message_pack.get("schema_version") != "zeststream.repo_story_message.v0":
     raise SystemExit(1)
 if data.get("repo_label") != "Flywheel":
     raise SystemExit(1)
@@ -37,6 +40,16 @@ if {row.get("id") for row in data.get("chapters", [])} != required_chapters:
 for chapter in data["chapters"]:
     if not chapter.get("owner_value") or not chapter.get("sales_translation"):
         raise SystemExit(1)
+if len(message_pack.get("story_arc", [])) != 5:
+    raise SystemExit(1)
+if len(message_pack.get("trust_objections", [])) != 10:
+    raise SystemExit(1)
+if len(message_pack.get("visual_primitives", [])) < 8:
+    raise SystemExit(1)
+if len(message_pack.get("proof_translation", [])) < 4:
+    raise SystemExit(1)
+if "Map my workflow" != message_pack.get("primary_cta"):
+    raise SystemExit(1)
 PY
 then
   pass "git story JSON contract"
@@ -47,7 +60,12 @@ fi
 if rg -qF "show the proof, do not sell the dream" "$MD_OUT" \
   && rg -qF "Flywheel has a history, not just a homepage." "$JSON_OUT" \
   && rg -qF "Foundation: make the work visible" "$MD_OUT" \
-  && rg -qF "Friction: expose the parts that were not ready" "$MD_OUT"; then
+  && rg -qF "Friction: expose the parts that were not ready" "$MD_OUT" \
+  && rg -qF "zeststream.repo_story_message.v0" "$JSON_OUT" "$MD_OUT" \
+  && rg -qF "Buy back the time hiding between your tools." "$JSON_OUT" \
+  && rg -qF "A slice is one bounded workflow improvement" "$JSON_OUT" "$MD_OUT" \
+  && rg -qF "OperatingRoomHero" "$JSON_OUT" "$MD_OUT" \
+  && rg -qF "AI will make a mess." "$JSON_OUT"; then
   pass "git story owner language"
 else
   fail "git story owner language"
@@ -68,4 +86,3 @@ fi
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]
-

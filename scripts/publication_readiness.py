@@ -44,6 +44,7 @@ REQUIRED_LOCAL_FILES = [
     "docs/concepts/socraticode.md",
     SKILLOS_BOUNDARY_DOC,
     "docs/concepts/evidence-contracts.md",
+    "docs/brand/naming-conventions.md",
     "docs/evidence/publication-evidence.md",
     "docs/evidence/publication-blocker-coverage.md",
     "docs/evidence/private-review-signoff-packet.md",

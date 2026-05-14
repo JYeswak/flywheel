@@ -17,6 +17,7 @@ from depersonalize import DEFAULT_TABLE, load_replacement_table, repo_root, tran
 
 
 SCHEMA_VERSION = "zeststream.repo_git_story.v0"
+MESSAGE_SCHEMA_VERSION = "zeststream.repo_story_message.v0"
 
 NATURAL_PLACEHOLDERS = {
     "{operator}": "the operator",
@@ -137,6 +138,127 @@ CHAPTERS = [
     },
 ]
 
+OWNER_TRUST_OBJECTIONS = [
+    {
+        "objection": "AI will make a mess.",
+        "visible_answer": "The map comes before automation.",
+        "proof_behavior": "The first slice must have a named boundary and stop condition.",
+    },
+    {
+        "objection": "I will not know what changed.",
+        "visible_answer": "Every slice has a proof rail.",
+        "proof_behavior": "Each claim links to evidence or stays blocked.",
+    },
+    {
+        "objection": "My data will leak.",
+        "visible_answer": "Private work stays private.",
+        "proof_behavior": "Public proof is redacted, consented, generated, or replaced.",
+    },
+    {
+        "objection": "AI makes things up.",
+        "visible_answer": "Blocked is better than bluffing.",
+        "proof_behavior": "Unsupported claims show as blocked instead of becoming copy.",
+    },
+    {
+        "objection": "This will replace people before it understands the work.",
+        "visible_answer": "The first slice is small on purpose.",
+        "proof_behavior": "Human approval remains part of the workflow slice.",
+    },
+    {
+        "objection": "My tools already do not talk to each other.",
+        "visible_answer": "The operating map starts with the disconnected tools the owner already uses.",
+        "proof_behavior": "Integration starts with one workflow path, not the whole company.",
+    },
+    {
+        "objection": "Every consultant has a framework.",
+        "visible_answer": "The method is visible enough to inspect.",
+        "proof_behavior": "Runbooks, tests, receipts, and blockers sit behind the story.",
+    },
+    {
+        "objection": "AI changes too fast.",
+        "visible_answer": "Fast tools go through a controlled loop.",
+        "proof_behavior": "Tool claims require current receipts before promotion.",
+    },
+    {
+        "objection": "If it fails, I will be stuck.",
+        "visible_answer": "Stop conditions are named up front.",
+        "proof_behavior": "Failed proof does not become a public claim.",
+    },
+    {
+        "objection": "I do not want to become an AI expert.",
+        "visible_answer": "The owner approves the slice; the operator manages the machinery.",
+        "proof_behavior": "Technical proof is available but not required to understand the offer.",
+    },
+]
+
+MESSAGE_ARC = [
+    {
+        "stage": "recognize",
+        "owner_question": "Is this about the mess I am actually dealing with?",
+        "visible_wording": "Your business already has the data. The work is just hidden between tools.",
+        "visual_cue": "A workflow map with disconnected systems and one highlighted manual route.",
+    },
+    {
+        "stage": "bound",
+        "owner_question": "How do we keep this from turning into a giant AI project?",
+        "visible_wording": "A slice is one bounded workflow improvement: useful enough to feel, small enough to inspect, and clear enough to stop if the proof is not there.",
+        "visual_cue": "The selected slice is pulled out of the map and placed on a workbench.",
+    },
+    {
+        "stage": "control",
+        "owner_question": "What keeps the system honest?",
+        "visible_wording": "If a claim is not proven, it stays blocked.",
+        "visual_cue": "A proof rail with proven, blocked, skipped-with-reason, and private states.",
+    },
+    {
+        "stage": "remember",
+        "owner_question": "Is this real method or just a nice page?",
+        "visible_wording": "The repo history shows the pivots, blockers, and lessons that survived contact with reality.",
+        "visual_cue": "A trajectory rail that connects foundation, friction, proof loop, reuse, and current arc.",
+    },
+    {
+        "stage": "act",
+        "owner_question": "What is the safe first step?",
+        "visible_wording": "Map one workflow before sending secrets, customer data, or system access.",
+        "visual_cue": "A safe intake room with redacted examples and a direct operator route.",
+    },
+]
+
+VISUAL_PRIMITIVES = [
+    {
+        "name": "OperatingRoomHero",
+        "job": "Open inside the owner workflow instead of a generic SaaS hero.",
+    },
+    {
+        "name": "WorkflowMap",
+        "job": "Show systems, manual handoffs, and the selected slice boundary.",
+    },
+    {
+        "name": "SliceWorkbench",
+        "job": "Show before state, bounded slice, proof state, and stop condition together.",
+    },
+    {
+        "name": "ProofRail",
+        "job": "Keep evidence visible without making the SMB owner decode raw receipts.",
+    },
+    {
+        "name": "TrustWorryMatrix",
+        "job": "Map owner objections to visible controls and evidence behavior.",
+    },
+    {
+        "name": "YuzuMethodRail",
+        "job": "Repeat Peel, Press, Pour as map, prove, and reuse.",
+    },
+    {
+        "name": "TrajectoryRail",
+        "job": "Translate git history into origin, friction, proof loop, reuse, and current arc.",
+    },
+    {
+        "name": "ProofDrawer",
+        "job": "Let reviewers inspect generated artifacts after the owner story lands.",
+    },
+]
+
 
 def run_git(repo: Path, args: list[str]) -> str:
     proc = subprocess.run(
@@ -237,7 +359,7 @@ def build_story(repo: Path, repo_label: str) -> dict[str, Any]:
     if not commits:
         raise SystemExit("git history produced no commits")
     chapters = [chapter_payload(chapter, commits) for chapter in CHAPTERS]
-    return {
+    story = {
         "schema_version": SCHEMA_VERSION,
         "generated_date": dt.datetime.now(dt.UTC).date().isoformat(),
         "repo_label": repo_label,
@@ -273,6 +395,83 @@ def build_story(repo: Path, repo_label: str) -> dict[str, Any]:
             "cta_copy": "Inspect the trajectory",
         },
         "chapters": chapters,
+    }
+    story["message_pack"] = build_message_pack(repo_label, story)
+    return story
+
+
+def strongest_chapter(chapters: list[dict[str, Any]], chapter_id: str) -> dict[str, Any]:
+    for chapter in chapters:
+        if chapter["id"] == chapter_id:
+            return chapter
+    raise KeyError(chapter_id)
+
+
+def build_message_pack(repo_label: str, story: dict[str, Any]) -> dict[str, Any]:
+    chapters = story["chapters"]
+    friction = strongest_chapter(chapters, "friction")
+    reuse = strongest_chapter(chapters, "reuse")
+    proof_loop = strongest_chapter(chapters, "proof-loop")
+    return {
+        "schema_version": MESSAGE_SCHEMA_VERSION,
+        "source_story_schema": SCHEMA_VERSION,
+        "audience": "SMB owner or buyer who wants safer AI adoption without becoming an AI tooling expert.",
+        "core_offer": "Map one workflow, improve one bounded slice, prove what changed, and carry the lesson into the next build.",
+        "voice_rules": [
+            "sell outcomes, not tools",
+            "name the owner worry before naming the machinery",
+            "show proof without forcing the owner to read raw receipts",
+            "prefer human-led control language over autonomous-agent hype",
+            "make blockers visible because hidden risk is the trust killer",
+            "treat cash flow, time, follow-up, and customer experience as stronger language than AI novelty",
+        ],
+        "page_headline_options": [
+            "Buy back the time hiding between your tools.",
+            "Turn one messy workflow into one proven slice.",
+            "Make AI useful before you make it big.",
+        ],
+        "owner_promise": "The operator helps SMB owners buy their time back by finding the manual work between systems, proving one safe slice, and keeping the lesson for the next project.",
+        "primary_cta": "Map my workflow",
+        "secondary_cta": "Inspect the proof",
+        "story_arc": MESSAGE_ARC,
+        "trust_objections": OWNER_TRUST_OBJECTIONS,
+        "visual_primitives": VISUAL_PRIMITIVES,
+        "proof_translation": [
+            {
+                "technical_signal": "commit history",
+                "owner_meaning": "The story comes from the work that actually happened, not a fresh marketing claim.",
+                "evidence_ref": "docs/stories/repo-trajectory.md",
+            },
+            {
+                "technical_signal": "friction and blocker evidence",
+                "owner_meaning": "The process exposes what is not ready before it can affect the business.",
+                "evidence_ref": f"{friction['commit_count']} friction-matched commits",
+            },
+            {
+                "technical_signal": "receipts, tests, and proof-loop commits",
+                "owner_meaning": "Claims move forward only when the system can show what changed.",
+                "evidence_ref": f"{proof_loop['commit_count']} proof-loop-matched commits",
+            },
+            {
+                "technical_signal": "runbooks, scripts, packages, and shared design grammar",
+                "owner_meaning": "Lessons from one repo become reusable operating material for the next repo.",
+                "evidence_ref": f"{reuse['commit_count']} reuse-matched commits",
+            },
+        ],
+        "nextjs_storytelling_targets": [
+            "App Router rooms for owner, method, developer, operator, and contact journeys",
+            "Server Components for proof manifests that should not ship private raw state to the browser",
+            "Suspense-backed proof drawers so the owner story renders before reviewer evidence",
+            "shared CSS/design tokens for proof states, yuzu method rails, and workflow maps",
+            "Playwright screenshot gates for mobile and desktop story quality",
+        ],
+        "must_not_say": [
+            "AI will transform your business",
+            "fully autonomous",
+            "set it and forget it",
+            "we have many commits, so trust us",
+            "all systems are supported without receipts",
+        ],
     }
 
 
@@ -326,6 +525,38 @@ def render_markdown(story: dict[str, Any]) -> str:
         lines.append("")
     lines.extend(
         [
+            "## Owner-Facing Message Pack",
+            "",
+            f"Schema: `{MESSAGE_SCHEMA_VERSION}`",
+            "",
+            f"Core offer: {story['message_pack']['core_offer']}",
+            "",
+            f"Owner promise: {story['message_pack']['owner_promise']}",
+            "",
+            "Primary CTA: `Map my workflow`",
+            "",
+            "The reusable story arc for this repo is:",
+            "",
+            "| Stage | Visible wording | Visual cue |",
+            "|---|---|---|",
+        ]
+    )
+    for row in story["message_pack"]["story_arc"]:
+        lines.append(f"| {row['stage']} | {row['visible_wording']} | {row['visual_cue']} |")
+    lines.extend(
+        [
+            "",
+            "Required visual primitives:",
+            "",
+            "| Primitive | Job |",
+            "|---|---|",
+        ]
+    )
+    for row in story["message_pack"]["visual_primitives"]:
+        lines.append(f"| `{row['name']}` | {row['job']} |")
+    lines.extend(
+        [
+            "",
             "## Use On The Public Site",
             "",
             "The site should summarize this arc for SMB owners:",

@@ -14,11 +14,12 @@ lessons became reusable.
 
 ## Contract
 
-Every repo-facing public story must have two layers:
+Every repo-facing public story must have three layers:
 
 | Layer | Audience | Job |
 |---|---|---|
 | Generated trajectory | Reviewer, operator | Extract sanitized chapters from git history with commit evidence. |
+| Owner message pack | SMB owner, buyer | Translate the trajectory into promise, objections, page arc, CTA, and visual primitives. |
 | Designed story surface | SMB owner, buyer | Translate the trajectory into plain language, visual rhythm, and CTA flow. |
 
 The generated layer is produced with:
@@ -55,6 +56,62 @@ The extractor groups commits into five public chapters:
 
 These chapters are deliberately not raw commit counts. Counts are useful to
 reviewers, but owners need movement: start, friction, control, reuse, outcome.
+
+## Message Pack
+
+The extractor also emits `message_pack` with schema
+`zeststream.repo_story_message.v0`. This is the reusable bridge from repo
+history to ZestStream page language. It is intentionally generic enough to use
+in Flywheel, ClutterFreeSpaces, Mobile Eats, ZestTube, and future proof-product
+repos.
+
+Required message fields:
+
+| Field | Purpose |
+|---|---|
+| `core_offer` | One plain-language sentence that names the bounded business outcome. |
+| `owner_promise` | The page-level promise in ZestStream voice. |
+| `voice_rules[]` | Editorial constraints that prevent AI hype and generic SaaS language. |
+| `story_arc[]` | The reusable page journey: recognize, bound, control, remember, act. |
+| `trust_objections[]` | The ten SMB objections the page must answer visibly. |
+| `visual_primitives[]` | Shared design objects the site must render, not merely describe. |
+| `proof_translation[]` | Mapping from commit/proof signals to owner-readable meaning. |
+| `nextjs_storytelling_targets[]` | The implementation affordances the Next.js foundation should inherit. |
+| `must_not_say[]` | Blocked language that sells the dream instead of showing proof. |
+
+The owner message is not a summary of commits. It is a packaging layer that
+answers a business question: "Why should I trust this person with my workflow?"
+
+## 2026 SMB Language Rules
+
+Current SMB adoption research points to the same useful language pattern:
+owners want time back, simpler operations, human approval, privacy clarity,
+training, and proof from businesses that look like theirs. They do not need a
+tour of the agent stack before they understand the offer.
+
+Use these translations:
+
+| Do not lead with | Lead with |
+|---|---|
+| autonomous agents | human-approved slices |
+| AI transformation | hours, follow-up, cash flow, and customer experience |
+| model/tool names | the manual workflow being fixed |
+| raw receipt counts | the control the receipt proves |
+| generic innovation | what changes in the owner's week |
+| everything integrated | one inspected workflow path |
+
+Source anchors reviewed for this wording:
+
+- Business.com 2026 Small Business AI Outlook: adoption is rising, but workers
+  still worry about reputation, over-implementation, and whether work stays
+  human-led.
+- inTandem/vcita 2026 SMB adoption report: SMB owners prefer AI that drafts,
+  suggests, organizes, and waits for approval before execution.
+- Connected Commerce Council 2026 SMB study: small-business leaders are
+  investing in AI training and adoption, with time savings and productivity as
+  the practical frame.
+- Dun & Bradstreet 2025 and 2026 AI data-quality research: trust depends on the
+  reliability, readiness, and governance of the data feeding AI systems.
 
 ## Copy Rule
 
@@ -95,17 +152,36 @@ For Next.js projects, these should live in the shared design foundation beside
 `OperatingRoomHero`, `WorkflowMap`, `SliceWorkbench`, `ProofRail`, and
 `YuzuMethodRail`.
 
+The same primitives should be package/global-config material. A project should
+not rediscover the ZestStream page grammar from scratch. New frontend repos
+should inherit:
+
+- shared design tokens for proof states, yuzu accents, owner-safe warning
+  colors, and room layouts;
+- shared React components for `OperatingRoomHero`, `WorkflowMap`,
+  `SliceWorkbench`, `ProofRail`, `TrustWorryMatrix`, `YuzuMethodRail`,
+  `TrajectoryRail`, and `ProofDrawer`;
+- shared Playwright screenshot gates that fail blank, overlapping, or
+  generic-card pages;
+- shared copy lint that rejects blocked phrases from `message_pack.must_not_say`;
+- a repo-local generated story artifact wired into the page, not manually
+  copied from the last session.
+
 ## Acceptance Gate
 
 A repo trajectory story is acceptable when:
 
 1. `scripts/extract_git_story.py --json` emits `zeststream.repo_git_story.v0`.
-2. Generated JSON and Markdown contain no private paths, client names, or
+2. Generated JSON includes `message_pack.schema_version` equal to
+   `zeststream.repo_story_message.v0`.
+3. The message pack contains owner promise, story arc, trust objections, visual
+   primitives, proof translations, and blocked phrases.
+4. Generated JSON and Markdown contain no private paths, client names, or
    unsupported claims.
-3. The public page includes the trajectory as a buyer journey, not a developer
+5. The public page includes the trajectory as a buyer journey, not a developer
    changelog.
-4. The page links to the generated story artifact for reviewers.
-5. Any claim based on runtime support, release status, or public availability
+6. The page links to the generated story artifact for reviewers.
+7. Any claim based on runtime support, release status, or public availability
    still points to its own proof receipt.
 
 Flywheel's current generated artifacts:

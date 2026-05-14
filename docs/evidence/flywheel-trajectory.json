@@ -1,7 +1,7 @@
 {
   "chapters": [
     {
-      "commit_count": 380,
+      "commit_count": 386,
       "evidence_commits": [
         {
           "date": "2026-05-06",
@@ -97,7 +97,7 @@
       "title": "Foundation: make the work visible"
     },
     {
-      "commit_count": 797,
+      "commit_count": 799,
       "evidence_commits": [
         {
           "date": "2026-05-06",
@@ -190,7 +190,7 @@
       "title": "Proof loop: turn activity into evidence"
     },
     {
-      "commit_count": 202,
+      "commit_count": 209,
       "evidence_commits": [
         {
           "date": "2026-05-13",
@@ -287,7 +287,7 @@
       "title": "Friction: expose the parts that were not ready"
     },
     {
-      "commit_count": 640,
+      "commit_count": 644,
       "evidence_commits": [
         {
           "date": "2026-05-13",
@@ -386,7 +386,7 @@
       "title": "Reuse: keep lessons that survived contact with reality"
     },
     {
-      "commit_count": 124,
+      "commit_count": 127,
       "evidence_commits": [
         {
           "date": "2026-05-13",
@@ -488,13 +488,189 @@
     },
     "first_date": "2026-04-30",
     "latest_commit": {
-      "sha": "b4d28c6b",
-      "subject": "fix(public): depersonalize repo mission surfaces [work item]"
+      "sha": "e9696376",
+      "subject": "docs(evidence): align trajectory artifacts with evidence contracts [work item]"
     },
     "latest_date": "2026-05-13",
-    "total_commits": 1471
+    "total_commits": 1478
   },
   "generated_date": "2026-05-14",
+  "message_pack": {
+    "audience": "SMB owner or buyer who wants safer AI adoption without becoming an AI tooling expert.",
+    "core_offer": "Map one workflow, improve one bounded slice, prove what changed, and carry the lesson into the next build.",
+    "must_not_say": [
+      "AI will transform your business",
+      "fully autonomous",
+      "set it and forget it",
+      "we have many commits, so trust us",
+      "all systems are supported without receipts"
+    ],
+    "nextjs_storytelling_targets": [
+      "App Router rooms for owner, method, developer, operator, and contact journeys",
+      "Server Components for proof manifests that should not ship private raw state to the browser",
+      "Suspense-backed proof drawers so the owner story renders before reviewer evidence",
+      "shared CSS/design tokens for proof states, yuzu method rails, and workflow maps",
+      "Playwright screenshot gates for mobile and desktop story quality"
+    ],
+    "owner_promise": "The operator helps SMB owners buy their time back by finding the manual work between systems, proving one safe slice, and keeping the lesson for the next project.",
+    "page_headline_options": [
+      "Buy back the time hiding between your tools.",
+      "Turn one messy workflow into one proven slice.",
+      "Make AI useful before you make it big."
+    ],
+    "primary_cta": "Map my workflow",
+    "proof_translation": [
+      {
+        "evidence_ref": "docs/stories/repo-trajectory.md",
+        "owner_meaning": "The story comes from the work that actually happened, not a fresh marketing claim.",
+        "technical_signal": "commit history"
+      },
+      {
+        "evidence_ref": "209 friction-matched commits",
+        "owner_meaning": "The process exposes what is not ready before it can affect the business.",
+        "technical_signal": "friction and blocker evidence"
+      },
+      {
+        "evidence_ref": "799 proof-loop-matched commits",
+        "owner_meaning": "Claims move forward only when the system can show what changed.",
+        "technical_signal": "receipts, tests, and proof-loop commits"
+      },
+      {
+        "evidence_ref": "644 reuse-matched commits",
+        "owner_meaning": "Lessons from one repo become reusable operating material for the next repo.",
+        "technical_signal": "runbooks, scripts, packages, and shared design grammar"
+      }
+    ],
+    "schema_version": "zeststream.repo_story_message.v0",
+    "secondary_cta": "Inspect the proof",
+    "source_story_schema": "zeststream.repo_git_story.v0",
+    "story_arc": [
+      {
+        "owner_question": "Is this about the mess I am actually dealing with?",
+        "stage": "recognize",
+        "visible_wording": "Your business already has the data. The work is just hidden between tools.",
+        "visual_cue": "A workflow map with disconnected systems and one highlighted manual route."
+      },
+      {
+        "owner_question": "How do we keep this from turning into a giant AI project?",
+        "stage": "bound",
+        "visible_wording": "A slice is one bounded workflow improvement: useful enough to feel, small enough to inspect, and clear enough to stop if the proof is not there.",
+        "visual_cue": "The selected slice is pulled out of the map and placed on a workbench."
+      },
+      {
+        "owner_question": "What keeps the system honest?",
+        "stage": "control",
+        "visible_wording": "If a claim is not proven, it stays blocked.",
+        "visual_cue": "A proof rail with proven, blocked, skipped-with-reason, and private states."
+      },
+      {
+        "owner_question": "Is this real method or just a nice page?",
+        "stage": "remember",
+        "visible_wording": "The repo history shows the pivots, blockers, and lessons that survived contact with reality.",
+        "visual_cue": "A trajectory rail that connects foundation, friction, proof loop, reuse, and current arc."
+      },
+      {
+        "owner_question": "What is the safe first step?",
+        "stage": "act",
+        "visible_wording": "Map one workflow before sending secrets, customer data, or system access.",
+        "visual_cue": "A safe intake room with redacted examples and a direct operator route."
+      }
+    ],
+    "trust_objections": [
+      {
+        "objection": "AI will make a mess.",
+        "proof_behavior": "The first slice must have a named boundary and stop condition.",
+        "visible_answer": "The map comes before automation."
+      },
+      {
+        "objection": "I will not know what changed.",
+        "proof_behavior": "Each claim links to evidence or stays blocked.",
+        "visible_answer": "Every slice has a proof rail."
+      },
+      {
+        "objection": "My data will leak.",
+        "proof_behavior": "Public proof is redacted, consented, generated, or replaced.",
+        "visible_answer": "Private work stays private."
+      },
+      {
+        "objection": "AI makes things up.",
+        "proof_behavior": "Unsupported claims show as blocked instead of becoming copy.",
+        "visible_answer": "Blocked is better than bluffing."
+      },
+      {
+        "objection": "This will replace people before it understands the work.",
+        "proof_behavior": "Human approval remains part of the workflow slice.",
+        "visible_answer": "The first slice is small on purpose."
+      },
+      {
+        "objection": "My tools already do not talk to each other.",
+        "proof_behavior": "Integration starts with one workflow path, not the whole company.",
+        "visible_answer": "The operating map starts with the disconnected tools the owner already uses."
+      },
+      {
+        "objection": "Every consultant has a framework.",
+        "proof_behavior": "Runbooks, tests, receipts, and blockers sit behind the story.",
+        "visible_answer": "The method is visible enough to inspect."
+      },
+      {
+        "objection": "AI changes too fast.",
+        "proof_behavior": "Tool claims require current receipts before promotion.",
+        "visible_answer": "Fast tools go through a controlled loop."
+      },
+      {
+        "objection": "If it fails, I will be stuck.",
+        "proof_behavior": "Failed proof does not become a public claim.",
+        "visible_answer": "Stop conditions are named up front."
+      },
+      {
+        "objection": "I do not want to become an AI expert.",
+        "proof_behavior": "Technical proof is available but not required to understand the offer.",
+        "visible_answer": "The owner approves the slice; the operator manages the machinery."
+      }
+    ],
+    "visual_primitives": [
+      {
+        "job": "Open inside the owner workflow instead of a generic SaaS hero.",
+        "name": "OperatingRoomHero"
+      },
+      {
+        "job": "Show systems, manual handoffs, and the selected slice boundary.",
+        "name": "WorkflowMap"
+      },
+      {
+        "job": "Show before state, bounded slice, proof state, and stop condition together.",
+        "name": "SliceWorkbench"
+      },
+      {
+        "job": "Keep evidence visible without making the SMB owner decode raw receipts.",
+        "name": "ProofRail"
+      },
+      {
+        "job": "Map owner objections to visible controls and evidence behavior.",
+        "name": "TrustWorryMatrix"
+      },
+      {
+        "job": "Repeat Peel, Press, Pour as map, prove, and reuse.",
+        "name": "YuzuMethodRail"
+      },
+      {
+        "job": "Translate git history into origin, friction, proof loop, reuse, and current arc.",
+        "name": "TrajectoryRail"
+      },
+      {
+        "job": "Let reviewers inspect generated artifacts after the owner story lands.",
+        "name": "ProofDrawer"
+      }
+    ],
+    "voice_rules": [
+      "sell outcomes, not tools",
+      "name the owner worry before naming the machinery",
+      "show proof without forcing the owner to read raw receipts",
+      "prefer human-led control language over autonomous-agent hype",
+      "make blockers visible because hidden risk is the trust killer",
+      "treat cash flow, time, follow-up, and customer experience as stronger language than AI novelty"
+    ]
+  },
   "owner_story": {
     "cta_copy": "Inspect the trajectory",
     "headline": "Flywheel has a history, not just a homepage.",

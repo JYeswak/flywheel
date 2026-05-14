@@ -17,9 +17,9 @@ friction, what changed, and which lessons became reusable.
 
 - First commit date: `2026-04-30`
 - Latest commit date: `2026-05-13`
-- Commits inspected: `1471`
+- Commits inspected: `1478`
 - First commit: `aa079a83` feat(scripts): add source_repo backfill script for all local beads DBs
-- Latest commit: `b4d28c6b` fix(public): depersonalize repo mission surfaces [work item]
+- Latest commit: `e9696376` docs(evidence): align trajectory artifacts with evidence contracts [work item]
 
 ## Public Story Arc
 
@@ -29,7 +29,7 @@ The first useful proof is not a polished page. It is a workbench where the goal,
 
 Owner translation: For an SMB owner, this means the project starts by mapping how work really moves before anyone promises automation.
 
-Commit evidence: `380` matching commits from `2026-04-30` to `2026-05-13`.
+Commit evidence: `386` matching commits from `2026-04-30` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -45,7 +45,7 @@ The system moved from work being described after the fact to work being closed w
 
 Owner translation: That is the difference between an AI demo and an operating process: the claim does not move forward until the proof can follow it.
 
-Commit evidence: `797` matching commits from `2026-04-30` to `2026-05-13`.
+Commit evidence: `799` matching commits from `2026-04-30` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -61,7 +61,7 @@ The useful pivots came from red evidence: private residue, unsupported lanes, st
 
 Owner translation: This is where trust is earned. The process treats blocked evidence as useful signal, not as something to hide in a footnote.
 
-Commit evidence: `202` matching commits from `2026-05-04` to `2026-05-13`.
+Commit evidence: `209` matching commits from `2026-05-04` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -77,7 +77,7 @@ Once a pattern worked, it moved into runbooks, scripts, tests, docs, shared lang
 
 Owner translation: Every project should make the next project safer and faster. That is the compounding part of the Flywheel.
 
-Commit evidence: `640` matching commits from `2026-04-30` to `2026-05-13`.
+Commit evidence: `644` matching commits from `2026-04-30` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -93,7 +93,7 @@ The current arc is making the proof understandable to a non-technical owner: wha
 
 Owner translation: Show the proof, not the dream: one bounded workflow slice, one visible control path, one lesson that compounds into the next build.
 
-Commit evidence: `124` matching commits from `2026-05-04` to `2026-05-13`.
+Commit evidence: `127` matching commits from `2026-05-04` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -102,6 +102,39 @@ Commit evidence: `124` matching commits from `2026-05-04` to `2026-05-13`.
 | 2026-05-13 | `b41544ba` | docs(site): require SMB journey wireframe |
 | 2026-05-13 | `3eba30b9` | test(ci): add local actions gate and SMB journey reset |
 | 2026-05-13 | `def16c98` | feat(site): rebuild SMB operating-room hero [work item] |
+
+## Owner-Facing Message Pack
+
+Schema: `zeststream.repo_story_message.v0`
+
+Core offer: Map one workflow, improve one bounded slice, prove what changed, and carry the lesson into the next build.
+
+Owner promise: The operator helps SMB owners buy their time back by finding the manual work between systems, proving one safe slice, and keeping the lesson for the next project.
+
+Primary CTA: `Map my workflow`
+
+The reusable story arc for this repo is:
+
+| Stage | Visible wording | Visual cue |
+|---|---|---|
+| recognize | Your business already has the data. The work is just hidden between tools. | A workflow map with disconnected systems and one highlighted manual route. |
+| bound | A slice is one bounded workflow improvement: useful enough to feel, small enough to inspect, and clear enough to stop if the proof is not there. | The selected slice is pulled out of the map and placed on a workbench. |
+| control | If a claim is not proven, it stays blocked. | A proof rail with proven, blocked, skipped-with-reason, and private states. |
+| remember | The repo history shows the pivots, blockers, and lessons that survived contact with reality. | A trajectory rail that connects foundation, friction, proof loop, reuse, and current arc. |
+| act | Map one workflow before sending secrets, customer data, or system access. | A safe intake room with redacted examples and a direct operator route. |
+
+Required visual primitives:
+
+| Primitive | Job |
+|---|---|
+| `OperatingRoomHero` | Open inside the owner workflow instead of a generic SaaS hero. |
+| `WorkflowMap` | Show systems, manual handoffs, and the selected slice boundary. |
+| `SliceWorkbench` | Show before state, bounded slice, proof state, and stop condition together. |
+| `ProofRail` | Keep evidence visible without making the SMB owner decode raw receipts. |
+| `TrustWorryMatrix` | Map owner objections to visible controls and evidence behavior. |
+| `YuzuMethodRail` | Repeat Peel, Press, Pour as map, prove, and reuse. |
+| `TrajectoryRail` | Translate git history into origin, friction, proof loop, reuse, and current arc. |
+| `ProofDrawer` | Let reviewers inspect generated artifacts after the owner story lands. |
 
 ## Use On The Public Site
 

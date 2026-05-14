@@ -96,6 +96,7 @@ for rel in \
   docs/concepts/socraticode.md \
   "$SKILLOS_BOUNDARY_DOC" \
   docs/concepts/evidence-contracts.md \
+  docs/brand/naming-conventions.md \
   docs/evidence/publication-evidence.md \
   docs/evidence/publication-blocker-coverage.md \
   docs/evidence/private-review-signoff-packet.md \
@@ -126,6 +127,11 @@ require_literal "docs/concepts/agent-mail.md" "file reservations" "agent mail co
 require_literal "docs/concepts/socraticode.md" "search first, patch second" "socraticode concept names search discipline"
 require_literal "$SKILLOS_BOUNDARY_DOC" "Flywheel owns public installability" "capability boundary concept names Flywheel ownership"
 require_literal "docs/concepts/evidence-contracts.md" "Public copy must follow the evidence." "evidence concept names copy discipline"
+require_literal "docs/brand/naming-conventions.md" "Yuzu Method" "naming doc defines Yuzu Method"
+require_literal "docs/brand/naming-conventions.md" "Flywheel remains the engine and" "naming doc preserves Flywheel namespace"
+require_literal "docs/brand/naming-conventions.md" "Domain-collision" "naming doc requires domain-collision protection"
+require_literal "docs/brand/naming-conventions.md" "Rename Gate" "naming doc includes rename gate"
+require_literal "docs/concepts/evidence-contracts.md" "docs/brand/naming-conventions.md" "evidence concept names naming contract"
 require_literal "README.md" "docs/evidence/publication-evidence.md" "README links publication evidence index"
 require_literal "docs/evidence/publication-evidence.md" "Live Evidence Still Required" "publication evidence names live evidence boundary"
 require_literal "docs/evidence/publication-evidence.md" "remote_repo_private" "publication evidence includes remote repo blocker"
@@ -141,7 +147,10 @@ require_literal "docs/evidence/private-review-signoff-packet.md" "docs/stories/f
 require_literal "docs/evidence/private-review-signoff-packet.md" "remote_repo_private" "private review packet names public blockers"
 require_literal "docs/evidence/private-review-signoff-packet.md" "Not granted by this packet" "private review packet separates private and public approval"
 require_literal "docs/evidence/flywheel-trajectory.json" "zeststream.repo_git_story.v0" "trajectory evidence names schema"
+require_literal "docs/evidence/flywheel-trajectory.json" "zeststream.repo_story_message.v0" "trajectory evidence embeds owner message pack"
 require_literal "docs/evidence/flywheel-trajectory.json" "show proof, do not sell the dream" "trajectory evidence names copy rule"
+require_literal "docs/evidence/flywheel-trajectory.json" "Buy back the time hiding between your tools." "trajectory evidence names SMB headline option"
+require_literal "docs/evidence/flywheel-trajectory.json" "AI will make a mess." "trajectory evidence names owner objection"
 require_literal "docs/evidence/publication-blocker-coverage.md" "readiness_blocker_coverage" "blocker coverage names registry contract"
 require_literal "docs/evidence/publication-blocker-coverage.md" "joshua_release_signoff_missing" "blocker coverage includes final signoff blocker"
 require_literal "docs/evidence/publication-goal-completion-audit.md" "Prompt-To-Artifact Checklist" "goal completion audit maps prompt to artifacts"
@@ -209,9 +218,20 @@ require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Map my wor
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Implementation should not be accepted if tests pass while the page still feels" "SMB wireframe prevents generic-page acceptance"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Implementation should not be accepted if the page can pass tests while still failing this journey." "SMB wireframe prevents tests-only acceptance"
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "zeststream.repo_git_story_pack.v0" "repo trajectory pack names schema"
+require_literal "docs/runbooks/repo-trajectory-story-pack.md" "zeststream.repo_story_message.v0" "repo trajectory pack names message schema"
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "Show the proof, do not sell the dream." "repo trajectory pack names editorial rule"
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "For another repo" "repo trajectory pack is reusable"
+require_literal "docs/runbooks/repo-trajectory-story-pack.md" "trust_objections[]" "repo trajectory pack requires trust objections"
+require_literal "docs/runbooks/repo-trajectory-story-pack.md" "visual_primitives[]" "repo trajectory pack requires visual primitives"
+require_literal "docs/runbooks/repo-trajectory-story-pack.md" "generic SaaS language" "repo trajectory pack blocks generic SaaS language"
+require_literal "docs/runbooks/repo-trajectory-story-pack.md" "human-approved slices" "repo trajectory pack uses owner-control language"
+require_literal "docs/runbooks/repo-trajectory-story-pack.md" "shared React components" "repo trajectory pack targets reusable frontend components"
+require_literal "docs/runbooks/repo-trajectory-story-pack.md" "ClutterFreeSpaces" "repo trajectory pack applies beyond Flywheel"
+require_literal "docs/runbooks/repo-trajectory-story-pack.md" "Mobile Eats" "repo trajectory pack applies to Mobile Eats"
 require_literal "docs/stories/flywheel-trajectory.md" "Flywheel has a history, not just a homepage." "generated trajectory names owner headline"
+require_literal "docs/stories/flywheel-trajectory.md" "Owner-Facing Message Pack" "generated trajectory includes owner message pack"
+require_literal "docs/stories/flywheel-trajectory.md" "Map my workflow" "generated trajectory includes owner CTA"
+require_literal "docs/stories/flywheel-trajectory.md" "OperatingRoomHero" "generated trajectory includes visual primitive"
 require_literal "docs/stories/flywheel-trajectory.md" "show the proof, do not sell the dream" "generated trajectory names proof-not-dream rule"
 require_literal "docs/runbooks/local-actions-preflight.md" "GitHub Actions as the final hosted-runner approval surface" "local actions runbook preserves GitHub final approval boundary"
 require_literal "docs/runbooks/local-actions-preflight.md" "brew install act actionlint" "local actions runbook names global open-source tools"
@@ -257,7 +277,10 @@ require_literal "docs/reference/commands.md" "scripts/live_site_probe.py" "comma
 require_literal "docs/reference/commands.md" "scripts/validate_cutover_receipts.py" "command reference includes cutover receipt validation"
 require_literal "docs/reference/commands.md" "scripts/validate_user_journey_pack.py" "command reference includes user journey validation"
 require_literal "docs/reference/commands.md" "scripts/extract_git_story.py" "command reference includes git story extraction"
+require_literal "docs/reference/commands.md" "zeststream.repo_story_message.v0" "command reference names story message pack"
 require_literal "docs/reference/files.md" ".flywheel/last_closeout_receipt.json" "file reference includes closeout receipt"
+require_literal "docs/reference/files.md" "docs/brand/naming-conventions.md" "file reference includes naming contract"
+require_literal "docs/reference/files.md" "zeststream.repo_story_message.v0" "file reference names story message pack"
 require_literal "docs/reference/files.md" "receipts/agent-lanes/<lane>.json" "file reference includes agent-lane receipts"
 require_literal "docs/reference/files.md" "flywheel.agent_lane_blocker_receipt.v0" "file reference includes blocked agent-lane receipt schema"
 require_literal "docs/reference/files.md" "scripts/isolated-agent-lane-smoke.sh" "file reference includes isolated lane smoke"

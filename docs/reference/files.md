@@ -17,13 +17,14 @@ Flywheel keeps public state repo-local.
 | `scripts/live_site_probe.py` | First-party deployed site page and asset probe. |
 | `scripts/validate_cutover_receipts.py` | Saved release cutover receipt bundle verifier. |
 | `scripts/validate_user_journey_pack.py` | Public user journey pack verifier. |
-| `scripts/extract_git_story.py` | Git-history trajectory extractor for public story evidence. |
+| `scripts/extract_git_story.py` | Git-history trajectory and owner message-pack extractor for public story evidence. |
 | `receipts/agent-lanes/<lane>.json` | Strict `flywheel.agent_lane_runtime_receipt.v0` proof before an agent lane can move from compatibility target to supported copy, or `flywheel.agent_lane_blocker_receipt.v0` evidence naming why the lane remains blocked. |
+| `docs/brand/naming-conventions.md` | Public naming contract separating ZestStream, the Yuzu Method, Flywheel, SkillOS, upstream substrate, and proof surfaces. |
 | `docs/evidence/publication-evidence.md` | Public trust-claim evidence index. |
 | `docs/evidence/publication-blocker-coverage.md` | Public blocker-code ownership and closure-proof map. |
 | `docs/evidence/private-review-signoff-packet.md` | Human private-review packet that maps site, story, evidence, developer path, agent-lane proof, and remaining public blockers without granting public release approval. |
 | `docs/evidence/publication-goal-completion-audit.md` | Prompt-to-artifact audit for the active publication goal and remaining release blockers. |
-| `docs/evidence/flywheel-trajectory.json` | Machine-readable `zeststream.repo_git_story.v0` trajectory evidence generated from git history. |
+| `docs/evidence/flywheel-trajectory.json` | Machine-readable `zeststream.repo_git_story.v0` trajectory evidence with embedded `zeststream.repo_story_message.v0` owner message pack. |
 | `docs/evidence/external-review-log.jsonl` | Sanitized external-review evidence used by the public release workflow. |
 | `docs/stories/flywheel-trajectory.md` | Owner-readable generated trajectory story for reviewers and the public site. |
 | `docs/getting-started/first-run.md` | First-run guide. |
