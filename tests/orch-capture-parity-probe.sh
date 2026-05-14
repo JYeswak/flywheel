@@ -49,6 +49,12 @@ EOF
   cat >"$dir/settings.json" <<'EOF'
 {"hooks":{"UserPromptSubmit":[{"matcher":"*","hooks":[{"type":"command","command":"$HOME/.claude/hooks/josh-request-capture.sh"}]}]}}
 EOF
+  cat >"$dir/wezterm.json" <<'EOF'
+[
+  {"window_id":1,"tab_id":1,"pane_id":22,"title":"stale-codex","cwd":"file:///tmp/stale-codex/","tty_name":"/dev/ttys022","is_active":true},
+  {"window_id":2,"tab_id":2,"pane_id":23,"title":"notes","cwd":"file:///tmp/notes/","tty_name":"/dev/ttys023","is_active":true}
+]
+EOF
 }
 
 write_duplicate_fixture() {
@@ -80,6 +86,7 @@ make_repo() {
 fixture="$TMP/fixture"
 write_fixture "$fixture"
 export FLYWHEEL_CLAUDE_SETTINGS="$fixture/settings.json"
+export FLYWHEEL_ORCH_CAPTURE_WEZTERM=0
 
 schema_out="$TMP/schema.json"
 python3 "$PROBE" --schema --json >"$schema_out"
@@ -95,11 +102,12 @@ python3 "$PROBE" \
   --josh-requests "$fixture/josh-requests.jsonl" \
   --coordination-log "$fixture/coordination.jsonl" \
   --team-roster "$fixture/team-roster.jsonl" \
+  --wezterm-list "$fixture/wezterm.json" \
   --now "2026-05-04T00:00:00Z" \
   --stale-hours 24 \
   --json >"$probe_out"
 
-assert_jq "$probe_out" '(.rows | length == 7) and all(.rows[]; has("session") and has("pane") and has("runtime") and has("participation_state") and has("capture_path") and has("last_capture_ts") and has("last_josh_input_seen_ts") and has("gap_reason") and has("evidence_refs") and has("team_roster_event") and has("team_roster_participation"))' "B13_AG1 probe emits required row fields"
+assert_jq "$probe_out" '(.rows | length == 7) and all(.rows[]; has("session") and has("pane") and has("runtime") and has("participation_state") and has("capture_path") and has("last_capture_ts") and has("last_josh_input_seen_ts") and has("gap_reason") and has("evidence_refs") and has("team_roster_event") and has("team_roster_participation") and has("wezterm_live") and has("wezterm_panes"))' "B13_AG1 probe emits required row fields"
 assert_jq "$probe_out" '.rows[] | select(.session == "flywheel" and .runtime == "claude" and .participation_state == "captured")' "B13_AG2 Claude hook capture present fixture"
 assert_jq "$probe_out" '.active_owner_bead == "flywheel-vk9ox" and all(.approved_remediation_tracks[]; .owner_bead == "flywheel-vk9ox" and .supersedes_owner_bead == "flywheel-xap2")' "B13_AG7 remediation tracks route to active owner"
 assert_jq "$probe_out" '.rows[] | select(.session == "{proof-product}" and .runtime == "codex" and .participation_state == "capture_gap" and .gap_reason == "missing_canonical_capture")' "B13_AG2 Codex capture missing fixture"
@@ -107,6 +115,7 @@ assert_jq "$probe_out" '.rows[] | select(.session == "{capability-control-plane}
 assert_jq "$probe_out" '.rows[] | select(.session == "legacy-shell" and .participation_state == "non_participating")' "B13_AG2 explicit non-participating runtime fixture"
 assert_jq "$probe_out" '.rows[] | select(.session == "dormant-codex" and .participation_state == "non_participating" and .gap_reason == "team_roster_session_dormant" and .team_roster_participation == "dormant")' "B13_AG2 dormant roster runtime fixture"
 assert_jq "$probe_out" '.rows[] | select(.session == "stale-codex" and .participation_state == "stale_capture" and .gap_reason == "stale_capture_row")' "B13_AG2 stale capture fixture"
+assert_jq "$probe_out" '(.wezterm_visibility.source == "fixture") and any(.rows[]; .session == "stale-codex" and .wezterm_live == true and .wezterm_panes[0].pane_id == 22)' "B13_AG9 WezTerm live visibility is exposed but not capture proof"
 assert_jq "$probe_out" '.rows[] | select(.session == "scrollback-codex" and .gap_reason == "pane_scrollback_not_canonical_capture")' "B13_AG4 pane scrollback alone rejected"
 assert_jq "$probe_out" '.approved_remediation_tracks | length == 3 and any(.[]; .track == "primary_agent_mail_cross_orch_route") and any(.[]; .track == "secondary_ntm_send_wrapper_capture") and any(.[]; .track == "tertiary_pane_tail_poller" and has("fragility_note"))' "B13_AG5 dry-run remediation tracks"
 assert_jq "$probe_out" '.capture_substrate.status == "pass" and .capture_substrate.claude_user_prompt_submit_hook_registered == true and .capture_substrate.latest_capture_ts == "2026-05-03T23:30:00Z"' "B13_AG9 capture substrate reports hook and log freshness"

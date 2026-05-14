@@ -6,6 +6,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import subprocess
+import urllib.parse
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -91,6 +93,18 @@ def read_json(path: Path) -> dict[str, Any] | None:
     return data if isinstance(data, dict) else None
 
 
+def read_json_array(path: Path) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    try:
+        data = json.loads(path.read_text(errors="replace"))
+    except json.JSONDecodeError:
+        return []
+    if not isinstance(data, list):
+        return []
+    return [item for item in data if isinstance(item, dict)]
+
+
 def user_prompt_submit_hook_registered(settings: dict[str, Any] | None) -> bool:
     if not settings:
         return False
@@ -110,6 +124,88 @@ def user_prompt_submit_hook_registered(settings: dict[str, Any] | None) -> bool:
             if "josh-request-capture.sh" in command:
                 return True
     return False
+
+
+def path_from_wezterm_cwd(value: Any) -> str:
+    text = str(value or "")
+    if text.startswith("file://"):
+        parsed = urllib.parse.urlparse(text)
+        return urllib.parse.unquote(parsed.path)
+    return text
+
+
+def wezterm_matches_session(pane: dict[str, Any], session: str) -> bool:
+    session_lc = session.lower()
+    title = str(pane.get("title") or pane.get("window_title") or "").lower()
+    tab_title = str(pane.get("tab_title") or "").lower()
+    cwd = path_from_wezterm_cwd(pane.get("cwd")).lower()
+    return (
+        session_lc in title
+        or session_lc in tab_title
+        or cwd.endswith(f"/{session_lc}")
+        or f"/{session_lc}/" in cwd
+        or (session_lc == "flywheel" and ("/.flywheel" in cwd or ".flywheel" in title))
+    )
+
+
+def summarize_wezterm_pane(pane: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "pane_id": pane.get("pane_id"),
+        "window_id": pane.get("window_id"),
+        "tab_id": pane.get("tab_id"),
+        "title": pane.get("title") or pane.get("window_title") or "",
+        "cwd": path_from_wezterm_cwd(pane.get("cwd")),
+        "tty_name": pane.get("tty_name"),
+        "is_active": bool(pane.get("is_active")),
+    }
+
+
+def load_wezterm_panes(path: Path | None, *, enabled: bool, timeout_seconds: float) -> tuple[str, list[dict[str, Any]], list[dict[str, Any]]]:
+    if path is not None:
+        return ("fixture", read_json_array(path), [])
+    if not enabled:
+        return ("disabled", [], [])
+    try:
+        proc = subprocess.run(
+            ["wezterm", "cli", "list", "--format", "json"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=timeout_seconds,
+        )
+    except FileNotFoundError:
+        return (
+            "unavailable",
+            [],
+            [{"code": "wezterm_unavailable", "message": "wezterm binary not found"}],
+        )
+    except subprocess.TimeoutExpired:
+        return (
+            "timeout",
+            [],
+            [{"code": "wezterm_list_timeout", "message": "wezterm cli list timed out"}],
+        )
+    if proc.returncode != 0:
+        return (
+            "error",
+            [],
+            [{"code": "wezterm_list_failed", "message": (proc.stderr or "").strip()[:240]}],
+        )
+    try:
+        data = json.loads(proc.stdout)
+    except json.JSONDecodeError:
+        return (
+            "invalid_json",
+            [],
+            [{"code": "wezterm_list_invalid_json", "message": "wezterm cli list returned invalid JSON"}],
+        )
+    if not isinstance(data, list):
+        return (
+            "invalid_shape",
+            [],
+            [{"code": "wezterm_list_invalid_shape", "message": "wezterm cli list did not return an array"}],
+        )
+    return ("wezterm", [item for item in data if isinstance(item, dict)], [])
 
 
 def latest_topology_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -332,6 +428,7 @@ def classify_row(
     request_path: Path,
     team_roster_path: Path,
     team_roster_row: dict[str, Any] | None,
+    wezterm_panes: list[dict[str, Any]],
     capture_rows: list[dict[str, Any]],
     coord_seen_ts: datetime | None,
     stale_cutoff: datetime,
@@ -342,6 +439,7 @@ def classify_row(
     team_roster_event = roster_event(team_roster_row)
     team_roster_participation = roster_participation(team_roster_row)
     capture_ts = latest_capture_ts(capture_rows)
+    matching_wezterm_panes = [summarize_wezterm_pane(pane) for pane in wezterm_panes if wezterm_matches_session(pane, session)]
     duplicate_rows = duplicate_groups(capture_rows)
     last_seen = max([ts for ts in [capture_ts, coord_seen_ts] if ts is not None], default=None)
     evidence_refs: list[str] = []
@@ -395,6 +493,8 @@ def classify_row(
         "duplicate_capture_groups": duplicate_rows,
         "team_roster_event": team_roster_event,
         "team_roster_participation": team_roster_participation,
+        "wezterm_live": bool(matching_wezterm_panes),
+        "wezterm_panes": matching_wezterm_panes,
         "remediation_options": APPROVED_REMEDIATION_TRACKS if state in {"capture_gap", "stale_capture"} else [],
     }
 
@@ -414,6 +514,8 @@ def schema_payload() -> dict[str, Any]:
             "evidence_refs",
             "team_roster_event",
             "team_roster_participation",
+            "wezterm_live",
+            "wezterm_panes",
         ],
         "participation_state_enum": ["captured", "capture_gap", "stale_capture", "non_participating"],
         "gap_reason_examples": [
@@ -448,6 +550,8 @@ def main() -> int:
     parser.add_argument("--coordination-log", default=os.environ.get("FLYWHEEL_CROSS_ORCH_COORDINATION_LOG", "~/.local/state/flywheel/cross-orch-coordination.jsonl"))
     parser.add_argument("--team-roster", default=os.environ.get("TEAM_ROSTER", "~/.local/state/flywheel/team-roster.jsonl"))
     parser.add_argument("--claude-settings", default=os.environ.get("FLYWHEEL_CLAUDE_SETTINGS", "~/.claude/settings.json"))
+    parser.add_argument("--wezterm-list", default=os.environ.get("FLYWHEEL_ORCH_CAPTURE_WEZTERM_LIST"))
+    parser.add_argument("--disable-wezterm", action="store_true")
     parser.add_argument("--stale-hours", type=float, default=float(os.environ.get("FLYWHEEL_ORCH_CAPTURE_STALE_HOURS", "24")))
     parser.add_argument("--now")
     parser.add_argument("--doctor", action="store_true")
@@ -469,6 +573,7 @@ def main() -> int:
     coord_path = Path(os.path.expanduser(args.coordination_log)).resolve()
     team_roster_path = Path(os.path.expanduser(args.team_roster)).resolve()
     claude_settings_path = Path(os.path.expanduser(args.claude_settings)).resolve()
+    wezterm_list_path = Path(os.path.expanduser(args.wezterm_list)).resolve() if args.wezterm_list else None
     now = parse_ts(args.now) if args.now else utc_now()
     assert now is not None
     stale_cutoff = now - timedelta(hours=args.stale_hours)
@@ -478,12 +583,19 @@ def main() -> int:
     requests_by_session = capture_rows_by_session(request_rows)
     coord_seen = coord_ts_by_session(read_jsonl(coord_path))
     roster_by_session = latest_team_roster_rows(read_jsonl(team_roster_path))
+    wezterm_enabled = not args.disable_wezterm and os.environ.get("FLYWHEEL_ORCH_CAPTURE_WEZTERM", "1") != "0"
+    wezterm_source, wezterm_panes, wezterm_warnings = load_wezterm_panes(
+        wezterm_list_path,
+        enabled=wezterm_enabled,
+        timeout_seconds=float(os.environ.get("FLYWHEEL_ORCH_CAPTURE_WEZTERM_TIMEOUT_SECONDS", "2")),
+    )
     rows = [
         classify_row(
             topo,
             request_path=request_path,
             team_roster_path=team_roster_path,
             team_roster_row=roster_by_session.get(str(topo.get("session"))),
+            wezterm_panes=wezterm_panes,
             capture_rows=requests_by_session.get(str(topo.get("session")), []),
             coord_seen_ts=coord_seen.get(str(topo.get("session"))),
             stale_cutoff=stale_cutoff,
@@ -508,6 +620,12 @@ def main() -> int:
         "team_roster_path": str(team_roster_path),
         "claude_settings_path": str(claude_settings_path),
         "capture_substrate": capture_substrate,
+        "wezterm_visibility": {
+            "source": wezterm_source,
+            "enabled": wezterm_enabled or wezterm_list_path is not None,
+            "pane_count": len(wezterm_panes),
+            "warnings": wezterm_warnings,
+        },
         "checked_orchestrators_count": len(rows),
         "orchs_with_capture_gap_count": len(gap_rows),
         "rows": rows,
