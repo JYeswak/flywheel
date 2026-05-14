@@ -24,7 +24,8 @@
 #   FQ-06 Motion safety: prefers-reduced-motion respected
 #   FQ-07 Accessibility: aria-label on interactive elements
 #   FQ-08 Proof states: ProofRail or equivalent in public-facing content
-#   FQ-09 Story system: story-system.json or @zeststream/story-system linked
+#   FQ-09 Story system: story-system.json or @zeststream/story-system linked,
+#         plus generated trajectory and owner brief artifacts
 #   FQ-10 Package.json: @zeststream/* packages declared
 #
 # Jeff Emanuel design principle: every check produces a machine-readable number.
@@ -68,6 +69,20 @@ find_first_file() {
       -o -path "*/node_modules/*" -o -path "*/.next/*" -o -path "*/dist/*" \
       -o -path "*/build/*" -o -path "*/coverage/*" \) -prune \
     -o -type f -name "$name" -print \
+    | head -1
+}
+
+find_first_name_match() {
+  local base="$1"
+  local pattern="$2"
+  if [[ ! -d "$base" ]]; then
+    return 0
+  fi
+  find "$base" \
+    \( -path "*/.git/*" -o -path "*/.flywheel/*" -o -path "*/.ntm/*" \
+      -o -path "*/node_modules/*" -o -path "*/.next/*" -o -path "*/dist/*" \
+      -o -path "*/build/*" -o -path "*/coverage/*" \) -prune \
+    -o -type f -name "$pattern" -print \
     | head -1
 }
 
@@ -244,17 +259,24 @@ else
   check "FQ-08" "Proof states / evidence surfaces" "warn" "No ProofRail or proof states - claims are ungrounded"
 fi
 
-# ── FQ-09 Story system linked ─────────────────────────────────────────────
+# ── FQ-09 Story system linked with generated owner brief ──────────────────
 story_hit=$(find_first_file "$REPO" "story-system.json")
-if [[ -n "$story_hit" ]]; then
-  check "FQ-09" "Story system linked" "pass" "$story_hit"
-else
+story_dep=""
+if [[ -z "$story_hit" ]]; then
   story_dep=$(grep "@zeststream/story-system\|story-system" "$REPO/package.json" 2>/dev/null | head -1 || true)
-  if [[ -n "$story_dep" ]]; then
-    check "FQ-09" "Story system linked" "pass" "Dependency declared: @zeststream/story-system"
+fi
+if [[ -n "$story_hit" || -n "$story_dep" ]]; then
+  trajectory_artifact=$(find_first_name_match "$REPO" "*trajectory.json")
+  owner_brief_artifact=$(find_first_name_match "$REPO" "*owner-brief.json")
+  if [[ -n "$trajectory_artifact" && -n "$owner_brief_artifact" ]] \
+    && grep -q "zeststream.repo_owner_story_brief.v0" "$owner_brief_artifact" 2>/dev/null; then
+    story_detail="${story_hit:-Dependency declared: @zeststream/story-system}; trajectory=$trajectory_artifact; owner_brief=$owner_brief_artifact"
+    check "FQ-09" "Story system linked" "pass" "$story_detail"
   else
-    check "FQ-09" "Story system linked" "warn" "No story-system.json - brand voice and proof taxonomy undefined"
+    check "FQ-09" "Story system linked" "fail" "Story system is linked, but generated trajectory JSON and zeststream.repo_owner_story_brief.v0 are required before public frontend work can pass"
   fi
+else
+  check "FQ-09" "Story system linked" "warn" "No story-system.json - brand voice and proof taxonomy undefined"
 fi
 
 # ── FQ-10 ZestStream packages declared OR hosted ──────────────────────────
@@ -264,7 +286,7 @@ fi
 # Updated 2026-05-14 after flywheel false-warned despite hosting the packages.
 zs_pkg_file="${NEXT_APP:-$REPO}/package.json"
 zs_packages=$(num "$(grep -c "@zeststream" "$zs_pkg_file" 2>/dev/null || true)")
-zs_hosted=$(num "$(ls -d "$REPO"/packages/zeststream-* 2>/dev/null | wc -l)")
+zs_hosted=$(num "$(find "$REPO/packages" -maxdepth 1 -type d -name "zeststream-*" 2>/dev/null | wc -l)")
 if [[ "$zs_packages" -gt 0 ]]; then
   check "FQ-10" "@zeststream/* packages declared" "pass" "${zs_packages} package(s) consumed"
 elif [[ "$zs_hosted" -gt 0 ]]; then

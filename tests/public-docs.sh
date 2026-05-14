@@ -300,7 +300,7 @@ require_literal "docs/runbooks/public-release-runbook.md" "bash tests/zeststream
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/zeststream-motion-package.sh" "release runbook includes motion package gate"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/repo-story-portability.sh" "release runbook includes repo story portability gate"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/repo-owner-brief.sh" "release runbook includes repo owner brief gate"
-require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=18 fail=0" "release runbook names UI package verifier count"
+require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=19 fail=0" "release runbook names UI package verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=20 fail=0" "release runbook names motion package verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=6 fail=0" "release runbook names repo story portability count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=8 fail=0" "release runbook names repo owner brief count"

@@ -42,6 +42,7 @@ require_literal "packages/zeststream-ui/package.json" "./trust-worry-matrix" "ui
 require_literal "packages/zeststream-ui/src/index.ts" "TrustWorryMatrix" "ui index exports trust worry matrix"
 require_literal "packages/zeststream-ui/src/components/TrustWorryMatrix.tsx" "visibleAnswer" "trust matrix carries owner-visible answer"
 require_literal "scripts/zs-frontend-quality-gate.sh" "zs-frontend-quality-gate/v1" "frontend gate emits schema"
+require_literal "scripts/zs-frontend-quality-gate.sh" "zeststream.repo_owner_story_brief.v0" "frontend gate requires owner brief evidence"
 
 if python3 - "$ROOT" <<'PY'
 import json
@@ -67,7 +68,7 @@ else
 fi
 
 GOOD="$TMP/good-next"
-mkdir -p "$GOOD/app" "$GOOD/components" "$GOOD/lib/design" "$GOOD/lib"
+mkdir -p "$GOOD/app" "$GOOD/components" "$GOOD/lib/design" "$GOOD/lib" "$GOOD/docs/evidence"
 cat >"$GOOD/package.json" <<'JSON'
 {
   "dependencies": {
@@ -131,6 +132,17 @@ export const copy = {
   cta: "Map my workflow",
 }
 TS
+cat >"$GOOD/docs/evidence/repo-trajectory.json" <<'JSON'
+{
+  "schema_version": "zeststream.repo_git_story.v0"
+}
+JSON
+cat >"$GOOD/docs/evidence/repo-owner-brief.json" <<'JSON'
+{
+  "schema_version": "zeststream.repo_owner_story_brief.v0",
+  "primary_cta": "Map my workflow"
+}
+JSON
 
 if "$ROOT/scripts/zs-frontend-quality-gate.sh" --repo "$GOOD" --json >"$TMP/good.json" \
   && jq -e '.status == "pass" and .pass == 10 and .fail == 0 and .warn == 0' "$TMP/good.json" >/dev/null; then
@@ -169,7 +181,7 @@ else
 fi
 
 if "$ROOT/scripts/zs-frontend-quality-gate.sh" --repo "$ROOT" --json >"$TMP/flywheel.json" \
-  && jq -e '.status == "warn" and .fail == 0 and any(.results[]; .id == "FQ-09" and (.detail | contains("packages/zeststream-story-system/story-system.json")))' "$TMP/flywheel.json" >/dev/null; then
+  && jq -e '.status == "pass" and .fail == 0 and any(.results[]; .id == "FQ-09" and (.detail | contains("packages/zeststream-story-system/story-system.json")) and (.detail | contains("flywheel-owner-brief.json")))' "$TMP/flywheel.json" >/dev/null; then
   pass "frontend quality gate prunes private extraction state"
 else
   fail "frontend quality gate prunes private extraction state"
