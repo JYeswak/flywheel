@@ -11,7 +11,9 @@
  * abstract process legible as a sequence the owner can see themselves moving
  * through.
  *
- * The Yuzu Method ® is a registered ZestStream mark — render exactly.
+ * The Yuzu Method ™ is a ZestStream mark — U.S. application SN 99572208 is
+ * pending (not yet registered), so render with ™, not ®. Switch to ® only
+ * when the registration certificate issues.
  *
  * Usage:
  *   <YuzuMethodRail
@@ -157,7 +159,7 @@ export function YuzuMethodRail({
             fontFamily: "var(--zs-font-mono, SFMono-Regular, Consolas, monospace)",
           }}
         >
-          The Yuzu Method ®
+          The Yuzu Method ™
         </span>
       )}
       <div
