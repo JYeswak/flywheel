@@ -459,6 +459,37 @@ run_probe_json() {
   fi
 }
 
+ntm_activity_probe() {
+  local output exit_code normalized default_json
+  set +e
+  output="$("$NTM" activity "$SESSION" --json 2>&1)"
+  exit_code=$?
+  set -e
+  default_json="$(jq -nc --arg raw "$output" '{status:"error",agents:[],warnings:["ntm_activity_invalid_json"],raw:$raw}')"
+  normalized="$(json_stream_last_object_or_default "$output" "$default_json")"
+  jq -c \
+    --arg session "$SESSION" \
+    --argjson exit_code "$exit_code" \
+    --argjson normalized "$normalized" \
+    'if type == "object" then
+      (.agents // []) as $agents
+      | {
+          schema_version:"flywheel-tick-ntm-activity/v1",
+          status:(if $exit_code == 0 then "ok" else "error" end),
+          probe_exit_code:$exit_code,
+          session:$session,
+          raw:$normalized,
+          sessions_seen:([$agents[]? | (.session // $session)] | unique),
+          sessions_error:(if $exit_code == 0 then [] else [$session] end),
+          stalled_panes:[$agents[]? | select((((.state // .activity // .status // "") | tostring | ascii_downcase) | test("stalled|frozen|error|unknown"))) | (.pane // .pane_idx // .index // .pane_index)],
+          health_daemon_fresh:(.health_daemon_fresh // .daemon_fresh // (($exit_code == 0) and (($agents | length) > 0))),
+          warnings:(.warnings // [])
+        }
+    else
+      {schema_version:"flywheel-tick-ntm-activity/v1",status:"error",probe_exit_code:$exit_code,session:$session,raw:$normalized,sessions_seen:[],sessions_error:[$session],stalled_panes:[],health_daemon_fresh:false,warnings:["ntm_activity_non_object"]}
+    end' <<<"$normalized"
+}
+
 jeff_status_probe() {
   run_probe_json "$REPO/.flywheel/scripts/jeff-issues-status-probe.sh" doctor --json
 }
@@ -2095,6 +2126,14 @@ jq -nc \
   --argjson result "$NTM_SURFACE_VALIDATION_RESULT" \
   '{ts:$ts,event:$event,ordering_after:$ordering_after,ordering_before:$ordering_before,result:$result}' >>"$LOG"
 
+NTM_ACTIVITY_RESULT="$(ntm_activity_probe 2>&1 || printf '{"schema_version":"flywheel-tick-ntm-activity/v1","status":"error","sessions_seen":[],"sessions_error":["%s"],"stalled_panes":[],"health_daemon_fresh":false,"warnings":["ntm_activity_probe_failed"]}' "$SESSION")"
+NTM_ACTIVITY_RESULT="$(json_stream_last_object_or_default "$NTM_ACTIVITY_RESULT" "$(jq -nc --arg session "$SESSION" '{schema_version:"flywheel-tick-ntm-activity/v1",status:"error",sessions_seen:[],sessions_error:[$session],stalled_panes:[],health_daemon_fresh:false,warnings:["ntm_activity_invalid_json"]}')")"
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "ntm_activity_probe" \
+  --argjson result "$NTM_ACTIVITY_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
 INBOX_RESULT="$(SESSION="$SESSION" ORCH_PANE="$TARGET_PANE" bash "$REPO/.flywheel/scripts/inbox-check-tick-step.sh" 2>&1 || printf '{"action":"error"}')"
 INBOX_RESULT="$(first_json_or_raw "$INBOX_RESULT")"
 INBOX_IDENTITY="$(jq -r '.identity // "unknown"' <<<"$INBOX_RESULT" 2>/dev/null || printf 'unknown')"
@@ -2349,6 +2388,7 @@ jq -nc \
   --argjson topology_tick_refresh "$TOPOLOGY_TICK_REFRESH_RESULT" \
   --argjson frozen_detector "$FROZEN_DETECTOR_SUMMARY" \
   --argjson ntm_surface_validation "$NTM_SURFACE_VALIDATION_RESULT" \
+  --argjson ntm_activity "$NTM_ACTIVITY_RESULT" \
   --argjson dispatch_capacity "$DISPATCH_CAPACITY_RESULT" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --arg hold_reason "$HOLD_REASON" \
@@ -2420,6 +2460,12 @@ jq -nc \
     ntm_surface_validation_status:($ntm_surface_validation.status // null),
     ntm_surface_validation_fail_count:($ntm_surface_validation.status_counts.FAIL // 0),
     ntm_surface_validation_unverified_count:($ntm_surface_validation.status_counts.UNVERIFIED // 0),
+    ntm_activity:$ntm_activity,
+    sessions_seen:($ntm_activity.sessions_seen // []),
+    sessions_error:($ntm_activity.sessions_error // []),
+    stalled_panes:($ntm_activity.stalled_panes // []),
+    respawns_attempted:(($frozen_detector.frozen_panes_respawned // 0) + ($frozen_detector.frozen_panes_relaunched // 0)),
+    health_daemon_fresh:($ntm_activity.health_daemon_fresh // false),
     dispatch_capacity:$dispatch_capacity,
     pane_work_signal_sampled:($dispatch_capacity.pane_work_signal_sampled // false),
     pane_work_signal_disabled:($dispatch_capacity.pane_work_signal_disabled // false),
@@ -2506,6 +2552,7 @@ jq -nc \
   --argjson topology_tick_refresh "$TOPOLOGY_TICK_REFRESH_RESULT" \
   --argjson frozen_detector "$FROZEN_DETECTOR_SUMMARY" \
   --argjson ntm_surface_validation "$NTM_SURFACE_VALIDATION_RESULT" \
+  --argjson ntm_activity "$NTM_ACTIVITY_RESULT" \
   --argjson dispatch_capacity "$DISPATCH_CAPACITY_RESULT" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --arg hold_reason "$HOLD_REASON" \
@@ -2576,6 +2623,12 @@ jq -nc \
     ntm_surface_validation_status:($ntm_surface_validation.status // null),
     ntm_surface_validation_fail_count:($ntm_surface_validation.status_counts.FAIL // 0),
     ntm_surface_validation_unverified_count:($ntm_surface_validation.status_counts.UNVERIFIED // 0),
+    ntm_activity:$ntm_activity,
+    sessions_seen:($ntm_activity.sessions_seen // []),
+    sessions_error:($ntm_activity.sessions_error // []),
+    stalled_panes:($ntm_activity.stalled_panes // []),
+    respawns_attempted:(($frozen_detector.frozen_panes_respawned // 0) + ($frozen_detector.frozen_panes_relaunched // 0)),
+    health_daemon_fresh:($ntm_activity.health_daemon_fresh // false),
     dispatch_capacity:$dispatch_capacity,
     pane_work_signal_sampled:($dispatch_capacity.pane_work_signal_sampled // false),
     pane_work_signal_disabled:($dispatch_capacity.pane_work_signal_disabled // false),
