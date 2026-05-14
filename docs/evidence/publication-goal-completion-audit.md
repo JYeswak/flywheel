@@ -51,7 +51,7 @@ Current verdict: `not complete`.
 | Staging review signoff map | `docs/evidence/staging-review-signoff-packet.md` | `bash tests/public-docs.sh`; `python3 scripts/publication_readiness.py --json` | Locally verified as a review aid; it explicitly does not grant public release approval. |
 | External developer run path | `README.md`, `docs/getting-started/first-run.md`, `docs/reference/commands.md`, `docs/reference/files.md` | `bash tests/public-links.sh`; `bash tests/public-docs.sh`; `bash tests/installer-smoke.sh`; `bash tests/journey-smoke.sh` | Locally verified; public GitHub availability still blocked. |
 | Blocker/gap tracking to closure | `docs/evidence/publication-blocker-coverage.md`, `.flywheel/PLANS/public-share-readiness-2026-05-12/`, Beads | `python3 .flywheel/scripts/true-publication-registry-validate.py --json`; `bash tests/true-publication-registry-validate.sh` | Coverage verified; six release blockers remain open. |
-| Public GitHub repository availability | GitHub repo `JYeswak/flywheel` | `python3 scripts/publication_readiness.py --json` | Blocked: `remote_repo_private`. |
+| Public GitHub repository availability | GitHub repo `JYeswak/flywheel` | `python3 scripts/publication_readiness.py --json` | Blocked: `remote_repo_unavailable` until the public remote can be inspected; `remote_repo_private` if inspection proves the remote is still private. |
 | Public GitHub workflows available | GitHub Actions workflows: `CI`, `Installer Smoke`, `Release`, `Site Deploy` | `python3 scripts/publication_readiness.py --json` | Blocked: `remote_workflows_missing`. |
 | Remote default-branch green runs | GitHub Actions run history | `python3 scripts/publication_readiness.py --json` | Blocked: `remote_green_runs_missing`. |
 | Published release exists | GitHub release `v0.2.0` | `python3 scripts/publication_readiness.py --json` | Blocked: `github_release_missing_or_draft`. |
@@ -72,6 +72,7 @@ Current result:
 {
   "status": "blocked",
   "blockers": [
+    "remote_repo_unavailable",
     "remote_repo_private",
     "remote_workflows_missing",
     "remote_green_runs_missing",
@@ -91,7 +92,7 @@ Latest public export evidence: `scripts/assemble.py --run-id
 codex-public-export-20260514T152734Z --clean --json` passed with 14,759
 classified files, 10,274 copied public-safe files, 4,043 denylist exclusions,
 and 7,465 manual-review rows. Staged checks passed for publication readiness,
-public docs 279/0, this audit, website static 99/0/accessibility, user-journey pack
+public docs 279/0, this audit, website static 149/0/accessibility, user-journey pack
 10/0, repo-story portability, repo-owner brief, git-story extraction, the embedded owner message pack,
 frontend story payload, story-system package 26/0, UI package 23/0, motion package,
 public links, top-level files, release assets, cutover receipts, agent lanes,
