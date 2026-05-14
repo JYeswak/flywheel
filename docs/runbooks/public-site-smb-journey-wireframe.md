@@ -1,7 +1,7 @@
 # Public Site SMB Journey Wireframe
 
 Schema: `flywheel.public_site_smb_journey_wireframe.v0`
-Status: `private-review-implementation-active`
+Status: `private-review-deep-system-reset-active`
 Source pack ID: `user-journey-wireframe-pack`
 
 This wireframe replaces the rejected placeholder page. It is the governing
@@ -25,7 +25,7 @@ The Jeff Emanuel reference pattern is not a component library. It is a way of
 making a technical idea feel alive before the reader has to understand the
 details.
 
-Current reference surfaces reviewed on 2026-05-13:
+Current reference surfaces reviewed on 2026-05-13 and refreshed on 2026-05-14:
 
 - `https://www.jeffreyemanuel.com/`
 - `https://asupersync.com/`
@@ -42,6 +42,8 @@ The useful pattern to adapt:
 | Proof escalates by scroll depth. | Casual readers get the idea; technical readers can keep drilling. | SMB owners see the method in plain language; reviewers can open proof drawers and evidence links. |
 | The maker is accountable. | Jeff's name, work volume, project graph, and contact path sit near the surface. | Joshua is the operator. The page should not hide behind a corporate voice. |
 | The style is advanced but not timid. | Big type, coded status language, instrument panels, and live-feeling visuals signal seriousness. | Use strong ZestStream visual primitives: operating map, yuzu slice, proof rail, blocked-over-bluffing status, not stock SaaS cards. |
+| Each route feels like the same product world. | Navigation moves from hero to demos, architecture, docs, and source without losing the visual language. | Every Flywheel page must use the shared scene shell, proof language, and Yuzu control grammar. Updating only `site/index.html` is a failing implementation. |
+| Dense technical depth stays available. | Developer-heavy pages keep architecture, glossary, source, and demos nearby. | SMB pages lead with trapped work and owner safety; reviewer and developer routes expose commands and receipts after the owner story lands. |
 
 What not to copy:
 
@@ -69,6 +71,11 @@ developer-dense than the references. The reader should leave thinking: "he sees
 my workflow mess, he has controls for AI risk, and I can start with one small
 piece."
 
+Deep reset requirement: the public site must feel like a small operating system,
+not a stack of interchangeable SaaS cards. The homepage should open inside a
+full-bleed scene. Subpages should feel like rooms in the same system: control
+room, method room, local-run room, operator room, and safe-intake room.
+
 ### Multi-Page Implementation Rule
 
 The visual grammar cannot live only on `site/index.html`. Every public page must
@@ -89,14 +96,26 @@ developer-dense, but the depth and designed-world feeling should remain.
 
 ## SMB Trust Research
 
-The story must address what owners actually worry about. 2025 SMB research
+The story must address what owners actually worry about. Current SMB research
 clusters around the same concerns: data privacy and security, data quality,
 accuracy, lack of training, cost, integration with existing systems, and
 uncertainty about whether AI belongs in the real workflow. Sources reviewed
-include SMB Group 2025 AI adoption research, Dun & Bradstreet's 2025 AI trust
-and data-quality survey, Paychex's 2025 small-business AI survey, NFIB's 2025
-Small Business and Technology survey, and Homebase's 2025 small-business AI
-report.
+include SMB Group 2025 AI adoption research, Dun & Bradstreet's 2025 and 2026 AI
+trust and data-quality surveys, Paychex's 2025 small-business AI survey, and
+Techaisle's 2025 SMB and midmarket AI adoption research.
+
+Source anchors for wording:
+
+- Paychex 2025 small-business AI research names data privacy/security as a top
+  concern while also reporting a positive AI outlook among many small
+  businesses.
+- Dun & Bradstreet 2025 research names trustworthiness and data quality as a
+  major AI adoption concern; its 2026 AI Momentum survey sharpens that into a
+  data-readiness problem.
+- SMB Group's 2025 AI report names privacy/security concerns and incorrect
+  information as top drawbacks.
+- Techaisle's 2025 SMB and midmarket research names talent shortages,
+  integration complexity, and data quality as deployment challenges.
 
 The page should not argue that owners are behind. It should show that their
 caution is rational, then show the ZestStream method that makes the caution
@@ -117,6 +136,7 @@ page-specific styling.
 | `YuzuMethodRail` | Make the named method memorable. | Uses `Peel. Press. Pour.™` as the visual rhythm: map, prove, reuse. |
 | `TechnicalDrawer` | Give reviewers a path without hijacking the SMB story. | Opens proof, commands, receipts, and support tiers only after the owner story lands. |
 | `OperatorSignature` | Make Joshua accountable. | First-person singular, public email, no faceless corporate "we." |
+| `RoomSystem` | Make every route feel connected. | Each public page is a room in the same operating system, not a standalone landing page. |
 
 These primitives should become shared package or global-config material for the
 larger ZestStream site rewrite. Static Flywheel HTML can prove the design, but
@@ -340,6 +360,8 @@ Tone:
 The implementation is not acceptable unless all of these are true:
 
 - the first viewport is an operating map, not a decorative card layout;
+- all six public site pages use the shared immersive hero or room system;
+- homepage-only visual updates fail the gate even if copy tests pass;
 - `The Yuzu Method ®` and `Peel. Press. Pour.™` appear with correct trademark
   rendering;
 - `I help SMB owners buy their time back.` appears verbatim;

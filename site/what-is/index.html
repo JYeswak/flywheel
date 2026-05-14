@@ -20,75 +20,68 @@
       </nav>
     </header>
     <main>
-      <section class="page-hero system-hero">
-        <div class="shell page-hero-grid">
-          <div class="page-copy">
-            <div class="hero-status-row">
-              <span class="status-pill">Control surface</span>
-              <span class="status-chip">Owner lane</span>
-              <span class="status-chip proof">Inspectable</span>
-            </div>
-            <h1>Flywheel is the control room behind one safer workflow slice.</h1>
-            <p class="lead">It is not a chatbot promise. It is the public operating layer ZestStream uses to map messy work, choose one bounded improvement, run AI-assisted build loops, and keep the proof close enough for a business owner to inspect.</p>
+      <section class="experience-hero compact" aria-labelledby="what-title">
+        <div class="scene-grid" aria-hidden="true"></div>
+        <div class="scene-floor" aria-hidden="true"></div>
+        <div class="shell hero-story">
+          <div class="hero-story-inner">
+            <div class="hero-eyebrow"><span class="hot">Control room</span><span>Owner lane</span><span>Inspectable</span></div>
+            <h1 id="what-title">Flywheel is the control room behind one safer workflow slice.</h1>
+            <p class="hero-plain">It is the public operating layer ZestStream uses to map messy work, choose one bounded improvement, run AI-assisted build loops, and keep proof close enough for a business owner to inspect.</p>
             <div class="actions">
               <a class="button" href="../methodology/index.html">See the method</a>
               <a class="button secondary" href="../for-developers/index.html">Run the local lane</a>
             </div>
           </div>
-          <aside class="instrument-panel" aria-label="Flywheel control-room layers">
-            <div class="panel-topline"><span>FLYWHEEL CONTROL ROOM</span><span>PRIVATE STATE FILTERED</span></div>
-            <img class="system-map" src="../assets/loop-map.svg" alt="Flywheel operating loop diagram">
-            <div class="signal-strip">
-              <span>MAP</span>
-              <span>SLICE</span>
-              <span>BUILD</span>
-              <span>VERIFY</span>
-              <span>REUSE</span>
-            </div>
-          </aside>
         </div>
       </section>
 
-      <section class="story-band">
-        <div class="shell split">
+      <section class="section-theater" aria-labelledby="boundary-title">
+        <div class="shell system-room">
           <div>
             <p class="kicker">Plain-English boundary</p>
-            <h2>It turns AI work into a governed operating loop.</h2>
+            <h2 id="boundary-title">Flywheel turns AI work into a governed operating loop.</h2>
+            <p class="section-lead">The owner-facing job is simple: make hidden manual work visible, improve one part of it, and stop pretending a claim is true until the evidence exists. The technical machinery sits underneath that journey.</p>
           </div>
-          <p class="section-lead">The owner-facing job is simple: make the hidden manual route visible, improve one part of it, and stop pretending a claim is true until the evidence exists. The technical machinery sits underneath that owner journey.</p>
-        </div>
-        <div class="shell control-lanes">
-          <article>
-            <span>01</span>
-            <h3>Installable engine</h3>
-            <p>Flywheel owns first-run docs, local doctor checks, reduced mode, loop state, closeout receipts, and publication gates.</p>
-          </article>
-          <article>
-            <span>02</span>
-            <h3>Capability boundary</h3>
-            <p>SkillOS is a capability control plane integration point. Flywheel can name it without copying private SkillOS state into the public story.</p>
-          </article>
-          <article>
-            <span>03</span>
-            <h3>Proof surface</h3>
-            <p>Proof products show the method in real contexts without making any single product the mission ceiling.</p>
-          </article>
+          <div class="room-visual">
+            <span class="overlay-chip">Flywheel control room</span>
+            <img src="../assets/loop-map.svg" alt="Flywheel operating loop diagram">
+          </div>
         </div>
       </section>
 
-      <section class="control-room">
-        <div class="shell proof-console-grid">
-          <div>
-            <p class="kicker">What it refuses to do</p>
-            <h2>Flywheel does not ask you to trust a black box.</h2>
+      <section class="section-theater warm" aria-labelledby="layers-title">
+        <div class="shell">
+          <div class="room-header">
+            <div>
+              <p class="kicker">Three layers, one promise</p>
+              <h2 id="layers-title">The system is visible before it asks for trust.</h2>
+            </div>
+            <p>Each layer has a job, a boundary, and a proof state. That is how the public story stays useful without turning private client work into marketing copy.</p>
+          </div>
+          <div class="lane-stack">
+            <article><span>01 Installable engine</span><h3>Flywheel owns the run path.</h3><p>First-run docs, doctor checks, reduced mode, loop state, closeout receipts, and publication gates belong here.</p></article>
+            <article><span>02 Capability control</span><h3>SkillOS is a capability control plane integration point.</h3><p>Flywheel can name the boundary without copying private SkillOS state into the public story.</p></article>
+            <article><span>03 Proof surface</span><h3>Proof products show the method without becoming the mission ceiling.</h3><p>The page points to evidence when useful and marks blockers when evidence is still missing.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-theater dark" aria-labelledby="refuse-title">
+        <div class="shell">
+          <div class="room-header">
+            <div>
+              <p class="kicker">What it refuses to do</p>
+              <h2 id="refuse-title">Flywheel does not ask you to trust a black box.</h2>
+            </div>
             <p>Every public-facing claim needs a state. Proven means tested. Blocked means not ready. Skipped means intentionally out of scope with a reason. Private means the lesson can be reused, but the customer detail stays out.</p>
           </div>
-          <div class="proof-console">
-            <div class="panel-topline"><span>PROOF STATES</span><span>NO BLUFF MODE</span></div>
-            <div class="console-row"><span class="proof-dot good"></span><strong>Proven</strong><em>Local or live evidence exists.</em></div>
-            <div class="console-row"><span class="proof-dot warn"></span><strong>Blocked</strong><em>The claim stays red until the missing proof is real.</em></div>
-            <div class="console-row"><span class="proof-dot warn"></span><strong>Skipped with reason</strong><em>Out-of-scope work is named instead of hidden.</em></div>
-            <div class="console-row"><span class="proof-dot stop"></span><strong>Private</strong><em>Client-specific details do not become marketing copy.</em></div>
+          <div class="trust-console">
+            <article><span>Proven</span><strong>Local or live evidence exists.</strong><p>The claim can point at a run, receipt, check, or reviewed artifact.</p></article>
+            <article><span>Blocked</span><strong>The missing proof stays visible.</strong><p>No amount of polish upgrades a red claim.</p></article>
+            <article><span>Skipped</span><strong>Out of scope is named.</strong><p>A skip has a reason, not a shrug.</p></article>
+            <article><span>Private</span><strong>Client detail stays out.</strong><p>The lesson can move forward without exposing the work behind it.</p></article>
+            <article><span>Reusable</span><strong>The next project starts smarter.</strong><p>Runbooks, checks, and skills preserve what was learned.</p></article>
           </div>
         </div>
       </section>

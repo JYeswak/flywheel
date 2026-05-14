@@ -65,8 +65,12 @@ require_literal "index.html" "Peel. Press. Pour.™" "landing names Yuzu motto"
 require_literal "index.html" "I help SMB owners buy their time back." "landing carries ZestStream canon line"
 require_literal "index.html" "A slice is one bounded workflow improvement" "landing defines workflow slice"
 require_literal "index.html" "Blocked is better than bluffing" "landing names blocked-over-bluffing trust stance"
-require_literal "index.html" "operating-hero" "landing uses operating-room visual section"
+require_literal "index.html" "experience-hero" "landing uses immersive operating-room visual section"
+require_literal "index.html" "scene-route" "landing renders selected slice inside scene"
 require_literal "index.html" "Proof states" "landing includes proof states"
+for rel in index.html what-is/index.html for-developers/index.html methodology/index.html about/index.html contact/index.html; do
+  require_literal "$rel" "experience-hero" "page uses shared immersive hero: $rel"
+done
 require_literal "visual-system.css" "--zs-lime: #d4f34a" "visual system exposes yuzu lime"
 require_literal "visual-system.css" "--zs-yuzu: #f2c94c" "visual system exposes yuzu gold"
 require_literal "assets/operating-room-map.svg" "SELECTED WORKFLOW SLICE" "operating map names selected slice"

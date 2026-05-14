@@ -5,6 +5,10 @@
   --zs-muted: #64706a;
   --zs-paper: #fbfaf4;
   --zs-paper-warm: #f2eadc;
+  --zs-night: #101412;
+  --zs-night-2: #18201c;
+  --zs-field: #edf7df;
+  --zs-cream: #fffdf7;
   --zs-lime: #d4f34a;
   --zs-yuzu: #f2c94c;
   --zs-leaf: #1f8f5f;
@@ -12,9 +16,12 @@
   --zs-blue: #2a6fbb;
   --zs-tomato: #df5b46;
   --zs-plum: #6c4ab6;
+  --zs-amber: #f08f3e;
   --zs-line: rgba(21, 24, 22, 0.18);
   --zs-line-strong: rgba(21, 24, 22, 0.36);
+  --zs-line-light: rgba(255, 253, 247, 0.18);
   --zs-shadow: 0 22px 70px rgba(21, 24, 22, 0.14);
+  --zs-shadow-deep: 0 34px 100px rgba(0, 0, 0, 0.36);
   --zs-radius-sm: 6px;
   --zs-radius-md: 8px;
   --zs-shell: 1180px;
