@@ -30,9 +30,12 @@ method.
 | CASS | Memory patterns so useful context does not live only in one transcript. |
 | jsm, dcg, ubs | Skill movement, destructive-command safety, and shell discipline that keep the lower layer honest. |
 
-Flywheel and SkillOS are my layer on top of that substrate. Flywheel owns the
-repo-local loop. SkillOS owns capability status: which skills exist, which ones
-are adopted, which ones are blocked, and which ones have proof.
+Flywheel and SkillOS are my layer around that substrate. They can run a reduced
+public path without private panes, Agent Mail archives, or my local skill
+library. When Jeffrey Emanuel's tools are installed, they can also use the
+richer local substrate. Flywheel owns the repo-local loop. SkillOS owns
+capability status: which skills exist, which ones are adopted, which ones are
+blocked, and which ones have proof.
 
 ## What This Repo Is
 
@@ -106,8 +109,9 @@ Then read [`docs/getting-started/first-run.md`](docs/getting-started/first-run.m
 ## The Deal
 
 You can use Jeffrey Emanuel's tools directly. You can clone Flywheel and SkillOS
-and run the public path without me. I am publishing the method because trust is
-earned faster when the work is inspectable.
+and run the public path without me. The choice is yours: start standalone, add
+the richer substrate later, or use only the parts that fit. I am publishing the
+method because trust is earned faster when the work is inspectable.
 
 If you want help applying it to a real business workflow, book a 20-minute Peel
 session. Free, specific, no pitch at the end:
