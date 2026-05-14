@@ -41,6 +41,8 @@ for payload in (current, saved):
         raise SystemExit("schema mismatch")
     if payload.get("required_frontend_schema") != "zeststream.repo_frontend_story.v0":
         raise SystemExit("frontend schema missing")
+    if payload.get("required_owner_brief_schema") != "zeststream.repo_owner_story_brief.v0":
+        raise SystemExit("owner brief schema missing")
     if payload.get("status") != "pass":
         raise SystemExit("probe did not pass")
     if payload.get("public_safety", {}).get("absolute_paths_in_receipt") is not False:
@@ -57,6 +59,12 @@ for repo_id in ("flywheel", "home_services_proof_product", "food_ordering_proof_
         raise SystemExit(f"frontend schema missing: {repo_id}")
     if row.get("frontend_component_count") != 9:
         raise SystemExit(f"component count mismatch: {repo_id}")
+    if row.get("owner_brief_schema") != "zeststream.repo_owner_story_brief.v0":
+        raise SystemExit(f"owner brief schema missing: {repo_id}")
+    if row.get("owner_brief_trust_answer_count") != 10:
+        raise SystemExit(f"owner brief trust count mismatch: {repo_id}")
+    if row.get("owner_brief_page_room_count", 0) < 8:
+        raise SystemExit(f"owner brief page room count mismatch: {repo_id}")
     if row.get("primary_cta") != "Map my workflow":
         raise SystemExit(f"primary CTA mismatch: {repo_id}")
     if not row.get("commit_count") or row["commit_count"] <= 0:

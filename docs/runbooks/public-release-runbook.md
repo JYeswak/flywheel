@@ -276,11 +276,11 @@ Expected results:
 | Gate | Expected result |
 |---|---|
 | Naming conventions | `SUMMARY pass=... fail=0` |
-| Public docs contract | `SUMMARY pass=273 fail=0` and coverage for story, user journey, cutover, evidence, frontend quality, and agent-lane surfaces. |
+| Public docs contract | `SUMMARY pass=274 fail=0` and coverage for story, user journey, cutover, evidence, frontend quality, and agent-lane surfaces. |
 | Public surface gap scanner | `SUMMARY pass=16 fail=0` |
 | ZestStream UI package | `SUMMARY pass=19 fail=0`; export targets, `TrustWorryMatrix`, shellcheck, owner-brief evidence enforcement, complete Next.js fixture, weak Next.js fixture rejection, and private extraction pruning are covered. |
 | ZestStream motion package | `SUMMARY pass=20 fail=0`; export targets, spring presets, reduced-motion docs, package typecheck, and frontend-gate recognition are covered. |
-| Repo story portability | `SUMMARY pass=6 fail=0`; saved receipt proves the git-story/front-end payload contract across Flywheel, ClutterFreeSpaces, and Mobile Eats without editing sibling repos. |
+| Repo story portability | `SUMMARY pass=6 fail=0`; saved receipt proves the git-story/front-end/owner-brief contract across Flywheel, ClutterFreeSpaces, and Mobile Eats without editing sibling repos. |
 | Repo owner brief | `SUMMARY pass=8 fail=0`; generated brief turns repo trajectory evidence into SMB-owner page language, page rooms, trust answers, and proof refs without blocked public-copy markers. |
 | Public link checker | `SUMMARY pass=3 fail=0` and JSON `failure_count=0` for public docs/site links. |
 | Website static contract | `SUMMARY pass=95 fail=0` across the six-page staging review site bundle. |

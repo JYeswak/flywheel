@@ -136,7 +136,7 @@
       "owner_meaning": "The story comes from the work that actually happened, not a fresh marketing claim."
     },
     {
-      "evidence_ref": "221 friction-matched commits",
+      "evidence_ref": "224 friction-matched commits",
       "owner_meaning": "The process exposes what is not ready before it can affect the business."
     },
     {
@@ -144,17 +144,17 @@
       "owner_meaning": "Claims move forward only when the system can show what changed."
     },
     {
-      "evidence_ref": "662 reuse-matched commits",
+      "evidence_ref": "665 reuse-matched commits",
       "owner_meaning": "Lessons from one repo become reusable operating material for the next repo."
     }
   ],
   "proof_summary": {
     "commit_span": "2026-04-30 to 2026-05-14",
-    "commits_inspected": 1503,
-    "friction_signals": 221,
+    "commits_inspected": 1506,
+    "friction_signals": 224,
     "owner_translation": "The repo shows origin, friction, proof, reuse, and story work as a path a reviewer can inspect.",
     "proof_loop_signals": 805,
-    "reuse_signals": 662
+    "reuse_signals": 665
   },
   "public_copy_checks": {
     "blocked_state_allowed": true,

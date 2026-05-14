@@ -17,9 +17,9 @@ friction, what changed, and which lessons became reusable.
 
 - First commit date: `2026-04-30`
 - Latest commit date: `2026-05-14`
-- Commits inspected: `1503`
+- Commits inspected: `1506`
 - First commit: `aa079a83` feat(scripts): add source_repo backfill script for all local beads DBs
-- Latest commit: `d37da23b` feat(story): prove repo story portability [work item]
+- Latest commit: `7f6ba8f9` fix(trademark): The Yuzu Method ® → ™ ; application is pending, not registered
 
 ## Public Story Arc
 
@@ -29,7 +29,7 @@ The first useful proof is not a polished page. It is a workbench where the goal,
 
 Owner translation: For an SMB owner, this means the project starts by mapping how work really moves before anyone promises automation.
 
-Commit evidence: `399` matching commits from `2026-04-30` to `2026-05-14`.
+Commit evidence: `400` matching commits from `2026-04-30` to `2026-05-14`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -61,7 +61,7 @@ The useful pivots came from red evidence: private residue, unsupported lanes, st
 
 Owner translation: This is where trust is earned. The process treats blocked evidence as useful signal, not as something to hide in a footnote.
 
-Commit evidence: `221` matching commits from `2026-05-04` to `2026-05-14`.
+Commit evidence: `224` matching commits from `2026-05-04` to `2026-05-14`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -77,7 +77,7 @@ Once a pattern worked, it moved into runbooks, scripts, tests, docs, shared lang
 
 Owner translation: Every project should make the next project safer and faster. That is the compounding part of the Flywheel.
 
-Commit evidence: `662` matching commits from `2026-04-30` to `2026-05-14`.
+Commit evidence: `665` matching commits from `2026-04-30` to `2026-05-14`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -93,7 +93,7 @@ The current arc is making the proof understandable to a non-technical owner: wha
 
 Owner translation: Show the proof, not the dream: one bounded workflow slice, one visible control path, one lesson that compounds into the next build.
 
-Commit evidence: `141` matching commits from `2026-05-04` to `2026-05-14`.
+Commit evidence: `144` matching commits from `2026-05-04` to `2026-05-14`.
 
 | Date | Commit | What changed |
 |---|---|---|

@@ -57,10 +57,10 @@ Safe first step: Start with one workflow map before broader access, automation, 
 ## Proof Summary
 
 - Commit span: `2026-04-30 to 2026-05-14`
-- Commits inspected: `1503`
-- Friction signals: `221`
+- Commits inspected: `1506`
+- Friction signals: `224`
 - Proof-loop signals: `805`
-- Reuse signals: `662`
+- Reuse signals: `665`
 - Owner translation: The repo shows origin, friction, proof, reuse, and story work as a path a reviewer can inspect.
 
 ## Evidence Refs

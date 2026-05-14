@@ -52,8 +52,8 @@ project-specific table.
 
 To prove the pack is not Flywheel-only, run the portability probe. It reads
 Flywheel plus the available sibling proof-product repos, validates the same
-story/message/dossier/front-end schemas, and writes a receipt without absolute
-local paths or sibling-repo edits.
+story/message/dossier/front-end schemas and owner brief schema, and writes a
+receipt without absolute local paths or sibling-repo edits.
 
 ```bash
 python3 scripts/probe_repo_story_portability.py \

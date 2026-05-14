@@ -35,8 +35,8 @@ public release line.
   so public story copy is grounded in commit history instead of one session's
   memory.
 - Repo story portability probe and saved receipt proving the same
-  git-history-to-front-end story contract across Flywheel, ClutterFreeSpaces,
-  and Mobile Eats without editing sibling repos.
+  git-history-to-front-end and owner-brief story contract across Flywheel,
+  ClutterFreeSpaces, and Mobile Eats without editing sibling repos.
 - Repo owner brief renderer and saved `zeststream.repo_owner_story_brief.v0`
   artifact that turn generated repo trajectory evidence into SMB-owner page
   language, trust answers, page rooms, proof refs, and CTA copy before frontend
