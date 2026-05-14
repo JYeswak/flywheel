@@ -246,7 +246,7 @@ require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "A slice is
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Recommended Next.js target" "SMB wireframe names Next.js storytelling target"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Server Components" "SMB wireframe maps progressive proof to Next.js"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "If a claim is not proven, it stays blocked." "SMB wireframe names blocked claim stance"
-require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "The Yuzu Method ®" "SMB wireframe defines Yuzu Method"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "The Yuzu Method ™" "SMB wireframe defines Yuzu Method"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "TrajectoryRail" "SMB wireframe names trajectory rail"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Flywheel has a history, not just a homepage." "SMB wireframe names git-derived story scene"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Map my workflow" "SMB wireframe names primary CTA"

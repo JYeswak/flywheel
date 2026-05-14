@@ -60,7 +60,7 @@ done < <(find "$SITE" -name '*.html' -print0 | sort -z)
 require_literal "index.html" "scripts/journey-smoke.sh --matrix reduced --dry-run --json" "landing has reduced first run"
 require_literal "index.html" "https://github.com/JYeswak/flywheel" "landing links github"
 require_literal "index.html" "Your business already has the data. <span>The work is just trapped between tools.</span>" "landing leads with SMB owner problem"
-require_literal "index.html" "The Yuzu Method ®" "landing names Yuzu Method with trademark"
+require_literal "index.html" "The Yuzu Method ™" "landing names Yuzu Method with trademark"
 require_literal "index.html" "Peel. Press. Pour.™" "landing names Yuzu motto"
 require_literal "index.html" "I help SMB owners buy their time back." "landing carries ZestStream canon line"
 require_literal "index.html" "Passing a checklist is not the same as earning trust." "landing names real review failure"

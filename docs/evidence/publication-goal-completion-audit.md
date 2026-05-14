@@ -2,7 +2,7 @@
 
 Schema: `flywheel.publication_goal_completion_audit.v0`
 Status: `not-complete`
-Last audited: `2026-05-14T14:43:42Z`
+Last audited: `2026-05-14T16:10:00Z`
 
 This audit restates the active `/goal` as concrete deliverables, maps each
 deliverable to repo evidence, and names the remaining blockers. It is not a
@@ -44,9 +44,9 @@ Current verdict: `not complete`.
 | Loop workflow works | `.flywheel/GOAL.md`, `.flywheel/STATE.md`, `.flywheel/last_closeout_receipt.json`, `scripts/journey-smoke.sh` | `bash tests/journey-smoke.sh`; receipt validation references in docs | Locally verified for reduced journey and documented closeout flow. |
 | NTM and non-NTM workflow support | `docs/runbooks/agent-lane-compatibility.md`, `docs/runbooks/isolated-agent-lane-testing.md`, `docs/runbooks/local-actions-preflight.md` | `bash tests/isolated-agent-lane-smoke.sh`; `bash tests/agent-lane-probe.sh`; local-actions preflight evidence in `docs/evidence/publication-evidence.md` | Locally verified as receipt-governed compatibility, not public-release completion. |
 | Claude Code, Codex CLI, Gemini CLI, OpenClaw end-to-end stance | `receipts/agent-lanes/<lane>.json`, `state/isolated-agent-lane-smoke.receipt.json`, support tier docs/site | `scripts/agent-lane-probe.sh --receipt-dir receipts/agent-lanes --json`; `scripts/isolated-agent-lane-smoke.sh --json` | Reduced lane proven; agent lanes governed by strict receipts/blockers. |
-| SkillOS integration boundary | `docs/concepts/skillos-boundary.md`, `docs/runbooks/public-user-journey-pack.md`, SkillOS-compatible schema | `bash tests/public-docs.sh`; `python3 scripts/validate_user_journey_pack.py --json` | Locally verified; public copy names SkillOS only as capability-control-plane integration point. |
+| SkillOS integration boundary | `docs/concepts/skillos-boundary.md`, `docs/runbooks/public-user-journey-pack.md`, SkillOS-compatible schema | `bash tests/public-docs.sh`; `python3 scripts/validate_user_journey_pack.py --json` | Locally verified; SkillOS stays in developer/reviewer evidence and SMB-facing page copy avoids internal control-plane language. |
 | Proof-product surfaces integrated without becoming mission ceiling | `docs/evidence/publication-evidence.md`, `docs/evidence/asupersync-gated-adoption.md`, proof-surface language in charter/site | `bash tests/upstream-substrate-adoption.sh`; `bash tests/public-docs.sh`; staged live site review | Locally verified; Asupersync remains gated evaluation. |
-| SMB business-owner trust journey | `site/`, `docs/runbooks/public-site-smb-journey-wireframe.md`, `docs/runbooks/public-user-journey-pack.md` | Commit `fdb7f3ad`; `bash tests/website-static.sh`; `bash tests/website-accessibility.sh`; `python3 scripts/live_site_probe.py --base-url https://flywheel.zeststream.ai/ --json` | Private-live verified with the deep SMB operating-room site across all six pages, Joshua final site signoff still pending. |
+| SMB business-owner trust journey | `site/`, `docs/runbooks/public-site-smb-journey-wireframe.md`, `docs/runbooks/public-user-journey-pack.md`, `state/private-live-site-deploy.receipt.json` | Commit `b897edcd`; private-live receipt commit `973a20eb`; `bash tests/website-static.sh` pass=99 fail=0; `bash tests/website-accessibility.sh`; `python3 scripts/live_site_probe.py --base-url https://flywheel.zeststream.ai/ --json` status=pass with `failure_count=0` | Private-live verified with the meta-voice rewrite across all six pages; Joshua final site signoff still pending. |
 | Git-derived public story trajectory, owner message pack, owner brief, shared story package, reusable UI package, and reusable motion package | `scripts/extract_git_story.py`, `scripts/probe_repo_story_portability.py`, `scripts/render_repo_owner_brief.py`, `docs/stories/flywheel-trajectory.md`, `docs/stories/flywheel-owner-brief.md`, `docs/evidence/flywheel-trajectory.json`, `docs/evidence/repo-story-portability.json`, `docs/evidence/flywheel-owner-brief.json`, `docs/runbooks/repo-trajectory-story-pack.md`, `packages/zeststream-story-system/`, `packages/zeststream-ui/`, `packages/zeststream-motion/`, `scripts/zs-frontend-quality-gate.sh` | `bash tests/git-story-extract.sh`; `bash tests/repo-story-portability.sh`; `bash tests/repo-owner-brief.sh`; `bash tests/story-system-package.sh`; `bash tests/zeststream-ui-package.sh`; `bash tests/zeststream-motion-package.sh`; `bash tests/public-docs.sh`; `zeststream.repo_story_message.v0` message pack with trust objections, visual primitives, proof translations, Next.js storytelling targets, reusable React proof primitives, owner-facing brief, and reduced-motion-safe spring presets | Locally verified as a reusable story/design mechanism and package foundation across Flywheel, ClutterFreeSpaces, and Mobile Eats; private-live site still needs final signoff against the stronger message contract. |
 | Staging review signoff map | `docs/evidence/staging-review-signoff-packet.md` | `bash tests/public-docs.sh`; `python3 scripts/publication_readiness.py --json` | Locally verified as a review aid; it explicitly does not grant public release approval. |
 | External developer run path | `README.md`, `docs/getting-started/first-run.md`, `docs/reference/commands.md`, `docs/reference/files.md` | `bash tests/public-links.sh`; `bash tests/public-docs.sh`; `bash tests/installer-smoke.sh`; `bash tests/journey-smoke.sh` | Locally verified; public GitHub availability still blocked. |
@@ -91,12 +91,19 @@ Latest public export evidence: `scripts/assemble.py --run-id
 codex-public-export-20260514T152734Z --clean --json` passed with 14,759
 classified files, 10,274 copied public-safe files, 4,043 denylist exclusions,
 and 7,465 manual-review rows. Staged checks passed for publication readiness,
-public docs 278/0, this audit, website static 95/0/accessibility, user-journey pack,
-repo-story portability, repo-owner brief, git-story extraction, the embedded owner message pack,
-frontend story payload, story-system package 26/0, UI package, motion package,
+public docs 279/0, this audit, website static 99/0/accessibility, user-journey pack
+10/0, repo-story portability, repo-owner brief, git-story extraction, the embedded owner message pack,
+frontend story payload, story-system package 26/0, UI package 20/0, motion package,
 public links, top-level files, release assets, cutover receipts, agent lanes,
 isolated agent-lane smoke, journey smoke, public blocker coverage, and the
 depersonalization scan.
+
+Current source and private-live checks after the meta-voice rewrite also passed:
+`bash tests/website-static.sh` 99/0, `bash tests/public-docs.sh` 279/0,
+`bash tests/public-user-journey-pack.sh` 10/0, `bash
+tests/zeststream-ui-package.sh` 20/0, `bash tests/publication-readiness.sh`
+72/0, and `python3 scripts/publication_readiness.py --json` remains blocked
+only on the six public cutover gates.
 
 ## Audit Closeout Rule
 
