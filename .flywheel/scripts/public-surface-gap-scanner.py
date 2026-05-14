@@ -74,7 +74,7 @@ SITE_REQUIRED_COPY = {
     "site/index.html": {
         "owner_outcome": "Buy back the hours hiding between your tools.",
         "before_scene": "It is Saturday again.",
-        "anonymized_client_proof": "Regional insurance carrier",
+        "anonymized_client_proof": "A regional insurance carrier",
         "after_state": "Saturday does not have to be your backup system.",
         "trust_stance": "Blocked is better than bluffing.",
     }

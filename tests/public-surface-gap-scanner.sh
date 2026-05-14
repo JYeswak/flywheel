@@ -128,7 +128,7 @@ cat >"$TMP/site/index.html" <<'EOF'
 <body>
 <p>Buy back the hours hiding between your tools.</p>
 <p>It is Saturday again.</p>
-<p>Regional insurance carrier</p>
+<p>A regional insurance carrier</p>
 <p>Saturday does not have to be your backup system.</p>
 <p>Blocked is better than bluffing.</p>
 </body>
