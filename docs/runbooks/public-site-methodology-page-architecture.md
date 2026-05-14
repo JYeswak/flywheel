@@ -29,7 +29,7 @@ the guarantee — and that every part of it is inspectable.
 - **Cite Donella Meadows.** Her framework is hers — "Meadows' twelve leverage
   points," "per *Thinking in Systems*," "the Meadows iceberg." Never present
   systems thinking as Joshua's invention. (Brand-voice attribution rule.)
-- **Cite Jeff Emanuel** for any of his substrate named here (NTM, Agent Mail,
+- **Cite Jeffrey Emanuel** for any of his substrate named here (NTM, Agent Mail,
   beads, CASS) — Dicklesworthstone, never Joshua.
 - **The worker must invoke the `donella-meadows-systems-thinking` skill** when
   writing this page's content. The skill carries the primary-source citations
@@ -69,7 +69,7 @@ the guarantee — and that every part of it is inspectable.
    repo-local operating loop — mission, goal, state, the tick, dispatch, beads,
    doctrine, daily reports, closeout receipts. **SkillOS:** the capability
    layer beside it — skills as explicit, validated capabilities with adoption
-   proof and pack-level status. How they relate, and how they sit on Jeff's
+   proof and pack-level status. How they relate, and how they sit on Jeffrey's
    substrate. Job: turn "an ecosystem" into a legible map the reader can hold.
 
 5. **The safety mechanisms — defense-in-depth, in depth.**

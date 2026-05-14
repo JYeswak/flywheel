@@ -13,7 +13,7 @@ contributor onboarding, not a public front door. It also leads "Why flywheel"
 with a per-run export stat dump (14,759 / 10,274 / 4,043 / 7,465).
 
 **zeststream-skillos/README.md** has good bones — the "marketing person walked
-out the door" hook, the two anonymized client stories, heavy Jeff attribution,
+out the door" hook, the two anonymized client stories, heavy Jeffrey attribution,
 an honest alpha boundary. But it is **stat-heavy, not arc-driven**: a 21-phase
 rev-7/8/9 status spreadsheet, "145/101/30/365" counts, PR references (#46-50)
 dominate the middle. That is the II-2a anti-pattern — pinned numbers from one
@@ -29,14 +29,14 @@ Both READMEs follow the same arc the site follows:
   is going*: 25 years of operational discipline, now turned on AI-assisted
   software. Numbers serve the arc (make it concrete); they never replace it. No
   leading with per-run export counts or phase-status spreadsheets.
-- **Jeff Emanuel's substrate, cited absolutely.** NTM, Agent Mail, beads, CASS,
-  jsm, dcg, ubs are Jeff's (Dicklesworthstone) — every load-bearing piece named
+- **Jeffrey Emanuel's substrate, cited absolutely.** NTM, Agent Mail, beads, CASS,
+  jsm, dcg, ubs are Jeffrey's (Dicklesworthstone) — every load-bearing piece named
   and credited. flywheel and skillos are Joshua's, *on top of* that substrate.
   (skillos already does this well — keep it.)
 - **Honest alpha boundary.** What is real vs. aspirational, stated plainly. No
   overpromise. (skillos does this well — "the alpha boundary today is real" —
   flywheel must too.)
-- **The give-it-away / trust-not-sales philosophy.** Jeff's rulebook: make it
+- **The give-it-away / trust-not-sales philosophy.** Jeffrey's rulebook: make it
   available, document the sharp edges, let the work earn trust. Soft close —
   a 20-minute Peel session, never a sales push.
 - **First-person Joshua**, brand-voice gate as the floor, no banned words, no
@@ -44,7 +44,7 @@ Both READMEs follow the same arc the site follows:
 - **Public-first / contributor-below-the-fold.** The public study front door
   comes first. Internal operator/worker onboarding moves below the fold or to
   `CONTRIBUTING.md` / `AGENTS.md`. (skillos already does "For peer operators
-  running Jeff's stack — Below the fold." flywheel must adopt the same split.)
+  running Jeffrey's stack — Below the fold." flywheel must adopt the same split.)
 
 ## The README spine — section order, both repos
 
@@ -53,7 +53,7 @@ Both READMEs follow the same arc the site follows:
    AI-assisted software. skillos: keep the "your company's skills are trapped"
    hook — it already lands. Lead with the why, not a quickstart, not a stat.
 
-2. **The foundation — Jeff Emanuel's substrate.** Named and credited. What each
+2. **The foundation — Jeffrey Emanuel's substrate.** Named and credited. What each
    piece does, where to get it.
 
 3. **What this repo is.** The thing itself, explained study-grade. flywheel =

@@ -21,7 +21,7 @@ The page must answer that in one sentence:
 
 ## Reference Distillation
 
-The Jeff Emanuel reference pattern is not a component library. It is a way of
+The Jeffrey Emanuel reference pattern is not a component library. It is a way of
 making a technical idea feel alive before the reader has to understand the
 details.
 
@@ -34,13 +34,13 @@ Current reference surfaces reviewed on 2026-05-13 and refreshed on 2026-05-14:
 
 The useful pattern to adapt:
 
-| Jeff pattern | What it does | ZestStream translation |
+| Jeffrey pattern | What it does | ZestStream translation |
 |---|---|---|
 | A named world appears immediately. | The reader lands inside a system, not a brochure. | The first viewport is the ZestStream operating room: disconnected SMB tools, manual glue, and one bounded workflow slice under inspection. |
 | The first concept is sharp. | "Cancel-correct runtime" and "Monster terminal kernel" make the product memorable. | "Your business already has the data. The work is hidden between tools." |
 | The machinery is visible. | Architecture diagrams, terminal renders, project graphs, counters, and live demos make depth tangible. | Show the workflow map, slice boundary, proof trail, and blocked claims as on-screen instruments. |
 | Proof escalates by scroll depth. | Casual readers get the idea; technical readers can keep drilling. | SMB owners see the method in plain language; reviewers can open proof drawers and evidence links. |
-| The maker is accountable. | Jeff's name, work volume, project graph, and contact path sit near the surface. | Joshua is the operator. The page should not hide behind a corporate voice. |
+| The maker is accountable. | Jeffrey's name, work volume, project graph, and contact path sit near the surface. | Joshua is the operator. The page should not hide behind a corporate voice. |
 | The style is advanced but not timid. | Big type, coded status language, instrument panels, and live-feeling visuals signal seriousness. | Use strong ZestStream visual primitives: operating map, yuzu slice, proof rail, blocked-over-bluffing status, not stock SaaS cards. |
 | Each route feels like the same product world. | Navigation moves from hero to demos, architecture, docs, and source without losing the visual language. | Every Flywheel page must use the shared scene shell, proof language, and Yuzu control grammar. Updating only `site/index.html` is a failing implementation. |
 | Dense technical depth stays available. | Developer-heavy pages keep architecture, glossary, source, and demos nearby. | SMB pages lead with trapped work and owner safety; reviewer and developer routes expose commands and receipts after the owner story lands. |
@@ -90,7 +90,7 @@ reuse the same core primitives so the visitor experiences one system:
 | `site/about/index.html` | Operator room | Joshua/ZestStream accountability, public contact, and privacy stance. |
 | `site/contact/index.html` | Safe intake room | Redacted-message guidance and direct operator routing. |
 
-Jeff's strongest surfaces make each page feel like a different instrument in
+Jeffrey's strongest surfaces make each page feel like a different instrument in
 the same system. Flywheel must do the same for SMB adoption: the tone is less
 developer-dense, but the depth and designed-world feeling should remain.
 
@@ -269,8 +269,8 @@ Message:
 - New tools are isolated, tested, and promoted only when proof supports them.
 - The owner does not need to run NTM, Agent Mail, Beads, SkillOS, Claude,
   Codex, Gemini, or OpenClaw to benefit from the method.
-- Jeff Emanuel's public work can be attributed where it informs the substrate.
-  ZestStream must never claim Jeff's work as Joshua's.
+- Jeffrey Emanuel's public work can be attributed where it informs the substrate.
+  ZestStream must never claim Jeffrey's work as Joshua's.
 
 Owner-facing control language:
 

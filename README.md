@@ -17,11 +17,12 @@ well enough that you can study it, run it, and decide what you trust.
 
 ## The Foundation
 
-Flywheel stands on open-source work from Jeff Emanuel, also known as
+Flywheel stands on open-source work from
+[Jeffrey Emanuel](https://www.jeffreyemanuel.com), also known as
 Dicklesworthstone. I cite that directly because attribution is part of the
 method.
 
-| Jeff substrate | What it gives the work |
+| Jeffrey substrate | What it gives the work |
 |---|---|
 | NTM | Named terminal sessions and panes so agent work has stable places to run. |
 | Agent Mail | Durable messages, acknowledgements, and thread history between agents. |
@@ -104,7 +105,7 @@ Then read [`docs/getting-started/first-run.md`](docs/getting-started/first-run.m
 
 ## The Deal
 
-You can use Jeff Emanuel's tools directly. You can clone Flywheel and SkillOS
+You can use Jeffrey Emanuel's tools directly. You can clone Flywheel and SkillOS
 and run the public path without me. I am publishing the method because trust is
 earned faster when the work is inspectable.
 

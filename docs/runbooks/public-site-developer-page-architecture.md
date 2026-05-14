@@ -4,7 +4,7 @@ Decided 2026-05-14 by Joshua. The current `site/for-developers/index.html`
 "reads like a bad book": wall-to-wall internal jargon ("reduced lane",
 "4/4 supported agent lanes", "no ambient substrate", "isolated runtime
 receipts"), meta-voice about its own proof machinery, the *SMB-owner* canon
-line on a developer page, and — most telling — **it never mentions Jeff
+line on a developer page, and — most telling — **it never mentions Jeffrey
 Emanuel at all**, when his open-source substrate is the foundation the whole
 ecosystem stands on.
 
@@ -29,8 +29,8 @@ in their own environment, without Joshua. Framed by trust, not sales.
 ## Grounding constraints — non-negotiable
 
 - **Attribution (brand-voice hard rule).** NTM, Agent Mail, beads, CASS are
-  **Jeff Emanuel's** work (Dicklesworthstone) — always cited, never attributed
-  to Joshua. flywheel and skillos are Joshua's, built *on top of* Jeff's
+  **Jeffrey Emanuel's** work (Dicklesworthstone) — always cited, never attributed
+  to Joshua. flywheel and skillos are Joshua's, built *on top of* Jeffrey's
   substrate. Get this exactly right or the page is a hard reject.
 - **Written for the public-repos state.** Joshua's decision: flywheel and
   skillos go public so they are downloadable — the page and the repo flip ship
@@ -54,23 +54,23 @@ in their own environment, without Joshua. Framed by trust, not sales.
    working, open, curtain pulled back. Job: the developer knows they are
    looking at a working system they can take, not a brochure.
 
-2. **The foundation — Jeff Emanuel's substrate.**
-   Developers need to know about Jeff's body of work. Name the actual tools —
-   NTM, Agent Mail, beads, CASS — credit Jeff Emanuel (Dicklesworthstone),
+2. **The foundation — Jeffrey Emanuel's substrate.**
+   Developers need to know about Jeffrey's body of work. Name the actual tools —
+   NTM, Agent Mail, beads, CASS — credit Jeffrey Emanuel (Dicklesworthstone),
    note they are open source and downloadable, and explain in plain terms what
-   each one does. "I did not build the foundation — Jeff Emanuel did, and it is
+   each one does. "I did not build the foundation — Jeffrey Emanuel did, and it is
    the most capable agent substrate I have found. Here is what each piece does,
    and where to get it." Job: orient the developer to the real foundation;
    this is the first block of study material.
 
 3. **What I built on top — flywheel + skillos.**
-   The ecosystem Joshua built on Jeff's substrate. What it does: parallelizes
+   The ecosystem Joshua built on Jeffrey's substrate. What it does: parallelizes
    work across multiple agents and multiple models, all feeding back into a
    common, locally-produced ecosystem; turns information found on the internet
    into **testable, reproducible knowledge packs** for agents; and wires
    operational protocols using the flywheel substrate. Job: the developer
    understands the thing that is uniquely Joshua's — and why it is more than
-   the sum of Jeff's tools.
+   the sum of Jeffrey's tools.
 
 4. **How it works — the architecture.**
    The study-grade depth section. Walk the loop: parallel agents → multiple
@@ -80,14 +80,14 @@ in their own environment, without Joshua. Framed by trust, not sales.
    genuinely explanatory — concrete, not abstract.
 
 5. **Take it — the two open doors.**
-   (a) Use the same open-source foundation Joshua uses, if you see fit — Jeff's
+   (a) Use the same open-source foundation Joshua uses, if you see fit — Jeffrey's
    tools, where to start. (b) Download flywheel + skillos into your own
    environment, usable without Joshua — clone, `install.sh` (scoped, dry-run
    capable, installs to `~/.flywheel/engine`, touches nothing else), run. Job:
    the developer has a concrete, real first step for each door.
 
 6. **The deal — trust, not sales.**
-   The philosophy, stated plainly: this largely follows Jeff's rulebook — give
+   The philosophy, stated plainly: this largely follows Jeffrey's rulebook — give
    it away for free. When people get stuck, they can pay Joshua to come to the
    rescue — and that happens through trust earned by the work being good and
    open, never through sales pressure. Job: the soft, honest close — "it is all

@@ -2370,7 +2370,7 @@ textarea {
 
 /* ── TelemetryBar — static port of @zeststream/ui TelemetryBar.
    Canonical React source: packages/zeststream-ui/src/components/TelemetryBar.tsx
-   Jeff Emanuel design pattern C5: fake-but-coherent system status as
+   Jeffrey Emanuel design pattern C5: fake-but-coherent system status as
    navigational texture, making the page feel like a live system. */
 .zs-telemetry {
   display: flex;
