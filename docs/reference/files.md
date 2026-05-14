@@ -20,6 +20,7 @@ Flywheel keeps public state repo-local.
 | `receipts/agent-lanes/<lane>.json` | Strict `flywheel.agent_lane_runtime_receipt.v0` proof before an agent lane can move from compatibility target to supported copy, or `flywheel.agent_lane_blocker_receipt.v0` evidence naming why the lane remains blocked. |
 | `docs/evidence/publication-evidence.md` | Public trust-claim evidence index. |
 | `docs/evidence/publication-blocker-coverage.md` | Public blocker-code ownership and closure-proof map. |
+| `docs/evidence/publication-goal-completion-audit.md` | Prompt-to-artifact audit for the active publication goal and remaining release blockers. |
 | `docs/evidence/external-review-log.jsonl` | Sanitized external-review evidence used by the public release workflow. |
 | `docs/getting-started/first-run.md` | First-run guide. |
 | `docs/runbooks/public-user-journey-pack.md` | SkillOS-compatible public journey map requiring visible wording, visual cues, proof refs, signoff status, and blocker/skip receipt refs for each public asset. |

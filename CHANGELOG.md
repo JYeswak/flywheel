@@ -28,6 +28,9 @@ public release line.
 - SkillOS-compatible public user journey pack and validator requiring every
   public asset to map persona lane, journey stage, visible wording, visual cue,
   CTA, proof refs, signoff status, and blocker/skip receipt refs before signoff.
+- Publication goal completion audit and validator that map the active `/goal`
+  to concrete artifacts while preserving the current not-complete verdict until
+  live public readiness blockers clear.
 
 ### Changed
 

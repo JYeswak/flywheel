@@ -56,6 +56,7 @@ jobs:
           bash tests/cutover-receipts.sh
           bash tests/external-review-gate.sh
           bash tests/public-user-journey-pack.sh
+          bash tests/publication-goal-completion-audit.sh
           bash tests/publication-readiness.sh
           bash tests/true-publication-registry-validate.sh
           bash tests/preflight-fixtures.sh
@@ -92,6 +93,7 @@ jobs:
             tests/cutover-receipts.sh \
             tests/external-review-gate.sh \
             tests/public-user-journey-pack.sh \
+            tests/publication-goal-completion-audit.sh \
             tests/publication-readiness.sh \
             tests/true-publication-registry-validate.sh \
             tests/preflight-fixtures.sh
@@ -140,5 +142,6 @@ jobs:
             docs/runbooks/public-site-smb-journey-wireframe.md \
             docs/stories/public-journey-and-redaction.md \
             docs/evidence/publication-evidence.md \
+            docs/evidence/publication-goal-completion-audit.md \
             docs/concepts/*.md \
             docs/reference/*.md

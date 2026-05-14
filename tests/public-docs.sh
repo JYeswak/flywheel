@@ -98,6 +98,7 @@ for rel in \
   docs/concepts/evidence-contracts.md \
   docs/evidence/publication-evidence.md \
   docs/evidence/publication-blocker-coverage.md \
+  docs/evidence/publication-goal-completion-audit.md \
   docs/evidence/asupersync-gated-adoption.md \
   docs/evidence/asupersync-poc-receipt.template.json \
   docs/evidence/asupersync-poc-receipt.local.json \
@@ -128,8 +129,12 @@ require_literal "docs/evidence/publication-evidence.md" "headBranch" "publicatio
 require_literal "docs/evidence/publication-evidence.md" "non-draft, non-prerelease release" "publication evidence rejects prerelease release proof"
 require_literal "docs/evidence/publication-evidence.md" "sha256:" "publication evidence requires release asset digests"
 require_literal "docs/evidence/publication-evidence.md" "docs/evidence/publication-blocker-coverage.md" "publication evidence links blocker coverage"
+require_literal "docs/evidence/publication-evidence.md" "docs/evidence/publication-goal-completion-audit.md" "publication evidence links goal completion audit"
 require_literal "docs/evidence/publication-blocker-coverage.md" "readiness_blocker_coverage" "blocker coverage names registry contract"
 require_literal "docs/evidence/publication-blocker-coverage.md" "joshua_release_signoff_missing" "blocker coverage includes final signoff blocker"
+require_literal "docs/evidence/publication-goal-completion-audit.md" "Prompt-To-Artifact Checklist" "goal completion audit maps prompt to artifacts"
+require_literal "docs/evidence/publication-goal-completion-audit.md" "Current verdict: \`not complete\`." "goal completion audit blocks premature completion"
+require_literal "docs/evidence/publication-goal-completion-audit.md" "remote_repo_private" "goal completion audit includes live remote blocker"
 require_literal "docs/evidence/asupersync-gated-adoption.md" "Status: \`gated-evaluation\`." "asupersync evidence packet keeps gated status"
 require_literal "docs/evidence/asupersync-gated-adoption.md" "add Asupersync to the public install path" "asupersync evidence packet blocks install dependency"
 require_literal "docs/evidence/asupersync-poc-receipt.template.json" "flywheel.asupersync_poc_receipt.v0" "asupersync POC receipt template names schema"
