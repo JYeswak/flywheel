@@ -17,7 +17,10 @@ Flywheel keeps public state repo-local.
 | `scripts/live_site_probe.py` | First-party deployed site page and asset probe. |
 | `scripts/validate_cutover_receipts.py` | Saved release cutover receipt bundle verifier. |
 | `scripts/validate_user_journey_pack.py` | Public user journey pack verifier. |
+| `scripts/validate_story_system_package.py` | Shared story-system package verifier. |
 | `scripts/extract_git_story.py` | Git-history trajectory and owner message-pack extractor for public story evidence. |
+| `packages/zeststream-story-system/story-system.json` | Reusable owner-message, proof-state, visual-primitive, and blocked-phrase contract for ZestStream frontend surfaces. |
+| `packages/zeststream-story-system/tokens.css` | Reusable CSS token package mirrored by `site/visual-system.css`. |
 | `receipts/agent-lanes/<lane>.json` | Strict `flywheel.agent_lane_runtime_receipt.v0` proof before an agent lane can move from compatibility target to supported copy, or `flywheel.agent_lane_blocker_receipt.v0` evidence naming why the lane remains blocked. |
 | `docs/brand/naming-conventions.md` | Public naming contract separating ZestStream, the Yuzu Method, Flywheel, SkillOS, upstream substrate, and proof surfaces. |
 | `docs/evidence/publication-evidence.md` | Public trust-claim evidence index. |

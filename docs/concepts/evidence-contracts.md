@@ -15,8 +15,11 @@ Common evidence surfaces:
 | `scripts/live_site_probe.py --json` | Deployed first-party site pages and assets. |
 | `scripts/validate_cutover_receipts.py --json` | Saved cutover receipt bundle replay for final release evidence. |
 | `scripts/validate_user_journey_pack.py --json` | SkillOS-compatible public user journey pack validator with journey-step, visual-cue, evidence-ref, and skip/blocker receipt checks. |
+| `scripts/validate_story_system_package.py --json` | Reusable ZestStream story-system package validator that checks story arc, trust objections, visual primitives, blocked phrases, and CSS token parity. |
 | `scripts/extract_git_story.py --json` | Git-derived trajectory and owner message-pack evidence so public copy can show the proof path instead of relying on one session's memory. |
 | `docs/brand/naming-conventions.md` | Public naming contract separating company, method, engine, capability-control plane, upstream substrate, and proof surfaces. |
+| `packages/zeststream-story-system/story-system.json` | Shared public story grammar for Flywheel, ClutterFreeSpaces, Mobile Eats, and future ZestStream frontend surfaces. |
+| `packages/zeststream-story-system/tokens.css` | Shared ZestStream visual tokens mirrored by the static Flywheel site and intended for Next.js package adoption. |
 | `docs/evidence/publication-evidence.md` | Public index of trust claims, local receipts, and live evidence still required. |
 | `docs/evidence/publication-blocker-coverage.md` | Public mapping from live readiness codes to owner and closure proof. |
 | `docs/evidence/private-review-signoff-packet.md` | Private-review map for the site, story, evidence, developer path, agent-lane proof, and remaining public blockers; not public release approval. |

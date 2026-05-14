@@ -117,6 +117,10 @@ for rel in \
   docs/reference/commands.md \
   docs/reference/files.md \
   docs/reference/troubleshooting.md \
+  packages/zeststream-story-system/package.json \
+  packages/zeststream-story-system/README.md \
+  packages/zeststream-story-system/story-system.json \
+  packages/zeststream-story-system/tokens.css \
   docs/stories/flywheel-trajectory.md; do
   require_file "$rel"
 done
@@ -168,7 +172,9 @@ require_literal "docs/concepts/evidence-contracts.md" "docs/evidence/external-re
 require_literal "docs/concepts/evidence-contracts.md" "scripts/live_site_probe.py" "evidence concept names live site probe"
 require_literal "docs/concepts/evidence-contracts.md" "scripts/validate_cutover_receipts.py" "evidence concept names cutover receipt replay"
 require_literal "docs/concepts/evidence-contracts.md" "scripts/validate_user_journey_pack.py" "evidence concept names user journey pack validator"
+require_literal "docs/concepts/evidence-contracts.md" "scripts/validate_story_system_package.py" "evidence concept names story system validator"
 require_literal "docs/concepts/evidence-contracts.md" "scripts/extract_git_story.py" "evidence concept names git story extractor"
+require_literal "docs/concepts/evidence-contracts.md" "packages/zeststream-story-system/story-system.json" "evidence concept names story system package"
 require_literal "docs/concepts/evidence-contracts.md" "docs/evidence/private-review-signoff-packet.md" "evidence concept names private review packet"
 require_literal "docs/concepts/evidence-contracts.md" "docs/evidence/flywheel-trajectory.json" "evidence concept names trajectory evidence"
 require_literal "docs/concepts/evidence-contracts.md" "docs/stories/flywheel-trajectory.md" "evidence concept names trajectory story"
@@ -226,6 +232,8 @@ require_literal "docs/runbooks/repo-trajectory-story-pack.md" "visual_primitives
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "generic SaaS language" "repo trajectory pack blocks generic SaaS language"
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "human-approved slices" "repo trajectory pack uses owner-control language"
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "shared React components" "repo trajectory pack targets reusable frontend components"
+require_literal "docs/runbooks/repo-trajectory-story-pack.md" "packages/zeststream-story-system/" "repo trajectory pack names shared package"
+require_literal "docs/runbooks/repo-trajectory-story-pack.md" "scripts/validate_story_system_package.py" "repo trajectory pack names package validator"
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "ClutterFreeSpaces" "repo trajectory pack applies beyond Flywheel"
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "Mobile Eats" "repo trajectory pack applies to Mobile Eats"
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "falls back to Flywheel's public redaction" "repo trajectory pack documents fallback redaction"
@@ -277,12 +285,14 @@ require_literal "docs/reference/commands.md" "scripts/local-actions-preflight.sh
 require_literal "docs/reference/commands.md" "scripts/live_site_probe.py" "command reference includes live site probe"
 require_literal "docs/reference/commands.md" "scripts/validate_cutover_receipts.py" "command reference includes cutover receipt validation"
 require_literal "docs/reference/commands.md" "scripts/validate_user_journey_pack.py" "command reference includes user journey validation"
+require_literal "docs/reference/commands.md" "scripts/validate_story_system_package.py" "command reference includes story system validation"
 require_literal "docs/reference/commands.md" "scripts/extract_git_story.py" "command reference includes git story extraction"
 require_literal "docs/reference/commands.md" "zeststream.repo_story_message.v0" "command reference names story message pack"
 require_literal "docs/reference/commands.md" "--redaction-table" "command reference documents story redaction table"
 require_literal "docs/reference/commands.md" "flywheel:de-personalization-table.yaml" "command reference documents fallback redaction table"
 require_literal "docs/reference/files.md" ".flywheel/last_closeout_receipt.json" "file reference includes closeout receipt"
 require_literal "docs/reference/files.md" "docs/brand/naming-conventions.md" "file reference includes naming contract"
+require_literal "docs/reference/files.md" "packages/zeststream-story-system/story-system.json" "file reference includes story system package"
 require_literal "docs/reference/files.md" "zeststream.repo_story_message.v0" "file reference names story message pack"
 require_literal "docs/reference/files.md" "receipts/agent-lanes/<lane>.json" "file reference includes agent-lane receipts"
 require_literal "docs/reference/files.md" "flywheel.agent_lane_blocker_receipt.v0" "file reference includes blocked agent-lane receipt schema"

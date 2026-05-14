@@ -32,6 +32,9 @@ public release line.
   trajectory evidence, embedded `zeststream.repo_story_message.v0` owner message
   pack, and homepage trajectory rail so public story copy is grounded in commit
   history instead of one session's memory.
+- Candidate `@zeststream/story-system` package with shared story grammar, proof
+  states, visual primitives, blocked phrases, CSS tokens, and drift validator
+  for Flywheel-powered frontend repos.
 - Private review signoff packet that gives the reviewer one map for the live
   private site, story trajectory, journey contract, evidence, developer path,
   agent-lane proof, and remaining public-release blockers.
@@ -57,6 +60,6 @@ public release line.
 
 - Public evidence index added at `docs/evidence/publication-evidence.md` to map
   v0.2 trust claims to local verifiers and live evidence still required.
-- Latest extraction evidence: 14,708 files classified, 10,226 public-safe
-  artifacts copied, 4,040 private/manual-review paths excluded, and 7,453
+- Latest extraction evidence: 14,714 files classified, 10,231 public-safe
+  artifacts copied, 4,041 private/manual-review paths excluded, and 7,453
   review rows signed in the v0.2 publication lane.

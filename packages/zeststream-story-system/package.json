@@ -1,0 +1,16 @@
+{
+  "name": "@zeststream/story-system",
+  "version": "0.0.0-public-candidate",
+  "private": true,
+  "description": "Reusable ZestStream story, proof, and visual grammar for Flywheel-powered public surfaces.",
+  "type": "module",
+  "exports": {
+    "./story-system.json": "./story-system.json",
+    "./tokens.css": "./tokens.css"
+  },
+  "files": [
+    "README.md",
+    "story-system.json",
+    "tokens.css"
+  ]
+}

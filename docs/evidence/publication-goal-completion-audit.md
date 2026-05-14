@@ -47,7 +47,7 @@ Current verdict: `not complete`.
 | SkillOS integration boundary | `docs/concepts/skillos-boundary.md`, `docs/runbooks/public-user-journey-pack.md`, SkillOS-compatible schema | `bash tests/public-docs.sh`; `python3 scripts/validate_user_journey_pack.py --json` | Locally verified; public copy names SkillOS only as capability-control-plane integration point. |
 | Proof-product surfaces integrated without becoming mission ceiling | `docs/evidence/publication-evidence.md`, `docs/evidence/asupersync-gated-adoption.md`, proof-surface language in charter/site | `bash tests/upstream-substrate-adoption.sh`; `bash tests/public-docs.sh`; live site private review | Locally verified; Asupersync remains gated evaluation. |
 | SMB business-owner trust journey | `site/`, `docs/runbooks/public-site-smb-journey-wireframe.md`, `docs/runbooks/public-user-journey-pack.md` | Commit `fdb7f3ad`; `bash tests/website-static.sh`; `bash tests/website-accessibility.sh`; `python3 scripts/live_site_probe.py --base-url https://flywheel.zeststream.ai/ --json` | Private-live verified with the deep SMB operating-room site across all six pages, Joshua final site signoff still pending. |
-| Git-derived public story trajectory and owner message pack | `scripts/extract_git_story.py`, `docs/stories/flywheel-trajectory.md`, `docs/evidence/flywheel-trajectory.json`, `docs/runbooks/repo-trajectory-story-pack.md` | `bash tests/git-story-extract.sh`; `bash tests/public-docs.sh`; `zeststream.repo_story_message.v0` message pack with trust objections, visual primitives, proof translations, and Next.js storytelling targets | Locally verified as a reusable story mechanism; private-live site still needs final signoff against the stronger message contract. |
+| Git-derived public story trajectory, owner message pack, and shared story package | `scripts/extract_git_story.py`, `docs/stories/flywheel-trajectory.md`, `docs/evidence/flywheel-trajectory.json`, `docs/runbooks/repo-trajectory-story-pack.md`, `packages/zeststream-story-system/` | `bash tests/git-story-extract.sh`; `bash tests/story-system-package.sh`; `bash tests/public-docs.sh`; `zeststream.repo_story_message.v0` message pack with trust objections, visual primitives, proof translations, and Next.js storytelling targets | Locally verified as a reusable story mechanism and package foundation; private-live site still needs final signoff against the stronger message contract. |
 | Private review signoff map | `docs/evidence/private-review-signoff-packet.md` | `bash tests/public-docs.sh`; `python3 scripts/publication_readiness.py --json` | Locally verified as a review aid; it explicitly does not grant public release approval. |
 | External developer run path | `README.md`, `docs/getting-started/first-run.md`, `docs/reference/commands.md`, `docs/reference/files.md` | `bash tests/public-links.sh`; `bash tests/public-docs.sh`; `bash tests/installer-smoke.sh`; `bash tests/journey-smoke.sh` | Locally verified; public GitHub availability still blocked. |
 | Blocker/gap tracking to closure | `docs/evidence/publication-blocker-coverage.md`, `.flywheel/PLANS/public-share-readiness-2026-05-12/`, Beads | `python3 .flywheel/scripts/true-publication-registry-validate.py --json`; `bash tests/true-publication-registry-validate.sh` | Coverage verified; six release blockers remain open. |
@@ -88,13 +88,14 @@ not substitutes for real public GitHub, release assets, hosted runs, and Joshua
 signoff.
 
 Latest public export evidence: `scripts/assemble.py --run-id
-codex-public-export-20260514T0218Z --clean --json` passed with 14,708
-classified files, 10,226 copied public-safe files, 4,040 denylist exclusions,
+codex-public-export-20260514T0224Z --clean --json` passed with 14,714
+classified files, 10,231 copied public-safe files, 4,041 denylist exclusions,
 and 7,453 manual-review rows. Staged checks passed for publication readiness,
 public docs, this audit, website static/accessibility, user-journey pack,
-git-story extraction, the embedded owner message pack, public links, top-level
-files, release assets, cutover receipts, agent lanes, isolated agent-lane smoke,
-journey smoke, public blocker coverage, and the depersonalization scan.
+git-story extraction, the embedded owner message pack, story-system package,
+public links, top-level files, release assets, cutover receipts, agent lanes,
+isolated agent-lane smoke, journey smoke, public blocker coverage, and the
+depersonalization scan.
 
 ## Audit Closeout Rule
 

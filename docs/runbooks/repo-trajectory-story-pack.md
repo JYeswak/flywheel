@@ -174,6 +174,21 @@ should inherit:
 - a repo-local generated story artifact wired into the page, not manually
   copied from the last session.
 
+The candidate shared package lives at `packages/zeststream-story-system/`:
+
+| File | Job |
+|---|---|
+| `package.json` | Names the reusable `@zeststream/story-system` export surface. |
+| `story-system.json` | Carries story arc stages, proof states, visual primitives, voice rules, blocked phrases, and Next.js targets. |
+| `tokens.css` | Carries reusable CSS variables mirrored by `site/visual-system.css`. |
+
+Validate package drift with:
+
+```bash
+python3 scripts/validate_story_system_package.py --json
+bash tests/story-system-package.sh
+```
+
 ## Acceptance Gate
 
 A repo trajectory story is acceptable when:
@@ -185,12 +200,16 @@ A repo trajectory story is acceptable when:
    primitives, proof translations, and blocked phrases.
 4. The extractor records which `redaction_table` was used and works when the
    target repo has not adopted a repo-local table yet.
-5. Generated JSON and Markdown contain no private paths, client names, or
+5. `packages/zeststream-story-system/story-system.json` matches the generated
+   message pack for stages, primitives, CTA, core offer, and objection count.
+6. `packages/zeststream-story-system/tokens.css` matches required public site
+   visual tokens.
+7. Generated JSON and Markdown contain no private paths, client names, or
    unsupported claims.
-6. The public page includes the trajectory as a buyer journey, not a developer
+8. The public page includes the trajectory as a buyer journey, not a developer
    changelog.
-7. The page links to the generated story artifact for reviewers.
-8. Any claim based on runtime support, release status, or public availability
+9. The page links to the generated story artifact for reviewers.
+10. Any claim based on runtime support, release status, or public availability
    still points to its own proof receipt.
 
 Flywheel's current generated artifacts:

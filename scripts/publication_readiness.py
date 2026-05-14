@@ -80,6 +80,7 @@ REQUIRED_LOCAL_FILES = [
     "scripts/extract_git_story.py",
     "scripts/validate_cutover_receipts.py",
     "scripts/validate_user_journey_pack.py",
+    "scripts/validate_story_system_package.py",
     "scripts/live_site_probe.py",
     "scripts/website_accessibility.py",
     "scripts/contact_route_probe.py",
@@ -98,6 +99,7 @@ REQUIRED_LOCAL_FILES = [
     "tests/publication-readiness.sh",
     "tests/public-user-journey-pack.sh",
     "tests/git-story-extract.sh",
+    "tests/story-system-package.sh",
     "tests/installer-smoke.sh",
     "tests/journey-smoke.sh",
     "tests/agent-lane-probe.sh",
@@ -117,7 +119,13 @@ REQUIRED_LOCAL_FILES = [
     "site/about/index.html",
     "site/contact/index.html",
     "site/styles.css",
+    "site/visual-system.css",
     "site/assets/loop-map.svg",
+    "site/assets/operating-room-map.svg",
+    "packages/zeststream-story-system/package.json",
+    "packages/zeststream-story-system/README.md",
+    "packages/zeststream-story-system/story-system.json",
+    "packages/zeststream-story-system/tokens.css",
 ]
 REQUIRED_WORKFLOWS = {"CI", "Installer Smoke", "Release", "Site Deploy"}
 SUCCESS_CONCLUSIONS = {"success"}
