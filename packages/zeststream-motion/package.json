@@ -1,0 +1,55 @@
+{
+  "name": "@zeststream/motion",
+  "version": "0.0.1",
+  "description": "ZestStream motion primitives — SpringSheet, SpringChip, ConfidenceBadge, StreamingText, SkeletonMatch. Reusable React components built on @zeststream/motion-tokens spring presets. Reduced-motion safe.",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./spring-sheet": "./src/components/SpringSheet.tsx",
+    "./spring-chip": "./src/components/SpringChip.tsx",
+    "./confidence-badge": "./src/components/ConfidenceBadge.tsx",
+    "./streaming-text": "./src/components/StreamingText.tsx",
+    "./skeleton-match": "./src/components/SkeletonMatch.tsx"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.0",
+    "typescript": "^5.9.0"
+  },
+  "keywords": [
+    "zeststream",
+    "motion",
+    "spring",
+    "ai-native",
+    "streaming-text",
+    "confidence-badge",
+    "react"
+  ],
+  "zeststream": {
+    "layer": "ui",
+    "sub_shape": "REACT-MOTION-LIBRARY",
+    "wraps": "@zeststream/motion-tokens spring presets",
+    "consumers": ["mobile-eats", "clutterfreespaces", "flywheel-docs"],
+    "design_sources": [
+      "Robinhood — spring physics budget (A2): damping 22-28, stiffness 300-400",
+      "Citizen — live-confirmation pulse (A3): one ring, 1200ms expand, 4s cycle",
+      "Linear — instant-snap menus, zero delay before motion starts",
+      "AI-native 2025-2026 — streaming text with cursor-first, skeleton-matches-layout, categorical confidence signals"
+    ]
+  }
+}

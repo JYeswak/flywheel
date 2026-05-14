@@ -187,8 +187,12 @@ else
 fi
 
 # ── FQ-07 Accessibility (aria-labels) ─────────────────────────────────────
+# Scans the whole app dir (not just components/) so the src/components +
+# src/pages layout used by CFS-style repos is covered, not just the
+# next-app/components layout used by mobile-eats. Fixed 2026-05-14 after
+# FQ-07 false-failed CFS, which has ARIA in src/pages/.
 if [[ -n "$NEXT_APP" ]]; then
-  aria_count=$(num "$(count_matches "$NEXT_APP/components" "aria-label|aria-labelledby|role=" -name "*.tsx")")
+  aria_count=$(num "$(count_matches "$NEXT_APP" "aria-label|aria-labelledby|role=" -name "*.tsx")")
   if [[ "$aria_count" -gt 0 ]]; then
     check "FQ-07" "ARIA labels on interactive elements" "pass" "${aria_count} aria-label/role declarations"
   else
