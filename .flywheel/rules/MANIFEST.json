@@ -1,7 +1,7 @@
 {
   "canonical_index": ".flywheel/AGENTS-CANONICAL.md",
   "round_trip_command": "cat .flywheel/rules/L*.md | shasum -a 256",
-  "rule_count": 107,
+  "rule_count": 112,
   "rules": [
     {
       "id": "L48",
@@ -947,7 +947,7 @@
       "id": "L144",
       "order": 95,
       "path": ".flywheel/rules/L095-L144-git-stash-janitor-fleet-hygiene.md",
-      "sha256": "e726c0a8877a14ada42de5c52fda9d4c3d24cfd206387e54499d83e8a9142098",
+      "sha256": "9964220f43a858c104c58283658d668983db4432c09e89479b8846c3694067f5",
       "shipped": "2026-05-08",
       "status": "long_term",
       "title": "GIT-JANITOR-FLEET-HYGIENE",
@@ -1067,14 +1067,64 @@
       "id": "L156",
       "order": 107,
       "path": ".flywheel/rules/L107-L156-inbox-discipline-0th-probe.md",
-      "sha256": "4a961f6170ed8ad37d731d00235f385f14f9320d8b9b8c67856f057bfcf2266f",
+      "sha256": "f2e0725c60c18572473cd004eb36590996c6c6d0057eaa762c8b7f26dd891b69",
       "shipped": "2026-05-11",
       "status": "long_term",
       "title": "INBOX-DISCIPLINE-0TH-PROBE",
       "trauma_class": "inbox-discipline-missed-during-deep-burndown-motion"
+    },
+    {
+      "id": "L157",
+      "order": 108,
+      "path": ".flywheel/rules/L108-L157-outbox-discipline-cross-orch-ship-notification.md",
+      "sha256": "aad762cd3fe88153929781558f6268d7c806da82d170dccaab865ead0d443aa0",
+      "shipped": "2026-05-11",
+      "status": "long_term",
+      "title": "OUTBOX-DISCIPLINE-CROSS-ORCH-SHIP-NOTIFICATION",
+      "trauma_class": "outbox-discipline-missed-when-codifying-doctrine-same-session"
+    },
+    {
+      "id": "L168",
+      "order": 109,
+      "path": ".flywheel/rules/L109-L168-every-consumer-repo-must-declare-zs-tenant-yaml-at-root.md",
+      "sha256": "a815600d58812b6c32f635a8f0b025c7d2367cc66d43c8fd18d69e2fbab23d37",
+      "shipped": "2026-05-12",
+      "status": "long_term",
+      "title": "EVERY-CONSUMER-REPO-MUST-DECLARE-ZS-TENANT-YAML-AT-ROOT",
+      "trauma_class": "cross-infisical-supabase-tenant-collision-catastrophic-regulatory-exposure"
+    },
+    {
+      "id": "L169",
+      "order": 110,
+      "path": ".flywheel/rules/L110-L169-jsm-first-search-before-hand-rolling-mandatory.md",
+      "sha256": "52e1e2d11e51f7e958708d0c8217478396426acd7c41e328bbf75374904befd1",
+      "shipped": "2026-05-12",
+      "status": "long_term",
+      "title": "JSM-FIRST-SEARCH-BEFORE-HAND-ROLLING-MANDATORY",
+      "trauma_class": "hand-rolled-substrate-when-jsm-already-ships-canonical"
+    },
+    {
+      "id": "L170",
+      "order": 111,
+      "path": ".flywheel/rules/L111-L170-every-consumer-repo-must-declare-3-user-journeys-minimum.md",
+      "sha256": "a1dd058bb16252adc40a3a93e3431f428592fda56be5971ec47b7f160a47adf4",
+      "shipped": "2026-05-12",
+      "status": "long_term",
+      "title": "EVERY-CONSUMER-REPO-MUST-DECLARE-3-USER-JOURNEYS-MINIMUM",
+      "trauma_class": "consumer-repo-ships-without-user-journey-validation"
+    },
+    {
+      "id": "L171",
+      "order": 112,
+      "path": ".flywheel/rules/L112-L171-skill-creation-requires-skillos-handoff.md",
+      "sha256": "fd0cae13d6c4e81c124c7f5f4a360bf8df26213ebf28a384073e3eb1a6fcc148",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "SKILL-CREATION-REQUIRES-SKILLOS-HANDOFF",
+      "trauma_class": "skill-shipped-without-skillos-handoff"
     }
   ],
-  "rules_body_sha256": "11c6068d4000222f01d4f3a1380522d04e82ae177a93ed4a09addbd55a166b87",
+  "rules_body_sha256": "2349b70b857bf732b9ef954b1068e498667a5bbee69687fb94bb45db3c074007",
   "schema_version": "agents-canonical-shards/v1",
   "source": "AGENTS.md"
 }

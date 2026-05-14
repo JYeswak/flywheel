@@ -145,19 +145,9 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 107 | L156 — INBOX-DISCIPLINE-0TH-PROBE | long_term | `.flywheel/rules/L107-L156-inbox-discipline-0th-probe.md` |
 | 108 | L157 — OUTBOX-DISCIPLINE-CROSS-ORCH-SHIP-NOTIFICATION | long_term | `.flywheel/rules/L108-L157-outbox-discipline-cross-orch-ship-notification.md` |
 | 109 | L168 — EVERY-CONSUMER-REPO-MUST-DECLARE-ZS-TENANT-YAML-AT-ROOT | long_term | `.flywheel/rules/L109-L168-every-consumer-repo-must-declare-zs-tenant-yaml-at-root.md` |
+| 110 | L169 — JSM-FIRST-SEARCH-BEFORE-HAND-ROLLING-MANDATORY | long_term | `.flywheel/rules/L110-L169-jsm-first-search-before-hand-rolling-mandatory.md` |
+| 111 | L170 — EVERY-CONSUMER-REPO-MUST-DECLARE-3-USER-JOURNEYS-MINIMUM | long_term | `.flywheel/rules/L111-L170-every-consumer-repo-must-declare-3-user-journeys-minimum.md` |
+| 112 | L171 — SKILL-CREATION-REQUIRES-SKILLOS-HANDOFF | long_term | `.flywheel/rules/L112-L171-skill-creation-requires-skillos-handoff.md` |
 <!-- END-RULES-INDEX -->
-
-<!-- BMBUB-PENDING (template held behind canonical for L154-L167; backfill on next propagator-class-aware-ownership-gate ship) -->
-
-## Tenant routing (Hard Rule — L168)
-
-Every consumer repo MUST declare its tenant routing at the repo root via `.zs-tenant.yaml`. Run `/zs:project-bootstrap <slug>` to generate the declaration + CI wiring.
-
-Required hooks once bootstrapped:
-- `pnpm secrets:doctor` (or equivalent) MUST pass in CI BEFORE deploy
-- DB migrations MUST gate on `zs-verify-supabase-tenant` against the declared Supabase ref
-- Deploy fails with: `"Run /zs:project-bootstrap <slug> to declare tenant routing for this repo."` if `.zs-tenant.yaml` is absent
-
-Origin: cross-Infisical-Supabase tenant collision (proof-product:1 TIER-3 <timestamp>; 66 migrations almost ran against {insurance-client} production). {operator}-directive PROMOTED-IMMEDIATE.
 
 <!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->
