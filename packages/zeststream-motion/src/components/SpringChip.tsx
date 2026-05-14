@@ -3,7 +3,7 @@
 /**
  * SpringChip — toggle/filter chip with spring physics on selection.
  *
- * Wraps @zeststream/motion-tokens springPresets.filterChip
+ * Wraps @zeststream/motion/tokens springPresets.filterChip
  * (damping 20, stiffness 400, mass 1 — snappy, 160ms settle).
  *
  * Design source — Robinhood (A2): spring physics for state changes, not

@@ -1,7 +1,7 @@
 {
   "name": "@zeststream/motion",
   "version": "0.0.1",
-  "description": "ZestStream motion primitives — SpringSheet, SpringChip, ConfidenceBadge, StreamingText, SkeletonMatch. Reusable React components built on @zeststream/motion-tokens spring presets. Reduced-motion safe.",
+  "description": "ZestStream motion primitives — SpringSheet, SpringChip, ConfidenceBadge, StreamingText, SkeletonMatch. Reusable React components with exported spring presets. Reduced-motion safe.",
   "type": "module",
   "license": "MIT",
   "private": true,
@@ -12,7 +12,8 @@
     "./spring-chip": "./src/components/SpringChip.tsx",
     "./confidence-badge": "./src/components/ConfidenceBadge.tsx",
     "./streaming-text": "./src/components/StreamingText.tsx",
-    "./skeleton-match": "./src/components/SkeletonMatch.tsx"
+    "./skeleton-match": "./src/components/SkeletonMatch.tsx",
+    "./tokens": "./src/tokens.ts"
   },
   "files": [
     "src",
@@ -43,7 +44,7 @@
   "zeststream": {
     "layer": "ui",
     "sub_shape": "REACT-MOTION-LIBRARY",
-    "wraps": "@zeststream/motion-tokens spring presets",
+    "wraps": "@zeststream/motion/tokens spring presets",
     "consumers": ["mobile-eats", "clutterfreespaces", "flywheel-docs"],
     "design_sources": [
       "Robinhood — spring physics budget (A2): damping 22-28, stiffness 300-400",

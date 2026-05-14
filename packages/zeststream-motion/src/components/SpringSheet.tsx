@@ -3,7 +3,7 @@
 /**
  * SpringSheet — bottom sheet with spring-physics open/close.
  *
- * Wraps @zeststream/motion-tokens springPresets.sheetSnap
+ * Wraps @zeststream/motion/tokens springPresets.sheetSnap
  * (damping 28, stiffness 300, mass 1 — settled, 240ms).
  *
  * Design source — Robinhood (A2) + Linear: sheets snap with physics, not

@@ -3,8 +3,8 @@
 Schema: `zeststream.motion_package.v0`
 Status: `candidate-shared-foundation`
 
-Reusable React motion primitives built on `@zeststream/motion-tokens` spring
-presets. Every component is reduced-motion safe — animations collapse to
+Reusable React motion primitives with exported spring presets at
+`@zeststream/motion/tokens`. Every component is reduced-motion safe — animations collapse to
 instant under `prefers-reduced-motion`, no transform.
 
 ## Design sources
@@ -25,6 +25,8 @@ instant under `prefers-reduced-motion`, no transform.
 | `ConfidenceBadge` | AI-native categorical confidence indicator. `verified / estimated / needs-review / stale` — not a percentage. A category tells the user how much to trust the output and what to do next. |
 | `StreamingText` | Word-by-word reveal for AI-streamed content. Cursor blinks before the first token so the user knows generation is happening. Word-by-word, not character (character reads as retro typewriter). |
 | `SkeletonMatch` | Skeleton loading state that matches the final layout exactly. Takes a `shape` describing final dimensions — no layout shift on load, because the skeleton dims matched. |
+| `springPresets` | Self-contained spring budgets for filter chips, sheets, and live pulses. |
+| `motionDurations` | Named duration values derived from the spring presets. |
 
 ## Installation
 
@@ -50,6 +52,7 @@ import { SpringChip, ConfidenceBadge, StreamingText } from "@zeststream/motion"
 ```
 
 Per-component import paths: `@zeststream/motion/spring-chip`, etc.
+Raw motion values are exported from `@zeststream/motion/tokens`.
 
 ## Reduced-motion safety
 
@@ -60,13 +63,12 @@ This is not optional. Every component:
 
 Tested against `(prefers-reduced-motion: reduce)`.
 
-## Relationship to @zeststream/motion-tokens
+## Relationship to motion tokens
 
-`@zeststream/motion-tokens` is the raw layer — spring configs, durations,
-easings as plain objects. `@zeststream/motion` is the component layer — those
-presets wired into reduced-motion-safe React components. Use motion-tokens when
-you're building a custom animated component; use motion when a primitive
-already fits.
+The raw layer lives inside this package as `@zeststream/motion/tokens`: spring
+configs, durations, and easings as plain objects. Use the token export when
+you're building a custom animated component; use the component exports when a
+primitive already fits.
 
 ## Development
 
@@ -78,5 +80,4 @@ pnpm typecheck    # tsc --noEmit, must exit 0
 ## Companion packages
 
 - **`@zeststream/ui`** — visual primitives (ProofRail, WorkflowMap, OperatingRoomHero, ...)
-- **`@zeststream/motion-tokens`** — raw spring presets this package wraps
 - **`@zeststream/story-system`** — brand voice schema + design tokens

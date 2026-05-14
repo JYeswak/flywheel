@@ -1,8 +1,8 @@
 /**
  * @zeststream/motion — ZestStream motion primitives
  *
- * Reusable React motion components built on @zeststream/motion-tokens spring
- * presets. All components are reduced-motion safe.
+ * Reusable React motion components built on exported spring presets. All
+ * components are reduced-motion safe.
  *
  * Design sources (see package.json zeststream.design_sources):
  * - Robinhood — spring physics budget (A2)
@@ -28,3 +28,5 @@ export type { StreamingTextProps } from "./components/StreamingText"
 
 export { SkeletonMatch } from "./components/SkeletonMatch"
 export type { SkeletonElement, SkeletonMatchProps } from "./components/SkeletonMatch"
+
+export { motionDurations, springPresets } from "./tokens"
