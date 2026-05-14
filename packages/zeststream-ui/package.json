@@ -1,0 +1,33 @@
+{
+  "name": "@zeststream/ui",
+  "version": "0.0.1",
+  "description": "ZestStream canonical UI component library — ProofRail, WorkflowMap, TrustWorryMatrix and brand primitives. Consumes @zeststream/story-system tokens.",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./proof-rail": "./src/components/ProofRail.tsx",
+    "./workflow-map": "./src/components/WorkflowMap.tsx",
+    "./trust-worry-matrix": "./src/components/TrustWorryMatrix.tsx",
+    "./telemetry-bar": "./src/components/TelemetryBar.tsx"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "keywords": [
+    "zeststream",
+    "ui",
+    "proof-rail",
+    "workflow-map",
+    "react"
+  ],
+  "zeststream": {
+    "layer": "ui",
+    "sub_shape": "REACT-COMPONENT-LIBRARY",
+    "wraps": "@zeststream/story-system tokens",
+    "consumers": ["flywheel-docs", "mobile-eats", "clutterfreespaces"]
+  }
+}
