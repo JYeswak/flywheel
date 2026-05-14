@@ -609,10 +609,10 @@ payload="$(
       agent_lane_probe:{exit_code:$probe_rc, receipt:$probe},
       support_copy_gate:{
         reduced_supported:$reduced_pass,
-        claude_supported:($probe.rows[]? | select(.id == "claude") | .support_copy_allowed) // false,
-        codex_supported:($probe.rows[]? | select(.id == "codex") | .support_copy_allowed) // false,
-        gemini_supported:($probe.rows[]? | select(.id == "gemini") | .support_copy_allowed) // false,
-        openclaw_supported:($probe.rows[]? | select(.id == "openclaw") | .support_copy_allowed) // false
+        claude_supported:(($probe.rows[]? | select(.id == "claude") | .support_copy_allowed) // false),
+        codex_supported:(($probe.rows[]? | select(.id == "codex") | .support_copy_allowed) // false),
+        gemini_supported:(($probe.rows[]? | select(.id == "gemini") | .support_copy_allowed) // false),
+        openclaw_supported:(($probe.rows[]? | select(.id == "openclaw") | .support_copy_allowed) // false)
       },
       blockers:(($lanes | map(.id)) as $requested_lane_ids
         | $probe.rows // []
