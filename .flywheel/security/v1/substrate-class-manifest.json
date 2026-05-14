@@ -7,7 +7,12 @@
   "inputs_hash": "sha256:meadows-l2-substrate-class-paradigm-2026-05-12",
   "_doctrine_ref": ".flywheel/doctrine/substrate-class-classifier.md",
   "_l_rule_candidate": "L162-SUBSTRATE-CLASS-CLASSIFIER-BEFORE-PROTECTION-HALT-MANDATORY",
-  "_promotion_threshold": "3-strike (current N=2 on AKID-fixture-trip; standard cadence; NOT secrets-class exemption)",
+  "_promotion_threshold": "N=3 SATURATION reached 2026-05-14 (secret-bank.txt fixture trip) — L162 canonical L-rule promotion due",
+  "_promotion_history": [
+    "N=1: 2026-05-12 — L160 fires on AKID in tests/test_ntm_coordinator_wire.sh:110",
+    "N=2: 2026-05-12 — L160 fires again on same fixture during secret-scan probe (~4h later)",
+    "N=3: 2026-05-14 — hook fires on .flywheel/tests/fixtures/ntm-scrub-secret-scan/secret-bank.txt (missing marker_substring 'fixture' + missing test_fixture_path pattern)"
+  ],
 
   "substrate_classes": {
     "production": {
@@ -38,6 +43,8 @@
     "tests/*-canonical-cli.sh",
     ".flywheel/tests/test_*.sh",
     ".flywheel/tests/*.sh",
+    ".flywheel/tests/fixtures/**",
+    ".flywheel/tests/fixtures/ntm-scrub-secret-scan/secret-bank.txt",
     ".flywheel/security/v1/secret-patterns.json"
   ],
 
@@ -92,8 +99,13 @@
       "synthetic-key",
       "for unit test",
       "canonical-fake",
-      "obvious-fake"
-    ]
+      "obvious-fake",
+      "fixture",
+      "FIXTURE",
+      "000000000000",
+      "xxxxxxxxxxx"
+    ],
+    "_marker_case_policy": "match case-insensitively; 'fixture' added 2026-05-14 after N=3 SATURATION on secret-bank.txt trip"
   },
 
   "_paradigm_notes": [
