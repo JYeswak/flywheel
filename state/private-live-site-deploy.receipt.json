@@ -1,13 +1,13 @@
 {
   "schema_version": "flywheel.private_live_site_deploy_receipt.v0",
-  "receipt_id": "flywheel-private-live-site-operating-room-deploy-20260513T2343Z",
+  "receipt_id": "flywheel-private-live-site-multi-page-story-deploy-20260514T0007Z",
   "status": "pass",
-  "deployed_at": "2026-05-13T23:43:20Z",
+  "deployed_at": "2026-05-14T00:07:33Z",
   "host": "flywheel.zeststream.ai",
   "provider": "vercel",
-  "deployment_url": "https://flywheel-tq5l6k83o-joshuas-projects-96d49291.vercel.app",
+  "deployment_url": "https://flywheel-7jbd8upcp-joshuas-projects-96d49291.vercel.app",
   "production_alias": "https://flywheel.zeststream.ai",
-  "source_commit": "b6e36e0d",
+  "source_commit": "9406ee11",
   "deployed_bundle_scope": [
     "site/",
     "install.sh",
@@ -21,6 +21,14 @@
     "rejected_placeholder_scrapped": true,
     "wireframe_ref": "docs/runbooks/public-site-smb-journey-wireframe.md",
     "journey_pack_ref": "docs/runbooks/public-user-journey-pack.md",
+    "multi_page_story_system": [
+      "site/index.html",
+      "site/what-is/index.html",
+      "site/methodology/index.html",
+      "site/for-developers/index.html",
+      "site/about/index.html",
+      "site/contact/index.html"
+    ],
     "visual_primitives": [
       "OperatingRoomHero",
       "WorkflowMap",
@@ -42,8 +50,10 @@
     "install_proxy_checksum_match": true,
     "install_sha256": "a4e04cd1e08f13110d74dca34c38018a5b93c9a173cca2db63a91458efe6f364",
     "screenshot_checks": {
-      "desktop": "/tmp/flywheel-site-shots/flywheel-desktop-b6e36e0d.png",
-      "mobile": "/tmp/flywheel-site-shots/flywheel-mobile-b6e36e0d.png",
+      "reference_review_dir": "/tmp/flywheel-jeff-deep",
+      "local_review_dir": "/tmp/flywheel-redesign-review",
+      "desktop": "/tmp/flywheel-redesign-review/developers-desktop-v2.png",
+      "mobile": "/tmp/flywheel-redesign-review/contact-mobile-v2.png",
       "nonblank_pixel_variance": true
     },
     "publication_readiness_status": "blocked",
