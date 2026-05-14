@@ -28,9 +28,20 @@
 #         import @zeststream/story-system, plus generated trajectory and owner
 #         brief artifacts
 #   FQ-10 Package.json: @zeststream/* packages declared
+#   --- content-quality checks (catch what mechanical proxies cannot) ---
+#   FQ-11 Meta-voice: public copy speaks to the customer, not about the page;
+#         no internal-doctrine vocabulary leaks
+#   FQ-12 First-person operator voice on public ZestStream surfaces
+#   FQ-13 Concreteness: process claims carry specifics, not pure abstraction
+#   FQ-14 Cross-page repetition: pages build, they do not restate
 #
 # Jeff Emanuel design principle: every check produces a machine-readable number.
 # "pass=8 fail=2" beats "mostly good." Blocks CI on fail in --strict mode.
+#
+# FQ-01..FQ-10 measure proxies (a file exists, a font is imported). FQ-11..FQ-14
+# measure the copy itself — because a gate that passes a product its owner
+# rejects is a gate that is lying. The gate is the floor; Joshua's taste is the
+# ceiling. Nothing should reach Joshua that has not cleared FQ-11..FQ-14.
 
 set -euo pipefail
 
@@ -302,6 +313,124 @@ elif [[ "$zs_hosted" -gt 0 ]]; then
   check "FQ-10" "@zeststream/* packages declared" "pass" "${zs_hosted} package(s) hosted in packages/"
 else
   check "FQ-10" "@zeststream/* packages declared" "warn" "No @zeststream/* packages - no shared infrastructure"
+fi
+
+# ══════════════════════════════════════════════════════════════════════════
+# CONTENT-QUALITY CHECKS (FQ-11..FQ-14)
+# Added 2026-05-14. Joshua's leverage point: "if our gates are passing and
+# it's not acceptable, it's a gate problem." FQ-01..FQ-10 measure PROXIES
+# (fonts loaded, files exist, packages declared). They are structurally blind
+# to whether the COPY is acceptable. These checks catch the failure class
+# that shipped a gate-passing site Joshua rejected: copy that narrates the
+# page instead of speaking to the customer, third-person brochure voice,
+# all-abstract claims, and the same paragraph restated across pages.
+# Public copy = site/**/*.html + content/**/*.mdx. Internal docs/ excluded.
+# ══════════════════════════════════════════════════════════════════════════
+
+# Collect the public-copy file list once.
+PUBLIC_COPY_FILES=()
+if [[ -d "$REPO/site" ]]; then
+  while IFS= read -r f; do PUBLIC_COPY_FILES+=("$f"); done \
+    < <(find "$REPO/site" -type f -name "*.html" 2>/dev/null)
+fi
+if [[ -d "$REPO/content" ]]; then
+  while IFS= read -r f; do PUBLIC_COPY_FILES+=("$f"); done \
+    < <(find "$REPO/content" -type f -name "*.mdx" 2>/dev/null)
+fi
+
+# ── FQ-11 Meta-voice (copy that narrates the page, not the customer) ──────
+# A meta-voice sentence's SUBJECT is the page/site/story itself, or it leaks
+# internal-doctrine vocabulary. Both are notes-to-self shipped as copy.
+META_VOICE_PATTERN='[Tt]he page (is|should|does|stays|points|makes|must|will)|[Tt]his page |[Tt]he (public )?site should|[Tt]he (public )?story (stays|comes|shows|must)|should make the owner feel|should not shame|trust surface|trophy case|proof bait|mission ceiling|capability control plane|control plane integration|not a footnote|is part of the product, not|the public story'
+meta_hits=0
+meta_examples=""
+for f in "${PUBLIC_COPY_FILES[@]:-}"; do
+  [[ -z "$f" ]] && continue
+  while IFS= read -r line; do
+    meta_hits=$((meta_hits + 1))
+    [[ -z "$meta_examples" ]] && meta_examples="$(basename "$(dirname "$f")")/$(basename "$f"): $(echo "$line" | sed 's/<[^>]*>//g' | tr -s ' ' | cut -c1-70)"
+  done < <(grep -hoE "$META_VOICE_PATTERN" "$f" 2>/dev/null)
+done
+if [[ "${#PUBLIC_COPY_FILES[@]}" -eq 0 ]]; then
+  check "FQ-11" "Meta-voice (copy speaks to customer, not about the page)" "warn" "No public copy surface (site/ or content/) found"
+elif [[ "$meta_hits" -eq 0 ]]; then
+  check "FQ-11" "Meta-voice (copy speaks to customer, not about the page)" "pass" "0 meta-voice / internal-vocabulary leaks in public copy"
+else
+  check "FQ-11" "Meta-voice (copy speaks to customer, not about the page)" "fail" "${meta_hits} meta-voice/internal-vocab leak(s) — e.g. ${meta_examples} — copy narrates the page or leaks doctrine instead of speaking to the customer"
+fi
+
+# ── FQ-12 First-person operator voice on public ZestStream surfaces ───────
+# PUBLISHABILITY-BAR mandates first-person singular for ZestStream. A public
+# page with zero first-person markers is a third-person brochure, not Joshua.
+if [[ "${#PUBLIC_COPY_FILES[@]}" -gt 0 ]]; then
+  fp_brochure_pages=0
+  fp_total_pages=0
+  for f in "${PUBLIC_COPY_FILES[@]}"; do
+    [[ -z "$f" ]] && continue
+    fp_total_pages=$((fp_total_pages + 1))
+    fp_markers=$(num "$(grep -hoE '(^|[^A-Za-z])(I|I'\''m|I'\''ll|I'\''ve|my)([^A-Za-z]|$)' "$f" 2>/dev/null | wc -l)")
+    [[ "$fp_markers" -eq 0 ]] && fp_brochure_pages=$((fp_brochure_pages + 1))
+  done
+  if [[ "$fp_total_pages" -gt 0 && "$((fp_brochure_pages * 2))" -gt "$fp_total_pages" ]]; then
+    check "FQ-12" "First-person operator voice" "fail" "${fp_brochure_pages}/${fp_total_pages} public pages have zero first-person voice — site reads as a third-person brochure, not Joshua's"
+  elif [[ "$fp_brochure_pages" -gt 0 ]]; then
+    check "FQ-12" "First-person operator voice" "warn" "${fp_brochure_pages}/${fp_total_pages} public page(s) have no first-person voice"
+  else
+    check "FQ-12" "First-person operator voice" "pass" "all ${fp_total_pages} public pages carry first-person operator voice"
+  fi
+fi
+
+# ── FQ-13 Concreteness (claims backed by specifics, not all abstraction) ──
+# Jeff Emanuel principle: numbers over adjectives. A public page that talks
+# about workflows/methods/slices but contains zero concrete numbers in body
+# copy is all-abstraction — it tells, never shows.
+if [[ "${#PUBLIC_COPY_FILES[@]}" -gt 0 ]]; then
+  abstract_pages=0
+  for f in "${PUBLIC_COPY_FILES[@]}"; do
+    [[ -z "$f" ]] && continue
+    body=$(sed 's/<[^>]*>//g' "$f" 2>/dev/null)
+    makes_claims=$(echo "$body" | grep -ciE 'workflow|method|slice|proof|automation' || true)
+    has_numbers=$(echo "$body" | grep -coE '[0-9]+(min|s|m|h|x|%|/| min| sec| hour| day)| [0-9]{2,}' || true)
+    if [[ "$makes_claims" -gt 0 && "$has_numbers" -eq 0 ]]; then
+      abstract_pages=$((abstract_pages + 1))
+    fi
+  done
+  if [[ "$abstract_pages" -gt 0 ]]; then
+    check "FQ-13" "Concreteness (specifics, not pure abstraction)" "warn" "${abstract_pages} public page(s) make process claims with zero concrete numbers — show one real before/after, don't only tell"
+  else
+    check "FQ-13" "Concreteness (specifics, not pure abstraction)" "pass" "public pages making process claims also carry concrete specifics"
+  fi
+fi
+
+# ── FQ-14 Cross-page repetition (pages build, not restate) ────────────────
+# Same copy block repeated near-verbatim across pages = pages restate instead
+# of progress. Counts 6-word shingles appearing in 3+ distinct public pages.
+if [[ "${#PUBLIC_COPY_FILES[@]}" -ge 3 ]]; then
+  repeat_report=$(
+    for f in "${PUBLIC_COPY_FILES[@]}"; do
+      [[ -z "$f" ]] && continue
+      # Strip <header>/<nav>/<footer> chrome first — shared nav across pages
+      # is intentional, not body-copy repetition. Then strip remaining tags.
+      sed '/<header/,/<\/header>/d; /<nav/,/<\/nav>/d; /<footer/,/<\/footer>/d' "$f" 2>/dev/null \
+        | sed 's/<[^>]*>//g' \
+        | tr '[:upper:]' '[:lower:]' | tr -cs 'a-z0-9' ' ' \
+        | awk -v fn="$f" '{for(i=1;i+5<=NF;i++) print fn"\t"$i" "$(i+1)" "$(i+2)" "$(i+3)" "$(i+4)" "$(i+5)}'
+    done \
+      | sort -u \
+      | awk -F'\t' '{c[$2]++} END {for(s in c) if(c[s]>=3) print c[s]"\t"s}' \
+      | sort -rn
+  )
+  repeat_count=$(num "$(echo "$repeat_report" | grep -c . || true)")
+  if [[ "$repeat_count" -eq 0 ]]; then
+    check "FQ-14" "Cross-page repetition (pages build, not restate)" "pass" "no 6-word phrase repeats across 3+ public pages"
+  else
+    top_repeat=$(echo "$repeat_report" | head -1 | cut -f2)
+    if [[ "$repeat_count" -ge 3 ]]; then
+      check "FQ-14" "Cross-page repetition (pages build, not restate)" "fail" "${repeat_count} phrase(s) repeated near-verbatim across 3+ pages — e.g. \"${top_repeat}\" — pages restate instead of building"
+    else
+      check "FQ-14" "Cross-page repetition (pages build, not restate)" "warn" "${repeat_count} phrase(s) repeated across 3+ pages — e.g. \"${top_repeat}\""
+    fi
+  fi
 fi
 
 # ── Emit results ──────────────────────────────────────────────────────────
