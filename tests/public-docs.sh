@@ -121,6 +121,12 @@ for rel in \
   packages/zeststream-story-system/README.md \
   packages/zeststream-story-system/story-system.json \
   packages/zeststream-story-system/tokens.css \
+  packages/zeststream-ui/package.json \
+  packages/zeststream-ui/README.md \
+  packages/zeststream-ui/src/index.ts \
+  packages/zeststream-ui/src/components/TrustWorryMatrix.tsx \
+  scripts/zs-frontend-quality-gate.sh \
+  tests/zeststream-ui-package.sh \
   docs/stories/flywheel-trajectory.md; do
   require_file "$rel"
 done
@@ -173,8 +179,10 @@ require_literal "docs/concepts/evidence-contracts.md" "scripts/live_site_probe.p
 require_literal "docs/concepts/evidence-contracts.md" "scripts/validate_cutover_receipts.py" "evidence concept names cutover receipt replay"
 require_literal "docs/concepts/evidence-contracts.md" "scripts/validate_user_journey_pack.py" "evidence concept names user journey pack validator"
 require_literal "docs/concepts/evidence-contracts.md" "scripts/validate_story_system_package.py" "evidence concept names story system validator"
+require_literal "docs/concepts/evidence-contracts.md" "scripts/zs-frontend-quality-gate.sh" "evidence concept names frontend quality gate"
 require_literal "docs/concepts/evidence-contracts.md" "scripts/extract_git_story.py" "evidence concept names git story extractor"
 require_literal "docs/concepts/evidence-contracts.md" "packages/zeststream-story-system/story-system.json" "evidence concept names story system package"
+require_literal "docs/concepts/evidence-contracts.md" "packages/zeststream-ui/" "evidence concept names UI package"
 require_literal "docs/concepts/evidence-contracts.md" "docs/evidence/staging-review-signoff-packet.md" "evidence concept names staging review packet"
 require_literal "docs/concepts/evidence-contracts.md" "docs/evidence/flywheel-trajectory.json" "evidence concept names trajectory evidence"
 require_literal "docs/concepts/evidence-contracts.md" "docs/stories/flywheel-trajectory.md" "evidence concept names trajectory story"
@@ -265,9 +273,11 @@ require_literal "docs/runbooks/isolated-agent-lane-testing.md" "--require-runtim
 require_literal "docs/runbooks/isolated-agent-lane-testing.md" "bash tests/isolated-agent-lane-smoke.sh" "isolated lane runbook names contract test"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/cutover-receipts.sh" "release runbook includes cutover receipt gate"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/story-system-package.sh" "release runbook includes story package gate"
+require_literal "docs/runbooks/public-release-runbook.md" "bash tests/zeststream-ui-package.sh" "release runbook includes UI package gate"
+require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=18 fail=0" "release runbook names UI package verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=23 fail=0" "release runbook names current cutover verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=17 fail=0" "release runbook names story package verifier count"
-require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=220 fail=0" "release runbook names current public docs count"
+require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=233 fail=0" "release runbook names current public docs count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=95 fail=0" "release runbook names current website static count"
 require_literal "docs/runbooks/public-release-runbook.md" "docs/runbooks/public-user-journey-pack.md\` maps every public asset" "release runbook includes user journey pack gate"
 require_literal "docs/runbooks/public-release-runbook.md" "user-journey-pack-validation.json" "release runbook captures user journey validation receipt"
@@ -291,6 +301,7 @@ require_literal "docs/reference/commands.md" "scripts/live_site_probe.py" "comma
 require_literal "docs/reference/commands.md" "scripts/validate_cutover_receipts.py" "command reference includes cutover receipt validation"
 require_literal "docs/reference/commands.md" "scripts/validate_user_journey_pack.py" "command reference includes user journey validation"
 require_literal "docs/reference/commands.md" "scripts/validate_story_system_package.py" "command reference includes story system validation"
+require_literal "docs/reference/commands.md" "scripts/zs-frontend-quality-gate.sh" "command reference includes frontend quality gate"
 require_literal "docs/reference/commands.md" "scripts/extract_git_story.py" "command reference includes git story extraction"
 require_literal "docs/reference/commands.md" "zeststream.repo_story_message.v0" "command reference names story message pack"
 require_literal "docs/reference/commands.md" "--redaction-table" "command reference documents story redaction table"
@@ -298,6 +309,8 @@ require_literal "docs/reference/commands.md" "flywheel:de-personalization-table.
 require_literal "docs/reference/files.md" ".flywheel/last_closeout_receipt.json" "file reference includes closeout receipt"
 require_literal "docs/reference/files.md" "docs/brand/naming-conventions.md" "file reference includes naming contract"
 require_literal "docs/reference/files.md" "packages/zeststream-story-system/story-system.json" "file reference includes story system package"
+require_literal "docs/reference/files.md" "packages/zeststream-ui/" "file reference includes UI package"
+require_literal "docs/reference/files.md" "scripts/zs-frontend-quality-gate.sh" "file reference includes frontend quality gate"
 require_literal "docs/reference/files.md" "zeststream.repo_story_message.v0" "file reference names story message pack"
 require_literal "docs/reference/files.md" "receipts/agent-lanes/<lane>.json" "file reference includes agent-lane receipts"
 require_literal "docs/reference/files.md" "flywheel.agent_lane_blocker_receipt.v0" "file reference includes blocked agent-lane receipt schema"

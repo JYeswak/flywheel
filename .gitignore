@@ -72,6 +72,7 @@ AGENTS.md.bak.*
 # Cache
 .ruff_cache/
 .pytest_cache/
+node_modules/
 
 # Continue/transient files
 .continue-here.md

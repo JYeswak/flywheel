@@ -36,7 +36,10 @@ public release line.
 - Candidate `@zeststream/story-system` package with shared story grammar, proof
   states, visual primitives, excluded hype phrases, CSS tokens, and drift validator
   for Flywheel-powered frontend repos.
-- Private review signoff packet that gives the reviewer one map for the live
+- Candidate `@zeststream/ui` package with shared proof rails, workflow maps,
+  trust-worry matrices, telemetry texture, and a reusable frontend quality gate
+  for public Next.js proof surfaces.
+- Staging review signoff packet that gives the reviewer one map for the live
   staging site, story trajectory, journey contract, evidence, developer path,
   agent-lane proof, and remaining public-release blockers.
 - Publication goal completion audit and validator that map the active `/goal`
@@ -61,6 +64,6 @@ public release line.
 
 - Public evidence index added at `docs/evidence/publication-evidence.md` to map
   v0.2 trust claims to local verifiers and live evidence still required.
-- Latest extraction evidence: 14,714 files classified, 10,231 public-safe
-  artifacts copied, 4,041 private/manual-review paths excluded, and 7,453
+- Latest extraction evidence: 14,733 files classified, 10,249 public-safe
+  artifacts copied, 4,042 private/manual-review paths excluded, and 7,460
   review rows signed in the v0.2 publication lane.
