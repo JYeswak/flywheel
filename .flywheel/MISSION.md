@@ -17539,3 +17539,95 @@ auth, credential, PII, and customer-trust surfaces.
 - **supersedes:** null
 - **stale_after:** 24
 - **closure_evidence:** null
+
+### jr-2026-05-14T025350Z-230
+- **id:** jr-2026-05-14T025350Z-230
+- **captured_at:** 2026-05-14T02:53:50Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:20f4e87ea366c2fbfa04d6459c0991e494088c9a4efc2112297e3feaccbe9522
+- **request_text_hash:** sha256:20f4e87ea366c2fbfa04d6459c0991e494088c9a4efc2112297e3feaccbe9522
+- **sanitized_excerpt:** "i have alps, flywheel, and skillos all running in wezterm cli's instead of ntm sessions - codex workres were working better directly than through ntm for me the last day or so. can you take a look at what they are all doing, look at the mission, the ar, flywhee.zeststream.ai, and talk to me, as a coach about if we're doing the right thing"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T02:53:50Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T025747Z-467
+- **id:** jr-2026-05-14T025747Z-467
+- **captured_at:** 2026-05-14T02:57:47Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:f9a6c4c18ffca92bd32122a1015707b3fad40d27fc025d9c768a130e6ceccb5c
+- **request_text_hash:** sha256:f9a6c4c18ffca92bd32122a1015707b3fad40d27fc025d9c768a130e6ceccb5c
+- **sanitized_excerpt:** "actually look at what they are doing - flywheel is gated because the quality isn't good enough - if the quality sin't good enough they need to improve it - i won't improve something that isn't meeting our quality but I don't want them rorating tokens without actually improving"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T02:57:47Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T030155Z-715
+- **id:** jr-2026-05-14T030155Z-715
+- **captured_at:** 2026-05-14T03:01:55Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:606a3cc63aadfa3d7e8377774ef546fb6604bbb3df86860b471f56b0530ed97e
+- **request_text_hash:** sha256:606a3cc63aadfa3d7e8377774ef546fb6604bbb3df86860b471f56b0530ed97e
+- **sanitized_excerpt:** "we need to get the git states of all of these repos cleaned up. part of our flywheel processs as a whole is to eforce git heigyne through our skill processes, why aren't they"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T03:01:55Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T030341Z-821
+- **id:** jr-2026-05-14T030341Z-821
+- **captured_at:** 2026-05-14T03:03:41Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:49943ee01d401348c31abfce5a660c8eda3e88a2c32a1edf57eedf1c39e5e494
+- **request_text_hash:** sha256:49943ee01d401348c31abfce5a660c8eda3e88a2c32a1edf57eedf1c39e5e494
+- **sanitized_excerpt:** "lets get all gits cleaned up. lets take this one by one - hit excape on those panes too if you need to apus ethem while we do this"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T03:03:41Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null

@@ -1,3 +1,9 @@
+# NTM runtime state — never commit
+.ntm/pids/
+.ntm/rate_limits.json
+.ntm/human_inbox/
+.ntm/summaries/
+
 # bv (beads viewer) local config and caches
 .bv/
 
