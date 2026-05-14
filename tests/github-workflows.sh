@@ -90,7 +90,7 @@ else
   fail "site checksum manifest uses artifact-relative filename"
 fi
 
-for token in shellcheck ripgrep 'ruff check' markdownlint tests/public-top-level-files.sh tests/public-surface-gap-scanner.sh tests/naming-conventions.sh tests/context-routing-discipline.sh tests/agent-lane-probe.sh tests/isolated-agent-lane-smoke.sh scripts/agent-lane-probe.sh scripts/isolated-agent-lane-smoke.sh scripts/local-actions-preflight.sh tests/public-docs.sh tests/public-links.sh tests/website-static.sh tests/website-accessibility.sh tests/live-site-probe.sh tests/contact-routing.sh tests/upstream-substrate-adoption.sh tests/release-assets.sh tests/cutover-receipts.sh tests/external-review-gate.sh tests/public-user-journey-pack.sh tests/publication-goal-completion-audit.sh tests/publication-readiness.sh tests/true-publication-registry-validate.sh tests/journey-smoke.sh; do
+for token in shellcheck ripgrep 'ruff check' markdownlint tests/public-top-level-files.sh tests/public-surface-gap-scanner.sh tests/naming-conventions.sh tests/context-routing-discipline.sh tests/agent-lane-probe.sh tests/isolated-agent-lane-smoke.sh scripts/agent-lane-probe.sh scripts/isolated-agent-lane-smoke.sh scripts/local-actions-preflight.sh tests/public-docs.sh tests/public-links.sh tests/website-static.sh tests/website-accessibility.sh tests/live-site-probe.sh tests/contact-routing.sh tests/upstream-substrate-adoption.sh tests/release-assets.sh tests/cutover-receipts.sh tests/external-review-gate.sh tests/public-user-journey-pack.sh tests/story-system-package.sh tests/publication-goal-completion-audit.sh tests/publication-readiness.sh tests/true-publication-registry-validate.sh tests/journey-smoke.sh; do
   if grep -q "$token" "$CI"; then
     pass "ci includes $token"
   else
@@ -98,7 +98,7 @@ for token in shellcheck ripgrep 'ruff check' markdownlint tests/public-top-level
   fi
 done
 
-for token in scripts/assemble.py scripts/classify.py scripts/depersonalize.py scripts/review_queue.py scripts/validate_external_review.py scripts/website_accessibility.py scripts/live_site_probe.py scripts/check_links.py scripts/contact_route_probe.py scripts/publication_readiness.py scripts/validate_cutover_receipts.py scripts/validate_user_journey_pack.py; do
+for token in scripts/assemble.py scripts/classify.py scripts/depersonalize.py scripts/review_queue.py scripts/validate_external_review.py scripts/website_accessibility.py scripts/live_site_probe.py scripts/check_links.py scripts/contact_route_probe.py scripts/publication_readiness.py scripts/validate_cutover_receipts.py scripts/validate_user_journey_pack.py scripts/validate_story_system_package.py; do
   if grep -q "$token" "$CI"; then
     pass "ci python lint includes $token"
   else
@@ -106,7 +106,7 @@ for token in scripts/assemble.py scripts/classify.py scripts/depersonalize.py sc
   fi
 done
 
-for token in docs/getting-started/first-run.md docs/runbooks/public-release-runbook.md docs/runbooks/release-cutover-authorization.md docs/runbooks/context-and-model-routing.md docs/runbooks/local-actions-preflight.md docs/runbooks/isolated-agent-lane-testing.md docs/runbooks/agent-lane-compatibility.md docs/runbooks/upstream-substrate-adoption.md docs/runbooks/public-user-journey-pack.md docs/runbooks/public-site-smb-journey-wireframe.md docs/stories/public-journey-and-redaction.md docs/evidence/publication-evidence.md docs/evidence/publication-goal-completion-audit.md; do
+for token in docs/getting-started/first-run.md docs/runbooks/public-release-runbook.md docs/runbooks/release-cutover-authorization.md docs/runbooks/context-and-model-routing.md docs/runbooks/local-actions-preflight.md docs/runbooks/isolated-agent-lane-testing.md docs/runbooks/agent-lane-compatibility.md docs/runbooks/upstream-substrate-adoption.md docs/runbooks/public-user-journey-pack.md docs/runbooks/public-site-smb-journey-wireframe.md docs/stories/public-journey-and-redaction.md docs/evidence/publication-evidence.md docs/evidence/publication-goal-completion-audit.md packages/zeststream-story-system/README.md; do
   if grep -q "$token" "$CI"; then
     pass "ci markdownlint includes $token"
   else
@@ -130,7 +130,7 @@ for token in ubuntu-22.04 macos-14 ripgrep tests/installer-smoke.sh tests/journe
   fi
 done
 
-for token in 'git archive' 'install.sh.sha256' SHA256SUMS 'gh release' 'tests/release-assets.sh' 'tests/cutover-receipts.sh' 'tests/public-links.sh' 'tests/website-accessibility.sh' 'scripts/validate_external_review.py --log docs/evidence/external-review-log.jsonl --release --json'; do
+for token in 'git archive' 'install.sh.sha256' SHA256SUMS 'gh release' 'tests/release-assets.sh' 'tests/cutover-receipts.sh' 'tests/public-links.sh' 'tests/website-accessibility.sh' 'tests/story-system-package.sh' 'scripts/validate_external_review.py --log docs/evidence/external-review-log.jsonl --release --json'; do
   if grep -q "$token" "$RELEASE"; then
     pass "release includes $token"
   else
@@ -143,6 +143,7 @@ for token in \
   'actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa' \
   'actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e' \
   tests/website-static.sh \
+  tests/story-system-package.sh \
   'site-dist/install.sh.sha256' \
   'flywheel.zeststream.ai' \
   'site-deploy-manifest.json'; do

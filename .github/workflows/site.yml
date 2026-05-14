@@ -51,6 +51,7 @@ jobs:
         run: |
           set -euo pipefail
           bash tests/website-static.sh
+          bash tests/story-system-package.sh
           python3 scripts/depersonalize.py --scan-table --root site --json
 
       - name: Build site artifact

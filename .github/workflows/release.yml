@@ -54,6 +54,7 @@ jobs:
           bash tests/public-links.sh
           bash tests/website-static.sh
           bash tests/website-accessibility.sh
+          bash tests/story-system-package.sh
           bash tests/release-assets.sh
           bash tests/cutover-receipts.sh
           bash tests/installer-smoke.sh
