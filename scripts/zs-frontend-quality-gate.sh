@@ -24,8 +24,9 @@
 #   FQ-06 Motion safety: prefers-reduced-motion respected
 #   FQ-07 Accessibility: aria-label on interactive elements
 #   FQ-08 Proof states: ProofRail or equivalent in public-facing content
-#   FQ-09 Story system: story-system.json or @zeststream/story-system linked,
-#         plus generated trajectory and owner brief artifacts
+#   FQ-09 Story system: static sites carry story-system.json; Next.js apps
+#         import @zeststream/story-system, plus generated trajectory and owner
+#         brief artifacts
 #   FQ-10 Package.json: @zeststream/* packages declared
 #
 # Jeff Emanuel design principle: every check produces a machine-readable number.
@@ -265,12 +266,20 @@ story_dep=""
 if [[ -z "$story_hit" ]]; then
   story_dep=$(grep "@zeststream/story-system\|story-system" "$REPO/package.json" 2>/dev/null | head -1 || true)
 fi
-if [[ -n "$story_hit" || -n "$story_dep" ]]; then
+story_module_hits=0
+if [[ -n "$NEXT_APP" ]]; then
+  story_module_hits=$(num "$(count_matches "$NEXT_APP" \
+    "@zeststream/story-system|assertStorySystemContract|storySystem" \
+    -name "*.ts" -o -name "*.tsx")")
+fi
+if [[ -n "$story_hit" || -n "$story_dep" || "$story_module_hits" -gt 0 ]]; then
   trajectory_artifact=$(find_first_name_match "$REPO" "*trajectory.json")
   owner_brief_artifact=$(find_first_name_match "$REPO" "*owner-brief.json")
-  if [[ -n "$trajectory_artifact" && -n "$owner_brief_artifact" ]] \
+  if [[ -n "$NEXT_APP" && "$story_module_hits" -eq 0 ]]; then
+    check "FQ-09" "Story system linked" "fail" "Next.js apps must import @zeststream/story-system or assertStorySystemContract, not only declare the dependency"
+  elif [[ -n "$trajectory_artifact" && -n "$owner_brief_artifact" ]] \
     && grep -q "zeststream.repo_owner_story_brief.v0" "$owner_brief_artifact" 2>/dev/null; then
-    story_detail="${story_hit:-Dependency declared: @zeststream/story-system}; trajectory=$trajectory_artifact; owner_brief=$owner_brief_artifact"
+    story_detail="${story_hit:-Dependency declared: @zeststream/story-system}; imports=${story_module_hits}; trajectory=$trajectory_artifact; owner_brief=$owner_brief_artifact"
     check "FQ-09" "Story system linked" "pass" "$story_detail"
   else
     check "FQ-09" "Story system linked" "fail" "Story system is linked, but generated trajectory JSON and zeststream.repo_owner_story_brief.v0 are required before public frontend work can pass"

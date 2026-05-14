@@ -97,9 +97,11 @@ cat >"$GOOD/app/globals.css" <<'CSS'
 }
 CSS
 cat >"$GOOD/components/StoryPanel.tsx" <<'TS'
+import storySystem, { assertStorySystemContract } from "@zeststream/story-system"
 import { ProofRail, TrustWorryMatrix, WorkflowMap } from "@zeststream/ui"
 
 const springPresets = { proof: "bounded" }
+assertStorySystemContract(storySystem)
 
 export function StoryPanel() {
   return (
