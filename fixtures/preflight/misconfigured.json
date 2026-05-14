@@ -9,7 +9,7 @@
     "git --version": {"exit_code": 0, "stdout": "git version 2.45.0\n", "stderr": ""},
     "sh -c 'echo ok'": {"exit_code": 0, "stdout": "ok\n", "stderr": ""},
     "bash --version": {"exit_code": 0, "stdout": "GNU bash, version 5.2.26\n", "stderr": ""},
-    "jq --version": {"exit_code": 0, "stdout": "jq-1.7\n", "stderr": ""},
+    "jq --version": {"exit_code": 1, "stdout": "", "stderr": "jq binary present but unusable"},
     "sqlite3 --version": {"exit_code": 1, "stdout": "", "stderr": "sqlite3 database probe failed"},
     "br --version": {"exit_code": 0, "stdout": "br 0.23.0 synthetic\n", "stderr": ""},
     "test -f fixtures/preflight/reduced.json": {"exit_code": 0, "stdout": "", "stderr": ""},

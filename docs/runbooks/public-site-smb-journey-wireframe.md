@@ -275,7 +275,7 @@ Message:
 Owner-facing control language:
 
 - "Blocked is better than bluffing."
-- "Private work stays private."
+- "private work stays private."
 - "The work stays inspectable."
 - "You approve the slice; I manage the machinery."
 - "If a claim is not proven, it stays blocked."
@@ -367,7 +367,7 @@ Tone:
 |---|---|---|
 | AI will make a mess. | The map comes before automation. | First slice must have a boundary. |
 | I will not know what changed. | Every slice has a proof rail. | Claim links to evidence or stays blocked. |
-| My data will leak. | Private work stays private. | Public proof is redacted, consented, or replaced. |
+| My data will leak. | private work stays private. | Public proof is redacted, consented, or replaced. |
 | AI makes things up. | Blocked is better than bluffing. | Unsupported claims show as blocked. |
 | This will replace people before it understands the work. | The first slice is small on purpose. | Human approval remains part of the slice. |
 | My tools already do not talk. | The operating map starts with disconnected tools. | Integration is scoped to one workflow path first. |

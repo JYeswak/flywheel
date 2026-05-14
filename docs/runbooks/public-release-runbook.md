@@ -278,13 +278,13 @@ Expected results:
 | Naming conventions | `SUMMARY pass=... fail=0` |
 | Public docs contract | `SUMMARY pass=279 fail=0` and coverage for story, user journey, cutover, evidence, frontend quality, and agent-lane surfaces. |
 | Public surface gap scanner | `SUMMARY pass=16 fail=0` |
-| ZestStream UI package | `SUMMARY pass=20 fail=0`; export targets, `TrustWorryMatrix`, shellcheck, FQ-11 meta-voice rejection, owner-brief evidence enforcement, complete Next.js fixture, weak Next.js fixture rejection, and private extraction pruning are covered. |
+| ZestStream UI package | `SUMMARY pass=23 fail=0`; export targets, `TrustWorryMatrix`, shellcheck, product-tier storytelling skips, FQ-11 meta-voice rejection, generic customer-copy false-positive protection, FQ-14 TSX repetition false-positive protection, owner-brief evidence enforcement, complete Next.js fixture, weak Next.js fixture rejection, and private extraction pruning are covered. |
 | ZestStream motion package | `SUMMARY pass=20 fail=0`; export targets, spring presets, reduced-motion docs, package typecheck, and frontend-gate recognition are covered. |
 | Repo story portability | `SUMMARY pass=6 fail=0`; saved receipt proves the git-story/front-end/owner-brief contract across Flywheel, ClutterFreeSpaces, and Mobile Eats without editing sibling repos. |
 | Repo owner brief | `SUMMARY pass=8 fail=0`; generated brief turns repo trajectory evidence into SMB-owner page language, page rooms, trust answers, and proof refs without blocked public-copy markers. |
 | User journey pack | `SUMMARY pass=10 fail=0`; every public asset row must carry visible wording, visual cue, CTA, proof refs, signoff state, and blocker or skip receipt refs that resolve to real local evidence paths. |
 | Public link checker | `SUMMARY pass=3 fail=0` and JSON `failure_count=0` for public docs/site links. |
-| Website static contract | `SUMMARY pass=99 fail=0` across the six-page staging review site bundle, including rejected meta-voice copy markers. |
+| Website static contract | `SUMMARY pass=149 fail=0` across the six-page staging review site bundle, including research-backed owner-outcome homepage markers, brand-voice banned-word guards, deleted repo-slice copy markers, and rejected meta-voice copy markers. |
 | Website accessibility | Static accessibility script reports zero errors across public site pages. |
 | Live site probe harness | `SUMMARY pass=3 fail=0`; final cutover still requires a saved `live-site-probe.json` with `status=pass` and `failure_count=0`. |
 | Installer smoke | `SUMMARY pass=10 fail=0` against a temporary prefix. |

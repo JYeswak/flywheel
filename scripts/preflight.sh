@@ -50,8 +50,8 @@ git	runtime	required	git --version	system package, Xcode CLT, or Homebrew	block
 shell	runtime	required	sh -c 'echo ok'	system shell	block
 bash	runtime	required	bash --version	Homebrew bash on macOS or apt bash	block
 jq	runtime	required	jq --version	Homebrew or apt	block
-sqlite	runtime	required	sqlite3 --version	system package or Homebrew	block
-br	substrate	required	br --version	Beads CLI install path	dispatch simulation only if absent
+sqlite	runtime	full-mode	sqlite3 --version	system package or Homebrew	reduced CLI state uses repo-local files
+br	substrate	full-mode	br --version	Beads CLI install path	dispatch simulation only if absent
 validated-closeout-fixture	substrate	required	test -f fixtures/preflight/reduced.json	repo fixture support	block fixture closeout
 python	runtime	full-mode	python3 --version	uv, pyenv, Homebrew, or apt	no Agent Mail server; single-agent only
 node	runtime	full-mode	node --version	nvm, Homebrew, apt, or Bun installer	no docs dev server or Node-backed memory

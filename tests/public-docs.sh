@@ -312,7 +312,7 @@ require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=8 fail=0
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=23 fail=0" "release runbook names current cutover verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=26 fail=0" "release runbook names story package verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=279 fail=0" "release runbook names current public docs count"
-require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=113 fail=0" "release runbook names current website static count"
+require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=149 fail=0" "release runbook names current website static count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=10 fail=0" "release runbook names user journey verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "docs/runbooks/public-user-journey-pack.md\` maps every public asset" "release runbook includes user journey pack gate"
 require_literal "docs/runbooks/public-release-runbook.md" "user-journey-pack-validation.json" "release runbook captures user journey validation receipt"
