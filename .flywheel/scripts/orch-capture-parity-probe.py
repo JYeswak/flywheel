@@ -17,6 +17,15 @@ from typing import Any
 SCHEMA_VERSION = "orch-capture-parity/v1"
 ACTIVE_CAPTURE_OWNER_BEAD = "flywheel-vk9ox"
 ORIGINAL_CAPTURE_MECHANISM_BEAD = "flywheel-xap2"
+NON_HUMAN_TRANSCRIPT_PREFIXES = (
+    "<command-name>",
+    "<command-message>",
+    "<task-notification>",
+    "Blocker tick watcher fired",
+    "CODEX_WATCHTOWER_",
+    "PHASE3_FLEET_BROADCAST",
+    "This session is being continued from a previous conversation",
+)
 APPROVED_REMEDIATION_TRACKS = [
     {
         "track": "primary_agent_mail_cross_orch_route",
@@ -103,6 +112,78 @@ def read_json_array(path: Path) -> list[dict[str, Any]]:
     if not isinstance(data, list):
         return []
     return [item for item in data if isinstance(item, dict)]
+
+
+def claude_project_dir_for_repo(projects_root: Path, repo_path: Any) -> Path | None:
+    text = str(repo_path or "").strip()
+    if not text.startswith("/"):
+        return None
+    candidates = [projects_root / text.replace("/", "-")]
+    try:
+        resolved = str(Path(text).resolve())
+    except OSError:
+        resolved = text
+    resolved_candidate = projects_root / resolved.replace("/", "-")
+    if resolved_candidate not in candidates:
+        candidates.append(resolved_candidate)
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0]
+
+
+def prompt_text_from_transcript_row(row: dict[str, Any]) -> str | None:
+    if row.get("type") != "user":
+        return None
+    message = row.get("message")
+    if not isinstance(message, dict) or message.get("role") != "user":
+        return None
+    content = message.get("content")
+    if not isinstance(content, str):
+        return None
+    stripped = content.strip()
+    if "<local-command-caveat>" in content or "<local-command-stdout>" in content:
+        return None
+    if any(stripped.startswith(prefix) for prefix in NON_HUMAN_TRANSCRIPT_PREFIXES):
+        return None
+    return stripped
+
+
+def latest_claude_prompt_for_repo(projects_root: Path, repo_path: Any) -> dict[str, Any] | None:
+    project_dir = claude_project_dir_for_repo(projects_root, repo_path)
+    if project_dir is None or not project_dir.exists():
+        return None
+    latest: dict[str, Any] | None = None
+    latest_ts: datetime | None = None
+    for transcript in sorted(project_dir.glob("*.jsonl")):
+        try:
+            lines = transcript.read_text(errors="replace").splitlines()
+        except OSError:
+            continue
+        for line in lines:
+            if not line.strip():
+                continue
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(row, dict) or row.get("isSidechain") is True:
+                continue
+            text = prompt_text_from_transcript_row(row)
+            if text is None:
+                continue
+            ts = parse_ts(row.get("timestamp"))
+            if ts is None:
+                continue
+            if latest_ts is None or ts > latest_ts:
+                latest_ts = ts
+                latest = {
+                    "timestamp": ts_text(ts),
+                    "source_message_id": row.get("uuid") or row.get("message_id") or row.get("sessionId"),
+                    "transcript_path": str(transcript),
+                    "excerpt": " ".join(text.split())[:240],
+                }
+    return latest
 
 
 def user_prompt_submit_hook_registered(settings: dict[str, Any] | None) -> bool:
@@ -429,6 +510,7 @@ def classify_row(
     team_roster_path: Path,
     team_roster_row: dict[str, Any] | None,
     wezterm_panes: list[dict[str, Any]],
+    latest_transcript_prompt: dict[str, Any] | None,
     capture_rows: list[dict[str, Any]],
     coord_seen_ts: datetime | None,
     stale_cutoff: datetime,
@@ -439,9 +521,10 @@ def classify_row(
     team_roster_event = roster_event(team_roster_row)
     team_roster_participation = roster_participation(team_roster_row)
     capture_ts = latest_capture_ts(capture_rows)
+    latest_prompt_ts = parse_ts(latest_transcript_prompt.get("timestamp")) if latest_transcript_prompt else None
     matching_wezterm_panes = [summarize_wezterm_pane(pane) for pane in wezterm_panes if wezterm_matches_session(pane, session)]
     duplicate_rows = duplicate_groups(capture_rows)
-    last_seen = max([ts for ts in [capture_ts, coord_seen_ts] if ts is not None], default=None)
+    last_seen = max([ts for ts in [capture_ts, coord_seen_ts, latest_prompt_ts] if ts is not None], default=None)
     evidence_refs: list[str] = []
     capture_path: str | None = None
     state = "captured"
@@ -461,7 +544,16 @@ def classify_row(
         state = "captured"
         capture_path = str(request_path)
         evidence_refs = evidence_for_capture(request_path, capture_rows)
-        if capture_ts is not None and capture_ts < stale_cutoff:
+        if capture_ts is not None and latest_prompt_ts is not None and latest_prompt_ts > capture_ts:
+            state = "stale_capture"
+            gap_reason = "latest_transcript_prompt_uncaptured"
+            prompt_ref = latest_transcript_prompt.get("transcript_path")
+            prompt_id = latest_transcript_prompt.get("source_message_id")
+            if prompt_ref and prompt_id:
+                evidence_refs.append(f"{prompt_ref}#{prompt_id}")
+        elif capture_ts is not None and capture_ts < stale_cutoff and latest_prompt_ts is not None and capture_ts >= latest_prompt_ts:
+            gap_reason = "no_new_prompt_since_capture"
+        elif capture_ts is not None and capture_ts < stale_cutoff:
             state = "stale_capture"
             gap_reason = "stale_capture_row"
         elif duplicate_rows:
@@ -487,6 +579,8 @@ def classify_row(
         "participation_state": state,
         "capture_path": capture_path,
         "last_capture_ts": ts_text(capture_ts),
+        "latest_transcript_prompt_ts": ts_text(latest_prompt_ts),
+        "latest_transcript_prompt": latest_transcript_prompt,
         "last_josh_input_seen_ts": ts_text(last_seen),
         "gap_reason": gap_reason,
         "evidence_refs": evidence_refs,
@@ -509,6 +603,8 @@ def schema_payload() -> dict[str, Any]:
             "participation_state",
             "capture_path",
             "last_capture_ts",
+            "latest_transcript_prompt_ts",
+            "latest_transcript_prompt",
             "last_josh_input_seen_ts",
             "gap_reason",
             "evidence_refs",
@@ -522,6 +618,8 @@ def schema_payload() -> dict[str, Any]:
             "missing_canonical_capture",
             "pane_scrollback_not_canonical_capture",
             "stale_capture_row",
+            "latest_transcript_prompt_uncaptured",
+            "no_new_prompt_since_capture",
             "duplicate_capture_rows",
             "team_roster_session_dormant",
         ],
@@ -550,6 +648,7 @@ def main() -> int:
     parser.add_argument("--coordination-log", default=os.environ.get("FLYWHEEL_CROSS_ORCH_COORDINATION_LOG", "~/.local/state/flywheel/cross-orch-coordination.jsonl"))
     parser.add_argument("--team-roster", default=os.environ.get("TEAM_ROSTER", "~/.local/state/flywheel/team-roster.jsonl"))
     parser.add_argument("--claude-settings", default=os.environ.get("FLYWHEEL_CLAUDE_SETTINGS", "~/.claude/settings.json"))
+    parser.add_argument("--claude-projects-root", default=os.environ.get("FLYWHEEL_CLAUDE_PROJECTS_ROOT", "~/.claude/projects"))
     parser.add_argument("--wezterm-list", default=os.environ.get("FLYWHEEL_ORCH_CAPTURE_WEZTERM_LIST"))
     parser.add_argument("--disable-wezterm", action="store_true")
     parser.add_argument("--stale-hours", type=float, default=float(os.environ.get("FLYWHEEL_ORCH_CAPTURE_STALE_HOURS", "24")))
@@ -573,6 +672,7 @@ def main() -> int:
     coord_path = Path(os.path.expanduser(args.coordination_log)).resolve()
     team_roster_path = Path(os.path.expanduser(args.team_roster)).resolve()
     claude_settings_path = Path(os.path.expanduser(args.claude_settings)).resolve()
+    claude_projects_root = Path(os.path.expanduser(args.claude_projects_root)).resolve()
     wezterm_list_path = Path(os.path.expanduser(args.wezterm_list)).resolve() if args.wezterm_list else None
     now = parse_ts(args.now) if args.now else utc_now()
     assert now is not None
@@ -589,6 +689,10 @@ def main() -> int:
         enabled=wezterm_enabled,
         timeout_seconds=float(os.environ.get("FLYWHEEL_ORCH_CAPTURE_WEZTERM_TIMEOUT_SECONDS", "2")),
     )
+    latest_prompts_by_session = {
+        str(topo.get("session")): latest_claude_prompt_for_repo(claude_projects_root, topo.get("repo_path"))
+        for topo in topology_rows
+    }
     rows = [
         classify_row(
             topo,
@@ -596,6 +700,7 @@ def main() -> int:
             team_roster_path=team_roster_path,
             team_roster_row=roster_by_session.get(str(topo.get("session"))),
             wezterm_panes=wezterm_panes,
+            latest_transcript_prompt=latest_prompts_by_session.get(str(topo.get("session"))),
             capture_rows=requests_by_session.get(str(topo.get("session")), []),
             coord_seen_ts=coord_seen.get(str(topo.get("session"))),
             stale_cutoff=stale_cutoff,
@@ -619,6 +724,7 @@ def main() -> int:
         "coordination_log_path": str(coord_path),
         "team_roster_path": str(team_roster_path),
         "claude_settings_path": str(claude_settings_path),
+        "claude_projects_root": str(claude_projects_root),
         "capture_substrate": capture_substrate,
         "wezterm_visibility": {
             "source": wezterm_source,

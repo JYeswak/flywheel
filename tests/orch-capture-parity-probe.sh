@@ -107,7 +107,7 @@ python3 "$PROBE" \
   --stale-hours 24 \
   --json >"$probe_out"
 
-assert_jq "$probe_out" '(.rows | length == 7) and all(.rows[]; has("session") and has("pane") and has("runtime") and has("participation_state") and has("capture_path") and has("last_capture_ts") and has("last_josh_input_seen_ts") and has("gap_reason") and has("evidence_refs") and has("team_roster_event") and has("team_roster_participation") and has("wezterm_live") and has("wezterm_panes"))' "B13_AG1 probe emits required row fields"
+assert_jq "$probe_out" '(.rows | length == 7) and all(.rows[]; has("session") and has("pane") and has("runtime") and has("participation_state") and has("capture_path") and has("last_capture_ts") and has("latest_transcript_prompt_ts") and has("latest_transcript_prompt") and has("last_josh_input_seen_ts") and has("gap_reason") and has("evidence_refs") and has("team_roster_event") and has("team_roster_participation") and has("wezterm_live") and has("wezterm_panes"))' "B13_AG1 probe emits required row fields"
 assert_jq "$probe_out" '.rows[] | select(.session == "flywheel" and .runtime == "claude" and .participation_state == "captured")' "B13_AG2 Claude hook capture present fixture"
 assert_jq "$probe_out" '.active_owner_bead == "flywheel-vk9ox" and all(.approved_remediation_tracks[]; .owner_bead == "flywheel-vk9ox" and .supersedes_owner_bead == "flywheel-xap2")' "B13_AG7 remediation tracks route to active owner"
 assert_jq "$probe_out" '.rows[] | select(.session == "{proof-product}" and .runtime == "codex" and .participation_state == "capture_gap" and .gap_reason == "missing_canonical_capture")' "B13_AG2 Codex capture missing fixture"
@@ -153,6 +153,45 @@ write_duplicate_fixture "$dup"
 dup_out="$TMP/duplicate.json"
 python3 "$PROBE" --topology "$dup/topology.jsonl" --josh-requests "$dup/josh-requests.jsonl" --coordination-log "$dup/coordination.jsonl" --now "2026-05-04T00:00:00Z" --json >"$dup_out"
 assert_jq "$dup_out" '(.duplicate_capture_policy | test("prompt_hash")) and .status == "pass" and .orchs_with_capture_gap_count == 0 and .rows[0].participation_state == "captured" and .rows[0].gap_reason == "duplicate_capture_rows_non_blocking" and (.rows[0].duplicate_capture_groups[0].count == 2)' "B13_AG6 duplicate capture history is detected but non-blocking when capture exists"
+
+transcript="$TMP/transcript-aware"
+mkdir -p "$transcript/repos/quiet-claude" "$transcript/repos/missed-claude" "$transcript/claude-projects"
+quiet_repo="$transcript/repos/quiet-claude"
+missed_repo="$transcript/repos/missed-claude"
+quiet_project="$transcript/claude-projects/$(printf '%s' "$quiet_repo" | sed 's#/#-#g')"
+missed_project="$transcript/claude-projects/$(printf '%s' "$missed_repo" | sed 's#/#-#g')"
+mkdir -p "$quiet_project" "$missed_project"
+jq -nc --arg repo "$quiet_repo" '{session:"quiet-claude",repo_path:$repo,orchestrator_pane:1,orchestrator_kind:"claude",effective_at:"2026-05-03T23:00:00Z"}' >"$transcript/topology.jsonl"
+jq -nc --arg repo "$missed_repo" '{session:"missed-claude",repo_path:$repo,orchestrator_pane:1,orchestrator_kind:"claude",effective_at:"2026-05-03T23:00:00Z"}' >>"$transcript/topology.jsonl"
+cat >"$transcript/josh-requests.jsonl" <<'EOF'
+{"schema_version":2,"id":"jr-quiet-001","captured_at":"2026-05-01T00:00:00Z","source_session":"quiet-claude","source_pane":1,"prompt_hash":"sha256:quiet","source_message_id":"quiet-message","sanitized_excerpt":"quiet captured request"}
+{"schema_version":2,"id":"jr-missed-001","captured_at":"2026-05-01T00:00:00Z","source_session":"missed-claude","source_pane":1,"prompt_hash":"sha256:missed-old","source_message_id":"missed-old-message","sanitized_excerpt":"old captured request"}
+EOF
+cat >"$quiet_project/quiet.jsonl" <<'EOF'
+{"type":"user","message":{"role":"user","content":"quiet captured request"},"uuid":"quiet-message","timestamp":"2026-05-01T00:00:00.000Z","cwd":"/tmp/quiet-claude","sessionId":"quiet-session","isSidechain":false}
+{"type":"user","message":{"role":"user","content":"<command-name>/login</command-name>\n<command-message>login</command-message>\n<command-args></command-args>"},"uuid":"quiet-command-message","timestamp":"2026-05-03T00:00:00.000Z","cwd":"/tmp/quiet-claude","sessionId":"quiet-session","isSidechain":false}
+{"type":"user","message":{"role":"user","content":"<command-message>flywheel:handoff</command-message>\n<command-name>/flywheel:handoff</command-name>"},"uuid":"quiet-command-message-alt","timestamp":"2026-05-03T01:00:00.000Z","cwd":"/tmp/quiet-claude","sessionId":"quiet-session","isSidechain":false}
+EOF
+cat >"$missed_project/missed.jsonl" <<'EOF'
+{"type":"user","message":{"role":"user","content":"old captured request"},"uuid":"missed-old-message","timestamp":"2026-05-01T00:00:00.000Z","cwd":"/tmp/missed-claude","sessionId":"missed-session","isSidechain":false}
+{"type":"user","message":{"role":"user","content":"please capture this newer request"},"uuid":"missed-new-message","timestamp":"2026-05-02T00:00:00.000Z","cwd":"/tmp/missed-claude","sessionId":"missed-session","isSidechain":false}
+{"type":"user","message":{"role":"user","content":"<task-notification>\n<task-id>ignored</task-id>\n</task-notification>"},"uuid":"missed-task-notification","timestamp":"2026-05-03T00:00:00.000Z","cwd":"/tmp/missed-claude","sessionId":"missed-session","isSidechain":false}
+{"type":"user","message":{"role":"user","content":"CODEX_WATCHTOWER_HIGH new_issues=1"},"uuid":"missed-watchtower","timestamp":"2026-05-03T01:00:00.000Z","cwd":"/tmp/missed-claude","sessionId":"missed-session","isSidechain":false}
+EOF
+: >"$transcript/coordination.jsonl"
+: >"$transcript/team-roster.jsonl"
+transcript_out="$TMP/transcript-aware.json"
+python3 "$PROBE" \
+  --topology "$transcript/topology.jsonl" \
+  --josh-requests "$transcript/josh-requests.jsonl" \
+  --coordination-log "$transcript/coordination.jsonl" \
+  --team-roster "$transcript/team-roster.jsonl" \
+  --claude-projects-root "$transcript/claude-projects" \
+  --disable-wezterm \
+  --now "2026-05-04T00:00:00Z" \
+  --json >"$transcript_out"
+assert_jq "$transcript_out" '(.orchs_with_capture_gap_count == 1) and any(.rows[]; .session == "quiet-claude" and .participation_state == "captured" and .gap_reason == "no_new_prompt_since_capture" and .latest_transcript_prompt_ts == "2026-05-01T00:00:00Z")' "B13_AG10 stale wall-clock capture is OK when no newer transcript prompt exists"
+assert_jq "$transcript_out" 'any(.rows[]; .session == "missed-claude" and .participation_state == "stale_capture" and .gap_reason == "latest_transcript_prompt_uncaptured" and .latest_transcript_prompt.source_message_id == "missed-new-message")' "B13_AG10 newer transcript prompt remains a capture gap"
 
 repo="$(make_repo)"
 doctor_out="$TMP/doctor.json"
