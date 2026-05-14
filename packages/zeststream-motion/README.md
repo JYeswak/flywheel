@@ -57,6 +57,7 @@ Raw motion values are exported from `@zeststream/motion/tokens`.
 ## Reduced-motion safety
 
 This is not optional. Every component:
+
 - `SpringChip` / `SpringSheet` — transitions collapse to instant
 - `StreamingText` — shows full text immediately, no reveal animation
 - `SkeletonMatch` — pulse animation disabled, static placeholder

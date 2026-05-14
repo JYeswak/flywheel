@@ -21,8 +21,9 @@ The public CLI starts with reduced-mode commands.
 | `python3 scripts/validate_cutover_receipts.py --receipt-dir <dir> --release --json` | Replay a saved cutover receipt bundle and return pass only when every required proof is present and current. |
 | `python3 scripts/validate_user_journey_pack.py --json` | Validate the SkillOS-compatible public user journey pack fields, visual cues, proof refs, signoff status, and blocker/skip receipt refs. |
 | `python3 scripts/validate_story_system_package.py --json` | Validate the reusable ZestStream story-system package against the generated repo message pack and static site token mirror. |
+| `bash tests/zeststream-motion-package.sh` | Validate the reusable `@zeststream/motion` package, exported spring presets, reduced-motion docs, and frontend-gate recognition. |
 | `bash scripts/zs-frontend-quality-gate.sh --repo /path/to/next-project --json --strict` | Run the reusable ZestStream frontend quality gate before a Next.js proof surface can claim story-system adoption. |
-| `python3 scripts/extract_git_story.py --repo-label Flywheel --write-json docs/evidence/flywheel-trajectory.json --write-md docs/stories/flywheel-trajectory.md` | Regenerate the public trajectory story and `zeststream.repo_story_message.v0` owner message pack from git history instead of writing the journey from one session's memory. |
+| `python3 scripts/extract_git_story.py --repo-label Flywheel --write-json docs/evidence/flywheel-trajectory.json --write-md docs/stories/flywheel-trajectory.md` | Regenerate the public trajectory story, `zeststream.repo_story_message.v0` owner message pack, and `zeststream.repo_frontend_story.v0` UI payload from git history instead of writing the journey from one session's memory. |
 | `python3 scripts/extract_git_story.py --repo /path/to/repo --repo-label "Product Name" --redaction-table /path/to/table.yaml --json` | Probe another repo with an explicit redaction table; when omitted, the extractor uses the target repo table or falls back to `flywheel:de-personalization-table.yaml`. |
 
 Full-mode harness dispatch through NTM and Agent Mail is intentionally not

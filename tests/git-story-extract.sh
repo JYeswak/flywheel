@@ -28,11 +28,14 @@ data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
 required_chapters = {"foundation", "proof-loop", "friction", "reuse", "story"}
 message_pack = data.get("message_pack", {})
 story_dossier = data.get("story_dossier", {})
+frontend_story = data.get("frontend_story", {})
 if data.get("schema_version") != "zeststream.repo_git_story.v0":
     raise SystemExit(1)
 if message_pack.get("schema_version") != "zeststream.repo_story_message.v0":
     raise SystemExit(1)
 if story_dossier.get("schema_version") != "zeststream.repo_story_dossier.v0":
+    raise SystemExit(1)
+if frontend_story.get("schema_version") != "zeststream.repo_frontend_story.v0":
     raise SystemExit(1)
 if data.get("repo_label") != "Flywheel":
     raise SystemExit(1)
@@ -61,6 +64,24 @@ if len(story_dossier.get("audience_truths", [])) < 5:
     raise SystemExit(1)
 if "blocked until proven" not in story_dossier.get("owner_language_bank", {}).get("lead_with", []):
     raise SystemExit(1)
+components = frontend_story.get("component_props", {})
+for name in [
+    "OperatingRoomHero",
+    "WorkflowMap",
+    "SliceWorkbench",
+    "ProofRail",
+    "TrustWorryMatrix",
+    "YuzuMethodRail",
+    "ProofDrawer",
+    "LessonLedger",
+    "SafeContactPanel",
+]:
+    if name not in components:
+        raise SystemExit(1)
+if frontend_story.get("package_targets", {}).get("components") != "@zeststream/ui":
+    raise SystemExit(1)
+if "show the proof" not in frontend_story.get("copy_rule", "").lower():
+    raise SystemExit(1)
 PY
 then
   pass "git story JSON contract"
@@ -78,6 +99,9 @@ if rg -qF "show the proof, do not sell the dream" "$MD_OUT" \
   && rg -qF "OperatingRoomHero" "$JSON_OUT" "$MD_OUT" \
   && rg -qF "AI will make a mess." "$JSON_OUT" \
   && rg -qF "zeststream.repo_story_dossier.v0" "$JSON_OUT" "$MD_OUT" \
+  && rg -qF "zeststream.repo_frontend_story.v0" "$JSON_OUT" "$MD_OUT" \
+  && rg -qF "@zeststream/ui" "$JSON_OUT" \
+  && rg -qF "SafeContactPanel" "$JSON_OUT" "$MD_OUT" \
   && rg -qF "OwnerTensionRoom" "$JSON_OUT" "$MD_OUT" \
   && rg -qF "The map comes before automation." "$JSON_OUT" "$MD_OUT"; then
   pass "git story owner language"
@@ -127,6 +151,8 @@ if data.get("schema_version") != "zeststream.repo_git_story.v0":
 if data.get("message_pack", {}).get("schema_version") != "zeststream.repo_story_message.v0":
     raise SystemExit(1)
 if data.get("story_dossier", {}).get("schema_version") != "zeststream.repo_story_dossier.v0":
+    raise SystemExit(1)
+if data.get("frontend_story", {}).get("schema_version") != "zeststream.repo_frontend_story.v0":
     raise SystemExit(1)
 if data.get("redaction_table") != "flywheel:de-personalization-table.yaml":
     raise SystemExit(1)

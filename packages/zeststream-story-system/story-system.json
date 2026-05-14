@@ -3,6 +3,7 @@
   "status": "candidate-shared-foundation",
   "source_message_schema": "zeststream.repo_story_message.v0",
   "source_dossier_schema": "zeststream.repo_story_dossier.v0",
+  "source_frontend_schema": "zeststream.repo_frontend_story.v0",
   "core_offer": "Map one workflow, improve one bounded slice, prove what changed, and carry the lesson into the next build.",
   "primary_cta": "Map my workflow",
   "secondary_cta": "Inspect the proof",

@@ -47,7 +47,7 @@ Current verdict: `not complete`.
 | SkillOS integration boundary | `docs/concepts/skillos-boundary.md`, `docs/runbooks/public-user-journey-pack.md`, SkillOS-compatible schema | `bash tests/public-docs.sh`; `python3 scripts/validate_user_journey_pack.py --json` | Locally verified; public copy names SkillOS only as capability-control-plane integration point. |
 | Proof-product surfaces integrated without becoming mission ceiling | `docs/evidence/publication-evidence.md`, `docs/evidence/asupersync-gated-adoption.md`, proof-surface language in charter/site | `bash tests/upstream-substrate-adoption.sh`; `bash tests/public-docs.sh`; staged live site review | Locally verified; Asupersync remains gated evaluation. |
 | SMB business-owner trust journey | `site/`, `docs/runbooks/public-site-smb-journey-wireframe.md`, `docs/runbooks/public-user-journey-pack.md` | Commit `fdb7f3ad`; `bash tests/website-static.sh`; `bash tests/website-accessibility.sh`; `python3 scripts/live_site_probe.py --base-url https://flywheel.zeststream.ai/ --json` | Private-live verified with the deep SMB operating-room site across all six pages, Joshua final site signoff still pending. |
-| Git-derived public story trajectory, owner message pack, shared story package, and reusable UI package | `scripts/extract_git_story.py`, `docs/stories/flywheel-trajectory.md`, `docs/evidence/flywheel-trajectory.json`, `docs/runbooks/repo-trajectory-story-pack.md`, `packages/zeststream-story-system/`, `packages/zeststream-ui/`, `scripts/zs-frontend-quality-gate.sh` | `bash tests/git-story-extract.sh`; `bash tests/story-system-package.sh`; `bash tests/zeststream-ui-package.sh`; `bash tests/public-docs.sh`; `zeststream.repo_story_message.v0` message pack with trust objections, visual primitives, proof translations, Next.js storytelling targets, and reusable React proof primitives | Locally verified as a reusable story/design mechanism and package foundation; private-live site still needs final signoff against the stronger message contract. |
+| Git-derived public story trajectory, owner message pack, shared story package, reusable UI package, and reusable motion package | `scripts/extract_git_story.py`, `docs/stories/flywheel-trajectory.md`, `docs/evidence/flywheel-trajectory.json`, `docs/runbooks/repo-trajectory-story-pack.md`, `packages/zeststream-story-system/`, `packages/zeststream-ui/`, `packages/zeststream-motion/`, `scripts/zs-frontend-quality-gate.sh` | `bash tests/git-story-extract.sh`; `bash tests/story-system-package.sh`; `bash tests/zeststream-ui-package.sh`; `bash tests/zeststream-motion-package.sh`; `bash tests/public-docs.sh`; `zeststream.repo_story_message.v0` message pack with trust objections, visual primitives, proof translations, Next.js storytelling targets, reusable React proof primitives, and reduced-motion-safe spring presets | Locally verified as a reusable story/design mechanism and package foundation; private-live site still needs final signoff against the stronger message contract. |
 | Staging review signoff map | `docs/evidence/staging-review-signoff-packet.md` | `bash tests/public-docs.sh`; `python3 scripts/publication_readiness.py --json` | Locally verified as a review aid; it explicitly does not grant public release approval. |
 | External developer run path | `README.md`, `docs/getting-started/first-run.md`, `docs/reference/commands.md`, `docs/reference/files.md` | `bash tests/public-links.sh`; `bash tests/public-docs.sh`; `bash tests/installer-smoke.sh`; `bash tests/journey-smoke.sh` | Locally verified; public GitHub availability still blocked. |
 | Blocker/gap tracking to closure | `docs/evidence/publication-blocker-coverage.md`, `.flywheel/PLANS/public-share-readiness-2026-05-12/`, Beads | `python3 .flywheel/scripts/true-publication-registry-validate.py --json`; `bash tests/true-publication-registry-validate.sh` | Coverage verified; six release blockers remain open. |
@@ -88,11 +88,11 @@ not substitutes for real public GitHub, release assets, hosted runs, and Joshua
 signoff.
 
 Latest public export evidence: `scripts/assemble.py --run-id
-codex-public-export-20260514T1401Z --clean --json` passed with 14,733
-classified files, 10,249 copied public-safe files, 4,042 denylist exclusions,
-and 7,460 manual-review rows. Staged checks passed for publication readiness,
-public docs 233/0, this audit, website static 95/0/accessibility, user-journey pack,
-git-story extraction, the embedded owner message pack, story-system package, UI package,
+codex-public-export-20260514T1434Z --clean --json` passed with 14,752
+classified files, 10,267 copied public-safe files, 4,043 denylist exclusions,
+and 7,462 manual-review rows. Staged checks passed for publication readiness,
+public docs 247/0, this audit, website static 95/0/accessibility, user-journey pack,
+git-story extraction, the embedded owner message pack, frontend story payload, story-system package, UI package, motion package,
 public links, top-level files, release assets, cutover receipts, agent lanes,
 isolated agent-lane smoke, journey smoke, public blocker coverage, and the
 depersonalization scan.

@@ -30,12 +30,15 @@ public release line.
   CTA, proof refs, signoff status, and blocker/skip receipt refs before signoff.
 - Git-derived repo trajectory story pack, extractor, generated Flywheel
   trajectory evidence, embedded `zeststream.repo_story_message.v0` owner message
-  pack, `zeststream.repo_story_dossier.v0` frontend story brief, and homepage
-  trajectory rail so public story copy is grounded in commit history instead of
-  one session's memory.
+  pack, `zeststream.repo_story_dossier.v0` story brief,
+  `zeststream.repo_frontend_story.v0` UI payload, and homepage trajectory rail
+  so public story copy is grounded in commit history instead of one session's
+  memory.
 - Candidate `@zeststream/story-system` package with shared story grammar, proof
   states, visual primitives, excluded hype phrases, CSS tokens, and drift validator
   for Flywheel-powered frontend repos.
+- Candidate `@zeststream/motion` package with reduced-motion-safe proof-surface
+  motion primitives and exported spring presets for shared Next.js work.
 - Candidate `@zeststream/ui` package with shared proof rails, workflow maps,
   trust-worry matrices, telemetry texture, and a reusable frontend quality gate
   for public Next.js proof surfaces.
@@ -64,6 +67,6 @@ public release line.
 
 - Public evidence index added at `docs/evidence/publication-evidence.md` to map
   v0.2 trust claims to local verifiers and live evidence still required.
-- Latest extraction evidence: 14,733 files classified, 10,249 public-safe
-  artifacts copied, 4,042 private/manual-review paths excluded, and 7,460
+- Latest extraction evidence: 14,752 files classified, 10,267 public-safe
+  artifacts copied, 4,043 private/manual-review paths excluded, and 7,462
   review rows signed in the v0.2 publication lane.

@@ -213,7 +213,7 @@ The candidate shared package lives at `packages/zeststream-story-system/`:
 | File | Job |
 |---|---|
 | `package.json` | Names the reusable `@zeststream/story-system` export surface. |
-| `story-system.json` | Carries story arc stages, proof states, visual primitives, voice rules, blocked phrases, and Next.js targets. |
+| `story-system.json` | Carries story arc stages, proof states, visual primitives, voice rules, blocked phrases, frontend story schema, and Next.js targets. |
 | `tokens.css` | Carries reusable CSS variables mirrored by `site/visual-system.css`. |
 
 Validate package drift with:
@@ -237,19 +237,23 @@ A repo trajectory story is acceptable when:
 5. The dossier contains audience truths, owner language bank, reference
    patterns, page blueprint, Next.js foundation targets, visual direction, and
    signoff questions.
-6. The extractor records which `redaction_table` was used and works when the
+6. Generated JSON includes `frontend_story.schema_version` equal to
+   `zeststream.repo_frontend_story.v0`, with component props for the shared
+   `@zeststream/ui` primitives.
+7. The extractor records which `redaction_table` was used and works when the
    target repo has not adopted a repo-local table yet.
-7. `packages/zeststream-story-system/story-system.json` matches the generated
+8. `packages/zeststream-story-system/story-system.json` matches the generated
    message pack and dossier for stages, primitives, CTA, core offer, objection
-   count, owner language, audience truths, and page blueprint.
-8. `packages/zeststream-story-system/tokens.css` matches required public site
+   count, owner language, audience truths, page blueprint, and frontend story
+   schema.
+9. `packages/zeststream-story-system/tokens.css` matches required public site
    visual tokens.
-9. Generated JSON and Markdown contain no private paths, client names, or
+10. Generated JSON and Markdown contain no private paths, client names, or
    unsupported claims.
-10. The public page includes the trajectory as a buyer journey, not a developer
+11. The public page includes the trajectory as a buyer journey, not a developer
    changelog.
-11. The page links to the generated story artifact for reviewers.
-12. Any claim based on runtime support, release status, or public availability
+12. The page links to the generated story artifact for reviewers.
+13. Any claim based on runtime support, release status, or public availability
    still points to its own proof receipt.
 
 Flywheel's current generated artifacts:

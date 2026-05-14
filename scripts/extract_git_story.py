@@ -19,6 +19,7 @@ from depersonalize import DEFAULT_TABLE, load_replacement_table, repo_root, tran
 SCHEMA_VERSION = "zeststream.repo_git_story.v0"
 MESSAGE_SCHEMA_VERSION = "zeststream.repo_story_message.v0"
 DOSSIER_SCHEMA_VERSION = "zeststream.repo_story_dossier.v0"
+FRONTEND_SCHEMA_VERSION = "zeststream.repo_frontend_story.v0"
 
 NATURAL_PLACEHOLDERS = {
     "{operator}": "the operator",
@@ -619,6 +620,7 @@ def build_story(repo: Path, repo_label: str, redaction_table: Path | None = None
     }
     story["message_pack"] = build_message_pack(repo_label, story)
     story["story_dossier"] = build_story_dossier(repo_label, story)
+    story["frontend_story"] = build_frontend_story(repo_label, story)
     return story
 
 
@@ -727,6 +729,165 @@ def build_story_dossier(repo_label: str, story: dict[str, Any]) -> dict[str, Any
             "Does the design make the workflow and proof path visible without requiring GitHub literacy?",
             "Does the page feel ownable to the operator brand rather than copied from another builder's aesthetic?",
         ],
+    }
+
+
+def build_frontend_story(repo_label: str, story: dict[str, Any]) -> dict[str, Any]:
+    """Translate git story evidence into props for reusable ZestStream UI primitives."""
+
+    message = story["message_pack"]
+    chapters = story["chapters"]
+    friction = strongest_chapter(chapters, "friction")
+    proof_loop = strongest_chapter(chapters, "proof-loop")
+    reuse = strongest_chapter(chapters, "reuse")
+    proof_items = [
+        {
+            "label": "Repo trajectory",
+            "state": "proven",
+            "detail": "Generated from git history, not one session's memory.",
+            "receiptUrl": "docs/stories/repo-trajectory.md",
+        },
+        {
+            "label": "Friction visible",
+            "state": "proven" if friction["commit_count"] > 0 else "blocked",
+            "detail": f"{friction['commit_count']} blocker/friction signals inspected.",
+            "receiptUrl": "docs/evidence/repo-trajectory.json",
+        },
+        {
+            "label": "Proof loop",
+            "state": "proven" if proof_loop["commit_count"] > 0 else "blocked",
+            "detail": f"{proof_loop['commit_count']} proof-loop signals inspected.",
+            "receiptUrl": "docs/evidence/repo-trajectory.json",
+        },
+        {
+            "label": "Reusable lessons",
+            "state": "proven" if reuse["commit_count"] > 0 else "blocked",
+            "detail": f"{reuse['commit_count']} reusable-method signals inspected.",
+            "receiptUrl": "docs/evidence/repo-trajectory.json",
+        },
+    ]
+    trust_worries = [
+        {
+            "ownerWorry": row["objection"],
+            "visibleAnswer": row["visible_answer"],
+            "proofBehavior": row["proof_behavior"],
+            "proofState": "proven",
+        }
+        for row in message["trust_objections"]
+    ]
+    yuzu_stages = [
+        {
+            "id": row["stage"],
+            "label": row["stage"].replace("-", " ").title(),
+            "detail": row["visible_wording"],
+        }
+        for row in message["story_arc"]
+    ]
+    lessons = [
+        {
+            "date": chapter["latest_date"] or story["generated_date"],
+            "lesson": chapter["owner_takeaway"],
+            "appliedTo": chapter["visual_scene"],
+        }
+        for chapter in chapters
+    ]
+    return {
+        "schema_version": FRONTEND_SCHEMA_VERSION,
+        "source_story_schema": SCHEMA_VERSION,
+        "source_message_schema": MESSAGE_SCHEMA_VERSION,
+        "source_dossier_schema": DOSSIER_SCHEMA_VERSION,
+        "repo_label": repo_label,
+        "package_targets": {
+            "tokens": "@zeststream/story-system",
+            "components": "@zeststream/ui",
+        },
+        "copy_rule": "Show the proof, not the dream; every strong line must point to proof, blocked state, or a safe first step.",
+        "blocked_language": message["must_not_say"],
+        "quality_gate_commands": [
+            "python3 scripts/extract_git_story.py --repo <repo> --write-json docs/evidence/repo-trajectory.json --write-md docs/stories/repo-trajectory.md",
+            "python3 scripts/validate_story_system_package.py --json",
+            "bash scripts/zs-frontend-quality-gate.sh --repo <nextjs-repo> --json --strict",
+            "playwright screenshot checks for desktop and mobile proof primitives",
+        ],
+        "component_props": {
+            "OperatingRoomHero": {
+                "headline": message["page_headline_options"][0],
+                "subhead": message["core_offer"],
+                "tools": ["Email", "CRM", "Calendar", "Invoices", "Documents", "Reports"],
+                "activeRoute": ["Email", "CRM"],
+                "primaryCta": {"label": message["primary_cta"], "href": "/contact"},
+                "secondaryCta": {"label": message["secondary_cta"], "href": "/proof"},
+            },
+            "WorkflowMap": {
+                "title": f"{repo_label} first workflow slice",
+                "nodes": [
+                    {"id": "source", "label": "Owner request", "role": "source", "system": "Inbox"},
+                    {"id": "slice", "label": "Bounded slice", "role": "transform", "system": "Yuzu Method"},
+                    {"id": "proof", "label": "Proof state", "role": "gate", "system": "Receipt"},
+                    {"id": "lesson", "label": "Reusable lesson", "role": "sink", "system": "Flywheel"},
+                ],
+                "edges": [
+                    {"from": "source", "to": "slice", "label": "map", "proofState": "proven"},
+                    {"from": "slice", "to": "proof", "label": "verify", "proofState": "proven"},
+                    {"from": "proof", "to": "lesson", "label": "carry forward", "proofState": "proven"},
+                ],
+            },
+            "SliceWorkbench": {
+                "sliceName": "One bounded workflow improvement",
+                "before": {
+                    "steps": ["Copy", "Chase", "Check", "Remember"],
+                    "cost": "Manual time hidden between tools",
+                },
+                "after": {
+                    "steps": ["Map the route", "Improve one slice", "Verify the proof", "Keep the lesson"],
+                    "cost": "One inspected change before any broader rollout",
+                },
+                "scopeNote": "This is one slice first. Anything unproven stays blocked, private, or skipped with a reason.",
+            },
+            "ProofRail": {"items": proof_items, "title": "Proof path", "showCount": True},
+            "TrustWorryMatrix": {"title": "Owner worries answered by controls", "worries": trust_worries},
+            "YuzuMethodRail": {"stages": yuzu_stages, "currentStage": "control", "showMark": True},
+            "ProofDrawer": {
+                "verdict": "proven",
+                "headline": "The page story is generated from repo trajectory evidence.",
+                "receipts": [
+                    {
+                        "label": "Generated story",
+                        "detail": "Sanitized Markdown story generated from git history.",
+                        "url": "docs/stories/repo-trajectory.md",
+                    },
+                    {
+                        "label": "Generated JSON",
+                        "detail": "Machine-readable message pack, dossier, and frontend story.",
+                        "url": "docs/evidence/repo-trajectory.json",
+                    },
+                ],
+            },
+            "LessonLedger": {"lessons": lessons, "title": "Lessons that became method"},
+            "SafeContactPanel": {
+                "headline": "Start with one workflow map",
+                "cta": {"label": message["primary_cta"], "href": "/contact"},
+                "trustAnchors": [
+                    {
+                        "anchor": "Human approval",
+                        "detail": "The owner approves the slice before broader motion.",
+                    },
+                    {
+                        "anchor": "Narrow scope",
+                        "detail": "The first engagement is one workflow route, not the whole company.",
+                    },
+                    {
+                        "anchor": "Visible stop conditions",
+                        "detail": "Unproven claims stay blocked instead of becoming copy.",
+                    },
+                    {
+                        "anchor": "Privacy clarity",
+                        "detail": "Use redacted examples before secrets, customer data, or system access.",
+                    },
+                ],
+                "notFor": ["black-box automation", "set-it-and-forget-it AI", "broad access before a map"],
+            },
+        },
     }
 
 
@@ -845,6 +1006,30 @@ def render_markdown(story: dict[str, Any]) -> str:
     )
     for phrase in dossier["owner_language_bank"]["proof_phrases"]:
         lines.append(f"- {phrase}")
+    lines.extend(
+        [
+            "",
+            "## Frontend Story Payload",
+            "",
+            f"Schema: `{FRONTEND_SCHEMA_VERSION}`",
+            "",
+            "The generated payload maps the story directly onto shared public",
+            "frontend primitives, so a repo can render the arc without rewriting the",
+            "message from scratch.",
+            "",
+            "| Component | Generated purpose |",
+            "|---|---|",
+        ]
+    )
+    for name, props in story["frontend_story"]["component_props"].items():
+        purpose = props.get("headline") or props.get("title") or props.get("sliceName") or props.get("headline", "")
+        if not purpose and name == "ProofRail":
+            purpose = "Proof path"
+        if not purpose and name == "TrustWorryMatrix":
+            purpose = "Owner worries answered by controls"
+        if not purpose:
+            purpose = "Reusable story primitive"
+        lines.append(f"| `{name}` | {purpose} |")
     lines.extend(
         [
             "",

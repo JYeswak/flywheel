@@ -15,17 +15,18 @@ Common evidence surfaces:
 | `scripts/live_site_probe.py --json` | Deployed first-party site pages and assets. |
 | `scripts/validate_cutover_receipts.py --json` | Saved cutover receipt bundle replay for final release evidence. |
 | `scripts/validate_user_journey_pack.py --json` | SkillOS-compatible public user journey pack validator with journey-step, visual-cue, evidence-ref, and skip/blocker receipt checks. |
-| `scripts/validate_story_system_package.py --json` | Reusable ZestStream story-system package validator that checks story arc, trust objections, visual primitives, excluded hype phrases, and CSS token parity. |
+| `scripts/validate_story_system_package.py --json` | Reusable public story-system package validator that checks story arc, trust objections, visual primitives, frontend story schema, excluded hype phrases, and CSS token parity. |
 | `scripts/zs-frontend-quality-gate.sh --json` | Reusable frontend quality gate for Next.js projects; checks font loading, design tokens, motion, copy source, accessibility, proof states, story-system linkage, and shared package wiring. |
-| `scripts/extract_git_story.py --json` | Git-derived trajectory and owner message-pack evidence so public copy can show the proof path instead of relying on one session's memory. |
+| `scripts/extract_git_story.py --json` | Git-derived trajectory, owner message pack, story dossier, and frontend UI payload so public copy can show the proof path instead of relying on one session's memory. |
 | `docs/brand/naming-conventions.md` | Public naming contract separating company, method, engine, capability-control plane, upstream substrate, and proof surfaces. |
-| `packages/zeststream-story-system/story-system.json` | Shared public story grammar for Flywheel, ClutterFreeSpaces, Mobile Eats, and future ZestStream frontend surfaces. |
-| `packages/zeststream-story-system/tokens.css` | Shared ZestStream visual tokens mirrored by the static Flywheel site and intended for Next.js package adoption. |
+| `packages/zeststream-story-system/story-system.json` | Shared public story grammar for Flywheel, ClutterFreeSpaces, Mobile Eats, and future frontend surfaces. |
+| `packages/zeststream-story-system/tokens.css` | Shared visual tokens mirrored by the static Flywheel site and intended for Next.js package adoption. |
 | `packages/zeststream-ui/` | Shared React primitives for proof rails, workflow maps, trust-worry matrices, and telemetry texture. |
+| `packages/zeststream-motion/` | Shared React motion primitives and `@zeststream/motion/tokens` spring presets for living proof surfaces, with reduced-motion behavior documented. |
 | `docs/evidence/publication-evidence.md` | Public index of trust claims, local receipts, and live evidence still required. |
 | `docs/evidence/publication-blocker-coverage.md` | Public mapping from live readiness codes to owner and closure proof. |
 | `docs/evidence/staging-review-signoff-packet.md` | Staging-review map for the site, story, evidence, developer path, agent-lane proof, and remaining public blockers; not public release approval. |
-| `docs/evidence/flywheel-trajectory.json` | Machine-readable `zeststream.repo_git_story.v0` trajectory evidence with embedded `zeststream.repo_story_message.v0` owner message pack generated from git history. |
+| `docs/evidence/flywheel-trajectory.json` | Machine-readable `zeststream.repo_git_story.v0` trajectory evidence with embedded `zeststream.repo_story_message.v0` owner message pack and `zeststream.repo_frontend_story.v0` UI payload generated from git history. |
 | `docs/stories/flywheel-trajectory.md` | Owner-readable trajectory story used by the public site and reviewers. |
 | `docs/runbooks/public-user-journey-pack.md` | Public asset journey map for business-owner, developer, operator, contributor, and signoff paths. |
 | `docs/runbooks/repo-trajectory-story-pack.md` | Reusable story-pack contract for applying the git-derived trajectory pattern to other repo surfaces. |

@@ -58,6 +58,7 @@ jobs:
           bash tests/public-user-journey-pack.sh
           bash tests/story-system-package.sh
           bash tests/zeststream-ui-package.sh
+          bash tests/zeststream-motion-package.sh
           bash tests/publication-goal-completion-audit.sh
           bash tests/publication-readiness.sh
           bash tests/true-publication-registry-validate.sh
@@ -98,6 +99,7 @@ jobs:
             tests/public-user-journey-pack.sh \
             tests/story-system-package.sh \
             tests/zeststream-ui-package.sh \
+            tests/zeststream-motion-package.sh \
             tests/publication-goal-completion-audit.sh \
             tests/publication-readiness.sh \
             tests/true-publication-registry-validate.sh \
@@ -149,6 +151,7 @@ jobs:
             docs/stories/public-journey-and-redaction.md \
             packages/zeststream-story-system/README.md \
             packages/zeststream-ui/README.md \
+            packages/zeststream-motion/README.md \
             docs/evidence/publication-evidence.md \
             docs/evidence/publication-goal-completion-audit.md \
             docs/concepts/*.md \

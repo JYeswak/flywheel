@@ -102,6 +102,7 @@ REQUIRED_LOCAL_FILES = [
     "tests/git-story-extract.sh",
     "tests/story-system-package.sh",
     "tests/zeststream-ui-package.sh",
+    "tests/zeststream-motion-package.sh",
     "tests/installer-smoke.sh",
     "tests/journey-smoke.sh",
     "tests/agent-lane-probe.sh",
@@ -142,6 +143,16 @@ REQUIRED_LOCAL_FILES = [
     "packages/zeststream-ui/src/components/ProofDrawer.tsx",
     "packages/zeststream-ui/src/components/LessonLedger.tsx",
     "packages/zeststream-ui/src/components/SafeContactPanel.tsx",
+    "packages/zeststream-motion/package.json",
+    "packages/zeststream-motion/README.md",
+    "packages/zeststream-motion/tsconfig.json",
+    "packages/zeststream-motion/src/index.ts",
+    "packages/zeststream-motion/src/tokens.ts",
+    "packages/zeststream-motion/src/components/SpringChip.tsx",
+    "packages/zeststream-motion/src/components/SpringSheet.tsx",
+    "packages/zeststream-motion/src/components/ConfidenceBadge.tsx",
+    "packages/zeststream-motion/src/components/StreamingText.tsx",
+    "packages/zeststream-motion/src/components/SkeletonMatch.tsx",
 ]
 REQUIRED_WORKFLOWS = {"CI", "Installer Smoke", "Release", "Site Deploy"}
 SUCCESS_CONCLUSIONS = {"success"}

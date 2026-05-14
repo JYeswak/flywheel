@@ -1,20 +1,9 @@
 {
   "chapters": [
     {
-      "commit_count": 392,
+      "commit_count": 397,
       "copy_block": "Before we automate anything, we make the work visible enough to inspect.",
       "evidence_commits": [
-        {
-          "date": "2026-05-06",
-          "paths": [
-            ".flywheel/scripts/dispatch-self-test-delivery-identity.sh",
-            ".flywheel/scripts/golden-fixture-replay-runner.sh",
-            ".flywheel/scripts/mission-lock-readiness-doctor.sh",
-            ".flywheel/scripts/polish-preflight-quality-gate.sh"
-          ],
-          "sha": "10cec738",
-          "subject": "feat(scripts): ship Wave 3+4 validators + doctor + replay-runner + quality-gate orchestrator"
-        },
         {
           "date": "2026-05-07",
           "paths": [
@@ -88,11 +77,22 @@
           ],
           "sha": "b4d28c6b",
           "subject": "fix(public): depersonalize repo mission surfaces [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".flywheel/MISSION.md",
+            ".flywheel/doctrine/dispatch-author-skill-routing-contract.md",
+            ".flywheel/doctrine/substrate-class-classifier.md",
+            ".flywheel/last_closeout_receipt.json"
+          ],
+          "sha": "ad055c85",
+          "subject": "feat(hygiene): ship bszgl.1-4 git hygiene paradigm enforcement"
         }
       ],
       "first_date": "2026-04-30",
       "id": "foundation",
-      "latest_date": "2026-05-13",
+      "latest_date": "2026-05-14",
       "owner_takeaway": "We begin with the actual path work takes today, including the handoffs people have stopped noticing.",
       "owner_value": "The first useful proof is not a polished page. It is a workbench where the goal, current state, checks, and next action can be inspected instead of guessed.",
       "sales_translation": "For an SMB owner, this means the project starts by mapping how work really moves before anyone promises automation.",
@@ -100,7 +100,7 @@
       "visual_scene": "A first-room operating map with existing tools, owner memory, and one highlighted manual route."
     },
     {
-      "commit_count": 802,
+      "commit_count": 805,
       "copy_block": "Claims earn their place on the page by surviving checks, not by sounding impressive.",
       "evidence_commits": [
         {
@@ -196,7 +196,7 @@
       "visual_scene": "A proof rail beside the workflow with proven, blocked, skipped-with-reason, and private states."
     },
     {
-      "commit_count": 216,
+      "commit_count": 218,
       "copy_block": "If the proof is not ready, the claim stays blocked.",
       "evidence_commits": [
         {
@@ -284,7 +284,7 @@
       ],
       "first_date": "2026-05-04",
       "id": "friction",
-      "latest_date": "2026-05-13",
+      "latest_date": "2026-05-14",
       "owner_takeaway": "Blocked evidence is a control surface. It shows the operator is willing to stop before chaos reaches the business.",
       "owner_value": "The useful pivots came from red evidence: private residue, unsupported lanes, stale copy, brittle workflows, and claims that needed to be blocked until proven.",
       "sales_translation": "This is where trust is earned. The process treats blocked evidence as useful signal, not as something to hide in a footnote.",
@@ -292,7 +292,7 @@
       "visual_scene": "A visible friction band where unsupported claims are held in amber until the proof catches up."
     },
     {
-      "commit_count": 651,
+      "commit_count": 655,
       "copy_block": "A useful lesson becomes a reusable method, not a memory in one chat window.",
       "evidence_commits": [
         {
@@ -364,6 +364,17 @@
         {
           "date": "2026-05-13",
           "paths": [
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/24-CURRENT-GOAL-COMPLETION-AUDIT.md",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/25-RELEASE-CUTOVER-AUTHORIZATION-PACKET.md",
+            "CHANGELOG.md",
+            "README.md"
+          ],
+          "sha": "9b104522",
+          "subject": "feat(story): package repo trajectory dossier [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
             ".beads/issues.jsonl",
             ".flywheel/AGENTS-CANONICAL.md",
             ".flywheel/PLANS/public-share-readiness-2026-05-12/05-INSTALLABILITY-COVERAGE-AUDIT.md",
@@ -371,22 +382,11 @@
           ],
           "sha": "6e8b0fb5",
           "subject": "feat(publication): prepare staging review bundle"
-        },
-        {
-          "date": "2026-05-13",
-          "paths": [
-            ".beads/issues.jsonl",
-            ".flywheel/PLANS/public-share-readiness-2026-05-12/19-TRUE-PUBLICATION-RELEASE-BLOCKER-REGISTRY.md",
-            ".flywheel/PLANS/public-share-readiness-2026-05-12/25-RELEASE-CUTOVER-AUTHORIZATION-PACKET.md",
-            "docs/evidence/publication-blocker-coverage.md"
-          ],
-          "sha": "aeba6971",
-          "subject": "fix(readiness): block stale live site content"
         }
       ],
       "first_date": "2026-04-30",
       "id": "reuse",
-      "latest_date": "2026-05-13",
+      "latest_date": "2026-05-14",
       "owner_takeaway": "The operator does not sell a fresh start every time. Each project improves the next project.",
       "owner_value": "Once a pattern worked, it moved into runbooks, scripts, tests, docs, shared language, or reusable operating rules instead of staying trapped in one session.",
       "sales_translation": "Every project should make the next project safer and faster. That is the compounding part of the Flywheel.",
@@ -394,7 +394,7 @@
       "visual_scene": "A lesson ledger showing which checks, words, components, or runbooks were created from the last hard-earned lesson."
     },
     {
-      "commit_count": 134,
+      "commit_count": 137,
       "copy_block": "The story lands when a buyer can see the workflow pain, the safe first slice, and the proof path without decoding the stack.",
       "evidence_commits": [
         {
@@ -487,7 +487,7 @@
       ],
       "first_date": "2026-05-04",
       "id": "story",
-      "latest_date": "2026-05-13",
+      "latest_date": "2026-05-14",
       "owner_takeaway": "The public page should feel like a guided visit through a working shop, not a generic AI pitch.",
       "owner_value": "The current arc is making the proof understandable to a non-technical owner: what changed, why it was safe, where it stopped, and which lesson now carries forward.",
       "sales_translation": "Show the proof, not the dream: one bounded workflow slice, one visible control path, one lesson that compounds into the next build.",
@@ -502,11 +502,335 @@
     },
     "first_date": "2026-04-30",
     "latest_commit": {
-      "sha": "d25f878c",
-      "subject": "chore(beads): record release runbook gate evidence [work item]"
+      "sha": "913500d6",
+      "subject": "feat(ui): gate reusable story primitives [work item]"
     },
-    "latest_date": "2026-05-13",
-    "total_commits": 1487
+    "latest_date": "2026-05-14",
+    "total_commits": 1495
+  },
+  "frontend_story": {
+    "blocked_language": [
+      "AI will transform your business",
+      "fully autonomous",
+      "set it and forget it",
+      "we have many commits, so trust us",
+      "all systems are supported without receipts"
+    ],
+    "component_props": {
+      "LessonLedger": {
+        "lessons": [
+          {
+            "appliedTo": "A first-room operating map with existing tools, owner memory, and one highlighted manual route.",
+            "date": "2026-05-14",
+            "lesson": "We begin with the actual path work takes today, including the handoffs people have stopped noticing."
+          },
+          {
+            "appliedTo": "A proof rail beside the workflow with proven, blocked, skipped-with-reason, and private states.",
+            "date": "2026-05-13",
+            "lesson": "The value is not that an AI agent did work. The value is that the work left behind proof a business owner can question."
+          },
+          {
+            "appliedTo": "A visible friction band where unsupported claims are held in amber until the proof catches up.",
+            "date": "2026-05-14",
+            "lesson": "Blocked evidence is a control surface. It shows the operator is willing to stop before chaos reaches the business."
+          },
+          {
+            "appliedTo": "A lesson ledger showing which checks, words, components, or runbooks were created from the last hard-earned lesson.",
+            "date": "2026-05-14",
+            "lesson": "The operator does not sell a fresh start every time. Each project improves the next project."
+          },
+          {
+            "appliedTo": "A cinematic but calm buyer journey: workflow room, slice workbench, proof theater, trajectory rail, contact room.",
+            "date": "2026-05-14",
+            "lesson": "The public page should feel like a guided visit through a working shop, not a generic AI pitch."
+          }
+        ],
+        "title": "Lessons that became method"
+      },
+      "OperatingRoomHero": {
+        "activeRoute": [
+          "Email",
+          "CRM"
+        ],
+        "headline": "Buy back the time hiding between your tools.",
+        "primaryCta": {
+          "href": "/contact",
+          "label": "Map my workflow"
+        },
+        "secondaryCta": {
+          "href": "/proof",
+          "label": "Inspect the proof"
+        },
+        "subhead": "Map one workflow, improve one bounded slice, prove what changed, and carry the lesson into the next build.",
+        "tools": [
+          "Email",
+          "CRM",
+          "Calendar",
+          "Invoices",
+          "Documents",
+          "Reports"
+        ]
+      },
+      "ProofDrawer": {
+        "headline": "The page story is generated from repo trajectory evidence.",
+        "receipts": [
+          {
+            "detail": "Sanitized Markdown story generated from git history.",
+            "label": "Generated story",
+            "url": "docs/stories/repo-trajectory.md"
+          },
+          {
+            "detail": "Machine-readable message pack, dossier, and frontend story.",
+            "label": "Generated JSON",
+            "url": "docs/evidence/repo-trajectory.json"
+          }
+        ],
+        "verdict": "proven"
+      },
+      "ProofRail": {
+        "items": [
+          {
+            "detail": "Generated from git history, not one session's memory.",
+            "label": "Repo trajectory",
+            "receiptUrl": "docs/stories/repo-trajectory.md",
+            "state": "proven"
+          },
+          {
+            "detail": "218 blocker/friction signals inspected.",
+            "label": "Friction visible",
+            "receiptUrl": "docs/evidence/repo-trajectory.json",
+            "state": "proven"
+          },
+          {
+            "detail": "805 proof-loop signals inspected.",
+            "label": "Proof loop",
+            "receiptUrl": "docs/evidence/repo-trajectory.json",
+            "state": "proven"
+          },
+          {
+            "detail": "655 reusable-method signals inspected.",
+            "label": "Reusable lessons",
+            "receiptUrl": "docs/evidence/repo-trajectory.json",
+            "state": "proven"
+          }
+        ],
+        "showCount": true,
+        "title": "Proof path"
+      },
+      "SafeContactPanel": {
+        "cta": {
+          "href": "/contact",
+          "label": "Map my workflow"
+        },
+        "headline": "Start with one workflow map",
+        "notFor": [
+          "black-box automation",
+          "set-it-and-forget-it AI",
+          "broad access before a map"
+        ],
+        "trustAnchors": [
+          {
+            "anchor": "Human approval",
+            "detail": "The owner approves the slice before broader motion."
+          },
+          {
+            "anchor": "Narrow scope",
+            "detail": "The first engagement is one workflow route, not the whole company."
+          },
+          {
+            "anchor": "Visible stop conditions",
+            "detail": "Unproven claims stay blocked instead of becoming copy."
+          },
+          {
+            "anchor": "Privacy clarity",
+            "detail": "Use redacted examples before secrets, customer data, or system access."
+          }
+        ]
+      },
+      "SliceWorkbench": {
+        "after": {
+          "cost": "One inspected change before any broader rollout",
+          "steps": [
+            "Map the route",
+            "Improve one slice",
+            "Verify the proof",
+            "Keep the lesson"
+          ]
+        },
+        "before": {
+          "cost": "Manual time hidden between tools",
+          "steps": [
+            "Copy",
+            "Chase",
+            "Check",
+            "Remember"
+          ]
+        },
+        "scopeNote": "This is one slice first. Anything unproven stays blocked, private, or skipped with a reason.",
+        "sliceName": "One bounded workflow improvement"
+      },
+      "TrustWorryMatrix": {
+        "title": "Owner worries answered by controls",
+        "worries": [
+          {
+            "ownerWorry": "AI will make a mess.",
+            "proofBehavior": "The first slice must have a named boundary and stop condition.",
+            "proofState": "proven",
+            "visibleAnswer": "The map comes before automation."
+          },
+          {
+            "ownerWorry": "I will not know what changed.",
+            "proofBehavior": "Each claim links to evidence or stays blocked.",
+            "proofState": "proven",
+            "visibleAnswer": "Every slice has a proof rail."
+          },
+          {
+            "ownerWorry": "My data will leak.",
+            "proofBehavior": "Public proof is redacted, consented, generated, or replaced.",
+            "proofState": "proven",
+            "visibleAnswer": "Private work stays private."
+          },
+          {
+            "ownerWorry": "AI makes things up.",
+            "proofBehavior": "Unsupported claims show as blocked instead of becoming copy.",
+            "proofState": "proven",
+            "visibleAnswer": "Blocked is better than bluffing."
+          },
+          {
+            "ownerWorry": "This will replace people before it understands the work.",
+            "proofBehavior": "Human approval remains part of the workflow slice.",
+            "proofState": "proven",
+            "visibleAnswer": "The first slice is small on purpose."
+          },
+          {
+            "ownerWorry": "My tools already do not talk to each other.",
+            "proofBehavior": "Integration starts with one workflow path, not the whole company.",
+            "proofState": "proven",
+            "visibleAnswer": "The operating map starts with the disconnected tools the owner already uses."
+          },
+          {
+            "ownerWorry": "Every consultant has a framework.",
+            "proofBehavior": "Runbooks, tests, receipts, and blockers sit behind the story.",
+            "proofState": "proven",
+            "visibleAnswer": "The method is visible enough to inspect."
+          },
+          {
+            "ownerWorry": "AI changes too fast.",
+            "proofBehavior": "Tool claims require current receipts before promotion.",
+            "proofState": "proven",
+            "visibleAnswer": "Fast tools go through a controlled loop."
+          },
+          {
+            "ownerWorry": "If it fails, I will be stuck.",
+            "proofBehavior": "Failed proof does not become a public claim.",
+            "proofState": "proven",
+            "visibleAnswer": "Stop conditions are named up front."
+          },
+          {
+            "ownerWorry": "I do not want to become an AI expert.",
+            "proofBehavior": "Technical proof is available but not required to understand the offer.",
+            "proofState": "proven",
+            "visibleAnswer": "The owner approves the slice; the operator manages the machinery."
+          }
+        ]
+      },
+      "WorkflowMap": {
+        "edges": [
+          {
+            "from": "source",
+            "label": "map",
+            "proofState": "proven",
+            "to": "slice"
+          },
+          {
+            "from": "slice",
+            "label": "verify",
+            "proofState": "proven",
+            "to": "proof"
+          },
+          {
+            "from": "proof",
+            "label": "carry forward",
+            "proofState": "proven",
+            "to": "lesson"
+          }
+        ],
+        "nodes": [
+          {
+            "id": "source",
+            "label": "Owner request",
+            "role": "source",
+            "system": "Inbox"
+          },
+          {
+            "id": "slice",
+            "label": "Bounded slice",
+            "role": "transform",
+            "system": "Yuzu Method"
+          },
+          {
+            "id": "proof",
+            "label": "Proof state",
+            "role": "gate",
+            "system": "Receipt"
+          },
+          {
+            "id": "lesson",
+            "label": "Reusable lesson",
+            "role": "sink",
+            "system": "Flywheel"
+          }
+        ],
+        "title": "Flywheel first workflow slice"
+      },
+      "YuzuMethodRail": {
+        "currentStage": "control",
+        "showMark": true,
+        "stages": [
+          {
+            "detail": "Your business already has the data. The work is just hidden between tools.",
+            "id": "recognize",
+            "label": "Recognize"
+          },
+          {
+            "detail": "A slice is one bounded workflow improvement: useful enough to feel, small enough to inspect, and clear enough to stop if the proof is not there.",
+            "id": "bound",
+            "label": "Bound"
+          },
+          {
+            "detail": "If a claim is not proven, it stays blocked.",
+            "id": "control",
+            "label": "Control"
+          },
+          {
+            "detail": "The repo history shows the pivots, blockers, and lessons that survived contact with reality.",
+            "id": "remember",
+            "label": "Remember"
+          },
+          {
+            "detail": "Map one workflow before sending secrets, customer data, or system access.",
+            "id": "act",
+            "label": "Act"
+          }
+        ]
+      }
+    },
+    "copy_rule": "Show the proof, not the dream; every strong line must point to proof, blocked state, or a safe first step.",
+    "package_targets": {
+      "components": "@zeststream/ui",
+      "tokens": "@zeststream/story-system"
+    },
+    "quality_gate_commands": [
+      "python3 scripts/extract_git_story.py --repo <repo> --write-json docs/evidence/repo-trajectory.json --write-md docs/stories/repo-trajectory.md",
+      "python3 scripts/validate_story_system_package.py --json",
+      "bash scripts/zs-frontend-quality-gate.sh --repo <nextjs-repo> --json --strict",
+      "playwright screenshot checks for desktop and mobile proof primitives"
+    ],
+    "repo_label": "Flywheel",
+    "schema_version": "zeststream.repo_frontend_story.v0",
+    "source_dossier_schema": "zeststream.repo_story_dossier.v0",
+    "source_message_schema": "zeststream.repo_story_message.v0",
+    "source_story_schema": "zeststream.repo_git_story.v0"
   },
   "generated_date": "2026-05-14",
   "message_pack": {
@@ -540,17 +864,17 @@
         "technical_signal": "commit history"
       },
       {
-        "evidence_ref": "216 friction-matched commits",
+        "evidence_ref": "218 friction-matched commits",
         "owner_meaning": "The process exposes what is not ready before it can affect the business.",
         "technical_signal": "friction and blocker evidence"
       },
       {
-        "evidence_ref": "802 proof-loop-matched commits",
+        "evidence_ref": "805 proof-loop-matched commits",
         "owner_meaning": "Claims move forward only when the system can show what changed.",
         "technical_signal": "receipts, tests, and proof-loop commits"
       },
       {
-        "evidence_ref": "651 reuse-matched commits",
+        "evidence_ref": "655 reuse-matched commits",
         "owner_meaning": "Lessons from one repo become reusable operating material for the next repo.",
         "technical_signal": "runbooks, scripts, packages, and shared design grammar"
       }
@@ -876,7 +1200,7 @@
     "source_message_schema": "zeststream.repo_story_message.v0",
     "source_story_schema": "zeststream.repo_git_story.v0",
     "trajectory_summary": {
-      "current": "The latest inspected movement is chore(beads): record release runbook gate evidence [work item] on 2026-05-13.",
+      "current": "The latest inspected movement is feat(ui): gate reusable story primitives [work item] on 2026-05-14.",
       "owner_meaning": "The repo has a visible path from setup, through friction, into proof, reuse, and public story.",
       "start": "Work began on 2026-04-30 with feat(scripts): add source_repo backfill script for all local beads DBs."
     },

@@ -38,6 +38,7 @@ def validate() -> dict[str, Any]:
     trajectory = read_json(TRAJECTORY_PATH)
     message_pack = trajectory.get("message_pack", {})
     story_dossier = trajectory.get("story_dossier", {})
+    frontend_story = trajectory.get("frontend_story", {})
 
     if package_json.get("name") != "@zeststream/story-system":
         errors.append({"code": "PACKAGE_NAME_INVALID"})
@@ -47,10 +48,14 @@ def validate() -> dict[str, Any]:
         errors.append({"code": "SOURCE_MESSAGE_SCHEMA_INVALID"})
     if story_system.get("source_dossier_schema") != "zeststream.repo_story_dossier.v0":
         errors.append({"code": "SOURCE_DOSSIER_SCHEMA_INVALID"})
+    if story_system.get("source_frontend_schema") != "zeststream.repo_frontend_story.v0":
+        errors.append({"code": "SOURCE_FRONTEND_SCHEMA_INVALID"})
     if message_pack.get("schema_version") != story_system.get("source_message_schema"):
         errors.append({"code": "MESSAGE_PACK_SCHEMA_MISMATCH"})
     if story_dossier.get("schema_version") != story_system.get("source_dossier_schema"):
         errors.append({"code": "STORY_DOSSIER_SCHEMA_MISMATCH"})
+    if frontend_story.get("schema_version") != story_system.get("source_frontend_schema"):
+        errors.append({"code": "FRONTEND_STORY_SCHEMA_MISMATCH"})
 
     message_stages = [row.get("stage") for row in message_pack.get("story_arc", [])]
     if story_system.get("story_arc_stages") != message_stages:
@@ -59,6 +64,14 @@ def validate() -> dict[str, Any]:
     message_primitives = [row.get("name") for row in message_pack.get("visual_primitives", [])]
     if story_system.get("visual_primitives") != message_primitives:
         errors.append({"code": "VISUAL_PRIMITIVE_MISMATCH"})
+    frontend_components = set(frontend_story.get("component_props", {}))
+    for primitive in story_system.get("visual_primitives", []):
+        if primitive in {"TrajectoryRail", "OwnerTensionRoom"}:
+            continue
+        if primitive not in frontend_components:
+            errors.append({"code": "FRONTEND_COMPONENT_PROPS_MISSING", "component": primitive})
+    if frontend_story.get("package_targets", {}).get("components") != "@zeststream/ui":
+        errors.append({"code": "FRONTEND_COMPONENT_PACKAGE_TARGET_INVALID"})
 
     dossier_sections = [row.get("section_id") for row in story_dossier.get("page_blueprint", [])]
     if story_system.get("page_blueprint_sections") != dossier_sections:
@@ -98,6 +111,7 @@ def validate() -> dict[str, Any]:
         "story_arc_stage_count": len(story_system.get("story_arc_stages", [])),
         "visual_primitive_count": len(story_system.get("visual_primitives", [])),
         "page_blueprint_section_count": len(story_system.get("page_blueprint_sections", [])),
+        "frontend_component_count": len(frontend_story.get("component_props", {})),
         "audience_truth_count": len(story_system.get("audience_truths", [])),
         "owner_objection_count": story_system.get("owner_objection_count"),
         "required_css_token_count": len(story_system.get("required_css_tokens", [])),

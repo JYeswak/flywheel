@@ -125,7 +125,12 @@ for rel in \
   packages/zeststream-ui/README.md \
   packages/zeststream-ui/src/index.ts \
   packages/zeststream-ui/src/components/TrustWorryMatrix.tsx \
+  packages/zeststream-motion/package.json \
+  packages/zeststream-motion/README.md \
+  packages/zeststream-motion/src/index.ts \
+  packages/zeststream-motion/src/tokens.ts \
   scripts/zs-frontend-quality-gate.sh \
+  tests/zeststream-motion-package.sh \
   tests/zeststream-ui-package.sh \
   docs/stories/flywheel-trajectory.md; do
   require_file "$rel"
@@ -158,6 +163,7 @@ require_literal "docs/evidence/staging-review-signoff-packet.md" "remote_repo_pr
 require_literal "docs/evidence/staging-review-signoff-packet.md" "Not granted by this packet" "staging review packet separates staged and public approval"
 require_literal "docs/evidence/flywheel-trajectory.json" "zeststream.repo_git_story.v0" "trajectory evidence names schema"
 require_literal "docs/evidence/flywheel-trajectory.json" "zeststream.repo_story_message.v0" "trajectory evidence embeds owner message pack"
+require_literal "docs/evidence/flywheel-trajectory.json" "zeststream.repo_frontend_story.v0" "trajectory evidence embeds frontend story payload"
 require_literal "docs/evidence/flywheel-trajectory.json" "show proof, do not sell the dream" "trajectory evidence names copy rule"
 require_literal "docs/evidence/flywheel-trajectory.json" "Buy back the time hiding between your tools." "trajectory evidence names SMB headline option"
 require_literal "docs/evidence/flywheel-trajectory.json" "AI will make a mess." "trajectory evidence names owner objection"
@@ -183,6 +189,7 @@ require_literal "docs/concepts/evidence-contracts.md" "scripts/zs-frontend-quali
 require_literal "docs/concepts/evidence-contracts.md" "scripts/extract_git_story.py" "evidence concept names git story extractor"
 require_literal "docs/concepts/evidence-contracts.md" "packages/zeststream-story-system/story-system.json" "evidence concept names story system package"
 require_literal "docs/concepts/evidence-contracts.md" "packages/zeststream-ui/" "evidence concept names UI package"
+require_literal "docs/concepts/evidence-contracts.md" "packages/zeststream-motion/" "evidence concept names motion package"
 require_literal "docs/concepts/evidence-contracts.md" "docs/evidence/staging-review-signoff-packet.md" "evidence concept names staging review packet"
 require_literal "docs/concepts/evidence-contracts.md" "docs/evidence/flywheel-trajectory.json" "evidence concept names trajectory evidence"
 require_literal "docs/concepts/evidence-contracts.md" "docs/stories/flywheel-trajectory.md" "evidence concept names trajectory story"
@@ -242,6 +249,7 @@ require_literal "docs/runbooks/repo-trajectory-story-pack.md" "human-approved sl
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "shared React components" "repo trajectory pack targets reusable frontend components"
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "packages/zeststream-story-system/" "repo trajectory pack names shared package"
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "scripts/validate_story_system_package.py" "repo trajectory pack names package validator"
+require_literal "docs/runbooks/repo-trajectory-story-pack.md" "zeststream.repo_frontend_story.v0" "repo trajectory pack names frontend story schema"
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "ClutterFreeSpaces" "repo trajectory pack applies beyond Flywheel"
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "Mobile Eats" "repo trajectory pack applies to Mobile Eats"
 require_literal "docs/runbooks/repo-trajectory-story-pack.md" "falls back to Flywheel's public redaction" "repo trajectory pack documents fallback redaction"
@@ -274,10 +282,12 @@ require_literal "docs/runbooks/isolated-agent-lane-testing.md" "bash tests/isola
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/cutover-receipts.sh" "release runbook includes cutover receipt gate"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/story-system-package.sh" "release runbook includes story package gate"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/zeststream-ui-package.sh" "release runbook includes UI package gate"
+require_literal "docs/runbooks/public-release-runbook.md" "bash tests/zeststream-motion-package.sh" "release runbook includes motion package gate"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=18 fail=0" "release runbook names UI package verifier count"
+require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=20 fail=0" "release runbook names motion package verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=23 fail=0" "release runbook names current cutover verifier count"
-require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=17 fail=0" "release runbook names story package verifier count"
-require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=233 fail=0" "release runbook names current public docs count"
+require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=18 fail=0" "release runbook names story package verifier count"
+require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=247 fail=0" "release runbook names current public docs count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=95 fail=0" "release runbook names current website static count"
 require_literal "docs/runbooks/public-release-runbook.md" "docs/runbooks/public-user-journey-pack.md\` maps every public asset" "release runbook includes user journey pack gate"
 require_literal "docs/runbooks/public-release-runbook.md" "user-journey-pack-validation.json" "release runbook captures user journey validation receipt"
@@ -301,17 +311,21 @@ require_literal "docs/reference/commands.md" "scripts/live_site_probe.py" "comma
 require_literal "docs/reference/commands.md" "scripts/validate_cutover_receipts.py" "command reference includes cutover receipt validation"
 require_literal "docs/reference/commands.md" "scripts/validate_user_journey_pack.py" "command reference includes user journey validation"
 require_literal "docs/reference/commands.md" "scripts/validate_story_system_package.py" "command reference includes story system validation"
+require_literal "docs/reference/commands.md" "tests/zeststream-motion-package.sh" "command reference includes motion package validation"
 require_literal "docs/reference/commands.md" "scripts/zs-frontend-quality-gate.sh" "command reference includes frontend quality gate"
 require_literal "docs/reference/commands.md" "scripts/extract_git_story.py" "command reference includes git story extraction"
 require_literal "docs/reference/commands.md" "zeststream.repo_story_message.v0" "command reference names story message pack"
+require_literal "docs/reference/commands.md" "zeststream.repo_frontend_story.v0" "command reference names frontend story payload"
 require_literal "docs/reference/commands.md" "--redaction-table" "command reference documents story redaction table"
 require_literal "docs/reference/commands.md" "flywheel:de-personalization-table.yaml" "command reference documents fallback redaction table"
 require_literal "docs/reference/files.md" ".flywheel/last_closeout_receipt.json" "file reference includes closeout receipt"
 require_literal "docs/reference/files.md" "docs/brand/naming-conventions.md" "file reference includes naming contract"
 require_literal "docs/reference/files.md" "packages/zeststream-story-system/story-system.json" "file reference includes story system package"
 require_literal "docs/reference/files.md" "packages/zeststream-ui/" "file reference includes UI package"
+require_literal "docs/reference/files.md" "packages/zeststream-motion/" "file reference includes motion package"
 require_literal "docs/reference/files.md" "scripts/zs-frontend-quality-gate.sh" "file reference includes frontend quality gate"
 require_literal "docs/reference/files.md" "zeststream.repo_story_message.v0" "file reference names story message pack"
+require_literal "docs/reference/files.md" "zeststream.repo_frontend_story.v0" "file reference names frontend story payload"
 require_literal "docs/reference/files.md" "receipts/agent-lanes/<lane>.json" "file reference includes agent-lane receipts"
 require_literal "docs/reference/files.md" "flywheel.agent_lane_blocker_receipt.v0" "file reference includes blocked agent-lane receipt schema"
 require_literal "docs/reference/files.md" "scripts/isolated-agent-lane-smoke.sh" "file reference includes isolated lane smoke"

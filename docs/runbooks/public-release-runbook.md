@@ -265,6 +265,7 @@ bash tests/true-publication-registry-validate.sh
 bash tests/cutover-receipts.sh
 bash tests/story-system-package.sh
 bash tests/zeststream-ui-package.sh
+bash tests/zeststream-motion-package.sh
 python3 scripts/depersonalize.py --scan-table --root docs --json
 ```
 
@@ -273,9 +274,10 @@ Expected results:
 | Gate | Expected result |
 |---|---|
 | Naming conventions | `SUMMARY pass=... fail=0` |
-| Public docs contract | `SUMMARY pass=233 fail=0` and coverage for story, user journey, cutover, evidence, frontend quality, and agent-lane surfaces. |
+| Public docs contract | `SUMMARY pass=247 fail=0` and coverage for story, user journey, cutover, evidence, frontend quality, and agent-lane surfaces. |
 | Public surface gap scanner | `SUMMARY pass=16 fail=0` |
 | ZestStream UI package | `SUMMARY pass=18 fail=0`; export targets, `TrustWorryMatrix`, shellcheck, complete Next.js fixture, weak Next.js fixture rejection, and private extraction pruning are covered. |
+| ZestStream motion package | `SUMMARY pass=20 fail=0`; export targets, spring presets, reduced-motion docs, package typecheck, and frontend-gate recognition are covered. |
 | Public link checker | `SUMMARY pass=3 fail=0` and JSON `failure_count=0` for public docs/site links. |
 | Website static contract | `SUMMARY pass=95 fail=0` across the six-page staging review site bundle. |
 | Website accessibility | Static accessibility script reports zero errors across public site pages. |
@@ -288,7 +290,7 @@ Expected results:
 | Upstream substrate adoption | Asupersync remains `gated-evaluation` until promotion gates and repo-local POC evidence pass. |
 | Registry validator | `SUMMARY pass=6 fail=0` while rows remain open; coverage is derived from live readiness blockers and currently expects open TP-005/TP-017/TP-018 until release cutover. |
 | Cutover receipt verifier | `SUMMARY pass=23 fail=0`; fixture proof shows saved receipt bundles replay, checksum drift is rejected, website/head failures are rejected, live-site/user-journey receipts are required, and stale signoff evidence is rejected. |
-| Story-system package | `SUMMARY pass=17 fail=0`; CI, Release, and Site Deploy all validate it before public packaging or publishing. |
+| Story-system package | `SUMMARY pass=18 fail=0`; CI, Release, and Site Deploy all validate it before public packaging or publishing. |
 | Docs depersonalization | JSON status `pass` and zero findings. |
 
 Failure branches:

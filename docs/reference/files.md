@@ -22,6 +22,7 @@ Flywheel keeps public state repo-local.
 | `packages/zeststream-story-system/story-system.json` | Reusable owner-message, proof-state, visual-primitive, and blocked-phrase contract for ZestStream frontend surfaces. |
 | `packages/zeststream-story-system/tokens.css` | Reusable CSS token package mirrored by `site/visual-system.css`. |
 | `packages/zeststream-ui/` | Reusable React component package for `ProofRail`, `WorkflowMap`, `TrustWorryMatrix`, and `TelemetryBar`. |
+| `packages/zeststream-motion/` | Reusable React motion package for `SpringChip`, `SpringSheet`, `ConfidenceBadge`, `StreamingText`, `SkeletonMatch`, and `@zeststream/motion/tokens`. |
 | `scripts/zs-frontend-quality-gate.sh` | Reusable Next.js frontend quality gate for story-system adoption, token discipline, proof states, motion, and accessibility. |
 | `receipts/agent-lanes/<lane>.json` | Strict `flywheel.agent_lane_runtime_receipt.v0` proof before an agent lane can move from compatibility target to supported copy, or `flywheel.agent_lane_blocker_receipt.v0` evidence naming why the lane remains blocked. |
 | `docs/brand/naming-conventions.md` | Public naming contract separating ZestStream, the Yuzu Method, Flywheel, SkillOS, upstream substrate, and proof surfaces. |
@@ -29,7 +30,7 @@ Flywheel keeps public state repo-local.
 | `docs/evidence/publication-blocker-coverage.md` | Public blocker-code ownership and closure-proof map. |
 | `docs/evidence/staging-review-signoff-packet.md` | Human staging-review packet that maps site, story, evidence, developer path, agent-lane proof, and remaining public blockers without granting public release approval. |
 | `docs/evidence/publication-goal-completion-audit.md` | Prompt-to-artifact audit for the active publication goal and remaining release blockers. |
-| `docs/evidence/flywheel-trajectory.json` | Machine-readable `zeststream.repo_git_story.v0` trajectory evidence with embedded `zeststream.repo_story_message.v0` owner message pack and `zeststream.repo_story_dossier.v0` frontend story brief. |
+| `docs/evidence/flywheel-trajectory.json` | Machine-readable `zeststream.repo_git_story.v0` trajectory evidence with embedded `zeststream.repo_story_message.v0` owner message pack, `zeststream.repo_story_dossier.v0` story brief, and `zeststream.repo_frontend_story.v0` UI payload. |
 | `docs/evidence/external-review-log.jsonl` | Sanitized external-review evidence used by the public release workflow. |
 | `docs/stories/flywheel-trajectory.md` | Owner-readable generated trajectory story for reviewers and the public site. |
 | `docs/getting-started/first-run.md` | First-run guide. |
