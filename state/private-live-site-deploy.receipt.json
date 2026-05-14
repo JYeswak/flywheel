@@ -1,18 +1,17 @@
 {
   "schema_version": "flywheel.private_live_site_deploy_receipt.v0",
-  "receipt_id": "flywheel-private-live-site-deep-smb-story-deploy-20260514T0058Z",
+  "receipt_id": "flywheel-private-live-site-trajectory-story-deploy-20260514T0146Z",
   "status": "pass",
-  "deployed_at": "2026-05-14T00:58:00Z",
+  "deployed_at": "2026-05-14T01:46:00Z",
   "host": "flywheel.zeststream.ai",
   "provider": "vercel",
-  "deployment_url": "https://flywheel-cxxzza643-joshuas-projects-96d49291.vercel.app",
+  "deployment_url": "https://flywheel-ovlfc7x1v-joshuas-projects-96d49291.vercel.app",
   "production_alias": "https://flywheel.zeststream.ai",
-  "source_commit": "da3e2db0",
+  "source_commit": "fdb7f3ad",
   "deployed_bundle_scope": [
     "site/",
     "install.sh",
     "install.sh.sha256",
-    "CNAME",
     "site-deploy-manifest.json"
   ],
   "public_ready_claim": false,
@@ -21,6 +20,8 @@
     "rejected_placeholder_scrapped": true,
     "wireframe_ref": "docs/runbooks/public-site-smb-journey-wireframe.md",
     "journey_pack_ref": "docs/runbooks/public-user-journey-pack.md",
+    "trajectory_story_ref": "docs/stories/flywheel-trajectory.md",
+    "trajectory_pack_ref": "docs/runbooks/repo-trajectory-story-pack.md",
     "multi_page_story_system": [
       "site/index.html",
       "site/what-is/index.html",
@@ -36,6 +37,7 @@
       "ProofRail",
       "TrustWorryMatrix",
       "YuzuMethodRail",
+      "TrajectoryRail",
       "TechnicalDrawer",
       "OperatorSignature",
       "RoomSystem"
@@ -48,13 +50,15 @@
     "live_site_probe_probe_count": 17,
     "live_site_probe_pass_count": 17,
     "live_site_probe_failure_count": 0,
+    "live_site_probe_skipped_external_count": 7,
     "install_proxy_checksum_match": true,
     "install_sha256": "a4e04cd1e08f13110d74dca34c38018a5b93c9a173cca2db63a91458efe6f364",
     "site_deploy_manifest": {
       "schema_version": "flywheel.site_deploy_manifest.v0",
       "mode": "private-review",
-      "tag": "private-review-da3e2db0",
-      "commit": "da3e2db0",
+      "tag": "private-review-fdb7f3ad",
+      "commit": "fdb7f3ad",
+      "install_sha256": "a4e04cd1e08f13110d74dca34c38018a5b93c9a173cca2db63a91458efe6f364",
       "public_ready_claim": false
     },
     "screenshot_checks": {
