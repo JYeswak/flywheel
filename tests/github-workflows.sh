@@ -90,7 +90,7 @@ else
   fail "site checksum manifest uses artifact-relative filename"
 fi
 
-for token in shellcheck ripgrep 'ruff check' markdownlint tests/public-top-level-files.sh tests/public-surface-gap-scanner.sh tests/naming-conventions.sh tests/context-routing-discipline.sh tests/agent-lane-probe.sh tests/isolated-agent-lane-smoke.sh scripts/agent-lane-probe.sh scripts/isolated-agent-lane-smoke.sh scripts/local-actions-preflight.sh scripts/zs-frontend-quality-gate.sh tests/public-docs.sh tests/public-links.sh tests/website-static.sh tests/website-accessibility.sh tests/live-site-probe.sh tests/contact-routing.sh tests/upstream-substrate-adoption.sh tests/release-assets.sh tests/cutover-receipts.sh tests/external-review-gate.sh tests/public-user-journey-pack.sh tests/story-system-package.sh tests/zeststream-ui-package.sh tests/zeststream-motion-package.sh tests/publication-goal-completion-audit.sh tests/publication-readiness.sh tests/true-publication-registry-validate.sh tests/journey-smoke.sh; do
+for token in shellcheck ripgrep 'ruff check' markdownlint tests/public-top-level-files.sh tests/public-surface-gap-scanner.sh tests/naming-conventions.sh tests/context-routing-discipline.sh tests/agent-lane-probe.sh tests/isolated-agent-lane-smoke.sh scripts/agent-lane-probe.sh scripts/isolated-agent-lane-smoke.sh scripts/local-actions-preflight.sh scripts/zs-frontend-quality-gate.sh tests/public-docs.sh tests/public-links.sh tests/website-static.sh tests/website-accessibility.sh tests/live-site-probe.sh tests/contact-routing.sh tests/upstream-substrate-adoption.sh tests/release-assets.sh tests/cutover-receipts.sh tests/external-review-gate.sh tests/public-user-journey-pack.sh tests/repo-story-portability.sh tests/story-system-package.sh tests/zeststream-ui-package.sh tests/zeststream-motion-package.sh tests/publication-goal-completion-audit.sh tests/publication-readiness.sh tests/true-publication-registry-validate.sh tests/journey-smoke.sh; do
   if grep -q "$token" "$CI"; then
     pass "ci includes $token"
   else
@@ -98,7 +98,7 @@ for token in shellcheck ripgrep 'ruff check' markdownlint tests/public-top-level
   fi
 done
 
-for token in scripts/assemble.py scripts/classify.py scripts/depersonalize.py scripts/review_queue.py scripts/validate_external_review.py scripts/website_accessibility.py scripts/live_site_probe.py scripts/check_links.py scripts/contact_route_probe.py scripts/publication_readiness.py scripts/validate_cutover_receipts.py scripts/validate_user_journey_pack.py scripts/validate_story_system_package.py; do
+for token in scripts/assemble.py scripts/classify.py scripts/depersonalize.py scripts/review_queue.py scripts/validate_external_review.py scripts/website_accessibility.py scripts/live_site_probe.py scripts/check_links.py scripts/contact_route_probe.py scripts/publication_readiness.py scripts/probe_repo_story_portability.py scripts/validate_cutover_receipts.py scripts/validate_user_journey_pack.py scripts/validate_story_system_package.py; do
   if grep -q "$token" "$CI"; then
     pass "ci python lint includes $token"
   else

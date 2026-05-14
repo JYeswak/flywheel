@@ -63,7 +63,7 @@ evidence_match = re.search(
     evidence,
     flags=re.S,
 )
-run_match = re.search(r"codex-public-export-\d{8}T\d{4}Z", evidence)
+run_match = re.search(r"codex-public-export-\d{8}T\d{4,6}Z", evidence)
 
 if not readme_match or not evidence_match or not run_match:
     sys.exit(1)
@@ -102,6 +102,7 @@ for rel in \
   docs/evidence/staging-review-signoff-packet.md \
   docs/evidence/publication-goal-completion-audit.md \
   docs/evidence/flywheel-trajectory.json \
+  docs/evidence/repo-story-portability.json \
   docs/evidence/asupersync-gated-adoption.md \
   docs/evidence/asupersync-poc-receipt.template.json \
   docs/evidence/asupersync-poc-receipt.local.json \
@@ -129,7 +130,9 @@ for rel in \
   packages/zeststream-motion/README.md \
   packages/zeststream-motion/src/index.ts \
   packages/zeststream-motion/src/tokens.ts \
+  scripts/probe_repo_story_portability.py \
   scripts/zs-frontend-quality-gate.sh \
+  tests/repo-story-portability.sh \
   tests/zeststream-motion-package.sh \
   tests/zeststream-ui-package.sh \
   docs/stories/flywheel-trajectory.md; do
@@ -187,11 +190,13 @@ require_literal "docs/concepts/evidence-contracts.md" "scripts/validate_user_jou
 require_literal "docs/concepts/evidence-contracts.md" "scripts/validate_story_system_package.py" "evidence concept names story system validator"
 require_literal "docs/concepts/evidence-contracts.md" "scripts/zs-frontend-quality-gate.sh" "evidence concept names frontend quality gate"
 require_literal "docs/concepts/evidence-contracts.md" "scripts/extract_git_story.py" "evidence concept names git story extractor"
+require_literal "docs/concepts/evidence-contracts.md" "scripts/probe_repo_story_portability.py" "evidence concept names story portability probe"
 require_literal "docs/concepts/evidence-contracts.md" "packages/zeststream-story-system/story-system.json" "evidence concept names story system package"
 require_literal "docs/concepts/evidence-contracts.md" "packages/zeststream-ui/" "evidence concept names UI package"
 require_literal "docs/concepts/evidence-contracts.md" "packages/zeststream-motion/" "evidence concept names motion package"
 require_literal "docs/concepts/evidence-contracts.md" "docs/evidence/staging-review-signoff-packet.md" "evidence concept names staging review packet"
 require_literal "docs/concepts/evidence-contracts.md" "docs/evidence/flywheel-trajectory.json" "evidence concept names trajectory evidence"
+require_literal "docs/concepts/evidence-contracts.md" "docs/evidence/repo-story-portability.json" "evidence concept names story portability evidence"
 require_literal "docs/concepts/evidence-contracts.md" "docs/stories/flywheel-trajectory.md" "evidence concept names trajectory story"
 require_literal "docs/concepts/evidence-contracts.md" "docs/runbooks/public-user-journey-pack.md" "evidence concept names public user journey pack"
 require_literal "docs/concepts/evidence-contracts.md" "docs/runbooks/repo-trajectory-story-pack.md" "evidence concept names trajectory story pack"
@@ -283,11 +288,13 @@ require_literal "docs/runbooks/public-release-runbook.md" "bash tests/cutover-re
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/story-system-package.sh" "release runbook includes story package gate"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/zeststream-ui-package.sh" "release runbook includes UI package gate"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/zeststream-motion-package.sh" "release runbook includes motion package gate"
+require_literal "docs/runbooks/public-release-runbook.md" "bash tests/repo-story-portability.sh" "release runbook includes repo story portability gate"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=18 fail=0" "release runbook names UI package verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=20 fail=0" "release runbook names motion package verifier count"
+require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=6 fail=0" "release runbook names repo story portability count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=23 fail=0" "release runbook names current cutover verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=18 fail=0" "release runbook names story package verifier count"
-require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=247 fail=0" "release runbook names current public docs count"
+require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=257 fail=0" "release runbook names current public docs count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=95 fail=0" "release runbook names current website static count"
 require_literal "docs/runbooks/public-release-runbook.md" "docs/runbooks/public-user-journey-pack.md\` maps every public asset" "release runbook includes user journey pack gate"
 require_literal "docs/runbooks/public-release-runbook.md" "user-journey-pack-validation.json" "release runbook captures user journey validation receipt"
@@ -314,6 +321,7 @@ require_literal "docs/reference/commands.md" "scripts/validate_story_system_pack
 require_literal "docs/reference/commands.md" "tests/zeststream-motion-package.sh" "command reference includes motion package validation"
 require_literal "docs/reference/commands.md" "scripts/zs-frontend-quality-gate.sh" "command reference includes frontend quality gate"
 require_literal "docs/reference/commands.md" "scripts/extract_git_story.py" "command reference includes git story extraction"
+require_literal "docs/reference/commands.md" "scripts/probe_repo_story_portability.py" "command reference includes repo story portability probe"
 require_literal "docs/reference/commands.md" "zeststream.repo_story_message.v0" "command reference names story message pack"
 require_literal "docs/reference/commands.md" "zeststream.repo_frontend_story.v0" "command reference names frontend story payload"
 require_literal "docs/reference/commands.md" "--redaction-table" "command reference documents story redaction table"
@@ -334,11 +342,13 @@ require_literal "docs/reference/files.md" "scripts/live_site_probe.py" "file ref
 require_literal "docs/reference/files.md" "scripts/validate_cutover_receipts.py" "file reference includes cutover receipt verifier"
 require_literal "docs/reference/files.md" "scripts/validate_user_journey_pack.py" "file reference includes user journey verifier"
 require_literal "docs/reference/files.md" "scripts/extract_git_story.py" "file reference includes git story extractor"
+require_literal "docs/reference/files.md" "scripts/probe_repo_story_portability.py" "file reference includes repo story portability probe"
 require_literal "docs/reference/files.md" "docs/runbooks/public-user-journey-pack.md" "file reference includes user journey pack"
 require_literal "docs/reference/files.md" "docs/runbooks/repo-trajectory-story-pack.md" "file reference includes repo trajectory pack"
 require_literal "docs/reference/files.md" "docs/evidence/publication-blocker-coverage.md" "file reference includes blocker coverage"
 require_literal "docs/reference/files.md" "docs/evidence/staging-review-signoff-packet.md" "file reference includes staging review packet"
 require_literal "docs/reference/files.md" "docs/evidence/flywheel-trajectory.json" "file reference includes trajectory evidence"
+require_literal "docs/reference/files.md" "docs/evidence/repo-story-portability.json" "file reference includes story portability evidence"
 require_literal "docs/reference/files.md" "docs/stories/flywheel-trajectory.md" "file reference includes trajectory story"
 require_literal "docs/reference/files.md" "docs/evidence/external-review-log.jsonl" "file reference includes public review evidence"
 require_literal "docs/reference/troubleshooting.md" "Publication readiness is blocked" "troubleshooting includes publication blocker path"

@@ -19,6 +19,7 @@ Flywheel keeps public state repo-local.
 | `scripts/validate_user_journey_pack.py` | Public user journey pack verifier. |
 | `scripts/validate_story_system_package.py` | Shared story-system package verifier. |
 | `scripts/extract_git_story.py` | Git-history trajectory and owner message-pack extractor for public story evidence. |
+| `scripts/probe_repo_story_portability.py` | Portability probe for the git-history story contract across Flywheel, ClutterFreeSpaces, Mobile Eats, and future repos. |
 | `packages/zeststream-story-system/story-system.json` | Reusable owner-message, proof-state, visual-primitive, and blocked-phrase contract for ZestStream frontend surfaces. |
 | `packages/zeststream-story-system/tokens.css` | Reusable CSS token package mirrored by `site/visual-system.css`. |
 | `packages/zeststream-ui/` | Reusable React component package for `ProofRail`, `WorkflowMap`, `TrustWorryMatrix`, and `TelemetryBar`. |
@@ -31,6 +32,7 @@ Flywheel keeps public state repo-local.
 | `docs/evidence/staging-review-signoff-packet.md` | Human staging-review packet that maps site, story, evidence, developer path, agent-lane proof, and remaining public blockers without granting public release approval. |
 | `docs/evidence/publication-goal-completion-audit.md` | Prompt-to-artifact audit for the active publication goal and remaining release blockers. |
 | `docs/evidence/flywheel-trajectory.json` | Machine-readable `zeststream.repo_git_story.v0` trajectory evidence with embedded `zeststream.repo_story_message.v0` owner message pack, `zeststream.repo_story_dossier.v0` story brief, and `zeststream.repo_frontend_story.v0` UI payload. |
+| `docs/evidence/repo-story-portability.json` | Saved `zeststream.repo_story_portability_probe.v0` receipt proving the story contract is not Flywheel-only. |
 | `docs/evidence/external-review-log.jsonl` | Sanitized external-review evidence used by the public release workflow. |
 | `docs/stories/flywheel-trajectory.md` | Owner-readable generated trajectory story for reviewers and the public site. |
 | `docs/getting-started/first-run.md` | First-run guide. |

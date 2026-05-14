@@ -50,6 +50,17 @@ and other frontend repos before they have adopted the full publication scaffold.
 Use `--redaction-table /path/to/table.yaml` when a repo needs a stricter
 project-specific table.
 
+To prove the pack is not Flywheel-only, run the portability probe. It reads
+Flywheel plus the available sibling proof-product repos, validates the same
+story/message/dossier/front-end schemas, and writes a receipt without absolute
+local paths or sibling-repo edits.
+
+```bash
+python3 scripts/probe_repo_story_portability.py \
+  --write-json docs/evidence/repo-story-portability.json
+bash tests/repo-story-portability.sh
+```
+
 ## Story Chapters
 
 The extractor groups commits into five public chapters:
