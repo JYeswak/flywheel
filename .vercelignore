@@ -1,0 +1,26 @@
+# Vercel serves the static site/ directory only (see vercel.json
+# outputDirectory). Exclude everything else — especially the bloat and the
+# flywheel__nextra Next.js app, whose presence made Vercel auto-detect the
+# wrong framework and 404 the deploy.
+.git
+node_modules
+flywheel__nextra_documentation_site
+.flywheel
+.beads
+.git-archive
+beads_compliance_audit
+.repo_janitor_workspace
+.ntm
+.ruff_cache
+.pytest_cache
+packages
+tests
+docs
+scripts
+templates
+fixtures
+inventory
+state
+receipts
+.planning
+.cass
