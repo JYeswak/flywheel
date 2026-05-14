@@ -17,18 +17,19 @@ assert_contains() {
   fi
 }
 
-assert_contains "AGENTS.md" "/git-stash-janitor" "agents_names_git_stash_janitor"
-assert_contains "AGENTS.md" "fleet_stash_bloat_detected" "agents_names_soft_signal"
-assert_contains "AGENTS.md" "<basename>-stash-archive-YYYY-MM-DD" "agents_names_bundle_convention"
-assert_contains "templates/flywheel-install/AGENTS.md" "/git-stash-janitor" "template_names_git_stash_janitor"
+assert_contains "AGENTS.md" "L144 — GIT-JANITOR-FLEET-HYGIENE" "agents_indexes_git_janitor_rule"
+assert_contains ".flywheel/rules/L095-L144-git-stash-janitor-fleet-hygiene.md" "/git-stash-janitor" "rule_names_git_stash_janitor"
+assert_contains ".flywheel/rules/L095-L144-git-stash-janitor-fleet-hygiene.md" "fleet_stash_bloat_detected" "rule_names_soft_signal"
+assert_contains ".flywheel/rules/L095-L144-git-stash-janitor-fleet-hygiene.md" "<basename>-stash-archive-YYYY-MM-DD" "rule_names_bundle_convention"
+assert_contains "templates/flywheel-install/AGENTS.md" "L144 — GIT-JANITOR-FLEET-HYGIENE" "template_indexes_git_janitor_rule"
 assert_contains ".flywheel/flywheel-loop-tick" "fleet_stash_bloat_probe" "tick_has_probe"
-assert_contains ".flywheel/flywheel-loop-tick" 'git -C "\$repo" stash list' "tick_counts_stashes"
+assert_contains ".flywheel/flywheel-loop-tick" "git -C \"\\\$repo\" stash list" "tick_counts_stashes"
 assert_contains ".flywheel/flywheel-loop-tick" "fleet_stash_bloat_detected" "tick_emits_soft_signal"
 assert_contains ".flywheel/scripts/flywheel-onboard.sh" "stash_health_probe" "onboard_has_stash_health_probe"
 assert_contains ".flywheel/scripts/flywheel-onboard.sh" "stash_recommend_before_continue" "onboard_recommends_before_continue"
 
-bash -n "$ROOT/.flywheel/flywheel-loop-tick" && pass "tick_bash_syntax" || fail "tick_bash_syntax"
-bash -n "$ROOT/.flywheel/scripts/flywheel-onboard.sh" && pass "onboard_bash_syntax" || fail "onboard_bash_syntax"
+if bash -n "$ROOT/.flywheel/flywheel-loop-tick"; then pass "tick_bash_syntax"; else fail "tick_bash_syntax"; fi
+if bash -n "$ROOT/.flywheel/scripts/flywheel-onboard.sh"; then pass "onboard_bash_syntax"; else fail "onboard_bash_syntax"; fi
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]

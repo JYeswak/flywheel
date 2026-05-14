@@ -947,11 +947,11 @@
       "id": "L144",
       "order": 95,
       "path": ".flywheel/rules/L095-L144-git-stash-janitor-fleet-hygiene.md",
-      "sha256": "9431390e446bb1d7533562af7a509775367438ae7c9311edadfe8a89c9516a4b",
+      "sha256": "e726c0a8877a14ada42de5c52fda9d4c3d24cfd206387e54499d83e8a9142098",
       "shipped": "2026-05-08",
       "status": "long_term",
-      "title": "GIT-STASH-JANITOR-FLEET-HYGIENE",
-      "trauma_class": "stash-bloat-state-leak"
+      "title": "GIT-JANITOR-FLEET-HYGIENE",
+      "trauma_class": "repo-state-leak"
     },
     {
       "id": "L145",

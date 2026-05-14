@@ -22,36 +22,28 @@ if [[ -x "$LOOP_GOAL_GATE" ]]; then
   fi
 fi
 
-# ── bszgl.3: git hygiene gate ─────────────────────────────────────────────────
-# Refuse dispatch when the repo has excessive uncommitted or unclassified files.
-if git -C "$REPO" rev-parse --git-dir &>/dev/null; then
-  GIT_UNCOMMITTED="$(git -C "$REPO" status --short 2>/dev/null | grep -c "^.M\|^ M\|^M\|^A\|^D\|^R\|^C\|^U" || true)"
-  GIT_UNTRACKED="$(git -C "$REPO" status --short 2>/dev/null | grep -c "^??" || true)"
-  GIT_AHEAD="$(git -C "$REPO" rev-list --count @{u}..HEAD 2>/dev/null || echo 0)"
-
-  if [[ "$GIT_UNCOMMITTED" -gt 100 ]]; then
-    jq -nc --arg session "$SESSION" --arg pane "$PANE" \
-      --argjson dirty "$GIT_UNCOMMITTED" --argjson ahead "$GIT_AHEAD" \
-      '{verdict:"blocked",reason:"git_production_dirty_exceeds_threshold",session:$session,
+# ── bszgl.3 + git-repo-discipline: git hygiene gate ───────────────────────────
+# Refuse dispatch when dirty repo state has crossed the halt threshold. Below
+# halt, carry the repo-discipline action into the normal capacity envelope.
+REPO_DISCIPLINE_CHECK="${REPO_DISCIPLINE_CHECK:-$(dirname "$0")/repo-discipline-check.sh}"
+if [[ -x "$REPO_DISCIPLINE_CHECK" ]] && git -C "$REPO" rev-parse --git-dir &>/dev/null; then
+  REPO_DISCIPLINE_STATUS=0
+  REPO_DISCIPLINE_OUT="$("$REPO_DISCIPLINE_CHECK" --repo "$REPO" --no-append --json 2>/dev/null)" || REPO_DISCIPLINE_STATUS=$?
+  if [[ "$REPO_DISCIPLINE_STATUS" -eq 1 ]]; then
+    jq -nc --arg session "$SESSION" --arg pane "$PANE" --argjson repo_hygiene "$REPO_DISCIPLINE_OUT" \
+      '{verdict:"blocked",reason:"git_repo_hygiene_halt_threshold",session:$session,
         pane:($pane|tonumber? // $pane),
-        git_uncommitted:$dirty,git_ahead:$ahead,
-        action:"clear_deck_first_commit_or_gitignore_before_dispatch"}'
+        repo_hygiene:$repo_hygiene,
+        action:$repo_hygiene.action}'
     exit 1
   fi
-
-  if [[ "$GIT_UNTRACKED" -gt 20 ]]; then
-    jq -nc --arg session "$SESSION" --arg pane "$PANE" \
-      --argjson untracked "$GIT_UNTRACKED" \
-      '{verdict:"blocked",reason:"git_unclassified_files_exceeds_threshold",session:$session,
-        pane:($pane|tonumber? // $pane),
-        git_untracked:$untracked,
-        action:"classify_substrate_first_commit_or_gitignore_untracked_files"}'
-    exit 1
+  if jq -e '.commits_ahead > 300' >/dev/null 2>&1 <<<"$REPO_DISCIPLINE_OUT"; then
+    GIT_AHEAD_WARNING="commits_ahead=$(jq -r '.commits_ahead' <<<"$REPO_DISCIPLINE_OUT") consider push decision"
   fi
-
-  if [[ "$GIT_AHEAD" -gt 300 ]]; then
-    # warn only, don't block
-    GIT_AHEAD_WARNING="commits_ahead=${GIT_AHEAD} consider push decision"
+  if jq -e '.class != "clean"' >/dev/null 2>&1 <<<"$REPO_DISCIPLINE_OUT"; then
+    REPO_HYGIENE_WARNING="$(
+      jq -r '"repo_hygiene=\(.class) action=\(.action) dirty_total=\(.dirty_total) handler=\(.handler)"' <<<"$REPO_DISCIPLINE_OUT"
+    )"
   fi
 fi
 
@@ -105,16 +97,21 @@ esac
 if [[ "$HEALTH_IDLE_HINT" == "true" || ( "$PROCESS_STATUS" == "running" && "$RAW_ACTIVITY" == "idle" ) ]]; then HEALTH_IDLE=true; else HEALTH_IDLE=false; fi
 if [[ "$HEALTH_STATUS" == "ok" || "$HEALTH_SCORE" -ge 80 ]]; then HEALTH_REC="HEALTHY"; else HEALTH_REC="$(printf '%s' "${HEALTH_STATUS:-UNKNOWN}" | tr '[:lower:]' '[:upper:]')"; fi
 
+COMBINED_WARNING="${REPO_HYGIENE_WARNING:-${GIT_AHEAD_WARNING:-}}"
+if [[ -n "${REPO_HYGIENE_WARNING:-}" && -n "${GIT_AHEAD_WARNING:-}" ]]; then
+  COMBINED_WARNING="${REPO_HYGIENE_WARNING}; ${GIT_AHEAD_WARNING}"
+fi
+
 if [[ "$ASSIGN_PANE_MATCH" -gt 0 || ( "$ACTIVITY_STATE" == "WAITING" && "$ASSIGN_IDLE_COUNT" -gt 0 ) ]]; then
-  emit "available" "assign_idle_capacity" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC"
+  emit "available" "assign_idle_capacity" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC" "$COMBINED_WARNING"
   exit 0
 fi
 if [[ "$ACTIVITY_STATE" == "ERROR" && "$HEALTH_IDLE" == "true" && "$HEALTH_REC" == "HEALTHY" ]]; then
-  emit "override_available" "activity_error_but_health_idle_healthy" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC" "stale_chevron_or_api_error_pattern"
+  emit "override_available" "activity_error_but_health_idle_healthy" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC" "${COMBINED_WARNING:-stale_chevron_or_api_error_pattern}"
   exit 2
 fi
 case "$ACTIVITY_STATE" in
-  ERROR|STALLED|UNKNOWN) emit "blocked" "activity_${ACTIVITY_STATE}" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC"; exit 1 ;;
+  ERROR|STALLED|UNKNOWN) emit "blocked" "activity_${ACTIVITY_STATE}" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC" "$COMBINED_WARNING"; exit 1 ;;
 esac
-emit "blocked" "activity_${ACTIVITY_STATE}" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC"
+emit "blocked" "activity_${ACTIVITY_STATE}" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC" "$COMBINED_WARNING"
 exit 1

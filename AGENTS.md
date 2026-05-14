@@ -130,7 +130,7 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 92 | L141 — LOOP-MUST-BE-ACCRETIVE | long_term | `.flywheel/rules/L092-L141-loop-must-be-accretive.md` |
 | 93 | L142 — CODEX-PREPARED-CHEVRON-NOT-STALE-BUFFER | long_term | `.flywheel/rules/L093-L142-codex-prepared-chevron-not-stale-buffer.md` |
 | 94 | L143 — WORKER-CLOSE-REQUIRES-GIT-COMMIT | long_term | `.flywheel/rules/L094-L143-worker-close-requires-git-commit.md` |
-| 95 | L144 — GIT-STASH-JANITOR-FLEET-HYGIENE | long_term | `.flywheel/rules/L095-L144-git-stash-janitor-fleet-hygiene.md` |
+| 95 | L144 — GIT-JANITOR-FLEET-HYGIENE | long_term | `.flywheel/rules/L095-L144-git-stash-janitor-fleet-hygiene.md` |
 | 96 | L145 — ORCH-HANDSHAKES-NEVER-GATE-ON-JOSHUA | long_term | `.flywheel/rules/L096-L145-orch-handshakes-never-gate-on-joshua.md` |
 | 97 | L146 — SKILL-ENHANCE-HONORS-JSM-MANAGEMENT | long_term | `.flywheel/rules/L097-L146-skill-enhance-honors-jsm-management.md` |
 | 98 | L147 — SKILL-AUTORESEARCH-ROUTES-BY-TOOLING-SUBSTRATE | long_term | `.flywheel/rules/L098-L147-skill-autoresearch-routes-by-tooling-substrate.md` |

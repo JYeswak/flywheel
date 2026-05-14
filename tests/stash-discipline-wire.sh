@@ -14,6 +14,7 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/.flywheel/scripts/stash-discipline-check.sh"
 VALIDATOR="$ROOT/.flywheel/scripts/mission-fitness-callback-validator.sh"
+FLYWHEEL_LOOP="${FLYWHEEL_LOOP:-/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop}"
 
 pass_count=0
 fail_count=0
@@ -35,8 +36,8 @@ trap 'rm -rf "$TMPREPO"' EXIT
 stash_n() {
   local n="$1"
   (
-    cd "$TMPREPO"
-    git stash list 2>/dev/null | while read -r line; do git stash drop -q stash@'{0}' 2>/dev/null; done
+    cd "$TMPREPO" || exit
+    git stash list 2>/dev/null | while read -r _line; do git stash drop -q stash@'{0}' 2>/dev/null; done
     # Drain entirely
     while [[ "$(git stash list 2>/dev/null | wc -l | tr -d ' ')" -gt 0 ]]; do
       git stash drop -q stash@'{0}' 2>/dev/null || break
@@ -169,10 +170,14 @@ if printf '%s' "$DEC" | jq -e '(.stash_count == -1 or .stash_count == null) and 
 else fail "BLOCKED callback incorrectly stash-checked: $(printf '%s' "$DEC" | jq -c '{decision, stash_count}')"; fi
 
 # Test 17: flywheel-loop doctor exposes stash_count for current repo
-DOC="$(<flywheel-state>/bin/flywheel-loop doctor --repo "$ROOT" --json 2>/dev/null)"
-if printf '%s' "$DOC" | jq -e 'has("stash_count") and has("stash_class") and has("stash_halt") and has("stash_thresholds")' >/dev/null; then
-  pass "flywheel-loop doctor includes stash fields"
-else fail "flywheel-loop doctor stash fields"; fi
+if [[ -x "$FLYWHEEL_LOOP" ]]; then
+  DOC="$("$FLYWHEEL_LOOP" doctor --repo "$ROOT" --json 2>/dev/null)"
+  if printf '%s' "$DOC" | jq -e 'has("stash_count") and has("stash_class") and has("stash_halt") and has("stash_thresholds")' >/dev/null; then
+    pass "flywheel-loop doctor includes stash fields"
+  else fail "flywheel-loop doctor stash fields"; fi
+else
+  fail "flywheel-loop executable missing: $FLYWHEEL_LOOP"
+fi
 
 # Cleanup tmp file
 rm -f /tmp/stash-test-out.json

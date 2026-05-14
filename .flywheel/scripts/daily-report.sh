@@ -523,14 +523,27 @@ if [[ -f "$REPORT_PATH" ]]; then
   } >>"$REPORT_PATH"
 fi
 
-# ── bszgl.3: git hygiene block ───────────────────────────────────────────────
+# ── bszgl.3 + git-repo-discipline: git hygiene block ────────────────────────
 GIT_UNCOMMITTED=0; GIT_UNTRACKED=0; GIT_AHEAD="?"; GIT_STASHES=0; GIT_ALARM=""
+GIT_REPO_CLASS="not_a_git_repo"; GIT_REPO_ACTION="n/a"; GIT_REPO_HANDLER="/git-repo-janitor"
 if git -C "$REPO" rev-parse --git-dir &>/dev/null; then
-  GIT_UNCOMMITTED="$(git -C "$REPO" status --short 2>/dev/null | grep -cE '^.M|^ M|^[MADRC]' || true)"
-  GIT_UNTRACKED="$(git -C "$REPO" status --short 2>/dev/null | grep -c '^??' || true)"
-  GIT_AHEAD="$(git -C "$REPO" rev-list --count @{u}..HEAD 2>/dev/null || echo '?')"
+  GIT_AHEAD="$(git -C "$REPO" rev-list --count '@{u}..HEAD' 2>/dev/null || echo '?')"
   GIT_STASHES="$(git -C "$REPO" stash list 2>/dev/null | wc -l | tr -d ' ')"
-  [[ "$GIT_UNTRACKED" -gt 0 ]] && GIT_ALARM=" ← ALARM: classify or gitignore"
+  REPO_DISCIPLINE_CHECK="${REPO_DISCIPLINE_CHECK:-$(dirname "$0")/repo-discipline-check.sh}"
+  if [[ -x "$REPO_DISCIPLINE_CHECK" ]]; then
+    REPO_DISCIPLINE_OUT="$("$REPO_DISCIPLINE_CHECK" --repo "$REPO" --no-append --json 2>/dev/null || true)"
+    if jq -e . >/dev/null 2>&1 <<<"$REPO_DISCIPLINE_OUT"; then
+      GIT_UNCOMMITTED="$(jq -r '.tracked_dirty_count // 0' <<<"$REPO_DISCIPLINE_OUT")"
+      GIT_UNTRACKED="$(jq -r '.untracked_count // 0' <<<"$REPO_DISCIPLINE_OUT")"
+      GIT_REPO_CLASS="$(jq -r '.class // "unknown"' <<<"$REPO_DISCIPLINE_OUT")"
+      GIT_REPO_ACTION="$(jq -r '.action // "unknown"' <<<"$REPO_DISCIPLINE_OUT")"
+      GIT_REPO_HANDLER="$(jq -r '.handler // "/git-repo-janitor"' <<<"$REPO_DISCIPLINE_OUT")"
+    fi
+  else
+    GIT_UNCOMMITTED="$(git -C "$REPO" status --short 2>/dev/null | grep -cE '^.M|^ M|^[MADRC]' || true)"
+    GIT_UNTRACKED="$(git -C "$REPO" status --short 2>/dev/null | grep -c '^??' || true)"
+  fi
+  [[ "$GIT_REPO_CLASS" != "clean" ]] && GIT_ALARM=" ← ACTION: ${GIT_REPO_ACTION}"
 fi
 
 GOAL_GATE_STATUS="unknown"
@@ -546,8 +559,8 @@ if [[ -x "$LOOP_GOAL_GATE" ]]; then
   esac
 fi
 
-GIT_BLOCK="$(printf 'Git hygiene (%s):\n  uncommitted:    %s\n  unclassified:   %s%s\n  commits_ahead:  %s\n  stash_count:    %s\n  goal_gate:      %s' \
-  "$(basename "$REPO")" "$GIT_UNCOMMITTED" "$GIT_UNTRACKED" "$GIT_ALARM" "$GIT_AHEAD" "$GIT_STASHES" "$GOAL_GATE_STATUS")"
+GIT_BLOCK="$(printf 'Git hygiene (%s):\n  uncommitted:    %s\n  unclassified:   %s%s\n  repo_class:     %s\n  repo_handler:   %s\n  commits_ahead:  %s\n  stash_count:    %s\n  goal_gate:      %s' \
+  "$(basename "$REPO")" "$GIT_UNCOMMITTED" "$GIT_UNTRACKED" "$GIT_ALARM" "$GIT_REPO_CLASS" "$GIT_REPO_HANDLER" "$GIT_AHEAD" "$GIT_STASHES" "$GOAL_GATE_STATUS")"
 
 if [[ -f "$REPORT_PATH" ]]; then
   { printf '\n## Git hygiene\n'; printf '%s\n' "$GIT_BLOCK"; } >>"$REPORT_PATH"
@@ -557,7 +570,8 @@ if [[ "$WANT_JSON" -eq 1 ]]; then
   GIT_JSON="$(jq -nc \
     --argjson u "${GIT_UNCOMMITTED:-0}" --argjson n "${GIT_UNTRACKED:-0}" \
     --arg a "${GIT_AHEAD:-?}" --argjson s "${GIT_STASHES:-0}" --arg g "$GOAL_GATE_STATUS" \
-    '{uncommitted:$u,untracked:$n,commits_ahead:$a,stash_count:$s,goal_gate:$g}')"
+    --arg c "$GIT_REPO_CLASS" --arg h "$GIT_REPO_HANDLER" --arg action "$GIT_REPO_ACTION" \
+    '{uncommitted:$u,untracked:$n,repo_class:$c,repo_handler:$h,repo_action:$action,commits_ahead:$a,stash_count:$s,goal_gate:$g}')"
   jq -c --argjson ntm_rollup "$ROLLUP" --argjson git_hygiene "$GIT_JSON" \
     '. + {ntm_rollup:$ntm_rollup,git_hygiene:$git_hygiene}' "$PY_OUT"
 else
