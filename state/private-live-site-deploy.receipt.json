@@ -1,13 +1,13 @@
 {
   "schema_version": "flywheel.private_live_site_deploy_receipt.v0",
-  "receipt_id": "flywheel-private-live-site-multi-page-story-deploy-20260514T0007Z",
+  "receipt_id": "flywheel-private-live-site-deep-smb-story-deploy-20260514T0058Z",
   "status": "pass",
-  "deployed_at": "2026-05-14T00:07:33Z",
+  "deployed_at": "2026-05-14T00:58:00Z",
   "host": "flywheel.zeststream.ai",
   "provider": "vercel",
-  "deployment_url": "https://flywheel-7jbd8upcp-joshuas-projects-96d49291.vercel.app",
+  "deployment_url": "https://flywheel-cxxzza643-joshuas-projects-96d49291.vercel.app",
   "production_alias": "https://flywheel.zeststream.ai",
-  "source_commit": "9406ee11",
+  "source_commit": "da3e2db0",
   "deployed_bundle_scope": [
     "site/",
     "install.sh",
@@ -37,7 +37,8 @@
       "TrustWorryMatrix",
       "YuzuMethodRail",
       "TechnicalDrawer",
-      "OperatorSignature"
+      "OperatorSignature",
+      "RoomSystem"
     ]
   },
   "verification": {
@@ -49,11 +50,19 @@
     "live_site_probe_failure_count": 0,
     "install_proxy_checksum_match": true,
     "install_sha256": "a4e04cd1e08f13110d74dca34c38018a5b93c9a173cca2db63a91458efe6f364",
+    "site_deploy_manifest": {
+      "schema_version": "flywheel.site_deploy_manifest.v0",
+      "mode": "private-review",
+      "tag": "private-review-da3e2db0",
+      "commit": "da3e2db0",
+      "public_ready_claim": false
+    },
     "screenshot_checks": {
       "reference_review_dir": "/tmp/flywheel-jeff-deep",
-      "local_review_dir": "/tmp/flywheel-redesign-review",
-      "desktop": "/tmp/flywheel-redesign-review/developers-desktop-v2.png",
-      "mobile": "/tmp/flywheel-redesign-review/contact-mobile-v2.png",
+      "local_desktop": "/tmp/flywheel-home-v3-desktop-b.png",
+      "local_mobile": "/tmp/flywheel-home-v3-mobile-c.png",
+      "live_desktop": "/tmp/flywheel-live-home-v3-desktop.png",
+      "live_mobile": "/tmp/flywheel-live-home-v3-mobile.png",
       "nonblank_pixel_variance": true
     },
     "publication_readiness_status": "blocked",
