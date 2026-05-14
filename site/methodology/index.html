@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flywheel Methodology | ZestStream</title>
-    <meta name="description" content="The Yuzu Method maps one SMB workflow, fixes one route, proves what changed, and keeps the lesson.">
+    <meta name="description" content="How Joshua applies Donella Meadows systems thinking to agentic coding, Flywheel, SkillOS, and layered safety.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
@@ -28,82 +28,109 @@
         <div class="scene-floor" aria-hidden="true"></div>
         <div class="shell hero-story">
           <div class="hero-story-inner">
-            <div class="hero-eyebrow"><span class="hot">The Yuzu Method ™</span><span>Peel. Press. Pour.™</span><span>specific first</span></div>
-            <h1 id="method-title">Do not automate the mess. Map it first.</h1>
-            <p class="hero-plain">I bring AI into a business the same way I would fix any expensive operations problem: find the route, cut the waste, prove the change, and leave the owner with something they understand.</p>
-            <p class="operator-proof-line">I help SMB owners buy their time back.</p>
+            <div class="hero-eyebrow"><span class="hot">Methodology</span><span>Systems thinking</span><span>Inspectable work</span></div>
+            <h1 id="method-title">This is how I decide where to intervene.</h1>
+            <p class="hero-plain">Flywheel is not a diagram I ask you to admire. It is how I look at recurring work, find the structure that keeps producing the same problem, change one small rule or signal, and measure whether the system behaves differently.</p>
+            <p class="operator-proof-line">The lens comes from Donella Meadows. The implementation is mine, built on top of Jeffrey Emanuel's open-source substrate.</p>
             <div class="actions">
-              <a class="button" href="../contact/index.html">Map my workflow</a>
-              <a class="button secondary" href="../for-developers/index.html">Inspect the run path</a>
+              <a class="button" href="#lens">Study the lens</a>
+              <a class="button secondary" href="../for-developers/index.html">Study the developer path</a>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="section-theater warm" aria-labelledby="method-rail-title">
+      <section class="section-theater warm" id="lens" aria-labelledby="lens-title">
         <div class="shell">
           <div class="room-header">
             <div>
-              <p class="kicker">How I work</p>
-              <h2 id="method-rail-title">Peel. Press. Pour.™</h2>
+              <p class="kicker">The lens</p>
+              <h2 id="lens-title">Donella Meadows taught me to look below the event.</h2>
             </div>
-            <p>Three plain moves. No giant rollout before the first route earns it.</p>
+            <p>In <em>Thinking in Systems</em> and in the Donella Meadows Project archive, Meadows gives the vocabulary: stocks and flows, balancing and reinforcing feedback loops, delays, information flows, rules, goals, mental models, and Meadows' 12 leverage points.</p>
           </div>
-          <div class="yuzu-cutline" aria-label="Yuzu Method steps">
-            <article><span>Peel</span><h3>Show me the work.</h3><p>Bring the thing that is eating your week. I map where it starts, where it stalls, and what the team does by hand.</p></article>
-            <article><span>Press</span><h3>I wire one useful fix.</h3><p>The fix must be small enough to review and real enough to matter.</p></article>
-            <article><span>Pour</span><h3>You keep the value.</h3><p>When the route works, the runbook, checks, and operating lesson carry forward.</p></article>
+          <div class="proof-grid developer-study-grid" aria-label="Meadows systems-thinking lens">
+            <article><span>Events</span><strong>The thing that happened.</strong><p>A test failed. A repo filled with generated files. A worker waited on stale state. Events matter, but they are the surface.</p></article>
+            <article><span>Patterns</span><strong>The thing that keeps happening.</strong><p>The same class returns across repos. The same check passes while the user experience still fails. The same cleanup grows back.</p></article>
+            <article><span>Structure</span><strong>The arrangement producing it.</strong><p>A missing signal, a weak rule, a delayed check, or a stock with inflow but no outflow keeps recreating the event.</p></article>
+            <article><span>Mental model</span><strong>The belief that makes it feel normal.</strong><p>The Meadows iceberg helps me ask what the system believes: is a dirty repo weather, or is it a queue of unresolved decisions?</p></article>
+          </div>
+          <p class="source-note">Source note: Donella H. Meadows, <em>Thinking in Systems</em>; "Leverage Points: Places to Intervene in a System"; "Dancing With Systems"; and "Let's Have a Little More Feedback," Donella Meadows Project archive.</p>
+        </div>
+      </section>
+
+      <section class="section-theater dark" aria-labelledby="applied-title">
+        <div class="shell">
+          <div class="room-header">
+            <div>
+              <p class="kicker">Applied</p>
+              <h2 id="applied-title">The method is useful only when it changes real work.</h2>
+            </div>
+            <p>I use Meadows as a discipline, not decoration. Before I change tooling, I name the stock, the flow, the loop, the delay, and the leverage point the evidence supports.</p>
+          </div>
+          <div class="manual-flow" aria-label="Meadows applied to Flywheel work">
+            <div><span>Balancing feedback loop</span><strong>The frontend quality gate pushes drift back toward the bar.</strong><p>The observed failure was false confidence: a page could pass visual proxies while speaking in internal notes-to-self. The correction loop now checks meta-voice, first-person posture, concreteness, and repetition before a page is treated as review-ready.</p></div>
+            <div><span>Stock</span><strong>Doctrine accretion is a stock, not a win by itself.</strong><p>Useful rules accumulate. So does dead weight. The outflow has to be retention, pruning, validation, and wiring into dispatch. Otherwise doctrine becomes a pile, not a memory.</p></div>
+            <div><span>Structure</span><strong>A dirty working tree is not an event problem.</strong><p>If files sit unclassified, the structure is missing a route to commit, restore, ignore, bead, or janitor triage. More reminders tune a parameter; a repo-discipline check changes the information flow.</p></div>
+            <div><span>Rules</span><strong>Blocked is better than bluffing only when the rule is enforced.</strong><p>A red receipt is useful because it changes behavior. If a gate can be skipped with prose, the rule is weak. If the skip needs a receipt, the system learns what is still unproven.</p></div>
           </div>
         </div>
       </section>
 
-      <section class="section-theater dark" aria-labelledby="worry-title">
+      <section class="section-theater" aria-labelledby="surfaces-title">
         <div class="shell">
           <div class="room-header">
             <div>
-              <p class="kicker">Owner questions</p>
-              <h2 id="worry-title">You are right to be careful.</h2>
+              <p class="kicker">System map</p>
+              <h2 id="surfaces-title">Flywheel and SkillOS are separate surfaces with a shared loop.</h2>
             </div>
-            <p>Bad AI work creates cleanup. Good AI work starts with the parts of the business that already hurt and keeps the owner in the decision loop.</p>
+            <p><a href="https://www.jeffreyemanuel.com">Jeffrey Emanuel</a>, also known as Dicklesworthstone, built the substrate pieces I rely on: NTM, Agent Mail, beads, and CASS. I cite that work because attribution is part of the method. Flywheel and SkillOS sit above it.</p>
           </div>
           <div class="trust-console">
-            <article><span>Mess risk</span><strong>What if AI makes this worse?</strong><p>The map comes before automation. One route gets a stop point.</p></article>
-            <article><span>Accuracy risk</span><strong>What if it sounds right and is wrong?</strong><p>If I cannot prove it, I do not ask you to trust it.</p></article>
-            <article><span>Privacy risk</span><strong>What leaves my business?</strong><p>Start with redacted examples. Private work stays private.</p></article>
-            <article><span>Change risk</span><strong>What if the tools change next month?</strong><p>New tools get tested before they become part of your work.</p></article>
-            <article><span>People risk</span><strong>What happens to judgment?</strong><p>The owner approves the route. AI does not get the final say.</p></article>
+            <article><span>Jeffrey Emanuel</span><strong>NTM, Agent Mail, beads, CASS</strong><p>Agent panes, durable messages, local issue graphs, and memory patterns give the work places to live outside one chat window.</p></article>
+            <article><span>Flywheel</span><strong>Repo-local operating loop</strong><p>Mission, goal, state, tick, dispatch, daily report, closeout receipt, doctrine, and local preflight belong with the repo being changed.</p></article>
+            <article><span>SkillOS</span><strong>Capability layer</strong><p>Skills become explicit capabilities with adoption proof, validators, pack status, and a way to say "not ready" without hiding the gap.</p></article>
+            <article><span>Shared loop</span><strong>Observe, route, prove, retain</strong><p>The loop is the same on each repo: observe current state, route bounded work, prove the result, and retain the lesson where the next agent can use it.</p></article>
           </div>
         </div>
       </section>
 
-      <section class="section-theater" aria-labelledby="numbers-title">
-        <div class="shell system-room">
-          <div>
-            <p class="kicker">Receipts matter</p>
-            <h2 id="numbers-title">I do not ask for trust where a number will do.</h2>
-            <p class="section-lead">On infrastructure work, I have moved a cache hit rate from 0.007% to 6.37%, a 910× improvement, with a 2-line regex. On workflow work, the same principle applies: name the stuck step, change one thing, measure the before and after.</p>
-          </div>
-          <div class="control-stack" aria-label="Before and after proof">
-            <article><span>Before</span><h3>0.007% cache hit rate.</h3></article>
-            <article><span>Change</span><h3>Normalize one billing header.</h3></article>
-            <article><span>After</span><h3>6.37% cache hit rate.</h3></article>
-            <article><span>Result</span><h3>910× improvement, measured.</h3></article>
-          </div>
-        </div>
-      </section>
-
-      <section class="section-theater warm" aria-labelledby="pricing-title">
+      <section class="section-theater warm" aria-labelledby="safety-title">
         <div class="shell">
           <div class="room-header">
             <div>
-              <p class="kicker">First step</p>
-              <h2 id="pricing-title">Book a 20-minute Peel session. $0. Specific. No pitch at the end.</h2>
+              <p class="kicker">Safety mechanisms</p>
+              <h2 id="safety-title">Defense-in-depth means every guard has a failure mode.</h2>
             </div>
-            <p>If the route is worth mapping deeper, the next public step is a $500 Peel Report. Anything past that gets quoted after I see the actual work.</p>
+            <p>I do not trust one gate to protect the work. I layer guards because each one catches a different class of failure, and each class came from something observed.</p>
+          </div>
+          <div class="proof-grid" aria-label="Defense-in-depth safety mechanisms">
+            <article><span>Destructive-command guard</span><strong>Prevents irreversible shell mistakes.</strong><p>Failure mode: a normal coding session drifts into a delete, force, wipe, or destructive move without explicit authorization.</p></article>
+            <article><span>Cross-repo write guards</span><strong>Prevent bleed between repos.</strong><p>Failure mode: an agent fixes the right pattern in the wrong working tree, or carries private state into a public surface.</p></article>
+            <article><span>Quality gates</span><strong>Prevent "wired" from pretending to be "good."</strong><p>Failure mode: a page, command, or package technically runs while copy, accessibility, proof state, or visual hierarchy still fails the real bar.</p></article>
+            <article><span>Recovery bundles</span><strong>Prevent cleanup from becoming data loss.</strong><p>Failure mode: a legitimate prune, move, or janitor run removes the only copy of work that should have been preserved first.</p></article>
+            <article><span>Repo-hygiene invariants</span><strong>Prevent bloat before it becomes the story.</strong><p>Failure mode: tracked-but-ignored files, generated output, rebuildable substrate, and unbounded local state keep accumulating until basic work slows down.</p></article>
+            <article><span>Closeout receipts</span><strong>Prevent prose-only trust.</strong><p>Failure mode: an agent says work is done, but the next reader cannot inspect status, failures, validation, next action, or why a human is truly needed.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-theater dark" aria-labelledby="throughline-title">
+        <div class="shell">
+          <div class="room-header">
+            <div>
+              <p class="kicker">Throughline</p>
+              <h2 id="throughline-title">Trust the method means inspect the method.</h2>
+            </div>
+            <p>A systems-thinking lens keeps me from treating symptoms as the work. Flywheel gives the repo a visible loop. SkillOS gives capabilities a status. Layered safety keeps one missed check from becoming the whole truth. That is the promise I can stand behind: not "believe me," but "look where the work changed, what proved it, and what remains red."</p>
+          </div>
+          <div class="actions">
+            <a class="button" href="../for-developers/index.html">Inspect the developer path</a>
+            <a class="button secondary" href="../contact/index.html">Ask about a workflow</a>
           </div>
         </div>
       </section>
     </main>
-    <footer class="footer"><div class="shell"><a href="../contact/index.html">Book a Peel session</a>.</div></footer>
+    <footer class="footer"><div class="shell">Sources: <a href="https://donellameadows.org/archives/leverage-points-places-to-intervene-in-a-system/">Donella Meadows Project</a>, <a href="https://www.jeffreyemanuel.com">Jeffrey Emanuel</a>, and <a href="https://github.com/Dicklesworthstone">github.com/Dicklesworthstone</a>.</div></footer>
   </body>
 </html>
