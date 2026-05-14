@@ -60,14 +60,14 @@ scripts/journey-smoke.sh --matrix claude,codex,gemini,openclaw,reduced --dry-run
               <p class="kicker">Support tiers</p>
               <h2 id="tiers-title">Each lane has to earn its label.</h2>
             </div>
-            <p>The public developer path must work inside and outside NTM. Agent-specific lanes stay compatibility targets until the matching isolated runtime proof exists.</p>
+            <p>The public developer path must work inside and outside NTM. Reduced local mode is required, and each named agent lane now carries an isolated runtime receipt before it gets support copy.</p>
           </div>
           <div class="manual-flow" aria-label="Agent support lane console">
-            <div><span>Required</span><strong>Reduced local mode</strong><p>The public fallback path that does not rely on private substrate.</p></div>
-            <div><span>Target</span><strong>Claude Code</strong><p>Compatibility target until isolated runtime proof exists.</p></div>
-            <div><span>Target</span><strong>Codex CLI</strong><p>Compatibility target until isolated runtime proof exists.</p></div>
-            <div><span>Target</span><strong>Gemini CLI</strong><p>Compatibility target until isolated runtime proof exists.</p></div>
-            <div><span>Target</span><strong>OpenClaw</strong><p>Compatibility target until daemon or gateway smoke proves behavior.</p></div>
+            <div><span>Required</span><strong>Reduced local mode</strong><p>Proven fallback path for preflight, init, doctor, tick, dispatch simulation, closeout, and next action without private substrate.</p></div>
+            <div><span>Proven</span><strong>Claude Code</strong><p>Isolated runtime receipt proves the lane with a live adapter response and clean private-state scan.</p></div>
+            <div><span>Proven</span><strong>Codex CLI</strong><p>Isolated runtime receipt proves the lane using an explicit operator-provided Codex auth home while target repo and HOME stay isolated.</p></div>
+            <div><span>Proven</span><strong>Gemini CLI</strong><p>Isolated runtime receipt proves the lane with live adapter response and the same required journey stages.</p></div>
+            <div><span>Proven</span><strong>OpenClaw</strong><p>Isolated runtime receipt proves behavior through a disposable isolated OpenClaw agent.</p></div>
           </div>
         </div>
       </section>

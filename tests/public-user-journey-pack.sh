@@ -33,7 +33,7 @@ else
 fi
 
 cp "$PACK" "$TMP/no-visual.md"
-perl -0pi -e 's/Full-bleed operating-room scene with SMB systems, manual route, yuzu slice beam, workflow slice definition, and proof states rail/ /' "$TMP/no-visual.md"
+perl -0pi -e 's/Full-bleed operating-room scene with SMB systems, manual route, yuzu slice beam, workflow slice definition, proof states rail, and git-derived trajectory rail/ /' "$TMP/no-visual.md"
 if python3 "$SCRIPT" --pack "$TMP/no-visual.md" --json >"$TMP/no-visual.json"; then
   fail "missing visual cue fails"
 elif jq -e '.status == "fail" and any(.errors[]?; .code == "STEP_VISUAL_CUE_MISSING")' "$TMP/no-visual.json" >/dev/null; then
@@ -43,7 +43,7 @@ else
 fi
 
 cp "$PACK" "$TMP/no-proof.md"
-perl -0pi -e 's#tests/website-static\.sh; tests/website-accessibility\.sh#none#' "$TMP/no-proof.md"
+perl -0pi -e 's#tests/website-static\.sh; tests/website-accessibility\.sh; docs/stories/flywheel-trajectory\.md; docs/evidence/flywheel-trajectory\.json#none#' "$TMP/no-proof.md"
 if python3 "$SCRIPT" --pack "$TMP/no-proof.md" --json >"$TMP/no-proof.json"; then
   fail "missing evidence fails"
 elif jq -e '.status == "fail" and any(.errors[]?; .code == "CLAIM_WITHOUT_EVIDENCE")' "$TMP/no-proof.json" >/dev/null; then

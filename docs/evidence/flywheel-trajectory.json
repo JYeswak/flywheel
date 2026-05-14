@@ -1,0 +1,515 @@
+{
+  "chapters": [
+    {
+      "commit_count": 380,
+      "evidence_commits": [
+        {
+          "date": "2026-05-06",
+          "paths": [
+            ".flywheel/scripts/dispatch-self-test-delivery-identity.sh",
+            ".flywheel/scripts/golden-fixture-replay-runner.sh",
+            ".flywheel/scripts/mission-lock-readiness-doctor.sh",
+            ".flywheel/scripts/polish-preflight-quality-gate.sh"
+          ],
+          "sha": "10cec738",
+          "subject": "feat(scripts): ship Wave 3+4 validators + doctor + replay-runner + quality-gate orchestrator"
+        },
+        {
+          "date": "2026-05-07",
+          "paths": [
+            "tests/test_autoloop_daily_queue_digest.sh",
+            "tests/test_autoloop_explain_json.sh",
+            "tests/test_autoloop_fairness_aging_score.sh",
+            "tests/test_doctor_autoloop_fields.sh"
+          ],
+          "sha": "722ee457",
+          "subject": "flywheel-gocp add autoloop fairness tests"
+        },
+        {
+          "date": "2026-05-08",
+          "paths": [
+            ".flywheel/doctrine/tick-script-the capability control plane-doctor-emission.md"
+          ],
+          "sha": "4a9d2811",
+          "subject": "docs(doctrine): add tick-script the capability control plane doctor emission standard"
+        },
+        {
+          "date": "2026-05-10",
+          "paths": [
+            ".flywheel/STATE.md",
+            ".flywheel/compliance/flywheel-pynxp/evidence.md",
+            ".flywheel/scripts/mission-fitness-callback-validator.sh",
+            ".flywheel/scripts/stash-discipline-check.sh"
+          ],
+          "sha": "a9f1312d",
+          "subject": "feat(stash-discipline): wire git-stash-discipline doctrine into worker close + orch tick + flywheel-loop doctor [flywheel-pynxp]"
+        },
+        {
+          "date": "2026-05-10",
+          "paths": [
+            ".flywheel/audit/work item/evidence.md",
+            ".flywheel/evidence/work item/report.md",
+            ".flywheel/scripts/scaffold-canonical-cli.sh",
+            ".flywheel/state/scaffold-runs.jsonl"
+          ],
+          "sha": "ec7308f8",
+          "subject": "feat(scaffold-canonical-cli): refuse non-bash shebang [work item]"
+        },
+        {
+          "date": "2026-05-10",
+          "paths": [
+            ".flywheel/audit/work item/compliance-pack.md",
+            ".flywheel/audit/work item/config.toml.before",
+            ".flywheel/audit/work item/evidence.md",
+            ".flywheel/audit/work item/loop-state.before.json"
+          ],
+          "sha": "2ec8c79e",
+          "subject": "feat(loop-driver): migrate dispatch_mode launchd_prompt -> cc_skill_loop [work item]"
+        },
+        {
+          "date": "2026-05-11",
+          "paths": [
+            ".flywheel/audit/flywheel-oxzyr.2.6/evidence.md",
+            ".flywheel/fixtures/doctor-mode/README.md",
+            ".flywheel/fixtures/doctor-mode/fm1/README.md",
+            ".flywheel/fixtures/doctor-mode/fm1/corrupt-loop-state.json"
+          ],
+          "sha": "0f48dadf",
+          "subject": "test(oxzyr.2.6): real fixture data + round-trip tests for 10 FMs [flywheel-oxzyr.2.6]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            "GOAL.md",
+            "MISSION.md",
+            "README.md",
+            "STATE.md"
+          ],
+          "sha": "b4d28c6b",
+          "subject": "fix(public): depersonalize repo mission surfaces [work item]"
+        }
+      ],
+      "first_date": "2026-04-30",
+      "id": "foundation",
+      "latest_date": "2026-05-13",
+      "owner_value": "The first useful proof is not a polished page. It is a workbench where the goal, current state, checks, and next action can be inspected instead of guessed.",
+      "sales_translation": "For an SMB owner, this means the project starts by mapping how work really moves before anyone promises automation.",
+      "title": "Foundation: make the work visible"
+    },
+    {
+      "commit_count": 797,
+      "evidence_commits": [
+        {
+          "date": "2026-05-06",
+          "paths": [
+            ".claude/commands/flywheel/recovery.md",
+            ".claude/commands/flywheel/reorient.md",
+            ".flywheel/scripts/agentmail-identity-canonical-validator.sh",
+            ".flywheel/scripts/agents-md-fleet-propagator.sh"
+          ],
+          "sha": "ff719390",
+          "subject": "feat(substrate): add validators and gates"
+        },
+        {
+          "date": "2026-05-07",
+          "paths": [
+            ".flywheel/receipts/work item-receipt.md"
+          ],
+          "sha": "ab190836",
+          "subject": "docs(agentmail): diagnose an insurance client orphan metric divergence"
+        },
+        {
+          "date": "2026-05-07",
+          "paths": [
+            ".flywheel/receipts/work item-receipt.md",
+            "tests/agent-mail-identity-registry.sh",
+            "tests/test_agentmail_identity_raw_vs_confirmed_orphans.sh"
+          ],
+          "sha": "ae92aea2",
+          "subject": "test(agentmail): split raw topology drift from confirmed sessions"
+        },
+        {
+          "date": "2026-05-08",
+          "paths": [
+            ".claude/settings.json",
+            ".flywheel/AGENTS-CANONICAL.md",
+            ".flywheel/rules/L001-L48-substrate-exhaustion-before-escalation.md",
+            ".flywheel/rules/L002-L29-ntm-only-doctrine.md"
+          ],
+          "sha": "a42e050e",
+          "subject": "refactor(doctrine): shard canonical agents rules [work item]"
+        },
+        {
+          "date": "2026-05-08",
+          "paths": [
+            ".flywheel/canonical-paths.txt",
+            ".flywheel/scripts/validate-callback.py",
+            ".flywheel/validation-schema/v1/parse.sh",
+            ".flywheel/validation-schema/v1/schema.json"
+          ],
+          "sha": "a6fc677b",
+          "subject": "feat(callback-receipts): land work item ; agent-mail reservation lifecycle"
+        },
+        {
+          "date": "2026-05-09",
+          "paths": [
+            ".beads/issues.jsonl",
+            ".flywheel/dispatch-log.jsonl",
+            ".flywheel/doctrine/agent-ergonomics-application-baseline-2026-05-08.md",
+            ".flywheel/doctrine/dispatch-author-skill-routing-contract.md"
+          ],
+          "sha": "3eaa0147",
+          "subject": "chore(housekeeping): the capability control plane:1-fleet-housekeeping auto-commit 119 append-only/log files"
+        },
+        {
+          "date": "2026-05-09",
+          "paths": [
+            ".flywheel/receipts/work item/audit/baselines.json",
+            ".flywheel/receipts/work item/audit/compliance-pack.json",
+            ".flywheel/receipts/work item/audit/doctor.json",
+            ".flywheel/receipts/work item/audit/evidence.md"
+          ],
+          "sha": "8707722a",
+          "subject": "feat(probe): agentmail-fd-pressure with decision-tree verdict (work item)"
+        },
+        {
+          "date": "2026-05-11",
+          "paths": [
+            ".beads/issues.jsonl",
+            ".flywheel/audit/work item/evidence.md"
+          ],
+          "sha": "d5ddecec",
+          "subject": "docs(gap-triage): agentmail-fd-pressure-probe is on-demand diagnostic, not missing-receiver [work item]"
+        }
+      ],
+      "first_date": "2026-04-30",
+      "id": "proof-loop",
+      "latest_date": "2026-05-13",
+      "owner_value": "The system moved from work being described after the fact to work being closed with receipts, tests, blockers, and replayable checks.",
+      "sales_translation": "That is the difference between an AI demo and an operating process: the claim does not move forward until the proof can follow it.",
+      "title": "Proof loop: turn activity into evidence"
+    },
+    {
+      "commit_count": 202,
+      "evidence_commits": [
+        {
+          "date": "2026-05-13",
+          "paths": [
+            "GOAL.md",
+            "MISSION.md",
+            "README.md",
+            "STATE.md"
+          ],
+          "sha": "b4d28c6b",
+          "subject": "fix(public): depersonalize repo mission surfaces [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            ".flywheel/AGENTS-CANONICAL.md",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/05-INSTALLABILITY-COVERAGE-AUDIT.md",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/09-SUBSTRATE-PREFLIGHT-INVENTORY.md"
+          ],
+          "sha": "6e8b0fb5",
+          "subject": "feat(publication): prepare private review bundle"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".github/workflows/installer-smoke.yml",
+            "docs/evidence/publication-evidence.md",
+            "tests/installer-smoke.sh"
+          ],
+          "sha": "adc8dfe1",
+          "subject": "fix(ci): repair private review checks"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/19-TRUE-PUBLICATION-RELEASE-BLOCKER-REGISTRY.md",
+            ".gitignore",
+            "docs/evidence/publication-blocker-coverage.md"
+          ],
+          "sha": "90365f80",
+          "subject": "chore(site): record private live SMB deploy"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/24-CURRENT-GOAL-COMPLETION-AUDIT.md",
+            ".flywheel/PUBLICATION-COMPLETION-AUDIT.md",
+            "docs/getting-started/first-run.md"
+          ],
+          "sha": "e30e3c25",
+          "subject": "fix(public-export): preserve test fixtures in staged package [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/23-TP-005-017-018-PUBLICATION-READINESS-RECEIPT.md",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/24-CURRENT-GOAL-COMPLETION-AUDIT.md",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/25-RELEASE-CUTOVER-AUTHORIZATION-PACKET.md",
+            ".flywheel/PUBLICATION-COMPLETION-AUDIT.md"
+          ],
+          "sha": "21dfde36",
+          "subject": "docs(readiness): refresh public export evidence [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/23-TP-005-017-018-PUBLICATION-READINESS-RECEIPT.md",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/25-RELEASE-CUTOVER-AUTHORIZATION-PACKET.md",
+            "docs/evidence/publication-evidence.md"
+          ],
+          "sha": "ebc44c95",
+          "subject": "docs(readiness): refresh public export evidence [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/24-CURRENT-GOAL-COMPLETION-AUDIT.md",
+            ".flywheel/PUBLICATION-COMPLETION-AUDIT.md"
+          ],
+          "sha": "1d7e4143",
+          "subject": "docs(readiness): align audit export references [work item]"
+        }
+      ],
+      "first_date": "2026-05-04",
+      "id": "friction",
+      "latest_date": "2026-05-13",
+      "owner_value": "The useful pivots came from red evidence: private residue, unsupported lanes, stale copy, brittle workflows, and claims that needed to be blocked until proven.",
+      "sales_translation": "This is where trust is earned. The process treats blocked evidence as useful signal, not as something to hide in a footnote.",
+      "title": "Friction: expose the parts that were not ready"
+    },
+    {
+      "commit_count": 640,
+      "evidence_commits": [
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/24-CURRENT-GOAL-COMPLETION-AUDIT.md",
+            ".github/workflows/ci.yml",
+            "docs/evidence/publication-evidence.md",
+            "docs/reference/commands.md"
+          ],
+          "sha": "687a64ec",
+          "subject": "test(agent-lanes): add isolated runtime smoke [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            ".flywheel/scripts/true-publication-registry-validate.py",
+            ".github/workflows/ci.yml",
+            ".github/workflows/installer-smoke.yml"
+          ],
+          "sha": "3eba30b9",
+          "subject": "test(ci): add local actions gate and SMB journey reset"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            "docs/reference/commands.md",
+            "docs/runbooks/isolated-agent-lane-testing.md",
+            "docs/runbooks/public-release-runbook.md"
+          ],
+          "sha": "d92f0280",
+          "subject": "feat(agent-lanes): add live adapter smoke mode [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/24-CURRENT-GOAL-COMPLETION-AUDIT.md",
+            ".flywheel/PUBLICATION-COMPLETION-AUDIT.md",
+            "docs/getting-started/first-run.md"
+          ],
+          "sha": "e30e3c25",
+          "subject": "fix(public-export): preserve test fixtures in staged package [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            "docs/evidence/publication-evidence.md",
+            "docs/getting-started/first-run.md",
+            "docs/reference/commands.md"
+          ],
+          "sha": "d26926ac",
+          "subject": "test(agent-lanes): record live adapter evidence [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/24-CURRENT-GOAL-COMPLETION-AUDIT.md",
+            ".flywheel/PUBLICATION-COMPLETION-AUDIT.md",
+            "README.md"
+          ],
+          "sha": "035efb09",
+          "subject": "test(agent-lanes): prove codex and openclaw runtime lanes [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            ".flywheel/AGENTS-CANONICAL.md",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/05-INSTALLABILITY-COVERAGE-AUDIT.md",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/09-SUBSTRATE-PREFLIGHT-INVENTORY.md"
+          ],
+          "sha": "6e8b0fb5",
+          "subject": "feat(publication): prepare private review bundle"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/19-TRUE-PUBLICATION-RELEASE-BLOCKER-REGISTRY.md",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/25-RELEASE-CUTOVER-AUTHORIZATION-PACKET.md",
+            "docs/evidence/publication-blocker-coverage.md"
+          ],
+          "sha": "aeba6971",
+          "subject": "fix(readiness): block stale live site content"
+        }
+      ],
+      "first_date": "2026-04-30",
+      "id": "reuse",
+      "latest_date": "2026-05-13",
+      "owner_value": "Once a pattern worked, it moved into runbooks, scripts, tests, docs, shared language, or reusable operating rules instead of staying trapped in one session.",
+      "sales_translation": "Every project should make the next project safer and faster. That is the compounding part of the Flywheel.",
+      "title": "Reuse: keep lessons that survived contact with reality"
+    },
+    {
+      "commit_count": 124,
+      "evidence_commits": [
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            "docs/runbooks/public-site-smb-journey-wireframe.md",
+            "docs/runbooks/public-user-journey-pack.md",
+            "docs/runbooks/release-cutover-authorization.md"
+          ],
+          "sha": "3923d48f",
+          "subject": "redesign(site): rebuild SMB story system [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            "docs/runbooks/public-site-smb-journey-wireframe.md",
+            "docs/runbooks/public-user-journey-pack.md",
+            "site/about/index.html",
+            "site/contact/index.html"
+          ],
+          "sha": "9406ee11",
+          "subject": "feat(site): extend SMB story system across pages [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            "docs/runbooks/public-site-smb-journey-wireframe.md",
+            "docs/runbooks/public-user-journey-pack.md",
+            "tests/public-docs.sh",
+            "tests/public-user-journey-pack.sh"
+          ],
+          "sha": "b41544ba",
+          "subject": "docs(site): require SMB journey wireframe"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            ".flywheel/scripts/true-publication-registry-validate.py",
+            ".github/workflows/ci.yml",
+            ".github/workflows/installer-smoke.yml"
+          ],
+          "sha": "3eba30b9",
+          "subject": "test(ci): add local actions gate and SMB journey reset"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            "docs/runbooks/public-site-smb-journey-wireframe.md",
+            "site/index.html",
+            "site/styles.css"
+          ],
+          "sha": "def16c98",
+          "subject": "feat(site): rebuild SMB operating-room hero [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            "docs/runbooks/public-site-smb-journey-wireframe.md",
+            "docs/runbooks/public-user-journey-pack.md",
+            "site/about/index.html",
+            "site/contact/index.html"
+          ],
+          "sha": "da3e2db0",
+          "subject": "feat(site): deepen SMB operating-room journey [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            ".beads/issues.jsonl",
+            ".flywheel/PLANS/public-share-readiness-2026-05-12/19-TRUE-PUBLICATION-RELEASE-BLOCKER-REGISTRY.md",
+            ".gitignore",
+            "docs/evidence/publication-blocker-coverage.md"
+          ],
+          "sha": "90365f80",
+          "subject": "chore(site): record private live SMB deploy"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
+            "state/private-live-site-deploy.receipt.json"
+          ],
+          "sha": "53949c34",
+          "subject": "chore(site): refresh private SMB redesign deploy receipt [work item]"
+        }
+      ],
+      "first_date": "2026-05-04",
+      "id": "story",
+      "latest_date": "2026-05-13",
+      "owner_value": "The current arc is making the proof understandable to a non-technical owner: what changed, why it was safe, where it stopped, and which lesson now carries forward.",
+      "sales_translation": "Show the proof, not the dream: one bounded workflow slice, one visible control path, one lesson that compounds into the next build.",
+      "title": "Story: translate the machinery into a buying journey"
+    }
+  ],
+  "commit_span": {
+    "first_commit": {
+      "sha": "aa079a83",
+      "subject": "feat(scripts): add source_repo backfill script for all local beads DBs"
+    },
+    "first_date": "2026-04-30",
+    "latest_commit": {
+      "sha": "b4d28c6b",
+      "subject": "fix(public): depersonalize repo mission surfaces [work item]"
+    },
+    "latest_date": "2026-05-13",
+    "total_commits": 1471
+  },
+  "generated_date": "2026-05-14",
+  "owner_story": {
+    "cta_copy": "Inspect the trajectory",
+    "headline": "Flywheel has a history, not just a homepage.",
+    "plain_language": "The work started with a problem, hit constraints, changed shape, and kept the parts that proved useful. That trajectory is the trust signal.",
+    "proof_posture": "The evidence is the path through the repo, not a detached claim written after the fact."
+  },
+  "positioning_principles": [
+    "show proof, do not sell the dream",
+    "translate technical movement into owner consequences",
+    "name pivots and blockers instead of smoothing them away",
+    "keep evidence available without making the SMB owner decode it",
+    "turn lessons into reusable method, copy, design, tests, or runbooks"
+  ],
+  "public_claim": "The public story is extracted from repository history, then translated into owner-readable trajectory without treating commit volume as the sales pitch.",
+  "repo_label": "Flywheel",
+  "schema_version": "zeststream.repo_git_story.v0",
+  "source": "git log --reverse --date=short --pretty=format:... --name-only HEAD"
+}

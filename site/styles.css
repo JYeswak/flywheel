@@ -281,6 +281,12 @@
   background: linear-gradient(135deg, var(--zs-paper-warm), #fff8df);
 }
 
+.section-theater.trajectory-room {
+  background:
+    linear-gradient(180deg, rgba(21, 24, 22, 0.04), rgba(21, 24, 22, 0)),
+    var(--zs-cream);
+}
+
 .room-header {
   display: grid;
   grid-template-columns: minmax(0, 0.82fr) minmax(320px, 1.18fr);
@@ -431,6 +437,124 @@
 
 .yuzu-cutline p {
   color: rgba(255, 253, 247, 0.72);
+}
+
+.trajectory-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  border: 1px solid var(--zs-line-strong);
+  background: var(--zs-night);
+  color: var(--zs-cream);
+  overflow: hidden;
+}
+
+.trajectory-stage::before {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 82px;
+  height: 10px;
+  content: "";
+  background: linear-gradient(90deg, var(--zs-lime), var(--zs-yuzu), var(--zs-teal), var(--zs-leaf));
+  transform: skewX(-18deg);
+}
+
+.trajectory-stage article {
+  position: relative;
+  min-height: 320px;
+  padding: 126px 24px 26px;
+  border-right: 1px solid rgba(255, 253, 247, 0.14);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.04), rgba(255, 253, 247, 0)),
+    rgba(255, 253, 247, 0.02);
+}
+
+.trajectory-stage article:last-child {
+  border-right: 0;
+}
+
+.trajectory-stage article::before {
+  position: absolute;
+  left: 24px;
+  top: 69px;
+  z-index: 1;
+  width: 34px;
+  height: 34px;
+  content: "";
+  border: 6px solid var(--zs-night);
+  border-radius: 50%;
+  background: var(--zs-lime);
+  box-shadow: 0 0 0 1px rgba(255, 253, 247, 0.32);
+}
+
+.trajectory-stage article.friction::before {
+  background: var(--zs-tomato);
+}
+
+.trajectory-stage article.friction {
+  background:
+    linear-gradient(180deg, rgba(222, 91, 73, 0.22), rgba(255, 253, 247, 0.02)),
+    rgba(255, 253, 247, 0.02);
+}
+
+.trajectory-stage span,
+.lesson-ledger span {
+  color: var(--zs-yuzu);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.trajectory-stage strong,
+.lesson-ledger strong {
+  display: block;
+  margin-top: 16px;
+  color: var(--zs-cream);
+  font-size: 25px;
+  line-height: 1.08;
+}
+
+.trajectory-stage p {
+  color: rgba(255, 253, 247, 0.72);
+}
+
+.lesson-ledger {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0;
+  align-items: stretch;
+  border: 1px solid var(--zs-line);
+  border-top: 0;
+  background: var(--zs-paper);
+}
+
+.lesson-ledger div,
+.lesson-ledger .button {
+  min-height: 106px;
+  border-right: 1px solid var(--zs-line);
+}
+
+.lesson-ledger div {
+  padding: 20px 24px;
+}
+
+.lesson-ledger div:last-of-type {
+  border-right: 0;
+}
+
+.lesson-ledger strong {
+  color: var(--zs-ink);
+  font-size: 19px;
+}
+
+.lesson-ledger .button {
+  width: 100%;
+  min-width: 230px;
+  height: 100%;
+  border-radius: 0;
 }
 
 .trust-console {
@@ -641,6 +765,8 @@
   .manual-flow,
   .trust-console,
   .yuzu-cutline,
+  .trajectory-stage,
+  .lesson-ledger,
   .dual-proof-path {
     grid-template-columns: 1fr;
   }
@@ -654,6 +780,40 @@
     min-height: 250px;
     border-right: 0;
     border-bottom: 1px solid rgba(255, 253, 247, 0.16);
+  }
+
+  .trajectory-stage::before {
+    left: 40px;
+    top: 52px;
+    bottom: 52px;
+    right: auto;
+    width: 10px;
+    height: auto;
+    transform: skewY(-18deg);
+  }
+
+  .trajectory-stage article {
+    min-height: 220px;
+    padding: 34px 24px 28px 88px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 253, 247, 0.14);
+  }
+
+  .trajectory-stage article::before {
+    left: 25px;
+    top: 34px;
+  }
+
+  .lesson-ledger div,
+  .lesson-ledger .button {
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--zs-line);
+  }
+
+  .lesson-ledger .button {
+    min-width: 0;
+    min-height: 62px;
   }
 }
 

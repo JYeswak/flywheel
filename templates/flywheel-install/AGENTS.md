@@ -44,7 +44,7 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 6 | L52 — ISSUES-TO-BEADS-OR-EXPLICIT-NO-BEAD-RECEIPT (no observed gap is absorbed silently) | long_term | `.flywheel/rules/L006-L52-issues-to-beads-or-explicit-no-bead-receipt-no-observed-gap-is-absorbe.md` |
 | 7 | L53 — FUCKUPS-REPORTED-IN-CALLBACK (every blocker / trauma / gap surfaces as a fuckup-log row) | long_term | `.flywheel/rules/L007-L53-fuckups-reported-in-callback-every-blocker-trauma-gap-surfaces-as-a-fu.md` |
 | 8 | L54 — SKILL-DEEP-DIVE-ON-BLOCKERS (workers climb the skill tree before declaring a wall) | long_term | `.flywheel/rules/L008-L54-skill-deep-dive-on-blockers-workers-climb-the-skill-tree-before-declar.md` |
-| 9 | L55 — CAPABILITY-CONTROL-PLANE-ESCALATION-FOR-MISSING-SKILLS (when no skill exists for a trauma class, route to capability-control-plane) | long_term | `.flywheel/rules/L009-L55-capability-control-plane-escalation-for-missing-skills-when-no-skill-exists-for-a-traum.md` |
+| 9 | L55 — CAPABILITY-CONTROL-PLANE-ESCALATION-FOR-MISSING-SKILLS (when no skill exists for a trauma class) | long_term | `.flywheel/rules/L009-L55-capability-control-plane-escalation-for-missing-skills-when-no-skill-exists-fo.md` |
 | 10 | L56 — FUCKUP-LOG → INCIDENTS → CANONICAL-L-RULE PROMOTION LADDER | long_term | `.flywheel/rules/L010-L56-fuckup-log-incidents-canonical-l-rule-promotion-ladder.md` |
 | 11 | L57 — LOOP-STATE-MARKER-NOT-DRIVER | long_term | `.flywheel/rules/L011-L57-loop-state-marker-not-driver.md` |
 | 12 | L58 — SECRET-MATERIAL-NEVER-IN-PANE-TEXT | long_term | `.flywheel/rules/L012-L58-secret-material-never-in-pane-text.md` |

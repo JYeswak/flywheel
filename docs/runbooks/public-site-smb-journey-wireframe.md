@@ -134,6 +134,7 @@ page-specific styling.
 | `ProofRail` | Keep evidence close without making it the headline. | Each claim has a proof state: proven, blocked, skipped-with-reason, or private. |
 | `TrustWorryMatrix` | Respect owner objections. | Maps each owner worry to the visible control that answers it. |
 | `YuzuMethodRail` | Make the named method memorable. | Uses `Peel. Press. Pour.™` as the visual rhythm: map, prove, reuse. |
+| `TrajectoryRail` | Turn git history into a buyer-readable trust story. | Shows origin, friction, proof loop, reusable lessons, and current public arc without making commit counts the pitch. |
 | `TechnicalDrawer` | Give reviewers a path without hijacking the SMB story. | Opens proof, commands, receipts, and support tiers only after the owner story lands. |
 | `OperatorSignature` | Make Joshua accountable. | First-person singular, public email, no faceless corporate "we." |
 | `RoomSystem` | Make every route feel connected. | Each public page is a room in the same operating system, not a standalone landing page. |
@@ -155,7 +156,7 @@ Recommended Next.js target:
 
 ## Core Story
 
-The page should move through seven scenes.
+The page should move through eight scenes.
 
 ### Scene 1: Operating Room
 
@@ -284,7 +285,38 @@ Visual:
 - controlled loop with gates: map, build, test, review, reuse;
 - unproven claims visibly blocked instead of hidden.
 
-### Scene 6: Two Proof Paths
+### Scene 6: The Work Has A Memory
+
+Goal: prove that the story is not invented from one build session.
+
+Owner question: "Is this a real operating method, or did someone write a nice
+page after the fact?"
+
+Visible wording:
+
+> "Flywheel has a history, not just a homepage."
+
+Visual:
+
+- trajectory rail from foundation to friction to proof loop to reusable lessons;
+- one visible red friction band so blocked evidence feels like a control, not a
+  defect;
+- lesson ledger showing scripts, tests, runbooks, and visual primitives as the
+  things that compound;
+- proof drawer link to `docs/stories/flywheel-trajectory.md`.
+
+Primary CTA:
+
+- `Inspect the trajectory`
+
+Forbidden:
+
+- leading with raw commit counts;
+- pretending the generated story is final signoff;
+- listing technical commit subjects as SMB persuasion;
+- rewriting the trajectory by memory when the repo can extract it from git.
+
+### Scene 7: Two Proof Paths
 
 Goal: avoid forcing SMB owners into developer evidence while keeping reviewers
 fully served.
@@ -309,7 +341,7 @@ Visual:
 - one proof rail with owner labels on top and technical receipts beneath;
 - drawers, accordions, or route links for deeper review.
 
-### Scene 7: Hire Joshua For The Map
+### Scene 8: Hire Joshua For The Map
 
 Goal: turn trust into a safe next action.
 

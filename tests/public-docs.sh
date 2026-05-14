@@ -99,11 +99,13 @@ for rel in \
   docs/evidence/publication-evidence.md \
   docs/evidence/publication-blocker-coverage.md \
   docs/evidence/publication-goal-completion-audit.md \
+  docs/evidence/flywheel-trajectory.json \
   docs/evidence/asupersync-gated-adoption.md \
   docs/evidence/asupersync-poc-receipt.template.json \
   docs/evidence/asupersync-poc-receipt.local.json \
   docs/evidence/external-review-log.jsonl \
   docs/runbooks/release-cutover-authorization.md \
+  docs/runbooks/repo-trajectory-story-pack.md \
   docs/runbooks/public-user-journey-pack.md \
   docs/runbooks/public-site-smb-journey-wireframe.md \
   docs/runbooks/local-actions-preflight.md \
@@ -112,7 +114,8 @@ for rel in \
   docs/runbooks/agent-lane-compatibility.md \
   docs/reference/commands.md \
   docs/reference/files.md \
-  docs/reference/troubleshooting.md; do
+  docs/reference/troubleshooting.md \
+  docs/stories/flywheel-trajectory.md; do
   require_file "$rel"
 done
 
@@ -130,6 +133,9 @@ require_literal "docs/evidence/publication-evidence.md" "non-draft, non-prerelea
 require_literal "docs/evidence/publication-evidence.md" "sha256:" "publication evidence requires release asset digests"
 require_literal "docs/evidence/publication-evidence.md" "docs/evidence/publication-blocker-coverage.md" "publication evidence links blocker coverage"
 require_literal "docs/evidence/publication-evidence.md" "docs/evidence/publication-goal-completion-audit.md" "publication evidence links goal completion audit"
+require_literal "docs/evidence/publication-evidence.md" "docs/stories/flywheel-trajectory.md" "publication evidence links generated trajectory"
+require_literal "docs/evidence/flywheel-trajectory.json" "zeststream.repo_git_story.v0" "trajectory evidence names schema"
+require_literal "docs/evidence/flywheel-trajectory.json" "show proof, do not sell the dream" "trajectory evidence names copy rule"
 require_literal "docs/evidence/publication-blocker-coverage.md" "readiness_blocker_coverage" "blocker coverage names registry contract"
 require_literal "docs/evidence/publication-blocker-coverage.md" "joshua_release_signoff_missing" "blocker coverage includes final signoff blocker"
 require_literal "docs/evidence/publication-goal-completion-audit.md" "Prompt-To-Artifact Checklist" "goal completion audit maps prompt to artifacts"
@@ -186,9 +192,16 @@ require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Recommende
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Server Components" "SMB wireframe maps progressive proof to Next.js"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "If a claim is not proven, it stays blocked." "SMB wireframe names blocked claim stance"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "The Yuzu Method ®" "SMB wireframe defines Yuzu Method"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "TrajectoryRail" "SMB wireframe names trajectory rail"
+require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Flywheel has a history, not just a homepage." "SMB wireframe names git-derived story scene"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Map my workflow" "SMB wireframe names primary CTA"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Implementation should not be accepted if tests pass while the page still feels" "SMB wireframe prevents generic-page acceptance"
 require_literal "docs/runbooks/public-site-smb-journey-wireframe.md" "Implementation should not be accepted if the page can pass tests while still failing this journey." "SMB wireframe prevents tests-only acceptance"
+require_literal "docs/runbooks/repo-trajectory-story-pack.md" "zeststream.repo_git_story_pack.v0" "repo trajectory pack names schema"
+require_literal "docs/runbooks/repo-trajectory-story-pack.md" "Show the proof, do not sell the dream." "repo trajectory pack names editorial rule"
+require_literal "docs/runbooks/repo-trajectory-story-pack.md" "For another repo" "repo trajectory pack is reusable"
+require_literal "docs/stories/flywheel-trajectory.md" "Flywheel has a history, not just a homepage." "generated trajectory names owner headline"
+require_literal "docs/stories/flywheel-trajectory.md" "show the proof, do not sell the dream" "generated trajectory names proof-not-dream rule"
 require_literal "docs/runbooks/local-actions-preflight.md" "GitHub Actions as the final hosted-runner approval surface" "local actions runbook preserves GitHub final approval boundary"
 require_literal "docs/runbooks/local-actions-preflight.md" "brew install act actionlint" "local actions runbook names global open-source tools"
 require_literal "docs/runbooks/local-actions-preflight.md" "docker context use orbstack" "local actions runbook uses OrbStack"

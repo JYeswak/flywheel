@@ -86,11 +86,11 @@
     {
       "id": "L55",
       "order": 9,
-      "path": ".flywheel/rules/L009-L55-skillos-escalation-for-missing-skills-when-no-skill-exists-for-a-traum.md",
-      "sha256": "57edc54da5a1b2e27170f3ecacef3be10132296c1150cfbebba4db9f1b85537a",
+      "path": ".flywheel/rules/L009-L55-capability-control-plane-escalation-for-missing-skills-when-no-skill-exists-fo.md",
+      "sha256": "bb993501680453c23e301897ef426b7d050a52e9efaaf67662e763278f9538e7",
       "shipped": "2026-04-30",
       "status": "long_term",
-      "title": "SKILLOS-ESCALATION-FOR-MISSING-SKILLS (when no skill exists for a trauma class, route to skillos)",
+      "title": "CAPABILITY-CONTROL-PLANE-ESCALATION-FOR-MISSING-SKILLS (when no skill exists for a trauma class)",
       "trauma_class": "skill-arsenal-gap"
     },
     {

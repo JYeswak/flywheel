@@ -111,6 +111,51 @@
         </div>
       </section>
 
+      <section class="section-theater trajectory-room" aria-labelledby="trajectory-title">
+        <div class="shell">
+          <div class="room-header">
+            <div>
+              <p class="kicker">Git history, translated</p>
+              <h2 id="trajectory-title">Flywheel has a history, not just a homepage.</h2>
+            </div>
+            <p>The public story should not depend on what an agent remembers from today's session. Flywheel now extracts the arc from git history, then turns it into owner-readable proof: where the work started, where it met friction, what became safer, and which lessons carry forward.</p>
+          </div>
+          <div class="trajectory-stage" aria-label="Flywheel trajectory rail">
+            <article>
+              <span>Foundation</span>
+              <strong>Make the work visible.</strong>
+              <p>Before automation, the system exposes goals, state, checks, and the next action.</p>
+            </article>
+            <article class="friction">
+              <span>Friction</span>
+              <strong>Keep red evidence visible.</strong>
+              <p>Private residue, stale copy, and unproven support claims become blockers instead of sales language.</p>
+            </article>
+            <article>
+              <span>Proof loop</span>
+              <strong>Close work with receipts.</strong>
+              <p>Tests, smoke runs, local gates, and reviewer paths decide what can be claimed.</p>
+            </article>
+            <article>
+              <span>Reuse</span>
+              <strong>Lock in the lesson.</strong>
+              <p>What survives becomes runbooks, scripts, visual primitives, or shared story grammar for the next build.</p>
+            </article>
+          </div>
+          <div class="lesson-ledger">
+            <div>
+              <span>Generated artifact</span>
+              <strong>docs/stories/flywheel-trajectory.md</strong>
+            </div>
+            <div>
+              <span>Reusable pack</span>
+              <strong>Repo Trajectory Story Pack</strong>
+            </div>
+            <a class="button secondary" href="https://github.com/JYeswak/flywheel/blob/main/docs/stories/flywheel-trajectory.md">Inspect the trajectory</a>
+          </div>
+        </div>
+      </section>
+
       <section class="section-theater dark" id="proof-path" aria-labelledby="trust-title">
         <div class="shell">
           <div class="room-header">
@@ -167,7 +212,7 @@
           <div>
             <p class="kicker">For reviewers</p>
             <h2 id="technical-title">The proof gets deeper on demand.</h2>
-            <p>The public path starts with reduced local mode. Agent-specific lanes stay compatibility targets until the matching isolated runtime proof exists.</p>
+            <p>The public path starts with reduced local mode. Claude Code, Codex CLI, Gemini CLI, and OpenClaw now have isolated runtime receipts, so the site copy follows proof instead of stale compatibility placeholders.</p>
           </div>
           <pre><code>git clone https://github.com/JYeswak/flywheel.git
 cd flywheel
