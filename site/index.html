@@ -24,6 +24,19 @@
           <a href="./contact/index.html">Contact</a>
         </div>
       </nav>
+      <!-- TelemetryBar — static port of @zeststream/ui TelemetryBar.
+           Canonical React source: packages/zeststream-ui/src/components/TelemetryBar.tsx
+           Jeff Emanuel design pattern C5: fake-but-coherent system status as
+           navigational texture (frankentui.com, asupersync.com). -->
+      <div class="shell zs-telemetry" role="status" aria-label="System status">
+        <span><span class="zs-tel-key">Method</span><span class="zs-tel-val success">THE YUZU METHOD ®</span></span>
+        <span class="zs-tel-sep" aria-hidden="true">·</span>
+        <span><span class="zs-tel-key">Proof_states</span><span class="zs-tel-val neutral">proven / blocked / scoped / private</span></span>
+        <span class="zs-tel-sep" aria-hidden="true">·</span>
+        <span><span class="zs-tel-key">Scope</span><span class="zs-tel-val success">ONE BOUNDED SLICE</span></span>
+        <span class="zs-tel-sep" aria-hidden="true">·</span>
+        <span><span class="zs-tel-key">Control</span><span class="zs-tel-val warning">HUMAN-APPROVED</span></span>
+      </div>
     </header>
     <main>
       <section class="experience-hero" aria-labelledby="hero-title">

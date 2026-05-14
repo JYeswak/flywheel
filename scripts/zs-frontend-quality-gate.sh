@@ -19,7 +19,7 @@
 #   FQ-01 Font loading: next/font/google (not system fallback)
 #   FQ-02 Design tokens: tokens.ts exists and @theme inline mirrors it
 #   FQ-03 Token purity: no raw hex/rgb outside tokens.ts
-#   FQ-04 Motion: @zeststream/motion-tokens wired to at least one component
+#   FQ-04 Motion: @zeststream/motion tokens wired to at least one component
 #   FQ-05 Brand voice: copy.ts exists, no raw inline strings in components
 #   FQ-06 Motion safety: prefers-reduced-motion respected
 #   FQ-07 Accessibility: aria-label on interactive elements
@@ -154,10 +154,14 @@ if [[ -n "$NEXT_APP" ]]; then
 fi
 
 # ── FQ-04 Motion tokens wired ─────────────────────────────────────────────
+# Recognizes @zeststream/motion imports, motion-tokens, AND the generic
+# per-repo motion-class convention (<prefix>-spring / <prefix>-pulse /
+# <prefix>-pin-spring etc.). Updated 2026-05-14 so CFS's cfs-spring and any
+# future repo's <prefix>-spring convention is detected, not just mobile-eats me-*.
 motion_usage=0
 if [[ -n "$NEXT_APP" ]]; then
   motion_usage=$(num "$(count_matches "$NEXT_APP" \
-    "motion-tokens|me-live-pulse|me-pin-spring|springPresets|pulseSpec|sheetSnap|filterChip" \
+    "@zeststream/motion|motion-tokens|springPresets|pulseSpec|sheetSnap|filterChip|[a-z]+-(spring|pulse|live-pulse|pin-spring|chip-spring|sheet-spring)" \
     -name "*.tsx" -o -name "*.css")")
 fi
 if [[ "$motion_usage" -gt 0 ]]; then
@@ -165,7 +169,7 @@ if [[ "$motion_usage" -gt 0 ]]; then
 elif [[ -z "$NEXT_APP" ]]; then
   check "FQ-04" "Motion tokens wired to components" "warn" "No Next.js app directory found at $REPO"
 else
-  check "FQ-04" "Motion tokens wired to components" "fail" "No motion token usage - @zeststream/motion-tokens exists but is unwired"
+  check "FQ-04" "Motion tokens wired to components" "fail" "No motion token usage - @zeststream/motion exists but is unwired"
 fi
 
 # ── FQ-05 Brand voice (copy.ts single source) ─────────────────────────────
