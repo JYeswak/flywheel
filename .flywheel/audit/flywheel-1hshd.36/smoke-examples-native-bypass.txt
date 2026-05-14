@@ -1,4 +1,0 @@
-examples:
-  .flywheel/scripts/hub-blocker-detect.sh --json
-  .flywheel/scripts/hub-blocker-detect.sh --threshold 3 --apply --idempotency-key=hourly-$(date -u +%Y%m%d-%H) --json
-  HUB_BLOCKER_THRESHOLD=5 .flywheel/scripts/hub-blocker-detect.sh doctor --json

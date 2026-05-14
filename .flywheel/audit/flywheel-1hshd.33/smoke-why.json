@@ -1,1 +1,0 @@
-{"schema_version":"fuckup-coverage-join/v1","command":"why","ts":"2026-05-11T05:56:39Z","id":"some-id","status":"unavailable","reason":"audit_log_missing","audit_log":"/Users/josh/.local/state/flywheel/fuckup-coverage-join-runs.jsonl"}

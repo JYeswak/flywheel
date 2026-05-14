@@ -1,2 +1,0 @@
-# STUB pass-1 - chevron visible but SUBMITS-WORK signal present in last 5min - false-positive recovery candidate
-# pass-2: real fixture data here

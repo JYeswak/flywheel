@@ -1,1 +1,0 @@
-{"schema_version":"gap-hunt-probe/v1","command":"quickstart","steps":[{"step":1,"action":"probe substrate","command":"gap-hunt-probe.sh doctor --json"},{"step":2,"action":"dry-run discovery","command":"gap-hunt-probe.sh --dry-run --json"},{"step":3,"action":"apply discovery + auto-bead-cap=1","command":"GAP_HUNT_AUTO_BEAD_CAP=1 gap-hunt-probe.sh --json"}]}

@@ -1,1 +1,0 @@
-{"schema_version":"fuckup-coverage-join/v1","command":"validate","subject":"join-layer","ts":"2026-05-11T05:56:39Z","status":"ok","value":"memory","source":"native --schema .joins[] (5 layers)"}

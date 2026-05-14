@@ -1,1 +1,0 @@
-14a788f4d36efef5247664c083f4db9e0e5410fe307a2eb022d2b23a6548c015  tests/b3h2p-daily-report-doctor-signal-resolved.sh

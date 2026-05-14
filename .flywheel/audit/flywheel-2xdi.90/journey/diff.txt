@@ -1,4 +1,0 @@
-before: 20 probe-without-receiver gaps total (probe was flagged)
-after: 19 probe-without-receiver gaps total (operator-fatigue-probe.sh cleared)
-new receiver: tests/operator-fatigue-probe-canonical-cli.sh (9/9 PASS)
-

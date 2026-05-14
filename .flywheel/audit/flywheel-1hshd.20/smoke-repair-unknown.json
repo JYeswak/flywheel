@@ -1,2 +1,0 @@
-{"schema_version":"cost-telemetry-token-burn-probe/v1","command":"repair","status":"refused","scope":"nope","reason":"unknown_scope","valid_scopes":["ledger_dir","audit_log_dir"]}
-rc=64

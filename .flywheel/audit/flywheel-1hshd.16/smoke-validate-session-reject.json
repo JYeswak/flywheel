@@ -1,2 +1,0 @@
-{"schema_version":"codex-queued-not-submitted-bare-enter-primitive/v1","command":"validate","subject":"session-name","ts":"2026-05-11T04:25:03Z","status":"reject","value":"Flywheel","reason":"pattern_mismatch","pattern":"^[a-z][a-z0-9_-]*$"}
-rc=1

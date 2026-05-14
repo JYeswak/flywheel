@@ -1,1 +1,0 @@
-{"schema_version":"jeff-daily-diff/v1","command":"schema","surface":"validate","subjects":["repo-name","state-path","audit-row"],"contract":{"rejects_with_rc1":"on schema violation","repo_name_pattern":"^[A-Za-z0-9_.-]+$","state_path_extensions":[".json",".jsonl"]}}

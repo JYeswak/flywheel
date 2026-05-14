@@ -1,1 +1,0 @@
-{"schema_version":"br-authority-probe/v1","command":"audit","status":"pass","row_count":1,"recent":[{"ts":"2026-05-10T18:07:20Z","action":"repair","status":"applied","sha256":"337ccb304d0ad561bfe768fa874636055ccec1b4dc6ad91ddb34b3578f9fe8f8","scope":"audit_log_dir","idempotency_key":"eqcsa-evidence"}]}

@@ -1,1 +1,0 @@
-{"schema_version":"file-length-probe/v1","command":"repair","status":"report","ts":"2026-05-11T05:42:47Z","mode":"dry_run","scope":"repo_path","idempotency_key":"","target":"/Users/josh/Developer/flywheel","existed":true,"readable":true,"note":"REPORT-ONLY — file-length-probe is a read-only scanner; the repo path is reported, not modified"}

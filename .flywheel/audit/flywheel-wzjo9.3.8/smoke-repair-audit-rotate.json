@@ -1,1 +1,0 @@
-{"schema_version":"tick-skill-version-check/v1","command":"repair","status":"warn","mode":"dry_run","scope":"audit-log-rotate","reason":"audit ledger absent — nothing to rotate","log_path":"/Users/josh/.local/state/flywheel/tick-skill-version-check-runs.jsonl"}

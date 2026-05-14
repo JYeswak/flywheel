@@ -1,4 +1,0 @@
-{"ts":"2026-05-10T16:33:15Z","action":"probe","status":"fail","sha256":"351b72dcb21706008c2986d26e87ca59e0c1c90a83d4ae6212a8238bdebdbf90","dispatch_path":"/tmp/dispatch_flywheel-tfgt3-1632a2.md","verdict":"fail","violation_count":6}
-{"ts":"2026-05-10T16:33:42Z","action":"probe","status":"fail","sha256":"5353a5e83439655cca2eda3250373f189aa7957bb255bec5964d9f5b1af03180","dispatch_path":"/tmp/dispatch_flywheel-tfgt3-1632a2.md","verdict":"fail","violation_count":6}
-{"ts":"2026-05-10T16:33:43Z","action":"probe","status":"fail","sha256":"5353a5e83439655cca2eda3250373f189aa7957bb255bec5964d9f5b1af03180","dispatch_path":"/tmp/dispatch_flywheel-tfgt3-1632a2.md","verdict":"fail","violation_count":6}
-{"ts":"2026-05-10T16:34:30Z","action":"probe","status":"fail","sha256":"96dc3053c68e0d8dbb448d285933454a87d0fa7f7dbbb814a9cc7ba309bfe038","dispatch_path":"/tmp/dispatch_flywheel-tfgt3-1632a2.md","verdict":"fail","violation_count":6}

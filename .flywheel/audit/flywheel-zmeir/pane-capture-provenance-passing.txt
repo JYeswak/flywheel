@@ -1,1 +1,0 @@
-PASS pane-capture-provenance fixtures=4 repo=/Users/josh/Developer/flywheel

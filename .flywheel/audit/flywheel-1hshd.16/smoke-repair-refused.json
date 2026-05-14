@@ -1,2 +1,0 @@
-{"schema_version":"codex-queued-not-submitted-bare-enter-primitive/v1","command":"repair","status":"refused","mode":"apply","scope":"audit_log_dir","reason":"--apply requires --idempotency-key"}
-rc=3

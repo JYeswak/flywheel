@@ -1,1 +1,0 @@
-{"schema_version":"docs-validation-probe/v1","command":"validate","subject":"validation-status","ts":"2026-05-11T05:25:36Z","status":"ok","value":"validated","source":"native --schema .metadata_fields[0] (docs_validation_status)"}

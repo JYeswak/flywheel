@@ -1,1 +1,0 @@
-{"schema_version":"flywheel-anchor/v1","command":"health","ts":"2026-05-10T21:33:08Z","status":"warn","reason":"audit ledger absent (no historical runs yet)","audit_log":"/Users/josh/.local/state/flywheel/flywheel-anchor-runs.jsonl","recent_runs":0}

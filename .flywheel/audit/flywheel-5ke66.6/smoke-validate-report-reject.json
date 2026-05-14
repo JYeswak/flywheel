@@ -1,2 +1,0 @@
-{"schema_version":"daily-report/v1","command":"validate","subject":"report-path","ts":"2026-05-11T01:09:49Z","status":"reject","value":"/some/daily.txt","reason":"unsupported_extension","valid_extensions":[".md",".json"]}
-rc=1

@@ -1,2 +1,0 @@
-{"schema_version":"test-fuckup-join/v1","command":"repair","status":"refused","mode":"apply","scope":"scratch_dir","reason":"--apply requires --idempotency-key"}
-rc=3

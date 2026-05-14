@@ -1,1 +1,0 @@
-{"schema_version":"scratch-cleanup/v1","name":"flywheel-cleanup-scratch","script":"/Users/josh/Developer/flywheel/.flywheel/scripts/cleanup-scratch.sh","default_mode":"dry-run","apply_requires_valid_scratch_path":true}

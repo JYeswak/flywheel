@@ -1,1 +1,0 @@
-{"schema_version":"jeff-issue-response-poll/v1","command":"schema","surface":"validate","subjects":["jeff-issue-ref","registry-row","audit-row"],"contract":{"rejects_with_rc1":"on schema violation","jeff_issue_ref_pattern":"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+#[0-9]+$","registry_row_required_fields":["repo","number"]}}

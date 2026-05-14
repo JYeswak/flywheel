@@ -1,1 +1,0 @@
-{"command":"schema","schema_version":"flywheel-readme/v1","stable_exit_codes":{"0":"success","1":"general","2":"warn","3":"refused (mutation without idempotency-key)","64":"bad args"},"surface":"default","surfaces":["doctor","health","repair","validate","audit","why"]}

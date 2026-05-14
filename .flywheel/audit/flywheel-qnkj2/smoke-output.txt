@@ -1,8 +1,0 @@
-PASS doctrine-ladder-promote.sh exists + bash -n ok
-PASS default_incident_paths includes $REPO/INCIDENTS.md (post-fix) and $REPO/AGENTS.md
-PASS script exited rc=0 under synthetic fuckup-log
-PASS covered class skipped with reason=incidents_covered
-PASS uncovered class created (heuristic still active)
-PASS live default-path run completed
-PASS agent-mail-reservation-timeout is now skipped via repo-local INCIDENTS.md (canonical regression gate)
-SUMMARY pass=7 fail=0

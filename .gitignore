@@ -32,6 +32,11 @@
 /.flywheel/*.md.preview.*
 /.flywheel/.reconcile-*.diff
 /.flywheel/extraction/
+# Audit output — per-bead audit JSON is regenerable skill output, never commit.
+# Retention policy + the rule that output dirs are gitignored at creation:
+# .flywheel/doctrine/repo-hygiene-operational-protocol.md
+/.flywheel/audit/
+!/.flywheel/audit/README.md
 /.flywheel/scripts/*.bak.*
 /.flywheel/validation-schema/v1/*.bak.*
 /.flywheel/PLANS/**/*.bak.*

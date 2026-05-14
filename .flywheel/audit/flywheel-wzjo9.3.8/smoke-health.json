@@ -1,1 +1,0 @@
-{"schema_version":"tick-skill-version-check/v1","command":"health","ts":"2026-05-10T22:17:09Z","status":"warn","reason":"audit ledger absent (no historical runs yet)","audit_log":"/Users/josh/.local/state/flywheel/tick-skill-version-check-runs.jsonl","recent_runs":0}

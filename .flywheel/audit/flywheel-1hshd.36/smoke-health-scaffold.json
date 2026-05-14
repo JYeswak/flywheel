@@ -1,1 +1,0 @@
-{"schema_version":"hub-blocker-detect/v1","command":"health","ts":"2026-05-11T06:06:29Z","status":"ok","last_run_ts":null,"audit_log":"/Users/josh/.local/state/flywheel/hub-blocker-detect-runs.jsonl","binds_audit_log":true,"note":"distinct from native doctor verb"}

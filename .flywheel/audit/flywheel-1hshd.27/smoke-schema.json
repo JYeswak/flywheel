@@ -1,1 +1,0 @@
-{"schema_version":"fleet-coherence-launchd/v1","command":"schema","surfaces":["doctor","health","repair","validate","audit","why"],"variant":"SELECTIVE-VERB-BYPASS","bypassed_natively":["validate plist","install","load","unload","status","run"],"note":"per-surface schema available via --schema <surface>"}

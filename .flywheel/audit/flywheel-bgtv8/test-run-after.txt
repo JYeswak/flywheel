@@ -1,4 +1,0 @@
-PASS passing_probe_allows_close_and_logs_gate_pass
-PASS failing_probe_blocks_close_and_logs_fix_bead
-PASS legacy_callback_warns_and_allows_close
-SUMMARY pass=3 fail=0

@@ -1,1 +1,0 @@
-{"schema_version":"jeff-philosophy-mine/v1","command":"schema","surface":"validate","subjects":["repo-name","pattern-jsonl-path","audit-row"],"contract":{"rejects_with_rc1":"on schema violation","repo_name_pattern":"^[A-Za-z0-9_.-]+$","pattern_jsonl_extensions":[".jsonl"]}}

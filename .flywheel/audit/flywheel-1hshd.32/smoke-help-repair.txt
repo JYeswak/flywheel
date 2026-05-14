@@ -1,1 +1,0 @@
-topic: repair --scope <audit_log_dir|ntm_state_dir> [--dry-run|--apply --idempotency-key KEY] — apply needs key (rc=3). Unknown = rc=64.

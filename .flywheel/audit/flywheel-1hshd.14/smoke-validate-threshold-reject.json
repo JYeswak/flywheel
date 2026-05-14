@@ -1,2 +1,0 @@
-{"schema_version":"codex-budget-probe/v1","command":"validate","subject":"threshold-pct","ts":"2026-05-11T04:16:04Z","status":"reject","value":"150","reason":"out_of_range_or_not_integer","valid_range":"[0, 100]","default":10}
-rc=1

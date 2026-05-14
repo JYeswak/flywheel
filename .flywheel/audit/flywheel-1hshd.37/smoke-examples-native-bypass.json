@@ -1,1 +1,0 @@
-{"schema_version":"idempotency-replay-guard.examples/v1","examples":["idempotency-replay-guard.sh --input-file /tmp/dispatch.md --json","printf %s payload | idempotency-replay-guard.sh --json","idempotency-replay-guard.sh --mark-completed --receipt-ref .beads/issues.jsonl#L1 --input payload --json","idempotency-replay-guard.sh --release-lock --input payload --json"]}

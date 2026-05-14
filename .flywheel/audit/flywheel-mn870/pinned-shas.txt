@@ -1,1 +1,0 @@
-1fccd3be85e2381735ff5c9b3189971d8cd0aeefda8884abec332dd5c7dfef1c  tests/autoloop-executor-known-silos-registry.sh

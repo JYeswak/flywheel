@@ -1,1 +1,0 @@
-{"schema_version":"docs-validation-probe/v1","command":"validate","subject":"doc-path","ts":"2026-05-11T05:25:36Z","status":"reject","value":"/nonexistent","reason":"file_not_readable"}

@@ -1,7 +1,0 @@
-{
-  "pane": "flywheel:0.3",
-  "error_state": "stale",
-  "error_age_sec": 900,
-  "preflight_blocked": false,
-  "_TODO": "pass-2: stale error should block preflight per L87 stale-error-auto-ping"
-}

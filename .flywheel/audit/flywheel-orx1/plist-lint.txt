@@ -1,4 +1,0 @@
-ai.zeststream.mobile-eats-flywheel-loop.plist -> /Users/josh/Library/LaunchAgents/ai.zeststream.mobile-eats-flywheel-loop.plist: OK
-ai.zeststream.codex-rollout-permission-janitor.plist -> /Users/josh/Library/LaunchAgents/ai.zeststream.codex-rollout-permission-janitor.plist: OK
-ai.zeststream.codex-watchtower-daily.plist -> /Users/josh/Library/LaunchAgents/ai.zeststream.codex-watchtower-daily.plist: OK
-ai.zeststream.flywheel-codex-stuck-detector.plist -> /Users/josh/Library/LaunchAgents/ai.zeststream.flywheel-codex-stuck-detector.plist: OK

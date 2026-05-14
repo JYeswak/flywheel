@@ -1,8 +1,0 @@
-PASS agent.sh present and syntax-valid
-PASS probe returns valid JSON
-PASS schema_version matches agent-mail-identity-registry-doctor/v1
-PASS missing-probe path returns warn+drift=0+probe_missing (NOT synth-fail)
-PASS regression guard: agent.sh no longer uses "$0" identity --doctor pattern
-PASS live probe: status=pass drift=0 (AC met)
-PASS agent.sh under 600 lines (     242)
-SUMMARY pass=7 fail=0

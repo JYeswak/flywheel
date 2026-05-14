@@ -1,1 +1,0 @@
-{"schema_version":"recovery-install-plist-mobile-eats/v1","command":"validate","subject":"plist","label":"com.zeststream.mobile-eats.watcher","path":"/Users/josh/Library/LaunchAgents/com.zeststream.mobile-eats.watcher.plist","status":"warn","plist_present":true,"launchctl_loaded":false}

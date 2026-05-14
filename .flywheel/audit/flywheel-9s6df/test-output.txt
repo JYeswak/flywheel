@@ -1,6 +1,0 @@
-PASS macOS /usr/bin/xargs rejects -d (bug class confirmed)
-PASS tr | xargs -0 preserves newline-record-boundary on this host
-PASS live skill copy still carries 'xargs -d (GNU-only)' (waiting on JSM push)
-PASS patched copy applies cleanly and passes bash -n
-PASS patched copy uses xargs -0 and drops xargs -d
-SUMMARY pass=5 fail=0

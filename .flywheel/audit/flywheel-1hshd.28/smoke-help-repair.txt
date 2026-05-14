@@ -1,1 +1,0 @@
-topic: repair --scope <audit_log_dir|ntm_state_dir> [--dry-run|--apply --idempotency-key KEY] — apply contract: --apply requires --idempotency-key (rc=3 refusal); scopes: audit_log_dir (mkdir -p dirname of $SCAFFOLD_AUDIT_LOG), ntm_state_dir (mkdir -p ~/.local/state/ntm). Unknown = rc=64.

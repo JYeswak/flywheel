@@ -1,1 +1,0 @@
-{"schema_version":"recovery-preinstall-audit/v1","command":"validate","subject":"topology","path":"/Users/josh/.local/state/flywheel/session-topology.jsonl","status":"pass","tail_total":100,"tail_valid_json":100}

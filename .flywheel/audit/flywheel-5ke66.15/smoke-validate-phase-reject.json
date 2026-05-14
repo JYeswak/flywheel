@@ -1,2 +1,0 @@
-{"schema_version":"picoz-archive-and-fresh-2026-05-07/v1","command":"validate","subject":"phase-name","ts":"2026-05-11T01:48:46Z","status":"reject","value":"phase-3-bad","reason":"pattern_mismatch","pattern":"^phase_[0-9]+_(ok|skipped)$"}
-rc=1

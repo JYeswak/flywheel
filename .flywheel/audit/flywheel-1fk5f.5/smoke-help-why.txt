@@ -1,1 +1,0 @@
-topic: why — given <id>, look up audit-log rows. id = numeric row index (negative indexes from tail) OR substring matched against status / gate / subcommand fields.

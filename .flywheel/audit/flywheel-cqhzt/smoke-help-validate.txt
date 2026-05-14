@@ -1,1 +1,0 @@
-topic: validate — subjects: mission-file PATH (run validator on a MISSION.md, report SEC-001..SEC-006 status + missing invariants); audit-row JSONL_LINE (verify ts/status fields).

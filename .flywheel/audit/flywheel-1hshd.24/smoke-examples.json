@@ -1,1 +1,0 @@
-{"schema_version":"customer-facing-observability-probe/v1","command":"examples","examples":[{"name":"default run","invocation":"customer-facing-observability-probe.sh","purpose":"backward-compatible original behavior"},{"name":"doctor","invocation":"customer-facing-observability-probe.sh doctor --json","purpose":"probe substrate health"}]}

@@ -1,1 +1,0 @@
-topic: doctor — probes watcher substrate (ledger writability, contract ledger, fuckup log, storage-probe binary, jsonl-append lib, jq/awk/df/python3 deps, BUFFER_GB sanity, repo root). Pass = watcher ready; warn = recoverable; fail = blocked.

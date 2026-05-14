@@ -1,1 +1,0 @@
-{"schema_version":"codex-template-stuck-detector/v1","command":"validate","subject":"fixture-path","ts":"2026-05-11T04:32:07Z","status":"reject","value":"/etc/hosts","reason":"file_not_readable_or_not_json"}

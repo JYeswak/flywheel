@@ -1,2 +1,0 @@
-{"schema_version":"mobile-eats-loop-with-receipt-mirror/v1","command":"repair","status":"refused","scope":"nope","reason":"unknown_scope","valid_scopes":["out_dir","log_dir","audit_log_dir"]}
-rc=64

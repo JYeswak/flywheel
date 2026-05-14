@@ -1,1 +1,0 @@
-{"schema_version":"dispatch-trigger-gated-precheck/v1","command":"repair","status":"plan","mode":"dry_run","scope":"audit-log-clear","current_lines":7,"planned_actions":["truncate audit-log to zero rows when --apply --idempotency-key KEY passed"]}

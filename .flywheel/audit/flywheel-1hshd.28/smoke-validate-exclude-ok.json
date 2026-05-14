@@ -1,1 +1,0 @@
-{"schema_version":"fleet-rotate-all-sessions/v1","command":"validate","subject":"exclude-list","ts":"2026-05-11T05:36:54Z","status":"ok","value":"flywheel,alps","note":"comma-separated session names; matches --exclude flag contract"}

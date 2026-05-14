@@ -1,1 +1,0 @@
-{"schema_version":"scaffold-canonical-cli-py/v1","command":"scaffold","status":"refused","mode":"apply","target":"/Users/josh/.claude/skills/.flywheel/bin/flywheel-readme","reason":"--apply requires --idempotency-key"}

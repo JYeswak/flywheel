@@ -1,1 +1,0 @@
-{"schema_version":"customer-facing-observability-probe/v1","command":"validate","status":"refused","reason":"missing_subject","valid_subjects":["client-slug","freshness-hours","observability-state"]}

@@ -1,1 +1,0 @@
-{"schema_version":"recovery-install-plist-mobile-eats/v1","command":"repair","status":"ok","mode":"read_only","scope":"plist-status-prime","path":"/Users/josh/Developer/flywheel/.flywheel/receipts/recovery-install-mobile-eats-status.json","installed_at":null,"launchctl_loaded":"unknown","note":"read-only probe of install status JSON"}

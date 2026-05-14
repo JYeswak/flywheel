@@ -1,1 +1,0 @@
-topic: validate — per-subject contract checks. Subjects: row (--row-json=JSON validates an audit-log row schema), schema (--surface=NAME re-emits the schema), config (env presence: FLYWHEEL_HOME, ANTHROPIC_API_KEY, FLYWHEEL_SKILLS_DIR, jq).

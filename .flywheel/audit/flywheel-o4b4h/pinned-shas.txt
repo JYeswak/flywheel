@@ -1,1 +1,0 @@
-7cdb253cf3011b11b1ca7f00d63c9a2b4e2700391cf6453134aad29116bab189  tests/o4b4h-skillos-journey-alignment-receipt.sh

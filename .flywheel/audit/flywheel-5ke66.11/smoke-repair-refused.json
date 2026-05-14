@@ -1,2 +1,0 @@
-{"schema_version":"fleet-conformance-probe/v1","command":"repair","status":"refused","mode":"apply","scope":"cache_dir","reason":"--apply requires --idempotency-key"}
-rc=3

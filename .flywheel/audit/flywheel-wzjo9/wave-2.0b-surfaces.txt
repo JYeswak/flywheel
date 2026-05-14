@@ -1,9 +1,0 @@
-clobber-recovery.sh
-recovery-baseline-snapshot.sh
-recovery-baseline-status.sh
-recovery-install-plist-alpsinsurance.sh
-recovery-install-plist-clutterfreespaces.sh
-recovery-install-plist-mobile-eats.sh
-recovery-install-plist-skillos.sh
-recovery-preinstall-audit.sh
-skillos-template-handshake.sh

@@ -1,1 +1,0 @@
-topic: doctor — probes substrate (br binary, target dir resolvable, .beads discovery, jq/mktemp/realpath deps, audit log dir, repo root). Pass = probe ready; warn = recoverable; fail = blocked.

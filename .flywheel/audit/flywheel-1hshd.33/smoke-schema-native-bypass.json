@@ -1,1 +1,0 @@
-{"schema_version":"fuckup-coverage-join/v1","joins":["memory","incident","canonical_l_rule","probe","dashboard"],"output_fields":["fuckup_classes_without_route_count","promotion_ready_without_mechanism_count","rows"]}

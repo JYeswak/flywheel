@@ -1,3 +1,0 @@
-# L107 collision blocks canonical INCIDENTS.md edit
-
-{"blocking_holders": [{"__line": 3654, "action": "reserve", "pane": "4", "path": "/Users/josh/Developer/flywheel/INCIDENTS.md", "session": "flywheel", "task_id": "flywheel-uyd9i-68b606", "ts": "2026-05-09T18:52:09Z"}], "detail": "coordination-collision-detected: pane=4 path=/Users/josh/Developer/flywheel/INCIDENTS.md", "malformed_rows_count": 0, "ntm_conflicts": {"exit_code": 0, "native_surface": "ntm conflicts --json", "raw": null, "status": "ok"}, "pane": "2", "path": "/Users/josh/Developer/flywheel/INCIDENTS.md", "schema_version": "shared-surface-reservation/v1", "status": "blocked"}

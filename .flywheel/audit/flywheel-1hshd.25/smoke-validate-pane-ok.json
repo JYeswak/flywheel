@@ -1,1 +1,0 @@
-{"schema_version":"docs-validation-probe/v1","command":"validate","subject":"pane-name","ts":"2026-05-11T05:25:37Z","status":"ok","value":"flywheel","note":"matches validated_by_pane/authored_by_pane shape"}

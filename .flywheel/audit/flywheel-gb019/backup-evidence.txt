@@ -1,1 +1,0 @@
--rwxr-xr-x@ 1 josh  staff  45098 May  4 02:23 /Users/josh/.claude/skills/.flywheel/bin/flywheel-readme.bak.scaffold-py-20260510T190609066857000Z-2585

@@ -1,1 +1,0 @@
-{"schema_version":"jeff-verdict-heuristic/v1","command":"repair","status":"ok","ts":"2026-05-11T00:13:57Z","mode":"dry_run","scope":"state_dir","idempotency_key":"","target":"/Users/josh/.local/state/jeff-verdict-heuristic","existed_before":false}

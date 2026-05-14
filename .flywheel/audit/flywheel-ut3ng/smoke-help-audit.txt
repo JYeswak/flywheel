@@ -1,1 +1,0 @@
-topic: audit — tails $SCAFFOLD_AUDIT_LOG (default 20 rows, override with audit N). Each row: ts, action, status, sha256, repo, integrity.
