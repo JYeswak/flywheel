@@ -54,10 +54,10 @@ bash tests/test_four_lens_validator_did_total_structural.sh
 
 Contract receipt: callback-close-contract/v1.
 Payload schema: fixture-payload/v1.
-Four-Lens Self-Grade: brand voice pass; Joshua sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
+Four-Lens Self-Grade: brand voice pass; {operator} sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
 Outcome: the structural gate prevents all-PASS lens receipts from closing partial work.
 Result: did less than total is a close blocker before rubber-stamp drift can enter the bead graph.
-Joshua lens: 25-year operations manager judgment says every silenced partial becomes tomorrow's broken regression, so the validator refuses APPROVE_CLOSE on did less than total.
+{operator} lens: 25-year operations manager judgment says every silenced partial becomes tomorrow's broken regression, so the validator refuses APPROVE_CLOSE on did less than total.
 EOF
 
 bad_envelope="DONE fixture did=5/9 didnt=none gaps=test-continuation tmp_dir_released=true tests_passing=true validator_brand_pass=true validator_sniff_pass=true validator_jeff_pass=true validator_public_pass=true"

@@ -2,7 +2,7 @@
 # tests/test-ze4xv-context-upgrade-packet-schema.sh
 #
 # Regression test for flywheel-ze4xv (cohort precondition AG4: jq schema
-# validator for skillos.context_upgrade_packet.session_start.v1).
+# validator for {capability-control-plane}.context_upgrade_packet.session_start.v1).
 #
 # Asserts every packet under HOME/.local/state/flywheel/sessions/<id>/
 # carries the canonical schema_version, an ISO8601 generated_at, and a
@@ -14,7 +14,7 @@
 set -euo pipefail
 
 SESSIONS_ROOT="${SESSIONS_ROOT:-$HOME/.local/state/flywheel/sessions}"
-EXPECTED_SCHEMA_VERSION="${EXPECTED_SCHEMA_VERSION:-skillos.context_upgrade_packet.session_start.v1}"
+EXPECTED_SCHEMA_VERSION="${EXPECTED_SCHEMA_VERSION:-{capability-control-plane}.context_upgrade_packet.session_start.v1}"
 COHORT_FLOOR="${COHORT_FLOOR:-5}"
 
 pass(){ printf 'PASS %s\n' "$1"; }

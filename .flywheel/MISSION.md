@@ -4,7 +4,7 @@ schema_version: 1
 doc_type: mission
 status: locked
 locked_at: 2026-05-07T04:07:55Z
-lock_hash: 96db8f2f0805f846f8578d2254fd0dcade0cefedd4b91a7a360dd0bacf53648f
+lock_hash: d473c983e641881b38cbcff31d8a55343563cf358e9716151e25f391fec99528
 repo: /Users/josh/Developer/flywheel
 repo_realpath: /Users/josh/Developer/flywheel
 installed_from: /Users/josh/Developer/flywheel/templates/flywheel-install
@@ -135,6 +135,19 @@ Review when the repo mission, owner, or operating constraints change.
 ## Lock Receipt
 
 Reconciled from existing .flywheel/MISSION.md at 20260501T052023Z.
+
+## Mission anchor extension locked 2026-05-14
+
+> "Repo hygiene is mission-critical infrastructure of the AaaS product — the flywheel is accountable to the same standards it enforces on client repos. Every session closes with a `git_hygiene` block in the closeout receipt; unclassified accretion is the alarm, not classified motion."
+
+**Corollary — gated-loop halt:** When a loop's goal is blocked exclusively by external gates (`owner: joshua` or `owner: external-system`), the loop MUST detect the gate and halt rather than burning tokens on adjacent work. A loop that spins on gated information is a defect, not diligence.
+
+**Cross-references:**
+- Doctrine: `.flywheel/doctrine/substrate-class-classifier.md` (substrate class taxonomy)
+- Enforcement: `.flywheel/scripts/validate-callback-before-close.sh` (git hygiene gate)
+- Enforcement: `.flywheel/scripts/dispatch-capacity-gate.sh` (dirty-tree dispatch block)
+- Enforcement: `.flywheel/scripts/loop-goal-gate.sh` (gated-loop halt check)
+- L-rule pending: flywheel-bszgl.2 (untracked_delta + substrate_classified mandatory)
 
 ## Joshua Requests
 
@@ -17533,6 +17546,144 @@ auth, credential, PII, and customer-trust surfaces.
 - **priority:** P1
 - **scope:** single-repo
 - **last_updated_at:** 2026-05-06T22:55:00Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T025350Z-230
+- **id:** jr-2026-05-14T025350Z-230
+- **captured_at:** 2026-05-14T02:53:50Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:20f4e87ea366c2fbfa04d6459c0991e494088c9a4efc2112297e3feaccbe9522
+- **request_text_hash:** sha256:20f4e87ea366c2fbfa04d6459c0991e494088c9a4efc2112297e3feaccbe9522
+- **sanitized_excerpt:** "i have alps, flywheel, and skillos all running in wezterm cli's instead of ntm sessions - codex workres were working better directly than through ntm for me the last day or so. can you take a look at what they are all doing, look at the mission, the ar, flywhee.zeststream.ai, and talk to me, as a coach about if we're doing the right thing"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T02:53:50Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T025747Z-467
+- **id:** jr-2026-05-14T025747Z-467
+- **captured_at:** 2026-05-14T02:57:47Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:f9a6c4c18ffca92bd32122a1015707b3fad40d27fc025d9c768a130e6ceccb5c
+- **request_text_hash:** sha256:f9a6c4c18ffca92bd32122a1015707b3fad40d27fc025d9c768a130e6ceccb5c
+- **sanitized_excerpt:** "actually look at what they are doing - flywheel is gated because the quality isn't good enough - if the quality sin't good enough they need to improve it - i won't improve something that isn't meeting our quality but I don't want them rorating tokens without actually improving"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T02:57:47Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T030155Z-715
+- **id:** jr-2026-05-14T030155Z-715
+- **captured_at:** 2026-05-14T03:01:55Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:606a3cc63aadfa3d7e8377774ef546fb6604bbb3df86860b471f56b0530ed97e
+- **request_text_hash:** sha256:606a3cc63aadfa3d7e8377774ef546fb6604bbb3df86860b471f56b0530ed97e
+- **sanitized_excerpt:** "we need to get the git states of all of these repos cleaned up. part of our flywheel processs as a whole is to eforce git heigyne through our skill processes, why aren't they"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T03:01:55Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T030341Z-821
+- **id:** jr-2026-05-14T030341Z-821
+- **captured_at:** 2026-05-14T03:03:41Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:49943ee01d401348c31abfce5a660c8eda3e88a2c32a1edf57eedf1c39e5e494
+- **request_text_hash:** sha256:49943ee01d401348c31abfce5a660c8eda3e88a2c32a1edf57eedf1c39e5e494
+- **sanitized_excerpt:** "lets get all gits cleaned up. lets take this one by one - hit excape on those panes too if you need to apus ethem while we do this"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T03:03:41Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T031225Z-345
+- **id:** jr-2026-05-14T031225Z-345
+- **captured_at:** 2026-05-14T03:12:25Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:26d687d382f0ccd7f5f296460ca71c7f696d433dcab92b6634b874e4501fc08e
+- **request_text_hash:** sha256:26d687d382f0ccd7f5f296460ca71c7f696d433dcab92b6634b874e4501fc08e
+- **sanitized_excerpt:** "lets get git commits cleaned up - that means 0 ahead, right?"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T03:12:25Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T032439Z-079
+- **id:** jr-2026-05-14T032439Z-079
+- **captured_at:** 2026-05-14T03:24:39Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:bffb809be33c1d774b4195d228a6aad3584139d800322e574392b4ee6deff6d6
+- **request_text_hash:** sha256:bffb809be33c1d774b4195d228a6aad3584139d800322e574392b4ee6deff6d6
+- **sanitized_excerpt:** "can you work through all of the beads right now that keeps our git history in alightment. then I want you to help look at the new codex and claude /goal features releasted this week and talk to me how we wire them properly into our goal /flywheel:loop /flywheel:tick processes in the most accretive way possible"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T03:24:39Z
 - **closure_actor:** null
 - **linked_bead_ids:** []
 - **duplicate_of:** null

@@ -1,1 +1,0 @@
-{"examples":["bleed-ledger-watch.sh --doctor --json","bleed-ledger-watch.sh --doctor --json --ledger /tmp/ledger.jsonl","bleed-ledger-watch.sh repair --apply --json"],"schema_version":"bleed-ledger-watch/v1"}

@@ -4,6 +4,48 @@ set -euo pipefail
 NTM="${NTM:-/Users/josh/.local/bin/ntm}"
 [[ $# -ge 2 ]] || { printf 'usage: dispatch-capacity-gate.sh <session> <pane>\n' >&2; exit 1; }
 SESSION="$1"; PANE="$2"
+REPO="${DISPATCH_GATE_REPO:-$PWD}"
+LOOP_GOAL_GATE="${LOOP_GOAL_GATE:-$(dirname "$0")/loop-goal-gate.sh}"
+
+# ── bszgl.3: gated-loop halt check ───────────────────────────────────────────
+# If all remaining goal blockers are owner:external, refuse dispatch.
+# Loops must not burn tokens when gated on Joshua/external action.
+if [[ -x "$LOOP_GOAL_GATE" ]]; then
+  GATE_STATUS=0
+  GATE_OUT="$("$LOOP_GOAL_GATE" --repo "$REPO" --json 2>/dev/null)" || GATE_STATUS=$?
+  if [[ "$GATE_STATUS" -eq 2 ]]; then
+    jq -nc --arg session "$SESSION" --arg pane "$PANE" --argjson gate "$GATE_OUT" \
+      '{verdict:"gated",reason:"loop_gated_all_blockers_external",session:$session,
+        pane:($pane|tonumber? // $pane),gate:$gate,
+        action:"halt_loop_await_external_gate_clearance"}'
+    exit 3
+  fi
+fi
+
+# ── bszgl.3 + git-repo-discipline: git hygiene gate ───────────────────────────
+# Refuse dispatch when dirty repo state has crossed the halt threshold. Below
+# halt, carry the repo-discipline action into the normal capacity envelope.
+REPO_DISCIPLINE_CHECK="${REPO_DISCIPLINE_CHECK:-$(dirname "$0")/repo-discipline-check.sh}"
+if [[ -x "$REPO_DISCIPLINE_CHECK" ]] && git -C "$REPO" rev-parse --git-dir &>/dev/null; then
+  REPO_DISCIPLINE_STATUS=0
+  REPO_DISCIPLINE_OUT="$("$REPO_DISCIPLINE_CHECK" --repo "$REPO" --no-append --json 2>/dev/null)" || REPO_DISCIPLINE_STATUS=$?
+  if [[ "$REPO_DISCIPLINE_STATUS" -eq 1 ]]; then
+    jq -nc --arg session "$SESSION" --arg pane "$PANE" --argjson repo_hygiene "$REPO_DISCIPLINE_OUT" \
+      '{verdict:"blocked",reason:"git_repo_hygiene_halt_threshold",session:$session,
+        pane:($pane|tonumber? // $pane),
+        repo_hygiene:$repo_hygiene,
+        action:$repo_hygiene.action}'
+    exit 1
+  fi
+  if jq -e '.commits_ahead > 300' >/dev/null 2>&1 <<<"$REPO_DISCIPLINE_OUT"; then
+    GIT_AHEAD_WARNING="commits_ahead=$(jq -r '.commits_ahead' <<<"$REPO_DISCIPLINE_OUT") consider push decision"
+  fi
+  if jq -e '.class != "clean"' >/dev/null 2>&1 <<<"$REPO_DISCIPLINE_OUT"; then
+    REPO_HYGIENE_WARNING="$(
+      jq -r '"repo_hygiene=\(.class) action=\(.action) dirty_total=\(.dirty_total) handler=\(.handler)"' <<<"$REPO_DISCIPLINE_OUT"
+    )"
+  fi
+fi
 
 json_source() {
   local env_name="$1" file_env_name="$2"; shift 2
@@ -55,16 +97,21 @@ esac
 if [[ "$HEALTH_IDLE_HINT" == "true" || ( "$PROCESS_STATUS" == "running" && "$RAW_ACTIVITY" == "idle" ) ]]; then HEALTH_IDLE=true; else HEALTH_IDLE=false; fi
 if [[ "$HEALTH_STATUS" == "ok" || "$HEALTH_SCORE" -ge 80 ]]; then HEALTH_REC="HEALTHY"; else HEALTH_REC="$(printf '%s' "${HEALTH_STATUS:-UNKNOWN}" | tr '[:lower:]' '[:upper:]')"; fi
 
+COMBINED_WARNING="${REPO_HYGIENE_WARNING:-${GIT_AHEAD_WARNING:-}}"
+if [[ -n "${REPO_HYGIENE_WARNING:-}" && -n "${GIT_AHEAD_WARNING:-}" ]]; then
+  COMBINED_WARNING="${REPO_HYGIENE_WARNING}; ${GIT_AHEAD_WARNING}"
+fi
+
 if [[ "$ASSIGN_PANE_MATCH" -gt 0 || ( "$ACTIVITY_STATE" == "WAITING" && "$ASSIGN_IDLE_COUNT" -gt 0 ) ]]; then
-  emit "available" "assign_idle_capacity" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC"
+  emit "available" "assign_idle_capacity" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC" "$COMBINED_WARNING"
   exit 0
 fi
 if [[ "$ACTIVITY_STATE" == "ERROR" && "$HEALTH_IDLE" == "true" && "$HEALTH_REC" == "HEALTHY" ]]; then
-  emit "override_available" "activity_error_but_health_idle_healthy" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC" "stale_chevron_or_api_error_pattern"
+  emit "override_available" "activity_error_but_health_idle_healthy" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC" "${COMBINED_WARNING:-stale_chevron_or_api_error_pattern}"
   exit 2
 fi
 case "$ACTIVITY_STATE" in
-  ERROR|STALLED|UNKNOWN) emit "blocked" "activity_${ACTIVITY_STATE}" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC"; exit 1 ;;
+  ERROR|STALLED|UNKNOWN) emit "blocked" "activity_${ACTIVITY_STATE}" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC" "$COMBINED_WARNING"; exit 1 ;;
 esac
-emit "blocked" "activity_${ACTIVITY_STATE}" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC"
+emit "blocked" "activity_${ACTIVITY_STATE}" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC" "$COMBINED_WARNING"
 exit 1

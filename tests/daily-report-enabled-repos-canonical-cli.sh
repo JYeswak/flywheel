@@ -20,7 +20,7 @@
 #
 set -euo pipefail
 
-SCRIPT="${DAILY_REPORT_ENABLED_BIN:-/Users/josh/Developer/flywheel/.flywheel/scripts/daily-report-enabled-repos.sh}"
+SCRIPT="${DAILY_REPORT_ENABLED_BIN:-<flywheel-repo>/.flywheel/scripts/daily-report-enabled-repos.sh}"
 CHECKER="${CANONICAL_CLI_CHECKER:-$HOME/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh}"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/dre-canonical-cli.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT

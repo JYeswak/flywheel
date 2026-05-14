@@ -66,7 +66,7 @@ assert_contains "$TMP/rust.out" 'cargo fmt -- --check' "rust excerpt injected"
 assert_contains "$TMP/python.out" 'public function signatures have type hints' "python excerpt injected"
 assert_contains "$TMP/cli.out" 'doctor / health / repair triad' "cli excerpt injected"
 assert_contains "$TMP/readme.out" 'Quick Start stays copy-pasteable' "readme excerpt injected"
-assert_contains "$TMP/multi.out" 'source=/Users/josh/.claude/skills/readme-writing/SKILL.md:120' "multi source cites readme skill"
+assert_contains "$TMP/multi.out" 'source=<skills-root>/readme-writing/SKILL.md:120' "multi source cites readme skill"
 
 assert_same_hash "$TMP/multi.md"
 

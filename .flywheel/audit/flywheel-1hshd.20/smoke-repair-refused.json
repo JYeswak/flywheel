@@ -1,2 +1,0 @@
-{"schema_version":"cost-telemetry-token-burn-probe/v1","command":"repair","status":"refused","mode":"apply","scope":"ledger_dir","reason":"--apply requires --idempotency-key"}
-rc=3

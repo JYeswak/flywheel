@@ -1,6 +1,0 @@
-PASS postcheck file present + syntax-valid
-PASS postcheck pulls .publishability_bar.errors into rollup (sister-pattern)
-PASS postcheck has loud-failure invariant maybe() clause (status_failed_silent)
-PASS fixture-level: .publishability_bar.errors propagation produces correct array
-PASS live doctor: fail_codes do not consist solely of doctor_internal_empty_fail (codes=brand_voice_banned_words)
-SUMMARY pass=5 fail=0

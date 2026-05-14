@@ -70,7 +70,7 @@ write_good_evidence() {
     printf 'bash templates/flywheel-install/tests/test_polish_gate_close_validator.sh\n'
     printf '```\n\n'
     printf 'Contract version: four-lens-close-validator/v1 and polish-gate/close-validation-result/v1.\n'
-    printf 'Four-Lens Self-Grade: brand voice pass; Joshua sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.\n'
+    printf 'Four-Lens Self-Grade: brand voice pass; {operator} sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.\n'
     printf 'Outcome: shipped validator proof prevents touched surfaces from closing without a polish-gate receipt.\n'
     printf 'Result: close path blocks missing or invalid polish-gate verdicts while preserving bootstrap and audit-only modes.\n'
     printf 'Operator note: the fixture keeps the evidence above the public readability floor.\n'
@@ -93,7 +93,7 @@ write_waiver() {
   mkdir -p "$(dirname "$path")"
   jq -n '{
     schema_version:"polish-gate/grade-receipt/v1",
-    ts:"2026-05-05T00:00:00Z",
+    ts:"<timestamp>",
     surface_path:".flywheel/GOAL.md",
     surface_name:"GOAL.md",
     mode:"blocking",
@@ -102,7 +102,7 @@ write_waiver() {
     verdict:"WAIVED",
     evidence_paths:[".flywheel/polish-gate/waivers/goal-waiver.json"],
     grader:"fixture",
-    waiver:{reason:"fixture waiver",expires_at:"2026-12-31T00:00:00Z",approver:"fixture-owner"},
+    waiver:{reason:"fixture waiver",expires_at:"<timestamp>",approver:"fixture-owner"},
     mission_anchor_hash:"sha256:fixture"
   }' >"$path"
 }

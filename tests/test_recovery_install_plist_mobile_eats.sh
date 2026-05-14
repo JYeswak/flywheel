@@ -2,9 +2,9 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/recovery-install-plist-mobile-eats.sh"
-PLIST="/Users/josh/Library/LaunchAgents/com.zeststream.mobile-eats.watcher.plist"
-STATUS="$ROOT/.flywheel/receipts/recovery-install-mobile-eats-status.json"
+SCRIPT="$ROOT/.flywheel/scripts/recovery-install-plist-{proof-product}.sh"
+PLIST="$HOME/Library/LaunchAgents/com.zeststream.{proof-product}.watcher.plist"
+STATUS="$ROOT/.flywheel/receipts/recovery-install-{proof-product}-status.json"
 
 pass_count=0
 fail_count=0
@@ -29,10 +29,10 @@ plutil -lint "$PLIST" >/dev/null && pass "plist_lint" || fail "plist_lint"
 assert_jq "$STATUS" \
   '.schema_version == "recovery-session-watcher-install/v1"
    and .source_plan == ".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md"
-   and .label == "com.zeststream.mobile-eats.watcher"
-   and .session == "mobile-eats"
-   and .plist_path == "/Users/josh/Library/LaunchAgents/com.zeststream.mobile-eats.watcher.plist"
-   and .audit_receipt_path == "/tmp/preinstall-mobile-eats.json"
+   and .label == "com.zeststream.{proof-product}.watcher"
+   and .session == "{proof-product}"
+   and .plist_path == "$HOME/Library/LaunchAgents/com.zeststream.{proof-product}.watcher.plist"
+   and .audit_receipt_path == "/tmp/preinstall-{proof-product}.json"
    and .dry_run_pass == true
    and .exactly_one_label == true
    and .reboot_recovery_claimed == false
@@ -44,17 +44,17 @@ assert_jq "$STATUS" \
 assert_jq "$STATUS" \
   '.readiness.ntm_binary.executable == true
    and .readiness.ntm_config.exists == true
-   and .readiness.repo.path == "/Users/josh/Developer/mobile-eats"
+   and .readiness.repo.path == "$HOME/Developer/{proof-product}"
    and .readiness.repo.exists == true
    and .readiness.logs_dir.exists == true' \
   "readiness_shape"
 
 assert_jq "$STATUS" \
-  '.program_arguments[0] == "/Users/josh/.local/bin/ntm"
+  '.program_arguments[0] == "$HOME/.local/bin/ntm"
    and .program_arguments[1] == "watch"
-   and .program_arguments[2] == "mobile-eats"
-   and (.program_arguments | index("mobile-eats")) == 2
-   and .working_directory == "/Users/josh/Developer/mobile-eats"' \
+   and .program_arguments[2] == "{proof-product}"
+   and (.program_arguments | index("{proof-product}")) == 2
+   and .working_directory == "$HOME/Developer/{proof-product}"' \
   "dashed_name_program_argument_shape"
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"

@@ -52,7 +52,7 @@ cat >"$tmp/tests/test_smoke.sh" <<'EOF'
 exit 0
 EOF
 
-now="2026-04-30T00:00:00Z"
+now="<timestamp>"
 repo_realpath="$(cd "$tmp" && pwd -P)"
 tmpl_hash() {
     shasum -a 256 "$1" | awk '{print $1}'
@@ -161,8 +161,8 @@ chmod 0755 "$tmp/.flywheel/scripts/validate-callback-before-close.sh"
     || fail "four-lens close validator help failed"
 ! grep -q '{{[^}][^}]*}}' "$tmp/.flywheel/scripts/validate-callback-before-close.sh" \
     || fail "unsubstituted marker in four-lens close validator"
-if [[ -x "$ROOT/../../.flywheel/scripts/publishability-bar.sh" ]]; then
-    cp "$ROOT/../../.flywheel/scripts/publishability-bar.sh" "$tmp/.flywheel/scripts/publishability-bar.sh"
+if [[ -x "$ROOT/.flywheel/scripts/publishability-bar.sh" ]]; then
+    cp "$ROOT/.flywheel/scripts/publishability-bar.sh" "$tmp/.flywheel/scripts/publishability-bar.sh"
     chmod 0755 "$tmp/.flywheel/scripts/publishability-bar.sh"
     cat >"$tmp/.flywheel/PUBLISHABILITY-AUDIT.md" <<'EOF'
 Public repo: no

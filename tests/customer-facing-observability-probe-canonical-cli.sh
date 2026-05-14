@@ -108,10 +108,10 @@ if [[ "$sweep_pass" -eq 3 ]] && [[ "$rc" -eq 1 ]] \
 else fail "validate observability-state sweep accept=$sweep_pass/3 reject_rc=$rc"; fi
 rm -f /tmp/1hshd-24-test15.json
 
-# Test 16: validate client-slug accepts canonical client (alpsinsurance)
-if "$SCRIPT" validate client-slug "alpsinsurance" 2>/dev/null \
+# Test 16: validate client-slug accepts canonical client ({session})
+if "$SCRIPT" validate client-slug "{session}" 2>/dev/null \
    | jq -e '.subject == "client-slug" and .status == "ok"' >/dev/null; then
-  pass "validate client-slug accepts canonical client (alpsinsurance)"
+  pass "validate client-slug accepts canonical client ({session})"
 else fail "validate client-slug accept"; fi
 
 # Test 17: validate client-slug REJECTS non-canonical with rc=1 + not_in_canonical_set

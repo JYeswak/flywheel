@@ -1,2 +1,0 @@
- tests/callback-receipt-validator-canonical-cli.sh | 16 ++++++++++++----
- 1 file changed, 12 insertions(+), 4 deletions(-)

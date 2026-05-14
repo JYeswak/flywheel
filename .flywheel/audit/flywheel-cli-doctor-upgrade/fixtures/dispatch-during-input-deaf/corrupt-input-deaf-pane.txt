@@ -1,2 +1,0 @@
-# STUB pass-1 - pane chevron visible + dispatch sent + no input-ack within 30s - input-deaf
-# pass-2: real fixture data here

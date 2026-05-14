@@ -49,7 +49,7 @@ write_row() {
       metadata:{fixture:true},
       state:$state,
       producer:"fixture",
-      owner:(if $artifact == "skill_candidate" then "skillos" else $owning end),
+      owner:(if $artifact == "skill_candidate" then "{capability-control-plane}" else $owning end),
       consumer:$consumer,
       trust_domain:$trust_domain,
       blocking_scope:$scope,
@@ -174,29 +174,29 @@ assert_jq "$TMP/bootstrap_consumed.json" '.allowed == false and .reason_code == 
 pass "fixture_5_bootstrap_one_shot"
 
 cross="$TMP/cross.jsonl"
-write_row "$cross" cross-row unwired alpsinsurance alpsinsurance:pane-1 /Users/josh/Developer/alpsinsurance fleet finding peer-orch repo:alpsinsurance
+write_row "$cross" cross-row unwired {session} {session}:pane-1 $HOME/Developer/{session} fleet finding peer-orch repo:{session}
 run_gate cross 0 --ledger "$cross" --mode enforce
 assert_jq "$TMP/cross.json" '.allowed == true and .cross_orch_unresolved_count == 1 and any(.warnings[]; .code == "cross_orch_unresolved_rows")' "cross_orch_warn_only"
 
 owned_elsewhere="$TMP/owned-elsewhere.jsonl"
-write_row "$owned_elsewhere" owned-elsewhere unwired flywheel alpsinsurance:pane-1 "$ROOT" tick finding peer-orch repo:alpsinsurance
+write_row "$owned_elsewhere" owned-elsewhere unwired flywheel {session}:pane-1 "$ROOT" tick finding peer-orch repo:{session}
 run_gate owned_elsewhere 0 --ledger "$owned_elsewhere" --mode enforce
 assert_jq "$TMP/owned_elsewhere.json" '.allowed == true and .cross_orch_unresolved_count == 1 and .local_unresolved_count == 0 and any(.warnings[]; .code == "cross_orch_unresolved_rows")' "owned_elsewhere_warns_not_blocks"
 
 skill="$TMP/skill.jsonl"
-write_row "$skill" skill-backlog unwired flywheel flywheel:pane-1 "$ROOT" skill_triage skill_candidate skillos
+write_row "$skill" skill-backlog unwired flywheel flywheel:pane-1 "$ROOT" skill_triage skill_candidate {capability-control-plane}
 run_gate skill 0 --ledger "$skill" --mode shadow
-assert_jq "$TMP/skill.json" '.skill_candidate_count == 1 and any(.top_actions[]; .route.action == "route_to_skillos" and .next_action == "route_skill_candidate_rows_to_skillos_or_record_deferral")' "skill_candidate_routes_to_skillos"
+assert_jq "$TMP/skill.json" '.skill_candidate_count == 1 and any(.top_actions[]; .route.action == "route_to_{capability-control-plane}" and .next_action == "route_skill_candidate_rows_to_{capability-control-plane}_or_record_deferral")' "skill_candidate_routes_to_{capability-control-plane}"
 
 fleet_config="$TMP/fleet-rollout.json"
 jq -n --arg root "$ROOT" '{
   schema_version:"wire-or-explain-rollout/v1",
   default_state:"shadow",
   repos:[
-    {repo:$root,session:"flywheel",trust_domain:"repo:flywheel",owning_orch:"flywheel:pane-1",state:"enforce",leader:"flywheel",followers:["skillos","alpsinsurance"],rollback_state:"shadow"},
-    {repo:"/Users/josh/Developer/skillos",session:"skillos",trust_domain:"repo:skillos",owning_orch:"skillos:pane-1",state:"shadow",leader:"flywheel",followers:[],rollback_state:"disabled"},
-    {repo:"/Users/josh/Desktop/Projects/clients/alps-insurance",session:"alpsinsurance",trust_domain:"client:alpsinsurance",owning_orch:"alpsinsurance:pane-1",state:"deferred",leader:"flywheel",followers:[],rollback_state:"disabled"},
-    {repo:"/Users/josh/Developer/vrtx",session:"vrtx",trust_domain:"repo:vrtx",owning_orch:"vrtx:pane-1",state:"disabled",leader:"flywheel",followers:[],rollback_state:"disabled"}
+    {repo:$root,session:"flywheel",trust_domain:"repo:flywheel",owning_orch:"flywheel:pane-1",state:"enforce",leader:"flywheel",followers:["{capability-control-plane}","{session}"],rollback_state:"shadow"},
+    {repo:"$HOME/Developer/{capability-control-plane}",session:"{capability-control-plane}",trust_domain:"repo:{capability-control-plane}",owning_orch:"{capability-control-plane}:pane-1",state:"shadow",leader:"flywheel",followers:[],rollback_state:"disabled"},
+    {repo:"$HOME/Desktop/Projects/clients/alps-insurance",session:"{session}",trust_domain:"client:{session}",owning_orch:"{session}:pane-1",state:"deferred",leader:"flywheel",followers:[],rollback_state:"disabled"},
+    {repo:"$HOME/Developer/vrtx",session:"vrtx",trust_domain:"repo:vrtx",owning_orch:"vrtx:pane-1",state:"disabled",leader:"flywheel",followers:[],rollback_state:"disabled"}
   ],
   rollback:{preserve_ledger_history:true,allowed_target_states:["shadow","disabled"]}
 }' >"$fleet_config"
@@ -206,8 +206,8 @@ assert_jq "$TMP/rollout-status.json" '.mode == "enforce" and .fleet_rollout.entr
 
 fleet_smoke="$TMP/fleet-smoke.jsonl"
 write_row "$fleet_smoke" flywheel-local unwired flywheel flywheel:pane-1 "$ROOT" tick finding doctor repo:flywheel
-write_row "$fleet_smoke" skillos-peer unwired skillos skillos:pane-1 /Users/josh/Developer/skillos tick finding peer-orch repo:skillos
-write_row "$fleet_smoke" alps-peer unwired alpsinsurance alpsinsurance:pane-1 /Users/josh/Desktop/Projects/clients/alps-insurance tick finding peer-orch client:alpsinsurance
+write_row "$fleet_smoke" {capability-control-plane}-peer unwired {capability-control-plane} {capability-control-plane}:pane-1 $HOME/Developer/{capability-control-plane} tick finding peer-orch repo:{capability-control-plane}
+write_row "$fleet_smoke" alps-peer unwired {session} {session}:pane-1 $HOME/Desktop/Projects/clients/alps-insurance tick finding peer-orch client:{session}
 run_gate fleet_smoke 1 --ledger "$fleet_smoke" --fleet-config "$fleet_config"
 assert_jq "$TMP/fleet_smoke.json" '.mode == "enforce" and .local_unresolved_count == 1 and .cross_orch_unresolved_count == 2 and .allowed == false and any(.top_actions[]; .trust_domain == "repo:flywheel")' "fleet_smoke_blocks_only_flywheel"
 
@@ -227,11 +227,11 @@ python3 "$BIN" rollback --repo "$ROOT" --session flywheel --fleet-config "$fleet
 assert_jq "$TMP/rollback-apply.json" '.new_state == "disabled" and .written == true and .ledger_history_deleted == false' "rollback_apply_writes_disabled"
 jq -e '.repos[0].state == "disabled"' "$fleet_config" >/dev/null && pass "rollback_apply_updates_config" || fail "rollback_apply_updates_config"
 
-python3 "$BIN" why skill-backlog --ledger "$skill" --repo "$ROOT" --json | jq -e '.command == "why" and .found.route.action == "route_to_skillos" and (.rows | has("skill-backlog"))' >/dev/null && pass "why_json"
+python3 "$BIN" why skill-backlog --ledger "$skill" --repo "$ROOT" --json | jq -e '.command == "why" and .found.route.action == "route_to_{capability-control-plane}" and (.rows | has("skill-backlog"))' >/dev/null && pass "why_json"
 python3 "$BIN" --why --ledger "$skill" --repo "$ROOT" --json | jq -e '.command == "why" and (.rows | has("skill-backlog"))' >/dev/null && pass "why_flag_json"
 python3 "$BIN" repair --ledger "$skill" --repo "$ROOT" --dry-run --json | jq -e '.planned_actions | length >= 2' >/dev/null && pass "repair_dry_run"
 
-tail -n 1 "$ROOT/.flywheel/wire-or-explain-close-gate/README.md" | grep -qx 'Part of the Yuzu Method framework by ZestStream.' \
+tail -n 1 "$ROOT/.flywheel/wire-or-explain-close-gate/README.md" | grep -qx 'Part of the Yuzu Method framework by {operator-company}.' \
   && pass "readme_yuzu_footer" || fail "readme_yuzu_footer"
 
 printf 'PASS wire-or-explain-close-gate %s checks\n' "$pass_count"

@@ -20,7 +20,7 @@ examples() {
         ".flywheel/scripts/publishability-bar.sh --doctor --json" \
         "" \
         "# Score another repo" \
-        ".flywheel/scripts/publishability-bar.sh --doctor --json --repo /Users/josh/Developer/mobile-eats"
+        ".flywheel/scripts/publishability-bar.sh --doctor --json --repo $HOME/Developer/{proof-product}"
 }
 
 field_value() {
@@ -52,7 +52,7 @@ header_value() {
 }
 
 brand_voice_banned_words_json() {
-    local voice_yaml="/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml"
+    local voice_yaml="<skills-root>/zeststream-brand-voice/brands/zeststream/voice.yaml"
     if [[ ! -f "$voice_yaml" ]]; then
         jq -nc '[]'
         return 0
@@ -89,7 +89,7 @@ brand_voice_metrics_json() {
         }'
         return 0
     fi
-    score="$(field_value "ZestStream voice score" "$audit")"
+    score="$(field_value "{operator-company} voice score" "$audit")"
     score="${score:-0}"
     scorecard_log="$(field_value "Scorecard log" "$audit")"
     ungrounded="$(field_value "Ungrounded claims count" "$audit")"
@@ -127,7 +127,7 @@ brand_voice_metrics_json() {
         scorecard_log:(if $scorecard_log == "" then null else $scorecard_log end),
         errors:(
           (if $score < 90 then [{code:"brand_voice_composite_low", message:"brand voice composite below readiness floor"}] else [] end)
-          + (if $banned_count > 0 then [{code:"brand_voice_banned_words", message:"public copy contains banned ZestStream voice words"}] else [] end)
+          + (if $banned_count > 0 then [{code:"brand_voice_banned_words", message:"public copy contains banned {operator-company} voice words"}] else [] end)
           + (if $ungrounded > 0 then [{code:"brand_voice_ungrounded_claims", message:"public copy has ungrounded claims"}] else [] end)
         ),
         warnings:(if $score < 95 and $score >= 90 then [{code:"brand_voice_composite_regen", message:"brand voice composite below publish threshold"}] else [] end)
@@ -206,7 +206,7 @@ esac
 repo="$(cd "$repo" 2>/dev/null && pwd -P || printf '%s' "$repo")"
 audit_path="$repo/.flywheel/PUBLISHABILITY-AUDIT.md"
 doctrine_path="$repo/.flywheel/PUBLISHABILITY-BAR.md"
-prompt_path="/Users/josh/.claude/skills/.flywheel/prompts/three-judges-rubric.md"
+prompt_path="<flywheel-state>/prompts/three-judges-rubric.md"
 
 if [[ ! -f "$audit_path" ]]; then
     jq -n \

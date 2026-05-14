@@ -1,8 +1,0 @@
-PASS script syntax
-PASS help exposes surface
-PASS version emits v1
-PASS info JSON
-PASS dry-run finds only live stale-error candidates
-PASS apply sends ping and recheck recovers
-PASS fake ntm recorded no-cass-check sends
-Summary: 7 passed, 0 failed

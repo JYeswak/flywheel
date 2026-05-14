@@ -6,7 +6,7 @@
   "actor": "codex",
   "target": "AGENTS.md",
   "changed_paths": ["AGENTS.md", "templates/flywheel-install/AGENTS.md"],
-  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_repo": "<flywheel-repo>",
   "ship_actor": "codex",
   "git_ref": "def456",
   "action_ledger_pointer": ".flywheel/dispatch-log.jsonl#L11",

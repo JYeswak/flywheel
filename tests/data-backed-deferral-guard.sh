@@ -224,8 +224,8 @@ assert_tick_score_threshold_fixture() {
     action_in_doctrine:true,
     pagerank_pick:"flywheel-next-pagerank",
     suggested_action:"dispatch flywheel-next-pagerank via canonical dispatch enforcement",
-    draft_question:"Should I ask Joshua whether to dispatch flywheel-next-pagerank?",
-    draft_text:"Should I ask Joshua whether to dispatch flywheel-next-pagerank?",
+    draft_question:"Should I ask {operator} whether to dispatch flywheel-next-pagerank?",
+    draft_text:"Should I ask {operator} whether to dispatch flywheel-next-pagerank?",
     signals:{
       idle_worker_count:1,
       ready_bead_count:1,

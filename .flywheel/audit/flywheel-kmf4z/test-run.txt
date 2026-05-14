@@ -1,9 +1,0 @@
-PASS config.toml dispatch_mode=cc_skill_loop
-PASS config.toml driver_kind=cc_skill_loop
-PASS marker preserves migration audit trail (from + bead + at) — survived writeback
-PASS probe resolves dispatch_mode=cc_skill_loop (config.toml precedence holds)
-PASS probe source recognizes cc_skill_loop string
-PASS live probe: driver_status=NOT_APPLICABLE_CC
-PASS live probe: status=warn errors=0 (AC met — was fail/2-errors before)
-PASS audit pack has pre-migration backups (loop-state.before.json + config.toml.before)
-SUMMARY pass=8 fail=0

@@ -5,7 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 GATE="$ROOT/.flywheel/scripts/auto-l112-gate.sh"
 CLOSE="$ROOT/.flywheel/scripts/br-close-with-gate.sh"
 REAL_HOME="$(dscl . -read "/Users/$(id -un)" NFSHomeDirectory 2>/dev/null | awk '{print $2}' || true)"
-REAL_HOME="${REAL_HOME:-/Users/josh}"
+REAL_HOME="${REAL_HOME:-$HOME}"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/auto-l112-gate-orch-adoption.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 

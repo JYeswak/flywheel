@@ -1,1 +1,0 @@
-{"schema_version":"fuckup-coverage-join/v1","command":"examples","examples":[{"name":"default run","invocation":"fuckup-coverage-join.sh","purpose":"backward-compatible original behavior"},{"name":"doctor","invocation":"fuckup-coverage-join.sh doctor --json","purpose":"probe substrate health"}]}

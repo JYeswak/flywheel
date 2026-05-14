@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-BIN="/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop"
+BIN="<flywheel-state>/bin/flywheel-loop"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/fleet-coherence-step4i.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 

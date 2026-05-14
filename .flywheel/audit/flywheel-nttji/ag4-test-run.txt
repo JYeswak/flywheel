@@ -1,8 +1,0 @@
-PASS T1a JSON exposes target_discovery_timeout_count field
-PASS T1b JSON exposes target_discovery_timeout_roots field
-PASS T1c JSON exposes target_discovery_timeout_seconds field
-PASS T2 explicit-root dry-run shows 0 timeouts (short-circuit path)
-NOTE T3 synthetic-fixture run did not produce parseable JSON (downstream stage may have choked); inconclusive
-
-=== test-sync-canonical-discovery-timeout.sh ===
-pass=4 fail=0

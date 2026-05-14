@@ -1,0 +1,492 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+ENGINE_ROOT="$(cd "$SELF_DIR/.." && pwd -P)"
+PREFLIGHT="$ENGINE_ROOT/scripts/preflight.sh"
+VERSION="flywheel-public-spine/v0"
+
+usage() {
+  cat <<'EOF'
+usage:
+  flywheel preflight [args...]
+  flywheel init --repo PATH --json
+  flywheel doctor --repo PATH --json
+  flywheel health --json
+  flywheel repair --scope reduced --repo PATH --dry-run --json
+  flywheel validate repo --repo PATH --json
+  flywheel validate receipt --repo PATH --file PATH --json
+  flywheel audit --repo PATH --json
+  flywheel why ID --json
+  flywheel tick --repo PATH --dry-run --json
+  flywheel dispatch --repo PATH --simulate --json
+  flywheel validate-receipt --repo PATH --file PATH --json
+  flywheel inspect --repo PATH --json
+  flywheel quickstart --json
+  flywheel help TOPIC --json
+  flywheel completion bash|zsh
+  flywheel --examples
+  flywheel --info
+
+Planned commands that are not public-release-ready yet:
+  full-mode harness dispatch through NTM/Agent Mail
+EOF
+}
+
+die_usage() {
+  printf 'ERROR: %s\n' "$1" >&2
+  usage >&2
+  exit 64
+}
+
+repo_abs() {
+  local repo="$1"
+  [[ -d "$repo" ]] || {
+    printf 'ERROR: repo not found: %s\n' "$repo" >&2
+    exit 30
+  }
+  (cd "$repo" && pwd -P)
+}
+
+json_string_array() {
+  jq -Rsc 'split("\n")[:-1]'
+}
+
+emit_examples() {
+  jq -nc '{
+    schema_version:"flywheel.examples.v0",
+    command:"examples",
+    examples:[
+      {name:"preflight", command:"flywheel preflight --json"},
+      {name:"initialize reduced state", command:"flywheel init --repo \"$PWD\" --json"},
+      {name:"diagnose reduced state", command:"flywheel doctor --repo \"$PWD\" --json"},
+      {name:"dry-run next tick", command:"flywheel tick --repo \"$PWD\" --dry-run --json"},
+      {name:"simulate dispatch and closeout", command:"flywheel dispatch --repo \"$PWD\" --simulate --json"},
+      {name:"validate closeout", command:"flywheel validate receipt --repo \"$PWD\" --file .flywheel/last_closeout_receipt.json --json"}
+    ]
+  }'
+}
+
+quickstart_cmd() {
+  if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    printf 'usage: flywheel quickstart [--json]\n'
+    return 0
+  fi
+  jq -nc '{
+    schema_version:"flywheel.quickstart.v0",
+    command:"quickstart",
+    status:"ok",
+    steps:[
+      {step:1, command:"flywheel preflight --json", purpose:"check local dependencies"},
+      {step:2, command:"flywheel init --repo \"$PWD\" --json", purpose:"create repo-local reduced-mode state"},
+      {step:3, command:"flywheel doctor --repo \"$PWD\" --json", purpose:"verify the repo can proceed"},
+      {step:4, command:"flywheel tick --repo \"$PWD\" --dry-run --json", purpose:"preview the next loop action"},
+      {step:5, command:"flywheel dispatch --repo \"$PWD\" --simulate --json", purpose:"write a simulated closeout receipt"},
+      {step:6, command:"flywheel inspect --repo \"$PWD\" --json", purpose:"read the next actionable step"}
+    ]
+  }'
+}
+
+help_topic() {
+  local topic="${1:-overview}"
+  if [[ "$topic" == "-h" || "$topic" == "--help" ]]; then
+    printf 'usage: flywheel help [topic] [--json]\n'
+    return 0
+  fi
+  jq -nc --arg topic "$topic" '{
+    schema_version:"flywheel.help.v0",
+    command:"help",
+    topic:$topic,
+    text:(
+      if $topic == "repair" then "repair is dry-run first and only initializes missing reduced-mode repo state when --apply is supplied"
+      elif $topic == "validate" then "validate repo runs the reduced doctor; validate receipt checks simulated closeout receipts"
+      elif $topic == "audit" then "audit reports repo-local Flywheel receipts and runtime surfaces without reading private fleet state"
+      elif $topic == "why" then "why returns provenance pointers for public CLI objects and known beads"
+      elif $topic == "completion" then "completion emits bash or zsh shell completion"
+      else "Flywheel public CLI supports reduced-mode first-run commands without requiring NTM or Agent Mail"
+      end
+    )
+  }'
+}
+
+completion_cmd() {
+  local shell_name="${1:-}"
+  if [[ "$shell_name" == "-h" || "$shell_name" == "--help" || -z "$shell_name" ]]; then
+    printf 'usage: flywheel completion bash|zsh\n'
+    return 0
+  fi
+  case "$shell_name" in
+    bash)
+      cat <<'EOF'
+_flywheel_completion() {
+  COMPREPLY=($(compgen -W "preflight init doctor health repair validate audit why tick dispatch validate-receipt inspect quickstart help completion --info --examples --help" -- "${COMP_WORDS[COMP_CWORD]}"))
+}
+complete -F _flywheel_completion flywheel
+EOF
+      ;;
+    zsh)
+      cat <<'EOF'
+#compdef flywheel
+compadd preflight init doctor health repair validate audit why tick dispatch validate-receipt inspect quickstart help completion --info --examples --help
+EOF
+      ;;
+    *) die_usage "completion shell must be bash or zsh" ;;
+  esac
+}
+
+parse_repo_json_flags() {
+  REPO=""
+  JSON_OUT=0
+  DRY_RUN=0
+  SIMULATE=0
+  FILE_ARG=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --repo) [[ $# -ge 2 ]] || die_usage "--repo requires PATH"; REPO="$2"; shift 2 ;;
+      --repo=*) REPO="${1#*=}"; shift ;;
+      --json) JSON_OUT=1; shift ;;
+      --dry-run) DRY_RUN=1; shift ;;
+      --simulate) SIMULATE=1; shift ;;
+      --file) [[ $# -ge 2 ]] || die_usage "--file requires PATH"; FILE_ARG="$2"; shift 2 ;;
+      --file=*) FILE_ARG="${1#*=}"; shift ;;
+      *) die_usage "unknown argument: $1" ;;
+    esac
+  done
+  [[ -n "$REPO" ]] || die_usage "--repo is required"
+  REPO="$(repo_abs "$REPO")"
+}
+
+parse_repair_flags() {
+  REPO=""
+  JSON_OUT=0
+  DRY_RUN=0
+  APPLY=0
+  SCOPE="reduced"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --repo) [[ $# -ge 2 ]] || die_usage "--repo requires PATH"; REPO="$2"; shift 2 ;;
+      --repo=*) REPO="${1#*=}"; shift ;;
+      --json) JSON_OUT=1; shift ;;
+      --dry-run) DRY_RUN=1; shift ;;
+      --apply) APPLY=1; shift ;;
+      --scope) [[ $# -ge 2 ]] || die_usage "--scope requires NAME"; SCOPE="$2"; shift 2 ;;
+      --scope=*) SCOPE="${1#*=}"; shift ;;
+      *) die_usage "unknown argument: $1" ;;
+    esac
+  done
+  [[ -n "$REPO" ]] || die_usage "--repo is required"
+  REPO="$(repo_abs "$REPO")"
+}
+
+init_repo() {
+  parse_repo_json_flags "$@"
+  local fw="$REPO/.flywheel" created
+  mkdir -p "$fw/runtime" "$fw/receipts"
+  created="$(
+    for p in .flywheel .flywheel/runtime .flywheel/receipts; do printf '%s\n' "$p"; done
+  )"
+  if [[ ! -f "$fw/GOAL.md" ]]; then
+    cat >"$fw/GOAL.md" <<'EOF'
+# Goal
+
+Use Flywheel reduced mode to keep the repo's first AI-assisted work loop
+inspectable without copying private fleet state.
+EOF
+    created="$created"$'\n'".flywheel/GOAL.md"
+  fi
+  if [[ ! -f "$fw/STATE.md" ]]; then
+    cat >"$fw/STATE.md" <<'EOF'
+# State
+
+status: initialized
+mode: reduced
+next_action: run flywheel doctor --repo "$PWD" --json
+EOF
+    created="$created"$'\n'".flywheel/STATE.md"
+  fi
+  jq -nc --arg repo "$REPO" --argjson paths "$(printf '%s\n' "$created" | json_string_array)" '{
+    schema_version:"flywheel.init.v0",
+    command:"init",
+    status:"initialized",
+    mode:"reduced",
+    repo:$repo,
+    created_paths:$paths,
+    private_state_scan:{
+      status:"pass",
+      forbidden_patterns:["private absolute home path","runtime rate-limit state","agent-mail archive","pane scrollback"],
+      findings:[]
+    },
+    next_action:{kind:"continue",command:"flywheel doctor --repo \"$PWD\" --json"}
+  }'
+}
+
+doctor_repo() {
+  parse_repo_json_flags "$@"
+  local status="pass" missing=()
+  [[ -d "$REPO/.flywheel" ]] || { status="fail"; missing+=(".flywheel"); }
+  [[ -f "$REPO/.flywheel/GOAL.md" ]] || { status="fail"; missing+=(".flywheel/GOAL.md"); }
+  [[ -f "$REPO/.flywheel/STATE.md" ]] || { status="fail"; missing+=(".flywheel/STATE.md"); }
+  jq -nc --arg repo "$REPO" --arg status "$status" --argjson missing "$(printf '%s\n' "${missing[@]:-}" | sed '/^$/d' | json_string_array)" '{
+    schema_version:"flywheel.doctor.v0",
+    command:"doctor",
+    status:$status,
+    mode:"reduced",
+    repo:$repo,
+    stable_codes:(if $status == "pass" then [] else ["repo_not_initialized"] end),
+    missing:$missing,
+    next_action:(if $status == "pass" then {kind:"continue",command:"flywheel tick --repo \"$PWD\" --dry-run --json"} else {kind:"init",command:"flywheel init --repo \"$PWD\" --json"} end)
+  }'
+  [[ "$status" == "pass" ]] || exit 30
+}
+
+repair_repo() {
+  if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    printf 'usage: flywheel repair --scope reduced --repo PATH --dry-run|--apply --json\n'
+    return 0
+  fi
+  parse_repair_flags "$@"
+  [[ "$DRY_RUN" -eq 1 || "$APPLY" -eq 1 ]] || die_usage "repair requires --dry-run or --apply"
+  local planned=()
+  [[ -d "$REPO/.flywheel" ]] || planned+=("create .flywheel/")
+  [[ -f "$REPO/.flywheel/GOAL.md" ]] || planned+=("create .flywheel/GOAL.md")
+  [[ -f "$REPO/.flywheel/STATE.md" ]] || planned+=("create .flywheel/STATE.md")
+  if [[ "$APPLY" -eq 1 && "${#planned[@]}" -gt 0 ]]; then
+    init_repo --repo "$REPO" --json >/dev/null
+  fi
+  jq -nc \
+    --arg repo "$REPO" \
+    --arg scope "$SCOPE" \
+    --argjson dry_run "$([[ "$DRY_RUN" -eq 1 ]] && printf true || printf false)" \
+    --argjson apply "$([[ "$APPLY" -eq 1 ]] && printf true || printf false)" \
+    --argjson planned "$(printf '%s\n' "${planned[@]:-}" | sed '/^$/d' | json_string_array)" '{
+      schema_version:"flywheel.repair.v0",
+      command:"repair",
+      status:"pass",
+      mode:"reduced",
+      scope:$scope,
+      repo:$repo,
+      dry_run:$dry_run,
+      apply:$apply,
+      planned_actions:$planned,
+      actual_actions:(if $apply then $planned else [] end),
+      would_write:(if $dry_run then $planned else [] end)
+    }'
+}
+
+validate_cmd() {
+  if [[ "${1:-}" == "-h" || "${1:-}" == "--help" || $# -eq 0 ]]; then
+    printf 'usage: flywheel validate repo|receipt --repo PATH [--file PATH] --json\n'
+    return 0
+  fi
+  local thing="$1"
+  shift
+  case "$thing" in
+    repo) doctor_repo "$@" ;;
+    receipt) validate_receipt "$@" ;;
+    *) die_usage "validate target must be repo or receipt" ;;
+  esac
+}
+
+audit_repo() {
+  if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    printf 'usage: flywheel audit --repo PATH --json\n'
+    return 0
+  fi
+  parse_repo_json_flags "$@"
+  local receipt="$REPO/.flywheel/last_closeout_receipt.json"
+  local runtime="$REPO/.flywheel/runtime/last_dispatch.json"
+  jq -nc \
+    --arg repo "$REPO" \
+    --arg receipt "$receipt" \
+    --arg runtime "$runtime" \
+    --argjson receipt_present "$([[ -f "$receipt" ]] && printf true || printf false)" \
+    --argjson runtime_present "$([[ -f "$runtime" ]] && printf true || printf false)" '{
+      schema_version:"flywheel.audit.v0",
+      command:"audit",
+      status:"pass",
+      repo:$repo,
+      writes_are_repo_local:true,
+      mutation_ledgers:[
+        {path:$receipt,present:$receipt_present,kind:"closeout_receipt"},
+        {path:$runtime,present:$runtime_present,kind:"simulated_dispatch"}
+      ]
+    }'
+}
+
+why_cmd() {
+  if [[ "${1:-}" == "-h" || "${1:-}" == "--help" || $# -eq 0 ]]; then
+    printf 'usage: flywheel why ID [--json]\n'
+    return 0
+  fi
+  local id="$1"
+  jq -nc --arg id "$id" '{
+    schema_version:"flywheel.why.v0",
+    command:"why",
+    id:$id,
+    status:"pass",
+    provenance:[
+      "docs/getting-started/first-run.md",
+      "scripts/journey-smoke.sh",
+      ".flywheel/last_closeout_receipt.json"
+    ],
+    note:"Public CLI provenance is repo-local and reduced-mode safe; full fleet provenance remains in flywheel-loop."
+  }'
+}
+
+tick_repo() {
+  parse_repo_json_flags "$@"
+  [[ "$DRY_RUN" -eq 1 ]] || die_usage "reduced-mode tick currently requires --dry-run"
+  [[ -d "$REPO/.flywheel" ]] || {
+    printf 'ERROR: repo is not initialized; run flywheel init first\n' >&2
+    exit 30
+  }
+  jq -nc --arg repo "$REPO" --arg generated "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" '{
+    schema_version:"flywheel.tick.v0",
+    command:"tick",
+    status:"pass",
+    mode:"reduced",
+    dry_run:true,
+    repo:$repo,
+    generated_at:$generated,
+    next_action:{kind:"simulate-dispatch",command:"flywheel dispatch --repo \"$PWD\" --simulate --json"}
+  }'
+}
+
+dispatch_repo() {
+  parse_repo_json_flags "$@"
+  [[ "$SIMULATE" -eq 1 ]] || die_usage "reduced-mode dispatch requires --simulate"
+  [[ -d "$REPO/.flywheel" ]] || {
+    printf 'ERROR: repo is not initialized; run flywheel init first\n' >&2
+    exit 30
+  }
+  mkdir -p "$REPO/.flywheel/runtime"
+  local receipt="$REPO/.flywheel/last_closeout_receipt.json"
+  jq -nc --arg repo "$REPO" --arg generated "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" '{
+    schema_version:"flywheel.closeout.v0",
+    command:"dispatch",
+    status:"pass",
+    mode:"reduced",
+    repo:$repo,
+    generated_at:$generated,
+    real_dispatch:false,
+    callback_contract:{required:true, simulated:true, ack:"reduced-mode simulator wrote this receipt"},
+    unavailable_claims:["multi-agent coordination","shared inboxes","cross-session memory"],
+    next_action:{kind:"inspect",command:"flywheel inspect --repo \"$PWD\" --json"}
+  }' >"$receipt"
+  cp "$receipt" "$REPO/.flywheel/runtime/last_dispatch.json"
+  jq -nc --arg repo "$REPO" --arg receipt "$receipt" '{
+    schema_version:"flywheel.dispatch.v0",
+    command:"dispatch",
+    status:"pass",
+    mode:"reduced",
+    repo:$repo,
+    real_dispatch:false,
+    receipt:$receipt,
+    callback_contract:{required:true, simulated:true},
+    next_action:{kind:"validate",command:"flywheel validate-receipt --repo \"$PWD\" --file .flywheel/last_closeout_receipt.json --json"}
+  }'
+}
+
+validate_receipt() {
+  parse_repo_json_flags "$@"
+  [[ -n "$FILE_ARG" ]] || FILE_ARG="$REPO/.flywheel/last_closeout_receipt.json"
+  [[ "$FILE_ARG" == /* ]] || FILE_ARG="$REPO/$FILE_ARG"
+  [[ -f "$FILE_ARG" ]] || {
+    printf 'ERROR: receipt not found: %s\n' "$FILE_ARG" >&2
+    exit 30
+  }
+  if jq -e '
+    .schema_version == "flywheel.closeout.v0"
+    and .status == "pass"
+    and .mode == "reduced"
+    and .real_dispatch == false
+    and (.next_action.kind == "inspect")
+  ' "$FILE_ARG" >/dev/null; then
+    jq -nc --arg repo "$REPO" --arg file "$FILE_ARG" '{
+      schema_version:"flywheel.validate_receipt.v0",
+      command:"validate-receipt",
+      status:"pass",
+      repo:$repo,
+      file:$file,
+      failure_classes:[],
+      next_action:{kind:"inspect",command:"flywheel inspect --repo \"$PWD\" --json"}
+    }'
+  else
+    jq -nc --arg repo "$REPO" --arg file "$FILE_ARG" '{
+      schema_version:"flywheel.validate_receipt.v0",
+      command:"validate-receipt",
+      status:"fail",
+      repo:$repo,
+      file:$file,
+      failure_classes:["invalid_reduced_mode_receipt"]
+    }'
+    exit 30
+  fi
+}
+
+inspect_repo() {
+  parse_repo_json_flags "$@"
+  local receipt="$REPO/.flywheel/last_closeout_receipt.json"
+  local receipt_status="missing"
+  [[ -f "$receipt" ]] && receipt_status="present"
+  jq -nc --arg repo "$REPO" --arg receipt "$receipt" --arg receipt_status "$receipt_status" --slurpfile r "$receipt" '{
+    schema_version:"flywheel.inspect.v0",
+    command:"inspect",
+    status:(if $receipt_status == "present" then "pass" else "warn" end),
+    repo:$repo,
+    receipt:{path:$receipt,status:$receipt_status},
+    next_action:(if $receipt_status == "present" then $r[0].next_action else {kind:"dispatch",command:"flywheel dispatch --repo \"$PWD\" --simulate --json"} end)
+  }'
+}
+
+case "${1:-}" in
+  preflight)
+    shift
+    exec "$PREFLIGHT" "$@"
+    ;;
+  doctor)
+    shift
+    if [[ "${1:-}" == --repo* ]]; then
+      doctor_repo "$@"
+    else
+      exec "$PREFLIGHT" doctor "$@"
+    fi
+    ;;
+  health)
+    shift
+    exec "$PREFLIGHT" health "$@"
+    ;;
+  repair) shift; repair_repo "$@" ;;
+  validate) shift; validate_cmd "$@" ;;
+  audit) shift; audit_repo "$@" ;;
+  why) shift; why_cmd "$@" ;;
+  init) shift; init_repo "$@" ;;
+  tick) shift; tick_repo "$@" ;;
+  dispatch) shift; dispatch_repo "$@" ;;
+  validate-receipt) shift; validate_receipt "$@" ;;
+  inspect) shift; inspect_repo "$@" ;;
+  quickstart) shift; quickstart_cmd "$@" ;;
+  completion) shift; completion_cmd "$@" ;;
+  --examples|examples)
+    emit_examples
+    ;;
+  --info)
+    jq -nc --arg version "$VERSION" --arg engine "$ENGINE_ROOT" '{
+      schema_version:"flywheel.cli.v0",
+      command:"info",
+      version:$version,
+      engine_root:$engine,
+      implemented:["preflight","init","doctor","health","repair","validate","audit","why","tick","dispatch --simulate","validate-receipt","inspect","quickstart","help","completion"],
+      planned:["full-mode dispatch","harness-backed journey smoke"]
+    }'
+    ;;
+  help) shift; help_topic "$@" ;;
+  -h|--help|"")
+    usage
+    ;;
+  *)
+    printf 'ERROR: unknown command: %s\n' "$1" >&2
+    usage >&2
+    exit 64
+    ;;
+esac

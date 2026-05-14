@@ -86,7 +86,7 @@ assert_manifest_error() {
   assert_no_traceback "$err" "${label}_no_traceback"
 }
 
-repo="$TMP/alps-fixture"
+repo="$TMP/strict-client-fixture"
 manifest="$repo/.flywheel/polish-gate/manifest.json"
 mkdir -p \
   "$repo/.flywheel/wire-or-explain-ledger" \
@@ -143,8 +143,8 @@ pass json_validates_against_schema
 
 assert_jq "$out" '.surfaces[] | select(.path == ".flywheel/wire-or-explain-ledger/writer.py" and .in_scope == true and .category == "cli-script")' "wave0_style_substrate_in_scope"
 assert_jq "$out" '.scope_excluded[] | select(.path == "src/insurance-policies/policy_model.py")' "client_domain_code_excluded"
-assert_jq "$out" 'all(.surfaces[]; (.path | startswith(".flywheel/")))' "alps_only_flywheel_in_scope"
-assert_jq "$out" '.scope_excluded[] | select(.path == "scripts/fetch_run_log.py" and .reason == "root-domain-not-substrate")' "alps_root_domain_reason"
+assert_jq "$out" 'all(.surfaces[]; (.path | startswith(".flywheel/")))' "strict_client_only_flywheel_in_scope"
+assert_jq "$out" '.scope_excluded[] | select(.path == "scripts/fetch_run_log.py" and .reason == "root-domain-not-substrate")' "strict_client_root_domain_reason"
 
 explain="$TMP/explain.txt"
 python3 "$SCRIPT" --repo "$repo" --manifest "$manifest" --explain >"$explain"

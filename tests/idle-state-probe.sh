@@ -81,7 +81,7 @@ out="$(run_probe --config "$TMP/config-filtered.json")"
 jq -e '.idle_state_class[0].idle_state_class == "disabled_class" and .idle_state_class[0].disabled_original_class == "saturated"' <<<"$out" >/dev/null \
   || fail "classes_active filter did not suppress saturated"
 
-out="$("$PROBE" --json --repo "$ROOT" --session skillos \
+out="$("$PROBE" --json --repo "$ROOT" --session {capability-control-plane} \
   --activity-fixture "$TMP/activity.json" \
   --ready-fixture "$TMP/ready.json" \
   --mission-fixture "$TMP/mission.json" \

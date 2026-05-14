@@ -1,1 +1,0 @@
-{"schema_version":"fuckup-coverage-join/v1","command":"validate","subject":"fuckup-class","ts":"2026-05-11T05:56:39Z","status":"ok","value":"stuck_pane_detector_freeze","note":"matches canonical fuckup_class shape (snake_case)"}

@@ -69,7 +69,7 @@ Run:
 \`\`\`
 
 Contract version: four-lens-close-validator/v1.
-Four-Lens Self-Grade: brand voice pass; Joshua sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
+Four-Lens Self-Grade: brand voice pass; {operator} sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
 Outcome: Bash 3.2 validation proof prevents close-gate crashes on macOS default shells.
 Result: close path stays blocked until evidence is specific, executable, and public-grade.
 Operator note: direct /bin/bash invocation exercises the compatibility path, not Homebrew bash.

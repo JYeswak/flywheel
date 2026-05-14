@@ -13,7 +13,7 @@ fail_count=0
 pass() { printf 'PASS %s\n' "$1"; pass_count=$((pass_count + 1)); }
 fail() { printf 'FAIL %s\n' "$1" >&2; fail_count=$((fail_count + 1)); }
 
-sessions=(flywheel alpsinsurance clutterfreespaces picoz skillos vrtx zeststream-v2 mobile-eats)
+sessions=(flywheel {session} clutterfreespaces {session} {capability-control-plane} vrtx zeststream-v2 {proof-product})
 mkdir -p "$TMP/repos" "$TMP/state" "$TMP/snaps" "$TMP/launch" "$DRILL_DIR"
 repo_json="$TMP/repo-map.json"; jq -nc '{}' >"$repo_json"
 for session in "${sessions[@]}"; do
@@ -41,8 +41,8 @@ done
 
 FLYWHEEL_RECOVERY_RESTORE_APPROVAL=JOSHUA_APPROVED FLYWHEEL_RECOVERY_NOW="2026-05-07T03:20:00Z" \
   "$RESTORE" --apply --idempotency-key blocked-drill --manifest "$manifest" --restore-root "$TMP/restore-blocked" --receipt-dir "$TMP/receipts-blocked" --json >"$TMP/blocked.json"
-jq -e '.status=="applied" and (.protected_sessions_restore_blocked|length)==2 and any(.actions[]; .session=="picoz" and .action=="audit_only")' "$TMP/blocked.json" >/dev/null && pass "protected_blocked_path" || fail "protected_blocked_path"
-[[ ! -e "$TMP/restore-blocked/picoz/.beads/issues.jsonl" && ! -e "$TMP/restore-blocked/alpsinsurance/.beads/issues.jsonl" ]] && pass "protected_not_restored_without_policy" || fail "protected_not_restored_without_policy"
+jq -e '.status=="applied" and (.protected_sessions_restore_blocked|length)==2 and any(.actions[]; .session=="{session}" and .action=="audit_only")' "$TMP/blocked.json" >/dev/null && pass "protected_blocked_path" || fail "protected_blocked_path"
+[[ ! -e "$TMP/restore-blocked/{session}/.beads/issues.jsonl" && ! -e "$TMP/restore-blocked/{session}/.beads/issues.jsonl" ]] && pass "protected_not_restored_without_policy" || fail "protected_not_restored_without_policy"
 
 drill="$DRILL_DIR/drill-20260507T032000Z.json"
 jq -n \

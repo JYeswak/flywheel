@@ -1,1 +1,0 @@
-{"schema_version":"flywheel-codex-stuck-detector-install/v1","command":"validate","subject":"install-mode","ts":"2026-05-11T05:46:17Z","status":"ok","value":"apply","source":"native --apply/--dry-run flag contract"}

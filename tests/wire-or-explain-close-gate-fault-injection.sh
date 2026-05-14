@@ -122,7 +122,7 @@ assert_jq "$TMP/fm7.json" '.allowed == false and any(.top_actions[]; .identity_k
 assert_surfaces fm7 fm7-stale-consumer-superseded
 
 run_gate relay_missing missing-relay 0 shadow
-assert_jq "$TMP/relay_missing.json" '.skill_candidate_count == 1 and any(.top_actions[]; .route.action == "route_to_skillos" and .next_action == "route_skill_candidate_rows_to_skillos_or_record_deferral")' "relay_missing_routes_to_skillos"
+assert_jq "$TMP/relay_missing.json" '.skill_candidate_count == 1 and any(.top_actions[]; .route.action == "route_to_{capability-control-plane}" and .next_action == "route_skill_candidate_rows_to_{capability-control-plane}_or_record_deferral")' "relay_missing_routes_to_{capability-control-plane}"
 assert_surfaces relay_missing relay-missing-skill-candidate
 
 run_gate relay_duplicate duplicate-relay 0 shadow
@@ -137,9 +137,9 @@ run_gate relay_stale stale-relay 0 shadow
 assert_jq "$TMP/relay_stale.json" 'any(.top_actions[]; .identity_key == "relay-stale-overdue-skill-candidate" and .age_hours > 24)' "relay_stale_overdue_action"
 assert_jq "$FIXTURES/stale-relay/rows.json" '.[0].metadata.expires_at < "2026-05-05T12:00:00Z"' "relay_stale_fixture_expired"
 
-run_gate skillos_unavailable skillos-unavailable 1 enforce
-assert_jq "$TMP/skillos_unavailable.json" '.allowed == false and .reason_code == "unresolved_local_rows" and any(.top_actions[]; .route.target == "skillos" and .predicate == "skillos_unavailable")' "relay_skillos_unavailable_not_silent"
-assert_surfaces skillos_unavailable relay-skillos-unavailable
+run_gate {capability-control-plane}_unavailable {capability-control-plane}-unavailable 1 enforce
+assert_jq "$TMP/{capability-control-plane}_unavailable.json" '.allowed == false and .reason_code == "unresolved_local_rows" and any(.top_actions[]; .route.target == "{capability-control-plane}" and .predicate == "{capability-control-plane}_unavailable")' "relay_{capability-control-plane}_unavailable_not_silent"
+assert_surfaces {capability-control-plane}_unavailable relay-{capability-control-plane}-unavailable
 
 run_gate ntm_chain ntm-chain-break 1 enforce
 set +e

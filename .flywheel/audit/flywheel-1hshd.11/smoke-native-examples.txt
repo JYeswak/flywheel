@@ -1,3 +1,0 @@
-canonical-root-drift-fleet-check.sh --json
-canonical-root-drift-fleet-check.sh --root /Users/josh/Developer --timeout 20 --json
-CANONICAL_ROOT_DRIFT_SYNC=/tmp/fake-sync.sh canonical-root-drift-fleet-check.sh --timeout 1 --json

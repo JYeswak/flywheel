@@ -78,7 +78,7 @@ expect_rc "$rc" 64 "repair unknown rc=64"
 # --- validate (NEW canonical 3-subject contract) ---
 
 # Test 12: validate session-name OK
-"$SCRIPT" validate session-name skillos >"$TMP/v-sn.json"
+"$SCRIPT" validate session-name {capability-control-plane} >"$TMP/v-sn.json"
 expect_jq "$TMP/v-sn.json" '.status == "ok"' "validate session-name OK"
 
 # Test 13: validate threshold-seconds in range
@@ -111,7 +111,7 @@ expect_jq "$TMP/a-empty.json" '.status == "missing" or .status == "empty"' "audi
 
 # Test 19: audit with rows
 TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-printf '{"ts":"%s","session":"skillos","productivity_state":"productive"}\n' "$TS" > "$LOG"
+printf '{"ts":"%s","session":"{capability-control-plane}","productivity_state":"productive"}\n' "$TS" > "$LOG"
 SCAFFOLD_AUDIT_LOG="$LOG" "$SCRIPT" audit --json >"$TMP/a-row.json"
 expect_jq "$TMP/a-row.json" '(.status == "pass" or .status == "ok") and (.row_count == 1 or (.rows|length) == 1)' "audit with row"
 

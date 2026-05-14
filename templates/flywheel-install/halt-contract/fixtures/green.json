@@ -16,6 +16,6 @@
   ],
   "repair_actions": [],
   "owner": "repo_orch",
-  "expires_at": "2026-05-05T00:00:00Z",
+  "expires_at": "<timestamp>",
   "reason": "ordinary tick; all catalogued dispatch classes may proceed"
 }

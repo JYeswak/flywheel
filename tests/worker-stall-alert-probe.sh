@@ -23,7 +23,7 @@ assert_jq() {
 }
 
 jq -nc '{
-  session:"alpsinsurance",
+  session:"{session}",
   worker_panes:[2],
   orchestrator_pane:1,
   callback_pane:1,
@@ -61,7 +61,7 @@ assert_jq "$TMP/info.json" '.schema_version == "worker-stall-alert-probe/v1" and
 assert_jq "$TMP/schema.json" '.properties.worker_stall_candidate_count.type == "integer"' "schema JSON"
 
 FAKE_NTM_SENDS="$TMP/sends.log" NTM_BIN="$fake_ntm" "$SCRIPT" \
-  --session alpsinsurance \
+  --session {session} \
   --repo "$TMP/repo" \
   --state-dir "$TMP/state" \
   --activity-fixture "$TMP/activity.json" \
@@ -73,7 +73,7 @@ FAKE_NTM_SENDS="$TMP/sends.log" NTM_BIN="$fake_ntm" "$SCRIPT" \
 assert_jq "$TMP/first.json" '.worker_stall_candidate_count == 0 and .alerts_sent_count == 0' "first tick only records observation"
 
 FAKE_NTM_SENDS="$TMP/sends.log" NTM_BIN="$fake_ntm" "$SCRIPT" \
-  --session alpsinsurance \
+  --session {session} \
   --repo "$TMP/repo" \
   --state-dir "$TMP/state" \
   --activity-fixture "$TMP/activity.json" \

@@ -1,1 +1,0 @@
-{"schema_version":"test-fuckup-join/v1","command":"schema","surface":"validate","subjects":["jsonl-path","trauma-class","audit-row"],"contract":{"rejects_with_rc1":"on schema violation","jsonl_path_extension":".jsonl","trauma_class_pattern":"^[a-z][a-z0-9_-]*$"}}

@@ -1,1 +1,0 @@
-{"schema_version":"recovery-preinstall-audit/v1","command":"validate","subject":"agent-mail","liveness_url":"http://127.0.0.1:8765/health/liveness","status":"pass","http_code":"200","note":"probe agent-mail HTTP liveness endpoint"}

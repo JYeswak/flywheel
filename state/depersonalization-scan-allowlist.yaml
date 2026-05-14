@@ -1,0 +1,156 @@
+schema_version: flywheel.depersonalization_scan_allowlist.v0
+rows:
+  - id: public-brand-naming-doc-zeststream
+    path_pattern: "brand/naming-conventions.md"
+    row_id: zeststream-company
+    reason: "Reviewed public brand/naming convention surface intentionally explains ZestStream ownership."
+  - id: public-readme-zeststream-owner
+    path_pattern: "README.md"
+    row_id: zeststream-company
+    reason: "Reviewed public package metadata intentionally names ZestStream as the engine operator."
+  - id: public-story-system-package-zeststream-metadata
+    root_pattern: "**/packages/zeststream-story-system"
+    path_pattern: "package.json"
+    row_id: zeststream-company
+    reason: "Reviewed public package metadata intentionally names the ZestStream story-system namespace."
+  - id: public-story-system-readme-zeststream-metadata
+    root_pattern: "**/packages/zeststream-story-system"
+    path_pattern: "README.md"
+    row_id: zeststream-company
+    reason: "Reviewed public package README intentionally names the ZestStream story-system namespace."
+  - id: public-charter-zeststream-owner
+    path_pattern: "CHARTER.md"
+    row_id: zeststream-company
+    reason: "Joshua-approved public charter intentionally names ZestStream ownership and commercial context."
+  - id: public-charter-operator-name
+    path_pattern: "CHARTER.md"
+    row_id: operator-full-name
+    reason: "Joshua-approved public charter intentionally names the maintainer/governance reviewer."
+  - id: public-charter-operator-first-name
+    path_pattern: "CHARTER.md"
+    row_id: operator-first-name
+    reason: "Joshua-approved public charter intentionally uses the maintainer's first name in governance text."
+  - id: public-charter-operator-email
+    path_pattern: "CHARTER.md"
+    row_id: operator-email
+    reason: "Joshua-approved public charter intentionally records the public review/contact trailer."
+  - id: public-license-zeststream-owner
+    path_pattern: "LICENSE"
+    row_id: zeststream-company
+    reason: "Reviewed public license intentionally names ZestStream.ai as copyright holder."
+  - id: public-support-zeststream-contact
+    path_pattern: "SUPPORT.md"
+    row_id: zeststream-company
+    reason: "Reviewed public support surface intentionally names ZestStream for commercial routing."
+  - id: public-story-zeststream-context
+    path_pattern: "stories/public-journey-and-redaction.md"
+    row_id: zeststream-company
+    reason: "Reviewed public story surface intentionally names ZestStream as the service operator while prohibiting private customer claims."
+  - id: public-release-runbook-version-tag
+    path_pattern: "runbooks/public-release-runbook.md"
+    row_id: bead-id
+    reason: "Reviewed public release runbook intentionally names semantic version v0.2.0; this is not a Bead identifier."
+  - id: public-release-runbook-operator-signoff
+    path_pattern: "runbooks/public-release-runbook.md"
+    row_id: operator-full-name
+    reason: "Reviewed public release runbook intentionally names the allowed release approver values."
+  - id: public-release-runbook-operator-first-name
+    path_pattern: "runbooks/public-release-runbook.md"
+    row_id: operator-first-name
+    reason: "Reviewed public release runbook intentionally names the allowed release approver values."
+  - id: public-link-checker-skillos-boundary-doc
+    path_pattern: "check_links.py"
+    row_id: skillos-session-name
+    reason: "Reviewed public link-checker manifest intentionally includes the SkillOS boundary doc path."
+  - id: public-contact-route-probe-email
+    path_pattern: "contact_route_probe.py"
+    row_id: operator-email
+    reason: "Reviewed contact-route probe intentionally asserts the public contact address."
+  - id: public-contact-routing-test-email
+    path_pattern: "contact-routing.sh"
+    row_id: operator-email
+    reason: "Reviewed contact-routing test intentionally asserts the public contact address."
+  - id: public-release-runbook-contact-email
+    path_pattern: "runbooks/public-release-runbook.md"
+    row_id: operator-email
+    reason: "Reviewed public release runbook intentionally names the public contact-route address."
+  - id: public-site-zeststream-brand
+    root_pattern: "**/site"
+    path_pattern: "**/*"
+    row_id: zeststream-company
+    reason: "Reviewed public website source intentionally names ZestStream as the commercial operator."
+  - id: public-site-operator-name
+    root_pattern: "**/site"
+    path_pattern: "**/*"
+    row_id: operator-full-name
+    reason: "Reviewed public about surface intentionally names the founder."
+  - id: public-site-operator-first-name
+    root_pattern: "**/site"
+    path_pattern: "**/*"
+    row_id: operator-first-name
+    reason: "Reviewed public about surface intentionally uses the founder's first name."
+  - id: public-site-operator-email
+    root_pattern: "**/site"
+    path_pattern: "**/*"
+    row_id: operator-email
+    reason: "Reviewed public website contact surfaces intentionally publish the public contact address."
+  - id: public-support-operator-email
+    path_pattern: "SUPPORT.md"
+    row_id: operator-email
+    reason: "Reviewed public support surface intentionally publishes the maintainer contact address."
+  - id: public-coc-operator-email
+    path_pattern: "CODE_OF_CONDUCT.md"
+    row_id: operator-email
+    reason: "Reviewed public code-of-conduct surface intentionally publishes the maintainer contact address."
+  - id: public-pr-template-zeststream-voice
+    path_pattern: "**/PULL_REQUEST_TEMPLATE.md"
+    row_id: zeststream-company
+    reason: "Reviewed public contribution metadata intentionally uses ZestStream brand voice language."
+  - id: denylist-fixture-agents-md-fleet-propagator
+    path_pattern: "agents-md-fleet-propagator.sh"
+    row_id: halted-propagator-agents-md-fleet
+    reason: "Reviewed regression test filename intentionally exercises the halted-propagator denylist row."
+  - id: denylist-fixture-token-paths
+    path_pattern: "cost-telemetry-token-burn-probe-canonical-cli.sh"
+    row_id: token-paths
+    reason: "Reviewed regression test filename intentionally exercises credential-state denylist coverage."
+  - id: public-story-system-design-tokens
+    root_pattern: "**/packages/zeststream-story-system"
+    path_pattern: "tokens.css"
+    row_id: token-paths
+    reason: "Reviewed public CSS design-token file; these are visual design tokens, not credential tokens."
+  - id: denylist-fixture-pane-capture-provenance
+    path_pattern: "pane-capture-provenance.sh"
+    row_id: tmux-pane-captures
+    reason: "Reviewed regression test filename intentionally exercises raw pane-capture denylist coverage."
+  - id: denylist-fixture-raw-capture-blocked
+    path_pattern: "test_pane_state_dispatch_raw_capture_blocked.sh"
+    row_id: tmux-pane-captures
+    reason: "Reviewed regression test filename intentionally exercises raw pane-capture denylist coverage."
+  - id: tests-fixture-iso-timestamps
+    path_pattern: "tests/**"
+    row_id: iso-timestamp
+    reason: "Reviewed tests-only synthetic runtime timestamps; docs/scripts/templates still fail if this row appears there."
+  - id: tests-fixture-bead-ids
+    path_pattern: "tests/**"
+    row_id: bead-id
+    reason: "Reviewed tests-only synthetic Bead IDs in historical receipts and fixtures; public surfaces remain blocked."
+  - id: tests-fixture-pane-numbers
+    path_pattern: "tests/**"
+    row_id: pane-number
+    reason: "Reviewed tests-only synthetic pane numbers in shell fixtures; public surfaces remain blocked."
+  - id: tests-root-fixture-iso-timestamps
+    root_pattern: "**/tests"
+    path_pattern: "**/*"
+    row_id: iso-timestamp
+    reason: "Reviewed tests-only synthetic runtime timestamps when the scan root is the tests directory."
+  - id: tests-root-fixture-bead-ids
+    root_pattern: "**/tests"
+    path_pattern: "**/*"
+    row_id: bead-id
+    reason: "Reviewed tests-only synthetic Bead IDs when the scan root is the tests directory."
+  - id: tests-root-fixture-pane-numbers
+    root_pattern: "**/tests"
+    path_pattern: "**/*"
+    row_id: pane-number
+    reason: "Reviewed tests-only synthetic pane numbers when the scan root is the tests directory."

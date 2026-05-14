@@ -1,1 +1,0 @@
-{"schema_version":"hub-blocker-detect/v1","command":"validate","subject":"signal","ts":"2026-05-11T06:06:29Z","status":"reject","value":"phantom","reason":"not_in_enum","valid_signals":["GREEN","YELLOW","RED"]}

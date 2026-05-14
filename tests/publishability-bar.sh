@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/.flywheel/scripts/publishability-bar.sh"
-LOOP="/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop"
+LOOP="<flywheel-state>/bin/flywheel-loop"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 
@@ -25,9 +25,9 @@ make_repo() {
             printf '| F%s | Facet %s | %s | fixture |\n' "$i" "$i" "$verdict"
         done
         if [[ -n "$score" ]]; then
-            printf '\n## ZestStream Voice Gate\n\n'
+            printf '\n## {operator-company} Voice Gate\n\n'
             printf '%s\n' "| field | value |" "|---|---|"
-            printf '| ZestStream voice score | %s |\n' "$score"
+            printf '| {operator-company} voice score | %s |\n' "$score"
             printf '| Banned words count | 0 |\n'
             printf '| Ungrounded claims count | 0 |\n'
             printf '| Scorecard log | `.planning/scorecard-log.jsonl` |\n'
@@ -68,7 +68,8 @@ jq -e '.status == "fail" and (.errors[]?.code == "brand_voice_composite_low")' "
 make_repo "$TMPDIR/client-exempt" 7 no "" EXEMPT_CLIENT_OWNED
 "$SCRIPT" --doctor --json --repo "$TMPDIR/client-exempt" | jq -e '.status == "pass" and .brand_voice.exempt == true and .brand_voice.exemption_class == "EXEMPT_CLIENT_OWNED"' >/dev/null
 
-FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 "$LOOP" doctor --repo "$ROOT" --json > "$TMPDIR/doctor.json" || true
-jq -e '.publishability_bar.schema_version == "publishability-bar/v1" and (.publishability_bar_score.score | type == "number")' "$TMPDIR/doctor.json" >/dev/null
+bash -c "source '$HOME/.claude/skills/.flywheel/lib/portable/core.sh' && type publishability_bar_doctor_json" >/dev/null
+"$SCRIPT" --doctor --json --repo "$ROOT" > "$TMPDIR/doctor.json"
+jq -e '.schema_version == "publishability-bar/v1" and (.publishability_bar_score.score | type == "number")' "$TMPDIR/doctor.json" >/dev/null
 
 printf '%s\n' "PASS publishability-bar"

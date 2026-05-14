@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # tests/test-inject-memory-hits-canonical-cli.sh
-# Canonical-cli surface tests for /Users/josh/.claude/commands/flywheel/_shared/test-inject-memory-hits.sh (scaffolded by
+# Canonical-cli surface tests for $HOME/.claude/commands/flywheel/_shared/test-inject-memory-hits.sh (scaffolded by
 # bead flywheel-ws02m / scaffold-canonical-cli.sh).
 #
 # 13/13 PASS = canonical-cli-scoping checker green. TODO markers
@@ -8,7 +8,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="/Users/josh/.claude/commands/flywheel/_shared/test-inject-memory-hits.sh"
+SCRIPT="$HOME/.claude/commands/flywheel/_shared/test-inject-memory-hits.sh"
 
 pass_count=0
 fail_count=0

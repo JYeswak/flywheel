@@ -457,7 +457,12 @@ threshold_for_language() {
 
 emit_file_candidates() {
   find "$REPO_ABS" \
-    \( -path '*/.git' -o -path '*/.beads' -o -path '*/.cass' -o -path '*/node_modules' -o -path '*/.venv' -o -path '*/venv' -o -path '*/__pycache__' \) -prune \
+    \( -path '*/.git' -o -path '*/.beads' -o -path '*/.cass' -o -path '*/node_modules' -o -path '*/.venv' -o -path '*/venv' -o -path '*/__pycache__' \
+       -o -path '*/beads_compliance_audit' \
+       -o -path '*/.flywheel/audit' -o -path '*/.flywheel/receipts' -o -path '*/.flywheel/journal' -o -path '*/.flywheel/evidence' \
+       -o -path '*/.flywheel/compliance' -o -path '*/.flywheel/compliance-packs' -o -path '*/.flywheel/quality-bar-regrades' \
+       -o -path '*/.flywheel/PLANS' -o -path '*/.flywheel/handoffs' -o -path '*/.flywheel/prompts' -o -path '*/.flywheel/reports' \
+       -o -path '*/.flywheel/research' -o -path '*/.flywheel/skillos-requests' \) -prune \
     -o -type f \( -name '*.sh' -o -name '*.bash' -o -name '*.zsh' -o -name '*.py' -o -name '*.rs' -o -name '*.md' -o -name '*.markdown' \) -print
 
   if [[ "${FLYWHEEL_FILE_LENGTH_INCLUDE_LOOP_BIN:-auto}" != "0" ]]; then
@@ -470,7 +475,9 @@ emit_file_candidates() {
 
 oversized_tmp="$(mktemp "${TMPDIR:-/tmp}/file-length-oversized.XXXXXX")"
 allowed_tmp="$(mktemp "${TMPDIR:-/tmp}/file-length-allowed.XXXXXX")"
-trap 'rm -f "$oversized_tmp" "$allowed_tmp"' EXIT
+scan_tmp="$(mktemp "${TMPDIR:-/tmp}/file-length-scan.XXXXXX")"
+scanned_tmp="$(mktemp "${TMPDIR:-/tmp}/file-length-scanned.XXXXXX")"
+trap 'rm -f "$oversized_tmp" "$allowed_tmp" "$scan_tmp" "$scanned_tmp"' EXIT
 
 scanned=0
 # NOTE (flywheel-1hshd.26): the canonical-CLI scaffold pushed this
@@ -484,53 +491,98 @@ scanned=0
 # can invoke `wc -l` directly; self-exclusion is per-scan-call only.
 _SELF_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd -P)/$(basename "${BASH_SOURCE[0]}")"
 _SELF_BASENAME="$(basename "${BASH_SOURCE[0]}")"
-while IFS= read -r file; do
-  [[ -f "$file" ]] || continue
-  # Self-exclude this script from its own scan. Match (a) the absolute
-  # BASH_SOURCE path (covers operator invocations), AND (b) the
-  # canonical install suffix `.flywheel/scripts/file-length-probe.sh`
-  # (covers test fixtures that `cp` the probe into a separate scan
-  # repo and invoke the original, where BASH_SOURCE points at the
-  # original — not the copy under scan).
-  if [[ -n "${_SELF_PATH:-}" && "$file" == "$_SELF_PATH" ]]; then
-    continue
-  fi
-  if [[ -n "${_SELF_BASENAME:-}" && "$file" == */.flywheel/scripts/"$_SELF_BASENAME" ]]; then
-    continue
-  fi
-  lang="$(language_for_file "$file")"
-  [[ -n "$lang" ]] || continue
-  threshold="$(threshold_for_language "$lang")"
-  [[ "$threshold" -gt 0 ]] || continue
-  lines="$(wc -l <"$file" | tr -d ' ')"
-  scanned=$((scanned + 1))
-  [[ "$lines" -gt "$threshold" ]] || continue
-  # NOTE (flywheel-1hshd.26): regex bracket-classes `[-]` are equivalent
-  # to literal `-` but break the source-text substring match, so this
-  # script no longer self-matches when scanned (the scaffold layer
-  # pushed the file over the 500-line bash threshold). Behavior
-  # identical to the original literal-string grep against the
-  # canonical allow-large marker.
-  if grep -qE 'canonical[-]cli[-]scoping[-]allow[-]large:' "$file"; then
-    target="$allowed_tmp"
-    allowed=true
-  else
-    target="$oversized_tmp"
-    allowed=false
-  fi
-  rel="$file"
-  if [[ "$file" == "$REPO_ABS/"* ]]; then
-    rel="${file#$REPO_ABS/}"
-  fi
-  jq -nc \
-    --arg path "$rel" \
-    --arg abs_path "$file" \
-    --arg language "$lang" \
-    --argjson lines "$lines" \
-    --argjson threshold "$threshold" \
-    --argjson allowed "$allowed" \
-    '{path:$path,abs_path:$abs_path,language:$language,lines:$lines,threshold:$threshold,excess:($lines - $threshold),allow_override:$allowed}' >>"$target"
-done < <(emit_file_candidates | sort -u)
+emit_file_candidates | sort -u >"$scan_tmp"
+if command -v perl >/dev/null 2>&1; then
+  REPO_ABS="$REPO_ABS" _SELF_PATH="$_SELF_PATH" _SELF_BASENAME="$_SELF_BASENAME" SCANNED_OUT="$scanned_tmp" \
+    perl -MJSON::PP -MFile::Basename -we '
+      my $repo = $ENV{REPO_ABS} // "";
+      my $self_path = $ENV{_SELF_PATH} // "";
+      my $self_base = $ENV{_SELF_BASENAME} // "";
+      my $scanned_out = $ENV{SCANNED_OUT};
+      my %threshold = (bash => 500, python => 400, rust => 500, markdown => 1500);
+      my $json = JSON::PP->new->ascii->canonical;
+      my $scanned = 0;
+      while (defined(my $file = <STDIN>)) {
+        chomp $file;
+        next if $file eq "" || ! -f $file;
+        next if $self_path ne "" && $file eq $self_path;
+        next if $self_base ne "" && $file =~ m{/\Q.flywheel\E/scripts/\Q$self_base\E$};
+        my $base = basename($file);
+        my $lang = "";
+        if ($base =~ /\.(sh|bash|zsh)$/) { $lang = "bash"; }
+        elsif ($base =~ /\.py$/) { $lang = "python"; }
+        elsif ($base =~ /\.rs$/) { $lang = "rust"; }
+        elsif ($base =~ /\.(md|markdown)$/) { $lang = "markdown"; }
+        elsif ($base eq "flywheel-loop" || $base =~ /^flywheel-loop-/) { $lang = "bash"; }
+        next if $lang eq "";
+        my $lines = 0;
+        my $allowed = JSON::PP::false;
+        open my $fh, "<", $file or next;
+        while (defined(my $line = <$fh>)) {
+          ++$lines;
+          if ($line =~ /canonical[-]cli[-]scoping[-]allow[-]large:/) { $allowed = JSON::PP::true; }
+        }
+        close $fh;
+        ++$scanned;
+        my $limit = $threshold{$lang} // 0;
+        next if $limit <= 0 || $lines <= $limit;
+        my $rel = $file;
+        if ($repo ne "" && index($file, "$repo/") == 0) { $rel = substr($file, length($repo) + 1); }
+        print $json->encode({
+          path => $rel,
+          abs_path => $file,
+          language => $lang,
+          lines => $lines + 0,
+          threshold => $limit + 0,
+          excess => ($lines - $limit) + 0,
+          allow_override => $allowed
+        }) . "\n";
+      }
+      open my $sfh, ">", $scanned_out or die "cannot write scanned count";
+      print {$sfh} $scanned;
+      close $sfh;
+    ' <"$scan_tmp" >"$oversized_tmp"
+  scanned="$(cat "$scanned_tmp")"
+  jq -c 'select(.allow_override == true)' "$oversized_tmp" >"$allowed_tmp"
+  jq -c 'select(.allow_override != true)' "$oversized_tmp" >"$scan_tmp"
+  mv "$scan_tmp" "$oversized_tmp"
+else
+  while IFS= read -r file; do
+    [[ -f "$file" ]] || continue
+    if [[ -n "${_SELF_PATH:-}" && "$file" == "$_SELF_PATH" ]]; then
+      continue
+    fi
+    if [[ -n "${_SELF_BASENAME:-}" && "$file" == */.flywheel/scripts/"$_SELF_BASENAME" ]]; then
+      continue
+    fi
+    lang="$(language_for_file "$file")"
+    [[ -n "$lang" ]] || continue
+    threshold="$(threshold_for_language "$lang")"
+    [[ "$threshold" -gt 0 ]] || continue
+    lines="$(wc -l <"$file" | tr -d ' ')"
+    scanned=$((scanned + 1))
+    [[ "$lines" -gt "$threshold" ]] || continue
+    if grep -qE 'canonical[-]cli[-]scoping[-]allow[-]large:' "$file"; then
+      target="$allowed_tmp"
+      allowed=true
+    else
+      target="$oversized_tmp"
+      allowed=false
+    fi
+    rel="$file"
+    if [[ "$file" == "$REPO_ABS/"* ]]; then
+      rel="${file#$REPO_ABS/}"
+    fi
+    jq -nc \
+      --arg path "$rel" \
+      --arg abs_path "$file" \
+      --arg language "$lang" \
+      --argjson lines "$lines" \
+      --argjson threshold "$threshold" \
+      --argjson allowed "$allowed" \
+      '{path:$path,abs_path:$abs_path,language:$language,lines:$lines,threshold:$threshold,excess:($lines - $threshold),allow_override:$allowed}' >>"$target"
+  done <"$scan_tmp"
+fi
 
 oversized_json="$(jq -s 'sort_by(-.excess, .path)' "$oversized_tmp")"
 allowed_json="$(jq -s 'sort_by(-.excess, .path)' "$allowed_tmp")"

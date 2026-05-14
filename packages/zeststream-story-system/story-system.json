@@ -1,0 +1,135 @@
+{
+  "schema_version": "zeststream.story_system_package.v0",
+  "status": "candidate-shared-foundation",
+  "source_message_schema": "zeststream.repo_story_message.v0",
+  "source_dossier_schema": "zeststream.repo_story_dossier.v0",
+  "source_frontend_schema": "zeststream.repo_frontend_story.v0",
+  "core_offer": "Map one workflow, improve one bounded slice, prove what changed, and carry the lesson into the next build.",
+  "primary_cta": "Map my workflow",
+  "secondary_cta": "Inspect the proof",
+  "audience_truths": [
+    "The owner is usually buying back time, not buying AI.",
+    "The pain lives between systems: email, CRM, scheduling, invoices, documents, reports, and staff memory.",
+    "Trust comes from human approval, narrow scope, privacy clarity, and visible stop conditions.",
+    "A beautiful public surface must still behave like proof: every claim either has evidence or stays blocked.",
+    "Commit history is not the pitch. The pitch is the trajectory those commits prove."
+  ],
+  "owner_language_bank": {
+    "lead_with": [
+      "buy back the time hiding between your tools",
+      "one workflow slice",
+      "mapped before motion",
+      "human-approved",
+      "proof state",
+      "blocked until proven",
+      "lessons that carry into the next build",
+      "the work your team already does by hand"
+    ],
+    "replace": [
+      {
+        "weak": "AI transformation",
+        "strong": "one inspected workflow improvement"
+      },
+      {
+        "weak": "autonomous agents",
+        "strong": "human-approved workflow slices"
+      },
+      {
+        "weak": "seamless integration",
+        "strong": "one route between the tools you already use"
+      },
+      {
+        "weak": "powerful automation",
+        "strong": "less copying, chasing, checking, and remembering"
+      },
+      {
+        "weak": "we built a lot",
+        "strong": "the repo history shows what changed and what stayed blocked"
+      }
+    ],
+    "proof_phrases": [
+      "The map comes before automation.",
+      "Blocked is better than bluffing.",
+      "The owner approves the slice.",
+      "Private work stays private.",
+      "A lesson is only valuable when the next project inherits it."
+    ]
+  },
+  "story_arc_stages": [
+    "recognize",
+    "bound",
+    "control",
+    "remember",
+    "act"
+  ],
+  "proof_states": [
+    "proven",
+    "blocked",
+    "skipped-with-reason",
+    "private"
+  ],
+  "visual_primitives": [
+    "OperatingRoomHero",
+    "WorkflowMap",
+    "SliceWorkbench",
+    "ProofRail",
+    "TrustWorryMatrix",
+    "YuzuMethodRail",
+    "TrajectoryRail",
+    "ProofDrawer",
+    "LessonLedger",
+    "SafeContactPanel"
+  ],
+  "page_blueprint_sections": [
+    "operating-room-hero",
+    "owner-tension-room",
+    "slice-workbench",
+    "proof-theater",
+    "trajectory-room",
+    "lesson-ledger",
+    "decision-room",
+    "safe-contact-room"
+  ],
+  "owner_objection_count": 10,
+  "voice_rules": [
+    "sell outcomes, not tools",
+    "name the owner worry before naming the machinery",
+    "show proof without forcing the owner to read raw receipts",
+    "prefer human-led control language over autonomous-agent hype",
+    "make blockers visible because hidden risk is the trust killer",
+    "treat cash flow, time, follow-up, and customer experience as stronger language than AI novelty"
+  ],
+  "blocked_phrases": [
+    "AI will transform your business",
+    "fully autonomous",
+    "set it and forget it",
+    "we have many commits, so trust us",
+    "all systems are supported without receipts"
+  ],
+  "nextjs_targets": [
+    "routes: /, /method, /proof, /story, /contact",
+    "Server Components: RepoStoryData, ProofManifest, TrajectoryRail, LessonLedger",
+    "Client Components: WorkflowMap, SliceWorkbench, ProofDrawer, TrustWorryMatrix",
+    "shared CSS/design tokens for proof states, yuzu method rails, and workflow maps",
+    "Playwright screenshot gates for mobile and desktop story quality",
+    "proof drawers must not ship private raw state to the browser"
+  ],
+  "visual_quality_gates": [
+    "first viewport must show a workflow room, not a generic SaaS hero",
+    "workflow, slice, proof, trajectory, and lesson primitives must be visible on desktop and mobile",
+    "motion must explain handoff, proof state, or lesson carry-forward",
+    "public copy must expose blocked or skipped proof states instead of hiding them"
+  ],
+  "required_css_tokens": [
+    "--zs-ink",
+    "--zs-paper",
+    "--zs-night",
+    "--zs-lime",
+    "--zs-yuzu",
+    "--zs-leaf",
+    "--zs-teal",
+    "--zs-tomato",
+    "--zs-radius-md",
+    "--zs-shell"
+  ]
+}

@@ -1,1 +1,0 @@
-{"schema_version":"dispatch-trigger-gated-precheck/v1","command":"health","ts":"2026-05-10T18:48:56Z","status":"pass","reason":null,"audit_log":"/Users/josh/.local/state/flywheel/dispatch-trigger-gated-precheck-runs.jsonl","recent_runs":7,"last_run_ts":"2026-05-10T18:48:35Z","last_run_age_seconds":21,"recent_beads":["flywheel-1fk5f.3"],"recent_watchtowers":[]}

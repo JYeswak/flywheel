@@ -1,1 +1,0 @@
-{"command":"schema","required":["status","checks"],"schema_version":"caam-auto-rotate-on-usage-limit/v1","status_enum":["pass","fail","warn"],"surface":"doctor"}

@@ -126,14 +126,14 @@ cat >"$TMP/ubs-profile-pass.json" <<'JSON'
   "agent_mail_reservations": ["src/safety/kill_switch.py"],
   "skills_consulted": ["beads-workflow", "ubs", "profiling-software-performance"],
   "commit_message": "[perf] optimize worker tick speed",
-  "skillos_outcomes": [
+  "{capability-control-plane}_outcomes": [
     {"skill": "ubs", "success": true},
     {"skill": "profiling-software-performance", "success": true, "profile_delta": "captured"}
   ]
 }
 JSON
 run_worker_tick "$TMP/ubs-profile-pass.json" "$TMP/ubs-profile-pass.out"
-assert_jq "$TMP/ubs-profile-pass.out" '.status == "ok" and (.violations | length == 0) and (.check_results[] | select(.id == "ubs_audit_run_on_mission_critical" and .status == "pass" and .observed.skillos_outcome_signal == true)) and (.check_results[] | select(.id == "profile_run_before_perf_commit" and .status == "pass" and .observed.skillos_outcome_signal == true))' "ubs_and_profile_evidence_passes"
+assert_jq "$TMP/ubs-profile-pass.out" '.status == "ok" and (.violations | length == 0) and (.check_results[] | select(.id == "ubs_audit_run_on_mission_critical" and .status == "pass" and .observed.{capability-control-plane}_outcome_signal == true)) and (.check_results[] | select(.id == "profile_run_before_perf_commit" and .status == "pass" and .observed.{capability-control-plane}_outcome_signal == true))' "ubs_and_profile_evidence_passes"
 
 receipt="$TMP/state/flywheel-worker-3/last_tick.json"
 assert_jq "$receipt" '.schema_version == "flywheel-worker-tick/v1" and .harness == "codex" and .session == "flywheel" and .pane == 3 and .mode == "worker-mode" and .cadence == "30m" and .cadence_seconds == 1800 and (.checks_run | length == 5)' "receipt_shape"

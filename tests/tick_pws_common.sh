@@ -36,7 +36,7 @@ tick_pws_make_repo() {
   tick_pws_stub "$repo/.flywheel/scripts/jeff-intel-network.sh" '{"action":"test"}'
   tick_pws_stub "$repo/.flywheel/scripts/jeff-philosophy-mine.sh" '{"status":"ok","pattern_count":0,"complete_pattern_count":0,"latest_snapshot_path":null,"checks":{"patterns_jsonl_exists":true}}'
   tick_pws_stub "$repo/.flywheel/scripts/jeff-binary-version-watchtower.sh" '{"status":"ok","stale_count":0,"highest_priority":null,"stale":[]}'
-  tick_pws_stub "$repo/.flywheel/scripts/mobile-eats-receipt-bridge.sh" '{"status":"ok","mobile_eats":{},"warnings":[]}'
+  tick_pws_stub "$repo/.flywheel/scripts/{proof-product}-receipt-bridge.sh" '{"status":"ok","mobile_eats":{},"warnings":[]}'
   tick_pws_stub "$repo/.flywheel/scripts/flywheel-onboard.sh" '{"status":"ok","checked_repos":0,"limping_repos":[],"missing_repos":[],"warnings":[]}'
   tick_pws_stub "$repo/.flywheel/scripts/josh-request-tick-promote.sh" '{"action":"test"}'
   tick_pws_stub "$repo/.flywheel/scripts/doctor-signal-bead-promotion.sh" '{"action":"test"}'

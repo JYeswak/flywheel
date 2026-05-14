@@ -1,0 +1,34 @@
+{
+  "version": "1",
+  "profile_name": "capability-control-plane",
+  "domain": "skill-substrate",
+  "allowlist_paths": [
+    ".flywheel/",
+    "scripts/",
+    "tests/",
+    "state/",
+    "AGENTS.md",
+    "README.md"
+  ],
+  "blocklist_paths": [
+    ".beads/",
+    ".ntm/",
+    ".cass/",
+    "outputs/",
+    "AGENTS.md.archive/",
+    "*.bak",
+    "*.bak.*",
+    "caches/"
+  ],
+  "blocklist_reason_default": "historical-or-generated-not-active-substrate",
+  "domain_collision_terms": [
+    "skill",
+    "agent",
+    "dispatch",
+    "tick",
+    "worker",
+    "state"
+  ],
+  "requires_word_boundary": false,
+  "rationale": "Capability control-plane repos can declare active flywheel, script, test, state, and root doctrine surfaces as valid audit substrate."
+}

@@ -1,29 +1,29 @@
 # Flywheel Architecture
 
-> The control room for ZestStream's agent fleet. README is the front door; this
-> is how the room is wired.
+> The control room for an agentic software workflow. README is the front door;
+> this is how the room is wired.
 
 Mission anchor:
 
 > *continuous-orchestrator-uptime-self-sustaining-fleet*
 
 Flywheel owns the orchestration substrate, not product code. It turns doctrine,
-plans, beads, NTM sessions, Agent Mail, Socraticode, recovery scripts, and
-skills into one operating loop: pick useful work, dispatch it, verify it, close
-it, and keep the panes hot.
+plans, beads, optional NTM sessions, Agent Mail, Socraticode, recovery scripts,
+and skills into one operating loop: pick useful work, dispatch it, verify it,
+close it, and keep the panes hot.
 
 ## Three Layers
 
 ```mermaid
 flowchart TB
-    subgraph fleet["ZestStream repo fleet"]
+    subgraph fleet["repo fleet"]
         direction LR
         A[flywheel]
-        B[skillos]
-        C[picoz]
-        D[alpsinsurance]
-        E[zeststream-v2]
-        F[mobile-eats]
+        B["SkillOS integration"]
+        C["proof product"]
+        D["client repo"]
+        E["website"]
+        F["example project"]
     end
 
     subgraph control["flywheel control plane"]
@@ -36,7 +36,7 @@ flowchart TB
         P6["skill-discovery ledger"]
     end
 
-    subgraph substrate["Jeff + ZestStream substrate"]
+    subgraph substrate["upstream + operator substrate"]
         direction LR
         S1[br]
         S2[ntm]
@@ -127,7 +127,7 @@ substrate: no more rediscovering the same fix in five repos.
 
 ## Close and Evidence Gates
 
-Flywheel treats every plan as a hypothesis. The L128 doctrine wires six
+Flywheel treats every plan as a hypothesis. The close doctrine wires six
 mechanisms into close:
 
 - hypothesis slate with kill conditions

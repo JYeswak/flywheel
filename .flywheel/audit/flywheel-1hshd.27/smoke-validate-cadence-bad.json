@@ -1,1 +1,0 @@
-{"schema_version":"fleet-coherence-launchd/v1","command":"validate","subject":"cadence-seconds","ts":"2026-05-11T05:31:24Z","status":"reject","value":"5","reason":"out_of_range_or_not_integer","valid_range":"[10, 3600]","default":60}

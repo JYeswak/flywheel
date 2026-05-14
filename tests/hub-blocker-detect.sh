@@ -54,8 +54,8 @@ jq -e '.[0].priority == 0 and (.[0].labels | index("hub_blocker"))' <<<"$show" >
   && pass "child priority and label updated through br" \
   || { fail "child priority and label updated through br"; jq . <<<"$show" >&2; }
 jq -e 'select(.trauma_class == "hub-blocker" and (.what_happened | contains("ops-manager"))) | true' "$TMP/fuckups.jsonl" >/dev/null \
-  && pass "fuckup row carries Joshua ops-manager lens" \
-  || fail "fuckup row carries Joshua ops-manager lens"
+  && pass "fuckup row carries {operator} ops-manager lens" \
+  || fail "fuckup row carries {operator} ops-manager lens"
 
 solo_repo="$TMP/solo"
 mkdir -p "$solo_repo"

@@ -1,1 +1,0 @@
-{"schema_version":"jeff-daily-diff/v1","command":"why","ts":"2026-05-10T23:39:58Z","id":"nonexistent-id","status":"unavailable","reason":"audit_log_missing","audit_log":"/Users/josh/.local/state/flywheel/jeff-daily-diff-runs.jsonl"}

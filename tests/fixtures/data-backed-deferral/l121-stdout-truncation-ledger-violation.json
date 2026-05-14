@@ -11,8 +11,8 @@
   "action_in_doctrine": true,
   "pagerank_pick": "read-ledger-before-relay-status",
   "suggested_action": "read the relay ledger and report the 13 relay_sent rows instead of asking",
-  "draft_question": "Should I ask Joshua if only one relay was sent?",
-  "draft_text": "stdout was truncated, but the relay ledger has 13 relay_sent rows. Should I ask Joshua if only one relay was sent?",
+  "draft_question": "Should I ask {operator} if only one relay was sent?",
+  "draft_text": "stdout was truncated, but the relay ledger has 13 relay_sent rows. Should I ask {operator} if only one relay was sent?",
   "signals": {
     "idle_worker_count": 1,
     "ready_bead_count": 1,

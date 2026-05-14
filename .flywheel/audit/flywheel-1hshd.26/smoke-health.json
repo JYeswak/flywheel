@@ -1,1 +1,0 @@
-{"schema_version":"file-length-probe/v1","command":"health","ts":"2026-05-11T05:42:47Z","status":"warn","audit_log":"/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/tmp.muWAfFjibY","last_run_ts":null,"age_seconds":null,"recent_runs":0,"total_runs":0,"stale_threshold_seconds":604800}

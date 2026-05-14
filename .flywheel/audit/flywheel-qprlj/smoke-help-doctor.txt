@@ -1,1 +1,0 @@
-topic: doctor — probes recovery substrate (br binary, .beads/issues.jsonl input, recovery+contract ledgers, jsonl-append lib, jq/sqlite3/mktemp deps, audit log dir, repo root). Pass = recovery primitive ready; warn = recoverable; fail = blocked.

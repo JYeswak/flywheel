@@ -1,1 +1,0 @@
-{"schema_version":"frozen-pane-backtest/v1","command":"validate","subject":"metric-name","ts":"2026-05-11T06:17:25Z","status":"ok","value":"true_freezes_caught","source":"native --info .goal_metrics[] (6 metrics)"}

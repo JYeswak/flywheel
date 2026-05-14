@@ -42,13 +42,13 @@ assert_jq "$TMP/rank.json" '.top.oldest[0].identity_key == "oldest-row"' "top_ol
 assert_jq "$TMP/rank.json" '.top.downstream_cost[0].identity_key == "downstream-row"' "top_downstream_cost"
 assert_jq "$TMP/rank.json" '.top.blocking_scope[0].identity_key == "fleet-cross"' "top_blocking_scope"
 assert_jq "$TMP/rank.json" '.top.actionability[0].identity_key == "fleet-cross"' "top_actionability"
-assert_jq "$TMP/rank.json" '.unresolved[] | select(.identity_key == "skill-backlog" and .route.action == "route_to_skillos" and .route.target == "skillos")' "skill_candidate_backlog_routes_without_separate_system"
+assert_jq "$TMP/rank.json" '.unresolved[] | select(.identity_key == "skill-backlog" and .route.action == "route_to_{capability-control-plane}" and .route.target == "{capability-control-plane}")' "skill_candidate_backlog_routes_without_separate_system"
 assert_jq "$TMP/rank.json" '([.unresolved[].identity_key] | index("local-hard")) < ([.unresolved[].identity_key] | index("cross-nonfleet"))' "local_hard_outranks_cross_nonfleet"
 assert_jq "$TMP/rank.json" '([.unresolved[].identity_key] | index("fleet-cross")) < ([.unresolved[].identity_key] | index("local-hard"))' "fleet_cross_can_outrank_local"
 assert_jq "$TMP/rank.json" '.br_ready_context.status == "missing"' "br_ready_optional_missing"
 
 "$BIN" why skill-backlog --ledger "$FIXTURE" --now "2026-05-05T00:00:00Z" --json >"$TMP/why.json"
-assert_jq "$TMP/why.json" '.found == true and .row.route.action == "route_to_skillos"' "why_skill_backlog"
+assert_jq "$TMP/why.json" '.found == true and .row.route.action == "route_to_{capability-control-plane}"' "why_skill_backlog"
 
 "$BIN" doctor --ledger "$FIXTURE" --now "2026-05-05T00:00:00Z" --stale-hours -1 --json >"$TMP/doctor.json"
 assert_jq "$TMP/doctor.json" '.status == "pass" and .unresolved_count == 7 and (.top_actions | length) == 5' "doctor_passes_with_ranked_actions"
@@ -60,7 +60,7 @@ set -e
 if [[ "$missing_rc" == "1" ]]; then pass "missing_ledger_nonzero"; else fail "missing_ledger_nonzero"; fi
 assert_jq "$TMP/missing-doctor.json" '.status == "error" and .errors[0].reason_code == "ledger_missing"' "missing_ledger_doctor_error"
 
-tail -n 1 "$ROOT/.flywheel/wire-or-explain-ranker/README.md" | grep -qx 'Part of the Yuzu Method framework by ZestStream.' \
+tail -n 1 "$ROOT/.flywheel/wire-or-explain-ranker/README.md" | grep -qx 'Part of the Yuzu Method framework by {operator-company}.' \
   && pass "readme_yuzu_footer" || fail "readme_yuzu_footer"
 
 if [[ "$fail_count" -gt 0 ]]; then

@@ -171,7 +171,7 @@ graph LR
 | B17 | Pre-launch journey smoke test on fresh laptop (installability receipt) | P0 | S | 6 | B11, B13.7, B17.5 | The journey smoke emits a JSON receipt with `preflight`, `init`, `doctor`, `tick`, `dispatch_or_simulate`, `closeout`, and `inspect_next_action` all `pass` for either `mode=full` or explicitly documented `mode=reduced` on fresh `macos-14` |
 | B15 | Publish v0.2.0 release + Joshua sign-off | P0 | M | 7 | B8, B9, B10, B11, B11.6, B12.1, B12.2, B12.3, B13.1, B13.2, B13.3, B13.5, B13.6, B13.7, B14, B14.5, B17, B17.5 | The git tag `v0.2.0` exists, the github release at that tag is published, `gh api /repos/JYeswak/flywheel/commits/v0.2.0/check-runs --jq '.check_runs[] \| select(.conclusion!="success")'` returns empty, and Joshua signs off on repo, website, and first-run journey |
 
-**Total: 39 beads.** P0 count: 26. P1 count: 13. Effort sum (midpoints): S=10 × 1.5h = 15h; M=21 × 5h = 105h; L=8 × 14h = 112h. **Total envelope: ~232h.** This remains inside the Phase 3 feasibility finding F1 envelope (~180-240h total) while making public installability first-class rather than implicit.
+**Total: 39 beads.** P0 count: 28. P1 count: 11. Effort sum (midpoints): S=9 × 1.5h = 13.5h; M=23 × 5h = 115h; L=7 × 14h = 98h. **Total envelope: ~227h.** This remains inside the Phase 3 feasibility finding F1 envelope (~180-240h total) while making public installability first-class rather than implicit.
 
 ---
 

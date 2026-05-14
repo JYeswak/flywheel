@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/.flywheel/scripts/frozen-pane-detector.sh"
-LIB="/Users/josh/.local/share/flywheel-watchers/lib/jsonl-append.sh"
+LIB="$HOME/.local/share/flywheel-watchers/lib/jsonl-append.sh"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/frozen-pane-apply-gate.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 

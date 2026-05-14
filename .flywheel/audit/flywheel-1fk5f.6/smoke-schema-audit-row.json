@@ -1,1 +1,0 @@
-{"schema_version":"ntm-coordinator-shadow/v1","command":"schema","surface":"audit-row","required":["ts","command","schema_version"],"optional":["session","decision","status","failure_class","would_dispatch","blockers"],"purpose":"row shape written to SCAFFOLD_AUDIT_LOG by cmd_check terminal envelopes"}

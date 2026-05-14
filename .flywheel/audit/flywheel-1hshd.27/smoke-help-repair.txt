@@ -1,1 +1,0 @@
-topic: repair --scope <state_dir|audit_log_dir|launchagents_dir> [--dry-run|--apply --idempotency-key KEY] — apply contract: --apply requires --idempotency-key (rc=3 refusal); scopes: state_dir (mkdir -p $STATE_DIR), audit_log_dir (mkdir -p dirname of $SCAFFOLD_AUDIT_LOG), launchagents_dir (mkdir -p ~/Library/LaunchAgents). Unknown = rc=64.

@@ -1,2 +1,0 @@
-{"kind":"roster","session":"zesttube","row":{"ts":"2026-05-01T00:00:00Z","session":"zesttube","tier":"active_normal","client":"internal","available_for_borrow":true,"max_borrow_workers":1,"orchestrator":{"pane":1,"kind":"claude"}}}
-{"kind":"pane","session":"zesttube","pane":2,"state":"WAITING"}

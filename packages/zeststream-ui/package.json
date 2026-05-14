@@ -1,0 +1,61 @@
+{
+  "name": "@zeststream/ui",
+  "version": "0.0.1",
+  "description": "ZestStream canonical UI component library — ProofRail, WorkflowMap, TelemetryBar, TrustWorryMatrix and brand primitives. Consumes @zeststream/story-system tokens.",
+  "type": "module",
+  "license": "MIT",
+  "private": true,
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./proof-rail": "./src/components/ProofRail.tsx",
+    "./workflow-map": "./src/components/WorkflowMap.tsx",
+    "./trust-worry-matrix": "./src/components/TrustWorryMatrix.tsx",
+    "./telemetry-bar": "./src/components/TelemetryBar.tsx",
+    "./operating-room-hero": "./src/components/OperatingRoomHero.tsx",
+    "./slice-workbench": "./src/components/SliceWorkbench.tsx",
+    "./yuzu-method-rail": "./src/components/YuzuMethodRail.tsx",
+    "./proof-drawer": "./src/components/ProofDrawer.tsx",
+    "./lesson-ledger": "./src/components/LessonLedger.tsx",
+    "./safe-contact-panel": "./src/components/SafeContactPanel.tsx"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.0",
+    "typescript": "^5.9.0"
+  },
+  "keywords": [
+    "zeststream",
+    "ui",
+    "proof-rail",
+    "workflow-map",
+    "telemetry-bar",
+    "trust-worry-matrix",
+    "react",
+    "design-system"
+  ],
+  "zeststream": {
+    "layer": "ui",
+    "sub_shape": "REACT-COMPONENT-LIBRARY",
+    "wraps": "@zeststream/story-system tokens",
+    "consumers": ["flywheel-docs", "mobile-eats", "clutterfreespaces"],
+    "design_sources": [
+      "jeffreyemanuel.com — numbers over adjectives, dashboard-as-personal-site",
+      "frankentui.com — telemetry aesthetic, build transparency",
+      "asupersync.com — architecture diagram as pitch, neologism strategy",
+      "agentflywheel.com — methodology as product, interactive explainers"
+    ]
+  }
+}

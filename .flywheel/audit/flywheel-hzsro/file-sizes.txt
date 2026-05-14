@@ -1,4 +1,0 @@
-    1836 /Users/josh/.claude/skills/.flywheel/lib/portable/core.d/part-02-portable_doctor.sh
-    1098 /Users/josh/.claude/skills/.flywheel/lib/portable/identity.d/identity.py
-     582 /Users/josh/.claude/skills/.flywheel/lib/loop.d/loop_driver_doctor_json.py
-    3516 total

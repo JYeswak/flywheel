@@ -7,7 +7,7 @@
 
 set -euo pipefail
 
-REPO="${REPO:-/Users/josh/Developer/flywheel}"
+REPO="${REPO:-<flywheel-repo>}"
 SCRIPT="${SCRIPT:-$REPO/.flywheel/scripts/dispatch-selector-open-child-prefilter.sh}"
 
 [[ -x "$SCRIPT" ]] || { echo "FAIL script missing or not executable: $SCRIPT" >&2; exit 1; }

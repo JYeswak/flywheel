@@ -44,7 +44,7 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 6 | L52 — ISSUES-TO-BEADS-OR-EXPLICIT-NO-BEAD-RECEIPT (no observed gap is absorbed silently) | long_term | `.flywheel/rules/L006-L52-issues-to-beads-or-explicit-no-bead-receipt-no-observed-gap-is-absorbe.md` |
 | 7 | L53 — FUCKUPS-REPORTED-IN-CALLBACK (every blocker / trauma / gap surfaces as a fuckup-log row) | long_term | `.flywheel/rules/L007-L53-fuckups-reported-in-callback-every-blocker-trauma-gap-surfaces-as-a-fu.md` |
 | 8 | L54 — SKILL-DEEP-DIVE-ON-BLOCKERS (workers climb the skill tree before declaring a wall) | long_term | `.flywheel/rules/L008-L54-skill-deep-dive-on-blockers-workers-climb-the-skill-tree-before-declar.md` |
-| 9 | L55 — SKILLOS-ESCALATION-FOR-MISSING-SKILLS (when no skill exists for a trauma class, route to skillos) | long_term | `.flywheel/rules/L009-L55-skillos-escalation-for-missing-skills-when-no-skill-exists-for-a-traum.md` |
+| 9 | L55 — CAPABILITY-CONTROL-PLANE-ESCALATION-FOR-MISSING-SKILLS (when no skill exists for a trauma class) | long_term | `.flywheel/rules/L009-L55-capability-control-plane-escalation-for-missing-skills-when-no-skill-exists-fo.md` |
 | 10 | L56 — FUCKUP-LOG → INCIDENTS → CANONICAL-L-RULE PROMOTION LADDER | long_term | `.flywheel/rules/L010-L56-fuckup-log-incidents-canonical-l-rule-promotion-ladder.md` |
 | 11 | L57 — LOOP-STATE-MARKER-NOT-DRIVER | long_term | `.flywheel/rules/L011-L57-loop-state-marker-not-driver.md` |
 | 12 | L58 — SECRET-MATERIAL-NEVER-IN-PANE-TEXT | long_term | `.flywheel/rules/L012-L58-secret-material-never-in-pane-text.md` |
@@ -130,7 +130,7 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 92 | L141 — LOOP-MUST-BE-ACCRETIVE | long_term | `.flywheel/rules/L092-L141-loop-must-be-accretive.md` |
 | 93 | L142 — CODEX-PREPARED-CHEVRON-NOT-STALE-BUFFER | long_term | `.flywheel/rules/L093-L142-codex-prepared-chevron-not-stale-buffer.md` |
 | 94 | L143 — WORKER-CLOSE-REQUIRES-GIT-COMMIT | long_term | `.flywheel/rules/L094-L143-worker-close-requires-git-commit.md` |
-| 95 | L144 — GIT-STASH-JANITOR-FLEET-HYGIENE | long_term | `.flywheel/rules/L095-L144-git-stash-janitor-fleet-hygiene.md` |
+| 95 | L144 — GIT-JANITOR-FLEET-HYGIENE | long_term | `.flywheel/rules/L095-L144-git-stash-janitor-fleet-hygiene.md` |
 | 96 | L145 — ORCH-HANDSHAKES-NEVER-GATE-ON-JOSHUA | long_term | `.flywheel/rules/L096-L145-orch-handshakes-never-gate-on-joshua.md` |
 | 97 | L146 — SKILL-ENHANCE-HONORS-JSM-MANAGEMENT | long_term | `.flywheel/rules/L097-L146-skill-enhance-honors-jsm-management.md` |
 | 98 | L147 — SKILL-AUTORESEARCH-ROUTES-BY-TOOLING-SUBSTRATE | long_term | `.flywheel/rules/L098-L147-skill-autoresearch-routes-by-tooling-substrate.md` |
@@ -145,17 +145,6 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 107 | L156 — INBOX-DISCIPLINE-0TH-PROBE | long_term | `.flywheel/rules/L107-L156-inbox-discipline-0th-probe.md` |
 | 108 | L157 — OUTBOX-DISCIPLINE-CROSS-ORCH-SHIP-NOTIFICATION | long_term | `.flywheel/rules/L108-L157-outbox-discipline-cross-orch-ship-notification.md` |
 | 109 | L168 — EVERY-CONSUMER-REPO-MUST-DECLARE-ZS-TENANT-YAML-AT-ROOT | long_term | `.flywheel/rules/L109-L168-every-consumer-repo-must-declare-zs-tenant-yaml-at-root.md` |
-| 110 | L169 — JSM-FIRST-SEARCH-BEFORE-HAND-ROLLING-MANDATORY | long_term | `.flywheel/rules/L110-L169-jsm-first-search-before-hand-rolling-mandatory.md` |
-| 111 | L170 — EVERY-CONSUMER-REPO-MUST-DECLARE-3-USER-JOURNEYS-MINIMUM | long_term | `.flywheel/rules/L111-L170-every-consumer-repo-must-declare-3-user-journeys-minimum.md` |
 <!-- END-RULES-INDEX -->
-
-<!-- BMBUB-PENDING-INDEX (sister-shard authoring HELD until flywheel-bmbub class-aware-ownership-gate ships; cross-ref skillos canonical paths) -->
-<!-- L158 CLI-VERSION-FLAG-MISMATCH-OUTPUT-FORMAT-SWITCH-LEAKS (skillos canonical) -->
-<!-- L159 PROPAGATOR-CANONICAL-OWNERSHIP-CLASS-AWARE-GATE-MANDATORY (flywheel-source; HOOK-LAYER LIVE; shell-layer HELD bmbub) -->
-<!-- L160 AGENTIC-LOOP-HALT-VIA-POSTTOOLUSE-HOOK-WHEN-LEAK-DETECTED (skillos canonical) -->
-<!-- L161 OPERATOR-DIRECTED-MISSION-CONTINUATION-AFTER-LEAK (skillos canonical) -->
-<!-- L162 SUBSTRATE-CLASS-CLASSIFIER-BEFORE-PROTECTION-HALT-MANDATORY (flywheel-source; RESERVED N=2; HOLD until N=3 OR Joshua-directive) -->
-<!-- L163-L167 CROSS-INFISICAL/TENANT-VERIFICATION cohort (skillos canonical; ratified 2026-05-12T05:27Z) -->
-<!-- END-BMBUB-PENDING-INDEX -->
 
 <!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->

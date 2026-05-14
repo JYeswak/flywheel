@@ -1,0 +1,5 @@
+{"class":"engine-after-rewrite","path":"docs/a.md","reason":"mode_a_codemod_sufficient","rewrite_required":["operator-home-path"],"signed_off_by":null}
+{"class":"engine-after-rewrite","path":"docs/b.md","reason":"mode_a_codemod_sufficient","rewrite_required":["operator-email"],"signed_off_by":null}
+{"class":"overlay","path":".flywheel/PLANS/private.md","reason":"denylist:repo-flywheel-plans","rewrite_required":[],"signed_off_by":null}
+{"class":"engine-after-rewrite","path":"docs/c.md","reason":"mode_b_pattern_rewrite_required","rewrite_required":[],"signed_off_by":null}
+{"class":"engine-after-rewrite","path":"docs/d.md","reason":"mode_b_pattern_rewrite_required","rewrite_required":[],"signed_off_by":"human-review"}

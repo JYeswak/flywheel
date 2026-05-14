@@ -1,1 +1,0 @@
-{"schema_version":"verify-watcher-launchd-active/v1","command":"schema","surface":"validate","subjects":["launchd-label","session-name","audit-row"],"contract":{"rejects_with_rc1":"on schema violation","launchd_label_pattern":"^ai\\.zeststream\\.[a-z0-9-]+$","session_name_pattern":"^[a-z0-9-]+$"}}

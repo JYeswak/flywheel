@@ -4,7 +4,7 @@
 # Regression test for flywheel-mv2th (Phase 1 of flywheel-38u3d):
 # `flywheel docs init` subcommand + 5-archetype project-type detection.
 #
-# Substrate class: ~/.claude/skills/.flywheel is Class 1 (Joshua-unmanaged)
+# Substrate class: ~/.claude/skills/.flywheel is Class 1 ({operator}-unmanaged)
 # per substrate-boundary-three-class-taxonomy. Direct mutation + paired
 # jsm-import-ready patch artifact discipline applies; this test validates
 # the mutation didn't break the surface contract.

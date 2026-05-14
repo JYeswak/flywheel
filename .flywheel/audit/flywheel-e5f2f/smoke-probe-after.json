@@ -1,8 +1,0 @@
-{
-  "schema_version": "agent-mail-identity-registry-doctor/v1",
-  "status": "pass",
-  "identity_registry_drift": 0,
-  "drift_count": 0,
-  "total_registered": 20,
-  "errors": null
-}

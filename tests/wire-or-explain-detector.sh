@@ -36,7 +36,7 @@ rg -q 'wire-or-explain-detector.py' "$TMP/completion.bash" && pass "completion_b
 
 "$BIN" detect \
   --ledger "$FIXTURES/ledger.jsonl" \
-  --relay-ledger "$FIXTURES/skillos-relay-ledger.jsonl" \
+  --relay-ledger "$FIXTURES/{capability-control-plane}-relay-ledger.jsonl" \
   --send-receipts "$FIXTURES/send-receipts.jsonl" \
   --schema-file "$TMP/missing.schema.json" \
   --now "2026-05-05T00:00:00Z" \
@@ -52,8 +52,8 @@ assert_jq "$TMP/detect.json" '.rows[] | select(.row_id == "evt-deferred-expired"
 assert_jq "$TMP/detect.json" '.rows[] | select(.row_id == "evt-not-required" and .wire_state == "not_required")' "not_required_state"
 assert_jq "$TMP/detect.json" '.rows[] | select(.row_id == "evt-bypassed" and .wire_state == "bypassed")' "bypassed_state"
 assert_jq "$TMP/detect.json" '.rows[] | select(.row_id == "evt-circular" and .wire_state == "unwired" and .reason_code == "circular_self_proof_refused" and .proof_refused == true)' "circular_self_proof_refused"
-assert_jq "$TMP/detect.json" '.rows[] | select(.row_id == "evt-skill-relay" and .wire_state == "wired" and .consumer_id == "skillos-relay")' "skill_candidate_with_relay_wired"
-assert_jq "$TMP/detect.json" '.rows[] | select(.row_id == "evt-skill-missing" and .wire_state == "unwired" and .reason_code == "skill_candidate_missing_relay" and .action_metadata.target_session == "skillos")' "skill_candidate_missing_relay_unwired"
+assert_jq "$TMP/detect.json" '.rows[] | select(.row_id == "evt-skill-relay" and .wire_state == "wired" and .consumer_id == "{capability-control-plane}-relay")' "skill_candidate_with_relay_wired"
+assert_jq "$TMP/detect.json" '.rows[] | select(.row_id == "evt-skill-missing" and .wire_state == "unwired" and .reason_code == "skill_candidate_missing_relay" and .action_metadata.target_session == "{capability-control-plane}")' "skill_candidate_missing_relay_unwired"
 assert_jq "$TMP/detect.json" 'all(.rows[]; (.consumer_id | test("\\.md:[0-9]+$") | not))' "stable_consumer_ids_not_path_line"
 assert_jq "$TMP/detect.json" '.ranker_input.unresolved | length == 4' "feeds_ranker_unresolved"
 assert_jq "$TMP/detect.json" '.doctor_actions | length == 4' "feeds_doctor_actions"
@@ -63,7 +63,7 @@ LIVE_SCHEMA="$ROOT/.flywheel/validation-schema/v1/wire-or-explain-ledger.schema.
 if [[ -f "$LIVE_SCHEMA" ]]; then
   "$BIN" detect \
     --ledger "$FIXTURES/ledger.jsonl" \
-    --relay-ledger "$FIXTURES/skillos-relay-ledger.jsonl" \
+    --relay-ledger "$FIXTURES/{capability-control-plane}-relay-ledger.jsonl" \
     --send-receipts "$FIXTURES/send-receipts.jsonl" \
     --schema-file "$LIVE_SCHEMA" \
     --now "2026-05-05T00:00:00Z" \
@@ -79,7 +79,7 @@ fi
 
 "$BIN" why evt-skill-missing \
   --ledger "$FIXTURES/ledger.jsonl" \
-  --relay-ledger "$FIXTURES/skillos-relay-ledger.jsonl" \
+  --relay-ledger "$FIXTURES/{capability-control-plane}-relay-ledger.jsonl" \
   --send-receipts "$FIXTURES/send-receipts.jsonl" \
   --now "2026-05-05T00:00:00Z" \
   --execute-probes \
@@ -88,7 +88,7 @@ assert_jq "$TMP/why.json" '.found == true and .row.reason_code == "skill_candida
 
 "$BIN" health \
   --ledger "$FIXTURES/ledger.jsonl" \
-  --relay-ledger "$FIXTURES/skillos-relay-ledger.jsonl" \
+  --relay-ledger "$FIXTURES/{capability-control-plane}-relay-ledger.jsonl" \
   --send-receipts "$FIXTURES/send-receipts.jsonl" \
   --now "2026-05-05T00:00:00Z" \
   --execute-probes \

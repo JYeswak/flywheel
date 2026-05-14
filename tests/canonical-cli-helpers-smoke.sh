@@ -292,7 +292,7 @@ build_evidence() {
 export CANONICAL_CLI_CROSS_ORCH_STATE_DIR="$TMP/cross-orch-state"
 export CANONICAL_CLI_CROSS_ORCH_SCHEMA_PATH="$CANONICAL_CLI_CROSS_ORCH_STATE_DIR/schema/receipt.schema.json"
 mkdir -p "$CANONICAL_CLI_CROSS_ORCH_STATE_DIR/schema"
-cp /Users/josh/.local/state/canonical-cli-scoping/schema/receipt.schema.json \
+cp $HOME/.local/state/canonical-cli-scoping/schema/receipt.schema.json \
    "$CANONICAL_CLI_CROSS_ORCH_SCHEMA_PATH" 2>/dev/null || true
 
 # (26) cli_emit_canonical_receipt happy path
@@ -374,7 +374,7 @@ set -e
 pass 34 "out-of-range score rejected rc=2"
 
 # (35) Receipt body validates against the schema sidecar (structural check)
-recv_path2="$(cli_emit_canonical_receipt "skillos:1" "ts-helper-binary" 13 "$dims_ok" "$ev_ok")"
+recv_path2="$(cli_emit_canonical_receipt "{capability-control-plane}:1" "ts-helper-binary" 13 "$dims_ok" "$ev_ok")"
 if jq -e '
   has("orch") and has("surface") and has("spec_version") and has("score")
   and has("dimensions") and has("evidence") and has("ts") and has("schema_version")

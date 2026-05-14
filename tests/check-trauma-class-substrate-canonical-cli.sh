@@ -58,7 +58,7 @@ set +e; "$SCRIPT" repair --scope bogus --json >"$TMP/repair-unk.json"; rc=$?; se
 expect_rc "$rc" 64 "repair unknown_scope rc=64"
 
 # Test 10: validate root-path absolute OK
-"$SCRIPT" validate root-path /Users/josh >"$TMP/v-rp-ok.json"
+"$SCRIPT" validate root-path $HOME >"$TMP/v-rp-ok.json"
 expect_jq "$TMP/v-rp-ok.json" '.status == "ok" and .subject == "root-path"' "validate root-path absolute OK"
 
 # Test 11: validate root-path relative rc=1

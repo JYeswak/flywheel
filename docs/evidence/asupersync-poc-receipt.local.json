@@ -1,0 +1,61 @@
+{
+  "schema_version": "flywheel.asupersync_poc_receipt.v0",
+  "status": "pass",
+  "support_scope": "isolated_poc_only",
+  "generated_at": "2026-05-13T16:14:25Z",
+  "executor": {
+    "name": "BoldDog",
+    "class": "user-directed-codex-session",
+    "codex_or_claude_operated": true,
+    "license_rider_disposition": "Joshua clarified in-thread that the rider targets OpenAI/Anthropic companies directly and that normal adopter-side/user evaluation should proceed as open-source use."
+  },
+  "upstream": {
+    "repo": "https://github.com/Dicklesworthstone/asupersync",
+    "tag_or_commit": "crate:asupersync@0.3.1",
+    "crate_version": "0.3.1",
+    "website_version_observed": "V0.2.6",
+    "actions_status": "queued",
+    "actions_commit": "f29ff7b4c330f14e2748ec05c1a3420199b9cf77",
+    "open_high_impact_issues": [
+      "#35"
+    ]
+  },
+  "platform": {
+    "os": "Darwin 25.3.0",
+    "arch": "arm64",
+    "rustc": "rustc 1.95.0-nightly (842bd5be2 2026-01-29)",
+    "cargo": "cargo 1.95.0-nightly (efcd9f586 2026-01-23)",
+    "apple_silicon_path": "source-build"
+  },
+  "commands": [
+    {
+      "command": "cargo check",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "Finished dev check for a scratch binary depending on asupersync 0.3.1 in 22.21s."
+    },
+    {
+      "command": "cargo test",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "Ran one deterministic cancellation checkpoint test using asupersync::test_utils::run_test_with_cx; 1 passed, 0 failed."
+    },
+    {
+      "command": "cargo run",
+      "status": "pass",
+      "exit_code": 0,
+      "evidence": "Built and ran a scratch binary that constructs RuntimeBuilder::current_thread(), creates an explicit Cx, creates an owned scope, checks checkpoint success, sets cancellation, observes checkpoint failure, and returns Outcome::ok(42)."
+    }
+  ],
+  "poc_semantics": {
+    "explicit_cx": true,
+    "owned_regions": true,
+    "cancellation_tested": true,
+    "deterministic_test_used": true,
+    "no_flywheel_runtime_dependency": true
+  },
+  "promotion_decision": {
+    "status": "not_promoted",
+    "reason": "Local crate-level POC passed, but upstream promotion gates remain open: website version mismatch, queued upstream Actions, missing Darwin arm64 release asset, open issue #35, and no Flywheel runtime integration receipt."
+  }
+}

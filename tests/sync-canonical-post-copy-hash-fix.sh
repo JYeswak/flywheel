@@ -53,22 +53,22 @@ fi
 
 # Test 5: end-to-end: scoped --check against a sibling repo with worktree-style
 # targets produces canonical_drifted_count=0 + errors_count=0 (was 145 errors
-# pre-fix). Use alpsinsurance if present; otherwise skip with reason.
-ALPS=/Users/josh/Developer/alpsinsurance
+# pre-fix). Use {session} if present; otherwise skip with reason.
+ALPS=$HOME/Developer/{session}
 if [[ -d "$ALPS/.flywheel" ]]; then
   out="$TMP/check-receipt.json"
   if timeout 90 "$SCRIPT" --check --json --root "$ALPS" >"$out" 2>"$TMP/check.err"; then
     :
   fi
   if jq -e '.errors_count == 0 and .canonical_drifted_count == 0' "$out" >/dev/null 2>&1; then
-    pass "end-to-end: scoped --check against alpsinsurance reports 0 canonical errors + 0 canonical_drifted (was 145 errors pre-fix)"
+    pass "end-to-end: scoped --check against {session} reports 0 canonical errors + 0 canonical_drifted (was 145 errors pre-fix)"
   else
     canonical_errors="$(jq -r '[.errors[] | select(.code == "post_copy_hash_mismatch")] | length' "$out" 2>/dev/null || echo "?")"
     fail "end-to-end check still reports canonical errors (post_copy_hash_mismatch count=$canonical_errors)"
     head -c 400 "$out" >&2
   fi
 else
-  pass "end-to-end: alpsinsurance fixture not present locally — skipping live probe (test 5 is skipped, not failed)"
+  pass "end-to-end: {session} fixture not present locally — skipping live probe (test 5 is skipped, not failed)"
 fi
 
 if [[ "$fail_count" -gt 0 ]]; then

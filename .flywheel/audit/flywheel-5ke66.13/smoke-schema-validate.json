@@ -1,1 +1,0 @@
-{"schema_version":"mobile-eats-loop-with-receipt-mirror/v1","command":"schema","surface":"validate","subjects":["receipt-event","exit-code","audit-row"],"contract":{"rejects_with_rc1":"on schema violation","receipt_event_enum":["receipt_mirrored","receipt_mirror_failed"],"exit_code_range":"[0,255]"}}

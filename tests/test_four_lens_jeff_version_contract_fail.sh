@@ -48,7 +48,7 @@ bash tests/validate-callback-before-close.sh
 
 Contract receipt: callback close contract.
 Payload schema: callback close payload.
-Four-Lens Self-Grade: brand voice pass; Joshua sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
+Four-Lens Self-Grade: brand voice pass; {operator} sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
 Outcome: this fixture isolates the Jeff contract marker gate.
 Result: unmarked contract evidence must block close.
 Operator note: all other bar signals are present so the expected reason stays narrow.

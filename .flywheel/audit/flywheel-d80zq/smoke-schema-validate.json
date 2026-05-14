@@ -1,1 +1,0 @@
-{"schema_version":"jeff-verdict-heuristic/v1","command":"schema","surface":"validate","subjects":["verdict","repo-name","audit-row"],"contract":{"rejects_with_rc1":"on schema violation","verdict_enum":["YES_ADOPT","YES_ADAPT","NO_NOT_OUR_DOMAIN","NEED_RESEARCH"],"repo_name_pattern":"^[A-Za-z0-9_.-]+$"}}

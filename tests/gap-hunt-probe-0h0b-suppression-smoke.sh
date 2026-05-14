@@ -4,7 +4,7 @@
 # `upstream-issue-draft-or-comment-decision` suppression in
 # .flywheel/scripts/gap-hunt-probe.sh suppresses bead flywheel-0h0b
 # without over-matching. Closed bead 0h0b is upstream-issue draft work
-# (drafting an ntm#114 comment-or-new decision under Joshua signoff)
+# (drafting an ntm#114 comment-or-new decision under {operator} signoff)
 # whose body mentions "doctrine" only via AG1 boilerplate and
 # "canonical" only via skill-name reference — not a local
 # INCIDENTS/AGENTS promotion event. Same suppression-list pattern as

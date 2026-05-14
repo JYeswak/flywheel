@@ -7,7 +7,7 @@
   "actor": "codex",
   "target": ".flywheel/scripts/status-doctor-probe.sh",
   "changed_paths": [".flywheel/scripts/status-doctor-probe.sh"],
-  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_repo": "<flywheel-repo>",
   "ship_actor": "codex",
   "git_ref": "135abc",
   "action_ledger_pointer": ".flywheel/dispatch-log.jsonl#L13",

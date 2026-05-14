@@ -5,7 +5,7 @@
   "event_type": "fuckup",
   "actor": "codex",
   "target": "~/.local/state/flywheel/fuckup-log.jsonl#L777",
-  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_repo": "<flywheel-repo>",
   "ship_actor": "codex",
   "git_ref": "753ace",
   "skill_candidate": true,

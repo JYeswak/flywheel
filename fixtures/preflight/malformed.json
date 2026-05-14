@@ -1,0 +1,9 @@
+{
+  "schema_version": "flywheel.preflight.fixture.v0",
+  "name": "malformed",
+  "host": {
+    "os": "darwin",
+    "arch": "arm64"
+  },
+  "commands": []
+}

@@ -291,7 +291,7 @@
             "profiles": {
               "type": "array",
               "items": { "type": "string" },
-              "const": ["alps", "skillos", "swarm-daemon", "mobile-eats", "vrtx", "default"]
+              "const": ["strict-client", "capability-control-plane", "swarm-daemon", "proof-product", "vrtx", "default"]
             },
             "malformed_fixture": {
               "const": "malformed-no-allowlist.json"

@@ -2,7 +2,7 @@
 # tests/flywheel-replay-verify.sh
 # Regression for .flywheel/scripts/flywheel_replay_verify.py (flywheel-5m9gp).
 #
-# Adopts the deterministic-tick-simulation skill via skillos's PR233 wrapper
+# Adopts the deterministic-tick-simulation skill via {capability-control-plane}'s PR233 wrapper
 # pattern. Verifies all 5 modes (log/heartbeat/tick/blocker-ac/report) emit
 # canonical envelopes + exit-code taxonomy + --apply gate.
 
@@ -39,7 +39,7 @@ else fail "report rc=$rc (expected 3)"; fi
 
 # Test 4: heartbeat replay-from-receipt — PASS verdict + state_hash present
 cat > "$TMPDIR_TEST/blocker-escalations.jsonl" <<'EOF'
-{"ts":"2026-05-10T18:55:00Z","event":"heartbeat-tick","blocker_id_state_path":"/Users/josh/Developer/flywheel/.flywheel/state/blockers/foo.json","safe_unrelated_work_this_tick":"work","ticks_since_last_blocker_change":3,"blockers_open":1}
+{"ts":"2026-05-10T18:55:00Z","event":"heartbeat-tick","blocker_id_state_path":"<flywheel-repo>/.flywheel/state/blockers/foo.json","safe_unrelated_work_this_tick":"work","ticks_since_last_blocker_change":3,"blockers_open":1}
 EOF
 out="$("$SCRIPT" heartbeat --receipts "$TMPDIR_TEST/blocker-escalations.jsonl" --receipt-line 1 --json 2>/dev/null)"
 if printf '%s' "$out" | jq -e '.verdict == "PASS" and .command == "heartbeat" and (.state_hash | type == "string") and (.state_hash | test("^[0-9a-f]{64}$"))' >/dev/null; then
@@ -48,7 +48,7 @@ else fail "heartbeat envelope: $(printf '%s' "$out" | jq -c '{verdict, command, 
 
 # Test 5: heartbeat — narrative-field-excluded determinism (excludes safe_unrelated_work_this_tick)
 cat > "$TMPDIR_TEST/blocker-escalations-2.jsonl" <<'EOF'
-{"ts":"2026-05-10T18:55:00Z","event":"heartbeat-tick","blocker_id_state_path":"/Users/josh/Developer/flywheel/.flywheel/state/blockers/foo.json","safe_unrelated_work_this_tick":"DIFFERENT_NARRATIVE","ticks_since_last_blocker_change":3,"blockers_open":1}
+{"ts":"2026-05-10T18:55:00Z","event":"heartbeat-tick","blocker_id_state_path":"<flywheel-repo>/.flywheel/state/blockers/foo.json","safe_unrelated_work_this_tick":"DIFFERENT_NARRATIVE","ticks_since_last_blocker_change":3,"blockers_open":1}
 EOF
 hash1="$("$SCRIPT" heartbeat --receipts "$TMPDIR_TEST/blocker-escalations.jsonl" --receipt-line 1 --json 2>/dev/null | jq -r .state_hash)"
 hash2="$("$SCRIPT" heartbeat --receipts "$TMPDIR_TEST/blocker-escalations-2.jsonl" --receipt-line 1 --json 2>/dev/null | jq -r .state_hash)"

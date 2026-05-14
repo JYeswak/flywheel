@@ -1,6 +1,0 @@
-=== apply-spec validation predicate (strict) ===
-bash -n: ok
-0
-lint: clean
-test: 20/20 PASS
-AG1-5 PASS

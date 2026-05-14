@@ -1,2 +1,0 @@
-{"schema_version":"mobile-eats-loop-with-receipt-mirror/v1","command":"validate","subject":"receipt-event","ts":"2026-05-11T01:39:00Z","status":"reject","value":"unknown_event","reason":"not_in_enum","valid_events":["receipt_mirrored","receipt_mirror_failed"]}
-rc=1

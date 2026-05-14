@@ -1,4 +1,0 @@
-T3.5 (strict from repoB/sub no local .beads): rc=78 (refused)
-T3.4 (no strict, cross-tree symlink skipped, fall-back works): rc=0 (bv --help printed)
-T3.5b (strict from repoA root with valid .beads): rc=0 (passed through)
-T3.5c (strict from repoB cwd cross-tree symlink): rc=78 (refused with explicit cross-tree message)

@@ -1,1 +1,0 @@
-{"schema_version":"recovery-preinstall-audit/v1","command":"repair","status":"ok","mode":"read_only","scope":"topology-prime","path":"/Users/josh/.local/state/flywheel/session-topology.jsonl","row_count":1722,"distinct_sessions":["alpsinsurance","clutterfreespaces","flywheel","mobile-eats","picoz","skillos","vrtx"],"note":"read-only probe of session-topology.jsonl"}

@@ -34,7 +34,7 @@ write_identity() {
     --argjson pane "$pane" \
     --arg identity "$identity" \
     --arg token "$token" \
-    --arg project "/Users/josh/.local/state/flywheel/fleet-mail-project" \
+    --arg project "$HOME/.local/state/flywheel/fleet-mail-project" \
     '{schema_version:"agent-mail-identity-registry/v2",session:$session,pane:$pane,role:"orch",identity_name:$identity,token_path:$token,status:"active",identity_resolved:true,fleet_mail_project_key:$project}' \
     >"$TMP/agent-mail/sessions/$session:$pane.json"
 }
@@ -48,7 +48,7 @@ write_identity_missing_token() {
     --argjson pane "$pane" \
     --arg identity "$identity" \
     --arg token "$token" \
-    --arg project "/Users/josh/.local/state/flywheel/fleet-mail-project" \
+    --arg project "$HOME/.local/state/flywheel/fleet-mail-project" \
     '{schema_version:"agent-mail-identity-registry/v2",session:$session,pane:$pane,role:"orch",identity_name:$identity,token_path:$token,status:"active",identity_resolved:true,fleet_mail_project_key:$project}' \
     >"$TMP/agent-mail/sessions/$session:$pane.json"
 }
@@ -93,7 +93,7 @@ jq empty "$FIXTURE" && pass "fixture_jsonl_valid" || fail "fixture_jsonl_valid"
 assert_jq "$TMP/info.json" '.name == "fleet-mail-auth-probe.sh" and .read_only == true and (.canonical_cli_surfaces | index("--doctor"))' "info_surface"
 
 "$BIN" --schema --json --fixtures "$FIXTURE" >"$TMP/schema.json"
-assert_jq "$TMP/schema.json" '.fixed_project_key == "/Users/josh/.local/state/flywheel/fleet-mail-project" and (.failure_classes | index("fleet_mail_identity_invalid_or_missing"))' "schema_surface"
+assert_jq "$TMP/schema.json" '.fixed_project_key == "$HOME/.local/state/flywheel/fleet-mail-project" and (.failure_classes | index("fleet_mail_identity_invalid_or_missing"))' "schema_surface"
 
 for mode in doctor health validate audit; do
   "$BIN" "--$mode" --json --fixtures "$FIXTURE" >"$TMP/$mode.json"
@@ -111,7 +111,7 @@ fi
 
 write_identity valid 1 ValidPond valid-token
 "$BIN" "${base_args[@]}" --session valid --pane 1 >"$TMP/valid.json"
-assert_jq "$TMP/valid.json" '.status == "pass" and .ready == true and .project_key == "/Users/josh/.local/state/flywheel/fleet-mail-project"' "valid_authenticated_identity"
+assert_jq "$TMP/valid.json" '.status == "pass" and .ready == true and .project_key == "$HOME/.local/state/flywheel/fleet-mail-project"' "valid_authenticated_identity"
 assert_jq "$TMP/valid.json" '.l61.vault_token_validated == true and .l61_gate.would_count_as_success == true and .l61.l61_pairing_status == "authenticated"' "valid_counts_as_l61_success"
 
 write_identity invalid 1 InvalidPond invalid-token

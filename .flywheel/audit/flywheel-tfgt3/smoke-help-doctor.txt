@@ -1,1 +1,0 @@
-topic: doctor — probes substrate (helper-lib loaded, jq/awk/grep on PATH, audit-log dir writable, repo root resolved). Pass = all green; warn = recoverable (use repair); fail = blocked (probe will not run).

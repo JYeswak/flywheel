@@ -210,15 +210,15 @@
   },
   "_phase4_complete": {
     "bead_count": 39,
-    "p0_count": 26,
-    "p1_count": 13,
+    "p0_count": 28,
+    "p1_count": 11,
     "critical_path_length": 16,
     "critical_path": "B0 \u2192 B0.5 \u2192 B1 \u2192 B1.5 \u2192 B2 \u2192 B3.4 \u2192 B4 \u2192 B5 \u2192 B6 \u2192 B6.5 \u2192 B10 \u2192 B11 \u2192 B12.0 \u2192 B17.5 \u2192 B17 \u2192 B15",
-    "effort_envelope_hours": "180-240 (consensus revised to 232h after Phase 5 installability split)",
+    "effort_envelope_hours": "180-240 (consensus revised to ~227h after Phase 5 installability split)",
     "top_risks": [
       "B3.4 long pole (script sweep 394 files) \u2014 Phase 5 should hunt for further decomposition",
       "H3 likely collapses to /methodology in practice (consent calendar tight)",
-      "B15 launch bead is 17-dep fan-in; needs P1-to-P2 downgrade escape valves"
+      "B15 launch bead is 18-dep fan-in; needs P1-to-P2 downgrade escape valves"
     ],
     "dag_artifact": "04-BEADS-DAG.md",
     "completed_at": "2026-05-12T18:00:00Z",
@@ -248,7 +248,7 @@
           "d63018d chore: untrack preexisting sharpening report"
         ],
         "validation": "skillos doctor --scope socraticode OK; skillos doctor --scope trauma-to-skill-promotion OK; focused deterministic tests passed",
-        "phase5_implication": "Remaining red gates claude-state-pressure, file-length, and jsm-marker are next-phase skillos work, not blockers to Flywheel Phase 5 DAG convergence."
+        "phase5_implication": "Remaining red gates claude-state-pressure and file-length are next-phase skillos work, not blockers to Flywheel Phase 5 DAG convergence. jsm-marker was cleared by skillos pane2 at 2026-05-12T21:00Z via guarded JSM DB recovery and persistent marker proof refresh."
       }
     }
   },

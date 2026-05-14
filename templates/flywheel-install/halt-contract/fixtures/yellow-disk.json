@@ -17,6 +17,6 @@
     "storage.prune_dry_run"
   ],
   "owner": "host_orch",
-  "expires_at": "2026-05-04T20:55:00Z",
-  "reason": "skillos disk_free_pct=7.6; block growth and mutation, keep safe work moving"
+  "expires_at": "<timestamp>",
+  "reason": "{capability-control-plane} disk_free_pct=7.6; block growth and mutation, keep safe work moving"
 }

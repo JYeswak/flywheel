@@ -1,8 +1,0 @@
-{
-  "pane": "flywheel:0.3",
-  "error_state": "stale",
-  "error_age_sec": 900,
-  "preflight_blocked": true,
-  "resolution": "L87_auto_ping_required",
-  "_TODO": "pass-2: fix blocks dispatch + auto-pings"
-}

@@ -6,7 +6,7 @@
   "actor": "codex",
   "target": ".flywheel/jeff-corpus/consumer-path.json",
   "changed_paths": [".flywheel/jeff-corpus/consumer-path.json"],
-  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_repo": "<flywheel-repo>",
   "ship_actor": "codex",
   "git_ref": "864dbf",
   "jeff_corpus_consumer_path": "socraticode://jeff-corpus",

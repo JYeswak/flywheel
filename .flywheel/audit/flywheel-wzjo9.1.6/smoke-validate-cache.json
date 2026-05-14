@@ -1,1 +1,0 @@
-{"schema_version":"flywheel-anchor/v1","command":"validate","subject":"cache","skill":"cloudflare-api","cache_path":"/Users/josh/.claude/skills/.flywheel/logs/anchors/cloudflare-api.json","status":"pass","missing_required":[]}

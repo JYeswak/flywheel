@@ -1,1 +1,0 @@
-topic: health — summarizes last 50 fleet-health probes from $SCAFFOLD_AUDIT_LOG. Reports total_runs, last_run_ts, last_status, pass_rate. status=empty when log absent.

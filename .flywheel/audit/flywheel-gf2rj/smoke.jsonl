@@ -1,8 +1,0 @@
-{"surface":"beads-db-recover","probe":"info","schema_version":"beads-db-recover/v1"}
-{"surface":"beads-db-recover","probe":"doctor","status":"todo","note":"TODO(canonical-cli-scaffold): fill in doctor checks"}
-{"surface":"br-authority-probe","probe":"info","schema_version":"br-authority-probe/v1"}
-{"surface":"br-authority-probe","probe":"doctor","status":"todo","note":"TODO(canonical-cli-scaffold): fill in doctor checks"}
-{"surface":"br-close-with-gate","probe":"info","schema_version":"br-close-with-gate/v1"}
-{"surface":"br-close-with-gate","probe":"doctor","status":"todo","note":"TODO(canonical-cli-scaffold): fill in doctor checks"}
-{"surface":"br-db-corruption-monitor","probe":"info","schema_version":"br-db-corruption-monitor/v1"}
-{"surface":"br-db-corruption-monitor","probe":"doctor","status":"todo","note":"TODO(canonical-cli-scaffold): fill in doctor checks"}

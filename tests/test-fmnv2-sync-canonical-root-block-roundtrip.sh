@@ -24,7 +24,7 @@
 
 set -euo pipefail
 
-REPO="${REPO:-/Users/josh/Developer/flywheel}"
+REPO="${REPO:-<flywheel-repo>}"
 SCRIPT="${SCRIPT:-$REPO/.flywheel/scripts/sync-canonical-doctrine.sh}"
 
 [[ -f "$SCRIPT" ]] || { echo "FAIL script missing: $SCRIPT" >&2; exit 1; }
@@ -52,7 +52,7 @@ pass "render_root_agents_with_block uses canonicalize_source_for_hash for emit s
 
 # 5. Functional round-trip test: extract(render(source, empty_target)) hash == SOURCE_HASH
 WORK_TMP="$(mktemp -d -t fmnv2-rt.XXXXXX)"
-cleanup() { /Users/josh/Developer/flywheel/.flywheel/scripts/cleanup-scratch.sh --apply --json "$WORK_TMP" >/dev/null 2>&1 || true; }
+cleanup() { <flywheel-repo>/.flywheel/scripts/cleanup-scratch.sh --apply --json "$WORK_TMP" >/dev/null 2>&1 || true; }
 trap cleanup EXIT
 
 ROOT_BLOCK_BEGIN="<!-- BEGIN-CANONICAL-FLYWHEEL-DOCTRINE -->"

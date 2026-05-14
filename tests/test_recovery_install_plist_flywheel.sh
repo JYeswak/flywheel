@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-PLIST="/Users/josh/Library/LaunchAgents/com.zeststream.flywheel.watcher.plist"
+PLIST="$HOME/Library/LaunchAgents/com.zeststream.flywheel.watcher.plist"
 STATUS="$ROOT/.flywheel/receipts/recovery-install-flywheel-status.json"
 
 pass_count=0
@@ -28,7 +28,7 @@ assert_jq "$STATUS" \
   '.schema_version == "recovery-session-watcher-install/v1"
    and .source_plan == ".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md"
    and .label == "com.zeststream.flywheel.watcher"
-   and .plist_path == "/Users/josh/Library/LaunchAgents/com.zeststream.flywheel.watcher.plist"
+   and .plist_path == "$HOME/Library/LaunchAgents/com.zeststream.flywheel.watcher.plist"
    and .audit_receipt_path == "/tmp/preinstall-flywheel.json"
    and .dry_run_pass == true
    and .exactly_one_label == true

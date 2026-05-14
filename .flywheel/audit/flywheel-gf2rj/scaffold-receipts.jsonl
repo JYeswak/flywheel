@@ -1,4 +1,0 @@
-{"surface":"beads-db-recover","rc":0,"status":"apply_ok","after_lines":829}
-{"surface":"br-authority-probe","rc":0,"status":"apply_ok","after_lines":430}
-{"surface":"br-close-with-gate","rc":0,"status":"apply_ok","after_lines":349}
-{"surface":"br-db-corruption-monitor","rc":0,"status":"apply_ok","after_lines":464}

@@ -90,7 +90,7 @@ receipt_validator = Draft202012Validator(
 )
 receipt_validator.validate({
     "schema_version": "polish-gate/grade-receipt/v1",
-    "ts": "2026-05-05T00:00:00Z",
+    "ts": "<timestamp>",
     "surface_path": ".flywheel/GOAL.md",
     "surface_name": "GOAL.md",
     "mode": "audit_only",
@@ -114,7 +114,7 @@ summary_validator = Draft202012Validator(
 )
 summary_validator.validate({
     "schema_version": "polish-gate/latest-summary/v1",
-    "last_run_ts": "2026-05-05T00:00:00Z",
+    "last_run_ts": "<timestamp>",
     "mode": "audit_only",
     "surfaces_graded": 3,
     "surfaces_passed": 2,

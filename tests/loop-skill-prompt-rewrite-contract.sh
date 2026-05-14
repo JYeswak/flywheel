@@ -66,7 +66,7 @@ pass "step 3 directs the agent to drop references to since-closed beads"
 
 # 8. Provenance: the amendment cites the peer finding and memory rule that
 # motivated it (auditability for future reviewers).
-grep -qE 'alpsinsurance:1.*2026-05-08|feedback_orch_wake_event_driven_not_time_based' "$LOOP_MD" \
+grep -qE '{session}:1.*2026-05-08|feedback_orch_wake_event_driven_not_time_based' "$LOOP_MD" \
   || fail "loop.md amendment missing peer-finding/memory-rule provenance"
 pass "amendment cites peer finding and memory rule provenance"
 

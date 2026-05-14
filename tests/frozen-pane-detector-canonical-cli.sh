@@ -115,7 +115,7 @@ if "$SCRIPT" validate session-name "flywheel" 2>/dev/null \
 else fail "validate session-name accept"; fi
 
 # Test 17: validate ntm-bin accepts executable
-if [[ -x /Users/josh/.local/bin/ntm ]] && "$SCRIPT" validate ntm-bin "/Users/josh/.local/bin/ntm" 2>/dev/null \
+if [[ -x $HOME/.local/bin/ntm ]] && "$SCRIPT" validate ntm-bin "$HOME/.local/bin/ntm" 2>/dev/null \
    | jq -e '.subject == "ntm-bin" and .status == "ok"' >/dev/null; then
   pass "validate ntm-bin accepts executable ntm binary"
 else fail "validate ntm-bin accept"; fi

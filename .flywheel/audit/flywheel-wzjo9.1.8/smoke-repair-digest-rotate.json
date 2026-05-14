@@ -1,1 +1,0 @@
-{"schema_version":"flywheel-friday-digest/v1","command":"repair","status":"plan","mode":"dry_run","scope":"digest-log-rotate","dir":"/Users/josh/.claude/skills/.flywheel/logs","old_count":0,"age_threshold_days":90,"planned_actions":["mv digest-*.md older than 90d → digest_log_dir/archive/ when --apply --idempotency-key KEY passed"]}

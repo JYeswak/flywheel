@@ -2,7 +2,7 @@
 
 Session: `<target-session>`
 Doctrine version: `<YYYY-MM-DD.LNNN>`
-Canonical source: `/Users/josh/Developer/flywheel/templates/flywheel-install/AGENTS.md@<sha>`
+Canonical source: `<flywheel-repo>/templates/flywheel-install/AGENTS.md@<sha>`
 
 ## What Changed
 
@@ -15,7 +15,7 @@ Canonical source: `/Users/josh/Developer/flywheel/templates/flywheel-install/AGE
 Run this from the target repo:
 
 ```bash
-/Users/josh/.local/bin/flywheel-doctrine-sync \
+$HOME/.local/bin/flywheel-doctrine-sync \
   --target-repo "$PWD" \
   --dry-run \
   --json \
@@ -28,7 +28,7 @@ Do not auto-apply from tick. If the orchestrator chooses to accept the doctrine
 delta, apply one repo at a time:
 
 ```bash
-/Users/josh/.local/bin/flywheel-doctrine-sync \
+$HOME/.local/bin/flywheel-doctrine-sync \
   --target-repo "$PWD" \
   --apply \
   --idempotency-key "<session>-doctrine-<YYYYMMDDTHHMMSSZ>" \

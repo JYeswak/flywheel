@@ -1,8 +1,0 @@
-OK:   Anti-Patterns table present
-OK:   scripts/ has 1 .sh file(s)
-OK:   all scripts pass bash -n
-OK:   references/ has 3 .md file(s)
-OK:   SKILL.md line count: 293 (< 500)
-OK:   SELF-TEST.md present
-
-OK:   validate-skill: all hard checks passed for /Users/josh/.claude/skills/agent-lifecycle

@@ -44,7 +44,7 @@ if [[ "${1:-}" == "--config" ]]; then
 fi
 case "$*" in
   "list --json")
-    jq -nc '{sessions:[{name:"flywheel"},{name:"alpsinsurance"},{name:"skillos"},{name:"vrtx"}]}'
+    jq -nc '{sessions:[{name:"flywheel"},{name:"{session}"},{name:"{capability-control-plane}"},{name:"vrtx"}]}'
     ;;
   "config validate --json")
     if [[ -n "${cfg:-}" && -s "$cfg" ]]; then jq -nc '{status:"ok"}'; else jq -nc '{status:"error"}'; exit 1; fi
@@ -73,7 +73,7 @@ codex = "codex"
 # Resolve symlinks; preserve this comment.
 "flywheel" = "$wrong"
 "alps-insurance" = "$TMP/old/alps-insurance"
-"picoz" = "$TMP/repos/polymarket-pico-z"
+"{session}" = "$TMP/repos/polymarket-pico-z"
 "zesttube" = "$TMP/repos/zesttube"
 
 [coordinator]
@@ -86,10 +86,10 @@ canonical_json() {
     --arg root "$TMP/repos" \
     '{
       flywheel:($root+"/flywheel"),
-      alpsinsurance:($root+"/alpsinsurance"),
+      {session}:($root+"/{session}"),
       clutterfreespaces:($root+"/clutterfreespaces"),
-      picoz:($root+"/polymarket-pico-z"),
-      skillos:($root+"/skillos"),
+      {session}:($root+"/polymarket-pico-z"),
+      {capability-control-plane}:($root+"/{capability-control-plane}"),
       vrtx:($root+"/vrtx"),
       "zeststream-v2":($root+"/zeststream-v2"),
       zesttube:($root+"/zesttube")
@@ -107,7 +107,7 @@ run_tool() {
     "$@"
 }
 
-mkdir -p "$TMP/repos"/{flywheel,alpsinsurance,clutterfreespaces,polymarket-pico-z,skillos,vrtx,zeststream-v2,zesttube} "$TMP/other" "$TMP/old"
+mkdir -p "$TMP/repos"/{flywheel,{session},clutterfreespaces,polymarket-pico-z,{capability-control-plane},vrtx,zeststream-v2,zesttube} "$TMP/other" "$TMP/old"
 ntm="$TMP/ntm"; make_fake_ntm "$ntm"
 topology="$TMP/topology.jsonl"
 jq -nc --arg ts "$NOW" '{session:"flywheel",effective_at:$ts,orchestrator_pane:1,worker_panes:[2,3]}' >"$topology"
@@ -134,7 +134,7 @@ backup="$(jq -r '.backup_path' "$TMP/apply.json")"
 [[ "$(sha "$backup")" == "$initial_sha" ]] && pass "08_backup_matches_original" || fail "08_backup_matches_original"
 grep -q 'auto_assign = false' "$config" && grep -q 'Resolve symlinks' "$config" && grep -q '"alps-insurance"' "$config" \
   && pass "09_apply_preserves_unrelated_format_and_alias" || fail "09_apply_preserves_unrelated_format_and_alias"
-grep -q '"alpsinsurance" = ' "$config" && grep -q '"zeststream-v2" = ' "$config" \
+grep -q '"{session}" = ' "$config" && grep -q '"zeststream-v2" = ' "$config" \
   && pass "10_apply_adds_missing_target_paths" || fail "10_apply_adds_missing_target_paths"
 assert_jq "$audit" '.schema_version=="flywheel-recovery.session-path-repair.audit.v1" and .idempotency_key=="fixed-key" and (.sessions_changed|index("flywheel")) and .source_plan_path' "11_audit_row_has_required_receipt_fields"
 
@@ -149,12 +149,12 @@ cp "$backup" "$config"
 [[ "$(sha "$config")" == "$initial_sha" ]] && pass "15_copy_backup_rollback_restores_original_sha" || fail "15_copy_backup_rollback_restores_original_sha"
 
 block_report="$TMP/block-report.json"
-jq -nc --arg plan "/Users/josh/Developer/flywheel/.flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md" --arg desired "$TMP/repos/flywheel" '{
+jq -nc --arg plan "<flywheel-repo>/.flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md" --arg desired "$TMP/repos/flywheel" '{
   schema_version:"flywheel-recovery-preinstall-report.v1",
   source_plan_path:$plan,
   targets:[
     {session:"flywheel",current_path:"/tmp/wrong",desired_path:$desired,confidence:"low",protected:false},
-    {session:"skillos",current_path:"/tmp/wrong",desired_path:$desired,confidence:"high",protected:true}
+    {session:"{capability-control-plane}",current_path:"/tmp/wrong",desired_path:$desired,confidence:"high",protected:true}
   ]
 }' >"$block_report"
 report="$block_report"

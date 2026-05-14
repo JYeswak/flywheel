@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # stash-discipline-check.sh
-# Authority: .flywheel/doctrine/git-stash-discipline.md (joshua-direct-ask 2026-05-10T19:25Z)
+# Authority: .flywheel/doctrine/git-stash-discipline.md (joshua-direct-ask <timestamp>)
 #
 # Single-purpose gate that probes `git stash list | wc -l` for a repo and
 # emits a threshold class:
@@ -57,14 +57,14 @@ examples() {
   if [[ "$JSON_OUT" -eq 1 ]]; then
     jq -nc '{examples:[
       "stash-discipline-check.sh --json",
-      "stash-discipline-check.sh --repo /Users/josh/Developer/flywheel --json",
+      "stash-discipline-check.sh --repo <flywheel-repo> --json",
       "stash-discipline-check.sh --update-state-md .flywheel/STATE.md --json",
       "stash-discipline-check.sh --threshold-halt 8 --json"
     ]}'
   else
     cat <<'EX'
 stash-discipline-check.sh --json
-stash-discipline-check.sh --repo /Users/josh/Developer/flywheel --json
+stash-discipline-check.sh --repo <flywheel-repo> --json
 stash-discipline-check.sh --update-state-md .flywheel/STATE.md --json
 stash-discipline-check.sh --threshold-halt 8 --json
 EX
@@ -86,7 +86,7 @@ info() {
       schema_version:$schema_version,
       mutates:false,
       doctrine:".flywheel/doctrine/git-stash-discipline.md",
-      authority:"joshua-direct-ask 2026-05-10T19:25Z",
+      authority:"joshua-direct-ask <timestamp>",
       thresholds:{notable:$tn,bead:$tb,halt:$th},
       classes:["clean","notable","bead_filing_class","halt"],
       snapshot_log:$log,

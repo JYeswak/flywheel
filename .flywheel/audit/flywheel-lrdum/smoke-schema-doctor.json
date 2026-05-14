@@ -1,1 +1,0 @@
-{"schema_version":"bead-evidence-indexer/v1","command":"schema","surface":"doctor","fields":{"ts":"ISO8601","status":"pass|warn|fail","checks":"array of {name,status,detail?}"}}

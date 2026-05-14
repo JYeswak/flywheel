@@ -11,13 +11,17 @@
 # Idempotent: skips files that already have frontmatter.
 # Mutating modes require --apply --idempotency-key <KEY>.
 #
-# Bead: flywheel-s8tdd. Spec: .flywheel/audit/flywheel-fs-rag-discipline/apply-spec.md.
+# Bead: {bead-id}. Spec: .flywheel/audit/flywheel-fs-rag-discipline/apply-spec.md.
 set -euo pipefail
 
 SCHEMA_VERSION="scaffold-doc-frontmatter/v1"
 VERSION="0.1.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
+if [[ "$(basename "$(dirname "$SCRIPT_DIR")")" == ".flywheel" ]]; then
+  REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
+else
+  REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+fi
 RUN_LOG="${RUN_LOG:-$REPO_ROOT/.flywheel/state/scaffold-doc-frontmatter-runs.jsonl}"
 
 usage() {

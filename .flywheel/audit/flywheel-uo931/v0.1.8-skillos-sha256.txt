@@ -1,1 +1,0 @@
-f90dea38ea99df495b8b9c1b7eb87e2ba2238a94670460a0049978c53cb03fe8  /Users/josh/Developer/skillos/.flywheel/doctrine/audit-machinery-hygiene-discipline.md

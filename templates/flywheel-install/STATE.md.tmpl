@@ -48,6 +48,20 @@ polish_gate_min_composite_surface: null
 - snapshot_log: ~/.local/state/flywheel/stash-discipline-snapshots.jsonl
 <!-- stash-snapshot:end -->
 
+## Repo Hygiene Snapshot
+
+<!-- repo-hygiene-snapshot:begin -->
+- ts: <updated by .flywheel/scripts/repo-discipline-check.sh --update-state-md>
+- tracked_dirty_count: 0
+- untracked_count: 0
+- dirty_total: 0
+- class: clean
+- action: none
+- doctrine: .flywheel/doctrine/git-repo-discipline.md
+- handler: /git-repo-janitor
+- snapshot_log: ~/.local/state/flywheel/repo-discipline-snapshots.jsonl
+<!-- repo-hygiene-snapshot:end -->
+
 ## Resume Context
 
 {{resume_context}}

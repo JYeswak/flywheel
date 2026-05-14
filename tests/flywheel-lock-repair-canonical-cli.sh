@@ -2,7 +2,7 @@
 set -euo pipefail
 
 BIN="${FLYWHEEL_LOCK_REPAIR_BIN:-$HOME/.claude/skills/.flywheel/bin/flywheel-lock-repair}"
-REPO="${FLYWHEEL_LOCK_REPAIR_REPO:-/Users/josh/Developer/flywheel}"
+REPO="${FLYWHEEL_LOCK_REPAIR_REPO:-<flywheel-repo>}"
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
 

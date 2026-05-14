@@ -1,1 +1,0 @@
-{"schema_version":"idempotency-replay-guard/v1","command":"validate","subject":"receipt-ref","ts":"2026-05-11T06:11:56Z","status":"reject","value":"ab","reason":"pattern_or_length_mismatch","pattern":"^[A-Za-z0-9._/#:-]+$","length_range":"[4, 256]","observed_length":2}

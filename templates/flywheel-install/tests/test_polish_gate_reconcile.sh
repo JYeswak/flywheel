@@ -57,7 +57,7 @@ backup_ts_from_result() {
 bash -n "$SCRIPT"
 "$SCRIPT" --schema | jq -e '.title == "Polish gate reconcile output v1"' >/dev/null
 validate_result <(jq -n '{
-  ts:"2026-05-05T00:00:00Z",
+  ts:"<timestamp>",
   repo_path:"/tmp/repo",
   action:"detect",
   prior_state:"reconciled",

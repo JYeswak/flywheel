@@ -1,2 +1,0 @@
-{"schema_version":"jeff-verdict-heuristic/v1","command":"validate","subject":"verdict","ts":"2026-05-11T00:13:57Z","status":"reject","value":"MAYBE","reason":"not_in_enum","valid_verdicts":["YES_ADOPT","YES_ADAPT","NO_NOT_OUR_DOMAIN","NEED_RESEARCH"]}
-rc=1

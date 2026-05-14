@@ -40,9 +40,9 @@ assert_jq "$TMP/audit.json" '.status == "pass" and .managed == ["managed-skill"]
 cat >"$TMP/managed-direct.md" <<'MD'
 # DISPATCH
 Title: [skill-enhance-managed-skill] adopt pattern
-Skill path: `/Users/josh/.claude/skills/managed-skill/SKILL.md`
+Skill path: `<skills-root>/managed-skill/SKILL.md`
 Pre-flight: run `jsm status managed-skill --json`.
-Edit /Users/josh/.claude/skills/managed-skill/SKILL.md directly.
+Edit <skills-root>/managed-skill/SKILL.md directly.
 MD
 
 set +e
@@ -55,7 +55,7 @@ assert_jq "$TMP/managed-direct.json" '.status == "refused" and (.errors[] | cont
 cat >"$TMP/managed-patch.md" <<'MD'
 # DISPATCH
 Title: [skill-enhance-managed-skill] adopt pattern
-Skill path: `/Users/josh/.claude/skills/managed-skill/SKILL.md`
+Skill path: `<skills-root>/managed-skill/SKILL.md`
 Pre-flight: run `jsm status managed-skill --json`.
 Direct mutation forbidden. Produce a jsm-push-ready patch artifact, do not mutate live.
 MD
@@ -65,9 +65,9 @@ assert_jq "$TMP/managed-patch.json" '.status == "pass" and .skills[0].managed ==
 cat >"$TMP/unmanaged-missing-artifact.md" <<'MD'
 # DISPATCH
 Title: [skill-enhance-local-skill] adopt pattern
-Skill path: `/Users/josh/.claude/skills/local-skill/SKILL.md`
+Skill path: `<skills-root>/local-skill/SKILL.md`
 Pre-flight: run `jsm status local-skill --json`.
-Modify /Users/josh/.claude/skills/local-skill/SKILL.md directly.
+Modify <skills-root>/local-skill/SKILL.md directly.
 MD
 set +e
 "$SCRIPT" --validate-packet "$TMP/unmanaged-missing-artifact.md" --jsm-list-json "$TMP/jsm-list.json" --json >"$TMP/unmanaged-missing-artifact.json"
@@ -79,7 +79,7 @@ assert_jq "$TMP/unmanaged-missing-artifact.json" '.status == "refused" and (.err
 cat >"$TMP/unmanaged-import.md" <<'MD'
 # DISPATCH
 Title: [skill-enhance-local-skill] adopt pattern
-Skill path: `/Users/josh/.claude/skills/local-skill/SKILL.md`
+Skill path: `<skills-root>/local-skill/SKILL.md`
 Pre-flight: run `jsm status local-skill --json`.
 May mutate directly after writing a jsm-import-ready artifact.
 MD

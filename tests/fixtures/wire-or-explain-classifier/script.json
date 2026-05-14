@@ -6,7 +6,7 @@
   "actor": "codex",
   "target": ".flywheel/scripts/foo.sh",
   "changed_paths": [".flywheel/scripts/foo.sh"],
-  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_repo": "<flywheel-repo>",
   "ship_actor": "codex",
   "git_ref": "abc123",
   "action_ledger_pointer": ".flywheel/dispatch-log.jsonl#L10",

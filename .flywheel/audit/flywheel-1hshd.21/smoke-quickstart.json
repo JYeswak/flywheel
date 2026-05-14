@@ -1,1 +1,0 @@
-{"schema_version":"cross-repo-trauma-aggregator/v1","command":"quickstart","status":"ok","steps":[{"step":1,"action":"probe doctor","command":"cross-repo-trauma-aggregator.sh doctor --json"}],"next_actions":["doctor","health","repair"]}

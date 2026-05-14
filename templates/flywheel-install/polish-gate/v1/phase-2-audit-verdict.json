@@ -2,21 +2,21 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://zeststream.ai/schemas/flywheel/polish-gate/v1/phase-2-audit-verdict.json",
   "schema_version": "polish-gate/phase-2-audit-verdict/v1",
-  "audit_ts": "2026-05-05T23:50:38Z",
+  "audit_ts": "<timestamp>",
   "auditor_pane": "flywheel:2",
   "auditor_orch": "codex",
   "phase_2_beads_audited": [
-    "flywheel-4h6c8",
-    "flywheel-3uaa5",
-    "flywheel-3g6xh",
-    "flywheel-31bhc",
-    "flywheel-9xuom",
-    "flywheel-1oruh",
-    "flywheel-p2-12-f1",
-    "flywheel-3jq6y",
-    "flywheel-5jq48",
-    "flywheel-ok0yd",
-    "flywheel-p2-11"
+    "{bead-id}",
+    "{bead-id}",
+    "{bead-id}",
+    "{bead-id}",
+    "{bead-id}",
+    "{bead-id}",
+    "{bead-id}-12-f1",
+    "{bead-id}",
+    "{bead-id}",
+    "{bead-id}",
+    "{bead-id}-11"
   ],
   "surface_grades": [
     {"surface": "P2-01 schemas", "ubs": 9.1, "simplify": 9.2, "extreme-opt": 9.2, "readme": 9.0, "canonical-cli": 8.8, "composite": 9.06, "below_bar": true},
@@ -58,11 +58,11 @@
     {"surface": "P2-11 ledger replay", "score": 7, "pass": true, "failed_facets": []}
   ],
   "findings": [
-    {"id": "F-HIGH-001", "severity": "high", "summary": "Phase 2 P2-07 doctor surface is absent from flywheel-loop doctor JSON.", "bead_id": "flywheel-p2-12-f1", "root_class": "doctor-feedback-loop-missing"},
-    {"id": "F-HIGH-002", "severity": "high", "summary": "Template schema inventory omits discovery-output and reconcile-output schemas.", "bead_id": "flywheel-p2-12-f2", "root_class": "schema-inventory-drift"},
-    {"id": "F-HIGH-003", "severity": "high", "summary": "discover-surfaces.py tracebacks on malformed JSON manifests.", "bead_id": "flywheel-p2-12-f3", "root_class": "operator-error-shape"},
-    {"id": "F-MED-001", "severity": "medium", "summary": "Phase 2 closure inventory is not fully machine-auditable.", "bead_id": "flywheel-p2-12-f4", "root_class": "bead-receipt-drift"},
-    {"id": "F-LOW-001", "severity": "low", "summary": "Aggregate schema test does not enumerate every v1 schema.", "bead_id": "flywheel-p2-12-f5", "root_class": "aggregate-test-coverage"}
+    {"id": "F-HIGH-001", "severity": "high", "summary": "Phase 2 P2-07 doctor surface is absent from flywheel-loop doctor JSON.", "bead_id": "{bead-id}-12-f1", "root_class": "doctor-feedback-loop-missing"},
+    {"id": "F-HIGH-002", "severity": "high", "summary": "Template schema inventory omits discovery-output and reconcile-output schemas.", "bead_id": "{bead-id}-12-f2", "root_class": "schema-inventory-drift"},
+    {"id": "F-HIGH-003", "severity": "high", "summary": "discover-surfaces.py tracebacks on malformed JSON manifests.", "bead_id": "{bead-id}-12-f3", "root_class": "operator-error-shape"},
+    {"id": "F-MED-001", "severity": "medium", "summary": "Phase 2 closure inventory is not fully machine-auditable.", "bead_id": "{bead-id}-12-f4", "root_class": "bead-receipt-drift"},
+    {"id": "F-LOW-001", "severity": "low", "summary": "Aggregate schema test does not enumerate every v1 schema.", "bead_id": "{bead-id}-12-f5", "root_class": "aggregate-test-coverage"}
   ],
   "composite_score": 9.01,
   "lens_disagreement_max": 1,
@@ -83,7 +83,7 @@
   "evidence": {
     "audit_doc": "templates/flywheel-install/polish-gate/PHASE-2-AUDIT.md",
     "tests": "schemas, discovery, runner, close-validator, scope-allowlist, reconcile, ledger-replay, integration, render all passed",
-    "doctor_probe": "flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json | jq '.polish_gate // {missing:true}' returned {\"missing\":true}",
+    "doctor_probe": "flywheel-loop doctor --repo <flywheel-repo> --json | jq '.polish_gate // {missing:true}' returned {\"missing\":true}",
     "ubs_probe": "ubs reported 0 critical, 9 warning, 44 info across 3 Python surfaces"
   },
   "json_schema": {

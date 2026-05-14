@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-NTM="${NTM_BIN:-/Users/josh/.local/bin/ntm}"
+NTM="${NTM_BIN:-$HOME/.local/bin/ntm}"
 TMP="$(mktemp -d -t dispatch-repo.XXXXXX)"
 trap 'chmod -R u+w "$TMP" 2>/dev/null || true; find "$TMP" -depth -mindepth 1 -delete 2>/dev/null || true; rmdir "$TMP" 2>/dev/null || true' EXIT
 

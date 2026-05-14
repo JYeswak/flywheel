@@ -54,7 +54,7 @@ bash tests/test_four_lens_jeff_version_contract_pass.sh
 
 Contract receipt: fixture-contract/v1.
 Payload schema: fixture-payload/v1.
-Four-Lens Self-Grade: brand voice pass; Joshua sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
+Four-Lens Self-Grade: brand voice pass; {operator} sniff pass; Jeff doctrine pass; public publishability pass for Three Judges.
 Outcome: versioned contract evidence prevents silent ingestion drift.
 Result: the Jeff lens accepts explicit schema_version and v1 markers.
 EOF

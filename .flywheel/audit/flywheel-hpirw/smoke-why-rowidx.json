@@ -1,1 +1,0 @@
-{"schema_version":"dispatch-log-v2-violations-doctor/v1","command":"why","id":"-1","status":"pass","match_count":1,"matches":[{"ts":"2026-05-10T17:29:37Z","action":"repair","status":"applied","sha256":"0110abadf248a8d5f27f079af41d77fbf895dbda3ee549d225dc58ca3611f46b","scope":"audit_log_dir","idempotency_key":"hpirw-evidence"}]}

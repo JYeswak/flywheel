@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flywheel.zeststream.ai/schemas/depersonalization-table-v0.json",
+  "title": "Flywheel de-personalization table",
+  "type": "object",
+  "required": ["schema_version", "rows"],
+  "properties": {
+    "schema_version": {
+      "const": "flywheel.depersonalization_table.v0"
+    },
+    "rows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "class",
+          "private_value",
+          "match_type",
+          "action",
+          "public_value",
+          "risk",
+          "utility_impact",
+          "residual_risk",
+          "review_required",
+          "notes"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "class": {
+            "type": "string"
+          },
+          "private_value": {
+            "type": "string",
+            "minLength": 1
+          },
+          "match_type": {
+            "enum": ["literal", "regex", "path-prefix", "glob"]
+          },
+          "action": {
+            "enum": ["replace", "redact", "generalize", "drop", "manual-review"]
+          },
+          "public_value": {
+            "type": "string"
+          },
+          "risk": {
+            "enum": [
+              "direct_identifier",
+              "quasi_identifier",
+              "client_confidentiality",
+              "credential",
+              "live_state",
+              "relationship_identifier",
+              "linkage_identifier"
+            ]
+          },
+          "utility_impact": {
+            "enum": ["low", "medium", "high"]
+          },
+          "residual_risk": {
+            "enum": ["low", "medium", "high"]
+          },
+          "review_required": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

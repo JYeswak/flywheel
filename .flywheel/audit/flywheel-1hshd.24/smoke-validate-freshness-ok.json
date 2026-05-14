@@ -1,1 +1,0 @@
-{"schema_version":"customer-facing-observability-probe/v1","command":"validate","subject":"freshness-hours","ts":"2026-05-11T05:19:10Z","status":"ok","value":72,"default":72,"note":"matches CUSTOMER_OBS_FRESHNESS_HOURS env contract"}

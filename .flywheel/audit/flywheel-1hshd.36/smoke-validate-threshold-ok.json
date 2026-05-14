@@ -1,1 +1,0 @@
-{"schema_version":"hub-blocker-detect/v1","command":"validate","subject":"threshold","ts":"2026-05-11T06:06:29Z","status":"ok","value":3,"default":3,"note":"cross-sources native --threshold flag"}

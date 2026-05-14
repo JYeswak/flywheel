@@ -6,13 +6,13 @@
   "actor": "codex",
   "target": ".flywheel/worker-branches/flywheel-333j.json",
   "changed_paths": [".flywheel/worker-branches/flywheel-333j.json"],
-  "ship_repo": "/Users/josh/Developer/flywheel",
+  "ship_repo": "<flywheel-repo>",
   "ship_actor": "codex",
   "git_ref": "246bdf",
   "branch_ref": "refs/workers/flywheel-333j/opaque-abc",
   "identity_proof": {
     "agent": "FixtureWorker",
-    "identity_primary_key": "flywheel:3:/Users/josh/Developer/flywheel",
+    "identity_primary_key": "flywheel:3:<flywheel-repo>",
     "proof_hash": "sha256:fixtureidentity"
   },
   "action_ledger_pointer": ".flywheel/dispatch-log.jsonl#L14"

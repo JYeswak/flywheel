@@ -3,7 +3,7 @@
 # AG5 of flywheel-s8tdd.
 set -euo pipefail
 
-REPO="${REPO:-/Users/josh/Developer/flywheel}"
+REPO="${REPO:-<flywheel-repo>}"
 LINTER="${LINTER:-$REPO/.flywheel/scripts/file-rag-discipline-lint.sh}"
 SCAFFOLDER="${SCAFFOLDER:-$REPO/.flywheel/scripts/scaffold-doc-frontmatter.sh}"
 DOCTRINE="${DOCTRINE:-$REPO/.flywheel/doctrine/filesystem-as-rag.md}"

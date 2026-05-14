@@ -1,3 +1,0 @@
-issues_jsonl_mtime=2026-05-08T23:47:35-0600 issues_jsonl_size=2487820
-last_commit=182c3fea6ad960228216a3c4faa652894c1be93c 2026-05-08T23:47:10-06:00 Record canonical CLI 990 uplift evidence
-    1281 .beads/issues.jsonl

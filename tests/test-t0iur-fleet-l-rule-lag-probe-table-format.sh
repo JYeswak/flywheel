@@ -12,7 +12,7 @@
 
 set -euo pipefail
 
-REPO="${REPO:-/Users/josh/Developer/flywheel}"
+REPO="${REPO:-<flywheel-repo>}"
 SCRIPT="${SCRIPT:-$REPO/.flywheel/scripts/fleet-l-rule-lag-probe.sh}"
 CANONICAL="${CANONICAL:-$REPO/.flywheel/AGENTS-CANONICAL.md}"
 

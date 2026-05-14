@@ -1,1 +1,0 @@
-{"schema_version":"customer-facing-observability-probe/v1","command":"repair","status":"refused","mode":"apply","scope":"ledger_dir","reason":"--apply requires --idempotency-key"}

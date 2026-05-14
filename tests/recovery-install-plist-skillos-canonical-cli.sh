@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# tests/recovery-install-plist-skillos-canonical-cli.sh
-# Canonical-cli surface tests for .flywheel/scripts/recovery-install-plist-skillos.sh (scaffolded by
+# tests/recovery-install-plist-{capability-control-plane}-canonical-cli.sh
+# Canonical-cli surface tests for .flywheel/scripts/recovery-install-plist-{capability-control-plane}.sh (scaffolded by
 # bead flywheel-ws02m / scaffold-canonical-cli.sh).
 #
 # 13/13 PASS = canonical-cli-scoping checker green. TODO markers
@@ -8,7 +8,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/recovery-install-plist-skillos.sh"
+SCRIPT="$ROOT/.flywheel/scripts/recovery-install-plist-{capability-control-plane}.sh"
 
 pass_count=0
 fail_count=0
@@ -87,10 +87,10 @@ else fail "quickstart envelope"; fi
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/rips-fillin.XXXXXX")"
 trap 'find "$TMP" -type f -delete 2>/dev/null; rmdir "$TMP" 2>/dev/null || true' EXIT
 
-# Test 14: doctor has 14 named substrate probes (skillos = 12 family + jsm + skills_flywheel)
+# Test 14: doctor has 14 named substrate probes ({capability-control-plane} = 12 family + jsm + skills_flywheel)
 if "$SCRIPT" doctor --json 2>/dev/null \
   | jq -e '(.checks | length) >= 14 and ([.checks[].name] | contains(["dependency:python3","dependency:jq","ntm_bin_executable","plutil_bin","launchctl_bin","plist_parent_writable","audit_script_readable","jsm_bin_executable","skills_flywheel_readable","helper_lib_loaded","audit_log_writable"]))' >/dev/null; then
-  pass "doctor 14 named probes incl. skillos-extras (jsm_bin + skills_flywheel)"
+  pass "doctor 14 named probes incl. {capability-control-plane}-extras (jsm_bin + skills_flywheel)"
 else fail "doctor named probes"; fi
 
 # Test 15: health structured fields
@@ -119,33 +119,33 @@ else fail "validate plist missing"; fi
 
 # Test 19: validate audit-receipt with sufficient confidence → pass
 cat >"$TMP/audit-ok.json" <<JSON
-{"confidence_per_session":{"skillos":75}}
+{"confidence_per_session":{"{capability-control-plane}":75}}
 JSON
 RIPS_AUDIT_RECEIPT="$TMP/audit-ok.json" "$SCRIPT" validate audit-receipt --json >"$TMP/v-audit-ok.json" 2>&1 || true
 if jq -e '.subject == "audit-receipt" and .status == "pass" and (.reason | test("75"))' "$TMP/v-audit-ok.json" >/dev/null 2>&1; then
-  pass "validate audit-receipt skillos confidence 75 → pass"
+  pass "validate audit-receipt {capability-control-plane} confidence 75 → pass"
 else fail "validate audit-receipt confidence"; fi
 
 # Test 20: validate audit-receipt below threshold → fail
 cat >"$TMP/audit-low.json" <<JSON
-{"confidence_per_session":{"skillos":20}}
+{"confidence_per_session":{"{capability-control-plane}":20}}
 JSON
 RIPS_AUDIT_RECEIPT="$TMP/audit-low.json" "$SCRIPT" validate audit-receipt --json >"$TMP/v-audit-low.json" 2>&1 || true
 if jq -e '.subject == "audit-receipt" and .status == "fail" and (.reason | test("20"))' "$TMP/v-audit-low.json" >/dev/null 2>&1; then
-  pass "validate audit-receipt skillos confidence 20 → fail (below 60)"
+  pass "validate audit-receipt {capability-control-plane} confidence 20 → fail (below 60)"
 else fail "validate audit-receipt below threshold"; fi
 
-# Test 21: validate skillos-management subject (NEW for skillos variant)
-if "$SCRIPT" validate skillos-management --json 2>/dev/null \
-  | jq -e '.subject == "skillos-management" and (.reason | type == "string")' >/dev/null; then
-  pass "validate skillos-management subject (skillos-unique)"
-else fail "validate skillos-management"; fi
+# Test 21: validate {capability-control-plane}-management subject (NEW for {capability-control-plane} variant)
+if "$SCRIPT" validate {capability-control-plane}-management --json 2>/dev/null \
+  | jq -e '.subject == "{capability-control-plane}-management" and (.reason | type == "string")' >/dev/null; then
+  pass "validate {capability-control-plane}-management subject ({capability-control-plane}-unique)"
+else fail "validate {capability-control-plane}-management"; fi
 
-# Test 22: validate skillos-management with missing jsm → fail
-RIPS_JSM_BIN="$TMP/no-such-jsm" "$SCRIPT" validate skillos-management --json >"$TMP/v-skillos-mgmt.json" 2>&1 || true
-if jq -e '.subject == "skillos-management" and .status == "fail" and (.reason | test("jsm_bin"))' "$TMP/v-skillos-mgmt.json" >/dev/null 2>&1; then
-  pass "validate skillos-management missing jsm → fail"
-else fail "validate skillos-management missing jsm"; fi
+# Test 22: validate {capability-control-plane}-management with missing jsm → fail
+RIPS_JSM_BIN="$TMP/no-such-jsm" "$SCRIPT" validate {capability-control-plane}-management --json >"$TMP/v-{capability-control-plane}-mgmt.json" 2>&1 || true
+if jq -e '.subject == "{capability-control-plane}-management" and .status == "fail" and (.reason | test("jsm_bin"))' "$TMP/v-{capability-control-plane}-mgmt.json" >/dev/null 2>&1; then
+  pass "validate {capability-control-plane}-management missing jsm → fail"
+else fail "validate {capability-control-plane}-management missing jsm"; fi
 
 # Test 23: schema status variant
 if "$SCRIPT" --schema status 2>/dev/null \
@@ -153,21 +153,21 @@ if "$SCRIPT" --schema status 2>/dev/null \
   pass "schema status variant pins recovery-session-watcher-install/v1"
 else fail "schema status variant"; fi
 
-# Test 24: why with 7 known ids (skillos has the family 6 + skillos_management)
+# Test 24: why with 7 known ids ({capability-control-plane} has the family 6 + {capability-control-plane}_management)
 why_found=0
-for id in label audit dry_run_pass watcher_race install_flow skillos_management; do
+for id in label audit dry_run_pass watcher_race install_flow {capability-control-plane}_management; do
   res="$("$SCRIPT" why "$id" --json 2>/dev/null | jq -r '.resolution')"
   if [[ "$res" == "found" || "$res" == "unavailable" ]]; then why_found=$((why_found + 1)); fi
 done
 if [[ "$why_found" -ge 5 ]]; then
-  pass "why 6 ids (incl. skillos_management): $why_found/6 resolve"
+  pass "why 6 ids (incl. {capability-control-plane}_management): $why_found/6 resolve"
 else fail "why coverage ($why_found/6)"; fi
 
-# Test 25: why skillos_management explanation mentions jsm + skills-flywheel
-if "$SCRIPT" why skillos_management --json 2>/dev/null \
+# Test 25: why {capability-control-plane}_management explanation mentions jsm + skills-flywheel
+if "$SCRIPT" why {capability-control-plane}_management --json 2>/dev/null \
   | jq -e '.resolution == "found" and (.explanation | test("jsm")) and (.explanation | test("skills-flywheel"))' >/dev/null; then
-  pass "why skillos_management cites jsm + skills-flywheel"
-else fail "why skillos_management explanation"; fi
+  pass "why {capability-control-plane}_management cites jsm + skills-flywheel"
+else fail "why {capability-control-plane}_management explanation"; fi
 
 # Test 26: why unknown → not_found
 if "$SCRIPT" why definitely-not-a-real-id --json 2>/dev/null \

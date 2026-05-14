@@ -1,0 +1,239 @@
+{
+  "audience": "SMB owner or buyer who wants safer AI adoption without becoming an AI tooling expert.",
+  "copy_rule": "Show the proof, not the dream. Lead with the owner's stuck workflow, then show the controlled path forward.",
+  "evidence_refs": [
+    {
+      "label": "Generated repo trajectory",
+      "owner_meaning": "The message comes from work history, not a fresh pitch.",
+      "ref": "docs/evidence/repo-trajectory.json"
+    },
+    {
+      "label": "Generated story",
+      "owner_meaning": "A reviewer can inspect the path from origin to current state.",
+      "ref": "docs/stories/repo-trajectory.md"
+    },
+    {
+      "label": "Shared story package",
+      "owner_meaning": "The wording and visual grammar are reusable across projects.",
+      "ref": "packages/zeststream-story-system/story-system.json"
+    },
+    {
+      "label": "Frontend quality gate",
+      "owner_meaning": "A page cannot pass as a generic card stack with unsupported claims.",
+      "ref": "scripts/zs-frontend-quality-gate.sh --json --strict"
+    },
+    {
+      "label": "Component payload",
+      "owner_meaning": "The proof story has shared UI primitives instead of one-off copy.",
+      "ref": "@zeststream/ui"
+    }
+  ],
+  "frontend_contract": {
+    "component_count": 9,
+    "component_package": "@zeststream/ui",
+    "quality_gates": [
+      "python3 scripts/extract_git_story.py --repo <repo> --write-json docs/evidence/repo-trajectory.json --write-md docs/stories/repo-trajectory.md",
+      "python3 scripts/validate_story_system_package.py --json",
+      "bash scripts/zs-frontend-quality-gate.sh --repo <nextjs-repo> --json --strict",
+      "playwright screenshot checks for desktop and mobile proof primitives"
+    ],
+    "schema_version": "zeststream.repo_frontend_story.v0",
+    "token_package": "@zeststream/story-system"
+  },
+  "generated_date": "2026-05-14",
+  "headline": "Buy back the time hiding between your tools.",
+  "method_name": "The Yuzu Method",
+  "method_steps": [
+    {
+      "stage": "recognize",
+      "visible_wording": "Your business already has the data. The work is just hidden between tools.",
+      "visual_cue": "A workflow map with disconnected systems and one highlighted manual route."
+    },
+    {
+      "stage": "bound",
+      "visible_wording": "A slice is one bounded workflow improvement: useful enough to feel, small enough to inspect, and clear enough to stop if the proof is not there.",
+      "visual_cue": "The selected slice is pulled out of the map and placed on a workbench."
+    },
+    {
+      "stage": "control",
+      "visible_wording": "If a claim is not proven, it stays blocked.",
+      "visual_cue": "A proof rail with proven, blocked, skipped-with-reason, and private states."
+    },
+    {
+      "stage": "remember",
+      "visible_wording": "The repo history shows the pivots, blockers, and lessons that survived contact with reality.",
+      "visual_cue": "A trajectory rail that connects foundation, friction, proof loop, reuse, and current arc."
+    },
+    {
+      "stage": "act",
+      "visible_wording": "Map one workflow before sending secrets, customer data, or system access.",
+      "visual_cue": "A safe intake room with redacted examples and a direct operator route."
+    }
+  ],
+  "owner_problem": "The business already has systems. The waste sits between them: copying, chasing, checking, remembering, and wondering what changed.",
+  "page_rooms": [
+    {
+      "component": "OperatingRoomHero",
+      "owner_job": "Make the owner feel the trapped work between tools before naming AI.",
+      "proof_source": "message_pack.story_arc[recognize]",
+      "section_id": "operating-room-hero",
+      "visible_scene": "A first-room operating map with existing tools, owner memory, and one highlighted manual route."
+    },
+    {
+      "component": "OwnerTensionRoom",
+      "owner_job": "Name the ten reasons SMB owners hesitate and show the control beside each one.",
+      "proof_source": "message_pack.trust_objections",
+      "section_id": "owner-tension-room",
+      "visible_scene": "A visible friction band where unsupported claims are held in amber until the proof catches up."
+    },
+    {
+      "component": "SliceWorkbench",
+      "owner_job": "Define a slice as the safe unit of work: useful, inspectable, stoppable.",
+      "proof_source": "message_pack.story_arc[bound]",
+      "section_id": "slice-workbench",
+      "visible_scene": "A cinematic but calm buyer journey: workflow room, slice workbench, proof theater, trajectory rail, contact room."
+    },
+    {
+      "component": "ProofRail",
+      "owner_job": "Show proven, blocked, skipped, and private states without forcing raw receipt reading.",
+      "proof_source": "message_pack.proof_translation",
+      "section_id": "proof-theater",
+      "visible_scene": "A proof rail beside the workflow with proven, blocked, skipped-with-reason, and private states."
+    },
+    {
+      "component": "TrajectoryRail",
+      "owner_job": "Convert git history into origin, friction, proof loop, reuse, and current arc.",
+      "proof_source": "chapters",
+      "section_id": "trajectory-room",
+      "visible_scene": "A cinematic but calm buyer journey: workflow room, slice workbench, proof theater, trajectory rail, contact room."
+    },
+    {
+      "component": "LessonLedger",
+      "owner_job": "Show which lessons became shared checks, copy, tokens, components, or runbooks.",
+      "proof_source": "chapters[reuse]",
+      "section_id": "lesson-ledger",
+      "visible_scene": "A lesson ledger showing which checks, words, components, or runbooks were created from the last hard-earned lesson."
+    },
+    {
+      "component": "ProofDrawer",
+      "owner_job": "Let technical reviewers inspect artifacts after the owner story lands.",
+      "proof_source": "docs/evidence/publication-evidence.md",
+      "section_id": "decision-room",
+      "visible_scene": "A proof rail beside the workflow with proven, blocked, skipped-with-reason, and private states."
+    },
+    {
+      "component": "SafeContactPanel",
+      "owner_job": "Ask for a redacted workflow example, not secrets or broad access.",
+      "proof_source": "message_pack.story_arc[act]",
+      "section_id": "safe-contact-room",
+      "visible_scene": "A cinematic but calm buyer journey: workflow room, slice workbench, proof theater, trajectory rail, contact room."
+    }
+  ],
+  "primary_cta": "Map my workflow",
+  "proof_lanes": [
+    {
+      "evidence_ref": "docs/stories/repo-trajectory.md",
+      "owner_meaning": "The story comes from the work that actually happened, not a fresh marketing claim."
+    },
+    {
+      "evidence_ref": "226 friction-matched commits",
+      "owner_meaning": "The process exposes what is not ready before it can affect the business."
+    },
+    {
+      "evidence_ref": "805 proof-loop-matched commits",
+      "owner_meaning": "Claims move forward only when the system can show what changed."
+    },
+    {
+      "evidence_ref": "667 reuse-matched commits",
+      "owner_meaning": "Lessons from one repo become reusable operating material for the next repo."
+    }
+  ],
+  "proof_summary": {
+    "commit_span": "2026-04-30 to 2026-05-14",
+    "commits_inspected": 1509,
+    "friction_signals": 226,
+    "owner_translation": "The repo shows origin, friction, proof, reuse, and story work as a path a reviewer can inspect.",
+    "proof_loop_signals": 805,
+    "reuse_signals": 667
+  },
+  "public_copy_checks": {
+    "blocked_state_allowed": true,
+    "every_strong_claim_has_evidence_ref": true,
+    "hype_phrases_absent": true,
+    "private_paths_absent": true
+  },
+  "repo_label": "Flywheel",
+  "safe_first_step": "Start with one workflow map before broader access, automation, or claims.",
+  "sales_language_rules": [
+    "Say manual work, follow-up, cash flow, owner approval, and customer experience before naming AI.",
+    "Treat commit counts as reviewer evidence, not hero copy.",
+    "Call unsupported claims blocked instead of softening them into promises.",
+    "Use slice to mean one bounded workflow improvement with a visible stop condition.",
+    "Make the next step feel safe: map first, then decide what earns access."
+  ],
+  "schema_version": "zeststream.repo_owner_story_brief.v0",
+  "secondary_cta": "Inspect the proof",
+  "source_dossier_schema": "zeststream.repo_story_dossier.v0",
+  "source_frontend_schema": "zeststream.repo_frontend_story.v0",
+  "source_message_schema": "zeststream.repo_story_message.v0",
+  "source_story_schema": "zeststream.repo_git_story.v0",
+  "subhead": "Map the manual route between tools, improve one bounded slice, prove what changed, and carry the lesson forward.",
+  "trust_answers": [
+    {
+      "owner_worry": "AI will make a mess.",
+      "proof_behavior": "The first slice must have a named boundary and stop condition.",
+      "visible_answer": "The map comes before automation."
+    },
+    {
+      "owner_worry": "I will not know what changed.",
+      "proof_behavior": "Each claim links to evidence or stays blocked.",
+      "visible_answer": "Every slice has a proof rail."
+    },
+    {
+      "owner_worry": "My data will leak.",
+      "proof_behavior": "Public proof is redacted, consented, generated, or replaced.",
+      "visible_answer": "Private work stays private."
+    },
+    {
+      "owner_worry": "AI makes things up.",
+      "proof_behavior": "Unsupported claims show as blocked instead of becoming copy.",
+      "visible_answer": "Blocked is better than bluffing."
+    },
+    {
+      "owner_worry": "This will replace people before it understands the work.",
+      "proof_behavior": "Human approval remains part of the workflow slice.",
+      "visible_answer": "The first slice is small on purpose."
+    },
+    {
+      "owner_worry": "My tools already do not talk to each other.",
+      "proof_behavior": "Integration starts with one workflow path, not the whole company.",
+      "visible_answer": "The operating map starts with the disconnected tools the owner already uses."
+    },
+    {
+      "owner_worry": "Every consultant has a framework.",
+      "proof_behavior": "Runbooks, tests, receipts, and blockers sit behind the story.",
+      "visible_answer": "The method is visible enough to inspect."
+    },
+    {
+      "owner_worry": "AI changes too fast.",
+      "proof_behavior": "Tool claims require current receipts before promotion.",
+      "visible_answer": "Fast tools go through a controlled loop."
+    },
+    {
+      "owner_worry": "If it fails, I will be stuck.",
+      "proof_behavior": "Failed proof does not become a public claim.",
+      "visible_answer": "Stop conditions are named up front."
+    },
+    {
+      "owner_worry": "I do not want to become an AI expert.",
+      "proof_behavior": "Technical proof is available but not required to understand the offer.",
+      "visible_answer": "The owner approves the slice; the operator manages the machinery."
+    }
+  ],
+  "visual_direction": {
+    "asset_rule": "Use real workflow scenes, generated bitmap assets, or product-state visuals; avoid generic abstract gradients.",
+    "density_rule": "Let the first screen feel alive, then let the buyer choose owner, method, proof, or reviewer depth.",
+    "first_impression": "A working operating room for a real SMB workflow, not a floating SaaS card stack.",
+    "motion_rule": "Use motion to show handoff, proof state, and lesson carry-forward; do not use decoration-only motion."
+  }
+}

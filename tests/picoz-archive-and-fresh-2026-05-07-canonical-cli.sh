@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# tests/picoz-archive-and-fresh-2026-05-07-canonical-cli.sh
-# Canonical-cli surface tests for .flywheel/scripts/picoz-archive-and-fresh-2026-05-07.sh (scaffolded by
+# tests/{session}-archive-and-fresh-2026-05-07-canonical-cli.sh
+# Canonical-cli surface tests for .flywheel/scripts/{session}-archive-and-fresh-2026-05-07.sh (scaffolded by
 # bead flywheel-ws02m / scaffold-canonical-cli.sh).
 #
 # 13/13 PASS = canonical-cli-scoping checker green. TODO markers
@@ -8,7 +8,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/picoz-archive-and-fresh-2026-05-07.sh"
+SCRIPT="$ROOT/.flywheel/scripts/{session}-archive-and-fresh-2026-05-07.sh"
 
 pass_count=0
 fail_count=0

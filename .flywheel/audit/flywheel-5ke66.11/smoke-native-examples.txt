@@ -1,4 +1,0 @@
-.flywheel/scripts/fleet-conformance-probe.sh --fleet --json
-.flywheel/scripts/fleet-conformance-probe.sh --session flywheel --json
-.flywheel/scripts/fleet-conformance-probe.sh --fleet --apply --dry-run --json
-FLYWHEEL_CONFORMANCE_SKIP_DOCTOR=1 .flywheel/scripts/fleet-conformance-probe.sh --doctor --json

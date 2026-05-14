@@ -3,7 +3,7 @@
   "status": "dry_run",
   "dry_run": true,
   "project": "fixture",
-  "repo": "/Users/josh/Developer/fixture",
+  "repo": "$HOME/Developer/fixture",
   "tier": "active_normal",
   "interval": "30m",
   "planned_orchestrator_cadence": "30m",

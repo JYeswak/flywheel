@@ -7,14 +7,14 @@
 #   - probe_rc!=0 + bad JSON → identity_registry_doctor_invalid_json
 #
 # Bead: flywheel-3ycjw. Sister: flywheel-e5f2f (path resolution).
-# Cross-orch unblock: skillos-ubh3 partial-AC progresses toward full pass
+# Cross-orch unblock: {capability-control-plane}-ubh3 partial-AC progresses toward full pass
 # once doctor concurrent-load probe stops synth-failing.
 
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-AGENT_SH="/Users/josh/.claude/skills/.flywheel/lib/agent.sh"
-FLYWHEEL_LOOP_BIN="/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop"
+AGENT_SH="<flywheel-state>/lib/agent.sh"
+FLYWHEEL_LOOP_BIN="<flywheel-state>/bin/flywheel-loop"
 
 pass_count=0
 fail_count=0
@@ -197,9 +197,9 @@ fi
 # This is the cross-orch-load-bearing assertion: even with the doctor's
 # umbrella set to 0.2 internally (part-02-portable_doctor.sh:335), the
 # identity probe uses its own 5s default and returns drift=0.
-ROOT_REPO="/Users/josh/Developer/flywheel"
-if [[ -x /Users/josh/.claude/skills/.flywheel/bin/flywheel-loop ]] && [[ -d "$ROOT_REPO" ]]; then
-  doctor_out="$(/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo "$ROOT_REPO" --json 2>/dev/null)"
+ROOT_REPO="<flywheel-repo>"
+if [[ -x <flywheel-state>/bin/flywheel-loop ]] && [[ -d "$ROOT_REPO" ]]; then
+  doctor_out="$(<flywheel-state>/bin/flywheel-loop doctor --repo "$ROOT_REPO" --json 2>/dev/null)"
   if printf '%s' "$doctor_out" | jq -e '
     .identity_registry_drift == 0
     and .identity_registry.drift_count == 0

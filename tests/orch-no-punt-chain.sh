@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="/Users/josh/Developer/flywheel"
+ROOT="<flywheel-repo>"
 PROBE="$ROOT/.flywheel/scripts/ticks-punted-probe.sh"
 DRIVER="$ROOT/.flywheel/flywheel-loop-tick"
 LOOP="$HOME/.claude/skills/.flywheel/bin/flywheel-loop"

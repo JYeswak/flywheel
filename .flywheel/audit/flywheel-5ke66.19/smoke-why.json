@@ -1,1 +1,0 @@
-{"schema_version":"state-md-miner/v1","command":"why","ts":"2026-05-11T03:46:42Z","id":"nonexistent","status":"unavailable","reason":"audit_log_missing","audit_log":"/Users/josh/.local/state/flywheel/state-md-miner-runs.jsonl"}

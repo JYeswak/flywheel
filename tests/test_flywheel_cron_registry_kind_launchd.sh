@@ -29,13 +29,13 @@ FLYWHEEL_CRON_REGISTRY_PATH="$TMP/state/substrate-registry.jsonl" \
 FLYWHEEL_CRON_STOP_DIR="$TMP/stop" \
   "$SCRIPT" register \
     --label com.zeststream.fixture.registry \
-    --owner skillos \
+    --owner {capability-control-plane} \
     --command "$cmd" \
     --interval 120 \
     --json >"$TMP/out.json"
 
 test -s "$TMP/state/substrate-registry.jsonl" && pass "registry_written" || fail "registry_written"
-assert_jq "$TMP/state/substrate-registry.jsonl" '.kind == "launchd" and .owner == "skillos" and (.review_due | type == "string" and length > 0)' "registry_kind_owner_review_due"
+assert_jq "$TMP/state/substrate-registry.jsonl" '.kind == "launchd" and .owner == "{capability-control-plane}" and (.review_due | type == "string" and length > 0)' "registry_kind_owner_review_due"
 assert_jq "$TMP/out.json" '.registry_row.kind == "launchd" and .registry_written == true' "register_output_registry_kind"
 
 FLYWHEEL_CRON_REGISTRY_PATH="$TMP/state/substrate-registry.jsonl" "$SCRIPT" list --json >"$TMP/list.json"

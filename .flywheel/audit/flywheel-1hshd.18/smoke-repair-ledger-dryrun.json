@@ -1,1 +1,0 @@
-{"schema_version":"continuous-productivity-detector-install/v1","command":"repair","status":"ok","ts":"2026-05-11T04:34:36Z","mode":"dry_run","scope":"ledger_dir","idempotency_key":"","target":"/Users/josh/.local/state/flywheel","existed_before":true}

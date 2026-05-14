@@ -1,1 +1,0 @@
-{"schema_version":"dispatch-deferral-lint/v1","command":"health","status":"empty","ts":"2026-05-10T17:20:33Z","total_runs":0,"last_run_ts":null,"last_status":null,"pass_rate":null,"window":50,"note":"audit log absent — no lint runs recorded yet"}

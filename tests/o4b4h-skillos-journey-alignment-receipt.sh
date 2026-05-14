@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# tests/o4b4h-skillos-journey-alignment-receipt.sh
+# tests/o4b4h-{capability-control-plane}-journey-alignment-receipt.sh
 # Bead flywheel-o4b4h: alignment-receipt regression for the
-# skillos:1 / BrightLake cross-orch journey-writing 4-layer
+# {capability-control-plane}:1 / BrightLake cross-orch journey-writing 4-layer
 # architecture proposal.
 #
 # Bead body explicitly states "No action required this tick —
@@ -67,23 +67,30 @@ else
   fail "validation-schema/v1 directory missing"
 fi
 
-# Test 5: journey-entry.v1.schema.json NOT YET present — alignment
-# bead is informational; Layer 1 implementation lives in
-# flywheel-r0rox. INVERTS when r0rox lands.
+# Test 5: journey-entry.v1.schema.json present — Layer 1 implementation
+# has landed via flywheel-r0rox. This assertion was inverted after the
+# lifecycle advanced from alignment-only to shipped substrate.
 JOURNEY_SCHEMA="$SCHEMA_DIR/journey-entry.v1.schema.json"
 if [[ -f "$JOURNEY_SCHEMA" ]]; then
-  fail "LIFECYCLE ADVANCED: journey-entry.v1.schema.json now exists at $JOURNEY_SCHEMA — Layer 1 has landed; invert this assertion or close as superseded"
+  if jq -e '.title == "Per-bead journey entry v1" and (.required | index("bead_id")) and (.required | index("worker_identity")) and (.required | index("prose"))' "$JOURNEY_SCHEMA" >/dev/null; then
+    pass "journey-entry.v1.schema.json present with Layer-1 required fields"
+  else
+    fail "journey-entry.v1.schema.json present but missing canonical Layer-1 fields"
+  fi
 else
-  pass "journey-entry.v1.schema.json absent (Layer 1 pending; flywheel-r0rox will land it)"
+  fail "journey-entry.v1.schema.json missing — Layer 1 should be landed by flywheel-r0rox"
 fi
 
-# Test 6: .flywheel/journal/ NOT YET present — Layer 1 deliverable.
-# INVERTS when r0rox + onboarding wiring (AG6) lands.
+# Test 6: .flywheel/journal/ present — Layer 1 journal substrate exists.
 JOURNAL_DIR="$ROOT/.flywheel/journal"
 if [[ -d "$JOURNAL_DIR" ]]; then
-  fail "LIFECYCLE ADVANCED: .flywheel/journal/ now exists — onboarding wiring has landed; invert this assertion or close as superseded"
+  if [[ -f "$JOURNAL_DIR/flywheel-r0rox.md" ]] && grep -q '^schema_version: journey-entry/v1$' "$JOURNAL_DIR/flywheel-r0rox.md"; then
+    pass ".flywheel/journal/ present with flywheel-r0rox journey-entry/v1 receipt"
+  else
+    fail ".flywheel/journal/ present but missing flywheel-r0rox journey-entry/v1 receipt"
+  fi
 else
-  pass ".flywheel/journal/ absent (onboarding wiring AG6 pending; another follow-up bead will land it)"
+  fail ".flywheel/journal/ missing — Layer 1 journal substrate should exist"
 fi
 
 # Test 7: concrete Layer-1 follow-up bead flywheel-r0rox exists with the canonical scope
@@ -105,10 +112,10 @@ else
   fail "bead body does not frame as alignment-only — risk of scope drift"
 fi
 
-# Test 9: Layer 4 prototype reference (skillos session-2026-05-08-flywheel-spin.md) is cited
+# Test 9: Layer 4 prototype reference ({capability-control-plane} session-2026-05-08-flywheel-spin.md) is cited
 # in the bead body cross-references
 if grep -qE 'session-2026-05-08-flywheel-spin' <<<"$BEAD_BODY"; then
-  pass "bead body cites Layer 4 prototype (skillos session-2026-05-08-flywheel-spin.md) — cross-reference trail intact"
+  pass "bead body cites Layer 4 prototype ({capability-control-plane} session-2026-05-08-flywheel-spin.md) — cross-reference trail intact"
 else
   fail "bead body missing Layer 4 prototype citation"
 fi

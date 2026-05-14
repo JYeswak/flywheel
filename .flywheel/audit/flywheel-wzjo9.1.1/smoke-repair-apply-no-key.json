@@ -1,1 +1,0 @@
-{"schema_version":"flywheel-summarize/v1","command":"repair","status":"refused","mode":"apply","scope":"audit-log-rotate","reason":"--apply requires --idempotency-key"}

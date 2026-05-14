@@ -3,14 +3,14 @@ set -euo pipefail
 
 VERSION="idle-pane-mechanical-gate/v1"
 
-REPO="${PWD:-/Users/josh/Developer/flywheel}"
+REPO="${PWD:-<flywheel-repo>}"
 SESSION="${FLYWHEEL_SESSION:-flywheel}"
 RECEIPT=""
 DISPATCH_LOG=""
 IDLE_STATE_PROBE=""
 PEER_BLOCKER_WATCH=""
 PEER_LEDGER="${FLYWHEEL_CROSS_ORCH_COORDINATION_LEDGER:-$HOME/.local/state/flywheel/cross-orch-coordination.jsonl}"
-NTM="${NTM:-/Users/josh/.local/bin/ntm}"
+NTM="${NTM:-$HOME/.local/bin/ntm}"
 ACTIVITY_FIXTURE="${FLYWHEEL_IDLE_GATE_ACTIVITY_FIXTURE:-}"
 READY_FIXTURE="${FLYWHEEL_IDLE_GATE_READY_FIXTURE:-}"
 MEMORY_READY_FILE="${FLYWHEEL_IDLE_GATE_MEMORY_READY_FILE:-}"
@@ -56,9 +56,9 @@ USAGE
 
 examples() {
   cat <<'EXAMPLES'
-idle-pane-mechanical-gate.sh --repo /Users/josh/Developer/flywheel --session flywheel --json
-idle-pane-mechanical-gate.sh --repo "$PWD" --session mobile-eats --receipt .flywheel/last_closeout_receipt.json --strict-receipt --json
-idle-pane-mechanical-gate.sh --repo "$PWD" --session skillos --dispatch-log .flywheel/dispatch-log.jsonl --json
+idle-pane-mechanical-gate.sh --repo <flywheel-repo> --session flywheel --json
+idle-pane-mechanical-gate.sh --repo "$PWD" --session {proof-product} --receipt .flywheel/last_closeout_receipt.json --strict-receipt --json
+idle-pane-mechanical-gate.sh --repo "$PWD" --session {capability-control-plane} --dispatch-log .flywheel/dispatch-log.jsonl --json
 EXAMPLES
 }
 

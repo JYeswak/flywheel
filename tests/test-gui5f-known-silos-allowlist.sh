@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-REPO="${REPO:-/Users/josh/Developer/flywheel}"
+REPO="${REPO:-<flywheel-repo>}"
 PROBE="${PROBE:-$REPO/.flywheel/scripts/gap-hunt-probe.sh}"
 ALLOWLIST="${ALLOWLIST:-$REPO/.flywheel/gap-hunt-known-silos.jsonl}"
 

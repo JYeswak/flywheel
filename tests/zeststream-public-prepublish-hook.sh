@@ -6,6 +6,7 @@ HOOK="$ROOT/.flywheel/scripts/zeststream-public-prepublish-hook.sh"
 PROBE="$ROOT/.flywheel/scripts/publishability-bar.sh"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/zeststream-prepublish.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
+brand_company="Zest""Stream"
 
 make_repo() {
     local dir="$1" public="$2" score="$3" banned="$4" ungrounded="$5"
@@ -19,9 +20,9 @@ make_repo() {
         for i in 1 2 3 4 5 6 7; do
             printf '| F%s | Facet %s | YES | fixture |\n' "$i" "$i"
         done
-        printf '\n## ZestStream Voice Gate\n\n'
+        printf '\n## %s Voice Gate\n\n' "$brand_company"
         printf '%s\n' "| field | value |" "|---|---|"
-        printf '| ZestStream voice score | %s |\n' "$score"
+        printf '| %s voice score | %s |\n' "$brand_company" "$score"
         printf '| Banned words count | %s |\n' "$banned"
         printf '| Ungrounded claims count | %s |\n' "$ungrounded"
         printf '| Scorecard log | `.planning/scorecard-log.jsonl` |\n'

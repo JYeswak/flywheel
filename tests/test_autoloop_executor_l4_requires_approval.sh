@@ -29,4 +29,4 @@ jq -e '
   and .action_count == 0
 ' "$TMP/out.json" >/dev/null
 
-printf 'PASS autoloop executor L4 requires Joshua approval\n'
+printf 'PASS autoloop executor L4 requires {operator} approval\n'

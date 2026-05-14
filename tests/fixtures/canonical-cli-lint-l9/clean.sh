@@ -6,7 +6,7 @@ set -euo pipefail
 # BEFORE all side-effects. L9 must NOT flag this.
 mode="${1:-dry-run}"
 idem_key="${2:-}"
-target="/Users/josh/Developer/flywheel/.flywheel/state/foo"
+target="<flywheel-repo>/.flywheel/state/foo"
 
 if [[ "$mode" == "apply" ]]; then
   # GATE FIRES FIRST — apply-key check before any side-effect

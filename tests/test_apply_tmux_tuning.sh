@@ -64,7 +64,7 @@ set -g pane-border-format " #{pane_title} "
 set -g terminal-overrides "xterm*:smcup@:rmcup@"
 setw -g xterm-keys on
 bind-key -n F6 display-popup -E -w 90% -h 90% "ntm palette"
-set-environment -g PATH "/Users/josh/.opencode/bin:/Users/josh/.local/bin:/Users/josh/.cargo/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+set-environment -g PATH "$HOME/.opencode/bin:$HOME/.local/bin:$HOME/.cargo/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 bind-key -n F12 display-popup -E -w 95% -h 95% "NTM_POPUP=1 ntm dashboard --popup #{session_name}"
 
 # BEGIN apply-substrate-tuning (flywheel-3099j) -----------------------------

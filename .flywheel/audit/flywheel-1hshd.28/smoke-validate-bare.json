@@ -1,1 +1,0 @@
-{"schema_version":"fleet-rotate-all-sessions/v1","command":"validate","status":"refused","reason":"missing_subject","valid_subjects":["session-name","profile-name","exclude-list"]}

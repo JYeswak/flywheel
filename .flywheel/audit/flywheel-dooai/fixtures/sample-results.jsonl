@@ -1,5 +1,0 @@
-{"collection":"dickles_ntm_v1","file":"src/recover.rs","line":142,"snippet":"// pattern for caam_rotate retry; jeff convention: use exponential backoff","score":0.92}
-{"collection":"dickles_ntm_v1","file":"src/recover.rs","line":205,"snippet":"// jeff explicitly rejected synchronous wait here; previously deadlocked","score":0.88}
-{"collection":"dickles_ntm_v1","file":"issues/#114","snippet":"already filed: queued chevron stuck after caam_rotate","score":0.95,"category":"same_issue_already_filed"}
-{"collection":"dickles_beads_rust_v1","file":"src/db.rs","line":78,"snippet":"shape: prior art for stuck-state detection in beads-db","score":0.81}
-{"collection":"dickles_frankensqlite_v1","file":"src/wal.rs","line":312,"snippet":"convention: signal stuck via dedicated probe surface","score":0.74}

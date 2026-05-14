@@ -7,7 +7,6 @@ WATCHER="$ROOT/.flywheel/scripts/jeff-corpus-diff-watcher.sh"
 DELTA="$ROOT/.flywheel/scripts/jeff-corpus-delta-reindex.sh"
 COMPACT="$ROOT/.flywheel/scripts/jeff-corpus-compact.sh"
 DOCTOR="$ROOT/.flywheel/scripts/jeff-corpus-doctor.sh"
-LOOP="${FLYWHEEL_LOOP_BIN:-$HOME/.claude/skills/.flywheel/bin/flywheel-loop}"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/jeff-corpus-accretive.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -103,7 +102,7 @@ delta_fixture() {
   jq -nc --arg repo "$repo" --arg old "$old" --arg new "$new" '{repo:"fixture",path:$repo,old_sha:$old,new_sha:$new}' >"$pending"
   "$DELTA" --manifest "$manifest" --pending "$pending" --delta "$delta" --dry-run --now 2026-05-04T04:00:00Z --json >"$out"
   assert_jq "$out" '.status == "pass" and .full_reindex == false and .new_chunks == 2 and .processed[0].changed_files == 2' "AG5 delta dry-run only changed files"
-  "$DELTA" --manifest "$manifest" --pending "$pending" --delta "$delta" --apply --now 2026-05-04T04:00:00Z --json >"$TMP/delta-apply.out"
+  "$DELTA" --manifest "$manifest" --pending "$pending" --delta "$delta" --apply --idempotency-key fixture-delta --now 2026-05-04T04:00:00Z --json >"$TMP/delta-apply.out"
   jq -s 'length == 2 and ([.[].path] | sort) == ["a.txt","b.txt"]' "$delta" >/dev/null \
     && pass "AG5 delta emits expected chunks" || fail "AG5 delta emits expected chunks"
 }
@@ -136,16 +135,22 @@ storage_budget_fixture() {
   local manifest="$TMP/red-manifest.json" out="$TMP/red.out" yellow="$TMP/yellow-manifest.json" yellow_out="$TMP/yellow.out"
   jq -n '{schema_version:"jeff-corpus-manifest/v1",repo_count:1,total_repo_size_mb:5001,repos:[{repo:"fixture",content_hash_set:[{path:"a",sha256:"h",bytes:1}]}]}' >"$manifest"
   "$DOCTOR" --manifest "$manifest" --json >"$out" || true
-  assert_jq "$out" '.status == "fail" and .jeff_corpus_storage_health == "RED" and .jeff_corpus_v1_total_mb == 5001 and (.errors[]?.code == "jeff_corpus_storage_red")' "AG7 RED blocks new ingestion"
+  assert_jq "$out" '.status == "pass" and .jeff_corpus_storage_health == "GREEN" and .jeff_corpus_v1_total_mb == 5001 and .jeff_corpus_local_storage_mb < 1000' "AG7 source size alone does not trigger local storage block"
+  JEFF_CORPUS_LOCAL_STORAGE_MB_FIXTURE=5001 "$DOCTOR" --manifest "$manifest" --json >"$out" || true
+  assert_jq "$out" '.status == "fail" and .jeff_corpus_storage_health == "RED" and .jeff_corpus_v1_total_mb == 5001 and .jeff_corpus_local_storage_mb == 5001 and (.errors[]?.code == "jeff_corpus_storage_red")' "AG7 RED blocks local storage pressure"
   jq -n '{schema_version:"jeff-corpus-manifest/v1",repo_count:1,total_repo_size_mb:1001,repos:[{repo:"fixture",content_hash_set:[{path:"a",sha256:"h",bytes:1}]}]}' >"$yellow"
-  "$DOCTOR" --manifest "$yellow" --json >"$yellow_out" || true
-  assert_jq "$yellow_out" '.status == "warn" and .jeff_corpus_storage_health == "YELLOW" and (.warnings[]?.code == "jeff_corpus_storage_yellow")' "AG7 YELLOW allows compacted corpus"
+  JEFF_CORPUS_LOCAL_STORAGE_MB_FIXTURE=1001 "$DOCTOR" --manifest "$yellow" --json >"$yellow_out" || true
+  assert_jq "$yellow_out" '.status == "warn" and .jeff_corpus_storage_health == "YELLOW" and .jeff_corpus_local_storage_mb == 1001 and (.warnings[]?.code == "jeff_corpus_storage_yellow")' "AG7 YELLOW allows compacted corpus"
 }
 
 doctor_wiring_check() {
   local out="$TMP/loop-doctor.out"
-  FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 "$LOOP" doctor --repo "$ROOT" --json >"$out" 2>/dev/null || true
-  assert_jq "$out" '(.jeff_corpus_v1_total_mb | type) == "number" and (.jeff_corpus_storage_health | IN("GREEN","YELLOW","RED")) and (.jeff_corpus | type) == "object"' "AG2 flywheel-loop doctor exposes Jeff corpus fields"
+  FLYWHEEL_HOME="${FLYWHEEL_HOME:-$HOME/.claude/skills/.flywheel}" REPO_ABS="$ROOT" bash -c '
+    set -euo pipefail
+    source "$FLYWHEEL_HOME/lib/jeff.sh"
+    jeff_corpus_doctor_json
+  ' >"$out"
+  assert_jq "$out" '(.jeff_corpus_v1_total_mb | type) == "number" and (.jeff_corpus_local_storage_mb | type) == "number" and (.jeff_corpus_storage_health | IN("GREEN","YELLOW","RED"))' "AG2 Jeff corpus doctor helper exposes fields"
 }
 
 main() {

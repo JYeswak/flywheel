@@ -1,0 +1,87 @@
+{
+  "schema_version": "flywheel.private_live_site_deploy_receipt.v0",
+  "receipt_id": "flywheel-private-live-site-trademark-audit-deploy-20260514T1608Z",
+  "status": "pass",
+  "deployed_at": "2026-05-14T16:08:16Z",
+  "host": "flywheel.zeststream.ai",
+  "provider": "vercel",
+  "deployment_url": "https://flywheel-eyxrqqgxe-joshuas-projects-96d49291.vercel.app",
+  "production_alias": "https://flywheel.zeststream.ai",
+  "source_commit": "818d79a2",
+  "deployed_bundle_scope": [
+    "site/",
+    "install.sh",
+    "install.sh.sha256",
+    "site-deploy-manifest.json"
+  ],
+  "public_ready_claim": false,
+  "github_final_approval_required": true,
+  "story_reset": {
+    "rejected_placeholder_scrapped": true,
+    "wireframe_ref": "docs/runbooks/public-site-smb-journey-wireframe.md",
+    "journey_pack_ref": "docs/runbooks/public-user-journey-pack.md",
+    "trajectory_story_ref": "docs/stories/flywheel-trajectory.md",
+    "trajectory_pack_ref": "docs/runbooks/repo-trajectory-story-pack.md",
+    "multi_page_story_system": [
+      "site/index.html",
+      "site/what-is/index.html",
+      "site/methodology/index.html",
+      "site/for-developers/index.html",
+      "site/about/index.html",
+      "site/contact/index.html"
+    ],
+    "visual_primitives": [
+      "OperatingRoomHero",
+      "WorkflowMap",
+      "SliceWorkbench",
+      "ProofRail",
+      "TrustWorryMatrix",
+      "YuzuMethodRail",
+      "TrajectoryRail",
+      "TechnicalDrawer",
+      "OperatorSignature",
+      "RoomSystem"
+    ]
+  },
+  "verification": {
+    "homepage_markers_present": true,
+    "live_site_probe_status": "pass",
+    "live_site_probe_source_count": 6,
+    "live_site_probe_probe_count": 17,
+    "live_site_probe_pass_count": 17,
+    "live_site_probe_failure_count": 0,
+    "live_site_probe_skipped_external_count": 25,
+    "install_proxy_checksum_match": true,
+    "install_sha256": "a4e04cd1e08f13110d74dca34c38018a5b93c9a173cca2db63a91458efe6f364",
+    "site_deploy_manifest": {
+      "schema_version": "flywheel.site_deploy_manifest.v0",
+      "mode": "private-review",
+      "tag": "private-review-818d79a2",
+      "commit": "818d79a2",
+      "install_sha256": "a4e04cd1e08f13110d74dca34c38018a5b93c9a173cca2db63a91458efe6f364",
+      "public_ready_claim": false
+    },
+    "public_surface_quality": {
+      "owner_story_gate": "pass",
+      "meta_voice_gate": "pass",
+      "frontend_quality_gate_status": "pass",
+      "quality_finding_count": 0,
+      "session_memory_copy_absent": true,
+      "rejected_meta_copy_absent": true,
+      "worked_slice_markers_present": true
+    },
+    "screenshot_checks": {
+      "not_refreshed_in_this_slice": true,
+      "reason": "This deploy updated copy and gate evidence only; no new screenshot approval is claimed."
+    },
+    "publication_readiness_status": "blocked",
+    "remaining_blockers": [
+      "remote_repo_private",
+      "remote_workflows_missing",
+      "remote_green_runs_missing",
+      "github_release_missing_or_draft",
+      "github_release_assets_missing",
+      "joshua_release_signoff_missing"
+    ]
+  }
+}

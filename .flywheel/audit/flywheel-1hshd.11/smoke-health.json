@@ -1,1 +1,0 @@
-{"schema_version":"canonical-root-drift-fleet-check/v1","command":"health","ts":"2026-05-11T03:56:05Z","status":"warn","audit_log":"/Users/josh/.local/state/flywheel/canonical-root-drift-fleet-check-runs.jsonl","reason":"audit_log_missing","last_run_ts":null,"age_seconds":null,"recent_runs":0,"total_runs":0}

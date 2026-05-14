@@ -1,3 +1,9 @@
+# NTM runtime state — never commit
+.ntm/pids/
+.ntm/rate_limits.json
+.ntm/human_inbox/
+.ntm/summaries/
+
 # bv (beads viewer) local config and caches
 .bv/
 
@@ -25,6 +31,12 @@
 /.flywheel/.STATE.md.preview.*
 /.flywheel/*.md.preview.*
 /.flywheel/.reconcile-*.diff
+/.flywheel/extraction/
+# Audit output — per-bead audit JSON is regenerable skill output, never commit.
+# Retention policy + the rule that output dirs are gitignored at creation:
+# .flywheel/doctrine/repo-hygiene-operational-protocol.md
+/.flywheel/audit/
+!/.flywheel/audit/README.md
 /.flywheel/scripts/*.bak.*
 /.flywheel/validation-schema/v1/*.bak.*
 /.flywheel/PLANS/**/*.bak.*
@@ -65,6 +77,7 @@ AGENTS.md.bak.*
 # Cache
 .ruff_cache/
 .pytest_cache/
+node_modules/
 
 # Continue/transient files
 .continue-here.md
@@ -110,3 +123,5 @@ flywheel__nextra_documentation_site/
 !.env.local.example
 !**/.env.example
 !**/.env.local.example
+.vercel
+.env*.local

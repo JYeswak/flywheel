@@ -1,8 +1,8 @@
 {
   "schema_version": "flywheel-loop-doctor/v1",
-  "fixture": "incident-2026-05-04/skillos-doctor",
-  "session": "skillos",
-  "repo": "/Users/josh/Developer/skillos",
+  "fixture": "incident-2026-05-04/{capability-control-plane}-doctor",
+  "session": "{capability-control-plane}",
+  "repo": "$HOME/Developer/{capability-control-plane}",
   "observed_at": "2026-05-04T06:05:00Z",
   "status": "fail",
   "action": "repair_storage_headroom",
@@ -24,7 +24,7 @@
     "repo_prune_actions_count": 0,
     "mathematically_local": false
   },
-  "evidence_path": "/Users/josh/Developer/flywheel/.flywheel/plans/accretive-fix-storage-low-headroom-2026-05-04/00-INTENT.md",
+  "evidence_path": "<flywheel-repo>/.flywheel/plans/accretive-fix-storage-low-headroom-2026-05-04/00-INTENT.md",
   "legacy_outcome": {
     "escalated_to_flywheel_orch": true,
     "safe_local_work_remaining": false,

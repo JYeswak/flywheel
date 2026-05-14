@@ -1,0 +1,299 @@
+schema_version: flywheel.depersonalization_table.v0
+rows:
+  - id: operator-full-name
+    class: direct-identifier
+    private_value: "Joshua Nowak"
+    match_type: literal
+    action: replace
+    public_value: "{operator}"
+    risk: direct_identifier
+    utility_impact: low
+    residual_risk: low
+    review_required: false
+    notes: "Use only in engine/docs surfaces that should not be maintainer-personal."
+  - id: operator-first-name
+    class: direct-identifier
+    private_value: "Joshua"
+    match_type: literal
+    action: replace
+    public_value: "{operator}"
+    risk: direct_identifier
+    utility_impact: low
+    residual_risk: medium
+    review_required: true
+    notes: "Review public-about surfaces separately; engine artifacts should not depend on first-name references."
+  - id: operator-email
+    class: direct-identifier
+    private_value: "joshua@zeststream.ai"
+    match_type: literal
+    action: replace
+    public_value: "{operator-email}"
+    risk: direct_identifier
+    utility_impact: low
+    residual_risk: low
+    review_required: true
+    notes: "Public contact pages may intentionally preserve a reviewed email."
+  - id: operator-home-path
+    class: path-identifier
+    private_value: "/Users/josh"
+    match_type: path-prefix
+    action: replace
+    public_value: "$HOME"
+    risk: quasi_identifier
+    utility_impact: low
+    residual_risk: low
+    review_required: false
+    notes: "Local machine path; parameterize in public examples."
+  - id: source-repo-path
+    class: path-identifier
+    private_value: "/Users/josh/Developer/flywheel"
+    match_type: path-prefix
+    action: replace
+    public_value: "<flywheel-repo>"
+    risk: quasi_identifier
+    utility_impact: low
+    residual_risk: low
+    review_required: false
+    notes: "Use repo-relative paths or installation prefix variables."
+  - id: flywheel-skill-state-path
+    class: path-identifier
+    private_value: "/Users/josh/.claude/skills/.flywheel"
+    match_type: path-prefix
+    action: replace
+    public_value: "<flywheel-state>"
+    risk: live_state
+    utility_impact: medium
+    residual_risk: low
+    review_required: false
+    notes: "Public installs generate their own state root."
+  - id: skill-library-path
+    class: path-identifier
+    private_value: "/Users/josh/.claude/skills"
+    match_type: path-prefix
+    action: replace
+    public_value: "<skills-root>"
+    risk: quasi_identifier
+    utility_impact: low
+    residual_risk: low
+    review_required: false
+    notes: "Parameterize skill-library examples."
+  - id: codex-config-path
+    class: path-identifier
+    private_value: "/Users/josh/.codex"
+    match_type: path-prefix
+    action: replace
+    public_value: "<codex-config-dir>"
+    risk: live_state
+    utility_impact: low
+    residual_risk: low
+    review_required: false
+    notes: "Do not publish local Codex configuration state."
+  - id: claude-project-slug
+    class: path-identifier
+    private_value: "-Users-josh-Developer-flywheel"
+    match_type: literal
+    action: replace
+    public_value: "<claude-project-slug>"
+    risk: quasi_identifier
+    utility_impact: low
+    residual_risk: low
+    review_required: false
+    notes: "Claude project cache slug derived from a local absolute path; public exports should keep the path shape generic."
+  - id: claude-project-prefix
+    class: path-identifier
+    private_value: "-Users-josh-Developer-"
+    match_type: literal
+    action: replace
+    public_value: "<claude-project-prefix>-"
+    risk: quasi_identifier
+    utility_impact: low
+    residual_risk: low
+    review_required: false
+    notes: "Templated Claude project cache prefixes should not preserve the local operator username."
+  - id: zeststream-company
+    class: organization-identifier
+    private_value: "ZestStream"
+    match_type: literal
+    action: replace
+    public_value: "{operator-company}"
+    risk: direct_identifier
+    utility_impact: medium
+    residual_risk: medium
+    review_required: true
+    notes: "Preserve only in public website or attribution surfaces that Joshua approves."
+  - id: blackfoot-client
+    class: client-identifier
+    private_value: "Blackfoot Telecom"
+    match_type: literal
+    action: generalize
+    public_value: "{telecom-client}"
+    risk: client_confidentiality
+    utility_impact: medium
+    residual_risk: medium
+    review_required: true
+    notes: "Named-client use requires consent matrix coverage."
+  - id: alps-client
+    class: client-identifier
+    private_value: "ALPS Insurance"
+    match_type: literal
+    action: generalize
+    public_value: "{insurance-client}"
+    risk: client_confidentiality
+    utility_impact: medium
+    residual_risk: medium
+    review_required: true
+    notes: "Named-client use requires consent matrix coverage."
+  - id: alps-client-acronym
+    class: client-identifier
+    private_value: "ALPS"
+    match_type: literal
+    action: generalize
+    public_value: "{insurance-client}"
+    risk: client_confidentiality
+    utility_impact: medium
+    residual_risk: medium
+    review_required: true
+    notes: "Client acronym use requires the same consent matrix coverage as the full legal name."
+  - id: alps-client-slug
+    class: client-identifier
+    private_value: "alps-insurance"
+    match_type: literal
+    action: generalize
+    public_value: "{insurance-client}"
+    risk: client_confidentiality
+    utility_impact: medium
+    residual_risk: medium
+    review_required: true
+    notes: "Lowercase client slugs are direct enough to require the same consent matrix coverage as named-client text."
+  - id: terratitle-client
+    class: client-identifier
+    private_value: "TerraTitle"
+    match_type: literal
+    action: generalize
+    public_value: "{title-client}"
+    risk: client_confidentiality
+    utility_impact: medium
+    residual_risk: medium
+    review_required: true
+    notes: "Named-client use requires consent matrix coverage."
+  - id: cubcloud-vendor
+    class: vendor-identifier
+    private_value: "CubCloud"
+    match_type: literal
+    action: generalize
+    public_value: "{gpu-vendor}"
+    risk: relationship_identifier
+    utility_impact: low
+    residual_risk: low
+    review_required: true
+    notes: "Mention only as approved vendor attribution, not product ownership."
+  - id: mobile-eats-proof-product
+    class: proof-surface-identifier
+    private_value: "mobile-eats"
+    match_type: literal
+    action: generalize
+    public_value: "{proof-product}"
+    risk: linkage_identifier
+    utility_impact: medium
+    residual_risk: medium
+    review_required: true
+    notes: "Use journey semantics; do not import product-specific state."
+  - id: skillos-session-name
+    class: session-identifier
+    private_value: "skillos"
+    match_type: literal
+    action: generalize
+    public_value: "{capability-control-plane}"
+    risk: linkage_identifier
+    utility_impact: medium
+    residual_risk: medium
+    review_required: true
+    notes: "Boundary docs can name SkillOS only after review."
+  - id: alps-session-name
+    class: session-identifier
+    private_value: "alpsinsurance"
+    match_type: literal
+    action: replace
+    public_value: "{session}"
+    risk: client_confidentiality
+    utility_impact: low
+    residual_risk: low
+    review_required: true
+    notes: "Session labels can reveal client work."
+  - id: alps-session-label-colon
+    class: session-identifier
+    private_value: "alps:"
+    match_type: literal
+    action: replace
+    public_value: "{session}:"
+    risk: client_confidentiality
+    utility_impact: low
+    residual_risk: low
+    review_required: true
+    notes: "Peer-orchestrator labels can reveal client work."
+  - id: alps-session-path-fragment
+    class: session-identifier
+    private_value: "alps/"
+    match_type: literal
+    action: replace
+    public_value: "{session}/"
+    risk: client_confidentiality
+    utility_impact: low
+    residual_risk: low
+    review_required: true
+    notes: "Path and fleet-list fragments can reveal client work."
+  - id: alps-session-standalone
+    class: session-identifier
+    private_value: "(?<![A-Za-z0-9_-])alps(?![A-Za-z0-9_-])"
+    match_type: regex
+    action: replace
+    public_value: "{session}"
+    risk: client_confidentiality
+    utility_impact: low
+    residual_risk: low
+    review_required: true
+    notes: "Standalone lowercase session aliases are direct client residue; scoped to avoid mutating shell/Python identifiers such as alps_fixture."
+  - id: picoz-session-name
+    class: session-identifier
+    private_value: "picoz"
+    match_type: literal
+    action: replace
+    public_value: "{session}"
+    risk: linkage_identifier
+    utility_impact: low
+    residual_risk: low
+    review_required: true
+    notes: "Trading-project session names stay private unless explicitly approved."
+  - id: pane-number
+    class: runtime-identifier
+    private_value: "pane [0-9]+"
+    match_type: regex
+    action: replace
+    public_value: "<pane-id>"
+    risk: live_state
+    utility_impact: low
+    residual_risk: low
+    review_required: false
+    notes: "Pane numbers are local runtime coordinates."
+  - id: bead-id
+    class: runtime-identifier
+    private_value: '\bflywheel-[a-z0-9]*[0-9][a-z0-9]*(?:\.[0-9]+)?\b'
+    match_type: regex
+    action: replace
+    public_value: "{bead-id}"
+    risk: linkage_identifier
+    utility_impact: medium
+    residual_risk: low
+    review_required: false
+    notes: "Keep examples synthetic unless the public repo intentionally documents a specific release bead."
+  - id: iso-timestamp
+    class: quasi-identifier
+    private_value: "[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z"
+    match_type: regex
+    action: generalize
+    public_value: "<timestamp>"
+    risk: quasi_identifier
+    utility_impact: low
+    residual_risk: low
+    review_required: false
+    notes: "Generalize incident timing unless the date is release metadata."

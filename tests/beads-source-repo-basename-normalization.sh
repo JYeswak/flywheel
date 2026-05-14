@@ -4,13 +4,14 @@
 #
 # What this test verifies:
 #   1. JSONL has zero rows with source_repo='flywheel' (basename, the bug shape)
-#   2. JSONL has all 1644 rows with source_repo='/Users/josh/Developer/flywheel' (canonical)
+#   2. JSONL has all 1644 rows with source_repo='<flywheel-repo>' (canonical)
 #   3. DB matches JSONL (leakage_count = 0)
 #   4. The bug-shape regex doesn't appear in JSONL (regression guard)
 
 set -uo pipefail
 
-REPO="${FLYWHEEL_REPO:-/Users/josh/Developer/flywheel}"
+REPO="${FLYWHEEL_REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)}"
+CANONICAL_REPO="$(cd "$REPO" && pwd -P)"
 JSONL="$REPO/.beads/issues.jsonl"
 DB="$REPO/.beads/beads.db"
 
@@ -38,7 +39,7 @@ fi
 
 # Test 3 (load-bearing): all rows have canonical source_repo
 TOTAL_ROWS="$(wc -l < "$JSONL" | tr -d ' ')"
-CANONICAL_COUNT="$(jq -c 'select(.source_repo == "/Users/josh/Developer/flywheel")' "$JSONL" | wc -l | tr -d ' ')"
+CANONICAL_COUNT="$(jq -c --arg repo "$CANONICAL_REPO" 'select(.source_repo == $repo)' "$JSONL" | wc -l | tr -d ' ')"
 if [[ "$CANONICAL_COUNT" == "$TOTAL_ROWS" ]]; then
   pass "JSONL all $TOTAL_ROWS rows have canonical source_repo"
 else
@@ -56,7 +57,8 @@ fi
 
 # Test 5 (load-bearing AC): DB leakage_count == 0
 if [[ -r "$DB" ]] && command -v sqlite3 >/dev/null 2>&1; then
-  DB_LEAKAGE="$(sqlite3 "$DB" "SELECT COUNT(*) FROM issues WHERE source_repo IS NULL OR source_repo != '/Users/josh/Developer/flywheel';" 2>/dev/null)"
+  canonical_sql="$(printf '%s' "$CANONICAL_REPO" | sed "s/'/''/g")"
+  DB_LEAKAGE="$(sqlite3 "$DB" "SELECT COUNT(*) FROM issues WHERE source_repo IS NULL OR source_repo != '$canonical_sql';" 2>/dev/null)"
   if [[ "$DB_LEAKAGE" == "0" ]]; then
     pass "DB leakage_count=0 (was 253 before fix; matches gate at lib/doctor.d/part-02-check_beads_db_health-to-detect_tests_json.sh:87)"
   else

@@ -1,1 +1,0 @@
-{"schema_version":"idempotency-replay-guard/v1","command":"schema","surfaces":["doctor","health","repair","validate","audit","why"],"variant":"PARTIAL-BYPASS","bypassed_natively":["--info","--examples"],"note":"native owns rich --info envelope (info/v1 with statuses array) + --examples envelope (examples/v1); scaffold owns --schema (native lacked) + all verbs"}

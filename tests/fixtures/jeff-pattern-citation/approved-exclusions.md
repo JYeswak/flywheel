@@ -31,7 +31,7 @@ canonical prose template shown elsewhere in this fixture.
 
 ## Class 4: Structured-key Jeff evidence form
 
-**Jeff convergence:** jeff_pattern_adopted=hash_linked_audit_chain_receipts; jeff_evidence_path=`/Users/josh/Developer/jeff-corpus/frankenterm/crates/frankenterm-core-policy-types/src/policy_audit_chain.rs:1-5`.
+**Jeff convergence:** jeff_pattern_adopted=hash_linked_audit_chain_receipts; jeff_evidence_path=`$HOME/Developer/jeff-corpus/frankenterm/crates/frankenterm-core-policy-types/src/policy_audit_chain.rs:1-5`.
 
 The structured-key shape (`jeff_evidence_path=<path>:<line-or-range>`)
 provides the same file:line evidence as the canonical prose shape and
@@ -39,4 +39,4 @@ is approved by `valid_citation()` from bead flywheel-4rmc onward.
 
 ## Canonical (prose) citation — passes valid_citation strict shape
 
-This sentence imports a pattern. Source: Jeff franken_node:scripts/check_chokepoint_false_positives.py:121 + ZestStream adaptation.
+This sentence imports a pattern. Source: Jeff franken_node:scripts/check_chokepoint_false_positives.py:121 + {operator-company} adaptation.

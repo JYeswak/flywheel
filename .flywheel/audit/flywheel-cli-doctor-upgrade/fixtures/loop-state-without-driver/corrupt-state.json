@@ -1,7 +1,0 @@
-{
-  "project": "alps",
-  "active": true,
-  "driver_pid": null,
-  "last_dispatch_ts": null,
-  "_TODO": "pass-2: real corrupt fixture from feedback_loop_state_without_driver"
-}

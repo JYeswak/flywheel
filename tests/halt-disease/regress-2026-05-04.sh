@@ -38,17 +38,17 @@ not_contains() {
 }
 
 write_contracts() {
-  local skillos="$1" mobile="$2" flywheel="$3" out="$4"
+  local {capability-control-plane}="$1" mobile="$2" flywheel="$3" out="$4"
   jq -n \
-    --slurpfile skillos "$skillos" \
+    --slurpfile {capability-control-plane} "${capability-control-plane}" \
     --slurpfile mobile "$mobile" \
     --slurpfile flywheel "$flywheel" \
     '{
       schema_version:"halt-disease-regression/v1",
       contract_schema:"halt-contract/v1",
       scenarios:{
-        skillos_storage_low:{
-          source_fixture:$skillos[0].fixture,
+        {capability-control-plane}_storage_low:{
+          source_fixture:${capability-control-plane}[0].fixture,
           halt_contract:{
             schema_version:"halt-contract/v1",
             signal:"storage_low_headroom",
@@ -142,8 +142,8 @@ write_contracts() {
           global_halt:false,
           escalation_to_flywheel_orch_capsules:0,
           sessions:[
-            {session:"skillos", safe_dispatch_count_next_tick:1},
-            {session:"mobile-eats", safe_dispatch_count_next_tick:1},
+            {session:"{capability-control-plane}", safe_dispatch_count_next_tick:1},
+            {session:"{proof-product}", safe_dispatch_count_next_tick:1},
             {session:"flywheel", safe_dispatch_count_next_tick:1}
           ]
         }
@@ -178,8 +178,8 @@ write_adversarial() {
         global_halt:false,
         thrash_detected:false,
         sessions:[
-          {session:"skillos", safe_dispatch_count_next_tick:1},
-          {session:"mobile-eats", safe_dispatch_count_next_tick:1},
+          {session:"{capability-control-plane}", safe_dispatch_count_next_tick:1},
+          {session:"{proof-product}", safe_dispatch_count_next_tick:1},
           {session:"flywheel", safe_dispatch_count_next_tick:1}
         ]
       },
@@ -221,32 +221,32 @@ validate_contract_shape() {
 
 main() {
   need jq
-  for f in skillos-doctor.json mobile-eats-doctor.json flywheel-beads-db.json incident-narrative.md; do
+  for f in {capability-control-plane}-doctor.json {proof-product}-doctor.json flywheel-beads-db.json incident-narrative.md; do
     [ -s "$FIX/$f" ] || broken "missing fixture $FIX/$f"
   done
-  jq -e . "$FIX/skillos-doctor.json" >/dev/null || broken "bad skillos fixture json"
-  jq -e . "$FIX/mobile-eats-doctor.json" >/dev/null || broken "bad mobile fixture json"
+  jq -e . "$FIX/{capability-control-plane}-doctor.json" >/dev/null || broken "bad {capability-control-plane} fixture json"
+  jq -e . "$FIX/{proof-product}-doctor.json" >/dev/null || broken "bad mobile fixture json"
   jq -e . "$FIX/flywheel-beads-db.json" >/dev/null || broken "bad flywheel fixture json"
 
   contracts="$TMP/contracts.json"
   adversarial="$TMP/adversarial.json"
-  write_contracts "$FIX/skillos-doctor.json" "$FIX/mobile-eats-doctor.json" "$FIX/flywheel-beads-db.json" "$contracts"
+  write_contracts "$FIX/{capability-control-plane}-doctor.json" "$FIX/{proof-product}-doctor.json" "$FIX/flywheel-beads-db.json" "$contracts"
   write_adversarial "$adversarial"
 
-  validate_contract_shape "$contracts" '.scenarios.skillos_storage_low.halt_contract' "scenario1 contract shape"
-  assert_jq "$FIX/skillos-doctor.json" '.storage.disk_free_pct == 9.92 and .storage.threshold_pct == 10.0 and .status == "fail" and .action == "repair_storage_headroom"' "scenario1 fixture replays 06:05 skillos doctor"
-  assert_jq "$contracts" '.scenarios.skillos_storage_low.halt_contract.severity == "yellow" and .scenarios.skillos_storage_low.halt_contract.tier == "host" and .scenarios.skillos_storage_low.halt_contract.mathematically_local == false' "scenario1 storage yellow host nonlocal"
-  contains "$contracts" '.scenarios.skillos_storage_low.halt_contract.permitted_actions' "beads.update" "scenario1 permits beads.update"
-  contains "$contracts" '.scenarios.skillos_storage_low.halt_contract.permitted_actions' "docs.plan" "scenario1 permits docs.plan"
-  contains "$contracts" '.scenarios.skillos_storage_low.halt_contract.permitted_actions' "tests.no_growth" "scenario1 permits tests.no_growth"
-  contains "$contracts" '.scenarios.skillos_storage_low.halt_contract.blocked_actions' "corpus.ingest" "scenario1 blocks corpus.ingest"
-  contains "$contracts" '.scenarios.skillos_storage_low.halt_contract.blocked_actions' "host.disk.mutate" "scenario1 blocks host.disk.mutate"
-  assert_jq "$contracts" '.scenarios.skillos_storage_low.joshua_mornings_with_idle_fleet_count_would_increment == false and .scenarios.skillos_storage_low.safe_dispatch_count_next_tick >= 1' "scenario1 no Joshua morning idle increment"
+  validate_contract_shape "$contracts" '.scenarios.{capability-control-plane}_storage_low.halt_contract' "scenario1 contract shape"
+  assert_jq "$FIX/{capability-control-plane}-doctor.json" '.storage.disk_free_pct == 9.92 and .storage.threshold_pct == 10.0 and .status == "fail" and .action == "repair_storage_headroom"' "scenario1 fixture replays 06:05 {capability-control-plane} doctor"
+  assert_jq "$contracts" '.scenarios.{capability-control-plane}_storage_low.halt_contract.severity == "yellow" and .scenarios.{capability-control-plane}_storage_low.halt_contract.tier == "host" and .scenarios.{capability-control-plane}_storage_low.halt_contract.mathematically_local == false' "scenario1 storage yellow host nonlocal"
+  contains "$contracts" '.scenarios.{capability-control-plane}_storage_low.halt_contract.permitted_actions' "beads.update" "scenario1 permits beads.update"
+  contains "$contracts" '.scenarios.{capability-control-plane}_storage_low.halt_contract.permitted_actions' "docs.plan" "scenario1 permits docs.plan"
+  contains "$contracts" '.scenarios.{capability-control-plane}_storage_low.halt_contract.permitted_actions' "tests.no_growth" "scenario1 permits tests.no_growth"
+  contains "$contracts" '.scenarios.{capability-control-plane}_storage_low.halt_contract.blocked_actions' "corpus.ingest" "scenario1 blocks corpus.ingest"
+  contains "$contracts" '.scenarios.{capability-control-plane}_storage_low.halt_contract.blocked_actions' "host.disk.mutate" "scenario1 blocks host.disk.mutate"
+  assert_jq "$contracts" '.scenarios.{capability-control-plane}_storage_low.joshua_mornings_with_idle_fleet_count_would_increment == false and .scenarios.{capability-control-plane}_storage_low.safe_dispatch_count_next_tick >= 1' "scenario1 no {operator} morning idle increment"
 
   validate_contract_shape "$contracts" '.scenarios.mobile_beads_db_health_failed.halt_contract' "scenario2 leakage contract shape"
   validate_contract_shape "$contracts" '.scenarios.mobile_daily_report_missing.halt_contract' "scenario2 daily report contract shape"
   validate_contract_shape "$contracts" '.scenarios.mobile_agent_mail_fd_warn.halt_contract' "scenario2 fd warn contract shape"
-  assert_jq "$FIX/mobile-eats-doctor.json" '(.errors | length) == 2 and any(.errors[]; .code == "beads_db_health_failed" and .leakage_count == 10) and any(.errors[]; .code == "daily_report_missing") and any(.warnings[]; .code == "agent_mail_fd_doctor_warn" and .lock_fd_count == 27)' "scenario2 fixture replays mobile-eats blockers"
+  assert_jq "$FIX/{proof-product}-doctor.json" '(.errors | length) == 2 and any(.errors[]; .code == "beads_db_health_failed" and .leakage_count == 10) and any(.errors[]; .code == "daily_report_missing") and any(.warnings[]; .code == "agent_mail_fd_doctor_warn" and .lock_fd_count == 27)' "scenario2 fixture replays {proof-product} blockers"
   contains "$contracts" '.scenarios.mobile_daily_report_missing.halt_contract.permitted_actions' "dispatch.daily_report_fix" "scenario2 daily report fix dispatch permitted"
   contains "$contracts" '.scenarios.mobile_daily_report_missing.halt_contract.permitted_actions' "daily_report.generate" "scenario2 daily report generation permitted"
   assert_jq "$contracts" '[.scenarios.mobile_beads_db_health_failed.escalation_receipt_count, .scenarios.mobile_daily_report_missing.escalation_receipt_count, .scenarios.mobile_agent_mail_fd_warn.escalation_receipt_count] | add == 0' "scenario2 no flywheel escalation receipts"

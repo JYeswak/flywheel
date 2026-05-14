@@ -1,1 +1,0 @@
-{"schema_version":"skillos-template-handshake/v1","command":"health","ts":"2026-05-10T21:54:44Z","status":"warn","reason":"audit ledger absent (no historical runs yet)","audit_log":"/Users/josh/.local/state/flywheel/skillos-template-handshake-runs.jsonl","recent_runs":0}

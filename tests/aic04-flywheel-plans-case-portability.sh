@@ -129,7 +129,7 @@ else
 fi
 
 # Test 9: 3 ~/.claude files (INCIDENTS.md / flywheel-autoloop / data/README.md)
-# have zero lowercase refs to /Users/josh/Developer/flywheel/.flywheel/plans/
+# have zero lowercase refs to <flywheel-repo>/.flywheel/plans/
 home_files=(
   "$HOME/.claude/skills/.flywheel/INCIDENTS.md"
   "$HOME/.claude/skills/.flywheel/bin/flywheel-autoloop"

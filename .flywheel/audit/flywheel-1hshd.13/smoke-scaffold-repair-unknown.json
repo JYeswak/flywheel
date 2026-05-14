@@ -1,2 +1,0 @@
-{"schema_version":"cleanup-scratch/v1","command":"repair","status":"refused","scope":"nope","reason":"unknown_scope","valid_scopes":["audit_log_dir"],"note":"native cleanup is via default ABSOLUTE_PATH arg, not via repair verb"}
-rc=64

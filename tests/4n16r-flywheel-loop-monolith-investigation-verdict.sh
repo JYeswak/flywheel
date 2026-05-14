@@ -3,14 +3,14 @@
 # Bead flywheel-4n16r: investigation-verdict regression for the
 # `action=split_flywheel_loop_dispatcher` doctor signal.
 #
-# The bead was misfiled as a "skillos-gap" but the actual trauma is in
+# The bead was misfiled as a "{capability-control-plane}-gap" but the actual trauma is in
 # the shared flywheel substrate. Re-routed to refactor bead
 # flywheel-cmr7o. This test asserts the investigation-verdict's
 # load-bearing claims:
 #
 # 1. The doctor returns action=split_flywheel_loop_dispatcher (gap is real).
-# 2. The trigger is the monolith_size_regression check, NOT a skillos
-#    config issue (gap is fleet-wide, not skillos-specific).
+# 2. The trigger is the monolith_size_regression check, NOT a {capability-control-plane}
+#    config issue (gap is fleet-wide, not {capability-control-plane}-specific).
 # 3. The follow-up refactor bead exists.
 #
 # When flywheel-cmr7o lands the refactor (file ≤500 lines), Test 1
@@ -90,9 +90,9 @@ else
   pass "jq unavailable — live doctor invocation skipped"
 fi
 
-# Test 5: the misfiling is corrected — the bead body says skillos-gap
+# Test 5: the misfiling is corrected — the bead body says {capability-control-plane}-gap
 # but the actual scope is fleet-wide flywheel substrate. The
-# follow-up refactor bead must NOT mention skillos as the trauma site.
+# follow-up refactor bead must NOT mention {capability-control-plane} as the trauma site.
 # (Test asserts the bead exists; the refactor scope is in the bead body.)
 if br show flywheel-cmr7o 2>&1 | head -3 | grep -q "flywheel-cmr7o"; then
   if br show flywheel-cmr7o 2>&1 | grep -qE 'bin/flywheel-loop|814.*lines|monolith.*threshold'; then
@@ -105,12 +105,12 @@ else
 fi
 
 # Test 6: the misframing receipt is in the audit pack so future workers
-# learn not to refile this gap as "skillos-gap"
+# learn not to refile this gap as "{capability-control-plane}-gap"
 AUDIT_EVIDENCE="$ROOT/.flywheel/audit/flywheel-4n16r/evidence.md"
 if [[ -f "$AUDIT_EVIDENCE" ]] \
   && grep -qE 'misfiled|misframing|misframed|misframe' "$AUDIT_EVIDENCE" \
   && grep -qE 'flywheel.substrate|flywheel substrate' "$AUDIT_EVIDENCE"; then
-  pass "audit pack documents the skillos-gap misframing receipt + flywheel-substrate scope"
+  pass "audit pack documents the {capability-control-plane}-gap misframing receipt + flywheel-substrate scope"
 else
   fail "audit pack missing misframing receipt at $AUDIT_EVIDENCE"
 fi

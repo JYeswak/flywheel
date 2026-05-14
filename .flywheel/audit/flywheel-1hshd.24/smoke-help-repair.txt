@@ -1,1 +1,0 @@
-topic: repair --scope <ledger_dir|audit_log_dir> [--dry-run|--apply --idempotency-key KEY] — apply contract: --apply requires --idempotency-key (rc=3 refusal); scopes: ledger_dir (mkdir -p dirname of $CUSTOMER_OBS_LEDGER), audit_log_dir (mkdir -p dirname of $SCAFFOLD_AUDIT_LOG). Unknown scope = rc=64.

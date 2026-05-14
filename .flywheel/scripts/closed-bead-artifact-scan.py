@@ -115,7 +115,10 @@ def split_claims(text: str) -> list[tuple[str, str]]:
         if "=" not in part:
             continue
         key, raw = part.split("=", 1)
-        key = key.strip().strip(":,;").lower().replace("-", "_")
+        raw_key = key.strip().strip(":,;")
+        if raw_key == "PATH":
+            continue
+        key = raw_key.lower().replace("-", "_")
         value = raw.strip().strip(",;")
         if not key or not value or value.startswith(IGNORE_PREFIXES):
             continue
@@ -208,7 +211,7 @@ def scan(repo: Path, limit: int, command_timeout: int) -> dict[str, Any]:
     issues_path = repo / ".beads/issues.jsonl"
     rows = [row for row in load_jsonl(issues_path) if is_closed(row)]
     if limit > 0:
-        rows = rows[:limit]
+        rows = rows[-limit:]
     results = [scan_issue(repo, row, command_timeout) for row in rows]
     candidates = [item for item in results if item["state"] == "reopen_candidate"]
     unknown = [item for item in results if item["state"] == "unknown"]
@@ -346,6 +349,9 @@ def main() -> int:
     parser.add_argument("--examples", action="store_true")
     parser.add_argument("--info", action="store_true")
     args = parser.parse_args()
+    if (args.doctor or args.health) and args.limit == 0:
+        args.limit = int(os.environ.get("FLYWHEEL_CLOSED_BEAD_ARTIFACT_SCAN_DOCTOR_LIMIT", "200"))
+        args.command_timeout = min(args.command_timeout, int(os.environ.get("FLYWHEEL_CLOSED_BEAD_ARTIFACT_SCAN_DOCTOR_COMMAND_TIMEOUT", "1")))
 
     repo = repo_root(Path(args.repo).expanduser().resolve())
     if args.schema:

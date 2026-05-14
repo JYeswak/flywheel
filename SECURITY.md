@@ -1,9 +1,8 @@
 # Security
 
-This repository is private ZestStream infrastructure. Report suspected
-vulnerabilities, exposed secrets, or dispatch-safety regressions to
-`security@zeststream.ai` and include the affected path plus the observed
-behavior.
+Report suspected vulnerabilities, exposed secrets, install safety issues, or
+dispatch-safety regressions to `security@zeststream.ai` and include the affected
+path plus the observed behavior.
 
 Do not open public issues with sensitive details.
 
@@ -44,8 +43,9 @@ Allowed patterns:
 - redacted evidence with `[REDACTED:<class>]`
 - hashes of secret material only when the task explicitly asks for a verifier
 
-Use the Infisical and token-echo doctrine in `AGENTS.md` before touching
-credential-shaped work. Joshua must explicitly approve token rotation.
+Use the secret-handling doctrine in `AGENTS.md` before touching
+credential-shaped work. Project maintainers must explicitly approve token
+rotation.
 
 ## Dispatch Safety
 

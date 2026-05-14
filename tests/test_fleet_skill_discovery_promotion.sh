@@ -26,7 +26,7 @@ jq -nc '{
     pending_coordinator_action_count:1,
     suspicious_callback_warning_count:1,
     top_candidates:[
-      {candidate_skill_name:"fixture-alpha",sighting_count:3,action:"skill_builder_bead_needed",discovery_ids:["sd-1","sd-2","sd-3"],sessions:["flywheel","picoz","skillos"]}
+      {candidate_skill_name:"fixture-alpha",sighting_count:3,action:"skill_builder_bead_needed",discovery_ids:["sd-1","sd-2","sd-3"],sessions:["flywheel","{session}","{capability-control-plane}"]}
     ],
     warning_classes:["skill_discovery_coordinator_action_pending","skill_discovery_duty_skipped"]
   },

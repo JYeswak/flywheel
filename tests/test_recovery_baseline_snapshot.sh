@@ -15,7 +15,7 @@ assert_jq() {
   if jq -e "$filter" "$file" >/dev/null; then pass "$label"; else fail "$label"; jq . "$file" >&2 || true; fi
 }
 
-sessions=(flywheel alpsinsurance clutterfreespaces picoz skillos vrtx zeststream-v2 mobile-eats)
+sessions=(flywheel {session} clutterfreespaces {session} {capability-control-plane} vrtx zeststream-v2 {proof-product})
 mkdir -p "$TMP/repos" "$TMP/state" "$TMP/snapshots" "$TMP/LaunchAgents" "$TMP/tokens"
 repo_json="$TMP/repo-map.json"
 jq -nc '{ }' >"$repo_json"
@@ -61,9 +61,9 @@ tarball="$(jq -r '.paths.tarball' "$TMP/out.json")"
 [[ -s "$manifest" ]] && pass "manifest_written" || fail "manifest_written"
 [[ -s "$tarball" ]] && pass "tarball_written" || fail "tarball_written"
 assert_jq "$manifest" '.schema_version=="flywheel-recovery-baseline/v1" and .source_plan==".flywheel/PLANS/recovery-system-2026-05-01/00-PLAN.md" and (.sessions|length)==8' "manifest_shape_source_plan_sessions"
-assert_jq "$manifest" '([.sessions[].session] | sort) == (["alpsinsurance","clutterfreespaces","flywheel","mobile-eats","picoz","skillos","vrtx","zeststream-v2"] | sort)' "all_8_sessions_classified"
+assert_jq "$manifest" '([.sessions[].session] | sort) == (["{session}","clutterfreespaces","flywheel","{proof-product}","{session}","{capability-control-plane}","vrtx","zeststream-v2"] | sort)' "all_8_sessions_classified"
 assert_jq "$manifest" 'all(.sessions[]; has("checkpoint_ready") and (.checkpoint_ready|type=="boolean"))' "checkpoint_ready_boolean"
-assert_jq "$manifest" '.excluded_sessions[0].session=="zesttube" and (.protected_sessions_restore_blocked|sort)==(["alpsinsurance","picoz"]|sort)' "zesttube_excluded_protected_policy"
+assert_jq "$manifest" '.excluded_sessions[0].session=="zesttube" and (.protected_sessions_restore_blocked|sort)==(["{session}","{session}"]|sort)' "zesttube_excluded_protected_policy"
 if ! grep -R "fixture-secret-token" "$manifest" "$TMP/snapshots"/*.tar.gz >/dev/null 2>&1; then pass "agent_mail_token_value_not_copied"; else fail "agent_mail_token_value_not_copied"; fi
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"

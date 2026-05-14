@@ -1,9 +1,0 @@
-PASS T1 ntm wait --json on timeout emits NON-JSON (current upstream baseline; workaround required)
-PASS T2 idle-pane-auto-dispatch.sh wrapper output is parseable JSON (rc=0)
-PASS T3a wrapper JSON has top-level status field (no_idle_wait_timeout)
-PASS T3b wrapper JSON has wait field
-PASS T3c wrapper JSON wait.exit_code present (orchestrator can read timeout receipt)
-PASS T3d wrapper JSON wait.raw preserves the original non-JSON output (workaround visible)
-
-=== test-ntm-wait-json-timeout-fallback.sh ===
-pass=6 fail=0

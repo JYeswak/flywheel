@@ -16,14 +16,14 @@ mkdir -p "$TMP/repos/flywheel/.beads" "$TMP/repos/flywheel/.flywheel" "$TMP/snap
 printf '{"id":"fixture"}\n' >"$TMP/repos/flywheel/.beads/issues.jsonl"
 printf '{}\n' >"$TMP/repos/flywheel/.flywheel/dispatch-log.jsonl"
 printf 'm\n' >"$TMP/repos/flywheel/.flywheel/MISSION.md"; printf 'g\n' >"$TMP/repos/flywheel/.flywheel/GOAL.md"; printf 's\n' >"$TMP/repos/flywheel/.flywheel/STATE.md"
-for session in flywheel alpsinsurance clutterfreespaces picoz skillos vrtx zeststream-v2 mobile-eats; do
+for session in flywheel {session} clutterfreespaces {session} {capability-control-plane} vrtx zeststream-v2 {proof-product}; do
   repo="$TMP/repos/$session"; mkdir -p "$repo/.beads" "$repo/.flywheel"
   printf '{"id":"%s"}\n' "$session" >"$repo/.beads/issues.jsonl"
   printf '{}\n' >"$repo/.flywheel/dispatch-log.jsonl"
   printf 'm\n' >"$repo/.flywheel/MISSION.md"; printf 'g\n' >"$repo/.flywheel/GOAL.md"; printf 's\n' >"$repo/.flywheel/STATE.md"
   printf '<?xml version="1.0"?><plist version="1.0"><dict><key>Label</key><string>com.zeststream.%s.watcher</string></dict></plist>\n' "$session" >"$TMP/launch/com.zeststream.$session.watcher.plist"
 done
-repo_map="$(jq -nc --arg root "$TMP/repos" '{flywheel:($root+"/flywheel"),alpsinsurance:($root+"/alpsinsurance"),clutterfreespaces:($root+"/clutterfreespaces"),picoz:($root+"/picoz"),skillos:($root+"/skillos"),vrtx:($root+"/vrtx"),"zeststream-v2":($root+"/zeststream-v2"),"mobile-eats":($root+"/mobile-eats")}')"
+repo_map="$(jq -nc --arg root "$TMP/repos" '{flywheel:($root+"/flywheel"),{session}:($root+"/{session}"),clutterfreespaces:($root+"/clutterfreespaces"),{session}:($root+"/{session}"),{capability-control-plane}:($root+"/{capability-control-plane}"),vrtx:($root+"/vrtx"),"zeststream-v2":($root+"/zeststream-v2"),"{proof-product}":($root+"/{proof-product}")}')"
 FLYWHEEL_RECOVERY_REPO_MAP_JSON="$repo_map" FLYWHEEL_RECOVERY_NOW="2026-05-07T03:00:00Z" "$SNAP" --snapshot-dir "$TMP/snaps" --state-dir "$TMP/state" --ntm-config "$TMP/missing.toml" --launchagents-dir "$TMP/launch" --json >"$TMP/snap.json"
 
 set +e

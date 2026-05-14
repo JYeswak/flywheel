@@ -133,7 +133,7 @@ fi
 # Test 8: doctor_schema_postcheck mutates a packet, adds command_help_parity key
 SCHEMA_POST_OUT=$(bash -c '
 source "'"$DOCTOR_SH"'" 2>/dev/null
-export REPO_ABS=/Users/josh/Developer/flywheel
+export REPO_ABS=<flywheel-repo>
 export FLYWHEEL_COMMAND_HELP_PARITY_AUDIT=/nonexistent/probe-script
 export FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1
 doctor_schema_postcheck "$(printf "%s" "{\"status\":\"pass\",\"errors\":[],\"warnings\":[]}")"

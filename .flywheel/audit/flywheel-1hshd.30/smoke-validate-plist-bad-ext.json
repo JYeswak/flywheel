@@ -1,1 +1,0 @@
-{"schema_version":"flywheel-codex-stuck-detector-install/v1","command":"validate","subject":"plist-path","ts":"2026-05-11T05:46:17Z","status":"reject","value":"/tmp/foo.txt","reason":"unsupported_extension","hint":"must end in .plist"}

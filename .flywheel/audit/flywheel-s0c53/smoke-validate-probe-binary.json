@@ -1,1 +1,0 @@
-{"schema_version":"storage-headroom-watcher/v1","command":"validate","subject":"probe-binary","status":"pass","path":"/Users/josh/Developer/flywheel/.flywheel/scripts/storage-probe.sh","syntax_ok":true,"missing":[]}

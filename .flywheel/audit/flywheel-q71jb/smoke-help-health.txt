@@ -1,3 +1,0 @@
-topic: health — recent run summary from /Users/josh/.local/state/flywheel/build-dispatch-packet-runs.jsonl.
-  Reports recent_count, last_run_ts, age_seconds, distinct beads/sessions.
-  status=warn when ledger absent, empty, or stale (>24h).

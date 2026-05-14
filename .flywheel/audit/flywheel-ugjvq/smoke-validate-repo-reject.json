@@ -1,2 +1,0 @@
-{"schema_version":"jeff-philosophy-mine/v1","command":"validate","subject":"repo-name","ts":"2026-05-11T00:06:04Z","status":"reject","value":"bad name","reason":"pattern_mismatch","pattern":"^[A-Za-z0-9_.-]+$"}
-rc=1

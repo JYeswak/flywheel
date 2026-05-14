@@ -1,2 +1,0 @@
-{"schema_version":"cross-repo-trauma-aggregator/v1","command":"validate","subject":"output-path","ts":"2026-05-11T04:56:36Z","status":"reject","value":"/some/log.txt","reason":"unsupported_extension","valid_extensions":[".jsonl"],"contract":"$OUTPUT default global-trauma-log.jsonl is JSONL append-only"}
-rc=1

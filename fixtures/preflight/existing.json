@@ -1,0 +1,32 @@
+{
+  "schema_version": "flywheel.preflight.fixture.v0",
+  "name": "existing",
+  "host": {
+    "os": "darwin",
+    "arch": "arm64"
+  },
+  "commands": {
+    "git --version": {"exit_code": 0, "stdout": "git version 2.45.0\n", "stderr": ""},
+    "sh -c 'echo ok'": {"exit_code": 0, "stdout": "ok\n", "stderr": ""},
+    "bash --version": {"exit_code": 0, "stdout": "GNU bash, version 5.2.26\n", "stderr": ""},
+    "jq --version": {"exit_code": 0, "stdout": "jq-1.7\n", "stderr": ""},
+    "sqlite3 --version": {"exit_code": 0, "stdout": "3.45.1 synthetic\n", "stderr": ""},
+    "br --version": {"exit_code": 0, "stdout": "br 0.23.0 synthetic\n", "stderr": ""},
+    "test -f fixtures/preflight/reduced.json": {"exit_code": 0, "stdout": "", "stderr": ""},
+    "python3 --version": {"exit_code": 0, "stdout": "Python 3.12.0\n", "stderr": ""},
+    "node --version": {"exit_code": 0, "stdout": "v22.0.0\n", "stderr": ""},
+    "cargo --version": {"exit_code": 0, "stdout": "cargo 1.78.0 synthetic\n", "stderr": ""},
+    "tmux -V": {"exit_code": 0, "stdout": "tmux 3.4 synthetic\n", "stderr": ""},
+    "ntm --version": {"exit_code": 0, "stdout": "ntm 0.9 synthetic\n", "stderr": ""},
+    "python3 -c 'import mcp_agent_mail'": {"exit_code": 0, "stdout": "", "stderr": ""},
+    "dcg --version": {"exit_code": 0, "stdout": "dcg 0.5 synthetic\n", "stderr": ""},
+    "socraticode --help": {"exit_code": 0, "stdout": "socraticode help synthetic\n", "stderr": ""},
+    "go version": {"exit_code": 0, "stdout": "go version go1.23 synthetic\n", "stderr": ""},
+    "cass --help": {"exit_code": 0, "stdout": "cass help synthetic\n", "stderr": ""},
+    "beads_viewer --version": {"exit_code": 0, "stdout": "beads_viewer 0.1 synthetic\n", "stderr": ""},
+    "claude --version": {"exit_code": 0, "stdout": "claude 2.1 synthetic\n", "stderr": ""},
+    "codex --version": {"exit_code": 0, "stdout": "codex 0.36 synthetic\n", "stderr": ""},
+    "openclaw --version": {"exit_code": 0, "stdout": "openclaw 0.1 synthetic\n", "stderr": ""},
+    "gemini --version": {"exit_code": 0, "stdout": "gemini 0.1 synthetic\n", "stderr": ""}
+  }
+}

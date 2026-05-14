@@ -1,1 +1,0 @@
-{"$schema":"https://json-schema.org/draft/2020-12/schema","title":"flywheel daily report result","type":"object","required":["version","status","repo","date","report_path","hard_blockers_count"],"properties":{"version":{"const":"daily-report.v1"},"status":{"enum":["pass","fail"]},"report_path":{"type":"string"},"hard_blockers_count":{"type":"integer"}}}

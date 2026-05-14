@@ -1,8 +1,8 @@
 # Publishability Audit
 
 Repo: flywheel
-Reviewed: 2026-05-09
-Reviewer: CloudyMill via flywheel-lzc6 for L89 public-ready voice gate
+Reviewed: 2026-05-12
+Reviewer: Codex continuation audit for public-share readiness
 Doctrine: `.flywheel/PUBLISHABILITY-BAR.md`
 Public repo: no
 L89 classification: Joshua-owned ZestStream infrastructure, public-ready by default
@@ -13,23 +13,26 @@ Exemption: none
 
 | facet_id | facet | verdict | evidence |
 |---|---|---|---|
-| F1 | README front-door | YES | `README.md` names purpose, start path, command map, worker flow, and the publishability probe surface. |
+| F1 | README front-door | YES | `README.md` now opens with the public ZestStream/Flywheel story, names the SMB problem, links the first-run guide, and preserves the operator command map. |
 | F2 | Doctrine clarity | YES | `AGENTS.md`, `.flywheel/MISSION.md`, `.flywheel/GOAL.md`, and `INCIDENTS.md` expose operating rules and cost citations. |
 | F3 | Doctor/health/repair triad | YES | `FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json` surfaces `publishability_bar_score`. |
-| F4 | Executable tests | YES | `tests/publishability-bar.sh` validates schema, pass/warn/fail scoring, and doctor JSON wiring. |
-| F5 | Idempotent install + uninstall | NO | Portable init/reconcile exists, but full uninstall proof is not yet represented in this audit. |
+| F4 | Executable tests | YES | `tests/publishability-bar.sh` validates schema, pass/warn/fail scoring, Flywheel source wiring, and direct publishability JSON; final runtime 1.19s after replacing a full-doctor proxy assertion. |
+| F5 | Idempotent install + uninstall | YES | `bash tests/installer-smoke.sh` proves dry-run, install, installed reduced first-run, idempotent reinstall, uninstall, and empty-prefix byte equality. |
 | F6 | Code aesthetic | YES | Repo-local probes and tests are named by surface and registered in `.flywheel/canonical-paths.txt`; publishability probe is 331 lines and CLI-scoped. |
-| F7 | Demo-ability | NO | No single public demo command or first-look sample is registered yet. |
+| F7 | Demo-ability | YES | `scripts/journey-smoke.sh --matrix claude,codex,openclaw,gemini,reduced --dry-run --json` emits five support-tier rows and runtime-proves reduced dispatch-or-simulate. |
 
-Score: 5/7
+Score: 7/7
 
 ## Probe Evidence
 
 | command | status | evidence |
 |---|---|---|
 | `.flywheel/scripts/publishability-bar.sh --doctor --json --repo /Users/josh/Developer/flywheel` | PASS | `status=pass`, `publishability_bar_score.score=5`, `brand_voice_composite=96`, `banned_words_count=0`, `ungrounded_claims_count=0`. |
-| `FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 /Users/josh/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json` | PASS | Doctor JSON includes `publishability_bar.schema_version=publishability-bar/v1` and numeric `publishability_bar_score.score`. |
-| `bash tests/publishability-bar.sh` | PASS | Validates probe schema, thresholds, and doctor publishability field. |
+| `FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 FLYWHEEL_DOCTOR_CACHE_DISABLE=1 FLYWHEEL_TEAM_ROSTER_NTM_TIMEOUT_SECONDS=0 /Users/josh/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo /Users/josh/Developer/flywheel --json` | WARN_NO_ERRORS | `status=warn`, `errors=[]`, `repo_docs_state=ready`, `action=inspect_monolithic_file_debt`, `memory_health.status=OK`, `ntm_spawn_templates_versioned.status=pass`, `jeff_corpus_storage_health=GREEN`, `publishability_bar.status=pass`; remaining warnings are fleet/backlog hygiene. |
+| `bash tests/publishability-bar.sh` | PASS | Validates probe schema, thresholds, Flywheel source wiring, and direct publishability JSON in 1.19s. |
+| `bash tests/installer-smoke.sh` | PASS | `SUMMARY pass=10 fail=0`; install/uninstall proof includes installed reduced first-run and empty prefix after uninstall. |
+| `bash tests/journey-smoke.sh` | PASS | `SUMMARY pass=7 fail=0`; dry-run matrix validates Claude, Codex, OpenClaw, Gemini, and reduced lanes. |
+| `scripts/journey-smoke.sh --matrix claude,codex,openclaw,gemini,reduced --dry-run --json` | PASS | `status=pass`, `lanes=5`, `registry_valid=5`, `runtime_proven=1`, `reduced_dispatch_or_simulate=pass`. |
 
 ## ZestStream Voice Gate
 
@@ -57,6 +60,6 @@ Score: 5/7
 
 | facet | disposition | receipt |
 |---|---|---|
-| Facet F5 | no_bead_reason | Existing score is passing at 5/7; this audit records the gap without minting another bead because install/uninstall work is already covered by active installer and launchd-install surfaces (`flywheel-nh6d`, `flywheel-l5go`, `flywheel-cwdu`). |
-| Facet F7 | no_bead_reason | Existing score is passing at 5/7; demo-ability is intentionally deferred until the conductor/onboarding proof path (`flywheel-4vfa`) creates a real first-look flow instead of a fixture-only demo. |
+| Facet F5 | repaired | `tests/installer-smoke.sh` now records the public install, idempotent reinstall, uninstall, and empty-prefix proof. |
+| Facet F7 | repaired | `scripts/journey-smoke.sh` now provides the first-look dry-run matrix; reduced mode is runtime-proven while full harness rows remain registry-valid until later smoke. |
 | L89 banned words | repaired | Follow-up bead `flywheel-lzc6.1` removes public-prose banned-word hits from README/MISSION surfaces and records passing hook evidence. |

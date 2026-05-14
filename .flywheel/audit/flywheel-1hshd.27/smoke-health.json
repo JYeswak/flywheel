@@ -1,1 +1,0 @@
-{"schema_version":"fleet-coherence-launchd/v1","command":"health","ts":"2026-05-11T05:31:24Z","status":"ok","label":"com.zeststream.flywheel.fleet-coherence","loaded":false,"last_run_ts":null,"audit_log":"/Users/josh/.local/state/flywheel/fleet-coherence-launchd-runs.jsonl","binds_audit_log":true}

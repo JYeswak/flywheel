@@ -110,7 +110,7 @@ write_receipt() {
       schema_version:"storage-override/v1",
       issued_at:$issued,
       expires_at:$expires,
-      issuer:"Joshua",
+      issuer:"{operator}",
       scope:"fleet",
       min_free_gb_override:40,
       min_free_pct_override:($min_free | tonumber),

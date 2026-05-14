@@ -73,7 +73,7 @@ B_in_B=$(git show "$hash_canonical_B" -- shared2.md | grep -E "^\+[^+]" | grep -
 pass "canonical pattern: A's commit contains only A; B's commit contains only B"
 
 # Test 3: L107 rule body cites the canonical lifecycle ordering
-RULE="${RULE:-/Users/josh/Developer/flywheel/.flywheel/rules/L061-L107-shared-surface-writes-must-reserve-across-panes.md}"
+RULE="${RULE:-<flywheel-repo>/.flywheel/rules/L061-L107-shared-surface-writes-must-reserve-across-panes.md}"
 [[ -f "$RULE" ]] || fail "L107 rule missing at $RULE"
 grep -qF -- "--reserve → write → git add → git commit → --release" "$RULE" \
   || fail "L107 rule does not cite canonical lifecycle order"

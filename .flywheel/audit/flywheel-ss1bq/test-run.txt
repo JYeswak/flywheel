@@ -1,9 +1,0 @@
-PASS T1 --info exits 0 with non-empty output
-PASS T2a --schema exits 0
-PASS T2b --schema emits parseable JSON with schema_version field
-PASS T3 --examples exits 0 with non-empty output
-PASS T4 --schema flag and schema subcommand emit equivalent schema_version
-PASS T5 --help still exits 0 (no regression)
-
-=== test-flywheel-loop-introspection-triad.sh ===
-pass=6 fail=0

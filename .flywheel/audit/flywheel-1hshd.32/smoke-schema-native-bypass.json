@@ -1,1 +1,0 @@
-{"schema_version":"frozen-pane-detector.v2","properties":{"frozen_panes_detected":{"type":"integer"},"recoveries":{"type":"array"},"source_health":{"type":"object"}}}

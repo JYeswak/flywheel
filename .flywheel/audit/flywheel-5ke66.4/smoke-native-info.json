@@ -1,1 +1,0 @@
-{"commands":["doctor","health","repair","validate","schema","info","examples"],"ledger_path":"/Users/josh/.local/state/flywheel/coordinator-cross-repo-bleed.jsonl","mutation":"repair --apply creates one fix bead when bleed rows exist","name":"bleed-ledger-watch.sh","schema_version":"bleed-ledger-watch/v1"}

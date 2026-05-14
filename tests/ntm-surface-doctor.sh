@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-FLYWHEEL_BIN="${FLYWHEEL_BIN:-/Users/josh/.claude/skills/.flywheel/bin/flywheel}"
+FLYWHEEL_BIN="${FLYWHEEL_BIN:-<flywheel-state>/bin/flywheel}"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/ntm-surface-doctor.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 

@@ -1,2 +1,0 @@
-{"schema_version":"jeff-issue-response-poll/v1","command":"validate","subject":"jeff-issue-ref","ts":"2026-05-10T23:47:51Z","status":"reject","value":"no-slash-no-hash","reason":"pattern_mismatch","pattern":"^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+#[0-9]+$"}
-rc=1

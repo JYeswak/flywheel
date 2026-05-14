@@ -47,7 +47,9 @@ For public ZestStream-owned repos, the Joshua judge is concrete, not abstract:
 - Factual claims must map to
   `~/.claude/skills/zeststream-brand-voice/data/capabilities-ground-truth.yaml`.
 - Trademark rendering must be exact where those marks are used:
-  `The Yuzu Method ®` and `Peel. Press. Pour.™`.
+  `The Yuzu Method ™` and `Peel. Press. Pour.™`. The Yuzu Method uses `™`
+  while U.S. application SN 99572208 is pending (disclaimer response filed
+  2026-05-14); switch to `®` only when the registration certificate issues.
 - AI is framed as partnership, not enemy or doomer replacement.
 - Jeff Emanuel's tools (NTM, Agent Mail, beads, CASS) stay attributed to Jeff.
 

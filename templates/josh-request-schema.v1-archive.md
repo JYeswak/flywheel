@@ -6,7 +6,7 @@ status: shipped
 shipped_at: 2026-05-03
 ---
 
-# Joshua Request Schema
+# {operator} Request Schema
 
 ## 1. Frontmatter Contract
 
@@ -25,11 +25,11 @@ than `1`.
 
 ## 2. MISSION.md Section Header Contract
 
-Each flywheel-managed repo that receives Joshua request capture must include
+Each flywheel-managed repo that receives {operator} request capture must include
 this exact section in repo-local `.flywheel/MISSION.md`:
 
 ```markdown
-## Joshua Requests
+## {operator} Requests
 
 <!-- AUTO-MAINTAINED by ~/.claude/hooks/josh-request-capture.sh + ~/.local/bin/josh-requests
      APPEND-ONLY for entries; status field is mutable.
@@ -49,7 +49,7 @@ Each captured request is one Markdown subsection:
 - **captured_via:** orch_turn|hook|backfill|agent_mail|ntm_send
 - **session:** <repo-basename>
 - **pane:** <int|null>
-- **excerpt:** "<scrubbed Joshua message text, ≤500 chars>"
+- **excerpt:** "<scrubbed {operator} message text, ≤500 chars>"
 - **inferred_action:** <orch interpretation, set after capture>
 - **bead:** flywheel-<id>|null
 - **closed_at:** <iso>|null
@@ -60,7 +60,7 @@ Field rules:
 
 - `status` starts as `open`.
 - `captured_via` records the first substrate that captured the request.
-- `session` is the repo/session basename, for example `flywheel` or `mobile-eats`.
+- `session` is the repo/session basename, for example `flywheel` or `{proof-product}`.
 - `pane` is an integer when known, otherwise literal `null`.
 - `excerpt` must be scrubbed before persistence and truncated to 500 characters.
 - `inferred_action` remains unset or `null` until an orchestrator acknowledges the request.
@@ -75,12 +75,12 @@ Allowed transitions:
 - `open` -> `acknowledged`: orchestrator has read the request and set `inferred_action`.
 - `acknowledged` -> `in_progress`: a bead is linked or a dispatch is underway.
 - `in_progress` -> `done`: linked bead is closed and `closure_evidence` is populated.
-- `any` -> `deferred`: orchestrator records a reason note; Joshua is not blocked.
-- `any` -> `wont_do`: Joshua-confirmation excerpt is present as evidence.
+- `any` -> `deferred`: orchestrator records a reason note; {operator} is not blocked.
+- `any` -> `wont_do`: {operator}-confirmation excerpt is present as evidence.
 
 Rules:
 
-- `done`, `deferred`, and `wont_do` are terminal unless Joshua explicitly reopens the request.
+- `done`, `deferred`, and `wont_do` are terminal unless {operator} explicitly reopens the request.
 - `wont_do` is never an autonomous orchestrator decision.
 - A request may stay `acknowledged` when the correct action is plan-space work before bead creation.
 - A request must not be silently deleted; supersession is represented by a new request and a deferred note.
@@ -123,16 +123,16 @@ Terminal statuses require evidence:
 - `done`: at least one of:
   - linked bead status is `closed` and the bead has non-empty close-reason text;
   - commit sha references the request id or request excerpt;
-  - Joshua-confirmation quote says the request is satisfied.
-- `deferred`: orchestrator reason note is at least 20 characters and explains why Joshua is not blocked.
-- `wont_do`: Joshua-confirmation excerpt must be present.
+  - {operator}-confirmation quote says the request is satisfied.
+- `deferred`: orchestrator reason note is at least 20 characters and explains why {operator} is not blocked.
+- `wont_do`: {operator}-confirmation excerpt must be present.
 
 Invalid closures:
 
 - `done` with `closure_evidence: null`.
 - `done` with only "implemented" or another evidence-free phrase.
 - `deferred` with no reason or a reason shorter than 20 characters.
-- `wont_do` without a Joshua quote or explicit confirmation excerpt.
+- `wont_do` without a {operator} quote or explicit confirmation excerpt.
 
 ## 7. Cross-Session Propagation Note
 
@@ -142,8 +142,8 @@ This schema is canonical at:
 ~/Developer/flywheel/templates/josh-request-schema.md
 ```
 
-The doctrine-sync hook extended by `flywheel-cg9w` propagates the schema to peer
-repos. Each peer repo's `.flywheel/MISSION.md` receives the `## Joshua Requests`
+The doctrine-sync hook extended by `{bead-id}` propagates the schema to peer
+repos. Each peer repo's `.flywheel/MISSION.md` receives the `## {operator} Requests`
 section via `flywheel-iyex`. Propagation must not overwrite existing request
 entries; it may add the header section when missing and update schema references.
 
@@ -174,17 +174,17 @@ the writer increments the counter modulo 1000 until the id is unused.
 Plan and consumers:
 
 - Plan: `.flywheel/PLANS/joshua-request-capture-system-2026-05-03/`
-- MISSION canon: `.flywheel/MISSION.md` `## Joshua Requests`
+- MISSION canon: `.flywheel/MISSION.md` `## {operator} Requests`
 - JSONL mirror: `~/.local/state/flywheel/josh-requests.jsonl`
-- Hook: `~/.claude/hooks/josh-request-capture.sh` (`flywheel-l6j2`)
+- Hook: `~/.claude/hooks/josh-request-capture.sh` (`{bead-id}`)
 - CLI: `~/.local/bin/josh-requests` (`flywheel-iaak`)
-- Tick consumer: `~/Developer/flywheel/.flywheel/scripts/josh-request-tick-promote.sh` (`flywheel-a6ax`)
-- Doctrine-sync propagation: `flywheel-cg9w`
+- Tick consumer: `~/Developer/flywheel/.flywheel/scripts/josh-request-tick-promote.sh` (`{bead-id}`)
+- Doctrine-sync propagation: `{bead-id}`
 - Peer MISSION bootstrap: `flywheel-iyex`
-- Flywheel MISSION bootstrap: `flywheel-2ps2`
-- JSONL substrate initialization: `flywheel-j9fq`
-- Dispatch-template gate: `flywheel-sur0`
-- Status dashboard surface: `flywheel-3tzo`
+- Flywheel MISSION bootstrap: `{bead-id}`
+- JSONL substrate initialization: `{bead-id}`
+- Dispatch-template gate: `{bead-id}`
+- Status dashboard surface: `{bead-id}`
 
 Doctrine references:
 

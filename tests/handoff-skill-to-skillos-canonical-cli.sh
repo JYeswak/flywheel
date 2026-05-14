@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# tests/handoff-skill-to-skillos-canonical-cli.sh
-# Canonical-cli surface tests for .flywheel/scripts/handoff-skill-to-skillos.sh (scaffolded by
+# tests/handoff-skill-to-{capability-control-plane}-canonical-cli.sh
+# Canonical-cli surface tests for .flywheel/scripts/handoff-skill-to-{capability-control-plane}.sh (scaffolded by
 # bead flywheel-ws02m / scaffold-canonical-cli.sh).
 #
 # 13/13 PASS = canonical-cli-scoping checker green. TODO markers
@@ -8,7 +8,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/handoff-skill-to-skillos.sh"
+SCRIPT="$ROOT/.flywheel/scripts/handoff-skill-to-{capability-control-plane}.sh"
 
 pass_count=0
 fail_count=0

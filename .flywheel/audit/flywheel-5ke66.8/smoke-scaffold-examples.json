@@ -1,1 +1,0 @@
-{"schema_version":"fleet-canonical-rule-freshness-probe/v1","command":"examples","examples":[{"name":"default run","invocation":"fleet-canonical-rule-freshness-probe.sh","purpose":"backward-compatible original behavior"},{"name":"doctor","invocation":"fleet-canonical-rule-freshness-probe.sh doctor --json","purpose":"probe substrate health"}]}

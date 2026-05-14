@@ -121,7 +121,7 @@ fixture "$TMP/alive.json" "flywheel" 2 "line one" "line two"
 "$SCRIPT" --fixture "$TMP/alive.json" --apply --json >"$TMP/alive.out"
 assert_jq "$TMP/alive.out" '.status == "ok" and .stuck_count == 0 and .panes[0].subclass == "alive" and .panes[0].hash_stable == false' "active_output_alive"
 
-fixture "$TMP/deaf.json" "skillos" 1 $'› Use /skills to list available skills\n  gpt-5.5 xhigh · ~/Developer/skillos' $'› Use /skills to list available skills\n  gpt-5.5 xhigh · ~/Developer/skillos' $'› Use /skills to list available skills\n  gpt-5.5 xhigh · ~/Developer/skillos'
+fixture "$TMP/deaf.json" "{capability-control-plane}" 1 $'› Use /skills to list available skills\n  gpt-5.5 xhigh · ~/Developer/{capability-control-plane}' $'› Use /skills to list available skills\n  gpt-5.5 xhigh · ~/Developer/{capability-control-plane}' $'› Use /skills to list available skills\n  gpt-5.5 xhigh · ~/Developer/{capability-control-plane}'
 set +e
 "$SCRIPT" --fixture "$TMP/deaf.json" --auto-recover --apply --json >"$TMP/deaf.out"
 deaf_rc=$?

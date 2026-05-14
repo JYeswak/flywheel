@@ -53,7 +53,7 @@ After P2-02 discovery and P2-03 runner/storage land, the operator surface should
 read like this:
 
 ```bash
-repo="/Users/josh/Developer/flywheel"
+repo="<flywheel-repo>"
 flywheel-loop polish-gate --repo "$repo" --json
 flywheel-loop polish-gate --repo "$repo" doctor --json
 flywheel-loop polish-gate --repo "$repo" why templates/flywheel-install/README.md --json
@@ -262,10 +262,10 @@ receipt verdict is `WAIVED` and the waiver object contains all required fields.
 | `approver` | The accountable owner who accepted the exception. |
 
 Approval should follow ownership. Flywheel-owned template substrate can be
-waived by the flywheel orchestrator or Joshua. Client repo waivers belong to the
+waived by the flywheel orchestrator or {operator}. Client repo waivers belong to the
 client repo owner or the owning delivery orchestrator. Risk-boundary exceptions
 that affect production, credentials, safety gates, or external clients require
-Joshua-level approval.
+{operator}-level approval.
 
 Waivers must be visible in doctor output. A hidden waiver is operationally the
 same as bypassing the gate. A permanent waiver is not a waiver; it is either a
@@ -350,7 +350,7 @@ state from the named backup timestamp:
 ```bash
 bash templates/flywheel-install/scripts/reconcile-polish-gate.sh \
   --repo /path/to/repo \
-  --rollback 2026-05-05T232400Z \
+  --rollback <timestamp> \
   --json
 ```
 
@@ -366,7 +366,7 @@ Each profile declares:
 
 | Field | Meaning |
 |---|---|
-| `profile_name` | Repo profile to load, such as `alps`, `skillos`, or `default`. |
+| `profile_name` | Repo profile to load, such as `strict-client`, `capability-control-plane`, or `default`. |
 | `allowlist_paths` | Repo-relative path globs that are in scope. |
 | `blocklist_paths` | Repo-relative path globs that are always out of scope and take precedence. |
 | `blocklist_reason_default` | Reason attached when a blocked path is filtered. |
@@ -377,12 +377,11 @@ Manifest or reconcile code should select a profile with
 `scope_allowlist_profile`. Missing profile selection falls back to `default`,
 which allows only `.flywheel/` and excludes common app/domain roots.
 
-ALPS is the strict fixture. Its allowlist is exactly `.flywheel/`; every root
-path is healthcare, insurance, financial, CRM, or integration domain owned by
-the client. The memory rule is
-`feedback_scope_aware_rename_is_the_rule.md`: ALPS root is off-limits, and
-terms such as `doctor`, `ledger`, `worker`, `dispatch`, `tick`, and `router`
-must never be interpreted before path scope has been applied.
+`strict-client` is the strict fixture. Its allowlist is exactly `.flywheel/`;
+every root path is regulated customer domain territory. The memory rule is
+`feedback_scope_aware_rename_is_the_rule.md`: customer-owned root content is
+off-limits, and terms such as `doctor`, `ledger`, `worker`, `dispatch`, `tick`,
+and `router` must never be interpreted before path scope has been applied.
 
 To add a repo profile:
 
@@ -430,7 +429,7 @@ gate failures even if every surface grade is high.
 | Hide legacy debt by leaving scope at `new` forever. | The stock never drains. | Move to `touched`, then `repo_local_flywheel` or `all_declared`. |
 | Delete receipts to make the summary look clean. | The log is the evidence chain. | Append a new receipt that changes verdict or grade. |
 | Waive without expiry. | No owner revisits the exception. | Use `expires_at` and make doctor show pending waivers. |
-| Approve your own risky waiver. | The gate becomes self-attestation. | Use the owning orchestrator, repo owner, or Joshua for risk boundaries. |
+| Approve your own risky waiver. | The gate becomes self-attestation. | Use the owning orchestrator, repo owner, or {operator} for risk boundaries. |
 | Edit schemas to fit a bad run. | That changes the contract instead of fixing state. | Fix malformed manifest, receipt, or summary JSON. |
 | Count docs as receipt. | Docs can explain the gate but cannot prove a grade. | Write schema-valid grade receipts. |
 | Grade outside the allowlist. | It creates false confidence and noisy failures. | Fix discovery scope first. |
@@ -486,4 +485,4 @@ This is also the close-validator mental model. The operator should be able to
 answer "what failed, who owns it, what receipt proves it, and what blocks close"
 without reading implementation code.
 
-Part of the Yuzu Method framework by ZestStream.
+Part of the Yuzu Method framework by {operator-company}.
