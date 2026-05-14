@@ -45,8 +45,7 @@ for rel in \
   contact/index.html \
   styles.css \
   visual-system.css \
-  assets/operating-room-map.svg \
-  assets/loop-map.svg; do
+  assets/operating-room-map.svg; do
   require_file "$rel"
 done
 

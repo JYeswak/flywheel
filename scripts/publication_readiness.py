@@ -130,7 +130,6 @@ REQUIRED_LOCAL_FILES = [
     "site/contact/index.html",
     "site/styles.css",
     "site/visual-system.css",
-    "site/assets/loop-map.svg",
     "site/assets/operating-room-map.svg",
     "packages/zeststream-story-system/package.json",
     "packages/zeststream-story-system/README.md",
