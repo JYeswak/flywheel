@@ -19,6 +19,7 @@ Common evidence surfaces:
 | `scripts/zs-frontend-quality-gate.sh --json` | Reusable frontend quality gate for Next.js projects; checks font loading, design tokens, motion, copy source, accessibility, proof states, story-system linkage, and shared package wiring. |
 | `scripts/extract_git_story.py --json` | Git-derived trajectory, owner message pack, story dossier, and frontend UI payload so public copy can show the proof path instead of relying on one session's memory. |
 | `scripts/probe_repo_story_portability.py --json` | Repo-story portability probe proving the same git-derived story contract can run against Flywheel, ClutterFreeSpaces, Mobile Eats, or another local repo without editing sibling repos. |
+| `scripts/render_repo_owner_brief.py --json` | Owner-facing brief renderer that turns generated repo trajectory JSON into a de-slopified SMB page brief with method steps, trust answers, page rooms, CTA, and proof refs. |
 | `docs/brand/naming-conventions.md` | Public naming contract separating company, method, engine, capability-control plane, upstream substrate, and proof surfaces. |
 | `packages/zeststream-story-system/story-system.json` | Shared public story grammar for Flywheel, ClutterFreeSpaces, Mobile Eats, and future frontend surfaces. |
 | `packages/zeststream-story-system/tokens.css` | Shared visual tokens mirrored by the static Flywheel site and intended for Next.js package adoption. |
@@ -29,7 +30,9 @@ Common evidence surfaces:
 | `docs/evidence/staging-review-signoff-packet.md` | Staging-review map for the site, story, evidence, developer path, agent-lane proof, and remaining public blockers; not public release approval. |
 | `docs/evidence/flywheel-trajectory.json` | Machine-readable `zeststream.repo_git_story.v0` trajectory evidence with embedded `zeststream.repo_story_message.v0` owner message pack and `zeststream.repo_frontend_story.v0` UI payload generated from git history. |
 | `docs/evidence/repo-story-portability.json` | Saved `zeststream.repo_story_portability_probe.v0` receipt showing Flywheel, ClutterFreeSpaces, and Mobile Eats passed the shared story/front-end payload contract. |
+| `docs/evidence/flywheel-owner-brief.json` | Saved `zeststream.repo_owner_story_brief.v0` payload for the business-owner page message generated from repo trajectory evidence. |
 | `docs/stories/flywheel-trajectory.md` | Owner-readable trajectory story used by the public site and reviewers. |
+| `docs/stories/flywheel-owner-brief.md` | Generated owner-facing story brief for reviewers and Next.js page builders. |
 | `docs/runbooks/public-user-journey-pack.md` | Public asset journey map for business-owner, developer, operator, contributor, and signoff paths. |
 | `docs/runbooks/repo-trajectory-story-pack.md` | Reusable story-pack contract for applying the git-derived trajectory pattern to other repo surfaces. |
 | `docs/evidence/asupersync-gated-adoption.md` | Public packet proving Asupersync remains a gated upstream candidate, not a Flywheel runtime dependency. |

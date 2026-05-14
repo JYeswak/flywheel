@@ -57,6 +57,7 @@ jobs:
           bash tests/external-review-gate.sh
           bash tests/public-user-journey-pack.sh
           bash tests/repo-story-portability.sh
+          bash tests/repo-owner-brief.sh
           bash tests/story-system-package.sh
           bash tests/zeststream-ui-package.sh
           bash tests/zeststream-motion-package.sh
@@ -99,6 +100,7 @@ jobs:
             tests/external-review-gate.sh \
             tests/public-user-journey-pack.sh \
             tests/repo-story-portability.sh \
+            tests/repo-owner-brief.sh \
             tests/story-system-package.sh \
             tests/zeststream-ui-package.sh \
             tests/zeststream-motion-package.sh \
@@ -123,6 +125,7 @@ jobs:
             scripts/contact_route_probe.py \
             scripts/publication_readiness.py \
             scripts/probe_repo_story_portability.py \
+            scripts/render_repo_owner_brief.py \
             scripts/validate_cutover_receipts.py \
             scripts/validate_user_journey_pack.py \
             scripts/validate_story_system_package.py
@@ -152,6 +155,7 @@ jobs:
             docs/runbooks/public-user-journey-pack.md \
             docs/runbooks/public-site-smb-journey-wireframe.md \
             docs/stories/public-journey-and-redaction.md \
+            docs/stories/flywheel-owner-brief.md \
             packages/zeststream-story-system/README.md \
             packages/zeststream-ui/README.md \
             packages/zeststream-motion/README.md \

@@ -15,7 +15,7 @@
   "row_count": 3,
   "rows": [
     {
-      "commit_count": 1501,
+      "commit_count": 1503,
       "copy_rule": "Show the proof, not the dream; every strong line must point to proof, blocked state, or a safe first step.",
       "dossier_schema": "zeststream.repo_story_dossier.v0",
       "failure_codes": [],
@@ -34,7 +34,7 @@
       "story_schema": "zeststream.repo_git_story.v0"
     },
     {
-      "commit_count": 362,
+      "commit_count": 363,
       "copy_rule": "Show the proof, not the dream; every strong line must point to proof, blocked state, or a safe first step.",
       "dossier_schema": "zeststream.repo_story_dossier.v0",
       "failure_codes": [],
@@ -53,7 +53,7 @@
       "story_schema": "zeststream.repo_git_story.v0"
     },
     {
-      "commit_count": 1234,
+      "commit_count": 1237,
       "copy_rule": "Show the proof, not the dream; every strong line must point to proof, blocked state, or a safe first step.",
       "dossier_schema": "zeststream.repo_story_dossier.v0",
       "failure_codes": [],

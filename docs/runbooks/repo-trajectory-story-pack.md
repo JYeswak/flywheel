@@ -61,6 +61,20 @@ python3 scripts/probe_repo_story_portability.py \
 bash tests/repo-story-portability.sh
 ```
 
+Before a public page build starts, render the owner-facing brief from the same
+generated trajectory JSON. This is the sales-language handoff for design and
+copy review: it translates the repo path into owner problem, Yuzu Method steps,
+trust answers, page rooms, CTA, and proof refs without relying on the current
+agent's memory.
+
+```bash
+python3 scripts/render_repo_owner_brief.py \
+  --story-json docs/evidence/flywheel-trajectory.json \
+  --write-json docs/evidence/flywheel-owner-brief.json \
+  --write-md docs/stories/flywheel-owner-brief.md
+bash tests/repo-owner-brief.sh
+```
+
 ## Story Chapters
 
 The extractor groups commits into five public chapters:
@@ -251,23 +265,28 @@ A repo trajectory story is acceptable when:
 6. Generated JSON includes `frontend_story.schema_version` equal to
    `zeststream.repo_frontend_story.v0`, with component props for the shared
    `@zeststream/ui` primitives.
-7. The extractor records which `redaction_table` was used and works when the
+7. `scripts/render_repo_owner_brief.py --json` emits
+   `zeststream.repo_owner_story_brief.v0` from the generated trajectory.
+8. The owner brief rejects blocked hype/slop markers, local paths, and em dashes.
+9. The extractor records which `redaction_table` was used and works when the
    target repo has not adopted a repo-local table yet.
-8. `packages/zeststream-story-system/story-system.json` matches the generated
+10. `packages/zeststream-story-system/story-system.json` matches the generated
    message pack and dossier for stages, primitives, CTA, core offer, objection
    count, owner language, audience truths, page blueprint, and frontend story
    schema.
-9. `packages/zeststream-story-system/tokens.css` matches required public site
+11. `packages/zeststream-story-system/tokens.css` matches required public site
    visual tokens.
-10. Generated JSON and Markdown contain no private paths, client names, or
+12. Generated JSON and Markdown contain no private paths, client names, or
    unsupported claims.
-11. The public page includes the trajectory as a buyer journey, not a developer
+13. The public page includes the trajectory as a buyer journey, not a developer
    changelog.
-12. The page links to the generated story artifact for reviewers.
-13. Any claim based on runtime support, release status, or public availability
+14. The page links to the generated story artifact for reviewers.
+15. Any claim based on runtime support, release status, or public availability
    still points to its own proof receipt.
 
 Flywheel's current generated artifacts:
 
 - `docs/evidence/flywheel-trajectory.json`
+- `docs/evidence/flywheel-owner-brief.json`
 - `docs/stories/flywheel-trajectory.md`
+- `docs/stories/flywheel-owner-brief.md`

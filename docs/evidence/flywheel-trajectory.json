@@ -1,7 +1,7 @@
 {
   "chapters": [
     {
-      "commit_count": 397,
+      "commit_count": 399,
       "copy_block": "Before we automate anything, we make the work visible enough to inspect.",
       "evidence_commits": [
         {
@@ -196,7 +196,7 @@
       "visual_scene": "A proof rail beside the workflow with proven, blocked, skipped-with-reason, and private states."
     },
     {
-      "commit_count": 218,
+      "commit_count": 221,
       "copy_block": "If the proof is not ready, the claim stays blocked.",
       "evidence_commits": [
         {
@@ -292,7 +292,7 @@
       "visual_scene": "A visible friction band where unsupported claims are held in amber until the proof catches up."
     },
     {
-      "commit_count": 655,
+      "commit_count": 662,
       "copy_block": "A useful lesson becomes a reusable method, not a memory in one chat window.",
       "evidence_commits": [
         {
@@ -394,7 +394,7 @@
       "visual_scene": "A lesson ledger showing which checks, words, components, or runbooks were created from the last hard-earned lesson."
     },
     {
-      "commit_count": 137,
+      "commit_count": 141,
       "copy_block": "The story lands when a buyer can see the workflow pain, the safe first slice, and the proof path without decoding the stack.",
       "evidence_commits": [
         {
@@ -502,11 +502,11 @@
     },
     "first_date": "2026-04-30",
     "latest_commit": {
-      "sha": "913500d6",
-      "subject": "feat(ui): gate reusable story primitives [work item]"
+      "sha": "d37da23b",
+      "subject": "feat(story): prove repo story portability [work item]"
     },
     "latest_date": "2026-05-14",
-    "total_commits": 1495
+    "total_commits": 1503
   },
   "frontend_story": {
     "blocked_language": [
@@ -596,7 +596,7 @@
             "state": "proven"
           },
           {
-            "detail": "218 blocker/friction signals inspected.",
+            "detail": "221 blocker/friction signals inspected.",
             "label": "Friction visible",
             "receiptUrl": "docs/evidence/repo-trajectory.json",
             "state": "proven"
@@ -608,7 +608,7 @@
             "state": "proven"
           },
           {
-            "detail": "655 reusable-method signals inspected.",
+            "detail": "662 reusable-method signals inspected.",
             "label": "Reusable lessons",
             "receiptUrl": "docs/evidence/repo-trajectory.json",
             "state": "proven"
@@ -864,7 +864,7 @@
         "technical_signal": "commit history"
       },
       {
-        "evidence_ref": "218 friction-matched commits",
+        "evidence_ref": "221 friction-matched commits",
         "owner_meaning": "The process exposes what is not ready before it can affect the business.",
         "technical_signal": "friction and blocker evidence"
       },
@@ -874,7 +874,7 @@
         "technical_signal": "receipts, tests, and proof-loop commits"
       },
       {
-        "evidence_ref": "655 reuse-matched commits",
+        "evidence_ref": "662 reuse-matched commits",
         "owner_meaning": "Lessons from one repo become reusable operating material for the next repo.",
         "technical_signal": "runbooks, scripts, packages, and shared design grammar"
       }
@@ -1200,7 +1200,7 @@
     "source_message_schema": "zeststream.repo_story_message.v0",
     "source_story_schema": "zeststream.repo_git_story.v0",
     "trajectory_summary": {
-      "current": "The latest inspected movement is feat(ui): gate reusable story primitives [work item] on 2026-05-14.",
+      "current": "The latest inspected movement is feat(story): prove repo story portability [work item] on 2026-05-14.",
       "owner_meaning": "The repo has a visible path from setup, through friction, into proof, reuse, and public story.",
       "start": "Work began on 2026-04-30 with feat(scripts): add source_repo backfill script for all local beads DBs."
     },

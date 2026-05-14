@@ -17,6 +17,8 @@ It is intentionally small:
 - `scripts/validate_story_system_package.py` checks this package against the
   generated repo message pack, generated story dossier, and the static Flywheel
   site.
+- `scripts/render_repo_owner_brief.py` turns the generated trajectory JSON into
+  the owner-facing brief a Next.js page should satisfy before visual work starts.
 
 This is not a marketing copy dump. Public pages still need repo-local generated
 trajectory evidence from `scripts/extract_git_story.py`, then a designed

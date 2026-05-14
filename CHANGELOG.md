@@ -37,6 +37,10 @@ public release line.
 - Repo story portability probe and saved receipt proving the same
   git-history-to-front-end story contract across Flywheel, ClutterFreeSpaces,
   and Mobile Eats without editing sibling repos.
+- Repo owner brief renderer and saved `zeststream.repo_owner_story_brief.v0`
+  artifact that turn generated repo trajectory evidence into SMB-owner page
+  language, trust answers, page rooms, proof refs, and CTA copy before frontend
+  implementation starts.
 - Candidate `@zeststream/story-system` package with shared story grammar, proof
   states, visual primitives, excluded hype phrases, CSS tokens, and drift validator
   for Flywheel-powered frontend repos.
@@ -70,6 +74,6 @@ public release line.
 
 - Public evidence index added at `docs/evidence/publication-evidence.md` to map
   v0.2 trust claims to local verifiers and live evidence still required.
-- Latest extraction evidence: 14,755 files classified, 10,270 public-safe
-  artifacts copied, 4,043 private/manual-review paths excluded, and 7,464
+- Latest extraction evidence: 14,759 files classified, 10,274 public-safe
+  artifacts copied, 4,043 private/manual-review paths excluded, and 7,466
   review rows signed in the v0.2 publication lane.

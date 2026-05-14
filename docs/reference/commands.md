@@ -26,6 +26,7 @@ The public CLI starts with reduced-mode commands.
 | `python3 scripts/extract_git_story.py --repo-label Flywheel --write-json docs/evidence/flywheel-trajectory.json --write-md docs/stories/flywheel-trajectory.md` | Regenerate the public trajectory story, `zeststream.repo_story_message.v0` owner message pack, and `zeststream.repo_frontend_story.v0` UI payload from git history instead of writing the journey from one session's memory. |
 | `python3 scripts/extract_git_story.py --repo /path/to/repo --repo-label "Product Name" --redaction-table /path/to/table.yaml --json` | Probe another repo with an explicit redaction table; when omitted, the extractor uses the target repo table or falls back to `flywheel:de-personalization-table.yaml`. |
 | `python3 scripts/probe_repo_story_portability.py --write-json docs/evidence/repo-story-portability.json` | Save a portability receipt proving the shared git-story/front-end payload contract across Flywheel and the available sibling proof-product repos without editing them. |
+| `python3 scripts/render_repo_owner_brief.py --story-json docs/evidence/flywheel-trajectory.json --write-json docs/evidence/flywheel-owner-brief.json --write-md docs/stories/flywheel-owner-brief.md` | Render the SMB-owner page brief from generated repo trajectory evidence before building a public frontend surface. |
 
 Full-mode harness dispatch through NTM and Agent Mail is intentionally not
 claimed by the reduced public CLI.
