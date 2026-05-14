@@ -90,7 +90,7 @@ When the public repos are live, the normal path is:
 
 ```bash
 git clone https://github.com/JYeswak/flywheel.git
-git clone https://github.com/JYeswak/SkillOS.git
+git clone https://github.com/JYeswak/zeststream-skillos.git
 cd flywheel
 bash install.sh --dry-run --json
 bash install.sh --json
