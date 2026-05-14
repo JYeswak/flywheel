@@ -1,13 +1,13 @@
 {
   "schema_version": "flywheel.private_live_site_deploy_receipt.v0",
-  "receipt_id": "flywheel-private-live-site-trajectory-story-deploy-20260514T0146Z",
+  "receipt_id": "flywheel-private-live-site-owner-story-quality-deploy-20260514T0216Z",
   "status": "pass",
-  "deployed_at": "2026-05-14T01:46:00Z",
+  "deployed_at": "2026-05-14T02:16:36Z",
   "host": "flywheel.zeststream.ai",
   "provider": "vercel",
-  "deployment_url": "https://flywheel-ovlfc7x1v-joshuas-projects-96d49291.vercel.app",
+  "deployment_url": "https://flywheel-aza676a9p-joshuas-projects-96d49291.vercel.app",
   "production_alias": "https://flywheel.zeststream.ai",
-  "source_commit": "fdb7f3ad",
+  "source_commit": "72d00ffb",
   "deployed_bundle_scope": [
     "site/",
     "install.sh",
@@ -56,10 +56,16 @@
     "site_deploy_manifest": {
       "schema_version": "flywheel.site_deploy_manifest.v0",
       "mode": "private-review",
-      "tag": "private-review-fdb7f3ad",
-      "commit": "fdb7f3ad",
+      "tag": "private-review-72d00ffb",
+      "commit": "72d00ffb",
       "install_sha256": "a4e04cd1e08f13110d74dca34c38018a5b93c9a173cca2db63a91458efe6f364",
       "public_ready_claim": false
+    },
+    "public_surface_quality": {
+      "owner_story_gate": "pass",
+      "quality_finding_count": 0,
+      "session_memory_copy_absent": true,
+      "authority_value_chain_present": true
     },
     "screenshot_checks": {
       "reference_review_dir": "/tmp/flywheel-jeff-deep",
