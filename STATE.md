@@ -1,14 +1,17 @@
 # Flywheel Repo State
 
 status: ready
-repo: /Users/josh/Developer/flywheel
+repo: repo-local
 
-Current status: minimal repo-level state initialized for autoloop discovery.
+Current status: public publication lane is locally verified but not complete.
 
 Active focus:
-- Phase A autoloop and loop architecture.
-- Keep repo docs separate from ecosystem docs in `~/.claude/skills/.flywheel/`.
-- Do not use global bead state for repo-local decisions.
 
-Next safe action: run `flywheel-loop doctor --repo ~/Developer/flywheel --json`
-and inspect remaining warnings before scheduling autonomous ticks.
+- Keep public mission, goal, and state files free of private operator paths.
+- Preserve strict blocker truth for public GitHub, release assets, hosted
+  workflow runs, and final signoff.
+- Keep repo-local decisions grounded in checked-in docs, scripts, tests,
+  receipts, and public export evidence.
+
+Next safe action: run `python3 scripts/publication_readiness.py --json` and
+continue closing only the blockers it reports.

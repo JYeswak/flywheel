@@ -18,6 +18,9 @@ required=(
   SECURITY.md
   SUPPORT.md
   ARCHITECTURE.md
+  MISSION.md
+  GOAL.md
+  STATE.md
 )
 
 for file in "${required[@]}"; do
@@ -91,13 +94,34 @@ else
   fail "CHANGELOG has 0.2.0 section"
 fi
 
-for file in README.md LICENSE CHARTER.md CHANGELOG.md CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md SUPPORT.md ARCHITECTURE.md; do
+for file in README.md LICENSE CHARTER.md CHANGELOG.md CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md SUPPORT.md ARCHITECTURE.md MISSION.md GOAL.md STATE.md; do
   if python3 "$ROOT/scripts/depersonalize.py" --scan-table --root "$ROOT/$file" --json >/dev/null; then
     pass "$file depersonalization scan"
   else
     fail "$file depersonalization scan"
   fi
 done
+
+if ROOT="$ROOT" python3 <<'PY'
+import re
+import sys
+from pathlib import Path
+
+root = Path(__import__("os").environ["ROOT"])
+blocked = re.compile(
+    r"Joshua|ZestStream|/Users/josh|~/Developer|~/.claude/skills/.flywheel|"
+    r"\{operator\}|<flywheel-state>|<flywheel-repo>"
+)
+for rel in ("MISSION.md", "GOAL.md", "STATE.md"):
+    text = (root / rel).read_text(encoding="utf-8")
+    if blocked.search(text):
+        sys.exit(1)
+PY
+then
+  pass "repo mission goal state are public-safe source text"
+else
+  fail "repo mission goal state are public-safe source text"
+fi
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]
