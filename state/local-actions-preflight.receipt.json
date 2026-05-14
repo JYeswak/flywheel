@@ -1,22 +1,29 @@
 {
   "schema_version": "skillos.local_actions_preflight_receipt.v1",
-  "receipt_id": "flywheel-local-actions-preflight-20260513T202119Z",
+  "receipt_id": "flywheel-local-actions-preflight-20260514T003122Z",
   "repo": "/Users/josh/Developer/flywheel",
   "status": "pass",
   "source_pack_id": "local-actions-preflight-pack",
-  "verified_at": "2026-05-13T20:21:19Z",
+  "verified_at": "2026-05-14T00:31:22Z",
   "github_final_approval_required": true,
   "local_pass_is_pre_github_spend_gate_only": true,
   "act_artifact_server_addr": "127.0.0.1",
   "act_cache_server_addr": "127.0.0.1",
   "docker_context": "orbstack",
   "evidence_refs": [
-    "scripts/local-actions-preflight.sh --skip-tests",
-    "SUMMARY local_actions_preflight=pass act=run docker_context=orbstack",
+    "scripts/local-actions-preflight.sh --dry-run",
+    "bash tests/github-workflows.sh pass=96 fail=0",
+    "actionlint .github/workflows/*.yml",
+    "act pull_request --job public-surface --dryrun",
+    "act pull_request --job install-doctor-uninstall --matrix os:ubuntu-22.04 --dryrun",
+    "act workflow_dispatch --job package --input tag=v0.2.0 --dryrun",
+    "act workflow_dispatch --job deploy --input tag=v0.2.0 --dryrun",
+    "SUMMARY local_actions_preflight=pass act=dryrun docker_context=orbstack",
     "docs/runbooks/local-actions-preflight.md",
     "tests/github-workflows.sh",
     "tests/public-docs.sh",
     "tests/website-static.sh",
-    "tests/public-user-journey-pack.sh"
+    "tests/public-user-journey-pack.sh",
+    "tests/publication-goal-completion-audit.sh"
   ]
 }
