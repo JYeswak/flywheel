@@ -342,8 +342,32 @@ def chapter_payload(chapter: dict[str, Any], commits: list[Commit]) -> dict[str,
     }
 
 
-def build_story(repo: Path, repo_label: str) -> dict[str, Any]:
-    rows = load_replacement_table(repo / DEFAULT_TABLE)
+def resolve_redaction_table(repo: Path, explicit_table: str | None = None) -> Path:
+    if explicit_table:
+        candidate = Path(explicit_table)
+        if not candidate.is_absolute():
+            candidate = Path.cwd() / candidate
+        return candidate.resolve()
+    repo_table = repo / DEFAULT_TABLE
+    if repo_table.exists():
+        return repo_table
+    return repo_root() / DEFAULT_TABLE
+
+
+def redaction_table_ref(repo: Path, table_path: Path) -> str:
+    flywheel_root = repo_root()
+    for prefix, root in (("repo", repo), ("flywheel", flywheel_root)):
+        try:
+            rel = table_path.resolve().relative_to(root.resolve())
+        except ValueError:
+            continue
+        return f"{prefix}:{rel.as_posix()}"
+    return f"external:{table_path.name}"
+
+
+def build_story(repo: Path, repo_label: str, redaction_table: Path | None = None) -> dict[str, Any]:
+    table_path = redaction_table or resolve_redaction_table(repo)
+    rows = load_replacement_table(table_path)
     raw = run_git(
         repo,
         [
@@ -364,6 +388,7 @@ def build_story(repo: Path, repo_label: str) -> dict[str, Any]:
         "generated_date": dt.datetime.now(dt.UTC).date().isoformat(),
         "repo_label": repo_label,
         "source": "git log --reverse --date=short --pretty=format:... --name-only HEAD",
+        "redaction_table": redaction_table_ref(repo, table_path),
         "commit_span": {
             "first_date": commits[0].date,
             "latest_date": commits[-1].date,
@@ -579,13 +604,17 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", default=str(repo_root()))
     parser.add_argument("--repo-label")
+    parser.add_argument(
+        "--redaction-table",
+        help="Optional de-personalization table. Defaults to the target repo table when present, otherwise Flywheel's public table.",
+    )
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--write-json")
     parser.add_argument("--write-md")
     args = parser.parse_args()
 
     repo = Path(args.repo).resolve()
-    story = build_story(repo, args.repo_label or repo.name)
+    story = build_story(repo, args.repo_label or repo.name, resolve_redaction_table(repo, args.redaction_table))
     if args.write_json:
         path = Path(args.write_json)
         if not path.is_absolute():

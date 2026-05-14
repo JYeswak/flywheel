@@ -84,5 +84,42 @@ else
   fail "git story depersonalization scan"
 fi
 
+PORTABLE_REPO="$TMP_DIR/portable-repo"
+mkdir -p "$PORTABLE_REPO"
+git -C "$PORTABLE_REPO" init -q
+git -C "$PORTABLE_REPO" config user.email "portable@example.com"
+git -C "$PORTABLE_REPO" config user.name "Portable Test"
+cat >"$PORTABLE_REPO/README.md" <<'EOF'
+# Portable Repo
+
+This repo exists to prove story extraction works without a repo-local
+de-personalization table.
+EOF
+git -C "$PORTABLE_REPO" add README.md
+git -C "$PORTABLE_REPO" commit -q -m "feat(site): add public story foundation"
+
+if python3 "$ROOT/scripts/extract_git_story.py" \
+  --repo "$PORTABLE_REPO" \
+  --repo-label "Portable Product" \
+  --json >"$TMP_DIR/portable-story.json" \
+  && python3 - "$TMP_DIR/portable-story.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+if data.get("schema_version") != "zeststream.repo_git_story.v0":
+    raise SystemExit(1)
+if data.get("message_pack", {}).get("schema_version") != "zeststream.repo_story_message.v0":
+    raise SystemExit(1)
+if data.get("redaction_table") != "flywheel:de-personalization-table.yaml":
+    raise SystemExit(1)
+PY
+then
+  pass "git story portable repo fallback table"
+else
+  fail "git story portable repo fallback table"
+fi
+
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]

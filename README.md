@@ -29,7 +29,7 @@ surface is `/flywheel:README`.
 
 The trust claim is measurable: in the latest public-extraction run, Flywheel
 classified 14,708 source files, copied 10,226 public-safe files, excluded
-4,040 denylisted private/manual-review paths, and reduced a 7,452-row manual
+4,040 denylisted private/manual-review paths, and reduced a 7,453-row manual
 review queue to signed evidence in the same release lane. The point is not raw
 volume. The point is that the system can turn a private working substrate into
 an inspectable public engine with receipts instead of memory. The public

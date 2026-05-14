@@ -42,6 +42,13 @@ python3 /path/to/flywheel/scripts/extract_git_story.py \
   --write-md docs/stories/repo-trajectory.md
 ```
 
+If the target repo has its own `de-personalization-table.yaml`, the extractor
+uses it. If it does not, the extractor falls back to Flywheel's public redaction
+table so the pack can still run against early ClutterFreeSpaces, Mobile Eats,
+and other frontend repos before they have adopted the full publication scaffold.
+Use `--redaction-table /path/to/table.yaml` when a repo needs a stricter
+project-specific table.
+
 ## Story Chapters
 
 The extractor groups commits into five public chapters:
@@ -176,12 +183,14 @@ A repo trajectory story is acceptable when:
    `zeststream.repo_story_message.v0`.
 3. The message pack contains owner promise, story arc, trust objections, visual
    primitives, proof translations, and blocked phrases.
-4. Generated JSON and Markdown contain no private paths, client names, or
+4. The extractor records which `redaction_table` was used and works when the
+   target repo has not adopted a repo-local table yet.
+5. Generated JSON and Markdown contain no private paths, client names, or
    unsupported claims.
-5. The public page includes the trajectory as a buyer journey, not a developer
+6. The public page includes the trajectory as a buyer journey, not a developer
    changelog.
-6. The page links to the generated story artifact for reviewers.
-7. Any claim based on runtime support, release status, or public availability
+7. The page links to the generated story artifact for reviewers.
+8. Any claim based on runtime support, release status, or public availability
    still points to its own proof receipt.
 
 Flywheel's current generated artifacts:

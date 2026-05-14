@@ -1,7 +1,7 @@
 {
   "chapters": [
     {
-      "commit_count": 386,
+      "commit_count": 388,
       "evidence_commits": [
         {
           "date": "2026-05-06",
@@ -97,7 +97,7 @@
       "title": "Foundation: make the work visible"
     },
     {
-      "commit_count": 799,
+      "commit_count": 800,
       "evidence_commits": [
         {
           "date": "2026-05-06",
@@ -190,7 +190,7 @@
       "title": "Proof loop: turn activity into evidence"
     },
     {
-      "commit_count": 209,
+      "commit_count": 212,
       "evidence_commits": [
         {
           "date": "2026-05-13",
@@ -287,7 +287,7 @@
       "title": "Friction: expose the parts that were not ready"
     },
     {
-      "commit_count": 644,
+      "commit_count": 646,
       "evidence_commits": [
         {
           "date": "2026-05-13",
@@ -386,7 +386,7 @@
       "title": "Reuse: keep lessons that survived contact with reality"
     },
     {
-      "commit_count": 127,
+      "commit_count": 130,
       "evidence_commits": [
         {
           "date": "2026-05-13",
@@ -456,6 +456,17 @@
         {
           "date": "2026-05-13",
           "paths": [
+            ".flywheel/scripts/public-surface-gap-scanner.py",
+            "site/index.html",
+            "tests/public-surface-gap-scanner.sh",
+            "tests/website-static.sh"
+          ],
+          "sha": "72d00ffb",
+          "subject": "fix(public): gate owner-facing story quality [work item]"
+        },
+        {
+          "date": "2026-05-13",
+          "paths": [
             ".beads/issues.jsonl",
             ".flywheel/PLANS/public-share-readiness-2026-05-12/19-TRUE-PUBLICATION-RELEASE-BLOCKER-REGISTRY.md",
             ".gitignore",
@@ -463,14 +474,6 @@
           ],
           "sha": "90365f80",
           "subject": "chore(site): record private live SMB deploy"
-        },
-        {
-          "date": "2026-05-13",
-          "paths": [
-            "state/private-live-site-deploy.receipt.json"
-          ],
-          "sha": "53949c34",
-          "subject": "chore(site): refresh private SMB redesign deploy receipt [work item]"
         }
       ],
       "first_date": "2026-05-04",
@@ -488,11 +491,11 @@
     },
     "first_date": "2026-04-30",
     "latest_commit": {
-      "sha": "e9696376",
-      "subject": "docs(evidence): align trajectory artifacts with evidence contracts [work item]"
+      "sha": "6334f394",
+      "subject": "docs(site): refresh private live deploy receipt [work item]"
     },
     "latest_date": "2026-05-13",
-    "total_commits": 1478
+    "total_commits": 1481
   },
   "generated_date": "2026-05-14",
   "message_pack": {
@@ -526,17 +529,17 @@
         "technical_signal": "commit history"
       },
       {
-        "evidence_ref": "209 friction-matched commits",
+        "evidence_ref": "212 friction-matched commits",
         "owner_meaning": "The process exposes what is not ready before it can affect the business.",
         "technical_signal": "friction and blocker evidence"
       },
       {
-        "evidence_ref": "799 proof-loop-matched commits",
+        "evidence_ref": "800 proof-loop-matched commits",
         "owner_meaning": "Claims move forward only when the system can show what changed.",
         "technical_signal": "receipts, tests, and proof-loop commits"
       },
       {
-        "evidence_ref": "644 reuse-matched commits",
+        "evidence_ref": "646 reuse-matched commits",
         "owner_meaning": "Lessons from one repo become reusable operating material for the next repo.",
         "technical_signal": "runbooks, scripts, packages, and shared design grammar"
       }
@@ -685,6 +688,7 @@
     "turn lessons into reusable method, copy, design, tests, or runbooks"
   ],
   "public_claim": "The public story is extracted from repository history, then translated into owner-readable trajectory without treating commit volume as the sales pitch.",
+  "redaction_table": "repo:de-personalization-table.yaml",
   "repo_label": "Flywheel",
   "schema_version": "zeststream.repo_git_story.v0",
   "source": "git log --reverse --date=short --pretty=format:... --name-only HEAD"

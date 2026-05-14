@@ -17,9 +17,9 @@ friction, what changed, and which lessons became reusable.
 
 - First commit date: `2026-04-30`
 - Latest commit date: `2026-05-13`
-- Commits inspected: `1478`
+- Commits inspected: `1481`
 - First commit: `aa079a83` feat(scripts): add source_repo backfill script for all local beads DBs
-- Latest commit: `e9696376` docs(evidence): align trajectory artifacts with evidence contracts [work item]
+- Latest commit: `6334f394` docs(site): refresh private live deploy receipt [work item]
 
 ## Public Story Arc
 
@@ -29,7 +29,7 @@ The first useful proof is not a polished page. It is a workbench where the goal,
 
 Owner translation: For an SMB owner, this means the project starts by mapping how work really moves before anyone promises automation.
 
-Commit evidence: `386` matching commits from `2026-04-30` to `2026-05-13`.
+Commit evidence: `388` matching commits from `2026-04-30` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -45,7 +45,7 @@ The system moved from work being described after the fact to work being closed w
 
 Owner translation: That is the difference between an AI demo and an operating process: the claim does not move forward until the proof can follow it.
 
-Commit evidence: `799` matching commits from `2026-04-30` to `2026-05-13`.
+Commit evidence: `800` matching commits from `2026-04-30` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -61,7 +61,7 @@ The useful pivots came from red evidence: private residue, unsupported lanes, st
 
 Owner translation: This is where trust is earned. The process treats blocked evidence as useful signal, not as something to hide in a footnote.
 
-Commit evidence: `209` matching commits from `2026-05-04` to `2026-05-13`.
+Commit evidence: `212` matching commits from `2026-05-04` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -77,7 +77,7 @@ Once a pattern worked, it moved into runbooks, scripts, tests, docs, shared lang
 
 Owner translation: Every project should make the next project safer and faster. That is the compounding part of the Flywheel.
 
-Commit evidence: `644` matching commits from `2026-04-30` to `2026-05-13`.
+Commit evidence: `646` matching commits from `2026-04-30` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -93,7 +93,7 @@ The current arc is making the proof understandable to a non-technical owner: wha
 
 Owner translation: Show the proof, not the dream: one bounded workflow slice, one visible control path, one lesson that compounds into the next build.
 
-Commit evidence: `127` matching commits from `2026-05-04` to `2026-05-13`.
+Commit evidence: `130` matching commits from `2026-05-04` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
