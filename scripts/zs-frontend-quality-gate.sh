@@ -142,8 +142,12 @@ else
 fi
 
 # ── FQ-03 Token purity (no raw hex in component files) ────────────────────
+# The trailing [^0-9a-fA-F-] / end-of-token boundary excludes anchor hrefs
+# like "#add-menu-item" — "#add" matches {3} because a/d/d are hex digits.
+# A real hex color is #xxx or #xxxxxx terminated by a non-hex, non-hyphen
+# char. Fixed 2026-05-14 after FQ-03 false-failed a downstream app anchor.
 if [[ -n "$NEXT_APP" ]]; then
-  raw_hex=$(num "$(count_matches "$NEXT_APP" "#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3}" -name "*.tsx")")
+  raw_hex=$(num "$(count_matches "$NEXT_APP" "#[0-9a-fA-F]{6}([^0-9a-fA-F-]|\$)|#[0-9a-fA-F]{3}([^0-9a-fA-F-]|\$)" -name "*.tsx")")
   if [[ "$raw_hex" -eq 0 ]]; then
     check "FQ-03" "Token purity (no raw hex in components)" "pass" "0 raw hex values found"
   elif [[ "$raw_hex" -le 5 ]]; then

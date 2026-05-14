@@ -116,6 +116,7 @@ export function StoryPanel() {
           state: "proven",
         }]}
       />
+      <a href="#add-menu-item" aria-label="Jump to add menu item">Add menu item</a>
     </section>
   )
 }
