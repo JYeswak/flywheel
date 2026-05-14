@@ -136,6 +136,19 @@ Review when the repo mission, owner, or operating constraints change.
 
 Reconciled from existing .flywheel/MISSION.md at 20260501T052023Z.
 
+## Mission anchor extension locked 2026-05-14
+
+> "Repo hygiene is mission-critical infrastructure of the AaaS product — the flywheel is accountable to the same standards it enforces on client repos. Every session closes with a `git_hygiene` block in the closeout receipt; unclassified accretion is the alarm, not classified motion."
+
+**Corollary — gated-loop halt:** When a loop's goal is blocked exclusively by external gates (`owner: joshua` or `owner: external-system`), the loop MUST detect the gate and halt rather than burning tokens on adjacent work. A loop that spins on gated information is a defect, not diligence.
+
+**Cross-references:**
+- Doctrine: `.flywheel/doctrine/substrate-class-classifier.md` (substrate class taxonomy)
+- Enforcement: `.flywheel/scripts/validate-callback-before-close.sh` (git hygiene gate)
+- Enforcement: `.flywheel/scripts/dispatch-capacity-gate.sh` (dirty-tree dispatch block)
+- Enforcement: `.flywheel/scripts/loop-goal-gate.sh` (gated-loop halt check)
+- L-rule pending: flywheel-bszgl.2 (untracked_delta + substrate_classified mandatory)
+
 ## Joshua Requests
 
 <!-- Auto-managed by josh-request-capture.sh hook (flywheel-l6j2). Entries added below. -->
@@ -17648,6 +17661,29 @@ auth, credential, PII, and customer-trust surfaces.
 - **priority:** P1
 - **scope:** single-repo
 - **last_updated_at:** 2026-05-14T03:12:25Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T032439Z-079
+- **id:** jr-2026-05-14T032439Z-079
+- **captured_at:** 2026-05-14T03:24:39Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:bffb809be33c1d774b4195d228a6aad3584139d800322e574392b4ee6deff6d6
+- **request_text_hash:** sha256:bffb809be33c1d774b4195d228a6aad3584139d800322e574392b4ee6deff6d6
+- **sanitized_excerpt:** "can you work through all of the beads right now that keeps our git history in alightment. then I want you to help look at the new codex and claude /goal features releasted this week and talk to me how we wire them properly into our goal /flywheel:loop /flywheel:tick processes in the most accretive way possible"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T03:24:39Z
 - **closure_actor:** null
 - **linked_bead_ids:** []
 - **duplicate_of:** null

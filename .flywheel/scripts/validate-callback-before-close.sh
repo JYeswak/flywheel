@@ -484,6 +484,9 @@ ENVELOPE_DID_VALUE=""
 ENVELOPE_DIDNT_VALUE=""
 ENVELOPE_GAPS_VALUE=""
 ENVELOPE_TMP_DIR_RELEASED_VALUE=""
+ENVELOPE_UNTRACKED_DELTA=""
+ENVELOPE_SUBSTRATE_CLASSIFIED=""
+UNTRACKED_DELTA_WARNING=""
 ENVELOPE_STRUCTURAL_SOURCE="none"
 BLOCK_CLOSE_REASON=""
 
@@ -569,6 +572,8 @@ check_callback_envelope_structure() {
   ENVELOPE_DIDNT_VALUE="$(first_kv_token didnt "$structural_text" || true)"
   ENVELOPE_GAPS_VALUE="$(first_kv_token gaps "$structural_text" || true)"
   ENVELOPE_TMP_DIR_RELEASED_VALUE="$(first_kv_token tmp_dir_released "$structural_text" || true)"
+  ENVELOPE_UNTRACKED_DELTA="$(first_kv_token untracked_delta "$structural_text" || true)"
+  ENVELOPE_SUBSTRATE_CLASSIFIED="$(first_kv_token substrate_classified "$structural_text" || true)"
 
   if [ -n "$ENVELOPE_DID_VALUE" ]; then
     if printf '%s\n' "$ENVELOPE_DID_VALUE" | grep -qE '^[0-9]+/[0-9]+$'; then
@@ -597,6 +602,34 @@ check_callback_envelope_structure() {
 
   if [ "$ENVELOPE_TMP_DIR_RELEASED_VALUE" != "true" ]; then
     structural_fail "tmp_dir_not_released: tmp_dir_released=${ENVELOPE_TMP_DIR_RELEASED_VALUE:-missing}"
+  fi
+
+  # bszgl.2: substrate_classified gate — REFUSE close when absent or "no"
+  case "${ENVELOPE_SUBSTRATE_CLASSIFIED:-}" in
+    yes|partial)
+      ;;
+    no)
+      structural_fail "substrate_classified=no: worker did not account for untracked files — close refused until classified"
+      ;;
+    "")
+      structural_fail "substrate_classified missing from callback envelope — required field per bszgl.2 (untracked_delta + substrate_classified mandatory)"
+      ;;
+    *)
+      structural_fail "substrate_classified=${ENVELOPE_SUBSTRATE_CLASSIFIED}: invalid value, must be yes|partial|no"
+      ;;
+  esac
+
+  # bszgl.2: untracked_delta warning/block — require field, warn if >10, strict blocks
+  if [ -z "${ENVELOPE_UNTRACKED_DELTA:-}" ]; then
+    structural_fail "untracked_delta missing from callback envelope — required field per bszgl.2"
+  elif ! printf '%s\n' "$ENVELOPE_UNTRACKED_DELTA" | grep -qE '^[0-9]+$'; then
+    structural_fail "untracked_delta=${ENVELOPE_UNTRACKED_DELTA}: must be a non-negative integer"
+  elif [ "$ENVELOPE_UNTRACKED_DELTA" -gt 10 ]; then
+    if [ "$STRICT" -eq 1 ]; then
+      structural_fail "untracked_delta=${ENVELOPE_UNTRACKED_DELTA} > 10 in strict mode: justify in notes or clean up before close"
+    fi
+    # non-strict: surface as warning in output but don't block
+    UNTRACKED_DELTA_WARNING="untracked_delta=${ENVELOPE_UNTRACKED_DELTA} exceeds 10 — worker should classify or justify"
   fi
 }
 
@@ -941,7 +974,8 @@ else
   echo "mode: $MODE"
   echo "failures: $FAIL"
   echo "warnings: $WARN"
-  echo "structural: validator_structural_pass=$VALIDATOR_STRUCTURAL_PASS envelope_did_total_mismatch=${ENVELOPE_DID_TOTAL_MISMATCH:-none} tmp_dir_released=${ENVELOPE_TMP_DIR_RELEASED_VALUE:-missing}"
+  echo "structural: validator_structural_pass=$VALIDATOR_STRUCTURAL_PASS envelope_did_total_mismatch=${ENVELOPE_DID_TOTAL_MISMATCH:-none} tmp_dir_released=${ENVELOPE_TMP_DIR_RELEASED_VALUE:-missing} untracked_delta=${ENVELOPE_UNTRACKED_DELTA:-missing} substrate_classified=${ENVELOPE_SUBSTRATE_CLASSIFIED:-missing}"
+  [ -n "${UNTRACKED_DELTA_WARNING:-}" ] && echo "hygiene_warn: $UNTRACKED_DELTA_WARNING"
   echo "four_lens: brand=$BRAND_STATUS sniff=$SNIFF_STATUS jeff=$JEFF_STATUS public=$PUBLIC_STATUS"
   echo "ntm_changes: $(printf '%s\n' "$NTM_CHANGES_JSON" | jq -c '{status:(.status // "ok"), changed_count:(.changed_count // .count // (.changes // [] | length) // 0)}' 2>/dev/null || printf 'null')"
   echo "ntm_conflicts: $(printf '%s\n' "$NTM_CONFLICTS_JSON" | jq -c '{status:(.status // "ok"), conflict_count:(.conflict_count // .count // (.conflicts // [] | length) // 0)}' 2>/dev/null || printf 'null')"

@@ -1,5 +1,13 @@
 {
   "loop_receipt_version": 2,
+  "git_hygiene": {
+    "uncommitted": null,
+    "commits_ahead": null,
+    "stash_count": null,
+    "unclassified_count": null,
+    "pushed": null,
+    "_note": "populate on every session close; null = not yet measured"
+  },
   "ts": "2026-05-08T15:33:02Z",
   "repo": "/Users/josh/Developer/flywheel",
   "actual_surface": "repo_local",

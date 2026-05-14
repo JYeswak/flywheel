@@ -4,6 +4,56 @@ set -euo pipefail
 NTM="${NTM:-/Users/josh/.local/bin/ntm}"
 [[ $# -ge 2 ]] || { printf 'usage: dispatch-capacity-gate.sh <session> <pane>\n' >&2; exit 1; }
 SESSION="$1"; PANE="$2"
+REPO="${DISPATCH_GATE_REPO:-$PWD}"
+LOOP_GOAL_GATE="${LOOP_GOAL_GATE:-$(dirname "$0")/loop-goal-gate.sh}"
+
+# ── bszgl.3: gated-loop halt check ───────────────────────────────────────────
+# If all remaining goal blockers are owner:external, refuse dispatch.
+# Loops must not burn tokens when gated on Joshua/external action.
+if [[ -x "$LOOP_GOAL_GATE" ]]; then
+  GATE_STATUS=0
+  GATE_OUT="$("$LOOP_GOAL_GATE" --repo "$REPO" --json 2>/dev/null)" || GATE_STATUS=$?
+  if [[ "$GATE_STATUS" -eq 2 ]]; then
+    jq -nc --arg session "$SESSION" --arg pane "$PANE" --argjson gate "$GATE_OUT" \
+      '{verdict:"gated",reason:"loop_gated_all_blockers_external",session:$session,
+        pane:($pane|tonumber? // $pane),gate:$gate,
+        action:"halt_loop_await_external_gate_clearance"}'
+    exit 3
+  fi
+fi
+
+# ── bszgl.3: git hygiene gate ─────────────────────────────────────────────────
+# Refuse dispatch when the repo has excessive uncommitted or unclassified files.
+if git -C "$REPO" rev-parse --git-dir &>/dev/null; then
+  GIT_UNCOMMITTED="$(git -C "$REPO" status --short 2>/dev/null | grep -c "^.M\|^ M\|^M\|^A\|^D\|^R\|^C\|^U" || true)"
+  GIT_UNTRACKED="$(git -C "$REPO" status --short 2>/dev/null | grep -c "^??" || true)"
+  GIT_AHEAD="$(git -C "$REPO" rev-list --count @{u}..HEAD 2>/dev/null || echo 0)"
+
+  if [[ "$GIT_UNCOMMITTED" -gt 100 ]]; then
+    jq -nc --arg session "$SESSION" --arg pane "$PANE" \
+      --argjson dirty "$GIT_UNCOMMITTED" --argjson ahead "$GIT_AHEAD" \
+      '{verdict:"blocked",reason:"git_production_dirty_exceeds_threshold",session:$session,
+        pane:($pane|tonumber? // $pane),
+        git_uncommitted:$dirty,git_ahead:$ahead,
+        action:"clear_deck_first_commit_or_gitignore_before_dispatch"}'
+    exit 1
+  fi
+
+  if [[ "$GIT_UNTRACKED" -gt 20 ]]; then
+    jq -nc --arg session "$SESSION" --arg pane "$PANE" \
+      --argjson untracked "$GIT_UNTRACKED" \
+      '{verdict:"blocked",reason:"git_unclassified_files_exceeds_threshold",session:$session,
+        pane:($pane|tonumber? // $pane),
+        git_untracked:$untracked,
+        action:"classify_substrate_first_commit_or_gitignore_untracked_files"}'
+    exit 1
+  fi
+
+  if [[ "$GIT_AHEAD" -gt 300 ]]; then
+    # warn only, don't block
+    GIT_AHEAD_WARNING="commits_ahead=${GIT_AHEAD} consider push decision"
+  fi
+fi
 
 json_source() {
   local env_name="$1" file_env_name="$2"; shift 2

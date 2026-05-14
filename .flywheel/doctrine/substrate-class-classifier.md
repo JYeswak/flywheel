@@ -96,6 +96,12 @@ Once the L2 paradigm primitive ships, the L3–L12 cascades fall out for free:
 - L160 agentic-loop-halt-via-posttooluse-hook (the firing mechanism this paradigm shapes)
 - L161 operator-directed-mission-continuation-after-leak (the recovery path post-fire)
 
+## Repo hygiene cross-reference (bszgl.1 — 2026-05-14)
+
+Git state IS substrate state. Every session close must include a `git_hygiene` block (see `last_closeout_receipt.json` template). Unclassified file accretion is the same alarm class as unclassified substrate mutation — surface it, don't ignore it. See `.flywheel/MISSION.md` anchor extension 2026-05-14.
+
+Gated-loop halt applies the same class framework: if a loop's blocker set is 100% `owner: external`, the loop is in the same state as an unclassifiable substrate — halt rather than mutate.
+
 ## Promotion criteria
 
 This is **not secrets-class** (no irreversibility on incorrect classification — wrong calls are recoverable via re-classification). Standard 3-strike cadence applies:

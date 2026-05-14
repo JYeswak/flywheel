@@ -523,8 +523,44 @@ if [[ -f "$REPORT_PATH" ]]; then
   } >>"$REPORT_PATH"
 fi
 
+# ── bszgl.3: git hygiene block ───────────────────────────────────────────────
+GIT_UNCOMMITTED=0; GIT_UNTRACKED=0; GIT_AHEAD="?"; GIT_STASHES=0; GIT_ALARM=""
+if git -C "$REPO" rev-parse --git-dir &>/dev/null; then
+  GIT_UNCOMMITTED="$(git -C "$REPO" status --short 2>/dev/null | grep -cE '^.M|^ M|^[MADRC]' || true)"
+  GIT_UNTRACKED="$(git -C "$REPO" status --short 2>/dev/null | grep -c '^??' || true)"
+  GIT_AHEAD="$(git -C "$REPO" rev-list --count @{u}..HEAD 2>/dev/null || echo '?')"
+  GIT_STASHES="$(git -C "$REPO" stash list 2>/dev/null | wc -l | tr -d ' ')"
+  [[ "$GIT_UNTRACKED" -gt 0 ]] && GIT_ALARM=" ← ALARM: classify or gitignore"
+fi
+
+GOAL_GATE_STATUS="unknown"
+LOOP_GOAL_GATE="${LOOP_GOAL_GATE:-$(dirname "$0")/loop-goal-gate.sh}"
+if [[ -x "$LOOP_GOAL_GATE" ]]; then
+  GATE_EXIT=0; GATE_OUT="$("$LOOP_GOAL_GATE" --repo "$REPO" --json 2>/dev/null)" || GATE_EXIT=$?
+  GATE_STATUS="$(printf '%s\n' "$GATE_OUT" | jq -r '.status // "unknown"' 2>/dev/null || echo unknown)"
+  case "$GATE_STATUS" in
+    gated)  GOAL_GATE_STATUS="GATED — all blockers external, loop must halt" ;;
+    pass)   GOAL_GATE_STATUS="COMPLETE — goal satisfied" ;;
+    clear)  GOAL_GATE_STATUS="CLEAR — agent-actionable blockers exist" ;;
+    *)      GOAL_GATE_STATUS="unknown (${GATE_STATUS})" ;;
+  esac
+fi
+
+GIT_BLOCK="$(printf 'Git hygiene (%s):\n  uncommitted:    %s\n  unclassified:   %s%s\n  commits_ahead:  %s\n  stash_count:    %s\n  goal_gate:      %s' \
+  "$(basename "$REPO")" "$GIT_UNCOMMITTED" "$GIT_UNTRACKED" "$GIT_ALARM" "$GIT_AHEAD" "$GIT_STASHES" "$GOAL_GATE_STATUS")"
+
+if [[ -f "$REPORT_PATH" ]]; then
+  { printf '\n## Git hygiene\n'; printf '%s\n' "$GIT_BLOCK"; } >>"$REPORT_PATH"
+fi
+
 if [[ "$WANT_JSON" -eq 1 ]]; then
-  jq -c --argjson ntm_rollup "$ROLLUP" '. + {ntm_rollup:$ntm_rollup}' "$PY_OUT"
+  GIT_JSON="$(jq -nc \
+    --argjson u "${GIT_UNCOMMITTED:-0}" --argjson n "${GIT_UNTRACKED:-0}" \
+    --arg a "${GIT_AHEAD:-?}" --argjson s "${GIT_STASHES:-0}" --arg g "$GOAL_GATE_STATUS" \
+    '{uncommitted:$u,untracked:$n,commits_ahead:$a,stash_count:$s,goal_gate:$g}')"
+  jq -c --argjson ntm_rollup "$ROLLUP" --argjson git_hygiene "$GIT_JSON" \
+    '. + {ntm_rollup:$ntm_rollup,git_hygiene:$git_hygiene}' "$PY_OUT"
 else
   cat "$PY_OUT"
+  printf '\n%s\n' "$GIT_BLOCK"
 fi

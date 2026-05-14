@@ -192,6 +192,19 @@ The probe is intentionally narrower than the Wave 1 resolver. It checks packet
 contract conformance and cites sibling tools; it does not recalculate the entire
 skill graph.
 
+## 10. Git hygiene skill routing (bszgl.4 — 2026-05-14)
+
+These trigger phrases route to git hygiene skills before any manual investigation:
+
+| Trigger phrase | Skill | When |
+|---|---|---|
+| "clean up" / "dirty tree" / "git status messy" / "uncommitted files" / "untracked files" | `git-repo-janitor` | Petal 5 — before any bead work when repo state is unclear |
+| "stashes" / "stashed" / "git stash list" / "stash accumulation" / "stash archaeology" | `git-stash-janitor` | Petal 5 — when stash count > 2 |
+| "branches accumulated" / "worktrees pile" / "old branches" / "rationalize branches" | `git-worktree-branch-rationalization` | Petal 5 — when branch list is long or worktrees are stale |
+| "0 ahead" / "push everything" / "git is behind" / "commits ahead" | `git-repo-janitor` + push sequence | Petal 5 — when hygiene + push is needed |
+
+**Routing rule:** if the user or orch mentions any of the above phrases AND `git status` shows dirty state, route to the hygiene skill FIRST before filing or dispatching any other bead. Do not dispatch new work on a dirty tree.
+
 ## 9. Versioning
 
 Version `v1` is append-only. Future versions may add optional fields, but may
