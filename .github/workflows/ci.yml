@@ -73,6 +73,7 @@ jobs:
           bash tests/true-publication-registry-validate.sh
           bash tests/preflight-fixtures.sh
           bash tests/journey-smoke.sh
+          bash tests/presence-queue.sh
 
       - name: Shell lint
         run: |
@@ -114,7 +115,8 @@ jobs:
             tests/publication-goal-completion-audit.sh \
             tests/publication-readiness.sh \
             tests/true-publication-registry-validate.sh \
-            tests/preflight-fixtures.sh
+            tests/preflight-fixtures.sh \
+            tests/presence-queue.sh
 
       - name: Python syntax lint
         run: |
@@ -132,6 +134,7 @@ jobs:
             scripts/contact_route_probe.py \
             scripts/publication_readiness.py \
             scripts/probe_repo_story_portability.py \
+            scripts/presence_queue.py \
             scripts/render_repo_owner_brief.py \
             scripts/validate_cutover_receipts.py \
             scripts/validate_user_journey_pack.py \

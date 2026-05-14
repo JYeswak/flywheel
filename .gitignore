@@ -39,6 +39,9 @@
 !/.flywheel/audit/README.md
 # git-repo-janitor scratch workspace — regenerable skill output, never commit.
 /.repo_janitor_workspace/
+# Presence pipeline queue — generated, transient review artifacts.
+/.flywheel/presence/queue/*
+!/.flywheel/presence/queue/.gitkeep
 /.flywheel/scripts/*.bak.*
 /.flywheel/validation-schema/v1/*.bak.*
 /.flywheel/PLANS/**/*.bak.*
