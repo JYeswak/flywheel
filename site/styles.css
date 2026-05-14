@@ -89,8 +89,8 @@ a {
   overflow: hidden;
   border-bottom: 1px solid rgba(255, 253, 247, 0.12);
   background:
-    radial-gradient(circle at 74% 48%, rgba(242, 201, 76, 0.18), transparent 24%),
-    radial-gradient(circle at 84% 12%, rgba(31, 154, 154, 0.18), transparent 22%),
+    linear-gradient(115deg, rgba(212, 243, 74, 0.08) 0 22%, transparent 22% 100%),
+    linear-gradient(245deg, rgba(31, 154, 154, 0.12) 0 18%, transparent 18% 100%),
     linear-gradient(135deg, #111412 0%, #151816 50%, #20251f 100%);
   color: #fffdf7;
 }
@@ -680,6 +680,349 @@ textarea {
   background: #fffdf7;
 }
 
+.page-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: min(780px, calc(100svh - 76px));
+  border-bottom: 1px solid rgba(255, 253, 247, 0.12);
+  color: #fffdf7;
+}
+
+.page-hero::before {
+  position: absolute;
+  inset: 0;
+  content: "";
+  background-image:
+    linear-gradient(rgba(255, 253, 247, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 253, 247, 0.04) 1px, transparent 1px);
+  background-size: 54px 54px;
+  pointer-events: none;
+}
+
+.system-hero {
+  background:
+    linear-gradient(120deg, rgba(31, 154, 154, 0.18) 0 24%, transparent 24% 100%),
+    linear-gradient(150deg, #101514, #16201d 56%, #212817);
+}
+
+.yuzu-hero {
+  background:
+    linear-gradient(118deg, rgba(242, 201, 76, 0.18) 0 28%, transparent 28% 100%),
+    linear-gradient(150deg, #151816, #222418 60%, #2f2b17);
+}
+
+.developer-hero {
+  background:
+    linear-gradient(115deg, rgba(42, 111, 187, 0.18) 0 24%, transparent 24% 100%),
+    linear-gradient(150deg, #101318, #151816 54%, #18242d);
+}
+
+.operator-hero {
+  background:
+    linear-gradient(115deg, rgba(212, 243, 74, 0.16) 0 23%, transparent 23% 100%),
+    linear-gradient(150deg, #151816, #1d211c 55%, #28301c);
+}
+
+.contact-hero {
+  background:
+    linear-gradient(115deg, rgba(223, 91, 70, 0.16) 0 20%, transparent 20% 100%),
+    linear-gradient(150deg, #141614, #1d211f 54%, #2b241f);
+}
+
+.page-hero-grid {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(430px, 0.94fr) minmax(420px, 1.06fr);
+  gap: clamp(28px, 4vw, 58px);
+  align-items: center;
+  min-height: min(780px, calc(100svh - 76px));
+  padding: 58px 0 70px;
+}
+
+.page-copy {
+  max-width: 760px;
+}
+
+.page-copy .lead {
+  color: rgba(255, 253, 247, 0.82);
+}
+
+.page-copy a:not(.button),
+.operator-line a {
+  color: var(--zs-lime);
+}
+
+.instrument-panel,
+.terminal-panel,
+.yuzu-console,
+.operator-panel,
+.contact-console,
+.proof-console {
+  border: 1px solid rgba(255, 253, 247, 0.18);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.09), rgba(255, 253, 247, 0.035)),
+    rgba(5, 8, 7, 0.82);
+  box-shadow:
+    0 34px 95px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 253, 247, 0.12);
+}
+
+.instrument-panel,
+.terminal-panel,
+.yuzu-console,
+.operator-panel {
+  padding: 20px;
+}
+
+.panel-topline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 16px;
+  color: rgba(255, 253, 247, 0.68);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.panel-topline span:last-child {
+  color: var(--zs-lime);
+}
+
+.system-map {
+  display: block;
+  width: 100%;
+  border: 1px solid rgba(255, 253, 247, 0.12);
+  border-radius: 8px;
+  background: #fffdf7;
+}
+
+.signal-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.signal-strip span,
+.safe-send span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 253, 247, 0.14);
+  border-radius: 8px;
+  color: rgba(255, 253, 247, 0.76);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.control-lanes,
+.guardrail-grid,
+.route-console {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 36px;
+}
+
+.control-lanes article,
+.guardrail-grid article,
+.route-console article,
+.worry-console article {
+  min-height: 190px;
+  padding: 22px;
+  border: 1px solid var(--zs-line);
+  border-radius: 8px;
+  background: #fffdf7;
+  box-shadow: 0 12px 32px rgba(21, 24, 22, 0.06);
+}
+
+.control-lanes span,
+.guardrail-grid span,
+.route-console span,
+.worry-console span,
+.loop-board span {
+  display: inline-flex;
+  margin-bottom: 18px;
+  color: var(--zs-leaf);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.proof-console-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(380px, 1.1fr);
+  gap: 52px;
+  align-items: center;
+}
+
+.proof-console {
+  padding: 18px;
+}
+
+.console-row {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 16px 0;
+  border-top: 1px solid rgba(255, 253, 247, 0.13);
+}
+
+.console-row strong,
+.console-row em {
+  display: block;
+}
+
+.console-row strong {
+  color: #fffdf7;
+  font-size: 18px;
+}
+
+.console-row em {
+  color: rgba(255, 253, 247, 0.68);
+  font-style: normal;
+}
+
+.yuzu-step {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 16px;
+  align-items: center;
+  min-height: 104px;
+  padding: 18px;
+  border-top: 1px solid rgba(255, 253, 247, 0.13);
+}
+
+.yuzu-step span {
+  color: var(--zs-yuzu);
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.yuzu-step strong {
+  color: rgba(255, 253, 247, 0.84);
+  font-size: 19px;
+  line-height: 1.25;
+}
+
+.yuzu-step.active {
+  margin: 0 -8px;
+  border: 1px solid rgba(212, 243, 74, 0.38);
+  border-radius: 8px;
+  background: rgba(212, 243, 74, 0.12);
+}
+
+.worry-console {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 36px;
+}
+
+.loop-board {
+  display: grid;
+  gap: 10px;
+}
+
+.loop-board div {
+  display: grid;
+  grid-template-columns: 56px minmax(110px, 0.35fr) 1fr;
+  gap: 16px;
+  align-items: center;
+  min-height: 68px;
+  padding: 14px 18px;
+  border: 1px solid rgba(255, 253, 247, 0.16);
+  border-radius: 8px;
+  background: rgba(255, 253, 247, 0.06);
+}
+
+.loop-board strong {
+  color: #fffdf7;
+  font-size: 20px;
+}
+
+.loop-board em {
+  color: rgba(255, 253, 247, 0.68);
+  font-style: normal;
+}
+
+.route-console {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.route-console article {
+  min-height: 230px;
+}
+
+.route-console .route-live {
+  border-color: rgba(31, 143, 95, 0.55);
+  background: linear-gradient(180deg, #fffdf7, #eef8e5);
+}
+
+.terminal-panel pre {
+  border-color: rgba(255, 253, 247, 0.12);
+  background: #090d0b;
+  white-space: pre-wrap;
+}
+
+.terminal-panel code {
+  overflow-wrap: anywhere;
+}
+
+.safe-send {
+  display: grid;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.safe-send span {
+  justify-content: flex-start;
+  min-height: 42px;
+}
+
+.contact-console {
+  padding: 22px;
+}
+
+.contact-console label {
+  color: rgba(255, 253, 247, 0.8);
+}
+
+.contact-console input,
+.contact-console textarea,
+.contact-console select {
+  border-color: rgba(255, 253, 247, 0.18);
+  background: rgba(255, 253, 247, 0.92);
+  color: var(--zs-ink);
+}
+
+.contact-console .button.secondary {
+  border-color: rgba(255, 253, 247, 0.42);
+  background: rgba(255, 253, 247, 0.08);
+  color: #fffdf7;
+}
+
+.contact-console .button[type="submit"] {
+  border-color: var(--zs-lime);
+  background: var(--zs-lime);
+  color: var(--zs-ink);
+}
+
+.owner-note {
+  max-width: 920px;
+}
+
 @media (max-width: 940px) {
   .links {
     display: none;
@@ -688,6 +1031,17 @@ textarea {
   .hero-grid {
     grid-template-columns: 1fr;
     min-height: auto;
+    padding: 48px 0 66px;
+  }
+
+  .page-hero,
+  .page-hero-grid {
+    min-height: auto;
+  }
+
+  .page-hero-grid,
+  .proof-console-grid {
+    grid-template-columns: 1fr;
     padding: 48px 0 66px;
   }
 
@@ -706,7 +1060,11 @@ textarea {
   }
 
   .route-board,
+  .control-lanes,
+  .guardrail-grid,
+  .route-console,
   .worry-matrix,
+  .worry-console,
   .grid {
     grid-template-columns: 1fr;
   }
@@ -795,6 +1153,16 @@ textarea {
   }
 
   .method-rail li {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .signal-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .loop-board div,
+  .yuzu-step {
     grid-template-columns: 1fr;
     gap: 8px;
   }

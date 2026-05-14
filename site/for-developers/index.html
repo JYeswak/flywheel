@@ -4,36 +4,82 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flywheel For Developers | ZestStream</title>
+    <meta name="description" content="Run Flywheel locally in reduced mode, inspect receipts, and only then wire agent-specific lanes.">
     <link rel="stylesheet" href="../styles.css">
   </head>
   <body>
-    <header class="topbar"><nav class="shell nav" aria-label="Main navigation"><a class="brand" href="../index.html">Flywheel</a><div class="links"><a href="../what-is/index.html">What Is It</a><a href="../methodology/index.html">Methodology</a><a href="../about/index.html">About</a><a href="../contact/index.html">Contact</a></div></nav></header>
+    <header class="topbar">
+      <nav class="shell nav" aria-label="Main navigation">
+        <a class="brand" href="../index.html" aria-label="Flywheel home"><span class="brand-mark">F</span><span>Flywheel</span></a>
+        <div class="links">
+          <a href="../what-is/index.html">What Is It</a>
+          <a href="../methodology/index.html">Methodology</a>
+          <a href="../about/index.html">About</a>
+          <a href="../contact/index.html">Contact</a>
+        </div>
+      </nav>
+    </header>
     <main>
-      <section class="hero">
-        <div class="shell">
-          <div class="eyebrow">Developer path</div>
-          <h1>Run it before you trust it.</h1>
-          <p class="lead">Start with reduced mode, inspect the receipts, then decide whether to wire full-mode substrate.</p>
-          <pre><code>git clone https://github.com/JYeswak/flywheel.git
+      <section class="page-hero developer-hero">
+        <div class="shell page-hero-grid">
+          <div class="page-copy">
+            <div class="hero-status-row">
+              <span class="status-pill">Developer path</span>
+              <span class="status-chip">Reduced first</span>
+              <span class="status-chip proof">No ambient substrate</span>
+            </div>
+            <h1>Run the reduced lane before you trust the full machinery.</h1>
+            <p class="lead">Start with local proof, inspect the receipts, then decide whether Claude Code, Codex CLI, Gemini CLI, or OpenClaw belongs in your workflow.</p>
+            <div class="actions">
+              <a class="button" href="https://github.com/JYeswak/flywheel">Open repository</a>
+              <a class="button secondary" href="../methodology/index.html">Understand the method</a>
+            </div>
+          </div>
+          <aside class="terminal-panel" aria-label="Reduced local mode command panel">
+            <div class="panel-topline"><span>LOCAL PREFLIGHT</span><span>NO GITHUB SPEND</span></div>
+            <pre><code>git clone https://github.com/JYeswak/flywheel.git
 cd flywheel
 scripts/preflight.sh --json
 scripts/journey-smoke.sh --matrix claude,codex,gemini,openclaw,reduced --dry-run --json</code></pre>
+            <div class="signal-strip">
+              <span>clone</span>
+              <span>doctor</span>
+              <span>smoke</span>
+              <span>receipt</span>
+            </div>
+          </aside>
         </div>
       </section>
-      <section class="band alt">
-        <div class="shell">
-          <h2>Support Tiers</h2>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Lane</th><th>Public status</th></tr></thead>
-              <tbody>
-                <tr><td>Reduced local mode</td><td>Required public fallback path.</td></tr>
-                <tr><td>Claude Code</td><td>Compatibility target until isolated runtime proof exists.</td></tr>
-                <tr><td>Codex CLI</td><td>Compatibility target until isolated runtime proof exists.</td></tr>
-                <tr><td>Gemini CLI</td><td>Compatibility target until isolated runtime proof exists.</td></tr>
-                <tr><td>OpenClaw</td><td>Compatibility target until daemon or gateway smoke proves runtime behavior.</td></tr>
-              </tbody>
-            </table>
+
+      <section class="story-band alt">
+        <div class="shell split">
+          <div>
+            <p class="kicker">Support tiers</p>
+            <h2>Each lane has to earn its label.</h2>
+          </div>
+          <p class="section-lead">The public developer path must work inside and outside NTM. Agent-specific lanes stay compatibility targets until the matching isolated runtime proof exists.</p>
+        </div>
+        <div class="shell route-console">
+          <article class="route-live"><span>01</span><h3>Reduced local mode</h3><p>Required public fallback path.</p></article>
+          <article><span>02</span><h3>Claude Code</h3><p>Compatibility target until isolated runtime proof exists.</p></article>
+          <article><span>03</span><h3>Codex CLI</h3><p>Compatibility target until isolated runtime proof exists.</p></article>
+          <article><span>04</span><h3>Gemini CLI</h3><p>Compatibility target until isolated runtime proof exists.</p></article>
+          <article><span>05</span><h3>OpenClaw</h3><p>Compatibility target until daemon or gateway smoke proves runtime behavior.</p></article>
+        </div>
+      </section>
+
+      <section class="control-room">
+        <div class="shell proof-console-grid">
+          <div>
+            <p class="kicker">Local gates before hosted gates</p>
+            <h2>GitHub Actions should be final approval, not the first place you find basic breakage.</h2>
+            <p>Flywheel favors local containers, dry-runs, doctor receipts, and screenshot checks before spending hosted CI minutes. That makes the public path cheaper, faster, and easier to trust.</p>
+          </div>
+          <div class="proof-console">
+            <div class="panel-topline"><span>PREFLIGHT ORDER</span><span>GREEN LOCALLY FIRST</span></div>
+            <div class="console-row"><span class="proof-dot good"></span><strong>Local doctor</strong><em>Environment and public-surface checks run before publication.</em></div>
+            <div class="console-row"><span class="proof-dot good"></span><strong>Container rehearsal</strong><em>Workflow-like checks can run locally before hosted CI.</em></div>
+            <div class="console-row"><span class="proof-dot warn"></span><strong>Hosted CI</strong><em>Saved for final confirmation and external audit trail.</em></div>
           </div>
         </div>
       </section>

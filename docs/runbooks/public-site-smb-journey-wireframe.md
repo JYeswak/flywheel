@@ -1,7 +1,7 @@
 # Public Site SMB Journey Wireframe
 
 Schema: `flywheel.public_site_smb_journey_wireframe.v0`
-Status: `pre-build-required`
+Status: `private-review-implementation-active`
 Source pack ID: `user-journey-wireframe-pack`
 
 This wireframe replaces the rejected placeholder page. It is the governing
@@ -53,9 +53,9 @@ What not to copy:
 ### Visual Source Receipt
 
 Local Playwright review on 2026-05-13 captured the current reference surfaces
-into `/tmp/flywheel-site-research/`. The takeaway is not "make a darker SaaS
-site." The takeaway is that the page must feel like the reader has stepped into
-a real operating system for the work.
+into `/tmp/flywheel-jeff-deep/`. The takeaway is not "make a darker SaaS
+site." The takeaway is that every page must feel like the reader has stepped
+into a real operating system for the work.
 
 | Reference | Observable move | Flywheel requirement |
 |---|---|---|
@@ -68,6 +68,24 @@ The ZestStream translation must be brighter, more practical, and less
 developer-dense than the references. The reader should leave thinking: "he sees
 my workflow mess, he has controls for AI risk, and I can start with one small
 piece."
+
+### Multi-Page Implementation Rule
+
+The visual grammar cannot live only on `site/index.html`. Every public page must
+reuse the same core primitives so the visitor experiences one system:
+
+| Page | Required room in the system | Required visible object |
+|---|---|---|
+| `site/index.html` | Owner operating room | Workflow map, selected slice, proof rail, and SMB promise. |
+| `site/what-is/index.html` | Control-room explainer | Loop diagram, boundary lanes, and proof-state console. |
+| `site/methodology/index.html` | Yuzu method room | Peel/Press/Pour rail, owner-worry console, and compounding loop board. |
+| `site/for-developers/index.html` | Local run room | Terminal command panel, support-lane console, and local-before-hosted gate. |
+| `site/about/index.html` | Operator room | Joshua/ZestStream accountability, public contact, and privacy stance. |
+| `site/contact/index.html` | Safe intake room | Redacted-message guidance and direct operator routing. |
+
+Jeff's strongest surfaces make each page feel like a different instrument in
+the same system. Flywheel must do the same for SMB adoption: the tone is less
+developer-dense, but the depth and designed-world feeling should remain.
 
 ## SMB Trust Research
 

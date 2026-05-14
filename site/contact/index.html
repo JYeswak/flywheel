@@ -4,22 +4,44 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Contact Flywheel | ZestStream</title>
+    <meta name="description" content="Send a public Flywheel question to Joshua Nowak at ZestStream without sharing secrets or private client data.">
     <link rel="stylesheet" href="../styles.css">
   </head>
   <body>
-    <header class="topbar"><nav class="shell nav" aria-label="Main navigation"><a class="brand" href="../index.html">Flywheel</a><div class="links"><a href="../what-is/index.html">What Is It</a><a href="../for-developers/index.html">Developers</a><a href="../methodology/index.html">Methodology</a><a href="../about/index.html">About</a></div></nav></header>
+    <header class="topbar">
+      <nav class="shell nav" aria-label="Main navigation">
+        <a class="brand" href="../index.html" aria-label="Flywheel home"><span class="brand-mark">F</span><span>Flywheel</span></a>
+        <div class="links">
+          <a href="../what-is/index.html">What Is It</a>
+          <a href="../for-developers/index.html">Developers</a>
+          <a href="../methodology/index.html">Methodology</a>
+          <a href="../about/index.html">About</a>
+        </div>
+      </nav>
+    </header>
     <main>
-      <section class="hero">
-        <div class="shell">
-          <div class="eyebrow">Public routing</div>
-          <h1>Ask a Flywheel question.</h1>
-          <p class="lead">Use the public address for install, support, method, or commercial questions. Do not include secrets, private logs, or client data.</p>
-          <form action="mailto:joshua@zeststream.ai?subject=%5BFlywheel%5D%20Public%20site%20inquiry" method="post" enctype="text/plain">
+      <section class="page-hero contact-hero">
+        <div class="shell page-hero-grid">
+          <div class="page-copy">
+            <div class="hero-status-row">
+              <span class="status-pill">Public routing</span>
+              <span class="status-chip">Redacted only</span>
+              <span class="status-chip proof">Direct operator</span>
+            </div>
+            <h1>Send one workflow mess I can safely inspect.</h1>
+            <p class="lead">Use the public address for install, support, method, or commercial questions. Do not include secrets, private logs, or client data.</p>
+            <div class="safe-send">
+              <span>Good: "three systems disagree on customer follow-up"</span>
+              <span>Bad: passwords, API keys, private exports, live customer records</span>
+            </div>
+          </div>
+          <form class="contact-console" action="mailto:joshua@zeststream.ai?subject=%5BFlywheel%5D%20Public%20site%20inquiry" method="post" enctype="text/plain">
+            <div class="panel-topline"><span>PUBLIC SITE INQUIRY</span><span>joshua@zeststream.ai</span></div>
             <label for="topic">Topic</label>
             <select id="topic" name="topic">
+              <option>SMB consultation</option>
               <option>Install support</option>
               <option>Developer evaluation</option>
-              <option>SMB consultation</option>
               <option>Method question</option>
             </select>
             <label for="message">Message</label>
@@ -29,6 +51,19 @@
               <a class="button secondary" href="mailto:joshua@zeststream.ai?subject=%5BFlywheel%5D%20Public%20site%20inquiry">Email directly</a>
             </div>
           </form>
+        </div>
+      </section>
+
+      <section class="story-band alt">
+        <div class="shell">
+          <p class="kicker">Safe intake route</p>
+          <h2>What to send first</h2>
+          <div class="route-console">
+            <article><span>01</span><h3>Describe the workflow</h3><p>What starts the work, where it goes, and what gets missed?</p></article>
+            <article><span>02</span><h3>Name the systems</h3><p>Email, CRM, calendar, invoices, documents, reports, or other tools.</p></article>
+            <article><span>03</span><h3>Keep it safe</h3><p>Redact customer names, credentials, exports, logs, and private records.</p></article>
+            <article class="route-live"><span>04</span><h3>Pick one slice</h3><p>The first useful improvement should be small enough to inspect.</p></article>
+          </div>
         </div>
       </section>
     </main>
