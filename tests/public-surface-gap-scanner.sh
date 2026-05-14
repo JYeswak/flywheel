@@ -126,11 +126,11 @@ fi
 cat >"$TMP/site/index.html" <<'EOF'
 <html lang="en">
 <body>
-<p>Joshua works close to advanced open-source AI infrastructure.</p>
-<p>The buyer does not need to understand the machinery.</p>
-<p>The value is knowing the operator does.</p>
-<p>one bounded slice, one proof state, and one reusable lesson</p>
-<a href="docs/stories/flywheel-trajectory.md">Inspect the trajectory</a>
+<p>Buy back the hours hiding between your tools.</p>
+<p>It is Saturday again.</p>
+<p>Regional insurance carrier</p>
+<p>Saturday does not have to be your backup system.</p>
+<p>Blocked is better than bluffing.</p>
 </body>
 </html>
 EOF

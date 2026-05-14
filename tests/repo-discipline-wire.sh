@@ -6,7 +6,9 @@ set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/.flywheel/scripts/repo-discipline-check.sh"
+HYGIENE_SCRIPT="$ROOT/.flywheel/scripts/repo-hygiene-check.sh"
 TEMPLATE_SCRIPT="$ROOT/templates/flywheel-install/scripts/repo-discipline-check.sh"
+TEMPLATE_HYGIENE_SCRIPT="$ROOT/templates/flywheel-install/scripts/repo-hygiene-check.sh"
 DISPATCH_GATE="$ROOT/.flywheel/scripts/dispatch-capacity-gate.sh"
 
 pass_count=0
@@ -56,7 +58,9 @@ make_untracked_n() {
 }
 
 if bash -n "$SCRIPT" 2>/dev/null; then pass "script syntax"; else fail "script syntax"; fi
+if bash -n "$HYGIENE_SCRIPT" 2>/dev/null; then pass "hygiene script syntax"; else fail "hygiene script syntax"; fi
 if bash -n "$TEMPLATE_SCRIPT" 2>/dev/null; then pass "template script syntax"; else fail "template script syntax"; fi
+if bash -n "$TEMPLATE_HYGIENE_SCRIPT" 2>/dev/null; then pass "template hygiene script syntax"; else fail "template hygiene script syntax"; fi
 
 if "$SCRIPT" --info 2>/dev/null | jq -e '.version and .thresholds.untracked_janitor and .handler? // true' >/dev/null; then
   pass "--info envelope"
@@ -126,12 +130,36 @@ else
   fail "dispatch gate halts dirty repo rc=$rc"
 fi
 
+reset_tmprepo
+(
+  cd "$TMPREPO" || exit
+  printf '*.generated\n' > .gitignore
+  printf 'tracked generated output\n' > tracked.generated
+  git add .gitignore
+  git add -f tracked.generated
+  git commit -q -m shadowed-output
+)
+ASSIGN_JSON='{}' HEALTH_JSON='{}' DISPATCH_GATE_REPO="$TMPREPO" "$DISPATCH_GATE" test-session 1 >/tmp/repo-hygiene-dispatch.json
+rc=$?
+if [[ "$rc" -eq 1 ]] && jq -e '.reason == "repo_hygiene_operational_protocol_fail" and .repo_hygiene_operational.fail >= 1 and (.repo_hygiene_operational.checks[] | select(.id == "H-1" and .verdict == "fail"))' </tmp/repo-hygiene-dispatch.json >/dev/null; then
+  pass "dispatch gate halts H-1 repo hygiene failure"
+else
+  fail "dispatch gate halts H-1 repo hygiene failure rc=$rc"
+  cat /tmp/repo-hygiene-dispatch.json >&2 || true
+fi
+
 assert_contains ".flywheel/doctrine/git-repo-discipline.md" "dirty state is a queue" "doctrine paradigm"
 assert_contains "templates/flywheel-install/doctrine/git-repo-discipline.md" "/git-repo-janitor" "template doctrine handler"
+assert_contains ".flywheel/doctrine/git-repo-discipline.md" "repo-hygiene-operational-protocol.md" "repo doctrine folds hygiene sister"
+assert_contains ".flywheel/doctrine/repo-hygiene-operational-protocol.md" "substrate-hygiene-doctrine-cluster" "hygiene doctrine joins substrate cluster"
+assert_contains "templates/flywheel-install/doctrine/repo-hygiene-operational-protocol.md" "substrate-hygiene-doctrine-cluster" "template hygiene doctrine joins substrate cluster"
 assert_contains "templates/flywheel-install/STATE.md.tmpl" "Repo Hygiene Snapshot" "state template snapshot"
 assert_contains ".flywheel/rules/L095-L144-git-stash-janitor-fleet-hygiene.md" "git-repo-janitor" "L144 names repo janitor"
+assert_contains ".flywheel/rules/L095-L144-git-stash-janitor-fleet-hygiene.md" "repo-hygiene-check.sh" "L144 requires repo hygiene protocol"
 assert_contains ".flywheel/scripts/dispatch-capacity-gate.sh" "repo-discipline-check.sh" "dispatch gate calls repo discipline"
+assert_contains ".flywheel/scripts/dispatch-capacity-gate.sh" "repo-hygiene-check.sh" "dispatch gate calls repo hygiene protocol"
 assert_contains ".flywheel/scripts/daily-report.sh" "repo_handler" "daily report emits handler"
+assert_contains ".flywheel/scripts/daily-report.sh" "repo_hygiene_protocol" "daily report emits repo hygiene protocol"
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]

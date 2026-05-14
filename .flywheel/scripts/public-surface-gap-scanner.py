@@ -72,11 +72,11 @@ SITE_FORBIDDEN_COPY = [
 ]
 SITE_REQUIRED_COPY = {
     "site/index.html": {
-        "operator_authority": "advanced open-source AI infrastructure",
-        "buyer_machinery_boundary": "The buyer does not need to understand the machinery.",
-        "operator_value": "The value is knowing the operator does.",
-        "bounded_value": "one bounded slice, one proof state, and one reusable lesson",
-        "trajectory_proof_link": "docs/stories/flywheel-trajectory.md",
+        "owner_outcome": "Buy back the hours hiding between your tools.",
+        "before_scene": "It is Saturday again.",
+        "anonymized_client_proof": "Regional insurance carrier",
+        "after_state": "Saturday does not have to be your backup system.",
+        "trust_stance": "Blocked is better than bluffing.",
     }
 }
 
@@ -91,7 +91,7 @@ DISPOSITION_RE = re.compile(
     r"blocked until|blocked as expected|remaining public[- ]release blockers|"
     r"remaining release blockers|remaining public blockers|remaining blockers|readiness blockers clear|"
     r"current blocker set|former blocker code|without granting public release approval|"
-    r"publication_readiness\.py|public blocker coverage)\b",
+    r"publication_readiness\.py|public blocker coverage|Blocked is better than bluffing)\b",
     re.IGNORECASE,
 )
 BENIGN_SOFT_RE = re.compile(
@@ -104,7 +104,10 @@ BENIGN_SOFT_RE = re.compile(
     r"public surface gap scanner|full.*reduced.*blocked|source-gap|fixture-blocked|"
     r"blocked, or docs-only mode|full, reduced, blocked|blocked mode|reduced mode blocked|"
     r"gap discovery|gap detector|gap probe|gap-hunt|value-gap|topology-gap|process-gap|"
-    r"no_bead_reason|DID/DIDNT/GAPS)",
+    r"no_bead_reason|DID/DIDNT/GAPS|"
+    r"blockers, dependencies, and close evidence|which ones are blocked|blocked, and which ones have proof|"
+    r"status=done\|blocked|callback reports `blocked`|blocked public-copy markers|"
+    r"blocker or skip receipt refs|blocker or skip receipt paths)",
     re.IGNORECASE,
 )
 

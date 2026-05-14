@@ -51,8 +51,10 @@ readme = (root / "README.md").read_text(encoding="utf-8")
 evidence = (root / "docs/evidence/publication-evidence.md").read_text(encoding="utf-8")
 
 readme_match = re.search(
-    r"classified ([\d,]+) source files, copied ([\d,]+) public-safe files, excluded\s+"
-    r"([\d,]+) denylisted .*?reduced a ([\d,]+)-row manual\s+review queue",
+    r"classified ([\d,]+) source files, copied ([\d,]+) public-safe files,\s+"
+    r"excluded ([\d,]+) denylisted paths, and retained a ([\d,]+)-row "
+    r"manual-review queue\s+as evidence while turning a private substrate into "
+    r"an inspectable public one",
     readme,
     flags=re.S,
 )
@@ -303,14 +305,14 @@ require_literal "docs/runbooks/public-release-runbook.md" "bash tests/zeststream
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/zeststream-motion-package.sh" "release runbook includes motion package gate"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/repo-story-portability.sh" "release runbook includes repo story portability gate"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/repo-owner-brief.sh" "release runbook includes repo owner brief gate"
-require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=20 fail=0" "release runbook names UI package verifier count"
+require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=23 fail=0" "release runbook names UI package verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=20 fail=0" "release runbook names motion package verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=6 fail=0" "release runbook names repo story portability count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=8 fail=0" "release runbook names repo owner brief count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=23 fail=0" "release runbook names current cutover verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=26 fail=0" "release runbook names story package verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=279 fail=0" "release runbook names current public docs count"
-require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=99 fail=0" "release runbook names current website static count"
+require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=113 fail=0" "release runbook names current website static count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=10 fail=0" "release runbook names user journey verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "docs/runbooks/public-user-journey-pack.md\` maps every public asset" "release runbook includes user journey pack gate"
 require_literal "docs/runbooks/public-release-runbook.md" "user-journey-pack-validation.json" "release runbook captures user journey validation receipt"

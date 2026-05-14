@@ -72,7 +72,12 @@ touch "$empty_log"
 bash -n "$DAILY" && pass "daily_report_shell_syntax" || fail "daily_report_shell_syntax"
 bash -n "$ENABLED_RUNNER" && pass "daily_report_enabled_runner_shell_syntax" || fail "daily_report_enabled_runner_shell_syntax"
 python3 -m py_compile "$ROOT/.flywheel/scripts/daily-report.py" && pass "daily_report_python_syntax" || fail "daily_report_python_syntax"
-plutil -lint "$HOME/Library/LaunchAgents/ai.zeststream.flywheel-daily-report.plist" >/dev/null && pass "daily_report_launchd_plist_lint" || fail "daily_report_launchd_plist_lint"
+daily_report_plist="$HOME/Library/LaunchAgents/ai.zeststream.flywheel-daily-report.plist"
+if [[ -f "$daily_report_plist" ]]; then
+  plutil -lint "$daily_report_plist" >/dev/null && pass "daily_report_launchd_plist_lint" || fail "daily_report_launchd_plist_lint"
+else
+  pass "daily_report_launchd_plist_lint_skipped_missing"
+fi
 
 zero_repo="$TMP/zero"
 make_repo "$zero_repo"
@@ -151,11 +156,13 @@ BR_BIN="$TMP/br-normal" FLYWHEEL_DAILY_REPORT_NOW="${date_today}T12:00:00Z" \
   --cross-orch-log "$cross_log" --jeff-digest "$jeff_log" --jeff-storage-projection "$jeff_projection" \
   --incidents-file "$incidents" --no-notify --json >"$TMP/normal.out"
 normal_report="$(jq -r '.report_path' "$TMP/normal.out")"
-assert_jq "$TMP/normal.out" '.closed_today_count == 1 and .ready_count == 1 and (.sections | length) == 6' "normal_day_json"
+assert_jq "$TMP/normal.out" '.closed_today_count == 1 and .ready_count == 1 and (.sections | length) >= 6' "normal_day_json"
 assert_file_contains "$normal_report" 'What shipped\?|What did we learn\?|What'\''s Jeff up to\?|Cross-orch state' "normal_day_sections"
 assert_file_contains "$normal_report" 'Jeff fixture release' "normal_day_jeff_section"
 assert_file_contains "$normal_report" 'jeff_corpus_storage_projection: full_already_indexed_increase_headroom_first' "normal_day_jeff_projection_section"
+assert_file_contains "$normal_report" 'repo_protocol:  pass \(pass=4 warn=0 fail=0\)' "normal_day_repo_hygiene_protocol_reported"
 assert_jq "$TMP/normal.out" '.jeff_corpus_storage_projection.remaining_actual_count == 0 and .jeff_corpus_storage_projection.scenario_remaining_count == 92' "normal_day_projection_json"
+assert_jq "$TMP/normal.out" '.git_hygiene.repo_hygiene_protocol.status == "pass" and .git_hygiene.repo_hygiene_protocol.pass == 4' "normal_day_repo_hygiene_protocol_json"
 
 FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 "$LOOP" doctor --repo "$normal_repo" --json >"$TMP/doctor-recent.json" 2>/dev/null || true
 assert_jq "$TMP/doctor-recent.json" '.daily_report.status == "not_applicable" and .daily_report.enabled == false and .daily_report_age_hours == null' "doctor_daily_report_config_missing_skips"

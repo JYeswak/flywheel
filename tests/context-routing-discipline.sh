@@ -5,6 +5,7 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 DOC="$ROOT/docs/runbooks/context-and-model-routing.md"
 README="$ROOT/README.md"
 CI="$ROOT/.github/workflows/ci.yml"
+CONTRIBUTING="$ROOT/CONTRIBUTING.md"
 
 pass_count=0
 fail_count=0
@@ -67,8 +68,16 @@ for literal in "baseline command, timing, and hotspot" "single optimization leve
 done
 
 require_literal "$README" "docs/runbooks/context-and-model-routing.md" "README links context routing runbook"
-require_literal "$README" "This section is for maintainers running the full local substrate. It is not" \
-  "README separates public first run from full substrate"
+require_literal "$README" "Reduced mode is the required public path." \
+  "README names reduced mode as public path"
+require_literal "$README" "mode can use the richer substrate when it is installed." \
+  "README names full substrate as optional"
+require_literal "$README" "full-substrate quickstart, callback" \
+  "README points full-substrate details below the fold"
+require_literal "$README" "CONTRIBUTING.md" \
+  "README routes operator/contributor details to CONTRIBUTING"
+require_literal "$CONTRIBUTING" "This path is for maintainers running the full local substrate. It is not" \
+  "CONTRIBUTING owns full-substrate quickstart"
 require_literal "$CI" "tests/context-routing-discipline.sh" "CI runs context routing test"
 require_literal "$CI" "docs/runbooks/context-and-model-routing.md" "CI markdownlint includes context routing runbook"
 

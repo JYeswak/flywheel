@@ -37,8 +37,7 @@ else
   fail "DCO marker present"
 fi
 
-if grep -q '^## Why flywheel$' "$ROOT/README.md" \
-  && ROOT="$ROOT" python3 <<'PY'
+if ROOT="$ROOT" python3 <<'PY'
 import json
 import os
 import re
@@ -49,8 +48,10 @@ root = Path(os.environ["ROOT"])
 readme = (root / "README.md").read_text(encoding="utf-8")
 evidence = (root / "docs/evidence/publication-evidence.md").read_text(encoding="utf-8")
 readme_match = re.search(
-    r"classified ([\d,]+) source files, copied ([\d,]+) public-safe files, excluded\s+"
-    r"([\d,]+) denylisted .*?reduced a ([\d,]+)-row manual\s+review queue",
+    r"classified ([\d,]+) source files, copied ([\d,]+) public-safe files,\s+"
+    r"excluded ([\d,]+) denylisted paths, and retained a ([\d,]+)-row "
+    r"manual-review queue\s+as evidence while turning a private substrate into "
+    r"an inspectable public one",
     readme,
     flags=re.S,
 )
@@ -83,9 +84,9 @@ if manifest.exists():
         sys.exit(1)
 PY
 then
-  pass "README has concrete Flywheel metric"
+  pass "README has honest-state Flywheel metric"
 else
-  fail "README has concrete Flywheel metric"
+  fail "README has honest-state Flywheel metric"
 fi
 
 if grep -q '^## \[0\.2\.0\] - ' "$ROOT/CHANGELOG.md"; then

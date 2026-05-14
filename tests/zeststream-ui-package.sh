@@ -149,18 +149,63 @@ cat >"$GOOD/docs/evidence/repo-owner-brief.json" <<'JSON'
 JSON
 
 if "$ROOT/scripts/zs-frontend-quality-gate.sh" --repo "$GOOD" --json >"$TMP/good.json" \
-  && jq -e '.status == "pass" and .pass == 14 and .fail == 0 and .warn == 0 and any(.results[]; .id == "FQ-11" and .verdict == "pass")' "$TMP/good.json" >/dev/null; then
+  && jq -e '.status == "pass" and .pass == .total and .fail == 0 and .warn == 0 and any(.results[]; .id == "FQ-11" and .verdict == "pass") and any(.results[]; .id == "FQ-15" and .verdict == "pass")' "$TMP/good.json" >/dev/null; then
   pass "frontend quality gate accepts complete Next fixture"
 else
   fail "frontend quality gate accepts complete Next fixture"
   cat "$TMP/good.json" >&2 || true
 fi
 
+if jq -e '.brand_tier == "product"
+  and any(.results[]; .id == "FQ-08" and .verdict == "pass" and (.detail | contains("product-tier")))
+  and any(.results[]; .id == "FQ-09" and .verdict == "pass" and (.detail | contains("product-tier")))
+  and any(.results[]; .id == "FQ-12" and .verdict == "pass" and (.detail | contains("product-tier")))' "$TMP/good.json" >/dev/null; then
+  pass "frontend quality gate skips ZestStream-story checks for product-tier repos"
+else
+  fail "frontend quality gate skips ZestStream-story checks for product-tier repos"
+  cat "$TMP/good.json" >&2 || true
+fi
+
+GENERIC="$TMP/generic-page-next"
+cp -R "$GOOD" "$GENERIC"
+cat >"$GENERIC/components/GenericPage.tsx" <<'TS'
+export function GenericPage() {
+  return <p>This page is ready when the owner can see one clear next step.</p>
+}
+TS
+
+if "$ROOT/scripts/zs-frontend-quality-gate.sh" --repo "$GENERIC" --json >"$TMP/generic.json" \
+  && jq -e '.status == "pass" and any(.results[]; .id == "FQ-11" and .verdict == "pass")' "$TMP/generic.json" >/dev/null; then
+  pass "frontend quality gate allows generic customer-facing page copy"
+else
+  fail "frontend quality gate allows generic customer-facing page copy"
+  cat "$TMP/generic.json" >&2 || true
+fi
+
+TSX_REPEAT="$TMP/tsx-repeat-next"
+cp -R "$GOOD" "$TSX_REPEAT"
+for n in one two three; do
+  cat >"$TSX_REPEAT/components/Repeat${n}.tsx" <<'TS'
+export function RepeatMarker() {
+  const repeatedProp = "alpha beta gamma delta epsilon zeta eta theta iota kappa lambda"
+  return <span data-debug-copy={repeatedProp}>Workflow marker</span>
+}
+TS
+done
+
+if "$ROOT/scripts/zs-frontend-quality-gate.sh" --repo "$TSX_REPEAT" --json >"$TMP/tsx-repeat.json" \
+  && jq -e '.status == "pass" and any(.results[]; .id == "FQ-14" and .verdict == "pass")' "$TMP/tsx-repeat.json" >/dev/null; then
+  pass "frontend quality gate ignores raw TSX for FQ-14 repetition"
+else
+  fail "frontend quality gate ignores raw TSX for FQ-14 repetition"
+  cat "$TMP/tsx-repeat.json" >&2 || true
+fi
+
 META="$TMP/meta-next"
 cp -R "$GOOD" "$META"
 cat >"$META/components/MetaVoice.tsx" <<'TS'
 export function MetaVoice() {
-  return <p>The page speaks about the system instead of the owner.</p>
+  return <p>This page is a trust surface, not a trophy case.</p>
 }
 TS
 
