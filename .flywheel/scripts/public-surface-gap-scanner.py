@@ -63,6 +63,23 @@ DEFAULT_FILES = [
     "site/contact/index.html",
 ]
 
+SITE_OWNER_FILES = {"site/index.html"}
+SITE_FORBIDDEN_COPY = [
+    (
+        "site_session_memory_copy",
+        re.compile(r"\b(?:agent remembers|today'?s session|current session|last build session)\b", re.IGNORECASE),
+    ),
+]
+SITE_REQUIRED_COPY = {
+    "site/index.html": {
+        "operator_authority": "advanced open-source AI infrastructure",
+        "buyer_machinery_boundary": "The buyer does not need to understand the machinery.",
+        "operator_value": "The value is knowing the operator does.",
+        "bounded_value": "one bounded slice, one proof state, and one reusable lesson",
+        "trajectory_proof_link": "docs/stories/flywheel-trajectory.md",
+    }
+}
+
 STRONG_RE = re.compile(r"\b(TODO|FIXME|unproven)\b", re.IGNORECASE)
 DOC_SOFT_RE = re.compile(r"(?<![-_/A-Za-z0-9])(?:gap|gaps|blocker|blockers|blocked|missing)(?![-_/A-Za-z0-9])")
 TRACKED_RE = re.compile(r"\b(?:TP-\d{3}|flywheel-[a-z0-9]+(?:\.[0-9]+)?)\b")
@@ -71,7 +88,10 @@ DISPOSITION_RE = re.compile(
     r"documented runtime state|runtime status|schema field|fixture language|"
     r"example only|error message|not a supported path|release blocker|support copy|"
     r"gated[- ]evaluation|gated by live evidence|Promotion is blocked|"
-    r"blocked until|blocked as expected)\b",
+    r"blocked until|blocked as expected|remaining public[- ]release blockers|"
+    r"remaining release blockers|remaining public blockers|remaining blockers|readiness blockers clear|"
+    r"current blocker set|former blocker code|without granting public release approval|"
+    r"publication_readiness\.py|public blocker coverage)\b",
     re.IGNORECASE,
 )
 BENIGN_SOFT_RE = re.compile(
@@ -142,6 +162,42 @@ def scan_file(repo: Path, path: Path) -> list[dict[str, object]]:
     return findings
 
 
+def scan_site_quality(repo: Path, path: Path) -> list[dict[str, object]]:
+    rel = path.relative_to(repo).as_posix()
+    if rel not in SITE_OWNER_FILES:
+        return []
+
+    findings: list[dict[str, object]] = []
+    text = path.read_text(errors="replace")
+    for line_no, raw in enumerate(text.splitlines(), start=1):
+        for code, pattern in SITE_FORBIDDEN_COPY:
+            if pattern.search(raw):
+                findings.append(
+                    {
+                        "path": rel,
+                        "line": line_no,
+                        "kind": "public_site_copy_smell",
+                        "code": code,
+                        "dispositioned": False,
+                        "text": raw.strip(),
+                    }
+                )
+
+    for code, literal in SITE_REQUIRED_COPY.get(rel, {}).items():
+        if literal not in text:
+            findings.append(
+                {
+                    "path": rel,
+                    "line": 0,
+                    "kind": "public_site_story_contract_missing",
+                    "code": code,
+                    "dispositioned": False,
+                    "text": literal,
+                }
+            )
+    return findings
+
+
 def resolve_files(repo: Path, files: list[str]) -> tuple[list[Path], list[str]]:
     resolved: list[Path] = []
     missing: list[str] = []
@@ -158,14 +214,18 @@ def resolve_files(repo: Path, files: list[str]) -> tuple[list[Path], list[str]]:
 
 def payload(repo: Path, files: list[Path], missing: list[str], release: bool) -> dict[str, object]:
     findings: list[dict[str, object]] = []
+    quality_findings: list[dict[str, object]] = []
     for file in files:
         findings.extend(scan_file(repo, file))
+        quality_findings.extend(scan_site_quality(repo, file))
     undispositioned = [row for row in findings if not row["dispositioned"]]
     errors: list[dict[str, object]] = []
     if missing:
         errors.append({"code": "public_surface_missing", "paths": missing})
     if release and undispositioned:
         errors.append({"code": "undispositioned_public_gap", "count": len(undispositioned)})
+    if release and quality_findings:
+        errors.append({"code": "public_site_story_contract_failed", "count": len(quality_findings)})
     return {
         "schema_version": "flywheel.public_surface_gap_scan.v0",
         "status": "fail" if errors else "pass",
@@ -175,8 +235,10 @@ def payload(repo: Path, files: list[Path], missing: list[str], release: bool) ->
         "files": [path.relative_to(repo).as_posix() for path in files],
         "finding_count": len(findings),
         "undispositioned_count": len(undispositioned),
+        "quality_finding_count": len(quality_findings),
         "findings": findings,
         "undispositioned": undispositioned,
+        "quality_findings": quality_findings,
         "errors": errors,
     }
 

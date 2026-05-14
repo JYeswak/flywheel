@@ -103,12 +103,52 @@ else
   fail "code missing variable ignored"
 fi
 
+mkdir -p "$TMP/site"
+cat >"$TMP/site/index.html" <<'EOF'
+<html lang="en">
+<body>
+<p>The public story should not depend on what an agent remembers from today's session.</p>
+</body>
+</html>
+EOF
+
+set +e
+run_capture "$TMP/bad-site.json" "$TMP/bad-site.err" python3 "$SCRIPT" --repo "$TMP" --file site/index.html --release --json
+bad_site_rc=$?
+set -e
+if [[ "$bad_site_rc" -eq 1 ]] \
+  && jq -e '.status == "fail" and .quality_finding_count >= 1 and (.errors[]?.code == "public_site_story_contract_failed") and any(.quality_findings[]?; .code == "site_session_memory_copy")' "$TMP/bad-site.json" >/dev/null; then
+  pass "owner-facing site rejects session-memory copy"
+else
+  fail "owner-facing site rejects session-memory copy rc=${bad_site_rc}"
+fi
+
+cat >"$TMP/site/index.html" <<'EOF'
+<html lang="en">
+<body>
+<p>Joshua works close to advanced open-source AI infrastructure.</p>
+<p>The buyer does not need to understand the machinery.</p>
+<p>The value is knowing the operator does.</p>
+<p>one bounded slice, one proof state, and one reusable lesson</p>
+<a href="docs/stories/flywheel-trajectory.md">Inspect the trajectory</a>
+</body>
+</html>
+EOF
+
+if python3 "$SCRIPT" --repo "$TMP" --file site/index.html --release --json >"$TMP/good-site.json" \
+  && jq -e '.status == "pass" and .quality_finding_count == 0' "$TMP/good-site.json" >/dev/null; then
+  pass "owner-facing site passes story contract"
+else
+  fail "owner-facing site passes story contract"
+fi
+
 if python3 "$SCRIPT" --repo "$ROOT" --release --json >"$TMP/live.json" \
-  && jq -e '.status == "pass" and .file_count >= 48 and .undispositioned_count == 0' "$TMP/live.json" >/dev/null; then
+  && jq -e '.status == "pass" and .file_count >= 48 and .undispositioned_count == 0 and .quality_finding_count == 0' "$TMP/live.json" >/dev/null; then
   pass "live public surfaces pass release scan"
 else
   fail "live public surfaces pass release scan"
   jq '.undispositioned' "$TMP/live.json" >&2 || true
+  jq '.quality_findings' "$TMP/live.json" >&2 || true
 fi
 
 for required_path in \

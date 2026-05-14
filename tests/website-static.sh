@@ -66,6 +66,10 @@ require_literal "index.html" "I help SMB owners buy their time back." "landing c
 require_literal "index.html" "A slice is one bounded workflow improvement" "landing defines workflow slice"
 require_literal "index.html" "Blocked is better than bluffing" "landing names blocked-over-bluffing trust stance"
 require_literal "index.html" "Flywheel has a history, not just a homepage." "landing names git-derived trajectory"
+require_literal "index.html" "advanced open-source AI infrastructure" "landing names advanced open-source AI authority"
+require_literal "index.html" "The buyer does not need to understand the machinery." "landing separates buyer value from machinery"
+require_literal "index.html" "The value is knowing the operator does." "landing ties authority to operator trust"
+require_literal "index.html" "one bounded slice, one proof state, and one reusable lesson" "landing translates machinery into value"
 require_literal "index.html" "Repo Trajectory Story Pack" "landing names reusable trajectory pack"
 require_literal "index.html" "Inspect the trajectory" "landing exposes trajectory CTA"
 require_literal "index.html" "docs/stories/flywheel-trajectory.md" "landing links generated trajectory"
@@ -111,6 +115,7 @@ done
 reject_literal "Compatibility target until isolated runtime proof exists" "stale compatibility target copy absent"
 reject_literal "Compatibility target until daemon or gateway smoke proves behavior" "stale OpenClaw target copy absent"
 reject_literal "Agent-specific lanes stay compatibility targets" "stale homepage compatibility paragraph absent"
+reject_literal "what an agent remembers from today's session" "session-memory copy absent from public site"
 
 if rg -q '<img [^>]*alt=""' "$SITE"; then
   fail "no empty image alt text"
