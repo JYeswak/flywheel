@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flywheel For Developers | ZestStream</title>
-    <meta name="description" content="Run Flywheel locally in reduced mode, inspect receipts, and only then wire agent-specific lanes.">
+    <meta name="description" content="Study the open agent system Joshua runs: Jeff Emanuel's substrate, plus Flywheel and SkillOS on top.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
@@ -28,66 +28,107 @@
         <div class="scene-floor" aria-hidden="true"></div>
         <div class="shell hero-story">
           <div class="hero-story-inner">
-            <div class="hero-eyebrow"><span class="hot">Developer path</span><span>Reduced first</span><span>No ambient substrate</span></div>
-            <h1 id="dev-title">Run the reduced lane before you trust the full machinery.</h1>
-            <p class="hero-plain">Start with local proof, inspect the receipts, then decide whether the 4/4 supported agent lanes belong in your workflow.</p>
-            <p class="operator-proof-line">I help SMB owners buy their time back. The developer path exists so the proof is runnable before the pitch gets bigger.</p>
+            <div class="hero-eyebrow"><span class="hot">Developer study path</span><span>Jeff substrate</span><span>Joshua layer</span></div>
+            <h1 id="dev-title">Study the agent system I run every day.</h1>
+            <p class="hero-plain">I run parallel coding agents against real repos, keep their work visible, and turn useful lessons into repeatable checks.</p>
+            <p class="operator-proof-line">Jeff Emanuel built the open-source substrate. I built Flywheel and SkillOS on top, and I am making both public so you can clone them, run them locally, and decide what belongs in your own setup.</p>
             <div class="actions">
-              <a class="button" href="https://github.com/JYeswak/flywheel">Open repository</a>
-              <a class="button secondary" href="../methodology/index.html">Understand the method</a>
+              <a class="button" href="https://github.com/JYeswak/flywheel">Clone Flywheel</a>
+              <a class="button secondary" href="#architecture">Study the loop</a>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="section-theater dark" aria-labelledby="terminal-title">
+      <section class="section-theater dark" aria-labelledby="jeff-title">
+        <div class="shell">
+          <div class="room-header">
+            <div>
+              <p class="kicker">The foundation</p>
+              <h2 id="jeff-title">Jeff Emanuel built the substrate I stand on.</h2>
+            </div>
+            <p>I did not build NTM, Agent Mail, beads, or CASS. Jeff Emanuel, also known as Dicklesworthstone, did. I use his work because it solves the local-agent problems that matter before any higher layer is useful.</p>
+          </div>
+          <div class="proof-grid developer-study-grid" aria-label="Jeff Emanuel substrate components">
+            <article><span>Jeff Emanuel</span><strong>NTM</strong><p>Named Tmux Manager gives agent panes stable names, session shape, and a way to route work without guessing which terminal is which.</p></article>
+            <article><span>Jeff Emanuel</span><strong>Agent Mail</strong><p>Agent Mail gives agents durable messages, acknowledgements, and thread history so cross-agent work does not vanish into scrollback.</p></article>
+            <article><span>Jeff Emanuel</span><strong>beads</strong><p>beads gives the repo a local issue graph: work can be opened, blocked, linked, closed, and inspected without a hosted tracker.</p></article>
+            <article><span>Jeff Emanuel</span><strong>CASS</strong><p>CASS-style memory keeps useful context available without forcing every agent to rediscover the same facts every session.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-theater" aria-labelledby="built-title">
+        <div class="shell">
+          <div class="room-header">
+            <div>
+              <p class="kicker">What I built on top</p>
+              <h2 id="built-title">Flywheel and SkillOS turn the substrate into a working loop.</h2>
+            </div>
+            <p>Flywheel is my repo-local operating loop. SkillOS is the capability layer beside it. Together they make agent work easier to inspect, reuse, and run across Claude Code, Codex CLI, Gemini CLI, and OpenClaw.</p>
+          </div>
+          <div class="manual-flow" aria-label="Joshua-built layers">
+            <div><span>Flywheel</span><strong>Repo-local loop</strong><p>Mission, goal, state, doctor checks, daily reports, local preflight, and closeout receipts live with the repo.</p></div>
+            <div><span>SkillOS</span><strong>Capability control</strong><p>Skills become explicit capabilities with validators, adoption proof, and pack-level status instead of ambient prompt memory.</p></div>
+            <div><span>Research</span><strong>Knowledge packs</strong><p>External changes can become testable, reproducible packs that agents can load instead of re-learning the same update.</p></div>
+            <div><span>Routing</span><strong>Right model, right task</strong><p>Planning, implementation, cleanup, and local checks do not need the same model or the same context every time.</p></div>
+            <div><span>Proof</span><strong>Blocked beats guessed</strong><p>When a claim is not proven, the system says so. Red evidence is useful because it keeps the next step honest.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-theater warm" id="architecture" aria-labelledby="architecture-title">
+        <div class="shell">
+          <div class="room-header">
+            <div>
+              <p class="kicker">How it works</p>
+              <h2 id="architecture-title">The loop is simple enough to study and strict enough to keep.</h2>
+            </div>
+            <p>A repo starts with a mission. Agents take bounded work. Each run leaves receipts, tests, and lessons. Useful lessons move into skills or packs. The next repo starts with more of the map already drawn.</p>
+          </div>
+          <div class="trajectory-stage developer-architecture" aria-label="Flywheel architecture path">
+            <article><span>01</span><strong>Parallel agents</strong><p>Claude Code, Codex CLI, Gemini CLI, and OpenClaw can each work from the same repo-local state without assuming one private runtime.</p></article>
+            <article><span>02</span><strong>Shared feedback</strong><p>Daily reports, closeout receipts, and beads turn agent work into inspectable history instead of one long chat transcript.</p></article>
+            <article><span>03</span><strong>Reusable knowledge</strong><p>When internet research or repo work proves useful, SkillOS can turn it into a pack with validators and status.</p></article>
+            <article><span>04</span><strong>Local gates first</strong><p>Preflight, doctor, visual checks, and local containers catch basic breakage before GitHub Actions becomes final approval.</p></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-theater dark" aria-labelledby="take-title">
         <div class="shell system-room">
           <div>
-            <p class="kicker">Local preflight</p>
-            <h2 id="terminal-title">GitHub Actions should be final approval, not the first place you find basic breakage.</h2>
-            <p class="hero-plain">I favor local containers, dry-runs, doctor receipts, and screenshot checks before spending hosted CI minutes.</p>
+            <p class="kicker">Take it</p>
+            <h2 id="take-title">There are two honest doors.</h2>
+            <p class="hero-plain">You can use Jeff Emanuel's open-source tools directly. You can also clone Flywheel and SkillOS, run the installer locally, and keep working without me. The install path is scoped to <code>~/.flywheel/engine</code>; dry-run is available before files are copied.</p>
           </div>
-          <div class="terminal-stage" aria-label="Reduced local mode command panel">
-            <div class="panel-topline"><span>LOCAL PREFLIGHT</span><span>NO GITHUB SPEND</span></div>
+          <div class="terminal-stage" aria-label="Public local install commands">
+            <div class="panel-topline"><span>LOCAL INSTALL</span><span>DRY-RUN FIRST</span></div>
             <pre><code>git clone https://github.com/JYeswak/flywheel.git
+git clone https://github.com/JYeswak/zeststream-skillos.git
 cd flywheel
-scripts/preflight.sh --json
-scripts/journey-smoke.sh --matrix claude,codex,gemini,openclaw,reduced --dry-run --json</code></pre>
+bash install.sh --dry-run --json
+bash install.sh --json</code></pre>
           </div>
         </div>
       </section>
 
-      <section class="section-theater" aria-labelledby="tiers-title">
+      <section class="section-theater" aria-labelledby="deal-title">
         <div class="shell">
           <div class="room-header">
             <div>
-              <p class="kicker">Support tiers</p>
-              <h2 id="tiers-title">Each lane has to earn its label.</h2>
+              <p class="kicker">The deal</p>
+              <h2 id="deal-title">Use it for free. Call me when you want help.</h2>
             </div>
-            <p>The developer path has to work inside and outside NTM. Reduced local mode is required, and 4 named agent lanes carry isolated runtime receipts before I call them supported.</p>
+            <p>I am following the rulebook that made Jeff's work useful to me: make the system available, document the sharp edges, and let the work earn trust. If you get stuck, want this wired into a real repo, or want the commercial version of the loop, reach me directly.</p>
           </div>
-          <div class="manual-flow" aria-label="Agent support lane console">
-            <div><span>Required</span><strong>Reduced local mode</strong><p>Proven fallback path for preflight, init, doctor, tick, dispatch simulation, closeout, and next action without private substrate.</p></div>
-            <div><span>Proven</span><strong>Claude Code</strong><p>Isolated runtime receipt proves the lane with a live adapter response and clean private-state scan.</p></div>
-            <div><span>Proven</span><strong>Codex CLI</strong><p>Isolated runtime receipt proves the lane using an explicit operator-provided Codex auth home while target repo and HOME stay isolated.</p></div>
-            <div><span>Proven</span><strong>Gemini CLI</strong><p>Isolated runtime receipt proves the lane with live adapter response and the same required journey stages.</p></div>
-            <div><span>Proven</span><strong>OpenClaw</strong><p>Isolated runtime receipt proves behavior through a disposable isolated OpenClaw agent.</p></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section-theater warm" aria-labelledby="cost-title">
-        <div class="shell">
-          <div class="room-header">
-            <div>
-              <p class="kicker">Cost discipline</p>
-              <h2 id="cost-title">Fast systems should not burn expensive context to prove routine work.</h2>
-            </div>
-            <p>The same principle that makes Flywheel safer for SMB workflows makes it cheaper to operate: grep before fetching, batch routine checks, route the right model to the right task, and save hosted CI for final confirmation.</p>
+          <div class="actions">
+            <a class="button" href="../contact/index.html">Ask a developer question</a>
+            <a class="button secondary" href="https://github.com/JYeswak/flywheel">Open Flywheel on GitHub</a>
           </div>
         </div>
       </section>
     </main>
-    <footer class="footer"><div class="shell">Repository: <a href="https://github.com/JYeswak/flywheel">github.com/JYeswak/flywheel</a>.</div></footer>
+    <footer class="footer"><div class="shell">Flywheel by ZestStream. Jeff Emanuel's work: <a href="https://github.com/Dicklesworthstone">github.com/Dicklesworthstone</a>.</div></footer>
   </body>
 </html>
