@@ -30,13 +30,14 @@ public release line.
   CTA, proof refs, signoff status, and blocker/skip receipt refs before signoff.
 - Git-derived repo trajectory story pack, extractor, generated Flywheel
   trajectory evidence, embedded `zeststream.repo_story_message.v0` owner message
-  pack, and homepage trajectory rail so public story copy is grounded in commit
-  history instead of one session's memory.
+  pack, `zeststream.repo_story_dossier.v0` frontend story brief, and homepage
+  trajectory rail so public story copy is grounded in commit history instead of
+  one session's memory.
 - Candidate `@zeststream/story-system` package with shared story grammar, proof
-  states, visual primitives, blocked phrases, CSS tokens, and drift validator
+  states, visual primitives, excluded hype phrases, CSS tokens, and drift validator
   for Flywheel-powered frontend repos.
 - Private review signoff packet that gives the reviewer one map for the live
-  private site, story trajectory, journey contract, evidence, developer path,
+  staging site, story trajectory, journey contract, evidence, developer path,
   agent-lane proof, and remaining public-release blockers.
 - Publication goal completion audit and validator that map the active `/goal`
   to concrete artifacts while preserving the current not-complete verdict until

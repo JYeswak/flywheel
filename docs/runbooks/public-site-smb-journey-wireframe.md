@@ -1,11 +1,11 @@
 # Public Site SMB Journey Wireframe
 
 Schema: `flywheel.public_site_smb_journey_wireframe.v0`
-Status: `private-review-deep-system-reset-active`
+Status: `staging-review-deep-system-reset-active`
 Source pack ID: `user-journey-wireframe-pack`
 
 This wireframe replaces the rejected placeholder page. It is the governing
-story, visual system, and implementation target for the private
+story, visual system, and implementation target for the staged
 `flywheel.zeststream.ai` review surface. The current public page should be
 treated as scrapped unless a section below explicitly preserves it.
 
@@ -152,7 +152,7 @@ Recommended Next.js target:
 | Progressive evidence | Suspense and route-level loading states | Let proof drawers stream after the owner story is visible. |
 | Inspectable story pages | Route groups | Separate SMB routes, reviewer routes, and developer routes without duplicating layout code. |
 | Visual consistency | Shared CSS tokens package | Colors, status chips, proof rails, and workbench layouts travel across all ZestStream projects. |
-| Screenshot accountability | Playwright projects | Desktop and mobile screenshots must be checked before private review. |
+| Screenshot accountability | Playwright projects | Desktop and mobile screenshots must be checked before staging review. |
 
 ## Core Story
 

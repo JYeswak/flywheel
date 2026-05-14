@@ -25,9 +25,9 @@ Flywheel keeps public state repo-local.
 | `docs/brand/naming-conventions.md` | Public naming contract separating ZestStream, the Yuzu Method, Flywheel, SkillOS, upstream substrate, and proof surfaces. |
 | `docs/evidence/publication-evidence.md` | Public trust-claim evidence index. |
 | `docs/evidence/publication-blocker-coverage.md` | Public blocker-code ownership and closure-proof map. |
-| `docs/evidence/private-review-signoff-packet.md` | Human private-review packet that maps site, story, evidence, developer path, agent-lane proof, and remaining public blockers without granting public release approval. |
+| `docs/evidence/staging-review-signoff-packet.md` | Human staging-review packet that maps site, story, evidence, developer path, agent-lane proof, and remaining public blockers without granting public release approval. |
 | `docs/evidence/publication-goal-completion-audit.md` | Prompt-to-artifact audit for the active publication goal and remaining release blockers. |
-| `docs/evidence/flywheel-trajectory.json` | Machine-readable `zeststream.repo_git_story.v0` trajectory evidence with embedded `zeststream.repo_story_message.v0` owner message pack. |
+| `docs/evidence/flywheel-trajectory.json` | Machine-readable `zeststream.repo_git_story.v0` trajectory evidence with embedded `zeststream.repo_story_message.v0` owner message pack and `zeststream.repo_story_dossier.v0` frontend story brief. |
 | `docs/evidence/external-review-log.jsonl` | Sanitized external-review evidence used by the public release workflow. |
 | `docs/stories/flywheel-trajectory.md` | Owner-readable generated trajectory story for reviewers and the public site. |
 | `docs/getting-started/first-run.md` | First-run guide. |

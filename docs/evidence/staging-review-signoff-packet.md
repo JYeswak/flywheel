@@ -1,9 +1,9 @@
-# Private Review Signoff Packet
+# Staging Review Signoff Packet
 
-Schema: `flywheel.private_review_signoff_packet.v0`
-Status: `private-review-ready-not-public-release`
+Schema: `flywheel.staging_review_signoff_packet.v0`
+Status: `staging-review-ready-not-public-release`
 
-This packet is the human review map for the private Flywheel 2.0 surface. It
+This packet is the human review map for the staged Flywheel 2.0 surface. It
 does not approve public GitHub, release assets, hosted runs, or final signoff.
 It exists so the reviewer can inspect the story, install path, proof surfaces,
 and remaining blockers in one place before authorizing any public cutover.
@@ -12,7 +12,7 @@ and remaining blockers in one place before authorizing any public cutover.
 
 | Surface | What to inspect | Evidence |
 |---|---|---|
-| Private site | The SMB journey, Yuzu Method, trajectory rail, developer lane copy, about page, and safe contact path. | `https://flywheel.zeststream.ai/`; `state/private-live-site-deploy.receipt.json`; `bash tests/website-static.sh`; `bash tests/website-accessibility.sh`; `python3 scripts/live_site_probe.py --base-url https://flywheel.zeststream.ai/ --json` |
+| Staged site | The SMB journey, Yuzu Method, trajectory rail, developer lane copy, about page, and safe contact path. | `https://flywheel.zeststream.ai/`; `state/private-live-site-deploy.receipt.json`; `bash tests/website-static.sh`; `bash tests/website-accessibility.sh`; `python3 scripts/live_site_probe.py --base-url https://flywheel.zeststream.ai/ --json` |
 | Git-derived story | Whether the page tells the real trajectory, not only the latest sprint. | `docs/stories/flywheel-trajectory.md`; `docs/evidence/flywheel-trajectory.json`; `bash tests/git-story-extract.sh` |
 | User journey contract | Whether every public asset has persona lane, stage, visible wording, visual cue, CTA, proof refs, signoff status, and blocker or skip receipt. | `docs/runbooks/public-user-journey-pack.md`; `python3 scripts/validate_user_journey_pack.py --json`; `bash tests/public-user-journey-pack.sh` |
 | Public evidence | Whether claims point to proof and live blockers stay visible. | `docs/evidence/publication-evidence.md`; `docs/evidence/publication-blocker-coverage.md`; `python3 scripts/publication_readiness.py --json` |
@@ -21,7 +21,7 @@ and remaining blockers in one place before authorizing any public cutover.
 
 ## Reviewer Questions
 
-1. Does the private site make an SMB owner feel the workflow problem before it
+1. Does the staged site make an SMB owner feel the workflow problem before it
    asks them to care about the machinery?
 2. Does the trajectory section explain how the work compounded from real repo
    history instead of sounding like a one-session rewrite?
@@ -29,7 +29,7 @@ and remaining blockers in one place before authorizing any public cutover.
    tone of the reference sites?
 4. Does the developer path state what is proven, what is reduced local mode, and
    what still requires public GitHub/release evidence?
-5. Is any claim too broad, too technical, or too close to private substrate?
+5. Is any claim too broad, too technical, or too close to operator-only substrate?
 
 ## Current Blockers
 
@@ -43,7 +43,7 @@ real public cutover happens. Current blocker codes:
 - `github_release_assets_missing`
 - `joshua_release_signoff_missing`
 
-The reviewer can approve the private site direction while still withholding
+The reviewer can approve the staged site direction while still withholding
 public release approval. Public release approval requires the cutover runbook and
 receipt bundle in `docs/runbooks/release-cutover-authorization.md`.
 
@@ -51,6 +51,6 @@ receipt bundle in `docs/runbooks/release-cutover-authorization.md`.
 
 | Review outcome | Meaning |
 |---|---|
-| Private site approved | The story direction is acceptable for private review and can be used as the basis for operator site work. |
+| Staged site approved | The story direction is acceptable for staged review and can be used as the basis for operator site work. |
 | Public release approved | Not granted by this packet. Requires public repo, workflows, green hosted runs, release assets, and exact final signoff. |
-| Changes requested | Keep GitHub private, update the site or docs, re-run the checks above, and refresh this packet. |
+| Changes requested | Keep GitHub unreleased, update the site or docs, re-run the checks above, and refresh this packet. |

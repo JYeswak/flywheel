@@ -144,14 +144,14 @@ if [[ -f "$CUTOVER_PACKET" ]]; then
     fail "cutover packet states no-agent-publication boundary"
   fi
 
-  if rg -qF 'A fixture, local staging export, or private review packet is not' "$CUTOVER_PACKET"; then
+  if rg -qF 'A fixture, local staging export, or staging review packet is not' "$CUTOVER_PACKET"; then
     pass "cutover packet rejects proxy completion evidence"
   else
     fail "cutover packet rejects proxy completion evidence"
   fi
 fi
 
-if [[ -s "$PUBLIC_CUTOVER" ]] && rg -qF 'A fixture, local staging export, private review packet, or' "$PUBLIC_CUTOVER"; then
+if [[ -s "$PUBLIC_CUTOVER" ]] && rg -qF 'A fixture, local staging export, staging review packet, or' "$PUBLIC_CUTOVER"; then
   pass "public cutover runbook rejects proxy completion evidence"
 else
   fail "public cutover runbook rejects proxy completion evidence"

@@ -47,7 +47,7 @@ REQUIRED_LOCAL_FILES = [
     "docs/brand/naming-conventions.md",
     "docs/evidence/publication-evidence.md",
     "docs/evidence/publication-blocker-coverage.md",
-    "docs/evidence/private-review-signoff-packet.md",
+    "docs/evidence/staging-review-signoff-packet.md",
     "docs/evidence/flywheel-trajectory.json",
     "docs/evidence/asupersync-gated-adoption.md",
     "docs/evidence/asupersync-poc-receipt.template.json",

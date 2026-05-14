@@ -20,6 +20,7 @@ Every repo-facing public story must have three layers:
 |---|---|---|
 | Generated trajectory | Reviewer, operator | Extract sanitized chapters from git history with commit evidence. |
 | Owner message pack | SMB owner, buyer | Translate the trajectory into promise, objections, page arc, CTA, and visual primitives. |
+| Story dossier | Designer, frontend engineer, copy reviewer | Turn the generated history into page rooms, owner language, visual direction, and Next.js implementation targets. |
 | Designed story surface | SMB owner, buyer | Translate the trajectory into plain language, visual rhythm, and CTA flow. |
 
 The generated layer is produced with:
@@ -89,12 +90,32 @@ Required message fields:
 The owner message is not a summary of commits. It is a packaging layer that
 answers a business question: "Why should I trust this person with my workflow?"
 
+The extractor also emits `story_dossier` with schema
+`zeststream.repo_story_dossier.v0`. This is the reusable build brief for
+Flywheel-powered frontend work. It tells the next repo which page rooms,
+language choices, visual primitives, proof drawers, and Next.js foundations to
+inherit before design or copy work begins.
+
+Required dossier fields:
+
+| Field | Purpose |
+|---|---|
+| `audience_truths[]` | The plain truths the page must respect about SMB owners. |
+| `owner_language_bank` | Reusable 2026 sales language that sells proof, control, and time back instead of AI novelty. |
+| `reference_patterns[]` | What to learn from advanced reference sites without copying their audience or voice. |
+| `page_blueprint[]` | The required story rooms and component targets for the page arc. |
+| `nextjs_foundation_targets` | Routes, Server Components, Client Components, data sources, and quality gates. |
+| `visual_direction` | Rules for first impression, density, motion, and real workflow imagery. |
+| `signoff_questions[]` | Human review questions before any public page claims readiness. |
+
 ## 2026 SMB Language Rules
 
 Current SMB adoption research points to the same useful language pattern:
 owners want time back, simpler operations, human approval, privacy clarity,
 training, and proof from businesses that look like theirs. They do not need a
-tour of the agent stack before they understand the offer.
+tour of the agent stack before they understand the offer. The public language
+should sound like an operator who understands cash flow, follow-up, busywork,
+and customer experience, not a developer showing off tools.
 
 Use these translations:
 
@@ -109,16 +130,19 @@ Use these translations:
 
 Source anchors reviewed for this wording:
 
-- Business.com 2026 Small Business AI Outlook: adoption is rising, but workers
-  still worry about reputation, over-implementation, and whether work stays
-  human-led.
-- inTandem/vcita 2026 SMB adoption report: SMB owners prefer AI that drafts,
-  suggests, organizes, and waits for approval before execution.
-- Connected Commerce Council 2026 SMB study: small-business leaders are
-  investing in AI training and adoption, with time savings and productivity as
-  the practical frame.
-- Dun & Bradstreet 2025 and 2026 AI data-quality research: trust depends on the
-  reliability, readiness, and governance of the data feeding AI systems.
+- Intuit QuickBooks 2026 AI Impact Report: SMB adoption is now widespread, the
+  top barriers cluster around privacy, security, fear of errors, and uncertainty
+  about what AI can do, and owners reach first for admin, customer
+  communication, and scheduling work.
+- Salesforce Small Business Trends: SMB leaders report tool fatigue, competitive
+  pressure, and a willingness to spend more with trusted vendors; security
+  remains their top AI concern.
+- Intuit QuickBooks Small Business Insights: many small businesses use six or
+  more digital systems and still rely on manual processes, which supports
+  workflow-language over model-language.
+- McKinsey State of AI 2025: higher-performing AI adopters are more likely to
+  define when human validation is needed for accuracy, which supports the Yuzu
+  Method's human-approved slice language.
 
 ## Copy Rule
 
@@ -174,6 +198,16 @@ should inherit:
 - a repo-local generated story artifact wired into the page, not manually
   copied from the last session.
 
+The dossier's default Next.js target is:
+
+| Layer | Target |
+|---|---|
+| Routes | `/`, `/method`, `/proof`, `/story`, `/contact` |
+| Server Components | `RepoStoryData`, `ProofManifest`, `TrajectoryRail`, `LessonLedger` |
+| Client Components | `WorkflowMap`, `SliceWorkbench`, `ProofDrawer`, `TrustWorryMatrix` |
+| Data sources | Generated repo trajectory JSON, generated Markdown story, and `@zeststream/story-system` config. |
+| Gates | Story artifact exists, screenshots prove the visual primitives render, blocked phrases are absent, and proof drawers do not expose private raw state. |
+
 The candidate shared package lives at `packages/zeststream-story-system/`:
 
 | File | Job |
@@ -198,18 +232,24 @@ A repo trajectory story is acceptable when:
    `zeststream.repo_story_message.v0`.
 3. The message pack contains owner promise, story arc, trust objections, visual
    primitives, proof translations, and blocked phrases.
-4. The extractor records which `redaction_table` was used and works when the
+4. Generated JSON includes `story_dossier.schema_version` equal to
+   `zeststream.repo_story_dossier.v0`.
+5. The dossier contains audience truths, owner language bank, reference
+   patterns, page blueprint, Next.js foundation targets, visual direction, and
+   signoff questions.
+6. The extractor records which `redaction_table` was used and works when the
    target repo has not adopted a repo-local table yet.
-5. `packages/zeststream-story-system/story-system.json` matches the generated
-   message pack for stages, primitives, CTA, core offer, and objection count.
-6. `packages/zeststream-story-system/tokens.css` matches required public site
+7. `packages/zeststream-story-system/story-system.json` matches the generated
+   message pack and dossier for stages, primitives, CTA, core offer, objection
+   count, owner language, audience truths, and page blueprint.
+8. `packages/zeststream-story-system/tokens.css` matches required public site
    visual tokens.
-7. Generated JSON and Markdown contain no private paths, client names, or
+9. Generated JSON and Markdown contain no private paths, client names, or
    unsupported claims.
-8. The public page includes the trajectory as a buyer journey, not a developer
+10. The public page includes the trajectory as a buyer journey, not a developer
    changelog.
-9. The page links to the generated story artifact for reviewers.
-10. Any claim based on runtime support, release status, or public availability
+11. The page links to the generated story artifact for reviewers.
+12. Any claim based on runtime support, release status, or public availability
    still points to its own proof receipt.
 
 Flywheel's current generated artifacts:

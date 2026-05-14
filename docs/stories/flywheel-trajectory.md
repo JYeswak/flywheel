@@ -17,9 +17,9 @@ friction, what changed, and which lessons became reusable.
 
 - First commit date: `2026-04-30`
 - Latest commit date: `2026-05-13`
-- Commits inspected: `1481`
+- Commits inspected: `1487`
 - First commit: `aa079a83` feat(scripts): add source_repo backfill script for all local beads DBs
-- Latest commit: `6334f394` docs(site): refresh private live deploy receipt [work item]
+- Latest commit: `d25f878c` chore(beads): record release runbook gate evidence [work item]
 
 ## Public Story Arc
 
@@ -29,7 +29,7 @@ The first useful proof is not a polished page. It is a workbench where the goal,
 
 Owner translation: For an SMB owner, this means the project starts by mapping how work really moves before anyone promises automation.
 
-Commit evidence: `388` matching commits from `2026-04-30` to `2026-05-13`.
+Commit evidence: `392` matching commits from `2026-04-30` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -45,7 +45,7 @@ The system moved from work being described after the fact to work being closed w
 
 Owner translation: That is the difference between an AI demo and an operating process: the claim does not move forward until the proof can follow it.
 
-Commit evidence: `800` matching commits from `2026-04-30` to `2026-05-13`.
+Commit evidence: `802` matching commits from `2026-04-30` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -61,15 +61,15 @@ The useful pivots came from red evidence: private residue, unsupported lanes, st
 
 Owner translation: This is where trust is earned. The process treats blocked evidence as useful signal, not as something to hide in a footnote.
 
-Commit evidence: `212` matching commits from `2026-05-04` to `2026-05-13`.
+Commit evidence: `216` matching commits from `2026-05-04` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
 | 2026-05-13 | `b4d28c6b` | fix(public): depersonalize repo mission surfaces [work item] |
-| 2026-05-13 | `6e8b0fb5` | feat(publication): prepare private review bundle |
-| 2026-05-13 | `adc8dfe1` | fix(ci): repair private review checks |
 | 2026-05-13 | `90365f80` | chore(site): record private live SMB deploy |
 | 2026-05-13 | `e30e3c25` | fix(public-export): preserve test fixtures in staged package [work item] |
+| 2026-05-13 | `21dfde36` | docs(readiness): refresh public export evidence [work item] |
+| 2026-05-13 | `ebc44c95` | docs(readiness): refresh public export evidence [work item] |
 
 ### Reuse: keep lessons that survived contact with reality
 
@@ -77,7 +77,7 @@ Once a pattern worked, it moved into runbooks, scripts, tests, docs, shared lang
 
 Owner translation: Every project should make the next project safer and faster. That is the compounding part of the Flywheel.
 
-Commit evidence: `646` matching commits from `2026-04-30` to `2026-05-13`.
+Commit evidence: `651` matching commits from `2026-04-30` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -93,7 +93,7 @@ The current arc is making the proof understandable to a non-technical owner: wha
 
 Owner translation: Show the proof, not the dream: one bounded workflow slice, one visible control path, one lesson that compounds into the next build.
 
-Commit evidence: `130` matching commits from `2026-05-04` to `2026-05-13`.
+Commit evidence: `134` matching commits from `2026-05-04` to `2026-05-13`.
 
 | Date | Commit | What changed |
 |---|---|---|
@@ -135,6 +135,43 @@ Required visual primitives:
 | `YuzuMethodRail` | Repeat Peel, Press, Pour as map, prove, and reuse. |
 | `TrajectoryRail` | Translate git history into origin, friction, proof loop, reuse, and current arc. |
 | `ProofDrawer` | Let reviewers inspect generated artifacts after the owner story lands. |
+| `LessonLedger` | Show how hard-earned lessons become reusable checks, copy, components, or runbooks. |
+| `SafeContactPanel` | Ask for a redacted workflow example while keeping secrets and raw customer data out. |
+
+## Story Dossier
+
+Schema: `zeststream.repo_story_dossier.v0`
+
+Turn repo history into an SMB-facing page brief that proves trajectory without making commit volume the sales claim.
+
+Audience truths:
+
+- The owner is usually buying back time, not buying AI.
+- The pain lives between systems: email, CRM, scheduling, invoices, documents, reports, and staff memory.
+- Trust comes from human approval, narrow scope, privacy clarity, and visible stop conditions.
+- A beautiful public surface must still behave like proof: every claim either has evidence or stays blocked.
+- Commit history is not the pitch. The pitch is the trajectory those commits prove.
+
+Page blueprint:
+
+| Section | Component | Job |
+|---|---|---|
+| `operating-room-hero` | `OperatingRoomHero` | Make the owner feel the trapped work between tools before naming AI. |
+| `owner-tension-room` | `OwnerTensionRoom` | Name the ten reasons SMB owners hesitate and show the control beside each one. |
+| `slice-workbench` | `SliceWorkbench` | Define a slice as the safe unit of work: useful, inspectable, stoppable. |
+| `proof-theater` | `ProofRail` | Show proven, blocked, skipped, and private states without forcing raw receipt reading. |
+| `trajectory-room` | `TrajectoryRail` | Convert git history into origin, friction, proof loop, reuse, and current arc. |
+| `lesson-ledger` | `LessonLedger` | Show which lessons became shared checks, copy, tokens, components, or runbooks. |
+| `decision-room` | `ProofDrawer` | Let technical reviewers inspect artifacts after the owner story lands. |
+| `safe-contact-room` | `SafeContactPanel` | Ask for a redacted workflow example, not secrets or broad access. |
+
+Owner language bank:
+
+- The map comes before automation.
+- Blocked is better than bluffing.
+- The owner approves the slice.
+- Private work stays private.
+- A lesson is only valuable when the next project inherits it.
 
 ## Use On The Public Site
 

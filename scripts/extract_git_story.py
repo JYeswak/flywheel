@@ -18,6 +18,7 @@ from depersonalize import DEFAULT_TABLE, load_replacement_table, repo_root, tran
 
 SCHEMA_VERSION = "zeststream.repo_git_story.v0"
 MESSAGE_SCHEMA_VERSION = "zeststream.repo_story_message.v0"
+DOSSIER_SCHEMA_VERSION = "zeststream.repo_story_dossier.v0"
 
 NATURAL_PLACEHOLDERS = {
     "{operator}": "the operator",
@@ -33,6 +34,16 @@ NATURAL_PLACEHOLDERS = {
     "{title-client}": "a title client",
     "{bead-id}": "work item",
 }
+
+PUBLIC_HISTORY_REPHRASES = (
+    ("private review bundle", "staging review bundle"),
+    ("private review checks", "staging review checks"),
+    ("private review packet", "staging review packet"),
+    ("private-review", "staging-review"),
+    ("private site", "staging site"),
+    ("Private site", "Staging site"),
+    ("Keep GitHub private", "Hold GitHub release"),
+)
 
 
 @dataclass(frozen=True)
@@ -50,6 +61,9 @@ CHAPTERS = [
         "title": "Foundation: make the work visible",
         "owner_value": "The first useful proof is not a polished page. It is a workbench where the goal, current state, checks, and next action can be inspected instead of guessed.",
         "sales_translation": "For an SMB owner, this means the project starts by mapping how work really moves before anyone promises automation.",
+        "owner_takeaway": "We begin with the actual path work takes today, including the handoffs people have stopped noticing.",
+        "visual_scene": "A first-room operating map with existing tools, owner memory, and one highlighted manual route.",
+        "copy_block": "Before we automate anything, we make the work visible enough to inspect.",
         "keywords": {
             "loop",
             "doctor",
@@ -67,6 +81,9 @@ CHAPTERS = [
         "title": "Proof loop: turn activity into evidence",
         "owner_value": "The system moved from work being described after the fact to work being closed with receipts, tests, blockers, and replayable checks.",
         "sales_translation": "That is the difference between an AI demo and an operating process: the claim does not move forward until the proof can follow it.",
+        "owner_takeaway": "The value is not that an AI agent did work. The value is that the work left behind proof a business owner can question.",
+        "visual_scene": "A proof rail beside the workflow with proven, blocked, skipped-with-reason, and private states.",
+        "copy_block": "Claims earn their place on the page by surviving checks, not by sounding impressive.",
         "keywords": {
             "dispatch",
             "callback",
@@ -84,6 +101,9 @@ CHAPTERS = [
         "title": "Friction: expose the parts that were not ready",
         "owner_value": "The useful pivots came from red evidence: private residue, unsupported lanes, stale copy, brittle workflows, and claims that needed to be blocked until proven.",
         "sales_translation": "This is where trust is earned. The process treats blocked evidence as useful signal, not as something to hide in a footnote.",
+        "owner_takeaway": "Blocked evidence is a control surface. It shows the operator is willing to stop before chaos reaches the business.",
+        "visual_scene": "A visible friction band where unsupported claims are held in amber until the proof catches up.",
+        "copy_block": "If the proof is not ready, the claim stays blocked.",
         "keywords": {
             "public",
             "publish",
@@ -102,6 +122,9 @@ CHAPTERS = [
         "title": "Reuse: keep lessons that survived contact with reality",
         "owner_value": "Once a pattern worked, it moved into runbooks, scripts, tests, docs, shared language, or reusable operating rules instead of staying trapped in one session.",
         "sales_translation": "Every project should make the next project safer and faster. That is the compounding part of the Flywheel.",
+        "owner_takeaway": "The operator does not sell a fresh start every time. Each project improves the next project.",
+        "visual_scene": "A lesson ledger showing which checks, words, components, or runbooks were created from the last hard-earned lesson.",
+        "copy_block": "A useful lesson becomes a reusable method, not a memory in one chat window.",
         "keywords": {
             "isolated",
             "journey",
@@ -124,6 +147,9 @@ CHAPTERS = [
         "title": "Story: translate the machinery into a buying journey",
         "owner_value": "The current arc is making the proof understandable to a non-technical owner: what changed, why it was safe, where it stopped, and which lesson now carries forward.",
         "sales_translation": "Show the proof, not the dream: one bounded workflow slice, one visible control path, one lesson that compounds into the next build.",
+        "owner_takeaway": "The public page should feel like a guided visit through a working shop, not a generic AI pitch.",
+        "visual_scene": "A cinematic but calm buyer journey: workflow room, slice workbench, proof theater, trajectory rail, contact room.",
+        "copy_block": "The story lands when a buyer can see the workflow pain, the safe first slice, and the proof path without decoding the stack.",
         "keywords": {
             "site",
             "smb",
@@ -257,7 +283,172 @@ VISUAL_PRIMITIVES = [
         "name": "ProofDrawer",
         "job": "Let reviewers inspect generated artifacts after the owner story lands.",
     },
+    {
+        "name": "LessonLedger",
+        "job": "Show how hard-earned lessons become reusable checks, copy, components, or runbooks.",
+    },
+    {
+        "name": "SafeContactPanel",
+        "job": "Ask for a redacted workflow example while keeping secrets and raw customer data out.",
+    },
 ]
+
+AUDIENCE_TRUTHS = [
+    "The owner is usually buying back time, not buying AI.",
+    "The pain lives between systems: email, CRM, scheduling, invoices, documents, reports, and staff memory.",
+    "Trust comes from human approval, narrow scope, privacy clarity, and visible stop conditions.",
+    "A beautiful public surface must still behave like proof: every claim either has evidence or stays blocked.",
+    "Commit history is not the pitch. The pitch is the trajectory those commits prove.",
+]
+
+OWNER_LANGUAGE_BANK = {
+    "lead_with": [
+        "buy back the time hiding between your tools",
+        "one workflow slice",
+        "mapped before motion",
+        "human-approved",
+        "proof state",
+        "blocked until proven",
+        "lessons that carry into the next build",
+        "the work your team already does by hand",
+    ],
+    "replace": [
+        {
+            "weak": "AI transformation",
+            "strong": "one inspected workflow improvement",
+        },
+        {
+            "weak": "autonomous agents",
+            "strong": "human-approved workflow slices",
+        },
+        {
+            "weak": "seamless integration",
+            "strong": "one route between the tools you already use",
+        },
+        {
+            "weak": "powerful automation",
+            "strong": "less copying, chasing, checking, and remembering",
+        },
+        {
+            "weak": "we built a lot",
+            "strong": "the repo history shows what changed and what stayed blocked",
+        },
+    ],
+    "proof_phrases": [
+        "The map comes before automation.",
+        "Blocked is better than bluffing.",
+        "The owner approves the slice.",
+        "Private work stays private.",
+        "A lesson is only valuable when the next project inherits it.",
+    ],
+}
+
+JEFF_INSPIRED_PATTERNS = [
+    {
+        "pattern": "status-rich first viewport",
+        "zeststream_translation": "Open with a live-feeling workflow room, not a generic hero or tool diagram.",
+    },
+    {
+        "pattern": "interactive demos and architecture tabs",
+        "zeststream_translation": "Use owner, method, proof, and reviewer rooms so the buyer can go shallow or deep.",
+    },
+    {
+        "pattern": "dense proof after a clear claim",
+        "zeststream_translation": "Lead with owner consequence, then let reviewers open receipts, tests, and generated artifacts.",
+    },
+    {
+        "pattern": "glossary/tooltips for advanced concepts",
+        "zeststream_translation": "Translate slice, proof state, blocker, and lesson ledger into plain language on hover or drawer.",
+    },
+    {
+        "pattern": "visual systems that make invisible runtime behavior visible",
+        "zeststream_translation": "Show routes, queues, proof rails, and friction bands as the visual language of the operator brand.",
+    },
+]
+
+PAGE_BLUEPRINT = [
+    {
+        "section_id": "operating-room-hero",
+        "component": "OperatingRoomHero",
+        "job": "Make the owner feel the trapped work between tools before naming AI.",
+        "proof_source": "message_pack.story_arc[recognize]",
+    },
+    {
+        "section_id": "owner-tension-room",
+        "component": "OwnerTensionRoom",
+        "job": "Name the ten reasons SMB owners hesitate and show the control beside each one.",
+        "proof_source": "message_pack.trust_objections",
+    },
+    {
+        "section_id": "slice-workbench",
+        "component": "SliceWorkbench",
+        "job": "Define a slice as the safe unit of work: useful, inspectable, stoppable.",
+        "proof_source": "message_pack.story_arc[bound]",
+    },
+    {
+        "section_id": "proof-theater",
+        "component": "ProofRail",
+        "job": "Show proven, blocked, skipped, and private states without forcing raw receipt reading.",
+        "proof_source": "message_pack.proof_translation",
+    },
+    {
+        "section_id": "trajectory-room",
+        "component": "TrajectoryRail",
+        "job": "Convert git history into origin, friction, proof loop, reuse, and current arc.",
+        "proof_source": "chapters",
+    },
+    {
+        "section_id": "lesson-ledger",
+        "component": "LessonLedger",
+        "job": "Show which lessons became shared checks, copy, tokens, components, or runbooks.",
+        "proof_source": "chapters[reuse]",
+    },
+    {
+        "section_id": "decision-room",
+        "component": "ProofDrawer",
+        "job": "Let technical reviewers inspect artifacts after the owner story lands.",
+        "proof_source": "docs/evidence/publication-evidence.md",
+    },
+    {
+        "section_id": "safe-contact-room",
+        "component": "SafeContactPanel",
+        "job": "Ask for a redacted workflow example, not secrets or broad access.",
+        "proof_source": "message_pack.story_arc[act]",
+    },
+]
+
+NEXTJS_FOUNDATION_TARGETS = {
+    "routes": [
+        "/",
+        "/method",
+        "/proof",
+        "/story",
+        "/contact",
+    ],
+    "server_components": [
+        "RepoStoryData",
+        "ProofManifest",
+        "TrajectoryRail",
+        "LessonLedger",
+    ],
+    "client_components": [
+        "WorkflowMap",
+        "SliceWorkbench",
+        "ProofDrawer",
+        "TrustWorryMatrix",
+    ],
+    "data_sources": [
+        "docs/evidence/repo-trajectory.json",
+        "docs/stories/repo-trajectory.md",
+        "packages/zeststream-story-system/story-system.json",
+    ],
+    "quality_gates": [
+        "generated story artifact must exist before page build",
+        "Playwright desktop and mobile screenshots must render nonblank visual primitives",
+        "blocked phrases from the story package cannot appear on public pages",
+        "proof drawers must not ship private raw state to the browser",
+    ],
+}
 
 
 def run_git(repo: Path, args: list[str]) -> str:
@@ -296,6 +487,8 @@ def sanitize(value: str, rows: list[Any], relpath: str = "git-history") -> str:
     sanitized = transform_text(value, rows, relpath)[0]
     for placeholder, replacement in NATURAL_PLACEHOLDERS.items():
         sanitized = sanitized.replace(placeholder, replacement)
+    for old, new in PUBLIC_HISTORY_REPHRASES:
+        sanitized = sanitized.replace(old, new)
     sanitized = sanitized.replace("—", ";")
     return sanitized
 
@@ -327,6 +520,9 @@ def chapter_payload(chapter: dict[str, Any], commits: list[Commit]) -> dict[str,
         "title": chapter["title"],
         "owner_value": chapter["owner_value"],
         "sales_translation": chapter["sales_translation"],
+        "owner_takeaway": chapter["owner_takeaway"],
+        "visual_scene": chapter["visual_scene"],
+        "copy_block": chapter["copy_block"],
         "commit_count": len(matches),
         "first_date": matches[0].date if matches else None,
         "latest_date": matches[-1].date if matches else None,
@@ -422,6 +618,7 @@ def build_story(repo: Path, repo_label: str, redaction_table: Path | None = None
         "chapters": chapters,
     }
     story["message_pack"] = build_message_pack(repo_label, story)
+    story["story_dossier"] = build_story_dossier(repo_label, story)
     return story
 
 
@@ -500,6 +697,39 @@ def build_message_pack(repo_label: str, story: dict[str, Any]) -> dict[str, Any]
     }
 
 
+def build_story_dossier(repo_label: str, story: dict[str, Any]) -> dict[str, Any]:
+    span = story["commit_span"]
+    return {
+        "schema_version": DOSSIER_SCHEMA_VERSION,
+        "source_story_schema": SCHEMA_VERSION,
+        "source_message_schema": MESSAGE_SCHEMA_VERSION,
+        "repo_label": repo_label,
+        "job": "Turn repo history into an SMB-facing page brief that proves trajectory without making commit volume the sales claim.",
+        "audience_truths": AUDIENCE_TRUTHS,
+        "owner_language_bank": OWNER_LANGUAGE_BANK,
+        "reference_patterns": JEFF_INSPIRED_PATTERNS,
+        "page_blueprint": PAGE_BLUEPRINT,
+        "nextjs_foundation_targets": NEXTJS_FOUNDATION_TARGETS,
+        "trajectory_summary": {
+            "start": f"Work began on {span['first_date']} with {span['first_commit']['subject']}.",
+            "current": f"The latest inspected movement is {span['latest_commit']['subject']} on {span['latest_date']}.",
+            "owner_meaning": "The repo has a visible path from setup, through friction, into proof, reuse, and public story.",
+        },
+        "visual_direction": {
+            "first_impression": "A working operating room for a real SMB workflow, not a floating SaaS card stack.",
+            "motion_rule": "Use motion to show handoff, proof state, and lesson carry-forward; do not use decoration-only motion.",
+            "density_rule": "Let the first screen feel alive, then let the buyer choose owner, method, proof, or reviewer depth.",
+            "asset_rule": "Use real workflow scenes, generated bitmap assets, or product-state visuals; avoid generic abstract gradients.",
+        },
+        "signoff_questions": [
+            "Can an SMB owner explain the first safe step after reading the page?",
+            "Can a reviewer trace every strong claim to a generated story artifact, receipt, or test?",
+            "Does the design make the workflow and proof path visible without requiring GitHub literacy?",
+            "Does the page feel ownable to the operator brand rather than copied from another builder's aesthetic?",
+        ],
+    }
+
+
 def render_markdown(story: dict[str, Any]) -> str:
     span = story["commit_span"]
     lines = [
@@ -550,7 +780,7 @@ def render_markdown(story: dict[str, Any]) -> str:
         lines.append("")
     lines.extend(
         [
-            "## Owner-Facing Message Pack",
+        "## Owner-Facing Message Pack",
             "",
             f"Schema: `{MESSAGE_SCHEMA_VERSION}`",
             "",
@@ -579,6 +809,42 @@ def render_markdown(story: dict[str, Any]) -> str:
     )
     for row in story["message_pack"]["visual_primitives"]:
         lines.append(f"| `{row['name']}` | {row['job']} |")
+    dossier = story["story_dossier"]
+    lines.extend(
+        [
+            "",
+            "## Story Dossier",
+            "",
+            f"Schema: `{DOSSIER_SCHEMA_VERSION}`",
+            "",
+            dossier["job"],
+            "",
+            "Audience truths:",
+            "",
+        ]
+    )
+    for truth in dossier["audience_truths"]:
+        lines.append(f"- {truth}")
+    lines.extend(
+        [
+            "",
+            "Page blueprint:",
+            "",
+            "| Section | Component | Job |",
+            "|---|---|---|",
+        ]
+    )
+    for row in dossier["page_blueprint"]:
+        lines.append(f"| `{row['section_id']}` | `{row['component']}` | {row['job']} |")
+    lines.extend(
+        [
+            "",
+            "Owner language bank:",
+            "",
+        ]
+    )
+    for phrase in dossier["owner_language_bank"]["proof_phrases"]:
+        lines.append(f"- {phrase}")
     lines.extend(
         [
             "",

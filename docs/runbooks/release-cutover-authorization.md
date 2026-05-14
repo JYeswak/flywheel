@@ -59,7 +59,7 @@ staging pass as public-release completion.
 ## Signoff Boundary
 
 The signoff file is last. It must remain absent or pending until all real public
-surfaces pass. A fixture, local staging export, private review packet, or
+surfaces pass. A fixture, local staging export, staging review packet, or
 successful local test suite is useful evidence, but it is not enough to approve
 the release.
 

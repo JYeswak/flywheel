@@ -99,7 +99,7 @@ for rel in \
   docs/brand/naming-conventions.md \
   docs/evidence/publication-evidence.md \
   docs/evidence/publication-blocker-coverage.md \
-  docs/evidence/private-review-signoff-packet.md \
+  docs/evidence/staging-review-signoff-packet.md \
   docs/evidence/publication-goal-completion-audit.md \
   docs/evidence/flywheel-trajectory.json \
   docs/evidence/asupersync-gated-adoption.md \
@@ -145,11 +145,11 @@ require_literal "docs/evidence/publication-evidence.md" "sha256:" "publication e
 require_literal "docs/evidence/publication-evidence.md" "docs/evidence/publication-blocker-coverage.md" "publication evidence links blocker coverage"
 require_literal "docs/evidence/publication-evidence.md" "docs/evidence/publication-goal-completion-audit.md" "publication evidence links goal completion audit"
 require_literal "docs/evidence/publication-evidence.md" "docs/stories/flywheel-trajectory.md" "publication evidence links generated trajectory"
-require_literal "docs/evidence/private-review-signoff-packet.md" "private-review-ready-not-public-release" "private review packet blocks public release claim"
-require_literal "docs/evidence/private-review-signoff-packet.md" "https://flywheel.zeststream.ai/" "private review packet links private site"
-require_literal "docs/evidence/private-review-signoff-packet.md" "docs/stories/flywheel-trajectory.md" "private review packet links trajectory story"
-require_literal "docs/evidence/private-review-signoff-packet.md" "remote_repo_private" "private review packet names public blockers"
-require_literal "docs/evidence/private-review-signoff-packet.md" "Not granted by this packet" "private review packet separates private and public approval"
+require_literal "docs/evidence/staging-review-signoff-packet.md" "staging-review-ready-not-public-release" "staging review packet blocks public release claim"
+require_literal "docs/evidence/staging-review-signoff-packet.md" "https://flywheel.zeststream.ai/" "staging review packet links staged site"
+require_literal "docs/evidence/staging-review-signoff-packet.md" "docs/stories/flywheel-trajectory.md" "staging review packet links trajectory story"
+require_literal "docs/evidence/staging-review-signoff-packet.md" "remote_repo_private" "staging review packet names public blockers"
+require_literal "docs/evidence/staging-review-signoff-packet.md" "Not granted by this packet" "staging review packet separates staged and public approval"
 require_literal "docs/evidence/flywheel-trajectory.json" "zeststream.repo_git_story.v0" "trajectory evidence names schema"
 require_literal "docs/evidence/flywheel-trajectory.json" "zeststream.repo_story_message.v0" "trajectory evidence embeds owner message pack"
 require_literal "docs/evidence/flywheel-trajectory.json" "show proof, do not sell the dream" "trajectory evidence names copy rule"
@@ -175,7 +175,7 @@ require_literal "docs/concepts/evidence-contracts.md" "scripts/validate_user_jou
 require_literal "docs/concepts/evidence-contracts.md" "scripts/validate_story_system_package.py" "evidence concept names story system validator"
 require_literal "docs/concepts/evidence-contracts.md" "scripts/extract_git_story.py" "evidence concept names git story extractor"
 require_literal "docs/concepts/evidence-contracts.md" "packages/zeststream-story-system/story-system.json" "evidence concept names story system package"
-require_literal "docs/concepts/evidence-contracts.md" "docs/evidence/private-review-signoff-packet.md" "evidence concept names private review packet"
+require_literal "docs/concepts/evidence-contracts.md" "docs/evidence/staging-review-signoff-packet.md" "evidence concept names staging review packet"
 require_literal "docs/concepts/evidence-contracts.md" "docs/evidence/flywheel-trajectory.json" "evidence concept names trajectory evidence"
 require_literal "docs/concepts/evidence-contracts.md" "docs/stories/flywheel-trajectory.md" "evidence concept names trajectory story"
 require_literal "docs/concepts/evidence-contracts.md" "docs/runbooks/public-user-journey-pack.md" "evidence concept names public user journey pack"
@@ -266,7 +266,7 @@ require_literal "docs/runbooks/isolated-agent-lane-testing.md" "bash tests/isola
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/cutover-receipts.sh" "release runbook includes cutover receipt gate"
 require_literal "docs/runbooks/public-release-runbook.md" "bash tests/story-system-package.sh" "release runbook includes story package gate"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=23 fail=0" "release runbook names current cutover verifier count"
-require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=13 fail=0" "release runbook names story package verifier count"
+require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=17 fail=0" "release runbook names story package verifier count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=220 fail=0" "release runbook names current public docs count"
 require_literal "docs/runbooks/public-release-runbook.md" "SUMMARY pass=95 fail=0" "release runbook names current website static count"
 require_literal "docs/runbooks/public-release-runbook.md" "docs/runbooks/public-user-journey-pack.md\` maps every public asset" "release runbook includes user journey pack gate"
@@ -310,7 +310,7 @@ require_literal "docs/reference/files.md" "scripts/extract_git_story.py" "file r
 require_literal "docs/reference/files.md" "docs/runbooks/public-user-journey-pack.md" "file reference includes user journey pack"
 require_literal "docs/reference/files.md" "docs/runbooks/repo-trajectory-story-pack.md" "file reference includes repo trajectory pack"
 require_literal "docs/reference/files.md" "docs/evidence/publication-blocker-coverage.md" "file reference includes blocker coverage"
-require_literal "docs/reference/files.md" "docs/evidence/private-review-signoff-packet.md" "file reference includes private review packet"
+require_literal "docs/reference/files.md" "docs/evidence/staging-review-signoff-packet.md" "file reference includes staging review packet"
 require_literal "docs/reference/files.md" "docs/evidence/flywheel-trajectory.json" "file reference includes trajectory evidence"
 require_literal "docs/reference/files.md" "docs/stories/flywheel-trajectory.md" "file reference includes trajectory story"
 require_literal "docs/reference/files.md" "docs/evidence/external-review-log.jsonl" "file reference includes public review evidence"

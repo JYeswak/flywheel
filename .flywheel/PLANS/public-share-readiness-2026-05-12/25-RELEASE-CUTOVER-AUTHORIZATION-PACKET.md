@@ -68,7 +68,7 @@ authorizing the remaining public cutover steps.
 The signoff file is intentionally last. It must remain absent or pending until
 the public repository, remote workflows, green runs, release assets, website,
 install proxy checksum, and external-review gate all pass against real
-surfaces. A fixture, local staging export, or private review packet is not
+surfaces. A fixture, local staging export, or staging review packet is not
 enough.
 
 Required signoff fields:
