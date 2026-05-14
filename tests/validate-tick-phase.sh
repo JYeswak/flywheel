@@ -95,7 +95,7 @@ SH
 run_case() {
   local label="$1" copy_text="$2" expected_phase="$3" jq_filter="$4" detector_json="${5:-}"
   local contract_log="${6:-}"
-  local repo ntm state prompt log last phase_a_log
+  local repo ntm state prompt log last phase_a_log processed_log
   if [[ -z "$detector_json" ]]; then
     detector_json="$(jq -nc '{schema_version:"frozen-pane-detector.v2",success:true,source_health:{status:"healthy"},frozen_panes_detected:0,unknown_panes_detected:0,template_stub_prompt_count:0,queued_not_submitted_count:0,respawn_suppressed_count:0,recovery_suppressed_count:0,l60_signals_present:{no_silent_darkness:true,live_truth_delta:true,unknown_separated:true,recovery_budget:true,recovery_lease:true},soft_violations:[],durable_receipts:[],silent_dark_minutes:0,blackout_detection_latency_p95:0,false_recovery_count:0,unknown_auto_recovery_count:0}')"
   fi
@@ -114,6 +114,10 @@ run_case() {
     phase_a_log="$(mktemp "$TMP/phase-a.XXXXXX")"
     : >"$phase_a_log"
   fi
+  processed_log="${RUN_CASE_PROCESSED_LOG:-$TMP/no-processed-fuckups.jsonl}"
+  if [[ -z "${RUN_CASE_PROCESSED_LOG:-}" ]]; then
+    : >"$processed_log"
+  fi
   printf 'proof\n' >"$repo/evidence.md"
   jq -nc '{task_id:"task-pending"}' >"$last"
   jq -nc '{event:"ntm_dispatch_sent",task_id:"task-pending",dispatch_status:"sent",callback_received_at:null}' >"$log"
@@ -124,6 +128,7 @@ run_case() {
   FLYWHEEL_TICK_CONTRACT_FUCKUP_LOG="$contract_log" \
   FLYWHEEL_TICK_CONTRACT_NOW="2026-05-07T00:10:00Z" \
   FLYWHEEL_TICK_PHASE_A_FUCKUP_LOG="$phase_a_log" \
+  FLYWHEEL_TICK_FUCKUP_PROCESSED_LOG="$processed_log" \
   FLYWHEEL_TICK_AUTOLOOP_LOG="${FLYWHEEL_TICK_AUTOLOOP_LOG:-}" \
   FLYWHEEL_TICK_TRANSPORT_EVIDENCE_LOG="${FLYWHEEL_TICK_TRANSPORT_EVIDENCE_LOG:-}" \
   FLYWHEEL_TICK_BUDGET_SECONDS="${FLYWHEEL_TICK_BUDGET_SECONDS:-0}" \
@@ -152,6 +157,8 @@ jq -e '.properties.tick_contract and .properties.tick_contract_checks and .prope
   && pass "3mmp tick schema exposes contract registry fields" || fail "3mmp tick schema exposes contract registry fields"
 jq -e '.properties.phase_a and .properties.checks_run and .properties.violations and .properties.mode and .properties.hold_reason' "$TICK_SCHEMA" >/dev/null \
   && pass "kaqr tick schema exposes Phase A receipt fields" || fail "kaqr tick schema exposes Phase A receipt fields"
+jq -e '.properties.fuckup_to_bead_pipeline.properties.required_steps.items.enum | index("planning-workflow") and index("jeff-convergence-audit") and index("beads-workflow")' "$TICK_SCHEMA" >/dev/null \
+  && pass "2ha tick schema exposes fuckup planning pipeline fields" || fail "2ha tick schema exposes fuckup planning pipeline fields"
 
 run_case "B05_AG2 pending callback routes to VALIDATE and counts unvalidated" "" "VALIDATE" \
   '(.phase_reason | test("callback_pending_unvalidated")) and .validation_summary.callbacks_unvalidated_count == 1'
@@ -172,7 +179,7 @@ run_case "B05_AG7 tick receipt includes doctor/learn validation summary fields" 
   '.validation_summary | has("callbacks_unvalidated_count") and has("failure_classes") and has("receipt_path") and has("integration_allowed")'
 
 run_case "vnsw tick receipt includes scheduled probe fields" "DONE task-pending evidence=evidence.md evidence_redacted=n/a beads_updated=task-pending" "INTEGRATE" \
-  'has("jeff_status") and has("jeff_fixes") and has("agent_mail_fd") and has("mobile_eats_receipt") and has("{capability-control-plane}_loop") and has("daily_jeff_ingest") and has("fleet_onboard") and has("fleet_stash_bloat") and has("fleet_stash_bloat_detected") and has("fleet_stash_bloat_repo_count") and has("agent_mail_fd_status") and has("mobile_eats_receipt_status") and has("daily_jeff_ingest_status") and has("fleet_onboard_status")'
+  'has("jeff_status") and has("jeff_fixes") and has("agent_mail_fd") and has("mobile_eats_receipt") and has("skillos_loop") and has("daily_jeff_ingest") and has("fleet_onboard") and has("fleet_stash_bloat") and has("fleet_stash_bloat_detected") and has("fleet_stash_bloat_repo_count") and has("agent_mail_fd_status") and has("mobile_eats_receipt_status") and has("daily_jeff_ingest_status") and has("fleet_onboard_status")'
 
 run_case "3mmp tick receipt includes tick-contract registry fields" "DONE task-pending evidence=evidence.md evidence_redacted=n/a beads_updated=task-pending" "INTEGRATE" \
   'has("tick_contract") and has("tick_contract_checks") and has("tick_contract_graduation") and .tick_contract.contract_id == "tick-contract-core" and (.tick_contract.receipt_fields | index("tick_contract_graduation")) and (.tick_contract_checks | length) >= 16'
@@ -195,6 +202,30 @@ RUN_CASE_PHASE_A_LOG="$learn_log" \
 run_case "kaqr three unprocessed fuckups without review emits learn-review violation" "DONE task-pending evidence=evidence.md evidence_redacted=n/a beads_updated=task-pending" "INTEGRATE" \
   '.phase_a.violations[] | select(.failure_class == "orch_skipped_learn_review" and .detail.unprocessed_fuckup_events >= 3 and .logged_to_fuckup_log == true)'
 unset RUN_CASE_PHASE_A_LOG
+
+pipeline_log="$TMP/pipeline-fuckup.jsonl"
+jq -nc '{ts:"2026-05-07T00:00:00Z",id:"fu-1",class:"fixture_plan_required"}' >"$pipeline_log"
+RUN_CASE_PHASE_A_LOG="$pipeline_log" \
+run_case "2ha unprocessed fuckup requires planning/convergence/beads pipeline" "DONE task-pending evidence=evidence.md evidence_redacted=n/a beads_updated=task-pending" "INTEGRATE" \
+  '.fuckup_to_bead_pipeline.status == "pending"
+    and .fuckup_to_bead_pipeline.unprocessed_count == 1
+    and (.fuckup_to_bead_pipeline.required_steps | index("planning-workflow"))
+    and (.fuckup_to_bead_pipeline.required_steps | index("jeff-convergence-audit"))
+    and (.fuckup_to_bead_pipeline.required_steps | index("beads-workflow"))
+    and (.fuckup_to_bead_pipeline.next_action | test("planning-workflow.*jeff-convergence-audit.*beads-workflow"))'
+unset RUN_CASE_PHASE_A_LOG
+
+pipeline_empty="$TMP/pipeline-empty.jsonl"
+pipeline_processed="$TMP/pipeline-processed.jsonl"
+: >"$pipeline_empty"
+jq -nc '{ts:"2026-05-07T00:00:00Z",fuckup_log_id:"fu-2",beads_filed:"flywheel-fixture"}' >"$pipeline_processed"
+RUN_CASE_PROCESSED_LOG="$pipeline_processed" RUN_CASE_PHASE_A_LOG="$pipeline_empty" \
+run_case "2ha direct bead without plan/audit is visible drift" "DONE task-pending evidence=evidence.md evidence_redacted=n/a beads_updated=task-pending" "INTEGRATE" \
+  '.fuckup_to_bead_pipeline.status == "warn"
+    and .fuckup_to_bead_pipeline.direct_bead_without_pipeline_count == 1
+    and (.fuckup_to_bead_pipeline.missing_pipeline_reasons | index("planning_workflow_ref_missing"))
+    and (.fuckup_to_bead_pipeline.missing_pipeline_reasons | index("jeff_convergence_audit_ref_missing"))'
+unset RUN_CASE_PROCESSED_LOG RUN_CASE_PHASE_A_LOG
 
 raw_transport_log="$TMP/raw-transport.log"
 printf 'fixture: tmux send-keys flywheel:1 prompt\n' >"$raw_transport_log"
