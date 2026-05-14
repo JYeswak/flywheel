@@ -34,14 +34,17 @@
 #   FQ-12 First-person operator voice on public ZestStream surfaces
 #   FQ-13 Concreteness: process claims carry specifics, not pure abstraction
 #   FQ-14 Cross-page repetition: pages build, they do not restate
+#   FQ-15 Contrast: same-block CSS color/background pairs meet WCAG AA 4.5:1
 #
-# Jeff Emanuel design principle: every check produces a machine-readable number.
-# "pass=8 fail=2" beats "mostly good." Blocks CI on fail in --strict mode.
+# Jeffrey Emanuel design principle: every check produces a machine-readable
+# number. "pass=8 fail=2" beats "mostly good." Blocks CI on fail in --strict.
 #
 # FQ-01..FQ-10 measure proxies (a file exists, a font is imported). FQ-11..FQ-14
 # measure the copy itself — because a gate that passes a product its owner
-# rejects is a gate that is lying. The gate is the floor; Joshua's taste is the
-# ceiling. Nothing should reach Joshua that has not cleared FQ-11..FQ-14.
+# rejects is a gate that is lying. FQ-15 measures the CSS it can resolve
+# statically; cross-cascade/alpha contrast stays a render-review item. The gate
+# is the floor; Joshua's taste is the ceiling. Nothing should reach Joshua that
+# has not cleared FQ-11..FQ-15.
 
 set -euo pipefail
 
@@ -516,6 +519,30 @@ if [[ "$CONTENT_QUALITY_NA" -eq 0 ]]; then
   fi
 
 fi  # CONTENT_QUALITY_NA guard
+
+# ── FQ-15 Contrast: WCAG AA on same-block CSS color pairs ─────────────────
+# Joshua: "why are we not globally applying WCAG?" — and the methodology page
+# shipped white-on-white text. check-contrast.py resolves var() tokens and
+# computes WCAG 2.x ratios for same-block color+background pairs. Cross-cascade
+# and alpha-channel contrast cannot be resolved from static CSS — those stay a
+# render-review item. Tier-1: runs for any repo with site CSS.
+GATE_DIR="$(cd "$(dirname "$0")" && pwd)"
+if [[ -f "$GATE_DIR/check-contrast.py" ]] && command -v python3 >/dev/null 2>&1; then
+  contrast_out="$(python3 "$GATE_DIR/check-contrast.py" --repo "$REPO" 2>/dev/null || true)"
+  if [[ -z "$contrast_out" ]]; then
+    check "FQ-15" "Contrast (WCAG AA on CSS color pairs)" "pass" "n/a — no site CSS to check"
+  else
+    contrast_fails="$(num "$(printf '%s' "$contrast_out" | grep -oE 'fail=[0-9]+' | grep -oE '[0-9]+' | head -1)")"
+    contrast_indet="$(num "$(printf '%s' "$contrast_out" | grep -oE 'indeterminate\(alpha\)=[0-9]+' | grep -oE '[0-9]+' | head -1)")"
+    if [[ "$contrast_fails" -gt 0 ]]; then
+      check "FQ-15" "Contrast (WCAG AA on CSS color pairs)" "fail" "${contrast_fails} same-block color/background pair(s) below WCAG AA 4.5:1 — run scripts/check-contrast.py"
+    else
+      check "FQ-15" "Contrast (WCAG AA on CSS color pairs)" "pass" "same-block CSS color pairs pass WCAG AA; ${contrast_indet} alpha pair(s) need render review"
+    fi
+  fi
+else
+  check "FQ-15" "Contrast (WCAG AA on CSS color pairs)" "warn" "check-contrast.py or python3 unavailable — contrast not verified"
+fi
 
 # ── Emit results ──────────────────────────────────────────────────────────
 TOTAL=$((PASSES + FAILS + WARNINGS))

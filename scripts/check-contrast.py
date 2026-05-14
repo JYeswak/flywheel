@@ -131,6 +131,10 @@ def main():
         return 0 if r >= 4.5 else 1
 
     repo = Path(__file__).resolve().parent.parent
+    if "--repo" in args:
+        i = args.index("--repo")
+        if i + 1 < len(args):
+            repo = Path(args[i + 1])
     css_paths = sorted((repo / "site").glob("*.css"))
     if not css_paths:
         print("no site/*.css found", file=sys.stderr)
