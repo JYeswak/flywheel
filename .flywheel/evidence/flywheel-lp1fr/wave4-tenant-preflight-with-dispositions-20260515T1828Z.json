@@ -1,0 +1,63 @@
+{
+  "schema_version": "flywheel.fleet_tenant_registry_preflight.v1",
+  "registry": "/Users/josh/.claude/skills/infisical-secrets/data/project-mappings.yaml",
+  "run_doctor": true,
+  "status": "fail",
+  "row_count": 3,
+  "fail_count": 1,
+  "rows": [
+    {
+      "slug": "blackfoot-telecom",
+      "repo": null,
+      "status": "pass",
+      "registry_status": "skipped",
+      "declaration_status": "skipped",
+      "doctor_status": "skipped",
+      "failures": [],
+      "disposition": {
+        "status": "skip_with_reason",
+        "reason": "blackfoot-telecom is not locally available for L168 declaration repair. The configured catalog remote cubcloud-gitea:jzest/blackfoot.git fails DNS resolution and the direct Gitea HTTP fallback timed out, so Flywheel cannot safely inspect or stamp a repo-local tenant declaration in this pass. Re-run L168 when the CubCloud/Gitea remote resolver is healthy or the repo is cloned locally.",
+        "ref": ".flywheel/evidence/flywheel-lp1fr/blackfoot-telecom-tenant-disposition-20260515T1827Z.json"
+      },
+      "doctor": {
+        "status": "skipped",
+        "reason": "disposition_receipt"
+      }
+    },
+    {
+      "slug": "clutterfreespaces",
+      "repo": "/Users/josh/Developer/clutterfreespaces",
+      "status": "fail",
+      "registry_status": "fail",
+      "declaration_status": "fail",
+      "doctor_status": "not_run",
+      "failures": [
+        "registry_row_missing",
+        "repo_declaration_schema_mismatch",
+        "repo_declaration_slug_mismatch"
+      ],
+      "disposition": null,
+      "doctor": {
+        "status": "not_run"
+      }
+    },
+    {
+      "slug": "picoz",
+      "repo": "/Users/josh/Developer/picoz",
+      "status": "pass",
+      "registry_status": "skipped",
+      "declaration_status": "skipped",
+      "doctor_status": "skipped",
+      "failures": [],
+      "disposition": {
+        "status": "skip_with_reason",
+        "reason": "picoz is a safety-critical personal trading research repo with market/API credentials and local/Postgres migration history, but no Supabase tenant ref or repo-local Infisical workspace declaration was found. Forcing it into the current Supabase-shaped L168 registry would be false precision. It needs a SkillOS adapter for non-Supabase secret contexts before L168 can become a hard deploy gate for this class.",
+        "ref": ".flywheel/evidence/flywheel-lp1fr/picoz-tenant-disposition-20260515T1827Z.json"
+      },
+      "doctor": {
+        "status": "skipped",
+        "reason": "disposition_receipt"
+      }
+    }
+  ]
+}
