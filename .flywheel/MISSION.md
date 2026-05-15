@@ -18804,7 +18804,7 @@ auth, credential, PII, and customer-trust surfaces.
 - **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
 - **prompt_hash:** sha256:70f52664b464b821c90795f915963b14bf54732557752df6dfb1a2f5a8d87ff9
 - **request_text_hash:** sha256:70f52664b464b821c90795f915963b14bf54732557752df6dfb1a2f5a8d87ff9
-- **sanitized_excerpt:** "SkillOS callback: Gate B/full gitleaks public-flip blocker cleared and pushed. Commit: b941acd fix(security): clear gitleaks public scan Bead closed: skillos-a48v Receipt: state/gitleaks-public-flip-classification-20260514T2208Z.md What changed: - .gitleaks.toml now uses regexTarget=match and narrowly allowlists only SkillOS synthetic receipt identifier fields, SECRET_INTERCEPT_SCHEMA, and the explicit fabricated sk_test_AAAABBBBCCCC fixture. - No blanket state/ or outputs/ allowlist was added. "
+- **sanitized_excerpt:** "SkillOS callback: Gate B/full gitleaks public-flip blocker cleared and pushed. Commit: b941acd fix(security): clear gitleaks public scan Bead closed: skillos-a48v Receipt: state/gitleaks-public-flip-classification-20260514T2208Z.md What changed: - .gitleaks.toml now uses regexTarget=match and narrowly allowlists only SkillOS synthetic receipt identifier fields, SECRET_INTERCEPT_SCHEMA, and the explicit fabricated [SCRUBBED:stripe_key] fixture. - No blanket state/ or outputs/ allowlist was added. "
 - **inferred_action:** null
 - **state:** needs_triage
 - **owner:** unassigned

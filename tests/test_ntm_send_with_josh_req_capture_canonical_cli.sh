@@ -104,4 +104,29 @@ for name in deploy continue do-you; do
 done
 echo "PASS AG6 --capture-only captures current plain-language operator verbs"
 
-echo "PASS test_ntm_send_with_josh_req_capture_canonical_cli (6/6)"
+# AG7: payment-provider key shapes are scrubbed before sanitized_excerpt
+# persistence. This catches synthetic Stripe test keys that still trip
+# GitGuardian/Gitleaks when copied through historical callbacks.
+JOSH_REQUEST_STATE_DIR="$state_dir" \
+JOSH_REQUEST_STATE_FILE="$state_file" \
+JOSH_REQUEST_NOW="2026-05-15T11:57:00Z" \
+  "$SCRIPT" --capture-only --json --session flywheel --pane 1 --from "fixture-stripe" \
+  "fix the synthetic sk_test_AAAABBBBCCCC fixture before it hits public scan" >"$TMP/stripe.json" 2>"$TMP/stripe.err"
+if ! jq -e '.capture == "captured"' "$TMP/stripe.json" >/dev/null 2>&1; then
+  echo "FAIL --capture-only did not capture Stripe scrub fixture" >&2
+  cat "$TMP/stripe.json" "$TMP/stripe.err" >&2
+  exit 1
+fi
+if ! tail -n 1 "$state_file" | jq -e '.sanitized_excerpt | contains("[SCRUBBED:stripe_key]")' >/dev/null 2>&1; then
+  echo "FAIL Stripe-shaped key was not scrubbed from sanitized_excerpt" >&2
+  tail -n 1 "$state_file" >&2
+  exit 1
+fi
+if tail -n 1 "$state_file" | rg -q 'sk_(test|live)_'; then
+  echo "FAIL raw Stripe-shaped key leaked to captured row" >&2
+  tail -n 1 "$state_file" >&2
+  exit 1
+fi
+echo "PASS AG7 --capture-only scrubs Stripe-shaped keys"
+
+echo "PASS test_ntm_send_with_josh_req_capture_canonical_cli (7/7)"

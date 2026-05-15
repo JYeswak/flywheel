@@ -216,6 +216,7 @@ that spec. The current required classes are:
 | `github_token` | `ghp_`, `gho_`, `ghu_`, `ghs_`, `ghr_`, `github_pat_` |
 | `anthropic_key` | `sk-ant-...` |
 | `openai_key` | `sk-...`, `sk-proj-...` |
+| `stripe_key` | `sk_test_...`, `sk_live_...` |
 | `jwt` | `eyJ...`.`...`.`...` |
 | `bearer_token` | `Authorization: Bearer ...`, `Bearer ...` |
 | `google_api_key` | `AIza...` |

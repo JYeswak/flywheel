@@ -248,6 +248,7 @@ scrub_secrets() {
     s/ghr_[A-Za-z0-9]+/[SCRUBBED:github_refresh_token]/g;
     s/sk-ant-[A-Za-z0-9_-]+/[SCRUBBED:anthropic_key]/g;
     s/sk-proj-[A-Za-z0-9_-]+/[SCRUBBED:openai_project_key]/g;
+    s/sk_(?:test|live)_[A-Za-z0-9_-]+/[SCRUBBED:stripe_key]/g;
     s/sk-[A-Za-z0-9_-]{20,}/[SCRUBBED:openai_key]/g;
     s/AKIA[0-9A-Z]{16}/[SCRUBBED:aws_access_key]/g;
     s/ASIA[0-9A-Z]{16}/[SCRUBBED:aws_session_key]/g;
