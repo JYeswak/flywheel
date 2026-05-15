@@ -3,8 +3,8 @@
 # Canonical-cli surface tests for .flywheel/scripts/dispatch-canonical-cli-validator.sh (scaffolded by
 # bead flywheel-ws02m / scaffold-canonical-cli.sh).
 #
-# 13/13 PASS = canonical-cli-scoping checker green. TODO markers
-# point at per-surface assertions the operator should fill in.
+# Canonical checker coverage is paired with per-surface assertions filled by
+# the flywheel-wgitr dispatch-wave closure chain.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
