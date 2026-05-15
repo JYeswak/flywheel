@@ -76,13 +76,19 @@ assert_jq() {
 out="$(run_json success task-success 'DONE task-success evidence=/tmp/task-success.md')"
 assert_jq "$out" '.status == "ok" and .callback_delivery_verified == true and .verify_method == "ntm_history"'
 grep -q '^history ' "$CALLS"
-! grep -Eq '^(logs|copy) ' "$CALLS"
+if grep -Eq '^(logs|copy) ' "$CALLS"; then
+  echo "legacy scrollback command was used" >&2
+  exit 1
+fi
 
 : >"$CALLS"
 out="$(run_json queued task-queued 'DONE task-queued evidence=/tmp/task-queued.md')" || true
 assert_jq "$out" '.status == "fail" and .callback_delivery_verified == false and .failure_class == "callback_not_observed"'
 grep -q '^history ' "$CALLS"
-! grep -Eq '^(logs|copy) ' "$CALLS"
+if grep -Eq '^(logs|copy) ' "$CALLS"; then
+  echo "legacy scrollback command was used" >&2
+  exit 1
+fi
 
 : >"$CALLS"
 out="$(run_json fts5 task-fts 'DONE task-fts evidence=/tmp/task-fts.md')" || true
@@ -99,6 +105,12 @@ SPOOLED="$SPOOL_DIR/flywheel/task-copymode.json"
 test -s "$SPOOLED" || { echo "expected spool file at $SPOOLED" >&2; exit 1; }
 jq -e '.schema_version == "callback-spool/v1" and .task_id == "task-copymode" and .failure_class == "pane_not_in_input_mode" and .status == "pending" and .attempts == 0 and (.message | contains("DONE task-copymode"))' "$SPOOLED" >/dev/null \
   || { echo "spool file missing required fields" >&2; jq . "$SPOOLED" >&2; exit 1; }
+
+out="$("$SCRIPT" --ntm "$FAKE_NTM" --spool-dir "$SPOOL_DIR" --doctor --json)"
+assert_jq "$out" '.schema_version == "worker-callback-delivery-doctor.v1" and .status == "ok" and .mutates == false and .checks.ntm.status == "present" and .checks.spool.status == "available"'
+
+out="$("$SCRIPT" --ntm "$TMP/missing-ntm" --spool-dir "$SPOOL_DIR" --doctor --json)"
+assert_jq "$out" '.schema_version == "worker-callback-delivery-doctor.v1" and .status == "fail" and .checks.ntm.status == "missing"'
 
 FAILED="$TMP/custom-failure.md"
 MODE=queued CALLS="$CALLS" STATE="$STATE" \

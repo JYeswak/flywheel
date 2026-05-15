@@ -3,7 +3,7 @@ set -u
 
 VERSION="worker-callback-delivery.v3"; NTM="${NTM:-/Users/josh/.local/bin/ntm}"
 SESSION="flywheel"; PANE="1"; TASK_ID=""; MESSAGE=""; MESSAGE_FILE=""
-RETRIES=6; WAIT_SECONDS=1; JSON=0; SEND=1; FAILED_PATH=""
+RETRIES=6; WAIT_SECONDS=1; JSON=0; SEND=1; DOCTOR=0; FAILED_PATH=""
 SPOOL_DIR="${FLYWHEEL_CALLBACK_SPOOL_DIR:-$HOME/.local/state/flywheel/callback-spool}"
 SPOOL_PATH=""
 
@@ -11,6 +11,7 @@ usage(){ cat <<'USAGE'
 Usage: verify-callback-delivery.sh --task-id ID (--message TEXT|--message-file PATH) [--json] [--no-send]
 Options: --session NAME --pane N --retries N --wait-seconds N --failed-path PATH --ntm PATH
          --spool-dir PATH (default: $HOME/.local/state/flywheel/callback-spool)
+         --doctor (read-only environment check)
          --schema --examples --info --help
 Failure classes: ntm_send_failed, pane_not_in_input_mode, pane_disappeared, callback_not_observed
 On pane_not_in_input_mode the callback body is spooled to <spool-dir>/<session>/<task-id>.json
@@ -24,6 +25,26 @@ emit(){
   else
     printf '%s callback_delivery_verified=%s attempts=%s failure_class=%s verify_method=%s failed_path=%s spool_path=%s\n' "$1" "$2" "$3" "$4" "$5" "$6" "${SPOOL_PATH:-}"
   fi
+}
+
+emit_doctor(){
+  local ntm_status="missing" spool_status="missing" status="fail"
+  [[ -x "$NTM" ]] && ntm_status="present"
+  if [[ -d "$SPOOL_DIR" || ( -d "$(dirname "$SPOOL_DIR")" && -w "$(dirname "$SPOOL_DIR")" ) ]]; then
+    spool_status="available"
+  fi
+  [[ "$ntm_status" == "present" && "$spool_status" == "available" ]] && status="ok"
+  jq -nc \
+    --arg schema_version "worker-callback-delivery-doctor.v1" \
+    --arg status "$status" \
+    --arg version "$VERSION" \
+    --arg ntm "$NTM" \
+    --arg ntm_status "$ntm_status" \
+    --arg session "$SESSION" \
+    --arg pane "$PANE" \
+    --arg spool_dir "$SPOOL_DIR" \
+    --arg spool_status "$spool_status" \
+    '{schema_version:$schema_version,status:$status,version:$version,checks:{ntm:{path:$ntm,status:$ntm_status},target:{session:$session,pane:$pane},spool:{path:$spool_dir,status:$spool_status}},mutates:false}'
 }
 
 write_spool(){
@@ -56,10 +77,16 @@ while [[ $# -gt 0 ]]; do case "$1" in
   --wait-seconds) WAIT_SECONDS="$2"; shift 2;; --failed-path) FAILED_PATH="$2"; shift 2;;
   --spool-dir) SPOOL_DIR="$2"; shift 2;;
   --ntm) NTM="$2"; shift 2;; --no-send) SEND=0; shift;; --json) JSON=1; shift;;
-  --schema) printf '{"schema_version":"%s","fields":["status","callback_delivery_verified","attempts","failure_class","verify_method","failed_path","spool_path"]}\n' "$VERSION"; exit 0;;
+  --doctor) DOCTOR=1; shift;;
+  --schema) printf '{"schema_version":"%s","fields":["status","callback_delivery_verified","attempts","failure_class","verify_method","failed_path","spool_path"],"doctor_schema":"worker-callback-delivery-doctor.v1"}\n' "$VERSION"; exit 0;;
   --examples|--help|-h) usage; exit 0;; --info) printf 'verify-callback-delivery %s uses ntm history --json; spools to %s on pane_not_in_input_mode\n' "$VERSION" "$SPOOL_DIR"; exit 0;;
   *) echo "unknown argument: $1" >&2; usage >&2; exit 2;;
 esac; done
+
+if [[ "$DOCTOR" == 1 ]]; then
+  emit_doctor
+  exit 0
+fi
 
 [[ -n "$MESSAGE_FILE" ]] && MESSAGE="$(cat "$MESSAGE_FILE")"
 [[ -z "$TASK_ID" || -z "$MESSAGE" ]] && { usage >&2; exit 2; }
@@ -74,6 +101,7 @@ fail_artifact(){
   {
     printf '# Callback delivery verification failed\n\n'
     printf -- '- task_id: %s\n- session: %s\n- pane: %s\n- failure_class: %s\n- attempts: %s\n- verify_method: ntm_history\n\n' "$TASK_ID" "$SESSION" "$PANE" "$1" "$2"
+    # shellcheck disable=SC2016 # Markdown code fences are literal output.
     printf '## Expected callback\n\n```text\n%s\n```\n\n## ntm history --json probe\n\n```json\n%s\n```\n' "$MESSAGE" "$3"
   } >"$FAILED_PATH"
 }
