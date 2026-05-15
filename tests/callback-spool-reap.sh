@@ -64,7 +64,7 @@ test -f "$SPOOL/flywheel/task-dry.json" || { echo "dry-run must not delete spool
 printf 'PASS dry-run leaves spool intact\n'
 
 # 3. Apply with successful retry: archived
-out="$("$SCRIPT" --apply --json --spool-dir "$SPOOL" --archive-dir "$ARCHIVE" --ntm "$FAKE_NTM")"
+out="$("$SCRIPT" --apply --idempotency-key reap-success-fixture --json --spool-dir "$SPOOL" --archive-dir "$ARCHIVE" --ntm "$FAKE_NTM")"
 assert_jq "apply reaps successfully" "$out" '.reaped == 1 and .retry_pending == 0 and .persisted_failure == 0'
 test ! -f "$SPOOL/flywheel/task-dry.json" || { echo "expected spool entry removed" >&2; exit 1; }
 test -f "$ARCHIVE/flywheel/task-dry.json" || { echo "expected archive entry" >&2; exit 1; }
@@ -75,14 +75,14 @@ printf 'PASS apply archives reaped entry with attempts=1\n'
 write_spool_entry flywheel task-fail 'DONE task-fail evidence=/tmp/y.md'
 touch "$TMP/send-fail"
 export MOCK_SEND_FAIL_FILE="$TMP/send-fail"
-out="$("$SCRIPT" --apply --json --spool-dir "$SPOOL" --archive-dir "$ARCHIVE" --ntm "$FAKE_NTM")"
+out="$("$SCRIPT" --apply --idempotency-key reap-retry-fixture --json --spool-dir "$SPOOL" --archive-dir "$ARCHIVE" --ntm "$FAKE_NTM")"
 assert_jq "send fail leaves retry_pending" "$out" '.reaped == 0 and .retry_pending == 1'
 jq -e '.attempts == 1 and (.last_send_stderr | length > 0)' "$SPOOL/flywheel/task-fail.json" >/dev/null
 printf 'PASS retry increments attempts and records stderr\n'
 
 # 5. Persisted failure: max_attempts reached → row appended to dispatch-log + archive failure artifact
 write_spool_entry flywheel task-persist 'DONE task-persist evidence=/tmp/z.md' 4
-out="$("$SCRIPT" --apply --json --spool-dir "$SPOOL" --archive-dir "$ARCHIVE" --dispatch-log "$DLOG" --max-attempts 5 --ntm "$FAKE_NTM")"
+out="$("$SCRIPT" --apply --idempotency-key reap-persist-fixture --json --spool-dir "$SPOOL" --archive-dir "$ARCHIVE" --dispatch-log "$DLOG" --max-attempts 5 --ntm "$FAKE_NTM")"
 assert_jq "persisted failure surfaces" "$out" '(.results[] | select(.task_id == "task-persist") | .outcome == "persisted_failure") and (.persisted_failure >= 1)'
 test ! -f "$SPOOL/flywheel/task-persist.json" || { echo "spool should be moved to failure artifact" >&2; exit 1; }
 ls "$ARCHIVE/flywheel/task-persist.json.persisted-failure.json" >/dev/null
@@ -116,5 +116,9 @@ printf 'PASS schema endpoint\n'
 out="$("$SCRIPT" --info)"
 echo "$out" | jq -e '.name == "callback-spool-reap.sh" and (.version | startswith("callback-spool-reap"))' >/dev/null
 printf 'PASS info endpoint\n'
+
+inventory="$("$ROOT/.flywheel/scripts/trap-rollback-inventory.sh" scan --repo "$ROOT" --json)"
+echo "$inventory" | jq -e '.sample_without_trap | index(".flywheel/scripts/callback-spool-reap.sh") | not' >/dev/null
+printf 'PASS trap inventory no longer lists callback-spool-reap\n'
 
 printf 'callback-spool-reap tests passed\n'

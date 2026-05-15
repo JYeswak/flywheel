@@ -1,0 +1,26 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-z7ucq",
+  "closed_at": "2026-05-15T22:30:24Z",
+  "status": "ready_to_close",
+  "autonomy": "autonomous",
+  "summary": "callback-spool-reap now has an EXIT/ERR cleanup trap for send stderr and retry-update temp files, and its focused test uses the current apply idempotency contract.",
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-z7ucq/trap-inventory-after-20260515T223010Z.json"
+  ],
+  "inventory_delta": {
+    "with_trap_before": 99,
+    "without_trap_before": 233,
+    "with_trap_after": 100,
+    "without_trap_after": 232,
+    "mutating_like_scripts": 332,
+    "coverage_after_pct": 30.12
+  },
+  "validation": [
+    "bash tests/callback-spool-reap.sh PASS",
+    "bash tests/callback-spool-reap-canonical-cli.sh PASS 20/0",
+    "bash tests/trap-rollback-inventory.sh PASS 12/0",
+    "bash -n + targeted shellcheck PASS"
+  ],
+  "public_claim": false
+}

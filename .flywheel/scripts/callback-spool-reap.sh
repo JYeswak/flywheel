@@ -18,6 +18,21 @@ MODE="apply"
 # NEW (flywheel-1hshd.10): --idempotency-key for canonical apply contract.
 IDEMPOTENCY_KEY=""
 REPAIR_ARGS=()
+CLEANUP_FILES=()
+
+cleanup_on_exit() {
+  local f
+  for f in "${CLEANUP_FILES[@]}"; do
+    [[ -n "$f" ]] || continue
+    rm -f "$f" 2>/dev/null || true
+  done
+  return 0
+}
+trap cleanup_on_exit EXIT ERR
+
+register_cleanup_file() {
+  CLEANUP_FILES+=("$1")
+}
 
 usage(){ cat <<USAGE
 Usage: callback-spool-reap.sh [--dry-run|--apply] [--json] [--session NAME]
@@ -109,6 +124,7 @@ reap_one(){
   fi
 
   err_log="$(mktemp -t reap-send-err.XXXXXX)"
+  register_cleanup_file "$err_log"
   if "$NTM" send "$session" --pane="$pane" --no-cass-check "$message" >/dev/null 2>"$err_log"; then
     rm -f "$err_log"
     mkdir -p "$ARCHIVE_DIR/$session" 2>/dev/null
@@ -146,11 +162,13 @@ reap_one(){
     return 0
   fi
 
+  local retry_tmp="$f.tmp"
+  register_cleanup_file "$retry_tmp"
   jq --argjson attempts "$new_attempts" \
      --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
      --arg send_stderr "$err_text" \
-     '. + {attempts:$attempts,last_attempt_ts:$ts,last_send_stderr:$send_stderr}' "$f" >"$f.tmp" 2>/dev/null \
-    && mv -f "$f.tmp" "$f"
+     '. + {attempts:$attempts,last_attempt_ts:$ts,last_send_stderr:$send_stderr}' "$f" >"$retry_tmp" 2>/dev/null \
+    && mv -f "$retry_tmp" "$f"
   printf '{"file":"%s","outcome":"retry_pending","session":"%s","pane":"%s","task_id":"%s","attempts":%s}\n' \
     "$f" "$session" "$pane" "$task_id" "$new_attempts"
 }
