@@ -88,6 +88,13 @@ cat >"$fixture/scripts/comment-only-mutation-text.sh" <<'EOF'
 set -euo pipefail
 printf 'read only\n'
 EOF
+cat >"$fixture/scripts/quoted-mutation-text.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+echo "operator hint: git commit --no-verify if intentional"
+printf '%s\n' 'never run rm -rf from this message'
+jq -nc '{items:($xs | split(",") | map(select(length>0)))}'
+EOF
 cat >"$fixture/tests/mutating-test.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -103,7 +110,7 @@ git -C "$fixture" add tests .flywheel/receipts
 git -C "$fixture" commit -q -m fixture
 
 "$SCRIPT" scan --repo "$fixture" --json >"$TMP/fixture.json"
-assert_jq "$TMP/fixture.json" '.status == "warn" and .scan_scope == "tracked_operational_shell" and .tracked_shell_scripts_scanned == 6 and .mutating_like_scripts == 2 and .mutating_like_with_exit_or_err_trap == 1 and .mutating_like_without_exit_or_err_trap == 1' "fixture counts trap coverage"
+assert_jq "$TMP/fixture.json" '.status == "warn" and .scan_scope == "tracked_operational_shell" and .tracked_shell_scripts_scanned == 7 and .mutating_like_scripts == 2 and .mutating_like_with_exit_or_err_trap == 1 and .mutating_like_without_exit_or_err_trap == 1' "fixture counts trap coverage"
 assert_jq "$TMP/fixture.json" '.sample_without_trap == ["scripts/without-trap.sh"] and .claim == "inventory_only_not_adoption_complete"' "fixture sample and claim"
 assert_jq "$TMP/fixture.json" '(.excluded_non_operational_prefixes | index("tests/")) and (.excluded_non_operational_prefixes | index(".flywheel/receipts/"))' "fixture excludes non-operational prefixes"
 assert_jq "$TMP/fixture.json" '.declared_read_only_excluded_count == 1 and .declared_read_only_excluded_sample == ["scripts/read-only-apply-contract.sh"]' "fixture excludes declared read-only apply contract"
