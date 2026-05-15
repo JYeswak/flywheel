@@ -1,0 +1,22 @@
+{
+  "schema_version": "flywheel.contact_delivery_disposition.v1",
+  "bead_id": "flywheel-lz51w",
+  "recorded_at": "2026-05-15T18:30:00Z",
+  "decision": "keep_mailto_only_for_v0_2_public_launch",
+  "reason": "The public Flywheel site is a static Vercel surface for v0.2. The current release contract needs public contact routing, not browser-verified message delivery. Adding a form provider or owned API route now would add secrets, deployment shape changes, and provider policy before the broader ZestStream intake system is chosen.",
+  "current_contract": {
+    "contact_route": "mailto:joshua@zeststream.ai?subject=[Flywheel] Public site inquiry",
+    "required_subject": "[Flywheel] Public site inquiry",
+    "delivery_claim": "mailto_client_open_only",
+    "release_blocker": false
+  },
+  "proof_refs": [
+    "scripts/contact_route_probe.py",
+    "tests/contact-routing.sh",
+    "site/contact/index.html",
+    "docs/runbooks/public-release-runbook.md",
+    ".flywheel/evidence/flywheel-lz51w/blocker-receipt-20260515T104352Z.json"
+  ],
+  "future_upgrade_trigger": "When ZestStream chooses a shared intake provider or owned intake API, reopen this as a fleet-wide contact-delivery pack rather than a Flywheel-only form patch.",
+  "no_secret_values_included": true
+}
