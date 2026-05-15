@@ -15,21 +15,30 @@ pass() { pass_count=$((pass_count + 1)); printf 'PASS %s\n' "$1"; }
 fail() { fail_count=$((fail_count + 1)); printf 'FAIL %s\n' "$1" >&2; }
 
 # Canonical info/schema/examples surface
-"$SCRIPT" --info --json 2>/dev/null | jq -e '.name and .version and .schema_version and .capabilities and .bead' >/dev/null \
-  && pass "--info exposes name/version/schema/capabilities/bead" \
-  || fail "--info missing required fields"
+if "$SCRIPT" --info --json 2>/dev/null | jq -e '.name and .version and .schema_version and .capabilities and .bead' >/dev/null; then
+  pass "--info exposes name/version/schema/capabilities/bead"
+else
+  fail "--info missing required fields"
+fi
 
-"$SCRIPT" --schema --json 2>/dev/null | jq -e '.input_schema and .output_schema and .output_schema.required' >/dev/null \
-  && pass "--schema exposes input/output schemas" \
-  || fail "--schema missing input/output schemas"
+if "$SCRIPT" --schema --json 2>/dev/null | jq -e '.input_schema and .output_schema and .output_schema.required' >/dev/null; then
+  pass "--schema exposes input/output schemas"
+else
+  fail "--schema missing input/output schemas"
+fi
 
-"$SCRIPT" --examples --json 2>/dev/null | jq -e '.examples | length >= 2' >/dev/null \
-  && pass "--examples exposes ≥2 example invocations" \
-  || fail "--examples too few"
+if "$SCRIPT" --examples --json 2>/dev/null | jq -e '.examples | length >= 2' >/dev/null; then
+  pass "--examples exposes ≥2 example invocations"
+else
+  fail "--examples too few"
+fi
 
-"$SCRIPT" doctor 2>/dev/null | jq -e '.command == "doctor" and .status and (.checks | length >= 3)' >/dev/null \
-  && pass "doctor envelope schema-valid" \
-  || fail "doctor envelope wrong shape"
+DOCTOR_OUT="$("$SCRIPT" doctor 2>/dev/null || true)"
+if echo "$DOCTOR_OUT" | jq -e '.command == "doctor" and (.status == "ok" or .status == "fail") and (.checks | length >= 3)' >/dev/null; then
+  pass "doctor envelope schema-valid"
+else
+  fail "doctor envelope wrong shape"
+fi
 
 # Fixture probe — minimal jsonl with one absorbed and one open row
 cat >"$TMP/jr.jsonl" <<'JSONL'
@@ -50,25 +59,35 @@ OUT="$("$SCRIPT" check \
   --beads-jsonl "$TMP/beads/issues.jsonl" \
   --limit 10 2>/dev/null)"
 
-echo "$OUT" | jq -e '.stats.total_rows_in_file == 3 and .stats.open_rows == 2 and .stats.rows_classified == 2' >/dev/null \
-  && pass "fixture: classifies 2 open rows out of 3 total" \
-  || fail "fixture: row count wrong"
+if echo "$OUT" | jq -e '.stats.total_rows_in_file == 3 and .stats.open_rows == 2 and .stats.rows_classified == 2' >/dev/null; then
+  pass "fixture: classifies 2 open rows out of 3 total"
+else
+  fail "fixture: row count wrong"
+fi
 
-echo "$OUT" | jq -e '.disposition_counts["memory-absorbed"] == 1' >/dev/null \
-  && pass "fixture: storage row → memory-absorbed" \
-  || fail "fixture: storage row classification wrong"
+if echo "$OUT" | jq -e '.disposition_counts["memory-absorbed"] == 1' >/dev/null; then
+  pass "fixture: storage row → memory-absorbed"
+else
+  fail "fixture: storage row classification wrong"
+fi
 
-echo "$OUT" | jq -e '.disposition_counts["done-callback"] == 1' >/dev/null \
-  && pass "fixture: DONE row → done-callback" \
-  || fail "fixture: DONE row classification wrong"
+if echo "$OUT" | jq -e '.disposition_counts["done-callback"] == 1' >/dev/null; then
+  pass "fixture: DONE row → done-callback"
+else
+  fail "fixture: DONE row classification wrong"
+fi
 
-echo "$OUT" | jq -e '.consumed_count == 2 and .still_open_count == 0 and .consumed_pct == 100.0' >/dev/null \
-  && pass "fixture: consumed_count + still_open_count + consumed_pct correct" \
-  || fail "fixture: consumed metrics wrong"
+if echo "$OUT" | jq -e '.consumed_count == 2 and .still_open_count == 0 and .consumed_pct == 100.0' >/dev/null; then
+  pass "fixture: consumed_count + still_open_count + consumed_pct correct"
+else
+  fail "fixture: consumed metrics wrong"
+fi
 
-echo "$OUT" | jq -e '.schema_version == "flywheel.josh_requests_reverse_lookup.v0"' >/dev/null \
-  && pass "schema_version stamped" \
-  || fail "schema_version missing"
+if echo "$OUT" | jq -e '.schema_version == "flywheel.josh_requests_reverse_lookup.v0"' >/dev/null; then
+  pass "schema_version stamped"
+else
+  fail "schema_version missing"
+fi
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2
