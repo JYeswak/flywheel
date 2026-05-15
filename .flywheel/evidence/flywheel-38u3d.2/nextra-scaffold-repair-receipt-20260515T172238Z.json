@@ -1,0 +1,57 @@
+{
+  "schema": "flywheel.blocker_repair_receipt.v1",
+  "bead_id": "flywheel-38u3d.2",
+  "created_at": "2026-05-15T17:22:38Z",
+  "status": "repaired",
+  "blocker_class": "upstream_scaffold_runtime_compatibility",
+  "scope": {
+    "owner": "flywheel",
+    "patched_surface": "/Users/josh/.claude/skills/documentation-website-for-software-project/scripts/scaffold-nextra.sh",
+    "repo_mutations": "flywheel evidence and bead state only",
+    "client_repo_mutations": []
+  },
+  "root_cause": {
+    "summary": "The Nextra docs scaffold produced invalid or unreproducible builds because it mixed Nextra 4 App Router output with stale MDX/theme prop shapes and floating dependency ranges.",
+    "observed_failures": [
+      "MDX HTML comment failed: Unexpected character !",
+      "lastUpdated object prop failed typecheck because Nextra 4.6 expects ReactElement",
+      "search placeholder object prop failed typecheck because Nextra 4.6 expects ReactNode/Search element",
+      "floating Next/React ranges installed Next 16.2.6 + React 19.2.6 and failed prerender through nextra-theme-docs Layout"
+    ]
+  },
+  "repair": {
+    "changes": [
+      "Generate MDX comments with JSX comment syntax.",
+      "Generate lastUpdated as a React element.",
+      "Remove stale search object prop and use Nextra default search behavior.",
+      "Pin generated scaffold dependencies to the verified Nextra 4.0.0 / Next 15.1.3 / React 19.0.0 combination."
+    ],
+    "script_sha256_after": "0378e9eacfe063bf9e23865e4afb0f7c997e778d18ff5fcf8226eabaaf274af1"
+  },
+  "validation": {
+    "disposable_site": "/tmp/nextra-probe-final.jgLPwK/flywheel_probe__nextra_documentation_site",
+    "commands": [
+      "jq empty package.json tsconfig.json",
+      "bun install",
+      "bun run build"
+    ],
+    "result": "pass",
+    "build_summary": {
+      "next_version": "15.1.3",
+      "routes": [
+        "/_not-found",
+        "/[[...mdxPath]] -> /"
+      ],
+      "pagefind_indexed_pages": 1
+    }
+  },
+  "boundary": {
+    "no_client_repo_edits": true,
+    "no_live_deploy": true,
+    "skill_package_validation": "pre-existing warning: package has 58 files, above JSM 50-file limit"
+  },
+  "next_steps": [
+    "Clear flywheel-38u3d.2 as the upstream scaffold blocker.",
+    "Reactivate flywheel-sjr9e for the actual alpsinsurance/mobile-eats docs run under current cross-repo doctrine."
+  ]
+}
