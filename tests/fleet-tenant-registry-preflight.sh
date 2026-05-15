@@ -84,6 +84,20 @@ assert_jq "$TMP/todo.json" '.status == "fail" and (.rows[0].failures | index("re
 "$SCRIPT" --registry "$TMP/registry.yaml" --require absent --json >"$TMP/absent.json" 2>/dev/null
 assert_jq "$TMP/absent.json" '.status == "fail" and (.rows[0].failures | index("registry_row_missing"))' "missing registry row fails"
 
+cat >"$TMP/absent-disposition.json" <<'JSON'
+{
+  "schema_version": "flywheel.tenant_registry_disposition.v1",
+  "slug": "absent",
+  "status": "skip_with_reason",
+  "reason": "direct_postgres_no_infisical_supabase_surface",
+  "registry_row_required": false,
+  "repo_declaration_required": false,
+  "evidence_refs": ["fixture://direct-postgres"]
+}
+JSON
+"$SCRIPT" --registry "$TMP/registry.yaml" --require absent --disposition "absent=$TMP/absent-disposition.json" --json >"$TMP/absent-disposition.out.json"
+assert_jq "$TMP/absent-disposition.out.json" '.status == "pass" and .rows[0].registry_status == "skipped" and .rows[0].declaration_status == "skipped"' "disposition receipt can skip non-applicable registry row"
+
 "$SCRIPT" --registry "$TMP/registry.yaml" --require good --repo "good=$TMP/stale" --json >"$TMP/stale.json" 2>/dev/null
 assert_jq "$TMP/stale.json" '.status == "fail" and (.rows[0].failures | index("repo_declaration_schema_mismatch")) and (.rows[0].failures | index("repo_declaration_slug_mismatch"))' "stale declaration schema fails"
 

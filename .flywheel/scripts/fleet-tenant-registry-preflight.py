@@ -190,6 +190,39 @@ def run_doctor(slug: str, cwd: Path | None) -> dict[str, Any]:
     }
 
 
+def parse_disposition(value: str) -> tuple[str, Path]:
+    if "=" not in value:
+        raise argparse.ArgumentTypeError("--disposition must be slug=/absolute/path.json")
+    slug, path = value.split("=", 1)
+    if not slug:
+        raise argparse.ArgumentTypeError("--disposition slug cannot be empty")
+    return slug, Path(path).expanduser()
+
+
+def load_disposition(slug: str, path: Path | None) -> tuple[dict[str, Any] | None, list[str]]:
+    if path is None:
+        return None, []
+    if not path.exists():
+        return None, ["disposition_receipt_missing"]
+    try:
+        receipt = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None, ["disposition_receipt_invalid_json"]
+
+    failures: list[str] = []
+    if receipt.get("schema_version") != "flywheel.tenant_registry_disposition.v1":
+        failures.append("disposition_receipt_schema_invalid")
+    if receipt.get("slug") != slug:
+        failures.append("disposition_receipt_slug_mismatch")
+    if receipt.get("status") not in {"skip_with_reason", "adapter_required"}:
+        failures.append("disposition_receipt_status_invalid")
+    if is_todo(receipt.get("reason")):
+        failures.append("disposition_receipt_reason_missing")
+    if not receipt.get("evidence_refs"):
+        failures.append("disposition_receipt_evidence_missing")
+    return receipt, failures
+
+
 def parse_repo(value: str) -> tuple[str, Path]:
     if "=" not in value:
         raise argparse.ArgumentTypeError("--repo must be slug=/absolute/path")
@@ -204,6 +237,7 @@ def main() -> int:
     parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
     parser.add_argument("--require", action="append", default=[], help="Required slug")
     parser.add_argument("--repo", action="append", default=[], type=parse_repo)
+    parser.add_argument("--disposition", action="append", default=[], type=parse_disposition)
     parser.add_argument("--run-doctor", action="store_true")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
@@ -214,15 +248,35 @@ def main() -> int:
         raise SystemExit("registry missing mappings")
 
     repos = dict(args.repo)
+    dispositions = dict(args.disposition)
     slugs = list(dict.fromkeys([*args.require, *repos.keys()]))
     rows = []
     for slug in slugs:
         row = mappings.get(slug)
         repo = repos.get(slug)
-        registry_failures = check_registry_row(slug, row)
-        declaration_failures = check_declaration(slug, repo, row)
-        doctor = run_doctor(slug, repo) if args.run_doctor and row is not None else {"status": "not_run"}
+        disposition, disposition_failures = load_disposition(slug, dispositions.get(slug))
+        disposition_skips_registry = (
+            disposition is not None
+            and not disposition_failures
+            and disposition.get("status") == "skip_with_reason"
+            and disposition.get("registry_row_required") is False
+        )
+        disposition_skips_declaration = (
+            disposition is not None
+            and not disposition_failures
+            and disposition.get("status") == "skip_with_reason"
+            and disposition.get("repo_declaration_required") is False
+        )
+
+        registry_failures = [] if row is None and disposition_skips_registry else check_registry_row(slug, row)
+        declaration_failures = [] if disposition_skips_declaration else check_declaration(slug, repo, row)
+        doctor = (
+            {"status": "skipped", "reason": "disposition_receipt"}
+            if disposition_skips_registry
+            else run_doctor(slug, repo) if args.run_doctor and row is not None else {"status": "not_run"}
+        )
         failures = [*registry_failures, *declaration_failures]
+        failures.extend(disposition_failures)
         if doctor.get("status") == "fail":
             failures.append("tenant_doctor_failed")
         rows.append(
@@ -230,10 +284,15 @@ def main() -> int:
                 "slug": slug,
                 "repo": str(repo) if repo else None,
                 "status": "pass" if not failures else "fail",
-                "registry_status": "pass" if not registry_failures else "fail",
-                "declaration_status": "pass" if repo and not declaration_failures else ("not_checked" if not repo else "fail"),
+                "registry_status": "skipped" if disposition_skips_registry else ("pass" if not registry_failures else "fail"),
+                "declaration_status": "skipped" if disposition_skips_declaration else ("pass" if repo and not declaration_failures else ("not_checked" if not repo else "fail")),
                 "doctor_status": doctor.get("status"),
                 "failures": failures,
+                "disposition": {
+                    "status": disposition.get("status"),
+                    "reason": disposition.get("reason"),
+                    "ref": str(dispositions.get(slug)),
+                } if disposition else None,
                 "doctor": doctor,
             }
         )
