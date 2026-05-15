@@ -1,0 +1,83 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-ql1pa",
+  "parent_beads": [
+    "flywheel-h17x",
+    "flywheel-xhdg"
+  ],
+  "closed_at": "2026-05-15T18:50:57Z",
+  "status": "closed",
+  "scope": [
+    ".flywheel/scripts/tick-driver-manifest.json",
+    "tests/flywheel-tick-driver.sh",
+    "tests/leverage-ceiling-tick-driver-wire.sh",
+    ".flywheel/evidence/flywheel-ql1pa/"
+  ],
+  "local_runtime_scope": [
+    "/Users/josh/.local/bin/flywheel-tick-driver",
+    "/Users/josh/Library/LaunchAgents/com.flywheel.tick.plist"
+  ],
+  "change": "Repaired the local full-substrate tick driver so B6 leverage-ceiling evidence accrues without relying on a human-triggered loop tick.",
+  "root_cause": [
+    "LaunchAgent runtime depended on shebang/PATH resolution and could fall back to macOS Bash 3.2.",
+    "tick-driver lock handoff re-executed through the shebang instead of the Bash 5 runtime.",
+    "manifest primitives ran from launchd cwd instead of the repo, breaking repo-relative primitive arguments.",
+    "leverage-ceiling-probe existed but was not registered in the recurring tick-driver manifest."
+  ],
+  "repair": [
+    "LaunchAgent now runs /opt/homebrew/bin/bash directly and carries PATH, FLYWHEEL_TICK_DRIVER_BASH, and FLYWHEEL_TICK_DRIVER_MAX_RUNTIME_SEC.",
+    "tick-driver lock handoff re-execs with FLYWHEEL_TICK_DRIVER_BASH and a 240 second overall runtime guard.",
+    "tick-driver changes cwd to repo before invoking manifest primitives.",
+    "tick-driver manifest now registers leverage-ceiling-probe with --json and a 45 second timeout."
+  ],
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-ql1pa/leverage-accrual-repair-20260515T1846Z.json",
+    ".flywheel/evidence/flywheel-ql1pa/install-receipt-20260515T1850Z.json",
+    ".flywheel/evidence/flywheel-ql1pa/com.flywheel.tick.plist-20260515T1850Z.json"
+  ],
+  "measured_result": {
+    "leverage_ceiling_distinct_day_count_before": 4,
+    "leverage_ceiling_distinct_day_count_after": 5,
+    "current_day_present_after": true,
+    "latest_tick_driver_leverage_primitive_status": "ok"
+  },
+  "validation": [
+    {
+      "command": "bash -n /Users/josh/.local/bin/flywheel-tick-driver tests/flywheel-tick-driver.sh tests/leverage-ceiling-tick-driver-wire.sh",
+      "status": "pass"
+    },
+    {
+      "command": "bash tests/flywheel-tick-driver.sh",
+      "status": "pass",
+      "summary": "13/0"
+    },
+    {
+      "command": "bash tests/leverage-ceiling-tick-driver-wire.sh",
+      "status": "pass",
+      "summary": "5/0"
+    },
+    {
+      "command": "shellcheck -e SC2034 /Users/josh/.local/bin/flywheel-tick-driver tests/flywheel-tick-driver.sh tests/leverage-ceiling-tick-driver-wire.sh",
+      "status": "pass"
+    },
+    {
+      "command": "jq empty .flywheel/scripts/tick-driver-manifest.json .flywheel/evidence/flywheel-ql1pa/*.json",
+      "status": "pass"
+    },
+    {
+      "command": "br dep cycles",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check -- .flywheel/scripts/tick-driver-manifest.json tests/flywheel-tick-driver.sh tests/leverage-ceiling-tick-driver-wire.sh .flywheel/evidence/flywheel-ql1pa",
+      "status": "pass"
+    }
+  ],
+  "not_claimed": [
+    "flywheel-h17x complete",
+    "flywheel-xhdg complete",
+    "Axiom 23 authored",
+    "seven distinct B6 evidence days reached"
+  ],
+  "next_gate": "Let the repaired recurring tick gather two additional distinct B6 evidence days, then compute the baseline and author Axiom 23/L68 from evidence."
+}

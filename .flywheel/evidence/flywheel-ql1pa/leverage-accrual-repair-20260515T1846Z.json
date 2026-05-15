@@ -1,0 +1,128 @@
+{
+  "bead_id": "flywheel-ql1pa",
+  "created_at": "2026-05-15T18:46:00Z",
+  "current_day_present": true,
+  "distinct_day_count_after": 5,
+  "distinct_days_after": [
+    "2026-05-03",
+    "2026-05-04",
+    "2026-05-07",
+    "2026-05-09",
+    "2026-05-15"
+  ],
+  "install_receipt_ref": ".flywheel/evidence/flywheel-ql1pa/install-receipt-20260515T1850Z.json",
+  "last_valid_rows": [
+    {
+      "binding_constraint": "machines",
+      "day": "2026-05-09",
+      "score": 176,
+      "status": "critical",
+      "ts": "2026-05-09T17:33:06Z"
+    },
+    {
+      "binding_constraint": "machines",
+      "day": "2026-05-09",
+      "score": 118,
+      "status": "critical",
+      "ts": "2026-05-09T17:35:11Z"
+    },
+    {
+      "binding_constraint": "accounts",
+      "day": "2026-05-15",
+      "score": 500,
+      "status": "warn",
+      "ts": "2026-05-15T18:41:43Z"
+    },
+    {
+      "binding_constraint": "accounts",
+      "day": "2026-05-15",
+      "score": 0,
+      "status": "critical",
+      "ts": "2026-05-15T18:43:53Z"
+    },
+    {
+      "binding_constraint": "accounts",
+      "day": "2026-05-15",
+      "score": 0,
+      "status": "critical",
+      "ts": "2026-05-15T18:48:52Z"
+    }
+  ],
+  "latest_tick_rows_with_leverage": [
+    {
+      "error_count": 4,
+      "leverage": [
+        {
+          "args": [
+            "--json"
+          ],
+          "ended_ts": "2026-05-15T18:43:53Z",
+          "exit_status": 0,
+          "name": "leverage-ceiling-probe",
+          "path": "/Users/josh/Developer/flywheel/.flywheel/scripts/leverage-ceiling-probe.sh",
+          "started_ts": "2026-05-15T18:43:49Z",
+          "status": "ok",
+          "stderr_tail": "",
+          "stdout_tail": "{\"accounts_active\":0,\"binding_constraint\":\"accounts\",\"binding_evidence\":{\"accounts_norm\":0,\"anthropic_pct\":null,\"machines_norm\":1,\"tokens_norm\":1,\"xai_pct\":null},\"leverage_ceiling_score\":0,\"native_activity_sessions\":[\"flywheel\"],\"native_summary_sessions\":4,\"observed_at\":\"2026-05-15T18:43:53Z\",\"status\":\"critical\",\"success\":true,\"version\":\"leverage-ceiling-probe.v1\",\"warnings\":[\"no_active_account_detected\"],\"worker_panes_error_count\":0,\"worker_panes_idle_count\":1,\"worker_panes_total\":1,\"worker_panes_working_count\":0}",
+          "timeout_sec": 45
+        }
+      ],
+      "ok_count": 12,
+      "primitive_count": 19,
+      "status": "degraded",
+      "timeout_count": 0,
+      "ts": "2026-05-15T18:41:23Z"
+    },
+    {
+      "error_count": 3,
+      "leverage": [
+        {
+          "args": [
+            "--json"
+          ],
+          "ended_ts": "2026-05-15T18:48:52Z",
+          "exit_status": 0,
+          "name": "leverage-ceiling-probe",
+          "path": "/Users/josh/Developer/flywheel/.flywheel/scripts/leverage-ceiling-probe.sh",
+          "started_ts": "2026-05-15T18:48:48Z",
+          "status": "ok",
+          "stderr_tail": "",
+          "stdout_tail": "{\"accounts_active\":0,\"binding_constraint\":\"accounts\",\"binding_evidence\":{\"accounts_norm\":0,\"anthropic_pct\":null,\"machines_norm\":1,\"tokens_norm\":1,\"xai_pct\":null},\"leverage_ceiling_score\":0,\"native_activity_sessions\":[\"flywheel\"],\"native_summary_sessions\":4,\"observed_at\":\"2026-05-15T18:48:52Z\",\"status\":\"critical\",\"success\":true,\"version\":\"leverage-ceiling-probe.v1\",\"warnings\":[\"no_active_account_detected\"],\"worker_panes_error_count\":0,\"worker_panes_idle_count\":1,\"worker_panes_total\":1,\"worker_panes_working_count\":0}",
+          "timeout_sec": 45
+        }
+      ],
+      "ok_count": 13,
+      "primitive_count": 19,
+      "status": "degraded",
+      "timeout_count": 0,
+      "ts": "2026-05-15T18:45:55Z"
+    }
+  ],
+  "launchagent": "/Users/josh/Library/LaunchAgents/com.flywheel.tick.plist",
+  "launchagent_print_ref": "/tmp/flywheel-ql1pa-launchctl-print.txt",
+  "leverage_ledger": "/Users/josh/.local/state/flywheel/leverage-ceiling.jsonl",
+  "local_runtime_binary": "/Users/josh/.local/bin/flywheel-tick-driver",
+  "local_runtime_binary_sha256": "43e1c41857474fa11f1d5b84285dd0c6791ee57c6c7e6daf72ace8d21af8a6f3",
+  "next_evidence_gate": "Allow recurring tick-driver fires to collect two additional distinct days before authoring Axiom 23 / L68 policy.",
+  "not_claimed": [
+    "Axiom 23 authored",
+    "flywheel-h17x complete",
+    "flywheel-xhdg complete",
+    "7 distinct evidence days met"
+  ],
+  "parent_beads": [
+    "flywheel-h17x",
+    "flywheel-xhdg"
+  ],
+  "plist_receipt_ref": ".flywheel/evidence/flywheel-ql1pa/com.flywheel.tick.plist-20260515T1850Z.json",
+  "repairs": [
+    "LaunchAgent ProgramArguments use /opt/homebrew/bin/bash directly instead of shebang/path-dependent execution.",
+    "LaunchAgent EnvironmentVariables include PATH with /opt/homebrew/bin and FLYWHEEL_TICK_DRIVER_BASH.",
+    "tick-driver lock handoff re-execs with FLYWHEEL_TICK_DRIVER_BASH.",
+    "tick-driver changes cwd to repo before invoking manifest primitives.",
+    "tick-driver manifest includes leverage-ceiling-probe recurring primitive.",
+    "tick-driver lock handoff has an overall FLYWHEEL_TICK_DRIVER_MAX_RUNTIME_SEC=240 guard so a stuck primitive cannot hold the cadence lock indefinitely."
+  ],
+  "schema_version": "flywheel.leverage_ceiling_accrual_repair_receipt.v1",
+  "updated_at": "2026-05-15T18:50:00Z"
+}

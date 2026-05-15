@@ -84,6 +84,8 @@ append_lib="$TMP/jsonl-append.sh"
 write_jsonl_lib "$append_lib"
 
 write_primitive "$TMP/success.sh" 'printf "{\"status\":\"ok\"}\n"'
+repo_real="$(cd "$repo" && pwd -P)"
+write_primitive "$TMP/repo-cwd.sh" "[[ \"\$(pwd -P)\" == \"$repo_real\" ]] || { printf \"wrong cwd: %s\\n\" \"\$(pwd -P)\" >&2; exit 6; }; printf \"{\\\"status\\\":\\\"ok\\\"}\\n\""
 write_primitive "$TMP/error.sh" 'printf "boom\n" >&2; exit 7'
 write_primitive "$TMP/timeout.sh" 'sleep 3'
 
@@ -93,6 +95,7 @@ cat >"$manifest" <<JSON
   "schema_version": "tick-driver-manifest.v1",
   "primitives": [
     {"name":"success","path":"$TMP/success.sh","args":["--apply"],"timeout_sec":2},
+    {"name":"repo-cwd","path":"$TMP/repo-cwd.sh","args":[],"timeout_sec":2},
     {"name":"timeout","path":"$TMP/timeout.sh","args":["--apply"],"timeout_sec":1},
     {"name":"error","path":"$TMP/error.sh","args":["--apply"],"timeout_sec":2}
   ]
@@ -114,8 +117,9 @@ env_base=(
 
 bash -n "$DRIVER"
 env "${env_base[@]}" "$DRIVER" --json >"$TMP/run.json"
-assert_jq "$TMP/run.json" '.primitive_count == 3 and .ok_count == 1 and .timeout_count == 1 and .error_count == 1' "synthetic_invokes_all"
-assert_jq "$state/tick-driver.jsonl" '.primitive_count == 3 and .status == "degraded"' "ledger_row_written"
+assert_jq "$TMP/run.json" '.primitive_count == 4 and .ok_count == 2 and .timeout_count == 1 and .error_count == 1' "synthetic_invokes_all"
+assert_jq "$TMP/run.json" '.primitives[] | select(.name == "repo-cwd" and .status == "ok")' "primitive_runs_from_repo_cwd"
+assert_jq "$state/tick-driver.jsonl" '.primitive_count == 4 and .status == "degraded"' "ledger_row_written"
 assert_jq "$state/fuckup-log.jsonl" '[inputs] | length >= 1' "fuckup_for_failed_primitive"
 
 env "${env_base[@]}" "$DRIVER" schema drain-receipt --json >"$TMP/drain-schema.json"
@@ -150,6 +154,13 @@ env \
   FLYWHEEL_JSONL_APPEND_LIB="$append_lib" \
   "$DRIVER" --install --json >"$TMP/install.json"
 test -x "$install_bin" && test -f "$install_plist" && grep -q 'load -w' "$launchctl_log"
+if plutil -extract ProgramArguments json -o - "$install_plist" | jq -e '.[0] == "/opt/homebrew/bin/bash" and (.[1] | endswith("/flywheel-tick-driver"))' >/dev/null \
+  && plutil -extract EnvironmentVariables json -o - "$install_plist" | jq -e '(.PATH | contains("/opt/homebrew/bin")) and .FLYWHEEL_TICK_DRIVER_BASH == "/opt/homebrew/bin/bash" and .FLYWHEEL_TICK_DRIVER_MAX_RUNTIME_SEC == "240"' >/dev/null; then
+  pass "install_plist_uses_bash5_runtime"
+else
+  fail "install_plist_uses_bash5_runtime"
+  plutil -p "$install_plist" >&2 || true
+fi
 env \
   FLYWHEEL_TICK_DRIVER_HOME="$install_home" \
   FLYWHEEL_TICK_DRIVER_STATE_DIR="$install_home/state" \
