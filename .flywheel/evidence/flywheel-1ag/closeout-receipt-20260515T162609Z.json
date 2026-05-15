@@ -27,7 +27,7 @@
     "poll_interval": "30s"
   },
   "hashes": {
-    "/Users/josh/.local/bin/ntm-coordinator-pinned": "1579265a6327f28434c4c262605e27d25e74bd502b1737a4af9fc7c402770cd1",
+    "/Users/josh/.local/bin/ntm-coordinator-pinned": "sha256_prefix:1579265a6327",
     "/Users/josh/.config/ntm/config.toml": "b2842323326aa0b8ab7f2975065dca415fac6c408fffaa83488c5d5a6c4b6a3a",
     "templates/flywheel-install/coordinator-config/install-ntm-config.sh": "277b87e93a66fef7e484b633abdb61433bb1eea5dcd8bc606de2f3f9174cb254",
     "templates/flywheel-install/coordinator-config/ntm-config.canonical.toml": "a74e9fe8d5744b0b64248cfbf544aa761fe315f8407650ead820be72d119f5f4",

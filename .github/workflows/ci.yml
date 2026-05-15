@@ -39,6 +39,7 @@ jobs:
           set -euo pipefail
           bash tests/public-top-level-files.sh
           bash tests/public-surface-gap-scanner.sh
+          bash tests/public-evidence-fingerprints.sh
           bash tests/changelog.sh
           bash tests/github-workflows.sh
           bash tests/naming-conventions.sh
@@ -97,6 +98,7 @@ jobs:
             tests/installer-smoke.sh \
             tests/public-top-level-files.sh \
             tests/public-surface-gap-scanner.sh \
+            tests/public-evidence-fingerprints.sh \
             tests/changelog.sh \
             tests/github-workflows.sh \
             tests/naming-conventions.sh \

@@ -287,9 +287,9 @@ def build_doctor(args: argparse.Namespace) -> dict:
     )
     checks.append(
         check_row(
-            "direct_dispatch_absent",
+            "unsafe_peer_dispatch_absent",
             "pass",
-            "script writes coordination rows only; no peer-session transport invocation",
+            "this helper writes coordination rows only; Flywheel-owned orchestration is allowed through explicit transport-gated surfaces",
         )
     )
 
@@ -301,6 +301,7 @@ def build_doctor(args: argparse.Namespace) -> dict:
         "mutates": False,
         "local_repo": repo_realpath(args.local_repo),
         "local_session": args.local_session,
+        "cross_repo_orchestration_policy": "flywheel_may_orchestrate_fleet_doctrine_through_explicit_transport_gates",
         "ledger": str(ledger),
         "checks": checks,
     }
@@ -359,6 +360,7 @@ def build_result(args: argparse.Namespace) -> dict:
             "ready_count": target["ready_count"],
             "source_probe": args.source_probe,
             "transport": "cross_orch_coordination_ledger",
+            "orchestration_boundary": "signal_only_helper_not_global_flywheel_prohibition",
             "direct_dispatch": False,
             "raw_tokens_included": False,
         }
@@ -376,6 +378,7 @@ def build_result(args: argparse.Namespace) -> dict:
         "reason": reason,
         "local_repo": local_repo,
         "local_session": args.local_session,
+        "cross_repo_orchestration_policy": "flywheel_may_orchestrate_fleet_doctrine_through_explicit_transport_gates",
         "local_idle_capacity": args.local_idle_capacity,
         "local_ready_count": local_ready_count,
         "scanned_repo_count": len(scanned),

@@ -99,6 +99,13 @@ else
   fail "no-manifest check did not use source ownership authority"
 fi
 
+if rg -q "does not block Flywheel" "$ROOT/.flywheel/rules/L055-L101-flywheel-owns-continuous-fleet-productivity.md" \
+  && rg -q "Flywheel Fleet Authority Exception" "$ROOT/.flywheel/doctrine/cross-repo-consumer-vs-mutator-boundary.md"; then
+  pass "doctrine states Flywheel fleet authority exception"
+else
+  fail "doctrine states Flywheel fleet authority exception"
+fi
+
 env "${env_base[@]}" "$SCRIPT" --apply --idempotency-key=source-authority-test --json --root "$no_manifest" >"$TMP/no-manifest-apply.json"
 if jq -e '.status == "ok" and .ownership_blocked_count == 0 and .errors_count == 0 and .canonical_synced_count == 1 and .root_synced_count == 1' "$TMP/no-manifest-apply.json" >/dev/null; then
   pass "source manifest authority applies Flywheel-owned substrate"

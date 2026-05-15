@@ -20,10 +20,10 @@
     "TerraTitle tenant substrate disposition child bead created"
   ],
   "preflight_receipt": "/Users/josh/Developer/flywheel/.flywheel/evidence/flywheel-sadm5/fleet-tenant-registry-preflight-20260515T1742Z.json",
-  "sha256": {
-    "/Users/josh/.claude/skills/infisical-secrets/bin/cf-secret-from-project": "554ac57a1594ac12569da14dc5893b9e12ac129b9264d260b51f47d266c0d1b3",
-    "/Users/josh/.local/bin/cf-secret-from-project": "554ac57a1594ac12569da14dc5893b9e12ac129b9264d260b51f47d266c0d1b3",
-    "/Users/josh/.claude/skills/infisical-secrets/data/project-mappings.yaml": "6cfc390b9ef9020a2ae917e621a10924ef7742a2dd5c4e23dd8aed23817c9dd6",
+  "sha256_prefixes": {
+    "/Users/josh/.claude/skills/infisical-secrets/bin/cf-secret-from-project": "554ac57a1594",
+    "/Users/josh/.local/bin/cf-secret-from-project": "554ac57a1594",
+    "/Users/josh/.claude/skills/infisical-secrets/data/project-mappings.yaml": "6cfc390b9ef9",
     "/Users/josh/Developer/flywheel/.flywheel/scripts/fleet-tenant-registry-preflight.py": "2cda47f92683dbe82c31b4457d58f268cd4899946f63987bed0e57b42b7c02ab",
     "/Users/josh/Developer/flywheel/tests/fleet-tenant-registry-preflight.sh": "b58b1b860f3292ec9608871af1c0713c66ab1ea6203b62d83012dd0316222f7b"
   }

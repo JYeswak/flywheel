@@ -63,7 +63,7 @@ fi
   --fleet-config "$TMP/fleet.json" \
   --ledger "$TMP/doctor-ledger.jsonl" \
   --json >"$TMP/doctor.json"
-assert_jq "$TMP/doctor.json" '.schema_version == "fleet-refill-signal.doctor.v1" and .command == "doctor" and .mode == "read_only" and .mutates == false and (.status | IN("pass","warn","fail")) and ([.checks[] | select(.name == "doctor_read_only").status][0] == "pass") and ([.checks[] | select(.name == "direct_dispatch_absent").status][0] == "pass")' "doctor emits read-only envelope"
+assert_jq "$TMP/doctor.json" '.schema_version == "fleet-refill-signal.doctor.v1" and .command == "doctor" and .mode == "read_only" and .mutates == false and .cross_repo_orchestration_policy == "flywheel_may_orchestrate_fleet_doctrine_through_explicit_transport_gates" and (.status | IN("pass","warn","fail")) and ([.checks[] | select(.name == "doctor_read_only").status][0] == "pass") and ([.checks[] | select(.name == "unsafe_peer_dispatch_absent").status][0] == "pass")' "doctor emits read-only envelope"
 if [[ ! -e "$TMP/doctor-ledger.jsonl" ]]; then
   pass "doctor writes no ledger"
 else
@@ -123,7 +123,7 @@ write_config "$TMP/local-empty.json" "$TMP/peer-ready-2.json"
   --local-idle-capacity \
   --apply \
   --json >"$TMP/peer.out"
-assert_jq "$TMP/peer.out" '.decision == "peer_ready_signal_only" and .local_idle_capacity == true and .local_ready_count == 0 and .candidate_signal.target_repo == "'"$TMP_REAL"'/mobile-eats" and .candidate_signal.target_session == "mobile-eats" and .candidate_signal.top_bead_id == "mobile-p0" and .candidate_signal.ready_count == 2 and .candidate_signal.source_probe == "fixture-probe" and .candidate_signal.direct_dispatch == false and .candidate_signal.raw_tokens_included == false and .ledger_written == true and .direct_dispatch_attempted == false' "peer-ready creates signal only"
+assert_jq "$TMP/peer.out" '.decision == "peer_ready_signal_only" and .cross_repo_orchestration_policy == "flywheel_may_orchestrate_fleet_doctrine_through_explicit_transport_gates" and .local_idle_capacity == true and .local_ready_count == 0 and .candidate_signal.target_repo == "'"$TMP_REAL"'/mobile-eats" and .candidate_signal.target_session == "mobile-eats" and .candidate_signal.top_bead_id == "mobile-p0" and .candidate_signal.ready_count == 2 and .candidate_signal.source_probe == "fixture-probe" and .candidate_signal.orchestration_boundary == "signal_only_helper_not_global_flywheel_prohibition" and .candidate_signal.direct_dispatch == false and .candidate_signal.raw_tokens_included == false and .ledger_written == true and .direct_dispatch_attempted == false' "peer-ready creates signal only"
 assert_jq "$TMP/coord-peer.jsonl" 'select(.event == "fleet_refill_peer_ready_signal" and .target_repo == "'"$TMP_REAL"'/mobile-eats" and .target_session == "mobile-eats" and .top_bead_id == "mobile-p0" and .ready_count == 2 and .source_probe == "fixture-probe" and .raw_tokens_included == false and .direct_dispatch == false)' "peer-ready ledger row"
 
 # Fixture 3: no local or peer ready work. Nothing is written.
