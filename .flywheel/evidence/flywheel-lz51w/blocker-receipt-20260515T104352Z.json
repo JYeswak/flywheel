@@ -1,0 +1,40 @@
+{
+  "schema_version": "flywheel.bead_blocker_receipt.v1",
+  "bead_id": "flywheel-lz51w",
+  "recorded_at": "2026-05-15T10:43:52Z",
+  "disposition": "blocked_on_delivery_endpoint_decision",
+  "current_contract": {
+    "site_delivery_mode": "static Vercel site outputDirectory=site",
+    "contact_route": "mailto:joshua@zeststream.ai?subject=[Flywheel] Public site inquiry",
+    "existing_probe": "scripts/contact_route_probe.py",
+    "existing_test": "tests/contact-routing.sh",
+    "existing_delivery_claim": "mailto_client_open_only"
+  },
+  "why_agent_cannot_complete_honestly_now": [
+    "Browser-verified send proof requires a real POST delivery endpoint or third-party intake account.",
+    "The current Vercel config serves only the static site directory and does not expose an API route.",
+    "No owned form endpoint, provider access key, or approved third-party form target exists in the repo.",
+    "A fake local POST smoke would prove only test plumbing, not message delivery acceptance within sixty seconds."
+  ],
+  "acceptable_unblock_options": [
+    {
+      "option": "third_party_form_provider",
+      "needs": "Approved provider and project/form key for the public Flywheel contact surface.",
+      "examples": [
+        "Formspree",
+        "Web3Forms",
+        "Resend-backed intake"
+      ]
+    },
+    {
+      "option": "owned_api_route",
+      "needs": "Change Vercel deployment shape to include an API route or edge/serverless function plus delivery secret handling."
+    },
+    {
+      "option": "keep_mailto_only",
+      "needs": "Explicitly keep this as nonblocking route proof and close or defer delivery proof until a broader ZestStream intake system exists."
+    }
+  ],
+  "safe_local_work_remaining": false,
+  "public_release_blocker": false
+}
