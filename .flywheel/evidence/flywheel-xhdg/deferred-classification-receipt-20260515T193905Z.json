@@ -1,0 +1,16 @@
+{
+  "schema_version": "flywheel.blocker_classification_receipt.v1",
+  "bead_id": "flywheel-xhdg",
+  "ts": "20260515T193905Z",
+  "previous_status": "blocked",
+  "new_status": "deferred",
+  "classification": "time_gated_evidence_accrual",
+  "reason": "The dependency flywheel-h17x is not an active blocker; it is deferred until the canonical leverage evidence gate reaches seven distinct successful evidence days.",
+  "gate_ref": ".flywheel/evidence/flywheel-xhdg/leverage-gate-waiting-20260515T193905Z.json",
+  "gate_status": "waiting_for_evidence",
+  "distinct_day_count": 5,
+  "missing_distinct_days": 2,
+  "next_action": "continue_repaired_tick_driver_accrual",
+  "safe_local_work_remaining": false,
+  "blocker_left_open": false
+}

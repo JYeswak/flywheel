@@ -1,0 +1,29 @@
+{
+  "binding_counts": {
+    "accounts": 14,
+    "machines": 24
+  },
+  "distinct_day_count": 5,
+  "distinct_days": [
+    "2026-05-03",
+    "2026-05-04",
+    "2026-05-07",
+    "2026-05-09",
+    "2026-05-15"
+  ],
+  "generated_at": "2026-05-15T19:39:05Z",
+  "invalid_row_count": 0,
+  "latest_timestamp": "2026-05-15T19:32:08Z",
+  "ledger": "/Users/josh/.local/state/flywheel/leverage-ceiling.jsonl",
+  "missing_distinct_days": 2,
+  "next_action": "continue_repaired_tick_driver_accrual",
+  "required_distinct_days": 7,
+  "row_count": 38,
+  "schema_version": "flywheel.leverage_evidence_gate.v1",
+  "score_avg": 237.18,
+  "score_max": 500.0,
+  "score_min": 0.0,
+  "status": "waiting_for_evidence",
+  "unblocks": [],
+  "valid_success_row_count": 38
+}
