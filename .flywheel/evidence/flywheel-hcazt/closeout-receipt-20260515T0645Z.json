@@ -1,0 +1,72 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-hcazt",
+  "closed_at": "2026-05-15T06:45:00Z",
+  "status": "done",
+  "disposition": "SkillOS applied/adapted the Flywheel handoff with committed evidence; no Flywheel-side SkillOS mutation was performed.",
+  "source_handoff": ".flywheel/handoffs/skillos-meadows-mission-goal-lock-in-20260515.md",
+  "skillos_commits_verified": [
+    {
+      "commit": "364777c",
+      "subject": "docs(mission,goal): apply Jeff-pattern quality anchor (flywheel-hcazt)",
+      "evidence": [
+        "/Users/josh/Developer/skillos/.flywheel/MISSION.md:118",
+        "/Users/josh/Developer/skillos/.flywheel/MISSION.md:140",
+        "/Users/josh/Developer/skillos/.flywheel/GOAL.md:56",
+        "/Users/josh/Developer/skillos/.flywheel/GOAL.md:60"
+      ]
+    },
+    {
+      "commit": "ea2c3fb",
+      "subject": "feat(idle-2,skillos-2dhe): author-checklist validator + 3 fixtures",
+      "evidence": [
+        "/Users/josh/Developer/skillos/scripts/skillos_skill_author_checklist_validator.py",
+        "/Users/josh/Developer/skillos/tests/fixtures/skill-author-checklist/missing-doctrine-cluster-table.json",
+        "/Users/josh/Developer/skillos/tests/fixtures/skill-author-checklist/missing-code-pattern-table.json",
+        "/Users/josh/Developer/skillos/tests/fixtures/skill-author-checklist/valid-full-tables.json"
+      ]
+    },
+    {
+      "commit": "19cea15",
+      "subject": "feat(idle-2,skillos-2dhe): rev-9 metric computer + first real checklist",
+      "evidence": [
+        "/Users/josh/Developer/skillos/scripts/skillos_skill_quality_bar_coverage.py",
+        "/Users/josh/Developer/skillos/state/skill-author-checklists/zs-project-bootstrap.json"
+      ]
+    },
+    {
+      "commit": "396ee83",
+      "subject": "feat(idle-2,skillos-8d8b): wire skill-quality-bar-coverage doctor scope",
+      "evidence": [
+        "/Users/josh/Developer/skillos/mcp/skillos-mcp-server/lib/doctor_checks/skill_quality_bar_coverage.py",
+        "bin/skillos doctor --scope skill-quality-bar-coverage --json"
+      ]
+    }
+  ],
+  "acceptance": {
+    "mission_anchor": "met: SkillOS MISSION names Jeff-Pattern Quality Anchor, eight doctrine clusters, four ADOPT-grade code patterns, and Meadows #2/#3/#5 lock.",
+    "goal_stock_flow_metrics": "met: SkillOS GOAL names skill_quality_bar_coverage_ratio, new_skill_adopt_pattern_pass_rate, and skill_hardening_or_retirement_outflow_count with stock/inflow/outflow/feedback-loop wording.",
+    "author_checklist_bead": "met: SkillOS bead skillos-2dhe closed with validator, fixtures, close-time gate, and explicit follow-on for doctor wiring.",
+    "canonical_surface": "adapted: SkillOS records ratification in MISSION/GOAL and preserves root AGENTS externalization policy; no literal SKILLOS-DOCTRINE-PARADIGM-ANCHOR marker found.",
+    "callback_evidence": "met by committed SkillOS bead and git evidence; no duplicate Flywheel mutation."
+  },
+  "verification_commands": [
+    {
+      "command": "rg -n 'Jeff-Pattern Quality Anchor|skill_quality_bar_coverage_ratio|doctrine-cluster-coverage|code-pattern-applicability' /Users/josh/Developer/skillos/.flywheel /Users/josh/Developer/skillos/scripts",
+      "result": "pass"
+    },
+    {
+      "command": "python3 /Users/josh/Developer/skillos/scripts/skillos_skill_quality_bar_coverage.py --json",
+      "result": "pass status=OK ratio=1.0 inflow=1.0 outflow=0"
+    },
+    {
+      "command": "br --db /Users/josh/Developer/skillos/.beads/*.db show skillos-2dhe --json",
+      "result": "pass closed"
+    },
+    {
+      "command": "br --db /Users/josh/Developer/skillos/.beads/*.db show skillos-8d8b --json",
+      "result": "pass closed"
+    }
+  ],
+  "boundary": "Flywheel verified SkillOS evidence only; SkillOS dirty worktree was not modified."
+}
