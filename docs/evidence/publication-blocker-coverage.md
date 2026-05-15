@@ -17,9 +17,9 @@ Expected local state before cutover:
 
 - `publication_readiness.py` returns `status=blocked` with the blocker codes
   below;
-- the registry validator returns `status=pass`, `open_count=3`, and its
-  `readiness_blocker_coverage` covers all live readiness blockers plus the
-  conditional remote visibility blocker;
+- for TP-005/TP-017/TP-018, the registry validator returns `status=pass`,
+  `open_count=3`, and `readiness_blocker_coverage` covers every live
+  readiness code plus the conditional remote visibility code;
 - the open registry rows are TP-005, TP-017, and TP-018.
 
 | Readiness blocker code | Owner | Public closure proof |
