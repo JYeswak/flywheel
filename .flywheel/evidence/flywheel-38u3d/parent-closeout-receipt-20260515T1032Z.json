@@ -1,0 +1,72 @@
+{
+  "schema_version": "flywheel.parent_bead_reclassification_receipt.v1",
+  "bead_id": "flywheel-38u3d",
+  "timestamp": "2026-05-15T10:32:00Z",
+  "disposition": "reclassified_blocked_decomposed_container",
+  "summary": "The original Nextra docs scaffold bead was a monolithic parent that explicitly called for decomposition. The decomposition was completed and recorded in .flywheel/audit/flywheel-38u3d/evidence.md; phase work now lives in child/sister beads. The parent cannot be closed while br sees an open child, so it is reclassified to blocked to prevent bv/br from routing workers to the stale container while preserving the actual remaining rollout work in the child graph.",
+  "not_a_claim": [
+    "This does not claim all client docs sites are complete.",
+    "This does not claim Phase 3 or Phase 4 rollout is unblocked.",
+    "This does not claim the upstream Jeffrey Premium scaffold template issue is fixed."
+  ],
+  "decomposition_evidence": [
+    {
+      "path": ".flywheel/audit/flywheel-38u3d/evidence.md",
+      "summary": "Declined + decomposed evidence pack with four phase beads."
+    },
+    {
+      "path": ".flywheel/audit/flywheel-38u3d/compliance-pack.md",
+      "summary": "Compliance pack scored the decomposition disposition at 940/1000."
+    }
+  ],
+  "phase_state": [
+    {
+      "bead_id": "flywheel-mv2th",
+      "phase": "1",
+      "status": "closed",
+      "scope": "flywheel docs init subcommand and project-type detection"
+    },
+    {
+      "bead_id": "flywheel-ti46c",
+      "phase": "2",
+      "status": "closed",
+      "scope": "dogfood docs site on Flywheel repo with personas, Diataxis IA, and doctrine pages"
+    },
+    {
+      "bead_id": "flywheel-sjr9e",
+      "phase": "3",
+      "status": "deferred",
+      "scope": "alpsinsurance and mobile-eats docs rollout",
+      "blocker": "deferred until upstream scaffold compatibility and retry trigger are green"
+    },
+    {
+      "bead_id": "flywheel-ll107",
+      "phase": "4",
+      "status": "open",
+      "scope": "blackfoot, terratitle, and vrtx docs rollout",
+      "blocker": "blocked by deferred Phase 3 / client onboarding readiness"
+    }
+  ],
+  "validation": [
+    {
+      "command": "bash tests/flywheel-docs-canonical-cli.sh",
+      "result": "pass",
+      "summary": "18 passed, 0 failed"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass",
+      "summary": "No dependency cycles detected."
+    },
+    {
+      "command": "br close flywheel-38u3d --reason ...",
+      "result": "blocked_by_open_child",
+      "summary": "br refused parent close because flywheel-38u3d still has an open child; reclassification avoids force-closing over the child graph."
+    }
+  ],
+  "value_added": [
+    "Removes a stale monolithic parent from ready triage.",
+    "Keeps remaining docs rollout work visible in child beads instead of hiding it behind the parent.",
+    "Preserves the documented Jeffrey-substrate boundary: consume/read the docs-site skill, do not mutate it."
+  ]
+}
