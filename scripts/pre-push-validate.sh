@@ -68,6 +68,13 @@ CI_TESTS=(
   # contracts
   "tests/hosted-install-contract.sh"
   "tests/preflight-fixtures.sh"
+
+  # canonical CLI + protocol contracts (cycle 534 delta — worker-found gap)
+  "tests/presence-queue.sh"
+  "tests/goal-mode.sh"
+  "tests/josh-requests-reverse-lookup-canonical-cli.sh"
+  "tests/goal-build-canonical-cli.sh"
+  "tests/trauma-claim-emitter-canonical-cli.sh"
 )
 
 # Tests that require network / external services — skip with --fast.
@@ -100,6 +107,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ $list_only -eq 1 ]]; then
+  printf '=== python-gates (always run, ahead of shell tests) ===\n'
+  for gate in "${PYTHON_GATES[@]}"; do
+    printf '  python-gate:%s -> %s\n' "${gate%%|*}" "${gate#*|}"
+  done
   printf '=== CI tests run by pre-push-validate ===\n'
   for t in "${CI_TESTS[@]}"; do
     printf '  %s\n' "$t"
