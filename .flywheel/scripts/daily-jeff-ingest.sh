@@ -286,6 +286,22 @@ record_item() {
   fi
 }
 
+github_repo_is_unmodified_fork() {
+  local repo="$1"
+  local meta is_fork parent_owner parent_name branch compare
+  have gh || return 1
+  meta="$(gh repo view "Dicklesworthstone/$repo" --json isFork,parent,defaultBranchRef 2>/dev/null)" || return 1
+  is_fork="$(jq -r '.isFork // false' <<<"$meta" 2>/dev/null)" || return 1
+  [ "$is_fork" = "true" ] || return 1
+  parent_owner="$(jq -r '.parent.owner.login // empty' <<<"$meta" 2>/dev/null)" || return 1
+  parent_name="$(jq -r '.parent.name // empty' <<<"$meta" 2>/dev/null)" || return 1
+  branch="$(jq -r '.defaultBranchRef.name // "main"' <<<"$meta" 2>/dev/null)" || return 1
+  [ -n "$parent_owner" ] && [ -n "$parent_name" ] && [ -n "$branch" ] || return 1
+  compare="$(gh api "repos/Dicklesworthstone/$repo/compare/${parent_owner}:${branch}...Dicklesworthstone:${branch}" \
+    --jq '{status,ahead_by,behind_by,total_commits}' 2>/dev/null)" || return 1
+  jq -e '.status == "identical" and .ahead_by == 0 and .total_commits == 0' <<<"$compare" >/dev/null 2>&1
+}
+
 compare_and_snapshot() {
   local label="$1" current="$2" today="$3" class="$4" high_default="$5" reason="$6"
   local safe target prior additions count
@@ -298,6 +314,10 @@ compare_and_snapshot() {
     grep -Fvx -f "$prior" "$current" 2>/dev/null | sed '/^[[:space:]]*$/d' | head -50 >"$additions" || true
     while IFS= read -r line; do
       [ -n "$line" ] || continue
+      if [ "$label" = "github-repos" ] && github_repo_is_unmodified_fork "$line"; then
+        record_item "$label" "archived-signal" "$(printf '%s' "$line" | cut -c1-180)" "$label" 0 "Unmodified fork of an upstream repo; no Jeffrey-authored delta to evaluate"
+        continue
+      fi
       record_item "$label" "$class" "$(printf '%s' "$line" | cut -c1-180)" "$label" "$high_default" "$reason"
     done <"$additions"
   else
