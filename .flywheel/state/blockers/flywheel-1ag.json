@@ -22,8 +22,25 @@
   "source_repo": "/Users/josh/Developer/flywheel",
   "source_row_sha256": "0ea2d3f454a08ab9ae9c1aefb9398dddf89baa586376ed2eea853cb1f0f6d492",
   "source_status": "blocked",
-  "status": "open",
+  "status": "closed",
   "synced_at": "2026-05-15T16:08:00Z",
   "title": "ntm-coordinator-config-toml-runtime-wiring-gap",
-  "verification_path": "br show flywheel-1ag --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-1ag\" and .status == \"blocked\"'"
+  "verification_path": "br show flywheel-1ag --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-1ag\" and .status == \"blocked\"'",
+  "closed_at": "2026-05-15T16:26:47Z",
+  "closed_by": "orch:auto",
+  "closed_reason": "ac_passed_auto_close_hook",
+  "live_probe_evidence": {
+    "schema_version": "blocker-escalation/v1",
+    "ts": "2026-05-15T16:26:47Z",
+    "event": "blocker_auto_closed",
+    "blocker_id": "flywheel-1ag",
+    "ac_command": "br show flywheel-1ag --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-1ag\" and .status != \"blocked\"'",
+    "ac_stdout": "true",
+    "ac_exit_code": 0,
+    "live_probe_at": "2026-05-15T16:26:47Z",
+    "previous_last_verified_at": "2026-05-15T16:03:28Z",
+    "delta_seconds": 1399,
+    "auto_closer": "orch:auto",
+    "ac_state_hash": "6daf9e6a9e6f212a1aeaa46470d7cdda685bfee834ada58c627fa2934bfcdee4"
+  }
 }

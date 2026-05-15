@@ -1,0 +1,62 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-1ag",
+  "closed_at": "2026-05-15T16:26:09Z",
+  "summary": "Closed the NTM coordinator config runtime wiring gap for the Flywheel-owned runtime path. The installed pinned coordinator wrapper now feeds coordinator subcommands a sanitized flat coordinator config, the live coordinator block has no nested/schema shapes that trigger fallback, and the wire test asserts canonical runtime values instead of command shape only.",
+  "runtime_boundary": {
+    "owned_runtime_path": "/Users/josh/.local/bin/ntm-coordinator-pinned",
+    "raw_ntm_full_config_status": "not_load_bearing_for_flywheel_coordinator_commands",
+    "raw_ntm_full_config_note": "Direct ntm coordinator status with the full ~/.config/ntm/config.toml still falls back because the global file intentionally contains extension sections outside current upstream NTM schema. That broader validation drift is separate from this blocker; Flywheel command surfaces use the pinned wrapper."
+  },
+  "live_config_cleanup": {
+    "backup": "/Users/josh/.config/ntm/config.toml.bak.20260515T162458Z",
+    "post_apply_dry_run": {
+      "matches": 5,
+      "coordinator_block_count": 1,
+      "nested_coordinator_block_count": 0,
+      "coordinator_schema_version_count": 0,
+      "drifts": [],
+      "structural_drifts": []
+    }
+  },
+  "runtime_config_observed": {
+    "assign_only_idle": true,
+    "auto_assign": true,
+    "digest_interval": "30m0s",
+    "idle_threshold": 300,
+    "poll_interval": "30s"
+  },
+  "hashes": {
+    "/Users/josh/.local/bin/ntm-coordinator-pinned": "1579265a6327f28434c4c262605e27d25e74bd502b1737a4af9fc7c402770cd1",
+    "/Users/josh/.config/ntm/config.toml": "b2842323326aa0b8ab7f2975065dca415fac6c408fffaa83488c5d5a6c4b6a3a",
+    "templates/flywheel-install/coordinator-config/install-ntm-config.sh": "277b87e93a66fef7e484b633abdb61433bb1eea5dcd8bc606de2f3f9174cb254",
+    "templates/flywheel-install/coordinator-config/ntm-config.canonical.toml": "a74e9fe8d5744b0b64248cfbf544aa761fe315f8407650ead820be72d119f5f4",
+    "tests/test_ntm_coordinator_wire.sh": "a170b1a0a50ae9e41ae643351961b09dd6c5ba318e955a137fba3bbc6f107c83",
+    "templates/flywheel-install/coordinator-config/tests/test_install_ntm_config.sh": "6608016fdded068ade9b259cb1ac8570dea14fb304d68e8c34b554ea86482d8d"
+  },
+  "validation": [
+    {
+      "command": "bash tests/test_ntm_coordinator_wire.sh",
+      "result": "13/13 checks passed"
+    },
+    {
+      "command": "bash templates/flywheel-install/coordinator-config/tests/test_install_ntm_config.sh",
+      "result": "9 pass, 0 fail"
+    },
+    {
+      "command": "templates/flywheel-install/coordinator-config/install-ntm-config.sh --dry-run --json",
+      "result": "matches=5 drifts=0 structural_drifts=0"
+    },
+    {
+      "command": "~/.local/bin/ntm-coordinator-pinned --session=flywheel status --json | jq .config",
+      "result": "canonical runtime values observed"
+    },
+    {
+      "command": "bash -n templates/flywheel-install/coordinator-config/install-ntm-config.sh /Users/josh/.local/bin/ntm-coordinator-pinned tests/test_ntm_coordinator_wire.sh",
+      "result": "pass"
+    }
+  ],
+  "residuals": [
+    "Direct raw ntm coordinator status against the full global config still falls back due non-upstream extension sections. Flywheel does not treat that path as the coordinator runtime; broader config validation drift is a separate classified surface."
+  ]
+}
