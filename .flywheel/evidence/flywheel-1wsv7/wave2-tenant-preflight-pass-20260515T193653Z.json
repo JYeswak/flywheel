@@ -1,0 +1,63 @@
+{
+  "schema_version": "flywheel.fleet_tenant_registry_preflight.v1",
+  "registry": "/Users/josh/.claude/skills/infisical-secrets/data/project-mappings.yaml",
+  "run_doctor": true,
+  "status": "pass",
+  "row_count": 3,
+  "fail_count": 0,
+  "rows": [
+    {
+      "slug": "vrtx",
+      "repo": "/Users/josh/Developer/vrtx",
+      "status": "pass",
+      "registry_status": "pass",
+      "declaration_status": "pass",
+      "doctor_status": "pass",
+      "failures": [],
+      "disposition": null,
+      "doctor": {
+        "status": "pass",
+        "returncode": 0,
+        "drift_count": 0,
+        "warn_count": 0,
+        "result_count": 3
+      }
+    },
+    {
+      "slug": "zeststream-v2-fresh",
+      "repo": null,
+      "status": "pass",
+      "registry_status": "skipped",
+      "declaration_status": "skipped",
+      "doctor_status": "skipped",
+      "failures": [],
+      "disposition": {
+        "status": "skip_with_reason",
+        "reason": "zeststream-v2-fresh is a legacy active clone with local/Vercel/Railway environment history, but no current value-blind proof of a canonical Infisical tenant row. L168 will not fabricate tenant IDs or pass a registry row from stale local env files; this requires a separate secret-migration repair before it can become tenant-doctor eligible.",
+        "ref": "/Users/josh/Developer/flywheel/.flywheel/evidence/flywheel-1wsv7/zeststream-v2-fresh-tenant-disposition-20260515T1936Z.json"
+      },
+      "doctor": {
+        "status": "skipped",
+        "reason": "disposition_receipt"
+      }
+    },
+    {
+      "slug": "zeststream-platform",
+      "repo": null,
+      "status": "pass",
+      "registry_status": "skipped",
+      "declaration_status": "skipped",
+      "doctor_status": "skipped",
+      "failures": [],
+      "disposition": {
+        "status": "skip_with_reason",
+        "reason": "zeststream-platform is a shared package/docs substrate, not a tenant-bound runtime deployment. It produces reusable packages consumed by product repos; tenant routing belongs to the consuming runtime repos.",
+        "ref": "/Users/josh/Developer/flywheel/.flywheel/evidence/flywheel-1wsv7/zeststream-platform-tenant-disposition-20260515T1936Z.json"
+      },
+      "doctor": {
+        "status": "skipped",
+        "reason": "disposition_receipt"
+      }
+    }
+  ]
+}
