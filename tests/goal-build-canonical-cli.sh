@@ -16,43 +16,79 @@ fail_count=0
 pass() { pass_count=$((pass_count + 1)); printf 'PASS %s\n' "$1"; }
 fail() { fail_count=$((fail_count + 1)); printf 'FAIL %s\n' "$1" >&2; }
 
-bash -n "$SCRIPT" 2>/dev/null && pass "shellcheck: syntax" || fail "syntax"
+if bash -n "$SCRIPT" 2>/dev/null; then
+  pass "shellcheck: syntax"
+else
+  fail "syntax"
+fi
 
 # Canonical surfaces
-"$SCRIPT" --info --json 2>/dev/null | jq -e '.name and .version and .schema_version and .anti_pattern_fixed' >/dev/null \
-  && pass "--info exposes name/version/schema/anti_pattern_fixed" || fail "--info"
-"$SCRIPT" --schema --json 2>/dev/null | jq -e '.input_schema and .output_schema and .max_chars == 4000' >/dev/null \
-  && pass "--schema exposes I/O schemas + max_chars=4000" || fail "--schema"
-"$SCRIPT" --examples --json 2>/dev/null | jq -e '.examples | length >= 3' >/dev/null \
-  && pass "--examples ≥3 invocations" || fail "--examples"
-"$SCRIPT" doctor 2>/dev/null | jq -e '.command == "doctor" and (.checks | length >= 3)' >/dev/null \
-  && pass "doctor envelope" || fail "doctor"
+if "$SCRIPT" --info --json 2>/dev/null | jq -e '.name and .version and .schema_version and .anti_pattern_fixed' >/dev/null; then
+  pass "--info exposes name/version/schema/anti_pattern_fixed"
+else
+  fail "--info"
+fi
+if "$SCRIPT" --schema --json 2>/dev/null | jq -e '.input_schema and .output_schema and .max_chars == 4000' >/dev/null; then
+  pass "--schema exposes I/O schemas + max_chars=4000"
+else
+  fail "--schema"
+fi
+if "$SCRIPT" --examples --json 2>/dev/null | jq -e '.examples | length >= 3' >/dev/null; then
+  pass "--examples ≥3 invocations"
+else
+  fail "--examples"
+fi
+if "$SCRIPT" doctor 2>/dev/null | jq -e '.command == "doctor" and (.checks | length >= 3)' >/dev/null; then
+  pass "doctor envelope"
+else
+  fail "doctor"
+fi
 
 # Behavior: under-limit body writes
 UNDER="$TMP/under.txt"
 python3 -c "open('$UNDER','w').write('x'*3500)"
 OUT="$("$SCRIPT" build --repo testrepo --slug under-test --from "$UNDER" --json 2>&1)"
-echo "$OUT" | jq -e '.status == "written" and .char_count == 3500' >/dev/null \
-  && pass "under-limit body writes (3500 chars)" || { fail "under-limit body should write"; echo "$OUT" >&2; }
-echo "$OUT" | jq -e '.path | endswith("under-test-'"$(date -u +%Y%m%d)"'.txt")' >/dev/null \
-  && pass "canonical path: <slug>-<YYYYMMDD>.txt" || fail "canonical path wrong"
-echo "$OUT" | jq -e '.path | contains("/testrepo/")' >/dev/null \
-  && pass "per-repo folder structure" || fail "per-repo folder wrong"
+if echo "$OUT" | jq -e '.status == "written" and .char_count == 3500' >/dev/null; then
+  pass "under-limit body writes (3500 chars)"
+else
+  fail "under-limit body should write"
+  echo "$OUT" >&2
+fi
+if echo "$OUT" | jq -e '.path | endswith("under-test-'"$(date -u +%Y%m%d)"'.txt")' >/dev/null; then
+  pass "canonical path: <slug>-<YYYYMMDD>.txt"
+else
+  fail "canonical path wrong"
+fi
+if echo "$OUT" | jq -e '.path | contains("/testrepo/")' >/dev/null; then
+  pass "per-repo folder structure"
+else
+  fail "per-repo folder wrong"
+fi
 
 # Behavior: at-limit body writes (exactly 4000)
 AT="$TMP/at.txt"
 python3 -c "open('$AT','w').write('x'*4000)"
-"$SCRIPT" build --repo testrepo --slug at-test --from "$AT" --json 2>&1 | jq -e '.status == "written" and .char_count == 4000' >/dev/null \
-  && pass "at-limit body writes (4000 chars)" || fail "at-limit body should write"
+if "$SCRIPT" build --repo testrepo --slug at-test --from "$AT" --json 2>&1 | jq -e '.status == "written" and .char_count == 4000' >/dev/null; then
+  pass "at-limit body writes (4000 chars)"
+else
+  fail "at-limit body should write"
+fi
 
 # Behavior: over-limit body REFUSES
 OVER="$TMP/over.txt"
 python3 -c "open('$OVER','w').write('x'*4001)"
 OUT="$("$SCRIPT" build --repo testrepo --slug over-test --from "$OVER" --json 2>&1)"
-echo "$OUT" | jq -e '.status == "refused" and .char_count == 4001' >/dev/null \
-  && pass "over-limit body REFUSES (4001 chars)" || { fail "over-limit body should refuse"; echo "$OUT" >&2; }
-[[ ! -f "$GOAL_BUILD_REPO/.flywheel/goals/testrepo/over-test-$(date -u +%Y%m%d).txt" ]] \
-  && pass "refused body NOT written to disk" || fail "refused body leaked to disk"
+if echo "$OUT" | jq -e '.status == "refused" and .char_count == 4001' >/dev/null; then
+  pass "over-limit body REFUSES (4001 chars)"
+else
+  fail "over-limit body should refuse"
+  echo "$OUT" >&2
+fi
+if [[ ! -f "$GOAL_BUILD_REPO/.flywheel/goals/testrepo/over-test-$(date -u +%Y%m%d).txt" ]]; then
+  pass "refused body NOT written to disk"
+else
+  fail "refused body leaked to disk"
+fi
 
 # Behavior: 17000-char body (Joshua's actual case) REFUSES
 # Note: script returns 1 on refuse (by design); capture output separately to
@@ -60,24 +96,39 @@ echo "$OUT" | jq -e '.status == "refused" and .char_count == 4001' >/dev/null \
 HUGE="$TMP/huge.txt"
 python3 -c "open('$HUGE','w').write('x'*17343)"
 OUT="$("$SCRIPT" build --repo testrepo --slug huge-test --from "$HUGE" --json 2>&1 || true)"
-echo "$OUT" | jq -e '.status == "refused" and .char_count == 17343' >/dev/null \
-  && pass "17343-char body REFUSES (real failure case)" || fail "17343 should refuse"
+if echo "$OUT" | jq -e '.status == "refused" and .char_count == 17343' >/dev/null; then
+  pass "17343-char body REFUSES (real failure case)"
+else
+  fail "17343 should refuse"
+fi
 
 # Behavior: check subcommand validates without writing
 OUT="$("$SCRIPT" check --from "$UNDER" --json 2>&1 || true)"
-echo "$OUT" | jq -e '.status == "pass"' >/dev/null \
-  && pass "check: under-limit pass" || fail "check: under-limit"
+if echo "$OUT" | jq -e '.status == "pass"' >/dev/null; then
+  pass "check: under-limit pass"
+else
+  fail "check: under-limit"
+fi
 OUT="$("$SCRIPT" check --from "$OVER" --json 2>&1 || true)"
-echo "$OUT" | jq -e '.status == "fail"' >/dev/null \
-  && pass "check: over-limit fail" || fail "check: over-limit"
+if echo "$OUT" | jq -e '.status == "fail"' >/dev/null; then
+  pass "check: over-limit fail"
+else
+  fail "check: over-limit"
+fi
 
 # Behavior: list subcommand
-"$SCRIPT" list --repo testrepo --json 2>&1 | jq -e '. | length >= 2 and all(.[]; .limit_ok == true)' >/dev/null \
-  && pass "list: shows written files with limit_ok flag" || fail "list"
+if "$SCRIPT" list --repo testrepo --json 2>&1 | jq -e '. | length >= 2 and all(.[]; .limit_ok == true)' >/dev/null; then
+  pass "list: shows written files with limit_ok flag"
+else
+  fail "list"
+fi
 
 # Behavior: stdin source
-echo -n "stdin body under limit" | "$SCRIPT" build --repo testrepo --slug stdin-test --stdin --json 2>&1 | jq -e '.status == "written"' >/dev/null \
-  && pass "stdin body source writes" || fail "stdin source"
+if echo -n "stdin body under limit" | "$SCRIPT" build --repo testrepo --slug stdin-test --stdin --json 2>&1 | jq -e '.status == "written"' >/dev/null; then
+  pass "stdin body source writes"
+else
+  fail "stdin source"
+fi
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2
