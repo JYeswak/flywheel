@@ -98,6 +98,7 @@ declared_read_only_re = re.compile(
     r"|mutates_state\s*[:=]\s*false.*read_only\s*[:=]\s*true",
     re.S,
 )
+devnull_redir_re = re.compile(r"(?:[0-9]?>|[0-9]?>>|&>)\s*/dev/null\b")
 
 tracked_shell = []
 mutating = []
@@ -151,7 +152,8 @@ for rel_raw in raw.split(b"\0"):
     if declared_read_only_re.search(text):
         declared_read_only_excluded.append(rel)
         continue
-    if mutating_re.search(text):
+    mutation_text = devnull_redir_re.sub("", text)
+    if mutating_re.search(mutation_text):
         mutating.append(rel)
         if trap_re.search(text):
             with_trap.append(rel)
