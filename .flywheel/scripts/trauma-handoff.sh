@@ -34,6 +34,11 @@ REPO_ROOT="${TRAUMA_HANDOFF_REPO:-$REPO_DEFAULT}"
 CANDIDATES_PATH="${TRAUMA_HANDOFF_CANDIDATES:-$REPO_ROOT/.flywheel/evidence/trauma-candidates.jsonl}"
 LEDGER_PATH="${TRAUMA_HANDOFF_LEDGER:-$REPO_ROOT/.flywheel/state/skillos-relay-ledger.jsonl}"
 TTL_SECONDS="${TRAUMA_HANDOFF_TTL:-86400}"
+REGISTER_SCRIPT="${TRAUMA_HANDOFF_REGISTER_SCRIPT:-$REPO_ROOT/.flywheel/scripts/orch-agent-mail-session-register.sh}"
+MCP_URL="${TRAUMA_HANDOFF_MCP_URL:-http://127.0.0.1:8765/api/}"
+MCP_CONFIG="${TRAUMA_HANDOFF_MCP_CONFIG:-$HOME/.config/mcp/agent-mail.json}"
+CURL_BIN="${TRAUMA_HANDOFF_CURL:-curl}"
+FLEET_MAIL_PROJECT="${TRAUMA_HANDOFF_PROJECT_KEY:-$REPO_ROOT}"
 
 if [[ "${FLYWHEEL_TRAUMA_HANDOFF:-1}" == "0" ]]; then
   printf '{"status":"disabled","reason":"FLYWHEEL_TRAUMA_HANDOFF=0"}\n'
@@ -44,7 +49,7 @@ usage() {
   cat <<EOF
 usage:
   trauma-handoff.sh prepare [--row-index N] [--all] [--json]
-  trauma-handoff.sh send-via-mcp-agent-mail [--row-index N] [--dry-run] [--json]
+  trauma-handoff.sh send-via-mcp-agent-mail [--row-index N] [--to AGENT] [--dry-run] [--json]
   trauma-handoff.sh doctor|health [--json]
   trauma-handoff.sh --info|--schema|--examples [--json]
   trauma-handoff.sh --help|-h
@@ -58,6 +63,7 @@ Env overrides:
   TRAUMA_HANDOFF_LEDGER      default <repo>/.flywheel/state/skillos-relay-ledger.jsonl
   TRAUMA_HANDOFF_TTL         default 86400 (24h)
   FLYWHEEL_TRAUMA_HANDOFF=0  disable entirely
+  TRAUMA_HANDOFF_RECIPIENT   required for live send if --to is not provided
 EOF
 }
 
@@ -214,6 +220,119 @@ EOFBODY
 EOF
 }
 
+bearer_token() {
+  if [[ -n "${AGENTMAIL_HTTP_BEARER_TOKEN:-}" ]]; then
+    printf '%s\n' "$AGENTMAIL_HTTP_BEARER_TOKEN"
+  elif [[ -f "$MCP_CONFIG" ]]; then
+    jq -r '.auth_token // empty' "$MCP_CONFIG"
+  fi
+}
+
+append_sent_ledger_row() {
+  local packet="$1" message_id="$2" recipient="$3" sender="$4"
+  local class; class="$(echo "$packet" | jq -r '.trauma_candidate.class')"
+  local idem; idem="$(echo "$packet" | jq -r '.idempotency_key')"
+  local ts; ts="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  mkdir -p "$(dirname "$LEDGER_PATH")"
+  jq -nc \
+    --arg ts "$ts" \
+    --arg idem "$idem" \
+    --arg class "$class" \
+    --arg target "skillos:1" \
+    --arg message_id "$message_id" \
+    --arg recipient "$recipient" \
+    --arg sender "$sender" \
+    --argjson packet "$packet" \
+    '{
+      schema_version: "flywheel-skillos-relay-ledger/v1",
+      ts: $ts,
+      idempotency_key: $idem,
+      trauma_class: $class,
+      target_session: $target,
+      packet: $packet,
+      status: "sent",
+      skillos_handoff_message_id: $message_id,
+      agent_mail_sender: $sender,
+      agent_mail_recipient: $recipient
+    }' >>"$LEDGER_PATH"
+}
+
+cmd_send_via_mcp_agent_mail() {
+  local row_index=0 json_out=0 dry_run=0 recipient="${TRAUMA_HANDOFF_RECIPIENT:-}"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --row-index) row_index="$2"; shift 2 ;;
+      --to) recipient="$2"; shift 2 ;;
+      --dry-run) dry_run=1; shift ;;
+      --json) json_out=1; shift ;;
+      *) printf 'unknown arg: %s\n' "$1" >&2; return 2 ;;
+    esac
+  done
+  [[ -f "$CANDIDATES_PATH" ]] || { printf 'candidates not found: %s\n' "$CANDIDATES_PATH" >&2; return 1; }
+  [[ -x "$REGISTER_SCRIPT" ]] || { printf 'registration helper not executable: %s\n' "$REGISTER_SCRIPT" >&2; return 1; }
+
+  local row; row="$(sed -n "$((row_index + 1))p" "$CANDIDATES_PATH")"
+  [[ -n "$row" ]] || { printf 'no row at index %d\n' "$row_index" >&2; return 1; }
+  local packet class subject body
+  packet="$(build_packet "$row")"
+  class="$(echo "$packet" | jq -r '.trauma_candidate.class')"
+  subject="trauma_handoff: $class"
+  body="$(echo "$packet" | jq -c '.')"
+
+  if [[ "$dry_run" -eq 1 ]]; then
+    local planned
+    planned="$("$REGISTER_SCRIPT" --project-key "$FLEET_MAIL_PROJECT" --json)"
+    jq -nc \
+      --arg status "planned" \
+      --arg recipient "$recipient" \
+      --arg subject "$subject" \
+      --argjson registration "$planned" \
+      '{status:$status,recipient:$recipient,subject:$subject,registration:$registration,would_send:true,raw_token_in_output:false}'
+    return 0
+  fi
+  [[ -n "$recipient" ]] || { printf '{"status":"fail","reason":"recipient_required"}\n'; return 2; }
+
+  local registration sender token_path sender_token bearer payload response message_id
+  registration="$("$REGISTER_SCRIPT" --project-key "$FLEET_MAIL_PROJECT" --apply --json)"
+  sender="$(jq -r '.identity_name // empty' <<<"$registration")"
+  token_path="$(jq -r '.token_path // empty' <<<"$registration")"
+  [[ -n "$sender" && -f "$token_path" ]] || { printf '{"status":"fail","reason":"sender_registration_unavailable"}\n'; return 1; }
+  sender_token="$(cat "$token_path")"
+  bearer="$(bearer_token)"
+  [[ -n "$bearer" ]] || { printf '{"status":"fail","reason":"agent_mail_bearer_missing"}\n'; return 1; }
+
+  payload="$(jq -nc \
+    --arg project_key "$FLEET_MAIL_PROJECT" \
+    --arg sender_name "$sender" \
+    --arg sender_token "$sender_token" \
+    --arg recipient "$recipient" \
+    --arg subject "$subject" \
+    --arg body_md "$body" \
+    '{jsonrpc:"2.0",id:1,method:"tools/call",params:{name:"send_message",arguments:{project_key:$project_key,sender_name:$sender_name,sender_token:$sender_token,to:[$recipient],subject:$subject,body_md:$body_md,importance:"normal",ack_required:false,thread_id:"trauma-handoff"}}}')"
+  response="$("$CURL_BIN" -fsS "$MCP_URL" -H "Authorization: Bearer $bearer" -H "Content-Type: application/json" -d "$payload")" || {
+    printf '{"status":"fail","reason":"send_message_http_failed"}\n'
+    return 1
+  }
+  if jq -e '.error?' <<<"$response" >/dev/null; then
+    jq -nc --arg reason "$(jq -c '.error' <<<"$response")" '{status:"fail",reason:"send_message_error",error:$reason}'
+    return 1
+  fi
+  message_id="$(jq -r '
+    .result.content[0].text as $text
+    | ($text | fromjson? // {}) as $parsed
+    | ($parsed.deliveries[0].payload.id // $parsed.deliveries[0].payload.message_id // $parsed.id // null)
+  ' <<<"$response")"
+  [[ "$message_id" =~ ^[0-9]+$ ]] || { printf '{"status":"fail","reason":"message_id_missing"}\n'; return 1; }
+  write_ledger_row "$packet" >/dev/null
+  append_sent_ledger_row "$packet" "$message_id" "$recipient" "$sender"
+  if [[ "$json_out" -eq 1 ]]; then
+    jq -nc --arg message_id "$message_id" --arg sender "$sender" --arg recipient "$recipient" --arg ledger "$LEDGER_PATH" \
+      '{status:"sent",message_id:($message_id|tonumber),sender:$sender,recipient:$recipient,ledger:$ledger,raw_token_in_output:false}'
+  else
+    printf 'SENT trauma_handoff message_id=%s sender=%s recipient=%s ledger=%s\n' "$message_id" "$sender" "$recipient" "$LEDGER_PATH"
+  fi
+}
+
 cmd_prepare() {
   local row_index=0 do_all=0 json_out=0
   while [[ $# -gt 0 ]]; do
@@ -262,8 +381,8 @@ main() {
     --help|-h|"") usage ;;
     prepare) shift; cmd_prepare "$@" ;;
     send-via-mcp-agent-mail)
-      printf '{"status":"not_implemented","reason":"cross-orch send is operator-authorization-class; use prepare + manual fire"}\n'
-      return 2
+      shift
+      cmd_send_via_mcp_agent_mail "$@"
       ;;
     doctor|health) shift; emit_doctor ;;
     *) printf 'unknown subcommand: %s\n' "$1" >&2; usage >&2; return 2 ;;
