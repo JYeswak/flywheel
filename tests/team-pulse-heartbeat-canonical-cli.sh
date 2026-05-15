@@ -3,8 +3,8 @@
 # Canonical-cli surface tests for .flywheel/scripts/team-pulse-heartbeat.sh (scaffolded by
 # bead flywheel-ws02m / scaffold-canonical-cli.sh).
 #
-# 13/13 PASS = canonical-cli-scoping checker green. TODO markers
-# point at per-surface assertions the operator should fill in.
+# Native run/doctor/status/schema/validate own their verbs; scaffold owns
+# introspection plus repair/audit/why helpers.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
@@ -33,14 +33,14 @@ if "$SCRIPT" --examples --json 2>/dev/null | jq -e '.command == "examples"' >/de
   pass "--examples emits canonical envelope"
 else fail "--examples envelope"; fi
 
-# Test 5: doctor returns valid envelope (even pre-fill-in stub is valid JSON)
-if "$SCRIPT" doctor --json 2>/dev/null | jq -e '.command == "doctor"' >/dev/null; then
-  pass "doctor emits canonical envelope"
+# Test 5: doctor returns native doctor envelope
+if "$SCRIPT" doctor --json 2>/dev/null | jq -e '.schema_version == "team-pulse-doctor/v1" and (.status | IN("pass","warn","fail"))' >/dev/null; then
+  pass "doctor emits native doctor envelope"
 else fail "doctor envelope"; fi
 
-# Test 6: health envelope
-if "$SCRIPT" health --json 2>/dev/null | jq -e '.command == "health"' >/dev/null; then
-  pass "health emits canonical envelope"
+# Test 6: health/status returns native status envelope
+if "$SCRIPT" health --json 2>/dev/null | jq -e '.schema_version == "team-pulse-status/v1" and (.status | IN("pass","warn","fail"))' >/dev/null; then
+  pass "health emits native status envelope"
 else fail "health envelope"; fi
 
 # Test 7: repair --dry-run envelope
@@ -57,9 +57,9 @@ else
   fail "repair --apply rc=$rc (expected 3)"
 fi
 
-# Test 9: validate envelope
-if "$SCRIPT" validate --json 2>/dev/null | jq -e '.command == "validate"' >/dev/null; then
-  pass "validate emits canonical envelope"
+# Test 9: validate plist returns native validation envelope
+if "$SCRIPT" validate plist --json 2>/dev/null | jq -e '.schema_version == "team-pulse-plist-validation/v1" and (.status | IN("pass","fail"))' >/dev/null; then
+  pass "validate plist emits native validation envelope"
 else fail "validate envelope"; fi
 
 # Test 10: audit envelope
@@ -81,10 +81,6 @@ else fail "help topic"; fi
 if "$SCRIPT" quickstart 2>/dev/null | jq -e '.command == "quickstart"' >/dev/null; then
   pass "quickstart emits canonical envelope"
 else fail "quickstart envelope"; fi
-
-# TODO(canonical-cli-scaffold): add per-surface assertions here.
-# Examples: doctor checks specific data; repair --apply with key
-# performs expected mutation; validate enforces a known schema.
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2

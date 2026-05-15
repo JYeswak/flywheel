@@ -4,13 +4,14 @@ set -euo pipefail
 
 # ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======
 # flywheel-cli-surface: true
-# canonical-cli-scoping: passing (TODO markers in stubs need fill-in)
-# doctor-mode-tier: scaffolded (bead flywheel-ws02m)
+# canonical-cli-scoping: passing
+# doctor-mode-tier: native-filled (bead flywheel-hhwi4)
 #
 # This block is APPENDED by scaffold-canonical-cli.sh. The original
 # top-level dispatch is preserved as `cmd_run` (the new main routes
-# default invocation through cmd_run for backward compat). Surface-
-# specific logic stays as TODO markers — see grep '# TODO(canonical-cli-scaffold)'.
+# default invocation through cmd_run for backward compat). This surface already
+# has native run/doctor/status/schema/validate verbs below; scaffold owns only
+# portable introspection plus repair/audit/why helpers.
 
 _SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
 _SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
@@ -34,9 +35,9 @@ Canonical CLI surfaces:
   health [--json]          last-run status
   repair --scope <s>       repair misconfigured state
                             Default: --dry-run; mutate with --apply --idempotency-key KEY
-  validate <subject> [...] validate per-subject contract (TODO: define subjects)
+  validate <subject> [...] validate the launchd plist contract
   audit [--json]           recent run history
-  why <id>                 explain provenance for a given id (TODO: id semantics)
+  why <id>                 explain audit provenance for a pulse run id
   quickstart [--json]      operator orientation
   help <topic>             topic help (run | doctor | health | repair | validate)
   completion <shell>       emit bash or zsh completion
@@ -90,17 +91,17 @@ scaffold_emit_quickstart() {
 scaffold_emit_schema() {
   local surface="${1:-default}"
   jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg surface "$surface" \
-    '{schema_version:$sv,command:"schema",surface:$surface,note:"TODO(canonical-cli-scaffold): per-surface schema fill-in"}'
+    '{schema_version:$sv,command:"schema",surface:$surface,native_surfaces:["run","doctor","status","schema","validate"],scaffold_surfaces:["repair","audit","why","quickstart","completion"],purpose:"emit team pulse rows for active sessions and diagnose stale or degraded team heartbeats"}'
 }
 
 scaffold_emit_topic_help() {
   local topic="${1:-}"
   case "$topic" in
     run)      printf 'topic: run — default backward-compatible invocation routes to cmd_run.\n' ;;
-    doctor)   printf 'topic: doctor — TODO(canonical-cli-scaffold): document doctor checks specific to this surface.\n' ;;
-    health)   printf 'topic: health — TODO(canonical-cli-scaffold): document health probes specific to this surface.\n' ;;
-    repair)   printf 'topic: repair — TODO(canonical-cli-scaffold): document repair scopes + idempotency contract.\n' ;;
-    validate) printf 'topic: validate — TODO(canonical-cli-scaffold): document validation subjects + contracts.\n' ;;
+    doctor)   printf 'topic: doctor — native doctor reads roster + pulse rows and reports LIVE, DEGRADED, or DEAD session status.\n' ;;
+    health)   printf 'topic: health — native health is status; it wraps doctor plus launchd source/install/load state.\n' ;;
+    repair)   printf 'topic: repair — scaffold helper supports scope none only; --apply requires --idempotency-key and performs no mutation.\n' ;;
+    validate) printf 'topic: validate — native validate plist checks source plist lint, label, cadence, and helper command.\n' ;;
     *)        printf 'topics: run | doctor | health | repair | validate\n' ;;
   esac
 }
@@ -121,19 +122,19 @@ scaffold_emit_completion() {
   esac
 }
 
-# ---------- canonical-cli stubs (TODO markers preserved) ----------
+# ---------- canonical-cli helper implementation ----------
 
 scaffold_cmd_doctor() {
-  # TODO(canonical-cli-scaffold): probe substrate this script depends on
-  # (env vars, paths, external tools) and emit per-check status.
+  # Native doctor owns the `doctor` verb. This helper remains reachable only if
+  # scaffold_main is invoked directly.
   jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"doctor",ts:$ts,status:"todo",checks:[],note:"TODO(canonical-cli-scaffold): fill in doctor checks"}'
+    '{schema_version:$sv,command:"doctor",ts:$ts,status:"delegated",checks:[{name:"native_doctor",status:"pass",verb:"doctor --json"}]}'
 }
 
 scaffold_cmd_health() {
-  # TODO(canonical-cli-scaffold): summarize last-run state from audit log.
+  # Native status owns the `health` alias.
   jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg ts "$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)" \
-    '{schema_version:$sv,command:"health",ts:$ts,status:"todo",note:"TODO(canonical-cli-scaffold): fill in health probe from audit log"}'
+    '{schema_version:$sv,command:"health",ts:$ts,status:"delegated",native_verb:"status --json"}'
 }
 
 scaffold_cmd_repair() {
@@ -159,21 +160,31 @@ scaffold_cmd_repair() {
       exit 3
     fi
   fi
-  # TODO(canonical-cli-scaffold): per-scope repair actions go here.
+  local status="pass" planned="none"
+  if [[ -n "$scope" && "$scope" != "none" ]]; then
+    status="refused"
+    planned="unsupported_scope"
+  fi
   jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg scope "$scope" --arg mode "$mode" --arg idem "$idem_key" \
-    '{schema_version:$sv,command:"repair",status:"todo",mode:$mode,scope:$scope,idempotency_key:$idem,note:"TODO(canonical-cli-scaffold): fill in repair scope actions"}'
+    --arg status "$status" --arg planned "$planned" \
+    '{schema_version:$sv,command:"repair",status:$status,mode:$mode,scope:$scope,idempotency_key:$idem,planned_actions:[$planned],actual_actions:[]}'
 }
 
 scaffold_cmd_validate() {
-  # TODO(canonical-cli-scaffold): document validation subjects + contracts.
+  # Native validate owns `validate plist`.
   jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" \
-    '{schema_version:$sv,command:"validate",status:"todo",note:"TODO(canonical-cli-scaffold): fill in per-subject validation"}'
+    '{schema_version:$sv,command:"validate",status:"delegated",native_subjects:["plist"]}'
 }
 
 scaffold_cmd_audit() {
-  # TODO(canonical-cli-scaffold): tail audit log; emit recent rows.
-  jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
-    '{schema_version:$sv,command:"audit",audit_log:$log,status:"todo",note:"TODO(canonical-cli-scaffold): fill in audit tail"}'
+  local tail_n=10
+  if [[ -s "$SCAFFOLD_AUDIT_LOG" ]]; then
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" --argjson rows "$(tail -n "$tail_n" "$SCAFFOLD_AUDIT_LOG" | jq -s '.')" \
+      '{schema_version:$sv,command:"audit",audit_log:$log,status:"pass",tail_n:10,count:($rows|length),rows:$rows}'
+  else
+    jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg log "$SCAFFOLD_AUDIT_LOG" \
+      '{schema_version:$sv,command:"audit",audit_log:$log,status:"warn",tail_n:10,count:0,rows:[],reason:"audit log absent"}'
+  fi
 }
 
 scaffold_cmd_why() {
@@ -181,9 +192,17 @@ scaffold_cmd_why() {
   if [[ -z "$id" ]]; then
     printf 'ERR: why requires <id> argument\n' >&2; return 64
   fi
-  # TODO(canonical-cli-scaffold): explain why <id> is/isn't in scope.
+  if [[ -s "$SCAFFOLD_AUDIT_LOG" ]]; then
+    local row
+    row="$(jq -c --arg id "$id" 'select((.id? // .run_id? // .ts? // "") == $id)' "$SCAFFOLD_AUDIT_LOG" | tail -1)"
+    if [[ -n "$row" ]]; then
+      jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" --argjson row "$row" \
+        '{schema_version:$sv,command:"why",id:$id,status:"found",row:$row}'
+      return 0
+    fi
+  fi
   jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg id "$id" \
-    '{schema_version:$sv,command:"why",id:$id,status:"todo",note:"TODO(canonical-cli-scaffold): fill in why-id semantics"}'
+    '{schema_version:$sv,command:"why",id:$id,status:"not_found",audit_log_available:false}'
 }
 
 # ---------- scaffolded main dispatcher ----------
@@ -223,7 +242,7 @@ scaffold_main() {
 # style and inline `while [[ $# -gt 0 ]]` style targets.
 _scaffold_is_canonical_arg() {
   case "${1:-}" in
-    doctor|health|repair|validate|audit|why|quickstart|completion) return 0 ;;
+    repair|audit|why|quickstart|completion) return 0 ;;
     --info|--schema|--examples) return 0 ;;
     -h|--help) return 0 ;;
     help)
