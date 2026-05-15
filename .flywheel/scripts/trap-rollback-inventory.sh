@@ -128,6 +128,15 @@ def in_scan_scope(rel: str) -> bool:
         return False
     return rel.startswith(operational_prefixes)
 
+def strip_shell_comment_lines(text: str) -> str:
+    lines = []
+    for line in text.splitlines():
+        stripped = line.lstrip()
+        if stripped.startswith("#"):
+            continue
+        lines.append(line)
+    return "\n".join(lines)
+
 for rel_raw in raw.split(b"\0"):
     if not rel_raw:
         continue
@@ -149,10 +158,11 @@ for rel_raw in raw.split(b"\0"):
         text = path.read_text(errors="replace")
     except OSError:
         text = ""
+    executable_text = strip_shell_comment_lines(text)
     if declared_read_only_re.search(text):
         declared_read_only_excluded.append(rel)
         continue
-    mutation_text = devnull_redir_re.sub("", text)
+    mutation_text = devnull_redir_re.sub("", executable_text)
     if mutating_re.search(mutation_text):
         mutating.append(rel)
         if trap_re.search(text):
