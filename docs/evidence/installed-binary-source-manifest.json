@@ -10,7 +10,8 @@
     "not_required_for_reduced_mode": [
       "flywheel-lock-repair",
       "flywheel-verdict",
-      "flywheel-refresh-source"
+      "flywheel-refresh-source",
+      "flywheel-doctrine-sync"
     ]
   },
   "binaries": [
@@ -39,6 +40,15 @@
       "source_status": "source-gap-receipt-required",
       "source_gap_bead": "flywheel-nkw4o",
       "closeout_receipt_ref": ".flywheel/evidence/flywheel-pfpd/closeout-receipt-20260515T0248Z.json",
+      "shipped_in_reduced_install": false
+    },
+    {
+      "name": "flywheel-doctrine-sync",
+      "installed_path": "$HOME/.claude/skills/.flywheel/bin/flywheel-doctrine-sync",
+      "public_install_status": "full-substrate-local-only",
+      "source_status": "source-gap-receipt-required",
+      "source_gap_bead": "flywheel-nkw4o",
+      "closeout_receipt_ref": ".flywheel/evidence/flywheel-ynys/closeout-receipt-20260515T0242Z.json",
       "shipped_in_reduced_install": false
     }
   ]
