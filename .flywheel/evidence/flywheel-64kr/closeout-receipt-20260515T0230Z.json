@@ -20,5 +20,6 @@
       "status": "pass"
     }
   ],
+  "source_gap_bead": "flywheel-nkw4o",
   "boundary_note": "The repaired executable is the installed Flywheel substrate binary under ~/.claude/skills/.flywheel/bin. Flywheel repo evidence captures the passing contract and source-ownership gap is tracked separately."
 }

@@ -1,0 +1,35 @@
+{
+  "schema_version": "flywheel.installed_binary_source_manifest.v0",
+  "status": "reduced-install-public-full-substrate-local",
+  "summary": "The public reduced installer ships bin/flywheel only. Full-substrate operator binaries are local substrate surfaces until each has tracked source or an explicit generation path.",
+  "reduced_public_install": {
+    "installer": "install.sh",
+    "shipped_binaries": [
+      "bin/flywheel"
+    ],
+    "not_required_for_reduced_mode": [
+      "flywheel-lock-repair",
+      "flywheel-verdict"
+    ]
+  },
+  "binaries": [
+    {
+      "name": "flywheel-lock-repair",
+      "installed_path": "$HOME/.claude/skills/.flywheel/bin/flywheel-lock-repair",
+      "public_install_status": "full-substrate-local-only",
+      "source_status": "source-gap-receipt-required",
+      "source_gap_bead": "flywheel-nkw4o",
+      "closeout_receipt_ref": ".flywheel/evidence/flywheel-64kr/closeout-receipt-20260515T0230Z.json",
+      "shipped_in_reduced_install": false
+    },
+    {
+      "name": "flywheel-verdict",
+      "installed_path": "$HOME/.claude/skills/.flywheel/bin/flywheel-verdict",
+      "public_install_status": "full-substrate-local-only",
+      "source_status": "source-gap-receipt-required",
+      "source_gap_bead": "flywheel-nkw4o",
+      "closeout_receipt_ref": ".flywheel/evidence/flywheel-6flh/closeout-receipt-20260515T0240Z.json",
+      "shipped_in_reduced_install": false
+    }
+  ]
+}
