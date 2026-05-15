@@ -1,0 +1,65 @@
+{
+  "schema_version": "flywheel.fleet_tenant_registry_preflight.v1",
+  "registry": "/Users/josh/.claude/skills/infisical-secrets/data/project-mappings.yaml",
+  "run_doctor": true,
+  "status": "fail",
+  "row_count": 3,
+  "fail_count": 1,
+  "rows": [
+    {
+      "slug": "zesttube",
+      "repo": "/Users/josh/Developer/zesttube",
+      "status": "fail",
+      "registry_status": "pass",
+      "declaration_status": "pass",
+      "doctor_status": "fail",
+      "failures": [
+        "tenant_doctor_failed"
+      ],
+      "disposition": null,
+      "doctor": {
+        "status": "fail",
+        "returncode": 2,
+        "drift_count": 5,
+        "warn_count": 0,
+        "result_count": 5
+      }
+    },
+    {
+      "slug": "agent-ui",
+      "repo": null,
+      "status": "pass",
+      "registry_status": "skipped",
+      "declaration_status": "skipped",
+      "doctor_status": "skipped",
+      "failures": [],
+      "disposition": {
+        "status": "skip_with_reason",
+        "reason": "agent-ui is currently an upstream Agno Agent UI template/local chat UI shell, not a ZestStream-owned tenant-bound runtime deploy. No repo-local .infisical.json, Supabase project ref, tenant database, or ZestStream deployment identifier was found in the scoped probe. If Joshua adopts it as a ZestStream-hosted product surface later, L168 should be rerun and a tenant row/declaration added then.",
+        "ref": ".flywheel/evidence/flywheel-hsdb9/agent-ui-tenant-disposition-20260515T1820Z.json"
+      },
+      "doctor": {
+        "status": "skipped",
+        "reason": "disposition_receipt"
+      }
+    },
+    {
+      "slug": "flywheel_gateway",
+      "repo": null,
+      "status": "pass",
+      "registry_status": "skipped",
+      "declaration_status": "skipped",
+      "doctor_status": "skipped",
+      "failures": [],
+      "disposition": {
+        "status": "skip_with_reason",
+        "reason": "flywheel_gateway is currently a standalone gateway substrate with local SQLite as the documented quick-start database and BYOA provider-key configuration. It is not presently a ZestStream tenant-bound deploy backed by Infisical plus Supabase. If a hosted ZestStream gateway deployment is created, L168 should be rerun and a tenant row/declaration added for that deployment.",
+        "ref": ".flywheel/evidence/flywheel-hsdb9/flywheel_gateway-tenant-disposition-20260515T1820Z.json"
+      },
+      "doctor": {
+        "status": "skipped",
+        "reason": "disposition_receipt"
+      }
+    }
+  ]
+}
