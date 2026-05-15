@@ -1,0 +1,60 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-gupg",
+  "created_at": "2026-05-15T07:28:10Z",
+  "status": "closed",
+  "summary": "The cass-v2 sustained validation probe canonical CLI surface is implemented and fixture-tested; this bead remained open as status drift after flywheel-bozy recorded the repaired surface.",
+  "implementation_surface": "/Users/josh/.local/bin/cass-v2-sustained-validation-probe",
+  "prior_evidence": [
+    ".flywheel/audit/flywheel-bozy/compliance-pack.md",
+    "tests/cass-v2-sustained-validation-probe.sh"
+  ],
+  "acceptance": {
+    "help_surface": true,
+    "info_json": true,
+    "schema_json": true,
+    "doctor_json": true,
+    "doctor_read_only": true,
+    "explicit_status_count_last_probe_ts_consecutive_healthy_warnings": true,
+    "canonical_cli_checker_passes": true
+  },
+  "observed_doctor": {
+    "command": "doctor",
+    "status": "ok",
+    "count": 73,
+    "last_probe_ts": "2026-05-03T05:14:27Z",
+    "consecutive_healthy": 0,
+    "warnings": []
+  },
+  "tests": [
+    {
+      "command": "bash -n /Users/josh/.local/bin/cass-v2-sustained-validation-probe",
+      "result": "pass"
+    },
+    {
+      "command": "/Users/josh/.local/bin/cass-v2-sustained-validation-probe --info --json",
+      "result": "pass"
+    },
+    {
+      "command": "/Users/josh/.local/bin/cass-v2-sustained-validation-probe --schema --json",
+      "result": "pass"
+    },
+    {
+      "command": "/Users/josh/.local/bin/cass-v2-sustained-validation-probe --doctor --json",
+      "result": "pass"
+    },
+    {
+      "command": "bash /Users/josh/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh cass-v2-sustained-validation-probe",
+      "result": "pass",
+      "summary": "Summary: 13 pass, 0 fail"
+    },
+    {
+      "command": "bash tests/cass-v2-sustained-validation-probe.sh",
+      "result": "pass"
+    }
+  ],
+  "did_not": [
+    "No mutation to the probe binary was needed in this closeout slice.",
+    "No claim that CASS itself is online; the canonical surface reports the latest ledger state and remains read-only in doctor mode."
+  ]
+}
