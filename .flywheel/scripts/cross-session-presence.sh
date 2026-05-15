@@ -34,7 +34,7 @@ STATE_DIR="${CSP_STATE_DIR:-$REPO_ROOT/.flywheel/state}"
 LOG_PATH="${CSP_LOG:-$STATE_DIR/cross-session-presence.jsonl}"
 
 # Known fleet sessions (per goal P8 contract)
-SESSIONS=("${CSP_SESSIONS:-flywheel skillos mobile-eats alps cfs vrtx zeststream-public}")
+read -r -a SESSIONS <<<"${CSP_SESSIONS:-flywheel skillos mobile-eats alps cfs vrtx zeststream-public}"
 # Repo paths for each session
 declare -A SESSION_REPO=(
   [flywheel]="$HOME/Developer/flywheel"
@@ -237,7 +237,7 @@ cmd_probe() {
   if [[ -n "$session" ]]; then
     rows+=("$(probe_one_session "$session")")
   else
-    for s in $SESSIONS; do
+    for s in "${SESSIONS[@]}"; do
       rows+=("$(probe_one_session "$s")")
     done
   fi
@@ -274,7 +274,7 @@ cmd_gate() {
   if [[ "$alive" != "true" ]]; then
     reason="receiver_not_alive"
   elif python3 -c "import sys; sys.exit(0 if float('$age') > float('$max_age_hours') else 1)" 2>/dev/null; then
-    reason="receiver_stale_age_hours=$age_max=$max_age_hours"
+    reason="receiver_stale_age_hours=$age max_age_hours=$max_age_hours"
   else
     decision="allow"
     reason="receiver_alive_and_fresh"
