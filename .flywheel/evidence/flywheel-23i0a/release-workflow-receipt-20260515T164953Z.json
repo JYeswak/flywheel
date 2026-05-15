@@ -1,0 +1,15 @@
+{
+  "schema_version": "flywheel.release_workflow_receipt.v1",
+  "ts": "20260515T164953Z",
+  "bead_id": "flywheel-23i0a",
+  "release_workflow": ".github/workflows/release.yml",
+  "local_proof": {
+    "release_assets": "tests/release-assets.sh pass 12/0"
+  },
+  "github_pr": {
+    "number": 3,
+    "head": "58cd675b07e1f9f5d645e7451259b158efded7ab",
+    "merge_state": "CLEAN"
+  },
+  "boundary": "workflow and asset contract exist; final v0.2.0 tag/release publication remains B15/Joshua signoff"
+}
