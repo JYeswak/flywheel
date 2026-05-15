@@ -1,0 +1,36 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-fqlov",
+  "closed_at": "2026-05-15T19:08:50Z",
+  "status": "closed",
+  "summary": "Added a canonical leverage evidence gate so h17x/xhdg auto-unblock decisions read ts, observed_at, created_at, and timestamp consistently instead of relying on ad hoc jq snippets.",
+  "artifacts": [
+    ".flywheel/scripts/leverage-evidence-gate.py",
+    "tests/leverage-evidence-gate.sh",
+    ".flywheel/evidence/flywheel-fqlov/leverage-evidence-gate-20260515T190650Z.json"
+  ],
+  "live_gate": {
+    "status": "waiting_for_evidence",
+    "required_distinct_days": 7,
+    "distinct_day_count": 5,
+    "missing_distinct_days": 2,
+    "next_action": "continue_repaired_tick_driver_accrual",
+    "unblocks": []
+  },
+  "validation": [
+    {
+      "command": "bash tests/leverage-evidence-gate.sh",
+      "result": "pass",
+      "summary": "5/0"
+    },
+    {
+      "command": "shellcheck tests/leverage-evidence-gate.sh",
+      "result": "pass"
+    },
+    {
+      "command": "python3 -m py_compile .flywheel/scripts/leverage-evidence-gate.py",
+      "result": "pass"
+    }
+  ],
+  "boundary": "This closes the gate-shape blocker only. flywheel-h17x and flywheel-xhdg remain not-actionable until the canonical gate reports seven distinct evidence days."
+}
