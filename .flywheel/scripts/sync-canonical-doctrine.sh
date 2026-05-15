@@ -479,11 +479,9 @@ ownership_manifest_path() {
   printf '%s/%s\n' "$repo" "$OWNERSHIP_MANIFEST_REL"
 }
 
-target_owner_class() {
-  local repo="$1" target="$2" manifest rel
-  manifest="$(ownership_manifest_path "$repo")"
+owner_class_from_manifest() {
+  local manifest="$1" rel="$2"
   [[ -f "$manifest" ]] || return 1
-  rel="$(relpath_for_repo "$repo" "$target")"
   jq -r --arg rel "$rel" '
     def norm_path:
       if type == "string" then .
@@ -504,6 +502,21 @@ target_owner_class() {
       )
       // (.canonical_owner_class // .owner_class // .repo_class // empty)
   ' "$manifest" 2>/dev/null | awk 'NF {print; exit}'
+}
+
+target_owner_class() {
+  local repo="$1" target="$2" manifest rel owner_class source_manifest
+  manifest="$(ownership_manifest_path "$repo")"
+  rel="$(relpath_for_repo "$repo" "$target")"
+  owner_class="$(owner_class_from_manifest "$manifest" "$rel" || true)"
+  if [[ -n "$owner_class" ]]; then
+    printf '%s\n' "$owner_class"
+    return 0
+  fi
+  source_manifest="$(ownership_manifest_path "$SOURCE_REPO")"
+  owner_class="$(owner_class_from_manifest "$source_manifest" "$rel" || true)"
+  [[ -n "$owner_class" ]] || return 1
+  printf '%s\n' "$owner_class"
 }
 
 record_ownership_block() {

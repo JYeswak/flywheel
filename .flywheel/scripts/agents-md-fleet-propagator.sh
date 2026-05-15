@@ -137,11 +137,9 @@ relpath_for_repo() {
   esac
 }
 
-target_owner_class() {
-  local repo="$1" target="$2" manifest rel
-  manifest="$repo/$OWNERSHIP_MANIFEST_REL"
+owner_class_from_manifest() {
+  local manifest="$1" rel="$2"
   [[ -f "$manifest" ]] || return 1
-  rel="$(relpath_for_repo "$repo" "$target")"
   jq -r --arg rel "$rel" '
     def norm_path:
       if type == "string" then .
@@ -162,6 +160,21 @@ target_owner_class() {
       )
       // (.canonical_owner_class // .owner_class // .repo_class // empty)
   ' "$manifest" 2>/dev/null | awk 'NF {print; exit}'
+}
+
+target_owner_class() {
+  local repo="$1" target="$2" manifest rel owner_class source_manifest
+  manifest="$repo/$OWNERSHIP_MANIFEST_REL"
+  rel="$(relpath_for_repo "$repo" "$target")"
+  owner_class="$(owner_class_from_manifest "$manifest" "$rel" || true)"
+  if [[ -n "$owner_class" ]]; then
+    printf '%s\n' "$owner_class"
+    return 0
+  fi
+  source_manifest="$(canonical_path "$REPO_ROOT")/$OWNERSHIP_MANIFEST_REL"
+  owner_class="$(owner_class_from_manifest "$source_manifest" "$rel" || true)"
+  [[ -n "$owner_class" ]] || return 1
+  printf '%s\n' "$owner_class"
 }
 
 ownership_gate_allows() {

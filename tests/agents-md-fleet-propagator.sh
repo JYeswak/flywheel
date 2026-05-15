@@ -94,6 +94,7 @@ missing_l="$TMP/repos/missing-l"
 divergent="$TMP/repos/divergent"
 missing_agents="$TMP/repos/missing-agents"
 sync_fail="$TMP/repos/sync-fail"
+no_manifest="$TMP/repos/no-manifest"
 make_repo "$in_sync" "$(cat "$SOURCE")"
 make_repo "$missing_l" "# Canonical
 
@@ -108,6 +109,11 @@ make_repo "$sync_fail" "# Old
 
 ## L1
 old"
+make_repo "$no_manifest" "# Old
+
+## L1
+old"
+rm -f "$no_manifest/.flywheel/ownership.json"
 
 append_lib="$TMP/jsonl-append.sh"
 write_append_lib "$append_lib"
@@ -190,4 +196,11 @@ jq -e '.failure_count == 1 and .propagation_results[0].failure_reason == "canoni
 jq -s -e '[.[] | select(.trauma_class == "fleet-propagation-failed" and .reason == "canonical_ownership_gate_blocked")] | length == 1' "$blocked_fuckup" >/dev/null || fail "ownership gate edge did not write fuckup"
 edge
 
-printf 'OK agents-md-fleet-propagator tests pass=%s/5 edges=%s/3\n' "$pass_count" "$edge_count"
+no_manifest_ledger="$TMP/no-manifest-ledger.jsonl"
+no_manifest_fuckup="$TMP/no-manifest-fuckup.jsonl"
+no_manifest_out="$(env "${env_base[@]}" AGENTS_MD_FLEET_REPOS="$no_manifest" AGENTS_MD_FLEET_LEDGER="$no_manifest_ledger" AGENTS_MD_FLEET_FUCKUP_LOG="$no_manifest_fuckup" "$SCRIPT" --apply --json)"
+jq -e '.success_count == 1 and .failure_count == 0 and .fleet_doctrine_drift_count_after == 0' <<<"$no_manifest_out" >/dev/null || fail "source-owned fallback did not propagate into repo without target manifest"
+rg -q '^## L2$' "$no_manifest/AGENTS.md" || fail "source-owned fallback did not update no-manifest AGENTS.md"
+edge
+
+printf 'OK agents-md-fleet-propagator tests pass=%s/5 edges=%s/4\n' "$pass_count" "$edge_count"
