@@ -2,7 +2,8 @@
 set -euo pipefail
 
 BIN="${FLYWHEEL_TOOLSET_PARITY_BIN:-$HOME/.local/bin/flywheel-toolset-parity}"
-CHECKER="${CANONICAL_CLI_CHECKER:-<skills-root>/canonical-cli-scoping/scripts/check-cli-scoping.sh}"
+CHECKER="${CANONICAL_CLI_CHECKER:-$HOME/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh}"
+SCORECARD="${CANONICAL_CLI_SCORECARD:-$HOME/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh}"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/toolset-parity.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -68,6 +69,7 @@ assert_jq "$TMP/health.json" '.command == "health" and .status == "pass"' "healt
 
 "$BIN" repair --scope state --dry-run --json --state-dir "$TMP/state" >"$TMP/repair.json"
 assert_jq "$TMP/repair.json" '.command == "repair" and .mode == "dry_run" and (.would_write | length) == 1' "repair_dry_run"
+assert_jq "$TMP/repair.json" '.dry_run == true and (.actual_actions | length) == 0' "repair_dry_run_canonical_json"
 
 "$BIN" check --runtime=claude --json --state-dir "$TMP/state" >"$TMP/claude.json"
 assert_jq "$TMP/claude.json" '.status == "uniform" and (.matrix | length) == 5 and all(.matrix[]; .found == true and .smoke_ok == true and .runtime == "claude") and (.output_path | test("toolset-parity-"))' "claude_matrix"
@@ -140,7 +142,10 @@ assert_jq "$TMP/claims-doctor.json" '.warnings[] | select(.code == "active_runti
 grep -q 'complete -W' "$TMP/completion.bash" && pass "completion_bash" || fail "completion_bash"
 
 bash "$CHECKER" "$BIN" >"$TMP/checker.txt"
-grep -q 'Summary: 4 pass, 0 fail' "$TMP/checker.txt" && pass "canonical_checker" || fail "canonical_checker"
+grep -q 'Summary: 13 pass, 0 fail' "$TMP/checker.txt" && pass "canonical_checker" || fail "canonical_checker"
+
+bash "$SCORECARD" score "$BIN" --domain-exit-codes --json >"$TMP/scorecard.json"
+assert_jq "$TMP/scorecard.json" '.status == "pass" and .composite_score >= 990 and .dimensions.domain_exit_code_validator == 1000' "canonical_scorecard"
 
 printf 'SUMMARY pass=%s fail=%s\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]
