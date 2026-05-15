@@ -3,6 +3,7 @@ set -euo pipefail
 
 BIN="${FLYWHEEL_AUTOLOOP_BIN:-<flywheel-state>/bin/flywheel-autoloop}"
 CHECKER="${CANONICAL_CLI_CHECKER:-<skills-root>/canonical-cli-scoping/scripts/check-cli-scoping.sh}"
+SCORECARD="${CANONICAL_CLI_SCORECARD:-$HOME/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh}"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"; rm -f /tmp/flywheel-autoloop-fixture-dispatch-90.md' EXIT
 
@@ -714,3 +715,21 @@ pass "simultaneous runs produce one tick and one lock-held receipt"
 bash "$CHECKER" "$BIN" >"$TMP/check-cli-scoping.txt"
 cat "$TMP/check-cli-scoping.txt"
 pass "canonical CLI scoping checker passes"
+
+"$BIN" help exit-codes >"$TMP/exit-codes.txt"
+rg -q '0 success' "$TMP/exit-codes.txt"
+rg -q '2 usage' "$TMP/exit-codes.txt"
+rg -q 'transient retry' "$TMP/exit-codes.txt"
+pass "exit-code help documents success usage transient retry and domain classes"
+
+"$BIN" --exit-codes >"$TMP/exit-codes-flag.txt"
+cmp "$TMP/exit-codes.txt" "$TMP/exit-codes-flag.txt"
+pass "--exit-codes matches help exit-codes"
+
+"$BIN" repair --dry-run --json \
+  | jq -e '.dry_run == true and (.actual_actions | length) == 0 and (.planned_actions | length) >= 1 and (.blocked_by | length) == 0' >/dev/null
+pass "repair --dry-run --json is parseable and non-mutating"
+
+bash "$SCORECARD" score "$BIN" --domain-exit-codes --json \
+  | jq -e '.status == "pass" and .composite_score >= 990 and .dimensions.domain_exit_code_validator == 1000 and .dimensions.dry_run_json_fixture == 1000' >/dev/null
+pass "canonical CLI scorecard passes domain exit-code and dry-run dimensions"
