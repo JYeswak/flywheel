@@ -1,0 +1,64 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-nerno",
+  "parent_bead_id": "flywheel-3kq",
+  "closed_at": "2026-05-15T21:13:42Z",
+  "status": "closed",
+  "surface": ".flywheel/scripts/apply-tmux-tuning.sh",
+  "claim": "apply-tmux-tuning now tracks candidate config temp files and removes them on EXIT/ERR, including parse-failure cleanup before the candidate can leak.",
+  "changes": [
+    "Added a temp-file registry and EXIT/ERR cleanup trap.",
+    "Registered the generated tmux candidate config file.",
+    "Aligned the fixture test with the existing canonical idempotency-key apply gate.",
+    "Added static trap wiring and parse-failure temp cleanup assertions."
+  ],
+  "trap_inventory_delta": {
+    "before_with_trap": 93,
+    "before_without_trap": 289,
+    "after_with_trap": 94,
+    "after_without_trap": 288,
+    "after_coverage_pct": 24.61,
+    "after_receipt_ref": ".flywheel/evidence/flywheel-nerno/trap-inventory-after-20260515T211342Z.json"
+  },
+  "validation": [
+    {
+      "command": "bash tests/test_apply_tmux_tuning.sh",
+      "status": "pass",
+      "summary": "22/0"
+    },
+    {
+      "command": "bash tests/apply-tmux-tuning-canonical-cli.sh",
+      "status": "pass",
+      "summary": "20/0"
+    },
+    {
+      "command": "bash tests/trap-rollback-inventory.sh",
+      "status": "pass",
+      "summary": "10/0"
+    },
+    {
+      "command": ".flywheel/scripts/trap-rollback-inventory.sh scan --repo . --json",
+      "status": "warn_expected",
+      "summary": "with_trap=94 without_trap=288 coverage_pct=24.61"
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/apply-tmux-tuning.sh tests/test_apply_tmux_tuning.sh tests/apply-tmux-tuning-canonical-cli.sh .flywheel/scripts/trap-rollback-inventory.sh tests/trap-rollback-inventory.sh",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check && br dep cycles",
+      "status": "pass"
+    }
+  ],
+  "artifact_sha256": {
+    ".flywheel/scripts/apply-tmux-tuning.sh": "5eef65125fb8f684f6d193747792cc288faa528d55a3611e9441eb0081ad8010",
+    "tests/test_apply_tmux_tuning.sh": "4ef91de4f8bf355e6ca71790d0845d2acabf7d7fbc0fe1533b432c24e31c8eff",
+    "tests/apply-tmux-tuning-canonical-cli.sh": "8cc6019e551ee81faa178ff82f81e7db2e5500dd554f9838d84be335f7a4c971",
+    ".flywheel/evidence/flywheel-nerno/trap-inventory-after-20260515T211342Z.json": "e13c3e88fddf94769584232f4b4af34636462eae1ef595ca10d42da6d4a6670a"
+  },
+  "boundaries": [
+    "No live tmux config mutation.",
+    "No cross-repo mutation.",
+    "Parent flywheel-3kq remains open for continued trap adoption."
+  ]
+}
