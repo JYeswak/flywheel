@@ -1,0 +1,27 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-2xdi.171",
+  "status": "closed",
+  "closed_at": "2026-05-15T13:40:00Z",
+  "summary": "Added an executable receiver test for recovery-drill-sacrificial-live.sh so the live sacrificial recovery drill surface is not wired-but-cold.",
+  "artifacts": [
+    "tests/test_recovery_drill_sacrificial_live_receiver.sh"
+  ],
+  "validation": [
+    {
+      "command": "tests/test_recovery_drill_sacrificial_live_receiver.sh",
+      "result": "pass",
+      "summary": "6/0"
+    },
+    {
+      "command": "shellcheck tests/test_recovery_drill_sacrificial_live_receiver.sh",
+      "result": "pass"
+    },
+    {
+      "command": ".flywheel/scripts/gap-hunt-probe.sh --dry-run --json | jq -r '.gap_ids[]? | select(test(\"recovery-drill-sacrificial-live\"))'",
+      "result": "pass",
+      "summary": "no matching gap ids"
+    }
+  ]
+}
+

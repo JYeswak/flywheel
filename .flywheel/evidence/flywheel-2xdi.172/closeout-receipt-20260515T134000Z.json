@@ -1,0 +1,21 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-2xdi.172",
+  "status": "closed",
+  "closed_at": "2026-05-15T13:40:00Z",
+  "summary": "Anchored feedback_cross_session_probe_canonical_truth_sources.md in repo doctrine so cross-session probe truth-source memory is discoverable from Flywheel surfaces.",
+  "artifacts": [
+    ".flywheel/doctrine/cross-session-probe-canonical-truth-sources.md"
+  ],
+  "validation": [
+    {
+      "command": "rg 'feedback_cross_session_probe_canonical_truth_sources.md' .flywheel/doctrine/cross-session-probe-canonical-truth-sources.md",
+      "result": "pass"
+    },
+    {
+      "command": ".flywheel/scripts/gap-hunt-probe.sh --dry-run --json | jq -r '.gap_ids[]? | select(test(\"feedback_cross_session_probe_canonical_truth_sources\"))'",
+      "result": "pass",
+      "summary": "no matching gap ids"
+    }
+  ]
+}
