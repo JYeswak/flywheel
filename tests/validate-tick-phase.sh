@@ -148,17 +148,37 @@ run_case() {
   fi
 }
 
-bash -n "$TICK" && pass "B05_AG1 tick script syntax includes VALIDATE" || fail "B05_AG1 tick script syntax includes VALIDATE"
-grep -q 'VALIDATE' "$TICK" && pass "B05_AG1 phase order includes VALIDATE" || fail "B05_AG1 phase order includes VALIDATE"
-jq -e '.properties.dispatch_status.enum | index("blocked_frozen_detector")' "$TICK_SCHEMA" >/dev/null \
-  && jq -e '.properties.frozen_detector and .properties.frozen_detector_unknown_panes_detected and .properties.frozen_detector_respawn_suppressed_count and .properties.frozen_detector_l60_all_present' "$TICK_SCHEMA" >/dev/null \
-  && pass "i8rd tick schema exposes detector v2 consumer fields" || fail "i8rd tick schema exposes detector v2 consumer fields"
-jq -e '.properties.tick_contract and .properties.tick_contract_checks and .properties.tick_contract_graduation' "$TICK_SCHEMA" >/dev/null \
-  && pass "3mmp tick schema exposes contract registry fields" || fail "3mmp tick schema exposes contract registry fields"
-jq -e '.properties.phase_a and .properties.checks_run and .properties.violations and .properties.mode and .properties.hold_reason' "$TICK_SCHEMA" >/dev/null \
-  && pass "kaqr tick schema exposes Phase A receipt fields" || fail "kaqr tick schema exposes Phase A receipt fields"
-jq -e '.properties.fuckup_to_bead_pipeline.properties.required_steps.items.enum | index("planning-workflow") and index("jeff-convergence-audit") and index("beads-workflow")' "$TICK_SCHEMA" >/dev/null \
-  && pass "2ha tick schema exposes fuckup planning pipeline fields" || fail "2ha tick schema exposes fuckup planning pipeline fields"
+if bash -n "$TICK"; then
+  pass "B05_AG1 tick script syntax includes VALIDATE"
+else
+  fail "B05_AG1 tick script syntax includes VALIDATE"
+fi
+if grep -q 'VALIDATE' "$TICK"; then
+  pass "B05_AG1 phase order includes VALIDATE"
+else
+  fail "B05_AG1 phase order includes VALIDATE"
+fi
+if jq -e '.properties.dispatch_status.enum | index("blocked_frozen_detector")' "$TICK_SCHEMA" >/dev/null \
+  && jq -e '.properties.frozen_detector and .properties.frozen_detector_unknown_panes_detected and .properties.frozen_detector_respawn_suppressed_count and .properties.frozen_detector_l60_all_present' "$TICK_SCHEMA" >/dev/null; then
+  pass "i8rd tick schema exposes detector v2 consumer fields"
+else
+  fail "i8rd tick schema exposes detector v2 consumer fields"
+fi
+if jq -e '.properties.tick_contract and .properties.tick_contract_checks and .properties.tick_contract_graduation' "$TICK_SCHEMA" >/dev/null; then
+  pass "3mmp tick schema exposes contract registry fields"
+else
+  fail "3mmp tick schema exposes contract registry fields"
+fi
+if jq -e '.properties.phase_a and .properties.checks_run and .properties.violations and .properties.mode and .properties.hold_reason' "$TICK_SCHEMA" >/dev/null; then
+  pass "kaqr tick schema exposes Phase A receipt fields"
+else
+  fail "kaqr tick schema exposes Phase A receipt fields"
+fi
+if jq -e '.properties.fuckup_to_bead_pipeline.properties.required_steps.items.enum | index("planning-workflow") and index("jeff-convergence-audit") and index("beads-workflow")' "$TICK_SCHEMA" >/dev/null; then
+  pass "2ha tick schema exposes fuckup planning pipeline fields"
+else
+  fail "2ha tick schema exposes fuckup planning pipeline fields"
+fi
 
 run_case "B05_AG2 pending callback routes to VALIDATE and counts unvalidated" "" "VALIDATE" \
   '(.phase_reason | test("callback_pending_unvalidated")) and .validation_summary.callbacks_unvalidated_count == 1'
