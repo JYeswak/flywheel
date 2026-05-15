@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016
 # canonical-cli-scoping-allow-large: c1zgt keeps fleet scan, apply, doctor, repair, schema, and test-facing fixture knobs in one portable CLI.
 # flywheel-cli-surface: true
 # canonical-cli-scoping: passing (partial → passing per bead flywheel-1hshd.2)
@@ -46,6 +47,9 @@ CONTRACT_LEDGER="${AGENTS_MD_FLEET_CONTRACT_LEDGER:-$HOME/.local/state/flywheel/
 JSONL_APPEND_LIB="${FLYWHEEL_JSONL_APPEND_LIB:-$HOME/.local/share/flywheel-watchers/lib/jsonl-append.sh}"
 FLEET_ROSTER="${AGENTS_MD_FLEET_ROSTER:-$HOME/.local/state/flywheel/fleet-roster.json}"
 LOOPS_DIR="${AGENTS_MD_FLEET_LOOPS_DIR:-$HOME/.flywheel/loops}"
+OWNERSHIP_GATE="${AGENTS_MD_FLEET_OWNERSHIP_GATE:-1}"
+SOURCE_OWNER_CLASS="${AGENTS_MD_FLEET_SOURCE_OWNER_CLASS:-flywheel}"
+OWNERSHIP_MANIFEST_REL="${AGENTS_MD_FLEET_OWNERSHIP_MANIFEST:-.flywheel/ownership.json}"
 TARGET_REPO=""
 MODE="scan"
 JSON_OUT=0
@@ -125,6 +129,51 @@ sha256_file() {
   fi
 }
 
+relpath_for_repo() {
+  local repo="$1" target="$2"
+  case "$target" in
+    "$repo"/*) printf '%s\n' "${target#"$repo"/}" ;;
+    *) printf '%s\n' "$target" ;;
+  esac
+}
+
+target_owner_class() {
+  local repo="$1" target="$2" manifest rel
+  manifest="$repo/$OWNERSHIP_MANIFEST_REL"
+  [[ -f "$manifest" ]] || return 1
+  rel="$(relpath_for_repo "$repo" "$target")"
+  jq -r --arg rel "$rel" '
+    def norm_path:
+      if type == "string" then .
+      else (.path // .prefix // .glob // "")
+      end;
+    def norm_class:
+      if type == "string" then empty
+      else (.owner_class // .class // .canonical_owner_class // "")
+      end;
+    (.owned_canonical_paths // []) as $paths
+    | (
+        [
+          $paths[]
+          | select((norm_path) as $p | $p != "" and ($rel == $p or ($rel | startswith($p + "/"))))
+          | norm_class
+          | select(. != "")
+        ][0]
+      )
+      // (.canonical_owner_class // .owner_class // .repo_class // empty)
+  ' "$manifest" 2>/dev/null | awk 'NF {print; exit}'
+}
+
+ownership_gate_allows() {
+  local repo="$1" target="$2" owner_class
+  [[ "$OWNERSHIP_GATE" == "1" ]] || return 0
+  if [[ "$repo" == "$(canonical_path "$REPO_ROOT")" ]]; then
+    return 0
+  fi
+  owner_class="$(target_owner_class "$repo" "$target" || true)"
+  [[ -n "$owner_class" && "$owner_class" == "$SOURCE_OWNER_CLASS" ]]
+}
+
 l_rule_count() {
   local path="$1"
   if [[ -f "$path" ]]; then
@@ -180,7 +229,7 @@ repo_list() {
     return 0
   fi
   if [[ -n "${AGENTS_MD_FLEET_REPOS:-}" ]]; then
-    tr ',:' '\n\n' <<<"$AGENTS_MD_FLEET_REPOS" | while IFS= read -r raw; do
+    tr ',:' '\n' <<<"$AGENTS_MD_FLEET_REPOS" | while IFS= read -r raw; do
       candidate="${raw/#\~/$HOME}"
       [[ -n "$candidate" ]] || continue
       canonical_path "$candidate"
@@ -346,6 +395,15 @@ apply_one_repo() {
     result="$(apply_result_row_json "$pre" "$post" "0" "" false "$reason")"
     append_validated "$LEDGER" "$result"
     append_validated "$FUCKUP_LOG" "$(failure_fuckup_row_json "$repo" "$reason" "0" "")"
+    printf '%s\n' "$result"
+    return 0
+  fi
+  if ! ownership_gate_allows "$repo" "$repo/AGENTS.md"; then
+    post="$pre"
+    sync_output="canonical ownership gate refused AGENTS.md propagation; target repo must declare owner_class=$SOURCE_OWNER_CLASS for AGENTS.md in $OWNERSHIP_MANIFEST_REL"
+    result="$(apply_result_row_json "$pre" "$post" "2" "$sync_output" false "canonical_ownership_gate_blocked")"
+    append_validated "$LEDGER" "$result"
+    append_validated "$FUCKUP_LOG" "$(failure_fuckup_row_json "$repo" "canonical_ownership_gate_blocked" "2" "$sync_output")"
     printf '%s\n' "$result"
     return 0
   fi
