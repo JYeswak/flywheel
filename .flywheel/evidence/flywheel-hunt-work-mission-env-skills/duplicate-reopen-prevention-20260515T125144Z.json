@@ -1,0 +1,68 @@
+{
+  "schema_version": "flywheel.low_bead_threshold_duplicate_reopen_prevention.v1",
+  "bead_id": "flywheel-hunt-work-mission-env-skills",
+  "created_at": "2026-05-15T12:51:44Z",
+  "problem": "low-bead-threshold-detector re-appended the fixed hunt bead id after the original fixed-id bead had been closed, causing Beads CONFIG_ERROR duplicate issue id.",
+  "decision": "Treat the fixed hunt bead id as single-use. If the fixed id already exists, even closed, --auto-bead suppresses instead of appending another row.",
+  "changed_files": [
+    ".flywheel/scripts/low-bead-threshold-detector.sh",
+    ".flywheel/validation-schema/v1/low-bead-threshold-decision.schema.json",
+    "tests/low-bead-threshold-detector-canonical-cli.sh",
+    ".flywheel/tests/test-low-bead-threshold-detector.sh",
+    ".beads/issues.jsonl"
+  ],
+  "removed_duplicate_row": {
+    "id": "flywheel-hunt-work-mission-env-skills",
+    "created_at": "2026-05-15T12:48:34Z",
+    "status": "open"
+  },
+  "validation": [
+    {
+      "command": "bash tests/low-bead-threshold-detector-canonical-cli.sh",
+      "result": "pass",
+      "summary": "23/0"
+    },
+    {
+      "command": "bash .flywheel/tests/test-low-bead-threshold-detector.sh",
+      "result": "pass",
+      "summary": "cases=10 assertions=19 failures=0"
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/low-bead-threshold-detector.sh tests/low-bead-threshold-detector-canonical-cli.sh .flywheel/tests/test-low-bead-threshold-detector.sh",
+      "result": "pass"
+    },
+    {
+      "command": "LOW_BEAD_THRESHOLD_LEDGER=/tmp/low-bead-live-dedupe-20260515T1255Z.jsonl .flywheel/scripts/low-bead-threshold-detector.sh check --auto-bead --json",
+      "result": "pass",
+      "summary": "signal=RED auto_bead_filed=false auto_bead_action=suppressed_existing_id"
+    },
+    {
+      "command": "rg -n '\"id\":\"flywheel-hunt-work-mission-env-skills\"' .beads/issues.jsonl",
+      "result": "pass",
+      "summary": "one row remains"
+    },
+    {
+      "command": "br ready --json",
+      "result": "pass",
+      "summary": "Beads no longer returns CONFIG_ERROR; one real ready bead surfaced"
+    },
+    {
+      "command": "br dep cycles --json",
+      "result": "pass",
+      "summary": "count=0"
+    },
+    {
+      "command": "./tests/publication-readiness.sh",
+      "result": "pass",
+      "summary": "72/0"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    }
+  ],
+  "skillos_coordination": {
+    "agent_mail": "Direct send to LilacDog was blocked pending contact approval; contact request exists from DarkRidge.",
+    "wezterm": "Sent concise blocker update to SkillOS pane_id=21."
+  }
+}
