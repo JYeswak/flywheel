@@ -78,6 +78,7 @@ jobs:
           bash tests/goal-mode.sh
           bash tests/josh-requests-reverse-lookup-canonical-cli.sh
           bash tests/goal-build-canonical-cli.sh
+          bash tests/trauma-claim-emitter-canonical-cli.sh
 
       - name: Shell lint
         run: |
@@ -87,6 +88,7 @@ jobs:
             uninstall.sh \
             scripts/preflight.sh \
             .flywheel/scripts/goal-build.sh \
+            .flywheel/scripts/trauma-claim-emitter.sh \
             scripts/local-actions-preflight.sh \
             scripts/journey-smoke.sh \
             scripts/agent-lane-probe.sh \
@@ -125,7 +127,8 @@ jobs:
             tests/presence-queue.sh \
             tests/goal-mode.sh \
             tests/josh-requests-reverse-lookup-canonical-cli.sh \
-            tests/goal-build-canonical-cli.sh
+            tests/goal-build-canonical-cli.sh \
+            tests/trauma-claim-emitter-canonical-cli.sh
 
       - name: Python syntax lint
         run: |
