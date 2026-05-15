@@ -1,0 +1,67 @@
+{
+  "schema": "flywheel.docs_scaffold_phase_receipt.v1",
+  "bead_id": "flywheel-ll107",
+  "created_at": "2026-05-15T17:29:47Z",
+  "status": "closed",
+  "phase": "phase4-remaining-client-docs",
+  "scope": {
+    "targets": [
+      {
+        "name": "blackfoot",
+        "source": "/Users/josh/Developer/cubcloud-docs/clients/blackfoot",
+        "site": "/Users/josh/Developer/blackfoot__nextra_documentation_site",
+        "archetype": "unknown"
+      },
+      {
+        "name": "terratitle",
+        "source": "/Users/josh/Developer/terratitle",
+        "site": "/Users/josh/Developer/terratitle__nextra_documentation_site",
+        "archetype": "fullstack"
+      },
+      {
+        "name": "vrtx",
+        "source": "/Users/josh/Developer/vrtx",
+        "site": "/Users/josh/Developer/vrtx__nextra_documentation_site",
+        "archetype": "unknown"
+      }
+    ],
+    "client_repo_source_mutations": false,
+    "notes": "Docs sites were created as sibling directories. Build validation used temporary copies to avoid leaving dependency/build artifacts beside the repos."
+  },
+  "upstream_scaffold_receipt": ".flywheel/evidence/flywheel-38u3d.2/nextra-scaffold-repair-receipt-20260515T172238Z.json",
+  "builds": [
+    {
+      "name": "blackfoot",
+      "package_json_sha256": "db67b389ab28d36a794c9d4e38f97b20b0384194a8ca8e0347c1995888b26cd7",
+      "temp_build_site": "/tmp/blackfoot-nextra-build.Rhunl1/site",
+      "result": "pass",
+      "pagefind_indexed_pages": 1
+    },
+    {
+      "name": "terratitle",
+      "package_json_sha256": "b62f83682f3fd0ecf0d48c210d0d7f8d08689da0ab144a416a235ce2bd3b7361",
+      "temp_build_site": "/tmp/terratitle-nextra-build.W3tbv4/site",
+      "result": "pass",
+      "pagefind_indexed_pages": 1
+    },
+    {
+      "name": "vrtx",
+      "package_json_sha256": "20db8a2fc9263670b180da1374f967b6e4889a8d772a7519e04085065ee8a9c6",
+      "temp_build_site": "/tmp/vrtx-nextra-build.QYrEbT/site",
+      "result": "pass",
+      "pagefind_indexed_pages": 1
+    }
+  ],
+  "hygiene": {
+    "site_directory_sizes": {
+      "blackfoot": "44K",
+      "terratitle": "44K",
+      "vrtx": "44K"
+    },
+    "dependency_artifacts_retained_in_site_dirs": false
+  },
+  "residuals": [
+    "Blackfoot target is a lightweight client docs placeholder under cubcloud-docs, not a full application repo.",
+    "VRTX and Blackfoot archetype detection still returns unknown; scaffold/build is clean, but detector enrichment remains a separate quality improvement if richer archetype-specific docs are required."
+  ]
+}
