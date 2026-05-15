@@ -1,0 +1,57 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-gr403",
+  "closed_at": "2026-05-15T20:30:00Z",
+  "status": "closed",
+  "closure_type": "release_cutover_complete",
+  "summary": "B15 public publication cutover is complete on non-destructive tag v0.2.1. The older v0.2.0 tag remains an unpublished prerequisite-failure tag and was not force-moved.",
+  "remote": "JYeswak/flywheel",
+  "master_commit": "6056bd8c42f60688b74f8057f61ae0825a18e315",
+  "release": {
+    "tag": "v0.2.1",
+    "url": "https://github.com/JYeswak/flywheel/releases/tag/v0.2.1",
+    "is_draft": false,
+    "is_prerelease": false,
+    "required_assets": [
+      "flywheel-v0.2.1.tar.gz",
+      "flywheel-v0.2.1.tar.gz.sha256",
+      "install.sh",
+      "install.sh.sha256",
+      "SHA256SUMS"
+    ]
+  },
+  "live_site": {
+    "url": "https://flywheel.zeststream.ai/",
+    "manifest_url": "https://flywheel.zeststream.ai/site-deploy-manifest.json",
+    "manifest_tag": "v0.2.1",
+    "install_sha256": "a4e04cd1e08f13110d74dca34c38018a5b93c9a173cca2db63a91458efe6f364"
+  },
+  "proof": [
+    {
+      "command": "python3 scripts/publication_readiness.py --release --json",
+      "result": "status=pass blockers=0 next_actions=0"
+    },
+    {
+      "command": "python3 .flywheel/scripts/true-publication-registry-validate.py --release --json",
+      "result": "status=pass open_count=0 warnings=0 errors=0"
+    },
+    {
+      "command": "python3 scripts/live_site_probe.py --base-url https://flywheel.zeststream.ai/ --json",
+      "result": "status=pass probe_count=18 pass_count=18 failure_count=0"
+    },
+    {
+      "command": "gh run list --repo JYeswak/flywheel --limit 5 --json ...",
+      "result": "master CI success on 6056bd8c42f60688b74f8057f61ae0825a18e315"
+    },
+    {
+      "command": "curl install.sh | shasum -a 256 compared with install.sh.sha256",
+      "result": "actual=expected=a4e04cd1e08f13110d74dca34c38018a5b93c9a173cca2db63a91458efe6f364"
+    }
+  ],
+  "root_cause_removed": [
+    "Hosted-runner prerequisite drift was fixed in release/site workflows by installing jq, ripgrep, and shellcheck.",
+    "The destructive tag-rewrite path was rejected by dcg, so publication moved to v0.2.1 instead of force-moving v0.2.0.",
+    "The registry and goal-audit tests now distinguish real release truth from unauthenticated CI live-remote visibility."
+  ],
+  "safe_local_work_remaining": false
+}
