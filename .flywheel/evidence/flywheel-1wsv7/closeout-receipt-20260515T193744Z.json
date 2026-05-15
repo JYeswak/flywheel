@@ -1,0 +1,21 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-1wsv7",
+  "title": "L168 wave2 active product tenant registry/declaration rollout",
+  "ts": "20260515T193744Z",
+  "status": "closed",
+  "summary": "Wave 2 preflight passes: VRTX applied and tenant-doctor clean; zeststream-v2-fresh and zeststream-platform carry explicit disposition receipts.",
+  "raw_secret_values_recorded": false,
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-1wsv7/wave2-tenant-preflight-pass-20260515T193653Z.json",
+    ".flywheel/evidence/flywheel-1wsv7/vrtx-tenant-doctor-pass-20260515T193653Z.json",
+    ".flywheel/evidence/flywheel-1wsv7/zeststream-v2-fresh-tenant-disposition-20260515T1936Z.json",
+    ".flywheel/evidence/flywheel-1wsv7/zeststream-platform-tenant-disposition-20260515T1936Z.json"
+  ],
+  "validation": {
+    "tenant_doctor_vrtx": "pass",
+    "tenant_doctor_zesttube": "not_applicable",
+    "wave2_preflight": "pass",
+    "wave3_preflight": "not_applicable"
+  }
+}
