@@ -134,7 +134,7 @@ These are issues already closed before this tracker existed. They're recorded he
 | [#269](https://github.com/Dicklesworthstone/beads_rust/issues/269) | (per memory `reference_upstream_issues.md`) | 2026-04-30 | CLOSED — FIXED | Part of the original bead-isolation phase-3 SQL/source_repo hardening |
 | [#270](https://github.com/Dicklesworthstone/beads_rust/issues/270) | (per memory `reference_upstream_issues.md`) | 2026-04-30 | TRIAGED + FIXED 2026-05-01 | Dogfood receipt 2026-05-04: `br 0.2.4` remains current; disposable fixture exits with `.beads/beads.db-wal` at 0 bytes (expected); closure signal posted upstream |
 | [#273](https://github.com/Dicklesworthstone/beads_rust/issues/273) | (per memory `reference_upstream_issues.md`) | 2026-05-03 | CLOSED — FIXED | |
-| [#285](https://github.com/Dicklesworthstone/beads_rust/issues/285) | `br close` persists JSONL but not SQLite (divergence) | 2026-05-08 | OPEN | Jeff engaged 2026-05-08 with 2 artifact requests (`RUST_LOG=trace` + `br doctor --json`); reproduction requires live divergence; tracked under flywheel-`f23ix` |
+| [#285](https://github.com/Dicklesworthstone/beads_rust/issues/285) | `br close` persists JSONL but not SQLite (divergence) | 2026-05-08 | CLOSED — FIXED | Jeffrey closed 2026-05-14 as reproduced/fixed in `br 0.2.6`; local Flywheel absorbed with `br 0.2.10` and an isolated close-path smoke proving SQLite + JSONL both move `open -> closed`. Receipt: `.flywheel/evidence/flywheel-ei5fp/closeout-receipt-20260515T111219Z.json`. |
 
 Authoritative source for these rows: `~/.claude/projects/-Users-josh-Developer-flywheel/memory/reference_upstream_issues.md`.
 

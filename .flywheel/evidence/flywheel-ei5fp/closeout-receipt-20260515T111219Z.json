@@ -1,0 +1,51 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-ei5fp",
+  "closed_at": "2026-05-15T11:12:19Z",
+  "status": "closed",
+  "decision": "close_after_upstream_fix_absorbed",
+  "upstream": {
+    "repo": "Dicklesworthstone/beads_rust",
+    "issue": 285,
+    "url": "https://github.com/Dicklesworthstone/beads_rust/issues/285",
+    "state": "CLOSED",
+    "closed_signal": "Jeffrey Emanuel reported the close-path persistence repro verified fixed in br 0.2.6 on 2026-05-14T06:02:54Z."
+  },
+  "local_absorption": {
+    "previous_version": "br 0.2.5",
+    "installed_version": "br 0.2.10",
+    "install_command": "cargo install beads_rust --version 0.2.10 --locked --force",
+    "install_result": "success",
+    "binary": "/Users/josh/.cargo/bin/br"
+  },
+  "smoke_test": {
+    "command": "tmp=$(mktemp -d /tmp/br285-smoke.XXXXXX); cd \"$tmp\"; br init; id=$(br create --title \"br285 close persistence smoke\" --type bug --priority 2 --json | jq -r '.id'); before=$(sqlite3 .beads/beads.db \"SELECT status FROM issues WHERE id='$id'\"); br close \"$id\" --reason \"br285 local absorption smoke\"; after=$(sqlite3 .beads/beads.db \"SELECT status FROM issues WHERE id='$id'\"); jsonl=$(tail -1 .beads/issues.jsonl | jq -r '.status'); test \"$before\" = open && test \"$after\" = closed && test \"$jsonl\" = closed",
+    "result": "pass",
+    "observed": {
+      "tmp": "/tmp/br285-smoke.hFh047",
+      "id": "br285-smokehfh047-uxf",
+      "before": "open",
+      "after": "closed",
+      "jsonl_tail_status": "closed"
+    }
+  },
+  "additional_validation": [
+    {
+      "command": "br --version",
+      "result": "br 0.2.10"
+    },
+    {
+      "command": "gh issue view 285 --repo Dicklesworthstone/beads_rust --json state,updatedAt",
+      "result": "state=CLOSED updatedAt=2026-05-14T06:02:55Z"
+    },
+    {
+      "command": "gh pr view 3 --json headRefOid,mergeStateStatus,statusCheckRollup",
+      "result": "head 201439c7 CLEAN; Public Surface, Install Doctor Uninstall ubuntu, Install Doctor Uninstall macOS, and GitGuardian all SUCCESS"
+    }
+  ],
+  "not_claimed": [
+    "This does not claim every historical Flywheel bead row has been reconciled.",
+    "This does not patch Jeffrey-owned beads_rust source locally.",
+    "This closes only the local upstream tracker because the upstream issue is closed and the fixed binary is absorbed."
+  ]
+}
