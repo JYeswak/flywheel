@@ -119,12 +119,12 @@ broadcast_args=(
   --json
 )
 
-zsh -n "$SCRIPT" && pass "broadcast_script_syntax" || fail "broadcast_script_syntax"
-zsh -n "$LOOP" && pass "flywheel_loop_syntax" || fail "flywheel_loop_syntax"
+if zsh -n "$SCRIPT"; then pass "broadcast_script_syntax"; else fail "broadcast_script_syntax"; fi
+if zsh -n "$LOOP"; then pass "flywheel_loop_syntax"; else fail "flywheel_loop_syntax"; fi
 
 "$SCRIPT" "${broadcast_args[@]}" >"$TMP/first.json"
 assert_jq "$TMP/first.json" '.sent_count == 2 and .dead_count == 2 and .deferred_dead_count == 1 and (.results[] | select(.session=="live").action) == "sent" and (.results[] | select(.session=="mixed").action) == "sent"' "live_rows_broadcast_once"
-test "$(jq -s 'length' "$SEND_LOG")" = "1" && pass "ntm_message_broadcast_called_once" || fail "ntm_message_broadcast_called_once"
+if test "$(jq -s 'length' "$SEND_LOG")" = "1"; then pass "ntm_message_broadcast_called_once"; else fail "ntm_message_broadcast_called_once"; fi
 assert_jq "$SEND_LOG" '.command == ["message","--broadcast"] and .recipients == "live:1,mixed:2" and .no_raw_tokens == true' "ntm_message_broadcast_expands_recipients"
 if ! grep -q 'token=' "$TMP"/agentmail-registration-broadcast-*.txt 2>/dev/null; then
   pass "request_omits_raw_token_shape"
@@ -134,15 +134,50 @@ fi
 
 "$SCRIPT" "${broadcast_args[@]}" >"$TMP/second.json"
 assert_jq "$TMP/second.json" '.sent_count == 0 and .deduped_count == 2 and (.results[] | select(.session=="live").action) == "deduped_recent_send" and (.results[] | select(.session=="mixed").action) == "deduped_recent_send"' "repeat_within_window_dedupes"
-test "$(jq -s 'length' "$SEND_LOG")" = "1" && pass "dedupe_suppresses_second_send" || fail "dedupe_suppresses_second_send"
+if test "$(jq -s 'length' "$SEND_LOG")" = "1"; then pass "dedupe_suppresses_second_send"; else fail "dedupe_suppresses_second_send"; fi
 
 "$SCRIPT" "${broadcast_args[@]}" --doctor >"$TMP/doctor.json"
 assert_jq "$TMP/doctor.json" '.status == "pass" and .agentmail_pending_registration_broadcasts_count == 0 and .deferred_dead_count == 1' "doctor_passes_when_only_dead_deferred_or_deduped"
 
+FAIL_NTM="$TMP/ntm-fail-message"
+cat >"$FAIL_NTM" <<'SH'
+#!/usr/bin/env bash
+set -euo pipefail
+if [[ "${1:-}" == "health" ]]; then
+  printf '{"session":"live","agents":[{"pane":1,"status":"ok","process_status":"running"}]}\n'
+  exit 0
+fi
+if [[ "${1:-}" == "message" ]]; then
+  printf 'simulated send failure\n' >&2
+  exit 9
+fi
+exit 1
+SH
+chmod +x "$FAIL_NTM"
+rm -f "$COORD"
+fail_request_dir="$TMP/fail-requests"
+mkdir -p "$fail_request_dir"
+set +e
+"$SCRIPT" \
+  --state-dir "$STATE" \
+  --deferral-dir "$DEFERRALS" \
+  --coordination-log "$COORD" \
+  --request-dir "$fail_request_dir" \
+  --ntm "$FAIL_NTM" \
+  --now 2026-05-04T02:00:00Z \
+  --session live \
+  --pane 1 \
+  --json >"$TMP/send-fail.json"
+send_fail_rc=$?
+set -e
+if [[ "$send_fail_rc" -eq 1 ]]; then pass "failed_send_returns_nonzero"; else fail "failed_send_returns_nonzero"; fi
+assert_jq "$TMP/send-fail.json" '.status == "fail" and .sent_count == 0 and (.errors | length == 1)' "failed_send_reports_error"
+if [[ -z "$(find "$fail_request_dir" -type f -name 'agentmail-registration-broadcast-*.txt' -print -quit)" ]]; then pass "failed_send_cleans_request_file"; else fail "failed_send_cleans_request_file"; fi
+
 rm -f "$COORD" "$SEND_LOG"
 "$SCRIPT" "${broadcast_args[@]}" --session mixed --pane 2 --no-raw-tokens >"$TMP/scoped.json"
 assert_jq "$TMP/scoped.json" '.sent_count == 1 and .rows_checked == 1 and .session_filter == "mixed" and .pane_filter == 2 and .no_raw_tokens == true and (.results[] | select(.session=="mixed").action) == "sent"' "scoped_broadcast_sends_target_only"
-test "$(jq -s 'length' "$SEND_LOG")" = "1" && pass "scoped_broadcast_ntm_send_once" || fail "scoped_broadcast_ntm_send_once"
+if test "$(jq -s 'length' "$SEND_LOG")" = "1"; then pass "scoped_broadcast_ntm_send_once"; else fail "scoped_broadcast_ntm_send_once"; fi
 assert_jq "$SEND_LOG" '.recipients == "mixed:2"' "scoped_broadcast_recipient_expansion"
 
 rm -f "$COORD" "$SEND_LOG"
