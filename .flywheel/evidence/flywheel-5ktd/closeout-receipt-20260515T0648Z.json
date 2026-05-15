@@ -1,0 +1,41 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-5ktd",
+  "closed_at": "2026-05-15T06:48:00Z",
+  "status": "done",
+  "source_plan": ".flywheel/PLANS/pane-work-signal-truth-source-2026-05-01.md",
+  "scope": "Parent decomposition bead for Pane Work Signal as Codex truth source.",
+  "child_beads_closed": [
+    "flywheel-5ktd.1",
+    "flywheel-5ktd.2",
+    "flywheel-5ktd.3",
+    "flywheel-5ktd.4",
+    "flywheel-5ktd.5",
+    "flywheel-5ktd.6"
+  ],
+  "acceptance": {
+    "one_bead_per_phase_or_slice": "met: six child beads cover fixtures, helper parser/classifier, tick capacity, status markers, doctor/promotion, and rollout proof.",
+    "dependencies_wired": "met: child beads are parent-child linked under flywheel-5ktd; dependency graph has zero cycles.",
+    "plan_path_referenced": "met: child bead descriptions and tests reference .flywheel/PLANS/pane-work-signal-truth-source-2026-05-01.md.",
+    "integration_proof": "met: tests/test_pws_integration_proof.sh passes 7/0 and writes /tmp/flywheel-5ktd-final-receipt.md."
+  },
+  "verification": [
+    {
+      "command": "bash tests/test_pws_integration_proof.sh",
+      "result": "pass 7/0; receipt=/tmp/flywheel-5ktd-final-receipt.md"
+    },
+    {
+      "command": "for id in flywheel-5ktd.1 flywheel-5ktd.2 flywheel-5ktd.3 flywheel-5ktd.4 flywheel-5ktd.5 flywheel-5ktd.6; do br show \"$id\" --json | jq -r '.[0] | [.id,.status,.close_reason] | @tsv'; done",
+      "result": "all six child beads closed"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass; no dependency cycles detected"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    }
+  ],
+  "notes": "No source files changed in this closeout; this closes stale parent state after already-shipped child work."
+}
