@@ -1,0 +1,75 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-lp1fr",
+  "closed_at": "2026-05-15T19:22:00Z",
+  "status": "closed",
+  "summary": "Closed L168 Wave 4 by applying explicit dispositions for blackfoot-telecom and picoz, adapting ClutterFreeSpaces to the SkillOS tenant declaration schema, and repairing the tenant-doctor/preflight validator boundary for modern Supabase publishable keys.",
+  "wave_scope": [
+    "blackfoot-telecom",
+    "clutterfreespaces",
+    "picoz"
+  ],
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-lp1fr/blackfoot-telecom-tenant-disposition-20260515T1827Z.json",
+    ".flywheel/evidence/flywheel-lp1fr/picoz-tenant-disposition-20260515T1827Z.json",
+    ".flywheel/evidence/flywheel-lp1fr/wave4-tenant-preflight-pass-20260515T1920Z.json"
+  ],
+  "external_repo_changes": [
+    {
+      "repo": "/Users/josh/Developer/clutterfreespaces",
+      "commit": "e513f70",
+      "summary": "chore(tenant): add SkillOS routing declaration overlay [flywheel-lp1fr]",
+      "files": [
+        ".zs-tenant.yaml"
+      ]
+    }
+  ],
+  "runtime_and_registry_changes": [
+    {
+      "path": "/Users/josh/.claude/skills/infisical-secrets/bin/zs-tenant-doctor",
+      "sha256": "30ec909fc76655c04736884ba6fc28e88312c8ac1e2b23bffc21e4653008c5b0",
+      "summary": "Adds supabase_publishable_key_format for modern sb_publishable_* keys and preserves legacy anon JWT ref support."
+    },
+    {
+      "path": "/Users/josh/.local/bin/zs-tenant-doctor",
+      "sha256": "30ec909fc76655c04736884ba6fc28e88312c8ac1e2b23bffc21e4653008c5b0",
+      "summary": "Installed runtime copy matches canonical local skill copy."
+    },
+    {
+      "path": "/Users/josh/.claude/skills/infisical-secrets/data/project-mappings.yaml",
+      "summary": "ClutterFreeSpaces row uses supabase_publishable_key_format for NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY; URL and service-role keys remain the tenant-ref proof."
+    }
+  ],
+  "validation": [
+    {
+      "command": "npm test in /Users/josh/Developer/clutterfreespaces",
+      "result": "pass",
+      "summary": "266 suites, 2680 tests"
+    },
+    {
+      "command": "zs-tenant-doctor --json clutterfreespaces",
+      "result": "pass",
+      "summary": "overall=ok drift_count=0 warn_count=0 key_count=4"
+    },
+    {
+      "command": ".flywheel/scripts/fleet-tenant-registry-preflight.py ... --run-doctor --json",
+      "result": "pass",
+      "summary": "wave4 fail_count=0; clutterfreespaces doctor_status=pass"
+    },
+    {
+      "command": "bash tests/fleet-tenant-registry-preflight.sh",
+      "result": "pass",
+      "summary": "7/0"
+    },
+    {
+      "command": "bash tests/l168-registry-patch-plan.sh",
+      "result": "pass",
+      "summary": "7/0"
+    },
+    {
+      "command": "shellcheck /Users/josh/.claude/skills/infisical-secrets/bin/zs-tenant-doctor tests/l168-registry-patch-plan.sh tests/fleet-tenant-registry-preflight.sh",
+      "result": "pass"
+    }
+  ],
+  "remaining_l168_scope": "Wave 2 and the ZestTube row in Wave 3 still require canonical identifier/key decisions; this receipt closes Wave 4 only."
+}

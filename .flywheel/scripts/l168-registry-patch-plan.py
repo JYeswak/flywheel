@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -33,6 +33,11 @@ def first_present(mapping: dict[str, Any], *keys: str) -> Any:
 
 def canonical_key_spec(key: str, ref: str | None, url: str | None) -> dict[str, Any]:
     upper = key.upper()
+    if upper == "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY":
+        return {
+            "validator": "supabase_publishable_key_format",
+            "expected_format": "supabase_publishable_key",
+        }
     if "DATABASE_URL" in upper or upper == "DATABASE_URL":
         return {
             "validator": "postgres_url_contains_supabase_ref",
@@ -229,7 +234,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", action="append", required=True, type=Path)
     parser.add_argument("--out", type=Path)
-    parser.add_argument("--generated-at", default=datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"))
+    parser.add_argument("--generated-at", default=datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 

@@ -41,6 +41,9 @@ mappings:
       SUPABASE_SERVICE_ROLE_KEY:
         validator: supabase_jwt_ref_claim_equals
         expected_ref_claim: abcdefghijklmnopqrst
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
+        validator: supabase_publishable_key_format
+        expected_format: supabase_publishable_key
   todo-row:
     infisical_project_id: TODO_ASK_JOSHUA
     description: TODO

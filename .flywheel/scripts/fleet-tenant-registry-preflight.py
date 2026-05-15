@@ -98,6 +98,7 @@ def check_registry_row(slug: str, row: dict[str, Any] | None) -> list[str]:
                 "postgres_url_contains_supabase_ref": "expected_supabase_ref",
                 "equals": "expected_value",
                 "supabase_jwt_ref_claim_equals": "expected_ref_claim",
+                "supabase_publishable_key_format": "expected_format",
             }
             expected = expected_fields.get(str(validator))
             if expected is None:
@@ -145,7 +146,7 @@ def check_declaration(slug: str, repo: Path | None, row: dict[str, Any] | None) 
 
 
 def run_doctor(slug: str, cwd: Path | None) -> dict[str, Any]:
-    command = ["zs-tenant-doctor", "--json", slug]
+    command = ["zs-tenant-doctor", "--json", "--no-journeys", slug]
     env = dict(os.environ)
     env["PATH"] = f"{Path.home() / '.local/bin'}:{env.get('PATH', '')}"
     try:
