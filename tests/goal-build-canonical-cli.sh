@@ -8,7 +8,9 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/.flywheel/scripts/goal-build.sh"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/goal-build-test.XXXXXX")"
 export GOAL_BUILD_REPO="$TMP/repo"
-mkdir -p "$GOAL_BUILD_REPO/.flywheel/goals"
+# Isolate from production residue ledger at ~/Desktop/zeststream-goals/_residue/
+export GOAL_BUILD_GOALS_DIR="$TMP/goals"
+mkdir -p "$GOAL_BUILD_REPO/.flywheel/goals" "$GOAL_BUILD_GOALS_DIR"
 trap 'rm -rf "$TMP"' EXIT
 
 pass_count=0

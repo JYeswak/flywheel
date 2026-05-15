@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from collections import Counter
@@ -31,7 +32,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 SCHEMA_VERSION = "flywheel.goal_doc_residue.v0"
-LEDGER_PATH = Path.home() / "Desktop/zeststream-goals/_residue/ledger.jsonl"
+# GOAL_BUILD_GOALS_DIR env override matches goal-build.sh, so tests using a
+# scratch GOAL_BUILD_GOALS_DIR don't pollute the production ledger.
+GOALS_DIR = Path(os.environ.get("GOAL_BUILD_GOALS_DIR") or str(Path.home() / "Desktop/zeststream-goals"))
+LEDGER_PATH = GOALS_DIR / "_residue/ledger.jsonl"
 LIMIT = 4000
 
 # Mission anchors that goal docs should reference verbatim.
