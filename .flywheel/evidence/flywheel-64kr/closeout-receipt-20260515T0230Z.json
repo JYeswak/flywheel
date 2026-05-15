@@ -1,0 +1,24 @@
+{
+  "schema_version": "flywheel.canonical_cli_repair_evidence.v1",
+  "bead_id": "flywheel-64kr",
+  "surface": "flywheel-lock-repair",
+  "installed_binary": {
+    "path": "/Users/josh/.claude/skills/.flywheel/bin/flywheel-lock-repair",
+    "sha256": "3fded833b988bb2510f7be2fb13a44dc4bc13d615fcefcf0e0d24d5be51ea031",
+    "tracked_in_flywheel_repo": false
+  },
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-64kr/canonical-cli-scorecard-20260515T0230Z.json"
+  ],
+  "validations": [
+    {
+      "command": "FLYWHEEL_LOCK_REPAIR_REPO=/Users/josh/Developer/flywheel bash tests/flywheel-lock-repair-canonical-cli.sh",
+      "status": "pass"
+    },
+    {
+      "command": "PATH=\"$HOME/.claude/skills/.flywheel/bin:$PATH\" bash ~/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh flywheel-lock-repair",
+      "status": "pass"
+    }
+  ],
+  "boundary_note": "The repaired executable is the installed Flywheel substrate binary under ~/.claude/skills/.flywheel/bin. Flywheel repo evidence captures the passing contract and source-ownership gap is tracked separately."
+}
