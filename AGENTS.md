@@ -155,6 +155,14 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 111 | L170 — EVERY-CONSUMER-REPO-MUST-DECLARE-3-USER-JOURNEYS-MINIMUM | long_term | `.flywheel/rules/L111-L170-every-consumer-repo-must-declare-3-user-journeys-minimum.md` |
 | 112 | L171 — SKILL-CREATION-REQUIRES-SKILLOS-HANDOFF | long_term | `.flywheel/rules/L112-L171-skill-creation-requires-skillos-handoff.md` |
 | 113 | L162 — SUBSTRATE-CLASS-CLASSIFIER-BEFORE-PROTECTION-HALT-MANDATORY | long_term | `.flywheel/rules/L113-L162-substrate-class-classifier-before-protection-halt-mandatory.md` |
+| 114 | L158 — CLI-VERSION-FLAG-MISMATCH-OUTPUT-FORMAT-SWITCH-LEAKS | long_term | `.flywheel/rules/L114-L158-cli-version-flag-mismatch-output-format-switch-leaks.md` |
+| 115 | L160 — AGENTIC-LOOP-HALT-VIA-POSTTOOLUSE-HOOK-WHEN-LEAK-DETECTED | long_term | `.flywheel/rules/L115-L160-agentic-loop-halt-via-posttooluse-hook-when-leak-detected.md` |
+| 116 | L161 — OPERATOR-DIRECTED-MISSION-CONTINUATION-AFTER-LEAK | long_term | `.flywheel/rules/L116-L161-operator-directed-mission-continuation-after-leak.md` |
+| 117 | L163 — CROSS-INFISICAL-PROJECT-CREDENTIAL-COLLISION-WRONG-TENANT-CONNECT | long_term | `.flywheel/rules/L117-L163-cross-infisical-project-credential-collision-wrong-tenant-connect.md` |
+| 118 | L164 — TENANT-VERIFICATION-GATE-MANDATORY-BEFORE-DB-MUTATION | long_term | `.flywheel/rules/L118-L164-tenant-verification-gate-mandatory-before-db-mutation.md` |
+| 119 | L165 — CF-SECRET-ITERATION-RETURNS-WRONG-PROJECT-FIRST-HIT | long_term | `.flywheel/rules/L119-L165-cf-secret-iteration-returns-wrong-project-first-hit.md` |
+| 120 | L166 — INFISICAL-SET-IGNORES-PROJECT-ID-ENV-OVERRIDE-USE-CLI-FLAG | long_term | `.flywheel/rules/L120-L166-infisical-set-ignores-project-id-env-override-use-cli-flag.md` |
+| 121 | L167 — TRANSACTIONAL-MIGRATION-AND-IDEMPOTENT-SCHEMA-MANDATORY | long_term | `.flywheel/rules/L121-L167-transactional-migration-and-idempotent-schema-mandatory.md` |
 <!-- END-RULES-INDEX -->
 
 <!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->

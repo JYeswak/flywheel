@@ -1,0 +1,60 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-96fnx",
+  "status": "closed",
+  "closed_at": "2026-05-15T13:27:05Z",
+  "summary": "Authored Flywheel-side sister shards for SkillOS-owned secrets-class L-rules L158, L160, L161, and L163-L167; regenerated AGENTS indexes and rules manifest; validated that every SkillOS source locator resolves.",
+  "artifacts": [
+    ".flywheel/rules/L114-L158-cli-version-flag-mismatch-output-format-switch-leaks.md",
+    ".flywheel/rules/L115-L160-agentic-loop-halt-via-posttooluse-hook-when-leak-detected.md",
+    ".flywheel/rules/L116-L161-operator-directed-mission-continuation-after-leak.md",
+    ".flywheel/rules/L117-L163-cross-infisical-project-credential-collision-wrong-tenant-connect.md",
+    ".flywheel/rules/L118-L164-tenant-verification-gate-mandatory-before-db-mutation.md",
+    ".flywheel/rules/L119-L165-cf-secret-iteration-returns-wrong-project-first-hit.md",
+    ".flywheel/rules/L120-L166-infisical-set-ignores-project-id-env-override-use-cli-flag.md",
+    ".flywheel/rules/L121-L167-transactional-migration-and-idempotent-schema-mandatory.md",
+    ".flywheel/doctrine/skillos-secrets-class-sister-shards.md",
+    "tests/skillos-secrets-sister-shards.sh"
+  ],
+  "source_locators_checked": [
+    "/Users/josh/Developer/skillos/.flywheel/doctrine/cli-version-flag-mismatch-output-format-switch.md",
+    "/Users/josh/Developer/skillos/.flywheel/doctrine/cross-infisical-project-credential-collision-wrong-tenant-connect.md",
+    ".flywheel/handoffs/20260512T040500Z-from-flywheel-1-to-skillos-1-L158-L159-RATIFICATION.md",
+    ".flywheel/handoffs/20260512T052716Z-from-flywheel-1-to-skillos-1-L163-L167-RATIFICATION.md"
+  ],
+  "validation": [
+    {
+      "command": "tests/skillos-secrets-sister-shards.sh",
+      "result": "pass",
+      "summary": "82/0"
+    },
+    {
+      "command": ".flywheel/scripts/agents-md-shard-extract.sh --dry-run --json",
+      "result": "pass",
+      "summary": "status=in_sync drifted_count=0 rule_count=121"
+    },
+    {
+      "command": "jq empty .flywheel/rules/MANIFEST.json",
+      "result": "pass"
+    },
+    {
+      "command": "shellcheck tests/skillos-secrets-sister-shards.sh",
+      "result": "pass"
+    },
+    {
+      "command": "br dep cycles --json",
+      "result": "pass",
+      "summary": "count=0"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    }
+  ],
+  "boundaries": [
+    "No SkillOS files mutated.",
+    "SkillOS remains source owner for capability-control-plane doctrine.",
+    "Flywheel carries sister shards, AGENTS rows, and doctrine cross-reference only.",
+    ".flywheel/MISSION.md was pre-existing dirty state and was not staged."
+  ]
+}
