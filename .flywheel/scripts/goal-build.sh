@@ -23,10 +23,11 @@
 
 set -euo pipefail
 
-VERSION="goal-build.v1.0.0"
+VERSION="goal-build.v1.1.0"
 SCHEMA_VERSION="flywheel.goal_build.v1"
 MAX_CHARS=4000
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+GRADER="${SCRIPT_DIR}/goal_grade.py"
 REPO_DEFAULT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
 REPO_ROOT="${GOAL_BUILD_REPO:-$REPO_DEFAULT}"
 # Default to ~/Desktop/zeststream-goals/ — visible in Finder, easy CLI access.
@@ -248,12 +249,48 @@ cmd_build() {
       return 4
     fi
   fi
+  # Auto-grade the written goal + append residue row to the ledger.
+  # Failure to grade is non-fatal — the write already succeeded.
+  local grade_output=""
+  if [[ -x "$GRADER" ]] || [[ -f "$GRADER" ]]; then
+    grade_output="$(python3 "$GRADER" write-residue --goal "$out_path" --json 2>/dev/null || true)"
+  fi
   if [[ "$json_out" -eq 1 ]]; then
-    printf '{"status":"written","char_count":%d,"limit":%d,"path":"%s"}\n' "$n" "$MAX_CHARS" "$out_path"
+    if [[ -n "$grade_output" ]]; then
+      local composite weakest
+      composite="$(echo "$grade_output" | python3 -c "import sys,json;d=json.load(sys.stdin);print(d.get('row',{}).get('composite',0))" 2>/dev/null || echo 0)"
+      weakest="$(echo "$grade_output" | python3 -c "import sys,json;d=json.load(sys.stdin);print(d.get('row',{}).get('weakest_dim','?'))" 2>/dev/null || echo '?')"
+      printf '{"status":"written","char_count":%d,"limit":%d,"path":"%s","composite":%s,"weakest_dim":"%s","residue_logged":true}\n' "$n" "$MAX_CHARS" "$out_path" "$composite" "$weakest"
+    else
+      printf '{"status":"written","char_count":%d,"limit":%d,"path":"%s","residue_logged":false}\n' "$n" "$MAX_CHARS" "$out_path"
+    fi
   else
     printf 'WRITTEN (%d/%d chars) → %s\n' "$n" "$MAX_CHARS" "$out_path"
+    if [[ -n "$grade_output" ]]; then
+      local composite weakest
+      composite="$(echo "$grade_output" | python3 -c "import sys,json;d=json.load(sys.stdin);print(d.get('row',{}).get('composite',0))" 2>/dev/null || echo 0)"
+      weakest="$(echo "$grade_output" | python3 -c "import sys,json;d=json.load(sys.stdin);print(d.get('row',{}).get('weakest_dim','?'))" 2>/dev/null || echo '?')"
+      printf 'GRADE   %s/100 composite (weakest: %s)\nRESIDUE %s\n' "$composite" "$weakest" "$HOME/Desktop/zeststream-goals/_residue/ledger.jsonl"
+    fi
   fi
   return 0
+}
+
+# ── grade / review / weakest passthrough subcommands ────────────────────────
+
+cmd_grade() {
+  [[ -f "$GRADER" ]] || { printf 'grader not found: %s\n' "$GRADER" >&2; return 3; }
+  python3 "$GRADER" grade "$@"
+}
+
+cmd_review() {
+  [[ -f "$GRADER" ]] || { printf 'grader not found: %s\n' "$GRADER" >&2; return 3; }
+  python3 "$GRADER" review "$@"
+}
+
+cmd_weakest() {
+  [[ -f "$GRADER" ]] || { printf 'grader not found: %s\n' "$GRADER" >&2; return 3; }
+  python3 "$GRADER" weakest "$@"
 }
 
 cmd_check() {
@@ -328,6 +365,9 @@ main() {
     build) shift; cmd_build "$@" ;;
     check) shift; cmd_check "$@" ;;
     list) shift; cmd_list "$@" ;;
+    grade) shift; cmd_grade "$@" ;;
+    review) shift; cmd_review "$@" ;;
+    weakest) shift; cmd_weakest "$@" ;;
     doctor|health) shift; emit_doctor ;;
     validate) shift; emit_doctor ;;
     quickstart) printf '{"command":"quickstart","next":"goal-build.sh build --repo flywheel --slug <topic> --from <file>"}\n' ;;

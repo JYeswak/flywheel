@@ -130,6 +130,44 @@ else
   fail "stdin source"
 fi
 
+# Behavior: grade subcommand returns rubric + composite + weakest_dim
+GRADE_BODY="$TMP/grade-body.txt"
+python3 -c "open('$GRADE_BODY','w').write('continuous-orchestrator-uptime-self-sustaining-fleet\\ncapability control plane\\nself-improving capability loops\\nEXIT criterion 1\\nEXIT criterion 2\\nEXIT criterion 3\\nrevert reversible env flag rollback\\nhard stall greenfield untested\\nfeeds the next phase compounds because\\nBASELINE shipped\\nself-contained\\n')"
+OUT="$("$SCRIPT" grade --from "$GRADE_BODY" --json 2>&1 || true)"
+if echo "$OUT" | jq -e '.composite >= 0 and .composite <= 100 and .weakest_dim and .scores and .improvements' >/dev/null; then
+  pass "grade: returns composite + weakest_dim + scores + improvements"
+else
+  fail "grade output shape wrong"
+  echo "$OUT" >&2
+fi
+
+# Behavior: build auto-writes residue (composite + weakest_dim appear in JSON)
+RESIDUE_BODY="$TMP/residue-body.txt"
+python3 -c "open('$RESIDUE_BODY','w').write('test body under limit\\n')"
+OUT="$("$SCRIPT" build --repo testrepo --slug residue-test --from "$RESIDUE_BODY" --json 2>&1)"
+if echo "$OUT" | jq -e '.status == "written" and has("composite") and has("weakest_dim") and .residue_logged == true' >/dev/null; then
+  pass "build auto-logs residue (composite + weakest_dim in output)"
+else
+  fail "build residue auto-log missing"
+  echo "$OUT" >&2
+fi
+
+# Behavior: review subcommand reads ledger (test uses real ledger, so just check shape)
+OUT="$("$SCRIPT" review --json 2>&1 || true)"
+if echo "$OUT" | jq -e '. | (.total_rows? // .rows? // 0) >= 0' >/dev/null; then
+  pass "review subcommand returns ledger summary"
+else
+  fail "review shape wrong"
+fi
+
+# Behavior: weakest subcommand returns JSON envelope
+OUT="$("$SCRIPT" weakest --json 2>&1 || true)"
+if echo "$OUT" | jq -e 'has("weakest_dim")' >/dev/null; then
+  pass "weakest subcommand returns weakest_dim field"
+else
+  fail "weakest shape wrong"
+fi
+
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2
   exit 1
