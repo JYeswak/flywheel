@@ -2,7 +2,7 @@
 
 Schema: `flywheel.publication_goal_completion_audit.v0`
 Status: `not-complete`
-Last audited: `2026-05-14T16:10:00Z`
+Last audited: `2026-05-15T03:50:00Z`
 
 This audit restates the active `/goal` as concrete deliverables, maps each
 deliverable to repo evidence, and names the remaining blockers. It is not a
@@ -39,7 +39,7 @@ Current verdict: `not complete`.
 |---|---|---|---|
 | Renamed, public-ready Flywheel ecosystem | `README.md`, `CHARTER.md`, `CHANGELOG.md`, `docs/brand/naming-conventions.md` | `bash tests/naming-conventions.sh`; `bash tests/public-top-level-files.sh`; `bash tests/public-surface-gap-scanner.sh` | Locally verified, final public cutover blocked. |
 | Joshua/ZestStream-private naming and paths removed or intentionally documented | `de-personalization-table.yaml`, `scripts/depersonalize.py`, public docs/site scans | `bash tests/depersonalize-table-codemod.sh`; `bash tests/live-state-denylist.sh`; `bash tests/public-docs.sh` | Locally verified for current public surfaces. |
-| Install path works from public package | `install.sh`, `uninstall.sh`, `templates/flywheel-install/`, `docs/getting-started/first-run.md` | `bash tests/installer-smoke.sh`; private live `install.sh` checksum parity in `state/private-live-site-deploy.receipt.json` | Locally verified and private-live verified; final release assets still blocked. |
+| Install path works from public package | `install.sh`, `uninstall.sh`, `templates/flywheel-install/`, `docs/getting-started/first-run.md` | `bash tests/installer-smoke.sh`; `bash tests/hosted-install-contract.sh`; private live `install.sh` checksum parity in `state/private-live-site-deploy.receipt.json` | Locally verified as clone-or-release-tarball first; hosted `install.sh` is checksum mirror only; final release assets still blocked. |
 | Doctor/preflight path works | `scripts/preflight.sh`, `docs/reference/commands.md`, `docs/reference/troubleshooting.md` | `bash tests/preflight-fixtures.sh`; `scripts/preflight.sh --json` fixtures | Locally verified. |
 | Loop workflow works | `.flywheel/GOAL.md`, `.flywheel/STATE.md`, `.flywheel/last_closeout_receipt.json`, `scripts/journey-smoke.sh` | `bash tests/journey-smoke.sh`; receipt validation references in docs | Locally verified for reduced journey and documented closeout flow. |
 | NTM and non-NTM workflow support | `docs/runbooks/agent-lane-compatibility.md`, `docs/runbooks/isolated-agent-lane-testing.md`, `docs/runbooks/local-actions-preflight.md` | `bash tests/isolated-agent-lane-smoke.sh`; `bash tests/agent-lane-probe.sh`; local-actions preflight evidence in `docs/evidence/publication-evidence.md` | Locally verified as receipt-governed compatibility, not public-release completion. |
@@ -51,11 +51,12 @@ Current verdict: `not complete`.
 | Staging review signoff map | `docs/evidence/staging-review-signoff-packet.md` | `bash tests/public-docs.sh`; `python3 scripts/publication_readiness.py --json` | Locally verified as a review aid; it explicitly does not grant public release approval. |
 | External developer run path | `README.md`, `docs/getting-started/first-run.md`, `docs/reference/commands.md`, `docs/reference/files.md` | `bash tests/public-links.sh`; `bash tests/public-docs.sh`; `bash tests/installer-smoke.sh`; `bash tests/journey-smoke.sh` | Locally verified; public GitHub availability still blocked. |
 | Blocker/gap tracking to closure | `docs/evidence/publication-blocker-coverage.md`, `.flywheel/PLANS/public-share-readiness-2026-05-12/`, Beads | `python3 .flywheel/scripts/true-publication-registry-validate.py --json`; `bash tests/true-publication-registry-validate.sh` | Coverage verified; six release blockers remain open. |
-| Public GitHub repository availability | GitHub repo `JYeswak/flywheel` | `python3 scripts/publication_readiness.py --json` | Blocked: `remote_repo_unavailable` until the public remote can be inspected; `remote_repo_private` if inspection proves the remote is still private. |
+| Public GitHub repository availability | GitHub repo `JYeswak/flywheel` | `python3 scripts/publication_readiness.py --json` | Currently inspectable; final release still waits on workflows, green default-branch runs, release assets, and signoff. |
 | Public GitHub workflows available | GitHub Actions workflows: `CI`, `Installer Smoke`, `Release`, `Site Deploy` | `python3 scripts/publication_readiness.py --json` | Blocked: `remote_workflows_missing`. |
 | Remote default-branch green runs | GitHub Actions run history | `python3 scripts/publication_readiness.py --json` | Blocked: `remote_green_runs_missing`. |
 | Published release exists | GitHub release `v0.2.0` | `python3 scripts/publication_readiness.py --json` | Blocked: `github_release_missing_or_draft`. |
 | Release assets exist with digests | `install.sh`, `install.sh.sha256`, `SHA256SUMS`, archive, archive checksum | `python3 scripts/publication_readiness.py --json` | Blocked: `github_release_assets_missing`. |
+| Install proxy checksum parity | `https://flywheel.zeststream.ai/install.sh` and `.sha256` | `python3 scripts/publication_readiness.py --json`; `docs/runbooks/release-cutover-authorization.md` | Blocked when the hosted checksum mirror does not match the release asset; this is not a curl-only installer claim. Current blocker: `install_proxy_checksum_mismatch`. |
 | Joshua final release signoff | `release-signoff.json` and receipt bundle | `python3 scripts/publication_readiness.py --json`; `docs/runbooks/release-cutover-authorization.md` | Blocked: `joshua_release_signoff_missing`. |
 
 ## Live Readiness Truth
@@ -72,12 +73,11 @@ Current result:
 {
   "status": "blocked",
   "blockers": [
-    "remote_repo_unavailable",
-    "remote_repo_private",
     "remote_workflows_missing",
     "remote_green_runs_missing",
     "github_release_missing_or_draft",
     "github_release_assets_missing",
+    "install_proxy_checksum_mismatch",
     "joshua_release_signoff_missing"
   ]
 }
@@ -100,11 +100,12 @@ isolated agent-lane smoke, journey smoke, public blocker coverage, and the
 depersonalization scan.
 
 Current source checks after the research-backed owner-outcome rewrite also passed:
-`bash tests/website-static.sh` 149/0, `bash tests/public-docs.sh` 279/0,
+`bash tests/website-static.sh` 154/0, `bash tests/public-docs.sh` 279/0,
 `bash tests/public-user-journey-pack.sh` 10/0, `bash
-tests/zeststream-ui-package.sh` 23/0, `bash tests/publication-readiness.sh`
-72/0, and `python3 scripts/publication_readiness.py --json` remains blocked
-only on the six public cutover gates.
+tests/hosted-install-contract.sh` 14/0, `bash tests/zeststream-ui-package.sh`
+23/0, `bash tests/publication-readiness.sh` 72/0, and `python3
+scripts/publication_readiness.py --json` remains blocked only on the five
+public cutover gates plus install-proxy checksum parity.
 
 ## Audit Closeout Rule
 

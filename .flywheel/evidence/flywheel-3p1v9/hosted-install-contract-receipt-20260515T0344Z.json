@@ -50,6 +50,11 @@
       "summary": "72 pass / 0 fail"
     },
     {
+      "command": "bash tests/publication-goal-completion-audit.sh",
+      "status": "pass",
+      "summary": "37 pass / 0 fail"
+    },
+    {
       "command": "python3 scripts/publication_readiness.py --release --json",
       "status": "blocked_expected",
       "summary": "Remaining blockers are live cutover facts only: remote_workflows_missing, remote_green_runs_missing, github_release_missing_or_draft, github_release_assets_missing, joshua_release_signoff_missing"
