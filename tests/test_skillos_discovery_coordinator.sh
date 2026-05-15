@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/{capability-control-plane}-discovery-coordinator.py"
+SCRIPT="$ROOT/.flywheel/scripts/skillos-discovery-coordinator.py"
 BR_BIN="${BR_BIN:-$HOME/.cargo/bin/br}"
 TMP="$(mktemp -d -t s08u.XXXXXX)"
 export TMP
