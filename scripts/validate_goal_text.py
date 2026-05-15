@@ -80,8 +80,8 @@ CHECKS: list[tuple[str, str, re.Pattern[str]]] = [
     ),
     (
         "rolling_log_named",
-        "names a rolling log path under .flywheel/evidence/",
-        re.compile(r"\.flywheel/evidence/.*\.jsonl", re.IGNORECASE),
+        "names a rolling-log JSONL path (any directory) — operator's choice",
+        re.compile(r"[\w./-]+\.jsonl", re.IGNORECASE),
     ),
     (
         "accretion_classes_named",
