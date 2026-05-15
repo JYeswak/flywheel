@@ -1,0 +1,98 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-9nhx",
+  "closed_at": "2026-05-15T07:14:12Z",
+  "close_type": "parent_verified_after_validator_repair",
+  "status": "ready_to_close",
+  "summary": "Verified the Jeff-corpus library ingestion parent after stale validator repair. The local Jeff intel state now proves 177/177 repos verified and indexed, 177 unique Qdrant collection references, 10 learning artifacts, P0/P1 derived beads across all statuses, canonical path entries, and a focused doctor signal reporting 177/177.",
+  "acceptance_gates": [
+    {
+      "gate": "AG1 repos.jsonl shows indexed_at for all 177 repos",
+      "status": "pass",
+      "evidence": "tests/jeff-corpus-library-ingestion.sh: AG1 verified repo state covers 177 repos"
+    },
+    {
+      "gate": "AG2 Socraticode/Qdrant project coverage",
+      "status": "pass",
+      "evidence": "tests/jeff-corpus-library-ingestion.sh: AG2 qdrant collection refs cover 177 unique repos; mcp socraticode codebase_list_projects shows /Users/josh/Developer/jeff-corpus entries"
+    },
+    {
+      "gate": "AG3 resume-after-interrupt state",
+      "status": "pass",
+      "evidence": "tests/jeff-corpus-library-ingestion.sh: AG3 persistent progress supports resume-after-interrupt"
+    },
+    {
+      "gate": "AG4/AG5 learning extraction artifacts",
+      "status": "pass",
+      "evidence": "tests/jeff-corpus-library-ingestion.sh: ten per-query learning artifacts exist and carry What We Found / Gap In Flywheel / Recommended Bead/Memory Action sections"
+    },
+    {
+      "gate": "AG6 top learnings filed as P0/P1 beads",
+      "status": "pass",
+      "evidence": "Validator repaired to use br list --all because filed derived beads may now be closed. Test now passes with at least five P0/P1 jeff-corpus-derived beads across all statuses."
+    },
+    {
+      "gate": "AG7 doctor signal",
+      "status": "pass",
+      "evidence": ".flywheel/scripts/jeff-corpus-doctor.sh --json reports jeff_corpus_indexed_count=177 and jeff_corpus_index_target=177; validated by tests/jeff-corpus-library-ingestion.sh"
+    },
+    {
+      "gate": "AG8 canonical paths",
+      "status": "pass",
+      "evidence": "tests/jeff-corpus-library-ingestion.sh: AG8 jeff-intel state and learnings canonical paths exist"
+    },
+    {
+      "gate": "AG9 fixture queries",
+      "status": "pass",
+      "evidence": "tests/jeff-corpus-library-ingestion.sh: fixture artifacts present plus shape fixtures for both br array and object-with-issues output"
+    }
+  ],
+  "validation": [
+    {
+      "command": "bash tests/jeff-corpus-library-ingestion.sh",
+      "status": "pass",
+      "result": "11 passed, 0 failed"
+    },
+    {
+      "command": "shellcheck tests/jeff-corpus-library-ingestion.sh",
+      "status": "pass"
+    },
+    {
+      "command": "bash tests/jeff-corpus-accretive.sh",
+      "status": "pass",
+      "result": "20 passed, 0 failed"
+    },
+    {
+      "command": "bash tests/jeff-corpus-doctor-scoping.sh",
+      "status": "pass",
+      "result": "4 passed, 0 failed"
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass"
+    },
+    {
+      "command": "br dep cycles",
+      "status": "pass",
+      "result": "No dependency cycles detected"
+    }
+  ],
+  "validator_repairs": [
+    {
+      "file": "tests/jeff-corpus-library-ingestion.sh",
+      "change": "AG6 now uses br list --all so closed derived beads still count as filed proof."
+    },
+    {
+      "file": "tests/jeff-corpus-library-ingestion.sh",
+      "change": "AG7 now validates the focused Jeff corpus doctor directly instead of invoking the full flywheel-loop doctor tail, which can hang behind unrelated canonical-sync substrate work."
+    },
+    {
+      "file": "tests/jeff-corpus-library-ingestion.sh",
+      "change": "AG2 now asserts 177 unique qdrant_collection refs from repos.jsonl."
+    }
+  ],
+  "residuals": [
+    "Full flywheel-loop doctor remains a broader substrate surface; this closeout only proves the Jeff-corpus doctor signal and library-ingestion acceptance gates."
+  ],
+  "operator_value": "Turns Jeffrey Emanuel corpus ingestion into a reusable learning substrate with durable learning artifacts, derived work routing, and focused doctor proof instead of one-off research memory."
+}
