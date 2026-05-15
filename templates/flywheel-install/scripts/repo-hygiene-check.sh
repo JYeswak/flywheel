@@ -12,21 +12,98 @@
 # Wire this into the flywheel tick/loop so accretion is caught at the tick.
 #
 # Exit codes: 0 all pass/warn · 1 one or more fail · 2 usage error
-# Usage: repo-hygiene-check.sh [--repo PATH] [--json]
+# Usage: repo-hygiene-check.sh [--repo PATH] [--json] [doctor|--doctor]
 
 set -euo pipefail
 
 REPO="${REPO_HYGIENE_REPO:-$PWD}"
 JSON_OUT=0
+DOCTOR=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    doctor|--doctor) DOCTOR=1; shift ;;
     --repo) REPO="$2"; shift 2 ;;
     --json) JSON_OUT=1; shift ;;
     --help) grep '^#' "$0" | sed 's/^# \?//'; exit 0 ;;
     *) echo "Unknown arg: $1" >&2; exit 2 ;;
   esac
 done
-cd "$REPO"
+
+cd_ok=1
+if ! cd "$REPO" 2>/dev/null; then
+  cd_ok=0
+fi
+
+doctor_emit() {
+  local name="$1" status="$2" detail="$3"
+  jq -nc --arg name "$name" --arg status "$status" --arg detail "$detail" \
+    '{name:$name,status:$status,detail:$detail}'
+}
+
+run_doctor() {
+  local checks=()
+  local status="pass"
+  local doctrine=".flywheel/doctrine/repo-hygiene-operational-protocol.md"
+
+  if [[ "$cd_ok" -eq 1 ]]; then
+    checks+=("$(doctor_emit "repo_directory_readable" "pass" "$REPO")")
+  else
+    checks+=("$(doctor_emit "repo_directory_readable" "fail" "$REPO")")
+    status="fail"
+  fi
+
+  if command -v git >/dev/null 2>&1; then
+    checks+=("$(doctor_emit "git_available" "pass" "$(command -v git)")")
+  else
+    checks+=("$(doctor_emit "git_available" "fail" "git not found")")
+    status="fail"
+  fi
+
+  if command -v jq >/dev/null 2>&1; then
+    checks+=("$(doctor_emit "jq_available" "pass" "$(command -v jq)")")
+  else
+    checks+=("$(doctor_emit "jq_available" "fail" "jq not found")")
+    status="fail"
+  fi
+
+  if [[ "$cd_ok" -eq 1 ]] && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    checks+=("$(doctor_emit "git_work_tree" "pass" "$(git rev-parse --show-toplevel 2>/dev/null)")")
+  else
+    checks+=("$(doctor_emit "git_work_tree" "fail" "repo hygiene requires a git work tree")")
+    status="fail"
+  fi
+
+  if [[ "$cd_ok" -eq 1 && -f "$doctrine" ]]; then
+    checks+=("$(doctor_emit "doctrine_reference_present" "pass" "$doctrine")")
+  else
+    checks+=("$(doctor_emit "doctrine_reference_present" "warn" "$doctrine missing from this repo")")
+    [[ "$status" == "pass" ]] && status="warn"
+  fi
+
+  checks+=("$(doctor_emit "doctor_read_only" "pass" "doctor does not run H-1..H-4 scans and performs no cleanup")")
+  checks+=("$(doctor_emit "cleanup_not_embedded" "pass" "repo-hygiene-check reports only; pruning remains a separate explicit surface")")
+
+  if [[ "$JSON_OUT" -eq 1 ]]; then
+    printf '%s\n' "${checks[@]}" | jq -s \
+      --arg status "$status" --arg repo "$REPO" \
+      '{schema:"flywheel.repo_hygiene_check.doctor.v1",command:"doctor",status:$status,mode:"read_only",mutates:false,repo:$repo,checks:.}'
+  else
+    echo "Repo Hygiene Doctor — $REPO"
+    echo "Status: $status"
+    printf '%s\n' "${checks[@]}" | jq -r '. | "  \(.status | ascii_upcase) [\(.name)] \(.detail)"'
+  fi
+  [[ "$status" == "fail" ]] && return 1 || return 0
+}
+
+if [[ "$DOCTOR" -eq 1 ]]; then
+  run_doctor
+  exit $?
+fi
+
+if [[ "$cd_ok" -ne 1 ]]; then
+  echo "Repo not readable: $REPO" >&2
+  exit 2
+fi
 
 PASSES=0; FAILS=0; WARNINGS=0
 RESULTS=()
