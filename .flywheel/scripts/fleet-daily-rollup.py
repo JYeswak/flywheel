@@ -73,6 +73,7 @@ def info_dict() -> dict[str, Any]:
         "consumes": [
             "daily-report-enabled-repos.sh --no-notify --json",
             "per-repo .quality_grade field from daily-report.py",
+            "per-repo doctor_mode_scorecard evidence from daily-report.py or .flywheel/audit/",
         ],
         "red_flags_taxonomy": [
             "fleet_median_compliance_below_850",
@@ -80,6 +81,7 @@ def info_dict() -> dict[str, Any]:
             "worker_avg_compliance_below_800_window7d",
             "repo_blocked_escalate_rate_above_20pct",
             "fleet_mission_fitness_drift_above_5",
+            "doctor_mode_scorecard_regressed_above_50",
         ],
     }
 
@@ -166,6 +168,99 @@ def read_json_file(path: Path) -> Any:
         return None
 
 
+def as_float(value: Any) -> float | None:
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    if isinstance(value, str):
+        try:
+            return float(value.strip())
+        except ValueError:
+            return None
+    return None
+
+
+def first_dict(*values: Any) -> dict[str, Any] | None:
+    for value in values:
+        if isinstance(value, dict):
+            return value
+    return None
+
+
+def first_float(*values: Any) -> float | None:
+    for value in values:
+        parsed = as_float(value)
+        if parsed is not None:
+            return parsed
+    return None
+
+
+def latest_doctor_scorecard_file(repo_path: str) -> dict[str, Any] | None:
+    audit_dir = Path(repo_path) / ".flywheel" / "audit"
+    if not audit_dir.is_dir():
+        return None
+    candidates = sorted(
+        [*audit_dir.glob("doctor-mode-scorecard*.json"), *audit_dir.glob("*doctor-mode-scorecard*.json")]
+    )
+    for candidate in reversed(candidates):
+        payload = read_json_file(candidate)
+        if isinstance(payload, dict):
+            payload = dict(payload)
+            payload.setdefault("evidence_ref", str(candidate))
+            return payload
+    return None
+
+
+def normalize_doctor_scorecard(repo_path: str, result: dict[str, Any]) -> dict[str, Any] | None:
+    """Normalize doctor-mode scorecard evidence from daily-report or audit files."""
+    card = first_dict(
+        result.get("doctor_mode_scorecard"),
+        (result.get("doctor_mode") or {}).get("scorecard") if isinstance(result.get("doctor_mode"), dict) else None,
+        (result.get("doctor") or {}).get("scorecard") if isinstance(result.get("doctor"), dict) else None,
+        latest_doctor_scorecard_file(repo_path),
+    )
+    if not card:
+        return None
+
+    current = first_float(
+        card.get("current_score"),
+        card.get("score"),
+        card.get("composite_score"),
+        card.get("world_class_doctor_score"),
+    )
+    previous = first_float(
+        card.get("previous_score"),
+        card.get("prior_score"),
+        card.get("last_week_score"),
+    )
+    baseline = as_float(card.get("baseline_score"))
+    score_delta = as_float(card.get("score_delta"))
+    week_delta = first_float(
+        card.get("week_over_week_delta"),
+        card.get("wow_delta"),
+        card.get("delta_week_over_week"),
+    )
+
+    if current is None:
+        return None
+    if week_delta is None and previous is not None:
+        week_delta = current - previous
+    if score_delta is None and baseline is not None:
+        score_delta = current - baseline
+
+    return {
+        "present": True,
+        "binary": card.get("binary") or card.get("name") or card.get("target") or "unknown",
+        "current_score": current,
+        "previous_score": previous,
+        "baseline_score": baseline,
+        "score_delta": score_delta,
+        "week_over_week_delta": week_delta,
+        "evidence_ref": card.get("evidence_ref") or card.get("receipt_ref") or card.get("source_ref"),
+    }
+
+
 def aggregate(per_repo: list[dict[str, Any]]) -> dict[str, Any]:
     """Aggregate quality_grade across per-repo daily-report.py results."""
     fleet_compliance: list[float] = []
@@ -206,6 +301,7 @@ def aggregate(per_repo: list[dict[str, Any]]) -> dict[str, Any]:
         fleet_blockers += blocked
 
         fs_rag = fs_rag_for_repo(str(repo_row.get("repo") or ""))
+        doctor_scorecard = normalize_doctor_scorecard(str(repo_row.get("repo") or ""), result)
 
         repo_summaries.append(
             {
@@ -218,6 +314,7 @@ def aggregate(per_repo: list[dict[str, Any]]) -> dict[str, Any]:
                 "mission_fitness_counts": grade.get("mission_fitness_counts") or {},
                 "red_flags": grade.get("red_flags") or [],
                 "fs_rag": fs_rag,
+                "doctor_mode_scorecard": doctor_scorecard,
             }
         )
 
@@ -234,6 +331,24 @@ def aggregate(per_repo: list[dict[str, Any]]) -> dict[str, Any]:
         if v > fs_rag_max_count:
             fs_rag_max_count = v
             fs_rag_max_repo = r.get("repo")
+
+    doctor_cards = [
+        r["doctor_mode_scorecard"]
+        for r in repo_summaries
+        if isinstance(r.get("doctor_mode_scorecard"), dict)
+    ]
+    doctor_scores = [
+        float(card["current_score"])
+        for card in doctor_cards
+        if isinstance(card.get("current_score"), (int, float))
+    ]
+    doctor_regressions = [
+        {"repo": r["repo"], "scorecard": r["doctor_mode_scorecard"]}
+        for r in repo_summaries
+        if isinstance(r.get("doctor_mode_scorecard"), dict)
+        and isinstance(r["doctor_mode_scorecard"].get("week_over_week_delta"), (int, float))
+        and r["doctor_mode_scorecard"]["week_over_week_delta"] < -50
+    ]
 
     fleet_summary = {
         "callbacks": fleet_callbacks,
@@ -253,6 +368,12 @@ def aggregate(per_repo: list[dict[str, Any]]) -> dict[str, Any]:
             "violations_avg_per_repo": fs_rag_avg,
             "violations_max_count": fs_rag_max_count,
             "violations_max_repo": fs_rag_max_repo,
+        },
+        "doctor_mode_scorecard": {
+            "repos_with_scorecard": len(doctor_cards),
+            "current_score_min": min(doctor_scores) if doctor_scores else None,
+            "current_score_median": float(statistics.median(doctor_scores)) if doctor_scores else None,
+            "week_over_week_regression_gt_50_count": len(doctor_regressions),
         },
     }
     worker_table = sorted(
@@ -338,6 +459,18 @@ def detect_red_flags(aggregated: dict[str, Any]) -> list[dict[str, str]]:
                     "detail": f"repo={repo_row.get('repo')} count={rag.get('violations_total')}",
                 }
             )
+        card = repo_row.get("doctor_mode_scorecard") or {}
+        delta = card.get("week_over_week_delta") if isinstance(card, dict) else None
+        if isinstance(delta, (int, float)) and delta < -50:
+            flags.append(
+                {
+                    "code": "doctor_mode_scorecard_regressed_above_50",
+                    "detail": (
+                        f"repo={repo_row.get('repo')} binary={card.get('binary')} "
+                        f"current={card.get('current_score')} week_over_week_delta={delta}"
+                    ),
+                }
+            )
     return flags
 
 
@@ -389,6 +522,13 @@ def render_markdown(date_text: str, aggregated: dict[str, Any], red_flags: list[
             f"fleet_max={fs_rag.get('violations_max_count')}@{fs_rag.get('violations_max_repo')} "
             f"baseline_repos={fs_rag.get('repos_with_baseline')}"
         )
+    doctor_scores = fleet_summary.get("doctor_mode_scorecard") or {}
+    if doctor_scores.get("repos_with_scorecard"):
+        lines.append(
+            f"- doctor_mode_scorecard: repos={doctor_scores.get('repos_with_scorecard')} "
+            f"median={doctor_scores.get('current_score_median')} "
+            f"regressions_gt_50={doctor_scores.get('week_over_week_regression_gt_50_count')}"
+        )
     lines.append("")
 
     lines.append("## Per-repo")
@@ -403,6 +543,12 @@ def render_markdown(date_text: str, aggregated: dict[str, Any], red_flags: list[
                 f"compliance_median={repo_row.get('compliance_median')} "
                 f"blocked_rate={repo_row.get('blocked_escalate_rate')}"
             )
+            card = repo_row.get("doctor_mode_scorecard") or {}
+            if isinstance(card, dict):
+                lines.append(
+                    f"    - doctor_mode_scorecard: {card.get('binary')} current={card.get('current_score')} "
+                    f"week_over_week_delta={card.get('week_over_week_delta')}"
+                )
             for repo_flag in repo_row.get("red_flags") or []:
                 lines.append(f"    - flag: {repo_flag.get('code')}: {repo_flag.get('detail')}")
     else:

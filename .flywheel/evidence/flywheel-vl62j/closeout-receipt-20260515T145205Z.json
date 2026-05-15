@@ -1,0 +1,35 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-vl62j",
+  "parent_bead_id": "flywheel-oxzyr",
+  "status": "closed",
+  "closed_at": "2026-05-15T14:52:05Z",
+  "summary": "Added a read-only doctor/--doctor envelope to blocker-auto-close.sh so the blocker auto-close hook exposes prerequisites without evaluating acceptance conditions or mutating blocker/escalation state.",
+  "changed_files": [
+    ".flywheel/scripts/blocker-auto-close.sh",
+    "tests/blocker-auto-close.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/blocker-auto-close.sh",
+      "result": "pass",
+      "summary": "22/0 including doctor read-only envelope, --doctor alias, dry-run/apply/idempotency/failure/scan/live-probe fixtures."
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/blocker-auto-close.sh tests/blocker-auto-close.sh",
+      "result": "pass",
+      "summary": "No shellcheck findings."
+    },
+    {
+      "command": ".flywheel/audit/flywheel-cli-inventory/build-inventory.sh && jq row for .flywheel/scripts/blocker-auto-close.sh",
+      "result": "pass",
+      "summary": "doctor_subcommand_status moved to basic; canonical_cli_scoping_status remains partial; mutates_state=yes; ownership=own."
+    }
+  ],
+  "boundaries": [
+    "Doctor mode does not evaluate acceptance_condition commands.",
+    "Doctor mode writes no blocker JSON and no escalation JSONL rows.",
+    "Mutation remains gated by existing --apply behavior.",
+    "Canonical CLI scoping remains separately classified as partial; this closeout is limited to doctor-mode gap reduction."
+  ]
+}

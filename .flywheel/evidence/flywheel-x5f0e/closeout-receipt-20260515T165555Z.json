@@ -1,0 +1,41 @@
+{
+  "schema": "flywheel.closeout_receipt.v1",
+  "bead": "flywheel-x5f0e",
+  "generated_at": "2026-05-15T16:55:55Z",
+  "status": "closed_non_destructive_verifier_green",
+  "target_repo": "/Users/josh/Developer/alpsinsurance",
+  "bundle_path": "/Users/josh/Developer/alpsinsurance-stash-archive-2026-05-08",
+  "workspace": "/Users/josh/Developer/alpsinsurance/.stash_janitor_workspace",
+  "blocker_removed_by": "flywheel-glrlb verifier/polish repair",
+  "non_destructive_boundary": {
+    "alps_source_edits": false,
+    "stash_drops": false,
+    "stash_applies": false,
+    "pushes": false,
+    "destructive_cleanup_authorized": false
+  },
+  "validation": [
+    {
+      "command": "bash /Users/josh/.claude/skills/git-stash-janitor/scripts/verify-bundle.sh /Users/josh/Developer/alpsinsurance",
+      "status": "pass",
+      "summary": {
+        "total_stashes": 82,
+        "ok_rows": 140,
+        "mismatch_or_missing": 0
+      }
+    },
+    {
+      "command": "bash /Users/josh/.claude/skills/git-stash-janitor/scripts/polish-bar-check.sh /Users/josh/Developer/alpsinsurance",
+      "status": "pass",
+      "summary": {
+        "total_fails": 0,
+        "recovery_completeness": "pass",
+        "verdict_evidence": "pass",
+        "no_phantom_keepers": "pass",
+        "per_apply_gates": "pass",
+        "no_phantom_side_effects": "pass"
+      }
+    }
+  ],
+  "next_phase_boundary": "The ALPS stash recovery bundle is now verifier-green. Destructive cleanup remains out of scope until a future operator-approved cleanup phase with the required verbatim authorization."
+}

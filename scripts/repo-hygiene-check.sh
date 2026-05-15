@@ -42,7 +42,7 @@ emit() { # id verdict detail
 
 # ── H-1 shadowing — no tracked file matches a .gitignore rule ──────────────
 # git check-ignore exits 1 when zero paths match — legitimate, not an error.
-shadowed="$( { git ls-files | git check-ignore --stdin 2>/dev/null || true; } | wc -l | tr -d ' ')"
+shadowed="$( { git ls-files | git check-ignore --no-index --stdin 2>/dev/null || true; } | wc -l | tr -d ' ')"
 if [[ "$shadowed" -eq 0 ]]; then
   emit "H-1" "pass" "shadowing audit clean — 0 tracked files match a .gitignore rule"
 else

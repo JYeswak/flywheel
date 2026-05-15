@@ -1,0 +1,39 @@
+{
+  "schema": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-oxzyr.6",
+  "created_at": "2026-05-15T14:06:21Z",
+  "status": "closed",
+  "decision": "closed_with_evidence",
+  "summary": "Added a read-only doctor envelope to dcg-prose-trigger-strip-gate so the DCG prose safety gate can report prerequisite and pattern-catalog health without requiring an input body.",
+  "changed_files": [
+    ".flywheel/scripts/dcg-prose-trigger-strip-gate.sh",
+    "tests/dcg-prose-trigger-strip-gate-doctor.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/dcg-prose-trigger-strip-gate-doctor.sh",
+      "result": "pass",
+      "summary": "10/0 focused assertions: doctor and --doctor emit dcg-prose-trigger-strip-gate.doctor.v1 with mutates=false, info/help/examples advertise doctor, safe prose still passes, dangerous prose still returns rc=1 with matches, and apply remains reserved/refused."
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/dcg-prose-trigger-strip-gate.sh tests/dcg-prose-trigger-strip-gate-doctor.sh",
+      "result": "pass",
+      "summary": "Touched shell surfaces are ShellCheck clean."
+    },
+    {
+      "command": ".flywheel/scripts/dcg-prose-trigger-strip-gate.sh doctor --json | jq .",
+      "result": "pass",
+      "summary": "Live read-only doctor reports schema dcg-prose-trigger-strip-gate.doctor.v1, status pass, pattern_count=8, memory_rule_present, jq_available, pattern_catalog_nonempty, and mutates=false."
+    },
+    {
+      "command": ".flywheel/audit/flywheel-cli-inventory/build-inventory.sh",
+      "result": "pass",
+      "summary": "Inventory regenerated; dcg-prose-trigger-strip-gate.sh now reports doctor_subcommand_status=basic instead of absent."
+    }
+  ],
+  "parent_state": {
+    "parent_bead_id": "flywheel-oxzyr",
+    "parent_closed": false,
+    "reason": "The broader doctor-mode wave remains open; this closes one scoped DCG safety-gate surface only."
+  }
+}

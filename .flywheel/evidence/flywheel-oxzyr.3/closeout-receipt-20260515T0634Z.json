@@ -1,0 +1,52 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-oxzyr.3",
+  "parent_bead_id": "flywheel-oxzyr",
+  "closed_at": "2026-05-15T06:34:00Z",
+  "status": "done",
+  "scope": "AG4 fleet daily rollup consumer for doctor-mode scorecard regression evidence",
+  "producer": "per-repo daily-report result fields doctor_mode_scorecard, doctor_mode.scorecard, doctor.scorecard, or latest .flywheel/audit/*doctor-mode-scorecard*.json",
+  "measurement": ".flywheel/scripts/fleet-daily-rollup.py run --enabled-repos-bin <bin> --json",
+  "consumer": "fleet_summary.doctor_mode_scorecard plus red_flags[] code doctor_mode_scorecard_regressed_above_50 when week_over_week_delta < -50",
+  "promotion": "warn-equivalent fleet red flag in the daily rollup; regression threshold matches flywheel-oxzyr AG4",
+  "files_changed": [
+    ".flywheel/scripts/fleet-daily-rollup.py",
+    "tests/fleet-daily-rollup-doctor-scorecard.sh",
+    ".beads/issues.jsonl"
+  ],
+  "verification": [
+    {
+      "command": "bash tests/fleet-daily-rollup-doctor-scorecard.sh",
+      "result": "pass 5/0"
+    },
+    {
+      "command": "DAILY_REPORT_ENABLED_BIN=/Users/josh/Developer/flywheel/.flywheel/scripts/daily-report-enabled-repos.sh bash tests/daily-report-enabled-repos-canonical-cli.sh",
+      "result": "pass 22/0"
+    },
+    {
+      "command": "bash tests/daily-report.sh",
+      "result": "pass 23/0"
+    },
+    {
+      "command": "shellcheck tests/fleet-daily-rollup-doctor-scorecard.sh",
+      "result": "pass"
+    },
+    {
+      "command": "python3 -m py_compile .flywheel/scripts/fleet-daily-rollup.py",
+      "result": "pass"
+    },
+    {
+      "command": ".flywheel/scripts/fleet-daily-rollup.py doctor --json | jq -e '.schema_version == \"fleet-daily-rollup.v1\" and .command == \"doctor\"'",
+      "result": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass"
+    }
+  ],
+  "parent_disposition": "flywheel-oxzyr remains open for the broader per-binary doctor-mode wave; this child closes the explicit AG4 rollup wiring gap."
+}

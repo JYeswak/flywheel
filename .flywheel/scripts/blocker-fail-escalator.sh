@@ -64,6 +64,7 @@ blocker-fail-escalator.sh — escalation policy per blocker-discipline doctrine
 USAGE:
   blocker-fail-escalator.sh check --blocker-file PATH [--apply] [--json]
   blocker-fail-escalator.sh scan [--blockers-dir DIR] [--apply] [--json]
+  blocker-fail-escalator.sh doctor|--doctor [--json]
   blocker-fail-escalator.sh --info|--examples|--schema|--help [--json]
 
 OPTIONS:
@@ -195,6 +196,94 @@ emit_schema() {
         }
       }
     }'
+}
+
+doctor_check() {
+  local name="$1" status="$2" detail="$3"
+  jq -nc --arg name "$name" --arg status "$status" --arg detail "$detail" \
+    '{name:$name,status:$status,detail:$detail}'
+}
+
+emit_doctor() {
+  local checks=()
+  local status="pass"
+
+  if command -v jq >/dev/null 2>&1; then
+    checks+=("$(doctor_check "jq_available" "pass" "$(command -v jq)")")
+  else
+    printf '{"schema_version":"blocker-fail-escalator.doctor.v1","command":"doctor","status":"fail","mode":"read_only","mutates":false,"checks":[{"name":"jq_available","status":"fail","detail":"jq not found"}]}\n'
+    return 1
+  fi
+
+  if command -v python3 >/dev/null 2>&1; then
+    checks+=("$(doctor_check "python3_available" "pass" "$(command -v python3)")")
+  else
+    checks+=("$(doctor_check "python3_available" "fail" "python3 not found")")
+    status="fail"
+  fi
+
+  if [[ -r "$REPLAY_VERIFY" ]]; then
+    checks+=("$(doctor_check "replay_verify_readable" "pass" "$REPLAY_VERIFY")")
+  else
+    checks+=("$(doctor_check "replay_verify_readable" "fail" "$REPLAY_VERIFY")")
+    status="fail"
+  fi
+
+  if [[ "$THRESHOLD_N" =~ ^[0-9]+$ && "$THRESHOLD_N" -ge 1 ]]; then
+    checks+=("$(doctor_check "threshold_valid" "pass" "$THRESHOLD_N")")
+  else
+    checks+=("$(doctor_check "threshold_valid" "fail" "$THRESHOLD_N")")
+    status="fail"
+  fi
+
+  if [[ -d "$BLOCKERS_DIR" ]]; then
+    checks+=("$(doctor_check "blockers_dir_available" "pass" "$BLOCKERS_DIR")")
+  else
+    checks+=("$(doctor_check "blockers_dir_available" "warn" "$BLOCKERS_DIR missing; scan mode will be not-applicable")")
+    [[ "$status" == "pass" ]] && status="warn"
+  fi
+
+  if [[ -d "$COUNTER_DIR" ]]; then
+    checks+=("$(doctor_check "counter_dir_available" "pass" "$COUNTER_DIR")")
+  else
+    checks+=("$(doctor_check "counter_dir_available" "warn" "$COUNTER_DIR missing until --apply creates counters")")
+    [[ "$status" == "pass" ]] && status="warn"
+  fi
+
+  local escalation_parent
+  escalation_parent="$(dirname "$ESCALATIONS_LOG")"
+  if [[ -d "$escalation_parent" ]]; then
+    checks+=("$(doctor_check "escalations_parent_available" "pass" "$escalation_parent")")
+  else
+    checks+=("$(doctor_check "escalations_parent_available" "warn" "$escalation_parent missing until --apply creates it")")
+    [[ "$status" == "pass" ]] && status="warn"
+  fi
+
+  if [[ "$SKIP_AGENT_MAIL" == "1" ]]; then
+    checks+=("$(doctor_check "agent_mail_route" "warn" "agent mail is explicitly skipped")")
+    [[ "$status" == "pass" ]] && status="warn"
+  elif command -v "$AGENT_MAIL_BIN" >/dev/null 2>&1; then
+    checks+=("$(doctor_check "agent_mail_route" "pass" "$AGENT_MAIL_BIN")")
+  else
+    checks+=("$(doctor_check "agent_mail_route" "warn" "$AGENT_MAIL_BIN missing; apply will use skipped_no_cli")")
+    [[ "$status" == "pass" ]] && status="warn"
+  fi
+
+  checks+=("$(doctor_check "mutation_default_dry_run" "pass" "--apply is required before counter/escalation/mail mutation")")
+  checks+=("$(doctor_check "doctor_read_only" "pass" "doctor does not evaluate acceptance_condition commands, increment counters, append escalation rows, or send mail")")
+
+  printf '%s\n' "${checks[@]}" | jq -s \
+    --arg sv "$SCHEMA_VERSION" \
+    --arg status "$status" \
+    --arg blockers_dir "$BLOCKERS_DIR" \
+    --arg escalations_log "$ESCALATIONS_LOG" \
+    --arg counter_dir "$COUNTER_DIR" \
+    --arg replay_verify "$REPLAY_VERIFY" \
+    --arg agent_mail_bin "$AGENT_MAIL_BIN" \
+    --argjson threshold_n "$THRESHOLD_N" \
+    '{schema_version:"blocker-fail-escalator.doctor.v1",command:"doctor",status:$status,mode:"read_only",mutates:false,blocker_schema_version:$sv,blockers_dir:$blockers_dir,escalations_log:$escalations_log,counter_dir:$counter_dir,replay_verify:$replay_verify,agent_mail_bin:$agent_mail_bin,threshold_n:$threshold_n,checks:.}'
+
+  [[ "$status" == "fail" ]] && return 1 || return 0
 }
 
 # ---------- helpers ----------
@@ -564,6 +653,7 @@ while [[ $# -gt 0 ]]; do
     --info) emit_info; exit 0 ;;
     --examples) emit_examples; exit 0 ;;
     --schema) emit_schema; exit 0 ;;
+    doctor|--doctor) emit_doctor; exit $? ;;
     --help|-h) usage; exit 0 ;;
     --json) JSON_OUT=1; shift ;;
     --apply) APPLY=1; shift ;;

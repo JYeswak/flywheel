@@ -1,0 +1,22 @@
+{
+  "schema_version": "flywheel.bead_reclassification_receipt.v1",
+  "bead_id": "flywheel-ll107",
+  "recorded_at": "2026-05-15T10:47:51Z",
+  "previous_status": "open",
+  "new_status": "blocked",
+  "disposition": "dependency_blocked_nextra_phase_order",
+  "why_not_claimable": [
+    "Phase 4 remaining-client Nextra rollout depends on Phase 3 alpsinsurance/mobile-eats rollout.",
+    "Dependency flywheel-sjr9e is deferred.",
+    "br ready already excludes this bead; the open status was stale relative to dependency truth."
+  ],
+  "blocking_dependencies": [
+    {
+      "id": "flywheel-sjr9e",
+      "status": "deferred",
+      "title": "[nextra-scaffold-phase3] flywheel docs run on alpsinsurance + mobile-eats"
+    }
+  ],
+  "safe_local_work_remaining": false,
+  "completion_boundary": "Do not run Phase 4 client scaffolds until Phase 3 and its deferred compatibility gate clear."
+}

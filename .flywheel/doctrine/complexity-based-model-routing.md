@@ -139,6 +139,7 @@ The pattern is the same: cheap classifier → model.select hook. The classifier 
 - `project_flywheel_publish_readiness_every_jyeswak_repo_mission_2026_05_11.md` — the stamping mission this preserves value within
 - `feedback_class_divergence_public_mit_vs_private_alpha.md` — sister discipline (audience-class) for the rewrite-side
 - `feedback_orch_wake_event_driven_not_time_based.md` — Meadows leverage-6 (information flow) parallel pattern
+- `feedback_dcg_blocked_subcommand_rest_api_alternative.md` — safety discipline for the archive receipt below: the REST API path is only valid after explicit approval is already visible.
 
 ## Retirement receipt (CHANGELOG)
 

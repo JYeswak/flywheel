@@ -12,6 +12,11 @@ MODE="run"
 JSON_OUT=0
 FIXTURE=""
 SUBJECT=""
+# --public: technical-reviewer-friendly mode. Maps reduced-mode-available (exit 20)
+# → exit 0 so the public-page-documented invocation succeeds for fresh-clone
+# reviewers. Substrate consumers keep the canonical 20=reduced semantic by not
+# passing --public. P9 of substrate-compounding-v2.
+PUBLIC_MODE=0
 
 usage() {
   cat <<'EOF'
@@ -276,6 +281,12 @@ result_envelope() {
       },
       next_action:{kind:$next_kind, command:$next_cmd}
     }'
+  # --public mode: technical-reviewer-friendly. Map reduced-mode-available
+  # (exit 20) → exit 0. Other exit codes unchanged. Preserves substrate
+  # semantics for non-public consumers.
+  if [[ "$PUBLIC_MODE" -eq 1 && "$exit_code" -eq 20 ]]; then
+    exit_code=0
+  fi
   return "$exit_code"
 }
 
@@ -314,6 +325,7 @@ health_json() {
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --json) JSON_OUT=1; shift ;;
+    --public) PUBLIC_MODE=1; shift ;;
     --fixture) [[ $# -ge 2 ]] || die_usage "--fixture requires path"; FIXTURE="$2"; shift 2 ;;
     --fixture=*) FIXTURE="${1#*=}"; shift ;;
     --schema) MODE="schema"; shift ;;

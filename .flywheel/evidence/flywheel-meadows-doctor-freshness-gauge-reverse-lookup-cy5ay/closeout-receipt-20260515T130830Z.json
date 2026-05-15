@@ -1,0 +1,28 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-meadows-doctor-freshness-gauge-reverse-lookup-cy5ay",
+  "created_at": "20260515T130830Z",
+  "status": "mechanism_complete_truth_not_all_green",
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-meadows-doctor-freshness-gauge-reverse-lookup-cy5ay/doctor-freshness-gauge-audit-20260515T130830Z.json"
+  ],
+  "acceptance_summary": {
+    "josh_requests": "tick/doctor path now reports queued_count, unread, consumed_with_evidence_count and evidence refs",
+    "schema": "templates/josh-request-schema.md documents v1/v2 live normalization",
+    "sibling_gauges": "doctor-freshness-gauge-audit verifies mission lock content stability, daily-report work since report, and canonical propagation vs local root drift"
+  },
+  "residual_truth": {
+    "josh_requests_unread": "nonzero live unread remains surfaced as truth",
+    "mission_lock": "warn because mission body hash mismatch/age is real",
+    "canonical_root_drift": "fail because local canonical root block compare sees drift; not masked"
+  },
+  "validation": [
+    "tests/josh-request-tick-promote-consumption.sh 12/0",
+    "tests/doctor-freshness-gauge-audit.sh 9/0",
+    "tests/canonical-root-drift-fleet-check.sh 8 assertions",
+    "python py_compile pass",
+    "shellcheck targeted pass",
+    "br dep cycles pass",
+    "git diff --check pass"
+  ]
+}

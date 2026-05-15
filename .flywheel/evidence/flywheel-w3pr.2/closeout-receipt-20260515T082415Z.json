@@ -1,0 +1,52 @@
+{
+  "schema": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-w3pr.2",
+  "closed_at": "2026-05-15T08:24:15Z",
+  "status": "closed",
+  "summary": "Closed the Jeff corpus Phase 4 synthesis after repairing the verdict-table mismatch and verifying the outcome rework that resolved the prior sniff-lens status_without_outcome block.",
+  "changed_files": [
+    ".flywheel/jeff-corpus/v1/learnings/04-adopt-extend-avoid.md"
+  ],
+  "acceptance": {
+    "phase_4_artifact_exists": "pass",
+    "all_repeated_patterns_have_verdict_rows": "pass",
+    "adopt_extend_items_have_bead_or_no_bead_receipts": "pass",
+    "surface_mapping_present": "pass",
+    "joshua_decision_points_preserved": "pass",
+    "sniff_lens_rework_outcome_framed": "pass",
+    "phase_5_promotion_boundary_preserved": "pass"
+  },
+  "evidence": [
+    {
+      "command": "test -s .flywheel/jeff-corpus/v1/learnings/04-adopt-extend-avoid.md",
+      "result": "artifact exists"
+    },
+    {
+      "command": "rg -n \"^## Verdict Counts|^## Decision Table|^## Existing Flywheel Surface Map|^## Joshua Decision Points|^## Bead / No-Bead Receipts|^## Three-Q Check\" .flywheel/jeff-corpus/v1/learnings/04-adopt-extend-avoid.md",
+      "result": "all required synthesis sections present"
+    },
+    {
+      "command": "awk decision-table count over .flywheel/jeff-corpus/v1/learnings/04-adopt-extend-avoid.md",
+      "result": "decision_rows=19; adopt=5 extend=9 diverge=2 avoid=3, matching the verdict count table"
+    },
+    {
+      "command": "for b in flywheel-e7c2 flywheel-94si flywheel-f2bm flywheel-8qix flywheel-w3pr.3 flywheel-1wbr; do br show \"$b\" --json | jq -r '.[0] | [.id,.status,.title] | @tsv'; done",
+      "result": "new implementation beads are closed, Phase 5 remains in_progress by design, and the sniff-lens rework bead is closed"
+    },
+    {
+      "command": "grep -c '^### Outcome ' .flywheel/audit/flywheel-1wbr/evidence.md && rg -n \"four_lens=brand:9,sniff:9,jeff:9,public:9|did=5/5 didnt=none gaps=none\" .flywheel/audit/flywheel-1wbr/evidence.md",
+      "result": "five outcome sections plus four-lens pass and did/didnt/gaps callback evidence"
+    }
+  ],
+  "did": [
+    "Kept the original 04 synthesis as the Phase 4 decision ledger.",
+    "Added the missing AVOID decision row for one-off scripts without runnable proof so the decision table matches the stated verdict counts.",
+    "Verified the implementation beads named by the synthesis exist and are closed.",
+    "Verified flywheel-w3pr.3 remains the explicit Phase 5 promotion boundary instead of prematurely closing promotion work."
+  ],
+  "didnt": [
+    "Did not close flywheel-w3pr.3; skill and L-rule promotion staging remains separate open work.",
+    "Did not mutate live skills or canonical L-rules from this synthesis."
+  ],
+  "gaps": []
+}

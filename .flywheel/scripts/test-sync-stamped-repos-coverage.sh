@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2155,SC2317
 # Regression test: sync-canonical-doctrine.sh discovers + writes to every
 # named stamped repo, including newly-stamped terratitle and zeststream-infra.
 #
@@ -509,11 +510,22 @@ for repo in "${STAMPED_REPOS[@]}"; do
   mkdir -p "$TMP/repos/$repo/.flywheel"
   printf 'stale doctrine for %s\n' "$repo" >"$TMP/repos/$repo/.flywheel/AGENTS-CANONICAL.md"
   printf '# %s local instructions\n\nKeep this line.\n' "$repo" >"$TMP/repos/$repo/AGENTS.md"
+  cat >"$TMP/repos/$repo/.flywheel/ownership.json" <<'JSON'
+{
+  "schema_version": "flywheel.canonical_ownership.v1",
+  "canonical_owner_class": "flywheel",
+  "owned_canonical_paths": [
+    {"path": "AGENTS.md", "owner_class": "flywheel"},
+    {"path": ".flywheel", "owner_class": "flywheel"}
+  ]
+}
+JSON
 done
 
 # Phase 1: dry-run drift detection
 rc=0
 dry="$(SYNC_CANONICAL_SOURCE="$CANONICAL" \
+       SYNC_CANONICAL_LEDGER="$TMP/doctrine-sync-ledger.jsonl" \
        SYNC_CANONICAL_ROOTS="$TMP/repos" \
        SYNC_CANONICAL_LOOPS_DIR="$TMP/no-loops" \
        "$SYNC" --dry-run --json 2>&1)" || rc=$?
@@ -543,9 +555,10 @@ done
 
 # Phase 2: apply writes to all 6
 apply="$(SYNC_CANONICAL_SOURCE="$CANONICAL" \
+         SYNC_CANONICAL_LEDGER="$TMP/doctrine-sync-ledger.jsonl" \
          SYNC_CANONICAL_ROOTS="$TMP/repos" \
          SYNC_CANONICAL_LOOPS_DIR="$TMP/no-loops" \
-         "$SYNC" --apply --json)"
+         "$SYNC" --apply --idempotency-key stamped-coverage-apply --json)"
 if [[ "$(jq -r '.status' <<<"$apply")" != "ok" ]]; then
   printf 'FAIL: apply expected status=ok\n%s\n' "$apply" >&2
   exit 1
@@ -583,6 +596,7 @@ done
 
 # Phase 3: idempotent re-run — apply twice yields zero further drift.
 post="$(SYNC_CANONICAL_SOURCE="$CANONICAL" \
+        SYNC_CANONICAL_LEDGER="$TMP/doctrine-sync-ledger.jsonl" \
         SYNC_CANONICAL_ROOTS="$TMP/repos" \
         SYNC_CANONICAL_LOOPS_DIR="$TMP/no-loops" \
         "$SYNC" --dry-run --json)"

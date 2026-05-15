@@ -1,0 +1,26 @@
+{
+  "schema_version": "flywheel.l168_consumer_repo_gate_closeout.v1",
+  "ts": "2026-05-15T17:54:00Z",
+  "bead": "flywheel-sadm5.1",
+  "consumer_repo": "/Users/josh/Developer/alpsinsurance",
+  "consumer_commit": "b74c5329",
+  "branch": "worker-pane-4-josh-nzocc-uhf2-14",
+  "pushed": true,
+  "status": "closed",
+  "proof": [
+    "scripts/secrets/tenant-doctor.sh --json drift_count=0 warn_count=0 result_count=5",
+    "scripts/secrets/pre-deploy-gate.sh exits 0",
+    "frontend pnpm script added via staged patch without staging unrelated perf:routes worktree change",
+    "fleet-tenant-registry-preflight shows alpsinsurance pass; TerraTitle remains separate child flywheel-sadm5.2"
+  ],
+  "preflight_receipt": ".flywheel/evidence/flywheel-sadm5.1/alps-tenant-gate-preflight-20260515T1750Z.json",
+  "sha256": {
+    "/Users/josh/Developer/alpsinsurance/.zs-tenant.yaml": "9b0ce56973ae56628b485b5ccbf89fe9fb3bc5fce4e4df93cb926afd1a3ea4b6",
+    "/Users/josh/Developer/alpsinsurance/scripts/secrets/tenant-doctor.sh": "4aed4bda73f42ab58d56238d20298460e0b85fdb19160bf514a86a03bffb017c",
+    "/Users/josh/Developer/alpsinsurance/scripts/secrets/pre-deploy-gate.sh": "836b491c70b049bfb27ea464611cef68fa5f4126f663a3982597ae9d484b69be",
+    "/Users/josh/Developer/alpsinsurance/scripts/secrets/sync-to-vercel.sh": "1d2fa1332b954de0bdd83fbe5404e24a8cad0becd1b5f3d0e470ecafab1b871a",
+    "/Users/josh/Developer/alpsinsurance/.github/workflows/secrets-doctor.yaml": "17c0ff5b6b6f51a6388ff11934adfd02c9d1fcd0699e6e32f65efcf1b9ac9097",
+    "/Users/josh/Developer/alpsinsurance/frontend/vercel.json": "72df111d2f24ec0f63c37a7490b7791ed077c7e9ef2ec38b7bb08ffb6ffa0ee8"
+  },
+  "raw_secret_values_included": false
+}

@@ -1,0 +1,45 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-5wuhe",
+  "title": "[doctor-mode-mission-fillin] mission-lock-readiness-doctor — fill TODO markers post-scaffold (q92io followup)",
+  "closed_at": "2026-05-15T11:00:00Z",
+  "decision": "close_as_implemented",
+  "autonomy": "autonomous",
+  "files_changed": [
+    ".flywheel/scripts/mission-lock-readiness-doctor.sh",
+    "tests/mission-lock-readiness-doctor-canonical-cli.sh"
+  ],
+  "implementation_summary": [
+    "Filled the canonical scaffold doctor surface with concrete mission-lock substrate checks.",
+    "Added health summary from SCAFFOLD_AUDIT_LOG.",
+    "Added repair scopes for audit_log_dir and audit_log_truncate with dry-run/apply/idempotency behavior.",
+    "Added readiness-state and audit-row validators.",
+    "Added audit tail and why provenance lookups.",
+    "Added exit-code documentation and dry-run JSON shape required by canonical-cli-scorecard.",
+    "Added an explicit canonical-cli-scoping allow-large receipt for the single-file operator surface."
+  ],
+  "validation": [
+    {
+      "command": "bash tests/mission-lock-readiness-doctor-canonical-cli.sh",
+      "result": "pass",
+      "summary": "SUMMARY pass=20 fail=0"
+    },
+    {
+      "command": "bash ~/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh score .flywheel/scripts/mission-lock-readiness-doctor.sh --domain-exit-codes --json",
+      "result": "pass",
+      "summary": "composite_score=1000; all dimensions=1000; canonical_surface_checker=13/0"
+    },
+    {
+      "command": "bash .flywheel/scripts/file-length-probe.sh --repo /Users/josh/Developer/flywheel --json",
+      "result": "pass",
+      "summary": "mission-lock-readiness-doctor.sh appears under allowed_oversized_files with allow_override=true"
+    },
+    {
+      "command": ".flywheel/scripts/mission-lock-readiness-doctor.sh .flywheel/MISSION.md --json",
+      "result": "expected_red_readiness",
+      "summary": "native readiness payload remains parseable; health=0.30, audit_only=true, blocked_count=2, rc=1"
+    }
+  ],
+  "residual_risk": "The live mission-lock readiness state remains intentionally red. This bead only fills the doctor-mode canonical CLI surface and does not claim mission readiness is green.",
+  "close_reason": "Filled mission-lock-readiness-doctor canonical CLI scaffold; focused tests pass 20/0; scorecard 1000/1000; AUTONOMY: autonomous"
+}

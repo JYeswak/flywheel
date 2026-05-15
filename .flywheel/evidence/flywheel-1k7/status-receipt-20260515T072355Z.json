@@ -1,0 +1,60 @@
+{
+  "schema_version": "flywheel.bead_status_receipt.v1",
+  "bead_id": "flywheel-1k7",
+  "created_at": "2026-05-15T07:23:55Z",
+  "status": "blocked",
+  "summary": "kill-recover-drill script and fixture harness are present, but live L63 acceptance is not proven in the durable recovery log.",
+  "did": [
+    "Verified /Users/josh/.claude/skills/.flywheel/scripts/kill-recover-drill.sh exists and exposes D1/D2/D3 acceptance metadata.",
+    "Repaired tests/kill-recover-drill-apply-gate-test.sh to point at the real skill-local drill script instead of the scaffold placeholder.",
+    "Ran the script self-test successfully: 15 fixture rows, D1/D2/D3, 5 rows per class, all green.",
+    "Ran the focused apply gate successfully after repair: 5 pass, 0 fail.",
+    "Ran shellcheck on the focused test successfully."
+  ],
+  "did_not": [
+    "Did not claim the live 5x3 recovery-drill acceptance gate is satisfied.",
+    "Did not mutate protected sessions alpsinsurance, picoz, or skillos.",
+    "Did not append fixture/self-test rows to the live recovery-drill ledger as if they were live proof."
+  ],
+  "live_acceptance": {
+    "command": "/Users/josh/.claude/skills/.flywheel/scripts/kill-recover-drill.sh --validate-log --json",
+    "status": "fail",
+    "log_path": "/Users/josh/.local/state/flywheel/recovery-drill.jsonl",
+    "green_rows": 0,
+    "classes": {},
+    "required": {
+      "D1": 5,
+      "D2": 5,
+      "D3": 5
+    }
+  },
+  "current_runtime_probe": {
+    "command": "ntm list --json",
+    "observation": "visible sessions clutterfreespaces, flywheel, mobile-eats, and skillos report zero panes, so no sacrificial live NTM pane was available for a real drill without spawning or mutating a session."
+  },
+  "tests": [
+    {
+      "command": "bash tests/kill-recover-drill-apply-gate-test.sh",
+      "result": "pass",
+      "summary": "RESULT pass=5 fail=0"
+    },
+    {
+      "command": "shellcheck tests/kill-recover-drill-apply-gate-test.sh",
+      "result": "pass"
+    },
+    {
+      "command": "/Users/josh/.claude/skills/.flywheel/scripts/kill-recover-drill.sh --self-test --json",
+      "result": "pass",
+      "summary": "rows=15 damage_classes=D1,D2,D3 min_rows_per_class=5 all_green=true"
+    },
+    {
+      "command": "/Users/josh/.claude/skills/.flywheel/scripts/kill-recover-drill.sh --validate-log --json",
+      "result": "fail_expected",
+      "summary": "live ledger has green_rows=0 for D1/D2/D3"
+    }
+  ],
+  "blocked_on": [
+    "A sacrificial NTM-managed session with non-protected panes, or an explicit decision that fixture self-test proof is sufficient for this bead's acceptance."
+  ],
+  "next_safe_action": "Run the live 5x3 drill only against an explicit sacrificial NTM session, then re-run --validate-log and close this bead if D1/D2/D3 each have at least 5 green live rows."
+}

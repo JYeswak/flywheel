@@ -1,0 +1,22 @@
+{
+  "schema_version": "flywheel.bead_reclassification_receipt.v1",
+  "bead_id": "flywheel-xhdg",
+  "recorded_at": "2026-05-15T10:47:51Z",
+  "previous_status": "open",
+  "new_status": "blocked",
+  "disposition": "dependency_blocked_waiting_for_b6_data",
+  "why_not_claimable": [
+    "The L68 refill discipline rule depends on the deferred Axiom 23/B6 evidence bead.",
+    "Dependency flywheel-h17x is deferred until seven B6 data ticks exist.",
+    "br ready already excludes this bead; the open status was stale relative to dependency truth."
+  ],
+  "blocking_dependencies": [
+    {
+      "id": "flywheel-h17x",
+      "status": "deferred",
+      "title": "[axiom-23-bitter-lesson] add CLAUDE.md Axiom 23 — DEFER until 7 ticks of B6 data"
+    }
+  ],
+  "safe_local_work_remaining": false,
+  "completion_boundary": "Do not add the L68 rule until B6 evidence exists and the deferred axiom bead clears."
+}

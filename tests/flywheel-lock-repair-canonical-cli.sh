@@ -48,6 +48,6 @@ set -e
 rg -q 'unknown argument' "$TMPDIR/bad.err"
 
 bash "$HOME/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh" "$BIN" >"$TMPDIR/check-cli-scoping"
-rg -q 'Summary: 4 pass, 0 fail' "$TMPDIR/check-cli-scoping"
+rg -q 'Summary: 13 pass, 0 fail' "$TMPDIR/check-cli-scoping"
 
 echo "PASS flywheel-lock-repair canonical CLI smoke"

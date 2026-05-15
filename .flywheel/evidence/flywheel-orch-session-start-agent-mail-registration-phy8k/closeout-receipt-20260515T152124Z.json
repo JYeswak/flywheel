@@ -1,0 +1,36 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-orch-session-start-agent-mail-registration-phy8k",
+  "status": "closed",
+  "summary": "Added a canonical orchestrator AgentMail registration helper, wired trauma-handoff send-via-mcp-agent-mail to use a sender token field, and proved a real Flywheel-to-SkillOS AgentMail send.",
+  "artifacts": [
+    ".flywheel/scripts/orch-agent-mail-session-register.sh",
+    ".flywheel/scripts/trauma-handoff.sh",
+    "tests/orch-agent-mail-session-register.sh",
+    "tests/trauma-handoff-agent-mail-send.sh",
+    ".flywheel/state/skillos-relay-ledger.jsonl"
+  ],
+  "live_evidence": {
+    "project_key": "/Users/josh/Developer/skillos",
+    "sender_identity": "flywheel-1-skillos-handoff-152014",
+    "recipient": "GentleCompass",
+    "agent_mail_message_id": 540,
+    "ledger_status": "sent",
+    "raw_token_in_output": false
+  },
+  "token_discipline": {
+    "canonical_vault": "~/.local/state/flywheel/agent-mail/tokens",
+    "compat_index": "~/.local/state/flywheel/agent-mail-tokens.json",
+    "compat_index_stores_raw_token": false,
+    "token_files_mode": "0600",
+    "token_values_committed": false
+  },
+  "validation": [
+    "tests/orch-agent-mail-session-register.sh pass 14/0",
+    "tests/trauma-handoff-agent-mail-send.sh pass 7/0",
+    "tests/handoff-skill-to-skillos.sh pass 10/0",
+    "shellcheck .flywheel/scripts/orch-agent-mail-session-register.sh .flywheel/scripts/trauma-handoff.sh tests/orch-agent-mail-session-register.sh tests/trauma-handoff-agent-mail-send.sh pass"
+  ],
+  "autonomy": "autonomous",
+  "no_public_ready_claim": true
+}

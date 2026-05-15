@@ -87,6 +87,16 @@ echo "$STATUS_JSON" | jq -e '.config | (has("auto_assign") or has("send_digests"
   && ok "coordinator status exposes config flags" \
   || fail "coordinator status missing .config block"
 
+echo "$STATUS_JSON" | jq -e '
+  .config.auto_assign == true
+  and .config.assign_only_idle == true
+  and .config.idle_threshold == 300
+  and .config.poll_interval == "30s"
+  and (.config.digest_interval == "30m" or .config.digest_interval == "30m0s")
+' >/dev/null 2>&1 \
+  && ok "coordinator status consumes canonical runtime values" \
+  || fail "coordinator status fell back to non-canonical runtime values"
+
 # Digest shape
 DIGEST_JSON="$("$PINNED_BIN" --session="$SESSION" digest --json 2>/dev/null || echo '{}')"
 echo "$DIGEST_JSON" | jq -e '.work_summary | has("pending_tasks") and has("in_progress_tasks") and has("completed_today") and has("blocked_tasks")' >/dev/null 2>&1 \

@@ -24,6 +24,7 @@ NON_HUMAN_TRANSCRIPT_PREFIXES = (
     "Blocker tick watcher fired",
     "CODEX_WATCHTOWER_",
     "PHASE3_FLEET_BROADCAST",
+    "[pane-1-test",
     "This session is being continued from a previous conversation",
 )
 APPROVED_REMEDIATION_TRACKS = [

@@ -15,8 +15,10 @@ surfaces next to `dicklesworthstone-stack`.
 
 For working-tree dirt, `/flywheel:tick`, dispatch gates, daily reports, and
 repo-local close surfaces MUST use `.flywheel/scripts/repo-discipline-check.sh`
-or an equivalent envelope. The required behavior is not merely to flag dirty
-state; it is to route the dirt to a responsible disposition:
+or an equivalent envelope. For accretion/bloat hygiene, the same surfaces MUST
+also run `.flywheel/scripts/repo-hygiene-check.sh` or an equivalent H-1..H-4
+protocol envelope. The required behavior is not merely to flag dirty state; it
+is to route the dirt to a responsible disposition:
 
 - owner-scoped work commits;
 - generated/runtime noise restores;
@@ -26,6 +28,11 @@ state; it is to route the dirt to a responsible disposition:
   `triage-only` mode before unrelated dispatch continues;
 - halt-threshold dirty state blocks new unrelated dispatch until a cleanup
   plan, cleanup commit, or explicit skip receipt exists.
+
+For repo accretion, tracked-but-ignored output, missing output-dir ignore
+rules, overgrown retention surfaces, and rebuildable substrate in git are not
+style findings. They are substrate-hygiene findings and must surface in the
+same tick/dispatch/report channel as dirty working-tree findings.
 
 For stash bloat, use stash count `<5` as manual/default-no-run territory, `5-9`
 as Quick mode, `10-80` as Standard mode, and `80+` as Comprehensive mode.

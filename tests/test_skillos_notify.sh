@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/{capability-control-plane}-notify.py"
+SCRIPT="$ROOT/.flywheel/scripts/skillos-notify.py"
 TMP="$(mktemp -d -t f2oy.XXXXXX)"
 export TMP
 trap 'python3 -c "import os, shutil; shutil.rmtree(os.environ[\"TMP\"], ignore_errors=True)"' EXIT
@@ -25,7 +25,7 @@ assert_jq() {
 
 write_topology() {
   local path="$1"
-  jq -nc '{session:"{capability-control-plane}",effective_at:"2026-05-08T00:00:00Z",orchestrator_pane:4,repo_path:"$HOME/Developer/{capability-control-plane}"}' >"$path"
+  jq -nc '{session:"skillos",effective_at:"2026-05-08T00:00:00Z",orchestrator_pane:4,repo_path:"$HOME/Developer/skillos"}' >"$path"
 }
 
 write_fake_ntm() {
@@ -55,8 +55,8 @@ threads="$TMP/threads.jsonl"
 write_topology "$topology"
 
 dry_out="$(run_notify dry --topology "$topology" --thread-state "$threads" --candidate-skill-name reusable-fixture-skill --discovery-id sd-001 --source-session flywheel --dry-run --json)"
-assert_jq "$dry_out" '.status == "dry_run" and .target.session == "{capability-control-plane}" and .target.pane == 4 and .candidate_skill_name == "reusable-fixture-skill" and .discovery_id == "sd-001" and (.message | contains("sd-001")) and .mutations.ntm_sent == false' "dry_run_prints_target_candidate_message_without_send"
-assert_jq "$dry_out" '.ntm_argv[0] == "$HOME/.local/bin/ntm" and .ntm_argv[1] == "send"' "planned_apply_uses_absolute_ntm"
+assert_jq "$dry_out" '.status == "dry_run" and .target.session == "skillos" and .target.pane == 4 and .candidate_skill_name == "reusable-fixture-skill" and .discovery_id == "sd-001" and (.message | contains("sd-001")) and .mutations.ntm_sent == false' "dry_run_prints_target_candidate_message_without_send"
+assert_jq "$dry_out" '.ntm_argv[0] == "/Users/josh/.local/bin/ntm" and .ntm_argv[1] == "send"' "planned_apply_uses_absolute_ntm"
 assert_jq "$dry_out" '.agent_mail_thread.thread_key == "[skill-discovery] reusable-fixture-skill" and .agent_mail_thread.thread_id == "skill-discovery:reusable-fixture-skill"' "thread_key_deterministic"
 
 fake_ntm="$TMP/ntm"
@@ -85,7 +85,7 @@ missing_topology="$TMP/missing-topology.jsonl"
 discovery_ledger="$TMP/skill-discoveries.jsonl"
 jq -nc '{ts:"2026-05-08T00:00:00Z",discovery_id:"sd-006",candidate_skill_name:"missing-target-skill"}' >"$discovery_ledger"
 missing_out="$(run_notify missing --topology "$missing_topology" --thread-state "$TMP/missing-threads.jsonl" --discovery-ledger "$discovery_ledger" --candidate-skill-name missing-target-skill --discovery-id sd-006 --source-session flywheel --dry-run --json)"
-assert_jq "$missing_out" '.status == "{capability-control-plane}_target_unavailable" and .reason == "{capability-control-plane}_topology_missing" and .row_left_intact == true and .mutations.discoveries_mutated == false' "missing_topology_structured_unavailable"
+assert_jq "$missing_out" '.status == "skillos_target_unavailable" and .reason == "skillos_topology_missing" and .row_left_intact == true and .mutations.discoveries_mutated == false' "missing_topology_structured_unavailable"
 jq -e '.discovery_id == "sd-006"' "$discovery_ledger" >/dev/null && pass "missing_topology_leaves_discovery_row_intact" || fail "missing_topology_leaves_discovery_row_intact"
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"

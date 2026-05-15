@@ -16,8 +16,14 @@ cat >"$TMP/ntm" <<'SH'
 #!/usr/bin/env bash
 set -euo pipefail
 case "${1:-}" in
+  preflight)
+    printf '{"error_count":0,"warning_count":0,"findings":[]}\n'
+    ;;
   send)
     printf 'sent\n'
+    ;;
+  wait)
+    printf '{"status":"generating"}\n'
     ;;
   *)
     printf 'unsupported fake ntm args: %s\n' "$*" >&2

@@ -1,0 +1,62 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-7dkw",
+  "closed_at": "2026-05-15T06:56:59Z",
+  "decision": "close_stale_parent_after_durable_evidence_and_shipped_gap_signal",
+  "status": "pass",
+  "autonomy": "autonomous",
+  "acceptance": {
+    "ag1_upstream_comment_posted": {
+      "status": "pass",
+      "evidence_ref": "https://github.com/openai/codex/issues/20925#issuecomment-4370508608",
+      "observed_author": "JYeswak",
+      "observed_created_at": "2026-05-04T11:04:02Z"
+    },
+    "ag2_existing_capture_signal_assessed": {
+      "status": "pass",
+      "evidence_ref": ".flywheel/audit/flywheel-7dkw/evidence.md#ag2-confirm-whether-pane_capture_unavailable_count-covers-this-capture_provenanceunavailable",
+      "finding": "pane_capture_unavailable_count and capture_provenance observe text capture availability, not unresolved MCP tools/call lifecycle"
+    },
+    "ag3_gap_signal_shipped": {
+      "status": "pass",
+      "gap_bead": "flywheel-2b0n",
+      "gap_bead_status": "closed",
+      "evidence_refs": [
+        ".flywheel/scripts/orphaned-mcp-tool-call-probe.py",
+        "tests/orphaned-mcp-tool-call-doctor.sh",
+        ".flywheel/canonical-paths.txt"
+      ]
+    },
+    "ag4_receipt_durable": {
+      "status": "pass",
+      "evidence_ref": ".flywheel/audit/flywheel-7dkw/evidence.md",
+      "line_count": 205,
+      "rework_bead": "flywheel-ucdw"
+    }
+  },
+  "validation": [
+    {
+      "command": "gh issue view 20925 --repo openai/codex --json comments --jq '.comments[] | select(.url==\"https://github.com/openai/codex/issues/20925#issuecomment-4370508608\") | {author:.author.login,createdAt,url}'",
+      "status": "pass"
+    },
+    {
+      "command": "bash tests/orphaned-mcp-tool-call-doctor.sh",
+      "status": "pass",
+      "summary": "SUMMARY pass=10 fail=0"
+    },
+    {
+      "command": "bash tests/agent-mail-fd-doctor.sh",
+      "status": "pass",
+      "summary": "SUMMARY pass=8 fail=0"
+    },
+    {
+      "command": "wc -l .flywheel/audit/flywheel-7dkw/evidence.md && rg -n 'Version-pin|Acceptance gate map|Bar self-grade|flywheel-2b0n' .flywheel/audit/flywheel-7dkw/evidence.md",
+      "status": "pass"
+    }
+  ],
+  "notes": [
+    "The original /tmp receipt aged out; flywheel-ucdw rebuilt it as durable repo-owned evidence.",
+    "The follow-up gap signal flywheel-2b0n is closed and fixture-backed.",
+    "No source-code mutation was needed for this closeout."
+  ]
+}

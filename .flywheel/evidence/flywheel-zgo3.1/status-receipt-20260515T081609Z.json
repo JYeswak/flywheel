@@ -1,0 +1,27 @@
+{
+  "schema_version": "flywheel.bead_status_receipt.v1",
+  "bead_id": "flywheel-zgo3.1",
+  "recorded_at": "2026-05-15T08:16:09Z",
+  "status": "blocked",
+  "blocked_by": "flywheel-l6qs8",
+  "reason": "B04_AG9 requires current full flywheel-loop doctor JSON. The focused acceptance test tests/doctor-validation-signals.sh currently hangs in fixture mode because full doctor invokes live subprocess probes without complete timeout bounds.",
+  "evidence": [
+    {
+      "command": "bash tests/doctor-validation-signals.sh",
+      "result": "blocked",
+      "summary": "Hung in full doctor; manual process inspection showed flywheel-loop doctor waiting in orch-capture-parity-probe.py --doctor --json. This is the same failure class captured in flywheel-l6qs8."
+    },
+    {
+      "path": "/Users/josh/.claude/commands/flywheel/status.md",
+      "result": "present",
+      "summary": "/flywheel:status command surface exists, but B04_AG9 cannot be honestly closed until full doctor fixture proof is bounded and repeatable."
+    },
+    {
+      "path": "tests/doctor-validation-signals.sh",
+      "result": "present",
+      "summary": "Contains the B04_AG9 assertion for stable doctor JSON fields once the full-doctor timeout gap is repaired."
+    }
+  ],
+  "safe_local_work_remaining": true,
+  "next_action": "Resolve flywheel-l6qs8, then rerun tests/doctor-validation-signals.sh and close flywheel-zgo3.1 if B04_AG9 passes."
+}

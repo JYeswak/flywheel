@@ -1,0 +1,45 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-a0rnr",
+  "parent_bead_id": "flywheel-oxzyr",
+  "status": "closed",
+  "closed_at": "2026-05-15T14:46:39Z",
+  "summary": "Added a read-only doctor/--doctor envelope to audit-skill-handoff-coverage.sh so Flywheel can inspect the SkillOS handoff audit prerequisites without running the full coverage scan.",
+  "changed_files": [
+    ".flywheel/scripts/audit-skill-handoff-coverage.sh",
+    "tests/audit-skill-handoff-coverage.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/audit-skill-handoff-coverage.sh",
+      "result": "pass",
+      "summary": "11/0 including doctor pass envelope, --doctor alias, required-skill coverage, dispatch-message coverage, receipt coverage, and intentional skip handling."
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/audit-skill-handoff-coverage.sh tests/audit-skill-handoff-coverage.sh",
+      "result": "pass",
+      "summary": "No shellcheck findings."
+    },
+    {
+      "command": ".flywheel/audit/flywheel-cli-inventory/build-inventory.sh && jq row for .flywheel/scripts/audit-skill-handoff-coverage.sh",
+      "result": "pass",
+      "summary": "doctor_subcommand_status moved to basic; canonical_cli_scoping_status remains partial; mutates_state=yes; ownership=own."
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass",
+      "summary": "No whitespace errors."
+    },
+    {
+      "command": "br dep cycles --json",
+      "result": "pass",
+      "summary": "No active dependency cycles."
+    }
+  ],
+  "boundaries": [
+    "Doctor mode checks prerequisites only.",
+    "Doctor mode does not scan SkillOS receipts.",
+    "Doctor mode writes no dispatch rows and mutates no SkillOS state.",
+    "Canonical CLI scoping remains separately classified as partial; this closeout is limited to doctor-mode gap reduction."
+  ]
+}

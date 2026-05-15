@@ -39,6 +39,8 @@ if jq -e '
   and .mutates == true
   and .default_mode == "dry-run"
   and (.mutation_requires | index("--apply")) != null
+  and (.flags | index("doctor")) != null
+  and .doctor_schema == "tentacle-inventory-bump.doctor.v1"
   and .curated_table_modified == false
   and .atomicity == "tempfile-rename-only"
   and .idempotent == true
@@ -48,6 +50,13 @@ if jq -e '
   pass "--info advertises atomicity + idempotent + curated_table_modified=false + tracking bead"
 else
   fail "--info envelope shape regressed; got: ${INFO:0:200}"
+fi
+
+# Test 2b: --examples advertises the read-only doctor
+if "$BUMPER" --examples 2>/dev/null | grep -Fq 'tentacle-inventory-bump.sh doctor'; then
+  pass "--examples advertises doctor"
+else
+  fail "--examples missing doctor"
 fi
 
 # Build isolated fixture
@@ -71,7 +80,6 @@ cat >"$FIXTURE/inventory.md" <<'INVENTORY_EOF'
 - Fixture: 2 mock repos for atomic-bump testing only.
 INVENTORY_EOF
 
-CURATED_BEFORE_SHA="$(awk '/^## Clone And Index Notes/{found=1} found{notes=notes$0"\n"; next} {body=body$0"\n"} END{printf "%s", body}' "$FIXTURE/inventory.md" | shasum -a 256 | awk '{print $1}')"
 TABLE_BEFORE_SHA="$(awk '/^## Full Corpus Table/,/^## Clone And Index Notes/' "$FIXTURE/inventory.md" | shasum -a 256 | awk '{print $1}')"
 # Capture notes-section CONTENT (lines starting with "## Clone..." or "- ")
 # rather than the literal range; the surrounding blank lines change
@@ -95,6 +103,38 @@ cat >"$FIXTURE/sweep.json" <<'SWEEP_EOF'
   "alert_ledger_path": "/fixture/alerts.jsonl"
 }
 SWEEP_EOF
+
+# Test 2c: doctor emits read-only prerequisite envelope without mutating
+INVENTORY="$FIXTURE/inventory.md" "$BUMPER" --summary "$FIXTURE/sweep.json" doctor >"$FIXTURE/doctor.json"
+if jq -e '
+  .schema_version == "tentacle-inventory-bump.doctor.v1"
+  and .command == "doctor"
+  and .status == "pass"
+  and .mode == "read_only"
+  and .mutates == false
+  and (.checks | length == 5)
+  and ([.checks[] | select(.name == "summary_readable_when_supplied").status][0] == "pass")
+' "$FIXTURE/doctor.json" >/dev/null 2>&1; then
+  if ! grep -q "BEGIN-TENTACLE-DRIFT-TRAILER" "$FIXTURE/inventory.md"; then
+    pass "doctor emits read-only prerequisite envelope without mutating"
+  else
+    fail "doctor mutated fixture inventory"
+  fi
+else
+  fail "doctor envelope regressed; got: $(cat "$FIXTURE/doctor.json")"
+fi
+
+# Test 2d: doctor warns, not fails, when no summary is supplied
+INVENTORY="$FIXTURE/inventory.md" "$BUMPER" --doctor >"$FIXTURE/doctor-warn.json"
+if jq -e '
+  .schema_version == "tentacle-inventory-bump.doctor.v1"
+  and .status == "warn"
+  and ([.checks[] | select(.name == "summary_readable_when_supplied").status][0] == "warn")
+' "$FIXTURE/doctor-warn.json" >/dev/null 2>&1; then
+  pass "doctor warns without summary"
+else
+  fail "doctor without summary should warn; got: $(cat "$FIXTURE/doctor-warn.json")"
+fi
 
 # Test 3: dry-run does NOT mutate the fixture
 INVENTORY="$FIXTURE/inventory.md" "$BUMPER" --summary "$FIXTURE/sweep.json" --json >"$FIXTURE/dryrun-receipt.json" 2>"$FIXTURE/dryrun.stderr"

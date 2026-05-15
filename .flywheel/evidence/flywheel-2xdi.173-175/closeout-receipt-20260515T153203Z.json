@@ -1,0 +1,27 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "created_at": "2026-05-15T15:32:03Z",
+  "beads": [
+    "flywheel-2xdi.173",
+    "flywheel-2xdi.174",
+    "flywheel-2xdi.175"
+  ],
+  "status": "pass",
+  "summary": "Added one canonical receiver test covering cross-session-presence.sh, trap-rollback-inventory.sh, and trauma-handoff.sh so gap-hunt-probe can distinguish live receiver coverage from wired-but-cold scripts.",
+  "changed_files": [
+    ".flywheel/scripts/cross-session-presence.sh",
+    "tests/flywheel-gap-wired-receivers-canonical-cli.sh"
+  ],
+  "validation": [
+    "bash tests/flywheel-gap-wired-receivers-canonical-cli.sh pass 9/0",
+    "bash tests/trap-rollback-inventory.sh pass 9/0",
+    "bash tests/trauma-handoff-agent-mail-send.sh pass 7/0",
+    "shellcheck tests/flywheel-gap-wired-receivers-canonical-cli.sh .flywheel/scripts/cross-session-presence.sh .flywheel/scripts/trap-rollback-inventory.sh .flywheel/scripts/trauma-handoff.sh pass",
+    ".flywheel/scripts/gap-hunt-probe.sh --json --dry-run no longer reports cross-session-presence, trap-rollback-inventory, or trauma-handoff gap ids"
+  ],
+  "boundary": {
+    "no_live_cross_session_probe": true,
+    "no_live_agent_mail_send": true,
+    "fixture_only": true
+  }
+}

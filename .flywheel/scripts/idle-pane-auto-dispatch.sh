@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016,SC2034,SC2317
 set -euo pipefail
 
 
@@ -66,7 +67,12 @@ scaffold_emit_info() {
     "$SCAFFOLD_SCHEMA_VERSION" \
     "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
     "SCAFFOLD_AUDIT_LOG" \
-    '{}'
+    '{}' \
+    | jq '. + {native_surface:[
+        "ntm wait <session> --until=idle --any --json",
+        "ntm assign <session> --repo <path> --dry-run --json",
+        "ntm assign <session> --watch --auto --json"
+      ]}'
 }
 
 scaffold_emit_examples() {

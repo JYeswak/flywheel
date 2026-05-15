@@ -526,6 +526,7 @@ fi
 # ── bszgl.3 + git-repo-discipline: git hygiene block ────────────────────────
 GIT_UNCOMMITTED=0; GIT_UNTRACKED=0; GIT_AHEAD="?"; GIT_STASHES=0; GIT_ALARM=""
 GIT_REPO_CLASS="not_a_git_repo"; GIT_REPO_ACTION="n/a"; GIT_REPO_HANDLER="/git-repo-janitor"
+REPO_HYGIENE_PROTOCOL_STATUS="not_run"; REPO_HYGIENE_PROTOCOL_PASS=0; REPO_HYGIENE_PROTOCOL_WARN=0; REPO_HYGIENE_PROTOCOL_FAIL=0
 if git -C "$REPO" rev-parse --git-dir &>/dev/null; then
   GIT_AHEAD="$(git -C "$REPO" rev-list --count '@{u}..HEAD' 2>/dev/null || echo '?')"
   GIT_STASHES="$(git -C "$REPO" stash list 2>/dev/null | wc -l | tr -d ' ')"
@@ -542,6 +543,22 @@ if git -C "$REPO" rev-parse --git-dir &>/dev/null; then
   else
     GIT_UNCOMMITTED="$(git -C "$REPO" status --short 2>/dev/null | grep -cE '^.M|^ M|^[MADRC]' || true)"
     GIT_UNTRACKED="$(git -C "$REPO" status --short 2>/dev/null | grep -c '^??' || true)"
+  fi
+  REPO_HYGIENE_CHECK="${REPO_HYGIENE_CHECK:-$(dirname "$0")/repo-hygiene-check.sh}"
+  if [[ -x "$REPO_HYGIENE_CHECK" ]]; then
+    REPO_HYGIENE_OUT="$("$REPO_HYGIENE_CHECK" --repo "$REPO" --json 2>/dev/null || true)"
+    if jq -e . >/dev/null 2>&1 <<<"$REPO_HYGIENE_OUT"; then
+      REPO_HYGIENE_PROTOCOL_PASS="$(jq -r '.pass // 0' <<<"$REPO_HYGIENE_OUT")"
+      REPO_HYGIENE_PROTOCOL_WARN="$(jq -r '.warn // 0' <<<"$REPO_HYGIENE_OUT")"
+      REPO_HYGIENE_PROTOCOL_FAIL="$(jq -r '.fail // 0' <<<"$REPO_HYGIENE_OUT")"
+      if [[ "$REPO_HYGIENE_PROTOCOL_FAIL" -gt 0 ]]; then
+        REPO_HYGIENE_PROTOCOL_STATUS="fail"
+      elif [[ "$REPO_HYGIENE_PROTOCOL_WARN" -gt 0 ]]; then
+        REPO_HYGIENE_PROTOCOL_STATUS="warn"
+      else
+        REPO_HYGIENE_PROTOCOL_STATUS="pass"
+      fi
+    fi
   fi
   [[ "$GIT_REPO_CLASS" != "clean" ]] && GIT_ALARM=" ← ACTION: ${GIT_REPO_ACTION}"
 fi
@@ -561,6 +578,7 @@ fi
 
 GIT_BLOCK="$(printf 'Git hygiene (%s):\n  uncommitted:    %s\n  unclassified:   %s%s\n  repo_class:     %s\n  repo_handler:   %s\n  commits_ahead:  %s\n  stash_count:    %s\n  goal_gate:      %s' \
   "$(basename "$REPO")" "$GIT_UNCOMMITTED" "$GIT_UNTRACKED" "$GIT_ALARM" "$GIT_REPO_CLASS" "$GIT_REPO_HANDLER" "$GIT_AHEAD" "$GIT_STASHES" "$GOAL_GATE_STATUS")"
+GIT_BLOCK="$(printf '%s\n  repo_protocol:  %s (pass=%s warn=%s fail=%s)' "$GIT_BLOCK" "$REPO_HYGIENE_PROTOCOL_STATUS" "$REPO_HYGIENE_PROTOCOL_PASS" "$REPO_HYGIENE_PROTOCOL_WARN" "$REPO_HYGIENE_PROTOCOL_FAIL")"
 
 if [[ -f "$REPORT_PATH" ]]; then
   { printf '\n## Git hygiene\n'; printf '%s\n' "$GIT_BLOCK"; } >>"$REPORT_PATH"
@@ -571,7 +589,12 @@ if [[ "$WANT_JSON" -eq 1 ]]; then
     --argjson u "${GIT_UNCOMMITTED:-0}" --argjson n "${GIT_UNTRACKED:-0}" \
     --arg a "${GIT_AHEAD:-?}" --argjson s "${GIT_STASHES:-0}" --arg g "$GOAL_GATE_STATUS" \
     --arg c "$GIT_REPO_CLASS" --arg h "$GIT_REPO_HANDLER" --arg action "$GIT_REPO_ACTION" \
-    '{uncommitted:$u,untracked:$n,repo_class:$c,repo_handler:$h,repo_action:$action,commits_ahead:$a,stash_count:$s,goal_gate:$g}')"
+    --arg protocol_status "$REPO_HYGIENE_PROTOCOL_STATUS" \
+    --argjson protocol_pass "$REPO_HYGIENE_PROTOCOL_PASS" \
+    --argjson protocol_warn "$REPO_HYGIENE_PROTOCOL_WARN" \
+    --argjson protocol_fail "$REPO_HYGIENE_PROTOCOL_FAIL" \
+    '{uncommitted:$u,untracked:$n,repo_class:$c,repo_handler:$h,repo_action:$action,commits_ahead:$a,stash_count:$s,goal_gate:$g,
+      repo_hygiene_protocol:{status:$protocol_status,pass:$protocol_pass,warn:$protocol_warn,fail:$protocol_fail}}')"
   jq -c --argjson ntm_rollup "$ROLLUP" --argjson git_hygiene "$GIT_JSON" \
     '. + {ntm_rollup:$ntm_rollup,git_hygiene:$git_hygiene}' "$PY_OUT"
 else

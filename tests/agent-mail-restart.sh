@@ -102,25 +102,81 @@ run_case() {
   printf '%s\n' "$dir"
 }
 
-bash -n "$SCRIPT" && pass "restart script syntax" || fail "restart script syntax"
-"$SCRIPT" --info --json | jq -e '.mutates_with_apply == true and .dry_run_default == true' >/dev/null \
-  && pass "info documents dry-run/apply posture" || fail "info documents dry-run/apply posture"
+run_failed_case() {
+  local dir="$TMP/failed"
+  mkdir -p "$dir/tmp"
+  make_fakes "$dir"
+  printf 'loaded' >"$dir/state"
+  printf '0' >"$dir/bootstrap-count"
+  : >"$dir/log"
+  : >"$dir/plist"
+  set +e
+  TMPDIR="$dir/tmp" \
+    AGENT_MAIL_RESTART_LAUNCHCTL="$dir/launchctl" \
+    AGENT_MAIL_RESTART_PGREP="$dir/pgrep" \
+    AGENT_MAIL_RESTART_PLUTIL="$dir/plutil" \
+    AGENT_MAIL_RESTART_SLEEP_BIN="$dir/sleep" \
+    AGENT_MAIL_FAKE_STATE="$dir/state" \
+    AGENT_MAIL_FAKE_LOG="$dir/log" \
+    AGENT_MAIL_FAKE_BOOTSTRAP_COUNT="$dir/bootstrap-count" \
+    AGENT_MAIL_FAKE_BOOTSTRAP_FAILS=99 \
+    AGENT_MAIL_PLIST="$dir/plist" \
+    "$SCRIPT" --apply --json >"$dir/out.jsonl" 2>"$dir/err.log"
+  local rc=$?
+  set -e
+  printf '%s\n%s\n' "$dir" "$rc"
+}
+
+if bash -n "$SCRIPT"; then
+  pass "restart script syntax"
+else
+  fail "restart script syntax"
+fi
+
+if "$SCRIPT" --info --json | jq -e '.mutates_with_apply == true and .dry_run_default == true' >/dev/null; then
+  pass "info documents dry-run/apply posture"
+else
+  fail "info documents dry-run/apply posture"
+fi
 
 unloaded_dir="$(run_case unloaded unloaded 0)"
-grep -q '^bootstrap ' "$unloaded_dir/log" && grep -q '^kickstart ' "$unloaded_dir/log" \
-  && [[ "$(cat "$unloaded_dir/state")" == loaded ]] \
-  && pass "unloaded service bootstraps and kickstarts" || fail "unloaded service bootstraps and kickstarts"
+if grep -q '^bootstrap ' "$unloaded_dir/log" \
+  && grep -q '^kickstart ' "$unloaded_dir/log" \
+  && [[ "$(cat "$unloaded_dir/state")" == loaded ]]; then
+  pass "unloaded service bootstraps and kickstarts"
+else
+  fail "unloaded service bootstraps and kickstarts"
+fi
 
 loaded_dir="$(run_case loaded loaded 0)"
-grep -q '^bootout ' "$loaded_dir/log" && grep -q '^bootstrap ' "$loaded_dir/log" && grep -q '^kickstart ' "$loaded_dir/log" \
-  && [[ "$(cat "$loaded_dir/state")" == loaded ]] \
-  && pass "already loaded service bootouts then reloads" || fail "already loaded service bootouts then reloads"
+if grep -q '^bootout ' "$loaded_dir/log" \
+  && grep -q '^bootstrap ' "$loaded_dir/log" \
+  && grep -q '^kickstart ' "$loaded_dir/log" \
+  && [[ "$(cat "$loaded_dir/state")" == loaded ]]; then
+  pass "already loaded service bootouts then reloads"
+else
+  fail "already loaded service bootouts then reloads"
+fi
 
 recover_dir="$(run_case recover loaded 3)"
-[[ "$(cat "$recover_dir/state")" == loaded ]] \
+if [[ "$(cat "$recover_dir/state")" == loaded ]] \
   && [[ "$(cat "$recover_dir/bootstrap-count")" == 4 ]] \
-  && grep -q 'recovered from bootstrap failure after bootout' "$recover_dir/out.jsonl" \
-  && pass "bootstrap failure after bootout recovers loaded service" || fail "bootstrap failure after bootout recovers loaded service"
+  && grep -q 'recovered from bootstrap failure after bootout' "$recover_dir/out.jsonl"; then
+  pass "bootstrap failure after bootout recovers loaded service"
+else
+  fail "bootstrap failure after bootout recovers loaded service"
+fi
+
+mapfile -t failed_case < <(run_failed_case)
+failed_dir="${failed_case[0]}"
+failed_rc="${failed_case[1]}"
+if [[ "$failed_rc" == "1" ]] \
+  && [[ -z "$(find "$failed_dir/tmp" -type f -name 'agent-mail-*' -print -quit)" ]] \
+  && grep -q 'Bootstrap failed' "$failed_dir/err.log"; then
+  pass "failed bootstrap path cleans tracked temp files"
+else
+  fail "failed bootstrap path cleans tracked temp files"
+fi
 
 printf '\nSummary: %s passed, %s failed\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]

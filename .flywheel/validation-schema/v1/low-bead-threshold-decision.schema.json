@@ -35,7 +35,7 @@
     "auto_bead_filed": { "type": "boolean" },
     "hunt_bead_id": { "type": ["string", "null"] },
     "auto_bead_action": {
-      "enum": ["skipped", "jsonl_fallback", "reused", "append_failed"]
+      "enum": ["skipped", "jsonl_fallback", "reused", "suppressed_existing_id", "append_failed"]
     },
     "hunt_bead_suggestion": {
       "type": ["object", "null"],

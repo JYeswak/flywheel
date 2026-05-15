@@ -33,6 +33,8 @@ if jq -e '
   and .default_mode == "dry-run"
   and .mutates == true
   and (.mutation_requires | index("--apply")) != null
+  and (.flags | index("doctor")) != null
+  and .doctor_schema == "jeff-bead-285-divergence-capture.doctor.v1"
   and (.rust_log_targets | index("br::storage::sqlite=trace")) != null
   and (.rust_log_targets | index("br::cli::commands::close=trace")) != null
   and (.exit_codes | has("0") and has("1") and has("2") and has("3"))
@@ -60,9 +62,38 @@ else
   fail "--schema envelope regressed; got: ${SCHEMA_JSON:0:200}"
 fi
 
-# Test 4: --examples cites the canonical Jeffrey ask + sandbox warning
+# Test 4: doctor emits read-only prerequisite envelope without bead-id
+DOCTOR_JSON="$("$TARGET" doctor 2>/dev/null || true)"
+if jq -e '
+  .schema_version == "jeff-bead-285-divergence-capture.doctor.v1"
+  and .command == "doctor"
+  and (.status | IN("pass","warn","fail"))
+  and .mode == "read_only"
+  and .mutates == false
+  and (.checks | length == 4)
+  and ([.checks[] | select(.name == "lock_timeout_positive_integer").status][0] == "pass")
+' >/dev/null 2>&1 <<<"$DOCTOR_JSON"; then
+  pass "doctor emits read-only prerequisite envelope without bead-id"
+else
+  fail "doctor envelope regressed; got: ${DOCTOR_JSON:0:200}"
+fi
+
+# Test 5: invalid lock timeout is a doctor fail, not a jq crash
+BAD_TIMEOUT_DOCTOR="$(DEFAULT_LOCK_TIMEOUT_MS=not-a-number "$TARGET" --doctor 2>/dev/null || true)"
+if jq -e '
+  .schema_version == "jeff-bead-285-divergence-capture.doctor.v1"
+  and .status == "fail"
+  and ([.checks[] | select(.name == "lock_timeout_positive_integer").status][0] == "fail")
+' >/dev/null 2>&1 <<<"$BAD_TIMEOUT_DOCTOR"; then
+  pass "doctor fails cleanly for invalid lock timeout"
+else
+  fail "doctor invalid timeout handling regressed; got: ${BAD_TIMEOUT_DOCTOR:0:200}"
+fi
+
+# Test 6: --examples cites the canonical Jeffrey ask + sandbox warning
 EXAMPLES="$("$TARGET" --examples 2>/dev/null || true)"
 if grep -Fq -- "--info" <<<"$EXAMPLES" \
+  && grep -Fq -- "doctor" <<<"$EXAMPLES" \
   && grep -Fq -- "--apply" <<<"$EXAMPLES" \
   && grep -Fq -- "--lock-timeout 10000" <<<"$EXAMPLES" \
   && grep -Fq -- "DEFAULT_LOCK_TIMEOUT_MS" <<<"$EXAMPLES"; then
@@ -71,7 +102,7 @@ else
   fail "--examples missing Jeffrey ask or env var override"
 fi
 
-# Test 5: missing bead-id exits rc=2 (canonical-cli-scoping usage error)
+# Test 7: missing bead-id exits rc=2 (canonical-cli-scoping usage error)
 set +e
 "$TARGET" --apply >/dev/null 2>&1
 rc=$?
@@ -82,7 +113,7 @@ else
   fail "missing bead-id exit code mismatch (expected 2, got $rc)"
 fi
 
-# Test 6: dry-run is the default + does NOT mutate state
+# Test 8: dry-run is the default + does NOT mutate state
 DRY_BEAD="test-bead-$(date -u +%s)"
 DRY_OUTPUT="$("$TARGET" "$DRY_BEAD" --json 2>/dev/null || true)"
 if jq -e '
@@ -95,7 +126,7 @@ else
   fail "default mode regressed; got: ${DRY_OUTPUT:0:200}"
 fi
 
-# Test 7: capture script does NOT contain a push to upstream / no auto-comment
+# Test 9: capture script does NOT contain a push to upstream / no auto-comment
 # (Jeffrey-restraint: artifacts are bundled locally; operator decides when/if to upload)
 if grep -qE 'gh issue (comment|reopen)|git push|curl.*github.com.*beads_rust' "$TARGET"; then
   fail "capture script contains upstream-push verbs — Jeffrey-restraint violated"
@@ -103,7 +134,7 @@ else
   pass "capture script bundles artifacts locally; no auto-push to upstream"
 fi
 
-# Test 8: tracking-bead linkage in source (audit trail)
+# Test 10: tracking-bead linkage in source (audit trail)
 if grep -q "flywheel-f23ix" "$TARGET" \
   && grep -q "Dicklesworthstone/beads_rust/issues/285" "$TARGET"; then
   pass "tracking-bead + upstream issue both cited in source comments"

@@ -62,10 +62,26 @@ cat >"$TMP/identity/flywheel.json" <<JSON
 ],"validation":{"all_workers_registered":true,"unregistered_count":0}}
 JSON
 
-bash -n "$SCRIPT" && pass "script syntax" || fail "script syntax"
-"$SCRIPT" --info --json | jq -e '.name == "architecture-health-rollup" and .write_requires == "--write"' >/dev/null && pass "info surface" || fail "info surface"
-"$SCRIPT" --schema --json | jq -e '.schema_version == "architecture-health-rollup/v1"' >/dev/null && pass "schema surface" || fail "schema surface"
-"$SCRIPT" --examples --json | jq -e '.examples | length >= 3' >/dev/null && pass "examples surface" || fail "examples surface"
+if bash -n "$SCRIPT"; then
+  pass "script syntax"
+else
+  fail "script syntax"
+fi
+if "$SCRIPT" --info --json | jq -e '.name == "architecture-health-rollup" and .write_requires == "--write"' >/dev/null; then
+  pass "info surface"
+else
+  fail "info surface"
+fi
+if "$SCRIPT" --schema --json | jq -e '.schema_version == "architecture-health-rollup/v1"' >/dev/null; then
+  pass "schema surface"
+else
+  fail "schema surface"
+fi
+if "$SCRIPT" --examples --json | jq -e '.examples | length >= 3' >/dev/null; then
+  pass "examples surface"
+else
+  fail "examples surface"
+fi
 
 "$SCRIPT" \
   --repo "$TMP/repo" \
@@ -81,6 +97,8 @@ assert_jq "$TMP/out.json" '.architecture_health_metric_unpaired_count == 0 and .
 assert_jq "$TMP/out.json" '.identity_vectors | length == 2 and all(.[]; .agent_id | contains(":"))' "identity vectors use tuple ids"
 assert_jq "$TMP/out.json" '.report_policy.individual_rankings_emitted == false' "no leaderboard emitted"
 assert_jq "$TMP/out.json" '.fleet_metrics.rework_ratio > 0' "rework ratio computed"
+assert_jq "$TMP/out.json" '.fleet_metrics.architecture_debt_observation_ratio > 0 and .source_counts.architecture_debt_observation_rows == 1' "architecture debt observation ratio computed"
+assert_jq "$TMP/out.json" '.source_counts.rework_event_count == (.source_counts.validation_fail + .source_counts.redispatch_rows)' "rework excludes debt observations"
 
 "$SCRIPT" \
   --repo "$TMP/repo" \
@@ -93,7 +111,11 @@ assert_jq "$TMP/out.json" '.fleet_metrics.rework_ratio > 0' "rework ratio comput
   --json >"$TMP/all.json"
 
 for period in 24h 7d 30d 90d; do
-  test -s "$TMP/state/$period.json" && pass "wrote $period rollup" || fail "wrote $period rollup"
+  if test -s "$TMP/state/$period.json"; then
+    pass "wrote $period rollup"
+  else
+    fail "wrote $period rollup"
+  fi
 done
 
 if [[ "$fail_count" -gt 0 ]]; then

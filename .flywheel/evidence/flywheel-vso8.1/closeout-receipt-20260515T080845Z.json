@@ -1,0 +1,35 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-vso8.1",
+  "closed_at": "2026-05-15T08:08:45Z",
+  "status": "safe_to_close",
+  "closure_class": "stale_audit_gap_verified",
+  "summary": "The storage-override schema exists and the doctor-facing storage override segment exposes auto_clear_signal mechanically.",
+  "evidence": [
+    {
+      "command": "bash tests/storage-override.sh",
+      "result": "pass",
+      "summary": "17 passed, 0 failed; includes valid_receipt_lowers_low_storage_gate and doctor_exposes_auto_clear_signal."
+    },
+    {
+      "command": "shellcheck tests/storage-override.sh",
+      "result": "pass"
+    },
+    {
+      "path": ".flywheel/validation-schema/v1/storage-override.schema.json",
+      "result": "present",
+      "summary": "Schema declares storage-override/v1 and object rollback_guard shape."
+    },
+    {
+      "bead": "flywheel-c5zi",
+      "result": "closed",
+      "summary": "Follow-up rollback_guard schema-validation gap is already closed."
+    }
+  ],
+  "discovered_followups": [
+    {
+      "bead": "flywheel-l6qs8",
+      "reason": "Full flywheel-loop doctor fixture path can hang on unrelated live probes; storage validation is now bounded while the broader doctor timeout gap remains open."
+    }
+  ]
+}

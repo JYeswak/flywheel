@@ -91,6 +91,51 @@
         }
       }
     },
+    "fuckup_to_bead_pipeline": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "schema_version",
+        "status",
+        "source_rules",
+        "required_steps",
+        "unprocessed_count",
+        "direct_bead_without_pipeline_count",
+        "incomplete_processed_count"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "flywheel.fuckup_to_bead_pipeline.v1"
+        },
+        "status": {
+          "enum": ["pass", "pending", "warn"]
+        },
+        "source_rules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "required_steps": {
+          "type": "array",
+          "items": {
+            "enum": ["planning-workflow", "jeff-convergence-audit", "beads-workflow"]
+          }
+        },
+        "unprocessed_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "direct_bead_without_pipeline_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "incomplete_processed_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
     "callback_validation": {
       "type": "object"
     },

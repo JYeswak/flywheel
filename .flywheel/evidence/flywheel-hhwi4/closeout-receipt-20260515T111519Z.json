@@ -1,0 +1,38 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-hhwi4",
+  "closed_at": "2026-05-15T11:15:19Z",
+  "status": "closed",
+  "decision": "native_team_pulse_verbs_must_bypass_scaffold_todo_intercept",
+  "summary": "team-pulse-heartbeat already had native doctor/status/schema/validate logic below the canonical scaffold, but the early scaffold intercept captured doctor, health, and validate first. The fix lets native verbs own those surfaces and keeps scaffold ownership for introspection, repair, audit, why, quickstart, and completion.",
+  "changed_files": [
+    ".flywheel/scripts/team-pulse-heartbeat.sh",
+    "tests/team-pulse-heartbeat-canonical-cli.sh"
+  ],
+  "validation": [
+    {
+      "command": "bash tests/team-pulse-heartbeat.sh",
+      "result": "pass",
+      "observed": "RESULT pass=11 fail=0"
+    },
+    {
+      "command": "bash tests/team-pulse-heartbeat-canonical-cli.sh",
+      "result": "pass",
+      "observed": "SUMMARY pass=13 fail=0"
+    },
+    {
+      "command": "rg stale canonical scaffold TODO wording in team-pulse script/test",
+      "result": "pass",
+      "observed": "no matches"
+    }
+  ],
+  "value_add": [
+    "Restores the live team-pulse doctor signal so degraded and stale sessions are visible instead of hidden behind a TODO scaffold envelope.",
+    "Keeps canonical CLI coverage calibrated to the real owner of each verb rather than forcing native command surfaces through generic scaffold output.",
+    "Converts an observed regression into a bead and closes it with executable proof."
+  ],
+  "not_claimed": [
+    "This does not change launchd installation state.",
+    "This does not claim every team pulse operational state is healthy; it restores the doctor path that reports those states."
+  ]
+}

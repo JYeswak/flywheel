@@ -4,15 +4,28 @@ type: doctrine
 created: 2026-05-10
 status: active
 authority: joshua-direct-ask-2026-05-10T19:25Z
+cluster: substrate-hygiene-doctrine-cluster
+sisters:
+  - repo-hygiene-operational-protocol.md
+  - git-repo-discipline.md
+  - blocker-discipline.md
 ---
 
 # Git Stash Discipline (Fleet-Wide)
 
 ## Substrate-hygiene doctrine cluster
 
-This doctrine is part of the **substrate-hygiene doctrine cluster** alongside `blocker-discipline.md`. Both share a Meadows-lens diagnosis: recursive-self-validation failure modes — substrate that nobody verifies accumulates as silent debt.
+This doctrine is part of the **substrate-hygiene doctrine cluster** alongside
+`repo-hygiene-operational-protocol.md`, `git-repo-discipline.md`, and
+`blocker-discipline.md`. All four share a Meadows-lens diagnosis:
+recursive-self-validation failure modes — substrate that nobody verifies
+accumulates as silent debt.
 
 - **git-stash-discipline.md** (this doctrine): addresses stash accumulation as durable storage (paradigm: stash is 24h scratch, not parking lot)
+- **repo-hygiene-operational-protocol.md**: addresses repo accretion/bloat
+  before it becomes a 70k-file cleanup event
+- **git-repo-discipline.md**: addresses dirty working trees as unresolved
+  decisions
 - **blocker-discipline.md**: addresses blocker accumulation as unverified claims (paradigm: blockers are claims, not facts)
 
 Both rely on per-tick orch verification + worker-time discipline + named trauma classes. When you read one, read the other — failure modes overlap.
@@ -193,4 +206,3 @@ Decision-tree extension to the substrate-runtime ledger class is sourced from:
 - **Triage report:** `/Users/josh/Developer/alpsinsurance/.flywheel/audit/2026-05-10-held-stash-triage/report.md` (cited as exemplar)
 - **Doctrine ratification:** `flywheel-yqzj8` worker tick 2026-05-11 (this fold-in)
 - **Cross-orch ratification:** AG3 of `flywheel-yqzj8` defers to next sister-orch tick (orch-class action; not authored by this worker tick)
-

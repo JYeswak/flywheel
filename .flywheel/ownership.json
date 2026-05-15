@@ -1,0 +1,15 @@
+{
+  "schema_version": "flywheel.canonical_ownership.v1",
+  "canonical_owner_class": "flywheel",
+  "owned_canonical_paths": [
+    {"path": "AGENTS.md", "owner_class": "flywheel"},
+    {"path": ".flywheel/AGENTS-CANONICAL.md", "owner_class": "flywheel"},
+    {"path": ".flywheel/doctrine", "owner_class": "flywheel"},
+    {"path": ".flywheel/rules", "owner_class": "flywheel"},
+    {"path": ".flywheel/scripts", "owner_class": "flywheel"},
+    {"path": ".flywheel/launchd", "owner_class": "flywheel"},
+    {"path": ".flywheel/validation-schema", "owner_class": "flywheel"},
+    {"path": ".flywheel/security", "owner_class": "flywheel"},
+    {"path": ".claude/settings.json", "owner_class": "flywheel"}
+  ]
+}

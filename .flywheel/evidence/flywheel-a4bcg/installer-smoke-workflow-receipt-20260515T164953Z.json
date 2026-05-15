@@ -1,0 +1,37 @@
+{
+  "schema_version": "flywheel.installer_smoke_workflow_receipt.v1",
+  "ts": "20260515T164953Z",
+  "bead_id": "flywheel-a4bcg",
+  "workflow": ".github/workflows/installer-smoke.yml",
+  "local_proof": {
+    "installer_smoke": "tests/installer-smoke.sh pass 10/0"
+  },
+  "github_pr": {
+    "number": 3,
+    "head": "58cd675b07e1f9f5d645e7451259b158efded7ab",
+    "merge_state": "CLEAN",
+    "checks": [
+      {
+        "name": "Public Surface",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Install Doctor Uninstall (ubuntu-22.04)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "Install Doctor Uninstall (macos-14)",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      },
+      {
+        "name": "GitGuardian Security Checks",
+        "status": "COMPLETED",
+        "conclusion": "SUCCESS"
+      }
+    ]
+  },
+  "boundary": "installer CI workflow is green on PR; final release publication remains B15/Joshua signoff"
+}

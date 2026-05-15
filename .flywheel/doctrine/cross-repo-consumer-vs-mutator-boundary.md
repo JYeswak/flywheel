@@ -106,3 +106,27 @@ one of:
 - (consumer-class) explicit graceful-degradation test evidence cited
 
 Missing any of these on a cross-repo bead is a doctrine drift.
+
+## Flywheel Fleet Authority Exception
+
+Flywheel-owned fleet substrate is a special class. The generic cross-repo
+mutation caution prevents accidental product/client repo edits; it is not a ban
+on Flywheel doing its job. When the source owner class is `flywheel` and the
+target path is Flywheel-owned canonical substrate, an ownership-gated Flywheel
+propagator may apply across repos. Examples include `AGENTS.md` canonical
+blocks, `.flywheel/AGENTS-CANONICAL.md`, `.flywheel/rules`,
+`.flywheel/doctrine`, validation schemas, install templates, and explicit
+transport-gated orchestration packets.
+
+The rule is:
+
+- **Allowed:** Flywheel-owned canonical substrate into a target with no
+  conflicting ownership declaration.
+- **Allowed:** Flywheel-owned canonical substrate into a target declaring that
+  path as `owner_class=flywheel`.
+- **Blocked:** product/client files, private runtime state, or any target path
+  explicitly owned by another control plane such as SkillOS.
+
+This is the practical meaning of "same operating doctrine across the fleet":
+Flywheel must be able to carry doctrine to the repos that inherit it, while the
+ownership gate prevents ambient clobbering of surfaces Flywheel does not own.

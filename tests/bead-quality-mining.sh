@@ -43,9 +43,20 @@ export BEAD_QUALITY_DOCTOR_JSON_FILE="$doctor_fixture"
 valid_body="$TMP/valid-body.md"
 nested_body="$TMP/nested-body.md"
 noverb_body="$TMP/noverb-body.md"
-printf 'Acceptance gates\nAG1: `.flywheel/full.txt` exists.\nAG2: `tests/pass.sh` passes.\n' >"$valid_body"
-printf 'Acceptance gates\nAG1: `.flywheel/full.txt` exists.\n  - nested subgate should be rejected\n' >"$nested_body"
-printf 'Acceptance gates\nAG1: green path\n' >"$noverb_body"
+cat >"$valid_body" <<'EOF'
+Acceptance gates
+AG1: `.flywheel/full.txt` exists.
+AG2: `tests/pass.sh` passes.
+EOF
+cat >"$nested_body" <<'EOF'
+Acceptance gates
+AG1: `.flywheel/full.txt` exists.
+  - nested subgate should be rejected
+EOF
+cat >"$noverb_body" <<'EOF'
+Acceptance gates
+AG1: green path
+EOF
 
 valid_once="$TMP/valid-once.json"
 valid_twice="$TMP/valid-twice.json"
@@ -61,6 +72,9 @@ valid_twice="$TMP/valid-twice.json"
 "$VALIDATOR" --description-file "$noverb_body" --json >"$TMP/noverb.json"
 [[ "$(json_get '.status' "$TMP/noverb.json")" == "warn" ]] || fail "AG without testable verb was not warned"
 jq -e '.warnings[] | select(.code=="ag_without_testable_verb")' "$TMP/noverb.json" >/dev/null || fail "missing ag_without_testable_verb warning"
+
+"$SCRIPT" --repo "$repo" --dry-run --scan-open-ag-format --skip-loop-doctor --json >"$TMP/skip-loop-doctor.json"
+[[ "$(json_get '.loop_doctor_skipped' "$TMP/skip-loop-doctor.json")" == "true" ]] || fail "skip-loop-doctor flag did not skip doctor probe"
 
 wrapper_id="$("$WRAPPER" --title "validated wrapper fixture" --type task --priority 1 --description-file "$valid_body" --json | jq -r '.id // .issue.id')"
 [[ -n "$wrapper_id" && "$wrapper_id" != "null" ]] || fail "validated wrapper did not create bead"
@@ -109,4 +123,4 @@ doctor="$TMP/doctor-mode.json"
 [[ "$(json_get '.closed_bead_audit_gap_count' "$doctor")" -ge 3 ]] || fail "doctor mode did not expose gap count"
 [[ "$(json_get '.signals | length' "$doctor")" -eq 3 ]] || fail "doctor mode did not expose 3 signal contracts"
 
-echo "PASS bead-quality-mining fixtures full-evidence missing-AG doctor-not-wired tests-skipped canonical-AG-format idempotent-rerun"
+echo "PASS bead-quality-mining fixtures full-evidence missing-AG doctor-not-wired tests-skipped canonical-AG-format skip-loop-doctor idempotent-rerun"

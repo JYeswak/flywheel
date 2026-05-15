@@ -103,7 +103,7 @@ set -e
 if [[ "$bad_rc" -eq 2 ]]; then pass "usage_error_exit_2"; else fail "usage_error_exit_2"; fi
 
 bash "$CHECKER" "$BIN" >"$TMP/check-cli-scoping.txt"
-assert_text "$TMP/check-cli-scoping.txt" 'Summary: 4 pass, 0 fail' "canonical_checker"
+assert_text "$TMP/check-cli-scoping.txt" 'Summary: 13 pass, 0 fail' "canonical_checker"
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]

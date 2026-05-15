@@ -16,9 +16,6 @@
 # `~/.config/ntm/config.local.toml` (not yet wired — TODO).
 
 [coordinator]
-# Schema version of THIS canonical block. Install script gates on this.
-schema_version = 1
-
 # Seconds without output before a worker is considered "idle" and assignable.
 # 300s matches idle-state-probe.sh; avoids thrashing on between-tool-call pauses.
 idle_threshold = 300
@@ -37,18 +34,6 @@ assign_only_idle = true
 # Master toggle for auto-assignment. ENABLED 2026-05-07 after pinned-wrapper bleed validation 4/4 CWDs identical.
 auto_assign = true
 
-# Defaults applied to every session unless overridden in
-# [coordinator.session.<name>] below. Reserved namespace; NTM may not honor
-# this layer in older builds — global block above is the load-bearing one.
-[coordinator.session_default]
-auto_assign = true
-send_digests = true
-conflict_notify = true
-conflict_negotiate = true
-
-# Per-session overrides. Empty by default. Add blocks like:
-#
-#   [coordinator.session.flywheel]
-#   idle_threshold = 180
-#
-# only when a session has a documented reason to deviate.
+# Per-session coordinator tables are intentionally not emitted here. Current
+# NTM builds treat unknown nested coordinator tables as a config-load failure
+# and fall back to runtime defaults. Keep the live-consumed block flat.

@@ -1,0 +1,71 @@
+{
+  "schema": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-zzx9",
+  "closed_at": "2026-05-15T08:29:42Z",
+  "status": "closed",
+  "summary": "Closed Codex #20875/DCG sibling tracking after current-state re-evaluation: upstream remains closed, Joshua's sibling comment exists, local DCG doctrine remains necessary, and the volatile /tmp receipt is superseded by canonical evidence.",
+  "acceptance": {
+    "ag1_comment_on_codex_20875": "pass",
+    "ag2_reevaluate_dcg_redirect_doctrine_after_upstream_resolution": "pass_keep_local_doctrine",
+    "ag3_tmp_receipt": "superseded_by_canonical_evidence",
+    "jeff_lens_version_pins": "pass_current_state",
+    "public_lens_acceptance_addressed": "pass"
+  },
+  "current_state": {
+    "upstream_issue": "https://github.com/openai/codex/issues/20875",
+    "upstream_state": "CLOSED",
+    "upstream_closed_at": "2026-05-03T19:59:15Z",
+    "joshua_comment_at": "2026-05-04T10:58:28Z",
+    "codex_cli_version": "codex-cli 0.130.0",
+    "dcg_path_version": "0.5.1",
+    "dcg_cargo_version": "0.3.0"
+  },
+  "decision": {
+    "dcg_doctrine_change": "none",
+    "reason": "Codex #20875 was closed as an internal fork fix rather than public upstream behavior, and Flywheel's local DCG prose-trigger class remains orthogonal: DCG still protects shell prose in bead/dispatch bodies. The local structural gate now catches and routes that class directly.",
+    "canonical_replacement_for_tmp_receipt": ".flywheel/evidence/flywheel-zzx9/report.md plus this closeout receipt"
+  },
+  "evidence": [
+    {
+      "command": "gh issue view 20875 --repo openai/codex --json number,title,state,url,createdAt,updatedAt,closedAt,comments",
+      "result": "issue CLOSED at 2026-05-03T19:59:15Z; JYeswak sibling evidence comment present at 2026-05-04T10:58:28Z"
+    },
+    {
+      "command": "codex --version",
+      "result": "codex-cli 0.130.0"
+    },
+    {
+      "command": "DCG_NO_COLOR=1 dcg --version",
+      "result": "0.5.1"
+    },
+    {
+      "command": "DCG_NO_COLOR=1 /Users/josh/.cargo/bin/dcg --version",
+      "result": "dcg v0.3.0"
+    },
+    {
+      "command": "bash .flywheel/tests/test-dcg-prose-trigger-strip.sh",
+      "result": "SUMMARY pass=11 fail=0"
+    },
+    {
+      "command": "bash tests/failure-class-emit.sh",
+      "result": "Summary: 15 passed, 0 failed"
+    },
+    {
+      "command": ".flywheel/scripts/memory-rule-gate-parity-detector.sh check --json | jq '{remaining: ((.partial_rules + .unwired_rules) | map(select(.memory_path | endswith(\"feedback_dcg_prose_trigger_strip_dangerous_substrings.md\"))) | length), wired, partial, unwired, total_meta_rules}'",
+      "result": "remaining=0, wired=64, partial=22, unwired=19, total_meta_rules=105"
+    }
+  ],
+  "did": [
+    "Verified current upstream issue state and Joshua sibling evidence comment.",
+    "Pinned current Codex CLI and DCG versions.",
+    "Re-evaluated the local workaround more than one week after upstream closure.",
+    "Kept local DCG doctrine and the structural prose-trigger gate because the failure mode still belongs to local dispatch/bead prose safety, not only Codex exec_command quoting.",
+    "Validated the structural gate and failure-class routing tests."
+  ],
+  "didnt": [
+    "Did not remove DCG redirect/prose doctrine.",
+    "Did not edit Jeffrey-owned DCG substrate.",
+    "Did not rely on volatile /tmp evidence as the durable close proof."
+  ],
+  "gaps": []
+}

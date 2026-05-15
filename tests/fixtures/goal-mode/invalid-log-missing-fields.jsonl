@@ -1,0 +1,5 @@
+{"ts":"2026-05-15T00:00:01Z","cycle":"ACT","event":"operator-input","detail":"missing receipt field for ACT cycle"}
+{"ts":"2026-05-15T00:00:02Z","cycle":"ACCRETE","event":"doctrine-refinement","detail":"missing artifact field","reusable_because":"x"}
+{"ts":"2026-05-15T00:00:03Z","cycle":"BADCYCLE","event":"unknown","detail":"cycle not in enum","receipt":"x"}
+{"ts":"NOT-A-VALID-TIMESTAMP","cycle":"ACT","event":"x","detail":"bad timestamp","receipt":"x"}
+{"ts":"2026-05-15T00:00:05Z","cycle":"ACT","event":"CamelCaseBad","detail":"event not kebab-case","receipt":"x"}

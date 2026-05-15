@@ -1,0 +1,75 @@
+{
+  "schema_version": "flywheel.doctrine_propagation_ownership_repair.v1",
+  "ts": "20260515T164547Z",
+  "bead_id": "flywheel-rhdcq",
+  "decision": "ownership_gate_repaired_no_blind_peer_apply",
+  "fix": {
+    "source_manifest_authority": true,
+    "explicit_target_manifest_override": true,
+    "flywheel_owned_substrate_can_propagate_without_target_manifest": true,
+    "product_owned_paths_remain_out_of_scope": true
+  },
+  "live_dry_run": {
+    "status": "drift_detected",
+    "mode": "check",
+    "target_count": 5,
+    "drifted_count": 277,
+    "canonical_drifted_count": 4,
+    "root_drifted_count": 4,
+    "managed_file_drifted_count": 266,
+    "security_settings_drifted_count": 1,
+    "ownership_blocked_count": 0,
+    "errors_count": 0,
+    "target_discovery_timeout_count": 0,
+    "repos": [
+      "/Users/josh/Developer/alpsinsurance",
+      "/Users/josh/Developer/clutterfreespaces",
+      "/Users/josh/Developer/mobile-eats",
+      "/Users/josh/Developer/polymarket-pico-z",
+      "/Users/josh/Developer/vrtx"
+    ],
+    "per_repo": [
+      {
+        "repo": "/Users/josh/Developer/alpsinsurance",
+        "canonical": 1,
+        "root": 1,
+        "managed": 33,
+        "security": 0
+      },
+      {
+        "repo": "/Users/josh/Developer/clutterfreespaces",
+        "canonical": 1,
+        "root": 1,
+        "managed": 137,
+        "security": 1
+      },
+      {
+        "repo": "/Users/josh/Developer/mobile-eats",
+        "canonical": 1,
+        "root": 1,
+        "managed": 33,
+        "security": 0
+      },
+      {
+        "repo": "/Users/josh/Developer/polymarket-pico-z",
+        "canonical": 1,
+        "root": 1,
+        "managed": 33,
+        "security": 0
+      },
+      {
+        "repo": "/Users/josh/Developer/vrtx",
+        "canonical": 0,
+        "root": 0,
+        "managed": 30,
+        "security": 0
+      }
+    ]
+  },
+  "dry_run_sha256": "ecbe9af85aa2fa36f0a72283933b4473cea6542cb9a1a13e4a003378a83934cf",
+  "peer_apply": {
+    "applied": false,
+    "reason": "peer worktrees are active/dirty; do not overwrite uncommitted peer work blindly",
+    "next_safe_action": "run targeted apply in each repo after repo-local owner/session ack or clean Flywheel-owned substrate window"
+  }
+}

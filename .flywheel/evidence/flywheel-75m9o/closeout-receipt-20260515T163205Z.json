@@ -1,0 +1,52 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-75m9o",
+  "closed_at": "2026-05-15T16:32:05Z",
+  "closure_type": "explicit_managed_skip",
+  "summary": "Closed the Flywheel blocker after SkillOS supplied a formal JSM validate/push skip receipt and Flywheel added a verifier that compares the receipt against live JSM validation output. This is not a JSM-publishable claim; it is a managed non-publish decision for v1.",
+  "skillos_receipt": {
+    "path": "/Users/josh/Developer/skillos/state/jsm-validate-skip-receipt-agent-ergonomics-20260515T2200Z.json",
+    "sha256": "41e0505cd298d4cde7b1736d6bc276948eb20e5106c89cb087c711d668ba8997",
+    "schema_version": "skillos.jsm_validate_skip_receipt.v1",
+    "skip_decision": "explicit_skip_jsm_validate_for_this_skill_v1"
+  },
+  "verified_current_failures": [
+    "JSM_VALIDATE_FAIL_DIR_NAME_MISMATCH",
+    "JSM_VALIDATE_FAIL_FILE_COUNT_OVER_50"
+  ],
+  "verifier": {
+    "path": ".flywheel/scripts/verify-skillos-jsm-skip-receipt.py",
+    "sha256": "3acf9f4fd3e27268d2c32f22ceba9e4862e7544247a68f0178846ae8feb55ab8"
+  },
+  "test": {
+    "path": "tests/verify-skillos-jsm-skip-receipt.sh",
+    "sha256": "d5559f171c8c3356efdd76de44283299de9b1ca14c3b99e6ac24faf77c89a4a7",
+    "result": "SUMMARY pass=4 fail=0"
+  },
+  "live_verification": {
+    "command": ".flywheel/scripts/verify-skillos-jsm-skip-receipt.py --json",
+    "status": "pass",
+    "covered_codes": [
+      "JSM_VALIDATE_FAIL_DIR_NAME_MISMATCH",
+      "JSM_VALIDATE_FAIL_FILE_COUNT_OVER_50"
+    ],
+    "warnings": [
+      {
+        "code": "RECEIPT_SKILL_DIR_LABEL_MISMATCH",
+        "detail": "receipt label missing second 'agent'; SkillOS notified, warning-only because live failure coverage is exact"
+      }
+    ]
+  },
+  "boundary": {
+    "not_claimed": [
+      "JSM validation pass",
+      "JSM push success",
+      "skill package <= 50 files",
+      "public publishability of this skill"
+    ],
+    "claimed": [
+      "SkillOS made an explicit managed-skip decision",
+      "Flywheel can mechanically verify the skip receipt covers the current live JSM failures"
+    ]
+  }
+}

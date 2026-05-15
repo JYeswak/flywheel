@@ -130,6 +130,19 @@ def callback_rows(rows, start, end):
     return out
 
 
+def dispatch_rework_counts(dispatches):
+    task_counts = {}
+    for row in dispatches:
+        task_id = row.get("task_id")
+        if not task_id:
+            continue
+        key = str(task_id)
+        task_counts[key] = task_counts.get(key, 0) + 1
+    redispatched_task_ids = sum(1 for count in task_counts.values() if count > 1)
+    redispatch_rows = sum(count - 1 for count in task_counts.values() if count > 1)
+    return len(task_counts), redispatched_task_ids, redispatch_rows
+
+
 def validation_rows(validation_dir, start, end):
     rows = []
     root = Path(validation_dir).expanduser()
@@ -270,11 +283,14 @@ def build_period(args, period, now):
     callback_task_ids = {str(row.get("task_id")) for row in callbacks if row.get("task_id")}
     callback_task_ids |= {str(row.get("dispatch_id")) for row in callbacks if row.get("dispatch_id")}
     callbacks_for_dispatches = sum(1 for task_id in by_task if task_id in callback_task_ids)
+    unique_dispatch_task_ids, redispatched_task_ids, redispatch_rows = dispatch_rework_counts(dispatches)
     reliability = safe_ratio(callbacks_for_dispatches, len(by_task))
     faithfulness = safe_ratio(valid_pass, valid_pass + valid_fail + valid_unknown)
     skill_citations = skill_citation_count(dispatches + callbacks + validations)
     structural_fixes = structural_fix_count(dispatches, callbacks, incident_commits, closed)
-    rework_ratio = round((valid_fail + len(fuckups)) / max(len(dispatches), 1), 4)
+    rework_event_count = valid_fail + redispatch_rows
+    rework_ratio = round(rework_event_count / max(len(dispatches), 1), 4)
+    architecture_debt_observation_ratio = safe_ratio(len(fuckups), max(len(dispatches), 1))
     founder_dispose_mentions = sum(1 for row in dispatches + callbacks if "joshua-dispose" in json.dumps(row).lower() or "founder" in json.dumps(row).lower())
     founder_dispose_pct = round(100 * founder_dispose_mentions / max(len(dispatches) + len(callbacks), 1), 2)
     leverage_now = safe_ratio(structural_fixes + skill_citations, max(len(dispatches), 1))
@@ -320,13 +336,14 @@ def build_period(args, period, now):
         {"metric": "coordination", "trend": True, "cohort": True, "counterfactual": "more messages can mean confusion unless callbacks close cleanly"},
         {"metric": "drift_authoring", "trend": True, "cohort": True, "counterfactual": "fuckups without structural fixes indicate architecture debt"},
         {"metric": "founder_dispose_pct", "trend": True, "cohort": True, "counterfactual": "flat or rising founder decisions means company-outgrowing-founder is failing"},
-        {"metric": "rework_ratio", "trend": True, "cohort": True, "counterfactual": "fast completion can hide rework unless validated failures are counted"},
+        {"metric": "rework_ratio", "trend": True, "cohort": True, "counterfactual": "fast completion can hide rework unless validation failures and duplicate dispatch attempts are counted"},
+        {"metric": "architecture_debt_observation_ratio", "trend": True, "cohort": True, "counterfactual": "rework can look low while unresolved architecture-debt observations accumulate"},
     ]
     unpaired = sum(1 for item in metric_contracts if not (item["trend"] and item["cohort"] and item["counterfactual"]))
     status = "green"
-    if shaming_hits or unpaired > 0 or rework_ratio > 1 or founder_dispose_pct > 50:
+    if shaming_hits or unpaired > 0 or rework_ratio > 1 or architecture_debt_observation_ratio > 1 or founder_dispose_pct > 50:
         status = "red"
-    elif rework_ratio > 0.3 or founder_dispose_pct > 20 or valid_fail > valid_pass:
+    elif rework_ratio > 0.3 or architecture_debt_observation_ratio > 0.3 or founder_dispose_pct > 20 or valid_fail > valid_pass:
         status = "yellow"
 
     work_types = {}
@@ -345,7 +362,7 @@ def build_period(args, period, now):
         "window_end": iso(end),
         "status": status,
         "architecture_health_status": status,
-        "dashboard_line": f"Architecture Health: {status} | leverage_trend={leverage_trend_pct:+.0f}%/30d | rework_ratio={rework_ratio:.2f} | founder_dispose_pct={founder_dispose_pct:.0f}%",
+        "dashboard_line": f"Architecture Health: {status} | leverage_trend={leverage_trend_pct:+.0f}%/30d | rework_ratio={rework_ratio:.2f} | debt_observation_ratio={architecture_debt_observation_ratio:.2f} | founder_dispose_pct={founder_dispose_pct:.0f}%",
         "architecture_health_metric_unpaired_count": unpaired,
         "agent_shaming_report_detected": bool(shaming_hits),
         "agent_shaming_report_paths": shaming_hits,
@@ -358,6 +375,11 @@ def build_period(args, period, now):
             "validation_fail": valid_fail,
             "validation_unknown": valid_unknown,
             "fuckup_rows": len(fuckups),
+            "architecture_debt_observation_rows": len(fuckups),
+            "unique_dispatch_task_ids": unique_dispatch_task_ids,
+            "redispatched_task_ids": redispatched_task_ids,
+            "redispatch_rows": redispatch_rows,
+            "rework_event_count": rework_event_count,
             "closed_beads": len(closed),
             "incident_commits": incident_commits,
             "identity_vectors": len(per_agent),
@@ -370,6 +392,7 @@ def build_period(args, period, now):
             "coordination": coordination_clean,
             "drift_authoring": safe_ratio(structural_fixes, max(len(fuckups), 1)),
             "rework_ratio": rework_ratio,
+            "architecture_debt_observation_ratio": architecture_debt_observation_ratio,
             "founder_dispose_pct": founder_dispose_pct,
             "leverage_trend_30d_pct": leverage_trend_pct,
         },

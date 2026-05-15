@@ -1,0 +1,67 @@
+{
+  "schema": "flywheel.blocker_repair_receipt.v1",
+  "bead": "flywheel-glrlb",
+  "generated_at": "2026-05-15T16:55:55Z",
+  "status": "repaired_after_false_green",
+  "source_blocker": "flywheel-x5f0e",
+  "target_repo": "/Users/josh/Developer/alpsinsurance",
+  "runtime_surface": "/Users/josh/.claude/skills/git-stash-janitor",
+  "portable_patch_ref": ".flywheel/evidence/flywheel-glrlb/git-stash-janitor-script-patch-20260515T165555.diff",
+  "changed_files": [
+    "/Users/josh/.claude/skills/git-stash-janitor/scripts/verify-bundle.sh",
+    "/Users/josh/.claude/skills/git-stash-janitor/scripts/polish-bar-check.sh"
+  ],
+  "artifact_hashes": {
+    "verify_bundle_sha256": "5e90e1ddf80f3c4f4fdf758e2d01c6a65434339ab87acdba2da1d97acbdc8771",
+    "polish_bar_check_sha256": "ff130f7e0b54e4f1d19343e20498261efb0c2ff00041748811b9c26fd27246a3"
+  },
+  "root_causes": [
+    "verify-bundle treated an existing empty third-parent stash tree plus an empty materialized directory as missing instead of byte-equal empty",
+    "polish-bar-check counted canonical diff files with GNU find -regextype, which fails on macOS/BSD find",
+    "polish-bar-check treated the discovery classification column as the final apply decision, making conservative unknown/no-symbol rows fail even when apply_check was clean or reject"
+  ],
+  "repairs": [
+    "verify-bundle now compares expected and materialized untracked manifests even when both are empty",
+    "polish-bar-check now counts canonical NNN.diff files with a portable basename regex",
+    "polish-bar-check verdict evidence now validates the apply_check decision column instead of the discovery label"
+  ],
+  "non_destructive_boundary": {
+    "alps_source_edits": false,
+    "stash_drops": false,
+    "stash_applies": false,
+    "pushes": false
+  },
+  "validation": [
+    {
+      "command": "bash -n /Users/josh/.claude/skills/git-stash-janitor/scripts/verify-bundle.sh /Users/josh/.claude/skills/git-stash-janitor/scripts/polish-bar-check.sh",
+      "status": "pass"
+    },
+    {
+      "command": "shellcheck -x -P /Users/josh/.claude/skills/git-stash-janitor/scripts /Users/josh/.claude/skills/git-stash-janitor/scripts/verify-bundle.sh /Users/josh/.claude/skills/git-stash-janitor/scripts/polish-bar-check.sh",
+      "status": "pass"
+    },
+    {
+      "command": "bash /Users/josh/.claude/skills/git-stash-janitor/scripts/verify-bundle.sh /Users/josh/Developer/alpsinsurance",
+      "status": "pass",
+      "summary": {
+        "total_stashes": 82,
+        "ok_rows": 140,
+        "mismatch_or_missing": 0
+      }
+    },
+    {
+      "command": "bash /Users/josh/.claude/skills/git-stash-janitor/scripts/polish-bar-check.sh /Users/josh/Developer/alpsinsurance",
+      "status": "pass",
+      "summary": {
+        "total_fails": 0,
+        "has_untracked_rows_verified": 58,
+        "apply_decision_rows": 82
+      }
+    }
+  ],
+  "jsm_status": {
+    "listed_by_jsm": false,
+    "validate_status": "fail_existing_package_shape",
+    "validate_note": "jsm validate reports the local git-stash-janitor skill has 81 files, exceeding the 50-file package limit; this predates the script repair and was not broadened in this slice."
+  }
+}

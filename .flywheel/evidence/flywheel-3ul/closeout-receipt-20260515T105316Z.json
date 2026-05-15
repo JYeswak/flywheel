@@ -1,0 +1,41 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-3ul",
+  "title": "autoloop-anti-monoculture",
+  "closed_at": "2026-05-15T10:53:16Z",
+  "decision": "close_as_implemented_by_current_autoloop_fairness_controls",
+  "autonomy": "autonomous",
+  "original_acceptance": [
+    "Stop repeated autoloop selection of the same repo after consecutive no-decision ticks.",
+    "Act on the fleet_monoculture_detected class with a rotation/fairness mechanism.",
+    "Preserve machine-readable evidence so the loop can explain why it did or did not dispatch."
+  ],
+  "evidence": [
+    {
+      "surface": "/Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop",
+      "proof": "Current scan logic reads cooldowns.same_repo_seconds, defaults to 14400 seconds, marks repeated same-repo queue writes as cooldown_active, sets cooldown.reason=same_repo_cooldown, and blocks dispatch_allowed while cooldown is active."
+    },
+    {
+      "surface": "tests/flywheel-autoloop-canonical-cli.sh",
+      "proof": "Fixture test writes a queue entry, scans again, and asserts threshold=cooldown, cooldown.active=true, and dispatch_allowed=false."
+    },
+    {
+      "surface": ".flywheel/scripts/autoloop-target-selector.sh",
+      "proof": "Topology-driven selector keeps eligible sessions deterministic and read-only; it refuses missing pane/status rows instead of blindly dispatching into stale topology."
+    }
+  ],
+  "validation": [
+    {
+      "command": "FLYWHEEL_AUTOLOOP_BIN=/Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop CANONICAL_CLI_CHECKER=/Users/josh/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh bash tests/flywheel-autoloop-canonical-cli.sh",
+      "result": "pass",
+      "summary": "same-repo cooldown, dispatch suppression, canonical CLI checker, exit-code help, repair dry-run, and scorecard all passed"
+    },
+    {
+      "command": "bash tests/autoloop-target-selector-e2e.sh",
+      "result": "pass",
+      "summary": "SUMMARY pass=13 fail=0"
+    }
+  ],
+  "residual_risk": "The current mechanism is cooldown/fairness based rather than a literal fleet_monoculture_detected flag consumer. It still satisfies the control objective: repeated same-repo selection is suppressed and explainable before dispatch.",
+  "close_reason": "Implemented by autoloop same-repo cooldown/fairness controls and topology selector proof; tests passed; AUTONOMY: autonomous"
+}

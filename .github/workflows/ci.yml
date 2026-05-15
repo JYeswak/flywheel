@@ -39,9 +39,11 @@ jobs:
           set -euo pipefail
           bash tests/public-top-level-files.sh
           bash tests/public-surface-gap-scanner.sh
+          bash tests/public-evidence-fingerprints.sh
           bash tests/changelog.sh
           bash tests/github-workflows.sh
           bash tests/naming-conventions.sh
+          bash tests/hosted-install-contract.sh
           bash tests/context-routing-discipline.sh
           bash tests/agent-lane-probe.sh
           # tests/isolated-agent-lane-smoke.sh is substrate-coupled: its script
@@ -73,6 +75,11 @@ jobs:
           bash tests/true-publication-registry-validate.sh
           bash tests/preflight-fixtures.sh
           bash tests/journey-smoke.sh
+          bash tests/presence-queue.sh
+          bash tests/goal-mode.sh
+          bash tests/josh-requests-reverse-lookup-canonical-cli.sh
+          bash tests/goal-build-canonical-cli.sh
+          bash tests/trauma-claim-emitter-canonical-cli.sh
 
       - name: Shell lint
         run: |
@@ -81,6 +88,8 @@ jobs:
             install.sh \
             uninstall.sh \
             scripts/preflight.sh \
+            .flywheel/scripts/goal-build.sh \
+            .flywheel/scripts/trauma-claim-emitter.sh \
             scripts/local-actions-preflight.sh \
             scripts/journey-smoke.sh \
             scripts/agent-lane-probe.sh \
@@ -89,9 +98,11 @@ jobs:
             tests/installer-smoke.sh \
             tests/public-top-level-files.sh \
             tests/public-surface-gap-scanner.sh \
+            tests/public-evidence-fingerprints.sh \
             tests/changelog.sh \
             tests/github-workflows.sh \
             tests/naming-conventions.sh \
+            tests/hosted-install-contract.sh \
             tests/context-routing-discipline.sh \
             tests/agent-lane-probe.sh \
             tests/isolated-agent-lane-smoke.sh \
@@ -114,7 +125,12 @@ jobs:
             tests/publication-goal-completion-audit.sh \
             tests/publication-readiness.sh \
             tests/true-publication-registry-validate.sh \
-            tests/preflight-fixtures.sh
+            tests/preflight-fixtures.sh \
+            tests/presence-queue.sh \
+            tests/goal-mode.sh \
+            tests/josh-requests-reverse-lookup-canonical-cli.sh \
+            tests/goal-build-canonical-cli.sh \
+            tests/trauma-claim-emitter-canonical-cli.sh
 
       - name: Python syntax lint
         run: |
@@ -132,7 +148,13 @@ jobs:
             scripts/contact_route_probe.py \
             scripts/publication_readiness.py \
             scripts/probe_repo_story_portability.py \
+            scripts/presence_queue.py \
             scripts/render_repo_owner_brief.py \
+            scripts/simulate_goal_cycles.py \
+            scripts/validate_goal_text.py \
+            scripts/validate_watch_log.py \
+            .flywheel/scripts/josh-requests-reverse-lookup.py \
+            .flywheel/scripts/goal_grade.py \
             scripts/validate_cutover_receipts.py \
             scripts/validate_user_journey_pack.py \
             scripts/validate_story_system_package.py

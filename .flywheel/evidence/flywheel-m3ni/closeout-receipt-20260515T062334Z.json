@@ -1,0 +1,94 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-m3ni",
+  "closed_at": "2026-05-15T06:23:34Z",
+  "status": "closed",
+  "summary": "Backfilled the two required Flywheel-shipped skill handoffs to SkillOS and made the auditor treat durable AgentMail handoff sends as coverage before SkillOS writes its own optional state receipt.",
+  "required_skills": [
+    "info-source-watchtower",
+    "codex-watchtower"
+  ],
+  "agent_mail": {
+    "skillos_project_key": "/Users/josh/Developer/skillos",
+    "sender": "RedLantern",
+    "recipient": "GentleCompass",
+    "contact_request_message_id": 529,
+    "thread_id": "529",
+    "handoff_message_ids": {
+      "info-source-watchtower": 530,
+      "codex-watchtower": 531
+    },
+    "thread_resource": "resource://thread/529?project=users-josh-developer-skillos&include_bodies=true"
+  },
+  "flywheel_dispatch_log_rows": [
+    {
+      "event": "skillos_handoff_sent",
+      "skill": "info-source-watchtower",
+      "message_id": 530,
+      "project_key": "/Users/josh/Developer/skillos"
+    },
+    {
+      "event": "skillos_handoff_sent",
+      "skill": "codex-watchtower",
+      "message_id": 531,
+      "project_key": "/Users/josh/Developer/skillos"
+    }
+  ],
+  "acceptance_gates": [
+    {
+      "id": "AG1",
+      "description": "info-source-watchtower handoff sent and visible in SkillOS AgentMail thread",
+      "status": "pass",
+      "evidence": "message_id=530 thread_id=529 recipient=GentleCompass"
+    },
+    {
+      "id": "AG2",
+      "description": "codex-watchtower handoff sent as child/parent watchtower pair",
+      "status": "pass",
+      "evidence": "message_id=531 thread_id=529 recipient=GentleCompass"
+    },
+    {
+      "id": "AG3",
+      "description": "All 30d required gaps are either handoff-sent or intentional skip",
+      "status": "pass",
+      "evidence": ".flywheel/scripts/audit-skill-handoff-coverage.sh --json returns gaps=[] intentional_skips=[]"
+    },
+    {
+      "id": "AG4",
+      "description": "Re-running audit script shows zero gaps",
+      "status": "pass",
+      "command": ".flywheel/scripts/audit-skill-handoff-coverage.sh --json"
+    },
+    {
+      "id": "AG5",
+      "description": "ALPS dispatch boundary respected",
+      "status": "pass",
+      "evidence": "Only Flywheel dispatch-log/evidence/test/script rows and AgentMail messages were written; no ALPS repo writes and no SkillOS repo state files were mutated."
+    }
+  ],
+  "validation": [
+    {
+      "command": "bash tests/audit-skill-handoff-coverage.sh",
+      "status": "pass",
+      "result": "9/0"
+    },
+    {
+      "command": "bash tests/handoff-skill-to-skillos.sh",
+      "status": "pass",
+      "result": "10/0"
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/audit-skill-handoff-coverage.sh tests/audit-skill-handoff-coverage.sh tests/handoff-skill-to-skillos.sh",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check && br dep cycles",
+      "status": "pass"
+    }
+  ],
+  "unrelated_dirty_files_preserved": [
+    ".flywheel/AGENTS-CANONICAL.md",
+    ".flywheel/MISSION.md",
+    "templates/flywheel-install/AGENTS.md"
+  ]
+}

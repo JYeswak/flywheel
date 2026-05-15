@@ -1,0 +1,52 @@
+{
+  "schema": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-gve5",
+  "closed_at": "2026-05-15T08:32:50Z",
+  "close_class": "upstream_fixed_and_absorbed",
+  "decision": "close_as_subsumed_by_upstream_fix_and_local_absorb",
+  "upstream": {
+    "repo": "Dicklesworthstone/ntm",
+    "issue": 122,
+    "url": "https://github.com/Dicklesworthstone/ntm/issues/122",
+    "state": "CLOSED",
+    "closed_at": "2026-05-07T06:48:03Z",
+    "fix_commit": "c0f8f222",
+    "owner_comment_summary": "DryRun was plumbed through AutoReassignOptions and watch-mode dispatch sites so watch mode can preview without pane mutation."
+  },
+  "local_absorb": {
+    "absorbing_bead": "flywheel-qv2fs",
+    "absorbing_bead_status": "closed",
+    "installed_ntm_version": "v1.14.0-479-g7d1fc78e",
+    "installed_ntm_commit": "7d1fc78ebf19af12b193c972d25016ec707d8f87",
+    "daemon_policy": "operator-driven dispatch remains canonical; daemon live flip requires explicit Joshua approval",
+    "plan_ref": ".flywheel/PLANS/auto-assign-daemon-reinstatement-2026-05-08.md",
+    "test_ref": "tests/test_ntm_assign_watch_dry_run_preflight.sh"
+  },
+  "validation": [
+    {
+      "command": "gh issue view 122 --repo Dicklesworthstone/ntm --json number,title,state,url,createdAt,updatedAt,closedAt,comments",
+      "result": "pass",
+      "evidence": "issue closed; owner fix comment and JYeswak dogfood comment present"
+    },
+    {
+      "command": "ntm version",
+      "result": "pass",
+      "evidence": "ntm version v1.14.0-479-g7d1fc78e commit 7d1fc78ebf19af12b193c972d25016ec707d8f87"
+    },
+    {
+      "command": "br show flywheel-qv2fs --json",
+      "result": "pass",
+      "evidence": "absorbing bead closed with dry-run preflight plan and daemon-disabled policy"
+    },
+    {
+      "command": "bash tests/test_ntm_assign_watch_dry_run_preflight.sh",
+      "result": "pass",
+      "evidence": "fake ntm preflight emits Would assign, includes --watch --dry-run --limit=1 --stop-when-done, and leaves pane activity unchanged"
+    }
+  ],
+  "non_actions": [
+    "did not run the historical live mutating repro command",
+    "did not enable the auto-assign daemon",
+    "did not flip auto_assign=true"
+  ]
+}

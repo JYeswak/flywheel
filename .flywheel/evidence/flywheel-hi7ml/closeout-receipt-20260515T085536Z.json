@@ -1,0 +1,82 @@
+{
+  "schema": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-hi7ml",
+  "closed_at": "2026-05-15T08:55:36Z",
+  "close_class": "external_repo_package_extraction",
+  "source_plan": ".flywheel/audit/flywheel-5e4jf/recommendation.md#7A",
+  "target_repo": "/Users/josh/Developer/n8n-deploy-kit",
+  "target_branch": "feat/phase-0-canonical-stamp",
+  "target_commit": "d964af8b6b6607031049cc5ca7624c39a18eff89",
+  "target_pr": "https://github.com/JYeswak/n8n-deploy-kit/pull/1",
+  "delivered": {
+    "packages_validate": [
+      "packages/validate/package.json",
+      "packages/validate/tsconfig.json",
+      "packages/validate/README.md",
+      "packages/validate/ALGORITHM.md",
+      "packages/validate/src/types.ts",
+      "packages/validate/src/schemas.ts",
+      "packages/validate/src/workflow.ts",
+      "packages/validate/src/semantic.ts",
+      "packages/validate/src/connection.ts",
+      "packages/validate/src/configuration.ts",
+      "packages/validate/src/firewall.ts",
+      "packages/validate/src/orchestration.ts",
+      "packages/validate/src/pitfall.ts",
+      "packages/validate/src/index.ts"
+    ],
+    "deploy_integration": [
+      "packages/deploy/package.json",
+      "packages/deploy/src/validator.ts",
+      "packages/deploy/README.md"
+    ],
+    "docs_updated": [
+      "README.md",
+      "ARCHITECTURE.md"
+    ]
+  },
+  "source_handling": {
+    "zeststream_v2_fresh": "extracted the workflow-factory validation contract into portable package boundaries instead of copying app-alias-coupled validators wholesale",
+    "schemas": "added Zod workflow/node/connection schemas directly under packages/validate/src/schemas.ts",
+    "layers": "implemented workflow, semantic, connection, configuration, firewall, orchestration, and pitfall layers with explicit weights in ALGORITHM.md"
+  },
+  "validation": [
+    {
+      "repo": "n8n-deploy-kit",
+      "command": "npm run check",
+      "result": "pass",
+      "evidence": "TypeScript check passed for @n8n-deploy-kit/deploy and @n8n-deploy-kit/validate"
+    },
+    {
+      "repo": "n8n-deploy-kit",
+      "command": "npx tsx packages/deploy/bin/n8n-deploy.ts scaffold --out \"$tmpdir\" && npx tsx packages/deploy/bin/n8n-deploy.ts validate \"$tmpdir/synthetic-lead-intake.json\"",
+      "result": "pass",
+      "evidence": "seven-layer output reported workflow/semantic/connection/configuration/firewall/orchestration/pitfall all 100/100"
+    },
+    {
+      "repo": "n8n-deploy-kit",
+      "command": "gitleaks detect --no-git --source . --redact --exit-code 1",
+      "result": "pass",
+      "evidence": "no leaks found"
+    },
+    {
+      "repo": "n8n-deploy-kit",
+      "command": "trufflehog filesystem --no-update --fail --json --exclude-paths /tmp/trufflehog-exclude-n8n-deploy-kit.txt .",
+      "result": "pass",
+      "evidence": "verified_secrets=0, unverified_secrets=0 with node_modules excluded"
+    },
+    {
+      "repo": "n8n-deploy-kit",
+      "command": "git diff --check",
+      "result": "pass",
+      "evidence": "no whitespace errors"
+    }
+  ],
+  "boundaries": [
+    "did not author packages/templates; that remains flywheel-4mjw4",
+    "did not add pre-commit secret-scan hooks; that remains flywheel-vlc2h",
+    "did not publish npm packages",
+    "did not flip n8n-deploy-kit public",
+    "did not deploy to a live n8n instance or activate a workflow"
+  ]
+}

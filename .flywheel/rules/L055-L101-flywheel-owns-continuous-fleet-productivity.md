@@ -14,6 +14,15 @@ quiet only when it is genuinely caught up or blocked by something Joshua must
 personally decide or perform. Workers waiting, empty or low ready queues, and
 unfiled findings are not downtime; they are a flywheel:1 action signal.
 
+This ownership is not subordinate to a generic "no cross-repo orchestration"
+shortcut. Flywheel is the source-of-truth repo for fleet operating doctrine, so
+Flywheel-owned doctrine, rules, validation schemas, install templates, and
+transport-gated orchestration packets may cross repo boundaries when the target
+surface is Flywheel-owned or has no conflicting owner declaration. Default-deny
+protects peer-owned product/client surfaces and explicit non-Flywheel ownership;
+it does not block Flywheel from keeping the fleet on the same operating
+doctrine.
+
 **Why:** Joshua's 2026-05-04 directive in memory
 `feedback_flywheel_owns_continuous_productivity_no_downtime_unless_josh_blocker.md`
 states that every project stays productive unless a true Josh-blocker exists,
@@ -80,4 +89,3 @@ script `.flywheel/scripts/peer-orch-productivity-watch.sh`; tests
 (idle-state-class canonical), L92 (audit findings route by data), L98
 (architecture-health measured, not individual agents), and L99
 (worker-recovery SLO).
-

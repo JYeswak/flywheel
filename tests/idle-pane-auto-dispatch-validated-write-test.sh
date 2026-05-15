@@ -44,8 +44,9 @@ run_case() {
 }
 
 run_case dry --dry-run
-if jq -e '.schema_version == "idle-pane-auto-dispatch/v2" and .status == "assigned" and .dry_run == true and .apply == false and .wait.exit_code == 0 and .assign.exit_code == 0' "$TMP/dry.json" >/dev/null \
+if jq -e '.schema_version == "idle-pane-auto-dispatch/v3" and .status == "assigned" and .dry_run == true and .apply == false and .wait.exit_code == 0 and .assign.exit_code == 0' "$TMP/dry.json" >/dev/null \
   && grep -q '^wait fixture --until=idle --any --timeout=1s --json$' "$TMP/dry.argv" \
+  && grep -q '^--robot-activity=fixture --json$' "$TMP/dry.argv" \
   && grep -q '^assign fixture --repo '"$TMP"'/repo-dry --json --limit=1 --dry-run$' "$TMP/dry.argv"; then
   pass "dry_run_waits_then_previews_native_assign"
 else

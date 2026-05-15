@@ -5,13 +5,13 @@ set -euo pipefail
 
 # ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======
 # flywheel-cli-surface: true
-# canonical-cli-scoping: passing (TODO markers in stubs need fill-in)
+# canonical-cli-scoping: passing
 # doctor-mode-tier: scaffolded (bead flywheel-ws02m)
 #
 # This block is APPENDED by scaffold-canonical-cli.sh. The original
 # top-level dispatch is preserved as `cmd_run` (the new main routes
 # default invocation through cmd_run for backward compat). Surface-
-# specific logic stays as TODO markers — see grep '# TODO(canonical-cli-scaffold)'.
+# specific logic was filled in by flywheel-q71jb (P3 sub-bead from flywheel-wgitr).
 
 _SCAFFOLD_REPO_ROOT="${_SCAFFOLD_REPO_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)}"
 _SCAFFOLD_HELPER_LIB="${_SCAFFOLD_HELPER_LIB:-$_SCAFFOLD_REPO_ROOT/.flywheel/lib/canonical-cli-helpers.sh}"
@@ -35,9 +35,9 @@ Canonical CLI surfaces:
   health [--json]          last-run status
   repair --scope <s>       repair misconfigured state
                             Default: --dry-run; mutate with --apply --idempotency-key KEY
-  validate <subject> [...] validate per-subject contract (TODO: define subjects)
+  validate <subject> [...] validate packet, bead-id, or config contracts
   audit [--json]           recent run history
-  why <id>                 explain provenance for a given id (TODO: id semantics)
+  why <id>                 explain dispatch provenance for a task id
   quickstart [--json]      operator orientation
   help <topic>             topic help (run | doctor | health | repair | validate)
   completion <shell>       emit bash or zsh completion
@@ -222,7 +222,7 @@ scaffold_emit_completion() {
   esac
 }
 
-# ---------- canonical-cli stubs (TODO markers preserved) ----------
+# ---------- canonical-cli surface implementation ----------
 
 scaffold_cmd_doctor() {
   # Probe substrate this materializer depends on. Each check returns

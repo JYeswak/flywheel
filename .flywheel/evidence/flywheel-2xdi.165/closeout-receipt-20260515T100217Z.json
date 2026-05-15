@@ -1,0 +1,45 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-2xdi.165",
+  "closed_scope": "Converted canonical-doctrine-sync.sh from gap-hunt wired-but-cold into a canonical receiver-backed alias surface.",
+  "paths": [
+    "tests/canonical-doctrine-sync-canonical-cli.sh"
+  ],
+  "before": {
+    "gap_hunt_probe_matches": [
+      "wired-but-cold:developer-flywheel-.flywheel-scripts-canonical-doctrine-sync.sh"
+    ],
+    "reason": "The alias existed to preserve naming compatibility, but no canonical receiver cited the alias filename."
+  },
+  "after": {
+    "gap_hunt_probe_matches": [],
+    "receiver": "tests/canonical-doctrine-sync-canonical-cli.sh",
+    "coverage": [
+      "alias exists and passes bash syntax",
+      "--info-alias reports canonical target",
+      "--info delegates to sync-canonical-doctrine.sh",
+      "missing target fails closed with rc=2",
+      "no fleet propagation or canonical file mutation"
+    ]
+  },
+  "validation": [
+    {
+      "command": "bash tests/canonical-doctrine-sync-canonical-cli.sh",
+      "result": "pass 6/0"
+    },
+    {
+      "command": "shellcheck tests/canonical-doctrine-sync-canonical-cli.sh",
+      "result": "pass"
+    },
+    {
+      "command": "timeout 180 .flywheel/scripts/gap-hunt-probe.sh --json --dry-run",
+      "result": "pass; no canonical-doctrine-sync or flywheel-2xdi.165 gap_ids"
+    }
+  ],
+  "safety": {
+    "runtime_mutation": false,
+    "fleet_mutation": false,
+    "dirty_canonical_files_touched": false
+  },
+  "autonomy": "autonomous"
+}

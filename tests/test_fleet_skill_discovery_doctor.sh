@@ -2,6 +2,8 @@
 set -euo pipefail
 
 LOOP="${LOOP:-$HOME/.claude/skills/.flywheel/bin/flywheel-loop}"
+MISC_LIB="${FLYWHEEL_MISC_LIB:-$HOME/.claude/skills/.flywheel/lib/misc.sh}"
+DOCTOR_LIB="${FLYWHEEL_DOCTOR_LIB:-$HOME/.claude/skills/.flywheel/lib/portable/core.d/part-02-portable_doctor.sh}"
 TMP="$(mktemp -d -t 5gyv.XXXXXX)"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -24,7 +26,8 @@ run_doctor() {
   FLYWHEEL_SKILL_DISCOVERY_PATH="$discoveries" \
   FLYWHEEL_SKILL_DISCOVERY_DISPATCH_LOG="$dispatch_log" \
   FLYWHEEL_SKILL_DISCOVERY_NOW="2026-05-08T01:00:00Z" \
-    "$LOOP" doctor --repo "$repo" --json >"$out" 2>/dev/null || true
+    bash -c 'source "$1"; doctor_check_fleet_skill_discovery' _ "$MISC_LIB" 2>/dev/null |
+    jq -c '{fleet_skill_discovery:.}' >"$out" || true
 }
 
 repo_missing="$TMP/repo-missing"
@@ -108,5 +111,10 @@ jq -e '
   jq '.fleet_skill_discovery' "$TMP/counts.json" >&2 || true
   fail "expected malformed/top-candidate/pending-action/suspicious-callback fields"
 }
+
+grep -q 'fleet_skill_discovery="$(doctor_check_fleet_skill_discovery)"' "$DOCTOR_LIB" ||
+  fail "portable doctor should call fleet skill discovery doctor check"
+grep -q 'fleet_skill_discovery:$fleet_skill_discovery' "$DOCTOR_LIB" ||
+  fail "portable doctor should expose fleet_skill_discovery in its JSON packet"
 
 printf 'OK fleet skill discovery doctor\n'

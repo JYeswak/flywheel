@@ -55,7 +55,7 @@ assert_jq "$TMP/examples.json" '.examples | length >= 3' "examples_surface"
 assert_jq "$TMP/schema.json" '.properties.workers.type == "array" and .properties.schema_version.const == "orch-worker-identity/v1"' "schema_surface"
 
 "$SCRIPT" --fleet --dry-run --json --loop-dir "$TMP/loops" --topology "$TMP/topology.jsonl" --agent-mail-dir "$TMP/agent-mail" --out-dir "$TMP/out" >"$TMP/dry.json"
-assert_jq "$TMP/dry.json" '.mode == "dry-run" and .manifests_written == 0 and .sessions.flywheel.workers == 2 and .sessions.flywheel.registered == 1 and .sessions.{capability-control-plane}.registered == 1' "dry_run_fleet_summary"
+assert_jq "$TMP/dry.json" '.mode == "dry-run" and .manifests_written == 0 and .sessions.flywheel.workers == 2 and .sessions.flywheel.registered == 1 and .sessions["{capability-control-plane}"].registered == 1' "dry_run_fleet_summary"
 test ! -e "$TMP/out/flywheel.json" && pass "dry_run_does_not_write" || fail "dry_run_does_not_write"
 
 "$SCRIPT" --fleet --apply --json --loop-dir "$TMP/loops" --topology "$TMP/topology.jsonl" --agent-mail-dir "$TMP/agent-mail" --out-dir "$TMP/out" >"$TMP/apply.json"

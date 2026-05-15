@@ -1,0 +1,70 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-btw0h",
+  "closed_scope": "Raised flywheel-autoloop canonical-cli-scorecard from red to green without changing default supervisor behavior.",
+  "runtime_commit": {
+    "repo": "/Users/josh/.claude",
+    "commit": "1ee082c",
+    "message": "fix(flywheel): complete autoloop CLI scorecard [flywheel-btw0h]",
+    "paths": [
+      "skills/.flywheel/bin/flywheel-autoloop"
+    ]
+  },
+  "flywheel_repo_paths": [
+    "tests/flywheel-autoloop-canonical-cli.sh"
+  ],
+  "before": {
+    "scorecard_command": "bash ~/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh score /Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop --domain-exit-codes --json",
+    "composite_score": 745,
+    "status": "fail",
+    "self_doc_content_minimums": 930,
+    "dry_run_json_fixture": 650,
+    "domain_exit_code_validator": 0,
+    "direct_probe_failures": [
+      "flywheel-autoloop help exit-codes",
+      "flywheel-autoloop --exit-codes"
+    ]
+  },
+  "after": {
+    "scorecard_command": "bash ~/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh score /Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop --domain-exit-codes --json",
+    "composite_score": 1000,
+    "status": "pass",
+    "self_doc_content_minimums": 1000,
+    "dry_run_json_fixture": 1000,
+    "domain_exit_code_validator": 1000,
+    "surfaces": [
+      "flywheel-autoloop help exit-codes",
+      "flywheel-autoloop --exit-codes",
+      "flywheel-autoloop repair --dry-run --json"
+    ]
+  },
+  "validation": [
+    {
+      "command": "bash -n /Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop",
+      "result": "pass"
+    },
+    {
+      "command": "FLYWHEEL_AUTOLOOP_BIN=/Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop CANONICAL_CLI_CHECKER=/Users/josh/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh bash tests/flywheel-autoloop-canonical-cli.sh",
+      "result": "pass"
+    },
+    {
+      "command": "bash ~/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh score /Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop --domain-exit-codes --json",
+      "result": "pass composite_score=1000 dry_run_json_fixture=1000 domain_exit_code_validator=1000"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    }
+  ],
+  "safety": {
+    "no_arg_supervisor_behavior_preserved": true,
+    "passive_help_doctor_health_preserved": true,
+    "repair_dry_run_actual_actions_empty": true,
+    "new_mutating_behavior": false
+  },
+  "autonomy": "autonomous"
+}
