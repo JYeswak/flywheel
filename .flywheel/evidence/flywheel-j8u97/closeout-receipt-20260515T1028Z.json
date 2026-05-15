@@ -1,0 +1,80 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-j8u97",
+  "timestamp": "2026-05-15T10:28:00Z",
+  "disposition": "closed_as_superseded_by_stronger_bead",
+  "superseded_by": "flywheel-gr403.2",
+  "summary": "The Asupersync gated adoption POC requested by flywheel-j8u97 was completed by later P0 publication-readiness bead flywheel-gr403.2. The shipped artifacts include live upstream metadata, a gated adoption packet, a POC receipt template, and an isolated local Apple Silicon Rust POC receipt. Asupersync remains gated-evaluation and is not a Flywheel public runtime dependency.",
+  "superseding_evidence": [
+    {
+      "path": "docs/evidence/asupersync-gated-adoption.md",
+      "purpose": "Live upstream adoption packet and no-overclaim decision"
+    },
+    {
+      "path": "docs/evidence/asupersync-poc-receipt.template.json",
+      "purpose": "Default-blocked POC receipt shape"
+    },
+    {
+      "path": "docs/evidence/asupersync-poc-receipt.local.json",
+      "purpose": "Isolated local POC receipt: explicit Cx, owned regions, cancellation checkpoint, deterministic test, Apple Silicon source-build path"
+    },
+    {
+      "path": "docs/runbooks/upstream-substrate-adoption.md",
+      "purpose": "Promotion gates and reduced-mode boundary"
+    },
+    {
+      "bead_id": "flywheel-gr403.2",
+      "purpose": "Closed P0 bead that delivered the gated investigation and POC receipt"
+    }
+  ],
+  "acceptance_mapping": [
+    {
+      "j8u97_acceptance": "Refresh live upstream facts from GitHub releases, crates.io, and asupersync.com.",
+      "status": "satisfied_by_gr403.2",
+      "evidence": "docs/evidence/asupersync-gated-adoption.md; tests/upstream-substrate-adoption.sh"
+    },
+    {
+      "j8u97_acceptance": "Record source tag/commit, crate version, license posture, website/docs version consistency, Apple Silicon path, known failing-test disposition, and residual risks.",
+      "status": "satisfied_by_gr403.2",
+      "evidence": "docs/evidence/asupersync-gated-adoption.md and docs/evidence/asupersync-poc-receipt.local.json"
+    },
+    {
+      "j8u97_acceptance": "Build a tiny Rust POC only if isolated from reduced mode and current shell/Python loop publication.",
+      "status": "satisfied_by_gr403.2",
+      "evidence": "docs/evidence/asupersync-poc-receipt.local.json support_scope=isolated_poc_only"
+    },
+    {
+      "j8u97_acceptance": "POC must use explicit Cx/owned region/cancellation semantics and deterministic test evidence.",
+      "status": "satisfied_by_gr403.2",
+      "evidence": "docs/evidence/asupersync-poc-receipt.local.json poc_semantics"
+    },
+    {
+      "j8u97_acceptance": "Public copy remains gated-evaluation until adoption packet and POC pass.",
+      "status": "satisfied_by_gr403.2",
+      "evidence": "docs/evidence/asupersync-gated-adoption.md and tests/public-docs.sh"
+    }
+  ],
+  "validation": [
+    {
+      "command": "bash tests/upstream-substrate-adoption.sh",
+      "result": "pass",
+      "summary": "57 passed, 0 failed"
+    },
+    {
+      "command": "bash tests/public-docs.sh",
+      "result": "pass",
+      "summary": "279 passed, 0 failed"
+    },
+    {
+      "command": "jq -e '.schema_version == \"flywheel.asupersync_poc_receipt.v0\" and .status == \"pass\" and .support_scope == \"isolated_poc_only\" and .poc_semantics.no_flywheel_runtime_dependency == true and .promotion_decision.status == \"not_promoted\"' docs/evidence/asupersync-poc-receipt.local.json",
+      "result": "pass",
+      "summary": "local POC receipt proves isolated smoke without promotion"
+    }
+  ],
+  "publication_boundary": {
+    "runtime_promoted": false,
+    "public_install_dependency": false,
+    "reduced_mode_dependency": false,
+    "status": "gated-evaluation"
+  }
+}
