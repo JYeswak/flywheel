@@ -8,7 +8,9 @@
 # 4000-char limit because writers (operators, agents) keep emitting goal docs
 # over the limit. The fix is to refuse the write at substrate level.
 #
-# Canonical output: .flywheel/goals/<repo>/<slug>-<YYYYMMDD>.txt
+# Canonical output: ~/Desktop/zeststream-goals/<repo>/<slug>-<YYYYMMDD>.txt
+# (Override via GOAL_BUILD_GOALS_DIR env var; in-repo not used so docs are
+# accessible in Finder without traversing a dotfolder.)
 #
 # Exit codes:
 #   0  goal written + validated
@@ -27,7 +29,9 @@ MAX_CHARS=4000
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_DEFAULT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
 REPO_ROOT="${GOAL_BUILD_REPO:-$REPO_DEFAULT}"
-GOALS_DIR_DEFAULT="$REPO_ROOT/.flywheel/goals"
+# Default to ~/Desktop/zeststream-goals/ — visible in Finder, easy CLI access.
+# Operator override via GOAL_BUILD_GOALS_DIR env var.
+GOALS_DIR_DEFAULT="${GOAL_BUILD_GOALS_DIR:-$HOME/Desktop/zeststream-goals}"
 T2_VALIDATOR="$REPO_ROOT/scripts/validate_goal_text.py"
 
 usage() {
@@ -55,9 +59,10 @@ emit_info() {
   "version": "$VERSION",
   "schema_version": "$SCHEMA_VERSION",
   "purpose": "Write goal docs ≤${MAX_CHARS} chars to per-repo canonical path. Machine-enforced limit.",
+  "default_goals_dir": "$GOALS_DIR_DEFAULT",
   "capabilities": [
     "validate body char count (≤${MAX_CHARS})",
-    "write to .flywheel/goals/<repo>/<slug>-<YYYYMMDD>.txt",
+    "write to ~/Desktop/zeststream-goals/<repo>/<slug>-<YYYYMMDD>.txt (override via GOAL_BUILD_GOALS_DIR)",
     "refuse over-limit writes with trim guidance",
     "optional T2 full-validation via validate_goal_text.py"
   ],
@@ -94,7 +99,11 @@ emit_schema() {
       "refuse_reason": {"type": "string"}
     }
   },
-  "output_path_template": ".flywheel/goals/<repo>/<slug>-<YYYYMMDD>.txt"
+  "output_path_template": "~/Desktop/zeststream-goals/<repo>/<slug>-<YYYYMMDD>.txt",
+  "env_overrides": {
+    "GOAL_BUILD_GOALS_DIR": "override default output folder",
+    "GOAL_BUILD_REPO": "override repo root (for the T2 validator path resolution)"
+  }
 }
 JSON
 }
