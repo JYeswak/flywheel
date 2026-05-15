@@ -93,11 +93,17 @@ mutating_re = re.compile(
     re.M,
 )
 trap_re = re.compile(r"(^|\n)\s*trap\b[^\n]*(EXIT|ERR|RETURN)\b")
+declared_read_only_re = re.compile(
+    r"read_only\s*[:=]\s*true.*mutates_state\s*[:=]\s*false"
+    r"|mutates_state\s*[:=]\s*false.*read_only\s*[:=]\s*true",
+    re.S,
+)
 
 tracked_shell = []
 mutating = []
 with_trap = []
 without_trap = []
+declared_read_only_excluded = []
 
 operational_prefixes = (
     ".flywheel/scripts/",
@@ -142,6 +148,9 @@ for rel_raw in raw.split(b"\0"):
         text = path.read_text(errors="replace")
     except OSError:
         text = ""
+    if declared_read_only_re.search(text):
+        declared_read_only_excluded.append(rel)
+        continue
     if mutating_re.search(text):
         mutating.append(rel)
         if trap_re.search(text):
@@ -167,6 +176,8 @@ payload = {
     "mutating_like_scripts": len(mutating),
     "mutating_like_with_exit_or_err_trap": len(with_trap),
     "mutating_like_without_exit_or_err_trap": len(without_trap),
+    "declared_read_only_excluded_count": len(declared_read_only_excluded),
+    "declared_read_only_excluded_sample": declared_read_only_excluded[:25],
     "coverage_pct": round((100.0 * len(with_trap) / len(mutating)), 2) if mutating else 100.0,
     "sample_without_trap": without_trap[:25],
     "max_without_trap": max_without_trap,

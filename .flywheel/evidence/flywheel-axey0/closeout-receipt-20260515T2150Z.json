@@ -1,0 +1,48 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-axey0",
+  "parent_bead_id": "flywheel-3kq",
+  "status": "closed",
+  "summary": "trap-rollback-inventory now excludes operational shell scripts that explicitly declare read_only=true and mutates_state=false, so --apply help text alone no longer makes a read-only validator look like a rollback gap.",
+  "why_flywheel_centric": "The trap adoption parent is an ecosystem steering metric. Its classifier must separate real state mutation from canonical CLI contract text, otherwise Flywheel routes work toward false gaps.",
+  "changed_files": [
+    ".flywheel/scripts/trap-rollback-inventory.sh",
+    ".flywheel/scripts/agentmail-identity-canonical-validator.sh",
+    "tests/trap-rollback-inventory.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/trap-rollback-inventory.sh",
+      "result": "pass",
+      "summary": "11/0 assertions including a fixture where a tracked operational shell script mentions --apply but declares read_only=true and mutates_state=false, and is excluded from mutating-like counts."
+    },
+    {
+      "command": "bash tests/agentmail-identity-canonical-validator-canonical-cli.sh",
+      "result": "pass",
+      "summary": "13/0 assertions; the validator still emits canonical CLI envelopes after adding mutates_state=false to its info contract."
+    },
+    {
+      "command": "bash tests/flywheel-gap-wired-receivers-canonical-cli.sh",
+      "result": "pass",
+      "summary": "9/0 assertions; trap-rollback-inventory remains wired as a receiver."
+    },
+    {
+      "command": "bash -n .flywheel/scripts/trap-rollback-inventory.sh .flywheel/scripts/agentmail-identity-canonical-validator.sh tests/trap-rollback-inventory.sh && shellcheck .flywheel/scripts/trap-rollback-inventory.sh .flywheel/scripts/agentmail-identity-canonical-validator.sh tests/trap-rollback-inventory.sh",
+      "result": "pass",
+      "summary": "Syntax and ShellCheck are clean for the edited surfaces."
+    },
+    {
+      "command": ".flywheel/scripts/trap-rollback-inventory.sh scan --repo . --json",
+      "result": "warn",
+      "summary": "Live inventory now reports with_trap=98, without_trap=282, mutating_like_scripts=380, declared_read_only_excluded_count=2, coverage_pct=25.79."
+    },
+    {
+      "command": "git diff --check && br dep cycles --json",
+      "result": "pass",
+      "summary": "No whitespace errors and no active dependency cycles."
+    }
+  ],
+  "inventory_after_ref": ".flywheel/evidence/flywheel-axey0/trap-inventory-after-20260515T214933Z.json",
+  "autonomy": "autonomous",
+  "human_question": null
+}
