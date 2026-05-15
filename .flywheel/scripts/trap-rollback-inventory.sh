@@ -9,9 +9,10 @@ usage() {
   cat <<'EOF'
 usage: trap-rollback-inventory.sh [scan|doctor|health|validate] [--repo PATH] [--max-without-trap N] [--json]
 
-Read-only inventory for flywheel-3kq. It scans tracked shell scripts, classifies
-mutating-like files, and counts EXIT/ERR/RETURN trap coverage. It measures the
-rollback-adoption gap; it does not claim the gap is closed.
+Read-only inventory for flywheel-3kq. It scans tracked operational shell
+scripts, classifies mutating-like files, and counts EXIT/ERR/RETURN trap
+coverage. It measures the rollback-adoption gap; it does not claim the gap is
+closed.
 EOF
 }
 
@@ -31,7 +32,7 @@ info() {
       default_command:"scan",
       commands:["scan","doctor","health","validate"],
       capabilities:[
-        "scan tracked shell scripts",
+        "scan tracked operational shell scripts",
         "classify mutating-like scripts",
         "count EXIT/ERR/RETURN trap coverage",
         "emit rollback-adoption inventory JSON"
@@ -42,7 +43,7 @@ info() {
 schema() {
   jq -nc --arg schema_version "$SCHEMA_VERSION" '{
     schema_version:$schema_version,
-    required:["schema_version","status","repo","tracked_shell_scripts_scanned","mutating_like_scripts","mutating_like_without_exit_or_err_trap","sample_without_trap"],
+    required:["schema_version","status","repo","scan_scope","tracked_shell_scripts_scanned","mutating_like_scripts","mutating_like_without_exit_or_err_trap","sample_without_trap"],
     status_values:["pass","warn","fail"]
   }'
 }
@@ -98,12 +99,36 @@ mutating = []
 with_trap = []
 without_trap = []
 
+operational_prefixes = (
+    ".flywheel/scripts/",
+    ".flywheel/hooks/",
+    ".flywheel/lib/",
+    "scripts/",
+)
+non_operational_prefixes = (
+    ".flywheel/PLANS/",
+    ".flywheel/audit/",
+    ".flywheel/evidence/",
+    ".flywheel/extraction/",
+    ".flywheel/fixtures/",
+    ".flywheel/receipts/",
+    ".flywheel/reports/",
+    "tests/",
+)
+
+def in_scan_scope(rel: str) -> bool:
+    if rel.startswith(non_operational_prefixes):
+        return False
+    return rel.startswith(operational_prefixes)
+
 for rel_raw in raw.split(b"\0"):
     if not rel_raw:
         continue
     rel = rel_raw.decode("utf-8", "replace")
     path = repo / rel
     if not path.is_file():
+        continue
+    if not in_scan_scope(rel):
         continue
     try:
         first = path.open("rb").read(256)
@@ -135,6 +160,8 @@ payload = {
     "schema_version": schema_version,
     "status": status,
     "repo": str(repo),
+    "scan_scope": "tracked_operational_shell",
+    "excluded_non_operational_prefixes": list(non_operational_prefixes),
     "scanned_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
     "tracked_shell_scripts_scanned": len(tracked_shell),
     "mutating_like_scripts": len(mutating),

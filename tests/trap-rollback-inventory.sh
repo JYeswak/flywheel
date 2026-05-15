@@ -30,7 +30,7 @@ fi
 assert_jq "$TMP/info.json" '.name == "trap-rollback-inventory.sh" and .read_only == true and .mutates_state == false and .bead == "flywheel-3kq.1"' "info envelope"
 
 "$SCRIPT" --schema --json >"$TMP/schema.json"
-assert_jq "$TMP/schema.json" '.schema_version == "flywheel.trap_rollback_inventory.v1" and (.required | index("mutating_like_without_exit_or_err_trap"))' "schema envelope"
+assert_jq "$TMP/schema.json" '.schema_version == "flywheel.trap_rollback_inventory.v1" and (.required | index("scan_scope")) and (.required | index("mutating_like_without_exit_or_err_trap"))' "schema envelope"
 
 "$SCRIPT" --examples --json >"$TMP/examples.json"
 assert_jq "$TMP/examples.json" '.examples | length >= 3' "examples envelope"
@@ -40,6 +40,7 @@ assert_jq "$TMP/doctor.json" '.command == "doctor" and .status == "pass"' "docto
 
 fixture="$TMP/repo"
 mkdir -p "$fixture/scripts"
+mkdir -p "$fixture/tests" "$fixture/.flywheel/receipts/demo"
 git -C "$fixture" init -q
 git -C "$fixture" config user.email test@example.invalid
 git -C "$fixture" config user.name "Test User"
@@ -60,12 +61,24 @@ cat >"$fixture/scripts/read-only.sh" <<'EOF'
 set -euo pipefail
 printf 'hello\n'
 EOF
+cat >"$fixture/tests/mutating-test.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+touch test-state.txt
+EOF
+cat >"$fixture/.flywheel/receipts/demo/historical-probe.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+touch historical-state.txt
+EOF
 git -C "$fixture" add scripts
+git -C "$fixture" add tests .flywheel/receipts
 git -C "$fixture" commit -q -m fixture
 
 "$SCRIPT" scan --repo "$fixture" --json >"$TMP/fixture.json"
-assert_jq "$TMP/fixture.json" '.status == "warn" and .tracked_shell_scripts_scanned == 3 and .mutating_like_scripts == 2 and .mutating_like_with_exit_or_err_trap == 1 and .mutating_like_without_exit_or_err_trap == 1' "fixture counts trap coverage"
+assert_jq "$TMP/fixture.json" '.status == "warn" and .scan_scope == "tracked_operational_shell" and .tracked_shell_scripts_scanned == 3 and .mutating_like_scripts == 2 and .mutating_like_with_exit_or_err_trap == 1 and .mutating_like_without_exit_or_err_trap == 1' "fixture counts trap coverage"
 assert_jq "$TMP/fixture.json" '.sample_without_trap == ["scripts/without-trap.sh"] and .claim == "inventory_only_not_adoption_complete"' "fixture sample and claim"
+assert_jq "$TMP/fixture.json" '(.excluded_non_operational_prefixes | index("tests/")) and (.excluded_non_operational_prefixes | index(".flywheel/receipts/"))' "fixture excludes non-operational prefixes"
 
 if "$SCRIPT" scan --repo "$fixture" --max-without-trap 0 --json >"$TMP/strict.json"; then
   fail "strict threshold fails when trap gap exists"
