@@ -1,0 +1,59 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-zbs8",
+  "closed_at": "2026-05-15T06:15:51Z",
+  "status": "closed",
+  "surface": "local-full-substrate",
+  "artifact": "/Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop",
+  "artifact_sha256": "5c1914142ce0d61d5a0beb509fec0a846a146cf4e7a5322fdbc3fd6424497c5b",
+  "public_reduced_install_boundary": "flywheel-autoloop remains a full-substrate local surface, not a public reduced-install binary.",
+  "changes": [
+    "widened run/scan eligibility from ok/ready only to ok, ready, warn, fail, and interrupt when next_owner is agent and override is clear",
+    "added deterministic run selection priority: fail=100, interrupt=90, warn=70, ready=50, ok=50 before dirty-count tiebreaks",
+    "mapped doctor payload docs_state=drift_detected as well as repo_docs_state=drift_detected to flywheel-lock-repair --scope locks --apply",
+    "replaced raw doctor_failed exit path with diagnose, repair, strict-doctor retry, and repair_failed/repair_not_available negative-cache outcomes",
+    "replaced raw tick_failed exit path with diagnose, local repair, tick retry, and tick_repair_failed negative-cache outcome"
+  ],
+  "acceptance_gates": [
+    {
+      "id": "AG1",
+      "command": "bash -n /Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop",
+      "status": "pass"
+    },
+    {
+      "id": "AG2",
+      "command": "FLYWHEEL_AUTOLOOP_BIN=/Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop CANONICAL_CLI_CHECKER=/Users/josh/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh bash tests/flywheel-autoloop-canonical-cli.sh",
+      "status": "pass",
+      "proof": "run dry-run prioritizes fail repair candidate before ready work"
+    },
+    {
+      "id": "AG3",
+      "command": "FLYWHEEL_AUTOLOOP_BIN=/Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop CANONICAL_CLI_CHECKER=/Users/josh/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh bash tests/flywheel-autoloop-canonical-cli.sh",
+      "status": "pass",
+      "proof": "doctor drift repair invokes lock repair, retries doctor, and avoids raw doctor_failed cache"
+    },
+    {
+      "id": "AG4",
+      "command": "FLYWHEEL_AUTOLOOP_BIN=/Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop CANONICAL_CLI_CHECKER=/Users/josh/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh bash tests/flywheel-autoloop-canonical-cli.sh",
+      "status": "pass",
+      "proof": "successful repair fixture retries doctor and writes no raw doctor_failed cache"
+    },
+    {
+      "id": "AG5",
+      "command": "FLYWHEEL_AUTOLOOP_BIN=/Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop CANONICAL_CLI_CHECKER=/Users/josh/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh bash tests/flywheel-autoloop-canonical-cli.sh",
+      "status": "pass",
+      "proof": "failed doctor repair caches repair_not_available or repair_failed, never raw doctor_failed"
+    },
+    {
+      "id": "support",
+      "command": "shellcheck tests/flywheel-autoloop-canonical-cli.sh && git diff --check && br dep cycles",
+      "status": "pass"
+    }
+  ],
+  "socraticode_query": "flywheel-autoloop diagnose and repair doctor failure negative cache fixtures tests convergence autoloop zbs8",
+  "unrelated_dirty_files_preserved": [
+    ".flywheel/AGENTS-CANONICAL.md",
+    ".flywheel/MISSION.md",
+    "templates/flywheel-install/AGENTS.md"
+  ]
+}
