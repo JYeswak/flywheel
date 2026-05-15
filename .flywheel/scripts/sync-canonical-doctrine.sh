@@ -47,7 +47,7 @@ SCHEMA_VERSION="sync-canonical-doctrine-receipt/v1"
 
 usage() {
   cat <<'EOF'
-usage: sync-canonical-doctrine.sh [--dry-run|--apply [--idempotency-key KEY]] [--json] [--source PATH] [--root PATH ...]
+usage: sync-canonical-doctrine.sh [doctor|--doctor] [--dry-run|--apply [--idempotency-key KEY]] [--json] [--source PATH] [--root PATH ...]
 
 Synchronizes doctrine surfaces for each flywheel-installed repo:
   1. .flywheel/rules/L*.md is the canonical L-rule source.
@@ -116,6 +116,94 @@ Environment:
 EOF
 }
 
+emit_doctor() {
+  local repo manifest ledger_dir checks status pass_count warn_count fail_count
+  repo="/Users/josh/Developer/flywheel"
+  manifest="$repo/$OWNERSHIP_MANIFEST_REL"
+  ledger_dir="$(dirname "$SYNC_LEDGER")"
+  checks="$(
+    {
+      if [[ -r "$SOURCE" ]]; then
+        jq -nc --arg name "canonical_source_readable" --arg status "pass" --arg message "$SOURCE" \
+          '{name:$name,status:$status,message:$message}'
+      else
+        jq -nc --arg name "canonical_source_readable" --arg status "fail" --arg message "$SOURCE" \
+          '{name:$name,status:$status,message:$message}'
+      fi
+      if [[ -x "$AGENTS_MD_GENERATOR" ]]; then
+        jq -nc --arg name "agents_md_generator_executable" --arg status "pass" --arg message "$AGENTS_MD_GENERATOR" \
+          '{name:$name,status:$status,message:$message}'
+      else
+        jq -nc --arg name "agents_md_generator_executable" --arg status "fail" --arg message "$AGENTS_MD_GENERATOR" \
+          '{name:$name,status:$status,message:$message}'
+      fi
+      if command -v jq >/dev/null 2>&1; then
+        jq -nc --arg name "jq_available" --arg status "pass" --arg message "$(command -v jq)" \
+          '{name:$name,status:$status,message:$message}'
+      else
+        jq -nc --arg name "jq_available" --arg status "fail" --arg message "jq missing from PATH" \
+          '{name:$name,status:$status,message:$message}'
+      fi
+      if [[ -d "$RULES_SOURCE_DIR" && -f "$RULES_SOURCE_DIR/MANIFEST.json" ]]; then
+        jq -nc --arg name "rules_source_manifest_present" --arg status "pass" --arg message "$RULES_SOURCE_DIR/MANIFEST.json" \
+          '{name:$name,status:$status,message:$message}'
+      else
+        jq -nc --arg name "rules_source_manifest_present" --arg status "warn" --arg message "$RULES_SOURCE_DIR/MANIFEST.json" \
+          '{name:$name,status:$status,message:$message}'
+      fi
+      if [[ "$OWNERSHIP_GATE" != "1" ]]; then
+        jq -nc --arg name "ownership_gate_configured" --arg status "warn" --arg message "SYNC_CANONICAL_OWNERSHIP_GATE is disabled" \
+          '{name:$name,status:$status,message:$message}'
+      elif [[ -f "$manifest" ]]; then
+        jq -nc --arg name "ownership_gate_configured" --arg status "pass" --arg message "$manifest" \
+          '{name:$name,status:$status,message:$message}'
+      else
+        jq -nc --arg name "ownership_gate_configured" --arg status "fail" --arg message "$manifest" \
+          '{name:$name,status:$status,message:$message}'
+      fi
+      if [[ -d "$ledger_dir" || "${SYNC_CANONICAL_LEDGER_DISABLE:-0}" = "1" ]]; then
+        jq -nc --arg name "ledger_path_ready" --arg status "pass" --arg message "$SYNC_LEDGER" \
+          '{name:$name,status:$status,message:$message}'
+      else
+        jq -nc --arg name "ledger_path_ready" --arg status "warn" --arg message "$SYNC_LEDGER" \
+          '{name:$name,status:$status,message:$message}'
+      fi
+    } | jq -s '.'
+  )"
+  fail_count="$(jq '[.[] | select(.status == "fail")] | length' <<<"$checks")"
+  warn_count="$(jq '[.[] | select(.status == "warn")] | length' <<<"$checks")"
+  pass_count="$(jq '[.[] | select(.status == "pass")] | length' <<<"$checks")"
+  if [[ "$fail_count" -gt 0 ]]; then
+    status="fail"
+  elif [[ "$warn_count" -gt 0 ]]; then
+    status="warn"
+  else
+    status="pass"
+  fi
+  jq -nc \
+    --arg schema_version "sync-canonical-doctrine.doctor.v1" \
+    --arg command "doctor" \
+    --arg name "sync-canonical-doctrine.sh" \
+    --arg version "$VERSION" \
+    --arg status "$status" \
+    --arg mode "read_only" \
+    --argjson checks "$checks" \
+    --argjson pass_count "$pass_count" \
+    --argjson warn_count "$warn_count" \
+    --argjson fail_count "$fail_count" \
+    '{
+      schema_version:$schema_version,
+      command:$command,
+      name:$name,
+      version:$version,
+      status:$status,
+      mode:$mode,
+      mutates:false,
+      checks:$checks,
+      summary:{pass_count:$pass_count,warn_count:$warn_count,fail_count:$fail_count}
+    }'
+}
+
 emit_info() {
   jq -nc \
     --arg name "sync-canonical-doctrine.sh" \
@@ -144,7 +232,7 @@ emit_info() {
       orch_validation_skill_source: $orch_validation_skill_source,
       shared_script_allowlist: ($shared_script_allowlist | split(" ") | map(select(length > 0))),
       modes: ["check","apply"],
-      flags: ["--dry-run","--check","--apply","--idempotency-key KEY","--json","--source PATH","--root PATH","--info","--schema","--examples","--help","-h"],
+      flags: ["doctor","--doctor","--dry-run","--check","--apply","--idempotency-key KEY","--json","--source PATH","--root PATH","--info","--schema","--examples","--help","-h"],
       env_vars: [
         "SYNC_CANONICAL_SOURCE","SYNC_AGENTS_MD_GENERATOR","SYNC_GENERATED_MIRRORS_DISABLE",
         "SYNC_CANONICAL_INDEX_TARGET","SYNC_CANONICAL_TEMPLATE_TARGET",
@@ -245,6 +333,7 @@ sync-canonical-doctrine.sh --info --json     # tool metadata + env vars + flags
 sync-canonical-doctrine.sh --schema           # JSON Schema for receipt envelope
 sync-canonical-doctrine.sh --examples         # this list
 sync-canonical-doctrine.sh --help             # usage text
+sync-canonical-doctrine.sh doctor --json      # read-only dependency/config doctor
 
 # Disable ledger writes (e.g., test fixtures)
 SYNC_CANONICAL_LEDGER_DISABLE=1 sync-canonical-doctrine.sh --check --json
@@ -257,6 +346,10 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    doctor|--doctor)
+      emit_doctor
+      exit 0
+      ;;
     --dry-run|--check)
       MODE="check"
       shift
