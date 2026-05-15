@@ -1,0 +1,37 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-v6lpq",
+  "parent_bead_id": "flywheel-3kq",
+  "status": "closed",
+  "summary": "agentmail-registration-broadcast.sh now registers generated request packets with a shell cleanup registry and removes unsent packets on EXIT/ERR when broadcast delivery fails.",
+  "why_flywheel_centric": "This script coordinates Agent Mail identity registration requests across Flywheel sessions. Failed sends should leave a red result, not untracked request files with no coordination-log event.",
+  "changed_files": [
+    ".flywheel/scripts/agentmail-registration-broadcast.sh",
+    "tests/agentmail-registration-broadcast.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/agentmail-registration-broadcast.sh",
+      "result": "pass",
+      "summary": "17/0 assertions including failed ntm message path: status=fail, sent_count=0, one error, and no agentmail-registration-broadcast request file left behind."
+    },
+    {
+      "command": "bash -n .flywheel/scripts/agentmail-registration-broadcast.sh tests/agentmail-registration-broadcast.sh && shellcheck .flywheel/scripts/agentmail-registration-broadcast.sh tests/agentmail-registration-broadcast.sh",
+      "result": "pass",
+      "summary": "Syntax and ShellCheck are clean for the edited script and test."
+    },
+    {
+      "command": ".flywheel/scripts/trap-rollback-inventory.sh scan --repo . --json",
+      "result": "warn",
+      "summary": "Scoped operational shell inventory moved to with_trap=98, without_trap=284, coverage_pct=25.65."
+    },
+    {
+      "command": "git diff --check && br dep cycles --json",
+      "result": "pass",
+      "summary": "No whitespace errors and no active dependency cycles."
+    }
+  ],
+  "inventory_after_ref": ".flywheel/evidence/flywheel-v6lpq/trap-inventory-after-20260515T214304Z.json",
+  "autonomy": "autonomous",
+  "human_question": null
+}
