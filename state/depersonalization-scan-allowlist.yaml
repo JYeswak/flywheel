@@ -8,10 +8,6 @@ rows:
     path_pattern: "README.md"
     row_id: zeststream-company
     reason: "Reviewed public package metadata intentionally names ZestStream as the engine operator."
-  - id: public-readme-skillos-repo-clone
-    path_pattern: "README.md"
-    row_id: skillos-session-name
-    reason: "Reviewed public README intentionally names the zeststream-skillos public repository in the clone command; this is the repository name, not the internal session identifier."
   - id: public-story-system-package-zeststream-metadata
     root_pattern: "**/packages/zeststream-story-system"
     path_pattern: "package.json"
