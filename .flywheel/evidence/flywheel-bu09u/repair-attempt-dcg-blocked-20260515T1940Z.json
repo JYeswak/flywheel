@@ -1,0 +1,20 @@
+{
+  "schema_version": "flywheel.secret_repair_attempt.v1",
+  "bead_id": "flywheel-bu09u",
+  "status": "blocked_by_dcg",
+  "attempted_repair": "Set zesty-swarm Supabase runtime keys to the verified hsmyagcerajgjmlljtmx tenant set after proving the existing zesty-swarm DB password can authenticate to the intended hsmy Supabase pooler.",
+  "dcg_result": "blocked_destructive_command",
+  "operator_action": "Do not retry, bypass, or change DCG policy. Route to explicit operator/SkillOS secret-owner authorization.",
+  "proof_before_block": {
+    "database_password_pooler_probe": "pass",
+    "probe_statement": "PGPASSWORD from zesty-swarm SUPABASE_DB_PASSWORD authenticated to host=aws-1-us-west-1.pooler.supabase.com user=postgres.hsmyagcerajgjmlljtmx sslmode=require with rc=0.",
+    "raw_secret_values_recorded": false
+  },
+  "required_next_step": "SkillOS/secret owner must explicitly authorize or execute the zesty-swarm secret correction; after repair rerun zs-tenant-doctor for vrtx and zesttube plus Wave 2/Wave 3 preflights.",
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-hsdb9/zesty-swarm-supabase-drift-20260515T1935Z.json",
+    ".flywheel/evidence/flywheel-1wsv7/vrtx-tenant-doctor-drift-20260515T1935Z.json",
+    ".flywheel/evidence/flywheel-hsdb9/zesttube-tenant-doctor-20260515T1930Z.json"
+  ],
+  "created_at": "2026-05-15T19:40:00Z"
+}
