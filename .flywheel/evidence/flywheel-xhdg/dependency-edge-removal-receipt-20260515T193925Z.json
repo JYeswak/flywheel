@@ -1,0 +1,9 @@
+{
+  "schema_version": "flywheel.dependency_edge_disposition_receipt.v1",
+  "bead_id": "flywheel-xhdg",
+  "ts": "20260515T193925Z",
+  "removed_dependency": "flywheel-h17x",
+  "reason": "h17x is deferred/time-gated by the canonical leverage evidence gate, not an active blocker. Keeping the dependency edge causes br blocked to misclassify deferred evidence accrual as a blocker.",
+  "replacement_control": "xhdg defer_until plus .flywheel/evidence/flywheel-xhdg/leverage-gate-waiting-20260515T193905Z.json",
+  "blocker_left_open": false
+}
