@@ -105,6 +105,9 @@ scripts/journey-smoke.sh --matrix reduced --dry-run --json
 ```
 
 Then read [`docs/getting-started/first-run.md`](docs/getting-started/first-run.md).
+For Jeffrey Emanuel substrate monitoring, the canonical local helper is
+`.flywheel/scripts/jeff-intel-network.sh`; it is an operator surface, not a
+requirement for the reduced public first run.
 
 ## The Deal
 

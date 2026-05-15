@@ -22,7 +22,8 @@ FW_STATE="$TMP/state/flywheel"
 mkdir -p "$HOME_FIX/Library/LaunchAgents" "$TMP/bin" "$STATE" "$FW_STATE"
 touch "$HOME_FIX/Library/LaunchAgents/ai.zeststream.flywheel-daily-jeff-ingest.plist"
 touch "$HOME_FIX/Library/LaunchAgents/ai.zeststream.flywheel-jeff-x-poll.plist"
-printf '0\tai.zeststream.flywheel-daily-jeff-ingest\n0\tai.zeststream.flywheel-jeff-x-poll\n' >"$TMP/launchctl.txt"
+touch "$HOME_FIX/Library/LaunchAgents/ai.zeststream.flywheel-jeff-philosophy-monthly.plist"
+printf '0\tai.zeststream.flywheel-daily-jeff-ingest\n0\tai.zeststream.flywheel-jeff-x-poll\n0\tai.zeststream.flywheel-jeff-philosophy-monthly\n0\tai.zeststream.flywheel-tentacle-drift-sweep\n' >"$TMP/launchctl.txt"
 printf 'github:Dicklesworthstone/ntm\nx:@doodlestein\n' >"$TMP/sources.txt"
 cat >"$TMP/storage-probe.sh" <<'EOF'
 #!/usr/bin/env bash
