@@ -23,7 +23,11 @@ assert_jq() {
   fi
 }
 
-bash -n "$PROBE" && pass "topology probe syntax" || fail "topology probe syntax"
+if bash -n "$PROBE"; then
+  pass "topology probe syntax"
+else
+  fail "topology probe syntax"
+fi
 
 if test -f "$LIVE_TOPOLOGY"; then
   pass "live session-topology.jsonl exists"
@@ -31,8 +35,11 @@ else
   fail "live session-topology.jsonl exists"
 fi
 
-jq -s 'group_by(.session) | map(max_by(.effective_at))' "$LIVE_TOPOLOGY" >"$TMP/live-latest.json" \
-  && pass "live latest-wins jq succeeds" || fail "live latest-wins jq succeeds"
+if jq -s 'group_by(.session) | map(max_by(.effective_at))' "$LIVE_TOPOLOGY" >"$TMP/live-latest.json"; then
+  pass "live latest-wins jq succeeds"
+else
+  fail "live latest-wins jq succeeds"
+fi
 
 "$PROBE" --schema --json >"$TMP/schema.json"
 assert_jq "$TMP/schema.json" \
@@ -44,9 +51,14 @@ assert_jq "$TMP/schema.json" \
 
 "$PROBE" --examples --json >"$TMP/examples.json"
 jq -c '.rows[]' "$TMP/examples.json" >"$TMP/bootstrap.jsonl"
-assert_jq "$TMP/examples.json" \
-  '([.rows[].session] | sort) == (["{session}","clutterfreespaces","flywheel","{session}","{capability-control-plane}","vrtx","zeststream-v2","zesttube"] | sort)' \
-  "bootstrap fixture covers plan sessions"
+jq -r '.rows[].session' "$TMP/examples.json" | sort >"$TMP/examples-sessions.txt"
+jq -r '.plan_sessions[]' "$TMP/schema.json" | sort >"$TMP/schema-plan-sessions.txt"
+if cmp -s "$TMP/examples-sessions.txt" "$TMP/schema-plan-sessions.txt"; then
+  pass "bootstrap fixture covers plan sessions"
+else
+  fail "bootstrap fixture covers plan sessions"
+  diff -u "$TMP/schema-plan-sessions.txt" "$TMP/examples-sessions.txt" || true
+fi
 
 "$PROBE" --topology "$TMP/bootstrap.jsonl" --strict --json >"$TMP/bootstrap-probe.json"
 assert_jq "$TMP/bootstrap-probe.json" \

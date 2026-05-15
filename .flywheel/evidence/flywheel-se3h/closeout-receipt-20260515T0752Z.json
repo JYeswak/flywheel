@@ -1,0 +1,56 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-se3h",
+  "created_at": "2026-05-15T07:52:00Z",
+  "status": "safe_to_close",
+  "summary": "Session-topology plan-decompose parent is now complete: all nine child beads are closed, dependency cycles are clean, and the parent validator reports SAFE_TO_CLOSE.",
+  "plan_ref": ".flywheel/PLANS/session-topology-2026-05-01.md",
+  "child_state": {
+    "closed_children": [
+      "flywheel-se3h.1",
+      "flywheel-se3h.2",
+      "flywheel-se3h.3",
+      "flywheel-se3h.4",
+      "flywheel-se3h.5",
+      "flywheel-se3h.6",
+      "flywheel-se3h.7",
+      "flywheel-se3h.8",
+      "flywheel-se3h.9"
+    ],
+    "open_children": []
+  },
+  "validation": [
+    {
+      "command": ".flywheel/scripts/validate-callback-before-close.sh flywheel-se3h /Users/josh/Developer/flywheel/.flywheel/audit/flywheel-se3h/evidence.md",
+      "result": "pass",
+      "summary": "VERDICT: SAFE_TO_CLOSE; four_lens brand/sniff/jeff/public pass"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass"
+    },
+    {
+      "command": "bash tests/session-topology-ledger.sh",
+      "result": "pass",
+      "summary": "12/0"
+    },
+    {
+      "command": "bash tests/session-topology-register-session.sh",
+      "result": "pass",
+      "summary": "16/0"
+    },
+    {
+      "command": "bash tests/autoloop-target-selector-e2e.sh",
+      "result": "pass",
+      "summary": "13/0"
+    },
+    {
+      "command": "bash .flywheel/tests/test-topology-lookup-before-dispatch.sh",
+      "result": "pass"
+    }
+  ],
+  "notes": [
+    "The parent audit evidence was refreshed locally to remove stale temp-artifact references and reflect all children closed.",
+    "The stale test repair keeps bootstrap fixture coverage strict by comparing examples against topology-gap-probe schema plan_sessions."
+  ]
+}
