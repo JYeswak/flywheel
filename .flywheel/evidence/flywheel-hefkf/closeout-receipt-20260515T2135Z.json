@@ -1,0 +1,49 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-hefkf",
+  "parent_bead_id": "flywheel-3kq",
+  "status": "closed",
+  "summary": "br-create-validated.sh now registers inline description temp files and removes them on EXIT/ERR, so failed AG validation does not leave temporary markdown files behind.",
+  "why_flywheel_centric": "br-create-validated.sh is the Flywheel-owned wrapper for creating Beads with canonical AG gates. Hardening its cleanup path improves the work-intake surface used across the ecosystem.",
+  "changed_files": [
+    ".flywheel/scripts/br-create-validated.sh",
+    "tests/bead-quality-mining.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/bead-quality-mining.sh",
+      "result": "pass",
+      "summary": "Existing AG-format and wrapper-source-repo fixtures pass, plus a new failing inline --description validation proves no br-create-validated temp file remains."
+    },
+    {
+      "command": "bash tests/test_bead_isolation_source_repo_backfill.sh",
+      "result": "pass",
+      "summary": "Wrapper-created Beads still canonicalize source_repo after the cleanup change."
+    },
+    {
+      "command": "bash -n .flywheel/scripts/br-create-validated.sh tests/bead-quality-mining.sh && shellcheck .flywheel/scripts/br-create-validated.sh tests/bead-quality-mining.sh",
+      "result": "pass",
+      "summary": "Syntax and ShellCheck are clean for the edited script and regression test."
+    },
+    {
+      "command": ".flywheel/scripts/trap-rollback-inventory.sh scan --repo . --json",
+      "result": "warn",
+      "summary": "Scoped operational shell inventory moved to with_trap=97, without_trap=285, coverage_pct=25.39."
+    },
+    {
+      "command": "git diff --check && br dep cycles --json",
+      "result": "pass",
+      "summary": "No whitespace errors and no active dependency cycles."
+    }
+  ],
+  "residuals": [
+    {
+      "surface": "gitleaks detect --source . --no-git --redact --exit-code 1",
+      "status": "pre_existing_repo_scan_red",
+      "summary": "Full no-git secret scan reports existing repository findings unrelated to this patch. Staged-diff secret scan must be used before push for this slice."
+    }
+  ],
+  "inventory_after_ref": ".flywheel/evidence/flywheel-hefkf/trap-inventory-after-20260515T213454Z.json",
+  "autonomy": "autonomous",
+  "human_question": null
+}

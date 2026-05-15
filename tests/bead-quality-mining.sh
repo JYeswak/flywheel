@@ -85,6 +85,12 @@ wrapper_jsonl_src="$(jq -r --arg id "$wrapper_id" 'select(.id == $id) | .source_
 "$WRAPPER" --title "blocked nested wrapper fixture" --type task --priority 1 --description-file "$nested_body" --json >"$TMP/wrapper-blocked.json" 2>/dev/null && wrapper_block_rc=0 || wrapper_block_rc=$?
 [[ "$wrapper_block_rc" -eq 1 ]] || fail "validated wrapper did not block nested AG body"
 
+wrapper_tmpdir="$TMP/wrapper-tmp"
+mkdir -p "$wrapper_tmpdir"
+TMPDIR="$wrapper_tmpdir" "$WRAPPER" --title "blocked inline wrapper fixture" --type task --priority 1 --description "$(cat "$nested_body")" --json >"$TMP/wrapper-inline-blocked.json" 2>/dev/null && wrapper_inline_rc=0 || wrapper_inline_rc=$?
+[[ "$wrapper_inline_rc" -eq 1 ]] || fail "validated wrapper did not block nested inline AG body"
+[[ -z "$(find "$wrapper_tmpdir" -type f -name 'br-create-validated.*.md' -print -quit)" ]] || fail "validated wrapper left inline description temp file after validation failure"
+
 full_id="$(create_closed_bead "$repo" "full evidence fixture" $'Acceptance gates\nAG1: file `.flywheel/full.txt` exists and doctor signal `present_signal_count` wired.\nAG2: test `tests/pass.sh` exists.')"
 missing_id="$(create_closed_bead "$repo" "missing artifact fixture" $'Acceptance gates\nAG1: file `.flywheel/missing.txt` exists.')"
 doctor_id="$(create_closed_bead "$repo" "doctor not wired fixture" $'Acceptance gates\nAG1: doctor signal `missing_signal_count` is exposed.')"
