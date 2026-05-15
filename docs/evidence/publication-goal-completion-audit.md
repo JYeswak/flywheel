@@ -1,14 +1,15 @@
 # Publication Goal Completion Audit
 
 Schema: `flywheel.publication_goal_completion_audit.v0`
-Status: `not-complete`
-Last audited: `2026-05-15T03:50:00Z`
+Status: `complete`
+Last audited: `2026-05-15T20:30:00Z`
 
 This audit restates the active `/goal` as concrete deliverables, maps each
-deliverable to repo evidence, and names the remaining blockers. It is not a
-signoff document. The goal is complete only when every row below is green and
-`scripts/publication_readiness.py --release --json` returns `status=pass` with
-zero blockers against real public surfaces.
+deliverable to repo evidence, and records the release checks that closed it. It
+is not a substitute for ongoing monitoring. The goal is complete only while
+every row below stays green and `scripts/publication_readiness.py --release
+--json` returns `status=pass` with zero readiness codes against real public
+surfaces.
 
 ## Objective Restatement
 
@@ -28,36 +29,36 @@ Publish Flywheel as a renamed, public-ready agentic workflow ecosystem:
    receipts, and public evidence.
 6. A business owner can trust the public story without reading deep developer
    artifacts, and an external developer can still inspect and run the system.
-7. Final publication waits for real public GitHub, release assets, hosted runs,
-   and Joshua signoff.
+7. Final publication is gated by real public GitHub, release assets, hosted
+   runs, live site/install parity, and Joshua signoff.
 
-Current verdict: `not complete`.
+Current verdict: `complete`.
 
 ## Prompt-To-Artifact Checklist
 
 | Requirement from goal | Primary artifact or command | Current evidence | Current status |
 |---|---|---|---|
-| Renamed, public-ready Flywheel ecosystem | `README.md`, `CHARTER.md`, `CHANGELOG.md`, `docs/brand/naming-conventions.md` | `bash tests/naming-conventions.sh`; `bash tests/public-top-level-files.sh`; `bash tests/public-surface-gap-scanner.sh` | Locally verified, final public cutover blocked. |
+| Renamed, public-ready Flywheel ecosystem | `README.md`, `CHARTER.md`, `CHANGELOG.md`, `docs/brand/naming-conventions.md` | `bash tests/naming-conventions.sh`; `bash tests/public-top-level-files.sh`; `bash tests/public-surface-gap-scanner.sh` | Verified for source and public cutover. |
 | Joshua/ZestStream-private naming and paths removed or intentionally documented | `de-personalization-table.yaml`, `scripts/depersonalize.py`, public docs/site scans | `bash tests/depersonalize-table-codemod.sh`; `bash tests/live-state-denylist.sh`; `bash tests/public-docs.sh` | Locally verified for current public surfaces. |
-| Install path works from public package | `install.sh`, `uninstall.sh`, `templates/flywheel-install/`, `docs/getting-started/first-run.md` | `bash tests/installer-smoke.sh`; `bash tests/hosted-install-contract.sh`; private live `install.sh` checksum parity in `state/private-live-site-deploy.receipt.json` | Locally verified as clone-or-release-tarball first; hosted `install.sh` is checksum mirror only; final release assets still blocked. |
+| Install path works from public package | `install.sh`, `uninstall.sh`, `templates/flywheel-install/`, `docs/getting-started/first-run.md` | `bash tests/installer-smoke.sh`; `bash tests/hosted-install-contract.sh`; release `v0.2.1`; live `install.sh` checksum parity | Verified as clone-or-release-tarball first; hosted `install.sh` is checksum mirror only. |
 | Doctor/preflight path works | `scripts/preflight.sh`, `docs/reference/commands.md`, `docs/reference/troubleshooting.md` | `bash tests/preflight-fixtures.sh`; `scripts/preflight.sh --json` fixtures | Locally verified. |
 | Loop workflow works | `.flywheel/GOAL.md`, `.flywheel/STATE.md`, `.flywheel/last_closeout_receipt.json`, `scripts/journey-smoke.sh` | `bash tests/journey-smoke.sh`; receipt validation references in docs | Locally verified for reduced journey and documented closeout flow. |
 | NTM and non-NTM workflow support | `docs/runbooks/agent-lane-compatibility.md`, `docs/runbooks/isolated-agent-lane-testing.md`, `docs/runbooks/local-actions-preflight.md` | `bash tests/isolated-agent-lane-smoke.sh`; `bash tests/agent-lane-probe.sh`; local-actions preflight evidence in `docs/evidence/publication-evidence.md` | Locally verified as receipt-governed compatibility, not public-release completion. |
 | Claude Code, Codex CLI, Gemini CLI, OpenClaw end-to-end stance | `receipts/agent-lanes/<lane>.json`, `state/isolated-agent-lane-smoke.receipt.json`, support tier docs/site | `scripts/agent-lane-probe.sh --receipt-dir receipts/agent-lanes --json`; `scripts/isolated-agent-lane-smoke.sh --json` | Reduced lane proven; agent lanes governed by strict receipts/blockers. |
 | SkillOS integration boundary | `docs/concepts/skillos-boundary.md`, `docs/runbooks/public-user-journey-pack.md`, SkillOS-compatible schema | `bash tests/public-docs.sh`; `python3 scripts/validate_user_journey_pack.py --json` | Locally verified; SkillOS stays in developer/reviewer evidence and SMB-facing page copy avoids internal control-plane language. |
 | Proof-product surfaces integrated without becoming mission ceiling | `docs/evidence/publication-evidence.md`, `docs/evidence/asupersync-gated-adoption.md`, proof-surface language in charter/site | `bash tests/upstream-substrate-adoption.sh`; `bash tests/public-docs.sh`; staged live site review | Locally verified; Asupersync remains gated evaluation. |
-| SMB business-owner trust journey | `site/`, `docs/runbooks/public-site-message-architecture.md`, `.flywheel/doctrine/frontend-design-and-story-principles.md`, `docs/runbooks/public-user-journey-pack.md`, `state/private-live-site-deploy.receipt.json` | Research-backed owner-outcome source rewrite; `bash tests/website-static.sh` pass=149 fail=0; `bash tests/website-accessibility.sh`; `python3 scripts/live_site_probe.py --base-url https://flywheel.zeststream.ai/ --json` status=pass with `failure_count=0` | Source now carries the owner-scene rewrite; Joshua final site signoff still pending. |
-| Git-derived public story trajectory, owner message pack, owner brief, shared story package, reusable UI package, and reusable motion package | `scripts/extract_git_story.py`, `scripts/probe_repo_story_portability.py`, `scripts/render_repo_owner_brief.py`, `docs/stories/flywheel-trajectory.md`, `docs/stories/flywheel-owner-brief.md`, `docs/evidence/flywheel-trajectory.json`, `docs/evidence/repo-story-portability.json`, `docs/evidence/flywheel-owner-brief.json`, `docs/runbooks/repo-trajectory-story-pack.md`, `packages/zeststream-story-system/`, `packages/zeststream-ui/`, `packages/zeststream-motion/`, `scripts/zs-frontend-quality-gate.sh` | `bash tests/git-story-extract.sh`; `bash tests/repo-story-portability.sh`; `bash tests/repo-owner-brief.sh`; `bash tests/story-system-package.sh`; `bash tests/zeststream-ui-package.sh`; `bash tests/zeststream-motion-package.sh`; `bash tests/public-docs.sh`; `zeststream.repo_story_message.v0` message pack with trust objections, visual primitives, proof translations, Next.js storytelling targets, reusable React proof primitives, owner-facing brief, and reduced-motion-safe spring presets | Locally verified as a reusable story/design mechanism and package foundation across Flywheel, ClutterFreeSpaces, and Mobile Eats; private-live site still needs final signoff against the stronger message contract. |
-| Staging review signoff map | `docs/evidence/staging-review-signoff-packet.md` | `bash tests/public-docs.sh`; `python3 scripts/publication_readiness.py --json` | Locally verified as a review aid; it explicitly does not grant public release approval. |
-| External developer run path | `README.md`, `docs/getting-started/first-run.md`, `docs/reference/commands.md`, `docs/reference/files.md` | `bash tests/public-links.sh`; `bash tests/public-docs.sh`; `bash tests/installer-smoke.sh`; `bash tests/journey-smoke.sh` | Locally verified; public GitHub availability still blocked. |
-| Blocker/gap tracking to closure | `docs/evidence/publication-blocker-coverage.md`, `.flywheel/PLANS/public-share-readiness-2026-05-12/`, Beads | `python3 .flywheel/scripts/true-publication-registry-validate.py --json`; `bash tests/true-publication-registry-validate.sh` | Coverage verified; six release blockers remain open. |
-| Public GitHub repository availability | GitHub repo `JYeswak/flywheel` | `python3 scripts/publication_readiness.py --json` | Currently inspectable from this workstation; `remote_repo_unavailable` remains a valid blocker in bare or unauthenticated environments. Final release still waits on workflows, green default-branch runs, release assets, and signoff. |
-| Public GitHub workflows available | GitHub Actions workflows: `CI`, `Installer Smoke`, `Release`, `Site Deploy` | `python3 scripts/publication_readiness.py --json` | Blocked: `remote_workflows_missing`. |
-| Remote default-branch green runs | GitHub Actions run history | `python3 scripts/publication_readiness.py --json` | Blocked: `remote_green_runs_missing`. |
-| Published release exists | GitHub release `v0.2.0` | `python3 scripts/publication_readiness.py --json` | Blocked: `github_release_missing_or_draft`. |
-| Release assets exist with digests | `install.sh`, `install.sh.sha256`, `SHA256SUMS`, archive, archive checksum | `python3 scripts/publication_readiness.py --json` | Blocked: `github_release_assets_missing`. |
-| Install proxy checksum parity | `https://flywheel.zeststream.ai/install.sh` and `.sha256` | `python3 scripts/publication_readiness.py --json`; `docs/runbooks/release-cutover-authorization.md` | Blocked when the hosted checksum mirror does not match the release asset; this is not a curl-only installer claim. Current blocker: `install_proxy_checksum_mismatch`. |
-| Joshua final release signoff | `release-signoff.json` and receipt bundle | `python3 scripts/publication_readiness.py --json`; `docs/runbooks/release-cutover-authorization.md` | Blocked: `joshua_release_signoff_missing`. |
+| SMB business-owner trust journey | `site/`, `docs/runbooks/public-site-message-architecture.md`, `.flywheel/doctrine/frontend-design-and-story-principles.md`, `docs/runbooks/public-user-journey-pack.md`, live `https://flywheel.zeststream.ai/` | Research-backed owner-outcome source rewrite; `bash tests/website-static.sh` pass=154 fail=0; `bash tests/website-accessibility.sh`; `python3 scripts/live_site_probe.py --base-url https://flywheel.zeststream.ai/ --json` status=pass with `failure_count=0` | Source and live site verified; Joshua signoff receipt is recorded for this release. |
+| Git-derived public story trajectory, owner message pack, owner brief, shared story package, reusable UI package, and reusable motion package | `scripts/extract_git_story.py`, `scripts/probe_repo_story_portability.py`, `scripts/render_repo_owner_brief.py`, `docs/stories/flywheel-trajectory.md`, `docs/stories/flywheel-owner-brief.md`, `docs/evidence/flywheel-trajectory.json`, `docs/evidence/repo-story-portability.json`, `docs/evidence/flywheel-owner-brief.json`, `docs/runbooks/repo-trajectory-story-pack.md`, `packages/zeststream-story-system/`, `packages/zeststream-ui/`, `packages/zeststream-motion/`, `scripts/zs-frontend-quality-gate.sh` | `bash tests/git-story-extract.sh`; `bash tests/repo-story-portability.sh`; `bash tests/repo-owner-brief.sh`; `bash tests/story-system-package.sh`; `bash tests/zeststream-ui-package.sh`; `bash tests/zeststream-motion-package.sh`; `bash tests/public-docs.sh`; `zeststream.repo_story_message.v0` message pack with trust objections, visual primitives, proof translations, Next.js storytelling targets, reusable React proof primitives, owner-facing brief, and reduced-motion-safe spring presets | Verified as a reusable story/design mechanism and package foundation across Flywheel, ClutterFreeSpaces, and Mobile Eats. |
+| Staging review signoff map | `docs/evidence/staging-review-signoff-packet.md` | `bash tests/public-docs.sh`; `python3 scripts/publication_readiness.py --json` | Verified as review aid; final approval is recorded separately in `release-signoff.json`. |
+| External developer run path | `README.md`, `docs/getting-started/first-run.md`, `docs/reference/commands.md`, `docs/reference/files.md` | `bash tests/public-links.sh`; `bash tests/public-docs.sh`; `bash tests/installer-smoke.sh`; `bash tests/journey-smoke.sh` | Verified against the public repository and release path. |
+| Blocker/gap tracking to closure | `docs/evidence/publication-blocker-coverage.md`, `.flywheel/PLANS/public-share-readiness-2026-05-12/`, Beads | `python3 .flywheel/scripts/true-publication-registry-validate.py --json`; `bash tests/true-publication-registry-validate.sh` | Coverage verified; release registry open count is zero. |
+| Public GitHub repository availability | GitHub repo `JYeswak/flywheel` | `python3 scripts/publication_readiness.py --json` | Verified public and inspectable. |
+| Public GitHub workflows available | GitHub Actions workflows: `CI`, `Installer Smoke`, `Release`, `Site Deploy` | `python3 scripts/publication_readiness.py --json` | Verified present. |
+| Remote default-branch green runs | GitHub Actions run history | `python3 scripts/publication_readiness.py --json` | Verified green on default branch. |
+| Published release exists | GitHub release `v0.2.1` | `python3 scripts/publication_readiness.py --json` | Verified non-draft and non-prerelease. |
+| Release assets exist with digests | `install.sh`, `install.sh.sha256`, `SHA256SUMS`, archive, archive checksum | `python3 scripts/publication_readiness.py --json` | Verified present, non-empty, and digest-bearing. |
+| Install proxy checksum parity | `https://flywheel.zeststream.ai/install.sh` and `.sha256` | `python3 scripts/publication_readiness.py --json`; `docs/runbooks/release-cutover-authorization.md` | Verified checksum mirror parity; this is not a curl-only installer claim. |
+| Joshua final release signoff | `release-signoff.json` and receipt bundle | `python3 scripts/publication_readiness.py --json`; `docs/runbooks/release-cutover-authorization.md` | Verified approved for `v0.2.1`. |
 
 ## Live Readiness Truth
 
@@ -71,22 +72,16 @@ Current result:
 
 ```json
 {
-  "status": "blocked",
-  "blockers": [
-    "remote_workflows_missing",
-    "remote_green_runs_missing",
-    "github_release_missing_or_draft",
-    "github_release_assets_missing",
-    "install_proxy_checksum_mismatch",
-    "joshua_release_signoff_missing"
-  ]
+  "status": "pass",
+  "blockers": []
 }
 ```
 
-The release is not complete while any blocker above remains. Private-live site
-success, local tests, fixture receipts, and public export staging are evidence,
-not substitutes for real public GitHub, release assets, hosted runs, and Joshua
-signoff.
+The release remains complete only while the live readiness command keeps
+returning pass-state JSON. Private-live site success, local tests, fixture
+receipts, and public export staging are useful evidence, but they are not
+substitutes for real public GitHub, release assets, hosted runs, live
+site/install parity, and Joshua signoff.
 
 Latest public export evidence: `scripts/assemble.py --run-id
 codex-public-export-20260514T152734Z --clean --json` passed with 14,759
@@ -104,8 +99,8 @@ Current source checks after the research-backed owner-outcome rewrite also passe
 `bash tests/public-user-journey-pack.sh` 10/0, `bash
 tests/hosted-install-contract.sh` 14/0, `bash tests/zeststream-ui-package.sh`
 23/0, `bash tests/publication-readiness.sh` 72/0, and `python3
-scripts/publication_readiness.py --json` remains blocked only on the five
-public cutover gates plus install-proxy checksum parity.
+scripts/publication_readiness.py --release --json` returns `status=pass` with
+zero readiness codes.
 
 ## Audit Closeout Rule
 
@@ -117,6 +112,6 @@ Before marking the `/goal` complete:
 4. Re-run `bash tests/public-docs.sh`, `bash tests/website-static.sh`,
    `bash tests/website-accessibility.sh`, `bash tests/installer-smoke.sh`, and
    `bash tests/journey-smoke.sh`.
-5. Confirm this audit has no `Current status` row that is blocked, pending
+5. Confirm this audit has no `Current status` row that is open, pending
    Joshua review, or only private-live verified.
 6. Only then create or accept final signoff evidence.
