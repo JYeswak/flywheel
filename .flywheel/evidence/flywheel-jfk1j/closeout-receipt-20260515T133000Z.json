@@ -1,0 +1,54 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-jfk1j",
+  "status": "closed",
+  "closed_at": "2026-05-15T13:30:00Z",
+  "summary": "Closed stale v38e1.5 N=4 mitigation blocker after live hooks, SkillOS status flip, and post-bmbub sister-shard batch were verified.",
+  "evidence": {
+    "write_edit_hook": "/Users/josh/.claude/hooks/pretooluse-write-edit-cross-repo-guard.sh",
+    "bash_hook": "/Users/josh/.claude/hooks/pretooluse-bash-cross-repo-guard.sh",
+    "settings": "/Users/josh/.claude/settings.json",
+    "authorize_list": "/Users/josh/.flywheel/cross-repo-authorized-writes.json",
+    "block_ledger": "/Users/josh/.local/state/flywheel/cross-repo-write-block-ledger.jsonl",
+    "skillos_both_layers_validated": "/Users/josh/Developer/skillos/state/heartbeat-tick-2026-05-12T1951Z.md",
+    "skillos_status_flip": "/Users/josh/Developer/skillos/state/blocker-escalations.jsonl",
+    "sister_shard_batch": ".flywheel/evidence/flywheel-96fnx/closeout-receipt-20260515T132705Z.json"
+  },
+  "validation": [
+    {
+      "command": "bash -n /Users/josh/.claude/hooks/pretooluse-write-edit-cross-repo-guard.sh",
+      "result": "pass"
+    },
+    {
+      "command": "bash -n /Users/josh/.claude/hooks/pretooluse-bash-cross-repo-guard.sh",
+      "result": "pass"
+    },
+    {
+      "command": "rg 'BOTH-LAYERS-LIVE-VALIDATED' /Users/josh/Developer/skillos/state/heartbeat-tick-2026-05-12T1951Z.md",
+      "result": "pass"
+    },
+    {
+      "command": "rg 'mitigation_validated_awaiting_canonical_doctrine_ratification' /Users/josh/Developer/skillos/state/blocker-escalations.jsonl",
+      "result": "pass"
+    },
+    {
+      "command": "rg 'v38e1\\.5.*N=5|N=5.*v38e1\\.5|skillos-clobber-N5|clobber.*N=5|N=5.*clobber' /Users/josh/Developer/skillos/state /Users/josh/Developer/skillos/.flywheel .flywheel",
+      "result": "pass",
+      "summary": "No later v38e1.5 N=5 clobber receipt found."
+    },
+    {
+      "command": "br dep cycles --json",
+      "result": "pass",
+      "summary": "count=0"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    }
+  ],
+  "boundaries": [
+    "No SkillOS files mutated.",
+    "No protected sessions mutated.",
+    "flywheel-96fnx carries the post-bmbub sister-shard proof."
+  ]
+}

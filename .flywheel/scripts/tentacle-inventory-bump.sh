@@ -18,8 +18,6 @@
 set -euo pipefail
 
 VERSION="tentacle-inventory-bump.v1"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
 
 INVENTORY_DEFAULT="$HOME/.claude/skills/dicklesworthstone-stack/references/INVENTORY.md"
 INVENTORY="${INVENTORY:-$INVENTORY_DEFAULT}"
@@ -34,6 +32,7 @@ usage() {
   cat <<'USAGE'
 Usage:
   tentacle-inventory-bump.sh --summary PATH [--inventory PATH] [--apply|--dry-run] [--json]
+  tentacle-inventory-bump.sh doctor|--doctor [--inventory PATH] [--summary PATH] [--json]
   tentacle-inventory-bump.sh --info|--schema|--examples|--help [--json]
 
 Reads a tentacle-drift-sweep summary (JSON, schema_version
@@ -76,7 +75,7 @@ info_json() {
     --arg trailer_end "$TRAILER_END" \
     --argjson exit_codes '{"0":"bump applied or preview emitted","1":"bump failed","2":"usage error","3":"prerequisite missing"}' \
     --argjson modes '["dry-run","apply"]' \
-    --argjson flags '["--summary","--inventory","--apply","--dry-run","--json","--info","--schema","--examples","--help"]' \
+    --argjson flags '["--summary","--inventory","--apply","--dry-run","--json","doctor","--doctor","--info","--schema","--examples","--help"]' \
     --argjson env_vars '["INVENTORY","TENTACLE_INVENTORY_BUMP_NOW"]' \
     '{
       schema_version: "tool-info/v1",
@@ -91,6 +90,7 @@ info_json() {
       env_vars: $env_vars,
       mutates: true,
       mutation_requires: ["--apply"],
+      doctor_schema: "tentacle-inventory-bump.doctor.v1",
       curated_table_modified: false,
       atomicity: "tempfile-rename-only",
       idempotent: true,
@@ -124,6 +124,9 @@ schema_json() {
 examples() {
   cat <<'EXAMPLES'
 Examples:
+  # Read-only doctor (no trailer rewrite)
+  .flywheel/scripts/tentacle-inventory-bump.sh doctor | jq .
+
   # Dry-run preview against the default INVENTORY (no mutation)
   echo '{"schema_version":"tentacle-drift-sweep/v1","status":"warn","ts":"2026-05-10T01:00:00Z","repo_count":177,"alert_count":11,"max_commits_behind":5780,"ledger_path":"/x/sweep.jsonl","alert_ledger_path":"/x/alerts.jsonl"}' \
     > /tmp/sweep.json
@@ -141,12 +144,93 @@ Examples:
 EXAMPLES
 }
 
+doctor_json() {
+  local jq_status inventory_status inventory_parent_status summary_status markers_status overall
+  local inventory_parent
+  overall="pass"
+  if command -v jq >/dev/null 2>&1; then
+    jq_status="pass"
+  else
+    jq_status="fail"
+    overall="fail"
+  fi
+  if [[ -f "$INVENTORY" && -r "$INVENTORY" ]]; then
+    inventory_status="pass"
+  else
+    inventory_status="fail"
+    overall="fail"
+  fi
+  inventory_parent="$(dirname "$INVENTORY")"
+  if [[ -d "$inventory_parent" && -w "$inventory_parent" ]]; then
+    inventory_parent_status="pass"
+  else
+    inventory_parent_status="warn"
+    [[ "$overall" == "fail" ]] || overall="warn"
+  fi
+  if [[ -z "$SUMMARY_PATH" ]]; then
+    summary_status="warn"
+    [[ "$overall" == "fail" ]] || overall="warn"
+  elif [[ "$SUMMARY_PATH" == "-" ]]; then
+    summary_status="warn"
+    [[ "$overall" == "fail" ]] || overall="warn"
+  elif [[ -f "$SUMMARY_PATH" && -r "$SUMMARY_PATH" ]]; then
+    if jq -e '.schema_version | test("^tentacle-drift-sweep/")' "$SUMMARY_PATH" >/dev/null 2>&1; then
+      summary_status="pass"
+    else
+      summary_status="fail"
+      overall="fail"
+    fi
+  else
+    summary_status="fail"
+    overall="fail"
+  fi
+  if [[ -n "$TRAILER_BEGIN" && -n "$TRAILER_END" && "$TRAILER_BEGIN" != "$TRAILER_END" ]]; then
+    markers_status="pass"
+  else
+    markers_status="fail"
+    overall="fail"
+  fi
+  jq -nc \
+    --arg status "$overall" \
+    --arg version "$VERSION" \
+    --arg inventory "$INVENTORY" \
+    --arg inventory_parent "$inventory_parent" \
+    --arg summary_path "$SUMMARY_PATH" \
+    --arg jq_status "$jq_status" \
+    --arg inventory_status "$inventory_status" \
+    --arg inventory_parent_status "$inventory_parent_status" \
+    --arg summary_status "$summary_status" \
+    --arg markers_status "$markers_status" \
+    --arg trailer_begin "$TRAILER_BEGIN" \
+    --arg trailer_end "$TRAILER_END" \
+    '{
+      schema_version: "tentacle-inventory-bump.doctor.v1",
+      command: "doctor",
+      status: $status,
+      mode: "read_only",
+      mutates: false,
+      version: $version,
+      inventory: $inventory,
+      summary_path: $summary_path,
+      trailer_begin: $trailer_begin,
+      trailer_end: $trailer_end,
+      checks: [
+        {name:"jq_available", status:$jq_status},
+        {name:"inventory_readable", status:$inventory_status},
+        {name:"inventory_parent_writable", status:$inventory_parent_status, path:$inventory_parent},
+        {name:"summary_readable_when_supplied", status:$summary_status},
+        {name:"trailer_markers_configured", status:$markers_status}
+      ]
+    }'
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --info)     info_json; exit 0 ;;
     --schema)   schema_json; exit 0 ;;
     --examples) examples; exit 0 ;;
     -h|--help)  usage; exit 0 ;;
+    doctor|--doctor) MODE="doctor"; shift ;;
     --apply)    MODE="apply"; shift ;;
     --dry-run)  MODE="dry-run"; shift ;;
     --json)     JSON_OUT=1; shift ;;
@@ -156,6 +240,11 @@ while [[ $# -gt 0 ]]; do
     *)          printf 'unexpected arg: %s\n' "$1" >&2; exit 2 ;;
   esac
 done
+
+if [[ "$MODE" == "doctor" ]]; then
+  doctor_json
+  exit 0
+fi
 
 if [[ -z "$SUMMARY_PATH" ]]; then
   printf 'error: --summary PATH required\n' >&2

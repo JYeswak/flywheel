@@ -1,0 +1,38 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-q03g",
+  "status": "closed",
+  "closed_at": "2026-05-15T03:18:00Z",
+  "summary": "flywheel-toolset-parity now clears the focused parity matrix test and the canonical CLI scorecard at 1000/1000.",
+  "artifact": {
+    "path": "/Users/josh/.local/bin/flywheel-toolset-parity",
+    "sha256": "170c7e616475a7b55088ef92f22256dfb7fe2b66ed19e2cfdfd1187e828c9774",
+    "distribution": "local-substrate"
+  },
+  "changes": [
+    "Replaced the stale literal canonical checker path in tests/flywheel-toolset-parity.sh with the real skill path.",
+    "Added focused assertions for canonical dry-run JSON and full canonical scorecard pass.",
+    "Updated the local flywheel-toolset-parity binary so root help documents the repair --dry-run safe mutation surface.",
+    "Updated repair --dry-run --json to emit dry_run=true and actual_actions=[].",
+    "Added help exit-codes / --exit-codes coverage with documented success, usage, transient retry, gate, and domain failure classes."
+  ],
+  "validation": [
+    {
+      "command": "bash tests/flywheel-toolset-parity.sh",
+      "status": "pass",
+      "summary": "25 pass / 0 fail"
+    },
+    {
+      "command": "bash /Users/josh/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh flywheel-toolset-parity",
+      "status": "pass",
+      "summary": "13 pass / 0 fail"
+    },
+    {
+      "command": "bash /Users/josh/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh score flywheel-toolset-parity --domain-exit-codes --json",
+      "status": "pass",
+      "summary": "composite_score=1000"
+    }
+  ],
+  "public_boundary": "The binary is a local full-substrate operator tool under ~/.local/bin, not a reduced public installer requirement.",
+  "autonomy": "autonomous"
+}

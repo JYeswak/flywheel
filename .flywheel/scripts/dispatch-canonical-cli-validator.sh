@@ -42,9 +42,9 @@ Canonical CLI surfaces:
   health [--json]          last-run status
   repair --scope <s>       repair misconfigured state
                             Default: --dry-run; mutate with --apply --idempotency-key KEY
-  validate <subject> [...] validate per-subject contract (TODO: define subjects)
+  validate <subject> [...] validate decision ledger contracts
   audit [--json]           recent run history
-  why <id>                 explain provenance for a given id (TODO: id semantics)
+  why <id>                 explain decision-ledger provenance for a timestamp or id
   quickstart [--json]      operator orientation
   help <topic>             topic help (run | doctor | health | repair | validate)
   completion <shell>       emit bash or zsh completion
@@ -182,7 +182,7 @@ scaffold_emit_completion() {
   esac
 }
 
-# ---------- canonical-cli stubs (TODO markers preserved) ----------
+# ---------- canonical-cli surface implementation ----------
 
 scaffold_cmd_doctor() {
   # Probe the substrate this validator depends on: jq, repo_root, ledger

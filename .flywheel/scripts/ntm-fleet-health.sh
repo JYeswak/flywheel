@@ -144,10 +144,10 @@ scaffold_emit_topic_help() {
   case "$topic" in
     run)      printf 'topic: run — default backward-compatible invocation routes to cmd_run.\n' ;;
     doctor)   printf 'topic: doctor — probes substrate (ntm binary, jsonl-append lib, topology file, out file dir, lock file dir, jq/mktemp deps, audit log dir, repo root, helper-lib). Pass = wrapper ready; warn = recoverable; fail = blocked.\n' ;;
-    health)   printf 'topic: health — summarizes last 50 fleet-health probes from $SCAFFOLD_AUDIT_LOG. Reports total_runs, last_run_ts, last_status, pass_rate. status=empty when log absent.\n' ;;
+    health)   printf 'topic: health — summarizes last 50 fleet-health probes from %s. Reports total_runs, last_run_ts, last_status, pass_rate. status=empty when log absent.\n' "$SCAFFOLD_AUDIT_LOG" ;;
     repair)   printf 'topic: repair — scopes: audit_log_dir (mkdir -p the parent), audit_log_truncate (keep last 1000 rows). Default --dry-run; --apply requires --idempotency-key KEY.\n' ;;
     validate) printf 'topic: validate — subjects: ntm-bin (verify ntm executable + ntm health subcommand recognized); audit-row JSONL_LINE (verify ts/status fields).\n' ;;
-    audit)    printf 'topic: audit — tails $SCAFFOLD_AUDIT_LOG (default 20 rows, override with audit N). Each row: ts, action, status, sha256, threshold, restart.\n' ;;
+    audit)    printf 'topic: audit — tails %s (default 20 rows, override with audit N). Each row: ts, action, status, sha256, threshold, restart.\n' "$SCAFFOLD_AUDIT_LOG" ;;
     why)      printf 'topic: why — given <id>, look up audit-log rows. id = numeric row index (negative indexes from tail) OR substring matched against status / threshold / restart fields.\n' ;;
     *)        printf 'topics: run | doctor | health | repair | validate | audit | why\n' ;;
   esac
@@ -584,6 +584,7 @@ _scaffold_is_canonical_arg() {
 
 if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
   scaffold_main "$@"
+  # shellcheck disable=SC2317
   exit $?
 fi
 # ====== END canonical-cli scaffold ======
@@ -644,16 +645,62 @@ role_split(){
   jq -cn --argjson t "$1" --argjson h "$2" 'def panes:$h.panes//$h.agents//[]; def pid:.pane//.pane_idx//.id//null; def bad:((.status//.process_status//"unknown")|tostring|ascii_downcase|test("error|exited|failed|dead|stuck|unhealthy")); def role:(pid|tostring) as $p | ((.agent_type//.type//"")|tostring|ascii_downcase) as $k | if (($t.human_pane//null)!=null and $p==($t.human_pane|tostring)) or $k=="user" then "user" elif (($t.orchestrator_pane//null)!=null and $p==($t.orchestrator_pane|tostring)) or (($t.callback_pane//null)!=null and $p==($t.callback_pane|tostring)) or (($t.worker_panes//[]|map(tostring)|index($p))!=null) or ($k|test("^(cod|codex|cc|claude)$")) then "agent" else "other" end; def source:(pid|tostring) as $p | ((.agent_type//.type//"")|tostring|ascii_downcase) as $k | if (($t.human_pane//null)!=null and $p==($t.human_pane|tostring)) then "topology.human_pane" elif $k=="user" then "ntm.agent_type" elif (($t.orchestrator_pane//null)!=null and $p==($t.orchestrator_pane|tostring)) then "topology.orchestrator_pane" elif (($t.callback_pane//null)!=null and $p==($t.callback_pane|tostring)) then "topology.callback_pane" elif (($t.worker_panes//[]|map(tostring)|index($p))!=null) then "topology.worker_panes" elif ($k|test("^(cod|codex|cc|claude)$")) then "ntm.agent_type" else "unknown" end; def deco:panes[]|{pane:pid,role:role,role_source:source,status:(.status//.process_status//"unknown"),process_status:(.process_status//null),agent_type:(.agent_type//.type//null),activity:(.activity//.state//null),unhealthy:bad}; def summary($r):[deco|select(.role==$r)] as $rows|($rows|map(select(.unhealthy))) as $bad|{status:(if ($rows|length)==0 then "unknown" elif ($bad|length)>0 then "error" else "ok" end),total:($rows|length),unhealthy_count:($bad|length),panes:$rows}; {schema_version:"ntm-health-role-split/v1",agent_pane_health:summary("agent"),user_pane_health:summary("user"),other_pane_health:summary("other")}'
 }
 
+topology_observer(){
+  local previous_count=""
+  if [[ -r "$OUT_FILE" ]]; then
+    previous_count="$(tail -n 50 "$OUT_FILE" 2>/dev/null \
+      | jq -rs 'map((.topology_observer? // .ledger_row?.topology_observer?) // empty) | last | .row_count // empty' 2>/dev/null || true)"
+  fi
+  if [[ ! -r "$TOPOLOGY_FILE" ]]; then
+    jq -cn --arg path "$TOPOLOGY_FILE" --arg previous "$previous_count" \
+      '{schema_version:"ntm-fleet-health.topology-observer/v1",status:"missing",path:$path,row_count:null,previous_row_count:($previous|tonumber? // null),row_count_decreased:false,regression:false,walk_in_progress:false,confirmed_rebuild:false,confirmed_via_present:false,joshua_confirmed_rows:0,confirmed_via_rows:0,walk_in_progress_rows:0}'
+    return 0
+  fi
+  jq -cs --arg path "$TOPOLOGY_FILE" --arg previous "$previous_count" '
+    def truthy:
+      . == true or . == 1 or ((. // "" | tostring | ascii_downcase) | IN("true","yes","1","walk_in_progress"));
+    map(select(type == "object")) as $rows
+    | ($rows | length) as $row_count
+    | ($previous | tonumber? // null) as $previous_count
+    | ($rows | map(select((.joshua_confirmed_at // "") != "")) | length) as $joshua_rows
+    | ($rows | map(select((.confirmed_via // "") != "")) | length) as $via_rows
+    | ($rows | map(select((.walk_in_progress // .inferred_wipe_walk_in_progress // .topology_walk_in_progress // false | truthy) or (((.session_status // .status // "") | tostring | ascii_downcase) | test("walk.*progress|rebuild.*progress")))) | length) as $walk_rows
+    | ($previous_count != null and $row_count < $previous_count) as $decreased
+    | ($row_count > 0 and $joshua_rows == $row_count and $via_rows == $row_count) as $confirmed_rebuild
+    | ($walk_rows > 0) as $walk_in_progress
+    | ($decreased and ($confirmed_rebuild | not) and ($walk_in_progress | not)) as $regression
+    | {
+        schema_version:"ntm-fleet-health.topology-observer/v1",
+        status:(if $regression then "regression" elif $decreased and $walk_in_progress then "walk_in_progress" elif $decreased and $confirmed_rebuild then "confirmed_rebuild" else "ok" end),
+        path:$path,
+        row_count:$row_count,
+        previous_row_count:$previous_count,
+        row_count_decreased:$decreased,
+        regression:$regression,
+        walk_in_progress:$walk_in_progress,
+        confirmed_rebuild:$confirmed_rebuild,
+        confirmed_via_present:($via_rows > 0),
+        joshua_confirmed_rows:$joshua_rows,
+        confirmed_via_rows:$via_rows,
+        walk_in_progress_rows:$walk_rows
+      }' "$TOPOLOGY_FILE"
+}
+
 mkdir -p "$(dirname "$OUT_FILE")" "$(dirname "$LOCK_FILE")"
-if command -v flock >/dev/null 2>&1; then exec 9>"$LOCK_FILE"; flock -n 9 || { echo "another instance running"; exit 0; }
-else if ! mkdir "$LOCK_FILE" 2>/dev/null; then echo "another instance running"; exit 0; fi; trap 'rmdir "$LOCK_FILE" 2>/dev/null || true' EXIT INT TERM; fi
+if command -v flock >/dev/null 2>&1; then
+  exec 9>"$LOCK_FILE"; flock -n 9 || { echo "another instance running"; exit 0; }
+else
+  if ! mkdir "$LOCK_FILE" 2>/dev/null; then echo "another instance running"; exit 0; fi
+  trap 'rmdir "$LOCK_FILE" 2>/dev/null || true' EXIT INT TERM
+fi
 NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+TOPOLOGY_OBSERVER="$(topology_observer)"
 
 set +e; LIST_OUT="$("$NTM_BIN" list --json 2>&1)"; LIST_RC=$?; set -e
-if [[ "$LIST_RC" -ne 0 ]]; then LIST_JSON="$(wrap_json "$LIST_OUT" "$LIST_RC")"; ROW="$(jq -cn --arg ts "$NOW" --argjson list "$LIST_JSON" '{ts:$ts,event:"session_discovery_failed",list:$list}')"; append_row "$ROW" "session_discovery_failed"; emit "$ROW" "$(jq -cn '{enabled:false,apply:false,action:"none"}')"; exit 0; fi
+if [[ "$LIST_RC" -ne 0 ]]; then LIST_JSON="$(wrap_json "$LIST_OUT" "$LIST_RC")"; ROW="$(jq -cn --arg ts "$NOW" --argjson list "$LIST_JSON" --argjson topo "$TOPOLOGY_OBSERVER" '{ts:$ts,event:"session_discovery_failed",list:$list,topology_observer:$topo}')"; append_row "$ROW" "session_discovery_failed"; emit "$ROW" "$(jq -cn '{enabled:false,apply:false,action:"none"}')"; exit 0; fi
 
 SESSIONS="$(jq -r 'if type=="array" then .[]? | (.name // .session // empty) elif (.sessions? | type)=="array" then .sessions[]? | (.name // .session // empty) else .name // .session // empty end' <<<"$LIST_OUT" 2>/dev/null || true)"
-if [[ -z "$SESSIONS" ]]; then ROW="$(jq -cn --arg ts "$NOW" '{ts:$ts,event:"no_sessions_discovered"}')"; append_row "$ROW" "no_sessions_discovered"; emit "$ROW" "$(jq -cn '{enabled:false,apply:false,action:"none"}')"; exit 0; fi
+if [[ -z "$SESSIONS" ]]; then ROW="$(jq -cn --arg ts "$NOW" --argjson topo "$TOPOLOGY_OBSERVER" '{ts:$ts,event:"no_sessions_discovered",topology_observer:$topo}')"; append_row "$ROW" "no_sessions_discovered"; emit "$ROW" "$(jq -cn '{enabled:false,apply:false,action:"none"}')"; exit 0; fi
 
 while IFS= read -r SESSION; do
   [[ -z "$SESSION" ]] && continue
@@ -661,6 +708,6 @@ while IFS= read -r SESSION; do
   HEALTH_ARGS=(health "$SESSION" --json --threshold "$THRESHOLD"); [[ "$AUTO_RESTART_STUCK" -eq 1 && "$APPLY" -eq 1 ]] && HEALTH_ARGS+=(--auto-restart-stuck)
   set +e; HEALTH_OUT="$("$NTM_BIN" "${HEALTH_ARGS[@]}" 2>&1)"; HEALTH_RC=$?; set -e
   HEALTH="$(wrap_json "$HEALTH_OUT" "$HEALTH_RC")"; ROLE_SPLIT="$(role_split "$TOPO" "$HEALTH")"
-  ROW="$(jq -cn --arg ts "$NOW" --arg session "$SESSION" --arg threshold "$THRESHOLD" --argjson health "$HEALTH" --argjson role "$ROLE_SPLIT" '{ts:$ts,session:$session,threshold:$threshold,health:$health,agent_pane_health:$role.agent_pane_health,user_pane_health:$role.user_pane_health,other_pane_health:$role.other_pane_health,health_role_split:$role}')"
+  ROW="$(jq -cn --arg ts "$NOW" --arg session "$SESSION" --arg threshold "$THRESHOLD" --argjson health "$HEALTH" --argjson role "$ROLE_SPLIT" --argjson topo "$TOPOLOGY_OBSERVER" '{ts:$ts,session:$session,threshold:$threshold,health:$health,agent_pane_health:$role.agent_pane_health,user_pane_health:$role.user_pane_health,other_pane_health:$role.other_pane_health,health_role_split:$role,topology_observer:$topo}')"
   AUTO="$(auto_preview "$SESSION" "$HEALTH")"; append_row "$ROW" "health"; emit "$ROW" "$AUTO"
 done <<<"$SESSIONS"

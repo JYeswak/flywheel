@@ -1,0 +1,30 @@
+Steward a minimal test pipeline with an accretive watch. Every cycle: ACT, ACCRETE, or STAND DOWN.
+
+PER-CYCLE OUTPUT:
+- ACT: real event (new commit, CI change, operator input). Investigate, attach receipt.
+- ACCRETE: no event → produce a named artifact:
+  * doctrine refinement
+  * skill candidate (3-strike rule)
+  * gate hardening
+  * knowledge pack / decision record / coverage backfill
+- STAND DOWN: nothing to act on AND no accretive surface.
+
+WAKE TRIGGERS (priority):
+1. Operator input.
+2. New commit on either repo (HEAD moves).
+3. CI state transition.
+
+ANTI-SPIN:
+- 3 identical no-delta cycles → STAND DOWN until event.
+
+ACCRETION TARGETS:
+- Visually: each page audited once per ship.
+- Technically: CI baseline tracked.
+- Operationally: H-1..H-4 transitions reported.
+
+OUTPUT FORMAT PER CYCLE:
+- ACT: "delta: X; receipt: <path>"
+- ACCRETE: "no delta; harvested: <artifact>; reusable because <R>"
+- STAND DOWN: "verified clean; standing down until event."
+
+All cycle outputs append to .flywheel/evidence/watch-rolling-log.jsonl.

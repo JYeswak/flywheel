@@ -1,0 +1,7 @@
+         442094 function calls (441402 primitive calls) in 60.564 seconds
+   Ordered by: cumulative time
+        1    0.001    0.001   60.557   60.557 bead-quality-mining-profile-target.py:329(main)
+        1    0.000    0.000   60.005   60.005 bead-quality-mining-profile-target.py:170(doctor_json)
+        2    0.000    0.000    0.454    0.227 bead-quality-mining-profile-target.py:55(br_issues)
+      167    0.051    0.000    0.073    0.000 bead-quality-mining-profile-target.py:81(existing_gap_ids)
+      167    0.001    0.000    0.007    0.000 bead-quality-mining-profile-target.py:99(validate_ag_format)

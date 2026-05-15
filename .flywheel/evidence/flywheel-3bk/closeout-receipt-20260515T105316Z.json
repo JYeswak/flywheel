@@ -1,0 +1,47 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-3bk",
+  "title": "dynamic-ntm-session-coverage-heartbeat",
+  "closed_at": "2026-05-15T10:53:16Z",
+  "decision": "close_as_superseded_by_successor_surfaces",
+  "autonomy": "autonomous",
+  "original_acceptance": [
+    "Replace static session list in ntm-watcher-heartbeat.sh with dynamic ntm list --json discovery.",
+    "Use config/topology session paths where available.",
+    "Surface daemon freshness through flywheel status/health surfaces."
+  ],
+  "evidence": [
+    {
+      "surface": ".flywheel/scripts/ntm-fleet-health.sh",
+      "proof": "The current fleet-health wrapper uses ntm list --json for session discovery, calls ntm health <session> --json for each discovered session, and carries topology_observer state in each ledger row."
+    },
+    {
+      "surface": ".flywheel/scripts/ntm-fleet-health.sh health --json",
+      "proof": "Canonical health summarizes recent fleet-health runs from the audit log with total_runs, last_run_ts, last_status, pass_rate, and window."
+    },
+    {
+      "surface": "tests/ntm-fleet-health-topology-regression.sh",
+      "proof": "Regression coverage distinguishes unconfirmed topology row-count decreases from Joshua-confirmed rebuilds and walk-in-progress states."
+    }
+  ],
+  "validation": [
+    {
+      "command": "bash tests/ntm-fleet-health-canonical-cli.sh",
+      "result": "pass",
+      "summary": "SUMMARY pass=19 fail=0"
+    },
+    {
+      "command": "bash tests/ntm-fleet-health-topology-regression.sh",
+      "result": "pass",
+      "summary": "PASS ntm-fleet-health-topology-regression tests pass=4 fail=0"
+    }
+  ],
+  "not_used_as_evidence": [
+    {
+      "surface": ".flywheel/scripts/team-pulse-heartbeat.sh",
+      "reason": "A separate scaffold interception gap remains: doctor/validate are intercepted by the canonical scaffold and return TODO even though native implementations exist below it. This receipt does not rely on that surface."
+    }
+  ],
+  "residual_risk": "The legacy file name ntm-watcher-heartbeat.sh no longer exists as the active surface. Closure is based on the successor ntm-fleet-health path and its tests, not on resurrecting the old filename.",
+  "close_reason": "Completed by successor ntm-fleet-health dynamic discovery and topology/freshness evidence; tests passed; AUTONOMY: autonomous"
+}

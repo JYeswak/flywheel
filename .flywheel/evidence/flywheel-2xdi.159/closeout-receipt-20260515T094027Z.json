@@ -1,0 +1,55 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-2xdi.159",
+  "closed_scope": "Converted security-posture-probe.sh from wired-but-cold into a tested receiver-backed security probe.",
+  "paths": [
+    "tests/security-posture-probe-canonical-cli.sh"
+  ],
+  "before": {
+    "gap_hunt_probe_matches": [
+      "wired-but-cold:developer-flywheel-.flywheel-scripts-security-posture-probe.sh",
+      "probe-without-receiver:security-posture-probe.sh"
+    ],
+    "reason": "The probe existed but no receiver/test corpus referenced it, so the gap hunter treated it as cold."
+  },
+  "after": {
+    "gap_hunt_probe_matches": [],
+    "receiver": "tests/security-posture-probe-canonical-cli.sh",
+    "coverage": [
+      "executable and bash syntax",
+      "info/schema prove synthetic-only and no secret value emission",
+      "clean fixture returns pass with zero findings",
+      "leaky fixture returns rc=1 with classes/counts only",
+      "raw CANARY_TEST secret material is absent from output",
+      "validate mode reuses the safe scan contract"
+    ]
+  },
+  "validation": [
+    {
+      "command": "bash tests/security-posture-probe-canonical-cli.sh",
+      "result": "pass 9/0"
+    },
+    {
+      "command": "shellcheck tests/security-posture-probe-canonical-cli.sh",
+      "result": "pass"
+    },
+    {
+      "command": "timeout 180 .flywheel/scripts/gap-hunt-probe.sh --json --dry-run",
+      "result": "pass; no security-posture-probe or flywheel-2xdi.159 gap_ids"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    }
+  ],
+  "safety": {
+    "secret_values_emitted": false,
+    "fixture_only": true,
+    "runtime_mutation": false
+  },
+  "autonomy": "autonomous"
+}

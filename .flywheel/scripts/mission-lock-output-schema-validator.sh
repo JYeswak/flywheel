@@ -16,14 +16,16 @@ usage() {
   printf '%s\n' \
     'usage:' \
     '  mission-lock-output-schema-validator.sh [--mission MISSION.md|payload.json] [--schema schema.json] [--json] [--quiet]' \
+    '  mission-lock-output-schema-validator.sh doctor|--doctor [--json]' \
     '  mission-lock-output-schema-validator.sh --info|--help|--examples [--json]'
 }
 
 examples() {
   if [[ "$JSON_OUT" -eq 1 ]]; then
-    jq -nc '{examples:["mission-lock-output-schema-validator.sh --json","mission-lock-output-schema-validator.sh --mission /tmp/MISSION.md --quiet","mission-lock-output-schema-validator.sh --mission /tmp/output.json --schema .flywheel/validation-schema/v1/mission-lock-output.schema.json --json"]}'
+    jq -nc '{examples:["mission-lock-output-schema-validator.sh doctor --json","mission-lock-output-schema-validator.sh --json","mission-lock-output-schema-validator.sh --mission /tmp/MISSION.md --quiet","mission-lock-output-schema-validator.sh --mission /tmp/output.json --schema .flywheel/validation-schema/v1/mission-lock-output.schema.json --json"]}'
   else
     printf '%s\n' \
+      'mission-lock-output-schema-validator.sh doctor --json' \
       'mission-lock-output-schema-validator.sh --json' \
       'mission-lock-output-schema-validator.sh --mission /tmp/MISSION.md --quiet' \
       'mission-lock-output-schema-validator.sh --mission /tmp/output.json --schema .flywheel/validation-schema/v1/mission-lock-output.schema.json --json'
@@ -31,10 +33,68 @@ examples() {
 }
 
 info() {
-  jq -nc --arg version "$VERSION" --arg schema "$SCHEMA_PATH" '{name:"mission-lock-output-schema-validator.sh",version:$version,schema:$schema,mutates:false,canonical_cli_flags:["--info","--help","--examples","--json","--quiet"],input_sources:["json","yaml_frontmatter","sidecar_json","key_value_metadata"],exit_codes:{"0":"pass","1":"validation_fail","2":"usage_or_schema_error"}}'
+  jq -nc --arg version "$VERSION" --arg schema "$SCHEMA_PATH" '{name:"mission-lock-output-schema-validator.sh",version:$version,schema:$schema,mutates:false,canonical_cli_flags:["--info","--help","--examples","doctor","--doctor","--json","--quiet"],input_sources:["json","yaml_frontmatter","sidecar_json","key_value_metadata"],doctor_schema:"mission-lock-output-schema-validator.doctor.v1",exit_codes:{"0":"pass","1":"validation_fail","2":"usage_or_schema_error"}}'
 }
 
 die_usage() { printf 'ERR: %s\n' "$1" >&2; exit 2; }
+
+doctor() {
+  local schema_status mission_status backend_status tmp_status overall
+  overall="pass"
+  if [[ -r "$SCHEMA_PATH" ]]; then
+    schema_status="pass"
+  else
+    schema_status="fail"
+    overall="fail"
+  fi
+  if [[ -r "$MISSION_PATH" ]]; then
+    mission_status="pass"
+  else
+    mission_status="warn"
+    [[ "$overall" == "fail" ]] || overall="warn"
+  fi
+  if python3 - <<'PY' >/dev/null 2>&1
+import jsonschema
+PY
+  then
+    backend_status="pass"
+  else
+    backend_status="fail"
+    overall="fail"
+  fi
+  if tmp_probe="$(mktemp "${TMPDIR:-/tmp}/mission-lock-output-schema-doctor.XXXXXX" 2>/dev/null)"; then
+    rm -f "$tmp_probe"
+    tmp_status="pass"
+  else
+    tmp_status="fail"
+    overall="fail"
+  fi
+  jq -nc \
+    --arg status "$overall" \
+    --arg version "$VERSION" \
+    --arg schema_path "$SCHEMA_PATH" \
+    --arg mission_path "$MISSION_PATH" \
+    --arg schema_status "$schema_status" \
+    --arg mission_status "$mission_status" \
+    --arg backend_status "$backend_status" \
+    --arg tmp_status "$tmp_status" \
+    '{
+      schema_version: "mission-lock-output-schema-validator.doctor.v1",
+      command: "doctor",
+      status: $status,
+      mode: "read_only",
+      mutates: false,
+      version: $version,
+      schema_path: $schema_path,
+      mission_path: $mission_path,
+      checks: [
+        {name:"schema_readable", status:$schema_status},
+        {name:"mission_input_readable", status:$mission_status},
+        {name:"python_jsonschema_available", status:$backend_status},
+        {name:"tmp_writable", status:$tmp_status}
+      ]
+    }'
+}
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -45,6 +105,7 @@ while [[ $# -gt 0 ]]; do
     --info) info; exit 0 ;;
     --help|-h) usage; exit 0 ;;
     --examples) examples; exit 0 ;;
+    doctor|--doctor) doctor; exit 0 ;;
     --*) die_usage "unknown argument: $1" ;;
     *) MISSION_PATH="$1"; shift ;;
   esac

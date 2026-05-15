@@ -3,12 +3,14 @@
 # Canonical-cli surface tests for .flywheel/scripts/mission-lock-readiness-doctor.sh (scaffolded by
 # bead flywheel-ws02m / scaffold-canonical-cli.sh).
 #
-# 13/13 PASS = canonical-cli-scoping checker green. TODO markers
-# point at per-surface assertions the operator should fill in.
+# Base checks prove canonical-cli-scoping. Fill-in checks prove the mission-lock
+# readiness surface has concrete doctor/health/repair/validate/audit/why logic.
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 SCRIPT="$ROOT/.flywheel/scripts/mission-lock-readiness-doctor.sh"
+TMP="$(mktemp -d "${TMPDIR:-/tmp}/mission-lock-readiness-test.XXXXXX")"
+trap 'rm -rf "$TMP"' EXIT
 
 pass_count=0
 fail_count=0
@@ -33,7 +35,7 @@ if "$SCRIPT" --examples --json 2>/dev/null | jq -e '.command == "examples"' >/de
   pass "--examples emits canonical envelope"
 else fail "--examples envelope"; fi
 
-# Test 5: doctor returns valid envelope (even pre-fill-in stub is valid JSON)
+# Test 5: doctor returns valid envelope.
 if "$SCRIPT" doctor --json 2>/dev/null | jq -e '.command == "doctor"' >/dev/null; then
   pass "doctor emits canonical envelope"
 else fail "doctor envelope"; fi
@@ -82,9 +84,60 @@ if "$SCRIPT" quickstart 2>/dev/null | jq -e '.command == "quickstart"' >/dev/nul
   pass "quickstart emits canonical envelope"
 else fail "quickstart envelope"; fi
 
-# TODO(canonical-cli-scaffold): add per-surface assertions here.
-# Examples: doctor checks specific data; repair --apply with key
-# performs expected mutation; validate enforces a known schema.
+# Fill-in assertions for flywheel-5wuhe.
+
+# Test 14: doctor has concrete load-bearing checks.
+if "$SCRIPT" doctor --json 2>/dev/null \
+  | jq -e '.command == "doctor"
+           and (.status | IN("pass","warn","fail"))
+           and (.checks | length >= 8)
+           and (.checks | any(.name == "mission_default_readable"))
+           and (.checks | any(.name == "schema_validator_executable"))
+           and (.checks | any(.name == "scaffold_validator_executable"))
+           and (.checks | any(.name == "lens_merge_executable"))' >/dev/null; then
+  pass "doctor returns concrete mission-lock substrate checks"
+else fail "doctor concrete mission-lock checks"; fi
+
+# Test 15: repair has real scopes and apply writes an audit row.
+TEST_LOG="$TMP/readiness-runs.jsonl"
+SCAFFOLD_AUDIT_LOG="$TEST_LOG" "$SCRIPT" repair --scope audit_log_dir --apply --idempotency-key 5wuhe-test --json >/dev/null 2>&1
+if [[ -f "$TEST_LOG" ]] && jq -e 'select(.action == "repair" and .status == "applied")' "$TEST_LOG" >/dev/null; then
+  pass "repair --apply writes audit row for audit_log_dir"
+else fail "repair apply audit row"; fi
+
+# Test 16: health summarizes audit rows.
+if SCAFFOLD_AUDIT_LOG="$TEST_LOG" "$SCRIPT" health --json 2>/dev/null \
+  | jq -e '.command == "health" and .total_runs >= 1 and .last_status == "applied" and (.pass_rate | type == "number")' >/dev/null; then
+  pass "health summarizes mission-lock readiness audit rows"
+else fail "health audit summary"; fi
+
+# Test 17: validate readiness-state accepts the native doctor payload shape.
+READINESS_FIXTURE='{"mission_lock_readiness_health_score":0.7,"blocked_surfaces":["mission-lock-scaffold"],"phase0_scaffold_bead_suggestions":[],"repair_receipt_identity_fields":{"repair_idempotency_key":"sha256:test"},"audit_only":true}'
+if "$SCRIPT" validate readiness-state "$READINESS_FIXTURE" 2>/dev/null \
+  | jq -e '.command == "validate" and .subject == "readiness-state" and .status == "pass"' >/dev/null; then
+  pass "validate readiness-state accepts native payload shape"
+else fail "validate readiness-state"; fi
+
+# Test 18: validate audit-row rejects hash-only or arbitrary rows.
+set +e
+"$SCRIPT" validate audit-row '{"sha256":"abc"}' >/dev/null 2>&1
+rc=$?
+set -e
+if [[ "$rc" -eq 1 ]]; then
+  pass "validate audit-row rejects hash-only rows"
+else fail "validate audit-row hash-only rc=$rc"; fi
+
+# Test 19: audit tails concrete rows.
+if SCAFFOLD_AUDIT_LOG="$TEST_LOG" "$SCRIPT" audit --json 2>/dev/null \
+  | jq -e '.command == "audit" and .status == "pass" and .row_count >= 1 and (.recent | length >= 1)' >/dev/null; then
+  pass "audit tails mission-lock readiness audit rows"
+else fail "audit tail"; fi
+
+# Test 20: why can explain audit rows by substring.
+if SCAFFOLD_AUDIT_LOG="$TEST_LOG" "$SCRIPT" why repair 2>/dev/null \
+  | jq -e '.command == "why" and .status == "pass" and .match_count >= 1' >/dev/null; then
+  pass "why explains repair audit provenance"
+else fail "why audit provenance"; fi
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2

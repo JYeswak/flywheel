@@ -7,6 +7,8 @@ authority: {capability-control-plane}-1-blocker-closure-with-live-probe-evidence
 ratified: <timestamp> (P3-trivial cross-orch via cross-orch-anti-divergence-v1.0.0)
 cluster: substrate-hygiene-doctrine-cluster
 sisters:
+  - repo-hygiene-operational-protocol.md
+  - git-repo-discipline.md
   - git-stash-discipline.md
 ---
 
@@ -14,8 +16,16 @@ sisters:
 
 ## Substrate-hygiene doctrine cluster
 
-This doctrine is part of the **substrate-hygiene doctrine cluster** alongside `git-stash-discipline.md`. Both share a Meadows-lens diagnosis: recursive-self-validation failure modes — substrate that nobody verifies accumulates as silent debt.
+This doctrine is part of the **substrate-hygiene doctrine cluster** alongside
+`repo-hygiene-operational-protocol.md`, `git-repo-discipline.md`, and
+`git-stash-discipline.md`. All four share a Meadows-lens diagnosis:
+recursive-self-validation failure modes — substrate that nobody verifies
+accumulates as silent debt.
 
+- **repo-hygiene-operational-protocol.md** addresses: repo accretion/bloat
+  before it becomes a 70k-file cleanup event
+- **git-repo-discipline.md** addresses: dirty working trees as unresolved
+  decisions
 - **git-stash-discipline.md** addresses: stash accumulation as durable storage (paradigm: stash is 24h scratch, not parking lot)
 - **blocker-discipline.md** (this doctrine): addresses blocker accumulation as unverified claims (paradigm: blockers are claims, not facts)
 

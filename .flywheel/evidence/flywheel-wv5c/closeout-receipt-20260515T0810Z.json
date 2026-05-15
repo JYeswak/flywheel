@@ -1,0 +1,41 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-wv5c",
+  "created_at": "2026-05-15T08:10:00Z",
+  "status": "safe_to_close_with_followup",
+  "summary": "The original flywheel-autoloop passive doctor/health/help gates are green: --help exits read-only, doctor/health JSON parse cleanly, health --watch is long-running and externally stoppable, and canonical checker passes.",
+  "validation": [
+    {
+      "command": "flywheel-autoloop --help",
+      "result": "pass",
+      "summary": "exits 0; no autoloop state directory written in fixture"
+    },
+    {
+      "command": "flywheel-autoloop doctor --json | jq empty",
+      "result": "pass"
+    },
+    {
+      "command": "flywheel-autoloop health --json | jq empty",
+      "result": "pass"
+    },
+    {
+      "command": "gtimeout 3 flywheel-autoloop health --watch --json",
+      "result": "pass",
+      "summary": "terminated by timeout rc=124 after writing JSONL"
+    },
+    {
+      "command": "bash ~/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh /Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop",
+      "result": "pass",
+      "summary": "13/0"
+    },
+    {
+      "command": "FLYWHEEL_AUTOLOOP_BIN=/Users/josh/.claude/skills/.flywheel/bin/flywheel-autoloop CANONICAL_CLI_CHECKER=/Users/josh/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh bash tests/flywheel-autoloop-canonical-cli.sh",
+      "result": "pass",
+      "summary": "canonical CLI smoke and no-arg supervisor regression pass"
+    }
+  ],
+  "followup_gap": {
+    "bead_id": "flywheel-btw0h",
+    "reason": "Newer canonical-cli scorecard reports composite_score=745 because help exit-codes / --exit-codes are missing and self-doc/dry-run JSON dimensions need hardening. This is separate from the original passive doctor health acceptance gates."
+  }
+}

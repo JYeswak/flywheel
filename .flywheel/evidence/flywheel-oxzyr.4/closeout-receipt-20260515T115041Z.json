@@ -1,0 +1,39 @@
+{
+  "schema": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-oxzyr.4",
+  "created_at": "2026-05-15T11:50:41Z",
+  "status": "closed",
+  "decision": "closed_with_evidence",
+  "summary": "Added a read-only doctor envelope to the P0 worker callback delivery verifier so doctor-mode inventory no longer treats the surface as absent-doctor.",
+  "changed_files": [
+    ".flywheel/scripts/verify-callback-delivery.sh",
+    "tests/verify-callback-delivery.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/verify-callback-delivery.sh",
+      "result": "pass",
+      "summary": "Existing callback delivery fixtures pass, including success, queued-not-observed, ntm send failure, pane disappeared, copy-mode spool, doctor ok, and missing-ntm doctor failure."
+    },
+    {
+      "command": "bash -n .flywheel/scripts/verify-callback-delivery.sh tests/verify-callback-delivery.sh",
+      "result": "pass",
+      "summary": "Shell syntax clean."
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/verify-callback-delivery.sh tests/verify-callback-delivery.sh",
+      "result": "pass",
+      "summary": "ShellCheck clean after fixing existing info-level findings in touched files."
+    },
+    {
+      "command": ".flywheel/scripts/verify-callback-delivery.sh --ntm /Users/josh/.local/bin/ntm --doctor --json | jq .",
+      "result": "pass",
+      "summary": "Live read-only doctor reports schema worker-callback-delivery-doctor.v1, status ok, ntm present, spool available, mutates=false."
+    }
+  ],
+  "parent_state": {
+    "parent_bead_id": "flywheel-oxzyr",
+    "parent_closed": false,
+    "reason": "The broader per-binary doctor-mode wave remains open; this closes one P0 absent-doctor surface only."
+  }
+}

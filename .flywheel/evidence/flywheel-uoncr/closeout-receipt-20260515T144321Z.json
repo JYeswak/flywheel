@@ -1,0 +1,51 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-uoncr",
+  "parent_bead_id": "flywheel-oxzyr",
+  "status": "closed",
+  "closed_at": "2026-05-15T14:43:21Z",
+  "summary": "Added a read-only doctor/--doctor envelope to repo-hygiene-check.sh and the install-template copy so the substrate-hygiene protocol can be inspected without cleanup or pruning side effects.",
+  "changed_files": [
+    ".flywheel/scripts/repo-hygiene-check.sh",
+    "templates/flywheel-install/scripts/repo-hygiene-check.sh",
+    "tests/repo-hygiene-check-doctor.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/repo-hygiene-check-doctor.sh",
+      "result": "pass",
+      "summary": "8/0 for repo-local and template scripts: syntax, doctor pass envelope, --doctor alias, missing-repo fail envelope."
+    },
+    {
+      "command": "bash tests/repo-discipline-wire.sh",
+      "result": "pass",
+      "summary": "25/0; existing dispatch and daily-report wiring still passes after the doctor addition."
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/repo-hygiene-check.sh templates/flywheel-install/scripts/repo-hygiene-check.sh tests/repo-hygiene-check-doctor.sh",
+      "result": "pass",
+      "summary": "No shellcheck findings."
+    },
+    {
+      "command": ".flywheel/audit/flywheel-cli-inventory/build-inventory.sh && jq row for .flywheel/scripts/repo-hygiene-check.sh",
+      "result": "pass",
+      "summary": "doctor_subcommand_status moved to basic; mutates_state=yes; ownership=own."
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass",
+      "summary": "No whitespace errors."
+    },
+    {
+      "command": "br dep cycles --json",
+      "result": "pass",
+      "summary": "No active dependency cycles."
+    }
+  ],
+  "boundaries": [
+    "Doctor mode does not run H-1..H-4 scans.",
+    "Doctor mode does not prune, delete, untrack, or clean files.",
+    "repo-hygiene-prune.sh remains the separate explicit cleanup surface.",
+    "Canonical CLI scoping remains separately classified as missing; this closeout is limited to doctor-mode gap reduction."
+  ]
+}

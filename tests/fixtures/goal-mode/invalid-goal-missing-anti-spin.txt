@@ -1,0 +1,24 @@
+Steward a minimal test pipeline. Every cycle: ACT, ACCRETE, or STAND DOWN.
+
+PER-CYCLE OUTPUT:
+- ACT: real event.
+- ACCRETE: no event → produce a named artifact (doctrine refinement, skill candidate, gate hardening, knowledge pack, decision record, coverage backfill).
+- STAND DOWN: nothing to act on.
+
+WAKE TRIGGERS:
+1. Operator input.
+2. New commit on either repo (HEAD moves).
+
+ACCRETION TARGETS:
+- Visually: each page audited.
+- Technically: CI tracked.
+- Operationally: transitions reported.
+
+OUTPUT FORMAT PER CYCLE:
+- ACT: "delta: X"
+- ACCRETE: "harvested artifact"
+- STAND DOWN: "standing down."
+
+All cycle outputs append to .flywheel/evidence/watch-rolling-log.jsonl.
+
+(Fixture: deliberately omits the load-bearing streak-fires-stand-down clause.)

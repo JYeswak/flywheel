@@ -1,7 +1,7 @@
 {
   "canonical_index": ".flywheel/AGENTS-CANONICAL.md",
   "round_trip_command": "cat .flywheel/rules/L*.md | shasum -a 256",
-  "rule_count": 107,
+  "rule_count": 121,
   "rules": [
     {
       "id": "L48",
@@ -947,7 +947,7 @@
       "id": "L144",
       "order": 95,
       "path": ".flywheel/rules/L095-L144-git-stash-janitor-fleet-hygiene.md",
-      "sha256": "e726c0a8877a14ada42de5c52fda9d4c3d24cfd206387e54499d83e8a9142098",
+      "sha256": "9964220f43a858c104c58283658d668983db4432c09e89479b8846c3694067f5",
       "shipped": "2026-05-08",
       "status": "long_term",
       "title": "GIT-JANITOR-FLEET-HYGIENE",
@@ -1067,14 +1067,154 @@
       "id": "L156",
       "order": 107,
       "path": ".flywheel/rules/L107-L156-inbox-discipline-0th-probe.md",
-      "sha256": "4a961f6170ed8ad37d731d00235f385f14f9320d8b9b8c67856f057bfcf2266f",
+      "sha256": "f2e0725c60c18572473cd004eb36590996c6c6d0057eaa762c8b7f26dd891b69",
       "shipped": "2026-05-11",
       "status": "long_term",
       "title": "INBOX-DISCIPLINE-0TH-PROBE",
       "trauma_class": "inbox-discipline-missed-during-deep-burndown-motion"
+    },
+    {
+      "id": "L157",
+      "order": 108,
+      "path": ".flywheel/rules/L108-L157-outbox-discipline-cross-orch-ship-notification.md",
+      "sha256": "aad762cd3fe88153929781558f6268d7c806da82d170dccaab865ead0d443aa0",
+      "shipped": "2026-05-11",
+      "status": "long_term",
+      "title": "OUTBOX-DISCIPLINE-CROSS-ORCH-SHIP-NOTIFICATION",
+      "trauma_class": "outbox-discipline-missed-when-codifying-doctrine-same-session"
+    },
+    {
+      "id": "L168",
+      "order": 109,
+      "path": ".flywheel/rules/L109-L168-every-consumer-repo-must-declare-zs-tenant-yaml-at-root.md",
+      "sha256": "a815600d58812b6c32f635a8f0b025c7d2367cc66d43c8fd18d69e2fbab23d37",
+      "shipped": "2026-05-12",
+      "status": "long_term",
+      "title": "EVERY-CONSUMER-REPO-MUST-DECLARE-ZS-TENANT-YAML-AT-ROOT",
+      "trauma_class": "cross-infisical-supabase-tenant-collision-catastrophic-regulatory-exposure"
+    },
+    {
+      "id": "L169",
+      "order": 110,
+      "path": ".flywheel/rules/L110-L169-jsm-first-search-before-hand-rolling-mandatory.md",
+      "sha256": "52e1e2d11e51f7e958708d0c8217478396426acd7c41e328bbf75374904befd1",
+      "shipped": "2026-05-12",
+      "status": "long_term",
+      "title": "JSM-FIRST-SEARCH-BEFORE-HAND-ROLLING-MANDATORY",
+      "trauma_class": "hand-rolled-substrate-when-jsm-already-ships-canonical"
+    },
+    {
+      "id": "L170",
+      "order": 111,
+      "path": ".flywheel/rules/L111-L170-every-consumer-repo-must-declare-3-user-journeys-minimum.md",
+      "sha256": "a1dd058bb16252adc40a3a93e3431f428592fda56be5971ec47b7f160a47adf4",
+      "shipped": "2026-05-12",
+      "status": "long_term",
+      "title": "EVERY-CONSUMER-REPO-MUST-DECLARE-3-USER-JOURNEYS-MINIMUM",
+      "trauma_class": "consumer-repo-ships-without-user-journey-validation"
+    },
+    {
+      "id": "L171",
+      "order": 112,
+      "path": ".flywheel/rules/L112-L171-skill-creation-requires-skillos-handoff.md",
+      "sha256": "fd0cae13d6c4e81c124c7f5f4a360bf8df26213ebf28a384073e3eb1a6fcc148",
+      "shipped": "2026-05-03",
+      "status": "long_term",
+      "title": "SKILL-CREATION-REQUIRES-SKILLOS-HANDOFF",
+      "trauma_class": "skill-shipped-without-skillos-handoff"
+    },
+    {
+      "id": "L162",
+      "order": 113,
+      "path": ".flywheel/rules/L113-L162-substrate-class-classifier-before-protection-halt-mandatory.md",
+      "sha256": "b5e4faa395c818296af637cf2ae409b745c831380fad418725358c56b2fbcb09",
+      "shipped": "2026-05-15",
+      "status": "long_term",
+      "title": "SUBSTRATE-CLASS-CLASSIFIER-BEFORE-PROTECTION-HALT-MANDATORY",
+      "trauma_class": "protection-mechanism-self-blindness"
+    },
+    {
+      "id": "L158",
+      "order": 114,
+      "path": ".flywheel/rules/L114-L158-cli-version-flag-mismatch-output-format-switch-leaks.md",
+      "sha256": "f9c10b45d1ce02ffa3405c3205e2416248956b59b9387a49b4129272f162b7b7",
+      "shipped": "2026-05-15",
+      "status": "long_term",
+      "title": "CLI-VERSION-FLAG-MISMATCH-OUTPUT-FORMAT-SWITCH-LEAKS",
+      "trauma_class": "cli-version-flag-mismatch-secret-leak"
+    },
+    {
+      "id": "L160",
+      "order": 115,
+      "path": ".flywheel/rules/L115-L160-agentic-loop-halt-via-posttooluse-hook-when-leak-detected.md",
+      "sha256": "ab533e50fe851bcb6ffffe22eca6172e8f88c27b2fd3d7ba569d0b2882610df0",
+      "shipped": "2026-05-15",
+      "status": "long_term",
+      "title": "AGENTIC-LOOP-HALT-VIA-POSTTOOLUSE-HOOK-WHEN-LEAK-DETECTED",
+      "trauma_class": "leak-detected-but-agent-loop-continued"
+    },
+    {
+      "id": "L161",
+      "order": 116,
+      "path": ".flywheel/rules/L116-L161-operator-directed-mission-continuation-after-leak.md",
+      "sha256": "50d40ebcc42a580a59f078a8ef08c8b03a9e2fb2421d01335dc6d96eb2757948",
+      "shipped": "2026-05-15",
+      "status": "long_term",
+      "title": "OPERATOR-DIRECTED-MISSION-CONTINUATION-AFTER-LEAK",
+      "trauma_class": "mission-continued-after-leak-without-operator-proof"
+    },
+    {
+      "id": "L163",
+      "order": 117,
+      "path": ".flywheel/rules/L117-L163-cross-infisical-project-credential-collision-wrong-tenant-connect.md",
+      "sha256": "c3f49b7272e61aaea2368994a83864334314c8f4751d216d16848e8aac06a963",
+      "shipped": "2026-05-15",
+      "status": "long_term",
+      "title": "CROSS-INFISICAL-PROJECT-CREDENTIAL-COLLISION-WRONG-TENANT-CONNECT",
+      "trauma_class": "cross-tenant-credential-misrouting"
+    },
+    {
+      "id": "L164",
+      "order": 118,
+      "path": ".flywheel/rules/L118-L164-tenant-verification-gate-mandatory-before-db-mutation.md",
+      "sha256": "638014b186a2a905e7eb0b48be31abbdd2d7a98ef1cd17b09f345a13312a8b64",
+      "shipped": "2026-05-15",
+      "status": "long_term",
+      "title": "TENANT-VERIFICATION-GATE-MANDATORY-BEFORE-DB-MUTATION",
+      "trauma_class": "db-mutation-without-tenant-verification"
+    },
+    {
+      "id": "L165",
+      "order": 119,
+      "path": ".flywheel/rules/L119-L165-cf-secret-iteration-returns-wrong-project-first-hit.md",
+      "sha256": "dae8d66c00735b26621721ff016fdcac03a03d60f006eeb3beac65d6b8dc23e5",
+      "shipped": "2026-05-15",
+      "status": "long_term",
+      "title": "CF-SECRET-ITERATION-RETURNS-WRONG-PROJECT-FIRST-HIT",
+      "trauma_class": "cloudflare-secret-first-hit-wrong-project"
+    },
+    {
+      "id": "L166",
+      "order": 120,
+      "path": ".flywheel/rules/L120-L166-infisical-set-ignores-project-id-env-override-use-cli-flag.md",
+      "sha256": "0a4c6465dafe2b1000901776c3df12738e5ef6eb1bdd55ce2a5b17fe1aa7a551",
+      "shipped": "2026-05-15",
+      "status": "long_term",
+      "title": "INFISICAL-SET-IGNORES-PROJECT-ID-ENV-OVERRIDE-USE-CLI-FLAG",
+      "trauma_class": "infisical-write-project-scope-drift"
+    },
+    {
+      "id": "L167",
+      "order": 121,
+      "path": ".flywheel/rules/L121-L167-transactional-migration-and-idempotent-schema-mandatory.md",
+      "sha256": "fcf1347bced44c697aa7596a4cb3aabc077bb3df3498afa5cc2bc832c68d6dc9",
+      "shipped": "2026-05-15",
+      "status": "long_term",
+      "title": "TRANSACTIONAL-MIGRATION-AND-IDEMPOTENT-SCHEMA-MANDATORY",
+      "trauma_class": "non-transactional-non-idempotent-schema-mutation"
     }
   ],
-  "rules_body_sha256": "11c6068d4000222f01d4f3a1380522d04e82ae177a93ed4a09addbd55a166b87",
+  "rules_body_sha256": "f25679b8d62af4637695fc18d8944329317c300bc29654096e9aed90173363ce",
   "schema_version": "agents-canonical-shards/v1",
   "source": "AGENTS.md"
 }

@@ -2,6 +2,50 @@
 
 Promoted trauma classes from `~/.local/state/flywheel/fuckup-log.jsonl`.
 
+## skill-shipped-without-skillos-handoff
+
+Date: 2026-05-14
+
+Promotion Action: HEURISTIC REGISTERED
+
+Class: `skill-shipped-without-skillos-handoff`
+
+Event Count: 1 known historical exemplar
+
+Severity: medium
+
+Cost: A skill can ship into `~/.claude/skills/` without the matching SkillOS
+handoff, leaving catalog truth stale, version bumps unobserved, and future
+agents likely to re-discover or re-author work that should have become a
+shared capability.
+
+Root Cause: Skill-creation dispatches had file-reservation and callback
+discipline, but the SkillOS handoff proof was not a required callback field at
+the time of the `info-source-watchtower` gap. The failure class is not "the
+skill was bad"; it is "the skill left the local filesystem without a control
+plane receipt."
+
+Forever-Rule: Any dispatch that creates or modifies
+`~/.claude/skills/<name>/` must either report `skillos_handoff_message_id` or
+report `skillos_handoff_skipped_reason`. A callback with both fields blank is
+non-compliant.
+
+Fix Applied/Status: `templates/fuckup-heuristics.json` now includes an exact
+heuristic for `skill-shipped-without-skillos-handoff`. The heuristic records
+the detection shape (`files_reserved=.*~/.claude/skills/`, missing
+`skillos_handoff_message_id`, unless `skillos_handoff_skipped_reason` is set),
+routes the class to the L56 ladder, and names the remediation helper:
+`.flywheel/scripts/handoff-skill-to-skillos.sh`.
+
+Evidence:
+- Bead: `flywheel-4dpj`.
+- Exemplar gap: `info-source-watchtower` shipped without a SkillOS handoff.
+- Template: `templates/fuckup-heuristics.json`.
+- Helper: `.flywheel/scripts/handoff-skill-to-skillos.sh`.
+- Dispatch gate: `tests/skillos-handoff-dispatch-template.sh`.
+- Heuristic test: `tests/fuckup-heuristics-skillos-handoff.sh`.
+- Follow-up canonical L-rule bead: `flywheel-w307`.
+
 ## Wired canonical-cli-at-dispatch as pre-dispatch validator (2026-05-05)
 
 Date: 2026-05-05

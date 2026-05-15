@@ -1,0 +1,27 @@
+{
+  "schema_version": "flywheel.canonical_cli_repair_evidence.v1",
+  "bead_id": "flywheel-pfpd",
+  "surface": "flywheel-refresh-source",
+  "installed_binary": {
+    "path": "/Users/josh/.claude/skills/.flywheel/bin/flywheel-refresh-source",
+    "sha256": "286dd2d8fe7ec854a6ac6a671f5fcde61d8caef2ea1433b6c07fc9ace0edc341",
+    "tracked_in_flywheel_repo": false
+  },
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-pfpd/canonical-cli-scorecard-20260515T0248Z.json"
+  ],
+  "validations": [
+    {
+      "command": "bash tests/flywheel-refresh-source-canonical-cli.sh",
+      "status": "pass",
+      "summary": "18 pass / 0 fail"
+    },
+    {
+      "command": "PATH=\"$HOME/.claude/skills/.flywheel/bin:$PATH\" bash ~/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh flywheel-refresh-source",
+      "status": "pass",
+      "summary": "13 pass / 0 fail"
+    }
+  ],
+  "source_gap_bead": "flywheel-nkw4o",
+  "boundary_note": "The repaired executable is the installed Flywheel substrate binary under ~/.claude/skills/.flywheel/bin. Flywheel repo evidence captures the passing contract; flywheel-nkw4o tracks the publication/source-of-truth status for installed binaries."
+}

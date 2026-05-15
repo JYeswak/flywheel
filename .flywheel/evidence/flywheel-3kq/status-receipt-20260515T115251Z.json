@@ -1,0 +1,41 @@
+{
+  "schema": "flywheel.status_receipt.v1",
+  "bead_id": "flywheel-3kq",
+  "created_at": "2026-05-15T11:52:51Z",
+  "status": "blocked",
+  "decision": "keep_blocked",
+  "reason": "The original acceptance is fleet-wide and not safely closeable as a single 30-minute stale bead. A current tracked-shell scan shows the trap-on-exit rollback pattern is not broadly adopted yet.",
+  "scan": {
+    "tracked_shell_scripts_scanned": 374,
+    "mutating_like_scripts": 303,
+    "mutating_like_with_exit_or_err_trap": 88,
+    "mutating_like_without_exit_or_err_trap": 215,
+    "sample_without_trap": [
+      ".flywheel/scripts/agent-mail-fd-pressure-check.sh",
+      ".flywheel/scripts/agent-mail-pre-allocate-worker-identities.sh",
+      ".flywheel/scripts/agent-mail-restart.sh",
+      ".flywheel/scripts/agent-mail-send-redacted.sh",
+      ".flywheel/scripts/agentmail-fd-pressure-probe.sh",
+      ".flywheel/scripts/agentmail-identity-canonical-validator.sh",
+      ".flywheel/scripts/agents-md-shard-extract.sh",
+      ".flywheel/scripts/apply-substrate-tuning.sh",
+      ".flywheel/scripts/apply-tmux-tuning.sh",
+      ".flywheel/scripts/auto-l112-gate.sh",
+      ".flywheel/scripts/auto-refill-decision-log.sh",
+      ".flywheel/scripts/autoloop-target-selector.sh",
+      ".flywheel/scripts/bcv-task-harness.sh",
+      ".flywheel/scripts/bead-evidence-indexer.sh",
+      ".flywheel/scripts/bleed-ledger-watch.sh",
+      ".flywheel/scripts/blocker-auto-close.sh",
+      ".flywheel/scripts/blocker-discipline-tick-chain-launchd-install.sh",
+      ".flywheel/scripts/blocker-discipline-tick-chain.sh",
+      ".flywheel/scripts/blocker-fail-escalator.sh",
+      ".flywheel/scripts/br-close-with-gate.sh"
+    ]
+  },
+  "safe_boundary": {
+    "source_files_changed": false,
+    "rollback_pattern_claimed_complete": false
+  },
+  "next_action": "Decompose into a mechanical trap/rollback inventory gate plus prioritized per-surface adoption beads. Do not close the parent from spot checks."
+}

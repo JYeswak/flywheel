@@ -1,0 +1,45 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-rx1t",
+  "closed_at": "2026-05-15T07:18:58Z",
+  "close_type": "stale_parent_verified",
+  "status": "ready_to_close",
+  "summary": "Verified the original init-path gap no longer reproduces. A fresh disposable git repo initialized by flywheel-loop now receives .flywheel/INCIDENTS.md, the selected mission-anchor-drift incident slug is present, and init planned_writes includes the repo-local INCIDENTS target.",
+  "acceptance_gates": [
+    {
+      "gate": "Fresh init creates repo-local .flywheel/INCIDENTS.md",
+      "status": "pass",
+      "evidence": "Disposable repo probe at /var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T//rx1t-init.aUnKAp reported incidents_exists=yes."
+    },
+    {
+      "gate": "Selected canonical mission-anchor-drift incident is distributed",
+      "status": "pass",
+      "evidence": "Probe found mission-anchor-drift-sub-mission-promotion slug_count=2 in generated .flywheel/INCIDENTS.md."
+    },
+    {
+      "gate": "Init declares .flywheel/INCIDENTS.md in planned_writes",
+      "status": "pass",
+      "evidence": "Probe planned_incidents=1 from flywheel-loop init --json."
+    },
+    {
+      "gate": "Unselected canonical incidents are not wholesale-copied",
+      "status": "pass",
+      "evidence": "Existing regression test check_init_distributes_selected_incidents includes this assertion; the focused probe confirms selected-incident rendering rather than full canonical INCIDENTS copy."
+    }
+  ],
+  "validation": [
+    {
+      "command": "flywheel-loop init --repo <tmp> --mission-source <tmp>/README.md --goal-source <tmp>/README.md --state-source <tmp>/README.md --json",
+      "status": "pass",
+      "result": "rc=0; planned_writes includes .flywheel/INCIDENTS.md; generated .flywheel/INCIDENTS.md exists; mission-anchor-drift-sub-mission-promotion present"
+    },
+    {
+      "command": "bash -n /Users/josh/.claude/skills/.flywheel/bin/flywheel-loop",
+      "status": "pass"
+    }
+  ],
+  "residuals": [
+    "tests/flywheel-loop-core.sh contains a focused rx1t regression, but the full suite currently hangs later in strict doctor canonical-sync/fleet probing. This closeout does not claim the unrelated full core suite is green."
+  ],
+  "operator_value": "New repos initialized into the flywheel now inherit the mission-anchor-drift lesson at install time instead of rediscovering the same failure class after the first loop."
+}

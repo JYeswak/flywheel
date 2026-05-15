@@ -5,7 +5,6 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 REPOS_JSONL="${JEFF_INTEL_REPOS_JSONL:-$HOME/.local/state/jeff-intel/repos.jsonl}"
 PROGRESS_JSONL="${JEFF_INTEL_PROGRESS_JSONL:-$HOME/.local/state/jeff-intel/index-progress.jsonl}"
 LEARNINGS_DIR="${JEFF_INTEL_LEARNINGS_DIR:-$HOME/.local/state/jeff-intel/learnings}"
-LOOP="${FLYWHEEL_LOOP_BIN:-$HOME/.claude/skills/.flywheel/bin/flywheel-loop}"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/jeff-corpus-library-ingestion.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -31,9 +30,12 @@ repo_state_check() {
     total:length,
     verified:(map(select(.index_status == "verified_indexed")) | length),
     indexed_at:(map(select((.indexed_at // "") != "")) | length),
-    skipped:(map(select(.index_status == "skipped_budget")) | length)
+    skipped:(map(select(.index_status == "skipped_budget")) | length),
+    qdrant_collections:(map(select((.qdrant_collection // "") != "")) | length),
+    unique_qdrant_collections:(map(.qdrant_collection // empty) | unique | length)
   }' "$REPOS_JSONL" >"$TMP/repos.json"
   assert_jq "$TMP/repos.json" '.total == 177 and .verified == 177 and .indexed_at == 177 and .skipped == 0' "AG1 verified repo state covers 177 repos"
+  assert_jq "$TMP/repos.json" '.qdrant_collections == 177 and .unique_qdrant_collections == 177' "AG2 qdrant collection refs cover 177 unique repos"
 }
 
 progress_resume_check() {
@@ -79,11 +81,13 @@ learning_artifact_check() {
 }
 
 derived_beads_check() {
-  br list --json --limit 0 >"$TMP/beads.json"
+  br list --all --json --limit 0 >"$TMP/beads.json"
   # Shape-tolerant: tolerate both top-level array (legacy br shape) and
   # object-with-issues key (current br 0.2.5 shape). flywheel-keji
   # 2026-05-09: bead-keji rework after br shape drift exposed by
   # flywheel-1lpv 2026-05-04 validation.
+  # flywheel-9nhx closeout 2026-05-15: AG6 proves derived beads were filed;
+  # they may now be closed, so the query must include all statuses.
   assert_jq "$TMP/beads.json" \
     '[(if type == "object" then .issues else . end)[] | select(((.labels // []) | index("jeff-corpus-derived")) and (.priority <= 1))] | length >= 5' \
     "AG6 five P0/P1 jeff-corpus-derived beads exist"
@@ -125,7 +129,7 @@ canonical_paths_check() {
 }
 
 doctor_signal_check() {
-  FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 "$LOOP" doctor --repo "$ROOT" --json >"$TMP/doctor.json" 2>/dev/null || true
+  "$ROOT/.flywheel/scripts/jeff-corpus-doctor.sh" --json >"$TMP/doctor.json" 2>/dev/null || true
   assert_jq "$TMP/doctor.json" '.jeff_corpus_indexed_count == 177 and .jeff_corpus_index_target == 177' "AG7 doctor exposes jeff_corpus_indexed_count"
 }
 

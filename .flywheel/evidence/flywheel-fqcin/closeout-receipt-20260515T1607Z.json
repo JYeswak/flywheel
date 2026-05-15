@@ -1,0 +1,40 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-fqcin",
+  "closed_at": "2026-05-15T16:07:20Z",
+  "status": "closed",
+  "summary": "Blocked Beads now sync into executable blocker-discipline JSON files so blocked queue rows enter the existing AC recheck, auto-close, and escalation loop.",
+  "files_changed": [
+    ".flywheel/scripts/bead-blocker-sync.py",
+    "tests/bead-blocker-sync.sh",
+    ".flywheel/doctrine/blocker-discipline.md",
+    ".flywheel/state/blockers/*.json"
+  ],
+  "live_application": {
+    "command": "python3 .flywheel/scripts/bead-blocker-sync.py sync --apply --idempotency-key bead-blocker-sync-20260515T1607Z",
+    "blocked_bead_count": 12,
+    "applied_count": 12,
+    "doctor_status": "pass",
+    "synced_count": 12,
+    "missing_count": 0,
+    "malformed_count": 0
+  },
+  "proof": [
+    "bash tests/bead-blocker-sync.sh => SUMMARY pass=12 fail=0",
+    "python3 .flywheel/scripts/bead-blocker-sync.py doctor => status=pass synced_count=12 missing_count=0 malformed_count=0",
+    "for f in .flywheel/state/blockers/*.json; do python3 .flywheel/scripts/bead-blocker-sync.py validate --blocker-file \"$f\"; done => 12 validated",
+    "bash tests/blocker-discipline-tick-chain.sh => SUMMARY pass=23 fail=0",
+    "BLOCKER_DISCIPLINE_SKIP_AGENT_MAIL=1 .flywheel/scripts/blocker-discipline-tick-chain.sh tick --blockers-dir .flywheel/state/blockers --counter-dir /tmp/flywheel-blocker-sync-counters2 --escalations-log /tmp/flywheel-blocker-sync-escalations2.jsonl --json => status=clean blockers_total=12 stages_failed=0",
+    "shellcheck tests/bead-blocker-sync.sh => pass",
+    "python3 -m py_compile .flywheel/scripts/bead-blocker-sync.py => pass",
+    "git diff --check => pass",
+    "br dep cycles --json => count=0"
+  ],
+  "acceptance": {
+    "blocked_rows_are_not_parked": true,
+    "blocked_rows_have_acceptance_conditions": true,
+    "blocker_discipline_doctor_fails_unsynced_rows": true,
+    "existing_tick_chain_can_consume_generated_files": true
+  },
+  "push_status": "not_pushed_due_existing_unrelated_local_ahead_commits"
+}

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034
 # flywheel-cli-surface: true
 # canonical-cli-scoping: passing (partial -> passing per bead flywheel-k8gcv.7)
 set -euo pipefail
@@ -405,7 +406,7 @@ done
 
 default_config() {
   local classes
-  if [[ "$SESSION" == "mobile-eats" || "$SESSION" == "skillos" ]]; then
+  if [[ "$SESSION" == "mobile-eats" || "$SESSION" == "skillos" || "$SESSION" == "{capability-control-plane}" ]]; then
     classes='["dispatching","light_queue"]'
   else
     classes='["dispatching","cooldown","light_queue","saturated"]'

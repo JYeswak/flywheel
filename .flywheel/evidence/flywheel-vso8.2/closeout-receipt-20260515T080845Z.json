@@ -1,0 +1,41 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-vso8.2",
+  "closed_at": "2026-05-15T08:08:45Z",
+  "status": "safe_to_close",
+  "closure_class": "stale_audit_gap_verified",
+  "summary": "The original audit path was stale: the repo now carries L79 through the split public doctrine surfaces, including .flywheel/AGENTS.md and the rule manifest.",
+  "evidence": [
+    {
+      "path": ".flywheel/AGENTS.md",
+      "result": "present",
+      "summary": "Contains L79 — STORAGE-OVERRIDE-RECEIPTS-ARE-MECHANICAL."
+    },
+    {
+      "path": "AGENTS.md",
+      "result": "present",
+      "summary": "Indexes L79 and points to .flywheel/rules/L033-L79-storage-override-receipts-are-mechanical.md."
+    },
+    {
+      "path": ".flywheel/rules/MANIFEST.json",
+      "result": "present",
+      "summary": "Registers rule id L79 with the storage-override rule path."
+    },
+    {
+      "path": ".flywheel/canonical-paths.txt",
+      "result": "present",
+      "summary": "Includes storage_override_doctrine_flywheel_agents for .flywheel/AGENTS.md."
+    },
+    {
+      "command": "bash tests/storage-override.sh",
+      "result": "pass",
+      "summary": "17 passed, 0 failed; proves the documented rule is backed by executable storage receipt behavior."
+    }
+  ],
+  "discovered_followups": [
+    {
+      "bead": "flywheel-l6qs8",
+      "reason": "Unrelated full-doctor live probe timeout gap found while validating the storage override children."
+    }
+  ]
+}

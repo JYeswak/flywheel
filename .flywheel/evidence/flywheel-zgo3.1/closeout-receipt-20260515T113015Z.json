@@ -1,0 +1,52 @@
+{
+  "schema": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-zgo3.1",
+  "status": "closed",
+  "closed_at": "2026-05-15T11:30:15Z",
+  "autonomy": "autonomous",
+  "problem": "The audit bead required stable doctor JSON fields for tick receipts and /flywheel:status, but was blocked because full doctor validation previously hung on live probe timeouts.",
+  "blocker_removed_by": {
+    "bead_id": "flywheel-l6qs8",
+    "status": "closed",
+    "evidence_ref": ".flywheel/evidence/flywheel-l6qs8/closeout-receipt-20260515T092100Z.json"
+  },
+  "current_proof": {
+    "command": "timeout 45 bash tests/doctor-validation-signals.sh",
+    "cwd": "/Users/josh/Developer/flywheel",
+    "result": "pass",
+    "summary": "14 passed, 0 failed",
+    "covered_acceptance": [
+      "B04_AG1 callbacks_unvalidated_count",
+      "B04_AG2 callbacks_validated_with_failures_count",
+      "B04_AG3 ticks_punted_count",
+      "B04_AG4 surfaces_unwired_count",
+      "B04_AG5 closed_bead_artifact_missing_count",
+      "B04_AG6 secondary validation signals",
+      "B04_AG7 L60 signal metadata",
+      "B04_AG8 strict fails on unvalidated callbacks",
+      "B04_AG9 stable doctor JSON fields"
+    ]
+  },
+  "validation": [
+    {
+      "command": "jq empty .flywheel/evidence/flywheel-zgo3.1/closeout-receipt-20260515T113015Z.json",
+      "result": "pass"
+    },
+    {
+      "command": "br dep cycles --json",
+      "result": "pass",
+      "observed": {
+        "count": 0
+      }
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    }
+  ],
+  "acceptance": {
+    "stable_doctor_json_fields_proven": true,
+    "timeout_blocker_resolved": true,
+    "proxy_signal_only": false
+  }
+}

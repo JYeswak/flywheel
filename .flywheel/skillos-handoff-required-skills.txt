@@ -1,0 +1,5 @@
+# Flywheel-owned or Flywheel-shipped skills requiring SkillOS handoff backfill.
+# This keeps the backfill audit focused on skill creation events, not broad JSM
+# sync churn across the full skill library.
+info-source-watchtower
+codex-watchtower

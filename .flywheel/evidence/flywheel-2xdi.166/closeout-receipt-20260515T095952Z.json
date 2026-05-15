@@ -1,0 +1,50 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-2xdi.166",
+  "closed_scope": "Converted agent-lane-probe.sh from gap-hunt probe-without-receiver into a canonical receiver-backed probe surface.",
+  "paths": [
+    "tests/agent-lane-probe-canonical-cli.sh",
+    "tests/agent-lane-probe.sh"
+  ],
+  "before": {
+    "gap_hunt_probe_matches": [
+      "probe-without-receiver:agent-lane-probe.sh"
+    ],
+    "reason": "The probe had a functional test and public docs, but its receiver test filename sat outside gap-hunt's canonical receiver corpus."
+  },
+  "after": {
+    "gap_hunt_probe_matches": [],
+    "receiver": "tests/agent-lane-probe-canonical-cli.sh",
+    "coverage": [
+      "syntax and help path",
+      "probe envelope",
+      "CLI presence is not support proof",
+      "blocked receipt withholds support copy",
+      "valid runtime receipt permits support copy",
+      "invalid or conflicting runtime receipts remain compatibility targets",
+      "private-state findings withhold support copy",
+      "weak runtime receipts withhold support copy",
+      "non-JSON mode is rejected"
+    ]
+  },
+  "validation": [
+    {
+      "command": "bash tests/agent-lane-probe-canonical-cli.sh",
+      "result": "pass 10/0"
+    },
+    {
+      "command": "shellcheck tests/agent-lane-probe-canonical-cli.sh",
+      "result": "pass"
+    },
+    {
+      "command": "timeout 180 .flywheel/scripts/gap-hunt-probe.sh --json --dry-run",
+      "result": "pass; no agent-lane-probe or flywheel-2xdi.166 gap_ids"
+    }
+  ],
+  "safety": {
+    "runtime_mutation": false,
+    "fixture_only": true,
+    "support_copy_greenwashed": false
+  },
+  "autonomy": "autonomous"
+}

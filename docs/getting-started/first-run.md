@@ -89,6 +89,12 @@ cd flywheel
 If you are reading this inside a release tarball, start in the extracted
 directory instead.
 
+Do not run the hosted `https://flywheel.zeststream.ai/install.sh` file from an
+empty directory. That endpoint is a checksum mirror for the release asset, not a
+curl-only standalone installer. The public install contract is clone-or-release
+tarball first, then run `bash install.sh` from inside the checked-out or
+extracted tree.
+
 ## 2. Run Preflight
 
 ```bash

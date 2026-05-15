@@ -1,0 +1,50 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-2xdi.169",
+  "closed_scope": "Converted fleet-refill-signal.sh from gap-hunt wired-but-cold into a canonical receiver-backed cross-orch coordination surface.",
+  "paths": [
+    "tests/fleet-refill-signal-canonical-cli.sh",
+    "tests/fleet-refill-signal.sh"
+  ],
+  "before": {
+    "gap_hunt_probe_matches": [
+      "wired-but-cold:developer-flywheel-.flywheel-scripts-fleet-refill-signal.sh"
+    ],
+    "reason": "The surface had a functional test, but its filename sat outside gap-hunt's canonical receiver corpus."
+  },
+  "after": {
+    "gap_hunt_probe_matches": [],
+    "receiver": "tests/fleet-refill-signal-canonical-cli.sh",
+    "coverage": [
+      "script syntax",
+      "script contains no direct peer dispatch surfaces",
+      "local-ready dispatch remains local",
+      "local-ready writes no peer signal",
+      "peer-ready creates only a cross-orch signal",
+      "peer-ready ledger row carries target repo/session/top bead data",
+      "no-ready writes no ledger",
+      "no local idle capacity writes no peer signal"
+    ]
+  },
+  "validation": [
+    {
+      "command": "bash tests/fleet-refill-signal-canonical-cli.sh",
+      "result": "pass 10/0"
+    },
+    {
+      "command": "shellcheck tests/fleet-refill-signal-canonical-cli.sh",
+      "result": "pass"
+    },
+    {
+      "command": "timeout 180 .flywheel/scripts/gap-hunt-probe.sh --json --dry-run",
+      "result": "pass; no fleet-refill-signal or flywheel-2xdi.169 gap_ids"
+    }
+  ],
+  "safety": {
+    "runtime_mutation": false,
+    "fixture_only": true,
+    "direct_dispatch_attempted": false,
+    "raw_tokens_included": false
+  },
+  "autonomy": "autonomous"
+}

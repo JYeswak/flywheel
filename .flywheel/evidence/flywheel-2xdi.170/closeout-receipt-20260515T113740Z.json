@@ -1,0 +1,42 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-2xdi.170",
+  "created_at": "2026-05-15T11:37:40Z",
+  "status": "closed",
+  "summary": "Anchored feedback_verify_ntm_send.md into the existing dispatch post-send verification doctrine so gap-hunt no longer reports it as memory-without-cross-link.",
+  "changed_files": [
+    ".flywheel/doctrine/dispatch-post-send-verification-silent-deaf.md",
+    "tests/gap-hunt-probe-verify-ntm-send-memory.sh"
+  ],
+  "memory_source": "/Users/josh/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_verify_ntm_send.md",
+  "doctrine_anchor": ".flywheel/doctrine/dispatch-post-send-verification-silent-deaf.md",
+  "did": [
+    "Added a filename-level doctrine cross-link for feedback_verify_ntm_send.md.",
+    "Kept the memory attached to the already-shipped silent-deaf transport doctrine instead of creating a duplicate island.",
+    "Added a targeted gap-hunt regression test that proves the specific memory no longer emits as memory-without-cross-link."
+  ],
+  "did_not": [
+    "Did not alter NTM runtime behavior.",
+    "Did not touch unrelated dirty canonical/template files.",
+    "Did not claim the broader gap-hunt backlog is clear."
+  ],
+  "validation": [
+    {
+      "command": "bash tests/gap-hunt-probe-verify-ntm-send-memory.sh",
+      "result": "pass",
+      "summary": "4 passed, 0 failed; target memory no longer emitted as memory-without-cross-link."
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    },
+    {
+      "command": "br dep cycles --json",
+      "result": "pass",
+      "summary": "count=0"
+    }
+  ],
+  "residuals": [
+    "gap-hunt-probe still reports unrelated classes including loop-integrity and other memory-without-cross-link rows."
+  ]
+}

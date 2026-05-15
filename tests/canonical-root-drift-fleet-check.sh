@@ -27,6 +27,16 @@ assert_jq() {
 write_repo() {
   local repo="$1" source="$2"
   mkdir -p "$repo/.flywheel"
+  cat >"$repo/.flywheel/ownership.json" <<'JSON'
+{
+  "schema_version": "flywheel.canonical_ownership.v1",
+  "canonical_owner_class": "flywheel",
+  "owned_canonical_paths": [
+    {"path": "AGENTS.md", "owner_class": "flywheel"},
+    {"path": ".flywheel/AGENTS-CANONICAL.md", "owner_class": "flywheel"}
+  ]
+}
+JSON
   cp "$source" "$repo/.flywheel/AGENTS-CANONICAL.md"
   {
     printf '# Local repo\n\n'
@@ -85,6 +95,16 @@ assert_jq "$TMP/timeout.json" '.status == "error" and .classification == "sync_h
 ## and inflated root_target_count.
 deep="$TMP/repos/repo-deep"
 mkdir -p "$deep/.flywheel"
+cat >"$deep/.flywheel/ownership.json" <<'JSON'
+{
+  "schema_version": "flywheel.canonical_ownership.v1",
+  "canonical_owner_class": "flywheel",
+  "owned_canonical_paths": [
+    {"path": "AGENTS.md", "owner_class": "flywheel"},
+    {"path": ".flywheel/AGENTS-CANONICAL.md", "owner_class": "flywheel"}
+  ]
+}
+JSON
 cp "$source" "$deep/.flywheel/AGENTS-CANONICAL.md"
 {
   printf '# Local repo\n\n'

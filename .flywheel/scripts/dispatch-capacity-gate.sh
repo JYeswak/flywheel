@@ -47,6 +47,30 @@ if [[ -x "$REPO_DISCIPLINE_CHECK" ]] && git -C "$REPO" rev-parse --git-dir &>/de
   fi
 fi
 
+# ── repo-hygiene-operational-protocol: accretion/bloat gate ─────────────────
+# This is the sister check to repo-discipline-check.sh. Dirty-tree discipline
+# handles unresolved working-tree decisions; repo-hygiene-check.sh handles
+# H-1..H-4 accretion failures such as tracked-but-ignored output and
+# rebuildable substrate drifting into git.
+REPO_HYGIENE_CHECK="${REPO_HYGIENE_CHECK:-$(dirname "$0")/repo-hygiene-check.sh}"
+if [[ -x "$REPO_HYGIENE_CHECK" ]] && git -C "$REPO" rev-parse --git-dir &>/dev/null; then
+  REPO_HYGIENE_STATUS=0
+  REPO_HYGIENE_OUT="$("$REPO_HYGIENE_CHECK" --repo "$REPO" --json 2>/dev/null)" || REPO_HYGIENE_STATUS=$?
+  if [[ "$REPO_HYGIENE_STATUS" -eq 1 ]]; then
+    jq -nc --arg session "$SESSION" --arg pane "$PANE" --argjson repo_hygiene_operational "$REPO_HYGIENE_OUT" \
+      '{verdict:"blocked",reason:"repo_hygiene_operational_protocol_fail",session:$session,
+        pane:($pane|tonumber? // $pane),
+        repo_hygiene_operational:$repo_hygiene_operational,
+        action:"fix_H1_H2_repo_hygiene_failures_before_dispatch"}'
+    exit 1
+  fi
+  if jq -e '.warn > 0' >/dev/null 2>&1 <<<"$REPO_HYGIENE_OUT"; then
+    REPO_HYGIENE_OPERATIONAL_WARNING="$(
+      jq -r '"repo_hygiene_protocol=warn pass=\(.pass) warn=\(.warn) fail=\(.fail)"' <<<"$REPO_HYGIENE_OUT"
+    )"
+  fi
+fi
+
 json_source() {
   local env_name="$1" file_env_name="$2"; shift 2
   local value="${!env_name:-}" file_value="${!file_env_name:-}"
@@ -97,10 +121,15 @@ esac
 if [[ "$HEALTH_IDLE_HINT" == "true" || ( "$PROCESS_STATUS" == "running" && "$RAW_ACTIVITY" == "idle" ) ]]; then HEALTH_IDLE=true; else HEALTH_IDLE=false; fi
 if [[ "$HEALTH_STATUS" == "ok" || "$HEALTH_SCORE" -ge 80 ]]; then HEALTH_REC="HEALTHY"; else HEALTH_REC="$(printf '%s' "${HEALTH_STATUS:-UNKNOWN}" | tr '[:lower:]' '[:upper:]')"; fi
 
-COMBINED_WARNING="${REPO_HYGIENE_WARNING:-${GIT_AHEAD_WARNING:-}}"
-if [[ -n "${REPO_HYGIENE_WARNING:-}" && -n "${GIT_AHEAD_WARNING:-}" ]]; then
-  COMBINED_WARNING="${REPO_HYGIENE_WARNING}; ${GIT_AHEAD_WARNING}"
-fi
+COMBINED_WARNING=""
+for w in "${REPO_HYGIENE_WARNING:-}" "${REPO_HYGIENE_OPERATIONAL_WARNING:-}" "${GIT_AHEAD_WARNING:-}"; do
+  [[ -z "$w" ]] && continue
+  if [[ -z "$COMBINED_WARNING" ]]; then
+    COMBINED_WARNING="$w"
+  else
+    COMBINED_WARNING="${COMBINED_WARNING}; ${w}"
+  fi
+done
 
 if [[ "$ASSIGN_PANE_MATCH" -gt 0 || ( "$ACTIVITY_STATE" == "WAITING" && "$ASSIGN_IDLE_COUNT" -gt 0 ) ]]; then
   emit "available" "assign_idle_capacity" "$ACTIVITY_STATE" "$HEALTH_IDLE" "$HEALTH_SCORE" "$HEALTH_REC" "$COMBINED_WARNING"

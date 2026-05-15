@@ -26,7 +26,6 @@ DRYRUN_MARKER="/tmp/install-ntm-config-dryrun.${USER}"
 
 # Canonical key/value pairs the script enforces. Order matters for diff output.
 CANON_KEYS=(
-    "schema_version=1"
     "idle_threshold=300"
     "poll_interval=\"30s\""
     "digest_interval=\"30m\""
@@ -162,6 +161,41 @@ read_live_value() {
 # --- compute diff ---
 declare -a DRIFTS=()
 declare -a MATCHES=()
+declare -a STRUCTURAL_DRIFTS=()
+
+coordinator_block_count() {
+    [[ -r "$LIVE" ]] || { echo 0; return; }
+    awk '/^\[coordinator\][[:space:]]*$/ {count++} END{print count+0}' "$LIVE"
+}
+
+nested_coordinator_block_count() {
+    [[ -r "$LIVE" ]] || { echo 0; return; }
+    awk '/^\[coordinator\./ {count++} END{print count+0}' "$LIVE"
+}
+
+coordinator_schema_version_count() {
+    [[ -r "$LIVE" ]] || { echo 0; return; }
+    awk '
+        /^\[coordinator\][[:space:]]*$/ {in_block=1; next}
+        /^\[/ && in_block {in_block=0}
+        in_block && /^[[:space:]]*schema_version[[:space:]]*=/ {count++}
+        END{print count+0}
+    ' "$LIVE"
+}
+
+COORDINATOR_BLOCK_COUNT="$(coordinator_block_count)"
+if [[ "$COORDINATOR_BLOCK_COUNT" != "1" ]]; then
+    STRUCTURAL_DRIFTS+=("coordinator_block_count|$COORDINATOR_BLOCK_COUNT|1")
+fi
+NESTED_COORDINATOR_BLOCK_COUNT="$(nested_coordinator_block_count)"
+if [[ "$NESTED_COORDINATOR_BLOCK_COUNT" != "0" ]]; then
+    STRUCTURAL_DRIFTS+=("nested_coordinator_block_count|$NESTED_COORDINATOR_BLOCK_COUNT|0")
+fi
+COORDINATOR_SCHEMA_VERSION_COUNT="$(coordinator_schema_version_count)"
+if [[ "$COORDINATOR_SCHEMA_VERSION_COUNT" != "0" ]]; then
+    STRUCTURAL_DRIFTS+=("coordinator_schema_version_count|$COORDINATOR_SCHEMA_VERSION_COUNT|0")
+fi
+
 for kv in "${CANON_KEYS[@]}"; do
     key="${kv%%=*}"
     want="${kv#*=}"
@@ -179,6 +213,7 @@ emit_diff_human() {
     echo "live      : $LIVE"
     echo "matches   : ${#MATCHES[@]}"
     echo "drifts    : ${#DRIFTS[@]}"
+    echo "structural: ${#STRUCTURAL_DRIFTS[@]}"
     if [[ ${#DRIFTS[@]} -gt 0 ]]; then
         echo
         printf '  %-22s %-22s %-22s\n' KEY LIVE CANONICAL
@@ -187,12 +222,29 @@ emit_diff_human() {
             printf '  %-22s %-22s %-22s\n' "$k" "$g" "$w"
         done
     fi
+    if [[ ${#STRUCTURAL_DRIFTS[@]} -gt 0 ]]; then
+        echo
+        printf '  %-22s %-22s %-22s\n' STRUCTURE LIVE CANONICAL
+        for d in "${STRUCTURAL_DRIFTS[@]}"; do
+            IFS='|' read -r k g w <<<"$d"
+            printf '  %-22s %-22s %-22s\n' "$k" "$g" "$w"
+        done
+    fi
 }
 
 emit_diff_json() {
-    printf '{"canonical":"%s","live":"%s","matches":%d,"drifts":[' "$CANON" "$LIVE" "${#MATCHES[@]}"
+    printf '{"canonical":"%s","live":"%s","matches":%d,"coordinator_block_count":%s,"nested_coordinator_block_count":%s,"coordinator_schema_version_count":%s,"drifts":[' "$CANON" "$LIVE" "${#MATCHES[@]}" "$COORDINATOR_BLOCK_COUNT" "$NESTED_COORDINATOR_BLOCK_COUNT" "$COORDINATOR_SCHEMA_VERSION_COUNT"
     local first=1
     for d in "${DRIFTS[@]}"; do
+        IFS='|' read -r k g w <<<"$d"
+        [[ $first -eq 1 ]] || printf ','
+        first=0
+        printf '{"key":"%s","live":%s,"canonical":%s}' \
+            "$k" "$(printf '%s' "$g" | jq -R .)" "$(printf '%s' "$w" | jq -R .)"
+    done
+    printf '],"structural_drifts":['
+    first=1
+    for d in "${STRUCTURAL_DRIFTS[@]}"; do
         IFS='|' read -r k g w <<<"$d"
         [[ $first -eq 1 ]] || printf ','
         first=0
@@ -224,7 +276,7 @@ canon_block_file="$(mktemp)"
 awk '
     BEGIN{grab=0}
     /^\[coordinator\][[:space:]]*$/ {grab=1; print; next}
-    /^\[/ && grab && !/^\[coordinator\./ {grab=0}
+    /^\[/ && grab {grab=0}
     grab {print}
 ' "$CANON" > "$canon_block_file"
 
@@ -246,8 +298,37 @@ awk -v repl_file="$canon_block_file" '
 rm -f "$canon_block_file"
 mv "$tmp" "$LIVE"
 
-# Validate.
-if ! ntm coordinator status flywheel --json >/dev/null 2>&1; then
+validate_runtime_config() {
+    local status_json runtime_config jq_rc
+    runtime_config="$(mktemp)"
+    awk '
+        BEGIN{grab=0}
+        /^\[coordinator\][[:space:]]*$/ {grab=1; print; next}
+        /^\[/ && grab {grab=0}
+        grab {print}
+    ' "$LIVE" > "$runtime_config"
+    if ! grep -q '^\[coordinator\][[:space:]]*$' "$runtime_config"; then
+        rm -f "$runtime_config"
+        return 1
+    fi
+    status_json="$(ntm coordinator status flywheel --config "$runtime_config" --json 2>/dev/null)" || {
+        rm -f "$runtime_config"
+        return 1
+    }
+    jq -e '
+      .config.auto_assign == true
+      and .config.assign_only_idle == true
+      and .config.idle_threshold == 300
+      and (.config.poll_interval == "30s" or .config.poll_interval == "30s0ms")
+      and (.config.digest_interval == "30m" or .config.digest_interval == "30m0s")
+    ' >/dev/null <<<"$status_json"
+    jq_rc=$?
+    rm -f "$runtime_config"
+    return "$jq_rc"
+}
+
+# Validate actual runtime semantics, not just command shape.
+if ! validate_runtime_config; then
     echo "VALIDATION FAILED — restoring backup $backup" >&2
     cp "$backup" "$LIVE"
     exit 6

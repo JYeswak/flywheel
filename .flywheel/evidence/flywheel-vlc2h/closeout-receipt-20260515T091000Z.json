@@ -1,0 +1,72 @@
+{
+  "schema": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-vlc2h",
+  "closed_at": "2026-05-15T09:10:00Z",
+  "status": "closed",
+  "summary": "Delivered n8n-deploy-kit Phase 1.5 secret-scan and pre-commit safety surface with gitleaks, trufflehog, and idempotent credential UUID scrubber.",
+  "external_repo": {
+    "path": "/Users/josh/Developer/n8n-deploy-kit",
+    "branch": "feat/phase-0-canonical-stamp",
+    "commit": "fbdc5397f7694abfee16c24d8e9165c7d6c6a00c",
+    "pr": "https://github.com/JYeswak/n8n-deploy-kit/pull/1"
+  },
+  "delivered_files": [
+    ".gitleaks.toml",
+    ".pre-commit-config.yaml",
+    ".trufflehog-exclude",
+    "scripts/pre-commit.sh",
+    "scripts/scrub-credential-uuids.sh",
+    "scripts/security-scan.sh",
+    "package.json",
+    "README.md",
+    "ARCHITECTURE.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md"
+  ],
+  "validation": [
+    {
+      "command": "npm run check",
+      "cwd": "/Users/josh/Developer/n8n-deploy-kit",
+      "result": "pass"
+    },
+    {
+      "command": "npm run security:scan",
+      "cwd": "/Users/josh/Developer/n8n-deploy-kit",
+      "result": "pass"
+    },
+    {
+      "command": "bash scripts/pre-commit.sh",
+      "cwd": "/Users/josh/Developer/n8n-deploy-kit",
+      "result": "pass"
+    },
+    {
+      "command": "scripts/scrub-credential-uuids.sh positive fixture check/write/recheck",
+      "cwd": "/Users/josh/Developer/n8n-deploy-kit",
+      "result": "pass",
+      "stdout_summary": "check fails on live UUID, --write scrubs to all-zero UUID, follow-up check passes"
+    },
+    {
+      "command": "npm run security:scrub-check",
+      "cwd": "/Users/josh/Developer/n8n-deploy-kit",
+      "result": "pass"
+    },
+    {
+      "command": "shellcheck scripts/pre-commit.sh scripts/scrub-credential-uuids.sh scripts/security-scan.sh packages/templates/scripts/check-templates.sh",
+      "cwd": "/Users/josh/Developer/n8n-deploy-kit",
+      "result": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "cwd": "/Users/josh/Developer/n8n-deploy-kit",
+      "result": "pass"
+    }
+  ],
+  "boundaries": [
+    "This slice ships local and pre-commit safety checks only.",
+    "No public flip, npm publish, live n8n deploy, or real workflow dogfood deploy was performed.",
+    "The scrubber only rewrites UUID-shaped values inside n8n credentials objects; it does not rewrite workflow node IDs or arbitrary JSON strings.",
+    "gitleaks and trufflehog remain external tool prerequisites for the scan and hook commands."
+  ],
+  "next_owner": "flywheel",
+  "safe_local_work_remaining": false
+}

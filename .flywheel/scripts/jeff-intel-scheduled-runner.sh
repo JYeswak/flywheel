@@ -95,6 +95,7 @@ emit_info() {
       capabilities:[
         "launchd-label-aware-cadence-runner",
         "daily-ingest-5-sources",
+        "daily-source-regeneration-apply-with-per-day-idempotency-key",
         "hourly-x-poll-for-doodlestein",
         "monthly-deep-mine-philosophy",
         "weekly-tentacle-drift-readonly",
@@ -233,7 +234,7 @@ emit_why() {
   local body=""
   case "$topic" in
     ""|launchd-cadences)
-      body='Four cadences: daily (5-source ingest, GitHub+RSS+X+JSM+mirror), x-poll (hourly @doodlestein X capture), monthly-deep-mine (Jeff philosophy refresh), tentacle-drift (weekly readonly drift sweep). Each has a dedicated launchd plist + label so cron-equivalent scheduling lives in macOS native subsystem, not in shell.'
+      body='Four cadences: daily (sources.txt regeneration plus 5-source ingest, GitHub+RSS+X+JSM+mirror), x-poll (hourly @doodlestein X capture), monthly-deep-mine (Jeff philosophy refresh), tentacle-drift (weekly readonly drift sweep). Each has a dedicated launchd plist + label so cron-equivalent scheduling lives in macOS native subsystem, not in shell.'
       ;;
     storage-precheck)
       body='--storage-min-free-pct precheck guards against running ingest when disk is full — daily ingest snapshots can be hundreds of MB. Default behavior reads JEFF_INTEL_STORAGE_MIN_FREE_PCT env; --storage-min-free-pct=0 disables the precheck (for tests).'
@@ -360,7 +361,7 @@ schema_json() {
       launchd_labels:{daily:$daily_label,x_hourly:$x_label,monthly_deep_mine:$monthly_label,tentacle_drift:$tentacle_label},
       launchd_plists:{daily:$daily_plist,x_hourly:$x_plist,monthly_deep_mine:$monthly_plist,tentacle_drift:$tentacle_plist},
       source_cadence:{
-        github_git:"daily via daily-jeff-ingest plus jeff-corpus diff watcher surface",
+        github_git:"daily via sources.txt regeneration apply, daily-jeff-ingest, and jeff-corpus diff watcher surface",
         website_rss:"daily via daily-jeff-ingest",
         x:"hourly via x-poll and daily via daily-jeff-ingest",
         jeff_philosophy:"daily via jeff-philosophy-mine.sh --daily-snapshot --skip-fetch; monthly via jeff-philosophy-mine.sh --deep-mine",
@@ -394,7 +395,14 @@ run_daily() {
   trap 'rm -rf "$tmp"' RETURN
 
   if [[ -x "$SOURCE_REGEN_SCRIPT" ]]; then
-    "$SOURCE_REGEN_SCRIPT" --dry-run --json >"$tmp/source-regeneration.json" || regen_rc=$?
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+      "$SOURCE_REGEN_SCRIPT" --dry-run --now "$ts" --json >"$tmp/source-regeneration.json" || regen_rc=$?
+    else
+      local regen_key_date source_regen_key
+      regen_key_date="${ts%%T*}"
+      source_regen_key="${IDEMPOTENCY_KEY:-daily-jeff-sources-${regen_key_date}}"
+      "$SOURCE_REGEN_SCRIPT" --apply --idempotency-key "$source_regen_key" --now "$ts" --json >"$tmp/source-regeneration.json" || regen_rc=$?
+    fi
   else
     jq -n --arg script "$SOURCE_REGEN_SCRIPT" '{status:"skipped", reason:"source_regen_script_missing", script:$script}' >"$tmp/source-regeneration.json"
   fi

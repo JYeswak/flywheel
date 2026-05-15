@@ -1,0 +1,64 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-bi76",
+  "status": "safe_to_close",
+  "closed_scope": "Plan-tracking bead for validate-and-redispatch foundational plan; implementation delegated to B01-B14 child beads.",
+  "validated_at": "2026-05-15T07:49:35Z",
+  "evidence": {
+    "plan_dir": ".flywheel/PLANS/validate-and-redispatch-foundational-2026-05-03",
+    "final_plan": ".flywheel/PLANS/validate-and-redispatch-foundational-2026-05-03/05-POLISH-FINAL.md",
+    "historical_receipt": ".flywheel/receipts/flywheel-fpt2-bi76-evidence.md",
+    "all_child_beads_closed": [
+      "flywheel-bc7c",
+      "flywheel-scwo",
+      "flywheel-0wbf",
+      "flywheel-zgo3",
+      "flywheel-hf58",
+      "flywheel-8xrn",
+      "flywheel-i8b6",
+      "flywheel-zdva",
+      "flywheel-kscr",
+      "flywheel-dw5w",
+      "flywheel-u2dr",
+      "flywheel-yasl",
+      "flywheel-erkx",
+      "flywheel-m5kg"
+    ]
+  },
+  "validation": [
+    {
+      "command": "find .flywheel/PLANS/validate-and-redispatch-foundational-2026-05-03 -maxdepth 1 -type f | sort",
+      "result": "pass",
+      "summary": "Phase 0-5 plan, research, audit, pre-draft, polish, and STATE artifacts are present."
+    },
+    {
+      "command": "br show flywheel-bc7c flywheel-scwo flywheel-0wbf flywheel-zgo3 flywheel-hf58 flywheel-8xrn flywheel-i8b6 flywheel-zdva flywheel-kscr flywheel-dw5w flywheel-u2dr flywheel-yasl flywheel-erkx flywheel-m5kg --json | jq -r '.[] | [.id,.status,.priority] | @tsv'",
+      "result": "pass",
+      "summary": "B01-B14 all report status=closed."
+    },
+    {
+      "command": "bash tests/doctrine-memory-wire.sh",
+      "result": "pass",
+      "summary": "66 passed, 0 failed after aligning stale public README and skill path assertions with current public-repo architecture."
+    },
+    {
+      "command": "shellcheck tests/doctrine-memory-wire.sh",
+      "result": "pass"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass",
+      "summary": "No dependency cycles detected."
+    }
+  ],
+  "changed_files": [
+    "tests/doctrine-memory-wire.sh"
+  ],
+  "notes": [
+    "The fresh validation found the old test had drifted after the public README rewrite and still referenced a literal <skills-root> placeholder.",
+    "The repair keeps internal validation doctrine in AGENTS/rules/canonical paths and checks public README plus CONTRIBUTING for the public-first split instead of reintroducing internal doctrine copy into README."
+  ],
+  "remaining_work": [
+    "None for the bi76 plan-tracking bead. Child implementation surfaces remain represented by their own closed beads and later follow-up beads where applicable."
+  ]
+}

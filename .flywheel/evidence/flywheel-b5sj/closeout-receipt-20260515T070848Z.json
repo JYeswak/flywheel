@@ -1,0 +1,64 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-b5sj",
+  "closed_at": "2026-05-15T07:08:48Z",
+  "close_type": "stale_parent_verified",
+  "status": "ready_to_close",
+  "summary": "Verified the Jeff-corpus storage projection parent after four-lens rework. The shipped projection now reports the corpus is fully indexed, preserves the original 92-repo scenario projection, and feeds the daily-report surface so storage risk is visible before future ingestion work resumes.",
+  "acceptance_gates": [
+    {
+      "gate": "Estimate per-Jeff-repo qdrant size",
+      "status": "pass",
+      "evidence": "tests/jeff-corpus-storage-projection.sh pass 13/0; live projection reports average_total_qdrant_mb_per_verified_repo via .flywheel/scripts/jeff-corpus-storage-projection.sh --json"
+    },
+    {
+      "gate": "Project total need for 92 remaining",
+      "status": "pass",
+      "evidence": "Live projection preserves scenario_remaining_count=92 and projected_scenario_remaining_gb=3.07 while current remaining_actual_count=0."
+    },
+    {
+      "gate": "Compare against current disk_free_gb",
+      "status": "pass",
+      "evidence": "Live projection reports disk_free_gb=134.4, disk_free_pct=14.51, headroom_above_reserve_gb=41.76."
+    },
+    {
+      "gate": "Output recommendation",
+      "status": "pass",
+      "evidence": "Live projection recommendation=full_already_indexed_monitor with jeff_corpus_already_fully_indexed warning."
+    },
+    {
+      "gate": "Wire into daily-report",
+      "status": "pass",
+      "evidence": "tests/daily-report.sh reached and passed normal_day_jeff_projection_section and normal_day_projection_json before an unrelated flywheel-loop doctor tail hung in canonical-sync substrate work."
+    }
+  ],
+  "source_evidence": [
+    ".flywheel/receipts/flywheel-pen9-b5sj-evidence.md",
+    ".flywheel/scripts/jeff-corpus-storage-projection.py",
+    ".flywheel/scripts/jeff-corpus-storage-projection.sh",
+    ".flywheel/scripts/daily-report.py",
+    "tests/jeff-corpus-storage-projection.sh",
+    "tests/daily-report.sh"
+  ],
+  "validation": [
+    {
+      "command": "bash tests/jeff-corpus-storage-projection.sh",
+      "status": "pass",
+      "result": "13 passed, 0 failed"
+    },
+    {
+      "command": ".flywheel/scripts/jeff-corpus-storage-projection.sh --json",
+      "status": "pass",
+      "result": "rc=0; verified_indexed_count=177; index_target=177; remaining_actual_count=0; scenario_remaining_count=92; projected_scenario_remaining_gb=3.07; recommendation=full_already_indexed_monitor"
+    },
+    {
+      "command": "bash tests/daily-report.sh",
+      "status": "partial_pass_then_hung",
+      "result": "Projection-related assertions passed; the later flywheel-loop doctor check hung in canonical-sync substrate work and was stopped. This is not used as full-test pass evidence."
+    }
+  ],
+  "open_risks": [
+    "Daily-report full test still has a substrate-coupled doctor tail that can hang behind canonical-sync/fleet propagator work; this closeout does not claim that unrelated full test is clean."
+  ],
+  "operator_value": "Turns Jeff-corpus storage growth from a surprise disk-pressure failure into a daily visible capacity decision with a concrete recommendation."
+}

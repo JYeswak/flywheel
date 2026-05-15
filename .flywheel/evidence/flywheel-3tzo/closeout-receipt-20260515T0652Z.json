@@ -1,0 +1,38 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-3tzo",
+  "closed_at": "2026-05-15T06:52:00Z",
+  "status": "done",
+  "scope": "/flywheel:status dashboard surface for open Joshua requests",
+  "implementation_evidence": [
+    "/Users/josh/.claude/commands/flywheel/status.md:63",
+    "/Users/josh/.claude/commands/flywheel/status.md:64",
+    "/Users/josh/.claude/commands/flywheel/status.md:331"
+  ],
+  "rework_evidence": ".flywheel/validation-receipts/flywheel-3tzo-pru9-four-lens-rework.md",
+  "acceptance": {
+    "status_section": "met: status.md includes Step 4a Joshua Requests immediately after Inbox.",
+    "open_and_stale_counts": "met: status.md specifies open_count and stale_count heading semantics.",
+    "top_three_recent": "met: status.md specifies top 3 most recent open rows with linked beads and sanitized excerpt.",
+    "bar_rework": "met: flywheel-pru9 closed after validator returned SAFE_TO_CLOSE with four_lens brand/sniff/jeff/public pass."
+  },
+  "verification": [
+    {
+      "command": "rg -n 'Joshua Requests|Acceptance Gates|Four-Lens|Contract version' /Users/josh/.claude/commands/flywheel/status.md .flywheel/validation-receipts/flywheel-3tzo-pru9-four-lens-rework.md",
+      "result": "pass"
+    },
+    {
+      "command": "br show flywheel-pru9 --json",
+      "result": "pass closed; close_reason says all 4 validators pass"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    }
+  ],
+  "notes": "No source files changed in this closeout; this closes stale parent state after already-shipped implementation and four-lens rework."
+}

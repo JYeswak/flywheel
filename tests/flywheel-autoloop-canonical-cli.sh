@@ -3,6 +3,7 @@ set -euo pipefail
 
 BIN="${FLYWHEEL_AUTOLOOP_BIN:-<flywheel-state>/bin/flywheel-autoloop}"
 CHECKER="${CANONICAL_CLI_CHECKER:-<skills-root>/canonical-cli-scoping/scripts/check-cli-scoping.sh}"
+SCORECARD="${CANONICAL_CLI_SCORECARD:-$HOME/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh}"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"; rm -f /tmp/flywheel-autoloop-fixture-dispatch-90.md' EXIT
 
@@ -116,6 +117,24 @@ done
 printf '%s strict=%s repo=%s file=%s\n' "$cmd" "$strict" "$repo" "$file" >> "$AUTOLOOP_FIXTURE_LOOP_LOG"
 case "$cmd" in
   doctor)
+    if [[ -n "${AUTOLOOP_FIXTURE_DOCTOR_COUNT_FILE:-}" ]]; then
+      current_count=0
+      [[ -f "$AUTOLOOP_FIXTURE_DOCTOR_COUNT_FILE" ]] && current_count="$(cat "$AUTOLOOP_FIXTURE_DOCTOR_COUNT_FILE")"
+      printf '%s\n' "$((current_count + 1))" >"$AUTOLOOP_FIXTURE_DOCTOR_COUNT_FILE"
+    fi
+    if [[ "${AUTOLOOP_FIXTURE_DOCTOR_ALWAYS_FAIL:-0}" == "1" ]]; then
+      printf '%s\n' "${AUTOLOOP_FIXTURE_DOCTOR_FAIL_JSON:-{\"status\":\"fail\",\"docs_state\":\"drift_detected\",\"action\":\"repair_docs_state\"}}"
+      exit "${AUTOLOOP_FIXTURE_DOCTOR_FAIL_RC:-3}"
+    fi
+    if [[ "${AUTOLOOP_FIXTURE_DOCTOR_FAIL_ONCE:-0}" == "1" ]]; then
+      marker="${AUTOLOOP_FIXTURE_DOCTOR_FAIL_MARKER:-${TMPDIR:-/tmp}/autoloop-doctor-failed-once}"
+      if [[ ! -e "$marker" ]]; then
+        mkdir -p "$(dirname "$marker")"
+        touch "$marker"
+        printf '%s\n' "${AUTOLOOP_FIXTURE_DOCTOR_FAIL_JSON:-{\"status\":\"fail\",\"docs_state\":\"drift_detected\",\"action\":\"repair_docs_state\"}}"
+        exit "${AUTOLOOP_FIXTURE_DOCTOR_FAIL_RC:-3}"
+      fi
+    fi
     printf '{"status":"ok","repo_docs_state":"ready","action":"tick"}\n'
     ;;
   tick)
@@ -137,6 +156,20 @@ case "$cmd" in
 esac
 EOF
 chmod +x "$FIXTURE_HOME/bin/flywheel-loop"
+
+cat >"$FIXTURE_HOME/bin/flywheel-lock-repair" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+printf '%s' "${1:-}" >> "$AUTOLOOP_FIXTURE_LOCK_REPAIR_LOG"
+shift || true
+for arg in "$@"; do
+  printf ' %s' "$arg" >> "$AUTOLOOP_FIXTURE_LOCK_REPAIR_LOG"
+done
+printf '\n' >> "$AUTOLOOP_FIXTURE_LOCK_REPAIR_LOG"
+printf '{"status":"%s","scope":"locks"}\n' "${AUTOLOOP_FIXTURE_LOCK_REPAIR_STATUS:-repaired}"
+exit "${AUTOLOOP_FIXTURE_LOCK_REPAIR_RC:-0}"
+EOF
+chmod +x "$FIXTURE_HOME/bin/flywheel-lock-repair"
 
 cat >"$FIXTURE_HOME/bin/ntm" <<'EOF'
 #!/usr/bin/env bash
@@ -463,6 +496,88 @@ grep -q -- "doctor strict=1 repo=$repo_a" "$select_loop_log"
 grep -q -- "tick strict=0 repo=$repo_a" "$select_loop_log"
 pass "run selects dirtiest eligible repo, breaks ties lexicographically, and runs strict doctor then tick"
 
+repo_fail="$ROOT/fail-repo"
+repo_ready="$ROOT/ready-repo"
+mkdir -p "$repo_fail/.flywheel" "$repo_ready/.flywheel"
+repair_priority_check_json="$TMP/check-repair-priority.json"
+jq -n --arg repo_fail "$repo_fail" --arg repo_ready "$repo_ready" '{
+  scanned_git_repos: 2,
+  repos: [
+    {repo:$repo_ready,status:"ready",next_owner:"agent",next_tick_override_present:false,dirty_count:99},
+    {repo:$repo_fail,status:"fail",next_owner:"agent",next_tick_override_present:false,dirty_count:0}
+  ]
+}' >"$repair_priority_check_json"
+repair_priority_state="$TMP/repair-priority-state"
+repair_priority_check_log="$TMP/repair-priority-check.log"
+repair_priority_loop_log="$TMP/repair-priority-loop.log"
+HOME="$TMP/home-repair-priority" \
+FLYWHEEL_HOME="$FIXTURE_HOME" \
+FLYWHEEL_AUTOLOOP_STATE_DIR="$repair_priority_state" \
+FLYWHEEL_AUTOLOOP_ROOT="$ROOT" \
+AUTOLOOP_FIXTURE_CHECK_JSON="$repair_priority_check_json" \
+AUTOLOOP_FIXTURE_CHECK_LOG="$repair_priority_check_log" \
+AUTOLOOP_FIXTURE_LOOP_LOG="$repair_priority_loop_log" \
+  "$BIN" run --dry-run --json >"$TMP/repair-priority.json"
+jq -e --arg repo "$repo_fail" '.status == "dry_run" and .repo == $repo and .selected_status == "fail" and .planned_actions[0].repo == $repo' "$TMP/repair-priority.json" >/dev/null
+test ! -e "$repair_priority_state"
+test ! -s "$repair_priority_loop_log"
+pass "run dry-run prioritizes fail repair candidate before ready work"
+
+doctor_repair_state="$TMP/doctor-repair-state"
+doctor_repair_check_log="$TMP/doctor-repair-check.log"
+doctor_repair_loop_log="$TMP/doctor-repair-loop.log"
+doctor_repair_lock_log="$TMP/doctor-repair-lock.log"
+doctor_repair_count="$TMP/doctor-repair-count.txt"
+HOME="$TMP/home-doctor-repair" \
+FLYWHEEL_HOME="$FIXTURE_HOME" \
+FLYWHEEL_AUTOLOOP_STATE_DIR="$doctor_repair_state" \
+FLYWHEEL_AUTOLOOP_ROOT="$ROOT" \
+AUTOLOOP_FIXTURE_CHECK_JSON="$repair_priority_check_json" \
+AUTOLOOP_FIXTURE_CHECK_LOG="$doctor_repair_check_log" \
+AUTOLOOP_FIXTURE_LOOP_LOG="$doctor_repair_loop_log" \
+AUTOLOOP_FIXTURE_LOCK_REPAIR_LOG="$doctor_repair_lock_log" \
+AUTOLOOP_FIXTURE_DOCTOR_COUNT_FILE="$doctor_repair_count" \
+AUTOLOOP_FIXTURE_DOCTOR_FAIL_ONCE=1 \
+AUTOLOOP_FIXTURE_DOCTOR_FAIL_MARKER="$TMP/doctor-repair-once.marker" \
+  "$BIN" run --json >"$TMP/doctor-repair.json"
+jq -e --arg repo "$repo_fail" '.status == "ticked" and .repo == $repo and .doctor_status == "ok"' "$TMP/doctor-repair.json" >/dev/null
+grep -q "repair --scope locks --repo $repo_fail --apply --json" "$doctor_repair_lock_log"
+test "$(cat "$doctor_repair_count")" -eq 2
+if [[ -s "$doctor_repair_state/negative-cache.jsonl" ]]; then
+  if jq -e 'select(.reason == "doctor_failed")' "$doctor_repair_state/negative-cache.jsonl" >/dev/null; then
+    printf 'unexpected raw doctor_failed cache after repair\n' >&2
+    exit 1
+  fi
+fi
+pass "doctor drift repair invokes lock repair, retries doctor, and avoids raw doctor_failed cache"
+
+doctor_no_repair_state="$TMP/doctor-no-repair-state"
+doctor_no_repair_check_log="$TMP/doctor-no-repair-check.log"
+doctor_no_repair_loop_log="$TMP/doctor-no-repair-loop.log"
+doctor_no_repair_lock_log="$TMP/doctor-no-repair-lock.log"
+set +e
+HOME="$TMP/home-doctor-no-repair" \
+FLYWHEEL_HOME="$FIXTURE_HOME" \
+FLYWHEEL_AUTOLOOP_STATE_DIR="$doctor_no_repair_state" \
+FLYWHEEL_AUTOLOOP_ROOT="$ROOT" \
+AUTOLOOP_FIXTURE_CHECK_JSON="$repair_priority_check_json" \
+AUTOLOOP_FIXTURE_CHECK_LOG="$doctor_no_repair_check_log" \
+AUTOLOOP_FIXTURE_LOOP_LOG="$doctor_no_repair_loop_log" \
+AUTOLOOP_FIXTURE_LOCK_REPAIR_LOG="$doctor_no_repair_lock_log" \
+AUTOLOOP_FIXTURE_DOCTOR_ALWAYS_FAIL=1 \
+AUTOLOOP_FIXTURE_LOCK_REPAIR_RC=2 \
+  "$BIN" run --json >"$TMP/doctor-no-repair.json"
+doctor_no_repair_rc=$?
+set -e
+test "$doctor_no_repair_rc" -eq 1
+jq -e '.status == "repair_not_available" or .status == "repair_failed"' "$TMP/doctor-no-repair.json" >/dev/null
+jq -e '.reason == "repair_not_available" or .reason == "repair_failed"' "$doctor_no_repair_state/negative-cache.jsonl" >/dev/null
+if jq -e 'select(.reason == "doctor_failed")' "$doctor_no_repair_state/negative-cache.jsonl" >/dev/null; then
+  printf 'unexpected raw doctor_failed cache after failed repair\n' >&2
+  exit 1
+fi
+pass "failed doctor repair caches repair outcome, never raw doctor_failed"
+
 stop_state="$TMP/stop-state"
 stop_check_log="$TMP/stop-check.log"
 stop_loop_log="$TMP/stop-loop.log"
@@ -600,3 +715,21 @@ pass "simultaneous runs produce one tick and one lock-held receipt"
 bash "$CHECKER" "$BIN" >"$TMP/check-cli-scoping.txt"
 cat "$TMP/check-cli-scoping.txt"
 pass "canonical CLI scoping checker passes"
+
+"$BIN" help exit-codes >"$TMP/exit-codes.txt"
+rg -q '0 success' "$TMP/exit-codes.txt"
+rg -q '2 usage' "$TMP/exit-codes.txt"
+rg -q 'transient retry' "$TMP/exit-codes.txt"
+pass "exit-code help documents success usage transient retry and domain classes"
+
+"$BIN" --exit-codes >"$TMP/exit-codes-flag.txt"
+cmp "$TMP/exit-codes.txt" "$TMP/exit-codes-flag.txt"
+pass "--exit-codes matches help exit-codes"
+
+"$BIN" repair --dry-run --json \
+  | jq -e '.dry_run == true and (.actual_actions | length) == 0 and (.planned_actions | length) >= 1 and (.blocked_by | length) == 0' >/dev/null
+pass "repair --dry-run --json is parseable and non-mutating"
+
+bash "$SCORECARD" score "$BIN" --domain-exit-codes --json \
+  | jq -e '.status == "pass" and .composite_score >= 990 and .dimensions.domain_exit_code_validator == 1000 and .dimensions.dry_run_json_fixture == 1000' >/dev/null
+pass "canonical CLI scorecard passes domain exit-code and dry-run dimensions"

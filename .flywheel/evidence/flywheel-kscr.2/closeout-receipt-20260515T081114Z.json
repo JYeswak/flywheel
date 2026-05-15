@@ -1,0 +1,35 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-kscr.2",
+  "closed_at": "2026-05-15T08:11:14Z",
+  "status": "safe_to_close",
+  "closure_class": "stale_audit_gap_verified",
+  "summary": "B09_AG6 is covered by the validation-learn review surface: unrouted validation events are listed without treating the literal '/flywheel:learn' text as a filesystem path.",
+  "evidence": [
+    {
+      "command": "bash tests/validation-learn-routing.sh",
+      "result": "pass",
+      "summary": "13 passed, 0 failed; includes B09_AG6 review lists unrouted and pending events."
+    },
+    {
+      "path": "/Users/josh/.claude/commands/flywheel/learn.md",
+      "result": "present",
+      "summary": "Operator command documentation for /flywheel:learn exists."
+    },
+    {
+      "path": ".flywheel/reports/learn-review-2026-05-06.md",
+      "result": "present",
+      "summary": "Review report documents the read-only learn review surface and promotion candidates."
+    },
+    {
+      "path": ".flywheel/validation-learn-ledger.jsonl",
+      "result": "present",
+      "summary": "Ledger records validation-learn routes and dedupe state."
+    },
+    {
+      "command": "bash tests/bead-quality-mining.sh && shellcheck tests/validation-learn-routing.sh tests/bead-quality-mining.sh",
+      "result": "pass",
+      "summary": "Audit mining resolves /flywheel:learn command shorthand and shell tests lint cleanly."
+    }
+  ]
+}

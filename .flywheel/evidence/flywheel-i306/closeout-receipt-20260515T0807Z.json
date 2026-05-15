@@ -1,0 +1,44 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-i306",
+  "created_at": "2026-05-15T08:07:00Z",
+  "status": "safe_to_close_with_followup",
+  "summary": "The original flywheel-loop repair mutation-safety gates are green: repair exists, dry-run is no-op/planned-only, --scope is accepted, --explain and --idempotency-key are accepted, canonical surface checker passes, and current smoke tests pass.",
+  "validation": [
+    {
+      "command": "flywheel-loop repair --repo /Users/josh/Developer/flywheel --scope docs --dry-run --json | jq empty",
+      "result": "pass"
+    },
+    {
+      "command": "flywheel-loop repair --repo /Users/josh/Developer/flywheel --scope docs --dry-run --explain --idempotency-key test-loop-repair-1 --json | jq empty",
+      "result": "pass"
+    },
+    {
+      "command": "repeat same idempotency-key dry-run",
+      "result": "pass",
+      "summary": "same planned no-op envelope; no writes/deletes/external calls"
+    },
+    {
+      "command": "bash ~/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh /Users/josh/.claude/skills/.flywheel/bin/flywheel-loop",
+      "result": "pass",
+      "summary": "13/0"
+    },
+    {
+      "command": "bash tests/canonical-cli-scoping-flywheel-loop.sh",
+      "result": "pass"
+    },
+    {
+      "command": "bash tests/flywheel-loop-canonical-cli.sh",
+      "result": "pass",
+      "summary": "17 assertions"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass"
+    }
+  ],
+  "followup_gap": {
+    "bead_id": "flywheel-20udm",
+    "reason": "Newer canonical-cli scorecard with --domain-exit-codes reports composite_score=850 because flywheel-loop lacks help exit-codes / --exit-codes. This is separate from the original repair mutation-safety acceptance gates."
+  }
+}

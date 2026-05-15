@@ -42,18 +42,28 @@ if "$HOOK" --examples | jq -e '.examples | length >= 4' >/dev/null; then
   pass "--examples >=4 items"
 else fail "--examples"; fi
 
-# Test 5: missing --blocker-file → rc=2
+# Test 5: doctor emits read-only envelope without evaluating AC commands
+if "$HOOK" doctor --blockers-dir "$TMPDIR_TEST/missing-blockers" --counter-dir "$TMPDIR_TEST/missing-counters" --escalations-log "$TMPDIR_TEST/missing-state/escalations.jsonl" --skip-agent-mail --json 2>/dev/null \
+  | jq -e '.schema_version == "blocker-fail-escalator.doctor.v1" and .command == "doctor" and .mode == "read_only" and .mutates == false and (.status | IN("pass","warn","fail")) and ([.checks[] | select(.name == "doctor_read_only").status][0] == "pass") and ([.checks[] | select(.name == "mutation_default_dry_run").status][0] == "pass")' >/dev/null; then
+  pass "doctor emits read-only envelope"
+else fail "doctor envelope"; fi
+
+if "$HOOK" --doctor --json 2>/dev/null | jq -e '.command == "doctor" and .mutates == false' >/dev/null; then
+  pass "--doctor aliases doctor"
+else fail "--doctor alias"; fi
+
+# Test 6: missing --blocker-file → rc=2
 "$HOOK" check --json >/dev/null 2>&1
 if [[ $? -eq 2 ]]; then pass "check without --blocker-file → rc=2"; else fail "rc"; fi
 
-# Test 6: missing file → rc=3
+# Test 7: missing file → rc=3
 out="$("$HOOK" check --blocker-file "$TMPDIR_TEST/nope.json" --json 2>/dev/null)"
 rc=$?
 if [[ "$rc" -eq 3 ]] && printf '%s' "$out" | jq -e '.status == "error"' >/dev/null; then
   pass "missing blocker file → rc=3"
 else fail "missing file rc=$rc"; fi
 
-# Test 7: AC passes → not_escalated_ac_passed (counter resets)
+# Test 8: AC passes → not_escalated_ac_passed (counter resets)
 cat > "$TMPDIR_TEST/passing.json" <<'EOF'
 {"blocker_id":"int-pass","acceptance_condition":"echo OK","status":"open","last_verified_at":"2026-05-09T00:00:00Z"}
 EOF
@@ -67,7 +77,7 @@ if printf '%s' "$out" | jq -e '.status == "not_escalated_ac_passed" and .ac_pass
   pass "AC passes → not_escalated_ac_passed + counter reset (was 2, now 0)"
 else fail "AC pass: $(printf '%s' "$out" | jq -c '{status, ac_passes_now, consecutive_fail_count, previous_consecutive_fail_count}')"; fi
 
-# Test 8: AC fails below threshold → not_escalated_below_threshold + counter incremented
+# Test 9: AC fails below threshold → not_escalated_below_threshold + counter incremented
 cat > "$TMPDIR_TEST/failing.json" <<'EOF'
 {"blocker_id":"int-fail","acceptance_condition":"false","status":"open","last_verified_at":"2026-05-09T00:00:00Z"}
 EOF
@@ -76,22 +86,26 @@ out="$("$HOOK" check --blocker-file "$TMPDIR_TEST/failing.json" --counter-dir "$
 if printf '%s' "$out" | jq -e '.status == "not_escalated_below_threshold" and .consecutive_fail_count == 1 and .threshold_n == 4' >/dev/null; then
   pass "AC fail #1 (below threshold) → counter 0→1, no escalation, no row"
 else fail "fail #1: $(printf '%s' "$out" | jq -c '{status, consecutive_fail_count, threshold_n}')"; fi
-[[ ! -e "$ELOG" ]] && pass "no escalation row appended on below-threshold fail" || fail "row appended too early"
+if [[ ! -e "$ELOG" ]]; then
+  pass "no escalation row appended on below-threshold fail"
+else
+  fail "row appended too early"
+fi
 
-# Test 9: Two more fails — counter 1→2→3, still below threshold=4
+# Test 10: Two more fails — counter 1→2→3, still below threshold=4
 "$HOOK" check --blocker-file "$TMPDIR_TEST/failing.json" --counter-dir "$COUNTER_DIR" --escalations-log "$ELOG" --threshold-n 4 --apply --json >/dev/null 2>&1
 out="$("$HOOK" check --blocker-file "$TMPDIR_TEST/failing.json" --counter-dir "$COUNTER_DIR" --escalations-log "$ELOG" --threshold-n 4 --apply --json 2>/dev/null)"
 if printf '%s' "$out" | jq -e '.status == "not_escalated_below_threshold" and .consecutive_fail_count == 3' >/dev/null; then
   pass "counter increments across consecutive fails (3rd fail = counter 3)"
 else fail "3rd fail: $(printf '%s' "$out" | jq -c '{status, consecutive_fail_count}')"; fi
 
-# Test 10: 4th fail hits threshold=4 → escalated + row appended
+# Test 11: 4th fail hits threshold=4 → escalated + row appended
 out="$("$HOOK" check --blocker-file "$TMPDIR_TEST/failing.json" --counter-dir "$COUNTER_DIR" --escalations-log "$ELOG" --threshold-n 4 --apply --json 2>/dev/null)"
 if printf '%s' "$out" | jq -e '.status == "escalated" and .consecutive_fail_count == 4 and .threshold_n == 4 and .agent_mail_status == "skipped_flag"' >/dev/null; then
   pass "AC fail #4 at threshold → escalated, agent_mail=skipped_flag"
 else fail "4th fail: $(printf '%s' "$out" | jq -c '{status, consecutive_fail_count, agent_mail_status}')"; fi
 
-# Test 11: escalations.jsonl row matches DOCTRINE schema (10 doctrine fields + 3 escalator extensions)
+# Test 12: escalations.jsonl row matches DOCTRINE schema (10 doctrine fields + 3 escalator extensions)
 row="$(tail -1 "$ELOG")"
 if printf '%s' "$row" | jq -e '
   .schema_version == "blocker-escalation/v1"
@@ -111,18 +125,18 @@ if printf '%s' "$row" | jq -e '
   pass "escalation row matches doctrine schema + 3 extensions (consecutive_fail_count, threshold_n, agent_mail_status)"
 else fail "row: $row"; fi
 
-# Test 12: ac_state_hash present (cross-orch replay-verify link)
+# Test 13: ac_state_hash present (cross-orch replay-verify link)
 if printf '%s' "$row" | jq -e '.ac_state_hash != null and (.ac_state_hash | test("^[0-9a-f]{64}$"))' >/dev/null; then
   pass "ac_state_hash 64-hex present"
 else fail "ac_state_hash: $(printf '%s' "$row" | jq -r .ac_state_hash)"; fi
 
-# Test 13: counter reset to 0 after escalation
+# Test 14: counter reset to 0 after escalation
 counter_after="$(jq -r '.counter' "$COUNTER_DIR/int-fail.json")"
 if [[ "$counter_after" -eq 0 ]]; then
   pass "counter reset to 0 after escalation"
 else fail "counter after escalation: $counter_after"; fi
 
-# Test 14: 5th fail starts a fresh streak — back to not_escalated_below_threshold
+# Test 15: 5th fail starts a fresh streak — back to not_escalated_below_threshold
 out="$("$HOOK" check --blocker-file "$TMPDIR_TEST/failing.json" --counter-dir "$COUNTER_DIR" --escalations-log "$ELOG" --threshold-n 4 --apply --json 2>/dev/null)"
 if printf '%s' "$out" | jq -e '.status == "not_escalated_below_threshold" and .consecutive_fail_count == 1' >/dev/null; then
   pass "post-escalation: fresh streak starts at counter=1"
@@ -133,7 +147,7 @@ if [[ "$row_count" -eq 1 ]]; then
   pass "still only 1 escalation row after fresh-streak start"
 else fail "row count: $row_count"; fi
 
-# Test 15: dry-run does NOT mutate counter or write row
+# Test 16: dry-run does NOT mutate counter or write row
 mkdir -p "$TMPDIR_TEST/dry-counters"
 DRY_ELOG="$TMPDIR_TEST/dry-escalations.jsonl"
 "$HOOK" check --blocker-file "$TMPDIR_TEST/failing.json" --counter-dir "$TMPDIR_TEST/dry-counters" --escalations-log "$DRY_ELOG" --threshold-n 1 --json 2>/dev/null >/dev/null
@@ -141,7 +155,7 @@ if [[ ! -e "$DRY_ELOG" ]] && [[ ! -e "$TMPDIR_TEST/dry-counters/int-fail.json" ]
   pass "dry-run: no row, no counter file"
 else fail "dry-run mutated state"; fi
 
-# Test 16: AC pure MISMATCH (impure predicate) → ac_pure_mismatch + rc=1
+# Test 17: AC pure MISMATCH (impure predicate) → ac_pure_mismatch + rc=1
 cat > "$TMPDIR_TEST/impure.json" <<'EOF'
 {"blocker_id":"int-impure","acceptance_condition":"echo $RANDOM","status":"open"}
 EOF
@@ -151,7 +165,7 @@ if [[ "$rc" -eq 1 ]] && printf '%s' "$out" | jq -e '.status == "ac_pure_mismatch
   pass "impure AC → ac_pure_mismatch rc=1"
 else fail "impure rc=$rc: $(printf '%s' "$out" | jq -c '{status, ac_verdict}')"; fi
 
-# Test 17: per-blocker threshold override from ac_check_interval_ticks
+# Test 18: per-blocker threshold override from ac_check_interval_ticks
 cat > "$TMPDIR_TEST/override.json" <<'EOF'
 {"blocker_id":"int-override","acceptance_condition":"false","status":"open","ac_check_interval_ticks":2}
 EOF
@@ -162,7 +176,7 @@ if printf '%s' "$out" | jq -e '.status == "escalated" and .threshold_n == 2 and 
   pass "per-blocker ac_check_interval_ticks override (n=2 wins over CLI --threshold-n=99)"
 else fail "override: $(printf '%s' "$out" | jq -c '{status, threshold_n, consecutive_fail_count}')"; fi
 
-# Test 18: already-closed blocker → error rc=3
+# Test 19: already-closed blocker → error rc=3
 cat > "$TMPDIR_TEST/closed.json" <<'EOF'
 {"blocker_id":"int-closed","acceptance_condition":"false","status":"closed"}
 EOF
@@ -172,7 +186,7 @@ if [[ "$rc" -eq 3 ]] && printf '%s' "$out" | jq -e '.status == "error" and .bloc
   pass "closed blocker → rc=3 error"
 else fail "closed: rc=$rc, $(printf '%s' "$out" | jq -c '{status, blocker_status}')"; fi
 
-# Test 19: scan mode — mixed verdicts
+# Test 20: scan mode — mixed verdicts
 SCANDIR="$TMPDIR_TEST/scan"; mkdir -p "$SCANDIR"
 SCAN_ELOG="$TMPDIR_TEST/scan-escalations.jsonl"
 SCAN_COUNTERS="$TMPDIR_TEST/scan-counters"

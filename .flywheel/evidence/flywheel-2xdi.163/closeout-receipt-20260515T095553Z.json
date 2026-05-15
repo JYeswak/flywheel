@@ -1,0 +1,53 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-2xdi.163",
+  "closed_scope": "Anchored feedback_worker_tick_shared_append_stable_tail_checklist.md in repo-local doctrine and locked the gap-hunt regression.",
+  "paths": [
+    ".flywheel/doctrine/worker-tick-shared-append-stable-tail.md",
+    "tests/gap-hunt-probe-worker-tick-stable-tail-memory.sh"
+  ],
+  "before": {
+    "gap_hunt_probe_matches": [
+      "memory-without-cross-link:feedback_worker_tick_shared_append_stable_tail_checklist.md"
+    ],
+    "reason": "The memory existed under the Claude project memory directory but was not cited by sampled commands, doctrine, incidents, or recent plan files."
+  },
+  "after": {
+    "gap_hunt_probe_matches": [],
+    "doctrine_anchor": ".flywheel/doctrine/worker-tick-shared-append-stable-tail.md",
+    "memory_name": "feedback_worker_tick_shared_append_stable_tail_checklist.md",
+    "rule_locked": [
+      "reserve shared path",
+      "re-read tail before append",
+      "append only at EOF",
+      "verify appended marker",
+      "run close validation",
+      "release reservations",
+      "report reserved/released paths and stable-tail method"
+    ]
+  },
+  "validation": [
+    {
+      "command": "bash tests/gap-hunt-probe-worker-tick-stable-tail-memory.sh",
+      "result": "pass 4/0"
+    },
+    {
+      "command": "shellcheck tests/gap-hunt-probe-worker-tick-stable-tail-memory.sh",
+      "result": "pass"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    }
+  ],
+  "safety": {
+    "runtime_mutation": false,
+    "external_memory_file_mutated": false,
+    "repo_local_anchor_only": true
+  },
+  "autonomy": "autonomous"
+}

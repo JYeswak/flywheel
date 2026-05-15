@@ -406,6 +406,33 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+/* Horizontal project portfolio — keeps .proof-grid card visuals, overrides
+   the grid layout with a scroll-snap row. Scales to any number of cards. */
+.proof-grid.portfolio-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 14px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.proof-grid.portfolio-scroll article {
+  flex: 0 0 clamp(258px, 24vw, 320px);
+  min-height: 264px;
+  scroll-snap-align: start;
+}
+
+.proof-grid.portfolio-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.proof-grid.portfolio-scroll::-webkit-scrollbar-thumb {
+  background: var(--zs-line);
+  border-radius: 999px;
+}
+
 .section-theater {
   position: relative;
   padding: 96px 0;
@@ -915,6 +942,13 @@
   border: 0;
   background: transparent;
   white-space: pre-wrap;
+}
+
+.terminal-stage .proof-note {
+  margin: 18px 0 0;
+  color: var(--zs-aa-muted-on-dark);
+  font-size: 14px;
+  line-height: 1.55;
 }
 
 .contact-console.v2 {

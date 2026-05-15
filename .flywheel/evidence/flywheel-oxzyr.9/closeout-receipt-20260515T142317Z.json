@@ -1,0 +1,34 @@
+{
+  "schema": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-oxzyr.9",
+  "created_at": "2026-05-15T14:23:17Z",
+  "status": "closed",
+  "decision": "closed_with_evidence",
+  "summary": "Added a read-only doctor envelope to the Jeffrey corpus daily diff renderer so it can report jq, input snapshot, and output-parent readiness without rendering or mutating a report.",
+  "changed_files": [
+    ".flywheel/scripts/jeff-daily-corpus-diff-render.sh",
+    "tests/jeff-daily-corpus-diff-render-doctor.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/jeff-daily-corpus-diff-render-doctor.sh",
+      "result": "pass",
+      "summary": "6/0 assertions: help/examples advertise doctor, doctor emits jeff-daily-diff-render.doctor.v1 with mutates=false, missing input warns, readable input passes, and markdown rendering still works from a fixture snapshot."
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/jeff-daily-corpus-diff-render.sh tests/jeff-daily-corpus-diff-render-doctor.sh",
+      "result": "pass",
+      "summary": "Touched renderer and test surfaces are ShellCheck clean."
+    },
+    {
+      "command": ".flywheel/audit/flywheel-cli-inventory/build-inventory.sh",
+      "result": "pass",
+      "summary": "Inventory regenerated; jeff-daily-corpus-diff-render.sh now reports doctor_subcommand_status=basic instead of absent."
+    }
+  ],
+  "parent_state": {
+    "parent_bead_id": "flywheel-oxzyr",
+    "parent_closed": false,
+    "reason": "The broader doctor-mode wave remains open; this closes one scoped Jeffrey corpus renderer surface only."
+  }
+}

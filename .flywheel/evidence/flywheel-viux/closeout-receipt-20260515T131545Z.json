@@ -1,0 +1,27 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-viux",
+  "created_at": "20260515T131545Z",
+  "status": "closed_with_current_idle_signal_green",
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-viux/live-idle-state-probe-20260515T131545Z.json",
+    ".flywheel/evidence/flywheel-viux/live-doctor-idle-state-20260515T131545Z.json"
+  ],
+  "changes": [
+    "peer-orch default suppresses saturated for {capability-control-plane}",
+    "idle-pane watcher convergence test now follows native ntm wait/assign path instead of removed --state-dir contract",
+    "idle-pane-auto-dispatch --info exposes native watch surface"
+  ],
+  "validation": [
+    "tests/idle-state-probe.sh PASS",
+    "tests/test_idle_pane_watcher_convergence.sh PASS 7/0",
+    "tests/idle-pane-auto-dispatch-validated-write-test.sh PASS 3/0",
+    "tests/idle-pane-auto-dispatch-work-started-validation-test.sh PASS",
+    "shellcheck targeted pass",
+    "br dep cycles pass",
+    "git diff --check pass"
+  ],
+  "residuals": [
+    "overall flywheel-loop doctor still fails separately on repair_beads_db_health; idle_state signal itself is pass/empty with over_threshold_count=0"
+  ]
+}

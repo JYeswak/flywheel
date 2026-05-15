@@ -459,6 +459,37 @@ run_probe_json() {
   fi
 }
 
+ntm_activity_probe() {
+  local output exit_code normalized default_json
+  set +e
+  output="$("$NTM" activity "$SESSION" --json 2>&1)"
+  exit_code=$?
+  set -e
+  default_json="$(jq -nc --arg raw "$output" '{status:"error",agents:[],warnings:["ntm_activity_invalid_json"],raw:$raw}')"
+  normalized="$(json_stream_last_object_or_default "$output" "$default_json")"
+  jq -c \
+    --arg session "$SESSION" \
+    --argjson exit_code "$exit_code" \
+    --argjson normalized "$normalized" \
+    'if type == "object" then
+      (.agents // []) as $agents
+      | {
+          schema_version:"flywheel-tick-ntm-activity/v1",
+          status:(if $exit_code == 0 then "ok" else "error" end),
+          probe_exit_code:$exit_code,
+          session:$session,
+          raw:$normalized,
+          sessions_seen:([$agents[]? | (.session // $session)] | unique),
+          sessions_error:(if $exit_code == 0 then [] else [$session] end),
+          stalled_panes:[$agents[]? | select((((.state // .activity // .status // "") | tostring | ascii_downcase) | test("stalled|frozen|error|unknown"))) | (.pane // .pane_idx // .index // .pane_index)],
+          health_daemon_fresh:(.health_daemon_fresh // .daemon_fresh // (($exit_code == 0) and (($agents | length) > 0))),
+          warnings:(.warnings // [])
+        }
+    else
+      {schema_version:"flywheel-tick-ntm-activity/v1",status:"error",probe_exit_code:$exit_code,session:$session,raw:$normalized,sessions_seen:[],sessions_error:[$session],stalled_panes:[],health_daemon_fresh:false,warnings:["ntm_activity_non_object"]}
+    end' <<<"$normalized"
+}
+
 jeff_status_probe() {
   run_probe_json "$REPO/.flywheel/scripts/jeff-issues-status-probe.sh" doctor --json
 }
@@ -910,6 +941,62 @@ phase_a_learn_review_check_json() {
       learn_review_ran:$learn_review_ran,
       learn_review_status:$learn_review_status
     }'
+}
+
+fuckup_to_bead_pipeline_json() {
+  local raw_log processed_log empty_jsonl
+  raw_log="$(phase_a_fuckup_log_path)"
+  processed_log="${FLYWHEEL_TICK_FUCKUP_PROCESSED_LOG:-$HOME/.local/state/flywheel/fuckup-processed.jsonl}"
+  empty_jsonl="$(mktemp "${TMPDIR:-/tmp}/flywheel-fuckup-pipeline.XXXXXX")"
+  : >"$empty_jsonl"
+  [[ -f "$raw_log" ]] || raw_log="$empty_jsonl"
+  [[ -f "$processed_log" ]] || processed_log="$empty_jsonl"
+
+  jq -n -c \
+    --arg schema_version "flywheel.fuckup_to_bead_pipeline.v1" \
+    --arg raw_log "$raw_log" \
+    --arg processed_log "$processed_log" \
+    --argjson raw_rows "$(jq -s '.' "$raw_log" 2>/dev/null || jq -nc '[]')" \
+    --argjson processed_rows "$(jq -s '.' "$processed_log" 2>/dev/null || jq -nc '[]')" '
+      def clean_text($v): (($v // "") | tostring);
+      def present($v): (clean_text($v) | ascii_downcase) as $s | ($s != "" and $s != "none" and $s != "null");
+      def has_planning: present(.planning_workflow_ref // .planning_ref // .plan_ref);
+      def has_convergence: present(.jeff_convergence_audit_ref // .convergence_audit_ref // .audit_ref);
+      def has_bead_action:
+        present(.beads_filed // .bead_id // .beads_updated // .bead_ref)
+        or ((.bead_actions // []) | any(.action?; . == "filed" or . == "updated"));
+      def has_no_bead: present(.no_bead_reason);
+      def has_beads_workflow:
+        present(.beads_workflow_ref // .bead_dispatch_ref // .dispatch_ref)
+        or has_no_bead;
+      def processed:
+        ((.processed // false) == true)
+        or present(.processed_at // .promoted_at // .resolved_at // .processed_into);
+      def missing_reasons:
+        [
+          (if has_planning then empty else "planning_workflow_ref_missing" end),
+          (if has_convergence then empty else "jeff_convergence_audit_ref_missing" end),
+          (if (has_bead_action or has_no_bead) then empty else "bead_or_no_bead_decision_missing" end),
+          (if has_beads_workflow then empty else "beads_workflow_ref_missing" end)
+        ];
+      ($raw_rows | map(select(processed | not))) as $unprocessed
+      | ($processed_rows | map(select(has_bead_action and ((has_planning and has_convergence and has_beads_workflow) | not)))) as $direct
+      | ($processed_rows | map(select(((has_bead_action or has_no_bead) and (missing_reasons | length > 0))))) as $incomplete
+      | {
+          schema_version:$schema_version,
+          status:(if ($direct | length) > 0 then "warn" elif ($unprocessed | length) > 0 then "pending" else "pass" end),
+          source_rules:["L52","L128"],
+          required_steps:["planning-workflow","jeff-convergence-audit","beads-workflow"],
+          raw_log:$raw_log,
+          processed_log:$processed_log,
+          unprocessed_count:($unprocessed | length),
+          processed_decision_count:($processed_rows | length),
+          direct_bead_without_pipeline_count:($direct | length),
+          incomplete_processed_count:($incomplete | length),
+          missing_pipeline_reasons:($incomplete | map(missing_reasons[]) | unique),
+          next_action:(if ($unprocessed | length) > 0 then "run planning-workflow, run jeff-convergence-audit, then file/update bead via beads-workflow with synthesis refs" elif ($direct | length) > 0 then "repair processed rows with planning/convergence/beads-workflow refs before treating them as routed" else "none" end)
+        }'
+  rm -f "$empty_jsonl"
 }
 
 phase_a_worker_state_check_json() {
@@ -2039,6 +2126,14 @@ jq -nc \
   --argjson result "$NTM_SURFACE_VALIDATION_RESULT" \
   '{ts:$ts,event:$event,ordering_after:$ordering_after,ordering_before:$ordering_before,result:$result}' >>"$LOG"
 
+NTM_ACTIVITY_RESULT="$(ntm_activity_probe 2>&1 || printf '{"schema_version":"flywheel-tick-ntm-activity/v1","status":"error","sessions_seen":[],"sessions_error":["%s"],"stalled_panes":[],"health_daemon_fresh":false,"warnings":["ntm_activity_probe_failed"]}' "$SESSION")"
+NTM_ACTIVITY_RESULT="$(json_stream_last_object_or_default "$NTM_ACTIVITY_RESULT" "$(jq -nc --arg session "$SESSION" '{schema_version:"flywheel-tick-ntm-activity/v1",status:"error",sessions_seen:[],sessions_error:[$session],stalled_panes:[],health_daemon_fresh:false,warnings:["ntm_activity_invalid_json"]}')")"
+jq -nc \
+  --arg ts "$(ts)" \
+  --arg event "ntm_activity_probe" \
+  --argjson result "$NTM_ACTIVITY_RESULT" \
+  '{ts:$ts,event:$event,result:$result}' >>"$LOG"
+
 INBOX_RESULT="$(SESSION="$SESSION" ORCH_PANE="$TARGET_PANE" bash "$REPO/.flywheel/scripts/inbox-check-tick-step.sh" 2>&1 || printf '{"action":"error"}')"
 INBOX_RESULT="$(first_json_or_raw "$INBOX_RESULT")"
 INBOX_IDENTITY="$(jq -r '.identity // "unknown"' <<<"$INBOX_RESULT" 2>/dev/null || printf 'unknown')"
@@ -2096,6 +2191,7 @@ TICK_CONTRACT_GRADUATION="$(tick_contract_graduation_json "$TICK_CONTRACT_REGIST
 TICK_CONTRACT="$(tick_contract_json "$TICK_CONTRACT_REGISTRY_JSON" "$TICK_CONTRACT_CHECKS" "$PHASE" "$TICK_CLASS")"
 L70_CHAIN_DECISION="$(l70_chain_decision_json "$PHASE" "$PHASE_REASON" "$DISPATCH_CAPACITY_RESULT")"
 PHASE_A_CHECKS_RESULT="$(phase_a_checks_json "$PHASE" "$DISPATCH_CAPACITY_RESULT")"
+FUCKUP_TO_BEAD_PIPELINE_RESULT="$(fuckup_to_bead_pipeline_json)"
 HOLD_REASON="$(
   jq -r --arg phase "$PHASE" '
     if ((.work_summary.pending_tasks // 0) | tonumber) == 0 then
@@ -2204,6 +2300,9 @@ ls -1t "$PROMPT_DIR"/flywheel-tick-*.md 2>/dev/null | tail -n +201 | xargs rm -f
   printf '%s\n\n' "$TICK_CONTRACT_GRADUATION"
   printf '## Phase A orchestrator checks\n'
   printf '%s\n\n' "$PHASE_A_CHECKS_RESULT"
+  printf '## Fuckup-to-bead planning pipeline\n'
+  printf '%s\n\n' "$FUCKUP_TO_BEAD_PIPELINE_RESULT"
+  printf 'Fuckup routing guardrail: raw fuckup rows do not go straight to prose or direct bead creation. Route row -> planning-workflow synthesis -> jeff-convergence-audit -> beads-workflow action, and preserve the refs in the processed receipt.\n\n'
   printf '## Data-backed deferral pre-tick\n'
   printf '%s\n\n' "$DATA_BACKED_DEFERRAL_RESULT"
   printf '## Callback validation pre-tick\n'
@@ -2269,6 +2368,7 @@ jq -nc \
   --argjson tick_contract_checks "$TICK_CONTRACT_CHECKS" \
   --argjson tick_contract_graduation "$TICK_CONTRACT_GRADUATION" \
   --argjson phase_a "$PHASE_A_CHECKS_RESULT" \
+  --argjson fuckup_to_bead_pipeline "$FUCKUP_TO_BEAD_PIPELINE_RESULT" \
   --argjson l70_chain "$L70_CHAIN_DECISION" \
   --argjson data_backed_deferral "$DATA_BACKED_DEFERRAL_RESULT" \
   --argjson jeff_status "$JEFF_STATUS_RESULT" \
@@ -2288,6 +2388,7 @@ jq -nc \
   --argjson topology_tick_refresh "$TOPOLOGY_TICK_REFRESH_RESULT" \
   --argjson frozen_detector "$FROZEN_DETECTOR_SUMMARY" \
   --argjson ntm_surface_validation "$NTM_SURFACE_VALIDATION_RESULT" \
+  --argjson ntm_activity "$NTM_ACTIVITY_RESULT" \
   --argjson dispatch_capacity "$DISPATCH_CAPACITY_RESULT" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --arg hold_reason "$HOLD_REASON" \
@@ -2308,6 +2409,11 @@ jq -nc \
     checks_run:$phase_a.checks_run,
     violations:$phase_a.violations,
     mode:$phase_a.mode,
+    fuckup_to_bead_pipeline:$fuckup_to_bead_pipeline,
+    fuckup_pipeline_status:($fuckup_to_bead_pipeline.status // null),
+    fuckup_pipeline_unprocessed_count:($fuckup_to_bead_pipeline.unprocessed_count // 0),
+    fuckup_pipeline_direct_bead_without_pipeline_count:($fuckup_to_bead_pipeline.direct_bead_without_pipeline_count // 0),
+    fuckup_pipeline_incomplete_processed_count:($fuckup_to_bead_pipeline.incomplete_processed_count // 0),
     data_backed_deferral:$data_backed_deferral,
     data_backed_deferral_event:($data_backed_deferral.event // null),
     data_backed_deferral_soft_violation:($data_backed_deferral.soft_violation // false),
@@ -2354,6 +2460,12 @@ jq -nc \
     ntm_surface_validation_status:($ntm_surface_validation.status // null),
     ntm_surface_validation_fail_count:($ntm_surface_validation.status_counts.FAIL // 0),
     ntm_surface_validation_unverified_count:($ntm_surface_validation.status_counts.UNVERIFIED // 0),
+    ntm_activity:$ntm_activity,
+    sessions_seen:($ntm_activity.sessions_seen // []),
+    sessions_error:($ntm_activity.sessions_error // []),
+    stalled_panes:($ntm_activity.stalled_panes // []),
+    respawns_attempted:(($frozen_detector.frozen_panes_respawned // 0) + ($frozen_detector.frozen_panes_relaunched // 0)),
+    health_daemon_fresh:($ntm_activity.health_daemon_fresh // false),
     dispatch_capacity:$dispatch_capacity,
     pane_work_signal_sampled:($dispatch_capacity.pane_work_signal_sampled // false),
     pane_work_signal_disabled:($dispatch_capacity.pane_work_signal_disabled // false),
@@ -2421,6 +2533,7 @@ jq -nc \
   --argjson tick_contract_checks "$TICK_CONTRACT_CHECKS" \
   --argjson tick_contract_graduation "$TICK_CONTRACT_GRADUATION" \
   --argjson phase_a "$PHASE_A_CHECKS_RESULT" \
+  --argjson fuckup_to_bead_pipeline "$FUCKUP_TO_BEAD_PIPELINE_RESULT" \
   --argjson l70_chain "$L70_CHAIN_DECISION" \
   --argjson data_backed_deferral "$DATA_BACKED_DEFERRAL_RESULT" \
   --argjson jeff_status "$JEFF_STATUS_RESULT" \
@@ -2439,6 +2552,7 @@ jq -nc \
   --argjson topology_tick_refresh "$TOPOLOGY_TICK_REFRESH_RESULT" \
   --argjson frozen_detector "$FROZEN_DETECTOR_SUMMARY" \
   --argjson ntm_surface_validation "$NTM_SURFACE_VALIDATION_RESULT" \
+  --argjson ntm_activity "$NTM_ACTIVITY_RESULT" \
   --argjson dispatch_capacity "$DISPATCH_CAPACITY_RESULT" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --arg hold_reason "$HOLD_REASON" \
@@ -2459,6 +2573,11 @@ jq -nc \
     checks_run:$phase_a.checks_run,
     violations:$phase_a.violations,
     mode:$phase_a.mode,
+    fuckup_to_bead_pipeline:$fuckup_to_bead_pipeline,
+    fuckup_pipeline_status:($fuckup_to_bead_pipeline.status // null),
+    fuckup_pipeline_unprocessed_count:($fuckup_to_bead_pipeline.unprocessed_count // 0),
+    fuckup_pipeline_direct_bead_without_pipeline_count:($fuckup_to_bead_pipeline.direct_bead_without_pipeline_count // 0),
+    fuckup_pipeline_incomplete_processed_count:($fuckup_to_bead_pipeline.incomplete_processed_count // 0),
     data_backed_deferral:$data_backed_deferral,
     data_backed_deferral_event:($data_backed_deferral.event // null),
     data_backed_deferral_soft_violation:($data_backed_deferral.soft_violation // false),
@@ -2504,6 +2623,12 @@ jq -nc \
     ntm_surface_validation_status:($ntm_surface_validation.status // null),
     ntm_surface_validation_fail_count:($ntm_surface_validation.status_counts.FAIL // 0),
     ntm_surface_validation_unverified_count:($ntm_surface_validation.status_counts.UNVERIFIED // 0),
+    ntm_activity:$ntm_activity,
+    sessions_seen:($ntm_activity.sessions_seen // []),
+    sessions_error:($ntm_activity.sessions_error // []),
+    stalled_panes:($ntm_activity.stalled_panes // []),
+    respawns_attempted:(($frozen_detector.frozen_panes_respawned // 0) + ($frozen_detector.frozen_panes_relaunched // 0)),
+    health_daemon_fresh:($ntm_activity.health_daemon_fresh // false),
     dispatch_capacity:$dispatch_capacity,
     pane_work_signal_sampled:($dispatch_capacity.pane_work_signal_sampled // false),
     pane_work_signal_disabled:($dispatch_capacity.pane_work_signal_disabled // false),

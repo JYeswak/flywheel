@@ -1,0 +1,36 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-dw5w.2",
+  "status": "safe_to_close",
+  "validated_at": "2026-05-15T07:54:23Z",
+  "closed_scope": "Stale B10_AG7 primitive-drift audit gap recalibrated to current public README plus internal doctrine surfaces.",
+  "evidence": {
+    "test": "tests/doctrine-memory-wire.sh",
+    "source_commit": "a36e3377",
+    "internal_doctrine_surfaces": [
+      "AGENTS.md",
+      ".flywheel/rules/L025-L71-validate-and-redispatch-discipline.md",
+      "/Users/josh/.claude/skills/orchestrator-validation-discipline/SKILL.md",
+      "/Users/josh/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_validate_redispatch_foundational_discipline.md"
+    ],
+    "public_surfaces": [
+      "README.md",
+      "CONTRIBUTING.md"
+    ]
+  },
+  "validation": [
+    {
+      "command": "bash tests/doctrine-memory-wire.sh",
+      "result": "pass",
+      "summary": "66 passed, 0 failed; checks internal primitive drift and public/contributor validation wording separately."
+    },
+    {
+      "command": "shellcheck tests/doctrine-memory-wire.sh",
+      "result": "pass"
+    }
+  ],
+  "notes": [
+    "The original audit-gap path `AGENTS/README/memory/skill` was a prose-combined pseudo-path, not a real artifact path.",
+    "The repaired test points at the real canonical skill path and avoids treating the public README as an internal doctrine dump."
+  ]
+}

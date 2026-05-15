@@ -1,0 +1,59 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-ty21",
+  "created_at": "2026-05-15T07:26:55Z",
+  "status": "closed",
+  "summary": "The team-roster plan-decomposition parent is stale; its decomposition and rework evidence already landed, all mapped child beads are closed, and focused roster gates pass.",
+  "source_plan": ".flywheel/PLANS/team-roster-2026-05-01.md",
+  "mapped_existing_beads": [
+    "flywheel-31p",
+    "flywheel-2zl",
+    "flywheel-6xk",
+    "flywheel-2a7"
+  ],
+  "mapped_new_beads": [
+    "flywheel-32so",
+    "flywheel-4vg3",
+    "flywheel-cgjo",
+    "flywheel-2wyv",
+    "flywheel-dm83"
+  ],
+  "child_status": "all_mapped_beads_closed",
+  "prior_rework_evidence": [
+    ".flywheel/receipts/flywheel-32so-compliance-pack.json",
+    ".flywheel/receipts/flywheel-92pq-compliance-pack.json"
+  ],
+  "acceptance": {
+    "one_bead_per_phase_or_slice": true,
+    "dependencies_wired": true,
+    "br_dep_cycles_zero": true,
+    "plan_path_referenced_in_created_beads": true,
+    "four_lens_rework_repaired": true
+  },
+  "tests": [
+    {
+      "command": "bash tests/team-roster-watch-canonical-cli.sh",
+      "result": "pass",
+      "summary": "SUMMARY pass=13 fail=0"
+    },
+    {
+      "command": "bash tests/test_doctor_team_roster_fresh.sh && bash tests/test_doctor_team_roster_stale.sh && bash tests/test_doctor_team_roster_dead.sh && bash tests/test_doctor_team_roster_missing.sh && bash tests/test_doctor_team_roster_dormant.sh",
+      "result": "pass",
+      "summary": "five focused doctor fixtures pass, 4/0 each"
+    },
+    {
+      "command": "bash tests/test_loop_refuses_missing_roster.sh && bash tests/test_loop_refuses_stale_pulse.sh && bash tests/test_doctor_fleet_capacity_counts.sh",
+      "result": "pass",
+      "summary": "SUMMARY pass=4 fail=0"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass",
+      "summary": "No dependency cycles detected."
+    }
+  ],
+  "did_not": [
+    "No new team-roster source edits were required.",
+    "No claim that unrelated live fleet heartbeat state is globally healthy."
+  ]
+}

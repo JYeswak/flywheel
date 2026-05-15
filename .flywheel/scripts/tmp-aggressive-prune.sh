@@ -17,6 +17,7 @@
 #   --max-mtime-days=N       default 1 (24h)
 #   --root=PATH   target root, default /private/tmp (test/fixture support)
 #   --json        emit JSON receipt
+#   doctor|--doctor  read-only prerequisite/safety envelope
 #
 # Excludes (deny-list):
 #   /private/tmp/com.apple.*  — Apple system
@@ -34,9 +35,9 @@ set -euo pipefail
 SCRIPT_PATH="${BASH_SOURCE[0]}"
 LOCK_DIR="${TMPDIR:-/tmp}/.tmp-aggressive-prune.lock"
 RECEIPT_DIR="${HOME}/.local/state/flywheel/tmp-prune-receipts"
-mkdir -p "$RECEIPT_DIR"
 
 apply=0
+doctor=0
 idem_key=""
 max_mtime_days=1
 emit_json=0
@@ -53,6 +54,7 @@ while [ $# -gt 0 ]; do
         --root=*) target_root="${1#*=}" ;;
         --root) shift; target_root="$1" ;;
         --json) emit_json=1 ;;
+        doctor|--doctor) doctor=1 ;;
         --help|-h)
             grep '^#' "$SCRIPT_PATH" | head -40
             exit 0
@@ -62,18 +64,21 @@ while [ $# -gt 0 ]; do
         # agents can discover this tool's contract without parsing --help text.
         --info)
             cat <<INFO_JSON
-{"tool":"tmp-aggressive-prune","purpose":"default-aggressive /private/tmp lifecycle enforcement (Layer 2 doctrine)","schema_version":"tmp-aggressive-prune.v1","doctrine_pointer":"flywheel-2bd2r","blast_radius":"medium","mutation_default":"dry-run","canonical_surfaces":{"introspection":["--help","--info","--schema","--examples"],"primary":["--apply","--dry-run","--idempotency-key","--max-mtime-days","--root"],"output":["--json"]},"safety_gates":["--apply requires --idempotency-key","mkdir-atomic mutex lock","deny-list protects system+IPC paths"]}
+{"tool":"tmp-aggressive-prune","purpose":"default-aggressive /private/tmp lifecycle enforcement (Layer 2 doctrine)","schema_version":"tmp-aggressive-prune.v1","doctrine_pointer":"flywheel-2bd2r","blast_radius":"medium","mutation_default":"dry-run","canonical_surfaces":{"introspection":["--help","--info","--schema","--examples","doctor","--doctor"],"primary":["--apply","--dry-run","--idempotency-key","--max-mtime-days","--root"],"output":["--json"]},"safety_gates":["--apply requires --idempotency-key","mkdir-atomic mutex lock","deny-list protects system+IPC paths"],"doctor_schema":"tmp-aggressive-prune.doctor.v1"}
 INFO_JSON
             exit 0
             ;;
         --schema)
             cat <<SCHEMA_JSON
-{"schema_version":"tmp-aggressive-prune.v1","tool":"tmp-aggressive-prune","output_modes":[{"mode":"dry-run","fields":["status","apply","ts","root","candidates_count","protected_count","sample_size_failures","max_mtime_days","sample","protected_sample"]},{"mode":"apply","fields":["status","apply","ts","root","idempotency_key","candidates_count","protected_count","sample_size_failures","deleted_count","max_mtime_days","free_after_gb"]}],"exit_codes":{"0":"success","1":"lock_conflict","2":"validation_failure"}}
+{"schema_version":"tmp-aggressive-prune.v1","tool":"tmp-aggressive-prune","output_modes":[{"mode":"doctor","schema_version":"tmp-aggressive-prune.doctor.v1","fields":["schema_version","command","status","mutates","checks"]},{"mode":"dry-run","fields":["status","apply","ts","root","candidates_count","protected_count","sample_size_failures","max_mtime_days","sample","protected_sample"]},{"mode":"apply","fields":["status","apply","ts","root","idempotency_key","candidates_count","protected_count","sample_size_failures","deleted_count","max_mtime_days","free_after_gb"]}],"exit_codes":{"0":"success","1":"lock_conflict","2":"validation_failure"}}
 SCHEMA_JSON
             exit 0
             ;;
         --examples)
             cat <<'EXAMPLES'
+# Read-only doctor envelope
+tmp-aggressive-prune.sh doctor --json
+
 # Dry-run (default) — report what would be pruned, mutate nothing
 tmp-aggressive-prune.sh
 tmp-aggressive-prune.sh --json
@@ -95,6 +100,56 @@ EXAMPLES
     shift
 done
 
+doctor_json() {
+    local jq_status root_status receipt_parent receipt_status lock_status
+    local overall="pass"
+    if command -v jq >/dev/null; then jq_status="pass"; else jq_status="fail"; overall="fail"; fi
+    if [ -d "$target_root" ]; then root_status="pass"; else root_status="fail"; overall="fail"; fi
+    receipt_parent="$(dirname "$RECEIPT_DIR")"
+    if [ -d "$receipt_parent" ] && [ -w "$receipt_parent" ]; then
+        receipt_status="pass"
+    else
+        receipt_status="warn"
+        [ "$overall" = "fail" ] || overall="warn"
+    fi
+    if [ -e "$LOCK_DIR" ]; then
+        lock_status="warn"
+        [ "$overall" = "fail" ] || overall="warn"
+    else
+        lock_status="pass"
+    fi
+    jq -nc \
+      --arg status "$overall" \
+      --arg root "$target_root" \
+      --arg receipt_dir "$RECEIPT_DIR" \
+      --arg lock_dir "$LOCK_DIR" \
+      --arg jq_status "$jq_status" \
+      --arg root_status "$root_status" \
+      --arg receipt_status "$receipt_status" \
+      --arg lock_status "$lock_status" \
+      '{
+        schema_version: "tmp-aggressive-prune.doctor.v1",
+        command: "doctor",
+        status: $status,
+        mode: "read_only",
+        mutates: false,
+        root: $root,
+        receipt_dir: $receipt_dir,
+        lock_dir: $lock_dir,
+        checks: [
+          {name:"jq_available", status:$jq_status},
+          {name:"root_exists", status:$root_status},
+          {name:"receipt_parent_writable", status:$receipt_status},
+          {name:"apply_lock_clear", status:$lock_status}
+        ]
+      }'
+}
+
+if [ "$doctor" = "1" ]; then
+    doctor_json
+    exit 0
+fi
+
 if [ "$apply" = "1" ] && [ -z "$idem_key" ]; then
     echo "ERROR: --apply requires --idempotency-key=<key>" >&2
     exit 2
@@ -107,6 +162,7 @@ fi
 
 # Mutex lock (mkdir-atomic)
 if [ "$apply" = "1" ]; then
+    mkdir -p "$RECEIPT_DIR"
     if ! mkdir "$LOCK_DIR" 2>/dev/null; then
         echo "ERROR: lock held at $LOCK_DIR (another prune in flight)" >&2
         exit 1

@@ -1,0 +1,63 @@
+diff --git a/scripts/verify-bundle.sh b/scripts/verify-bundle.sh
+--- a/scripts/verify-bundle.sh
++++ b/scripts/verify-bundle.sh
+@@
+-    elif [[ ! -d "$untracked_dir" ]]; then
++    elif [[ ! -d "$untracked_dir" ]]; then
+       echo "MISSING n=$n UNTRACKED: $untracked_dir not found" >> "$LOG"
+       MISMATCH_COUNT=$((MISMATCH_COUNT + 1))
+-    elif [[ -z "$(find "$untracked_dir" -mindepth 1 -print -quit)" ]]; then
+-      echo "MISSING n=$n UNTRACKED: $untracked_dir is empty" >> "$LOG"
+-      MISMATCH_COUNT=$((MISMATCH_COUNT + 1))
+     else
+       expected_manifest="$WORKSPACE/.verify_${npad}_untracked_expected.tsv"
+       actual_manifest="$WORKSPACE/.verify_${npad}_untracked_actual.tsv"
+       write_git_tree_manifest "$untracked_tree" "$expected_manifest"
+       write_materialized_tree_manifest "$untracked_dir" "$actual_manifest"
+       if cmp -s "$expected_manifest" "$actual_manifest"; then
+-        echo "OK n=$n UNTRACKED: materialized files match $untracked_tree" >> "$LOG"
++        if [[ -s "$expected_manifest" ]]; then
++          echo "OK n=$n UNTRACKED: materialized files match $untracked_tree" >> "$LOG"
++        else
++          echo "OK n=$n UNTRACKED: empty materialized directory matches empty $untracked_tree" >> "$LOG"
++        fi
+       else
+         echo "MISMATCH n=$n UNTRACKED: materialized files differ from $untracked_tree" >> "$LOG"
+         diff -u "$expected_manifest" "$actual_manifest" >> "$LOG" || true
+diff --git a/scripts/polish-bar-check.sh b/scripts/polish-bar-check.sh
+--- a/scripts/polish-bar-check.sh
++++ b/scripts/polish-bar-check.sh
+@@
+ warn() { printf '  \033[33mWARN\033[0m  %s\n' "$1"; }
+ 
++count_canonical_diff_files() {
++  local dir="$1"
++  [[ -d "$dir" ]] || return 0
++  find "$dir" -maxdepth 1 -type f -name '*.diff' -print 2>/dev/null \
++    | while IFS= read -r path; do
++        base=${path##*/}
++        [[ "$base" =~ ^[0-9]{3,}\.diff$ ]] && printf '%s\n' "$path"
++      done
++}
++
+ write_git_tree_manifest() {
+@@
+-	    N_DIFFS=$({ find "$BUNDLE/diffs" -maxdepth 1 -type f -regextype posix-extended -regex '.*/[0-9]{3,}\.diff' 2>/dev/null || true ; } | wc -l)
++	    N_DIFFS=$({ count_canonical_diff_files "$BUNDLE/diffs" || true ; } | wc -l)
+@@
+-		    if [[ ! -d "$untracked_dir" ]] || [[ -z "$(find "$untracked_dir" -mindepth 1 -print -quit 2>/dev/null)" ]]; then
++		    if [[ ! -d "$untracked_dir" ]]; then
+ 		      UNTRACKED_BAD=$((UNTRACKED_BAD + 1))
+ 		    elif ! write_git_tree_manifest "refs/stash-backup/$npad^3" "$expected_manifest"; then
+@@
+ echo "P2: Verdict evidence"
+ if [[ -f "$TRIAGE" ]]; then
+-  EMPTY_VERDICT=$(awk -F'\t' 'NR > 1 && ($2 == "" || $2 == "unknown")' "$TRIAGE" | wc -l)
++  EMPTY_VERDICT=$(awk -F'\t' 'NR > 1 && ($5 == "" || ($5 != "clean" && $5 != "reject"))' "$TRIAGE" | wc -l)
+   if [[ "$EMPTY_VERDICT" -eq 0 ]]; then
+-    pass "every row has a verdict"
++    pass "every row has an apply decision"
+   else
+-    fail "$EMPTY_VERDICT rows have empty/unknown verdict"
++    fail "$EMPTY_VERDICT rows have empty/unknown apply decision"
+   fi

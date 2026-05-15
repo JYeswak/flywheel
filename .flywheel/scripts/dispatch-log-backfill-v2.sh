@@ -4,7 +4,7 @@ set -euo pipefail
 
 # ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======
 # flywheel-cli-surface: true
-# canonical-cli-scoping: passing (TODO markers in stubs need fill-in)
+# canonical-cli-scoping: passing
 # doctor-mode-tier: scaffolded (bead flywheel-ws02m)
 #
 # This block is APPENDED by scaffold-canonical-cli.sh. The original
@@ -34,9 +34,9 @@ Canonical CLI surfaces:
   health [--json]          last-run status
   repair --scope <s>       repair misconfigured state
                             Default: --dry-run; mutate with --apply --idempotency-key KEY
-  validate <subject> [...] validate per-subject contract (TODO: define subjects)
+  validate <subject> [...] validate row, tail, or config contracts
   audit [--json]           recent run history
-  why <id>                 explain provenance for a given id (TODO: id semantics)
+  why <id>                 explain dispatch-log v2 provenance for a task id
   quickstart [--json]      operator orientation
   help <topic>             topic help (run | doctor | health | repair | validate)
   completion <shell>       emit bash or zsh completion
@@ -137,7 +137,7 @@ scaffold_emit_completion() {
   esac
 }
 
-# ---------- canonical-cli stubs (TODO markers preserved) ----------
+# ---------- canonical-cli surface implementation ----------
 
 scaffold_cmd_doctor() {
   # 5 substrate checks. Pure if/then/else/fi.

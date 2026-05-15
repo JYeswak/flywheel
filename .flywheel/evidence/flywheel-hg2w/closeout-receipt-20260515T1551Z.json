@@ -1,0 +1,58 @@
+{
+  "schema": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-hg2w",
+  "created_at": "2026-05-15T15:51:00Z",
+  "status": "closed",
+  "decision": "classifier-backed non-pane operating mode accepted",
+  "change_summary": [
+    "gap-hunt loop integrity now recognizes launchd-backed non-pane loops when pane motion is the only missing signal",
+    "raw pane-state failure remains visible in raw_failed_signals",
+    "SkillOS full gap-hunt doctor no longer emits loop-integrity:skillos when all ledger, receipt, callback, decision, marker, callback-receipt, and canonical-bridge signals are fresh"
+  ],
+  "live_evidence": {
+    "loop_integrity_signals": {
+      "command": ".flywheel/scripts/loop-integrity-signals.sh --project skillos --json",
+      "verdict": "HEALTHY",
+      "failed_signals": []
+    },
+    "gap_hunt_doctor": {
+      "command": ".flywheel/scripts/gap-hunt-probe.sh --doctor --json",
+      "skillos_verdict": "HEALTHY",
+      "skillos_failed_signals": [],
+      "skillos_raw_failed_signals": [
+        "pane_state_changed_since_last_tick"
+      ],
+      "non_pane_operating_mode": {
+        "status": "accepted",
+        "reason": "launchd_prompt_non_pane_loop",
+        "suppressed_signal": "pane_state_changed_since_last_tick"
+      },
+      "loop_integrity_skillos_gap_present": false
+    }
+  },
+  "validation": [
+    {
+      "command": "bash -n .flywheel/scripts/gap-hunt-probe.sh",
+      "status": "pass"
+    },
+    {
+      "command": "bash tests/skillos-non-pane-loop-mode.sh",
+      "status": "pass",
+      "summary": "12 passed, 0 failed"
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/gap-hunt-probe.sh tests/skillos-non-pane-loop-mode.sh",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass"
+    },
+    {
+      "command": "br dep cycles --json",
+      "status": "pass",
+      "summary": "cycles=0"
+    }
+  ],
+  "honest_boundary": "This does not manufacture pane activity. It records that the SkillOS loop is currently service/launchd-backed and is healthy when every non-pane proof surface is fresh."
+}

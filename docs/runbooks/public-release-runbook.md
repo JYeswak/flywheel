@@ -18,6 +18,22 @@ receipt locations.
 | Gemini CLI | Supported by current isolated receipt | `flywheel.agent_lane_runtime_receipt.v0` proves the reduced journey, live adapter response, and private-state scan. |
 | OpenClaw | Supported by current isolated receipt | The harness creates a disposable isolated OpenClaw agent before the live marker turn. |
 
+## Binary Source Boundary
+
+The reduced public installer ships `bin/flywheel`. Full-substrate operator
+commands such as `flywheel-lock-repair` and `flywheel-verdict` are local
+substrate surfaces unless a tracked source or generation path is listed in
+`docs/evidence/installed-binary-source-manifest.json`.
+
+Any canonical CLI closeout receipt for an installed binary with
+`tracked_in_flywheel_repo=false` must name a source-gap bead and an evidence
+receipt. Validate that contract with:
+
+```bash
+python3 scripts/validate_installed_binary_source.py
+bash tests/installed-binary-source.sh
+```
+
 Do not upgrade a compatibility target to supported copy from docs alone. The
 source of truth is `scripts/journey-smoke.sh`.
 Use `scripts/agent-lane-probe.sh --json` to verify that command presence is not

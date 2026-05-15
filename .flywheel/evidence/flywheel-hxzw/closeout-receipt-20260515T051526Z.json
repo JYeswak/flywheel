@@ -1,0 +1,60 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-hxzw",
+  "closed_at": "2026-05-15T05:15:26Z",
+  "status": "pass",
+  "scope": "canonical CLI repair for flywheel-loop",
+  "runtime_changes": [
+    {
+      "path": "/Users/josh/.claude/skills/.flywheel/lib/portable/operator.sh",
+      "change": "repair --dry-run --json now defaults to scope=doctrine only for the read-only no-apply fixture path; apply and non-dry-run paths still require explicit --scope",
+      "sha256": "9d2ad2fc7984a9471f928dd3edeb00c21262341a131e159946510c949668c951"
+    }
+  ],
+  "binary_refs": [
+    {
+      "path": "/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop",
+      "sha256": "31f387d7d2225ad2d479cd1ef3569597aa1e56f6437ca1dd7dc53a4090a1c212"
+    },
+    {
+      "path": "/Users/josh/.local/bin/flywheel-loop",
+      "sha256": "fc44c01efaf43fb70b5bf1ce2da61588e1dc4030dc5825bf64a96d6eb2a8b2d3"
+    }
+  ],
+  "validation": [
+    {
+      "command": "flywheel-loop repair --dry-run --json | jq -e '.command==\"repair\" and .scope==\"doctrine\" and .dry_run==true and ((.actual_actions? // [])|length)==0'",
+      "status": "pass"
+    },
+    {
+      "command": "bash /Users/josh/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh score flywheel-loop --json",
+      "status": "pass",
+      "composite_score": 1000,
+      "canonical_surface_checker_pass_count": 13,
+      "canonical_surface_checker_fail_count": 0,
+      "dry_run_json_fixture": 1000
+    },
+    {
+      "command": "bash tests/flywheel-loop-canonical-cli.sh",
+      "status": "pass",
+      "assertions": 17
+    },
+    {
+      "command": "bash tests/canonical-cli-scoping-flywheel-loop.sh",
+      "status": "pass"
+    },
+    {
+      "command": "br dep cycles",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass"
+    }
+  ],
+  "boundaries": [
+    "This receipt records the Flywheel runtime repair and repo-local regression tests.",
+    "No SkillOS files were mutated.",
+    "Existing unrelated dirty files were left untouched."
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "ac_check_interval_ticks": 1,
+  "acceptance_condition": "br show flywheel-lz51w --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-lz51w\" and .status != \"blocked\"'",
+  "blocker_class": "external_service_decision",
+  "blocker_id": "flywheel-lz51w",
+  "dependency_count": 0,
+  "dependent_count": 0,
+  "foundational_rule": "A Beads status=blocked row must have an executable blocker-discipline file before it can be treated as stable state.",
+  "issue_type": "task",
+  "labels": [
+    "contact",
+    "nonblocking-followup",
+    "public-share-readiness"
+  ],
+  "last_verified_at": "2026-05-15T16:03:28Z",
+  "next_action": "Either ship the owned local/provider-backed proof path or record an explicit keep-mailto-only disposition.",
+  "priority": 2,
+  "remediation_required": true,
+  "schema_version": "flywheel.bead_blocker.v1",
+  "source": "beads",
+  "source_bead_id": "flywheel-lz51w",
+  "source_repo": "/Users/josh/Developer/flywheel",
+  "source_row_sha256": "5d8a24fd297e6daaa46b80e72e0b14e36577f8759c990f3646558a1fb2341198",
+  "source_status": "blocked",
+  "status": "open",
+  "synced_at": "2026-05-15T16:08:00Z",
+  "title": "[contact-followup] add form-backed delivery proof beyond mailto route",
+  "verification_path": "br show flywheel-lz51w --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-lz51w\" and .status == \"blocked\"'"
+}

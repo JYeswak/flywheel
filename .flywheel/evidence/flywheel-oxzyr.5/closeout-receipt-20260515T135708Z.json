@@ -1,0 +1,43 @@
+{
+  "schema": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-oxzyr.5",
+  "created_at": "2026-05-15T13:57:08Z",
+  "status": "closed",
+  "decision": "closed_with_evidence",
+  "summary": "Added a read-only doctor envelope to tmp-aggressive-prune so the safety-critical mutating /private/tmp prune surface can be checked without creating receipt directories or deleting anything.",
+  "changed_files": [
+    ".flywheel/scripts/tmp-aggressive-prune.sh",
+    "tests/tmp-aggressive-prune-doctor.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/tmp-aggressive-prune-doctor.sh",
+      "result": "pass",
+      "summary": "9/0 focused assertions: doctor and --doctor emit tmp-aggressive-prune.doctor.v1 with mutates=false, info/schema/examples advertise doctor, doctor does not create the receipt directory, dry-run still works, and apply without idempotency key refuses."
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/tmp-aggressive-prune.sh tests/tmp-aggressive-prune-doctor.sh",
+      "result": "pass",
+      "summary": "Touched shell surfaces are ShellCheck clean."
+    },
+    {
+      "command": ".flywheel/scripts/tmp-aggressive-prune.sh doctor --json | jq .",
+      "result": "pass",
+      "summary": "Live read-only doctor reports schema tmp-aggressive-prune.doctor.v1, status pass, root exists, receipt parent writable, apply lock clear, and mutates=false."
+    },
+    {
+      "command": ".flywheel/audit/flywheel-cli-inventory/build-inventory.sh",
+      "result": "pass",
+      "summary": "Inventory regenerated; tmp-aggressive-prune.sh moved from absent doctor to basic doctor with score estimate 625."
+    }
+  ],
+  "parent_state": {
+    "parent_bead_id": "flywheel-oxzyr",
+    "parent_closed": false,
+    "reason": "The broader doctor-mode wave remains open; this closes one scoped P0/P1 safety surface only."
+  },
+  "skillos_coordination": {
+    "sent_to_pane_id": 21,
+    "summary": "SkillOS/shared blockers were sent separately with current proof for JSM package naming/file-count, SkillOS loop-health callback receipt freshness, and Codex skill scan truncation."
+  }
+}

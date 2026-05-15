@@ -14,6 +14,7 @@
 #
 # Usage:
 #   jeff-bead-285-divergence-capture.sh <bead-id> [--apply|--dry-run]
+#   jeff-bead-285-divergence-capture.sh doctor|--doctor
 #   jeff-bead-285-divergence-capture.sh --info|--schema|--examples|--help
 #
 # Default mode is --dry-run (prints what would run; does NOT execute the
@@ -35,12 +36,14 @@ DEFAULT_LOCK_TIMEOUT_MS="${DEFAULT_LOCK_TIMEOUT_MS:-10000}"
 BEAD_ID=""
 MODE="dry-run"
 IDEMPOTENCY_KEY=""
+JSON_OUT=0
 AUDIT_LOG="${JEFF_285_AUDIT_LOG:-$HOME/.local/state/flywheel/jeff-bead-285-divergence-capture-runs.jsonl}"
 
 usage() {
   cat <<'EOF'
 usage:
   jeff-bead-285-divergence-capture.sh <bead-id> [--apply --idempotency-key KEY | --dry-run] [--json]
+  jeff-bead-285-divergence-capture.sh doctor|--doctor [--json]
   jeff-bead-285-divergence-capture.sh --info|--schema|--examples|--help [--json]
 
 Captures the two artifacts Jeffrey requested on
@@ -79,11 +82,12 @@ info_json() {
       default_lock_timeout_ms: $default_lock_timeout_ms,
       modes: ["dry-run", "apply"],
       default_mode: "dry-run",
-      flags: ["--apply", "--dry-run", "--idempotency-key", "--json", "--info", "--schema", "--examples", "--help"],
+      flags: ["--apply", "--dry-run", "--idempotency-key", "--json", "doctor", "--doctor", "--info", "--schema", "--examples", "--help"],
       env_vars: ["BR_BIN", "DEFAULT_LOCK_TIMEOUT_MS", "CAPTURE_ROOT", "RUST_LOG", "JEFF_285_AUDIT_LOG"],
       mutates: true,
       mutation_requires: ["--apply", "--idempotency-key"],
       apply_requires: "--idempotency-key",
+      doctor_schema: "jeff-bead-285-divergence-capture.doctor.v1",
       audit_log: $audit_log,
       rust_log_targets: $trace_targets,
       exit_codes: $exit_codes,
@@ -128,6 +132,9 @@ Examples:
   # Inspect the tool (no execution)
   .flywheel/scripts/jeff-bead-285-divergence-capture.sh --info | jq .
 
+  # Read-only doctor (no bead close, no capture directory creation)
+  .flywheel/scripts/jeff-bead-285-divergence-capture.sh doctor | jq .
+
   # Dry-run preview against a sandbox bead-id
   .flywheel/scripts/jeff-bead-285-divergence-capture.sh sandbox-fixture-001
 
@@ -144,12 +151,79 @@ Examples:
 EOF
 }
 
+doctor_json() {
+  local br_status capture_parent_status audit_parent_status timeout_status overall timeout_json
+  local capture_root capture_parent audit_parent
+  overall="pass"
+  if command -v "$BR_BIN" >/dev/null 2>&1; then
+    br_status="pass"
+  else
+    br_status="fail"
+    overall="fail"
+  fi
+  capture_root="${CAPTURE_ROOT:-$CAPTURE_ROOT_DEFAULT}"
+  capture_parent="$(dirname "$capture_root")"
+  if [[ -d "$capture_parent" && -w "$capture_parent" ]]; then
+    capture_parent_status="pass"
+  else
+    capture_parent_status="warn"
+    [[ "$overall" == "fail" ]] || overall="warn"
+  fi
+  audit_parent="$(dirname "$AUDIT_LOG")"
+  if [[ -d "$audit_parent" && -w "$audit_parent" ]]; then
+    audit_parent_status="pass"
+  else
+    audit_parent_status="warn"
+    [[ "$overall" == "fail" ]] || overall="warn"
+  fi
+  if [[ "$DEFAULT_LOCK_TIMEOUT_MS" =~ ^[0-9]+$ && "$DEFAULT_LOCK_TIMEOUT_MS" -gt 0 ]]; then
+    timeout_status="pass"
+    timeout_json="$DEFAULT_LOCK_TIMEOUT_MS"
+  else
+    timeout_status="fail"
+    timeout_json="0"
+    overall="fail"
+  fi
+  jq -nc \
+    --arg status "$overall" \
+    --arg version "$VERSION" \
+    --arg br_bin "$BR_BIN" \
+    --arg capture_root "$capture_root" \
+    --arg capture_parent "$capture_parent" \
+    --arg audit_log "$AUDIT_LOG" \
+    --arg audit_parent "$audit_parent" \
+    --arg br_status "$br_status" \
+    --arg capture_parent_status "$capture_parent_status" \
+    --arg audit_parent_status "$audit_parent_status" \
+    --arg timeout_status "$timeout_status" \
+    --argjson default_lock_timeout_ms "$timeout_json" \
+    '{
+      schema_version: "jeff-bead-285-divergence-capture.doctor.v1",
+      command: "doctor",
+      status: $status,
+      mode: "read_only",
+      mutates: false,
+      version: $version,
+      br_bin: $br_bin,
+      capture_root: $capture_root,
+      audit_log: $audit_log,
+      default_lock_timeout_ms: $default_lock_timeout_ms,
+      checks: [
+        {name:"br_available", status:$br_status},
+        {name:"capture_root_parent_writable", status:$capture_parent_status, path:$capture_parent},
+        {name:"audit_log_parent_writable", status:$audit_parent_status, path:$audit_parent},
+        {name:"lock_timeout_positive_integer", status:$timeout_status}
+      ]
+    }'
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --info)     info_json; exit 0 ;;
     --schema)   schema_json; exit 0 ;;
     --examples) examples; exit 0 ;;
     -h|--help)  usage; exit 0 ;;
+    doctor|--doctor) doctor_json; exit 0 ;;
     --apply)    MODE="apply"; shift ;;
     --dry-run)  MODE="dry-run"; shift ;;
     --idempotency-key) [[ -n "${2:-}" ]] || { printf 'error: --idempotency-key requires VALUE\n' >&2; exit 2; }; IDEMPOTENCY_KEY="$2"; shift 2 ;;
@@ -331,7 +405,7 @@ else
   printf 'CAPTURE: bead=%s mode=apply close_rc=%s pre=%s post=%s divergence=%s\n' \
     "$BEAD_ID" "$CLOSE_RC" "$PRE_STATUS" "$POST_STATUS" "$DIVERGENCE_OBSERVED"
   printf '  artifacts at: %s\n' "$CAPTURE_DIR"
-  printf '  ls: %s\n' "$(ls "$CAPTURE_DIR" 2>/dev/null | tr '\n' ' ')"
+  printf '  files: %s\n' "$(find "$CAPTURE_DIR" -maxdepth 1 -type f -exec basename {} \; 2>/dev/null | tr '\n' ' ')"
   if [[ "$DIVERGENCE_OBSERVED" == "true" ]]; then
     printf '  DIVERGENCE OBSERVED — bundle ready for upstream issue #285\n'
   fi

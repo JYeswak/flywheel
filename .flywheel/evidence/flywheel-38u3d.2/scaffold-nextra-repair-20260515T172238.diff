@@ -1,0 +1,24 @@
+--- a/scripts/scaffold-nextra.sh
++++ b/scripts/scaffold-nextra.sh
+@@
+-    "next": "^16.0.7",
+-    "nextra": "^4.0.0",
+-    "nextra-theme-docs": "^4.0.0",
+-    "react": "^19.1.0",
+-    "react-dom": "^19.1.0"
++    "next": "15.1.3",
++    "nextra": "4.0.0",
++    "nextra-theme-docs": "4.0.0",
++    "react": "19.0.0",
++    "react-dom": "19.0.0"
+@@
+-    "@types/react": "^19.1.8",
++    "@types/react": "^19.0.0",
+@@
+-          lastUpdated={{ formatOptions: { dateStyle: 'medium' } }}
++          lastUpdated={<span>Last updated</span>}
+@@
+-          search={{ placeholder: 'Search docs…' }}
+@@
+-<!-- Synthesis agent (Phase 3) will replace this with a real landing page. -->
++{/* Synthesis agent (Phase 3) will replace this with a real landing page. */}
