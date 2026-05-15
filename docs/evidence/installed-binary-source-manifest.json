@@ -9,7 +9,8 @@
     ],
     "not_required_for_reduced_mode": [
       "flywheel-lock-repair",
-      "flywheel-verdict"
+      "flywheel-verdict",
+      "flywheel-refresh-source"
     ]
   },
   "binaries": [
@@ -29,6 +30,15 @@
       "source_status": "source-gap-receipt-required",
       "source_gap_bead": "flywheel-nkw4o",
       "closeout_receipt_ref": ".flywheel/evidence/flywheel-6flh/closeout-receipt-20260515T0240Z.json",
+      "shipped_in_reduced_install": false
+    },
+    {
+      "name": "flywheel-refresh-source",
+      "installed_path": "$HOME/.claude/skills/.flywheel/bin/flywheel-refresh-source",
+      "public_install_status": "full-substrate-local-only",
+      "source_status": "source-gap-receipt-required",
+      "source_gap_bead": "flywheel-nkw4o",
+      "closeout_receipt_ref": ".flywheel/evidence/flywheel-pfpd/closeout-receipt-20260515T0248Z.json",
       "shipped_in_reduced_install": false
     }
   ]

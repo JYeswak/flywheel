@@ -23,20 +23,20 @@ else
 fi
 
 out="$(python3 "$SCRIPT")"
-if jq -e '.status == "pass" and .binary_count == 2 and .failure_count == 0' <<<"$out" >/dev/null; then
+if jq -e '.status == "pass" and .binary_count == 3 and .failure_count == 0' <<<"$out" >/dev/null; then
   pass "source manifest validates"
 else
   fail "source manifest validates"
   printf '%s\n' "$out" >&2
 fi
 
-if jq -e '[.rows[] | select(.tracked_in_flywheel_repo == false and .source_gap_bead == "flywheel-nkw4o")] | length == 2' <<<"$out" >/dev/null; then
+if jq -e '[.rows[] | select(.tracked_in_flywheel_repo == false and .source_gap_bead == "flywheel-nkw4o")] | length == 3' <<<"$out" >/dev/null; then
   pass "untracked binary rows require source gap bead"
 else
   fail "untracked binary rows require source gap bead"
 fi
 
-if jq -e '[.rows[] | select(.shipped_in_reduced_install == false)] | length == 2' <<<"$out" >/dev/null; then
+if jq -e '[.rows[] | select(.shipped_in_reduced_install == false)] | length == 3' <<<"$out" >/dev/null; then
   pass "full-substrate binaries excluded from reduced install"
 else
   fail "full-substrate binaries excluded from reduced install"
