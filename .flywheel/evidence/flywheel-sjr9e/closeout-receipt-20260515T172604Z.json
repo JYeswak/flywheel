@@ -1,0 +1,70 @@
+{
+  "schema": "flywheel.docs_scaffold_phase_receipt.v1",
+  "bead_id": "flywheel-sjr9e",
+  "created_at": "2026-05-15T17:26:04Z",
+  "status": "closed",
+  "phase": "phase3-alpsinsurance-mobile-eats",
+  "scope": {
+    "target_repos": [
+      "/Users/josh/Developer/alpsinsurance",
+      "/Users/josh/Developer/mobile-eats"
+    ],
+    "docs_sites": [
+      "/Users/josh/Developer/alpsinsurance__nextra_documentation_site",
+      "/Users/josh/Developer/mobile-eats__nextra_documentation_site"
+    ],
+    "client_repo_source_mutations": false,
+    "notes": "Both target repos had active dirty worktrees. The docs sites were created as sibling directories, not by editing client source trees."
+  },
+  "preflight": {
+    "flywheel_docs_init": [
+      {
+        "target": "/Users/josh/Developer/alpsinsurance",
+        "archetype": "fullstack",
+        "mutates_state": false
+      },
+      {
+        "target": "/Users/josh/Developer/mobile-eats",
+        "archetype": "fullstack",
+        "mutates_state": false
+      }
+    ],
+    "upstream_scaffold_receipt": ".flywheel/evidence/flywheel-38u3d.2/nextra-scaffold-repair-receipt-20260515T172238Z.json"
+  },
+  "builds": [
+    {
+      "name": "alpsinsurance",
+      "site": "/Users/josh/Developer/alpsinsurance__nextra_documentation_site",
+      "package_json_sha256": "8e2ad80553cb10fcc8d9936b788c5a2310ffc3676a40c39dc2896fbbd5ea1a18",
+      "commands": [
+        "jq empty package.json tsconfig.json",
+        "git init -q",
+        "bun install",
+        "bun run build"
+      ],
+      "result": "pass",
+      "pagefind_indexed_pages": 1
+    },
+    {
+      "name": "mobile-eats",
+      "site": "/Users/josh/Developer/mobile-eats__nextra_documentation_site",
+      "package_json_sha256": "944ded49d4f64665768fddb727d93020a8002c67742985af6c4b36c233bf6373",
+      "commands": [
+        "jq empty package.json tsconfig.json",
+        "git init -q",
+        "bun install",
+        "bun run build"
+      ],
+      "result": "pass",
+      "pagefind_indexed_pages": 1
+    }
+  ],
+  "hygiene": {
+    "rebuildable_artifact_cleanup_attempted": true,
+    "cleanup_result": "blocked_by_dcg_rm_rf_general",
+    "cleanup_note": "node_modules and .next are rebuildable and should be pruned by an approved janitor surface; direct rm -rf was blocked and not retried."
+  },
+  "unblocks": [
+    "flywheel-ll107"
+  ]
+}
