@@ -3,7 +3,7 @@ set -euo pipefail
 
 BIN="${FLYWHEEL_LOOP_BIN:-$HOME/.claude/skills/.flywheel/bin/flywheel-loop}"
 CHECKER="${CANONICAL_CLI_CHECKER:-$HOME/.claude/skills/canonical-cli-scoping/scripts/check-cli-scoping.sh}"
-REPO="${FLYWHEEL_LOOP_HEALTH_REPO:-<flywheel-repo>}"
+REPO="${FLYWHEEL_LOOP_HEALTH_REPO:-/Users/josh/Developer/flywheel}"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/flywheel-loop-canonical-health.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -17,7 +17,8 @@ env_base=(
 )
 
 bash "$CHECKER" flywheel-loop >"$TMP/check-cli-scoping.txt"
-rg -q 'Summary: 4 pass, 0 fail' "$TMP/check-cli-scoping.txt"
+# flywheel-loop now targets the full calibrated canonical surface.
+rg -q 'Summary: 13 pass, 0 fail' "$TMP/check-cli-scoping.txt"
 
 env "${env_base[@]}" "$BIN" health --repo "$REPO" --json \
   | jq -e '.success == true and .version == "flywheel-loop.health.v1" and (.subsystems | length) >= 5' >/dev/null
