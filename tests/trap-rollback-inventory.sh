@@ -61,6 +61,18 @@ cat >"$fixture/scripts/read-only.sh" <<'EOF'
 set -euo pipefail
 printf 'hello\n'
 EOF
+cat >"$fixture/scripts/read-only-apply-contract.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+info() {
+  jq -nc '{read_only:true,mutates_state:false,canonical_cli:["--apply"]}'
+}
+case "${1:-}" in
+  --info) info ;;
+  --apply) printf 'dry contract only\n' ;;
+  *) printf 'hello\n' ;;
+esac
+EOF
 cat >"$fixture/tests/mutating-test.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -76,9 +88,10 @@ git -C "$fixture" add tests .flywheel/receipts
 git -C "$fixture" commit -q -m fixture
 
 "$SCRIPT" scan --repo "$fixture" --json >"$TMP/fixture.json"
-assert_jq "$TMP/fixture.json" '.status == "warn" and .scan_scope == "tracked_operational_shell" and .tracked_shell_scripts_scanned == 3 and .mutating_like_scripts == 2 and .mutating_like_with_exit_or_err_trap == 1 and .mutating_like_without_exit_or_err_trap == 1' "fixture counts trap coverage"
+assert_jq "$TMP/fixture.json" '.status == "warn" and .scan_scope == "tracked_operational_shell" and .tracked_shell_scripts_scanned == 4 and .mutating_like_scripts == 2 and .mutating_like_with_exit_or_err_trap == 1 and .mutating_like_without_exit_or_err_trap == 1' "fixture counts trap coverage"
 assert_jq "$TMP/fixture.json" '.sample_without_trap == ["scripts/without-trap.sh"] and .claim == "inventory_only_not_adoption_complete"' "fixture sample and claim"
 assert_jq "$TMP/fixture.json" '(.excluded_non_operational_prefixes | index("tests/")) and (.excluded_non_operational_prefixes | index(".flywheel/receipts/"))' "fixture excludes non-operational prefixes"
+assert_jq "$TMP/fixture.json" '.declared_read_only_excluded_count == 1 and .declared_read_only_excluded_sample == ["scripts/read-only-apply-contract.sh"]' "fixture excludes declared read-only apply contract"
 
 if "$SCRIPT" scan --repo "$fixture" --max-without-trap 0 --json >"$TMP/strict.json"; then
   fail "strict threshold fails when trap gap exists"

@@ -237,6 +237,7 @@ _scaffold_is_canonical_arg() {
 
 if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
   scaffold_main "$@"
+  # shellcheck disable=SC2317 # scaffold_main exits; retained for generated scaffold consistency.
   exit $?
 fi
 # ====== END canonical-cli scaffold ======
@@ -281,7 +282,7 @@ if [[ "$MODE" == "help" ]]; then usage; exit 0; fi
 if [[ "$MODE" == "examples" ]]; then examples; exit 0; fi
 if [[ "$MODE" == "info" ]]; then
   jq -nc --arg version "$VERSION" --arg schema "$SCHEMA_VERSION" \
-    '{name:"agentmail-identity-canonical-validator",version:$version,schema_version:$schema,read_only:true,canonical_cli:["--info","--help","--examples","--json","--quiet","--apply"],exit_codes:{"0":"canonical or live advisory report","1":"strict drift detected","2":"malformed-state","3":"read-error"},strict_flag:"--strict",identity_primary_key:"session:pane:fleet_mail_project_key"}'
+    '{name:"agentmail-identity-canonical-validator",version:$version,schema_version:$schema,read_only:true,mutates_state:false,canonical_cli:["--info","--help","--examples","--json","--quiet","--apply"],exit_codes:{"0":"canonical or live advisory report","1":"strict drift detected","2":"malformed-state","3":"read-error"},strict_flag:"--strict",identity_primary_key:"session:pane:fleet_mail_project_key"}'
   exit 0
 fi
 
