@@ -1,0 +1,26 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-t0jqj",
+  "closed_at": "2026-05-15T22:16:13Z",
+  "status": "ready_to_close",
+  "autonomy": "autonomous",
+  "summary": "agent-mail-pre-allocate-worker-identities now records structured failure evidence on failed delegate exits while preserving the delegate exit code.",
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-t0jqj/trap-inventory-after-20260515T221556Z.json"
+  ],
+  "inventory_delta": {
+    "with_trap_before": 98,
+    "without_trap_before": 236,
+    "with_trap_after": 99,
+    "without_trap_after": 235,
+    "mutating_like_scripts": 334,
+    "coverage_after_pct": 29.64
+  },
+  "validation": [
+    "bash tests/locked-worker-identities.sh PASS 13/0",
+    "bash tests/agent-mail-pre-allocate-worker-identities-canonical-cli.sh PASS 13/0",
+    "bash tests/trap-rollback-inventory.sh PASS 11/0",
+    "bash -n + shellcheck -e SC2317 targeted PASS"
+  ],
+  "public_claim": false
+}

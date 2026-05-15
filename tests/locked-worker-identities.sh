@@ -50,15 +50,35 @@ export FLYWHEEL_AGENT_MAIL_STATE_DIR="$TMP/agent-mail"
 export FLYWHEEL_SESSION_TOPOLOGY="$TMP/session-topology.jsonl"
 mkdir -p "$FLYWHEEL_AGENT_MAIL_STATE_DIR"
 
-zsh -n "$LOOP" && pass "flywheel_loop_syntax" || fail "flywheel_loop_syntax"
-bash -n "$PREALLOC" && pass "preallocate_script_syntax" || fail "preallocate_script_syntax"
-"$PREALLOC" --help >/dev/null && pass "preallocate_help" || fail "preallocate_help"
+if zsh -n "$LOOP"; then pass "flywheel_loop_syntax"; else fail "flywheel_loop_syntax"; fi
+if bash -n "$PREALLOC"; then pass "preallocate_script_syntax"; else fail "preallocate_script_syntax"; fi
+if "$PREALLOC" --help >/dev/null; then pass "preallocate_help"; else fail "preallocate_help"; fi
+
+FAKE_LOOP="$TMP/fake-loop-fails.sh"
+FAILURE_LOG="$TMP/prealloc-failures.jsonl"
+cat >"$FAKE_LOOP" <<'SH'
+#!/usr/bin/env bash
+printf '%s\n' "synthetic loop failure" >&2
+exit 42
+SH
+chmod +x "$FAKE_LOOP"
+if FLYWHEEL_LOOP_BIN="$FAKE_LOOP" FLYWHEEL_PREALLOC_FAILURE_LOG="$FAILURE_LOG" "$PREALLOC" --apply --session flywheel --json >"$TMP/prealloc-fail.out" 2>"$TMP/prealloc-fail.err"; then
+  fail "preallocate_failure_preserves_delegate_rc"
+else
+  rc=$?
+  if [[ "$rc" -eq 42 ]]; then
+    pass "preallocate_failure_preserves_delegate_rc"
+  else
+    fail "preallocate_failure_preserves_delegate_rc"
+  fi
+fi
+assert_jq "$FAILURE_LOG" '.schema_version == "flywheel.agent_mail_preallocate_failure.v1" and .status == "failed" and .exit_code == 42 and .session == "flywheel" and .apply == true' "preallocate_failure_logs_structured_receipt"
 
 write_topology '[2,3,4]'
 "$PREALLOC" --apply --session flywheel --json >"$TMP/prealloc.json"
 assert_jq "$TMP/prealloc.json" '.created_count == 4 and ([.created[].pane] | sort == [1,2,3,4])' "missing_panes_minted"
 
-jq empty "$TMP/agent-mail/sessions/flywheel:2.json" && pass "worker_row_json_valid" || fail "worker_row_json_valid"
+if jq empty "$TMP/agent-mail/sessions/flywheel:2.json"; then pass "worker_row_json_valid"; else fail "worker_row_json_valid"; fi
 assert_jq "$TMP/agent-mail/sessions/flywheel:2.json" '.schema_version == "agent-mail-identity-registry/v2" and .role == "worker" and .status == "needs_registration" and (.identity_name | type == "string")' "worker_row_v2_role_status"
 
 identity_before="$(jq -r '.identity_name' "$TMP/agent-mail/sessions/flywheel:4.json")"
