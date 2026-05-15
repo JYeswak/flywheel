@@ -52,7 +52,7 @@ class_is dispatching
 
 printf '2:950\n' > "$TMP/pane-fired"
 class_is cooldown
-> "$TMP/pane-fired"
+: > "$TMP/pane-fired"
 
 write_ready '[]'
 class_is light_queue
@@ -60,7 +60,7 @@ class_is light_queue
 write_ready '[{"id":"a","priority":1,"created_at":"1","title":"x"},{"id":"b","priority":1,"created_at":"2","title":"x"},{"id":"c","priority":1,"created_at":"3","title":"x"},{"id":"d","priority":1,"created_at":"4","title":"x"},{"id":"e","priority":1,"created_at":"5","title":"x"},{"id":"f","priority":1,"created_at":"6","title":"x"},{"id":"g","priority":1,"created_at":"7","title":"x"},{"id":"h","priority":1,"created_at":"8","title":"x"},{"id":"i","priority":1,"created_at":"9","title":"x"},{"id":"j","priority":1,"created_at":"10","title":"x"}]'
 printf 'a:950\nb:950\nc:950\nd:950\ne:950\nf:950\ng:950\nh:950\ni:950\nj:950\n' > "$TMP/bead-fired"
 class_is saturated
-> "$TMP/bead-fired"
+: > "$TMP/bead-fired"
 
 write_activity THINKING live 900
 out="$(run_probe --include-non-waiting)"
@@ -81,7 +81,7 @@ out="$(run_probe --config "$TMP/config-filtered.json")"
 jq -e '.idle_state_class[0].idle_state_class == "disabled_class" and .idle_state_class[0].disabled_original_class == "saturated"' <<<"$out" >/dev/null \
   || fail "classes_active filter did not suppress saturated"
 
-out="$("$PROBE" --json --repo "$ROOT" --session {capability-control-plane} \
+out="$("$PROBE" --json --repo "$ROOT" --session "{capability-control-plane}" \
   --activity-fixture "$TMP/activity.json" \
   --ready-fixture "$TMP/ready.json" \
   --mission-fixture "$TMP/mission.json" \
@@ -93,7 +93,7 @@ jq -e '.idle_state_class[0].idle_state_class == "disabled_class" and .idle_state
 
 write_activity WAITING live 100
 write_ready '[{"id":"flywheel-a","priority":0,"created_at":"2026-05-01T00:00:00Z","title":"P0 repair"}]'
-> "$TMP/bead-fired"
+: > "$TMP/bead-fired"
 out="$(run_probe)"
 jq -e '.status == "fail" and .idle_dispatching_over_threshold_count == 1' <<<"$out" >/dev/null \
   || fail "dispatching over threshold did not fail"
