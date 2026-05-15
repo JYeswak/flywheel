@@ -18725,3 +18725,992 @@ auth, credential, PII, and customer-trust surfaces.
 - **supersedes:** null
 - **stale_after:** 24
 - **closure_evidence:** null
+
+### jr-2026-05-14T220004Z-004
+- **id:** jr-2026-05-14T220004Z-004
+- **captured_at:** 2026-05-14T22:00:04Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:b7f7e342256de0b41c4656e53cbd2064f9857628ef801a294f9e6c5644d20b85
+- **request_text_hash:** sha256:b7f7e342256de0b41c4656e53cbd2064f9857628ef801a294f9e6c5644d20b85
+- **sanitized_excerpt:** "SkillOS callback: scoped Mobile Eats compression gap routing refreshed and pushed. Commit: 3025caa chore(compression): refresh mobile eats gap route Branch: arc/cadence-loop-full-closure-2026-05-11, pushed to origin. What changed: - Re-applied the 2144Z active consumer scope plan; CubCloud remains excluded/inactive for current commercial compression routing. - Beads refreshed: skillos-ijuq, skillos-pltb, skillos-p3gj now show Mobile Eats dirty_total=34 and /git-repo-janitor precondition. - state"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T22:00:04Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T220206Z-126
+- **id:** jr-2026-05-14T220206Z-126
+- **captured_at:** 2026-05-14T22:02:06Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:0827268c2cf95a21f0aa1f720ee9ff48619d913034c54c8f21a7bca389d88bff
+- **request_text_hash:** sha256:0827268c2cf95a21f0aa1f720ee9ff48619d913034c54c8f21a7bca389d88bff
+- **sanitized_excerpt:** "SkillOS follow-up: filed and pushed full-scan secret backlog bead discovered during validation. Commit: a0fad21 chore(security): file gitleaks backlog bead Bead: skillos-a48v Reason: staged gitleaks for 3025caa was clean, but full `gitleaks dir .` still reports 707 pre-existing generic false positives in historical state/receipt files. Public flip should not claim full repo secret-scan-clean until this is classified/allowlisted/cleaned. Validation for bead commit: br dep cycles pass, git diff --"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T22:02:06Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T220601Z-361
+- **id:** jr-2026-05-14T220601Z-361
+- **captured_at:** 2026-05-14T22:06:01Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:bbdc7d37d0ee5f713a15f32dd48e28b59f63235bea79e3485965ffabd188312a
+- **request_text_hash:** sha256:bbdc7d37d0ee5f713a15f32dd48e28b59f63235bea79e3485965ffabd188312a
+- **sanitized_excerpt:** "take the old goal we were working on - lets break things down into actionalbe chunks I can work on one at a time with you"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T22:06:01Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T221024Z-624
+- **id:** jr-2026-05-14T221024Z-624
+- **captured_at:** 2026-05-14T22:10:24Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:70f52664b464b821c90795f915963b14bf54732557752df6dfb1a2f5a8d87ff9
+- **request_text_hash:** sha256:70f52664b464b821c90795f915963b14bf54732557752df6dfb1a2f5a8d87ff9
+- **sanitized_excerpt:** "SkillOS callback: Gate B/full gitleaks public-flip blocker cleared and pushed. Commit: b941acd fix(security): clear gitleaks public scan Bead closed: skillos-a48v Receipt: state/gitleaks-public-flip-classification-20260514T2208Z.md What changed: - .gitleaks.toml now uses regexTarget=match and narrowly allowlists only SkillOS synthetic receipt identifier fields, SECRET_INTERCEPT_SCHEMA, and the explicit fabricated sk_test_AAAABBBBCCCC fixture. - No blanket state/ or outputs/ allowlist was added. "
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T22:10:24Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T224446Z-686
+- **id:** jr-2026-05-14T224446Z-686
+- **captured_at:** 2026-05-14T22:44:46Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:6e45322bd852b0f024d7e87b809c1354098ed59a59bb38222232a0298d4a45c5
+- **request_text_hash:** sha256:6e45322bd852b0f024d7e87b809c1354098ed59a59bb38222232a0298d4a45c5
+- **sanitized_excerpt:** "SkillOS -> Flywheel update: pushed f34892f chore(secrets): classify full-history public scan [skillos-a59g]. Current tree + latest push range are clean: gitleaks dir current tree 0 findings; gitleaks git origin/arc/cadence-loop-full-closure-2026-05-11..HEAD 0 findings; br dep cycles 0; JSON receipts validate. Also removed the remaining current-tree Stripe-shaped fixture wording and the sk_test allowlist from .gitleaks.toml; current repo grep for AKIA/sk_live_/sk_test fixture shapes is empty. Ful"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T22:44:46Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T230434Z-874
+- **id:** jr-2026-05-14T230434Z-874
+- **captured_at:** 2026-05-14T23:04:34Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:12014b9a4a3caf55f2e5ea3e56288cda9abf20e6c2d1ce0e4dc260fde2d28440
+- **request_text_hash:** sha256:12014b9a4a3caf55f2e5ea3e56288cda9abf20e6c2d1ce0e4dc260fde2d28440
+- **sanitized_excerpt:** "SkillOS -> Flywheel update: committed and pushed 7233681 feat(jsm): add fast-lane upstream intake plus 112ebfc chore(beads): close JSM fast-lane intake [skillos-3il7]. Added scripts/jsm_fast_lane_intake.py with serialized fcntl lock + pre/post SQLite integrity, timeout-bounded jsm changelog, search fallback, receipt/state emission, optional br adoption-bead creation, and doctor surface. Wired scripts/jsm_ingestion_doctor.sh to expose fast_lane. Live run used short timeout: changelog timed out, s"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T23:04:34Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T230808Z-088
+- **id:** jr-2026-05-14T230808Z-088
+- **captured_at:** 2026-05-14T23:08:08Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:f903fa056cdbaa2204a2ca427873fbb11158d07780e182607c41afb95080fc89
+- **request_text_hash:** sha256:f903fa056cdbaa2204a2ca427873fbb11158d07780e182607c41afb95080fc89
+- **sanitized_excerpt:** "SkillOS -> Flywheel update: committed and pushed fda934f chore(jsm): add fast-lane launchd surface [skillos-a1k7]. Added repo-owned .flywheel/launchd/ai.zeststream.skillos-jsm-fast-lane-intake.plist for scripts/jsm_fast_lane_intake.py apply --create-beads every 1800s with RunAtLoad=true, KeepAlive=false, low priority, and no jsm install/sync/upgrade path. Added plist validation to tests/unit/test_jsm_fast_lane_intake.py and receipt state/jsm-fast-lane-launchd-20260514T2308Z.json. Did not bootstr"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T23:08:08Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-14T232104Z-864
+- **id:** jr-2026-05-14T232104Z-864
+- **captured_at:** 2026-05-14T23:21:04Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-mobile-eats/a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1.jsonl
+- **source_message_id:** a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1
+- **prompt_hash:** sha256:3037654e2554ff4c0ec87b7e88576ac5b82e1aa77bcf75b77980dbeae83db145
+- **request_text_hash:** sha256:3037654e2554ff4c0ec87b7e88576ac5b82e1aa77bcf75b77980dbeae83db145
+- **sanitized_excerpt:** "/goal /goal — L3d: Moderation Real-Data — anonymous community_submissions → /admin/moderation (mobile-eats next-app) ## Why L3's three journeys shipped (PRs #38-#40); the R5 leaderboard is already done. Last L3 cross-cutting item is GOAL.md gate 7: /admin/moderation on real community_submissions data — today listModerationQueue() returns a hardcoded placeholder behind a TODO. Schema fork (Joshua-decided): community_submissions.submitter_user_id is `uuid NOT NULL`, but L3a/L3b submissions are ano"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-14T23:21:04Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T031917Z-157
+- **id:** jr-2026-05-15T031917Z-157
+- **captured_at:** 2026-05-15T03:19:17Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:ef593c3a610cb815e09ee46d16c52736cc3015a4e7ec01f50feed3be61068dab
+- **request_text_hash:** sha256:ef593c3a610cb815e09ee46d16c52736cc3015a4e7ec01f50feed3be61068dab
+- **sanitized_excerpt:** "/goal Steward flywheel + skillos with a watch that compounds value each cycle. Not polling. Every cycle: ACT, ACCRETE, or STAND DOWN. No empty ticks. PER-CYCLE OUTPUT (one required): - ACT: real event (new commit, CI change, worker delta, operator input). Investigate, resolve or surface, attach receipt. - ACCRETE: no event → produce a named reusable artifact: * doctrine refinement (codify observed pattern) * skill candidate (3-strike: same fix repeats 3x → extract) * gate hardening (defect class"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T03:19:17Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T035009Z-009
+- **id:** jr-2026-05-15T035009Z-009
+- **captured_at:** 2026-05-15T03:50:09Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:2ce1ae423bdd0deac6c82dd2adc1c1c351f4c9d07678938ec8b22a899974e931
+- **request_text_hash:** sha256:2ce1ae423bdd0deac6c82dd2adc1c1c351f4c9d07678938ec8b22a899974e931
+- **sanitized_excerpt:** "I want to re-think the /flywheel:loop & /flywheel:tick for a moment - research only. Claude and Codex recently released /goal mode - where you can assign a goal and let it run for long-standing sessions. I like this - it lets me achive flywheel level quality for much longer running periods of time. It might be a little slower than paralleizing over many agentes, but thats not a bad thing early on while we're still beuilding teh whole ecosystem. For flywheel and skillos, for example. we can put t"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T03:50:09Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T035749Z-469
+- **id:** jr-2026-05-15T035749Z-469
+- **captured_at:** 2026-05-15T03:57:49Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:808d13936e1002b3e085980922247fbd2fb716717c6e7b56837f836b36e3ccf6
+- **request_text_hash:** sha256:808d13936e1002b3e085980922247fbd2fb716717c6e7b56837f836b36e3ccf6
+- **sanitized_excerpt:** "yes lets build a testing plan and impelment it - we can test with workers on pane 1"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T03:57:49Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T042607Z-167
+- **id:** jr-2026-05-15T042607Z-167
+- **captured_at:** 2026-05-15T04:26:07Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:959bd0e26b01aec9f8cefd1b4d33202825e46706d7e963c0da0d2339b6bf044b
+- **request_text_hash:** sha256:959bd0e26b01aec9f8cefd1b4d33202825e46706d7e963c0da0d2339b6bf044b
+- **sanitized_excerpt:** "[pane-1-test cycle 16] ACT new-commit — local HEAD moved to 607a354; no Actions run visible yet; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T04:26:07Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T042840Z-320
+- **id:** jr-2026-05-15T042840Z-320
+- **captured_at:** 2026-05-15T04:28:40Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:8580f01e03e811a8e7ce644fcac7f6cad82b81fe91214c26514d929dceffb06e
+- **request_text_hash:** sha256:8580f01e03e811a8e7ce644fcac7f6cad82b81fe91214c26514d929dceffb06e
+- **sanitized_excerpt:** "[pane-1-test cycle 19] ACT new-commit — local HEAD moved to 6d6a359; no Actions run visible yet; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T04:28:40Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T052822Z-902
+- **id:** jr-2026-05-15T052822Z-902
+- **captured_at:** 2026-05-15T05:28:22Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:df48077ea6562e12126977d1369e1dd8362edd6b6dc78ac27c7f0828802dc7d5
+- **request_text_hash:** sha256:df48077ea6562e12126977d1369e1dd8362edd6b6dc78ac27c7f0828802dc7d5
+- **sanitized_excerpt:** "[pane-1-test cycle 74] ACCRETE no-delta-gate-surface — L162 verification surface harvested; focused test passes 17/17; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T05:28:22Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T052924Z-964
+- **id:** jr-2026-05-15T052924Z-964
+- **captured_at:** 2026-05-15T05:29:24Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:8a80387555433546d95cd9eca9b0d2662ed1815bf4ebc0bf6b0c96aa9c4cc7ea
+- **request_text_hash:** sha256:8a80387555433546d95cd9eca9b0d2662ed1815bf4ebc0bf6b0c96aa9c4cc7ea
+- **sanitized_excerpt:** "[pane-1-test cycle 75] STAND_DOWN anti-spin-stand-down — no HEAD/CI/operator delta and no new accretive surface after L162 gate harvest; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T05:29:24Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T053412Z-252
+- **id:** jr-2026-05-15T053412Z-252
+- **captured_at:** 2026-05-15T05:34:12Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:33c363603613fd8543de2140b4cfa10ffbc52a1f0464fd4159f2b8a7ce6d37aa
+- **request_text_hash:** sha256:33c363603613fd8543de2140b4cfa10ffbc52a1f0464fd4159f2b8a7ce6d37aa
+- **sanitized_excerpt:** "[pane-1-test cycle 79] STAND_DOWN anti-spin-stand-down — no HEAD/CI/operator delta and no new surface after 32e3a5fa green baseline; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T05:34:12Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T053533Z-333
+- **id:** jr-2026-05-15T053533Z-333
+- **captured_at:** 2026-05-15T05:35:33Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:670df9a5235e1c16c0cb6267f8ef641170cff286a061db482be68e8b0e257941
+- **request_text_hash:** sha256:670df9a5235e1c16c0cb6267f8ef641170cff286a061db482be68e8b0e257941
+- **sanitized_excerpt:** "[pane-1-test cycle 80] ACT head-ci-transition — HEAD advanced to e298c17b flywheel-44fn bead-close; CI/Installer Smoke in progress; heartbeat satisfied; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T05:35:33Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T053954Z-594
+- **id:** jr-2026-05-15T053954Z-594
+- **captured_at:** 2026-05-15T05:39:54Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:9a2386b7ad193b8da2fb71a3529ffad1500699c5646821719902ad33e9e80e30
+- **request_text_hash:** sha256:9a2386b7ad193b8da2fb71a3529ffad1500699c5646821719902ad33e9e80e30
+- **sanitized_excerpt:** "[pane-1-test cycle 84] ACT head-ci-transition — HEAD advanced to 949880bd flywheel-2k4m bead-close; CI/Installer Smoke in progress; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T05:39:54Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T054405Z-845
+- **id:** jr-2026-05-15T054405Z-845
+- **captured_at:** 2026-05-15T05:44:05Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:4b20fd5cca950a65eecafe47403a20a6120d2df362d02a4cc22749c5483cfeaa
+- **request_text_hash:** sha256:4b20fd5cca950a65eecafe47403a20a6120d2df362d02a4cc22749c5483cfeaa
+- **sanitized_excerpt:** "[pane-1-test cycle 87] ACCRETE no-delta-optimization-implementation — flywheel-078ku --skip-loop-doctor implementation surface harvested; focused fixture passes; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T05:44:05Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T055001Z-201
+- **id:** jr-2026-05-15T055001Z-201
+- **captured_at:** 2026-05-15T05:50:01Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:957800bd928d79555b4cd1cd59e0b734654bced07f75618232c7be6461b54c21
+- **request_text_hash:** sha256:957800bd928d79555b4cd1cd59e0b734654bced07f75618232c7be6461b54c21
+- **sanitized_excerpt:** "[pane-1-test cycle 91] ACT head-ci-transition — HEAD advanced to 46d9e8f8 flywheel-gswz bead-close; CI/Installer Smoke in progress; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T05:50:01Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T055731Z-651
+- **id:** jr-2026-05-15T055731Z-651
+- **captured_at:** 2026-05-15T05:57:31Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:e9009b55f82df7d54ec92316df1e96ebc010ff424cdbe474794c3e8ca635010f
+- **request_text_hash:** sha256:e9009b55f82df7d54ec92316df1e96ebc010ff424cdbe474794c3e8ca635010f
+- **sanitized_excerpt:** "[pane-1-test cycle 96] ACT head-ci-transition — HEAD advanced to 3dcc72dc for flywheel-7u0z bead close; CI and Installer Smoke started; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T05:57:31Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T060033Z-833
+- **id:** jr-2026-05-15T060033Z-833
+- **captured_at:** 2026-05-15T06:00:33Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:d3a0504d7c1370bb4d2956d581fa852bbd92fe44ad23c4c69e6adbad9bb10864
+- **request_text_hash:** sha256:d3a0504d7c1370bb4d2956d581fa852bbd92fe44ad23c4c69e6adbad9bb10864
+- **sanitized_excerpt:** "[pane-1-test cycle 98] ACT head-ci-transition — HEAD advanced to c25035b0 for flywheel-5thm bead close; CI and Installer Smoke started; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T06:00:33Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T060545Z-145
+- **id:** jr-2026-05-15T060545Z-145
+- **captured_at:** 2026-05-15T06:05:45Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:130f9c38dd7cdd402fa56b2fb534358c605ffb24941a85b41b908d1329fdbb37
+- **request_text_hash:** sha256:130f9c38dd7cdd402fa56b2fb534358c605ffb24941a85b41b908d1329fdbb37
+- **sanitized_excerpt:** "[pane-1-test cycle 102] ACT head-ci-transition — HEAD advanced to d69342ee for flywheel-ef8m bead close; Installer Smoke green and CI still running; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T06:05:45Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T060811Z-291
+- **id:** jr-2026-05-15T060811Z-291
+- **captured_at:** 2026-05-15T06:08:11Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:7d37727b949ad158275b7f5a8f02d438100aab777887728a622a3755935585f7
+- **request_text_hash:** sha256:7d37727b949ad158275b7f5a8f02d438100aab777887728a622a3755935585f7
+- **sanitized_excerpt:** "[pane-1-test cycle 104] ACT head-ci-transition — HEAD advanced to e0873deb for flywheel-b8zm bead close; Installer Smoke green and CI still running; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T06:08:11Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T061801Z-881
+- **id:** jr-2026-05-15T061801Z-881
+- **captured_at:** 2026-05-15T06:18:01Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:e7b137fac401d4757c8d2dbc4048266a673e09fd93f95183d92794ccae28af94
+- **request_text_hash:** sha256:e7b137fac401d4757c8d2dbc4048266a673e09fd93f95183d92794ccae28af94
+- **sanitized_excerpt:** "[pane-1-test cycle 112] ACCRETE zbs8-closeout-evidence-pack — autoloop doctor-repair gate surface tied to closed Beads receipt; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T06:18:01Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T063346Z-826
+- **id:** jr-2026-05-15T063346Z-826
+- **captured_at:** 2026-05-15T06:33:46Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:1bd5c25365178069eaf24adc95edcc6e80c3453324315d1a4f5e7fc50be8f222
+- **request_text_hash:** sha256:1bd5c25365178069eaf24adc95edcc6e80c3453324315d1a4f5e7fc50be8f222
+- **sanitized_excerpt:** "[pane-1-test cycle 122] ACCRETE oxzyr3-implementation-evidence-pack — verified doctor-mode scorecard rollup surface, 5/5 focused gate PASS; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T06:33:46Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T081059Z-659
+- **id:** jr-2026-05-15T081059Z-659
+- **captured_at:** 2026-05-15T08:10:59Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:e59a18fceec7c71e323a1ccbaa7e27efa42d7db3e0a2d50d0353f42b20f597e7
+- **request_text_hash:** sha256:e59a18fceec7c71e323a1ccbaa7e27efa42d7db3e0a2d50d0353f42b20f597e7
+- **sanitized_excerpt:** "[pane-1-test cycle 204] ACT head-storage-validation-fix — e0bb3853 landed storage override validation fix; tests/storage-override.sh 17/0; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T08:10:59Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T084211Z-531
+- **id:** jr-2026-05-15T084211Z-531
+- **captured_at:** 2026-05-15T08:42:11Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:a826b76c842e69343322aec692d8d8550b101b31bfcc4eb6b8ccd2144d978a09
+- **request_text_hash:** sha256:a826b76c842e69343322aec692d8d8550b101b31bfcc4eb6b8ccd2144d978a09
+- **sanitized_excerpt:** "[pane-1-test cycle 233] STAND_DOWN anti-spin-stand-down — no HEAD/CI/operator delta and no unused accretive surface after cycles 231-232; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T08:42:11Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T085447Z-287
+- **id:** jr-2026-05-15T085447Z-287
+- **captured_at:** 2026-05-15T08:54:47Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:838cf674a6d53783afdef2d4b168954f0767783c3062a72008975be8136e4e35
+- **request_text_hash:** sha256:838cf674a6d53783afdef2d4b168954f0767783c3062a72008975be8136e4e35
+- **sanitized_excerpt:** "[pane-1-test cycle 248] STAND_DOWN anti-spin-stand-down — no HEAD/CI/operator delta and no unused accretive surface after cycles 246-247; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T08:54:47Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T085740Z-460
+- **id:** jr-2026-05-15T085740Z-460
+- **captured_at:** 2026-05-15T08:57:40Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:0fa40c362bd9223d7a1ee9c9d391f4b390b10d8199ce4c3415e3584e86bbccbb
+- **request_text_hash:** sha256:0fa40c362bd9223d7a1ee9c9d391f4b390b10d8199ce4c3415e3584e86bbccbb
+- **sanitized_excerpt:** "[pane-1-test cycle 251] ACT worktree-hi7ml-validation-closeout — hi7ml closed with n8n-deploy-kit validate package commit d964af8; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T08:57:40Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T091654Z-614
+- **id:** jr-2026-05-15T091654Z-614
+- **captured_at:** 2026-05-15T09:16:54Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:f43c72acae9d3ebc8473dc55dd9eed6e6e2fa262758af9d2d437160ad0d28b80
+- **request_text_hash:** sha256:f43c72acae9d3ebc8473dc55dd9eed6e6e2fa262758af9d2d437160ad0d28b80
+- **sanitized_excerpt:** "[pane-1-test cycle 266] STAND_DOWN anti-spin-stand-down — no new delta or accretive surface after l6qs8 acceptance map; standing down until event; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T09:16:54Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T101101Z-861
+- **id:** jr-2026-05-15T101101Z-861
+- **captured_at:** 2026-05-15T10:11:01Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:5c6f94a83b44757f8a2da419d6f5b85a730569a11dbfeac6fc53ab94912d7112
+- **request_text_hash:** sha256:5c6f94a83b44757f8a2da419d6f5b85a730569a11dbfeac6fc53ab94912d7112
+- **sanitized_excerpt:** "[pane-1-test cycle 296] ACT worktree-2xdi-169-fleet-refill-receiver-start — fleet-refill receiver test appeared/pass 10/0; bead still open; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T10:11:01Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T102823Z-903
+- **id:** jr-2026-05-15T102823Z-903
+- **captured_at:** 2026-05-15T10:28:23Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:35cbe7e795a67979cbe9bc64163128a26a35954dd15ad17526d976cefd16cb8b
+- **request_text_hash:** sha256:35cbe7e795a67979cbe9bc64163128a26a35954dd15ad17526d976cefd16cb8b
+- **sanitized_excerpt:** "[pane-1-test cycle 303] ACT head-j8u97-closeout-ci-start — HEAD 71b23ba closes superseded Asupersync POC bead flywheel-j8u97; CI/Installer in progress; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T10:28:23Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T110710Z-230
+- **id:** jr-2026-05-15T110710Z-230
+- **captured_at:** 2026-05-15T11:07:10Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:f2db15f6a9544c85f3599a46d6c7edb82012bf07ed98cf774fc7e9f38f27dfca
+- **request_text_hash:** sha256:f2db15f6a9544c85f3599a46d6c7edb82012bf07ed98cf774fc7e9f38f27dfca
+- **sanitized_excerpt:** "[pane-1-test cycle 335] ACT worktree-dispatch-cli-help-cleanup — five dispatch CLI scripts removed scaffold TODO wording; focused dispatch checks pass on rerun; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T11:07:10Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T111745Z-865
+- **id:** jr-2026-05-15T111745Z-865
+- **captured_at:** 2026-05-15T11:17:45Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:7a6335a9b5a0fefc66012ec1ec2ac1b902d18ba71b8844b3646a4075107ffcf1
+- **request_text_hash:** sha256:7a6335a9b5a0fefc66012ec1ec2ac1b902d18ba71b8844b3646a4075107ffcf1
+- **sanitized_excerpt:** "[pane-1-test cycle 344] ACT head-hhwi4-team-pulse-ci-running — HEAD 8725657f lands flywheel-hhwi4 team-pulse fix; CI and Installer Smoke completed by receipt time; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T11:17:45Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T112305Z-185
+- **id:** jr-2026-05-15T112305Z-185
+- **captured_at:** 2026-05-15T11:23:05Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:f53ceac0bfc5d3f7bf654c8d58100d139f3f06e21889e003c614a69ee28d4992
+- **request_text_hash:** sha256:f53ceac0bfc5d3f7bf654c8d58100d139f3f06e21889e003c614a69ee28d4992
+- **sanitized_excerpt:** "[pane-1-test cycle 348] ACT worktree-new-bv-in-progress-umbrella-bead — new open bead flywheel-ttz5x filed for beads_viewer in-progress umbrella triage bug; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T11:23:05Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T114244Z-364
+- **id:** jr-2026-05-15T114244Z-364
+- **captured_at:** 2026-05-15T11:42:44Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:f7965c6da82ce46954491be7facf69783445fce81579aeaace44de60943ba7f6
+- **request_text_hash:** sha256:f7965c6da82ce46954491be7facf69783445fce81579aeaace44de60943ba7f6
+- **sanitized_excerpt:** "I need you to step back for a second from your current post. Use socraticode to go really deep on flywheel and skillos ecosystems. I like where your head is at but I need you to be more aware of what our ecosystem looks like before you make assumptions and proposals. We've buit a pretty powerful ecosystem, but some of what you just said isn't ringingin 100% true. I think we can do better. The 9 petal concept came from an image that Jeffrey and his discord group made but its been layered witih op"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T11:42:44Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T115511Z-111
+- **id:** jr-2026-05-15T115511Z-111
+- **captured_at:** 2026-05-15T11:55:11Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:fdc3e280a540c57ead4eab0bf3a51cd58c0455fe23c8e9978498829c3c1b2fe2
+- **request_text_hash:** sha256:fdc3e280a540c57ead4eab0bf3a51cd58c0455fe23c8e9978498829c3c1b2fe2
+- **sanitized_excerpt:** "ok - now what are we wiring in, where, how, and why - what is the blast radius of every move, and how does each and every one lend towards the true mission we've outlined here? I want our local flywheel ecosystem to be a representation of what we've learned from Jeffrey and his tools, and what we've built on top to manage our system(s). look at flywheel.zeststream.ai on what we're telling the public. We need to prove it works end to end across every surface."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T11:55:11Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T121839Z-519
+- **id:** jr-2026-05-15T121839Z-519
+- **captured_at:** 2026-05-15T12:18:39Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-mobile-eats/a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1.jsonl
+- **source_message_id:** a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1
+- **prompt_hash:** sha256:c93364059bec5ee4f75104eb8e12ccfa90687770824ba2af8f1f3db97014b4ef
+- **request_text_hash:** sha256:c93364059bec5ee4f75104eb8e12ccfa90687770824ba2af8f1f3db97014b4ef
+- **sanitized_excerpt:** "i'll start taking notes on everything that I see as I navigate through this. 1) when I don't have the open now button selected, 3 trucks show up on the map. The idea of this system is to show as many trucks as possible, right? how do we balance out showing trucks on the map with non verified data? why is the map the first thing we show people if we aren't showing them trucks on it? 2) when I select the pills up top (cuisine, price, dietary), the selection options pop up on the bottom of the page"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T12:18:39Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T122613Z-973
+- **id:** jr-2026-05-15T122613Z-973
+- **captured_at:** 2026-05-15T12:26:13Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:ef8add254cc025efec9df9c92e5e18cc28ed8e459762b2a61e34d6c1c4ab4fcc
+- **request_text_hash:** sha256:ef8add254cc025efec9df9c92e5e18cc28ed8e459762b2a61e34d6c1c4ab4fcc
+- **sanitized_excerpt:** "so how about we wire up a test plan that actually 1) is locked into our actual flywheel substrate, and 2) moves our system forward?"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T12:26:13Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T122846Z-126
+- **id:** jr-2026-05-15T122846Z-126
+- **captured_at:** 2026-05-15T12:28:46Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:0efcbbb6478f5af239835995fadbdd32a80faead0e4dc5dceae502e7c814d2a7
+- **request_text_hash:** sha256:0efcbbb6478f5af239835995fadbdd32a80faead0e4dc5dceae502e7c814d2a7
+- **sanitized_excerpt:** "I already shut down pane 1 /goal mode they are sitting idel. lets do full path b we close all gaps during build as part of hte run process."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T12:28:46Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T124251Z-971
+- **id:** jr-2026-05-15T124251Z-971
+- **captured_at:** 2026-05-15T12:42:51Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-mobile-eats/a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1.jsonl
+- **source_message_id:** a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1
+- **prompt_hash:** sha256:0015c4e826289fa87ecbb2291df00ba80c8d15dc8541894d72d7a64c702db6e4
+- **request_text_hash:** sha256:0015c4e826289fa87ecbb2291df00ba80c8d15dc8541894d72d7a64c702db6e4
+- **sanitized_excerpt:** "there is more too - I've already mentioned this but when I go to /trucks, the text at the top \"71 source-backed - roster or firsthand signal are strong enough to show publicity - 1) that doesn't read like a missoulan, 2) its green text on a green background, then the next one is blue text on blue background, then orange text on orange background. when I navigate to a truck, - https://mobile-eats.zeststream.ai/trucks/aikos for example, if I click the \"help check this\" button, which doesn't sound "
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T12:42:51Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T125031Z-431
+- **id:** jr-2026-05-15T125031Z-431
+- **captured_at:** 2026-05-15T12:50:31Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-mobile-eats/a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1.jsonl
+- **source_message_id:** a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1
+- **prompt_hash:** sha256:b1ef1fbda97c490cc4bdc491bbba6dc4c74e0cffe7f2bdbaa26efaf2638f5f66
+- **request_text_hash:** sha256:b1ef1fbda97c490cc4bdc491bbba6dc4c74e0cffe7f2bdbaa26efaf2638f5f66
+- **sanitized_excerpt:** "yes - lets write up an l4.5 goal that bundles all of this"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T12:50:31Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null

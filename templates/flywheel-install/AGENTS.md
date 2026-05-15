@@ -8,6 +8,12 @@ flywheel-loop init to every flywheel-installed repo as
 reference this file and add only repo-specific operational rules.
 Domain rules (what we're building, not how we operate) belong in CLAUDE.md.
 
+## Canonical Operator Surfaces
+
+- Jeff intel network: `.flywheel/scripts/jeff-intel-network.sh` is the
+  canonical operator helper for Jeffrey Emanuel substrate monitoring; the
+  slash wrapper is `/flywheel:jeff-intel`.
+
 ## L-Rule Schema
 
 Each L-rule below uses this frontmatter (YAML between `---` fences):
