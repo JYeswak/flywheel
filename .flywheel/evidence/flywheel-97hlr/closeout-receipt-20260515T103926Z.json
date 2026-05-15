@@ -1,0 +1,34 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-97hlr",
+  "closed_at": "2026-05-15T10:39:26Z",
+  "disposition": "implemented",
+  "source_repo": "/Users/josh/Developer/flywheel",
+  "target_repo": "/Users/josh/Developer/n8n-deploy-kit",
+  "target_commit": "2ffcd20790f9a807781289907b580bece330b819",
+  "target_branch": "feat/phase-0-canonical-stamp",
+  "target_pr": "JYeswak/n8n-deploy-kit#1",
+  "value_added": [
+    "Added examples/deploy-first-workflow with a copy-paste validate-to-inactive-import path.",
+    "Added examples/validate-before-deploy with a broken workflow that exits 2 and a repaired workflow that passes.",
+    "Added examples/migrate-v1-to-v2 with source and inactive target workflow examples.",
+    "Added npm run examples:check so the examples remain mechanically runnable."
+  ],
+  "proof": {
+    "npm_run_examples_check": "SUMMARY pass=4 fail=0",
+    "npm_run_typecheck": "pass",
+    "npm_run_security_scan": "PASS security scan; verified_secrets=0; unverified_secrets=0",
+    "shellcheck": "scripts/check-examples.sh pass",
+    "git_diff_check": "pass",
+    "github": {
+      "head_ref_oid": "2ffcd20790f9a807781289907b580bece330b819",
+      "gitguardian": "SUCCESS"
+    }
+  },
+  "public_boundary": {
+    "synthetic_data_only": true,
+    "credential_ids_included": false,
+    "live_n8n_required_for_local_example_check": false,
+    "deploy_command_requires_operator_supplied_n8n_api_url_and_key": true
+  }
+}
