@@ -138,6 +138,14 @@ for token in 'git archive' 'install.sh.sha256' SHA256SUMS 'gh release' 'tests/re
   fi
 done
 
+for token in jq ripgrep shellcheck; do
+  if grep -q "$token" "$RELEASE"; then
+    pass "release installs $token"
+  else
+    fail "release installs $token"
+  fi
+done
+
 for token in \
   'actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b' \
   'actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa' \
@@ -151,6 +159,14 @@ for token in \
     pass "site includes $token"
   else
     fail "site includes $token"
+  fi
+done
+
+for token in jq ripgrep shellcheck; do
+  if grep -q "$token" "$SITE"; then
+    pass "site installs $token"
+  else
+    fail "site installs $token"
   fi
 done
 
