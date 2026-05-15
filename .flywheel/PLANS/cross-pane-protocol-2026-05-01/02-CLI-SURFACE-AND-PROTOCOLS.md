@@ -72,7 +72,7 @@ Canonical standard: `/Users/josh/.claude/skills/canonical-cli-scoping/SKILL.md` 
 
 `flywheel-readme` is the planned operator CLI for cross-pane README review. It supports the worker -> orchestrator -> Joshua flow while following canonical CLI scoping: doctor, health, repair, validate, audit, why, self-documentation, universal JSON, universal exit codes, dry-run mutation discipline, metrics, logs, and trace.
 
-This plan does not implement the binary, does not define L69 doctrine wording, and does not design the backfill engine.
+This plan does not implement the binary, does not define the historical proposed L69/L70 doctrine blocks that later landed as L81/L82, and does not design the backfill engine.
 
 ## Console-Script Name Precheck
 
