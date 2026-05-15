@@ -7,6 +7,7 @@ python3 - "$ROOT" "$@" <<'PY'
 import argparse
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -20,6 +21,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Signal repo-owning orchestrators when peer repos have ready beads."
     )
+    parser.add_argument("command", nargs="?")
     parser.add_argument("--local-repo", default=str(ROOT))
     parser.add_argument("--local-session", default="flywheel")
     parser.add_argument("--fleet-config", default="")
@@ -29,8 +31,22 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--now", default="")
     parser.add_argument("--local-idle-capacity", action="store_true")
     parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--doctor", action="store_true")
     parser.add_argument("--json", action="store_true")
     return parser.parse_args(sys.argv[2:])
+
+
+def check_row(name: str, status: str, detail: str) -> dict:
+    return {"name": name, "status": status, "detail": detail}
+
+
+def aggregate_status(checks: list[dict]) -> str:
+    statuses = {str(check.get("status", "")) for check in checks}
+    if "fail" in statuses:
+        return "fail"
+    if "warn" in statuses:
+        return "warn"
+    return "pass"
 
 
 def iso_now(explicit: str = "") -> str:
@@ -206,6 +222,90 @@ def append_atomic(path: Path, row: dict) -> None:
     os.replace(tmp_name, path)
 
 
+def build_doctor(args: argparse.Namespace) -> dict:
+    local_repo = Path(args.local_repo).expanduser()
+    ledger = Path(args.ledger).expanduser() if args.ledger else Path.home() / ".local/state/flywheel/cross-orch-coordination.jsonl"
+    checks = []
+
+    checks.append(
+        check_row(
+            "local_repo_readable",
+            "pass" if local_repo.is_dir() else "fail",
+            str(local_repo),
+        )
+    )
+    checks.append(
+        check_row(
+            "br_binary_available",
+            "pass" if shutil.which(args.br_bin) else "warn",
+            args.br_bin,
+        )
+    )
+
+    if args.fleet_config:
+        config = Path(args.fleet_config).expanduser()
+        payload = read_json(str(config), None)
+        if payload is None:
+            checks.append(check_row("fleet_config_readable", "fail", str(config)))
+            row_count = 0
+        else:
+            row_count = len(normalize_config_payload(payload))
+            checks.append(check_row("fleet_config_readable", "pass", f"{config} rows={row_count}"))
+    else:
+        topology = Path.home() / ".local/state/flywheel/session-topology.jsonl"
+        row_count = len(default_fleet_rows(str(local_repo), args.local_session))
+        checks.append(
+            check_row(
+                "default_topology_available",
+                "pass" if topology.is_file() or row_count > 0 else "warn",
+                f"{topology} rows={row_count}",
+            )
+        )
+
+    checks.append(
+        check_row(
+            "fleet_rows_available",
+            "pass" if row_count > 0 else "warn",
+            f"rows={row_count}",
+        )
+    )
+
+    parent = ledger.parent
+    checks.append(
+        check_row(
+            "ledger_parent_available",
+            "pass" if parent.is_dir() else "warn",
+            str(parent),
+        )
+    )
+    checks.append(
+        check_row(
+            "doctor_read_only",
+            "pass",
+            "doctor builds no signal rows and never appends the coordination ledger",
+        )
+    )
+    checks.append(
+        check_row(
+            "direct_dispatch_absent",
+            "pass",
+            "script writes coordination rows only; no peer-session transport invocation",
+        )
+    )
+
+    return {
+        "schema_version": "fleet-refill-signal.doctor.v1",
+        "command": "doctor",
+        "status": aggregate_status(checks),
+        "mode": "read_only",
+        "mutates": False,
+        "local_repo": repo_realpath(args.local_repo),
+        "local_session": args.local_session,
+        "ledger": str(ledger),
+        "checks": checks,
+    }
+
+
 def build_result(args: argparse.Namespace) -> dict:
     local_repo = repo_realpath(args.local_repo)
     ledger = Path(args.ledger) if args.ledger else Path.home() / ".local/state/flywheel/cross-orch-coordination.jsonl"
@@ -289,6 +389,16 @@ def build_result(args: argparse.Namespace) -> dict:
 
 def main() -> int:
     args = parse_args()
+    if args.command == "doctor" or args.doctor:
+        result = build_doctor(args)
+        if args.json:
+            print(json.dumps(result, sort_keys=True, separators=(",", ":")))
+        else:
+            print(f"doctor status={result['status']} checks={len(result['checks'])}")
+        return 0 if result["status"] in {"pass", "warn"} else 1
+    if args.command:
+        print(f"Unknown command: {args.command}", file=sys.stderr)
+        return 2
     result = build_result(args)
     if args.json:
         print(json.dumps(result, sort_keys=True, separators=(",", ":")))

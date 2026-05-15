@@ -47,12 +47,36 @@ JSON
 }
 
 mkdir -p "$TMP/flywheel" "$TMP/mobile-eats"
+printf '%s\n' '{"issues":[]}' >"$TMP/doctor-local-empty.json"
+printf '%s\n' '{"issues":[]}' >"$TMP/doctor-peer-empty.json"
+write_config "$TMP/doctor-local-empty.json" "$TMP/doctor-peer-empty.json"
 
 if bash -n "$SCRIPT"; then
   pass "script syntax"
 else
   fail "script syntax"
 fi
+
+"$SCRIPT" doctor \
+  --local-repo "$TMP/flywheel" \
+  --local-session flywheel \
+  --fleet-config "$TMP/fleet.json" \
+  --ledger "$TMP/doctor-ledger.jsonl" \
+  --json >"$TMP/doctor.json"
+assert_jq "$TMP/doctor.json" '.schema_version == "fleet-refill-signal.doctor.v1" and .command == "doctor" and .mode == "read_only" and .mutates == false and (.status | IN("pass","warn","fail")) and ([.checks[] | select(.name == "doctor_read_only").status][0] == "pass") and ([.checks[] | select(.name == "direct_dispatch_absent").status][0] == "pass")' "doctor emits read-only envelope"
+if [[ ! -e "$TMP/doctor-ledger.jsonl" ]]; then
+  pass "doctor writes no ledger"
+else
+  fail "doctor writes no ledger"
+fi
+
+"$SCRIPT" --doctor \
+  --local-repo "$TMP/flywheel" \
+  --local-session flywheel \
+  --fleet-config "$TMP/fleet.json" \
+  --json >"$TMP/doctor-alias.json"
+assert_jq "$TMP/doctor-alias.json" '.command == "doctor" and .mutates == false' "--doctor aliases doctor"
+
 rg -n "ntm assign|ntm send|send-text|raw_tokens_included.: true" "$SCRIPT" >/tmp/fleet-refill-signal-forbidden.$$ 2>/dev/null || true
 if [[ -s /tmp/fleet-refill-signal-forbidden.$$ ]]; then
   cat /tmp/fleet-refill-signal-forbidden.$$ >&2
