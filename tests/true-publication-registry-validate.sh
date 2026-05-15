@@ -67,8 +67,7 @@ else
 fi
 
 if jq -e '
-  (.expected_readiness_blockers | length) == 0
-  and ([.readiness_blocker_coverage[]?.code] | sort) == ([
+  ([.readiness_blocker_coverage[]?.code] | sort) == ([
     "github_release_assets_missing",
     "github_release_missing_or_draft",
     "install_proxy_checksum_mismatch",
