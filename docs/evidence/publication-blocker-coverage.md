@@ -17,8 +17,9 @@ Expected local state before cutover:
 
 - `publication_readiness.py` returns `status=blocked` with the blocker codes
   below;
-- the registry validator returns `status=pass`, `open_count=3`, and
-  `readiness_blocker_coverage` count `6`;
+- the registry validator returns `status=pass`, `open_count=3`, and its
+  `readiness_blocker_coverage` covers all live readiness blockers plus the
+  conditional remote visibility blocker;
 - the open registry rows are TP-005, TP-017, and TP-018.
 
 | Readiness blocker code | Owner | Public closure proof |
@@ -28,6 +29,7 @@ Expected local state before cutover:
 | `remote_green_runs_missing` | Flywheel | `CI` and `Installer Smoke` succeed on the public default branch. |
 | `github_release_missing_or_draft` | Flywheel | `v0.2.0` release exists and is neither draft nor prerelease. |
 | `github_release_assets_missing` | Flywheel | Required release assets are uploaded, non-empty, and expose `sha256:` digests. |
+| `install_proxy_checksum_mismatch` | Flywheel | Hosted `install.sh` and `install.sh.sha256` match the release asset checksum. |
 | `joshua_release_signoff_missing` | Release approver | `release-signoff.json` validates after all real checks pass. |
 
 The public release is not complete while any row above remains blocked.

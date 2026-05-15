@@ -60,6 +60,7 @@ codes change.
 | `remote_green_runs_missing` | `TP-017` | open |
 | `github_release_missing_or_draft` | `TP-018` | open |
 | `github_release_assets_missing` | `TP-018` | open |
+| `install_proxy_checksum_mismatch` | `TP-005` | open |
 | `joshua_release_signoff_missing` | `TP-018` | open |
 
 ## Progress Log

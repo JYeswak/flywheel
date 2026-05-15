@@ -16,6 +16,7 @@ fail() { fail_count=$((fail_count + 1)); printf 'FAIL %s\n' "$1" >&2; }
 expected_codes=(
   github_release_assets_missing
   github_release_missing_or_draft
+  install_proxy_checksum_mismatch
   joshua_release_signoff_missing
   remote_green_runs_missing
   remote_repo_private
@@ -65,17 +66,25 @@ else
 fi
 
 if jq -e '
-  (.readiness_blocker_coverage | length) == 6
-  and (.expected_readiness_blockers | length) == 6
+  (.expected_readiness_blockers | length) == 6
+  and ([.expected_readiness_blockers[]?] | sort) == [
+    "github_release_assets_missing",
+    "github_release_missing_or_draft",
+    "install_proxy_checksum_mismatch",
+    "joshua_release_signoff_missing",
+    "remote_green_runs_missing",
+    "remote_workflows_missing"
+  ]
   and ([.readiness_blocker_coverage[]?.code] | sort) == [
     "github_release_assets_missing",
     "github_release_missing_or_draft",
+    "install_proxy_checksum_mismatch",
     "joshua_release_signoff_missing",
     "remote_green_runs_missing",
     "remote_repo_private",
     "remote_workflows_missing"
   ]
-  and ([.readiness_blocker_coverage[]?.code] | sort) == (.expected_readiness_blockers | sort)
+  and (([.readiness_blocker_coverage[]?.code] - ["remote_repo_private"]) | sort) == (.expected_readiness_blockers | sort)
   and all(.readiness_blocker_coverage[]?; .status == "open" and (.registry_rows | length) > 0)
 ' "$TMP/default.json" >/dev/null; then
   pass "default registry maps every live readiness blocker to open rows"

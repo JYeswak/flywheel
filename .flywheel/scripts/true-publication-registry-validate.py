@@ -24,6 +24,9 @@ COVERAGE_HEADER = "| Readiness blocker code | Registry rows | Coverage status |"
 READINESS_BLOCKER_ALIASES = {
     "remote_repo_unavailable": "remote_repo_private",
 }
+OPTIONAL_COVERAGE_CODES = {
+    "remote_repo_private",
+}
 
 
 def parse_rows(path: Path) -> list[dict[str, str]]:
@@ -127,7 +130,7 @@ def validate(
     row_by_id = {row["id"]: row for row in rows if row.get("id")}
     coverage_codes = {row.get("code", "") for row in coverage if row.get("code")}
     missing_coverage = sorted(expected_blockers - coverage_codes)
-    unknown_coverage = sorted(coverage_codes - expected_blockers)
+    unknown_coverage = sorted(coverage_codes - expected_blockers - OPTIONAL_COVERAGE_CODES)
     for code in missing_coverage:
         errors.append({"code": "missing_readiness_blocker_coverage", "blocker_code": code})
     for code in unknown_coverage:
