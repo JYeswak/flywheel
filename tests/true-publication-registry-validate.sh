@@ -13,7 +13,7 @@ fail_count=0
 pass() { pass_count=$((pass_count + 1)); printf 'PASS %s\n' "$1"; }
 fail() { fail_count=$((fail_count + 1)); printf 'FAIL %s\n' "$1" >&2; }
 
-expected_codes=(
+historical_codes=(
   github_release_assets_missing
   github_release_missing_or_draft
   install_proxy_checksum_mismatch
@@ -30,7 +30,7 @@ if [[ ! -s "$REGISTRY" ]]; then
     fail "public blocker coverage exists when private registry omitted"
   fi
 
-  for code in "${expected_codes[@]}"; do
+  for code in "${historical_codes[@]}"; do
     if rg -qF "| \`$code\` |" "$PUBLIC_COVERAGE"; then
       pass "public blocker coverage includes $code"
     else
@@ -46,8 +46,8 @@ fi
 if python3 -m py_compile "$SCRIPT"; then pass "syntax"; else fail "syntax"; fi
 
 if python3 "$SCRIPT" --registry "$REGISTRY" --json >"$TMP/default.json"; then
-  if jq -e '.status == "pass" and .row_count == 20 and .open_count == 3 and (.warnings | length) == 3' "$TMP/default.json" >/dev/null; then
-    pass "default registry shape passes with remaining open warnings"
+  if jq -e '.status == "pass" and .row_count == 20 and .open_count == 0 and (.warnings | length) == 0' "$TMP/default.json" >/dev/null; then
+    pass "default registry shape passes after cutover"
   else
     fail "default registry envelope"
   fi
@@ -56,39 +56,42 @@ else
 fi
 
 if jq -e '
-  (.open_rows | length) == 3
-  and ([.open_rows[]?.id] | sort) == ["TP-005","TP-017","TP-018"]
-  and all(.open_rows[]?; (.required_closure | length) > 0 and (.owner | length) > 0)
+  (.open_rows | length) == 0
+  and ([.ids[]] | index("TP-005"))
+  and ([.ids[]] | index("TP-017"))
+  and ([.ids[]] | index("TP-018"))
 ' "$TMP/default.json" >/dev/null; then
-  pass "default registry exposes machine-readable open rows"
+  pass "default registry exposes machine-readable closed cutover rows"
 else
-  fail "default registry exposes machine-readable open rows"
+  fail "default registry exposes machine-readable closed cutover rows"
 fi
 
 if jq -e '
-  (.expected_readiness_blockers | index("github_release_assets_missing"))
-  and (.expected_readiness_blockers | index("github_release_missing_or_draft"))
-  and (.expected_readiness_blockers | index("install_proxy_checksum_mismatch"))
-  and (.expected_readiness_blockers | index("joshua_release_signoff_missing"))
-  and (.expected_readiness_blockers | index("remote_green_runs_missing"))
-  and (.expected_readiness_blockers | index("remote_workflows_missing"))
-  and (([.readiness_blocker_coverage[]?.code] - ["remote_repo_private"]) | sort) == ((.expected_readiness_blockers - ["remote_repo_private"]) | sort)
-  and ([.readiness_blocker_coverage[]?.code] - .expected_readiness_blockers - ["remote_repo_private"] | length) == 0
-  and all(.readiness_blocker_coverage[]?; .status == "open" and (.registry_rows | length) > 0)
+  (.expected_readiness_blockers | length) == 0
+  and ([.readiness_blocker_coverage[]?.code] | sort) == ([
+    "github_release_assets_missing",
+    "github_release_missing_or_draft",
+    "install_proxy_checksum_mismatch",
+    "joshua_release_signoff_missing",
+    "remote_green_runs_missing",
+    "remote_repo_private",
+    "remote_workflows_missing"
+  ] | sort)
+  and all(.readiness_blocker_coverage[]?; .status == "closed" and (.registry_rows | length) > 0)
 ' "$TMP/default.json" >/dev/null; then
-  pass "default registry maps every live readiness blocker to open rows"
+  pass "default registry preserves closed historical blocker coverage"
 else
-  fail "default registry maps every live readiness blocker to open rows"
+  fail "default registry preserves closed historical blocker coverage"
 fi
 
 if python3 "$SCRIPT" --registry "$REGISTRY" --release --json >"$TMP/release.json"; then
-  fail "release mode must fail while rows remain open"
-else
-  if jq -e '.status == "fail" and (.errors[]?.code == "release_blocked_open_row")' "$TMP/release.json" >/dev/null; then
-    pass "release mode blocks open rows"
+  if jq -e '.status == "pass" and .open_count == 0 and (.errors | length) == 0' "$TMP/release.json" >/dev/null; then
+    pass "release mode passes after rows close"
   else
-    fail "release mode failure shape"
+    fail "release mode pass shape"
   fi
+else
+  fail "release mode command"
 fi
 
 cat >"$TMP/duplicate.md" <<'EOF'

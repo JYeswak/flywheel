@@ -309,7 +309,7 @@ Expected results:
 | Preflight fixtures | Fixture-backed full, reduced, blocked, docs-only, and misconfigured modes pass. |
 | Contact routing | Public mailto route uses `joshua@zeststream.ai` and subject `[Flywheel] Public site inquiry`; this proves routing, not delivery. |
 | Upstream substrate adoption | Asupersync remains `gated-evaluation` until promotion gates and repo-local POC evidence pass. |
-| Registry validator | `SUMMARY pass=6 fail=0` while rows remain open; coverage is derived from live readiness blockers and currently expects open TP-005/TP-017/TP-018 until release cutover. |
+| Registry validator | `SUMMARY pass=6 fail=0`; after `v0.2.1` cutover the validator reports `open_count=0`, empty live readiness blockers, and closed historical coverage for TP-005/TP-017/TP-018. |
 | Cutover receipt verifier | `SUMMARY pass=23 fail=0`; fixture proof shows saved receipt bundles replay, checksum drift is rejected, website/head failures are rejected, live-site/user-journey receipts are required, and stale signoff evidence is rejected. |
 | Story-system package | `SUMMARY pass=26 fail=0`; CI, Release, and Site Deploy all validate the package JSON, typed root import, CSS tokens, and story-system contract before public packaging or publishing. |
 | Docs depersonalization | JSON status `pass` and zero findings. |
@@ -410,7 +410,7 @@ Failure branches:
 
 | Failure | Action |
 |---|---|
-| Any publication readiness blocker remains | Do not create an approved signoff. Keep TP-005, TP-017, or TP-018 open. |
+| Any publication readiness code remains | Do not create an approved signoff. Keep or reopen the matching TP row until live proof closes it. |
 | Signoff exists before real remote/web checks pass | Treat it as invalid; reset to `pending` or remove the file. |
 | External review has fewer than two valid reviewers or omits any current public trust surface | Keep TP-015 and B11.6 open. |
 

@@ -28,8 +28,8 @@ else
 fi
 
 require_literal "flywheel.publication_goal_completion_audit.v0" "goal audit names schema"
-require_literal "Status: \`not-complete\`" "goal audit is not a completion claim"
-require_literal "Current verdict: \`not complete\`." "goal audit states current verdict"
+require_literal "Status: \`complete\`" "goal audit records completed status"
+require_literal "Current verdict: \`complete\`." "goal audit states current verdict"
 require_literal "Objective Restatement" "goal audit restates objective"
 require_literal "Prompt-To-Artifact Checklist" "goal audit has prompt-to-artifact checklist"
 require_literal "Live Readiness Truth" "goal audit names live readiness truth"
@@ -78,7 +78,7 @@ status="$(jq -r '.status' "$TMP/readiness.json")"
 if [[ "$status" == "blocked" ]]; then
   require_literal "Current verdict: \`not complete\`." "blocked readiness keeps goal incomplete"
 elif [[ "$status" == "pass" ]]; then
-  fail "goal audit must be refreshed before pass-state completion"
+  require_literal "Current verdict: \`complete\`." "pass readiness keeps goal complete"
 else
   fail "publication readiness status is recognized"
 fi
