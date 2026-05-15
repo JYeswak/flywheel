@@ -1,13 +1,15 @@
 # CI gate baseline
 
-The flywheel `Contract tests` CI step runs 29 bash test files. This file
+The flywheel `Contract tests` CI step runs 30 bash test files. This file
 names each gate, what it enforces in one line, and the last commit where
 the gate was confirmed green on `review/flywheel-2.0-private-20260513`.
 Authored 2026-05-15 per the accretive watch goal's "CI baseline tracked"
 target.
 
 Source of truth: `.github/workflows/ci.yml` (`Contract tests` step).
-Last branch-green commit at authoring: `d3d2d616`.
+Last branch-green at authoring: `d3d2d616`. Last confirmed green:
+`62264037` (predates the install-contract addition + automation drift on
+`publication-goal-completion-audit.sh`).
 
 ## Contract tests (in CI order)
 
@@ -18,6 +20,7 @@ Last branch-green commit at authoring: `d3d2d616`.
 | 3 | `changelog.sh` | CHANGELOG has v0.2.0 section + required structure |
 | 4 | `github-workflows.sh` | Workflow YAMLs match contract (action hashes, job shape, concurrency, permissions) |
 | 5 | `naming-conventions.sh` | Public surfaces reject private lowercase fleet slugs + stale operator markers + superseded product names (`rg --case-sensitive`) — no allowlist mechanism |
+| 5a | `hosted-install-contract.sh` | Hosted installer contract — `install.sh` + `install.sh.sha256` parity from the release asset set (added by `821b4e95 fix(install): prove hosted installer contract`) |
 | 6 | `context-routing-discipline.sh` | Context/model routing rules (grep-before-fetch, batched tool calls, SKILL.md graduation, etc.) |
 | 7 | `agent-lane-probe.sh` | Agent-lane support matrix (Claude/Codex/Gemini/OpenClaw) receipt truth |
 | 8 | `public-docs.sh` | Public docs internal contract — required surfaces present, no private references |
