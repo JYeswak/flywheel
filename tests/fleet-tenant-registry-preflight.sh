@@ -35,6 +35,7 @@ mappings:
       DATABASE_URL:
         validator: postgres_url_contains_supabase_ref
         expected_supabase_ref: abcdefghijklmnopqrst
+        source_project_id: 11111111-1111-4111-8111-111111111111
       NEXT_PUBLIC_SUPABASE_URL:
         validator: equals
         expected_value: https://abcdefghijklmnopqrst.supabase.co

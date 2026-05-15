@@ -105,6 +105,9 @@ def check_registry_row(slug: str, row: dict[str, Any] | None) -> list[str]:
                 failures.append(f"canonical_key_unknown_validator:{key}")
             elif is_todo(spec.get(expected)):
                 failures.append(f"canonical_key_missing_expected:{key}:{expected}")
+            source_project_id = spec.get("source_project_id")
+            if source_project_id is not None and not UUID_RE.match(str(source_project_id)):
+                failures.append(f"canonical_key_invalid_source_project_id:{key}")
 
     return failures
 

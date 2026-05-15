@@ -1,0 +1,18 @@
+{
+  "schema_version": "flywheel.tenant_registry_disposition.v1",
+  "slug": "zeststream-v2-fresh",
+  "status": "skip_with_reason",
+  "registry_row_required": false,
+  "repo_declaration_required": false,
+  "reason": "zeststream-v2-fresh is a legacy active clone with local/Vercel/Railway environment history, but no current value-blind proof of a canonical Infisical tenant row. L168 will not fabricate tenant IDs or pass a registry row from stale local env files; this requires a separate secret-migration repair before it can become tenant-doctor eligible.",
+  "evidence_refs": [
+    "/Users/josh/Developer/zeststream-v2-fresh/README.md",
+    "/Users/josh/Developer/zeststream-v2-fresh/vercel.json",
+    "/Users/josh/Developer/zeststream-infra/infisical-registry.env",
+    "/Users/josh/Developer/zeststream-infra/railway-substrate-registry.env"
+  ],
+  "followup_required": true,
+  "followup_reason": "Create a canonical tenant row only after live secret migration proves which Infisical project owns the production Supabase keys.",
+  "no_secret_values_included": true,
+  "created_at": "2026-05-15T19:36:00Z"
+}
