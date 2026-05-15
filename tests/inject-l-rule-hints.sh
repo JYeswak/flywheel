@@ -20,6 +20,15 @@ assert_contains() {
   local file="$1" pattern="$2" name="$3"
   if rg -q "$pattern" "$file"; then pass "$name"; else fail "$name"; fi
 }
+assert_jq() {
+  local file="$1" expr="$2" name="$3"
+  if jq -e "$expr" "$file" >/dev/null; then
+    pass "$name"
+  else
+    fail "$name"
+    jq . "$file" >&2 || true
+  fi
+}
 
 mkdir -p "$TMP/rules"
 cat >"$TMP/rules/L50.md" <<'EOF'
@@ -80,6 +89,25 @@ EOF
 export FLYWHEEL_L_RULES_DIR="$TMP/rules"
 export FLYWHEEL_L_RULE_HINTS_LOG="$TMP/hints.jsonl"
 export FLYWHEEL_RULE_HINT_USAGE_LOG="$TMP/usage.jsonl"
+
+if "$BIN" --info | grep -Fq 'doctor=inject-l-rule-hints.doctor.v1'; then
+  pass "info advertises doctor"
+else
+  fail "info advertises doctor"
+fi
+if "$BIN" --schema | jq -e '.doctor_schema == "inject-l-rule-hints.doctor.v1"' >/dev/null; then
+  pass "schema advertises doctor"
+else
+  fail "schema advertises doctor"
+fi
+if "$BIN" --examples | grep -Fq 'inject-l-rule-hints.sh doctor'; then
+  pass "examples include doctor"
+else
+  fail "examples include doctor"
+fi
+"$BIN" doctor >"$TMP/doctor.json"
+assert_jq "$TMP/doctor.json" '.schema_version == "inject-l-rule-hints.doctor.v1" and .command == "doctor" and .status == "pass" and .mode == "read_only" and .mutates == false and (.checks | length == 3)' "doctor read-only pass envelope"
+
 "$BIN" "$TMP/packet.md" fixture-task "$TMP/repo" >"$TMP/out.md"
 
 assert_contains "$TMP/out.md" '^## L-RULE HINTS$' "hint block emitted"
