@@ -1,0 +1,67 @@
+{
+  "schema": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-nz74",
+  "closed_at": "2026-05-15T08:35:42Z",
+  "close_class": "upstream_fixed_and_absorbed",
+  "decision": "close_as_subsumed_by_upstream_fix_and_local_absorb",
+  "upstream": {
+    "repo": "Dicklesworthstone/ntm",
+    "issue": 123,
+    "url": "https://github.com/Dicklesworthstone/ntm/issues/123",
+    "state": "CLOSED",
+    "closed_at": "2026-05-07T06:48:23Z",
+    "fix_commit": "c0f8f222",
+    "owner_comment_summary": "ntm assign gained an explicit --repo <path> flag, validates the path before work, and chdirs to the resolved project before bv calls."
+  },
+  "local_absorb": {
+    "absorbing_bead": "flywheel-26jof",
+    "absorbing_bead_status": "closed",
+    "installed_ntm_version": "v1.14.0-479-g7d1fc78e",
+    "installed_ntm_commit": "7d1fc78ebf19af12b193c972d25016ec707d8f87",
+    "cwd_independence_test": "tests/test_dispatch_repo_flag_cwd_independent.sh",
+    "coordinator_wire_test": "tests/test_ntm_coordinator_wire.sh",
+    "daemon_policy": "explicit --repo is required for dispatch substrate calls; live coordinator behavior remains gated by pinned wrapper and operator policy"
+  },
+  "validation": [
+    {
+      "command": "gh issue view 123 --repo Dicklesworthstone/ntm --json number,title,state,url,createdAt,updatedAt,closedAt,comments",
+      "result": "pass",
+      "evidence": "issue closed; owner fix comment and JYeswak dogfood comment present"
+    },
+    {
+      "command": "gh issue list --repo Dicklesworthstone/ntm --state all --search \"coordinator repo CWD --repo in:title,body\" --limit 20 --json number,title,state,url,createdAt,updatedAt,closedAt",
+      "result": "pass",
+      "evidence": "no newer open upstream coordinator CWD follow-up found beyond closed ntm#123"
+    },
+    {
+      "command": "ntm version",
+      "result": "pass",
+      "evidence": "ntm version v1.14.0-479-g7d1fc78e commit 7d1fc78ebf19af12b193c972d25016ec707d8f87"
+    },
+    {
+      "command": "br show flywheel-26jof --json",
+      "result": "pass",
+      "evidence": "absorbing bead closed with explicit --repo dispatch substrate adoption"
+    },
+    {
+      "command": "bash tests/test_dispatch_repo_flag_cwd_independent.sh",
+      "result": "pass",
+      "evidence": "native ntm assign --repo returns the same normalized ready set from / and a temp cwd"
+    },
+    {
+      "command": "bash tests/test_dispatch_skill_required_disable_per_gate.sh",
+      "result": "pass",
+      "evidence": "dispatch safety hook keeps ntm assign --repo --auto --watch denied outside the allowed disabled gate"
+    },
+    {
+      "command": "bash tests/test_ntm_coordinator_wire.sh",
+      "result": "pass",
+      "evidence": "12/12 checks passed; slash commands use pinned coordinator wrapper and coordinator assign dry-run honors limit"
+    }
+  ],
+  "non_actions": [
+    "did not enable or reconfigure the live coordinator daemon",
+    "did not file a new upstream coordinator issue because no current failing coordinator CWD repro was found",
+    "did not treat stale adjacent idle-pane wrapper v3 fixture failure as part of this bead"
+  ]
+}
