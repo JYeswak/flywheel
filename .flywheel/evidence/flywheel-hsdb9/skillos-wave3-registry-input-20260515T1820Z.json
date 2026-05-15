@@ -1,0 +1,62 @@
+{
+  "schema_version": "flywheel.l168_skillos_registry_input.v1",
+  "bead_id": "flywheel-hsdb9",
+  "wave": 3,
+  "scope": "internal tooling tenant registry/declaration rollout",
+  "created_at": "2026-05-15T18:20:00Z",
+  "source_preflight_ref": ".flywheel/evidence/flywheel-hsdb9/wave3-tenant-preflight-20260515T1817Z.json",
+  "target_registry": "/Users/josh/.claude/skills/infisical-secrets/data/project-mappings.yaml",
+  "registry_authority": "skillos:1 canonical-locator",
+  "flywheel_boundary": "Flywheel gathered value-blind repo evidence and disposition receipts. SkillOS owns applying/adapting/rejecting the canonical registry and any /zs:project-bootstrap declarations.",
+  "rows": [
+    {
+      "slug": "zesttube",
+      "repo": "/Users/josh/Developer/zesttube",
+      "current_failures": [
+        "registry_row_missing",
+        "repo_declaration_missing"
+      ],
+      "classification": "tenant_registry_row_required",
+      "known_non_secret_identifiers": {
+        "infisical_project_id": "42b194c3-89d7-4ebb-895f-dd77ddf005ba",
+        "infisical_project_source": "/Users/josh/Developer/zesttube/.infisical.json",
+        "supabase_runtime_project_ref": "hsmyagcerajgjmlljtmx",
+        "supabase_runtime_project_url": "https://hsmyagcerajgjmlljtmx.supabase.co",
+        "n8n_base_url": "https://n8n.zeststream.ai",
+        "r2_public_origin": "https://media.zeststream.ai"
+      },
+      "evidence_refs": [
+        "/Users/josh/Developer/zesttube/.infisical.json",
+        "/Users/josh/Developer/zesttube/.claude/references/upstream-systems.md",
+        "/Users/josh/Developer/zesttube/CLAUDE.md",
+        "/Users/josh/Developer/zesttube/supabase/migrations/012_render_jobs.sql"
+      ],
+      "skillos_needed_decision": [
+        "confirm whether zesttube should use zesty-swarm as the registry infisical_project_id or receive a dedicated ZestTube/ZestStream media project row",
+        "confirm canonical_keys for SUPABASE_SERVICE_ROLE_KEY and any additional ZestTube tenant-bound deploy keys",
+        "derive/write root .zs-tenant.yaml via the canonical SkillOS /zs:project-bootstrap surface after registry row is accepted"
+      ]
+    },
+    {
+      "slug": "agent-ui",
+      "repo": "/Users/josh/Developer/agent-ui",
+      "current_failures": [
+        "registry_row_missing",
+        "repo_declaration_missing"
+      ],
+      "classification": "skip_with_reason",
+      "disposition_ref": ".flywheel/evidence/flywheel-hsdb9/agent-ui-tenant-disposition-20260515T1820Z.json"
+    },
+    {
+      "slug": "flywheel_gateway",
+      "repo": "/Users/josh/Developer/flywheel_gateway",
+      "current_failures": [
+        "registry_row_missing",
+        "repo_declaration_missing"
+      ],
+      "classification": "skip_with_reason",
+      "disposition_ref": ".flywheel/evidence/flywheel-hsdb9/flywheel_gateway-tenant-disposition-20260515T1820Z.json"
+    }
+  ],
+  "no_secret_values_included": true
+}
