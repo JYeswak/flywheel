@@ -50,9 +50,15 @@ USG
 }
 
 scaffold_emit_info() {
+  local label domain target plist
+  label="${AGENT_MAIL_LABEL:-ai.zeststream.mcp-agent-mail-local}"
+  domain="${AGENT_MAIL_DOMAIN:-gui/$UID}"
+  target="$domain/$label"
+  plist="${AGENT_MAIL_PLIST:-$HOME/Library/LaunchAgents/${label}.plist}"
   if ! command -v cli_emit_info >/dev/null; then
     jq -nc --arg sv "$SCAFFOLD_SCHEMA_VERSION" --arg name "agent-mail-restart.sh" \
-      '{schema_version:$sv,command:"info",name:$name,helper_lib_missing:true}'
+      --arg label "$label" --arg target "$target" --arg plist "$plist" \
+      '{schema_version:$sv,command:"info",name:$name,helper_lib_missing:true,label:$label,target:$target,plist:$plist,mutates_with_apply:true,dry_run_default:true}'
     return 0
   fi
   cli_emit_info \
@@ -61,7 +67,9 @@ scaffold_emit_info() {
     "$SCAFFOLD_SCHEMA_VERSION" \
     "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
     "SCAFFOLD_AUDIT_LOG" \
-    '{}'
+    '{}' \
+    | jq --arg label "$label" --arg target "$target" --arg plist "$plist" \
+      '. + {label:$label,target:$target,plist:$plist,mutates_with_apply:true,dry_run_default:true}'
 }
 
 scaffold_emit_examples() {
