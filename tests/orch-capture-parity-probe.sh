@@ -177,6 +177,7 @@ cat >"$missed_project/missed.jsonl" <<'EOF'
 {"type":"user","message":{"role":"user","content":"please capture this newer request"},"uuid":"missed-new-message","timestamp":"2026-05-02T00:00:00.000Z","cwd":"/tmp/missed-claude","sessionId":"missed-session","isSidechain":false}
 {"type":"user","message":{"role":"user","content":"<task-notification>\n<task-id>ignored</task-id>\n</task-notification>"},"uuid":"missed-task-notification","timestamp":"2026-05-03T00:00:00.000Z","cwd":"/tmp/missed-claude","sessionId":"missed-session","isSidechain":false}
 {"type":"user","message":{"role":"user","content":"CODEX_WATCHTOWER_HIGH new_issues=1"},"uuid":"missed-watchtower","timestamp":"2026-05-03T01:00:00.000Z","cwd":"/tmp/missed-claude","sessionId":"missed-session","isSidechain":false}
+{"type":"user","message":{"role":"user","content":"[pane-1-test cycle 1] ACT operator-input — captured HEAD 1151cee and green CI baseline; log: /tmp/goal-mode-worker-test.jsonl"},"uuid":"missed-pane-test","timestamp":"2026-05-03T02:00:00.000Z","cwd":"/tmp/missed-claude","sessionId":"missed-session","isSidechain":false}
 EOF
 : >"$transcript/coordination.jsonl"
 : >"$transcript/team-roster.jsonl"
