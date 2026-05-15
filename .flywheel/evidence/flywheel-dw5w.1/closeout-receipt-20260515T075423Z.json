@@ -1,0 +1,28 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-dw5w.1",
+  "status": "safe_to_close",
+  "validated_at": "2026-05-15T07:54:23Z",
+  "closed_scope": "Stale B10_AG3 README/operator-workflow audit gap recalibrated after the public README split.",
+  "evidence": {
+    "test": "tests/doctrine-memory-wire.sh",
+    "source_commit": "a36e3377",
+    "public_readme_surface": "README.md",
+    "contributor_surface": "CONTRIBUTING.md"
+  },
+  "validation": [
+    {
+      "command": "bash tests/doctrine-memory-wire.sh",
+      "result": "pass",
+      "summary": "66 passed, 0 failed; verifies README public validation principle and CONTRIBUTING worker callback validation fields."
+    },
+    {
+      "command": "shellcheck tests/doctrine-memory-wire.sh",
+      "result": "pass"
+    }
+  ],
+  "notes": [
+    "The original audit-gap path `/Users/josh/Developer/flywheel/README` was a stale extensionless README artifact check. Current public README is README.md.",
+    "Operator workflow details now live in CONTRIBUTING.md per the public-first README architecture; the test asserts that split instead of forcing internal doctrine into the public front door."
+  ]
+}
