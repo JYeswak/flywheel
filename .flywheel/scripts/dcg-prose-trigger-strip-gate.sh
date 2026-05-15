@@ -22,8 +22,6 @@
 set -euo pipefail
 
 VERSION="dcg-prose-trigger-strip-gate.v1"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
 MEMORY_RULE="${DCG_PROSE_TRIGGER_MEMORY_RULE:-$HOME/.claude/projects/-Users-josh-Developer-flywheel/memory/feedback_dcg_prose_trigger_strip_dangerous_substrings.md}"
 
 INPUT_FILE=""
@@ -49,6 +47,7 @@ usage() {
 usage:
   dcg-prose-trigger-strip-gate.sh --file PATH [--check] [--json]
   dcg-prose-trigger-strip-gate.sh - [--check] [--json]   # read stdin
+  dcg-prose-trigger-strip-gate.sh doctor|--doctor [--json]
   dcg-prose-trigger-strip-gate.sh --info|--schema|--examples|--help
 
 Scans candidate prose (file path or stdin) for canonical
@@ -81,12 +80,13 @@ info_json() {
       sourced_by_bead: $sourced_by,
       modes: ["check"],
       default_mode: "check",
-      flags: ["--file","--check","--apply","--json","--info","--schema","--examples","--help","-"],
+      flags: ["--file","--check","--apply","--json","doctor","--doctor","--info","--schema","--examples","--help","-"],
       env_vars: ["DCG_PROSE_TRIGGER_MEMORY_RULE"],
       mutates: false,
       pattern_count: $pattern_count,
       exit_codes: $exit_codes,
-      receipt_schema: "dcg-prose-trigger-strip-gate-receipt/v1"
+      receipt_schema: "dcg-prose-trigger-strip-gate-receipt/v1",
+      doctor_schema: "dcg-prose-trigger-strip-gate.doctor.v1"
     }'
 }
 
@@ -120,9 +120,58 @@ schema_json() {
   }'
 }
 
+doctor_json() {
+  local jq_status memory_status pattern_status overall
+  overall="pass"
+  if command -v jq >/dev/null; then
+    jq_status="pass"
+  else
+    jq_status="fail"
+    overall="fail"
+  fi
+  if [[ -f "$MEMORY_RULE" ]]; then
+    memory_status="pass"
+  else
+    memory_status="warn"
+    [[ "$overall" == "fail" ]] || overall="warn"
+  fi
+  if [[ "${#DANGEROUS_PATTERNS[@]}" -gt 0 ]]; then
+    pattern_status="pass"
+  else
+    pattern_status="fail"
+    overall="fail"
+  fi
+  jq -nc \
+    --arg status "$overall" \
+    --arg version "$VERSION" \
+    --arg memory_rule "$MEMORY_RULE" \
+    --arg jq_status "$jq_status" \
+    --arg memory_status "$memory_status" \
+    --arg pattern_status "$pattern_status" \
+    --argjson pattern_count "${#DANGEROUS_PATTERNS[@]}" \
+    '{
+      schema_version: "dcg-prose-trigger-strip-gate.doctor.v1",
+      command: "doctor",
+      status: $status,
+      mode: "read_only",
+      mutates: false,
+      version: $version,
+      memory_rule_path: $memory_rule,
+      pattern_count: $pattern_count,
+      checks: [
+        {name:"jq_available", status:$jq_status},
+        {name:"memory_rule_present", status:$memory_status},
+        {name:"pattern_catalog_nonempty", status:$pattern_status}
+      ]
+    }'
+}
+
 examples() {
   cat <<'EXAMPLES'
 Examples:
+  # Read-only prerequisite/catalog doctor:
+  .flywheel/scripts/dcg-prose-trigger-strip-gate.sh doctor --json
+
   # Pre-flight prose before `br create -d` (intended canonical pattern):
   cat > /tmp/bead-body.md <<'EOF'
   ## Trauma class
@@ -148,6 +197,7 @@ while [[ $# -gt 0 ]]; do
     --info)     info_json; exit 0 ;;
     --schema)   schema_json; exit 0 ;;
     --examples) examples; exit 0 ;;
+    doctor|--doctor) doctor_json; exit 0 ;;
     -h|--help)  usage; exit 0 ;;
     --check)    MODE="check"; shift ;;
     --apply)
