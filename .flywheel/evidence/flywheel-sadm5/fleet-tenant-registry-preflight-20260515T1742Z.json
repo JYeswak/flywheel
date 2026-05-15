@@ -1,0 +1,75 @@
+{
+  "schema_version": "flywheel.fleet_tenant_registry_preflight.v1",
+  "registry": "/Users/josh/.claude/skills/infisical-secrets/data/project-mappings.yaml",
+  "run_doctor": true,
+  "status": "fail",
+  "row_count": 4,
+  "fail_count": 2,
+  "rows": [
+    {
+      "slug": "mobile-eats",
+      "repo": "/Users/josh/Developer/mobile-eats",
+      "status": "pass",
+      "registry_status": "pass",
+      "declaration_status": "pass",
+      "doctor_status": "pass",
+      "failures": [],
+      "doctor": {
+        "status": "pass",
+        "returncode": 0,
+        "drift_count": 0,
+        "warn_count": 0,
+        "result_count": 5
+      }
+    },
+    {
+      "slug": "alpsinsurance",
+      "repo": "/Users/josh/Developer/alpsinsurance",
+      "status": "fail",
+      "registry_status": "pass",
+      "declaration_status": "fail",
+      "doctor_status": "pass",
+      "failures": [
+        "repo_declaration_missing"
+      ],
+      "doctor": {
+        "status": "pass",
+        "returncode": 0,
+        "drift_count": 0,
+        "warn_count": 0,
+        "result_count": 5
+      }
+    },
+    {
+      "slug": "alpsinsurance-staging",
+      "repo": null,
+      "status": "pass",
+      "registry_status": "pass",
+      "declaration_status": "not_checked",
+      "doctor_status": "pass",
+      "failures": [],
+      "doctor": {
+        "status": "pass",
+        "returncode": 0,
+        "drift_count": 0,
+        "warn_count": 0,
+        "result_count": 5
+      }
+    },
+    {
+      "slug": "terratitle",
+      "repo": "/Users/josh/Developer/terratitle",
+      "status": "fail",
+      "registry_status": "fail",
+      "declaration_status": "fail",
+      "doctor_status": "not_run",
+      "failures": [
+        "registry_row_missing",
+        "repo_declaration_missing"
+      ],
+      "doctor": {
+        "status": "not_run"
+      }
+    }
+  ]
+}
