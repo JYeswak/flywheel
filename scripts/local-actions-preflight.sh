@@ -156,7 +156,7 @@ if [[ "$ROOT" == "$SCRIPT_ROOT" ]]; then
     --cache-server-port "$ACT_SERVER_PORT" \
     --strict \
     --dryrun \
-    --input tag=v0.2.0 \
+    --input tag=v0.2.1 \
     --workflows "$ROOT/.github/workflows/release.yml" \
     --job package
 
@@ -170,7 +170,7 @@ if [[ "$ROOT" == "$SCRIPT_ROOT" ]]; then
     --cache-server-port "$ACT_SERVER_PORT" \
     --strict \
     --dryrun \
-    --input tag=v0.2.0 \
+    --input tag=v0.2.1 \
     --workflows "$ROOT/.github/workflows/site.yml" \
     --job deploy
 else

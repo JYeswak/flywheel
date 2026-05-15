@@ -3,10 +3,21 @@
 All notable changes to Flywheel are documented here.
 
 This project follows Keep a Changelog structure and uses semantic versioning for
-public releases. There are no public git tags yet; `0.2.0` is the first planned
-public release line.
+public releases. `0.2.1` is the first publishable public release line; `0.2.0`
+was an unpublished release tag that exposed hosted-runner prerequisites before
+a GitHub release was published.
 
-## [0.2.0] - Unreleased
+## [0.2.1] - 2026-05-15
+
+### Fixed
+
+- Release and Site Deploy workflows now install the same bare-runner
+  prerequisites as the public contract workflow before validating the release
+  tag, so hosted release jobs have `ripgrep` before validation starts.
+- Workflow contract tests now require Release and Site Deploy to keep `jq`,
+  `ripgrep`, and `shellcheck` installed before tag validation.
+
+## [0.2.0] - 2026-05-15
 
 ### Added
 

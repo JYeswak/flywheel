@@ -20,7 +20,7 @@ fi
 make_receipts() {
   local dir="$1"
   mkdir -p "$dir"
-  local tag="v0.2.0"
+  local tag="v0.2.1"
   local tarball="flywheel-${tag}.tar.gz"
   local digest="sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
   local install_hash
@@ -52,7 +52,7 @@ JSON
 {"schema_version":"flywheel.external_review_gate.v0","status":"pass","valid_review_count":2,"distinct_reviewer_count":2,"errors":[]}
 JSON
   cat >"$dir/release-signoff.receipt.json" <<'JSON'
-{"schema_version":"flywheel.release_signoff.v0","status":"approved","approver":"Joshua Nowak","tag":"v0.2.0","remote":"JYeswak/flywheel","signed_at":"2026-05-13T00:00:00Z"}
+{"schema_version":"flywheel.release_signoff.v0","status":"approved","approver":"Joshua Nowak","tag":"v0.2.1","remote":"JYeswak/flywheel","signed_at":"2026-05-13T00:00:00Z"}
 JSON
   cat >"$dir/publication-readiness.json" <<'JSON'
 {"schema_version":"flywheel.publication_readiness.v0","status":"pass","blockers":[]}

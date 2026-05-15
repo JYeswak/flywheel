@@ -479,13 +479,13 @@ ACTION_BY_CODE = {
     },
     "github_release_missing_or_draft": {
         "owner": "Flywheel",
-        "action": "Create or publish the final v0.2.0 GitHub release only after all release gates pass.",
-        "command": "git tag v0.2.0 && git push origin v0.2.0",
+        "action": "Create or publish the final v0.2.1 GitHub release only after all release gates pass.",
+        "command": "git tag v0.2.1 && git push origin v0.2.1",
     },
     "github_release_assets_missing": {
         "owner": "Flywheel",
         "action": "Run the release workflow and verify all required release assets are attached.",
-        "command": "gh release view v0.2.0 --repo JYeswak/flywheel --json tagName,isDraft,isPrerelease,assets",
+        "command": "gh release view v0.2.1 --repo JYeswak/flywheel --json tagName,isDraft,isPrerelease,assets",
     },
     "website_unavailable": {
         "owner": "Flywheel",
@@ -694,7 +694,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo", default=".")
     parser.add_argument("--remote", default="JYeswak/flywheel")
-    parser.add_argument("--tag", default="v0.2.0")
+    parser.add_argument("--tag", default="v0.2.1")
     parser.add_argument("--repo-view-json")
     parser.add_argument("--workflows-json")
     parser.add_argument("--runs-json")

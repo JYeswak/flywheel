@@ -367,8 +367,8 @@ Expected closure state:
 | Green runs | `CI` and `Installer Smoke` have successful remote runs on the remote default branch. |
 | Installer smoke receipts | Each `Installer Smoke` OS leg uploads an `installer-smoke-<os>` artifact containing `installer-smoke-receipt.json`, install/uninstall receipts, reduced first-run receipts, and the closeout receipt. |
 | User journey pack | `docs/runbooks/public-user-journey-pack.md` maps every public asset to persona lane, journey stage, entrypoint, visible wording, visual cue, CTA, proof refs, signoff status, and blocker/skip receipt reference. |
-| GitHub release | `v0.2.0` exists and is neither draft nor prerelease. |
-| Release assets | `install.sh`, `install.sh.sha256`, `SHA256SUMS`, `flywheel-v0.2.0.tar.gz`, and `flywheel-v0.2.0.tar.gz.sha256` are uploaded, non-empty, and expose `sha256:` digest metadata. |
+| GitHub release | `v0.2.1` exists and is neither draft nor prerelease. |
+| Release assets | `install.sh`, `install.sh.sha256`, `SHA256SUMS`, `flywheel-v0.2.1.tar.gz`, and `flywheel-v0.2.1.tar.gz.sha256` are uploaded, non-empty, and expose `sha256:` digest metadata. |
 | Website | `https://flywheel.zeststream.ai/` returns a successful status and contains the reviewed SMB/Yuzu journey markers. |
 | Install proxy | `https://flywheel.zeststream.ai/install.sh` hashes to the value served at `https://flywheel.zeststream.ai/install.sh.sha256`. |
 | External review | Two distinct non-Joshua reviewers approve or approve with follow-ups and cover every current public trust surface. |
@@ -403,7 +403,7 @@ Then edit `release-signoff.json` with:
 | `status` | `approved` |
 | `approver` | `Joshua Nowak` exactly; aliases are rejected by `scripts/publication_readiness.py`. |
 | `remote` | `JYeswak/flywheel` |
-| `tag` | `v0.2.0` |
+| `tag` | `v0.2.1` |
 | `signed_at` | ISO-8601 UTC timestamp of the approval |
 
 Failure branches:

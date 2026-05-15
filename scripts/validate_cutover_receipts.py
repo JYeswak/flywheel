@@ -262,7 +262,7 @@ def main() -> int:
     parser.add_argument("--receipt-dir", default=".")
     parser.add_argument("--repo", default=".")
     parser.add_argument("--remote", default="JYeswak/flywheel")
-    parser.add_argument("--tag", default="v0.2.0")
+    parser.add_argument("--tag", default="v0.2.1")
     parser.add_argument("--release", action="store_true", help="exit non-zero when blocked")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
