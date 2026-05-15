@@ -23,6 +23,14 @@ trap '[[ -n "${TMPDIR_TEST:-}" ]] && find "$TMPDIR_TEST" -mindepth 1 -delete 2>/
 # Test 1: bash -n
 if bash -n "$HOOK" 2>/dev/null; then pass "hook syntax"; else fail "hook syntax"; fi
 
+if grep -qF 'trap cleanup_temp_files EXIT ERR' "$HOOK" \
+  && grep -qF "register_temp_file \"\$tmpout\"" "$HOOK" \
+  && grep -qF "register_temp_file \"\$tmp_new\"" "$HOOK"; then
+  pass "temp-cleanup-trap-wired"
+else
+  fail "temp-cleanup-trap-wired"
+fi
+
 # Test 2: --info envelope shape
 out="$("$HOOK" --info 2>/dev/null)"
 if printf '%s' "$out" | jq -e '
@@ -223,6 +231,24 @@ ac_stdout_in_row="$(printf '%s' "$last_row" | jq -r .ac_stdout)"
 if [[ "$ac_stdout_in_row" == $'line1\nline2' ]]; then
   pass "live_probe captures multiline stdout exactly"
 else fail "ac_stdout captured: $(printf '%s' "$ac_stdout_in_row")"; fi
+
+FAIL_TMP="$TMPDIR_TEST/fail-tmp"
+mkdir -p "$FAIL_TMP"
+BEFORE_TEMP_COUNT=$(find "$FAIL_TMP" -maxdepth 1 -type f -name 'blocker-ac-stdout.*' | wc -l | tr -d ' ')
+cat > "$TMPDIR_TEST/tmp-cleanup.json" <<'EOF'
+{"blocker_id":"tmp-cleanup","acceptance_condition":"echo cleanup","status":"open"}
+EOF
+mkdir -p "$TMPDIR_TEST/escalations-as-dir"
+out="$(TMPDIR="$FAIL_TMP" "$HOOK" close --blocker-file "$TMPDIR_TEST/tmp-cleanup.json" --escalations-log "$TMPDIR_TEST/escalations-as-dir" --apply --json 2>/dev/null)"
+rc=$?
+AFTER_TEMP_COUNT=$(find "$FAIL_TMP" -maxdepth 1 -type f -name 'blocker-ac-stdout.*' | wc -l | tr -d ' ')
+if [[ "$rc" -ne 0 && "$BEFORE_TEMP_COUNT" == "$AFTER_TEMP_COUNT" ]] \
+  && printf '%s' "$out" | jq -e '.status == "close_failed" and .reason == "failed to append escalation row or mutate blocker file"' >/dev/null \
+  && [[ "$(jq -r '.status' "$TMPDIR_TEST/tmp-cleanup.json")" == "open" ]]; then
+  pass "failed apply returns close_failed, leaves blocker open, and cleans live-probe stdout temp"
+else
+  fail "failed apply cleanup/close_failed rc=$rc before=$BEFORE_TEMP_COUNT after=$AFTER_TEMP_COUNT blocker_status=$(jq -r '.status' "$TMPDIR_TEST/tmp-cleanup.json") out=$(printf '%s' "$out" | jq -c . 2>/dev/null || printf '%s' "$out")"
+fi
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2
