@@ -1,0 +1,273 @@
+{
+  "schema_version": "flywheel.josh_requests_reverse_lookup.v0",
+  "version": "josh-requests-reverse-lookup.v0.1.0",
+  "ts": "2026-05-15T13:31:02Z",
+  "inputs": {
+    "jr_path": "/Users/josh/.local/state/flywheel/josh-requests.jsonl",
+    "memory_dir": "/Users/josh/.claude/projects/-Users-josh-Developer-flywheel/memory",
+    "incidents_path": "/Users/josh/Developer/flywheel/INCIDENTS.md",
+    "beads_jsonl": "/Users/josh/Developer/flywheel/.beads/issues.jsonl",
+    "memory_files_loaded": 144,
+    "bead_rows_loaded": 2172
+  },
+  "stats": {
+    "total_rows_in_file": 1769,
+    "open_rows": 9,
+    "rows_classified": 9,
+    "parse_errors": 0
+  },
+  "disposition_counts": {
+    "memory-absorbed": 5,
+    "bead-tracked": 2,
+    "done-callback": 2
+  },
+  "consumed_count": 9,
+  "still_open_count": 0,
+  "consumed_pct": 100.0,
+  "rows": [
+    {
+      "id": "jr-2026-05-03T22-18-42Z-722",
+      "ts": "2026-05-03T22:18:42Z",
+      "priority": "?",
+      "excerpt_head": "this process of validate and redispatch needs foundationally baked into our flywheel - /flywheel:plan",
+      "disposition": "memory-absorbed",
+      "matches": [
+        {
+          "class": "memory-absorbed",
+          "evidence": [
+            "feedback_callback_first_dispatch.md",
+            "feedback_canonical_cli_at_dispatch.md",
+            "feedback_dispatch_delivery_validation_required.md",
+            "feedback_dispatch_post_send_verify_for_silent_deaf.md",
+            "feedback_dispatch_to_lib_not_bin_for_split_modules.md"
+          ]
+        },
+        {
+          "class": "bead-tracked",
+          "evidence": [
+            "baked",
+            "needs",
+            "process",
+            "redispatch",
+            "validate"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jr-2026-05-03T22-15-19Z-519",
+      "ts": "2026-05-03T22:15:19Z",
+      "priority": "?",
+      "excerpt_head": "part of any orchestrator's job is to validate the work and open any new beads as issues if work wasn't completed - this is a /flywheel:learn fuckup",
+      "disposition": "bead-tracked",
+      "matches": [
+        {
+          "class": "bead-tracked",
+          "evidence": [
+            "beads",
+            "completed",
+            "issues",
+            "learn",
+            "orchestrator"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jr-2026-05-03T22-06-43Z-003",
+      "ts": "2026-05-03T22:06:43Z",
+      "priority": "?",
+      "excerpt_head": "this bring up a good point - we need to have a validation process that every toolset we are using in our system(s) are uniformly applied to claude and codex wor\u2026",
+      "disposition": "memory-absorbed",
+      "matches": [
+        {
+          "class": "memory-absorbed",
+          "evidence": [
+            "feedback_codex_workers_panes_234.md",
+            "feedback_fleet_count_in_workers_not_panes.md",
+            "feedback_substrate_loss_worker_commit_orphan.md",
+            "feedback_use_codex_workers.md",
+            "feedback_worker_close_requires_git_commit.md"
+          ]
+        },
+        {
+          "class": "bead-tracked",
+          "evidence": [
+            "bring",
+            "point",
+            "process",
+            "toolset",
+            "using"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jr-2026-05-03T22-01-45Z-705",
+      "ts": "2026-05-03T22:01:45Z",
+      "priority": "?",
+      "excerpt_head": "lets update it and make sure it applies to codex",
+      "disposition": "bead-tracked",
+      "matches": [
+        {
+          "class": "bead-tracked",
+          "evidence": [
+            "applies",
+            "codex",
+            "update"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jr-2026-05-03T21-57-11Z-431",
+      "ts": "2026-05-03T21:57:11Z",
+      "priority": "?",
+      "excerpt_head": "lets proceed with dispatch. but this has happened 3 times today and completely kills my flywheel session every time. I need to get eyes on why it keeps happenin\u2026",
+      "disposition": "memory-absorbed",
+      "matches": [
+        {
+          "class": "memory-absorbed",
+          "evidence": [
+            "feedback_callback_first_dispatch.md",
+            "feedback_canonical_cli_at_dispatch.md",
+            "feedback_codex_workers_panes_234.md",
+            "feedback_cross_session_probe_canonical_truth_sources.md",
+            "feedback_dispatch_delivery_validation_required.md"
+          ]
+        },
+        {
+          "class": "bead-tracked",
+          "evidence": [
+            "completely",
+            "dispatch",
+            "happened",
+            "proceed",
+            "times"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jr-2026-05-03T21-55-33Z-333",
+      "ts": "2026-05-03T21:55:33Z",
+      "priority": "?",
+      "excerpt_head": "PHASE: DISPATCH Repo: /Users/josh/Developer/flywheel Session: flywheel pane 1 Driver: ai.zeststream.flywheel-flywheel-loop Task: flywheel_loop_20260503T215524Z \u2026",
+      "disposition": "done-callback",
+      "matches": [
+        {
+          "class": "done-callback",
+          "evidence": "pattern: ^\\s*PHASE:\\s*(DISPATCH|TICK|CLOSE|LEARN|MISSION)"
+        },
+        {
+          "class": "memory-absorbed",
+          "evidence": [
+            "feedback_callback_first_dispatch.md",
+            "feedback_canonical_cli_at_dispatch.md",
+            "feedback_cross_session_probe_canonical_truth_sources.md",
+            "feedback_dispatch_delivery_validation_required.md",
+            "feedback_dispatch_post_send_verify_for_silent_deaf.md"
+          ]
+        },
+        {
+          "class": "bead-tracked",
+          "evidence": [
+            "developer",
+            "dispatch",
+            "driver",
+            "phase",
+            "users"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jr-2026-05-03T21-55-30Z-330",
+      "ts": "2026-05-03T21:55:30Z",
+      "priority": "?",
+      "excerpt_head": "PHASE: DISPATCH Repo: /Users/josh/Developer/flywheel Session: flywheel pane 1 Driver: ai.zeststream.flywheel-flywheel-loop Task: flywheel_loop_20260503T215524Z \u2026",
+      "disposition": "done-callback",
+      "matches": [
+        {
+          "class": "done-callback",
+          "evidence": "pattern: ^\\s*PHASE:\\s*(DISPATCH|TICK|CLOSE|LEARN|MISSION)"
+        },
+        {
+          "class": "memory-absorbed",
+          "evidence": [
+            "feedback_callback_first_dispatch.md",
+            "feedback_canonical_cli_at_dispatch.md",
+            "feedback_cross_session_probe_canonical_truth_sources.md",
+            "feedback_dispatch_delivery_validation_required.md",
+            "feedback_dispatch_post_send_verify_for_silent_deaf.md"
+          ]
+        },
+        {
+          "class": "bead-tracked",
+          "evidence": [
+            "developer",
+            "dispatch",
+            "driver",
+            "phase",
+            "users"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jr-2026-05-03T21-42-28Z-548",
+      "ts": "2026-05-03T21:42:28Z",
+      "priority": "?",
+      "excerpt_head": "look at our learn process - we need to keep our workers active - you have two idle workers - we need to redispatch workers and log work as one action not two",
+      "disposition": "memory-absorbed",
+      "matches": [
+        {
+          "class": "memory-absorbed",
+          "evidence": [
+            "feedback_callback_first_dispatch.md",
+            "feedback_canonical_cli_at_dispatch.md",
+            "feedback_codex_workers_panes_234.md",
+            "feedback_dispatch_delivery_validation_required.md",
+            "feedback_dispatch_post_send_verify_for_silent_deaf.md"
+          ]
+        },
+        {
+          "class": "bead-tracked",
+          "evidence": [
+            "active",
+            "learn",
+            "process",
+            "redispatch",
+            "workers"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jr-2026-05-03T21-24-17Z-457",
+      "ts": "2026-05-03T21:24:17Z",
+      "priority": "?",
+      "excerpt_head": "yes you can fix them from your flywheel perch - I just dont wnat you dispatching work to their workers",
+      "disposition": "memory-absorbed",
+      "matches": [
+        {
+          "class": "memory-absorbed",
+          "evidence": [
+            "feedback_callback_first_dispatch.md",
+            "feedback_canonical_cli_at_dispatch.md",
+            "feedback_codex_workers_panes_234.md",
+            "feedback_dispatch_delivery_validation_required.md",
+            "feedback_dispatch_post_send_verify_for_silent_deaf.md"
+          ]
+        },
+        {
+          "class": "bead-tracked",
+          "evidence": [
+            "dispatching",
+            "workers"
+          ]
+        }
+      ]
+    }
+  ]
+}

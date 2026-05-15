@@ -76,6 +76,7 @@ jobs:
           bash tests/journey-smoke.sh
           bash tests/presence-queue.sh
           bash tests/goal-mode.sh
+          bash tests/josh-requests-reverse-lookup-canonical-cli.sh
 
       - name: Shell lint
         run: |
@@ -120,7 +121,8 @@ jobs:
             tests/true-publication-registry-validate.sh \
             tests/preflight-fixtures.sh \
             tests/presence-queue.sh \
-            tests/goal-mode.sh
+            tests/goal-mode.sh \
+            tests/josh-requests-reverse-lookup-canonical-cli.sh
 
       - name: Python syntax lint
         run: |
@@ -143,6 +145,7 @@ jobs:
             scripts/simulate_goal_cycles.py \
             scripts/validate_goal_text.py \
             scripts/validate_watch_log.py \
+            .flywheel/scripts/josh-requests-reverse-lookup.py \
             scripts/validate_cutover_receipts.py \
             scripts/validate_user_journey_pack.py \
             scripts/validate_story_system_package.py
