@@ -11,7 +11,8 @@
       "flywheel-lock-repair",
       "flywheel-verdict",
       "flywheel-refresh-source",
-      "flywheel-doctrine-sync"
+      "flywheel-doctrine-sync",
+      "flywheel-skillos-relay"
     ]
   },
   "binaries": [
@@ -49,6 +50,15 @@
       "source_status": "source-gap-receipt-required",
       "source_gap_bead": "flywheel-nkw4o",
       "closeout_receipt_ref": ".flywheel/evidence/flywheel-ynys/closeout-receipt-20260515T0242Z.json",
+      "shipped_in_reduced_install": false
+    },
+    {
+      "name": "flywheel-skillos-relay",
+      "installed_path": "$HOME/.claude/skills/.flywheel/bin/flywheel-skillos-relay",
+      "public_install_status": "full-substrate-local-only",
+      "source_status": "source-gap-receipt-required",
+      "source_gap_bead": "flywheel-nkw4o",
+      "closeout_receipt_ref": ".flywheel/evidence/flywheel-eyvi/closeout-receipt-20260515T0250Z.json",
       "shipped_in_reduced_install": false
     }
   ]

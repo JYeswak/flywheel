@@ -1,0 +1,35 @@
+{
+  "schema_version": "flywheel.canonical_cli_repair_evidence.v1",
+  "bead_id": "flywheel-eyvi",
+  "surface": "flywheel-skillos-relay",
+  "status": "closed",
+  "closed_at": "2026-05-15T02:50:00Z",
+  "summary": "Completed canonical CLI repair for the full-substrate flywheel-skillos-relay binary while preserving dry-run relay behavior.",
+  "installed_binary": {
+    "path": "/Users/josh/.claude/skills/.flywheel/bin/flywheel-skillos-relay",
+    "sha256": "0c368ac659245ede2401609693e7fe98819de23603a498fb798c2f14d9e23221",
+    "tracked_in_flywheel_repo": false
+  },
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-eyvi/canonical-cli-scorecard-20260515T0250Z.json"
+  ],
+  "validations": [
+    {
+      "command": "bash tests/flywheel-skillos-relay-canonical-cli.sh",
+      "status": "pass",
+      "summary": "canonical CLI smoke passed"
+    },
+    {
+      "command": "canonical-cli-scorecard.sh score flywheel-skillos-relay --domain-exit-codes --json",
+      "status": "pass",
+      "summary": "composite_score=1000; checker=13 pass, 0 fail"
+    },
+    {
+      "command": "check-cli-scoping.sh flywheel-skillos-relay",
+      "status": "pass",
+      "summary": "13 pass, 0 fail"
+    }
+  ],
+  "source_gap_bead": "flywheel-nkw4o",
+  "boundary_note": "The repaired executable is the installed Flywheel full-substrate relay binary under ~/.claude/skills/.flywheel/bin. It is not part of the reduced public installer."
+}
