@@ -1,0 +1,15 @@
+{
+  "schema_version": "flywheel.tenant_registry_disposition.v1",
+  "slug": "agent-ui",
+  "status": "skip_with_reason",
+  "registry_row_required": false,
+  "repo_declaration_required": false,
+  "reason": "agent-ui is currently an upstream Agno Agent UI template/local chat UI shell, not a ZestStream-owned tenant-bound runtime deploy. No repo-local .infisical.json, Supabase project ref, tenant database, or ZestStream deployment identifier was found in the scoped probe. If Joshua adopts it as a ZestStream-hosted product surface later, L168 should be rerun and a tenant row/declaration added then.",
+  "evidence_refs": [
+    "/Users/josh/Developer/agent-ui/README.md",
+    "/Users/josh/Developer/agent-ui/package.json",
+    ".flywheel/evidence/flywheel-hsdb9/wave3-tenant-preflight-20260515T1817Z.json"
+  ],
+  "created_at": "2026-05-15T18:20:00Z",
+  "created_by": "flywheel"
+}

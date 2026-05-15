@@ -1,0 +1,73 @@
+{
+  "schema_version": "flywheel.l168_wave_registry_input.v1",
+  "bead_id": "flywheel-1wsv7",
+  "created_at": "2026-05-15T18:15:00Z",
+  "target_owner": "skillos",
+  "target_registry": "/Users/josh/.claude/skills/infisical-secrets/data/project-mappings.yaml",
+  "target_registry_authority": "skillos:1 canonical-locator",
+  "preflight_receipt": ".flywheel/evidence/flywheel-1wsv7/wave2-tenant-preflight-20260515T1815Z.json",
+  "wave": 2,
+  "scope": [
+    "vrtx",
+    "zeststream-v2-fresh",
+    "zeststream-platform"
+  ],
+  "current_failures": {
+    "vrtx": [
+      "registry_row_missing",
+      "repo_declaration_missing"
+    ],
+    "zeststream-v2-fresh": [
+      "registry_row_missing",
+      "repo_declaration_missing"
+    ],
+    "zeststream-platform": [
+      "registry_row_missing",
+      "repo_declaration_missing"
+    ]
+  },
+  "non_secret_evidence": {
+    "vrtx": {
+      "infisical_project_id": "f6e31796-9434-486d-94bd-9e23a27d5c44",
+      "infisical_project_name": "vrtx-engagement",
+      "supabase_project_ref": "hsmyagcerajgjmlljtmx",
+      "supabase_project_url": "https://hsmyagcerajgjmlljtmx.supabase.co",
+      "source_refs": [
+        "/Users/josh/.claude/skills/infisical-secrets/references/PROJECTS-ENVS.md",
+        "/Users/josh/Developer/vrtx/.planning/system-awareness.md",
+        "/Users/josh/Developer/vrtx/supabase/.temp/pooler-url"
+      ],
+      "needs_owner_decision": [
+        "whether VRTX needs a root .zs-tenant.yaml despite dirty repo state",
+        "whether no Vercel project row is acceptable for this n8n/Postgres engagement"
+      ]
+    },
+    "zeststream-v2-fresh": {
+      "known_state": "Supabase usage detected, but no canonical Infisical project id or Supabase ref was proven from public-safe local evidence in this pass.",
+      "source_refs": [
+        "/Users/josh/Developer/zeststream-v2-fresh/apply_ekv_psql.sh",
+        "/Users/josh/Developer/zeststream-v2-fresh/.env.example",
+        "/Users/josh/Developer/zeststream-v2-fresh/vercel.json"
+      ],
+      "needs_owner_decision": [
+        "confirm canonical Infisical project id",
+        "confirm canonical Supabase project ref",
+        "confirm Vercel project id or write non-applicable disposition"
+      ]
+    },
+    "zeststream-platform": {
+      "known_state": "Package/platform monorepo with Supabase/Postgres-related packages and no root .zs-tenant.yaml. It may need a non-applicable disposition rather than a runtime tenant row.",
+      "source_refs": [
+        "/Users/josh/Developer/zeststream-platform/README.md",
+        "/Users/josh/Developer/zeststream-platform/packages/runtime-env/README.md",
+        "/Users/josh/Developer/zeststream-platform/packages/postgres-tenant/README.md",
+        "/Users/josh/Developer/zeststream-platform/packages/supabase-auth-middleware/README.md"
+      ],
+      "needs_owner_decision": [
+        "decide whether this is a deployable consumer repo or a package substrate",
+        "if package substrate, write explicit tenant_registry_disposition receipt"
+      ]
+    }
+  },
+  "flywheel_boundary": "Flywheel produced value-blind evidence and did not mutate the SkillOS-owned registry or dirty Wave 2 repos."
+}

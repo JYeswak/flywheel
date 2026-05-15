@@ -1,0 +1,69 @@
+{
+  "schema_version": "flywheel.l168_skillos_registry_input.v1",
+  "bead_id": "flywheel-lp1fr",
+  "wave": 4,
+  "scope": "clone-first tenant registry/disposition rollout",
+  "created_at": "2026-05-15T18:27:00Z",
+  "source_preflight_ref": ".flywheel/evidence/flywheel-lp1fr/wave4-tenant-preflight-20260515T1822Z.json",
+  "target_registry": "/Users/josh/.claude/skills/infisical-secrets/data/project-mappings.yaml",
+  "registry_authority": "skillos:1 canonical-locator",
+  "flywheel_boundary": "Flywheel gathered value-blind repo evidence and disposition receipts. SkillOS owns applying/adapting/rejecting the canonical registry and any /zs:project-bootstrap declaration rewrites.",
+  "rows": [
+    {
+      "slug": "clutterfreespaces",
+      "repo": "/Users/josh/Developer/clutterfreespaces",
+      "current_failures": [
+        "registry_row_missing",
+        "repo_declaration_schema_mismatch",
+        "repo_declaration_slug_mismatch"
+      ],
+      "classification": "tenant_registry_row_and_declaration_adapter_required",
+      "known_non_secret_identifiers": {
+        "infisical_project_id": "f8a53408-53f2-4213-9bfb-7b5154d032f3",
+        "infisical_project_source": "/Users/josh/Developer/clutterfreespaces/.infisical.json",
+        "legacy_declaration_schema_version": 1,
+        "legacy_tenant_slug": "cfs",
+        "expected_l168_slug": "clutterfreespaces",
+        "supabase_candidate_project_ref": "hsmyagcerajgjmlljtmx",
+        "supabase_candidate_project_url": "https://hsmyagcerajgjmlljtmx.supabase.co",
+        "candidate_server_keys": [
+          "SUPABASE_URL",
+          "SUPABASE_SERVICE_ROLE_KEY"
+        ],
+        "candidate_client_keys": [
+          "NEXT_PUBLIC_SUPABASE_URL",
+          "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
+        ]
+      },
+      "evidence_refs": [
+        "/Users/josh/Developer/clutterfreespaces/.infisical.json",
+        "/Users/josh/Developer/clutterfreespaces/.zs-tenant.yaml"
+      ],
+      "skillos_needed_decision": [
+        "confirm whether clutterfreespaces should use shared ZestStream Supabase hsmyagcerajgjmlljtmx or receive a dedicated CFS Supabase row",
+        "add canonical registry row after confirming canonical key names",
+        "preserve the existing rich CFS declaration content while adding the top-level skillos.tenant_routing_repo_declaration.v1 fields required by L168"
+      ]
+    },
+    {
+      "slug": "blackfoot-telecom",
+      "repo": null,
+      "current_failures": [
+        "registry_row_missing"
+      ],
+      "classification": "skip_with_reason_until_repo_clone_available",
+      "disposition_ref": ".flywheel/evidence/flywheel-lp1fr/blackfoot-telecom-tenant-disposition-20260515T1827Z.json"
+    },
+    {
+      "slug": "picoz",
+      "repo": "/Users/josh/Developer/picoz",
+      "current_failures": [
+        "registry_row_missing",
+        "repo_declaration_missing"
+      ],
+      "classification": "skip_with_reason_until_non_supabase_secret_context_adapter_exists",
+      "disposition_ref": ".flywheel/evidence/flywheel-lp1fr/picoz-tenant-disposition-20260515T1827Z.json"
+    }
+  ],
+  "no_secret_values_included": true
+}

@@ -1,0 +1,17 @@
+{
+  "schema_version": "flywheel.tenant_registry_disposition.v1",
+  "slug": "picoz",
+  "status": "skip_with_reason",
+  "registry_row_required": false,
+  "repo_declaration_required": false,
+  "reason": "picoz is a safety-critical personal trading research repo with market/API credentials and local/Postgres migration history, but no Supabase tenant ref or repo-local Infisical workspace declaration was found. Forcing it into the current Supabase-shaped L168 registry would be false precision. It needs a SkillOS adapter for non-Supabase secret contexts before L168 can become a hard deploy gate for this class.",
+  "evidence_refs": [
+    "/Users/josh/Developer/picoz/README.md",
+    "/Users/josh/Developer/picoz/pyproject.toml",
+    "/Users/josh/Developer/polymarket-pico-z/README.md",
+    "/Users/josh/Developer/polymarket-pico-z/pyproject.toml",
+    ".flywheel/evidence/flywheel-lp1fr/wave4-tenant-preflight-20260515T1822Z.json"
+  ],
+  "created_at": "2026-05-15T18:27:00Z",
+  "created_by": "flywheel"
+}
