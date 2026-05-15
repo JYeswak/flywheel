@@ -1,0 +1,164 @@
+{
+  "action_count": 9,
+  "actions": [
+    {
+      "action": "decision_required",
+      "missing_fields": [
+        "canonical_keys"
+      ],
+      "needed_decisions": [
+        "whether VRTX needs a root .zs-tenant.yaml despite dirty repo state",
+        "whether no Vercel project row is acceptable for this n8n/Postgres engagement"
+      ],
+      "slug": "vrtx",
+      "source_ref": ".flywheel/evidence/flywheel-1wsv7/skillos-wave2-registry-input-20260515T1815Z.json",
+      "status": "blocked_until_decision"
+    },
+    {
+      "action": "decision_required",
+      "missing_fields": [
+        "infisical_project_id",
+        "supabase.project_ref",
+        "supabase.project_url",
+        "canonical_keys"
+      ],
+      "needed_decisions": [
+        "confirm canonical Infisical project id",
+        "confirm canonical Supabase project ref",
+        "confirm Vercel project id or write non-applicable disposition"
+      ],
+      "slug": "zeststream-v2-fresh",
+      "source_ref": ".flywheel/evidence/flywheel-1wsv7/skillos-wave2-registry-input-20260515T1815Z.json",
+      "status": "blocked_until_decision"
+    },
+    {
+      "action": "decision_required",
+      "missing_fields": [
+        "infisical_project_id",
+        "supabase.project_ref",
+        "supabase.project_url",
+        "canonical_keys"
+      ],
+      "needed_decisions": [
+        "decide whether this is a deployable consumer repo or a package substrate",
+        "if package substrate, write explicit tenant_registry_disposition receipt"
+      ],
+      "slug": "zeststream-platform",
+      "source_ref": ".flywheel/evidence/flywheel-1wsv7/skillos-wave2-registry-input-20260515T1815Z.json",
+      "status": "blocked_until_decision"
+    },
+    {
+      "action": "decision_required",
+      "missing_fields": [
+        "canonical_keys"
+      ],
+      "needed_decisions": [
+        "confirm whether zesttube should use zesty-swarm as the registry infisical_project_id or receive a dedicated ZestTube/ZestStream media project row",
+        "confirm canonical_keys for SUPABASE_SERVICE_ROLE_KEY and any additional ZestTube tenant-bound deploy keys",
+        "derive/write root .zs-tenant.yaml via the canonical SkillOS /zs:project-bootstrap surface after registry row is accepted"
+      ],
+      "slug": "zesttube",
+      "source_ref": ".flywheel/evidence/flywheel-hsdb9/skillos-wave3-registry-input-20260515T1820Z.json",
+      "status": "blocked_until_decision"
+    },
+    {
+      "action": "apply_disposition_receipt",
+      "disposition_ref": ".flywheel/evidence/flywheel-hsdb9/agent-ui-tenant-disposition-20260515T1820Z.json",
+      "slug": "agent-ui",
+      "source_ref": ".flywheel/evidence/flywheel-hsdb9/skillos-wave3-registry-input-20260515T1820Z.json",
+      "status": "ready"
+    },
+    {
+      "action": "apply_disposition_receipt",
+      "disposition_ref": ".flywheel/evidence/flywheel-hsdb9/flywheel_gateway-tenant-disposition-20260515T1820Z.json",
+      "slug": "flywheel_gateway",
+      "source_ref": ".flywheel/evidence/flywheel-hsdb9/skillos-wave3-registry-input-20260515T1820Z.json",
+      "status": "ready"
+    },
+    {
+      "action": "apply_registry_row_and_repo_declaration",
+      "evidence_refs": [
+        "/Users/josh/Developer/clutterfreespaces/.infisical.json",
+        "/Users/josh/Developer/clutterfreespaces/.zs-tenant.yaml"
+      ],
+      "notes": [
+        "confirm whether clutterfreespaces should use shared ZestStream Supabase hsmyagcerajgjmlljtmx or receive a dedicated CFS Supabase row",
+        "add canonical registry row after confirming canonical key names",
+        "preserve the existing rich CFS declaration content while adding the top-level skillos.tenant_routing_repo_declaration.v1 fields required by L168"
+      ],
+      "registry_row": {
+        "canonical_keys": {
+          "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": {
+            "expected_ref_claim": "hsmyagcerajgjmlljtmx",
+            "validator": "supabase_jwt_ref_claim_equals"
+          },
+          "NEXT_PUBLIC_SUPABASE_URL": {
+            "expected_value": "https://hsmyagcerajgjmlljtmx.supabase.co",
+            "validator": "equals"
+          },
+          "SUPABASE_SERVICE_ROLE_KEY": {
+            "expected_ref_claim": "hsmyagcerajgjmlljtmx",
+            "validator": "supabase_jwt_ref_claim_equals"
+          },
+          "SUPABASE_URL": {
+            "expected_value": "https://hsmyagcerajgjmlljtmx.supabase.co",
+            "validator": "equals"
+          }
+        },
+        "description": "clutterfreespaces tenant routing row",
+        "infisical_project_id": "f8a53408-53f2-4213-9bfb-7b5154d032f3",
+        "supabase": {
+          "pooler_mode": "dedicated",
+          "project_ref": "hsmyagcerajgjmlljtmx",
+          "project_url": "https://hsmyagcerajgjmlljtmx.supabase.co"
+        }
+      },
+      "repo_declaration_overlay": {
+        "deploy_targets": [
+          {
+            "env": "production",
+            "keys": [
+              "SUPABASE_URL",
+              "SUPABASE_SERVICE_ROLE_KEY",
+              "NEXT_PUBLIC_SUPABASE_URL",
+              "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY"
+            ],
+            "kind": "tenant-bound-runtime"
+          }
+        ],
+        "expected_supabase_ref": "hsmyagcerajgjmlljtmx",
+        "infisical_project_id": "f8a53408-53f2-4213-9bfb-7b5154d032f3",
+        "migration_note": "Preserve existing declaration content; add these top-level SkillOS v1 fields without deleting repo-specific metadata.",
+        "project_slug": "clutterfreespaces",
+        "schema_version": "skillos.tenant_routing_repo_declaration.v1"
+      },
+      "slug": "clutterfreespaces",
+      "source_ref": ".flywheel/evidence/flywheel-lp1fr/skillos-wave4-registry-input-20260515T1827Z.json",
+      "status": "ready"
+    },
+    {
+      "action": "apply_disposition_receipt",
+      "disposition_ref": ".flywheel/evidence/flywheel-lp1fr/blackfoot-telecom-tenant-disposition-20260515T1827Z.json",
+      "slug": "blackfoot-telecom",
+      "source_ref": ".flywheel/evidence/flywheel-lp1fr/skillos-wave4-registry-input-20260515T1827Z.json",
+      "status": "ready"
+    },
+    {
+      "action": "apply_disposition_receipt",
+      "disposition_ref": ".flywheel/evidence/flywheel-lp1fr/picoz-tenant-disposition-20260515T1827Z.json",
+      "slug": "picoz",
+      "source_ref": ".flywheel/evidence/flywheel-lp1fr/skillos-wave4-registry-input-20260515T1827Z.json",
+      "status": "ready"
+    }
+  ],
+  "decision_required_count": 4,
+  "generated_at": "2026-05-15T190200Z",
+  "ready_action_count": 5,
+  "schema_version": "flywheel.l168_registry_patch_plan.v1",
+  "source_evidence_refs": [
+    ".flywheel/evidence/flywheel-1wsv7/skillos-wave2-registry-input-20260515T1815Z.json",
+    ".flywheel/evidence/flywheel-hsdb9/skillos-wave3-registry-input-20260515T1820Z.json",
+    ".flywheel/evidence/flywheel-lp1fr/skillos-wave4-registry-input-20260515T1827Z.json"
+  ],
+  "status": "ready_with_decisions"
+}
