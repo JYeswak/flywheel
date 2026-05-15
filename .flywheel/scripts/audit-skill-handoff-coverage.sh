@@ -11,7 +11,7 @@ NOW_EPOCH="${AUDIT_SKILL_HANDOFF_NOW_EPOCH:-$(date +%s)}"
 
 usage() {
   cat <<'EOF'
-usage: audit-skill-handoff-coverage.sh [--period-days N] [--json]
+usage: audit-skill-handoff-coverage.sh [--period-days N] [--json] [doctor|--doctor]
 
 Walk recent SKILL.md files and report missing flywheel -> skillos handoff
 coverage. This script is read-only against SkillOS state.
@@ -25,8 +25,10 @@ Environment overrides:
 EOF
 }
 
+DOCTOR=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    doctor|--doctor) DOCTOR=1; shift ;;
     --period-days) PERIOD_DAYS="${2:-}"; shift 2 ;;
     --period-days=*) PERIOD_DAYS="${1#--period-days=}"; shift ;;
     --json|--no-color|--no-emoji) shift ;;
@@ -35,6 +37,85 @@ while [[ $# -gt 0 ]]; do
     *) printf 'ERROR: unknown arg %s\n' "$1" >&2; usage >&2; exit 2 ;;
   esac
 done
+
+doctor_emit() {
+  local name="$1" status="$2" detail="$3"
+  jq -nc --arg name "$name" --arg status "$status" --arg detail "$detail" \
+    '{name:$name,status:$status,detail:$detail}'
+}
+
+run_doctor() {
+  local checks=()
+  local status="pass"
+  local root_count=0
+  local root
+
+  if command -v jq >/dev/null 2>&1; then
+    checks+=("$(doctor_emit "jq_available" "pass" "$(command -v jq)")")
+  else
+    printf '{"schema":"audit-skill-handoff-coverage.doctor.v1","command":"doctor","status":"fail","mode":"read_only","mutates":false,"checks":[{"name":"jq_available","status":"fail","detail":"jq not found"}]}\n'
+    return 1
+  fi
+
+  if command -v python3 >/dev/null 2>&1; then
+    checks+=("$(doctor_emit "python3_available" "pass" "$(command -v python3)")")
+  else
+    checks+=("$(doctor_emit "python3_available" "fail" "python3 not found")")
+    status="fail"
+  fi
+
+  IFS=":" read -r -a roots <<<"$SKILL_ROOTS"
+  for root in "${roots[@]}"; do
+    [[ -d "$root" ]] && root_count=$((root_count + 1))
+  done
+  if [[ "$root_count" -gt 0 ]]; then
+    checks+=("$(doctor_emit "skill_roots_readable" "pass" "readable_roots=$root_count")")
+  else
+    checks+=("$(doctor_emit "skill_roots_readable" "warn" "no configured skill roots are readable")")
+    [[ "$status" == "pass" ]] && status="warn"
+  fi
+
+  if [[ -f "$REQUIRED_SKILLS_FILE" ]]; then
+    checks+=("$(doctor_emit "required_skills_file_readable" "pass" "$REQUIRED_SKILLS_FILE")")
+  else
+    checks+=("$(doctor_emit "required_skills_file_readable" "warn" "$REQUIRED_SKILLS_FILE missing; audit falls back to recent skill mtimes")")
+    [[ "$status" == "pass" ]] && status="warn"
+  fi
+
+  if [[ -s "$DISPATCH_LOG" ]]; then
+    checks+=("$(doctor_emit "dispatch_log_readable" "pass" "$DISPATCH_LOG")")
+  else
+    checks+=("$(doctor_emit "dispatch_log_readable" "warn" "$DISPATCH_LOG missing or empty")")
+    [[ "$status" == "pass" ]] && status="warn"
+  fi
+
+  if [[ -d "$SKILLOS_STATE_DIR" ]]; then
+    checks+=("$(doctor_emit "skillos_state_dir_readable" "pass" "$SKILLOS_STATE_DIR")")
+  else
+    checks+=("$(doctor_emit "skillos_state_dir_readable" "warn" "$SKILLOS_STATE_DIR missing; receipt matching will be empty")")
+    [[ "$status" == "pass" ]] && status="warn"
+  fi
+
+  checks+=("$(doctor_emit "doctor_read_only" "pass" "doctor inspects prerequisites only and does not scan SkillOS receipts or write dispatch rows")")
+
+  if [[ "$PERIOD_DAYS" =~ ^[0-9]+$ && "$PERIOD_DAYS" -ge 1 ]]; then
+    checks+=("$(doctor_emit "period_days_valid" "pass" "$PERIOD_DAYS")")
+  else
+    checks+=("$(doctor_emit "period_days_valid" "fail" "$PERIOD_DAYS")")
+    status="fail"
+  fi
+
+  printf '%s\n' "${checks[@]}" | jq -s \
+    --arg status "$status" \
+    --argjson period_days "$PERIOD_DAYS" \
+    --arg skill_roots "$SKILL_ROOTS" \
+    --arg required_skills_file "$REQUIRED_SKILLS_FILE" \
+    --arg dispatch_log "$DISPATCH_LOG" \
+    --arg skillos_state_dir "$SKILLOS_STATE_DIR" \
+    '{schema:"audit-skill-handoff-coverage.doctor.v1",command:"doctor",status:$status,mode:"read_only",mutates:false,period_days:$period_days,skill_roots:($skill_roots | split(":")),required_skills_file:$required_skills_file,dispatch_log:$dispatch_log,skillos_state_dir:$skillos_state_dir,checks:.}'
+
+  [[ "$status" == "fail" ]] && return 1 || return 0
+}
 
 command -v jq >/dev/null 2>&1 || {
   printf 'ERROR: jq is required\n' >&2
@@ -48,6 +129,11 @@ command -v python3 >/dev/null 2>&1 || {
 if ! [[ "$PERIOD_DAYS" =~ ^[0-9]+$ ]] || [[ "$PERIOD_DAYS" -lt 1 ]]; then
   printf 'ERROR: --period-days must be a positive integer\n' >&2
   exit 2
+fi
+
+if [[ "$DOCTOR" -eq 1 ]]; then
+  run_doctor
+  exit $?
 fi
 
 TMPDIR_AUDIT="$(mktemp -d "${TMPDIR:-/tmp}/audit-skill-handoff.XXXXXX")"

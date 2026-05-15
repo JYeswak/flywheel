@@ -56,6 +56,22 @@ env \
   AUDIT_SKILL_HANDOFF_REQUIRED_SKILLS="$TMP/required-skills.txt" \
   AUDIT_SKILL_HANDOFF_DISPATCH_LOG="$TMP/dispatch-log.jsonl" \
   AUDIT_SKILL_HANDOFF_SKILLOS_STATE_DIR="$TMP/skillos-state" \
+  "$SCRIPT" doctor --json >"$TMP/doctor.json"
+assert_jq "$TMP/doctor.json" '.schema == "audit-skill-handoff-coverage.doctor.v1" and .command == "doctor" and .mode == "read_only" and .mutates == false and .status == "pass" and ([.checks[] | select(.name == "doctor_read_only").status][0] == "pass")' "doctor emits read-only pass envelope"
+
+env \
+  AUDIT_SKILL_HANDOFF_SKILL_ROOTS="$TMP/skills" \
+  AUDIT_SKILL_HANDOFF_REQUIRED_SKILLS="$TMP/required-skills.txt" \
+  AUDIT_SKILL_HANDOFF_DISPATCH_LOG="$TMP/dispatch-log.jsonl" \
+  AUDIT_SKILL_HANDOFF_SKILLOS_STATE_DIR="$TMP/skillos-state" \
+  "$SCRIPT" --doctor >"$TMP/doctor-alias.json"
+assert_jq "$TMP/doctor-alias.json" '.command == "doctor" and .mutates == false' "--doctor aliases doctor"
+
+env \
+  AUDIT_SKILL_HANDOFF_SKILL_ROOTS="$TMP/skills" \
+  AUDIT_SKILL_HANDOFF_REQUIRED_SKILLS="$TMP/required-skills.txt" \
+  AUDIT_SKILL_HANDOFF_DISPATCH_LOG="$TMP/dispatch-log.jsonl" \
+  AUDIT_SKILL_HANDOFF_SKILLOS_STATE_DIR="$TMP/skillos-state" \
   "$SCRIPT" --json >"$TMP/out.json"
 
 assert_jq "$TMP/out.json" '.period_days == 30 and .skills_checked == 5 and .candidate_source == "required_skills_file"' "json envelope counts required skills"
