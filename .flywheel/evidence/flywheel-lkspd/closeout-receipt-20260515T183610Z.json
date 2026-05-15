@@ -1,0 +1,63 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-lkspd",
+  "parent_bead_id": "flywheel-3kq",
+  "closed_at": "2026-05-15T18:36:10Z",
+  "status": "closed",
+  "scope": [
+    ".flywheel/scripts/agent-mail-send-redacted.sh",
+    ".flywheel/scripts/test-agent-mail-redact.sh",
+    ".flywheel/evidence/flywheel-lkspd/trap-inventory-after-20260515T1834Z.json"
+  ],
+  "change": "Added EXIT/ERR cleanup tracking for agent-mail redaction temp input files and a regression proving failed redaction helpers leave no agent-mail-redact-input.* files behind.",
+  "why": "flywheel-3kq is eliminating temp-file and mutation rollback traps at the script level. This slice removes a token-adjacent temp-file leak path from the Agent Mail redacted sender.",
+  "inventory_delta": {
+    "before": {
+      "mutating_like_with_exit_or_err_trap": 89,
+      "mutating_like_without_exit_or_err_trap": 292,
+      "coverage_pct": 23.36,
+      "sample_without_trap_contains_agent_mail_send_redacted": true
+    },
+    "after": {
+      "receipt_ref": ".flywheel/evidence/flywheel-lkspd/trap-inventory-after-20260515T1834Z.json",
+      "mutating_like_with_exit_or_err_trap": 90,
+      "mutating_like_without_exit_or_err_trap": 291,
+      "coverage_pct": 23.62,
+      "sample_without_trap_contains_agent_mail_send_redacted": false
+    }
+  },
+  "validation": [
+    {
+      "command": "bash -n .flywheel/scripts/agent-mail-send-redacted.sh .flywheel/scripts/test-agent-mail-redact.sh",
+      "status": "pass"
+    },
+    {
+      "command": "bash .flywheel/scripts/test-agent-mail-redact.sh",
+      "status": "pass",
+      "proof": "Synthetic token absent from dispatch text, wrapper logs, and pane-visible args; failing redact helper leaves no temp input files."
+    },
+    {
+      "command": "bash tests/agent-mail-send-redacted-canonical-cli.sh",
+      "status": "pass",
+      "summary": "13/0"
+    },
+    {
+      "command": "shellcheck -e SC2317 .flywheel/scripts/agent-mail-send-redacted.sh .flywheel/scripts/test-agent-mail-redact.sh tests/agent-mail-send-redacted-canonical-cli.sh",
+      "status": "pass",
+      "note": "SC2317 is an existing canonical scaffold reachability warning outside this slice."
+    },
+    {
+      "command": "br dep cycles",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check -- .flywheel/scripts/agent-mail-send-redacted.sh .flywheel/scripts/test-agent-mail-redact.sh",
+      "status": "pass"
+    }
+  ],
+  "claim": "targeted_trap_adoption_slice_only",
+  "not_claimed": [
+    "flywheel-3kq parent complete",
+    "trap inventory fully green"
+  ]
+}

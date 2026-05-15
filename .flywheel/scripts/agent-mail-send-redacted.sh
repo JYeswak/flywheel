@@ -241,6 +241,15 @@ if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
 fi
 # ====== END canonical-cli scaffold ======
 NTM="${AGENT_MAIL_SEND_REDACTED_NTM_BIN:-/Users/josh/.local/bin/ntm}"
+AGENT_MAIL_REDACT_TMP_FILES=()
+
+cleanup_redact_tmp_files(){
+  local tmp_file
+  for tmp_file in "${AGENT_MAIL_REDACT_TMP_FILES[@]}"; do
+    [[ -n "$tmp_file" ]] && rm -f "$tmp_file"
+  done
+}
+trap cleanup_redact_tmp_files EXIT ERR
 
 usage(){ printf '%s\n' \
   'Usage:' \
@@ -277,7 +286,10 @@ scrub_text(){
 redact_text(){
   local text="$1" tmp out
   need jq; need perl
-  tmp="$(mktemp "${TMPDIR:-/tmp}/agent-mail-redact-input.XXXXXX")"; chmod 600 "$tmp"; printf '%s' "$text" >"$tmp"
+  tmp="$(mktemp "${TMPDIR:-/tmp}/agent-mail-redact-input.XXXXXX")"
+  AGENT_MAIL_REDACT_TMP_FILES+=("$tmp")
+  chmod 600 "$tmp"
+  printf '%s' "$text" >"$tmp"
   if ! out="$("$NTM" redact preview --json --file "$tmp" | jq -r '.output')"; then rm -f "$tmp"; return 1; fi
   rm -f "$tmp"
   printf '%s' "$out" | scrub_text
