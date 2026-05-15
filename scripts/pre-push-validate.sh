@@ -74,6 +74,13 @@ CI_TESTS=(
 SLOW_TESTS=(
   "tests/live-site-probe.sh"
   "tests/agent-lane-probe.sh"
+  "tests/journey-smoke.sh"
+)
+
+# Python scans that gate workflows (treated like tests but called via python3).
+# Format: "label|command"
+PYTHON_GATES=(
+  "depersonalize-site|python3 scripts/depersonalize.py --scan-table --root site --json"
 )
 
 mode="all"
@@ -106,7 +113,7 @@ if [[ $list_only -eq 1 ]]; then
   exit 0
 fi
 
-declare -a tests_to_run
+declare -a tests_to_run=()
 for t in "${CI_TESTS[@]}"; do
   if [[ -n "$filter" && "$t" != *"$filter"* ]]; then continue; fi
   tests_to_run+=("$t")
@@ -124,7 +131,33 @@ fail=0
 failed=()
 start_ts=$(date +%s)
 
-printf '=== pre-push-validate: running %d tests ===\n' "$total"
+total=$((${#tests_to_run[@]} + ${#PYTHON_GATES[@]}))
+printf '=== pre-push-validate: running %d tests + %d python-gates ===\n' "${#tests_to_run[@]}" "${#PYTHON_GATES[@]}"
+
+# Python gates run first since they are the cheapest (site.yml gate ~1s)
+for gate in "${PYTHON_GATES[@]}"; do
+  label="${gate%%|*}"
+  cmd="${gate#*|}"
+  g_start=$(date +%s)
+  if eval "$cmd" >/tmp/pre-push-validate-last.out 2>&1; then
+    g_elapsed=$(( $(date +%s) - g_start ))
+    if grep -q '"status": *"pass"' /tmp/pre-push-validate-last.out 2>/dev/null || grep -q '"exit_code": *0' /tmp/pre-push-validate-last.out 2>/dev/null; then
+      printf '  PASS  python-gate:%s (%ds)\n' "$label" "$g_elapsed"
+      pass=$((pass + 1))
+    else
+      printf '  FAIL  python-gate:%s (%ds) — exit 0 but status not pass\n' "$label" "$g_elapsed"
+      fail=$((fail + 1))
+      failed+=("python-gate:$label")
+      tail -5 /tmp/pre-push-validate-last.out | sed 's/^/        | /'
+    fi
+  else
+    g_elapsed=$(( $(date +%s) - g_start ))
+    printf '  FAIL  python-gate:%s (%ds)\n' "$label" "$g_elapsed"
+    fail=$((fail + 1))
+    failed+=("python-gate:$label")
+    tail -10 /tmp/pre-push-validate-last.out | sed 's/^/        | /'
+  fi
+done
 
 for t in "${tests_to_run[@]}"; do
   if [[ ! -f "$t" ]]; then
