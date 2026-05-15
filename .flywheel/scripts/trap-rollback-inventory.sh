@@ -137,6 +137,33 @@ def strip_shell_comment_lines(text: str) -> str:
         lines.append(line)
     return "\n".join(lines)
 
+def strip_quoted_literals(text: str) -> str:
+    out = []
+    quote = None
+    escaped = False
+    for ch in text:
+        if quote == '"':
+            if escaped:
+                escaped = False
+                continue
+            if ch == "\\":
+                escaped = True
+                continue
+            if ch == '"':
+                quote = None
+                out.append('""')
+            continue
+        if quote == "'":
+            if ch == "'":
+                quote = None
+                out.append("''")
+            continue
+        if ch in {"'", '"'}:
+            quote = ch
+            continue
+        out.append(ch)
+    return "".join(out)
+
 for rel_raw in raw.split(b"\0"):
     if not rel_raw:
         continue
@@ -158,7 +185,7 @@ for rel_raw in raw.split(b"\0"):
         text = path.read_text(errors="replace")
     except OSError:
         text = ""
-    executable_text = strip_shell_comment_lines(text)
+    executable_text = strip_quoted_literals(strip_shell_comment_lines(text))
     if declared_read_only_re.search(text):
         declared_read_only_excluded.append(rel)
         continue
