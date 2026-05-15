@@ -47,14 +47,27 @@ assert_jq "$TMP/resolve.json" '.status == "active" and .identity_name == "RubyCr
 token="$TMP/new.token"
 printf '%s\n' 'new-token' >"$token"
 chmod 600 "$token"
-"$LOOP" identity --session flywheel --pane 3 --register --identity CyanBadger --token-path "$token" --project-key <flywheel-repo> --json >"$TMP/register.json"
+"$LOOP" identity --session flywheel --pane 3 --register --identity CyanBadger --token-path "$token" --project-key "<flywheel-repo>" --json >"$TMP/register.json"
 assert_jq "$TMP/register.json" '.status == "active" and .identity_name == "CyanBadger"' "register_identity"
+
+legacy_tokens="$TMP/legacy-stub.identity-tokens.jsonl"
+jq -nc '{ts:"2026-05-01T14:16:39Z",session:"flywheel",pane:3,identity:"StaleLocalStub",project:"<flywheel-repo>",registered_via:"local-stub"}' >"$legacy_tokens"
+lookup_identity="$(
+  FLYWHEEL_AGENT_MAIL_STATE_DIR="$FLYWHEEL_AGENT_MAIL_STATE_DIR" \
+  FLYWHEEL_IDENTITY_TOKENS="$legacy_tokens" \
+  "$ROOT/.flywheel/scripts/lookup-pane-identity.sh" flywheel 3
+)"
+if [[ "$lookup_identity" == "CyanBadger" ]]; then
+  pass "lookup_prefers_phase2_registry_over_legacy_stub"
+else
+  fail "lookup_prefers_phase2_registry_over_legacy_stub got=$lookup_identity"
+fi
 
 rotated="$TMP/rotated.token"
 printf '%s\n' 'rotated-token' >"$rotated"
 chmod 600 "$rotated"
 "$LOOP" identity --session {capability-control-plane} --pane 1 --register --identity BrightLake --token-path "$rotated" --project-key $HOME/Developer/{capability-control-plane} --predecessor-identity FoggyBear --rotation-reason compaction --json >"$TMP/rotate.json"
-assert_jq "$TMP/rotate.json" '.predecessor_identity == "FoggyBear" and .rotation_reason == "compaction-continuity" and (.predecessor_identity_chain | index("FoggyBear")) and .identity_primary_key.session == "{capability-control-plane}" and .identity_primary_key.pane == 1 and .identity_primary_key.fleet_mail_project_key == "$HOME/Developer/{capability-control-plane}" and .status == "active"' "rotation_records_tuple_predecessor_chain"
+assert_jq "$TMP/rotate.json" '.predecessor_identity == "FoggyBear" and .rotation_reason == "compaction-continuity" and (.predecessor_identity_chain | index("FoggyBear")) and .identity_primary_key.session == "{capability-control-plane}" and .identity_primary_key.pane == 1 and .identity_primary_key.fleet_mail_project_key == (env.HOME + "/Developer/{capability-control-plane}") and .status == "active"' "rotation_records_tuple_predecessor_chain"
 
 trigger_index=0
 for trigger in agent-mail-name-policy resolver-mcp-generated-identity compaction-continuity missing-token-recovery path-canonicalization strict-mode-preallocation; do
