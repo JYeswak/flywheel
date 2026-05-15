@@ -1,0 +1,78 @@
+{
+  "schema_version": "flywheel.hosted_install_contract_receipt.v0",
+  "bead_id": "flywheel-3p1v9",
+  "created_at": "2026-05-15T03:44:00Z",
+  "decision": "clone_or_release_tarball_first",
+  "hosted_install_endpoint_role": "checksum_mirror_only",
+  "standalone_curl_only_install_supported": false,
+  "summary": "The public first-run contract is clone or release tarball first, then run bash install.sh from inside that tree. https://flywheel.zeststream.ai/install.sh remains a checksum-mirrored release asset, not a curl-only standalone installer.",
+  "surfaces_aligned": [
+    "README.md",
+    "docs/getting-started/first-run.md",
+    "site/index.html",
+    "site/for-developers/index.html",
+    "docs/runbooks/public-user-journey-pack.md",
+    "docs/runbooks/release-cutover-authorization.md",
+    "scripts/publication_readiness.py",
+    ".github/workflows/ci.yml",
+    "tests/github-workflows.sh",
+    "tests/hosted-install-contract.sh"
+  ],
+  "validation": [
+    {
+      "command": "bash tests/hosted-install-contract.sh",
+      "status": "pass",
+      "summary": "14 pass / 0 fail"
+    },
+    {
+      "command": "bash tests/github-workflows.sh",
+      "status": "pass",
+      "summary": "112 pass / 0 fail"
+    },
+    {
+      "command": "bash tests/website-static.sh",
+      "status": "pass",
+      "summary": "154 pass / 0 fail"
+    },
+    {
+      "command": "bash tests/public-docs.sh",
+      "status": "pass",
+      "summary": "279 pass / 0 fail"
+    },
+    {
+      "command": "bash tests/public-user-journey-pack.sh",
+      "status": "pass",
+      "summary": "10 pass / 0 fail"
+    },
+    {
+      "command": "bash tests/publication-readiness.sh",
+      "status": "pass",
+      "summary": "72 pass / 0 fail"
+    },
+    {
+      "command": "python3 scripts/publication_readiness.py --release --json",
+      "status": "blocked_expected",
+      "summary": "Remaining blockers are live cutover facts only: remote_workflows_missing, remote_green_runs_missing, github_release_missing_or_draft, github_release_assets_missing, joshua_release_signoff_missing"
+    },
+    {
+      "command": "shellcheck tests/github-workflows.sh tests/hosted-install-contract.sh",
+      "status": "pass",
+      "summary": "No shellcheck findings"
+    },
+    {
+      "command": "python3 -m py_compile scripts/publication_readiness.py",
+      "status": "pass",
+      "summary": "Python syntax OK"
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass",
+      "summary": "No whitespace errors"
+    },
+    {
+      "command": "br dep cycles",
+      "status": "pass",
+      "summary": "No dependency cycles detected"
+    }
+  ]
+}

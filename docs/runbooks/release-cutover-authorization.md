@@ -56,6 +56,10 @@ staging pass as public-release completion.
 | Install proxy checksum parity | `install_proxy_checksum_mismatch` | `curl -fsSL https://flywheel.zeststream.ai/install.sh \| shasum -a 256` matches the checksum served at `https://flywheel.zeststream.ai/install.sh.sha256`. |
 | External review current | `external_review_gate_blocked` | `python3 scripts/validate_external_review.py --release --json` returns `status=pass`. |
 
+The install proxy proof is checksum parity only. It does not make the hosted
+script a curl-only installer; the public first-run contract remains clone or
+release tarball first, then `bash install.sh` from inside that tree.
+
 ## Signoff Boundary
 
 The signoff file is last. It must remain absent or pending until all real public

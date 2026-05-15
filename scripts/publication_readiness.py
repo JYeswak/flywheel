@@ -499,7 +499,7 @@ ACTION_BY_CODE = {
     },
     "install_proxy_checksum_mismatch": {
         "owner": "Flywheel",
-        "action": "Publish install.sh and install.sh.sha256 from the same release artifact set.",
+        "action": "Publish install.sh and install.sh.sha256 as checksum-mirrored assets from the same release artifact set; public install remains clone or release tarball first.",
         "command": "actual=\"$(curl -fsSL https://flywheel.zeststream.ai/install.sh | shasum -a 256 | awk '{print $1}')\"; expected=\"$(curl -fsSL https://flywheel.zeststream.ai/install.sh.sha256 | awk '{print $1}')\"; test \"$actual\" = \"$expected\"",
     },
     "joshua_release_signoff_missing": {

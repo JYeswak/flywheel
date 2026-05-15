@@ -42,6 +42,7 @@ jobs:
           bash tests/changelog.sh
           bash tests/github-workflows.sh
           bash tests/naming-conventions.sh
+          bash tests/hosted-install-contract.sh
           bash tests/context-routing-discipline.sh
           bash tests/agent-lane-probe.sh
           # tests/isolated-agent-lane-smoke.sh is substrate-coupled: its script
@@ -93,6 +94,7 @@ jobs:
             tests/changelog.sh \
             tests/github-workflows.sh \
             tests/naming-conventions.sh \
+            tests/hosted-install-contract.sh \
             tests/context-routing-discipline.sh \
             tests/agent-lane-probe.sh \
             tests/isolated-agent-lane-smoke.sh \

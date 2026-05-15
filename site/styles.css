@@ -944,6 +944,13 @@
   white-space: pre-wrap;
 }
 
+.terminal-stage .proof-note {
+  margin: 18px 0 0;
+  color: var(--zs-aa-muted-on-dark);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
 .contact-console.v2 {
   border-color: var(--zs-line);
   background: var(--zs-night);
