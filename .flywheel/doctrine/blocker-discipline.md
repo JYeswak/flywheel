@@ -61,6 +61,13 @@ When filing a blocker, MUST include:
 
 Per-tick blocker audit:
 
+0. **Beads-to-blocker bridge.** Before accepting the blocked queue as true
+   state, sync every `br status=blocked` row into
+   `.flywheel/state/blockers/<bead-id>.json` with
+   `.flywheel/scripts/bead-blocker-sync.py`. A blocked Bead without a blocker
+   JSON file is itself a blocker-discipline failure, because it cannot be
+   rechecked, auto-closed, or escalated by the tick chain.
+
 1. **Stale-blocker auto-escalation.** For each open blocker:
    - Read `last_verified_at`
    - If >24h old: AUTO-ESCALATE

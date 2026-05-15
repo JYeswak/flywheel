@@ -1,0 +1,31 @@
+{
+  "ac_check_interval_ticks": 1,
+  "acceptance_condition": "br show flywheel-sadm5 --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-sadm5\" and .status != \"blocked\"'",
+  "blocker_class": "ownership_or_registry_gate",
+  "blocker_id": "flywheel-sadm5",
+  "dependency_count": 0,
+  "dependent_count": 0,
+  "foundational_rule": "A Beads status=blocked row must have an executable blocker-discipline file before it can be treated as stable state.",
+  "issue_type": "feature",
+  "labels": [
+    "cross-orch",
+    "fleet-bootstrap",
+    "joshua-bandwidth-ask",
+    "l168",
+    "tenant-routing"
+  ],
+  "last_verified_at": "2026-05-15T16:03:28Z",
+  "next_action": "Add the missing ownership or registry artifact and prove the propagator is blocked only where ownership says it should be.",
+  "priority": 0,
+  "remediation_required": true,
+  "schema_version": "flywheel.bead_blocker.v1",
+  "source": "beads",
+  "source_bead_id": "flywheel-sadm5",
+  "source_repo": "/Users/josh/Developer/flywheel",
+  "source_row_sha256": "13ac040ade0419cafb1b91d43a58d2ea39cd47b22074e2364ec963780ed28cf3",
+  "source_status": "blocked",
+  "status": "open",
+  "synced_at": "2026-05-15T16:08:00Z",
+  "title": "L168 fleet-bootstrap dispatch waves (per-repo zs-project-bootstrap rollout)",
+  "verification_path": "br show flywheel-sadm5 --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-sadm5\" and .status == \"blocked\"'"
+}

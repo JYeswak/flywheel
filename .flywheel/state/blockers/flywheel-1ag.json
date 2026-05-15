@@ -1,0 +1,29 @@
+{
+  "ac_check_interval_ticks": 1,
+  "acceptance_condition": "br show flywheel-1ag --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-1ag\" and .status != \"blocked\"'",
+  "blocker_class": "runtime_config_wiring",
+  "blocker_id": "flywheel-1ag",
+  "dependency_count": 0,
+  "dependent_count": 0,
+  "foundational_rule": "A Beads status=blocked row must have an executable blocker-discipline file before it can be treated as stable state.",
+  "issue_type": "task",
+  "labels": [
+    "ntm",
+    "picoz-coord",
+    "upstream"
+  ],
+  "last_verified_at": "2026-05-15T16:03:28Z",
+  "next_action": "Prove the runtime loads the intended config file in the deployed path, then lock the fixture so drift becomes a test failure.",
+  "priority": 2,
+  "remediation_required": true,
+  "schema_version": "flywheel.bead_blocker.v1",
+  "source": "beads",
+  "source_bead_id": "flywheel-1ag",
+  "source_repo": "/Users/josh/Developer/flywheel",
+  "source_row_sha256": "0ea2d3f454a08ab9ae9c1aefb9398dddf89baa586376ed2eea853cb1f0f6d492",
+  "source_status": "blocked",
+  "status": "open",
+  "synced_at": "2026-05-15T16:08:00Z",
+  "title": "ntm-coordinator-config-toml-runtime-wiring-gap",
+  "verification_path": "br show flywheel-1ag --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-1ag\" and .status == \"blocked\"'"
+}
