@@ -199,7 +199,7 @@ case "$command" in
   scan) scan "$repo" "$max_without_trap" ;;
   validate) scan "$repo" "$max_without_trap" >/dev/null ;;
   doctor|health)
-    if [[ -d "$repo/.git" ]] && command -v git >/dev/null && command -v python3 >/dev/null && command -v jq >/dev/null; then
+    if command -v git >/dev/null && git -C "$repo" rev-parse --is-inside-work-tree >/dev/null 2>&1 && command -v python3 >/dev/null && command -v jq >/dev/null; then
       jq -nc --arg schema_version "$SCHEMA_VERSION" --arg command "$command" --arg repo "$repo" '{schema_version:$schema_version,command:$command,status:"pass",repo:$repo,checks:["git","python3","jq"]}'
     else
       jq -nc --arg schema_version "$SCHEMA_VERSION" --arg command "$command" --arg repo "$repo" '{schema_version:$schema_version,command:$command,status:"fail",repo:$repo}'

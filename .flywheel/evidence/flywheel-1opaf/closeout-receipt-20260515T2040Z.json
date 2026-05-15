@@ -1,0 +1,60 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-1opaf",
+  "parent_bead_id": "flywheel-3kq",
+  "closed_at": "2026-05-15T20:40:00Z",
+  "summary": "Adopted EXIT cleanup for Flywheel's agents-md fleet propagator temp files and fixed the trap inventory doctor so it works in Git worktrees.",
+  "why_flywheel_centric": "agents-md-fleet-propagator.sh is a Flywheel-owned cross-repo doctrine propagation surface. Adding process-level tmp cleanup reduces partial-state risk on a script that coordinates fleet doctrine, while preserving the ownership gate behavior that protects peer-owned product/client surfaces.",
+  "changed_files": [
+    ".flywheel/scripts/agents-md-fleet-propagator.sh",
+    ".flywheel/scripts/trap-rollback-inventory.sh",
+    ".flywheel/evidence/flywheel-1opaf/trap-inventory-after-20260515T2040Z.json"
+  ],
+  "mechanical_delta": {
+    "trap_inventory_before": {
+      "tracked_shell_scripts_scanned": 393,
+      "mutating_like_scripts": 382,
+      "mutating_like_with_exit_or_err_trap": 90,
+      "mutating_like_without_exit_or_err_trap": 292,
+      "coverage_pct": 23.56
+    },
+    "trap_inventory_after": {
+      "tracked_shell_scripts_scanned": 393,
+      "mutating_like_scripts": 382,
+      "mutating_like_with_exit_or_err_trap": 91,
+      "mutating_like_without_exit_or_err_trap": 291,
+      "coverage_pct": 23.82
+    },
+    "surface_hardened": ".flywheel/scripts/agents-md-fleet-propagator.sh",
+    "doctor_portability_fix": ".flywheel/scripts/trap-rollback-inventory.sh now accepts Git worktrees where .git is a file"
+  },
+  "validation": [
+    {
+      "command": "bash tests/agents-md-fleet-propagator.sh",
+      "result": "pass 5/5 edges 4/4"
+    },
+    {
+      "command": "bash tests/agents-md-fleet-propagator-large-ledger.sh",
+      "result": "pass 7/0 including no leftover fleet-prop-rows tmpfiles"
+    },
+    {
+      "command": "bash tests/trap-rollback-inventory.sh",
+      "result": "pass 10/0"
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/agents-md-fleet-propagator.sh .flywheel/scripts/trap-rollback-inventory.sh tests/agents-md-fleet-propagator.sh tests/agents-md-fleet-propagator-large-ledger.sh tests/trap-rollback-inventory.sh",
+      "result": "pass"
+    },
+    {
+      "command": ".flywheel/scripts/trap-rollback-inventory.sh scan --repo . --json",
+      "result": "warn; with_trap=91; without_trap=291; coverage_pct=23.82"
+    }
+  ],
+  "claim_boundary": {
+    "parent_closed": false,
+    "reason": "flywheel-3kq is a broad adoption queue with 291 remaining mutating-like operational shell surfaces without EXIT/ERR/RETURN traps.",
+    "no_cross_repo_mutation": true,
+    "ownership_gate_behavior_changed": false
+  },
+  "safe_local_work_remaining": true
+}
