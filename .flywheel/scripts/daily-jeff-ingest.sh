@@ -316,20 +316,33 @@ compare_and_snapshot() {
 
 fetch_url() {
   local url="$1" out="$2"
-  local attempt
-  for attempt in 1 2 3; do
-    if curl -fsSL --max-time 30 -A "flywheel-daily-jeff-ingest/1.0" "$url" -o "$out" 2>/dev/null; then
+  local attempt max_time attempts
+  max_time="${DAILY_JEFF_FETCH_MAX_TIME:-}"
+  attempts="${DAILY_JEFF_FETCH_ATTEMPTS:-}"
+  if [ -z "$max_time" ]; then
+    if [ "$DRY_RUN" -eq 1 ]; then max_time=5; else max_time=30; fi
+  fi
+  if [ -z "$attempts" ]; then
+    if [ "$DRY_RUN" -eq 1 ]; then attempts=1; else attempts=3; fi
+  fi
+  for attempt in $(seq 1 "$attempts"); do
+    if curl -fsSL --max-time "$max_time" -A "flywheel-daily-jeff-ingest/1.0" "$url" -o "$out" 2>/dev/null; then
       return 0
     fi
-    sleep "$attempt"
+    [ "$attempt" -ge "$attempts" ] || sleep "$attempt"
   done
   return 1
 }
 
 fetch_github() {
   local today="$1" out="$TMP_ROOT/github-atom.txt" repos="$TMP_ROOT/github-repos.txt"
+  local feed_seen=0 feed_limit
   : >"$out"
   : >"$repos"
+  feed_limit="${DAILY_JEFF_GITHUB_FEED_LIMIT:-}"
+  if [ -z "$feed_limit" ]; then
+    if [ "$DRY_RUN" -eq 1 ]; then feed_limit=8; else feed_limit=0; fi
+  fi
 
   if [ -x "$CHECK_SCRIPT" ] || [ -f "$CHECK_SCRIPT" ]; then
     if [ "$DRY_RUN" -eq 0 ]; then
@@ -356,6 +369,10 @@ fetch_github() {
     url="$(printf '%s' "$url" | awk '{$1=$1; print}')"
     case "$url" in
       https://github.com/*".atom")
+        feed_seen=$((feed_seen + 1))
+        if [ "$feed_limit" -gt 0 ] && [ "$feed_seen" -gt "$feed_limit" ]; then
+          continue
+        fi
         tmp="$TMP_ROOT/feed-$(printf '%s' "$url" | shasum -a 256 | awk '{print $1}').xml"
         if fetch_url "$url" "$tmp"; then
           printf 'SOURCE %s\n' "$url" >>"$out"
@@ -383,6 +400,9 @@ PY
         ;;
     esac
   done <"$SOURCES_FILE"
+  if [ "$feed_limit" -gt 0 ] && [ "$feed_seen" -gt "$feed_limit" ]; then
+    warn "GitHub atom dry-run feed limit applied: fetched ${feed_limit} of ${feed_seen}"
+  fi
 
   if have gh; then
     if gh api users/Dicklesworthstone/repos --paginate --jq '.[].name' >"$repos" 2>"$TMP_ROOT/gh-repos.err"; then
