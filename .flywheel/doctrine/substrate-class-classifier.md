@@ -1,7 +1,7 @@
 # Substrate-Class Classifier — Meadows L2 Paradigm Primitive
 
-**Status:** v0.1 draft — 2026-05-12 by flywheel:1
-**L-rule candidate:** L162 (standard 3-strike cadence; N=2 today on AKID-fixture-trip; NOT secrets-class exemption)
+**Status:** v0.2 promoted — 2026-05-15 by Codex
+**L-rule:** L162 (standard 3-strike cadence; N=3 reached 2026-05-14 on secret-bank fixture trip; NOT secrets-class exemption)
 **Owning bead:** flywheel-substrate-class-paradigm (parent)
 **Substrate class of this document:** `self-documentation`
 
@@ -17,7 +17,7 @@ Three recent traumas share one paradigm failure shape — the system cannot dist
 | L160 hook fires on its own AKID test fixture | 2026-05-12 (N=2 today) | PostToolUse hook halts agentic loop on canonical synthetic `AKIA…` sentinel | Detector cannot recognize its own test corpus |
 | 425 dirty files + 677 commits ahead in flywheel repo | accreted over weeks | Flywheel orchestrates client repos with discipline; can't keep its own | Cobbler's children — orchestrator exempt from its own standard |
 
-Per Donella Meadows (*Thinking in Systems*, ch. 5, p. 145): **when a system's mitigation has to be applied INSIDE the same boundary it's trying to protect, the abstraction is wrong.**
+Per Donella Meadows' systems-thinking and leverage-points work: **when a system's mitigation has to be applied INSIDE the same boundary it's trying to protect, the abstraction is wrong.**
 
 Adding more rules (L5), more negative feedback (L8), or bigger buffers (L11) **does not fix this**. The fix lives at L2 — the paradigm out of which the system arises.
 
@@ -110,6 +110,9 @@ This is **not secrets-class** (no irreversibility on incorrect classification �
 |---|---|---|
 | N=1 | 2026-05-12 | L160 fires on synthetic AKID in `tests/test_ntm_coordinator_wire.sh:110` (first occurrence this session) |
 | N=2 | 2026-05-12 | L160 fires again on same fixture in my secret-scan probe (this incident, ~4h later) |
-| N=3 | pending | One more same-day or same-week fire on test-fixture-class → SATURATION → canonical L-rule promotion |
+| N=3 | 2026-05-14 | Hook fires on `.flywheel/tests/fixtures/ntm-scrub-secret-scan/secret-bank.txt` after the fixture was missing both marker and path coverage → SATURATION → canonical L162 promotion |
 
-Until N=3 SATURATION, this ships as flywheel-local doctrine + memory rule + manifest. Cross-orch ratification (skillos, mobile-eats, alps, vrtx, zeststream-v2-fresh) follows the propagator-bmbub-class-aware-gate ship.
+After N=3 SATURATION, this ships as canonical L162 rule +
+flywheel-local doctrine + manifest. Cross-orch propagation still follows the
+ownership-gated propagator path; peer repos adopt only through their declared
+ownership class.

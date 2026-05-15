@@ -147,7 +147,7 @@ Reconciled from existing .flywheel/MISSION.md at 20260501T052023Z.
 - Enforcement: `.flywheel/scripts/validate-callback-before-close.sh` (git hygiene gate)
 - Enforcement: `.flywheel/scripts/dispatch-capacity-gate.sh` (dirty-tree dispatch block)
 - Enforcement: `.flywheel/scripts/loop-goal-gate.sh` (gated-loop halt check)
-- L-rule pending: flywheel-bszgl.2 (untracked_delta + substrate_classified mandatory)
+- L-rule: L162 substrate-class classifier before protection halt mandatory (`.flywheel/rules/L113-L162-substrate-class-classifier-before-protection-halt-mandatory.md`)
 
 ## Joshua Requests
 

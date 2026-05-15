@@ -1,7 +1,7 @@
 {
   "canonical_index": ".flywheel/AGENTS-CANONICAL.md",
   "round_trip_command": "cat .flywheel/rules/L*.md | shasum -a 256",
-  "rule_count": 112,
+  "rule_count": 113,
   "rules": [
     {
       "id": "L48",
@@ -1122,9 +1122,19 @@
       "status": "long_term",
       "title": "SKILL-CREATION-REQUIRES-SKILLOS-HANDOFF",
       "trauma_class": "skill-shipped-without-skillos-handoff"
+    },
+    {
+      "id": "L162",
+      "order": 113,
+      "path": ".flywheel/rules/L113-L162-substrate-class-classifier-before-protection-halt-mandatory.md",
+      "sha256": "b5e4faa395c818296af637cf2ae409b745c831380fad418725358c56b2fbcb09",
+      "shipped": "2026-05-15",
+      "status": "long_term",
+      "title": "SUBSTRATE-CLASS-CLASSIFIER-BEFORE-PROTECTION-HALT-MANDATORY",
+      "trauma_class": "protection-mechanism-self-blindness"
     }
   ],
-  "rules_body_sha256": "2349b70b857bf732b9ef954b1068e498667a5bbee69687fb94bb45db3c074007",
+  "rules_body_sha256": "cd0427ec14b0087db2a3c627c6409174a16885d97332826f8424ce2e991ccb36",
   "schema_version": "agents-canonical-shards/v1",
   "source": "AGENTS.md"
 }

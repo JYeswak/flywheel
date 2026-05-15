@@ -148,6 +148,7 @@ The full canonical L-rule bodies are sharded under `.flywheel/rules/`.
 | 110 | L169 — JSM-FIRST-SEARCH-BEFORE-HAND-ROLLING-MANDATORY | long_term | `.flywheel/rules/L110-L169-jsm-first-search-before-hand-rolling-mandatory.md` |
 | 111 | L170 — EVERY-CONSUMER-REPO-MUST-DECLARE-3-USER-JOURNEYS-MINIMUM | long_term | `.flywheel/rules/L111-L170-every-consumer-repo-must-declare-3-user-journeys-minimum.md` |
 | 112 | L171 — SKILL-CREATION-REQUIRES-SKILLOS-HANDOFF | long_term | `.flywheel/rules/L112-L171-skill-creation-requires-skillos-handoff.md` |
+| 113 | L162 — SUBSTRATE-CLASS-CLASSIFIER-BEFORE-PROTECTION-HALT-MANDATORY | long_term | `.flywheel/rules/L113-L162-substrate-class-classifier-before-protection-halt-mandatory.md` |
 <!-- END-RULES-INDEX -->
 
 <!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->
