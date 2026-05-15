@@ -20,14 +20,27 @@ fail_count=0
 pass() { pass_count=$((pass_count + 1)); printf 'PASS %s\n' "$1"; }
 fail() { fail_count=$((fail_count + 1)); printf 'FAIL %s\n' "$1" >&2; }
 
-bash -n "$SCRIPT" 2>/dev/null && pass "shellcheck: syntax" || fail "syntax"
+if bash -n "$SCRIPT" 2>/dev/null; then
+  pass "shellcheck: syntax"
+else
+  fail "syntax"
+fi
 
-"$SCRIPT" --info --json 2>/dev/null | jq -e '.name == "trauma-claim-emitter" and .schema_version and .subcommands' >/dev/null \
-  && pass "--info exposes name/schema/subcommands" || fail "--info"
-"$SCRIPT" --schema --json 2>/dev/null | jq -e '.schema_version and .input_schema and .output_schema' >/dev/null \
-  && pass "--schema exposes I/O schemas" || fail "--schema"
-"$SCRIPT" --examples --json 2>/dev/null | jq -e '.examples | length >= 2' >/dev/null \
-  && pass "--examples ≥2 invocations" || fail "--examples"
+if "$SCRIPT" --info --json 2>/dev/null | jq -e '.name == "trauma-claim-emitter" and .schema_version and .subcommands' >/dev/null; then
+  pass "--info exposes name/schema/subcommands"
+else
+  fail "--info"
+fi
+if "$SCRIPT" --schema --json 2>/dev/null | jq -e '.schema_version and .input_schema and .output_schema' >/dev/null; then
+  pass "--schema exposes I/O schemas"
+else
+  fail "--schema"
+fi
+if "$SCRIPT" --examples --json 2>/dev/null | jq -e '.examples | length >= 2' >/dev/null; then
+  pass "--examples >=2 invocations"
+else
+  fail "--examples"
+fi
 
 # Fixture: 3 fuckup rows, one already in INCIDENTS, one already in SKILL, one novel
 cat >"$TRAUMA_EMITTER_FUCKUP_LOG" <<'JSONL'
@@ -41,36 +54,63 @@ echo "## known-class-in-skill" >"$TRAUMA_EMITTER_RECOVERY_SKILL"
 
 # Dry-run should NOT write to out (status JSON is the first line; candidates array follows)
 STATUS_LINE="$("$SCRIPT" emit --dry-run --json 2>&1 | head -1 || true)"
-echo "$STATUS_LINE" | jq -e '.status == "dry_run" and .candidate_count == 3' >/dev/null \
-  && pass "dry-run reports candidate_count=3 (excludes test-class)" \
-  || { fail "dry-run count wrong"; echo "$STATUS_LINE" >&2; }
-[[ ! -f "$TRAUMA_EMITTER_OUT" ]] && pass "dry-run does NOT write to disk" || fail "dry-run wrote to disk"
+if echo "$STATUS_LINE" | jq -e '.status == "dry_run" and .candidate_count == 3' >/dev/null; then
+  pass "dry-run reports candidate_count=3 (excludes test-class)"
+else
+  fail "dry-run count wrong"
+  echo "$STATUS_LINE" >&2
+fi
+if [[ ! -f "$TRAUMA_EMITTER_OUT" ]]; then
+  pass "dry-run does NOT write to disk"
+else
+  fail "dry-run wrote to disk"
+fi
 
 # Real emit should write 3 rows
-"$SCRIPT" emit --json 2>&1 | jq -e '.status == "emitted" and .candidate_count == 3' >/dev/null \
-  && pass "emit writes 3 candidates" || fail "emit count wrong"
-[[ -f "$TRAUMA_EMITTER_OUT" ]] && pass "emit writes to expected path" || fail "out path not created"
+if "$SCRIPT" emit --json 2>&1 | jq -e '.status == "emitted" and .candidate_count == 3' >/dev/null; then
+  pass "emit writes 3 candidates"
+else
+  fail "emit count wrong"
+fi
+if [[ -f "$TRAUMA_EMITTER_OUT" ]]; then
+  pass "emit writes to expected path"
+else
+  fail "out path not created"
+fi
 row_count="$(jq -s 'length' "$TRAUMA_EMITTER_OUT" 2>/dev/null || echo 0)"
-[[ "$row_count" == "3" ]] && pass "out has 3 rows" || fail "row count wrong: got $row_count"
+if [[ "$row_count" == "3" ]]; then
+  pass "out has 3 rows"
+else
+  fail "row count wrong: got $row_count"
+fi
 
 # Schema-shape validation per row
 all_valid=1
 while IFS= read -r row; do
   echo "$row" | jq -e '.schema_version == "flywheel.trauma_candidate.v0" and .class and .ts and .proposed_disposition and .recommended_skillos_loop' >/dev/null || { all_valid=0; break; }
 done <"$TRAUMA_EMITTER_OUT"
-[[ "$all_valid" == "1" ]] && pass "all rows match schema flywheel.trauma_candidate.v0" || fail "schema violation"
+if [[ "$all_valid" == "1" ]]; then
+  pass "all rows match schema flywheel.trauma_candidate.v0"
+else
+  fail "schema violation"
+fi
 
 # Disposition classification
 known_count="$(jq -s '[.[] | select(.proposed_disposition == "known")] | length' "$TRAUMA_EMITTER_OUT")"
 new_count="$(jq -s '[.[] | select(.proposed_disposition == "new")] | length' "$TRAUMA_EMITTER_OUT")"
-[[ "$known_count" == "2" && "$new_count" == "1" ]] \
-  && pass "disposition correct: 2 known (INCIDENTS + SKILL hits) + 1 new" \
-  || fail "disposition: known=$known_count new=$new_count"
+if [[ "$known_count" == "2" && "$new_count" == "1" ]]; then
+  pass "disposition correct: 2 known (INCIDENTS + SKILL hits) + 1 new"
+else
+  fail "disposition: known=$known_count new=$new_count"
+fi
 
 # Env-disable check (script returns 3 by design; capture output separately)
 DISABLED_OUT="$(FLYWHEEL_TRAUMA_EMITTER=0 "$SCRIPT" emit --json 2>&1 || true)"
-echo "$DISABLED_OUT" | jq -e '.status == "disabled"' >/dev/null \
-  && pass "FLYWHEEL_TRAUMA_EMITTER=0 disables emit" || fail "env disable broken"
+if echo "$DISABLED_OUT" | jq -e '.status == "disabled"' >/dev/null; then
+  pass "FLYWHEEL_TRAUMA_EMITTER=0 disables emit"
+else
+  fail "env disable broken"
+fi
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2

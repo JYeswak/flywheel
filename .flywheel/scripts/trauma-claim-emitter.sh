@@ -267,7 +267,9 @@ cmd_check() {
       *) printf 'unknown arg: %s\n' "$1" >&2; return 2 ;;
     esac
   done
-  cmd_emit --dry-run $([[ "$json_out" -eq 1 ]] && echo "--json")
+  local args=(--dry-run)
+  [[ "$json_out" -eq 1 ]] && args+=(--json)
+  cmd_emit "${args[@]}"
 }
 
 main() {
