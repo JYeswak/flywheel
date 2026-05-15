@@ -27,6 +27,13 @@ export BLOCKER_FAIL_ESCALATOR_SKIP_AGENT_MAIL=1
 # Test 1: bash -n
 if bash -n "$HOOK" 2>/dev/null; then pass "hook syntax"; else fail "hook syntax"; fi
 
+if grep -qF 'trap cleanup_temp_files EXIT ERR' "$HOOK" \
+  && grep -qF "register_temp_file \"\$tmpout\"" "$HOOK"; then
+  pass "temp-cleanup-trap-wired"
+else
+  fail "temp-cleanup-trap-wired"
+fi
+
 # Test 2: --info envelope
 if "$HOOK" --info | jq -e '.schema_version == "blocker-fail-escalator/v1" and .threshold_n == 4 and (.modes | type == "array") and (.escalation_row_fields | length) >= 13' >/dev/null; then
   pass "--info envelope shape"
@@ -230,6 +237,29 @@ ac_stdout_captured="$(printf '%s' "$last_row" | jq -r .ac_stdout)"
 if [[ "$ac_stdout_captured" == $'l1\nl2' ]]; then
   pass "multiline stderr (via 2>&1 in live probe) captured exactly"
 else fail "multiline ac_stdout: $(printf '%q' "$ac_stdout_captured")"; fi
+
+FAIL_TMP="$TMPDIR_TEST/fail-tmp"
+mkdir -p "$FAIL_TMP"
+FAIL_ELOG="$TMPDIR_TEST/escalations-as-dir"
+mkdir -p "$FAIL_ELOG"
+FAIL_COUNTERS="$TMPDIR_TEST/fail-counters"
+cat > "$TMPDIR_TEST/tmp-cleanup.json" <<'EOF'
+{"blocker_id":"tmp-cleanup","acceptance_condition":"false","status":"open","ac_check_interval_ticks":1}
+EOF
+BEFORE_TEMP_COUNT=$(find "$FAIL_TMP" -maxdepth 1 -type f -name 'blocker-fail-stdout.*' | wc -l | tr -d ' ')
+set +e
+out="$(TMPDIR="$FAIL_TMP" "$HOOK" check --blocker-file "$TMPDIR_TEST/tmp-cleanup.json" --counter-dir "$FAIL_COUNTERS" --escalations-log "$FAIL_ELOG" --apply --json 2>/dev/null)"
+rc=$?
+set -e
+AFTER_TEMP_COUNT=$(find "$FAIL_TMP" -maxdepth 1 -type f -name 'blocker-fail-stdout.*' | wc -l | tr -d ' ')
+counter_after_fail="$(jq -r '.counter // "missing"' "$FAIL_COUNTERS/tmp-cleanup.json" 2>/dev/null || printf 'missing')"
+if [[ "$rc" -ne 0 && "$BEFORE_TEMP_COUNT" == "$AFTER_TEMP_COUNT" ]] \
+  && printf '%s' "$out" | jq -e '.status == "escalation_failed" and .reason == "failed to append escalation row; counter not reset"' >/dev/null \
+  && [[ "$counter_after_fail" == "missing" ]]; then
+  pass "failed escalation returns escalation_failed, preserves counter, and cleans live-probe stdout temp"
+else
+  fail "failed escalation cleanup/escalation_failed rc=$rc before=$BEFORE_TEMP_COUNT after=$AFTER_TEMP_COUNT counter=$counter_after_fail out=$(printf '%s' "$out" | jq -c . 2>/dev/null || printf '%s' "$out")"
+fi
 
 if [[ "$fail_count" -gt 0 ]]; then
   printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count" >&2

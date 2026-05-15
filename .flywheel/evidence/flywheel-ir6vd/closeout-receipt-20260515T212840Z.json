@@ -1,0 +1,60 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-ir6vd",
+  "parent_bead_id": "flywheel-3kq",
+  "closed_at": "2026-05-15T21:28:40Z",
+  "status": "closed",
+  "surface": ".flywheel/scripts/blocker-fail-escalator.sh",
+  "claim": "blocker-fail-escalator now cleans live-probe temp files on EXIT/ERR and no longer resets fail counters or reports escalation success when escalation persistence fails.",
+  "changes": [
+    "Added a temp-file registry and EXIT/ERR cleanup trap.",
+    "Registered live-probe stdout temp files and removed the previous truncate-only cleanup.",
+    "Made escalation append failures emit status=escalation_failed and return nonzero.",
+    "Preserved the fail counter when escalation persistence fails.",
+    "Added a failure-path test that proves temp cleanup, escalation_failed status, and no counter reset."
+  ],
+  "trap_inventory_delta": {
+    "before_with_trap": 95,
+    "before_without_trap": 287,
+    "after_with_trap": 96,
+    "after_without_trap": 286,
+    "after_coverage_pct": 25.13,
+    "after_receipt_ref": ".flywheel/evidence/flywheel-ir6vd/trap-inventory-after-20260515T212840Z.json"
+  },
+  "validation": [
+    {
+      "command": "bash tests/blocker-fail-escalator.sh",
+      "status": "pass",
+      "summary": "28/0"
+    },
+    {
+      "command": "bash tests/trap-rollback-inventory.sh",
+      "status": "pass",
+      "summary": "10/0"
+    },
+    {
+      "command": ".flywheel/scripts/trap-rollback-inventory.sh scan --repo . --json",
+      "status": "warn_expected",
+      "summary": "with_trap=96 without_trap=286 coverage_pct=25.13"
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/blocker-fail-escalator.sh tests/blocker-fail-escalator.sh .flywheel/scripts/trap-rollback-inventory.sh tests/trap-rollback-inventory.sh",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check && br dep cycles",
+      "status": "pass"
+    }
+  ],
+  "artifact_sha256": {
+    ".flywheel/scripts/blocker-fail-escalator.sh": "18d1f702c51f83259fc8af689689471b57c104304b892b1f1c90c2b328e622ef",
+    "tests/blocker-fail-escalator.sh": "2b077e71662fbc34899b2b7cf5368d0e59288796b5c0baf6fd6baca99216bb6a",
+    ".flywheel/evidence/flywheel-ir6vd/trap-inventory-after-20260515T212840Z.json": "6ba941438a4420c022453201b3c038e6cd2be17f46a20d6b5e6d4c3224a93728"
+  },
+  "boundaries": [
+    "No live blocker state mutation.",
+    "No Agent Mail send.",
+    "No cross-repo mutation.",
+    "Parent flywheel-3kq remains open for continued trap adoption."
+  ]
+}
