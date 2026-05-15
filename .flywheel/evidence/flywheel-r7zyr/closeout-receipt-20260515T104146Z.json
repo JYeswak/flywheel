@@ -1,0 +1,39 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-r7zyr",
+  "closed_at": "2026-05-15T10:42:24Z",
+  "disposition": "implemented",
+  "source_repo": "/Users/josh/Developer/flywheel",
+  "tool_repo": "/Users/josh/Developer/n8n-deploy-kit",
+  "tool_commit": "2ffcd20790f9a807781289907b580bece330b819",
+  "consumer_repo": "/Users/josh/Developer/vrtx",
+  "consumer_workflow": "n8n-workflows/01-webhook-echo-test.json",
+  "dogfood_surface": "n8n v2 inactive import via packages/deploy/bin/n8n-deploy.ts",
+  "proof": {
+    "preflight_validate": "Validation Score: 100/100; Status: VALID",
+    "deploy_command": "n8n-deploy deploy /Users/josh/Developer/vrtx/n8n-workflows/01-webhook-echo-test.json --name <dogfood timestamp name>",
+    "verification": {
+      "http_status": 200,
+      "active": false,
+      "node_count": 2,
+      "webhook_paths": [
+        "vrtx-test"
+      ],
+      "workflow_id_hash": "a7483220fe3b50c9",
+      "workflow_name": "VRTX 01 - Webhook Echo Test - n8n-deploy-kit dogfood 20260515T104146Z",
+      "verify_receipt_path": "/tmp/n8n-deploy-kit-vrtx01-dogfood-verify-20260515T104146Z.json",
+      "full_id_result_path": "/tmp/n8n-deploy-kit-vrtx01-dogfood-20260515T104146Z.json"
+    }
+  },
+  "guardrails": {
+    "activated": false,
+    "consumer_repo_mutated": false,
+    "secret_values_logged": false,
+    "full_workflow_id_committed": false,
+    "full_workflow_id_location": "/tmp only"
+  },
+  "followup": {
+    "public_flip_still_joshua_gated": true,
+    "template_or_publish_claim_made": false
+  }
+}

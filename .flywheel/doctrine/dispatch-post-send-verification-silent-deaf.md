@@ -23,12 +23,17 @@ distinct from classification-layer parser-artifacts).
 
 ## Canonical memory source
 
-This doctrine summarizes
-`feedback_dispatch_post_send_verify_for_silent_deaf.md` — the META-RULE
-memory documenting the Shape G silent-deaf class. Known exemplar:
-flywheel-bg06b first dispatch (2026-05-10). Joshua flagged manually
-("pane 3 is idle") after ~6 min phantom occupied state. Read the
-memory for full pattern detail and below-trauma-class tracking
+This doctrine summarizes two canonical memory sources:
+
+- `feedback_dispatch_post_send_verify_for_silent_deaf.md` — the META-RULE
+  memory documenting the Shape G silent-deaf class. Known exemplar:
+  flywheel-bg06b first dispatch (2026-05-10). Joshua flagged manually
+  ("pane 3 is idle") after ~6 min phantom occupied state.
+- `feedback_verify_ntm_send.md` — the older dispatch discipline memory that
+  names the same operator rule in plainer terms: after `ntm send`, verify the
+  target pane is working on the intended task, not stale previous work.
+
+Read the memories for full pattern detail and below-trauma-class tracking
 context.
 
 ## The pattern
@@ -97,6 +102,8 @@ for sister doctrine pattern.
   parser-artifacts)
 - Memory `feedback_dispatch_post_send_verify_for_silent_deaf` (above-cited
   canonical source)
+- Memory `feedback_verify_ntm_send.md` (plain-language predecessor: verify
+  `ntm send` landed and the pane is working on the right task)
 
 ## Conformance
 

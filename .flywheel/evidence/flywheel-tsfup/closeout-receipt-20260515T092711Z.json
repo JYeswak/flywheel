@@ -1,0 +1,68 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-tsfup",
+  "closed_scope": "Routed current live identity-doctor drift for non-running picoz panes through a bounded identity-registration-deferral/v1 receipt.",
+  "local_state_receipt_ref": "/Users/josh/.local/state/flywheel/identity-overrides/picoz-worker-registration-deferred-2026-05-15T092711Z.json",
+  "decision": {
+    "selected": "fresh_bounded_deferral",
+    "reason": "No picoz or polymarket pane was live in wezterm, so registering or preallocating worker identities would create live identity state for a stopped session. A bounded deferral keeps the doctor truthful and expires automatically.",
+    "expires_at": "2026-05-22T09:27:11Z",
+    "rollback_guard": "expires_at OR auto-register-when-live event for picoz session panes 1-3"
+  },
+  "before": {
+    "command": "/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop identity --doctor --json",
+    "status": "fail",
+    "drift_count": 1,
+    "raw_drift_count": 1,
+    "deferred_count": 0,
+    "receipt_honored": false,
+    "worker_registration_pending_count": 2,
+    "pending_rows": [
+      "picoz:2",
+      "picoz:3"
+    ],
+    "uncovered_drift_rows": [
+      "picoz:1"
+    ]
+  },
+  "after": {
+    "command": "/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop identity --doctor --json",
+    "status": "pass",
+    "drift_count": 0,
+    "raw_drift_count": 1,
+    "deferred_count": 3,
+    "deferred_rows": [
+      "picoz:1",
+      "picoz:2",
+      "picoz:3"
+    ],
+    "receipt_honored": true,
+    "worker_registration_pending_count": 0,
+    "active_receipt_count": 1
+  },
+  "validation": [
+    {
+      "command": "python3 jsonschema.validate receipt against .flywheel/validation-schema/v1/identity-registration-deferral.schema.json",
+      "result": "pass"
+    },
+    {
+      "command": "bash tests/identity-deferral-receipt.sh",
+      "result": "pass 6/0"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    }
+  ],
+  "safety": {
+    "raw_tokens_printed": false,
+    "raw_token_paths_recorded": false,
+    "agentmail_registration_mutated": false,
+    "session_rows_mutated": false
+  },
+  "autonomy": "autonomous"
+}

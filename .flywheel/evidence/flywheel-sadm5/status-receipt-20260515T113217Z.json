@@ -1,0 +1,80 @@
+{
+  "schema": "flywheel.bead_status_receipt.v1",
+  "bead_id": "flywheel-sadm5",
+  "status": "blocked",
+  "recorded_at": "2026-05-15T11:32:17Z",
+  "reason": "L168 fleet-bootstrap dispatch waves remain unsafe, but the blocker has narrowed: zs-project-bootstrap self-test is now green; registry completeness is still red for Wave 1.",
+  "checks": [
+    {
+      "command": "~/.claude/skills/zs-project-bootstrap/scripts/probe.sh --json",
+      "result": "pass",
+      "observed": {
+        "schema_version": "zs-project-bootstrap.self_test.v1",
+        "status": "ok",
+        "pass_count": 26,
+        "fail_count": 0,
+        "axis": "structural_inputs_only",
+        "non_axes": [
+          "registry_completeness_per_tenant",
+          "consumer_repo_run_outcome"
+        ]
+      }
+    },
+    {
+      "command": "tail -300 /Users/josh/Developer/skillos/state/skill-freshness.jsonl | jq -c 'select(.skill_id==\"zs-project-bootstrap\")'",
+      "result": "pass",
+      "observed_latest": {
+        "ts": "2026-05-15T02:55:00Z",
+        "verdict": "green",
+        "axis": "self_test",
+        "remaining_blockers_other_axes": [
+          "project_mappings_incomplete_tenant_rows"
+        ]
+      }
+    },
+    {
+      "command": "python3 registry TODO/missing-row probe against ~/.claude/skills/infisical-secrets/data/project-mappings.yaml",
+      "result": "pass",
+      "observed": {
+        "mobile-eats": {
+          "row": "present",
+          "todo_count": 0
+        },
+        "alpsinsurance": {
+          "row": "present",
+          "todo_count": 1,
+          "todo_paths": [
+            "vercel.project_id"
+          ]
+        },
+        "alpsinsurance-staging": {
+          "row": "present",
+          "todo_count": 4,
+          "todo_paths": [
+            "infisical_project_id",
+            "supabase.pooler_mode",
+            "vercel.project_id",
+            "vercel.project_name"
+          ]
+        },
+        "terratitle": {
+          "row": "missing"
+        },
+        "vrtx": {
+          "row": "missing"
+        },
+        "clutterfreespaces": {
+          "row": "missing"
+        },
+        "blackfoot-telecom": {
+          "row": "missing"
+        },
+        "picoz": {
+          "row": "missing"
+        }
+      }
+    }
+  ],
+  "safe_next_action": "Keep flywheel-sadm5 blocked until Joshua/source registry identifiers fill Wave 1 tenant rows and SkillOS/fleet registry completeness is proven. Do not dispatch per-repo bootstrap waves from Flywheel while registry rows contain TODO or missing tenants.",
+  "proxy_signal_only": false
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-a4djr",
+  "closed_at": "2026-05-15T18:05:23Z",
+  "status": "closed",
+  "summary": "Made Joshua's Flywheel authority clarification mechanical: Flywheel-owned fleet doctrine and transport-gated orchestration are allowed across repos, while default-deny remains for peer-owned product/client surfaces and explicit non-Flywheel ownership. Added a public evidence guard so private local full-hash fingerprints cannot recur in publishable evidence.",
+  "source_class": "foundational_blocker_triage",
+  "authority": {
+    "flywheel_may_orchestrate_fleet_doctrine": true,
+    "default_deny_scope": "peer_owned_product_client_surfaces_or_explicit_non_flywheel_ownership",
+    "signal_only_helpers_are_not_global_bans": true
+  },
+  "changed_files": [
+    ".flywheel/doctrine/cross-repo-consumer-vs-mutator-boundary.md",
+    ".flywheel/rules/L055-L101-flywheel-owns-continuous-fleet-productivity.md",
+    ".flywheel/scripts/fleet-refill-signal.sh",
+    ".flywheel/evidence/flywheel-1ag/closeout-receipt-20260515T162609Z.json",
+    ".flywheel/evidence/flywheel-sadm5/registry-foundation-repair-20260515T1745Z.json",
+    ".github/workflows/ci.yml",
+    "tests/fleet-refill-signal.sh",
+    "tests/public-evidence-fingerprints.sh",
+    "tests/sync-canonical-ownership-source-authority.sh"
+  ],
+  "validation": [
+    {"command": "bash tests/sync-canonical-ownership-source-authority.sh", "result": "pass 6/0"},
+    {"command": "bash tests/fleet-refill-signal.sh", "result": "pass 13/0"},
+    {"command": "bash tests/public-evidence-fingerprints.sh", "result": "pass 3/0"},
+    {"command": "bash tests/public-surface-gap-scanner.sh", "result": "pass 16/0"},
+    {"command": "bash tests/github-workflows.sh", "result": "pass 112/0"},
+    {"command": "shellcheck tests/sync-canonical-ownership-source-authority.sh tests/public-evidence-fingerprints.sh tests/fleet-refill-signal.sh .flywheel/scripts/fleet-refill-signal.sh", "result": "pass"},
+    {"command": "git diff --check", "result": "pass"},
+    {"command": "br dep cycles", "result": "pass"}
+  ],
+  "residuals": [
+    "GitGuardian still flags historical PR commits. Forward commits cannot make PR #3 green because GitGuardian scans commit history. Remaining choices are GitGuardian incident skip/false-positive in dashboard or explicit operator-approved branch history rewrite/force-push."
+  ]
+}

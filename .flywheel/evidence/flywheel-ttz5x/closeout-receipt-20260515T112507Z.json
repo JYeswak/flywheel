@@ -1,0 +1,90 @@
+{
+  "schema": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-ttz5x",
+  "status": "closed",
+  "closed_at": "2026-05-15T11:25:07Z",
+  "autonomy": "autonomous",
+  "problem": "bv --robot-triage treated in_progress umbrella beads as actionable top picks and quick wins, which could dispatch workers into long-running parent beads instead of scoped leaf work.",
+  "change_summary": [
+    "Patched beads_viewer robot triage to distinguish robot-claimable open work from visible in-progress context.",
+    "Kept in-progress rows visible in recommendations with continue/review guidance.",
+    "Excluded in-progress rows from quick_ref.actionable_count, quick_ref.top_picks, quick_wins, blocker actionable flags, and claim command selection."
+  ],
+  "source_patch": {
+    "repo": "/Users/josh/Developer/beads_viewer",
+    "commit": "f85514c085e6c6fa6e49a3a5ea4f5b0eee0b40c9",
+    "files": [
+      "pkg/analysis/triage.go",
+      "pkg/analysis/triage_test.go"
+    ]
+  },
+  "installed_binary": {
+    "path": "/Users/josh/.local/bin/bv-real",
+    "version": "bv v0.16.0",
+    "sha256": "27f0548b2a7ca9b184d30240d36211ebab54dbf68236f52400a23612ff9a4d17",
+    "backup_path": "/Users/josh/.local/bin/bv-real.bak.20260515T1124Z",
+    "backup_sha256": "a51be6e17a3c6760c3a96c4a436da3df570e24c9bb9a9fbf84319fcf99751902"
+  },
+  "validation": [
+    {
+      "command": "go test ./pkg/analysis ./cmd/bv",
+      "cwd": "/Users/josh/Developer/beads_viewer",
+      "result": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "cwd": "/Users/josh/Developer/beads_viewer",
+      "result": "pass"
+    },
+    {
+      "command": "bv --robot-triage | jq -c '{quick_ref:.triage.quick_ref, quick_wins:.triage.quick_wins, commands:.triage.commands}'",
+      "cwd": "/Users/josh/Developer/flywheel",
+      "result": "pass",
+      "observed": {
+        "quick_ref": {
+          "open_count": 28,
+          "actionable_count": 0,
+          "blocked_count": 27,
+          "in_progress_count": 1,
+          "top_picks": []
+        },
+        "quick_wins": [],
+        "commands": {
+          "claim_top": "CI=1 br ready --json  # No top pick available",
+          "show_top": "CI=1 br ready --json  # No top pick available",
+          "list_ready": "CI=1 br ready --json",
+          "list_blocked": "CI=1 br blocked --json",
+          "refresh_triage": "bv --robot-triage"
+        }
+      }
+    },
+    {
+      "command": "bv --robot-next",
+      "cwd": "/Users/josh/Developer/flywheel",
+      "result": "pass",
+      "observed": {
+        "message": "No actionable items available"
+      }
+    },
+    {
+      "command": "br dep cycles --json",
+      "cwd": "/Users/josh/Developer/flywheel",
+      "result": "pass",
+      "observed": {
+        "count": 0
+      }
+    }
+  ],
+  "acceptance": {
+    "in_progress_excluded_from_top_picks": true,
+    "in_progress_excluded_from_quick_wins": true,
+    "actionable_count_counts_claimable_open_work_only": true,
+    "robot_next_has_no_claim_when_only_in_progress_remains": true,
+    "regression_test_added": true,
+    "live_flywheel_output_verified": true
+  },
+  "skillos_gap_flag": {
+    "needed": true,
+    "reason": "Control-plane routing should treat in-progress umbrella beads as non-claimable dispatch context, not ready work."
+  }
+}

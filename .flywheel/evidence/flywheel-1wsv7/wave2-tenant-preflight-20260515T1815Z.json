@@ -1,0 +1,58 @@
+{
+  "schema_version": "flywheel.fleet_tenant_registry_preflight.v1",
+  "registry": "/Users/josh/.claude/skills/infisical-secrets/data/project-mappings.yaml",
+  "run_doctor": true,
+  "status": "fail",
+  "row_count": 3,
+  "fail_count": 3,
+  "rows": [
+    {
+      "slug": "vrtx",
+      "repo": "/Users/josh/Developer/vrtx",
+      "status": "fail",
+      "registry_status": "fail",
+      "declaration_status": "fail",
+      "doctor_status": "not_run",
+      "failures": [
+        "registry_row_missing",
+        "repo_declaration_missing"
+      ],
+      "disposition": null,
+      "doctor": {
+        "status": "not_run"
+      }
+    },
+    {
+      "slug": "zeststream-v2-fresh",
+      "repo": "/Users/josh/Developer/zeststream-v2-fresh",
+      "status": "fail",
+      "registry_status": "fail",
+      "declaration_status": "fail",
+      "doctor_status": "not_run",
+      "failures": [
+        "registry_row_missing",
+        "repo_declaration_missing"
+      ],
+      "disposition": null,
+      "doctor": {
+        "status": "not_run"
+      }
+    },
+    {
+      "slug": "zeststream-platform",
+      "repo": "/Users/josh/Developer/zeststream-platform",
+      "status": "fail",
+      "registry_status": "fail",
+      "declaration_status": "fail",
+      "doctor_status": "not_run",
+      "failures": [
+        "registry_row_missing",
+        "repo_declaration_missing"
+      ],
+      "disposition": null,
+      "doctor": {
+        "status": "not_run"
+      }
+    }
+  ]
+}

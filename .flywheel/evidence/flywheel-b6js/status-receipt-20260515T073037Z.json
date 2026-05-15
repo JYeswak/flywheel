@@ -1,0 +1,65 @@
+{
+  "schema_version": "flywheel.bead_status_receipt.v1",
+  "bead_id": "flywheel-b6js",
+  "created_at": "2026-05-15T07:30:37Z",
+  "status": "blocked",
+  "summary": "The SkillOS mission/JSM direction has advanced, but this Flywheel parent should not remain in_progress or close while the SkillOS loop-health apply path is still blocked.",
+  "context": {
+    "child_apply_bead": "flywheel-b6js.1",
+    "child_apply_result": "closed_rollback",
+    "child_blocker_bead": "flywheel-b6js.1.1",
+    "child_blocker_result": "closed_with_cross_session_skillos_gaps",
+    "design_refresh_bead": "flywheel-668a",
+    "design_refresh_result": "closed",
+    "active_apply_owner": "flywheel-hg2w",
+    "active_apply_owner_status": "blocked"
+  },
+  "current_evidence": {
+    "loop_integrity_signals": {
+      "command": ".flywheel/scripts/loop-integrity-signals.sh --project skillos --json",
+      "verdict": "LIMPING",
+      "failed_signals": [
+        "callback_receipt_fresh"
+      ],
+      "passing_signals": [
+        "marker_fresh",
+        "canonical_bridge_fresh"
+      ],
+      "callback_receipt_evidence": "path=/Users/josh/Developer/skillos/.flywheel/dispatch-log.jsonl age_sec=14687 window_sec=7200"
+    },
+    "gap_hunt_doctor": {
+      "command": ".flywheel/scripts/gap-hunt-probe.sh --doctor --json --quiet",
+      "status": "completed",
+      "duration_sec": 39.368,
+      "skillos_verdict": "DEAD",
+      "skillos_failed_signals": [
+        "pane_state_changed_since_last_tick",
+        "callback_received_in_last_2_ticks",
+        "callback_receipt_fresh"
+      ],
+      "auto_beads_filed": [
+        "flywheel-2xdi.169"
+      ]
+    }
+  },
+  "did": [
+    "Confirmed SkillOS has substantial mission-v2/JSM surfaces in its repo, including daily JSM sync observability and mission-v2 migration tooling.",
+    "Confirmed Flywheel's dependent apply owner flywheel-hg2w is still blocked by current loop-health evidence.",
+    "Moved this bead out of stale in_progress state so robot triage does not keep assigning it as active work."
+  ],
+  "did_not": [
+    "Did not edit SkillOS repo files from Flywheel.",
+    "Did not claim SkillOS mission/JSM work is complete while loop-integrity remains non-green.",
+    "Did not close flywheel-hg2w."
+  ],
+  "blocked_on": [
+    "flywheel-hg2w or SkillOS-side equivalent must make callback receipt and pane/non-pane activity semantics current, then rerun loop-integrity-signals and gap-hunt-probe doctor."
+  ],
+  "tests": [
+    {
+      "command": "br dep cycles",
+      "result": "pass",
+      "summary": "No dependency cycles detected."
+    }
+  ]
+}

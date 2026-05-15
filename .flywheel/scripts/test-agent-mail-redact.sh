@@ -311,6 +311,34 @@ if ! grep -Fq '[REDACTED]' "$REGISTER_CAPTURE/pane-visible-tool-call-args.json";
   exit 1
 fi
 
+FAIL_TMPDIR="$TMP/failtmp"
+FAKE_NTM="$TMP/failing-ntm"
+mkdir -p "$FAIL_TMPDIR"
+cat >"$FAKE_NTM" <<'SH'
+#!/usr/bin/env bash
+exit 7
+SH
+chmod +x "$FAKE_NTM"
+
+if TMPDIR="$FAIL_TMPDIR" AGENT_MAIL_TOKEN_VAULT_DIR="$VAULT" AGENT_MAIL_SEND_REDACTED_NTM_BIN="$FAKE_NTM" "$WRAPPER" send_message \
+  --project-key "/tmp/synthetic-agent-mail-project" \
+  --sender-name "SyntheticAgent" \
+  --to "SyntheticRecipient" \
+  --subject "Synthetic redact failure cleanup test" \
+  --body "Synthetic body" \
+  --sender-token-handle "vault:SyntheticAgent" \
+  --capture-dir "$TMP/failure-capture" \
+  --dry-run >"$TMP/failure-stdout.txt" 2>"$TMP/failure-stderr.txt"; then
+  printf 'FAIL: failing redact helper unexpectedly succeeded\n' >&2
+  exit 1
+fi
+
+if find "$FAIL_TMPDIR" -maxdepth 1 -type f -name 'agent-mail-redact-input.*' | grep -q .; then
+  printf 'FAIL: redact failure left temp input files behind\n' >&2
+  find "$FAIL_TMPDIR" -maxdepth 1 -type f -print >&2
+  exit 1
+fi
+
 if ! "$WRAPPER" send_message \
   --project-key "/tmp/synthetic-agent-mail-project" \
   --sender-name "SyntheticAgent" \

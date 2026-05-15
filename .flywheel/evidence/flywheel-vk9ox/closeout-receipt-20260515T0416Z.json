@@ -1,0 +1,91 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-vk9ox",
+  "created_at": "2026-05-15T04:16:39Z",
+  "status": "pass",
+  "scope": "orch-capture-parity live gap repair",
+  "changes": [
+    {
+      "path": ".flywheel/scripts/ntm-send-with-josh-req-capture.sh",
+      "summary": "Broadened request-shape detection for terse/current operator prompts: check, continue, deploy, stop, and do you."
+    },
+    {
+      "path": ".flywheel/scripts/orch-capture-parity-probe.py",
+      "summary": "Classified pane-1-test telemetry rows as non-human transcript rows so generated test feedback does not become capture debt."
+    },
+    {
+      "path": "~/.local/state/flywheel/josh-requests.jsonl",
+      "summary": "Backfilled transcript-backed request rows with original prompt timestamps and source message ids; no freshness was invented."
+    }
+  ],
+  "backfilled_request_rows": [
+    {
+      "session": "alpsinsurance",
+      "id": "jr-2026-05-11T204434Z-274",
+      "captured_at": "2026-05-11T20:44:34Z",
+      "source_message_id": "3f1bd917-b107-49eb-abb1-2dc1da905590",
+      "captured_via": "manual",
+      "runtime": "claude"
+    },
+    {
+      "session": "clutterfreespaces",
+      "id": "jr-2026-05-15T041019Z-219",
+      "captured_at": "2026-05-15T04:10:19Z",
+      "source_message_id": "4bc659b0-2696-4c54-9f6a-62fb335d7d9b",
+      "captured_via": "manual",
+      "runtime": "claude"
+    },
+    {
+      "session": "flywheel",
+      "id": "jr-2026-05-15T040800Z-080",
+      "captured_at": "2026-05-15T04:08:00Z",
+      "source_message_id": "8fb90713-dd29-49ec-96b3-1a75696d00e5",
+      "captured_via": "manual",
+      "runtime": "claude"
+    },
+    {
+      "session": "mobile-eats",
+      "id": "jr-2026-05-15T040402Z-842",
+      "captured_at": "2026-05-15T04:04:02Z",
+      "source_message_id": "911877e4-ff70-4dc7-8c74-6f7600267878",
+      "captured_via": "manual",
+      "runtime": "claude"
+    },
+    {
+      "session": "skillos",
+      "id": "jr-2026-05-15T040121Z-681",
+      "captured_at": "2026-05-15T04:01:21Z",
+      "source_message_id": "2debadc5-6477-4f27-a223-fabb9b1a721a",
+      "captured_via": "manual",
+      "runtime": "claude"
+    }
+  ],
+  "live_probe": {
+    "command": "python3 .flywheel/scripts/orch-capture-parity-probe.py --json",
+    "status": "pass",
+    "active_owner_bead": "flywheel-vk9ox",
+    "orchs_with_capture_gap_count": 0,
+    "capture_substrate_status": "pass"
+  },
+  "skillos_doctor_scope": {
+    "command": "~/.claude/skills/.flywheel/bin/flywheel-loop doctor --repo /Users/josh/Developer/skillos --json",
+    "orch_capture_parity_status": "pass",
+    "orchs_with_capture_gap_count": 0,
+    "active_owner_bead": "flywheel-vk9ox",
+    "overall_doctor_status": "fail",
+    "overall_doctor_action": "repair_publishability_bar",
+    "note": "The remaining doctor failure is outside flywheel-vk9ox and was not claimed as fixed."
+  },
+  "validation": [
+    "python3 -m py_compile .flywheel/scripts/orch-capture-parity-probe.py",
+    "bash tests/orch-capture-parity-probe.sh -> 21 passed, 0 failed",
+    "bash tests/test_ntm_send_with_josh_req_capture_canonical_cli.sh -> 6 passed, 0 failed"
+  ],
+  "acceptance": {
+    "open_owner_until_gap_zero": "met",
+    "duplicate_rows_non_blocking": "met",
+    "missing_live_capture_repaired_or_classified": "met",
+    "probe_tests_cover_owner_routing_and_semantics": "met",
+    "skillos_doctor_no_closed_xap2_owner": "met"
+  }
+}

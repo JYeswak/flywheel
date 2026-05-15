@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  W7 cadence (v5 forever-goal): fires cross-session-presence probe hourly.
+  Appends one row to .flywheel/state/cross-session-presence.jsonl per hour.
+
+  Load:
+    cp .flywheel/launchd/com.zeststream.flywheel.w7-cross-session-presence.plist ~/Library/LaunchAgents/
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.zeststream.flywheel.w7-cross-session-presence.plist
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.zeststream.flywheel.w7-cross-session-presence</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-c</string>
+    <string>/Users/josh/Developer/flywheel/.flywheel/scripts/cross-session-presence.sh probe</string>
+  </array>
+  <key>StartInterval</key>
+  <integer>3600</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/josh/.local/state/flywheel/w7-cross-session-presence.stdout.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/josh/.local/state/flywheel/w7-cross-session-presence.stderr.log</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+</dict>
+</plist>

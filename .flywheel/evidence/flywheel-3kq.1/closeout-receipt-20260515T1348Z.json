@@ -1,0 +1,34 @@
+{
+  "schema": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-3kq.1",
+  "created_at": "2026-05-15T13:48:00Z",
+  "status": "closed",
+  "decision": "inventory_gate_shipped",
+  "summary": "Added a read-only trap rollback inventory gate for flywheel-3kq. The gate scans tracked shell scripts, classifies mutating-like surfaces, counts EXIT/ERR/RETURN trap coverage, and emits JSON without claiming fleet-wide adoption complete.",
+  "changed_files": [
+    ".flywheel/scripts/trap-rollback-inventory.sh",
+    "tests/trap-rollback-inventory.sh",
+    ".flywheel/evidence/flywheel-3kq.1/inventory-20260515T1348Z.json"
+  ],
+  "inventory_receipt": ".flywheel/evidence/flywheel-3kq.1/inventory-20260515T1348Z.json",
+  "inventory_summary": {
+    "status": "warn",
+    "tracked_shell_scripts_scanned": 1459,
+    "mutating_like_scripts": 1359,
+    "mutating_like_with_exit_or_err_trap": 680,
+    "mutating_like_without_exit_or_err_trap": 679,
+    "coverage_pct": 50.04
+  },
+  "validation": [
+    "bash tests/trap-rollback-inventory.sh",
+    "shellcheck .flywheel/scripts/trap-rollback-inventory.sh tests/trap-rollback-inventory.sh",
+    ".flywheel/scripts/trap-rollback-inventory.sh scan --json",
+    "br dep cycles --json",
+    "git diff --check"
+  ],
+  "parent_state": {
+    "parent_bead": "flywheel-3kq",
+    "parent_closed": false,
+    "reason": "The inventory gate is shipped, but adoption is still incomplete: 679 mutating-like tracked shell scripts currently lack an EXIT/ERR/RETURN trap."
+  }
+}

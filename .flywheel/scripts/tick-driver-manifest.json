@@ -133,6 +133,17 @@
       "timeout_sec": 30
     },
     {
+      "name": "leverage-ceiling-probe",
+      "path": ".flywheel/scripts/leverage-ceiling-probe.sh",
+      "args": [
+        "--json"
+      ],
+      "timeout_sec": 45,
+      "purpose": "Recurring B6 evidence accrual for leverage-ceiling score and binding constraint. Keeps flywheel-h17x/xhdg data gates from stalling when no human-triggered loop tick runs.",
+      "source_bead": "flywheel-ql1pa",
+      "ledger": "~/.local/state/flywheel/leverage-ceiling.jsonl"
+    },
+    {
       "name": "fleet-shutdown-recovery",
       "path": "/Users/josh/.local/bin/flywheel-fleet-shutdown",
       "args": [],

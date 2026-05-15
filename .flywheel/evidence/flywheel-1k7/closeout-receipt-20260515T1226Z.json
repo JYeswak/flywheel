@@ -1,0 +1,48 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-1k7",
+  "created_at": "2026-05-15T12:26:53Z",
+  "status": "closed",
+  "summary": "Live L63 recovery drill acceptance is now proven with 15 green rows: five D1, five D2, and five D3 rows against a disposable NTM-adopted sacrificial session.",
+  "did": [
+    "Added a reusable Flywheel helper that creates a disposable NTM session and runs the live recovery drill without touching active project sessions.",
+    "Repaired the local full-substrate kill-recover-drill runtime so liveness accepts shell-parented node agents and D3 can simulate agent-dead-pane-alive behavior.",
+    "Ran the full 5x3 live drill against ~/.local/state/flywheel/recovery-drill.jsonl and validated the durable ledger."
+  ],
+  "did_not": [
+    "Did not mutate protected sessions alpsinsurance, picoz, or skillos.",
+    "Did not count fixture self-test rows as live recovery proof.",
+    "Did not claim global topology-ledger health; the helper uses a session-scoped topology probe for the disposable drill session."
+  ],
+  "evidence": {
+    "live_summary_ref": ".flywheel/evidence/flywheel-1k7/live-sacrificial-summary-20260515T1220Z.json",
+    "helper_ref": ".flywheel/scripts/recovery-drill-sacrificial-live.sh",
+    "runtime_ref": "/Users/josh/.claude/skills/.flywheel/scripts/kill-recover-drill.sh",
+    "helper_sha256": "23a8146e764fde044a226947dc96df31442fc88670c3a8b5240c1b6d91594beb",
+    "runtime_sha256": "787e1bbfb611102b75c529c8792893d5b699dd1912721a0b62baf0244a03d56c",
+    "live_summary_sha256": "442e9447e2e6e2d742e548be85c82bd94752ea81d3df1ebd1036b01570ec9be7"
+  },
+  "validation": [
+    {
+      "command": "bash -n /Users/josh/.claude/skills/.flywheel/scripts/kill-recover-drill.sh .flywheel/scripts/recovery-drill-sacrificial-live.sh",
+      "result": "pass"
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/recovery-drill-sacrificial-live.sh tests/kill-recover-drill-apply-gate-test.sh",
+      "result": "pass"
+    },
+    {
+      "command": "bash tests/kill-recover-drill-apply-gate-test.sh",
+      "result": "pass",
+      "summary": "RESULT pass=5 fail=0"
+    },
+    {
+      "command": "/Users/josh/.claude/skills/.flywheel/scripts/kill-recover-drill.sh --validate-log --json",
+      "result": "pass",
+      "summary": "green_rows=15 classes D1=5 D2=5 D3=5"
+    }
+  ],
+  "residuals": [
+    "The runtime kill-recover-drill.sh source currently lives in the local full-substrate skill tree, not as a public reduced installer surface."
+  ]
+}

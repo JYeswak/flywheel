@@ -1,0 +1,46 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-se3h.1",
+  "created_at": "2026-05-15T07:48:00Z",
+  "status": "safe_to_close",
+  "summary": "Session topology ledger schema/latest-wins/bootstrap conformance is mechanically proven; stale hardcoded bootstrap test expectation was replaced with schema-vs-example comparison.",
+  "evidence_refs": [
+    ".flywheel/audit/flywheel-se3h.1/evidence.md",
+    "tests/session-topology-ledger.sh"
+  ],
+  "validation": [
+    {
+      "command": "bash tests/session-topology-ledger.sh",
+      "result": "pass",
+      "summary": "12/0"
+    },
+    {
+      "command": "bash tests/session-topology-register-session.sh",
+      "result": "pass",
+      "summary": "16/0"
+    },
+    {
+      "command": "bash tests/autoloop-target-selector-e2e.sh",
+      "result": "pass",
+      "summary": "13/0"
+    },
+    {
+      "command": "bash .flywheel/tests/test-topology-lookup-before-dispatch.sh",
+      "result": "pass"
+    },
+    {
+      "command": ".flywheel/scripts/validate-callback-before-close.sh flywheel-se3h.1 /Users/josh/Developer/flywheel/.flywheel/audit/flywheel-se3h.1/evidence.md",
+      "result": "pass",
+      "summary": "VERDICT: SAFE_TO_CLOSE; four_lens brand/sniff/jeff/public pass"
+    },
+    {
+      "command": "shellcheck tests/session-topology-ledger.sh",
+      "result": "pass"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass"
+    }
+  ],
+  "contract_note": "The bootstrap fixture remains strict against the probe schema plan_sessions. Live topology is allowed to drift when explicit current-fleet delta reasons are recorded by the probe/evidence."
+}

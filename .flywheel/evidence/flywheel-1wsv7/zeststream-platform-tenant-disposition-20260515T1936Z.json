@@ -1,0 +1,15 @@
+{
+  "schema_version": "flywheel.tenant_registry_disposition.v1",
+  "slug": "zeststream-platform",
+  "status": "skip_with_reason",
+  "registry_row_required": false,
+  "repo_declaration_required": false,
+  "reason": "zeststream-platform is a shared package/docs substrate, not a tenant-bound runtime deployment. It produces reusable packages consumed by product repos; tenant routing belongs to the consuming runtime repos.",
+  "evidence_refs": [
+    "/Users/josh/Developer/zeststream-platform/README.md",
+    "/Users/josh/Developer/zeststream-platform/package.json"
+  ],
+  "followup_required": false,
+  "no_secret_values_included": true,
+  "created_at": "2026-05-15T19:36:00Z"
+}

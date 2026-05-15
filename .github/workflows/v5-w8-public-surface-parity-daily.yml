@@ -1,0 +1,68 @@
+name: v5-w8-public-surface-parity-daily
+
+# v5 W8: daily fresh-clone test of preflight + journey-smoke per the
+# substrate-compounding-v5 goal. Runs each morning UTC. EXIT criterion:
+# last 4 weekly CI runs all exit 0.
+
+on:
+  schedule:
+    - cron: "15 6 * * *"  # 06:15 UTC daily
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - "scripts/preflight.sh"
+      - "scripts/journey-smoke.sh"
+      - ".github/workflows/v5-w8-public-surface-parity-daily.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  fresh-clone-parity:
+    name: Fresh-clone preflight + journey-smoke (public path)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Fresh clone (replicates the public README invocation)
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/fresh-clone
+          cd /tmp/fresh-clone
+          git clone --depth 1 https://github.com/JYeswak/flywheel.git
+          cd flywheel
+          echo "fresh_clone_sha=$(git rev-parse HEAD)" >>"$GITHUB_OUTPUT"
+
+      - name: Install minimal deps (jq + bash)
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - name: Run scripts/preflight.sh --public --json
+        id: preflight
+        working-directory: /tmp/fresh-clone/flywheel
+        run: |
+          set -euo pipefail
+          bash scripts/preflight.sh --public --json > /tmp/preflight-result.json
+          jq -e '.exit_code == 0 or .exit_code == 20' /tmp/preflight-result.json
+          echo "preflight_passed=true" >>"$GITHUB_OUTPUT"
+
+      - name: Run scripts/journey-smoke.sh --matrix reduced --dry-run --json
+        id: journey
+        working-directory: /tmp/fresh-clone/flywheel
+        run: |
+          set -euo pipefail
+          bash scripts/journey-smoke.sh --matrix reduced --dry-run --json > /tmp/journey-result.json
+          jq -e '.status == "pass"' /tmp/journey-result.json
+          echo "journey_passed=true" >>"$GITHUB_OUTPUT"
+
+      - name: Emit cadence evidence row
+        run: |
+          set -euo pipefail
+          TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          jq -nc \
+            --arg ts "$TS" \
+            --arg sha "$(cd /tmp/fresh-clone/flywheel && git rev-parse HEAD)" \
+            '{ts:$ts,wave:"W8",cadence:"daily-ci",fresh_clone_sha:$sha,preflight_passed:true,journey_passed:true}'

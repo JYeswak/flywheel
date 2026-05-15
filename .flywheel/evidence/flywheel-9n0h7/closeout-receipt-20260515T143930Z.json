@@ -1,0 +1,50 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-9n0h7",
+  "parent_bead_id": "flywheel-oxzyr",
+  "status": "closed",
+  "closed_at": "2026-05-15T14:39:30Z",
+  "summary": "Added a read-only doctor/--doctor envelope to fleet-refill-signal.sh so the cross-orch refill surface can be inspected without writing its coordination ledger or dispatching peer sessions.",
+  "changed_files": [
+    ".flywheel/scripts/fleet-refill-signal.sh",
+    "tests/fleet-refill-signal.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/fleet-refill-signal.sh",
+      "result": "pass",
+      "summary": "13/0 including doctor read-only envelope, no ledger write, direct-dispatch absence, local-ready, peer-ready, no-ready, and no-idle-capacity fixtures."
+    },
+    {
+      "command": "bash tests/fleet-refill-signal-canonical-cli.sh",
+      "result": "pass",
+      "summary": "13/0 canonical receiver remains wired to the functional test."
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/fleet-refill-signal.sh tests/fleet-refill-signal.sh tests/fleet-refill-signal-canonical-cli.sh",
+      "result": "pass",
+      "summary": "No shellcheck findings."
+    },
+    {
+      "command": ".flywheel/audit/flywheel-cli-inventory/build-inventory.sh && jq row for .flywheel/scripts/fleet-refill-signal.sh",
+      "result": "pass",
+      "summary": "doctor_subcommand_status moved to basic; mutates_state=yes; ownership=own."
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass",
+      "summary": "No whitespace errors."
+    },
+    {
+      "command": "br dep cycles --json",
+      "result": "pass",
+      "summary": "No active dependency cycles."
+    }
+  ],
+  "boundaries": [
+    "No peer repo writes.",
+    "No direct NTM/wezterm dispatch surfaces added.",
+    "Doctor mode is read-only and does not append the cross-orch coordination ledger.",
+    "Canonical CLI scoping remains separately classified as missing; this closeout is limited to doctor-mode gap reduction."
+  ]
+}

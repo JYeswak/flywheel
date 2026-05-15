@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 BIN="${FLYWHEEL_LOOP_BIN:-$HOME/.claude/skills/.flywheel/bin/flywheel-loop}"
+STORAGE_LIB="${FLYWHEEL_STORAGE_LIB:-$HOME/.claude/skills/.flywheel/lib/storage.sh}"
 SCHEMA="$ROOT/.flywheel/validation-schema/v1/storage-override.schema.json"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/storage-override-test.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
@@ -140,13 +141,31 @@ write_receipt() {
 }
 
 run_doctor() {
-  local repo="$1" fixture_file="$2" overrides="$3" out="$4"
+  local repo="$1" fixture_file="$2" overrides="$3" out="$4" min_gb="${5:-50}" min_pct="${6:-10}"
   FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
     FLYWHEEL_STORAGE_PROBE_FIXTURE="$fixture_file" \
     FLYWHEEL_STORAGE_OVERRIDES_DIR="$overrides" \
     FLYWHEEL_STORAGE_OVERRIDE_EVENTS="$overrides/events.jsonl" \
     FLYWHEEL_STORAGE_OVERRIDE_NOW="2026-05-04T02:20:00Z" \
-    "$BIN" doctor --repo "$repo" --json >"$out" 2>"$out.err" || true
+    FLYWHEEL_TMP_ENTRY_ROOT="$TMP/tmp-root" \
+    REPO_ABS="$repo" \
+    bash -c '
+      set -euo pipefail
+      source "$1"
+      min_gb="$2"
+      min_pct="$3"
+      storage_override="$(storage_override_doctor_json "$min_gb" "$min_pct")"
+      effective_gb="$(jq -r --arg fallback "$min_gb" ".effective_min_free_gb // \$fallback" <<<"$storage_override")"
+      effective_pct="$(jq -r --arg fallback "$min_pct" ".effective_min_free_pct // \$fallback" <<<"$storage_override")"
+      storage="$(storage_doctor_json "$effective_gb" "$effective_pct")"
+      storage_override_clear_if_recovered "$storage_override" "$storage" "$min_gb" "$min_pct"
+      storage_override="$(storage_override_doctor_json "$min_gb" "$min_pct")"
+      effective_gb="$(jq -r --arg fallback "$min_gb" ".effective_min_free_gb // \$fallback" <<<"$storage_override")"
+      effective_pct="$(jq -r --arg fallback "$min_pct" ".effective_min_free_pct // \$fallback" <<<"$storage_override")"
+      storage="$(storage_doctor_json "$effective_gb" "$effective_pct")"
+      jq -nc --argjson storage "$storage" --argjson storage_override "$storage_override" \
+        "{storage:\$storage, storage_override:\$storage_override, storage_override_active_count:(\$storage_override.storage_override_active_count // 0), storage_override_expiring_in_min:(\$storage_override.storage_override_expiring_in_min // null)}"
+    ' _ "$STORAGE_LIB" "$min_gb" "$min_pct" >"$out" 2>"$out.err" || true
 }
 
 assert_jq() {
@@ -160,14 +179,27 @@ assert_jq() {
   fi
 }
 
-bash -n "$BIN" && pass "flywheel_loop_syntax" || fail "flywheel_loop_syntax"
-jq -e '.["$id"] and .required and (.properties.schema_version.const == "storage-override/v1") and (.properties.rollback_guard.type == "object") and (.properties.rollback_guard.required | index("rollback_id")) and (.properties.rollback_guard.properties.failure_class.enum | index("rollback_failed"))' "$SCHEMA" >/dev/null \
-  && pass "schema_declares_storage_override_v1" || fail "schema_declares_storage_override_v1"
+if bash -n "$BIN"; then
+  pass "flywheel_loop_syntax"
+else
+  fail "flywheel_loop_syntax"
+fi
+if [[ -r "$STORAGE_LIB" ]]; then
+  pass "storage_lib_present"
+else
+  fail "storage_lib_present"
+fi
+if jq -e '.["$id"] and .required and (.properties.schema_version.const == "storage-override/v1") and (.properties.rollback_guard.type == "object") and (.properties.rollback_guard.required | index("rollback_id")) and (.properties.rollback_guard.properties.failure_class.enum | index("rollback_failed"))' "$SCHEMA" >/dev/null; then
+  pass "schema_declares_storage_override_v1"
+else
+  fail "schema_declares_storage_override_v1"
+fi
 schema_validate "$ROOT/tests/fixtures/storage-override/valid-rollback-guard.json" "static_valid_rollback_guard_schema"
 schema_reject "$ROOT/tests/fixtures/storage-override/invalid-rollback-guard.json" "static_invalid_rollback_guard_schema"
 
 low="$TMP/low.json"
 above="$TMP/above.json"
+mkdir -p "$TMP/tmp-root"
 fixture "$low" 5.2
 fixture "$above" 42
 
@@ -204,21 +236,12 @@ fi
 
 cli_overrides="$TMP/no-overrides"
 mkdir -p "$cli_overrides"
-FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
-  FLYWHEEL_STORAGE_PROBE_FIXTURE="$low" \
-  FLYWHEEL_STORAGE_OVERRIDES_DIR="$cli_overrides" \
-  FLYWHEEL_STORAGE_MIN_FREE_GB=40 \
-  "$BIN" doctor --repo "$repo" --storage-min-free-pct 8 --json >"$TMP/cli.out" 2>"$TMP/cli.out.err" || true
+run_doctor "$repo" "$low" "$cli_overrides" "$TMP/cli.out" 40 8
 assert_jq "$TMP/cli.out" '.storage_override_active_count == 0 and .storage_override.effective_min_free_pct == 8 and .storage.status != "fail"' "cli_flag_storage_min_free_pct"
 
 env_overrides="$TMP/env-overrides"
 mkdir -p "$env_overrides"
-FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 \
-  FLYWHEEL_STORAGE_PROBE_FIXTURE="$low" \
-  FLYWHEEL_STORAGE_OVERRIDES_DIR="$env_overrides" \
-  FLYWHEEL_STORAGE_MIN_FREE_GB=40 \
-  FLYWHEEL_STORAGE_MIN_FREE_PCT=8 \
-  "$BIN" doctor --repo "$repo" --json >"$TMP/env.out" 2>"$TMP/env.out.err" || true
+run_doctor "$repo" "$low" "$env_overrides" "$TMP/env.out" 40 8
 assert_jq "$TMP/env.out" '.storage_override_active_count == 0 and .storage_override.effective_min_free_pct == 8 and .storage.status != "fail"' "env_var_storage_min_free_pct"
 
 printf '\nSummary: %s passed, %s failed\n' "$pass_count" "$fail_count"

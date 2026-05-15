@@ -1,0 +1,68 @@
+{
+  "schema": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-4mjw4",
+  "closed_at": "2026-05-15T09:03:38Z",
+  "status": "closed",
+  "summary": "Delivered n8n-deploy-kit Phase 1.4 packages/templates with five curated synthetic-data workflow templates and package-level validation.",
+  "external_repo": {
+    "path": "/Users/josh/Developer/n8n-deploy-kit",
+    "branch": "feat/phase-0-canonical-stamp",
+    "commit": "96be9ade9ea47ab791ceb3c33b7a76648f4e8722",
+    "pr": "https://github.com/JYeswak/n8n-deploy-kit/pull/1"
+  },
+  "delivered_files": [
+    "packages/templates/package.json",
+    "packages/templates/scripts/check-templates.sh",
+    "packages/templates/README.md",
+    "packages/templates/manifest.json",
+    "packages/templates/templates/regional-gym-lead-intake/",
+    "packages/templates/templates/title-closing-checklist/",
+    "packages/templates/templates/telecom-outage-escalation/",
+    "packages/templates/templates/insurance-renewal-follow-up/",
+    "packages/templates/templates/appointment-reminder/",
+    "README.md",
+    "ARCHITECTURE.md",
+    "package-lock.json"
+  ],
+  "validation": [
+    {
+      "command": "npm run check",
+      "cwd": "/Users/josh/Developer/n8n-deploy-kit",
+      "result": "pass"
+    },
+    {
+      "command": "bash packages/templates/scripts/check-templates.sh",
+      "cwd": "/Users/josh/Developer/n8n-deploy-kit",
+      "result": "pass",
+      "stdout_summary": "PASS templates validate through n8n-deploy"
+    },
+    {
+      "command": "shellcheck packages/templates/scripts/check-templates.sh",
+      "cwd": "/Users/josh/Developer/n8n-deploy-kit",
+      "result": "pass"
+    },
+    {
+      "command": "gitleaks detect --no-git --source . --redact --exit-code 1",
+      "cwd": "/Users/josh/Developer/n8n-deploy-kit",
+      "result": "pass"
+    },
+    {
+      "command": "trufflehog filesystem --no-update --fail --json --exclude-paths /tmp/trufflehog-exclude-n8n-deploy-kit.txt .",
+      "cwd": "/Users/josh/Developer/n8n-deploy-kit",
+      "result": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "cwd": "/Users/josh/Developer/n8n-deploy-kit",
+      "result": "pass"
+    }
+  ],
+  "boundaries": [
+    "Templates are synthetic-data-only and do not copy VRTX production workflows.",
+    "No named client workflow data, credential IDs, secrets, or private webhook URLs were included.",
+    "No public flip, npm publish, or live deployment was performed.",
+    "Existing n8n README/ARCHITECTURE ZestStream/VRTX references predate this template slice and were not introduced as template content."
+  ],
+  "next_owner": "flywheel",
+  "safe_local_work_remaining": false
+}

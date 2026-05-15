@@ -1,0 +1,53 @@
+{
+  "schema_version": "flywheel.bead_reclassification_receipt.v1",
+  "bead_id": "flywheel-rhdcq",
+  "timestamp": "2026-05-15T10:22:00Z",
+  "decision": "reclassify_blocked_not_close",
+  "reason": "The original cross-repo doctrine propagation request is no longer a ready action after the class-aware ownership gate shipped. Current dry-run truth shows every attempted peer-repo write is blocked by canonical_ownership_gate_blocked until target repos declare ownership manifests or receive an owner-specific rollout plan.",
+  "source_context": {
+    "parent_title": "doctrine-sync.sh propagation — propagate 6 new flywheel canonical doctrines + 9 xref-skillos stubs to fleet repos (alpsinsurance, mobile-eats, clutterfreespaces, picoz, vrtx, blackfoot, terratitle)",
+    "closed_children": [
+      "flywheel-rhdcq.1",
+      "flywheel-rhdcq.2"
+    ],
+    "superseding_guardrail": "flywheel-bmbub class-aware ownership gate"
+  },
+  "current_probe": {
+    "command": "SYNC_CANONICAL_LEDGER_DISABLE=1 .flywheel/scripts/canonical-doctrine-sync.sh --check --json --root /Users/josh/Developer/alpsinsurance --root /Users/josh/Developer/mobile-eats --root /Users/josh/Developer/picoz",
+    "status": "drift_detected",
+    "mode": "check",
+    "target_count": 3,
+    "drifted_count": 45,
+    "synced_count": 0,
+    "ownership_blocked_count": 45,
+    "rule_shard_drift_count": 0,
+    "canonical_drifted_count": 0,
+    "root_drifted_count": 0,
+    "ownership_gate": {
+      "enabled": true,
+      "source_owner_class": "flywheel",
+      "ownership_manifest": ".flywheel/ownership.json",
+      "blocked_count": 45
+    },
+    "blocked_by": "ownership_manifest_missing_or_no_match"
+  },
+  "target_preconditions": {
+    "alpsinsurance": "STATE.json present, ownership manifest missing/no match",
+    "mobile-eats": "STATE.json present, ownership manifest missing/no match",
+    "picoz": "mapped to /Users/josh/Developer/polymarket-pico-z by sync roots, ownership manifest missing/no match",
+    "clutterfreespaces": "no doctrine_version in STATE.json",
+    "vrtx": "no doctrine_version in STATE.json",
+    "terratitle": "no doctrine_version in STATE.json",
+    "blackfoot": "absent from /Users/josh/Developer"
+  },
+  "value_added": [
+    "Removes a stale parent from the ready queue without bypassing ownership protection.",
+    "Preserves rhdcq.1/rhdcq.2 implementation evidence while acknowledging the newer default-deny propagation contract.",
+    "Turns an ambiguous ready bead into an explicit blocked owner-routing item."
+  ],
+  "next_safe_actions": [
+    "Create target-specific ownership manifests or owner-specific rollout beads before any peer-repo canonical write.",
+    "Keep sync-canonical-doctrine default-deny behavior intact.",
+    "Do not close publication or fleet propagation readiness based on this parent alone."
+  ]
+}

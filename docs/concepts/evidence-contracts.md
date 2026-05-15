@@ -16,6 +16,7 @@ Common evidence surfaces:
 | `scripts/validate_cutover_receipts.py --json` | Saved cutover receipt bundle replay for final release evidence. |
 | `scripts/validate_user_journey_pack.py --json` | SkillOS-compatible public user journey pack validator with journey-step, visual-cue, evidence-ref, and skip/blocker receipt checks. |
 | `scripts/validate_story_system_package.py --json` | Reusable public story-system package validator that checks story arc, trust objections, visual primitives, frontend story schema, excluded hype phrases, and CSS token parity. |
+| `scripts/validate_installed_binary_source.py` | Installed-binary source manifest validator; blocks untracked full-substrate CLI closeout receipts unless they name a source-gap bead and evidence receipt. |
 | `scripts/zs-frontend-quality-gate.sh --json` | Reusable frontend quality gate for Next.js projects; checks font loading, design tokens, motion, copy source, accessibility, proof states, story-system linkage, and shared package wiring. |
 | `scripts/extract_git_story.py --json` | Git-derived trajectory, owner message pack, story dossier, and frontend UI payload so public copy can show the proof path instead of relying on one session's memory. |
 | `scripts/probe_repo_story_portability.py --json` | Repo-story portability probe proving the same git-derived story contract can run against Flywheel, ClutterFreeSpaces, Mobile Eats, or another local repo without editing sibling repos. |
@@ -29,6 +30,7 @@ Common evidence surfaces:
 | `packages/zeststream-motion/` | Shared React motion primitives and `@zeststream/motion/tokens` spring presets for living proof surfaces, with reduced-motion behavior documented. |
 | `docs/evidence/publication-evidence.md` | Public index of trust claims, local receipts, and live evidence still required. |
 | `docs/evidence/publication-blocker-coverage.md` | Public mapping from live readiness codes to owner and closure proof. |
+| `docs/evidence/installed-binary-source-manifest.json` | Tracked source/status manifest separating the reduced public install binary from full-substrate local-only binaries such as `flywheel-lock-repair` and `flywheel-verdict`. |
 | `docs/evidence/staging-review-signoff-packet.md` | Staging-review map for the site, story, evidence, developer path, agent-lane proof, and remaining public blockers; not public release approval. |
 | `docs/evidence/flywheel-trajectory.json` | Machine-readable `zeststream.repo_git_story.v0` trajectory evidence with embedded `zeststream.repo_story_message.v0` owner message pack and `zeststream.repo_frontend_story.v0` UI payload generated from git history. |
 | `docs/evidence/repo-story-portability.json` | Saved `zeststream.repo_story_portability_probe.v0` receipt showing Flywheel, ClutterFreeSpaces, and Mobile Eats passed the shared story/front-end payload contract. |

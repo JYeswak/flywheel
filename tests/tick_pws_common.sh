@@ -66,7 +66,7 @@ case "\${1:-}" in
     jq -nc --arg agent_type "$agent_type" --arg activity "$activity" --arg status "$status" --arg process "$process" '{agents:[{pane:2,pane_idx:2,agent_type:\$agent_type,activity:\$activity,state:\$activity,status:\$status,process_status:\$process,health_score:100,local_state:{is_idle:(\$activity=="idle" or \$activity=="WAITING")}}]}'
     ;;
   activity)
-    jq -nc --arg agent_type "$agent_type" '{agents:[{pane:2,pane_idx:2,agent_type:\$agent_type,state:"WAITING",idle_seconds:1}]}'
+    jq -nc --arg agent_type "$agent_type" --arg activity "$activity" '{agents:[{session:"flywheel",pane:2,pane_idx:2,agent_type:\$agent_type,state:\$activity,activity:\$activity,idle_seconds:1}]}'
     ;;
   history)
     jq -nc '{entries:[]}'

@@ -45,21 +45,31 @@ if "$HOOK" --schema 2>/dev/null | jq -e '."$defs".envelope and ."$defs".escalati
   pass "--schema has envelope + escalation_row defs"
 else fail "--schema defs"; fi
 
-# Test 5: close with no --blocker-file → rc=2 usage
+# Test 5: doctor emits read-only envelope without evaluating AC commands
+if "$HOOK" doctor --blockers-dir "$TMPDIR_TEST/missing-blockers" --escalations-log "$TMPDIR_TEST/missing-state/escalations.jsonl" --json 2>/dev/null \
+  | jq -e '.schema_version == "blocker-auto-close.doctor.v1" and .command == "doctor" and .mode == "read_only" and .mutates == false and (.status | IN("pass","warn","fail")) and ([.checks[] | select(.name == "doctor_read_only").status][0] == "pass") and ([.checks[] | select(.name == "mutation_default_dry_run").status][0] == "pass")' >/dev/null; then
+  pass "doctor emits read-only envelope"
+else fail "doctor envelope"; fi
+
+if "$HOOK" --doctor --json 2>/dev/null | jq -e '.command == "doctor" and .mutates == false' >/dev/null; then
+  pass "--doctor aliases doctor"
+else fail "--doctor alias"; fi
+
+# Test 6: close with no --blocker-file → rc=2 usage
 "$HOOK" close --json >/dev/null 2>&1
 rc=$?
 if [[ "$rc" -eq 2 ]]; then
   pass "close without --blocker-file → rc=2"
 else fail "close without --blocker-file rc=$rc"; fi
 
-# Test 6: close on missing file → rc=3 (not-applicable)
+# Test 7: close on missing file → rc=3 (not-applicable)
 out="$("$HOOK" close --blocker-file "$TMPDIR_TEST/nope.json" --json 2>/dev/null)"
 rc=$?
 if [[ "$rc" -eq 3 ]] && printf '%s' "$out" | jq -e '.status == "error" and (.reason | test("not readable"))' >/dev/null; then
   pass "close on missing file → rc=3 + error envelope"
 else fail "close missing file rc=$rc: $(printf '%s' "$out" | jq -c .)"; fi
 
-# Test 7: close on malformed JSON → rc=3
+# Test 8: close on malformed JSON → rc=3
 printf 'not json\n' > "$TMPDIR_TEST/bad.json"
 out="$("$HOOK" close --blocker-file "$TMPDIR_TEST/bad.json" --json 2>/dev/null)"
 rc=$?
@@ -67,7 +77,7 @@ if [[ "$rc" -eq 3 ]] && printf '%s' "$out" | jq -e '.status == "error" and (.rea
   pass "close on malformed JSON → rc=3 + error envelope"
 else fail "close malformed rc=$rc: $(printf '%s' "$out" | jq -c .)"; fi
 
-# Test 8: blocker missing acceptance_condition → rc=3
+# Test 9: blocker missing acceptance_condition → rc=3
 cat > "$TMPDIR_TEST/no-ac.json" <<'EOF'
 {"blocker_id":"no-ac","status":"open"}
 EOF
@@ -77,7 +87,7 @@ if [[ "$rc" -eq 3 ]] && printf '%s' "$out" | jq -e '.status == "error" and (.rea
   pass "blocker without acceptance_condition → rc=3"
 else fail "no-ac rc=$rc: $(printf '%s' "$out" | jq -c .)"; fi
 
-# Test 9: dry-run on passing AC — emits planned_escalation_row but does NOT mutate
+# Test 10: dry-run on passing AC — emits planned_escalation_row but does NOT mutate
 ELOG="$TMPDIR_TEST/escalations.jsonl"
 cat > "$TMPDIR_TEST/passing.json" <<'EOF'
 {"blocker_id":"int-test-pass","acceptance_condition":"echo READY","last_verified_at":"2026-05-09T00:00:00Z","status":"open"}
@@ -91,14 +101,14 @@ if [[ "$rc" -eq 0 ]] \
   pass "dry-run on passing AC: would_close=true, no escalations.jsonl, blocker unmutated"
 else fail "dry-run: rc=$rc, log_exists=$([[ -e "$ELOG" ]] && echo y || echo n), blocker_status=$(jq -r '.status' "$TMPDIR_TEST/passing.json")"; fi
 
-# Test 10: --apply on passing AC — writes row + mutates blocker file
+# Test 11: --apply on passing AC — writes row + mutates blocker file
 out="$("$HOOK" close --blocker-file "$TMPDIR_TEST/passing.json" --escalations-log "$ELOG" --apply --json 2>/dev/null)"
 rc=$?
 if [[ "$rc" -eq 0 ]] && printf '%s' "$out" | jq -e '.status == "closed" and (.closed_at | type == "string")' >/dev/null; then
   pass "--apply on passing AC: status=closed + closed_at set"
 else fail "--apply rc=$rc: $(printf '%s' "$out" | jq -c '{status, closed_at}')"; fi
 
-# Test 11: escalations.jsonl row matches DOCTRINE schema (all 10 required fields per blocker-discipline.md)
+# Test 12: escalations.jsonl row matches DOCTRINE schema (all 10 required fields per blocker-discipline.md)
 row="$(tail -1 "$ELOG")"
 if printf '%s' "$row" | jq -e '
   .schema_version == "blocker-escalation/v1"
@@ -117,7 +127,7 @@ if printf '%s' "$row" | jq -e '
   pass "escalations.jsonl row matches doctrine schema (10/10 required fields)"
 else fail "escalations row: $row"; fi
 
-# Test 12: ac_state_hash field surfaced (bonus over doctrine — links back to flywheel_replay_verify telemetry)
+# Test 13: ac_state_hash field surfaced (bonus over doctrine — links back to flywheel_replay_verify telemetry)
 if printf '%s' "$row" | jq -e '.ac_state_hash != null and (.ac_state_hash | test("^[0-9a-f]{64}$"))' >/dev/null; then
   pass "ac_state_hash bonus field: 64-hex (cross-orch replay-verify link)"
 else fail "ac_state_hash: $(printf '%s' "$row" | jq -r .ac_state_hash)"; fi

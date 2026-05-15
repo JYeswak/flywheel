@@ -248,6 +248,7 @@ scrub_secrets() {
     s/ghr_[A-Za-z0-9]+/[SCRUBBED:github_refresh_token]/g;
     s/sk-ant-[A-Za-z0-9_-]+/[SCRUBBED:anthropic_key]/g;
     s/sk-proj-[A-Za-z0-9_-]+/[SCRUBBED:openai_project_key]/g;
+    s/sk_(?:test|live)_[A-Za-z0-9_-]+/[SCRUBBED:stripe_key]/g;
     s/sk-[A-Za-z0-9_-]{20,}/[SCRUBBED:openai_key]/g;
     s/AKIA[0-9A-Z]{16}/[SCRUBBED:aws_access_key]/g;
     s/ASIA[0-9A-Z]{16}/[SCRUBBED:aws_session_key]/g;
@@ -264,7 +265,7 @@ scrub_secrets() {
 is_request_shape() {
   local lc="$1"
   printf '%s' "$lc" | grep -Eq \
-    "(^|[[:space:]])(dispatch|review|implement|build|fix|ship|close|create|update|wire|add|investigate|verify|validate|write|make|run|set up|surface|capture|register|reserve|callback|follow up|need to|we need|please|can you|could you|let'?s|todo|task|bead|p0|p1)([[:space:][:punct:]]|$)"
+    "(^|[[:space:]])(dispatch|review|implement|build|fix|ship|close|create|update|wire|add|investigate|verify|validate|write|make|run|set up|surface|capture|register|reserve|callback|follow up|check|continue|deploy|stop|do you|need to|we need|please|can you|could you|let'?s|todo|task|bead|p0|p1)([[:space:][:punct:]]|$)"
 }
 
 dedup_request_text_hash_present() {

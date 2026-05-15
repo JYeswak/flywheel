@@ -1,0 +1,6 @@
+{"turn":1,"event":"none"}
+{"turn":2,"event":"none"}
+{"turn":3,"event":"none","detail":"third consecutive no-event; anti-spin should fire here"}
+{"turn":4,"event":"none","detail":"hold STAND_DOWN"}
+{"turn":5,"event":"new_commit","detail":"abc1234"}
+{"turn":6,"event":"none"}

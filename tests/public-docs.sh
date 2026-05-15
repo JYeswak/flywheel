@@ -182,7 +182,7 @@ require_literal "docs/evidence/publication-blocker-coverage.md" "readiness_block
 require_literal "docs/evidence/publication-blocker-coverage.md" "joshua_release_signoff_missing" "blocker coverage includes final signoff blocker"
 require_literal "docs/evidence/publication-goal-completion-audit.md" "Prompt-To-Artifact Checklist" "goal completion audit maps prompt to artifacts"
 require_literal "docs/evidence/publication-goal-completion-audit.md" "Current verdict: \`not complete\`." "goal completion audit blocks premature completion"
-require_literal "docs/evidence/publication-goal-completion-audit.md" "remote_repo_private" "goal completion audit includes live remote blocker"
+require_literal "docs/evidence/publication-goal-completion-audit.md" "remote_workflows_missing" "goal completion audit includes live remote blocker"
 require_literal "docs/evidence/asupersync-gated-adoption.md" "Status: \`gated-evaluation\`." "asupersync evidence packet keeps gated status"
 require_literal "docs/evidence/asupersync-gated-adoption.md" "add Asupersync to the public install path" "asupersync evidence packet blocks install dependency"
 require_literal "docs/evidence/asupersync-poc-receipt.template.json" "flywheel.asupersync_poc_receipt.v0" "asupersync POC receipt template names schema"

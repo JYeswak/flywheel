@@ -1,0 +1,39 @@
+{
+  "schema": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-p8xth",
+  "created_at": "2026-05-15T14:27:25Z",
+  "status": "closed",
+  "decision": "closed_with_evidence",
+  "summary": "Added a read-only doctor envelope to the Jeffrey beads_rust #285 divergence capture harness so it can report br, capture-root, audit-log, and lock-timeout readiness without requiring a bead id or creating capture state.",
+  "changed_files": [
+    ".flywheel/scripts/jeff-bead-285-divergence-capture.sh",
+    "tests/jeff-bead-285-divergence-capture-introspection.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/jeff-bead-285-divergence-capture-introspection.sh",
+      "result": "pass",
+      "summary": "10/0 assertions: info advertises doctor schema, doctor emits jeff-bead-285-divergence-capture.doctor.v1 with mutates=false, invalid lock timeout fails cleanly, dry-run remains default, and no upstream auto-push verbs exist."
+    },
+    {
+      "command": "bash tests/jeff-bead-285-divergence-capture-idempotency-key.sh",
+      "result": "pass",
+      "summary": "11/0 assertions: existing idempotency-key refusal, equals-form parsing, per-(key, bead_id) replay, tolerant audit parsing, and schema behavior are preserved."
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/jeff-bead-285-divergence-capture.sh tests/jeff-bead-285-divergence-capture-introspection.sh tests/jeff-bead-285-divergence-capture-idempotency-key.sh",
+      "result": "pass",
+      "summary": "Touched divergence-capture shell surfaces are ShellCheck clean."
+    },
+    {
+      "command": ".flywheel/audit/flywheel-cli-inventory/build-inventory.sh",
+      "result": "pass",
+      "summary": "Inventory regenerated; jeff-bead-285-divergence-capture.sh now reports doctor_subcommand_status=basic with score 625."
+    }
+  ],
+  "parent_state": {
+    "parent_bead_id": "flywheel-oxzyr",
+    "parent_closed": false,
+    "reason": "The broader doctor-mode wave remains open; this closes one scoped Jeffrey divergence capture surface only."
+  }
+}

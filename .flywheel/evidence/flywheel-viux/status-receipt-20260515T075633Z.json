@@ -1,0 +1,30 @@
+{
+  "schema_version": "flywheel.status_receipt.v1",
+  "bead_id": "flywheel-viux",
+  "status": "blocked",
+  "checked_at": "2026-05-15T07:56:33Z",
+  "reason": "Historical receipt claims idle-state proof is pass, but current focused tests are red.",
+  "validation": [
+    {
+      "command": "bash tests/idle-state-probe.sh",
+      "result": "fail",
+      "summary": "Fails `peer orch default did not disable saturated`; fixture still uses `{capability-control-plane}` placeholder while current default_config disables saturated only for real peer sessions mobile-eats and skillos."
+    },
+    {
+      "command": "bash tests/test_idle_pane_watcher_convergence.sh",
+      "result": "fail",
+      "summary": "Exits 64 after first pass because the fixture invokes legacy watcher args including `--state-dir`, while current idle-pane-auto-dispatch routes through native `ntm wait/assign` and no longer accepts that old argument."
+    },
+    {
+      "command": "bash tests/idle-state-probe-canonical-cli.sh",
+      "result": "pass",
+      "summary": "21 passed, 0 failed; canonical CLI surface remains intact."
+    }
+  ],
+  "safe_local_work_remaining": true,
+  "next_action": "Reconcile idle-state tests with the current native ntm wait/assign watcher contract, or restore a compatibility adapter for the old watcher fixture before closing flywheel-viux.",
+  "notes": [
+    "Do not close from the historical flywheel-icua receipt alone; it is stale against current tests.",
+    "This is a mechanical blocker, not a Joshua decision."
+  ]
+}

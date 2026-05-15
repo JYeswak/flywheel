@@ -1,0 +1,42 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-ofwh",
+  "created_at": "2026-05-15T08:03:00Z",
+  "status": "safe_to_close",
+  "summary": "The 2026-05-03 Joshua-request transcript backfill task is complete: six jr-backfill entries are present in committed MISSION.md, the CLI/helper dependency is closed, and the four-lens public-lens rework bead is closed.",
+  "evidence_refs": [
+    ".flywheel/MISSION.md#jr-backfill-001",
+    ".flywheel/MISSION.md#jr-backfill-006",
+    "flywheel-fp5g"
+  ],
+  "validation": [
+    {
+      "command": "git show HEAD:.flywheel/MISSION.md | python3 -c '...jr-backfill-001..006...'",
+      "result": "pass",
+      "summary": "HEAD contains jr-backfill-001..006"
+    },
+    {
+      "command": "josh-requests doctor --json | jq -e '.status==\"ok\" and .jsonl_valid==true and .rows >= 1'",
+      "result": "pass"
+    },
+    {
+      "command": "josh-requests validate registry --json | jq -e '.valid==true'",
+      "result": "pass"
+    },
+    {
+      "command": "bash tests/test_ntm_send_with_josh_req_capture_canonical_cli.sh",
+      "result": "pass",
+      "summary": "6/6"
+    },
+    {
+      "command": "br show flywheel-fp5g",
+      "result": "pass",
+      "summary": "four-lens rework closed; all 7 facets and validators passed"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass"
+    }
+  ],
+  "scope_note": "This closes the historical backfill task, not every open Joshua-request row currently in the live registry. Later request rows remain separate queue work."
+}

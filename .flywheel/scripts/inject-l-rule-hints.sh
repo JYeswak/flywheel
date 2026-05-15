@@ -9,6 +9,7 @@ TMP_BODY=""
 if [[ "$BODY_FILE" == "--help" || "$BODY_FILE" == "-h" ]]; then
   cat <<'EOF'
 Usage: inject-l-rule-hints.sh <task-body-file> [task-id] [repo-path]
+       inject-l-rule-hints.sh doctor|--doctor
 
 Injects up to three relevant canonical L-rule hints into a dispatch body.
 Reads .flywheel/rules shards when present, otherwise falls back to AGENTS.md
@@ -19,21 +20,82 @@ EOF
 fi
 
 if [[ "$BODY_FILE" == "--info" ]]; then
-  printf 'inject-l-rule-hints: rule hint injector, max_hints=3, dedupe_window_sec=1800\n'
+  printf 'inject-l-rule-hints: rule hint injector, max_hints=3, dedupe_window_sec=1800, doctor=inject-l-rule-hints.doctor.v1\n'
   exit 0
 fi
 
 if [[ "$BODY_FILE" == "--schema" ]]; then
-  printf '%s\n' '{"schema_version":"inject-l-rule-hints.v1","output":"markdown","max_hints":3,"dedupe_window_sec":1800}'
+  printf '%s\n' '{"schema_version":"inject-l-rule-hints.v1","output":"markdown","max_hints":3,"dedupe_window_sec":1800,"doctor_schema":"inject-l-rule-hints.doctor.v1"}'
   exit 0
 fi
 
 if [[ "$BODY_FILE" == "--examples" ]]; then
   cat <<'EOF'
+inject-l-rule-hints.sh doctor
 inject-l-rule-hints.sh /tmp/task-body.md flywheel-abc /Users/josh/Developer/flywheel
 FLYWHEEL_L_RULES_DIR=/tmp/rules inject-l-rule-hints.sh /tmp/body.md fixture
 L_RULE_HINTS_DISABLED=1 inject-l-rule-hints.sh /tmp/body.md fixture
 EOF
+  exit 0
+fi
+
+if [[ "$BODY_FILE" == "doctor" || "$BODY_FILE" == "--doctor" ]]; then
+  python_status="pass"
+  rules_status="warn"
+  log_parent_status="pass"
+  overall="pass"
+  command -v python3 >/dev/null 2>&1 || { python_status="fail"; overall="fail"; }
+  if [[ -n "${FLYWHEEL_L_RULES_DIR:-}" ]]; then
+    if [[ -d "${FLYWHEEL_L_RULES_DIR:-}" ]]; then
+      rules_status="pass"
+      rules_source="${FLYWHEEL_L_RULES_DIR:-}"
+    else
+      rules_status="fail"
+      rules_source="${FLYWHEEL_L_RULES_DIR:-}"
+      overall="fail"
+    fi
+  elif [[ -d "$REPO_PATH/.flywheel/rules" ]]; then
+    rules_status="pass"
+    rules_source="$REPO_PATH/.flywheel/rules"
+  elif [[ -f "$REPO_PATH/AGENTS.md" ]]; then
+    rules_status="pass"
+    rules_source="$REPO_PATH/AGENTS.md"
+  elif [[ -f "$REPO_PATH/.flywheel/AGENTS-CANONICAL.md" ]]; then
+    rules_status="pass"
+    rules_source="$REPO_PATH/.flywheel/AGENTS-CANONICAL.md"
+  else
+    rules_source="$REPO_PATH/.flywheel/rules"
+    [[ "$overall" == "fail" ]] || overall="warn"
+  fi
+  log_parent="$(dirname "${FLYWHEEL_L_RULE_HINTS_LOG:-$HOME/.cache/flywheel-l-rule-hints-emitted.jsonl}")"
+  usage_parent="$(dirname "${FLYWHEEL_RULE_HINT_USAGE_LOG:-$HOME/.local/state/flywheel/rule-hint-usage.jsonl}")"
+  if [[ -d "$log_parent" && -w "$log_parent" && -d "$usage_parent" && -w "$usage_parent" ]]; then
+    log_parent_status="pass"
+  else
+    log_parent_status="warn"
+    [[ "$overall" == "fail" ]] || overall="warn"
+  fi
+  jq -nc \
+    --arg status "$overall" \
+    --arg repo_path "$REPO_PATH" \
+    --arg rules_source "$rules_source" \
+    --arg python_status "$python_status" \
+    --arg rules_status "$rules_status" \
+    --arg log_parent_status "$log_parent_status" \
+    '{
+      schema_version: "inject-l-rule-hints.doctor.v1",
+      command: "doctor",
+      status: $status,
+      mode: "read_only",
+      mutates: false,
+      repo_path: $repo_path,
+      rules_source: $rules_source,
+      checks: [
+        {name:"python3_available", status:$python_status},
+        {name:"rules_source_present", status:$rules_status},
+        {name:"log_parents_writable", status:$log_parent_status}
+      ]
+    }'
   exit 0
 fi
 

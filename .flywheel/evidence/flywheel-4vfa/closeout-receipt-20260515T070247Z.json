@@ -1,0 +1,60 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-4vfa",
+  "closed_at": "2026-05-15T07:02:47Z",
+  "decision": "close_after_fresh_timed_disposable_onboarding_proof",
+  "status": "pass",
+  "autonomy": "autonomous",
+  "flagship_anchor": "flywheel-6kew",
+  "proof_ref": ".flywheel/evidence/flywheel-4vfa/flagship-onboarding-proof-20260515T070116Z.json",
+  "flagship_crosslink_ref": ".flywheel/evidence/flywheel-6kew/flagship-onboarding-proof-ref-20260515T070116Z.json",
+  "measured_elapsed_seconds": 15,
+  "measured_elapsed_minutes": 0.25,
+  "under_30min": true,
+  "acceptance": {
+    "timed_dry_run_walkthrough": "pass",
+    "exact_commands_recorded": "pass",
+    "generated_artifacts_recorded": "pass",
+    "client_doctrine_path_recorded": "pass",
+    "blocker_required": "not_required_under_30min",
+    "flywheel_6kew_crosslinked": "pass"
+  },
+  "validation": [
+    {
+      "command": "flywheel-loop init --repo <fixture> --mission-source README.md --goal-source README.md --state-source README.md --json",
+      "status": "pass"
+    },
+    {
+      "command": ".flywheel/scripts/flywheel-onboard.sh --repo <fixture> --dry-run --doctor --json",
+      "status": "pass",
+      "observed_status": "PARTIAL",
+      "reason": "dry-run path succeeded while preserving skipped mutating NTM commands"
+    },
+    {
+      "command": ".flywheel/scripts/flywheel-onboard.sh validate --repo <fixture> --json",
+      "status": "pass"
+    },
+    {
+      "command": "bash tests/flagship-onboarding-proof.sh",
+      "status": "pass",
+      "summary": "SUMMARY pass=11 fail=0"
+    },
+    {
+      "command": "shellcheck tests/flagship-onboarding-proof.sh",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass"
+    },
+    {
+      "command": "br dep cycles",
+      "status": "pass"
+    }
+  ],
+  "notes": [
+    "The durable proof is sanitized and keeps raw local command output in /tmp only.",
+    "The proof records AGENTS.md, README.md, .flywheel/MISSION.md, .flywheel/GOAL.md, and .flywheel/STATE.md as the client-facing doctrine path.",
+    "No client repo was mutated; the target was a disposable /tmp fixture repo."
+  ]
+}

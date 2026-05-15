@@ -1,0 +1,95 @@
+{
+  "schema_version": "flywheel.work_hunt_closeout.v1",
+  "bead_id": "flywheel-hunt-work-mission-env-skills",
+  "created_at": "2026-05-15T12:42:39Z",
+  "status": "closed",
+  "autonomy": "autonomous",
+  "hunt_scope": [
+    ".flywheel/GOAL.md",
+    ".flywheel/STATE.md",
+    ".flywheel/MISSION.md",
+    "br ready --json",
+    "bv --robot-triage",
+    "publication readiness",
+    "PR #3 remote checks",
+    ".flywheel/audit/flywheel-cli-inventory/inventory.jsonl",
+    "~/.claude/skills and ~/.codex/skills"
+  ],
+  "finding_summary": {
+    "ready_beads_before_claim": 1,
+    "ready_beads_after_claim": 0,
+    "remaining_publication_blockers": [
+      "public default-branch workflow proof",
+      "v0.2.0 release assets",
+      "Joshua release signoff"
+    ],
+    "safe_local_work_found": "doctor-mode umbrella still had P0 own-mutating CLI surfaces with absent doctor envelopes",
+    "selected_surface": ".flywheel/scripts/sync-canonical-doctrine.sh",
+    "selection_reason": "central fleet propagation surface; high blast radius; current inventory classified it P0 because it mutates state, passes canonical CLI scoping, and had doctor_subcommand_status=absent"
+  },
+  "change_summary": {
+    "script": ".flywheel/scripts/sync-canonical-doctrine.sh",
+    "test": "tests/sync-canonical-doctrine-doctor.sh",
+    "behavior": "Added read-only doctor and --doctor envelope for dependency/config checks; no apply path or propagation behavior changed.",
+    "inventory_effect": "Current local CLI inventory P0 own-mutating passing surfaces reduced from 8 to 7; sync-canonical-doctrine.sh moved out of the P0 absent-doctor set.",
+    "script_sha256": "6a59a4eb5ea412257ee9c8472d612b0abd83003db8d98759c2fd05474cd3f68f",
+    "test_sha256": "87048015f4ceed410a2752e036083ada2cd9c90f48976ca5e63ff9830b57a15f"
+  },
+  "proof": [
+    {
+      "command": "bash -n .flywheel/scripts/sync-canonical-doctrine.sh tests/sync-canonical-doctrine-doctor.sh",
+      "status": "pass"
+    },
+    {
+      "command": "bash tests/sync-canonical-doctrine-doctor.sh",
+      "status": "pass",
+      "summary": "6/0"
+    },
+    {
+      "command": "bash tests/sync-canonical-doctrine-introspection.sh",
+      "status": "pass",
+      "summary": "9/0"
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/sync-canonical-doctrine.sh tests/sync-canonical-doctrine-doctor.sh",
+      "status": "pass"
+    },
+    {
+      "command": "bash .flywheel/audit/flywheel-cli-inventory/build-inventory.sh",
+      "status": "pass",
+      "summary": "422 rows"
+    },
+    {
+      "command": "./tests/publication-readiness.sh",
+      "status": "pass",
+      "summary": "72/0"
+    },
+    {
+      "command": "gh pr view 3 --json headRefOid,mergeStateStatus,statusCheckRollup",
+      "status": "pass",
+      "summary": "bbd65b1c was CLEAN before this local follow-up slice"
+    }
+  ],
+  "boundaries": {
+    "no_public_release_claim": true,
+    "no_doctrine_apply_run": true,
+    "unrelated_dirty_files_left_unstaged": [
+      ".flywheel/AGENTS-CANONICAL.md",
+      ".flywheel/MISSION.md",
+      "templates/flywheel-install/AGENTS.md"
+    ]
+  },
+  "next_state": {
+    "remaining_ready_work_expected": false,
+    "remaining_local_p0_doctor_absent_surfaces": [
+      "dcg-prose-trigger-strip-gate.sh",
+      "inject-l-rule-hints.sh",
+      "jeff-bead-285-divergence-capture.sh",
+      "jeff-daily-corpus-diff-render.sh",
+      "mission-lock-output-schema-validator.sh",
+      "tentacle-inventory-bump.sh",
+      "tmp-aggressive-prune.sh"
+    ],
+    "disposition": "These remain part of the open doctor-mode umbrella rather than publication cutover blockers."
+  }
+}

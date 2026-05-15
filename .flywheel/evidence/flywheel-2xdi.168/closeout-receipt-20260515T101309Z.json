@@ -1,0 +1,52 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-2xdi.168",
+  "closed_scope": "Classified regenerate-dicklesworthstone-sources-runs.jsonl as a known self-instrumentation silo and locked the gap-hunt regression.",
+  "paths": [
+    ".flywheel/gap-hunt-known-silos.jsonl",
+    "tests/regenerate-dicklesworthstone-sources-known-silos-registry.sh"
+  ],
+  "before": {
+    "gap_hunt_probe_matches": [
+      "cross-source-silos:regenerate-dicklesworthstone-sources-runs.jsonl"
+    ],
+    "reason": "The audit ledger existed under ~/.local/state/flywheel but was not referenced by sampled tick/status/synth/doctrine surfaces."
+  },
+  "after": {
+    "gap_hunt_probe_matches": [],
+    "known_silo": {
+      "name": "regenerate-dicklesworthstone-sources-runs.jsonl",
+      "class": "self-instrumentation",
+      "writer": "/Users/josh/Developer/flywheel/.flywheel/scripts/regenerate-dicklesworthstone-sources.sh"
+    },
+    "rationale": "The ledger is replay/audit evidence for the idempotent Dicklesworthstone sources regenerator, not a missing tick/status consumer."
+  },
+  "validation": [
+    {
+      "command": "bash tests/regenerate-dicklesworthstone-sources-known-silos-registry.sh",
+      "result": "pass 6/0"
+    },
+    {
+      "command": "shellcheck tests/regenerate-dicklesworthstone-sources-known-silos-registry.sh",
+      "result": "pass"
+    },
+    {
+      "command": "jq -c . .flywheel/gap-hunt-known-silos.jsonl",
+      "result": "pass"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    }
+  ],
+  "safety": {
+    "runtime_mutation": false,
+    "ledger_mutation": false,
+    "allowlist_only": true
+  },
+  "autonomy": "autonomous"
+}

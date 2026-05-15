@@ -1,0 +1,40 @@
+{
+  "schema_version": "flywheel.public_surface_parity.v0",
+  "ts": "2026-05-15T14:53:48Z",
+  "run_context": "local-checkout-not-fresh-clone",
+  "tests": [
+    {
+      "name": "preflight",
+      "cmd": "scripts/preflight.sh --json",
+      "exit_code": 20,
+      "summary": {
+        "reduced_mode_available": true,
+        "full_mode_missing": [
+          "ntm",
+          "agent-mail"
+        ],
+        "misconfigured": [
+          "ntm",
+          "agent-mail"
+        ],
+        "next_action_kind": "continue"
+      },
+      "public_page_expectation": "exit 0 implied by docs",
+      "actual_passes": false
+    },
+    {
+      "name": "journey-smoke",
+      "cmd": "scripts/journey-smoke.sh --matrix reduced --dry-run --json",
+      "exit_code": 0,
+      "summary": {
+        "status": "pass",
+        "lanes": 1
+      },
+      "actual_passes": true
+    }
+  ],
+  "overall_pass": false,
+  "findings": [
+    "preflight exit_code=20 (public page implies exit 0 success path)"
+  ]
+}

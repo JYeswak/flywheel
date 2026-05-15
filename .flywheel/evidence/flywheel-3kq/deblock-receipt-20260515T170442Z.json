@@ -1,0 +1,43 @@
+{
+  "schema": "flywheel.blocker_reduction_receipt.v1",
+  "bead": "flywheel-3kq",
+  "generated_at": "2026-05-15T17:04:42Z",
+  "status": "deblocked_into_mechanical_adoption_queue",
+  "changed_surfaces": [
+    ".flywheel/scripts/trap-rollback-inventory.sh",
+    "tests/trap-rollback-inventory.sh"
+  ],
+  "problem_reduced": "The prior blocker mixed operational scripts with tests, receipts, evidence artifacts, fixtures, and historical plans. That made the rollback gap look larger but less actionable.",
+  "repair": "The inventory now scans tracked operational shell surfaces only: .flywheel/scripts, .flywheel/hooks, .flywheel/lib, and top-level scripts. Non-operational prefixes are explicitly excluded and reported.",
+  "current_inventory_ref": ".flywheel/evidence/flywheel-3kq/inventory-scoped-operational-shell-20260515T170442Z.json",
+  "current_inventory": {
+    "scan_scope": "tracked_operational_shell",
+    "tracked_shell_scripts_scanned": 392,
+    "mutating_like_scripts": 381,
+    "mutating_like_with_exit_or_err_trap": 89,
+    "mutating_like_without_exit_or_err_trap": 292,
+    "coverage_pct": 23.36
+  },
+  "status_decision": {
+    "from": "blocked",
+    "to": "in_progress",
+    "reason": "Safe local work exists: one operational surface at a time can be patched and proven. The parent should not sit in blocked state waiting for a perfect fleet-wide rewrite."
+  },
+  "validation": [
+    {
+      "command": "bash tests/trap-rollback-inventory.sh",
+      "status": "pass",
+      "summary": "10/0"
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/trap-rollback-inventory.sh tests/trap-rollback-inventory.sh",
+      "status": "pass"
+    },
+    {
+      "command": ".flywheel/scripts/trap-rollback-inventory.sh scan --repo . --json",
+      "status": "pass_warn_expected",
+      "summary": "warn because operational rollback adoption is incomplete; no false complete claim"
+    }
+  ],
+  "next_work_policy": "Create or claim bounded child beads for specific high-risk operational scripts; close only when the inventory count decreases and the script has a failure-path regression."
+}

@@ -45,8 +45,7 @@ for rel in \
   contact/index.html \
   styles.css \
   visual-system.css \
-  assets/operating-room-map.svg \
-  assets/loop-map.svg; do
+  assets/operating-room-map.svg; do
   require_file "$rel"
 done
 
@@ -122,9 +121,15 @@ require_literal "for-developers/index.html" "https://github.com/Dicklesworthston
 require_literal "for-developers/index.html" "https://github.com/Dicklesworthstone/mcp_agent_mail" "developer page links Agent Mail repo"
 require_literal "for-developers/index.html" "https://github.com/Dicklesworthstone/beads_rust" "developer page links beads repo"
 require_literal "for-developers/index.html" "https://github.com/Dicklesworthstone/destructive_command_guard" "developer page links dcg repo"
-require_literal "for-developers/index.html" "0.007 percent cache hit rate" "developer page owns technical cache before number"
-require_literal "for-developers/index.html" "6.37 percent cache hit rate" "developer page owns technical cache after number"
-require_literal "for-developers/index.html" "910x improvement, measured." "developer page owns technical measured result"
+require_literal "for-developers/index.html" "Project portfolio" "developer page owns project portfolio"
+require_literal "for-developers/index.html" "Different problems. One method that compounds." "developer page frames compounding project spine"
+require_literal "for-developers/index.html" "Flywheel</a> — make agent work auditable" "developer page portfolio includes Flywheel"
+require_literal "for-developers/index.html" "SkillOS — keep know-how from walking out the door" "developer page portfolio includes SkillOS"
+require_literal "for-developers/index.html" "Brand voice — copy that cannot quietly lie" "developer page portfolio includes brand voice"
+require_literal "for-developers/index.html" "ZestTube — repeatable video, not one-off edits" "developer page portfolio includes ZestTube"
+require_literal "for-developers/index.html" "Mobile Eats — a real consumer app, shipped" "developer page portfolio includes Mobile Eats"
+require_literal "for-developers/index.html" "A regional gym — leads and follow-up, automated" "developer page portfolio includes anonymized gym"
+require_literal "for-developers/index.html" "A regional insurance carrier — one integration backend" "developer page portfolio includes anonymized insurance carrier"
 require_literal "for-developers/index.html" "Flywheel and SkillOS" "developer page names Joshua-built layer"
 require_literal "for-developers/index.html" "bash install.sh --dry-run --json" "developer page gives public install dry-run"
 require_literal "for-developers/index.html" "github.com/Dicklesworthstone" "developer page links Dicklesworthstone source"

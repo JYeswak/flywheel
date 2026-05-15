@@ -30,6 +30,9 @@ SHARED_SCRIPT_SOURCE_DIR="${SYNC_SHARED_SCRIPT_SOURCE_DIR:-/Users/josh/Developer
 SHARED_SCRIPT_ALLOWLIST="${SYNC_SHARED_SCRIPT_ALLOWLIST:-agents-md-shard-extract.sh bead-quality-mining.sh cleanup-scratch.sh dispatch-and-verify.sh tmp-aggressive-prune.sh topology-tick-refresh.sh sync-canonical-doctrine.sh publishability-bar.sh zeststream-public-prepublish-hook.sh}"
 LAUNCHD_TEMPLATE_SOURCE_DIR="${SYNC_LAUNCHD_TEMPLATE_SOURCE_DIR:-/Users/josh/Developer/flywheel/.flywheel/launchd}"
 SECURITY_SETTINGS_DENY_SOURCE="${SYNC_SECURITY_SETTINGS_DENY_SOURCE:-/Users/josh/Developer/flywheel/.flywheel/security/v1/claude-settings-deny.json}"
+OWNERSHIP_GATE="${SYNC_CANONICAL_OWNERSHIP_GATE:-1}"
+SOURCE_OWNER_CLASS="${SYNC_CANONICAL_SOURCE_OWNER_CLASS:-flywheel}"
+OWNERSHIP_MANIFEST_REL="${SYNC_CANONICAL_OWNERSHIP_MANIFEST:-.flywheel/ownership.json}"
 LOOPS_DIR="${SYNC_CANONICAL_LOOPS_DIR:-$HOME/.flywheel/loops}"
 SYNC_LEDGER="${SYNC_CANONICAL_LEDGER:-$HOME/.local/state/flywheel/doctrine-sync-ledger.jsonl}"
 SYNC_TS="${SYNC_CANONICAL_NOW:-$(date -u +%Y-%m-%dT%H:%M:%SZ)}"
@@ -44,7 +47,7 @@ SCHEMA_VERSION="sync-canonical-doctrine-receipt/v1"
 
 usage() {
   cat <<'EOF'
-usage: sync-canonical-doctrine.sh [--dry-run|--apply [--idempotency-key KEY]] [--json] [--source PATH] [--root PATH ...]
+usage: sync-canonical-doctrine.sh [doctor|--doctor] [--dry-run|--apply [--idempotency-key KEY]] [--json] [--source PATH] [--root PATH ...]
 
 Synchronizes doctrine surfaces for each flywheel-installed repo:
   1. .flywheel/rules/L*.md is the canonical L-rule source.
@@ -102,12 +105,103 @@ Environment:
   SYNC_SHARED_SCRIPT_ALLOWLIST="bead-quality-mining.sh dispatch-and-verify.sh"
   SYNC_LAUNCHD_TEMPLATE_SOURCE_DIR=/path/to/.flywheel/launchd
   SYNC_SECURITY_SETTINGS_DENY_SOURCE=/path/to/claude-settings-deny.json
+  SYNC_CANONICAL_OWNERSHIP_GATE=1
+  SYNC_CANONICAL_SOURCE_OWNER_CLASS=flywheel
+  SYNC_CANONICAL_OWNERSHIP_MANIFEST=.flywheel/ownership.json
   SYNC_ORCH_VALIDATION_SKILL_SOURCE=/path/to/orchestrator-validation-discipline/SKILL.md
   SYNC_CANONICAL_ROOTS="/path/a:/path/b"
   SYNC_CANONICAL_LOOPS_DIR=/path/to/loops-json-dir
   SYNC_CANONICAL_LEDGER=/path/to/doctrine-sync-ledger.jsonl
   SYNC_CANONICAL_LEDGER_DISABLE=1
 EOF
+}
+
+emit_doctor() {
+  local repo manifest ledger_dir checks status pass_count warn_count fail_count
+  repo="/Users/josh/Developer/flywheel"
+  manifest="$repo/$OWNERSHIP_MANIFEST_REL"
+  ledger_dir="$(dirname "$SYNC_LEDGER")"
+  checks="$(
+    {
+      if [[ -r "$SOURCE" ]]; then
+        jq -nc --arg name "canonical_source_readable" --arg status "pass" --arg message "$SOURCE" \
+          '{name:$name,status:$status,message:$message}'
+      else
+        jq -nc --arg name "canonical_source_readable" --arg status "fail" --arg message "$SOURCE" \
+          '{name:$name,status:$status,message:$message}'
+      fi
+      if [[ -x "$AGENTS_MD_GENERATOR" ]]; then
+        jq -nc --arg name "agents_md_generator_executable" --arg status "pass" --arg message "$AGENTS_MD_GENERATOR" \
+          '{name:$name,status:$status,message:$message}'
+      else
+        jq -nc --arg name "agents_md_generator_executable" --arg status "fail" --arg message "$AGENTS_MD_GENERATOR" \
+          '{name:$name,status:$status,message:$message}'
+      fi
+      if command -v jq >/dev/null 2>&1; then
+        jq -nc --arg name "jq_available" --arg status "pass" --arg message "$(command -v jq)" \
+          '{name:$name,status:$status,message:$message}'
+      else
+        jq -nc --arg name "jq_available" --arg status "fail" --arg message "jq missing from PATH" \
+          '{name:$name,status:$status,message:$message}'
+      fi
+      if [[ -d "$RULES_SOURCE_DIR" && -f "$RULES_SOURCE_DIR/MANIFEST.json" ]]; then
+        jq -nc --arg name "rules_source_manifest_present" --arg status "pass" --arg message "$RULES_SOURCE_DIR/MANIFEST.json" \
+          '{name:$name,status:$status,message:$message}'
+      else
+        jq -nc --arg name "rules_source_manifest_present" --arg status "warn" --arg message "$RULES_SOURCE_DIR/MANIFEST.json" \
+          '{name:$name,status:$status,message:$message}'
+      fi
+      if [[ "$OWNERSHIP_GATE" != "1" ]]; then
+        jq -nc --arg name "ownership_gate_configured" --arg status "warn" --arg message "SYNC_CANONICAL_OWNERSHIP_GATE is disabled" \
+          '{name:$name,status:$status,message:$message}'
+      elif [[ -f "$manifest" ]]; then
+        jq -nc --arg name "ownership_gate_configured" --arg status "pass" --arg message "$manifest" \
+          '{name:$name,status:$status,message:$message}'
+      else
+        jq -nc --arg name "ownership_gate_configured" --arg status "fail" --arg message "$manifest" \
+          '{name:$name,status:$status,message:$message}'
+      fi
+      if [[ -d "$ledger_dir" || "${SYNC_CANONICAL_LEDGER_DISABLE:-0}" = "1" ]]; then
+        jq -nc --arg name "ledger_path_ready" --arg status "pass" --arg message "$SYNC_LEDGER" \
+          '{name:$name,status:$status,message:$message}'
+      else
+        jq -nc --arg name "ledger_path_ready" --arg status "warn" --arg message "$SYNC_LEDGER" \
+          '{name:$name,status:$status,message:$message}'
+      fi
+    } | jq -s '.'
+  )"
+  fail_count="$(jq '[.[] | select(.status == "fail")] | length' <<<"$checks")"
+  warn_count="$(jq '[.[] | select(.status == "warn")] | length' <<<"$checks")"
+  pass_count="$(jq '[.[] | select(.status == "pass")] | length' <<<"$checks")"
+  if [[ "$fail_count" -gt 0 ]]; then
+    status="fail"
+  elif [[ "$warn_count" -gt 0 ]]; then
+    status="warn"
+  else
+    status="pass"
+  fi
+  jq -nc \
+    --arg schema_version "sync-canonical-doctrine.doctor.v1" \
+    --arg command "doctor" \
+    --arg name "sync-canonical-doctrine.sh" \
+    --arg version "$VERSION" \
+    --arg status "$status" \
+    --arg mode "read_only" \
+    --argjson checks "$checks" \
+    --argjson pass_count "$pass_count" \
+    --argjson warn_count "$warn_count" \
+    --argjson fail_count "$fail_count" \
+    '{
+      schema_version:$schema_version,
+      command:$command,
+      name:$name,
+      version:$version,
+      status:$status,
+      mode:$mode,
+      mutates:false,
+      checks:$checks,
+      summary:{pass_count:$pass_count,warn_count:$warn_count,fail_count:$fail_count}
+    }'
 }
 
 emit_info() {
@@ -138,7 +232,7 @@ emit_info() {
       orch_validation_skill_source: $orch_validation_skill_source,
       shared_script_allowlist: ($shared_script_allowlist | split(" ") | map(select(length > 0))),
       modes: ["check","apply"],
-      flags: ["--dry-run","--check","--apply","--idempotency-key KEY","--json","--source PATH","--root PATH","--info","--schema","--examples","--help","-h"],
+      flags: ["doctor","--doctor","--dry-run","--check","--apply","--idempotency-key KEY","--json","--source PATH","--root PATH","--info","--schema","--examples","--help","-h"],
       env_vars: [
         "SYNC_CANONICAL_SOURCE","SYNC_AGENTS_MD_GENERATOR","SYNC_GENERATED_MIRRORS_DISABLE",
         "SYNC_CANONICAL_INDEX_TARGET","SYNC_CANONICAL_TEMPLATE_TARGET",
@@ -146,6 +240,8 @@ emit_info() {
         "SYNC_BEAD_QUALITY_MINING_SOURCE","SYNC_DOCTRINE_DOCS_SOURCE_DIR",
         "SYNC_RULES_SOURCE_DIR","SYNC_SHARED_SCRIPT_SOURCE_DIR","SYNC_SHARED_SCRIPT_ALLOWLIST",
         "SYNC_LAUNCHD_TEMPLATE_SOURCE_DIR","SYNC_SECURITY_SETTINGS_DENY_SOURCE",
+        "SYNC_CANONICAL_OWNERSHIP_GATE","SYNC_CANONICAL_SOURCE_OWNER_CLASS",
+        "SYNC_CANONICAL_OWNERSHIP_MANIFEST",
         "SYNC_ORCH_VALIDATION_SKILL_SOURCE","SYNC_CANONICAL_ROOTS","SYNC_CANONICAL_LOOPS_DIR",
         "SYNC_CANONICAL_LEDGER","SYNC_CANONICAL_LEDGER_DISABLE","SYNC_CANONICAL_NOW"
       ],
@@ -237,6 +333,7 @@ sync-canonical-doctrine.sh --info --json     # tool metadata + env vars + flags
 sync-canonical-doctrine.sh --schema           # JSON Schema for receipt envelope
 sync-canonical-doctrine.sh --examples         # this list
 sync-canonical-doctrine.sh --help             # usage text
+sync-canonical-doctrine.sh doctor --json      # read-only dependency/config doctor
 
 # Disable ledger writes (e.g., test fixtures)
 SYNC_CANONICAL_LEDGER_DISABLE=1 sync-canonical-doctrine.sh --check --json
@@ -249,6 +346,10 @@ EOF
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    doctor|--doctor)
+      emit_doctor
+      exit 0
+      ;;
     --dry-run|--check)
       MODE="check"
       shift
@@ -339,8 +440,8 @@ fi
 
 expand_path() {
   case "$1" in
-    "~") printf '%s\n' "$HOME" ;;
-    "~/"*) printf '%s/%s\n' "$HOME" "${1#~/}" ;;
+    \~) printf '%s\n' "$HOME" ;;
+    \~/*) printf '%s/%s\n' "$HOME" "${1#\~/}" ;;
     *) printf '%s\n' "$1" ;;
   esac
 }
@@ -363,6 +464,116 @@ canonicalize_dir() {
   local dir="$1"
   dir="$(expand_path "$dir")"
   (cd "$dir" 2>/dev/null && pwd -P) || printf '%s\n' "$dir"
+}
+
+relpath_for_repo() {
+  local repo="$1" target="$2"
+  case "$target" in
+    "$repo"/*) printf '%s\n' "${target#"$repo"/}" ;;
+    *) printf '%s\n' "$target" ;;
+  esac
+}
+
+ownership_manifest_path() {
+  local repo="$1"
+  printf '%s/%s\n' "$repo" "$OWNERSHIP_MANIFEST_REL"
+}
+
+owner_class_from_manifest() {
+  local manifest="$1" rel="$2"
+  [[ -f "$manifest" ]] || return 1
+  jq -r --arg rel "$rel" '
+    def norm_path:
+      if type == "string" then .
+      else (.path // .prefix // .glob // "")
+      end;
+    def norm_class:
+      if type == "string" then empty
+      else (.owner_class // .class // .canonical_owner_class // "")
+      end;
+    (.owned_canonical_paths // []) as $paths
+    | (
+        [
+          $paths[]
+          | select((norm_path) as $p | $p != "" and ($rel == $p or ($rel | startswith($p + "/"))))
+          | norm_class
+          | select(. != "")
+        ][0]
+      )
+      // (.canonical_owner_class // .owner_class // .repo_class // empty)
+  ' "$manifest" 2>/dev/null | awk 'NF {print; exit}'
+}
+
+target_owner_class() {
+  local repo="$1" target="$2" manifest rel owner_class source_manifest
+  manifest="$(ownership_manifest_path "$repo")"
+  rel="$(relpath_for_repo "$repo" "$target")"
+  owner_class="$(owner_class_from_manifest "$manifest" "$rel" || true)"
+  if [[ -n "$owner_class" ]]; then
+    printf '%s\n' "$owner_class"
+    return 0
+  fi
+  source_manifest="$(ownership_manifest_path "$SOURCE_REPO")"
+  owner_class="$(owner_class_from_manifest "$source_manifest" "$rel" || true)"
+  [[ -n "$owner_class" ]] || return 1
+  printf '%s\n' "$owner_class"
+}
+
+record_ownership_block() {
+  local repo="$1" target="$2" action="$3" detail_file="$4" owner_class="${5:-}" manifest
+  local row
+  OWNERSHIP_BLOCKED_COUNT=$((OWNERSHIP_BLOCKED_COUNT + 1))
+  manifest="$(ownership_manifest_path "$repo")"
+  row="$(jq -cn \
+    --arg repo "$repo" \
+    --arg target "$target" \
+    --arg action "$action" \
+    --arg source_owner_class "$SOURCE_OWNER_CLASS" \
+    --arg target_owner_class "$owner_class" \
+    --arg manifest "$manifest" \
+    --arg mode "$MODE" \
+    '{
+      repo:$repo,
+      target:$target,
+      action:$action,
+      status:"ownership_blocked",
+      mode:$mode,
+      source_owner_class:$source_owner_class,
+      target_owner_class:(if $target_owner_class == "" then null else $target_owner_class end),
+      ownership_manifest:$manifest,
+      blocked_by:(if $target_owner_class == "" then "ownership_manifest_missing_or_no_match" else "ownership_class_mismatch" end)
+    }')"
+  printf '%s\n' "$row" >>"$detail_file"
+  if [[ -n "${OWNERSHIP_DETAILS_FILE:-}" ]]; then
+    printf '%s\n' "$row" >>"$OWNERSHIP_DETAILS_FILE"
+  fi
+  if [[ "$MODE" == "apply" ]]; then
+    ERROR_COUNT=$((ERROR_COUNT + 1))
+    jq -cn \
+      --arg repo "$repo" \
+      --arg target "$target" \
+      --arg action "$action" \
+      --arg source_owner_class "$SOURCE_OWNER_CLASS" \
+      --arg target_owner_class "$owner_class" \
+      --arg code "canonical_ownership_gate_blocked" \
+      '{repo:$repo,target:$target,action:$action,status:"error",code:$code,source_owner_class:$source_owner_class,target_owner_class:(if $target_owner_class == "" then null else $target_owner_class end),message:"propagator ownership gate refused peer-repo canonical write"}' >>"$ERRORS_FILE"
+  fi
+}
+
+ownership_gate_allows() {
+  local repo="$1" target="$2" action="$3" detail_file="$4" owner_class
+  if [[ "$OWNERSHIP_GATE" != "1" ]]; then
+    return 0
+  fi
+  if [[ "$repo" == "$SOURCE_REPO" ]]; then
+    return 0
+  fi
+  owner_class="$(target_owner_class "$repo" "$target" || true)"
+  if [[ -n "$owner_class" && "$owner_class" == "$SOURCE_OWNER_CLASS" ]]; then
+    return 0
+  fi
+  record_ownership_block "$repo" "$target" "$action" "$detail_file" "$owner_class"
+  return 1
 }
 
 backup_file() {
@@ -504,6 +715,9 @@ copy_managed_file() {
   fi
 
   MANAGED_FILE_DRIFTED_COUNT=$((MANAGED_FILE_DRIFTED_COUNT + 1))
+  if ! ownership_gate_allows "$repo" "$target_file" "$action" "$MANAGED_DETAILS_FILE"; then
+    return 0
+  fi
   if [[ "$MODE" != "apply" ]]; then
     jq -cn --arg repo "$repo" --arg source "$source_file" --arg target "$target_file" --arg action "$action" --arg source_hash "$source_hash" --arg target_hash "$target_hash" \
       '{repo:$repo,source:$source,target:$target,action:$action,status:"drifted",source_hash:$source_hash,target_hash:$target_hash}' >>"$MANAGED_DETAILS_FILE"
@@ -652,6 +866,11 @@ sync_security_settings_for_repo() {
   fi
 
   SECURITY_SETTINGS_DRIFTED_COUNT=$((SECURITY_SETTINGS_DRIFTED_COUNT + 1))
+  if ! ownership_gate_allows "$repo" "$target_file" "merge_security_settings_deny" "$SECURITY_SETTINGS_DETAILS_FILE"; then
+    SECURITY_SETTINGS_BLOCKED_COUNT=$((SECURITY_SETTINGS_BLOCKED_COUNT + 1))
+    rm -f "$rendered_tmp"
+    return 0
+  fi
   if [[ "$MODE" != "apply" ]]; then
     jq -cn --arg repo "$repo" --arg target "$target_file" --arg source_hash "$source_hash" --arg target_hash "$target_hash" \
       '{repo:$repo,target:$target,status:"drifted",source_hash:$source_hash,target_hash:$target_hash,blocked_by:null}' >>"$SECURITY_SETTINGS_DETAILS_FILE"
@@ -788,9 +1007,10 @@ WRITES_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-writes.XXXXXX")"
 ERRORS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-errors.XXXXXX")"
 MANAGED_DETAILS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-managed-details.XXXXXX")"
 SECURITY_SETTINGS_DETAILS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-security-settings.XXXXXX")"
+OWNERSHIP_DETAILS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-ownership-blocks.XXXXXX")"
 SOURCE_RULES_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-source-rules.XXXXXX")"
 RULE_SHARD_DRIFT_DETAILS_FILE="$(mktemp "${TMPDIR:-/tmp}/sync-canonical-rule-shard-drift.XXXXXX")"
-trap 'rm -f "$TARGETS_FILE" "$REPOS_FILE" "$DETAILS_FILE" "$ROOT_DETAILS_FILE" "$WRITES_FILE" "$ERRORS_FILE" "$MANAGED_DETAILS_FILE" "$SECURITY_SETTINGS_DETAILS_FILE" "$SOURCE_RULES_FILE" "$RULE_SHARD_DRIFT_DETAILS_FILE"' EXIT
+trap 'rm -f "$TARGETS_FILE" "$REPOS_FILE" "$DETAILS_FILE" "$ROOT_DETAILS_FILE" "$WRITES_FILE" "$ERRORS_FILE" "$MANAGED_DETAILS_FILE" "$SECURITY_SETTINGS_DETAILS_FILE" "$OWNERSHIP_DETAILS_FILE" "$SOURCE_RULES_FILE" "$RULE_SHARD_DRIFT_DETAILS_FILE"' EXIT
 
 collect_targets "$TARGETS_FILE"
 : >"$DETAILS_FILE"
@@ -799,6 +1019,7 @@ collect_targets "$TARGETS_FILE"
 : >"$ERRORS_FILE"
 : >"$MANAGED_DETAILS_FILE"
 : >"$SECURITY_SETTINGS_DETAILS_FILE"
+: >"$OWNERSHIP_DETAILS_FILE"
 : >"$RULE_SHARD_DRIFT_DETAILS_FILE"
 : >"$REPOS_FILE"
 extract_l_rules "$SOURCE" >"$SOURCE_RULES_FILE"
@@ -852,6 +1073,7 @@ SECURITY_SETTINGS_TARGET_COUNT=0
 SECURITY_SETTINGS_DRIFTED_COUNT=0
 SECURITY_SETTINGS_SYNCED_COUNT=0
 SECURITY_SETTINGS_BLOCKED_COUNT=0
+OWNERSHIP_BLOCKED_COUNT=0
 RULE_SHARD_DRIFT_COUNT=0
 RULE_SHARD_MIN_COUNT="${SYNC_RULE_SHARD_MIN_COUNT:-99}"
 RULE_SHARD_THIN_CANONICAL_LINES="${SYNC_RULE_SHARD_THIN_CANONICAL_LINES:-142}"
@@ -882,6 +1104,9 @@ while IFS= read -r target; do
   fi
 
   CANONICAL_DRIFTED_COUNT=$((CANONICAL_DRIFTED_COUNT + 1))
+  if ! ownership_gate_allows "$repo" "$target" "copy_canonical" "$DETAILS_FILE"; then
+    continue
+  fi
   if [[ "$MODE" == "apply" ]]; then
     tmp="${target}.tmp.$$"
     if cp "$SOURCE" "$tmp"; then
@@ -950,6 +1175,10 @@ while IFS= read -r repo; do
   fi
 
   ROOT_DRIFTED_COUNT=$((ROOT_DRIFTED_COUNT + 1))
+  if ! ownership_gate_allows "$repo" "$root_agents" "replace_root_agents_canonical_block" "$ROOT_DETAILS_FILE"; then
+    rm -f "$block_tmp" "$target_rules_tmp" "$missing_rules_tmp" "$rendered_tmp"
+    continue
+  fi
   if [[ "$MODE" == "apply" ]]; then
     if render_root_agents_with_block "$SOURCE" "$root_agents" "$rendered_tmp"; then
       backup_file "$root_agents"
@@ -995,6 +1224,9 @@ if [[ -f "$STORAGE_OVERRIDE_SCHEMA_SOURCE" ]]; then
       continue
     fi
     SCHEMA_DRIFTED_COUNT=$((SCHEMA_DRIFTED_COUNT + 1))
+    if ! ownership_gate_allows "$repo" "$schema_target" "copy_storage_override_schema" "$DETAILS_FILE"; then
+      continue
+    fi
     if [[ "$MODE" == "apply" ]]; then
       mkdir -p "$(dirname "$schema_target")"
       tmp="${schema_target}.tmp.$$"
@@ -1036,6 +1268,9 @@ if [[ -f "$BEAD_QUALITY_MINING_SOURCE" ]]; then
       continue
     fi
     BEAD_MINING_DRIFTED_COUNT=$((BEAD_MINING_DRIFTED_COUNT + 1))
+    if ! ownership_gate_allows "$repo" "$mining_target" "copy_bead_quality_mining_probe" "$DETAILS_FILE"; then
+      continue
+    fi
     if [[ "$MODE" == "apply" ]]; then
       mkdir -p "$(dirname "$mining_target")"
       tmp="${mining_target}.tmp.$$"
@@ -1078,6 +1313,9 @@ if [[ -f "$IDENTITY_DEFERRAL_SCHEMA_SOURCE" ]]; then
       continue
     fi
     IDENTITY_DEFERRAL_SCHEMA_DRIFTED_COUNT=$((IDENTITY_DEFERRAL_SCHEMA_DRIFTED_COUNT + 1))
+    if ! ownership_gate_allows "$repo" "$schema_target" "copy_identity_registration_deferral_schema" "$DETAILS_FILE"; then
+      continue
+    fi
     if [[ "$MODE" == "apply" ]]; then
       mkdir -p "$(dirname "$schema_target")"
       tmp="${schema_target}.tmp.$$"
@@ -1185,6 +1423,7 @@ ERRORS="$(jq -s -c '.' "$ERRORS_FILE")"
 TARGETS="$(json_string_array_from_file "$TARGETS_FILE")"
 REPOS="$(json_string_array_from_file "$REPOS_FILE")"
 SECURITY_SETTINGS_DETAILS="$(jq -s -c '.' "$SECURITY_SETTINGS_DETAILS_FILE")"
+OWNERSHIP_DETAILS="$(jq -s -c '.' "$OWNERSHIP_DETAILS_FILE")"
 SECURITY_ROLLOUT_RECEIPT="$(jq -nc \
   --arg schema_version "security-settings-rollout/v1" \
   --arg ts "$SYNC_TS" \
@@ -1244,6 +1483,11 @@ RESULT="$(jq -nc \
   --argjson security_settings_drifted_count "$SECURITY_SETTINGS_DRIFTED_COUNT" \
   --argjson security_settings_synced_count "$SECURITY_SETTINGS_SYNCED_COUNT" \
   --argjson security_settings_blocked_count "$SECURITY_SETTINGS_BLOCKED_COUNT" \
+  --argjson ownership_blocked_count "$OWNERSHIP_BLOCKED_COUNT" \
+  --argjson ownership_details "$OWNERSHIP_DETAILS" \
+  --arg ownership_gate "$OWNERSHIP_GATE" \
+  --arg source_owner_class "$SOURCE_OWNER_CLASS" \
+  --arg ownership_manifest_rel "$OWNERSHIP_MANIFEST_REL" \
   --argjson security_settings_details "$SECURITY_SETTINGS_DETAILS" \
   --argjson security_rollout_receipt "$SECURITY_ROLLOUT_RECEIPT" \
   --argjson rule_shard_drift_count "$RULE_SHARD_DRIFT_COUNT" \
@@ -1308,6 +1552,14 @@ RESULT="$(jq -nc \
     security_settings_drifted_count:$security_settings_drifted_count,
     security_settings_synced_count:$security_settings_synced_count,
     security_settings_blocked_count:$security_settings_blocked_count,
+    ownership_gate:{
+      enabled:($ownership_gate == "1"),
+      source_owner_class:$source_owner_class,
+      ownership_manifest:$ownership_manifest_rel,
+      blocked_count:$ownership_blocked_count,
+      details:$ownership_details
+    },
+    ownership_blocked_count:$ownership_blocked_count,
     security_settings_drift:{
       target_count:$security_settings_target_count,
       drifted_count:$security_settings_drifted_count,

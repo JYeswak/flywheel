@@ -1,0 +1,39 @@
+{
+  "schema": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-lhi4",
+  "closed_at": "2026-05-15T08:21:11Z",
+  "status": "closed",
+  "summary": "Reconciled the remaining cross-pane protocol wording so historical proposed L69/L70 doctrine references explicitly point to landed L81/L82, while preserving canonical L69/L70 ownership.",
+  "acceptance": {
+    "cross_pane_plan_references_reconciled": "pass",
+    "open_bead_descriptions_checked": "pass",
+    "downstream_docs_checked": "pass",
+    "duplicate_l_rule_ids": "pass",
+    "stale_available_id_implication": "pass"
+  },
+  "changed_files": [
+    ".flywheel/PLANS/cross-pane-protocol-2026-05-01/02-CLI-SURFACE-AND-PROTOCOLS.md"
+  ],
+  "evidence": [
+    {
+      "command": "rg -n \"does not define L69 doctrine wording|does not define L70 doctrine wording|L69 doctrine wording\" .flywheel/PLANS/cross-pane-protocol-2026-05-01 .flywheel/rules AGENTS.md README.md docs site .beads/issues.jsonl || true",
+      "result": "no stale unreconciled doctrine wording remains"
+    },
+    {
+      "command": "rg -n \"proposed L69|proposed L70|landed as L81|landed as L82|available IDs for these two doctrines\" .flywheel/PLANS/cross-pane-protocol-2026-05-01 .flywheel/rules AGENTS.md README.md docs site .beads/issues.jsonl",
+      "result": "remaining hits are historical/reconciliation contexts, including explicit L81/L82 landing and L69/L70 unavailable wording"
+    },
+    {
+      "command": "ls .flywheel/rules/L*-L*.md | sed -E 's|.*/L[0-9]+-(L[0-9]+)-.*|\\\\1|' | sort | uniq -d",
+      "result": "empty output; no duplicate L-rule IDs"
+    },
+    {
+      "command": "jq -r 'select(.status != \"closed\") | select((.description // \"\" | test(\"proposed L69|proposed L70|does not define L69|does not define L70|L69 doctrine|L70 doctrine\")) or (.title // \"\" | test(\"proposed L69|proposed L70|does not define L69|does not define L70|L69 doctrine|L70 doctrine\"))) | [.id,.status,.title] | @tsv' .beads/issues.jsonl",
+      "result": "only flywheel-lhi4 remains; its description is the reconciliation bead itself"
+    }
+  ],
+  "notes": [
+    "The historical filename 01-L69-DOCTRINE-AND-STATE-MACHINE.md is intentionally preserved as source provenance; its body says the doctrine landed as L81 and CLI scoping landed as L82.",
+    "Canonical L69 remains ORCH-PROBE-AGENT-CONTEXT and canonical L70 remains ORCH-NO-PUNT."
+  ]
+}

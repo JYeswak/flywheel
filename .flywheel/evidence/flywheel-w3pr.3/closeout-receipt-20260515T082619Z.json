@@ -1,0 +1,60 @@
+{
+  "schema": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-w3pr.3",
+  "closed_at": "2026-05-15T08:26:19Z",
+  "status": "closed",
+  "summary": "Closed Jeff corpus Phase 5 promotion staging after verifying approval-only skill drafts, candidate L-rules, no-promotion reasons, and the sniff-lens outcome rework.",
+  "changed_files": [],
+  "acceptance": {
+    "skill_promotions_artifact_exists": "pass",
+    "staged_skill_drafts_approval_only": "pass",
+    "candidate_l_rules_not_numbered_canonical": "pass",
+    "promotion_candidates_have_phase4_verdict_and_three_citations": "pass",
+    "no_promotion_reasons_present": "pass",
+    "sniff_lens_rework_outcome_framed": "pass",
+    "live_skill_or_l_rule_mutation": "not_performed"
+  },
+  "evidence": [
+    {
+      "command": "find .flywheel/jeff-corpus/v1/promotions/skills -mindepth 1 -maxdepth 1 -type d | wc -l",
+      "result": "5 staged skill directories"
+    },
+    {
+      "command": "find .flywheel/jeff-corpus/v1/promotions/skills -mindepth 2 -maxdepth 2 -name SKILL.md | wc -l",
+      "result": "5 staged SKILL.md drafts"
+    },
+    {
+      "command": "grep -c '^## Candidate:' .flywheel/jeff-corpus/v1/promotions/l-rules/candidate-l-rules.md",
+      "result": "5 candidate L-rule sections"
+    },
+    {
+      "command": "awk no-promotion table count over .flywheel/jeff-corpus/v1/learnings/05-skill-promotions.md",
+      "result": "5 no-promotion rows"
+    },
+    {
+      "command": "for f in .flywheel/jeff-corpus/v1/promotions/skills/*/SKILL.md; do grep verdict and citation counts; done",
+      "result": "all 5 staged skill drafts have one phase4_verdict field and at least three repo/file/line citations"
+    },
+    {
+      "command": "awk candidate L-rule citation/verdict count over .flywheel/jeff-corpus/v1/promotions/l-rules/candidate-l-rules.md",
+      "result": "all 5 candidate L-rules have Phase 4 verdict and exactly three evidence citations"
+    },
+    {
+      "command": "grep -c 'four_lens=brand:9,sniff:9,jeff:9,public:9' .flywheel/evidence/flywheel-w3pr.3/report.md",
+      "result": "1 outcome-framed four-lens pass report"
+    }
+  ],
+  "did": [
+    "Verified .flywheel/jeff-corpus/v1/learnings/05-skill-promotions.md exists and maps the staged promotions.",
+    "Verified five approval-only staged skill drafts under .flywheel/jeff-corpus/v1/promotions/skills/.",
+    "Verified five candidate L-rule sections under .flywheel/jeff-corpus/v1/promotions/l-rules/candidate-l-rules.md.",
+    "Verified five no-promotion reasons for DIVERGE/AVOID patterns.",
+    "Verified the sniff-lens rework report frames the result as promotion-ready drafts, saved plan-time, and closed false-positive paths."
+  ],
+  "didnt": [
+    "Did not install any staged skill into ~/.claude/skills/.",
+    "Did not number or promote any candidate L-rule into AGENTS.md.",
+    "Did not bypass the Joshua approval or JSM workflow named by the staging artifact."
+  ],
+  "gaps": []
+}

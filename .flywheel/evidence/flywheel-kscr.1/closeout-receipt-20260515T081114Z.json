@@ -1,0 +1,34 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-kscr.1",
+  "closed_at": "2026-05-15T08:11:14Z",
+  "status": "safe_to_close",
+  "closure_class": "stale_audit_gap_verified",
+  "summary": "B09_AG4 is covered by the current validation-learn routing test: recurring failure promotion enters the L56 ladder through the fuckup log, not by direct L-rule mutation.",
+  "evidence": [
+    {
+      "command": "bash tests/validation-learn-routing.sh",
+      "result": "pass",
+      "summary": "13 passed, 0 failed; includes B09_AG4 promote route enters L56 via fuckup-log and recurring failure follows L56 ladder."
+    },
+    {
+      "command": "bash tests/bead-quality-mining.sh",
+      "result": "pass",
+      "summary": "Verifies INCIDENTS shorthand resolves to INCIDENTS.md and /flywheel:learn resolves to the command surface."
+    },
+    {
+      "command": "shellcheck tests/validation-learn-routing.sh tests/bead-quality-mining.sh",
+      "result": "pass"
+    },
+    {
+      "path": "INCIDENTS.md",
+      "result": "present",
+      "summary": "The original audit path 'INCIDENTS' was stale; the current repo surface is INCIDENTS.md."
+    },
+    {
+      "path": "AGENTS.md",
+      "result": "present",
+      "summary": "Indexes L56 — FUCKUP-LOG -> INCIDENTS -> CANONICAL-L-RULE PROMOTION LADDER."
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "schema_version": "flywheel.fleet_tenant_registry_preflight.v1",
+  "registry": "/Users/josh/.claude/skills/infisical-secrets/data/project-mappings.yaml",
+  "run_doctor": true,
+  "status": "pass",
+  "row_count": 4,
+  "fail_count": 0,
+  "rows": [
+    {
+      "slug": "mobile-eats",
+      "repo": "/Users/josh/Developer/mobile-eats",
+      "status": "pass",
+      "registry_status": "pass",
+      "declaration_status": "pass",
+      "doctor_status": "pass",
+      "failures": [],
+      "disposition": null,
+      "doctor": {
+        "status": "pass",
+        "returncode": 0,
+        "drift_count": 0,
+        "warn_count": 0,
+        "result_count": 5
+      }
+    },
+    {
+      "slug": "alpsinsurance",
+      "repo": "/Users/josh/Developer/alpsinsurance",
+      "status": "pass",
+      "registry_status": "pass",
+      "declaration_status": "pass",
+      "doctor_status": "pass",
+      "failures": [],
+      "disposition": null,
+      "doctor": {
+        "status": "pass",
+        "returncode": 0,
+        "drift_count": 0,
+        "warn_count": 0,
+        "result_count": 5
+      }
+    },
+    {
+      "slug": "alpsinsurance-staging",
+      "repo": null,
+      "status": "pass",
+      "registry_status": "pass",
+      "declaration_status": "not_checked",
+      "doctor_status": "pass",
+      "failures": [],
+      "disposition": null,
+      "doctor": {
+        "status": "pass",
+        "returncode": 0,
+        "drift_count": 0,
+        "warn_count": 0,
+        "result_count": 5
+      }
+    },
+    {
+      "slug": "terratitle",
+      "repo": "/Users/josh/Developer/terratitle",
+      "status": "pass",
+      "registry_status": "skipped",
+      "declaration_status": "skipped",
+      "doctor_status": "skipped",
+      "failures": [],
+      "disposition": {
+        "status": "skip_with_reason",
+        "reason": "direct_postgres_no_infisical_supabase_surface",
+        "ref": ".flywheel/evidence/flywheel-sadm5.2/terratitle-tenant-disposition-20260515T1758Z.json"
+      },
+      "doctor": {
+        "status": "skipped",
+        "reason": "disposition_receipt"
+      }
+    }
+  ]
+}

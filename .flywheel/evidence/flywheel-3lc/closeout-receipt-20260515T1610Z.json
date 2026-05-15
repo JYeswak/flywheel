@@ -1,0 +1,46 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-3lc",
+  "closed_at": "2026-05-15T16:12:17Z",
+  "status": "closed",
+  "summary": "Classified Codex skill-scan over-budget warnings as non-blocking only when skill-search MCP is configured as the large-library route.",
+  "files_changed": [
+    ".flywheel/scripts/codex-skill-scan-budget.py",
+    "tests/codex-skill-scan-budget.sh"
+  ],
+  "live_probe": {
+    "command": "python3 .flywheel/scripts/codex-skill-scan-budget.py --pretty",
+    "status": "pass",
+    "blocker_disposition": "not_blocking",
+    "skill_search_mcp_configured": true,
+    "roots": [
+      {
+        "root": "/Users/josh/.codex/skills",
+        "dir_count": 2104,
+        "skill_count": 402,
+        "over_internal_cap": true
+      },
+      {
+        "root": "/Users/josh/.claude/skills",
+        "dir_count": 3853,
+        "skill_count": 537,
+        "over_internal_cap": true
+      }
+    ],
+    "warning_codes": [
+      "INTERNAL_SCAN_CAP_EXCEEDED",
+      "INTERNAL_SCAN_CAP_EXCEEDED_BUT_MCP_CONFIGURED"
+    ],
+    "failure_codes": []
+  },
+  "proof": [
+    "bash tests/codex-skill-scan-budget.sh => SUMMARY pass=4 fail=0",
+    "python3 -m py_compile .flywheel/scripts/codex-skill-scan-budget.py => pass",
+    "mcp skill-search catalog_stats => qdrant_health=true ollama_health=true total_skills=455 filesystem_skills=490",
+    ".flywheel/scripts/blocker-auto-close.sh close --blocker-file .flywheel/state/blockers/flywheel-3lc.json --apply --json => status=closed ac_passes_now=true",
+    "python3 .flywheel/scripts/bead-blocker-sync.py doctor => status=pass blocked_bead_count=11 synced_count=11 missing_count=0 malformed_count=0",
+    "git diff --check => pass",
+    "br dep cycles --json => count=0"
+  ],
+  "boundary": "This does not claim Codex's internal warning is gone. It makes the warning unable to masquerade as a blocker while the configured MCP fallback covers skill discovery; if the fallback disappears, the probe fails."
+}

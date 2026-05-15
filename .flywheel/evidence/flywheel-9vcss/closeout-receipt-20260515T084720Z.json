@@ -1,0 +1,91 @@
+{
+  "schema": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-9vcss",
+  "closed_at": "2026-05-15T08:47:20Z",
+  "close_class": "external_repo_package_extraction",
+  "source_plan": ".flywheel/audit/flywheel-5e4jf/recommendation.md#7A",
+  "target_repo": "/Users/josh/Developer/n8n-deploy-kit",
+  "target_branch": "feat/phase-0-canonical-stamp",
+  "target_commit": "26daf26f7361f323368e362eec3bb88bea8c6ea7",
+  "target_pr": "https://github.com/JYeswak/n8n-deploy-kit/pull/1",
+  "delivered": {
+    "packages_deploy": [
+      "package.json",
+      "tsconfig.json",
+      "packages/deploy/package.json",
+      "packages/deploy/tsconfig.json",
+      "packages/deploy/src/client.ts",
+      "packages/deploy/src/compiler.ts",
+      "packages/deploy/src/deployer.ts",
+      "packages/deploy/src/validator.ts",
+      "packages/deploy/src/types.ts",
+      "packages/deploy/src/index.ts",
+      "packages/deploy/src/webhook-signature.ts",
+      "packages/deploy/bin/n8n-deploy.ts",
+      "packages/deploy/README.md"
+    ],
+    "packages_railway": [
+      "packages/railway/Dockerfile",
+      "packages/railway/railway.json",
+      "packages/railway/railway.toml",
+      "packages/railway/.env.example",
+      "packages/railway/deploy.sh",
+      "packages/railway/README.md",
+      "packages/railway/CHECKLIST.md"
+    ],
+    "docs_updated": [
+      "README.md",
+      "ARCHITECTURE.md"
+    ]
+  },
+  "source_handling": {
+    "zeststream_v2_fresh": "mechanically extracted n8n client/compiler/deployer/types/index/webhook-signature and replaced framework-coupled validator with a package-local lightweight validator",
+    "vrtx": "ported deploy-to-n8n shell behavior into a generic TypeScript CLI and distilled scaffold behavior into synthetic workflow generation; did not copy VRTX workflow data",
+    "railway": "copied n8n-v2 Railway assets and scrubbed docs/script wording to generic deployment language"
+  },
+  "validation": [
+    {
+      "repo": "n8n-deploy-kit",
+      "command": "npm run check",
+      "result": "pass",
+      "evidence": "TypeScript check passed for @n8n-deploy-kit/deploy"
+    },
+    {
+      "repo": "n8n-deploy-kit",
+      "command": "npx tsx packages/deploy/bin/n8n-deploy.ts scaffold --out \"$tmpdir\" && npx tsx packages/deploy/bin/n8n-deploy.ts validate \"$tmpdir/synthetic-lead-intake.json\"",
+      "result": "pass",
+      "evidence": "scaffold wrote synthetic workflows; validate reported score 100/100"
+    },
+    {
+      "repo": "n8n-deploy-kit",
+      "command": "shellcheck packages/railway/deploy.sh",
+      "result": "pass",
+      "evidence": "Railway helper shellcheck clean"
+    },
+    {
+      "repo": "n8n-deploy-kit",
+      "command": "gitleaks detect --no-git --source . --redact --exit-code 1",
+      "result": "pass",
+      "evidence": "no leaks found"
+    },
+    {
+      "repo": "n8n-deploy-kit",
+      "command": "trufflehog filesystem --no-update --fail --json --exclude-paths /tmp/trufflehog-exclude-n8n-deploy-kit.txt .",
+      "result": "pass",
+      "evidence": "verified_secrets=0, unverified_secrets=0 with node_modules excluded"
+    },
+    {
+      "repo": "n8n-deploy-kit",
+      "command": "git diff --check",
+      "result": "pass",
+      "evidence": "no whitespace errors"
+    }
+  ],
+  "boundaries": [
+    "did not extract packages/validate 7-layer V3 core; that remains flywheel-hi7ml",
+    "did not author packages/templates; that remains flywheel-4mjw4",
+    "did not publish npm packages",
+    "did not flip n8n-deploy-kit public",
+    "did not deploy to a live n8n instance or activate a workflow"
+  ]
+}

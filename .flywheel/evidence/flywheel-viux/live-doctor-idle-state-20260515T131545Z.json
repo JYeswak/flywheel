@@ -1,0 +1,14 @@
+{
+  "status": "fail",
+  "action": "repair_beads_db_health",
+  "idle_state_class": [],
+  "idle_state_summary": {
+    "dispatching": 0,
+    "cooldown": 0,
+    "light_queue": 0,
+    "saturated": 0,
+    "disabled_class": 0,
+    "not_waiting": 0
+  },
+  "idle_dispatching_over_threshold_count": 0
+}

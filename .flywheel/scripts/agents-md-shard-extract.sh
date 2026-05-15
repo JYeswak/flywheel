@@ -514,7 +514,7 @@ END = "<!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->"
 GENERATED_MARKER = "<!-- GENERATED: edit .flywheel/rules/L*.md, then run .flywheel/scripts/agents-md-shard-extract.sh --apply -->"
 INDEX_BEGIN = "<!-- BEGIN-RULES-INDEX -->"
 INDEX_END = "<!-- END-RULES-INDEX -->"
-RULE_RE = re.compile(r"(?m)^## (L\d+)(?:\s+—\s+|\s+)(.+)$")
+RULE_RE = re.compile(r"(?m)^#{1,2} (L\d+)(?:\s+—\s+|\s+)(.+)$")
 REQUIRED_FRONTMATTER = {"id", "title", "status", "shipped", "trauma_class"}
 FRONTMATTER_BACKFILL = {
     "L60": ("Loop integrity 5 signal contract", "2026-05-03", "loop-integrity-liveness"),

@@ -1,0 +1,106 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-wgitr",
+  "closed_at": "2026-05-15T11:06:34Z",
+  "status": "closed",
+  "decision": "close_parent_after_child_chain_validation",
+  "scope": "dispatch wave 1 doctor-mode fill-in parent",
+  "summary": "Closed parent only after all eight dispatch-wave child beads were already closed, focused canonical CLI tests passed, stale TODO wording was removed from the parent surfaces, and repository checks remained clean.",
+  "child_beads": [
+    {
+      "id": "flywheel-q71jb",
+      "surface": "build-dispatch-packet",
+      "status": "closed",
+      "evidence": "close_reason cites commit 5244f8e24971ae5e718bfaebffcbdc27d3a1fa66 and 15/15 PASS"
+    },
+    {
+      "id": "flywheel-vc3zs",
+      "surface": "dispatch-and-log",
+      "status": "closed",
+      "evidence": "close_reason cites commit 2da07d8 and 15/15 PASS"
+    },
+    {
+      "id": "flywheel-tfgt3",
+      "surface": "dispatch-author-contract-probe",
+      "status": "closed",
+      "evidence": "close_reason cites commit e2bccdcf41a40fcc6efe6996b037858f10f14fd8 and 15/15 PASS"
+    },
+    {
+      "id": "flywheel-39vhm",
+      "surface": "dispatch-canonical-cli-validator",
+      "status": "closed",
+      "evidence": "close_reason records doctor/health/repair/validate/audit/why bound to the real decision ledger with focused surface tests"
+    },
+    {
+      "id": "flywheel-bqvpa",
+      "surface": "dispatch-deferral-lint",
+      "status": "closed",
+      "evidence": "close_reason cites commit 3e92ab29bcd0018becf70fef9d260429a138c7ed and 15/15 PASS"
+    },
+    {
+      "id": "flywheel-5kjez",
+      "surface": "dispatch-delivery-verify",
+      "status": "closed",
+      "evidence": "close_reason cites commit a3bad66 and 15/15 PASS"
+    },
+    {
+      "id": "flywheel-x882q",
+      "surface": "dispatch-log-backfill-v2",
+      "status": "closed",
+      "evidence": "close_reason cites commit 3cc9c2a and 15/15 PASS"
+    },
+    {
+      "id": "flywheel-hpirw",
+      "surface": "dispatch-log-v2-violations-doctor",
+      "status": "closed",
+      "evidence": "close_reason cites commit 97f54b210f6ac0dceab36e8b7ca6c5425e6fff60 and 15/15 PASS"
+    }
+  ],
+  "fresh_validation": [
+    {
+      "command": "for t in tests/build-dispatch-packet-canonical-cli.sh tests/dispatch-and-log-canonical-cli.sh tests/dispatch-author-contract-probe-canonical-cli.sh tests/dispatch-canonical-cli-validator-canonical-cli.sh tests/dispatch-deferral-lint-canonical-cli.sh tests/dispatch-delivery-verify-canonical-cli.sh tests/dispatch-log-backfill-v2-canonical-cli.sh tests/dispatch-log-v2-violations-doctor-canonical-cli.sh; do bash \"$t\"; done",
+      "result": "pass",
+      "observed_summaries": [
+        "build-dispatch-packet 15/0",
+        "dispatch-and-log 15/0",
+        "dispatch-author-contract-probe 15/0",
+        "dispatch-canonical-cli-validator 19/0",
+        "dispatch-deferral-lint 15/0",
+        "dispatch-delivery-verify 15/0",
+        "dispatch-log-backfill-v2 15/0",
+        "dispatch-log-v2-violations-doctor 15/0"
+      ]
+    },
+    {
+      "command": "bash -n on all eight dispatch-wave scripts",
+      "result": "pass"
+    },
+    {
+      "command": "rg stale scaffold TODO wording across eight scripts and eight tests",
+      "result": "pass",
+      "note": "no matches for TODO markers, TODO: define subjects, TODO: id semantics, or canonical-cli stubs preserved"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    },
+    {
+      "command": "br dep cycles --json",
+      "result": "pass",
+      "observed": {
+        "cycles": [],
+        "count": 0
+      }
+    }
+  ],
+  "value_add": [
+    "Keeps the parent bead from lingering after the eight concrete child surfaces already shipped.",
+    "Aligns operator-facing script/test text with the implemented state so future agents do not treat stale scaffold wording as live work.",
+    "Preserves the launch branch invariant that PR #3 remains clean and unrelated canonical/template dirty files are untouched."
+  ],
+  "not_claimed": [
+    "This does not claim every dispatch ecosystem issue is solved.",
+    "This does not touch the separate team-pulse-heartbeat scaffold regression observed during triage.",
+    "This does not close upstream tracker flywheel-ei5fp or long-running parent flywheel-oxzyr."
+  ]
+}

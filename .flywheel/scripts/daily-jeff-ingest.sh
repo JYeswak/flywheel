@@ -286,6 +286,22 @@ record_item() {
   fi
 }
 
+github_repo_is_unmodified_fork() {
+  local repo="$1"
+  local meta is_fork parent_owner parent_name branch compare
+  have gh || return 1
+  meta="$(gh repo view "Dicklesworthstone/$repo" --json isFork,parent,defaultBranchRef 2>/dev/null)" || return 1
+  is_fork="$(jq -r '.isFork // false' <<<"$meta" 2>/dev/null)" || return 1
+  [ "$is_fork" = "true" ] || return 1
+  parent_owner="$(jq -r '.parent.owner.login // empty' <<<"$meta" 2>/dev/null)" || return 1
+  parent_name="$(jq -r '.parent.name // empty' <<<"$meta" 2>/dev/null)" || return 1
+  branch="$(jq -r '.defaultBranchRef.name // "main"' <<<"$meta" 2>/dev/null)" || return 1
+  [ -n "$parent_owner" ] && [ -n "$parent_name" ] && [ -n "$branch" ] || return 1
+  compare="$(gh api "repos/Dicklesworthstone/$repo/compare/${parent_owner}:${branch}...Dicklesworthstone:${branch}" \
+    --jq '{status,ahead_by,behind_by,total_commits}' 2>/dev/null)" || return 1
+  jq -e '.status == "identical" and .ahead_by == 0 and .total_commits == 0' <<<"$compare" >/dev/null 2>&1
+}
+
 compare_and_snapshot() {
   local label="$1" current="$2" today="$3" class="$4" high_default="$5" reason="$6"
   local safe target prior additions count
@@ -298,6 +314,10 @@ compare_and_snapshot() {
     grep -Fvx -f "$prior" "$current" 2>/dev/null | sed '/^[[:space:]]*$/d' | head -50 >"$additions" || true
     while IFS= read -r line; do
       [ -n "$line" ] || continue
+      if [ "$label" = "github-repos" ] && github_repo_is_unmodified_fork "$line"; then
+        record_item "$label" "archived-signal" "$(printf '%s' "$line" | cut -c1-180)" "$label" 0 "Unmodified fork of an upstream repo; no Jeffrey-authored delta to evaluate"
+        continue
+      fi
       record_item "$label" "$class" "$(printf '%s' "$line" | cut -c1-180)" "$label" "$high_default" "$reason"
     done <"$additions"
   else
@@ -316,20 +336,33 @@ compare_and_snapshot() {
 
 fetch_url() {
   local url="$1" out="$2"
-  local attempt
-  for attempt in 1 2 3; do
-    if curl -fsSL --max-time 30 -A "flywheel-daily-jeff-ingest/1.0" "$url" -o "$out" 2>/dev/null; then
+  local attempt max_time attempts
+  max_time="${DAILY_JEFF_FETCH_MAX_TIME:-}"
+  attempts="${DAILY_JEFF_FETCH_ATTEMPTS:-}"
+  if [ -z "$max_time" ]; then
+    if [ "$DRY_RUN" -eq 1 ]; then max_time=5; else max_time=30; fi
+  fi
+  if [ -z "$attempts" ]; then
+    if [ "$DRY_RUN" -eq 1 ]; then attempts=1; else attempts=3; fi
+  fi
+  for attempt in $(seq 1 "$attempts"); do
+    if curl -fsSL --max-time "$max_time" -A "flywheel-daily-jeff-ingest/1.0" "$url" -o "$out" 2>/dev/null; then
       return 0
     fi
-    sleep "$attempt"
+    [ "$attempt" -ge "$attempts" ] || sleep "$attempt"
   done
   return 1
 }
 
 fetch_github() {
   local today="$1" out="$TMP_ROOT/github-atom.txt" repos="$TMP_ROOT/github-repos.txt"
+  local feed_seen=0 feed_limit
   : >"$out"
   : >"$repos"
+  feed_limit="${DAILY_JEFF_GITHUB_FEED_LIMIT:-}"
+  if [ -z "$feed_limit" ]; then
+    if [ "$DRY_RUN" -eq 1 ]; then feed_limit=8; else feed_limit=0; fi
+  fi
 
   if [ -x "$CHECK_SCRIPT" ] || [ -f "$CHECK_SCRIPT" ]; then
     if [ "$DRY_RUN" -eq 0 ]; then
@@ -356,6 +389,10 @@ fetch_github() {
     url="$(printf '%s' "$url" | awk '{$1=$1; print}')"
     case "$url" in
       https://github.com/*".atom")
+        feed_seen=$((feed_seen + 1))
+        if [ "$feed_limit" -gt 0 ] && [ "$feed_seen" -gt "$feed_limit" ]; then
+          continue
+        fi
         tmp="$TMP_ROOT/feed-$(printf '%s' "$url" | shasum -a 256 | awk '{print $1}').xml"
         if fetch_url "$url" "$tmp"; then
           printf 'SOURCE %s\n' "$url" >>"$out"
@@ -383,6 +420,9 @@ PY
         ;;
     esac
   done <"$SOURCES_FILE"
+  if [ "$feed_limit" -gt 0 ] && [ "$feed_seen" -gt "$feed_limit" ]; then
+    warn "GitHub atom dry-run feed limit applied: fetched ${feed_limit} of ${feed_seen}"
+  fi
 
   if have gh; then
     if gh api users/Dicklesworthstone/repos --paginate --jq '.[].name' >"$repos" 2>"$TMP_ROOT/gh-repos.err"; then

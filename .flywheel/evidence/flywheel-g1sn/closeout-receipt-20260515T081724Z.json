@@ -1,0 +1,39 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-g1sn",
+  "closed_at": "2026-05-15T08:17:24Z",
+  "status": "safe_to_close",
+  "closure_class": "stale_audit_gap_verified",
+  "summary": "The CLOSED-BEAD-AUDIT-MINING doctrine entry exists as L80 across current doctrine surfaces and is backed by the bead-quality-mining regression.",
+  "evidence": [
+    {
+      "path": ".flywheel/AGENTS.md",
+      "result": "present",
+      "summary": "Contains ## L80 — CLOSED-BEAD-AUDIT-MINING."
+    },
+    {
+      "path": "AGENTS.md",
+      "result": "present",
+      "summary": "Indexes L80 and points to .flywheel/rules/L034-L80-closed-bead-audit-mining.md."
+    },
+    {
+      "path": ".flywheel/rules/MANIFEST.json",
+      "result": "present",
+      "summary": "Registers id L80 with title CLOSED-BEAD-AUDIT-MINING."
+    },
+    {
+      "path": ".flywheel/rules/L034-L80-closed-bead-audit-mining.md",
+      "result": "present",
+      "summary": "Rule body documents the audit mining command, doctor signals, and tests."
+    },
+    {
+      "command": "bash tests/bead-quality-mining.sh",
+      "result": "pass",
+      "summary": "Fixture suite passes full-evidence, missing-AG, doctor-not-wired, tests-skipped, canonical-AG-format, skip-loop-doctor, and idempotent rerun cases."
+    },
+    {
+      "command": "shellcheck tests/bead-quality-mining.sh",
+      "result": "pass"
+    }
+  ]
+}

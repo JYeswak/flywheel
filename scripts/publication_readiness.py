@@ -130,7 +130,6 @@ REQUIRED_LOCAL_FILES = [
     "site/contact/index.html",
     "site/styles.css",
     "site/visual-system.css",
-    "site/assets/loop-map.svg",
     "site/assets/operating-room-map.svg",
     "packages/zeststream-story-system/package.json",
     "packages/zeststream-story-system/README.md",
@@ -170,11 +169,13 @@ REVIEW_LOG_PATH = "docs/evidence/external-review-log.jsonl"
 WEBSITE_URL = "https://flywheel.zeststream.ai/"
 INSTALL_URL = "https://flywheel.zeststream.ai/install.sh"
 INSTALL_SHA256_URL = "https://flywheel.zeststream.ai/install.sh.sha256"
+WEBSITE_PROBE_TEXT_LIMIT = 50_000
 REQUIRED_WEBSITE_MARKERS = [
-    "Your business already has the data.",
+    "Buy back the hours hiding between your tools.",
     "I help SMB owners buy their time back.",
+    "25+ years in operations",
     "Yuzu Method",
-    "workflow slice",
+    "No CRM connection. No auto-response. No follow-up.",
 ]
 
 
@@ -374,7 +375,7 @@ def probe_url(url: str, timeout: float = 8.0) -> tuple[dict[str, Any] | None, st
         "status_code": status_code,
         "content_type": headers.get("Content-Type", ""),
         "body_sha256": hashlib.sha256(body).hexdigest(),
-        "body_text": text[:2000],
+        "body_text": text[:WEBSITE_PROBE_TEXT_LIMIT],
     }, None
 
 
@@ -498,7 +499,7 @@ ACTION_BY_CODE = {
     },
     "install_proxy_checksum_mismatch": {
         "owner": "Flywheel",
-        "action": "Publish install.sh and install.sh.sha256 from the same release artifact set.",
+        "action": "Publish install.sh and install.sh.sha256 as checksum-mirrored assets from the same release artifact set; public install remains clone or release tarball first.",
         "command": "actual=\"$(curl -fsSL https://flywheel.zeststream.ai/install.sh | shasum -a 256 | awk '{print $1}')\"; expected=\"$(curl -fsSL https://flywheel.zeststream.ai/install.sh.sha256 | awk '{print $1}')\"; test \"$actual\" = \"$expected\"",
     },
     "joshua_release_signoff_missing": {

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2015,SC2016,SC2317
 set -euo pipefail
 
 
@@ -573,9 +574,9 @@ if [[ "${#ROOTS[@]}" -eq 0 && -d "$LOOPS_DIR" ]]; then
   done < <(find "$LOOPS_DIR" -maxdepth 1 -name '*.json' -not -name '*.bak.*' -type f -print 2>/dev/null | sort)
 fi
 
-OUT="$(mktemp "${TMPDIR:-/tmp}/canonical-root-drift-fleet-check.XXXXXX.out")"
-ERR="$(mktemp "${TMPDIR:-/tmp}/canonical-root-drift-fleet-check.XXXXXX.err")"
-META="$(mktemp "${TMPDIR:-/tmp}/canonical-root-drift-fleet-check.XXXXXX.meta")"
+OUT="$(mktemp "${TMPDIR:-/tmp}/canonical-root-drift-fleet-check.out.XXXXXX")"
+ERR="$(mktemp "${TMPDIR:-/tmp}/canonical-root-drift-fleet-check.err.XXXXXX")"
+META="$(mktemp "${TMPDIR:-/tmp}/canonical-root-drift-fleet-check.meta.XXXXXX")"
 trap 'rm -f "$OUT" "$ERR" "$META"' EXIT
 
 cmd=("$SYNC" --check --json --source "$SOURCE")

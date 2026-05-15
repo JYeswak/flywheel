@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.zeststream.flywheel.w4-skill-consumed-cadence</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string><string>-c</string>
+    <string>/Users/josh/Developer/flywheel/.flywheel/scripts/w4-skill-consumed-cadence-tick.sh tick</string>
+  </array>
+  <key>StartInterval</key><integer>3600</integer>
+  <key>RunAtLoad</key><true/>
+  <key>StandardOutPath</key><string>/Users/josh/.local/state/flywheel/w4-skill-consumed-cadence.stdout.log</string>
+  <key>StandardErrorPath</key><string>/Users/josh/.local/state/flywheel/w4-skill-consumed-cadence.stderr.log</string>
+  <key>EnvironmentVariables</key><dict><key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string></dict>
+</dict>
+</plist>

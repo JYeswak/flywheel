@@ -5,7 +5,7 @@
 # explicit `|| return 1` on jq/append so strict mode is safe here.
 set -euo pipefail
 
-VERSION="low-bead-threshold-detector.v1.1.0"
+VERSION="low-bead-threshold-detector.v1.1.1"
 SCHEMA_VERSION="low-bead-threshold/v1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_DEFAULT="$(cd "$SCRIPT_DIR/../.." && pwd -P)"
@@ -124,7 +124,7 @@ emit_schema() {
         yellow_floor:{type:"integer"},
         auto_bead_filed:{type:"boolean"},
         hunt_bead_id:{type:["string","null"]},
-        auto_bead_action:{enum:["skipped","reused","jsonl_fallback","append_failed"]}
+        auto_bead_action:{enum:["skipped","reused","jsonl_fallback","suppressed_existing_id","append_failed"]}
       }
     },
     exit_codes:{"0":"probe completed","2":"usage / missing JSONL / probe error","3":"refused apply without --idempotency-key"}
@@ -154,7 +154,7 @@ emit_why() {
       body='GREEN: ready_count >= threshold (default 10). YELLOW: ready_count >= ceil(threshold/2). RED: below yellow_floor — fleet is starving and should hunt work via MISSION/GOAL/env/skills before idling.'
       ;;
     auto-bead)
-      body='When --auto-bead is set and signal=RED, the detector files a hunt-work-MISSION-env-skills bead at p0 via direct JSONL append (no br dep so the detector survives br outages). Dedupe-by-id ensures only one such bead exists.'
+      body='When --auto-bead is set and signal=RED, the detector files a hunt-work-MISSION-env-skills bead at p0 via direct JSONL append (no br dep so the detector survives br outages). The fixed id is single-use: once it exists, future RED checks reuse or suppress instead of appending a duplicate id.'
       ;;
     gray-status)
       body='GRAY/exit-2: issues.jsonl is missing or parses fail. Detector emits a gray_payload so the orchestrator can surface substrate damage rather than silently report ready=0.'
@@ -320,8 +320,7 @@ repair_run() {
         '{schema_version:$sv,command:"repair",ts:$ts,status:"pass",scope:$scope,mode:$mode,idempotency_key:$key,ledger:$ledger,ledger_present_before:$before,ledger_present_after:$after}'
       ;;
     issues-jsonl-prime)
-      local issues_dir issues_before
-      issues_dir="$(dirname "$ISSUES_JSONL")"
+      local issues_before
       issues_before="$([[ -f "$ISSUES_JSONL" ]] && printf true || printf false)"
       jq -nc --arg sv "$SCHEMA_VERSION.repair" --arg ts "$ts" --arg scope "$scope" --arg mode "$mode" \
         --arg path "$ISSUES_JSONL" --arg key "$idem_key" --argjson present "$issues_before" \
@@ -353,6 +352,7 @@ emit() {
   return "$rc"
 }
 
+# shellcheck disable=SC2016
 latest_jq='
   def latest:
     reduce .[] as $r ({}; if (($r.id // "") | length) > 0 then .[$r.id] = $r else . end) | [.[]];
@@ -390,21 +390,33 @@ issues_stats() {
 
 existing_hunt_bead() {
   jq -s -r "$latest_jq"'
-    latest[]
-    | select((.status // "" | ascii_downcase) == "open")
-    | select((.title // "") | startswith("hunt-work-"))
-    | select((.title // "") == "hunt-work-MISSION-env-skills"
-        or (.created_by // "") == "low-bead-threshold-detector"
-        or ((.labels // []) | index("low-bead-threshold-work-hunt")))
-    | .id // empty' "$ISSUES_JSONL" 2>/dev/null | head -1
+    latest as $issues
+    | (
+        [$issues[] | select((.id // "") == "flywheel-hunt-work-mission-env-skills")]
+        +
+        [$issues[]
+          | select((.id // "") != "flywheel-hunt-work-mission-env-skills")
+          | select((.status // "" | ascii_downcase) == "open")
+          | select((.title // "") | startswith("hunt-work-"))
+          | select((.title // "") == "hunt-work-MISSION-env-skills"
+              or (.created_by // "") == "low-bead-threshold-detector"
+              or ((.labels // []) | index("low-bead-threshold-work-hunt")))]
+      )
+    | .[0]?
+    | select(.)
+    | [(.id // ""), (.status // "unknown" | ascii_downcase)]
+    | @tsv' "$ISSUES_JSONL" 2>/dev/null | head -1
 }
 
 file_hunt_bead() {
   local audit_ts="$1"
-  local existing id desc row
+  local existing existing_id existing_status action id desc row
   existing="$(existing_hunt_bead || true)"
   if [[ -n "$existing" ]]; then
-    jq -nc --arg id "$existing" '{auto_bead_filed:false,hunt_bead_id:$id,auto_bead_action:"reused"}'
+    IFS=$'\t' read -r existing_id existing_status <<<"$existing"
+    action="suppressed_existing_id"
+    [[ "$existing_status" == "open" ]] && action="reused"
+    jq -nc --arg id "$existing_id" --arg action "$action" '{auto_bead_filed:false,hunt_bead_id:$id,auto_bead_action:$action}'
     return 0
   fi
   id="flywheel-hunt-work-mission-env-skills"

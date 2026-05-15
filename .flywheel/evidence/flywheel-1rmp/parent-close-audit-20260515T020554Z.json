@@ -1,0 +1,93 @@
+{
+  "schema_version": "flywheel.value_gap_parent_close_audit.v1",
+  "bead_id": "flywheel-1rmp",
+  "generated_at": "2026-05-15T02:05:54Z",
+  "status": "ready_to_close",
+  "acceptance_gates": [
+    {
+      "gate": "Step 4o documented with 10 dimensions",
+      "status": "pass",
+      "evidence_refs": [
+        "operator command surface Step 4o",
+        ".flywheel/scripts/value-gap-probe.sh:DIMENSIONS"
+      ]
+    },
+    {
+      "gate": "canonical value-gap helper exists",
+      "status": "pass",
+      "evidence_refs": [
+        ".flywheel/scripts/value-gap-probe.sh",
+        "tests/value-gap-probe.sh"
+      ]
+    },
+    {
+      "gate": "tick receipt schema carries value_gap fields",
+      "status": "pass",
+      "evidence_refs": [
+        ".flywheel/validation-schema/v1/tick-receipt.schema.json"
+      ]
+    },
+    {
+      "gate": "three ticks produce three different dimension scans",
+      "status": "pass",
+      "evidence_refs": [
+        "tests/value-gap-probe.sh: three dry-run ticks scan three dimensions"
+      ]
+    },
+    {
+      "gate": "at least one value-gap bead is filed by the loop",
+      "status": "pass",
+      "evidence_refs": [
+        "tests/value-gap-probe.sh: apply files value-gap bead",
+        ".beads/issues.jsonl: flywheel-1rmp.1..flywheel-1rmp.20 closed"
+      ]
+    }
+  ],
+  "child_status": {
+    "children_checked": 20,
+    "open_children": 0,
+    "closed_child_ids": [
+      "flywheel-1rmp.1",
+      "flywheel-1rmp.2",
+      "flywheel-1rmp.3",
+      "flywheel-1rmp.4",
+      "flywheel-1rmp.5",
+      "flywheel-1rmp.6",
+      "flywheel-1rmp.7",
+      "flywheel-1rmp.8",
+      "flywheel-1rmp.9",
+      "flywheel-1rmp.10",
+      "flywheel-1rmp.11",
+      "flywheel-1rmp.12",
+      "flywheel-1rmp.13",
+      "flywheel-1rmp.14",
+      "flywheel-1rmp.15",
+      "flywheel-1rmp.16",
+      "flywheel-1rmp.17",
+      "flywheel-1rmp.18",
+      "flywheel-1rmp.19",
+      "flywheel-1rmp.20"
+    ]
+  },
+  "validation": [
+    {
+      "command": "bash tests/value-gap-probe.sh",
+      "result": "pass",
+      "summary": "17 passed, 0 failed"
+    },
+    {
+      "command": "REPO=/Users/josh/Developer/flywheel bash tests/test-t9iva-value-gap-dedupe-open.sh",
+      "result": "pass",
+      "summary": "7 assertions passed"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass",
+      "summary": "No dependency cycles detected"
+    }
+  ],
+  "notes": [
+    "Parent close is an audit closure, not new feature scope.",
+    "The test expectation was updated to accept the later open-duplicate hardening path: skipped_duplicate is the safer current idempotency result while a same-title bead remains open."
+  ]
+}

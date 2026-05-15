@@ -1,0 +1,30 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-hf58.1",
+  "closed_at": "2026-05-15T08:15:04Z",
+  "status": "safe_to_close",
+  "closure_class": "stale_audit_gap_verified",
+  "summary": "B05_AG7 is covered by the validate-tick-phase regression: tick receipts include validation_summary fields consumed by doctor and validation-learn surfaces.",
+  "evidence": [
+    {
+      "command": "bash tests/validate-tick-phase.sh",
+      "result": "pass",
+      "summary": "28 passed, 0 failed; includes B05_AG7 tick receipt includes doctor/learn validation summary fields."
+    },
+    {
+      "command": "shellcheck tests/validate-tick-phase.sh",
+      "result": "pass",
+      "summary": "SC2015 guard assertions repaired while preserving behavior."
+    },
+    {
+      "path": ".flywheel/validation-schema/v1/tick-receipt.schema.json",
+      "result": "present",
+      "summary": "Schema exposes validation_summary as a tick receipt field."
+    },
+    {
+      "path": "/Users/josh/.claude/commands/flywheel/learn.md",
+      "result": "present",
+      "summary": "The literal /flywheel:learn audit path is a command surface, not a repo file path."
+    }
+  ]
+}

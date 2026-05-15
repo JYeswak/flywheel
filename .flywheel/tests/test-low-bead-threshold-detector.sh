@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2015
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
@@ -63,9 +64,11 @@ assert_jq "$TMP/red2.json" '.auto_bead_filed == false and .auto_bead_action == "
 [[ "$(grep -c '"title":"hunt-work-MISSION-env-skills"' "$r/.beads/issues.jsonl")" == "1" ]] || fail "open_hunt_duplicate"
 pass "open_hunt_no_duplicate"
 
-r="$(repo closed)"; issue "$r" h closed hunt-work-MISSION-env-skills; for n in $(seq 1 2); do issue "$r" "c$n" open; done
+r="$(repo closed)"; issue "$r" flywheel-hunt-work-mission-env-skills closed hunt-work-MISSION-env-skills; for n in $(seq 1 2); do issue "$r" "c$n" open; done
 run closed "$r" --auto-bead
-assert_jq "$TMP/closed.json" '.signal == "RED" and .auto_bead_filed == true' "closed_hunt_allows_new"
+assert_jq "$TMP/closed.json" '.signal == "RED" and .auto_bead_filed == false and .auto_bead_action == "suppressed_existing_id"' "closed_fixed_hunt_suppressed"
+[[ "$(grep -c '"id":"flywheel-hunt-work-mission-env-skills"' "$r/.beads/issues.jsonl")" == "1" ]] || fail "closed_fixed_hunt_duplicate"
+pass "closed_fixed_hunt_no_duplicate"
 
 r="$(repo noauto)"; for n in $(seq 1 3); do issue "$r" "n$n" open; done
 run noauto "$r"

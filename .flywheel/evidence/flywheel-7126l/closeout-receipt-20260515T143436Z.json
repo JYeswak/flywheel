@@ -1,0 +1,39 @@
+{
+  "schema": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-7126l",
+  "created_at": "2026-05-15T14:34:36Z",
+  "status": "closed",
+  "decision": "closed_with_evidence",
+  "summary": "Added an alias-level read-only doctor envelope to canonical-doctrine-sync so the public canonical name reports the delegated sync-canonical-doctrine doctor state without mutating fleet doctrine surfaces.",
+  "changed_files": [
+    ".flywheel/scripts/canonical-doctrine-sync.sh",
+    "tests/canonical-doctrine-sync-canonical-cli.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/canonical-doctrine-sync-canonical-cli.sh",
+      "result": "pass",
+      "summary": "9/0 assertions: alias exists, --info-alias reports target, doctor emits canonical-doctrine-sync.doctor.v1 with mutates=false and delegated sync schema, --doctor aliases doctor, normal --info still delegates, and missing target fails closed."
+    },
+    {
+      "command": "bash tests/sync-canonical-doctrine-doctor.sh",
+      "result": "pass",
+      "summary": "6/0 assertions: underlying sync-canonical-doctrine doctor remains read-only, --doctor aliases doctor, and help/info/examples advertise doctor."
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/canonical-doctrine-sync.sh tests/canonical-doctrine-sync-canonical-cli.sh",
+      "result": "pass",
+      "summary": "Touched alias shell surfaces are ShellCheck clean."
+    },
+    {
+      "command": ".flywheel/audit/flywheel-cli-inventory/build-inventory.sh",
+      "result": "pass",
+      "summary": "Inventory regenerated; canonical-doctrine-sync.sh now reports doctor_subcommand_status=basic with score 500."
+    }
+  ],
+  "parent_state": {
+    "parent_bead_id": "flywheel-oxzyr",
+    "parent_closed": false,
+    "reason": "The broader doctor-mode wave remains open; this closes one scoped canonical doctrine sync alias surface only."
+  }
+}

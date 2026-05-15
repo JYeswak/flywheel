@@ -2027,6 +2027,41 @@ def signal_pane_state(marker: dict, interval_seconds: int) -> dict:
     }
 
 
+def non_pane_loop_mode_signal(marker: dict, signals: list[dict], failed: list[str]) -> dict | None:
+    """Accept launchd-backed loop health when pane motion is the only miss.
+
+    Some repo loops are deliberately service-driven instead of pane-driven. For
+    those, a fresh marker, callback receipt, canonical bridge, ledger, receipt,
+    and decision surface is stronger evidence than synthetic pane churn.
+    """
+    if failed != ["pane_state_changed_since_last_tick"]:
+        return None
+    dispatch_mode = str(marker.get("dispatch_mode") or "")
+    driver = marker.get("driver")
+    driver_mode = str(driver.get("mode") if isinstance(driver, dict) else driver or "")
+    if dispatch_mode != "launchd_prompt" and driver_mode != "flywheel-loop-driver-writeback":
+        return None
+    signal_map = {str(item.get("name") or ""): bool(item.get("ok")) for item in signals}
+    required = [
+        "ledger_writes_since_last_tick",
+        "receipt_files_written_since_last_tick",
+        "callback_received_in_last_2_ticks",
+        "fuckup_log_decisions_made_since_last_tick",
+        "marker_fresh",
+        "callback_receipt_fresh",
+        "canonical_bridge_fresh",
+    ]
+    missing = [name for name in required if not signal_map.get(name)]
+    if missing:
+        return None
+    return {
+        "status": "accepted",
+        "reason": "launchd_prompt_non_pane_loop",
+        "suppressed_signal": "pane_state_changed_since_last_tick",
+        "required_signals": required,
+    }
+
+
 def loop_candidate_paths(project: str, repo: Path, kind: str) -> list[Path]:
     local_state = Path.home() / ".local/state"
     local_logs = Path.home() / ".local/logs"
@@ -2237,7 +2272,9 @@ def classify_loop(marker: dict) -> dict:
         signal_fuckup_decisions(project, repo, interval),
         *explicit,
     ]
-    failed = [str(item["name"]) for item in signals if not item.get("ok")]
+    raw_failed = [str(item["name"]) for item in signals if not item.get("ok")]
+    non_pane_mode = non_pane_loop_mode_signal(marker, signals, raw_failed)
+    failed = [] if non_pane_mode else raw_failed
     verdict = "HEALTHY"
     if len(failed) >= 3:
         verdict = "DEAD"
@@ -2250,7 +2287,9 @@ def classify_loop(marker: dict) -> dict:
         "interval_seconds": interval,
         "verdict": verdict,
         "failed_signals": failed,
+        "raw_failed_signals": raw_failed,
         "signals": {str(item["name"]): item for item in signals},
+        "non_pane_operating_mode": non_pane_mode,
         "explicit_freshness_signals": [str(item["name"]) for item in explicit],
         "marker": str(marker.get("_marker_path") or ""),
     }
@@ -2451,11 +2490,11 @@ _scaffold_emit_topic_help() {
   case "$topic" in
     run)         printf 'topic: run (default) — discover gaps across 9 classes; --apply mode auto-files capped beads (default 3 via GAP_HUNT_AUTO_BEAD_CAP); --dry-run skips ledger writes; rc 0 ok / 1 domain / 64 usage\n' ;;
     doctor)      printf 'topic: doctor (positional) — substrate-health envelope with .checks (canonical AG3.4); distinct from --doctor flag which marks doctor-mode gap-hunt invocation\n' ;;
-    health)      printf 'topic: health — tail $_SCAFFOLD_GHP_AUDIT_LOG (= $LEDGER); report last_run_ts, age_seconds, recent_runs, total_runs; status=warn at >24h stale (daily probe cadence)\n' ;;
+    health)      printf 'topic: health — tail %s (= %s); report last_run_ts, age_seconds, recent_runs, total_runs; status=warn at >24h stale (daily probe cadence)\n' "\$_SCAFFOLD_GHP_AUDIT_LOG" "\$LEDGER" ;;
     repair)      printf 'topic: repair --scope <audit_log_dir|ledger_path> [--dry-run|--apply --idempotency-key KEY] — apply contract: --apply requires --idempotency-key (rc=3); audit_log_dir mkdir; ledger_path REPORT-ONLY (ledger writes are gap-hunt path, not repair-owned)\n' ;;
     validate)    printf 'topic: validate <subject> [VALUE] — subjects: gap-class (must be one of 9 enum members), bead-id (matches ^flywheel-[a-z0-9.]+$), auto-bead-cap (positive int); rc=1 on schema violation\n' ;;
-    audit)       printf 'topic: audit [--limit N] — tail $_SCAFFOLD_GHP_AUDIT_LOG; default limit=20\n' ;;
-    why)         printf 'topic: why <id> — provenance lookup against $_SCAFFOLD_GHP_AUDIT_LOG; matches against ts/gap_id/version; states: found / not_found / unavailable\n' ;;
+    audit)       printf 'topic: audit [--limit N] — tail %s; default limit=20\n' "\$_SCAFFOLD_GHP_AUDIT_LOG" ;;
+    why)         printf 'topic: why <id> — provenance lookup against %s; matches against ts/gap_id/version; states: found / not_found / unavailable\n' "\$_SCAFFOLD_GHP_AUDIT_LOG" ;;
     *)           printf 'topics: run | doctor | health | repair | validate | audit | why | quickstart (SURGICAL: scaffold owns positional verbs + --examples --json envelope; native --info/--schema/--doctor/default-mode preserved with in-place .name/.capabilities/.input_schema/.output_schema augmentations)\n' ;;
   esac
 }

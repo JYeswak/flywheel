@@ -40,6 +40,20 @@
       "recommended_action": "bead_db_repair.sh recovery path losing data; audit Gate 8 rebuild logic"
     },
     {
+      "pattern": "skill-shipped-without-skillos-handoff",
+      "match": "exact",
+      "severity": "medium",
+      "detection": {
+        "log_pattern": "files_reserved=.*~/.claude/skills/",
+        "missing_field": "skillos_handoff_message_id",
+        "exclude_if_field_set": "skillos_handoff_skipped_reason"
+      },
+      "should_become": "canonical-L-rule",
+      "promotion_target": "INCIDENTS.md per L56 ladder",
+      "remediation": "run .flywheel/scripts/handoff-skill-to-skillos.sh <name> <version>",
+      "recommended_action": "Skill files were reserved without SkillOS handoff proof. Run .flywheel/scripts/handoff-skill-to-skillos.sh <name> <version>, append or update INCIDENTS.md evidence for skill-shipped-without-skillos-handoff, and continue to the canonical L-rule if the class recurs."
+    },
+    {
       "pattern": "read-tool-secret-leak",
       "match": "exact",
       "should_become": "canonical-L-rule",

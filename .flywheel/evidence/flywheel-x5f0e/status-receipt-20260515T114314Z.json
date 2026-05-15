@@ -1,0 +1,43 @@
+{
+  "schema": "flywheel.status_receipt.v1",
+  "bead_id": "flywheel-x5f0e",
+  "created_at": "2026-05-15T11:43:14Z",
+  "status": "blocked",
+  "decision": "keep_blocked",
+  "reason": "current git-stash-janitor verifier and polish bar still fail on real recovery evidence, not only the prior verifier false-positive blocker",
+  "target_repo": "/Users/josh/Developer/alpsinsurance",
+  "archive_path": "/Users/josh/Developer/alpsinsurance-stash-archive-2026-05-08",
+  "workspace_path": "/Users/josh/Developer/alpsinsurance/.stash_janitor_workspace",
+  "commands": [
+    {
+      "command": "bash /Users/josh/.claude/skills/git-stash-janitor/scripts/verify-bundle.sh /Users/josh/Developer/alpsinsurance",
+      "exit_code": 1,
+      "result": "fail",
+      "summary": "Verification complete: Total stashes 82; OK rows 90; mismatch/missing 50; gate failure says do not proceed to destructive phases"
+    },
+    {
+      "command": "bash /Users/josh/.claude/skills/git-stash-janitor/scripts/polish-bar-check.sh /Users/josh/Developer/alpsinsurance",
+      "exit_code": 3,
+      "result": "fail",
+      "summary": "P1 counts mismatch because diffs count is 0 while inventory/refs/meta/index are 82; 50 has_untracked=true rows lack byte-equal materialized untracked files; P2 has 47 rows with empty/unknown verdict"
+    },
+    {
+      "command": "awk verdict-count probe over /Users/josh/Developer/alpsinsurance/.stash_janitor_workspace/triage.tsv",
+      "exit_code": 0,
+      "result": "pass",
+      "summary": "verdict counts: novel-and-accretive=9, partially-novel=26, unknown=47"
+    }
+  ],
+  "current_blockers": [
+    "50 untracked stash rows fail materialized byte-equality checks under stashed-untracked/",
+    "47 triage.tsv rows remain unknown and do not satisfy verdict evidence",
+    "archive has refs/meta/index coverage for 82 stashes but polish bar reports diffs count 0, so P1 recovery completeness remains red"
+  ],
+  "safe_boundary": {
+    "destructive_cleanup_authorized": false,
+    "destructive_cleanup_run": false,
+    "alps_source_edits": false,
+    "flywheel_close_claim": false
+  },
+  "next_action": "Run ALPS-side stash janitor remediation to materialize missing untracked files and finish verdict evidence, then rerun verify-bundle and polish-bar before any destructive cleanup."
+}

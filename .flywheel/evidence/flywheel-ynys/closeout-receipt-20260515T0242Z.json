@@ -1,0 +1,35 @@
+{
+  "schema_version": "flywheel.canonical_cli_repair_evidence.v1",
+  "bead_id": "flywheel-ynys",
+  "surface": "flywheel-doctrine-sync",
+  "status": "closed",
+  "closed_at": "2026-05-15T02:42:00Z",
+  "summary": "Completed canonical CLI repair for the full-substrate flywheel-doctrine-sync binary and recorded it as a local-only installed substrate surface.",
+  "installed_binary": {
+    "path": "/Users/josh/.claude/skills/.flywheel/bin/flywheel-doctrine-sync",
+    "sha256": "d8708c6afd6fb69fffdd826624c5a64b17c9beb8ab893a18aeb5743e7e480c7c",
+    "tracked_in_flywheel_repo": false
+  },
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-ynys/canonical-cli-scorecard-20260515T0242Z.json"
+  ],
+  "validations": [
+    {
+      "command": "bash tests/flywheel-doctrine-sync-canonical-cli.sh",
+      "status": "pass",
+      "summary": "19 pass, 0 fail"
+    },
+    {
+      "command": "canonical-cli-scorecard.sh score flywheel-doctrine-sync --domain-exit-codes --json",
+      "status": "pass",
+      "summary": "composite_score=1000; checker=13 pass, 0 fail"
+    },
+    {
+      "command": "check-cli-scoping.sh flywheel-doctrine-sync",
+      "status": "pass",
+      "summary": "13 pass, 0 fail"
+    }
+  ],
+  "source_gap_bead": "flywheel-nkw4o",
+  "boundary_note": "This closes the canonical CLI surface for the installed full-substrate operator binary. It does not claim flywheel-doctrine-sync is part of the public reduced installer."
+}

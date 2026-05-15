@@ -1,0 +1,52 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-sadm5",
+  "closed_at": "2026-05-15T18:14:00Z",
+  "status": "closed_as_decomposed_parent",
+  "summary": "Converted L168 fleet bootstrap from a broad in-progress parent into exact wave child work. Wave 1 is mechanically clear; Waves 2-4 remain real, measurable work with per-wave children and preflight evidence.",
+  "source_preflight": ".flywheel/evidence/flywheel-sadm5/all-waves-tenant-preflight-20260515T1813Z.json",
+  "current_truth": {
+    "all_wave_status": "fail",
+    "row_count": 13,
+    "fail_count": 9,
+    "wave1_status": "pass_with_terratitle_disposition"
+  },
+  "children": [
+    {
+      "id": "flywheel-sadm5.1",
+      "status": "closed",
+      "scope": "ALPS tenant declaration and repo gates"
+    },
+    {
+      "id": "flywheel-sadm5.2",
+      "status": "closed",
+      "scope": "TerraTitle direct-Postgres/no-Infisical disposition"
+    },
+    {
+      "id": "flywheel-1wsv7",
+      "status": "open",
+      "scope": "Wave 2 active products: vrtx, zeststream-v2-fresh, zeststream-platform"
+    },
+    {
+      "id": "flywheel-hsdb9",
+      "status": "open",
+      "scope": "Wave 3 internal tooling: zesttube, agent-ui, flywheel_gateway"
+    },
+    {
+      "id": "flywheel-lp1fr",
+      "status": "open",
+      "scope": "Wave 4 clone-first repos: blackfoot-telecom, clutterfreespaces, picoz"
+    }
+  ],
+  "validation": [
+    {
+      "command": ".flywheel/scripts/fleet-tenant-registry-preflight.py ... --run-doctor --json",
+      "result": "all-wave receipt captured fail_count=9 and exact per-slug failures"
+    },
+    {
+      "command": "br show flywheel-sadm5 --json",
+      "result": "closed Wave 1 children plus open Wave 2-4 children are linked"
+    }
+  ],
+  "closure_reason": "The parent no longer carries ambiguous blocked work. Remaining work is intentionally open as exact children with measurable acceptance and no secret values in evidence."
+}

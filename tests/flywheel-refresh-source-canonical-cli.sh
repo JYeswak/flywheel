@@ -82,7 +82,7 @@ assert_jq "$TMP/help-topic.json" '.topic == "doctor" and (.content | test("Diagn
 assert_text "$TMP/completion.bash" 'complete -F _flywheel_refresh_source_complete flywheel-refresh-source' "completion_bash"
 
 bash "$CHECKER" "$BIN" >"$TMP/check-cli-scoping.txt"
-assert_text "$TMP/check-cli-scoping.txt" 'Summary: 4 pass, 0 fail' "canonical_checker"
+assert_text "$TMP/check-cli-scoping.txt" 'Summary: 13 pass, 0 fail' "canonical_checker"
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]

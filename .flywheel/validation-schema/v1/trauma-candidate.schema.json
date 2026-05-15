@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "flywheel.trauma_candidate.v0",
+  "title": "Trauma Candidate Row",
+  "description": "One trauma-claim candidate emitted from worker observations of fuckup-log classes not yet absorbed into INCIDENTS.md or flywheel-recovery SKILL.md Forever-Rules. Consumed by skillos via flywheel-skillos-relay.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "ts",
+    "class",
+    "fuckup_log_ref",
+    "proposed_disposition",
+    "recommended_skillos_loop"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "flywheel.trauma_candidate.v0"
+    },
+    "ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 UTC timestamp of emission"
+    },
+    "class": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The trauma class observed (matches fuckup-log .class field)"
+    },
+    "fuckup_log_ref": {
+      "type": "string",
+      "description": "Reference to source row(s): file_path#L<line> or file_path:ts=<iso>"
+    },
+    "dispatch_log_task_id": {
+      "type": ["string", "null"],
+      "description": "Linked dispatch task_id if the trauma fired during a dispatch"
+    },
+    "proposed_disposition": {
+      "type": "string",
+      "enum": ["known", "new", "duplicate"],
+      "description": "Emitter's classification: known=already in INCIDENTS/SKILL; new=novel; duplicate=links to existing trauma-candidate"
+    },
+    "recommended_skillos_loop": {
+      "type": "integer",
+      "enum": [2, 4, 5],
+      "description": "Which skillos loop should ingest: 2=worker-finding intake; 4=trauma-class accretor; 5=research-triad"
+    },
+    "evidence_excerpt": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Excerpt from the source fuckup-log row (what_happened field, sanitized)"
+    },
+    "session": {
+      "type": "string",
+      "description": "Session where the trauma was observed"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"]
+    },
+    "skillos_handoff_message_id": {
+      "type": ["string", "null"],
+      "description": "Populated after flywheel-skillos-relay handoff; null until then"
+    }
+  },
+  "additionalProperties": false
+}

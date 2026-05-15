@@ -1,0 +1,49 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-2xdi.162",
+  "closed_scope": "Converted worker-deep-liveness-probe-launchd-install.sh from gap-hunt wired-but-cold into a canonical receiver-backed test surface.",
+  "paths": [
+    "tests/worker-deep-liveness-probe-launchd-install-canonical-cli.sh",
+    "tests/worker-deep-liveness-probe-classification.sh"
+  ],
+  "before": {
+    "gap_hunt_probe_matches": [
+      "wired-but-cold:developer-flywheel-.flywheel-scripts-worker-deep-liveness-probe-launchd-install.sh"
+    ],
+    "reason": "The installer was covered by the deep-liveness classification test, but that test filename sat outside gap-hunt's canonical receiver corpus."
+  },
+  "after": {
+    "gap_hunt_probe_matches": [],
+    "receiver": "tests/worker-deep-liveness-probe-launchd-install-canonical-cli.sh",
+    "coverage": [
+      "probe executable exists",
+      "launchd plist exists and validates",
+      "StartInterval is 300 seconds",
+      "installer exists and passes bash syntax",
+      "installer doctor returns status=ok",
+      "synthetic topology fixture emits hung_count=1 for a stale pane",
+      "deep_liveness_state is present per pane",
+      "loaded launchd service reports run interval = 300"
+    ]
+  },
+  "validation": [
+    {
+      "command": "bash tests/worker-deep-liveness-probe-launchd-install-canonical-cli.sh",
+      "result": "pass 8/0"
+    },
+    {
+      "command": "shellcheck tests/worker-deep-liveness-probe-launchd-install-canonical-cli.sh",
+      "result": "pass"
+    },
+    {
+      "command": "timeout 180 .flywheel/scripts/gap-hunt-probe.sh --json --dry-run",
+      "result": "pass; no worker-deep-liveness-probe-launchd-install or flywheel-2xdi.162 gap_ids"
+    }
+  ],
+  "safety": {
+    "fixture_only": true,
+    "runtime_mutation": false,
+    "broad_probe_changed": false
+  },
+  "autonomy": "autonomous"
+}

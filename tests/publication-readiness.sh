@@ -326,7 +326,7 @@ jq -nc --arg tag "$release_tag" --arg tarball "$release_tarball" --arg digest "$
   ]
 }' >"$TMP/release-duplicate-asset.json"
 install_hash="$(printf 'install-body' | shasum -a 256 | awk '{print $1}')"
-website_current_text='Your business already has the data. I help SMB owners buy their time back. The Yuzu Method starts with one workflow slice.'
+website_current_text="$(printf 'Buy back the hours hiding between your tools. I help SMB owners buy their time back. 25+ years in operations. The Yuzu Method starts with one safe first fix. %02500d No CRM connection. No auto-response. No follow-up.' 0)"
 jq -nc --arg body "$website_current_text" '{url:"https://flywheel.zeststream.ai/",status_code:200,body_text:$body,body_sha256:"unused"}' >"$TMP/website-ok.json"
 jq -nc '{url:"https://flywheel.zeststream.ai/",status_code:200,body_text:"Old Flywheel placeholder",body_sha256:"unused"}' >"$TMP/website-stale.json"
 jq -nc --arg hash "$install_hash" '{url:"https://flywheel.zeststream.ai/install.sh",status_code:200,body_sha256:$hash,body_text:"install-body"}' >"$TMP/install-ok.json"

@@ -113,9 +113,10 @@ in their own environment, without Joshua. Framed by trust, not sales.
   cache receipt (0.007% → 6.37%, a 2-line regex) is real but wrong-audience for
   an SMB owner — it was relocated to the developer page, where a technical
   reader finds it compelling.
-- **/about image.** RESOLVED. The recycled `loop-map.svg` was replaced with a
-  purpose-built operator-arc visual on /about. `loop-map.svg` remains on
-  /what-is, where an operating-loop diagram is contextually correct.
+- **/about image.** RESOLVED. The recycled `loop-map.svg` was removed from the
+  live site path. /about now uses a purpose-built operator-arc visual, and
+  /what-is uses `operating-room-map.svg` so the explainer opens on the current
+  workflow-slice visual instead of a generic loop diagram.
 
 ## Methodology page — next, its own focused spine
 

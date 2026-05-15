@@ -100,6 +100,20 @@ itself, but the pipeline cannot ship on top of inconsistent channels.
   brand-gate against his eye, same way the flywheel site became the gate's
   fixture.
 
+## Implementation status
+
+The buildable-now path — **TRIGGER → DRAFT → BRAND-GATE → REVIEW** — is built:
+`scripts/presence_queue.py` (test: `tests/presence-queue.sh`, wired into CI;
+working directory + usage: `.flywheel/presence/README.md`). It takes a curated
+ship descriptor, drafts one channel-shaped post per channel, runs every draft
+through the mechanical brand gate (banned words/phrases, first-person-singular
+pronouns, Jeffrey Emanuel attribution, link-back presence, channel length,
+arc-not-stats per II-2a), and writes a publish-ready queue file.
+
+Still Joshua's, by design: REVIEW/PUBLISH (taste + per-surface consent), and
+the Phase 0 social review — which needs the live channel handles this pipeline
+never guesses.
+
 ## Not done until
 
 1. Phase 0 social review complete — every existing channel audited, punch-list

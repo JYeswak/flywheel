@@ -39,6 +39,16 @@ make_repo() {
   mkdir -p "$path/.flywheel"
   printf '%s\n' "$body" >"$path/AGENTS.md"
   printf '%s\n' "$body" >"$path/.flywheel/AGENTS-CANONICAL.md"
+  cat >"$path/.flywheel/ownership.json" <<'JSON'
+{
+  "schema_version": "flywheel.canonical_ownership.v1",
+  "canonical_owner_class": "flywheel",
+  "owned_canonical_paths": [
+    {"path": "AGENTS.md", "owner_class": "flywheel"},
+    {"path": ".flywheel/AGENTS-CANONICAL.md", "owner_class": "flywheel"}
+  ]
+}
+JSON
 }
 
 write_sync() {
@@ -84,6 +94,7 @@ missing_l="$TMP/repos/missing-l"
 divergent="$TMP/repos/divergent"
 missing_agents="$TMP/repos/missing-agents"
 sync_fail="$TMP/repos/sync-fail"
+no_manifest="$TMP/repos/no-manifest"
 make_repo "$in_sync" "$(cat "$SOURCE")"
 make_repo "$missing_l" "# Canonical
 
@@ -98,6 +109,11 @@ make_repo "$sync_fail" "# Old
 
 ## L1
 old"
+make_repo "$no_manifest" "# Old
+
+## L1
+old"
+rm -f "$no_manifest/.flywheel/ownership.json"
 
 append_lib="$TMP/jsonl-append.sh"
 write_append_lib "$append_lib"
@@ -157,4 +173,34 @@ jq -e '.failure_count == 1 and .propagation_results[0].failure_reason == "sync_n
 jq -s -e '[.[] | select(.trauma_class == "fleet-propagation-failed" and .reason == "sync_nonzero")] | length == 1' "$sync_fail_fuckup" >/dev/null || fail "sync nonzero edge did not write fuckup"
 edge
 
-printf 'OK agents-md-fleet-propagator tests pass=%s/5 edges=%s/2\n' "$pass_count" "$edge_count"
+blocked="$TMP/repos/blocked-owner"
+make_repo "$blocked" "# Blocked
+
+## L1
+old"
+cat >"$blocked/.flywheel/ownership.json" <<'JSON'
+{
+  "schema_version": "flywheel.canonical_ownership.v1",
+  "canonical_owner_class": "skillos",
+  "owned_canonical_paths": [
+    {"path": "AGENTS.md", "owner_class": "skillos"},
+    {"path": ".flywheel/AGENTS-CANONICAL.md", "owner_class": "skillos"}
+  ]
+}
+JSON
+blocked_ledger="$TMP/blocked-ledger.jsonl"
+blocked_fuckup="$TMP/blocked-fuckup.jsonl"
+blocked_out="$(env "${env_base[@]}" AGENTS_MD_FLEET_REPOS="$blocked" AGENTS_MD_FLEET_LEDGER="$blocked_ledger" AGENTS_MD_FLEET_FUCKUP_LOG="$blocked_fuckup" "$SCRIPT" --apply --json || true)"
+jq -e '.failure_count == 1 and .propagation_results[0].failure_reason == "canonical_ownership_gate_blocked"' <<<"$blocked_out" >/dev/null || fail "ownership gate edge did not fail with canonical_ownership_gate_blocked"
+! rg -q '^## L2$' "$blocked/AGENTS.md" || fail "ownership gate edge mutated blocked AGENTS.md"
+jq -s -e '[.[] | select(.trauma_class == "fleet-propagation-failed" and .reason == "canonical_ownership_gate_blocked")] | length == 1' "$blocked_fuckup" >/dev/null || fail "ownership gate edge did not write fuckup"
+edge
+
+no_manifest_ledger="$TMP/no-manifest-ledger.jsonl"
+no_manifest_fuckup="$TMP/no-manifest-fuckup.jsonl"
+no_manifest_out="$(env "${env_base[@]}" AGENTS_MD_FLEET_REPOS="$no_manifest" AGENTS_MD_FLEET_LEDGER="$no_manifest_ledger" AGENTS_MD_FLEET_FUCKUP_LOG="$no_manifest_fuckup" "$SCRIPT" --apply --json)"
+jq -e '.success_count == 1 and .failure_count == 0 and .fleet_doctrine_drift_count_after == 0' <<<"$no_manifest_out" >/dev/null || fail "source-owned fallback did not propagate into repo without target manifest"
+rg -q '^## L2$' "$no_manifest/AGENTS.md" || fail "source-owned fallback did not update no-manifest AGENTS.md"
+edge
+
+printf 'OK agents-md-fleet-propagator tests pass=%s/5 edges=%s/4\n' "$pass_count" "$edge_count"

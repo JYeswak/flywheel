@@ -337,6 +337,7 @@ def main(argv):
     parser.add_argument("--include-id", action="append", default=[])
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--doctor", action="store_true")
+    parser.add_argument("--skip-loop-doctor", action="store_true", help="skip flywheel-loop doctor probe for fast format-only audits; equivalent to BEAD_QUALITY_MINING_SKIP_FLYWHEEL_DOCTOR=1")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--now")
     parser.add_argument("--br-bin", default=os.environ.get("BR_BIN", "br"))
@@ -346,7 +347,8 @@ def main(argv):
     repo = Path(args.repo).resolve()
     now = now_utc(args.now)
     since = now - timedelta(hours=args.since_hours)
-    doctor = doctor_json(repo, skip_loop=args.doctor)
+    doctor_skipped = bool(args.doctor or args.skip_loop_doctor or os.environ.get("BEAD_QUALITY_MINING_SKIP_FLYWHEEL_DOCTOR") == "1")
+    doctor = doctor_json(repo, skip_loop=doctor_skipped)
     issues = closed_recent(repo, args.br_bin, since, args.include_id)
     all_issues = br_issues(repo, args.br_bin, all_issues=True)
 
@@ -441,6 +443,7 @@ def main(argv):
         "repo": str(repo),
         "since_hours": args.since_hours,
         "closed_beads_checked": len(issues),
+        "loop_doctor_skipped": doctor_skipped,
         "closed_bead_audit_pending_count": pending_count,
         "closed_bead_audit_gap_count": gap_count,
         "ag_format_gap_count": ag_format_gap_count,

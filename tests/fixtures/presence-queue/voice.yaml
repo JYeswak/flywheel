@@ -1,0 +1,17 @@
+# Test fixture for tests/presence-queue.sh — a minimal slice of the real
+# zeststream-brand-voice voice.yaml. The presence-queue brand gate only reads
+# banned_words + banned_phrases, so the fixture carries just those. Keeping it
+# hermetic means CI does not depend on a ~/.claude skill being installed.
+banned_words:
+  - platform
+  - ecosystem
+  - seamless
+  - robust
+  - best-in-class
+  - enterprise
+  - transformation
+  - "we built"
+banned_phrases:
+  - "in today's world"
+  - empower
+  - leverage

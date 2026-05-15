@@ -1,0 +1,74 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-20udm",
+  "closed_scope": "Added the flywheel-loop domain exit-code surface required by canonical-cli-scoping.",
+  "runtime_commit": {
+    "repo": "/Users/josh/.claude",
+    "commit": "70c1dc4",
+    "message": "fix(flywheel): document loop exit codes [flywheel-20udm]",
+    "paths": [
+      "skills/.flywheel/bin/flywheel-loop",
+      "skills/.flywheel/lib/portable/operator.sh"
+    ]
+  },
+  "flywheel_repo_paths": [
+    "tests/canonical-cli-scoping-flywheel-loop.sh"
+  ],
+  "before": {
+    "scorecard_command": "bash ~/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh score /Users/josh/.claude/skills/.flywheel/bin/flywheel-loop --domain-exit-codes --json",
+    "composite_score": 850,
+    "status": "fail",
+    "domain_exit_code_validator": 0,
+    "direct_probe_failures": [
+      "flywheel-loop help exit-codes",
+      "flywheel-loop --exit-codes"
+    ]
+  },
+  "after": {
+    "scorecard_command": "bash ~/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh score /Users/josh/.claude/skills/.flywheel/bin/flywheel-loop --domain-exit-codes --json",
+    "composite_score": 1000,
+    "status": "pass",
+    "domain_exit_code_validator": 1000,
+    "surfaces": [
+      "flywheel-loop help exit-codes",
+      "flywheel-loop --exit-codes",
+      "flywheel-loop --exit-codes --json"
+    ]
+  },
+  "validation": [
+    {
+      "command": "bash -n /Users/josh/.claude/skills/.flywheel/bin/flywheel-loop",
+      "result": "pass"
+    },
+    {
+      "command": "bash -n /Users/josh/.claude/skills/.flywheel/lib/portable/operator.sh",
+      "result": "pass"
+    },
+    {
+      "command": "bash tests/canonical-cli-scoping-flywheel-loop.sh",
+      "result": "pass"
+    },
+    {
+      "command": "bash tests/flywheel-loop-canonical-cli.sh",
+      "result": "pass"
+    },
+    {
+      "command": "bash ~/.claude/skills/canonical-cli-scoping/scripts/canonical-cli-scorecard.sh score /Users/josh/.claude/skills/.flywheel/bin/flywheel-loop --domain-exit-codes --json",
+      "result": "pass composite_score=1000 domain_exit_code_validator=1000"
+    },
+    {
+      "command": "br dep cycles",
+      "result": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "result": "pass"
+    }
+  ],
+  "safety": {
+    "existing_doctor_repair_tick_callers_preserved": true,
+    "new_mutating_behavior": false,
+    "global_help_alias_added": true
+  },
+  "autonomy": "autonomous"
+}

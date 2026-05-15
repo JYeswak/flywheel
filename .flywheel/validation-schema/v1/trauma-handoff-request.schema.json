@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/schemas/flywheel/trauma-handoff/v1/request.schema.json",
+  "title": "Flywheel → skillos trauma-handoff request v1",
+  "description": "Hands a flywheel.trauma_candidate.v0 row to skillos for loop-2/4/5 ingestion via Agent Mail. Distinct from skillos-template-handshake (which is skill-template injection); this one is trauma-class ingestion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "type",
+    "idempotency_key",
+    "trauma_candidate",
+    "requestor_orch",
+    "requestor_session",
+    "requested_at",
+    "ttl_seconds"
+  ],
+  "properties": {
+    "schema_version": { "const": "flywheel-trauma-handoff-request/v1" },
+    "type": { "const": "trauma_handoff_request" },
+    "idempotency_key": {
+      "type": "string",
+      "description": "sha256:<hex> over (class + fuckup_log_ref)",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "trauma_candidate": {
+      "type": "object",
+      "description": "Verbatim row from flywheel.trauma_candidate.v0",
+      "required": ["schema_version", "class", "proposed_disposition", "recommended_skillos_loop"]
+    },
+    "requestor_orch": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{0,63}:[0-9]{1,3}$",
+      "examples": ["flywheel:1"]
+    },
+    "requestor_session": {
+      "type": "string",
+      "examples": ["flywheel"]
+    },
+    "requested_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ttl_seconds": {
+      "type": "integer",
+      "minimum": 60,
+      "maximum": 604800,
+      "description": "Handoff valid for this many seconds; expired requests should be re-emitted"
+    },
+    "target_skillos_loop": {
+      "type": "integer",
+      "enum": [2, 4, 5]
+    }
+  }
+}

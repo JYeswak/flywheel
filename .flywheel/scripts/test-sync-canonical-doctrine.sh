@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2016,SC2317
 # Synthetic regression test for sync-canonical-doctrine.sh.
 set -euo pipefail
 
@@ -566,6 +567,7 @@ END="<!-- END-CANONICAL-FLYWHEEL-DOCTRINE -->"
 
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/sync-canonical-doctrine-test.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
+export SYNC_CANONICAL_LEDGER="$TMP/doctrine-sync-ledger.jsonl"
 
 CANONICAL="$TMP/source/AGENTS.md"
 mkdir -p "$(dirname "$CANONICAL")"
@@ -573,6 +575,22 @@ printf '# Canonical doctrine\n\n## L61 - synthetic ecosystem rule\nbody\n\n## L7
 
 for repo in repo-a repo-b repo-c; do
   mkdir -p "$TMP/repos/$repo/.flywheel"
+  cat >"$TMP/repos/$repo/.flywheel/ownership.json" <<'JSON'
+{
+  "schema_version": "flywheel.canonical_ownership.v1",
+  "canonical_owner_class": "flywheel",
+  "owned_canonical_paths": [
+    {"path": "AGENTS.md", "owner_class": "flywheel"},
+    {"path": ".flywheel/AGENTS-CANONICAL.md", "owner_class": "flywheel"},
+    {"path": ".flywheel/rules", "owner_class": "flywheel"},
+    {"path": ".flywheel/doctrine", "owner_class": "flywheel"},
+    {"path": ".flywheel/scripts", "owner_class": "flywheel"},
+    {"path": ".flywheel/launchd", "owner_class": "flywheel"},
+    {"path": ".flywheel/validation-schema", "owner_class": "flywheel"},
+    {"path": ".claude/settings.json", "owner_class": "flywheel"}
+  ]
+}
+JSON
 done
 cp "$CANONICAL" "$TMP/repos/repo-a/.flywheel/AGENTS-CANONICAL.md"
 printf 'old doctrine\n' >"$TMP/repos/repo-b/.flywheel/AGENTS-CANONICAL.md"
@@ -600,7 +618,7 @@ if [[ "$(jq -r '[.root_details[] | select(.status=="drifted" and (.missing_rules
   exit 1
 fi
 
-apply="$(SYNC_CANONICAL_SOURCE="$CANONICAL" SYNC_CANONICAL_ROOTS="$TMP/repos" SYNC_CANONICAL_LOOPS_DIR="$TMP/no-loops" "$SYNC" --apply --json)"
+apply="$(SYNC_CANONICAL_SOURCE="$CANONICAL" SYNC_CANONICAL_ROOTS="$TMP/repos" SYNC_CANONICAL_LOOPS_DIR="$TMP/no-loops" "$SYNC" --apply --idempotency-key synthetic-apply-1 --json)"
 if [[ "$(jq -r '.status' <<<"$apply")" != "ok" || "$(jq -r '.canonical_synced_count' <<<"$apply")" != "2" || "$(jq -r '.root_synced_count' <<<"$apply")" != "3" ]]; then
   printf 'FAIL: apply expected status=ok canonical_synced_count=2 root_synced_count=3\n%s\n' "$apply" >&2
   exit 1
@@ -656,7 +674,7 @@ if [[ "$(jq -r '.status' <<<"$post")" != "ok" || "$(jq -r '.drifted_count' <<<"$
 fi
 
 before_hash="$(shasum -a 256 "$TMP/repos/repo-a/AGENTS.md" | awk '{print $1}')"
-rerun="$(SYNC_CANONICAL_SOURCE="$CANONICAL" SYNC_CANONICAL_ROOTS="$TMP/repos" SYNC_CANONICAL_LOOPS_DIR="$TMP/no-loops" "$SYNC" --apply --json)"
+rerun="$(SYNC_CANONICAL_SOURCE="$CANONICAL" SYNC_CANONICAL_ROOTS="$TMP/repos" SYNC_CANONICAL_LOOPS_DIR="$TMP/no-loops" "$SYNC" --apply --idempotency-key synthetic-apply-2 --json)"
 after_hash="$(shasum -a 256 "$TMP/repos/repo-a/AGENTS.md" | awk '{print $1}')"
 if [[ "$(jq -r '.synced_count' <<<"$rerun")" != "0" || "$before_hash" != "$after_hash" ]]; then
   printf 'FAIL: idempotent re-run changed root AGENTS.md\n%s\n' "$rerun" >&2
@@ -664,13 +682,45 @@ if [[ "$(jq -r '.synced_count' <<<"$rerun")" != "0" || "$before_hash" != "$after
 fi
 
 missing_rc=0
-missing="$(SYNC_CANONICAL_SOURCE="$TMP/missing/AGENTS.md" SYNC_CANONICAL_ROOTS="$TMP/repos" SYNC_CANONICAL_LOOPS_DIR="$TMP/no-loops" "$SYNC" --dry-run --json 2>&1)" || missing_rc=$?
+missing_output="$(SYNC_CANONICAL_SOURCE="$TMP/missing/AGENTS.md" SYNC_CANONICAL_ROOTS="$TMP/repos" SYNC_CANONICAL_LOOPS_DIR="$TMP/no-loops" "$SYNC" --dry-run --json 2>&1)" || missing_rc=$?
 if [[ "$missing_rc" -ne 2 ]]; then
-  printf 'FAIL: missing source expected rc=2, got %s\n%s\n' "$missing_rc" "$missing" >&2
+  printf 'FAIL: missing source expected rc=2, got %s\n%s\n' "$missing_rc" "$missing_output" >&2
   exit 1
 fi
-if [[ "$(jq -r '.errors[0].code // empty' <<<"$missing")" != "source_missing" ]]; then
-  printf 'FAIL: missing source expected source_missing code\n%s\n' "$missing" >&2
+if [[ "$(jq -r '.errors[0].code // empty' <<<"$missing_output")" != "source_missing" ]]; then
+  printf 'FAIL: missing source expected source_missing code\n%s\n' "$missing_output" >&2
+  exit 1
+fi
+
+mkdir -p "$TMP/blocked/repo-skillos/.flywheel"
+printf 'old doctrine\n' >"$TMP/blocked/repo-skillos/.flywheel/AGENTS-CANONICAL.md"
+printf '# SkillOS local instructions\n' >"$TMP/blocked/repo-skillos/AGENTS.md"
+cat >"$TMP/blocked/repo-skillos/.flywheel/ownership.json" <<'JSON'
+{
+  "schema_version": "flywheel.canonical_ownership.v1",
+  "canonical_owner_class": "skillos",
+  "owned_canonical_paths": [
+    {"path": "AGENTS.md", "owner_class": "skillos"},
+    {"path": ".flywheel/AGENTS-CANONICAL.md", "owner_class": "skillos"}
+  ]
+}
+JSON
+blocked_rc=0
+blocked="$(SYNC_CANONICAL_SOURCE="$CANONICAL" SYNC_CANONICAL_ROOTS="$TMP/blocked" SYNC_CANONICAL_LOOPS_DIR="$TMP/no-loops" "$SYNC" --apply --idempotency-key blocked-ownership --json 2>&1)" || blocked_rc=$?
+if [[ "$blocked_rc" -ne 2 ]]; then
+  printf 'FAIL: blocked ownership apply expected rc=2, got %s\n%s\n' "$blocked_rc" "$blocked" >&2
+  exit 1
+fi
+if [[ "$(jq -r '.ownership_blocked_count' <<<"$blocked")" -lt 1 ]]; then
+  printf 'FAIL: blocked ownership apply expected ownership_blocked_count > 0\n%s\n' "$blocked" >&2
+  exit 1
+fi
+if [[ "$(jq -r '.errors[0].code // empty' <<<"$blocked")" != "canonical_ownership_gate_blocked" ]]; then
+  printf 'FAIL: blocked ownership apply expected canonical_ownership_gate_blocked error\n%s\n' "$blocked" >&2
+  exit 1
+fi
+if grep -q 'L70' "$TMP/blocked/repo-skillos/AGENTS.md" || grep -q 'L70' "$TMP/blocked/repo-skillos/.flywheel/AGENTS-CANONICAL.md"; then
+  printf 'FAIL: ownership-blocked repo was mutated\n%s\n' "$blocked" >&2
   exit 1
 fi
 

@@ -1,0 +1,76 @@
+{
+  "schema": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-l6qs8",
+  "closed_at": "2026-05-15T09:21:00Z",
+  "status": "closed",
+  "summary": "Bound the live full-doctor subprocess probes that were able to hang fixture validation, preserving warning JSON instead of blocking the doctor.",
+  "source_commits": [
+    {
+      "repo": "/Users/josh/.claude",
+      "commit": "10d6585edc4ebf24c916eca4ef13de7437788d4b",
+      "message": "fix(flywheel): bound live doctor probes [flywheel-l6qs8]",
+      "pushed": false
+    }
+  ],
+  "changed_runtime_surfaces": [
+    "/Users/josh/.claude/skills/.flywheel/lib/misc.d/part-04-doctor_check_pane_work_signal-to-selected_incident_slugs.sh",
+    "/Users/josh/.claude/skills/.flywheel/lib/fleet.d/part-01-fleet_l_rule_lag_json-to-peer_orch_blocker_watch_doctor_json.sh"
+  ],
+  "optimization_proof": {
+    "baseline": {
+      "command": "timeout 45 bash tests/doctor-validation-signals.sh",
+      "result": "timeout",
+      "elapsed_seconds": 45.010,
+      "exit_code": 124
+    },
+    "after": {
+      "command": "timeout 45 bash tests/doctor-validation-signals.sh",
+      "result": "pass",
+      "elapsed_seconds": 24.974,
+      "summary": "14 passed, 0 failed"
+    },
+    "storage_override_guard": {
+      "command": "timeout 45 bash tests/storage-override.sh",
+      "result": "pass",
+      "elapsed_seconds": 1.812,
+      "summary": "17 passed, 0 failed"
+    },
+    "single_lever": "Add timeout envelopes and warning JSON fallbacks to orch_capture_parity_doctor_json and fleet_three_surface_drift_json."
+  },
+  "validation": [
+    {
+      "command": "bash -n /Users/josh/.claude/skills/.flywheel/lib/misc.d/part-04-doctor_check_pane_work_signal-to-selected_incident_slugs.sh /Users/josh/.claude/skills/.flywheel/lib/fleet.d/part-01-fleet_l_rule_lag_json-to-peer_orch_blocker_watch_doctor_json.sh /Users/josh/.claude/skills/.flywheel/bin/flywheel-loop",
+      "result": "pass"
+    },
+    {
+      "command": "targeted timeout branches: orch timeout, orch timeout-bin-missing, fleet aggregate timeout",
+      "result": "pass"
+    },
+    {
+      "command": "git -C /Users/josh/.claude diff --check -- skills/.flywheel/lib/misc.d/part-04-doctor_check_pane_work_signal-to-selected_incident_slugs.sh",
+      "result": "pass"
+    },
+    {
+      "command": "br dep cycles --json",
+      "result": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "cwd": "/Users/josh/Developer/flywheel",
+      "result": "pass"
+    }
+  ],
+  "behavior_contract": [
+    "If the orch capture parity probe times out, doctor emits status=warn with warning=orch_capture_parity_probe_timeout and timeout_seconds.",
+    "If timeout is unavailable for orch capture parity, doctor emits status=warn with warning=orch_capture_parity_timeout_bin_missing instead of running unbounded.",
+    "If fleet three-surface drift exceeds the aggregate timeout, doctor emits status=warn with warning code fleet_three_surface_drift_timeout and zero drift counts.",
+    "Storage override semantics are unchanged: active, expired, wrong-target, auto-clear, CLI, and env threshold checks still pass."
+  ],
+  "boundaries": [
+    "This is a full-substrate local runtime repair in /Users/josh/.claude, not a public reduced-mode installer change.",
+    "The /Users/josh/.claude source commit is local and not pushed because that repository already has a large unrelated private worktree state.",
+    "No unrelated dirty files in /Users/josh/Developer/flywheel were modified."
+  ],
+  "next_owner": "flywheel",
+  "safe_local_work_remaining": false
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-bu09u",
+  "title": "repair zesty-swarm shared Supabase source drift",
+  "ts": "20260515T193744Z",
+  "status": "closed",
+  "summary": "Shared zesty-swarm Supabase source corrected via infisical-set stdin-only overwrite path; VRTX and ZestTube tenant doctors now pass with zero drift/warnings.",
+  "raw_secret_values_recorded": false,
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-bu09u/secret-repair-receipt-20260515T193653Z.json",
+    ".flywheel/evidence/flywheel-1wsv7/vrtx-tenant-doctor-pass-20260515T193653Z.json",
+    ".flywheel/evidence/flywheel-hsdb9/zesttube-tenant-doctor-pass-20260515T193653Z.json"
+  ],
+  "validation": {
+    "tenant_doctor_vrtx": "pass",
+    "tenant_doctor_zesttube": "pass",
+    "wave2_preflight": "not_applicable",
+    "wave3_preflight": "not_applicable"
+  }
+}

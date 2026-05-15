@@ -1,0 +1,43 @@
+{
+  "schema_version": "flywheel.tenant_source_drift.v1",
+  "status": "fail",
+  "source_project_slug": "zesty-swarm",
+  "source_project_id": "42b194c3-89d7-4ebb-895f-dd77ddf005ba",
+  "expected_supabase_ref": "hsmyagcerajgjmlljtmx",
+  "observed": {
+    "SUPABASE_URL": {
+      "status": "ok",
+      "fingerprint": "a31aea8c7b63"
+    },
+    "DATABASE_URL": {
+      "status": "drift",
+      "actual_ref": "nwwovaoscsgeevqrcwhb",
+      "fingerprint": "c1ee19b0452a"
+    },
+    "SUPABASE_SERVICE_ROLE_KEY": {
+      "status": "drift",
+      "actual_ref": "bsvatvfsqblsibblzlij",
+      "fingerprint": "fa2e7f0ec7b9"
+    },
+    "NEXT_PUBLIC_SUPABASE_URL": {
+      "status": "drift",
+      "fingerprint": "f32c38fb2776"
+    },
+    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY": {
+      "status": "drift",
+      "fingerprint": "3613c207049d",
+      "detail": "format invalid or quote-wrapped"
+    }
+  },
+  "impact": [
+    "Blocks L168 VRTX tenant row from becoming green without hiding the source-project mismatch.",
+    "Blocks L168 ZestTube tenant row from becoming green without pretending zesty-swarm has coherent hsmyagcerajgjmlljtmx keys."
+  ],
+  "required_repair": "Canonicalize the zesty-swarm shared ZestStream Supabase secret set, or move VRTX/ZestTube to a dedicated verified source project. Do not copy values silently; run tenant doctor after repair.",
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-1wsv7/vrtx-tenant-doctor-drift-20260515T1935Z.json",
+    ".flywheel/evidence/flywheel-hsdb9/zesttube-tenant-doctor-20260515T1930Z.json"
+  ],
+  "no_secret_values_included": true,
+  "created_at": "2026-05-15T19:35:00Z"
+}

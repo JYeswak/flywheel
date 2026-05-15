@@ -105,6 +105,13 @@ scripts/journey-smoke.sh --matrix reduced --dry-run --json
 ```
 
 Then read [`docs/getting-started/first-run.md`](docs/getting-started/first-run.md).
+The hosted `https://flywheel.zeststream.ai/install.sh` endpoint is a checksum
+mirror for the same release asset, not a curl-only standalone installer. Clone
+the repo or extract the release tarball first so the installer can see its
+sibling `scripts/`, `bin/`, and template files.
+For Jeffrey Emanuel substrate monitoring, the canonical local helper is
+`.flywheel/scripts/jeff-intel-network.sh`; it is an operator surface, not a
+requirement for the reduced public first run.
 
 ## The Deal
 

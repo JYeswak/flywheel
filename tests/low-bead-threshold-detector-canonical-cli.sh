@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # tests/low-bead-threshold-detector-canonical-cli.sh
 # flywheel-k8gcv.2 (wave-3-02).
+# shellcheck disable=SC2015
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
@@ -82,6 +83,28 @@ LOW_BEAD_THRESHOLD_LEDGER="$TMP_LEDGER" \
   "$SCRIPT" check --repo "$TMP_REPO" --threshold 5 --auto-bead --json 2>/dev/null \
   | jq -e '.auto_bead_filed == false and .auto_bead_action == "reused"' >/dev/null \
   && pass "legacy --auto-bead idempotent (reuses existing hunt bead)" || fail "legacy --auto-bead idempotent"
+
+python3 - "$TMP_REPO/.beads/issues.jsonl" <<'PY'
+import json, sys
+path = sys.argv[1]
+with open(path, 'w') as f:
+    row = {
+        "id": "flywheel-hunt-work-mission-env-skills",
+        "title": "hunt-work-MISSION-env-skills",
+        "status": "closed",
+        "priority": 0,
+        "issue_type": "task",
+        "created_by": "low-bead-threshold-detector",
+        "created_at": "2026-05-11T00:00:00Z",
+        "updated_at": "2026-05-11T00:00:00Z",
+    }
+    f.write(json.dumps(row) + "\n")
+PY
+
+LOW_BEAD_THRESHOLD_LEDGER="$TMP_LEDGER" \
+  "$SCRIPT" check --repo "$TMP_REPO" --threshold 5 --auto-bead --json 2>/dev/null \
+  | jq -e '.auto_bead_filed == false and .auto_bead_action == "suppressed_existing_id" and .hunt_bead_id == "flywheel-hunt-work-mission-env-skills"' >/dev/null \
+  && pass "legacy --auto-bead suppresses closed fixed id" || fail "legacy --auto-bead suppress closed fixed id"
 
 # Cleanup tmp files (safe paths)
 rm -f "$TMP_LEDGER" "$TMP_REPO/.beads/issues.jsonl"

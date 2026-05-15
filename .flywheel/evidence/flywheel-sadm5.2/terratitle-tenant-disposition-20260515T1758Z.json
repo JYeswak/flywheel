@@ -1,0 +1,18 @@
+{
+  "schema_version": "flywheel.tenant_registry_disposition.v1",
+  "slug": "terratitle",
+  "status": "skip_with_reason",
+  "reason": "direct_postgres_no_infisical_supabase_surface",
+  "registry_row_required": false,
+  "repo_declaration_required": false,
+  "source_repo": "/Users/josh/Developer/terratitle",
+  "evidence_refs": [
+    "/Users/josh/Developer/terratitle/config/env-manifest.yaml: production_required names POSTGRES/DATABASE_URL/READONLY_DATABASE_URL and no Supabase deploy target",
+    "/Users/josh/Developer/terratitle/docker-compose.yml: local services use PostGIS/Postgres container terratitle-db and DATABASE_URL/READONLY_DATABASE_URL",
+    "probe: /Users/josh/Developer/terratitle/.infisical.json absent",
+    "probe: active Supabase string hits are Flywheel doctrine references, not TerraTitle runtime configuration"
+  ],
+  "not_a_compliance_claim": true,
+  "follow_up_policy": "If TerraTitle is moved to Infisical, add a canonical registry row and replace this skip receipt with tenant-doctor proof before deploy or DB mutation gating claims.",
+  "raw_secret_values_included": false
+}

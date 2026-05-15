@@ -36,7 +36,7 @@ write_topology() {
     effective_at:"2026-05-04T00:00:00Z"
   }' >>"$FLYWHEEL_SESSION_TOPOLOGY"
   jq -nc '{
-    session:"{capability-control-plane}",
+    session:"skillos",
     orchestrator_pane:1,
     callback_pane:1,
     worker_panes:[2],
@@ -79,17 +79,17 @@ assert_jq "$TMP/agent-mail/sessions/flywheel:3.json" '.role == "archived" and .s
 
 write_topology '[2,3,4]'
 "$PREALLOC" --apply --json >"$TMP/prealloc-cross.json"
-{capability-control-plane}_identity_before="$(jq -r '.identity_name' "$TMP/agent-mail/sessions/{capability-control-plane}:2.json")"
+skillos_identity_before="$(jq -r '.identity_name' "$TMP/agent-mail/sessions/skillos:2.json")"
 "$PREALLOC" --apply --json >"$TMP/prealloc-cross-again.json"
-{capability-control-plane}_identity_after="$(jq -r '.identity_name' "$TMP/agent-mail/sessions/{capability-control-plane}:2.json")"
-if [[ "${capability-control-plane}_identity_before" == "${capability-control-plane}_identity_after" ]]; then
+skillos_identity_after="$(jq -r '.identity_name' "$TMP/agent-mail/sessions/skillos:2.json")"
+if [[ "$skillos_identity_before" == "$skillos_identity_after" ]]; then
   pass "cross_session_reboot_preserves_identity"
 else
   fail "cross_session_reboot_preserves_identity"
 fi
 
 "$LOOP" identity --doctor --json >"$TMP/doctor.json"
-assert_jq "$TMP/doctor.json" '.worker_identity_registered_count.flywheel == 3 and .worker_identity_registered_count.{capability-control-plane} == 1 and .agentmail_orphan_session_rows_count == 0 and (.signals[] | select(.name == "worker_identity_registered_count"))' "doctor_worker_counts_and_orphans"
+assert_jq "$TMP/doctor.json" '.worker_identity_registered_count.flywheel == 3 and .worker_identity_registered_count.skillos == 1 and .agentmail_orphan_session_rows_count == 0 and (.signals[] | select(.name == "worker_identity_registered_count"))' "doctor_worker_counts_and_orphans"
 
 printf '\nSummary: %s passed, %s failed\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]
