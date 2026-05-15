@@ -47,6 +47,22 @@ JSON_OUT=0
 APPLY=0
 BLOCKER_FILE=""
 MODE=""
+declare -a BLOCKER_AUTO_CLOSE_TEMP_FILES=()
+
+register_temp_file() {
+  BLOCKER_AUTO_CLOSE_TEMP_FILES+=("$1")
+}
+
+cleanup_temp_files() {
+  local tmp
+  for tmp in "${BLOCKER_AUTO_CLOSE_TEMP_FILES[@]}"; do
+    [[ -n "$tmp" ]] || continue
+    rm -f "$tmp"
+  done
+  return 0
+}
+
+trap cleanup_temp_files EXIT ERR
 
 usage() {
   cat <<'USAGE'
@@ -262,6 +278,7 @@ run_ac_live_probe() {
   local timeout_s="${2:-10}"
   local tmpout
   tmpout="$(mktemp "${TMPDIR:-/tmp}/blocker-ac-stdout.XXXXXX")"
+  register_temp_file "$tmpout"
   local rc=0
   if command -v timeout >/dev/null 2>&1; then
     timeout "$timeout_s" bash -c "$ac_command" >"$tmpout" 2>&1 || rc=$?
@@ -339,12 +356,15 @@ apply_close() {
 
   # Append escalation row to escalations.jsonl
   mkdir -p "$(dirname "$ESCALATIONS_LOG")"
-  printf '%s\n' "$escalation_row" >>"$ESCALATIONS_LOG"
+  if ! printf '%s\n' "$escalation_row" >>"$ESCALATIONS_LOG"; then
+    return 1
+  fi
 
   # Update blocker file: status=closed + audit metadata
   local tmp_new
   tmp_new="$(mktemp "${blocker_file}.auto-close.XXXXXX")"
-  jq --arg ca "$closed_at" --arg closer "$AUTO_CLOSER_ID" \
+  register_temp_file "$tmp_new"
+  if ! jq --arg ca "$closed_at" --arg closer "$AUTO_CLOSER_ID" \
      --argjson row "$escalation_row" \
     '. + {
       status:"closed",
@@ -352,8 +372,12 @@ apply_close() {
       closed_by:$closer,
       closed_reason:"ac_passed_auto_close_hook",
       live_probe_evidence:$row
-    }' "$blocker_file" >"$tmp_new"
-  mv "$tmp_new" "$blocker_file"
+    }' "$blocker_file" >"$tmp_new"; then
+    return 1
+  fi
+  if ! mv "$tmp_new" "$blocker_file"; then
+    return 1
+  fi
 }
 
 # Process one blocker. Emits envelope to stdout. Returns canonical exit code.
@@ -422,7 +446,19 @@ process_blocker() {
   escalation_row="$(compose_escalation_row "$blocker_id" "$ac_command" "$live_probe_json" "$previous_last_verified_at" "$ac_state_hash")"
 
   if [[ "$APPLY" -eq 1 ]]; then
-    apply_close "$blocker_file" "$escalation_row" "$closed_at"
+    if ! apply_close "$blocker_file" "$escalation_row" "$closed_at"; then
+      jq -nc \
+        --arg sv "$SCHEMA_VERSION" \
+        --arg b "$blocker_id" \
+        --arg el "$ESCALATIONS_LOG" \
+        --arg f "$blocker_file" \
+        --argjson row "$escalation_row" \
+        --argjson lpe "$live_probe_json" \
+        '{schema_version:$sv,status:"close_failed",blocker_id:$b,ac_verdict:"PASS",ac_passes_now:true,
+          live_probe_evidence:$lpe,escalation_row:$row,escalations_log_path:$el,
+          blocker_file:$f,reason:"failed to append escalation row or mutate blocker file"}'
+      return 1
+    fi
     jq -nc \
       --arg sv "$SCHEMA_VERSION" \
       --arg b "$blocker_id" \
