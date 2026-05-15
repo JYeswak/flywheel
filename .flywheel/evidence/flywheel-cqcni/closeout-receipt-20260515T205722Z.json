@@ -1,0 +1,58 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-cqcni",
+  "parent_bead_id": "flywheel-3kq",
+  "closed_at": "2026-05-15T20:57:22Z",
+  "status": "closed",
+  "surface": ".flywheel/scripts/agentmail-fd-pressure-probe.sh",
+  "claim": "Agent Mail pressure probe burst workers now have EXIT/ERR cleanup coverage, including registered curl child PIDs, so early probe failures do not leave long-running burst processes behind.",
+  "changes": [
+    "Added parent EXIT/ERR cleanup trap with worker and child PID registries.",
+    "Added worker-local child cleanup trap for curl calls inside burst workers.",
+    "Added focused fake-launchctl/fake-lsof/fake-curl regression test for early probe exit cleanup.",
+    "Kept --dry-run and --info envelopes unchanged."
+  ],
+  "trap_inventory_delta": {
+    "before_with_trap": 91,
+    "before_without_trap": 291,
+    "after_with_trap": 92,
+    "after_without_trap": 290,
+    "after_coverage_pct": 24.08,
+    "after_receipt_ref": ".flywheel/evidence/flywheel-cqcni/trap-inventory-after-20260515T205722Z.json"
+  },
+  "validation": [
+    {
+      "command": "bash tests/agentmail-fd-pressure-probe-trap.sh",
+      "status": "pass",
+      "summary": "7/0"
+    },
+    {
+      "command": "bash tests/trap-rollback-inventory.sh",
+      "status": "pass",
+      "summary": "10/0"
+    },
+    {
+      "command": ".flywheel/scripts/trap-rollback-inventory.sh scan --repo . --json",
+      "status": "warn_expected",
+      "summary": "with_trap=92 without_trap=290 coverage_pct=24.08"
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/agentmail-fd-pressure-probe.sh tests/agentmail-fd-pressure-probe-trap.sh .flywheel/scripts/trap-rollback-inventory.sh tests/trap-rollback-inventory.sh",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check && br dep cycles",
+      "status": "pass"
+    }
+  ],
+  "artifact_sha256": {
+    ".flywheel/scripts/agentmail-fd-pressure-probe.sh": "a9c576f3bda59b814079df8ef356672c2f435bb79a5760ba8b46707b7e66aafe",
+    "tests/agentmail-fd-pressure-probe-trap.sh": "d8086fbc002ea593cb7952db5dcb9c96eeda386a996aa6794c9c187bedbc1784",
+    ".flywheel/evidence/flywheel-cqcni/trap-inventory-after-20260515T205722Z.json": "66f77bd15b6cc1906580f425c7875ab2897571ea545466be22eea494a6711259"
+  },
+  "boundaries": [
+    "No live Agent Mail daemon mutation.",
+    "No cross-repo mutation.",
+    "Parent flywheel-3kq remains open for continued trap adoption."
+  ]
+}

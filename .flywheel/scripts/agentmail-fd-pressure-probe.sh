@@ -26,6 +26,65 @@ DEFAULT_PORT="${AGENTMAIL_PORT:-8765}"
 DEFAULT_HOST="${AGENTMAIL_HOST:-127.0.0.1}"
 DEFAULT_LABEL="${AGENTMAIL_PLIST_LABEL:-ai.zeststream.mcp-agent-mail-local}"
 DEFAULT_TARGET="${AGENTMAIL_TARGET:-/health/liveness}"
+declare -a BURST_WORKER_PIDS=()
+BURST_CHILD_PID_FILE=""
+
+worker_descendants() {
+  local root_pid="$1"
+  local child_pid
+  command -v pgrep >/dev/null 2>&1 || return 0
+  while IFS= read -r child_pid; do
+    [[ -n "$child_pid" ]] || continue
+    printf '%s\n' "$child_pid"
+    worker_descendants "$child_pid"
+  done < <(pgrep -P "$root_pid" 2>/dev/null || true)
+}
+
+cleanup_burst_workers() {
+  local worker_pid child_pid
+  for worker_pid in "${BURST_WORKER_PIDS[@]}"; do
+    [[ -n "$worker_pid" ]] || continue
+    kill "$worker_pid" 2>/dev/null || true
+  done
+  if [[ -n "$BURST_CHILD_PID_FILE" && -f "$BURST_CHILD_PID_FILE" ]]; then
+    while IFS= read -r child_pid; do
+      [[ -n "$child_pid" ]] || continue
+      kill "$child_pid" 2>/dev/null || true
+    done <"$BURST_CHILD_PID_FILE"
+  fi
+  for worker_pid in "${BURST_WORKER_PIDS[@]}"; do
+    [[ -n "$worker_pid" ]] || continue
+    while IFS= read -r child_pid; do
+      [[ -n "$child_pid" ]] || continue
+      kill "$child_pid" 2>/dev/null || true
+    done < <(worker_descendants "$worker_pid")
+    if command -v pkill >/dev/null 2>&1; then
+      pkill -TERM -P "$worker_pid" 2>/dev/null || true
+    fi
+    kill "$worker_pid" 2>/dev/null || true
+  done
+  sleep 0.1
+  for worker_pid in "${BURST_WORKER_PIDS[@]}"; do
+    [[ -n "$worker_pid" ]] || continue
+    if [[ -n "$BURST_CHILD_PID_FILE" && -f "$BURST_CHILD_PID_FILE" ]]; then
+      while IFS= read -r child_pid; do
+        [[ -n "$child_pid" ]] || continue
+        kill -KILL "$child_pid" 2>/dev/null || true
+      done <"$BURST_CHILD_PID_FILE"
+    fi
+    while IFS= read -r child_pid; do
+      [[ -n "$child_pid" ]] || continue
+      kill -KILL "$child_pid" 2>/dev/null || true
+    done < <(worker_descendants "$worker_pid")
+    kill -KILL "$worker_pid" 2>/dev/null || true
+    wait "$worker_pid" 2>/dev/null || true
+  done
+  if [[ -n "$BURST_CHILD_PID_FILE" ]]; then
+    rm -f "$BURST_CHILD_PID_FILE"
+  fi
+}
+
+trap cleanup_burst_workers EXIT ERR
 
 usage() {
   cat <<USAGE
@@ -157,7 +216,7 @@ fd_count() {
 
 burst_probe() {
   local pid="$1" workers="$2" duration="$3" target="$4" port="$5" host="$6" label="$7"
-  local soft hard limits idle peak avg samples_json
+  local soft hard limits idle peak avg
   if [[ -z "$pid" || "$pid" == "-" ]]; then
     jq -nc --arg t "$(iso_now)" '{schema_version:"agentmail-fd-pressure-probe/v1",timestamp:$t,mode:"probe",error:"daemon_pid_not_found",verdict:"doctor_fail",verdict_route:"none"}'
     return 2
@@ -177,13 +236,28 @@ burst_probe() {
   # Spawn N parallel curl workers in background; each loops for $duration seconds.
   local end="$(( $(date +%s) + duration ))"
   local pids=()
+  BURST_CHILD_PID_FILE="$(mktemp "${TMPDIR:-/tmp}/agentmail-fd-pressure-children.XXXXXX")"
   for ((i=0; i<workers; i++)); do
     (
+      worker_child_pid=""
+      # shellcheck disable=SC2329 # Invoked by the EXIT/TERM trap in this worker subshell.
+      cleanup_worker_child() {
+        if [[ -n "$worker_child_pid" ]]; then
+          kill "$worker_child_pid" 2>/dev/null || true
+          wait "$worker_child_pid" 2>/dev/null || true
+        fi
+      }
+      trap cleanup_worker_child EXIT TERM INT HUP
       while [[ $(date +%s) -lt $end ]]; do
-        curl -sf -m 2 -o /dev/null "$probe_url" || true
+        curl -sf -m 2 -o /dev/null "$probe_url" &
+        worker_child_pid="$!"
+        printf '%s\n' "$worker_child_pid" >>"$BURST_CHILD_PID_FILE"
+        wait "$worker_child_pid" || true
+        worker_child_pid=""
       done
     ) &
     pids+=("$!")
+    BURST_WORKER_PIDS+=("$!")
   done
 
   # Sample lsof every 100ms for the duration.
@@ -201,6 +275,9 @@ burst_probe() {
   for p in "${pids[@]}"; do
     wait "$p" 2>/dev/null || true
   done
+  BURST_WORKER_PIDS=()
+  rm -f "$BURST_CHILD_PID_FILE"
+  BURST_CHILD_PID_FILE=""
 
   peak="$peak_local"
   avg="$(jq -nc --argjson s "$samples" '($s | add) / ([$s | length, 1] | max) | floor' 2>/dev/null || echo 0)"
@@ -357,7 +434,6 @@ doctor() {
 mode=""
 workers=4
 duration=5
-json=1
 apply=1
 target="$DEFAULT_TARGET"
 port="$DEFAULT_PORT"
@@ -379,7 +455,7 @@ while [[ $# -gt 0 ]]; do
     --port) port="$2"; shift 2 ;;
     --host) host="$2"; shift 2 ;;
     --label) label="$2"; shift 2 ;;
-    --json) json=1; shift ;;
+    --json) shift ;;
     --apply) apply=1; shift ;;
     --dry-run) apply=0; shift ;;
     *) echo "ERROR: unknown arg: $1" >&2; usage >&2; exit 1 ;;
