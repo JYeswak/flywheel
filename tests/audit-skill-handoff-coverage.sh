@@ -22,9 +22,9 @@ assert_jq() {
   fi
 }
 
-mkdir -p "$TMP/skills/info-source-watchtower" "$TMP/skills/covered-skill" "$TMP/skills/skipped-skill" "$TMP/skills/sent-no-receipt" "$TMP/skillos-state"
+mkdir -p "$TMP/skills/info-source-watchtower" "$TMP/skills/covered-skill" "$TMP/skills/skipped-skill" "$TMP/skills/sent-no-receipt" "$TMP/skills/sync-churn-skill" "$TMP/skillos-state"
 
-for skill in info-source-watchtower covered-skill skipped-skill sent-no-receipt; do
+for skill in info-source-watchtower covered-skill skipped-skill sent-no-receipt sync-churn-skill; do
   cat >"$TMP/skills/$skill/SKILL.md" <<EOF
 ---
 name: $skill
@@ -32,6 +32,13 @@ version: 1.2.3
 ---
 EOF
 done
+cat >"$TMP/required-skills.txt" <<'EOF'
+# only flywheel-shipped skills belong in the backfill audit
+info-source-watchtower
+covered-skill
+skipped-skill
+sent-no-receipt
+EOF
 
 cat >"$TMP/dispatch-log.jsonl" <<'EOF'
 {"ts":"2026-05-14T00:00:00Z","event":"skillos_handoff_sent","skill":"covered-skill","version":"1.2.3","message_id":1,"skillos_handoff_skipped_reason":null}
@@ -44,11 +51,13 @@ if bash -n "$SCRIPT"; then pass "script syntax"; else fail "script syntax"; fi
 
 env \
   AUDIT_SKILL_HANDOFF_SKILL_ROOTS="$TMP/skills" \
+  AUDIT_SKILL_HANDOFF_REQUIRED_SKILLS="$TMP/required-skills.txt" \
   AUDIT_SKILL_HANDOFF_DISPATCH_LOG="$TMP/dispatch-log.jsonl" \
   AUDIT_SKILL_HANDOFF_SKILLOS_STATE_DIR="$TMP/skillos-state" \
   "$SCRIPT" --json >"$TMP/out.json"
 
-assert_jq "$TMP/out.json" '.period_days == 30 and .skills_checked == 4' "json envelope counts recent skills"
+assert_jq "$TMP/out.json" '.period_days == 30 and .skills_checked == 4 and .candidate_source == "required_skills_file"' "json envelope counts required skills"
+assert_jq "$TMP/out.json" '([.gaps[].skill, .intentional_skips[].skill] | index("sync-churn-skill") | not)' "required skill file excludes sync churn"
 assert_jq "$TMP/out.json" '.gaps[] | select(.skill == "info-source-watchtower" and .reason == "no_dispatch_log_entry")' "finds info-source-watchtower no-dispatch gap"
 assert_jq "$TMP/out.json" '.gaps[] | select(.skill == "sent-no-receipt" and .reason == "no_skillos_receipt")' "finds sent skill missing skillos receipt"
 assert_jq "$TMP/out.json" '([.gaps[].skill] | index("covered-skill") | not)' "receipt-covered skill is not a gap"
@@ -57,6 +66,7 @@ assert_jq "$TMP/out.json" '.intentional_skips[] | select(.skill == "skipped-skil
 set +e
 env \
   AUDIT_SKILL_HANDOFF_SKILL_ROOTS="$TMP/skills" \
+  AUDIT_SKILL_HANDOFF_REQUIRED_SKILLS="$TMP/required-skills.txt" \
   AUDIT_SKILL_HANDOFF_DISPATCH_LOG="$TMP/dispatch-log.jsonl" \
   AUDIT_SKILL_HANDOFF_SKILLOS_STATE_DIR="$TMP/skillos-state" \
   "$SCRIPT" --json >"$TMP/out2.json"

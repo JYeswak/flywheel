@@ -3,6 +3,8 @@ set -euo pipefail
 
 PERIOD_DAYS="${AUDIT_SKILL_HANDOFF_PERIOD_DAYS:-30}"
 SKILL_ROOTS="${AUDIT_SKILL_HANDOFF_SKILL_ROOTS:-$HOME/.claude/skills:$HOME/.codex/skills}"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
+REQUIRED_SKILLS_FILE="${AUDIT_SKILL_HANDOFF_REQUIRED_SKILLS:-$ROOT/.flywheel/skillos-handoff-required-skills.txt}"
 DISPATCH_LOG="${AUDIT_SKILL_HANDOFF_DISPATCH_LOG:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)/.flywheel/dispatch-log.jsonl}"
 SKILLOS_STATE_DIR="${AUDIT_SKILL_HANDOFF_SKILLOS_STATE_DIR:-$HOME/Developer/skillos/state}"
 NOW_EPOCH="${AUDIT_SKILL_HANDOFF_NOW_EPOCH:-$(date +%s)}"
@@ -16,6 +18,7 @@ coverage. This script is read-only against SkillOS state.
 
 Environment overrides:
   AUDIT_SKILL_HANDOFF_SKILL_ROOTS       colon-separated skill roots
+  AUDIT_SKILL_HANDOFF_REQUIRED_SKILLS   newline skill allowlist; comments allowed
   AUDIT_SKILL_HANDOFF_DISPATCH_LOG      dispatch log JSONL path
   AUDIT_SKILL_HANDOFF_SKILLOS_STATE_DIR SkillOS state directory
   AUDIT_SKILL_HANDOFF_NOW_EPOCH         deterministic test clock
@@ -50,9 +53,27 @@ fi
 TMPDIR_AUDIT="$(mktemp -d "${TMPDIR:-/tmp}/audit-skill-handoff.XXXXXX")"
 trap 'rm -rf "$TMPDIR_AUDIT"' EXIT
 skills_jsonl="$TMPDIR_AUDIT/skills.jsonl"
+required_json="$TMPDIR_AUDIT/required-skills.json"
 dispatch_index_json="$TMPDIR_AUDIT/dispatch-index.json"
 receipt_index_txt="$TMPDIR_AUDIT/receipt-index.txt"
 : >"$skills_jsonl"
+
+if [[ -f "$REQUIRED_SKILLS_FILE" ]]; then
+  python3 - "$REQUIRED_SKILLS_FILE" >"$required_json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+skills = []
+for line in Path(sys.argv[1]).read_text(encoding="utf-8").splitlines():
+    line = line.split("#", 1)[0].strip()
+    if line:
+        skills.append(line)
+print(json.dumps(skills, sort_keys=True))
+PY
+else
+  printf '[]\n' >"$required_json"
+fi
 
 build_dispatch_index() {
   if [[ ! -s "$DISPATCH_LOG" ]]; then
@@ -83,14 +104,16 @@ else
   : >"$receipt_index_txt"
 fi
 
-python3 - "$SKILL_ROOTS" "$cutoff_epoch" "$skills_jsonl" <<'PY'
+python3 - "$SKILL_ROOTS" "$cutoff_epoch" "$skills_jsonl" "$required_json" <<'PY'
 import datetime as dt
 import json
 import os
 import sys
 
-roots_arg, cutoff_arg, out_path = sys.argv[1:4]
+roots_arg, cutoff_arg, out_path, required_path = sys.argv[1:5]
 cutoff = int(cutoff_arg)
+with open(required_path, "r", encoding="utf-8") as handle:
+    required_skills = set(json.load(handle))
 
 def version_from_skill_file(path: str) -> str:
     try:
@@ -114,6 +137,8 @@ with open(out_path, "w", encoding="utf-8") as out:
         for entry in skill_dirs:
             if not entry.is_dir(follow_symlinks=False):
                 continue
+            if required_skills and entry.name not in required_skills:
+                continue
             skill_file = os.path.join(entry.path, "SKILL.md")
             try:
                 stat = os.stat(skill_file)
@@ -136,7 +161,9 @@ jq -n \
   --arg dispatch_log "$DISPATCH_LOG" \
   --arg skill_roots "$SKILL_ROOTS" \
   --arg skillos_state_dir "$SKILLOS_STATE_DIR" \
+  --arg required_skills_file "$REQUIRED_SKILLS_FILE" \
   --slurpfile skills "$skills_jsonl" \
+  --slurpfile required_skills "$required_json" \
   --slurpfile dispatch_index "$dispatch_index_json" \
   --rawfile receipt_index "$receipt_index_txt" \
   '{
@@ -155,6 +182,9 @@ jq -n \
     {
     period_days:$period_days,
     skills_checked:($skills | length),
+    candidate_source:(if (($required_skills[0] // []) | length) > 0 then "required_skills_file" else "recent_skill_mtime" end),
+    required_skills_file:$required_skills_file,
+    required_skills:($required_skills[0] // []),
     dispatch_log:$dispatch_log,
     skill_roots:($skill_roots | split(":")),
     skillos_state_dir:$skillos_state_dir,
