@@ -1,0 +1,42 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-9dp1t",
+  "parent_bead_id": "flywheel-3kq",
+  "status": "closed",
+  "summary": "trap-rollback-inventory now strips shell comment lines before mutating-like classification, so documentation-only setup examples do not count as rollback gaps.",
+  "why_flywheel_centric": "The trap backlog drives Flywheel's next work. Comment-only mutation examples in hooks and docs should not send agents to add fake traps to read-only scripts.",
+  "changed_files": [
+    ".flywheel/scripts/trap-rollback-inventory.sh",
+    "tests/trap-rollback-inventory.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/trap-rollback-inventory.sh",
+      "result": "pass",
+      "summary": "11/0 assertions including a tracked operational shell fixture whose comments mention git commit and ln -s while executable code stays read-only."
+    },
+    {
+      "command": "bash tests/flywheel-gap-wired-receivers-canonical-cli.sh",
+      "result": "pass",
+      "summary": "9/0 assertions; trap-rollback-inventory remains wired as a receiver."
+    },
+    {
+      "command": "bash -n .flywheel/scripts/trap-rollback-inventory.sh tests/trap-rollback-inventory.sh && shellcheck .flywheel/scripts/trap-rollback-inventory.sh tests/trap-rollback-inventory.sh",
+      "result": "pass",
+      "summary": "Syntax and ShellCheck are clean for the edited script and test."
+    },
+    {
+      "command": ".flywheel/scripts/trap-rollback-inventory.sh scan --repo . --json",
+      "result": "warn",
+      "summary": "Live inventory now reports with_trap=98, without_trap=264, mutating_like_scripts=362, declared_read_only_excluded_count=2, coverage_pct=27.07."
+    },
+    {
+      "command": "git diff --check && br dep cycles --json",
+      "result": "pass",
+      "summary": "No whitespace errors and no active dependency cycles."
+    }
+  ],
+  "inventory_after_ref": ".flywheel/evidence/flywheel-9dp1t/trap-inventory-after-20260515T220202Z.json",
+  "autonomy": "autonomous",
+  "human_question": null
+}
