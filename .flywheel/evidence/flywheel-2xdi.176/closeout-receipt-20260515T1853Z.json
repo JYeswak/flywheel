@@ -1,0 +1,34 @@
+{
+  "bead_id": "flywheel-2xdi.176",
+  "claim": "Hook-authored coordination-collision-detected saturation is now cross-linked to doctrine and named as a receiver obligation.",
+  "closed_at": "2026-05-15T18:53:00Z",
+  "doctrine_ref": ".flywheel/doctrine/hook-trauma-class-promotion-discipline.md",
+  "gap_hunt_after_ref": ".flywheel/evidence/flywheel-2xdi.176/gap-hunt-after-20260515T1853Z.json",
+  "memory_file": "feedback_coordination_collision_detected_saturated_unpromoted.md",
+  "not_claimed": [
+    "all memory-without-cross-link gaps complete",
+    "behavioral receivers fully audited beyond this memory class"
+  ],
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "status": "closed",
+  "validation": [
+    {
+      "command": "bash tests/memory-cross-link-current.sh",
+      "status": "pass",
+      "summary": "5/0"
+    },
+    {
+      "command": "shellcheck tests/memory-cross-link-current.sh",
+      "status": "pass"
+    },
+    {
+      "command": ".flywheel/scripts/gap-hunt-probe.sh --dry-run --json",
+      "proof": "matching_count=0 for the three memory filenames",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check -- .flywheel/doctrine/hook-trauma-class-promotion-discipline.md .flywheel/doctrine/goal-contract-no-writable-escape.md tests/memory-cross-link-current.sh",
+      "status": "pass"
+    }
+  ]
+}
