@@ -1,0 +1,50 @@
+{
+  "schema_version": "flywheel.bead_closeout_receipt.v1",
+  "bead_id": "flywheel-7crg",
+  "handoff_bead_id": "flywheel-hcazt",
+  "closed_at": "2026-05-15T03:20:10Z",
+  "status": "closed_flywheel_handoff_complete",
+  "skillos_mutated": false,
+  "summary": "Flywheel produced the Meadows/Jeff mission-goal diff preview and filed a SkillOS handoff bead without mutating SkillOS-owned files.",
+  "source_inputs": [
+    ".flywheel/jeff-corpus/v1/learnings/01-doctrine-cluster.md",
+    ".flywheel/jeff-corpus/v1/learnings/02-code-patterns.md",
+    ".flywheel/jeff-corpus/v1/learnings/04-adopt-extend-avoid.md",
+    ".flywheel/jeff-corpus/v1/learnings/06-skill-enhancement-matrix.md",
+    "/Users/josh/Developer/skillos/.flywheel/MISSION.md",
+    "/Users/josh/Developer/skillos/.flywheel/GOAL.md",
+    "/Users/josh/.claude/skills/donella-meadows-systems-thinking/references/LEVERAGE-POINTS.md",
+    "/Users/josh/.claude/skills/donella-meadows-systems-thinking/references/STOCKS-AND-FLOWS.md",
+    "/Users/josh/.claude/skills/donella-meadows-systems-thinking/references/FEEDBACK-LOOPS.md",
+    "/Users/josh/.claude/skills/donella-meadows-systems-thinking/references/SOURCE-REGISTRY.md"
+  ],
+  "artifacts": {
+    "handoff": ".flywheel/handoffs/skillos-meadows-mission-goal-lock-in-20260515.md",
+    "tmp_diff_preview": "/tmp/skillos-mission-goal-diff-preview.md",
+    "tmp_evidence": "/tmp/skillos-meadows-lock-in-evidence.md",
+    "proposed_followup_bead": "flywheel-hcazt"
+  },
+  "acceptance_mapping": {
+    "AG1": "Read and cited Jeff corpus learnings 01, 02, 04, and 06 in the handoff artifact.",
+    "AG2": "MISSION.md rewrite is provided as diff preview only; SkillOS owns apply.",
+    "AG3": "GOAL.md stock/inflow/outflow/feedback-loop rewrite is provided as diff preview only; SkillOS owns apply.",
+    "AG4": "Follow-up SkillOS checklist bead text is provided and Flywheel handoff bead flywheel-hcazt is filed.",
+    "AG5": "Proposed SKILLOS-DOCTRINE-PARADIGM-ANCHOR L-rule entry is included without touching dirty AGENTS surfaces.",
+    "AG6": "Evidence receipt exists here and at /tmp/skillos-meadows-lock-in-evidence.md.",
+    "AG7": "No SkillOS repo files were modified; preview path /tmp/skillos-mission-goal-diff-preview.md is provided."
+  },
+  "validation": [
+    {
+      "command": "bash tests/skillos-meadows-lock-in-handoff.sh",
+      "status": "pass",
+      "summary": "14 pass / 0 fail"
+    },
+    {
+      "command": "br dep cycles",
+      "status": "pass",
+      "summary": "No dependency cycles detected"
+    }
+  ],
+  "remaining_owner": "SkillOS",
+  "remaining_work": "SkillOS should apply/adapt/reject the preview and close flywheel-hcazt with commit/test/doctor evidence."
+}
