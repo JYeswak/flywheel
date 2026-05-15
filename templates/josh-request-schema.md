@@ -291,6 +291,13 @@ Doctrine references:
 
 ## 11. v1 to v2 Mapping
 
+Current live mirror status: **v1-compatible JSONL is canonical for the live
+doctor/tick path until the writer migration lands**. Consumers must normalize
+both live v1 rows and target v2 rows instead of treating all `status: open`
+rows as unread. The tick consumer `josh-request-tick-promote.sh` now reports
+`queued_count`, `unread`, and `consumed_with_evidence_count`; evidence-backed
+rows stay in the append-only mirror but do not inflate the unread gauge.
+
 | v1 field | v2 field |
 |---|---|
 | `status: open` | `state: needs_triage` |
@@ -302,4 +309,5 @@ Doctrine references:
 | free-text `closure_evidence` | typed `closure_evidence.type/ref` |
 
 Consumers must not down-migrate v2 rows to v1 because v1 loses provenance and
-typed closure data.
+typed closure data. Until every writer emits v2, consumers must treat this table
+as the live normalization contract.
