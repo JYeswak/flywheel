@@ -37,6 +37,34 @@ else
   f "--info-alias envelope mismatch"
 fi
 
+if "$SCRIPT" doctor --json >"$TMP/doctor.json" 2>"$TMP/doctor.err"; then
+  p "doctor exits 0"
+else
+  f "doctor failed"
+fi
+
+if jq -e --arg target "$TARGET" '
+  .schema_version == "canonical-doctrine-sync.doctor.v1"
+  and .command == "doctor"
+  and .name == "canonical-doctrine-sync.sh"
+  and .alias_for == $target
+  and .delegated_schema_version == "sync-canonical-doctrine.doctor.v1"
+  and .mode == "read_only"
+  and .mutates == false
+  and (.status | IN("pass","warn","fail"))
+  and (.checks | length) >= 6
+' "$TMP/doctor.json" >/dev/null; then
+  p "doctor emits alias read-only envelope"
+else
+  f "doctor envelope mismatch"
+fi
+
+if "$SCRIPT" --doctor --json | jq -e '.command == "doctor" and .mutates == false' >/dev/null; then
+  p "--doctor aliases doctor"
+else
+  f "--doctor alias"
+fi
+
 if "$SCRIPT" --info >"$TMP/passthrough-info.json" 2>"$TMP/passthrough-info.err"; then
   p "--info passthrough exits 0"
 else

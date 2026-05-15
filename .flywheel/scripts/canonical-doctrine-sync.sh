@@ -20,7 +20,9 @@
 #
 # Behavior: exec-replaces this process with sync-canonical-doctrine.sh,
 # forwarding all arguments verbatim. Exit codes, stdout/stderr, --dry-run /
-# --apply semantics, and idempotency-key contract are all preserved.
+# --apply semantics, and idempotency-key contract are all preserved. The
+# doctor|--doctor path remains read-only and annotates the delegated doctor
+# envelope with the canonical-doctrine-sync alias identity.
 
 set -euo pipefail
 
@@ -37,6 +39,24 @@ fi
 # discover the alias chain.
 if [[ "${1:-}" == "--info-alias" ]]; then
   printf '{"name":"canonical-doctrine-sync.sh","alias_for":"%s","authored_by":"flywheel-rhdcq.2"}\n' "$TARGET"
+  exit 0
+fi
+
+if [[ "${1:-}" == "doctor" || "${1:-}" == "--doctor" ]]; then
+  "$TARGET" doctor --json | jq -c \
+    --arg alias_for "$TARGET" \
+    '{
+      schema_version: "canonical-doctrine-sync.doctor.v1",
+      command: "doctor",
+      name: "canonical-doctrine-sync.sh",
+      alias_for: $alias_for,
+      delegated_schema_version: .schema_version,
+      status: .status,
+      mode: "read_only",
+      mutates: false,
+      checks: .checks,
+      summary: .summary
+    }'
   exit 0
 fi
 
