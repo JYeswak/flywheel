@@ -1,0 +1,25 @@
+{
+  "schema": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-xbgt3",
+  "parent_bead_id": "flywheel-3kq",
+  "created_at": "2026-05-15T15:41:46Z",
+  "status": "closed",
+  "scope": {
+    "script": ".flywheel/scripts/agent-mail-restart.sh",
+    "test": "tests/agent-mail-restart.sh",
+    "parent_scope_remaining": true
+  },
+  "change_summary": [
+    "agent-mail-restart now tracks mktemp bootstrap/recovery/kickstart stderr files",
+    "EXIT trap removes tracked temp files even when bootstrap fails after bootout",
+    "focused regression proves failed bootstrap leaves no agent-mail-* temp files"
+  ],
+  "validation": [
+    {"command": "bash tests/agent-mail-restart.sh", "status": "pass", "summary": "6 passed, 0 failed"},
+    {"command": "bash tests/trap-rollback-inventory.sh", "status": "pass", "summary": "9 passed, 0 failed"},
+    {"command": "shellcheck .flywheel/scripts/agent-mail-restart.sh tests/agent-mail-restart.sh", "status": "pass"},
+    {"command": "git diff --check", "status": "pass"},
+    {"command": "br dep cycles --json", "status": "pass", "summary": "cycles=0"}
+  ],
+  "honest_boundary": "This closes the first concrete flywheel-3kq rollback adoption slice only. The broad parent remains open/blocked for remaining mutating scripts that still need per-surface trap/rollback adoption or skip receipts."
+}

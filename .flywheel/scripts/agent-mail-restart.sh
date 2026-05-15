@@ -245,6 +245,7 @@ _scaffold_is_canonical_arg() {
 
 if [[ $# -gt 0 ]] && _scaffold_is_canonical_arg "$@"; then
   scaffold_main "$@"
+  # shellcheck disable=SC2317 # ShellCheck cannot follow the scaffold intercept path.
   exit $?
 fi
 # ====== END canonical-cli scaffold ======
@@ -261,6 +262,21 @@ APPLY=0
 EXPLAIN=0
 JSON=0
 MODE="run"
+AGENT_MAIL_RESTART_TMPFILES=()
+
+track_tmp_file() {
+  AGENT_MAIL_RESTART_TMPFILES+=("$1")
+  printf '%s\n' "$1"
+}
+
+# shellcheck disable=SC2329 # Invoked by the EXIT trap.
+cleanup_tmp_files() {
+  local path
+  for path in "${AGENT_MAIL_RESTART_TMPFILES[@]:-}"; do
+    [[ -n "$path" ]] && rm -f "$path"
+  done
+}
+trap cleanup_tmp_files EXIT
 
 usage() {
   cat <<'USAGE'
@@ -330,7 +346,7 @@ json_event() {
 
 bootstrap_with_retry() {
   local attempt err rc
-  err="$(mktemp "${TMPDIR:-/tmp}/agent-mail-bootstrap.XXXXXX")"
+  err="$(track_tmp_file "$(mktemp "${TMPDIR:-/tmp}/agent-mail-bootstrap.XXXXXX")")"
   for attempt in 1 2 3; do
     rc=0
     "$LAUNCHCTL_BIN" bootstrap "$DOMAIN" "$PLIST" 2>"$err" || rc=$?
@@ -354,7 +370,7 @@ bootstrap_with_retry() {
 
 recover_bootstrap_after_bootout() {
   local attempt rc err
-  err="$(mktemp "${TMPDIR:-/tmp}/agent-mail-bootstrap-recover.XXXXXX")"
+  err="$(track_tmp_file "$(mktemp "${TMPDIR:-/tmp}/agent-mail-bootstrap-recover.XXXXXX")")"
   json_event retry "bootstrap failed after bootout; attempting recovery bootstrap/kickstart"
   for attempt in 1 2 3; do
     rc=0
@@ -375,7 +391,7 @@ recover_bootstrap_after_bootout() {
 
 kickstart_with_retry() {
   local attempt rc err
-  err="$(mktemp "${TMPDIR:-/tmp}/agent-mail-kickstart.XXXXXX")"
+  err="$(track_tmp_file "$(mktemp "${TMPDIR:-/tmp}/agent-mail-kickstart.XXXXXX")")"
   for attempt in 1 2 3; do
     rc=0
     "$LAUNCHCTL_BIN" kickstart -k "$TARGET" 2>"$err" || rc=$?
