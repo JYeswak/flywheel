@@ -1,0 +1,42 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-dekp",
+  "status": "safe_to_close_with_followup",
+  "closed_scope": "Identity-registration-deferral/v1 schema, doctor subcommand contract, fixtures, canonical paths, and doctrine continuation.",
+  "validated_at": "2026-05-15T07:53:20Z",
+  "evidence": {
+    "schema": ".flywheel/validation-schema/v1/identity-registration-deferral.schema.json",
+    "test": "tests/identity-deferral-receipt.sh",
+    "doctrine": ".flywheel/doctrine/identity-deferral.md",
+    "canonical_paths": ".flywheel/canonical-paths.txt",
+    "continuation_bead": "flywheel-ulha",
+    "continuation_evidence": ".flywheel/receipts/flywheel-ulha-identity-deferral-evidence.md",
+    "current_state_followup": "flywheel-tsfup"
+  },
+  "validation": [
+    {
+      "command": "bash tests/identity-deferral-receipt.sh",
+      "result": "pass",
+      "summary": "6 passed, 0 failed; covers valid+covers-all-drift, expired, partial, and missing receipt fixtures."
+    },
+    {
+      "command": "flywheel-loop identity --doctor --json",
+      "result": "current_state_fail_routed",
+      "summary": "status=fail, drift_count=1, raw_drift_count=1, deferred_count=0, receipt_honored=false because the historical Joshua-disposed deferral receipt expired on 2026-05-05."
+    },
+    {
+      "command": ".flywheel/scripts/sync-canonical-doctrine.sh --dry-run --json --root /Users/josh/Developer/flywheel",
+      "result": "pass",
+      "summary": "errors_count=0, identity_deferral_schema_target_count=1, identity_deferral_schema_drifted_count=0, identity_deferral_schema_synced_count=0."
+    }
+  ],
+  "followup": {
+    "bead_id": "flywheel-tsfup",
+    "reason": "Live identity doctor has current picoz worker-row debt after the original deferral expired. This is current-state cleanup, not a missing identity-deferral fixture contract.",
+    "relationship": "br dep add flywheel-dekp flywheel-tsfup --type discovered-from"
+  },
+  "notes": [
+    "flywheel-ulha closed the original AG8 doctrine/canonical-path continuation for this bead.",
+    "The historical acceptance target was doctor behavior when an active receipt covers all drift; the fixture now proves that path. The live doctor failure is preserved as a new routed bead rather than hidden."
+  ]
+}
