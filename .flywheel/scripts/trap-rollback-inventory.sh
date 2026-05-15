@@ -105,12 +105,15 @@ mutating = []
 with_trap = []
 without_trap = []
 declared_read_only_excluded = []
+library_excluded = []
 
 operational_prefixes = (
     ".flywheel/scripts/",
     ".flywheel/hooks/",
-    ".flywheel/lib/",
     "scripts/",
+)
+library_prefixes = (
+    ".flywheel/lib/",
 )
 non_operational_prefixes = (
     ".flywheel/PLANS/",
@@ -125,6 +128,9 @@ non_operational_prefixes = (
 
 def in_scan_scope(rel: str) -> bool:
     if rel.startswith(non_operational_prefixes):
+        return False
+    if rel.startswith(library_prefixes):
+        library_excluded.append(rel)
         return False
     return rel.startswith(operational_prefixes)
 
@@ -210,6 +216,7 @@ payload = {
     "repo": str(repo),
     "scan_scope": "tracked_operational_shell",
     "excluded_non_operational_prefixes": list(non_operational_prefixes),
+    "excluded_library_prefixes": list(library_prefixes),
     "scanned_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
     "tracked_shell_scripts_scanned": len(tracked_shell),
     "mutating_like_scripts": len(mutating),
@@ -217,6 +224,8 @@ payload = {
     "mutating_like_without_exit_or_err_trap": len(without_trap),
     "declared_read_only_excluded_count": len(declared_read_only_excluded),
     "declared_read_only_excluded_sample": declared_read_only_excluded[:25],
+    "library_excluded_count": len(library_excluded),
+    "library_excluded_sample": library_excluded[:25],
     "coverage_pct": round((100.0 * len(with_trap) / len(mutating)), 2) if mutating else 100.0,
     "sample_without_trap": without_trap[:25],
     "max_without_trap": max_without_trap,

@@ -1,0 +1,27 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-1knvp",
+  "closed_at": "2026-05-15T22:23:41Z",
+  "status": "ready_to_close",
+  "autonomy": "autonomous",
+  "summary": "trap-rollback-inventory now excludes sourced .flywheel/lib helper libraries from direct operational rollback adoption counts.",
+  "evidence_refs": [
+    ".flywheel/evidence/flywheel-1knvp/trap-inventory-after-20260515T222329Z.json"
+  ],
+  "inventory_delta": {
+    "with_trap_before": 99,
+    "without_trap_before": 235,
+    "mutating_like_before": 334,
+    "with_trap_after": 99,
+    "without_trap_after": 233,
+    "mutating_like_after": 332,
+    "library_excluded_count": 5,
+    "coverage_after_pct": 29.82
+  },
+  "validation": [
+    "bash tests/trap-rollback-inventory.sh PASS 12/0",
+    "bash tests/flywheel-gap-wired-receivers-canonical-cli.sh PASS 9/0",
+    "bash -n + shellcheck targeted PASS"
+  ],
+  "public_claim": false
+}
