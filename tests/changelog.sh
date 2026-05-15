@@ -13,10 +13,17 @@ if [[ -s "$CHANGELOG" ]]; then pass "exists"; else fail "exists"; fi
 
 if grep -q '^# Changelog$' "$CHANGELOG"; then pass "title"; else fail "title"; fi
 
-if grep -q '^## \[0\.2\.0\] - ' "$CHANGELOG"; then
-  pass "0.2.0 section"
+if grep -q '^## \[0\.2\.1\] - ' "$CHANGELOG"; then
+  pass "0.2.1 section"
 else
-  fail "0.2.0 section"
+  fail "0.2.1 section"
+fi
+
+if grep -q '^## \[0\.2\.0\] - ' "$CHANGELOG" \
+  && grep -q 'hosted-runner prerequisites' "$CHANGELOG"; then
+  pass "0.2.0 cutover tag documented"
+else
+  fail "0.2.0 cutover tag documented"
 fi
 
 for heading in Added Changed Security Evidence; do

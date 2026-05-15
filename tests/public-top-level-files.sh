@@ -89,10 +89,10 @@ else
   fail "README has honest-state Flywheel metric"
 fi
 
-if grep -q '^## \[0\.2\.0\] - ' "$ROOT/CHANGELOG.md"; then
-  pass "CHANGELOG has 0.2.0 section"
+if grep -q '^## \[0\.2\.1\] - ' "$ROOT/CHANGELOG.md"; then
+  pass "CHANGELOG has 0.2.1 section"
 else
-  fail "CHANGELOG has 0.2.0 section"
+  fail "CHANGELOG has 0.2.1 section"
 fi
 
 for file in README.md LICENSE CHARTER.md CHANGELOG.md CODE_OF_CONDUCT.md CONTRIBUTING.md SECURITY.md SUPPORT.md ARCHITECTURE.md MISSION.md GOAL.md STATE.md; do

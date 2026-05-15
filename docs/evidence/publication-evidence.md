@@ -42,8 +42,8 @@ These claims are intentionally not closed by local tests:
 | The approved repository or export path is public. | `remote_repo_private` | `gh repo view JYeswak/flywheel --json visibility,isPrivate` reports public and not private. |
 | Public GitHub Actions workflows exist. | `remote_workflows_missing` | `gh api repos/JYeswak/flywheel/actions/workflows --jq '.workflows[].name'` includes `CI`, `Installer Smoke`, `Release`, and `Site Deploy`. |
 | Remote CI and installer smoke are green. | `remote_green_runs_missing` | `gh run list --repo JYeswak/flywheel --limit 20 --json workflowName,status,conclusion,headBranch` shows successful `CI` and `Installer Smoke` runs on the default branch. |
-| The `v0.2.0` release is published. | `github_release_missing_or_draft` | `gh release view v0.2.0 --repo JYeswak/flywheel --json tagName,isDraft,isPrerelease,url` reports a non-draft, non-prerelease release. |
-| Required release assets are attached. | `github_release_assets_missing` | The release includes exactly one valid row for each required asset: `install.sh`, `install.sh.sha256`, `SHA256SUMS`, `flywheel-v0.2.0.tar.gz`, and `flywheel-v0.2.0.tar.gz.sha256`; every required asset is uploaded, non-empty, and exposes `sha256:` digest metadata. |
+| The `v0.2.1` release is published. | `github_release_missing_or_draft` | `gh release view v0.2.1 --repo JYeswak/flywheel --json tagName,isDraft,isPrerelease,url` reports a non-draft, non-prerelease release. |
+| Required release assets are attached. | `github_release_assets_missing` | The release includes exactly one valid row for each required asset: `install.sh`, `install.sh.sha256`, `SHA256SUMS`, `flywheel-v0.2.1.tar.gz`, and `flywheel-v0.2.1.tar.gz.sha256`; every required asset is uploaded, non-empty, and exposes `sha256:` digest metadata. |
 | Final signoff is approved after real checks pass. | `joshua_release_signoff_missing` | `release-signoff.json` passes `scripts/publication_readiness.py --release --json`. |
 
 ## Closure Rule
