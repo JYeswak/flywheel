@@ -18,8 +18,25 @@
   "source_repo": "/Users/josh/Developer/flywheel",
   "source_row_sha256": "d59da72a60df721e0d5ce0d910f90a8e66e4324a85da92c664cb44920b6c59fe",
   "source_status": "blocked",
-  "status": "open",
+  "status": "closed",
   "synced_at": "2026-05-15T16:08:00Z",
-  "title": "[skillos-handoff] agent-ergonomics-cli-max jsm push blocked \u2014 dir/name mismatch + 190 file count > 50 limit",
-  "verification_path": "br show flywheel-75m9o --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-75m9o\" and .status == \"blocked\"'"
+  "title": "[skillos-handoff] agent-ergonomics-cli-max jsm push blocked — dir/name mismatch + 190 file count > 50 limit",
+  "verification_path": "br show flywheel-75m9o --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-75m9o\" and .status == \"blocked\"'",
+  "closed_at": "2026-05-15T16:32:30Z",
+  "closed_by": "orch:auto",
+  "closed_reason": "ac_passed_auto_close_hook",
+  "live_probe_evidence": {
+    "schema_version": "blocker-escalation/v1",
+    "ts": "2026-05-15T16:32:30Z",
+    "event": "blocker_auto_closed",
+    "blocker_id": "flywheel-75m9o",
+    "ac_command": "br show flywheel-75m9o --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-75m9o\" and .status != \"blocked\"'",
+    "ac_stdout": "true",
+    "ac_exit_code": 0,
+    "live_probe_at": "2026-05-15T16:32:30Z",
+    "previous_last_verified_at": "2026-05-15T16:03:28Z",
+    "delta_seconds": 1742,
+    "auto_closer": "orch:auto",
+    "ac_state_hash": "5a1efe1217d200947c467cd522963e201d4626acb1f470e63ead569164c4b3f8"
+  }
 }
