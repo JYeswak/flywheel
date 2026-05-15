@@ -1,0 +1,42 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-0ifjx",
+  "parent_bead_id": "flywheel-3kq",
+  "status": "closed",
+  "summary": "trap-rollback-inventory now strips /dev/null probe redirections before mutating-like classification, so read-only command probes are not counted as rollback gaps just because they suppress output.",
+  "why_flywheel_centric": "The trap backlog drives Flywheel's parent adoption queue. Removing /dev/null false positives keeps agents focused on scripts that actually write state, launch processes, or mutate the fleet.",
+  "changed_files": [
+    ".flywheel/scripts/trap-rollback-inventory.sh",
+    "tests/trap-rollback-inventory.sh"
+  ],
+  "proof": [
+    {
+      "command": "bash tests/trap-rollback-inventory.sh",
+      "result": "pass",
+      "summary": "11/0 assertions including a tracked operational read-only fixture with >/dev/null and 2>/dev/null probes that remains outside mutating-like counts."
+    },
+    {
+      "command": "bash tests/flywheel-gap-wired-receivers-canonical-cli.sh",
+      "result": "pass",
+      "summary": "9/0 assertions; trap-rollback-inventory remains wired as a receiver after classifier repair."
+    },
+    {
+      "command": "bash -n .flywheel/scripts/trap-rollback-inventory.sh tests/trap-rollback-inventory.sh && shellcheck .flywheel/scripts/trap-rollback-inventory.sh tests/trap-rollback-inventory.sh",
+      "result": "pass",
+      "summary": "Syntax and ShellCheck are clean for the edited script and test."
+    },
+    {
+      "command": ".flywheel/scripts/trap-rollback-inventory.sh scan --repo . --json",
+      "result": "warn",
+      "summary": "Live inventory now reports with_trap=98, without_trap=268, mutating_like_scripts=366, declared_read_only_excluded_count=2, coverage_pct=26.78."
+    },
+    {
+      "command": "git diff --check && br dep cycles --json",
+      "result": "pass",
+      "summary": "No whitespace errors and no active dependency cycles."
+    }
+  ],
+  "inventory_after_ref": ".flywheel/evidence/flywheel-0ifjx/trap-inventory-after-20260515T215601Z.json",
+  "autonomy": "autonomous",
+  "human_question": null
+}
