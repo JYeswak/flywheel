@@ -195,6 +195,8 @@ jq -n \
       | if $dispatch.state == "intentional_skip" then empty
         elif $dispatch.state == "missing" then
           {skill:$skill_row.skill, mtime:$skill_row.mtime, reason:"no_dispatch_log_entry"}
+        elif $dispatch.state == "sent" and (($dispatch.dispatch_row.message_id // null) != null) then
+          empty
         elif (has_receipt($skill_row.skill; $skill_row.version) | not) then
           {skill:$skill_row.skill, version:$skill_row.version, mtime:$skill_row.mtime, reason:"no_skillos_receipt"}
         else empty end
