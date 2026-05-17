@@ -16,6 +16,7 @@ This directory defines the first machine-readable receipt contract for validatin
 | `portfolio-company-registry.schema.json` | ZestStream holding-company registry contract; refuses to count a portfolio company without signed-owner, equity, first-paying-customer, and substrate-share receipts. |
 | `substrate-share-receipt.schema.json` | ZestStream holding-company substrate-share receipt; names tenant declaration, package manifest, adopted `@zeststream/*` packages, and N+1 measurement inputs. |
 | `holding-company-launch-economics.schema.json` | ZestStream holding-company launch economics ledger; refuses N+1 cheaper-than-N claims without at least two comparable launch rows. |
+| `holding-company-runway-receipt.schema.json` | ZestStream holding-company redacted runway receipt; proves launch runway months without storing balances, burn-rate dollars, account identifiers, or secret material. |
 | `agent-security-control.schema.json` | JSON Schema contract for `agent-security-control/v1` security-control receipts. |
 | `fixtures/pass/*.json` | Receipts that must validate. |
 | `fixtures/fail/*.json` | Receipts that must be rejected with deterministic JSON errors. |

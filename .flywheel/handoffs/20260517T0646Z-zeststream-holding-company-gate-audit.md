@@ -17,7 +17,7 @@ The audit did not find the receipts that would let the system count a formed por
 
 | Gate | Status | Finding |
 |---|---|---|
-| Personal runway | `not_proven` | Runway is modeled as a hard gate, but no redacted 18+ month receipt was located. |
+| Personal runway | `not_provided` | Redacted runway receipt contract exists; current receipt is months-not-provided and blocks launch. |
 | Portfolio company existence | `not_proven` | mobile-eats is strong product/substrate proof, but not countable as a portfolio company without signed owner + first paying customer registry evidence. |
 | PEEL market signal | `planned_not_proven` | Five prospect interviews are locked as a gate; no candidate interview receipt found. |
 | Anti-pitch voice | `partial_drift` | Brand voice skill exists, but `zeststream-v2-fresh` still contains old automation/custom-app/workflow-builder framing. |
@@ -39,6 +39,7 @@ The audit did not find the receipts that would let the system count a formed por
 - SkillOS adoption gate: `/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json`
 - Brand voice config: `/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml`
 - Launch economics ledger: `state/holding-company-launch-economics.json`
+- Runway receipt: `state/holding-company-runway-current.json`
 
 ## Immediate Next Actions
 

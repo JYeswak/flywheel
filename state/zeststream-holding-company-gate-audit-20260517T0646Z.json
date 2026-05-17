@@ -82,6 +82,11 @@
       "kind": "launch_economics_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-launch-economics.json",
       "result": "baseline ledger exists and validates; it refuses N+1 cheaper-than-N claims until at least two comparable launch rows exist"
+    },
+    {
+      "kind": "runway_receipt",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-runway-current.json",
+      "result": "redacted runway receipt contract exists; current status is not_provided and launch gate remains blocked"
     }
   ],
   "canonical_gates": [
@@ -89,10 +94,11 @@
       "gate": "personal_runway",
       "status": "not_proven",
       "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-runway-current.json",
         "/Users/josh/Developer/skillos/state/holding-co-quant/CHANGES.md",
         "/Users/josh/Developer/skillos/state/mission-alignment/EXECUTION-PLAN.md"
       ],
-      "finding": "Runway is correctly modeled as a hard gate, but no runway receipt with 18+ months before sub #1 or 24+ months before sub #4 was located."
+      "finding": "Runway is correctly modeled as a hard gate and now has a redacted receipt contract, but current receipt status is not_provided. Launch remains blocked until a months-only receipt proves 18+ months before sub #1 and later 24+ months before sub #4."
     },
     {
       "gate": "portfolio_company_existence",
@@ -203,7 +209,7 @@
     },
     {
       "owner": "Joshua",
-      "action": "Produce a redacted runway receipt proving the 18-month sub #1 launch gate or mark launch blocked."
+      "action": "Populate state/holding-company-runway-current.json with a months-only redacted runway receipt proving the 18-month sub #1 launch gate, or keep launch blocked."
     },
     {
       "owner": "zeststream-brand-voice",
