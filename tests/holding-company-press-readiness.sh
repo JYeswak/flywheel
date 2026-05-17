@@ -36,6 +36,13 @@ jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
 assert_jq "$TMP/current.json" '.status == "pass" and .clear_count == 0 and .presses[0].press_readiness_gate_status == "blocked"' "current ledger validates and blocks PRESS"
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid PRESS ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid PRESS ledger rejected"
+fi
+
 jq '
   .clear_count = 1
   | .presses[0].status = "press_clear"
@@ -46,6 +53,13 @@ jq '
 ' "$LEDGER" >"$TMP/press-clear.json"
 "$SCRIPT" --ledger "$TMP/press-clear.json" --json >"$TMP/press-clear.out.json"
 assert_jq "$TMP/press-clear.out.json" '.status == "pass" and .clear_count == 1 and .presses[0].press_readiness_gate_status == "clear"' "PRESS clear with v0.1 and required refs passes"
+
+jq '.presses[0].notes = ("sk-" + "NOTAREALSECRET")' "$TMP/press-clear.json" >"$TMP/secret-shaped-value.json"
+if "$SCRIPT" --ledger "$TMP/secret-shaped-value.json" --json >"$TMP/secret-shaped-value.out.json" 2>/dev/null; then
+  fail "secret-shaped PRESS value rejected"
+else
+  assert_jq "$TMP/secret-shaped-value.out.json" '.status == "fail" and (.failures[] | select(.code == "secret_or_raw_value_shape_detected"))' "secret-shaped PRESS value rejected"
+fi
 
 jq '.presses[0].status = "formation_ready" | .presses[0].release_version = "v0.1.1"' "$TMP/press-clear.json" >"$TMP/formation-ready.json"
 "$SCRIPT" --ledger "$TMP/formation-ready.json" --json >"$TMP/formation-ready.out.json"
@@ -77,6 +91,27 @@ if "$SCRIPT" --ledger "$TMP/no-substrate.json" --json >"$TMP/no-substrate.out.js
   fail "PRESS clear without substrate-share receipt rejected"
 else
   assert_jq "$TMP/no-substrate.out.json" '.status == "fail" and (.failures[] | select(.code == "press_clear_missing_required_refs" and (.missing_refs | index("substrate_share_receipt"))))' "PRESS clear without substrate-share receipt rejected"
+fi
+
+jq '.presses[0].evidence_refs = []' "$TMP/press-clear.json" >"$TMP/no-evidence-refs.json"
+if "$SCRIPT" --ledger "$TMP/no-evidence-refs.json" --json >"$TMP/no-evidence-refs.out.json" 2>/dev/null; then
+  fail "PRESS clear without evidence refs rejected"
+else
+  assert_jq "$TMP/no-evidence-refs.out.json" '.status == "fail" and (.failures[] | select(.code == "press_clear_without_evidence_refs"))' "PRESS clear without evidence refs rejected"
+fi
+
+jq '.presses[0].signed_equity_ref = "state/no-such-press-equity.json"' "$TMP/press-clear.json" >"$TMP/missing-required-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-required-ref.json" --check-paths --json >"$TMP/missing-required-ref.out.json" 2>/dev/null; then
+  fail "missing PRESS required ref rejected"
+else
+  assert_jq "$TMP/missing-required-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "required_ref_missing"))' "missing PRESS required ref rejected"
+fi
+
+jq '.presses[0].evidence_refs = ["state/no-such-press-evidence.json"]' "$TMP/press-clear.json" >"$TMP/missing-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence-ref.json" --check-paths --json >"$TMP/missing-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing PRESS evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing PRESS evidence ref rejected"
 fi
 
 jq '.clear_count = 2' "$TMP/press-clear.json" >"$TMP/mismatch.json"
