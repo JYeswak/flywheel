@@ -139,6 +139,11 @@
       "result": "company lifecycle disposition ledger exists and validates; current clear_count is 0 because no close, pivot, or graduation event has owner/operator, customer, financial, substrate-retention, public-update, and holding-plane-continuity receipts"
     },
     {
+      "kind": "coach_role_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-coach-role.json",
+      "result": "post-launch coach-role ledger exists and validates; current clear_count is 0 because no owner/operator, operating-control handoff, coach-role agreement, majority-stake, or owner-control acknowledgement receipts exist"
+    },
+    {
       "kind": "pour_readiness_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json",
       "result": "POUR readiness ledger exists and validates; current clear_count is 0 because first paying-customer, owner-operator, and operating-control handoff receipts are absent"
@@ -243,6 +248,16 @@
         "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json"
       ],
       "finding": "The company close/pivot/graduation path is now machine-checkable separately from the standing holding-plane goal. Current ledger tracks Mobile Eats only as a baseline and blocks any lifecycle disposition claim until owner/operator, customer-obligation, financial, substrate-retention, and brand/public-update receipts exist."
+    },
+    {
+      "gate": "post_launch_coach_role",
+      "status": "blocked_missing_coach_role_receipts",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-coach-role.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-owner-economics.json"
+      ],
+      "finding": "The post-launch coach-role and majority-stake promise is now machine-checkable separately from POUR and owner economics. Current ledger blocks clear status because no owner/operator, operating-control handoff, coach-role agreement, majority-stake, or owner-control acknowledgement refs exist."
     },
     {
       "gate": "sustainable_pace",
@@ -407,6 +422,10 @@
     {
       "owner": "portfolio-operations",
       "action": "Fill state/holding-company-lifecycle-disposition.json with owner/operator, customer-obligation, financial, substrate-retention, brand/public-update, and continuity receipts before marking any portfolio company closed, pivoted, or graduated."
+    },
+    {
+      "owner": "portfolio-operations",
+      "action": "Fill state/holding-company-coach-role.json with owner/operator, operating-control handoff, coach-role agreement, majority-stake, and owner-control acknowledgement receipts before marking Joshua's post-launch coach role retained."
     },
     {
       "owner": "mobile-eats",

@@ -1,0 +1,32 @@
+{
+  "schema_version": "zeststream.holding_company_coach_role.v1",
+  "generated_at": "2026-05-17T08:19:00Z",
+  "gate": "post_launch_coach_role",
+  "required_min_holding_stake_percent": 51,
+  "clear_count": 0,
+  "roles": [
+    {
+      "role_id": "mobile-eats-coach-role-20260517",
+      "company_slug": "mobile-eats",
+      "status": "blocked",
+      "owner_operator_ref": null,
+      "operating_control_handoff_ref": null,
+      "coach_role_agreement_ref": null,
+      "majority_stake_ref": null,
+      "holding_stake_percent": null,
+      "owner_operating_control_ack_ref": null,
+      "evidence_refs": [
+        "state/holding-company-pour-readiness.json",
+        "state/holding-company-owner-economics.json",
+        "state/zeststream-portfolio-company-registry.json"
+      ],
+      "notes": "Mobile Eats has no owner/operator, operating-control handoff, coach-role agreement, majority-stake receipt, or owner operating-control acknowledgement."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical gate for Joshua retaining coach role and majority stake while the owner receives operating control.",
+    "It is separate from peer-coach eligibility, which applies to graduated Tier 2+ owners coaching future companies.",
+    "This is a receipt gate, not legal or tax advice."
+  ],
+  "next_action": "Add owner/operator, operating-control handoff, coach-role agreement, majority-stake, and owner control acknowledgement refs before marking post-launch coach role clear."
+}

@@ -25,6 +25,7 @@ The audit did not find the receipts that would let the system count a formed por
 | Public story receipts | `blocked_not_receipt_led` | Public-story ledger exists and validates; `zeststream-v2-fresh` lacks a receipt-led holding-company story and still carries builder/automation framing. |
 | Future nonprofit extension | `deferred_no_scope_or_legal_receipts` | Nonprofit/social-cause extension ledger exists and validates; no scoped initiative, legal review, governance, separation, funding, or public-story receipts exist. |
 | Lifecycle disposition | `tracking_no_disposition_event` | Lifecycle-disposition ledger exists and validates; no close, pivot, or graduation event has owner/operator, customer, financial, substrate-retention, public-update, and continuity receipts. |
+| Coach role retention | `blocked_missing_coach_role_receipts` | Coach-role ledger exists and validates; no owner/operator, operating-control handoff, coach-role agreement, majority-stake, or owner-control acknowledgement receipts exist. |
 | Sustainable pace | `blocked_no_measurement` | Sustainable-pace ledger exists and validates; weekly hours and substrate coaching-time offset are not measured yet. |
 | Owner-search phasing | `blocked_no_warm_network_proof` | Owner-search phasing ledger exists and validates; sub #1 remains blocked because no warm-network source proof exists. |
 | Shared substrate | `partial_proven` | mobile-eats + SkillOS prove substrate adoption; the remaining gap is tying the substrate-share receipt to a formed owner/company registry row. |
@@ -52,6 +53,7 @@ The audit did not find the receipts that would let the system count a formed por
 - Public-story ledger: `state/holding-company-public-story.json`
 - Nonprofit-extension ledger: `state/holding-company-nonprofit-extension.json`
 - Lifecycle-disposition ledger: `state/holding-company-lifecycle-disposition.json`
+- Coach-role ledger: `state/holding-company-coach-role.json`
 - Shared-stack ledger: `state/holding-company-shared-stack.json`
 - Launch economics ledger: `state/holding-company-launch-economics.json`
 - RECYCLE ledger: `state/holding-company-recycle-loop.json`
@@ -76,17 +78,18 @@ The audit did not find the receipts that would let the system count a formed por
 6. Fill the public-story ledger with receipt/proof refs and holding-company positioning after removing build-app/workflow-builder framing from public surfaces.
 7. Fill the nonprofit-extension ledger with social-cause scope, nonprofit legal review, governance, operating-separation, funding policy, and public-story receipts before marking a future social-cause extension ready or active.
 8. Fill the lifecycle-disposition ledger with owner/operator, customer-obligation, financial, substrate-retention, brand/public-update, and continuity receipts before marking any portfolio company closed, pivoted, or graduated.
-9. For mobile-eats, either attach owner/customer/company/control-handoff receipts or explicitly classify it as product/substrate proof rather than portfolio company #1.
-10. Fill the shared-stack ledger with present receipt refs for SkillOS, flywheel, JSM, `@zeststream/*` packages, and brand voice before marking Mobile Eats shared-stack clear.
-11. Fill the PEEL interview ledger with client-talk, community, or field-trip source evidence plus five qualified prospect interviews before clearing or committing formation cash for any candidate.
-12. Fill the owner-search phasing ledger with warm-network source proof before allowing or signing an owner for sub #1 or sub #2.
-13. Fill the sustainable-pace ledger with measured weekly hours and substrate coaching-time offset before claiming sustainable pace for any Year 2+ company period.
-14. Fill the legal-structure ledger with binding artifact refs plus attorney and CPA review receipts before signing a sub #2 owner.
-15. Fill the POUR readiness ledger with first paying-customer, owner-operator, and operating-control handoff receipts before marking Mobile Eats launch-clear.
-16. Fill the owner-economics ledger with signed owner-operator, cap-table, distribution terms, legal review, and substrate-share refs proving 25% owner equity and 45-75% tiered owner distributions before marking a deal signed or active.
-17. Fill the peer-coach ledger with Tier 2+ owner, sustainable cash, operating-control, peer-coach agreement, and 5% equity grant receipts before marking any owner eligible to peer-coach.
-18. Establish the exact nine product-surface set and rerun the progress-velocity ledger before using the 4,000+ commits in 7 days claim in public or gate summaries.
-19. Fill the RECYCLE ledger when launch friction appears, then attach SkillOS capability, package/substrate, and portfolio propagation receipts within the configured window.
+9. Fill the coach-role ledger with owner/operator, operating-control handoff, coach-role agreement, majority-stake, and owner-control acknowledgement receipts before marking Joshua's post-launch coach role retained.
+10. For mobile-eats, either attach owner/customer/company/control-handoff receipts or explicitly classify it as product/substrate proof rather than portfolio company #1.
+11. Fill the shared-stack ledger with present receipt refs for SkillOS, flywheel, JSM, `@zeststream/*` packages, and brand voice before marking Mobile Eats shared-stack clear.
+12. Fill the PEEL interview ledger with client-talk, community, or field-trip source evidence plus five qualified prospect interviews before clearing or committing formation cash for any candidate.
+13. Fill the owner-search phasing ledger with warm-network source proof before allowing or signing an owner for sub #1 or sub #2.
+14. Fill the sustainable-pace ledger with measured weekly hours and substrate coaching-time offset before claiming sustainable pace for any Year 2+ company period.
+15. Fill the legal-structure ledger with binding artifact refs plus attorney and CPA review receipts before signing a sub #2 owner.
+16. Fill the POUR readiness ledger with first paying-customer, owner-operator, and operating-control handoff receipts before marking Mobile Eats launch-clear.
+17. Fill the owner-economics ledger with signed owner-operator, cap-table, distribution terms, legal review, and substrate-share refs proving 25% owner equity and 45-75% tiered owner distributions before marking a deal signed or active.
+18. Fill the peer-coach ledger with Tier 2+ owner, sustainable cash, operating-control, peer-coach agreement, and 5% equity grant receipts before marking any owner eligible to peer-coach.
+19. Establish the exact nine product-surface set and rerun the progress-velocity ledger before using the 4,000+ commits in 7 days claim in public or gate summaries.
+20. Fill the RECYCLE ledger when launch friction appears, then attach SkillOS capability, package/substrate, and portfolio propagation receipts within the configured window.
 
 ## Close Rule
 
