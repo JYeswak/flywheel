@@ -371,6 +371,18 @@
       "finding": "Lifecycle-disposition ledger exists and tracks the path, but no disposition event has occurred."
     }
   ],
+  "validation_commands": [
+    {
+      "command_id": "standing_goal_aggregate",
+      "command": "bash tests/zeststream-holding-company-standing-goal.sh",
+      "purpose": "Registry-inclusive validation sweep for the standing holding-company coverage matrix.",
+      "covers": [
+        "state/zeststream-portfolio-company-registry.json",
+        "state/holding-company-objective-coverage.json",
+        "state/holding-company-*.json"
+      ]
+    }
+  ],
   "notes": [
     "This is a prompt-to-artifact checklist, not a completion claim.",
     "The standing holding-company objective cannot be marked complete; this matrix records current coverage and blockers.",

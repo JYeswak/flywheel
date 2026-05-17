@@ -36,6 +36,7 @@ jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
 assert_jq "$TMP/current.json" '.status == "pass" and .objective_coverage_gate_status == "not_complete" and .summary_counts.total == 29 and .summary_counts.partial == 8 and .summary_counts.blocked == 17' "current objective coverage validates as not complete"
 assert_jq "$LEDGER" 'any(.notes[]; contains("bash tests/zeststream-holding-company-standing-goal.sh"))' "coverage matrix names aggregate standing-goal validation"
+assert_jq "$LEDGER" '.validation_commands[] | select(.command_id == "standing_goal_aggregate" and .command == "bash tests/zeststream-holding-company-standing-goal.sh" and (.covers | index("state/zeststream-portfolio-company-registry.json")))' "coverage matrix structures aggregate validation command"
 
 jq 'del(.requirements[] | select(.requirement_id == "runway_gate")) | .summary_counts.total = 28 | .summary_counts.blocked = 20' "$LEDGER" >"$TMP/missing-id.json"
 if "$SCRIPT" --ledger "$TMP/missing-id.json" --json >"$TMP/missing-id.out.json" 2>/dev/null; then
@@ -49,6 +50,13 @@ if "$SCRIPT" --ledger "$TMP/duplicate-id.json" --json >"$TMP/duplicate-id.out.js
   fail "duplicate requirement id rejected"
 else
   assert_jq "$TMP/duplicate-id.out.json" '.failures[] | select(.code == "duplicate_requirement_id")' "duplicate requirement id rejected"
+fi
+
+jq 'del(.validation_commands)' "$LEDGER" >"$TMP/missing-validation-commands.json"
+if "$SCRIPT" --ledger "$TMP/missing-validation-commands.json" --json >"$TMP/missing-validation-commands.out.json" 2>/dev/null; then
+  fail "missing validation commands rejected"
+else
+  assert_jq "$TMP/missing-validation-commands.out.json" '.failures[] | select(.code == "schema_invalid")' "missing validation commands rejected"
 fi
 
 jq '.coverage_status = "complete"' "$LEDGER" >"$TMP/complete.json"
