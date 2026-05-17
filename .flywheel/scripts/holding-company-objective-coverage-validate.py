@@ -192,6 +192,12 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         "summary_counts": computed_counts,
         "missing_required_requirement_ids": missing_ids,
         "unknown_requirement_ids": extra_ids,
+        "validation_commands": validation_commands,
+        "required_validation_command": {
+            "command_id": REQUIRED_VALIDATION_COMMAND_ID,
+            "command": REQUIRED_VALIDATION_COMMAND,
+            "required_coverage": REQUIRED_VALIDATION_COVERAGE,
+        },
         "failures": failures,
     }
 
