@@ -236,6 +236,32 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "joshua_coach_sustainable_pace") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/coach-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/coach-overclaim.json" --json >"$TMP/coach-overclaim.out.json" 2>/dev/null; then
+  fail "blocked coach-role and pace receipts reject coach status promotion"
+else
+  assert_jq "$TMP/coach-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_coach_role_receipt" and .requirement_id == "joshua_coach_sustainable_pace" and .evidence_status == "blocked")' "blocked coach-role receipt rejects coach status promotion"
+  assert_jq "$TMP/coach-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_sustainable_pace_receipt" and .requirement_id == "joshua_coach_sustainable_pace" and .evidence_status == "blocked")' "blocked pace receipt rejects coach status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "joshua_coach_sustainable_pace") | .evidence_refs) -= ["state/holding-company-coach-role.json"]' "$LEDGER" >"$TMP/missing-coach-role-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-coach-role-ref.json" --json >"$TMP/missing-coach-role-ref.out.json" 2>/dev/null; then
+  fail "coach requirement missing coach-role receipt ref rejected"
+else
+  assert_jq "$TMP/missing-coach-role-ref.out.json" '.failures[] | select(.code == "coach_requirement_missing_coach_role_ref" and .requirement_id == "joshua_coach_sustainable_pace")' "coach requirement missing coach-role receipt ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "joshua_coach_sustainable_pace") | .evidence_refs) -= ["state/holding-company-sustainable-pace.json"]' "$LEDGER" >"$TMP/missing-coach-pace-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-coach-pace-ref.json" --json >"$TMP/missing-coach-pace-ref.out.json" 2>/dev/null; then
+  fail "coach requirement missing sustainable-pace receipt ref rejected"
+else
+  assert_jq "$TMP/missing-coach-pace-ref.out.json" '.failures[] | select(.code == "coach_requirement_missing_sustainable_pace_ref" and .requirement_id == "joshua_coach_sustainable_pace")' "coach requirement missing sustainable-pace receipt ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "owner_search_phasing_gate") | .coverage_status) = "partial"
   | .summary_counts.partial += 1
   | .summary_counts.blocked -= 1

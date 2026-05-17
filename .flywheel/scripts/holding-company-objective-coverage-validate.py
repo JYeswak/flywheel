@@ -56,6 +56,7 @@ PORTFOLIO_REGISTRY_REF = "state/zeststream-portfolio-company-registry.json"
 RUNWAY_RECEIPT_REF = "state/holding-company-runway-current.json"
 LEGAL_STRUCTURE_REF = "state/holding-company-legal-structure.json"
 SUSTAINABLE_PACE_REF = "state/holding-company-sustainable-pace.json"
+COACH_ROLE_REF = "state/holding-company-coach-role.json"
 OWNER_SEARCH_PHASING_REF = "state/holding-company-owner-search-phasing.json"
 OWNER_ECONOMICS_REF = "state/holding-company-owner-economics.json"
 CANDIDATE_FIT_REF = "state/holding-company-candidate-fit.json"
@@ -101,6 +102,13 @@ OWNER_ECONOMICS_REQUIRED_REFS = {
     "distribution_terms_ref",
     "legal_review_ref",
     "substrate_share_receipt",
+}
+COACH_ROLE_REQUIRED_REFS = {
+    "owner_operator_ref",
+    "operating_control_handoff_ref",
+    "coach_role_agreement_ref",
+    "majority_stake_ref",
+    "owner_operating_control_ack_ref",
 }
 CANDIDATE_FIT_CLEAR_STATUSES = {"candidate_clear", "press_clear", "formation_clear"}
 CANDIDATE_FIT_CLASSIFICATIONS = {"sharpen_legacy_smb", "incubate_ai_first"}
@@ -312,6 +320,21 @@ def owner_economics_gate_status(receipt: dict[str, Any]) -> str:
             and all(distribution_min <= value <= distribution_max for value in distribution_values)
         )
         if has_ref(deal.get("owner_operator_slug")) and owner_equity_ok and holding_equity_ok and refs_ok and distribution_bounds_ok:
+            return "clear"
+    return "blocked"
+
+
+def coach_role_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    required_min_stake = receipt.get("required_min_holding_stake_percent", 51)
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1 or not is_number(required_min_stake):
+        return "blocked"
+    for role in receipt.get("roles", []):
+        if not isinstance(role, dict) or role.get("status") not in {"coach_role_clear", "active"}:
+            continue
+        stake = role.get("holding_stake_percent")
+        refs_ok = all(has_ref(role.get(field)) for field in COACH_ROLE_REQUIRED_REFS)
+        if is_number(stake) and stake >= required_min_stake and refs_ok:
             return "clear"
     return "blocked"
 
@@ -742,6 +765,45 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "sustainable_pace_ref_missing", "ref": SUSTAINABLE_PACE_REF})
+
+    coach_role_path = path_for_ref(COACH_ROLE_REF)
+    if coach_role_path is not None and coach_role_path.exists():
+        coach_role_status = coach_role_gate_status(load_json(coach_role_path))
+    else:
+        coach_role_status = None
+        failures.append({"code": "coach_role_ref_missing", "ref": COACH_ROLE_REF})
+    if sustainable_pace_path is not None and sustainable_pace_path.exists():
+        coach_pace_status = sustainable_pace_gate_status(load_json(sustainable_pace_path))
+    else:
+        coach_pace_status = None
+    coach_requirement = requirements_by_id.get("joshua_coach_sustainable_pace")
+    if coach_requirement is not None:
+        evidence_refs = coach_requirement.get("evidence_refs", [])
+        for required_ref, code in (
+            (COACH_ROLE_REF, "coach_requirement_missing_coach_role_ref"),
+            (SUSTAINABLE_PACE_REF, "coach_requirement_missing_sustainable_pace_ref"),
+        ):
+            if required_ref not in evidence_refs:
+                failures.append(
+                    {
+                        "code": code,
+                        "requirement_id": "joshua_coach_sustainable_pace",
+                        "required_ref": required_ref,
+                    }
+                )
+        for evidence_status, code in (
+            (coach_role_status, "requirement_status_mismatch_with_coach_role_receipt"),
+            (coach_pace_status, "requirement_status_mismatch_with_sustainable_pace_receipt"),
+        ):
+            if evidence_status == "blocked" and coach_requirement.get("coverage_status") != "blocked":
+                failures.append(
+                    {
+                        "code": code,
+                        "requirement_id": "joshua_coach_sustainable_pace",
+                        "claimed": coach_requirement.get("coverage_status"),
+                        "evidence_status": evidence_status,
+                    }
+                )
 
     owner_search_phasing_path = path_for_ref(OWNER_SEARCH_PHASING_REF)
     if owner_search_phasing_path is not None and owner_search_phasing_path.exists():
