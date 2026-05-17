@@ -74,6 +74,11 @@
       "result": "brand voice skill alignment ledger exists and validates; current clear_count is 0 because the JSM-managed skill has grounding rules but does not yet prove holding-company canon or explicit anti-builder rejection"
     },
     {
+      "kind": "founder_post_voice_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-founder-post-voice.json",
+      "result": "founder-post voice ledger exists and validates; current clear_count is 0 because the SkillOS public-share LinkedIn draft has a fact-check discrepancy and lacks holding-company positioning despite a publisher dry-run pass"
+    },
+    {
       "kind": "public_surface_probe",
       "path": "/Users/josh/Developer/zeststream-v2-fresh",
       "result": "targeted grep found old automation/custom-app/workflow-builder language in content and app code; mission-alignment drift remains"
@@ -265,6 +270,17 @@
         "/Users/josh/Developer/flywheel/state/holding-company-public-story.json"
       ],
       "finding": "The brand voice skill alignment gate is now machine-checkable separately from public-surface anti-pitch checks. Current ledger blocks skill-alignment clear because the JSM-managed voice yaml still uses the older SMB time-back primary canon and has no approved JSM workflow receipt proving holding-company canon plus explicit workflow-builder/custom-app-builder rejection."
+    },
+    {
+      "gate": "founder_post_anti_pitch_voice",
+      "status": "blocked_fact_check_and_positioning",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-founder-post-voice.json",
+        "/Users/josh/Developer/skillos/state/public-share/2026-05-16/linkedin-001-weekly-system-sharpening.md",
+        "/Users/josh/Developer/skillos/state/public-share/2026-05-16/FACT-CHECK-2026-05-16.md",
+        "/Users/josh/Developer/skillos/state/public-share/2026-05-17/linkedin-001-weekly-system-sharpening-publish-receipt-2026-05-17T045455Z.json"
+      ],
+      "finding": "Joshua-post/public-share voice is now machine-checkable separately from zeststream.ai site surfaces. The current LinkedIn draft has a successful dry-run publisher receipt, but the fact-check reports a commit-count discrepancy and the draft does not carry the holding-company sharpen/incubate positioning, so founder-post clear remains blocked."
     },
     {
       "gate": "yuzu_owner_operator_voice",
@@ -485,6 +501,10 @@
     {
       "owner": "zeststream-brand-voice",
       "action": "Use state/holding-company-brand-voice-skill.json and state/holding-company-anti-pitch-voice.json to update the JSM-managed voice skill through its approved workflow; attach the JSM receipt before marking skill alignment clear."
+    },
+    {
+      "owner": "skillos/public-share",
+      "action": "Use state/holding-company-founder-post-voice.json to revise public-share drafts so Joshua posts carry holding-company positioning, fact-checked receipt values, and human-ratified publisher receipts before marking founder-post voice clear."
     },
     {
       "owner": "zeststream-v2-fresh",
