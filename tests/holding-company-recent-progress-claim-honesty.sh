@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+SCRIPT="$ROOT/.flywheel/scripts/holding-company-recent-progress-claim-honesty-validate.py"
 SCHEMA="$ROOT/.flywheel/validation-schema/v1/holding-company-recent-progress-claim-honesty.schema.json"
 RECEIPT="$ROOT/state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/holding-company-claim-honesty.XXXXXX")"
@@ -35,21 +36,15 @@ assert_eq() {
 
 jq empty "$RECEIPT" && pass "receipt json valid" || fail "receipt json valid"
 jq empty "$SCHEMA" && pass "schema json valid" || fail "schema json valid"
-python3 - "$SCHEMA" "$RECEIPT" <<'PY' && pass "receipt validates against schema" || fail "receipt validates against schema"
-import json
-import sys
+if python3 -m py_compile "$SCRIPT"; then
+  pass "validator py_compile"
+else
+  fail "validator py_compile"
+fi
+"$SCRIPT" --receipt "$RECEIPT" --check-paths --json >"$TMP/current.json"
+assert_jq "$TMP/current.json" '.status == "pass" and .recent_progress_claim_honesty_status == "mixed_claims_guarded" and .claim_count == 4' "validator accepts current claim-honesty receipt"
+assert_jq "$TMP/current.json" '.gate_status_by_claim.anthropic_adoption == "proven" and .gate_status_by_claim.mobile_eats_shipping == "partial" and .gate_status_by_claim.progress_velocity == "blocked" and .gate_status_by_claim.skillos_forever_os_lock == "partial"' "validator surfaces source gate statuses"
 
-from jsonschema import Draft202012Validator, FormatChecker
-
-schema_path, receipt_path = sys.argv[1], sys.argv[2]
-with open(schema_path, encoding="utf-8") as handle:
-    schema = json.load(handle)
-with open(receipt_path, encoding="utf-8") as handle:
-    receipt = json.load(handle)
-
-Draft202012Validator.check_schema(schema)
-Draft202012Validator(schema, format_checker=FormatChecker()).validate(receipt)
-PY
 assert_jq "$RECEIPT" '.schema_version == "zeststream.holding_company_recent_progress_claim_honesty.v1" and (.claims | length == 4)' "receipt declares four active recent-progress claims"
 
 for id in anthropic_adoption mobile_eats_shipping progress_velocity skillos_forever_os_lock; do
@@ -83,6 +78,27 @@ if jq -e '.claims[] | select(.claim_id == "skillos_forever_os_lock") | .claim_te
   fail "SkillOS active text avoids structure-lock overclaim"
 else
   pass "SkillOS active text avoids structure-lock overclaim"
+fi
+
+jq '(.claims[] | select(.claim_id == "progress_velocity") | .claim_text) = "4,000+ commits in 7 days across 9 product surfaces."' "$RECEIPT" >"$TMP/progress-overclaim.json"
+if "$SCRIPT" --receipt "$TMP/progress-overclaim.json" --json >"$TMP/progress-overclaim.out.json" 2>/dev/null; then
+  fail "progress velocity overclaim rejected"
+else
+  assert_jq "$TMP/progress-overclaim.out.json" '.failures[] | select(.code == "recent_progress_claim_overstates_velocity_target")' "progress velocity overclaim rejected"
+fi
+
+jq '(.claims[] | select(.claim_id == "mobile_eats_shipping") | .claim_text) = "mobile-eats shipping; first portfolio company on shared substrate with 9+ @zeststream/* package adoptions."' "$RECEIPT" >"$TMP/mobile-overclaim.json"
+if "$SCRIPT" --receipt "$TMP/mobile-overclaim.json" --json >"$TMP/mobile-overclaim.out.json" 2>/dev/null; then
+  fail "mobile eats overclaim rejected"
+else
+  assert_jq "$TMP/mobile-overclaim.out.json" '.failures[] | select(.code == "mobile_eats_first_company_overclaim")' "mobile eats overclaim rejected"
+fi
+
+jq '(.claims[] | select(.claim_id == "skillos_forever_os_lock") | .claim_text) = "SkillOS Forever-OS v3 ratified 2026-05-16; structure locked 2026-05-17."' "$RECEIPT" >"$TMP/skillos-overclaim.json"
+if "$SCRIPT" --receipt "$TMP/skillos-overclaim.json" --json >"$TMP/skillos-overclaim.out.json" 2>/dev/null; then
+  fail "SkillOS structure-lock overclaim rejected"
+else
+  assert_jq "$TMP/skillos-overclaim.out.json" '.failures[] | select(.code == "skillos_structure_lock_overclaim")' "SkillOS structure-lock overclaim rejected"
 fi
 
 if [[ "$fail_count" -ne 0 ]]; then
