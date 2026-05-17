@@ -430,6 +430,13 @@ else
   assert_jq "$TMP/portfolio-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_zero_portfolio_registry" and .requirement_id == "portfolio_company_existence_gate" and .expected == "blocked")' "zero-portfolio registry overclaim rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "portfolio_company_existence_gate") | .evidence_refs) -= ["state/holding-company-mobile-eats-shipping.json"]' "$LEDGER" >"$TMP/missing-portfolio-existence-mobile-eats-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-portfolio-existence-mobile-eats-ref.json" --json >"$TMP/missing-portfolio-existence-mobile-eats-ref.out.json" 2>/dev/null; then
+  fail "portfolio existence requirement missing Mobile Eats shipping ref rejected"
+else
+  assert_jq "$TMP/missing-portfolio-existence-mobile-eats-ref.out.json" '.failures[] | select(.code == "portfolio_existence_requirement_missing_mobile_eats_shipping_ref" and .requirement_id == "portfolio_company_existence_gate")' "portfolio existence requirement missing Mobile Eats shipping ref rejected"
+fi
+
 jq '(.requirements[] | select(.requirement_id == "one_year_small_portfolio_making_money") | .evidence_refs) -= ["state/zeststream-portfolio-company-registry.json"]' "$LEDGER" >"$TMP/missing-registry-ref.json"
 if "$SCRIPT" --ledger "$TMP/missing-registry-ref.json" --json >"$TMP/missing-registry-ref.out.json" 2>/dev/null; then
   fail "portfolio requirement missing registry ref rejected"

@@ -2078,6 +2078,17 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "expected": expected_status,
                     }
                 )
+        portfolio_existence_requirement = requirements_by_id.get("portfolio_company_existence_gate")
+        if portfolio_existence_requirement is not None:
+            evidence_refs = portfolio_existence_requirement.get("evidence_refs", [])
+            if MOBILE_EATS_SHIPPING_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "portfolio_existence_requirement_missing_mobile_eats_shipping_ref",
+                        "requirement_id": "portfolio_company_existence_gate",
+                        "required_ref": MOBILE_EATS_SHIPPING_REF,
+                    }
+                )
 
     claim_honesty_path = path_for_ref(RECENT_PROGRESS_CLAIM_HONESTY_REF)
     claim_status_by_id: dict[str, Any] = {}
