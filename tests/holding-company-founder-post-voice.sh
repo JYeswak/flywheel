@@ -111,6 +111,27 @@ else
   assert_jq "$TMP/no-publisher.out.json" '.status == "fail" and (.failures[] | select(.code == "founder_post_clear_without_publisher_receipt"))' "clear without publisher receipt rejected"
 fi
 
+jq '.posts[0].proof_or_receipt_refs = ["state/no-such-founder-post-proof.md"]' "$TMP/clear.json" >"$TMP/missing-proof-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-proof-ref.json" --check-paths --json >"$TMP/missing-proof-ref.out.json" 2>/dev/null; then
+  fail "missing founder post proof ref rejected"
+else
+  assert_jq "$TMP/missing-proof-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "proof_or_receipt_ref_missing"))' "missing founder post proof ref rejected"
+fi
+
+jq '.posts[0].evidence_refs = ["state/no-such-founder-post-evidence.json"]' "$TMP/clear.json" >"$TMP/missing-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence-ref.json" --check-paths --json >"$TMP/missing-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing founder post evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing founder post evidence ref rejected"
+fi
+
+jq '.posts[0].builder_framing_hits = [{"frame":"workflow_builder","path":"state/no-such-founder-post-builder-hit.md","line":1,"excerpt":"workflow builder"}]' "$TMP/clear.json" >"$TMP/missing-builder-hit-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-builder-hit-ref.json" --check-paths --json >"$TMP/missing-builder-hit-ref.out.json" 2>/dev/null; then
+  fail "missing founder post builder-hit ref rejected"
+else
+  assert_jq "$TMP/missing-builder-hit-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "builder_hit_path_missing"))' "missing founder post builder-hit ref rejected"
+fi
+
 jq '.clear_count = 2' "$TMP/clear.json" >"$TMP/count-mismatch.json"
 if "$SCRIPT" --ledger "$TMP/count-mismatch.json" --json >"$TMP/count-mismatch.out.json" 2>/dev/null; then
   fail "founder post clear count mismatch rejected"
