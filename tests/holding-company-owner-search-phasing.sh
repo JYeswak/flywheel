@@ -36,9 +36,23 @@ jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
 assert_jq "$TMP/current.json" '.status == "pass" and .phasing_clear_count == 0 and .searches[0].phasing_gate_status == "blocked"' "current ledger validates and blocks owner search"
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid owner search ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid owner search ledger rejected"
+fi
+
 jq '.phasing_clear_count = 1 | .searches[0].search_status = "allowed" | .searches[0].sourcing_channel = "warm_network"' "$LEDGER" >"$TMP/warm-allowed.json"
 "$SCRIPT" --ledger "$TMP/warm-allowed.json" --json >"$TMP/warm-allowed.out.json"
 assert_jq "$TMP/warm-allowed.out.json" '.status == "pass" and .phasing_clear_count == 1 and .searches[0].phasing_gate_status == "clear"' "warm network clears sub 1"
+
+jq '.searches[0].notes = ("sk-" + "NOTAREALSECRET")' "$TMP/warm-allowed.json" >"$TMP/secret-shaped-value.json"
+if "$SCRIPT" --ledger "$TMP/secret-shaped-value.json" --json >"$TMP/secret-shaped-value.out.json" 2>/dev/null; then
+  fail "secret-shaped owner search value rejected"
+else
+  assert_jq "$TMP/secret-shaped-value.out.json" '.status == "fail" and (.failures[] | select(.code == "secret_or_raw_amount_shape_detected"))' "secret-shaped owner search value rejected"
+fi
 
 jq '.phasing_clear_count = 1 | .searches[0].search_status = "allowed" | .searches[0].sourcing_channel = "public_open_call" | .searches[0].public_open_call_active = true' "$LEDGER" >"$TMP/public-sub1.json"
 if "$SCRIPT" --ledger "$TMP/public-sub1.json" --json >"$TMP/public-sub1.out.json" 2>/dev/null; then
@@ -57,6 +71,13 @@ fi
 jq '.phasing_clear_count = 1 | .searches[0].sequence = 3 | .searches[0].search_status = "allowed" | .searches[0].sourcing_channel = "public_open_call" | .searches[0].public_open_call_active = true' "$LEDGER" >"$TMP/public-sub3.json"
 "$SCRIPT" --ledger "$TMP/public-sub3.json" --json >"$TMP/public-sub3.out.json"
 assert_jq "$TMP/public-sub3.out.json" '.status == "pass" and .phasing_clear_count == 1 and .searches[0].phasing_gate_status == "clear"' "public open call allowed from sub 3"
+
+jq '.searches[0].evidence_refs = ["state/no-such-owner-search-evidence.json"]' "$TMP/warm-allowed.json" >"$TMP/missing-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence-ref.json" --check-paths --json >"$TMP/missing-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing owner search evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing owner search evidence ref rejected"
+fi
 
 jq '.phasing_clear_count = 2 | .searches[0].search_status = "allowed" | .searches[0].sourcing_channel = "warm_network"' "$LEDGER" >"$TMP/mismatch.json"
 if "$SCRIPT" --ledger "$TMP/mismatch.json" --json >"$TMP/mismatch.out.json" 2>/dev/null; then
