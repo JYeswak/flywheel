@@ -24,7 +24,7 @@ The audit did not find the receipts that would let the system count a formed por
 | Sustainable pace | `blocked_no_measurement` | Sustainable-pace ledger exists and validates; weekly hours and substrate coaching-time offset are not measured yet. |
 | Owner-search phasing | `blocked_no_warm_network_proof` | Owner-search phasing ledger exists and validates; sub #1 remains blocked because no warm-network source proof exists. |
 | Shared substrate | `partial_proven` | mobile-eats + SkillOS prove substrate adoption; the remaining gap is tying the substrate-share receipt to a formed owner/company registry row. |
-| Legal structure | `scaffolded_not_cleared` | Legal house exists; attorney/CPA and binding operating agreement remain gates. |
+| Legal structure | `blocked_scaffold_only` | Legal-structure ledger exists and validates; sub #2 owner signing remains blocked until binding artifact, attorney review, and CPA review refs are present. |
 | N+1 cheaper than N | `baseline_only` | Baseline launch economics ledger exists; no second comparable launch row proves compounding economics yet. |
 
 ## Evidence Anchors
@@ -43,6 +43,7 @@ The audit did not find the receipts that would let the system count a formed por
 - PEEL interview ledger: `state/holding-company-peel-interviews.json`
 - Owner-search phasing ledger: `state/holding-company-owner-search-phasing.json`
 - Sustainable-pace ledger: `state/holding-company-sustainable-pace.json`
+- Legal-structure ledger: `state/holding-company-legal-structure.json`
 
 ## Immediate Next Actions
 
@@ -54,6 +55,7 @@ The audit did not find the receipts that would let the system count a formed por
 6. Fill the PEEL interview ledger with five qualified prospect interviews before clearing or committing formation cash for any candidate.
 7. Fill the owner-search phasing ledger with warm-network source proof before allowing or signing an owner for sub #1 or sub #2.
 8. Fill the sustainable-pace ledger with measured weekly hours and substrate coaching-time offset before claiming sustainable pace for any Year 2+ company period.
+9. Fill the legal-structure ledger with binding artifact refs plus attorney and CPA review receipts before signing a sub #2 owner.
 
 ## Close Rule
 

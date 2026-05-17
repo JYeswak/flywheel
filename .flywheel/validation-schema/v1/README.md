@@ -20,6 +20,7 @@ This directory defines the first machine-readable receipt contract for validatin
 | `holding-company-peel-interviews.schema.json` | ZestStream holding-company PEEL interview ledger; refuses formation-cash clear/commit status without five qualified prospect interviews. |
 | `holding-company-owner-search-phasing.schema.json` | ZestStream holding-company owner-search phasing ledger; refuses public/cold sourcing before sub #3 and clear/signed status without phasing proof. |
 | `holding-company-sustainable-pace.schema.json` | ZestStream holding-company sustainable-pace ledger; refuses Year 2+ clear status without measured weekly hours at or below 60 and 50%+ substrate coaching-time offset. |
+| `holding-company-legal-structure.schema.json` | ZestStream holding-company legal-structure readiness ledger; refuses sub #2 owner-signing clearance without binding artifact, attorney review, and CPA review refs for required terms. |
 | `agent-security-control.schema.json` | JSON Schema contract for `agent-security-control/v1` security-control receipts. |
 | `fixtures/pass/*.json` | Receipts that must validate. |
 | `fixtures/fail/*.json` | Receipts that must be rejected with deterministic JSON errors. |

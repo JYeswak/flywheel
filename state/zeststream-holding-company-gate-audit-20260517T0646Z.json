@@ -102,6 +102,11 @@
       "kind": "sustainable_pace_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-sustainable-pace.json",
       "result": "sustainable-pace ledger exists and validates; current pace_clear_count is 0 because weekly hours and substrate coaching-time offset are not measured"
+    },
+    {
+      "kind": "legal_structure_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-legal-structure.json",
+      "result": "legal-structure readiness ledger exists and validates; current clear_count is 0 because binding artifact, attorney review, and CPA review refs are absent"
     }
   ],
   "canonical_gates": [
@@ -175,12 +180,13 @@
     },
     {
       "gate": "legal_structure",
-      "status": "scaffolded_not_cleared",
+      "status": "blocked_scaffold_only",
       "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-legal-structure.json",
         "/Users/josh/Developer/skillos/state/legal-house/SCAFFOLD.md",
         "/Users/josh/Developer/skillos/state/mission-alignment/EXECUTION-PLAN.md"
       ],
-      "finding": "Legal house scaffold exists and names the correct layers; attorney/CPA call and binding operating-agreement artifacts are still gates before sub #2 signs."
+      "finding": "Legal house scaffold exists and the required sub #2 signing gates are now machine-checkable. Current ledger blocks sub #2 owner signing because no binding artifact, attorney review, or CPA review refs are present for operating agreement, peer-coach, annual review, substrate pool, subsidiary owner agreement, and intercompany services terms."
     },
     {
       "gate": "n_plus_one_cheaper",
@@ -252,6 +258,10 @@
     {
       "owner": "skillos/flywheel",
       "action": "Fill state/holding-company-sustainable-pace.json with measured weekly hours and substrate coaching-time offset before claiming sustainable pace for any Year 2+ company period."
+    },
+    {
+      "owner": "Joshua/legal-counsel/CPA",
+      "action": "Fill state/holding-company-legal-structure.json with binding artifact refs plus attorney and CPA review receipts before signing a sub #2 owner."
     },
     {
       "owner": "skillos/flywheel",
