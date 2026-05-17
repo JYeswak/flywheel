@@ -51,7 +51,12 @@
     {
       "kind": "mobile_eats_package_adoption",
       "path": "/Users/josh/Developer/mobile-eats/next-app/package.json",
-      "result": "27 production @zeststream/* file dependencies plus one dev @zeststream/* dependency observed"
+      "result": "26 production @zeststream/* file dependencies plus one dev @zeststream/* dependency observed"
+    },
+    {
+      "kind": "mobile_eats_substrate_share_receipt",
+      "path": "/Users/josh/Developer/flywheel/state/substrate-share/mobile-eats-20260517T0654Z.json",
+      "result": "baseline substrate-share receipt validates the 27 total @zeststream/* package adoptions; N+1 cost curve remains unmeasured"
     },
     {
       "kind": "skillos_adoption_receipt",
@@ -134,9 +139,10 @@
       "evidence": [
         "/Users/josh/Developer/mobile-eats/.zs-tenant.yaml",
         "/Users/josh/Developer/mobile-eats/next-app/package.json",
+        "/Users/josh/Developer/flywheel/state/substrate-share/mobile-eats-20260517T0654Z.json",
         "/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json"
       ],
-      "finding": "The substrate is real: mobile-eats has tenant routing and many @zeststream/* dependencies, and SkillOS records real pack adoption across three consumer repos. The missing part is a per-portfolio-company substrate-share receipt tied to an actual owner/company registry row."
+      "finding": "The substrate is real: mobile-eats has tenant routing, a baseline substrate-share receipt with 27 total @zeststream/* dependencies, and SkillOS records real pack adoption across three consumer repos. The missing part is a formed owner/company registry row."
     },
     {
       "gate": "legal_structure",
@@ -203,7 +209,7 @@
     },
     {
       "owner": "mobile-eats",
-      "action": "If mobile-eats is intended as portfolio company #1, add owner-operator, first paying-customer, and substrate-share receipts; otherwise classify it as product/substrate proof, not a counted company."
+      "action": "If mobile-eats is intended as portfolio company #1, add owner-operator, equity, and first paying-customer receipts; otherwise keep it classified as product/substrate proof, not a counted company."
     },
     {
       "owner": "skillos/flywheel",

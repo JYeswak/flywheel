@@ -9,7 +9,7 @@ Receipt: `state/zeststream-holding-company-gate-audit-20260517T0646Z.json`
 
 The holding-company goal is active, but not closeable by design. Current state is `active_with_receipt_gaps`.
 
-The audit found real substrate receipts: mobile-eats has tenant routing, share-ready proof, and 27 production `@zeststream/*` dependencies; SkillOS has package-adoption receipts for `anthropic-sdk-python` across three real consumer repos; legal/quant scaffolds exist.
+The audit found real substrate receipts: mobile-eats has tenant routing, share-ready proof, a baseline substrate-share receipt, and 26 production plus 1 development `@zeststream/*` dependencies; SkillOS has package-adoption receipts for `anthropic-sdk-python` across three real consumer repos; legal/quant scaffolds exist.
 
 The audit did not find the receipts that would let the system count a formed portfolio company: named signed owner-operator, cap-table/equity receipt, and first paying-customer registry row.
 
@@ -23,7 +23,7 @@ The audit did not find the receipts that would let the system count a formed por
 | Anti-pitch voice | `partial_drift` | Brand voice skill exists, but `zeststream-v2-fresh` still contains old automation/custom-app/workflow-builder framing. |
 | Sustainable pace | `planned_not_measured` | 60h/week and 50%+ time-offset are locked; no measurement receipt found. |
 | Owner-search phasing | `planned_not_proven` | Warm-network-first is locked; no candidate/outreach receipt found. |
-| Shared substrate | `partial_proven` | mobile-eats + SkillOS prove substrate adoption; missing per-company substrate-share receipt tied to a valid company registry row. |
+| Shared substrate | `partial_proven` | mobile-eats + SkillOS prove substrate adoption; the remaining gap is tying the substrate-share receipt to a formed owner/company registry row. |
 | Legal structure | `scaffolded_not_cleared` | Legal house exists; attorney/CPA and binding operating agreement remain gates. |
 | N+1 cheaper than N | `instrumentation_missing` | Reuse exists, but no per-launch cost/time curve proves compounding economics yet. |
 
@@ -35,6 +35,7 @@ The audit did not find the receipts that would let the system count a formed por
 - Legal scaffold: `/Users/josh/Developer/skillos/state/legal-house/SCAFFOLD.md`
 - Mobile Eats share-ready packet: `/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md`
 - Mobile Eats tenant declaration: `/Users/josh/Developer/mobile-eats/.zs-tenant.yaml`
+- Mobile Eats substrate-share receipt: `state/substrate-share/mobile-eats-20260517T0654Z.json`
 - SkillOS adoption gate: `/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json`
 - Brand voice config: `/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml`
 

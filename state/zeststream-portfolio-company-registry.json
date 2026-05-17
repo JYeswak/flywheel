@@ -16,21 +16,22 @@
         "signed_owner_operator_receipt": null,
         "equity_receipt": null,
         "first_paying_customer_receipt": null,
-        "substrate_share_receipt": null
+        "substrate_share_receipt": "state/substrate-share/mobile-eats-20260517T0654Z.json"
       },
       "evidence_refs": [
         "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md",
         "/Users/josh/Developer/mobile-eats/.zs-tenant.yaml",
         "/Users/josh/Developer/mobile-eats/next-app/package.json",
-        "/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json"
+        "/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json",
+        "state/substrate-share/mobile-eats-20260517T0654Z.json"
       ],
       "blockers": [
         "missing signed owner-operator receipt",
         "missing equity/cap-table receipt",
         "missing first paying-customer receipt",
-        "missing substrate-share receipt tied to a formed company row"
+        "substrate-share receipt is present but not tied to a formed owner/company row"
       ],
-      "notes": "Tracked as product/substrate proof only. The registry refuses to count it as a portfolio company until the formation receipts land."
+      "notes": "Tracked as product/substrate proof only. Substrate-share evidence exists, but the registry refuses to count it as a portfolio company until signed owner, equity, and first paying-customer receipts land."
     }
   ],
   "notes": [
