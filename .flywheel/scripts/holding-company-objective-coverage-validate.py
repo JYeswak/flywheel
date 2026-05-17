@@ -152,10 +152,19 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         failures.append({"code": "not_complete_without_open_gaps"})
 
     for requirement in requirements:
-        if requirement.get("coverage_status") != "proven":
-            continue
         requirement_id = requirement.get("requirement_id")
         primary_ref = requirement.get("primary_evidence_ref")
+        evidence_refs = requirement.get("evidence_refs", [])
+        if isinstance(primary_ref, str) and primary_ref not in evidence_refs:
+            failures.append(
+                {
+                    "code": "primary_evidence_ref_missing_from_evidence_refs",
+                    "requirement_id": requirement_id,
+                    "primary_evidence_ref": primary_ref,
+                }
+            )
+        if requirement.get("coverage_status") != "proven":
+            continue
         if not isinstance(primary_ref, str) or not primary_ref.startswith("state/holding-company-"):
             continue
         primary_path = path_for_ref(primary_ref)

@@ -118,6 +118,14 @@ else
   assert_jq "$TMP/missing-registry-ref.out.json" '.failures[] | select(.code == "portfolio_requirement_missing_registry_ref" and .requirement_id == "one_year_small_portfolio_making_money")' "portfolio requirement missing registry ref rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "runway_gate") | .evidence_refs) = []' "$LEDGER" >"$TMP/missing-primary-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-primary-ref.json" --json >"$TMP/missing-primary-ref.out.json" 2>/dev/null; then
+  fail "primary evidence ref must appear in evidence refs"
+else
+  assert_jq "$TMP/missing-primary-ref.out.json" '.failures[] | select(.code == "schema_invalid")' "empty evidence refs still trips schema"
+  assert_jq "$TMP/missing-primary-ref.out.json" '.failures[] | select(.code == "primary_evidence_ref_missing_from_evidence_refs" and .requirement_id == "runway_gate")' "primary evidence ref must appear in evidence refs"
+fi
+
 jq '
   (.requirements[] | select(.requirement_id == "peel_loop") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
