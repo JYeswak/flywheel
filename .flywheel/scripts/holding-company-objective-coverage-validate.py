@@ -837,6 +837,67 @@ def shared_stack_gate_status(receipt: dict[str, Any]) -> str:
     return "blocked"
 
 
+def substrate_share_receipt_present(receipt: dict[str, Any]) -> bool:
+    counts = receipt.get("counts", {})
+    total_packages = counts.get("total_packages") if isinstance(counts, dict) else None
+    packages = receipt.get("packages", [])
+    return (
+        receipt.get("schema_version") == "zeststream.substrate_share_receipt.v1"
+        and receipt.get("company_slug") == "mobile-eats"
+        and isinstance(total_packages, int)
+        and total_packages >= 9
+        and isinstance(packages, list)
+        and len(packages) == total_packages
+        and has_ref(receipt.get("tenant_declaration"))
+        and has_ref(receipt.get("package_manifest"))
+    )
+
+
+def shared_stack_partial_evidence_present(receipt: dict[str, Any]) -> bool:
+    declared_components = set(receipt.get("required_components", []))
+    if declared_components != SHARED_STACK_REQUIRED_COMPONENTS:
+        return False
+    for company in receipt.get("companies", []):
+        if not isinstance(company, dict) or company.get("company_slug") != "mobile-eats":
+            continue
+        component_rows = [row for row in company.get("components", []) if isinstance(row, dict)]
+        by_component = {row.get("component"): row for row in component_rows}
+        return (
+            set(by_component) == SHARED_STACK_REQUIRED_COMPONENTS
+            and by_component["flywheel"].get("status") == "present"
+            and by_component["zeststream_packages"].get("status") == "present"
+            and by_component["skillos"].get("status") == "partial"
+            and by_component["brand_voice"].get("status") == "partial"
+            and by_component["jsm"].get("status") == "missing"
+        )
+    return False
+
+
+def shared_substrate_requirement_status(
+    shared_stack_status: str | None,
+    shared_stack_receipt: dict[str, Any] | None,
+    substrate_share_receipt: dict[str, Any] | None,
+    anthropic_adoption_status: str | None,
+) -> str:
+    if (
+        shared_stack_status == "clear"
+        and substrate_share_receipt is not None
+        and substrate_share_receipt_present(substrate_share_receipt)
+        and anthropic_adoption_status == "proven"
+    ):
+        return "proven"
+    if (
+        shared_stack_status == "blocked"
+        and shared_stack_receipt is not None
+        and shared_stack_partial_evidence_present(shared_stack_receipt)
+        and substrate_share_receipt is not None
+        and substrate_share_receipt_present(substrate_share_receipt)
+        and anthropic_adoption_status == "proven"
+    ):
+        return "partial"
+    return "blocked"
+
+
 def peer_coach_gate_status(receipt: dict[str, Any]) -> str:
     claimed_clear_count = receipt.get("clear_count")
     min_tier = receipt.get("required_min_owner_tier", 2)
@@ -1397,6 +1458,7 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         failures.append({"code": "skillos_forever_os_lock_ref_missing", "ref": SKILLOS_FOREVER_OS_LOCK_REF})
 
     anthropic_adoption_path = path_for_ref(ANTHROPIC_ADOPTION_REF)
+    anthropic_adoption_status = None
     if anthropic_adoption_path is not None and anthropic_adoption_path.exists():
         anthropic_adoption_status = anthropic_adoption_gate_status(load_json(anthropic_adoption_path))
         anthropic_adoption_requirement = requirements_by_id.get("recent_anthropic_adoption_claim")
@@ -1785,11 +1847,19 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
     shared_stack_path = path_for_ref(SHARED_STACK_REF)
     peer_coach_path = path_for_ref(PEER_COACH_REF)
     shared_stack_status = None
+    shared_stack_receipt = None
+    substrate_share_receipt = None
     peer_coach_status = None
     if shared_stack_path is not None and shared_stack_path.exists():
-        shared_stack_status = shared_stack_gate_status(load_json(shared_stack_path))
+        shared_stack_receipt = load_json(shared_stack_path)
+        shared_stack_status = shared_stack_gate_status(shared_stack_receipt)
     else:
         failures.append({"code": "shared_stack_ref_missing", "ref": SHARED_STACK_REF})
+    substrate_share_path = path_for_ref(MOBILE_EATS_SUBSTRATE_SHARE_REF)
+    if substrate_share_path is not None and substrate_share_path.exists():
+        substrate_share_receipt = load_json(substrate_share_path)
+    else:
+        failures.append({"code": "mobile_eats_substrate_share_ref_missing", "ref": MOBILE_EATS_SUBSTRATE_SHARE_REF})
     if peer_coach_path is not None and peer_coach_path.exists():
         peer_coach_status = peer_coach_gate_status(load_json(peer_coach_path))
     else:
@@ -1797,6 +1867,12 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
 
     shared_substrate_requirement = requirements_by_id.get("shared_substrate_stack")
     if shared_substrate_requirement is not None:
+        shared_substrate_status = shared_substrate_requirement_status(
+            shared_stack_status,
+            shared_stack_receipt,
+            substrate_share_receipt,
+            anthropic_adoption_status,
+        )
         evidence_refs = shared_substrate_requirement.get("evidence_refs", [])
         for required_ref, code in (
             (SHARED_STACK_REF, "shared_substrate_requirement_missing_shared_stack_ref"),
@@ -1811,6 +1887,15 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "required_ref": required_ref,
                     }
                 )
+        if shared_substrate_requirement.get("coverage_status") != shared_substrate_status:
+            failures.append(
+                {
+                    "code": "requirement_status_mismatch_with_shared_substrate_receipts",
+                    "requirement_id": "shared_substrate_stack",
+                    "claimed": shared_substrate_requirement.get("coverage_status"),
+                    "evidence_status": shared_substrate_status,
+                }
+            )
         if shared_stack_status == "blocked" and shared_substrate_requirement.get("coverage_status") == "proven":
             failures.append(
                 {

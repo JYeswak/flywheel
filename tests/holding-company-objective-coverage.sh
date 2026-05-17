@@ -702,8 +702,20 @@ jq '
 if "$SCRIPT" --ledger "$TMP/shared-substrate-overclaim.json" --json >"$TMP/shared-substrate-overclaim.out.json" 2>/dev/null; then
   fail "blocked shared-stack receipt rejects shared-substrate proven claim"
 else
+  assert_jq "$TMP/shared-substrate-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_shared_substrate_receipts" and .requirement_id == "shared_substrate_stack" and .evidence_status == "partial")' "shared-substrate overclaim rejected by combined receipts"
   assert_jq "$TMP/shared-substrate-overclaim.out.json" '.failures[] | select(.code == "proven_requirement_has_zero_clear_primary_evidence" and .requirement_id == "shared_substrate_stack")' "zero-clear shared-stack receipt rejects shared-substrate proven claim"
   assert_jq "$TMP/shared-substrate-overclaim.out.json" '.failures[] | select(.code == "proven_requirement_has_blocked_shared_stack_receipt" and .requirement_id == "shared_substrate_stack" and .evidence_status == "blocked")' "blocked shared-stack receipt rejects shared-substrate proven claim"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "shared_substrate_stack") | .coverage_status) = "blocked"
+  | .summary_counts.blocked += 1
+  | .summary_counts.partial -= 1
+' "$LEDGER" >"$TMP/shared-substrate-underclaim.json"
+if "$SCRIPT" --ledger "$TMP/shared-substrate-underclaim.json" --json >"$TMP/shared-substrate-underclaim.out.json" 2>/dev/null; then
+  fail "shared-substrate partial status underclaim rejected"
+else
+  assert_jq "$TMP/shared-substrate-underclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_shared_substrate_receipts" and .requirement_id == "shared_substrate_stack" and .evidence_status == "partial")' "shared-substrate partial status underclaim rejected"
 fi
 
 jq '(.requirements[] | select(.requirement_id == "shared_substrate_stack") | .evidence_refs) -= ["state/holding-company-shared-stack.json"]' "$LEDGER" >"$TMP/missing-shared-substrate-stack-ref.json"
