@@ -134,6 +134,11 @@
       "result": "future nonprofit/social-cause extension ledger exists and validates; current clear_count is 0 because no scoped initiative, legal review, governance, operating-separation, funding, or public-story receipts exist"
     },
     {
+      "kind": "lifecycle_disposition_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-lifecycle-disposition.json",
+      "result": "company lifecycle disposition ledger exists and validates; current clear_count is 0 because no close, pivot, or graduation event has owner/operator, customer, financial, substrate-retention, public-update, and holding-plane-continuity receipts"
+    },
+    {
       "kind": "pour_readiness_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json",
       "result": "POUR readiness ledger exists and validates; current clear_count is 0 because first paying-customer, owner-operator, and operating-control handoff receipts are absent"
@@ -228,6 +233,16 @@
         "/Users/josh/Developer/flywheel/state/holding-company-legal-structure.json"
       ],
       "finding": "The future nonprofit/social-cause extension is now machine-checkable. Current ledger treats it as deferred and blocks readiness because no social-cause scope, nonprofit legal review, governance model, operating-separation, funding policy, or public-story receipts exist."
+    },
+    {
+      "gate": "company_lifecycle_disposition",
+      "status": "tracking_no_disposition_event",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-lifecycle-disposition.json",
+        "/Users/josh/Developer/flywheel/state/zeststream-portfolio-company-registry.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json"
+      ],
+      "finding": "The company close/pivot/graduation path is now machine-checkable separately from the standing holding-plane goal. Current ledger tracks Mobile Eats only as a baseline and blocks any lifecycle disposition claim until owner/operator, customer-obligation, financial, substrate-retention, and brand/public-update receipts exist."
     },
     {
       "gate": "sustainable_pace",
@@ -388,6 +403,10 @@
     {
       "owner": "future-nonprofit-extension",
       "action": "Fill state/holding-company-nonprofit-extension.json with social-cause scope, nonprofit legal review, governance, operating-separation, funding policy, and public-story receipts before marking any nonprofit extension ready or active."
+    },
+    {
+      "owner": "portfolio-operations",
+      "action": "Fill state/holding-company-lifecycle-disposition.json with owner/operator, customer-obligation, financial, substrate-retention, brand/public-update, and continuity receipts before marking any portfolio company closed, pivoted, or graduated."
     },
     {
       "owner": "mobile-eats",

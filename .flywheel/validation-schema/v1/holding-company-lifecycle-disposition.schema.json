@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-lifecycle-disposition/v1/schema.json",
+  "title": "ZestStream Holding Company Lifecycle Disposition v1",
+  "description": "Ledger for portfolio-company close, pivot, or graduate disposition receipts.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "clear_count",
+    "dispositions",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_lifecycle_disposition.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "company_lifecycle_disposition"
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "dispositions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/disposition"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "disposition": {
+      "type": "object",
+      "required": [
+        "disposition_id",
+        "company_slug",
+        "disposition_type",
+        "status",
+        "owner_operator_ref",
+        "customer_obligation_disposition_ref",
+        "financial_disposition_ref",
+        "substrate_retention_ref",
+        "brand_public_update_ref",
+        "holding_plane_continues",
+        "evidence_refs"
+      ],
+      "properties": {
+        "disposition_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "company_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "disposition_type": {
+          "type": "string",
+          "enum": [
+            "active_tracking",
+            "pivot",
+            "closed",
+            "graduated"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "tracking",
+            "pending_disposition",
+            "disposition_clear",
+            "deferred"
+          ]
+        },
+        "owner_operator_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "customer_obligation_disposition_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "financial_disposition_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "substrate_retention_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "brand_public_update_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "graduation_terms_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "pivot_scope_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "holding_plane_continues": {
+          "type": "boolean"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
