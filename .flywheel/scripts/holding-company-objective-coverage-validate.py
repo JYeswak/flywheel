@@ -621,6 +621,14 @@ def recent_brand_voice_claim_status(receipt: dict[str, Any], anti_pitch_status: 
     return "blocked"
 
 
+def anti_pitch_requirement_status(statuses: dict[str, str | None]) -> str:
+    if statuses["anti_pitch"] != "clear":
+        return "blocked"
+    if statuses["brand_voice"] == "clear" and statuses["founder_post"] == "clear":
+        return "proven"
+    return "partial"
+
+
 def founder_post_voice_gate_status(receipt: dict[str, Any]) -> str:
     claimed_clear_count = receipt.get("clear_count")
     if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
@@ -1354,6 +1362,7 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
 
     anti_pitch_requirement = requirements_by_id.get("anti_pitch_voice_gate")
     if anti_pitch_requirement is not None:
+        anti_pitch_status = anti_pitch_requirement_status(public_receipt_statuses)
         evidence_refs = anti_pitch_requirement.get("evidence_refs", [])
         for required_ref, code in (
             (ANTI_PITCH_VOICE_REF, "anti_pitch_requirement_missing_anti_pitch_voice_ref"),
@@ -1362,6 +1371,15 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         ):
             if required_ref not in evidence_refs:
                 failures.append({"code": code, "requirement_id": "anti_pitch_voice_gate", "required_ref": required_ref})
+        if anti_pitch_requirement.get("coverage_status") != anti_pitch_status:
+            failures.append(
+                {
+                    "code": "requirement_status_mismatch_with_anti_pitch_voice_receipts",
+                    "requirement_id": "anti_pitch_voice_gate",
+                    "claimed": anti_pitch_requirement.get("coverage_status"),
+                    "evidence_status": anti_pitch_status,
+                }
+            )
         if public_receipt_statuses["anti_pitch"] == "blocked" and anti_pitch_requirement.get("coverage_status") != "blocked":
             failures.append(
                 {

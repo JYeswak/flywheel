@@ -220,8 +220,27 @@ jq '
 if "$SCRIPT" --ledger "$TMP/anti-pitch-overclaim.json" --json >"$TMP/anti-pitch-overclaim.out.json" 2>/dev/null; then
   fail "blocked adjacent voice receipts reject anti-pitch proven claim"
 else
+  assert_jq "$TMP/anti-pitch-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_anti_pitch_voice_receipts" and .requirement_id == "anti_pitch_voice_gate" and .evidence_status == "partial")' "anti-pitch overclaim rejected by combined receipts"
   assert_jq "$TMP/anti-pitch-overclaim.out.json" '.failures[] | select(.code == "proven_requirement_has_blocked_brand_voice_skill_receipt" and .requirement_id == "anti_pitch_voice_gate")' "blocked brand-voice receipt rejects anti-pitch proven claim"
   assert_jq "$TMP/anti-pitch-overclaim.out.json" '.failures[] | select(.code == "proven_requirement_has_blocked_founder_post_voice_receipt" and .requirement_id == "anti_pitch_voice_gate")' "blocked founder-post receipt rejects anti-pitch proven claim"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "anti_pitch_voice_gate") | .coverage_status) = "blocked"
+  | .summary_counts.blocked += 1
+  | .summary_counts.partial -= 1
+' "$LEDGER" >"$TMP/anti-pitch-underclaim.json"
+if "$SCRIPT" --ledger "$TMP/anti-pitch-underclaim.json" --json >"$TMP/anti-pitch-underclaim.out.json" 2>/dev/null; then
+  fail "anti-pitch partial status underclaim rejected"
+else
+  assert_jq "$TMP/anti-pitch-underclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_anti_pitch_voice_receipts" and .requirement_id == "anti_pitch_voice_gate" and .evidence_status == "partial")' "anti-pitch partial status underclaim rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "anti_pitch_voice_gate") | .evidence_refs) -= ["state/holding-company-anti-pitch-voice.json"]' "$LEDGER" >"$TMP/missing-anti-pitch-voice-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-anti-pitch-voice-ref.json" --json >"$TMP/missing-anti-pitch-voice-ref.out.json" 2>/dev/null; then
+  fail "anti-pitch requirement missing anti-pitch voice ref rejected"
+else
+  assert_jq "$TMP/missing-anti-pitch-voice-ref.out.json" '.failures[] | select(.code == "anti_pitch_requirement_missing_anti_pitch_voice_ref" and .requirement_id == "anti_pitch_voice_gate")' "anti-pitch requirement missing anti-pitch voice ref rejected"
 fi
 
 jq '(.requirements[] | select(.requirement_id == "anti_pitch_voice_gate") | .evidence_refs) -= ["state/holding-company-brand-voice-skill.json"]' "$LEDGER" >"$TMP/missing-anti-pitch-brand-voice-ref.json"
