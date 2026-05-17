@@ -105,6 +105,10 @@ def has_secretish_string(value: Any) -> bool:
     return False
 
 
+def has_zero_clear_count(value: dict[str, Any]) -> bool:
+    return any(key.endswith("clear_count") and count == 0 for key, count in value.items())
+
+
 def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_paths: bool) -> dict[str, Any]:
     failures: list[dict[str, Any]] = []
     try:
@@ -146,6 +150,26 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         failures.append({"code": "standing_goal_cannot_be_complete"})
     if ledger.get("coverage_status") == "not_complete" and computed_counts["blocked"] == 0 and computed_counts["partial"] == 0:
         failures.append({"code": "not_complete_without_open_gaps"})
+
+    for requirement in requirements:
+        if requirement.get("coverage_status") != "proven":
+            continue
+        requirement_id = requirement.get("requirement_id")
+        primary_ref = requirement.get("primary_evidence_ref")
+        if not isinstance(primary_ref, str) or not primary_ref.startswith("state/holding-company-"):
+            continue
+        primary_path = path_for_ref(primary_ref)
+        if primary_path is None or not primary_path.exists():
+            continue
+        primary_evidence = load_json(primary_path)
+        if has_zero_clear_count(primary_evidence):
+            failures.append(
+                {
+                    "code": "proven_requirement_has_zero_clear_primary_evidence",
+                    "requirement_id": requirement_id,
+                    "primary_evidence_ref": primary_ref,
+                }
+            )
 
     portfolio_registry_path = path_for_ref(PORTFOLIO_REGISTRY_REF)
     counted_portfolio_companies = None

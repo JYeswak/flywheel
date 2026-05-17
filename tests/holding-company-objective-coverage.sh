@@ -118,6 +118,17 @@ else
   assert_jq "$TMP/missing-registry-ref.out.json" '.failures[] | select(.code == "portfolio_requirement_missing_registry_ref" and .requirement_id == "one_year_small_portfolio_making_money")' "portfolio requirement missing registry ref rejected"
 fi
 
+jq '
+  (.requirements[] | select(.requirement_id == "peel_loop") | .coverage_status) = "proven"
+  | .summary_counts.proven += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/zero-clear-proven.json"
+if "$SCRIPT" --ledger "$TMP/zero-clear-proven.json" --json >"$TMP/zero-clear-proven.out.json" 2>/dev/null; then
+  fail "zero-clear primary evidence cannot support proven coverage"
+else
+  assert_jq "$TMP/zero-clear-proven.out.json" '.failures[] | select(.code == "proven_requirement_has_zero_clear_primary_evidence" and .requirement_id == "peel_loop")' "zero-clear primary evidence cannot support proven coverage"
+fi
+
 jq '.coverage_status = "complete"' "$LEDGER" >"$TMP/complete.json"
 if "$SCRIPT" --ledger "$TMP/complete.json" --json >"$TMP/complete.out.json" 2>/dev/null; then
   fail "standing goal completion claim rejected"
