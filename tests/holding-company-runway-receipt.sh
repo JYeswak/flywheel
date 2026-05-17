@@ -47,6 +47,20 @@ else
   assert_jq "$TMP/short.out.json" '.status == "fail" and (.failures[] | select(.code == "pass_status_below_required_months"))' "short runway pass rejected"
 fi
 
+jq 'del(.launch_gate)' "$RECEIPT" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --receipt "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid runway receipt rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid runway receipt rejected"
+fi
+
+jq '.status = "fail" | .verified_runway_months = 20' "$RECEIPT" >"$TMP/fail-with-months.json"
+if "$SCRIPT" --receipt "$TMP/fail-with-months.json" --json >"$TMP/fail-with-months.out.json" 2>/dev/null; then
+  fail "fail status with enough runway months rejected"
+else
+  assert_jq "$TMP/fail-with-months.out.json" '.status == "fail" and (.failures[] | select(.code == "fail_status_meets_required_months"))' "fail status with enough runway months rejected"
+fi
+
 jq '.status = "blocked" | .verified_runway_months = 20' "$RECEIPT" >"$TMP/blocked-with-months.json"
 if "$SCRIPT" --receipt "$TMP/blocked-with-months.json" --json >"$TMP/blocked-with-months.out.json" 2>/dev/null; then
   fail "blocked receipt with months rejected"
@@ -59,6 +73,13 @@ if "$SCRIPT" --receipt "$TMP/raw-amount.json" --json >"$TMP/raw-amount.out.json"
   fail "raw amount rejected"
 else
   assert_jq "$TMP/raw-amount.out.json" '.status == "fail" and (.failures[] | select(.code == "secret_or_raw_amount_shape_detected"))' "raw amount rejected"
+fi
+
+jq '.evidence_refs += ["/no/such/runway-evidence.json"]' "$RECEIPT" >"$TMP/missing-evidence.json"
+if "$SCRIPT" --receipt "$TMP/missing-evidence.json" --check-paths --json >"$TMP/missing-evidence.out.json" 2>/dev/null; then
+  fail "missing evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing evidence ref rejected"
 fi
 
 printf 'RESULT pass=%d fail=%d\n' "$pass_count" "$fail_count"
