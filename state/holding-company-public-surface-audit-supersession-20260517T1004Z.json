@@ -29,6 +29,16 @@
       "path": "next_actions[zeststream-public-story]",
       "previous_action": "Fill state/holding-company-public-story.json with receipt/proof refs and holding-company positioning after removing build-app/workflow-builder framing from public surfaces.",
       "current_disposition": "superseded_by_public_story_gate_maintenance_action"
+    },
+    {
+      "path": "state/holding-company-anti-pitch-active-content-repair-20260517T0935Z.json",
+      "previous_status": "active_content_repaired_ledger_still_blocked_on_historical_summary",
+      "current_disposition": "superseded_by_historical_builder_retirement_and_public_story_route_receipts"
+    },
+    {
+      "path": "state/holding-company-historical-builder-summary-retirement-20260517T0942Z.json",
+      "previous_status": "known_builder_hits_retired_gates_still_blocked_on_durable_story",
+      "current_disposition": "superseded_by_public_story_route_receipt"
     }
   ],
   "current_receipts": [
