@@ -68,5 +68,53 @@ else
   assert_jq "$TMP/count-mismatch.out.json" '.status == "fail" and (.failures[] | select(.code == "pace_clear_count_mismatch"))' "pace clear count mismatch rejected"
 fi
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid sustainable pace ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid sustainable pace ledger rejected"
+fi
+
+jq '.periods[0].measurement_status = "measured_fail" | .periods[0].weekly_hours_total = null | .pace_clear_count = 0' "$TMP/clear.json" >"$TMP/incomplete-metrics.json"
+if "$SCRIPT" --ledger "$TMP/incomplete-metrics.json" --json >"$TMP/incomplete-metrics.out.json" 2>/dev/null; then
+  fail "measured status without complete metrics rejected"
+else
+  assert_jq "$TMP/incomplete-metrics.out.json" '.status == "fail" and (.failures[] | select(.code == "measured_status_without_complete_metrics"))' "measured status without complete metrics rejected"
+fi
+
+jq '
+  .periods[0].coaching_hours_manual = 0
+  | .periods[0].coaching_hours_offset_by_substrate = 0
+  | .periods[0].substrate_offset_ratio = 0
+  | .periods[0].measurement_status = "baseline"
+  | .pace_clear_count = 0
+' "$TMP/clear.json" >"$TMP/ratio-not-computable.json"
+if "$SCRIPT" --ledger "$TMP/ratio-not-computable.json" --json >"$TMP/ratio-not-computable.out.json" 2>/dev/null; then
+  fail "non-computable substrate offset ratio rejected"
+else
+  assert_jq "$TMP/ratio-not-computable.out.json" '.status == "fail" and (.failures[] | select(.code == "substrate_offset_ratio_not_computable"))' "non-computable substrate offset ratio rejected"
+fi
+
+jq '.periods[0].lifecycle_year = 1 | .pace_clear_count = 0' "$TMP/clear.json" >"$TMP/year1-clear.json"
+if "$SCRIPT" --ledger "$TMP/year1-clear.json" --json >"$TMP/year1-clear.out.json" 2>/dev/null; then
+  fail "measured clear before sustainable pace rejected"
+else
+  assert_jq "$TMP/year1-clear.out.json" '.status == "fail" and (.failures[] | select(.code == "measured_clear_without_sustainable_pace"))' "measured clear before sustainable pace rejected"
+fi
+
+jq '.periods[0].evidence_refs = ["state/does-not-exist-sustainable-pace-evidence.json"] | .pace_clear_count = 0' "$TMP/clear.json" >"$TMP/missing-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence-ref.json" --check-paths --json >"$TMP/missing-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing sustainable pace evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing sustainable pace evidence ref rejected"
+fi
+
+jq '.periods[0].notes = "fixture sk-TestSecret123 should be rejected" | .pace_clear_count = 0' "$TMP/clear.json" >"$TMP/secret-shape.json"
+if "$SCRIPT" --ledger "$TMP/secret-shape.json" --json >"$TMP/secret-shape.out.json" 2>/dev/null; then
+  fail "secret-shaped sustainable pace value rejected"
+else
+  assert_jq "$TMP/secret-shape.out.json" '.status == "fail" and (.failures[] | select(.code == "secret_or_raw_amount_shape_detected"))' "secret-shaped sustainable pace value rejected"
+fi
+
 printf 'RESULT pass=%d fail=%d\n' "$pass_count" "$fail_count"
 exit "$fail_count"
