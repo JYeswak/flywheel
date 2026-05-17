@@ -25,7 +25,7 @@ The audit did not find the receipts that would let the system count a formed por
 | Owner-search phasing | `planned_not_proven` | Warm-network-first is locked; no candidate/outreach receipt found. |
 | Shared substrate | `partial_proven` | mobile-eats + SkillOS prove substrate adoption; the remaining gap is tying the substrate-share receipt to a formed owner/company registry row. |
 | Legal structure | `scaffolded_not_cleared` | Legal house exists; attorney/CPA and binding operating agreement remain gates. |
-| N+1 cheaper than N | `instrumentation_missing` | Reuse exists, but no per-launch cost/time curve proves compounding economics yet. |
+| N+1 cheaper than N | `baseline_only` | Baseline launch economics ledger exists; no second comparable launch row proves compounding economics yet. |
 
 ## Evidence Anchors
 
@@ -38,6 +38,7 @@ The audit did not find the receipts that would let the system count a formed por
 - Mobile Eats substrate-share receipt: `state/substrate-share/mobile-eats-20260517T0654Z.json`
 - SkillOS adoption gate: `/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json`
 - Brand voice config: `/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml`
+- Launch economics ledger: `state/holding-company-launch-economics.json`
 
 ## Immediate Next Actions
 

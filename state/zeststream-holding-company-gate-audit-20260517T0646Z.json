@@ -77,6 +77,11 @@
       "kind": "commit_velocity_probe",
       "command": "git rev-list --count --since='7 days ago' HEAD across skillos, flywheel, mobile-eats, zeststream-platform, zesttube, clutterfreespaces, terratitle, agent-bench, cubcloud-aaas",
       "result": "sample count 3755 commits; does not independently prove the 4000+ claim because the exact nine-product-surface set was not established"
+    },
+    {
+      "kind": "launch_economics_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-launch-economics.json",
+      "result": "baseline ledger exists and validates; it refuses N+1 cheaper-than-N claims until at least two comparable launch rows exist"
     }
   ],
   "canonical_gates": [
@@ -157,10 +162,11 @@
       "gate": "n_plus_one_cheaper",
       "status": "instrumentation_missing",
       "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-launch-economics.json",
         "/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json",
         "/Users/josh/Developer/mobile-eats/next-app/package.json"
       ],
-      "finding": "Reusable substrate and adoption receipts exist, but there is no per-launch cost/time curve proving PEEL or PRESS N+1 is cheaper than N."
+      "finding": "Reusable substrate and a baseline launch economics ledger exist, but there is still no second comparable launch row proving PEEL or PRESS N+1 is cheaper than N."
     }
   ],
   "recent_progress_claims": [
@@ -213,7 +219,7 @@
     },
     {
       "owner": "skillos/flywheel",
-      "action": "Add N+1 cost instrumentation: per-launch PEEL interviews, PRESS build hours, reused package count, new substrate contributions, and downstream propagation window."
+      "action": "Populate the launch economics ledger with per-launch PEEL interviews, PRESS build hours, reused package count, new substrate contributions, and downstream propagation window as new companies form."
     }
   ]
 }

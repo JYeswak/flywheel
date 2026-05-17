@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-launch-economics/v1/schema.json",
+  "title": "ZestStream Holding Company Launch Economics v1",
+  "description": "Ledger for proving or refusing the N+1 cheaper-than-N gate across launches.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "measurement_status",
+    "launches"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_launch_economics.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "n_plus_one_cheaper_than_n"
+    },
+    "measurement_status": {
+      "type": "string",
+      "enum": [
+        "baseline",
+        "measured_pass",
+        "measured_fail",
+        "blocked"
+      ]
+    },
+    "launches": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/launch"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "receiptRef": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nonNegativeNumber": {
+      "type": "number",
+      "minimum": 0
+    },
+    "nullableNonNegativeNumber": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/nonNegativeNumber"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "launch": {
+      "type": "object",
+      "required": [
+        "launch_id",
+        "company_slug",
+        "sequence",
+        "status",
+        "peel_interview_count",
+        "peel_hours",
+        "press_build_hours",
+        "reused_package_count",
+        "new_substrate_contribution_count",
+        "substrate_share_receipt",
+        "evidence_refs"
+      ],
+      "properties": {
+        "launch_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "company_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "candidate_baseline",
+            "formed",
+            "launched",
+            "blocked",
+            "deferred"
+          ]
+        },
+        "peel_interview_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "peel_hours": {
+          "$ref": "#/$defs/nullableNonNegativeNumber"
+        },
+        "press_build_hours": {
+          "$ref": "#/$defs/nullableNonNegativeNumber"
+        },
+        "reused_package_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "new_substrate_contribution_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "downstream_propagation_window_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "substrate_share_receipt": {
+          "$ref": "#/$defs/receiptRef"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/receiptRef"
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
