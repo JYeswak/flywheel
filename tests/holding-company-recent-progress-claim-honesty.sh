@@ -101,6 +101,20 @@ else
   assert_jq "$TMP/duplicate-claim-id.out.json" '.failures[] | select(.code == "duplicate_claim_id" and (.claim_ids | index("anthropic_adoption")))' "duplicate recent-progress claim id rejected"
 fi
 
+jq '(.claims[] | select(.claim_id == "mobile_eats_shipping") | .claim_honesty_status) = "safe_to_use"' "$RECEIPT" >"$TMP/wrong-claim-honesty.json"
+if "$SCRIPT" --receipt "$TMP/wrong-claim-honesty.json" --json >"$TMP/wrong-claim-honesty.out.json" 2>/dev/null; then
+  fail "claim honesty status drift rejected"
+else
+  assert_jq "$TMP/wrong-claim-honesty.out.json" '.failures[] | select(.code == "claim_honesty_status_mismatch" and .claim_id == "mobile_eats_shipping" and .expected == "formation_claim_blocked_in_text")' "claim honesty status drift rejected"
+fi
+
+jq '(.claims[] | select(.claim_id == "progress_velocity") | .current_gate_status) = "proven"' "$RECEIPT" >"$TMP/wrong-current-gate-status.json"
+if "$SCRIPT" --receipt "$TMP/wrong-current-gate-status.json" --json >"$TMP/wrong-current-gate-status.out.json" 2>/dev/null; then
+  fail "current gate status drift rejected"
+else
+  assert_jq "$TMP/wrong-current-gate-status.out.json" '.failures[] | select(.code == "current_gate_status_mismatch" and .claim_id == "progress_velocity" and .validator_status == "blocked")' "current gate status drift rejected"
+fi
+
 jq '(.claims[] | select(.claim_id == "progress_velocity") | .claim_text) = "4,000+ commits in 7 days across 9 product surfaces."' "$RECEIPT" >"$TMP/progress-overclaim.json"
 if "$SCRIPT" --receipt "$TMP/progress-overclaim.json" --json >"$TMP/progress-overclaim.out.json" 2>/dev/null; then
   fail "progress velocity overclaim rejected"
