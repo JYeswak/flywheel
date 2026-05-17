@@ -546,6 +546,27 @@ def skillos_forever_os_lock_gate_status(receipt: dict[str, Any]) -> str:
     return "blocked"
 
 
+def anthropic_adoption_gate_status(receipt: dict[str, Any]) -> str:
+    min_repo_count = receipt.get("min_real_consumer_repo_count")
+    real_repo_count = receipt.get("real_consumer_repo_count")
+    distinct_target_count = receipt.get("distinct_target_count")
+    if (
+        receipt.get("status") == "proven"
+        and receipt.get("doctor_status") == "OK"
+        and isinstance(min_repo_count, int)
+        and isinstance(real_repo_count, int)
+        and isinstance(distinct_target_count, int)
+        and real_repo_count >= min_repo_count
+        and distinct_target_count >= min_repo_count
+        and receipt.get("target_repos_remaining_to_min_target_count") == 0
+        and receipt.get("packages_phantom_fail") == 0
+        and receipt.get("all_expected_events_present") is True
+        and receipt.get("all_expected_repos_present") is True
+    ):
+        return "proven"
+    return "blocked"
+
+
 def brand_voice_skill_gate_status(receipt: dict[str, Any]) -> str:
     claimed_clear_count = receipt.get("clear_count")
     if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
@@ -1243,6 +1264,32 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "skillos_forever_os_lock_ref_missing", "ref": SKILLOS_FOREVER_OS_LOCK_REF})
+
+    anthropic_adoption_path = path_for_ref(ANTHROPIC_ADOPTION_REF)
+    if anthropic_adoption_path is not None and anthropic_adoption_path.exists():
+        anthropic_adoption_status = anthropic_adoption_gate_status(load_json(anthropic_adoption_path))
+        anthropic_adoption_requirement = requirements_by_id.get("recent_anthropic_adoption_claim")
+        if anthropic_adoption_requirement is not None:
+            evidence_refs = anthropic_adoption_requirement.get("evidence_refs", [])
+            if ANTHROPIC_ADOPTION_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "anthropic_adoption_requirement_missing_adoption_ref",
+                        "requirement_id": "recent_anthropic_adoption_claim",
+                        "required_ref": ANTHROPIC_ADOPTION_REF,
+                    }
+                )
+            if anthropic_adoption_requirement.get("coverage_status") != anthropic_adoption_status:
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_anthropic_adoption_receipt",
+                        "requirement_id": "recent_anthropic_adoption_claim",
+                        "claimed": anthropic_adoption_requirement.get("coverage_status"),
+                        "evidence_status": anthropic_adoption_status,
+                    }
+                )
+    else:
+        failures.append({"code": "anthropic_adoption_ref_missing", "ref": ANTHROPIC_ADOPTION_REF})
 
     anti_pitch_requirement = requirements_by_id.get("anti_pitch_voice_gate")
     if anti_pitch_requirement is not None:

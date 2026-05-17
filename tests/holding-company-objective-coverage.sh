@@ -145,6 +145,25 @@ else
   assert_jq "$TMP/mobile-eats-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_claim_honesty" and .requirement_id == "recent_mobile_eats_shipping_claim" and .evidence_status == "partial")' "Mobile Eats shipping status overclaim rejected by claim honesty"
 fi
 
+jq '
+  (.requirements[] | select(.requirement_id == "recent_anthropic_adoption_claim") | .coverage_status) = "partial"
+  | .summary_counts.proven -= 1
+  | .summary_counts.partial += 1
+' "$LEDGER" >"$TMP/anthropic-adoption-underclaim.json"
+if "$SCRIPT" --ledger "$TMP/anthropic-adoption-underclaim.json" --json >"$TMP/anthropic-adoption-underclaim.out.json" 2>/dev/null; then
+  fail "Anthropic adoption receipt status drift rejected"
+else
+  assert_jq "$TMP/anthropic-adoption-underclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_anthropic_adoption_receipt" and .requirement_id == "recent_anthropic_adoption_claim" and .evidence_status == "proven")' "Anthropic adoption status drift rejected by adoption receipt"
+  assert_jq "$TMP/anthropic-adoption-underclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_claim_honesty" and .requirement_id == "recent_anthropic_adoption_claim" and .evidence_status == "proven")' "Anthropic adoption status drift rejected by claim honesty"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "recent_anthropic_adoption_claim") | .evidence_refs) -= ["state/holding-company-anthropic-adoption.json"]' "$LEDGER" >"$TMP/missing-anthropic-adoption-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-anthropic-adoption-ref.json" --json >"$TMP/missing-anthropic-adoption-ref.out.json" 2>/dev/null; then
+  fail "Anthropic adoption requirement missing adoption receipt ref rejected"
+else
+  assert_jq "$TMP/missing-anthropic-adoption-ref.out.json" '.failures[] | select(.code == "anthropic_adoption_requirement_missing_adoption_ref" and .requirement_id == "recent_anthropic_adoption_claim")' "Anthropic adoption requirement missing adoption receipt ref rejected"
+fi
+
 jq '(.requirements[] | select(.requirement_id == "recent_mobile_eats_shipping_claim") | .evidence_refs) -= ["state/holding-company-mobile-eats-shipping.json"]' "$LEDGER" >"$TMP/missing-mobile-eats-shipping-ref.json"
 if "$SCRIPT" --ledger "$TMP/missing-mobile-eats-shipping-ref.json" --json >"$TMP/missing-mobile-eats-shipping-ref.out.json" 2>/dev/null; then
   fail "Mobile Eats requirement missing shipping receipt ref rejected"
