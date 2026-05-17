@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-owner-economics/v1/schema.json",
+  "title": "ZestStream Holding Company Owner Economics v1",
+  "description": "Ledger for the signed owner-economics gate: owner-operators get 25% equity and tiered 45-75% profit distributions.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "required_owner_equity_percent",
+    "owner_distribution_min_percent",
+    "owner_distribution_max_percent",
+    "clear_count",
+    "deals",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_owner_economics.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "owner_economics"
+    },
+    "required_owner_equity_percent": {
+      "const": 25
+    },
+    "owner_distribution_min_percent": {
+      "const": 45
+    },
+    "owner_distribution_max_percent": {
+      "const": 75
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "deals": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/deal"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "deal": {
+      "type": "object",
+      "required": [
+        "deal_id",
+        "company_slug",
+        "owner_operator_slug",
+        "status",
+        "owner_equity_percent",
+        "holding_company_equity_percent",
+        "profit_distribution_tiers",
+        "signed_owner_operator_receipt",
+        "cap_table_ref",
+        "distribution_terms_ref",
+        "legal_review_ref",
+        "substrate_share_receipt",
+        "evidence_refs"
+      ],
+      "properties": {
+        "deal_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "company_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "owner_operator_slug": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "blocked",
+            "signed",
+            "active",
+            "deferred"
+          ]
+        },
+        "owner_equity_percent": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "holding_company_equity_percent": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "profit_distribution_tiers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/profit_distribution_tier"
+          }
+        },
+        "signed_owner_operator_receipt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "cap_table_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "distribution_terms_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "legal_review_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "substrate_share_receipt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "profit_distribution_tier": {
+      "type": "object",
+      "required": [
+        "tier_id",
+        "owner_distribution_percent",
+        "basis_ref"
+      ],
+      "properties": {
+        "tier_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "owner_distribution_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "basis_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

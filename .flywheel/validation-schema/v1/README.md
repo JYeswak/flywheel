@@ -24,6 +24,7 @@ This directory defines the first machine-readable receipt contract for validatin
 | `holding-company-anti-pitch-voice.schema.json` | ZestStream holding-company anti-pitch voice ledger; refuses public-clear status while builder-framing hits remain or the holding-company story is absent. |
 | `holding-company-pour-readiness.schema.json` | ZestStream holding-company POUR readiness ledger; refuses launch-clear status without own brand, public surface, first customer, owner-operator, and operating-control handoff refs. |
 | `holding-company-peer-coach.schema.json` | ZestStream holding-company NURTURE peer-coach ledger; refuses eligible/active status without Tier 2+ owner, sustainable cash, operating-control, peer-coach agreement, and 5% equity grant refs. |
+| `holding-company-owner-economics.schema.json` | ZestStream holding-company owner-economics ledger; refuses signed/active deal clearance without 25% owner equity, 45-75% tiered owner distributions, owner/cap-table/distribution/legal refs, and substrate-share proof. |
 | `agent-security-control.schema.json` | JSON Schema contract for `agent-security-control/v1` security-control receipts. |
 | `fixtures/pass/*.json` | Receipts that must validate. |
 | `fixtures/fail/*.json` | Receipts that must be rejected with deterministic JSON errors. |

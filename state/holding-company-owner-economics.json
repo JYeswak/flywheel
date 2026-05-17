@@ -1,0 +1,37 @@
+{
+  "schema_version": "zeststream.holding_company_owner_economics.v1",
+  "generated_at": "2026-05-17T07:39:00Z",
+  "gate": "owner_economics",
+  "required_owner_equity_percent": 25,
+  "owner_distribution_min_percent": 45,
+  "owner_distribution_max_percent": 75,
+  "clear_count": 0,
+  "deals": [
+    {
+      "deal_id": "mobile-eats-owner-economics-20260517",
+      "company_slug": "mobile-eats",
+      "owner_operator_slug": null,
+      "status": "blocked",
+      "owner_equity_percent": null,
+      "holding_company_equity_percent": null,
+      "profit_distribution_tiers": [],
+      "signed_owner_operator_receipt": null,
+      "cap_table_ref": null,
+      "distribution_terms_ref": null,
+      "legal_review_ref": null,
+      "substrate_share_receipt": "state/substrate-share/mobile-eats-20260517T0654Z.json",
+      "evidence_refs": [
+        "state/zeststream-portfolio-company-registry.json",
+        "state/holding-company-legal-structure.json",
+        "state/substrate-share/mobile-eats-20260517T0654Z.json"
+      ],
+      "notes": "Mobile Eats has substrate evidence but no signed owner-operator, cap-table, distribution terms, or legal review refs, so owner economics cannot clear."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical gate for the holding-company owner-operator economics promise.",
+    "A deal clears only when signed or active terms prove 25% owner equity and tiered 45-75% owner profit distributions.",
+    "This is a receipt gate, not legal or tax advice."
+  ],
+  "next_action": "Before counting a company as deal-clear, add signed owner-operator, cap-table, distribution terms, legal review, and substrate-share receipts proving 25% owner equity and 45-75% tiered distributions."
+}
