@@ -954,6 +954,13 @@ else
   assert_jq "$TMP/missing-shared-substrate-anthropic-ref.out.json" '.failures[] | select(.code == "shared_substrate_requirement_missing_anthropic_adoption_ref" and .requirement_id == "shared_substrate_stack")' "shared-substrate requirement missing Anthropic adoption ref rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "shared_substrate_stack") | .finding) = "Flywheel and @zeststream package evidence are present, but full NURTURE stack remains blocked by missing formed-company operating receipts."' "$LEDGER" >"$TMP/stale-shared-stack-component-finding.json"
+if "$SCRIPT" --ledger "$TMP/stale-shared-stack-component-finding.json" --json >"$TMP/stale-shared-stack-component-finding.out.json" 2>/dev/null; then
+  fail "shared-substrate stale missing-component finding rejected"
+else
+  assert_jq "$TMP/stale-shared-stack-component-finding.out.json" '.failures[] | select(.code == "shared_substrate_finding_missing_component" and .requirement_id == "shared_substrate_stack" and .component == "jsm")' "shared-substrate stale missing-component finding rejected"
+fi
+
 jq '
   (.requirements[] | select(.requirement_id == "nurture_loop") | .coverage_status) = "partial"
   | .summary_counts.partial += 1

@@ -1981,6 +1981,28 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                     "evidence_status": shared_stack_status,
                 }
             )
+        if shared_stack_receipt is not None:
+            finding = shared_substrate_requirement.get("finding")
+            finding_text = finding.lower() if isinstance(finding, str) else ""
+            missing_components = sorted(
+                {
+                    str(component.get("component"))
+                    for company in shared_stack_receipt.get("companies", [])
+                    if isinstance(company, dict)
+                    for component in company.get("components", [])
+                    if isinstance(component, dict) and component.get("status") == "missing"
+                }
+            )
+            for component in missing_components:
+                component_text = component.replace("_", " ").lower()
+                if component.lower() not in finding_text and component_text not in finding_text:
+                    failures.append(
+                        {
+                            "code": "shared_substrate_finding_missing_component",
+                            "requirement_id": "shared_substrate_stack",
+                            "component": component,
+                        }
+                    )
 
     nurture_requirement = requirements_by_id.get("nurture_loop")
     if nurture_requirement is not None:
