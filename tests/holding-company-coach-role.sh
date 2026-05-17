@@ -36,6 +36,13 @@ jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
 assert_jq "$TMP/current.json" '.status == "pass" and .clear_count == 0 and .roles[0].coach_role_gate_status == "blocked"' "current ledger validates and blocks coach role"
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid coach role ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid coach role ledger rejected"
+fi
+
 jq '
   .clear_count = 1
   | .roles[0].status = "coach_role_clear"
@@ -49,6 +56,13 @@ jq '
 "$SCRIPT" --ledger "$TMP/clear.json" --json >"$TMP/clear.out.json"
 assert_jq "$TMP/clear.out.json" '.status == "pass" and .clear_count == 1 and .roles[0].coach_role_gate_status == "clear"' "coach role and majority stake clear"
 
+jq '.roles[0].notes = ("sk-" + "NOTAREALSECRET")' "$TMP/clear.json" >"$TMP/secret-shaped-value.json"
+if "$SCRIPT" --ledger "$TMP/secret-shaped-value.json" --json >"$TMP/secret-shaped-value.out.json" 2>/dev/null; then
+  fail "secret-shaped coach role value rejected"
+else
+  assert_jq "$TMP/secret-shaped-value.out.json" '.status == "fail" and (.failures[] | select(.code == "secret_or_raw_value_shape_detected"))' "secret-shaped coach role value rejected"
+fi
+
 jq '.roles[0].status = "coach_role_clear" | .roles[0].holding_stake_percent = 75' "$LEDGER" >"$TMP/missing.json"
 if "$SCRIPT" --ledger "$TMP/missing.json" --json >"$TMP/missing.out.json" 2>/dev/null; then
   fail "coach role clear missing refs rejected"
@@ -61,6 +75,20 @@ if "$SCRIPT" --ledger "$TMP/minority.json" --json >"$TMP/minority.out.json" 2>/d
   fail "minority holding stake rejected"
 else
   assert_jq "$TMP/minority.out.json" '.failures[] | select(.code == "holding_stake_below_majority")' "minority holding stake rejected"
+fi
+
+jq '.roles[0].owner_operator_ref = "state/no-such-coach-role-owner.json"' "$TMP/clear.json" >"$TMP/missing-required-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-required-ref.json" --check-paths --json >"$TMP/missing-required-ref.out.json" 2>/dev/null; then
+  fail "missing coach role required ref rejected"
+else
+  assert_jq "$TMP/missing-required-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "required_ref_missing"))' "missing coach role required ref rejected"
+fi
+
+jq '.roles[0].evidence_refs = ["state/no-such-coach-role-evidence.json"]' "$TMP/clear.json" >"$TMP/missing-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence-ref.json" --check-paths --json >"$TMP/missing-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing coach role evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing coach role evidence ref rejected"
 fi
 
 jq '.clear_count = 1' "$LEDGER" >"$TMP/bad-count.json"
