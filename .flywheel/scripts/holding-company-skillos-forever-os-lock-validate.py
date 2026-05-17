@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SCHEMA = ROOT / ".flywheel/validation-schema/v1/holding-company-skillos-forever-os-lock.schema.json"
 DEFAULT_LEDGER = ROOT / "state/holding-company-skillos-forever-os-lock.json"
 SECRETISH_RE = re.compile(r"(\$[0-9]|sk-[A-Za-z0-9]|AKIA[0-9A-Z]{16})")
+STRUCTURE_LOCK_OVERCLAIM_RE = re.compile(r"\bstructure\s+locked\b|\blocked\s+2026-05-17\b", re.IGNORECASE)
 
 
 def load_json(path: Path) -> Any:
@@ -59,6 +60,10 @@ def has_secretish_string(value: Any) -> bool:
 
 def non_empty_ref(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
+
+
+def structure_lock_overclaim(value: Any) -> bool:
+    return isinstance(value, str) and bool(STRUCTURE_LOCK_OVERCLAIM_RE.search(value))
 
 
 def check_ref_hash(ref: Any, expected_hash: Any, code_prefix: str, failures: list[dict[str, Any]]) -> None:
@@ -135,6 +140,8 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         )
     ):
         failures.append({"code": "proven_without_structure_lock_receipt"})
+    if ledger.get("structure_locked_20260517") is not True and structure_lock_overclaim(ledger.get("claim_text")):
+        failures.append({"code": "claim_text_overstates_missing_structure_lock"})
 
     proven = (
         status == "proven"

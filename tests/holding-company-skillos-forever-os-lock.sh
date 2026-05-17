@@ -45,6 +45,19 @@ jq '
 "$SCRIPT" --ledger "$TMP/proven.json" --json >"$TMP/proven.out.json"
 assert_jq "$TMP/proven.out.json" '.status == "pass" and .forever_os_lock_gate_status == "proven"' "proven fixture clears with structure lock receipt"
 
+jq '
+  .status = "partial"
+  | .claim_text = "SkillOS Forever-OS v3 ratified 2026-05-16; structure locked 2026-05-17."
+  | .structure_locked_20260517 = false
+  | .structure_lock_receipt_ref = null
+  | .structure_lock_receipt_sha256 = null
+' "$LEDGER" >"$TMP/partial-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/partial-overclaim.json" --json >"$TMP/partial-overclaim.out.json" 2>/dev/null; then
+  fail "partial structure-lock overclaim rejected"
+else
+  assert_jq "$TMP/partial-overclaim.out.json" '.failures[] | select(.code == "claim_text_overstates_missing_structure_lock")' "partial structure-lock overclaim rejected"
+fi
+
 jq '.status = "proven"' "$LEDGER" >"$TMP/proven-no-lock.json"
 if "$SCRIPT" --ledger "$TMP/proven-no-lock.json" --json >"$TMP/proven-no-lock.out.json" 2>/dev/null; then
   fail "proven without structure lock receipt rejected"

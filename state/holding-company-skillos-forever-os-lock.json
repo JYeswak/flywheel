@@ -2,7 +2,7 @@
   "schema_version": "zeststream.holding_company_skillos_forever_os_lock.v1",
   "generated_at": "2026-05-17T09:07:00Z",
   "gate": "recent_progress_skillos_forever_os_lock",
-  "claim_text": "SkillOS Forever-OS v3 ratified 2026-05-16; structure locked 2026-05-17.",
+  "claim_text": "SkillOS Forever-OS v3 ratified 2026-05-16; structure-lock receipt pending for the 2026-05-17 lock claim.",
   "status": "partial",
   "goal_ref": "/Users/josh/Desktop/zeststream-goals/skillos/forever-operating-system-v3-20260515.txt",
   "goal_sha256": "2653cad765cba1ee85df71e5275e8552a148c0284c241d92de4caf0de931815f",
