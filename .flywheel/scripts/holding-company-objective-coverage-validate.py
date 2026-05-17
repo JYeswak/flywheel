@@ -49,6 +49,9 @@ REQUIRED_REQUIREMENT_IDS = {
     "public_story_show_receipts",
     "company_close_pivot_graduate",
 }
+REQUIRED_VALIDATION_COMMAND_ID = "standing_goal_aggregate"
+REQUIRED_VALIDATION_COMMAND = "bash tests/zeststream-holding-company-standing-goal.sh"
+REQUIRED_VALIDATION_COVERAGE = "state/zeststream-portfolio-company-registry.json"
 
 
 def load_json(path: Path) -> Any:
@@ -120,6 +123,28 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         failures.append({"code": "standing_goal_cannot_be_complete"})
     if ledger.get("coverage_status") == "not_complete" and computed_counts["blocked"] == 0 and computed_counts["partial"] == 0:
         failures.append({"code": "not_complete_without_open_gaps"})
+
+    validation_commands = [row for row in ledger.get("validation_commands", []) if isinstance(row, dict)]
+    aggregate_commands = [row for row in validation_commands if row.get("command_id") == REQUIRED_VALIDATION_COMMAND_ID]
+    if not aggregate_commands:
+        failures.append({"code": "missing_standing_goal_aggregate_command"})
+    else:
+        aggregate_command = aggregate_commands[0]
+        if aggregate_command.get("command") != REQUIRED_VALIDATION_COMMAND:
+            failures.append(
+                {
+                    "code": "wrong_standing_goal_aggregate_command",
+                    "claimed": aggregate_command.get("command"),
+                    "required": REQUIRED_VALIDATION_COMMAND,
+                }
+            )
+        if REQUIRED_VALIDATION_COVERAGE not in aggregate_command.get("covers", []):
+            failures.append(
+                {
+                    "code": "standing_goal_aggregate_missing_registry_coverage",
+                    "required": REQUIRED_VALIDATION_COVERAGE,
+                }
+            )
 
     if check_paths:
         for field in ("source_goal_ref", "audit_ref"):

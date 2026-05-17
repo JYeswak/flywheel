@@ -59,6 +59,20 @@ else
   assert_jq "$TMP/missing-validation-commands.out.json" '.failures[] | select(.code == "schema_invalid")' "missing validation commands rejected"
 fi
 
+jq '.validation_commands[0].command = "bash tests/holding-company-objective-coverage.sh"' "$LEDGER" >"$TMP/wrong-aggregate-command.json"
+if "$SCRIPT" --ledger "$TMP/wrong-aggregate-command.json" --json >"$TMP/wrong-aggregate-command.out.json" 2>/dev/null; then
+  fail "wrong aggregate command rejected"
+else
+  assert_jq "$TMP/wrong-aggregate-command.out.json" '.failures[] | select(.code == "wrong_standing_goal_aggregate_command")' "wrong aggregate command rejected"
+fi
+
+jq '.validation_commands[0].covers -= ["state/zeststream-portfolio-company-registry.json"]' "$LEDGER" >"$TMP/missing-registry-coverage.json"
+if "$SCRIPT" --ledger "$TMP/missing-registry-coverage.json" --json >"$TMP/missing-registry-coverage.out.json" 2>/dev/null; then
+  fail "aggregate command missing registry coverage rejected"
+else
+  assert_jq "$TMP/missing-registry-coverage.out.json" '.failures[] | select(.code == "standing_goal_aggregate_missing_registry_coverage")' "aggregate command missing registry coverage rejected"
+fi
+
 jq '.coverage_status = "complete"' "$LEDGER" >"$TMP/complete.json"
 if "$SCRIPT" --ledger "$TMP/complete.json" --json >"$TMP/complete.out.json" 2>/dev/null; then
   fail "standing goal completion claim rejected"
