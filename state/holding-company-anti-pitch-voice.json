@@ -1,6 +1,6 @@
 {
   "schema_version": "zeststream.holding_company_anti_pitch_voice.v1",
-  "generated_at": "2026-05-17T09:38:00Z",
+  "generated_at": "2026-05-17T09:43:00Z",
   "gate": "anti_pitch_voice",
   "required_positioning": "sharpen_legacy_incubate_new_not_builder",
   "clear_count": 0,
@@ -11,27 +11,15 @@
       "surface_ref": "/Users/josh/Developer/zeststream-v2-fresh",
       "status": "needs_rewrite",
       "holding_company_story_present": false,
-      "builder_framing_hits": [
-        {
-          "frame": "workflow_builder",
-          "path": "/Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md",
-          "line": 61,
-          "excerpt": "Page Title: \"AI Workflow Builder | ZestStream\""
-        },
-        {
-          "frame": "automation_positioning",
-          "path": "/Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md",
-          "line": 62,
-          "excerpt": "Main Heading: \"Your Stack.Our Automation.\""
-        }
-      ],
+      "builder_framing_hits": [],
       "evidence_refs": [
         "/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml",
         "state/holding-company-anti-pitch-active-content-repair-20260517T0935Z.json",
+        "state/holding-company-historical-builder-summary-retirement-20260517T0942Z.json",
         "/Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md",
         "/Users/josh/Developer/zeststream-v2-fresh/src/data/local-landing-content.ts"
       ],
-      "notes": "Active local landing content no longer carries the prior Process Automation hit. The surface remains blocked because SPRINT_VALIDATION_SUMMARY.md still preserves historical workflow-builder/automation-positioning text and needs archival classification or rewrite before this ledger can mark the repo clear."
+      "notes": "Known builder-framing hits in the active local landing content and historical sprint validation summary are removed. The surface remains not-clear until a durable committed holding-company public story is present; current portfolio-route story files in zeststream-v2-fresh are outside this receipt's ownership."
     }
   ],
   "notes": [
@@ -39,5 +27,5 @@
     "Public-clear status requires holding-company story presence and zero builder-framing hits.",
     "This ledger does not edit the JSM-managed brand-voice skill; it records surface readiness evidence."
   ],
-  "next_action": "Classify or rewrite the remaining historical SPRINT validation summary hits, then set holding_company_story_present=true only after the live public surface carries the sharpen-legacy/incubate-new story."
+  "next_action": "Set holding_company_story_present=true only after the live public surface carries a durable committed sharpen-legacy/incubate-new story."
 }

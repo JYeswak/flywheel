@@ -34,13 +34,22 @@ jq empty "$SCHEMA" && pass "schema json valid" || fail "schema json valid"
 jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
-assert_jq "$TMP/current.json" '.status == "pass" and .clear_count == 0 and .surfaces[0].voice_gate_status == "blocked" and .surfaces[0].builder_framing_hit_count == 2' "current surface validates and blocks voice clear"
+assert_jq "$TMP/current.json" '.status == "pass" and .clear_count == 0 and .surfaces[0].voice_gate_status == "blocked" and .surfaces[0].builder_framing_hit_count == 0' "current surface validates and blocks voice clear"
 
 jq '.clear_count = 1 | .surfaces[0].status = "clear" | .surfaces[0].holding_company_story_present = true | .surfaces[0].builder_framing_hits = []' "$LEDGER" >"$TMP/clear.json"
 "$SCRIPT" --ledger "$TMP/clear.json" --json >"$TMP/clear.out.json"
 assert_jq "$TMP/clear.out.json" '.status == "pass" and .clear_count == 1 and .surfaces[0].voice_gate_status == "clear"' "clear surface with holding-company story and no builder hits passes"
 
-jq '.surfaces[0].status = "clear" | .surfaces[0].holding_company_story_present = true' "$LEDGER" >"$TMP/clear-with-hits.json"
+jq '
+  .surfaces[0].status = "clear"
+  | .surfaces[0].holding_company_story_present = true
+  | .surfaces[0].builder_framing_hits = [{
+      "frame": "workflow_builder",
+      "path": "/tmp/synthetic-public-copy.txt",
+      "line": 1,
+      "excerpt": "workflow builder"
+    }]
+' "$LEDGER" >"$TMP/clear-with-hits.json"
 if "$SCRIPT" --ledger "$TMP/clear-with-hits.json" --json >"$TMP/clear-with-hits.out.json" 2>/dev/null; then
   fail "clear status with builder hits rejected"
 else

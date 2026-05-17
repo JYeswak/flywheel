@@ -34,7 +34,7 @@ jq empty "$SCHEMA" && pass "schema json valid" || fail "schema json valid"
 jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
-assert_jq "$TMP/current.json" '.status == "pass" and .clear_count == 0 and .surfaces[0].public_story_gate_status == "blocked" and .surfaces[0].build_app_framing_hit_count == 2' "current ledger validates and blocks public story"
+assert_jq "$TMP/current.json" '.status == "pass" and .clear_count == 0 and .surfaces[0].public_story_gate_status == "blocked" and .surfaces[0].build_app_framing_hit_count == 0' "current ledger validates and blocks public story"
 
 jq '
   .clear_count = 1
@@ -54,7 +54,18 @@ else
   assert_jq "$TMP/no-receipts.out.json" '.failures[] | select(.code == "public_story_clear_missing_receipt_refs")' "clear without receipt refs rejected"
 fi
 
-jq '.surfaces[0].status = "clear" | .surfaces[0].receipt_story_present = true | .surfaces[0].holding_company_positioning_present = true | .surfaces[0].proof_or_receipt_refs = ["urn:proof:x"]' "$LEDGER" >"$TMP/with-builder.json"
+jq '
+  .surfaces[0].status = "clear"
+  | .surfaces[0].receipt_story_present = true
+  | .surfaces[0].holding_company_positioning_present = true
+  | .surfaces[0].proof_or_receipt_refs = ["urn:proof:x"]
+  | .surfaces[0].build_app_framing_hits = [{
+      "frame": "workflow_builder",
+      "path": "/tmp/synthetic-public-copy.txt",
+      "line": 1,
+      "excerpt": "workflow builder"
+    }]
+' "$LEDGER" >"$TMP/with-builder.json"
 if "$SCRIPT" --ledger "$TMP/with-builder.json" --json >"$TMP/with-builder.out.json" 2>/dev/null; then
   fail "clear with build-app framing rejected"
 else

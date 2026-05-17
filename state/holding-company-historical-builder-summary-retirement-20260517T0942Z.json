@@ -1,0 +1,65 @@
+{
+  "schema_version": "zeststream.holding_company_historical_builder_summary_retirement.v1",
+  "generated_at": "2026-05-17T09:42:00Z",
+  "bead_id": "flywheel-vpjps",
+  "source_goal": "ZestStream Holding Company Goal",
+  "gates": [
+    "anti_pitch_voice",
+    "public_story_receipts"
+  ],
+  "target_repo": "/Users/josh/Developer/zeststream-v2-fresh",
+  "target_repo_commit": "e9d4c50f",
+  "target_path": "/Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md",
+  "change_summary": "Retired two stale historical validation lines that preserved prior workflow-builder and automation-positioning public copy.",
+  "retired_hits": [
+    {
+      "frame": "workflow_builder",
+      "previous_excerpt": "Page Title: \"AI Workflow Builder | ZestStream\""
+    },
+    {
+      "frame": "workflow_automation_shop",
+      "previous_excerpt": "Main Heading: \"Your Stack.Our Automation.\""
+    }
+  ],
+  "replacement_text": [
+    "Page Title: Retired legacy workflow-factory title; public route now redirects to /portfolio.",
+    "Main Heading: Retired legacy automation heading; not active public ZestStream copy."
+  ],
+  "ledger_effect": {
+    "anti_pitch_builder_framing_hits": 0,
+    "public_story_build_app_framing_hits": 0,
+    "anti_pitch_clear": false,
+    "public_story_clear": false,
+    "remaining_reason": "Durable committed holding-company story and receipt refs are still required before either gate can mark the repo clear."
+  },
+  "validation": [
+    {
+      "command": "rg -n \"AI Workflow Builder|Your Stack\\\\.Our Automation|Process Automation|workflow-builder|custom-app-builder|Workflow Builder\" /Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md /Users/josh/Developer/zeststream-v2-fresh/src/data/local-landing-content.ts",
+      "status": "pass_no_matches"
+    },
+    {
+      "command": "git -C /Users/josh/Developer/zeststream-v2-fresh diff --check -- SPRINT_VALIDATION_SUMMARY.md",
+      "status": "pass"
+    }
+  ],
+  "reservations": {
+    "zeststream_v2_fresh": {
+      "agent": "QuietDune",
+      "paths": [
+        "SPRINT_VALIDATION_SUMMARY.md"
+      ]
+    },
+    "flywheel": {
+      "agent": "FuchsiaMoose",
+      "paths": [
+        "state/holding-company-anti-pitch-voice.json",
+        "tests/holding-company-anti-pitch-voice.sh",
+        "state/holding-company-public-story.json",
+        "tests/holding-company-public-story.sh",
+        "state/holding-company-historical-builder-summary-retirement-20260517T0942Z.json",
+        ".beads/issues.jsonl"
+      ]
+    }
+  },
+  "status": "known_builder_hits_retired_gates_still_blocked_on_durable_story"
+}
