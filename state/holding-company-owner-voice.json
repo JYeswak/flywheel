@@ -1,0 +1,33 @@
+{
+  "schema_version": "zeststream.holding_company_owner_voice.v1",
+  "generated_at": "2026-05-17T07:55:00Z",
+  "gate": "yuzu_owner_operator_voice",
+  "clear_count": 0,
+  "surfaces": [
+    {
+      "surface_id": "mobile-eats-owner-voice-20260517",
+      "company_slug": "mobile-eats",
+      "status": "blocked",
+      "owner_operator_ref": null,
+      "owner_voice_ref": null,
+      "community_context_ref": null,
+      "yuzu_review_ref": null,
+      "public_surface_ref": "https://mobile-eats.zeststream.ai",
+      "owner_voice_present": false,
+      "community_context_present": false,
+      "zeststream_meta_voice_detected": false,
+      "evidence_refs": [
+        "state/holding-company-pour-readiness.json",
+        "state/zeststream-portfolio-company-registry.json",
+        "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md"
+      ],
+      "notes": "Mobile Eats has brand/public-surface evidence, but no signed owner-operator voice capture, community context receipt, or Yuzu review receipt."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical Yuzu owner-operator voice gate for the ZestStream holding-company goal.",
+    "A surface clears only when owner voice and community context are present, reviewed, and not replaced by ZestStream meta copy.",
+    "This gate is separate from the ZestStream anti-pitch voice gate."
+  ],
+  "next_action": "Capture owner voice, community context, Yuzu review, and signed owner-operator refs before marking any company surface voice-clear."
+}

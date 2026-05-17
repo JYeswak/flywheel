@@ -114,6 +114,11 @@
       "result": "anti-pitch voice ledger exists and validates; current clear_count is 0 because zeststream-v2-fresh still has workflow-builder and automation-positioning hits"
     },
     {
+      "kind": "owner_voice_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-owner-voice.json",
+      "result": "Yuzu owner-operator voice ledger exists and validates; current clear_count is 0 because Mobile Eats lacks owner voice, community context, owner-operator, and Yuzu review receipts"
+    },
+    {
       "kind": "pour_readiness_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json",
       "result": "POUR readiness ledger exists and validates; current clear_count is 0 because first paying-customer, owner-operator, and operating-control handoff receipts are absent"
@@ -178,6 +183,16 @@
         "/Users/josh/Developer/zeststream-v2-fresh"
       ],
       "finding": "The anti-pitch voice gate is now machine-checkable. Current ledger blocks public-clear status because zeststream-v2-fresh still contains workflow-builder and automation-positioning hits and does not yet carry the sharpen-legacy/incubate-new holding-company story."
+    },
+    {
+      "gate": "yuzu_owner_operator_voice",
+      "status": "blocked_no_owner_voice",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-owner-voice.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json",
+        "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md"
+      ],
+      "finding": "The Yuzu owner-operator voice gate is now machine-checkable separately from ZestStream anti-pitch voice. Mobile Eats has brand/public-surface evidence, but no signed owner-operator voice capture, community context, or Yuzu review receipt."
     },
     {
       "gate": "sustainable_pace",
@@ -323,6 +338,10 @@
     {
       "owner": "zeststream-v2-fresh",
       "action": "Inventory and grade public surfaces against the mission-alignment goal; route D/F surfaces to update plans."
+    },
+    {
+      "owner": "mobile-eats/yuzu",
+      "action": "Fill state/holding-company-owner-voice.json with owner voice, community context, Yuzu review, owner-operator, and public-surface refs before marking any company surface owner-voice clear."
     },
     {
       "owner": "mobile-eats",

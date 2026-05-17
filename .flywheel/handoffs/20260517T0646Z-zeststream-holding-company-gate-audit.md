@@ -21,6 +21,7 @@ The audit did not find the receipts that would let the system count a formed por
 | Portfolio company existence | `not_proven` | mobile-eats is strong product/substrate proof, but not countable as a portfolio company without signed owner + first paying customer registry evidence. |
 | PEEL market signal | `blocked_no_qualified_interviews` | PEEL interview ledger exists and validates; formation cash remains blocked because no candidate has source provenance plus five qualified prospect interviews. |
 | Anti-pitch voice | `blocked_builder_framing` | Anti-pitch voice ledger exists and validates; `zeststream-v2-fresh` still has workflow-builder and automation-positioning hits. |
+| Yuzu owner voice | `blocked_no_owner_voice` | Owner-operator voice ledger exists and validates; Mobile Eats lacks owner voice, community context, owner-operator, and Yuzu review receipts. |
 | Sustainable pace | `blocked_no_measurement` | Sustainable-pace ledger exists and validates; weekly hours and substrate coaching-time offset are not measured yet. |
 | Owner-search phasing | `blocked_no_warm_network_proof` | Owner-search phasing ledger exists and validates; sub #1 remains blocked because no warm-network source proof exists. |
 | Shared substrate | `partial_proven` | mobile-eats + SkillOS prove substrate adoption; the remaining gap is tying the substrate-share receipt to a formed owner/company registry row. |
@@ -43,6 +44,7 @@ The audit did not find the receipts that would let the system count a formed por
 - Mobile Eats substrate-share receipt: `state/substrate-share/mobile-eats-20260517T0654Z.json`
 - SkillOS adoption gate: `/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json`
 - Brand voice config: `/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml`
+- Owner-voice ledger: `state/holding-company-owner-voice.json`
 - Shared-stack ledger: `state/holding-company-shared-stack.json`
 - Launch economics ledger: `state/holding-company-launch-economics.json`
 - RECYCLE ledger: `state/holding-company-recycle-loop.json`
@@ -62,16 +64,17 @@ The audit did not find the receipts that would let the system count a formed por
 2. Produce a redacted runway receipt or mark sub #1 launch blocked.
 3. Use the anti-pitch voice ledger to rewrite or retire builder-framed surfaces, then update `zeststream-brand-voice` through the approved JSM workflow.
 4. Grade `zeststream-v2-fresh` against the mission-alignment goal and route stale automation/custom-app pages to update plans.
-5. For mobile-eats, either attach owner/customer/company/control-handoff receipts or explicitly classify it as product/substrate proof rather than portfolio company #1.
-6. Fill the shared-stack ledger with present receipt refs for SkillOS, flywheel, JSM, `@zeststream/*` packages, and brand voice before marking Mobile Eats shared-stack clear.
-7. Fill the PEEL interview ledger with client-talk, community, or field-trip source evidence plus five qualified prospect interviews before clearing or committing formation cash for any candidate.
-8. Fill the owner-search phasing ledger with warm-network source proof before allowing or signing an owner for sub #1 or sub #2.
-9. Fill the sustainable-pace ledger with measured weekly hours and substrate coaching-time offset before claiming sustainable pace for any Year 2+ company period.
-10. Fill the legal-structure ledger with binding artifact refs plus attorney and CPA review receipts before signing a sub #2 owner.
-11. Fill the POUR readiness ledger with first paying-customer, owner-operator, and operating-control handoff receipts before marking Mobile Eats launch-clear.
-12. Fill the owner-economics ledger with signed owner-operator, cap-table, distribution terms, legal review, and substrate-share refs proving 25% owner equity and 45-75% tiered owner distributions before marking a deal signed or active.
-13. Fill the peer-coach ledger with Tier 2+ owner, sustainable cash, operating-control, peer-coach agreement, and 5% equity grant receipts before marking any owner eligible to peer-coach.
-14. Fill the RECYCLE ledger when launch friction appears, then attach SkillOS capability, package/substrate, and portfolio propagation receipts within the configured window.
+5. Fill the owner-voice ledger with owner voice, community context, Yuzu review, owner-operator, and public-surface refs before marking any company surface owner-voice clear.
+6. For mobile-eats, either attach owner/customer/company/control-handoff receipts or explicitly classify it as product/substrate proof rather than portfolio company #1.
+7. Fill the shared-stack ledger with present receipt refs for SkillOS, flywheel, JSM, `@zeststream/*` packages, and brand voice before marking Mobile Eats shared-stack clear.
+8. Fill the PEEL interview ledger with client-talk, community, or field-trip source evidence plus five qualified prospect interviews before clearing or committing formation cash for any candidate.
+9. Fill the owner-search phasing ledger with warm-network source proof before allowing or signing an owner for sub #1 or sub #2.
+10. Fill the sustainable-pace ledger with measured weekly hours and substrate coaching-time offset before claiming sustainable pace for any Year 2+ company period.
+11. Fill the legal-structure ledger with binding artifact refs plus attorney and CPA review receipts before signing a sub #2 owner.
+12. Fill the POUR readiness ledger with first paying-customer, owner-operator, and operating-control handoff receipts before marking Mobile Eats launch-clear.
+13. Fill the owner-economics ledger with signed owner-operator, cap-table, distribution terms, legal review, and substrate-share refs proving 25% owner equity and 45-75% tiered owner distributions before marking a deal signed or active.
+14. Fill the peer-coach ledger with Tier 2+ owner, sustainable cash, operating-control, peer-coach agreement, and 5% equity grant receipts before marking any owner eligible to peer-coach.
+15. Fill the RECYCLE ledger when launch friction appears, then attach SkillOS capability, package/substrate, and portfolio propagation receipts within the configured window.
 
 ## Close Rule
 
