@@ -1,0 +1,32 @@
+{
+  "schema_version": "zeststream.holding_company_nonprofit_extension.v1",
+  "generated_at": "2026-05-17T08:11:00Z",
+  "gate": "future_nonprofit_social_cause_extension",
+  "clear_count": 0,
+  "initiatives": [
+    {
+      "initiative_id": "future-social-cause-extension",
+      "status": "deferred",
+      "social_cause_scope_ref": null,
+      "nonprofit_legal_review_ref": null,
+      "governance_model_ref": null,
+      "operating_separation_ref": null,
+      "funding_policy_ref": null,
+      "public_story_ref": null,
+      "portfolio_company_counting_excluded": true,
+      "commingled_owner_economics_detected": false,
+      "evidence_refs": [
+        "state/zeststream-holding-company-gate-audit-20260517T0646Z.json",
+        "state/holding-company-public-story.json",
+        "state/holding-company-legal-structure.json"
+      ],
+      "notes": "The objective names a future nonprofit extension for social-cause work, but no scoped initiative, legal review, governance model, operating separation, funding policy, or public story receipt exists yet."
+    }
+  ],
+  "notes": [
+    "This ledger prevents a future nonprofit/social-cause idea from being counted as a portfolio company or treated as launch-ready without separate receipts.",
+    "Clear status requires social-cause scope, nonprofit legal review, governance, operating separation, funding policy, and public-story refs.",
+    "This gate does not authorize nonprofit formation; it records readiness evidence only."
+  ],
+  "next_action": "When the social-cause extension becomes active work, add scoped nonprofit, legal, governance, funding, operating-separation, and public-story receipts before marking it ready."
+}

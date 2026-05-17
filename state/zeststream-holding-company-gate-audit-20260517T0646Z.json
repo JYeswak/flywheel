@@ -129,6 +129,11 @@
       "result": "public-story receipt ledger exists and validates; current clear_count is 0 because zeststream-v2-fresh lacks a receipt-led holding-company story and still carries builder/automation framing"
     },
     {
+      "kind": "nonprofit_extension_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-nonprofit-extension.json",
+      "result": "future nonprofit/social-cause extension ledger exists and validates; current clear_count is 0 because no scoped initiative, legal review, governance, operating-separation, funding, or public-story receipts exist"
+    },
+    {
       "kind": "pour_readiness_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json",
       "result": "POUR readiness ledger exists and validates; current clear_count is 0 because first paying-customer, owner-operator, and operating-control handoff receipts are absent"
@@ -213,6 +218,16 @@
         "/Users/josh/Developer/flywheel/docs/concepts/evidence-contracts.md"
       ],
       "finding": "The public story is now machine-checkable separately from anti-pitch voice. Current ledger blocks public-clear status because zeststream-v2-fresh lacks proof/receipt refs and still carries workflow-builder or automation-shop framing."
+    },
+    {
+      "gate": "future_nonprofit_social_cause_extension",
+      "status": "deferred_no_scope_or_legal_receipts",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-nonprofit-extension.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-public-story.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-legal-structure.json"
+      ],
+      "finding": "The future nonprofit/social-cause extension is now machine-checkable. Current ledger treats it as deferred and blocks readiness because no social-cause scope, nonprofit legal review, governance model, operating-separation, funding policy, or public-story receipts exist."
     },
     {
       "gate": "sustainable_pace",
@@ -369,6 +384,10 @@
     {
       "owner": "zeststream-public-story",
       "action": "Fill state/holding-company-public-story.json with receipt/proof refs and holding-company positioning after removing build-app/workflow-builder framing from public surfaces."
+    },
+    {
+      "owner": "future-nonprofit-extension",
+      "action": "Fill state/holding-company-nonprofit-extension.json with social-cause scope, nonprofit legal review, governance, operating-separation, funding policy, and public-story receipts before marking any nonprofit extension ready or active."
     },
     {
       "owner": "mobile-eats",

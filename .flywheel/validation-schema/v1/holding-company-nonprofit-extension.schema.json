@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-nonprofit-extension/v1/schema.json",
+  "title": "ZestStream Holding Company Nonprofit Extension v1",
+  "description": "Ledger for the future nonprofit/social-cause extension readiness gate.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "clear_count",
+    "initiatives",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_nonprofit_extension.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "future_nonprofit_social_cause_extension"
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "initiatives": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/initiative"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "initiative": {
+      "type": "object",
+      "required": [
+        "initiative_id",
+        "status",
+        "social_cause_scope_ref",
+        "nonprofit_legal_review_ref",
+        "governance_model_ref",
+        "operating_separation_ref",
+        "funding_policy_ref",
+        "public_story_ref",
+        "portfolio_company_counting_excluded",
+        "commingled_owner_economics_detected",
+        "evidence_refs"
+      ],
+      "properties": {
+        "initiative_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "deferred",
+            "blocked",
+            "ready",
+            "active"
+          ]
+        },
+        "social_cause_scope_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "nonprofit_legal_review_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "governance_model_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "operating_separation_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "funding_policy_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "public_story_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "portfolio_company_counting_excluded": {
+          "type": "boolean"
+        },
+        "commingled_owner_economics_detected": {
+          "type": "boolean"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
