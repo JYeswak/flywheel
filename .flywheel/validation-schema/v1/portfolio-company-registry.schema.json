@@ -1,0 +1,205 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/portfolio-company-registry/v1/schema.json",
+  "title": "ZestStream Portfolio Company Registry v1",
+  "description": "Registry contract for the ZestStream holding-company gate: a company is not countable until signed owner-operator, equity, first paying customer, and substrate-share receipts exist.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "owner",
+    "counted_portfolio_companies",
+    "companies"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.portfolio_company_registry.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "counted_portfolio_companies": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "companies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/company"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "receiptRef": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Absolute path, repo-relative path, or URI-like evidence reference. Secret values are forbidden."
+    },
+    "nullableReceiptRef": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/receiptRef"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "company": {
+      "type": "object",
+      "required": [
+        "slug",
+        "name",
+        "portfolio_company_status",
+        "counted_as_portfolio_company",
+        "stage",
+        "gate_evidence",
+        "evidence_refs"
+      ],
+      "properties": {
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "portfolio_company_status": {
+          "type": "string",
+          "enum": [
+            "candidate",
+            "product_substrate_proof",
+            "formed",
+            "graduated",
+            "pivoted",
+            "closed",
+            "deferred"
+          ]
+        },
+        "counted_as_portfolio_company": {
+          "type": "boolean"
+        },
+        "stage": {
+          "type": "string",
+          "enum": [
+            "none",
+            "peel",
+            "press",
+            "pour",
+            "nurture",
+            "recycle"
+          ]
+        },
+        "repo_path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "public_url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gate_evidence": {
+          "type": "object",
+          "required": [
+            "signed_owner_operator_receipt",
+            "equity_receipt",
+            "first_paying_customer_receipt",
+            "substrate_share_receipt"
+          ],
+          "properties": {
+            "signed_owner_operator_receipt": {
+              "$ref": "#/$defs/nullableReceiptRef"
+            },
+            "equity_receipt": {
+              "$ref": "#/$defs/nullableReceiptRef"
+            },
+            "first_paying_customer_receipt": {
+              "$ref": "#/$defs/nullableReceiptRef"
+            },
+            "substrate_share_receipt": {
+              "$ref": "#/$defs/nullableReceiptRef"
+            }
+          },
+          "additionalProperties": false
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/receiptRef"
+          }
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "counted_as_portfolio_company": {
+                "const": true
+              }
+            },
+            "required": [
+              "counted_as_portfolio_company"
+            ]
+          },
+          "then": {
+            "properties": {
+              "portfolio_company_status": {
+                "enum": [
+                  "formed",
+                  "graduated",
+                  "pivoted",
+                  "closed"
+                ]
+              },
+              "gate_evidence": {
+                "properties": {
+                  "signed_owner_operator_receipt": {
+                    "$ref": "#/$defs/receiptRef"
+                  },
+                  "equity_receipt": {
+                    "$ref": "#/$defs/receiptRef"
+                  },
+                  "first_paying_customer_receipt": {
+                    "$ref": "#/$defs/receiptRef"
+                  },
+                  "substrate_share_receipt": {
+                    "$ref": "#/$defs/receiptRef"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  }
+}

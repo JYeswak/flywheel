@@ -1,0 +1,40 @@
+{
+  "schema_version": "zeststream.portfolio_company_registry.v1",
+  "generated_at": "2026-05-17T06:50:00Z",
+  "owner": "ZestStream",
+  "counted_portfolio_companies": 0,
+  "companies": [
+    {
+      "slug": "mobile-eats",
+      "name": "Mobile Eats",
+      "portfolio_company_status": "product_substrate_proof",
+      "counted_as_portfolio_company": false,
+      "stage": "press",
+      "repo_path": "/Users/josh/Developer/mobile-eats",
+      "public_url": "https://mobile-eats.zeststream.ai",
+      "gate_evidence": {
+        "signed_owner_operator_receipt": null,
+        "equity_receipt": null,
+        "first_paying_customer_receipt": null,
+        "substrate_share_receipt": null
+      },
+      "evidence_refs": [
+        "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md",
+        "/Users/josh/Developer/mobile-eats/.zs-tenant.yaml",
+        "/Users/josh/Developer/mobile-eats/next-app/package.json",
+        "/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json"
+      ],
+      "blockers": [
+        "missing signed owner-operator receipt",
+        "missing equity/cap-table receipt",
+        "missing first paying-customer receipt",
+        "missing substrate-share receipt tied to a formed company row"
+      ],
+      "notes": "Tracked as product/substrate proof only. The registry refuses to count it as a portfolio company until the formation receipts land."
+    }
+  ],
+  "notes": [
+    "Standing holding-company goal does not close.",
+    "Vanity-metric guard: counted_portfolio_companies only includes rows with counted_as_portfolio_company=true and all required formation receipts."
+  ]
+}

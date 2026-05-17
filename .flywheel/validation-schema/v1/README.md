@@ -13,6 +13,7 @@ This directory defines the first machine-readable receipt contract for validatin
 | `parse.sh` | Read-only parser and semantic invariant checker. |
 | `dispatch-template-audit.sh` | Read-only audit for dispatch packets and the shared dispatch template. |
 | `wire-or-explain-ledger.schema.json` | JSON Schema contract for The Zest Ledger. |
+| `portfolio-company-registry.schema.json` | ZestStream holding-company registry contract; refuses to count a portfolio company without signed-owner, equity, first-paying-customer, and substrate-share receipts. |
 | `agent-security-control.schema.json` | JSON Schema contract for `agent-security-control/v1` security-control receipts. |
 | `fixtures/pass/*.json` | Receipts that must validate. |
 | `fixtures/fail/*.json` | Receipts that must be rejected with deterministic JSON errors. |
