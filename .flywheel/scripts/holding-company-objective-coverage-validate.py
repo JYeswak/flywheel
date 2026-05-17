@@ -53,6 +53,7 @@ REQUIRED_VALIDATION_COMMAND_ID = "standing_goal_aggregate"
 REQUIRED_VALIDATION_COMMAND = "bash tests/zeststream-holding-company-standing-goal.sh"
 REQUIRED_VALIDATION_COVERAGE = "state/zeststream-portfolio-company-registry.json"
 PORTFOLIO_REGISTRY_REF = "state/zeststream-portfolio-company-registry.json"
+RUNWAY_RECEIPT_REF = "state/holding-company-runway-current.json"
 RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 RECENT_PROGRESS_REQUIREMENT_CLAIMS = {
     "recent_anthropic_adoption_claim": "anthropic_adoption",
@@ -107,6 +108,20 @@ def has_secretish_string(value: Any) -> bool:
 
 def has_zero_clear_count(value: dict[str, Any]) -> bool:
     return any(key.endswith("clear_count") and count == 0 for key, count in value.items())
+
+
+def runway_gate_status(receipt: dict[str, Any]) -> str:
+    status = receipt.get("status")
+    required_months = receipt.get("required_months")
+    verified_months = receipt.get("verified_runway_months")
+    if (
+        status == "pass"
+        and isinstance(required_months, (int, float))
+        and isinstance(verified_months, (int, float))
+        and verified_months >= required_months
+    ):
+        return "clear"
+    return "blocked"
 
 
 def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_paths: bool) -> dict[str, Any]:
@@ -179,6 +194,32 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                     "primary_evidence_ref": primary_ref,
                 }
             )
+
+    runway_path = path_for_ref(RUNWAY_RECEIPT_REF)
+    if runway_path is not None and runway_path.exists():
+        runway_status = runway_gate_status(load_json(runway_path))
+        runway_requirement = requirements_by_id.get("runway_gate")
+        if runway_requirement is not None:
+            evidence_refs = runway_requirement.get("evidence_refs", [])
+            if RUNWAY_RECEIPT_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "runway_requirement_missing_runway_receipt_ref",
+                        "requirement_id": "runway_gate",
+                        "required_ref": RUNWAY_RECEIPT_REF,
+                    }
+                )
+            if runway_status == "blocked" and runway_requirement.get("coverage_status") != "blocked":
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_runway_receipt",
+                        "requirement_id": "runway_gate",
+                        "claimed": runway_requirement.get("coverage_status"),
+                        "evidence_status": runway_status,
+                    }
+                )
+    else:
+        failures.append({"code": "runway_receipt_ref_missing", "ref": RUNWAY_RECEIPT_REF})
 
     portfolio_registry_path = path_for_ref(PORTFOLIO_REGISTRY_REF)
     counted_portfolio_companies = None

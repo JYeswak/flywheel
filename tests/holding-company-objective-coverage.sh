@@ -127,6 +127,24 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "runway_gate") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/runway-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/runway-overclaim.json" --json >"$TMP/runway-overclaim.out.json" 2>/dev/null; then
+  fail "blocked runway receipt rejects runway status promotion"
+else
+  assert_jq "$TMP/runway-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_runway_receipt" and .requirement_id == "runway_gate" and .evidence_status == "blocked")' "blocked runway receipt rejects runway status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "runway_gate") | .evidence_refs) -= ["state/holding-company-runway-current.json"]' "$LEDGER" >"$TMP/missing-runway-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-runway-ref.json" --json >"$TMP/missing-runway-ref.out.json" 2>/dev/null; then
+  fail "runway requirement missing runway receipt ref rejected"
+else
+  assert_jq "$TMP/missing-runway-ref.out.json" '.failures[] | select(.code == "runway_requirement_missing_runway_receipt_ref" and .requirement_id == "runway_gate")' "runway requirement missing runway receipt ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "peel_loop") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
   | .summary_counts.blocked -= 1
