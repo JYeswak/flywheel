@@ -253,6 +253,24 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "pour_loop") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/pour-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/pour-overclaim.json" --json >"$TMP/pour-overclaim.out.json" 2>/dev/null; then
+  fail "blocked POUR receipt rejects POUR status promotion"
+else
+  assert_jq "$TMP/pour-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_pour_readiness_receipt" and .requirement_id == "pour_loop" and .evidence_status == "blocked")' "blocked POUR receipt rejects POUR status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "pour_loop") | .evidence_refs) -= ["state/holding-company-pour-readiness.json"]' "$LEDGER" >"$TMP/missing-pour-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-pour-ref.json" --json >"$TMP/missing-pour-ref.out.json" 2>/dev/null; then
+  fail "POUR requirement missing readiness receipt ref rejected"
+else
+  assert_jq "$TMP/missing-pour-ref.out.json" '.failures[] | select(.code == "pour_requirement_missing_pour_readiness_ref" and .requirement_id == "pour_loop")' "POUR requirement missing readiness receipt ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "peel_loop") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
   | .summary_counts.blocked -= 1

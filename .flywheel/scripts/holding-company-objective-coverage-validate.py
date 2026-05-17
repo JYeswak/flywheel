@@ -60,6 +60,7 @@ OWNER_SEARCH_PHASING_REF = "state/holding-company-owner-search-phasing.json"
 OWNER_ECONOMICS_REF = "state/holding-company-owner-economics.json"
 PEEL_INTERVIEWS_REF = "state/holding-company-peel-interviews.json"
 PRESS_READINESS_REF = "state/holding-company-press-readiness.json"
+POUR_READINESS_REF = "state/holding-company-pour-readiness.json"
 RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 RECENT_PROGRESS_REQUIREMENT_CLAIMS = {
     "recent_anthropic_adoption_claim": "anthropic_adoption",
@@ -104,6 +105,14 @@ PRESS_REQUIRED_REFS = {
     "signed_equity_ref",
     "owner_economics_ref",
     "substrate_share_receipt",
+}
+POUR_REQUIRED_REFS = {
+    "brand_identity_ref",
+    "repo_ref",
+    "public_surface_ref",
+    "first_paying_customer_receipt",
+    "owner_operator_ref",
+    "operating_control_handoff_ref",
 }
 
 
@@ -324,6 +333,18 @@ def press_gate_status(receipt: dict[str, Any]) -> str:
             and all(has_ref(press.get(field)) for field in PRESS_REQUIRED_REFS)
             and bool(press.get("evidence_refs"))
         ):
+            return "clear"
+    return "blocked"
+
+
+def pour_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    for launch in receipt.get("launches", []):
+        if not isinstance(launch, dict) or launch.get("status") not in {"pour_clear", "launched"}:
+            continue
+        if all(has_ref(launch.get(field)) for field in POUR_REQUIRED_REFS):
             return "clear"
     return "blocked"
 
@@ -580,6 +601,32 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "press_readiness_ref_missing", "ref": PRESS_READINESS_REF})
+
+    pour_readiness_path = path_for_ref(POUR_READINESS_REF)
+    if pour_readiness_path is not None and pour_readiness_path.exists():
+        pour_status = pour_gate_status(load_json(pour_readiness_path))
+        pour_requirement = requirements_by_id.get("pour_loop")
+        if pour_requirement is not None:
+            evidence_refs = pour_requirement.get("evidence_refs", [])
+            if POUR_READINESS_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "pour_requirement_missing_pour_readiness_ref",
+                        "requirement_id": "pour_loop",
+                        "required_ref": POUR_READINESS_REF,
+                    }
+                )
+            if pour_status == "blocked" and pour_requirement.get("coverage_status") != "blocked":
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_pour_readiness_receipt",
+                        "requirement_id": "pour_loop",
+                        "claimed": pour_requirement.get("coverage_status"),
+                        "evidence_status": pour_status,
+                    }
+                )
+    else:
+        failures.append({"code": "pour_readiness_ref_missing", "ref": POUR_READINESS_REF})
 
     portfolio_registry_path = path_for_ref(PORTFOLIO_REGISTRY_REF)
     counted_portfolio_companies = None
