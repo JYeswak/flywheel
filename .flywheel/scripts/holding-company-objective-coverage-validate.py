@@ -1429,7 +1429,8 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
 
     mobile_eats_shipping_path = path_for_ref(MOBILE_EATS_SHIPPING_REF)
     if mobile_eats_shipping_path is not None and mobile_eats_shipping_path.exists():
-        mobile_eats_shipping_status = mobile_eats_shipping_gate_status(load_json(mobile_eats_shipping_path))
+        mobile_eats_shipping_receipt = load_json(mobile_eats_shipping_path)
+        mobile_eats_shipping_status = mobile_eats_shipping_gate_status(mobile_eats_shipping_receipt)
         mobile_eats_requirement = requirements_by_id.get("recent_mobile_eats_shipping_claim")
         if mobile_eats_requirement is not None:
             evidence_refs = mobile_eats_requirement.get("evidence_refs", [])
@@ -1452,6 +1453,18 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "requirement_id": "recent_mobile_eats_shipping_claim",
                         "claimed": mobile_eats_requirement.get("coverage_status"),
                         "evidence_status": mobile_eats_shipping_status,
+                    }
+                )
+            package_count = mobile_eats_shipping_receipt.get("substrate_package_count")
+            finding = mobile_eats_requirement.get("finding")
+            if isinstance(package_count, int) and (
+                not isinstance(finding, str) or f"{package_count:,}" not in finding
+            ):
+                failures.append(
+                    {
+                        "code": "mobile_eats_finding_missing_package_count",
+                        "requirement_id": "recent_mobile_eats_shipping_claim",
+                        "substrate_package_count": package_count,
                     }
                 )
     else:

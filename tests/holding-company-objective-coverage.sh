@@ -331,6 +331,13 @@ else
   assert_jq "$TMP/missing-mobile-eats-substrate-ref.out.json" '.failures[] | select(.code == "mobile_eats_requirement_missing_substrate_share_ref" and .requirement_id == "recent_mobile_eats_shipping_claim")' "Mobile Eats requirement missing substrate-share ref rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "recent_mobile_eats_shipping_claim") | .finding) = "Product/substrate shipping and 9 packages are proven; first-portfolio-company proof is blocked."' "$LEDGER" >"$TMP/stale-mobile-eats-package-finding.json"
+if "$SCRIPT" --ledger "$TMP/stale-mobile-eats-package-finding.json" --json >"$TMP/stale-mobile-eats-package-finding.out.json" 2>/dev/null; then
+  fail "Mobile Eats stale package-count finding rejected"
+else
+  assert_jq "$TMP/stale-mobile-eats-package-finding.out.json" '.failures[] | select(.code == "mobile_eats_finding_missing_package_count" and .requirement_id == "recent_mobile_eats_shipping_claim" and (.substrate_package_count | type == "number"))' "Mobile Eats stale package-count finding rejected"
+fi
+
 jq '
   (.requirements[] | select(.requirement_id == "recent_skillos_forever_os_claim") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
