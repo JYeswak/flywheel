@@ -181,6 +181,24 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "owner_search_phasing_gate") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/owner-search-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/owner-search-overclaim.json" --json >"$TMP/owner-search-overclaim.out.json" 2>/dev/null; then
+  fail "blocked owner-search receipt rejects owner-search status promotion"
+else
+  assert_jq "$TMP/owner-search-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_owner_search_phasing_receipt" and .requirement_id == "owner_search_phasing_gate" and .evidence_status == "blocked")' "blocked owner-search receipt rejects owner-search status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "owner_search_phasing_gate") | .evidence_refs) -= ["state/holding-company-owner-search-phasing.json"]' "$LEDGER" >"$TMP/missing-owner-search-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-owner-search-ref.json" --json >"$TMP/missing-owner-search-ref.out.json" 2>/dev/null; then
+  fail "owner-search requirement missing phasing receipt ref rejected"
+else
+  assert_jq "$TMP/missing-owner-search-ref.out.json" '.failures[] | select(.code == "owner_search_requirement_missing_phasing_ref" and .requirement_id == "owner_search_phasing_gate")' "owner-search requirement missing phasing receipt ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "peel_loop") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
   | .summary_counts.blocked -= 1

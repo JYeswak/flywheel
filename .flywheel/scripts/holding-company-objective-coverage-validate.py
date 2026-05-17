@@ -56,6 +56,7 @@ PORTFOLIO_REGISTRY_REF = "state/zeststream-portfolio-company-registry.json"
 RUNWAY_RECEIPT_REF = "state/holding-company-runway-current.json"
 LEGAL_STRUCTURE_REF = "state/holding-company-legal-structure.json"
 SUSTAINABLE_PACE_REF = "state/holding-company-sustainable-pace.json"
+OWNER_SEARCH_PHASING_REF = "state/holding-company-owner-search-phasing.json"
 RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 RECENT_PROGRESS_REQUIREMENT_CLAIMS = {
     "recent_anthropic_adoption_claim": "anthropic_adoption",
@@ -78,6 +79,8 @@ LEGAL_REQUIRED_BEFORE_SUB_2 = {
     "subsidiary_owner_operating_agreement",
     "intercompany_services_agreement",
 }
+OWNER_SEARCH_WARM_CHANNELS = {"warm_network", "referral", "client_talk", "community", "field_trip"}
+OWNER_SEARCH_PUBLIC_OR_COLD_CHANNELS = {"public_open_call", "inbound_public", "cold_outreach"}
 
 
 def load_json(path: Path) -> Any:
@@ -181,6 +184,30 @@ def sustainable_pace_gate_status(receipt: dict[str, Any]) -> str:
             and is_number(offset_ratio)
             and offset_ratio >= required_offset_ratio
         ):
+            return "clear"
+    return "blocked"
+
+
+def owner_search_phasing_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("phasing_clear_count")
+    warm_only_through = receipt.get("warm_network_only_through_sequence", 2)
+    public_min = receipt.get("public_open_call_min_sequence", 3)
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    for search in receipt.get("searches", []):
+        if not isinstance(search, dict):
+            continue
+        sequence = search.get("sequence")
+        channel = search.get("sourcing_channel")
+        public_open_call_active = search.get("public_open_call_active")
+        early_sequence = isinstance(sequence, int) and isinstance(warm_only_through, int) and sequence <= warm_only_through
+        public_allowed = isinstance(sequence, int) and isinstance(public_min, int) and sequence >= public_min
+        warm_proven = channel in OWNER_SEARCH_WARM_CHANNELS and public_open_call_active is False
+        early_public_violation = early_sequence and (
+            channel in OWNER_SEARCH_PUBLIC_OR_COLD_CHANNELS or public_open_call_active is True
+        )
+        phasing_clear = (early_sequence and warm_proven) or (public_allowed and channel != "unknown")
+        if phasing_clear and not early_public_violation:
             return "clear"
     return "blocked"
 
@@ -333,6 +360,32 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "sustainable_pace_ref_missing", "ref": SUSTAINABLE_PACE_REF})
+
+    owner_search_phasing_path = path_for_ref(OWNER_SEARCH_PHASING_REF)
+    if owner_search_phasing_path is not None and owner_search_phasing_path.exists():
+        owner_search_phasing_status = owner_search_phasing_gate_status(load_json(owner_search_phasing_path))
+        owner_search_phasing_requirement = requirements_by_id.get("owner_search_phasing_gate")
+        if owner_search_phasing_requirement is not None:
+            evidence_refs = owner_search_phasing_requirement.get("evidence_refs", [])
+            if OWNER_SEARCH_PHASING_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "owner_search_requirement_missing_phasing_ref",
+                        "requirement_id": "owner_search_phasing_gate",
+                        "required_ref": OWNER_SEARCH_PHASING_REF,
+                    }
+                )
+            if owner_search_phasing_status == "blocked" and owner_search_phasing_requirement.get("coverage_status") != "blocked":
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_owner_search_phasing_receipt",
+                        "requirement_id": "owner_search_phasing_gate",
+                        "claimed": owner_search_phasing_requirement.get("coverage_status"),
+                        "evidence_status": owner_search_phasing_status,
+                    }
+                )
+    else:
+        failures.append({"code": "owner_search_phasing_ref_missing", "ref": OWNER_SEARCH_PHASING_REF})
 
     portfolio_registry_path = path_for_ref(PORTFOLIO_REGISTRY_REF)
     counted_portfolio_companies = None
