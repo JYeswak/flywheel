@@ -150,6 +150,13 @@ else
   assert_jq "$TMP/missing-validator-path.out.json" '.failures[] | select(.code == "validator_ref_missing" and .claim_id == "anthropic_adoption")' "missing claim validator path rejected"
 fi
 
+jq '.claims[0].claim_text = ("sk-" + "NOTAREALSECRET")' "$RECEIPT" >"$TMP/secret-shaped-value.json"
+if "$SCRIPT" --receipt "$TMP/secret-shaped-value.json" --json >"$TMP/secret-shaped-value.out.json" 2>/dev/null; then
+  fail "secret-shaped claim receipt value rejected"
+else
+  assert_jq "$TMP/secret-shaped-value.out.json" '.failures[] | select(.code == "secret_or_raw_value_shape_detected")' "secret-shaped claim receipt value rejected"
+fi
+
 jq '(.claims[] | select(.claim_id == "progress_velocity") | .claim_text) = "4,000+ commits in 7 days across 9 product surfaces."' "$RECEIPT" >"$TMP/progress-overclaim.json"
 if "$SCRIPT" --receipt "$TMP/progress-overclaim.json" --json >"$TMP/progress-overclaim.out.json" 2>/dev/null; then
   fail "progress velocity overclaim rejected"
