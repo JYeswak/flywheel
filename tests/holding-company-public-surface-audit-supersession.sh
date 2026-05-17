@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+SCRIPT="$ROOT/.flywheel/scripts/holding-company-public-surface-audit-supersession-validate.py"
 SCHEMA="$ROOT/.flywheel/validation-schema/v1/holding-company-public-surface-audit-supersession.schema.json"
 RECEIPT="$ROOT/state/holding-company-public-surface-audit-supersession-20260517T1004Z.json"
 COVERAGE="$ROOT/state/holding-company-objective-coverage.json"
@@ -36,21 +37,15 @@ assert_eq() {
 
 jq empty "$RECEIPT" && pass "receipt json valid" || fail "receipt json valid"
 jq empty "$SCHEMA" && pass "schema json valid" || fail "schema json valid"
-python3 - "$SCHEMA" "$RECEIPT" <<'PY' && pass "receipt validates against schema" || fail "receipt validates against schema"
-import json
-import sys
+if python3 -m py_compile "$SCRIPT"; then
+  pass "validator py_compile"
+else
+  fail "validator py_compile"
+fi
 
-from jsonschema import Draft202012Validator, FormatChecker
-
-schema_path, receipt_path = sys.argv[1], sys.argv[2]
-with open(schema_path, encoding="utf-8") as handle:
-    schema = json.load(handle)
-with open(receipt_path, encoding="utf-8") as handle:
-    receipt = json.load(handle)
-
-Draft202012Validator.check_schema(schema)
-Draft202012Validator(schema, format_checker=FormatChecker()).validate(receipt)
-PY
+"$SCRIPT" --receipt "$RECEIPT" --coverage "$COVERAGE" --check-paths --json >"$TMP/current.json"
+assert_jq "$TMP/current.json" '.status == "pass" and .public_surface_supersession_status == "clear_surfaces_objective_incomplete" and .superseded_findings_count == 7' "validator accepts current supersession receipt"
+assert_jq "$TMP/current.json" '.anti_pitch_receipt_ref_count == 3 and .public_story_receipt_ref_count == 3' "validator exposes supersession evidence ref counts"
 
 assert_jq "$RECEIPT" '.schema_version == "zeststream.holding_company_public_surface_audit_supersession.v1" and (.superseded_findings | length == 7)' "receipt declares seven superseded findings"
 assert_jq "$RECEIPT" '.current_status.anti_pitch_voice_surface_status == "clear" and .current_status.public_story_surface_status == "clear" and .current_status.objective_coverage_status == "not_complete"' "receipt distinguishes clear surfaces from incomplete objective"
@@ -81,6 +76,27 @@ if jq -e 'any(.notes[]; contains("does not rewrite the 06:46 audit"))' "$RECEIPT
   pass "receipt preserves historical audit rather than rewriting it"
 else
   fail "receipt preserves historical audit rather than rewriting it"
+fi
+
+jq '.current_status.objective_counts_unchanged.blocked = 0' "$RECEIPT" >"$TMP/bad-counts.json"
+if "$SCRIPT" --receipt "$TMP/bad-counts.json" --coverage "$COVERAGE" --json >"$TMP/bad-counts.out.json" 2>/dev/null; then
+  fail "objective count snapshot mismatch rejected"
+else
+  assert_jq "$TMP/bad-counts.out.json" '.failures[] | select(.code == "objective_counts_snapshot_mismatch")' "objective count snapshot mismatch rejected"
+fi
+
+jq '.current_receipts -= ["state/holding-company-public-story.json"]' "$RECEIPT" >"$TMP/missing-public-story-ref.json"
+if "$SCRIPT" --receipt "$TMP/missing-public-story-ref.json" --coverage "$COVERAGE" --json >"$TMP/missing-public-story-ref.out.json" 2>/dev/null; then
+  fail "missing public-story supersession ref rejected"
+else
+  assert_jq "$TMP/missing-public-story-ref.out.json" '.failures[] | select(.code == "public_story_supersession_evidence_ref_count_mismatch")' "missing public-story supersession ref rejected"
+fi
+
+jq '.current_receipts += ["state/no-such-public-surface-receipt.json"]' "$RECEIPT" >"$TMP/missing-ref.json"
+if "$SCRIPT" --receipt "$TMP/missing-ref.json" --coverage "$COVERAGE" --check-paths --json >"$TMP/missing-ref.out.json" 2>/dev/null; then
+  fail "missing current receipt ref rejected"
+else
+  assert_jq "$TMP/missing-ref.out.json" '.failures[] | select(.code == "current_receipt_ref_missing")' "missing current receipt ref rejected"
 fi
 
 if [[ "$fail_count" -ne 0 ]]; then
