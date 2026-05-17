@@ -171,6 +171,42 @@ if "$SCRIPT" --ledger "$TMP/missing-registry-ref.json" --json >"$TMP/missing-reg
   fail "portfolio requirement missing registry ref rejected"
 else
   assert_jq "$TMP/missing-registry-ref.out.json" '.failures[] | select(.code == "portfolio_requirement_missing_registry_ref" and .requirement_id == "one_year_small_portfolio_making_money")' "portfolio requirement missing registry ref rejected"
+  assert_jq "$TMP/missing-registry-ref.out.json" '.failures[] | select(.code == "one_year_requirement_missing_registry_ref" and .requirement_id == "one_year_small_portfolio_making_money")' "one-year requirement missing registry ref rejected"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "one_year_small_portfolio_making_money") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/one-year-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/one-year-overclaim.json" --json >"$TMP/one-year-overclaim.out.json" 2>/dev/null; then
+  fail "blocked one-year receipts reject success status promotion"
+else
+  assert_jq "$TMP/one-year-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_zero_portfolio_registry" and .requirement_id == "one_year_small_portfolio_making_money" and .expected == "blocked")' "zero-portfolio registry rejects one-year status promotion"
+  assert_jq "$TMP/one-year-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_owner_economics_receipt" and .requirement_id == "one_year_small_portfolio_making_money" and .evidence_status == "blocked")' "blocked owner-economics receipt rejects one-year status promotion"
+  assert_jq "$TMP/one-year-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_operating_health_receipt" and .requirement_id == "one_year_small_portfolio_making_money" and .evidence_status == "blocked")' "blocked operating-health receipt rejects one-year status promotion"
+  assert_jq "$TMP/one-year-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_shared_stack_receipt" and .requirement_id == "one_year_small_portfolio_making_money" and .evidence_status == "blocked")' "blocked shared-stack receipt rejects one-year status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "one_year_small_portfolio_making_money") | .evidence_refs) -= ["state/holding-company-owner-economics.json"]' "$LEDGER" >"$TMP/missing-one-year-owner-economics-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-one-year-owner-economics-ref.json" --json >"$TMP/missing-one-year-owner-economics-ref.out.json" 2>/dev/null; then
+  fail "one-year requirement missing owner-economics ref rejected"
+else
+  assert_jq "$TMP/missing-one-year-owner-economics-ref.out.json" '.failures[] | select(.code == "one_year_requirement_missing_owner_economics_ref" and .requirement_id == "one_year_small_portfolio_making_money")' "one-year requirement missing owner-economics ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "one_year_small_portfolio_making_money") | .evidence_refs) -= ["state/holding-company-operating-health.json"]' "$LEDGER" >"$TMP/missing-one-year-operating-health-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-one-year-operating-health-ref.json" --json >"$TMP/missing-one-year-operating-health-ref.out.json" 2>/dev/null; then
+  fail "one-year requirement missing operating-health ref rejected"
+else
+  assert_jq "$TMP/missing-one-year-operating-health-ref.out.json" '.failures[] | select(.code == "one_year_requirement_missing_operating_health_ref" and .requirement_id == "one_year_small_portfolio_making_money")' "one-year requirement missing operating-health ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "one_year_small_portfolio_making_money") | .evidence_refs) -= ["state/holding-company-shared-stack.json"]' "$LEDGER" >"$TMP/missing-one-year-shared-stack-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-one-year-shared-stack-ref.json" --json >"$TMP/missing-one-year-shared-stack-ref.out.json" 2>/dev/null; then
+  fail "one-year requirement missing shared-stack ref rejected"
+else
+  assert_jq "$TMP/missing-one-year-shared-stack-ref.out.json" '.failures[] | select(.code == "one_year_requirement_missing_shared_stack_ref" and .requirement_id == "one_year_small_portfolio_making_money")' "one-year requirement missing shared-stack ref rejected"
 fi
 
 jq '

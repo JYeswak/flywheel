@@ -59,6 +59,7 @@ SUSTAINABLE_PACE_REF = "state/holding-company-sustainable-pace.json"
 COACH_ROLE_REF = "state/holding-company-coach-role.json"
 OWNER_SEARCH_PHASING_REF = "state/holding-company-owner-search-phasing.json"
 OWNER_ECONOMICS_REF = "state/holding-company-owner-economics.json"
+OPERATING_HEALTH_REF = "state/holding-company-operating-health.json"
 CANDIDATE_FIT_REF = "state/holding-company-candidate-fit.json"
 OWNER_VOICE_REF = "state/holding-company-owner-voice.json"
 ANTI_PITCH_VOICE_REF = "state/holding-company-anti-pitch-voice.json"
@@ -104,6 +105,18 @@ OWNER_ECONOMICS_REQUIRED_REFS = {
     "legal_review_ref",
     "substrate_share_receipt",
 }
+OPERATING_HEALTH_CLEAR_STATUSES = {"revenue_clear", "profit_clear"}
+OPERATING_HEALTH_REVENUE_REFS = [
+    "first_paying_customer_receipt",
+    "revenue_snapshot_ref",
+    "owner_operator_report_ref",
+    "operating_control_ref",
+    "substrate_share_receipt",
+]
+OPERATING_HEALTH_PROFIT_REFS = OPERATING_HEALTH_REVENUE_REFS + [
+    "positive_gross_profit_ref",
+    "owner_distribution_ref",
+]
 COACH_ROLE_REQUIRED_REFS = {
     "owner_operator_ref",
     "operating_control_handoff_ref",
@@ -329,6 +342,29 @@ def owner_economics_gate_status(receipt: dict[str, Any]) -> str:
             and all(distribution_min <= value <= distribution_max for value in distribution_values)
         )
         if has_ref(deal.get("owner_operator_slug")) and owner_equity_ok and holding_equity_ok and refs_ok and distribution_bounds_ok:
+            return "clear"
+    return "blocked"
+
+
+def operating_health_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    for company in receipt.get("companies", []):
+        if not isinstance(company, dict) or company.get("status") not in OPERATING_HEALTH_CLEAR_STATUSES:
+            continue
+        required_refs = (
+            OPERATING_HEALTH_PROFIT_REFS
+            if company.get("status") == "profit_clear"
+            else OPERATING_HEALTH_REVENUE_REFS
+        )
+        refs_ok = all(has_ref(company.get(field)) for field in required_refs)
+        if (
+            refs_ok
+            and company.get("metrics_are_redacted") is True
+            and company.get("raw_amounts_present") is False
+            and bool(company.get("evidence_refs"))
+        ):
             return "clear"
     return "blocked"
 
@@ -861,6 +897,7 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         failures.append({"code": "owner_search_phasing_ref_missing", "ref": OWNER_SEARCH_PHASING_REF})
 
     owner_economics_path = path_for_ref(OWNER_ECONOMICS_REF)
+    owner_economics_status = None
     if owner_economics_path is not None and owner_economics_path.exists():
         owner_economics_status = owner_economics_gate_status(load_json(owner_economics_path))
         owner_economics_requirement = requirements_by_id.get("owner_equity_distribution_terms")
@@ -1283,6 +1320,45 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                     "evidence_status": peer_coach_status,
                 }
             )
+
+    operating_health_path = path_for_ref(OPERATING_HEALTH_REF)
+    operating_health_status = None
+    if operating_health_path is not None and operating_health_path.exists():
+        operating_health_status = operating_health_gate_status(load_json(operating_health_path))
+    else:
+        failures.append({"code": "operating_health_ref_missing", "ref": OPERATING_HEALTH_REF})
+
+    one_year_requirement = requirements_by_id.get("one_year_small_portfolio_making_money")
+    if one_year_requirement is not None:
+        evidence_refs = one_year_requirement.get("evidence_refs", [])
+        for required_ref, code in (
+            (PORTFOLIO_REGISTRY_REF, "one_year_requirement_missing_registry_ref"),
+            (OWNER_ECONOMICS_REF, "one_year_requirement_missing_owner_economics_ref"),
+            (OPERATING_HEALTH_REF, "one_year_requirement_missing_operating_health_ref"),
+            (SHARED_STACK_REF, "one_year_requirement_missing_shared_stack_ref"),
+        ):
+            if required_ref not in evidence_refs:
+                failures.append(
+                    {
+                        "code": code,
+                        "requirement_id": "one_year_small_portfolio_making_money",
+                        "required_ref": required_ref,
+                    }
+                )
+        for evidence_status, code in (
+            (owner_economics_status, "requirement_status_mismatch_with_owner_economics_receipt"),
+            (operating_health_status, "requirement_status_mismatch_with_operating_health_receipt"),
+            (shared_stack_status, "requirement_status_mismatch_with_shared_stack_receipt"),
+        ):
+            if evidence_status == "blocked" and one_year_requirement.get("coverage_status") != "blocked":
+                failures.append(
+                    {
+                        "code": code,
+                        "requirement_id": "one_year_small_portfolio_making_money",
+                        "claimed": one_year_requirement.get("coverage_status"),
+                        "evidence_status": evidence_status,
+                    }
+                )
 
     portfolio_registry_path = path_for_ref(PORTFOLIO_REGISTRY_REF)
     counted_portfolio_companies = None
