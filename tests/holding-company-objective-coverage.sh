@@ -288,6 +288,42 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "no_custom_apps_positioning") | .coverage_status) = "proven"
+  | .summary_counts.proven += 1
+  | .summary_counts.partial -= 1
+' "$LEDGER" >"$TMP/no-custom-apps-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/no-custom-apps-overclaim.json" --json >"$TMP/no-custom-apps-overclaim.out.json" 2>/dev/null; then
+  fail "no-custom-apps partial status overclaim rejected"
+else
+  assert_jq "$TMP/no-custom-apps-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_no_custom_apps_positioning_receipts" and .requirement_id == "no_custom_apps_positioning" and .evidence_status == "partial")' "no-custom-apps partial status overclaim rejected"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "no_custom_apps_positioning") | .coverage_status) = "blocked"
+  | .summary_counts.blocked += 1
+  | .summary_counts.partial -= 1
+' "$LEDGER" >"$TMP/no-custom-apps-underclaim.json"
+if "$SCRIPT" --ledger "$TMP/no-custom-apps-underclaim.json" --json >"$TMP/no-custom-apps-underclaim.out.json" 2>/dev/null; then
+  fail "no-custom-apps partial status underclaim rejected"
+else
+  assert_jq "$TMP/no-custom-apps-underclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_no_custom_apps_positioning_receipts" and .requirement_id == "no_custom_apps_positioning" and .evidence_status == "partial")' "no-custom-apps partial status underclaim rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "no_custom_apps_positioning") | .evidence_refs) -= ["state/holding-company-public-story-route-20260517T0948Z.json"]' "$LEDGER" >"$TMP/missing-no-custom-public-story-route-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-no-custom-public-story-route-ref.json" --json >"$TMP/missing-no-custom-public-story-route-ref.out.json" 2>/dev/null; then
+  fail "no-custom-apps requirement missing public-story route ref rejected"
+else
+  assert_jq "$TMP/missing-no-custom-public-story-route-ref.out.json" '.failures[] | select(.code == "no_custom_apps_requirement_missing_public_story_route_ref" and .requirement_id == "no_custom_apps_positioning")' "no-custom-apps requirement missing public-story route ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "no_custom_apps_positioning") | .evidence_refs) -= ["state/holding-company-public-surface-audit-supersession-20260517T1004Z.json"]' "$LEDGER" >"$TMP/missing-no-custom-public-surface-supersession-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-no-custom-public-surface-supersession-ref.json" --json >"$TMP/missing-no-custom-public-surface-supersession-ref.out.json" 2>/dev/null; then
+  fail "no-custom-apps requirement missing public-surface supersession ref rejected"
+else
+  assert_jq "$TMP/missing-no-custom-public-surface-supersession-ref.out.json" '.failures[] | select(.code == "no_custom_apps_requirement_missing_public_surface_supersession_ref" and .requirement_id == "no_custom_apps_positioning")' "no-custom-apps requirement missing public-surface supersession ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "public_story_show_receipts") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
   | .summary_counts.partial -= 1

@@ -64,6 +64,8 @@ CANDIDATE_FIT_REF = "state/holding-company-candidate-fit.json"
 OWNER_VOICE_REF = "state/holding-company-owner-voice.json"
 ANTI_PITCH_VOICE_REF = "state/holding-company-anti-pitch-voice.json"
 PUBLIC_STORY_REF = "state/holding-company-public-story.json"
+PUBLIC_STORY_ROUTE_REF = "state/holding-company-public-story-route-20260517T0948Z.json"
+PUBLIC_SURFACE_AUDIT_SUPERSESSION_REF = "state/holding-company-public-surface-audit-supersession-20260517T1004Z.json"
 BRAND_VOICE_SKILL_REF = "state/holding-company-brand-voice-skill.json"
 FOUNDER_POST_VOICE_REF = "state/holding-company-founder-post-voice.json"
 BRAND_NAMING_REF = "state/holding-company-brand-naming.json"
@@ -503,6 +505,43 @@ def public_story_gate_status(receipt: dict[str, Any]) -> str:
         ):
             return "clear"
     return "blocked"
+
+
+def no_custom_apps_positioning_status(
+    statuses: dict[str, str | None],
+    route_receipt: dict[str, Any] | None,
+    supersession_receipt: dict[str, Any] | None,
+) -> str:
+    if statuses["public_story"] != "clear" or statuses["anti_pitch"] != "clear":
+        return "blocked"
+    if route_receipt is None or supersession_receipt is None:
+        return "blocked"
+
+    public_surface = route_receipt.get("public_surface", {})
+    route_clear = (
+        isinstance(public_surface, dict)
+        and route_receipt.get("schema_version") == "zeststream.holding_company_public_story_route.v1"
+        and route_receipt.get("status") == "public_story_route_committed"
+        and public_surface.get("route") == "/portfolio"
+        and public_surface.get("posture") == "holding_company_not_services_shop"
+        and {"/workflow-factory", "/roi-calculator"}.issubset(set(public_surface.get("retired_routes", [])))
+        and bool(route_receipt.get("proof_refs"))
+    )
+    current_status = supersession_receipt.get("current_status", {})
+    supersession_clear = (
+        isinstance(current_status, dict)
+        and supersession_receipt.get("schema_version")
+        == "zeststream.holding_company_public_surface_audit_supersession.v1"
+        and current_status.get("anti_pitch_voice_surface_status") == "clear"
+        and current_status.get("public_story_surface_status") == "clear"
+        and current_status.get("objective_coverage_status") == "not_complete"
+        and PUBLIC_STORY_ROUTE_REF in supersession_receipt.get("current_receipts", [])
+    )
+    if not route_clear or not supersession_clear:
+        return "blocked"
+    if route_receipt.get("excluded_uncommitted_surfaces"):
+        return "partial"
+    return "proven"
 
 
 def mobile_eats_shipping_gate_status(receipt: dict[str, Any]) -> str:
@@ -1233,7 +1272,11 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
     public_story_path = path_for_ref(PUBLIC_STORY_REF)
     brand_voice_skill_path = path_for_ref(BRAND_VOICE_SKILL_REF)
     founder_post_voice_path = path_for_ref(FOUNDER_POST_VOICE_REF)
+    public_story_route_path = path_for_ref(PUBLIC_STORY_ROUTE_REF)
+    public_surface_supersession_path = path_for_ref(PUBLIC_SURFACE_AUDIT_SUPERSESSION_REF)
     brand_voice_receipt = None
+    public_story_route_receipt = None
+    public_surface_supersession_receipt = None
     if anti_pitch_voice_path is not None and anti_pitch_voice_path.exists():
         public_receipt_statuses["anti_pitch"] = anti_pitch_voice_gate_status(load_json(anti_pitch_voice_path))
     else:
@@ -1251,6 +1294,16 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         public_receipt_statuses["founder_post"] = founder_post_voice_gate_status(load_json(founder_post_voice_path))
     else:
         failures.append({"code": "founder_post_voice_ref_missing", "ref": FOUNDER_POST_VOICE_REF})
+    if public_story_route_path is not None and public_story_route_path.exists():
+        public_story_route_receipt = load_json(public_story_route_path)
+    else:
+        failures.append({"code": "public_story_route_ref_missing", "ref": PUBLIC_STORY_ROUTE_REF})
+    if public_surface_supersession_path is not None and public_surface_supersession_path.exists():
+        public_surface_supersession_receipt = load_json(public_surface_supersession_path)
+    else:
+        failures.append(
+            {"code": "public_surface_supersession_ref_missing", "ref": PUBLIC_SURFACE_AUDIT_SUPERSESSION_REF}
+        )
 
     mobile_eats_shipping_path = path_for_ref(MOBILE_EATS_SHIPPING_REF)
     if mobile_eats_shipping_path is not None and mobile_eats_shipping_path.exists():
@@ -1434,13 +1487,32 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
 
     no_custom_apps_requirement = requirements_by_id.get("no_custom_apps_positioning")
     if no_custom_apps_requirement is not None:
+        no_custom_apps_status = no_custom_apps_positioning_status(
+            public_receipt_statuses,
+            public_story_route_receipt,
+            public_surface_supersession_receipt,
+        )
         evidence_refs = no_custom_apps_requirement.get("evidence_refs", [])
         for required_ref, code in (
             (PUBLIC_STORY_REF, "no_custom_apps_requirement_missing_public_story_ref"),
             (ANTI_PITCH_VOICE_REF, "no_custom_apps_requirement_missing_anti_pitch_voice_ref"),
+            (PUBLIC_STORY_ROUTE_REF, "no_custom_apps_requirement_missing_public_story_route_ref"),
+            (
+                PUBLIC_SURFACE_AUDIT_SUPERSESSION_REF,
+                "no_custom_apps_requirement_missing_public_surface_supersession_ref",
+            ),
         ):
             if required_ref not in evidence_refs:
                 failures.append({"code": code, "requirement_id": "no_custom_apps_positioning", "required_ref": required_ref})
+        if no_custom_apps_requirement.get("coverage_status") != no_custom_apps_status:
+            failures.append(
+                {
+                    "code": "requirement_status_mismatch_with_no_custom_apps_positioning_receipts",
+                    "requirement_id": "no_custom_apps_positioning",
+                    "claimed": no_custom_apps_requirement.get("coverage_status"),
+                    "evidence_status": no_custom_apps_status,
+                }
+            )
         for status_key, code in (
             ("public_story", "requirement_status_mismatch_with_public_story_receipt"),
             ("anti_pitch", "requirement_status_mismatch_with_anti_pitch_voice_receipt"),
