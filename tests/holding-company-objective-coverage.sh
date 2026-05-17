@@ -173,6 +173,32 @@ else
   assert_jq "$TMP/missing-registry-ref.out.json" '.failures[] | select(.code == "portfolio_requirement_missing_registry_ref" and .requirement_id == "one_year_small_portfolio_making_money")' "portfolio requirement missing registry ref rejected"
 fi
 
+jq '
+  (.requirements[] | select(.requirement_id == "each_business_own_brand_owner_customers") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/own-brand-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/own-brand-overclaim.json" --json >"$TMP/own-brand-overclaim.out.json" 2>/dev/null; then
+  fail "blocked brand-naming and POUR receipts reject own-brand status promotion"
+else
+  assert_jq "$TMP/own-brand-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_brand_naming_receipt" and .requirement_id == "each_business_own_brand_owner_customers" and .evidence_status == "blocked")' "blocked brand-naming receipt rejects own-brand status promotion"
+  assert_jq "$TMP/own-brand-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_pour_readiness_receipt" and .requirement_id == "each_business_own_brand_owner_customers" and .evidence_status == "blocked")' "blocked POUR receipt rejects own-brand status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "each_business_own_brand_owner_customers") | .evidence_refs) -= ["state/holding-company-brand-naming.json"]' "$LEDGER" >"$TMP/missing-own-brand-naming-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-own-brand-naming-ref.json" --json >"$TMP/missing-own-brand-naming-ref.out.json" 2>/dev/null; then
+  fail "own-brand requirement missing brand-naming receipt ref rejected"
+else
+  assert_jq "$TMP/missing-own-brand-naming-ref.out.json" '.failures[] | select(.code == "own_brand_requirement_missing_brand_naming_ref" and .requirement_id == "each_business_own_brand_owner_customers")' "own-brand requirement missing brand-naming receipt ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "each_business_own_brand_owner_customers") | .evidence_refs) -= ["state/holding-company-pour-readiness.json"]' "$LEDGER" >"$TMP/missing-own-brand-pour-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-own-brand-pour-ref.json" --json >"$TMP/missing-own-brand-pour-ref.out.json" 2>/dev/null; then
+  fail "own-brand requirement missing POUR receipt ref rejected"
+else
+  assert_jq "$TMP/missing-own-brand-pour-ref.out.json" '.failures[] | select(.code == "own_brand_requirement_missing_pour_readiness_ref" and .requirement_id == "each_business_own_brand_owner_customers")' "own-brand requirement missing POUR receipt ref rejected"
+fi
+
 jq '(.requirements[] | select(.requirement_id == "runway_gate") | .evidence_refs) = []' "$LEDGER" >"$TMP/missing-primary-ref.json"
 if "$SCRIPT" --ledger "$TMP/missing-primary-ref.json" --json >"$TMP/missing-primary-ref.out.json" 2>/dev/null; then
   fail "primary evidence ref must appear in evidence refs"

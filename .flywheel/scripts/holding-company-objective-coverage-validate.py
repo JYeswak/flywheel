@@ -65,6 +65,7 @@ ANTI_PITCH_VOICE_REF = "state/holding-company-anti-pitch-voice.json"
 PUBLIC_STORY_REF = "state/holding-company-public-story.json"
 BRAND_VOICE_SKILL_REF = "state/holding-company-brand-voice-skill.json"
 FOUNDER_POST_VOICE_REF = "state/holding-company-founder-post-voice.json"
+BRAND_NAMING_REF = "state/holding-company-brand-naming.json"
 PEEL_INTERVIEWS_REF = "state/holding-company-peel-interviews.json"
 PRESS_READINESS_REF = "state/holding-company-press-readiness.json"
 POUR_READINESS_REF = "state/holding-company-pour-readiness.json"
@@ -123,6 +124,14 @@ PUBLIC_POSITIONING_REQUIRED = "sharpen_legacy_incubate_new_not_builder"
 BRAND_VOICE_CLEAR_STATUSES = {"aligned", "clear"}
 FOUNDER_POST_CLEAR_STATUSES = {"clear", "ratified"}
 FOUNDER_POST_FACT_CHECK_CLEAR = {"pass", "no_claims"}
+BRAND_NAMING_CLEAR_STATUSES = {"name_clear", "launch_clear"}
+BRAND_NAMING_REQUIRED_REFS = {
+    "owner_operator_ref",
+    "community_context_ref",
+    "naming_decision_ref",
+    "brand_identity_ref",
+    "public_surface_ref",
+}
 PEEL_QUALIFYING_URGENCY = {"medium", "strong"}
 PEEL_QUALIFYING_SOURCE_CHANNELS = {"client_talk", "community", "field_trip"}
 PRESS_CLEAR_STATUSES = {"press_clear", "formation_ready"}
@@ -456,6 +465,26 @@ def founder_post_voice_gate_status(receipt: dict[str, Any]) -> str:
             and post.get("claim_fact_check_status") in FOUNDER_POST_FACT_CHECK_CLEAR
             and post.get("human_ratification_required") is True
             and has_ref(post.get("publisher_receipt_ref"))
+        ):
+            return "clear"
+    return "blocked"
+
+
+def brand_naming_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    for row in receipt.get("names", []):
+        if not isinstance(row, dict) or row.get("status") not in BRAND_NAMING_CLEAR_STATUSES:
+            continue
+        refs_ok = all(has_ref(row.get(field)) for field in BRAND_NAMING_REQUIRED_REFS)
+        if (
+            row.get("own_brand_name") is True
+            and row.get("owner_involved_in_name") is True
+            and row.get("community_context_in_name") is True
+            and refs_ok
+            and row.get("prohibited_name_flags") == []
+            and bool(row.get("evidence_refs"))
         ):
             return "clear"
     return "blocked"
@@ -1082,6 +1111,7 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         failures.append({"code": "press_readiness_ref_missing", "ref": PRESS_READINESS_REF})
 
     pour_readiness_path = path_for_ref(POUR_READINESS_REF)
+    pour_status = None
     if pour_readiness_path is not None and pour_readiness_path.exists():
         pour_status = pour_gate_status(load_json(pour_readiness_path))
         pour_requirement = requirements_by_id.get("pour_loop")
@@ -1106,6 +1136,42 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "pour_readiness_ref_missing", "ref": POUR_READINESS_REF})
+
+    brand_naming_path = path_for_ref(BRAND_NAMING_REF)
+    if brand_naming_path is not None and brand_naming_path.exists():
+        brand_naming_status = brand_naming_gate_status(load_json(brand_naming_path))
+    else:
+        brand_naming_status = None
+        failures.append({"code": "brand_naming_ref_missing", "ref": BRAND_NAMING_REF})
+    own_brand_requirement = requirements_by_id.get("each_business_own_brand_owner_customers")
+    if own_brand_requirement is not None:
+        evidence_refs = own_brand_requirement.get("evidence_refs", [])
+        for required_ref, code in (
+            (BRAND_NAMING_REF, "own_brand_requirement_missing_brand_naming_ref"),
+            (POUR_READINESS_REF, "own_brand_requirement_missing_pour_readiness_ref"),
+            (PORTFOLIO_REGISTRY_REF, "own_brand_requirement_missing_registry_ref"),
+        ):
+            if required_ref not in evidence_refs:
+                failures.append(
+                    {
+                        "code": code,
+                        "requirement_id": "each_business_own_brand_owner_customers",
+                        "required_ref": required_ref,
+                    }
+                )
+        for evidence_status, code in (
+            (brand_naming_status, "requirement_status_mismatch_with_brand_naming_receipt"),
+            (pour_status, "requirement_status_mismatch_with_pour_readiness_receipt"),
+        ):
+            if evidence_status == "blocked" and own_brand_requirement.get("coverage_status") != "blocked":
+                failures.append(
+                    {
+                        "code": code,
+                        "requirement_id": "each_business_own_brand_owner_customers",
+                        "claimed": own_brand_requirement.get("coverage_status"),
+                        "evidence_status": evidence_status,
+                    }
+                )
 
     launch_economics_path = path_for_ref(LAUNCH_ECONOMICS_REF)
     if launch_economics_path is not None and launch_economics_path.exists():
