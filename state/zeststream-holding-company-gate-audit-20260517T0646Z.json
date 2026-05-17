@@ -107,6 +107,11 @@
       "kind": "legal_structure_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-legal-structure.json",
       "result": "legal-structure readiness ledger exists and validates; current clear_count is 0 because binding artifact, attorney review, and CPA review refs are absent"
+    },
+    {
+      "kind": "anti_pitch_voice_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-anti-pitch-voice.json",
+      "result": "anti-pitch voice ledger exists and validates; current clear_count is 0 because zeststream-v2-fresh still has workflow-builder and automation-positioning hits"
     }
   ],
   "canonical_gates": [
@@ -141,12 +146,13 @@
     },
     {
       "gate": "anti_pitch_voice",
-      "status": "partial_drift",
+      "status": "blocked_builder_framing",
       "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-anti-pitch-voice.json",
         "/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml",
         "/Users/josh/Developer/zeststream-v2-fresh"
       ],
-      "finding": "A machine-checkable voice gate exists, but public/content surfaces in zeststream-v2-fresh still contain older automation/custom-app/workflow-builder framing. The holding-company anti-pitch rule is not fleet-green yet."
+      "finding": "The anti-pitch voice gate is now machine-checkable. Current ledger blocks public-clear status because zeststream-v2-fresh still contains workflow-builder and automation-positioning hits and does not yet carry the sharpen-legacy/incubate-new holding-company story."
     },
     {
       "gate": "sustainable_pace",
@@ -237,7 +243,7 @@
     },
     {
       "owner": "zeststream-brand-voice",
-      "action": "Update ZestStream voice config to explicitly reject workflow-builder/custom-app-builder public framing and encode the holding-company anti-pitch story."
+      "action": "Use state/holding-company-anti-pitch-voice.json to drive rewrite/removal of builder-framed surfaces and then update the JSM-managed voice skill through its approved workflow."
     },
     {
       "owner": "zeststream-v2-fresh",

@@ -20,7 +20,7 @@ The audit did not find the receipts that would let the system count a formed por
 | Personal runway | `not_provided` | Redacted runway receipt contract exists; current receipt is months-not-provided and blocks launch. |
 | Portfolio company existence | `not_proven` | mobile-eats is strong product/substrate proof, but not countable as a portfolio company without signed owner + first paying customer registry evidence. |
 | PEEL market signal | `blocked_no_qualified_interviews` | PEEL interview ledger exists and validates; formation cash remains blocked because no candidate has five qualified prospect interviews. |
-| Anti-pitch voice | `partial_drift` | Brand voice skill exists, but `zeststream-v2-fresh` still contains old automation/custom-app/workflow-builder framing. |
+| Anti-pitch voice | `blocked_builder_framing` | Anti-pitch voice ledger exists and validates; `zeststream-v2-fresh` still has workflow-builder and automation-positioning hits. |
 | Sustainable pace | `blocked_no_measurement` | Sustainable-pace ledger exists and validates; weekly hours and substrate coaching-time offset are not measured yet. |
 | Owner-search phasing | `blocked_no_warm_network_proof` | Owner-search phasing ledger exists and validates; sub #1 remains blocked because no warm-network source proof exists. |
 | Shared substrate | `partial_proven` | mobile-eats + SkillOS prove substrate adoption; the remaining gap is tying the substrate-share receipt to a formed owner/company registry row. |
@@ -44,12 +44,13 @@ The audit did not find the receipts that would let the system count a formed por
 - Owner-search phasing ledger: `state/holding-company-owner-search-phasing.json`
 - Sustainable-pace ledger: `state/holding-company-sustainable-pace.json`
 - Legal-structure ledger: `state/holding-company-legal-structure.json`
+- Anti-pitch voice ledger: `state/holding-company-anti-pitch-voice.json`
 
 ## Immediate Next Actions
 
 1. Create a portfolio-company registry schema that refuses rows without signed owner-operator and first paying-customer receipt paths.
 2. Produce a redacted runway receipt or mark sub #1 launch blocked.
-3. Update `zeststream-brand-voice` so the holding-company anti-pitch rule is mechanical.
+3. Use the anti-pitch voice ledger to rewrite or retire builder-framed surfaces, then update `zeststream-brand-voice` through the approved JSM workflow.
 4. Grade `zeststream-v2-fresh` against the mission-alignment goal and route stale automation/custom-app pages to update plans.
 5. For mobile-eats, either attach owner/customer/company receipts or explicitly classify it as product/substrate proof rather than portfolio company #1.
 6. Fill the PEEL interview ledger with five qualified prospect interviews before clearing or committing formation cash for any candidate.

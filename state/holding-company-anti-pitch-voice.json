@@ -1,0 +1,48 @@
+{
+  "schema_version": "zeststream.holding_company_anti_pitch_voice.v1",
+  "generated_at": "2026-05-17T07:26:00Z",
+  "gate": "anti_pitch_voice",
+  "required_positioning": "sharpen_legacy_incubate_new_not_builder",
+  "clear_count": 0,
+  "surfaces": [
+    {
+      "surface_id": "zeststream-v2-fresh",
+      "surface_kind": "repo",
+      "surface_ref": "/Users/josh/Developer/zeststream-v2-fresh",
+      "status": "needs_rewrite",
+      "holding_company_story_present": false,
+      "builder_framing_hits": [
+        {
+          "frame": "workflow_builder",
+          "path": "/Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md",
+          "line": 61,
+          "excerpt": "Page Title: \"AI Workflow Builder | ZestStream\""
+        },
+        {
+          "frame": "automation_positioning",
+          "path": "/Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md",
+          "line": 62,
+          "excerpt": "Main Heading: \"Your Stack.Our Automation.\""
+        },
+        {
+          "frame": "automation_positioning",
+          "path": "/Users/josh/Developer/zeststream-v2-fresh/src/data/local-landing-content.ts",
+          "line": 56,
+          "excerpt": "category: \"Process Automation\""
+        }
+      ],
+      "evidence_refs": [
+        "/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml",
+        "/Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md",
+        "/Users/josh/Developer/zeststream-v2-fresh/src/data/local-landing-content.ts"
+      ],
+      "notes": "Current surface still carries workflow-builder and automation-positioning copy. It is not clear until holding-company story is present and builder framing hits are removed or explicitly archived out of public surface scope."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical anti-pitch voice gate for the ZestStream holding-company goal.",
+    "Public-clear status requires holding-company story presence and zero builder-framing hits.",
+    "This ledger does not edit the JSM-managed brand-voice skill; it records surface readiness evidence."
+  ],
+  "next_action": "Rewrite or retire stale builder-framed public surfaces, then set holding_company_story_present=true only after the surface carries the sharpen-legacy/incubate-new story."
+}
