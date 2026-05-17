@@ -550,6 +550,13 @@ else
   assert_jq "$TMP/missing-legal-ref.out.json" '.failures[] | select(.code == "legal_requirement_missing_legal_structure_ref" and .requirement_id == "legal_structure_gate")' "legal requirement missing legal-structure receipt ref rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "legal_structure_gate") | .evidence_refs) -= ["/Users/josh/Developer/skillos/state/legal-house/SCAFFOLD.md"]' "$LEDGER" >"$TMP/missing-legal-scaffold-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-legal-scaffold-ref.json" --json >"$TMP/missing-legal-scaffold-ref.out.json" 2>/dev/null; then
+  fail "legal requirement missing SkillOS scaffold ref rejected"
+else
+  assert_jq "$TMP/missing-legal-scaffold-ref.out.json" '.failures[] | select(.code == "legal_requirement_missing_legal_house_scaffold_ref" and .requirement_id == "legal_structure_gate")' "legal requirement missing SkillOS scaffold ref rejected"
+fi
+
 jq '
   (.requirements[] | select(.requirement_id == "sustainable_pace_gate") | .coverage_status) = "partial"
   | .summary_counts.partial += 1

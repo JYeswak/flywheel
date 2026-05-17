@@ -55,6 +55,7 @@ REQUIRED_VALIDATION_COVERAGE = "state/zeststream-portfolio-company-registry.json
 PORTFOLIO_REGISTRY_REF = "state/zeststream-portfolio-company-registry.json"
 RUNWAY_RECEIPT_REF = "state/holding-company-runway-current.json"
 LEGAL_STRUCTURE_REF = "state/holding-company-legal-structure.json"
+LEGAL_HOUSE_SCAFFOLD_REF = "/Users/josh/Developer/skillos/state/legal-house/SCAFFOLD.md"
 SUSTAINABLE_PACE_REF = "state/holding-company-sustainable-pace.json"
 COACH_ROLE_REF = "state/holding-company-coach-role.json"
 OWNER_SEARCH_PHASING_REF = "state/holding-company-owner-search-phasing.json"
@@ -1184,6 +1185,14 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "code": "legal_requirement_missing_legal_structure_ref",
                         "requirement_id": "legal_structure_gate",
                         "required_ref": LEGAL_STRUCTURE_REF,
+                    }
+                )
+            if LEGAL_HOUSE_SCAFFOLD_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "legal_requirement_missing_legal_house_scaffold_ref",
+                        "requirement_id": "legal_structure_gate",
+                        "required_ref": LEGAL_HOUSE_SCAFFOLD_REF,
                     }
                 )
             if legal_structure_status == "blocked" and legal_structure_requirement.get("coverage_status") != "blocked":
