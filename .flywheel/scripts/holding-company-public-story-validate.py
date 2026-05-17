@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SCHEMA = ROOT / ".flywheel/validation-schema/v1/holding-company-public-story.schema.json"
 DEFAULT_LEDGER = ROOT / "state/holding-company-public-story.json"
 SECRETISH_RE = re.compile(r"(\$[0-9]|sk-[A-Za-z0-9]|AKIA[0-9A-Z]{16})")
+STALE_CLEAR_NEXT_ACTION_RE = re.compile(r"\bbefore\s+marking\b.*\bclear\b", re.IGNORECASE)
 
 
 def load_json(path: Path) -> Any:
@@ -41,6 +42,10 @@ def has_secretish_string(value: Any) -> bool:
     if isinstance(value, list):
         return any(has_secretish_string(v) for v in value)
     return False
+
+
+def stale_clear_next_action(value: Any) -> bool:
+    return isinstance(value, str) and bool(STALE_CLEAR_NEXT_ACTION_RE.search(value))
 
 
 def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_paths: bool) -> dict[str, Any]:
@@ -111,6 +116,8 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
     claimed_clear_count = ledger.get("clear_count")
     if claimed_clear_count != computed_clear_count:
         failures.append({"code": "clear_count_mismatch", "claimed": claimed_clear_count, "computed": computed_clear_count})
+    if computed_clear_count > 0 and stale_clear_next_action(ledger.get("next_action")):
+        failures.append({"code": "stale_clear_next_action", "next_action": ledger.get("next_action")})
 
     return {
         "schema_version": "zeststream.holding_company_public_story.validation.v1",

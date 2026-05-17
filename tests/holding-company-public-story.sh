@@ -48,6 +48,21 @@ jq '
 assert_jq "$TMP/clear.out.json" '.status == "pass" and .clear_count == 1 and .surfaces[0].public_story_gate_status == "clear"' "receipt-led public story clears"
 
 jq '
+  .clear_count = 1
+  | .next_action = "Rewrite public ZestStream surfaces around receipt/proof evidence before marking public-story clear."
+  | .surfaces[0].status = "clear"
+  | .surfaces[0].receipt_story_present = true
+  | .surfaces[0].holding_company_positioning_present = true
+  | .surfaces[0].proof_or_receipt_refs = ["urn:proof:portfolio-receipt-rail"]
+  | .surfaces[0].build_app_framing_hits = []
+' "$LEDGER" >"$TMP/stale-next-action.json"
+if "$SCRIPT" --ledger "$TMP/stale-next-action.json" --json >"$TMP/stale-next-action.out.json" 2>/dev/null; then
+  fail "clear with stale pre-clear next_action rejected"
+else
+  assert_jq "$TMP/stale-next-action.out.json" '.failures[] | select(.code == "stale_clear_next_action")' "clear with stale pre-clear next_action rejected"
+fi
+
+jq '
   .surfaces[0].status = "clear"
   | .surfaces[0].receipt_story_present = true
   | .surfaces[0].holding_company_positioning_present = true

@@ -36,5 +36,5 @@
     "Public clear requires receipt/proof refs, holding-company positioning, and zero build-app framing hits.",
     "Do not use this ledger to publish secret or private receipt values; refs only."
   ],
-  "next_action": "Rewrite public ZestStream surfaces around receipt/proof evidence and holding-company positioning before marking public-story clear."
+  "next_action": "Keep the public-story gate clear by requiring receipt/proof refs, holding-company positioning, and zero build-app framing on future public surfaces."
 }
