@@ -68,6 +68,7 @@ BRAND_VOICE_SKILL_REF = "state/holding-company-brand-voice-skill.json"
 FOUNDER_POST_VOICE_REF = "state/holding-company-founder-post-voice.json"
 BRAND_NAMING_REF = "state/holding-company-brand-naming.json"
 MOBILE_EATS_SHIPPING_REF = "state/holding-company-mobile-eats-shipping.json"
+SKILLOS_FOREVER_OS_LOCK_REF = "state/holding-company-skillos-forever-os-lock.json"
 PEEL_INTERVIEWS_REF = "state/holding-company-peel-interviews.json"
 PRESS_READINESS_REF = "state/holding-company-press-readiness.json"
 POUR_READINESS_REF = "state/holding-company-pour-readiness.json"
@@ -521,6 +522,26 @@ def mobile_eats_shipping_gate_status(receipt: dict[str, Any]) -> str:
     if receipt.get("status") == "proven" and product_substrate_present and formation_receipts_present and portfolio_claim_clear:
         return "proven"
     if receipt.get("status") == "partial" and product_substrate_present:
+        return "partial"
+    return "blocked"
+
+
+def skillos_forever_os_lock_gate_status(receipt: dict[str, Any]) -> str:
+    ratification_present = receipt.get("ratification_receipts_present") is True
+    v3_foundation_present = (
+        receipt.get("v3_goal_present") is True
+        and receipt.get("v3_scope_clarifier_present") is True
+        and receipt.get("anti_punt_forbid_list_present") is True
+        and ratification_present
+    )
+    structure_lock_present = (
+        receipt.get("structure_locked_20260517") is True
+        and has_ref(receipt.get("structure_lock_receipt_ref"))
+        and has_ref(receipt.get("structure_lock_receipt_sha256"))
+    )
+    if receipt.get("status") == "proven" and v3_foundation_present and structure_lock_present:
+        return "proven"
+    if receipt.get("status") == "partial" and v3_foundation_present:
         return "partial"
     return "blocked"
 
@@ -1196,6 +1217,32 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "mobile_eats_shipping_ref_missing", "ref": MOBILE_EATS_SHIPPING_REF})
+
+    skillos_forever_os_path = path_for_ref(SKILLOS_FOREVER_OS_LOCK_REF)
+    if skillos_forever_os_path is not None and skillos_forever_os_path.exists():
+        skillos_forever_os_status = skillos_forever_os_lock_gate_status(load_json(skillos_forever_os_path))
+        skillos_forever_requirement = requirements_by_id.get("recent_skillos_forever_os_claim")
+        if skillos_forever_requirement is not None:
+            evidence_refs = skillos_forever_requirement.get("evidence_refs", [])
+            if SKILLOS_FOREVER_OS_LOCK_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "skillos_forever_os_requirement_missing_lock_ref",
+                        "requirement_id": "recent_skillos_forever_os_claim",
+                        "required_ref": SKILLOS_FOREVER_OS_LOCK_REF,
+                    }
+                )
+            if skillos_forever_requirement.get("coverage_status") != skillos_forever_os_status:
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_skillos_forever_os_lock_receipt",
+                        "requirement_id": "recent_skillos_forever_os_claim",
+                        "claimed": skillos_forever_requirement.get("coverage_status"),
+                        "evidence_status": skillos_forever_os_status,
+                    }
+                )
+    else:
+        failures.append({"code": "skillos_forever_os_lock_ref_missing", "ref": SKILLOS_FOREVER_OS_LOCK_REF})
 
     anti_pitch_requirement = requirements_by_id.get("anti_pitch_voice_gate")
     if anti_pitch_requirement is not None:
