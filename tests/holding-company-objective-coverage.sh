@@ -267,6 +267,13 @@ else
   assert_jq "$TMP/missing-progress-velocity-ref.out.json" '.failures[] | select(.code == "progress_velocity_requirement_missing_progress_velocity_ref" and .requirement_id == "recent_progress_velocity_claim")' "recent-progress requirement missing progress velocity ref rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "recent_progress_velocity_claim") | .finding) = "Replayable ledger blocks the claim at 3,755 sampled commits and no exact surface-set proof."' "$LEDGER" >"$TMP/stale-progress-velocity-finding.json"
+if "$SCRIPT" --ledger "$TMP/stale-progress-velocity-finding.json" --json >"$TMP/stale-progress-velocity-finding.out.json" 2>/dev/null; then
+  fail "recent-progress stale measured-total finding rejected"
+else
+  assert_jq "$TMP/stale-progress-velocity-finding.out.json" '.failures[] | select(.code == "progress_velocity_finding_missing_measured_total" and .requirement_id == "recent_progress_velocity_claim" and (.measured_total_commit_count | type == "number"))' "recent-progress stale measured-total finding rejected"
+fi
+
 jq '
   (.requirements[] | select(.requirement_id == "recent_mobile_eats_shipping_claim") | .coverage_status) = "proven"
   | .summary_counts.proven += 1

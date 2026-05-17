@@ -1512,7 +1512,8 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
 
     progress_velocity_path = path_for_ref(PROGRESS_VELOCITY_REF)
     if progress_velocity_path is not None and progress_velocity_path.exists():
-        progress_velocity_status = progress_velocity_gate_status(load_json(progress_velocity_path))
+        progress_velocity_receipt = load_json(progress_velocity_path)
+        progress_velocity_status = progress_velocity_gate_status(progress_velocity_receipt)
         progress_velocity_requirement = requirements_by_id.get("recent_progress_velocity_claim")
         if progress_velocity_requirement is not None:
             evidence_refs = progress_velocity_requirement.get("evidence_refs", [])
@@ -1531,6 +1532,18 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "requirement_id": "recent_progress_velocity_claim",
                         "claimed": progress_velocity_requirement.get("coverage_status"),
                         "evidence_status": progress_velocity_status,
+                    }
+                )
+            measured_total = progress_velocity_receipt.get("measured_total_commit_count")
+            finding = progress_velocity_requirement.get("finding")
+            if isinstance(measured_total, int) and (
+                not isinstance(finding, str) or f"{measured_total:,}" not in finding
+            ):
+                failures.append(
+                    {
+                        "code": "progress_velocity_finding_missing_measured_total",
+                        "requirement_id": "recent_progress_velocity_claim",
+                        "measured_total_commit_count": measured_total,
                     }
                 )
     else:

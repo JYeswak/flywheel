@@ -229,7 +229,7 @@
         "state/holding-company-progress-velocity.json",
         "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
       ],
-      "finding": "Replayable ledger blocks the claim at 3,755 sampled commits and no exact surface-set proof."
+      "finding": "Replayable ledger blocks the claim at 3,906 current-window commits and no exact surface-set proof."
     },
     {
       "requirement_id": "recent_mobile_eats_shipping_claim",
