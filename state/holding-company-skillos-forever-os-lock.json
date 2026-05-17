@@ -1,0 +1,55 @@
+{
+  "schema_version": "zeststream.holding_company_skillos_forever_os_lock.v1",
+  "generated_at": "2026-05-17T09:07:00Z",
+  "gate": "recent_progress_skillos_forever_os_lock",
+  "claim_text": "SkillOS Forever-OS v3 ratified 2026-05-16; structure locked 2026-05-17.",
+  "status": "partial",
+  "goal_ref": "/Users/josh/Desktop/zeststream-goals/skillos/forever-operating-system-v3-20260515.txt",
+  "goal_sha256": "2653cad765cba1ee85df71e5275e8552a148c0284c241d92de4caf0de931815f",
+  "v3_goal_present": true,
+  "v3_scope_clarifier_present": true,
+  "anti_punt_forbid_list_present": true,
+  "ratification_receipts": [
+    {
+      "receipt_id": "codex-rate-limit-window-substrate-20260515t2135z",
+      "receipt_ref": "/Users/josh/Developer/skillos/state/session-arc-receipts/skillos-codex-rate-limit-window-substrate-2026-05-15T21-35Z.json",
+      "receipt_sha256": "614b7a79eb86908cdf6059e14eaa4bd1d5a5e5b39f0bc6f034198d147456d2f0",
+      "status": "present",
+      "notes": "Session receipt says Joshua handed the v3 forever-goal to Codex and records v3 anti-punt primitives."
+    },
+    {
+      "receipt_id": "v3-cadence-robustness-190-ticks-20260516t0530z",
+      "receipt_ref": "/Users/josh/Developer/skillos/state/v3-cadence-robustness-receipt-190-ticks-20260516T0530Z.json",
+      "receipt_sha256": "9eb51711755863cad68d11c80fbe068866dc806a6212cc94f441d0f7a9ee43b1",
+      "status": "present",
+      "notes": "190 v3 activity ticks with zero punt phrases or hold citations."
+    },
+    {
+      "receipt_id": "v3-anti-punt-close-gate-proof-20260516t0929z",
+      "receipt_ref": "/Users/josh/Developer/skillos/state/v3-anti-punt-close-gate-proof-20260516T0929Z.json",
+      "receipt_sha256": "650defe6654de68b07d7003877ef693770ff4b452e13efbbb2bc3846d68f0c45",
+      "status": "present",
+      "notes": "Executable v3 anti-punt close-gate proof exists."
+    }
+  ],
+  "ratification_receipts_present": true,
+  "structure_lock_receipt_ref": null,
+  "structure_lock_receipt_sha256": null,
+  "structure_locked_20260517": false,
+  "structure_lock_search_command": "rg -n \"structure locked|locked 2026-05-17|2026-05-17.*locked|Forever-OS v3 ratified|ratified.*2026-05-16\" /Users/josh/Desktop/zeststream-goals /Users/josh/Developer/skillos/state -S --glob '!jsm-release-classifications*.jsonl*' --glob '!research-watchtower*'",
+  "inspected_paths": [
+    "/Users/josh/Desktop/zeststream-goals",
+    "/Users/josh/Developer/skillos/state"
+  ],
+  "evidence_refs": [
+    "/Users/josh/Desktop/zeststream-goals/skillos/forever-operating-system-v3-20260515.txt",
+    "/Users/josh/Developer/skillos/state/session-arc-receipts/skillos-codex-rate-limit-window-substrate-2026-05-15T21-35Z.json",
+    "/Users/josh/Developer/skillos/state/v3-cadence-robustness-receipt-190-ticks-20260516T0530Z.json",
+    "/Users/josh/Developer/skillos/state/v3-anti-punt-close-gate-proof-20260516T0929Z.json"
+  ],
+  "notes": [
+    "This ledger separates v3 ratification evidence from the later structure-lock claim.",
+    "Current evidence proves v3 goal text and v3 operating receipts, but no distinct 2026-05-17 structure-lock receipt was found in the inspected SkillOS/Desktop goal paths."
+  ],
+  "next_action": "Attach the 2026-05-17 SkillOS structure-lock receipt, or downgrade public/audit wording to v3 ratified with structure-lock receipt pending."
+}

@@ -79,6 +79,11 @@
       "result": "founder-post voice ledger exists and validates; current clear_count is 0 because the SkillOS public-share LinkedIn draft has a fact-check discrepancy and lacks holding-company positioning despite a publisher dry-run pass"
     },
     {
+      "kind": "skillos_forever_os_lock_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-skillos-forever-os-lock.json",
+      "result": "SkillOS Forever-OS lock ledger exists and validates; v3 goal and operating receipts are present, but no distinct 2026-05-17 structure-lock receipt was found in the inspected SkillOS/Desktop goal paths"
+    },
+    {
       "kind": "public_surface_probe",
       "path": "/Users/josh/Developer/zeststream-v2-fresh",
       "result": "targeted grep found old automation/custom-app/workflow-builder language in content and app code; mission-alignment drift remains"
@@ -481,8 +486,15 @@
     },
     {
       "claim": "SkillOS Forever-OS v3 ratified and structure locked",
-      "status": "proven",
-      "finding": "The v3 goal file and session arc receipts exist under Desktop goals and SkillOS state."
+      "status": "partial_structure_lock_receipt_missing",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-skillos-forever-os-lock.json",
+        "/Users/josh/Desktop/zeststream-goals/skillos/forever-operating-system-v3-20260515.txt",
+        "/Users/josh/Developer/skillos/state/session-arc-receipts/skillos-codex-rate-limit-window-substrate-2026-05-15T21-35Z.json",
+        "/Users/josh/Developer/skillos/state/v3-cadence-robustness-receipt-190-ticks-20260516T0530Z.json",
+        "/Users/josh/Developer/skillos/state/v3-anti-punt-close-gate-proof-20260516T0929Z.json"
+      ],
+      "finding": "The replayable Forever-OS lock ledger proves v3 goal text plus v3 operating receipts, but blocks the full structure-locked claim because no distinct 2026-05-17 structure-lock receipt was found in the inspected paths."
     }
   ],
   "next_actions": [
@@ -505,6 +517,10 @@
     {
       "owner": "skillos/public-share",
       "action": "Use state/holding-company-founder-post-voice.json to revise public-share drafts so Joshua posts carry holding-company positioning, fact-checked receipt values, and human-ratified publisher receipts before marking founder-post voice clear."
+    },
+    {
+      "owner": "skillos",
+      "action": "Attach a distinct 2026-05-17 SkillOS structure-lock receipt to state/holding-company-skillos-forever-os-lock.json, or keep public/audit wording downgraded to v3 ratified with structure-lock receipt pending."
     },
     {
       "owner": "zeststream-v2-fresh",
