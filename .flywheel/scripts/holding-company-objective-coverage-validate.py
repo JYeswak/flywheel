@@ -1718,6 +1718,14 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "required_ref": PRESS_READINESS_REF,
                     }
                 )
+            if OWNER_ECONOMICS_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "press_requirement_missing_owner_economics_ref",
+                        "requirement_id": "press_loop",
+                        "required_ref": OWNER_ECONOMICS_REF,
+                    }
+                )
             if press_status == "blocked" and press_requirement.get("coverage_status") != "blocked":
                 failures.append(
                     {

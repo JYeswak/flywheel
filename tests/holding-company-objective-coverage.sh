@@ -692,6 +692,13 @@ else
   assert_jq "$TMP/missing-press-ref.out.json" '.failures[] | select(.code == "press_requirement_missing_press_readiness_ref" and .requirement_id == "press_loop")' "PRESS requirement missing readiness receipt ref rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "press_loop") | .evidence_refs) -= ["state/holding-company-owner-economics.json"]' "$LEDGER" >"$TMP/missing-press-owner-economics-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-press-owner-economics-ref.json" --json >"$TMP/missing-press-owner-economics-ref.out.json" 2>/dev/null; then
+  fail "PRESS requirement missing owner-economics receipt ref rejected"
+else
+  assert_jq "$TMP/missing-press-owner-economics-ref.out.json" '.failures[] | select(.code == "press_requirement_missing_owner_economics_ref" and .requirement_id == "press_loop")' "PRESS requirement missing owner-economics receipt ref rejected"
+fi
+
 jq '
   (.requirements[] | select(.requirement_id == "pour_loop") | .coverage_status) = "partial"
   | .summary_counts.partial += 1
