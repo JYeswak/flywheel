@@ -235,6 +235,24 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "press_loop") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/press-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/press-overclaim.json" --json >"$TMP/press-overclaim.out.json" 2>/dev/null; then
+  fail "blocked PRESS receipt rejects PRESS status promotion"
+else
+  assert_jq "$TMP/press-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_press_readiness_receipt" and .requirement_id == "press_loop" and .evidence_status == "blocked")' "blocked PRESS receipt rejects PRESS status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "press_loop") | .evidence_refs) -= ["state/holding-company-press-readiness.json"]' "$LEDGER" >"$TMP/missing-press-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-press-ref.json" --json >"$TMP/missing-press-ref.out.json" 2>/dev/null; then
+  fail "PRESS requirement missing readiness receipt ref rejected"
+else
+  assert_jq "$TMP/missing-press-ref.out.json" '.failures[] | select(.code == "press_requirement_missing_press_readiness_ref" and .requirement_id == "press_loop")' "PRESS requirement missing readiness receipt ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "peel_loop") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
   | .summary_counts.blocked -= 1

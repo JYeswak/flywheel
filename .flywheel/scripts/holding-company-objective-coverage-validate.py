@@ -59,6 +59,7 @@ SUSTAINABLE_PACE_REF = "state/holding-company-sustainable-pace.json"
 OWNER_SEARCH_PHASING_REF = "state/holding-company-owner-search-phasing.json"
 OWNER_ECONOMICS_REF = "state/holding-company-owner-economics.json"
 PEEL_INTERVIEWS_REF = "state/holding-company-peel-interviews.json"
+PRESS_READINESS_REF = "state/holding-company-press-readiness.json"
 RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 RECENT_PROGRESS_REQUIREMENT_CLAIMS = {
     "recent_anthropic_adoption_claim": "anthropic_adoption",
@@ -92,6 +93,18 @@ OWNER_ECONOMICS_REQUIRED_REFS = {
 }
 PEEL_QUALIFYING_URGENCY = {"medium", "strong"}
 PEEL_QUALIFYING_SOURCE_CHANNELS = {"client_talk", "community", "field_trip"}
+PRESS_CLEAR_STATUSES = {"press_clear", "formation_ready"}
+PRESS_REQUIRED_REFS = {
+    "candidate_fit_ref",
+    "v0_1_release_ref",
+    "skillos_hardening_ref",
+    "flywheel_coordination_ref",
+    "package_delivery_ref",
+    "yuzu_owner_voice_ref",
+    "signed_equity_ref",
+    "owner_economics_ref",
+    "substrate_share_receipt",
+}
 
 
 def load_json(path: Path) -> Any:
@@ -291,6 +304,26 @@ def peel_gate_status(receipt: dict[str, Any]) -> str:
             if isinstance(interview, dict) and peel_interview_qualifies(interview)
         )
         if source_clear and qualified_count >= required:
+            return "clear"
+    return "blocked"
+
+
+def press_release_version_ok(value: Any) -> bool:
+    return isinstance(value, str) and (value == "v0.1" or value.startswith("v0.1."))
+
+
+def press_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    for press in receipt.get("presses", []):
+        if not isinstance(press, dict) or press.get("status") not in PRESS_CLEAR_STATUSES:
+            continue
+        if (
+            press_release_version_ok(press.get("release_version"))
+            and all(has_ref(press.get(field)) for field in PRESS_REQUIRED_REFS)
+            and bool(press.get("evidence_refs"))
+        ):
             return "clear"
     return "blocked"
 
@@ -521,6 +554,32 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "peel_interviews_ref_missing", "ref": PEEL_INTERVIEWS_REF})
+
+    press_readiness_path = path_for_ref(PRESS_READINESS_REF)
+    if press_readiness_path is not None and press_readiness_path.exists():
+        press_status = press_gate_status(load_json(press_readiness_path))
+        press_requirement = requirements_by_id.get("press_loop")
+        if press_requirement is not None:
+            evidence_refs = press_requirement.get("evidence_refs", [])
+            if PRESS_READINESS_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "press_requirement_missing_press_readiness_ref",
+                        "requirement_id": "press_loop",
+                        "required_ref": PRESS_READINESS_REF,
+                    }
+                )
+            if press_status == "blocked" and press_requirement.get("coverage_status") != "blocked":
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_press_readiness_receipt",
+                        "requirement_id": "press_loop",
+                        "claimed": press_requirement.get("coverage_status"),
+                        "evidence_status": press_status,
+                    }
+                )
+    else:
+        failures.append({"code": "press_readiness_ref_missing", "ref": PRESS_READINESS_REF})
 
     portfolio_registry_path = path_for_ref(PORTFOLIO_REGISTRY_REF)
     counted_portfolio_companies = None
