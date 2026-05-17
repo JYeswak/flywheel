@@ -71,6 +71,8 @@ PEEL_INTERVIEWS_REF = "state/holding-company-peel-interviews.json"
 PRESS_READINESS_REF = "state/holding-company-press-readiness.json"
 POUR_READINESS_REF = "state/holding-company-pour-readiness.json"
 SHARED_STACK_REF = "state/holding-company-shared-stack.json"
+MOBILE_EATS_SUBSTRATE_SHARE_REF = "state/substrate-share/mobile-eats-20260517T0654Z.json"
+ANTHROPIC_ADOPTION_REF = "state/holding-company-anthropic-adoption.json"
 PEER_COACH_REF = "state/holding-company-peer-coach.json"
 LAUNCH_ECONOMICS_REF = "state/holding-company-launch-economics.json"
 RECYCLE_LOOP_REF = "state/holding-company-recycle-loop.json"
@@ -1336,6 +1338,32 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         peer_coach_status = peer_coach_gate_status(load_json(peer_coach_path))
     else:
         failures.append({"code": "peer_coach_ref_missing", "ref": PEER_COACH_REF})
+
+    shared_substrate_requirement = requirements_by_id.get("shared_substrate_stack")
+    if shared_substrate_requirement is not None:
+        evidence_refs = shared_substrate_requirement.get("evidence_refs", [])
+        for required_ref, code in (
+            (SHARED_STACK_REF, "shared_substrate_requirement_missing_shared_stack_ref"),
+            (MOBILE_EATS_SUBSTRATE_SHARE_REF, "shared_substrate_requirement_missing_substrate_share_ref"),
+            (ANTHROPIC_ADOPTION_REF, "shared_substrate_requirement_missing_anthropic_adoption_ref"),
+        ):
+            if required_ref not in evidence_refs:
+                failures.append(
+                    {
+                        "code": code,
+                        "requirement_id": "shared_substrate_stack",
+                        "required_ref": required_ref,
+                    }
+                )
+        if shared_stack_status == "blocked" and shared_substrate_requirement.get("coverage_status") == "proven":
+            failures.append(
+                {
+                    "code": "proven_requirement_has_blocked_shared_stack_receipt",
+                    "requirement_id": "shared_substrate_stack",
+                    "claimed": shared_substrate_requirement.get("coverage_status"),
+                    "evidence_status": shared_stack_status,
+                }
+            )
 
     nurture_requirement = requirements_by_id.get("nurture_loop")
     if nurture_requirement is not None:

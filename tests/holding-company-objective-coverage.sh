@@ -483,6 +483,39 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "shared_substrate_stack") | .coverage_status) = "proven"
+  | .summary_counts.proven += 1
+  | .summary_counts.partial -= 1
+' "$LEDGER" >"$TMP/shared-substrate-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/shared-substrate-overclaim.json" --json >"$TMP/shared-substrate-overclaim.out.json" 2>/dev/null; then
+  fail "blocked shared-stack receipt rejects shared-substrate proven claim"
+else
+  assert_jq "$TMP/shared-substrate-overclaim.out.json" '.failures[] | select(.code == "proven_requirement_has_zero_clear_primary_evidence" and .requirement_id == "shared_substrate_stack")' "zero-clear shared-stack receipt rejects shared-substrate proven claim"
+  assert_jq "$TMP/shared-substrate-overclaim.out.json" '.failures[] | select(.code == "proven_requirement_has_blocked_shared_stack_receipt" and .requirement_id == "shared_substrate_stack" and .evidence_status == "blocked")' "blocked shared-stack receipt rejects shared-substrate proven claim"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "shared_substrate_stack") | .evidence_refs) -= ["state/holding-company-shared-stack.json"]' "$LEDGER" >"$TMP/missing-shared-substrate-stack-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-shared-substrate-stack-ref.json" --json >"$TMP/missing-shared-substrate-stack-ref.out.json" 2>/dev/null; then
+  fail "shared-substrate requirement missing shared-stack ref rejected"
+else
+  assert_jq "$TMP/missing-shared-substrate-stack-ref.out.json" '.failures[] | select(.code == "shared_substrate_requirement_missing_shared_stack_ref" and .requirement_id == "shared_substrate_stack")' "shared-substrate requirement missing shared-stack ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "shared_substrate_stack") | .evidence_refs) -= ["state/substrate-share/mobile-eats-20260517T0654Z.json"]' "$LEDGER" >"$TMP/missing-shared-substrate-share-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-shared-substrate-share-ref.json" --json >"$TMP/missing-shared-substrate-share-ref.out.json" 2>/dev/null; then
+  fail "shared-substrate requirement missing substrate-share ref rejected"
+else
+  assert_jq "$TMP/missing-shared-substrate-share-ref.out.json" '.failures[] | select(.code == "shared_substrate_requirement_missing_substrate_share_ref" and .requirement_id == "shared_substrate_stack")' "shared-substrate requirement missing substrate-share ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "shared_substrate_stack") | .evidence_refs) -= ["state/holding-company-anthropic-adoption.json"]' "$LEDGER" >"$TMP/missing-shared-substrate-anthropic-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-shared-substrate-anthropic-ref.json" --json >"$TMP/missing-shared-substrate-anthropic-ref.out.json" 2>/dev/null; then
+  fail "shared-substrate requirement missing Anthropic adoption ref rejected"
+else
+  assert_jq "$TMP/missing-shared-substrate-anthropic-ref.out.json" '.failures[] | select(.code == "shared_substrate_requirement_missing_anthropic_adoption_ref" and .requirement_id == "shared_substrate_stack")' "shared-substrate requirement missing Anthropic adoption ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "nurture_loop") | .coverage_status) = "partial"
   | .summary_counts.partial += 1
   | .summary_counts.blocked -= 1
