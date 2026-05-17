@@ -82,6 +82,24 @@ else
   assert_jq "$TMP/missing-command-script.out.json" '.failures[] | select(.code == "validation_command_script_missing")' "missing validation command script rejected"
 fi
 
+jq '
+  (.requirements[] | select(.requirement_id == "recent_progress_velocity_claim") | .coverage_status) = "proven"
+  | .summary_counts.proven += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/recent-progress-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/recent-progress-overclaim.json" --json >"$TMP/recent-progress-overclaim.out.json" 2>/dev/null; then
+  fail "recent-progress requirement status overclaim rejected"
+else
+  assert_jq "$TMP/recent-progress-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_claim_honesty" and .requirement_id == "recent_progress_velocity_claim" and .evidence_status == "blocked")' "recent-progress requirement status overclaim rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "recent_mobile_eats_shipping_claim") | .evidence_refs) -= ["state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"]' "$LEDGER" >"$TMP/missing-claim-honesty-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-claim-honesty-ref.json" --json >"$TMP/missing-claim-honesty-ref.out.json" 2>/dev/null; then
+  fail "recent-progress missing claim-honesty ref rejected"
+else
+  assert_jq "$TMP/missing-claim-honesty-ref.out.json" '.failures[] | select(.code == "recent_progress_requirement_missing_claim_honesty_ref" and .requirement_id == "recent_mobile_eats_shipping_claim")' "recent-progress missing claim-honesty ref rejected"
+fi
+
 jq '.coverage_status = "complete"' "$LEDGER" >"$TMP/complete.json"
 if "$SCRIPT" --ledger "$TMP/complete.json" --json >"$TMP/complete.out.json" 2>/dev/null; then
   fail "standing goal completion claim rejected"

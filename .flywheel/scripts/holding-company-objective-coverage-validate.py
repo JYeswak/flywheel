@@ -52,6 +52,13 @@ REQUIRED_REQUIREMENT_IDS = {
 REQUIRED_VALIDATION_COMMAND_ID = "standing_goal_aggregate"
 REQUIRED_VALIDATION_COMMAND = "bash tests/zeststream-holding-company-standing-goal.sh"
 REQUIRED_VALIDATION_COVERAGE = "state/zeststream-portfolio-company-registry.json"
+RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
+RECENT_PROGRESS_REQUIREMENT_CLAIMS = {
+    "recent_anthropic_adoption_claim": "anthropic_adoption",
+    "recent_mobile_eats_shipping_claim": "mobile_eats_shipping",
+    "recent_progress_velocity_claim": "progress_velocity",
+    "recent_skillos_forever_os_claim": "skillos_forever_os_lock",
+}
 
 
 def load_json(path: Path) -> Any:
@@ -100,6 +107,7 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
 
     requirements = [row for row in ledger.get("requirements", []) if isinstance(row, dict)]
     ids = [str(row.get("requirement_id")) for row in requirements]
+    requirements_by_id = {str(row.get("requirement_id")): row for row in requirements}
     counts = Counter(row.get("coverage_status") for row in requirements)
     computed_counts = {
         "proven": counts.get("proven", 0),
@@ -130,6 +138,51 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         failures.append({"code": "standing_goal_cannot_be_complete"})
     if ledger.get("coverage_status") == "not_complete" and computed_counts["blocked"] == 0 and computed_counts["partial"] == 0:
         failures.append({"code": "not_complete_without_open_gaps"})
+
+    claim_honesty_path = path_for_ref(RECENT_PROGRESS_CLAIM_HONESTY_REF)
+    claim_status_by_id: dict[str, Any] = {}
+    if claim_honesty_path is not None and claim_honesty_path.exists():
+        claim_honesty = load_json(claim_honesty_path)
+        claim_status_by_id = {
+            str(claim.get("claim_id")): claim.get("current_gate_status")
+            for claim in claim_honesty.get("claims", [])
+            if isinstance(claim, dict)
+        }
+    else:
+        failures.append({"code": "recent_progress_claim_honesty_ref_missing", "ref": RECENT_PROGRESS_CLAIM_HONESTY_REF})
+
+    for requirement_id, claim_id in RECENT_PROGRESS_REQUIREMENT_CLAIMS.items():
+        requirement = requirements_by_id.get(requirement_id)
+        if requirement is None:
+            continue
+        evidence_refs = requirement.get("evidence_refs", [])
+        if RECENT_PROGRESS_CLAIM_HONESTY_REF not in evidence_refs:
+            failures.append(
+                {
+                    "code": "recent_progress_requirement_missing_claim_honesty_ref",
+                    "requirement_id": requirement_id,
+                    "required_ref": RECENT_PROGRESS_CLAIM_HONESTY_REF,
+                }
+            )
+        evidence_status = claim_status_by_id.get(claim_id)
+        if evidence_status is None:
+            failures.append(
+                {
+                    "code": "recent_progress_claim_honesty_claim_missing",
+                    "requirement_id": requirement_id,
+                    "claim_id": claim_id,
+                }
+            )
+        elif requirement.get("coverage_status") != evidence_status:
+            failures.append(
+                {
+                    "code": "requirement_status_mismatch_with_claim_honesty",
+                    "requirement_id": requirement_id,
+                    "claim_id": claim_id,
+                    "claimed": requirement.get("coverage_status"),
+                    "evidence_status": evidence_status,
+                }
+            )
 
     validation_commands = [row for row in ledger.get("validation_commands", []) if isinstance(row, dict)]
     aggregate_commands = [row for row in validation_commands if row.get("command_id") == REQUIRED_VALIDATION_COMMAND_ID]
