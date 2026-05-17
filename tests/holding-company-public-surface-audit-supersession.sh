@@ -50,6 +50,34 @@ assert_jq "$TMP/current.json" '.anti_pitch_receipt_ref_count == 3 and .public_st
 assert_jq "$RECEIPT" '.schema_version == "zeststream.holding_company_public_surface_audit_supersession.v1" and (.superseded_findings | length == 7)' "receipt declares seven superseded findings"
 assert_jq "$RECEIPT" '.current_status.anti_pitch_voice_surface_status == "clear" and .current_status.public_story_surface_status == "clear" and .current_status.objective_coverage_status == "not_complete"' "receipt distinguishes clear surfaces from incomplete objective"
 
+jq 'del(.source_goal)' "$RECEIPT" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --receipt "$TMP/schema-invalid.json" --coverage "$COVERAGE" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid supersession receipt rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.failures[] | select(.code == "schema_invalid")' "schema-invalid supersession receipt rejected"
+fi
+
+jq '.schema_version = "zeststream.holding_company_public_surface_audit_supersession.v0"' "$RECEIPT" >"$TMP/unexpected-schema-version.json"
+if "$SCRIPT" --receipt "$TMP/unexpected-schema-version.json" --coverage "$COVERAGE" --json >"$TMP/unexpected-schema-version.out.json" 2>/dev/null; then
+  fail "unexpected supersession schema version rejected"
+else
+  assert_jq "$TMP/unexpected-schema-version.out.json" '.failures[] | select(.code == "unexpected_schema_version")' "unexpected supersession schema version rejected"
+fi
+
+jq '.source_goal = "temporary public surface cleanup"' "$RECEIPT" >"$TMP/unexpected-source-goal.json"
+if "$SCRIPT" --receipt "$TMP/unexpected-source-goal.json" --coverage "$COVERAGE" --json >"$TMP/unexpected-source-goal.out.json" 2>/dev/null; then
+  fail "unexpected supersession source goal rejected"
+else
+  assert_jq "$TMP/unexpected-source-goal.out.json" '.failures[] | select(.code == "unexpected_source_goal")' "unexpected supersession source goal rejected"
+fi
+
+jq '.notes += [("sk-" + "NOTAREALSECRET")]' "$RECEIPT" >"$TMP/secret-shaped-value.json"
+if "$SCRIPT" --receipt "$TMP/secret-shaped-value.json" --coverage "$COVERAGE" --json >"$TMP/secret-shaped-value.out.json" 2>/dev/null; then
+  fail "secret-shaped supersession value rejected"
+else
+  assert_jq "$TMP/secret-shaped-value.out.json" '.failures[] | select(.code == "secret_or_raw_value_shape_detected")' "secret-shaped supersession value rejected"
+fi
+
 while IFS= read -r relpath; do
   if [[ -f "$ROOT/$relpath" ]]; then
     pass "referenced path exists: $relpath"
