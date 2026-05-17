@@ -122,6 +122,20 @@ else
   assert_jq "$TMP/claim-text-mismatch.out.json" '.failures[] | select(.code == "claim_text_mismatch" and .claim_id == "anthropic_adoption")' "claim text mismatch rejected"
 fi
 
+jq 'del(.claims[] | select(.claim_id == "anthropic_adoption") | .ledger_ref)' "$RECEIPT" >"$TMP/missing-ledger-ref.json"
+if "$SCRIPT" --receipt "$TMP/missing-ledger-ref.json" --json >"$TMP/missing-ledger-ref.out.json" 2>/dev/null; then
+  fail "missing claim ledger ref rejected"
+else
+  assert_jq "$TMP/missing-ledger-ref.out.json" '.failures[] | select(.code == "claim_missing_validator_or_ledger_ref" and .claim_id == "anthropic_adoption")' "missing claim ledger ref rejected"
+fi
+
+jq 'del(.claims[] | select(.claim_id == "anthropic_adoption") | .validator)' "$RECEIPT" >"$TMP/missing-validator-ref.json"
+if "$SCRIPT" --receipt "$TMP/missing-validator-ref.json" --json >"$TMP/missing-validator-ref.out.json" 2>/dev/null; then
+  fail "missing claim validator ref rejected"
+else
+  assert_jq "$TMP/missing-validator-ref.out.json" '.failures[] | select(.code == "claim_missing_validator_or_ledger_ref" and .claim_id == "anthropic_adoption")' "missing claim validator ref rejected"
+fi
+
 jq '(.claims[] | select(.claim_id == "progress_velocity") | .claim_text) = "4,000+ commits in 7 days across 9 product surfaces."' "$RECEIPT" >"$TMP/progress-overclaim.json"
 if "$SCRIPT" --receipt "$TMP/progress-overclaim.json" --json >"$TMP/progress-overclaim.out.json" 2>/dev/null; then
   fail "progress velocity overclaim rejected"
