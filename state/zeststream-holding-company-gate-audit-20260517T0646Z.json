@@ -164,6 +164,11 @@
       "result": "POUR readiness ledger exists and validates; current clear_count is 0 because first paying-customer, owner-operator, and operating-control handoff receipts are absent"
     },
     {
+      "kind": "operating_health_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-operating-health.json",
+      "result": "operating-health ledger exists and validates; current clear_count is 0 because Mobile Eats lacks redacted first-customer, revenue snapshot, positive gross-profit, owner report/distribution, and operating-control receipts"
+    },
+    {
       "kind": "peer_coach_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-peer-coach.json",
       "result": "NURTURE peer-coach ledger exists and validates; current clear_count is 0 because no Tier 2+ owner with sustainable cash, operating control, agreement, and 5% equity grant refs exists"
@@ -357,6 +362,17 @@
       "finding": "POUR readiness is now machine-checkable. Mobile Eats has brand, repo, public-surface, and substrate proof, but launch clear remains blocked because first paying-customer, owner-operator, and operating-control handoff receipts are absent."
     },
     {
+      "gate": "operating_health",
+      "status": "blocked_no_money_making_receipts",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-operating-health.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-owner-economics.json",
+        "/Users/josh/Developer/flywheel/.flywheel/scripts/mobile-eats-end-user-health-probe.sh"
+      ],
+      "finding": "The money-making success condition is now machine-checkable separately from first-customer and owner-economics terms. Mobile Eats cannot be counted as making money until redacted revenue, positive gross-profit, owner report/distribution, operating-control, and substrate-share receipts exist without raw amounts."
+    },
+    {
       "gate": "owner_economics",
       "status": "blocked_unsigned_terms",
       "evidence": [
@@ -513,6 +529,10 @@
     {
       "owner": "mobile-eats/flywheel",
       "action": "Fill state/holding-company-pour-readiness.json with first paying-customer, owner-operator, and operating-control handoff receipts before marking Mobile Eats POUR clear."
+    },
+    {
+      "owner": "mobile-eats/flywheel",
+      "action": "Fill state/holding-company-operating-health.json with redacted first-customer, revenue snapshot, positive gross-profit, owner report/distribution, operating-control, and substrate-share refs before counting Mobile Eats as making money."
     },
     {
       "owner": "mobile-eats/flywheel/legal",

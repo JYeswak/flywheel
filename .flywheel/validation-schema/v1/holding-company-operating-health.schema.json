@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-operating-health/v1/schema.json",
+  "title": "ZestStream Holding Company Operating Health v1",
+  "description": "Ledger for the money-making proof gate: redacted operating revenue, positive gross-profit, owner reporting, and distribution evidence.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "clear_count",
+    "companies",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_operating_health.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "operating_health"
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "companies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/company"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "company": {
+      "type": "object",
+      "required": [
+        "health_id",
+        "company_slug",
+        "sequence",
+        "status",
+        "metrics_are_redacted",
+        "first_paying_customer_receipt",
+        "revenue_snapshot_ref",
+        "positive_gross_profit_ref",
+        "owner_distribution_ref",
+        "owner_operator_report_ref",
+        "operating_control_ref",
+        "substrate_share_receipt",
+        "raw_amounts_present",
+        "evidence_refs"
+      ],
+      "properties": {
+        "health_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "company_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "blocked",
+            "revenue_clear",
+            "profit_clear",
+            "deferred"
+          ]
+        },
+        "metrics_are_redacted": {
+          "type": "boolean"
+        },
+        "first_paying_customer_receipt": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "revenue_snapshot_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "positive_gross_profit_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "owner_distribution_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "owner_operator_report_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "operating_control_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "substrate_share_receipt": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "raw_amounts_present": {
+          "type": "boolean"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  }
+}

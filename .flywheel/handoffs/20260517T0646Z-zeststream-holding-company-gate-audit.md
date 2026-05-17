@@ -34,6 +34,7 @@ The audit did not find the receipts that would let the system count a formed por
 | Shared substrate | `partial_proven` | mobile-eats + SkillOS prove substrate adoption; the remaining gap is tying the substrate-share receipt to a formed owner/company registry row. |
 | NURTURE shared stack | `blocked_incomplete_stack` | Shared-stack ledger exists and validates; Mobile Eats has package/flywheel evidence but lacks JSM and only partially proves SkillOS + brand voice. |
 | POUR launch readiness | `blocked_missing_customer_owner_handoff` | POUR readiness ledger exists and validates; Mobile Eats lacks first paying-customer, owner-operator, and operating-control handoff receipts. |
+| Operating health | `blocked_no_money_making_receipts` | Operating-health ledger exists and validates; Mobile Eats lacks redacted first-customer, revenue, positive gross-profit, owner report/distribution, and operating-control receipts. |
 | Owner economics | `blocked_unsigned_terms` | Owner-economics ledger exists and validates; no signed terms prove 25% owner equity plus 45-75% tiered owner distributions. |
 | NURTURE peer-coach | `blocked_no_eligible_owner` | Peer-coach ledger exists and validates; no Tier 2+ owner with required cash/control/agreement/equity receipts exists. |
 | Legal structure | `blocked_scaffold_only` | Legal-structure ledger exists and validates; sub #2 owner signing remains blocked until binding artifact, attorney review, and CPA review refs are present. |
@@ -67,6 +68,7 @@ The audit did not find the receipts that would let the system count a formed por
 - Legal-structure ledger: `state/holding-company-legal-structure.json`
 - Anti-pitch voice ledger: `state/holding-company-anti-pitch-voice.json`
 - POUR readiness ledger: `state/holding-company-pour-readiness.json`
+- Operating-health ledger: `state/holding-company-operating-health.json`
 - Owner-economics ledger: `state/holding-company-owner-economics.json`
 - Peer-coach ledger: `state/holding-company-peer-coach.json`
 - Candidate-fit ledger: `state/holding-company-candidate-fit.json`
@@ -95,10 +97,11 @@ The audit did not find the receipts that would let the system count a formed por
 17. Fill the sustainable-pace ledger with measured weekly hours and substrate coaching-time offset before claiming sustainable pace for any Year 2+ company period.
 18. Fill the legal-structure ledger with binding artifact refs plus attorney and CPA review receipts before signing a sub #2 owner.
 19. Fill the POUR readiness ledger with first paying-customer, owner-operator, and operating-control handoff receipts before marking Mobile Eats launch-clear.
-20. Fill the owner-economics ledger with signed owner-operator, cap-table, distribution terms, legal review, and substrate-share refs proving 25% owner equity and 45-75% tiered owner distributions before marking a deal signed or active.
-21. Fill the peer-coach ledger with Tier 2+ owner, sustainable cash, operating-control, peer-coach agreement, and 5% equity grant receipts before marking any owner eligible to peer-coach.
-22. Establish the exact nine product-surface set and rerun the progress-velocity ledger before using the 4,000+ commits in 7 days claim in public or gate summaries.
-23. Fill the RECYCLE ledger when launch friction appears, then attach SkillOS capability, package/substrate, and portfolio propagation receipts within the configured window.
+20. Fill the operating-health ledger with redacted first-customer, revenue snapshot, positive gross-profit, owner report/distribution, operating-control, and substrate-share refs before counting Mobile Eats as making money.
+21. Fill the owner-economics ledger with signed owner-operator, cap-table, distribution terms, legal review, and substrate-share refs proving 25% owner equity and 45-75% tiered owner distributions before marking a deal signed or active.
+22. Fill the peer-coach ledger with Tier 2+ owner, sustainable cash, operating-control, peer-coach agreement, and 5% equity grant receipts before marking any owner eligible to peer-coach.
+23. Establish the exact nine product-surface set and rerun the progress-velocity ledger before using the 4,000+ commits in 7 days claim in public or gate summaries.
+24. Fill the RECYCLE ledger when launch friction appears, then attach SkillOS capability, package/substrate, and portfolio propagation receipts within the configured window.
 
 ## Close Rule
 
