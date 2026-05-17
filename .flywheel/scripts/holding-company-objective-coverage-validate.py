@@ -67,6 +67,7 @@ PUBLIC_STORY_REF = "state/holding-company-public-story.json"
 BRAND_VOICE_SKILL_REF = "state/holding-company-brand-voice-skill.json"
 FOUNDER_POST_VOICE_REF = "state/holding-company-founder-post-voice.json"
 BRAND_NAMING_REF = "state/holding-company-brand-naming.json"
+MOBILE_EATS_SHIPPING_REF = "state/holding-company-mobile-eats-shipping.json"
 PEEL_INTERVIEWS_REF = "state/holding-company-peel-interviews.json"
 PRESS_READINESS_REF = "state/holding-company-press-readiness.json"
 POUR_READINESS_REF = "state/holding-company-pour-readiness.json"
@@ -199,6 +200,11 @@ LIFECYCLE_DISPOSITION_REQUIRED_REFS = [
     "substrate_retention_ref",
     "brand_public_update_ref",
 ]
+MOBILE_EATS_FORMATION_RECEIPT_FIELDS = (
+    "signed_owner_operator_receipt",
+    "equity_receipt",
+    "first_paying_customer_receipt",
+)
 SOURCE_GOAL_REQUIRED_PHRASES = [
     "This is a standing operating system goal",
     "the holding plane operates forever",
@@ -494,6 +500,28 @@ def public_story_gate_status(receipt: dict[str, Any]) -> str:
             and not surface.get("build_app_framing_hits", [])
         ):
             return "clear"
+    return "blocked"
+
+
+def mobile_eats_shipping_gate_status(receipt: dict[str, Any]) -> str:
+    product_substrate_present = (
+        receipt.get("repo_present") is True
+        and receipt.get("share_ready_packet_present") is True
+        and receipt.get("tenant_declaration_present") is True
+        and receipt.get("package_manifest_present") is True
+        and receipt.get("public_surface_declared") is True
+        and receipt.get("substrate_share_receipt_present") is True
+        and receipt.get("package_threshold_met") is True
+    )
+    formation_receipts_present = all(has_ref(receipt.get(field)) for field in MOBILE_EATS_FORMATION_RECEIPT_FIELDS)
+    portfolio_claim_clear = (
+        receipt.get("counted_as_portfolio_company") is True
+        and receipt.get("first_portfolio_company_claim_clear") is True
+    )
+    if receipt.get("status") == "proven" and product_substrate_present and formation_receipts_present and portfolio_claim_clear:
+        return "proven"
+    if receipt.get("status") == "partial" and product_substrate_present:
+        return "partial"
     return "blocked"
 
 
@@ -1138,6 +1166,36 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         public_receipt_statuses["founder_post"] = founder_post_voice_gate_status(load_json(founder_post_voice_path))
     else:
         failures.append({"code": "founder_post_voice_ref_missing", "ref": FOUNDER_POST_VOICE_REF})
+
+    mobile_eats_shipping_path = path_for_ref(MOBILE_EATS_SHIPPING_REF)
+    if mobile_eats_shipping_path is not None and mobile_eats_shipping_path.exists():
+        mobile_eats_shipping_status = mobile_eats_shipping_gate_status(load_json(mobile_eats_shipping_path))
+        mobile_eats_requirement = requirements_by_id.get("recent_mobile_eats_shipping_claim")
+        if mobile_eats_requirement is not None:
+            evidence_refs = mobile_eats_requirement.get("evidence_refs", [])
+            for required_ref, code in (
+                (MOBILE_EATS_SHIPPING_REF, "mobile_eats_requirement_missing_shipping_ref"),
+                (MOBILE_EATS_SUBSTRATE_SHARE_REF, "mobile_eats_requirement_missing_substrate_share_ref"),
+            ):
+                if required_ref not in evidence_refs:
+                    failures.append(
+                        {
+                            "code": code,
+                            "requirement_id": "recent_mobile_eats_shipping_claim",
+                            "required_ref": required_ref,
+                        }
+                    )
+            if mobile_eats_requirement.get("coverage_status") != mobile_eats_shipping_status:
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_mobile_eats_shipping_receipt",
+                        "requirement_id": "recent_mobile_eats_shipping_claim",
+                        "claimed": mobile_eats_requirement.get("coverage_status"),
+                        "evidence_status": mobile_eats_shipping_status,
+                    }
+                )
+    else:
+        failures.append({"code": "mobile_eats_shipping_ref_missing", "ref": MOBILE_EATS_SHIPPING_REF})
 
     anti_pitch_requirement = requirements_by_id.get("anti_pitch_voice_gate")
     if anti_pitch_requirement is not None:

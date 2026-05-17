@@ -133,6 +133,32 @@ else
   assert_jq "$TMP/recent-progress-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_claim_honesty" and .requirement_id == "recent_progress_velocity_claim" and .evidence_status == "blocked")' "recent-progress requirement status overclaim rejected"
 fi
 
+jq '
+  (.requirements[] | select(.requirement_id == "recent_mobile_eats_shipping_claim") | .coverage_status) = "proven"
+  | .summary_counts.proven += 1
+  | .summary_counts.partial -= 1
+' "$LEDGER" >"$TMP/mobile-eats-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/mobile-eats-overclaim.json" --json >"$TMP/mobile-eats-overclaim.out.json" 2>/dev/null; then
+  fail "Mobile Eats shipping status overclaim rejected"
+else
+  assert_jq "$TMP/mobile-eats-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_mobile_eats_shipping_receipt" and .requirement_id == "recent_mobile_eats_shipping_claim" and .evidence_status == "partial")' "Mobile Eats shipping status overclaim rejected by shipping receipt"
+  assert_jq "$TMP/mobile-eats-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_claim_honesty" and .requirement_id == "recent_mobile_eats_shipping_claim" and .evidence_status == "partial")' "Mobile Eats shipping status overclaim rejected by claim honesty"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "recent_mobile_eats_shipping_claim") | .evidence_refs) -= ["state/holding-company-mobile-eats-shipping.json"]' "$LEDGER" >"$TMP/missing-mobile-eats-shipping-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-mobile-eats-shipping-ref.json" --json >"$TMP/missing-mobile-eats-shipping-ref.out.json" 2>/dev/null; then
+  fail "Mobile Eats requirement missing shipping receipt ref rejected"
+else
+  assert_jq "$TMP/missing-mobile-eats-shipping-ref.out.json" '.failures[] | select(.code == "mobile_eats_requirement_missing_shipping_ref" and .requirement_id == "recent_mobile_eats_shipping_claim")' "Mobile Eats requirement missing shipping receipt ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "recent_mobile_eats_shipping_claim") | .evidence_refs) -= ["state/substrate-share/mobile-eats-20260517T0654Z.json"]' "$LEDGER" >"$TMP/missing-mobile-eats-substrate-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-mobile-eats-substrate-ref.json" --json >"$TMP/missing-mobile-eats-substrate-ref.out.json" 2>/dev/null; then
+  fail "Mobile Eats requirement missing substrate-share ref rejected"
+else
+  assert_jq "$TMP/missing-mobile-eats-substrate-ref.out.json" '.failures[] | select(.code == "mobile_eats_requirement_missing_substrate_share_ref" and .requirement_id == "recent_mobile_eats_shipping_claim")' "Mobile Eats requirement missing substrate-share ref rejected"
+fi
+
 jq '(.requirements[] | select(.requirement_id == "recent_mobile_eats_shipping_claim") | .evidence_refs) -= ["state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"]' "$LEDGER" >"$TMP/missing-claim-honesty-ref.json"
 if "$SCRIPT" --ledger "$TMP/missing-claim-honesty-ref.json" --json >"$TMP/missing-claim-honesty-ref.out.json" 2>/dev/null; then
   fail "recent-progress missing claim-honesty ref rejected"
