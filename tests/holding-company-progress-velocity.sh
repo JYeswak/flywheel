@@ -45,6 +45,17 @@ jq '
 "$SCRIPT" --ledger "$TMP/proven.json" --json >"$TMP/proven.out.json"
 assert_jq "$TMP/proven.out.json" '.status == "pass" and .progress_velocity_gate_status == "proven" and .computed_total_commit_count == 4000' "exact nine-surface 4000 count proves gate"
 
+jq '
+  .status = "blocked"
+  | .claim_text = "4,000+ commits in 7 days across 9 product surfaces"
+  | .measured_total_commit_count = 3755
+' "$LEDGER" >"$TMP/blocked-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/blocked-overclaim.json" --json >"$TMP/blocked-overclaim.out.json" 2>/dev/null; then
+  fail "blocked under-target 4000+ overclaim rejected"
+else
+  assert_jq "$TMP/blocked-overclaim.out.json" '.failures[] | select(.code == "claim_text_overstates_under_target_velocity")' "blocked under-target 4000+ overclaim rejected"
+fi
+
 jq '.status = "proven" | .exact_surface_set_established = false' "$TMP/proven.json" >"$TMP/no-exact.json"
 if "$SCRIPT" --ledger "$TMP/no-exact.json" --json >"$TMP/no-exact.out.json" 2>/dev/null; then
   fail "proven without exact surface set rejected"

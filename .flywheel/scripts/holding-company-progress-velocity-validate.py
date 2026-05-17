@@ -18,6 +18,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SCHEMA = ROOT / ".flywheel/validation-schema/v1/holding-company-progress-velocity.schema.json"
 DEFAULT_LEDGER = ROOT / "state/holding-company-progress-velocity.json"
 SECRETISH_RE = re.compile(r"(\$[0-9]|sk-[A-Za-z0-9]|AKIA[0-9A-Z]{16})")
+FOUR_THOUSAND_OVERCLAIM_RE = re.compile(r"\b4,?000\+", re.IGNORECASE)
 
 
 def load_json(path: Path) -> Any:
@@ -46,6 +47,10 @@ def has_secretish_string(value: Any) -> bool:
     if isinstance(value, list):
         return any(has_secretish_string(v) for v in value)
     return False
+
+
+def four_thousand_overclaim(value: Any) -> bool:
+    return isinstance(value, str) and bool(FOUR_THOUSAND_OVERCLAIM_RE.search(value))
 
 
 def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_paths: bool) -> dict[str, Any]:
@@ -130,6 +135,8 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         failures.append({"code": "proven_below_target_commits", "target": target_min_commits, "computed": computed_total})
     if status == "proven" and any(surface.get("commit_count", 0) <= 0 for surface in surfaces):
         failures.append({"code": "proven_surface_zero_commits"})
+    if status != "proven" and isinstance(target_min_commits, int) and computed_total < target_min_commits and four_thousand_overclaim(ledger.get("claim_text")):
+        failures.append({"code": "claim_text_overstates_under_target_velocity", "target": target_min_commits, "computed": computed_total})
 
     return {
         "schema_version": "zeststream.holding_company_progress_velocity.validation.v1",

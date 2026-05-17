@@ -2,7 +2,7 @@
   "schema_version": "zeststream.holding_company_progress_velocity.v1",
   "generated_at": "2026-05-17T08:01:00Z",
   "gate": "recent_progress_velocity",
-  "claim_text": "4,000+ commits in 7 days across 9 product surfaces",
+  "claim_text": "Sampled 3,755 commits in the fixed 7-day window across 9 local repos; the public velocity target remains blocked until the exact surface set and count clear.",
   "status": "blocked",
   "target_min_commits": 4000,
   "target_window_days": 7,
