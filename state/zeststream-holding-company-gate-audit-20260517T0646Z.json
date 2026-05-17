@@ -124,6 +124,11 @@
       "result": "Yuzu owner-operator voice ledger exists and validates; current clear_count is 0 because Mobile Eats lacks owner voice, community context, owner-operator, and Yuzu review receipts"
     },
     {
+      "kind": "public_story_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-public-story.json",
+      "result": "public-story receipt ledger exists and validates; current clear_count is 0 because zeststream-v2-fresh lacks a receipt-led holding-company story and still carries builder/automation framing"
+    },
+    {
       "kind": "pour_readiness_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json",
       "result": "POUR readiness ledger exists and validates; current clear_count is 0 because first paying-customer, owner-operator, and operating-control handoff receipts are absent"
@@ -198,6 +203,16 @@
         "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md"
       ],
       "finding": "The Yuzu owner-operator voice gate is now machine-checkable separately from ZestStream anti-pitch voice. Mobile Eats has brand/public-surface evidence, but no signed owner-operator voice capture, community context, or Yuzu review receipt."
+    },
+    {
+      "gate": "public_story_receipts",
+      "status": "blocked_not_receipt_led",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-public-story.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-anti-pitch-voice.json",
+        "/Users/josh/Developer/flywheel/docs/concepts/evidence-contracts.md"
+      ],
+      "finding": "The public story is now machine-checkable separately from anti-pitch voice. Current ledger blocks public-clear status because zeststream-v2-fresh lacks proof/receipt refs and still carries workflow-builder or automation-shop framing."
     },
     {
       "gate": "sustainable_pace",
@@ -350,6 +365,10 @@
     {
       "owner": "mobile-eats/yuzu",
       "action": "Fill state/holding-company-owner-voice.json with owner voice, community context, Yuzu review, owner-operator, and public-surface refs before marking any company surface owner-voice clear."
+    },
+    {
+      "owner": "zeststream-public-story",
+      "action": "Fill state/holding-company-public-story.json with receipt/proof refs and holding-company positioning after removing build-app/workflow-builder framing from public surfaces."
     },
     {
       "owner": "mobile-eats",

@@ -1,0 +1,163 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-public-story/v1/schema.json",
+  "title": "ZestStream Holding Company Public Story v1",
+  "description": "Ledger for the public story gate: show the receipts, not build the apps.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "required_story",
+    "clear_count",
+    "surfaces",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_public_story.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "public_story_receipts"
+    },
+    "required_story": {
+      "const": "show_the_receipts_not_build_the_apps"
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "surfaces": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/surface"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "surface": {
+      "type": "object",
+      "required": [
+        "surface_id",
+        "surface_kind",
+        "surface_ref",
+        "status",
+        "receipt_story_present",
+        "holding_company_positioning_present",
+        "proof_or_receipt_refs",
+        "build_app_framing_hits",
+        "evidence_refs"
+      ],
+      "properties": {
+        "surface_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "surface_kind": {
+          "type": "string",
+          "enum": [
+            "public_site",
+            "social",
+            "document",
+            "repo",
+            "skill"
+          ]
+        },
+        "surface_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "blocked",
+            "needs_rewrite",
+            "clear",
+            "deferred"
+          ]
+        },
+        "receipt_story_present": {
+          "type": "boolean"
+        },
+        "holding_company_positioning_present": {
+          "type": "boolean"
+        },
+        "proof_or_receipt_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "build_app_framing_hits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/build_app_hit"
+          }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "build_app_hit": {
+      "type": "object",
+      "required": [
+        "frame",
+        "path",
+        "line",
+        "excerpt"
+      ],
+      "properties": {
+        "frame": {
+          "type": "string",
+          "enum": [
+            "build_the_apps",
+            "custom_app_builder",
+            "custom_app",
+            "workflow_builder",
+            "workflow_automation_shop"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "excerpt": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

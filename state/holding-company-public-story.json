@@ -1,0 +1,44 @@
+{
+  "schema_version": "zeststream.holding_company_public_story.v1",
+  "generated_at": "2026-05-17T08:06:00Z",
+  "gate": "public_story_receipts",
+  "required_story": "show_the_receipts_not_build_the_apps",
+  "clear_count": 0,
+  "surfaces": [
+    {
+      "surface_id": "zeststream-v2-fresh-public-story",
+      "surface_kind": "repo",
+      "surface_ref": "/Users/josh/Developer/zeststream-v2-fresh",
+      "status": "needs_rewrite",
+      "receipt_story_present": false,
+      "holding_company_positioning_present": false,
+      "proof_or_receipt_refs": [],
+      "build_app_framing_hits": [
+        {
+          "frame": "workflow_builder",
+          "path": "/Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md",
+          "line": 61,
+          "excerpt": "Page Title: \"AI Workflow Builder | ZestStream\""
+        },
+        {
+          "frame": "workflow_automation_shop",
+          "path": "/Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md",
+          "line": 62,
+          "excerpt": "Main Heading: \"Your Stack.Our Automation.\""
+        }
+      ],
+      "evidence_refs": [
+        "state/holding-company-anti-pitch-voice.json",
+        "docs/concepts/evidence-contracts.md",
+        "/Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md"
+      ],
+      "notes": "This surface is not public-story clear: it lacks a receipt-led holding-company narrative and still carries builder/automation framing."
+    }
+  ],
+  "notes": [
+    "This ledger is separate from anti-pitch voice: it requires the public story to lead with evidence receipts, not just avoid banned builder language.",
+    "Public clear requires receipt/proof refs, holding-company positioning, and zero build-app framing hits.",
+    "Do not use this ledger to publish secret or private receipt values; refs only."
+  ],
+  "next_action": "Rewrite public ZestStream surfaces around receipt/proof evidence and holding-company positioning before marking public-story clear."
+}
