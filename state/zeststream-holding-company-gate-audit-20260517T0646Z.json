@@ -69,6 +69,11 @@
       "result": "anthropic-sdk-python adoption clause green across agent-bench, mobile-eats, and zesttube"
     },
     {
+      "kind": "anthropic_sdk_adoption_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-anthropic-adoption.json",
+      "result": "Anthropic SDK adoption ledger exists and validates; SkillOS canonical gate, pack-applied event rows, and three real consumer repo paths prove anthropic-sdk-python adoption across agent-bench, mobile-eats, and zesttube"
+    },
+    {
       "kind": "brand_voice_skill",
       "path": "/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml",
       "result": "brand voice gate exists; current config still anchors the older SMB time-back canon, not the full holding-company story"
@@ -490,7 +495,15 @@
     {
       "claim": "anthropic-sdk-python adoption OK across three consumer repos",
       "status": "proven",
-      "finding": "canonical-gates-status records package-adoption-velocity OK with real consumer repos agent-bench, mobile-eats, and zesttube."
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-anthropic-adoption.json",
+        "/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json",
+        "/Users/josh/Developer/skillos/state/skillos-pack-applied-events.jsonl",
+        "/Users/josh/Developer/agent-bench",
+        "/Users/josh/Developer/mobile-eats",
+        "/Users/josh/Developer/zesttube"
+      ],
+      "finding": "The replayable Anthropic adoption ledger proves the claim: SkillOS canonical gate records package-adoption-velocity OK, packages_phantom_fail=0, and distinct_target_count=3; source pack-applied rows exist for real consumer repos agent-bench, mobile-eats, and zesttube."
     },
     {
       "claim": "zeststream-brand-voice enforces canon and grounding",

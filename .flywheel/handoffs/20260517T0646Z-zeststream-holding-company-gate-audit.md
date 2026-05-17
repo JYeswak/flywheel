@@ -23,6 +23,7 @@ The audit did not find the receipts that would let the system count a formed por
 | PEEL market signal | `blocked_no_qualified_interviews` | PEEL interview ledger exists and validates; formation cash remains blocked because no candidate has source provenance plus five qualified prospect interviews. |
 | PRESS readiness | `blocked_missing_press_receipts` | PRESS readiness ledger exists and validates; Mobile Eats lacks v0.1 release, SkillOS hardening, and signed-equity receipts. |
 | Anti-pitch voice | `blocked_builder_framing` | Anti-pitch voice ledger exists and validates; `zeststream-v2-fresh` still has workflow-builder and automation-positioning hits. |
+| Anthropic SDK adoption | `proven` | Anthropic adoption ledger exists and validates; SkillOS canonical gate and pack-applied event rows prove `anthropic-sdk-python` adoption across real consumer repos `agent-bench`, `mobile-eats`, and `zesttube`. |
 | Brand voice skill alignment | `blocked_stale_skill_canon` | Brand voice skill ledger exists and validates; JSM-managed `zeststream-brand-voice` has grounding rules but still uses the older SMB time-back primary canon and lacks an approved holding-company JSM update receipt. |
 | Founder post voice | `blocked_fact_check_and_positioning` | Founder-post voice ledger exists and validates; the current public-share LinkedIn draft has a publisher dry-run pass, but its fact-check reports a commit-count discrepancy and it lacks holding-company positioning. |
 | Mobile Eats shipping/substrate claim | `partial_product_substrate_proven_portfolio_company_blocked` | Mobile Eats shipping ledger exists and validates; product/substrate evidence and 27 `@zeststream/*` packages are present, but first-portfolio-company proof is blocked by missing owner, equity, and first-customer receipts. |
@@ -57,6 +58,7 @@ The audit did not find the receipts that would let the system count a formed por
 - Mobile Eats substrate-share receipt: `state/substrate-share/mobile-eats-20260517T0654Z.json`
 - Mobile Eats shipping/substrate claim ledger: `state/holding-company-mobile-eats-shipping.json`
 - SkillOS adoption gate: `/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json`
+- Anthropic SDK adoption ledger: `state/holding-company-anthropic-adoption.json`
 - Brand voice config: `/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml`
 - Brand voice skill alignment ledger: `state/holding-company-brand-voice-skill.json`
 - Founder post voice ledger: `state/holding-company-founder-post-voice.json`
