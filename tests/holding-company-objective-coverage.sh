@@ -185,6 +185,13 @@ else
   assert_jq "$TMP/missing-validation-commands.out.json" '.failures[] | select(.code == "schema_invalid")' "missing validation commands rejected"
 fi
 
+jq '.validation_commands[0].command_id = "other_validation"' "$LEDGER" >"$TMP/missing-aggregate-command-row.json"
+if "$SCRIPT" --ledger "$TMP/missing-aggregate-command-row.json" --json >"$TMP/missing-aggregate-command-row.out.json" 2>/dev/null; then
+  fail "missing aggregate validation command row rejected"
+else
+  assert_jq "$TMP/missing-aggregate-command-row.out.json" '.failures[] | select(.code == "missing_standing_goal_aggregate_command")' "missing aggregate validation command row rejected"
+fi
+
 jq '.validation_commands[0].command = "bash tests/holding-company-objective-coverage.sh"' "$LEDGER" >"$TMP/wrong-aggregate-command.json"
 if "$SCRIPT" --ledger "$TMP/wrong-aggregate-command.json" --json >"$TMP/wrong-aggregate-command.out.json" 2>/dev/null; then
   fail "wrong aggregate command rejected"
