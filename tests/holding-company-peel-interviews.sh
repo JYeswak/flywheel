@@ -116,6 +116,13 @@ jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
 assert_jq "$TMP/current.json" '.status == "pass" and .formation_cash_clear_count == 0 and .candidates[0].formation_cash_gate_status == "blocked"' "current ledger validates and blocks formation cash"
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid PEEL ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid PEEL ledger rejected"
+fi
+
 write_clear_fixture "$TMP/clear.json"
 "$SCRIPT" --ledger "$TMP/clear.json" --json >"$TMP/clear.out.json"
 assert_jq "$TMP/clear.out.json" '.status == "pass" and .formation_cash_clear_count == 1 and .candidates[0].formation_cash_gate_status == "clear"' "five qualified interviews clear formation cash"
@@ -146,6 +153,27 @@ if "$SCRIPT" --ledger "$TMP/mismatch.json" --json >"$TMP/mismatch.out.json" 2>/d
   fail "clear count mismatch rejected"
 else
   assert_jq "$TMP/mismatch.out.json" '.status == "fail" and (.failures[] | select(.code == "formation_cash_clear_count_mismatch"))' "clear count mismatch rejected"
+fi
+
+jq '.candidates[0].evidence_refs = ["state/no-such-peel-evidence.json"]' "$TMP/clear.json" >"$TMP/missing-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence-ref.json" --check-paths --json >"$TMP/missing-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing PEEL evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing PEEL evidence ref rejected"
+fi
+
+jq '.candidates[0].candidate_source.evidence_ref = "state/no-such-peel-source-evidence.json"' "$TMP/clear.json" >"$TMP/missing-source-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-source-evidence-ref.json" --check-paths --json >"$TMP/missing-source-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing PEEL candidate source evidence ref rejected"
+else
+  assert_jq "$TMP/missing-source-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "candidate_source_evidence_ref_missing"))' "missing PEEL candidate source evidence ref rejected"
+fi
+
+jq '.candidates[0].interviews[0].buying_signal.evidence_ref = "state/no-such-peel-interview-evidence.json"' "$TMP/clear.json" >"$TMP/missing-interview-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-interview-evidence-ref.json" --check-paths --json >"$TMP/missing-interview-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing PEEL interview evidence ref rejected"
+else
+  assert_jq "$TMP/missing-interview-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "interview_evidence_ref_missing"))' "missing PEEL interview evidence ref rejected"
 fi
 
 jq '.candidates[0].interviews[0].buying_signal.price_point = "$1000 pasted raw"' "$TMP/clear.json" >"$TMP/raw-amount.json"
