@@ -54,6 +54,7 @@ REQUIRED_VALIDATION_COMMAND = "bash tests/zeststream-holding-company-standing-go
 REQUIRED_VALIDATION_COVERAGE = "state/zeststream-portfolio-company-registry.json"
 PORTFOLIO_REGISTRY_REF = "state/zeststream-portfolio-company-registry.json"
 RUNWAY_RECEIPT_REF = "state/holding-company-runway-current.json"
+LEGAL_STRUCTURE_REF = "state/holding-company-legal-structure.json"
 RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 RECENT_PROGRESS_REQUIREMENT_CLAIMS = {
     "recent_anthropic_adoption_claim": "anthropic_adoption",
@@ -67,6 +68,14 @@ ZERO_PORTFOLIO_REQUIREMENT_STATUSES = {
     "portfolio_company_existence_gate": "blocked",
     "each_business_own_brand_owner_customers": "blocked",
     "one_year_small_portfolio_making_money": "blocked",
+}
+LEGAL_REQUIRED_BEFORE_SUB_2 = {
+    "holding_company_operating_agreement",
+    "peer_coach_equity_pathway",
+    "annual_tier_review_process",
+    "substrate_contributor_pool",
+    "subsidiary_owner_operating_agreement",
+    "intercompany_services_agreement",
 }
 
 
@@ -120,6 +129,23 @@ def runway_gate_status(receipt: dict[str, Any]) -> str:
         and isinstance(verified_months, (int, float))
         and verified_months >= required_months
     ):
+        return "clear"
+    return "blocked"
+
+
+def legal_structure_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    requirements = [row for row in receipt.get("requirements", []) if isinstance(row, dict)]
+    cleared_required_rows = {
+        row.get("requirement_id")
+        for row in requirements
+        if row.get("requirement_id") in LEGAL_REQUIRED_BEFORE_SUB_2
+        and row.get("status") == "cleared"
+        and isinstance(row.get("binding_artifact_ref"), str)
+        and isinstance(row.get("attorney_review_ref"), str)
+        and isinstance(row.get("cpa_review_ref"), str)
+    }
+    if claimed_clear_count == len(LEGAL_REQUIRED_BEFORE_SUB_2) and cleared_required_rows == LEGAL_REQUIRED_BEFORE_SUB_2:
         return "clear"
     return "blocked"
 
@@ -220,6 +246,32 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "runway_receipt_ref_missing", "ref": RUNWAY_RECEIPT_REF})
+
+    legal_structure_path = path_for_ref(LEGAL_STRUCTURE_REF)
+    if legal_structure_path is not None and legal_structure_path.exists():
+        legal_structure_status = legal_structure_gate_status(load_json(legal_structure_path))
+        legal_structure_requirement = requirements_by_id.get("legal_structure_gate")
+        if legal_structure_requirement is not None:
+            evidence_refs = legal_structure_requirement.get("evidence_refs", [])
+            if LEGAL_STRUCTURE_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "legal_requirement_missing_legal_structure_ref",
+                        "requirement_id": "legal_structure_gate",
+                        "required_ref": LEGAL_STRUCTURE_REF,
+                    }
+                )
+            if legal_structure_status == "blocked" and legal_structure_requirement.get("coverage_status") != "blocked":
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_legal_structure_receipt",
+                        "requirement_id": "legal_structure_gate",
+                        "claimed": legal_structure_requirement.get("coverage_status"),
+                        "evidence_status": legal_structure_status,
+                    }
+                )
+    else:
+        failures.append({"code": "legal_structure_ref_missing", "ref": LEGAL_STRUCTURE_REF})
 
     portfolio_registry_path = path_for_ref(PORTFOLIO_REGISTRY_REF)
     counted_portfolio_companies = None

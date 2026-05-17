@@ -145,6 +145,24 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "legal_structure_gate") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/legal-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/legal-overclaim.json" --json >"$TMP/legal-overclaim.out.json" 2>/dev/null; then
+  fail "blocked legal receipt rejects legal status promotion"
+else
+  assert_jq "$TMP/legal-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_legal_structure_receipt" and .requirement_id == "legal_structure_gate" and .evidence_status == "blocked")' "blocked legal receipt rejects legal status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "legal_structure_gate") | .evidence_refs) -= ["state/holding-company-legal-structure.json"]' "$LEDGER" >"$TMP/missing-legal-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-legal-ref.json" --json >"$TMP/missing-legal-ref.out.json" 2>/dev/null; then
+  fail "legal requirement missing legal-structure receipt ref rejected"
+else
+  assert_jq "$TMP/missing-legal-ref.out.json" '.failures[] | select(.code == "legal_requirement_missing_legal_structure_ref" and .requirement_id == "legal_structure_gate")' "legal requirement missing legal-structure receipt ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "peel_loop") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
   | .summary_counts.blocked -= 1
