@@ -517,6 +517,13 @@ else
   assert_jq "$TMP/missing-no-custom-public-surface-supersession-ref.out.json" '.failures[] | select(.code == "no_custom_apps_requirement_missing_public_surface_supersession_ref" and .requirement_id == "no_custom_apps_positioning")' "no-custom-apps requirement missing public-surface supersession ref rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "no_custom_apps_positioning") | .finding) = "The committed /portfolio route and retired builder-route redirects prove the current public positioning is no longer custom-app/workflow-builder framed."' "$LEDGER" >"$TMP/stale-no-custom-excluded-surface-finding.json"
+if "$SCRIPT" --ledger "$TMP/stale-no-custom-excluded-surface-finding.json" --json >"$TMP/stale-no-custom-excluded-surface-finding.out.json" 2>/dev/null; then
+  fail "no-custom-apps stale excluded-surface finding rejected"
+else
+  assert_jq "$TMP/stale-no-custom-excluded-surface-finding.out.json" '.failures[] | select(.code == "no_custom_apps_finding_missing_excluded_surface_caveat" and .requirement_id == "no_custom_apps_positioning")' "no-custom-apps stale excluded-surface finding rejected"
+fi
+
 jq '
   (.requirements[] | select(.requirement_id == "public_story_show_receipts") | .coverage_status) = "proven"
   | .summary_counts.proven += 1

@@ -1729,6 +1729,20 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "evidence_status": public_receipt_statuses[status_key],
                     }
                 )
+        if public_story_route_receipt is not None and public_story_route_receipt.get("excluded_uncommitted_surfaces"):
+            finding = no_custom_apps_requirement.get("finding")
+            finding_text = finding.lower() if isinstance(finding, str) else ""
+            if (
+                "uncommitted" not in finding_text
+                or "excluded" not in finding_text
+                or "grounding" not in finding_text
+            ):
+                failures.append(
+                    {
+                        "code": "no_custom_apps_finding_missing_excluded_surface_caveat",
+                        "requirement_id": "no_custom_apps_positioning",
+                    }
+                )
 
     public_story_requirement = requirements_by_id.get("public_story_show_receipts")
     if public_story_requirement is not None:
