@@ -82,16 +82,48 @@ check_portfolio_registry_pair() {
   fi
 }
 
+check_validator_failure_code_coverage() {
+  local report="$TMP/validator-failure-code-coverage.json"
+  if python3 - "$ROOT" >"$report" <<'PY'
+import json
+import re
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+scripts = sorted((root / ".flywheel/scripts").glob("holding-company-*-validate.py"))
+scripts.append(root / ".flywheel/scripts/portfolio-company-registry-validate.py")
+test_paths = sorted((root / "tests").glob("holding-company-*.sh"))
+test_paths.append(root / "tests/portfolio-company-registry.sh")
+test_text = "\n".join(path.read_text(encoding="utf-8") for path in test_paths)
+missing: dict[str, list[str]] = {}
+for script in scripts:
+    codes = sorted(set(re.findall(r'"code"\s*:\s*f?"([^"{]+)', script.read_text(encoding="utf-8"))))
+    uncovered = [code for code in codes if code not in test_text]
+    if uncovered:
+        missing[str(script.relative_to(root))] = uncovered
+print(json.dumps({"missing": missing}, indent=2, sort_keys=True))
+sys.exit(1 if missing else 0)
+PY
+  then
+    pass "holding-company validator failure-code coverage"
+  else
+    fail "holding-company validator failure-code coverage"
+    jq . "$report" >&2 || cat "$report" >&2
+  fi
+}
+
 mapfile -t holding_tests < <(find "$ROOT/tests" -maxdepth 1 -type f -name 'holding-company-*.sh' | sort)
 
 check_inventory_parity
 check_portfolio_registry_pair
+check_validator_failure_code_coverage
 run_test "$ROOT/tests/portfolio-company-registry.sh"
 for test_path in "${holding_tests[@]}"; do
   run_test "$test_path"
 done
 
-expected_count=$((4 + ${#holding_tests[@]}))
+expected_count=$((5 + ${#holding_tests[@]}))
 if [[ "$pass_count" -eq "$expected_count" && "$fail_count" -eq 0 ]]; then
   printf 'RESULT pass=%s fail=%s checked=%s\n' "$pass_count" "$fail_count" "$expected_count"
   exit 0
