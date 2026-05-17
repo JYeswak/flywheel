@@ -509,6 +509,42 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "future_nonprofit_extension") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.deferred -= 1
+' "$LEDGER" >"$TMP/nonprofit-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/nonprofit-overclaim.json" --json >"$TMP/nonprofit-overclaim.out.json" 2>/dev/null; then
+  fail "blocked nonprofit receipt rejects future nonprofit status promotion"
+else
+  assert_jq "$TMP/nonprofit-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_nonprofit_extension_receipt" and .requirement_id == "future_nonprofit_extension" and .expected == "deferred" and .evidence_status == "blocked")' "blocked nonprofit receipt rejects future nonprofit status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "future_nonprofit_extension") | .evidence_refs) -= ["state/holding-company-nonprofit-extension.json"]' "$LEDGER" >"$TMP/missing-nonprofit-extension-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-nonprofit-extension-ref.json" --json >"$TMP/missing-nonprofit-extension-ref.out.json" 2>/dev/null; then
+  fail "future nonprofit requirement missing nonprofit-extension ref rejected"
+else
+  assert_jq "$TMP/missing-nonprofit-extension-ref.out.json" '.failures[] | select(.code == "future_nonprofit_requirement_missing_nonprofit_extension_ref" and .requirement_id == "future_nonprofit_extension")' "future nonprofit requirement missing nonprofit-extension ref rejected"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "company_close_pivot_graduate") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.deferred -= 1
+' "$LEDGER" >"$TMP/lifecycle-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/lifecycle-overclaim.json" --json >"$TMP/lifecycle-overclaim.out.json" 2>/dev/null; then
+  fail "blocked lifecycle receipt rejects lifecycle status promotion"
+else
+  assert_jq "$TMP/lifecycle-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_lifecycle_disposition_receipt" and .requirement_id == "company_close_pivot_graduate" and .expected == "deferred" and .evidence_status == "blocked")' "blocked lifecycle receipt rejects lifecycle status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "company_close_pivot_graduate") | .evidence_refs) -= ["state/holding-company-lifecycle-disposition.json"]' "$LEDGER" >"$TMP/missing-lifecycle-disposition-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-lifecycle-disposition-ref.json" --json >"$TMP/missing-lifecycle-disposition-ref.out.json" 2>/dev/null; then
+  fail "lifecycle requirement missing lifecycle-disposition ref rejected"
+else
+  assert_jq "$TMP/missing-lifecycle-disposition-ref.out.json" '.failures[] | select(.code == "lifecycle_requirement_missing_lifecycle_disposition_ref" and .requirement_id == "company_close_pivot_graduate")' "lifecycle requirement missing lifecycle-disposition ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "peel_loop") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
   | .summary_counts.blocked -= 1

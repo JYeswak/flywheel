@@ -74,6 +74,8 @@ SHARED_STACK_REF = "state/holding-company-shared-stack.json"
 PEER_COACH_REF = "state/holding-company-peer-coach.json"
 LAUNCH_ECONOMICS_REF = "state/holding-company-launch-economics.json"
 RECYCLE_LOOP_REF = "state/holding-company-recycle-loop.json"
+NONPROFIT_EXTENSION_REF = "state/holding-company-nonprofit-extension.json"
+LIFECYCLE_DISPOSITION_REF = "state/holding-company-lifecycle-disposition.json"
 RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 RECENT_PROGRESS_REQUIREMENT_CLAIMS = {
     "recent_anthropic_adoption_claim": "anthropic_adoption",
@@ -179,6 +181,21 @@ RECYCLE_REQUIRED_REFS = [
     "skillos_capability_ref",
     "package_or_substrate_ref",
     "portfolio_propagation_ref",
+]
+NONPROFIT_EXTENSION_REQUIRED_REFS = [
+    "social_cause_scope_ref",
+    "nonprofit_legal_review_ref",
+    "governance_model_ref",
+    "operating_separation_ref",
+    "funding_policy_ref",
+    "public_story_ref",
+]
+LIFECYCLE_DISPOSITION_REQUIRED_REFS = [
+    "owner_operator_ref",
+    "customer_obligation_disposition_ref",
+    "financial_disposition_ref",
+    "substrate_retention_ref",
+    "brand_public_update_ref",
 ]
 
 
@@ -678,6 +695,43 @@ def recycle_loop_gate_status(receipt: dict[str, Any]) -> str:
         refs_ok = all(has_ref(item.get(field)) for field in RECYCLE_REQUIRED_REFS)
         window_ok = isinstance(window, int) and not isinstance(window, bool) and window <= max_window
         if refs_ok and window_ok:
+            return "clear"
+    return "blocked"
+
+
+def nonprofit_extension_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    for initiative in receipt.get("initiatives", []):
+        if not isinstance(initiative, dict) or initiative.get("status") not in {"ready", "active"}:
+            continue
+        refs_ok = all(has_ref(initiative.get(field)) for field in NONPROFIT_EXTENSION_REQUIRED_REFS)
+        if (
+            refs_ok
+            and initiative.get("portfolio_company_counting_excluded") is True
+            and initiative.get("commingled_owner_economics_detected") is False
+        ):
+            return "clear"
+    return "blocked"
+
+
+def lifecycle_disposition_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    for disposition in receipt.get("dispositions", []):
+        if not isinstance(disposition, dict) or disposition.get("status") != "disposition_clear":
+            continue
+        disposition_type = disposition.get("disposition_type")
+        if disposition_type not in {"pivot", "closed", "graduated"}:
+            continue
+        required_refs = list(LIFECYCLE_DISPOSITION_REQUIRED_REFS)
+        if disposition_type == "graduated":
+            required_refs.append("graduation_terms_ref")
+        if disposition_type == "pivot":
+            required_refs.append("pivot_scope_ref")
+        if all(has_ref(disposition.get(field)) for field in required_refs) and disposition.get("holding_plane_continues") is True:
             return "clear"
     return "blocked"
 
@@ -1359,6 +1413,60 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "evidence_status": evidence_status,
                     }
                 )
+
+    nonprofit_extension_path = path_for_ref(NONPROFIT_EXTENSION_REF)
+    if nonprofit_extension_path is not None and nonprofit_extension_path.exists():
+        nonprofit_extension_status = nonprofit_extension_gate_status(load_json(nonprofit_extension_path))
+        nonprofit_requirement = requirements_by_id.get("future_nonprofit_extension")
+        if nonprofit_requirement is not None:
+            evidence_refs = nonprofit_requirement.get("evidence_refs", [])
+            if NONPROFIT_EXTENSION_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "future_nonprofit_requirement_missing_nonprofit_extension_ref",
+                        "requirement_id": "future_nonprofit_extension",
+                        "required_ref": NONPROFIT_EXTENSION_REF,
+                    }
+                )
+            if nonprofit_extension_status == "blocked" and nonprofit_requirement.get("coverage_status") != "deferred":
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_nonprofit_extension_receipt",
+                        "requirement_id": "future_nonprofit_extension",
+                        "claimed": nonprofit_requirement.get("coverage_status"),
+                        "expected": "deferred",
+                        "evidence_status": nonprofit_extension_status,
+                    }
+                )
+    else:
+        failures.append({"code": "nonprofit_extension_ref_missing", "ref": NONPROFIT_EXTENSION_REF})
+
+    lifecycle_disposition_path = path_for_ref(LIFECYCLE_DISPOSITION_REF)
+    if lifecycle_disposition_path is not None and lifecycle_disposition_path.exists():
+        lifecycle_disposition_status = lifecycle_disposition_gate_status(load_json(lifecycle_disposition_path))
+        lifecycle_requirement = requirements_by_id.get("company_close_pivot_graduate")
+        if lifecycle_requirement is not None:
+            evidence_refs = lifecycle_requirement.get("evidence_refs", [])
+            if LIFECYCLE_DISPOSITION_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "lifecycle_requirement_missing_lifecycle_disposition_ref",
+                        "requirement_id": "company_close_pivot_graduate",
+                        "required_ref": LIFECYCLE_DISPOSITION_REF,
+                    }
+                )
+            if lifecycle_disposition_status == "blocked" and lifecycle_requirement.get("coverage_status") != "deferred":
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_lifecycle_disposition_receipt",
+                        "requirement_id": "company_close_pivot_graduate",
+                        "claimed": lifecycle_requirement.get("coverage_status"),
+                        "expected": "deferred",
+                        "evidence_status": lifecycle_disposition_status,
+                    }
+                )
+    else:
+        failures.append({"code": "lifecycle_disposition_ref_missing", "ref": LIFECYCLE_DISPOSITION_REF})
 
     portfolio_registry_path = path_for_ref(PORTFOLIO_REGISTRY_REF)
     counted_portfolio_companies = None
