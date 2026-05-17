@@ -78,6 +78,41 @@ else
   assert_jq "$TMP/secret-shaped-value.out.json" '.failures[] | select(.code == "secret_or_raw_value_shape_detected")' "secret-shaped supersession value rejected"
 fi
 
+jq '.superseded_findings |= .[0:6]' "$RECEIPT" >"$TMP/superseded-count-mismatch.json"
+if "$SCRIPT" --receipt "$TMP/superseded-count-mismatch.json" --coverage "$COVERAGE" --json >"$TMP/superseded-count-mismatch.out.json" 2>/dev/null; then
+  fail "superseded finding count mismatch rejected"
+else
+  assert_jq "$TMP/superseded-count-mismatch.out.json" '.failures[] | select(.code == "superseded_findings_count_mismatch")' "superseded finding count mismatch rejected"
+fi
+
+jq '.current_status.anti_pitch_voice_surface_status = "blocked"' "$RECEIPT" >"$TMP/anti-pitch-not-clear.json"
+if "$SCRIPT" --receipt "$TMP/anti-pitch-not-clear.json" --coverage "$COVERAGE" --json >"$TMP/anti-pitch-not-clear.out.json" 2>/dev/null; then
+  fail "anti-pitch surface not-clear status rejected"
+else
+  assert_jq "$TMP/anti-pitch-not-clear.out.json" '.failures[] | select(.code == "anti_pitch_voice_surface_not_clear")' "anti-pitch surface not-clear status rejected"
+fi
+
+jq '.current_status.public_story_surface_status = "blocked"' "$RECEIPT" >"$TMP/public-story-not-clear.json"
+if "$SCRIPT" --receipt "$TMP/public-story-not-clear.json" --coverage "$COVERAGE" --json >"$TMP/public-story-not-clear.out.json" 2>/dev/null; then
+  fail "public-story surface not-clear status rejected"
+else
+  assert_jq "$TMP/public-story-not-clear.out.json" '.failures[] | select(.code == "public_story_surface_not_clear")' "public-story surface not-clear status rejected"
+fi
+
+jq '.current_status.objective_coverage_status = "complete"' "$RECEIPT" >"$TMP/objective-marked-complete.json"
+if "$SCRIPT" --receipt "$TMP/objective-marked-complete.json" --coverage "$COVERAGE" --json >"$TMP/objective-marked-complete.out.json" 2>/dev/null; then
+  fail "objective coverage complete overclaim rejected"
+else
+  assert_jq "$TMP/objective-marked-complete.out.json" '.failures[] | select(.code == "objective_coverage_not_marked_incomplete")' "objective coverage complete overclaim rejected"
+fi
+
+jq '.notes = []' "$RECEIPT" >"$TMP/missing-preservation-note.json"
+if "$SCRIPT" --receipt "$TMP/missing-preservation-note.json" --coverage "$COVERAGE" --json >"$TMP/missing-preservation-note.out.json" 2>/dev/null; then
+  fail "missing historical audit preservation note rejected"
+else
+  assert_jq "$TMP/missing-preservation-note.out.json" '.failures[] | select(.code == "historical_audit_preservation_note_missing")' "missing historical audit preservation note rejected"
+fi
+
 while IFS= read -r relpath; do
   if [[ -f "$ROOT/$relpath" ]]; then
     pass "referenced path exists: $relpath"
@@ -113,11 +148,25 @@ else
   assert_jq "$TMP/bad-counts.out.json" '.failures[] | select(.code == "objective_counts_snapshot_mismatch")' "objective count snapshot mismatch rejected"
 fi
 
+jq '.current_receipts -= ["state/holding-company-anti-pitch-voice.json"]' "$RECEIPT" >"$TMP/missing-anti-pitch-ref.json"
+if "$SCRIPT" --receipt "$TMP/missing-anti-pitch-ref.json" --coverage "$COVERAGE" --json >"$TMP/missing-anti-pitch-ref.out.json" 2>/dev/null; then
+  fail "missing anti-pitch supersession ref rejected"
+else
+  assert_jq "$TMP/missing-anti-pitch-ref.out.json" '.failures[] | select(.code == "anti_pitch_supersession_evidence_ref_count_mismatch")' "missing anti-pitch supersession ref rejected"
+fi
+
 jq '.current_receipts -= ["state/holding-company-public-story.json"]' "$RECEIPT" >"$TMP/missing-public-story-ref.json"
 if "$SCRIPT" --receipt "$TMP/missing-public-story-ref.json" --coverage "$COVERAGE" --json >"$TMP/missing-public-story-ref.out.json" 2>/dev/null; then
   fail "missing public-story supersession ref rejected"
 else
   assert_jq "$TMP/missing-public-story-ref.out.json" '.failures[] | select(.code == "public_story_supersession_evidence_ref_count_mismatch")' "missing public-story supersession ref rejected"
+fi
+
+jq '.supersedes_audit_ref = "state/no-such-holding-company-audit.json"' "$RECEIPT" >"$TMP/missing-supersedes-audit-ref.json"
+if "$SCRIPT" --receipt "$TMP/missing-supersedes-audit-ref.json" --coverage "$COVERAGE" --check-paths --json >"$TMP/missing-supersedes-audit-ref.out.json" 2>/dev/null; then
+  fail "missing superseded audit ref rejected"
+else
+  assert_jq "$TMP/missing-supersedes-audit-ref.out.json" '.failures[] | select(.code == "supersedes_audit_ref_missing")' "missing superseded audit ref rejected"
 fi
 
 jq '.current_receipts += ["state/no-such-public-surface-receipt.json"]' "$RECEIPT" >"$TMP/missing-ref.json"
