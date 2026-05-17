@@ -80,6 +80,7 @@ LAUNCH_ECONOMICS_REF = "state/holding-company-launch-economics.json"
 RECYCLE_LOOP_REF = "state/holding-company-recycle-loop.json"
 NONPROFIT_EXTENSION_REF = "state/holding-company-nonprofit-extension.json"
 LIFECYCLE_DISPOSITION_REF = "state/holding-company-lifecycle-disposition.json"
+PROGRESS_VELOCITY_REF = "state/holding-company-progress-velocity.json"
 RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 RECENT_PROGRESS_REQUIREMENT_CLAIMS = {
     "recent_anthropic_adoption_claim": "anthropic_adoption",
@@ -562,6 +563,26 @@ def anthropic_adoption_gate_status(receipt: dict[str, Any]) -> str:
         and receipt.get("packages_phantom_fail") == 0
         and receipt.get("all_expected_events_present") is True
         and receipt.get("all_expected_repos_present") is True
+    ):
+        return "proven"
+    return "blocked"
+
+
+def progress_velocity_gate_status(receipt: dict[str, Any]) -> str:
+    surfaces = [surface for surface in receipt.get("surface_counts", []) if isinstance(surface, dict)]
+    computed_total = sum(surface.get("commit_count", 0) for surface in surfaces)
+    target_min_commits = receipt.get("target_min_commits")
+    target_surface_count = receipt.get("target_surface_count")
+    if (
+        receipt.get("status") == "proven"
+        and receipt.get("exact_surface_set_established") is True
+        and isinstance(target_min_commits, int)
+        and isinstance(target_surface_count, int)
+        and isinstance(receipt.get("target_window_days"), int)
+        and computed_total >= target_min_commits
+        and receipt.get("measured_total_commit_count") == computed_total
+        and len(surfaces) == target_surface_count
+        and all(surface.get("commit_count", 0) > 0 for surface in surfaces)
     ):
         return "proven"
     return "blocked"
@@ -1304,6 +1325,32 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "anthropic_adoption_ref_missing", "ref": ANTHROPIC_ADOPTION_REF})
+
+    progress_velocity_path = path_for_ref(PROGRESS_VELOCITY_REF)
+    if progress_velocity_path is not None and progress_velocity_path.exists():
+        progress_velocity_status = progress_velocity_gate_status(load_json(progress_velocity_path))
+        progress_velocity_requirement = requirements_by_id.get("recent_progress_velocity_claim")
+        if progress_velocity_requirement is not None:
+            evidence_refs = progress_velocity_requirement.get("evidence_refs", [])
+            if PROGRESS_VELOCITY_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "progress_velocity_requirement_missing_progress_velocity_ref",
+                        "requirement_id": "recent_progress_velocity_claim",
+                        "required_ref": PROGRESS_VELOCITY_REF,
+                    }
+                )
+            if progress_velocity_requirement.get("coverage_status") != progress_velocity_status:
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_progress_velocity_receipt",
+                        "requirement_id": "recent_progress_velocity_claim",
+                        "claimed": progress_velocity_requirement.get("coverage_status"),
+                        "evidence_status": progress_velocity_status,
+                    }
+                )
+    else:
+        failures.append({"code": "progress_velocity_ref_missing", "ref": PROGRESS_VELOCITY_REF})
 
     anti_pitch_requirement = requirements_by_id.get("anti_pitch_voice_gate")
     if anti_pitch_requirement is not None:

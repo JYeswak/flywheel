@@ -130,7 +130,15 @@ jq '
 if "$SCRIPT" --ledger "$TMP/recent-progress-overclaim.json" --json >"$TMP/recent-progress-overclaim.out.json" 2>/dev/null; then
   fail "recent-progress requirement status overclaim rejected"
 else
+  assert_jq "$TMP/recent-progress-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_progress_velocity_receipt" and .requirement_id == "recent_progress_velocity_claim" and .evidence_status == "blocked")' "recent-progress requirement status overclaim rejected by progress velocity receipt"
   assert_jq "$TMP/recent-progress-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_claim_honesty" and .requirement_id == "recent_progress_velocity_claim" and .evidence_status == "blocked")' "recent-progress requirement status overclaim rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "recent_progress_velocity_claim") | .evidence_refs) -= ["state/holding-company-progress-velocity.json"]' "$LEDGER" >"$TMP/missing-progress-velocity-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-progress-velocity-ref.json" --json >"$TMP/missing-progress-velocity-ref.out.json" 2>/dev/null; then
+  fail "recent-progress requirement missing progress velocity ref rejected"
+else
+  assert_jq "$TMP/missing-progress-velocity-ref.out.json" '.failures[] | select(.code == "progress_velocity_requirement_missing_progress_velocity_ref" and .requirement_id == "recent_progress_velocity_claim")' "recent-progress requirement missing progress velocity ref rejected"
 fi
 
 jq '
