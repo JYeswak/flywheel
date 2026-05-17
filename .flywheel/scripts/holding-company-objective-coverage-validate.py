@@ -63,6 +63,8 @@ PRESS_READINESS_REF = "state/holding-company-press-readiness.json"
 POUR_READINESS_REF = "state/holding-company-pour-readiness.json"
 SHARED_STACK_REF = "state/holding-company-shared-stack.json"
 PEER_COACH_REF = "state/holding-company-peer-coach.json"
+LAUNCH_ECONOMICS_REF = "state/holding-company-launch-economics.json"
+RECYCLE_LOOP_REF = "state/holding-company-recycle-loop.json"
 RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 RECENT_PROGRESS_REQUIREMENT_CLAIMS = {
     "recent_anthropic_adoption_claim": "anthropic_adoption",
@@ -122,6 +124,12 @@ PEER_COACH_REQUIRED_REFS = [
     "operating_control_ref",
     "peer_coach_agreement_ref",
     "equity_grant_ref",
+]
+RECYCLE_REQUIRED_REFS = [
+    "friction_receipt_ref",
+    "skillos_capability_ref",
+    "package_or_substrate_ref",
+    "portfolio_propagation_ref",
 ]
 
 
@@ -398,6 +406,49 @@ def peer_coach_gate_status(receipt: dict[str, Any]) -> str:
         equity_ok = is_number(equity) and equity == required_equity
         refs_ok = all(has_ref(coach.get(field)) for field in PEER_COACH_REQUIRED_REFS)
         if tier_ok and equity_ok and refs_ok:
+            return "clear"
+    return "blocked"
+
+
+def launch_economics_gate_status(receipt: dict[str, Any]) -> str:
+    launches = receipt.get("launches") if isinstance(receipt.get("launches"), list) else []
+    sorted_launches = sorted(
+        (row for row in launches if isinstance(row, dict)),
+        key=lambda row: row.get("sequence", 0),
+    )
+    if receipt.get("measurement_status") != "measured_pass" or len(sorted_launches) < 2:
+        return "blocked"
+    for previous, current in zip(sorted_launches, sorted_launches[1:]):
+        previous_hours = previous.get("peel_hours"), previous.get("press_build_hours")
+        current_hours = current.get("peel_hours"), current.get("press_build_hours")
+        if not all(is_number(value) for value in (*previous_hours, *current_hours)):
+            continue
+        previous_total = float(previous_hours[0]) + float(previous_hours[1])
+        current_total = float(current_hours[0]) + float(current_hours[1])
+        previous_reuse = previous.get("reused_package_count")
+        current_reuse = current.get("reused_package_count")
+        if (
+            current_total < previous_total
+            and isinstance(previous_reuse, int)
+            and isinstance(current_reuse, int)
+            and current_reuse >= previous_reuse
+        ):
+            return "clear"
+    return "blocked"
+
+
+def recycle_loop_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    max_window = receipt.get("required_max_propagation_window_days", 30)
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1 or not isinstance(max_window, int):
+        return "blocked"
+    for item in receipt.get("friction_items", []):
+        if not isinstance(item, dict) or item.get("status") != "propagated":
+            continue
+        window = item.get("propagation_window_days")
+        refs_ok = all(has_ref(item.get(field)) for field in RECYCLE_REQUIRED_REFS)
+        window_ok = isinstance(window, int) and not isinstance(window, bool) and window <= max_window
+        if refs_ok and window_ok:
             return "clear"
     return "blocked"
 
@@ -680,6 +731,66 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "pour_readiness_ref_missing", "ref": POUR_READINESS_REF})
+
+    launch_economics_path = path_for_ref(LAUNCH_ECONOMICS_REF)
+    if launch_economics_path is not None and launch_economics_path.exists():
+        launch_economics_status = launch_economics_gate_status(load_json(launch_economics_path))
+        launch_economics_requirement = requirements_by_id.get("n_plus_one_cheaper_than_n")
+        if launch_economics_requirement is not None:
+            evidence_refs = launch_economics_requirement.get("evidence_refs", [])
+            if LAUNCH_ECONOMICS_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "n_plus_one_requirement_missing_launch_economics_ref",
+                        "requirement_id": "n_plus_one_cheaper_than_n",
+                        "required_ref": LAUNCH_ECONOMICS_REF,
+                    }
+                )
+            if launch_economics_status == "blocked" and launch_economics_requirement.get("coverage_status") != "blocked":
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_launch_economics_receipt",
+                        "requirement_id": "n_plus_one_cheaper_than_n",
+                        "claimed": launch_economics_requirement.get("coverage_status"),
+                        "evidence_status": launch_economics_status,
+                    }
+                )
+    else:
+        failures.append({"code": "launch_economics_ref_missing", "ref": LAUNCH_ECONOMICS_REF})
+
+    recycle_loop_path = path_for_ref(RECYCLE_LOOP_REF)
+    if recycle_loop_path is not None and recycle_loop_path.exists():
+        recycle_status = recycle_loop_gate_status(load_json(recycle_loop_path))
+        recycle_requirement = requirements_by_id.get("recycle_loop")
+        if recycle_requirement is not None:
+            evidence_refs = recycle_requirement.get("evidence_refs", [])
+            if RECYCLE_LOOP_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "recycle_requirement_missing_recycle_loop_ref",
+                        "requirement_id": "recycle_loop",
+                        "required_ref": RECYCLE_LOOP_REF,
+                    }
+                )
+            if LAUNCH_ECONOMICS_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "recycle_requirement_missing_launch_economics_ref",
+                        "requirement_id": "recycle_loop",
+                        "required_ref": LAUNCH_ECONOMICS_REF,
+                    }
+                )
+            if recycle_status == "blocked" and recycle_requirement.get("coverage_status") != "blocked":
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_recycle_loop_receipt",
+                        "requirement_id": "recycle_loop",
+                        "claimed": recycle_requirement.get("coverage_status"),
+                        "evidence_status": recycle_status,
+                    }
+                )
+    else:
+        failures.append({"code": "recycle_loop_ref_missing", "ref": RECYCLE_LOOP_REF})
 
     shared_stack_path = path_for_ref(SHARED_STACK_REF)
     peer_coach_path = path_for_ref(PEER_COACH_REF)

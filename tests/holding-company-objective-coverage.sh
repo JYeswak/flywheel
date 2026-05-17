@@ -271,6 +271,49 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "n_plus_one_cheaper_than_n") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/n-plus-one-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/n-plus-one-overclaim.json" --json >"$TMP/n-plus-one-overclaim.out.json" 2>/dev/null; then
+  fail "blocked launch-economics receipt rejects N+1 status promotion"
+else
+  assert_jq "$TMP/n-plus-one-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_launch_economics_receipt" and .requirement_id == "n_plus_one_cheaper_than_n" and .evidence_status == "blocked")' "blocked launch-economics receipt rejects N+1 status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "n_plus_one_cheaper_than_n") | .evidence_refs) -= ["state/holding-company-launch-economics.json"]' "$LEDGER" >"$TMP/missing-n-plus-one-launch-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-n-plus-one-launch-ref.json" --json >"$TMP/missing-n-plus-one-launch-ref.out.json" 2>/dev/null; then
+  fail "N+1 requirement missing launch-economics receipt ref rejected"
+else
+  assert_jq "$TMP/missing-n-plus-one-launch-ref.out.json" '.failures[] | select(.code == "n_plus_one_requirement_missing_launch_economics_ref" and .requirement_id == "n_plus_one_cheaper_than_n")' "N+1 requirement missing launch-economics receipt ref rejected"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "recycle_loop") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/recycle-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/recycle-overclaim.json" --json >"$TMP/recycle-overclaim.out.json" 2>/dev/null; then
+  fail "blocked RECYCLE receipt rejects RECYCLE status promotion"
+else
+  assert_jq "$TMP/recycle-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_recycle_loop_receipt" and .requirement_id == "recycle_loop" and .evidence_status == "blocked")' "blocked RECYCLE receipt rejects RECYCLE status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "recycle_loop") | .evidence_refs) -= ["state/holding-company-recycle-loop.json"]' "$LEDGER" >"$TMP/missing-recycle-loop-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-recycle-loop-ref.json" --json >"$TMP/missing-recycle-loop-ref.out.json" 2>/dev/null; then
+  fail "RECYCLE requirement missing recycle-loop receipt ref rejected"
+else
+  assert_jq "$TMP/missing-recycle-loop-ref.out.json" '.failures[] | select(.code == "recycle_requirement_missing_recycle_loop_ref" and .requirement_id == "recycle_loop")' "RECYCLE requirement missing recycle-loop receipt ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "recycle_loop") | .evidence_refs) -= ["state/holding-company-launch-economics.json"]' "$LEDGER" >"$TMP/missing-recycle-launch-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-recycle-launch-ref.json" --json >"$TMP/missing-recycle-launch-ref.out.json" 2>/dev/null; then
+  fail "RECYCLE requirement missing launch-economics receipt ref rejected"
+else
+  assert_jq "$TMP/missing-recycle-launch-ref.out.json" '.failures[] | select(.code == "recycle_requirement_missing_launch_economics_ref" and .requirement_id == "recycle_loop")' "RECYCLE requirement missing launch-economics receipt ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "nurture_loop") | .coverage_status) = "partial"
   | .summary_counts.partial += 1
   | .summary_counts.blocked -= 1
