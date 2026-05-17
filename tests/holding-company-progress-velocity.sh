@@ -77,6 +77,69 @@ else
   assert_jq "$TMP/bad-total.out.json" '.failures[] | select(.code == "commit_total_mismatch")' "total mismatch rejected"
 fi
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid progress velocity ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.failures[] | select(.code == "schema_invalid")' "schema-invalid progress velocity ledger rejected"
+fi
+
+jq '.surface_counts += [.surface_counts[0]] | .target_surface_count = 10 | .measured_total_commit_count = (.measured_total_commit_count + .surface_counts[0].commit_count)' "$LEDGER" >"$TMP/duplicate-surface.json"
+if "$SCRIPT" --ledger "$TMP/duplicate-surface.json" --json >"$TMP/duplicate-surface.out.json" 2>/dev/null; then
+  fail "duplicate progress surface rejected"
+else
+  assert_jq "$TMP/duplicate-surface.out.json" '.failures[] | select(.code == "duplicate_surface_id")' "duplicate progress surface rejected"
+fi
+
+jq '.target_surface_count = 8' "$LEDGER" >"$TMP/surface-count-mismatch.json"
+if "$SCRIPT" --ledger "$TMP/surface-count-mismatch.json" --json >"$TMP/surface-count-mismatch.out.json" 2>/dev/null; then
+  fail "surface count mismatch rejected"
+else
+  assert_jq "$TMP/surface-count-mismatch.out.json" '.failures[] | select(.code == "surface_count_mismatch")' "surface count mismatch rejected"
+fi
+
+jq '.target_window_days = 8' "$LEDGER" >"$TMP/window-days-mismatch.json"
+if "$SCRIPT" --ledger "$TMP/window-days-mismatch.json" --json >"$TMP/window-days-mismatch.out.json" 2>/dev/null; then
+  fail "window days mismatch rejected"
+else
+  assert_jq "$TMP/window-days-mismatch.out.json" '.failures[] | select(.code == "window_days_mismatch")' "window days mismatch rejected"
+fi
+
+jq '.window_end = "not-a-timestamp"' "$LEDGER" >"$TMP/window-parse-failed.json"
+if "$SCRIPT" --ledger "$TMP/window-parse-failed.json" --json >"$TMP/window-parse-failed.out.json" 2>/dev/null; then
+  fail "window parse failure rejected"
+else
+  assert_jq "$TMP/window-parse-failed.out.json" '.failures[] | select(.code == "window_parse_failed")' "window parse failure rejected"
+fi
+
+jq '.status = "proven" | .exact_surface_set_established = true | .measured_total_commit_count = 4000 | .surface_counts[0].commit_count = 0 | .surface_counts[7].commit_count = 1132' "$LEDGER" >"$TMP/zero-surface.json"
+if "$SCRIPT" --ledger "$TMP/zero-surface.json" --json >"$TMP/zero-surface.out.json" 2>/dev/null; then
+  fail "proven with zero-commit surface rejected"
+else
+  assert_jq "$TMP/zero-surface.out.json" '.failures[] | select(.code == "proven_surface_zero_commits")' "proven with zero-commit surface rejected"
+fi
+
+jq '.surface_counts[0].repo_path = "/no/such/progress-velocity-repo"' "$LEDGER" >"$TMP/missing-surface-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-surface-ref.json" --check-paths --json >"$TMP/missing-surface-ref.out.json" 2>/dev/null; then
+  fail "missing progress surface ref rejected"
+else
+  assert_jq "$TMP/missing-surface-ref.out.json" '.failures[] | select(.code == "ref_missing" and .field == "repo_path")' "missing progress surface ref rejected"
+fi
+
+jq '.evidence_refs = ["state/does-not-exist-progress-velocity-evidence.json"]' "$LEDGER" >"$TMP/missing-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence-ref.json" --check-paths --json >"$TMP/missing-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing progress evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence-ref.out.json" '.failures[] | select(.code == "evidence_ref_missing")' "missing progress evidence ref rejected"
+fi
+
+jq '.notes += ["fixture sk-TestSecret123 should be rejected"]' "$LEDGER" >"$TMP/secret-shape.json"
+if "$SCRIPT" --ledger "$TMP/secret-shape.json" --json >"$TMP/secret-shape.out.json" 2>/dev/null; then
+  fail "secret-shaped progress value rejected"
+else
+  assert_jq "$TMP/secret-shape.out.json" '.failures[] | select(.code == "secret_shape_detected")' "secret-shaped progress value rejected"
+fi
+
 if [[ "$fail_count" -ne 0 ]]; then
   printf 'RESULT pass=%s fail=%s\n' "$pass_count" "$fail_count" >&2
   exit 1
