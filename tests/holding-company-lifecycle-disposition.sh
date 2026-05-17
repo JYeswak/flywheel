@@ -36,6 +36,13 @@ jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
 assert_jq "$TMP/current.json" '.status == "pass" and .clear_count == 0 and .dispositions[0].lifecycle_disposition_gate_status == "blocked"' "current tracking row validates and blocks disposition clear"
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid lifecycle ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid lifecycle ledger rejected"
+fi
+
 jq '
   .clear_count = 1
   | .dispositions[0].disposition_type = "closed"
@@ -49,6 +56,13 @@ jq '
 "$SCRIPT" --ledger "$TMP/closed.json" --json >"$TMP/closed.out.json"
 assert_jq "$TMP/closed.out.json" '.status == "pass" and .clear_count == 1 and .dispositions[0].lifecycle_disposition_gate_status == "clear"' "closed disposition refs clear"
 
+jq '.dispositions[0].notes = ("sk-" + "NOTAREALSECRET")' "$TMP/closed.json" >"$TMP/secret-shaped-value.json"
+if "$SCRIPT" --ledger "$TMP/secret-shaped-value.json" --json >"$TMP/secret-shaped-value.out.json" 2>/dev/null; then
+  fail "secret-shaped lifecycle value rejected"
+else
+  assert_jq "$TMP/secret-shaped-value.out.json" '.status == "fail" and (.failures[] | select(.code == "secret_or_raw_value_shape_detected"))' "secret-shaped lifecycle value rejected"
+fi
+
 jq '.clear_count = 1 | .dispositions[0].disposition_type = "pivot" | .dispositions[0].status = "disposition_clear" | .dispositions[0].owner_operator_ref = "urn:owner:x" | .dispositions[0].customer_obligation_disposition_ref = "urn:customers:x" | .dispositions[0].financial_disposition_ref = "urn:financial:x" | .dispositions[0].substrate_retention_ref = "urn:substrate:x" | .dispositions[0].brand_public_update_ref = "urn:brand:x" | .dispositions[0].pivot_scope_ref = "urn:pivot-scope:x"' "$LEDGER" >"$TMP/pivot.json"
 "$SCRIPT" --ledger "$TMP/pivot.json" --json >"$TMP/pivot.out.json"
 assert_jq "$TMP/pivot.out.json" '.status == "pass" and .clear_count == 1 and .dispositions[0].lifecycle_disposition_gate_status == "clear"' "pivot scope clears pivot disposition"
@@ -58,6 +72,7 @@ if "$SCRIPT" --ledger "$TMP/missing.json" --json >"$TMP/missing.out.json" 2>/dev
   fail "disposition clear missing refs rejected"
 else
   assert_jq "$TMP/missing.out.json" '.failures[] | select(.code == "active_tracking_cannot_be_disposition_clear")' "active tracking clear rejected"
+  assert_jq "$TMP/missing.out.json" '.failures[] | select(.code == "disposition_clear_missing_refs")' "disposition clear missing refs rejected"
 fi
 
 jq '.dispositions[0].holding_plane_continues = false' "$TMP/closed.json" >"$TMP/no-continuity.json"
@@ -65,6 +80,20 @@ if "$SCRIPT" --ledger "$TMP/no-continuity.json" --json >"$TMP/no-continuity.out.
   fail "disposition without holding-plane continuity rejected"
 else
   assert_jq "$TMP/no-continuity.out.json" '.failures[] | select(.code == "disposition_clear_without_holding_plane_continuity")' "disposition without holding-plane continuity rejected"
+fi
+
+jq '.dispositions[0].owner_operator_ref = "state/no-such-lifecycle-owner.json"' "$TMP/closed.json" >"$TMP/missing-required-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-required-ref.json" --check-paths --json >"$TMP/missing-required-ref.out.json" 2>/dev/null; then
+  fail "missing lifecycle required ref rejected"
+else
+  assert_jq "$TMP/missing-required-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "required_ref_missing"))' "missing lifecycle required ref rejected"
+fi
+
+jq '.dispositions[0].evidence_refs = ["state/no-such-lifecycle-evidence.json"]' "$TMP/closed.json" >"$TMP/missing-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence-ref.json" --check-paths --json >"$TMP/missing-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing lifecycle evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing lifecycle evidence ref rejected"
 fi
 
 jq '.clear_count = 1' "$LEDGER" >"$TMP/bad-count.json"
