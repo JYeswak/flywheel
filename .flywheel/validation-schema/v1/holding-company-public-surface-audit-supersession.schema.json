@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-public-surface-audit-supersession/v1/schema.json",
+  "title": "ZestStream Holding Company Public Surface Audit Supersession v1",
+  "description": "Receipt for superseding stale public-surface audit findings with newer anti-pitch and public-story evidence while preserving the standing-goal blocker counts.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "bead_id",
+    "source_goal",
+    "supersedes_audit_ref",
+    "superseded_findings",
+    "current_receipts",
+    "current_status",
+    "notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_public_surface_audit_supersession.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "bead_id": {
+      "type": "string",
+      "pattern": "^flywheel-[a-z0-9]+$"
+    },
+    "source_goal": {
+      "const": "ZestStream Holding Company Goal"
+    },
+    "supersedes_audit_ref": {
+      "type": "string",
+      "pattern": "^state/[A-Za-z0-9._-]+\\.json$"
+    },
+    "superseded_findings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/superseded_finding"
+      }
+    },
+    "current_receipts": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^state/[A-Za-z0-9._-]+\\.json$"
+      }
+    },
+    "current_status": {
+      "$ref": "#/$defs/current_status"
+    },
+    "notes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "superseded_finding": {
+      "type": "object",
+      "required": [
+        "path",
+        "current_disposition"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "previous_result": {
+          "type": "string",
+          "minLength": 1
+        },
+        "previous_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "previous_action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "current_disposition": {
+          "type": "string",
+          "pattern": "^superseded_by_[a-z0-9_]+$"
+        }
+      },
+      "oneOf": [
+        {
+          "required": [
+            "previous_result"
+          ]
+        },
+        {
+          "required": [
+            "previous_status"
+          ]
+        },
+        {
+          "required": [
+            "previous_action"
+          ]
+        }
+      ],
+      "additionalProperties": false
+    },
+    "current_status": {
+      "type": "object",
+      "required": [
+        "anti_pitch_voice_surface_status",
+        "public_story_surface_status",
+        "objective_coverage_status",
+        "objective_counts_unchanged"
+      ],
+      "properties": {
+        "anti_pitch_voice_surface_status": {
+          "const": "clear"
+        },
+        "public_story_surface_status": {
+          "const": "clear"
+        },
+        "objective_coverage_status": {
+          "const": "not_complete"
+        },
+        "objective_counts_unchanged": {
+          "type": "object",
+          "required": [
+            "proven",
+            "partial",
+            "blocked",
+            "deferred",
+            "total"
+          ],
+          "properties": {
+            "proven": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "partial": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "blocked": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "deferred": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "total": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
