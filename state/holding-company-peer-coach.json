@@ -1,0 +1,34 @@
+{
+  "schema_version": "zeststream.holding_company_peer_coach.v1",
+  "generated_at": "2026-05-17T07:34:00Z",
+  "gate": "nurture_peer_coach",
+  "required_min_owner_tier": 2,
+  "required_peer_coach_equity_percent": 5,
+  "clear_count": 0,
+  "peer_coaches": [
+    {
+      "coach_id": "mobile-eats-owner-peer-coach-20260517",
+      "owner_company_slug": "mobile-eats",
+      "target_company_slug": "future-sub",
+      "status": "not_eligible",
+      "owner_tier": null,
+      "sustainable_cash_position_ref": null,
+      "operating_control_ref": null,
+      "peer_coach_agreement_ref": null,
+      "equity_grant_percent": null,
+      "equity_grant_ref": null,
+      "evidence_refs": [
+        "state/holding-company-pour-readiness.json",
+        "state/holding-company-legal-structure.json",
+        "state/zeststream-portfolio-company-registry.json"
+      ],
+      "notes": "Mobile Eats has no signed owner/operator, no Tier 2 status, and no operating-control handoff, so no graduated owner can peer-coach a new sub yet."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical NURTURE peer-coach gate for the ZestStream holding-company goal.",
+    "A peer coach clears only at Tier 2+, with sustainable cash position, operating-control, peer-coach agreement, and exactly 5% equity-grant receipts.",
+    "Legal term readiness is tracked separately in state/holding-company-legal-structure.json."
+  ],
+  "next_action": "After a portfolio company reaches Tier 2 with sustainable cash and operating control, add peer-coach agreement and 5% equity-grant receipts before marking a coach eligible or active."
+}

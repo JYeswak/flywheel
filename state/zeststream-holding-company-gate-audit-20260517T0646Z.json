@@ -117,6 +117,11 @@
       "kind": "pour_readiness_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json",
       "result": "POUR readiness ledger exists and validates; current clear_count is 0 because first paying-customer, owner-operator, and operating-control handoff receipts are absent"
+    },
+    {
+      "kind": "peer_coach_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-peer-coach.json",
+      "result": "NURTURE peer-coach ledger exists and validates; current clear_count is 0 because no Tier 2+ owner with sustainable cash, operating control, agreement, and 5% equity grant refs exists"
     }
   ],
   "canonical_gates": [
@@ -198,6 +203,16 @@
         "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md"
       ],
       "finding": "POUR readiness is now machine-checkable. Mobile Eats has brand, repo, public-surface, and substrate proof, but launch clear remains blocked because first paying-customer, owner-operator, and operating-control handoff receipts are absent."
+    },
+    {
+      "gate": "nurture_peer_coach",
+      "status": "blocked_no_eligible_owner",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-peer-coach.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-legal-structure.json"
+      ],
+      "finding": "NURTURE peer-coach eligibility is now machine-checkable. Mobile Eats has no signed owner/operator, no Tier 2 status, no sustainable cash receipt, and no 5% peer-coach equity grant, so no owner can peer-coach a new sub yet."
     },
     {
       "gate": "legal_structure",
@@ -287,6 +302,10 @@
     {
       "owner": "mobile-eats/flywheel",
       "action": "Fill state/holding-company-pour-readiness.json with first paying-customer, owner-operator, and operating-control handoff receipts before marking Mobile Eats POUR clear."
+    },
+    {
+      "owner": "skillos/flywheel",
+      "action": "Fill state/holding-company-peer-coach.json with Tier 2+ owner, sustainable cash, operating-control, peer-coach agreement, and 5% equity grant receipts before marking any owner eligible to peer-coach."
     },
     {
       "owner": "skillos/flywheel",

@@ -25,6 +25,7 @@ The audit did not find the receipts that would let the system count a formed por
 | Owner-search phasing | `blocked_no_warm_network_proof` | Owner-search phasing ledger exists and validates; sub #1 remains blocked because no warm-network source proof exists. |
 | Shared substrate | `partial_proven` | mobile-eats + SkillOS prove substrate adoption; the remaining gap is tying the substrate-share receipt to a formed owner/company registry row. |
 | POUR launch readiness | `blocked_missing_customer_owner_handoff` | POUR readiness ledger exists and validates; Mobile Eats lacks first paying-customer, owner-operator, and operating-control handoff receipts. |
+| NURTURE peer-coach | `blocked_no_eligible_owner` | Peer-coach ledger exists and validates; no Tier 2+ owner with required cash/control/agreement/equity receipts exists. |
 | Legal structure | `blocked_scaffold_only` | Legal-structure ledger exists and validates; sub #2 owner signing remains blocked until binding artifact, attorney review, and CPA review refs are present. |
 | N+1 cheaper than N | `baseline_only` | Baseline launch economics ledger exists; no second comparable launch row proves compounding economics yet. |
 
@@ -47,6 +48,7 @@ The audit did not find the receipts that would let the system count a formed por
 - Legal-structure ledger: `state/holding-company-legal-structure.json`
 - Anti-pitch voice ledger: `state/holding-company-anti-pitch-voice.json`
 - POUR readiness ledger: `state/holding-company-pour-readiness.json`
+- Peer-coach ledger: `state/holding-company-peer-coach.json`
 
 ## Immediate Next Actions
 
@@ -60,6 +62,7 @@ The audit did not find the receipts that would let the system count a formed por
 8. Fill the sustainable-pace ledger with measured weekly hours and substrate coaching-time offset before claiming sustainable pace for any Year 2+ company period.
 9. Fill the legal-structure ledger with binding artifact refs plus attorney and CPA review receipts before signing a sub #2 owner.
 10. Fill the POUR readiness ledger with first paying-customer, owner-operator, and operating-control handoff receipts before marking Mobile Eats launch-clear.
+11. Fill the peer-coach ledger with Tier 2+ owner, sustainable cash, operating-control, peer-coach agreement, and 5% equity grant receipts before marking any owner eligible to peer-coach.
 
 ## Close Rule
 

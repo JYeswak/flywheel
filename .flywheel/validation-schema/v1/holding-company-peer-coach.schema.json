@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-peer-coach/v1/schema.json",
+  "title": "ZestStream Holding Company Peer-Coach v1",
+  "description": "Ledger for the NURTURE peer-coach gate: Tier 2+ graduated owners may peer-coach new subs for 5% equity.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "required_min_owner_tier",
+    "required_peer_coach_equity_percent",
+    "clear_count",
+    "peer_coaches",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_peer_coach.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "nurture_peer_coach"
+    },
+    "required_min_owner_tier": {
+      "const": 2
+    },
+    "required_peer_coach_equity_percent": {
+      "const": 5
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "peer_coaches": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/peer_coach"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "peer_coach": {
+      "type": "object",
+      "required": [
+        "coach_id",
+        "owner_company_slug",
+        "target_company_slug",
+        "status",
+        "owner_tier",
+        "sustainable_cash_position_ref",
+        "operating_control_ref",
+        "peer_coach_agreement_ref",
+        "equity_grant_percent",
+        "equity_grant_ref",
+        "evidence_refs"
+      ],
+      "properties": {
+        "coach_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "owner_company_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "target_company_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "not_eligible",
+            "blocked",
+            "eligible",
+            "active",
+            "deferred"
+          ]
+        },
+        "owner_tier": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "sustainable_cash_position_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "operating_control_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "peer_coach_agreement_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "equity_grant_percent": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "equity_grant_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
