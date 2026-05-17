@@ -98,6 +98,80 @@ else
   assert_jq "$TMP/missing-evidence.out.json" '.failures[] | select(.code == "evidence_ref_missing")' "missing evidence path rejected"
 fi
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid Mobile Eats ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.failures[] | select(.code == "schema_invalid")' "schema-invalid Mobile Eats ledger rejected"
+fi
+
+jq '.status = "proven" | .repo_present = false' "$TMP/proven.json" >"$TMP/proven-no-repo.json"
+if "$SCRIPT" --ledger "$TMP/proven-no-repo.json" --json >"$TMP/proven-no-repo.out.json" 2>/dev/null; then
+  fail "proven without Mobile Eats repo rejected"
+else
+  assert_jq "$TMP/proven-no-repo.out.json" '.failures[] | select(.code == "proven_without_repo")' "proven without Mobile Eats repo rejected"
+fi
+
+jq '.status = "proven" | .share_ready_packet_present = false' "$TMP/proven.json" >"$TMP/proven-no-share-ready.json"
+if "$SCRIPT" --ledger "$TMP/proven-no-share-ready.json" --json >"$TMP/proven-no-share-ready.out.json" 2>/dev/null; then
+  fail "proven without share-ready packet rejected"
+else
+  assert_jq "$TMP/proven-no-share-ready.out.json" '.failures[] | select(.code == "proven_without_share_ready_packet")' "proven without share-ready packet rejected"
+fi
+
+jq '.status = "proven" | .substrate_share_receipt_present = false' "$TMP/proven.json" >"$TMP/proven-no-substrate.json"
+if "$SCRIPT" --ledger "$TMP/proven-no-substrate.json" --json >"$TMP/proven-no-substrate.out.json" 2>/dev/null; then
+  fail "proven without substrate receipt rejected"
+else
+  assert_jq "$TMP/proven-no-substrate.out.json" '.failures[] | select(.code == "proven_without_substrate_receipt")' "proven without substrate receipt rejected"
+fi
+
+jq '.status = "proven" | .first_portfolio_company_claim_clear = false' "$TMP/proven.json" >"$TMP/proven-no-first-company.json"
+if "$SCRIPT" --ledger "$TMP/proven-no-first-company.json" --json >"$TMP/proven-no-first-company.out.json" 2>/dev/null; then
+  fail "proven without first portfolio company clear rejected"
+else
+  assert_jq "$TMP/proven-no-first-company.out.json" '.failures[] | select(.code == "proven_without_first_portfolio_company_clear")' "proven without first portfolio company clear rejected"
+fi
+
+printf '{"company_slug":"not-mobile-eats","counts":{"total_packages":27}}\n' >"$TMP/wrong-substrate.json"
+jq --arg ref "$TMP/wrong-substrate.json" '.substrate_share_receipt_ref = $ref' "$LEDGER" >"$TMP/substrate-wrong-slug.json"
+if "$SCRIPT" --ledger "$TMP/substrate-wrong-slug.json" --json >"$TMP/substrate-wrong-slug.out.json" 2>/dev/null; then
+  fail "substrate receipt company slug mismatch rejected"
+else
+  assert_jq "$TMP/substrate-wrong-slug.out.json" '.failures[] | select(.code == "substrate_company_slug_mismatch")' "substrate receipt company slug mismatch rejected"
+fi
+
+printf '{"companies":[]}\n' >"$TMP/registry-missing.json"
+jq --arg ref "$TMP/registry-missing.json" '.portfolio_registry_ref = $ref' "$LEDGER" >"$TMP/registry-company-missing.json"
+if "$SCRIPT" --ledger "$TMP/registry-company-missing.json" --json >"$TMP/registry-company-missing.out.json" 2>/dev/null; then
+  fail "registry missing Mobile Eats company rejected"
+else
+  assert_jq "$TMP/registry-company-missing.out.json" '.failures[] | select(.code == "registry_company_missing")' "registry missing Mobile Eats company rejected"
+fi
+
+printf '{"companies":[{"slug":"mobile-eats","counted_as_portfolio_company":true,"gate_evidence":{}}]}\n' >"$TMP/registry-counted.json"
+jq --arg ref "$TMP/registry-counted.json" '.portfolio_registry_ref = $ref' "$LEDGER" >"$TMP/registry-counted-mismatch.json"
+if "$SCRIPT" --ledger "$TMP/registry-counted-mismatch.json" --json >"$TMP/registry-counted-mismatch.out.json" 2>/dev/null; then
+  fail "registry counted status mismatch rejected"
+else
+  assert_jq "$TMP/registry-counted-mismatch.out.json" '.failures[] | select(.code == "registry_counted_status_mismatch")' "registry counted status mismatch rejected"
+fi
+
+printf '{"companies":[{"slug":"mobile-eats","counted_as_portfolio_company":true,"gate_evidence":{"signed_owner_operator_receipt":"urn:other-owner","equity_receipt":"urn:other-equity","first_paying_customer_receipt":"urn:other-customer"}}]}\n' >"$TMP/registry-formation.json"
+jq --arg ref "$TMP/registry-formation.json" '.portfolio_registry_ref = $ref' "$TMP/proven.json" >"$TMP/registry-formation-mismatch.json"
+if "$SCRIPT" --ledger "$TMP/registry-formation-mismatch.json" --json >"$TMP/registry-formation-mismatch.out.json" 2>/dev/null; then
+  fail "registry formation receipt mismatch rejected"
+else
+  assert_jq "$TMP/registry-formation-mismatch.out.json" '.failures[] | select(.code == "registry_formation_receipt_mismatch")' "registry formation receipt mismatch rejected"
+fi
+
+jq '.notes += ["fixture sk-TestSecret123 should be rejected"]' "$LEDGER" >"$TMP/secret-shape.json"
+if "$SCRIPT" --ledger "$TMP/secret-shape.json" --json >"$TMP/secret-shape.out.json" 2>/dev/null; then
+  fail "secret-shaped Mobile Eats value rejected"
+else
+  assert_jq "$TMP/secret-shape.out.json" '.failures[] | select(.code == "secret_or_raw_value_shape_detected")' "secret-shaped Mobile Eats value rejected"
+fi
+
 if [[ "$fail_count" -ne 0 ]]; then
   printf 'RESULT pass=%s fail=%s\n' "$pass_count" "$fail_count" >&2
   exit 1
