@@ -588,6 +588,18 @@ def brand_voice_skill_gate_status(receipt: dict[str, Any]) -> str:
     return "blocked"
 
 
+def recent_brand_voice_claim_status(receipt: dict[str, Any], anti_pitch_status: str | None) -> str:
+    if brand_voice_skill_gate_status(receipt) == "clear":
+        return "proven"
+    grounding_present = any(
+        isinstance(skill, dict) and skill.get("grounding_rules_present") is True
+        for skill in receipt.get("skills", [])
+    )
+    if grounding_present and anti_pitch_status == "clear":
+        return "partial"
+    return "blocked"
+
+
 def founder_post_voice_gate_status(receipt: dict[str, Any]) -> str:
     claimed_clear_count = receipt.get("clear_count")
     if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
@@ -1192,6 +1204,7 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
     public_story_path = path_for_ref(PUBLIC_STORY_REF)
     brand_voice_skill_path = path_for_ref(BRAND_VOICE_SKILL_REF)
     founder_post_voice_path = path_for_ref(FOUNDER_POST_VOICE_REF)
+    brand_voice_receipt = None
     if anti_pitch_voice_path is not None and anti_pitch_voice_path.exists():
         public_receipt_statuses["anti_pitch"] = anti_pitch_voice_gate_status(load_json(anti_pitch_voice_path))
     else:
@@ -1201,7 +1214,8 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
     else:
         failures.append({"code": "public_story_ref_missing", "ref": PUBLIC_STORY_REF})
     if brand_voice_skill_path is not None and brand_voice_skill_path.exists():
-        public_receipt_statuses["brand_voice"] = brand_voice_skill_gate_status(load_json(brand_voice_skill_path))
+        brand_voice_receipt = load_json(brand_voice_skill_path)
+        public_receipt_statuses["brand_voice"] = brand_voice_skill_gate_status(brand_voice_receipt)
     else:
         failures.append({"code": "brand_voice_skill_ref_missing", "ref": BRAND_VOICE_SKILL_REF})
     if founder_post_voice_path is not None and founder_post_voice_path.exists():
@@ -1318,14 +1332,31 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 failures.append({"code": code, "requirement_id": "anti_pitch_voice_gate"})
 
     brand_voice_requirement = requirements_by_id.get("recent_brand_voice_claim")
-    if brand_voice_requirement is not None:
+    if brand_voice_requirement is not None and brand_voice_receipt is not None:
+        recent_brand_voice_status = recent_brand_voice_claim_status(
+            brand_voice_receipt,
+            public_receipt_statuses["anti_pitch"],
+        )
         evidence_refs = brand_voice_requirement.get("evidence_refs", [])
-        if BRAND_VOICE_SKILL_REF not in evidence_refs:
+        for required_ref, code in (
+            (BRAND_VOICE_SKILL_REF, "brand_voice_requirement_missing_brand_voice_skill_ref"),
+            (ANTI_PITCH_VOICE_REF, "brand_voice_requirement_missing_anti_pitch_voice_ref"),
+        ):
+            if required_ref not in evidence_refs:
+                failures.append(
+                    {
+                        "code": code,
+                        "requirement_id": "recent_brand_voice_claim",
+                        "required_ref": required_ref,
+                    }
+                )
+        if brand_voice_requirement.get("coverage_status") != recent_brand_voice_status:
             failures.append(
                 {
-                    "code": "brand_voice_requirement_missing_brand_voice_skill_ref",
+                    "code": "requirement_status_mismatch_with_recent_brand_voice_receipts",
                     "requirement_id": "recent_brand_voice_claim",
-                    "required_ref": BRAND_VOICE_SKILL_REF,
+                    "claimed": brand_voice_requirement.get("coverage_status"),
+                    "evidence_status": recent_brand_voice_status,
                 }
             )
         if public_receipt_statuses["brand_voice"] == "blocked" and brand_voice_requirement.get("coverage_status") == "proven":

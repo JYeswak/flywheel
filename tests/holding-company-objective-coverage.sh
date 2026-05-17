@@ -231,7 +231,26 @@ jq '
 if "$SCRIPT" --ledger "$TMP/brand-voice-overclaim.json" --json >"$TMP/brand-voice-overclaim.out.json" 2>/dev/null; then
   fail "blocked brand-voice receipt rejects brand voice proven claim"
 else
+  assert_jq "$TMP/brand-voice-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_recent_brand_voice_receipts" and .requirement_id == "recent_brand_voice_claim" and .evidence_status == "partial")' "brand voice overclaim rejected by combined receipts"
   assert_jq "$TMP/brand-voice-overclaim.out.json" '.failures[] | select(.code == "proven_requirement_has_blocked_brand_voice_skill_receipt" and .requirement_id == "recent_brand_voice_claim")' "blocked brand-voice receipt rejects brand voice proven claim"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "recent_brand_voice_claim") | .coverage_status) = "blocked"
+  | .summary_counts.blocked += 1
+  | .summary_counts.partial -= 1
+' "$LEDGER" >"$TMP/brand-voice-underclaim.json"
+if "$SCRIPT" --ledger "$TMP/brand-voice-underclaim.json" --json >"$TMP/brand-voice-underclaim.out.json" 2>/dev/null; then
+  fail "brand voice partial status underclaim rejected"
+else
+  assert_jq "$TMP/brand-voice-underclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_recent_brand_voice_receipts" and .requirement_id == "recent_brand_voice_claim" and .evidence_status == "partial")' "brand voice partial status underclaim rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "recent_brand_voice_claim") | .evidence_refs) -= ["state/holding-company-anti-pitch-voice.json"]' "$LEDGER" >"$TMP/missing-brand-voice-anti-pitch-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-brand-voice-anti-pitch-ref.json" --json >"$TMP/missing-brand-voice-anti-pitch-ref.out.json" 2>/dev/null; then
+  fail "brand voice requirement missing anti-pitch ref rejected"
+else
+  assert_jq "$TMP/missing-brand-voice-anti-pitch-ref.out.json" '.failures[] | select(.code == "brand_voice_requirement_missing_anti_pitch_voice_ref" and .requirement_id == "recent_brand_voice_claim")' "brand voice requirement missing anti-pitch ref rejected"
 fi
 
 jq '(.requirements[] | select(.requirement_id == "no_custom_apps_positioning") | .evidence_refs) -= ["state/holding-company-anti-pitch-voice.json"]' "$LEDGER" >"$TMP/missing-no-custom-anti-pitch-ref.json"
