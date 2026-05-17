@@ -1,6 +1,6 @@
 {
   "schema_version": "zeststream.holding_company_recent_progress_claim_honesty.v1",
-  "generated_at": "2026-05-17T10:17:00Z",
+  "generated_at": "2026-05-17T15:50:21Z",
   "bead_id": "flywheel-masux",
   "source_goal": "ZestStream Holding Company Goal",
   "claims": [
@@ -24,7 +24,7 @@
       "claim_id": "progress_velocity",
       "ledger_ref": "state/holding-company-progress-velocity.json",
       "validator": ".flywheel/scripts/holding-company-progress-velocity-validate.py",
-      "claim_text": "Sampled 3,755 commits in the fixed 7-day window across 9 local repos; the public velocity target remains blocked until the exact surface set and count clear.",
+      "claim_text": "Sampled 3,906 commits in the current 7-day window across the same 9 local repos; the public velocity target remains blocked until the exact surface set and minimum count clear.",
       "current_gate_status": "blocked",
       "claim_honesty_status": "public_target_blocked_in_text"
     },

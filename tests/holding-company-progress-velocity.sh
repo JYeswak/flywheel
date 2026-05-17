@@ -34,13 +34,13 @@ jq empty "$SCHEMA" && pass "schema json valid" || fail "schema json valid"
 jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
-assert_jq "$TMP/current.json" '.status == "pass" and .progress_velocity_gate_status == "blocked" and .computed_total_commit_count == 3755 and .surface_count == 9' "current ledger validates and blocks 4000 claim"
+assert_jq "$TMP/current.json" '.status == "pass" and .progress_velocity_gate_status == "blocked" and .computed_total_commit_count == .measured_total_commit_count and .computed_total_commit_count < .target_min_commits and .surface_count == 9' "current ledger validates and blocks 4000 claim"
 
 jq '
   .status = "proven"
   | .exact_surface_set_established = true
   | .measured_total_commit_count = 4000
-  | .surface_counts[7].commit_count = 245
+  | .surface_counts[7].commit_count = 94
 ' "$LEDGER" >"$TMP/proven.json"
 "$SCRIPT" --ledger "$TMP/proven.json" --json >"$TMP/proven.out.json"
 assert_jq "$TMP/proven.out.json" '.status == "pass" and .progress_velocity_gate_status == "proven" and .computed_total_commit_count == 4000' "exact nine-surface 4000 count proves gate"
@@ -63,7 +63,7 @@ else
   assert_jq "$TMP/no-exact.out.json" '.failures[] | select(.code == "proven_without_exact_surface_set")' "proven without exact surface set rejected"
 fi
 
-jq '.status = "proven" | .exact_surface_set_established = true | .measured_total_commit_count = 3999 | .surface_counts[7].commit_count = 244' "$LEDGER" >"$TMP/below-target.json"
+jq '.status = "proven" | .exact_surface_set_established = true | .measured_total_commit_count = 3999 | .surface_counts[7].commit_count = 93' "$LEDGER" >"$TMP/below-target.json"
 if "$SCRIPT" --ledger "$TMP/below-target.json" --json >"$TMP/below-target.out.json" 2>/dev/null; then
   fail "proven below 4000 rejected"
 else

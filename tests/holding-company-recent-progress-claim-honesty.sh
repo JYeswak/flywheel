@@ -66,7 +66,7 @@ done
 
 assert_jq "$TMP/anthropic_adoption.json" '.anthropic_adoption_gate_status == "proven"' "anthropic adoption is proven"
 assert_jq "$TMP/mobile_eats_shipping.json" '.mobile_eats_shipping_gate_status == "partial" and .counted_as_portfolio_company == false and .first_portfolio_company_claim_clear == false' "mobile eats first-company claim remains blocked"
-assert_jq "$TMP/progress_velocity.json" '.progress_velocity_gate_status == "blocked" and .computed_total_commit_count == 3755 and .target_min_commits == 4000' "progress velocity public target remains blocked"
+assert_jq "$TMP/progress_velocity.json" '.progress_velocity_gate_status == "blocked" and .computed_total_commit_count == .measured_total_commit_count and .computed_total_commit_count < .target_min_commits' "progress velocity public target remains blocked"
 assert_jq "$TMP/skillos_forever_os_lock.json" '.forever_os_lock_gate_status == "partial" and .structure_locked_20260517 == false' "SkillOS structure lock receipt remains pending"
 
 if jq -e '.claims[] | select(.claim_id == "progress_velocity") | .claim_text | test("4,?000\\+")' "$RECEIPT" >/dev/null; then
