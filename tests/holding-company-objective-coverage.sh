@@ -73,6 +73,14 @@ else
   assert_jq "$TMP/missing-registry-coverage.out.json" '.failures[] | select(.code == "standing_goal_aggregate_missing_registry_coverage")' "aggregate command missing registry coverage rejected"
 fi
 
+jq '.validation_commands[0].command = "bash tests/no-such-holding-company-standing-goal.sh"' "$LEDGER" >"$TMP/missing-command-script.json"
+if "$SCRIPT" --ledger "$TMP/missing-command-script.json" --check-paths --json >"$TMP/missing-command-script.out.json" 2>/dev/null; then
+  fail "missing validation command script rejected"
+else
+  assert_jq "$TMP/missing-command-script.out.json" '.failures[] | select(.code == "wrong_standing_goal_aggregate_command")' "missing validation command still trips semantic command guard"
+  assert_jq "$TMP/missing-command-script.out.json" '.failures[] | select(.code == "validation_command_script_missing")' "missing validation command script rejected"
+fi
+
 jq '.coverage_status = "complete"' "$LEDGER" >"$TMP/complete.json"
 if "$SCRIPT" --ledger "$TMP/complete.json" --json >"$TMP/complete.out.json" 2>/dev/null; then
   fail "standing goal completion claim rejected"

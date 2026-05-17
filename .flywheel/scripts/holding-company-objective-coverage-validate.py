@@ -73,6 +73,13 @@ def ref_exists(ref: str) -> bool:
     return True if path is None else path.exists()
 
 
+def script_path_for_command(command: str) -> Path | None:
+    parts = command.split()
+    if len(parts) != 2 or parts[0] not in {"bash", "sh"}:
+        return None
+    return path_for_ref(parts[1])
+
+
 def has_secretish_string(value: Any) -> bool:
     if isinstance(value, str):
         return bool(SECRETISH_RE.search(value))
@@ -151,6 +158,20 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
             ref = ledger.get(field)
             if isinstance(ref, str) and not ref_exists(ref):
                 failures.append({"code": f"{field}_missing", "ref": ref})
+        for command_row in validation_commands:
+            command_id = command_row.get("command_id")
+            command = command_row.get("command")
+            if not isinstance(command, str):
+                continue
+            script_path = script_path_for_command(command)
+            if script_path is None:
+                continue
+            if not script_path.exists():
+                failures.append({"code": "validation_command_script_missing", "command_id": command_id, "command": command})
+            elif not script_path.is_file():
+                failures.append({"code": "validation_command_script_not_file", "command_id": command_id, "command": command})
+            elif not script_path.stat().st_mode & 0o111:
+                failures.append({"code": "validation_command_script_not_executable", "command_id": command_id, "command": command})
         for row in requirements:
             requirement_id = row.get("requirement_id")
             for field in ("primary_evidence_ref",):
