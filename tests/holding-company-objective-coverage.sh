@@ -331,7 +331,33 @@ jq '
 if "$SCRIPT" --ledger "$TMP/public-story-overclaim.json" --json >"$TMP/public-story-overclaim.out.json" 2>/dev/null; then
   fail "blocked founder-post receipt rejects public story proven claim"
 else
+  assert_jq "$TMP/public-story-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_public_story_receipts" and .requirement_id == "public_story_show_receipts" and .evidence_status == "partial")' "public-story overclaim rejected by combined receipts"
   assert_jq "$TMP/public-story-overclaim.out.json" '.failures[] | select(.code == "proven_requirement_has_blocked_founder_post_voice_receipt" and .requirement_id == "public_story_show_receipts")' "blocked founder-post receipt rejects public story proven claim"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "public_story_show_receipts") | .coverage_status) = "blocked"
+  | .summary_counts.blocked += 1
+  | .summary_counts.partial -= 1
+' "$LEDGER" >"$TMP/public-story-underclaim.json"
+if "$SCRIPT" --ledger "$TMP/public-story-underclaim.json" --json >"$TMP/public-story-underclaim.out.json" 2>/dev/null; then
+  fail "public-story partial status underclaim rejected"
+else
+  assert_jq "$TMP/public-story-underclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_public_story_receipts" and .requirement_id == "public_story_show_receipts" and .evidence_status == "partial")' "public-story partial status underclaim rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "public_story_show_receipts") | .evidence_refs) -= ["state/holding-company-public-story-route-20260517T0948Z.json"]' "$LEDGER" >"$TMP/missing-public-story-route-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-public-story-route-ref.json" --json >"$TMP/missing-public-story-route-ref.out.json" 2>/dev/null; then
+  fail "public-story requirement missing route ref rejected"
+else
+  assert_jq "$TMP/missing-public-story-route-ref.out.json" '.failures[] | select(.code == "public_story_requirement_missing_public_story_route_ref" and .requirement_id == "public_story_show_receipts")' "public-story requirement missing route ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "public_story_show_receipts") | .evidence_refs) -= ["state/holding-company-public-surface-audit-supersession-20260517T1004Z.json"]' "$LEDGER" >"$TMP/missing-public-story-public-surface-supersession-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-public-story-public-surface-supersession-ref.json" --json >"$TMP/missing-public-story-public-surface-supersession-ref.out.json" 2>/dev/null; then
+  fail "public-story requirement missing supersession ref rejected"
+else
+  assert_jq "$TMP/missing-public-story-public-surface-supersession-ref.out.json" '.failures[] | select(.code == "public_story_requirement_missing_public_surface_supersession_ref" and .requirement_id == "public_story_show_receipts")' "public-story requirement missing supersession ref rejected"
 fi
 
 jq '(.requirements[] | select(.requirement_id == "public_story_show_receipts") | .evidence_refs) -= ["state/holding-company-founder-post-voice.json"]' "$LEDGER" >"$TMP/missing-public-story-founder-ref.json"

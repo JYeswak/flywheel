@@ -544,6 +544,41 @@ def no_custom_apps_positioning_status(
     return "proven"
 
 
+def public_story_requirement_status(
+    statuses: dict[str, str | None],
+    route_receipt: dict[str, Any] | None,
+    supersession_receipt: dict[str, Any] | None,
+) -> str:
+    if statuses["public_story"] != "clear":
+        return "blocked"
+    if route_receipt is None or supersession_receipt is None:
+        return "blocked"
+
+    public_surface = route_receipt.get("public_surface", {})
+    route_clear = (
+        isinstance(public_surface, dict)
+        and route_receipt.get("schema_version") == "zeststream.holding_company_public_story_route.v1"
+        and route_receipt.get("status") == "public_story_route_committed"
+        and public_surface.get("route") == "/portfolio"
+        and public_surface.get("posture") == "holding_company_not_services_shop"
+        and bool(route_receipt.get("proof_refs"))
+    )
+    current_status = supersession_receipt.get("current_status", {})
+    supersession_clear = (
+        isinstance(current_status, dict)
+        and supersession_receipt.get("schema_version")
+        == "zeststream.holding_company_public_surface_audit_supersession.v1"
+        and current_status.get("public_story_surface_status") == "clear"
+        and current_status.get("objective_coverage_status") == "not_complete"
+        and PUBLIC_STORY_ROUTE_REF in supersession_receipt.get("current_receipts", [])
+    )
+    if not route_clear or not supersession_clear:
+        return "blocked"
+    if statuses["founder_post"] == "clear":
+        return "proven"
+    return "partial"
+
+
 def mobile_eats_shipping_gate_status(receipt: dict[str, Any]) -> str:
     product_substrate_present = (
         receipt.get("repo_present") is True
@@ -1529,13 +1564,32 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
 
     public_story_requirement = requirements_by_id.get("public_story_show_receipts")
     if public_story_requirement is not None:
+        public_story_status = public_story_requirement_status(
+            public_receipt_statuses,
+            public_story_route_receipt,
+            public_surface_supersession_receipt,
+        )
         evidence_refs = public_story_requirement.get("evidence_refs", [])
         for required_ref, code in (
             (PUBLIC_STORY_REF, "public_story_requirement_missing_public_story_ref"),
+            (PUBLIC_STORY_ROUTE_REF, "public_story_requirement_missing_public_story_route_ref"),
+            (
+                PUBLIC_SURFACE_AUDIT_SUPERSESSION_REF,
+                "public_story_requirement_missing_public_surface_supersession_ref",
+            ),
             (FOUNDER_POST_VOICE_REF, "public_story_requirement_missing_founder_post_voice_ref"),
         ):
             if required_ref not in evidence_refs:
                 failures.append({"code": code, "requirement_id": "public_story_show_receipts", "required_ref": required_ref})
+        if public_story_requirement.get("coverage_status") != public_story_status:
+            failures.append(
+                {
+                    "code": "requirement_status_mismatch_with_public_story_receipts",
+                    "requirement_id": "public_story_show_receipts",
+                    "claimed": public_story_requirement.get("coverage_status"),
+                    "evidence_status": public_story_status,
+                }
+            )
         if public_receipt_statuses["public_story"] == "blocked" and public_story_requirement.get("coverage_status") != "blocked":
             failures.append(
                 {
