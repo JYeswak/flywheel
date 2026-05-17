@@ -150,6 +150,29 @@ else
   assert_jq "$TMP/missing-validator-path.out.json" '.failures[] | select(.code == "validator_ref_missing" and .claim_id == "anthropic_adoption")' "missing claim validator path rejected"
 fi
 
+cat >"$TMP/failing-validator.py" <<'PY'
+import sys
+print('{"status":"fail"}')
+print("validator failed", file=sys.stderr)
+sys.exit(3)
+PY
+jq --arg validator "$TMP/failing-validator.py" '.claims[0].validator = $validator' "$RECEIPT" >"$TMP/failing-validator.json"
+if "$SCRIPT" --receipt "$TMP/failing-validator.json" --json >"$TMP/failing-validator.out.json" 2>/dev/null; then
+  fail "claim validator failure rejected"
+else
+  assert_jq "$TMP/failing-validator.out.json" '.failures[] | select(.code == "claim_validator_failed" and .claim_id == "anthropic_adoption")' "claim validator failure rejected"
+fi
+
+cat >"$TMP/invalid-output-validator.py" <<'PY'
+print("not json")
+PY
+jq --arg validator "$TMP/invalid-output-validator.py" '.claims[0].validator = $validator' "$RECEIPT" >"$TMP/invalid-validator-output.json"
+if "$SCRIPT" --receipt "$TMP/invalid-validator-output.json" --json >"$TMP/invalid-validator-output.out.json" 2>/dev/null; then
+  fail "claim validator invalid output rejected"
+else
+  assert_jq "$TMP/invalid-validator-output.out.json" '.failures[] | select(.code == "claim_validator_output_invalid" and .claim_id == "anthropic_adoption")' "claim validator invalid output rejected"
+fi
+
 jq '.claims[0].claim_text = ("sk-" + "NOTAREALSECRET")' "$RECEIPT" >"$TMP/secret-shaped-value.json"
 if "$SCRIPT" --receipt "$TMP/secret-shaped-value.json" --json >"$TMP/secret-shaped-value.out.json" 2>/dev/null; then
   fail "secret-shaped claim receipt value rejected"
