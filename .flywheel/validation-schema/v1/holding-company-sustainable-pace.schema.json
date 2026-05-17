@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-sustainable-pace/v1/schema.json",
+  "title": "ZestStream Holding Company Sustainable Pace v1",
+  "description": "Ledger for Joshua's sustainable-pace gate: Year 2+ weekly hours capped at 60 and substrate must offset at least 50% of coaching load.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "max_weekly_hours_year2",
+    "required_substrate_time_offset_ratio",
+    "pace_clear_count",
+    "periods",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_sustainable_pace.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "sustainable_pace"
+    },
+    "max_weekly_hours_year2": {
+      "const": 60
+    },
+    "required_substrate_time_offset_ratio": {
+      "const": 0.5
+    },
+    "pace_clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "periods": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/period"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "period": {
+      "type": "object",
+      "required": [
+        "period_id",
+        "company_slug",
+        "sequence",
+        "lifecycle_year",
+        "measurement_status",
+        "weekly_hours_total",
+        "coaching_hours_manual",
+        "coaching_hours_offset_by_substrate",
+        "substrate_offset_ratio",
+        "evidence_refs"
+      ],
+      "properties": {
+        "period_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "company_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "lifecycle_year": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "measurement_status": {
+          "type": "string",
+          "enum": [
+            "not_measured",
+            "baseline",
+            "measured_clear",
+            "measured_fail",
+            "deferred"
+          ]
+        },
+        "weekly_hours_total": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "coaching_hours_manual": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "coaching_hours_offset_by_substrate": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "substrate_offset_ratio": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

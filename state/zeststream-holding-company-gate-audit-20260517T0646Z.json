@@ -97,6 +97,11 @@
       "kind": "owner_search_phasing_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-owner-search-phasing.json",
       "result": "owner-search phasing ledger exists and validates; current phasing_clear_count is 0 because sub #1 has no warm-network owner-search proof"
+    },
+    {
+      "kind": "sustainable_pace_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-sustainable-pace.json",
+      "result": "sustainable-pace ledger exists and validates; current pace_clear_count is 0 because weekly hours and substrate coaching-time offset are not measured"
     }
   ],
   "canonical_gates": [
@@ -140,11 +145,12 @@
     },
     {
       "gate": "sustainable_pace",
-      "status": "planned_not_measured",
+      "status": "blocked_no_measurement",
       "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-sustainable-pace.json",
         "/Users/josh/Developer/skillos/state/holding-co-quant/CHANGES.md"
       ],
-      "finding": "The 60h/week Year 2 ceiling and 50%+ substrate time-offset invariant are locked, but no time-offset or weekly-hours measurement receipt was located."
+      "finding": "The 60h/week Year 2 ceiling and 50%+ substrate time-offset invariant are now machine-checkable. Current ledger validates structurally but blocks sustainable-pace claims because weekly hours and substrate coaching-time offset are not measured."
     },
     {
       "gate": "owner_search_phasing",
@@ -242,6 +248,10 @@
     {
       "owner": "skillos/flywheel",
       "action": "Fill state/holding-company-owner-search-phasing.json with warm-network source proof before allowing or signing an owner for sub #1 or sub #2."
+    },
+    {
+      "owner": "skillos/flywheel",
+      "action": "Fill state/holding-company-sustainable-pace.json with measured weekly hours and substrate coaching-time offset before claiming sustainable pace for any Year 2+ company period."
     },
     {
       "owner": "skillos/flywheel",
