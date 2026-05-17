@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+SCHEMA="$ROOT/.flywheel/validation-schema/v1/holding-company-recent-progress-claim-honesty.schema.json"
 RECEIPT="$ROOT/state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/holding-company-claim-honesty.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
@@ -33,6 +34,22 @@ assert_eq() {
 }
 
 jq empty "$RECEIPT" && pass "receipt json valid" || fail "receipt json valid"
+jq empty "$SCHEMA" && pass "schema json valid" || fail "schema json valid"
+python3 - "$SCHEMA" "$RECEIPT" <<'PY' && pass "receipt validates against schema" || fail "receipt validates against schema"
+import json
+import sys
+
+from jsonschema import Draft202012Validator, FormatChecker
+
+schema_path, receipt_path = sys.argv[1], sys.argv[2]
+with open(schema_path, encoding="utf-8") as handle:
+    schema = json.load(handle)
+with open(receipt_path, encoding="utf-8") as handle:
+    receipt = json.load(handle)
+
+Draft202012Validator.check_schema(schema)
+Draft202012Validator(schema, format_checker=FormatChecker()).validate(receipt)
+PY
 assert_jq "$RECEIPT" '.schema_version == "zeststream.holding_company_recent_progress_claim_honesty.v1" and (.claims | length == 4)' "receipt declares four active recent-progress claims"
 
 for id in anthropic_adoption mobile_eats_shipping progress_velocity skillos_forever_os_lock; do
