@@ -24,6 +24,7 @@ The audit did not find the receipts that would let the system count a formed por
 | Sustainable pace | `blocked_no_measurement` | Sustainable-pace ledger exists and validates; weekly hours and substrate coaching-time offset are not measured yet. |
 | Owner-search phasing | `blocked_no_warm_network_proof` | Owner-search phasing ledger exists and validates; sub #1 remains blocked because no warm-network source proof exists. |
 | Shared substrate | `partial_proven` | mobile-eats + SkillOS prove substrate adoption; the remaining gap is tying the substrate-share receipt to a formed owner/company registry row. |
+| POUR launch readiness | `blocked_missing_customer_owner_handoff` | POUR readiness ledger exists and validates; Mobile Eats lacks first paying-customer, owner-operator, and operating-control handoff receipts. |
 | Legal structure | `blocked_scaffold_only` | Legal-structure ledger exists and validates; sub #2 owner signing remains blocked until binding artifact, attorney review, and CPA review refs are present. |
 | N+1 cheaper than N | `baseline_only` | Baseline launch economics ledger exists; no second comparable launch row proves compounding economics yet. |
 
@@ -45,6 +46,7 @@ The audit did not find the receipts that would let the system count a formed por
 - Sustainable-pace ledger: `state/holding-company-sustainable-pace.json`
 - Legal-structure ledger: `state/holding-company-legal-structure.json`
 - Anti-pitch voice ledger: `state/holding-company-anti-pitch-voice.json`
+- POUR readiness ledger: `state/holding-company-pour-readiness.json`
 
 ## Immediate Next Actions
 
@@ -52,11 +54,12 @@ The audit did not find the receipts that would let the system count a formed por
 2. Produce a redacted runway receipt or mark sub #1 launch blocked.
 3. Use the anti-pitch voice ledger to rewrite or retire builder-framed surfaces, then update `zeststream-brand-voice` through the approved JSM workflow.
 4. Grade `zeststream-v2-fresh` against the mission-alignment goal and route stale automation/custom-app pages to update plans.
-5. For mobile-eats, either attach owner/customer/company receipts or explicitly classify it as product/substrate proof rather than portfolio company #1.
+5. For mobile-eats, either attach owner/customer/company/control-handoff receipts or explicitly classify it as product/substrate proof rather than portfolio company #1.
 6. Fill the PEEL interview ledger with five qualified prospect interviews before clearing or committing formation cash for any candidate.
 7. Fill the owner-search phasing ledger with warm-network source proof before allowing or signing an owner for sub #1 or sub #2.
 8. Fill the sustainable-pace ledger with measured weekly hours and substrate coaching-time offset before claiming sustainable pace for any Year 2+ company period.
 9. Fill the legal-structure ledger with binding artifact refs plus attorney and CPA review receipts before signing a sub #2 owner.
+10. Fill the POUR readiness ledger with first paying-customer, owner-operator, and operating-control handoff receipts before marking Mobile Eats launch-clear.
 
 ## Close Rule
 

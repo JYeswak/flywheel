@@ -112,6 +112,11 @@
       "kind": "anti_pitch_voice_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-anti-pitch-voice.json",
       "result": "anti-pitch voice ledger exists and validates; current clear_count is 0 because zeststream-v2-fresh still has workflow-builder and automation-positioning hits"
+    },
+    {
+      "kind": "pour_readiness_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json",
+      "result": "POUR readiness ledger exists and validates; current clear_count is 0 because first paying-customer, owner-operator, and operating-control handoff receipts are absent"
     }
   ],
   "canonical_gates": [
@@ -185,6 +190,16 @@
       "finding": "The substrate is real: mobile-eats has tenant routing, a baseline substrate-share receipt with 27 total @zeststream/* dependencies, and SkillOS records real pack adoption across three consumer repos. The missing part is a formed owner/company registry row."
     },
     {
+      "gate": "pour_launch_readiness",
+      "status": "blocked_missing_customer_owner_handoff",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json",
+        "/Users/josh/Developer/flywheel/state/zeststream-portfolio-company-registry.json",
+        "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md"
+      ],
+      "finding": "POUR readiness is now machine-checkable. Mobile Eats has brand, repo, public-surface, and substrate proof, but launch clear remains blocked because first paying-customer, owner-operator, and operating-control handoff receipts are absent."
+    },
+    {
       "gate": "legal_structure",
       "status": "blocked_scaffold_only",
       "evidence": [
@@ -251,7 +266,7 @@
     },
     {
       "owner": "mobile-eats",
-      "action": "If mobile-eats is intended as portfolio company #1, add owner-operator, equity, and first paying-customer receipts; otherwise keep it classified as product/substrate proof, not a counted company."
+      "action": "If mobile-eats is intended as portfolio company #1, add owner-operator, equity, first paying-customer, and operating-control handoff receipts; otherwise keep it classified as product/substrate proof, not a counted company."
     },
     {
       "owner": "skillos/flywheel",
@@ -268,6 +283,10 @@
     {
       "owner": "Joshua/legal-counsel/CPA",
       "action": "Fill state/holding-company-legal-structure.json with binding artifact refs plus attorney and CPA review receipts before signing a sub #2 owner."
+    },
+    {
+      "owner": "mobile-eats/flywheel",
+      "action": "Fill state/holding-company-pour-readiness.json with first paying-customer, owner-operator, and operating-control handoff receipts before marking Mobile Eats POUR clear."
     },
     {
       "owner": "skillos/flywheel",

@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-pour-readiness/v1/schema.json",
+  "title": "ZestStream Holding Company POUR Readiness v1",
+  "description": "Ledger for POUR readiness: own brand, public surface, first paying-customer transaction, and operating-control handoff.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "clear_count",
+    "launches",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_pour_readiness.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "pour_launch_readiness"
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "launches": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/launch"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "launch": {
+      "type": "object",
+      "required": [
+        "launch_id",
+        "company_slug",
+        "sequence",
+        "status",
+        "brand_name",
+        "brand_identity_ref",
+        "repo_ref",
+        "public_surface_ref",
+        "first_paying_customer_receipt",
+        "owner_operator_ref",
+        "operating_control_handoff_ref",
+        "evidence_refs"
+      ],
+      "properties": {
+        "launch_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "company_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "press_candidate",
+            "blocked",
+            "pour_clear",
+            "launched",
+            "deferred"
+          ]
+        },
+        "brand_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "brand_identity_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "repo_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "public_surface_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "first_paying_customer_receipt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "owner_operator_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "operating_control_handoff_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
