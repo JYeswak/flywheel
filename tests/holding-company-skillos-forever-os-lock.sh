@@ -93,6 +93,48 @@ else
   assert_jq "$TMP/missing-evidence.out.json" '.failures[] | select(.code == "evidence_ref_missing")' "missing evidence path rejected"
 fi
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid forever-os lock ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.failures[] | select(.code == "schema_invalid")' "schema-invalid forever-os lock ledger rejected"
+fi
+
+jq '.status = "proven" | .v3_goal_present = false' "$TMP/proven.json" >"$TMP/proven-no-v3-goal.json"
+if "$SCRIPT" --ledger "$TMP/proven-no-v3-goal.json" --json >"$TMP/proven-no-v3-goal.out.json" 2>/dev/null; then
+  fail "proven without v3 goal rejected"
+else
+  assert_jq "$TMP/proven-no-v3-goal.out.json" '.failures[] | select(.code == "proven_without_v3_goal")' "proven without v3 goal rejected"
+fi
+
+jq '.status = "proven" | .v3_scope_clarifier_present = false' "$TMP/proven.json" >"$TMP/proven-no-scope.json"
+if "$SCRIPT" --ledger "$TMP/proven-no-scope.json" --json >"$TMP/proven-no-scope.out.json" 2>/dev/null; then
+  fail "proven without v3 scope clarifier rejected"
+else
+  assert_jq "$TMP/proven-no-scope.out.json" '.failures[] | select(.code == "proven_without_scope_clarifier")' "proven without v3 scope clarifier rejected"
+fi
+
+jq '.ratification_receipts_present = false' "$LEDGER" >"$TMP/receipt-mismatch.json"
+if "$SCRIPT" --ledger "$TMP/receipt-mismatch.json" --json >"$TMP/receipt-mismatch.out.json" 2>/dev/null; then
+  fail "ratification receipts present mismatch rejected"
+else
+  assert_jq "$TMP/receipt-mismatch.out.json" '.failures[] | select(.code == "ratification_receipts_present_mismatch")' "ratification receipts present mismatch rejected"
+fi
+
+jq '.inspected_paths += ["/no/such/skillos-inspected-path"]' "$LEDGER" >"$TMP/missing-inspected-path.json"
+if "$SCRIPT" --ledger "$TMP/missing-inspected-path.json" --check-paths --json >"$TMP/missing-inspected-path.out.json" 2>/dev/null; then
+  fail "missing inspected path rejected"
+else
+  assert_jq "$TMP/missing-inspected-path.out.json" '.failures[] | select(.code == "inspected_path_missing")' "missing inspected path rejected"
+fi
+
+jq '.notes += ["fixture sk-TestSecret123 should be rejected"]' "$LEDGER" >"$TMP/secret-shape.json"
+if "$SCRIPT" --ledger "$TMP/secret-shape.json" --json >"$TMP/secret-shape.out.json" 2>/dev/null; then
+  fail "secret-shaped forever-os lock value rejected"
+else
+  assert_jq "$TMP/secret-shape.out.json" '.failures[] | select(.code == "secret_or_raw_value_shape_detected")' "secret-shaped forever-os lock value rejected"
+fi
+
 if [[ "$fail_count" -ne 0 ]]; then
   printf 'RESULT pass=%s fail=%s\n' "$pass_count" "$fail_count" >&2
   exit 1
