@@ -57,6 +57,7 @@ RUNWAY_RECEIPT_REF = "state/holding-company-runway-current.json"
 LEGAL_STRUCTURE_REF = "state/holding-company-legal-structure.json"
 SUSTAINABLE_PACE_REF = "state/holding-company-sustainable-pace.json"
 OWNER_SEARCH_PHASING_REF = "state/holding-company-owner-search-phasing.json"
+OWNER_ECONOMICS_REF = "state/holding-company-owner-economics.json"
 RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 RECENT_PROGRESS_REQUIREMENT_CLAIMS = {
     "recent_anthropic_adoption_claim": "anthropic_adoption",
@@ -81,6 +82,13 @@ LEGAL_REQUIRED_BEFORE_SUB_2 = {
 }
 OWNER_SEARCH_WARM_CHANNELS = {"warm_network", "referral", "client_talk", "community", "field_trip"}
 OWNER_SEARCH_PUBLIC_OR_COLD_CHANNELS = {"public_open_call", "inbound_public", "cold_outreach"}
+OWNER_ECONOMICS_REQUIRED_REFS = {
+    "signed_owner_operator_receipt",
+    "cap_table_ref",
+    "distribution_terms_ref",
+    "legal_review_ref",
+    "substrate_share_receipt",
+}
 
 
 def load_json(path: Path) -> Any:
@@ -121,6 +129,10 @@ def has_secretish_string(value: Any) -> bool:
 
 def has_zero_clear_count(value: dict[str, Any]) -> bool:
     return any(key.endswith("clear_count") and count == 0 for key, count in value.items())
+
+
+def has_ref(value: Any) -> bool:
+    return isinstance(value, str) and bool(value.strip())
 
 
 def runway_gate_status(receipt: dict[str, Any]) -> str:
@@ -208,6 +220,37 @@ def owner_search_phasing_gate_status(receipt: dict[str, Any]) -> str:
         )
         phasing_clear = (early_sequence and warm_proven) or (public_allowed and channel != "unknown")
         if phasing_clear and not early_public_violation:
+            return "clear"
+    return "blocked"
+
+
+def owner_economics_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    required_owner_equity = receipt.get("required_owner_equity_percent", 25)
+    distribution_min = receipt.get("owner_distribution_min_percent", 45)
+    distribution_max = receipt.get("owner_distribution_max_percent", 75)
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    for deal in receipt.get("deals", []):
+        if not isinstance(deal, dict) or deal.get("status") not in {"signed", "active"}:
+            continue
+        owner_equity = deal.get("owner_equity_percent")
+        holding_equity = deal.get("holding_company_equity_percent")
+        owner_equity_ok = is_number(owner_equity) and owner_equity == required_owner_equity
+        holding_equity_ok = is_number(holding_equity) and owner_equity_ok and holding_equity + owner_equity == 100
+        refs_ok = all(has_ref(deal.get(field)) for field in OWNER_ECONOMICS_REQUIRED_REFS)
+        distribution_values = [
+            tier.get("owner_distribution_percent")
+            for tier in deal.get("profit_distribution_tiers", [])
+            if isinstance(tier, dict) and is_number(tier.get("owner_distribution_percent"))
+        ]
+        distribution_bounds_ok = (
+            len(distribution_values) >= 2
+            and min(distribution_values) == distribution_min
+            and max(distribution_values) == distribution_max
+            and all(distribution_min <= value <= distribution_max for value in distribution_values)
+        )
+        if has_ref(deal.get("owner_operator_slug")) and owner_equity_ok and holding_equity_ok and refs_ok and distribution_bounds_ok:
             return "clear"
     return "blocked"
 
@@ -386,6 +429,32 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "owner_search_phasing_ref_missing", "ref": OWNER_SEARCH_PHASING_REF})
+
+    owner_economics_path = path_for_ref(OWNER_ECONOMICS_REF)
+    if owner_economics_path is not None and owner_economics_path.exists():
+        owner_economics_status = owner_economics_gate_status(load_json(owner_economics_path))
+        owner_economics_requirement = requirements_by_id.get("owner_equity_distribution_terms")
+        if owner_economics_requirement is not None:
+            evidence_refs = owner_economics_requirement.get("evidence_refs", [])
+            if OWNER_ECONOMICS_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "owner_economics_requirement_missing_owner_economics_ref",
+                        "requirement_id": "owner_equity_distribution_terms",
+                        "required_ref": OWNER_ECONOMICS_REF,
+                    }
+                )
+            if owner_economics_status == "blocked" and owner_economics_requirement.get("coverage_status") != "blocked":
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_owner_economics_receipt",
+                        "requirement_id": "owner_equity_distribution_terms",
+                        "claimed": owner_economics_requirement.get("coverage_status"),
+                        "evidence_status": owner_economics_status,
+                    }
+                )
+    else:
+        failures.append({"code": "owner_economics_ref_missing", "ref": OWNER_ECONOMICS_REF})
 
     portfolio_registry_path = path_for_ref(PORTFOLIO_REGISTRY_REF)
     counted_portfolio_companies = None

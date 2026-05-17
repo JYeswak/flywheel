@@ -199,6 +199,24 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "owner_equity_distribution_terms") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/owner-economics-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/owner-economics-overclaim.json" --json >"$TMP/owner-economics-overclaim.out.json" 2>/dev/null; then
+  fail "blocked owner-economics receipt rejects equity terms promotion"
+else
+  assert_jq "$TMP/owner-economics-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_owner_economics_receipt" and .requirement_id == "owner_equity_distribution_terms" and .evidence_status == "blocked")' "blocked owner-economics receipt rejects equity terms promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "owner_equity_distribution_terms") | .evidence_refs) -= ["state/holding-company-owner-economics.json"]' "$LEDGER" >"$TMP/missing-owner-economics-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-owner-economics-ref.json" --json >"$TMP/missing-owner-economics-ref.out.json" 2>/dev/null; then
+  fail "owner-economics requirement missing owner-economics receipt ref rejected"
+else
+  assert_jq "$TMP/missing-owner-economics-ref.out.json" '.failures[] | select(.code == "owner_economics_requirement_missing_owner_economics_ref" and .requirement_id == "owner_equity_distribution_terms")' "owner-economics requirement missing owner-economics receipt ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "peel_loop") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
   | .summary_counts.blocked -= 1
