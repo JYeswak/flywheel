@@ -82,5 +82,61 @@ else
   assert_jq "$TMP/count-mismatch.out.json" '.status == "fail" and (.failures[] | select(.code == "clear_count_mismatch"))' "owner economics clear count mismatch rejected"
 fi
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid owner economics ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid owner economics ledger rejected"
+fi
+
+jq '.deals[0].holding_company_equity_percent = 70' "$TMP/signed.json" >"$TMP/holding-equity-mismatch.json"
+if "$SCRIPT" --ledger "$TMP/holding-equity-mismatch.json" --json >"$TMP/holding-equity-mismatch.out.json" 2>/dev/null; then
+  fail "wrong holding company equity percent rejected"
+else
+  assert_jq "$TMP/holding-equity-mismatch.out.json" '.status == "fail" and (.failures[] | select(.code == "holding_company_equity_percent_mismatch"))' "wrong holding company equity percent rejected"
+fi
+
+jq '.deals[0].owner_operator_slug = null | .clear_count = 0' "$TMP/signed.json" >"$TMP/no-owner-operator.json"
+if "$SCRIPT" --ledger "$TMP/no-owner-operator.json" --json >"$TMP/no-owner-operator.out.json" 2>/dev/null; then
+  fail "signed owner economics without owner operator rejected"
+else
+  assert_jq "$TMP/no-owner-operator.out.json" '.status == "fail" and (.failures[] | select(.code == "signed_status_without_owner_operator"))' "signed owner economics without owner operator rejected"
+fi
+
+jq '.deals[0].cap_table_ref = null | .clear_count = 0' "$TMP/signed.json" >"$TMP/missing-status-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-status-ref.json" --json >"$TMP/missing-status-ref.out.json" 2>/dev/null; then
+  fail "signed owner economics missing status refs rejected"
+else
+  assert_jq "$TMP/missing-status-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "owner_economics_status_missing_refs" and (.missing_refs | index("cap_table_ref"))))' "signed owner economics missing status refs rejected"
+fi
+
+jq '.deals[0].profit_distribution_tiers[0].basis_ref = null | .clear_count = 0' "$TMP/signed.json" >"$TMP/missing-tier-basis.json"
+if "$SCRIPT" --ledger "$TMP/missing-tier-basis.json" --json >"$TMP/missing-tier-basis.out.json" 2>/dev/null; then
+  fail "owner economics tier missing basis ref rejected"
+else
+  assert_jq "$TMP/missing-tier-basis.out.json" '.status == "fail" and (.failures[] | select(.code == "profit_distribution_tier_missing_basis_ref"))' "owner economics tier missing basis ref rejected"
+fi
+
+jq '.deals[0].signed_owner_operator_receipt = "state/does-not-exist-owner-economics-signed.json" | .clear_count = 0' "$TMP/signed.json" >"$TMP/missing-required-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-required-ref.json" --check-paths --json >"$TMP/missing-required-ref.out.json" 2>/dev/null; then
+  fail "missing owner economics required ref rejected"
+else
+  assert_jq "$TMP/missing-required-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "required_ref_missing" and .field == "signed_owner_operator_receipt"))' "missing owner economics required ref rejected"
+fi
+
+jq '.deals[0].evidence_refs = ["state/does-not-exist-owner-economics-evidence.json"] | .clear_count = 0' "$TMP/signed.json" >"$TMP/missing-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence-ref.json" --check-paths --json >"$TMP/missing-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing owner economics evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing owner economics evidence ref rejected"
+fi
+
+jq '.deals[0].notes = "fixture sk-TestSecret123 should be rejected" | .clear_count = 0' "$TMP/signed.json" >"$TMP/secret-shape.json"
+if "$SCRIPT" --ledger "$TMP/secret-shape.json" --json >"$TMP/secret-shape.out.json" 2>/dev/null; then
+  fail "secret-shaped owner economics value rejected"
+else
+  assert_jq "$TMP/secret-shape.out.json" '.status == "fail" and (.failures[] | select(.code == "secret_or_raw_amount_shape_detected"))' "secret-shaped owner economics value rejected"
+fi
+
 printf 'RESULT pass=%d fail=%d\n' "$pass_count" "$fail_count"
 exit "$fail_count"
