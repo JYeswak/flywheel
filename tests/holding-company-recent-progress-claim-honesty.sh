@@ -115,6 +115,13 @@ else
   assert_jq "$TMP/wrong-current-gate-status.out.json" '.failures[] | select(.code == "current_gate_status_mismatch" and .claim_id == "progress_velocity" and .validator_status == "blocked")' "current gate status drift rejected"
 fi
 
+jq '(.claims[] | select(.claim_id == "anthropic_adoption") | .claim_text) = "stale claim text"' "$RECEIPT" >"$TMP/claim-text-mismatch.json"
+if "$SCRIPT" --receipt "$TMP/claim-text-mismatch.json" --json >"$TMP/claim-text-mismatch.out.json" 2>/dev/null; then
+  fail "claim text mismatch rejected"
+else
+  assert_jq "$TMP/claim-text-mismatch.out.json" '.failures[] | select(.code == "claim_text_mismatch" and .claim_id == "anthropic_adoption")' "claim text mismatch rejected"
+fi
+
 jq '(.claims[] | select(.claim_id == "progress_velocity") | .claim_text) = "4,000+ commits in 7 days across 9 product surfaces."' "$RECEIPT" >"$TMP/progress-overclaim.json"
 if "$SCRIPT" --receipt "$TMP/progress-overclaim.json" --json >"$TMP/progress-overclaim.out.json" 2>/dev/null; then
   fail "progress velocity overclaim rejected"
