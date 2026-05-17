@@ -1396,15 +1396,19 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
     founder_post_voice_path = path_for_ref(FOUNDER_POST_VOICE_REF)
     public_story_route_path = path_for_ref(PUBLIC_STORY_ROUTE_REF)
     public_surface_supersession_path = path_for_ref(PUBLIC_SURFACE_AUDIT_SUPERSESSION_REF)
+    anti_pitch_voice_receipt = None
+    public_story_receipt = None
     brand_voice_receipt = None
     public_story_route_receipt = None
     public_surface_supersession_receipt = None
     if anti_pitch_voice_path is not None and anti_pitch_voice_path.exists():
-        public_receipt_statuses["anti_pitch"] = anti_pitch_voice_gate_status(load_json(anti_pitch_voice_path))
+        anti_pitch_voice_receipt = load_json(anti_pitch_voice_path)
+        public_receipt_statuses["anti_pitch"] = anti_pitch_voice_gate_status(anti_pitch_voice_receipt)
     else:
         failures.append({"code": "anti_pitch_voice_ref_missing", "ref": ANTI_PITCH_VOICE_REF})
     if public_story_path is not None and public_story_path.exists():
-        public_receipt_statuses["public_story"] = public_story_gate_status(load_json(public_story_path))
+        public_story_receipt = load_json(public_story_path)
+        public_receipt_statuses["public_story"] = public_story_gate_status(public_story_receipt)
     else:
         failures.append({"code": "public_story_ref_missing", "ref": PUBLIC_STORY_REF})
     if brand_voice_skill_path is not None and brand_voice_skill_path.exists():
@@ -1608,6 +1612,23 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         ):
             if public_receipt_statuses[status_key] == "blocked" and anti_pitch_requirement.get("coverage_status") == "proven":
                 failures.append({"code": code, "requirement_id": "anti_pitch_voice_gate"})
+        if public_receipt_statuses["anti_pitch"] == "clear" and anti_pitch_voice_receipt is not None:
+            has_zero_hit_surface = any(
+                isinstance(surface, dict)
+                and surface.get("status") == "clear"
+                and surface.get("holding_company_story_present") is True
+                and not surface.get("builder_framing_hits", [])
+                for surface in anti_pitch_voice_receipt.get("surfaces", [])
+            )
+            finding = anti_pitch_requirement.get("finding")
+            finding_text = finding.lower() if isinstance(finding, str) else ""
+            if has_zero_hit_surface and ("zero" not in finding_text or "builder" not in finding_text):
+                failures.append(
+                    {
+                        "code": "anti_pitch_finding_missing_zero_builder_hits",
+                        "requirement_id": "anti_pitch_voice_gate",
+                    }
+                )
 
     brand_voice_requirement = requirements_by_id.get("recent_brand_voice_claim")
     if brand_voice_requirement is not None and brand_voice_receipt is not None:
@@ -1731,6 +1752,24 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                     "requirement_id": "public_story_show_receipts",
                 }
             )
+        if public_receipt_statuses["public_story"] == "clear" and public_story_receipt is not None:
+            has_zero_hit_surface = any(
+                isinstance(surface, dict)
+                and surface.get("status") == "clear"
+                and surface.get("receipt_story_present") is True
+                and surface.get("holding_company_positioning_present") is True
+                and not surface.get("build_app_framing_hits", [])
+                for surface in public_story_receipt.get("surfaces", [])
+            )
+            finding = public_story_requirement.get("finding")
+            finding_text = finding.lower() if isinstance(finding, str) else ""
+            if has_zero_hit_surface and ("zero" not in finding_text or "build-app" not in finding_text):
+                failures.append(
+                    {
+                        "code": "public_story_finding_missing_zero_build_app_hits",
+                        "requirement_id": "public_story_show_receipts",
+                    }
+                )
 
     peel_interviews_path = path_for_ref(PEEL_INTERVIEWS_REF)
     if peel_interviews_path is not None and peel_interviews_path.exists():

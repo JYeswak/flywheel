@@ -423,6 +423,13 @@ else
   assert_jq "$TMP/missing-anti-pitch-founder-ref.out.json" '.failures[] | select(.code == "anti_pitch_requirement_missing_founder_post_voice_ref" and .requirement_id == "anti_pitch_voice_gate")' "anti-pitch requirement missing founder-post ref rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "anti_pitch_voice_gate") | .finding) = "The durable zeststream.ai /portfolio route clears anti-pitch voice. Founder-post and JSM-managed brand-voice skill alignment remain open, so the full cross-channel gate is partial."' "$LEDGER" >"$TMP/stale-anti-pitch-zero-hits-finding.json"
+if "$SCRIPT" --ledger "$TMP/stale-anti-pitch-zero-hits-finding.json" --json >"$TMP/stale-anti-pitch-zero-hits-finding.out.json" 2>/dev/null; then
+  fail "anti-pitch stale zero-builder-hit finding rejected"
+else
+  assert_jq "$TMP/stale-anti-pitch-zero-hits-finding.out.json" '.failures[] | select(.code == "anti_pitch_finding_missing_zero_builder_hits" and .requirement_id == "anti_pitch_voice_gate")' "anti-pitch stale zero-builder-hit finding rejected"
+fi
+
 jq '
   (.requirements[] | select(.requirement_id == "recent_brand_voice_claim") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
@@ -531,6 +538,13 @@ if "$SCRIPT" --ledger "$TMP/missing-public-story-route-ref.json" --json >"$TMP/m
   fail "public-story requirement missing route ref rejected"
 else
   assert_jq "$TMP/missing-public-story-route-ref.out.json" '.failures[] | select(.code == "public_story_requirement_missing_public_story_route_ref" and .requirement_id == "public_story_show_receipts")' "public-story requirement missing route ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "public_story_show_receipts") | .finding) = "The committed /portfolio route clears the receipt-led website story with proof refs. Founder-post voice remains not clear, so the broader public-story requirement is partial."' "$LEDGER" >"$TMP/stale-public-story-zero-hits-finding.json"
+if "$SCRIPT" --ledger "$TMP/stale-public-story-zero-hits-finding.json" --json >"$TMP/stale-public-story-zero-hits-finding.out.json" 2>/dev/null; then
+  fail "public-story stale zero-build-app-hit finding rejected"
+else
+  assert_jq "$TMP/stale-public-story-zero-hits-finding.out.json" '.failures[] | select(.code == "public_story_finding_missing_zero_build_app_hits" and .requirement_id == "public_story_show_receipts")' "public-story stale zero-build-app-hit finding rejected"
 fi
 
 jq '(.requirements[] | select(.requirement_id == "public_story_show_receipts") | .evidence_refs) -= ["state/holding-company-public-surface-audit-supersession-20260517T1004Z.json"]' "$LEDGER" >"$TMP/missing-public-story-public-surface-supersession-ref.json"
