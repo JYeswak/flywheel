@@ -36,6 +36,13 @@ jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
 assert_jq "$TMP/current.json" '.status == "pass" and .clear_count == 0 and .names[0].brand_naming_gate_status == "blocked"' "current ledger validates and blocks brand naming"
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid brand naming ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid brand naming ledger rejected"
+fi
+
 jq '
   .clear_count = 1
   | .names[0].status = "name_clear"
@@ -49,6 +56,13 @@ jq '
 ' "$LEDGER" >"$TMP/name-clear.json"
 "$SCRIPT" --ledger "$TMP/name-clear.json" --json >"$TMP/name-clear.out.json"
 assert_jq "$TMP/name-clear.out.json" '.status == "pass" and .clear_count == 1 and .names[0].brand_naming_gate_status == "clear"' "owner and community name provenance clears"
+
+jq '.names[0].notes = ("sk-" + "NOTAREALSECRET")' "$TMP/name-clear.json" >"$TMP/secret-shaped-value.json"
+if "$SCRIPT" --ledger "$TMP/secret-shaped-value.json" --json >"$TMP/secret-shaped-value.out.json" 2>/dev/null; then
+  fail "secret-shaped brand naming value rejected"
+else
+  assert_jq "$TMP/secret-shaped-value.out.json" '.status == "fail" and (.failures[] | select(.code == "secret_or_raw_value_shape_detected"))' "secret-shaped brand naming value rejected"
+fi
 
 jq '.names[0].status = "launch_clear"' "$TMP/name-clear.json" >"$TMP/launch-clear.json"
 "$SCRIPT" --ledger "$TMP/launch-clear.json" --json >"$TMP/launch-clear.out.json"
@@ -87,6 +101,27 @@ if "$SCRIPT" --ledger "$TMP/prohibited.json" --json >"$TMP/prohibited.out.json" 
   fail "prohibited name flags rejected"
 else
   assert_jq "$TMP/prohibited.out.json" '.status == "fail" and (.failures[] | select(.code == "brand_name_clear_with_prohibited_flags"))' "prohibited name flags rejected"
+fi
+
+jq '.names[0].evidence_refs = []' "$TMP/name-clear.json" >"$TMP/no-evidence-refs.json"
+if "$SCRIPT" --ledger "$TMP/no-evidence-refs.json" --json >"$TMP/no-evidence-refs.out.json" 2>/dev/null; then
+  fail "name clear without evidence refs rejected"
+else
+  assert_jq "$TMP/no-evidence-refs.out.json" '.status == "fail" and (.failures[] | select(.code == "brand_name_clear_without_evidence_refs"))' "name clear without evidence refs rejected"
+fi
+
+jq '.names[0].owner_operator_ref = "state/no-such-brand-naming-owner.json"' "$TMP/name-clear.json" >"$TMP/missing-required-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-required-ref.json" --check-paths --json >"$TMP/missing-required-ref.out.json" 2>/dev/null; then
+  fail "missing brand naming required ref rejected"
+else
+  assert_jq "$TMP/missing-required-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "required_ref_missing" and .field == "owner_operator_ref"))' "missing brand naming required ref rejected"
+fi
+
+jq '.names[0].evidence_refs = ["state/no-such-brand-naming-evidence.json"]' "$TMP/name-clear.json" >"$TMP/missing-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence-ref.json" --check-paths --json >"$TMP/missing-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing brand naming evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing brand naming evidence ref rejected"
 fi
 
 jq '.clear_count = 2' "$TMP/name-clear.json" >"$TMP/mismatch.json"
