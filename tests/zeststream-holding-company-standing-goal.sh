@@ -27,8 +27,10 @@ run_test() {
 check_inventory_parity() {
   local schema_names="$TMP/holding-schema-names.txt"
   local test_names="$TMP/holding-test-names.txt"
+  local script_names="$TMP/holding-script-names.txt"
   local missing_tests="$TMP/missing-tests.txt"
   local missing_schemas="$TMP/missing-schemas.txt"
+  local missing_scripts="$TMP/missing-scripts.txt"
 
   find "$ROOT/.flywheel/validation-schema/v1" -maxdepth 1 -type f -name 'holding-company-*.schema.json' \
     | sed 's#.*/##; s#\.schema\.json$##' \
@@ -36,9 +38,13 @@ check_inventory_parity() {
   find "$ROOT/tests" -maxdepth 1 -type f -name 'holding-company-*.sh' \
     | sed 's#.*/##; s#\.sh$##' \
     | sort >"$test_names"
+  find "$ROOT/.flywheel/scripts" -maxdepth 1 -type f -name 'holding-company-*-validate.py' \
+    | sed 's#.*/##; s#-validate\.py$##' \
+    | sort >"$script_names"
 
   comm -23 "$schema_names" "$test_names" >"$missing_tests"
   comm -13 "$schema_names" "$test_names" >"$missing_schemas"
+  comm -23 "$schema_names" "$script_names" >"$missing_scripts"
 
   if [[ -s "$missing_tests" || -s "$missing_schemas" ]]; then
     fail "holding-company schema/test inventory parity"
@@ -52,6 +58,14 @@ check_inventory_parity() {
     fi
   else
     pass "holding-company schema/test inventory parity"
+  fi
+
+  if [[ -s "$missing_scripts" ]]; then
+    fail "holding-company schema/validator inventory parity"
+    printf 'missing validator scripts for schemas:\n' >&2
+    sed 's/^/  /' "$missing_scripts" >&2
+  else
+    pass "holding-company schema/validator inventory parity"
   fi
 }
 
@@ -77,7 +91,7 @@ for test_path in "${holding_tests[@]}"; do
   run_test "$test_path"
 done
 
-expected_count=$((3 + ${#holding_tests[@]}))
+expected_count=$((4 + ${#holding_tests[@]}))
 if [[ "$pass_count" -eq "$expected_count" && "$fail_count" -eq 0 ]]; then
   printf 'RESULT pass=%s fail=%s checked=%s\n' "$pass_count" "$fail_count" "$expected_count"
   exit 0
