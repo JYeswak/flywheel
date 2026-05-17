@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-shared-stack/v1/schema.json",
+  "title": "ZestStream Holding Company Shared Stack v1",
+  "description": "Ledger for the NURTURE shared-stack gate: companies share SkillOS, flywheel, JSM, @zeststream/* packages, and brand voice.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "required_components",
+    "clear_count",
+    "companies",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_shared_stack.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "nurture_shared_stack"
+    },
+    "required_components": {
+      "type": "array",
+      "prefixItems": [
+        {"const": "skillos"},
+        {"const": "flywheel"},
+        {"const": "jsm"},
+        {"const": "zeststream_packages"},
+        {"const": "brand_voice"}
+      ],
+      "minItems": 5,
+      "maxItems": 5
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "companies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/company"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "company": {
+      "type": "object",
+      "required": [
+        "company_slug",
+        "status",
+        "components",
+        "evidence_refs"
+      ],
+      "properties": {
+        "company_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "candidate",
+            "blocked",
+            "shared_stack_clear",
+            "deferred"
+          ]
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/component"
+          }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "component": {
+      "type": "object",
+      "required": [
+        "component",
+        "status",
+        "receipt_ref",
+        "evidence_refs"
+      ],
+      "properties": {
+        "component": {
+          "type": "string",
+          "enum": [
+            "skillos",
+            "flywheel",
+            "jsm",
+            "zeststream_packages",
+            "brand_voice"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "missing",
+            "partial",
+            "present",
+            "deferred"
+          ]
+        },
+        "receipt_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

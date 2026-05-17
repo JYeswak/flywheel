@@ -127,6 +127,11 @@
       "kind": "owner_economics_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-owner-economics.json",
       "result": "Owner-economics ledger exists and validates; current clear_count is 0 because Mobile Eats has no signed owner, cap-table, distribution terms, or legal review refs proving 25% equity and 45-75% tiered distributions"
+    },
+    {
+      "kind": "shared_stack_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-shared-stack.json",
+      "result": "NURTURE shared-stack ledger exists and validates; current clear_count is 0 because Mobile Eats lacks a JSM receipt and has only partial SkillOS and brand-voice evidence"
     }
   ],
   "canonical_gates": [
@@ -198,6 +203,16 @@
         "/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json"
       ],
       "finding": "The substrate is real: mobile-eats has tenant routing, a baseline substrate-share receipt with 27 total @zeststream/* dependencies, and SkillOS records real pack adoption across three consumer repos. The missing part is a formed owner/company registry row."
+    },
+    {
+      "gate": "nurture_shared_stack",
+      "status": "blocked_incomplete_stack",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-shared-stack.json",
+        "/Users/josh/Developer/flywheel/state/substrate-share/mobile-eats-20260517T0654Z.json",
+        "/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml"
+      ],
+      "finding": "The full NURTURE stack is now machine-checkable separately from package adoption. Mobile Eats has flywheel and @zeststream/* package evidence, but the JSM component is missing and SkillOS plus brand voice are only partial, so shared-stack clear remains blocked."
     },
     {
       "gate": "pour_launch_readiness",
@@ -297,6 +312,10 @@
     {
       "owner": "mobile-eats",
       "action": "If mobile-eats is intended as portfolio company #1, add owner-operator, equity, first paying-customer, and operating-control handoff receipts; otherwise keep it classified as product/substrate proof, not a counted company."
+    },
+    {
+      "owner": "mobile-eats/flywheel/skillos",
+      "action": "Fill state/holding-company-shared-stack.json with present receipt refs for SkillOS, flywheel, JSM, @zeststream/* packages, and brand voice before marking Mobile Eats shared-stack clear."
     },
     {
       "owner": "skillos/flywheel",
