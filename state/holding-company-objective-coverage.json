@@ -375,7 +375,8 @@
     "This is a prompt-to-artifact checklist, not a completion claim.",
     "The standing holding-company objective cannot be marked complete; this matrix records current coverage and blockers.",
     "The 2026-05-17T06:46Z gate audit is historical; public-surface builder-framing rows in it are superseded by state/holding-company-public-surface-audit-supersession-20260517T1004Z.json.",
-    "Recent-progress active claim text is summarized by state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json."
+    "Recent-progress active claim text is summarized by state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json.",
+    "Run bash tests/zeststream-holding-company-standing-goal.sh for the registry-inclusive standing-goal validation sweep."
   ],
   "next_action": "Use this matrix as the closeout checklist for future holding-company passes; fill blocked rows with durable receipts rather than treating proxy tests as completion."
 }

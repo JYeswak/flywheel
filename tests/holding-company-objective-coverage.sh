@@ -35,6 +35,7 @@ jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
 assert_jq "$TMP/current.json" '.status == "pass" and .objective_coverage_gate_status == "not_complete" and .summary_counts.total == 29 and .summary_counts.partial == 8 and .summary_counts.blocked == 17' "current objective coverage validates as not complete"
+assert_jq "$LEDGER" 'any(.notes[]; contains("bash tests/zeststream-holding-company-standing-goal.sh"))' "coverage matrix names aggregate standing-goal validation"
 
 jq 'del(.requirements[] | select(.requirement_id == "runway_gate")) | .summary_counts.total = 28 | .summary_counts.blocked = 20' "$LEDGER" >"$TMP/missing-id.json"
 if "$SCRIPT" --ledger "$TMP/missing-id.json" --json >"$TMP/missing-id.out.json" 2>/dev/null; then
