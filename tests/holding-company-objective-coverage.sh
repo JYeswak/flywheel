@@ -46,6 +46,20 @@ else
   assert_jq "$TMP/wrong-objective-status.out.json" '.failures[] | select(.code == "objective_status_not_standing_non_closing")' "non-standing objective status rejected"
 fi
 
+printf '%s\n' "temporary unrelated goal text" >"$TMP/wrong-source-goal.txt"
+jq --arg src "$TMP/wrong-source-goal.txt" '.source_goal = $src' "$ROOT/state/zeststream-holding-company-gate-audit-20260517T0646Z.json" >"$TMP/wrong-source-audit.json"
+jq --arg oldsrc "/Users/josh/Desktop/zeststream-goals/zeststream/holding-company-portfolio-20260516.txt" --arg src "$TMP/wrong-source-goal.txt" --arg oldaudit "state/zeststream-holding-company-gate-audit-20260517T0646Z.json" --arg audit "$TMP/wrong-source-audit.json" '
+  .source_goal_ref = $src
+  | .audit_ref = $audit
+  | (.requirements[] | select(.primary_evidence_ref == $oldaudit) | .primary_evidence_ref) = $audit
+  | (.requirements[] | .evidence_refs) |= map(if . == $oldsrc then $src elif . == $oldaudit then $audit else . end)
+' "$LEDGER" >"$TMP/wrong-source-goal-ledger.json"
+if "$SCRIPT" --ledger "$TMP/wrong-source-goal-ledger.json" --json >"$TMP/wrong-source-goal-ledger.out.json" 2>/dev/null; then
+  fail "source goal missing identity phrases rejected"
+else
+  assert_jq "$TMP/wrong-source-goal-ledger.out.json" '.failures[] | select(.code == "source_goal_missing_required_identity_phrases")' "source goal missing identity phrases rejected"
+fi
+
 jq '(.requirements[] | select(.requirement_id == "standing_non_closing_goal") | .evidence_refs) -= ["/Users/josh/Desktop/zeststream-goals/zeststream/holding-company-portfolio-20260516.txt"]' "$LEDGER" >"$TMP/missing-standing-source-ref.json"
 if "$SCRIPT" --ledger "$TMP/missing-standing-source-ref.json" --json >"$TMP/missing-standing-source-ref.out.json" 2>/dev/null; then
   fail "standing requirement missing source goal ref rejected"
