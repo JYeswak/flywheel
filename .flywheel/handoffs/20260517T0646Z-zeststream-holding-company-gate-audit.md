@@ -19,7 +19,7 @@ The audit did not find the receipts that would let the system count a formed por
 |---|---|---|
 | Personal runway | `not_provided` | Redacted runway receipt contract exists; current receipt is months-not-provided and blocks launch. |
 | Portfolio company existence | `not_proven` | mobile-eats is strong product/substrate proof, but not countable as a portfolio company without signed owner + first paying customer registry evidence. |
-| PEEL market signal | `planned_not_proven` | Five prospect interviews are locked as a gate; no candidate interview receipt found. |
+| PEEL market signal | `blocked_no_qualified_interviews` | PEEL interview ledger exists and validates; formation cash remains blocked because no candidate has five qualified prospect interviews. |
 | Anti-pitch voice | `partial_drift` | Brand voice skill exists, but `zeststream-v2-fresh` still contains old automation/custom-app/workflow-builder framing. |
 | Sustainable pace | `planned_not_measured` | 60h/week and 50%+ time-offset are locked; no measurement receipt found. |
 | Owner-search phasing | `planned_not_proven` | Warm-network-first is locked; no candidate/outreach receipt found. |
@@ -40,6 +40,7 @@ The audit did not find the receipts that would let the system count a formed por
 - Brand voice config: `/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml`
 - Launch economics ledger: `state/holding-company-launch-economics.json`
 - Runway receipt: `state/holding-company-runway-current.json`
+- PEEL interview ledger: `state/holding-company-peel-interviews.json`
 
 ## Immediate Next Actions
 
@@ -48,6 +49,7 @@ The audit did not find the receipts that would let the system count a formed por
 3. Update `zeststream-brand-voice` so the holding-company anti-pitch rule is mechanical.
 4. Grade `zeststream-v2-fresh` against the mission-alignment goal and route stale automation/custom-app pages to update plans.
 5. For mobile-eats, either attach owner/customer/company receipts or explicitly classify it as product/substrate proof rather than portfolio company #1.
+6. Fill the PEEL interview ledger with five qualified prospect interviews before clearing or committing formation cash for any candidate.
 
 ## Close Rule
 

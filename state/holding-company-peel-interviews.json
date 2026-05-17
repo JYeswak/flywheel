@@ -1,0 +1,26 @@
+{
+  "schema_version": "zeststream.holding_company_peel_interviews.v1",
+  "generated_at": "2026-05-17T07:08:00Z",
+  "gate": "five_qualified_prospect_interviews_before_formation_cash",
+  "required_qualified_interviews": 5,
+  "formation_cash_clear_count": 0,
+  "candidates": [
+    {
+      "candidate_slug": "mobile-eats",
+      "candidate_name": "Mobile Eats",
+      "formation_cash_status": "blocked",
+      "interviews": [],
+      "evidence_refs": [
+        "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md",
+        "state/substrate-share/mobile-eats-20260517T0654Z.json",
+        "state/holding-company-launch-economics.json"
+      ],
+      "notes": "Product and substrate proof exist, but no five qualified prospect-interview receipt exists. Formation cash remains blocked."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical PEEL market-signal gate for the ZestStream holding-company goal.",
+    "A candidate may not clear or commit formation cash until five qualified prospect interviews have would_buy=true, medium-or-strong urgency, a redacted price point, a pain point, a current alternative, and an evidence reference."
+  ],
+  "next_action": "Document five qualified prospect interviews for any candidate before setting formation_cash_status to clear or committed."
+}

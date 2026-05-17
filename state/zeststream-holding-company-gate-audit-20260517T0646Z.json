@@ -87,6 +87,11 @@
       "kind": "runway_receipt",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-runway-current.json",
       "result": "redacted runway receipt contract exists; current status is not_provided and launch gate remains blocked"
+    },
+    {
+      "kind": "peel_interview_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-peel-interviews.json",
+      "result": "PEEL interview gate ledger exists and validates; current formation_cash_clear_count is 0 because no candidate has five qualified prospect interviews"
     }
   ],
   "canonical_gates": [
@@ -111,12 +116,13 @@
     },
     {
       "gate": "peel_market_signal",
-      "status": "planned_not_proven",
+      "status": "blocked_no_qualified_interviews",
       "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-peel-interviews.json",
         "/Users/josh/Developer/skillos/state/holding-co-quant/CHANGES.md",
         "/Users/josh/Developer/skillos/state/mission-alignment/EXECUTION-PLAN.md"
       ],
-      "finding": "The 5 documented prospect-interview gate is locked in the plan; no per-candidate five-interview receipt was located."
+      "finding": "The 5 documented prospect-interview gate is now machine-checkable. Current ledger validates structurally but blocks formation cash because no candidate has five qualified would-buy interviews with medium-or-strong urgency and evidence refs."
     },
     {
       "gate": "anti_pitch_voice",
@@ -222,6 +228,10 @@
     {
       "owner": "mobile-eats",
       "action": "If mobile-eats is intended as portfolio company #1, add owner-operator, equity, and first paying-customer receipts; otherwise keep it classified as product/substrate proof, not a counted company."
+    },
+    {
+      "owner": "skillos/flywheel",
+      "action": "Fill state/holding-company-peel-interviews.json with five qualified prospect interviews before clearing or committing formation cash for any candidate."
     },
     {
       "owner": "skillos/flywheel",
