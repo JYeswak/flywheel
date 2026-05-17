@@ -25,6 +25,7 @@ The audit did not find the receipts that would let the system count a formed por
 | Anti-pitch voice | `blocked_builder_framing` | Anti-pitch voice ledger exists and validates; `zeststream-v2-fresh` still has workflow-builder and automation-positioning hits. |
 | Brand voice skill alignment | `blocked_stale_skill_canon` | Brand voice skill ledger exists and validates; JSM-managed `zeststream-brand-voice` has grounding rules but still uses the older SMB time-back primary canon and lacks an approved holding-company JSM update receipt. |
 | Founder post voice | `blocked_fact_check_and_positioning` | Founder-post voice ledger exists and validates; the current public-share LinkedIn draft has a publisher dry-run pass, but its fact-check reports a commit-count discrepancy and it lacks holding-company positioning. |
+| Mobile Eats shipping/substrate claim | `partial_product_substrate_proven_portfolio_company_blocked` | Mobile Eats shipping ledger exists and validates; product/substrate evidence and 27 `@zeststream/*` packages are present, but first-portfolio-company proof is blocked by missing owner, equity, and first-customer receipts. |
 | SkillOS Forever-OS lock | `partial_structure_lock_receipt_missing` | Forever-OS lock ledger exists and validates; v3 goal and operating receipts are present, but no distinct 2026-05-17 structure-lock receipt was found in the inspected SkillOS/Desktop goal paths. |
 | Yuzu owner voice | `blocked_no_owner_voice` | Owner-operator voice ledger exists and validates; Mobile Eats lacks owner voice, community context, owner-operator, and Yuzu review receipts. |
 | Brand naming provenance | `blocked_missing_owner_community_name_provenance` | Brand-naming ledger exists and validates; Mobile Eats lacks owner/operator and community naming decision receipts. |
@@ -54,6 +55,7 @@ The audit did not find the receipts that would let the system count a formed por
 - Mobile Eats share-ready packet: `/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md`
 - Mobile Eats tenant declaration: `/Users/josh/Developer/mobile-eats/.zs-tenant.yaml`
 - Mobile Eats substrate-share receipt: `state/substrate-share/mobile-eats-20260517T0654Z.json`
+- Mobile Eats shipping/substrate claim ledger: `state/holding-company-mobile-eats-shipping.json`
 - SkillOS adoption gate: `/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json`
 - Brand voice config: `/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml`
 - Brand voice skill alignment ledger: `state/holding-company-brand-voice-skill.json`
@@ -84,7 +86,7 @@ The audit did not find the receipts that would let the system count a formed por
 
 ## Immediate Next Actions
 
-1. Create a portfolio-company registry schema that refuses rows without signed owner-operator and first paying-customer receipt paths.
+1. Keep `state/zeststream-portfolio-company-registry.json` current; attach signed owner-operator, equity/cap-table, and first paying-customer receipts before counting Mobile Eats as a formed portfolio company.
 2. Fill the candidate-fit ledger with legacy-SMB sharpening or AI-first incubation classification, SMB owner-operator target proof, and AI problem refs before marking any candidate, PRESS, or formation fit clear.
 3. Produce a redacted runway receipt or mark sub #1 launch blocked.
 4. Use `state/holding-company-brand-voice-skill.json` and the anti-pitch voice ledger to update `zeststream-brand-voice` through the approved JSM workflow; attach the JSM receipt before marking skill alignment clear.

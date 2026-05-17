@@ -1,0 +1,48 @@
+{
+  "schema_version": "zeststream.holding_company_mobile_eats_shipping.v1",
+  "generated_at": "2026-05-17T09:16:00Z",
+  "gate": "recent_progress_mobile_eats_shipping",
+  "claim_text": "mobile-eats shipping; first portfolio company on shared substrate with 9+ @zeststream/* package adoptions.",
+  "status": "partial",
+  "company_slug": "mobile-eats",
+  "required_min_zeststream_packages": 9,
+  "repo_path": "/Users/josh/Developer/mobile-eats",
+  "share_ready_packet_ref": "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md",
+  "tenant_declaration_ref": "/Users/josh/Developer/mobile-eats/.zs-tenant.yaml",
+  "package_manifest_ref": "/Users/josh/Developer/mobile-eats/next-app/package.json",
+  "public_surface_ref": "https://mobile-eats.zeststream.ai",
+  "substrate_share_receipt_ref": "state/substrate-share/mobile-eats-20260517T0654Z.json",
+  "portfolio_registry_ref": "state/zeststream-portfolio-company-registry.json",
+  "repo_present": true,
+  "share_ready_packet_present": true,
+  "tenant_declaration_present": true,
+  "package_manifest_present": true,
+  "public_surface_declared": true,
+  "substrate_share_receipt_present": true,
+  "substrate_package_count": 27,
+  "package_threshold_met": true,
+  "counted_as_portfolio_company": false,
+  "first_portfolio_company_claim_clear": false,
+  "signed_owner_operator_receipt": null,
+  "equity_receipt": null,
+  "first_paying_customer_receipt": null,
+  "evidence_refs": [
+    "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md",
+    "/Users/josh/Developer/mobile-eats/.zs-tenant.yaml",
+    "/Users/josh/Developer/mobile-eats/next-app/package.json",
+    "state/substrate-share/mobile-eats-20260517T0654Z.json",
+    "state/zeststream-portfolio-company-registry.json"
+  ],
+  "blockers": [
+    "missing signed owner-operator receipt",
+    "missing equity/cap-table receipt",
+    "missing first paying-customer receipt",
+    "portfolio registry counts Mobile Eats as product/substrate proof only"
+  ],
+  "notes": [
+    "This ledger proves product/substrate shipping separately from portfolio-company formation.",
+    "The substrate-share receipt proves 27 total @zeststream/* package adoptions, exceeding the 9+ package threshold.",
+    "The first-portfolio-company portion of the claim remains blocked by the portfolio registry."
+  ],
+  "next_action": "Attach signed owner-operator, equity/cap-table, and first paying-customer receipts to the portfolio registry before marking Mobile Eats as the first counted portfolio company."
+}

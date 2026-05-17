@@ -59,6 +59,11 @@
       "result": "baseline substrate-share receipt validates the 27 total @zeststream/* package adoptions; N+1 cost curve remains unmeasured"
     },
     {
+      "kind": "mobile_eats_shipping_substrate_claim_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-mobile-eats-shipping.json",
+      "result": "Mobile Eats shipping/substrate claim ledger exists and validates; product/substrate evidence is present with 27 @zeststream/* packages, while the first-portfolio-company claim remains blocked by missing owner, equity, and first-customer receipts"
+    },
+    {
       "kind": "skillos_adoption_receipt",
       "path": "/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json",
       "result": "anthropic-sdk-python adoption clause green across agent-bench, mobile-eats, and zesttube"
@@ -471,8 +476,16 @@
     },
     {
       "claim": "mobile-eats shipping with shared substrate",
-      "status": "partial_proven",
-      "finding": "Share-ready packet, tenant declaration, and @zeststream/* dependencies are present. First paying-customer and signed owner-operator registry receipts were not located."
+      "status": "partial_product_substrate_proven_portfolio_company_blocked",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-mobile-eats-shipping.json",
+        "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md",
+        "/Users/josh/Developer/mobile-eats/.zs-tenant.yaml",
+        "/Users/josh/Developer/mobile-eats/next-app/package.json",
+        "/Users/josh/Developer/flywheel/state/substrate-share/mobile-eats-20260517T0654Z.json",
+        "/Users/josh/Developer/flywheel/state/zeststream-portfolio-company-registry.json"
+      ],
+      "finding": "The replayable Mobile Eats shipping ledger proves product/substrate shipping evidence and 27 @zeststream/* package adoptions, exceeding the 9+ package threshold. It blocks the first-portfolio-company part of the claim because the registry still lacks signed owner-operator, equity, and first paying-customer receipts."
     },
     {
       "claim": "anthropic-sdk-python adoption OK across three consumer repos",
@@ -500,7 +513,7 @@
   "next_actions": [
     {
       "owner": "flywheel/skillos",
-      "action": "Create a portfolio-company registry schema that refuses to count a company without signed owner-operator and first paying-customer receipt paths."
+      "action": "Keep state/zeststream-portfolio-company-registry.json current; attach signed owner-operator, equity/cap-table, and first paying-customer receipts before counting Mobile Eats as a formed portfolio company."
     },
     {
       "owner": "flywheel/skillos",
