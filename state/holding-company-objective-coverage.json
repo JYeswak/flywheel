@@ -1,6 +1,6 @@
 {
   "schema_version": "zeststream.holding_company_objective_coverage.v1",
-  "generated_at": "2026-05-17T09:27:00Z",
+  "generated_at": "2026-05-17T09:56:00Z",
   "objective": "ZestStream Holding Company Goal",
   "objective_status": "standing_non_closing",
   "coverage_status": "not_complete",
@@ -8,8 +8,8 @@
   "audit_ref": "state/zeststream-holding-company-gate-audit-20260517T0646Z.json",
   "summary_counts": {
     "proven": 2,
-    "partial": 4,
-    "blocked": 21,
+    "partial": 8,
+    "blocked": 17,
     "deferred": 2,
     "total": 29
   },
@@ -174,14 +174,15 @@
       "requirement_id": "anti_pitch_voice_gate",
       "section": "canonical_gate",
       "requirement_text": "Public voice says sharpen legacy, incubate new; not workflow-builder or custom-app-builder.",
-      "coverage_status": "blocked",
+      "coverage_status": "partial",
       "primary_evidence_ref": "state/holding-company-anti-pitch-voice.json",
       "evidence_refs": [
         "state/holding-company-anti-pitch-voice.json",
+        "state/holding-company-public-story-route-20260517T0948Z.json",
         "state/holding-company-founder-post-voice.json",
         "state/holding-company-brand-voice-skill.json"
       ],
-      "finding": "Voice gates exist, but public surfaces and founder-post draft still fail current checks."
+      "finding": "The durable zeststream.ai /portfolio route clears anti-pitch voice and has zero builder-framing hits. Founder-post and JSM-managed brand-voice skill alignment remain open, so the full cross-channel gate is partial."
     },
     {
       "requirement_id": "sustainable_pace_gate",
@@ -255,13 +256,14 @@
       "requirement_id": "recent_brand_voice_claim",
       "section": "recent_progress",
       "requirement_text": "zeststream-brand-voice skill enforces canon and grounding.",
-      "coverage_status": "blocked",
+      "coverage_status": "partial",
       "primary_evidence_ref": "state/holding-company-brand-voice-skill.json",
       "evidence_refs": [
         "state/holding-company-brand-voice-skill.json",
+        "state/holding-company-anti-pitch-voice.json",
         "/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml"
       ],
-      "finding": "Grounding exists, but current JSM-managed voice canon still carries older SMB time-back wording and lacks approved holding-company anti-builder receipt."
+      "finding": "The skill has canon and cite-or-omit grounding rules, and public-surface anti-pitch evidence is now clear. The JSM-managed voice canon still carries older SMB time-back wording and lacks an approved holding-company anti-builder update receipt."
     },
     {
       "requirement_id": "recent_skillos_forever_os_claim",
@@ -278,13 +280,14 @@
       "requirement_id": "no_custom_apps_positioning",
       "section": "plain_english",
       "requirement_text": "ZestStream no longer builds custom apps or workflows for clients.",
-      "coverage_status": "blocked",
+      "coverage_status": "partial",
       "primary_evidence_ref": "state/holding-company-public-story.json",
       "evidence_refs": [
         "state/holding-company-public-story.json",
-        "state/holding-company-anti-pitch-voice.json"
+        "state/holding-company-anti-pitch-voice.json",
+        "state/holding-company-public-story-route-20260517T0948Z.json"
       ],
-      "finding": "The public-story and anti-pitch ledgers still detect builder or automation framing on public surfaces."
+      "finding": "The committed /portfolio route and retired builder-route redirects prove the current public positioning is no longer custom-app/workflow-builder framed. This remains partial because uncommitted owner/legal/about drafts were excluded from the clear receipt and need separate grounding before publication."
     },
     {
       "requirement_id": "each_business_own_brand_owner_customers",
@@ -340,13 +343,14 @@
       "requirement_id": "public_story_show_receipts",
       "section": "success",
       "requirement_text": "The public story is show the receipts, not build the apps.",
-      "coverage_status": "blocked",
+      "coverage_status": "partial",
       "primary_evidence_ref": "state/holding-company-public-story.json",
       "evidence_refs": [
         "state/holding-company-public-story.json",
+        "state/holding-company-public-story-route-20260517T0948Z.json",
         "state/holding-company-founder-post-voice.json"
       ],
-      "finding": "Public-story and founder-post ledgers exist, but current surfaces/posts do not yet clear receipt-led holding-company positioning."
+      "finding": "The committed /portfolio route clears the receipt-led website story with proof refs and zero build-app framing. Founder-post voice remains not clear, so the broader public-story requirement is partial."
     },
     {
       "requirement_id": "company_close_pivot_graduate",
