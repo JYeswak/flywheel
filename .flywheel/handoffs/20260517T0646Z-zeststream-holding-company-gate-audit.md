@@ -13,6 +13,8 @@ The audit found real substrate receipts: mobile-eats has tenant routing, share-r
 
 The audit did not find the receipts that would let the system count a formed portfolio company: named signed owner-operator, cap-table/equity receipt, and first paying-customer registry row.
 
+The prompt-to-artifact coverage matrix at `state/holding-company-objective-coverage.json` maps 27 explicit requirements from the standing goal to current evidence. It validates as `not_complete`; it is not a completion claim.
+
 ## Gate Status
 
 | Gate | Status | Finding |
@@ -51,6 +53,7 @@ The audit did not find the receipts that would let the system count a formed por
 
 - Goal text: `/Users/josh/Desktop/zeststream-goals/zeststream/holding-company-portfolio-20260516.txt`
 - Alignment text: `/Users/josh/Desktop/zeststream-goals/zeststream/mission-alignment-20260517.txt`
+- Objective coverage matrix: `state/holding-company-objective-coverage.json`
 - Quant changes: `/Users/josh/Developer/skillos/state/holding-co-quant/CHANGES.md`
 - Legal scaffold: `/Users/josh/Developer/skillos/state/legal-house/SCAFFOLD.md`
 - Mobile Eats share-ready packet: `/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md`
@@ -88,7 +91,7 @@ The audit did not find the receipts that would let the system count a formed por
 
 ## Immediate Next Actions
 
-1. Keep `state/zeststream-portfolio-company-registry.json` current; attach signed owner-operator, equity/cap-table, and first paying-customer receipts before counting Mobile Eats as a formed portfolio company.
+1. Use `state/holding-company-objective-coverage.json` as the prompt-to-artifact checklist; keep `state/zeststream-portfolio-company-registry.json` current and attach signed owner-operator, equity/cap-table, and first paying-customer receipts before counting Mobile Eats as a formed portfolio company.
 2. Fill the candidate-fit ledger with legacy-SMB sharpening or AI-first incubation classification, SMB owner-operator target proof, and AI problem refs before marking any candidate, PRESS, or formation fit clear.
 3. Produce a redacted runway receipt or mark sub #1 launch blocked.
 4. Use `state/holding-company-brand-voice-skill.json` and the anti-pitch voice ledger to update `zeststream-brand-voice` through the approved JSM workflow; attach the JSM receipt before marking skill alignment clear.

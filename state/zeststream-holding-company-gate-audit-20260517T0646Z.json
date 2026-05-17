@@ -39,6 +39,11 @@
       "result": "Phase 0 execution plan names runway, prospect interviews, and attorney/CPA scheduling gates"
     },
     {
+      "kind": "objective_coverage_matrix",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-objective-coverage.json",
+      "result": "prompt-to-artifact coverage matrix exists and validates; it maps 27 explicit standing-goal requirements to evidence rows and records the current state as not_complete with blockers"
+    },
+    {
       "kind": "mobile_eats_receipt",
       "path": "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md",
       "result": "mobile-eats locally share-ready for guided demo; public social launch still externally gated"
@@ -526,7 +531,7 @@
   "next_actions": [
     {
       "owner": "flywheel/skillos",
-      "action": "Keep state/zeststream-portfolio-company-registry.json current; attach signed owner-operator, equity/cap-table, and first paying-customer receipts before counting Mobile Eats as a formed portfolio company."
+      "action": "Use state/holding-company-objective-coverage.json as the prompt-to-artifact checklist; keep state/zeststream-portfolio-company-registry.json current and attach signed owner-operator, equity/cap-table, and first paying-customer receipts before counting Mobile Eats as a formed portfolio company."
     },
     {
       "owner": "flywheel/skillos",

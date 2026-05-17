@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-objective-coverage/v1/schema.json",
+  "title": "ZestStream Holding Company Objective Coverage v1",
+  "description": "Prompt-to-artifact coverage matrix for the standing ZestStream Holding Company Goal.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "objective",
+    "objective_status",
+    "coverage_status",
+    "source_goal_ref",
+    "audit_ref",
+    "summary_counts",
+    "requirements",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_objective_coverage.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "objective": {
+      "const": "ZestStream Holding Company Goal"
+    },
+    "objective_status": {
+      "const": "standing_non_closing"
+    },
+    "coverage_status": {
+      "type": "string",
+      "enum": [
+        "not_complete",
+        "complete"
+      ]
+    },
+    "source_goal_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "audit_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "summary_counts": {
+      "type": "object",
+      "required": [
+        "proven",
+        "partial",
+        "blocked",
+        "deferred",
+        "total"
+      ],
+      "properties": {
+        "proven": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "partial": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "blocked": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "deferred": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/requirement"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "requirement": {
+      "type": "object",
+      "required": [
+        "requirement_id",
+        "section",
+        "requirement_text",
+        "coverage_status",
+        "primary_evidence_ref",
+        "evidence_refs",
+        "finding"
+      ],
+      "properties": {
+        "requirement_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_]{1,96}$"
+        },
+        "section": {
+          "type": "string",
+          "enum": [
+            "identity",
+            "loop",
+            "canonical_gate",
+            "recent_progress",
+            "plain_english",
+            "success"
+          ]
+        },
+        "requirement_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "coverage_status": {
+          "type": "string",
+          "enum": [
+            "proven",
+            "partial",
+            "blocked",
+            "deferred"
+          ]
+        },
+        "primary_evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "finding": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
