@@ -1,26 +1,34 @@
 {
   "schema_version": "zeststream.holding_company_public_story.v1",
-  "generated_at": "2026-05-17T09:43:00Z",
+  "generated_at": "2026-05-17T09:51:00Z",
   "gate": "public_story_receipts",
   "required_story": "show_the_receipts_not_build_the_apps",
-  "clear_count": 0,
+  "clear_count": 1,
   "surfaces": [
     {
       "surface_id": "zeststream-v2-fresh-public-story",
       "surface_kind": "repo",
       "surface_ref": "/Users/josh/Developer/zeststream-v2-fresh",
-      "status": "needs_rewrite",
-      "receipt_story_present": false,
-      "holding_company_positioning_present": false,
-      "proof_or_receipt_refs": [],
+      "status": "clear",
+      "receipt_story_present": true,
+      "holding_company_positioning_present": true,
+      "proof_or_receipt_refs": [
+        "state/holding-company-public-story-route-20260517T0948Z.json",
+        "state/holding-company-mobile-eats-shipping.json",
+        "state/holding-company-objective-coverage.json",
+        "state/holding-company-anthropic-adoption.json",
+        "state/holding-company-skillos-forever-os-lock.json"
+      ],
       "build_app_framing_hits": [],
       "evidence_refs": [
         "state/holding-company-anti-pitch-voice.json",
         "state/holding-company-historical-builder-summary-retirement-20260517T0942Z.json",
+        "state/holding-company-public-story-route-20260517T0948Z.json",
         "docs/concepts/evidence-contracts.md",
-        "/Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md"
+        "/Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md",
+        "/Users/josh/Developer/zeststream-v2-fresh/src/app/portfolio/page.tsx"
       ],
-      "notes": "The known historical builder/automation summary hits are removed. This surface is still not public-story clear until a durable committed receipt-led holding-company narrative and proof refs are present."
+      "notes": "The durable /portfolio route now presents the receipt-led holding-company story: no vanity launch count, Mobile Eats as formation evidence, shared substrate, and proof before launch claims."
     }
   ],
   "notes": [

@@ -1,0 +1,76 @@
+{
+  "schema_version": "zeststream.holding_company_public_story_route.v1",
+  "generated_at": "2026-05-17T09:48:00Z",
+  "bead_id": "flywheel-y3gy3",
+  "source_goal": "ZestStream Holding Company Goal",
+  "target_repo": "/Users/josh/Developer/zeststream-v2-fresh",
+  "target_repo_commit": "5f830dea",
+  "changed_files": [
+    "/Users/josh/Developer/zeststream-v2-fresh/src/app/portfolio/page.tsx",
+    "/Users/josh/Developer/zeststream-v2-fresh/src/app/workflow-factory/page.tsx",
+    "/Users/josh/Developer/zeststream-v2-fresh/src/app/roi-calculator/page.tsx",
+    "/Users/josh/Developer/zeststream-v2-fresh/src/data/local-landing-content.ts",
+    "/Users/josh/Developer/flywheel/state/holding-company-anti-pitch-voice.json",
+    "/Users/josh/Developer/flywheel/tests/holding-company-anti-pitch-voice.sh",
+    "/Users/josh/Developer/flywheel/state/holding-company-public-story.json",
+    "/Users/josh/Developer/flywheel/tests/holding-company-public-story.sh",
+    "/Users/josh/Developer/flywheel/state/holding-company-public-story-route-20260517T0948Z.json"
+  ],
+  "public_surface": {
+    "route": "/portfolio",
+    "posture": "holding_company_not_services_shop",
+    "story_claims": [
+      "sharpen legacy and incubate new",
+      "no launch claim without owner-operator and first-customer receipts",
+      "Mobile Eats is formation evidence, not a vanity launch count",
+      "SkillOS, flywheel, JSM, and @zeststream packages are the shared substrate",
+      "the public story is show the receipts, not build the apps"
+    ],
+    "retired_routes": [
+      "/workflow-factory",
+      "/roi-calculator"
+    ]
+  },
+  "proof_refs": [
+    "state/holding-company-mobile-eats-shipping.json",
+    "state/holding-company-objective-coverage.json",
+    "state/holding-company-anthropic-adoption.json",
+    "state/holding-company-skillos-forever-os-lock.json",
+    "state/holding-company-historical-builder-summary-retirement-20260517T0942Z.json"
+  ],
+  "excluded_uncommitted_surfaces": [
+    {
+      "path": "/Users/josh/Developer/zeststream-v2-fresh/src/app/owner-operator",
+      "reason": "Ungrounded owner-deal/legal/economic claims remain draft work and were intentionally not included in the public-story clear receipt."
+    },
+    {
+      "path": "/Users/josh/Developer/zeststream-v2-fresh/src/app/legal",
+      "reason": "Ungrounded legal-substrate claims remain draft work and were intentionally not included in the public-story clear receipt."
+    },
+    {
+      "path": "/Users/josh/Developer/zeststream-v2-fresh/src/app/about/page.tsx",
+      "reason": "About-page draft edits remain outside this route-focused receipt."
+    }
+  ],
+  "validation": [
+    {
+      "command": "rg -n \"\\\\b(we|We|our|Our|us|Us)\\\\b|platform|ecosystem|handoff|artifact|deliverable|workflow-builder|custom-app-builder|AI-automation|AI automation|workflow builds|build apps|Contact sales|AI Workflow Builder|Your Stack\\\\.Our Automation|Process Automation|Workflow Builder\" src/app/portfolio/page.tsx src/app/workflow-factory/page.tsx src/app/roi-calculator/page.tsx SPRINT_VALIDATION_SUMMARY.md src/data/local-landing-content.ts",
+      "status": "pass_no_matches"
+    },
+    {
+      "command": "git diff --cached --check -- src/data/local-landing-content.ts src/app/portfolio/page.tsx src/app/workflow-factory/page.tsx src/app/roi-calculator/page.tsx",
+      "status": "pass"
+    },
+    {
+      "command": "npm run lint -- src/data/local-landing-content.ts src/app/portfolio/page.tsx src/app/workflow-factory/page.tsx src/app/roi-calculator/page.tsx",
+      "status": "blocked",
+      "reason": "eslint not found in checkout"
+    },
+    {
+      "command": "npm run typecheck",
+      "status": "blocked",
+      "reason": "missing type packages in checkout"
+    }
+  ],
+  "status": "public_story_route_committed"
+}

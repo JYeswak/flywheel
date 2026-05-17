@@ -34,7 +34,7 @@ jq empty "$SCHEMA" && pass "schema json valid" || fail "schema json valid"
 jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
-assert_jq "$TMP/current.json" '.status == "pass" and .clear_count == 0 and .surfaces[0].public_story_gate_status == "blocked" and .surfaces[0].build_app_framing_hit_count == 0' "current ledger validates and blocks public story"
+assert_jq "$TMP/current.json" '.status == "pass" and .clear_count == 1 and .surfaces[0].public_story_gate_status == "clear" and .surfaces[0].build_app_framing_hit_count == 0' "current ledger validates as public story clear"
 
 jq '
   .clear_count = 1
@@ -47,7 +47,13 @@ jq '
 "$SCRIPT" --ledger "$TMP/clear.json" --json >"$TMP/clear.out.json"
 assert_jq "$TMP/clear.out.json" '.status == "pass" and .clear_count == 1 and .surfaces[0].public_story_gate_status == "clear"' "receipt-led public story clears"
 
-jq '.surfaces[0].status = "clear" | .surfaces[0].receipt_story_present = true | .surfaces[0].holding_company_positioning_present = true | .surfaces[0].build_app_framing_hits = []' "$LEDGER" >"$TMP/no-receipts.json"
+jq '
+  .surfaces[0].status = "clear"
+  | .surfaces[0].receipt_story_present = true
+  | .surfaces[0].holding_company_positioning_present = true
+  | .surfaces[0].proof_or_receipt_refs = []
+  | .surfaces[0].build_app_framing_hits = []
+' "$LEDGER" >"$TMP/no-receipts.json"
 if "$SCRIPT" --ledger "$TMP/no-receipts.json" --json >"$TMP/no-receipts.out.json" 2>/dev/null; then
   fail "clear without receipt refs rejected"
 else
@@ -72,7 +78,7 @@ else
   assert_jq "$TMP/with-builder.out.json" '.failures[] | select(.code == "public_story_clear_with_build_app_framing")' "clear with build-app framing rejected"
 fi
 
-jq '.clear_count = 1' "$LEDGER" >"$TMP/bad-count.json"
+jq '.clear_count = 0' "$LEDGER" >"$TMP/bad-count.json"
 if "$SCRIPT" --ledger "$TMP/bad-count.json" --json >"$TMP/bad-count.out.json" 2>/dev/null; then
   fail "public story clear count mismatch rejected"
 else
