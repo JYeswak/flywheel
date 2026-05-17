@@ -2145,6 +2145,17 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "expected": expected_status,
                     }
                 )
+            finding = requirement.get("finding")
+            if requirement_id == "management_plane_portfolio" and (
+                not isinstance(finding, str) or str(counted_portfolio_companies) not in finding
+            ):
+                failures.append(
+                    {
+                        "code": "portfolio_finding_missing_counted_company_count",
+                        "requirement_id": requirement_id,
+                        "counted_portfolio_companies": counted_portfolio_companies,
+                    }
+                )
         portfolio_existence_requirement = requirements_by_id.get("portfolio_company_existence_gate")
         if portfolio_existence_requirement is not None:
             evidence_refs = portfolio_existence_requirement.get("evidence_refs", [])

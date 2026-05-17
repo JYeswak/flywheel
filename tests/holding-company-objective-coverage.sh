@@ -121,6 +121,13 @@ else
   assert_jq "$TMP/management-plane-underclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_zero_portfolio_registry" and .requirement_id == "management_plane_portfolio" and .expected == "partial")' "zero-portfolio registry rejects management-plane underclaim"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "management_plane_portfolio") | .finding) = "The registry and gate audit exist, but counted portfolio companies changed."' "$LEDGER" >"$TMP/stale-management-registry-count.json"
+if "$SCRIPT" --ledger "$TMP/stale-management-registry-count.json" --json >"$TMP/stale-management-registry-count.out.json" 2>/dev/null; then
+  fail "management-plane stale registry count finding rejected"
+else
+  assert_jq "$TMP/stale-management-registry-count.out.json" '.failures[] | select(.code == "portfolio_finding_missing_counted_company_count" and .requirement_id == "management_plane_portfolio" and .counted_portfolio_companies == 0)' "management-plane stale registry count finding rejected"
+fi
+
 jq '.objective_status = "one_off_project"' "$ROOT/state/zeststream-holding-company-gate-audit-20260517T0646Z.json" >"$TMP/wrong-audit.json"
 jq --arg old "state/zeststream-holding-company-gate-audit-20260517T0646Z.json" --arg audit "$TMP/wrong-audit.json" '
   .audit_ref = $audit
