@@ -69,6 +69,11 @@
       "result": "brand voice gate exists; current config still anchors the older SMB time-back canon, not the full holding-company story"
     },
     {
+      "kind": "brand_voice_skill_alignment_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-brand-voice-skill.json",
+      "result": "brand voice skill alignment ledger exists and validates; current clear_count is 0 because the JSM-managed skill has grounding rules but does not yet prove holding-company canon or explicit anti-builder rejection"
+    },
+    {
       "kind": "public_surface_probe",
       "path": "/Users/josh/Developer/zeststream-v2-fresh",
       "result": "targeted grep found old automation/custom-app/workflow-builder language in content and app code; mission-alignment drift remains"
@@ -249,6 +254,17 @@
         "/Users/josh/Developer/zeststream-v2-fresh"
       ],
       "finding": "The anti-pitch voice gate is now machine-checkable. Current ledger blocks public-clear status because zeststream-v2-fresh still contains workflow-builder and automation-positioning hits and does not yet carry the sharpen-legacy/incubate-new holding-company story."
+    },
+    {
+      "gate": "brand_voice_skill_alignment",
+      "status": "blocked_stale_skill_canon",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-brand-voice-skill.json",
+        "/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml",
+        "/Users/josh/Developer/flywheel/state/holding-company-anti-pitch-voice.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-public-story.json"
+      ],
+      "finding": "The brand voice skill alignment gate is now machine-checkable separately from public-surface anti-pitch checks. Current ledger blocks skill-alignment clear because the JSM-managed voice yaml still uses the older SMB time-back primary canon and has no approved JSM workflow receipt proving holding-company canon plus explicit workflow-builder/custom-app-builder rejection."
     },
     {
       "gate": "yuzu_owner_operator_voice",
@@ -444,8 +460,8 @@
     },
     {
       "claim": "zeststream-brand-voice enforces canon and grounding",
-      "status": "proven_for_existing_voice_partial_for_new_story",
-      "finding": "The skill exists with banned words, grounding rules, and scorer gates. Its current canonical line is still the older SMB time-back positioning, so it needs a holding-company alignment update before it enforces the new anti-pitch rule."
+      "status": "blocked_stale_skill_canon",
+      "finding": "The skill exists with banned words, grounding rules, and scorer gates, and state/holding-company-brand-voice-skill.json now makes the remaining gap replayable. Its current canonical line is still the older SMB time-back positioning and lacks an approved JSM workflow receipt proving the holding-company anti-builder rule."
     },
     {
       "claim": "SkillOS Forever-OS v3 ratified and structure locked",
@@ -468,7 +484,7 @@
     },
     {
       "owner": "zeststream-brand-voice",
-      "action": "Use state/holding-company-anti-pitch-voice.json to drive rewrite/removal of builder-framed surfaces and then update the JSM-managed voice skill through its approved workflow."
+      "action": "Use state/holding-company-brand-voice-skill.json and state/holding-company-anti-pitch-voice.json to update the JSM-managed voice skill through its approved workflow; attach the JSM receipt before marking skill alignment clear."
     },
     {
       "owner": "zeststream-v2-fresh",

@@ -1,0 +1,34 @@
+{
+  "schema_version": "zeststream.holding_company_brand_voice_skill.v1",
+  "generated_at": "2026-05-17T08:54:00Z",
+  "gate": "brand_voice_skill_alignment",
+  "required_positioning": "sharpen_legacy_incubate_new_not_builder",
+  "clear_count": 0,
+  "skills": [
+    {
+      "skill_id": "zeststream-brand-voice",
+      "status": "blocked",
+      "skill_path": "/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml",
+      "jsm_managed": true,
+      "holding_company_canon_present": false,
+      "grounding_rules_present": true,
+      "builder_frame_rejection_present": false,
+      "approved_update_receipt": null,
+      "current_primary_canon": "I help SMB owners buy their time back.",
+      "required_positioning": "sharpen_legacy_incubate_new_not_builder",
+      "evidence_refs": [
+        "/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml",
+        "state/holding-company-anti-pitch-voice.json",
+        "state/holding-company-public-story.json",
+        "state/holding-company-shared-stack.json"
+      ],
+      "notes": "Current voice yaml has cite-or-omit grounding and ungrounded auto-reject rules, but canon.primary is still the older SMB time-back positioning and explicit holding-company anti-builder framing is not proven inside the JSM-managed skill."
+    }
+  ],
+  "notes": [
+    "This ledger verifies the skill contract itself, not public-surface copy. Public surfaces remain covered by anti-pitch and public-story ledgers.",
+    "Do not edit the JSM-managed skill directly from this lane; clear status requires an approved JSM workflow receipt.",
+    "Brand voice skill clear requires holding-company canon, grounding, and explicit rejection of workflow-builder/custom-app-builder framing."
+  ],
+  "next_action": "Update zeststream-brand-voice through the approved JSM workflow, attach the owner receipt, and rerun this validator before marking the skill alignment clear."
+}
