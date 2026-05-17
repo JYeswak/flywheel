@@ -136,6 +136,20 @@ else
   assert_jq "$TMP/missing-validator-ref.out.json" '.failures[] | select(.code == "claim_missing_validator_or_ledger_ref" and .claim_id == "anthropic_adoption")' "missing claim validator ref rejected"
 fi
 
+jq '(.claims[] | select(.claim_id == "anthropic_adoption") | .ledger_ref) = "state/no-such-holding-company-ledger.json"' "$RECEIPT" >"$TMP/missing-ledger-path.json"
+if "$SCRIPT" --receipt "$TMP/missing-ledger-path.json" --check-paths --json >"$TMP/missing-ledger-path.out.json" 2>/dev/null; then
+  fail "missing claim ledger path rejected"
+else
+  assert_jq "$TMP/missing-ledger-path.out.json" '.failures[] | select(.code == "ledger_ref_missing" and .claim_id == "anthropic_adoption")' "missing claim ledger path rejected"
+fi
+
+jq '(.claims[] | select(.claim_id == "anthropic_adoption") | .validator) = ".flywheel/scripts/no-such-holding-company-validator.py"' "$RECEIPT" >"$TMP/missing-validator-path.json"
+if "$SCRIPT" --receipt "$TMP/missing-validator-path.json" --check-paths --json >"$TMP/missing-validator-path.out.json" 2>/dev/null; then
+  fail "missing claim validator path rejected"
+else
+  assert_jq "$TMP/missing-validator-path.out.json" '.failures[] | select(.code == "validator_ref_missing" and .claim_id == "anthropic_adoption")' "missing claim validator path rejected"
+fi
+
 jq '(.claims[] | select(.claim_id == "progress_velocity") | .claim_text) = "4,000+ commits in 7 days across 9 product surfaces."' "$RECEIPT" >"$TMP/progress-overclaim.json"
 if "$SCRIPT" --receipt "$TMP/progress-overclaim.json" --json >"$TMP/progress-overclaim.out.json" 2>/dev/null; then
   fail "progress velocity overclaim rejected"
