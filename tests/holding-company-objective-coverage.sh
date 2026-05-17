@@ -467,6 +467,13 @@ else
   assert_jq "$TMP/missing-brand-voice-skill-ref.out.json" '.failures[] | select(.code == "brand_voice_requirement_missing_brand_voice_skill_ref" and .requirement_id == "recent_brand_voice_claim")' "brand voice requirement missing brand-voice skill ref rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "recent_brand_voice_claim") | .finding) = "The skill has canon and cite-or-omit grounding rules, and public-surface anti-pitch evidence is now clear."' "$LEDGER" >"$TMP/stale-brand-voice-jsm-caveat-finding.json"
+if "$SCRIPT" --ledger "$TMP/stale-brand-voice-jsm-caveat-finding.json" --json >"$TMP/stale-brand-voice-jsm-caveat-finding.out.json" 2>/dev/null; then
+  fail "brand voice stale JSM update caveat finding rejected"
+else
+  assert_jq "$TMP/stale-brand-voice-jsm-caveat-finding.out.json" '.failures[] | select(.code == "brand_voice_finding_missing_jsm_update_caveat" and .requirement_id == "recent_brand_voice_claim")' "brand voice stale JSM update caveat finding rejected"
+fi
+
 jq '(.requirements[] | select(.requirement_id == "no_custom_apps_positioning") | .evidence_refs) -= ["state/holding-company-anti-pitch-voice.json"]' "$LEDGER" >"$TMP/missing-no-custom-anti-pitch-ref.json"
 if "$SCRIPT" --ledger "$TMP/missing-no-custom-anti-pitch-ref.json" --json >"$TMP/missing-no-custom-anti-pitch-ref.out.json" 2>/dev/null; then
   fail "no-custom-apps requirement missing anti-pitch ref rejected"

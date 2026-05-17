@@ -1665,6 +1665,28 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                     "requirement_id": "recent_brand_voice_claim",
                 }
             )
+        has_jsm_update_gap = any(
+            isinstance(skill, dict)
+            and skill.get("status") == "blocked"
+            and skill.get("jsm_managed") is True
+            and (
+                not has_ref(skill.get("approved_update_receipt"))
+                or skill.get("builder_frame_rejection_present") is not True
+                or skill.get("holding_company_canon_present") is not True
+            )
+            for skill in brand_voice_receipt.get("skills", [])
+        )
+        finding = brand_voice_requirement.get("finding")
+        finding_text = finding.lower() if isinstance(finding, str) else ""
+        if has_jsm_update_gap and (
+            "jsm" not in finding_text or "approved" not in finding_text or "builder" not in finding_text
+        ):
+            failures.append(
+                {
+                    "code": "brand_voice_finding_missing_jsm_update_caveat",
+                    "requirement_id": "recent_brand_voice_claim",
+                }
+            )
 
     no_custom_apps_requirement = requirements_by_id.get("no_custom_apps_positioning")
     if no_custom_apps_requirement is not None:
