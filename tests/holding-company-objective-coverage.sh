@@ -100,6 +100,24 @@ else
   assert_jq "$TMP/missing-claim-honesty-ref.out.json" '.failures[] | select(.code == "recent_progress_requirement_missing_claim_honesty_ref" and .requirement_id == "recent_mobile_eats_shipping_claim")' "recent-progress missing claim-honesty ref rejected"
 fi
 
+jq '
+  (.requirements[] | select(.requirement_id == "portfolio_company_existence_gate") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/portfolio-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/portfolio-overclaim.json" --json >"$TMP/portfolio-overclaim.out.json" 2>/dev/null; then
+  fail "zero-portfolio registry overclaim rejected"
+else
+  assert_jq "$TMP/portfolio-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_zero_portfolio_registry" and .requirement_id == "portfolio_company_existence_gate" and .expected == "blocked")' "zero-portfolio registry overclaim rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "one_year_small_portfolio_making_money") | .evidence_refs) -= ["state/zeststream-portfolio-company-registry.json"]' "$LEDGER" >"$TMP/missing-registry-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-registry-ref.json" --json >"$TMP/missing-registry-ref.out.json" 2>/dev/null; then
+  fail "portfolio requirement missing registry ref rejected"
+else
+  assert_jq "$TMP/missing-registry-ref.out.json" '.failures[] | select(.code == "portfolio_requirement_missing_registry_ref" and .requirement_id == "one_year_small_portfolio_making_money")' "portfolio requirement missing registry ref rejected"
+fi
+
 jq '.coverage_status = "complete"' "$LEDGER" >"$TMP/complete.json"
 if "$SCRIPT" --ledger "$TMP/complete.json" --json >"$TMP/complete.out.json" 2>/dev/null; then
   fail "standing goal completion claim rejected"

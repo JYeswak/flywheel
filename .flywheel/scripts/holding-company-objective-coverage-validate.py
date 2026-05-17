@@ -52,12 +52,20 @@ REQUIRED_REQUIREMENT_IDS = {
 REQUIRED_VALIDATION_COMMAND_ID = "standing_goal_aggregate"
 REQUIRED_VALIDATION_COMMAND = "bash tests/zeststream-holding-company-standing-goal.sh"
 REQUIRED_VALIDATION_COVERAGE = "state/zeststream-portfolio-company-registry.json"
+PORTFOLIO_REGISTRY_REF = "state/zeststream-portfolio-company-registry.json"
 RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 RECENT_PROGRESS_REQUIREMENT_CLAIMS = {
     "recent_anthropic_adoption_claim": "anthropic_adoption",
     "recent_mobile_eats_shipping_claim": "mobile_eats_shipping",
     "recent_progress_velocity_claim": "progress_velocity",
     "recent_skillos_forever_os_claim": "skillos_forever_os_lock",
+}
+ZERO_PORTFOLIO_REQUIREMENT_STATUSES = {
+    "management_plane_portfolio": "partial",
+    "pour_loop": "blocked",
+    "portfolio_company_existence_gate": "blocked",
+    "each_business_own_brand_owner_customers": "blocked",
+    "one_year_small_portfolio_making_money": "blocked",
 }
 
 
@@ -138,6 +146,39 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         failures.append({"code": "standing_goal_cannot_be_complete"})
     if ledger.get("coverage_status") == "not_complete" and computed_counts["blocked"] == 0 and computed_counts["partial"] == 0:
         failures.append({"code": "not_complete_without_open_gaps"})
+
+    portfolio_registry_path = path_for_ref(PORTFOLIO_REGISTRY_REF)
+    counted_portfolio_companies = None
+    if portfolio_registry_path is not None and portfolio_registry_path.exists():
+        portfolio_registry = load_json(portfolio_registry_path)
+        counted_portfolio_companies = portfolio_registry.get("counted_portfolio_companies")
+    else:
+        failures.append({"code": "portfolio_registry_ref_missing", "ref": PORTFOLIO_REGISTRY_REF})
+
+    if counted_portfolio_companies == 0:
+        for requirement_id, expected_status in ZERO_PORTFOLIO_REQUIREMENT_STATUSES.items():
+            requirement = requirements_by_id.get(requirement_id)
+            if requirement is None:
+                continue
+            evidence_refs = requirement.get("evidence_refs", [])
+            if PORTFOLIO_REGISTRY_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "portfolio_requirement_missing_registry_ref",
+                        "requirement_id": requirement_id,
+                        "required_ref": PORTFOLIO_REGISTRY_REF,
+                    }
+                )
+            if requirement.get("coverage_status") != expected_status:
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_zero_portfolio_registry",
+                        "requirement_id": requirement_id,
+                        "counted_portfolio_companies": counted_portfolio_companies,
+                        "claimed": requirement.get("coverage_status"),
+                        "expected": expected_status,
+                    }
+                )
 
     claim_honesty_path = path_for_ref(RECENT_PROGRESS_CLAIM_HONESTY_REF)
     claim_status_by_id: dict[str, Any] = {}
