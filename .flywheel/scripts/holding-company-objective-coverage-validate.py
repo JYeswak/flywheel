@@ -58,6 +58,7 @@ LEGAL_STRUCTURE_REF = "state/holding-company-legal-structure.json"
 SUSTAINABLE_PACE_REF = "state/holding-company-sustainable-pace.json"
 OWNER_SEARCH_PHASING_REF = "state/holding-company-owner-search-phasing.json"
 OWNER_ECONOMICS_REF = "state/holding-company-owner-economics.json"
+PEEL_INTERVIEWS_REF = "state/holding-company-peel-interviews.json"
 RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 RECENT_PROGRESS_REQUIREMENT_CLAIMS = {
     "recent_anthropic_adoption_claim": "anthropic_adoption",
@@ -89,6 +90,8 @@ OWNER_ECONOMICS_REQUIRED_REFS = {
     "legal_review_ref",
     "substrate_share_receipt",
 }
+PEEL_QUALIFYING_URGENCY = {"medium", "strong"}
+PEEL_QUALIFYING_SOURCE_CHANNELS = {"client_talk", "community", "field_trip"}
 
 
 def load_json(path: Path) -> Any:
@@ -251,6 +254,43 @@ def owner_economics_gate_status(receipt: dict[str, Any]) -> str:
             and all(distribution_min <= value <= distribution_max for value in distribution_values)
         )
         if has_ref(deal.get("owner_operator_slug")) and owner_equity_ok and holding_equity_ok and refs_ok and distribution_bounds_ok:
+            return "clear"
+    return "blocked"
+
+
+def peel_interview_qualifies(interview: dict[str, Any]) -> bool:
+    signal = interview.get("buying_signal", {})
+    return bool(
+        isinstance(signal, dict)
+        and signal.get("would_buy") is True
+        and signal.get("urgency") in PEEL_QUALIFYING_URGENCY
+        and has_ref(signal.get("price_point"))
+        and has_ref(signal.get("evidence_ref"))
+        and has_ref(interview.get("pain_point"))
+        and has_ref(interview.get("current_alternative"))
+    )
+
+
+def peel_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("formation_cash_clear_count")
+    required = receipt.get("required_qualified_interviews", 5)
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1 or not isinstance(required, int):
+        return "blocked"
+    for candidate in receipt.get("candidates", []):
+        if not isinstance(candidate, dict) or candidate.get("formation_cash_status") not in {"clear", "committed"}:
+            continue
+        source = candidate.get("candidate_source") if isinstance(candidate.get("candidate_source"), dict) else {}
+        source_clear = (
+            source.get("source_channel") in PEEL_QUALIFYING_SOURCE_CHANNELS
+            and has_ref(source.get("source_ref"))
+            and has_ref(source.get("evidence_ref"))
+        )
+        qualified_count = sum(
+            1
+            for interview in candidate.get("interviews", [])
+            if isinstance(interview, dict) and peel_interview_qualifies(interview)
+        )
+        if source_clear and qualified_count >= required:
             return "clear"
     return "blocked"
 
@@ -455,6 +495,32 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "owner_economics_ref_missing", "ref": OWNER_ECONOMICS_REF})
+
+    peel_interviews_path = path_for_ref(PEEL_INTERVIEWS_REF)
+    if peel_interviews_path is not None and peel_interviews_path.exists():
+        peel_status = peel_gate_status(load_json(peel_interviews_path))
+        peel_requirement = requirements_by_id.get("peel_loop")
+        if peel_requirement is not None:
+            evidence_refs = peel_requirement.get("evidence_refs", [])
+            if PEEL_INTERVIEWS_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "peel_requirement_missing_interviews_ref",
+                        "requirement_id": "peel_loop",
+                        "required_ref": PEEL_INTERVIEWS_REF,
+                    }
+                )
+            if peel_status == "blocked" and peel_requirement.get("coverage_status") != "blocked":
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_peel_interviews_receipt",
+                        "requirement_id": "peel_loop",
+                        "claimed": peel_requirement.get("coverage_status"),
+                        "evidence_status": peel_status,
+                    }
+                )
+    else:
+        failures.append({"code": "peel_interviews_ref_missing", "ref": PEEL_INTERVIEWS_REF})
 
     portfolio_registry_path = path_for_ref(PORTFOLIO_REGISTRY_REF)
     counted_portfolio_companies = None

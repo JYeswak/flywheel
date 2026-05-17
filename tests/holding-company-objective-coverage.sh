@@ -217,6 +217,24 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "peel_loop") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/peel-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/peel-overclaim.json" --json >"$TMP/peel-overclaim.out.json" 2>/dev/null; then
+  fail "blocked PEEL receipt rejects PEEL status promotion"
+else
+  assert_jq "$TMP/peel-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_peel_interviews_receipt" and .requirement_id == "peel_loop" and .evidence_status == "blocked")' "blocked PEEL receipt rejects PEEL status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "peel_loop") | .evidence_refs) -= ["state/holding-company-peel-interviews.json"]' "$LEDGER" >"$TMP/missing-peel-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-peel-ref.json" --json >"$TMP/missing-peel-ref.out.json" 2>/dev/null; then
+  fail "PEEL requirement missing interview receipt ref rejected"
+else
+  assert_jq "$TMP/missing-peel-ref.out.json" '.failures[] | select(.code == "peel_requirement_missing_interviews_ref" and .requirement_id == "peel_loop")' "PEEL requirement missing interview receipt ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "peel_loop") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
   | .summary_counts.blocked -= 1
