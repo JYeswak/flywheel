@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
-SCRIPT="$ROOT/.flywheel/scripts/holding-company-runway-validate.py"
+SCRIPT="$ROOT/.flywheel/scripts/holding-company-runway-receipt-validate.py"
 SCHEMA="$ROOT/.flywheel/validation-schema/v1/holding-company-runway-receipt.schema.json"
 RECEIPT="$ROOT/state/holding-company-runway-current.json"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/holding-company-runway.XXXXXX")"
