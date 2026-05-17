@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SCHEMA = ROOT / ".flywheel/validation-schema/v1/holding-company-mobile-eats-shipping.schema.json"
 DEFAULT_LEDGER = ROOT / "state/holding-company-mobile-eats-shipping.json"
 SECRETISH_RE = re.compile(r"(\$[0-9]|sk-[A-Za-z0-9]|AKIA[0-9A-Z]{16})")
+FIRST_PORTFOLIO_COMPANY_OVERCLAIM_RE = re.compile(r"\bfirst\s+portfolio\s+company\b", re.IGNORECASE)
 FORMATION_RECEIPT_FIELDS = (
     "signed_owner_operator_receipt",
     "equity_receipt",
@@ -65,6 +66,10 @@ def has_secretish_string(value: Any) -> bool:
 
 def has_ref(value: Any) -> bool:
     return isinstance(value, str) and bool(value.strip())
+
+
+def first_portfolio_company_overclaim(value: Any) -> bool:
+    return isinstance(value, str) and bool(FIRST_PORTFOLIO_COMPANY_OVERCLAIM_RE.search(value))
 
 
 def registry_company(registry: dict[str, Any] | None, slug: str) -> dict[str, Any] | None:
@@ -173,6 +178,16 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
         for field in FORMATION_RECEIPT_FIELDS:
             if not has_ref(ledger.get(field)):
                 failures.append({"code": f"proven_without_{field}"})
+    if (
+        status != "proven"
+        and (
+            ledger.get("counted_as_portfolio_company") is not True
+            or ledger.get("first_portfolio_company_claim_clear") is not True
+            or not formation_receipts_present
+        )
+        and first_portfolio_company_overclaim(ledger.get("claim_text"))
+    ):
+        failures.append({"code": "claim_text_overstates_first_portfolio_company"})
 
     if status == "proven" and product_substrate_present and formation_receipts_present and portfolio_claim_clear:
         gate_status = "proven"

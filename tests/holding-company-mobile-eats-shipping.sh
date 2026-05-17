@@ -48,6 +48,21 @@ jq '
 "$SCRIPT" --ledger "$TMP/proven.json" --json >"$TMP/proven.out.json"
 assert_jq "$TMP/proven.out.json" '.status == "pass" and .mobile_eats_shipping_gate_status == "proven" and .formation_receipts_present == true' "formed portfolio company claim clears with formation receipts"
 
+jq '
+  .status = "partial"
+  | .claim_text = "mobile-eats shipping; first portfolio company on shared substrate with 9+ @zeststream/* package adoptions."
+  | .counted_as_portfolio_company = false
+  | .first_portfolio_company_claim_clear = false
+  | .signed_owner_operator_receipt = null
+  | .equity_receipt = null
+  | .first_paying_customer_receipt = null
+' "$LEDGER" >"$TMP/partial-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/partial-overclaim.json" --json >"$TMP/partial-overclaim.out.json" 2>/dev/null; then
+  fail "partial first portfolio company overclaim rejected"
+else
+  assert_jq "$TMP/partial-overclaim.out.json" '.failures[] | select(.code == "claim_text_overstates_first_portfolio_company")' "partial first portfolio company overclaim rejected"
+fi
+
 jq '.status = "proven"' "$LEDGER" >"$TMP/proven-current.json"
 if "$SCRIPT" --ledger "$TMP/proven-current.json" --json >"$TMP/proven-current.out.json" 2>/dev/null; then
   fail "proven without counted portfolio company rejected"
