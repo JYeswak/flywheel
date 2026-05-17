@@ -36,6 +36,13 @@ jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
 assert_jq "$TMP/current.json" '.status == "pass" and .clear_count == 0 and .posts[0].founder_post_voice_gate_status == "blocked" and .posts[0].claim_fact_check_status == "fail"' "current founder post validates and blocks voice clear"
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid founder post ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid founder post ledger rejected"
+fi
+
 jq '
   .clear_count = 1
   | .posts[0].status = "clear"
@@ -47,6 +54,13 @@ jq '
 ' "$LEDGER" >"$TMP/clear.json"
 "$SCRIPT" --ledger "$TMP/clear.json" --json >"$TMP/clear.out.json"
 assert_jq "$TMP/clear.out.json" '.status == "pass" and .clear_count == 1 and .posts[0].founder_post_voice_gate_status == "clear"' "fact-checked holding-company founder post clears"
+
+jq '.posts[0].notes = ("sk-" + "NOTAREALSECRET")' "$TMP/clear.json" >"$TMP/secret-shaped-value.json"
+if "$SCRIPT" --ledger "$TMP/secret-shaped-value.json" --json >"$TMP/secret-shaped-value.out.json" 2>/dev/null; then
+  fail "secret-shaped founder post value rejected"
+else
+  assert_jq "$TMP/secret-shaped-value.out.json" '.status == "fail" and (.failures[] | select(.code == "secret_or_raw_value_shape_detected"))' "secret-shaped founder post value rejected"
+fi
 
 jq '.posts[0].holding_company_positioning_present = false' "$TMP/clear.json" >"$TMP/no-positioning.json"
 if "$SCRIPT" --ledger "$TMP/no-positioning.json" --json >"$TMP/no-positioning.out.json" 2>/dev/null; then
