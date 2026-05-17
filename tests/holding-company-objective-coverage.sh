@@ -207,6 +207,23 @@ else
   assert_jq "$TMP/missing-command-script.out.json" '.failures[] | select(.code == "validation_command_script_missing")' "missing validation command script rejected"
 fi
 
+mkdir "$TMP/not-a-script-dir"
+jq --arg command "bash $TMP/not-a-script-dir" '.validation_commands += [{"command_id":"not_file_probe","command":$command}]' "$LEDGER" >"$TMP/not-file-command-script.json"
+if "$SCRIPT" --ledger "$TMP/not-file-command-script.json" --check-paths --json >"$TMP/not-file-command-script.out.json" 2>/dev/null; then
+  fail "validation command directory path rejected"
+else
+  assert_jq "$TMP/not-file-command-script.out.json" '.failures[] | select(.code == "validation_command_script_not_file" and .command_id == "not_file_probe")' "validation command directory path rejected"
+fi
+
+printf '%s\n' '#!/usr/bin/env bash' 'exit 0' >"$TMP/not-executable-script.sh"
+chmod 0644 "$TMP/not-executable-script.sh"
+jq --arg command "bash $TMP/not-executable-script.sh" '.validation_commands += [{"command_id":"not_executable_probe","command":$command}]' "$LEDGER" >"$TMP/not-executable-command-script.json"
+if "$SCRIPT" --ledger "$TMP/not-executable-command-script.json" --check-paths --json >"$TMP/not-executable-command-script.out.json" 2>/dev/null; then
+  fail "validation command non-executable script rejected"
+else
+  assert_jq "$TMP/not-executable-command-script.out.json" '.failures[] | select(.code == "validation_command_script_not_executable" and .command_id == "not_executable_probe")' "validation command non-executable script rejected"
+fi
+
 jq '
   (.requirements[] | select(.requirement_id == "recent_progress_velocity_claim") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
