@@ -179,6 +179,7 @@
       "evidence_refs": [
         "state/holding-company-anti-pitch-voice.json",
         "state/holding-company-public-story-route-20260517T0948Z.json",
+        "state/holding-company-public-surface-audit-supersession-20260517T1004Z.json",
         "state/holding-company-founder-post-voice.json",
         "state/holding-company-brand-voice-skill.json"
       ],
@@ -285,7 +286,8 @@
       "evidence_refs": [
         "state/holding-company-public-story.json",
         "state/holding-company-anti-pitch-voice.json",
-        "state/holding-company-public-story-route-20260517T0948Z.json"
+        "state/holding-company-public-story-route-20260517T0948Z.json",
+        "state/holding-company-public-surface-audit-supersession-20260517T1004Z.json"
       ],
       "finding": "The committed /portfolio route and retired builder-route redirects prove the current public positioning is no longer custom-app/workflow-builder framed. This remains partial because uncommitted owner/legal/about drafts were excluded from the clear receipt and need separate grounding before publication."
     },
@@ -348,6 +350,7 @@
       "evidence_refs": [
         "state/holding-company-public-story.json",
         "state/holding-company-public-story-route-20260517T0948Z.json",
+        "state/holding-company-public-surface-audit-supersession-20260517T1004Z.json",
         "state/holding-company-founder-post-voice.json"
       ],
       "finding": "The committed /portfolio route clears the receipt-led website story with proof refs and zero build-app framing. Founder-post voice remains not clear, so the broader public-story requirement is partial."
@@ -366,7 +369,8 @@
   ],
   "notes": [
     "This is a prompt-to-artifact checklist, not a completion claim.",
-    "The standing holding-company objective cannot be marked complete; this matrix records current coverage and blockers."
+    "The standing holding-company objective cannot be marked complete; this matrix records current coverage and blockers.",
+    "The 2026-05-17T06:46Z gate audit is historical; public-surface builder-framing rows in it are superseded by state/holding-company-public-surface-audit-supersession-20260517T1004Z.json."
   ],
   "next_action": "Use this matrix as the closeout checklist for future holding-company passes; fill blocked rows with durable receipts rather than treating proxy tests as completion."
 }

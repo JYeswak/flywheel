@@ -1,0 +1,58 @@
+{
+  "schema_version": "zeststream.holding_company_public_surface_audit_supersession.v1",
+  "generated_at": "2026-05-17T10:04:00Z",
+  "bead_id": "flywheel-cbt1q",
+  "source_goal": "ZestStream Holding Company Goal",
+  "supersedes_audit_ref": "state/zeststream-holding-company-gate-audit-20260517T0646Z.json",
+  "superseded_findings": [
+    {
+      "path": "evidence_checked[public_surface_probe]",
+      "previous_result": "targeted grep found old automation/custom-app/workflow-builder language in content and app code; mission-alignment drift remains",
+      "current_disposition": "superseded_by_public_surface_clear_receipts"
+    },
+    {
+      "path": "evidence_checked[anti_pitch_voice_ledger]",
+      "previous_result": "anti-pitch voice ledger exists and validates; current clear_count is 0 because zeststream-v2-fresh still has workflow-builder and automation-positioning hits",
+      "current_disposition": "superseded_by_anti_pitch_voice_clear_receipt"
+    },
+    {
+      "path": "canonical_gates[anti_pitch_voice]",
+      "previous_status": "blocked_builder_framing",
+      "current_disposition": "superseded_by_anti_pitch_voice_partial_gate"
+    },
+    {
+      "path": "canonical_gates[public_story_receipts]",
+      "previous_status": "blocked_public_story",
+      "current_disposition": "superseded_by_public_story_partial_gate"
+    },
+    {
+      "path": "next_actions[zeststream-public-story]",
+      "previous_action": "Fill state/holding-company-public-story.json with receipt/proof refs and holding-company positioning after removing build-app/workflow-builder framing from public surfaces.",
+      "current_disposition": "superseded_by_public_story_gate_maintenance_action"
+    }
+  ],
+  "current_receipts": [
+    "state/holding-company-anti-pitch-active-content-repair-20260517T0935Z.json",
+    "state/holding-company-historical-builder-summary-retirement-20260517T0942Z.json",
+    "state/holding-company-public-story-route-20260517T0948Z.json",
+    "state/holding-company-anti-pitch-voice.json",
+    "state/holding-company-public-story.json",
+    "state/holding-company-objective-coverage.json"
+  ],
+  "current_status": {
+    "anti_pitch_voice_surface_status": "clear",
+    "public_story_surface_status": "clear",
+    "objective_coverage_status": "not_complete",
+    "objective_counts_unchanged": {
+      "proven": 2,
+      "partial": 8,
+      "blocked": 17,
+      "deferred": 2,
+      "total": 29
+    }
+  },
+  "notes": [
+    "This receipt does not rewrite the 06:46 audit; it records which public-surface findings are now historical.",
+    "The broader anti-pitch and public-story gates remain partial because founder-post and JSM-managed brand-voice skill alignment are still open."
+  ]
+}
