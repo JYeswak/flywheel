@@ -80,6 +80,27 @@ else
   pass "SkillOS active text avoids structure-lock overclaim"
 fi
 
+jq 'del(.claims[] | select(.claim_id == "progress_velocity"))' "$RECEIPT" >"$TMP/missing-claim-id.json"
+if "$SCRIPT" --receipt "$TMP/missing-claim-id.json" --json >"$TMP/missing-claim-id.out.json" 2>/dev/null; then
+  fail "missing recent-progress claim id rejected"
+else
+  assert_jq "$TMP/missing-claim-id.out.json" '.failures[] | select(.code == "missing_claim_ids" and (.claim_ids | index("progress_velocity")))' "missing recent-progress claim id rejected"
+fi
+
+jq '.claims += [(.claims[0] | .claim_id = "unexpected_claim")]' "$RECEIPT" >"$TMP/unknown-claim-id.json"
+if "$SCRIPT" --receipt "$TMP/unknown-claim-id.json" --json >"$TMP/unknown-claim-id.out.json" 2>/dev/null; then
+  fail "unknown recent-progress claim id rejected"
+else
+  assert_jq "$TMP/unknown-claim-id.out.json" '.failures[] | select(.code == "unknown_claim_ids" and (.claim_ids | index("unexpected_claim")))' "unknown recent-progress claim id rejected"
+fi
+
+jq '.claims += [.claims[0]]' "$RECEIPT" >"$TMP/duplicate-claim-id.json"
+if "$SCRIPT" --receipt "$TMP/duplicate-claim-id.json" --json >"$TMP/duplicate-claim-id.out.json" 2>/dev/null; then
+  fail "duplicate recent-progress claim id rejected"
+else
+  assert_jq "$TMP/duplicate-claim-id.out.json" '.failures[] | select(.code == "duplicate_claim_id" and (.claim_ids | index("anthropic_adoption")))' "duplicate recent-progress claim id rejected"
+fi
+
 jq '(.claims[] | select(.claim_id == "progress_velocity") | .claim_text) = "4,000+ commits in 7 days across 9 product surfaces."' "$RECEIPT" >"$TMP/progress-overclaim.json"
 if "$SCRIPT" --receipt "$TMP/progress-overclaim.json" --json >"$TMP/progress-overclaim.out.json" 2>/dev/null; then
   fail "progress velocity overclaim rejected"
