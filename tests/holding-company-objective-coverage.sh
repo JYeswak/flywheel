@@ -101,6 +101,61 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "anti_pitch_voice_gate") | .coverage_status) = "proven"
+  | .summary_counts.proven += 1
+  | .summary_counts.partial -= 1
+' "$LEDGER" >"$TMP/anti-pitch-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/anti-pitch-overclaim.json" --json >"$TMP/anti-pitch-overclaim.out.json" 2>/dev/null; then
+  fail "blocked adjacent voice receipts reject anti-pitch proven claim"
+else
+  assert_jq "$TMP/anti-pitch-overclaim.out.json" '.failures[] | select(.code == "proven_requirement_has_blocked_brand_voice_skill_receipt" and .requirement_id == "anti_pitch_voice_gate")' "blocked brand-voice receipt rejects anti-pitch proven claim"
+  assert_jq "$TMP/anti-pitch-overclaim.out.json" '.failures[] | select(.code == "proven_requirement_has_blocked_founder_post_voice_receipt" and .requirement_id == "anti_pitch_voice_gate")' "blocked founder-post receipt rejects anti-pitch proven claim"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "anti_pitch_voice_gate") | .evidence_refs) -= ["state/holding-company-brand-voice-skill.json"]' "$LEDGER" >"$TMP/missing-anti-pitch-brand-voice-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-anti-pitch-brand-voice-ref.json" --json >"$TMP/missing-anti-pitch-brand-voice-ref.out.json" 2>/dev/null; then
+  fail "anti-pitch requirement missing brand-voice ref rejected"
+else
+  assert_jq "$TMP/missing-anti-pitch-brand-voice-ref.out.json" '.failures[] | select(.code == "anti_pitch_requirement_missing_brand_voice_skill_ref" and .requirement_id == "anti_pitch_voice_gate")' "anti-pitch requirement missing brand-voice ref rejected"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "recent_brand_voice_claim") | .coverage_status) = "proven"
+  | .summary_counts.proven += 1
+  | .summary_counts.partial -= 1
+' "$LEDGER" >"$TMP/brand-voice-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/brand-voice-overclaim.json" --json >"$TMP/brand-voice-overclaim.out.json" 2>/dev/null; then
+  fail "blocked brand-voice receipt rejects brand voice proven claim"
+else
+  assert_jq "$TMP/brand-voice-overclaim.out.json" '.failures[] | select(.code == "proven_requirement_has_blocked_brand_voice_skill_receipt" and .requirement_id == "recent_brand_voice_claim")' "blocked brand-voice receipt rejects brand voice proven claim"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "no_custom_apps_positioning") | .evidence_refs) -= ["state/holding-company-anti-pitch-voice.json"]' "$LEDGER" >"$TMP/missing-no-custom-anti-pitch-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-no-custom-anti-pitch-ref.json" --json >"$TMP/missing-no-custom-anti-pitch-ref.out.json" 2>/dev/null; then
+  fail "no-custom-apps requirement missing anti-pitch ref rejected"
+else
+  assert_jq "$TMP/missing-no-custom-anti-pitch-ref.out.json" '.failures[] | select(.code == "no_custom_apps_requirement_missing_anti_pitch_voice_ref" and .requirement_id == "no_custom_apps_positioning")' "no-custom-apps requirement missing anti-pitch ref rejected"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "public_story_show_receipts") | .coverage_status) = "proven"
+  | .summary_counts.proven += 1
+  | .summary_counts.partial -= 1
+' "$LEDGER" >"$TMP/public-story-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/public-story-overclaim.json" --json >"$TMP/public-story-overclaim.out.json" 2>/dev/null; then
+  fail "blocked founder-post receipt rejects public story proven claim"
+else
+  assert_jq "$TMP/public-story-overclaim.out.json" '.failures[] | select(.code == "proven_requirement_has_blocked_founder_post_voice_receipt" and .requirement_id == "public_story_show_receipts")' "blocked founder-post receipt rejects public story proven claim"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "public_story_show_receipts") | .evidence_refs) -= ["state/holding-company-founder-post-voice.json"]' "$LEDGER" >"$TMP/missing-public-story-founder-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-public-story-founder-ref.json" --json >"$TMP/missing-public-story-founder-ref.out.json" 2>/dev/null; then
+  fail "public-story requirement missing founder-post ref rejected"
+else
+  assert_jq "$TMP/missing-public-story-founder-ref.out.json" '.failures[] | select(.code == "public_story_requirement_missing_founder_post_voice_ref" and .requirement_id == "public_story_show_receipts")' "public-story requirement missing founder-post ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "portfolio_company_existence_gate") | .coverage_status) = "partial"
   | .summary_counts.partial += 1
   | .summary_counts.blocked -= 1

@@ -60,6 +60,10 @@ OWNER_SEARCH_PHASING_REF = "state/holding-company-owner-search-phasing.json"
 OWNER_ECONOMICS_REF = "state/holding-company-owner-economics.json"
 CANDIDATE_FIT_REF = "state/holding-company-candidate-fit.json"
 OWNER_VOICE_REF = "state/holding-company-owner-voice.json"
+ANTI_PITCH_VOICE_REF = "state/holding-company-anti-pitch-voice.json"
+PUBLIC_STORY_REF = "state/holding-company-public-story.json"
+BRAND_VOICE_SKILL_REF = "state/holding-company-brand-voice-skill.json"
+FOUNDER_POST_VOICE_REF = "state/holding-company-founder-post-voice.json"
 PEEL_INTERVIEWS_REF = "state/holding-company-peel-interviews.json"
 PRESS_READINESS_REF = "state/holding-company-press-readiness.json"
 POUR_READINESS_REF = "state/holding-company-pour-readiness.json"
@@ -107,6 +111,10 @@ OWNER_VOICE_REQUIRED_REFS = {
     "yuzu_review_ref",
     "public_surface_ref",
 }
+PUBLIC_POSITIONING_REQUIRED = "sharpen_legacy_incubate_new_not_builder"
+BRAND_VOICE_CLEAR_STATUSES = {"aligned", "clear"}
+FOUNDER_POST_CLEAR_STATUSES = {"clear", "ratified"}
+FOUNDER_POST_FACT_CHECK_CLEAR = {"pass", "no_claims"}
 PEEL_QUALIFYING_URGENCY = {"medium", "strong"}
 PEEL_QUALIFYING_SOURCE_CHANNELS = {"client_talk", "community", "field_trip"}
 PRESS_CLEAR_STATUSES = {"press_clear", "formation_ready"}
@@ -355,6 +363,76 @@ def owner_voice_gate_status(receipt: dict[str, Any]) -> str:
             and surface.get("owner_voice_present") is True
             and surface.get("community_context_present") is True
             and surface.get("zeststream_meta_voice_detected") is False
+        ):
+            return "clear"
+    return "blocked"
+
+
+def anti_pitch_voice_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    for surface in receipt.get("surfaces", []):
+        if not isinstance(surface, dict) or surface.get("status") != "clear":
+            continue
+        if surface.get("holding_company_story_present") is True and not surface.get("builder_framing_hits", []):
+            return "clear"
+    return "blocked"
+
+
+def public_story_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    for surface in receipt.get("surfaces", []):
+        if not isinstance(surface, dict) or surface.get("status") != "clear":
+            continue
+        if (
+            surface.get("receipt_story_present") is True
+            and surface.get("holding_company_positioning_present") is True
+            and bool(surface.get("proof_or_receipt_refs", []))
+            and not surface.get("build_app_framing_hits", [])
+        ):
+            return "clear"
+    return "blocked"
+
+
+def brand_voice_skill_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    if receipt.get("required_positioning") != PUBLIC_POSITIONING_REQUIRED:
+        return "blocked"
+    for skill in receipt.get("skills", []):
+        if not isinstance(skill, dict) or skill.get("status") not in BRAND_VOICE_CLEAR_STATUSES:
+            continue
+        if (
+            skill.get("jsm_managed") is True
+            and skill.get("holding_company_canon_present") is True
+            and skill.get("grounding_rules_present") is True
+            and skill.get("builder_frame_rejection_present") is True
+            and has_ref(skill.get("approved_update_receipt"))
+            and skill.get("required_positioning") == PUBLIC_POSITIONING_REQUIRED
+        ):
+            return "clear"
+    return "blocked"
+
+
+def founder_post_voice_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    for post in receipt.get("posts", []):
+        if not isinstance(post, dict) or post.get("status") not in FOUNDER_POST_CLEAR_STATUSES:
+            continue
+        if (
+            post.get("holding_company_positioning_present") is True
+            and post.get("receipt_story_present") is True
+            and bool(post.get("proof_or_receipt_refs", []))
+            and not post.get("builder_framing_hits", [])
+            and post.get("claim_fact_check_status") in FOUNDER_POST_FACT_CHECK_CLEAR
+            and post.get("human_ratification_required") is True
+            and has_ref(post.get("publisher_receipt_ref"))
         ):
             return "clear"
     return "blocked"
@@ -765,6 +843,127 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                     "requirement_id": "customer_smb_owner_operator",
                     "claimed": customer_requirement.get("coverage_status"),
                     "evidence_status": owner_voice_status,
+                }
+            )
+
+    public_receipt_statuses: dict[str, str | None] = {
+        "anti_pitch": None,
+        "public_story": None,
+        "brand_voice": None,
+        "founder_post": None,
+    }
+    anti_pitch_voice_path = path_for_ref(ANTI_PITCH_VOICE_REF)
+    public_story_path = path_for_ref(PUBLIC_STORY_REF)
+    brand_voice_skill_path = path_for_ref(BRAND_VOICE_SKILL_REF)
+    founder_post_voice_path = path_for_ref(FOUNDER_POST_VOICE_REF)
+    if anti_pitch_voice_path is not None and anti_pitch_voice_path.exists():
+        public_receipt_statuses["anti_pitch"] = anti_pitch_voice_gate_status(load_json(anti_pitch_voice_path))
+    else:
+        failures.append({"code": "anti_pitch_voice_ref_missing", "ref": ANTI_PITCH_VOICE_REF})
+    if public_story_path is not None and public_story_path.exists():
+        public_receipt_statuses["public_story"] = public_story_gate_status(load_json(public_story_path))
+    else:
+        failures.append({"code": "public_story_ref_missing", "ref": PUBLIC_STORY_REF})
+    if brand_voice_skill_path is not None and brand_voice_skill_path.exists():
+        public_receipt_statuses["brand_voice"] = brand_voice_skill_gate_status(load_json(brand_voice_skill_path))
+    else:
+        failures.append({"code": "brand_voice_skill_ref_missing", "ref": BRAND_VOICE_SKILL_REF})
+    if founder_post_voice_path is not None and founder_post_voice_path.exists():
+        public_receipt_statuses["founder_post"] = founder_post_voice_gate_status(load_json(founder_post_voice_path))
+    else:
+        failures.append({"code": "founder_post_voice_ref_missing", "ref": FOUNDER_POST_VOICE_REF})
+
+    anti_pitch_requirement = requirements_by_id.get("anti_pitch_voice_gate")
+    if anti_pitch_requirement is not None:
+        evidence_refs = anti_pitch_requirement.get("evidence_refs", [])
+        for required_ref, code in (
+            (ANTI_PITCH_VOICE_REF, "anti_pitch_requirement_missing_anti_pitch_voice_ref"),
+            (BRAND_VOICE_SKILL_REF, "anti_pitch_requirement_missing_brand_voice_skill_ref"),
+            (FOUNDER_POST_VOICE_REF, "anti_pitch_requirement_missing_founder_post_voice_ref"),
+        ):
+            if required_ref not in evidence_refs:
+                failures.append({"code": code, "requirement_id": "anti_pitch_voice_gate", "required_ref": required_ref})
+        if public_receipt_statuses["anti_pitch"] == "blocked" and anti_pitch_requirement.get("coverage_status") != "blocked":
+            failures.append(
+                {
+                    "code": "requirement_status_mismatch_with_anti_pitch_voice_receipt",
+                    "requirement_id": "anti_pitch_voice_gate",
+                    "claimed": anti_pitch_requirement.get("coverage_status"),
+                    "evidence_status": public_receipt_statuses["anti_pitch"],
+                }
+            )
+        for status_key, code in (
+            ("brand_voice", "proven_requirement_has_blocked_brand_voice_skill_receipt"),
+            ("founder_post", "proven_requirement_has_blocked_founder_post_voice_receipt"),
+        ):
+            if public_receipt_statuses[status_key] == "blocked" and anti_pitch_requirement.get("coverage_status") == "proven":
+                failures.append({"code": code, "requirement_id": "anti_pitch_voice_gate"})
+
+    brand_voice_requirement = requirements_by_id.get("recent_brand_voice_claim")
+    if brand_voice_requirement is not None:
+        evidence_refs = brand_voice_requirement.get("evidence_refs", [])
+        if BRAND_VOICE_SKILL_REF not in evidence_refs:
+            failures.append(
+                {
+                    "code": "brand_voice_requirement_missing_brand_voice_skill_ref",
+                    "requirement_id": "recent_brand_voice_claim",
+                    "required_ref": BRAND_VOICE_SKILL_REF,
+                }
+            )
+        if public_receipt_statuses["brand_voice"] == "blocked" and brand_voice_requirement.get("coverage_status") == "proven":
+            failures.append(
+                {
+                    "code": "proven_requirement_has_blocked_brand_voice_skill_receipt",
+                    "requirement_id": "recent_brand_voice_claim",
+                }
+            )
+
+    no_custom_apps_requirement = requirements_by_id.get("no_custom_apps_positioning")
+    if no_custom_apps_requirement is not None:
+        evidence_refs = no_custom_apps_requirement.get("evidence_refs", [])
+        for required_ref, code in (
+            (PUBLIC_STORY_REF, "no_custom_apps_requirement_missing_public_story_ref"),
+            (ANTI_PITCH_VOICE_REF, "no_custom_apps_requirement_missing_anti_pitch_voice_ref"),
+        ):
+            if required_ref not in evidence_refs:
+                failures.append({"code": code, "requirement_id": "no_custom_apps_positioning", "required_ref": required_ref})
+        for status_key, code in (
+            ("public_story", "requirement_status_mismatch_with_public_story_receipt"),
+            ("anti_pitch", "requirement_status_mismatch_with_anti_pitch_voice_receipt"),
+        ):
+            if public_receipt_statuses[status_key] == "blocked" and no_custom_apps_requirement.get("coverage_status") != "blocked":
+                failures.append(
+                    {
+                        "code": code,
+                        "requirement_id": "no_custom_apps_positioning",
+                        "claimed": no_custom_apps_requirement.get("coverage_status"),
+                        "evidence_status": public_receipt_statuses[status_key],
+                    }
+                )
+
+    public_story_requirement = requirements_by_id.get("public_story_show_receipts")
+    if public_story_requirement is not None:
+        evidence_refs = public_story_requirement.get("evidence_refs", [])
+        for required_ref, code in (
+            (PUBLIC_STORY_REF, "public_story_requirement_missing_public_story_ref"),
+            (FOUNDER_POST_VOICE_REF, "public_story_requirement_missing_founder_post_voice_ref"),
+        ):
+            if required_ref not in evidence_refs:
+                failures.append({"code": code, "requirement_id": "public_story_show_receipts", "required_ref": required_ref})
+        if public_receipt_statuses["public_story"] == "blocked" and public_story_requirement.get("coverage_status") != "blocked":
+            failures.append(
+                {
+                    "code": "requirement_status_mismatch_with_public_story_receipt",
+                    "requirement_id": "public_story_show_receipts",
+                    "claimed": public_story_requirement.get("coverage_status"),
+                    "evidence_status": public_receipt_statuses["public_story"],
+                }
+            )
+        if public_receipt_statuses["founder_post"] == "blocked" and public_story_requirement.get("coverage_status") == "proven":
+            failures.append(
+                {
+                    "code": "proven_requirement_has_blocked_founder_post_voice_receipt",
+                    "requirement_id": "public_story_show_receipts",
                 }
             )
 
