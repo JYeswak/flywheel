@@ -364,6 +364,13 @@ else
   assert_jq "$TMP/missing-skillos-forever-ref.out.json" '.failures[] | select(.code == "skillos_forever_os_requirement_missing_lock_ref" and .requirement_id == "recent_skillos_forever_os_claim")' "SkillOS Forever-OS requirement missing lock receipt ref rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "recent_skillos_forever_os_claim") | .finding) = "V3 goal and operating receipts are present."' "$LEDGER" >"$TMP/stale-skillos-structure-lock-finding.json"
+if "$SCRIPT" --ledger "$TMP/stale-skillos-structure-lock-finding.json" --json >"$TMP/stale-skillos-structure-lock-finding.out.json" 2>/dev/null; then
+  fail "SkillOS Forever-OS stale structure-lock finding rejected"
+else
+  assert_jq "$TMP/stale-skillos-structure-lock-finding.out.json" '.failures[] | select(.code == "skillos_forever_os_finding_missing_structure_lock_caveat" and .requirement_id == "recent_skillos_forever_os_claim")' "SkillOS Forever-OS stale structure-lock finding rejected"
+fi
+
 jq '(.requirements[] | select(.requirement_id == "recent_mobile_eats_shipping_claim") | .evidence_refs) -= ["state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"]' "$LEDGER" >"$TMP/missing-claim-honesty-ref.json"
 if "$SCRIPT" --ledger "$TMP/missing-claim-honesty-ref.json" --json >"$TMP/missing-claim-honesty-ref.out.json" 2>/dev/null; then
   fail "recent-progress missing claim-honesty ref rejected"

@@ -1472,7 +1472,8 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
 
     skillos_forever_os_path = path_for_ref(SKILLOS_FOREVER_OS_LOCK_REF)
     if skillos_forever_os_path is not None and skillos_forever_os_path.exists():
-        skillos_forever_os_status = skillos_forever_os_lock_gate_status(load_json(skillos_forever_os_path))
+        skillos_forever_os_receipt = load_json(skillos_forever_os_path)
+        skillos_forever_os_status = skillos_forever_os_lock_gate_status(skillos_forever_os_receipt)
         skillos_forever_requirement = requirements_by_id.get("recent_skillos_forever_os_claim")
         if skillos_forever_requirement is not None:
             evidence_refs = skillos_forever_requirement.get("evidence_refs", [])
@@ -1493,6 +1494,16 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "evidence_status": skillos_forever_os_status,
                     }
                 )
+            if skillos_forever_os_receipt.get("structure_locked_20260517") is not True:
+                finding = skillos_forever_requirement.get("finding")
+                finding_text = finding.lower() if isinstance(finding, str) else ""
+                if "structure-lock" not in finding_text and "structure lock" not in finding_text:
+                    failures.append(
+                        {
+                            "code": "skillos_forever_os_finding_missing_structure_lock_caveat",
+                            "requirement_id": "recent_skillos_forever_os_claim",
+                        }
+                    )
     else:
         failures.append({"code": "skillos_forever_os_lock_ref_missing", "ref": SKILLOS_FOREVER_OS_LOCK_REF})
 
