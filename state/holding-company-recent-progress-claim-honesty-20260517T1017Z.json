@@ -1,0 +1,44 @@
+{
+  "schema_version": "zeststream.holding_company_recent_progress_claim_honesty.v1",
+  "generated_at": "2026-05-17T10:17:00Z",
+  "bead_id": "flywheel-masux",
+  "source_goal": "ZestStream Holding Company Goal",
+  "claims": [
+    {
+      "claim_id": "anthropic_adoption",
+      "ledger_ref": "state/holding-company-anthropic-adoption.json",
+      "validator": ".flywheel/scripts/holding-company-anthropic-adoption-validate.py",
+      "claim_text": "@zeststream/* adoption live: anthropic-sdk-python velocity OK across three consumer repos.",
+      "current_gate_status": "proven",
+      "claim_honesty_status": "safe_to_use"
+    },
+    {
+      "claim_id": "mobile_eats_shipping",
+      "ledger_ref": "state/holding-company-mobile-eats-shipping.json",
+      "validator": ".flywheel/scripts/holding-company-mobile-eats-shipping-validate.py",
+      "claim_text": "mobile-eats product/substrate shipping with 27 @zeststream/* package adoptions; first portfolio-company claim remains blocked pending owner, equity, and first-customer receipts.",
+      "current_gate_status": "partial",
+      "claim_honesty_status": "formation_claim_blocked_in_text"
+    },
+    {
+      "claim_id": "progress_velocity",
+      "ledger_ref": "state/holding-company-progress-velocity.json",
+      "validator": ".flywheel/scripts/holding-company-progress-velocity-validate.py",
+      "claim_text": "Sampled 3,755 commits in the fixed 7-day window across 9 local repos; the public velocity target remains blocked until the exact surface set and count clear.",
+      "current_gate_status": "blocked",
+      "claim_honesty_status": "public_target_blocked_in_text"
+    },
+    {
+      "claim_id": "skillos_forever_os_lock",
+      "ledger_ref": "state/holding-company-skillos-forever-os-lock.json",
+      "validator": ".flywheel/scripts/holding-company-skillos-forever-os-lock-validate.py",
+      "claim_text": "SkillOS Forever-OS v3 ratified 2026-05-16; structure-lock receipt pending for the 2026-05-17 lock claim.",
+      "current_gate_status": "partial",
+      "claim_honesty_status": "structure_lock_receipt_pending_in_text"
+    }
+  ],
+  "notes": [
+    "This receipt summarizes active recent-progress claim text only; historical audit rows remain historical and are not treated as current public wording.",
+    "Blocked or partial rows must name the missing receipt condition in claim_text instead of repeating the public-ready wording as a current fact."
+  ]
+}
