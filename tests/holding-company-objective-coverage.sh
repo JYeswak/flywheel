@@ -67,6 +67,35 @@ else
   assert_jq "$TMP/missing-management-audit-ref.out.json" '.failures[] | select(.code == "management_plane_requirement_missing_audit_ref" and .requirement_id == "management_plane_portfolio")' "management-plane requirement missing audit ref rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "management_plane_portfolio") | .evidence_refs) -= ["state/zeststream-portfolio-company-registry.json"]' "$LEDGER" >"$TMP/missing-management-registry-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-management-registry-ref.json" --json >"$TMP/missing-management-registry-ref.out.json" 2>/dev/null; then
+  fail "management-plane requirement missing registry ref rejected"
+else
+  assert_jq "$TMP/missing-management-registry-ref.out.json" '.failures[] | select(.code == "management_plane_requirement_missing_registry_ref" and .requirement_id == "management_plane_portfolio")' "management-plane requirement missing registry ref rejected"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "management_plane_portfolio") | .coverage_status) = "proven"
+  | .summary_counts.proven += 1
+  | .summary_counts.partial -= 1
+' "$LEDGER" >"$TMP/management-plane-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/management-plane-overclaim.json" --json >"$TMP/management-plane-overclaim.out.json" 2>/dev/null; then
+  fail "zero-portfolio registry rejects management-plane overclaim"
+else
+  assert_jq "$TMP/management-plane-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_zero_portfolio_registry" and .requirement_id == "management_plane_portfolio" and .expected == "partial")' "zero-portfolio registry rejects management-plane overclaim"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "management_plane_portfolio") | .coverage_status) = "blocked"
+  | .summary_counts.blocked += 1
+  | .summary_counts.partial -= 1
+' "$LEDGER" >"$TMP/management-plane-underclaim.json"
+if "$SCRIPT" --ledger "$TMP/management-plane-underclaim.json" --json >"$TMP/management-plane-underclaim.out.json" 2>/dev/null; then
+  fail "zero-portfolio registry rejects management-plane underclaim"
+else
+  assert_jq "$TMP/management-plane-underclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_zero_portfolio_registry" and .requirement_id == "management_plane_portfolio" and .expected == "partial")' "zero-portfolio registry rejects management-plane underclaim"
+fi
+
 jq '.objective_status = "one_off_project"' "$ROOT/state/zeststream-holding-company-gate-audit-20260517T0646Z.json" >"$TMP/wrong-audit.json"
 jq --arg old "state/zeststream-holding-company-gate-audit-20260517T0646Z.json" --arg audit "$TMP/wrong-audit.json" '
   .audit_ref = $audit
