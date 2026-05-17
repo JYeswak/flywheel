@@ -199,6 +199,11 @@ LIFECYCLE_DISPOSITION_REQUIRED_REFS = [
     "substrate_retention_ref",
     "brand_public_update_ref",
 ]
+SOURCE_GOAL_REQUIRED_PHRASES = [
+    "This is a standing operating system goal",
+    "the holding plane operates forever",
+    "ZestStream is the management plane",
+]
 
 
 def load_json(path: Path) -> Any:
@@ -218,6 +223,14 @@ def path_for_ref(ref: str) -> Path | None:
 def ref_exists(ref: str) -> bool:
     path = path_for_ref(ref)
     return True if path is None else path.exists()
+
+
+def ref_text_contains(ref: str, phrases: list[str]) -> bool:
+    path = path_for_ref(ref)
+    if path is None or not path.exists() or not path.is_file():
+        return False
+    text = path.read_text(encoding="utf-8")
+    return all(phrase in text for phrase in phrases)
 
 
 def script_path_for_command(command: str) -> Path | None:
@@ -774,6 +787,75 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
 
     if ledger.get("summary_counts") != computed_counts:
         failures.append({"code": "summary_counts_mismatch", "claimed": ledger.get("summary_counts"), "computed": computed_counts})
+
+    source_goal_ref = ledger.get("source_goal_ref")
+    audit_ref = ledger.get("audit_ref")
+    if ledger.get("objective_status") != "standing_non_closing":
+        failures.append({"code": "objective_status_not_standing_non_closing", "claimed": ledger.get("objective_status")})
+    if isinstance(source_goal_ref, str) and not ref_text_contains(source_goal_ref, SOURCE_GOAL_REQUIRED_PHRASES):
+        failures.append({"code": "source_goal_missing_required_identity_phrases", "ref": source_goal_ref})
+    if isinstance(audit_ref, str):
+        audit_path = path_for_ref(audit_ref)
+        if audit_path is not None and audit_path.exists():
+            audit = load_json(audit_path)
+            if audit.get("objective_status") != "standing_non_closing":
+                failures.append(
+                    {
+                        "code": "audit_objective_status_not_standing_non_closing",
+                        "ref": audit_ref,
+                        "claimed": audit.get("objective_status"),
+                    }
+                )
+            if audit.get("source_goal") != source_goal_ref:
+                failures.append(
+                    {
+                        "code": "audit_source_goal_mismatch",
+                        "ref": audit_ref,
+                        "claimed": audit.get("source_goal"),
+                        "expected": source_goal_ref,
+                    }
+                )
+            if audit.get("summary_verdict") != "active_with_receipt_gaps":
+                failures.append(
+                    {
+                        "code": "audit_summary_verdict_mismatch",
+                        "ref": audit_ref,
+                        "claimed": audit.get("summary_verdict"),
+                        "expected": "active_with_receipt_gaps",
+                    }
+                )
+
+    standing_requirement = requirements_by_id.get("standing_non_closing_goal")
+    if standing_requirement is not None:
+        evidence_refs = standing_requirement.get("evidence_refs", [])
+        for required_ref, code in (
+            (source_goal_ref, "standing_requirement_missing_source_goal_ref"),
+            (audit_ref, "standing_requirement_missing_audit_ref"),
+        ):
+            if isinstance(required_ref, str) and required_ref not in evidence_refs:
+                failures.append(
+                    {
+                        "code": code,
+                        "requirement_id": "standing_non_closing_goal",
+                        "required_ref": required_ref,
+                    }
+                )
+
+    management_requirement = requirements_by_id.get("management_plane_portfolio")
+    if management_requirement is not None:
+        evidence_refs = management_requirement.get("evidence_refs", [])
+        for required_ref, code in (
+            (PORTFOLIO_REGISTRY_REF, "management_plane_requirement_missing_registry_ref"),
+            (audit_ref, "management_plane_requirement_missing_audit_ref"),
+        ):
+            if isinstance(required_ref, str) and required_ref not in evidence_refs:
+                failures.append(
+                    {
+                        "code": code,
+                        "requirement_id": "management_plane_portfolio",
+                        "required_ref": required_ref,
+                    }
+                )
 
     if ledger.get("coverage_status") == "complete":
         failures.append({"code": "standing_goal_cannot_be_complete"})

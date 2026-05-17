@@ -39,6 +39,46 @@ assert_jq "$TMP/current.json" '.required_validation_command.command == "bash tes
 assert_jq "$LEDGER" 'any(.notes[]; contains("bash tests/zeststream-holding-company-standing-goal.sh"))' "coverage matrix names aggregate standing-goal validation"
 assert_jq "$LEDGER" '.validation_commands[] | select(.command_id == "standing_goal_aggregate" and .command == "bash tests/zeststream-holding-company-standing-goal.sh" and (.covers | index("state/zeststream-portfolio-company-registry.json")))' "coverage matrix structures aggregate validation command"
 
+jq '.objective_status = "one_off_project"' "$LEDGER" >"$TMP/wrong-objective-status.json"
+if "$SCRIPT" --ledger "$TMP/wrong-objective-status.json" --json >"$TMP/wrong-objective-status.out.json" 2>/dev/null; then
+  fail "non-standing objective status rejected"
+else
+  assert_jq "$TMP/wrong-objective-status.out.json" '.failures[] | select(.code == "objective_status_not_standing_non_closing")' "non-standing objective status rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "standing_non_closing_goal") | .evidence_refs) -= ["/Users/josh/Desktop/zeststream-goals/zeststream/holding-company-portfolio-20260516.txt"]' "$LEDGER" >"$TMP/missing-standing-source-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-standing-source-ref.json" --json >"$TMP/missing-standing-source-ref.out.json" 2>/dev/null; then
+  fail "standing requirement missing source goal ref rejected"
+else
+  assert_jq "$TMP/missing-standing-source-ref.out.json" '.failures[] | select(.code == "standing_requirement_missing_source_goal_ref" and .requirement_id == "standing_non_closing_goal")' "standing requirement missing source goal ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "standing_non_closing_goal") | .evidence_refs) -= ["state/zeststream-holding-company-gate-audit-20260517T0646Z.json"]' "$LEDGER" >"$TMP/missing-standing-audit-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-standing-audit-ref.json" --json >"$TMP/missing-standing-audit-ref.out.json" 2>/dev/null; then
+  fail "standing requirement missing audit ref rejected"
+else
+  assert_jq "$TMP/missing-standing-audit-ref.out.json" '.failures[] | select(.code == "standing_requirement_missing_audit_ref" and .requirement_id == "standing_non_closing_goal")' "standing requirement missing audit ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "management_plane_portfolio") | .evidence_refs) -= ["state/zeststream-holding-company-gate-audit-20260517T0646Z.json"]' "$LEDGER" >"$TMP/missing-management-audit-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-management-audit-ref.json" --json >"$TMP/missing-management-audit-ref.out.json" 2>/dev/null; then
+  fail "management-plane requirement missing audit ref rejected"
+else
+  assert_jq "$TMP/missing-management-audit-ref.out.json" '.failures[] | select(.code == "management_plane_requirement_missing_audit_ref" and .requirement_id == "management_plane_portfolio")' "management-plane requirement missing audit ref rejected"
+fi
+
+jq '.objective_status = "one_off_project"' "$ROOT/state/zeststream-holding-company-gate-audit-20260517T0646Z.json" >"$TMP/wrong-audit.json"
+jq --arg old "state/zeststream-holding-company-gate-audit-20260517T0646Z.json" --arg audit "$TMP/wrong-audit.json" '
+  .audit_ref = $audit
+  | (.requirements[] | select(.primary_evidence_ref == $old) | .primary_evidence_ref) = $audit
+  | (.requirements[] | .evidence_refs) |= map(if . == $old then $audit else . end)
+' "$LEDGER" >"$TMP/wrong-audit-ledger.json"
+if "$SCRIPT" --ledger "$TMP/wrong-audit-ledger.json" --json >"$TMP/wrong-audit-ledger.out.json" 2>/dev/null; then
+  fail "audit objective status drift rejected"
+else
+  assert_jq "$TMP/wrong-audit-ledger.out.json" '.failures[] | select(.code == "audit_objective_status_not_standing_non_closing")' "audit objective status drift rejected"
+fi
+
 jq 'del(.requirements[] | select(.requirement_id == "runway_gate")) | .summary_counts.total = 28 | .summary_counts.blocked = 20' "$LEDGER" >"$TMP/missing-id.json"
 if "$SCRIPT" --ledger "$TMP/missing-id.json" --json >"$TMP/missing-id.out.json" 2>/dev/null; then
   fail "missing required requirement rejected"
