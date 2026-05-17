@@ -18,6 +18,7 @@ This directory defines the first machine-readable receipt contract for validatin
 | `holding-company-launch-economics.schema.json` | ZestStream holding-company launch economics ledger; refuses N+1 cheaper-than-N claims without at least two comparable launch rows. |
 | `holding-company-runway-receipt.schema.json` | ZestStream holding-company redacted runway receipt; proves launch runway months without storing balances, burn-rate dollars, account identifiers, or secret material. |
 | `holding-company-peel-interviews.schema.json` | ZestStream holding-company PEEL interview ledger; refuses formation-cash clear/commit status without five qualified prospect interviews. |
+| `holding-company-owner-search-phasing.schema.json` | ZestStream holding-company owner-search phasing ledger; refuses public/cold sourcing before sub #3 and clear/signed status without phasing proof. |
 | `agent-security-control.schema.json` | JSON Schema contract for `agent-security-control/v1` security-control receipts. |
 | `fixtures/pass/*.json` | Receipts that must validate. |
 | `fixtures/fail/*.json` | Receipts that must be rejected with deterministic JSON errors. |

@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-owner-search-phasing/v1/schema.json",
+  "title": "ZestStream Holding Company Owner-Search Phasing v1",
+  "description": "Ledger for owner-search sourcing rules: subs 1-2 warm-network only, public open-call allowed from sub 3 onward.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "warm_network_only_through_sequence",
+    "public_open_call_min_sequence",
+    "phasing_clear_count",
+    "searches",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_owner_search_phasing.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "owner_search_phasing"
+    },
+    "warm_network_only_through_sequence": {
+      "const": 2
+    },
+    "public_open_call_min_sequence": {
+      "const": 3
+    },
+    "phasing_clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "searches": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/search"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "search": {
+      "type": "object",
+      "required": [
+        "candidate_slug",
+        "candidate_name",
+        "sequence",
+        "search_status",
+        "sourcing_channel",
+        "public_open_call_active",
+        "evidence_refs"
+      ],
+      "properties": {
+        "candidate_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "candidate_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "search_status": {
+          "type": "string",
+          "enum": [
+            "not_started",
+            "blocked",
+            "allowed",
+            "signed_owner",
+            "deferred"
+          ]
+        },
+        "sourcing_channel": {
+          "type": "string",
+          "enum": [
+            "unknown",
+            "warm_network",
+            "referral",
+            "client_talk",
+            "community",
+            "field_trip",
+            "public_open_call",
+            "inbound_public",
+            "cold_outreach"
+          ]
+        },
+        "public_open_call_active": {
+          "type": "boolean"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

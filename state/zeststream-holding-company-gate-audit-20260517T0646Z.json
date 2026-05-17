@@ -92,6 +92,11 @@
       "kind": "peel_interview_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-peel-interviews.json",
       "result": "PEEL interview gate ledger exists and validates; current formation_cash_clear_count is 0 because no candidate has five qualified prospect interviews"
+    },
+    {
+      "kind": "owner_search_phasing_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-owner-search-phasing.json",
+      "result": "owner-search phasing ledger exists and validates; current phasing_clear_count is 0 because sub #1 has no warm-network owner-search proof"
     }
   ],
   "canonical_gates": [
@@ -143,12 +148,13 @@
     },
     {
       "gate": "owner_search_phasing",
-      "status": "planned_not_proven",
+      "status": "blocked_no_warm_network_proof",
       "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-owner-search-phasing.json",
         "/Users/josh/Developer/skillos/state/holding-co-quant/CHANGES.md",
         "/Users/josh/Developer/skillos/state/mission-alignment/EXECUTION-PLAN.md"
       ],
-      "finding": "Warm-network-only sourcing for subs #1-2 is locked. No warm candidate list, outreach receipt, or signed owner receipt was located."
+      "finding": "Warm-network-only sourcing for subs #1-2 is now machine-checkable. Current ledger validates structurally but blocks sub #1 owner search because no warm-network source proof exists, and public/cold sourcing is rejected before sub #3."
     },
     {
       "gate": "shared_substrate",
@@ -232,6 +238,10 @@
     {
       "owner": "skillos/flywheel",
       "action": "Fill state/holding-company-peel-interviews.json with five qualified prospect interviews before clearing or committing formation cash for any candidate."
+    },
+    {
+      "owner": "skillos/flywheel",
+      "action": "Fill state/holding-company-owner-search-phasing.json with warm-network source proof before allowing or signing an owner for sub #1 or sub #2."
     },
     {
       "owner": "skillos/flywheel",
