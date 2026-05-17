@@ -67,5 +67,47 @@ else
   assert_jq "$TMP/two-row-false-pass.out.json" '.status == "fail" and (.failures[] | select(.code == "measured_pass_without_cheaper_pair"))' "false measured pass rejected"
 fi
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid ledger rejected"
+fi
+
+jq '.launches[0].sequence = 2' "$LEDGER" >"$TMP/sequence-gap.json"
+if "$SCRIPT" --ledger "$TMP/sequence-gap.json" --json >"$TMP/sequence-gap.out.json" 2>/dev/null; then
+  fail "sequence gap rejected"
+else
+  assert_jq "$TMP/sequence-gap.out.json" '.status == "fail" and (.failures[] | select(.code == "sequence_gap_or_duplicate"))' "sequence gap rejected"
+fi
+
+jq '.measurement_status = "baseline"' "$TMP/two-row-pass.json" >"$TMP/baseline-multiple.json"
+if "$SCRIPT" --ledger "$TMP/baseline-multiple.json" --json >"$TMP/baseline-multiple.out.json" 2>/dev/null; then
+  fail "baseline with multiple launches rejected"
+else
+  assert_jq "$TMP/baseline-multiple.out.json" '.status == "fail" and (.failures[] | select(.code == "baseline_status_with_multiple_launches"))' "baseline with multiple launches rejected"
+fi
+
+jq '.measurement_status = "measured_fail"' "$TMP/two-row-pass.json" >"$TMP/measured-fail-cheaper.json"
+if "$SCRIPT" --ledger "$TMP/measured-fail-cheaper.json" --json >"$TMP/measured-fail-cheaper.out.json" 2>/dev/null; then
+  fail "measured fail with cheaper pair rejected"
+else
+  assert_jq "$TMP/measured-fail-cheaper.out.json" '.status == "fail" and (.failures[] | select(.code == "measured_fail_but_cheaper_pair_exists"))' "measured fail with cheaper pair rejected"
+fi
+
+jq '.launches[0].substrate_share_receipt = "state/does-not-exist-launch-economics.json"' "$LEDGER" >"$TMP/missing-path.json"
+if "$SCRIPT" --ledger "$TMP/missing-path.json" --check-paths --json >"$TMP/missing-path.out.json" 2>/dev/null; then
+  fail "missing substrate path rejected"
+else
+  assert_jq "$TMP/missing-path.out.json" '.status == "fail" and (.failures[] | select(.code | startswith("path_missing:")))' "missing substrate path rejected"
+fi
+
+jq '.launches[0].evidence_refs = ["state/does-not-exist-launch-evidence.json"]' "$LEDGER" >"$TMP/missing-evidence.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence.json" --check-paths --json >"$TMP/missing-evidence.out.json" 2>/dev/null; then
+  fail "missing evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing evidence ref rejected"
+fi
+
 printf 'RESULT pass=%d fail=%d\n' "$pass_count" "$fail_count"
 exit "$fail_count"
