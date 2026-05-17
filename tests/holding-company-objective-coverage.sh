@@ -756,6 +756,13 @@ else
   assert_jq "$TMP/missing-n-plus-one-launch-ref.out.json" '.failures[] | select(.code == "n_plus_one_requirement_missing_launch_economics_ref" and .requirement_id == "n_plus_one_cheaper_than_n")' "N+1 requirement missing launch-economics receipt ref rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "n_plus_one_cheaper_than_n") | .evidence_refs) -= ["state/substrate-share/mobile-eats-20260517T0654Z.json"]' "$LEDGER" >"$TMP/missing-n-plus-one-substrate-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-n-plus-one-substrate-ref.json" --json >"$TMP/missing-n-plus-one-substrate-ref.out.json" 2>/dev/null; then
+  fail "N+1 requirement missing substrate-share receipt ref rejected"
+else
+  assert_jq "$TMP/missing-n-plus-one-substrate-ref.out.json" '.failures[] | select(.code == "n_plus_one_requirement_missing_substrate_share_ref" and .requirement_id == "n_plus_one_cheaper_than_n")' "N+1 requirement missing substrate-share receipt ref rejected"
+fi
+
 jq '
   (.requirements[] | select(.requirement_id == "recycle_loop") | .coverage_status) = "partial"
   | .summary_counts.partial += 1

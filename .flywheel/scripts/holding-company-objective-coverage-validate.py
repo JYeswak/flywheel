@@ -1840,6 +1840,14 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "required_ref": LAUNCH_ECONOMICS_REF,
                     }
                 )
+            if MOBILE_EATS_SUBSTRATE_SHARE_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "n_plus_one_requirement_missing_substrate_share_ref",
+                        "requirement_id": "n_plus_one_cheaper_than_n",
+                        "required_ref": MOBILE_EATS_SUBSTRATE_SHARE_REF,
+                    }
+                )
             if launch_economics_status == "blocked" and launch_economics_requirement.get("coverage_status") != "blocked":
                 failures.append(
                     {
