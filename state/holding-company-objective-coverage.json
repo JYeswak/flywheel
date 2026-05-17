@@ -1,6 +1,6 @@
 {
   "schema_version": "zeststream.holding_company_objective_coverage.v1",
-  "generated_at": "2026-05-17T09:56:00Z",
+  "generated_at": "2026-05-17T10:20:00Z",
   "objective": "ZestStream Holding Company Goal",
   "objective_status": "standing_non_closing",
   "coverage_status": "not_complete",
@@ -226,7 +226,8 @@
       "coverage_status": "blocked",
       "primary_evidence_ref": "state/holding-company-progress-velocity.json",
       "evidence_refs": [
-        "state/holding-company-progress-velocity.json"
+        "state/holding-company-progress-velocity.json",
+        "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
       ],
       "finding": "Replayable ledger blocks the claim at 3,755 sampled commits and no exact surface-set proof."
     },
@@ -238,7 +239,8 @@
       "primary_evidence_ref": "state/holding-company-mobile-eats-shipping.json",
       "evidence_refs": [
         "state/holding-company-mobile-eats-shipping.json",
-        "state/substrate-share/mobile-eats-20260517T0654Z.json"
+        "state/substrate-share/mobile-eats-20260517T0654Z.json",
+        "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
       ],
       "finding": "Product/substrate shipping and 27 packages are proven; first-portfolio-company proof is blocked."
     },
@@ -249,7 +251,8 @@
       "coverage_status": "proven",
       "primary_evidence_ref": "state/holding-company-anthropic-adoption.json",
       "evidence_refs": [
-        "state/holding-company-anthropic-adoption.json"
+        "state/holding-company-anthropic-adoption.json",
+        "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
       ],
       "finding": "Anthropic adoption ledger validates against SkillOS canonical gate and source pack-applied rows."
     },
@@ -273,7 +276,8 @@
       "coverage_status": "partial",
       "primary_evidence_ref": "state/holding-company-skillos-forever-os-lock.json",
       "evidence_refs": [
-        "state/holding-company-skillos-forever-os-lock.json"
+        "state/holding-company-skillos-forever-os-lock.json",
+        "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
       ],
       "finding": "V3 goal and operating receipts are present; distinct 2026-05-17 structure-lock receipt is missing."
     },
@@ -370,7 +374,8 @@
   "notes": [
     "This is a prompt-to-artifact checklist, not a completion claim.",
     "The standing holding-company objective cannot be marked complete; this matrix records current coverage and blockers.",
-    "The 2026-05-17T06:46Z gate audit is historical; public-surface builder-framing rows in it are superseded by state/holding-company-public-surface-audit-supersession-20260517T1004Z.json."
+    "The 2026-05-17T06:46Z gate audit is historical; public-surface builder-framing rows in it are superseded by state/holding-company-public-surface-audit-supersession-20260517T1004Z.json.",
+    "Recent-progress active claim text is summarized by state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json."
   ],
   "next_action": "Use this matrix as the closeout checklist for future holding-company passes; fill blocked rows with durable receipts rather than treating proxy tests as completion."
 }
