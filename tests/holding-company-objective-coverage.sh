@@ -674,6 +674,13 @@ else
   assert_jq "$TMP/missing-peel-ref.out.json" '.failures[] | select(.code == "peel_requirement_missing_interviews_ref" and .requirement_id == "peel_loop")' "PEEL requirement missing interview receipt ref rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "peel_loop") | .evidence_refs) -= ["state/holding-company-candidate-fit.json"]' "$LEDGER" >"$TMP/missing-peel-candidate-fit-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-peel-candidate-fit-ref.json" --json >"$TMP/missing-peel-candidate-fit-ref.out.json" 2>/dev/null; then
+  fail "PEEL requirement missing candidate-fit receipt ref rejected"
+else
+  assert_jq "$TMP/missing-peel-candidate-fit-ref.out.json" '.failures[] | select(.code == "peel_requirement_missing_candidate_fit_ref" and .requirement_id == "peel_loop")' "PEEL requirement missing candidate-fit receipt ref rejected"
+fi
+
 jq '
   (.requirements[] | select(.requirement_id == "press_loop") | .coverage_status) = "partial"
   | .summary_counts.partial += 1

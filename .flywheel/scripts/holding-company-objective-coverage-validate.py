@@ -1692,6 +1692,14 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "required_ref": PEEL_INTERVIEWS_REF,
                     }
                 )
+            if CANDIDATE_FIT_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "peel_requirement_missing_candidate_fit_ref",
+                        "requirement_id": "peel_loop",
+                        "required_ref": CANDIDATE_FIT_REF,
+                    }
+                )
             if peel_status == "blocked" and peel_requirement.get("coverage_status") != "blocked":
                 failures.append(
                     {
