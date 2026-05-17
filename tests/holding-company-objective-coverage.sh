@@ -217,6 +217,32 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "customer_smb_owner_operator") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/customer-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/customer-overclaim.json" --json >"$TMP/customer-overclaim.out.json" 2>/dev/null; then
+  fail "blocked customer evidence rejects customer status promotion"
+else
+  assert_jq "$TMP/customer-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_candidate_fit_receipt" and .requirement_id == "customer_smb_owner_operator" and .evidence_status == "blocked")' "blocked candidate-fit receipt rejects customer status promotion"
+  assert_jq "$TMP/customer-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_owner_voice_receipt" and .requirement_id == "customer_smb_owner_operator" and .evidence_status == "blocked")' "blocked owner-voice receipt rejects customer status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "customer_smb_owner_operator") | .evidence_refs) -= ["state/holding-company-candidate-fit.json"]' "$LEDGER" >"$TMP/missing-customer-candidate-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-customer-candidate-ref.json" --json >"$TMP/missing-customer-candidate-ref.out.json" 2>/dev/null; then
+  fail "customer requirement missing candidate-fit receipt ref rejected"
+else
+  assert_jq "$TMP/missing-customer-candidate-ref.out.json" '.failures[] | select(.code == "customer_requirement_missing_candidate_fit_ref" and .requirement_id == "customer_smb_owner_operator")' "customer requirement missing candidate-fit receipt ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "customer_smb_owner_operator") | .evidence_refs) -= ["state/holding-company-owner-voice.json"]' "$LEDGER" >"$TMP/missing-customer-owner-voice-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-customer-owner-voice-ref.json" --json >"$TMP/missing-customer-owner-voice-ref.out.json" 2>/dev/null; then
+  fail "customer requirement missing owner-voice receipt ref rejected"
+else
+  assert_jq "$TMP/missing-customer-owner-voice-ref.out.json" '.failures[] | select(.code == "customer_requirement_missing_owner_voice_ref" and .requirement_id == "customer_smb_owner_operator")' "customer requirement missing owner-voice receipt ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "peel_loop") | .coverage_status) = "partial"
   | .summary_counts.partial += 1
   | .summary_counts.blocked -= 1

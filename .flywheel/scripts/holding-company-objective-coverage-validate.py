@@ -58,6 +58,8 @@ LEGAL_STRUCTURE_REF = "state/holding-company-legal-structure.json"
 SUSTAINABLE_PACE_REF = "state/holding-company-sustainable-pace.json"
 OWNER_SEARCH_PHASING_REF = "state/holding-company-owner-search-phasing.json"
 OWNER_ECONOMICS_REF = "state/holding-company-owner-economics.json"
+CANDIDATE_FIT_REF = "state/holding-company-candidate-fit.json"
+OWNER_VOICE_REF = "state/holding-company-owner-voice.json"
 PEEL_INTERVIEWS_REF = "state/holding-company-peel-interviews.json"
 PRESS_READINESS_REF = "state/holding-company-press-readiness.json"
 POUR_READINESS_REF = "state/holding-company-pour-readiness.json"
@@ -95,6 +97,15 @@ OWNER_ECONOMICS_REQUIRED_REFS = {
     "distribution_terms_ref",
     "legal_review_ref",
     "substrate_share_receipt",
+}
+CANDIDATE_FIT_CLEAR_STATUSES = {"candidate_clear", "press_clear", "formation_clear"}
+CANDIDATE_FIT_CLASSIFICATIONS = {"sharpen_legacy_smb", "incubate_ai_first"}
+OWNER_VOICE_REQUIRED_REFS = {
+    "owner_operator_ref",
+    "owner_voice_ref",
+    "community_context_ref",
+    "yuzu_review_ref",
+    "public_surface_ref",
 }
 PEEL_QUALIFYING_URGENCY = {"medium", "strong"}
 PEEL_QUALIFYING_SOURCE_CHANNELS = {"client_talk", "community", "field_trip"}
@@ -293,6 +304,58 @@ def owner_economics_gate_status(receipt: dict[str, Any]) -> str:
             and all(distribution_min <= value <= distribution_max for value in distribution_values)
         )
         if has_ref(deal.get("owner_operator_slug")) and owner_equity_ok and holding_equity_ok and refs_ok and distribution_bounds_ok:
+            return "clear"
+    return "blocked"
+
+
+def candidate_problem_fit_clear(candidate: dict[str, Any]) -> bool:
+    classification = candidate.get("classification")
+    if classification == "sharpen_legacy_smb":
+        return candidate.get("ai_transition_pain_present") is True
+    if classification == "incubate_ai_first":
+        return candidate.get("ai_first_opportunity_present") is True
+    return False
+
+
+def candidate_fit_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    for candidate in receipt.get("candidates", []):
+        if not isinstance(candidate, dict) or candidate.get("status") not in CANDIDATE_FIT_CLEAR_STATUSES:
+            continue
+        classification_clear = candidate.get("classification") in CANDIDATE_FIT_CLASSIFICATIONS and has_ref(
+            candidate.get("classification_ref")
+        )
+        owner_operator_clear = (
+            candidate.get("target_customer") == "smb_owner_operator"
+            and candidate.get("smb_owner_operator_fit") is True
+            and has_ref(candidate.get("persona_ref"))
+        )
+        problem_clear = (
+            candidate_problem_fit_clear(candidate)
+            and has_ref(candidate.get("problem_statement"))
+            and has_ref(candidate.get("problem_ref"))
+        )
+        if classification_clear and owner_operator_clear and problem_clear and candidate.get("target_drift_flags") == []:
+            return "clear"
+    return "blocked"
+
+
+def owner_voice_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    for surface in receipt.get("surfaces", []):
+        if not isinstance(surface, dict) or surface.get("status") != "clear":
+            continue
+        refs_ok = all(has_ref(surface.get(field)) for field in OWNER_VOICE_REQUIRED_REFS)
+        if (
+            refs_ok
+            and surface.get("owner_voice_present") is True
+            and surface.get("community_context_present") is True
+            and surface.get("zeststream_meta_voice_detected") is False
+        ):
             return "clear"
     return "blocked"
 
@@ -653,6 +716,57 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "owner_economics_ref_missing", "ref": OWNER_ECONOMICS_REF})
+
+    candidate_fit_path = path_for_ref(CANDIDATE_FIT_REF)
+    owner_voice_path = path_for_ref(OWNER_VOICE_REF)
+    candidate_fit_status = None
+    owner_voice_status = None
+    if candidate_fit_path is not None and candidate_fit_path.exists():
+        candidate_fit_status = candidate_fit_gate_status(load_json(candidate_fit_path))
+    else:
+        failures.append({"code": "candidate_fit_ref_missing", "ref": CANDIDATE_FIT_REF})
+    if owner_voice_path is not None and owner_voice_path.exists():
+        owner_voice_status = owner_voice_gate_status(load_json(owner_voice_path))
+    else:
+        failures.append({"code": "owner_voice_ref_missing", "ref": OWNER_VOICE_REF})
+
+    customer_requirement = requirements_by_id.get("customer_smb_owner_operator")
+    if customer_requirement is not None:
+        evidence_refs = customer_requirement.get("evidence_refs", [])
+        if CANDIDATE_FIT_REF not in evidence_refs:
+            failures.append(
+                {
+                    "code": "customer_requirement_missing_candidate_fit_ref",
+                    "requirement_id": "customer_smb_owner_operator",
+                    "required_ref": CANDIDATE_FIT_REF,
+                }
+            )
+        if OWNER_VOICE_REF not in evidence_refs:
+            failures.append(
+                {
+                    "code": "customer_requirement_missing_owner_voice_ref",
+                    "requirement_id": "customer_smb_owner_operator",
+                    "required_ref": OWNER_VOICE_REF,
+                }
+            )
+        if candidate_fit_status == "blocked" and customer_requirement.get("coverage_status") != "blocked":
+            failures.append(
+                {
+                    "code": "requirement_status_mismatch_with_candidate_fit_receipt",
+                    "requirement_id": "customer_smb_owner_operator",
+                    "claimed": customer_requirement.get("coverage_status"),
+                    "evidence_status": candidate_fit_status,
+                }
+            )
+        if owner_voice_status == "blocked" and customer_requirement.get("coverage_status") != "blocked":
+            failures.append(
+                {
+                    "code": "requirement_status_mismatch_with_owner_voice_receipt",
+                    "requirement_id": "customer_smb_owner_operator",
+                    "claimed": customer_requirement.get("coverage_status"),
+                    "evidence_status": owner_voice_status,
+                }
+            )
 
     peel_interviews_path = path_for_ref(PEEL_INTERVIEWS_REF)
     if peel_interviews_path is not None and peel_interviews_path.exists():
