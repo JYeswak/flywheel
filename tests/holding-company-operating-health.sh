@@ -36,6 +36,13 @@ jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
 assert_jq "$TMP/current.json" '.status == "pass" and .clear_count == 0 and .companies[0].operating_health_gate_status == "blocked"' "current ledger validates and blocks operating health"
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid operating health ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid operating health ledger rejected"
+fi
+
 jq '
   .clear_count = 1
   | .companies[0].status = "revenue_clear"
@@ -46,6 +53,13 @@ jq '
 ' "$LEDGER" >"$TMP/revenue-clear.json"
 "$SCRIPT" --ledger "$TMP/revenue-clear.json" --json >"$TMP/revenue-clear.out.json"
 assert_jq "$TMP/revenue-clear.out.json" '.status == "pass" and .clear_count == 1 and .companies[0].operating_health_gate_status == "clear"' "redacted revenue clear passes"
+
+jq '.companies[0].notes = ("sk-" + "NOTAREALSECRET")' "$TMP/revenue-clear.json" >"$TMP/secret-shaped-value.json"
+if "$SCRIPT" --ledger "$TMP/secret-shaped-value.json" --json >"$TMP/secret-shaped-value.out.json" 2>/dev/null; then
+  fail "secret-shaped operating health value rejected"
+else
+  assert_jq "$TMP/secret-shaped-value.out.json" '.status == "fail" and (.failures[] | select(.code == "secret_or_raw_value_shape_detected"))' "secret-shaped operating health value rejected"
+fi
 
 jq '
   .companies[0].status = "profit_clear"
@@ -81,6 +95,27 @@ if "$SCRIPT" --ledger "$TMP/raw-flag.json" --json >"$TMP/raw-flag.out.json" 2>/d
   fail "raw amount flag rejected"
 else
   assert_jq "$TMP/raw-flag.out.json" '.status == "fail" and (.failures[] | select(.code == "operating_health_clear_with_raw_amounts_flag"))' "raw amount flag rejected"
+fi
+
+jq '.companies[0].evidence_refs = []' "$TMP/revenue-clear.json" >"$TMP/no-evidence-refs.json"
+if "$SCRIPT" --ledger "$TMP/no-evidence-refs.json" --json >"$TMP/no-evidence-refs.out.json" 2>/dev/null; then
+  fail "operating health clear without evidence refs rejected"
+else
+  assert_jq "$TMP/no-evidence-refs.out.json" '.status == "fail" and (.failures[] | select(.code == "operating_health_clear_without_evidence_refs"))' "operating health clear without evidence refs rejected"
+fi
+
+jq '.companies[0].first_paying_customer_receipt = "state/no-such-operating-customer.json"' "$TMP/revenue-clear.json" >"$TMP/missing-required-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-required-ref.json" --check-paths --json >"$TMP/missing-required-ref.out.json" 2>/dev/null; then
+  fail "missing operating health required ref rejected"
+else
+  assert_jq "$TMP/missing-required-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "required_ref_missing"))' "missing operating health required ref rejected"
+fi
+
+jq '.companies[0].evidence_refs = ["state/no-such-operating-evidence.json"]' "$TMP/revenue-clear.json" >"$TMP/missing-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence-ref.json" --check-paths --json >"$TMP/missing-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing operating health evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing operating health evidence ref rejected"
 fi
 
 jq '.companies[0].notes = "Revenue is $1000 and should be rejected."' "$TMP/revenue-clear.json" >"$TMP/raw-shape.json"
