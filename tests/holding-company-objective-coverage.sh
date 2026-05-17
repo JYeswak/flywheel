@@ -178,6 +178,16 @@ else
   assert_jq "$TMP/duplicate-id.out.json" '.failures[] | select(.code == "duplicate_requirement_id")' "duplicate requirement id rejected"
 fi
 
+jq '
+  .requirements |= map(if .coverage_status == "blocked" or .coverage_status == "partial" then .coverage_status = "proven" else . end)
+  | .summary_counts = {"proven": 27, "partial": 0, "blocked": 0, "deferred": 2, "total": 29}
+' "$LEDGER" >"$TMP/not-complete-without-open-gaps.json"
+if "$SCRIPT" --ledger "$TMP/not-complete-without-open-gaps.json" --json >"$TMP/not-complete-without-open-gaps.out.json" 2>/dev/null; then
+  fail "not-complete status without open gaps rejected"
+else
+  assert_jq "$TMP/not-complete-without-open-gaps.out.json" '.failures[] | select(.code == "not_complete_without_open_gaps")' "not-complete status without open gaps rejected"
+fi
+
 jq '.notes += [("sk-" + "NOTAREALSECRET")]' "$LEDGER" >"$TMP/secret-shaped-value.json"
 if "$SCRIPT" --ledger "$TMP/secret-shaped-value.json" --json >"$TMP/secret-shaped-value.out.json" 2>/dev/null; then
   fail "secret-shaped ledger value rejected"
