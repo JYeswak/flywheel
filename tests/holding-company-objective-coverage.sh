@@ -817,6 +817,28 @@ else
   assert_jq "$TMP/nonprofit-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_nonprofit_extension_receipt" and .requirement_id == "future_nonprofit_extension" and .expected == "deferred" and .evidence_status == "blocked")' "blocked nonprofit receipt rejects future nonprofit status promotion"
 fi
 
+jq '
+  (.requirements[] | select(.requirement_id == "future_nonprofit_extension") | .coverage_status) = "proven"
+  | .summary_counts.proven += 1
+  | .summary_counts.deferred -= 1
+' "$LEDGER" >"$TMP/nonprofit-proven-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/nonprofit-proven-overclaim.json" --json >"$TMP/nonprofit-proven-overclaim.out.json" 2>/dev/null; then
+  fail "blocked nonprofit receipt rejects future nonprofit proven claim"
+else
+  assert_jq "$TMP/nonprofit-proven-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_nonprofit_extension_receipt" and .requirement_id == "future_nonprofit_extension" and .expected == "deferred" and .evidence_status == "blocked")' "blocked nonprofit receipt rejects future nonprofit proven claim"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "future_nonprofit_extension") | .coverage_status) = "blocked"
+  | .summary_counts.blocked += 1
+  | .summary_counts.deferred -= 1
+' "$LEDGER" >"$TMP/nonprofit-underclaim.json"
+if "$SCRIPT" --ledger "$TMP/nonprofit-underclaim.json" --json >"$TMP/nonprofit-underclaim.out.json" 2>/dev/null; then
+  fail "blocked nonprofit receipt preserves future nonprofit deferred status"
+else
+  assert_jq "$TMP/nonprofit-underclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_nonprofit_extension_receipt" and .requirement_id == "future_nonprofit_extension" and .expected == "deferred" and .evidence_status == "blocked")' "blocked nonprofit receipt preserves future nonprofit deferred status"
+fi
+
 jq '(.requirements[] | select(.requirement_id == "future_nonprofit_extension") | .evidence_refs) -= ["state/holding-company-nonprofit-extension.json"]' "$LEDGER" >"$TMP/missing-nonprofit-extension-ref.json"
 if "$SCRIPT" --ledger "$TMP/missing-nonprofit-extension-ref.json" --json >"$TMP/missing-nonprofit-extension-ref.out.json" 2>/dev/null; then
   fail "future nonprofit requirement missing nonprofit-extension ref rejected"
@@ -833,6 +855,28 @@ if "$SCRIPT" --ledger "$TMP/lifecycle-overclaim.json" --json >"$TMP/lifecycle-ov
   fail "blocked lifecycle receipt rejects lifecycle status promotion"
 else
   assert_jq "$TMP/lifecycle-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_lifecycle_disposition_receipt" and .requirement_id == "company_close_pivot_graduate" and .expected == "deferred" and .evidence_status == "blocked")' "blocked lifecycle receipt rejects lifecycle status promotion"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "company_close_pivot_graduate") | .coverage_status) = "proven"
+  | .summary_counts.proven += 1
+  | .summary_counts.deferred -= 1
+' "$LEDGER" >"$TMP/lifecycle-proven-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/lifecycle-proven-overclaim.json" --json >"$TMP/lifecycle-proven-overclaim.out.json" 2>/dev/null; then
+  fail "blocked lifecycle receipt rejects lifecycle proven claim"
+else
+  assert_jq "$TMP/lifecycle-proven-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_lifecycle_disposition_receipt" and .requirement_id == "company_close_pivot_graduate" and .expected == "deferred" and .evidence_status == "blocked")' "blocked lifecycle receipt rejects lifecycle proven claim"
+fi
+
+jq '
+  (.requirements[] | select(.requirement_id == "company_close_pivot_graduate") | .coverage_status) = "blocked"
+  | .summary_counts.blocked += 1
+  | .summary_counts.deferred -= 1
+' "$LEDGER" >"$TMP/lifecycle-underclaim.json"
+if "$SCRIPT" --ledger "$TMP/lifecycle-underclaim.json" --json >"$TMP/lifecycle-underclaim.out.json" 2>/dev/null; then
+  fail "blocked lifecycle receipt preserves lifecycle deferred status"
+else
+  assert_jq "$TMP/lifecycle-underclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_lifecycle_disposition_receipt" and .requirement_id == "company_close_pivot_graduate" and .expected == "deferred" and .evidence_status == "blocked")' "blocked lifecycle receipt preserves lifecycle deferred status"
 fi
 
 jq '(.requirements[] | select(.requirement_id == "company_close_pivot_graduate") | .evidence_refs) -= ["state/holding-company-lifecycle-disposition.json"]' "$LEDGER" >"$TMP/missing-lifecycle-disposition-ref.json"
