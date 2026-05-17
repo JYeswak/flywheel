@@ -60,6 +60,17 @@ else
   assert_jq "$TMP/missing-standing-audit-ref.out.json" '.failures[] | select(.code == "standing_requirement_missing_audit_ref" and .requirement_id == "standing_non_closing_goal")' "standing requirement missing audit ref rejected"
 fi
 
+jq '
+  (.requirements[] | select(.requirement_id == "standing_non_closing_goal") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.proven -= 1
+' "$LEDGER" >"$TMP/standing-status-underclaim.json"
+if "$SCRIPT" --ledger "$TMP/standing-status-underclaim.json" --json >"$TMP/standing-status-underclaim.out.json" 2>/dev/null; then
+  fail "standing requirement status underclaim rejected"
+else
+  assert_jq "$TMP/standing-status-underclaim.out.json" '.failures[] | select(.code == "standing_requirement_status_not_proven" and .requirement_id == "standing_non_closing_goal" and .expected == "proven")' "standing requirement status underclaim rejected"
+fi
+
 jq '(.requirements[] | select(.requirement_id == "management_plane_portfolio") | .evidence_refs) -= ["state/zeststream-holding-company-gate-audit-20260517T0646Z.json"]' "$LEDGER" >"$TMP/missing-management-audit-ref.json"
 if "$SCRIPT" --ledger "$TMP/missing-management-audit-ref.json" --json >"$TMP/missing-management-audit-ref.out.json" 2>/dev/null; then
   fail "management-plane requirement missing audit ref rejected"

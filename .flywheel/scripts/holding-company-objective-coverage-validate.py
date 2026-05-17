@@ -1086,6 +1086,15 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "required_ref": required_ref,
                     }
                 )
+        if standing_requirement.get("coverage_status") != "proven":
+            failures.append(
+                {
+                    "code": "standing_requirement_status_not_proven",
+                    "requirement_id": "standing_non_closing_goal",
+                    "claimed": standing_requirement.get("coverage_status"),
+                    "expected": "proven",
+                }
+            )
 
     management_requirement = requirements_by_id.get("management_plane_portfolio")
     if management_requirement is not None:
