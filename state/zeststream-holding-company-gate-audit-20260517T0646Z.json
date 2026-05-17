@@ -104,6 +104,11 @@
       "result": "PEEL interview gate ledger exists and validates; current formation_cash_clear_count is 0 because no candidate has source provenance plus five qualified prospect interviews"
     },
     {
+      "kind": "press_readiness_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-press-readiness.json",
+      "result": "PRESS readiness ledger exists and validates; current clear_count is 0 because Mobile Eats lacks v0.1 release, SkillOS hardening, and signed-equity receipts"
+    },
+    {
       "kind": "owner_search_phasing_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-owner-search-phasing.json",
       "result": "owner-search phasing ledger exists and validates; current phasing_clear_count is 0 because sub #1 has no warm-network owner-search proof"
@@ -213,6 +218,17 @@
         "/Users/josh/Developer/skillos/state/mission-alignment/EXECUTION-PLAN.md"
       ],
       "finding": "The client-talk/community/field-trip source provenance plus 5 documented prospect-interview gate is now machine-checkable. Current ledger validates structurally but blocks formation cash because no candidate has qualified source evidence plus five qualified would-buy interviews with medium-or-strong urgency and evidence refs."
+    },
+    {
+      "gate": "press_readiness",
+      "status": "blocked_missing_press_receipts",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-press-readiness.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-candidate-fit.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-owner-economics.json",
+        "/Users/josh/Developer/flywheel/state/substrate-share/mobile-eats-20260517T0654Z.json"
+      ],
+      "finding": "The PRESS loop is now machine-checkable as a bridge between candidate fit and POUR. Mobile Eats has package/flywheel substrate evidence, but cannot clear PRESS until v0.1 release, SkillOS hardening, Yuzu owner voice, signed-equity, owner-economics, and substrate-share receipts are all present."
     },
     {
       "gate": "anti_pitch_voice",
@@ -457,6 +473,10 @@
     {
       "owner": "skillos/flywheel",
       "action": "Fill state/holding-company-peel-interviews.json with client-talk, community, or field-trip source evidence plus five qualified prospect interviews before clearing or committing formation cash for any candidate."
+    },
+    {
+      "owner": "skillos/flywheel/mobile-eats",
+      "action": "Fill state/holding-company-press-readiness.json with v0.1 release, SkillOS hardening, flywheel coordination, package delivery, Yuzu owner voice, signed-equity, owner-economics, and substrate-share refs before marking any candidate PRESS or formation ready."
     },
     {
       "owner": "skillos/flywheel",

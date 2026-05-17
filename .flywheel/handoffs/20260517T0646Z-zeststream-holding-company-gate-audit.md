@@ -21,6 +21,7 @@ The audit did not find the receipts that would let the system count a formed por
 | Portfolio company existence | `not_proven` | mobile-eats is strong product/substrate proof, but not countable as a portfolio company without signed owner + first paying customer registry evidence. |
 | Candidate fit | `blocked_unclassified_candidate` | Candidate-fit ledger exists and validates; Mobile Eats is not yet classified as legacy SMB sharpening or AI-first incubation with SMB owner-operator and AI problem evidence. |
 | PEEL market signal | `blocked_no_qualified_interviews` | PEEL interview ledger exists and validates; formation cash remains blocked because no candidate has source provenance plus five qualified prospect interviews. |
+| PRESS readiness | `blocked_missing_press_receipts` | PRESS readiness ledger exists and validates; Mobile Eats lacks v0.1 release, SkillOS hardening, and signed-equity receipts. |
 | Anti-pitch voice | `blocked_builder_framing` | Anti-pitch voice ledger exists and validates; `zeststream-v2-fresh` still has workflow-builder and automation-positioning hits. |
 | Yuzu owner voice | `blocked_no_owner_voice` | Owner-operator voice ledger exists and validates; Mobile Eats lacks owner voice, community context, owner-operator, and Yuzu review receipts. |
 | Public story receipts | `blocked_not_receipt_led` | Public-story ledger exists and validates; `zeststream-v2-fresh` lacks a receipt-led holding-company story and still carries builder/automation framing. |
@@ -68,6 +69,7 @@ The audit did not find the receipts that would let the system count a formed por
 - Owner-economics ledger: `state/holding-company-owner-economics.json`
 - Peer-coach ledger: `state/holding-company-peer-coach.json`
 - Candidate-fit ledger: `state/holding-company-candidate-fit.json`
+- PRESS readiness ledger: `state/holding-company-press-readiness.json`
 - Progress-velocity ledger: `state/holding-company-progress-velocity.json`
 
 ## Immediate Next Actions
@@ -85,14 +87,15 @@ The audit did not find the receipts that would let the system count a formed por
 11. For mobile-eats, either attach owner/customer/company/control-handoff receipts or explicitly classify it as product/substrate proof rather than portfolio company #1.
 12. Fill the shared-stack ledger with present receipt refs for SkillOS, flywheel, JSM, `@zeststream/*` packages, and brand voice before marking Mobile Eats shared-stack clear.
 13. Fill the PEEL interview ledger with client-talk, community, or field-trip source evidence plus five qualified prospect interviews before clearing or committing formation cash for any candidate.
-14. Fill the owner-search phasing ledger with warm-network source proof before allowing or signing an owner for sub #1 or sub #2.
-15. Fill the sustainable-pace ledger with measured weekly hours and substrate coaching-time offset before claiming sustainable pace for any Year 2+ company period.
-16. Fill the legal-structure ledger with binding artifact refs plus attorney and CPA review receipts before signing a sub #2 owner.
-17. Fill the POUR readiness ledger with first paying-customer, owner-operator, and operating-control handoff receipts before marking Mobile Eats launch-clear.
-18. Fill the owner-economics ledger with signed owner-operator, cap-table, distribution terms, legal review, and substrate-share refs proving 25% owner equity and 45-75% tiered owner distributions before marking a deal signed or active.
-19. Fill the peer-coach ledger with Tier 2+ owner, sustainable cash, operating-control, peer-coach agreement, and 5% equity grant receipts before marking any owner eligible to peer-coach.
-20. Establish the exact nine product-surface set and rerun the progress-velocity ledger before using the 4,000+ commits in 7 days claim in public or gate summaries.
-21. Fill the RECYCLE ledger when launch friction appears, then attach SkillOS capability, package/substrate, and portfolio propagation receipts within the configured window.
+14. Fill the PRESS readiness ledger with v0.1 release, SkillOS hardening, flywheel coordination, package delivery, Yuzu owner voice, signed-equity, owner-economics, and substrate-share refs before marking any candidate PRESS or formation ready.
+15. Fill the owner-search phasing ledger with warm-network source proof before allowing or signing an owner for sub #1 or sub #2.
+16. Fill the sustainable-pace ledger with measured weekly hours and substrate coaching-time offset before claiming sustainable pace for any Year 2+ company period.
+17. Fill the legal-structure ledger with binding artifact refs plus attorney and CPA review receipts before signing a sub #2 owner.
+18. Fill the POUR readiness ledger with first paying-customer, owner-operator, and operating-control handoff receipts before marking Mobile Eats launch-clear.
+19. Fill the owner-economics ledger with signed owner-operator, cap-table, distribution terms, legal review, and substrate-share refs proving 25% owner equity and 45-75% tiered owner distributions before marking a deal signed or active.
+20. Fill the peer-coach ledger with Tier 2+ owner, sustainable cash, operating-control, peer-coach agreement, and 5% equity grant receipts before marking any owner eligible to peer-coach.
+21. Establish the exact nine product-surface set and rerun the progress-velocity ledger before using the 4,000+ commits in 7 days claim in public or gate summaries.
+22. Fill the RECYCLE ledger when launch friction appears, then attach SkillOS capability, package/substrate, and portfolio propagation receipts within the configured window.
 
 ## Close Rule
 
