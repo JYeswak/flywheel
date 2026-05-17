@@ -69,5 +69,55 @@ else
   assert_jq "$TMP/count-mismatch.out.json" '.status == "fail" and (.failures[] | select(.code == "clear_count_mismatch"))' "RECYCLE clear count mismatch rejected"
 fi
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid RECYCLE ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid RECYCLE ledger rejected"
+fi
+
+jq '
+  .friction_items[0].status = "capability_landed"
+  | .friction_items[0].friction_receipt_ref = null
+  | .clear_count = 0
+' "$TMP/propagated.json" >"$TMP/landed-missing-friction.json"
+if "$SCRIPT" --ledger "$TMP/landed-missing-friction.json" --json >"$TMP/landed-missing-friction.out.json" 2>/dev/null; then
+  fail "landed friction missing receipt rejected"
+else
+  assert_jq "$TMP/landed-missing-friction.out.json" '.status == "fail" and (.failures[] | select(.code == "landed_status_without_friction_receipt"))' "landed friction missing receipt rejected"
+fi
+
+jq '
+  .friction_items[0].status = "package_landed"
+  | .friction_items[0].skillos_capability_ref = null
+  | .clear_count = 0
+' "$TMP/propagated.json" >"$TMP/package-missing-capability.json"
+if "$SCRIPT" --ledger "$TMP/package-missing-capability.json" --json >"$TMP/package-missing-capability.out.json" 2>/dev/null; then
+  fail "package landed without SkillOS capability rejected"
+else
+  assert_jq "$TMP/package-missing-capability.out.json" '.status == "fail" and (.failures[] | select(.code == "package_landed_without_skillos_capability"))' "package landed without SkillOS capability rejected"
+fi
+
+jq '.friction_items[0].friction_receipt_ref = "state/does-not-exist-recycle-friction.json" | .clear_count = 0' "$TMP/propagated.json" >"$TMP/missing-required-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-required-ref.json" --check-paths --json >"$TMP/missing-required-ref.out.json" 2>/dev/null; then
+  fail "missing RECYCLE required ref rejected"
+else
+  assert_jq "$TMP/missing-required-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "required_ref_missing" and .field == "friction_receipt_ref"))' "missing RECYCLE required ref rejected"
+fi
+
+jq '.friction_items[0].evidence_refs = ["state/does-not-exist-recycle-evidence.json"] | .clear_count = 0' "$TMP/propagated.json" >"$TMP/missing-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence-ref.json" --check-paths --json >"$TMP/missing-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing RECYCLE evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing RECYCLE evidence ref rejected"
+fi
+
+jq '.friction_items[0].notes = "fixture sk-TestSecret123 should be rejected" | .clear_count = 0' "$TMP/propagated.json" >"$TMP/secret-shape.json"
+if "$SCRIPT" --ledger "$TMP/secret-shape.json" --json >"$TMP/secret-shape.out.json" 2>/dev/null; then
+  fail "secret-shaped RECYCLE value rejected"
+else
+  assert_jq "$TMP/secret-shape.out.json" '.status == "fail" and (.failures[] | select(.code == "secret_or_raw_amount_shape_detected"))' "secret-shaped RECYCLE value rejected"
+fi
+
 printf 'RESULT pass=%d fail=%d\n' "$pass_count" "$fail_count"
 exit "$fail_count"
