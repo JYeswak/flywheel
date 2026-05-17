@@ -29,6 +29,11 @@ write_clear_fixture() {
   jq '
     .formation_cash_clear_count = 1
     | .candidates[0].formation_cash_status = "clear"
+    | .candidates[0].candidate_source = {
+        "source_channel": "client_talk",
+        "source_ref": "urn:peel-source:mobile-eats-client-talk",
+        "evidence_ref": "urn:peel-source-evidence:mobile-eats-client-talk"
+      }
     | .candidates[0].interviews = [
       {
         "interview_id": "mobile-eats-peel-001",
@@ -114,6 +119,13 @@ assert_jq "$TMP/current.json" '.status == "pass" and .formation_cash_clear_count
 write_clear_fixture "$TMP/clear.json"
 "$SCRIPT" --ledger "$TMP/clear.json" --json >"$TMP/clear.out.json"
 assert_jq "$TMP/clear.out.json" '.status == "pass" and .formation_cash_clear_count == 1 and .candidates[0].formation_cash_gate_status == "clear"' "five qualified interviews clear formation cash"
+
+jq '.candidates[0].candidate_source.source_channel = "unknown" | .formation_cash_clear_count = 0' "$TMP/clear.json" >"$TMP/unknown-source.json"
+if "$SCRIPT" --ledger "$TMP/unknown-source.json" --json >"$TMP/unknown-source.out.json" 2>/dev/null; then
+  fail "clear status without PEEL candidate source rejected"
+else
+  assert_jq "$TMP/unknown-source.out.json" '.status == "fail" and (.failures[] | select(.code == "formation_cash_status_without_candidate_source"))' "clear status without PEEL candidate source rejected"
+fi
 
 jq '.candidates[0].interviews = .candidates[0].interviews[0:4] | .formation_cash_clear_count = 0' "$TMP/clear.json" >"$TMP/four.json"
 if "$SCRIPT" --ledger "$TMP/four.json" --json >"$TMP/four.out.json" 2>/dev/null; then

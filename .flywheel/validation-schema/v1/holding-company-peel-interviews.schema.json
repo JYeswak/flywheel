@@ -56,6 +56,7 @@
       "required": [
         "candidate_slug",
         "candidate_name",
+        "candidate_source",
         "formation_cash_status",
         "interviews",
         "evidence_refs"
@@ -68,6 +69,9 @@
         "candidate_name": {
           "type": "string",
           "minLength": 1
+        },
+        "candidate_source": {
+          "$ref": "#/$defs/candidate_source"
         },
         "formation_cash_status": {
           "type": "string",
@@ -93,6 +97,40 @@
         },
         "notes": {
           "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "candidate_source": {
+      "type": "object",
+      "required": [
+        "source_channel",
+        "source_ref",
+        "evidence_ref"
+      ],
+      "properties": {
+        "source_channel": {
+          "type": "string",
+          "enum": [
+            "unknown",
+            "client_talk",
+            "community",
+            "field_trip"
+          ]
+        },
+        "source_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
           "minLength": 1
         }
       },

@@ -19,7 +19,7 @@ The audit did not find the receipts that would let the system count a formed por
 |---|---|---|
 | Personal runway | `not_provided` | Redacted runway receipt contract exists; current receipt is months-not-provided and blocks launch. |
 | Portfolio company existence | `not_proven` | mobile-eats is strong product/substrate proof, but not countable as a portfolio company without signed owner + first paying customer registry evidence. |
-| PEEL market signal | `blocked_no_qualified_interviews` | PEEL interview ledger exists and validates; formation cash remains blocked because no candidate has five qualified prospect interviews. |
+| PEEL market signal | `blocked_no_qualified_interviews` | PEEL interview ledger exists and validates; formation cash remains blocked because no candidate has source provenance plus five qualified prospect interviews. |
 | Anti-pitch voice | `blocked_builder_framing` | Anti-pitch voice ledger exists and validates; `zeststream-v2-fresh` still has workflow-builder and automation-positioning hits. |
 | Sustainable pace | `blocked_no_measurement` | Sustainable-pace ledger exists and validates; weekly hours and substrate coaching-time offset are not measured yet. |
 | Owner-search phasing | `blocked_no_warm_network_proof` | Owner-search phasing ledger exists and validates; sub #1 remains blocked because no warm-network source proof exists. |
@@ -64,7 +64,7 @@ The audit did not find the receipts that would let the system count a formed por
 4. Grade `zeststream-v2-fresh` against the mission-alignment goal and route stale automation/custom-app pages to update plans.
 5. For mobile-eats, either attach owner/customer/company/control-handoff receipts or explicitly classify it as product/substrate proof rather than portfolio company #1.
 6. Fill the shared-stack ledger with present receipt refs for SkillOS, flywheel, JSM, `@zeststream/*` packages, and brand voice before marking Mobile Eats shared-stack clear.
-7. Fill the PEEL interview ledger with five qualified prospect interviews before clearing or committing formation cash for any candidate.
+7. Fill the PEEL interview ledger with client-talk, community, or field-trip source evidence plus five qualified prospect interviews before clearing or committing formation cash for any candidate.
 8. Fill the owner-search phasing ledger with warm-network source proof before allowing or signing an owner for sub #1 or sub #2.
 9. Fill the sustainable-pace ledger with measured weekly hours and substrate coaching-time offset before claiming sustainable pace for any Year 2+ company period.
 10. Fill the legal-structure ledger with binding artifact refs plus attorney and CPA review receipts before signing a sub #2 owner.

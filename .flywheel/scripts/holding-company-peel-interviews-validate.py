@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SCHEMA = ROOT / ".flywheel/validation-schema/v1/holding-company-peel-interviews.schema.json"
 DEFAULT_LEDGER = ROOT / "state/holding-company-peel-interviews.json"
 QUALIFYING_URGENCY = {"medium", "strong"}
+QUALIFYING_SOURCE_CHANNELS = {"client_talk", "community", "field_trip"}
 SECRETISH_RE = re.compile(r"(\$[0-9]|sk-[A-Za-z0-9]|AKIA[0-9A-Z]{16})")
 
 
@@ -42,6 +43,10 @@ def has_secretish_string(value: Any) -> bool:
     if isinstance(value, list):
         return any(has_secretish_string(v) for v in value)
     return False
+
+
+def has_ref(value: Any) -> bool:
+    return isinstance(value, str) and bool(value.strip())
 
 
 def interview_qualifies(interview: dict[str, Any]) -> bool:
@@ -73,13 +78,28 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
             continue
         slug = candidate.get("candidate_slug")
         status = candidate.get("formation_cash_status")
+        source = candidate.get("candidate_source") if isinstance(candidate.get("candidate_source"), dict) else {}
+        source_channel = source.get("source_channel")
+        source_clear = (
+            source_channel in QUALIFYING_SOURCE_CHANNELS
+            and has_ref(source.get("source_ref"))
+            and has_ref(source.get("evidence_ref"))
+        )
         qualified_count = sum(1 for interview in candidate.get("interviews", []) if isinstance(interview, dict) and interview_qualifies(interview))
         gate_clear = qualified_count >= required
-        cash_clear = status in {"clear", "committed"} and gate_clear
+        cash_clear = status in {"clear", "committed"} and gate_clear and source_clear
         if cash_clear:
             computed_clear_count += 1
 
         candidate_failures: list[dict[str, Any]] = []
+        if status in {"clear", "committed"} and not source_clear:
+            candidate_failures.append(
+                {
+                    "code": "formation_cash_status_without_candidate_source",
+                    "allowed_channels": sorted(QUALIFYING_SOURCE_CHANNELS),
+                    "source_channel": source_channel,
+                }
+            )
         if status in {"clear", "committed"} and not gate_clear:
             candidate_failures.append(
                 {
@@ -97,6 +117,9 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
             for ref in candidate.get("evidence_refs", []):
                 if isinstance(ref, str) and not ref_exists(ref):
                     candidate_failures.append({"code": "evidence_ref_missing", "ref": ref})
+            source_ref = source.get("evidence_ref")
+            if isinstance(source_ref, str) and not ref_exists(source_ref):
+                candidate_failures.append({"code": "candidate_source_evidence_ref_missing", "ref": source_ref})
             for interview in candidate.get("interviews", []):
                 if not isinstance(interview, dict):
                     continue
@@ -112,6 +135,8 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
             {
                 "candidate_slug": slug,
                 "formation_cash_status": status,
+                "candidate_source_channel": source_channel,
+                "candidate_source_status": "clear" if source_clear else "blocked",
                 "qualified_interview_count": qualified_count,
                 "interview_gate_status": "clear" if gate_clear else "blocked",
                 "formation_cash_gate_status": "clear" if cash_clear else "blocked",

@@ -8,6 +8,11 @@
     {
       "candidate_slug": "mobile-eats",
       "candidate_name": "Mobile Eats",
+      "candidate_source": {
+        "source_channel": "unknown",
+        "source_ref": null,
+        "evidence_ref": null
+      },
       "formation_cash_status": "blocked",
       "interviews": [],
       "evidence_refs": [
@@ -20,7 +25,8 @@
   ],
   "notes": [
     "This ledger is the mechanical PEEL market-signal gate for the ZestStream holding-company goal.",
+    "A candidate may not clear or commit formation cash until it traces to client_talk, community, or field_trip source evidence.",
     "A candidate may not clear or commit formation cash until five qualified prospect interviews have would_buy=true, medium-or-strong urgency, a redacted price point, a pain point, a current alternative, and an evidence reference."
   ],
-  "next_action": "Document five qualified prospect interviews for any candidate before setting formation_cash_status to clear or committed."
+  "next_action": "Document candidate source provenance plus five qualified prospect interviews before setting formation_cash_status to clear or committed."
 }
