@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-candidate-fit/v1/schema.json",
+  "title": "ZestStream Holding Company Candidate Fit v1",
+  "description": "Ledger for candidate thesis fit: legacy SMB sharpening or AI-first incubation, anchored to SMB owner-operator customers and problem evidence.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "clear_count",
+    "candidates",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_candidate_fit.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "candidate_fit"
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/candidate"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "candidate": {
+      "type": "object",
+      "required": [
+        "candidate_slug",
+        "candidate_name",
+        "sequence",
+        "status",
+        "classification",
+        "target_customer",
+        "smb_owner_operator_fit",
+        "ai_transition_pain_present",
+        "ai_first_opportunity_present",
+        "problem_statement",
+        "classification_ref",
+        "persona_ref",
+        "problem_ref",
+        "target_drift_flags",
+        "evidence_refs"
+      ],
+      "properties": {
+        "candidate_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "candidate_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "blocked",
+            "candidate_clear",
+            "press_clear",
+            "formation_clear",
+            "deferred"
+          ]
+        },
+        "classification": {
+          "type": "string",
+          "enum": [
+            "unknown",
+            "sharpen_legacy_smb",
+            "incubate_ai_first",
+            "out_of_scope"
+          ]
+        },
+        "target_customer": {
+          "type": "string",
+          "enum": [
+            "unknown",
+            "smb_owner_operator",
+            "enterprise_buyer",
+            "consumer",
+            "internal_tool"
+          ]
+        },
+        "smb_owner_operator_fit": {
+          "type": "boolean"
+        },
+        "ai_transition_pain_present": {
+          "type": "boolean"
+        },
+        "ai_first_opportunity_present": {
+          "type": "boolean"
+        },
+        "problem_statement": {
+          "type": "string"
+        },
+        "classification_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "persona_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "problem_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "target_drift_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "enterprise_saas_generic",
+              "consumer_app_generic",
+              "internal_tool_only",
+              "builder_shop_positioning",
+              "unclear_owner_operator"
+            ]
+          }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

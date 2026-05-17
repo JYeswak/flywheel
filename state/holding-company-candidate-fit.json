@@ -1,0 +1,39 @@
+{
+  "schema_version": "zeststream.holding_company_candidate_fit.v1",
+  "generated_at": "2026-05-17T08:26:00Z",
+  "gate": "candidate_fit",
+  "clear_count": 0,
+  "candidates": [
+    {
+      "candidate_slug": "mobile-eats",
+      "candidate_name": "Mobile Eats",
+      "sequence": 1,
+      "status": "blocked",
+      "classification": "unknown",
+      "target_customer": "unknown",
+      "smb_owner_operator_fit": false,
+      "ai_transition_pain_present": false,
+      "ai_first_opportunity_present": false,
+      "problem_statement": "",
+      "classification_ref": null,
+      "persona_ref": null,
+      "problem_ref": null,
+      "target_drift_flags": [
+        "unclear_owner_operator"
+      ],
+      "evidence_refs": [
+        "state/zeststream-portfolio-company-registry.json",
+        "state/holding-company-peel-interviews.json",
+        "state/holding-company-pour-readiness.json",
+        "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md"
+      ],
+      "notes": "Mobile Eats has product and substrate evidence, but candidate thesis fit is not clear until it is explicitly classified as legacy SMB sharpening or AI-first incubation with SMB owner-operator and problem evidence."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical candidate-fit gate for the ZestStream holding-company goal.",
+    "Candidate clear status requires legacy-SMB sharpening or AI-first incubation classification, SMB owner-operator target proof, problem evidence, and no enterprise/SaaS-generic target drift.",
+    "This gate sits before PEEL cash, owner search, POUR, and owner economics; it prevents product/substrate proof from being counted as thesis fit."
+  ],
+  "next_action": "Classify each candidate as sharpen_legacy_smb or incubate_ai_first, attach owner-operator persona and problem refs, and clear any target drift before marking candidate, PRESS, or formation fit clear."
+}

@@ -94,6 +94,11 @@
       "result": "redacted runway receipt contract exists; current status is not_provided and launch gate remains blocked"
     },
     {
+      "kind": "candidate_fit_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-candidate-fit.json",
+      "result": "candidate-fit ledger exists and validates; current clear_count is 0 because Mobile Eats is not yet classified as legacy SMB sharpening or AI-first incubation with SMB owner-operator and AI problem evidence"
+    },
+    {
       "kind": "peel_interview_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-peel-interviews.json",
       "result": "PEEL interview gate ledger exists and validates; current formation_cash_clear_count is 0 because no candidate has source provenance plus five qualified prospect interviews"
@@ -188,6 +193,16 @@
         "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md"
       ],
       "finding": "mobile-eats has strong product/substrate evidence, but no named signed owner-operator plus first paying-customer registry receipt was located. It should not be counted as a formed portfolio company under the goal's vanity-metric forbid until that registry row exists."
+    },
+    {
+      "gate": "candidate_fit",
+      "status": "blocked_unclassified_candidate",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-candidate-fit.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-peel-interviews.json",
+        "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md"
+      ],
+      "finding": "The candidate-fit gate is now machine-checkable before PEEL cash, owner search, POUR, or owner economics. Mobile Eats has product/substrate evidence but cannot clear candidate fit until it is classified as legacy SMB sharpening or AI-first incubation with SMB owner-operator target proof, AI-transition or AI-first problem evidence, and no enterprise/SaaS-generic target drift."
     },
     {
       "gate": "peel_market_signal",
@@ -394,6 +409,10 @@
     {
       "owner": "flywheel/skillos",
       "action": "Create a portfolio-company registry schema that refuses to count a company without signed owner-operator and first paying-customer receipt paths."
+    },
+    {
+      "owner": "flywheel/skillos",
+      "action": "Fill state/holding-company-candidate-fit.json with legacy-SMB sharpening or AI-first incubation classification, SMB owner-operator target proof, and AI problem refs before marking any candidate, PRESS, or formation fit clear."
     },
     {
       "owner": "Joshua",
