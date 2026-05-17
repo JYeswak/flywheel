@@ -178,6 +178,13 @@ else
   assert_jq "$TMP/duplicate-id.out.json" '.failures[] | select(.code == "duplicate_requirement_id")' "duplicate requirement id rejected"
 fi
 
+jq '.notes += [("sk-" + "NOTAREALSECRET")]' "$LEDGER" >"$TMP/secret-shaped-value.json"
+if "$SCRIPT" --ledger "$TMP/secret-shaped-value.json" --json >"$TMP/secret-shaped-value.out.json" 2>/dev/null; then
+  fail "secret-shaped ledger value rejected"
+else
+  assert_jq "$TMP/secret-shaped-value.out.json" '.failures[] | select(.code == "secret_or_raw_value_shape_detected")' "secret-shaped ledger value rejected"
+fi
+
 jq 'del(.validation_commands)' "$LEDGER" >"$TMP/missing-validation-commands.json"
 if "$SCRIPT" --ledger "$TMP/missing-validation-commands.json" --json >"$TMP/missing-validation-commands.out.json" 2>/dev/null; then
   fail "missing validation commands rejected"
