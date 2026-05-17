@@ -630,6 +630,13 @@ else
   assert_jq "$TMP/missing-owner-economics-ref.out.json" '.failures[] | select(.code == "owner_economics_requirement_missing_owner_economics_ref" and .requirement_id == "owner_equity_distribution_terms")' "owner-economics requirement missing owner-economics receipt ref rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "owner_equity_distribution_terms") | .evidence_refs) -= ["state/holding-company-legal-structure.json"]' "$LEDGER" >"$TMP/missing-owner-economics-legal-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-owner-economics-legal-ref.json" --json >"$TMP/missing-owner-economics-legal-ref.out.json" 2>/dev/null; then
+  fail "owner-economics requirement missing legal-structure receipt ref rejected"
+else
+  assert_jq "$TMP/missing-owner-economics-legal-ref.out.json" '.failures[] | select(.code == "owner_economics_requirement_missing_legal_structure_ref" and .requirement_id == "owner_equity_distribution_terms")' "owner-economics requirement missing legal-structure receipt ref rejected"
+fi
+
 jq '
   (.requirements[] | select(.requirement_id == "customer_smb_owner_operator") | .coverage_status) = "partial"
   | .summary_counts.partial += 1

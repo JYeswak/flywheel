@@ -1304,6 +1304,14 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "required_ref": OWNER_ECONOMICS_REF,
                     }
                 )
+            if LEGAL_STRUCTURE_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "owner_economics_requirement_missing_legal_structure_ref",
+                        "requirement_id": "owner_equity_distribution_terms",
+                        "required_ref": LEGAL_STRUCTURE_REF,
+                    }
+                )
             if owner_economics_status == "blocked" and owner_economics_requirement.get("coverage_status") != "blocked":
                 failures.append(
                     {
