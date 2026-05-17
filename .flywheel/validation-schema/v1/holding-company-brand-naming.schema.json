@@ -1,0 +1,154 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-brand-naming/v1/schema.json",
+  "title": "ZestStream Holding Company Brand Naming v1",
+  "description": "Ledger for POUR brand naming provenance: own brand name with owner and community naming evidence.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "clear_count",
+    "names",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_brand_naming.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "brand_naming_provenance"
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "names": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/name_row"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "name_row": {
+      "type": "object",
+      "required": [
+        "name_id",
+        "company_slug",
+        "sequence",
+        "status",
+        "brand_name",
+        "own_brand_name",
+        "owner_involved_in_name",
+        "community_context_in_name",
+        "owner_operator_ref",
+        "community_context_ref",
+        "naming_decision_ref",
+        "brand_identity_ref",
+        "public_surface_ref",
+        "prohibited_name_flags",
+        "evidence_refs"
+      ],
+      "properties": {
+        "name_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "company_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "blocked",
+            "name_clear",
+            "launch_clear",
+            "deferred"
+          ]
+        },
+        "brand_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "own_brand_name": {
+          "type": "boolean"
+        },
+        "owner_involved_in_name": {
+          "type": "boolean"
+        },
+        "community_context_in_name": {
+          "type": "boolean"
+        },
+        "owner_operator_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "community_context_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "naming_decision_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "brand_identity_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "public_surface_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "prohibited_name_flags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "zeststream_meta_brand",
+              "generic_app_name",
+              "missing_owner_context",
+              "missing_community_context",
+              "workflow_builder_positioning"
+            ]
+          }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  }
+}

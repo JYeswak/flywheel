@@ -1,0 +1,39 @@
+{
+  "schema_version": "zeststream.holding_company_brand_naming.v1",
+  "generated_at": "2026-05-17T08:36:00Z",
+  "gate": "brand_naming_provenance",
+  "clear_count": 0,
+  "names": [
+    {
+      "name_id": "mobile-eats-brand-naming-20260517",
+      "company_slug": "mobile-eats",
+      "sequence": 1,
+      "status": "blocked",
+      "brand_name": "Mobile Eats",
+      "own_brand_name": true,
+      "owner_involved_in_name": false,
+      "community_context_in_name": false,
+      "owner_operator_ref": null,
+      "community_context_ref": null,
+      "naming_decision_ref": null,
+      "brand_identity_ref": "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md",
+      "public_surface_ref": "https://mobile-eats.zeststream.ai",
+      "prohibited_name_flags": [
+        "missing_owner_context",
+        "missing_community_context"
+      ],
+      "evidence_refs": [
+        "state/holding-company-pour-readiness.json",
+        "state/holding-company-owner-voice.json",
+        "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md"
+      ],
+      "notes": "Mobile Eats has an own-brand name and public surface, but no owner/operator or community naming decision receipt is present. The name cannot be launch-clear under the owner + community naming rule."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical brand naming provenance gate for the ZestStream holding-company goal.",
+    "A company name clears only when it is its own brand and has owner/operator plus community naming evidence.",
+    "This gate complements owner voice and POUR readiness; it proves naming provenance, not customer or operating-control status."
+  ],
+  "next_action": "Attach owner/operator, community context, naming decision, brand identity, and public-surface refs before marking any company name or launch clear."
+}

@@ -134,6 +134,11 @@
       "result": "Yuzu owner-operator voice ledger exists and validates; current clear_count is 0 because Mobile Eats lacks owner voice, community context, owner-operator, and Yuzu review receipts"
     },
     {
+      "kind": "brand_naming_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-brand-naming.json",
+      "result": "brand-naming provenance ledger exists and validates; current clear_count is 0 because Mobile Eats lacks owner/operator and community naming decision receipts"
+    },
+    {
       "kind": "public_story_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-public-story.json",
       "result": "public-story receipt ledger exists and validates; current clear_count is 0 because zeststream-v2-fresh lacks a receipt-led holding-company story and still carries builder/automation framing"
@@ -249,6 +254,17 @@
         "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md"
       ],
       "finding": "The Yuzu owner-operator voice gate is now machine-checkable separately from ZestStream anti-pitch voice. Mobile Eats has brand/public-surface evidence, but no signed owner-operator voice capture, community context, or Yuzu review receipt."
+    },
+    {
+      "gate": "brand_naming_provenance",
+      "status": "blocked_missing_owner_community_name_provenance",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-brand-naming.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-pour-readiness.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-owner-voice.json",
+        "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md"
+      ],
+      "finding": "The POUR name rule is now machine-checkable separately from brand identity and public surface. Mobile Eats has an own-brand name, but cannot clear name or launch provenance until owner/operator and community naming decision receipts are present and prohibited meta/generic naming flags are absent."
     },
     {
       "gate": "public_story_receipts",
@@ -445,6 +461,10 @@
     {
       "owner": "mobile-eats/yuzu",
       "action": "Fill state/holding-company-owner-voice.json with owner voice, community context, Yuzu review, owner-operator, and public-surface refs before marking any company surface owner-voice clear."
+    },
+    {
+      "owner": "mobile-eats/yuzu",
+      "action": "Fill state/holding-company-brand-naming.json with owner/operator, community context, naming decision, brand identity, and public-surface refs before marking any company name or launch name provenance clear."
     },
     {
       "owner": "zeststream-public-story",
