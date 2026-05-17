@@ -36,6 +36,13 @@ jq empty "$LEDGER" && pass "ledger json valid" || fail "ledger json valid"
 "$SCRIPT" --ledger "$LEDGER" --check-paths --json >"$TMP/current.json"
 assert_jq "$TMP/current.json" '.status == "pass" and .clear_count == 0 and .initiatives[0].nonprofit_extension_gate_status == "blocked"' "current deferred initiative validates and blocks nonprofit readiness"
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid nonprofit ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid nonprofit ledger rejected"
+fi
+
 jq '
   .clear_count = 1
   | .initiatives[0].status = "ready"
@@ -48,6 +55,13 @@ jq '
 ' "$LEDGER" >"$TMP/ready.json"
 "$SCRIPT" --ledger "$TMP/ready.json" --json >"$TMP/ready.out.json"
 assert_jq "$TMP/ready.out.json" '.status == "pass" and .clear_count == 1 and .initiatives[0].nonprofit_extension_gate_status == "clear"' "complete nonprofit readiness refs clear"
+
+jq '.initiatives[0].notes = ("sk-" + "NOTAREALSECRET")' "$TMP/ready.json" >"$TMP/secret-shaped-value.json"
+if "$SCRIPT" --ledger "$TMP/secret-shaped-value.json" --json >"$TMP/secret-shaped-value.out.json" 2>/dev/null; then
+  fail "secret-shaped nonprofit value rejected"
+else
+  assert_jq "$TMP/secret-shaped-value.out.json" '.status == "fail" and (.failures[] | select(.code == "secret_or_raw_value_shape_detected"))' "secret-shaped nonprofit value rejected"
+fi
 
 jq '.initiatives[0].status = "ready"' "$LEDGER" >"$TMP/ready-missing.json"
 if "$SCRIPT" --ledger "$TMP/ready-missing.json" --json >"$TMP/ready-missing.out.json" 2>/dev/null; then
@@ -68,6 +82,20 @@ if "$SCRIPT" --ledger "$TMP/commingled.json" --json >"$TMP/commingled.out.json" 
   fail "commingled owner economics rejected"
 else
   assert_jq "$TMP/commingled.out.json" '.failures[] | select(.code == "nonprofit_ready_with_commingled_owner_economics")' "commingled owner economics rejected"
+fi
+
+jq '.initiatives[0].social_cause_scope_ref = "state/no-such-nonprofit-scope.json"' "$TMP/ready.json" >"$TMP/missing-required-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-required-ref.json" --check-paths --json >"$TMP/missing-required-ref.out.json" 2>/dev/null; then
+  fail "missing nonprofit required ref rejected"
+else
+  assert_jq "$TMP/missing-required-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "required_ref_missing"))' "missing nonprofit required ref rejected"
+fi
+
+jq '.initiatives[0].evidence_refs = ["state/no-such-nonprofit-evidence.json"]' "$TMP/ready.json" >"$TMP/missing-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence-ref.json" --check-paths --json >"$TMP/missing-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing nonprofit evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing nonprofit evidence ref rejected"
 fi
 
 jq '.clear_count = 1' "$LEDGER" >"$TMP/bad-count.json"
