@@ -183,6 +183,18 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "recent_mobile_eats_shipping_claim") | .coverage_status) = "blocked"
+  | .summary_counts.blocked += 1
+  | .summary_counts.partial -= 1
+' "$LEDGER" >"$TMP/mobile-eats-underclaim.json"
+if "$SCRIPT" --ledger "$TMP/mobile-eats-underclaim.json" --json >"$TMP/mobile-eats-underclaim.out.json" 2>/dev/null; then
+  fail "Mobile Eats shipping partial status underclaim rejected"
+else
+  assert_jq "$TMP/mobile-eats-underclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_mobile_eats_shipping_receipt" and .requirement_id == "recent_mobile_eats_shipping_claim" and .evidence_status == "partial")' "Mobile Eats shipping partial status underclaim rejected by shipping receipt"
+  assert_jq "$TMP/mobile-eats-underclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_claim_honesty" and .requirement_id == "recent_mobile_eats_shipping_claim" and .evidence_status == "partial")' "Mobile Eats shipping partial status underclaim rejected by claim honesty"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "recent_anthropic_adoption_claim") | .coverage_status) = "partial"
   | .summary_counts.proven -= 1
   | .summary_counts.partial += 1
