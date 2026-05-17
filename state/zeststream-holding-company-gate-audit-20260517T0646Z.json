@@ -79,6 +79,11 @@
       "result": "sample count 3755 commits; does not independently prove the 4000+ claim because the exact nine-product-surface set was not established"
     },
     {
+      "kind": "progress_velocity_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-progress-velocity.json",
+      "result": "progress-velocity ledger exists and validates; the sampled nine local repos total 3755 commits in the fixed seven-day window and do not prove the 4000+ claim"
+    },
+    {
       "kind": "launch_economics_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-launch-economics.json",
       "result": "baseline ledger exists and validates; it refuses N+1 cheaper-than-N claims until at least two comparable launch rows exist"
@@ -298,8 +303,11 @@
   "recent_progress_claims": [
     {
       "claim": "4000+ commits in 7 days across 9 product surfaces",
-      "status": "not_reproduced_by_sample",
-      "finding": "A quick count over nine obvious local repos produced 3755 commits. This may exclude the intended ALPS/Blackfoot or worker surfaces, but the audit did not prove the exact 4000+ claim."
+      "status": "blocked_by_progress_velocity_ledger",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-progress-velocity.json"
+      ],
+      "finding": "The replayable progress-velocity ledger blocks the claim: the sampled nine local repos total 3755 commits for the fixed 2026-05-10T06:46Z to 2026-05-17T06:46Z window, the exact intended nine product surfaces were not established, and agent-bench has zero commits in that window."
     },
     {
       "claim": "mobile-eats shipping with shared substrate",
@@ -382,6 +390,10 @@
     {
       "owner": "skillos/flywheel",
       "action": "Populate the launch economics ledger with per-launch PEEL interviews, PRESS build hours, reused package count, new substrate contributions, and downstream propagation window as new companies form."
+    },
+    {
+      "owner": "flywheel/skillos",
+      "action": "Establish the exact nine product-surface set and rerun state/holding-company-progress-velocity.json before using the 4000+ commits in 7 days velocity claim in public or gate summaries."
     },
     {
       "owner": "skillos/flywheel/package-owner",

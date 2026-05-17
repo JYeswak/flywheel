@@ -32,6 +32,7 @@ The audit did not find the receipts that would let the system count a formed por
 | Legal structure | `blocked_scaffold_only` | Legal-structure ledger exists and validates; sub #2 owner signing remains blocked until binding artifact, attorney review, and CPA review refs are present. |
 | N+1 cheaper than N | `baseline_only` | Baseline launch economics ledger exists; no second comparable launch row proves compounding economics yet. |
 | RECYCLE friction loop | `blocked_no_recycled_friction` | RECYCLE ledger exists and validates; no friction item has landed as SkillOS capability plus package/substrate upgrade with portfolio propagation evidence. |
+| Recent progress velocity | `blocked_not_reproduced` | Progress-velocity ledger exists and validates; sampled nine local repos total 3,755 commits in the fixed seven-day window, not 4,000+, and the exact intended nine product surfaces are not established. |
 
 ## Evidence Anchors
 
@@ -57,6 +58,7 @@ The audit did not find the receipts that would let the system count a formed por
 - POUR readiness ledger: `state/holding-company-pour-readiness.json`
 - Owner-economics ledger: `state/holding-company-owner-economics.json`
 - Peer-coach ledger: `state/holding-company-peer-coach.json`
+- Progress-velocity ledger: `state/holding-company-progress-velocity.json`
 
 ## Immediate Next Actions
 
@@ -74,7 +76,8 @@ The audit did not find the receipts that would let the system count a formed por
 12. Fill the POUR readiness ledger with first paying-customer, owner-operator, and operating-control handoff receipts before marking Mobile Eats launch-clear.
 13. Fill the owner-economics ledger with signed owner-operator, cap-table, distribution terms, legal review, and substrate-share refs proving 25% owner equity and 45-75% tiered owner distributions before marking a deal signed or active.
 14. Fill the peer-coach ledger with Tier 2+ owner, sustainable cash, operating-control, peer-coach agreement, and 5% equity grant receipts before marking any owner eligible to peer-coach.
-15. Fill the RECYCLE ledger when launch friction appears, then attach SkillOS capability, package/substrate, and portfolio propagation receipts within the configured window.
+15. Establish the exact nine product-surface set and rerun the progress-velocity ledger before using the 4,000+ commits in 7 days claim in public or gate summaries.
+16. Fill the RECYCLE ledger when launch friction appears, then attach SkillOS capability, package/substrate, and portfolio propagation receipts within the configured window.
 
 ## Close Rule
 
