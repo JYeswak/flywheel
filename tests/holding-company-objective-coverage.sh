@@ -119,11 +119,42 @@ else
   assert_jq "$TMP/wrong-audit-ledger.out.json" '.failures[] | select(.code == "audit_objective_status_not_standing_non_closing")' "audit objective status drift rejected"
 fi
 
+jq '.source_goal = "/tmp/not-the-standing-goal.txt"' "$ROOT/state/zeststream-holding-company-gate-audit-20260517T0646Z.json" >"$TMP/wrong-audit-source.json"
+jq --arg old "state/zeststream-holding-company-gate-audit-20260517T0646Z.json" --arg audit "$TMP/wrong-audit-source.json" '
+  .audit_ref = $audit
+  | (.requirements[] | select(.primary_evidence_ref == $old) | .primary_evidence_ref) = $audit
+  | (.requirements[] | .evidence_refs) |= map(if . == $old then $audit else . end)
+' "$LEDGER" >"$TMP/wrong-audit-source-ledger.json"
+if "$SCRIPT" --ledger "$TMP/wrong-audit-source-ledger.json" --json >"$TMP/wrong-audit-source-ledger.out.json" 2>/dev/null; then
+  fail "audit source-goal drift rejected"
+else
+  assert_jq "$TMP/wrong-audit-source-ledger.out.json" '.failures[] | select(.code == "audit_source_goal_mismatch")' "audit source-goal drift rejected"
+fi
+
+jq '.summary_verdict = "complete"' "$ROOT/state/zeststream-holding-company-gate-audit-20260517T0646Z.json" >"$TMP/wrong-audit-summary.json"
+jq --arg old "state/zeststream-holding-company-gate-audit-20260517T0646Z.json" --arg audit "$TMP/wrong-audit-summary.json" '
+  .audit_ref = $audit
+  | (.requirements[] | select(.primary_evidence_ref == $old) | .primary_evidence_ref) = $audit
+  | (.requirements[] | .evidence_refs) |= map(if . == $old then $audit else . end)
+' "$LEDGER" >"$TMP/wrong-audit-summary-ledger.json"
+if "$SCRIPT" --ledger "$TMP/wrong-audit-summary-ledger.json" --json >"$TMP/wrong-audit-summary-ledger.out.json" 2>/dev/null; then
+  fail "audit summary verdict drift rejected"
+else
+  assert_jq "$TMP/wrong-audit-summary-ledger.out.json" '.failures[] | select(.code == "audit_summary_verdict_mismatch")' "audit summary verdict drift rejected"
+fi
+
 jq 'del(.requirements[] | select(.requirement_id == "runway_gate")) | .summary_counts.total = 28 | .summary_counts.blocked = 20' "$LEDGER" >"$TMP/missing-id.json"
 if "$SCRIPT" --ledger "$TMP/missing-id.json" --json >"$TMP/missing-id.out.json" 2>/dev/null; then
   fail "missing required requirement rejected"
 else
   assert_jq "$TMP/missing-id.out.json" '.failures[] | select(.code == "missing_required_requirement_ids")' "missing required requirement rejected"
+fi
+
+jq '.requirements += [(.requirements[0] | .requirement_id = "unexpected_requirement")] | .summary_counts.total = 30 | .summary_counts.proven = 3' "$LEDGER" >"$TMP/unknown-id.json"
+if "$SCRIPT" --ledger "$TMP/unknown-id.json" --json >"$TMP/unknown-id.out.json" 2>/dev/null; then
+  fail "unknown requirement id rejected"
+else
+  assert_jq "$TMP/unknown-id.out.json" '.failures[] | select(.code == "unknown_requirement_ids")' "unknown requirement id rejected"
 fi
 
 jq '.requirements += [.requirements[0]] | .summary_counts.total = 30 | .summary_counts.proven = 3' "$LEDGER" >"$TMP/duplicate-id.json"
