@@ -561,6 +561,13 @@ else
   assert_jq "$TMP/stale-public-story-zero-hits-finding.out.json" '.failures[] | select(.code == "public_story_finding_missing_zero_build_app_hits" and .requirement_id == "public_story_show_receipts")' "public-story stale zero-build-app-hit finding rejected"
 fi
 
+jq '(.requirements[] | select(.requirement_id == "public_story_show_receipts") | .finding) = "The committed /portfolio route clears the receipt-led website story with proof refs and zero build-app framing."' "$LEDGER" >"$TMP/stale-public-story-founder-post-finding.json"
+if "$SCRIPT" --ledger "$TMP/stale-public-story-founder-post-finding.json" --json >"$TMP/stale-public-story-founder-post-finding.out.json" 2>/dev/null; then
+  fail "public-story stale founder-post caveat finding rejected"
+else
+  assert_jq "$TMP/stale-public-story-founder-post-finding.out.json" '.failures[] | select(.code == "public_story_finding_missing_founder_post_caveat" and .requirement_id == "public_story_show_receipts")' "public-story stale founder-post caveat finding rejected"
+fi
+
 jq '(.requirements[] | select(.requirement_id == "public_story_show_receipts") | .evidence_refs) -= ["state/holding-company-public-surface-audit-supersession-20260517T1004Z.json"]' "$LEDGER" >"$TMP/missing-public-story-public-surface-supersession-ref.json"
 if "$SCRIPT" --ledger "$TMP/missing-public-story-public-surface-supersession-ref.json" --json >"$TMP/missing-public-story-public-surface-supersession-ref.out.json" 2>/dev/null; then
   fail "public-story requirement missing supersession ref rejected"

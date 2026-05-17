@@ -1788,6 +1788,16 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                     "requirement_id": "public_story_show_receipts",
                 }
             )
+        if public_receipt_statuses["founder_post"] == "blocked" and public_receipt_statuses["public_story"] == "clear":
+            finding = public_story_requirement.get("finding")
+            finding_text = finding.lower() if isinstance(finding, str) else ""
+            if "founder-post" not in finding_text and "founder post" not in finding_text:
+                failures.append(
+                    {
+                        "code": "public_story_finding_missing_founder_post_caveat",
+                        "requirement_id": "public_story_show_receipts",
+                    }
+                )
         if public_receipt_statuses["public_story"] == "clear" and public_story_receipt is not None:
             has_zero_hit_surface = any(
                 isinstance(surface, dict)
