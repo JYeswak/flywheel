@@ -47,6 +47,13 @@ assert_jq "$TMP/current.json" '.gate_status_by_claim.anthropic_adoption == "prov
 
 assert_jq "$RECEIPT" '.schema_version == "zeststream.holding_company_recent_progress_claim_honesty.v1" and (.claims | length == 4)' "receipt declares four active recent-progress claims"
 
+jq 'del(.source_goal)' "$RECEIPT" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --receipt "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid claim-honesty receipt rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.failures[] | select(.code == "schema_invalid")' "schema-invalid claim-honesty receipt rejected"
+fi
+
 for id in anthropic_adoption mobile_eats_shipping progress_velocity skillos_forever_os_lock; do
   ledger="$(jq -r --arg id "$id" '.claims[] | select(.claim_id == $id) | .ledger_ref' "$RECEIPT")"
   validator="$(jq -r --arg id "$id" '.claims[] | select(.claim_id == $id) | .validator' "$RECEIPT")"
