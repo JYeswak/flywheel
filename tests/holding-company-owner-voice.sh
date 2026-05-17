@@ -71,5 +71,47 @@ else
   assert_jq "$TMP/count-mismatch.out.json" '.status == "fail" and (.failures[] | select(.code == "clear_count_mismatch"))' "owner voice clear count mismatch rejected"
 fi
 
+jq 'del(.gate)' "$LEDGER" >"$TMP/schema-invalid.json"
+if "$SCRIPT" --ledger "$TMP/schema-invalid.json" --json >"$TMP/schema-invalid.out.json" 2>/dev/null; then
+  fail "schema-invalid owner voice ledger rejected"
+else
+  assert_jq "$TMP/schema-invalid.out.json" '.status == "fail" and (.failures[] | select(.code == "schema_invalid"))' "schema-invalid owner voice ledger rejected"
+fi
+
+jq '.surfaces[0].owner_voice_present = false | .clear_count = 0' "$TMP/clear.json" >"$TMP/without-owner-voice.json"
+if "$SCRIPT" --ledger "$TMP/without-owner-voice.json" --json >"$TMP/without-owner-voice.out.json" 2>/dev/null; then
+  fail "clear without owner voice evidence rejected"
+else
+  assert_jq "$TMP/without-owner-voice.out.json" '.status == "fail" and (.failures[] | select(.code == "owner_voice_clear_without_owner_voice"))' "clear without owner voice evidence rejected"
+fi
+
+jq '.surfaces[0].community_context_present = false | .clear_count = 0' "$TMP/clear.json" >"$TMP/without-community-context.json"
+if "$SCRIPT" --ledger "$TMP/without-community-context.json" --json >"$TMP/without-community-context.out.json" 2>/dev/null; then
+  fail "clear without community context rejected"
+else
+  assert_jq "$TMP/without-community-context.out.json" '.status == "fail" and (.failures[] | select(.code == "owner_voice_clear_without_community_context"))' "clear without community context rejected"
+fi
+
+jq '.surfaces[0].notes = "fixture sk-TestSecret123 should be rejected" | .clear_count = 0' "$TMP/clear.json" >"$TMP/secret-shape.json"
+if "$SCRIPT" --ledger "$TMP/secret-shape.json" --json >"$TMP/secret-shape.out.json" 2>/dev/null; then
+  fail "secret-shaped owner voice value rejected"
+else
+  assert_jq "$TMP/secret-shape.out.json" '.status == "fail" and (.failures[] | select(.code == "secret_or_raw_amount_shape_detected"))' "secret-shaped owner voice value rejected"
+fi
+
+jq '.surfaces[0].owner_operator_ref = "state/does-not-exist-owner-operator.json" | .clear_count = 0' "$TMP/clear.json" >"$TMP/missing-required-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-required-ref.json" --check-paths --json >"$TMP/missing-required-ref.out.json" 2>/dev/null; then
+  fail "missing required owner voice ref rejected"
+else
+  assert_jq "$TMP/missing-required-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "required_ref_missing" and .field == "owner_operator_ref"))' "missing required owner voice ref rejected"
+fi
+
+jq '.surfaces[0].evidence_refs = ["state/does-not-exist-owner-voice-evidence.json"] | .clear_count = 0' "$TMP/clear.json" >"$TMP/missing-evidence-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-evidence-ref.json" --check-paths --json >"$TMP/missing-evidence-ref.out.json" 2>/dev/null; then
+  fail "missing owner voice evidence ref rejected"
+else
+  assert_jq "$TMP/missing-evidence-ref.out.json" '.status == "fail" and (.failures[] | select(.code == "evidence_ref_missing"))' "missing owner voice evidence ref rejected"
+fi
+
 printf 'RESULT pass=%d fail=%d\n' "$pass_count" "$fail_count"
 exit "$fail_count"
