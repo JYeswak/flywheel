@@ -163,6 +163,24 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "sustainable_pace_gate") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/pace-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/pace-overclaim.json" --json >"$TMP/pace-overclaim.out.json" 2>/dev/null; then
+  fail "blocked sustainable-pace receipt rejects pace status promotion"
+else
+  assert_jq "$TMP/pace-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_sustainable_pace_receipt" and .requirement_id == "sustainable_pace_gate" and .evidence_status == "blocked")' "blocked sustainable-pace receipt rejects pace status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "sustainable_pace_gate") | .evidence_refs) -= ["state/holding-company-sustainable-pace.json"]' "$LEDGER" >"$TMP/missing-pace-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-pace-ref.json" --json >"$TMP/missing-pace-ref.out.json" 2>/dev/null; then
+  fail "sustainable-pace requirement missing pace receipt ref rejected"
+else
+  assert_jq "$TMP/missing-pace-ref.out.json" '.failures[] | select(.code == "sustainable_pace_requirement_missing_pace_ref" and .requirement_id == "sustainable_pace_gate")' "sustainable-pace requirement missing pace receipt ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "peel_loop") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
   | .summary_counts.blocked -= 1

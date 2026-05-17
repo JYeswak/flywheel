@@ -55,6 +55,7 @@ REQUIRED_VALIDATION_COVERAGE = "state/zeststream-portfolio-company-registry.json
 PORTFOLIO_REGISTRY_REF = "state/zeststream-portfolio-company-registry.json"
 RUNWAY_RECEIPT_REF = "state/holding-company-runway-current.json"
 LEGAL_STRUCTURE_REF = "state/holding-company-legal-structure.json"
+SUSTAINABLE_PACE_REF = "state/holding-company-sustainable-pace.json"
 RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 RECENT_PROGRESS_REQUIREMENT_CLAIMS = {
     "recent_anthropic_adoption_claim": "anthropic_adoption",
@@ -147,6 +148,40 @@ def legal_structure_gate_status(receipt: dict[str, Any]) -> str:
     }
     if claimed_clear_count == len(LEGAL_REQUIRED_BEFORE_SUB_2) and cleared_required_rows == LEGAL_REQUIRED_BEFORE_SUB_2:
         return "clear"
+    return "blocked"
+
+
+def is_number(value: Any) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def sustainable_pace_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("pace_clear_count")
+    max_weekly_hours = receipt.get("max_weekly_hours_year2", 60)
+    required_offset_ratio = receipt.get("required_substrate_time_offset_ratio", 0.5)
+    if not is_number(max_weekly_hours) or not is_number(required_offset_ratio):
+        return "blocked"
+    for period in receipt.get("periods", []):
+        if not isinstance(period, dict):
+            continue
+        lifecycle_year = period.get("lifecycle_year")
+        weekly_hours = period.get("weekly_hours_total")
+        manual_hours = period.get("coaching_hours_manual")
+        offset_hours = period.get("coaching_hours_offset_by_substrate")
+        denominator = manual_hours + offset_hours if is_number(manual_hours) and is_number(offset_hours) else None
+        offset_ratio = offset_hours / denominator if is_number(denominator) and denominator > 0 else None
+        if (
+            is_number(claimed_clear_count)
+            and claimed_clear_count >= 1
+            and isinstance(lifecycle_year, int)
+            and lifecycle_year >= 2
+            and period.get("measurement_status") == "measured_clear"
+            and is_number(weekly_hours)
+            and weekly_hours <= max_weekly_hours
+            and is_number(offset_ratio)
+            and offset_ratio >= required_offset_ratio
+        ):
+            return "clear"
     return "blocked"
 
 
@@ -272,6 +307,32 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "legal_structure_ref_missing", "ref": LEGAL_STRUCTURE_REF})
+
+    sustainable_pace_path = path_for_ref(SUSTAINABLE_PACE_REF)
+    if sustainable_pace_path is not None and sustainable_pace_path.exists():
+        sustainable_pace_status = sustainable_pace_gate_status(load_json(sustainable_pace_path))
+        sustainable_pace_requirement = requirements_by_id.get("sustainable_pace_gate")
+        if sustainable_pace_requirement is not None:
+            evidence_refs = sustainable_pace_requirement.get("evidence_refs", [])
+            if SUSTAINABLE_PACE_REF not in evidence_refs:
+                failures.append(
+                    {
+                        "code": "sustainable_pace_requirement_missing_pace_ref",
+                        "requirement_id": "sustainable_pace_gate",
+                        "required_ref": SUSTAINABLE_PACE_REF,
+                    }
+                )
+            if sustainable_pace_status == "blocked" and sustainable_pace_requirement.get("coverage_status") != "blocked":
+                failures.append(
+                    {
+                        "code": "requirement_status_mismatch_with_sustainable_pace_receipt",
+                        "requirement_id": "sustainable_pace_gate",
+                        "claimed": sustainable_pace_requirement.get("coverage_status"),
+                        "evidence_status": sustainable_pace_status,
+                    }
+                )
+    else:
+        failures.append({"code": "sustainable_pace_ref_missing", "ref": SUSTAINABLE_PACE_REF})
 
     portfolio_registry_path = path_for_ref(PORTFOLIO_REGISTRY_REF)
     counted_portfolio_companies = None
