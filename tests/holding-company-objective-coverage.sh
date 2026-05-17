@@ -1071,6 +1071,100 @@ else
   assert_jq "$TMP/missing-evidence.out.json" '.failures[] | select(.code == "evidence_ref_missing")' "missing evidence path rejected"
 fi
 
+MISSING_REFS_SCRIPT="$TMP/objective-coverage-missing-refs.py"
+sed \
+  -e "s#^ROOT = .*#ROOT = Path(\"$ROOT\")#" \
+  -e 's#^PORTFOLIO_REGISTRY_REF = .*#PORTFOLIO_REGISTRY_REF = "state/__missing__/portfolio-registry.json"#' \
+  -e 's#^RUNWAY_RECEIPT_REF = .*#RUNWAY_RECEIPT_REF = "state/__missing__/runway-current.json"#' \
+  -e 's#^LEGAL_STRUCTURE_REF = .*#LEGAL_STRUCTURE_REF = "state/__missing__/legal-structure.json"#' \
+  -e 's#^SUSTAINABLE_PACE_REF = .*#SUSTAINABLE_PACE_REF = "state/__missing__/sustainable-pace.json"#' \
+  -e 's#^COACH_ROLE_REF = .*#COACH_ROLE_REF = "state/__missing__/coach-role.json"#' \
+  -e 's#^OWNER_SEARCH_PHASING_REF = .*#OWNER_SEARCH_PHASING_REF = "state/__missing__/owner-search-phasing.json"#' \
+  -e 's#^OWNER_ECONOMICS_REF = .*#OWNER_ECONOMICS_REF = "state/__missing__/owner-economics.json"#' \
+  -e 's#^OPERATING_HEALTH_REF = .*#OPERATING_HEALTH_REF = "state/__missing__/operating-health.json"#' \
+  -e 's#^CANDIDATE_FIT_REF = .*#CANDIDATE_FIT_REF = "state/__missing__/candidate-fit.json"#' \
+  -e 's#^OWNER_VOICE_REF = .*#OWNER_VOICE_REF = "state/__missing__/owner-voice.json"#' \
+  -e 's#^ANTI_PITCH_VOICE_REF = .*#ANTI_PITCH_VOICE_REF = "state/__missing__/anti-pitch-voice.json"#' \
+  -e 's#^PUBLIC_STORY_REF = .*#PUBLIC_STORY_REF = "state/__missing__/public-story.json"#' \
+  -e 's#^PUBLIC_STORY_ROUTE_REF = .*#PUBLIC_STORY_ROUTE_REF = "state/__missing__/public-story-route.json"#' \
+  -e 's#^PUBLIC_SURFACE_AUDIT_SUPERSESSION_REF = .*#PUBLIC_SURFACE_AUDIT_SUPERSESSION_REF = "state/__missing__/public-surface-audit-supersession.json"#' \
+  -e 's#^BRAND_VOICE_SKILL_REF = .*#BRAND_VOICE_SKILL_REF = "state/__missing__/brand-voice-skill.json"#' \
+  -e 's#^FOUNDER_POST_VOICE_REF = .*#FOUNDER_POST_VOICE_REF = "state/__missing__/founder-post-voice.json"#' \
+  -e 's#^BRAND_NAMING_REF = .*#BRAND_NAMING_REF = "state/__missing__/brand-naming.json"#' \
+  -e 's#^MOBILE_EATS_SHIPPING_REF = .*#MOBILE_EATS_SHIPPING_REF = "state/__missing__/mobile-eats-shipping.json"#' \
+  -e 's#^SKILLOS_FOREVER_OS_LOCK_REF = .*#SKILLOS_FOREVER_OS_LOCK_REF = "state/__missing__/skillos-forever-os-lock.json"#' \
+  -e 's#^PEEL_INTERVIEWS_REF = .*#PEEL_INTERVIEWS_REF = "state/__missing__/peel-interviews.json"#' \
+  -e 's#^PRESS_READINESS_REF = .*#PRESS_READINESS_REF = "state/__missing__/press-readiness.json"#' \
+  -e 's#^POUR_READINESS_REF = .*#POUR_READINESS_REF = "state/__missing__/pour-readiness.json"#' \
+  -e 's#^SHARED_STACK_REF = .*#SHARED_STACK_REF = "state/__missing__/shared-stack.json"#' \
+  -e 's#^MOBILE_EATS_SUBSTRATE_SHARE_REF = .*#MOBILE_EATS_SUBSTRATE_SHARE_REF = "state/__missing__/mobile-eats-substrate-share.json"#' \
+  -e 's#^ANTHROPIC_ADOPTION_REF = .*#ANTHROPIC_ADOPTION_REF = "state/__missing__/anthropic-adoption.json"#' \
+  -e 's#^PEER_COACH_REF = .*#PEER_COACH_REF = "state/__missing__/peer-coach.json"#' \
+  -e 's#^LAUNCH_ECONOMICS_REF = .*#LAUNCH_ECONOMICS_REF = "state/__missing__/launch-economics.json"#' \
+  -e 's#^RECYCLE_LOOP_REF = .*#RECYCLE_LOOP_REF = "state/__missing__/recycle-loop.json"#' \
+  -e 's#^NONPROFIT_EXTENSION_REF = .*#NONPROFIT_EXTENSION_REF = "state/__missing__/nonprofit-extension.json"#' \
+  -e 's#^LIFECYCLE_DISPOSITION_REF = .*#LIFECYCLE_DISPOSITION_REF = "state/__missing__/lifecycle-disposition.json"#' \
+  -e 's#^PROGRESS_VELOCITY_REF = .*#PROGRESS_VELOCITY_REF = "state/__missing__/progress-velocity.json"#' \
+  -e 's#^RECENT_PROGRESS_CLAIM_HONESTY_REF = .*#RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/__missing__/recent-progress-claim-honesty.json"#' \
+  "$SCRIPT" >"$MISSING_REFS_SCRIPT"
+if python3 "$MISSING_REFS_SCRIPT" --ledger "$LEDGER" --json >"$TMP/missing-receipt-refs.out.json" 2>/dev/null; then
+  fail "missing receipt references rejected"
+else
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "anthropic_adoption_ref_missing")' "missing Anthropic adoption receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "anti_pitch_voice_ref_missing")' "missing anti-pitch voice receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "brand_naming_ref_missing")' "missing brand-naming receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "brand_voice_skill_ref_missing")' "missing brand-voice skill receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "candidate_fit_ref_missing")' "missing candidate-fit receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "coach_role_ref_missing")' "missing coach-role receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "founder_post_voice_ref_missing")' "missing founder-post voice receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "launch_economics_ref_missing")' "missing launch-economics receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "legal_structure_ref_missing")' "missing legal-structure receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "lifecycle_disposition_ref_missing")' "missing lifecycle-disposition receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "mobile_eats_shipping_ref_missing")' "missing Mobile Eats shipping receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "mobile_eats_substrate_share_ref_missing")' "missing Mobile Eats substrate-share receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "nonprofit_extension_ref_missing")' "missing nonprofit-extension receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "operating_health_ref_missing")' "missing operating-health receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "owner_economics_ref_missing")' "missing owner-economics receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "owner_search_phasing_ref_missing")' "missing owner-search phasing receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "owner_voice_ref_missing")' "missing owner-voice receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "peel_interviews_ref_missing")' "missing PEEL interviews receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "peer_coach_ref_missing")' "missing peer-coach receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "portfolio_registry_ref_missing")' "missing portfolio registry receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "pour_readiness_ref_missing")' "missing POUR readiness receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "press_readiness_ref_missing")' "missing PRESS readiness receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "progress_velocity_ref_missing")' "missing progress-velocity receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "public_story_ref_missing")' "missing public-story receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "public_story_route_ref_missing")' "missing public-story route receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "public_surface_supersession_ref_missing")' "missing public-surface supersession receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "recent_progress_claim_honesty_ref_missing")' "missing recent-progress claim-honesty receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "recycle_loop_ref_missing")' "missing RECYCLE receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "runway_receipt_ref_missing")' "missing runway receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "shared_stack_ref_missing")' "missing shared-stack receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "skillos_forever_os_lock_ref_missing")' "missing SkillOS Forever-OS lock receipt rejected"
+  assert_jq "$TMP/missing-receipt-refs.out.json" '.failures[] | select(.code == "sustainable_pace_ref_missing")' "missing sustainable-pace receipt rejected"
+fi
+
+CLAIM_MISSING_REF="$TMP/recent-progress-claim-honesty-missing-claim.json"
+jq '.claims |= map(select(.claim_id != "progress_velocity"))' "$ROOT/state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json" >"$CLAIM_MISSING_REF"
+CLAIM_MISSING_SCRIPT="$TMP/objective-coverage-missing-claim.py"
+sed \
+  -e "s#^ROOT = .*#ROOT = Path(\"$ROOT\")#" \
+  -e "s#^RECENT_PROGRESS_CLAIM_HONESTY_REF = .*#RECENT_PROGRESS_CLAIM_HONESTY_REF = \"$CLAIM_MISSING_REF\"#" \
+  "$SCRIPT" >"$CLAIM_MISSING_SCRIPT"
+jq --arg ref "$CLAIM_MISSING_REF" '
+  (.requirements[] | select(
+    .requirement_id == "recent_anthropic_adoption_claim"
+    or .requirement_id == "recent_mobile_eats_shipping_claim"
+    or .requirement_id == "recent_progress_velocity_claim"
+    or .requirement_id == "recent_skillos_forever_os_claim"
+  ) | .evidence_refs) |= map(if . == "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json" then $ref else . end)
+' "$LEDGER" >"$TMP/missing-claim-honesty-claim.json"
+if python3 "$CLAIM_MISSING_SCRIPT" --ledger "$TMP/missing-claim-honesty-claim.json" --json >"$TMP/missing-claim-honesty-claim.out.json" 2>/dev/null; then
+  fail "recent-progress claim-honesty missing claim rejected"
+else
+  assert_jq "$TMP/missing-claim-honesty-claim.out.json" '.failures[] | select(.code == "recent_progress_claim_honesty_claim_missing" and .requirement_id == "recent_progress_velocity_claim" and .claim_id == "progress_velocity")' "recent-progress claim-honesty missing claim rejected"
+fi
+
 if [[ "$fail_count" -ne 0 ]]; then
   printf 'RESULT pass=%s fail=%s\n' "$pass_count" "$fail_count" >&2
   exit 1
