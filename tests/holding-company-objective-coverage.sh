@@ -271,6 +271,32 @@ else
 fi
 
 jq '
+  (.requirements[] | select(.requirement_id == "nurture_loop") | .coverage_status) = "partial"
+  | .summary_counts.partial += 1
+  | .summary_counts.blocked -= 1
+' "$LEDGER" >"$TMP/nurture-overclaim.json"
+if "$SCRIPT" --ledger "$TMP/nurture-overclaim.json" --json >"$TMP/nurture-overclaim.out.json" 2>/dev/null; then
+  fail "blocked NURTURE receipts reject NURTURE status promotion"
+else
+  assert_jq "$TMP/nurture-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_shared_stack_receipt" and .requirement_id == "nurture_loop" and .evidence_status == "blocked")' "blocked shared-stack receipt rejects NURTURE status promotion"
+  assert_jq "$TMP/nurture-overclaim.out.json" '.failures[] | select(.code == "requirement_status_mismatch_with_peer_coach_receipt" and .requirement_id == "nurture_loop" and .evidence_status == "blocked")' "blocked peer-coach receipt rejects NURTURE status promotion"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "nurture_loop") | .evidence_refs) -= ["state/holding-company-shared-stack.json"]' "$LEDGER" >"$TMP/missing-nurture-shared-stack-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-nurture-shared-stack-ref.json" --json >"$TMP/missing-nurture-shared-stack-ref.out.json" 2>/dev/null; then
+  fail "NURTURE requirement missing shared-stack receipt ref rejected"
+else
+  assert_jq "$TMP/missing-nurture-shared-stack-ref.out.json" '.failures[] | select(.code == "nurture_requirement_missing_shared_stack_ref" and .requirement_id == "nurture_loop")' "NURTURE requirement missing shared-stack receipt ref rejected"
+fi
+
+jq '(.requirements[] | select(.requirement_id == "nurture_loop") | .evidence_refs) -= ["state/holding-company-peer-coach.json"]' "$LEDGER" >"$TMP/missing-nurture-peer-coach-ref.json"
+if "$SCRIPT" --ledger "$TMP/missing-nurture-peer-coach-ref.json" --json >"$TMP/missing-nurture-peer-coach-ref.out.json" 2>/dev/null; then
+  fail "NURTURE requirement missing peer-coach receipt ref rejected"
+else
+  assert_jq "$TMP/missing-nurture-peer-coach-ref.out.json" '.failures[] | select(.code == "nurture_requirement_missing_peer_coach_ref" and .requirement_id == "nurture_loop")' "NURTURE requirement missing peer-coach receipt ref rejected"
+fi
+
+jq '
   (.requirements[] | select(.requirement_id == "peel_loop") | .coverage_status) = "proven"
   | .summary_counts.proven += 1
   | .summary_counts.blocked -= 1

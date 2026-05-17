@@ -61,6 +61,8 @@ OWNER_ECONOMICS_REF = "state/holding-company-owner-economics.json"
 PEEL_INTERVIEWS_REF = "state/holding-company-peel-interviews.json"
 PRESS_READINESS_REF = "state/holding-company-press-readiness.json"
 POUR_READINESS_REF = "state/holding-company-pour-readiness.json"
+SHARED_STACK_REF = "state/holding-company-shared-stack.json"
+PEER_COACH_REF = "state/holding-company-peer-coach.json"
 RECENT_PROGRESS_CLAIM_HONESTY_REF = "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
 RECENT_PROGRESS_REQUIREMENT_CLAIMS = {
     "recent_anthropic_adoption_claim": "anthropic_adoption",
@@ -114,6 +116,13 @@ POUR_REQUIRED_REFS = {
     "owner_operator_ref",
     "operating_control_handoff_ref",
 }
+SHARED_STACK_REQUIRED_COMPONENTS = {"skillos", "flywheel", "jsm", "zeststream_packages", "brand_voice"}
+PEER_COACH_REQUIRED_REFS = [
+    "sustainable_cash_position_ref",
+    "operating_control_ref",
+    "peer_coach_agreement_ref",
+    "equity_grant_ref",
+]
 
 
 def load_json(path: Path) -> Any:
@@ -345,6 +354,50 @@ def pour_gate_status(receipt: dict[str, Any]) -> str:
         if not isinstance(launch, dict) or launch.get("status") not in {"pour_clear", "launched"}:
             continue
         if all(has_ref(launch.get(field)) for field in POUR_REQUIRED_REFS):
+            return "clear"
+    return "blocked"
+
+
+def shared_stack_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    declared_components = set(receipt.get("required_components", []))
+    if (
+        not isinstance(claimed_clear_count, int)
+        or claimed_clear_count < 1
+        or declared_components != SHARED_STACK_REQUIRED_COMPONENTS
+    ):
+        return "blocked"
+    for company in receipt.get("companies", []):
+        if not isinstance(company, dict) or company.get("status") != "shared_stack_clear":
+            continue
+        component_rows = [row for row in company.get("components", []) if isinstance(row, dict)]
+        by_component = {row.get("component"): row for row in component_rows}
+        if set(by_component) != SHARED_STACK_REQUIRED_COMPONENTS:
+            continue
+        if all(
+            by_component[component].get("status") == "present"
+            and has_ref(by_component[component].get("receipt_ref"))
+            for component in SHARED_STACK_REQUIRED_COMPONENTS
+        ):
+            return "clear"
+    return "blocked"
+
+
+def peer_coach_gate_status(receipt: dict[str, Any]) -> str:
+    claimed_clear_count = receipt.get("clear_count")
+    min_tier = receipt.get("required_min_owner_tier", 2)
+    required_equity = receipt.get("required_peer_coach_equity_percent", 5)
+    if not isinstance(claimed_clear_count, int) or claimed_clear_count < 1:
+        return "blocked"
+    for coach in receipt.get("peer_coaches", []):
+        if not isinstance(coach, dict) or coach.get("status") not in {"eligible", "active"}:
+            continue
+        owner_tier = coach.get("owner_tier")
+        equity = coach.get("equity_grant_percent")
+        tier_ok = isinstance(owner_tier, int) and owner_tier >= min_tier
+        equity_ok = is_number(equity) and equity == required_equity
+        refs_ok = all(has_ref(coach.get(field)) for field in PEER_COACH_REQUIRED_REFS)
+        if tier_ok and equity_ok and refs_ok:
             return "clear"
     return "blocked"
 
@@ -627,6 +680,57 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                 )
     else:
         failures.append({"code": "pour_readiness_ref_missing", "ref": POUR_READINESS_REF})
+
+    shared_stack_path = path_for_ref(SHARED_STACK_REF)
+    peer_coach_path = path_for_ref(PEER_COACH_REF)
+    shared_stack_status = None
+    peer_coach_status = None
+    if shared_stack_path is not None and shared_stack_path.exists():
+        shared_stack_status = shared_stack_gate_status(load_json(shared_stack_path))
+    else:
+        failures.append({"code": "shared_stack_ref_missing", "ref": SHARED_STACK_REF})
+    if peer_coach_path is not None and peer_coach_path.exists():
+        peer_coach_status = peer_coach_gate_status(load_json(peer_coach_path))
+    else:
+        failures.append({"code": "peer_coach_ref_missing", "ref": PEER_COACH_REF})
+
+    nurture_requirement = requirements_by_id.get("nurture_loop")
+    if nurture_requirement is not None:
+        evidence_refs = nurture_requirement.get("evidence_refs", [])
+        if SHARED_STACK_REF not in evidence_refs:
+            failures.append(
+                {
+                    "code": "nurture_requirement_missing_shared_stack_ref",
+                    "requirement_id": "nurture_loop",
+                    "required_ref": SHARED_STACK_REF,
+                }
+            )
+        if PEER_COACH_REF not in evidence_refs:
+            failures.append(
+                {
+                    "code": "nurture_requirement_missing_peer_coach_ref",
+                    "requirement_id": "nurture_loop",
+                    "required_ref": PEER_COACH_REF,
+                }
+            )
+        if shared_stack_status == "blocked" and nurture_requirement.get("coverage_status") != "blocked":
+            failures.append(
+                {
+                    "code": "requirement_status_mismatch_with_shared_stack_receipt",
+                    "requirement_id": "nurture_loop",
+                    "claimed": nurture_requirement.get("coverage_status"),
+                    "evidence_status": shared_stack_status,
+                }
+            )
+        if peer_coach_status == "blocked" and nurture_requirement.get("coverage_status") != "blocked":
+            failures.append(
+                {
+                    "code": "requirement_status_mismatch_with_peer_coach_receipt",
+                    "requirement_id": "nurture_loop",
+                    "claimed": nurture_requirement.get("coverage_status"),
+                    "evidence_status": peer_coach_status,
+                }
+            )
 
     portfolio_registry_path = path_for_ref(PORTFOLIO_REGISTRY_REF)
     counted_portfolio_companies = None
