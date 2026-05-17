@@ -30,6 +30,7 @@ The audit did not find the receipts that would let the system count a formed por
 | NURTURE peer-coach | `blocked_no_eligible_owner` | Peer-coach ledger exists and validates; no Tier 2+ owner with required cash/control/agreement/equity receipts exists. |
 | Legal structure | `blocked_scaffold_only` | Legal-structure ledger exists and validates; sub #2 owner signing remains blocked until binding artifact, attorney review, and CPA review refs are present. |
 | N+1 cheaper than N | `baseline_only` | Baseline launch economics ledger exists; no second comparable launch row proves compounding economics yet. |
+| RECYCLE friction loop | `blocked_no_recycled_friction` | RECYCLE ledger exists and validates; no friction item has landed as SkillOS capability plus package/substrate upgrade with portfolio propagation evidence. |
 
 ## Evidence Anchors
 
@@ -44,6 +45,7 @@ The audit did not find the receipts that would let the system count a formed por
 - Brand voice config: `/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml`
 - Shared-stack ledger: `state/holding-company-shared-stack.json`
 - Launch economics ledger: `state/holding-company-launch-economics.json`
+- RECYCLE ledger: `state/holding-company-recycle-loop.json`
 - Runway receipt: `state/holding-company-runway-current.json`
 - PEEL interview ledger: `state/holding-company-peel-interviews.json`
 - Owner-search phasing ledger: `state/holding-company-owner-search-phasing.json`
@@ -69,6 +71,7 @@ The audit did not find the receipts that would let the system count a formed por
 11. Fill the POUR readiness ledger with first paying-customer, owner-operator, and operating-control handoff receipts before marking Mobile Eats launch-clear.
 12. Fill the owner-economics ledger with signed owner-operator, cap-table, distribution terms, legal review, and substrate-share refs proving 25% owner equity and 45-75% tiered owner distributions before marking a deal signed or active.
 13. Fill the peer-coach ledger with Tier 2+ owner, sustainable cash, operating-control, peer-coach agreement, and 5% equity grant receipts before marking any owner eligible to peer-coach.
+14. Fill the RECYCLE ledger when launch friction appears, then attach SkillOS capability, package/substrate, and portfolio propagation receipts within the configured window.
 
 ## Close Rule
 

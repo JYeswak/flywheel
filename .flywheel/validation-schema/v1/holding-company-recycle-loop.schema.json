@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-recycle-loop/v1/schema.json",
+  "title": "ZestStream Holding Company Recycle Loop v1",
+  "description": "Ledger for the RECYCLE gate: operating friction becomes SkillOS capability plus package/substrate upgrades that propagate across the portfolio.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "required_max_propagation_window_days",
+    "clear_count",
+    "friction_items",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_recycle_loop.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "recycle_friction_to_capability"
+    },
+    "required_max_propagation_window_days": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "friction_items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/friction_item"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "friction_item": {
+      "type": "object",
+      "required": [
+        "friction_id",
+        "company_slug",
+        "source_loop",
+        "status",
+        "friction_receipt_ref",
+        "skillos_capability_ref",
+        "package_or_substrate_ref",
+        "portfolio_propagation_ref",
+        "propagation_window_days",
+        "evidence_refs"
+      ],
+      "properties": {
+        "friction_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "company_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "source_loop": {
+          "type": "string",
+          "enum": [
+            "peel",
+            "press",
+            "pour",
+            "nurture",
+            "recycle"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "not_observed",
+            "observed",
+            "routed",
+            "capability_landed",
+            "package_landed",
+            "propagated",
+            "deferred"
+          ]
+        },
+        "friction_receipt_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "skillos_capability_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "package_or_substrate_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "portfolio_propagation_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "propagation_window_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -132,6 +132,11 @@
       "kind": "shared_stack_ledger",
       "path": "/Users/josh/Developer/flywheel/state/holding-company-shared-stack.json",
       "result": "NURTURE shared-stack ledger exists and validates; current clear_count is 0 because Mobile Eats lacks a JSM receipt and has only partial SkillOS and brand-voice evidence"
+    },
+    {
+      "kind": "recycle_loop_ledger",
+      "path": "/Users/josh/Developer/flywheel/state/holding-company-recycle-loop.json",
+      "result": "RECYCLE ledger exists and validates; current clear_count is 0 because no Mobile Eats friction item has been converted into a SkillOS capability plus package/substrate upgrade with portfolio propagation evidence"
     }
   ],
   "canonical_gates": [
@@ -263,6 +268,16 @@
         "/Users/josh/Developer/mobile-eats/next-app/package.json"
       ],
       "finding": "Reusable substrate and a baseline launch economics ledger exist, but there is still no second comparable launch row proving PEEL or PRESS N+1 is cheaper than N."
+    },
+    {
+      "gate": "recycle_friction_to_capability",
+      "status": "blocked_no_recycled_friction",
+      "evidence": [
+        "/Users/josh/Developer/flywheel/state/holding-company-recycle-loop.json",
+        "/Users/josh/Developer/flywheel/state/holding-company-launch-economics.json",
+        "/Users/josh/Developer/flywheel/state/substrate-share/mobile-eats-20260517T0654Z.json"
+      ],
+      "finding": "The RECYCLE loop is now machine-checkable separately from N+1 economics. Mobile Eats has package-reuse evidence, but no friction row has landed as a SkillOS capability plus package/substrate upgrade and portfolio propagation receipt."
     }
   ],
   "recent_progress_claims": [
@@ -348,6 +363,10 @@
     {
       "owner": "skillos/flywheel",
       "action": "Populate the launch economics ledger with per-launch PEEL interviews, PRESS build hours, reused package count, new substrate contributions, and downstream propagation window as new companies form."
+    },
+    {
+      "owner": "skillos/flywheel/package-owner",
+      "action": "Fill state/holding-company-recycle-loop.json when launch friction appears, then attach SkillOS capability, package/substrate, and portfolio propagation receipts within the configured window."
     }
   ]
 }
