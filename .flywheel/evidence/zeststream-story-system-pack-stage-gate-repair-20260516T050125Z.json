@@ -1,0 +1,55 @@
+{
+  "schema": "flywheel.skillos_pack_stage_gate_repair.v0",
+  "ts": "2026-05-16T05:01:25Z",
+  "bead_id": "flywheel-jr9eh",
+  "pack_id": "zeststream-story-system-pack",
+  "source_receipt": "/Users/josh/Developer/skillos/state/pack-feedback-zeststream-story-system-pack-classify-20260516T0458Z.json",
+  "changed_paths": [
+    "docs/runbooks/public-release-runbook.md",
+    "tests/public-docs.sh"
+  ],
+  "reconciled_literals": [
+    "SUMMARY pass=220 fail=0",
+    "SUMMARY pass=95 fail=0",
+    "SUMMARY pass=13 fail=0",
+    "require_literal \"docs/runbooks/public-release-runbook.md\" \"SUMMARY pass=220 fail=0\"",
+    "require_literal \"docs/runbooks/public-release-runbook.md\" \"SUMMARY pass=95 fail=0\"",
+    "require_literal \"docs/runbooks/public-release-runbook.md\" \"SUMMARY pass=13 fail=0\""
+  ],
+  "verification": {
+    "flywheel": [
+      {
+        "command": "bash tests/public-docs.sh",
+        "exit_code": 0,
+        "summary": "SUMMARY pass=282 fail=0"
+      },
+      {
+        "command": "python3 scripts/validate_story_system_package.py --json",
+        "exit_code": 0,
+        "status": "pass"
+      }
+    ],
+    "skillos": [
+      {
+        "command": "python3 state/packs/zeststream-story-system-pack/scripts/story-system-doctor.py --json",
+        "exit_code": 0,
+        "status": "pass",
+        "public_release_gates_present": true,
+        "source_validator_status": "pass",
+        "source_validator_exit": 0
+      },
+      {
+        "command": "python3 -m skillos_pack validate --pack zeststream-story-system-pack --json",
+        "exit_code": 0,
+        "status": "pass",
+        "blocked_count": 0,
+        "missing_count": 0,
+        "validation_exit": 0
+      }
+    ]
+  },
+  "pack_state": {
+    "ship_ready_marked": false,
+    "reason": "Requested action repaired stage-gate validation only; SkillOS ownership decides ship classification separately."
+  }
+}

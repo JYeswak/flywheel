@@ -1,0 +1,58 @@
+{
+  "schema": "flywheel.goal_mode_worker_test.receipt_integrity_backfill.v1",
+  "cycle": 627,
+  "ts": "2026-05-16T00:36:13Z",
+  "classification": "ACCRETE",
+  "event": "ci-receipt-integrity-backfill",
+  "finding": {
+    "summary": "Cycle 626 stand-down receipt carried a transcribed headSha for two completed PR CI runs, but no live CI state transition occurred.",
+    "affected_receipt": "/tmp/goal-mode-worker-test-cycle-626-stand-down-saturated-watch-surface/receipt.json",
+    "affected_fields": [
+      "latest_ci_runs[1].headSha",
+      "latest_ci_runs[2].headSha"
+    ],
+    "incorrect_value": "f0c30fb695b3fd294712a874fbfd4c4218aa7048",
+    "correct_value": "f0c30fb2bd0512ef5441cdce3c174e03b1212c71"
+  },
+  "live_verification": {
+    "run_25944513393": {
+      "workflowName": "CI",
+      "event": "pull_request",
+      "headBranch": "fix/callback-spool-reap-cleanup-trap-20260515",
+      "headSha": "f0c30fb2bd0512ef5441cdce3c174e03b1212c71",
+      "status": "completed",
+      "conclusion": "success",
+      "createdAt": "2026-05-15T22:31:06Z",
+      "updatedAt": "2026-05-15T22:32:36Z",
+      "url": "https://github.com/JYeswak/flywheel/actions/runs/25944513393"
+    },
+    "run_25944513371": {
+      "workflowName": "Installer Smoke",
+      "event": "pull_request",
+      "headBranch": "fix/callback-spool-reap-cleanup-trap-20260515",
+      "headSha": "f0c30fb2bd0512ef5441cdce3c174e03b1212c71",
+      "status": "completed",
+      "conclusion": "success",
+      "createdAt": "2026-05-15T22:31:06Z",
+      "updatedAt": "2026-05-15T22:31:43Z",
+      "url": "https://github.com/JYeswak/flywheel/actions/runs/25944513371"
+    }
+  },
+  "delta_assessment": {
+    "is_wake_trigger": false,
+    "reason": "The same completed run IDs, statuses, conclusions, and updatedAt values remained stable; only the prior receipt's copied headSha differed from live GitHub data.",
+    "canonical_prior_event": {
+      "source": "/tmp/goal-mode-worker-test.jsonl",
+      "cycle": "ACT row at 2026-05-15T22:33:06Z",
+      "detail_prefix": "PR #23 opened on fix/callback-spool-reap-cleanup-trap-20260515 at head f0c30fb2"
+    }
+  },
+  "reuse": {
+    "rule": "For CI baselines, copy run headSha directly from gh run view/list output and include run databaseId plus updatedAt; if a later receipt disagrees while databaseId and updatedAt are stable, classify as receipt-integrity backfill, not CI transition.",
+    "applies_to": [
+      "goal-mode watch receipts",
+      "CI baseline tracking",
+      "stand-down evidence packs"
+    ]
+  }
+}
