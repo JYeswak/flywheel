@@ -1,0 +1,51 @@
+{
+  "schema_version": "flywheel.petal9_substrate_repair.v1",
+  "ts": "2026-05-18T19:28:30Z",
+  "bead": "flywheel-9tp6u",
+  "repairs": {
+    "petal9_fail_loud": true,
+    "jsm_changelog_empty_or_hung_is_fatal": true,
+    "mine_rituals_invoked_via_python3": true,
+    "petal9_log_generated_row_appended_on_success": true,
+    "weekly_digest_launchd_restored": true
+  },
+  "artifacts": {
+    "tracked_script": "/Users/josh/.claude/skills/install-substrate/scripts/petal9-close.sh",
+    "live_script": "/Users/josh/.local/bin/petal9-close.sh",
+    "test_script": "/Users/josh/.claude/skills/.flywheel/tests/test_loop_de_petal9.sh",
+    "launchd_plist": "/Users/josh/Library/LaunchAgents/ai.zeststream.flywheel-digest.plist",
+    "tracked_sha256": "3e107115cf43f901221e2cf066a5b4a0c5e9ae32201d743f1e55389098885471",
+    "live_sha256": "3e107115cf43f901221e2cf066a5b4a0c5e9ae32201d743f1e55389098885471",
+    "live_matches_tracked": true,
+    "launchd_plist_sha256": "bab44778179328eec0e88033036f41267208c0fbac37cf6fa613209c4dcc9ef8"
+  },
+  "validation": {
+    "bash_n_tracked": "pass",
+    "install_verify": "pass",
+    "loop_de_petal9_test": "10 pass / 0 fail",
+    "live_fail_loud_rc": 2,
+    "live_fail_loud_no_artifact_overwrite": true,
+    "live_fail_loud_output_file": "/tmp/petal9-live-fail-loud.out",
+    "flywheel_friday_digest_dry_run": "pass",
+    "launchctl_list": "-\t0\tai.zeststream.flywheel-digest"
+  },
+  "reservations": {
+    "claude": [
+      23480,
+      23481
+    ],
+    "local": [
+      23478,
+      23479
+    ],
+    "library": [
+      23482
+    ],
+    "flywheel": [
+      23483,
+      23484,
+      23485,
+      23486
+    ]
+  }
+}
