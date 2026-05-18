@@ -8710,3 +8710,30 @@ Cross-refs:
   patch), b6p1m (jsm-managed patch), n4gt1 (jsm-unmanaged direct +
   paired patch), myfak.1 (jsm-unmanaged direct + paired patch), d6zk1.1
   (jsm-unmanaged deletion tombstone)
+
+## memory-without-cross-link: false-OPEN and gated-loop halt memories (2026-05-18)
+
+Class: `memory-without-cross-link`.
+
+Gap-hunt surfaced two flywheel memory entries that existed only in the memory
+store and were not cited by sampled command, doctrine, incident, or recent-plan
+surfaces. The fix is an incident-level cross-link, not new doctrine: both
+entries are audit/loop-control corollaries of existing close and halt discipline.
+
+Memory cross-refs:
+- `feedback_false_open_of_verified_bead_inverse_trauma.md`: false-OPEN is the
+  inverse trauma of false-CLOSE; both confuse probe/discovery output with
+  outcome truth.
+- `feedback_forever_goal_text_vs_mission_gated_loop_halt_corollary.md`:
+  forever-goal text yields to the mission gated-loop halt corollary when a loop
+  is exclusively blocked on owner:joshua or owner:external-system.
+
+Bead audit trail:
+- `flywheel-2xdi.181` — closes
+  `memory-without-cross-link:feedback_false_open_of_verified_bead_inverse_trauma.md`.
+- `flywheel-2xdi.182` — closes
+  `memory-without-cross-link:feedback_forever_goal_text_vs_mission_gated_loop_halt_corollary.md`.
+
+Receiver surface:
+- `INCIDENTS.md` now names both memory filenames so
+  `.flywheel/scripts/gap-hunt-probe.sh` has a durable repo-local receiver.
