@@ -604,8 +604,20 @@ mission_anchor = sys.argv[6]
 
 now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
+VALID_MODES = {"loop", "goal", "manual", "watcher", "unknown"}
+ATTRIBUTION_FIELDS = ("mode", "origin_task_id", "goal_id", "sprint_id", "tick_id")
+
 def is_v2(row):
     return str(row.get("schema_version", "")) == "2"
+
+def attribution_complete(row):
+    mode = row.get("mode")
+    return (
+        is_v2(row)
+        and isinstance(mode, str)
+        and mode in VALID_MODES
+        and all(name in row for name in ATTRIBUTION_FIELDS)
+    )
 
 def first_str(row, *names, default=""):
     for name in names:
@@ -661,6 +673,30 @@ def agent_type(row):
         return "gemini"
     return "other"
 
+def infer_mode(row, task_id):
+    mode = row.get("mode")
+    if isinstance(mode, str) and mode in VALID_MODES:
+        return mode
+    event = first_str(row, "event", "status", "dispatch_status").lower()
+    joined = " ".join(str(row.get(name, "")) for name in (
+        "event", "status", "task_id", "goal_id", "sprint_id", "pipeline_slug", "lane", "source"
+    )).lower()
+    if row.get("goal_id") or row.get("sprint_id") or "goal" in joined:
+        return "goal"
+    if (
+        row.get("tick_id")
+        or task_id.startswith("flywheel_loop")
+        or event in {"ntm_dispatch_sent", "autoloop_dispatch_sent", "idle_pane_auto_dispatch", "auto_refill_after_reap", "callback_reaped"}
+        or "autoloop" in joined
+        or "loop" in joined
+    ):
+        return "loop"
+    if "watcher" in joined:
+        return "watcher"
+    if event in {"dispatch_sent", "worker_callback", "bead_callback_received", "bead_close_verified"}:
+        return "unknown"
+    return "unknown"
+
 def pane_state_source(row):
     value = first_str(row, "pane_state_source")
     if value in {"ntm_health", "ntm_copy", "raw_capture", "none"}:
@@ -675,11 +711,21 @@ def backfill(row, line):
     session = infer_session(row)
     pane = infer_pane(row)
     task_id = first_str(row, "task_id", "dispatch_id", "id", default=f"legacy-line-{line}")
+    mode_value = infer_mode(row, task_id)
+    origin_task_id = first_str(row, "origin_task_id", default=task_id)
+    goal_id = first_str(row, "goal_id") or None
+    sprint_id = first_str(row, "sprint_id") or None
+    tick_id = first_str(row, "tick_id") or (origin_task_id if mode_value == "loop" else None)
     updated = dict(row)
     updated.update({
         "schema_version": 2,
         "task_id": task_id,
         "ts": iso_or_now(row),
+        "mode": mode_value,
+        "origin_task_id": origin_task_id,
+        "goal_id": goal_id,
+        "sprint_id": sprint_id,
+        "tick_id": tick_id,
         "from": first_str(row, "from", default="legacy-dispatch-log"),
         "to": first_str(row, "to", default=f"{session}:{pane}"),
         "pane": pane,
@@ -721,7 +767,7 @@ for line_no, raw in enumerate(log_path.read_text(encoding="utf-8", errors="repla
     if not isinstance(row, dict):
         output_lines.append(raw)
         continue
-    if is_v2(row):
+    if attribution_complete(row):
         already_v2 += 1
         output_lines.append(json.dumps(row, sort_keys=True, separators=(",", ":")))
         continue
@@ -735,6 +781,8 @@ for line_no, raw in enumerate(log_path.read_text(encoding="utf-8", errors="repla
         "task_id": new_row["task_id"],
         "session": new_row["session"],
         "pane": new_row["pane"],
+        "mode": new_row["mode"],
+        "origin_task_id": new_row["origin_task_id"],
         "dispatch_skill_version": new_row["dispatch_skill_version"],
     })
     output_lines.append(json.dumps(new_row, sort_keys=True, separators=(",", ":")))
