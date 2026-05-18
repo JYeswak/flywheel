@@ -1,0 +1,31 @@
+{
+  "schema_version": "flywheel.owner_commit_evidence.v1",
+  "generated_at": "2026-05-17T02:27:00Z",
+  "source_bead": "skillos-86q9",
+  "repo": "/Users/josh/Developer/zeststream-platform",
+  "commit": "26d541f",
+  "commit_subject": "docs(r2-storage): add batch download exports",
+  "changed_files": [
+    "docs/company/packages/r2-storage-spec-2026-q2.md"
+  ],
+  "exports_added": [
+    "PresignedDownloadBatchInput",
+    "BatchedPresignedDownloadResult",
+    "presignedDownloadUrlsBatch"
+  ],
+  "validation": {
+    "command": "bin/skillos doctor --scope spec-package-drift --json",
+    "status": "OK",
+    "top_drifted": [],
+    "drifted_packs": 0,
+    "package_only_export_count": 0,
+    "spec_only_export_count": 0
+  },
+  "boundary": {
+    "skillos_edited_zeststream_platform": false,
+    "only_relevant_file_committed": true,
+    "unrelated_dirty_files_left_untouched": true,
+    "secret_material_read_or_recorded": false
+  }
+}
+

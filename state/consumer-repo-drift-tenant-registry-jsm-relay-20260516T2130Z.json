@@ -1,0 +1,62 @@
+{
+  "schema_version": "flywheel.cross_orch_relay.consumer_repo_drift_tenant_registry.v1",
+  "created_at": "2026-05-16T21:30:00Z",
+  "thread": "skillos-ep40",
+  "tracking_bead": "skillos-ep40",
+  "from": "skillos:1",
+  "to": "flywheel:1",
+  "topic": "consumer-repo-drift tenant registry rows",
+  "source_command": "cd /Users/josh/Developer/skillos && bin/skillos doctor --scope consumer-repo-drift --json",
+  "source_status": "WARN",
+  "source_receipts": {
+    "current": "/Users/josh/Developer/skillos/state/consumer-repo-drift-tenant-registry-jsm-route-20260516T2130Z.json",
+    "bounded_bootstrap_closeout": "/Users/josh/Developer/skillos/state/consumer-repo-drift-bounded-bootstrap-closeout-20260515T2340Z.json",
+    "recheck": "/Users/josh/Developer/skillos/state/consumer-repo-drift-tenant-registry-recheck-20260516T2049Z.json"
+  },
+  "handoff": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260516T2130Z-from-skillos-to-jsm-infisical-registry-owner-consumer-repo-drift.md",
+  "rows": [
+    {
+      "repo": "terratitle",
+      "repo_path": "/Users/josh/Developer/terratitle",
+      "missing": [".zs-tenant.yaml"],
+      "required_action": "add canonical tenant registry row through authorized JSM/Infisical registry workflow before generating .zs-tenant.yaml"
+    },
+    {
+      "repo": "agent-bench",
+      "repo_path": "/Users/josh/Developer/agent-bench",
+      "missing": [".zs-tenant.yaml"],
+      "required_action": "add canonical tenant registry row through authorized JSM/Infisical registry workflow before generating .zs-tenant.yaml"
+    },
+    {
+      "repo": "cubcloud-aaas",
+      "repo_path": "/Users/josh/Developer/cubcloud-aaas",
+      "missing": [".zs-tenant.yaml"],
+      "required_action": "add canonical tenant registry row through authorized JSM/Infisical registry workflow before generating .zs-tenant.yaml"
+    }
+  ],
+  "boundaries": [
+    "no tenant secrets in pane text or receipts",
+    "no token rotation",
+    "no direct SkillOS-lane edits to /Users/josh/.claude/skills/infisical-secrets/data/project-mappings.yaml",
+    "generated .zs-tenant.yaml is invalid unless it traces to a canonical registry row",
+    "raw JSM mutation requires guarded workflow serialization, auth marker, and integrity checks"
+  ],
+  "requested_receiver_outputs": [
+    "registry row landed through proper JSM/Infisical workflow with validation receipt and generated .zs-tenant.yaml evidence",
+    "bounded write-lane grant to SkillOS with exact non-secret row contents and post-write validation commands",
+    "repo-specific deferral/removal receipt consumed by consumer-repo-drift"
+  ],
+  "validation_command": "cd /Users/josh/Developer/skillos && bin/skillos doctor --scope consumer-repo-drift --json | jq '.subsystems[\"consumer-repo-drift\"]'",
+  "live_probe_summary": {
+    "status": "WARN",
+    "partial_bootstrap": ["terratitle", "agent-bench", "cubcloud-aaas"],
+    "tenant_registry_missing_rows": ["terratitle", "agent-bench", "cubcloud-aaas"]
+  },
+  "delivery": {
+    "status": "sent",
+    "sent_at": "2026-05-16T21:25:00Z",
+    "target": "flywheel:1",
+    "method": "ntm send flywheel --pane=1 --file .flywheel/handoffs/20260516T2130Z-from-skillos-to-jsm-infisical-registry-owner-consumer-repo-drift.md --force-non-interactive --no-cass-check",
+    "result": "sent to pane 1"
+  }
+}

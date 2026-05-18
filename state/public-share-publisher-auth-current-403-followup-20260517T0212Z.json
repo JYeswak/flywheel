@@ -1,0 +1,47 @@
+{
+  "schema_version": "flywheel.public_share_publisher_auth_followup.v1",
+  "generated_at": "2026-05-17T02:12:00Z",
+  "source": "flywheel:1/codex",
+  "target": "skillos:1",
+  "topic": "public-share publisher Cloudflare Access service-token verification",
+  "secret_path_probe": {
+    "cf_secret_probe_exit": 0,
+    "expected_keys": [
+      "CF_AT_GAP_VOICE_GATED_PUBLISHER_CLIENT_ID",
+      "CF_AT_GAP_VOICE_GATED_PUBLISHER_CLIENT_SECRET"
+    ],
+    "expected_key_presence": {
+      "CF_AT_GAP_VOICE_GATED_PUBLISHER_CLIENT_ID": false,
+      "CF_AT_GAP_VOICE_GATED_PUBLISHER_CLIENT_SECRET": false
+    },
+    "wrapper_access_header_count": 0,
+    "secret_values_recorded": false
+  },
+  "dry_run": {
+    "command": "python3 scripts/skillos_weekly_publish_via_zesttube.py --draft state/public-share/2026-05-16/linkedin-001-weekly-system-sharpening.md --asset-type linkedin_post --mode dry_run --json",
+    "exit_code": 2,
+    "receipt": "/Users/josh/Developer/skillos/state/public-share/2026-05-17/linkedin-001-weekly-system-sharpening-publish-receipt-2026-05-17T021107Z.json",
+    "http_status": 403,
+    "webhook_payload_present": false,
+    "force_publish": false,
+    "mode": "dry_run"
+  },
+  "doctor": {
+    "command": "bin/skillos doctor --scope public-share-publisher-auth --json",
+    "exit_code": 2,
+    "status": "WARN",
+    "receipt": "/Users/josh/Developer/skillos/state/public-share/2026-05-17/linkedin-001-weekly-system-sharpening-publish-receipt-2026-05-17T021107Z.json",
+    "http_status": 403,
+    "webhook_payload_present": false
+  },
+  "classification": "approved_runtime_secret_keys_absent",
+  "owner_lane_packet": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260517T0212Z-from-flywheel-to-cloudflare-owner-public-share-publisher-auth-secret-missing.md",
+  "callback": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260517T0212Z-from-flywheel-to-skillos-public-share-publisher-auth-current-403-callback.md",
+  "safety": {
+    "live_publish_attempted": false,
+    "auth_mutation_attempted": false,
+    "token_rotation_attempted": false,
+    "secret_material_recorded": false
+  }
+}
+
