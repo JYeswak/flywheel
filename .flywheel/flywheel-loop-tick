@@ -144,6 +144,7 @@ NTM="${NTM:-/Users/josh/.local/bin/ntm}"
 COORDINATOR_BIN="${COORDINATOR_BIN:-/Users/josh/.local/bin/ntm-coordinator-pinned}"
 PANE_WORK_SIGNAL_SCRIPT="${PANE_WORK_SIGNAL_SCRIPT:-$REPO/.flywheel/scripts/pane-work-signal.sh}"
 PANE_WORK_SIGNAL_STATE_DIR="${PANE_WORK_SIGNAL_STATE_DIR:-${FLYWHEEL_STATE_DIR:-$HOME/.local/state/flywheel}}"
+LOOP_GOAL_CONTRACT_GATE_SCRIPT="${LOOP_GOAL_CONTRACT_GATE_SCRIPT:-$REPO/.flywheel/scripts/loop-goal-contract-gate.sh}"
 DRY_RUN="${FLYWHEEL_LOOP_TICK_DRY_RUN:-0}"
 FROZEN_DETECTOR_OVERRIDE="${FLYWHEEL_TICK_FROZEN_DETECTOR_OVERRIDE:-0}"
 CANONICAL_SOURCE="${FLYWHEEL_CANONICAL_DOCTRINE_SOURCE:-/Users/josh/Developer/flywheel/.flywheel/AGENTS-CANONICAL.md}"
@@ -2333,6 +2334,20 @@ ls -1t "$PROMPT_DIR"/flywheel-tick-*.md 2>/dev/null | tail -n +201 | xargs rm -f
 
 send_output=""
 status="failed"
+LOOP_GOAL_CONTRACT_GATE_RESULT="$(jq -nc '{schema_version:"loop-goal-contract-gate/v1",status:"not_applicable",decision:null}')"
+if [[ "$PHASE" == "DISPATCH" ]]; then
+  if [[ -x "$LOOP_GOAL_CONTRACT_GATE_SCRIPT" ]]; then
+    LOOP_GOAL_CONTRACT_GATE_RESULT="$("$LOOP_GOAL_CONTRACT_GATE_SCRIPT" validate --repo "$REPO" --decision DISPATCH_BEAD --task-id "$task_id" --dispatch-log "$LOG" --json 2>&1 || printf '{"schema_version":"loop-goal-contract-gate/v1","status":"error","reason":"gate_failed"}')"
+    LOOP_GOAL_CONTRACT_GATE_RESULT="$(json_stream_last_object_or_default "$LOOP_GOAL_CONTRACT_GATE_RESULT" "$(jq -nc '{schema_version:"loop-goal-contract-gate/v1",status:"error",reason:"invalid_gate_output"}')")"
+  else
+    LOOP_GOAL_CONTRACT_GATE_RESULT="$(jq -nc --arg script "$LOOP_GOAL_CONTRACT_GATE_SCRIPT" '{schema_version:"loop-goal-contract-gate/v1",status:"no_dispatch",reason:"missing_goal_contract",missing_fields:["gate_script"],gate_script:$script}')"
+    jq -nc \
+      --arg ts "$(ts)" \
+      --arg task_id "$task_id" \
+      --arg script "$LOOP_GOAL_CONTRACT_GATE_SCRIPT" \
+      '{schema_version:"loop-goal-contract-gate/v1",ts:$ts,event:"NO_DISPATCH",event_key:"NO_DISPATCH:missing-contract",status:"missing_goal_contract",reason:"missing_goal_contract",mode:"loop",origin_task_id:$task_id,goal_id:null,sprint_id:null,tick_id:$task_id,task_id:$task_id,decision:"DISPATCH_BEAD",missing_goal_contract:true,missing_fields:["gate_script"],gate_script:$script}' >>"$LOG"
+  fi
+fi
 CANONICAL_PULL_STATUS="$(jq -r '.status // "fail"' <<<"$CANONICAL_PULL_RESULT" 2>/dev/null || printf fail)"
 CANONICAL_PULL_FRESHNESS_SECONDS="$(jq -r '.canonical_pull_freshness_seconds // 999999999' <<<"$CANONICAL_PULL_RESULT" 2>/dev/null || printf 999999999)"
 
@@ -2342,6 +2357,9 @@ if [[ "$CANONICAL_PULL_STATUS" != "pass" || "$CANONICAL_PULL_FRESHNESS_SECONDS" 
 elif [[ "$FROZEN_DETECTOR_BLOCK_REASON" != "none" ]]; then
   status="blocked_frozen_detector"
   send_output="blocked_by_frozen_detector reason=$FROZEN_DETECTOR_BLOCK_REASON"
+elif [[ "$(jq -r '.status // empty' <<<"$LOOP_GOAL_CONTRACT_GATE_RESULT" 2>/dev/null || true)" == "no_dispatch" ]]; then
+  status="no_dispatch_missing_contract"
+  send_output="observe_only_missing_goal_contract"
 elif [[ "$DRY_RUN" == "1" ]]; then
   status="dry_run"
   send_output="dry_run prompt_file=$prompt_file"
@@ -2349,7 +2367,8 @@ elif send_output="$("$NTM" send "$SESSION" --pane="$TARGET_PANE" --file "$prompt
   status="sent"
 fi
 
-jq -nc \
+if [[ "$status" != "no_dispatch_missing_contract" ]]; then
+  jq -nc \
   --arg ts "$(ts)" \
   --arg event "ntm_dispatch_sent" \
   --arg task_id "$task_id" \
@@ -2390,6 +2409,7 @@ jq -nc \
   --argjson ntm_surface_validation "$NTM_SURFACE_VALIDATION_RESULT" \
   --argjson ntm_activity "$NTM_ACTIVITY_RESULT" \
   --argjson dispatch_capacity "$DISPATCH_CAPACITY_RESULT" \
+  --argjson loop_goal_contract_gate "$LOOP_GOAL_CONTRACT_GATE_RESULT" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --arg hold_reason "$HOLD_REASON" \
   --argjson value_gap "$VALUE_GAP_RESULT" \
@@ -2420,6 +2440,7 @@ jq -nc \
     data_backed_deferral_rewrite_path:($data_backed_deferral.rewrite_path // false),
     data_backed_deferral_action_source:($data_backed_deferral.selected_action_source // null),
     data_backed_deferral_rewrite_action:($data_backed_deferral.rewrite_action // null),
+    loop_goal_contract_gate:$loop_goal_contract_gate,
     jeff_status:$jeff_status,jeff_fixes:$jeff_fixes,agent_mail_fd:$agent_mail_fd,
     leverage_ceiling:$leverage_ceiling,
     mobile_eats_receipt:$mobile_eats,skillos_loop:$skillos_loop,daily_jeff_ingest:$daily_jeff,
@@ -2515,6 +2536,7 @@ jq -nc \
     jeff_fixes_status:($jeff_fixes.status // null),
     dispatch_status:$status,hold_reason:(if $hold_reason == "none" then null else $hold_reason end),ntm_send_output:$send_output
   }' >>"$LOG"
+fi
 
 jq -nc \
   --arg ts "$(ts)" \
@@ -2554,6 +2576,7 @@ jq -nc \
   --argjson ntm_surface_validation "$NTM_SURFACE_VALIDATION_RESULT" \
   --argjson ntm_activity "$NTM_ACTIVITY_RESULT" \
   --argjson dispatch_capacity "$DISPATCH_CAPACITY_RESULT" \
+  --argjson loop_goal_contract_gate "$LOOP_GOAL_CONTRACT_GATE_RESULT" \
   --arg frozen_detector_block_reason "$FROZEN_DETECTOR_BLOCK_REASON" \
   --arg hold_reason "$HOLD_REASON" \
   --argjson value_gap "$VALUE_GAP_RESULT" \
@@ -2584,6 +2607,7 @@ jq -nc \
     data_backed_deferral_rewrite_path:($data_backed_deferral.rewrite_path // false),
     data_backed_deferral_action_source:($data_backed_deferral.selected_action_source // null),
     data_backed_deferral_rewrite_action:($data_backed_deferral.rewrite_action // null),
+    loop_goal_contract_gate:$loop_goal_contract_gate,
     jeff_status:$jeff_status,jeff_fixes:$jeff_fixes,agent_mail_fd:$agent_mail_fd,
     leverage_ceiling:$leverage_ceiling,
     mobile_eats_receipt:$mobile_eats,skillos_loop:$skillos_loop,daily_jeff_ingest:$daily_jeff,
@@ -2674,4 +2698,4 @@ jq -nc \
     hold_reason:(if $hold_reason == "none" then null else $hold_reason end)
   }' >"$LAST"
 
-[[ "$status" == "sent" || "$status" == "dry_run" || "$status" == "blocked_frozen_detector" || "$status" == "blocked_canonical_pull" ]]
+[[ "$status" == "sent" || "$status" == "dry_run" || "$status" == "blocked_frozen_detector" || "$status" == "blocked_canonical_pull" || "$status" == "no_dispatch_missing_contract" ]]

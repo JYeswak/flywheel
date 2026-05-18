@@ -59,6 +59,7 @@ append_no_dispatch() {
       schema_version:"loop-goal-contract-gate/v1",
       ts:$ts,
       event:"NO_DISPATCH",
+      event_key:"NO_DISPATCH:missing-contract",
       status:"missing_goal_contract",
       reason:$reason,
       mode:"loop",
