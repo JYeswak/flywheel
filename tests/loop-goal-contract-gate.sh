@@ -17,7 +17,7 @@ log="$TMP/dispatch-log.jsonl"
 missing_out="$TMP/missing.json"
 "$GATE" validate --repo "$TMP" --decision DISPATCH_BEAD --task-id tick-missing --dispatch-log "$log" --json >"$missing_out"
 jq -e '.status == "no_dispatch" and .reason == "missing_goal_contract" and (.missing_fields | index("contract_path"))' "$missing_out" >/dev/null \
-  && jq -e '.event == "NO_DISPATCH" and .status == "missing_goal_contract" and .mode == "loop" and .tick_id == "tick-missing"' "$log" >/dev/null \
+  && jq -e '.event == "NO_DISPATCH" and .status == "missing_goal_contract" and .mode == "loop" and .tick_id == "tick-missing" and has("goal_id") and has("sprint_id")' "$log" >/dev/null \
   && ! jq -e 'select(.event == "ntm_dispatch_sent")' "$log" >/dev/null \
   && pass "missing contract refuses dispatch" || fail "missing contract refuses dispatch"
 

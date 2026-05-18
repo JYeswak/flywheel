@@ -63,6 +63,8 @@ append_no_dispatch() {
       reason:$reason,
       mode:"loop",
       origin_task_id:$task_id,
+      goal_id:null,
+      sprint_id:null,
       tick_id:$task_id,
       task_id:$task_id,
       decision:$decision,
