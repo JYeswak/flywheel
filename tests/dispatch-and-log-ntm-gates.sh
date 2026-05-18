@@ -80,10 +80,12 @@ if jq -e '
   and .preflight_errors == 0
   and .dispatch_status == "generating_verified"
   and .wait_generating_success == true
+  and .mode == "manual"
+  and .origin_task_id == "clean"
 ' "$log" >/dev/null; then
-  pass "dispatch_log_records_preflight_and_generating_wait"
+  pass "dispatch_log_records_preflight_generating_wait_and_mode"
 else
-  fail "dispatch_log_records_preflight_and_generating_wait"
+  fail "dispatch_log_records_preflight_generating_wait_and_mode"
   cat "$log" >&2
 fi
 

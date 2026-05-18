@@ -92,6 +92,31 @@
         { "type": "null" }
       ]
     },
+    "mode": {
+      "enum": ["loop", "goal", "manual", "watcher", "unknown"]
+    },
+    "origin_task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "goal_id": {
+      "anyOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "null" }
+      ]
+    },
+    "sprint_id": {
+      "anyOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "null" }
+      ]
+    },
+    "tick_id": {
+      "anyOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "null" }
+      ]
+    },
     "topology_resolved_pane": {
       "type": "integer",
       "minimum": 0
