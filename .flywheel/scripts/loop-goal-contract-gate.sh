@@ -3,7 +3,7 @@ set -euo pipefail
 
 usage() {
   cat <<'EOF'
-loop-goal-contract-gate.sh validate --decision <ID> --dispatch-log <path> [--contract <json>] [--repo <path>] [--task-id <id>] [--json]
+loop-goal-contract-gate.sh validate --decision <ID> --dispatch-log <path> [--contract <path>] [--repo <path>] [--task-id <id>] [--json]
 
 Validates the compact goal contract required before /flywheel:tick dispatches.
 Missing or invalid contracts emit NO_DISPATCH: missing_goal_contract and return 0.
