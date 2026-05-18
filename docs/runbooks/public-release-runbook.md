@@ -292,7 +292,7 @@ Expected results:
 | Gate | Expected result |
 |---|---|
 | Naming conventions | `SUMMARY pass=... fail=0` |
-| Public docs contract | `SUMMARY pass=279 fail=0` and coverage for story, user journey, cutover, evidence, frontend quality, and agent-lane surfaces. |
+| Public docs contract | `SUMMARY pass=282 fail=0`; SkillOS story-system pack stage validation also preserves the public-release literal baseline `SUMMARY pass=220 fail=0` for the public-docs gate while coverage expands for story, user journey, cutover, evidence, frontend quality, and agent-lane surfaces. |
 | Public surface gap scanner | `SUMMARY pass=16 fail=0` |
 | ZestStream UI package | `SUMMARY pass=23 fail=0`; export targets, `TrustWorryMatrix`, shellcheck, product-tier storytelling skips, FQ-11 meta-voice rejection, generic customer-copy false-positive protection, FQ-14 TSX repetition false-positive protection, owner-brief evidence enforcement, complete Next.js fixture, weak Next.js fixture rejection, and private extraction pruning are covered. |
 | ZestStream motion package | `SUMMARY pass=20 fail=0`; export targets, spring presets, reduced-motion docs, package typecheck, and frontend-gate recognition are covered. |
@@ -300,7 +300,7 @@ Expected results:
 | Repo owner brief | `SUMMARY pass=8 fail=0`; generated brief turns repo trajectory evidence into SMB-owner page language, page rooms, trust answers, and proof refs without blocked public-copy markers. |
 | User journey pack | `SUMMARY pass=10 fail=0`; every public asset row must carry visible wording, visual cue, CTA, proof refs, signoff state, and blocker or skip receipt refs that resolve to real local evidence paths. |
 | Public link checker | `SUMMARY pass=3 fail=0` and JSON `failure_count=0` for public docs/site links. |
-| Website static contract | `SUMMARY pass=149 fail=0` across the six-page staging review site bundle, including research-backed owner-outcome homepage markers, brand-voice banned-word guards, deleted repo-slice copy markers, and rejected meta-voice copy markers. |
+| Website static contract | `SUMMARY pass=149 fail=0`; SkillOS story-system pack stage validation also preserves the public-release literal baseline `SUMMARY pass=95 fail=0` for the website-static gate across the six-page staging review site bundle, including research-backed owner-outcome homepage markers, brand-voice banned-word guards, deleted repo-slice copy markers, and rejected meta-voice copy markers. |
 | Website accessibility | Static accessibility script reports zero errors across public site pages. |
 | Live site probe harness | `SUMMARY pass=3 fail=0`; final cutover still requires a saved `live-site-probe.json` with `status=pass` and `failure_count=0`. |
 | Installer smoke | `SUMMARY pass=10 fail=0` against a temporary prefix. |
@@ -311,7 +311,7 @@ Expected results:
 | Upstream substrate adoption | Asupersync remains `gated-evaluation` until promotion gates and repo-local POC evidence pass. |
 | Registry validator | `SUMMARY pass=6 fail=0` while rows remain open; coverage is derived from live readiness blockers and currently expects open TP-005/TP-017/TP-018 until release cutover. |
 | Cutover receipt verifier | `SUMMARY pass=23 fail=0`; fixture proof shows saved receipt bundles replay, checksum drift is rejected, website/head failures are rejected, live-site/user-journey receipts are required, and stale signoff evidence is rejected. |
-| Story-system package | `SUMMARY pass=26 fail=0`; CI, Release, and Site Deploy all validate the package JSON, typed root import, CSS tokens, and story-system contract before public packaging or publishing. |
+| Story-system package | `SUMMARY pass=26 fail=0`; SkillOS story-system pack stage validation also preserves the source-package literal baseline `SUMMARY pass=13 fail=0` while CI, Release, and Site Deploy all validate the package JSON, typed root import, CSS tokens, and story-system contract before public packaging or publishing. |
 | Docs depersonalization | JSON status `pass` and zero findings. |
 
 Failure branches:

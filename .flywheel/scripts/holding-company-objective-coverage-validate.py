@@ -1209,7 +1209,8 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
 
     sustainable_pace_path = path_for_ref(SUSTAINABLE_PACE_REF)
     if sustainable_pace_path is not None and sustainable_pace_path.exists():
-        sustainable_pace_status = sustainable_pace_gate_status(load_json(sustainable_pace_path))
+        sustainable_pace_receipt = load_json(sustainable_pace_path)
+        sustainable_pace_status = sustainable_pace_gate_status(sustainable_pace_receipt)
         sustainable_pace_requirement = requirements_by_id.get("sustainable_pace_gate")
         if sustainable_pace_requirement is not None:
             evidence_refs = sustainable_pace_requirement.get("evidence_refs", [])
@@ -1228,6 +1229,21 @@ def validate_ledger(ledger: dict[str, Any], schema: dict[str, Any], *, check_pat
                         "requirement_id": "sustainable_pace_gate",
                         "claimed": sustainable_pace_requirement.get("coverage_status"),
                         "evidence_status": sustainable_pace_status,
+                    }
+                )
+            has_unmeasured_period = any(
+                isinstance(period, dict) and period.get("measurement_status") == "not_measured"
+                for period in sustainable_pace_receipt.get("periods", [])
+            )
+            finding = sustainable_pace_requirement.get("finding")
+            finding_text = finding.lower() if isinstance(finding, str) else ""
+            if has_unmeasured_period and (
+                "weekly hours" not in finding_text or "substrate" not in finding_text or "not measured" not in finding_text
+            ):
+                failures.append(
+                    {
+                        "code": "sustainable_pace_finding_missing_measurement_caveat",
+                        "requirement_id": "sustainable_pace_gate",
                     }
                 )
     else:

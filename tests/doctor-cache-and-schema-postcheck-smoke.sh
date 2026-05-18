@@ -133,7 +133,7 @@ fi
 # Test 8: doctor_schema_postcheck mutates a packet, adds command_help_parity key
 SCHEMA_POST_OUT=$(bash -c '
 source "'"$DOCTOR_SH"'" 2>/dev/null
-export REPO_ABS=<flywheel-repo>
+export REPO_ABS="'"$ROOT"'"
 export FLYWHEEL_COMMAND_HELP_PARITY_AUDIT=/nonexistent/probe-script
 export FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1
 doctor_schema_postcheck "$(printf "%s" "{\"status\":\"pass\",\"errors\":[],\"warnings\":[]}")"
@@ -144,7 +144,44 @@ else
   fail "doctor_schema_postcheck output missing command_help_parity (got first 200 chars: ${SCHEMA_POST_OUT:0:200})"
 fi
 
-# Test 9: portable_doctor wires doctor_schema_postcheck (ledger reference for gap-hunter)
+# Test 9: aggregate postcheck honors identity doctor deferrals
+IDENTITY_DEFERRAL_OUT=$(bash -c '
+source "'"$DOCTOR_SH"'" 2>/dev/null
+export REPO_ABS=/Users/josh/Developer/vrtx
+export FLYWHEEL_COMMAND_HELP_PARITY_AUDIT=/nonexistent/probe-script
+export FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1
+packet=$(jq -nc '"'"'{
+  status:"pass",
+  repo:"/Users/josh/Developer/vrtx",
+  errors:[],
+  warnings:[],
+  identity_registry:{
+    schema_version:"agent-mail-identity-registry-doctor/v1",
+    status:"pass",
+    drift_count:0,
+    raw_drift_count:1,
+    deferred_rows:["picoz:1"],
+    receipt_honored:true,
+    rows:[{
+      session:"picoz",
+      pane:1,
+      role:"orch",
+      status:"inactive",
+      token_exists:true,
+      fleet_mail_project_key:"/Users/josh/Developer/polymarket-pico-z"
+    }]
+  },
+  agentmail_registration_broadcast:{results:[]}
+}'"'"')
+doctor_schema_postcheck "$packet"
+')
+if jq -e '([.errors[]? | select(.code == "identity_registry_drift")] | length) == 0' >/dev/null 2>&1 <<<"$IDENTITY_DEFERRAL_OUT"; then
+  pass "doctor_schema_postcheck honors identity deferred_rows"
+else
+  fail "doctor_schema_postcheck ignored identity deferred_rows (got: $(jq -c '{errors}' <<<"$IDENTITY_DEFERRAL_OUT" 2>/dev/null || printf %s "$IDENTITY_DEFERRAL_OUT"))"
+fi
+
+# Test 10: portable_doctor wires doctor_schema_postcheck (ledger reference for gap-hunter)
 WIRE_FILE="$HOME/.claude/skills/.flywheel/lib/portable/core.d/part-02-portable_doctor.sh"
 if [[ -r "$WIRE_FILE" ]] && grep -q "doctor_schema_postcheck" "$WIRE_FILE"; then
   pass "portable_doctor invokes doctor_schema_postcheck (file is hot, not cold)"

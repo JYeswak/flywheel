@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# canonical-cli-scoping-allow-large: Flywheel topology refresh operator driver with canonical CLI scaffold, reviewed 2026-05-16
 set -euo pipefail
 
 

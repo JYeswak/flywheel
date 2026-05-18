@@ -116,7 +116,7 @@ def fixture_env_for_repo(repo, env):
         "WATCHER_ISOMORPHIC_RECEIPT_FIXTURE": fixture_dir / "receipts.json",
     }
     for key, value in mapping.items():
-        if Path(value).exists() or key.endswith("_DIR"):
+        if Path(value).exists():
             env[key] = str(value)
     return env
 def missing_session(session, reason, **extra):
@@ -292,11 +292,20 @@ class Config:
     def __init__(self, args):
         home = Path.home()
         self.repo = Path(args.repo or os.environ.get("WATCHER_ISOMORPHIC_REPO", Path.cwd())).resolve()
+        repo_fixture_env = fixture_env_for_repo(self.repo, os.environ.copy())
+        repo_fixture_state_only = (
+            "WATCHER_ISOMORPHIC_STATE_DIR" in repo_fixture_env
+            and "WATCHER_ISOMORPHIC_PLIST_REGISTRY" not in repo_fixture_env
+            and "WATCHER_ISOMORPHIC_PLIST_REGISTRY" not in os.environ
+        )
+        for key, value in repo_fixture_env.items():
+            os.environ.setdefault(key, value)
         self.state_dir = env_path("WATCHER_ISOMORPHIC_STATE_DIR", home / ".local/state/flywheel")
         self.recovery_ledger = env_path("WATCHER_ISOMORPHIC_RECOVERY_LEDGER", self.state_dir / "frozen-pane-recovery-ledger.jsonl")
         self.dispatch_log = env_path("WATCHER_ISOMORPHIC_DISPATCH_LOG", self.repo / ".flywheel/dispatch-log.jsonl")
         self.bak_ledger = env_path("WATCHER_ISOMORPHIC_BAK_LEDGER", self.state_dir / "bak-quarantine-ledger.jsonl")
-        self.registry = env_path("WATCHER_ISOMORPHIC_PLIST_REGISTRY", self.state_dir / "plist-registry.jsonl")
+        registry_default = home / ".local/state/flywheel/plist-registry.jsonl" if repo_fixture_state_only else self.state_dir / "plist-registry.jsonl"
+        self.registry = env_path("WATCHER_ISOMORPHIC_PLIST_REGISTRY", registry_default)
         self.launch_agents = env_path("WATCHER_ISOMORPHIC_LA_DIR", home / "Library/LaunchAgents")
         self.disabled_dir = env_path("WATCHER_ISOMORPHIC_DISABLED_DIR", self.launch_agents / ".disabled")
         self.trauma_trend = env_path("WATCHER_ISOMORPHIC_TRAUMA_TREND", self.state_dir / "trauma-class-trend.jsonl")
