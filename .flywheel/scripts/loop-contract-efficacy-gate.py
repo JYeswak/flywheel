@@ -4,11 +4,14 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 DEFAULT_MIN_LOOP_CLOSES_PER_HOUR = 3.5
 DEFAULT_MIN_LOOP_TO_GOAL_RATIO = 0.5
+DEFAULT_MIN_SINCE = "2026-06-01T00:00:00Z"
+DEFAULT_MIN_WINDOW_HOURS = 336.0
 
 
 def load_metrics(path: Path) -> dict[str, Any]:
@@ -29,6 +32,21 @@ def number(value: Any) -> float:
     return 0.0
 
 
+def parse_ts(value: Any) -> datetime | None:
+    if not value:
+        return None
+    raw = str(value)
+    for candidate in (raw, raw.replace("Z", "+00:00")):
+        try:
+            parsed = datetime.fromisoformat(candidate)
+        except ValueError:
+            continue
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        return parsed.astimezone(timezone.utc)
+    return None
+
+
 def mode(metrics: dict[str, Any], name: str) -> dict[str, Any]:
     candidate = (metrics.get("modes") or {}).get(name)
     return candidate if isinstance(candidate, dict) else {}
@@ -38,14 +56,21 @@ def evaluate(
     metrics: dict[str, Any],
     min_loop_closes_per_hour: float,
     min_loop_to_goal_ratio: float,
+    min_since: datetime | None,
+    min_window_hours: float,
 ) -> dict[str, Any]:
     loop = mode(metrics, "loop")
     goal = mode(metrics, "goal")
+    since = parse_ts(metrics.get("since"))
+    until = parse_ts(metrics.get("until"))
     loop_rate = number(loop.get("bead_close_per_hour"))
     goal_rate = number(goal.get("bead_close_per_hour"))
     ratio = loop_rate / goal_rate if goal_rate > 0 else 0.0
+    window_hours = (until - since).total_seconds() / 3600 if since and until and until > since else 0.0
     checks = {
-        "bounded_window": bool(metrics.get("since") and metrics.get("until")),
+        "bounded_window": bool(since and until),
+        "post_soak_window": bool(since and min_since and since >= min_since),
+        "window_duration": window_hours >= min_window_hours,
         "loop_close_rate": loop_rate >= min_loop_closes_per_hour,
         "loop_goal_ratio": ratio >= min_loop_to_goal_ratio,
         "loop_dispatch_count": int(number(loop.get("pulse_count"))) > 0,
@@ -61,10 +86,13 @@ def evaluate(
         "thresholds": {
             "min_loop_closes_per_hour": min_loop_closes_per_hour,
             "min_loop_to_goal_ratio": min_loop_to_goal_ratio,
+            "min_since": min_since.strftime("%Y-%m-%dT%H:%M:%SZ") if min_since else None,
+            "min_window_hours": min_window_hours,
         },
         "window": {
             "since": metrics.get("since"),
             "until": metrics.get("until"),
+            "window_hours": round(window_hours, 6),
             "rows_considered": metrics.get("rows_considered"),
         },
         "observed": {
@@ -83,9 +111,17 @@ def main() -> int:
     parser.add_argument("--metrics", required=True, help="dispatch-mode-metrics.py JSON output")
     parser.add_argument("--min-loop-closes-per-hour", type=float, default=DEFAULT_MIN_LOOP_CLOSES_PER_HOUR)
     parser.add_argument("--min-loop-to-goal-ratio", type=float, default=DEFAULT_MIN_LOOP_TO_GOAL_RATIO)
+    parser.add_argument("--min-since", default=DEFAULT_MIN_SINCE)
+    parser.add_argument("--min-window-hours", type=float, default=DEFAULT_MIN_WINDOW_HOURS)
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
-    result = evaluate(load_metrics(Path(args.metrics)), args.min_loop_closes_per_hour, args.min_loop_to_goal_ratio)
+    result = evaluate(
+        load_metrics(Path(args.metrics)),
+        args.min_loop_closes_per_hour,
+        args.min_loop_to_goal_ratio,
+        parse_ts(args.min_since),
+        args.min_window_hours,
+    )
     if args.json:
         print(json.dumps(result, sort_keys=True))
     else:

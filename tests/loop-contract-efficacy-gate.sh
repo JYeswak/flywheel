@@ -46,8 +46,24 @@ base_metrics | jq 'del(.since)' >"$TMP/unbounded.json"
 if "$SCRIPT" --metrics "$TMP/unbounded.json" --json >"$TMP/unbounded.out"; then
   fail "unbounded metrics should exit nonzero"
 else
-  jq -e '.status == "fail" and (.failure_codes | index("bounded_window"))' "$TMP/unbounded.out" >/dev/null \
+  jq -e '.status == "fail" and (.failure_codes | index("bounded_window")) and (.failure_codes | index("post_soak_window"))' "$TMP/unbounded.out" >/dev/null \
     && pass "unbounded metrics rejected" || fail "unbounded metrics rejected"
+fi
+
+base_metrics | jq '.since = "2026-05-31T23:59:59Z" | .until = "2026-06-14T23:59:59Z"' >"$TMP/pre-soak.json"
+if "$SCRIPT" --metrics "$TMP/pre-soak.json" --json >"$TMP/pre-soak.out"; then
+  fail "pre-soak window should exit nonzero"
+else
+  jq -e '.status == "fail" and (.failure_codes | index("post_soak_window"))' "$TMP/pre-soak.out" >/dev/null \
+    && pass "pre-soak window rejected" || fail "pre-soak window rejected"
+fi
+
+base_metrics | jq '.until = "2026-06-07T23:59:59Z"' >"$TMP/short-window.json"
+if "$SCRIPT" --metrics "$TMP/short-window.json" --json >"$TMP/short-window.out"; then
+  fail "short window should exit nonzero"
+else
+  jq -e '.status == "fail" and (.failure_codes | index("window_duration")) and .window.window_hours < 336' "$TMP/short-window.out" >/dev/null \
+    && pass "short window rejected" || fail "short window rejected"
 fi
 
 base_metrics | jq '.modes.goal.pulse_count = 0' >"$TMP/no-goal-pulse.json"
