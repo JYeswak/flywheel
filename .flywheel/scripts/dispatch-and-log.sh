@@ -623,6 +623,7 @@ while [[ $# -gt 0 ]]; do
     --goal-id=*) GOAL_ID="${1#*=}" ;;
     --sprint-id=*) SPRINT_ID="${1#*=}" ;;
     --tick-id=*) TICK_ID="${1#*=}" ;;
+    --goal-contract) GOAL_CONTRACT="${2:-}"; shift ;;
     --goal-contract=*) GOAL_CONTRACT="${1#*=}" ;;
     --session=*) SESSION="${1#*=}" ;;
     --preflight-override=*) PREFLIGHT_OVERRIDE_REASON="${1#*=}" ;;
