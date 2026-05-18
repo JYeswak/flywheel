@@ -24,8 +24,25 @@
   "source_repo": "/Users/josh/Developer/flywheel",
   "source_row_sha256": "13ac040ade0419cafb1b91d43a58d2ea39cd47b22074e2364ec963780ed28cf3",
   "source_status": "blocked",
-  "status": "open",
+  "status": "closed",
   "synced_at": "2026-05-15T16:08:00Z",
   "title": "L168 fleet-bootstrap dispatch waves (per-repo zs-project-bootstrap rollout)",
-  "verification_path": "br show flywheel-sadm5 --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-sadm5\" and .status == \"blocked\"'"
+  "verification_path": "br show flywheel-sadm5 --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-sadm5\" and .status == \"blocked\"'",
+  "closed_at": "2026-05-15T18:02:32Z",
+  "closed_by": "orch:auto",
+  "closed_reason": "ac_passed_auto_close_hook",
+  "live_probe_evidence": {
+    "schema_version": "blocker-escalation/v1",
+    "ts": "2026-05-15T18:02:32Z",
+    "event": "blocker_auto_closed",
+    "blocker_id": "flywheel-sadm5",
+    "ac_command": "br show flywheel-sadm5 --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-sadm5\" and .status != \"blocked\"'",
+    "ac_stdout": "true",
+    "ac_exit_code": 0,
+    "live_probe_at": "2026-05-15T18:02:32Z",
+    "previous_last_verified_at": "2026-05-15T16:03:28Z",
+    "delta_seconds": 7144,
+    "auto_closer": "orch:auto",
+    "ac_state_hash": "a2eb012a424fa2ec2a5c39a670d57caefa3e0cfb4a3e8eaa5199211ad9cc6ca5"
+  }
 }
