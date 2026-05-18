@@ -57,7 +57,8 @@ run_dispatch() {
   FLYWHEEL_DISPATCH_LOG="$log" \
   FLYWHEEL_DISPATCH_AND_LOG_NOW_EPOCH=1777850000 \
   NTM="$TMP/ntm" \
-    "$SCRIPT" --session=fixture --pane=2 --task-file="$task_file" --task-id="$task_id" >"$out" 2>"$out.err"
+    "$SCRIPT" --session=fixture --pane=2 --task-file="$task_file" --task-id="$task_id" \
+      --mode loop --origin-task-id "$task_id-origin" --tick-id "$task_id-tick" --goal-id "$task_id-goal" >"$out" 2>"$out.err"
 }
 
 log="$TMP/dispatch-log.jsonl"
@@ -80,12 +81,14 @@ if jq -e '
   and .preflight_errors == 0
   and .dispatch_status == "generating_verified"
   and .wait_generating_success == true
-  and .mode == "manual"
-  and .origin_task_id == "clean"
+  and .mode == "loop"
+  and .origin_task_id == "clean-origin"
+  and .tick_id == "clean-tick"
+  and .goal_id == "clean-goal"
 ' "$log" >/dev/null; then
-  pass "dispatch_log_records_preflight_generating_wait_and_mode"
+  pass "dispatch_log_records_preflight_generating_wait_and_split_metadata"
 else
-  fail "dispatch_log_records_preflight_generating_wait_and_mode"
+  fail "dispatch_log_records_preflight_generating_wait_and_split_metadata"
   cat "$log" >&2
 fi
 

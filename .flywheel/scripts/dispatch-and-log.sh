@@ -618,10 +618,15 @@ while [[ $# -gt 0 ]]; do
     --callback-by=*) CALLBACK_BY="${1#*=}" ;;
     --pipeline=*) PIPELINE="${1#*=}" ;;
     --lane=*) LANE="${1#*=}" ;;
+    --mode) MODE="${2:-}"; shift ;;
     --mode=*) MODE="${1#*=}" ;;
+    --origin-task-id) ORIGIN_TASK_ID="${2:-}"; shift ;;
     --origin-task-id=*) ORIGIN_TASK_ID="${1#*=}" ;;
+    --goal-id) GOAL_ID="${2:-}"; shift ;;
     --goal-id=*) GOAL_ID="${1#*=}" ;;
+    --sprint-id) SPRINT_ID="${2:-}"; shift ;;
     --sprint-id=*) SPRINT_ID="${1#*=}" ;;
+    --tick-id) TICK_ID="${2:-}"; shift ;;
     --tick-id=*) TICK_ID="${1#*=}" ;;
     --goal-contract) GOAL_CONTRACT="${2:-}"; shift ;;
     --goal-contract=*) GOAL_CONTRACT="${1#*=}" ;;
