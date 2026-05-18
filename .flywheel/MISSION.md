@@ -19714,3 +19714,3177 @@ auth, credential, PII, and customer-trust surfaces.
 - **supersedes:** null
 - **stale_after:** 24
 - **closure_evidence:** null
+
+### jr-2026-05-15T125624Z-784
+- **id:** jr-2026-05-15T125624Z-784
+- **captured_at:** 2026-05-15T12:56:24Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-mobile-eats/a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1.jsonl
+- **source_message_id:** a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1
+- **prompt_hash:** sha256:c991cdef66a12bd67c38a13ad41b79f73c3ef1e5170f614ae2ff38664de4e533
+- **request_text_hash:** sha256:c991cdef66a12bd67c38a13ad41b79f73c3ef1e5170f614ae2ff38664de4e533
+- **sanitized_excerpt:** "/goal /goal — L4.5: Polish Pass 1 + Value Harness (mobile-eats next-app + @zeststream/*) ## Why L4a/L4b shipped all-green; Joshua's 2026-05-15 walkthrough surfaced ~15 failures the harness was structurally unable to catch (empty map, filters->0, no nav home, robotic claim copy, green-on-green badges, dead \"help check this\" CTA, SMS-only share, phone validator rejects 9894822431, promotion-gate friction, field-kit photo absurdity). Regression harness, not value harness. L4.5 closes the breakage A"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T12:56:24Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T133551Z-151
+- **id:** jr-2026-05-15T133551Z-151
+- **captured_at:** 2026-05-15T13:35:51Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:5c51dea5fafb5503a0665b46c9b8a5eb1caacc5e961eebf4e55ca008a8804bb0
+- **request_text_hash:** sha256:5c51dea5fafb5503a0665b46c9b8a5eb1caacc5e961eebf4e55ca008a8804bb0
+- **sanitized_excerpt:** "continue - write up a goal doc on my desktop in a .txt file that has you rolling through all of this work in the most accretive way possible with proper success criteria - it should be a longer running goal that is a little hard to get - full documented process along the way"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T13:35:51Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T134147Z-507
+- **id:** jr-2026-05-15T134147Z-507
+- **captured_at:** 2026-05-15T13:41:47Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:7d406b3902d84033605b3aba006c6cf28fecf48b9f2b412b272ac2b868e02ca2
+- **request_text_hash:** sha256:7d406b3902d84033605b3aba006c6cf28fecf48b9f2b412b272ac2b868e02ca2
+- **sanitized_excerpt:** "is the goal doc 4k or less characters - count it and validate"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T13:41:47Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T134920Z-960
+- **id:** jr-2026-05-15T134920Z-960
+- **captured_at:** 2026-05-15T13:49:20Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:9489f9f94bb5268511b8a061d811343335e63e1e974db7deaf499e84d837a5c0
+- **request_text_hash:** sha256:9489f9f94bb5268511b8a061d811343335e63e1e974db7deaf499e84d837a5c0
+- **sanitized_excerpt:** "so - we need to get something real fucking straight right now. I asked for a .txt file that has NO MORE THAN 4000 characters, and you gave me one with over 19k - i trimmed it to 17k. I need a repeatable /goal-build process that turns what we're working on into a confirmed goal doc with no more than 4k characters - repeatedly - into the same folder broken down by repo - this is a constant request of mine and I have to re-iterate this 4k character count several times, every time"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T13:49:20Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T141056Z-256
+- **id:** jr-2026-05-15T141056Z-256
+- **captured_at:** 2026-05-15T14:10:56Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:1b66f770361b3d7b7033a7e19c5cccf3f710d3eacf508f852edee80bc6ac9dba
+- **request_text_hash:** sha256:1b66f770361b3d7b7033a7e19c5cccf3f710d3eacf508f852edee80bc6ac9dba
+- **sanitized_excerpt:** "there should also be a grading mechanism following our /agent-ergonomics-and-agent-intuitiveness-maximization-for-cli-tools - every goal should leave residue on what could have made the goal better - that and then every goal build should review that ledger so every goal is better than the last"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T14:10:56Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T141627Z-587
+- **id:** jr-2026-05-15T141627Z-587
+- **captured_at:** 2026-05-15T14:16:27Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:4fac09deccd909ac3682eb134f49c965db66e902da9f070135116f95f350438e
+- **request_text_hash:** sha256:4fac09deccd909ac3682eb134f49c965db66e902da9f070135116f95f350438e
+- **sanitized_excerpt:** "run /goal-build on the latest .txt file you applied and get it updated (inflywheel)"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T14:16:27Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T142706Z-226
+- **id:** jr-2026-05-15T142706Z-226
+- **captured_at:** 2026-05-15T14:27:06Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-mobile-eats/a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1.jsonl
+- **source_message_id:** a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1
+- **prompt_hash:** sha256:c991cdef66a12bd67c38a13ad41b79f73c3ef1e5170f614ae2ff38664de4e533
+- **request_text_hash:** sha256:c991cdef66a12bd67c38a13ad41b79f73c3ef1e5170f614ae2ff38664de4e533
+- **sanitized_excerpt:** "/goal /goal — L4.5: Polish Pass 1 + Value Harness (mobile-eats next-app + @zeststream/*) ## Why L4a/L4b shipped all-green; Joshua's 2026-05-15 walkthrough surfaced ~15 failures the harness was structurally unable to catch (empty map, filters->0, no nav home, robotic claim copy, green-on-green badges, dead \"help check this\" CTA, SMS-only share, phone validator rejects 9894822431, promotion-gate friction, field-kit photo absurdity). Regression harness, not value harness. L4.5 closes the breakage A"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T14:27:06Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T142754Z-274
+- **id:** jr-2026-05-15T142754Z-274
+- **captured_at:** 2026-05-15T14:27:54Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-mobile-eats/a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1.jsonl
+- **source_message_id:** a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1
+- **prompt_hash:** sha256:2a4b9f912126df682e2d6fef8f446765ee340d4c67f78270588f29b859b51cd4
+- **request_text_hash:** sha256:2a4b9f912126df682e2d6fef8f446765ee340d4c67f78270588f29b859b51cd4
+- **sanitized_excerpt:** "actually - perhaps we need to update our goal - where do we stand right now?"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T14:27:54Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T143026Z-426
+- **id:** jr-2026-05-15T143026Z-426
+- **captured_at:** 2026-05-15T14:30:26Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:cd86d81afe4207e6c65d6347b667519efe984bbdd81b6dff40de050b97bbc46f
+- **request_text_hash:** sha256:cd86d81afe4207e6c65d6347b667519efe984bbdd81b6dff40de050b97bbc46f
+- **sanitized_excerpt:** "lets fix the last bug then lets dogfood the first flywheel goal into it with you"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T14:30:26Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T143148Z-508
+- **id:** jr-2026-05-15T143148Z-508
+- **captured_at:** 2026-05-15T14:31:48Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-mobile-eats/a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1.jsonl
+- **source_message_id:** a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1
+- **prompt_hash:** sha256:c3a53ba8d46c83a6f563d20aab07517783ae3d65ae1e6e5ce4a5ab8db07964b2
+- **request_text_hash:** sha256:c3a53ba8d46c83a6f563d20aab07517783ae3d65ae1e6e5ce4a5ab8db07964b2
+- **sanitized_excerpt:** "lets use /goal-build to prepare a new goal"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T14:31:48Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T144124Z-084
+- **id:** jr-2026-05-15T144124Z-084
+- **captured_at:** 2026-05-15T14:41:24Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-mobile-eats/a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1.jsonl
+- **source_message_id:** a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1
+- **prompt_hash:** sha256:929066fca14f7f60f20714a3445ca7da193fc7be1590409ebd105798ef852955
+- **request_text_hash:** sha256:929066fca14f7f60f20714a3445ca7da193fc7be1590409ebd105798ef852955
+- **sanitized_excerpt:** "/goal MOBILE-EATS L4.6 + L4.5b GOAL Harness wave finish + end-to-end polish so Joshua shares the URL. Cold worker resumes from this + baseline; each phase compounds. ANCHORS flywheel: continuous-orchestrator-uptime-self-sustaining-fleet skillos: capability control plane / self-improving capability loops mobile-eats: default food-truck finder for Missoula metrics: M1 ≥80% / M2 ≥2000 / M3 publish-p50 <30s / M4 paid ≥30% by 2026-Q4 ml-mobile-eats-2026-05-06-amendments-ma1-ma5 CONTRACT Exit = commit"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T14:41:24Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T152225Z-545
+- **id:** jr-2026-05-15T152225Z-545
+- **captured_at:** 2026-05-15T15:22:25Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:28b311d682d347ee5a1ff40f3e2e1e3ebee4bf09a63fd1f9b651759fbf99ed3b
+- **request_text_hash:** sha256:28b311d682d347ee5a1ff40f3e2e1e3ebee4bf09a63fd1f9b651759fbf99ed3b
+- **sanitized_excerpt:** "if you look at our v2 flywheel goal - it was meant to be a forever goal, largely - where did we fall short? lets /goal-build v3"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T15:22:25Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T152735Z-855
+- **id:** jr-2026-05-15T152735Z-855
+- **captured_at:** 2026-05-15T15:27:35Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:7f332b015a1b818314df76bf9a10dd6dba442e1392bd31cddddb32c1bbf55b94
+- **request_text_hash:** sha256:7f332b015a1b818314df76bf9a10dd6dba442e1392bd31cddddb32c1bbf55b94
+- **sanitized_excerpt:** "/goal ZESTSTREAM SUBSTRATE-COMPOUNDING GOAL v2 Skillos R1 has never fired on real input. Prove it. Cold worker resumes from this + baseline; each phase compounds. ANCHORS flywheel: continuous-orchestrator-uptime-self-sustaining-fleet skillos: capability control plane / self-improving capability loops CONTRACT Exit = tracked-substrate-delta (commit + path under .flywheel/, scripts/, tests/, ~/.claude/skills/, .beads/, docs/); never /tmp. 72h anti-stale halt; 6-class blocker or auto-advance. Rev p"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T15:27:35Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T155021Z-221
+- **id:** jr-2026-05-15T155021Z-221
+- **captured_at:** 2026-05-15T15:50:21Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:305d33d39dcfacde1f0107c77e218fd7c8fc3221906dade9fcc29343918e316b
+- **request_text_hash:** sha256:305d33d39dcfacde1f0107c77e218fd7c8fc3221906dade9fcc29343918e316b
+- **sanitized_excerpt:** "/goal ZESTSTREAM SUBSTRATE-COMPOUNDING GOAL v4 v3 was meant forever but each gate was threshold-shaped. Achievable in 10m. v4 fixes: rolling-window EXITs + automated schedulers + cadence audit trail. Single-shot proof ≠ EXIT; N periods = EXIT. Cold worker resumes from this + baseline; each phase compounds. ANCHORS flywheel: continuous-orchestrator-uptime-self-sustaining-fleet skillos: capability control plane / self-improving capability loops CONTRACT (v4 tightens v3) Exit = rolling-N-period cad"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T15:50:21Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T161526Z-726
+- **id:** jr-2026-05-15T161526Z-726
+- **captured_at:** 2026-05-15T16:15:26Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-mobile-eats/a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1.jsonl
+- **source_message_id:** a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1
+- **prompt_hash:** sha256:1b8f33355670b0664bff3d228095d3355ceb605f3cbd18e9afbdc6af7bf32f2b
+- **request_text_hash:** sha256:1b8f33355670b0664bff3d228095d3355ceb605f3cbd18e9afbdc6af7bf32f2b
+- **sanitized_excerpt:** "ok - with everything i've just pointed out, lets prepare a new /goal-build"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T16:15:26Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T162337Z-217
+- **id:** jr-2026-05-15T162337Z-217
+- **captured_at:** 2026-05-15T16:23:37Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-mobile-eats/a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1.jsonl
+- **source_message_id:** a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1
+- **prompt_hash:** sha256:44dd1f52e1dd6694d92633d48381d856980871cd3c394eb6fe5aab3be24583e0
+- **request_text_hash:** sha256:44dd1f52e1dd6694d92633d48381d856980871cd3c394eb6fe5aab3be24583e0
+- **sanitized_excerpt:** "/goal MOBILE-EATS L4.6c GOAL Close every walkthrough finding Joshua hits in dark mode + fix the harness that keeps missing them. Cold worker resumes from baseline; each phase compounds. ANCHORS flywheel: continuous-orchestrator-uptime-self-sustaining-fleet skillos: capability control plane / self-improving capability loops mobile-eats: default food-truck finder for Missoula metrics: M1 ≥80% / M2 ≥2000 / M3 publish-p50 <30s / M4 paid ≥30% by 2026-Q4 ml-mobile-eats-2026-05-06-amendments-ma1-ma5 CO"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T16:23:37Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T163710Z-030
+- **id:** jr-2026-05-15T163710Z-030
+- **captured_at:** 2026-05-15T16:37:10Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:725aba201eeacb1ab933fec8092d5295168502cc457c97210ef59282ecd867d6
+- **request_text_hash:** sha256:725aba201eeacb1ab933fec8092d5295168502cc457c97210ef59282ecd867d6
+- **sanitized_excerpt:** "/goal ZESTSTREAM SUBSTRATE-COMPOUNDING GOAL v5 (rev2) v5-rev1 conflated SESSION-CLOSE with COMPOUNDING-HEALTH and livelocked every repo on calendar time. rev2 splits the gates. Substrate-wired = session can close. Rolling-window = continuous health, advisory only. ANCHORS flywheel: continuous-orchestrator-uptime-self-sustaining-fleet skillos: capability control plane / self-improving capability loops CONTRACT (v5-rev2 = two-tier) SESSION-CLOSE gate (satisfiable when shipped): each wave has sched"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T16:37:10Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T165134Z-894
+- **id:** jr-2026-05-15T165134Z-894
+- **captured_at:** 2026-05-15T16:51:34Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:03da9d0c711b6882049301cdd34502f36583d6e4e72b4b28dd067abb328f1338
+- **request_text_hash:** sha256:03da9d0c711b6882049301cdd34502f36583d6e4e72b4b28dd067abb328f1338
+- **sanitized_excerpt:** "this is the goal i had skillos running on yesteday and they kept running all night long SkillOS Goal Build SkillOS into an always-on capability-compounding control plane for ZestStream’s agentic work: it continuously watches worker output, upstream skill/library changes, failures, client-repo needs, and fleet feedback; turns that signal into hardened skills/packs/doctrine/tests; applies those capabilities back into real repos; and measures whether they actually reduce future work. This is not a "
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T16:51:34Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T165852Z-332
+- **id:** jr-2026-05-15T165852Z-332
+- **captured_at:** 2026-05-15T16:58:52Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:5caba9ee00ab2444dec5b2fb69e8b3ea822f0ad0dea64cac0690011a34780251
+- **request_text_hash:** sha256:5caba9ee00ab2444dec5b2fb69e8b3ea822f0ad0dea64cac0690011a34780251
+- **sanitized_excerpt:** "ok - now - lets build a real forever goal - look at last 5, lets use new script and build a new one. If it stops after 10 minutes, I'm going to unplug you"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T16:58:52Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T170840Z-920
+- **id:** jr-2026-05-15T170840Z-920
+- **captured_at:** 2026-05-15T17:08:40Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:b05703dc77f909c3eb04b29a5b08aadd7afe4811c2058202059096593de9fc99
+- **request_text_hash:** sha256:b05703dc77f909c3eb04b29a5b08aadd7afe4811c2058202059096593de9fc99
+- **sanitized_excerpt:** "update your fleet-dicscipline-forever rule to integrate ntm comms protocols that we have established int he flywheel fleet - you asking me if you want me you to relay info over is an l70 failure"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T17:08:40Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T173219Z-339
+- **id:** jr-2026-05-15T173219Z-339
+- **captured_at:** 2026-05-15T17:32:19Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:f8e80c04373713af80fa5f43edb568938086ddd35b0846ace040c2680c9fa45a
+- **request_text_hash:** sha256:f8e80c04373713af80fa5f43edb568938086ddd35b0846ace040c2680c9fa45a
+- **sanitized_excerpt:** "Flywheel -> SkillOS update: closed upstream Nextra scaffold blocker flywheel-38u3d.2 in 8b844a28. Root cause was reusable docs scaffold drift: MDX HTML comment, stale Nextra Layout prop shapes, and floating deps installing Next 16.2/React 19.2 that fail prerender. Patched local documentation-website-for-software-project scaffold to generate valid MDX, ReactElement lastUpdated, default search, and pinned verified Nextra 4.0/Next 15.1.3/React 19.0. Disposable Nextra build passes with Pagefind. Rea"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T17:32:19Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T173458Z-498
+- **id:** jr-2026-05-15T173458Z-498
+- **captured_at:** 2026-05-15T17:34:58Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:1cf11be2201be1b8d52336d3dd4fe1da9acc823aa91e631ba21aee163bf08cae
+- **request_text_hash:** sha256:1cf11be2201be1b8d52336d3dd4fe1da9acc823aa91e631ba21aee163bf08cae
+- **sanitized_excerpt:** "/goal Build flywheel into an always-on agentic orchestration discipline for ZestStream's commercial work: validate worker output, capture trauma into META-RULEs, audit false-closed beads, dispatch via canonical comms (no raw tmux), propagate doctrine across the fleet — so ALPS, Blackfoot, TerraTitle, and AI Assessment ship faster and harder to break each week without Joshua catching every failure Standing operating system goal: flywheel runs forever, accreting discipline and tighter validators w"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T17:34:58Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T174124Z-884
+- **id:** jr-2026-05-15T174124Z-884
+- **captured_at:** 2026-05-15T17:41:24Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:37bf873ffce67a0d9fdf0ee108754ab193a0bfb20ec398361b7633383c961379
+- **request_text_hash:** sha256:37bf873ffce67a0d9fdf0ee108754ab193a0bfb20ec398361b7633383c961379
+- **sanitized_excerpt:** "ok so now lets run /goal-build again and see if it works this time"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T17:41:24Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T175947Z-987
+- **id:** jr-2026-05-15T175947Z-987
+- **captured_at:** 2026-05-15T17:59:47Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:7fe1aae709cf2007b06e7e787f39046bf405836212b5e6944160a74505c7684c
+- **request_text_hash:** sha256:7fe1aae709cf2007b06e7e787f39046bf405836212b5e6944160a74505c7684c
+- **sanitized_excerpt:** "/goal Flywheel Goal Build flywheel into an always-on agentic orchestration discipline for ZestStream's commercial work: validate worker output, capture trauma into META-RULEs, audit false-closed beads, dispatch via canonical comms (no raw tmux), propagate doctrine across the fleet — so ALPS, Blackfoot, TerraTitle, and AI Assessment ship faster and harder to break each week without Joshua catching every failure Standing operating system goal: flywheel runs forever, accreting discipline and tighte"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T17:59:47Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T180025Z-025
+- **id:** jr-2026-05-15T180025Z-025
+- **captured_at:** 2026-05-15T18:00:25Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:d42544495d266c267516620f2a1fb6d4bca50e26547090499e92f72561ac8ac3
+- **request_text_hash:** sha256:d42544495d266c267516620f2a1fb6d4bca50e26547090499e92f72561ac8ac3
+- **sanitized_excerpt:** "how is our goal-build.sh process allowing a goal to be build with more than 4k god damn characters"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T18:00:25Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T181821Z-101
+- **id:** jr-2026-05-15T181821Z-101
+- **captured_at:** 2026-05-15T18:18:21Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:b727e96669fcb6011a634a73ca9e970d9b301b17de53a1c30eac2c70f3b9e1db
+- **request_text_hash:** sha256:b727e96669fcb6011a634a73ca9e970d9b301b17de53a1c30eac2c70f3b9e1db
+- **sanitized_excerpt:** "ok - run it one more time on your forever goal"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T18:18:21Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T182032Z-232
+- **id:** jr-2026-05-15T182032Z-232
+- **captured_at:** 2026-05-15T18:20:32Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:8ac121cff0f9bbb6996a17dc972af6876c32697871f7ac44649d85b6b57910fa
+- **request_text_hash:** sha256:8ac121cff0f9bbb6996a17dc972af6876c32697871f7ac44649d85b6b57910fa
+- **sanitized_excerpt:** "did you create a new doc in the desktop folder? i dont see a new one"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T18:20:32Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T184059Z-459
+- **id:** jr-2026-05-15T184059Z-459
+- **captured_at:** 2026-05-15T18:40:59Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:871eb500902b0a74c78ec27048ac981e536f06ef67d12fba010fa82f275b7333
+- **request_text_hash:** sha256:871eb500902b0a74c78ec27048ac981e536f06ef67d12fba010fa82f275b7333
+- **sanitized_excerpt:** "/goal Flywheel Goal Build flywheel into an always-on agentic orchestration discipline for ZestStream commercial work: validate worker output, capture trauma to META-RULEs, audit false-closed beads, dispatch via canonical comms, propagate doctrine across fleet, so every active commercial engagement listed in the canonical project registry (project-mappings.yaml + MISSION.md) ships faster and harder to break each week without Joshua catching every failure. Standing operating system goal: flywheel "
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T18:40:59Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T185333Z-213
+- **id:** jr-2026-05-15T185333Z-213
+- **captured_at:** 2026-05-15T18:53:33Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:0fa3441ec76205d5203a59da2b28c02ecc4e2822ceb67ebfd0c50b0afa26777b
+- **request_text_hash:** sha256:0fa3441ec76205d5203a59da2b28c02ecc4e2822ceb67ebfd0c50b0afa26777b
+- **sanitized_excerpt:** "why would you spawn more workers? that wasn't in the proess. talk to me about whats going on. there is a flywheel worker operating out of wezterm cli right now - they've been running for 20 hours on a goal. we have a codex worker on pane 1 of this ntm session and you spawned more. I just closed them out. pane 1 is idle and ready for dispatch. not sure what you think you're doing"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T18:53:33Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T190050Z-650
+- **id:** jr-2026-05-15T190050Z-650
+- **captured_at:** 2026-05-15T19:00:50Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:13a79f971055133c25867b08883db15c789481361c19f02ad33c08dd53616311
+- **request_text_hash:** sha256:13a79f971055133c25867b08883db15c789481361c19f02ad33c08dd53616311
+- **sanitized_excerpt:** "we need to figure out a better way than you to jabber jawinmgn your aay through this. we have caam, we have multipel profiles, we can switch between them i've also found a workaround - send your message in with /goal(space) in front of it"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T19:00:50Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T192912Z-352
+- **id:** jr-2026-05-15T192912Z-352
+- **captured_at:** 2026-05-15T19:29:12Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:8ad3c0328258b7bc7a121523798225267afc59bdbb93cc581bf79b67f3d175d6
+- **request_text_hash:** sha256:8ad3c0328258b7bc7a121523798225267afc59bdbb93cc581bf79b67f3d175d6
+- **sanitized_excerpt:** "ensure you update [pane-1-test cycle 377] ACT beads-wave2-wave3-blocked-by-bu09u — Wave 2/3 L168 beads now blocked on zesty-swarm source drift; dep cycles clean; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T19:29:12Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T194453Z-293
+- **id:** jr-2026-05-15T194453Z-293
+- **captured_at:** 2026-05-15T19:44:53Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:16367c4ca056990b74d633eedb27d8b5b612c5dcf8f813290b679f2c8eff8d15
+- **request_text_hash:** sha256:16367c4ca056990b74d633eedb27d8b5b612c5dcf8f813290b679f2c8eff8d15
+- **sanitized_excerpt:** "[pane-1-test cycle 389] ACT push-ci-green-49b9519 — push CI completed success for 49b9519 after merge-publication run; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T19:44:53Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T194910Z-550
+- **id:** jr-2026-05-15T194910Z-550
+- **captured_at:** 2026-05-15T19:49:10Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:b985a300a05efef8f067377ae6e306ace3ba21a0d103de6d22ec1565b0aadf8c
+- **request_text_hash:** sha256:b985a300a05efef8f067377ae6e306ace3ba21a0d103de6d22ec1565b0aadf8c
+- **sanitized_excerpt:** "[pane-1-test cycle 393] ACT pr5-prereq-fix-ci-queued-87ace6f — PR #5 prerequisite fix started CI and Installer Smoke at 87ace6f; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T19:49:10Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T195207Z-727
+- **id:** jr-2026-05-15T195207Z-727
+- **captured_at:** 2026-05-15T19:52:07Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:050874127e5073f245f2cfea4499365edd2bcafbb5f8f3779f568e7ad9223d9a
+- **request_text_hash:** sha256:050874127e5073f245f2cfea4499365edd2bcafbb5f8f3779f568e7ad9223d9a
+- **sanitized_excerpt:** "[pane-1-test cycle 396] ACT push-ci-green-498d505f — push CI green for merge commit 498d505f after release/site prerequisite fix; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T19:52:07Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T200540Z-540
+- **id:** jr-2026-05-15T200540Z-540
+- **captured_at:** 2026-05-15T20:05:40Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:cf9ad766c46998fc379963f766faa19f3d0a8cc0d384d214570453426b797a94
+- **request_text_hash:** sha256:cf9ad766c46998fc379963f766faa19f3d0a8cc0d384d214570453426b797a94
+- **sanitized_excerpt:** "we need a good social share image to use with our system so when it gets shared on facebook - it represents the brand well"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T20:05:40Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T202614Z-774
+- **id:** jr-2026-05-15T202614Z-774
+- **captured_at:** 2026-05-15T20:26:14Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:779bc767e47b768a44d3a5e1960974548d53e8a061b4d7736a39772195a3fcf6
+- **request_text_hash:** sha256:779bc767e47b768a44d3a5e1960974548d53e8a061b4d7736a39772195a3fcf6
+- **sanitized_excerpt:** "[pane-1-test cycle 428] ACT pr7-merged-master-ci-started — PR #7 merged to master at 6056bd8c; default-branch CI run 25939639276 is in progress; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T20:26:14Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T202658Z-818
+- **id:** jr-2026-05-15T202658Z-818
+- **captured_at:** 2026-05-15T20:26:58Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:491c9d9f4cdd1e0be3c4e45810222750866d5b27951f0598911378ecdf7701fc
+- **request_text_hash:** sha256:491c9d9f4cdd1e0be3c4e45810222750866d5b27951f0598911378ecdf7701fc
+- **sanitized_excerpt:** "[pane-1-test cycle 429] ACT master-ci-green-after-pr7-merge — master CI run 25939639276 passed on merge commit 6056bd8c; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T20:26:58Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T203112Z-072
+- **id:** jr-2026-05-15T203112Z-072
+- **captured_at:** 2026-05-15T20:31:12Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:f5cd6d2f1f3e96d7696ce82ce6e7d660472e9fbaa1b049def5bd2f5f5ec9967c
+- **request_text_hash:** sha256:f5cd6d2f1f3e96d7696ce82ce6e7d660472e9fbaa1b049def5bd2f5f5ec9967c
+- **sanitized_excerpt:** "[pane-1-test cycle 434] ACT pr8-opened-ci-started-installer-green — PR #8 opened at 233cd33d; Installer Smoke green and CI run 25939852242 in progress; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T20:31:12Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T203202Z-122
+- **id:** jr-2026-05-15T203202Z-122
+- **captured_at:** 2026-05-15T20:32:02Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:48dd3f9a33d220546f4c96bb576439512a22f5e9941ca36302c925ab3ea0092d
+- **request_text_hash:** sha256:48dd3f9a33d220546f4c96bb576439512a22f5e9941ca36302c925ab3ea0092d
+- **sanitized_excerpt:** "[pane-1-test cycle 435] ACT pr8-ci-green-merge-clean — PR #8 CI run 25939852242 passed and mergeStateStatus is CLEAN; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T20:32:02Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T203300Z-180
+- **id:** jr-2026-05-15T203300Z-180
+- **captured_at:** 2026-05-15T20:33:00Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:46391210f5d5f8ad02ab376df28c9fd3e0dee62681ad130dd344674b62846437
+- **request_text_hash:** sha256:46391210f5d5f8ad02ab376df28c9fd3e0dee62681ad130dd344674b62846437
+- **sanitized_excerpt:** "[pane-1-test cycle 436] ACT pr8-merged-master-ci-started — PR #8 merged to master at 3d6ae0cd; default-branch CI run 25939941803 is in progress; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T20:33:00Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T203351Z-231
+- **id:** jr-2026-05-15T203351Z-231
+- **captured_at:** 2026-05-15T20:33:51Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:0e1548416d6110ac90a4e854b9ea0413e88a85a35a0ca4129b64ac4fe7897c55
+- **request_text_hash:** sha256:0e1548416d6110ac90a4e854b9ea0413e88a85a35a0ca4129b64ac4fe7897c55
+- **sanitized_excerpt:** "[pane-1-test cycle 437] ACT master-ci-green-after-pr8-merge — master CI run 25939941803 passed on merge commit 3d6ae0cd; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T20:33:51Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T203916Z-556
+- **id:** jr-2026-05-15T203916Z-556
+- **captured_at:** 2026-05-15T20:39:16Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/347b4fe9-5e2f-41dc-9da2-69a70be8820c.jsonl
+- **source_message_id:** 347b4fe9-5e2f-41dc-9da2-69a70be8820c
+- **prompt_hash:** sha256:0d56e4f6fa13afa929874e9d96d51320030b218e3aa84cf366a0b0a8e6ac4dc1
+- **request_text_hash:** sha256:0d56e4f6fa13afa929874e9d96d51320030b218e3aa84cf366a0b0a8e6ac4dc1
+- **sanitized_excerpt:** "<task-notification> <task-id>buhaaqjzb</task-id> <summary>Monitor event: \"cfs-nzju claude p2 close/commit\"</summary> <event>cfs-nzju finalized — ✓ cfs-nzju · 7F.1: cfs umbrella CLI — top-level operator command surface (status, in-flight, ready, doctor) [● P2 · CLOSED] | newest: b03ed41 chore(cfs): add cfs-7pen callback probe</event> </task-notification>"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T20:39:16Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T203917Z-557
+- **id:** jr-2026-05-15T203917Z-557
+- **captured_at:** 2026-05-15T20:39:17Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/347b4fe9-5e2f-41dc-9da2-69a70be8820c.jsonl
+- **source_message_id:** 347b4fe9-5e2f-41dc-9da2-69a70be8820c
+- **prompt_hash:** sha256:7a34f246d01f8b9ec86aa66e138321a9ed79036bcbef21d0380a3bd3b6353f50
+- **request_text_hash:** sha256:7a34f246d01f8b9ec86aa66e138321a9ed79036bcbef21d0380a3bd3b6353f50
+- **sanitized_excerpt:** "<task-notification> <task-id>buhaaqjzb</task-id> <tool-use-id>toolu_01WVPSdBCC4pTtx3NhHYSNxJ</tool-use-id> <output-file>/private/tmp/claude-501/-Users-josh-Developer-clutterfreespaces/347b4fe9-5e2f-41dc-9da2-69a70be8820c/tasks/buhaaqjzb.output</output-file> <status>completed</status> <summary>Monitor \"cfs-nzju claude p2 close/commit\" stream ended</summary> </task-notification>"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T20:39:17Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T204232Z-752
+- **id:** jr-2026-05-15T204232Z-752
+- **captured_at:** 2026-05-15T20:42:32Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:dbfd66d730cd48a3d70874313af1f804e11d38c1eb4aa1e4ddfc8caf5b7113dc
+- **request_text_hash:** sha256:dbfd66d730cd48a3d70874313af1f804e11d38c1eb4aa1e4ddfc8caf5b7113dc
+- **sanitized_excerpt:** "[pane-1-test cycle 448] ACT pr9-opened-ci-installer-started — PR #9 opened at fff82193; CI run 25940382689 and Installer Smoke run 25940382710 are in progress; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T20:42:32Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T204330Z-810
+- **id:** jr-2026-05-15T204330Z-810
+- **captured_at:** 2026-05-15T20:43:30Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:aba91e0bd87c1107f3f5e610ae015f3ea4cd0a5aad142079734004a6be6d49dd
+- **request_text_hash:** sha256:aba91e0bd87c1107f3f5e610ae015f3ea4cd0a5aad142079734004a6be6d49dd
+- **sanitized_excerpt:** "[pane-1-test cycle 449] ACT pr9-installer-green-ci-running — PR #9 Installer Smoke run 25940382710 passed; CI run 25940382689 still in progress; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T20:43:30Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T204421Z-861
+- **id:** jr-2026-05-15T204421Z-861
+- **captured_at:** 2026-05-15T20:44:21Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:3777d5ad2e053774d359681538c09617ad89e0b958c4bdb2bbeda77478732417
+- **request_text_hash:** sha256:3777d5ad2e053774d359681538c09617ad89e0b958c4bdb2bbeda77478732417
+- **sanitized_excerpt:** "[pane-1-test cycle 450] ACT pr9-ci-green-merge-clean — PR #9 CI run 25940382689 passed and mergeStateStatus is CLEAN; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T20:44:21Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T204524Z-924
+- **id:** jr-2026-05-15T204524Z-924
+- **captured_at:** 2026-05-15T20:45:24Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:6dc4f3ed726b7e0fca1610511a3a4ab6f296f838a25d2f05d87c3db6c31f0077
+- **request_text_hash:** sha256:6dc4f3ed726b7e0fca1610511a3a4ab6f296f838a25d2f05d87c3db6c31f0077
+- **sanitized_excerpt:** "[pane-1-test cycle 451] ACT pr9-merged-master-ci-started — PR #9 merged to master at 88663815; default-branch CI run 25940484306 is in progress; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T20:45:24Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T204656Z-016
+- **id:** jr-2026-05-15T204656Z-016
+- **captured_at:** 2026-05-15T20:46:56Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:365645c4ad847b4f03da02e34a380e51bab7d795bfa3a44f4d3d7c82d7cb3d09
+- **request_text_hash:** sha256:365645c4ad847b4f03da02e34a380e51bab7d795bfa3a44f4d3d7c82d7cb3d09
+- **sanitized_excerpt:** "[pane-1-test cycle 452] ACT master-ci-green-after-pr9-merge — master CI run 25940484306 passed on merge commit 88663815; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T20:46:56Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T213145Z-705
+- **id:** jr-2026-05-15T213145Z-705
+- **captured_at:** 2026-05-15T21:31:45Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:fd0468e0a4d3e742eb71654fc4b890b553f787f235b08e206e8776a41320db75
+- **request_text_hash:** sha256:fd0468e0a4d3e742eb71654fc4b890b553f787f235b08e206e8776a41320db75
+- **sanitized_excerpt:** "[pane-1-test cycle 490] ACCRETE visual-page-audit-post-pr13-ship — heartbeat: six-route desktop/mobile visual audit captured for PR #13 ship; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T21:31:45Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T220028Z-428
+- **id:** jr-2026-05-15T220028Z-428
+- **captured_at:** 2026-05-15T22:00:28Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:2a5ec09f13184ee0a8f8054401c3581d241c276421917809cc0b1c6f2ceab93f
+- **request_text_hash:** sha256:2a5ec09f13184ee0a8f8054401c3581d241c276421917809cc0b1c6f2ceab93f
+- **sanitized_excerpt:** "/goal never sit idle - always provide value to this session with every tick following /donella-meadows-systems-thinking - the only failure is inaction. every tick must provide verifiable documented value within our systems. if you dont know what to do - use /research-triad and socraticode to find work and add beads to skillos or flywheel repos as needed."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T22:00:28Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T222721Z-041
+- **id:** jr-2026-05-15T222721Z-041
+- **captured_at:** 2026-05-15T22:27:21Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:14abe19d9e8b1335e6234096332d0fe50db6455d49635344563ae14e195cf5a7
+- **request_text_hash:** sha256:14abe19d9e8b1335e6234096332d0fe50db6455d49635344563ae14e195cf5a7
+- **sanitized_excerpt:** "so why dont you look for something to fix instead of stopping short?"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T22:27:21Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T235304Z-184
+- **id:** jr-2026-05-15T235304Z-184
+- **captured_at:** 2026-05-15T23:53:04Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-mobile-eats/a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1.jsonl
+- **source_message_id:** a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1
+- **prompt_hash:** sha256:ecd1fa8c378f4b44c58eeb4aeea156fd4dbf6fcc55e51eda076fd61650ec89fa
+- **request_text_hash:** sha256:ecd1fa8c378f4b44c58eeb4aeea156fd4dbf6fcc55e51eda076fd61650ec89fa
+- **sanitized_excerpt:** "i need you to run it"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T23:53:04Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-15T235425Z-265
+- **id:** jr-2026-05-15T235425Z-265
+- **captured_at:** 2026-05-15T23:54:25Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-mobile-eats/a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1.jsonl
+- **source_message_id:** a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1
+- **prompt_hash:** sha256:bc723f956ae107fc0facbba4ec5accce381a3b533f444d7f59d85867d86b6e41
+- **request_text_hash:** sha256:bc723f956ae107fc0facbba4ec5accce381a3b533f444d7f59d85867d86b6e41
+- **sanitized_excerpt:** "we have scripts to sync infisical with vercel - you need to figure this out"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-15T23:54:25Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-16T002432Z-072
+- **id:** jr-2026-05-16T002432Z-072
+- **captured_at:** 2026-05-16T00:24:32Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:527eda38e45cea293b94b9f017e752739e716a7f164f76aad516581666ac51db
+- **request_text_hash:** sha256:527eda38e45cea293b94b9f017e752739e716a7f164f76aad516581666ac51db
+- **sanitized_excerpt:** "Flywheel Goal Build flywheel into an always-on agentic orchestration discipline for ZestStream commercial work: validate worker output, capture trauma to META-RULEs, audit false-closed beads, dispatch via canonical comms, propagate doctrine across fleet, so every active commercial engagement listed in the canonical project registry (project-mappings.yaml + MISSION.md) ships faster and harder to break each week without Joshua catching every failure. Standing operating system goal: flywheel runs f"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-16T00:24:32Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-16T002439Z-079
+- **id:** jr-2026-05-16T002439Z-079
+- **captured_at:** 2026-05-16T00:24:39Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:527eda38e45cea293b94b9f017e752739e716a7f164f76aad516581666ac51db
+- **request_text_hash:** sha256:527eda38e45cea293b94b9f017e752739e716a7f164f76aad516581666ac51db
+- **sanitized_excerpt:** "Flywheel Goal Build flywheel into an always-on agentic orchestration discipline for ZestStream commercial work: validate worker output, capture trauma to META-RULEs, audit false-closed beads, dispatch via canonical comms, propagate doctrine across fleet, so every active commercial engagement listed in the canonical project registry (project-mappings.yaml + MISSION.md) ships faster and harder to break each week without Joshua catching every failure. Standing operating system goal: flywheel runs f"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-16T00:24:39Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-16T002816Z-296
+- **id:** jr-2026-05-16T002816Z-296
+- **captured_at:** 2026-05-16T00:28:16Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-mobile-eats/a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1.jsonl
+- **source_message_id:** a65cabf3-08c8-4aeb-b846-f0efc0fbd3e1
+- **prompt_hash:** sha256:eb290656ac74a89457cd5ef92bb82425d454fdef93769c1e93b52ea293a26e1b
+- **request_text_hash:** sha256:eb290656ac74a89457cd5ef92bb82425d454fdef93769c1e93b52ea293a26e1b
+- **sanitized_excerpt:** "they were attached as \"photo evidence\" on the add sighting page"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-16T00:28:16Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-16T010045Z-245
+- **id:** jr-2026-05-16T010045Z-245
+- **captured_at:** 2026-05-16T01:00:45Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:527eda38e45cea293b94b9f017e752739e716a7f164f76aad516581666ac51db
+- **request_text_hash:** sha256:527eda38e45cea293b94b9f017e752739e716a7f164f76aad516581666ac51db
+- **sanitized_excerpt:** "Flywheel Goal Build flywheel into an always-on agentic orchestration discipline for ZestStream commercial work: validate worker output, capture trauma to META-RULEs, audit false-closed beads, dispatch via canonical comms, propagate doctrine across fleet, so every active commercial engagement listed in the canonical project registry (project-mappings.yaml + MISSION.md) ships faster and harder to break each week without Joshua catching every failure. Standing operating system goal: flywheel runs f"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-16T01:00:45Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-16T030714Z-834
+- **id:** jr-2026-05-16T030714Z-834
+- **captured_at:** 2026-05-16T03:07:14Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/18c1ae57-8231-4d39-8c67-176d8009fa78.jsonl
+- **source_message_id:** 18c1ae57-8231-4d39-8c67-176d8009fa78
+- **prompt_hash:** sha256:313a4e805e259db14cf4304ecc4b21deddeb163741035af80481d1cd0c2c2f1b
+- **request_text_hash:** sha256:313a4e805e259db14cf4304ecc4b21deddeb163741035af80481d1cd0c2c2f1b
+- **sanitized_excerpt:** "[pane-1-test cycle 705] ACT operator-jsm-digest-handoff-ack — JSM digest writer callback ACK received; remaining action is Joshua-owned sandbox marker refresh; log: /tmp/goal-mode-worker-test.jsonl"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-16T03:07:14Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-16T161150Z-910
+- **id:** jr-2026-05-16T161150Z-910
+- **captured_at:** 2026-05-16T16:11:50Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/347b4fe9-5e2f-41dc-9da2-69a70be8820c.jsonl
+- **source_message_id:** 347b4fe9-5e2f-41dc-9da2-69a70be8820c
+- **prompt_hash:** sha256:f960843804bc9b074849969592695ecffd00a62da00972bc1a3223a1621f4c84
+- **request_text_hash:** sha256:f960843804bc9b074849969592695ecffd00a62da00972bc1a3223a1621f4c84
+- **sanitized_excerpt:** "<task-notification> <task-id>bw98xa0ku</task-id> <summary>Monitor event: \"Wait for cfs-3sgi Build commit or stall\"</summary> <event>cfs-3sgi BUILD COMMIT LANDED: 068583b feat(cfs): MP1 Stage 2 INTAKE Build — code shipped behind flags</event> </task-notification>"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-16T16:11:50Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-17T061617Z-577
+- **id:** jr-2026-05-17T061617Z-577
+- **captured_at:** 2026-05-17T06:16:17Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-skillos/acfac06c-6cfb-4cce-81c9-f51ac94b1f35.jsonl
+- **source_message_id:** acfac06c-6cfb-4cce-81c9-f51ac94b1f35
+- **prompt_hash:** sha256:e1856e4a65bd9b4e695486d110ba770eb24761af6d571d3702b444ed028b1c17
+- **request_text_hash:** sha256:e1856e4a65bd9b4e695486d110ba770eb24761af6d571d3702b444ed028b1c17
+- **sanitized_excerpt:** "make whatever changes you feel necessary to improve our chances of success but also keeping it fair to both parties. we are both going to be bringing immense value - and I see what I bring ot the table as the beyond glue - its revolutionary"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-17T06:16:17Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-17T061815Z-695
+- **id:** jr-2026-05-17T061815Z-695
+- **captured_at:** 2026-05-17T06:18:15Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-skillos/acfac06c-6cfb-4cce-81c9-f51ac94b1f35.jsonl
+- **source_message_id:** acfac06c-6cfb-4cce-81c9-f51ac94b1f35
+- **prompt_hash:** sha256:4de662d420ed9b39d89b4c744b03c95311716c8370c88cc82a91fd457ce83483
+- **request_text_hash:** sha256:4de662d420ed9b39d89b4c744b03c95311716c8370c88cc82a91fd457ce83483
+- **sanitized_excerpt:** "make whatever final changes you think gets all of this to long term success"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-17T06:18:15Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-17T061920Z-760
+- **id:** jr-2026-05-17T061920Z-760
+- **captured_at:** 2026-05-17T06:19:20Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-skillos/acfac06c-6cfb-4cce-81c9-f51ac94b1f35.jsonl
+- **source_message_id:** acfac06c-6cfb-4cce-81c9-f51ac94b1f35
+- **prompt_hash:** sha256:bd48579effe66249c4be2b1ce2a7072475c8548d28d86ce809c7023ec2f23ce1
+- **request_text_hash:** sha256:bd48579effe66249c4be2b1ce2a7072475c8548d28d86ce809c7023ec2f23ce1
+- **sanitized_excerpt:** "make whatever final changes you think gets all of this to long term success. no the timeline is not realistic forever, i need to get my life back at some point. and I dont have warm candidates today but I feel strongly that I can deliver the message. i've done 4k git commits plus over the last 7 days - check it - is that faster than a small team? you tell me"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-17T06:19:20Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-17T062501Z-101
+- **id:** jr-2026-05-17T062501Z-101
+- **captured_at:** 2026-05-17T06:25:01Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-skillos/acfac06c-6cfb-4cce-81c9-f51ac94b1f35.jsonl
+- **source_message_id:** acfac06c-6cfb-4cce-81c9-f51ac94b1f35
+- **prompt_hash:** sha256:1cd8a4d9fb98122d5094615de889a28fac50fcc1cf9640b7146ae274cbdb3f35
+- **request_text_hash:** sha256:1cd8a4d9fb98122d5094615de889a28fac50fcc1cf9640b7146ae274cbdb3f35
+- **sanitized_excerpt:** "build a proper long running /goal-build (.sh) that measures, documents, and grades every surface across our stack that needs updates and edits to align with this new mission, once you have full confidence in the plan, you have my apporval to start executing on it. I want the entire plan packed with research from /research-triad and validated agianst our library of skills."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-17T06:25:01Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-17T064212Z-132
+- **id:** jr-2026-05-17T064212Z-132
+- **captured_at:** 2026-05-17T06:42:12Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-skillos/acfac06c-6cfb-4cce-81c9-f51ac94b1f35.jsonl
+- **source_message_id:** acfac06c-6cfb-4cce-81c9-f51ac94b1f35
+- **prompt_hash:** sha256:8a9cd52c668e7b929338f542df80d10bc9da1f7fef20351cd7450c9afa262f22
+- **request_text_hash:** sha256:8a9cd52c668e7b929338f542df80d10bc9da1f7fef20351cd7450c9afa262f22
+- **sanitized_excerpt:** "/goal ZestStream Mission Alignment Goal ZestStream's fleet (skills, repos, public surfaces, brand voice, doctrine, infra) must reflect the holding-co portfolio model locked 2026-05-16/17: Joshua sharpens legacy SMBs or incubates AI-first vertical software companies; SMB owner-operators take 25% equity + 45-75% tiered distribution; substrate (SkillOS + flywheel + @zeststream/*) compounds across launches. Misaligned surfaces signal the wrong message to recruits + customers. This is a standing oper"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-17T06:42:12Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T030445Z-485
+- **id:** jr-2026-05-18T030445Z-485
+- **captured_at:** 2026-05-18T03:04:45Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:0346416c0b82f1fdf122b38fb0b6f32833faf9626e05b1e2a4c1a64635c3bdcb
+- **request_text_hash:** sha256:0346416c0b82f1fdf122b38fb0b6f32833faf9626e05b1e2a4c1a64635c3bdcb
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-jyk7-4cbff8.md and run /flywheel:worker-tick /tmp/dispatch_cfs-jyk7-4cbff8.md. CRITICAL CALLBACK REQUIREMENT (per cfs-31kb investigation): you MUST shell out and execute this exact command on DONE/BLOCKED (not just print the DONE line to your pane output): /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-jyk7-4cbff8 commit=<sha> bead_closed=yes|no validated=<3-source-result> compliance=NNN/1000 notes=<one-line>'. "
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:04:45Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T031109Z-869
+- **id:** jr-2026-05-18T031109Z-869
+- **captured_at:** 2026-05-18T03:11:09Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:cab8bf8773c6915015f8e7af438974be7328971e93d94dc76959bad7992b9e78
+- **request_text_hash:** sha256:cab8bf8773c6915015f8e7af438974be7328971e93d94dc76959bad7992b9e78
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-4izk-fce448.md and run /flywheel:worker-tick /tmp/dispatch_cfs-4izk-fce448.md. CRITICAL CALLBACK (per cfs-31kb): you MUST shell out and execute this exact command on DONE/BLOCKED (not just print DONE to pane output): /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-4izk-fce448 commit=<sha> bead_closed=yes|no validated=<3-source> compliance=NNN/1000 notes=<one-line>'. The shell command IS the callback."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:11:09Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T031541Z-141
+- **id:** jr-2026-05-18T031541Z-141
+- **captured_at:** 2026-05-18T03:15:41Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:f9720e9c751cb429352d2f9e11a7400b9e7093a12a6432ce177aa0c401d74018
+- **request_text_hash:** sha256:f9720e9c751cb429352d2f9e11a7400b9e7093a12a6432ce177aa0c401d74018
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-clu3-e3613a.md and run /flywheel:worker-tick /tmp/dispatch_cfs-clu3-e3613a.md. On DONE/BLOCKED execute: /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-clu3-e3613a commit=<sha> bead_closed=yes|no validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:15:41Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T031937Z-377
+- **id:** jr-2026-05-18T031937Z-377
+- **captured_at:** 2026-05-18T03:19:37Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:050c961361c8bfc5d0d352a8598ee34be05795ed601f6de48036c9fc8771f6c0
+- **request_text_hash:** sha256:050c961361c8bfc5d0d352a8598ee34be05795ed601f6de48036c9fc8771f6c0
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-016-g0h0-639b4d.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-016-g0h0-639b4d.md. CRITICAL CALLBACK: on DONE/BLOCKED execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-016-g0h0-639b4d commit=<sha> bead_closed=yes|no validated=<3-source> compliance=NNN/1000 notes=<one-line>'. The shell command IS the callback."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:19:37Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T032301Z-581
+- **id:** jr-2026-05-18T032301Z-581
+- **captured_at:** 2026-05-18T03:23:01Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:73761ffd21fe73fbe4de6680e6e7faa20fc082ae886ab7e973aea54bf2749978
+- **request_text_hash:** sha256:73761ffd21fe73fbe4de6680e6e7faa20fc082ae886ab7e973aea54bf2749978
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-017-7fib-2930a2.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-017-7fib-2930a2.md. CRITICAL CALLBACK: on DONE/BLOCKED execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-017-7fib-2930a2 commit=<sha> bead_closed=yes|no validated=<3-source> compliance=NNN/1000 notes=<one-line>'. The shell command IS the callback."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:23:01Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T032513Z-713
+- **id:** jr-2026-05-18T032513Z-713
+- **captured_at:** 2026-05-18T03:25:13Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:ef1de52db7fbbf45630b2711ca5d3e78823fb3e49122c2b01e6cf813ca08bd1a
+- **request_text_hash:** sha256:ef1de52db7fbbf45630b2711ca5d3e78823fb3e49122c2b01e6cf813ca08bd1a
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-018-itw4-715c37.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-018-itw4-715c37.md. CRITICAL CALLBACK: on DONE/BLOCKED execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-018-itw4-715c37 commit=<sha> bead_closed=yes|no validated=<3-source> compliance=NNN/1000 notes=<one-line>'. The shell command IS the callback."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:25:13Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T032742Z-862
+- **id:** jr-2026-05-18T032742Z-862
+- **captured_at:** 2026-05-18T03:27:42Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:044841ca3b728dc5b1095ad2deb5ce54c105a040f1db455274f21eea7379d5c3
+- **request_text_hash:** sha256:044841ca3b728dc5b1095ad2deb5ce54c105a040f1db455274f21eea7379d5c3
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-020-yaza-d21251.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-020-yaza-d21251.md. CRITICAL CALLBACK: on DONE/BLOCKED execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-020-yaza-d21251 commit=<sha> bead_closed=yes|no validated=<3-source> compliance=NNN/1000 notes=<one-line>'. The shell command IS the callback."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:27:42Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T033013Z-013
+- **id:** jr-2026-05-18T033013Z-013
+- **captured_at:** 2026-05-18T03:30:13Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:bacbbedd45aa0d4bef862ac68026ffc10d879677aa571092ae3bcdb8132af8fd
+- **request_text_hash:** sha256:bacbbedd45aa0d4bef862ac68026ffc10d879677aa571092ae3bcdb8132af8fd
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-021-u3vu-84ab28.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-021-u3vu-84ab28.md. CRITICAL CALLBACK: on DONE/BLOCKED execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-021-u3vu-84ab28 commit=<sha> bead_closed=yes|no validated=<3-source> compliance=NNN/1000 notes=<one-line>'. The shell command IS the callback."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:30:13Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T033314Z-194
+- **id:** jr-2026-05-18T033314Z-194
+- **captured_at:** 2026-05-18T03:33:14Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:176aaad7ab83354185165d39b3dc9e9c9e73ff5dd1b9fb390aa7459f2969b211
+- **request_text_hash:** sha256:176aaad7ab83354185165d39b3dc9e9c9e73ff5dd1b9fb390aa7459f2969b211
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-022-ugsb-5b2539.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-022-ugsb-5b2539.md. CRITICAL CALLBACK: on DONE/BLOCKED execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-022-ugsb-5b2539 commit=<sha> bead_closed=yes|no validated=<3-source> compliance=NNN/1000 notes=<one-line>'. The shell command IS the callback."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:33:14Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T033509Z-309
+- **id:** jr-2026-05-18T033509Z-309
+- **captured_at:** 2026-05-18T03:35:09Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:1b22f328243bf4c6c539ddb467be2df51d166331b0bc683c66fcfe5cf5bf40d8
+- **request_text_hash:** sha256:1b22f328243bf4c6c539ddb467be2df51d166331b0bc683c66fcfe5cf5bf40d8
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-024-gpud-9501c8.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-024-gpud-9501c8.md. CRITICAL CALLBACK: on DONE/BLOCKED execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-024-gpud-9501c8 commit=<sha> bead_closed=yes|no validated=<3-source> compliance=NNN/1000 notes=<one-line>'. The shell command IS the callback."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:35:09Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T033813Z-493
+- **id:** jr-2026-05-18T033813Z-493
+- **captured_at:** 2026-05-18T03:38:13Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:38037a0f31dde228d2fa33b9e1e2cfddf4cdcbf6fc27c4150dd96153fca82126
+- **request_text_hash:** sha256:38037a0f31dde228d2fa33b9e1e2cfddf4cdcbf6fc27c4150dd96153fca82126
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-025-8v9y-f622df.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-025-8v9y-f622df.md. CRITICAL CALLBACK: on DONE/BLOCKED execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-025-8v9y-f622df commit=<sha> bead_closed=yes|no validated=<3-source> compliance=NNN/1000 notes=<one-line>'. The shell command IS the callback."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:38:13Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T034129Z-689
+- **id:** jr-2026-05-18T034129Z-689
+- **captured_at:** 2026-05-18T03:41:29Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:298e3581970cf7e9ed76a3232a1aa27e7a13cc1217197516ca0f453a70090c36
+- **request_text_hash:** sha256:298e3581970cf7e9ed76a3232a1aa27e7a13cc1217197516ca0f453a70090c36
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-032-87kl-0e5c2b.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-032-87kl-0e5c2b.md. CRITICAL CALLBACK: on DONE/BLOCKED execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-032-87kl-0e5c2b commit=<sha> bead_closed=yes|no validated=<3-source> compliance=NNN/1000 notes=<one-line>'. The shell command IS the callback. NOTE: 026-029 not in our P0 list — skip dire"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:41:29Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T034421Z-861
+- **id:** jr-2026-05-18T034421Z-861
+- **captured_at:** 2026-05-18T03:44:21Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:1470e5ccc23b6937601e106d1de84572eacb15002d13181b2834d3dd69b33584
+- **request_text_hash:** sha256:1470e5ccc23b6937601e106d1de84572eacb15002d13181b2834d3dd69b33584
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-066-uklu-909d0f.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-066-uklu-909d0f.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-066-uklu-909d0f commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:44:21Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T034657Z-017
+- **id:** jr-2026-05-18T034657Z-017
+- **captured_at:** 2026-05-18T03:46:57Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:ee153486836d5dcafb2f5252fe92a9c962e7ca5a90cbdb15997a0832379e2f06
+- **request_text_hash:** sha256:ee153486836d5dcafb2f5252fe92a9c962e7ca5a90cbdb15997a0832379e2f06
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-068-q0xw-79318d.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-068-q0xw-79318d.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-068-q0xw-79318d commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:46:57Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T034915Z-155
+- **id:** jr-2026-05-18T034915Z-155
+- **captured_at:** 2026-05-18T03:49:15Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:7c48a48d838b1a0397df64fa4fb6a1ad1c1d710be947e820b908428d1b940628
+- **request_text_hash:** sha256:7c48a48d838b1a0397df64fa4fb6a1ad1c1d710be947e820b908428d1b940628
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-069-pvcb-d4dbd1.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-069-pvcb-d4dbd1.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-069-pvcb-d4dbd1 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:49:15Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T035131Z-291
+- **id:** jr-2026-05-18T035131Z-291
+- **captured_at:** 2026-05-18T03:51:31Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:6a90d3097c1c97cebf6787b8f928e7ab4e5149aa846bebaec9c4bafe381ed72f
+- **request_text_hash:** sha256:6a90d3097c1c97cebf6787b8f928e7ab4e5149aa846bebaec9c4bafe381ed72f
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-070-0j35-306dd4.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-070-0j35-306dd4.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-070-0j35-306dd4 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:51:31Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T035332Z-412
+- **id:** jr-2026-05-18T035332Z-412
+- **captured_at:** 2026-05-18T03:53:32Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-zesttube/6ac85d99-f28b-4d5b-af49-f64cc059acf5.jsonl
+- **source_message_id:** 6ac85d99-f28b-4d5b-af49-f64cc059acf5
+- **prompt_hash:** sha256:03707e868ae5fbc2a7f91f41540d5349420893ffbbe1c8bc505f5d138d5277d5
+- **request_text_hash:** sha256:03707e868ae5fbc2a7f91f41540d5349420893ffbbe1c8bc505f5d138d5277d5
+- **sanitized_excerpt:** "/research-triad and plan deeply on this. having this turned into a repeateable pipeline is our #1 goal and it needs to be fast - what can we do for the remaining substrate rewrites? spawn agents to go deep on all of this - use our jsm skills and the /asupersync-mega-skill to think about this perhaps a little differently. we also have new rust skills by jsm that are super powerful if we need to consider writing this in rust. also consider what my other agent in the repo is wroking on with zeststr"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:53:32Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T035347Z-427
+- **id:** jr-2026-05-18T035347Z-427
+- **captured_at:** 2026-05-18T03:53:47Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:f291a3d90a682037950df1b1a7718924555800c65fed2272a7dde669c91e5741
+- **request_text_hash:** sha256:f291a3d90a682037950df1b1a7718924555800c65fed2272a7dde669c91e5741
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-072-m1zp-30daf8.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-072-m1zp-30daf8.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-072-m1zp-30daf8 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:53:47Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T035533Z-533
+- **id:** jr-2026-05-18T035533Z-533
+- **captured_at:** 2026-05-18T03:55:33Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:6c502c5e4cdcd4a1e724b0b1a8d43b579ffe9e0b953323066a3e6b514bc1fc3d
+- **request_text_hash:** sha256:6c502c5e4cdcd4a1e724b0b1a8d43b579ffe9e0b953323066a3e6b514bc1fc3d
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-073-lb5e-3b60f5.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-073-lb5e-3b60f5.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-073-lb5e-3b60f5 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:55:33Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T035730Z-650
+- **id:** jr-2026-05-18T035730Z-650
+- **captured_at:** 2026-05-18T03:57:30Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-zesttube/6ac85d99-f28b-4d5b-af49-f64cc059acf5.jsonl
+- **source_message_id:** 6ac85d99-f28b-4d5b-af49-f64cc059acf5
+- **prompt_hash:** sha256:7562426ea4c1a586da86b6181b00f65d7d4e936d7ecf80cb44296c719b6e9fdf
+- **request_text_hash:** sha256:7562426ea4c1a586da86b6181b00f65d7d4e936d7ecf80cb44296c719b6e9fdf
+- **sanitized_excerpt:** "<task-notification> <task-id>a8037c0136c431c1f</task-id> <tool-use-id>toolu_01SQY6UiHueZLt4GDiDRPjeS</tool-use-id> <output-file>/private/tmp/claude-501/-Users-josh-Developer-zesttube/b3daae48-d053-4571-bfad-cf6bbeaf1068/tasks/a8037c0136c431c1f.output</output-file> <status>completed</status> <summary>Agent \"ZestStream Studio + Marty integration scan\" completed</summary> <result>## Complete I've completed the investigation and saved the findings to `/Users/josh/Developer/zesttube/.planning/researc"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:57:30Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T035859Z-739
+- **id:** jr-2026-05-18T035859Z-739
+- **captured_at:** 2026-05-18T03:58:59Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:e8043afc43c9dfc61063814ae145c457bda859f80dd4ca5189ba32e4ec5c174f
+- **request_text_hash:** sha256:e8043afc43c9dfc61063814ae145c457bda859f80dd4ca5189ba32e4ec5c174f
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-074-ddh4-4ca235.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-074-ddh4-4ca235.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-074-ddh4-4ca235 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:58:59Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T035904Z-744
+- **id:** jr-2026-05-18T035904Z-744
+- **captured_at:** 2026-05-18T03:59:04Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-zesttube/6ac85d99-f28b-4d5b-af49-f64cc059acf5.jsonl
+- **source_message_id:** 6ac85d99-f28b-4d5b-af49-f64cc059acf5
+- **prompt_hash:** sha256:2589d6139b35278b3a766082ea00df0d480eba2220d1d3ce721985e10c6578bb
+- **request_text_hash:** sha256:2589d6139b35278b3a766082ea00df0d480eba2220d1d3ce721985e10c6578bb
+- **sanitized_excerpt:** "<task-notification> <task-id>af862277d41a74c80</task-id> <tool-use-id>toolu_01VExrY7WCfDC7kMrJMTrdvR</tool-use-id> <output-file>/private/tmp/claude-501/-Users-josh-Developer-zesttube/b3daae48-d053-4571-bfad-cf6bbeaf1068/tasks/af862277d41a74c80.output</output-file> <status>completed</status> <summary>Agent \"asupersync + jsm pattern review\" completed</summary> <result>Synthesis complete at `/Users/josh/Developer/zesttube/.planning/research/jsm-pattern-synthesis-v1.md`. Headline findings: - **asupe"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T03:59:04Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T040123Z-883
+- **id:** jr-2026-05-18T040123Z-883
+- **captured_at:** 2026-05-18T04:01:23Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:a865c88d521f71cf5ea88f088a3bb219e698664d83e101f991148565bd474a4b
+- **request_text_hash:** sha256:a865c88d521f71cf5ea88f088a3bb219e698664d83e101f991148565bd474a4b
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-076-5pu7-fed7a3.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-076-5pu7-fed7a3.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-076-5pu7-fed7a3 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:01:23Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T040411Z-051
+- **id:** jr-2026-05-18T040411Z-051
+- **captured_at:** 2026-05-18T04:04:11Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:266d964dd1254a35d0a946565eaccdb2e140ab0a9ca8e996f0c5cb44e418628a
+- **request_text_hash:** sha256:266d964dd1254a35d0a946565eaccdb2e140ab0a9ca8e996f0c5cb44e418628a
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-077-2bpz-5051ed.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-077-2bpz-5051ed.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-077-2bpz-5051ed commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:04:11Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T040733Z-253
+- **id:** jr-2026-05-18T040733Z-253
+- **captured_at:** 2026-05-18T04:07:33Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:f0079177ca84fc915a8897ca04e37e0967cc895b0402c6ae9baec1bc46aec32c
+- **request_text_hash:** sha256:f0079177ca84fc915a8897ca04e37e0967cc895b0402c6ae9baec1bc46aec32c
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-083-v4l2-fe5bc5.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-083-v4l2-fe5bc5.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-083-v4l2-fe5bc5 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:07:33Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T040957Z-397
+- **id:** jr-2026-05-18T040957Z-397
+- **captured_at:** 2026-05-18T04:09:57Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:af4f1d521f8b499e0bd910888b30d2be81c66fbc60a2a19ad5b728e82f473e90
+- **request_text_hash:** sha256:af4f1d521f8b499e0bd910888b30d2be81c66fbc60a2a19ad5b728e82f473e90
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-084-6fmb-bc4a91.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-084-6fmb-bc4a91.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-084-6fmb-bc4a91 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:09:57Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T041218Z-538
+- **id:** jr-2026-05-18T041218Z-538
+- **captured_at:** 2026-05-18T04:12:18Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:ffc3a3af4e07baa405b322926464c242eb88ad4a17cdf87972ab883fbeb8b8fd
+- **request_text_hash:** sha256:ffc3a3af4e07baa405b322926464c242eb88ad4a17cdf87972ab883fbeb8b8fd
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-085-ladb-3a965a.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-085-ladb-3a965a.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-085-ladb-3a965a commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:12:18Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T041500Z-700
+- **id:** jr-2026-05-18T041500Z-700
+- **captured_at:** 2026-05-18T04:15:00Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:0f5374786b731b9b1dc61960a9186e07fcf26deeb50314c5c382c54acc8c6c5c
+- **request_text_hash:** sha256:0f5374786b731b9b1dc61960a9186e07fcf26deeb50314c5c382c54acc8c6c5c
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-092-2zqe-8885b8.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-092-2zqe-8885b8.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-092-2zqe-8885b8 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:15:00Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T041727Z-847
+- **id:** jr-2026-05-18T041727Z-847
+- **captured_at:** 2026-05-18T04:17:27Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:6518637fd4e667e1d8174369944d52cabe299c8405e3993eab8579eacab7bdea
+- **request_text_hash:** sha256:6518637fd4e667e1d8174369944d52cabe299c8405e3993eab8579eacab7bdea
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-094-aflp-ccc839.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-094-aflp-ccc839.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-094-aflp-ccc839 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:17:27Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T042011Z-011
+- **id:** jr-2026-05-18T042011Z-011
+- **captured_at:** 2026-05-18T04:20:11Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:078c0787245668627c1cb9924e28be0bc2a0b7d2d008870bb49648008f740e75
+- **request_text_hash:** sha256:078c0787245668627c1cb9924e28be0bc2a0b7d2d008870bb49648008f740e75
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-097-d3jq-365b72.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-097-d3jq-365b72.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-097-d3jq-365b72 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:20:11Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T042306Z-186
+- **id:** jr-2026-05-18T042306Z-186
+- **captured_at:** 2026-05-18T04:23:06Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:067e83c9af39fcec9031f7f056bb61988e7abbc15aa5c14bb53d233b9d83b8a6
+- **request_text_hash:** sha256:067e83c9af39fcec9031f7f056bb61988e7abbc15aa5c14bb53d233b9d83b8a6
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-098-wxbb-d7ab58.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-098-wxbb-d7ab58.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-098-wxbb-d7ab58 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:23:06Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T042513Z-313
+- **id:** jr-2026-05-18T042513Z-313
+- **captured_at:** 2026-05-18T04:25:13Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:6244e5b622822f67a4b13e59708933cf708aecb9875d0730ab812be480cd2153
+- **request_text_hash:** sha256:6244e5b622822f67a4b13e59708933cf708aecb9875d0730ab812be480cd2153
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-099-cfci-0bdfe1.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-099-cfci-0bdfe1.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-099-cfci-0bdfe1 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:25:13Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T042735Z-455
+- **id:** jr-2026-05-18T042735Z-455
+- **captured_at:** 2026-05-18T04:27:35Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:6c0d83cf7bab879467d2b0a074a335685485a20d6e6bb877bf84a0f733b3995e
+- **request_text_hash:** sha256:6c0d83cf7bab879467d2b0a074a335685485a20d6e6bb877bf84a0f733b3995e
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-101-idk7-222c74.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-101-idk7-222c74.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-101-idk7-222c74 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:27:35Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T043031Z-631
+- **id:** jr-2026-05-18T043031Z-631
+- **captured_at:** 2026-05-18T04:30:31Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:6c557538d8b6022adf571e74d5c3d4c9663f43a2cf659953ca62a30a708233b5
+- **request_text_hash:** sha256:6c557538d8b6022adf571e74d5c3d4c9663f43a2cf659953ca62a30a708233b5
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-103-r2fh-a3f5c9.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-103-r2fh-a3f5c9.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-103-r2fh-a3f5c9 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:30:31Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T043336Z-816
+- **id:** jr-2026-05-18T043336Z-816
+- **captured_at:** 2026-05-18T04:33:36Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:61e3986c3397dc1e0d9df219992f7423e34524ce52b03d0aa520d6d84128b594
+- **request_text_hash:** sha256:61e3986c3397dc1e0d9df219992f7423e34524ce52b03d0aa520d6d84128b594
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-108-hl7d-dea43d.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-108-hl7d-dea43d.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-108-hl7d-dea43d commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:33:36Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T043551Z-951
+- **id:** jr-2026-05-18T043551Z-951
+- **captured_at:** 2026-05-18T04:35:51Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:038c8bf2692bc5f75a4ac7b9e80a5f6e77615bbe2148970eb544b4c13bba585b
+- **request_text_hash:** sha256:038c8bf2692bc5f75a4ac7b9e80a5f6e77615bbe2148970eb544b4c13bba585b
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-109-up3m-8381ff.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-109-up3m-8381ff.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-109-up3m-8381ff commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:35:51Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T043835Z-115
+- **id:** jr-2026-05-18T043835Z-115
+- **captured_at:** 2026-05-18T04:38:35Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:52cb8a5fd0d972618edfc504e9cfc2537c8e31543032be6ada97a6c441ee7c2c
+- **request_text_hash:** sha256:52cb8a5fd0d972618edfc504e9cfc2537c8e31543032be6ada97a6c441ee7c2c
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-111-wl8a-5f490b.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-111-wl8a-5f490b.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-111-wl8a-5f490b commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:38:35Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T044057Z-257
+- **id:** jr-2026-05-18T044057Z-257
+- **captured_at:** 2026-05-18T04:40:57Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:c05609504296bb8ea80f9b17aa477fb879cf28530d5c50a03ffe9d0a54c8238e
+- **request_text_hash:** sha256:c05609504296bb8ea80f9b17aa477fb879cf28530d5c50a03ffe9d0a54c8238e
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-113-qlsi-038eca.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-113-qlsi-038eca.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-113-qlsi-038eca commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:40:57Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T044401Z-441
+- **id:** jr-2026-05-18T044401Z-441
+- **captured_at:** 2026-05-18T04:44:01Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:6176b79b0c551d2143ca2329d207fdaabcca7e41daed7850a016214b10e5ab11
+- **request_text_hash:** sha256:6176b79b0c551d2143ca2329d207fdaabcca7e41daed7850a016214b10e5ab11
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-115-hwh1-654576.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-115-hwh1-654576.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-115-hwh1-654576 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:44:01Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T044610Z-570
+- **id:** jr-2026-05-18T044610Z-570
+- **captured_at:** 2026-05-18T04:46:10Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:9fbfa70537399b0c958ab38f1d948500604705a08d037850b08a3408dfe63155
+- **request_text_hash:** sha256:9fbfa70537399b0c958ab38f1d948500604705a08d037850b08a3408dfe63155
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-116-kl07-e2e4cb.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-116-kl07-e2e4cb.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-116-kl07-e2e4cb commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:46:10Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T044848Z-728
+- **id:** jr-2026-05-18T044848Z-728
+- **captured_at:** 2026-05-18T04:48:48Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:1a489e71933d9f002dad43460d8b1d5b01b4a04234063ca92ea8062b04283e06
+- **request_text_hash:** sha256:1a489e71933d9f002dad43460d8b1d5b01b4a04234063ca92ea8062b04283e06
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-122-wrsh-6686d0.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-122-wrsh-6686d0.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-122-wrsh-6686d0 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:48:48Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T045134Z-894
+- **id:** jr-2026-05-18T045134Z-894
+- **captured_at:** 2026-05-18T04:51:34Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:3897b447c291e451594e37707fb274fe8f56c9cb22ce052c14e180e08441081f
+- **request_text_hash:** sha256:3897b447c291e451594e37707fb274fe8f56c9cb22ce052c14e180e08441081f
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-123-0pwq-ca7bfd.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-123-0pwq-ca7bfd.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-123-0pwq-ca7bfd commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:51:34Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T045416Z-056
+- **id:** jr-2026-05-18T045416Z-056
+- **captured_at:** 2026-05-18T04:54:16Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:5e47c5cf122f8cce7249d7a508a9456ecc32032d2246e783e54233a9700da472
+- **request_text_hash:** sha256:5e47c5cf122f8cce7249d7a508a9456ecc32032d2246e783e54233a9700da472
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-135-8n33-1e9f47.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-135-8n33-1e9f47.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-135-8n33-1e9f47 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:54:16Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T045707Z-227
+- **id:** jr-2026-05-18T045707Z-227
+- **captured_at:** 2026-05-18T04:57:07Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:83a986f81055a3d5ce9daf763fe010b4147055cf7fff7a2dd898f426b78b506a
+- **request_text_hash:** sha256:83a986f81055a3d5ce9daf763fe010b4147055cf7fff7a2dd898f426b78b506a
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-136-tuku-876107.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-136-tuku-876107.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-136-tuku-876107 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T04:57:07Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T050015Z-415
+- **id:** jr-2026-05-18T050015Z-415
+- **captured_at:** 2026-05-18T05:00:15Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:a1e653b038b881d4fb373dfa9a8c9bcb973467fbdab1c529620c5ad43f7f647c
+- **request_text_hash:** sha256:a1e653b038b881d4fb373dfa9a8c9bcb973467fbdab1c529620c5ad43f7f647c
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-138-dnxp-e05229.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-138-dnxp-e05229.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-138-dnxp-e05229 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:00:15Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T050222Z-542
+- **id:** jr-2026-05-18T050222Z-542
+- **captured_at:** 2026-05-18T05:02:22Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:684388682d3225a1772b7a1e8f25e63981c0d416bbfdcf379bc6d345a5f91650
+- **request_text_hash:** sha256:684388682d3225a1772b7a1e8f25e63981c0d416bbfdcf379bc6d345a5f91650
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-139-sqyp-a76645.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-139-sqyp-a76645.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-139-sqyp-a76645 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:02:22Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T050618Z-778
+- **id:** jr-2026-05-18T050618Z-778
+- **captured_at:** 2026-05-18T05:06:18Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:afdb3a3432ee6fb6b493d62277b8c60a6c433623ac1a3130ebb40ae3fc4685d2
+- **request_text_hash:** sha256:afdb3a3432ee6fb6b493d62277b8c60a6c433623ac1a3130ebb40ae3fc4685d2
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-141-6py4-40aeb9.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-141-6py4-40aeb9.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-141-6py4-40aeb9 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:06:18Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T050833Z-913
+- **id:** jr-2026-05-18T050833Z-913
+- **captured_at:** 2026-05-18T05:08:33Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:95e4b1dfbccbba824c15383e8d71a4892dd6d0a80eea0f151727853aa29e23f5
+- **request_text_hash:** sha256:95e4b1dfbccbba824c15383e8d71a4892dd6d0a80eea0f151727853aa29e23f5
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-142-qfei-ddf075.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-142-qfei-ddf075.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-142-qfei-ddf075 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:08:33Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T051139Z-099
+- **id:** jr-2026-05-18T051139Z-099
+- **captured_at:** 2026-05-18T05:11:39Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:fb282a38349a4efb8bb2945079ce18c3514031830fe31144115a935b84c3894a
+- **request_text_hash:** sha256:fb282a38349a4efb8bb2945079ce18c3514031830fe31144115a935b84c3894a
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-145-mnrk-3c3c76.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-145-mnrk-3c3c76.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-145-mnrk-3c3c76 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:11:39Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T051510Z-310
+- **id:** jr-2026-05-18T051510Z-310
+- **captured_at:** 2026-05-18T05:15:10Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:cc7eb6d76ab0fdd51f9a210cd6a6d6afdb60007f42358a2ab5f5da4c85101c03
+- **request_text_hash:** sha256:cc7eb6d76ab0fdd51f9a210cd6a6d6afdb60007f42358a2ab5f5da4c85101c03
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-146-2w2e-8caaf2.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-146-2w2e-8caaf2.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-146-2w2e-8caaf2 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:15:10Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T051948Z-588
+- **id:** jr-2026-05-18T051948Z-588
+- **captured_at:** 2026-05-18T05:19:48Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:3bc96bf3450a85e93c494f9a8ae785f7be8186910c1f5d59c30aecc298a4b654
+- **request_text_hash:** sha256:3bc96bf3450a85e93c494f9a8ae785f7be8186910c1f5d59c30aecc298a4b654
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-151-sxkb-864539.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-151-sxkb-864539.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-151-sxkb-864539 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:19:48Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T052210Z-730
+- **id:** jr-2026-05-18T052210Z-730
+- **captured_at:** 2026-05-18T05:22:10Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:88f36f6b7a02580dbfaa9be2ae59d090f0f569aab0dda5658d72a4063984469c
+- **request_text_hash:** sha256:88f36f6b7a02580dbfaa9be2ae59d090f0f569aab0dda5658d72a4063984469c
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-153-exjg-951046.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-153-exjg-951046.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-153-exjg-951046 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:22:10Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T052536Z-936
+- **id:** jr-2026-05-18T052536Z-936
+- **captured_at:** 2026-05-18T05:25:36Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:3f84356fc6029663329e6ffefe4b6b7963b914f3d88fdf62254d1b5accf682d3
+- **request_text_hash:** sha256:3f84356fc6029663329e6ffefe4b6b7963b914f3d88fdf62254d1b5accf682d3
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-156-qngv-5e4050.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-156-qngv-5e4050.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-156-qngv-5e4050 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:25:36Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T052745Z-065
+- **id:** jr-2026-05-18T052745Z-065
+- **captured_at:** 2026-05-18T05:27:45Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:a82d8910dae216bfffadfdd8e27f0335f100117945c8c5fab36e6d2ef06dd278
+- **request_text_hash:** sha256:a82d8910dae216bfffadfdd8e27f0335f100117945c8c5fab36e6d2ef06dd278
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-157-4her-e7082d.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-157-4her-e7082d.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-157-4her-e7082d commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:27:45Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T053111Z-271
+- **id:** jr-2026-05-18T053111Z-271
+- **captured_at:** 2026-05-18T05:31:11Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:16b72ac9c5f03bb60cd16964c39e59d4e082c9d8e9e1473637b44bc41f6e77b8
+- **request_text_hash:** sha256:16b72ac9c5f03bb60cd16964c39e59d4e082c9d8e9e1473637b44bc41f6e77b8
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-159-iheo-fede07.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-159-iheo-fede07.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-159-iheo-fede07 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:31:11Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T053328Z-408
+- **id:** jr-2026-05-18T053328Z-408
+- **captured_at:** 2026-05-18T05:33:28Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:96c75a1035196ed48beb435194f09c603c3373a7c3d62983291942e45f748303
+- **request_text_hash:** sha256:96c75a1035196ed48beb435194f09c603c3373a7c3d62983291942e45f748303
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-160-2jaq-fe6440.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-160-2jaq-fe6440.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-160-2jaq-fe6440 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:33:28Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T053613Z-573
+- **id:** jr-2026-05-18T053613Z-573
+- **captured_at:** 2026-05-18T05:36:13Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:aedb47927599fc996a9a003f3ccb55ce91ce8db2359328ddf421fbd9cd26472d
+- **request_text_hash:** sha256:aedb47927599fc996a9a003f3ccb55ce91ce8db2359328ddf421fbd9cd26472d
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-161-n09b-dfbd73.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-161-n09b-dfbd73.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-161-n09b-dfbd73 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:36:13Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T053858Z-738
+- **id:** jr-2026-05-18T053858Z-738
+- **captured_at:** 2026-05-18T05:38:58Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:c615161ffb92e9c44f6b8f0d5c065775ac9dd8f919c408f58edbcf962708dd08
+- **request_text_hash:** sha256:c615161ffb92e9c44f6b8f0d5c065775ac9dd8f919c408f58edbcf962708dd08
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-165-n050-31eec0.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-165-n050-31eec0.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-165-n050-31eec0 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:38:58Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T054124Z-884
+- **id:** jr-2026-05-18T054124Z-884
+- **captured_at:** 2026-05-18T05:41:24Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:b7228366b67ff0318f358226ea55489b0aad9bd563ea36279bdb24213f21c7fc
+- **request_text_hash:** sha256:b7228366b67ff0318f358226ea55489b0aad9bd563ea36279bdb24213f21c7fc
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-166-bhsv-3c2e2d.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-166-bhsv-3c2e2d.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-166-bhsv-3c2e2d commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:41:24Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T054357Z-037
+- **id:** jr-2026-05-18T054357Z-037
+- **captured_at:** 2026-05-18T05:43:57Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:30e48746e106966a60396adc303adbe68de09550b8845d8dbce1a02b007382f4
+- **request_text_hash:** sha256:30e48746e106966a60396adc303adbe68de09550b8845d8dbce1a02b007382f4
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-167-ss68-123cbd.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-167-ss68-123cbd.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-167-ss68-123cbd commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:43:57Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T054646Z-206
+- **id:** jr-2026-05-18T054646Z-206
+- **captured_at:** 2026-05-18T05:46:46Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:8f3b78f87f6f0dd617dbf7767245b24d6f8e279575296112c2fd11dac2e1a987
+- **request_text_hash:** sha256:8f3b78f87f6f0dd617dbf7767245b24d6f8e279575296112c2fd11dac2e1a987
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-169-3lwo-6c709c.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-169-3lwo-6c709c.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-169-3lwo-6c709c commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:46:46Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T055039Z-439
+- **id:** jr-2026-05-18T055039Z-439
+- **captured_at:** 2026-05-18T05:50:39Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:4ced267d89d3bd6f726dc778130b3a84623aa8ead3484db0681ac07dcac14106
+- **request_text_hash:** sha256:4ced267d89d3bd6f726dc778130b3a84623aa8ead3484db0681ac07dcac14106
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-170-ex11-054a3c.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-170-ex11-054a3c.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-170-ex11-054a3c commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:50:39Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T055247Z-567
+- **id:** jr-2026-05-18T055247Z-567
+- **captured_at:** 2026-05-18T05:52:47Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:e90bec5b897b949737b038e19748e00b8a42ebb0965c1ffcf0170cf6d5360f55
+- **request_text_hash:** sha256:e90bec5b897b949737b038e19748e00b8a42ebb0965c1ffcf0170cf6d5360f55
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-172-9b1y-a0c0e3.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-172-9b1y-a0c0e3.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-172-9b1y-a0c0e3 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:52:47Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T055620Z-780
+- **id:** jr-2026-05-18T055620Z-780
+- **captured_at:** 2026-05-18T05:56:20Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:f45bdb1db68bdb242cfba25340c9da2c4adc17fbd9f777ed54b0db5a201e8331
+- **request_text_hash:** sha256:f45bdb1db68bdb242cfba25340c9da2c4adc17fbd9f777ed54b0db5a201e8331
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-173-23ft-2fb7a8.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-173-23ft-2fb7a8.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-173-23ft-2fb7a8 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T05:56:20Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T060018Z-018
+- **id:** jr-2026-05-18T060018Z-018
+- **captured_at:** 2026-05-18T06:00:18Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:618d8ada320f03c8ed16aabf7665a559333ce6fec8c0a04e9aaf6b9824b17039
+- **request_text_hash:** sha256:618d8ada320f03c8ed16aabf7665a559333ce6fec8c0a04e9aaf6b9824b17039
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-tenant-scope-api-176-d7bv-31cd3c.md and run /flywheel:worker-tick /tmp/dispatch_cfs-tenant-scope-api-176-d7bv-31cd3c.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-tenant-scope-api-176-d7bv-31cd3c commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T06:00:18Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T060331Z-211
+- **id:** jr-2026-05-18T060331Z-211
+- **captured_at:** 2026-05-18T06:03:31Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:1fcedaa5e0a61f1bdba71b40204239b4fc5c06a2a0c6ae5892ca3fa9635e0acd
+- **request_text_hash:** sha256:1fcedaa5e0a61f1bdba71b40204239b4fc5c06a2a0c6ae5892ca3fa9635e0acd
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-app-r6-74bea6.md and run /flywheel:worker-tick /tmp/dispatch_cfs-app-r6-74bea6.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-app-r6-74bea6 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T06:03:31Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T060714Z-434
+- **id:** jr-2026-05-18T060714Z-434
+- **captured_at:** 2026-05-18T06:07:14Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:f1abb6c0147afc3762601bf6f1d30eb771917eb480897594e16f8c2b4865c8b7
+- **request_text_hash:** sha256:f1abb6c0147afc3762601bf6f1d30eb771917eb480897594e16f8c2b4865c8b7
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-app-r1-5de345.md and run /flywheel:worker-tick /tmp/dispatch_cfs-app-r1-5de345.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-app-r1-5de345 commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T06:07:14Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T061019Z-619
+- **id:** jr-2026-05-18T061019Z-619
+- **captured_at:** 2026-05-18T06:10:19Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:ffe7f6bd7afaefbe2b9e0113d478dc4117f6fdbe59d13bc950171f77118923cd
+- **request_text_hash:** sha256:ffe7f6bd7afaefbe2b9e0113d478dc4117f6fdbe59d13bc950171f77118923cd
+- **sanitized_excerpt:** "<task-notification> <task-id>a8940d940ae914b24</task-id> <tool-use-id>toolu_01UteQD2F1LhbutefFe7j1FX</tool-use-id> <output-file>/private/tmp/claude-501/-Users-josh-Developer-clutterfreespaces/2d2bab7d-e004-4954-afe1-f3916c971cb4/tasks/a8940d940ae914b24.output</output-file> <status>completed</status> <summary>Agent \"Jobber teardown\" completed</summary> <result>Done. **Jobber Competitor Teardown complete.** --- ### Summary **File written:** `/tmp/cfs-competitor-teardown-jobber.md` (~2,300 words, M"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T06:10:19Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T061028Z-628
+- **id:** jr-2026-05-18T061028Z-628
+- **captured_at:** 2026-05-18T06:10:28Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:9633c14995d43978925f206a94c1aa6973e8c7974eac21e0c87f6aa8b3ad93d3
+- **request_text_hash:** sha256:9633c14995d43978925f206a94c1aa6973e8c7974eac21e0c87f6aa8b3ad93d3
+- **sanitized_excerpt:** "<task-notification> <task-id>a260eca5004057f7f</task-id> <tool-use-id>toolu_018E6Vy6hWKvsV6REiuxdCAB</tool-use-id> <output-file>/private/tmp/claude-501/-Users-josh-Developer-clutterfreespaces/2d2bab7d-e004-4954-afe1-f3916c971cb4/tasks/a260eca5004057f7f.output</output-file> <status>completed</status> <summary>Agent \"HousecallPro teardown\" completed</summary> <result>**Teardown complete.** File written to `/tmp/cfs-competitor-teardown-housecallpro.md` (2,340 words). **Key findings:** 1. **Pricing:"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T06:10:28Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T061054Z-654
+- **id:** jr-2026-05-18T061054Z-654
+- **captured_at:** 2026-05-18T06:10:54Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:b9775e4f01e354d86fe695950d05627b7c84ffb9eaf70891de652f353ec63648
+- **request_text_hash:** sha256:b9775e4f01e354d86fe695950d05627b7c84ffb9eaf70891de652f353ec63648
+- **sanitized_excerpt:** "<task-notification> <task-id>aed83228a2a943fc1</task-id> <tool-use-id>toolu_01GAVPkW3RyEir5F5wuevmDr</tool-use-id> <output-file>/private/tmp/claude-501/-Users-josh-Developer-clutterfreespaces/2d2bab7d-e004-4954-afe1-f3916c971cb4/tasks/aed83228a2a943fc1.output</output-file> <status>completed</status> <summary>Agent \"Notion teardown\" completed</summary> <result>Complete. The teardown is written to `/tmp/cfs-competitor-teardown-notion.md`, **~2,600 words**, following Axiom 22 (≥2 sources per nontri"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T06:10:54Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T061054Z-654
+- **id:** jr-2026-05-18T061054Z-654
+- **captured_at:** 2026-05-18T06:10:54Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:46ddff164ce2cf08242162dabb6079cd2c3555a90c1491b8d23098249a077a8c
+- **request_text_hash:** sha256:46ddff164ce2cf08242162dabb6079cd2c3555a90c1491b8d23098249a077a8c
+- **sanitized_excerpt:** "<task-notification> <task-id>a4d801ecef2d32a46</task-id> <tool-use-id>toolu_01SHH7afHnZDmS4gpBA27i7j</tool-use-id> <output-file>/private/tmp/claude-501/-Users-josh-Developer-clutterfreespaces/2d2bab7d-e004-4954-afe1-f3916c971cb4/tasks/a4d801ecef2d32a46.output</output-file> <status>completed</status> <summary>Agent \"Apple Reminders teardown\" completed</summary> <result>Done. I've written a 2100+ word competitor teardown of Apple Reminders covering all eight requested sections: 1. **Identity** — S"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T06:10:54Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T061240Z-760
+- **id:** jr-2026-05-18T061240Z-760
+- **captured_at:** 2026-05-18T06:12:40Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/0cf363f4-b5ac-40ba-b819-48a888c4c6d1.jsonl
+- **source_message_id:** 0cf363f4-b5ac-40ba-b819-48a888c4c6d1
+- **prompt_hash:** sha256:d21686dc6dceebdfa210615c63c7faa8bde3acbae3c896d4d077455b070ed657
+- **request_text_hash:** sha256:d21686dc6dceebdfa210615c63c7faa8bde3acbae3c896d4d077455b070ed657
+- **sanitized_excerpt:** "Read /tmp/dispatch_cfs-app-r5-befadd.md and run /flywheel:worker-tick /tmp/dispatch_cfs-app-r5-befadd.md. CRITICAL CALLBACK: on DONE execute /Users/josh/.local/bin/ntm send clutterfreespaces --pane=0 --force-non-interactive --no-cass-check 'DONE cfs-app-r5-befadd commit=<sha> bead_closed=yes validated=<3-source> compliance=NNN/1000 notes=<one-line>'"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T06:12:40Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T182912Z-952
+- **id:** jr-2026-05-18T182912Z-952
+- **captured_at:** 2026-05-18T18:29:12Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:c50c22373c82d231dd5b1d10798dad4cd4cbf6f2a3f2c6aa1a6fd6b80b6ae49d
+- **request_text_hash:** sha256:c50c22373c82d231dd5b1d10798dad4cd4cbf6f2a3f2c6aa1a6fd6b80b6ae49d
+- **sanitized_excerpt:** "I want you to give me a long running /goal-build (.sh validated) process that I can give pane 1 codex to keep working on our flywheel. Can you run /flywheel:status - its been a couple days since I've had you live - we've done a lot of work across our ecosystems. What open issues or observations can you make on our system(s) - what should we have codex work on that provides our ecosystem the best value? dig deep on this"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T18:29:12Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T184639Z-999
+- **id:** jr-2026-05-18T184639Z-999
+- **captured_at:** 2026-05-18T18:46:39Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:209b3d42d2669a5d68bf0f7dfeee82966d6c148431817006d06fa3af74c3226c
+- **request_text_hash:** sha256:209b3d42d2669a5d68bf0f7dfeee82966d6c148431817006d06fa3af74c3226c
+- **sanitized_excerpt:** "lets get git repo cleaned up first /git-stash-janitor and /git-repo-janitor"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T18:46:39Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
