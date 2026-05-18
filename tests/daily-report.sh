@@ -133,6 +133,8 @@ dispatch_log="$TMP/dispatch.jsonl"
 printf '%s\n' "{\"ts\":\"${date_today}T09:00:00Z\",\"event\":\"dispatch_sent\",\"pane\":2,\"callback_received_at\":\"${date_today}T09:10:00Z\"}" >"$dispatch_log"
 fuckup_log="$TMP/fuckup.jsonl"
 printf '%s\n' "{\"ts\":\"${date_today}T09:00:00Z\",\"trauma_class\":\"fixture-trauma\",\"severity\":\"medium\"}" >"$fuckup_log"
+trauma_candidates="$TMP/trauma-candidates.jsonl"
+printf '%s\n' "{\"schema_version\":\"flywheel.trauma_candidate.v0\",\"ts\":\"${date_today}T09:05:00Z\",\"class\":\"worker_low_socraticode_K\",\"N\":3,\"count_in_window\":3,\"window_hours\":24,\"saturation_threshold\":3,\"class_family\":\"worker_discipline\",\"first_seen\":\"${date_today}T08:00:00Z\",\"last_seen\":\"${date_today}T09:00:00Z\",\"sample_rows\":[],\"proposed_memory_path\":\"feedback_worker_low_socraticode_k.md\",\"fuckup_log_ref\":\"fixture\",\"proposed_disposition\":\"new\",\"recommended_skillos_loop\":4}" >"$trauma_candidates"
 cross_log="$TMP/cross.jsonl"
 printf '%s\n' "{\"ts\":\"${date_today}T09:00:00Z\",\"session\":\"{proof-product}\",\"event\":\"ack\"}" >"$cross_log"
 jeff_log="$TMP/jeff.jsonl"
@@ -153,15 +155,19 @@ printf 'Date: %s\n' "$date_today" >"$incidents"
 BR_BIN="$TMP/br-normal" FLYWHEEL_DAILY_REPORT_NOW="${date_today}T12:00:00Z" \
   "$DAILY" --repo "$normal_repo" --date "$date_today" --doctor-json "$TMP/doctor-ok.json" \
   --memory-dir "$memory_dir" --dispatch-log "$dispatch_log" --fuckup-log "$fuckup_log" \
+  --trauma-candidates "$trauma_candidates" \
   --cross-orch-log "$cross_log" --jeff-digest "$jeff_log" --jeff-storage-projection "$jeff_projection" \
   --incidents-file "$incidents" --no-notify --json >"$TMP/normal.out"
 normal_report="$(jq -r '.report_path' "$TMP/normal.out")"
 assert_jq "$TMP/normal.out" '.closed_today_count == 1 and .ready_count == 1 and (.sections | length) >= 6' "normal_day_json"
 assert_file_contains "$normal_report" 'What shipped\?|What did we learn\?|What'\''s Jeff up to\?|Cross-orch state' "normal_day_sections"
 assert_file_contains "$normal_report" 'Jeff fixture release' "normal_day_jeff_section"
+assert_file_contains "$normal_report" 'Auto-promoted trauma candidates for orch review' "normal_day_trauma_candidates_section"
+assert_file_contains "$normal_report" 'worker_low_socraticode_K N=3 family=worker_discipline' "normal_day_trauma_candidate_row"
 assert_file_contains "$normal_report" 'jeff_corpus_storage_projection: full_already_indexed_increase_headroom_first' "normal_day_jeff_projection_section"
 assert_file_contains "$normal_report" 'repo_protocol:  pass \(pass=4 warn=0 fail=0\)' "normal_day_repo_hygiene_protocol_reported"
 assert_jq "$TMP/normal.out" '.jeff_corpus_storage_projection.remaining_actual_count == 0 and .jeff_corpus_storage_projection.scenario_remaining_count == 92' "normal_day_projection_json"
+assert_jq "$TMP/normal.out" '.auto_promoted_trauma_candidates_count == 1' "normal_day_trauma_candidates_json"
 assert_jq "$TMP/normal.out" '.git_hygiene.repo_hygiene_protocol.status == "pass" and .git_hygiene.repo_hygiene_protocol.pass == 4' "normal_day_repo_hygiene_protocol_json"
 
 FLYWHEEL_DOCTOR_NTM_HEALTH_DISABLED=1 "$LOOP" doctor --repo "$normal_repo" --json >"$TMP/doctor-recent.json" 2>/dev/null || true

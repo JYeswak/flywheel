@@ -1,0 +1,111 @@
+{
+  "schema_version": "flywheel.trauma_claim_emitter_auto_promotion_receipt.v1",
+  "ts": "2026-05-18T19:53:56Z",
+  "bead": "flywheel-trauma-claim-emitter-auto-promotion-difge",
+  "acceptance": {
+    "worker_prefix_classes_first_class": true,
+    "saturation_threshold_default": 3,
+    "secrets_threshold": 1,
+    "candidate_fields": [
+      "class",
+      "N",
+      "first_seen",
+      "last_seen",
+      "sample_rows",
+      "proposed_memory_path"
+    ],
+    "daily_report_surfaces_candidates": true,
+    "stale_detection_probe": true
+  },
+  "live_validation": {
+    "emit": {
+      "status": "emitted",
+      "candidate_count": 1,
+      "path": "/Users/josh/Developer/flywheel/.flywheel/evidence/trauma-candidates.jsonl"
+    },
+    "stale_before": {
+      "status": "ok",
+      "stale_saturated_class_count": 0,
+      "trauma_candidates_path": "/Users/josh/Developer/flywheel/.flywheel/evidence/trauma-candidates.jsonl",
+      "stale_classes": []
+    },
+    "stale_after": {
+      "status": "ok",
+      "stale_saturated_class_count": 0,
+      "trauma_candidates_path": "/Users/josh/Developer/flywheel/.flywheel/evidence/trauma-candidates.jsonl",
+      "stale_classes": []
+    },
+    "newest_candidate": {
+      "schema_version": "flywheel.trauma_candidate.v0",
+      "ts": "2026-05-18T19:53:09Z",
+      "class": "worker_low_socraticode_K",
+      "N": 7,
+      "count_in_window": 7,
+      "window_hours": 24,
+      "saturation_threshold": 3,
+      "class_family": "worker_discipline",
+      "first_seen": "2026-05-18T09:24:21Z",
+      "last_seen": "2026-05-18T19:16:21Z",
+      "sample_rows": [
+        {
+          "ts": "2026-05-18T09:24:21Z",
+          "session": "clutterfreespaces",
+          "severity": "low",
+          "what_happened": "worker_low_socraticode_K detected by worker tick"
+        },
+        {
+          "ts": "2026-05-18T09:32:58Z",
+          "session": "clutterfreespaces",
+          "severity": "low",
+          "what_happened": "worker_low_socraticode_K detected by worker tick"
+        },
+        {
+          "ts": "2026-05-18T17:56:48Z",
+          "session": "vrtx",
+          "severity": "low",
+          "what_happened": "worker_low_socraticode_K detected by worker tick"
+        }
+      ],
+      "proposed_memory_path": "feedback_worker_low_socraticode_k.md",
+      "fuckup_log_ref": "/Users/josh/.local/state/flywheel/fuckup-log.jsonl:ts=2026-05-18T09:24:21Z..2026-05-18T19:16:21Z",
+      "dispatch_log_task_id": null,
+      "proposed_disposition": "new",
+      "recommended_skillos_loop": 4,
+      "evidence_excerpt": "worker_low_socraticode_K detected by worker tick",
+      "session": "clutterfreespaces",
+      "severity": "low",
+      "skillos_handoff_message_id": null
+    }
+  },
+  "tests": [
+    "bash -n .flywheel/scripts/trauma-claim-emitter.sh",
+    "python3 -m py_compile .flywheel/scripts/daily-report.py",
+    "bash tests/trauma-claim-emitter-canonical-cli.sh => SUMMARY pass=16 fail=0",
+    "bash tests/daily-report.sh => Summary: 26 passed, 0 failed"
+  ],
+  "modified_surfaces": [
+    ".flywheel/scripts/trauma-claim-emitter.sh",
+    ".flywheel/validation-schema/v1/trauma-candidate.schema.json",
+    ".flywheel/scripts/daily-report.py",
+    "tests/trauma-claim-emitter-canonical-cli.sh",
+    "tests/daily-report.sh",
+    ".flywheel/evidence/trauma-candidates.jsonl"
+  ],
+  "reservations": {
+    "flywheel": [
+      23488,
+      23489,
+      23490,
+      23491,
+      23492,
+      23493,
+      23494,
+      23495,
+      23496,
+      23498
+    ],
+    "local": [
+      23497
+    ]
+  }
+}
