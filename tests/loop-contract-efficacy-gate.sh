@@ -17,6 +17,10 @@ base_metrics() {
     since:"2026-06-01T00:00:00Z",
     until:"2026-06-15T00:00:00Z",
     rows_considered:40,
+    seven_day_windows:[
+      {start:"2026-06-01T00:00:00Z",end:"2026-06-08T00:00:00Z",pulse_counts:{loop:2,goal:1},loop_goal_harmony:true},
+      {start:"2026-06-08T00:00:00Z",end:"2026-06-15T00:00:00Z",pulse_counts:{loop:2,goal:1},loop_goal_harmony:true}
+    ],
     modes:{
       loop:{mode:"loop",pulse_count:4,bead_close_per_hour:3.6},
       goal:{mode:"goal",pulse_count:2,bead_close_per_hour:7.0}
@@ -72,6 +76,14 @@ if "$SCRIPT" --metrics "$TMP/no-goal-pulse.json" --json >"$TMP/no-goal-pulse.out
 else
   jq -e '.status == "fail" and (.failure_codes | index("goal_dispatch_count"))' "$TMP/no-goal-pulse.out" >/dev/null \
     && pass "two-mode harmony requires goal pulses" || fail "two-mode harmony requires goal pulses"
+fi
+
+base_metrics | jq '.seven_day_windows[1].pulse_counts.goal = 0 | .seven_day_windows[1].loop_goal_harmony = false' >"$TMP/window-harmony-fail.json"
+if "$SCRIPT" --metrics "$TMP/window-harmony-fail.json" --json >"$TMP/window-harmony-fail.out"; then
+  fail "aggregate-pass window-fail should exit nonzero"
+else
+  jq -e '.status == "fail" and (.failure_codes | index("seven_day_mode_harmony")) and .observed.goal_pulse_count == 2' "$TMP/window-harmony-fail.out" >/dev/null \
+    && pass "seven-day mode harmony required" || fail "seven-day mode harmony required"
 fi
 
 printf 'Summary: %d passed, %d failed\n' "$pass_count" "$fail_count"

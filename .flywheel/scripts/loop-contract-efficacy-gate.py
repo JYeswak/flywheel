@@ -67,10 +67,13 @@ def evaluate(
     goal_rate = number(goal.get("bead_close_per_hour"))
     ratio = loop_rate / goal_rate if goal_rate > 0 else 0.0
     window_hours = (until - since).total_seconds() / 3600 if since and until and until > since else 0.0
+    seven_day_windows = metrics.get("seven_day_windows") if isinstance(metrics.get("seven_day_windows"), list) else []
     checks = {
         "bounded_window": bool(since and until),
         "post_soak_window": bool(since and min_since and since >= min_since),
         "window_duration": window_hours >= min_window_hours,
+        "seven_day_mode_harmony": bool(seven_day_windows)
+        and all(bool(window.get("loop_goal_harmony")) for window in seven_day_windows if isinstance(window, dict)),
         "loop_close_rate": loop_rate >= min_loop_closes_per_hour,
         "loop_goal_ratio": ratio >= min_loop_to_goal_ratio,
         "loop_dispatch_count": int(number(loop.get("pulse_count"))) > 0,
@@ -94,6 +97,7 @@ def evaluate(
             "until": metrics.get("until"),
             "window_hours": round(window_hours, 6),
             "rows_considered": metrics.get("rows_considered"),
+            "seven_day_windows": seven_day_windows,
         },
         "observed": {
             "loop_bead_close_per_hour": loop_rate,

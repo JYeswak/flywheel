@@ -45,5 +45,21 @@ jq -e '
 ' "$TMP/window.json" >/dev/null \
   && pass "window bounds are surfaced and applied" || fail "window bounds are surfaced and applied"
 
+seven_day_log="$TMP/seven-day-dispatch-log.jsonl"
+cat >"$seven_day_log" <<'JSONL'
+{"ts":"2026-06-01T00:10:00Z","event":"dispatch_sent","task_id":"loop-w1","mode":"loop","origin_task_id":"loop-w1","tick_id":"tick-w1"}
+{"ts":"2026-06-01T00:20:00Z","event":"dispatch_sent","task_id":"goal-w1","mode":"goal","origin_task_id":"goal-w1","goal_id":"goal-w1","sprint_id":"sprint-w1"}
+{"ts":"2026-06-08T00:10:00Z","event":"dispatch_sent","task_id":"loop-w2","mode":"loop","origin_task_id":"loop-w2","tick_id":"tick-w2"}
+{"ts":"2026-06-08T00:20:00Z","event":"dispatch_sent","task_id":"goal-w2","mode":"goal","origin_task_id":"goal-w2","goal_id":"goal-w2","sprint_id":"sprint-w2"}
+JSONL
+"$SCRIPT" --log "$seven_day_log" --since 2026-06-01T00:00:00Z --until 2026-06-15T00:00:00Z --json >"$TMP/seven-day.json"
+jq -e '
+  (.seven_day_windows | length) == 2
+  and all(.seven_day_windows[]; .loop_goal_harmony == true)
+  and .seven_day_windows[0].pulse_counts.loop == 1
+  and .seven_day_windows[1].pulse_counts.goal == 1
+' "$TMP/seven-day.json" >/dev/null \
+  && pass "seven-day harmony windows emitted" || fail "seven-day harmony windows emitted"
+
 printf 'Summary: %d passed, %d failed\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]

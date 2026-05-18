@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -115,14 +115,17 @@ def summarize(rows: list[dict[str, Any]], since: datetime | None, until: datetim
         for mode in sorted(VALID_MODES)
     }
     considered = 0
+    pulse_rows: list[tuple[datetime, str]] = []
     for row in rows:
         ts = parse_ts(row.get("ts") or row.get("timestamp") or row.get("created_at"))
         if ts is None or (since and ts < since) or (until and ts > until):
             continue
         considered += 1
-        bucket = by_mode[normalized_mode(row, attribution)]
+        mode = normalized_mode(row, attribution)
+        bucket = by_mode[mode]
         if is_pulse(row):
             bucket["pulse_count"] += 1
+            pulse_rows.append((ts, mode))
         if is_productive_callback(row):
             bucket["productive_callback_count"] += 1
         if is_close(row):
@@ -146,11 +149,31 @@ def summarize(rows: list[dict[str, Any]], since: datetime | None, until: datetim
             bucket["active_span_hours"] = round(hours, 6)
             bucket["bead_close_per_hour"] = round(bucket["close_count"] / hours, 6)
 
+    seven_day_windows: list[dict[str, Any]] = []
+    if since and until and until > since:
+        start = since
+        while start + timedelta(days=7) <= until:
+            end = start + timedelta(days=7)
+            counts = {mode: 0 for mode in sorted(VALID_MODES)}
+            for ts, mode in pulse_rows:
+                if start <= ts < end:
+                    counts[mode] += 1
+            seven_day_windows.append(
+                {
+                    "start": start.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "end": end.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "pulse_counts": counts,
+                    "loop_goal_harmony": counts["loop"] > 0 and counts["goal"] > 0,
+                }
+            )
+            start = end
+
     return {
         "schema_version": "flywheel.dispatch_mode_metrics.v1",
         "since": since.strftime("%Y-%m-%dT%H:%M:%SZ") if since else None,
         "until": until.strftime("%Y-%m-%dT%H:%M:%SZ") if until else None,
         "rows_considered": considered,
+        "seven_day_windows": seven_day_windows,
         "modes": by_mode,
     }
 
