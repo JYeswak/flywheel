@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 GATE="$ROOT/.flywheel/scripts/loop-goal-contract-gate.sh"
 PACKET="$ROOT/.flywheel/scripts/build-dispatch-packet.sh"
+METRICS="$ROOT/.flywheel/scripts/dispatch-mode-metrics.py"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/loop-goal-contract-gate.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -83,6 +84,13 @@ jq -e '.fields_resolved.goal_contract.goal_id == "goal-fixture" and (.validation
   && grep -q '^## LOOP GOAL CONTRACT BLOCK' "$packet_path" \
   && grep -q '"goal_id":"goal-fixture"' "$packet_path" \
   && pass "dispatch packet carries contract verbatim" || fail "dispatch packet carries contract verbatim"
+
+metrics_log="$TMP/contract-bearing-loop.jsonl"
+jq -nc --argjson contract "$(cat "$contract")" '{ts:"2026-05-18T00:00:00Z",event:"dispatch_sent",task_id:"tick-valid",origin_task_id:"tick-valid",mode:"loop",tick_id:"tick-valid",goal_id:"goal-fixture",goal_contract:$contract}' >"$metrics_log"
+jq -nc '{ts:"2026-05-18T00:10:00Z",event:"worker_callback",task_id:"tick-valid",status:"DONE"}' >>"$metrics_log"
+"$METRICS" --log "$metrics_log" --json >"$TMP/metrics.json"
+jq -e '.modes.loop.pulse_count == 1 and .modes.loop.productive_callback_count == 1 and .modes.loop.productive_callback_per_pulse == 1' "$TMP/metrics.json" >/dev/null \
+  && pass "contract-bearing loop callbacks are attributable" || fail "contract-bearing loop callbacks are attributable"
 
 printf 'Summary: %d passed, %d failed\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]
