@@ -148,6 +148,8 @@ def summarize(rows: list[dict[str, Any]], since: datetime | None, until: datetim
 
     return {
         "schema_version": "flywheel.dispatch_mode_metrics.v1",
+        "since": since.strftime("%Y-%m-%dT%H:%M:%SZ") if since else None,
+        "until": until.strftime("%Y-%m-%dT%H:%M:%SZ") if until else None,
         "rows_considered": considered,
         "modes": by_mode,
     }

@@ -33,5 +33,17 @@ jq -e '.modes.goal.pulse_count == 1 and .modes.goal.close_count == 1 and .modes.
 jq -e '.modes.manual.pulse_count == 1' "$TMP/out.json" >/dev/null \
   && pass "manual dispatch counted" || fail "manual dispatch counted"
 
+"$SCRIPT" --log "$log" --since 2026-05-18T00:15:00Z --until 2026-05-18T00:45:00Z --json >"$TMP/window.json"
+jq -e '
+  .since == "2026-05-18T00:15:00Z"
+  and .until == "2026-05-18T00:45:00Z"
+  and .rows_considered == 3
+  and .modes.unknown.pulse_count == 0
+  and .modes.loop.productive_callback_count == 1
+  and .modes.goal.pulse_count == 1
+  and .modes.goal.close_count == 1
+' "$TMP/window.json" >/dev/null \
+  && pass "window bounds are surfaced and applied" || fail "window bounds are surfaced and applied"
+
 printf 'Summary: %d passed, %d failed\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]
