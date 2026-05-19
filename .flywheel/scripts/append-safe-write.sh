@@ -656,7 +656,7 @@ def maybe_emit_pane1_sprint_complete(target: Path, payload: bytes) -> dict | Non
     callback_key = hashlib.sha256(payload.strip()).hexdigest()
     ledger = Path(os.environ.get(
         "FLYWHEEL_PANE1_SPRINT_CALLBACK_LEDGER",
-        str(target.parent / "runtime" / "pane1-sprint-complete-bridge.jsonl"),
+        str(Path.home() / ".local/state/flywheel/pane1-sprint-complete-bridge.jsonl"),
     )).expanduser().resolve(strict=False)
     if ledger_contains(ledger, callback_key):
         return {
