@@ -61,6 +61,7 @@ cat >"$TRAUMA_EMITTER_FUCKUP_LOG" <<'JSONL'
 {"ts":"2026-05-15T00:00:14Z","class":"below-threshold","session":"flywheel","severity":"medium","what_happened":"b1"}
 {"ts":"2026-05-15T00:00:15Z","class":"below-threshold","session":"flywheel","severity":"medium","what_happened":"b2"}
 {"ts":"2026-05-15T00:00:16Z","class":"test-class","session":"flywheel","severity":"low","what_happened":"should_skip"}
+{"ts":"2026-05-15T00:00:17Z","class":"cross_track_dispatch_collision","session":"flywheel","severity":"high","what_happened":"track1 dispatch attempted through track3 substrate"}
 JSONL
 echo "## known-class-in-incidents" >"$TRAUMA_EMITTER_INCIDENTS"
 echo "## known-class-in-skill" >"$TRAUMA_EMITTER_RECOVERY_SKILL"
@@ -68,8 +69,8 @@ export TRAUMA_EMITTER_NOW="2026-05-15T01:00:00Z"
 
 # Dry-run should NOT write to out (status JSON is the first line; candidates array follows)
 STATUS_LINE="$("$SCRIPT" emit --dry-run --json 2>&1 | head -1 || true)"
-if echo "$STATUS_LINE" | jq -e '.status == "dry_run" and .candidate_count == 5' >/dev/null; then
-  pass "dry-run reports candidate_count=5 (thresholded + secrets)"
+if echo "$STATUS_LINE" | jq -e '.status == "dry_run" and .candidate_count == 6' >/dev/null; then
+  pass "dry-run reports candidate_count=6 (thresholded + secrets + cross-track)"
 else
   fail "dry-run count wrong"
   echo "$STATUS_LINE" >&2
@@ -81,15 +82,15 @@ else
 fi
 
 # Stale check warns before rows are promoted.
-if "$SCRIPT" stale-check --json 2>/dev/null | jq -e '.status == "warn" and .stale_saturated_class_count == 5' >/dev/null; then
+if "$SCRIPT" stale-check --json 2>/dev/null | jq -e '.status == "warn" and .stale_saturated_class_count == 6' >/dev/null; then
   pass "stale-check warns before promotion"
 else
   fail "stale-check should warn before promotion"
 fi
 
-# Real emit should write 5 rows
-if "$SCRIPT" emit --json 2>&1 | jq -e '.status == "emitted" and .candidate_count == 5' >/dev/null; then
-  pass "emit writes 5 thresholded candidates"
+# Real emit should write 6 rows
+if "$SCRIPT" emit --json 2>&1 | jq -e '.status == "emitted" and .candidate_count == 6' >/dev/null; then
+  pass "emit writes 6 thresholded candidates"
 else
   fail "emit count wrong"
 fi
@@ -99,8 +100,8 @@ else
   fail "out path not created"
 fi
 row_count="$(jq -s 'length' "$TRAUMA_EMITTER_OUT" 2>/dev/null || echo 0)"
-if [[ "$row_count" == "5" ]]; then
-  pass "out has 5 rows"
+if [[ "$row_count" == "6" ]]; then
+  pass "out has 6 rows"
 else
   fail "row count wrong: got $row_count"
 fi
@@ -119,8 +120,8 @@ fi
 # Disposition classification
 known_count="$(jq -s '[.[] | select(.proposed_disposition == "known")] | length' "$TRAUMA_EMITTER_OUT")"
 new_count="$(jq -s '[.[] | select(.proposed_disposition == "new")] | length' "$TRAUMA_EMITTER_OUT")"
-if [[ "$known_count" == "2" && "$new_count" == "3" ]]; then
-  pass "disposition correct: 2 known (INCIDENTS + SKILL hits) + 3 new"
+if [[ "$known_count" == "2" && "$new_count" == "4" ]]; then
+  pass "disposition correct: 2 known (INCIDENTS + SKILL hits) + 4 new"
 else
   fail "disposition: known=$known_count new=$new_count"
 fi
@@ -135,6 +136,12 @@ if jq -e 'select(.class == "credential-leak-fixture" and .class_family == "secre
   pass "secrets class promotes at N=1"
 else
   fail "secrets class threshold wrong"
+fi
+
+if jq -e 'select(.class == "cross_track_dispatch_collision" and .class_family == "cross_track_dispatch_collision" and .saturation_threshold == 1 and .N == 1)' "$TRAUMA_EMITTER_OUT" >/dev/null; then
+  pass "cross-track collision class promotes at N=1"
+else
+  fail "cross-track collision class registration wrong"
 fi
 
 if "$SCRIPT" stale-check --json 2>/dev/null | jq -e '.status == "ok" and .stale_saturated_class_count == 0' >/dev/null; then

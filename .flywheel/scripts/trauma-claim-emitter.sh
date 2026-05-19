@@ -188,6 +188,9 @@ WORKER_DISCIPLINE_CLASSES = {
     'worker_tick_missing_evidence',
     'worker_optimized_without_profile',
 }
+CROSS_TRACK_CLASSES = {
+    'cross_track_dispatch_collision',
+}
 SECRETS_CLASS_PATTERNS = (
     'secret', 'credential', 'token', 'key_leak', 'token_leak', 'pii_', 'cf_access',
 )
@@ -260,7 +263,8 @@ for cls, data in sorted(class_data.items()):
     lowered = cls.lower()
     is_secrets = any(pattern in lowered for pattern in SECRETS_CLASS_PATTERNS)
     is_worker = cls in WORKER_DISCIPLINE_CLASSES
-    threshold = int('$SECRETS_CLASS_THRESHOLD') if is_secrets else int('$SATURATION_THRESHOLD_DEFAULT')
+    is_cross_track = cls in CROSS_TRACK_CLASSES
+    threshold = int('$SECRETS_CLASS_THRESHOLD') if (is_secrets or is_cross_track) else int('$SATURATION_THRESHOLD_DEFAULT')
     if data['count'] < threshold:
         continue
 
@@ -275,7 +279,7 @@ for cls, data in sorted(class_data.items()):
         'count_in_window': data['count'],
         'window_hours': int('$WINDOW_HOURS'),
         'saturation_threshold': threshold,
-        'class_family': 'worker_discipline' if is_worker else ('secrets' if is_secrets else 'general'),
+        'class_family': 'cross_track_dispatch_collision' if is_cross_track else ('worker_discipline' if is_worker else ('secrets' if is_secrets else 'general')),
         'first_seen': data['first_seen'],
         'last_seen': data['last_seen'],
         'sample_rows': data['samples'],
