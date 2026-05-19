@@ -1,0 +1,15 @@
+schema_version: skillos.auto_push_policy.v1
+enabled: true
+upstream_required: true
+local_ci_gate: true
+gitguardian_gate: true
+post_commit_fire: true
+push_cadence: post-commit
+allowed_branches_regex: "^(main|master|review/.*|arc/.*)$"
+forbidden_branches_regex: "^(private/.*|wip/.*|release/.*|prod/.*|production/.*)$"
+private_paths_blocklist:
+  - ".env"
+  - ".env.*"
+  - "state/secrets/**"
+ledger_path: ".flywheel/runtime/auto-push-ledger.jsonl"
+on_failure: "block_next_commit"

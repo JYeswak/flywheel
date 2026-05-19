@@ -1,0 +1,249 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCHEMA_VERSION="flywheel.auto_push.v0_1"
+REPO="$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)"
+POLICY_PATH="${FLYWHEEL_AUTO_PUSH_POLICY_PATH:-$REPO/.flywheel/auto-push-policy.yaml}"
+DEFAULT_LEDGER="$REPO/.flywheel/runtime/auto-push-ledger.jsonl"
+GITGUARDIAN_GATE="${FLYWHEEL_AUTO_PUSH_GITGUARDIAN_GATE:-$REPO/.flywheel/scripts/gitguardian-pre-push-gate.sh}"
+ACT_BIN="${FLYWHEEL_AUTO_PUSH_ACT_BIN:-act}"
+GIT_BIN="${FLYWHEEL_AUTO_PUSH_GIT_BIN:-git}"
+REMOTE="${FLYWHEEL_AUTO_PUSH_REMOTE:-origin}"
+SOURCE="manual"
+DRY_RUN=0
+JSON_OUT=0
+SINCE=""
+
+ENABLED="true"
+UPSTREAM_REQUIRED="true"
+LOCAL_CI_GATE="true"
+GITGUARDIAN_GATE_ENABLED="true"
+POST_COMMIT_FIRE="true"
+PUSH_CADENCE="post-commit"
+ALLOWED_BRANCHES_REGEX=""
+FORBIDDEN_BRANCHES_REGEX=""
+LEDGER_PATH="$DEFAULT_LEDGER"
+ON_FAILURE="block_next_commit"
+PRIVATE_BLOCKLIST=()
+
+usage() {
+  cat <<'USAGE'
+Usage: auto-push.sh [--json] [--dry-run] [--source NAME] [--since DURATION]
+
+Dogfood adoption of the SkillOS auto-push v0.1 substrate for flywheel:
+clean-tree gate, branch policy, local act CI, GitGuardian Tier 4.5, then push.
+USAGE
+}
+
+trim() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "$value"
+}
+
+strip_quotes() {
+  local value="$1"
+  if [[ "$value" == \"*\" && "$value" == *\" ]]; then
+    value="${value#\"}"
+    value="${value%\"}"
+  elif [[ "$value" == \'*\' && "$value" == *\' ]]; then
+    value="${value#\'}"
+    value="${value%\'}"
+  fi
+  printf '%s' "$value"
+}
+
+load_policy() {
+  [[ -f "$POLICY_PATH" ]] || return 0
+  local line key value in_blocklist=0 item
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line%%#*}"
+    [[ -n "$(trim "$line")" ]] || continue
+    if [[ "$line" =~ ^[[:space:]]*private_paths_blocklist[[:space:]]*:[[:space:]]*$ ]]; then
+      in_blocklist=1
+      continue
+    fi
+    if [[ "$in_blocklist" -eq 1 && "$line" =~ ^[[:space:]]*-[[:space:]]*(.*)$ ]]; then
+      item="$(strip_quotes "$(trim "${BASH_REMATCH[1]}")")"
+      [[ -n "$item" ]] && PRIVATE_BLOCKLIST+=("$item")
+      continue
+    fi
+    in_blocklist=0
+    [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_-]*)[[:space:]]*:[[:space:]]*(.*)$ ]] || continue
+    key="${BASH_REMATCH[1]//-/_}"
+    value="$(strip_quotes "$(trim "${BASH_REMATCH[2]}")")"
+    case "$key" in
+      enabled) ENABLED="$value" ;;
+      upstream_required) UPSTREAM_REQUIRED="$value" ;;
+      local_ci_gate) LOCAL_CI_GATE="$value" ;;
+      gitguardian_gate) GITGUARDIAN_GATE_ENABLED="$value" ;;
+      post_commit_fire) POST_COMMIT_FIRE="$value" ;;
+      push_cadence) PUSH_CADENCE="$value" ;;
+      allowed_branches_regex) ALLOWED_BRANCHES_REGEX="$value" ;;
+      forbidden_branches_regex) FORBIDDEN_BRANCHES_REGEX="$value" ;;
+      ledger_path) LEDGER_PATH="$value" ;;
+      on_failure) ON_FAILURE="$value" ;;
+    esac
+  done <"$POLICY_PATH"
+  [[ "$LEDGER_PATH" = /* ]] || LEDGER_PATH="$REPO/$LEDGER_PATH"
+}
+
+iso_now() { date -u '+%Y-%m-%dT%H:%M:%SZ'; }
+
+current_commit() { "$GIT_BIN" -C "$REPO" rev-parse HEAD 2>/dev/null || printf 'unknown'; }
+
+current_branch() {
+  "$GIT_BIN" -C "$REPO" rev-parse --abbrev-ref HEAD 2>/dev/null || printf 'unknown'
+}
+
+upstream_ref() {
+  "$GIT_BIN" -C "$REPO" rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' 2>/dev/null || true
+}
+
+append_ledger() {
+  local status="$1" reason="$2" exit_code="$3" push_attempted="$4" push_success="$5" local_ci="$6" gitguardian="$7"
+  mkdir -p "$(dirname "$LEDGER_PATH")"
+  jq -nc \
+    --arg schema "$SCHEMA_VERSION" \
+    --arg ts "$(iso_now)" \
+    --arg source "$SOURCE" \
+    --arg repo "$REPO" \
+    --arg commit "$(current_commit)" \
+    --arg branch "$(current_branch)" \
+    --arg upstream "$(upstream_ref)" \
+    --arg status "$status" \
+    --arg reason "$reason" \
+    --arg local_ci_status "$local_ci" \
+    --arg gitguardian_status "$gitguardian" \
+    --arg push_cadence "$PUSH_CADENCE" \
+    --arg on_failure "$ON_FAILURE" \
+    --arg since "$SINCE" \
+    --argjson exit_code "$exit_code" \
+    --argjson dry_run "$DRY_RUN" \
+    --argjson push_attempted "$push_attempted" \
+    --argjson push_success "$push_success" \
+    '{schema_version:$schema,ts:$ts,source:$source,repo:$repo,commit:$commit,branch:$branch,upstream:$upstream,status:$status,reason:$reason,exit_code:$exit_code,dry_run:$dry_run,push_attempted:$push_attempted,push_success:$push_success,local_ci_status:$local_ci_status,gitguardian_status:$gitguardian_status,push_cadence:$push_cadence,on_failure:$on_failure,since:$since}' >>"$LEDGER_PATH"
+}
+
+emit() {
+  local status="$1" reason="$2" exit_code="$3" push_attempted="$4" push_success="$5" local_ci="$6" gitguardian="$7"
+  append_ledger "$status" "$reason" "$exit_code" "$push_attempted" "$push_success" "$local_ci" "$gitguardian"
+  if [[ "$JSON_OUT" -eq 1 ]]; then
+    tail -1 "$LEDGER_PATH"
+  else
+    printf 'auto-push status=%s reason=%s push_attempted=%s\n' "$status" "$reason" "$push_attempted"
+  fi
+  exit "$exit_code"
+}
+
+run_local_ci_gate() {
+  [[ "$LOCAL_CI_GATE" == "true" ]] || { printf 'skipped'; return 0; }
+  if ! command -v "$ACT_BIN" >/dev/null 2>&1; then
+    printf 'act_missing'
+    return 20
+  fi
+  if [[ ! -f "$REPO/.github/workflows/ci.yml" ]]; then
+    printf 'ci_workflow_missing'
+    return 21
+  fi
+  if "$ACT_BIN" -W "$REPO/.github/workflows/ci.yml" --container-daemon-socket /var/run/docker.sock >/dev/null 2>&1; then
+    printf 'pass'
+    return 0
+  fi
+  printf 'failed'
+  return 22
+}
+
+run_gitguardian_gate() {
+  [[ "$GITGUARDIAN_GATE_ENABLED" == "true" ]] || { printf 'skipped'; return 0; }
+  if [[ ! -x "$GITGUARDIAN_GATE" ]]; then
+    printf 'gate_missing'
+    return 30
+  fi
+  if "$GITGUARDIAN_GATE" --json --repo "$REPO" --mode commit-range >/dev/null; then
+    printf 'pass'
+    return 0
+  fi
+  printf 'blocked'
+  return 31
+}
+
+glob_to_regex() {
+  local glob="$1"
+  glob="${glob//./\\.}"
+  glob="${glob//\*\*/.*}"
+  glob="${glob//\*/[^/]*}"
+  printf '^%s$' "$glob"
+}
+
+private_path_blocked() {
+  [[ "${#PRIVATE_BLOCKLIST[@]}" -gt 0 ]] || return 1
+  local range path pattern regex
+  range="$(upstream_ref)"
+  [[ -n "$range" ]] || return 1
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    for pattern in "${PRIVATE_BLOCKLIST[@]}"; do
+      regex="$(glob_to_regex "$pattern")"
+      [[ "$path" =~ $regex ]] && return 0
+    done
+  done < <("$GIT_BIN" -C "$REPO" diff --name-only "$range"..HEAD 2>/dev/null || true)
+  return 1
+}
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --json) JSON_OUT=1; shift ;;
+    --dry-run) DRY_RUN=1; shift ;;
+    --source) SOURCE="${2:-}"; shift 2 ;;
+    --source=*) SOURCE="${1#--source=}"; shift ;;
+    --since) SINCE="${2:-}"; shift 2 ;;
+    --since=*) SINCE="${1#--since=}"; shift ;;
+    --help|-h) usage; exit 0 ;;
+    *) shift ;;
+  esac
+done
+
+load_policy
+
+[[ "$ENABLED" == "true" ]] || emit clean policy_disabled 0 false false skipped skipped
+[[ "$SOURCE" != "post-commit" || "$POST_COMMIT_FIRE" == "true" ]] || emit clean post_commit_disabled 0 false false skipped skipped
+
+unmerged="$("$GIT_BIN" -C "$REPO" ls-files -u 2>&1)"
+[[ -z "$unmerged" ]] || emit blocked unmerged_paths 10 false false skipped skipped
+[[ ! -f "$REPO/.git/MERGE_HEAD" && ! -d "$REPO/.git/rebase-merge" && ! -d "$REPO/.git/rebase-apply" ]] || emit blocked git_operation_in_progress 11 false false skipped skipped
+status_out="$("$GIT_BIN" -C "$REPO" status --porcelain 2>&1)"
+[[ -z "$status_out" ]] || emit blocked dirty_tree 12 false false skipped skipped
+
+branch="$(current_branch)"
+[[ "$branch" != "HEAD" && -n "$branch" ]] || emit blocked detached_head 13 false false skipped skipped
+if [[ "$UPSTREAM_REQUIRED" != "false" && -z "$(upstream_ref)" ]]; then
+  emit blocked upstream_missing 14 false false skipped skipped
+fi
+if [[ -n "$FORBIDDEN_BRANCHES_REGEX" && "$branch" =~ $FORBIDDEN_BRANCHES_REGEX ]]; then
+  emit blocked forbidden_branch 15 false false skipped skipped
+fi
+if [[ -n "$ALLOWED_BRANCHES_REGEX" && ! "$branch" =~ $ALLOWED_BRANCHES_REGEX ]]; then
+  emit blocked branch_not_allowed 16 false false skipped skipped
+fi
+if private_path_blocked; then
+  emit blocked private_path_blocked 17 false false skipped skipped
+fi
+
+local_ci_status="$(run_local_ci_gate)" || local_ci_rc=$?
+local_ci_rc="${local_ci_rc:-0}"
+[[ "$local_ci_rc" -eq 0 ]] || emit blocked "local_ci_${local_ci_status}" "$local_ci_rc" false false "$local_ci_status" skipped
+
+gitguardian_status="$(run_gitguardian_gate)" || gitguardian_rc=$?
+gitguardian_rc="${gitguardian_rc:-0}"
+[[ "$gitguardian_rc" -eq 0 ]] || emit blocked "gitguardian_${gitguardian_status}" "$gitguardian_rc" false false "$local_ci_status" "$gitguardian_status"
+
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  emit clean dry_run 0 false false "$local_ci_status" "$gitguardian_status"
+fi
+
+if "$GIT_BIN" -C "$REPO" push "$REMOTE" "$branch" >/dev/null 2>&1; then
+  emit clean pushed 0 true true "$local_ci_status" "$gitguardian_status"
+fi
+emit blocked push_failed 40 true false "$local_ci_status" "$gitguardian_status"
