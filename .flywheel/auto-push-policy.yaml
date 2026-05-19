@@ -3,6 +3,7 @@ enabled: true
 upstream_required: true
 local_ci_gate: true
 gitguardian_gate: true
+supabase_rls_gate: true
 post_commit_fire: true
 push_cadence: post-commit
 allowed_branches_regex: "^(main|master|review/.*|arc/.*)$"

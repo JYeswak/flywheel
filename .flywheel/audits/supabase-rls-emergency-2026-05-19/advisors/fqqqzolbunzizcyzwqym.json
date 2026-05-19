@@ -1,0 +1,1353 @@
+{
+  "lints": [
+    {
+      "name": "function_search_path_mutable",
+      "title": "Function Search Path Mutable",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects functions where the search_path parameter is not set.",
+      "detail": "Function \\`public.execute_contact_merge\\` has a role mutable search_path",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable",
+      "metadata": {
+        "name": "execute_contact_merge",
+        "type": "function",
+        "schema": "public"
+      },
+      "cache_key": "function_search_path_mutable_public_execute_contact_merge_1abb6a106a2550b626814607e8c594ed"
+    },
+    {
+      "name": "function_search_path_mutable",
+      "title": "Function Search Path Mutable",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects functions where the search_path parameter is not set.",
+      "detail": "Function \\`public.resurface_dismissed_clusters\\` has a role mutable search_path",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable",
+      "metadata": {
+        "name": "resurface_dismissed_clusters",
+        "type": "function",
+        "schema": "public"
+      },
+      "cache_key": "function_search_path_mutable_public_resurface_dismissed_clusters_50385bcc464efd1f626c6465def1eebc"
+    },
+    {
+      "name": "function_search_path_mutable",
+      "title": "Function Search Path Mutable",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects functions where the search_path parameter is not set.",
+      "detail": "Function \\`public.alps_update_organizations_updated_at\\` has a role mutable search_path",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable",
+      "metadata": {
+        "name": "alps_update_organizations_updated_at",
+        "type": "function",
+        "schema": "public"
+      },
+      "cache_key": "function_search_path_mutable_public_alps_update_organizations_updated_at_ef6b2d76360a727c9d6479352655b7ba"
+    },
+    {
+      "name": "function_search_path_mutable",
+      "title": "Function Search Path Mutable",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects functions where the search_path parameter is not set.",
+      "detail": "Function \\`public.alps_update_updated_at\\` has a role mutable search_path",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0011_function_search_path_mutable",
+      "metadata": {
+        "name": "alps_update_updated_at",
+        "type": "function",
+        "schema": "public"
+      },
+      "cache_key": "function_search_path_mutable_public_alps_update_updated_at_ef6b2d76360a727c9d6479352655b7ba"
+    },
+    {
+      "name": "extension_in_public",
+      "title": "Extension in Public",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects extensions installed in the \\`public\\` schema.",
+      "detail": "Extension \\`pgaudit\\` is installed in the public schema. Move it to another schema.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0014_extension_in_public",
+      "metadata": {
+        "name": "pgaudit",
+        "type": "extension",
+        "schema": "public"
+      },
+      "cache_key": "extension_in_public_pgaudit"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_audit_log` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_audit_log",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_audit_log"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_chat_messages` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_chat_messages",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_chat_messages"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_chat_sessions` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_chat_sessions",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_chat_sessions"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_config_versions` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_config_versions",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_config_versions"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_connectors` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_connectors",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_connectors"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_contact_analysis` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_contact_analysis",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_contact_analysis"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_contact_cache` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_contact_cache",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_contact_cache"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_deal_analysis` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_deal_analysis",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_deal_analysis"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_duplicate_clusters` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_duplicate_clusters",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_duplicate_clusters"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_embedding_queue` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_embedding_queue",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_embedding_queue"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_field_mappings` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_field_mappings",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_field_mappings"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_flag_timeline` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_flag_timeline",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_flag_timeline"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_hubspot_analysis_runs` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_hubspot_analysis_runs",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_hubspot_analysis_runs"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_integration_analysis` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_integration_analysis",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_integration_analysis"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_knowledge_documents` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_knowledge_documents",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_knowledge_documents"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_lookup_rows` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_lookup_rows",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_lookup_rows"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_lookup_tables` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_lookup_tables",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_lookup_tables"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_merge_audit` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_merge_audit",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_merge_audit"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_notification_configs` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_notification_configs",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_notification_configs"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_platform_users` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_platform_users",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_platform_users"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_red_flags` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_red_flags",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_red_flags"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_sync_batches` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_sync_batches",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_sync_batches"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_sync_configs` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_sync_configs",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_sync_configs"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_sync_history` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_sync_history",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_sync_history"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_sync_queue` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_sync_queue",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_sync_queue"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_sync_step_log` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_sync_step_log",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_sync_step_log"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_ticket_analysis` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_ticket_analysis",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_ticket_analysis"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_transforms` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_transforms",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_transforms"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.alps_workflow_analysis` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "alps_workflow_analysis",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_alps_workflow_analysis"
+    },
+    {
+      "name": "pg_graphql_anon_table_exposed",
+      "title": "Public Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to anyone using your public anon key. Revoke `SELECT` from `anon` for objects that should not be discoverable before sign-in, and check lint 0027 for the matching signed-in-user exposure.",
+      "detail": "table `public.organizations` is visible in the GraphQL schema because the `anon` role can `SELECT` it. Revoke `SELECT` from `anon` if it should not be discoverable without signing in.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0026_pg_graphql_anon_table_exposed",
+      "metadata": {
+        "name": "organizations",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_anon_table_exposed_public_organizations"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_audit_log` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_audit_log",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_audit_log"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_chat_messages` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_chat_messages",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_chat_messages"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_chat_sessions` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_chat_sessions",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_chat_sessions"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_config_versions` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_config_versions",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_config_versions"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_connectors` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_connectors",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_connectors"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_contact_analysis` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_contact_analysis",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_contact_analysis"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_contact_cache` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_contact_cache",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_contact_cache"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_deal_analysis` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_deal_analysis",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_deal_analysis"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_duplicate_clusters` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_duplicate_clusters",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_duplicate_clusters"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_embedding_queue` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_embedding_queue",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_embedding_queue"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_field_mappings` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_field_mappings",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_field_mappings"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_flag_timeline` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_flag_timeline",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_flag_timeline"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_hubspot_analysis_runs` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_hubspot_analysis_runs",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_hubspot_analysis_runs"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_integration_analysis` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_integration_analysis",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_integration_analysis"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_knowledge_documents` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_knowledge_documents",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_knowledge_documents"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_lookup_rows` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_lookup_rows",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_lookup_rows"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_lookup_tables` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_lookup_tables",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_lookup_tables"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_merge_audit` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_merge_audit",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_merge_audit"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_notification_configs` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_notification_configs",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_notification_configs"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_platform_users` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_platform_users",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_platform_users"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_red_flags` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_red_flags",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_red_flags"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_sync_batches` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_sync_batches",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_sync_batches"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_sync_configs` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_sync_configs",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_sync_configs"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_sync_history` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_sync_history",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_sync_history"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_sync_queue` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_sync_queue",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_sync_queue"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_sync_step_log` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_sync_step_log",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_sync_step_log"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_ticket_analysis` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_ticket_analysis",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_ticket_analysis"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_transforms` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_transforms",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_transforms"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.alps_workflow_analysis` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "alps_workflow_analysis",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_alps_workflow_analysis"
+    },
+    {
+      "name": "pg_graphql_authenticated_table_exposed",
+      "title": "Signed-In Users Can See Object in GraphQL Schema",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects tables, views, materialized views, and foreign tables that are visible in the GraphQL schema to signed-in users. Revoke `SELECT` from `authenticated` for objects that signed-in users should not discover, and check lint 0026 for the matching public exposure.",
+      "detail": "table `public.organizations` is visible in the GraphQL schema to signed-in users because the `authenticated` role can `SELECT` it. Revoke `SELECT` from `authenticated` if it should not be discoverable to every account.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0027_pg_graphql_authenticated_table_exposed",
+      "metadata": {
+        "name": "organizations",
+        "type": "table",
+        "schema": "public"
+      },
+      "cache_key": "pg_graphql_authenticated_table_exposed_public_organizations"
+    },
+    {
+      "name": "anon_security_definer_function_executable",
+      "title": "Public Can Execute SECURITY DEFINER Function",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects `SECURITY DEFINER` functions that are callable without signing in. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if it is not meant to be public.",
+      "detail": "Function `public.execute_contact_merge(p_cluster_id uuid, p_winner_contact_id uuid, p_loser_contact_ids uuid[], p_field_selections jsonb, p_merged_by uuid, p_organization_id uuid)` can be executed by the `anon` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/execute_contact_merge`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable",
+      "metadata": {
+        "name": "execute_contact_merge",
+        "schema": "public",
+        "language": "plpgsql",
+        "arguments": "p_cluster_id uuid, p_winner_contact_id uuid, p_loser_contact_ids uuid[], p_field_selections jsonb, p_merged_by uuid, p_organization_id uuid",
+        "security_definer": true
+      },
+      "cache_key": "anon_security_definer_function_executable_public_execute_contact_merge_p_cluster_id uuid, p_winner_contact_id uuid, p_loser_contact_ids uuid[], p_field_selections jsonb, p_merged_by uuid, p_organization_id uuid"
+    },
+    {
+      "name": "anon_security_definer_function_executable",
+      "title": "Public Can Execute SECURITY DEFINER Function",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects `SECURITY DEFINER` functions that are callable without signing in. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if it is not meant to be public.",
+      "detail": "Function `public.pgaudit_ddl_command_end()` can be executed by the `anon` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/pgaudit_ddl_command_end`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable",
+      "metadata": {
+        "name": "pgaudit_ddl_command_end",
+        "schema": "public",
+        "language": "c",
+        "arguments": "",
+        "security_definer": true
+      },
+      "cache_key": "anon_security_definer_function_executable_public_pgaudit_ddl_command_end_"
+    },
+    {
+      "name": "anon_security_definer_function_executable",
+      "title": "Public Can Execute SECURITY DEFINER Function",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects `SECURITY DEFINER` functions that are callable without signing in. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if it is not meant to be public.",
+      "detail": "Function `public.pgaudit_sql_drop()` can be executed by the `anon` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/pgaudit_sql_drop`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable",
+      "metadata": {
+        "name": "pgaudit_sql_drop",
+        "schema": "public",
+        "language": "c",
+        "arguments": "",
+        "security_definer": true
+      },
+      "cache_key": "anon_security_definer_function_executable_public_pgaudit_sql_drop_"
+    },
+    {
+      "name": "anon_security_definer_function_executable",
+      "title": "Public Can Execute SECURITY DEFINER Function",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects `SECURITY DEFINER` functions that are callable without signing in. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if it is not meant to be public.",
+      "detail": "Function `public.resurface_dismissed_clusters()` can be executed by the `anon` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/resurface_dismissed_clusters`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable",
+      "metadata": {
+        "name": "resurface_dismissed_clusters",
+        "schema": "public",
+        "language": "plpgsql",
+        "arguments": "",
+        "security_definer": true
+      },
+      "cache_key": "anon_security_definer_function_executable_public_resurface_dismissed_clusters_"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "title": "Signed-In Users Can Execute SECURITY DEFINER Function",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects `SECURITY DEFINER` functions that are callable by signed-in users. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if signed-in users should not call it.",
+      "detail": "Function `public.execute_contact_merge(p_cluster_id uuid, p_winner_contact_id uuid, p_loser_contact_ids uuid[], p_field_selections jsonb, p_merged_by uuid, p_organization_id uuid)` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/execute_contact_merge`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable",
+      "metadata": {
+        "name": "execute_contact_merge",
+        "schema": "public",
+        "language": "plpgsql",
+        "arguments": "p_cluster_id uuid, p_winner_contact_id uuid, p_loser_contact_ids uuid[], p_field_selections jsonb, p_merged_by uuid, p_organization_id uuid",
+        "security_definer": true
+      },
+      "cache_key": "authenticated_security_definer_function_executable_public_execute_contact_merge_p_cluster_id uuid, p_winner_contact_id uuid, p_loser_contact_ids uuid[], p_field_selections jsonb, p_merged_by uuid, p_organization_id uuid"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "title": "Signed-In Users Can Execute SECURITY DEFINER Function",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects `SECURITY DEFINER` functions that are callable by signed-in users. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if signed-in users should not call it.",
+      "detail": "Function `public.pgaudit_ddl_command_end()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/pgaudit_ddl_command_end`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable",
+      "metadata": {
+        "name": "pgaudit_ddl_command_end",
+        "schema": "public",
+        "language": "c",
+        "arguments": "",
+        "security_definer": true
+      },
+      "cache_key": "authenticated_security_definer_function_executable_public_pgaudit_ddl_command_end_"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "title": "Signed-In Users Can Execute SECURITY DEFINER Function",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects `SECURITY DEFINER` functions that are callable by signed-in users. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if signed-in users should not call it.",
+      "detail": "Function `public.pgaudit_sql_drop()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/pgaudit_sql_drop`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable",
+      "metadata": {
+        "name": "pgaudit_sql_drop",
+        "schema": "public",
+        "language": "c",
+        "arguments": "",
+        "security_definer": true
+      },
+      "cache_key": "authenticated_security_definer_function_executable_public_pgaudit_sql_drop_"
+    },
+    {
+      "name": "authenticated_security_definer_function_executable",
+      "title": "Signed-In Users Can Execute SECURITY DEFINER Function",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Detects `SECURITY DEFINER` functions that are callable by signed-in users. Revoke `EXECUTE`, switch the function to `SECURITY INVOKER`, or move it out of your exposed API schema if signed-in users should not call it.",
+      "detail": "Function `public.resurface_dismissed_clusters()` can be executed by the `authenticated` role as a `SECURITY DEFINER` function via `/rest/v1/rpc/resurface_dismissed_clusters`. Revoke `EXECUTE` or switch it to `SECURITY INVOKER` if that is not intentional.",
+      "remediation": "https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable",
+      "metadata": {
+        "name": "resurface_dismissed_clusters",
+        "schema": "public",
+        "language": "plpgsql",
+        "arguments": "",
+        "security_definer": true
+      },
+      "cache_key": "authenticated_security_definer_function_executable_public_resurface_dismissed_clusters_"
+    },
+    {
+      "name": "auth_leaked_password_protection",
+      "title": "Leaked Password Protection Disabled",
+      "level": "WARN",
+      "facing": "EXTERNAL",
+      "categories": [
+        "SECURITY"
+      ],
+      "description": "Leaked password protection is currently disabled.",
+      "detail": "Supabase Auth prevents the use of compromised passwords by checking against HaveIBeenPwned.org. Enable this feature to enhance security.",
+      "cache_key": "auth_leaked_password_protection",
+      "remediation": "https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection",
+      "metadata": {
+        "type": "auth",
+        "entity": "Auth"
+      }
+    }
+  ],
+  "project_ref": "fqqqzolbunzizcyzwqym",
+  "project_name": "Alps"
+}

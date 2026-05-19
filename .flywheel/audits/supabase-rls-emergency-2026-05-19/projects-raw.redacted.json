@@ -1,0 +1,51 @@
+[
+  {
+    "id": "xkrdwuqmhazpiqjlslql",
+    "ref": "xkrdwuqmhazpiqjlslql",
+    "name": "clutter-free-spaces",
+    "status": "ACTIVE_HEALTHY",
+    "region": "us-east-1"
+  },
+  {
+    "id": "hsmyagcerajgjmlljtmx",
+    "ref": "hsmyagcerajgjmlljtmx",
+    "name": "ZestStream",
+    "status": "ACTIVE_HEALTHY",
+    "region": "us-west-1"
+  },
+  {
+    "id": "fqqqzolbunzizcyzwqym",
+    "ref": "fqqqzolbunzizcyzwqym",
+    "name": "Alps",
+    "status": "ACTIVE_HEALTHY",
+    "region": "us-west-2"
+  },
+  {
+    "id": "raplebkihswfnqrkivij",
+    "ref": "raplebkihswfnqrkivij",
+    "name": "alps-staging",
+    "status": "ACTIVE_HEALTHY",
+    "region": "us-west-2"
+  },
+  {
+    "id": "nwwovaoscsgeevqrcwhb",
+    "ref": "nwwovaoscsgeevqrcwhb",
+    "name": "alps-insurance-staging",
+    "status": "ACTIVE_HEALTHY",
+    "region": "us-west-1"
+  },
+  {
+    "id": "fimctnbuzqnvfdgswhqt",
+    "ref": "fimctnbuzqnvfdgswhqt",
+    "name": "alps-insurance-prod",
+    "status": "ACTIVE_HEALTHY",
+    "region": "us-west-1"
+  },
+  {
+    "id": "bsvatvfsqblsibblzlij",
+    "ref": "bsvatvfsqblsibblzlij",
+    "name": "mobile-eats-dev",
+    "status": "ACTIVE_HEALTHY",
+    "region": "us-west-1"
+  }
+]
