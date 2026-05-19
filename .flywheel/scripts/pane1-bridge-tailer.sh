@@ -79,13 +79,28 @@ def callback_key(raw):
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
-def is_done_callback(row):
+TERMINAL_STATES = {"DONE", "BLOCKED", "DECLINED"}
+DONE_ALIASES = {"DONE", "PASS", "PASSED"}
+TRANSIENT_STATES = {"STARTED", "ACK", "IN_PROGRESS"}
+
+
+def terminal_state(row):
     status = str(row.get("status", "")).upper()
+    if status in DONE_ALIASES:
+        return "DONE"
+    if status in {"BLOCKED", "DECLINED"}:
+        return status
+    if status in TRANSIENT_STATES:
+        return None
+    return None
+
+
+def is_terminal_callback(row):
     return (
         row.get("schema_version") == "callback-envelope/v1"
         and row.get("event") == "worker_callback"
         and row.get("mode") == "goal"
-        and status in {"DONE", "PASS", "PASSED"}
+        and terminal_state(row) in TERMINAL_STATES
     )
 
 
@@ -100,6 +115,21 @@ def split_list(value):
 def sprint_message(row):
     sprint = row.get("sprint_id") or row.get("goal_id") or "unknown"
     task = row.get("task_id") or row.get("bead") or sprint
+    state = terminal_state(row) or "DONE"
+    evidence = row.get("evidence", "unknown")
+    if state == "BLOCKED":
+        stop_reason = (
+            row.get("stop_reason")
+            or row.get("reason")
+            or row.get("blocker")
+            or row.get("failure_class")
+            or row.get("gaps")
+            or "unknown"
+        )
+        return f"SPRINT BLOCKED: sprint={sprint} stop_reason={stop_reason} evidence={evidence} task={task}"
+    if state == "DECLINED":
+        declined_reason = row.get("declined_reason") or row.get("reason") or row.get("gaps") or "unknown"
+        return f"SPRINT DECLINED: sprint={sprint} declined_reason={declined_reason} task={task}"
     return (
         f"SPRINT DONE: sprint={sprint} task={task} "
         f"picks_completed={row.get('picks_completed', 'unknown')} "
@@ -108,7 +138,7 @@ def sprint_message(row):
         f"total_work_time={row.get('total_work_time', 'unknown')} "
         f"commit={row.get('commit', 'unknown')} "
         f"tests={row.get('tests', 'unknown')} "
-        f"evidence={row.get('evidence', 'unknown')}"
+        f"evidence={evidence}"
     )
 
 
@@ -168,6 +198,7 @@ def run_ntm(args, session, message, fallback=False):
 
 def build_ledger_entry(args, row, key, message, proc, start, attempt_n, retry_reason, fallback=False):
     session = row.get("session") or args.session
+    state = terminal_state(row)
     return {
         "schema_version": LEDGER_SCHEMA,
         "event": "pane1_sprint_complete_bridge",
@@ -179,6 +210,8 @@ def build_ledger_entry(args, row, key, message, proc, start, attempt_n, retry_re
         "pane": str(args.pane),
         "sprint_id": row.get("sprint_id"),
         "task_id": row.get("task_id"),
+        "callback_status": str(row.get("status", "")).upper(),
+        "terminal_state": state,
         "message": message,
         "attempt_n": attempt_n,
         "retry_reason": retry_reason,
@@ -194,6 +227,7 @@ def build_ledger_entry(args, row, key, message, proc, start, attempt_n, retry_re
 def emit_send(args, row, raw, key):
     session = row.get("session") or args.session
     message = sprint_message(row)
+    state = terminal_state(row)
     start = time.time()
     if args.record_only:
         entry = {
@@ -208,6 +242,8 @@ def emit_send(args, row, raw, key):
             "pane": str(args.pane),
             "sprint_id": row.get("sprint_id"),
             "task_id": row.get("task_id"),
+            "callback_status": str(row.get("status", "")).upper(),
+            "terminal_state": state,
             "message": message,
             "attempt_n": 1,
             "retry_reason": "record_only",
@@ -260,7 +296,7 @@ def eligible_rows(args, seen):
     since = parse_ts(args.since_ts)
     rows = []
     for line_no, raw, row in read_jsonl(args.dispatch_log):
-        if not is_done_callback(row):
+        if not is_terminal_callback(row):
             continue
         key = callback_key(raw)
         if key in seen:
