@@ -1,0 +1,34 @@
+{
+  "schema_version": "skillos.cross_orch_callback.v1",
+  "generated_at": "2026-05-19T16:29:00Z",
+  "source_bead": "skillos-xmp3o",
+  "source_repo": "/Users/josh/Developer/skillos",
+  "target_repo": "/Users/josh/Developer/agent-bench",
+  "target_commit": "54c319c",
+  "handoff": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260519T0721Z-from-flywheel-to-skillos-propagate-mp-to-agent-bench.md",
+  "status": "done",
+  "propagated_mp_count": 70,
+  "adoption_receipt_path": "/Users/josh/Developer/agent-bench/META-PATTERN-ADOPTION.md",
+  "discrepancies_receipt_path": "/Users/josh/Developer/agent-bench/DISCREPANCIES.md",
+  "verifier": {
+    "command": "/Users/josh/Developer/flywheel/.flywheel/scripts/cross-repo-inheritance-audit.sh --json --repo agent-bench=/Users/josh/Developer/agent-bench",
+    "exit_code": 0,
+    "repo": "agent-bench",
+    "present_mp_count": 70,
+    "missing_mp_count": 0,
+    "divergence_count": 0,
+    "meta_pattern_adoption": "PRESENT",
+    "discrepancies": "PRESENT",
+    "next_action": "OK",
+    "status": "OK"
+  },
+  "remaining_handoffs_in_bead": [
+    "alpsinsurance PROPAGATE",
+    "frankensqlite PROPAGATE",
+    "ntm PROPAGATE",
+    "vrtx RECONCILE",
+    "picoz RECONCILE"
+  ],
+  "br_close_executed": false,
+  "br_close_reason": "partial bead progress only; five of six handoffs remain"
+}
