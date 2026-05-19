@@ -152,3 +152,12 @@ threshold not met. Track via fuckup-log if recurs:
 Sister behavioral exemplar (skillos's detector `orch_running: null`
 bug, flagged via Agent Mail letter, bilateral over 6h gate) is part of
 the same class but tracked under skillos's repo.
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-09 — info-source watchtower:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-09-info-source-watchtower.md` for the canonical pattern.
+- **MP-13 — living documentation:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-13-living-documentation.md` for the canonical pattern.
+- **MP-28 — checklist before claim:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-28-checklist-before-claim.md` for the canonical pattern.

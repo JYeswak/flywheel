@@ -162,3 +162,12 @@ should be added to the table as they're discovered.
 - `feedback_naming_convention_distinguishable_ownership` (the WHAT)
 - `feedback_post_wire_or_explain_three_skill_polish_gate` (polish gate; runs scope-masked rename)
 - `project_alps_quintessential_member_2026_05_01` — ALPS-as-quintessential-flywheel-member; ALPS's existence is what teaches us scope-masking
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-09 — info-source watchtower:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-09-info-source-watchtower.md` for the canonical pattern.
+- **MP-13 — living documentation:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-13-living-documentation.md` for the canonical pattern.
+- **MP-28 — checklist before claim:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-28-checklist-before-claim.md` for the canonical pattern.

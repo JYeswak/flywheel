@@ -190,3 +190,12 @@ across workers, harvested into the substrate, no manual leverage per bead.
 - Skill location: this doctrine doc + injector script + meta-class harvest
   bead (xbsd8) form the canonical surface; no standalone skill at
   `~/.claude/skills/` (per option C — auto-injected, not invoke-on-demand)
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-17 — secret emission discipline:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md` for the canonical pattern.
+- **MP-29 — production safety guardrails:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-29-production-safety-guardrails.md` for the canonical pattern.
+- **MP-30 — human-gated invasiveness:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-30-human-gated-invasiveness.md` for the canonical pattern.

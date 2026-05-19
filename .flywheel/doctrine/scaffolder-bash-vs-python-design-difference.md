@@ -135,3 +135,12 @@ The bash scaffolder's refusal envelope (`status:refused reason:non_bash_shebang 
 - `flywheel-vyzza` — this doctrine close-out (deps `eyqo7.1.{1,2,3}` all closed)
 - canonical-cli-scoping skill — the rubric both scaffolders satisfy
 - audit-machinery-hygiene-discipline doctrine — the LIVE/HISTORICAL/DOCTRINE partitioning principle applied per rename
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-17 — secret emission discipline:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md` for the canonical pattern.
+- **MP-29 — production safety guardrails:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-29-production-safety-guardrails.md` for the canonical pattern.
+- **MP-30 — human-gated invasiveness:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-30-human-gated-invasiveness.md` for the canonical pattern.

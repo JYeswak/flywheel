@@ -207,3 +207,12 @@ A 25-year operations manager watching a shift report would not accept "team
 checked in, wrote shift notes, scheduled next check-in" as a productive shift
 when the floor was empty and orders were waiting. The loop's job is to move
 work, not to file paperwork about moving work.
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-09 — info-source watchtower:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-09-info-source-watchtower.md` for the canonical pattern.
+- **MP-13 — living documentation:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-13-living-documentation.md` for the canonical pattern.
+- **MP-28 — checklist before claim:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-28-checklist-before-claim.md` for the canonical pattern.

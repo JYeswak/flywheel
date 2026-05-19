@@ -119,3 +119,12 @@ Trauma-class doctrines escalate to skill at N=3+ recurrences. Current N=2 (this 
 - **Skeptical operator:** "Does this name a concrete failure mode?" Yes — both instances cited with specific 2026-05-11 ts + corrector identity.
 - **Maintainer:** "Can the rule extend to new instances?" Yes — 3-step probe + N=3 promotion path explicit.
 - **Future worker:** "Can I apply this before sending a packet?" Yes — mechanization snippet copy-pasteable.
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-17 — secret emission discipline:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md` for the canonical pattern.
+- **MP-29 — production safety guardrails:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-29-production-safety-guardrails.md` for the canonical pattern.
+- **MP-30 — human-gated invasiveness:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-30-human-gated-invasiveness.md` for the canonical pattern.

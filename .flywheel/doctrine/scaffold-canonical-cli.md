@@ -146,3 +146,12 @@ scaffolder is the 70% solution, the operator is the 30%.
 - bead flywheel-jloib.0c (linter — SHOULD precede; not a hard dep)
 - pilot: `.flywheel/scripts/daily-report-enabled-repos.sh`
 - inventory: `.flywheel/audit/flywheel-cli-inventory/inventory.jsonl` (395 entries)
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-09 — info-source watchtower:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-09-info-source-watchtower.md` for the canonical pattern.
+- **MP-13 — living documentation:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-13-living-documentation.md` for the canonical pattern.
+- **MP-28 — checklist before claim:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-28-checklist-before-claim.md` for the canonical pattern.

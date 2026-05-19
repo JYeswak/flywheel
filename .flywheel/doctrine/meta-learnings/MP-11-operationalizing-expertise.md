@@ -38,3 +38,12 @@ Skill has a `references/methodology/OPERATIONALIZING-EXPERTISE-TRACK-A.md` file 
 # Track A skills MUST reference the 6-level scaffold.
 ls references/methodology/OPERATIONALIZING-EXPERTISE-TRACK-A.md 2>/dev/null || grep -q "Track A" SKILL.md || fail
 ```
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-17 — secret emission discipline:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md` for the canonical pattern.
+- **MP-29 — production safety guardrails:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-29-production-safety-guardrails.md` for the canonical pattern.
+- **MP-30 — human-gated invasiveness:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-30-human-gated-invasiveness.md` for the canonical pattern.

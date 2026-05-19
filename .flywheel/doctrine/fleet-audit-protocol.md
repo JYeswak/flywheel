@@ -26,3 +26,12 @@ Mirror of `/Users/josh/Developer/skillos/.flywheel/doctrine/fleet-audit-protocol
 - Canonical: `/Users/josh/Developer/skillos/.flywheel/doctrine/fleet-audit-protocol.md`
 - First application: `/Users/josh/Developer/skillos/state/jsm-fleet-audit-20260518T2305Z/MANIFEST.md`
 - Sister: `.flywheel/doctrine/audit-machinery-hygiene-discipline.md`
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-04 — receipt-and-callback envelope contract:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-04-receipt-callback-envelope.md` for the canonical pattern.
+- **MP-20 — cross-orch handoff:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-20-cross-orch-handoff.md` for the canonical pattern.
+- **MP-23 — replayable mutation contract:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-23-replayable-mutation-contract.md` for the canonical pattern.

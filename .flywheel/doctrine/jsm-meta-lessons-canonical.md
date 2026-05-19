@@ -114,3 +114,12 @@ Callback: task_id=<id> phase=<phase> tick_class=<class> status=<done|warn|blocke
 - Existing agent-ergonomics baseline: `.flywheel/doctrine/agent-ergonomics-application-baseline-2026-05-08.md`
 - Existing audit-machinery doctrine: `.flywheel/doctrine/audit-machinery-hygiene-discipline.md`
 - Skill sources: `~/.claude/skills/world-class-doctor-mode-for-cli-tools/`, `~/.claude/skills/testing-conformance-harnesses/`, `~/.claude/skills/agent-ergonomics-cli/`, `~/.claude/skills/flywheel-end-to-end/`, `~/.claude/skills/orchestrator-validation-discipline/`, `~/.claude/skills/beads-compliance-and-completion-verification/`.
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-17 — secret emission discipline:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md` for the canonical pattern.
+- **MP-29 — production safety guardrails:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-29-production-safety-guardrails.md` for the canonical pattern.
+- **MP-30 — human-gated invasiveness:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-30-human-gated-invasiveness.md` for the canonical pattern.

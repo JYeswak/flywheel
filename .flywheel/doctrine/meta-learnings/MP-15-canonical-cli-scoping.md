@@ -39,3 +39,12 @@ CLI exposes `doctor` + `health` + `repair` subcommands AND `validate` + `audit` 
 # Top-level CLI binaries MUST expose doctor + health.
 which "$CLI" >/dev/null && "$CLI" doctor --help >/dev/null 2>&1 && "$CLI" health --help >/dev/null 2>&1 || fail
 ```
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-15 — canonical CLI scoping:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-15-canonical-cli-scoping.md` for the canonical pattern.
+- **MP-24 — boundary validation fail-closed:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-24-boundary-validation-fail-closed.md` for the canonical pattern.
+- **MP-27 — exact prompt/output template:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-27-exact-prompt-output-template.md` for the canonical pattern.

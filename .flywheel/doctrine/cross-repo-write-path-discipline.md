@@ -190,3 +190,12 @@ Per `feedback_8_strike_promotion_threshold` / fuckup-log promotion ladder (L56),
 - Sister doctrines cross-referenced reciprocally ✓ (6 cross-refs, with rationale for which require reciprocal back-ref and which don't)
 - `.flywheel/doctrine/README.md` `total_doctrines` frontmatter incremented from 89 to 90 ✓ (catalog auto-materializes via `ls -1 .flywheel/doctrine/*.md`; the count update is the AGENTS-catalog-equivalent surface)
 - AGENTS.md / `.flywheel/AGENTS-CANONICAL.md` rule catalog NOT modified — those catalogs list L-rules (frontmatter-tagged with L-numbers), not doctrines; doctrine catalog is the auto-materialized `.flywheel/doctrine/README.md`. This is the correct AGENTS-catalog surface per L96 (3-surface-diff rule satisfied by: this doctrine + README count + audit evidence pack).
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-17 — secret emission discipline:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md` for the canonical pattern.
+- **MP-29 — production safety guardrails:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-29-production-safety-guardrails.md` for the canonical pattern.
+- **MP-30 — human-gated invasiveness:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-30-human-gated-invasiveness.md` for the canonical pattern.

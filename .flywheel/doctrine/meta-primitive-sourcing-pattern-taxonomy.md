@@ -292,3 +292,12 @@ A META that does not declare its sourcing pattern in package metadata is operati
 - Doctrine authored: skillos:1 2026-05-11T~08:00Z (this file)
 - Mirror target: mobile-eats `/Users/josh/Developer/mobile-eats/.flywheel/doctrine/meta-primitive-sourcing-pattern-taxonomy.md`
 - Schema: `cross-orch-taxonomy-ratification.v1`
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-17 — secret emission discipline:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md` for the canonical pattern.
+- **MP-29 — production safety guardrails:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-29-production-safety-guardrails.md` for the canonical pattern.
+- **MP-30 — human-gated invasiveness:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-30-human-gated-invasiveness.md` for the canonical pattern.
