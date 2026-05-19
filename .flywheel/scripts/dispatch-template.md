@@ -31,6 +31,16 @@ Run as a watcher:
 .flywheel/scripts/pane1-bridge-tailer.sh --repo "$PWD" --follow --json
 ```
 
+## Beads JSONL Auto-Staging
+
+Worker dispatches that run `br` in this repo should resolve it through
+`/Users/josh/.local/bin/br`, which is the flywheel dogfood wrapper
+`.flywheel/scripts/br-stage-wrapper.sh`. Successful mutating Beads commands
+(`create`, `close`, `update`, and `dep`) auto-stage `.beads/issues.jsonl` so the
+worker's final commit can include the Beads mutation without carrying residual
+unrelated dirt. If `command -v br` does not resolve to `/Users/josh/.local/bin/br`,
+run the wrapper explicitly or report `beads_issues_autostage_missing`.
+
 ## Fallback
 
 If the bridge is suspected broken, the worker MUST run the pane-1 notification
