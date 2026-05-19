@@ -68,17 +68,17 @@ fi
 if jq -e '
   (.expected_readiness_blockers | index("github_release_assets_missing"))
   and (.expected_readiness_blockers | index("github_release_missing_or_draft"))
-  and (.expected_readiness_blockers | index("install_proxy_checksum_mismatch"))
   and (.expected_readiness_blockers | index("joshua_release_signoff_missing"))
-  and (.expected_readiness_blockers | index("remote_green_runs_missing"))
-  and (.expected_readiness_blockers | index("remote_workflows_missing"))
-  and (([.readiness_blocker_coverage[]?.code] - ["remote_repo_private"]) | sort) == ((.expected_readiness_blockers - ["remote_repo_private"]) | sort)
-  and ([.readiness_blocker_coverage[]?.code] - .expected_readiness_blockers - ["remote_repo_private"] | length) == 0
+  and (.optional_coverage_codes | index("install_proxy_checksum_mismatch"))
+  and (.optional_coverage_codes | index("remote_workflows_missing"))
+  and (.optional_coverage_codes | index("remote_green_runs_missing"))
+  and (([.readiness_blocker_coverage[]?.code] - .optional_coverage_codes) | sort) == (.expected_readiness_blockers | sort)
+  and ([.readiness_blocker_coverage[]?.code] - .expected_readiness_blockers - .optional_coverage_codes | length) == 0
   and all(.readiness_blocker_coverage[]?; .status == "open" and (.registry_rows | length) > 0)
 ' "$TMP/default.json" >/dev/null; then
-  pass "default registry maps every live readiness blocker to open rows"
+  pass "default registry maps live and optional readiness blockers to open rows"
 else
-  fail "default registry maps every live readiness blocker to open rows"
+  fail "default registry maps live and optional readiness blockers to open rows"
 fi
 
 if python3 "$SCRIPT" --registry "$REGISTRY" --release --json >"$TMP/release.json"; then

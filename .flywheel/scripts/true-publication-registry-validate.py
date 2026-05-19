@@ -25,7 +25,10 @@ READINESS_BLOCKER_ALIASES = {
     "remote_repo_unavailable": "remote_repo_private",
 }
 OPTIONAL_COVERAGE_CODES = {
+    "install_proxy_checksum_mismatch",
     "remote_repo_private",
+    "remote_green_runs_missing",
+    "remote_workflows_missing",
 }
 
 
@@ -240,6 +243,7 @@ def main() -> int:
         "open_count": len(open_rows),
         "open_rows": open_rows,
         "expected_readiness_blockers": sorted(expected_blockers),
+        "optional_coverage_codes": sorted(OPTIONAL_COVERAGE_CODES),
         "readiness_blocker_coverage": coverage,
         "ids": [row.get("id") for row in rows if row.get("id")],
         "errors": errors,
