@@ -298,6 +298,10 @@ scaffold_cmd_validate() {
   local arg="${1:-}"
   local ts; ts="$(iso_now 2>/dev/null || date -u +%Y-%m-%dT%H:%M:%SZ)"
   case "$subject" in
+    -h|--help)
+      scaffold_emit_topic_help validate
+      return 0
+      ;;
     target-path)
       if [[ -z "$arg" ]]; then
         printf 'ERR: validate target-path requires VALUE arg\n' >&2; return 64
@@ -465,9 +469,11 @@ python3 - "$@" <<'PY'
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
+import subprocess
 import time
 from pathlib import Path
 
@@ -584,6 +590,182 @@ def append_payload(target: Path, payload: bytes) -> None:
         os.fsync(handle.fileno())
 
 
+def truthy_env(name: str, default: str = "1") -> bool:
+    return os.environ.get(name, default).strip().lower() not in {"0", "false", "no", "off"}
+
+
+def listify(value) -> list[str]:
+    if value is None or value == "":
+        return []
+    if isinstance(value, list):
+        return [str(item) for item in value if str(item)]
+    return [part for part in (str(value).replace(",", " ").split()) if part]
+
+
+def nested(row: dict, *keys):
+    cur = row
+    for key in keys:
+        if not isinstance(cur, dict):
+            return None
+        cur = cur.get(key)
+    return cur
+
+
+def compact_join(values: list[str], fallback: str = "none") -> str:
+    return ",".join(values) if values else fallback
+
+
+def append_jsonl(path: Path, row: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n")
+
+
+def ledger_contains(path: Path, key: str) -> bool:
+    if not path.exists():
+        return False
+    try:
+        with path.open("r", encoding="utf-8") as handle:
+            for line in handle:
+                if f'"callback_key":"{key}"' in line:
+                    return True
+    except OSError:
+        return False
+    return False
+
+
+def maybe_emit_pane1_sprint_complete(target: Path, payload: bytes) -> dict | None:
+    if not truthy_env("FLYWHEEL_PANE1_SPRINT_CALLBACK_ENABLED", "1"):
+        return None
+    if target.name != "dispatch-log.jsonl":
+        return None
+    try:
+        row = json.loads(payload.decode("utf-8").strip())
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return None
+    if not isinstance(row, dict):
+        return None
+    if row.get("schema_version") != "callback-envelope/v1":
+        return None
+    if row.get("mode") != "goal":
+        return None
+    status = str(row.get("status") or row.get("callback_status") or "").upper()
+    if status not in {"DONE", "PASS", "PASSED"}:
+        return None
+
+    callback_key = hashlib.sha256(payload.strip()).hexdigest()
+    ledger = Path(os.environ.get(
+        "FLYWHEEL_PANE1_SPRINT_CALLBACK_LEDGER",
+        str(target.parent / "runtime" / "pane1-sprint-complete-bridge.jsonl"),
+    )).expanduser().resolve(strict=False)
+    if ledger_contains(ledger, callback_key):
+        return {
+            "name": "pane1_sprint_complete_bridge",
+            "status": "skipped",
+            "reason": "duplicate_callback_key",
+            "callback_key": callback_key,
+            "ledger": str(ledger),
+        }
+
+    task_id = str(row.get("task_id") or row.get("bead") or "unknown")
+    beads_closed = listify(row.get("beads_closed") or row.get("bead_ids_closed") or nested(row, "details", "beads_closed"))
+    if not beads_closed:
+        bead = str(row.get("bead") or "")
+        if bead:
+            beads_closed = [bead]
+        elif task_id.startswith("flywheel-"):
+            beads_closed = [task_id]
+    followups = listify(
+        row.get("followup_beads")
+        or row.get("follow_up_beads")
+        or row.get("followups")
+        or nested(row, "details", "followup_beads")
+        or nested(row, "details", "follow_up_beads")
+    )
+    evidence = listify(row.get("evidence") or row.get("evidence_paths") or nested(row, "details", "evidence") or nested(row, "details", "evidence_paths"))
+    picks_value = row.get("picks_completed") or nested(row, "details", "picks_completed")
+    if picks_value in (None, ""):
+        picks_value = len(beads_closed) if beads_closed else 1
+    total_work_time = (
+        row.get("total_work_time")
+        or row.get("total_work_time_seconds")
+        or row.get("work_time")
+        or nested(row, "details", "total_work_time")
+        or "unknown"
+    )
+    tests = str(row.get("tests") or nested(row, "details", "tests") or "unknown")
+    commit = str(row.get("commit") or "unknown")
+    sprint_id = str(row.get("sprint_id") or row.get("goal_id") or task_id)
+    session = os.environ.get("FLYWHEEL_PANE1_SPRINT_CALLBACK_SESSION") or str(row.get("session") or "flywheel")
+    pane = os.environ.get("FLYWHEEL_PANE1_SPRINT_CALLBACK_PANE", "1")
+    ntm = os.environ.get("FLYWHEEL_PANE1_SPRINT_CALLBACK_NTM") or os.environ.get("NTM") or "/Users/josh/.local/bin/ntm"
+    timeout_seconds = int(os.environ.get("FLYWHEEL_PANE1_SPRINT_CALLBACK_TIMEOUT_SECONDS", "60"))
+    message = (
+        f"SPRINT DONE: sprint={sprint_id} task={task_id} picks_completed={picks_value} "
+        f"beads_closed={compact_join(beads_closed)} followups={compact_join(followups)} "
+        f"total_work_time={total_work_time} commit={commit} tests={tests} "
+        f"evidence={compact_join(evidence)}"
+    )
+
+    started = time.monotonic()
+    ledger_row = {
+        "schema_version": "pane1-sprint-complete-bridge/v1",
+        "ts": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "event": "pane1_sprint_complete_bridge",
+        "callback_key": callback_key,
+        "session": session,
+        "pane": pane,
+        "task_id": task_id,
+        "sprint_id": sprint_id,
+        "message": message,
+        "status": "pending",
+    }
+    try:
+        proc = subprocess.run(
+            [ntm, "send", session, f"--pane={pane}", "--no-cass-check", message],
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=timeout_seconds,
+            check=False,
+        )
+        elapsed = round(time.monotonic() - started, 3)
+        status_text = "sent" if proc.returncode == 0 else "failed"
+        ledger_row.update({
+            "status": status_text,
+            "ntm_rc": proc.returncode,
+            "elapsed_seconds": elapsed,
+            "stdout": proc.stdout.strip(),
+            "stderr": proc.stderr.strip(),
+        })
+        append_jsonl(ledger, ledger_row)
+        return {
+            "name": "pane1_sprint_complete_bridge",
+            "status": status_text,
+            "session": session,
+            "pane": pane,
+            "task_id": task_id,
+            "sprint_id": sprint_id,
+            "callback_key": callback_key,
+            "elapsed_seconds": elapsed,
+            "ledger": str(ledger),
+        }
+    except Exception as exc:
+        elapsed = round(time.monotonic() - started, 3)
+        ledger_row.update({"status": "failed", "elapsed_seconds": elapsed, "error": str(exc)})
+        append_jsonl(ledger, ledger_row)
+        return {
+            "name": "pane1_sprint_complete_bridge",
+            "status": "failed",
+            "task_id": task_id,
+            "sprint_id": sprint_id,
+            "callback_key": callback_key,
+            "elapsed_seconds": elapsed,
+            "ledger": str(ledger),
+            "error": str(exc),
+        }
+
+
 def run(args: argparse.Namespace, payload: bytes) -> int:
     if not args.target or args.lease_ms <= 0 or args.max_retries < 0:
         emit({"schema_version": VERSION, "status": "invalid_args"}, args.json)
@@ -623,6 +805,7 @@ def run(args: argparse.Namespace, payload: bytes) -> int:
             tail = read_tail(target)
             data = payload if payload.endswith(b"\n") else payload + b"\n"
             ok = data in tail
+            post_hook = maybe_emit_pane1_sprint_complete(target, payload) if ok else None
             emit({
                 "schema_version": VERSION,
                 "status": "ok" if ok else "readback_failed",
@@ -631,6 +814,7 @@ def run(args: argparse.Namespace, payload: bytes) -> int:
                 "divergences": divergences,
                 "bytes_appended": len(data),
                 "idempotent_skip": False,
+                "post_append_hooks": [post_hook] if post_hook else [],
             }, args.json)
             return 0 if ok else 1
         finally:
