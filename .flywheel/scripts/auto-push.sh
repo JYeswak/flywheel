@@ -6,6 +6,7 @@ REPO="$(git rev-parse --show-toplevel 2>/dev/null || pwd -P)"
 POLICY_PATH="${FLYWHEEL_AUTO_PUSH_POLICY_PATH:-$REPO/.flywheel/auto-push-policy.yaml}"
 DEFAULT_LEDGER="$REPO/.flywheel/runtime/auto-push-ledger.jsonl"
 GITGUARDIAN_GATE="${FLYWHEEL_AUTO_PUSH_GITGUARDIAN_GATE:-$REPO/.flywheel/scripts/gitguardian-pre-push-gate.sh}"
+SUPABASE_MIRROR_GATE="${FLYWHEEL_AUTO_PUSH_SUPABASE_MIRROR_GATE:-$REPO/.flywheel/scripts/supabase-prepush-mirror-gate.sh}"
 ACT_BIN="${FLYWHEEL_AUTO_PUSH_ACT_BIN:-act}"
 GIT_BIN="${FLYWHEEL_AUTO_PUSH_GIT_BIN:-git}"
 REMOTE="${FLYWHEEL_AUTO_PUSH_REMOTE:-origin}"
@@ -18,6 +19,7 @@ ENABLED="true"
 UPSTREAM_REQUIRED="true"
 LOCAL_CI_GATE="true"
 GITGUARDIAN_GATE_ENABLED="true"
+SUPABASE_MIRROR_GATE_ENABLED="true"
 POST_COMMIT_FIRE="true"
 PUSH_CADENCE="post-commit"
 ALLOWED_BRANCHES_REGEX=""
@@ -31,7 +33,7 @@ usage() {
 Usage: auto-push.sh [--json] [--dry-run] [--source NAME] [--since DURATION]
 
 Dogfood adoption of the SkillOS auto-push v0.1 substrate for flywheel:
-clean-tree gate, branch policy, local act CI, GitGuardian Tier 4.5, then push.
+clean-tree gate, branch policy, local act CI, Tier 4.5 gates, then push.
 USAGE
 }
 
@@ -78,6 +80,7 @@ load_policy() {
       upstream_required) UPSTREAM_REQUIRED="$value" ;;
       local_ci_gate) LOCAL_CI_GATE="$value" ;;
       gitguardian_gate) GITGUARDIAN_GATE_ENABLED="$value" ;;
+      supabase_mirror_gate|supabase_rls_gate) SUPABASE_MIRROR_GATE_ENABLED="$value" ;;
       post_commit_fire) POST_COMMIT_FIRE="$value" ;;
       push_cadence) PUSH_CADENCE="$value" ;;
       allowed_branches_regex) ALLOWED_BRANCHES_REGEX="$value" ;;
@@ -102,7 +105,7 @@ upstream_ref() {
 }
 
 append_ledger() {
-  local status="$1" reason="$2" exit_code="$3" push_attempted="$4" push_success="$5" local_ci="$6" gitguardian="$7"
+  local status="$1" reason="$2" exit_code="$3" push_attempted="$4" push_success="$5" local_ci="$6" gitguardian="$7" supabase_mirror="$8"
   mkdir -p "$(dirname "$LEDGER_PATH")"
   jq -nc \
     --arg schema "$SCHEMA_VERSION" \
@@ -116,6 +119,7 @@ append_ledger() {
     --arg reason "$reason" \
     --arg local_ci_status "$local_ci" \
     --arg gitguardian_status "$gitguardian" \
+    --arg supabase_mirror_status "$supabase_mirror" \
     --arg push_cadence "$PUSH_CADENCE" \
     --arg on_failure "$ON_FAILURE" \
     --arg since "$SINCE" \
@@ -123,12 +127,12 @@ append_ledger() {
     --argjson dry_run "$DRY_RUN" \
     --argjson push_attempted "$push_attempted" \
     --argjson push_success "$push_success" \
-    '{schema_version:$schema,ts:$ts,source:$source,repo:$repo,commit:$commit,branch:$branch,upstream:$upstream,status:$status,reason:$reason,exit_code:$exit_code,dry_run:$dry_run,push_attempted:$push_attempted,push_success:$push_success,local_ci_status:$local_ci_status,gitguardian_status:$gitguardian_status,push_cadence:$push_cadence,on_failure:$on_failure,since:$since}' >>"$LEDGER_PATH"
+    '{schema_version:$schema,ts:$ts,source:$source,repo:$repo,commit:$commit,branch:$branch,upstream:$upstream,status:$status,reason:$reason,exit_code:$exit_code,dry_run:$dry_run,push_attempted:$push_attempted,push_success:$push_success,local_ci_status:$local_ci_status,gitguardian_status:$gitguardian_status,supabase_mirror_status:$supabase_mirror_status,push_cadence:$push_cadence,on_failure:$on_failure,since:$since}' >>"$LEDGER_PATH"
 }
 
 emit() {
-  local status="$1" reason="$2" exit_code="$3" push_attempted="$4" push_success="$5" local_ci="$6" gitguardian="$7"
-  append_ledger "$status" "$reason" "$exit_code" "$push_attempted" "$push_success" "$local_ci" "$gitguardian"
+  local status="$1" reason="$2" exit_code="$3" push_attempted="$4" push_success="$5" local_ci="$6" gitguardian="$7" supabase_mirror="$8"
+  append_ledger "$status" "$reason" "$exit_code" "$push_attempted" "$push_success" "$local_ci" "$gitguardian" "$supabase_mirror"
   if [[ "$JSON_OUT" -eq 1 ]]; then
     tail -1 "$LEDGER_PATH"
   else
@@ -169,6 +173,31 @@ run_gitguardian_gate() {
   return 31
 }
 
+outgoing_range() {
+  local upstream base
+  upstream="$(upstream_ref)"
+  [[ -n "$upstream" ]] || return 1
+  base="$("$GIT_BIN" -C "$REPO" merge-base HEAD "$upstream" 2>/dev/null || true)"
+  [[ -n "$base" ]] || return 1
+  printf '%s..HEAD\n' "$base"
+}
+
+run_supabase_mirror_gate() {
+  [[ "$SUPABASE_MIRROR_GATE_ENABLED" == "true" ]] || { printf 'skipped'; return 0; }
+  if [[ ! -x "$SUPABASE_MIRROR_GATE" ]]; then
+    printf 'gate_missing'
+    return 32
+  fi
+  local range
+  range="$(outgoing_range)" || { printf 'range_missing'; return 33; }
+  if "$SUPABASE_MIRROR_GATE" --json --repo "$REPO" --commit-range "$range" >/dev/null; then
+    printf 'pass'
+    return 0
+  fi
+  printf 'blocked'
+  return 34
+}
+
 glob_to_regex() {
   local glob="$1"
   glob="${glob//./\\.}"
@@ -207,43 +236,47 @@ done
 
 load_policy
 
-[[ "$ENABLED" == "true" ]] || emit clean policy_disabled 0 false false skipped skipped
-[[ "$SOURCE" != "post-commit" || "$POST_COMMIT_FIRE" == "true" ]] || emit clean post_commit_disabled 0 false false skipped skipped
+[[ "$ENABLED" == "true" ]] || emit clean policy_disabled 0 false false skipped skipped skipped
+[[ "$SOURCE" != "post-commit" || "$POST_COMMIT_FIRE" == "true" ]] || emit clean post_commit_disabled 0 false false skipped skipped skipped
 
 unmerged="$("$GIT_BIN" -C "$REPO" ls-files -u 2>&1)"
-[[ -z "$unmerged" ]] || emit blocked unmerged_paths 10 false false skipped skipped
-[[ ! -f "$REPO/.git/MERGE_HEAD" && ! -d "$REPO/.git/rebase-merge" && ! -d "$REPO/.git/rebase-apply" ]] || emit blocked git_operation_in_progress 11 false false skipped skipped
+[[ -z "$unmerged" ]] || emit blocked unmerged_paths 10 false false skipped skipped skipped
+[[ ! -f "$REPO/.git/MERGE_HEAD" && ! -d "$REPO/.git/rebase-merge" && ! -d "$REPO/.git/rebase-apply" ]] || emit blocked git_operation_in_progress 11 false false skipped skipped skipped
 status_out="$("$GIT_BIN" -C "$REPO" status --porcelain 2>&1)"
-[[ -z "$status_out" ]] || emit blocked dirty_tree 12 false false skipped skipped
+[[ -z "$status_out" ]] || emit blocked dirty_tree 12 false false skipped skipped skipped
 
 branch="$(current_branch)"
-[[ "$branch" != "HEAD" && -n "$branch" ]] || emit blocked detached_head 13 false false skipped skipped
+[[ "$branch" != "HEAD" && -n "$branch" ]] || emit blocked detached_head 13 false false skipped skipped skipped
 if [[ "$UPSTREAM_REQUIRED" != "false" && -z "$(upstream_ref)" ]]; then
-  emit blocked upstream_missing 14 false false skipped skipped
+  emit blocked upstream_missing 14 false false skipped skipped skipped
 fi
 if [[ -n "$FORBIDDEN_BRANCHES_REGEX" && "$branch" =~ $FORBIDDEN_BRANCHES_REGEX ]]; then
-  emit blocked forbidden_branch 15 false false skipped skipped
+  emit blocked forbidden_branch 15 false false skipped skipped skipped
 fi
 if [[ -n "$ALLOWED_BRANCHES_REGEX" && ! "$branch" =~ $ALLOWED_BRANCHES_REGEX ]]; then
-  emit blocked branch_not_allowed 16 false false skipped skipped
+  emit blocked branch_not_allowed 16 false false skipped skipped skipped
 fi
 if private_path_blocked; then
-  emit blocked private_path_blocked 17 false false skipped skipped
+  emit blocked private_path_blocked 17 false false skipped skipped skipped
 fi
 
 local_ci_status="$(run_local_ci_gate)" || local_ci_rc=$?
 local_ci_rc="${local_ci_rc:-0}"
-[[ "$local_ci_rc" -eq 0 ]] || emit blocked "local_ci_${local_ci_status}" "$local_ci_rc" false false "$local_ci_status" skipped
+[[ "$local_ci_rc" -eq 0 ]] || emit blocked "local_ci_${local_ci_status}" "$local_ci_rc" false false "$local_ci_status" skipped skipped
 
 gitguardian_status="$(run_gitguardian_gate)" || gitguardian_rc=$?
 gitguardian_rc="${gitguardian_rc:-0}"
-[[ "$gitguardian_rc" -eq 0 ]] || emit blocked "gitguardian_${gitguardian_status}" "$gitguardian_rc" false false "$local_ci_status" "$gitguardian_status"
+[[ "$gitguardian_rc" -eq 0 ]] || emit blocked "gitguardian_${gitguardian_status}" "$gitguardian_rc" false false "$local_ci_status" "$gitguardian_status" skipped
+
+supabase_mirror_status="$(run_supabase_mirror_gate)" || supabase_mirror_rc=$?
+supabase_mirror_rc="${supabase_mirror_rc:-0}"
+[[ "$supabase_mirror_rc" -eq 0 ]] || emit blocked "supabase_mirror_${supabase_mirror_status}" "$supabase_mirror_rc" false false "$local_ci_status" "$gitguardian_status" "$supabase_mirror_status"
 
 if [[ "$DRY_RUN" -eq 1 ]]; then
-  emit clean dry_run 0 false false "$local_ci_status" "$gitguardian_status"
+  emit clean dry_run 0 false false "$local_ci_status" "$gitguardian_status" "$supabase_mirror_status"
 fi
 
 if "$GIT_BIN" -C "$REPO" push "$REMOTE" "$branch" >/dev/null 2>&1; then
-  emit clean pushed 0 true true "$local_ci_status" "$gitguardian_status"
+  emit clean pushed 0 true true "$local_ci_status" "$gitguardian_status" "$supabase_mirror_status"
 fi
-emit blocked push_failed 40 true false "$local_ci_status" "$gitguardian_status"
+emit blocked push_failed 40 true false "$local_ci_status" "$gitguardian_status" "$supabase_mirror_status"

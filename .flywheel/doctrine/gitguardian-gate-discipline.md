@@ -8,7 +8,9 @@ frontmatter_source: gitguardian-tier-4.5-gate
 # GitGuardian Gate Discipline
 
 Status: v0.1 gate authored for `flywheel-rlmqw`.
-Scope: auto-push canonical substrate Tier 4.5.
+Scope: auto-push canonical substrate Tier 4.5. GitGuardian is one gate in
+this tier; Supabase schema/RLS pushes also pass through
+`supabase-prepush-mirror-gate.sh` before remote push.
 
 ## Tier Placement
 

@@ -32,6 +32,7 @@ enabled: true
 upstream_required: true
 local_ci_gate: true
 gitguardian_gate: true
+supabase_mirror_gate: true
 post_commit_fire: true
 push_cadence: post-commit
 allowed_branches_regex: "^(main|master|feature/.*)$"
@@ -61,6 +62,14 @@ exit 0
 SH
 chmod +x "$TMP/gitguardian"
 
+cat >"$TMP/supabase-mirror-gate" <<'SH'
+#!/usr/bin/env bash
+printf '%s\n' "$*" >>"${FAKE_SUPABASE_MIRROR_LOG:?}"
+jq -nc '{status:"pass",reason:"fixture",exit_code:0}'
+exit 0
+SH
+chmod +x "$TMP/supabase-mirror-gate"
+
 cat >"$repo/.git/hooks/post-commit" <<'SH'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -71,8 +80,10 @@ git -C "$repo" config core.hooksPath .git/hooks
 
 export FAKE_ACT_LOG="$TMP/act.log"
 export FAKE_GG_LOG="$TMP/gg.log"
+export FAKE_SUPABASE_MIRROR_LOG="$TMP/supabase-mirror.log"
 export FLYWHEEL_AUTO_PUSH_ACT_BIN="$TMP/act"
 export FLYWHEEL_AUTO_PUSH_GITGUARDIAN_GATE="$TMP/gitguardian"
+export FLYWHEEL_AUTO_PUSH_SUPABASE_MIRROR_GATE="$TMP/supabase-mirror-gate"
 
 printf 'change\n' >>"$repo/README.md"
 git -C "$repo" add README.md
@@ -83,7 +94,8 @@ ok "auto-push script syntax" bash -n "$AUTO_PUSH"
 ok "soak probe syntax" bash -n "$SOAK"
 ok "post-commit hook fired act" test -s "$TMP/act.log"
 ok "post-commit hook fired gitguardian" test -s "$TMP/gg.log"
-ok_jq "ledger records post-commit source" 'select(.source=="post-commit" and .local_ci_status=="pass" and .gitguardian_status=="pass")' "$ledger"
+ok "post-commit hook fired supabase mirror gate" test -s "$TMP/supabase-mirror.log"
+ok_jq "ledger records post-commit source" 'select(.source=="post-commit" and .local_ci_status=="pass" and .gitguardian_status=="pass" and .supabase_mirror_status=="pass")' "$ledger"
 ok_jq "ledger records push success" 'select(.push_attempted==true and .push_success==true and .exit_code==0)' "$ledger"
 ok "remote received commit" git -C "$repo" ls-remote --exit-code origin HEAD
 
@@ -92,4 +104,4 @@ ok_jq "soak probe emits counts" '.post_commit_hook_fired_count >= 1 and .push_su
 ok_jq "soak ledger row written" '.schema_version=="flywheel.auto_push_soak_probe.v1" and (.dashboard_line|contains("Auto-push soak:"))' "$TMP/soak.jsonl"
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass" "$fail"
-[[ "$fail" -eq 0 && "$pass" -ge 9 ]]
+[[ "$fail" -eq 0 && "$pass" -ge 10 ]]
