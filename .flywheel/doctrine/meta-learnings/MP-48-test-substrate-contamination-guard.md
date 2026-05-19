@@ -40,3 +40,8 @@ Skill scans for stubs, isolates test state, redirects unsafe stdout, uses real i
 ```bash
 grep -E "(stub|mock|placeholder|shared state|stdout.*redirect|fixture|re-scan|mocking everything)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-66-golden-sidecar-conformance.md`

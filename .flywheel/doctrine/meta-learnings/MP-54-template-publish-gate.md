@@ -40,3 +40,8 @@ Skill distinguishes draft from published, validates manifests, registers artifac
 ```bash
 grep -E "(DRAFT_NOT_PUBLISHED|manifest|registry|dry-run|rollback|idempotency key)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-43-release-installability-gate.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-59-generated-docs-publish-asset.md`

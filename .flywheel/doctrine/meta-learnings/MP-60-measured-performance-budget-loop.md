@@ -41,3 +41,8 @@ Skill captures baseline p50/p95/p99 or wall-clock, defines budgets, ranks contri
 ```bash
 grep -E "(p50|p95|baseline|budget|profile|re-profile|top-3|before/after)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-47-throughput-backpressure-budget.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-75-actionable-slo-burn-alert-contract.md`

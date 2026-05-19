@@ -40,3 +40,8 @@ The skill ships a schema, version marker, validator command, valid and invalid f
 ```bash
 grep -E "(schema|validator|SCHEMA_VERSION|fixture|cross-field|server-side|exit code|JSON)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-95-data-contract-reconciliation-ledger.md`

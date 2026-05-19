@@ -40,3 +40,8 @@ Skill requires streaming parsers/cursors, schema validation, stable pagination c
 ```bash
 grep -E "(stream|cursor|round-trip|MIME|delimiter|whitelist|memory budget)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-53-idempotent-delivery-replay.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-95-data-contract-reconciliation-ledger.md`

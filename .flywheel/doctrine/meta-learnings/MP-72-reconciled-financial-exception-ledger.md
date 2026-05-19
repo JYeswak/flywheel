@@ -41,3 +41,8 @@ The skill requires GL or bank reconciliation, aging or variance buckets, materia
 ```bash
 grep -E "(reconcile|GL|general ledger|bank balance|aging bucket|variance|approval|audit trail|material)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-49-money-path-input-integrity.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-95-data-contract-reconciliation-ledger.md`

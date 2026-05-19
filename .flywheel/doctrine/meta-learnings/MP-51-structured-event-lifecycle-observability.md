@@ -40,3 +40,8 @@ Events have stable names, parameters, correlation IDs, redaction policy, release
 ```bash
 grep -E "(correlation ID|dataLayer|release:|structured context|redaction|event pipeline)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-04-receipt-callback-envelope.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

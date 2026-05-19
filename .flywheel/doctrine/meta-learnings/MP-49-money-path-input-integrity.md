@@ -41,3 +41,8 @@ Skill names each money input, producer, writer, provenance ID, idempotency key, 
 ```bash
 grep -E "(idempotency|provenance|server-side validation|round-trip|deterministic.*auditable|money decision)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-41-gate-class-separation.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-72-reconciled-financial-exception-ledger.md`

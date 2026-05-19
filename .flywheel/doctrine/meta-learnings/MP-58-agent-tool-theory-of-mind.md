@@ -40,3 +40,8 @@ Skill has small tool clusters, Do/Don't docs, fake-CLI stubs or early intercepto
 ```bash
 grep -E "(agent theory of mind|wrong thing impossible|Fake CLI|changed-file matrix|thin frontend|soundness surface)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-03-agent-ergonomics-rubric.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

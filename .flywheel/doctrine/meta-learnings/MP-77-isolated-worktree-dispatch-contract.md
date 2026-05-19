@@ -41,3 +41,8 @@ The skill requires dirty-state checks, branch-origin validation, per-worktree re
 ```bash
 grep -E "(origin/main|dirty worktree|worktree|branch tip|port|one agent|status|diff)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-20-cross-orch-handoff.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-99-authorized-sandbox-envelope.md`

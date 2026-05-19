@@ -41,3 +41,8 @@ The skill defines the hypothesis and decision rule upfront, registers tracking d
 ```bash
 grep -E "(hypothesis|sample size|MDE|primary metric|guardrail|experiment_variant|stopping rule|power)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-41-gate-class-separation.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-60-measured-performance-budget-loop.md`

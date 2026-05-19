@@ -40,3 +40,8 @@ Skill classifies feedback signals, declares an iteration budget, changes one lev
 ```bash
 grep -E "(proof friction|one lever|proof-carrying|rubric|gap analysis|refinement rounds)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-08-trauma-class-promotion.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-98-customer-signal-to-root-cause-loop.md`

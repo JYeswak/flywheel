@@ -40,3 +40,8 @@ The skill requires an explicit planning artifact, states what evidence changes t
 ```bash
 grep -E "(register|intent|convergence|criteria|debt|interest rate|objective|tradeoff)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-06-plan-space-convergence.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-70-reviewed-machine-plan-before-apply.md`

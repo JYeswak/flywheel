@@ -40,3 +40,8 @@ Skill detects canonical location/name from source-of-truth metadata, verifies ru
 ```bash
 grep -E "(canonical|resolved path|PATH|package.json|domain path|canonical branch)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-15-canonical-cli-scoping.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-55-source-of-truth-hierarchy.md`

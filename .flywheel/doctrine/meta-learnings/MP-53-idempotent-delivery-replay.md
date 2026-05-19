@@ -40,3 +40,8 @@ Skill names event IDs, signature verification, retry/backoff rules, replay buffe
 ```bash
 grep -E "(idempotent|Last-Event-ID|replay|signature verification|acknowledg|retry.*idempotent)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-04-receipt-callback-envelope.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-100-contention-shaped-state-owner.md`

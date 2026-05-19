@@ -40,3 +40,8 @@ The skill defines a project-local state or progress file, updates it after each 
 ```bash
 grep -E "(STATE.md|progress|heartbeat|resume|owner|next action|write.*disk|compaction)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-83-portable-session-recovery-ladder.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-92-reversible-recovery-ladder.md`

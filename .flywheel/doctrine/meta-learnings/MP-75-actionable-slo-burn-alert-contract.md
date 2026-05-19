@@ -41,3 +41,8 @@ The skill defines SLIs, SLOs, error budgets, burn-rate thresholds, alert groupin
 ```bash
 grep -E "(SLI|SLO|error budget|burn rate|actionable|runbook|dedup|severity|alert-to-action)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-51-structured-event-lifecycle-observability.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-60-measured-performance-budget-loop.md`

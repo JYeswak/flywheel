@@ -40,3 +40,8 @@ The skill requires reading the produced image, iterating against visual defects,
 ```bash
 grep -E "(read.*image|screenshot|inspect|refine|curl|content-type|bytes|artifact)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-79-oracle-strength-testing-ladder.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-84-stable-interactive-surface-geometry.md`

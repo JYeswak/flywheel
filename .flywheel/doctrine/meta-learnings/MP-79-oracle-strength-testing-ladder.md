@@ -41,3 +41,8 @@ The skill names the oracle problem, ranks oracle strength, uses property or sche
 ```bash
 grep -E "(oracle|metamorphic|invariant|schema|fixture|fuzz|mutation|sanitizer|counterexample)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-66-golden-sidecar-conformance.md`

@@ -41,3 +41,8 @@ Skill names throughput scopes, queue behavior, retry headers, capacity metrics, 
 ```bash
 grep -E "(Retry-After|queue|backpressure|consumer lag|token.*minute|queue depth|429)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-60-measured-performance-budget-loop.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-75-actionable-slo-burn-alert-contract.md`

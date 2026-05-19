@@ -40,3 +40,8 @@ The skill emits sidecar metadata, tests independent tiers, probes provider capab
 ```bash
 grep -E "(sidecar|threshold|golden|probe|conformance|run.jsonl|health|listing)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-79-oracle-strength-testing-ladder.md`

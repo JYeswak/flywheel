@@ -41,3 +41,8 @@ The skill defines score inputs, time decay or calibration, tier thresholds, requ
 ```bash
 grep -E "(score|tier|stage|SLA|playbook|trigger|owner|recency|reasoning)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-81-computed-capability-maturity.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-75-actionable-slo-burn-alert-contract.md`

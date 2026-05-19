@@ -41,3 +41,8 @@ The skill forbids secret echoing, verifies presence rather than value, uses stdi
 ```bash
 grep -E "(secret|stdin|hash|redact|PKCE|token|URL|logs|presence)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-57-regulated-evidence-redaction-chain.md`

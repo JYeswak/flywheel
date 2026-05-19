@@ -40,3 +40,8 @@ Skill uses ffprobe/frame extraction, contiguous timing ranges, LUFS/timestamp si
 ```bash
 grep -E "(ffprobe|\\[TIME\\]|LUFS|pixel/audio|intro_outro|frame timestamp|drift)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-41-gate-class-separation.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-65-generated-visual-inspection-loop.md`

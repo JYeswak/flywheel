@@ -39,3 +39,8 @@ Skill requires a gate taxonomy, reports each gate status separately, and forbids
 ```bash
 grep -E "(gate_class|CODE.*OP|process.*math|stock.*flow|ready.*all.*gate)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-74-assertion-control-evidence-chain.md`

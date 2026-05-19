@@ -40,3 +40,8 @@ Skill names source docs, generated outputs, build/render commands, schema consum
 ```bash
 grep -E "(generated|build-docs|source document|schema|preview cards|docs.*feature)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-13-living-documentation.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-54-template-publish-gate.md`

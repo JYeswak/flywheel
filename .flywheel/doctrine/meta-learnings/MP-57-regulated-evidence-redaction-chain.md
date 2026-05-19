@@ -40,3 +40,8 @@ Skill requires audit logging, preservation/hold policy, redaction before transcr
 ```bash
 grep -E "(audit logging|legal hold|redaction|PII|PHI|compliance evidence|certificate chain)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-88-content-addressed-evidence-pack.md`

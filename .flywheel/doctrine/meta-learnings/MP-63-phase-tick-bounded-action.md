@@ -40,3 +40,8 @@ The skill names the current phase, dispatch class, next bounded action, callback
 ```bash
 grep -E "(phase|tick_class|bounded action|callback|done|blocked|worker|evidence)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-91-progress-counter-forced-motion-loop.md`

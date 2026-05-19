@@ -40,3 +40,8 @@ The skill documents machine-readable command surfaces, capability discovery, ter
 ```bash
 grep -E "(--json|--robot|capabilities|robot-docs|non-TTY|plain text|Ctrl-C|doctor)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-03-agent-ergonomics-rubric.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-58-agent-tool-theory-of-mind.md`

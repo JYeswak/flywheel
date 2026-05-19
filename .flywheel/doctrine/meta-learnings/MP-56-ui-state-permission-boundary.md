@@ -40,3 +40,8 @@ Skill classifies state type, uses server-state tooling, derives URL/bookmarkable
 ```bash
 grep -E "(server state|URL state|permission|authorization|strict schemas|impossible states)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+This flywheel doctrine shard was backfilled during batch-14 to keep MP adoption links navigable.
+- Related: `.flywheel/doctrine/meta-learnings/MP-80-scope-token-operation-matrix.md`
+- Related: `.flywheel/doctrine/meta-learnings/MP-84-stable-interactive-surface-geometry.md`
