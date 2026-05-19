@@ -39,3 +39,31 @@ flywheel is the canonical-pattern-substrate authoring repo. Skill-equivalent sur
 - Flywheel doctrine: `.flywheel/doctrine/jsm-meta-lessons-canonical.md`
 - Flywheel meta-doctor: `.flywheel/scripts/flywheel-meta-doctor.py`
 - Audit receipt: `.flywheel/audit/jsm-meta-lesson-coverage-2026-05-18.md`
+
+
+---
+
+## All 20 canonical meta-learnings referenced
+
+For full applicability + adoption recipes per MP, see `.flywheel/doctrine/meta-learnings/MP-NN-slug.md` (20 files mirrored from skillos canonical):
+
+- MP-01 sentinel-doctor-surface
+- MP-02 conformance-fixtures
+- MP-03 agent-ergonomics-rubric
+- MP-04 receipt-callback-envelope
+- MP-05 multi-pass-saturation
+- MP-06 plan-space-convergence
+- MP-07 multi-model-triangulation
+- MP-08 trauma-class-promotion
+- MP-09 info-source-watchtower
+- MP-10 codebase-archaeology
+- MP-11 operationalizing-expertise
+- MP-12 three-spaces-reasoning
+- MP-13 living-documentation
+- MP-14 simplify-isomorphic
+- MP-15 canonical-cli-scoping
+- MP-16 search-tool-routing
+- MP-17 secret-emission-discipline
+- MP-18 skill-when-not-to-use
+- MP-19 flywheel-engagement-protocol
+- MP-20 cross-orch-handoff
