@@ -1,63 +1,116 @@
-# JSM Meta-Lessons Canonical Reference (flywheel mirror)
+# JSM Meta-Lessons Canonical Reference
 
-**Source:** Jeff Emanuel's `jeffreys-skills.md` official skill pack.
-**Origin investigation:** `/Users/josh/Developer/skillos/state/jsm-meta-lesson-investigation-20260518T2235Z/REPORT.md`
-**Fleet audit:** `/Users/josh/Developer/skillos/state/jsm-fleet-audit-20260518T2305Z/MANIFEST.md`
-**Authored:** 2026-05-18 via skillos:1 cross-repo authorized.
+**Source:** Jeff Emanuel's `jeffreys-skills.md` official skill pack (synced 2026-05-18).
+**Origin investigation:** `state/jsm-meta-lesson-investigation-20260518T2235Z/REPORT.md`.
+**Status:** Canonical doctrine for flywheel-ecosystem authoring + audit work.
+**Maintained by:** skillos canonical-locator lane.
 
-> **Cross-repo canonical:** Skillos is the originator. Updates propagate skillos → flywheel via cross-orch handoff. See `/Users/josh/Developer/skillos/.flywheel/doctrine/jsm-meta-lessons-canonical.md` for any divergence.
+This file names the 4 highest-confidence meta-patterns extracted from Jeff's official skill pack and the flywheel ecosystem's adoption status for each. Refer to this file before authoring any new CLI surface, doctor script, fixture directory, or callback contract. Every new substrate piece should be checked against these patterns.
 
 ---
 
-## MP-01 — Sentinel-classified doctor surface
+## MP1 — Sentinel-classified doctor surface
 
 **Source skills:** `world-class-doctor-mode-for-cli-tools`, `canonical-cli-scoping`.
 
-**Rule:** Before trusting `<bin> <verb> --help; exit 0` as evidence that `<verb>` exists, run `<bin> __sentinel_xyz123__ --help` first. If sentinel exits 0, parser has a fallback (cass-bug round 54 class). Switch to awk-parsing `--help` for the `Commands:` section instead.
+**Rule:** Before trusting `<bin> <verb> --help; exit 0` as evidence that `<verb>` exists, run `<bin> __sentinel_xyz123__ --help` first. If sentinel exits 0, the parser has a fallback (like `cass <unknown>` falling through to `cass search`) and exit-code-based verb probing is unreliable — switch to awk-parsing the `Commands:` section of `--help` instead.
 
-**Flywheel adoption:**
-- ⚠️ `.flywheel/scripts/test-doctor-sentinel-probe-fleet.py` (sister-script to be authored).
-- ⚠️ `br` (beads_rust) + `bv` (beads_viewer) sentinel-safety — verify.
+**Why:** A round-54 audit on cass found 5 phantom diagnostic verbs because `cass verify --help`, `cass repair --help`, etc. all exited 0 via search-fallback. Agents reading the probe output would write specs for verbs that don't exist.
 
-## MP-02 — Verification-first conformance harnesses
+**Adoption (flywheel ecosystem):**
+- ✅ Skillos doctor scripts (`scripts/skillos_*.py`) have proper `if fn is None: return 1` patterns; no silent-fallback.
+- ⚠️ No automated sentinel-probe meta-test (now added at `scripts/tests/test_doctor_sentinel_probe.py` 2026-05-18).
+- ⚠️ `bin/skillos` top-level shim not yet graded against agent-ergonomics 11-dim rubric.
+
+---
+
+## MP2 — Verification-first conformance harnesses
 
 **Source skills:** `testing-conformance-harnesses`, `testing-golden-artifacts`, `beads-compliance-and-completion-verification`.
 
-**Rule:** Fixtures need PROVENANCE.md. Divergences need DISCREPANCIES.md. Completion claims require independent re-run with stdout+stderr+exit-code capture — never trust self-reported "tests pass."
+**Rule:** Fixtures need PROVENANCE.md (how generated, version, date). Divergences need DISCREPANCIES.md disposition (ACCEPTED / INVESTIGATING / WILL-FIX). Completion claims require independent re-run with stdout+stderr+exit-code capture — never trust self-reported "tests pass."
 
-**Flywheel adoption:**
-- ✅ `beads-compliance-and-completion-verification` upstream + applied via `.flywheel/scripts/closed-bead-artifact-scan.py`.
-- ⚠️ Multiple `fixtures/` dirs need PROVENANCE.md (this audit ships scaffolds).
+**Score threshold:** MUST-clauses ≥ 0.95 pass rate; below = NOT conformant.
 
-## MP-03 — Agent-ergonomics 11-dimension rubric
+**Adoption (flywheel ecosystem):**
+- ✅ Skillos `tests/fixtures/capability_*/` use `valid_*` / `invalid_*` naming matching the conformance-harness pattern.
+- ✅ `validate_capability_transition.py` doctor command re-runs fixture validation with `expected_status` cross-check.
+- ⚠️ Skillos `tests/fixtures/` directories lacked PROVENANCE.md until 2026-05-18 (template now added).
+- ⚠️ No top-level DISCREPANCIES.md (low priority — skillos isn't porting from a reference impl).
 
-**Source skills:** `agent-ergonomics-cli`, `world-class-doctor-mode-for-cli-tools`, `canonical-cli-scoping`.
+---
 
-**Rule:** Every CLI surface (subcommand, flag, exit code, JSON envelope field) is independently scorable 0-1000 across 11 dimensions. `capabilities --json` + `robot-docs` mandatory.
+## MP3 — Agent-ergonomics 11-dimension rubric
 
-**Flywheel adoption:**
-- ✅ `.flywheel/doctrine/agent-ergonomics-application-baseline-2026-05-08.md` active.
-- ⚠️ Full 11-dim audit pending for `flywheel-loop`, `flywheel-tick`, etc.
+**Source skills:** `agent-ergonomics-cli`, `world-class-doctor-mode-for-cli-tools` (Phase-6 grader), `canonical-cli-scoping`.
 
-## MP-04 — Receipt-and-callback envelope contract
+**Rule:** Every CLI surface (subcommand, flag, exit code, JSON envelope field) is independently scorable 0-1000 across 11 dimensions: agent_intuitiveness, agent_ergonomics (stable JSON + exit codes + stderr/stdout discipline), automation_degree, data_safety, idempotence, intent_infer_then_act, safe_alternative_always, self_describing (capabilities --json), in_tool_docs (robot-docs), exit_code_contract, error_teaches.
+
+**Canonical surface for doctor CLIs (verbatim):**
+```text
+<tool> doctor                              # exit 0 healthy, 1 findings, 4 unsafe-refused
+<tool> doctor --fix                        # exit 0/2/3/4
+<tool> doctor --dry-run --fix              # print plan, do NOT execute
+<tool> doctor --explain <finding-id>       # expand one finding with full evidence
+<tool> doctor undo <run-id> | latest       # restore from .doctor/runs/<id>/backups/
+<tool> doctor capabilities --json          # version, contract, detectors, fixers, exit codes, schema_version
+<tool> doctor health                       # cheap liveness, one line + exit code, for CI
+<tool> doctor robot-docs                   # paste-ready agent handbook to stdout
+<tool> doctor ls | diff | gc | --quick | --json | --robot | --online | --robot-triage
+```
+
+**Adoption (flywheel ecosystem):**
+- ✅ `.flywheel/doctrine/agent-ergonomics-application-baseline-2026-05-08.md` active ~10 days; baseline graded.
+- ⚠️ Most skillos doctor scripts lack `--explain <finding-id>` flag (Gap-5 in investigation report).
+- ⚠️ No skillos CLI provides `robot-docs` paste-ready agent handbook output (Gap-6).
+
+---
+
+## MP4 — Receipt-and-callback envelope contract
 
 **Source skills:** `flywheel-end-to-end`, `orchestrator-validation-discipline`, `python-best-practices`.
 
-**Rule:** Callbacks make claims; receipts on disk are the only acceptance. `evidence_path` is a contract, not a label. Doctor surfaces producing reports but driving no action are "decorative" anti-pattern.
+**Rule:** Callbacks make claims; receipts on disk are the only acceptance criterion. The `evidence_path` field of a callback is a contract — file MUST exist with the schema-versioned envelope. Doctor surfaces that produce reports but drive no action are "decorative" anti-pattern.
 
-**Flywheel adoption:**
-- ✅ `.flywheel/scripts/validate-callback.py` — canonical source.
-- ✅ `.flywheel/scripts/closed-bead-artifact-scan.py` — closed-bead artifact verifier.
-- ✅ `.flywheel/scripts/verify-callback-delivery.sh` — delivery verifier.
-- ✅ `.flywheel/callback-validation-log.jsonl` — schema-versioned ledger.
+**Canonical callback envelope:**
+```text
+Callback: task_id=<id> phase=<phase> tick_class=<class> status=<done|warn|blocked> repo=<path> receipt=<path or none> next_phase=<phase> findings=<N>
+```
 
-Flywheel is the canonical source for MP-04 in our ecosystem.
+**Anti-patterns to forbid (per `flywheel-end-to-end/references/ANTI-PATTERNS.md`):**
+1. `loop-state-without-driver` — state says loop active but no orchestrator receives prompts
+2. `callback-without-receipt` — callback says done but no evidence file
+3. `dispatch-without-reservation` — workers edit files without reserving them
+4. `decorative-doctor` — doctor reports produced but no action driven
+5. `beadless-plan` — plan files exist but no actionable beads
+6. `driver-hardcodes-pane` — tick script sends to stale pane number
+7. `raw-pane-ops` — instructions use terminal multiplexer instead of `ntm send`
+
+**Adoption (flywheel ecosystem):**
+- ✅ `.flywheel/last_closeout_receipt.json` uses `schema_version: "flywheel.loop.closeout.v2"`.
+- ✅ `state/blocker-escalations.jsonl` uses `schema_version: "skillos.blocker_escalation.v1"`.
+- ✅ Receipt-evidence-must-exist-on-disk trauma class hardened (memory `feedback_callback_evidence_must_exist_on_disk`).
+- ⚠️ No mechanical check that every `state/*.json` file cites `schema_version` (Gap-7).
+- ⚠️ No mechanical check that callback `evidence_path` fields point to extant files (Gap-8; cross-orch verifier exists in flywheel substrate but skillos lacks a sibling).
+
+---
+
+## How to use this file
+
+**Before authoring a new CLI surface:** Check MP1 + MP3. Verify sentinel-probe safety + 11-dim ergonomics alignment.
+
+**Before authoring a new fixture directory:** Check MP2. Add PROVENANCE.md. Use `valid_*` / `invalid_*` naming.
+
+**Before authoring a new state-machine or dispatch:** Check MP4. Define schema_version. Define evidence_path contract. Bind callback to receipt verification.
+
+**During audit work:** Each MP has an explicit anti-pattern list. Audit findings should cite the specific pattern + sub-rule violated.
 
 ---
 
 ## Cross-references
 
-- Skillos canonical: `/Users/josh/Developer/skillos/.flywheel/doctrine/jsm-meta-lessons-canonical.md`
-- Fleet audit MANIFEST: `/Users/josh/Developer/skillos/state/jsm-fleet-audit-20260518T2305Z/MANIFEST.md`
-- Investigation: `/Users/josh/Developer/skillos/state/jsm-meta-lesson-investigation-20260518T2235Z/REPORT.md`
-- Sister doctrines: `.flywheel/doctrine/agent-ergonomics-application-baseline-2026-05-08.md`, `.flywheel/doctrine/audit-machinery-hygiene-discipline.md`
+- Investigation report: `state/jsm-meta-lesson-investigation-20260518T2235Z/REPORT.md`
+- Sentinel-probe meta-test: `scripts/tests/test_doctor_sentinel_probe.py`
+- Existing agent-ergonomics baseline: `.flywheel/doctrine/agent-ergonomics-application-baseline-2026-05-08.md`
+- Existing audit-machinery doctrine: `.flywheel/doctrine/audit-machinery-hygiene-discipline.md`
+- Skill sources: `~/.claude/skills/world-class-doctor-mode-for-cli-tools/`, `~/.claude/skills/testing-conformance-harnesses/`, `~/.claude/skills/agent-ergonomics-cli/`, `~/.claude/skills/flywheel-end-to-end/`, `~/.claude/skills/orchestrator-validation-discipline/`, `~/.claude/skills/beads-compliance-and-completion-verification/`.
