@@ -711,3 +711,8 @@ while IFS= read -r SESSION; do
   ROW="$(jq -cn --arg ts "$NOW" --arg session "$SESSION" --arg threshold "$THRESHOLD" --argjson health "$HEALTH" --argjson role "$ROLE_SPLIT" --argjson topo "$TOPOLOGY_OBSERVER" '{ts:$ts,session:$session,threshold:$threshold,health:$health,agent_pane_health:$role.agent_pane_health,user_pane_health:$role.user_pane_health,other_pane_health:$role.other_pane_health,health_role_split:$role,topology_observer:$topo}')"
   AUTO="$(auto_preview "$SESSION" "$HEALTH")"; append_row "$ROW" "health"; emit "$ROW" "$AUTO"
 done <<<"$SESSIONS"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

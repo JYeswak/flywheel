@@ -321,3 +321,8 @@ echo "[dispatch-and-verify] ntm changes failure snapshot: $(ntm_changes_snapshot
 echo "[dispatch-and-verify] ntm conflicts failure snapshot: $(ntm_conflicts_snapshot | jq -c . 2>/dev/null || printf 'null')" >&2
 echo "[dispatch-and-verify] consider: $NTM_BIN respawn ${SESSION} --panes=${PANE} --force" >&2
 exit 1
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-20-cross-orch-handoff.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-63-phase-tick-bounded-action.md`

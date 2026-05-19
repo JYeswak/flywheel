@@ -236,3 +236,8 @@ total_events=$((total_commits + total_issues + total_releases + total_prs))
 } > "$out_path"
 
 printf 'rendered=%s bytes=%s\n' "$out_path" "$(/usr/bin/stat -f %z "$out_path")"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-09-info-source-watchtower.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-76-authority-ranked-retrieval-maintenance.md`

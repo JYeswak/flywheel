@@ -95,3 +95,8 @@ else:
 
 print(json.dumps(payload, sort_keys=True) if args.json else f"action={payload['action']} fix_bead_id={payload['fix_bead_id']}")
 PY
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-100-contention-shaped-state-owner.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-53-idempotent-delivery-replay.md`

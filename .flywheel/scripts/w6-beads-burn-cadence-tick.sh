@@ -60,3 +60,8 @@ row="$(jq -nc --arg ts "$TS" --argjson rc "$ready_count" --argjson c24 "$closed_
   '{ts:$ts,wave:"W6",ready_count:$rc,closed_24h:$c24,trend:$trend}')"
 echo "$row" >>"$LEDGER"
 echo "$row"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-100-contention-shaped-state-owner.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-53-idempotent-delivery-replay.md`

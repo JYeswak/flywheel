@@ -406,3 +406,8 @@ jq -e 'select(.respawn_outcome=="success" and .session=="'"$session"'" and .pane
 jq -e 'select(.respawn_outcome=="throttled" and .session=="'"$session"'" and .pane==1)' "$state_dir/auto-respawn.jsonl" >/dev/null
 
 echo "PASS: auto-respawn detector respawned synthetic dead pane, left live/excluded panes untouched, and enforced throttle"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

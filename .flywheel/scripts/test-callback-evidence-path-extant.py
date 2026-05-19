@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Meta-pattern Adoption stance:
+# Embodies MP-04-receipt-callback-envelope.md and MP-74-assertion-control-evidence-chain.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 """Flywheel callback evidence_path file-exists check.
 
 Per `.flywheel/doctrine/jsm-meta-lessons-canonical.md` § MP-04.
@@ -115,3 +118,8 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-04-receipt-callback-envelope.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-88-content-addressed-evidence-pack.md`

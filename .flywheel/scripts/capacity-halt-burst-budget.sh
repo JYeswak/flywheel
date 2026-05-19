@@ -127,3 +127,8 @@ def main():
 if __name__ == "__main__":
     main()
 PY
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-60-measured-performance-budget-loop.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-87-binding-constraint-capacity-score.md`

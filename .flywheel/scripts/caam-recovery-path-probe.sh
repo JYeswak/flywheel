@@ -175,3 +175,8 @@ elif [[ "$json" -eq 1 ]]; then
 else
   jq -r '"verdict=\(.verdict)\nauto_rotation_health_score=\(.auto_rotation_health_score)\nprofiles_expired=\(.profiles_expired)/\(.profiles_total)\nrotation_429_detections_last_24h=\(.rotation_429_detections_last_24h)\nrotation_events_last_24h=\(.rotation_events_last_24h)"' <<<"$probe_json"
 fi
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

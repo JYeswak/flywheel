@@ -620,3 +620,8 @@ if [[ "$JSON" -eq 1 || "$DOCTOR" -eq 1 ]]; then
 else
   jq -r '"oversized_files_count=\(.oversized_files_count)\nallowed_oversized_files_count=\(.allowed_oversized_files_count)"' <<<"$payload"
 fi
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

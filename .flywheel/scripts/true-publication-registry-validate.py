@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Meta-pattern Adoption stance:
+# Embodies MP-54-template-publish-gate.md and MP-69-registry-risk-ledger.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 """Validate the true-publication release-blocker registry."""
 
 from __future__ import annotations
@@ -258,3 +261,8 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Meta-pattern Adoption stance:
+# Embodies MP-01-sentinel-doctor-surface.md and MP-68-schema-executable-validator-pair.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 """Flywheel meta-doctor — runs all jsm-meta-lesson mechanical checks.
 
 Per `.flywheel/doctrine/jsm-meta-lessons-canonical.md`.
@@ -141,3 +144,8 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

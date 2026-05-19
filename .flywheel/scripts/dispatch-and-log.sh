@@ -773,3 +773,8 @@ jq -nc \
   --argjson packet "$PACKET_JSON" --argjson preflight "$PREFLIGHT_JSON" --argjson assign "$ASSIGN_JSON" --argjson send "$SEND_JSON" --argjson wait_generating "$WAIT_GENERATING_JSON" \
   --argjson history "$HISTORY_JSON" --argjson history_count "$HISTORY_COUNT" \
   '{ts:$ts,task_id:$task_id,pane:($pane|tonumber),ntm_sent:($send.success == true),log_appended:true,bead_status:$bead_status,packet_path:$packet.packet_path,packet_validation_status:$packet.validation_status,preflight_status:$preflight.status,preflight_errors:$preflight.error_count,preflight_warnings:$preflight.warning_count,native_assign_success:($assign.success == true),native_send_success:($send.success == true),native_wait_generating_success:($wait_generating.success == true),native_history_success:($history.success == true),history_entry_count:$history_count}'
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-20-cross-orch-handoff.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-63-phase-tick-bounded-action.md`

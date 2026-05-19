@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Meta-pattern Adoption stance:
+# Embodies MP-77-isolated-worktree-dispatch-contract.md and MP-68-schema-executable-validator-pair.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 from __future__ import annotations
 
 import argparse
@@ -396,3 +399,8 @@ if __name__ == "__main__":
     except Exception as exc:
         print(json.dumps({"schema_version": SCHEMA_VERSION, "status": "error", "error": str(exc)}), file=sys.stderr)
         raise SystemExit(1)
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

@@ -683,3 +683,8 @@ if [[ "$JSON_OUT" == 1 ]]; then
 else
   jq -r '"adversarial-orch-audit lookback=\(.lookback_hours)h punt=\(.punt_phrase_count) drift=\(.mission_drift_count) unaddressed_skills=\(.unaddressed_skill_routes_count) closed_no_evidence=\(.recent_closed_beads_without_evidence)/\(.recent_closed_beads_sampled) signal=\(.adversarial_signal) axes=\(.adversarial_axes_triggered | join(\",\"))"' <<<"$PAYLOAD"
 fi
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-20-cross-orch-handoff.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-63-phase-tick-bounded-action.md`

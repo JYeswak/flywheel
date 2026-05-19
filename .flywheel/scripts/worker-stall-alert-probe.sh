@@ -127,3 +127,8 @@ if [[ "$APPLY" -eq 1 ]]; then
   fi
 fi
 jq -nc --arg version "$VERSION" --arg session "$SESSION" --arg pane "$pane" --arg resolution "$resolution" --argjson dry "$([[ $DRY_RUN -eq 1 ]] && echo true || echo false)" --argjson apply "$([[ $APPLY -eq 1 ]] && echo true || echo false)" --argjson cand "$candidate" --argjson alerts "$alerts" --argjson sends "$sends" --argjson same "$same_count" '{schema_version:$version,session:$session,dry_run:$dry,apply:$apply,native_surface:"ntm wait --until=generating",worker_stall_candidate_count:$cand,alerts_sent_count:$alerts,probe_sends_count:$sends,receipts:[{schema_version:"worker-stall-alert-receipt/v1",pane:($pane|tonumber),same_tick_count:$same,resolution:$resolution}],authorized_operations:["call_ntm_wait_generating","emit_stall_receipt","send_l95_probe_in_apply"],forbidden_operations:["sleep_activity_polling","raw_tmux_access","alert_without_receipt"],ttl_native:"single_wait_probe",ttl_wrapper:"stall_receipt_lifetime",ttl_decision:"rerun_before_alert"}'
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-20-cross-orch-handoff.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-63-phase-tick-bounded-action.md`

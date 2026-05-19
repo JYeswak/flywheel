@@ -637,3 +637,8 @@ for spec in "${specs[@]}"; do
 done
 
 printf 'OK_watcher_launchd_active labels_checked=%s gui_domain=%s last_run_max_age_seconds=%s\n' "$checked" "$DOMAIN" "$max_observed_age"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-75-actionable-slo-burn-alert-contract.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-120-runtime-boundary-health-contract.md`

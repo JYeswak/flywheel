@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Meta-pattern Adoption stance:
+# Embodies MP-60-measured-performance-budget-loop.md and MP-40-outside-observer-goal-contract.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 from __future__ import annotations
 
 import argparse
@@ -138,3 +141,8 @@ if __name__ == "__main__":
         raise SystemExit(main())
     except BrokenPipeError:
         sys.exit(1)
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

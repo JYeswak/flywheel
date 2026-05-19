@@ -640,3 +640,8 @@ log "rotate_invoked" "profile=$NEXT_PROFILE all_idle=$IDLE_CODEX/$TOTAL_CODEX"
 ROTATE_EXIT=$?
 log "rotate_done" "exit=$ROTATE_EXIT profile=$NEXT_PROFILE"
 exit $ROTATE_EXIT
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-60-measured-performance-budget-loop.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-87-binding-constraint-capacity-score.md`

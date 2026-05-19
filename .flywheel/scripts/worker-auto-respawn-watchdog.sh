@@ -370,3 +370,8 @@ emit "$payload"
 jq -e '.auto_respawns_fired > 0' >/dev/null <<<"$payload" && exit 1
 jq -e '.notify_fallbacks_fired > 0' >/dev/null <<<"$payload" && exit 2
 exit 0
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-20-cross-orch-handoff.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-63-phase-tick-bounded-action.md`

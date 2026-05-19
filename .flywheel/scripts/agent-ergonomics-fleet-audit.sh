@@ -274,3 +274,8 @@ payload = {
 print(json.dumps(payload, sort_keys=True, separators=(",", ":")) if json_out else f"{payload['status']} median_score={median_score} summary={payload['summary']}")
 sys.exit(0 if payload["status"] == "PASS" else 1)
 PY
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

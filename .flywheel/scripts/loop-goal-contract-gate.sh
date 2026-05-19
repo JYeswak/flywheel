@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Meta-pattern Adoption stance:
+# Embodies MP-40-outside-observer-goal-contract.md and MP-24-boundary-validation-fail-closed.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 set -euo pipefail
 
 usage() {
@@ -108,3 +111,8 @@ if [[ "$(jq -r 'length' <<<"$missing")" -gt 0 ]]; then
 fi
 
 emit_result "$(jq -nc --arg ts "$ts" --arg task_id "$task_id" --arg decision "$decision" --arg contract_path "$contract_path" --argjson contract "$contract" '{schema_version:"loop-goal-contract-gate/v1",ts:$ts,status:"dispatch_allowed",task_id:$task_id,mode:"loop",tick_id:$task_id,decision:$decision,contract_path:$contract_path,contract:$contract}')"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

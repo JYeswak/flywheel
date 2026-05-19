@@ -839,3 +839,8 @@ payload_path = os.environ.get("APPEND_SAFE_PAYLOAD_FILE")
 payload = Path(payload_path).read_bytes() if payload_path else b""
 raise SystemExit(run(ns, payload))
 PY
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

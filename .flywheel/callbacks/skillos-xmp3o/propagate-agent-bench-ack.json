@@ -1,0 +1,13 @@
+{
+  "schema_version": "skillos.cross_orch_handoff_ack.v1",
+  "ts": "2026-05-19T16:29:59Z",
+  "handoff_id": "20260519T0721Z-from-flywheel-to-skillos-propagate-mp-to-agent-bench",
+  "responder": "skillos:1",
+  "disposition": "accepted-deferred",
+  "tracking_bead": "skillos-xmp3o",
+  "carryover_constraint": "mp-authoring-cadence-policy-2026-05-19; MP-01..MP-99 propagation paused until adoption signal reaches >=15% fleet-wide on MP-80..99",
+  "estimated_landing": "2026-05-26 to 2026-06-02 (after soak window closes + scaffolder apply round)",
+  "blockers": [
+    "no current blocker; queued behind cadence policy"
+  ]
+}

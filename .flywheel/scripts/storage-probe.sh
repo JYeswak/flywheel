@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Meta-pattern Adoption stance:
+# Embodies MP-32-executable-probe-source-of-truth.md and MP-24-boundary-validation-fail-closed.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 # shellcheck disable=SC2034
 set -euo pipefail
 
@@ -822,3 +825,8 @@ main() {
 }
 
 main "$@"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

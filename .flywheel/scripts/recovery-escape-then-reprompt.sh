@@ -282,3 +282,8 @@ while [[ $# -gt 0 ]]; do case "$1" in
 # "$NTM_BIN" send "$SESSION" "--pane=$PANE" --no-cass-check --enter=false
 # "$NTM_BIN" send "$SESSION" "--pane=$PANE" --no-cass-check --file "$prompt_path"
 case "$MODE" in run) run;; schema) schema;; explain) explain;; help) usage;; esac
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-92-reversible-recovery-ladder.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-45-reversible-cleanup-bundle.md`

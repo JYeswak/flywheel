@@ -1004,3 +1004,8 @@ else:
     print(f"{payload['status']} changed={payload.get('changed_repo_count', 0)} report={payload.get('report_path', 'none')}")
 sys.exit(0 if payload.get("status") == "pass" else 1)
 PY
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-09-info-source-watchtower.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-76-authority-ranked-retrieval-maintenance.md`

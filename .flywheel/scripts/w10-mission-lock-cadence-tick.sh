@@ -39,3 +39,8 @@ row="$(jq -nc --arg ts "$TS" --arg age "$age_hours" --arg s "$status" --argjson 
   '{ts:$ts,wave:"W10",mission_lock_age_hours:($age|tonumber),status:$s,warn_threshold_hit:$w,alarm_threshold_hit:$a}')"
 echo "$row" >>"$LEDGER"
 echo "$row"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

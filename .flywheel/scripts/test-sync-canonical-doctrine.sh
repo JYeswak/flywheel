@@ -732,3 +732,8 @@ if command -v cli_audit_append >/dev/null 2>&1; then
   cli_audit_append "$SCAFFOLD_AUDIT_LOG" "harness_run" "pass" \
     "$(jq -nc --arg outcome "synthetic_test_passed" '{outcome:$outcome,fixture_canonical_drifted:2,fixture_root_drifted:3}')" 2>/dev/null || true
 fi
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

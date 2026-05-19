@@ -22888,3 +22888,923 @@ auth, credential, PII, and customer-trust surfaces.
 - **supersedes:** null
 - **stale_after:** 24
 - **closure_evidence:** null
+
+### jr-2026-05-18T190016Z-816
+- **id:** jr-2026-05-18T190016Z-816
+- **captured_at:** 2026-05-18T19:00:16Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:fc5ff4ee81abddcf55b44e65cd2ac10be0491655a3447315509abc260c8adea9
+- **request_text_hash:** sha256:fc5ff4ee81abddcf55b44e65cd2ac10be0491655a3447315509abc260c8adea9
+- **sanitized_excerpt:** "yeah keep hunting for the best insight we can possibly make in our flywheel. I need to ensrue that all the work that i've done over this last week gets locked in - we have a petal 9 process that is supposed to run on sundays that we didn't do yesterday - can we do that today?"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T19:00:16Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T192228Z-148
+- **id:** jr-2026-05-18T192228Z-148
+- **captured_at:** 2026-05-18T19:22:28Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:fcd62ce9befa74e1457fd13ac005b5e8b370ba4a8c2dcebddcd8ea3d69031c3f
+- **request_text_hash:** sha256:fcd62ce9befa74e1457fd13ac005b5e8b370ba4a8c2dcebddcd8ea3d69031c3f
+- **sanitized_excerpt:** "scan through my git history - i think i had the biggest commit load in 1 week of my entire coding career - validate this. This week's productivity hit a new all time high for me I think. Every project working well. The biggest impact on some of my projects has been putting codex into long-running goal modes and having claude watch over, using the flywheel substrate to guide the process. This weke's work has been amazing - testing first focus, etc. Some of the biggest gaps this week have been bui"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T19:22:28Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T192940Z-580
+- **id:** jr-2026-05-18T192940Z-580
+- **captured_at:** 2026-05-18T19:29:40Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:9f1eba0878d1213d60987f3fd427d3e7edc843820b1f1b3c8eb2007356f3f389
+- **request_text_hash:** sha256:9f1eba0878d1213d60987f3fd427d3e7edc843820b1f1b3c8eb2007356f3f389
+- **sanitized_excerpt:** "there was far fewer noise this week than in previous weeks. I do occasionally run into a long running goal going off course, but I built our /goal-build (.sh) process to help keep that in line. Energy this week was a 5 - pumped about being able to work with my systems instead of on my systems for a few days. Nothing drained. I loved seeing our flywheel.zeststream.ai site come together, mobile-eats come together, I built a full custom crm for clutterfreespaces this week, I livened up Picoz and go"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T19:29:40Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T193852Z-132
+- **id:** jr-2026-05-18T193852Z-132
+- **captured_at:** 2026-05-18T19:38:52Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:f1f8f6c3926422fd4c23112ff61142700cdf40b89a97037b94091dbbe2347c26
+- **request_text_hash:** sha256:f1f8f6c3926422fd4c23112ff61142700cdf40b89a97037b94091dbbe2347c26
+- **sanitized_excerpt:** "commit the petal9 backfills and weekly review - codex pane 2 declares done - whats next"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T19:38:52Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T200930Z-970
+- **id:** jr-2026-05-18T200930Z-970
+- **captured_at:** 2026-05-18T20:09:30Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:d238c4cb6f9c1ffbea9b0abba6d9bfae8589ac8877ed79a3f5dd5637c7ee66d3
+- **request_text_hash:** sha256:d238c4cb6f9c1ffbea9b0abba6d9bfae8589ac8877ed79a3f5dd5637c7ee66d3
+- **sanitized_excerpt:** "worker is done with no callback to pane 1"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T20:09:30Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T202441Z-881
+- **id:** jr-2026-05-18T202441Z-881
+- **captured_at:** 2026-05-18T20:24:41Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:fd203f68864c8702ef0157f125ce8bac43abdd20823c3d47e02c9d9092a9f1bb
+- **request_text_hash:** sha256:fd203f68864c8702ef0157f125ce8bac43abdd20823c3d47e02c9d9092a9f1bb
+- **sanitized_excerpt:** "I think that we need to upgrade our loop process to be more akin to the goal process -the two work together nicely - what is the gamke plan to acocmplish that in a flywheel friendly manner?"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T20:24:41Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T205707Z-827
+- **id:** jr-2026-05-18T205707Z-827
+- **captured_at:** 2026-05-18T20:57:07Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-clutterfreespaces/35ed8ff3-64b3-410c-81fa-4cf480251817.jsonl
+- **source_message_id:** 35ed8ff3-64b3-410c-81fa-4cf480251817
+- **prompt_hash:** sha256:67730c565bcfa8f74fa5ded1e318a844e757de71298373473cde76cb30b061d8
+- **request_text_hash:** sha256:67730c565bcfa8f74fa5ded1e318a844e757de71298373473cde76cb30b061d8
+- **sanitized_excerpt:** "Read /tmp/dispatch_pane2_mc8u_closeout_m16_wire.md. Two beads: (1) cfs-mc8u parent closeout — verify the 4 children (cfs-ktu2/7bas/i2dn/5vwc) with three-source evidence per audit pattern, write closeout artifact, close epic. (2) cfs-cfs-app-epic-mobile-contract-gaps-t0al.16.1 — production JWS verifier wire-in (real Apple signature verification, deeper than cfs-lgr1 defensive default-flip). Quota-aware on the crypto work. Callback per bead."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T20:57:07Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T212644Z-604
+- **id:** jr-2026-05-18T212644Z-604
+- **captured_at:** 2026-05-18T21:26:44Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:7434a8313961595ade09c76bd2e3171a79f68b13acbd4230aee1dceaa82dfbaa
+- **request_text_hash:** sha256:7434a8313961595ade09c76bd2e3171a79f68b13acbd4230aee1dceaa82dfbaa
+- **sanitized_excerpt:** "pane 2 seems to have frozen 48m into their goal. we may need to do /flywheel:respawn, save work to git, and respawn them"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T21:26:44Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T215505Z-305
+- **id:** jr-2026-05-18T215505Z-305
+- **captured_at:** 2026-05-18T21:55:05Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:a5fa44987ecb9168bcb14d67a36cbfb63d0683497378a1e070287b6979d23c17
+- **request_text_hash:** sha256:a5fa44987ecb9168bcb14d67a36cbfb63d0683497378a1e070287b6979d23c17
+- **sanitized_excerpt:** "dispatch the phase 3 gate work using /goal as intro - why are you waiting on me - this is the whole fucking problem - l70 failure after failure. honestly, what I'm finding is having claude as my orchesstrator is causing the most issues fo rme - codex has been listening SO MUCH BETTER"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T21:55:05Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T220207Z-727
+- **id:** jr-2026-05-18T220207Z-727
+- **captured_at:** 2026-05-18T22:02:07Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:a5fa44987ecb9168bcb14d67a36cbfb63d0683497378a1e070287b6979d23c17
+- **request_text_hash:** sha256:a5fa44987ecb9168bcb14d67a36cbfb63d0683497378a1e070287b6979d23c17
+- **sanitized_excerpt:** "dispatch the phase 3 gate work using /goal as intro - why are you waiting on me - this is the whole fucking problem - l70 failure after failure. honestly, what I'm finding is having claude as my orchesstrator is causing the most issues fo rme - codex has been listening SO MUCH BETTER"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T22:02:07Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-18T222050Z-850
+- **id:** jr-2026-05-18T222050Z-850
+- **captured_at:** 2026-05-18T22:20:50Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:a5fa44987ecb9168bcb14d67a36cbfb63d0683497378a1e070287b6979d23c17
+- **request_text_hash:** sha256:a5fa44987ecb9168bcb14d67a36cbfb63d0683497378a1e070287b6979d23c17
+- **sanitized_excerpt:** "dispatch the phase 3 gate work using /goal as intro - why are you waiting on me - this is the whole fucking problem - l70 failure after failure. honestly, what I'm finding is having claude as my orchesstrator is causing the most issues fo rme - codex has been listening SO MUCH BETTER"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-18T22:20:50Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T023603Z-163
+- **id:** jr-2026-05-19T023603Z-163
+- **captured_at:** 2026-05-19T02:36:03Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:24fa7d1719ffb831a92b1ac0a33837490c4bde846c57e64a6e722897fe58b091
+- **request_text_hash:** sha256:24fa7d1719ffb831a92b1ac0a33837490c4bde846c57e64a6e722897fe58b091
+- **sanitized_excerpt:** "watch for phase 3 callback - they never called back"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T02:36:03Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T024059Z-459
+- **id:** jr-2026-05-19T024059Z-459
+- **captured_at:** 2026-05-19T02:40:59Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:24fa7d1719ffb831a92b1ac0a33837490c4bde846c57e64a6e722897fe58b091
+- **request_text_hash:** sha256:24fa7d1719ffb831a92b1ac0a33837490c4bde846c57e64a6e722897fe58b091
+- **sanitized_excerpt:** "watch for phase 3 callback - they never called back"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T02:40:59Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T024634Z-794
+- **id:** jr-2026-05-19T024634Z-794
+- **captured_at:** 2026-05-19T02:46:34Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:6f7b243cc04b752955448e9eede60f9e675b335c05a307f12dd98ee802308ee1
+- **request_text_hash:** sha256:6f7b243cc04b752955448e9eede60f9e675b335c05a307f12dd98ee802308ee1
+- **sanitized_excerpt:** "you and worker are idle - lets get this show on the road, reap their work"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T02:46:34Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T035320Z-800
+- **id:** jr-2026-05-19T035320Z-800
+- **captured_at:** 2026-05-19T03:53:20Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:315e03c4a60ccab0fa56b95eefa6baef03caa7102333b80b5323251234e4b2aa
+- **request_text_hash:** sha256:315e03c4a60ccab0fa56b95eefa6baef03caa7102333b80b5323251234e4b2aa
+- **sanitized_excerpt:** "dispatch the next P1 bead send using /goal <task> format"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T03:53:20Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T040739Z-659
+- **id:** jr-2026-05-19T040739Z-659
+- **captured_at:** 2026-05-19T04:07:39Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:25b5eceb4279311febf832b1560e60f438ba5610512eb647beb762e8c514f0db
+- **request_text_hash:** sha256:25b5eceb4279311febf832b1560e60f438ba5610512eb647beb762e8c514f0db
+- **sanitized_excerpt:** "<task-notification> <task-id>b7dknodd0</task-id> <tool-use-id>toolu_012ZocUdUM7wTaGBBVV3zzgu</tool-use-id> <output-file>/private/tmp/claude-501/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e/tasks/b7dknodd0.output</output-file> <status>failed</status> <summary>Background command \"Launch autonomous P1 dispatcher\" failed with exit code 2</summary> </task-notification>"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T04:07:39Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T043556Z-356
+- **id:** jr-2026-05-19T043556Z-356
+- **captured_at:** 2026-05-19T04:35:56Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:b5e135184029b3b9fa2f6f1020c1315571b02ae5925ffeaee974f61d509e3fc6
+- **request_text_hash:** sha256:b5e135184029b3b9fa2f6f1020c1315571b02ae5925ffeaee974f61d509e3fc6
+- **sanitized_excerpt:** "i think pane 2 froze unfortunately - not sure how long they've sat idle while you've not done anything, but we may need to capture their pane and respawn them"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T04:35:56Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T055642Z-202
+- **id:** jr-2026-05-19T055642Z-202
+- **captured_at:** 2026-05-19T05:56:42Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:ca2c2ed4a504beaf7876b1cc77737172f522fc881b1d1da267cc177037b8c6da
+- **request_text_hash:** sha256:ca2c2ed4a504beaf7876b1cc77737172f522fc881b1d1da267cc177037b8c6da
+- **sanitized_excerpt:** "your process needs to go deep with each - keep git repos cleaned up, flag issues, validate work, don't just repeat"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T05:56:42Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T060905Z-945
+- **id:** jr-2026-05-19T060905Z-945
+- **captured_at:** 2026-05-19T06:09:05Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:202ac33b9e7e723836bf32de2bf3e5c0fbe80426f1fe64c907009d7e13c21005
+- **request_text_hash:** sha256:202ac33b9e7e723836bf32de2bf3e5c0fbe80426f1fe64c907009d7e13c21005
+- **sanitized_excerpt:** "SPRINT DONE: sprint=flywheel-tfwjz task=flywheel-tfwjz picks_completed=1 beads_closed=flywheel-tfwjz followups=none total_work_time=under-30m commit=e3be0c14 tests=PASS evidence=tests/worker-pane1-sprint-complete-bridge.sh"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T06:09:05Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T061151Z-111
+- **id:** jr-2026-05-19T061151Z-111
+- **captured_at:** 2026-05-19T06:11:51Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:61b557401d580a4d7681341536281aed7471ba25808d98d5dac1bddf63e22d08
+- **request_text_hash:** sha256:61b557401d580a4d7681341536281aed7471ba25808d98d5dac1bddf63e22d08
+- **sanitized_excerpt:** "SPRINT DONE: sprint=flywheel-tfwjz task=flywheel-tfwjz picks_completed=1 beads_closed=flywheel-tfwjz followups=none total_work_time=under-30m commit=e3be0c14+9bc0824f tests=PASS evidence=tests/worker-pane1-sprint-complete-bridge.sh"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T06:11:51Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T061315Z-195
+- **id:** jr-2026-05-19T061315Z-195
+- **captured_at:** 2026-05-19T06:13:15Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:4fc61a3f65e115cf7f63a4b66a94e5447b083f9cc4998680c61afe6a5ac37713
+- **request_text_hash:** sha256:4fc61a3f65e115cf7f63a4b66a94e5447b083f9cc4998680c61afe6a5ac37713
+- **sanitized_excerpt:** "so you're saying that every single surface of our flywheel scores 1000/1000 on the /agent-ergonomics-and-agent-intuitiveness-maximization-for-cli-tools process? every single thing is perfect and every repo is inhereting, learning, pushing back lessons learned? every aspect our system is inventoried? then the job isn't done."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T06:13:15Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T062702Z-022
+- **id:** jr-2026-05-19T062702Z-022
+- **captured_at:** 2026-05-19T06:27:02Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:1128a107f4bb3aa6b3d0109d04849b4cb6b7aed009a176de441169b6aa53d00e
+- **request_text_hash:** sha256:1128a107f4bb3aa6b3d0109d04849b4cb6b7aed009a176de441169b6aa53d00e
+- **sanitized_excerpt:** "SPRINT DONE: sprint=substrate-quality-program-20260519-phase1 task=substrate-quality-program-20260519-phase1 picks_completed=1 beads_closed=flywheel-l96m4 followups=none total_work_time=under-2h commit=ab634238+3e79c549 tests=PASS evidence=.flywheel/inventory/2026-05-19/SYSTEM-INVENTORY.md"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T06:27:02Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T064155Z-915
+- **id:** jr-2026-05-19T064155Z-915
+- **captured_at:** 2026-05-19T06:41:55Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:dfb58218115ac55ab3d1c56486a1003e58f5d5cf7063249c32fa3eaa02520c49
+- **request_text_hash:** sha256:dfb58218115ac55ab3d1c56486a1003e58f5d5cf7063249c32fa3eaa02520c49
+- **sanitized_excerpt:** "SPRINT DONE: sprint=substrate-quality-program-20260519-phase2 task=substrate-quality-program-20260519-phase2 picks_completed=1 beads_closed=flywheel-49v50 followups=none total_work_time=under-2h commit=18ff5410 tests=PASS evidence=.flywheel/inventory/2026-05-19/TIER-REFINEMENT.md"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T06:41:55Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T065719Z-839
+- **id:** jr-2026-05-19T065719Z-839
+- **captured_at:** 2026-05-19T06:57:19Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:394f53ba69f2f9dae50528d2133caa6ec394f394b3cef99e733b715472eb12a9
+- **request_text_hash:** sha256:394f53ba69f2f9dae50528d2133caa6ec394f394b3cef99e733b715472eb12a9
+- **sanitized_excerpt:** "SPRINT DONE: sprint=substrate-quality-program-20260519-phase3 task=substrate-quality-program-20260519-phase3 picks_completed=1 beads_closed=flywheel-kukwt followups=none total_work_time=under-3h commit=3466b981 tests=PASS evidence=.flywheel/audits/agent-ergonomics-phase3-top5-2026-05-19/SUMMARY.md"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T06:57:19Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T070451Z-291
+- **id:** jr-2026-05-19T070451Z-291
+- **captured_at:** 2026-05-19T07:04:51Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:4a3050155a91fe6714e27a11fd0fcd37b61e04d88a8a2c05a5e09aa4a5991101
+- **request_text_hash:** sha256:4a3050155a91fe6714e27a11fd0fcd37b61e04d88a8a2c05a5e09aa4a5991101
+- **sanitized_excerpt:** "SPRINT DONE: sprint=substrate-quality-program-20260519-phase3a task=substrate-quality-program-20260519-phase3a picks_completed=1 beads_closed=flywheel-alr2c followups=none total_work_time=under-3h commit=01be0266 tests=PASS evidence=.flywheel/audits/agent-ergonomics-phase3a-next5-2026-05-19/SUMMARY.md"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T07:04:51Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T071734Z-054
+- **id:** jr-2026-05-19T071734Z-054
+- **captured_at:** 2026-05-19T07:17:34Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:3a6e58b859560f6c8f837f6a6e72860e6961373bed0c1c09ed881597d84d7169
+- **request_text_hash:** sha256:3a6e58b859560f6c8f837f6a6e72860e6961373bed0c1c09ed881597d84d7169
+- **sanitized_excerpt:** "SPRINT DONE: sprint=substrate-quality-program-20260519-phase4 task=substrate-quality-program-20260519-phase4 picks_completed=1 beads_closed=flywheel-hcjqf followups=none total_work_time=under-3h commit=9a551c5c tests=PASS evidence=.flywheel/audits/cross-repo-inheritance-2026-05-19/INHERITANCE.md"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T07:17:34Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T072417Z-457
+- **id:** jr-2026-05-19T072417Z-457
+- **captured_at:** 2026-05-19T07:24:17Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:1a93e1a15affe4f2f3d85e2df897e83f9cd82a863bc6839fbbb2fea4cc0dd29d
+- **request_text_hash:** sha256:1a93e1a15affe4f2f3d85e2df897e83f9cd82a863bc6839fbbb2fea4cc0dd29d
+- **sanitized_excerpt:** "SPRINT DONE: sprint=substrate-quality-program-20260519-phase4a task=substrate-quality-program-20260519-phase4a picks_completed=1 beads_closed=flywheel-rn2d1 followups=none total_work_time=under-2h commit=b6c05708 tests=PASS evidence=.flywheel/audits/cross-repo-inheritance-2026-05-19/PROPAGATION-PLAN.md"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T07:24:17Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T073437Z-077
+- **id:** jr-2026-05-19T073437Z-077
+- **captured_at:** 2026-05-19T07:34:37Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:6c6472eb6a479d88113abb15dab0be6cadeda9ea155aef7f956ed5201ef14631
+- **request_text_hash:** sha256:6c6472eb6a479d88113abb15dab0be6cadeda9ea155aef7f956ed5201ef14631
+- **sanitized_excerpt:** "SPRINT DONE: sprint=substrate-quality-program-20260519-phase5 task=substrate-quality-program-20260519-phase5 picks_completed=1 beads_closed=flywheel-pb89y followups=none total_work_time=under-2h commit=cbae27fd tests=PASS evidence=.flywheel/inventory/2026-05-19-rebuild/REBUILD-DIFF.md"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T07:34:37Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T075502Z-302
+- **id:** jr-2026-05-19T075502Z-302
+- **captured_at:** 2026-05-19T07:55:02Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:71bc871ffc8f5e65ab30f8ee5c55f30609b7865df72c15dcad770d4b00d961c9
+- **request_text_hash:** sha256:71bc871ffc8f5e65ab30f8ee5c55f30609b7865df72c15dcad770d4b00d961c9
+- **sanitized_excerpt:** "dispatch /goal <task> (less than 4k characters) to pane 2"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T07:55:02Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T140514Z-514
+- **id:** jr-2026-05-19T140514Z-514
+- **captured_at:** 2026-05-19T14:05:14Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:863930aa0234e9030fef5e2c24ad6f9850486a958706ffd10b651a3e53896fe1
+- **request_text_hash:** sha256:863930aa0234e9030fef5e2c24ad6f9850486a958706ffd10b651a3e53896fe1
+- **sanitized_excerpt:** "lets keep this going - i just found a blog online from anthropic - lets continue pushing HARD on all findings - plus apply any lessons learned from this blog post to our system: https://claude.com/blog/how-claude-code-works-in-large-codebases-best-practices-and-where-to-start"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T14:05:14Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T142024Z-424
+- **id:** jr-2026-05-19T142024Z-424
+- **captured_at:** 2026-05-19T14:20:24Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:6f4c3abe9cda5736f4001581638d7d50636ee1a4db70de7754be421b86f8a9b4
+- **request_text_hash:** sha256:6f4c3abe9cda5736f4001581638d7d50636ee1a4db70de7754be421b86f8a9b4
+- **sanitized_excerpt:** "pane 1 is done - we need to ensure they callback using ntm send to apne 1"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T14:20:24Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T142030Z-430
+- **id:** jr-2026-05-19T142030Z-430
+- **captured_at:** 2026-05-19T14:20:30Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:3d941f3c130bcdbbd4aec454f0e9e858d5c8bfdb26f2af2a54d01860ff64c136
+- **request_text_hash:** sha256:3d941f3c130bcdbbd4aec454f0e9e858d5c8bfdb26f2af2a54d01860ff64c136
+- **sanitized_excerpt:** "pane 1 is done - we need to ensure they callback using ntm send to apne 1 - mean they are pane 2"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T14:20:30Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T142651Z-811
+- **id:** jr-2026-05-19T142651Z-811
+- **captured_at:** 2026-05-19T14:26:51Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:b8c1fe07ea862220adbfe21aea4226bdccb37c7757bd5fee24d0e0268fa13845
+- **request_text_hash:** sha256:b8c1fe07ea862220adbfe21aea4226bdccb37c7757bd5fee24d0e0268fa13845
+- **sanitized_excerpt:** "fix bridge first then 387-skill scoping - you're keeping them idle, doing a low grade task is better than no task"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T14:26:51Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T143342Z-222
+- **id:** jr-2026-05-19T143342Z-222
+- **captured_at:** 2026-05-19T14:33:42Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:a7d2255a3c3bcb361f281dce532ed57b32ae155e2a8798a7f2f2d473380f2263
+- **request_text_hash:** sha256:a7d2255a3c3bcb361f281dce532ed57b32ae155e2a8798a7f2f2d473380f2263
+- **sanitized_excerpt:** "SPRINT DONE: sprint=mp-validator-framework-20260519 task=flywheel-ma4vx picks_completed=1 beads_closed=flywheel-ma4vx followups=none total_work_time=under-3h commit=0834bfdf tests=PASS evidence=.flywheel/audits/fleet-conformance-2026-05-19/SCORECARD.md"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T14:33:42Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T151636Z-796
+- **id:** jr-2026-05-19T151636Z-796
+- **captured_at:** 2026-05-19T15:16:36Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:fb3ca330f35a2f2c9139aa7450c2fc62d12c3ec8d6c6d32da3b9c89be5179f08
+- **request_text_hash:** sha256:fb3ca330f35a2f2c9139aa7450c2fc62d12c3ec8d6c6d32da3b9c89be5179f08
+- **sanitized_excerpt:** "SPRINT DONE: sprint=skill-scoping-audit-20260519 task=flywheel-i2x9s picks_completed=1 beads_closed=flywheel-i2x9s followups=none total_work_time=under-2h commit=11f5996f tests=PASS evidence=.flywheel/audits/skill-scoping-2026-05-19/FIX-PLAN.md"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T15:16:36Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T151823Z-903
+- **id:** jr-2026-05-19T151823Z-903
+- **captured_at:** 2026-05-19T15:18:23Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:f99fd3ea7f93fb4479731430295e6de7b1c18ecee624203440ef75c4480ea301
+- **request_text_hash:** sha256:f99fd3ea7f93fb4479731430295e6de7b1c18ecee624203440ef75c4480ea301
+- **sanitized_excerpt:** "SPRINT DONE: sprint=bridge-retry-escalation-20260519 task=flywheel-c8d6c picks_completed=1 beads_closed=flywheel-c8d6c followups=none total_work_time=under-2h commit=23b53d9a tests=PASS evidence=tests/pane1-callback-bridge-retry.sh"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T15:18:23Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T154435Z-475
+- **id:** jr-2026-05-19T154435Z-475
+- **captured_at:** 2026-05-19T15:44:35Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:e76ff6ceae568bbde61e52a727d9fb3a8438c7dff2cfa7bd968cbed068fe630b
+- **request_text_hash:** sha256:e76ff6ceae568bbde61e52a727d9fb3a8438c7dff2cfa7bd968cbed068fe630b
+- **sanitized_excerpt:** "SPRINT DONE: sprint=mp-validator-extension-20260519 task=flywheel-5bpso picks_completed=1 beads_closed=flywheel-5bpso followups=none total_work_time=under-3h commit=0e4edad7 tests=PASS evidence=.flywheel/audits/fleet-conformance-2026-05-19-v2/SCORECARD.md"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T15:44:35Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T160737Z-857
+- **id:** jr-2026-05-19T160737Z-857
+- **captured_at:** 2026-05-19T16:07:37Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:b7813e568ac3828cae4db13485028272d1f8f73e8023ccbca012008c675c09fb
+- **request_text_hash:** sha256:b7813e568ac3828cae4db13485028272d1f8f73e8023ccbca012008c675c09fb
+- **sanitized_excerpt:** "it seems like codex is dead - operator fuckup - you and skillos - my two lead orchs, can't seem to keep your workers active and working - we have a lot of infra in here to detect and help fix frozen codex panes"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T16:07:37Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T162038Z-638
+- **id:** jr-2026-05-19T162038Z-638
+- **captured_at:** 2026-05-19T16:20:38Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:916566c8cad53d3ae65a0f2957768ce1cea6c0f6b46b07063819184d95606753
+- **request_text_hash:** sha256:916566c8cad53d3ae65a0f2957768ce1cea6c0f6b46b07063819184d95606753
+- **sanitized_excerpt:** "SPRINT DONE: sprint=mp-scaffolders-20260519 task=flywheel-4jtbj picks_completed=1 beads_closed=flywheel-4jtbj followups=none total_work_time=under-3h commit=63daee6e tests=PASS evidence=.flywheel/audits/mp-scaffolders-2026-05-19/PLAN.md"
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T16:20:38Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null
+
+### jr-2026-05-19T171205Z-725
+- **id:** jr-2026-05-19T171205Z-725
+- **captured_at:** 2026-05-19T17:12:05Z
+- **source_session:** flywheel
+- **source_pane:** null
+- **transcript_path:** /Users/josh/.claude/projects/-Users-josh-Developer-flywheel/d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e.jsonl
+- **source_message_id:** d6aec5e4-cf2e-41be-a4a1-bcc4d0615f1e
+- **prompt_hash:** sha256:3f32a23a4e423d04bdf30d06ea9d5a2df4644f36cd6a02235169340e3d8d5a42
+- **request_text_hash:** sha256:3f32a23a4e423d04bdf30d06ea9d5a2df4644f36cd6a02235169340e3d8d5a42
+- **sanitized_excerpt:** "from jeffrey on x: I use the atuin tool for searching across my command history in linux and mac. It has always been pretty performant, so I was confused why it seemed to be so dog slow recently. Turns out my agents have overwhelmed it. Guess I'll need to nuke it. I need a human only history."
+- **inferred_action:** null
+- **state:** needs_triage
+- **owner:** unassigned
+- **priority:** P1
+- **scope:** single-repo
+- **last_updated_at:** 2026-05-19T17:12:05Z
+- **closure_actor:** null
+- **linked_bead_ids:** []
+- **duplicate_of:** null
+- **supersedes:** null
+- **stale_after:** 24
+- **closure_evidence:** null

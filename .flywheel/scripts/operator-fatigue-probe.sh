@@ -228,3 +228,8 @@ if [[ "$JSON_OUT" == 1 ]]; then
 else
   jq -r '"operator-fatigue 1h=\(.dispatches_1h)/\(.thresholds.dispatches_1h) 4h=\(.dispatches_4h)/\(.thresholds.dispatches_4h) 24h=\(.dispatches_24h)/\(.thresholds.dispatches_24h) trauma=\(.repeated_trauma_classes_count)/\(.thresholds.repeated_trauma_classes) signal=\(.fatigue_signal) step_away=\(.step_away_recommended)"' <<<"$PAYLOAD"
 fi
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`
