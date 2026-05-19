@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Meta-pattern Adoption stance:
+# Embodies MP-23-replayable-mutation-contract.md and MP-24-boundary-validation-fail-closed.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 set -euo pipefail
 
 # ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======

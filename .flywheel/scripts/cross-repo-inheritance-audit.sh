@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Meta-pattern Adoption stance:
+# Embodies MP-76-authority-ranked-retrieval-maintenance.md and MP-55-source-of-truth-hierarchy.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 set -euo pipefail
 
 usage() {

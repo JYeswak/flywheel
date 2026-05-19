@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Meta-pattern Adoption stance:
+# Embodies MP-74-assertion-control-evidence-chain.md and MP-28-checklist-before-claim.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 """Audit closed beads against the canonical josh-request closure evidence schema."""
 
 from __future__ import annotations

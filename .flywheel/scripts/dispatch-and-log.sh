@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Meta-pattern Adoption stance:
+# Embodies MP-20-cross-orch-handoff.md and MP-04-receipt-callback-envelope.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 set -euo pipefail
 
 # ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======

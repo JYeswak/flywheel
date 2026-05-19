@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Meta-pattern Adoption stance:
+# Embodies MP-03-agent-ergonomics-rubric.md and MP-61-agent-first-operator-surface.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 set -euo pipefail
 
 usage() {
