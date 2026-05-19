@@ -6,7 +6,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_ROOT="${W10_REPO:-$(cd "$SCRIPT_DIR/../.." && pwd -P)}"
 LEDGER="${W10_CADENCE_LEDGER:-$REPO_ROOT/.flywheel/state/mission-lock-cadence-ledger.jsonl}"
-DOCTOR="$HOME/.claude/skills/.flywheel/bin/flywheel-loop"
+DOCTOR="${W10_FLYWHEEL_LOOP_BIN:-$HOME/.claude/skills/.flywheel/bin/flywheel-loop}"
 
 case "${1:-tick}" in
   --info) echo '{"name":"w10-mission-lock-cadence-tick","schema_version":"flywheel.w10_cadence.v0","wave":"W10","cadence":"daily"}'; exit 0 ;;
@@ -21,7 +21,8 @@ esac
 mkdir -p "$(dirname "$LEDGER")"
 TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
-age_hours="$("$DOCTOR" doctor 2>/dev/null | grep -oE "age_hours=[0-9.]+" | head -1 | sed 's/age_hours=//' || echo 0)"
+doctor_json="$("$DOCTOR" doctor --repo "$REPO_ROOT" --json 2>/dev/null || true)"
+age_hours="$(jq -r '.mission_lock_age.mission_lock_age_hours // .mission_lock_age_hours // 0' <<<"$doctor_json" 2>/dev/null || echo 0)"
 [[ -z "$age_hours" ]] && age_hours=0
 # Guard against multi-line/empty values
 age_hours="$(printf '%s' "$age_hours" | head -1 | tr -d '[:space:]')"
