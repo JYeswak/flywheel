@@ -39,3 +39,11 @@ Skill explicitly identifies its space OR cites the 3-spaces taxonomy.
 # Workflow skills MUST cite their reasoning space.
 grep -E "(plan.space|bead.space|code.space|three.space)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-4 so every skillos doctrine file cites the relevant MP lessons directly.
+
+- **MP-06 — plan-space convergence:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-06-plan-space-convergence.md` for the canonical pattern.
+- **MP-20 — cross-orch handoff:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-20-cross-orch-handoff.md` for the canonical pattern.
+- **MP-28 — checklist before claim:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-28-checklist-before-claim.md` for the canonical pattern.

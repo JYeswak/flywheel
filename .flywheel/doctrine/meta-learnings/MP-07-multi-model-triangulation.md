@@ -38,3 +38,11 @@ Skill invokes 2+ models OR documents a multi-model phase in its workflow.
 # Decision-class skills MUST cite ≥2 distinct model namespaces.
 grep -cE "(claude|opus|grok|gemini|gpt|sonnet)" SKILL.md | awk '$1 >= 2 || (print "fail" && exit 1)'
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-4 so every skillos doctrine file cites the relevant MP lessons directly.
+
+- **MP-05 — multi-pass saturation:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-05-multi-pass-saturation.md` for the canonical pattern.
+- **MP-06 — plan-space convergence:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-06-plan-space-convergence.md` for the canonical pattern.
+- **MP-28 — checklist before claim:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-28-checklist-before-claim.md` for the canonical pattern.

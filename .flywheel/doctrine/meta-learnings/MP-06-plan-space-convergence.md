@@ -38,3 +38,11 @@ Skill produces a converged plan artifact (markdown, not code) BEFORE proposing i
 # Skills doing multi-phase work MUST cite a plan artifact path before any code-step.
 grep -E "plan.{0,5}\.md|RESEARCH.md|REFINE.md" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-4 so every skillos doctrine file cites the relevant MP lessons directly.
+
+- **MP-05 — multi-pass saturation:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-05-multi-pass-saturation.md` for the canonical pattern.
+- **MP-07 — multi-model triangulation:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-07-multi-model-triangulation.md` for the canonical pattern.
+- **MP-12 — three-spaces reasoning:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-12-three-spaces-reasoning.md` for the canonical pattern.

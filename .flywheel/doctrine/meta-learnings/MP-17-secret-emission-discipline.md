@@ -38,3 +38,11 @@ Skill cites redaction policy AND has a redact-helper OR uses an envelope that ex
 # Skills handling secrets MUST cite redaction.
 grep -iE "(redact|secret.safe|no.print|stdin.only)" SKILL.md || fail
 ```
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-4 so every skillos doctrine file cites the relevant MP lessons directly.
+
+- **MP-08 — trauma-class promotion:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-08-trauma-class-promotion.md` for the canonical pattern.
+- **MP-24 — boundary validation fail-closed:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-24-boundary-validation-fail-closed.md` for the canonical pattern.
+- **MP-29 — production safety guardrails:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-29-production-safety-guardrails.md` for the canonical pattern.
