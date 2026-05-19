@@ -249,7 +249,40 @@ usage() {
   cat <<'USAGE'
 usage: ntm-wave2-native-probes.sh <surface> [--json]
 surfaces: agents analytics cass config extract get-all-session-text memory resume
+
+Agent automation:
+  ntm-wave2-native-probes.sh capabilities --json
+  ntm-wave2-native-probes.sh agents --json
+  ntm-wave2-native-probes.sh robot-docs
+  Exit codes: 0 success, 2 usage error. Missing native ntm data is returned as null fields, not a hard failure.
 USAGE
+}
+
+capabilities() {
+  jq -nc --arg version "$VERSION" '{
+    schema_version:$version,
+    command:"capabilities",
+    contract_version:"1",
+    features:["json_output","native_probe_bundle","null_on_native_failure","robot_docs"],
+    surfaces:["agents","analytics","cass","config","extract","get-all-session-text","memory","resume"],
+    commands:{
+      agents:{command:"ntm-wave2-native-probes.sh agents --json",read_only:true},
+      analytics:{command:"ntm-wave2-native-probes.sh analytics --json",read_only:true},
+      robot_docs:{command:"ntm-wave2-native-probes.sh robot-docs",read_only:true}
+    },
+    exit_codes:{"0":"success","2":"usage error"},
+    env_vars:{NTM_BIN:"override ntm binary",NTM_WAVE2_SESSION:"session for session-scoped probes",NTM_WAVE2_TASK_TITLE:"task title for recommendation probes"}
+  }'
+}
+
+robot_docs() {
+  cat <<'EOF'
+NTM wave-2 native probe robot guide:
+1. Discover: ntm-wave2-native-probes.sh capabilities --json
+2. Probe one surface: ntm-wave2-native-probes.sh agents --json
+3. Probe session text: NTM_WAVE2_SESSION=flywheel ntm-wave2-native-probes.sh extract --json
+4. Treat null native payloads as unavailable native data, not script failure.
+EOF
 }
 
 json_or_null() {
@@ -404,6 +437,8 @@ case "$SURFACE" in
   get-all-session-text) payload="$(surface_get_all_session_text)" ;;
   memory) payload="$(surface_memory)" ;;
   resume) payload="$(surface_resume)" ;;
+  capabilities|--capabilities|--info) payload="$(capabilities)" ;;
+  robot-docs|robot-docs-guide) payload="$(jq -Rn --arg text "$(robot_docs)" '{schema_version:"ntm-wave2-native-probes.robot_docs/v1",command:"robot-docs",text:$text}')" ;;
   --help|-h|"") usage; exit 0 ;;
   *) echo "unknown surface: $SURFACE" >&2; usage >&2; exit 2 ;;
 esac

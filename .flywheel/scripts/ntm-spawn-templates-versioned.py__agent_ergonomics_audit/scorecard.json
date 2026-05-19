@@ -1,0 +1,75 @@
+{
+  "dimensions": {
+    "agent_ease_of_use": {
+      "final": 875,
+      "initial": 750
+    },
+    "agent_ergonomics": {
+      "final": 850,
+      "initial": 725
+    },
+    "agent_intuitiveness": {
+      "final": 820,
+      "initial": 770
+    },
+    "composability": {
+      "final": 825,
+      "initial": 775
+    },
+    "determinism_and_reproducibility": {
+      "final": 650,
+      "initial": 600
+    },
+    "error_pedagogy": {
+      "final": 780,
+      "initial": 730
+    },
+    "intent_inference": {
+      "final": 725,
+      "initial": 675
+    },
+    "output_parseability": {
+      "final": 875,
+      "initial": 750
+    },
+    "safety_with_recovery": {
+      "final": 1000,
+      "initial": 950
+    },
+    "self_documentation": {
+      "final": 875,
+      "initial": 750
+    }
+  },
+  "evidence": {
+    "bad_invocation_rc": 2,
+    "capabilities_json": true,
+    "capabilities_rc": 0,
+    "deterministic_json_probe": false,
+    "help_rc": 0,
+    "json_probe_rc": 0,
+    "json_probe_valid_json": true,
+    "robot_docs_rc": 0,
+    "useful_error": true
+  },
+  "final_score": 827.5,
+  "initial_score": 747.5,
+  "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+  "schema_version": "agent-ergonomics.scorecard/v1",
+  "surface": {
+    "capabilities_args": "capabilities --json",
+    "class": "CLI",
+    "invoke_count_30d": 48,
+    "json_probe_args": "doctor --json",
+    "path": ".flywheel/scripts/ntm-spawn-templates-versioned.py",
+    "robot_docs_args": "robot-docs --json"
+  },
+  "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/ntm-spawn-templates-versioned.py",
+  "transcripts": {
+    "bad_invocation_stderr": "usage: ntm-spawn-templates-versioned.py [-h] [--json] [--doctor] [--health]\n                                        [--schema] [--examples] [--info]\n                                        [--template-dir TEMPLATE_DIR]\n                                        [--registry REGISTRY]\n                                        [--ntm-bin NTM_BIN] [--dry-run]\n                                        [--apply]\n                                        [--idempotency-key IDEMPOTENCY_KEY]\n                                        [command]\nntm-spawn-templates-versioned.py: error: unrecognized arguments: --jsno\n",
+    "capabilities": "{\"command\":\"capabilities\",\"commands\":{\"doctor\":{\"command\":\"ntm-spawn-templates-versioned.py doctor --json\",\"read_only\":true},\"registry_apply\":{\"command\":\"ntm-spawn-templates-versioned.py registry --apply --idempotency-key KEY --json\",\"read_only\":false},\"registry_dry_run\":{\"command\":\"ntm-spawn-templates-versioned.py registry --dry-run --json\",\"read_only\":true},\"robot_docs\":{\"command\":\"ntm-spawn-templates-versioned.py robot-docs --json\",\"read_only\":true}},\"contract_version\":\"1\",\"env_vars\":{\"NTM_BIN\":\"override ntm binary\",\"NTM_SPAWN_TEMPLATES_DIR\":\"override template directory\",\"NTM_SPAWN_TEMPLATE_REGISTRY\":\"override registry path\"},\"exit_codes\":{\"0\":\"success\",\"1\":\"runtime error\",\"2\":\"usage error\"},\"features\":[\"json_output\",\"doctor\",\"registry_dry_run\",\"idempotent_apply\",\"robot_docs\"],\"schema_version\":\"ntm-spawn-templates-versioned/v1.capabilities\"}\n",
+    "help": "usage: ntm-spawn-templates-versioned.py [-h] [--json] [--doctor] [--health]\n                                        [--schema] [--examples] [--info]\n                                        [--template-dir TEMPLATE_DIR]\n                                        [--registry REGISTRY]\n                                        [--ntm-bin NTM_BIN] [--dry-run]\n                                        [--apply]\n                                        [--idempotency-key IDEMPOTENCY_KEY]\n                                        [command]\n\nVersion/hash doctor for NTM spawn templates\n\npositional arguments:\n  command\n\noptions:\n  -h, --help            show this help message and exit\n  --json\n  --doctor\n  --health\n  --schema\n  --examples\n  --info\n  --template-dir TEMPLATE_DIR\n  --registry REGISTRY\n  --ntm-bin NTM_BIN\n  --dry-run\n  --apply\n  --idempotency-key IDEMPOTENCY_KEY\n",
+    "robot_docs": "{\"command\":\"robot-docs\",\"guide\":[\"Discover: ntm-spawn-templates-versioned.py capabilities --json\",\"Diagnose drift: ntm-spawn-templates-versioned.py doctor --json\",\"Preview registry refresh: ntm-spawn-templates-versioned.py registry --dry-run --json\",\"Apply only after review: ntm-spawn-templates-versioned.py registry --apply --idempotency-key KEY --json\"],\"schema_version\":\"ntm-spawn-templates-versioned/v1.robot_docs\"}\n"
+  },
+  "uplift": 80.0
+}

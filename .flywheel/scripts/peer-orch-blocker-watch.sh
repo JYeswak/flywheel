@@ -11,13 +11,40 @@ MODE="doctor"; JSON=0; DRY_RUN=1
 
 usage() {
   cat <<'USAGE'
-Usage: peer-orch-blocker-watch.sh [--doctor|--validate|--schema|--examples] [--json] [--session NAME] [--dry-run] [--apply]
+Usage: peer-orch-blocker-watch.sh [--doctor|--validate|--schema|--examples|--info|--capabilities] [--json] [--session NAME] [--dry-run] [--apply]
 Native sources: ntm swarm status --json; ntm rebalance <session> --dry-run --format json.
+
+Agent automation:
+  peer-orch-blocker-watch.sh --capabilities --json
+  peer-orch-blocker-watch.sh --doctor --json --session flywheel --dry-run
+  peer-orch-blocker-watch.sh --validate --json --ledger .flywheel/state/cross-orch-coordination.jsonl
+  Exit codes: 0 success, 2 usage error, 127 ntm executable missing.
 USAGE
 }
 
 schema() {
   jq -nc --arg version "$VERSION" '{schema_version:$version,native_sources:["ntm swarm status --json","ntm rebalance <session> --dry-run --format json"],wrapper_policy:["requested_owner=flywheel:1","threshold_seconds is L75 escalation policy"],output_fields:["status","peer_orch_blocker_age_seconds","stale_blockers_count","stale_blockers","native"]}'
+}
+
+capabilities() {
+  jq -nc --arg version "$VERSION" '{
+    schema_version:$version,
+    command:"capabilities",
+    contract_version:"1",
+    features:["json_output","doctor","validate","dry_run_default","ledger_mode","native_ntm_probe"],
+    commands:{
+      doctor:{command:"peer-orch-blocker-watch.sh --doctor --json --session flywheel --dry-run",read_only:true},
+      validate:{command:"peer-orch-blocker-watch.sh --validate --json --ledger PATH",read_only:true},
+      schema:{command:"peer-orch-blocker-watch.sh --schema",read_only:true},
+      examples:{command:"peer-orch-blocker-watch.sh --examples",read_only:true}
+    },
+    exit_codes:{"0":"success","2":"usage error","127":"ntm executable missing"},
+    env_vars:{
+      PEER_ORCH_BLOCKER_WATCH_NTM_BIN:"override ntm binary",
+      PEER_ORCH_BLOCKER_WATCH_SESSION:"default session",
+      FLYWHEEL_PEER_ORCH_BLOCKER_THRESHOLD_SECONDS:"stale blocker threshold"
+    }
+  }'
 }
 
 run_ledger_watch() {
@@ -169,6 +196,7 @@ while [[ $# -gt 0 ]]; do
     --validate) MODE="validate"; shift ;;
     --schema) MODE="schema"; shift ;;
     --examples) MODE="examples"; shift ;;
+    --info|--capabilities|capabilities) MODE="capabilities"; shift ;;
     --json) JSON=1; shift ;;
     --session) SESSION="${2:-}"; shift 2 ;;
     --threshold-seconds) THRESHOLD_SECONDS="${2:-}"; shift 2 ;;
@@ -184,6 +212,7 @@ done
 case "$MODE" in
   schema) schema ;;
   examples) printf 'peer-orch-blocker-watch.sh --doctor --json\npeer-orch-blocker-watch.sh --session flywheel --dry-run --json\n' ;;
+  capabilities) capabilities ;;
   doctor|validate)
     if [[ -n "$LEDGER" ]]; then
       result="$(run_ledger_watch)"

@@ -1,0 +1,6 @@
+# path|class|invoke_count_30d|capabilities_args|robot_docs_args|json_probe_args
+bin/flywheel|CLI|118|capabilities --json|robot-docs guide|doctor --repo . --json
+.flywheel/scripts/storage-probe.sh|doctor|68|capabilities --json|robot-docs|--json
+.flywheel/scripts/peer-orch-blocker-watch.sh|CLI|56|--capabilities --json|--help|--schema
+.flywheel/scripts/ntm-wave2-native-probes.sh|doctor|56|capabilities --json|robot-docs|agents --json
+.flywheel/scripts/ntm-spawn-templates-versioned.py|CLI|48|capabilities --json|robot-docs --json|doctor --json

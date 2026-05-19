@@ -22,6 +22,8 @@ usage:
   flywheel dispatch --repo PATH --simulate --json
   flywheel validate-receipt --repo PATH --file PATH --json
   flywheel inspect --repo PATH --json
+  flywheel capabilities --json
+  flywheel robot-docs guide
   flywheel quickstart --json
   flywheel help TOPIC --json
   flywheel completion bash|zsh
@@ -30,6 +32,12 @@ usage:
 
 Planned commands that are not public-release-ready yet:
   full-mode harness dispatch through NTM/Agent Mail
+
+Agent automation:
+  Start with: flywheel capabilities --json
+  Diagnose:   flywheel doctor --repo "$PWD" --json
+  Preview:    flywheel repair --scope reduced --repo "$PWD" --dry-run --json
+  Exit codes: 0 success, 30 repo state missing/invalid, 64 usage error
 EOF
 }
 
@@ -65,6 +73,41 @@ emit_examples() {
       {name:"validate closeout", command:"flywheel validate receipt --repo \"$PWD\" --file .flywheel/last_closeout_receipt.json --json"}
     ]
   }'
+}
+
+capabilities_cmd() {
+  jq -nc --arg version "$VERSION" '{
+    schema_version:"flywheel.capabilities.v0",
+    command:"capabilities",
+    version:$version,
+    contract_version:"1",
+    features:["json_output","reduced_mode","doctor","dry_run_repair","receipt_validation","robot_docs","completion"],
+    commands:{
+      doctor:{command:"flywheel doctor --repo PATH --json",read_only:true},
+      repair:{command:"flywheel repair --scope reduced --repo PATH --dry-run --json",read_only:false,safe_preview:true},
+      tick:{command:"flywheel tick --repo PATH --dry-run --json",read_only:true},
+      dispatch:{command:"flywheel dispatch --repo PATH --simulate --json",read_only:false,simulated:true},
+      validate_receipt:{command:"flywheel validate-receipt --repo PATH --file PATH --json",read_only:true},
+      robot_docs:{command:"flywheel robot-docs guide",read_only:true}
+    },
+    exit_codes:{"0":"success","30":"repo state missing or invalid","64":"usage error"},
+    env_vars:{}
+  }'
+}
+
+robot_docs_cmd() {
+  local topic="${1:-guide}"
+  [[ "$topic" == "guide" || "$topic" == "--json" ]] || die_usage "robot-docs topic must be guide"
+  cat <<'EOF'
+Flywheel robot guide:
+1. Discover: flywheel capabilities --json
+2. Diagnose: flywheel doctor --repo "$PWD" --json
+3. Preview repair: flywheel repair --scope reduced --repo "$PWD" --dry-run --json
+4. Preview work: flywheel tick --repo "$PWD" --dry-run --json
+5. Simulate dispatch: flywheel dispatch --repo "$PWD" --simulate --json
+6. Validate receipt: flywheel validate-receipt --repo "$PWD" --file .flywheel/last_closeout_receipt.json --json
+Use stdout as data; usage errors and diagnostics go to stderr.
+EOF
 }
 
 quickstart_cmd() {
@@ -103,6 +146,8 @@ help_topic() {
       elif $topic == "audit" then "audit reports repo-local Flywheel receipts and runtime surfaces without reading private fleet state"
       elif $topic == "why" then "why returns provenance pointers for public CLI objects and known beads"
       elif $topic == "completion" then "completion emits bash or zsh shell completion"
+      elif $topic == "capabilities" then "capabilities returns machine-readable command, feature, env-var, and exit-code contracts"
+      elif $topic == "robot-docs" then "robot-docs guide prints the paste-ready agent workflow"
       else "Flywheel public CLI supports reduced-mode first-run commands without requiring NTM or Agent Mail"
       end
     )
@@ -119,7 +164,7 @@ completion_cmd() {
     bash)
       cat <<'EOF'
 _flywheel_completion() {
-  COMPREPLY=($(compgen -W "preflight init doctor health repair validate audit why tick dispatch validate-receipt inspect quickstart help completion --info --examples --help" -- "${COMP_WORDS[COMP_CWORD]}"))
+  COMPREPLY=($(compgen -W "preflight init doctor health repair validate audit why tick dispatch validate-receipt inspect capabilities robot-docs quickstart help completion --info --examples --help" -- "${COMP_WORDS[COMP_CWORD]}"))
 }
 complete -F _flywheel_completion flywheel
 EOF
@@ -127,7 +172,7 @@ EOF
     zsh)
       cat <<'EOF'
 #compdef flywheel
-compadd preflight init doctor health repair validate audit why tick dispatch validate-receipt inspect quickstart help completion --info --examples --help
+compadd preflight init doctor health repair validate audit why tick dispatch validate-receipt inspect capabilities robot-docs quickstart help completion --info --examples --help
 EOF
       ;;
     *) die_usage "completion shell must be bash or zsh" ;;
@@ -465,6 +510,8 @@ case "${1:-}" in
   dispatch) shift; dispatch_repo "$@" ;;
   validate-receipt) shift; validate_receipt "$@" ;;
   inspect) shift; inspect_repo "$@" ;;
+  capabilities) shift; capabilities_cmd "$@" ;;
+  robot-docs) shift; robot_docs_cmd "$@" ;;
   quickstart) shift; quickstart_cmd "$@" ;;
   completion) shift; completion_cmd "$@" ;;
   --examples|examples)

@@ -1,0 +1,75 @@
+{
+  "dimensions": {
+    "agent_ease_of_use": {
+      "final": 875,
+      "initial": 750
+    },
+    "agent_ergonomics": {
+      "final": 850,
+      "initial": 725
+    },
+    "agent_intuitiveness": {
+      "final": 820,
+      "initial": 770
+    },
+    "composability": {
+      "final": 825,
+      "initial": 775
+    },
+    "determinism_and_reproducibility": {
+      "final": 850,
+      "initial": 800
+    },
+    "error_pedagogy": {
+      "final": 780,
+      "initial": 730
+    },
+    "intent_inference": {
+      "final": 725,
+      "initial": 675
+    },
+    "output_parseability": {
+      "final": 875,
+      "initial": 750
+    },
+    "safety_with_recovery": {
+      "final": 1000,
+      "initial": 950
+    },
+    "self_documentation": {
+      "final": 875,
+      "initial": 750
+    }
+  },
+  "evidence": {
+    "bad_invocation_rc": 64,
+    "capabilities_json": true,
+    "capabilities_rc": 0,
+    "deterministic_json_probe": true,
+    "help_rc": 0,
+    "json_probe_rc": 0,
+    "json_probe_valid_json": true,
+    "robot_docs_rc": 0,
+    "useful_error": true
+  },
+  "final_score": 847.5,
+  "initial_score": 767.5,
+  "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+  "schema_version": "agent-ergonomics.scorecard/v1",
+  "surface": {
+    "capabilities_args": "capabilities --json",
+    "class": "CLI",
+    "invoke_count_30d": 118,
+    "json_probe_args": "doctor --repo . --json",
+    "path": "bin/flywheel",
+    "robot_docs_args": "robot-docs guide"
+  },
+  "target": "/Users/josh/Developer/flywheel/bin/flywheel",
+  "transcripts": {
+    "bad_invocation_stderr": "ERROR: unknown command: --jsno\nusage:\n  flywheel preflight [args...]\n  flywheel init --repo PATH --json\n  flywheel doctor --repo PATH --json\n  flywheel health --json\n  flywheel repair --scope reduced --repo PATH --dry-run --json\n  flywheel validate repo --repo PATH --json\n  flywheel validate receipt --repo PATH --file PATH --json\n  flywheel audit --repo PATH --json\n  flywheel why ID --json\n  flywheel tick --repo PATH --dry-run --json\n  flywheel dispatch --repo PATH --simulate --json\n  flywheel validate-receipt --repo PATH --file PATH --json\n  flywheel inspect --repo PATH --json\n  flywheel capabilities --json\n  flywheel robot-docs guide\n  flywheel quickstart --json\n  flywheel help TOPIC --json\n  flywheel completion bash|zsh\n  flywheel --examples\n  flywheel --info\n\nPlanned commands that are not public-release-ready yet:\n  full-mode harness dispatch through NTM/Agent Mail\n\nAgent automation:\n  Start with: flywheel capabilities --json\n  Diagnose:   flywheel doctor --repo \"$PWD\" --json\n  Pre",
+    "capabilities": "{\"schema_version\":\"flywheel.capabilities.v0\",\"command\":\"capabilities\",\"version\":\"flywheel-public-spine/v0\",\"contract_version\":\"1\",\"features\":[\"json_output\",\"reduced_mode\",\"doctor\",\"dry_run_repair\",\"receipt_validation\",\"robot_docs\",\"completion\"],\"commands\":{\"doctor\":{\"command\":\"flywheel doctor --repo PATH --json\",\"read_only\":true},\"repair\":{\"command\":\"flywheel repair --scope reduced --repo PATH --dry-run --json\",\"read_only\":false,\"safe_preview\":true},\"tick\":{\"command\":\"flywheel tick --repo PATH --dry-run --json\",\"read_only\":true},\"dispatch\":{\"command\":\"flywheel dispatch --repo PATH --simulate --json\",\"read_only\":false,\"simulated\":true},\"validate_receipt\":{\"command\":\"flywheel validate-receipt --repo PATH --file PATH --json\",\"read_only\":true},\"robot_docs\":{\"command\":\"flywheel robot-docs guide\",\"read_only\":true}},\"exit_codes\":{\"0\":\"success\",\"30\":\"repo state missing or invalid\",\"64\":\"usage error\"},\"env_vars\":{}}\n",
+    "help": "usage:\n  flywheel preflight [args...]\n  flywheel init --repo PATH --json\n  flywheel doctor --repo PATH --json\n  flywheel health --json\n  flywheel repair --scope reduced --repo PATH --dry-run --json\n  flywheel validate repo --repo PATH --json\n  flywheel validate receipt --repo PATH --file PATH --json\n  flywheel audit --repo PATH --json\n  flywheel why ID --json\n  flywheel tick --repo PATH --dry-run --json\n  flywheel dispatch --repo PATH --simulate --json\n  flywheel validate-receipt --repo PATH --file PATH --json\n  flywheel inspect --repo PATH --json\n  flywheel capabilities --json\n  flywheel robot-docs guide\n  flywheel quickstart --json\n  flywheel help TOPIC --json\n  flywheel completion bash|zsh\n  flywheel --examples\n  flywheel --info\n\nPlanned commands that are not public-release-ready yet:\n  full-mode harness dispatch through NTM/Agent Mail\n\nAgent automation:\n  Start with: flywheel capabilities --json\n  Diagnose:   flywheel doctor --repo \"$PWD\" --json\n  Preview:    flywheel repair --scope reduced --repo \"$PWD\" --dry-run --json\n  Exit codes: 0 success, 30 repo state missing/invalid, 64 usage error\n",
+    "robot_docs": "Flywheel robot guide:\n1. Discover: flywheel capabilities --json\n2. Diagnose: flywheel doctor --repo \"$PWD\" --json\n3. Preview repair: flywheel repair --scope reduced --repo \"$PWD\" --dry-run --json\n4. Preview work: flywheel tick --repo \"$PWD\" --dry-run --json\n5. Simulate dispatch: flywheel dispatch --repo \"$PWD\" --simulate --json\n6. Validate receipt: flywheel validate-receipt --repo \"$PWD\" --file .flywheel/last_closeout_receipt.json --json\nUse stdout as data; usage errors and diagnostics go to stderr.\n"
+  },
+  "uplift": 80.0
+}

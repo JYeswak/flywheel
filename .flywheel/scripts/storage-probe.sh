@@ -467,7 +467,13 @@ usage() {
     "Usage:" \
     "  storage-probe.sh [--json] [--repo PATH] [--record-history] [--notify]" \
     "  storage-probe.sh --fixture PATH [--json] [--record-history] [--notify]" \
+    "  storage-probe.sh capabilities --json" \
+    "  storage-probe.sh robot-docs" \
     "  storage-probe.sh --schema|--info|--examples|--help" \
+    "" \
+    "Agent automation: start with capabilities --json, then run --json. Use" \
+    "--record-history only when intentionally appending storage history." \
+    "Exit codes: 0 success, 1 dependency/probe failure, 2 usage error." \
     "" \
     "Fields: disk_free_gb, disk_free_pct, developer_dir_gb, local_state_gb," \
     "stale_baks_count, stale_baks_size_mb, qdrant_volumes_size_mb, tmp_dispatch_artifacts_count."
@@ -494,6 +500,39 @@ schema_json() {
       stale_baks_count:{type:"integer"}
     }
   }'
+}
+
+capabilities_json() {
+  jq -nc --arg version "$VERSION" --arg history "$HISTORY" '{
+    schema_version:"storage-probe.capabilities.v1",
+    command:"capabilities",
+    version:$version,
+    contract_version:"1",
+    features:["json_output","fixture_mode","history_append_opt_in","thresholds","robot_docs"],
+    commands:{
+      probe:{command:"storage-probe.sh --json",read_only:true},
+      fixture:{command:"storage-probe.sh --fixture PATH --json",read_only:true},
+      record_history:{command:"storage-probe.sh --record-history --json",read_only:false},
+      schema:{command:"storage-probe.sh --schema",read_only:true}
+    },
+    exit_codes:{"0":"success","1":"dependency/probe failure","2":"usage error"},
+    env_vars:{
+      FLYWHEEL_STORAGE_HISTORY:$history,
+      FLYWHEEL_STORAGE_MIN_FREE_PCT:"minimum free percentage before fail",
+      FLYWHEEL_STORAGE_FIRE_FREE_PCT:"fire threshold for notification"
+    }
+  }'
+}
+
+robot_docs() {
+  cat <<'EOF'
+Storage probe robot guide:
+1. Discover: storage-probe.sh capabilities --json
+2. Read current state: storage-probe.sh --json
+3. Test with fixture: storage-probe.sh --fixture PATH --json
+4. Append history only when requested: storage-probe.sh --record-history --json
+5. Treat stdout as JSON data; diagnostics and usage errors go to stderr.
+EOF
 }
 
 now_iso() {
@@ -748,6 +787,8 @@ build_row() {
 parse_args() {
   while [ $# -gt 0 ]; do
     case "$1" in
+      capabilities|--capabilities) capabilities_json; exit 0 ;;
+      robot-docs|robot-docs-guide) robot_docs; exit 0 ;;
       --help|-h) usage; exit 0 ;;
       --examples) examples; exit 0 ;;
       --schema) schema_json; exit 0 ;;

@@ -295,6 +295,40 @@ def examples() -> dict[str, Any]:
     }
 
 
+def capabilities() -> dict[str, Any]:
+    return {
+        "schema_version": f"{SCHEMA_VERSION}.capabilities",
+        "command": "capabilities",
+        "contract_version": "1",
+        "features": ["json_output", "doctor", "registry_dry_run", "idempotent_apply", "robot_docs"],
+        "commands": {
+            "doctor": {"command": "ntm-spawn-templates-versioned.py doctor --json", "read_only": True},
+            "registry_dry_run": {"command": "ntm-spawn-templates-versioned.py registry --dry-run --json", "read_only": True},
+            "registry_apply": {"command": "ntm-spawn-templates-versioned.py registry --apply --idempotency-key KEY --json", "read_only": False},
+            "robot_docs": {"command": "ntm-spawn-templates-versioned.py robot-docs --json", "read_only": True},
+        },
+        "exit_codes": {"0": "success", "1": "runtime error", "2": "usage error"},
+        "env_vars": {
+            "NTM_SPAWN_TEMPLATES_DIR": "override template directory",
+            "NTM_SPAWN_TEMPLATE_REGISTRY": "override registry path",
+            "NTM_BIN": "override ntm binary",
+        },
+    }
+
+
+def robot_docs() -> dict[str, Any]:
+    return {
+        "schema_version": f"{SCHEMA_VERSION}.robot_docs",
+        "command": "robot-docs",
+        "guide": [
+            "Discover: ntm-spawn-templates-versioned.py capabilities --json",
+            "Diagnose drift: ntm-spawn-templates-versioned.py doctor --json",
+            "Preview registry refresh: ntm-spawn-templates-versioned.py registry --dry-run --json",
+            "Apply only after review: ntm-spawn-templates-versioned.py registry --apply --idempotency-key KEY --json",
+        ],
+    }
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Version/hash doctor for NTM spawn templates")
     parser.add_argument("command", nargs="?", default="doctor")
@@ -327,7 +361,9 @@ def main(argv: list[str]) -> int:
         args.command = "doctor"
     elif args.schema:
         args.command = "schema"
-    elif args.examples or args.info:
+    elif args.info:
+        args.command = "capabilities"
+    elif args.examples:
         args.command = "examples"
     if args.apply:
         args.dry_run = False
@@ -338,6 +374,10 @@ def main(argv: list[str]) -> int:
         payload = registry(args)
     elif args.command == "schema":
         payload = schema()
+    elif args.command in ("capabilities", "capability"):
+        payload = capabilities()
+    elif args.command in ("robot-docs", "robot-docs-guide"):
+        payload = robot_docs()
     elif args.command in ("examples", "info", "quickstart"):
         payload = examples()
     elif args.command in ("audit", "validate", "why"):
