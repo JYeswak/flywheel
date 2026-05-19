@@ -1,0 +1,6 @@
+# path|class|invoke_count_30d|capabilities_args|robot_docs_args|json_probe_args
+.flywheel/scripts/frozen-pane-detector.sh|ledger-writer|93|--info --json|--help|--info --json
+.flywheel/scripts/stale-error-auto-ping.sh|ledger-writer|82|--info --json|--help|doctor --json
+.flywheel/scripts/recovery-escape-then-reprompt.sh|ledger-writer|64|--info --json|--help|--info --json
+.flywheel/scripts/peer-orch-respawn-permit.sh|ledger-writer|48|--info|--help|--schema
+.flywheel/scripts/worker-auto-respawn-watchdog.sh|ledger-writer|45|--info|--help|--info

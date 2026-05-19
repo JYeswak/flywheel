@@ -1,0 +1,75 @@
+{
+  "dimensions": {
+    "agent_ease_of_use": {
+      "final": 875,
+      "initial": 750
+    },
+    "agent_ergonomics": {
+      "final": 850,
+      "initial": 725
+    },
+    "agent_intuitiveness": {
+      "final": 820,
+      "initial": 770
+    },
+    "composability": {
+      "final": 825,
+      "initial": 775
+    },
+    "determinism_and_reproducibility": {
+      "final": 850,
+      "initial": 800
+    },
+    "error_pedagogy": {
+      "final": 780,
+      "initial": 730
+    },
+    "intent_inference": {
+      "final": 725,
+      "initial": 675
+    },
+    "output_parseability": {
+      "final": 875,
+      "initial": 750
+    },
+    "safety_with_recovery": {
+      "final": 850,
+      "initial": 800
+    },
+    "self_documentation": {
+      "final": 875,
+      "initial": 750
+    }
+  },
+  "evidence": {
+    "bad_invocation_rc": 2,
+    "capabilities_json": true,
+    "capabilities_rc": 0,
+    "deterministic_json_probe": true,
+    "help_rc": 0,
+    "json_probe_rc": 0,
+    "json_probe_valid_json": true,
+    "robot_docs_rc": 0,
+    "useful_error": true
+  },
+  "final_score": 832.5,
+  "initial_score": 752.5,
+  "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+  "schema_version": "agent-ergonomics.scorecard/v1",
+  "surface": {
+    "capabilities_args": "--info --json",
+    "class": "ledger-writer",
+    "invoke_count_30d": 64,
+    "json_probe_args": "--info --json",
+    "path": ".flywheel/scripts/recovery-escape-then-reprompt.sh",
+    "robot_docs_args": "--help"
+  },
+  "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/recovery-escape-then-reprompt.sh",
+  "transcripts": {
+    "bad_invocation_stderr": "unknown argument: --jsno\n",
+    "capabilities": "{\"schema_version\":\"recovery-escape-then-reprompt/v1\",\"command\":\"info\",\"name\":\"recovery-escape-then-reprompt.sh\",\"version\":\"scaffolded-v0\",\"sha256\":\"aaa83a57b37fc6456f2a159514007a39dd6643bf54e53675816efc53b16d02b1\",\"paths\":{},\"env_vars\":[\"SCAFFOLD_AUDIT_LOG\"],\"subcommands\":[\"doctor\",\"health\",\"repair\",\"validate\",\"audit\",\"why\",\"quickstart\",\"help\",\"completion\"],\"dependencies\":[\"bash\",\"jq\",\"date\",\"shasum\"],\"mutation_requires\":\"--apply --idempotency-key (or default --json output)\",\"canonical_cli_surfaces\":[\"doctor\",\"health\",\"repair\",\"validate\",\"audit\",\"why\",\"quickstart\",\"help\",\"completion\",\"--info\",\"--schema\",\"--examples\"]}\n",
+    "help": "usage: recovery-escape-then-reprompt.sh [SUBCOMMAND] [OPTIONS]\n\nBackward-compatible run mode: default invocation routes to the original\ntop-level logic (now exposed as `cmd_run`).\n\nCanonical CLI surfaces:\n  doctor [--json]          probe substrate health\n  health [--json]          last-run status\n  repair --scope <s>       repair misconfigured state\n                            Default: --dry-run; mutate with --apply --idempotency-key KEY\n  validate <subject> [...] validate per-subject contract (TODO: define subjects)\n  audit [--json]           recent run history\n  why <id>                 explain provenance for a given id (TODO: id semantics)\n  quickstart [--json]      operator orientation\n  help <topic>             topic help (run | doctor | health | repair | validate)\n  completion <shell>       emit bash or zsh completion\n\nIntrospection:\n  --info --json            version, paths, env vars, dependencies, sha256\n  --schema [<surface>]     JSON Schema for output envelopes\n  --examples --json        curated workflow examples\n  --help / -h              this help\n",
+    "robot_docs": "usage: recovery-escape-then-reprompt.sh [SUBCOMMAND] [OPTIONS]\n\nBackward-compatible run mode: default invocation routes to the original\ntop-level logic (now exposed as `cmd_run`).\n\nCanonical CLI surfaces:\n  doctor [--json]          probe substrate health\n  health [--json]          last-run status\n  repair --scope <s>       repair misconfigured state\n                            Default: --dry-run; mutate with --apply --idempotency-key KEY\n  validate <subject> [...] validate per-subject contract (TODO: define subjects)\n  audit [--json]           recent run history\n  why <id>                 explain provenance for a given id (TODO: id semantics)\n  quickstart [--json]      operator orientation\n  help <topic>             topic help (run | doctor | health | repair | validate)\n  completion <shell>       emit bash or zsh completion\n\nIntrospection:\n  --info --json            version, paths, env vars, dependencies, sha256\n  --schema [<surface>]     JSON Schema for output envelopes\n  --examples --json        curated workflow examples\n  --help / -h              this help\n"
+  },
+  "uplift": 80.0
+}

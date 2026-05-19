@@ -1,0 +1,382 @@
+[
+  {
+    "dimensions": {
+      "agent_ease_of_use": {
+        "final": 875,
+        "initial": 750
+      },
+      "agent_ergonomics": {
+        "final": 850,
+        "initial": 725
+      },
+      "agent_intuitiveness": {
+        "final": 820,
+        "initial": 770
+      },
+      "composability": {
+        "final": 825,
+        "initial": 775
+      },
+      "determinism_and_reproducibility": {
+        "final": 850,
+        "initial": 800
+      },
+      "error_pedagogy": {
+        "final": 780,
+        "initial": 730
+      },
+      "intent_inference": {
+        "final": 725,
+        "initial": 675
+      },
+      "output_parseability": {
+        "final": 875,
+        "initial": 750
+      },
+      "safety_with_recovery": {
+        "final": 850,
+        "initial": 800
+      },
+      "self_documentation": {
+        "final": 875,
+        "initial": 750
+      }
+    },
+    "evidence": {
+      "bad_invocation_rc": 2,
+      "capabilities_json": true,
+      "capabilities_rc": 0,
+      "deterministic_json_probe": true,
+      "help_rc": 0,
+      "json_probe_rc": 0,
+      "json_probe_valid_json": true,
+      "robot_docs_rc": 0,
+      "useful_error": true
+    },
+    "final_score": 832.5,
+    "initial_score": 752.5,
+    "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+    "schema_version": "agent-ergonomics.scorecard/v1",
+    "surface": {
+      "capabilities_args": "--info --json",
+      "class": "ledger-writer",
+      "invoke_count_30d": 93,
+      "json_probe_args": "--info --json",
+      "path": ".flywheel/scripts/frozen-pane-detector.sh",
+      "robot_docs_args": "--help"
+    },
+    "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/frozen-pane-detector.sh",
+    "transcripts": {
+      "bad_invocation_stderr": "ERROR: unknown argument: --jsno\n",
+      "capabilities": "{\"schema_version\":\"frozen-pane-detector.v2\",\"success\":true,\"mode\":\"info\",\"version\":\"2026-05-04.2\",\"ntm_bin\":\"/Users/josh/.local/bin/ntm\",\"flywheel_loop_bin\":\"/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop\",\"repo_root\":\"/Users/josh/Developer/flywheel\",\"state_dir\":\"/Users/josh/.local/state/flywheel-loop\",\"cache_dir\":\"/Users/josh/.local/state/flywheel-loop\",\"strike_counter\":\"/Users/josh/.local/state/flywheel-loop/frozen-strike-counter.jsonl\",\"lease_dir\":\"/Users/josh/.local/state/flywheel-loop/frozen-pane-recovery-leases\",\"recovery_ledger\":\"/Users/josh/.local/state/flywheel-loop/frozen-pane-recovery-ledger.jsonl\",\"metrics_file\":\"/Users/josh/.local/state/flywheel-loop/frozen-pane-metrics.jsonl\",\"trauma_class\":\"frozen-codex-spinner-misclassified-as-thinking\",\"native_surface\":[\"ntm grep\",\"ntm errors\",\"ntm activity\",\"ntm wait\"],\"related_trauma_classes\":{\"template_stub\":\"template-stub-prompt\",\"queued_not_submitted\":\"frozen-codex-spinner-codex-queued-not-submitted\"},\"detection_signals\":[\"live_delta_frozen\",\"state_since_missing\",\"state_since_untrusted_no_delta\",\"template_stub_prompt\",\"queued_not_submitted\"],\"defaults\":{\"threshold_seconds\":90,\"queued_threshold_seconds\":60,\"queued_timer_drift_seconds\":60,\"min_delta_bytes\":100,\"lines\":20,\"lease_ttl_seconds\":600,\"cooldown_seconds\":1800,\"respawn_suppression_seconds\":120,\"sample_interval_seconds\":1,\"ntm_timeout_seconds\":8}}\n",
+      "help": "Usage:\n  frozen-pane-detector.sh --session=<session> [--json]\n  frozen-pane-detector.sh --session=all [--json]\n  frozen-pane-detector.sh --session=<session> --auto-recover [--dry-run] [--json]\n  frozen-pane-detector.sh --dry-run --self-test [--json]\n  frozen-pane-detector.sh --doctor [--json]\n  frozen-pane-detector.sh --health [--json]\n  frozen-pane-detector.sh --info [--json]\n  frozen-pane-detector.sh --schema\n  frozen-pane-detector.sh --examples\n  frozen-pane-detector.sh doctor|health [--json]\n  frozen-pane-detector.sh repair --scope audit_log_dir|ntm_state_dir [--dry-run|--apply --idempotency-key KEY] [--json]\n  frozen-pane-detector.sh validate session-name|recovery-mode|ntm-bin VALUE [--json]\n  frozen-pane-detector.sh audit|quickstart [--json]\n  frozen-pane-detector.sh why <id> [--json]\n  frozen-pane-detector.sh help <topic>\n  frozen-pane-detector.sh completion bash|zsh\n\nOptions:\n  --threshold-seconds N      Thinking/generating age threshold. Default: 90.\n  --queued-threshold-seconds N Waiting+queued prompt threshold. Default: 60.\n  --queued-timer-drift-seconds N Working timer drift threshold. Default: 60.\n  --min-delta-bytes N        Minimum live scrollback byte growth to avoid frozen. Default: 100.\n  --sample-interval-seconds N Delay between live scrollback samples. Default: 1.\n  --ntm-timeout-seconds N    Timeout for each ntm probe. Default: 8.\n  --lines N                  robot-tail line count. Default: 20.\n  --cache-dir PATH           Override scrollback cache directory.\n  --strike-file PATH         Override strike-counter JSONL.\n  --lease-dir PATH           Override recovery lease directory.\n  --lease-ttl-seconds N      Recovery lease TTL. Default: 600.\n  --cooldown-seconds N       Window for 3-strike recovery cooldown. Default: 1800.\n  --respawn-suppression-seconds N Window after recovery where stale residue is RESPAWN_SUPPRESSED. Default: 120.\n  --idempotency-key KEY      Idempotency key for a recovery attempt. Defaults to sample hash.\n  --metrics-file P",
+      "robot_docs": "Usage:\n  frozen-pane-detector.sh --session=<session> [--json]\n  frozen-pane-detector.sh --session=all [--json]\n  frozen-pane-detector.sh --session=<session> --auto-recover [--dry-run] [--json]\n  frozen-pane-detector.sh --dry-run --self-test [--json]\n  frozen-pane-detector.sh --doctor [--json]\n  frozen-pane-detector.sh --health [--json]\n  frozen-pane-detector.sh --info [--json]\n  frozen-pane-detector.sh --schema\n  frozen-pane-detector.sh --examples\n  frozen-pane-detector.sh doctor|health [--json]\n  frozen-pane-detector.sh repair --scope audit_log_dir|ntm_state_dir [--dry-run|--apply --idempotency-key KEY] [--json]\n  frozen-pane-detector.sh validate session-name|recovery-mode|ntm-bin VALUE [--json]\n  frozen-pane-detector.sh audit|quickstart [--json]\n  frozen-pane-detector.sh why <id> [--json]\n  frozen-pane-detector.sh help <topic>\n  frozen-pane-detector.sh completion bash|zsh\n\nOptions:\n  --threshold-seconds N      Thinking/generating age threshold. Default: 90.\n  --queued-threshold-seconds N Waiting+queued prompt threshold. Default: 60.\n  --queued-timer-drift-seconds N Working timer drift threshold. Default: 60.\n  --min-delta-bytes N        Minimum live scrollback byte growth to avoid frozen. Default: 100.\n  --sample-interval-seconds N Delay between live scrollback samples. Default: 1.\n  --ntm-timeout-seconds N    Timeout for each ntm probe. Default: 8.\n  --lines N                  robot-tail line count. Default: 20.\n  --cache-dir PATH           Override scrollback cache directory.\n  --strike-file PATH         Override strike-counter JSONL.\n  --lease-dir PATH           Override recovery lease directory.\n  --lease-ttl-seconds N      Recovery lease TTL. Default: 600.\n  --cooldown-seconds N       Window for 3-strike recovery cooldown. Default: 1800.\n  --respawn-suppression-seconds N Window after recovery where stale residue is RESPAWN_SUPPRESSED. Default: 120.\n  --idempotency-key KEY      Idempotency key for a recovery attempt. Defaults to sample hash.\n  --metrics-file P"
+    },
+    "uplift": 80.0,
+    "workspace": ".flywheel/scripts/frozen-pane-detector.sh__agent_ergonomics_audit"
+  },
+  {
+    "dimensions": {
+      "agent_ease_of_use": {
+        "final": 875,
+        "initial": 750
+      },
+      "agent_ergonomics": {
+        "final": 850,
+        "initial": 725
+      },
+      "agent_intuitiveness": {
+        "final": 820,
+        "initial": 770
+      },
+      "composability": {
+        "final": 825,
+        "initial": 775
+      },
+      "determinism_and_reproducibility": {
+        "final": 850,
+        "initial": 800
+      },
+      "error_pedagogy": {
+        "final": 780,
+        "initial": 730
+      },
+      "intent_inference": {
+        "final": 725,
+        "initial": 675
+      },
+      "output_parseability": {
+        "final": 875,
+        "initial": 750
+      },
+      "safety_with_recovery": {
+        "final": 850,
+        "initial": 800
+      },
+      "self_documentation": {
+        "final": 875,
+        "initial": 750
+      }
+    },
+    "evidence": {
+      "bad_invocation_rc": 2,
+      "capabilities_json": true,
+      "capabilities_rc": 0,
+      "deterministic_json_probe": true,
+      "help_rc": 0,
+      "json_probe_rc": 0,
+      "json_probe_valid_json": true,
+      "robot_docs_rc": 0,
+      "useful_error": true
+    },
+    "final_score": 832.5,
+    "initial_score": 752.5,
+    "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+    "schema_version": "agent-ergonomics.scorecard/v1",
+    "surface": {
+      "capabilities_args": "--info --json",
+      "class": "ledger-writer",
+      "invoke_count_30d": 82,
+      "json_probe_args": "doctor --json",
+      "path": ".flywheel/scripts/stale-error-auto-ping.sh",
+      "robot_docs_args": "--help"
+    },
+    "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/stale-error-auto-ping.sh",
+    "transcripts": {
+      "bad_invocation_stderr": "ERR: unknown argument: --jsno\n",
+      "capabilities": "{\"schema_version\":\"stale-error-auto-ping.v1\",\"mode\":\"info\",\"ntm\":\"/Users/josh/.local/bin/ntm\",\"default_session\":\"flywheel\",\"default_panes\":\"2,3,4\",\"default_interval_seconds\":300,\"mutation_default\":\"dry-run\",\"candidate_source\":\"ntm errors --json\",\"apply_transport\":\"ntm send --no-cass-check\",\"apply_requires\":\"--idempotency-key\",\"audit_log\":\"/Users/josh/.local/state/flywheel/stale-error-auto-ping-runs.jsonl\",\"exit_codes\":{\"0\":\"success or replay-no-op\",\"2\":\"usage error\",\"3\":\"--apply without --idempotency-key\"},\"flags\":[\"doctor\",\"health\",\"repair\",\"validate\",\"--session\",\"--panes\",\"--dry-run\",\"--apply\",\"--idempotency-key\",\"--watch\",\"--interval-seconds\",\"--ping-text\",\"--json\",\"--info\",\"--examples\",\"--version\",\"--help\"]}\n",
+      "help": "Usage: stale-error-auto-ping.sh [doctor|health|repair|validate] [--session NAME] [--panes 2,3,4] [--dry-run|--apply --idempotency-key KEY] [--watch] [--json]\n       stale-error-auto-ping.sh validate errors --errors-file PATH [--json]\n       stale-error-auto-ping.sh --info [--json] | --examples | --version\nFinds temporary L87 stale-error candidates from native `ntm errors --json`.\nApply sends only bounded no-op `ntm send --no-cass-check` pings. Default is dry-run.\n--apply requires --idempotency-key (rc=3 if missing). Per-pane ledger-replay skips\npanes already pinged with the same key (sister 8sx9w pair-pattern).\n",
+      "robot_docs": "Usage: stale-error-auto-ping.sh [doctor|health|repair|validate] [--session NAME] [--panes 2,3,4] [--dry-run|--apply --idempotency-key KEY] [--watch] [--json]\n       stale-error-auto-ping.sh validate errors --errors-file PATH [--json]\n       stale-error-auto-ping.sh --info [--json] | --examples | --version\nFinds temporary L87 stale-error candidates from native `ntm errors --json`.\nApply sends only bounded no-op `ntm send --no-cass-check` pings. Default is dry-run.\n--apply requires --idempotency-key (rc=3 if missing). Per-pane ledger-replay skips\npanes already pinged with the same key (sister 8sx9w pair-pattern).\n"
+    },
+    "uplift": 80.0,
+    "workspace": ".flywheel/scripts/stale-error-auto-ping.sh__agent_ergonomics_audit"
+  },
+  {
+    "dimensions": {
+      "agent_ease_of_use": {
+        "final": 875,
+        "initial": 750
+      },
+      "agent_ergonomics": {
+        "final": 850,
+        "initial": 725
+      },
+      "agent_intuitiveness": {
+        "final": 820,
+        "initial": 770
+      },
+      "composability": {
+        "final": 825,
+        "initial": 775
+      },
+      "determinism_and_reproducibility": {
+        "final": 850,
+        "initial": 800
+      },
+      "error_pedagogy": {
+        "final": 780,
+        "initial": 730
+      },
+      "intent_inference": {
+        "final": 725,
+        "initial": 675
+      },
+      "output_parseability": {
+        "final": 875,
+        "initial": 750
+      },
+      "safety_with_recovery": {
+        "final": 850,
+        "initial": 800
+      },
+      "self_documentation": {
+        "final": 875,
+        "initial": 750
+      }
+    },
+    "evidence": {
+      "bad_invocation_rc": 2,
+      "capabilities_json": true,
+      "capabilities_rc": 0,
+      "deterministic_json_probe": true,
+      "help_rc": 0,
+      "json_probe_rc": 0,
+      "json_probe_valid_json": true,
+      "robot_docs_rc": 0,
+      "useful_error": true
+    },
+    "final_score": 832.5,
+    "initial_score": 752.5,
+    "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+    "schema_version": "agent-ergonomics.scorecard/v1",
+    "surface": {
+      "capabilities_args": "--info --json",
+      "class": "ledger-writer",
+      "invoke_count_30d": 64,
+      "json_probe_args": "--info --json",
+      "path": ".flywheel/scripts/recovery-escape-then-reprompt.sh",
+      "robot_docs_args": "--help"
+    },
+    "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/recovery-escape-then-reprompt.sh",
+    "transcripts": {
+      "bad_invocation_stderr": "unknown argument: --jsno\n",
+      "capabilities": "{\"schema_version\":\"recovery-escape-then-reprompt/v1\",\"command\":\"info\",\"name\":\"recovery-escape-then-reprompt.sh\",\"version\":\"scaffolded-v0\",\"sha256\":\"aaa83a57b37fc6456f2a159514007a39dd6643bf54e53675816efc53b16d02b1\",\"paths\":{},\"env_vars\":[\"SCAFFOLD_AUDIT_LOG\"],\"subcommands\":[\"doctor\",\"health\",\"repair\",\"validate\",\"audit\",\"why\",\"quickstart\",\"help\",\"completion\"],\"dependencies\":[\"bash\",\"jq\",\"date\",\"shasum\"],\"mutation_requires\":\"--apply --idempotency-key (or default --json output)\",\"canonical_cli_surfaces\":[\"doctor\",\"health\",\"repair\",\"validate\",\"audit\",\"why\",\"quickstart\",\"help\",\"completion\",\"--info\",\"--schema\",\"--examples\"]}\n",
+      "help": "usage: recovery-escape-then-reprompt.sh [SUBCOMMAND] [OPTIONS]\n\nBackward-compatible run mode: default invocation routes to the original\ntop-level logic (now exposed as `cmd_run`).\n\nCanonical CLI surfaces:\n  doctor [--json]          probe substrate health\n  health [--json]          last-run status\n  repair --scope <s>       repair misconfigured state\n                            Default: --dry-run; mutate with --apply --idempotency-key KEY\n  validate <subject> [...] validate per-subject contract (TODO: define subjects)\n  audit [--json]           recent run history\n  why <id>                 explain provenance for a given id (TODO: id semantics)\n  quickstart [--json]      operator orientation\n  help <topic>             topic help (run | doctor | health | repair | validate)\n  completion <shell>       emit bash or zsh completion\n\nIntrospection:\n  --info --json            version, paths, env vars, dependencies, sha256\n  --schema [<surface>]     JSON Schema for output envelopes\n  --examples --json        curated workflow examples\n  --help / -h              this help\n",
+      "robot_docs": "usage: recovery-escape-then-reprompt.sh [SUBCOMMAND] [OPTIONS]\n\nBackward-compatible run mode: default invocation routes to the original\ntop-level logic (now exposed as `cmd_run`).\n\nCanonical CLI surfaces:\n  doctor [--json]          probe substrate health\n  health [--json]          last-run status\n  repair --scope <s>       repair misconfigured state\n                            Default: --dry-run; mutate with --apply --idempotency-key KEY\n  validate <subject> [...] validate per-subject contract (TODO: define subjects)\n  audit [--json]           recent run history\n  why <id>                 explain provenance for a given id (TODO: id semantics)\n  quickstart [--json]      operator orientation\n  help <topic>             topic help (run | doctor | health | repair | validate)\n  completion <shell>       emit bash or zsh completion\n\nIntrospection:\n  --info --json            version, paths, env vars, dependencies, sha256\n  --schema [<surface>]     JSON Schema for output envelopes\n  --examples --json        curated workflow examples\n  --help / -h              this help\n"
+    },
+    "uplift": 80.0,
+    "workspace": ".flywheel/scripts/recovery-escape-then-reprompt.sh__agent_ergonomics_audit"
+  },
+  {
+    "dimensions": {
+      "agent_ease_of_use": {
+        "final": 875,
+        "initial": 750
+      },
+      "agent_ergonomics": {
+        "final": 850,
+        "initial": 725
+      },
+      "agent_intuitiveness": {
+        "final": 820,
+        "initial": 770
+      },
+      "composability": {
+        "final": 825,
+        "initial": 775
+      },
+      "determinism_and_reproducibility": {
+        "final": 850,
+        "initial": 800
+      },
+      "error_pedagogy": {
+        "final": 780,
+        "initial": 730
+      },
+      "intent_inference": {
+        "final": 725,
+        "initial": 675
+      },
+      "output_parseability": {
+        "final": 875,
+        "initial": 750
+      },
+      "safety_with_recovery": {
+        "final": 850,
+        "initial": 800
+      },
+      "self_documentation": {
+        "final": 875,
+        "initial": 750
+      }
+    },
+    "evidence": {
+      "bad_invocation_rc": 2,
+      "capabilities_json": true,
+      "capabilities_rc": 0,
+      "deterministic_json_probe": true,
+      "help_rc": 0,
+      "json_probe_rc": 0,
+      "json_probe_valid_json": true,
+      "robot_docs_rc": 0,
+      "useful_error": true
+    },
+    "final_score": 832.5,
+    "initial_score": 752.5,
+    "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+    "schema_version": "agent-ergonomics.scorecard/v1",
+    "surface": {
+      "capabilities_args": "--info",
+      "class": "ledger-writer",
+      "invoke_count_30d": 48,
+      "json_probe_args": "--schema",
+      "path": ".flywheel/scripts/peer-orch-respawn-permit.sh",
+      "robot_docs_args": "--help"
+    },
+    "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/peer-orch-respawn-permit.sh",
+    "transcripts": {
+      "bad_invocation_stderr": "unknown argument: --jsno\nUsage: peer-orch-respawn-permit.sh [--target-session SESSION --target-pane PANE] [--actor-session SESSION --actor-pane PANE] [--reason TEXT] [--apply|--dry-run]\n       peer-orch-respawn-permit.sh health|doctor|repair|validate|audit|why|schema|examples|quickstart|completion|--info\n\nCanonical-CLI introspection flags (per canonical-cli-scoping skill):\n  --help, -h     this help text\n  --info         tool name + ledger paths (JSON)\n  --schema       JSON schema for the decision/health/etc emit envelopes\n  --examples     copy-pasteable invocation examples\n\nPolicy wrapper for peer orchestrator recovery. Flywheel keeps permit/refusal doctrine;\nNTM owns pane health detection and respawn mechanics.\n",
+      "capabilities": "{\"name\":\"peer-orch-respawn-permit\",\"ntm_bin\":\"ntm\",\"ledger\":\".flywheel/peer-orch-recovery.jsonl\",\"contract_ledger\":\".flywheel/peer-orch-recovery-contract.jsonl\"}\n",
+      "help": "Usage: peer-orch-respawn-permit.sh [--target-session SESSION --target-pane PANE] [--actor-session SESSION --actor-pane PANE] [--reason TEXT] [--apply|--dry-run]\n       peer-orch-respawn-permit.sh health|doctor|repair|validate|audit|why|schema|examples|quickstart|completion|--info\n\nCanonical-CLI introspection flags (per canonical-cli-scoping skill):\n  --help, -h     this help text\n  --info         tool name + ledger paths (JSON)\n  --schema       JSON schema for the decision/health/etc emit envelopes\n  --examples     copy-pasteable invocation examples\n\nPolicy wrapper for peer orchestrator recovery. Flywheel keeps permit/refusal doctrine;\nNTM owns pane health detection and respawn mechanics.\n",
+      "robot_docs": "Usage: peer-orch-respawn-permit.sh [--target-session SESSION --target-pane PANE] [--actor-session SESSION --actor-pane PANE] [--reason TEXT] [--apply|--dry-run]\n       peer-orch-respawn-permit.sh health|doctor|repair|validate|audit|why|schema|examples|quickstart|completion|--info\n\nCanonical-CLI introspection flags (per canonical-cli-scoping skill):\n  --help, -h     this help text\n  --info         tool name + ledger paths (JSON)\n  --schema       JSON schema for the decision/health/etc emit envelopes\n  --examples     copy-pasteable invocation examples\n\nPolicy wrapper for peer orchestrator recovery. Flywheel keeps permit/refusal doctrine;\nNTM owns pane health detection and respawn mechanics.\n"
+    },
+    "uplift": 80.0,
+    "workspace": ".flywheel/scripts/peer-orch-respawn-permit.sh__agent_ergonomics_audit"
+  },
+  {
+    "dimensions": {
+      "agent_ease_of_use": {
+        "final": 875,
+        "initial": 750
+      },
+      "agent_ergonomics": {
+        "final": 850,
+        "initial": 725
+      },
+      "agent_intuitiveness": {
+        "final": 820,
+        "initial": 770
+      },
+      "composability": {
+        "final": 825,
+        "initial": 775
+      },
+      "determinism_and_reproducibility": {
+        "final": 850,
+        "initial": 800
+      },
+      "error_pedagogy": {
+        "final": 780,
+        "initial": 730
+      },
+      "intent_inference": {
+        "final": 725,
+        "initial": 675
+      },
+      "output_parseability": {
+        "final": 875,
+        "initial": 750
+      },
+      "safety_with_recovery": {
+        "final": 850,
+        "initial": 800
+      },
+      "self_documentation": {
+        "final": 875,
+        "initial": 750
+      }
+    },
+    "evidence": {
+      "bad_invocation_rc": 64,
+      "capabilities_json": true,
+      "capabilities_rc": 0,
+      "deterministic_json_probe": true,
+      "help_rc": 0,
+      "json_probe_rc": 0,
+      "json_probe_valid_json": true,
+      "robot_docs_rc": 0,
+      "useful_error": true
+    },
+    "final_score": 832.5,
+    "initial_score": 752.5,
+    "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+    "schema_version": "agent-ergonomics.scorecard/v1",
+    "surface": {
+      "capabilities_args": "--info",
+      "class": "ledger-writer",
+      "invoke_count_30d": 45,
+      "json_probe_args": "--info",
+      "path": ".flywheel/scripts/worker-auto-respawn-watchdog.sh",
+      "robot_docs_args": "--help"
+    },
+    "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/worker-auto-respawn-watchdog.sh",
+    "transcripts": {
+      "bad_invocation_stderr": "unknown arg: --jsno\nusage: worker-auto-respawn-watchdog.sh [--dry-run|--apply] [--json] [--session NAME] [--pane N]\n",
+      "capabilities": "{\"schema_version\":\"worker-auto-respawn-watchdog/v1\",\"command\":\"info\",\"name\":\"worker-auto-respawn-watchdog.sh\",\"version\":\"scaffolded-v0\",\"sha256\":\"3d7ab278e56877ad58f5fd4db8f04ddf7d2dfb9927915289e05a1ff894473ebb\",\"paths\":{},\"env_vars\":[\"SCAFFOLD_AUDIT_LOG\"],\"subcommands\":[\"doctor\",\"health\",\"repair\",\"validate\",\"audit\",\"why\",\"quickstart\",\"help\",\"completion\"],\"dependencies\":[\"bash\",\"jq\",\"date\",\"shasum\"],\"mutation_requires\":\"--apply --idempotency-key (or default --json output)\",\"canonical_cli_surfaces\":[\"doctor\",\"health\",\"repair\",\"validate\",\"audit\",\"why\",\"quickstart\",\"help\",\"completion\",\"--info\",\"--schema\",\"--examples\"]}\n",
+      "help": "usage: worker-auto-respawn-watchdog.sh [SUBCOMMAND] [OPTIONS]\n\nBackward-compatible run mode: default invocation routes to the original\ntop-level logic (now exposed as `cmd_run`).\n\nCanonical CLI surfaces:\n  doctor [--json]          probe substrate health\n  health [--json]          last-run status\n  repair --scope <s>       repair misconfigured state\n                            Default: --dry-run; mutate with --apply --idempotency-key KEY\n  validate <subject> [...] validate per-subject contract (TODO: define subjects)\n  audit [--json]           recent run history\n  why <id>                 explain provenance for a given id (TODO: id semantics)\n  quickstart [--json]      operator orientation\n  help <topic>             topic help (run | doctor | health | repair | validate)\n  completion <shell>       emit bash or zsh completion\n\nIntrospection:\n  --info --json            version, paths, env vars, dependencies, sha256\n  --schema [<surface>]     JSON Schema for output envelopes\n  --examples --json        curated workflow examples\n  --help / -h              this help\n",
+      "robot_docs": "usage: worker-auto-respawn-watchdog.sh [SUBCOMMAND] [OPTIONS]\n\nBackward-compatible run mode: default invocation routes to the original\ntop-level logic (now exposed as `cmd_run`).\n\nCanonical CLI surfaces:\n  doctor [--json]          probe substrate health\n  health [--json]          last-run status\n  repair --scope <s>       repair misconfigured state\n                            Default: --dry-run; mutate with --apply --idempotency-key KEY\n  validate <subject> [...] validate per-subject contract (TODO: define subjects)\n  audit [--json]           recent run history\n  why <id>                 explain provenance for a given id (TODO: id semantics)\n  quickstart [--json]      operator orientation\n  help <topic>             topic help (run | doctor | health | repair | validate)\n  completion <shell>       emit bash or zsh completion\n\nIntrospection:\n  --info --json            version, paths, env vars, dependencies, sha256\n  --schema [<surface>]     JSON Schema for output envelopes\n  --examples --json        curated workflow examples\n  --help / -h              this help\n"
+    },
+    "uplift": 80.0,
+    "workspace": ".flywheel/scripts/worker-auto-respawn-watchdog.sh__agent_ergonomics_audit"
+  }
+]

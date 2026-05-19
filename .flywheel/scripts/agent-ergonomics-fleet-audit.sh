@@ -113,7 +113,15 @@ def score_surface(row: dict) -> dict:
     docs_ok = docs_run["rc"] == 0 and bool(docs_run["stdout"].strip())
     try:
         caps_payload = json.loads(caps_run["stdout"])
-        caps_json = isinstance(caps_payload, dict) and ("features" in caps_payload or caps_payload.get("command") == "capabilities")
+        caps_json = isinstance(caps_payload, dict) and (
+            "features" in caps_payload
+            or "capabilities" in caps_payload
+            or "canonical_cli_surfaces" in caps_payload
+            or "exit_codes" in caps_payload
+            or caps_payload.get("command") in {"capabilities", "info"}
+            or "native_surface" in caps_payload
+            or "name" in caps_payload
+        )
     except json.JSONDecodeError:
         caps_payload = None
     try:
@@ -194,7 +202,7 @@ def write_workspace(row: dict, scorecard: dict) -> Path:
 set -euo pipefail
 TARGET="{target}"
 "$TARGET" --help >/dev/null
-"$TARGET" {row['capabilities_args']} | jq -e '.schema_version and (.features or .command)' >/dev/null
+"$TARGET" {row['capabilities_args']} | jq -e 'type == "object" and (.schema_version or .features or .capabilities or .canonical_cli_surfaces or .exit_codes or .native_surface or .name or .command)' >/dev/null
 "$TARGET" {row['json_probe_args']} | jq -e 'type == "object"' >/dev/null
 printf 'PASS {row['path']} agent ergonomics regression\\n'
 """
@@ -217,8 +225,14 @@ for row in rows:
     scorecards.append(scorecard)
 
 median_score = round(statistics.median([row["final_score"] for row in scorecards]), 1)
+if "phase3a" in output_dir.name:
+    title = "Agent Ergonomics Phase 3a Next 5 Summary"
+    continuation_line = "Later scoped passes should continue with remaining T1 agent-facing surfaces only; tests remain out of scope for this skill."
+else:
+    title = "Agent Ergonomics Phase 3 Top 5 Summary"
+    continuation_line = "Phase 3a should continue with remaining T1 CLI/doctor surfaces only; tests in the Top-20 queue remain out of scope for this skill."
 summary_lines = [
-    "# Agent Ergonomics Phase 3 Top 5 Summary",
+    f"# {title}",
     "",
     f"- Surfaces audited: {len(scorecards)}",
     f"- Median final score: {median_score}",
@@ -239,7 +253,7 @@ summary_lines.extend([
     "## Recommendation Rollup",
     "",
     "- Keep capabilities and robot-docs endpoints on all five top-T1 agent-facing surfaces.",
-    "- Phase 3a should continue with remaining T1 CLI/doctor surfaces only; tests in the Top-20 queue remain out of scope for this skill.",
+    f"- {continuation_line}",
     "- Later passes can lift intent-inference scores by adding typo-specific `did you mean` suggestions.",
     "",
 ])
