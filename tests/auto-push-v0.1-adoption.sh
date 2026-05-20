@@ -38,9 +38,13 @@ push_cadence: post-commit
 allowed_branches_regex: "^(main|master|feature/.*)$"
 forbidden_branches_regex: "^(private/.*|wip/.*)$"
 private_paths_blocklist: []
+known_dirty_paths_allow_list:
+  - ".flywheel/MISSION.md"
+  - ".flywheel/runtime/auto-push-ledger.jsonl"
 ledger_path: ".flywheel/runtime/auto-push-ledger.jsonl"
 on_failure: "block_next_commit"
 YAML
+printf '# Mission\n' >"$repo/.flywheel/MISSION.md"
 printf 'name: fixture\non: [push]\njobs: {fixture: {runs-on: ubuntu-latest, steps: [{run: "true"}]}}\n' >"$repo/.github/workflows/ci.yml"
 printf 'baseline\n' >"$repo/README.md"
 git -C "$repo" add .
@@ -103,5 +107,17 @@ AUTO_PUSH_LEDGER="$ledger" AUTO_PUSH_SECRET_LEDGER="$TMP/secret.jsonl" AUTO_PUSH
 ok_jq "soak probe emits counts" '.post_commit_hook_fired_count >= 1 and .push_success_count >= 1 and .push_blocked_count == 0 and .gitguardian_finding_count == 0' "$TMP/soak-out.json"
 ok_jq "soak ledger row written" '.schema_version=="flywheel.auto_push_soak_probe.v1" and (.dashboard_line|contains("Auto-push soak:"))' "$TMP/soak.jsonl"
 
+printf 'runtime journal drift\n' >>"$repo/.flywheel/MISSION.md"
+(cd "$repo" && .flywheel/scripts/auto-push.sh --source fixture-allow-list --json >"$TMP/allow-list.json")
+ok_jq "allow-listed dirty path pushes" '.status=="clean" and .reason=="pushed" and (.dirty_paths|index(".flywheel/MISSION.md")) and (.dirty_allowed_paths|index(".flywheel/MISSION.md")) and (.dirty_blocking_paths|length == 0)' "$TMP/allow-list.json"
+
+printf 'unlisted dirty drift\n' >>"$repo/README.md"
+set +e
+(cd "$repo" && .flywheel/scripts/auto-push.sh --source fixture-block --json >"$TMP/block.json")
+block_rc=$?
+set -e
+ok "unlisted dirty path blocks" test "$block_rc" -eq 12
+ok_jq "ledger records blocking dirty path" '.status=="blocked" and .reason=="dirty_tree" and (.dirty_blocking_paths|index("README.md")) and (.dirty_allowed_paths|index(".flywheel/MISSION.md"))' "$TMP/block.json"
+
 printf 'SUMMARY pass=%d fail=%d\n' "$pass" "$fail"
-[[ "$fail" -eq 0 && "$pass" -ge 10 ]]
+[[ "$fail" -eq 0 && "$pass" -ge 13 ]]

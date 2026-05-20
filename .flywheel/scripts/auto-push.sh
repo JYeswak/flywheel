@@ -27,6 +27,10 @@ FORBIDDEN_BRANCHES_REGEX=""
 LEDGER_PATH="$DEFAULT_LEDGER"
 ON_FAILURE="block_next_commit"
 PRIVATE_BLOCKLIST=()
+KNOWN_DIRTY_PATHS_ALLOW_LIST=()
+CURRENT_DIRTY_PATHS=()
+ALLOWED_DIRTY_PATHS=()
+BLOCKING_DIRTY_PATHS=()
 
 usage() {
   cat <<'USAGE'
@@ -58,12 +62,18 @@ strip_quotes() {
 
 load_policy() {
   [[ -f "$POLICY_PATH" ]] || return 0
-  local line key value in_blocklist=0 item
+    local line key value in_blocklist=0 in_allowlist=0 item
   while IFS= read -r line || [[ -n "$line" ]]; do
     line="${line%%#*}"
     [[ -n "$(trim "$line")" ]] || continue
     if [[ "$line" =~ ^[[:space:]]*private_paths_blocklist[[:space:]]*:[[:space:]]*$ ]]; then
       in_blocklist=1
+      in_allowlist=0
+      continue
+    fi
+    if [[ "$line" =~ ^[[:space:]]*known_dirty_paths_allow_list[[:space:]]*:[[:space:]]*$ ]]; then
+      in_blocklist=0
+      in_allowlist=1
       continue
     fi
     if [[ "$in_blocklist" -eq 1 && "$line" =~ ^[[:space:]]*-[[:space:]]*(.*)$ ]]; then
@@ -71,7 +81,13 @@ load_policy() {
       [[ -n "$item" ]] && PRIVATE_BLOCKLIST+=("$item")
       continue
     fi
+    if [[ "$in_allowlist" -eq 1 && "$line" =~ ^[[:space:]]*-[[:space:]]*(.*)$ ]]; then
+      item="$(strip_quotes "$(trim "${BASH_REMATCH[1]}")")"
+      [[ -n "$item" ]] && KNOWN_DIRTY_PATHS_ALLOW_LIST+=("$item")
+      continue
+    fi
     in_blocklist=0
+    in_allowlist=0
     [[ "$line" =~ ^[[:space:]]*([A-Za-z_][A-Za-z0-9_-]*)[[:space:]]*:[[:space:]]*(.*)$ ]] || continue
     key="${BASH_REMATCH[1]//-/_}"
     value="$(strip_quotes "$(trim "${BASH_REMATCH[2]}")")"
@@ -123,11 +139,15 @@ append_ledger() {
     --arg push_cadence "$PUSH_CADENCE" \
     --arg on_failure "$ON_FAILURE" \
     --arg since "$SINCE" \
+    --argjson dirty_paths "$(printf '%s\n' "${CURRENT_DIRTY_PATHS[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')" \
+    --argjson dirty_allow_list "$(printf '%s\n' "${KNOWN_DIRTY_PATHS_ALLOW_LIST[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')" \
+    --argjson dirty_allowed_paths "$(printf '%s\n' "${ALLOWED_DIRTY_PATHS[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')" \
+    --argjson dirty_blocking_paths "$(printf '%s\n' "${BLOCKING_DIRTY_PATHS[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')" \
     --argjson exit_code "$exit_code" \
     --argjson dry_run "$DRY_RUN" \
     --argjson push_attempted "$push_attempted" \
     --argjson push_success "$push_success" \
-    '{schema_version:$schema,ts:$ts,source:$source,repo:$repo,commit:$commit,branch:$branch,upstream:$upstream,status:$status,reason:$reason,exit_code:$exit_code,dry_run:$dry_run,push_attempted:$push_attempted,push_success:$push_success,local_ci_status:$local_ci_status,gitguardian_status:$gitguardian_status,supabase_mirror_status:$supabase_mirror_status,push_cadence:$push_cadence,on_failure:$on_failure,since:$since}' >>"$LEDGER_PATH"
+    '{schema_version:$schema,ts:$ts,source:$source,repo:$repo,commit:$commit,branch:$branch,upstream:$upstream,status:$status,reason:$reason,exit_code:$exit_code,dry_run:$dry_run,push_attempted:$push_attempted,push_success:$push_success,local_ci_status:$local_ci_status,gitguardian_status:$gitguardian_status,supabase_mirror_status:$supabase_mirror_status,push_cadence:$push_cadence,on_failure:$on_failure,since:$since,dirty_paths:$dirty_paths,known_dirty_paths_allow_list:$dirty_allow_list,dirty_allowed_paths:$dirty_allowed_paths,dirty_blocking_paths:$dirty_blocking_paths}' >>"$LEDGER_PATH"
 }
 
 emit() {
@@ -206,6 +226,32 @@ glob_to_regex() {
   printf '^%s$' "$glob"
 }
 
+dirty_path_allowed() {
+  [[ "${#KNOWN_DIRTY_PATHS_ALLOW_LIST[@]}" -gt 0 ]] || return 1
+  local path="$1" pattern regex
+  for pattern in "${KNOWN_DIRTY_PATHS_ALLOW_LIST[@]}"; do
+    regex="$(glob_to_regex "$pattern")"
+    [[ "$path" =~ $regex ]] && return 0
+  done
+  return 1
+}
+
+classify_dirty_paths() {
+  local status_out="$1" path
+  CURRENT_DIRTY_PATHS=()
+  ALLOWED_DIRTY_PATHS=()
+  BLOCKING_DIRTY_PATHS=()
+  while IFS= read -r path; do
+    [[ -n "$path" ]] || continue
+    CURRENT_DIRTY_PATHS+=("$path")
+    if dirty_path_allowed "$path"; then
+      ALLOWED_DIRTY_PATHS+=("$path")
+    else
+      BLOCKING_DIRTY_PATHS+=("$path")
+    fi
+  done < <(printf '%s\n' "$status_out" | sed -E 's/^.. //' | sed -E 's/^.* -> //')
+}
+
 private_path_blocked() {
   [[ "${#PRIVATE_BLOCKLIST[@]}" -gt 0 ]] || return 1
   local range path pattern regex
@@ -242,8 +288,11 @@ load_policy
 unmerged="$("$GIT_BIN" -C "$REPO" ls-files -u 2>&1)"
 [[ -z "$unmerged" ]] || emit blocked unmerged_paths 10 false false skipped skipped skipped
 [[ ! -f "$REPO/.git/MERGE_HEAD" && ! -d "$REPO/.git/rebase-merge" && ! -d "$REPO/.git/rebase-apply" ]] || emit blocked git_operation_in_progress 11 false false skipped skipped skipped
-status_out="$("$GIT_BIN" -C "$REPO" status --porcelain 2>&1)"
-[[ -z "$status_out" ]] || emit blocked dirty_tree 12 false false skipped skipped skipped
+status_out="$("$GIT_BIN" -C "$REPO" status --porcelain -uall 2>&1)"
+if [[ -n "$status_out" ]]; then
+  classify_dirty_paths "$status_out"
+  [[ "${#BLOCKING_DIRTY_PATHS[@]}" -eq 0 ]] || emit blocked dirty_tree 12 false false skipped skipped skipped
+fi
 
 branch="$(current_branch)"
 [[ "$branch" != "HEAD" && -n "$branch" ]] || emit blocked detached_head 13 false false skipped skipped skipped

@@ -13,5 +13,8 @@ private_paths_blocklist:
   - ".env"
   - ".env.*"
   - "state/secrets/**"
+known_dirty_paths_allow_list:
+  - ".flywheel/MISSION.md"
+  - ".flywheel/runtime/auto-push-ledger.jsonl"
 ledger_path: ".flywheel/runtime/auto-push-ledger.jsonl"
 on_failure: "block_next_commit"
