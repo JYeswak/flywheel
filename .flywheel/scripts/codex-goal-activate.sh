@@ -191,16 +191,34 @@ case "$state" in
 esac
 
 # Stage 0.3: context-pre-clear (bypass-mitigation candidate 2 — flywheel:1 ratified 2026-05-20T06:52Z).
-# Adopted from skillos canonical 2026-05-20 commit 1ed3ea30 (joint bypass-mitigation sub-sprint).
+# Adopted from skillos canonical 2026-05-20 commit 1ed3ea30 (initial) + b4d085db (bug fix per flywheel:1 07:31Z).
 # Send /clear slash command to reset codex session-context-state before /goal palette activation.
 # Mitigates bypass-class fires correlated with accumulated session context (N=7 observed 2026-05-20).
+#
+# BUG FIX 2026-05-20T07:31Z: /clear is ALSO a slash command requiring palette engagement (same as /goal).
+# Initial impl sent /clear + Enter — Enter didn't submit, /clear stayed primed, then Stage 1 /goal typed
+# on top producing "/clear /goal" concatenation. Fix: mirror /goal Stage-3 pattern — keystrokes + probe
+# palette + space (commit palette to arg-mode) + Enter (submit). Escape-out if palette never primed.
+#
 # Skip if CODEX_GOAL_SKIP_CONTEXT_CLEAR=1 (escape hatch for cross-validation A/B testing).
 if [[ "${CODEX_GOAL_SKIP_CONTEXT_CLEAR:-0}" != "1" ]]; then
-  emit_json "info" "stage0.3" "context pre-clear: sending /clear keystrokes"
+  emit_json "info" "stage0.3" "context pre-clear: sending /clear via palette pattern"
   tmux send-keys -t "$TARGET" "/" "c" "l" "e" "a" "r" 2>/dev/null
   sleep 0.5
-  tmux send-keys -t "$TARGET" Enter 2>/dev/null
-  sleep 1.5
+  # Probe primed-blue state for /clear (mirror probe_primed_blue_state for /goal)
+  snap=$(tmux capture-pane -t "$TARGET" -p 2>/dev/null | tail -10 || true)
+  if echo "$snap" | grep -qE '›[[:space:]]+/clear( |$)'; then
+    emit_json "info" "stage0.3" "/clear palette primed; sending space+Enter to commit+submit"
+    tmux send-keys -t "$TARGET" " " 2>/dev/null
+    sleep 0.3
+    tmux send-keys -t "$TARGET" Enter 2>/dev/null
+    sleep 2
+  else
+    emit_json "warn" "stage0.3" "/clear palette not primed after keystrokes — skipping submit (won't pollute chevron)"
+    # Send Escape to clear any partial input before proceeding to Stage 0.5
+    tmux send-keys -t "$TARGET" Escape 2>/dev/null
+    sleep 0.5
+  fi
 fi
 
 # Stage 0.5: clear stale palette/input residue before typing /goal.
