@@ -13,3 +13,10 @@ jq -r '
   .spend_dashboard as $d
   | "CI spend: $\($d.current_month_estimate_usd) est this month, \($d.on_target_pct)%-on-target (\($d.target_label); source=\($d.source))"
 ' "$POLICY"
+
+storage_line="$("$ROOT/.flywheel/scripts/storage-health-probe.sh" --json 2>/dev/null | jq -r '.dashboard_line // empty' 2>/dev/null || true)"
+if [[ -n "$storage_line" ]]; then
+  printf '%s\n' "$storage_line"
+else
+  printf 'Storage: (no data)\n'
+fi

@@ -495,12 +495,14 @@ schema_json() {
     "$schema":"https://json-schema.org/draft/2020-12/schema",
     title:"flywheel storage probe",
     type:"object",
-    required:["version","ts","status","disk_free_gb","disk_free_pct","developer_dir_gb","local_state_gb","stale_baks_count","stale_baks_size_mb","qdrant_volumes_size_mb","tmp_dispatch_artifacts_count","errors","warnings"],
+    required:["version","ts","status","disk_free_gb","disk_free_pct","developer_dir_gb","local_state_gb","stale_baks_count","stale_baks_size_mb","qdrant_volumes_size_mb","tmp_dispatch_artifacts_count","errors","warnings","storage_tier","storage_tier_label","storage_health"],
     properties:{
       status:{enum:["ok","warn","fail"]},
       disk_free_gb:{type:"number"},
       disk_free_pct:{type:"number"},
-      stale_baks_count:{type:"integer"}
+      stale_baks_count:{type:"integer"},
+      storage_tier:{type:"integer",minimum:0,maximum:5},
+      storage_tier_label:{enum:["comfortable","monitor","soft_prune","critical","fire","nuclear"]}
     }
   }'
 }
@@ -725,12 +727,39 @@ status_json() {
       | (($m.disk_free_pct // 0) < $fire_free) as $fire
       | (($m.stale_baks_count // 0) > 5) as $many_baks
       | ($m.probe_warnings // []) as $probe_warnings
+      | (($m.compaction_failed == true) or ($m.docker_raw_dominates == true) or ($m.machine_blocked == true) or ($m.nuclear_signal == true) or ($m.storage_nuclear == true)) as $nuclear
+      | (($m.storage_backed_services_unhealthy == true) or ($m.docker_unhealthy == true) or ($m.qdrant_unhealthy == true)) as $service_unhealthy
+      | (($m.disk_free_pct // 0) | tonumber) as $free_pct
+      | (if $nuclear then 5 elif $free_pct < 5 then 4 elif ($free_pct <= 15 or $service_unhealthy) then 3 elif $free_pct < 30 then 2 elif $free_pct <= 50 then 1 else 0 end) as $storage_tier
+      | (["comfortable","monitor","soft_prune","critical","fire","nuclear"][$storage_tier]) as $storage_tier_label
+      | [
+          {name:"developer_dir_gb",value:(($m.developer_dir_gb // 0) | tonumber),unit:"GiB"},
+          {name:"local_state_gb",value:(($m.local_state_gb // 0) | tonumber),unit:"GiB"},
+          {name:"stale_baks_count",value:(($m.stale_baks_count // 0) | floor),unit:"count"},
+          {name:"stale_baks_size_mb",value:(($m.stale_baks_size_mb // 0) | tonumber),unit:"MiB"},
+          {name:"qdrant_volumes_size_mb",value:(($m.qdrant_volumes_size_mb // 0) | tonumber),unit:"MiB"},
+          {name:"tmp_dispatch_artifacts_count",value:(($m.tmp_dispatch_artifacts_count // 0) | floor),unit:"count"}
+        ] as $accumulators
       | {
           version:$version,
           ts:$ts,
           repo:$repo,
-          status:(if ($low or $many_baks) then "fail" elif (($m.disk_free_pct // 0) < 15) then "warn" else "ok" end),
-          tier:(if $fire then "FIRE" elif $low then "CRITICAL" elif (($m.disk_free_pct // 0) < 15) then "SOFT_PRUNE" else "OK" end),
+          status:(if ($storage_tier >= 3 or $many_baks) then "fail" elif $storage_tier == 2 then "warn" else "ok" end),
+          tier:(if $storage_tier == 5 then "NUCLEAR" elif $storage_tier == 4 then "FIRE" elif $storage_tier == 3 then "CRITICAL" elif $storage_tier == 2 then "SOFT_PRUNE" else "OK" end),
+          storage_tier:$storage_tier,
+          storage_tier_label:$storage_tier_label,
+          storage_gate_blocks_dispatch:($storage_tier >= 3),
+          storage_health:{
+            schema_version:"storage-health-probe/v1",
+            status:(if $storage_tier >= 3 then "fail" elif $storage_tier == 2 then "warn" else "ok" end),
+            tier:$storage_tier,
+            tier_label:$storage_tier_label,
+            free_pct:$free_pct,
+            accumulators:$accumulators,
+            dispatch_gate:{blocks_dispatch:($storage_tier >= 3),threshold_tier:3,reason:(if $storage_tier >= 3 then "tier>=3" else "tier<3" end)},
+            dashboard_line:("Storage: tier=\($storage_tier)/\($storage_tier_label) free=\($free_pct)% gate=" + (if $storage_tier >= 3 then "block" else "allow" end) + " accumulators=\($accumulators|length)")
+          },
+          dashboard_line:("Storage: tier=\($storage_tier)/\($storage_tier_label) free=\($free_pct)% gate=" + (if $storage_tier >= 3 then "block" else "allow" end) + " accumulators=\($accumulators|length)"),
           disk_total_gb:(($m.disk_total_gb // 0) | tonumber),
           disk_free_gb:(($m.disk_free_gb // 0) | tonumber),
           disk_free_pct:(($m.disk_free_pct // 0) | tonumber),
