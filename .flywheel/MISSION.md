@@ -3,9 +3,12 @@
 schema_version: 1
 doc_type: mission
 status: locked
-locked_at: 2026-05-20T00:00:00Z
-lock_hash: 332f24a5f5ef61f1408b90c2c5d8ab326181ab47ef596a172e6148368a33e424
-prior_lock_hash: d473c983e641881b38cbcff31d8a55343563cf358e9716151e25f391fec99528
+locked_at: 2026-05-20T19:15:00Z
+lock_hash: 5ccb4f23a38b4aa2bb16ad4f69181f8f517c9b62207752f946a956c0df3aba4d
+prior_lock_hash: 332f24a5f5ef61f1408b90c2c5d8ab326181ab47ef596a172e6148368a33e424
+mission_lock_id: ml-2026-05-20-mission-drift-four-duties
+mission_lock_reason: mission-drift
+locked_by_extension: flywheel-1-mission-lock-skill
 repo: /Users/josh/Developer/flywheel
 repo_realpath: /Users/josh/Developer/flywheel
 installed_from: /Users/josh/Developer/flywheel/templates/flywheel-install
@@ -187,3 +190,50 @@ auth, credential, PII, and customer-trust surfaces.
   surfaces mean blocked readiness until Phase 0 scaffolding lands or a no-touch
   proof shows that the security surface is outside the dispatch scope.
 
+
+## Mission Anchor Extension Locked 2026-05-20T19:00Z
+
+Joshua-direct mission-drift event 2026-05-20: the "command center" anchor (2026-05-04 extension) now has explicit operational duties.
+Reason: `mission-drift` — auto-publish doctrine + agentic issue-bead flow + always-watching role formalization.
+
+### The Four Duties of flywheel:1
+
+1. **Workers-working** — every dispatched task pursuing-goal-active; dead panes detected + recovered (flywheel-pjaaj); idle codex panes assigned ready beads; no silent-fallback to grep when substrate is down. Metric: <3 idle codex panes with ready beads at any tick.
+
+2. **Blockers-unblocked** — red gates flip to research-beads via `/flywheel:plan`; bead-to-fix-to-close chains never go stale; "we'll fix it later" is a fileable trauma class, not an acceptable status. Metric: <5 hub blockers active; top blocker promoted within 24h.
+
+3. **Substrate-published** — every public repo in the fleet maintains a declared freshness invariant. Main is auto-merged from green feature branches via PR. If it's public, it's current. Disk-durability ≠ public-visibility. Per repo: `.flywheel/PUBLISH-POLICY.json` declares `max_main_staleness_hours`, `auto_merge_policy`, `audit_bot_identity`, `required_checks_before_merge`. Metric: 100% public repos within declared freshness invariant.
+
+4. **Public-issues-watched** — GitHub issues filed against any `JYeswak/*` public repo auto-route into beads (Jeff-style closed-loop pipeline). Bead closures emit PRs that link back to the source issue. PR merge closes source issue. No external collaborator waits. Metric: 0 GitHub issues on JYeswak/* repos older than 48h without a linked bead.
+
+### Doctor-Surface Visibility
+
+`flywheel_orch_four_duty_status` dashboard line renders per-duty green/yellow/red on every `/flywheel:status`. Underlying probes:
+- duty 1: `ntm --robot-activity` fleet sweep + idle-pane-with-ready-bead detector
+- duty 2: `doctor.fleet_process_health` + `hub_blockers` + `three_surface_drift` keys
+- duty 3: per-repo `public_repo_freshness_probe`; alarm at threshold breach
+- duty 4: `gh issue list` polling per JYeswak/* + bead cross-reference
+
+### Pause/Resume Policy
+
+flywheel:1 auto-pauses when ANY duty is RED for >2 ticks consecutive without remediation in flight. Resume requires `/flywheel:mission-lock --reason=resume-from-pause` OR explicit Joshua release.
+
+### Founder-Dispose Threshold
+
+- Duties 1-2 yellow: fully automated, no Joshua interrupt
+- Duty 3 red: notify only (dashboard + xpane to peer orchs)
+- Duty 4 red >2h: notify only
+- Any duty red >24h: page Joshua
+
+### Foundational Research Beads (filed 2026-05-20 in support of duties)
+
+- `flywheel-jrpfn` P0: auto-publish public repos doctrine (duty 3 implementation)
+- `flywheel-wukwc` P0: agentic issue↔bead↔commit↔push closed-loop (duty 4 implementation)
+- `flywheel-761ln` P0: always-watching role formalization (this section's parent bead)
+- `flywheel-pjaaj` P0: codex-worker-death-monitor (duty 1 implementation)
+- `flywheel-thw90` P0: team-pulse stale despite live fleet (duty 1 information-flow fix)
+- `flywheel-1dktu` P0: orbstack-cascade socraticode outage (duty 1 substrate health)
+- `flywheel-8gmx6` P0: caam refresh-token mutex (duty 1 transport reliability)
+- `flywheel-bxhxa` P0: storage-health-probe 5-tier classifier (substrate foundation)
+- `flywheel-94xyb` P0: log-rotation contract (substrate foundation)
+- `flywheel-ivb2s` P0: ledger-retention enforcer (substrate foundation)
