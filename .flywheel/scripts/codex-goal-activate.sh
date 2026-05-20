@@ -94,16 +94,28 @@ emit_json() {
 }
 
 classify_pane_state() {
-  local snap
+  local snap chevron_text
   snap="$(tmux capture-pane -t "$TARGET" -p 2>/dev/null | tail -15)"
   if echo "$snap" | grep -qE 'Pursuing goal \(([0-9]+[ms]|[0-9]+m [0-9]+s)'; then echo "goal-in-progress"
   elif echo "$snap" | grep -q "Replace current goal"; then echo "replace-goal-dialog"
   elif echo "$snap" | grep -q "Goal paused"; then echo "goal-paused"
   elif echo "$snap" | grep -q "Goal completed"; then echo "goal-completed"
   elif echo "$snap" | grep -qE 'Worked for [0-9]+m [0-9]+s'; then echo "goal-completing"
+  elif echo "$snap" | grep -q "Conversation interrupted"; then echo "codex_session_interrupted"
   elif echo "$snap" | grep -qE "Working \([0-9]+s"; then echo "working-non-goal"
   elif echo "$snap" | grep -q "Application not found\|josh@"; then echo "shell-no-codex"
-  else echo "idle-chat"
+  else
+    # Stale-chevron detection (CFS:1 N=4 trauma class 2026-05-20):
+    # Plain ntm send lands text in chevron but codex doesn't auto-submit; subsequent
+    # /clear + /goal keystrokes append to stale buffer → 'Conversation interrupted'.
+    # Detect by capturing the chevron-line text; if it's NOT a default codex idle
+    # placeholder hint, treat as stale-chevron-pending-text → caller must respawn.
+    chevron_text="$(echo "$snap" | grep -oE '^›[[:space:]]+.+' | tail -1 | sed -E 's/^›[[:space:]]+//')"
+    if [[ -n "$chevron_text" ]] && ! echo "$chevron_text" | grep -qE '^(Implement \{feature\}|Find and fix a bug in @filename|Improve documentation in @filename|Run /review on my current changes|Summarize recent commits|Use /skills to list available skills|Explain this codebase|Write tests for @filename)$'; then
+      echo "stale-chevron-pending-text"
+    else
+      echo "idle-chat"
+    fi
   fi
 }
 
