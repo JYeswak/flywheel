@@ -186,6 +186,14 @@ cat >"$TMP/gh" <<'STUB'
 #!/usr/bin/env bash
 set -euo pipefail
 printf '%s\n' "$*" >>"${GH_STUB_LOG:?}"
+if [[ "$1" == "repo" && "$2" == "view" ]]; then
+  case "$3" in
+    JYeswak/repo-one) printf '{"nameWithOwner":"JYeswak/repo-one","defaultBranchRef":{"name":"master"}}\n' ;;
+    JYeswak/repo-two) printf '{"nameWithOwner":"JYeswak/repo-two","defaultBranchRef":{"name":"main"}}\n' ;;
+    *) printf '{"nameWithOwner":"%s","defaultBranchRef":{"name":"main"}}\n' "$3" ;;
+  esac
+  exit 0
+fi
 if [[ "$1" == "api" && "$2" == repos/*/branches/main/protection ]]; then
   printf '{"required_status_checks":{"strict":false,"contexts":[]},"enforce_admins":true}\n'
   exit 0
@@ -286,6 +294,10 @@ ok_jq "branch-filtered pull-request workflow excluded from main" '.required_chec
 ok_jq "discovery details include trigger reasons" '[.discovery_details[] | select(.check == "Nightly Only" and .included == false and .trigger_reason == "excluded:no_pull_request_trigger")] | length == 1' "$TMP/matrix-dry.json"
 ok_jq "discovery details include matrix rows" '[.discovery_details[] | select(.check == "Install Doctor Uninstall (macos-14)" and .matrix.os == "macos-14")] | length == 1' "$TMP/matrix-dry.json"
 ok_jq "canonical flywheel matrix regression shape represented" '.required_checks == ["Install Doctor Uninstall (macos-14)","Install Doctor Uninstall (ubuntu-22.04)","Multi Axis (ubuntu-22.04, 20)","Dual Event","Pull Request Only"]' "$TMP/matrix-dry.json"
+
+BRANCH_PROTECTION_FLEET_REPOS=$'one|JYeswak/repo-one|'"$repo_one"$'\ntwo|JYeswak/repo-two|'"$repo_two" \
+  "$FLEET" --dry-run --overrides-file "$TMP/empty-overrides.json" --json >"$TMP/fleet-default-branches.json"
+ok_jq "fleet rollout uses live default branches" '[.results[] | {alias, branch}] == [{"alias":"one","branch":"master"},{"alias":"two","branch":"main"}]' "$TMP/fleet-default-branches.json"
 
 printf 'SUMMARY pass=%d fail=%d\n' "$pass" "$fail"
 [[ "$fail" -eq 0 && "$pass" -ge 20 ]]

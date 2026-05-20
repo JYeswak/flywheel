@@ -1,0 +1,395 @@
+{
+  "schema_version": "branch_protection_smoke_verify.v1",
+  "ts": "2026-05-20T07:36:59Z",
+  "outcome": "pass",
+  "results": [
+    {
+      "alias": "flywheel",
+      "repo": "JYeswak/flywheel",
+      "branch": "master",
+      "expected": [
+        "Public Surface",
+        "Install Doctor Uninstall (ubuntu-22.04)",
+        "Install Doctor Uninstall (macos-14)"
+      ],
+      "actual": [
+        "Public Surface",
+        "Install Doctor Uninstall (ubuntu-22.04)",
+        "Install Doctor Uninstall (macos-14)"
+      ],
+      "match": true,
+      "live": {
+        "url": "https://api.github.com/repos/JYeswak/flywheel/branches/master/protection",
+        "required_status_checks": {
+          "url": "https://api.github.com/repos/JYeswak/flywheel/branches/master/protection/required_status_checks",
+          "strict": true,
+          "contexts": [
+            "Public Surface",
+            "Install Doctor Uninstall (ubuntu-22.04)",
+            "Install Doctor Uninstall (macos-14)"
+          ],
+          "contexts_url": "https://api.github.com/repos/JYeswak/flywheel/branches/master/protection/required_status_checks/contexts",
+          "checks": [
+            {
+              "context": "Public Surface",
+              "app_id": 15368
+            },
+            {
+              "context": "Install Doctor Uninstall (ubuntu-22.04)",
+              "app_id": 15368
+            },
+            {
+              "context": "Install Doctor Uninstall (macos-14)",
+              "app_id": 15368
+            }
+          ]
+        },
+        "required_signatures": {
+          "url": "https://api.github.com/repos/JYeswak/flywheel/branches/master/protection/required_signatures",
+          "enabled": false
+        },
+        "enforce_admins": {
+          "url": "https://api.github.com/repos/JYeswak/flywheel/branches/master/protection/enforce_admins",
+          "enabled": false
+        },
+        "required_linear_history": {
+          "enabled": true
+        },
+        "allow_force_pushes": {
+          "enabled": false
+        },
+        "allow_deletions": {
+          "enabled": false
+        },
+        "block_creations": {
+          "enabled": false
+        },
+        "required_conversation_resolution": {
+          "enabled": false
+        },
+        "lock_branch": {
+          "enabled": false
+        },
+        "allow_fork_syncing": {
+          "enabled": false
+        }
+      }
+    },
+    {
+      "alias": "skillos",
+      "repo": "JYeswak/skillos",
+      "branch": "main",
+      "expected": [
+        "Public Readiness"
+      ],
+      "actual": [
+        "Public Readiness"
+      ],
+      "match": true,
+      "live": {
+        "url": "https://api.github.com/repos/JYeswak/SkillOS/branches/main/protection",
+        "required_status_checks": {
+          "url": "https://api.github.com/repos/JYeswak/SkillOS/branches/main/protection/required_status_checks",
+          "strict": true,
+          "contexts": [
+            "Public Readiness"
+          ],
+          "contexts_url": "https://api.github.com/repos/JYeswak/SkillOS/branches/main/protection/required_status_checks/contexts",
+          "checks": [
+            {
+              "context": "Public Readiness",
+              "app_id": 15368
+            }
+          ]
+        },
+        "required_signatures": {
+          "url": "https://api.github.com/repos/JYeswak/SkillOS/branches/main/protection/required_signatures",
+          "enabled": false
+        },
+        "enforce_admins": {
+          "url": "https://api.github.com/repos/JYeswak/SkillOS/branches/main/protection/enforce_admins",
+          "enabled": false
+        },
+        "required_linear_history": {
+          "enabled": true
+        },
+        "allow_force_pushes": {
+          "enabled": false
+        },
+        "allow_deletions": {
+          "enabled": false
+        },
+        "block_creations": {
+          "enabled": false
+        },
+        "required_conversation_resolution": {
+          "enabled": false
+        },
+        "lock_branch": {
+          "enabled": false
+        },
+        "allow_fork_syncing": {
+          "enabled": false
+        }
+      }
+    },
+    {
+      "alias": "zesttube",
+      "repo": "JYeswak/zesttube",
+      "branch": "main",
+      "expected": [
+        "Studio Visual Journey"
+      ],
+      "actual": [
+        "Studio Visual Journey"
+      ],
+      "match": true,
+      "live": {
+        "url": "https://api.github.com/repos/JYeswak/zesttube/branches/main/protection",
+        "required_status_checks": {
+          "url": "https://api.github.com/repos/JYeswak/zesttube/branches/main/protection/required_status_checks",
+          "strict": true,
+          "contexts": [
+            "Studio Visual Journey"
+          ],
+          "contexts_url": "https://api.github.com/repos/JYeswak/zesttube/branches/main/protection/required_status_checks/contexts",
+          "checks": [
+            {
+              "context": "Studio Visual Journey",
+              "app_id": null
+            }
+          ]
+        },
+        "required_signatures": {
+          "url": "https://api.github.com/repos/JYeswak/zesttube/branches/main/protection/required_signatures",
+          "enabled": false
+        },
+        "enforce_admins": {
+          "url": "https://api.github.com/repos/JYeswak/zesttube/branches/main/protection/enforce_admins",
+          "enabled": false
+        },
+        "required_linear_history": {
+          "enabled": true
+        },
+        "allow_force_pushes": {
+          "enabled": false
+        },
+        "allow_deletions": {
+          "enabled": false
+        },
+        "block_creations": {
+          "enabled": false
+        },
+        "required_conversation_resolution": {
+          "enabled": false
+        },
+        "lock_branch": {
+          "enabled": false
+        },
+        "allow_fork_syncing": {
+          "enabled": false
+        }
+      }
+    },
+    {
+      "alias": "mobile-eats",
+      "repo": "JYeswak/mobile-eats",
+      "branch": "main",
+      "expected": [
+        "secrets-scan",
+        "journey-contract",
+        "journeys"
+      ],
+      "actual": [
+        "secrets-scan",
+        "journey-contract",
+        "journeys"
+      ],
+      "match": true,
+      "live": {
+        "url": "https://api.github.com/repos/JYeswak/mobile-eats/branches/main/protection",
+        "required_status_checks": {
+          "url": "https://api.github.com/repos/JYeswak/mobile-eats/branches/main/protection/required_status_checks",
+          "strict": true,
+          "contexts": [
+            "secrets-scan",
+            "journey-contract",
+            "journeys"
+          ],
+          "contexts_url": "https://api.github.com/repos/JYeswak/mobile-eats/branches/main/protection/required_status_checks/contexts",
+          "checks": [
+            {
+              "context": "secrets-scan",
+              "app_id": 15368
+            },
+            {
+              "context": "journey-contract",
+              "app_id": 15368
+            },
+            {
+              "context": "journeys",
+              "app_id": 15368
+            }
+          ]
+        },
+        "required_signatures": {
+          "url": "https://api.github.com/repos/JYeswak/mobile-eats/branches/main/protection/required_signatures",
+          "enabled": false
+        },
+        "enforce_admins": {
+          "url": "https://api.github.com/repos/JYeswak/mobile-eats/branches/main/protection/enforce_admins",
+          "enabled": false
+        },
+        "required_linear_history": {
+          "enabled": true
+        },
+        "allow_force_pushes": {
+          "enabled": false
+        },
+        "allow_deletions": {
+          "enabled": false
+        },
+        "block_creations": {
+          "enabled": false
+        },
+        "required_conversation_resolution": {
+          "enabled": false
+        },
+        "lock_branch": {
+          "enabled": false
+        },
+        "allow_fork_syncing": {
+          "enabled": false
+        }
+      }
+    },
+    {
+      "alias": "clutterfreespaces",
+      "repo": "JYeswak/ClutterFreeSpaces",
+      "branch": "main",
+      "expected": [
+        "Re-run audit three-source checks",
+        "App Store submission readiness",
+        "Root Jest baseline",
+        "App Vitest",
+        "Playwright surface tests",
+        "Playwright customer journey",
+        "Brand token lint",
+        "CFS console next build",
+        "CFS TDD aggregate",
+        "Canonical CLI gate",
+        "Local pre-GitHub gate"
+      ],
+      "actual": [
+        "Re-run audit three-source checks",
+        "App Store submission readiness",
+        "Root Jest baseline",
+        "App Vitest",
+        "Playwright surface tests",
+        "Playwright customer journey",
+        "Brand token lint",
+        "CFS console next build",
+        "CFS TDD aggregate",
+        "Canonical CLI gate",
+        "Local pre-GitHub gate"
+      ],
+      "match": true,
+      "live": {
+        "url": "https://api.github.com/repos/JYeswak/ClutterFreeSpaces/branches/main/protection",
+        "required_status_checks": {
+          "url": "https://api.github.com/repos/JYeswak/ClutterFreeSpaces/branches/main/protection/required_status_checks",
+          "strict": true,
+          "contexts": [
+            "Re-run audit three-source checks",
+            "App Store submission readiness",
+            "Root Jest baseline",
+            "App Vitest",
+            "Playwright surface tests",
+            "Playwright customer journey",
+            "Brand token lint",
+            "CFS console next build",
+            "CFS TDD aggregate",
+            "Canonical CLI gate",
+            "Local pre-GitHub gate"
+          ],
+          "contexts_url": "https://api.github.com/repos/JYeswak/ClutterFreeSpaces/branches/main/protection/required_status_checks/contexts",
+          "checks": [
+            {
+              "context": "Re-run audit three-source checks",
+              "app_id": null
+            },
+            {
+              "context": "App Store submission readiness",
+              "app_id": null
+            },
+            {
+              "context": "Root Jest baseline",
+              "app_id": 15368
+            },
+            {
+              "context": "App Vitest",
+              "app_id": 15368
+            },
+            {
+              "context": "Playwright surface tests",
+              "app_id": 15368
+            },
+            {
+              "context": "Playwright customer journey",
+              "app_id": 15368
+            },
+            {
+              "context": "Brand token lint",
+              "app_id": 15368
+            },
+            {
+              "context": "CFS console next build",
+              "app_id": 15368
+            },
+            {
+              "context": "CFS TDD aggregate",
+              "app_id": 15368
+            },
+            {
+              "context": "Canonical CLI gate",
+              "app_id": null
+            },
+            {
+              "context": "Local pre-GitHub gate",
+              "app_id": 15368
+            }
+          ]
+        },
+        "required_signatures": {
+          "url": "https://api.github.com/repos/JYeswak/ClutterFreeSpaces/branches/main/protection/required_signatures",
+          "enabled": false
+        },
+        "enforce_admins": {
+          "url": "https://api.github.com/repos/JYeswak/ClutterFreeSpaces/branches/main/protection/enforce_admins",
+          "enabled": false
+        },
+        "required_linear_history": {
+          "enabled": true
+        },
+        "allow_force_pushes": {
+          "enabled": false
+        },
+        "allow_deletions": {
+          "enabled": false
+        },
+        "block_creations": {
+          "enabled": false
+        },
+        "required_conversation_resolution": {
+          "enabled": false
+        },
+        "lock_branch": {
+          "enabled": false
+        },
+        "allow_fork_syncing": {
+          "enabled": false
+        }
+      }
+    }
+  ]
+}

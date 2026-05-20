@@ -50,6 +50,9 @@ repos=(
   "mobile-eats|JYeswak/mobile-eats|/Users/josh/Developer/mobile-eats"
   "clutterfreespaces|JYeswak/ClutterFreeSpaces|/Users/josh/Developer/clutterfreespaces"
 )
+if [[ -n "${BRANCH_PROTECTION_FLEET_REPOS:-}" ]]; then
+  mapfile -t repos < <(printf '%s\n' "$BRANCH_PROTECTION_FLEET_REPOS" | sed '/^[[:space:]]*$/d')
+fi
 
 tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/branch-protection-fleet.XXXXXX")"
 tmp="$tmp_dir/results.jsonl"
@@ -66,7 +69,9 @@ for entry in "${repos[@]}"; do
       '{schema_version:"branch_protection_apply.v1",repo:$repo,alias:$alias,repo_path:$path,outcome:"error",error:"repo_view_failed"}' >>"$tmp"
     continue
   fi
-  "$APPLY" --repo "$repo" --branch main "--$MODE" --repo-path "$path" --overrides-file "$OVERRIDES_FILE" --json \
+  branch="$(jq -r '.defaultBranchRef.name // "main"' <<<"$repo_view")"
+  [[ -n "$branch" && "$branch" != "null" ]] || branch="main"
+  "$APPLY" --repo "$repo" --branch "$branch" "--$MODE" --repo-path "$path" --overrides-file "$OVERRIDES_FILE" --json \
     | jq -c --arg alias "$alias" --arg path "$path" --argjson repo_view "$repo_view" '. + {alias:$alias, repo_path:$path, repo_view:$repo_view}' >>"$tmp"
 done
 
