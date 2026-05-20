@@ -94,7 +94,7 @@ classify_pane_state() {
 handle_replace_dialog() {
   # If a Replace-goal dialog appears, send Enter to confirm "Replace current goal" (highlighted default)
   local snap
-  snap="$(tmux capture-pane -t "$TARGET" -p 2>/dev/null | tail -10)"
+  snap="$(tmux capture-pane -t "$TARGET" -p 2>/dev/null | tail -30)"
   if echo "$snap" | grep -q "Replace current goal"; then
     emit_json "info" "stage4.5" "Replace-goal dialog detected — sending Enter to confirm"
     tmux send-keys -t "$TARGET" Enter 2>/dev/null
@@ -108,7 +108,7 @@ probe_primed_blue_state() {
   # codex's input box shows `› /goal` (with /goal in blue) when palette engaged.
   # We probe by capturing the prompt area and checking for the /goal token.
   local snap
-  snap="$(tmux capture-pane -t "$TARGET" -p 2>/dev/null | tail -10)"
+  snap="$(tmux capture-pane -t "$TARGET" -p 2>/dev/null | tail -30)"
   echo "$snap" | grep -qE '›[[:space:]]+/goal( |$)'
 }
 
