@@ -1,0 +1,101 @@
+{
+  "schema_version": "flywheel.slb.recipes.v1",
+  "recipes": [
+    {
+      "id": "git-branch-delete-with-sha-suffix",
+      "description": "Delete disposable local branches that carry a SHA suffix after snapshotting the branch tip.",
+      "command_pattern": "^git branch -D (deploy|feat|fix|wip|chore|test|review)/[A-Za-z0-9._-]+-[a-f0-9]{7,40}$",
+      "safe_execution_protocol": {
+        "pre_snapshot": "git rev-parse <branch>",
+        "execute": "git branch -D <branch>",
+        "post_verify": "! git show-ref --verify --quiet refs/heads/<branch>",
+        "audit_log_required": true
+      },
+      "fallback_to_prompt_if": ["pre_snapshot_fails", "execute_returns_nonzero"]
+    },
+    {
+      "id": "git-worktree-remove-tmp",
+      "description": "Remove temporary worktrees rooted under TMPDIR or macOS per-user temp.",
+      "command_pattern": "^git worktree remove (?:--force )?(?:\\$TMPDIR|/tmp|/var/folders/.+/T)/.+$",
+      "safe_execution_protocol": {
+        "pre_snapshot": "test -e <target> && git worktree list --porcelain",
+        "execute": "git worktree remove --force <target>",
+        "post_verify": "test ! -e <target>",
+        "audit_log_required": true
+      },
+      "fallback_to_prompt_if": ["target_resolves_outside_temp", "pre_snapshot_fails", "post_verify_fails"]
+    },
+    {
+      "id": "rm-rf-tmpdir",
+      "description": "Remove explicit children of the current TMPDIR after size snapshot.",
+      "command_pattern": "^rm -rf \\$TMPDIR/[A-Za-z0-9._/-]+$",
+      "safe_execution_protocol": {
+        "pre_snapshot": "du -sk <target>",
+        "execute": "rm -rf <target>",
+        "post_verify": "test ! -e <target>",
+        "audit_log_required": true
+      },
+      "fallback_to_prompt_if": ["target_resolves_outside_TMPDIR", "pre_snapshot_fails", "post_verify_fails"]
+    },
+    {
+      "id": "rm-rf-stale-mktemp-dirs",
+      "description": "Remove known stale mktemp-style flywheel directories under TMPDIR.",
+      "command_pattern": "^rm -rf \\$TMPDIR/(flywheel|slb|dcg|codex|claude|tmp)[A-Za-z0-9._/-]*$",
+      "safe_execution_protocol": {
+        "pre_snapshot": "du -sk <target>",
+        "execute": "rm -rf <target>",
+        "post_verify": "test ! -e <target>",
+        "audit_log_required": true
+      },
+      "fallback_to_prompt_if": ["target_resolves_outside_TMPDIR", "pre_snapshot_fails", "post_verify_fails"]
+    },
+    {
+      "id": "gh-api-delete-branch-protection",
+      "description": "Delete branch protection only after capturing the live branch protection document.",
+      "command_pattern": "^gh api -X DELETE [\"']?repos/[^/]+/[^/]+/branches/[^/]+/protection[\"']?$",
+      "safe_execution_protocol": {
+        "pre_snapshot": "gh api repos/<owner>/<repo>/branches/<branch>/protection",
+        "execute": "gh api -X DELETE repos/<owner>/<repo>/branches/<branch>/protection",
+        "post_verify": "! gh api repos/<owner>/<repo>/branches/<branch>/protection >/dev/null 2>&1",
+        "audit_log_required": true
+      },
+      "fallback_to_prompt_if": ["pre_snapshot_fails", "post_verify_fails"]
+    },
+    {
+      "id": "git-stash-drop-older-than-30d",
+      "description": "Drop old local stash entries only after patch snapshot and age check.",
+      "command_pattern": "^git stash drop stash@\\{[0-9]+\\}$",
+      "safe_execution_protocol": {
+        "pre_snapshot": "git stash show -p <stash_ref>",
+        "execute": "git stash drop <stash_ref>",
+        "post_verify": "! git stash list --format='%H' | grep -F <stash_sha>",
+        "audit_log_required": true
+      },
+      "fallback_to_prompt_if": ["stash_younger_than_30d", "pre_snapshot_fails", "post_verify_fails"]
+    },
+    {
+      "id": "git-reset-hard-to-origin",
+      "description": "Reset only the current branch to its own origin branch after HEAD snapshot.",
+      "command_pattern": "^git reset --hard origin/[A-Za-z0-9._/-]+$",
+      "safe_execution_protocol": {
+        "pre_snapshot": "git rev-parse HEAD && git status --short",
+        "execute": "git reset --hard <target_ref>",
+        "post_verify": "test \"$(git rev-parse HEAD)\" = \"$(git rev-parse <target_ref>)\"",
+        "audit_log_required": true
+      },
+      "fallback_to_prompt_if": ["own_branch_scope_check_failed", "pre_snapshot_fails", "post_verify_fails"]
+    },
+    {
+      "id": "find-delete-stale-temp",
+      "description": "Allow bounded find -delete cleanup under TMPDIR for stale temp files.",
+      "command_pattern": "^find \\$TMPDIR/[A-Za-z0-9._/-]+ .*-mtime \\+[0-9]+ .*-delete$",
+      "safe_execution_protocol": {
+        "pre_snapshot": "find <target> -maxdepth 2 -print",
+        "execute": "find <target> -mindepth 1 -mtime +1 -delete",
+        "post_verify": "test -z \"$(find <target> -mindepth 1 -mtime +1 -print -quit)\"",
+        "audit_log_required": true
+      },
+      "fallback_to_prompt_if": ["target_resolves_outside_TMPDIR", "pre_snapshot_fails", "post_verify_fails"]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+ok 1 - recipe match executes and returns allow no-op
+ok 2 - safe execute removed tmp target
+ok 3 - successful SLB path did not prompt DCG
+ok 4 - snapshot failure falls through to DCG
+ok 5 - verify failure falls through to DCG
+ok 6 - verify failure writes audit row
+ok 7 - no recipe match falls through to DCG
+ok 8 - audit rows written for success and failures
+ok 9 - pre-snapshot artifact saved
+ok 10 - idempotent fixture first run allowed
+ok 11 - idempotent fixture second run allowed
+ok 12 - idempotent re-run produces no double audit rows or execution
+ok 13 - recipe add validates and writes idempotently
+ok 14 - schema validation rejects malformed recipe regex
+ok 15 - audit tail JSON envelope parseable
+ok 16 - hook JSON envelope parseable
+SUMMARY pass=16 fail=0
