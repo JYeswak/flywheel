@@ -1,0 +1,4 @@
+╭─ Goal in progress ─╮
+Worked for 0m 31s
+/goal build the monitor
+╰────────────────────╯
