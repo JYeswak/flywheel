@@ -47,8 +47,23 @@ ok_jq_equal_desired() {
   fi
 }
 
+ok_jq_equal_checks() {
+  local name="$1" left="$2" right="$3"
+  if jq -e --slurpfile other "$right" '.required_checks == $other[0].required_checks' "$left" >/dev/null; then
+    pass=$((pass + 1))
+    printf 'ok %d - %s\n' "$pass" "$name"
+  else
+    fail=$((fail + 1))
+    printf 'not ok %d - %s\n' "$((pass + fail))" "$name" >&2
+    cat "$left" >&2
+    cat "$right" >&2
+  fi
+}
+
 repo="$TMP/repo"
-mkdir -p "$repo/.github/workflows"
+repo_one="$TMP/repo-one"
+repo_two="$TMP/repo-two"
+mkdir -p "$repo/.github/workflows" "$repo_one/.github/workflows" "$repo_two/.github/workflows"
 cat >"$repo/.github/workflows/ci.yml" <<'YAML'
 name: CI
 on: [pull_request]
@@ -64,15 +79,44 @@ jobs:
       - run: bash tests/smoke.sh
 YAML
 
+cat >"$repo_one/.github/workflows/ci.yml" <<'YAML'
+name: Repo One CI
+on: [pull_request]
+jobs:
+  build:
+    name: Repo One Build
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo one
+  shared:
+    name: Shared Check
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo shared
+YAML
+
+cat >"$repo_two/.github/workflows/ci.yml" <<'YAML'
+name: Repo Two CI
+on: [pull_request]
+jobs:
+  validate:
+    name: Repo Two Validate
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo two
+YAML
+
 cat >"$TMP/gh" <<'STUB'
 #!/usr/bin/env bash
 set -euo pipefail
 printf '%s\n' "$*" >>"${GH_STUB_LOG:?}"
-if [[ "$1" == "api" && "$2" == "repos/JYeswak/flywheel/branches/main/protection" ]]; then
+if [[ "$1" == "api" && "$2" == repos/*/branches/main/protection ]]; then
   printf '{"required_status_checks":{"strict":false,"contexts":[]},"enforce_admins":true}\n'
   exit 0
 fi
 if [[ "$1" == "api" && "$2" == "-X" && "$3" == "PUT" ]]; then
+  safe="${4//\//__}"
+  cp "$6" "${GH_STUB_PUT_DIR:?}/${safe}.json"
   cp "$6" "${GH_STUB_LAST_INPUT:?}"
   printf '{"ok":true}\n'
   exit 0
@@ -81,12 +125,22 @@ if [[ "$1" == "api" && "$2" == "repos/JYeswak/flywheel/actions/runs" ]]; then
   printf 'CI\nSmoke\n'
   exit 0
 fi
+if [[ "$1" == "api" && "$2" == "repos/JYeswak/repo-one/actions/runs" ]]; then
+  printf 'Repo One CI\nShared Workflow\n'
+  exit 0
+fi
+if [[ "$1" == "api" && "$2" == "repos/JYeswak/repo-two/actions/runs" ]]; then
+  printf 'Repo Two CI\n'
+  exit 0
+fi
 printf '{}\n'
 STUB
 chmod +x "$TMP/gh"
 export GH_BIN="$TMP/gh"
 export GH_STUB_LOG="$TMP/gh.log"
 export GH_STUB_LAST_INPUT="$TMP/put.json"
+export GH_STUB_PUT_DIR="$TMP/puts"
+mkdir -p "$GH_STUB_PUT_DIR"
 : >"$GH_STUB_LOG"
 
 overrides="$TMP/overrides.json"
@@ -96,6 +150,7 @@ cat >"$overrides" <<'JSON'
   "default_substrate": {"required_pull_request_reviews": null},
   "repos": {
     "JYeswak/flywheel": {
+      "required_checks": ["Override Check"],
       "required_pull_request_reviews": {"required_approving_review_count": 1}
     }
   }
@@ -109,17 +164,34 @@ ok "fleet script syntax" bash -n "$FLEET"
 ok_jq "dry-run emits valid envelope without mutation" '.schema_version == "branch_protection_apply.v1" and .outcome == "dry-run" and .mode == "dry-run"' "$TMP/dry.json"
 ok "dry-run does not call PUT" test "$(grep -c -- '-X PUT' "$GH_STUB_LOG" || true)" -eq 0
 ok_jq "workflow job names discovered" '.required_checks == ["Test / shellcheck","smoke"]' "$TMP/dry.json"
+ok_jq "workflow discovery provenance emitted" '.discovery_source == "workflow_yml" and (.recent_run_names | length == 2)' "$TMP/dry.json"
 ok_jq "enforce_admins stays false" '.desired.enforce_admins == false' "$TMP/dry.json"
 
 "$SCRIPT" --repo JYeswak/flywheel --branch main --dry-run --repo-path "$repo" --overrides-file "$overrides" --json >"$TMP/override.json"
-ok_jq "override config respected" '.desired.required_pull_request_reviews.required_approving_review_count == 1' "$TMP/override.json"
+ok_jq "override config respected" '.desired.required_pull_request_reviews.required_approving_review_count == 1 and .required_checks == ["Override Check"] and .discovery_source == "override"' "$TMP/override.json"
 
 "$SCRIPT" --repo JYeswak/flywheel --branch main --apply --repo-path "$repo" --check-names "ci,smoke,shellcheck" --json >"$TMP/apply.json"
-ok_jq "mock apply reports applied" '.outcome == "applied" and .required_checks == ["ci","smoke","shellcheck"]' "$TMP/apply.json"
+ok_jq "mock apply reports applied" '.outcome == "applied" and .required_checks == ["ci","smoke","shellcheck"] and .discovery_source == "override"' "$TMP/apply.json"
 ok_jq "mock apply payload sets expected fields" '.required_status_checks.strict == true and .required_pull_request_reviews == null and .allow_force_pushes == false and .allow_deletions == false and .required_linear_history == true' "$GH_STUB_LAST_INPUT"
 
 "$SCRIPT" --repo JYeswak/flywheel --branch main --apply --repo-path "$repo" --check-names "ci,smoke,shellcheck" --json >"$TMP/apply-again.json"
 ok_jq_equal_desired "idempotent re-apply produces same desired state" "$TMP/apply.json" "$TMP/apply-again.json"
 
+"$SCRIPT" --repo JYeswak/repo-one --branch main --dry-run --repo-path "$repo_one" --json >"$TMP/repo-one-dry.json"
+"$SCRIPT" --repo JYeswak/repo-one --branch main --apply --repo-path "$repo_one" --json >"$TMP/repo-one-apply.json"
+ok_jq "repo one uses repo-specific workflow checks" '.required_checks == ["Repo One Build","Shared Check"]' "$TMP/repo-one-dry.json"
+ok_jq_equal_checks "repo one dry-run and apply checks match" "$TMP/repo-one-dry.json" "$TMP/repo-one-apply.json"
+ok_jq "repo one apply payload has repo-specific checks" '.required_status_checks.contexts == ["Repo One Build","Shared Check"]' "$GH_STUB_PUT_DIR/repos__JYeswak__repo-one__branches__main__protection.json"
+
+"$SCRIPT" --repo JYeswak/repo-two --branch main --dry-run --repo-path "$repo_two" --json >"$TMP/repo-two-dry.json"
+"$SCRIPT" --repo JYeswak/repo-two --branch main --apply --repo-path "$repo_two" --json >"$TMP/repo-two-apply.json"
+ok_jq "repo two uses different workflow checks" '.required_checks == ["Repo Two Validate"]' "$TMP/repo-two-dry.json"
+ok_jq_equal_checks "repo two dry-run and apply checks match" "$TMP/repo-two-dry.json" "$TMP/repo-two-apply.json"
+ok_jq "repo two apply payload has repo-specific checks" '.required_status_checks.contexts == ["Repo Two Validate"]' "$GH_STUB_PUT_DIR/repos__JYeswak__repo-two__branches__main__protection.json"
+
+"$SCRIPT" --repo JYeswak/repo-one --branch main --verify-parity --repo-path "$repo_one" --json >"$TMP/parity.json"
+ok_jq "verify parity passes without mutation" '.mode == "verify-parity" and .outcome == "pass" and .dry_run_required_checks == .apply_required_checks' "$TMP/parity.json"
+ok_jq_equal_checks "divergence detector asserts dry-run/apply equality" "$TMP/repo-two-dry.json" "$TMP/repo-two-apply.json"
+
 printf 'SUMMARY pass=%d fail=%d\n' "$pass" "$fail"
-[[ "$fail" -eq 0 && "$pass" -ge 6 ]]
+[[ "$fail" -eq 0 && "$pass" -ge 12 ]]

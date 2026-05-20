@@ -50,7 +50,9 @@ repos=(
   "clutterfreespaces|JYeswak/ClutterFreeSpaces|/Users/josh/Developer/clutterfreespaces"
 )
 
-tmp="$(mktemp "${TMPDIR:-/tmp}/branch-protection-fleet.XXXXXX.jsonl")"
+tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/branch-protection-fleet.XXXXXX")"
+tmp="$tmp_dir/results.jsonl"
+trap 'rm -rf "$tmp_dir"' EXIT
 for entry in "${repos[@]}"; do
   IFS='|' read -r alias repo path <<<"$entry"
   if [[ ! -d "$path" ]]; then
@@ -63,7 +65,6 @@ for entry in "${repos[@]}"; do
 done
 
 results="$(jq -sc '.' "$tmp")"
-rm -f "$tmp"
 envelope="$(jq -nc \
   --arg ts "$(now_iso)" \
   --arg mode "$MODE" \
