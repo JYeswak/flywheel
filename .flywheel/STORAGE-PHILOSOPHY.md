@@ -49,7 +49,7 @@ Wires into:
 | Browser/playwright profiles | Reap on session end + cap at 1GB | 1.5G playwright, 467M claude-skills-sync |
 | Codex MCP state | Reap >7d, never grow past 500MB | Currently fine |
 | Application data (databases) — Joshua-owned apps | Per-app — declared by owner | (none currently) |
-| **Vendor-owned data — upstream tool we consume** | Consumer-side size cap + archive-and-rotate at threshold. NEVER redesign upstream retention. | 21G agent_search.db (CASS, Dicklesworthstone upstream — bead flywheel-qdo7w) |
+| **Vendor-owned data — upstream tool we consume** | Consumer-side size cap + archive-and-rotate at threshold. NEVER redesign upstream retention. Same shape as "scope-discriminate-don't-bundle" — respect upstream ownership, manage consumption footprint. | 21G agent_search.db (CASS DuckDB — bead flywheel-qdo7w); 669M ~/.socraticode/qdrant-data (socraticode Qdrant — sister substrate, same Dicklesworthstone stack — cap by dropping stale per-project collections) |
 | Worker work-dirs (/private/tmp/<orch>-*) | Reap on task completion OR >6h | Covered (this morning's fix) |
 | User dumps (Desktop, Downloads) | Quarterly audit + archive prompt | 54G Desktop, 6G Downloads |
 | Git pack files | `git gc --aggressive` quarterly if pack >5G | zesttube 6.2G, coding_agent_session_search 6.4G |
