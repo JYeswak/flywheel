@@ -12,6 +12,16 @@ The 4-tier auto-push (`.flywheel/scripts/auto-push.sh`) refuses to push when wor
 
 ## What workers MUST do when they see `auto-push status=blocked`
 
+If `.flywheel/auto-push-policy.yaml` sets `auto_sweep_on_dirty_tree: true`, the
+script now performs the allow-list sweep itself: it stages only paths matching
+`known_dirty_paths_allow_list`, commits with the configured auto-sweep message,
+and retries the normal Tier 4/4.5/push chain. Workers do not need to run the
+manual sweep below when the ledger shows `auto_swept: true`.
+
+The manual discipline still applies when auto-sweep cannot fully resolve the
+tree, especially `reason=non_allowlist_dirty` with populated
+`non_swept_paths`.
+
 ### 1. READ the ledger entry
 
 ```bash

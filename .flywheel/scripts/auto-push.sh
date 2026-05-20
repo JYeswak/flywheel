@@ -26,11 +26,18 @@ ALLOWED_BRANCHES_REGEX=""
 FORBIDDEN_BRANCHES_REGEX=""
 LEDGER_PATH="$DEFAULT_LEDGER"
 ON_FAILURE="block_next_commit"
+AUTO_SWEEP_ON_DIRTY_TREE="false"
+AUTO_SWEEP_COMMIT_MESSAGE="chore(state): auto-sweep accreting substrate paths [auto-push]"
+AUTO_SWEEP_PLANNED="false"
+AUTO_SWEPT="false"
+SWEEP_COMMIT_SHA=""
 PRIVATE_BLOCKLIST=()
 KNOWN_DIRTY_PATHS_ALLOW_LIST=()
 CURRENT_DIRTY_PATHS=()
 ALLOWED_DIRTY_PATHS=()
 BLOCKING_DIRTY_PATHS=()
+SWEPT_PATHS=()
+NON_SWEPT_PATHS=()
 
 usage() {
   cat <<'USAGE'
@@ -103,6 +110,8 @@ load_policy() {
       forbidden_branches_regex) FORBIDDEN_BRANCHES_REGEX="$value" ;;
       ledger_path) LEDGER_PATH="$value" ;;
       on_failure) ON_FAILURE="$value" ;;
+      auto_sweep_on_dirty_tree) AUTO_SWEEP_ON_DIRTY_TREE="$value" ;;
+      auto_sweep_commit_message) [[ -n "$value" ]] && AUTO_SWEEP_COMMIT_MESSAGE="$value" ;;
     esac
   done <"$POLICY_PATH"
   [[ "$LEDGER_PATH" = /* ]] || LEDGER_PATH="$REPO/$LEDGER_PATH"
@@ -114,6 +123,10 @@ current_commit() { "$GIT_BIN" -C "$REPO" rev-parse HEAD 2>/dev/null || printf 'u
 
 current_branch() {
   "$GIT_BIN" -C "$REPO" rev-parse --abbrev-ref HEAD 2>/dev/null || printf 'unknown'
+}
+
+json_bool() {
+  [[ "$1" == "true" ]] && printf 'true' || printf 'false'
 }
 
 upstream_ref() {
@@ -139,15 +152,21 @@ append_ledger() {
     --arg push_cadence "$PUSH_CADENCE" \
     --arg on_failure "$ON_FAILURE" \
     --arg since "$SINCE" \
+    --arg sweep_commit_sha "$SWEEP_COMMIT_SHA" \
     --argjson dirty_paths "$(printf '%s\n' "${CURRENT_DIRTY_PATHS[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')" \
     --argjson dirty_allow_list "$(printf '%s\n' "${KNOWN_DIRTY_PATHS_ALLOW_LIST[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')" \
     --argjson dirty_allowed_paths "$(printf '%s\n' "${ALLOWED_DIRTY_PATHS[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')" \
     --argjson dirty_blocking_paths "$(printf '%s\n' "${BLOCKING_DIRTY_PATHS[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')" \
+    --argjson auto_sweep_on_dirty_tree "$(json_bool "$AUTO_SWEEP_ON_DIRTY_TREE")" \
+    --argjson auto_sweep_planned "$(json_bool "$AUTO_SWEEP_PLANNED")" \
+    --argjson auto_swept "$(json_bool "$AUTO_SWEPT")" \
+    --argjson swept_paths "$(printf '%s\n' "${SWEPT_PATHS[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')" \
+    --argjson non_swept_paths "$(printf '%s\n' "${NON_SWEPT_PATHS[@]}" | jq -Rsc 'split("\n") | map(select(length > 0))')" \
     --argjson exit_code "$exit_code" \
     --argjson dry_run "$DRY_RUN" \
     --argjson push_attempted "$push_attempted" \
     --argjson push_success "$push_success" \
-    '{schema_version:$schema,ts:$ts,source:$source,repo:$repo,commit:$commit,branch:$branch,upstream:$upstream,status:$status,reason:$reason,exit_code:$exit_code,dry_run:$dry_run,push_attempted:$push_attempted,push_success:$push_success,local_ci_status:$local_ci_status,gitguardian_status:$gitguardian_status,supabase_mirror_status:$supabase_mirror_status,push_cadence:$push_cadence,on_failure:$on_failure,since:$since,dirty_paths:$dirty_paths,known_dirty_paths_allow_list:$dirty_allow_list,dirty_allowed_paths:$dirty_allowed_paths,dirty_blocking_paths:$dirty_blocking_paths}' >>"$LEDGER_PATH"
+    '{schema_version:$schema,ts:$ts,source:$source,repo:$repo,commit:$commit,branch:$branch,upstream:$upstream,status:$status,reason:$reason,exit_code:$exit_code,dry_run:$dry_run,push_attempted:$push_attempted,push_success:$push_success,local_ci_status:$local_ci_status,gitguardian_status:$gitguardian_status,supabase_mirror_status:$supabase_mirror_status,push_cadence:$push_cadence,on_failure:$on_failure,since:$since,dirty_paths:$dirty_paths,known_dirty_paths_allow_list:$dirty_allow_list,dirty_allowed_paths:$dirty_allowed_paths,dirty_blocking_paths:$dirty_blocking_paths,auto_sweep_on_dirty_tree:$auto_sweep_on_dirty_tree,auto_sweep_planned:$auto_sweep_planned,auto_swept:$auto_swept,swept_paths:$swept_paths,non_swept_paths:$non_swept_paths,sweep_commit_sha:($sweep_commit_sha | if length > 0 then . else null end)}' >>"$LEDGER_PATH"
 }
 
 emit() {
@@ -252,6 +271,26 @@ classify_dirty_paths() {
   done < <(printf '%s\n' "$status_out" | sed -E 's/^.. //' | sed -E 's/^.* -> //')
 }
 
+prepare_auto_sweep_paths() {
+  SWEPT_PATHS=("${ALLOWED_DIRTY_PATHS[@]}")
+  NON_SWEPT_PATHS=("${BLOCKING_DIRTY_PATHS[@]}")
+}
+
+auto_sweep_dirty_paths() {
+  [[ "${#SWEPT_PATHS[@]}" -gt 0 ]] || return 1
+  AUTO_SWEEP_PLANNED="true"
+  if [[ "$DRY_RUN" -eq 1 ]]; then
+    return 0
+  fi
+  "$GIT_BIN" -C "$REPO" add -- "${SWEPT_PATHS[@]}"
+  if "$GIT_BIN" -C "$REPO" diff --cached --quiet -- "${SWEPT_PATHS[@]}"; then
+    return 1
+  fi
+  "$GIT_BIN" -C "$REPO" -c core.hooksPath=/dev/null commit -m "$AUTO_SWEEP_COMMIT_MESSAGE" >/dev/null
+  SWEEP_COMMIT_SHA="$(current_commit)"
+  AUTO_SWEPT="true"
+}
+
 private_path_blocked() {
   [[ "${#PRIVATE_BLOCKLIST[@]}" -gt 0 ]] || return 1
   local range path pattern regex
@@ -291,7 +330,17 @@ unmerged="$("$GIT_BIN" -C "$REPO" ls-files -u 2>&1)"
 status_out="$("$GIT_BIN" -C "$REPO" status --porcelain -uall 2>&1)"
 if [[ -n "$status_out" ]]; then
   classify_dirty_paths "$status_out"
-  [[ "${#BLOCKING_DIRTY_PATHS[@]}" -eq 0 ]] || emit blocked dirty_tree 12 false false skipped skipped skipped
+  if [[ "${#BLOCKING_DIRTY_PATHS[@]}" -gt 0 ]]; then
+    if [[ "$AUTO_SWEEP_ON_DIRTY_TREE" == "true" ]]; then
+      prepare_auto_sweep_paths
+      emit blocked non_allowlist_dirty 12 false false skipped skipped skipped
+    fi
+    emit blocked dirty_tree 12 false false skipped skipped skipped
+  fi
+  if [[ "$AUTO_SWEEP_ON_DIRTY_TREE" == "true" && "${#ALLOWED_DIRTY_PATHS[@]}" -gt 0 ]]; then
+    prepare_auto_sweep_paths
+    auto_sweep_dirty_paths || emit blocked auto_sweep_failed 18 false false skipped skipped skipped
+  fi
 fi
 
 branch="$(current_branch)"
