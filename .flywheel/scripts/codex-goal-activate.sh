@@ -10,6 +10,9 @@
 #      many blank trailing lines that hid the primed /goal line; -30 covers the gap
 #   4. Stage 0.5 stale-chevron-clear functions — adopted from skillos canonical
 #      commits 3a647cc4 + 8c057a67 (greenlight 1 ratified 2026-05-20T06:18Z)
+#   5. Stage 0.3 context-pre-clear (/clear before /goal) — adopted from skillos
+#      canonical commit 1ed3ea30 (bypass-mitigation candidate 2 ratified 2026-05-20T06:52Z).
+#      Escape hatch: CODEX_GOAL_SKIP_CONTEXT_CLEAR=1 for A/B testing.
 # Functional parity with canonical maintained; shasum divergence is intentional + documented.
 # Reverse-propagation candidates: bug-patches 2+3 should land in skillos canonical
 # at next bi-directional sync cadence.
@@ -186,6 +189,19 @@ case "$state" in
     exit 2
     ;;
 esac
+
+# Stage 0.3: context-pre-clear (bypass-mitigation candidate 2 — flywheel:1 ratified 2026-05-20T06:52Z).
+# Adopted from skillos canonical 2026-05-20 commit 1ed3ea30 (joint bypass-mitigation sub-sprint).
+# Send /clear slash command to reset codex session-context-state before /goal palette activation.
+# Mitigates bypass-class fires correlated with accumulated session context (N=7 observed 2026-05-20).
+# Skip if CODEX_GOAL_SKIP_CONTEXT_CLEAR=1 (escape hatch for cross-validation A/B testing).
+if [[ "${CODEX_GOAL_SKIP_CONTEXT_CLEAR:-0}" != "1" ]]; then
+  emit_json "info" "stage0.3" "context pre-clear: sending /clear keystrokes"
+  tmux send-keys -t "$TARGET" "/" "c" "l" "e" "a" "r" 2>/dev/null
+  sleep 0.5
+  tmux send-keys -t "$TARGET" Enter 2>/dev/null
+  sleep 1.5
+fi
 
 # Stage 0.5: clear stale palette/input residue before typing /goal.
 clear_stale_chevron_residue
