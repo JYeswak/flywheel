@@ -1,0 +1,8 @@
+{
+  "ai.zeststream.cron-meta-watchdog": 300,
+  "dicklesworthstone-version-probe": 86400,
+  "enospc-counter-status": 300,
+  "ai.zeststream.skillos-jsm-daily-heartbeat": 86400,
+  "ai.zeststream.skillos-codex-stall-detector": 60,
+  "ai.zeststream.skillos-temp-janitor": 300
+}

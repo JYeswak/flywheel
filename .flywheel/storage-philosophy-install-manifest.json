@@ -1,0 +1,147 @@
+{
+  "schema_version": "skillos.storage_philosophy_install_manifest.v1",
+  "installed_at": "2026-05-20T22:19:22Z",
+  "source_repo": "/Users/josh/Developer/skillos",
+  "source_commit": "33c05f57",
+  "target_repo": "/Users/josh/Developer/flywheel",
+  "manifest_rel": ".flywheel/storage-philosophy-install-manifest.json",
+  "files": [
+    {
+      "rel": ".flywheel/scripts/enospc-halt-hook.sh",
+      "action": "copy",
+      "status": "copied",
+      "source_rel": ".flywheel/scripts/enospc-halt-hook.sh",
+      "dest": "/Users/josh/Developer/flywheel/.flywheel/scripts/enospc-halt-hook.sh",
+      "installed_sha256": "9734b4065941e7857cde2cb11e557ffc0e0109cf66cb5faa3ad4631b489c5602",
+      "executable": true
+    },
+    {
+      "rel": ".flywheel/scripts/enospc-counter-status.sh",
+      "action": "copy",
+      "status": "copied",
+      "source_rel": ".flywheel/scripts/enospc-counter-status.sh",
+      "dest": "/Users/josh/Developer/flywheel/.flywheel/scripts/enospc-counter-status.sh",
+      "installed_sha256": "7601f0b956da37aded5eaaedec5d648762e4d25b708341836c0cd66f6c89bf52",
+      "executable": true
+    },
+    {
+      "rel": ".flywheel/scripts/cron-heartbeat-emit.sh",
+      "action": "copy",
+      "status": "copied",
+      "source_rel": ".flywheel/scripts/cron-heartbeat-emit.sh",
+      "dest": "/Users/josh/Developer/flywheel/.flywheel/scripts/cron-heartbeat-emit.sh",
+      "installed_sha256": "58ae15928f0915e9f0c9874754c2949ea8d27a53badb92e087c6d394ab0a2976",
+      "executable": true
+    },
+    {
+      "rel": ".flywheel/scripts/cron-meta-watchdog.sh",
+      "action": "copy",
+      "status": "copied",
+      "source_rel": ".flywheel/scripts/cron-meta-watchdog.sh",
+      "dest": "/Users/josh/Developer/flywheel/.flywheel/scripts/cron-meta-watchdog.sh",
+      "installed_sha256": "7c7c8849607e39858e2a374e992bbf3f66afc71c0d094ad022f339d492e01cde",
+      "executable": true
+    },
+    {
+      "rel": ".flywheel/scripts/cron-heartbeat-intervals.json",
+      "action": "copy",
+      "status": "copied",
+      "source_rel": ".flywheel/scripts/cron-heartbeat-intervals.json",
+      "dest": "/Users/josh/Developer/flywheel/.flywheel/scripts/cron-heartbeat-intervals.json",
+      "installed_sha256": "a4fb2d2cf6a3e465251547a61e37dbcbaaf3a4c9f6111296eeb4a755a4cf440d",
+      "executable": false
+    },
+    {
+      "rel": ".flywheel/scripts/dicklesworthstone-version-probe.sh",
+      "action": "copy",
+      "status": "copied",
+      "source_rel": ".flywheel/scripts/dicklesworthstone-version-probe.sh",
+      "dest": "/Users/josh/Developer/flywheel/.flywheel/scripts/dicklesworthstone-version-probe.sh",
+      "installed_sha256": "5c62ad36fb52543e88eeb7bf8bba858d12206d73152d1630c48dddd9a41b1bd9",
+      "executable": true
+    },
+    {
+      "rel": ".flywheel/scripts/dicklesworthstone-upgrade.sh",
+      "action": "copy",
+      "status": "copied",
+      "source_rel": ".flywheel/scripts/dicklesworthstone-upgrade.sh",
+      "dest": "/Users/josh/Developer/flywheel/.flywheel/scripts/dicklesworthstone-upgrade.sh",
+      "installed_sha256": "29a4597469732d76434ff23f95cfdf807f0ff42d9b6ffa38533f51b9d7ecb21e",
+      "executable": true
+    },
+    {
+      "rel": ".flywheel/scripts/dicklesworthstone-watchdog.sh",
+      "action": "copy",
+      "status": "copied",
+      "source_rel": ".flywheel/scripts/dicklesworthstone-watchdog.sh",
+      "dest": "/Users/josh/Developer/flywheel/.flywheel/scripts/dicklesworthstone-watchdog.sh",
+      "installed_sha256": "c856e5f2ee3c7a50e711a4dc5e6edc045d14e9a53dee87a9074f1c0b1200df58",
+      "executable": true
+    },
+    {
+      "rel": ".flywheel/doctrine/meta-learnings/enospc-halt-escalate-not-retry.md",
+      "action": "copy",
+      "status": "copied",
+      "source_rel": ".flywheel/doctrine/meta-learnings/enospc-halt-escalate-not-retry.md",
+      "dest": "/Users/josh/Developer/flywheel/.flywheel/doctrine/meta-learnings/enospc-halt-escalate-not-retry.md",
+      "installed_sha256": "38c802858050d3963a93d056e43942beb502a9f53ee75c1f65758dab2e495388",
+      "executable": false
+    },
+    {
+      "rel": ".flywheel/doctrine/meta-learnings/cron-meta-watchdog-discipline.md",
+      "action": "copy",
+      "status": "copied",
+      "source_rel": ".flywheel/doctrine/meta-learnings/cron-meta-watchdog-discipline.md",
+      "dest": "/Users/josh/Developer/flywheel/.flywheel/doctrine/meta-learnings/cron-meta-watchdog-discipline.md",
+      "installed_sha256": "3fd917308c8bed2ea550314c1c1c665a0343af73221444057ee9da982876a52f",
+      "executable": false
+    },
+    {
+      "rel": ".flywheel/doctrine/meta-learnings/storage-philosophy-v0.1.md",
+      "action": "copy",
+      "status": "copied",
+      "source_rel": ".flywheel/doctrine/meta-learnings/storage-philosophy-v0.1.md",
+      "dest": "/Users/josh/Developer/flywheel/.flywheel/doctrine/meta-learnings/storage-philosophy-v0.1.md",
+      "installed_sha256": "19e03087ae097c94dac2fd5287242e7d03142c3d03e38415be4fc430875bcf1d",
+      "executable": false
+    },
+    {
+      "rel": "STORAGE-PHILOSOPHY-SETTINGS-PATCH.json.diff",
+      "action": "generate",
+      "status": "generated",
+      "source_rel": "__generated__",
+      "dest": "/Users/josh/Developer/flywheel/STORAGE-PHILOSOPHY-SETTINGS-PATCH.json.diff",
+      "installed_sha256": "5b65b1f6ca9e5a47386687ebe69252b92008e286019a0122e1bdc95f3bc0e70b",
+      "executable": false
+    },
+    {
+      "rel": ".flywheel/launchd/ai.zeststream.cron-meta-watchdog.plist",
+      "action": "generate",
+      "status": "generated",
+      "source_rel": "__generated__",
+      "dest": "/Users/josh/Developer/flywheel/.flywheel/launchd/ai.zeststream.cron-meta-watchdog.plist",
+      "installed_sha256": "c41630f02800d5cff81ec259db8c53bf2425a05647c866b2e4fc3fc122f08c9b",
+      "executable": false
+    },
+    {
+      "rel": ".flywheel/launchd/ai.zeststream.dicklesworthstone-version-probe.plist",
+      "action": "generate",
+      "status": "generated",
+      "source_rel": "__generated__",
+      "dest": "/Users/josh/Developer/flywheel/.flywheel/launchd/ai.zeststream.dicklesworthstone-version-probe.plist",
+      "installed_sha256": "3b9ff897fc109ac2431c359e582073a0571f36aafd3f5ec3099463781b367306",
+      "executable": false
+    }
+  ],
+  "drafts": {
+    "settings_json_hook": "STORAGE-PHILOSOPHY-SETTINGS-PATCH.json.diff",
+    "launchagents": [
+      ".flywheel/launchd/ai.zeststream.cron-meta-watchdog.plist",
+      ".flywheel/launchd/ai.zeststream.dicklesworthstone-version-probe.plist"
+    ]
+  },
+  "uninstall": {
+    "preserve_ledgers": true,
+    "exact_hash_only": true
+  }
+}

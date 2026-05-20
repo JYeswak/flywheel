@@ -1,0 +1,19 @@
+{
+  "draft_only": true,
+  "operator_action": "Merge this PostToolUse:Bash hook manually; do not overwrite existing hooks.",
+  "settings_patch": {
+    "hooks": {
+      "PostToolUse": [
+        {
+          "matcher": "Bash",
+          "hooks": [
+            {
+              "type": "command",
+              "command": "$CLAUDE_PROJECT_DIR/.flywheel/scripts/enospc-halt-hook.sh"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
