@@ -1,0 +1,22 @@
+{
+  "schema_version": "flywheel.slb_implementation_receipt.v1",
+  "ts": "2026-05-20T07:55:28Z",
+  "hook": "/Users/josh/.claude/hooks/PreToolUse-bash-slb.sh",
+  "recipes": "/Users/josh/.flywheel/slb-recipes.json",
+  "audit_log": "/Users/josh/.local/state/flywheel/slb-execution-audit.jsonl",
+  "settings": "/Users/josh/.claude/settings.json",
+  "receipt_dir": ".flywheel/audits/slb-implementation-20260520T075223Z",
+  "validations": {
+    "smoke": "pass",
+    "shellcheck": "pass",
+    "live_hook_fixture": "pass"
+  },
+  "evidence_files": {
+    "installed_hook_copy": "installed-hook-copy.sh",
+    "installed_recipes_copy": "installed-recipes-copy.json",
+    "settings_pretooluse_excerpt": "settings-pretooluse-bash-excerpt.json",
+    "installed_sha256": "installed-sha256.txt",
+    "live_hook_output_postfix": "live-hook-output-postfix.json",
+    "live_hook_audit_postfix": "live-hook-audit-postfix.jsonl"
+  }
+}

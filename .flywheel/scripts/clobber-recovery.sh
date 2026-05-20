@@ -669,3 +669,8 @@ if [[ $n_restored -eq 0 ]] && [[ $n_noop -gt 0 ]] && [[ $n_refused -eq 0 ]]; the
   exit 4
 fi
 exit 0
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-92-reversible-recovery-ladder.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-45-reversible-cleanup-bundle.md`

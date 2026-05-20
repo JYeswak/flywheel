@@ -1,0 +1,23 @@
+{
+  "schema_version": "jsm-readonly-proof/v1",
+  "primary_integrity_pre": "ok",
+  "primary_integrity_post": "ok",
+  "cache_size_bytes": "0",
+  "search": {
+    "skills": [
+      {
+        "id": "1593ad9c-1309-4296-b0f6-d3eb90225eb3",
+        "name": "codex-goal-format-enforcement",
+        "description": "Codex goal format enforcement for /goal-first dispatch discipline on Codex panes while allowing Claude panes and audited operator bypasses.",
+        "category": "other",
+        "author": "Joshua Nowak",
+        "version": 2,
+        "is_jeffreys": false,
+        "is_public": false,
+        "updated_at": "2026-05-19T23:16:26.704Z"
+      }
+    ],
+    "count": 1,
+    "offline": false
+  }
+}

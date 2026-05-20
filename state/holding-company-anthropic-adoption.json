@@ -1,0 +1,72 @@
+{
+  "schema_version": "zeststream.holding_company_anthropic_adoption.v1",
+  "generated_at": "2026-05-17T09:21:00Z",
+  "gate": "recent_progress_anthropic_sdk_adoption",
+  "claim_text": "@zeststream/* adoption live: anthropic-sdk-python velocity OK across three consumer repos.",
+  "status": "proven",
+  "pack_name": "anthropic-sdk-python",
+  "min_real_consumer_repo_count": 3,
+  "expected_consumer_repos": [
+    "/Users/josh/Developer/agent-bench",
+    "/Users/josh/Developer/mobile-eats",
+    "/Users/josh/Developer/zesttube"
+  ],
+  "canonical_gates_status_ref": "/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json",
+  "pack_applied_events_ref": "/Users/josh/Developer/skillos/state/skillos-pack-applied-events.jsonl",
+  "doctor_scope": "package-adoption-velocity",
+  "doctor_status": "OK",
+  "distinct_target_count": 3,
+  "target_repos_remaining_to_min_target_count": 0,
+  "packages_phantom_fail": 0,
+  "valid_rows": 5,
+  "adoption_events": [
+    {
+      "target_repo": "/Users/josh/Developer/agent-bench",
+      "event_ts": "2026-05-13T14:40:33Z",
+      "event_source": "/Users/josh/Developer/skillos/state/skillos-pack-applied-events.jsonl",
+      "target_is_synthetic": false,
+      "target_was_self": false,
+      "destination": "/Users/josh/Developer/agent-bench/.skillos-libdocs/anthropic-sdk-python",
+      "applied_files": [
+        "llms-full.txt",
+        "llms.txt"
+      ]
+    },
+    {
+      "target_repo": "/Users/josh/Developer/mobile-eats",
+      "event_ts": "2026-05-08T23:12:23Z",
+      "event_source": "/Users/josh/Developer/skillos/state/skillos-pack-applied-events.jsonl",
+      "target_is_synthetic": null,
+      "target_was_self": null,
+      "destination": null,
+      "applied_files": null
+    },
+    {
+      "target_repo": "/Users/josh/Developer/zesttube",
+      "event_ts": "2026-05-13T14:40:33Z",
+      "event_source": "/Users/josh/Developer/skillos/state/skillos-pack-applied-events.jsonl",
+      "target_is_synthetic": false,
+      "target_was_self": false,
+      "destination": "/Users/josh/Developer/zesttube/.skillos-libdocs/anthropic-sdk-python",
+      "applied_files": [
+        "llms-full.txt",
+        "llms.txt"
+      ]
+    }
+  ],
+  "all_expected_repos_present": true,
+  "all_expected_events_present": true,
+  "real_consumer_repo_count": 3,
+  "evidence_refs": [
+    "/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json",
+    "/Users/josh/Developer/skillos/state/skillos-pack-applied-events.jsonl",
+    "/Users/josh/Developer/agent-bench",
+    "/Users/josh/Developer/mobile-eats",
+    "/Users/josh/Developer/zesttube"
+  ],
+  "notes": [
+    "The live SkillOS package-adoption-velocity doctor reported OK at 2026-05-17T09:20Z with distinct_target_count=3 and packages_phantom_fail=0.",
+    "The mobile-eats event is an older backfilled row that lacks target_is_synthetic/target_was_self fields; the target path is a real local consumer repo and the SkillOS doctor reports zero phantom failures."
+  ],
+  "next_action": "Keep this ledger pinned to the SkillOS canonical gate and pack-applied-events ledger; if target rows drift, rerun the SkillOS package-adoption-velocity doctor before using the adoption claim."
+}

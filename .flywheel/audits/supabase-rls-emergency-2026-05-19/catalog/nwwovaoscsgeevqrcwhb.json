@@ -1,0 +1,798 @@
+[
+  {
+    "table_schema": "public",
+    "table_name": "__drizzle_migrations__",
+    "rls_enabled": false,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_activities",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_api_idempotency_keys",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_audit_log",
+    "rls_enabled": true,
+    "row_count_estimate": 16655,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_bronze_review_events",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_chat_messages",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_chat_ratings",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_chat_sessions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_config_audit_log",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "user_email"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_config_versions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_connectors",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_contact_analysis",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_contact_cache",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "email",
+      "phone"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_contacts",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "email",
+      "phone"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_contract_results",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_cutover_actions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_data_conflict_audit_events",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_data_conflict_cases",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_data_conflict_decisions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_data_conflict_values",
+    "rls_enabled": true,
+    "row_count_estimate": 63,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_data_conflict_write_plans",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_deal_analysis",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_deals",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_duplicate_clusters",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_embedding_queue",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_feedback_coachmark_dismissal",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_feedback_messages",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_feedback_shipped_evidence",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_feedback_state_changes",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_field_lineage",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_field_mappings",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_firms",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_flag_timeline",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_hubspot_analysis_runs",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_hubspot_associations",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_hubspot_sync_checkpoints",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_integration_analysis",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_integration_flags",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_integration_live_signoffs",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_integration_run_approvals",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_integration_run_records",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_integration_runs",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_knowledge_documents",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_lookup_rows",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_lookup_tables",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_manual_processing_queue",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_merge_audit",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_notification_configs",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_pipeline_runs",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_platform_users",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "email"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_raw_ferro",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_raw_ferro_2026_03",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_raw_hawksoft",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_raw_hawksoft_2026_03",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_raw_hubspot",
+    "rls_enabled": true,
+    "row_count_estimate": 400,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_raw_phoenix",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_raw_phoenix_2026_03",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_reconciliation_log",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_red_flags",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_schema_drift_log",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_schema_snapshots",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_scoring_config",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_sync_batches",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_sync_configs",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_sync_history",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_sync_queue",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_sync_step_log",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_ticket_analysis",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_tickets",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_transforms",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_workflow_analysis",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cutover_shadow_window_events",
+    "rls_enabled": true,
+    "row_count_estimate": 14504,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cutover_shadow_window_runs",
+    "rls_enabled": true,
+    "row_count_estimate": 8769,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feedback_changes",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feedback_dispatch_pause_audit",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feedback_log_thread_message_policy_receipts",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feedback_log_thread_messages",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feedback_manual_mint_audit",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feedback_milestone_events",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feedback_outbox",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feedback_requests",
+    "rls_enabled": true,
+    "row_count_estimate": 7,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feedback_shipped_evidence",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feedback_system_state",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "hs_capability_probe_evidence",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "hs_gov_field_guard_changes",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "hs_gov_field_guard_properties",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "hs_gov_field_guard_snapshots",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "hs_gov_workflow_cleanup_items",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "hs_gov_workflow_cleanup_snapshots",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "hubspot_webhook_delivery_log",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "integration_shadow_aggregates",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "integration_shadow_diffs",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "integration_shadow_runs",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "migration_audit",
+    "rls_enabled": true,
+    "row_count_estimate": 26,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "organizations",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "schema_migrations",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_hubspot_tokens",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "hubspot_email"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "workato_observed_events",
+    "rls_enabled": true,
+    "row_count_estimate": 1657,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  }
+]

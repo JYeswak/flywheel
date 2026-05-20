@@ -143,3 +143,8 @@ case "$MODE" in
   cycle) run_cycle;; doctor|health) run_doctor;; repair) run_repair;; validate|audit) run_validate;; why) run_why;; schema) run_schema;;
   install) run_install;; uninstall) run_uninstall;; info) run_info;; examples) run_examples;; quickstart) run_quickstart;; completion) run_completion;;
 esac
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-20-cross-orch-handoff.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-63-phase-tick-bounded-action.md`

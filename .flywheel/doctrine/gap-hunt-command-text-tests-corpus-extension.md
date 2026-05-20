@@ -140,3 +140,12 @@ Run full: `.flywheel/tests/test-gap-hunt-probe-command-text-tests-corpus.sh`
 - Per-file cap precedent: 2xdi.66 + 2xdi.98 (SKILL.md + references/*.md cap raises)
 - META-RULE: `.flywheel/doctrine/bead-hypothesis-starting-point.md` (probe before implementing)
 - Orch hint accuracy note: Joshua/orch hinted "ee1f4e5b may have cleared this; close as resolved-upstream per 2m2cs". Per META-RULE 2xdi.54, verified empirically — fix did NOT clear. Disposition diverged from hint. Hint was directional signal, not conclusion.
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-09 — info-source watchtower:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-09-info-source-watchtower.md` for the canonical pattern.
+- **MP-13 — living documentation:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-13-living-documentation.md` for the canonical pattern.
+- **MP-28 — checklist before claim:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-28-checklist-before-claim.md` for the canonical pattern.

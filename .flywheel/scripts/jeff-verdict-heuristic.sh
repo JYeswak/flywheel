@@ -604,3 +604,8 @@ else:
     print(payload.get("verdict", "NEED_RESEARCH"))
 sys.exit(0 if payload.get("verdict") in VERDICTS or payload.get("status") == "pass" or args.examples else 1)
 PY
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-09-info-source-watchtower.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-76-authority-ranked-retrieval-maintenance.md`

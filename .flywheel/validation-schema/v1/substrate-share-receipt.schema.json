@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/substrate-share-receipt/v1/schema.json",
+  "title": "ZestStream Substrate Share Receipt v1",
+  "description": "Evidence that a candidate or portfolio company runs on shared ZestStream substrate and names the package, tenant, and N+1 measurement inputs.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "company_slug",
+    "repo_path",
+    "tenant_declaration",
+    "package_manifest",
+    "packages",
+    "counts",
+    "n_plus_one_metrics",
+    "evidence_refs"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.substrate_share_receipt.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "company_slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_declaration": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_manifest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "packages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "scope",
+          "version_or_ref"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^@zeststream/[a-z0-9][a-z0-9-]*$"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "production",
+              "development"
+            ]
+          },
+          "version_or_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "counts": {
+      "type": "object",
+      "required": [
+        "production_packages",
+        "development_packages",
+        "total_packages"
+      ],
+      "properties": {
+        "production_packages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "development_packages": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total_packages": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "n_plus_one_metrics": {
+      "type": "object",
+      "required": [
+        "baseline_launch_id",
+        "reused_package_count",
+        "new_substrate_contribution_count",
+        "downstream_propagation_window_days",
+        "measurement_status"
+      ],
+      "properties": {
+        "baseline_launch_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reused_package_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "new_substrate_contribution_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "downstream_propagation_window_days": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "measurement_status": {
+          "type": "string",
+          "enum": [
+            "baseline",
+            "measured",
+            "blocked"
+          ]
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "additionalProperties": false
+}

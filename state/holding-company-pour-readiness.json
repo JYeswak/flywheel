@@ -1,0 +1,34 @@
+{
+  "schema_version": "zeststream.holding_company_pour_readiness.v1",
+  "generated_at": "2026-05-17T07:30:00Z",
+  "gate": "pour_launch_readiness",
+  "clear_count": 0,
+  "launches": [
+    {
+      "launch_id": "mobile-eats-pour-readiness-20260517",
+      "company_slug": "mobile-eats",
+      "sequence": 1,
+      "status": "press_candidate",
+      "brand_name": "Mobile Eats",
+      "brand_identity_ref": "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md",
+      "repo_ref": "/Users/josh/Developer/mobile-eats",
+      "public_surface_ref": "https://mobile-eats.zeststream.ai",
+      "first_paying_customer_receipt": null,
+      "owner_operator_ref": null,
+      "operating_control_handoff_ref": null,
+      "evidence_refs": [
+        "state/zeststream-portfolio-company-registry.json",
+        "state/substrate-share/mobile-eats-20260517T0654Z.json",
+        "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md",
+        "/Users/josh/Developer/mobile-eats/.zs-tenant.yaml"
+      ],
+      "notes": "Brand, repo, public-surface, and substrate proof exist, but first paying-customer, owner-operator, and operating-control handoff receipts are absent. POUR is not clear."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical POUR readiness gate for the ZestStream holding-company goal.",
+    "POUR clear requires own brand evidence, repo/public surface, first paying-customer receipt, owner-operator receipt, and operating-control handoff receipt.",
+    "This ledger is stricter than product/substrate proof and does not count a company as launched by public URL alone."
+  ],
+  "next_action": "Add first paying-customer, owner-operator, and operating-control handoff receipts before marking any launch pour_clear or launched."
+}

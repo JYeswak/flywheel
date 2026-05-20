@@ -18,8 +18,25 @@
   "source_repo": "/Users/josh/Developer/flywheel",
   "source_row_sha256": "161619408db45794d3df37ed8a8e78ea8eff4732185ca4b1144e49d7ff100979",
   "source_status": "blocked",
-  "status": "open",
+  "status": "closed",
   "synced_at": "2026-05-15T16:08:00Z",
-  "title": "[stash-janitor target] alpsinsurance \u2014 79 stashes \u2014 Standard mode triage",
-  "verification_path": "br show flywheel-x5f0e --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-x5f0e\" and .status == \"blocked\"'"
+  "title": "[stash-janitor target] alpsinsurance — 79 stashes — Standard mode triage",
+  "verification_path": "br show flywheel-x5f0e --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-x5f0e\" and .status == \"blocked\"'",
+  "closed_at": "2026-05-15T17:02:20Z",
+  "closed_by": "orch:auto",
+  "closed_reason": "ac_passed_auto_close_hook",
+  "live_probe_evidence": {
+    "schema_version": "blocker-escalation/v1",
+    "ts": "2026-05-15T17:02:20Z",
+    "event": "blocker_auto_closed",
+    "blocker_id": "flywheel-x5f0e",
+    "ac_command": "br show flywheel-x5f0e --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-x5f0e\" and .status != \"blocked\"'",
+    "ac_stdout": "true",
+    "ac_exit_code": 0,
+    "live_probe_at": "2026-05-15T17:02:20Z",
+    "previous_last_verified_at": "2026-05-15T16:03:28Z",
+    "delta_seconds": 3532,
+    "auto_closer": "orch:auto",
+    "ac_state_hash": "0fa6837af0f9eb385d01a3f3f16f9d3ca0bc44bddd57ab40340fe2a8857e0784"
+  }
 }

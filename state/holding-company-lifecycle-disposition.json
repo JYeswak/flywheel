@@ -1,0 +1,34 @@
+{
+  "schema_version": "zeststream.holding_company_lifecycle_disposition.v1",
+  "generated_at": "2026-05-17T08:15:00Z",
+  "gate": "company_lifecycle_disposition",
+  "clear_count": 0,
+  "dispositions": [
+    {
+      "disposition_id": "mobile-eats-lifecycle-baseline-20260517",
+      "company_slug": "mobile-eats",
+      "disposition_type": "active_tracking",
+      "status": "tracking",
+      "owner_operator_ref": null,
+      "customer_obligation_disposition_ref": null,
+      "financial_disposition_ref": null,
+      "substrate_retention_ref": null,
+      "brand_public_update_ref": null,
+      "graduation_terms_ref": null,
+      "pivot_scope_ref": null,
+      "holding_plane_continues": true,
+      "evidence_refs": [
+        "state/zeststream-portfolio-company-registry.json",
+        "state/holding-company-pour-readiness.json",
+        "state/holding-company-public-story.json"
+      ],
+      "notes": "Baseline only. Mobile Eats is product/substrate proof, not a formed portfolio company, and no close, pivot, or graduation disposition is claimed."
+    }
+  ],
+  "notes": [
+    "This ledger keeps close, pivot, and graduate events separate from the standing holding-plane goal.",
+    "A disposition clears only with owner/operator, customer-obligation, financial, substrate-retention, and brand/public-update refs.",
+    "Graduation also requires graduation terms; pivot also requires pivot scope."
+  ],
+  "next_action": "When a portfolio company closes, pivots, or graduates, add disposition receipts before marking the lifecycle event clear."
+}

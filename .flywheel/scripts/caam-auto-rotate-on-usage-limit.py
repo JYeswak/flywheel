@@ -546,3 +546,8 @@ def main():
     append(a.ledger, row); append(a.recovery_ledger, {"schema": "caam-auto-rotate-recovery-ledger.v1", "event": RECOVERY, "wrapper_invoked": True, "rotated_at": ts, "identity_key": ident, "idempotency_key": idem, "active_profile_before": cur, "selected_profile": sel["name"], "post_check_active_profile": post, "ntm_rotate_subprocess_rc": rc})
     emit(a, "rotated", 0, rotated=True, rotated_at=ts, rotated_at_epoch=epoch, post_check_active_profile=post, recovery_ledger_written=True, **common, ntm_rotate_subprocess_rc=rc)
 if __name__ == "__main__": main()
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

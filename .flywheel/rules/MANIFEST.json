@@ -547,7 +547,7 @@
       "id": "L101",
       "order": 55,
       "path": ".flywheel/rules/L055-L101-flywheel-owns-continuous-fleet-productivity.md",
-      "sha256": "b880b18cd18918fc6573d829de42fc3991cbefcd1d426b8db84305697ebbb3e0",
+      "sha256": "04230a7e24c95a5bd106ce214ef7a97e5a3c80d73e23f610c5390623be4f6fec",
       "shipped": "2026-05-04",
       "status": "long_term",
       "title": "FLYWHEEL-OWNS-CONTINUOUS-FLEET-PRODUCTIVITY",
@@ -1214,7 +1214,7 @@
       "trauma_class": "non-transactional-non-idempotent-schema-mutation"
     }
   ],
-  "rules_body_sha256": "f25679b8d62af4637695fc18d8944329317c300bc29654096e9aed90173363ce",
+  "rules_body_sha256": "e21f0fa6067fd64c73a5926f66bd35bc2e54d926d28485978d3c97c759156b63",
   "schema_version": "agents-canonical-shards/v1",
   "source": "AGENTS.md"
 }

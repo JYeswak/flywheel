@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-owner-voice/v1/schema.json",
+  "title": "ZestStream Holding Company Owner Voice v1",
+  "description": "Ledger for the Yuzu owner-operator voice gate: each company surface speaks as the owner/community, not as ZestStream meta copy.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "clear_count",
+    "surfaces",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_owner_voice.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "yuzu_owner_operator_voice"
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "surfaces": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/surface"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "surface": {
+      "type": "object",
+      "required": [
+        "surface_id",
+        "company_slug",
+        "status",
+        "owner_operator_ref",
+        "owner_voice_ref",
+        "community_context_ref",
+        "yuzu_review_ref",
+        "public_surface_ref",
+        "owner_voice_present",
+        "community_context_present",
+        "zeststream_meta_voice_detected",
+        "evidence_refs"
+      ],
+      "properties": {
+        "surface_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "company_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "blocked",
+            "clear",
+            "deferred"
+          ]
+        },
+        "owner_operator_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "owner_voice_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "community_context_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "yuzu_review_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "public_surface_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "owner_voice_present": {
+          "type": "boolean"
+        },
+        "community_context_present": {
+          "type": "boolean"
+        },
+        "zeststream_meta_voice_detected": {
+          "type": "boolean"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

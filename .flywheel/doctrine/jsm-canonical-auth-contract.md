@@ -135,3 +135,12 @@ A flywheel worker that invokes `jsm` proves conformance via:
 This is a HARD RULE. Bypassing the skillos process re-introduces the GUI-prompt
 failure mode Joshua flagged on 2026-05-08. The canonical recovery is always
 "run skillos doctor; fix what it surfaces; verify all 4 invariants; re-try."
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-17 — secret emission discipline:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md` for the canonical pattern.
+- **MP-29 — production safety guardrails:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-29-production-safety-guardrails.md` for the canonical pattern.
+- **MP-30 — human-gated invasiveness:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-30-human-gated-invasiveness.md` for the canonical pattern.

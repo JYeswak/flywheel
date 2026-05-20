@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.zeststream.fleet-codex-health</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/josh/Developer/flywheel/.flywheel/scripts/fleet-codex-health-tick.sh</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/josh/Developer/flywheel</string>
+  <key>StartInterval</key>
+  <integer>300</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>/Users/josh/.local/state/flywheel/fleet-codex-health.launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/josh/.local/state/flywheel/fleet-codex-health.launchd.err.log</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/Users/josh/.local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>SKILLOS_REPO</key>
+    <string>/Users/josh/Developer/skillos</string>
+  </dict>
+</dict>
+</plist>

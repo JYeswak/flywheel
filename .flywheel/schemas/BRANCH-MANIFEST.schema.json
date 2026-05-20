@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flywheel.zeststream.ai/schemas/BRANCH-MANIFEST.schema.json",
+  "title": "BRANCH-MANIFEST",
+  "description": "Per-repo manifest declaring branches and their lifecycle. Authority: flywheel-m9yxr research (2026-05-20). Mission Duty 3 (substrate-published) + Duty 5a (auto-push, jrpfn).",
+  "type": "object",
+  "required": ["schema_version", "repo_path", "generated_at", "branches"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "flywheel.branch_manifest.v1"
+    },
+    "repo_path": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "branches": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/branch" }
+    }
+  },
+  "$defs": {
+    "branch": {
+      "type": "object",
+      "required": ["branch_name", "declared_bead", "lifecycle", "owner"],
+      "additionalProperties": false,
+      "properties": {
+        "branch_name": { "type": "string" },
+        "declared_bead": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Bead ID this branch implements. Branches without a declared bead are reaper candidates by default."
+        },
+        "lifecycle": {
+          "enum": ["merge_to_main", "abandon", "extract_to_repo", "long_running"],
+          "description": "merge_to_main=normal feature branch; abandon=workshop branch, do not merge; extract_to_repo=will move to another repo; long_running=integration branch (e.g. develop)."
+        },
+        "owner": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "last_pushed_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last successful push to remote. Drives auto-push cadence per flywheel-jrpfn."
+        },
+        "last_commit_at": { "type": "string", "format": "date-time" },
+        "upstream_state": {
+          "enum": ["tracking", "ahead", "behind", "diverged", "gone", "none"],
+          "description": "From `git for-each-ref --format='%(upstream:track)'`. 'gone'=upstream branch deleted from remote."
+        },
+        "lifecycle_state": {
+          "enum": ["active", "merged", "abandoned", "extracted", "stale"],
+          "description": "stale=N>90d no commits + no open PR. Reaper candidate."
+        },
+        "open_pr_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "labels": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Reaper carve-outs: keep-alive, pending-pr, archived-snapshot, joshua-gated, cross-orch-active, defer-gated."
+        },
+        "merged_at": { "type": "string", "format": "date-time" },
+        "merged_into": { "type": "string" }
+      }
+    }
+  }
+}

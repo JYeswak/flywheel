@@ -1,0 +1,31 @@
+{
+  "schema_version": "flywheel.loop_as_contract_goal_phase1_receipt.v1",
+  "ts": "2026-05-18T20:37:49Z",
+  "goal_path": "/Users/josh/Desktop/zeststream-goals/flywheel/loop-as-contract-mode-20260518.txt",
+  "validation": {
+    "schema_version": "goal-build.v1.validate",
+    "ts": "2026-05-18T20:37:49Z",
+    "command": "validate",
+    "file": "/Users/josh/Desktop/zeststream-goals/flywheel/loop-as-contract-mode-20260518.txt",
+    "success": true,
+    "exit_code": 0,
+    "char_count": 3976,
+    "char_limit": 4000,
+    "sections_missing": [],
+    "forbidden_matches": [],
+    "external_source_present": true,
+    "canonical_location": {
+      "expected_dir": "/Users/josh/Desktop/zeststream-goals/flywheel",
+      "file_realpath": "/Users/josh/Desktop/zeststream-goals/flywheel/loop-as-contract-mode-20260518.txt",
+      "status": "pass",
+      "violation": false,
+      "strict": true
+    }
+  },
+  "status": "pass",
+  "phase": "Phase 1 PLAN",
+  "next_beads": [
+    "flywheel-dispatch-mode-attribution-for-efficacy-audits-n04mc",
+    "flywheel-loop-goal-contract-gate-makes-dispatch-falsifiab-yyrph"
+  ]
+}

@@ -750,3 +750,8 @@ if [[ "$JSON_OUT" == 1 ]]; then
 else
   jq -r '"br-authority target=\(.target_dir) db=\(.db_path // "none") method=\(.discovery_method) walk_up=\(.walk_up_distance) symlink=\(.is_symlink) cross_tree=\(.cross_tree) source_repo_last=\(.source_repo_last // "none")"' <<<"$PAYLOAD"
 fi
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

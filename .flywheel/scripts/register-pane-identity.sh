@@ -103,3 +103,8 @@ echo ""
 echo "NEXT STEP (manual until MCP is wired): from a session with MCP agent-mail, run:"
 echo "  mcp__mcp-agent-mail__register_agent project_key=$PROJECT agent_name=$IDENTITY"
 echo "Then update topology rows to include the pane->identity mapping."
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-20-cross-orch-handoff.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-100-contention-shaped-state-owner.md`

@@ -545,3 +545,8 @@ if [[ "$APPLY" -eq 1 ]]; then
   append_jsonl_best_effort "$HISTORY" "$history_row" "headless-browser reap history"
 fi
 printf '%s\n' "$history_row"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

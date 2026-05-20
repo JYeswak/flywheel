@@ -1,0 +1,75 @@
+{
+  "dimensions": {
+    "agent_ease_of_use": {
+      "final": 875,
+      "initial": 750
+    },
+    "agent_ergonomics": {
+      "final": 850,
+      "initial": 725
+    },
+    "agent_intuitiveness": {
+      "final": 820,
+      "initial": 770
+    },
+    "composability": {
+      "final": 825,
+      "initial": 775
+    },
+    "determinism_and_reproducibility": {
+      "final": 850,
+      "initial": 800
+    },
+    "error_pedagogy": {
+      "final": 780,
+      "initial": 730
+    },
+    "intent_inference": {
+      "final": 725,
+      "initial": 675
+    },
+    "output_parseability": {
+      "final": 875,
+      "initial": 750
+    },
+    "safety_with_recovery": {
+      "final": 1000,
+      "initial": 950
+    },
+    "self_documentation": {
+      "final": 875,
+      "initial": 750
+    }
+  },
+  "evidence": {
+    "bad_invocation_rc": 2,
+    "capabilities_json": true,
+    "capabilities_rc": 0,
+    "deterministic_json_probe": true,
+    "help_rc": 0,
+    "json_probe_rc": 0,
+    "json_probe_valid_json": true,
+    "robot_docs_rc": 0,
+    "useful_error": true
+  },
+  "final_score": 847.5,
+  "initial_score": 767.5,
+  "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+  "schema_version": "agent-ergonomics.scorecard/v1",
+  "surface": {
+    "capabilities_args": "--capabilities --json",
+    "class": "CLI",
+    "invoke_count_30d": 56,
+    "json_probe_args": "--schema",
+    "path": ".flywheel/scripts/peer-orch-blocker-watch.sh",
+    "robot_docs_args": "--help"
+  },
+  "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/peer-orch-blocker-watch.sh",
+  "transcripts": {
+    "bad_invocation_stderr": "ERR: unknown argument: --jsno\nUsage: peer-orch-blocker-watch.sh [--doctor|--validate|--schema|--examples|--info|--capabilities] [--json] [--session NAME] [--dry-run] [--apply]\nNative sources: ntm swarm status --json; ntm rebalance <session> --dry-run --format json.\n\nAgent automation:\n  peer-orch-blocker-watch.sh --capabilities --json\n  peer-orch-blocker-watch.sh --doctor --json --session flywheel --dry-run\n  peer-orch-blocker-watch.sh --validate --json --ledger .flywheel/state/cross-orch-coordination.jsonl\n  Exit codes: 0 success, 2 usage error, 127 ntm executable missing.\n",
+    "capabilities": "{\"schema_version\":\"peer-orch-blocker-watch/v2\",\"command\":\"capabilities\",\"contract_version\":\"1\",\"features\":[\"json_output\",\"doctor\",\"validate\",\"dry_run_default\",\"ledger_mode\",\"native_ntm_probe\"],\"commands\":{\"doctor\":{\"command\":\"peer-orch-blocker-watch.sh --doctor --json --session flywheel --dry-run\",\"read_only\":true},\"validate\":{\"command\":\"peer-orch-blocker-watch.sh --validate --json --ledger PATH\",\"read_only\":true},\"schema\":{\"command\":\"peer-orch-blocker-watch.sh --schema\",\"read_only\":true},\"examples\":{\"command\":\"peer-orch-blocker-watch.sh --examples\",\"read_only\":true}},\"exit_codes\":{\"0\":\"success\",\"2\":\"usage error\",\"127\":\"ntm executable missing\"},\"env_vars\":{\"PEER_ORCH_BLOCKER_WATCH_NTM_BIN\":\"override ntm binary\",\"PEER_ORCH_BLOCKER_WATCH_SESSION\":\"default session\",\"FLYWHEEL_PEER_ORCH_BLOCKER_THRESHOLD_SECONDS\":\"stale blocker threshold\"}}\n",
+    "help": "Usage: peer-orch-blocker-watch.sh [--doctor|--validate|--schema|--examples|--info|--capabilities] [--json] [--session NAME] [--dry-run] [--apply]\nNative sources: ntm swarm status --json; ntm rebalance <session> --dry-run --format json.\n\nAgent automation:\n  peer-orch-blocker-watch.sh --capabilities --json\n  peer-orch-blocker-watch.sh --doctor --json --session flywheel --dry-run\n  peer-orch-blocker-watch.sh --validate --json --ledger .flywheel/state/cross-orch-coordination.jsonl\n  Exit codes: 0 success, 2 usage error, 127 ntm executable missing.\n",
+    "robot_docs": "Usage: peer-orch-blocker-watch.sh [--doctor|--validate|--schema|--examples|--info|--capabilities] [--json] [--session NAME] [--dry-run] [--apply]\nNative sources: ntm swarm status --json; ntm rebalance <session> --dry-run --format json.\n\nAgent automation:\n  peer-orch-blocker-watch.sh --capabilities --json\n  peer-orch-blocker-watch.sh --doctor --json --session flywheel --dry-run\n  peer-orch-blocker-watch.sh --validate --json --ledger .flywheel/state/cross-orch-coordination.jsonl\n  Exit codes: 0 success, 2 usage error, 127 ntm executable missing.\n"
+  },
+  "uplift": 80.0
+}

@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-brand-voice-skill/v1/schema.json",
+  "title": "ZestStream Holding Company Brand Voice Skill v1",
+  "description": "Ledger for the JSM-managed zeststream-brand-voice skill alignment gate: holding-company canon, grounding, and anti-builder rejection must be proven before the skill counts as aligned.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "required_positioning",
+    "clear_count",
+    "skills",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_brand_voice_skill.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "brand_voice_skill_alignment"
+    },
+    "required_positioning": {
+      "type": "string",
+      "minLength": 1
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "skills": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/skill"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "skill": {
+      "type": "object",
+      "required": [
+        "skill_id",
+        "status",
+        "skill_path",
+        "jsm_managed",
+        "holding_company_canon_present",
+        "grounding_rules_present",
+        "builder_frame_rejection_present",
+        "approved_update_receipt",
+        "current_primary_canon",
+        "required_positioning",
+        "evidence_refs"
+      ],
+      "properties": {
+        "skill_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "blocked",
+            "aligned",
+            "clear",
+            "deferred"
+          ]
+        },
+        "skill_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "jsm_managed": {
+          "type": "boolean"
+        },
+        "holding_company_canon_present": {
+          "type": "boolean"
+        },
+        "grounding_rules_present": {
+          "type": "boolean"
+        },
+        "builder_frame_rejection_present": {
+          "type": "boolean"
+        },
+        "approved_update_receipt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "current_primary_canon": {
+          "type": "string",
+          "minLength": 1
+        },
+        "required_positioning": {
+          "type": "string",
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

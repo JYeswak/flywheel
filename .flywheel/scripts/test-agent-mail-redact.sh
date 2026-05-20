@@ -357,3 +357,8 @@ fi
 
   printf 'FAIL: wrapper accepted a literal token-shaped handle\n' >&2
 exit 1
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-67-presence-hash-secret-diagnostics.md`

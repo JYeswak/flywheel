@@ -1,0 +1,75 @@
+{
+  "dimensions": {
+    "agent_ease_of_use": {
+      "final": 875,
+      "initial": 750
+    },
+    "agent_ergonomics": {
+      "final": 850,
+      "initial": 725
+    },
+    "agent_intuitiveness": {
+      "final": 820,
+      "initial": 770
+    },
+    "composability": {
+      "final": 825,
+      "initial": 775
+    },
+    "determinism_and_reproducibility": {
+      "final": 850,
+      "initial": 800
+    },
+    "error_pedagogy": {
+      "final": 780,
+      "initial": 730
+    },
+    "intent_inference": {
+      "final": 725,
+      "initial": 675
+    },
+    "output_parseability": {
+      "final": 875,
+      "initial": 750
+    },
+    "safety_with_recovery": {
+      "final": 850,
+      "initial": 800
+    },
+    "self_documentation": {
+      "final": 875,
+      "initial": 750
+    }
+  },
+  "evidence": {
+    "bad_invocation_rc": 2,
+    "capabilities_json": true,
+    "capabilities_rc": 0,
+    "deterministic_json_probe": true,
+    "help_rc": 0,
+    "json_probe_rc": 0,
+    "json_probe_valid_json": true,
+    "robot_docs_rc": 0,
+    "useful_error": true
+  },
+  "final_score": 832.5,
+  "initial_score": 752.5,
+  "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+  "schema_version": "agent-ergonomics.scorecard/v1",
+  "surface": {
+    "capabilities_args": "--info",
+    "class": "ledger-writer",
+    "invoke_count_30d": 48,
+    "json_probe_args": "--schema",
+    "path": ".flywheel/scripts/peer-orch-respawn-permit.sh",
+    "robot_docs_args": "--help"
+  },
+  "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/peer-orch-respawn-permit.sh",
+  "transcripts": {
+    "bad_invocation_stderr": "unknown argument: --jsno\nUsage: peer-orch-respawn-permit.sh [--target-session SESSION --target-pane PANE] [--actor-session SESSION --actor-pane PANE] [--reason TEXT] [--apply|--dry-run]\n       peer-orch-respawn-permit.sh health|doctor|repair|validate|audit|why|schema|examples|quickstart|completion|--info\n\nCanonical-CLI introspection flags (per canonical-cli-scoping skill):\n  --help, -h     this help text\n  --info         tool name + ledger paths (JSON)\n  --schema       JSON schema for the decision/health/etc emit envelopes\n  --examples     copy-pasteable invocation examples\n\nPolicy wrapper for peer orchestrator recovery. Flywheel keeps permit/refusal doctrine;\nNTM owns pane health detection and respawn mechanics.\n",
+    "capabilities": "{\"name\":\"peer-orch-respawn-permit\",\"ntm_bin\":\"ntm\",\"ledger\":\".flywheel/peer-orch-recovery.jsonl\",\"contract_ledger\":\".flywheel/peer-orch-recovery-contract.jsonl\"}\n",
+    "help": "Usage: peer-orch-respawn-permit.sh [--target-session SESSION --target-pane PANE] [--actor-session SESSION --actor-pane PANE] [--reason TEXT] [--apply|--dry-run]\n       peer-orch-respawn-permit.sh health|doctor|repair|validate|audit|why|schema|examples|quickstart|completion|--info\n\nCanonical-CLI introspection flags (per canonical-cli-scoping skill):\n  --help, -h     this help text\n  --info         tool name + ledger paths (JSON)\n  --schema       JSON schema for the decision/health/etc emit envelopes\n  --examples     copy-pasteable invocation examples\n\nPolicy wrapper for peer orchestrator recovery. Flywheel keeps permit/refusal doctrine;\nNTM owns pane health detection and respawn mechanics.\n",
+    "robot_docs": "Usage: peer-orch-respawn-permit.sh [--target-session SESSION --target-pane PANE] [--actor-session SESSION --actor-pane PANE] [--reason TEXT] [--apply|--dry-run]\n       peer-orch-respawn-permit.sh health|doctor|repair|validate|audit|why|schema|examples|quickstart|completion|--info\n\nCanonical-CLI introspection flags (per canonical-cli-scoping skill):\n  --help, -h     this help text\n  --info         tool name + ledger paths (JSON)\n  --schema       JSON schema for the decision/health/etc emit envelopes\n  --examples     copy-pasteable invocation examples\n\nPolicy wrapper for peer orchestrator recovery. Flywheel keeps permit/refusal doctrine;\nNTM owns pane health detection and respawn mechanics.\n"
+  },
+  "uplift": 80.0
+}

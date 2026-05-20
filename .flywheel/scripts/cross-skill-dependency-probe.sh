@@ -451,3 +451,8 @@ if [[ "$JSON_OUT" == 1 ]]; then
 else
   jq -r '"cross-skill-dep skills=\(.skills_scanned) high_radius=\(.high_radius_count) max=\(.distribution.max) p99=\(.distribution.p99) p90=\(.distribution.p90) top=\(.top_blast_radius[0:3] | map(.skill) | join(","))"' <<<"$PAYLOAD"
 fi
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

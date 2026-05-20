@@ -1,0 +1,97 @@
+{
+  "alias": "zesttube",
+  "before": {
+    "allow_deletions": {
+      "enabled": false
+    },
+    "allow_force_pushes": {
+      "enabled": false
+    },
+    "allow_fork_syncing": {
+      "enabled": false
+    },
+    "block_creations": {
+      "enabled": false
+    },
+    "enforce_admins": {
+      "enabled": false,
+      "url": "https://api.github.com/repos/JYeswak/zesttube/branches/main/protection/enforce_admins"
+    },
+    "lock_branch": {
+      "enabled": false
+    },
+    "required_conversation_resolution": {
+      "enabled": false
+    },
+    "required_linear_history": {
+      "enabled": true
+    },
+    "required_signatures": {
+      "enabled": false,
+      "url": "https://api.github.com/repos/JYeswak/zesttube/branches/main/protection/required_signatures"
+    },
+    "required_status_checks": {
+      "checks": [
+        {
+          "app_id": null,
+          "context": "Studio Visual Journey"
+        }
+      ],
+      "contexts": [
+        "Studio Visual Journey"
+      ],
+      "contexts_url": "https://api.github.com/repos/JYeswak/zesttube/branches/main/protection/required_status_checks/contexts",
+      "strict": true,
+      "url": "https://api.github.com/repos/JYeswak/zesttube/branches/main/protection/required_status_checks"
+    },
+    "url": "https://api.github.com/repos/JYeswak/zesttube/branches/main/protection"
+  },
+  "branch": "main",
+  "desired": {
+    "allow_deletions": false,
+    "allow_force_pushes": false,
+    "enforce_admins": false,
+    "required_linear_history": true,
+    "required_pull_request_reviews": null,
+    "required_status_checks": {
+      "contexts": [
+        "Studio Visual Journey"
+      ],
+      "strict": true
+    },
+    "restrictions": null
+  },
+  "diff": "--- /dev/fd/63\t2026-05-20 01:36:19\n+++ /dev/fd/62\t2026-05-20 01:36:19\n@@ -1,46 +1,14 @@\n {\n-  \"allow_deletions\": {\n-    \"enabled\": false\n-  },\n-  \"allow_force_pushes\": {\n-    \"enabled\": false\n-  },\n-  \"allow_fork_syncing\": {\n-    \"enabled\": false\n-  },\n-  \"block_creations\": {\n-    \"enabled\": false\n-  },\n-  \"enforce_admins\": {\n-    \"enabled\": false,\n-    \"url\": \"https://api.github.com/repos/JYeswak/zesttube/branches/main/protection/enforce_admins\"\n-  },\n-  \"lock_branch\": {\n-    \"enabled\": false\n-  },\n-  \"required_conversation_resolution\": {\n-    \"enabled\": false\n-  },\n-  \"required_linear_history\": {\n-    \"enabled\": true\n-  },\n-  \"required_signatures\": {\n-    \"enabled\": false,\n-    \"url\": \"https://api.github.com/repos/JYeswak/zesttube/branches/main/protection/required_signatures\"\n-  },\n+  \"allow_deletions\": false,\n+  \"allow_force_pushes\": false,\n+  \"enforce_admins\": false,\n+  \"required_linear_history\": true,\n+  \"required_pull_request_reviews\": null,\n   \"required_status_checks\": {\n-    \"checks\": [\n-      {\n-        \"app_id\": null,\n-        \"context\": \"Studio Visual Journey\"\n-      }\n-    ],\n     \"contexts\": [\n       \"Studio Visual Journey\"\n     ],\n-    \"contexts_url\": \"https://api.github.com/repos/JYeswak/zesttube/branches/main/protection/required_status_checks/contexts\",\n-    \"strict\": true,\n-    \"url\": \"https://api.github.com/repos/JYeswak/zesttube/branches/main/protection/required_status_checks\"\n+    \"strict\": true\n   },\n-  \"url\": \"https://api.github.com/repos/JYeswak/zesttube/branches/main/protection\"\n+  \"restrictions\": null\n }",
+  "discovery_decision": "recent_runs_only",
+  "discovery_details": [
+    {
+      "check": "Studio Visual Journey",
+      "included": true,
+      "job": null,
+      "matrix": null,
+      "trigger_reason": "included:recent_runs_only",
+      "workflow": null
+    }
+  ],
+  "discovery_source": "recent_runs",
+  "mode": "apply",
+  "outcome": "applied",
+  "override_checks": null,
+  "recent_run_names": [
+    "Studio Visual Journey"
+  ],
+  "repo": "JYeswak/zesttube",
+  "repo_path": "/Users/josh/Developer/zesttube",
+  "repo_view": {
+    "defaultBranchRef": {
+      "name": "main"
+    },
+    "nameWithOwner": "JYeswak/zesttube"
+  },
+  "required_checks": [
+    "Studio Visual Journey"
+  ],
+  "schema_version": "branch_protection_apply.v1",
+  "ts": "2026-05-20T07:36:19Z",
+  "workflow_yml_checks": []
+}

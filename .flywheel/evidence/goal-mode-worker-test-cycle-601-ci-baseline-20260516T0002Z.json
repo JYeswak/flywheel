@@ -1,0 +1,106 @@
+{
+  "schema": "flywheel.watch.ci_baseline.v1",
+  "cycle": 601,
+  "ts": "2026-05-16T00:02:00Z",
+  "event": "ci-baseline-refresh",
+  "repo": "/Users/josh/Developer/flywheel",
+  "github_repo": "JYeswak/flywheel",
+  "wake_trigger_status": {
+    "operator_input": "none-after-cycle-600",
+    "flywheel_head_moved": false,
+    "skillos_head_moved": false,
+    "ci_state_transition": false,
+    "pr_state_transition": false
+  },
+  "flywheel_local_head": {
+    "sha": "bb5b92c08ea5df4006b87b8233ee78adf0950baf",
+    "subject": "chore(handoff): record orch substrate-discipline arc 2026-05-15T2322Z"
+  },
+  "flywheel_remote_refs": {
+    "master": "38d541c61207f5a4c26554f0c03a7025024ba7ac",
+    "review/flywheel-2.0-private-20260513": "9115964f1abc36f94c1b967b3670ee646e3b8d2a"
+  },
+  "skillos_local_head": {
+    "sha": "5195d6eadf069b217645f002b4c1f2e800c9fdfa",
+    "subject": "doc(petal9): integrate with existing zesttube voice-gate + distributor"
+  },
+  "latest_runs": [
+    {
+      "database_id": 25944576844,
+      "workflow": "CI",
+      "event": "push",
+      "head_branch": "master",
+      "head_sha": "38d541c61207f5a4c26554f0c03a7025024ba7ac",
+      "status": "completed",
+      "conclusion": "success",
+      "updated_at": "2026-05-15T22:34:22Z"
+    },
+    {
+      "database_id": 25944513393,
+      "workflow": "CI",
+      "event": "pull_request",
+      "head_branch": "fix/callback-spool-reap-cleanup-trap-20260515",
+      "head_sha": "f0c30fb2bd0512ef5441cdce3c174e03b1212c71",
+      "status": "completed",
+      "conclusion": "success",
+      "updated_at": "2026-05-15T22:32:36Z"
+    },
+    {
+      "database_id": 25944513371,
+      "workflow": "Installer Smoke",
+      "event": "pull_request",
+      "head_branch": "fix/callback-spool-reap-cleanup-trap-20260515",
+      "head_sha": "f0c30fb2bd0512ef5441cdce3c174e03b1212c71",
+      "status": "completed",
+      "conclusion": "success",
+      "updated_at": "2026-05-15T22:31:43Z"
+    }
+  ],
+  "open_prs": [
+    {
+      "number": 3,
+      "title": "Post-merge readiness and handoff follow-up",
+      "head_ref": "review/flywheel-2.0-private-20260513",
+      "head_sha": "9115964f1abc36f94c1b967b3670ee646e3b8d2a",
+      "merge_state": "DIRTY",
+      "updated_at": "2026-05-15T18:06:36Z",
+      "checks": [
+        {
+          "name": "Public Surface",
+          "workflow": "CI",
+          "status": "COMPLETED",
+          "conclusion": "SUCCESS",
+          "completed_at": "2026-05-15T18:07:48Z"
+        },
+        {
+          "name": "Install Doctor Uninstall (ubuntu-22.04)",
+          "workflow": "Installer Smoke",
+          "status": "COMPLETED",
+          "conclusion": "SUCCESS",
+          "completed_at": "2026-05-15T18:07:32Z"
+        },
+        {
+          "name": "Install Doctor Uninstall (macos-14)",
+          "workflow": "Installer Smoke",
+          "status": "COMPLETED",
+          "conclusion": "SUCCESS",
+          "completed_at": "2026-05-15T18:07:15Z"
+        },
+        {
+          "name": "GitGuardian Security Checks",
+          "workflow": "",
+          "status": "COMPLETED",
+          "conclusion": "FAILURE",
+          "completed_at": "2026-05-15T18:06:35Z"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    "git rev-parse HEAD && git log -1 --format='%H %s'",
+    "git ls-remote origin refs/heads/master refs/heads/review/flywheel-2.0-private-20260513",
+    "git -C /Users/josh/Developer/skillos rev-parse HEAD && git -C /Users/josh/Developer/skillos log -1 --format='%H %s'",
+    "gh run list --repo JYeswak/flywheel --limit 3 --json databaseId,workflowName,headBranch,headSha,status,conclusion,updatedAt,event",
+    "gh pr list --repo JYeswak/flywheel --state open --json number,title,headRefOid,headRefName,mergeStateStatus,statusCheckRollup,updatedAt"
+  ]
+}

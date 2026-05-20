@@ -1,0 +1,652 @@
+[
+  {
+    "table_schema": "public",
+    "table_name": "__drizzle_migrations__",
+    "rls_enabled": true,
+    "row_count_estimate": 61,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "admin_actions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "badge_definitions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "billing_alerts",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "billing_customers",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "claim_disputes",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "community_push_subscriptions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "auth_secret"
+    ],
+    "anon_can_select": false,
+    "authenticated_can_select": false
+  },
+  {
+    "table_schema": "public",
+    "table_name": "community_submissions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "credit_transactions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "customer_health_snapshots",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "drive_shares",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "email_events",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "to_email",
+      "from_email"
+    ],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "email_sequences",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "events",
+    "rls_enabled": true,
+    "row_count_estimate": 4455,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feature_flags",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feedback_changes",
+    "rls_enabled": true,
+    "row_count_estimate": 21,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feedback_loop_state",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feedback_outbox",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "feedback_requests",
+    "rls_enabled": true,
+    "row_count_estimate": 22,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "inngest_dispatch_dead_letters",
+    "rls_enabled": true,
+    "row_count_estimate": 316,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "invoices",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "locations",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": false,
+    "authenticated_can_select": false
+  },
+  {
+    "table_schema": "public",
+    "table_name": "marketing_consents",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "media_assets",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "menu_items",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "mrr_daily_rollup",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "naming_candidate_votes",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": false,
+    "authenticated_can_select": false
+  },
+  {
+    "table_schema": "public",
+    "table_name": "naming_candidates",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": false,
+    "authenticated_can_select": false
+  },
+  {
+    "table_schema": "public",
+    "table_name": "notification_channel_prefs",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "notification_preferences",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "notifications",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "oauth_connections",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "owner_health_snapshots",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "owner_interventions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "owner_now_broadcasts",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "owner_profiles",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "owners",
+    "rls_enabled": true,
+    "row_count_estimate": 7,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "payment_events",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "payment_methods",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "photo_assets",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "plan_changes",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "published_stops",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "push_log",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "push_subscriptions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "auth_secret"
+    ],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "seed_truck_drafts",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "phone",
+      "email"
+    ],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sequence_enrollments",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "email_at_enrollment"
+    ],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sequence_step_sends",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "sequence_steps",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "email_template_key"
+    ],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "submission_extractions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "subscription_items",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "subscriptions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "truck_claims",
+    "rls_enabled": true,
+    "row_count_estimate": 1,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "phone_npa_nxx"
+    ],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "truck_location_bindings",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": false,
+    "authenticated_can_select": false
+  },
+  {
+    "table_schema": "public",
+    "table_name": "truck_schedule_slots",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": false,
+    "authenticated_can_select": false
+  },
+  {
+    "table_schema": "public",
+    "table_name": "truck_signals",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "trucks",
+    "rls_enabled": true,
+    "row_count_estimate": 89,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "phone_curated",
+      "phone_curated_source",
+      "phone_curated_at"
+    ],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_badges",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_credits",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_favorites",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_points",
+    "rls_enabled": true,
+    "row_count_estimate": 3,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "user_roles",
+    "rls_enabled": true,
+    "row_count_estimate": 7,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": false,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "verified_claims",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  },
+  {
+    "table_schema": "public",
+    "table_name": "voip_phone_prefixes",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": [],
+    "anon_can_select": true,
+    "authenticated_can_select": true
+  }
+]

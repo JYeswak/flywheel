@@ -94,6 +94,11 @@ assert_jq "$TMP/base.json" '.sub_gaps_addressed | length == 7' "seven gaps addre
 assert_jq "$TMP/base.json" '.trauma_trend_jsonl_bootstrapped == true and .baseline_total == 116' "trauma baseline bootstraps"
 assert_jq "$TMP/base.json" '.tuning_ledger_initialized == true and .watcher_tuning_count_30d >= 1' "tuning ledger initializes"
 
+repo_fixture="$TMP/repo-fixture"
+seed_common "$repo_fixture/.flywheel/watcher-isomorphic-fixtures"
+WATCHER_ISOMORPHIC_NOW="2026-05-05T02:30:00Z" "$SCRIPT" --doctor --repo "$repo_fixture" --json >"$TMP/repo-fixture.json" || true
+assert_jq "$TMP/repo-fixture.json" '.status == "pass" and .probes.pane_health.fixture_g_post_completion_buffer == "pass"' "repo-local fixture auto-loads in direct doctor mode"
+
 fp="$TMP/fp"
 seed_common "$fp"
 printf '%s\n' '{"ts":"2026-05-05T02:00:00Z","event":"recovery","false_positive":true}' >"$fp/recovery.jsonl"

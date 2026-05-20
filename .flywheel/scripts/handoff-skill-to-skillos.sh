@@ -626,3 +626,8 @@ append_dispatch_log "$ROW" || {
 }
 
 json_emit "sent" "$MESSAGE_ID" "$SKILL_NAME" "$SKILL_VERSION" "$OWNERSHIP"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-03-agent-ergonomics-rubric.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-58-agent-tool-theory-of-mind.md`

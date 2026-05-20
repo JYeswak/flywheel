@@ -206,3 +206,12 @@ name preserved from origin).
 - **Ratify-up packet**: 2026-05-12T00:10Z flywheel:1 → skillos:1 (sha256-ratification list of 8 doctrines + 4-rule cohort acceptance)
 - **Shipped to canonical**: this doctrine doc 2026-05-11T18:0X (worker MagentaPond)
 - **Future syncs**: `.flywheel/scripts/doctrine-sync.sh` propagates to fleet on next tick
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-17 — secret emission discipline:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md` for the canonical pattern.
+- **MP-29 — production safety guardrails:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-29-production-safety-guardrails.md` for the canonical pattern.
+- **MP-30 — human-gated invasiveness:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-30-human-gated-invasiveness.md` for the canonical pattern.

@@ -1,0 +1,38 @@
+{
+  "schema_version": "zeststream.holding_company_press_readiness.v1",
+  "generated_at": "2026-05-17T08:32:00Z",
+  "gate": "press_readiness",
+  "clear_count": 0,
+  "presses": [
+    {
+      "press_id": "mobile-eats-press-readiness-20260517",
+      "company_slug": "mobile-eats",
+      "sequence": 1,
+      "status": "blocked",
+      "release_version": null,
+      "candidate_fit_ref": "state/holding-company-candidate-fit.json",
+      "v0_1_release_ref": null,
+      "skillos_hardening_ref": null,
+      "flywheel_coordination_ref": "state/substrate-share/mobile-eats-20260517T0654Z.json",
+      "package_delivery_ref": "state/substrate-share/mobile-eats-20260517T0654Z.json",
+      "yuzu_owner_voice_ref": "state/holding-company-owner-voice.json",
+      "signed_equity_ref": null,
+      "owner_economics_ref": "state/holding-company-owner-economics.json",
+      "substrate_share_receipt": "state/substrate-share/mobile-eats-20260517T0654Z.json",
+      "evidence_refs": [
+        "state/holding-company-candidate-fit.json",
+        "state/holding-company-owner-voice.json",
+        "state/holding-company-owner-economics.json",
+        "state/substrate-share/mobile-eats-20260517T0654Z.json",
+        "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md"
+      ],
+      "notes": "Mobile Eats has package and flywheel substrate evidence, but no v0.1 release receipt, SkillOS hardening receipt, or signed-equity receipt. PRESS readiness remains blocked."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical PRESS readiness gate for the ZestStream holding-company goal.",
+    "PRESS clear requires candidate fit, v0.1 release proof, SkillOS hardening, flywheel coordination, package delivery, Yuzu owner-operator voice, signed equity, owner economics, and substrate-share receipts.",
+    "This gate ties the PRESS loop together; adjacent ledgers still own their detailed validation."
+  ],
+  "next_action": "Attach v0.1 release, SkillOS hardening, signed-equity, and owner-economics receipts before marking any candidate press_clear or formation_ready."
+}

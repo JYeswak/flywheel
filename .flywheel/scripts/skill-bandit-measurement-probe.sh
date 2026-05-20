@@ -453,3 +453,8 @@ if [[ "$JSON_OUT" == 1 ]]; then
 else
   jq -r '"skill-bandit measurement window=\(.samples_window) resolved=\(.samples_resolved) unresolved=\(.samples_unresolved) skills=\(.skills_observed_count) top=\(.top_skill // "none") entropy=\(.distribution_entropy) static=\(.static_selection_indicator) canonical_fraction=\(.canonical_set_match_fraction)"' <<<"$PAYLOAD"
 fi
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

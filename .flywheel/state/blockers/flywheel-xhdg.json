@@ -18,8 +18,25 @@
   "source_repo": "/Users/josh/Developer/flywheel",
   "source_row_sha256": "fec5afc84b0a12fbf545ce858fbf650e664814bf6a4cb3fcc1e1961793033506",
   "source_status": "blocked",
-  "status": "open",
+  "status": "closed",
   "synced_at": "2026-05-15T16:08:00Z",
   "title": "[L68-refill-discipline] AGENTS.md L-rule: refill must respect leverage_ceiling binding constraint",
-  "verification_path": "br show flywheel-xhdg --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-xhdg\" and .status == \"blocked\"'"
+  "verification_path": "br show flywheel-xhdg --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-xhdg\" and .status == \"blocked\"'",
+  "closed_at": "2026-05-15T20:02:40Z",
+  "closed_by": "orch:auto",
+  "closed_reason": "ac_passed_auto_close_hook",
+  "live_probe_evidence": {
+    "schema_version": "blocker-escalation/v1",
+    "ts": "2026-05-15T20:02:40Z",
+    "event": "blocker_auto_closed",
+    "blocker_id": "flywheel-xhdg",
+    "ac_command": "br show flywheel-xhdg --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-xhdg\" and .status != \"blocked\"'",
+    "ac_stdout": "true",
+    "ac_exit_code": 0,
+    "live_probe_at": "2026-05-15T20:02:40Z",
+    "previous_last_verified_at": "2026-05-15T16:03:28Z",
+    "delta_seconds": 14352,
+    "auto_closer": "orch:auto",
+    "ac_state_hash": "72b10c6af953e49fcf9c002481fcb1f20616b12c6b64055c26dd011f90ca8da1"
+  }
 }

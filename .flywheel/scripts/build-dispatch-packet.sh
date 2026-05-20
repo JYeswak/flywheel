@@ -701,6 +701,7 @@ REQUIRED:
 OPTIONAL:
   --task-id <id>           Override task id (default: <bead-id>-<short-ts>)
   --dispatch-channel <c>   auto | operator (default: operator)
+  --goal-contract <path>   Compact loop/goal contract JSON to embed verbatim
   --output-dir <path>      Where to write packet (default: /tmp)
   --apply                  Materialize packet (default: dry-run preview)
   --dry-run                Preview only, no file write (default)
@@ -728,9 +729,20 @@ jq_get() { jq -r "$1 // \"\"" 2>/dev/null; }
 json_array() {
   if [[ "$#" -eq 0 ]]; then echo "[]"; else printf '%s\n' "$@" | jq -R . | jq -s .; fi
 }
+resolve_callback_pane() {
+  local session="$1" resolved=""
+  # cfs-lb61: DONE callbacks route to the orchestrator pane, not the worker pane.
+  resolved="$(jq -sr --arg s "$session" 'map(select(.session == $s)) | sort_by(.effective_at // "") | last | (.orchestrator_pane // 0)' "$TOPOLOGY" 2>/dev/null || true)"
+  if [[ "$resolved" =~ ^[0-9]+$ ]]; then
+    printf '%s\n' "$resolved"
+  else
+    printf '0\n'
+  fi
+}
 
 BEAD_ID="" TARGET_PANE="" TARGET_SESSION="" TASK_ID=""
 DISPATCH_CHANNEL="operator" OUTPUT_DIR="/tmp" MODE="dry-run" JSON_OUT=false
+GOAL_CONTRACT_PATH="${FLYWHEEL_GOAL_CONTRACT:-}" GOAL_CONTRACT_JSON="null"
 ALLOW_TRIGGER_GATED=false SKIP_TRIGGER_GATED_PRECHECK=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -739,6 +751,7 @@ while [[ $# -gt 0 ]]; do
     --target-session) TARGET_SESSION="$2"; shift 2 ;;
     --task-id) TASK_ID="$2"; shift 2 ;;
     --dispatch-channel) DISPATCH_CHANNEL="$2"; shift 2 ;;
+    --goal-contract) GOAL_CONTRACT_PATH="$2"; shift 2 ;;
     --output-dir) OUTPUT_DIR="$2"; shift 2 ;;
     --apply) MODE="apply"; shift ;;
     --dry-run) MODE="dry-run"; shift ;;
@@ -760,6 +773,10 @@ done
 [[ -r "$TEMPLATE_FILE" ]] || die "template missing: $TEMPLATE_FILE" 4
 [[ -x "$NTM_BIN" ]] || die "ntm not executable: $NTM_BIN" 3
 [[ "$DISPATCH_CHANNEL" == "auto" || "$DISPATCH_CHANNEL" == "operator" ]] || die "--dispatch-channel must be auto or operator" 1
+if [[ -n "$GOAL_CONTRACT_PATH" ]]; then
+  [[ -r "$GOAL_CONTRACT_PATH" ]] || die "goal contract missing: $GOAL_CONTRACT_PATH" 5
+  GOAL_CONTRACT_JSON="$(jq -c . "$GOAL_CONTRACT_PATH" 2>/dev/null)" || die "goal contract invalid json: $GOAL_CONTRACT_PATH" 5
+fi
 [[ -z "$TASK_ID" ]] && TASK_ID="${BEAD_ID}-$(date -u +%s | shasum | cut -c1-6)"
 if [[ -n "${FLYWHEEL_PACKET_BUILT_AT:-}" ]]; then
   NOW="$FLYWHEEL_PACKET_BUILT_AT"
@@ -769,8 +786,7 @@ else
   NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 fi
 
-CALLBACK_PANE="$(jq -sr --arg s "$TARGET_SESSION" 'map(select(.session == $s)) | sort_by(.effective_at) | last | (.callback_pane // .orchestrator_pane // 1)' "$TOPOLOGY" 2>/dev/null || echo 1)"
-[[ "$CALLBACK_PANE" == "null" || -z "$CALLBACK_PANE" ]] && CALLBACK_PANE=1
+CALLBACK_PANE="$(resolve_callback_pane "$TARGET_SESSION")"
 
 MISSION_ANCHOR="continuous-orchestrator-uptime-self-sustaining-fleet"
 MISSION_FILE="$REPO_ROOT/.flywheel/MISSION.md"
@@ -909,6 +925,9 @@ trap 'rm -f "$TMP_BODY" "${TMP_BODY}.mem" "${TMP_BODY}.mem.routed" "${TMP_BODY}.
   printf '# DISPATCH PACKET (canonical)\n# Task ID: %s\n# Bead: %s (P%s)\n# Title: %s\n# Target: %s:0.%s\n# Callback pane: %s\n# Identity: %s (status=%s)\n# Started: %s\n# worker_substrate=codex-pane\n# agent_type=codex\n\n' "$TASK_ID" "$BEAD_ID" "$BEAD_PRIORITY" "$BEAD_TITLE" "$TARGET_SESSION" "$TARGET_PANE" "$CALLBACK_PANE" "$IDENTITY_NAME" "$IDENTITY_STATUS" "$NOW"
   printf '## CALLBACK CONTRACT\n\nWhen complete, send EXACTLY ONE of:\n\n```bash\n/Users/josh/.local/bin/ntm send %s --pane=%s --no-cass-check "DONE %s task_id=%s josh_request_id=%s identity_name=%s did=<n>/<total> didnt=<bead-ids-or-none> gaps=<bead-ids-or-none> evidence=<path-or-command-ref> evidence_redacted=<yes|no|n/a> tests=PASS|FAIL|SKIPPED tmp_dir_released=true mission_fitness=direct|adjacent|infrastructure|drift mission_fitness_evidence=<bead-or-sentence> br_close_executed=yes git_committed=<yes|no_changes|skipped> callback_delivery_verified=true worker_substrate=codex-pane agent_type=codex socraticode_queries=<int> indexed_chunks_observed=<int> artifact_checks=<artifact-id:path:exists|missing|unknown,...> validation_notes=<short> files_reserved=<comma-list|NONE_READONLY|NONE_NO_EDITS|UNAVAILABLE:reason> files_released=<comma-list|NONE_READONLY|NONE_NO_EDITS|UNAVAILABLE:reason> beads_filed=<ids|none> beads_updated=<ids|none> no_bead_reason=<specific-or-none> fuckups_logged=<classes|none> next_phase=<id|none> chain_if_capacity=<done|not_applicable> chain_blocked_reason=<reason|none> blocker_type=<flywheel_class|peer_class|external|unknown|none> blocker_class=<class|none> flywheel_orch_action_required=<action|none> compliance_score=<N>/1000 compliance_pack_path=<audit-dir>/%s/ l112_probe_command=<command> l112_probe_expected=<jq:filter|grep:pattern|literal:text> l112_probe_timeout_sec=<seconds> skill_auto_routes_addressed=<canonical-cli-scoping=yes|no|n/a,rust-best-practices=yes|no|n/a,python-best-practices=yes|no|n/a,readme-writing=yes|no|n/a> skill_discoveries=<N> sd_ids=<ids|none> cli_canonical=<yes|no> rust_clean=<yes|no|n/a> python_clean=<yes|no|n/a> readme_quality=<yes|no|n/a> four_lens=brand:N,sniff:N,jeff:N,public:N"\n```\n\nIf blocked: `BLOCKED %s reason=<short> need=<short> mission_fitness=<class> josh_request_id=%s identity_name=%s did=<n>/<total> didnt=<bead-ids-or-none> gaps=<bead-ids-or-none> evidence=<path> evidence_redacted=<yes|no|n/a> worker_substrate=codex-pane agent_type=codex socraticode_queries=<int> indexed_chunks_observed=<int> files_reserved=<list-or-reason> files_released=<list-or-reason> beads_filed=<ids|none> beads_updated=<ids|none> no_bead_reason=<specific-or-none> fuckups_logged=<classes|refs> tmp_dir_released=true br_close_executed=not_applicable callback_delivery_verified=true`\nIf declining: `DECLINED %s reason=<scope-mismatch|capability|risk> mission_fitness=drift josh_request_id=%s identity_name=%s evidence_redacted=n/a worker_substrate=codex-pane agent_type=codex br_close_executed=not_applicable callback_delivery_verified=true`\n\n' "$TARGET_SESSION" "$CALLBACK_PANE" "$BEAD_ID" "$TASK_ID" "$JOSH_REQUEST_ID" "$IDENTITY_NAME" "$BEAD_ID" "$TASK_ID" "$JOSH_REQUEST_ID" "$IDENTITY_NAME" "$TASK_ID" "$JOSH_REQUEST_ID" "$IDENTITY_NAME"
   printf '## MISSION FITNESS CLAIM BLOCK\n\n```text\nmission_anchor=%s\nmission_fitness_claim=%s\nmission_fitness_class=%s\n```\n\nWorkers MUST echo `mission_fitness=<direct|adjacent|infrastructure|drift>` in the DONE callback.\n\n' "$MISSION_ANCHOR" "$MISSION_FITNESS_CLAIM" "$MISSION_FITNESS_CLASS"
+  if [[ "$GOAL_CONTRACT_JSON" != "null" ]]; then
+    printf '## LOOP GOAL CONTRACT BLOCK\n\nThis dispatch came from a falsifiable loop/goal contract. Worker callbacks are validated against these fields verbatim.\n\n```json\n%s\n```\n\n' "$GOAL_CONTRACT_JSON"
+  fi
   printf '## JOSH REQUEST LINKAGE BLOCK\n\n```text\njosh_request_id=%s\n```\n\nDONE/BLOCKED/DECLINED callbacks MUST include the same field and value verbatim.\n\n## LOCKED WORKER IDENTITY BLOCK\n\n```text\nidentity_name=%s\nidentity_source=%s\nworker_identity=%s\nworker_identity_status=%s\n```\n\nIf `worker_identity_status=needs_registration`, dispatch wrapper triggered registration before this packet was sent.\n\n' "$JOSH_REQUEST_ID" "$IDENTITY_NAME" "$IDENTITY_FILE" "$IDENTITY_NAME" "$IDENTITY_STATUS"
   printf '## PRE-FLIGHT BEAD PRESENCE BLOCK (Forever Rule: bead-missing-from-local-db)\n\nBefore any work, verify the bead is present in the worker'\''s local Beads DB. Cross-worktree dispatches (orch repo A → worker mktemp checkout B) frequently miss beads created post-branch. Per `INCIDENTS.md#bead-missing-from-local-db` (filed by `flywheel-s2yd8`), the canonical sequence is verify-then-sync-or-surface:\n\n```bash\n# Step 1 — fast-path check\nif ! br show %s --json >/dev/null 2>&1; then\n  # Step 2 — recovery fallback (pull JSONL → DB; does not disturb other rows)\n  br sync --import-only 2>/dev/null || true\n  if ! br show %s --json >/dev/null 2>&1; then\n    # Step 3 — SURFACE, do NOT silently treat missing bead as success.\n    # Send BLOCKED callback with blocker_class=bead_missing_from_local_db\n    # so orch can reconcile via `br sync --flush-only` on its side.\n    /Users/josh/.local/bin/ntm send %s --pane=%s --no-cass-check "BLOCKED %s reason=bead_missing_from_local_db need=orch_br_sync_flush_only mission_fitness=adjacent josh_request_id=%s identity_name=%s blocker_type=flywheel_class blocker_class=bead_missing_from_local_db tmp_dir_released=true br_close_executed=not_applicable callback_delivery_verified=true"\n    exit 0\n  fi\nfi\n```\n\nForever-Rule discipline:\n- Workers MUST NOT silently treat a missing bead as success.\n- Workers MUST NOT fabricate a `br close` outcome by writing directly to `.beads/issues.jsonl` (canonical write path is `br close`).\n- The `br sync --import-only` fallback is non-disturbing: it pulls JSONL → DB without touching other rows.\n\n## SHARED-SURFACE RESERVATION BLOCK (L107)\n\nAgent Mail and shared-surface reservation are both part of the dispatch contract for edit tasks. Before staging shared paths (commit-touched files), reserve:\n```bash\n/Users/josh/Developer/flywheel/.flywheel/scripts/shared-surface-reservation-check.sh --reserve <path> --pane=%s --session %s --task-id=%s --json\n```\nRelease after commit or before BLOCKED/DECLINED:\n```bash\n/Users/josh/Developer/flywheel/.flywheel/scripts/shared-surface-reservation-check.sh --release <path> --pane=%s --session %s --task-id=%s --json\n```\nWorker callback MUST include `shared_surface_reservations_checked=yes shared_surface_reservations_released=yes files_reserved=<comma-list|NONE_READONLY|NONE_NO_EDITS|UNAVAILABLE:reason> files_released=<comma-list|NONE_READONLY|NONE_NO_EDITS|UNAVAILABLE:reason>`.\n\n## TMP LIFECYCLE BLOCK\n\nAt dispatch start create one scratch directory using the safe two-line idiom (per `INCIDENTS.md#clobbered_doctrine_docs`, `flywheel-tpprm`):\n```bash\nWORK_TMP="$(mktemp -d -t %s.XXXXXX)" || { echo "ERR: mktemp failed" >&2; exit 1; }\ncd "$WORK_TMP" || { echo "ERR: cd failed: $WORK_TMP" >&2; exit 1; }\n```\nFor any subsequent `cd` into worker-supplied paths in fixture-setup blocks (e.g., user-supplied scratch dirs, special-char paths), use the Layer-1 prevention primitive: `.flywheel/scripts/cd-realpath-wrapper.sh` (resolves + verifies sandbox membership before `cd`; refuses outside-sandbox or realpath-fail with explicit rc=2/3). Sister recovery primitive on clobber: `.flywheel/scripts/clobber-recovery.sh`. Copy durable evidence out before close, remove the directory, and callback with `tmp_dir_released=true`.\n\n## FILE DISCIPLINE (PICOZ_WORKER_FILES)\n\nEdit ONLY files named in this packet TASK BODY or files explicitly named in the bead body. Other edits require an in-band ntm message asking for scope expansion BEFORE the edit. If you edit files, set `PICOZ_WORKER_FILES` to those paths before commit and use pathspec staging only.\n\n' "$BEAD_ID" "$BEAD_ID" "$TARGET_SESSION" "$CALLBACK_PANE" "$TASK_ID" "$JOSH_REQUEST_ID" "$IDENTITY_NAME" "$TARGET_PANE" "$TARGET_SESSION" "$TASK_ID" "$TARGET_PANE" "$TARGET_SESSION" "$TASK_ID" "$BEAD_ID"
   printf '## VERIFICATION (pre-DONE)\n\nRun verification commands from the bead acceptance section. If none are explicit, run:\n```bash\nbash -n <any-edited-shell-script>\nbr show %s  # confirm bead state\n```\nThe packet must remain auditable through `.flywheel/validation-schema/v1/schema.json`, `.flywheel/validation-schema/v1/parse.sh`, and orchestrator `validate-callback` before closeout.\n\n## DID / DIDNT / GAPS BLOCK (L80 / L52)\n\nWorker DONE callback MUST include:\n- `did=<count>/<total-bead-acceptance-criteria>`\n- `didnt=<bead-ids-skipped-or-none>`\n- `gaps=<bead-ids-newly-discovered-or-none>`\n- one L52 bead receipt: `beads_filed=<ids>`, `beads_updated=<ids>`, or `no_bead_reason=<specific reason>`\n\n' "$BEAD_ID"
@@ -950,6 +969,9 @@ L_RULE_HINTS="$(grep -E '^l_rule_hints=[0-9]+' "$AUGMENTED_BODY" 2>/dev/null | t
 [[ "$L_RULE_HINTS" =~ ^[0-9]+$ ]] || L_RULE_HINTS=0
 
 REQUIRED_BLOCKS=("CALLBACK CONTRACT" "MISSION FITNESS CLAIM BLOCK" "JOSH REQUEST LINKAGE BLOCK" "LOCKED WORKER IDENTITY BLOCK" "PRE-FLIGHT BEAD PRESENCE BLOCK" "SHARED-SURFACE RESERVATION BLOCK" "TMP LIFECYCLE BLOCK" "FILE DISCIPLINE" "VERIFICATION" "DID / DIDNT / GAPS BLOCK" "SKILL DISCOVERY DUTY" "VERIFY-CALLBACK BLOCK" "AUTO-L112 CALLBACK GATE BLOCK" "SKILL AUTO-ROUTES BLOCK" "FOUR-LENS SELF-GRADE BLOCK" "L61 ECOSYSTEM-TOUCH BLOCK" "L120 BR-CLOSE-EXECUTED BLOCK" "TASK BODY" "VALIDATION BLOCK" "QUALITY BAR" "DISPATCH CAPACITY GATE" "EXECUTION")
+if [[ "$GOAL_CONTRACT_JSON" != "null" ]]; then
+  REQUIRED_BLOCKS+=("LOOP GOAL CONTRACT BLOCK")
+fi
 if [[ "$SKILL_ENHANCE" -eq 1 ]]; then
   REQUIRED_BLOCKS+=("SKILL-ENHANCE JSM DISCIPLINE BLOCK")
   REQUIRED_BLOCKS+=("SKILL-AUTORESEARCH TOOLING PREFERENCE BLOCK")
@@ -976,10 +998,11 @@ if $JSON_OUT; then
     --arg task "$TASK_ID" --arg bead "$BEAD_ID" --argjson tpane "$TARGET_PANE" --arg tsess "$TARGET_SESSION" \
     --argjson cpane "$CALLBACK_PANE" --arg manchor "$MISSION_ANCHOR" --arg mclass "$MISSION_FITNESS_CLASS" \
     --arg jrid "$JOSH_REQUEST_ID" --arg ident "$IDENTITY_NAME" --arg chan "$DISPATCH_CHANNEL" \
+    --arg goal_contract_path "$GOAL_CONTRACT_PATH" --argjson goal_contract "$GOAL_CONTRACT_JSON" \
     --arg context_id "$NTM_CONTEXT_ID" --arg template "$NTM_TEMPLATE_NAME" \
     --argjson memhits "$MEMORY_HITS" --argjson skillroutes "$SKILL_ROUTES" --argjson lrules "$L_RULE_HINTS" --argjson present "$PRESENT_JSON" --argjson missing "$MISSING_JSON" \
     --arg trigger_gated_status "$TRIGGER_GATED_PRECHECK_STATUS" --argjson trigger_gated_probe "${TRIGGER_GATED_PRECHECK_JSON:-null}" \
-    '{schema_version:"build-dispatch-packet.v1",packet_path:$packet,packet_sha256:$sha,validation_status:$vstatus,validation_blocks_present:$present,validation_blocks_missing:$missing,fields_resolved:{task_id:$task,bead_id:$bead,target_pane:$tpane,target_session:$tsess,callback_pane:$cpane,mission_anchor:$manchor,mission_fitness_class:$mclass,josh_request_id:(if $jrid=="null" then null else $jrid end),identity_name:(if $ident=="null" then null else $ident end),dispatch_channel:$chan,memory_hits_count:$memhits,skill_auto_routes_count:$skillroutes,l_rule_hints_count:$lrules,ntm_context_id:$context_id,ntm_template_name:$template,trigger_gated_precheck:{status:$trigger_gated_status,probe:$trigger_gated_probe}}}'
+    '{schema_version:"build-dispatch-packet.v1",packet_path:$packet,packet_sha256:$sha,validation_status:$vstatus,validation_blocks_present:$present,validation_blocks_missing:$missing,fields_resolved:{task_id:$task,bead_id:$bead,target_pane:$tpane,target_session:$tsess,callback_pane:$cpane,mission_anchor:$manchor,mission_fitness_class:$mclass,josh_request_id:(if $jrid=="null" then null else $jrid end),identity_name:(if $ident=="null" then null else $ident end),dispatch_channel:$chan,goal_contract_path:(if $goal_contract_path == "" then null else $goal_contract_path end),goal_contract:$goal_contract,memory_hits_count:$memhits,skill_auto_routes_count:$skillroutes,l_rule_hints_count:$lrules,ntm_context_id:$context_id,ntm_template_name:$template,trigger_gated_precheck:{status:$trigger_gated_status,probe:$trigger_gated_probe}}}'
 else
   echo "packet:    $PACKET_FILE"
   echo "sha256:    $PACKET_SHA"
@@ -995,3 +1018,8 @@ fi
 
 [[ "$VALIDATION" == "fail" ]] && exit 5
 exit 0
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-20-cross-orch-handoff.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-63-phase-tick-bounded-action.md`

@@ -1,23 +1,23 @@
 {
-  "generated_at": "2026-05-13T00:46:31Z",
+  "generated_at": "2026-05-17T10:52:41Z",
   "invariant_id": "ntm:spawn-templates-versioned",
   "ntm": {
-    "built_at": "2026-05-10T03:37:38Z",
-    "commit": "7d1fc78ebf19af12b193c972d25016ec707d8f87",
+    "built_at": "unknown",
+    "commit": "none",
     "go_version": "go1.25.6",
     "path": "/Users/josh/.local/bin/ntm",
     "platform": "darwin/arm64",
     "raw": {
-      "built_at": "2026-05-10T03:37:38Z",
-      "built_by": "make",
-      "commit": "7d1fc78ebf19af12b193c972d25016ec707d8f87",
-      "generated_at": "2026-05-13T00:46:31.867222Z",
+      "built_at": "unknown",
+      "built_by": "unknown",
+      "commit": "none",
+      "generated_at": "2026-05-17T10:52:41.843398Z",
       "go_version": "go1.25.6",
       "platform": "darwin/arm64",
-      "version": "v1.14.0-479-g7d1fc78e"
+      "version": "dev"
     },
     "status": "ok",
-    "version": "v1.14.0-479-g7d1fc78e",
+    "version": "dev",
     "warnings": []
   },
   "schema_version": "ntm-spawn-templates-versioned/v1",

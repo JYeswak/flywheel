@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Meta-pattern Adoption stance:
+# Embodies MP-20-cross-orch-handoff.md and MP-04-receipt-callback-envelope.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 set -euo pipefail
 
 # ====== BEGIN canonical-cli scaffold (bead flywheel-ws02m) ======
@@ -564,6 +567,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO="${FLYWHEEL_REPO:-$(cd "$SCRIPT_DIR/../.." && pwd -P)}"
 BUILD_DISPATCH_PACKET="${BUILD_DISPATCH_PACKET:-$SCRIPT_DIR/build-dispatch-packet.sh}"
 PANE=""; TASK_FILE=""; TASK_ID=""; BEAD=""; CALLBACK_BY=""; PIPELINE=""; LANE=""; PREFLIGHT_OVERRIDE_REASON=""
+MODE="${FLYWHEEL_DISPATCH_MODE:-manual}"
+ORIGIN_TASK_ID="${FLYWHEEL_ORIGIN_TASK_ID:-}"
+GOAL_ID="${FLYWHEEL_GOAL_ID:-}"
+SPRINT_ID="${FLYWHEEL_SPRINT_ID:-}"
+TICK_ID="${FLYWHEEL_TICK_ID:-}"
+GOAL_CONTRACT="${FLYWHEEL_GOAL_CONTRACT:-}"
 iso_from_epoch() {
   date -u -r "$1" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null ||
     date -u -d "@$1" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null
@@ -612,6 +621,18 @@ while [[ $# -gt 0 ]]; do
     --callback-by=*) CALLBACK_BY="${1#*=}" ;;
     --pipeline=*) PIPELINE="${1#*=}" ;;
     --lane=*) LANE="${1#*=}" ;;
+    --mode) MODE="${2:-}"; shift ;;
+    --mode=*) MODE="${1#*=}" ;;
+    --origin-task-id) ORIGIN_TASK_ID="${2:-}"; shift ;;
+    --origin-task-id=*) ORIGIN_TASK_ID="${1#*=}" ;;
+    --goal-id) GOAL_ID="${2:-}"; shift ;;
+    --goal-id=*) GOAL_ID="${1#*=}" ;;
+    --sprint-id) SPRINT_ID="${2:-}"; shift ;;
+    --sprint-id=*) SPRINT_ID="${1#*=}" ;;
+    --tick-id) TICK_ID="${2:-}"; shift ;;
+    --tick-id=*) TICK_ID="${1#*=}" ;;
+    --goal-contract) GOAL_CONTRACT="${2:-}"; shift ;;
+    --goal-contract=*) GOAL_CONTRACT="${1#*=}" ;;
     --session=*) SESSION="${1#*=}" ;;
     --preflight-override=*) PREFLIGHT_OVERRIDE_REASON="${1#*=}" ;;
     *) echo "unknown arg: $1" >&2; exit 2 ;;
@@ -622,6 +643,12 @@ if [[ -z "$PANE" || -z "$TASK_FILE" || -z "$TASK_ID" ]]; then
   exit 2
 fi
 [[ -f "$TASK_FILE" ]] || { echo "task file does not exist: $TASK_FILE" >&2; exit 3; }
+case "$MODE" in
+  loop|goal|manual|watcher|unknown) ;;
+  *) echo "invalid --mode=$MODE (expected loop|goal|manual|watcher|unknown)" >&2; exit 2 ;;
+esac
+[[ -n "$ORIGIN_TASK_ID" ]] || ORIGIN_TASK_ID="$TASK_ID"
+if [[ "$MODE" == "loop" && -z "$TICK_ID" ]]; then TICK_ID="$ORIGIN_TASK_ID"; fi
 TS_EPOCH="${FLYWHEEL_DISPATCH_AND_LOG_NOW_EPOCH:-$(date -u +%s)}"
 TS="$(iso_from_epoch "$TS_EPOCH")" || { echo "could not compute dispatch timestamp" >&2; exit 5; }
 CALLBACK_EXPECTED="$(callback_expected_json "$CALLBACK_BY" "$TS_EPOCH")"
@@ -691,7 +718,9 @@ wait_generating_ok() {
 SEND_FILE="$TASK_FILE"
 PACKET_JSON="$(jq -nc '{status:"not_applicable",packet_path:null,packet_sha256:null,validation_status:null}')"
 if [[ -n "$BEAD" ]]; then
-  PACKET_OUT="$("$BUILD_DISPATCH_PACKET" --bead-id "$BEAD" --target-pane "$PANE" --target-session "$SESSION" --task-id "$TASK_ID" --apply --json 2>&1)"
+  PACKET_ARGS=(--bead-id "$BEAD" --target-pane "$PANE" --target-session "$SESSION" --task-id "$TASK_ID" --apply --json)
+  [[ -z "$GOAL_CONTRACT" ]] || PACKET_ARGS+=(--goal-contract "$GOAL_CONTRACT")
+  PACKET_OUT="$("$BUILD_DISPATCH_PACKET" "${PACKET_ARGS[@]}" 2>&1)"
   PACKET_RC=$?
   [[ $PACKET_RC -eq 0 ]] || { echo "build-dispatch-packet failed (rc=$PACKET_RC): $PACKET_OUT" >&2; exit 6; }
   jq -e '.validation_status == "pass" and (.packet_path | type == "string")' >/dev/null 2>&1 <<<"$PACKET_OUT" ||
@@ -725,10 +754,11 @@ HISTORY_COUNT="$(jq -r 'if .success and (.json|type) == "array" then (.json|leng
 ROW="$(jq -nc \
   --arg ts "$TS" --arg session "$SESSION" --arg task_id "$TASK_ID" --arg pane "$PANE" \
   --arg task_file "$TASK_FILE" --arg bead "$BEAD" --arg pipeline "$PIPELINE" --arg lane "$LANE" \
+  --arg mode "$MODE" --arg origin_task_id "$ORIGIN_TASK_ID" --arg goal_id "$GOAL_ID" --arg sprint_id "$SPRINT_ID" --arg tick_id "$TICK_ID" \
   --arg dispatch_status "$DISPATCH_STATUS" \
   --argjson callback "$CALLBACK_EXPECTED" --argjson packet "$PACKET_JSON" \
   --argjson preflight "$PREFLIGHT_JSON" --argjson assign "$ASSIGN_JSON" --argjson send "$SEND_JSON" --argjson wait_generating "$WAIT_GENERATING_JSON" --argjson history "$HISTORY_JSON" --argjson history_count "$HISTORY_COUNT" \
-  '{ts:$ts,session:$session,task_id:$task_id,pane:($pane|tonumber),task_file:$task_file,channel:"ntm",pane_state_source:"ntm_wait",pane_state:$dispatch_status,dispatch_status:$dispatch_status,native_preflight:$preflight,preflight_status:$preflight.status,preflight_errors:$preflight.error_count,preflight_warnings:$preflight.warning_count,native_assignment:$assign,native_send:$send,native_wait_generating:$wait_generating,wait_generating_success:($wait_generating.success == true),native_history:$history,history_entry_count:$history_count,canonical_packet:$packet,packet_path:$packet.packet_path,packet_sha256:$packet.packet_sha256,packet_validation_status:$packet.validation_status,bead:(if $bead == "" then null else $bead end),callback_expected_by:$callback.value,callback_expected_by_input:$callback.input,callback_expected_by_legacy_duration:$callback.legacy_duration,callback_expected_by_parse_status:$callback.parse_status,pipeline_slug:(if $pipeline == "" then null else $pipeline end),lane:(if $lane == "" then null else $lane end)}')"
+  '{ts:$ts,event:"dispatch_sent",session:$session,task_id:$task_id,pane:($pane|tonumber),task_file:$task_file,mode:$mode,origin_task_id:$origin_task_id,goal_id:(if $goal_id == "" then null else $goal_id end),sprint_id:(if $sprint_id == "" then null else $sprint_id end),tick_id:(if $tick_id == "" then null else $tick_id end),channel:"ntm",pane_state_source:"ntm_wait",pane_state:$dispatch_status,dispatch_status:$dispatch_status,native_preflight:$preflight,preflight_status:$preflight.status,preflight_errors:$preflight.error_count,preflight_warnings:$preflight.warning_count,native_assignment:$assign,native_send:$send,native_wait_generating:$wait_generating,wait_generating_success:($wait_generating.success == true),native_history:$history,history_entry_count:$history_count,canonical_packet:$packet,goal_contract:($packet.fields_resolved.goal_contract // null),packet_path:$packet.packet_path,packet_sha256:$packet.packet_sha256,packet_validation_status:$packet.validation_status,bead:(if $bead == "" then null else $bead end),callback_expected_by:$callback.value,callback_expected_by_input:$callback.input,callback_expected_by_legacy_duration:$callback.legacy_duration,callback_expected_by_parse_status:$callback.parse_status,pipeline_slug:(if $pipeline == "" then null else $pipeline end),lane:(if $lane == "" then null else $lane end)}')"
 printf '%s\n' "$ROW" >>"$LOG"
 if [[ "$DISPATCH_STATUS" != "generating_verified" ]]; then
   echo "ntm wait generating failed: $(jq -r '.raw // (.json | tostring)' <<<"$WAIT_GENERATING_JSON")" >&2
@@ -743,3 +773,8 @@ jq -nc \
   --argjson packet "$PACKET_JSON" --argjson preflight "$PREFLIGHT_JSON" --argjson assign "$ASSIGN_JSON" --argjson send "$SEND_JSON" --argjson wait_generating "$WAIT_GENERATING_JSON" \
   --argjson history "$HISTORY_JSON" --argjson history_count "$HISTORY_COUNT" \
   '{ts:$ts,task_id:$task_id,pane:($pane|tonumber),ntm_sent:($send.success == true),log_appended:true,bead_status:$bead_status,packet_path:$packet.packet_path,packet_validation_status:$packet.validation_status,preflight_status:$preflight.status,preflight_errors:$preflight.error_count,preflight_warnings:$preflight.warning_count,native_assign_success:($assign.success == true),native_send_success:($send.success == true),native_wait_generating_success:($wait_generating.success == true),native_history_success:($history.success == true),history_entry_count:$history_count}'
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-20-cross-orch-handoff.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-63-phase-tick-bounded-action.md`

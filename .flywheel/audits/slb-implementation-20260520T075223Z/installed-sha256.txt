@@ -1,0 +1,3 @@
+eff3bf4122594eafd58dca38f669a0ede76aca7a848888998800edd8533e5761  /Users/josh/.claude/hooks/PreToolUse-bash-slb.sh
+335d83252bf87e39d7bb4556975359884d98032a13602b99a0e5acab070037d9  /Users/josh/.flywheel/slb-recipes.json
+9af6067c37ec49e2ae984140b66536c78b539dcc149d2d7a7c749c74fa528c33  /Users/josh/.claude/settings.json

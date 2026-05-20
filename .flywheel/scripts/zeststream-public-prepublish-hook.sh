@@ -84,3 +84,8 @@ out="$(jq -c --argjson publishability "$probe_out" --arg remote_name "$remote_na
 [[ "$json" -eq 1 ]] && printf '%s\n' "$out" || jq -r '"status=\(.status) score=\(.publishability_bar_score.score) brand_voice=\(.publishability_bar_score.brand_voice_composite)"' <<<"$out"
 jq -e '.status == "pass"' >/dev/null <<<"$out" && exit 0
 exit 1
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

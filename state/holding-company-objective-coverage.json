@@ -1,0 +1,394 @@
+{
+  "schema_version": "zeststream.holding_company_objective_coverage.v1",
+  "generated_at": "2026-05-17T10:20:00Z",
+  "objective": "ZestStream Holding Company Goal",
+  "objective_status": "standing_non_closing",
+  "coverage_status": "not_complete",
+  "source_goal_ref": "/Users/josh/Desktop/zeststream-goals/zeststream/holding-company-portfolio-20260516.txt",
+  "audit_ref": "state/zeststream-holding-company-gate-audit-20260517T0646Z.json",
+  "summary_counts": {
+    "proven": 2,
+    "partial": 8,
+    "blocked": 17,
+    "deferred": 2,
+    "total": 29
+  },
+  "requirements": [
+    {
+      "requirement_id": "standing_non_closing_goal",
+      "section": "identity",
+      "requirement_text": "This is a standing operating system goal; the holding plane operates forever and does not close.",
+      "coverage_status": "proven",
+      "primary_evidence_ref": "state/zeststream-holding-company-gate-audit-20260517T0646Z.json",
+      "evidence_refs": [
+        "/Users/josh/Desktop/zeststream-goals/zeststream/holding-company-portfolio-20260516.txt",
+        "state/zeststream-holding-company-gate-audit-20260517T0646Z.json"
+      ],
+      "finding": "The audit records objective_status=standing_non_closing and the handoff close rule says not to mark the standing goal complete."
+    },
+    {
+      "requirement_id": "management_plane_portfolio",
+      "section": "identity",
+      "requirement_text": "ZestStream is the management plane for a portfolio of AI-native businesses.",
+      "coverage_status": "partial",
+      "primary_evidence_ref": "state/zeststream-portfolio-company-registry.json",
+      "evidence_refs": [
+        "state/zeststream-portfolio-company-registry.json",
+        "state/zeststream-holding-company-gate-audit-20260517T0646Z.json"
+      ],
+      "finding": "The registry and gate audit exist, but counted_portfolio_companies is still 0."
+    },
+    {
+      "requirement_id": "customer_smb_owner_operator",
+      "section": "identity",
+      "requirement_text": "The customer is an SMB owner-operator.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-candidate-fit.json",
+      "evidence_refs": [
+        "state/holding-company-candidate-fit.json",
+        "state/holding-company-owner-voice.json"
+      ],
+      "finding": "Candidate-fit and owner-voice ledgers exist, but no candidate currently proves SMB owner-operator target or owner voice."
+    },
+    {
+      "requirement_id": "owner_equity_distribution_terms",
+      "section": "identity",
+      "requirement_text": "Owner-operator takes 25% equity plus tiered 45-75% profit distributions.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-owner-economics.json",
+      "evidence_refs": [
+        "state/holding-company-owner-economics.json",
+        "state/holding-company-legal-structure.json"
+      ],
+      "finding": "Owner-economics validator exists, but no signed owner/cap-table/distribution/legal refs exist for Mobile Eats."
+    },
+    {
+      "requirement_id": "shared_substrate_stack",
+      "section": "identity",
+      "requirement_text": "Joshua builds shared substrate: SkillOS, flywheel, and @zeststream/*.",
+      "coverage_status": "partial",
+      "primary_evidence_ref": "state/holding-company-shared-stack.json",
+      "evidence_refs": [
+        "state/holding-company-shared-stack.json",
+        "state/substrate-share/mobile-eats-20260517T0654Z.json",
+        "state/holding-company-anthropic-adoption.json"
+      ],
+      "finding": "Flywheel and @zeststream package evidence are present, SkillOS adoption has proof, but full NURTURE stack remains blocked by missing JSM and formed-company operating receipts."
+    },
+    {
+      "requirement_id": "n_plus_one_cheaper_than_n",
+      "section": "identity",
+      "requirement_text": "Each next launch gets cheaper than the last through substrate reuse.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-launch-economics.json",
+      "evidence_refs": [
+        "state/holding-company-launch-economics.json",
+        "state/substrate-share/mobile-eats-20260517T0654Z.json"
+      ],
+      "finding": "Baseline substrate reuse exists for Mobile Eats, but there is no second comparable launch row proving N+1 cheaper than N."
+    },
+    {
+      "requirement_id": "peel_loop",
+      "section": "loop",
+      "requirement_text": "PEEL discovers candidates from client talks, community, or field-trip insight and requires five buying-signal interviews before formation cash.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-peel-interviews.json",
+      "evidence_refs": [
+        "state/holding-company-peel-interviews.json",
+        "state/holding-company-candidate-fit.json"
+      ],
+      "finding": "PEEL interview ledger exists, but no candidate has source provenance plus five qualified interviews."
+    },
+    {
+      "requirement_id": "press_loop",
+      "section": "loop",
+      "requirement_text": "PRESS compounds on substrate to v0.1 plus signed equity.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-press-readiness.json",
+      "evidence_refs": [
+        "state/holding-company-press-readiness.json",
+        "state/holding-company-owner-economics.json"
+      ],
+      "finding": "PRESS readiness ledger exists, but Mobile Eats lacks v0.1 release, SkillOS hardening, and signed-equity receipts."
+    },
+    {
+      "requirement_id": "pour_loop",
+      "section": "loop",
+      "requirement_text": "POUR launches as own brand with public surface, first paying customer, and operating-control handoff.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-pour-readiness.json",
+      "evidence_refs": [
+        "state/holding-company-pour-readiness.json",
+        "state/zeststream-portfolio-company-registry.json"
+      ],
+      "finding": "Brand/repo/public surface evidence exists, but first paying customer, owner-operator, and operating-control handoff receipts are absent."
+    },
+    {
+      "requirement_id": "nurture_loop",
+      "section": "loop",
+      "requirement_text": "NURTURE shares SkillOS, JSM, packages, brand voice, and enables Tier 2+ peer coaching for 5% equity.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-shared-stack.json",
+      "evidence_refs": [
+        "state/holding-company-shared-stack.json",
+        "state/holding-company-peer-coach.json"
+      ],
+      "finding": "Shared-stack and peer-coach ledgers exist, but Mobile Eats lacks JSM/full stack receipts and no Tier 2+ owner exists."
+    },
+    {
+      "requirement_id": "recycle_loop",
+      "section": "loop",
+      "requirement_text": "RECYCLE turns friction into new SkillOS capability plus packages and portfolio propagation.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-recycle-loop.json",
+      "evidence_refs": [
+        "state/holding-company-recycle-loop.json",
+        "state/holding-company-launch-economics.json"
+      ],
+      "finding": "RECYCLE ledger exists, but no friction item has landed as SkillOS capability plus package/substrate upgrade with propagation evidence."
+    },
+    {
+      "requirement_id": "runway_gate",
+      "section": "canonical_gate",
+      "requirement_text": "Joshua personal-runway gate: 18+ months before sub #1 and 24+ months before sub #4.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-runway-current.json",
+      "evidence_refs": [
+        "state/holding-company-runway-current.json"
+      ],
+      "finding": "Runway receipt contract exists, but current status is not_provided."
+    },
+    {
+      "requirement_id": "portfolio_company_existence_gate",
+      "section": "canonical_gate",
+      "requirement_text": "A portfolio company does not exist until it has signed owner-operator and first paying-customer receipts in registry.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/zeststream-portfolio-company-registry.json",
+      "evidence_refs": [
+        "state/zeststream-portfolio-company-registry.json",
+        "state/holding-company-mobile-eats-shipping.json"
+      ],
+      "finding": "Registry refuses to count Mobile Eats because signed owner, equity, and first-customer receipts are missing."
+    },
+    {
+      "requirement_id": "anti_pitch_voice_gate",
+      "section": "canonical_gate",
+      "requirement_text": "Public voice says sharpen legacy, incubate new; not workflow-builder or custom-app-builder.",
+      "coverage_status": "partial",
+      "primary_evidence_ref": "state/holding-company-anti-pitch-voice.json",
+      "evidence_refs": [
+        "state/holding-company-anti-pitch-voice.json",
+        "state/holding-company-public-story-route-20260517T0948Z.json",
+        "state/holding-company-public-surface-audit-supersession-20260517T1004Z.json",
+        "state/holding-company-founder-post-voice.json",
+        "state/holding-company-brand-voice-skill.json"
+      ],
+      "finding": "The durable zeststream.ai /portfolio route clears anti-pitch voice and has zero builder-framing hits. Founder-post and JSM-managed brand-voice skill alignment remain open, so the full cross-channel gate is partial."
+    },
+    {
+      "requirement_id": "sustainable_pace_gate",
+      "section": "canonical_gate",
+      "requirement_text": "Joshua hours cap at 60/week from Year 2 and substrate must measurably offset coaching time.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-sustainable-pace.json",
+      "evidence_refs": [
+        "state/holding-company-sustainable-pace.json"
+      ],
+      "finding": "Sustainable-pace ledger exists, but weekly hours and substrate offset are not measured."
+    },
+    {
+      "requirement_id": "owner_search_phasing_gate",
+      "section": "canonical_gate",
+      "requirement_text": "Subs #1-2 use warm-network owner search; public open-call activates from sub #3.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-owner-search-phasing.json",
+      "evidence_refs": [
+        "state/holding-company-owner-search-phasing.json"
+      ],
+      "finding": "Owner-search phasing ledger exists, but sub #1 has no warm-network source proof."
+    },
+    {
+      "requirement_id": "legal_structure_gate",
+      "section": "canonical_gate",
+      "requirement_text": "Operating agreement covers holding-co, peer-coach, annual tier review, and substrate pool before sub #2 signs an owner.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-legal-structure.json",
+      "evidence_refs": [
+        "state/holding-company-legal-structure.json",
+        "/Users/josh/Developer/skillos/state/legal-house/SCAFFOLD.md"
+      ],
+      "finding": "Legal scaffold exists, but binding artifact, attorney review, and CPA review refs are absent."
+    },
+    {
+      "requirement_id": "recent_progress_velocity_claim",
+      "section": "recent_progress",
+      "requirement_text": "4,000+ commits in 7 days across 9 product surfaces.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-progress-velocity.json",
+      "evidence_refs": [
+        "state/holding-company-progress-velocity.json",
+        "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
+      ],
+      "finding": "Replayable ledger blocks the claim at 3,906 current-window commits and no exact surface-set proof."
+    },
+    {
+      "requirement_id": "recent_mobile_eats_shipping_claim",
+      "section": "recent_progress",
+      "requirement_text": "Mobile Eats shipping; first portfolio company on shared substrate with 9+ package adoptions.",
+      "coverage_status": "partial",
+      "primary_evidence_ref": "state/holding-company-mobile-eats-shipping.json",
+      "evidence_refs": [
+        "state/holding-company-mobile-eats-shipping.json",
+        "state/substrate-share/mobile-eats-20260517T0654Z.json",
+        "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
+      ],
+      "finding": "Product/substrate shipping and 27 packages are proven; first-portfolio-company proof is blocked."
+    },
+    {
+      "requirement_id": "recent_anthropic_adoption_claim",
+      "section": "recent_progress",
+      "requirement_text": "anthropic-sdk-python adoption OK across three consumer repos.",
+      "coverage_status": "proven",
+      "primary_evidence_ref": "state/holding-company-anthropic-adoption.json",
+      "evidence_refs": [
+        "state/holding-company-anthropic-adoption.json",
+        "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
+      ],
+      "finding": "Anthropic adoption ledger validates against SkillOS canonical gate and source pack-applied rows."
+    },
+    {
+      "requirement_id": "recent_brand_voice_claim",
+      "section": "recent_progress",
+      "requirement_text": "zeststream-brand-voice skill enforces canon and grounding.",
+      "coverage_status": "partial",
+      "primary_evidence_ref": "state/holding-company-brand-voice-skill.json",
+      "evidence_refs": [
+        "state/holding-company-brand-voice-skill.json",
+        "state/holding-company-anti-pitch-voice.json",
+        "/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml"
+      ],
+      "finding": "The skill has canon and cite-or-omit grounding rules, and public-surface anti-pitch evidence is now clear. The JSM-managed voice canon still carries older SMB time-back wording and lacks an approved holding-company anti-builder update receipt."
+    },
+    {
+      "requirement_id": "recent_skillos_forever_os_claim",
+      "section": "recent_progress",
+      "requirement_text": "SkillOS Forever-OS v3 ratified 2026-05-16 and structure locked 2026-05-17.",
+      "coverage_status": "partial",
+      "primary_evidence_ref": "state/holding-company-skillos-forever-os-lock.json",
+      "evidence_refs": [
+        "state/holding-company-skillos-forever-os-lock.json",
+        "state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json"
+      ],
+      "finding": "V3 goal and operating receipts are present; distinct 2026-05-17 structure-lock receipt is missing."
+    },
+    {
+      "requirement_id": "no_custom_apps_positioning",
+      "section": "plain_english",
+      "requirement_text": "ZestStream no longer builds custom apps or workflows for clients.",
+      "coverage_status": "partial",
+      "primary_evidence_ref": "state/holding-company-public-story.json",
+      "evidence_refs": [
+        "state/holding-company-public-story.json",
+        "state/holding-company-anti-pitch-voice.json",
+        "state/holding-company-public-story-route-20260517T0948Z.json",
+        "state/holding-company-public-surface-audit-supersession-20260517T1004Z.json"
+      ],
+      "finding": "The committed /portfolio route and retired builder-route redirects prove the current public positioning is no longer custom-app/workflow-builder framed. This remains partial because uncommitted owner/legal/about drafts were excluded from the clear receipt and need separate grounding before publication."
+    },
+    {
+      "requirement_id": "each_business_own_brand_owner_customers",
+      "section": "plain_english",
+      "requirement_text": "Each business gets its own name, owner, brand, and customers.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-brand-naming.json",
+      "evidence_refs": [
+        "state/holding-company-brand-naming.json",
+        "state/holding-company-pour-readiness.json",
+        "state/zeststream-portfolio-company-registry.json"
+      ],
+      "finding": "Mobile Eats has own-brand/product proof, but owner, customer, and naming provenance receipts are absent."
+    },
+    {
+      "requirement_id": "joshua_coach_sustainable_pace",
+      "section": "plain_english",
+      "requirement_text": "Joshua coaches owners and picks the next bet at a sustainable pace.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-coach-role.json",
+      "evidence_refs": [
+        "state/holding-company-coach-role.json",
+        "state/holding-company-sustainable-pace.json"
+      ],
+      "finding": "Coach-role and pace ledgers exist, but no owner/control handoff or pace measurement receipts exist."
+    },
+    {
+      "requirement_id": "one_year_small_portfolio_making_money",
+      "section": "success",
+      "requirement_text": "A year out: small portfolio of named companies, each with owner equity deal, making money, all on same foundation.",
+      "coverage_status": "blocked",
+      "primary_evidence_ref": "state/holding-company-operating-health.json",
+      "evidence_refs": [
+        "state/zeststream-portfolio-company-registry.json",
+        "state/holding-company-owner-economics.json",
+        "state/holding-company-operating-health.json",
+        "state/holding-company-shared-stack.json"
+      ],
+      "finding": "No counted companies, no signed owner-economics receipts, and no revenue/profit receipts exist yet."
+    },
+    {
+      "requirement_id": "future_nonprofit_extension",
+      "section": "success",
+      "requirement_text": "A future nonprofit extends this to social-cause work.",
+      "coverage_status": "deferred",
+      "primary_evidence_ref": "state/holding-company-nonprofit-extension.json",
+      "evidence_refs": [
+        "state/holding-company-nonprofit-extension.json"
+      ],
+      "finding": "Future nonprofit extension ledger exists and intentionally defers readiness until scope, legal, governance, separation, funding, and public-story receipts exist."
+    },
+    {
+      "requirement_id": "public_story_show_receipts",
+      "section": "success",
+      "requirement_text": "The public story is show the receipts, not build the apps.",
+      "coverage_status": "partial",
+      "primary_evidence_ref": "state/holding-company-public-story.json",
+      "evidence_refs": [
+        "state/holding-company-public-story.json",
+        "state/holding-company-public-story-route-20260517T0948Z.json",
+        "state/holding-company-public-surface-audit-supersession-20260517T1004Z.json",
+        "state/holding-company-founder-post-voice.json"
+      ],
+      "finding": "The committed /portfolio route clears the receipt-led website story with proof refs and zero build-app framing. Founder-post voice remains not clear, so the broader public-story requirement is partial."
+    },
+    {
+      "requirement_id": "company_close_pivot_graduate",
+      "section": "success",
+      "requirement_text": "Individual companies may close, pivot, or graduate while the holding plane continues.",
+      "coverage_status": "deferred",
+      "primary_evidence_ref": "state/holding-company-lifecycle-disposition.json",
+      "evidence_refs": [
+        "state/holding-company-lifecycle-disposition.json"
+      ],
+      "finding": "Lifecycle-disposition ledger exists and tracks the path, but no disposition event has occurred."
+    }
+  ],
+  "validation_commands": [
+    {
+      "command_id": "standing_goal_aggregate",
+      "command": "bash tests/zeststream-holding-company-standing-goal.sh",
+      "purpose": "Registry-inclusive validation sweep for the standing holding-company coverage matrix.",
+      "covers": [
+        "state/zeststream-portfolio-company-registry.json",
+        "state/holding-company-objective-coverage.json",
+        "state/holding-company-*.json"
+      ]
+    }
+  ],
+  "notes": [
+    "This is a prompt-to-artifact checklist, not a completion claim.",
+    "The standing holding-company objective cannot be marked complete; this matrix records current coverage and blockers.",
+    "The 2026-05-17T06:46Z gate audit is historical; public-surface builder-framing rows in it are superseded by state/holding-company-public-surface-audit-supersession-20260517T1004Z.json.",
+    "Recent-progress active claim text is summarized by state/holding-company-recent-progress-claim-honesty-20260517T1017Z.json.",
+    "Run bash tests/zeststream-holding-company-standing-goal.sh for the registry-inclusive standing-goal validation sweep."
+  ],
+  "next_action": "Use this matrix as the closeout checklist for future holding-company passes; fill blocked rows with durable receipts rather than treating proxy tests as completion."
+}

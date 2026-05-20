@@ -437,3 +437,8 @@ if json_out:
 elif not quiet:
     print(f"recovery-doctor-probe recovery_count_24h={total} recovery_success_pct_24h={payload['recovery_success_pct_24h']}")
 PY
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

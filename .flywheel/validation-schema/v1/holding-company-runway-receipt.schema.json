@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-runway-receipt/v1/schema.json",
+  "title": "ZestStream Holding Company Runway Receipt v1",
+  "description": "Redacted receipt for the holding-company runway gate. It proves months of runway without storing balances, burn rates, account names, or secret material.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "subject",
+    "launch_gate",
+    "status",
+    "required_months",
+    "verified_runway_months",
+    "redaction",
+    "evidence_refs",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_runway_receipt.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "subject": {
+      "const": "joshua_personal_runway"
+    },
+    "launch_gate": {
+      "type": "string",
+      "enum": [
+        "sub_1",
+        "sub_4"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail",
+        "not_provided",
+        "blocked"
+      ]
+    },
+    "required_months": {
+      "type": "integer",
+      "enum": [
+        18,
+        24
+      ]
+    },
+    "verified_runway_months": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "redaction": {
+      "type": "object",
+      "required": [
+        "cash_balances_redacted",
+        "monthly_burn_redacted",
+        "account_identifiers_redacted",
+        "secret_material_present"
+      ],
+      "properties": {
+        "cash_balances_redacted": {
+          "const": true
+        },
+        "monthly_burn_redacted": {
+          "const": true
+        },
+        "account_identifiers_redacted": {
+          "const": true
+        },
+        "secret_material_present": {
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "calculation_basis": {
+      "type": "object",
+      "properties": {
+        "scenario": {
+          "type": "string",
+          "enum": [
+            "bear",
+            "base",
+            "bull",
+            "not_provided"
+          ]
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "cash_on_hand_divided_by_monthly_burn",
+            "not_provided"
+          ]
+        },
+        "last_reviewed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "pass"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "verified_runway_months": {
+            "type": "number"
+          },
+          "evidence_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
+}

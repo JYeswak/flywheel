@@ -1,0 +1,54 @@
+{
+  "schema_version": "flywheel.slb_completion_audit.v1",
+  "ts": "2026-05-20T07:57:10Z",
+  "dispatch": ".flywheel/dispatches/flywheel-slb-implementation.md",
+  "bead": "flywheel-daeqx",
+  "receipt_dir": ".flywheel/audits/slb-implementation-20260520T075223Z",
+  "checklist": {
+    "hook_installed": {
+      "ok": true,
+      "evidence": "~/.claude/settings.json and settings-pretooluse-bash-excerpt.json"
+    },
+    "hook_preempts_dcg": {
+      "ok": true,
+      "evidence": "settings first Bash hook is SLB, second is dcg"
+    },
+    "recipes_seeded_8": {
+      "ok": true,
+      "evidence": "~/.flywheel/slb-recipes.json and installed-recipes-copy.json"
+    },
+    "helper_recipe_add": {
+      "ok": true,
+      "evidence": ".flywheel/scripts/slb-recipe-add.sh; tests/slb-smoke.sh assertions 13-14"
+    },
+    "helper_audit_tail": {
+      "ok": true,
+      "evidence": ".flywheel/scripts/slb-execution-audit-tail.sh; tests/slb-smoke.sh assertion 15"
+    },
+    "doctrine": {
+      "ok": true,
+      "evidence": ".flywheel/doctrine/slb-discipline.md"
+    },
+    "smoke_10_plus": {
+      "ok": true,
+      "evidence": "slb-smoke.txt SUMMARY pass=16 fail=0"
+    },
+    "shellcheck": {
+      "ok": true,
+      "evidence": "shellcheck.txt empty and command rerun pass"
+    },
+    "audit_ledger_initialized": {
+      "ok": true,
+      "evidence": "~/.local/state/flywheel/slb-execution-audit.jsonl exists"
+    },
+    "live_hook_fixture": {
+      "ok": true,
+      "evidence": "live-hook-output-postfix.json + live-hook-audit-postfix.jsonl"
+    },
+    "bead_closed": {
+      "ok": true,
+      "evidence": "br show flywheel-daeqx status closed"
+    }
+  },
+  "outcome": "pass"
+}

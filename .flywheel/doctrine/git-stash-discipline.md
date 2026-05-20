@@ -206,3 +206,12 @@ Decision-tree extension to the substrate-runtime ledger class is sourced from:
 - **Triage report:** `/Users/josh/Developer/alpsinsurance/.flywheel/audit/2026-05-10-held-stash-triage/report.md` (cited as exemplar)
 - **Doctrine ratification:** `flywheel-yqzj8` worker tick 2026-05-11 (this fold-in)
 - **Cross-orch ratification:** AG3 of `flywheel-yqzj8` defers to next sister-orch tick (orch-class action; not authored by this worker tick)
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-17 — secret emission discipline:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md` for the canonical pattern.
+- **MP-29 — production safety guardrails:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-29-production-safety-guardrails.md` for the canonical pattern.
+- **MP-30 — human-gated invasiveness:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-30-human-gated-invasiveness.md` for the canonical pattern.

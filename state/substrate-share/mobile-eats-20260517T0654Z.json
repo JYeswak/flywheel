@@ -1,0 +1,56 @@
+{
+  "schema_version": "zeststream.substrate_share_receipt.v1",
+  "generated_at": "2026-05-17T06:54:00Z",
+  "company_slug": "mobile-eats",
+  "repo_path": "/Users/josh/Developer/mobile-eats",
+  "tenant_declaration": "/Users/josh/Developer/mobile-eats/.zs-tenant.yaml",
+  "package_manifest": "/Users/josh/Developer/mobile-eats/next-app/package.json",
+  "packages": [
+    {"name": "@zeststream/ads-tracking", "scope": "production", "version_or_ref": "file:./vendor/ads-tracking"},
+    {"name": "@zeststream/audit-log-chain", "scope": "production", "version_or_ref": "file:./vendor/audit-log-chain"},
+    {"name": "@zeststream/cdn-cloudflare", "scope": "production", "version_or_ref": "file:./vendor/cdn-cloudflare"},
+    {"name": "@zeststream/community-moderation", "scope": "production", "version_or_ref": "file:./vendor/community-moderation"},
+    {"name": "@zeststream/compliance-aggregator", "scope": "production", "version_or_ref": "file:./vendor/compliance-aggregator"},
+    {"name": "@zeststream/contract-management", "scope": "production", "version_or_ref": "file:./vendor/contract-management"},
+    {"name": "@zeststream/contribution-cta", "scope": "production", "version_or_ref": "file:./vendor/contribution-cta"},
+    {"name": "@zeststream/cookie-consent", "scope": "production", "version_or_ref": "file:./vendor/cookie-consent"},
+    {"name": "@zeststream/cost-finops", "scope": "production", "version_or_ref": "file:./vendor/cost-finops"},
+    {"name": "@zeststream/deploy-vercel", "scope": "production", "version_or_ref": "file:./vendor/deploy-vercel"},
+    {"name": "@zeststream/dpa-substrate", "scope": "production", "version_or_ref": "file:./vendor/dpa-substrate"},
+    {"name": "@zeststream/fleet-registry", "scope": "production", "version_or_ref": "file:./vendor/fleet-registry"},
+    {"name": "@zeststream/google-ads-api", "scope": "production", "version_or_ref": "file:./vendor/google-ads-api"},
+    {"name": "@zeststream/google-calendar", "scope": "production", "version_or_ref": "file:./vendor/google-calendar"},
+    {"name": "@zeststream/google-maps", "scope": "production", "version_or_ref": "file:./vendor/google-maps"},
+    {"name": "@zeststream/hot-score", "scope": "production", "version_or_ref": "file:./vendor/hot-score"},
+    {"name": "@zeststream/map-style", "scope": "production", "version_or_ref": "file:./vendor/map-style"},
+    {"name": "@zeststream/meta-marketing-api", "scope": "production", "version_or_ref": "file:./vendor/meta-marketing-api"},
+    {"name": "@zeststream/motion-tokens", "scope": "production", "version_or_ref": "file:./vendor/motion-tokens"},
+    {"name": "@zeststream/nango-integrations", "scope": "production", "version_or_ref": "file:./vendor/nango-integrations"},
+    {"name": "@zeststream/og-share-images", "scope": "production", "version_or_ref": "file:./vendor/og-share-images"},
+    {"name": "@zeststream/policy-as-code", "scope": "production", "version_or_ref": "file:./vendor/policy-as-code"},
+    {"name": "@zeststream/proposal-generator", "scope": "production", "version_or_ref": "file:./vendor/proposal-generator"},
+    {"name": "@zeststream/r2-storage", "scope": "production", "version_or_ref": "file:./vendor/r2-storage"},
+    {"name": "@zeststream/self-hosted-svc", "scope": "production", "version_or_ref": "file:./vendor/self-hosted-svc"},
+    {"name": "@zeststream/story-system", "scope": "production", "version_or_ref": "file:./vendor/story-system"},
+    {"name": "@zeststream/user-journey-testing", "scope": "development", "version_or_ref": "file:./vendor/user-journey-testing"}
+  ],
+  "counts": {
+    "production_packages": 26,
+    "development_packages": 1,
+    "total_packages": 27
+  },
+  "n_plus_one_metrics": {
+    "baseline_launch_id": null,
+    "reused_package_count": 27,
+    "new_substrate_contribution_count": 0,
+    "downstream_propagation_window_days": null,
+    "measurement_status": "baseline",
+    "notes": "This is the first substrate-share baseline receipt for the holding-company gate. It proves reuse count, not yet N+1 cheaper-than-N across multiple launches."
+  },
+  "evidence_refs": [
+    "/Users/josh/Developer/mobile-eats/.zs-tenant.yaml",
+    "/Users/josh/Developer/mobile-eats/next-app/package.json",
+    "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md",
+    "/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json"
+  ]
+}

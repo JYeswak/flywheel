@@ -618,3 +618,8 @@ if [ "$JSON_OUT" -eq 1 ]; then
 else
   jq -r '"private-tmp-prune dry_run=\(.dry_run) ntm_files=\(.ntm_cleanup.total_files // 0) flywheel_candidates=\(.flywheel_candidates_count) flywheel_size_kb=\(.flywheel_total_size_kb)"' <<<"$RESULT"
 fi
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-92-reversible-recovery-ladder.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-45-reversible-cleanup-bundle.md`

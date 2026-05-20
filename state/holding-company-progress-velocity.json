@@ -1,0 +1,80 @@
+{
+  "schema_version": "zeststream.holding_company_progress_velocity.v1",
+  "generated_at": "2026-05-17T15:50:21Z",
+  "gate": "recent_progress_velocity",
+  "claim_text": "Sampled 3,906 commits in the current 7-day window across the same 9 local repos; the public velocity target remains blocked until the exact surface set and minimum count clear.",
+  "status": "blocked",
+  "target_min_commits": 4000,
+  "target_window_days": 7,
+  "target_surface_count": 9,
+  "window_start": "2026-05-10T15:50:21Z",
+  "window_end": "2026-05-17T15:50:21Z",
+  "exact_surface_set_established": false,
+  "measured_total_commit_count": 3906,
+  "surface_counts": [
+    {
+      "surface_id": "skillos",
+      "repo_path": "/Users/josh/Developer/skillos",
+      "commit_count": 888,
+      "evidence_ref": "git -C /Users/josh/Developer/skillos rev-list --count --since='2026-05-10T15:50:21Z' --until='2026-05-17T15:50:21Z' HEAD"
+    },
+    {
+      "surface_id": "flywheel",
+      "repo_path": "/Users/josh/Developer/flywheel",
+      "commit_count": 1222,
+      "evidence_ref": "git -C /Users/josh/Developer/flywheel rev-list --count --since='2026-05-10T15:50:21Z' --until='2026-05-17T15:50:21Z' HEAD"
+    },
+    {
+      "surface_id": "mobile-eats",
+      "repo_path": "/Users/josh/Developer/mobile-eats",
+      "commit_count": 413,
+      "evidence_ref": "git -C /Users/josh/Developer/mobile-eats rev-list --count --since='2026-05-10T15:50:21Z' --until='2026-05-17T15:50:21Z' HEAD"
+    },
+    {
+      "surface_id": "zeststream-platform",
+      "repo_path": "/Users/josh/Developer/zeststream-platform",
+      "commit_count": 298,
+      "evidence_ref": "git -C /Users/josh/Developer/zeststream-platform rev-list --count --since='2026-05-10T15:50:21Z' --until='2026-05-17T15:50:21Z' HEAD"
+    },
+    {
+      "surface_id": "zesttube",
+      "repo_path": "/Users/josh/Developer/zesttube",
+      "commit_count": 96,
+      "evidence_ref": "git -C /Users/josh/Developer/zesttube rev-list --count --since='2026-05-10T15:50:21Z' --until='2026-05-17T15:50:21Z' HEAD"
+    },
+    {
+      "surface_id": "clutterfreespaces",
+      "repo_path": "/Users/josh/Developer/clutterfreespaces",
+      "commit_count": 982,
+      "evidence_ref": "git -C /Users/josh/Developer/clutterfreespaces rev-list --count --since='2026-05-10T15:50:21Z' --until='2026-05-17T15:50:21Z' HEAD"
+    },
+    {
+      "surface_id": "terratitle",
+      "repo_path": "/Users/josh/Developer/terratitle",
+      "commit_count": 3,
+      "evidence_ref": "git -C /Users/josh/Developer/terratitle rev-list --count --since='2026-05-10T15:50:21Z' --until='2026-05-17T15:50:21Z' HEAD"
+    },
+    {
+      "surface_id": "agent-bench",
+      "repo_path": "/Users/josh/Developer/agent-bench",
+      "commit_count": 0,
+      "evidence_ref": "git -C /Users/josh/Developer/agent-bench rev-list --count --since='2026-05-10T15:50:21Z' --until='2026-05-17T15:50:21Z' HEAD"
+    },
+    {
+      "surface_id": "cubcloud-aaas",
+      "repo_path": "/Users/josh/Developer/cubcloud-aaas",
+      "commit_count": 4,
+      "evidence_ref": "git -C /Users/josh/Developer/cubcloud-aaas rev-list --count --since='2026-05-10T15:50:21Z' --until='2026-05-17T15:50:21Z' HEAD"
+    }
+  ],
+  "evidence_command": "for repo in /Users/josh/Developer/skillos /Users/josh/Developer/flywheel /Users/josh/Developer/mobile-eats /Users/josh/Developer/zeststream-platform /Users/josh/Developer/zesttube /Users/josh/Developer/clutterfreespaces /Users/josh/Developer/terratitle /Users/josh/Developer/agent-bench /Users/josh/Developer/cubcloud-aaas; do git -C \"$repo\" rev-list --count --since='2026-05-10T15:50:21Z' --until='2026-05-17T15:50:21Z' HEAD; done",
+  "evidence_refs": [
+    "state/zeststream-holding-company-gate-audit-20260517T0646Z.json"
+  ],
+  "notes": [
+    "This is a replayable receipt for the recent-progress claim, not an attempt to prove a launch gate.",
+    "The sampled nine local repos total 3906 commits, not 4000+.",
+    "The exact intended nine product surfaces were not established, and agent-bench has zero commits in this current window."
+  ],
+  "next_action": "Establish the exact nine product-surface set and rerun the current-window count before using the 4000+ velocity claim in public or gate summaries."
+}

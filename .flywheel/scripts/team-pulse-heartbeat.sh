@@ -361,3 +361,8 @@ load_json(){ local applied=false loaded=false rc=0; [[ "$APPLY" -eq 1 || "$DRY_R
 
 parse_args "$@"; need_jq
 case "$MODE" in run) run_pulse;; doctor) doctor_json | emit;; status|health) status_json | emit;; schema) schema_json | emit;; validate) validate_plist_json | emit;; install) install_json | emit;; load|unload) load_json | emit;; *) usage; exit 64;; esac
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

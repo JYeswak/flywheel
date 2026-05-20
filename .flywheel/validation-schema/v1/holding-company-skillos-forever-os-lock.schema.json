@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-skillos-forever-os-lock/v1/schema.json",
+  "title": "ZestStream Holding Company SkillOS Forever-OS Lock v1",
+  "description": "Ledger for the SkillOS Forever-OS v3 ratified and structure-locked recent-progress claim. It separates v3 ratification receipts from a distinct structure-lock receipt.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "claim_text",
+    "status",
+    "goal_ref",
+    "goal_sha256",
+    "v3_goal_present",
+    "v3_scope_clarifier_present",
+    "anti_punt_forbid_list_present",
+    "ratification_receipts",
+    "ratification_receipts_present",
+    "structure_lock_receipt_ref",
+    "structure_lock_receipt_sha256",
+    "structure_locked_20260517",
+    "structure_lock_search_command",
+    "inspected_paths",
+    "evidence_refs",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_skillos_forever_os_lock.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "recent_progress_skillos_forever_os_lock"
+    },
+    "claim_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "partial",
+        "proven",
+        "deferred"
+      ]
+    },
+    "goal_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "goal_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "v3_goal_present": {
+      "type": "boolean"
+    },
+    "v3_scope_clarifier_present": {
+      "type": "boolean"
+    },
+    "anti_punt_forbid_list_present": {
+      "type": "boolean"
+    },
+    "ratification_receipts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/receipt"
+      }
+    },
+    "ratification_receipts_present": {
+      "type": "boolean"
+    },
+    "structure_lock_receipt_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "structure_lock_receipt_sha256": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "structure_locked_20260517": {
+      "type": "boolean"
+    },
+    "structure_lock_search_command": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inspected_paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "receipt": {
+      "type": "object",
+      "required": [
+        "receipt_id",
+        "receipt_ref",
+        "receipt_sha256",
+        "status",
+        "notes"
+      ],
+      "properties": {
+        "receipt_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,128}$"
+        },
+        "receipt_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "receipt_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "present",
+            "missing",
+            "superseded"
+          ]
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

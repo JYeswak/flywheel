@@ -186,3 +186,8 @@ elif [[ "$QUIET" -eq 0 ]]; then
   printf '%s\n' "$payload" | jq -r '"identity_tuple status=\(.status) success=\(.success) tuples=\(.tuples_checked // 0) drift_count=\(.drift_count // 0) enforced=\(.enforced_drift_count // 0)"'
 fi
 exit "$rc"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-20-cross-orch-handoff.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-100-contention-shaped-state-owner.md`

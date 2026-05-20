@@ -22,8 +22,25 @@
   "source_repo": "/Users/josh/Developer/flywheel",
   "source_row_sha256": "5d8a24fd297e6daaa46b80e72e0b14e36577f8759c990f3646558a1fb2341198",
   "source_status": "blocked",
-  "status": "open",
+  "status": "closed",
   "synced_at": "2026-05-15T16:08:00Z",
   "title": "[contact-followup] add form-backed delivery proof beyond mailto route",
-  "verification_path": "br show flywheel-lz51w --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-lz51w\" and .status == \"blocked\"'"
+  "verification_path": "br show flywheel-lz51w --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-lz51w\" and .status == \"blocked\"'",
+  "closed_at": "2026-05-15T19:02:35Z",
+  "closed_by": "orch:auto",
+  "closed_reason": "ac_passed_auto_close_hook",
+  "live_probe_evidence": {
+    "schema_version": "blocker-escalation/v1",
+    "ts": "2026-05-15T19:02:35Z",
+    "event": "blocker_auto_closed",
+    "blocker_id": "flywheel-lz51w",
+    "ac_command": "br show flywheel-lz51w --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-lz51w\" and .status != \"blocked\"'",
+    "ac_stdout": "true",
+    "ac_exit_code": 0,
+    "live_probe_at": "2026-05-15T19:02:35Z",
+    "previous_last_verified_at": "2026-05-15T16:03:28Z",
+    "delta_seconds": 10747,
+    "auto_closer": "orch:auto",
+    "ac_state_hash": "aa15665b18b7e4a8f35ef95ee9b4c0fe601970f4f2822b5085cfd84598482b4e"
+  }
 }

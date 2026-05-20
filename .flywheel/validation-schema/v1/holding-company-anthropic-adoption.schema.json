@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-anthropic-adoption/v1/schema.json",
+  "title": "ZestStream Holding Company Anthropic SDK Adoption v1",
+  "description": "Ledger for the recent-progress claim that anthropic-sdk-python adoption is OK across three real consumer repos.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "claim_text",
+    "status",
+    "pack_name",
+    "min_real_consumer_repo_count",
+    "expected_consumer_repos",
+    "canonical_gates_status_ref",
+    "pack_applied_events_ref",
+    "doctor_scope",
+    "doctor_status",
+    "distinct_target_count",
+    "target_repos_remaining_to_min_target_count",
+    "packages_phantom_fail",
+    "valid_rows",
+    "adoption_events",
+    "all_expected_repos_present",
+    "all_expected_events_present",
+    "real_consumer_repo_count",
+    "evidence_refs",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_anthropic_adoption.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "recent_progress_anthropic_sdk_adoption"
+    },
+    "claim_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "proven",
+        "blocked",
+        "deferred"
+      ]
+    },
+    "pack_name": {
+      "const": "anthropic-sdk-python"
+    },
+    "min_real_consumer_repo_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "expected_consumer_repos": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "canonical_gates_status_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pack_applied_events_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "doctor_scope": {
+      "const": "package-adoption-velocity"
+    },
+    "doctor_status": {
+      "type": "string",
+      "enum": [
+        "OK",
+        "WARN",
+        "FAIL"
+      ]
+    },
+    "distinct_target_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "target_repos_remaining_to_min_target_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "packages_phantom_fail": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "valid_rows": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "adoption_events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/adoption_event"
+      }
+    },
+    "all_expected_repos_present": {
+      "type": "boolean"
+    },
+    "all_expected_events_present": {
+      "type": "boolean"
+    },
+    "real_consumer_repo_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "adoption_event": {
+      "type": "object",
+      "required": [
+        "target_repo",
+        "event_ts",
+        "event_source",
+        "target_is_synthetic",
+        "target_was_self",
+        "destination",
+        "applied_files"
+      ],
+      "properties": {
+        "target_repo": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event_ts": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "event_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_is_synthetic": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "target_was_self": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "destination": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "applied_files": {
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

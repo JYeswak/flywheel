@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flywheel.zeststream.ai/schemas/WORKTREE-MANIFEST.schema.json",
+  "title": "WORKTREE-MANIFEST",
+  "description": "Per-repo manifest declaring active worktrees and their lifecycle. Authority: flywheel-m9yxr research (2026-05-20). Mission Duty 3 (substrate-published). Sister: BRANCH-MANIFEST, STASH-POLICY.",
+  "type": "object",
+  "required": ["schema_version", "repo_path", "generated_at", "active_worktrees"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "flywheel.worktree_manifest.v1"
+    },
+    "repo_path": {
+      "type": "string",
+      "description": "Absolute path to the main repo (not a worktree path)."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "active_worktrees": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/worktree" }
+    }
+  },
+  "$defs": {
+    "worktree": {
+      "type": "object",
+      "required": ["path", "created_for_bead", "owner", "expires_at", "lifecycle_state"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Absolute worktree path. Conventionally /tmp/<repo>-<bead>-<role>-<pid> for ephemeral, or ../worktrees/wt-<topic> for long-lived."
+        },
+        "branch": {
+          "type": "string",
+          "description": "Branch checked out at this worktree, or 'DETACHED' if detached HEAD."
+        },
+        "created_for_bead": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]+$",
+          "description": "Bead ID this worktree was created to satisfy. Required for accountability."
+        },
+        "owner": {
+          "type": "string",
+          "description": "Agent identity or pane id responsible for this worktree (e.g. flywheel:1, codex-worker-3, joshua-manual)."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When this worktree should be reaped if still in 'active' lifecycle_state. Defaults: ephemeral=24h, isolated-validate=2h, long-lived=14d."
+        },
+        "lifecycle_state": {
+          "enum": ["active", "merged", "abandoned", "extracted", "closed"],
+          "description": "active=in use; merged=branch merged to main; abandoned=worker BLOCKED/dropped; extracted=moved to another repo; closed=reaped (terminal)."
+        },
+        "purpose": {
+          "enum": ["feature", "isolated-validate", "hotfix", "experiment", "rescue"],
+          "description": "Why this worktree exists. Drives default expires_at and reaper aggressiveness."
+        },
+        "labels": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Reaper carve-out labels: keep-alive, pending-pr, archived-snapshot, joshua-gated, cross-orch-active, defer-gated."
+        },
+        "ports": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 1024, "maximum": 65535 },
+          "description": "Allocated ports per service (app, db, redis). Mirrors .worktree-ports.json from git-worktree-manager skill."
+        }
+      }
+    }
+  }
+}

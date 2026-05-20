@@ -521,3 +521,8 @@ jq -nc \
   --argjson resumed "$resumed_json" \
   --argjson failed "$failed_json" \
   '{schema_version:"storage-pause-auto-resume/v1",status:$status,apply:($apply==1),state_path:$state,reclaim_receipt:$reclaim,resumed_count:$resumed_count,failed_count:$failed_count,pids:$resumed,failed_pids:$failed}'
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

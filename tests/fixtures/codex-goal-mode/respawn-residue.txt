@@ -1,0 +1,2 @@
+post-respawn residue: pane relaunched recently
+Previous scrollback still visible.

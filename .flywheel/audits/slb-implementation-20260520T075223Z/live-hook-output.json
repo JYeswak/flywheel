@@ -1,0 +1,1 @@
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"SLB safe execution verified: rm-rf-tmpdir","updatedInput":{"command":"printf '%s\\n' 'SLB already executed: rm-rf-tmpdir'"}}}

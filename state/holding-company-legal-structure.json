@@ -1,0 +1,93 @@
+{
+  "schema_version": "zeststream.holding_company_legal_structure.v1",
+  "generated_at": "2026-05-17T07:21:00Z",
+  "gate": "legal_structure",
+  "clear_count": 0,
+  "requirements": [
+    {
+      "requirement_id": "holding_company_operating_agreement",
+      "title": "Holding-company operating agreement",
+      "status": "scaffolded",
+      "blocks_before_sub_sequence": 2,
+      "binding_artifact_ref": null,
+      "attorney_review_ref": null,
+      "cpa_review_ref": null,
+      "evidence_refs": [
+        "/Users/josh/Developer/skillos/state/legal-house/SCAFFOLD.md",
+        "/Users/josh/Developer/skillos/state/mission-alignment/EXECUTION-PLAN.md"
+      ],
+      "notes": "Scaffold names the slot, but no binding operating agreement or attorney/CPA review receipt is present."
+    },
+    {
+      "requirement_id": "peer_coach_equity_pathway",
+      "title": "Peer-coach equity pathway",
+      "status": "scaffolded",
+      "blocks_before_sub_sequence": 2,
+      "binding_artifact_ref": null,
+      "attorney_review_ref": null,
+      "cpa_review_ref": null,
+      "evidence_refs": [
+        "/Users/josh/Developer/skillos/state/legal-house/SCAFFOLD.md"
+      ],
+      "notes": "Scaffold slot 4.6 is locked conceptually; no attorney-drafted binding term exists."
+    },
+    {
+      "requirement_id": "annual_tier_review_process",
+      "title": "Annual tier-threshold review process",
+      "status": "scaffolded",
+      "blocks_before_sub_sequence": 2,
+      "binding_artifact_ref": null,
+      "attorney_review_ref": null,
+      "cpa_review_ref": null,
+      "evidence_refs": [
+        "/Users/josh/Developer/skillos/state/legal-house/SCAFFOLD.md"
+      ],
+      "notes": "Scaffold slot 4.7 exists; no binding review process or counsel/CPA receipt is present."
+    },
+    {
+      "requirement_id": "substrate_contributor_pool",
+      "title": "Owner substrate-contribution pool",
+      "status": "scaffolded",
+      "blocks_before_sub_sequence": 2,
+      "binding_artifact_ref": null,
+      "attorney_review_ref": null,
+      "cpa_review_ref": null,
+      "evidence_refs": [
+        "/Users/josh/Developer/skillos/state/legal-house/SCAFFOLD.md"
+      ],
+      "notes": "Scaffold slot 4.9 exists; no binding pool language or review receipt is present."
+    },
+    {
+      "requirement_id": "subsidiary_owner_operating_agreement",
+      "title": "Subsidiary owner operating agreement",
+      "status": "scaffolded",
+      "blocks_before_sub_sequence": 2,
+      "binding_artifact_ref": null,
+      "attorney_review_ref": null,
+      "cpa_review_ref": null,
+      "evidence_refs": [
+        "/Users/josh/Developer/skillos/state/legal-house/SCAFFOLD.md"
+      ],
+      "notes": "Layer 2.2 and owner package slots exist in scaffold; no binding sub-owner agreement is present."
+    },
+    {
+      "requirement_id": "intercompany_services_agreement",
+      "title": "Inter-company services agreement and substrate license",
+      "status": "scaffolded",
+      "blocks_before_sub_sequence": 2,
+      "binding_artifact_ref": null,
+      "attorney_review_ref": null,
+      "cpa_review_ref": null,
+      "evidence_refs": [
+        "/Users/josh/Developer/skillos/state/legal-house/SCAFFOLD.md"
+      ],
+      "notes": "Layer 2.4 and 4.1 slots exist; no transfer-pricing or substrate-license review receipt is present."
+    }
+  ],
+  "notes": [
+    "This ledger is a readiness gate, not legal advice.",
+    "A requirement clears only when it has a binding artifact reference plus attorney and CPA review references.",
+    "Sub #2 owner signing remains blocked until every required legal-structure row clears."
+  ],
+  "next_action": "Obtain attorney and CPA review receipts plus binding artifact references for the six legal-structure requirements before signing a sub #2 owner."
+}

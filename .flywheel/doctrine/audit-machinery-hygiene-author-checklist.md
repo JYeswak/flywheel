@@ -315,3 +315,12 @@ Cluster origination: 2026-05-10T19:55Z (skillos-ubh3 5-way cross-link cycle bega
 | Audit pass bead | `flywheel-jyfjf` | (sister to this checklist; separate wire-in) |
 
 The two checklists cover orthogonal failure axes for the same broad "audit surface" category. A probe can be fully Rules-1-3 compliant AND still trip Shapes A/B/C/D — the rule applies to in-probe code; the shape applies to classification output.
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-17 — secret emission discipline:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md` for the canonical pattern.
+- **MP-29 — production safety guardrails:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-29-production-safety-guardrails.md` for the canonical pattern.
+- **MP-30 — human-gated invasiveness:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-30-human-gated-invasiveness.md` for the canonical pattern.

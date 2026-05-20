@@ -162,3 +162,12 @@ The pattern is the same: cheap classifier → model.select hook. The classifier 
 - The original test fixtures (recreate against current model versions per "When to re-run the benchmark" section above)
 
 If a future operator needs the original repo, unarchive via `gh repo edit JYeswak/opencode-grok-first-router --archived=false`. The git history is preserved at GitHub indefinitely while archived.
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-09 — info-source watchtower:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-09-info-source-watchtower.md` for the canonical pattern.
+- **MP-13 — living documentation:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-13-living-documentation.md` for the canonical pattern.
+- **MP-28 — checklist before claim:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-28-checklist-before-claim.md` for the canonical pattern.

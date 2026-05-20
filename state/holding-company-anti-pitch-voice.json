@@ -1,0 +1,33 @@
+{
+  "schema_version": "zeststream.holding_company_anti_pitch_voice.v1",
+  "generated_at": "2026-05-17T09:51:00Z",
+  "gate": "anti_pitch_voice",
+  "required_positioning": "sharpen_legacy_incubate_new_not_builder",
+  "clear_count": 1,
+  "surfaces": [
+    {
+      "surface_id": "zeststream-v2-fresh",
+      "surface_kind": "repo",
+      "surface_ref": "/Users/josh/Developer/zeststream-v2-fresh",
+      "status": "clear",
+      "holding_company_story_present": true,
+      "builder_framing_hits": [],
+      "evidence_refs": [
+        "/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml",
+        "state/holding-company-anti-pitch-active-content-repair-20260517T0935Z.json",
+        "state/holding-company-historical-builder-summary-retirement-20260517T0942Z.json",
+        "state/holding-company-public-story-route-20260517T0948Z.json",
+        "/Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md",
+        "/Users/josh/Developer/zeststream-v2-fresh/src/app/portfolio/page.tsx",
+        "/Users/josh/Developer/zeststream-v2-fresh/src/data/local-landing-content.ts"
+      ],
+      "notes": "Known builder-framing hits are removed. The durable /portfolio route now carries the holding-company story: sharpen legacy, incubate new, show receipts before launch claims."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical anti-pitch voice gate for the ZestStream holding-company goal.",
+    "Public-clear status requires holding-company story presence and zero builder-framing hits.",
+    "This ledger does not edit the JSM-managed brand-voice skill; it records surface readiness evidence."
+  ],
+  "next_action": "Keep the gate clear by rejecting future public builder-framing and requiring receipt-backed holding-company claims."
+}

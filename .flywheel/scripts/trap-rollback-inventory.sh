@@ -93,27 +93,17 @@ mutating_re = re.compile(
     re.M,
 )
 trap_re = re.compile(r"(^|\n)\s*trap\b[^\n]*(EXIT|ERR|RETURN)\b")
-declared_read_only_re = re.compile(
-    r"read_only\s*[:=]\s*true.*mutates_state\s*[:=]\s*false"
-    r"|mutates_state\s*[:=]\s*false.*read_only\s*[:=]\s*true",
-    re.S,
-)
-devnull_redir_re = re.compile(r"(?:[0-9]?>|[0-9]?>>|&>)\s*/dev/null\b")
 
 tracked_shell = []
 mutating = []
 with_trap = []
 without_trap = []
-declared_read_only_excluded = []
-library_excluded = []
 
 operational_prefixes = (
     ".flywheel/scripts/",
     ".flywheel/hooks/",
-    "scripts/",
-)
-library_prefixes = (
     ".flywheel/lib/",
+    "scripts/",
 )
 non_operational_prefixes = (
     ".flywheel/PLANS/",
@@ -129,46 +119,7 @@ non_operational_prefixes = (
 def in_scan_scope(rel: str) -> bool:
     if rel.startswith(non_operational_prefixes):
         return False
-    if rel.startswith(library_prefixes):
-        library_excluded.append(rel)
-        return False
     return rel.startswith(operational_prefixes)
-
-def strip_shell_comment_lines(text: str) -> str:
-    lines = []
-    for line in text.splitlines():
-        stripped = line.lstrip()
-        if stripped.startswith("#"):
-            continue
-        lines.append(line)
-    return "\n".join(lines)
-
-def strip_quoted_literals(text: str) -> str:
-    out = []
-    quote = None
-    escaped = False
-    for ch in text:
-        if quote == '"':
-            if escaped:
-                escaped = False
-                continue
-            if ch == "\\":
-                escaped = True
-                continue
-            if ch == '"':
-                quote = None
-                out.append('""')
-            continue
-        if quote == "'":
-            if ch == "'":
-                quote = None
-                out.append("''")
-            continue
-        if ch in {"'", '"'}:
-            quote = ch
-            continue
-        out.append(ch)
-    return "".join(out)
 
 for rel_raw in raw.split(b"\0"):
     if not rel_raw:
@@ -191,12 +142,7 @@ for rel_raw in raw.split(b"\0"):
         text = path.read_text(errors="replace")
     except OSError:
         text = ""
-    executable_text = strip_quoted_literals(strip_shell_comment_lines(text))
-    if declared_read_only_re.search(text):
-        declared_read_only_excluded.append(rel)
-        continue
-    mutation_text = devnull_redir_re.sub("", executable_text)
-    if mutating_re.search(mutation_text):
+    if mutating_re.search(text):
         mutating.append(rel)
         if trap_re.search(text):
             with_trap.append(rel)
@@ -216,16 +162,11 @@ payload = {
     "repo": str(repo),
     "scan_scope": "tracked_operational_shell",
     "excluded_non_operational_prefixes": list(non_operational_prefixes),
-    "excluded_library_prefixes": list(library_prefixes),
     "scanned_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
     "tracked_shell_scripts_scanned": len(tracked_shell),
     "mutating_like_scripts": len(mutating),
     "mutating_like_with_exit_or_err_trap": len(with_trap),
     "mutating_like_without_exit_or_err_trap": len(without_trap),
-    "declared_read_only_excluded_count": len(declared_read_only_excluded),
-    "declared_read_only_excluded_sample": declared_read_only_excluded[:25],
-    "library_excluded_count": len(library_excluded),
-    "library_excluded_sample": library_excluded[:25],
     "coverage_pct": round((100.0 * len(with_trap) / len(mutating)), 2) if mutating else 100.0,
     "sample_without_trap": without_trap[:25],
     "max_without_trap": max_without_trap,
@@ -258,7 +199,7 @@ case "$command" in
   scan) scan "$repo" "$max_without_trap" ;;
   validate) scan "$repo" "$max_without_trap" >/dev/null ;;
   doctor|health)
-    if command -v git >/dev/null && git -C "$repo" rev-parse --is-inside-work-tree >/dev/null 2>&1 && command -v python3 >/dev/null && command -v jq >/dev/null; then
+    if [[ -d "$repo/.git" ]] && command -v git >/dev/null && command -v python3 >/dev/null && command -v jq >/dev/null; then
       jq -nc --arg schema_version "$SCHEMA_VERSION" --arg command "$command" --arg repo "$repo" '{schema_version:$schema_version,command:$command,status:"pass",repo:$repo,checks:["git","python3","jq"]}'
     else
       jq -nc --arg schema_version "$SCHEMA_VERSION" --arg command "$command" --arg repo "$repo" '{schema_version:$schema_version,command:$command,status:"fail",repo:$repo}'
@@ -266,3 +207,8 @@ case "$command" in
     fi
     ;;
 esac
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

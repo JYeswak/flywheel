@@ -124,3 +124,45 @@ Commands:
   web          Open web UI
   --version    Show version
 [supervisor] max restarts (5) exceeded, not restarting
+am 1.0.0 - Agent Mail CLI
+
+Commands:
+  status       Check server health
+  web          Open web UI
+  --version    Show version
+[supervisor] restarting in 1s (attempt 1/5)
+am 1.0.0 - Agent Mail CLI
+
+Commands:
+  status       Check server health
+  web          Open web UI
+  --version    Show version
+[supervisor] restarting in 2s (attempt 2/5)
+am 1.0.0 - Agent Mail CLI
+
+Commands:
+  status       Check server health
+  web          Open web UI
+  --version    Show version
+[supervisor] restarting in 4s (attempt 3/5)
+am 1.0.0 - Agent Mail CLI
+
+Commands:
+  status       Check server health
+  web          Open web UI
+  --version    Show version
+[supervisor] restarting in 8s (attempt 4/5)
+am 1.0.0 - Agent Mail CLI
+
+Commands:
+  status       Check server health
+  web          Open web UI
+  --version    Show version
+[supervisor] restarting in 16s (attempt 5/5)
+am 1.0.0 - Agent Mail CLI
+
+Commands:
+  status       Check server health
+  web          Open web UI
+  --version    Show version
+[supervisor] max restarts (5) exceeded, not restarting

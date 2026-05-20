@@ -1,0 +1,31 @@
+{
+  "schema_version": "zeststream.holding_company_recycle_loop.v1",
+  "generated_at": "2026-05-17T07:48:00Z",
+  "gate": "recycle_friction_to_capability",
+  "required_max_propagation_window_days": 30,
+  "clear_count": 0,
+  "friction_items": [
+    {
+      "friction_id": "mobile-eats-recycle-baseline-20260517",
+      "company_slug": "mobile-eats",
+      "source_loop": "press",
+      "status": "not_observed",
+      "friction_receipt_ref": null,
+      "skillos_capability_ref": null,
+      "package_or_substrate_ref": null,
+      "portfolio_propagation_ref": null,
+      "propagation_window_days": null,
+      "evidence_refs": [
+        "state/holding-company-launch-economics.json",
+        "state/substrate-share/mobile-eats-20260517T0654Z.json"
+      ],
+      "notes": "Baseline row only. Mobile Eats proves package reuse, but no operating friction has been converted into a SkillOS capability plus package/substrate upgrade and portfolio propagation receipt yet."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical RECYCLE gate for the ZestStream holding-company goal.",
+    "A friction item clears only when it has friction, SkillOS capability, package/substrate, and portfolio propagation receipts.",
+    "N+1 cheaper-than-N is measured separately in state/holding-company-launch-economics.json."
+  ],
+  "next_action": "When launch friction appears, record the friction receipt, land the SkillOS capability and package/substrate upgrade, then attach portfolio propagation evidence within the configured window."
+}

@@ -40,7 +40,7 @@ assert_jq "$TMP/doctor.json" '.command == "doctor" and .status == "pass"' "docto
 
 fixture="$TMP/repo"
 mkdir -p "$fixture/scripts"
-mkdir -p "$fixture/tests" "$fixture/.flywheel/receipts/demo" "$fixture/.flywheel/lib"
+mkdir -p "$fixture/tests" "$fixture/.flywheel/receipts/demo"
 git -C "$fixture" init -q
 git -C "$fixture" config user.email test@example.invalid
 git -C "$fixture" config user.name "Test User"
@@ -61,48 +61,6 @@ cat >"$fixture/scripts/read-only.sh" <<'EOF'
 set -euo pipefail
 printf 'hello\n'
 EOF
-cat >"$fixture/scripts/read-only-apply-contract.sh" <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-info() {
-  jq -nc '{read_only:true,mutates_state:false,canonical_cli:["--apply"]}'
-}
-case "${1:-}" in
-  --info) info ;;
-  --apply) printf 'dry contract only\n' ;;
-  *) printf 'hello\n' ;;
-esac
-EOF
-cat >"$fixture/scripts/read-only-devnull-probe.sh" <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-command -v jq >/dev/null 2>&1
-pgrep -f definitely-not-real >/dev/null || true
-printf 'quiet\n' >/dev/null
-EOF
-cat >"$fixture/scripts/comment-only-mutation-text.sh" <<'EOF'
-#!/usr/bin/env bash
-# Setup note only:
-#   git commit --no-verify
-#   ln -s ../../.flywheel/hooks/example .git/hooks/pre-commit
-set -euo pipefail
-printf 'read only\n'
-EOF
-cat >"$fixture/scripts/quoted-mutation-text.sh" <<'EOF'
-#!/usr/bin/env bash
-set -euo pipefail
-echo "operator hint: git commit --no-verify if intentional"
-printf '%s\n' 'never run rm -rf from this message'
-jq -nc '{items:($xs | split(",") | map(select(length>0)))}'
-EOF
-cat >"$fixture/.flywheel/lib/helper-library.sh" <<'EOF'
-# shellcheck shell=bash
-helper_write_audit_row() {
-  local path="$1"
-  mkdir -p "$(dirname "$path")"
-  jq -nc '{status:"ok"}' >>"$path"
-}
-EOF
 cat >"$fixture/tests/mutating-test.sh" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -114,15 +72,13 @@ set -euo pipefail
 touch historical-state.txt
 EOF
 git -C "$fixture" add scripts
-git -C "$fixture" add tests .flywheel/receipts .flywheel/lib
+git -C "$fixture" add tests .flywheel/receipts
 git -C "$fixture" commit -q -m fixture
 
 "$SCRIPT" scan --repo "$fixture" --json >"$TMP/fixture.json"
-assert_jq "$TMP/fixture.json" '.status == "warn" and .scan_scope == "tracked_operational_shell" and .tracked_shell_scripts_scanned == 7 and .mutating_like_scripts == 2 and .mutating_like_with_exit_or_err_trap == 1 and .mutating_like_without_exit_or_err_trap == 1' "fixture counts trap coverage"
+assert_jq "$TMP/fixture.json" '.status == "warn" and .scan_scope == "tracked_operational_shell" and .tracked_shell_scripts_scanned == 3 and .mutating_like_scripts == 2 and .mutating_like_with_exit_or_err_trap == 1 and .mutating_like_without_exit_or_err_trap == 1' "fixture counts trap coverage"
 assert_jq "$TMP/fixture.json" '.sample_without_trap == ["scripts/without-trap.sh"] and .claim == "inventory_only_not_adoption_complete"' "fixture sample and claim"
 assert_jq "$TMP/fixture.json" '(.excluded_non_operational_prefixes | index("tests/")) and (.excluded_non_operational_prefixes | index(".flywheel/receipts/"))' "fixture excludes non-operational prefixes"
-assert_jq "$TMP/fixture.json" '.library_excluded_count == 1 and .library_excluded_sample == [".flywheel/lib/helper-library.sh"] and (.excluded_library_prefixes | index(".flywheel/lib/"))' "fixture excludes sourced helper libraries"
-assert_jq "$TMP/fixture.json" '.declared_read_only_excluded_count == 1 and .declared_read_only_excluded_sample == ["scripts/read-only-apply-contract.sh"]' "fixture excludes declared read-only apply contract"
 
 if "$SCRIPT" scan --repo "$fixture" --max-without-trap 0 --json >"$TMP/strict.json"; then
   fail "strict threshold fails when trap gap exists"

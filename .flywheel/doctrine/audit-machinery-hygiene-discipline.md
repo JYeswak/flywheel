@@ -237,3 +237,12 @@ Wire-in (separate beads):
 - v0.1.9 ADDITIVE refinement cycle (sd-synthesis-supersede-correct-scope + sd-substrate-exercises-itself-and-surfaces-own-gaps + tri-mirror meta-pattern): 2026-05-11T05:01Z scope-clause proposal (skillos), 05:04Z two-cycle routing decision (skillos), 05:07Z Shape C endorsement (skillos), 05:09Z bilateral enrollment manifest lock, 05:10Z flywheel-o9wx0 worker tick authored v0.1.9 ADDITIVE doctrine update preserving v0.1.8 verbatim (this commit)
 - Total origination-to-doctrine-ship-with-5-shapes-and-bilateral-validity-and-12-skill-discoveries-and-criterion-v3-waived-and-bilateral-mirror-cycle-with-mid-arc-retraction-and-Shape-C-self-exercise-via-additive-v0.1.9: ~9h 15min
 - Within-cycle exemplars: 11 closures (10 Shape A + 1 Shape B) + 1 Shape C exemplar pair + 1 Shape D exemplar + 11-instance Shape A synthesis-supersede batch (skillos triage drafts=10 + superseded=1)
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-17 — secret emission discipline:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md` for the canonical pattern.
+- **MP-29 — production safety guardrails:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-29-production-safety-guardrails.md` for the canonical pattern.
+- **MP-30 — human-gated invasiveness:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-30-human-gated-invasiveness.md` for the canonical pattern.

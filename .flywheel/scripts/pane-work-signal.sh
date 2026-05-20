@@ -86,3 +86,8 @@ case "$MODE" in
     jq -nc --arg classification "$CLASSIFICATION" --arg session "$SESSION" --argjson pane "$PANE" --arg source "$CLASS_SOURCE" --arg reason "$CLASS_REASON" --argjson distinct_hashes "$DISTINCT_HASHES" --argjson sample_count "$SAMPLE_COUNT" --argjson window_s "$WORK_WINDOW_S" --arg ts "$LATEST_TS" --arg evidence "$FOREGROUND_EVIDENCE" '{truth_state:$classification,session:$session,pane:$pane,truth_source:$source,truth_reason:$reason,classification:$classification,sample_count:$sample_count,distinct_hashes:$distinct_hashes,window_s:$window_s,ts:$ts,foreground_working_state:($evidence != ""),foreground_working_evidence:$evidence}'
     ;;
 esac
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-20-cross-orch-handoff.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-63-phase-tick-bounded-action.md`

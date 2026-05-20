@@ -1,0 +1,31 @@
+{
+  "schema_version": "zeststream.holding_company_launch_economics.v1",
+  "generated_at": "2026-05-17T06:58:00Z",
+  "gate": "n_plus_one_cheaper_than_n",
+  "measurement_status": "baseline",
+  "launches": [
+    {
+      "launch_id": "mobile-eats-baseline-20260517",
+      "company_slug": "mobile-eats",
+      "sequence": 1,
+      "status": "candidate_baseline",
+      "peel_interview_count": 0,
+      "peel_hours": null,
+      "press_build_hours": null,
+      "reused_package_count": 27,
+      "new_substrate_contribution_count": 0,
+      "downstream_propagation_window_days": null,
+      "substrate_share_receipt": "state/substrate-share/mobile-eats-20260517T0654Z.json",
+      "evidence_refs": [
+        "state/substrate-share/mobile-eats-20260517T0654Z.json",
+        "/Users/josh/Developer/mobile-eats/next-app/package.json",
+        "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md"
+      ],
+      "notes": "Baseline only. PEEL/Press labor metrics are not yet measured, and no second launch exists, so N+1 cheaper-than-N is not claimed."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical gate for the holding-company N+1 cheaper-than-N claim.",
+    "Status remains baseline until at least two comparable launch rows exist."
+  ]
+}

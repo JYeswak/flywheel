@@ -136,10 +136,34 @@ fi
 GRADE_BODY="$TMP/grade-body.txt"
 python3 -c "open('$GRADE_BODY','w').write('continuous-orchestrator-uptime-self-sustaining-fleet\\ncapability control plane\\nself-improving capability loops\\nEXIT criterion 1\\nEXIT criterion 2\\nEXIT criterion 3\\nrevert reversible env flag rollback\\nhard stall greenfield untested\\nfeeds the next phase compounds because\\nBASELINE shipped\\nself-contained\\n')"
 OUT="$("$SCRIPT" grade --from "$GRADE_BODY" --json 2>&1 || true)"
-if echo "$OUT" | jq -e '.composite >= 0 and .composite <= 100 and .weakest_dim and .scores and .improvements' >/dev/null; then
+if echo "$OUT" | jq -e '.composite >= 0 and .composite <= 100 and .weakest_dim and .scores and .improvements and (.warnings | type == "array")' >/dev/null; then
   pass "grade: returns composite + weakest_dim + scores + improvements"
 else
   fail "grade output shape wrong"
+  echo "$OUT" >&2
+fi
+
+CALENDAR_GATE="$TMP/calendar-gate.txt"
+cat >"$CALENDAR_GATE" <<'EOF'
+GOAL: 3 consecutive runs >=24h
+EOF
+OUT="$("$SCRIPT" grade --from "$CALENDAR_GATE" --json 2>&1 || true)"
+if echo "$OUT" | jq -e '.warnings[] | select(.code == "calendar_bound_gate_without_event_bound_override")' >/dev/null; then
+  pass "grade: warns on calendar-bound gates without event-bound override"
+else
+  fail "grade missing calendar-bound warning"
+  echo "$OUT" >&2
+fi
+
+EVENT_BOUND="$TMP/event-bound-ok.txt"
+cat >"$EVENT_BOUND" <<'EOF'
+GOAL: Prove the daily loop through one event-bound override: run the live doctor and record the receipt in this session.
+EOF
+OUT="$("$SCRIPT" grade --from "$EVENT_BOUND" --json 2>&1 || true)"
+if echo "$OUT" | jq -e '(.warnings // []) | map(select(.code == "calendar_bound_gate_without_event_bound_override")) | length == 0' >/dev/null; then
+  pass "grade: event-bound override suppresses calendar-bound warning"
+else
+  fail "grade should suppress calendar-bound warning with executable event-bound override"
   echo "$OUT" >&2
 fi
 

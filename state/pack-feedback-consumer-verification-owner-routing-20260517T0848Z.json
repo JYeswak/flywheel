@@ -1,0 +1,111 @@
+{
+  "schema_version": "flywheel.pack_feedback_consumer_owner_routing.v1",
+  "generated_at": "2026-05-17T08:48:17Z",
+  "source": "flywheel:1/codex",
+  "incoming_packet": {
+    "source": "skillos:1",
+    "receipt": "/Users/josh/Developer/skillos/state/pack-feedback-consumer-verification-current-routing-20260517T0648Z.json",
+    "source_verifier_receipt": "/Users/josh/Developer/skillos/state/pack-feedback-consumer-verification-tool-20260517T0425Z-api-contract-current.json",
+    "pack_name": "api-contract-pack"
+  },
+  "routing_status": "owner_handoffs_written",
+  "consumer_repo_mutation_attempted": false,
+  "consumer_repo_mutation_reason": "Flywheel only wrote coordination receipts in the flywheel repo; consumer artifact authoring and dirty-work settlement remain owner-lane work.",
+  "ntm_observation": {
+    "generated_at": "2026-05-17T08:47:23Z",
+    "live_sessions": [
+      "alpsinsurance",
+      "clutterfreespaces",
+      "flywheel",
+      "mobile-eats",
+      "skillos",
+      "vrtx",
+      "zesttube-pack-review-3067"
+    ],
+    "agent_bench_live": false,
+    "alpsinsurance_live": true,
+    "cubcloud_aaas_live": false,
+    "mobile_eats_live": true,
+    "skillos_live": true
+  },
+  "rows": [
+    {
+      "bead_id": "skillos-8kzp",
+      "target_repo": "/Users/josh/Developer/agent-bench",
+      "verification_status": "fail",
+      "routing": "author-missing-artifacts",
+      "target_dirty": true,
+      "target_dirty_count": 62,
+      "failure_codes": [
+        "OPENAPI_SPEC_MISSING",
+        "POSTMAN_COLLECTION_MISSING",
+        "CI_OPENAPI_LINT_MISSING",
+        "CI_NEWMAN_SMOKE_MISSING",
+        "CI_SCHEMA_PROBE_MISSING",
+        "CI_DRIFT_CHECK_MISSING",
+        "FIXTURE_AUTH_DENIED_MISSING",
+        "FIXTURE_VALIDATION_ERROR_MISSING",
+        "FIXTURE_IDEMPOTENCY_CONFLICT_MISSING"
+      ],
+      "handoff_path": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260517T0848Z-from-flywheel-to-agent-bench-api-contract-pack-missing-artifacts.md",
+      "delivery_status": "handoff_written_no_live_ntm_session"
+    },
+    {
+      "bead_id": "skillos-sued",
+      "target_repo": "/Users/josh/Developer/alpsinsurance",
+      "verification_status": "pass_dirty",
+      "routing": "commit-and-reverify",
+      "target_dirty": true,
+      "target_dirty_count": 231,
+      "failure_codes": [],
+      "handoff_path": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260517T0848Z-from-flywheel-to-alpsinsurance-api-contract-pack-current-commit-and-reverify.md",
+      "delivery_status": "handoff_written_and_ntm_sent_to_alpsinsurance_pane_0"
+    },
+    {
+      "bead_id": "skillos-9knb",
+      "target_repo": "/Users/josh/Developer/cubcloud-aaas",
+      "verification_status": "fail",
+      "routing": "author-missing-artifacts",
+      "target_dirty": true,
+      "target_dirty_count": 2,
+      "failure_codes": [
+        "OPENAPI_SPEC_MISSING",
+        "POSTMAN_COLLECTION_MISSING",
+        "CI_OPENAPI_LINT_MISSING",
+        "CI_NEWMAN_SMOKE_MISSING",
+        "CI_SCHEMA_PROBE_MISSING",
+        "CI_DRIFT_CHECK_MISSING",
+        "FIXTURE_AUTH_DENIED_MISSING",
+        "FIXTURE_IDEMPOTENCY_CONFLICT_MISSING"
+      ],
+      "handoff_path": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260517T0848Z-from-flywheel-to-cubcloud-aaas-api-contract-pack-missing-artifacts.md",
+      "delivery_status": "handoff_written_no_live_ntm_session"
+    },
+    {
+      "bead_id": "skillos-7vrr",
+      "target_repo": "/Users/josh/Developer/mobile-eats",
+      "verification_status": "fail",
+      "routing": "author-missing-artifacts",
+      "target_dirty": true,
+      "target_dirty_count": 40,
+      "failure_codes": [
+        "CI_OPENAPI_LINT_MISSING",
+        "CI_NEWMAN_SMOKE_MISSING",
+        "CI_SCHEMA_PROBE_MISSING",
+        "CI_DRIFT_CHECK_MISSING",
+        "FIXTURE_VALIDATION_ERROR_MISSING"
+      ],
+      "handoff_path": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260517T0848Z-from-flywheel-to-mobile-eats-api-contract-pack-missing-artifacts.md",
+      "delivery_status": "handoff_written_and_ntm_sent_to_mobile_eats_pane_0"
+    }
+  ],
+  "callback_path": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260517T0849Z-from-flywheel-to-skillos-pack-feedback-consumer-routing-current-callback.md",
+  "callback_delivery_status": "ntm_sent_to_skillos_pane_1",
+  "next_owner": "consumer owner lanes",
+  "safe_local_work_remaining_for_blocker_path": false,
+  "no_bead_receipt": "owner-lane routing receipt only; no source/runtime mutation in flywheel",
+  "validation": [
+    "jq empty state/pack-feedback-consumer-verification-owner-routing-20260517T0848Z.json",
+    "git diff --check -- .flywheel/handoffs/20260517T0848Z-from-flywheel-to-alpsinsurance-api-contract-pack-current-commit-and-reverify.md .flywheel/handoffs/20260517T0848Z-from-flywheel-to-agent-bench-api-contract-pack-missing-artifacts.md .flywheel/handoffs/20260517T0848Z-from-flywheel-to-cubcloud-aaas-api-contract-pack-missing-artifacts.md .flywheel/handoffs/20260517T0848Z-from-flywheel-to-mobile-eats-api-contract-pack-missing-artifacts.md .flywheel/handoffs/20260517T0849Z-from-flywheel-to-skillos-pack-feedback-consumer-routing-current-callback.md state/pack-feedback-consumer-verification-owner-routing-20260517T0848Z.json"
+  ]
+}

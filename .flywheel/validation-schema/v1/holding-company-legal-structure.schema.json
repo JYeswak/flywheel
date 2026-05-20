@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-legal-structure/v1/schema.json",
+  "title": "ZestStream Holding Company Legal Structure v1",
+  "description": "Readiness ledger for legal-structure gates before sub #2 signs an owner: operating agreement, peer-coach terms, annual tier review, substrate pool, and attorney/CPA review receipts.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "clear_count",
+    "requirements",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_legal_structure.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "legal_structure"
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/requirement"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "requirement": {
+      "type": "object",
+      "required": [
+        "requirement_id",
+        "title",
+        "status",
+        "blocks_before_sub_sequence",
+        "binding_artifact_ref",
+        "attorney_review_ref",
+        "cpa_review_ref",
+        "evidence_refs"
+      ],
+      "properties": {
+        "requirement_id": {
+          "type": "string",
+          "enum": [
+            "holding_company_operating_agreement",
+            "peer_coach_equity_pathway",
+            "annual_tier_review_process",
+            "substrate_contributor_pool",
+            "subsidiary_owner_operating_agreement",
+            "intercompany_services_agreement"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "scaffolded",
+            "drafted",
+            "attorney_reviewed",
+            "cpa_reviewed",
+            "cleared",
+            "deferred"
+          ]
+        },
+        "blocks_before_sub_sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "binding_artifact_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "attorney_review_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "cpa_review_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

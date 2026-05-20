@@ -1,0 +1,37 @@
+{
+  "schema_version": "zeststream.holding_company_operating_health.v1",
+  "generated_at": "2026-05-17T08:41:00Z",
+  "gate": "operating_health",
+  "clear_count": 0,
+  "companies": [
+    {
+      "health_id": "mobile-eats-operating-health-20260517",
+      "company_slug": "mobile-eats",
+      "sequence": 1,
+      "status": "blocked",
+      "metrics_are_redacted": true,
+      "first_paying_customer_receipt": null,
+      "revenue_snapshot_ref": null,
+      "positive_gross_profit_ref": null,
+      "owner_distribution_ref": null,
+      "owner_operator_report_ref": null,
+      "operating_control_ref": null,
+      "substrate_share_receipt": "state/substrate-share/mobile-eats-20260517T0654Z.json",
+      "raw_amounts_present": false,
+      "evidence_refs": [
+        "state/zeststream-portfolio-company-registry.json",
+        "state/holding-company-pour-readiness.json",
+        "state/holding-company-owner-economics.json",
+        "state/substrate-share/mobile-eats-20260517T0654Z.json",
+        ".flywheel/scripts/mobile-eats-end-user-health-probe.sh"
+      ],
+      "notes": "Mobile Eats has product/substrate evidence, but no flywheel-readable revenue snapshot, positive gross-profit proof, owner distribution/reporting receipt, or operating-control proof. It is not counted as making money."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical operating-health gate for the holding-company success condition that portfolio companies are making money.",
+    "Clear status uses redacted refs only; raw revenue, customer, account, or balance values do not belong in this ledger.",
+    "Owner economics terms are separate; this gate proves operating money-making evidence."
+  ],
+  "next_action": "Attach first-customer, redacted revenue snapshot, positive gross-profit, owner distribution/reporting, operating-control, and substrate-share refs before marking any company revenue_clear or profit_clear."
+}

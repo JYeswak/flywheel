@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-recent-progress-claim-honesty/v1/schema.json",
+  "title": "ZestStream Holding Company Recent Progress Claim Honesty v1",
+  "description": "Summary receipt tying active recent-progress claim text to the underlying holding-company validators.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "bead_id",
+    "source_goal",
+    "claims"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_recent_progress_claim_honesty.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "bead_id": {
+      "type": "string",
+      "pattern": "^flywheel-[a-z0-9]+$"
+    },
+    "source_goal": {
+      "const": "ZestStream Holding Company Goal"
+    },
+    "claims": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "$ref": "#/$defs/claim"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "claim": {
+      "type": "object",
+      "required": [
+        "claim_id",
+        "ledger_ref",
+        "validator",
+        "claim_text",
+        "current_gate_status",
+        "claim_honesty_status"
+      ],
+      "properties": {
+        "claim_id": {
+          "type": "string",
+          "enum": [
+            "anthropic_adoption",
+            "mobile_eats_shipping",
+            "progress_velocity",
+            "skillos_forever_os_lock"
+          ]
+        },
+        "ledger_ref": {
+          "type": "string",
+          "pattern": "^state/holding-company-[a-z0-9-]+\\.json$"
+        },
+        "validator": {
+          "type": "string",
+          "pattern": "^\\.flywheel/scripts/holding-company-[a-z0-9-]+-validate\\.py$"
+        },
+        "claim_text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "current_gate_status": {
+          "type": "string",
+          "enum": [
+            "proven",
+            "partial",
+            "blocked"
+          ]
+        },
+        "claim_honesty_status": {
+          "type": "string",
+          "enum": [
+            "safe_to_use",
+            "formation_claim_blocked_in_text",
+            "public_target_blocked_in_text",
+            "structure_lock_receipt_pending_in_text"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

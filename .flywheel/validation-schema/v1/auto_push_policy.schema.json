@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.ai/skillos/auto_push_policy.schema.json",
+  "title": "skillos.auto_push_policy.v1",
+  "description": "Policy schema for .flywheel/auto-push-policy.yaml. Controls whether repo-local automation may push after commits, on cadence, only during handoff, or never without manual approval.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "push_cadence",
+    "allowed_branches_regex",
+    "forbidden_branches_regex",
+    "private_paths_blocklist",
+    "ledger_path",
+    "on_failure"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "skillos.auto_push_policy.v1"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "upstream_required": {
+      "type": "boolean",
+      "default": true
+    },
+    "local_ci_gate": {
+      "type": "boolean",
+      "default": true
+    },
+    "gitguardian_gate": {
+      "type": "boolean",
+      "default": true
+    },
+    "post_commit_fire": {
+      "type": "boolean",
+      "default": true
+    },
+    "push_cadence": {
+      "type": "string",
+      "enum": ["post-commit", "every-30min", "handoff-only", "manual"]
+    },
+    "allowed_branches_regex": {
+      "type": "string",
+      "default": "^(main|arc/.*)$",
+      "minLength": 1
+    },
+    "forbidden_branches_regex": {
+      "type": "string",
+      "default": "^(private/.*|wip/.*|release|prod|production)/.*$"
+    },
+    "private_paths_blocklist": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "ledger_path": {
+      "type": "string",
+      "default": ".flywheel/runtime/auto-push-ledger.jsonl",
+      "minLength": 1
+    },
+    "on_failure": {
+      "type": "string",
+      "enum": ["log_and_continue", "block_next_commit", "escalate_bead"]
+    }
+  }
+}

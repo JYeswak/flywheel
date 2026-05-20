@@ -1,0 +1,108 @@
+{
+  "schema_version": "flywheel.pack_feedback_consumer_owner_routing.v1",
+  "generated_at": "2026-05-17T12:04:40Z",
+  "source": "flywheel:1/codex",
+  "supersedes": [
+    "/Users/josh/Developer/flywheel/state/pack-feedback-consumer-verification-owner-routing-20260517T0848Z.json",
+    "/Users/josh/Developer/flywheel/state/pack-feedback-consumer-verification-owner-routing-20260517T1028Z.json"
+  ],
+  "incoming_packet": {
+    "source": "skillos:1",
+    "stale_packet_receipt": "/Users/josh/Developer/skillos/state/pack-feedback-consumer-verification-current-routing-20260517T0648Z.json",
+    "prior_current_routing_receipt": "/Users/josh/Developer/skillos/state/pack-feedback-consumer-verification-current-routing-20260517T0938Z.json",
+    "source_verifier_receipt": "/Users/josh/Developer/skillos/state/pack-feedback-consumer-verification-tool-20260517T1148Z-api-contract-current.json",
+    "pack_name": "api-contract-pack"
+  },
+  "routing_status": "owner_handoffs_updated_for_latest_verifier_receipt",
+  "consumer_repo_mutation_attempted": false,
+  "consumer_repo_mutation_reason": "Flywheel only wrote coordination receipts in the flywheel repo; dirty-work settlement and verifier reruns remain owner-lane work.",
+  "stale_route_correction": {
+    "current_receipt_generated_at": "2026-05-17T11:48:07Z",
+    "current_counts": {
+      "pass_dirty": 4
+    },
+    "handling": "supersede stale missing-artifact and ALPS RLS-policy routes; all four rows now have passing doctor gates and empty failure codes, but remain unsafe to supersede until target dirty work is settled"
+  },
+  "ntm_observation": {
+    "generated_at": "2026-05-17T12:04:40Z",
+    "live_sessions": [
+      "__nonexistent_session_12345__",
+      "alpsinsurance",
+      "clutterfreespaces",
+      "flywheel",
+      "mobile-eats",
+      "skillos",
+      "test",
+      "vrtx",
+      "zesttube-pack-review-3067"
+    ],
+    "agent_bench_live": false,
+    "alpsinsurance_live": true,
+    "cubcloud_aaas_live": false,
+    "mobile_eats_live": true,
+    "skillos_live": true
+  },
+  "rows": [
+    {
+      "bead_id": "skillos-sued",
+      "target_repo": "/Users/josh/Developer/alpsinsurance",
+      "target_head": "74dc5ace2e8eb16a3b1b2adc8338c47afcc84e99",
+      "verification_status": "pass_dirty",
+      "routing": "commit-and-reverify",
+      "target_dirty": true,
+      "target_dirty_count": 1,
+      "failure_codes": [],
+      "doctor_status": "pass",
+      "handoff_path": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260517T1204Z-from-flywheel-to-alpsinsurance-api-contract-pack-pass-dirty.md",
+      "delivery_status": "handoff_written_and_ntm_sent_to_alpsinsurance_pane_0"
+    },
+    {
+      "bead_id": "skillos-7vrr",
+      "target_repo": "/Users/josh/Developer/mobile-eats",
+      "target_head": "2c1c99a257544d31644ab85e86c1c1d575b123fb",
+      "verification_status": "pass_dirty",
+      "routing": "commit-and-reverify",
+      "target_dirty": true,
+      "target_dirty_count": 43,
+      "failure_codes": [],
+      "doctor_status": "pass",
+      "handoff_path": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260517T1204Z-from-flywheel-to-mobile-eats-api-contract-pack-pass-dirty.md",
+      "delivery_status": "handoff_written_and_ntm_sent_to_mobile_eats_pane_0"
+    },
+    {
+      "bead_id": "skillos-8kzp",
+      "target_repo": "/Users/josh/Developer/agent-bench",
+      "target_head": "ec0788937afc6c69c33e0a64255e8f56ee65c88b",
+      "verification_status": "pass_dirty",
+      "routing": "commit-and-reverify",
+      "target_dirty": true,
+      "target_dirty_count": 66,
+      "failure_codes": [],
+      "doctor_status": "pass",
+      "handoff_path": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260517T1204Z-from-flywheel-to-agent-bench-api-contract-pack-pass-dirty.md",
+      "delivery_status": "handoff_written_no_live_ntm_session"
+    },
+    {
+      "bead_id": "skillos-9knb",
+      "target_repo": "/Users/josh/Developer/cubcloud-aaas",
+      "target_head": "b0825cc98943ee17f03468cfc657b78d487f338c",
+      "verification_status": "pass_dirty",
+      "routing": "commit-and-reverify",
+      "target_dirty": true,
+      "target_dirty_count": 7,
+      "failure_codes": [],
+      "doctor_status": "pass",
+      "handoff_path": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260517T1204Z-from-flywheel-to-cubcloud-aaas-api-contract-pack-pass-dirty.md",
+      "delivery_status": "handoff_written_no_live_ntm_session"
+    }
+  ],
+  "callback_path": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260517T1205Z-from-flywheel-to-skillos-pack-feedback-consumer-routing-1148Z-callback.md",
+  "callback_delivery_status": "ntm_sent_to_skillos_pane_1",
+  "next_owner": "consumer owner lanes",
+  "safe_local_work_remaining_for_blocker_path": false,
+  "no_bead_receipt": "owner-lane routing receipt only; no consumer source/runtime mutation in flywheel",
+  "validation": [
+    "jq empty state/pack-feedback-consumer-verification-owner-routing-20260517T1204Z.json",
+    "git diff --check -- .flywheel/handoffs/20260517T1204Z-from-flywheel-to-agent-bench-api-contract-pack-pass-dirty.md .flywheel/handoffs/20260517T1204Z-from-flywheel-to-alpsinsurance-api-contract-pack-pass-dirty.md .flywheel/handoffs/20260517T1204Z-from-flywheel-to-cubcloud-aaas-api-contract-pack-pass-dirty.md .flywheel/handoffs/20260517T1204Z-from-flywheel-to-mobile-eats-api-contract-pack-pass-dirty.md .flywheel/handoffs/20260517T1205Z-from-flywheel-to-skillos-pack-feedback-consumer-routing-1148Z-callback.md state/pack-feedback-consumer-verification-owner-routing-20260517T1204Z.json"
+  ]
+}

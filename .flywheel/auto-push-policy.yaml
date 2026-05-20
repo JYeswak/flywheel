@@ -1,0 +1,41 @@
+schema_version: skillos.auto_push_policy.v1
+enabled: true
+upstream_required: true
+local_ci_gate: true
+gitguardian_gate: true
+supabase_mirror_gate: true
+supabase_rls_gate: true
+post_commit_fire: true
+push_cadence: post-commit
+allowed_branches_regex: "^(main|master|review/.*|arc/.*)$"
+forbidden_branches_regex: "^(private/.*|wip/.*|release/.*|prod/.*|production/.*)$"
+private_paths_blocklist:
+  - ".env"
+  - ".env.*"
+  - "state/secrets/**"
+known_dirty_paths_allow_list:
+  - ".flywheel/MISSION.md"
+  - ".flywheel/runtime/auto-push-ledger.jsonl"
+  # State ledgers — accrete every tick, legitimate substrate
+  - ".flywheel/state/**"
+  - ".flywheel/runtime/**"
+  - ".flywheel/evidence/**"
+  - ".flywheel/peer-orch-recovery-contract.jsonl"
+  - ".flywheel/dispatch-log.jsonl"
+  # Cross-orch handoffs — arrive any time, can't pre-stage
+  - ".flywheel/handoffs/**"
+  # Worker dispatch task files — created/touched per dispatch
+  - ".flywheel/dispatches/**"
+  # Josh-requests archive — appended by capture system
+  - ".flywheel/josh-requests-archive/**"
+  # Beads JSONL — auto-staged via br-stage-wrapper but may still appear dirty briefly
+  - ".beads/issues.jsonl"
+  # Cadence ledgers and blockers
+  - ".flywheel/state/blockers/**"
+  - ".flywheel/audits/**"
+  - ".flywheel/rules/MANIFEST.json"
+  - ".ntm/logs/**"
+auto_sweep_on_dirty_tree: true
+auto_sweep_commit_message: "chore(state): auto-sweep accreting substrate paths [auto-push]"
+ledger_path: ".flywheel/runtime/auto-push-ledger.jsonl"
+on_failure: "block_next_commit"

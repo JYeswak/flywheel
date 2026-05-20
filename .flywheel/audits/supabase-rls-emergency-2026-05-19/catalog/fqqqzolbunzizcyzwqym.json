@@ -1,0 +1,247 @@
+[
+  {
+    "table_schema": "public",
+    "table_name": "alps_audit_log",
+    "rls_enabled": true,
+    "row_count_estimate": 5747,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_chat_messages",
+    "rls_enabled": true,
+    "row_count_estimate": 778,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_chat_sessions",
+    "rls_enabled": true,
+    "row_count_estimate": 355,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_config_versions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_connectors",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_contact_analysis",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_contact_cache",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "email",
+      "phone"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_deal_analysis",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_duplicate_clusters",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_embedding_queue",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_field_mappings",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_flag_timeline",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_hubspot_analysis_runs",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_integration_analysis",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_knowledge_documents",
+    "rls_enabled": true,
+    "row_count_estimate": 86,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_lookup_rows",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_lookup_tables",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_merge_audit",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_notification_configs",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_platform_users",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "email"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_red_flags",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_sync_batches",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_sync_configs",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_sync_history",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_sync_queue",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_sync_step_log",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_ticket_analysis",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_transforms",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "alps_workflow_analysis",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "organizations",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  }
+]

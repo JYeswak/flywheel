@@ -1,0 +1,79 @@
+{
+  "schema_version": "zeststream.holding_company_shared_stack.v1",
+  "generated_at": "2026-05-17T07:44:00Z",
+  "gate": "nurture_shared_stack",
+  "required_components": [
+    "skillos",
+    "flywheel",
+    "jsm",
+    "zeststream_packages",
+    "brand_voice"
+  ],
+  "clear_count": 0,
+  "companies": [
+    {
+      "company_slug": "mobile-eats",
+      "status": "blocked",
+      "components": [
+        {
+          "component": "skillos",
+          "status": "partial",
+          "receipt_ref": "/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json",
+          "evidence_refs": [
+            "/Users/josh/Developer/skillos/state/canonical-gates-status-20260514T2345Z.json"
+          ],
+          "notes": "SkillOS package-adoption receipts exist, but no formed-company operating receipt ties Mobile Eats to the full NURTURE stack."
+        },
+        {
+          "component": "flywheel",
+          "status": "present",
+          "receipt_ref": "/Users/josh/Developer/flywheel",
+          "evidence_refs": [
+            "/Users/josh/Developer/flywheel/state/zeststream-portfolio-company-registry.json",
+            "/Users/josh/Developer/flywheel/state/substrate-share/mobile-eats-20260517T0654Z.json"
+          ],
+          "notes": "Flywheel holds the portfolio registry, gate ledgers, and substrate-share receipt."
+        },
+        {
+          "component": "jsm",
+          "status": "missing",
+          "receipt_ref": null,
+          "evidence_refs": [],
+          "notes": "No JSM/skill-management adoption receipt for Mobile Eats was located."
+        },
+        {
+          "component": "zeststream_packages",
+          "status": "present",
+          "receipt_ref": "state/substrate-share/mobile-eats-20260517T0654Z.json",
+          "evidence_refs": [
+            "state/substrate-share/mobile-eats-20260517T0654Z.json",
+            "/Users/josh/Developer/mobile-eats/next-app/package.json"
+          ],
+          "notes": "Substrate-share receipt proves 27 total @zeststream/* package adoptions."
+        },
+        {
+          "component": "brand_voice",
+          "status": "partial",
+          "receipt_ref": "/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml",
+          "evidence_refs": [
+            "/Users/josh/.claude/skills/zeststream-brand-voice/brands/zeststream/voice.yaml",
+            "state/holding-company-anti-pitch-voice.json"
+          ],
+          "notes": "Brand voice skill exists, but the anti-pitch ledger says the public holding-company story is not yet clear."
+        }
+      ],
+      "evidence_refs": [
+        "state/zeststream-portfolio-company-registry.json",
+        "state/substrate-share/mobile-eats-20260517T0654Z.json",
+        "state/holding-company-anti-pitch-voice.json"
+      ],
+      "notes": "Mobile Eats has package and flywheel substrate proof, but no full shared-stack receipt because JSM is missing and SkillOS/brand voice are partial."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical NURTURE shared-stack gate for the ZestStream holding-company goal.",
+    "A company clears only when SkillOS, flywheel, JSM, @zeststream/* packages, and brand voice components are all present with receipt refs.",
+    "This gate is stricter than the substrate-share package receipt."
+  ],
+  "next_action": "Add durable JSM, full SkillOS operating, package, flywheel, and brand-voice receipts before marking any company shared_stack_clear."
+}

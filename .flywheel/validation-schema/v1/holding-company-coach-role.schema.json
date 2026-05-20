@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-coach-role/v1/schema.json",
+  "title": "ZestStream Holding Company Coach Role v1",
+  "description": "Ledger for post-launch coach role and majority-stake retention after operating-control handoff.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "required_min_holding_stake_percent",
+    "clear_count",
+    "roles",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_coach_role.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "post_launch_coach_role"
+    },
+    "required_min_holding_stake_percent": {
+      "const": 51
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "roles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/role"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "role": {
+      "type": "object",
+      "required": [
+        "role_id",
+        "company_slug",
+        "status",
+        "owner_operator_ref",
+        "operating_control_handoff_ref",
+        "coach_role_agreement_ref",
+        "majority_stake_ref",
+        "holding_stake_percent",
+        "owner_operating_control_ack_ref",
+        "evidence_refs"
+      ],
+      "properties": {
+        "role_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "company_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "blocked",
+            "coach_role_clear",
+            "active",
+            "deferred"
+          ]
+        },
+        "owner_operator_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "operating_control_handoff_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "coach_role_agreement_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "majority_stake_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "holding_stake_percent": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "owner_operating_control_ack_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

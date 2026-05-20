@@ -673,3 +673,8 @@ elif [[ "$QUIET" -eq 0 ]]; then
   jq -r '"health=\(.mission_lock_readiness_health_score) schema=\(.schema_validator_verdict) scaffold=\(.scaffold_validator_verdict) lens=\(.lens_merge_consistent)"' <<<"$payload"
 fi
 [[ "$(jq -r '.mission_lock_readiness_health_score == 1' <<<"$payload")" == true ]]
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

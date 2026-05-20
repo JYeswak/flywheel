@@ -1,0 +1,20 @@
+{
+  "schema_version": "branch_protection_reapply_completion_audit.v1",
+  "ts": "2026-05-20T07:38:33Z",
+  "dispatch": ".flywheel/dispatches/flywheel-bp-re-apply-post-fhbf9.md",
+  "authoritative_dry_run": ".flywheel/audits/branch-protection-fleet-dry-run-fhbf9-corrected-20260520T072521Z.md",
+  "receipt_dir": ".flywheel/audits/branch-protection-re-apply-receipts-20260520T073552Z",
+  "deliverables": {
+    "apply_all_5": true,
+    "per_repo_receipts": true,
+    "smoke_verify": true,
+    "pr_probe": true,
+    "no_required_check_block_on_open_flywheel_pr": true,
+    "reviews_null": true,
+    "cfs_applied_authoritative_count": 11
+  },
+  "notes": [
+    "Dispatch prose says CFS 19 checks, but the named fhbf9-corrected authoritative dry-run and live applied envelope contain 11 CFS required checks.",
+    "Fleet wrapper was corrected before apply to use live defaultBranchRef.name; flywheel protection applied to master because JYeswak/flywheel has no main branch."
+  ]
+}

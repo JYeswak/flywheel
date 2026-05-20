@@ -95,3 +95,8 @@ row="$(jq -nc --arg ts "$TS" --argjson count "$count" --argjson novel "$had_nove
   '{ts:$ts,wave:"W1",fired_emitter:true,candidates_emitted:$count,had_novel_trauma:$novel,notes:(if $novel then "novel_trauma_emitted" else "no_novel_trauma_this_hour" end)}')"
 echo "$row" >>"$LEDGER_PATH"
 echo "$row"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

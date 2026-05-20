@@ -1,0 +1,382 @@
+[
+  {
+    "dimensions": {
+      "agent_ease_of_use": {
+        "final": 875,
+        "initial": 750
+      },
+      "agent_ergonomics": {
+        "final": 850,
+        "initial": 725
+      },
+      "agent_intuitiveness": {
+        "final": 820,
+        "initial": 770
+      },
+      "composability": {
+        "final": 825,
+        "initial": 775
+      },
+      "determinism_and_reproducibility": {
+        "final": 850,
+        "initial": 800
+      },
+      "error_pedagogy": {
+        "final": 780,
+        "initial": 730
+      },
+      "intent_inference": {
+        "final": 725,
+        "initial": 675
+      },
+      "output_parseability": {
+        "final": 875,
+        "initial": 750
+      },
+      "safety_with_recovery": {
+        "final": 1000,
+        "initial": 950
+      },
+      "self_documentation": {
+        "final": 875,
+        "initial": 750
+      }
+    },
+    "evidence": {
+      "bad_invocation_rc": 64,
+      "capabilities_json": true,
+      "capabilities_rc": 0,
+      "deterministic_json_probe": true,
+      "help_rc": 0,
+      "json_probe_rc": 0,
+      "json_probe_valid_json": true,
+      "robot_docs_rc": 0,
+      "useful_error": true
+    },
+    "final_score": 847.5,
+    "initial_score": 767.5,
+    "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+    "schema_version": "agent-ergonomics.scorecard/v1",
+    "surface": {
+      "capabilities_args": "capabilities --json",
+      "class": "CLI",
+      "invoke_count_30d": 118,
+      "json_probe_args": "doctor --repo . --json",
+      "path": "bin/flywheel",
+      "robot_docs_args": "robot-docs guide"
+    },
+    "target": "/Users/josh/Developer/flywheel/bin/flywheel",
+    "transcripts": {
+      "bad_invocation_stderr": "ERROR: unknown command: --jsno\nusage:\n  flywheel preflight [args...]\n  flywheel init --repo PATH --json\n  flywheel doctor --repo PATH --json\n  flywheel health --json\n  flywheel repair --scope reduced --repo PATH --dry-run --json\n  flywheel validate repo --repo PATH --json\n  flywheel validate receipt --repo PATH --file PATH --json\n  flywheel audit --repo PATH --json\n  flywheel why ID --json\n  flywheel tick --repo PATH --dry-run --json\n  flywheel dispatch --repo PATH --simulate --json\n  flywheel validate-receipt --repo PATH --file PATH --json\n  flywheel inspect --repo PATH --json\n  flywheel capabilities --json\n  flywheel robot-docs guide\n  flywheel quickstart --json\n  flywheel help TOPIC --json\n  flywheel completion bash|zsh\n  flywheel --examples\n  flywheel --info\n\nPlanned commands that are not public-release-ready yet:\n  full-mode harness dispatch through NTM/Agent Mail\n\nAgent automation:\n  Start with: flywheel capabilities --json\n  Diagnose:   flywheel doctor --repo \"$PWD\" --json\n  Pre",
+      "capabilities": "{\"schema_version\":\"flywheel.capabilities.v0\",\"command\":\"capabilities\",\"version\":\"flywheel-public-spine/v0\",\"contract_version\":\"1\",\"features\":[\"json_output\",\"reduced_mode\",\"doctor\",\"dry_run_repair\",\"receipt_validation\",\"robot_docs\",\"completion\"],\"commands\":{\"doctor\":{\"command\":\"flywheel doctor --repo PATH --json\",\"read_only\":true},\"repair\":{\"command\":\"flywheel repair --scope reduced --repo PATH --dry-run --json\",\"read_only\":false,\"safe_preview\":true},\"tick\":{\"command\":\"flywheel tick --repo PATH --dry-run --json\",\"read_only\":true},\"dispatch\":{\"command\":\"flywheel dispatch --repo PATH --simulate --json\",\"read_only\":false,\"simulated\":true},\"validate_receipt\":{\"command\":\"flywheel validate-receipt --repo PATH --file PATH --json\",\"read_only\":true},\"robot_docs\":{\"command\":\"flywheel robot-docs guide\",\"read_only\":true}},\"exit_codes\":{\"0\":\"success\",\"30\":\"repo state missing or invalid\",\"64\":\"usage error\"},\"env_vars\":{}}\n",
+      "help": "usage:\n  flywheel preflight [args...]\n  flywheel init --repo PATH --json\n  flywheel doctor --repo PATH --json\n  flywheel health --json\n  flywheel repair --scope reduced --repo PATH --dry-run --json\n  flywheel validate repo --repo PATH --json\n  flywheel validate receipt --repo PATH --file PATH --json\n  flywheel audit --repo PATH --json\n  flywheel why ID --json\n  flywheel tick --repo PATH --dry-run --json\n  flywheel dispatch --repo PATH --simulate --json\n  flywheel validate-receipt --repo PATH --file PATH --json\n  flywheel inspect --repo PATH --json\n  flywheel capabilities --json\n  flywheel robot-docs guide\n  flywheel quickstart --json\n  flywheel help TOPIC --json\n  flywheel completion bash|zsh\n  flywheel --examples\n  flywheel --info\n\nPlanned commands that are not public-release-ready yet:\n  full-mode harness dispatch through NTM/Agent Mail\n\nAgent automation:\n  Start with: flywheel capabilities --json\n  Diagnose:   flywheel doctor --repo \"$PWD\" --json\n  Preview:    flywheel repair --scope reduced --repo \"$PWD\" --dry-run --json\n  Exit codes: 0 success, 30 repo state missing/invalid, 64 usage error\n",
+      "robot_docs": "Flywheel robot guide:\n1. Discover: flywheel capabilities --json\n2. Diagnose: flywheel doctor --repo \"$PWD\" --json\n3. Preview repair: flywheel repair --scope reduced --repo \"$PWD\" --dry-run --json\n4. Preview work: flywheel tick --repo \"$PWD\" --dry-run --json\n5. Simulate dispatch: flywheel dispatch --repo \"$PWD\" --simulate --json\n6. Validate receipt: flywheel validate-receipt --repo \"$PWD\" --file .flywheel/last_closeout_receipt.json --json\nUse stdout as data; usage errors and diagnostics go to stderr.\n"
+    },
+    "uplift": 80.0,
+    "workspace": "bin/flywheel__agent_ergonomics_audit"
+  },
+  {
+    "dimensions": {
+      "agent_ease_of_use": {
+        "final": 875,
+        "initial": 750
+      },
+      "agent_ergonomics": {
+        "final": 850,
+        "initial": 725
+      },
+      "agent_intuitiveness": {
+        "final": 820,
+        "initial": 770
+      },
+      "composability": {
+        "final": 825,
+        "initial": 775
+      },
+      "determinism_and_reproducibility": {
+        "final": 650,
+        "initial": 600
+      },
+      "error_pedagogy": {
+        "final": 780,
+        "initial": 730
+      },
+      "intent_inference": {
+        "final": 725,
+        "initial": 675
+      },
+      "output_parseability": {
+        "final": 875,
+        "initial": 750
+      },
+      "safety_with_recovery": {
+        "final": 1000,
+        "initial": 950
+      },
+      "self_documentation": {
+        "final": 875,
+        "initial": 750
+      }
+    },
+    "evidence": {
+      "bad_invocation_rc": 2,
+      "capabilities_json": true,
+      "capabilities_rc": 0,
+      "deterministic_json_probe": false,
+      "help_rc": 0,
+      "json_probe_rc": 0,
+      "json_probe_valid_json": true,
+      "robot_docs_rc": 0,
+      "useful_error": true
+    },
+    "final_score": 827.5,
+    "initial_score": 747.5,
+    "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+    "schema_version": "agent-ergonomics.scorecard/v1",
+    "surface": {
+      "capabilities_args": "capabilities --json",
+      "class": "doctor",
+      "invoke_count_30d": 68,
+      "json_probe_args": "--json",
+      "path": ".flywheel/scripts/storage-probe.sh",
+      "robot_docs_args": "robot-docs"
+    },
+    "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/storage-probe.sh",
+    "transcripts": {
+      "bad_invocation_stderr": "ERROR: unknown argument: --jsno\n",
+      "capabilities": "{\"schema_version\":\"storage-probe.capabilities.v1\",\"command\":\"capabilities\",\"version\":\"storage-probe.v1\",\"contract_version\":\"1\",\"features\":[\"json_output\",\"fixture_mode\",\"history_append_opt_in\",\"thresholds\",\"robot_docs\"],\"commands\":{\"probe\":{\"command\":\"storage-probe.sh --json\",\"read_only\":true},\"fixture\":{\"command\":\"storage-probe.sh --fixture PATH --json\",\"read_only\":true},\"record_history\":{\"command\":\"storage-probe.sh --record-history --json\",\"read_only\":false},\"schema\":{\"command\":\"storage-probe.sh --schema\",\"read_only\":true}},\"exit_codes\":{\"0\":\"success\",\"1\":\"dependency/probe failure\",\"2\":\"usage error\"},\"env_vars\":{\"FLYWHEEL_STORAGE_HISTORY\":\"/Users/josh/.local/state/flywheel/storage-history.jsonl\",\"FLYWHEEL_STORAGE_MIN_FREE_PCT\":\"minimum free percentage before fail\",\"FLYWHEEL_STORAGE_FIRE_FREE_PCT\":\"fire threshold for notification\"}}\n",
+      "help": "usage: storage-probe.sh [SUBCOMMAND] [OPTIONS]\n\nBackward-compatible run mode: default invocation routes to the original\ntop-level logic (now exposed as `cmd_run`).\n\nCanonical CLI surfaces:\n  doctor [--json]          probe substrate health\n  health [--json]          last-run status\n  repair --scope <s>       repair misconfigured state\n                            Default: --dry-run; mutate with --apply --idempotency-key KEY\n  validate <subject> [...] validate per-subject contract (TODO: define subjects)\n  audit [--json]           recent run history\n  why <id>                 explain provenance for a given id (TODO: id semantics)\n  quickstart [--json]      operator orientation\n  help <topic>             topic help (run | doctor | health | repair | validate)\n  completion <shell>       emit bash or zsh completion\n\nIntrospection:\n  --info --json            version, paths, env vars, dependencies, sha256\n  --schema [<surface>]     JSON Schema for output envelopes\n  --examples --json        curated workflow examples\n  --help / -h              this help\n",
+      "robot_docs": "Storage probe robot guide:\n1. Discover: storage-probe.sh capabilities --json\n2. Read current state: storage-probe.sh --json\n3. Test with fixture: storage-probe.sh --fixture PATH --json\n4. Append history only when requested: storage-probe.sh --record-history --json\n5. Treat stdout as JSON data; diagnostics and usage errors go to stderr.\n"
+    },
+    "uplift": 80.0,
+    "workspace": ".flywheel/scripts/storage-probe.sh__agent_ergonomics_audit"
+  },
+  {
+    "dimensions": {
+      "agent_ease_of_use": {
+        "final": 875,
+        "initial": 750
+      },
+      "agent_ergonomics": {
+        "final": 850,
+        "initial": 725
+      },
+      "agent_intuitiveness": {
+        "final": 820,
+        "initial": 770
+      },
+      "composability": {
+        "final": 825,
+        "initial": 775
+      },
+      "determinism_and_reproducibility": {
+        "final": 850,
+        "initial": 800
+      },
+      "error_pedagogy": {
+        "final": 780,
+        "initial": 730
+      },
+      "intent_inference": {
+        "final": 725,
+        "initial": 675
+      },
+      "output_parseability": {
+        "final": 875,
+        "initial": 750
+      },
+      "safety_with_recovery": {
+        "final": 1000,
+        "initial": 950
+      },
+      "self_documentation": {
+        "final": 875,
+        "initial": 750
+      }
+    },
+    "evidence": {
+      "bad_invocation_rc": 2,
+      "capabilities_json": true,
+      "capabilities_rc": 0,
+      "deterministic_json_probe": true,
+      "help_rc": 0,
+      "json_probe_rc": 0,
+      "json_probe_valid_json": true,
+      "robot_docs_rc": 0,
+      "useful_error": true
+    },
+    "final_score": 847.5,
+    "initial_score": 767.5,
+    "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+    "schema_version": "agent-ergonomics.scorecard/v1",
+    "surface": {
+      "capabilities_args": "--capabilities --json",
+      "class": "CLI",
+      "invoke_count_30d": 56,
+      "json_probe_args": "--schema",
+      "path": ".flywheel/scripts/peer-orch-blocker-watch.sh",
+      "robot_docs_args": "--help"
+    },
+    "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/peer-orch-blocker-watch.sh",
+    "transcripts": {
+      "bad_invocation_stderr": "ERR: unknown argument: --jsno\nUsage: peer-orch-blocker-watch.sh [--doctor|--validate|--schema|--examples|--info|--capabilities] [--json] [--session NAME] [--dry-run] [--apply]\nNative sources: ntm swarm status --json; ntm rebalance <session> --dry-run --format json.\n\nAgent automation:\n  peer-orch-blocker-watch.sh --capabilities --json\n  peer-orch-blocker-watch.sh --doctor --json --session flywheel --dry-run\n  peer-orch-blocker-watch.sh --validate --json --ledger .flywheel/state/cross-orch-coordination.jsonl\n  Exit codes: 0 success, 2 usage error, 127 ntm executable missing.\n",
+      "capabilities": "{\"schema_version\":\"peer-orch-blocker-watch/v2\",\"command\":\"capabilities\",\"contract_version\":\"1\",\"features\":[\"json_output\",\"doctor\",\"validate\",\"dry_run_default\",\"ledger_mode\",\"native_ntm_probe\"],\"commands\":{\"doctor\":{\"command\":\"peer-orch-blocker-watch.sh --doctor --json --session flywheel --dry-run\",\"read_only\":true},\"validate\":{\"command\":\"peer-orch-blocker-watch.sh --validate --json --ledger PATH\",\"read_only\":true},\"schema\":{\"command\":\"peer-orch-blocker-watch.sh --schema\",\"read_only\":true},\"examples\":{\"command\":\"peer-orch-blocker-watch.sh --examples\",\"read_only\":true}},\"exit_codes\":{\"0\":\"success\",\"2\":\"usage error\",\"127\":\"ntm executable missing\"},\"env_vars\":{\"PEER_ORCH_BLOCKER_WATCH_NTM_BIN\":\"override ntm binary\",\"PEER_ORCH_BLOCKER_WATCH_SESSION\":\"default session\",\"FLYWHEEL_PEER_ORCH_BLOCKER_THRESHOLD_SECONDS\":\"stale blocker threshold\"}}\n",
+      "help": "Usage: peer-orch-blocker-watch.sh [--doctor|--validate|--schema|--examples|--info|--capabilities] [--json] [--session NAME] [--dry-run] [--apply]\nNative sources: ntm swarm status --json; ntm rebalance <session> --dry-run --format json.\n\nAgent automation:\n  peer-orch-blocker-watch.sh --capabilities --json\n  peer-orch-blocker-watch.sh --doctor --json --session flywheel --dry-run\n  peer-orch-blocker-watch.sh --validate --json --ledger .flywheel/state/cross-orch-coordination.jsonl\n  Exit codes: 0 success, 2 usage error, 127 ntm executable missing.\n",
+      "robot_docs": "Usage: peer-orch-blocker-watch.sh [--doctor|--validate|--schema|--examples|--info|--capabilities] [--json] [--session NAME] [--dry-run] [--apply]\nNative sources: ntm swarm status --json; ntm rebalance <session> --dry-run --format json.\n\nAgent automation:\n  peer-orch-blocker-watch.sh --capabilities --json\n  peer-orch-blocker-watch.sh --doctor --json --session flywheel --dry-run\n  peer-orch-blocker-watch.sh --validate --json --ledger .flywheel/state/cross-orch-coordination.jsonl\n  Exit codes: 0 success, 2 usage error, 127 ntm executable missing.\n"
+    },
+    "uplift": 80.0,
+    "workspace": ".flywheel/scripts/peer-orch-blocker-watch.sh__agent_ergonomics_audit"
+  },
+  {
+    "dimensions": {
+      "agent_ease_of_use": {
+        "final": 875,
+        "initial": 750
+      },
+      "agent_ergonomics": {
+        "final": 850,
+        "initial": 725
+      },
+      "agent_intuitiveness": {
+        "final": 820,
+        "initial": 770
+      },
+      "composability": {
+        "final": 825,
+        "initial": 775
+      },
+      "determinism_and_reproducibility": {
+        "final": 850,
+        "initial": 800
+      },
+      "error_pedagogy": {
+        "final": 780,
+        "initial": 730
+      },
+      "intent_inference": {
+        "final": 725,
+        "initial": 675
+      },
+      "output_parseability": {
+        "final": 875,
+        "initial": 750
+      },
+      "safety_with_recovery": {
+        "final": 1000,
+        "initial": 950
+      },
+      "self_documentation": {
+        "final": 875,
+        "initial": 750
+      }
+    },
+    "evidence": {
+      "bad_invocation_rc": 2,
+      "capabilities_json": true,
+      "capabilities_rc": 0,
+      "deterministic_json_probe": true,
+      "help_rc": 0,
+      "json_probe_rc": 0,
+      "json_probe_valid_json": true,
+      "robot_docs_rc": 0,
+      "useful_error": true
+    },
+    "final_score": 847.5,
+    "initial_score": 767.5,
+    "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+    "schema_version": "agent-ergonomics.scorecard/v1",
+    "surface": {
+      "capabilities_args": "capabilities --json",
+      "class": "doctor",
+      "invoke_count_30d": 56,
+      "json_probe_args": "agents --json",
+      "path": ".flywheel/scripts/ntm-wave2-native-probes.sh",
+      "robot_docs_args": "robot-docs"
+    },
+    "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/ntm-wave2-native-probes.sh",
+    "transcripts": {
+      "bad_invocation_stderr": "unknown surface: --jsno\nusage: ntm-wave2-native-probes.sh <surface> [--json]\nsurfaces: agents analytics cass config extract get-all-session-text memory resume\n\nAgent automation:\n  ntm-wave2-native-probes.sh capabilities --json\n  ntm-wave2-native-probes.sh agents --json\n  ntm-wave2-native-probes.sh robot-docs\n  Exit codes: 0 success, 2 usage error. Missing native ntm data is returned as null fields, not a hard failure.\n",
+      "capabilities": "{\"schema_version\":\"ntm-wave2-native-probes/v1\",\"command\":\"capabilities\",\"contract_version\":\"1\",\"features\":[\"json_output\",\"native_probe_bundle\",\"null_on_native_failure\",\"robot_docs\"],\"surfaces\":[\"agents\",\"analytics\",\"cass\",\"config\",\"extract\",\"get-all-session-text\",\"memory\",\"resume\"],\"commands\":{\"agents\":{\"command\":\"ntm-wave2-native-probes.sh agents --json\",\"read_only\":true},\"analytics\":{\"command\":\"ntm-wave2-native-probes.sh analytics --json\",\"read_only\":true},\"robot_docs\":{\"command\":\"ntm-wave2-native-probes.sh robot-docs\",\"read_only\":true}},\"exit_codes\":{\"0\":\"success\",\"2\":\"usage error\"},\"env_vars\":{\"NTM_BIN\":\"override ntm binary\",\"NTM_WAVE2_SESSION\":\"session for session-scoped probes\",\"NTM_WAVE2_TASK_TITLE\":\"task title for recommendation probes\"}}\n",
+      "help": "usage: ntm-wave2-native-probes.sh [SUBCOMMAND] [OPTIONS]\n\nBackward-compatible run mode: default invocation routes to the original\ntop-level logic (now exposed as `cmd_run`).\n\nCanonical CLI surfaces:\n  doctor [--json]          probe substrate health\n  health [--json]          last-run status\n  repair --scope <s>       repair misconfigured state\n                            Default: --dry-run; mutate with --apply --idempotency-key KEY\n  validate <subject> [...] validate per-subject contract (TODO: define subjects)\n  audit [--json]           recent run history\n  why <id>                 explain provenance for a given id (TODO: id semantics)\n  quickstart [--json]      operator orientation\n  help <topic>             topic help (run | doctor | health | repair | validate)\n  completion <shell>       emit bash or zsh completion\n\nIntrospection:\n  --info --json            version, paths, env vars, dependencies, sha256\n  --schema [<surface>]     JSON Schema for output envelopes\n  --examples --json        curated workflow examples\n  --help / -h              this help\n",
+      "robot_docs": "null status=null\n"
+    },
+    "uplift": 80.0,
+    "workspace": ".flywheel/scripts/ntm-wave2-native-probes.sh__agent_ergonomics_audit"
+  },
+  {
+    "dimensions": {
+      "agent_ease_of_use": {
+        "final": 875,
+        "initial": 750
+      },
+      "agent_ergonomics": {
+        "final": 850,
+        "initial": 725
+      },
+      "agent_intuitiveness": {
+        "final": 820,
+        "initial": 770
+      },
+      "composability": {
+        "final": 825,
+        "initial": 775
+      },
+      "determinism_and_reproducibility": {
+        "final": 650,
+        "initial": 600
+      },
+      "error_pedagogy": {
+        "final": 780,
+        "initial": 730
+      },
+      "intent_inference": {
+        "final": 725,
+        "initial": 675
+      },
+      "output_parseability": {
+        "final": 875,
+        "initial": 750
+      },
+      "safety_with_recovery": {
+        "final": 1000,
+        "initial": 950
+      },
+      "self_documentation": {
+        "final": 875,
+        "initial": 750
+      }
+    },
+    "evidence": {
+      "bad_invocation_rc": 2,
+      "capabilities_json": true,
+      "capabilities_rc": 0,
+      "deterministic_json_probe": false,
+      "help_rc": 0,
+      "json_probe_rc": 0,
+      "json_probe_valid_json": true,
+      "robot_docs_rc": 0,
+      "useful_error": true
+    },
+    "final_score": 827.5,
+    "initial_score": 747.5,
+    "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+    "schema_version": "agent-ergonomics.scorecard/v1",
+    "surface": {
+      "capabilities_args": "capabilities --json",
+      "class": "CLI",
+      "invoke_count_30d": 48,
+      "json_probe_args": "doctor --json",
+      "path": ".flywheel/scripts/ntm-spawn-templates-versioned.py",
+      "robot_docs_args": "robot-docs --json"
+    },
+    "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/ntm-spawn-templates-versioned.py",
+    "transcripts": {
+      "bad_invocation_stderr": "usage: ntm-spawn-templates-versioned.py [-h] [--json] [--doctor] [--health]\n                                        [--schema] [--examples] [--info]\n                                        [--template-dir TEMPLATE_DIR]\n                                        [--registry REGISTRY]\n                                        [--ntm-bin NTM_BIN] [--dry-run]\n                                        [--apply]\n                                        [--idempotency-key IDEMPOTENCY_KEY]\n                                        [command]\nntm-spawn-templates-versioned.py: error: unrecognized arguments: --jsno\n",
+      "capabilities": "{\"command\":\"capabilities\",\"commands\":{\"doctor\":{\"command\":\"ntm-spawn-templates-versioned.py doctor --json\",\"read_only\":true},\"registry_apply\":{\"command\":\"ntm-spawn-templates-versioned.py registry --apply --idempotency-key KEY --json\",\"read_only\":false},\"registry_dry_run\":{\"command\":\"ntm-spawn-templates-versioned.py registry --dry-run --json\",\"read_only\":true},\"robot_docs\":{\"command\":\"ntm-spawn-templates-versioned.py robot-docs --json\",\"read_only\":true}},\"contract_version\":\"1\",\"env_vars\":{\"NTM_BIN\":\"override ntm binary\",\"NTM_SPAWN_TEMPLATES_DIR\":\"override template directory\",\"NTM_SPAWN_TEMPLATE_REGISTRY\":\"override registry path\"},\"exit_codes\":{\"0\":\"success\",\"1\":\"runtime error\",\"2\":\"usage error\"},\"features\":[\"json_output\",\"doctor\",\"registry_dry_run\",\"idempotent_apply\",\"robot_docs\"],\"schema_version\":\"ntm-spawn-templates-versioned/v1.capabilities\"}\n",
+      "help": "usage: ntm-spawn-templates-versioned.py [-h] [--json] [--doctor] [--health]\n                                        [--schema] [--examples] [--info]\n                                        [--template-dir TEMPLATE_DIR]\n                                        [--registry REGISTRY]\n                                        [--ntm-bin NTM_BIN] [--dry-run]\n                                        [--apply]\n                                        [--idempotency-key IDEMPOTENCY_KEY]\n                                        [command]\n\nVersion/hash doctor for NTM spawn templates\n\npositional arguments:\n  command\n\noptions:\n  -h, --help            show this help message and exit\n  --json\n  --doctor\n  --health\n  --schema\n  --examples\n  --info\n  --template-dir TEMPLATE_DIR\n  --registry REGISTRY\n  --ntm-bin NTM_BIN\n  --dry-run\n  --apply\n  --idempotency-key IDEMPOTENCY_KEY\n",
+      "robot_docs": "{\"command\":\"robot-docs\",\"guide\":[\"Discover: ntm-spawn-templates-versioned.py capabilities --json\",\"Diagnose drift: ntm-spawn-templates-versioned.py doctor --json\",\"Preview registry refresh: ntm-spawn-templates-versioned.py registry --dry-run --json\",\"Apply only after review: ntm-spawn-templates-versioned.py registry --apply --idempotency-key KEY --json\"],\"schema_version\":\"ntm-spawn-templates-versioned/v1.robot_docs\"}\n"
+    },
+    "uplift": 80.0,
+    "workspace": ".flywheel/scripts/ntm-spawn-templates-versioned.py__agent_ergonomics_audit"
+  }
+]

@@ -1,0 +1,82 @@
+{
+  "schema_version": "zeststream.holding_company_anti_pitch_active_content_repair.v1",
+  "generated_at": "2026-05-17T09:35:00Z",
+  "bead_id": "flywheel-w1ewh",
+  "source_goal": "ZestStream Holding Company Goal",
+  "gate": "anti_pitch_voice",
+  "target_repo": "/Users/josh/Developer/zeststream-v2-fresh",
+  "target_repo_commit": "6236d426",
+  "consumer_repo_mutation_attempted": true,
+  "changed_files": [
+    "/Users/josh/Developer/zeststream-v2-fresh/src/data/local-landing-content.ts",
+    "/Users/josh/Developer/flywheel/state/holding-company-anti-pitch-voice.json",
+    "/Users/josh/Developer/flywheel/tests/holding-company-anti-pitch-voice.sh",
+    "/Users/josh/Developer/flywheel/state/holding-company-anti-pitch-active-content-repair-20260517T0935Z.json"
+  ],
+  "active_content_repair": {
+    "path": "/Users/josh/Developer/zeststream-v2-fresh/src/data/local-landing-content.ts",
+    "removed_or_replaced_frames": [
+      "Process Automation",
+      "Connect any system with an API to create unified workflows",
+      "Eliminate repetitive tasks and human error",
+      "Web Development",
+      "Auto-respond to new leads in under 60 seconds",
+      "The first business to respond wins 78% of deals",
+      "I automate the repetitive stuff"
+    ],
+    "replacement_posture": [
+      "Stack Wiring",
+      "Owner Receipts",
+      "Operating Dashboard",
+      "Public Surface"
+    ]
+  },
+  "remaining_blocker": {
+    "path": "/Users/josh/Developer/zeststream-v2-fresh/SPRINT_VALIDATION_SUMMARY.md",
+    "classification": "historical_validation_text_needs_archive_or_rewrite_disposition",
+    "builder_framing_hit_count": 2,
+    "notes": "The active local landing content hit is repaired. The anti-pitch ledger remains blocked because the historical sprint validation summary still preserves workflow-builder and automation-positioning text until classified out of public-surface scope or rewritten."
+  },
+  "validation": [
+    {
+      "command": "git -C /Users/josh/Developer/zeststream-v2-fresh diff --check -- src/data/local-landing-content.ts",
+      "status": "pass"
+    },
+    {
+      "command": "rg -n \"Process Automation|Connect any system with an API to create unified workflows|Eliminate repetitive tasks|Web Development|under 60 seconds|78% of deals|Create reports that build themselves|modern, fast websites|no more copy-paste|data flows automatically|I automate\" /Users/josh/Developer/zeststream-v2-fresh/src/data/local-landing-content.ts",
+      "status": "pass_no_matches"
+    },
+    {
+      "command": "npm run lint -- src/data/local-landing-content.ts",
+      "status": "blocked",
+      "reason": "eslint not found in checkout"
+    },
+    {
+      "command": "npm run brand-lint -- --files src/data/local-landing-content.ts",
+      "status": "blocked",
+      "reason": "tsx not found in checkout"
+    },
+    {
+      "command": "npm run typecheck",
+      "status": "blocked",
+      "reason": "missing type packages: @testing-library/jest-dom, node, vitest/globals"
+    }
+  ],
+  "reservations": {
+    "zeststream_v2_fresh": {
+      "agent": "RedBasin",
+      "paths": [
+        "src/data/local-landing-content.ts"
+      ]
+    },
+    "flywheel": {
+      "agent": "FuchsiaMoose",
+      "paths": [
+        "state/holding-company-anti-pitch-voice.json",
+        "tests/holding-company-anti-pitch-voice.sh",
+        "state/holding-company-anti-pitch-active-content-repair-20260517T0935Z.json"
+      ]
+    }
+  },
+  "status": "active_content_repaired_ledger_still_blocked_on_historical_summary"
+}

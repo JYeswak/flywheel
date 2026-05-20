@@ -1,0 +1,15 @@
+{
+  "anon_authenticated_grants_revoked": 0,
+  "evidence_query": "PROJECTS.jsonl + POST_PROJECTS.jsonl catalog queries over pg_class/information_schema/has_table_privilege",
+  "fix_mode": "ALTER TABLE ENABLE ROW LEVEL SECURITY; service_role-only policy; REVOKE ALL FROM anon, authenticated; GRANT ALL TO service_role",
+  "fix_timestamp": "2026-05-19T21:55:00Z",
+  "policies_added": 0,
+  "post_fixed_tables_public_select_count": 0,
+  "post_reaudit_rls_disabled_count": 0,
+  "project_id": "fqqqzolbunzizcyzwqym",
+  "project_name": "Alps",
+  "schema_version": "flywheel.supabase_rls_emergency_receipt.v1",
+  "sensitive_tables_fixed": [],
+  "tables_audited": 30,
+  "tables_fixed": 0
+}

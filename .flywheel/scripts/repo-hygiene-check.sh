@@ -196,3 +196,8 @@ else
   echo "Status: pass=${PASSES} fail=${FAILS} warn=${WARNINGS}"
 fi
 [[ "$FAILS" -gt 0 ]] && exit 1 || exit 0
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

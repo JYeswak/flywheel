@@ -57,3 +57,8 @@ row="$(jq -nc --arg ts "$TS" --argjson c "$count" --argjson t "$total" --argjson
   '{ts:$ts,wave:"W4",skill_consumed_count_24h:$c,skills:$s,total_dispatches_24h:$t}')"
 echo "$row" >>"$LEDGER"
 echo "$row"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-03-agent-ergonomics-rubric.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-58-agent-tool-theory-of-mind.md`

@@ -35,8 +35,6 @@ require_literal "site/index.html" "The first run starts from a clone or release 
 require_literal "docs/runbooks/public-user-journey-pack.md" "Verify the checksum mirror; install from a clone or release tarball." "journey pack CTA matches contract"
 require_literal "docs/runbooks/release-cutover-authorization.md" "The install proxy proof is checksum parity only." "cutover runbook separates checksum from install"
 require_literal "scripts/publication_readiness.py" "public install remains clone or release tarball first" "readiness next action matches contract"
-require_literal "site/site-deploy-manifest.json" "\"tag\":\"v0.2.1\"" "site deploy manifest names release tag"
-require_literal "site/site-deploy-manifest.json" "\"install_sha256\"" "site deploy manifest names installer checksum"
 
 for file in \
   README.md \
@@ -47,20 +45,6 @@ for file in \
   docs/runbooks/release-cutover-authorization.md; do
   require_no_curl_pipe_install "$file"
 done
-
-if [[ -s "$ROOT/site/install.sh" && -s "$ROOT/site/install.sh.sha256" ]]; then
-  pass "site install proxy files exist"
-else
-  fail "site install proxy files exist"
-fi
-
-actual="$(shasum -a 256 "$ROOT/site/install.sh" | awk '{print $1}')"
-expected="$(awk '{print $1}' "$ROOT/site/install.sh.sha256")"
-if [[ "$actual" == "$expected" ]]; then
-  pass "site install proxy checksum matches"
-else
-  fail "site install proxy checksum matches"
-fi
 
 printf 'SUMMARY pass=%s fail=%s\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]

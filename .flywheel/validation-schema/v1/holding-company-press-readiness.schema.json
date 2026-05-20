@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-press-readiness/v1/schema.json",
+  "title": "ZestStream Holding Company PRESS Readiness v1",
+  "description": "Ledger for PRESS readiness: v0.1 release, signed equity, and substrate compounding receipts before PRESS or formation clear.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "clear_count",
+    "presses",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_press_readiness.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "press_readiness"
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "presses": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/press"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "press": {
+      "type": "object",
+      "required": [
+        "press_id",
+        "company_slug",
+        "sequence",
+        "status",
+        "release_version",
+        "candidate_fit_ref",
+        "v0_1_release_ref",
+        "skillos_hardening_ref",
+        "flywheel_coordination_ref",
+        "package_delivery_ref",
+        "yuzu_owner_voice_ref",
+        "signed_equity_ref",
+        "owner_economics_ref",
+        "substrate_share_receipt",
+        "evidence_refs"
+      ],
+      "properties": {
+        "press_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "company_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "sequence": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "blocked",
+            "press_clear",
+            "formation_ready",
+            "deferred"
+          ]
+        },
+        "release_version": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "candidate_fit_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "v0_1_release_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "skillos_hardening_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "flywheel_coordination_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "package_delivery_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "yuzu_owner_voice_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "signed_equity_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "owner_economics_ref": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "substrate_share_receipt": {
+          "$ref": "#/$defs/ref_or_null"
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "ref_or_null": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    }
+  }
+}

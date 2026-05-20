@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-mobile-eats-shipping/v1/schema.json",
+  "title": "ZestStream Holding Company Mobile Eats Shipping v1",
+  "description": "Ledger for the Mobile Eats recent-progress claim. It separates product/substrate shipping evidence from the stricter first-portfolio-company claim.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "claim_text",
+    "status",
+    "company_slug",
+    "required_min_zeststream_packages",
+    "repo_path",
+    "share_ready_packet_ref",
+    "tenant_declaration_ref",
+    "package_manifest_ref",
+    "public_surface_ref",
+    "substrate_share_receipt_ref",
+    "portfolio_registry_ref",
+    "repo_present",
+    "share_ready_packet_present",
+    "tenant_declaration_present",
+    "package_manifest_present",
+    "public_surface_declared",
+    "substrate_share_receipt_present",
+    "substrate_package_count",
+    "package_threshold_met",
+    "counted_as_portfolio_company",
+    "first_portfolio_company_claim_clear",
+    "signed_owner_operator_receipt",
+    "equity_receipt",
+    "first_paying_customer_receipt",
+    "evidence_refs",
+    "blockers",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_mobile_eats_shipping.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "recent_progress_mobile_eats_shipping"
+    },
+    "claim_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "partial",
+        "proven",
+        "deferred"
+      ]
+    },
+    "company_slug": {
+      "const": "mobile-eats"
+    },
+    "required_min_zeststream_packages": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "repo_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "share_ready_packet_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tenant_declaration_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "package_manifest_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "public_surface_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "substrate_share_receipt_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "portfolio_registry_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repo_present": {
+      "type": "boolean"
+    },
+    "share_ready_packet_present": {
+      "type": "boolean"
+    },
+    "tenant_declaration_present": {
+      "type": "boolean"
+    },
+    "package_manifest_present": {
+      "type": "boolean"
+    },
+    "public_surface_declared": {
+      "type": "boolean"
+    },
+    "substrate_share_receipt_present": {
+      "type": "boolean"
+    },
+    "substrate_package_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "package_threshold_met": {
+      "type": "boolean"
+    },
+    "counted_as_portfolio_company": {
+      "type": "boolean"
+    },
+    "first_portfolio_company_claim_clear": {
+      "type": "boolean"
+    },
+    "signed_owner_operator_receipt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "equity_receipt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "first_paying_customer_receipt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false
+}

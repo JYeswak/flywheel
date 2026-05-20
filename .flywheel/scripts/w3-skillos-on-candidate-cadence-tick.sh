@@ -60,3 +60,8 @@ row="$(jq -nc --arg ts "$TS" --argjson e "$emit" --argjson r "$reject" --argjson
   '{ts:$ts,wave:"W3",emit_new_candidate_count_14d:$e,reject_count_14d:$r,promoted_count_14d:$p,total_decisions_14d:$t}')"
 echo "$row" >>"$LEDGER"
 echo "$row"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-03-agent-ergonomics-rubric.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-58-agent-tool-theory-of-mind.md`

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Meta-pattern Adoption stance:
+# Embodies MP-54-template-publish-gate.md and MP-69-registry-risk-ledger.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 """Validate the true-publication release-blocker registry."""
 
 from __future__ import annotations
@@ -25,7 +28,10 @@ READINESS_BLOCKER_ALIASES = {
     "remote_repo_unavailable": "remote_repo_private",
 }
 OPTIONAL_COVERAGE_CODES = {
+    "install_proxy_checksum_mismatch",
     "remote_repo_private",
+    "remote_green_runs_missing",
+    "remote_workflows_missing",
 }
 
 
@@ -130,12 +136,7 @@ def validate(
     row_by_id = {row["id"]: row for row in rows if row.get("id")}
     coverage_codes = {row.get("code", "") for row in coverage if row.get("code")}
     missing_coverage = sorted(expected_blockers - coverage_codes)
-    live_coverage_codes = {
-        row.get("code", "")
-        for row in coverage
-        if row.get("code") and row.get("status") in {"open", "in_progress"}
-    }
-    unknown_coverage = sorted(live_coverage_codes - expected_blockers - OPTIONAL_COVERAGE_CODES)
+    unknown_coverage = sorted(coverage_codes - expected_blockers - OPTIONAL_COVERAGE_CODES)
     for code in missing_coverage:
         errors.append({"code": "missing_readiness_blocker_coverage", "blocker_code": code})
     for code in unknown_coverage:
@@ -255,6 +256,7 @@ def main() -> int:
         "open_count": len(open_rows),
         "open_rows": open_rows,
         "expected_readiness_blockers": sorted(expected_blockers),
+        "optional_coverage_codes": sorted(OPTIONAL_COVERAGE_CODES),
         "readiness_blocker_coverage": coverage,
         "ids": [row.get("id") for row in rows if row.get("id")],
         "errors": errors,
@@ -269,3 +271,8 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

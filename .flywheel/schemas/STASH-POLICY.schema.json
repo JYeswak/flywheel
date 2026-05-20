@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flywheel.zeststream.ai/schemas/STASH-POLICY.schema.json",
+  "title": "STASH-POLICY",
+  "description": "Per-repo stash retention policy. Authority: flywheel-m9yxr research + templates/flywheel-install/doctrine/git-stash-discipline.md. Mission Duty 3 (substrate-published).",
+  "type": "object",
+  "required": ["schema_version", "max_age_days", "auto_archive_path"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "flywheel.stash_policy.v1"
+    },
+    "max_age_days": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 90,
+      "default": 30,
+      "description": "Stashes older than this are auto-archived then dropped. Doctrine: stash=24h scratch; max=30 days is a generous grace before forced archive."
+    },
+    "auto_archive_path": {
+      "type": "string",
+      "default": "~/.local/state/flywheel/stash-archive/<repo>/",
+      "description": "Off-tree archive directory. Pattern '<ts>--stash-<n>--<message-slug>.patch' per stash. Survives the drop for forensic recovery."
+    },
+    "thresholds": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "notable": { "type": "integer", "minimum": 0, "default": 1, "description": "N≥this surfaces in tick output (no block)." },
+        "bead_filing": { "type": "integer", "minimum": 1, "default": 5, "description": "N≥this files a stash-cleanup bead (no block)." },
+        "halt": { "type": "integer", "minimum": 1, "default": 10, "description": "N≥this refuses close + halts lane (per stash-discipline-check.sh)." }
+      }
+    },
+    "named_trauma_classes": {
+      "type": "array",
+      "description": "Stash messages matching these substrings flag as paradigm violations.",
+      "items": {
+        "type": "object",
+        "required": ["class", "match_substrings", "remediation"],
+        "properties": {
+          "class": { "type": "string" },
+          "match_substrings": { "type": "array", "items": { "type": "string" } },
+          "remediation": { "type": "string" }
+        }
+      },
+      "default": [
+        {
+          "class": "out-of-scope-leak",
+          "match_substrings": ["out-of-scope", "out_of_scope", "oos:"],
+          "remediation": "File via `br create -p 2 -t bug \"...\"`; stash is the wrong tool."
+        },
+        {
+          "class": "AGENTS-CANONICAL-pane-leak",
+          "match_substrings": ["AGENTS-CANONICAL", "AGENTS.md pre-reset", "AGENTS-CANONICAL noise"],
+          "remediation": "`git restore <paths>`; tick-generated drift is restorable, not stashable."
+        }
+      ]
+    },
+    "exempt_stash_message_prefixes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": ["scratch:", "recover:"],
+      "description": "Stash messages starting with these prefixes get max_age_days exemption (still age-out at 90d hard cap)."
+    },
+    "hard_cap_days": {
+      "type": "integer",
+      "default": 90,
+      "description": "Absolute ceiling — no stash survives this regardless of exempt prefixes."
+    }
+  }
+}

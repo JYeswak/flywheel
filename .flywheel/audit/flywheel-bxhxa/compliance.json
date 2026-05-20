@@ -1,0 +1,25 @@
+{
+  "schema_version": "flywheel-compliance-pack/v1",
+  "bead": "flywheel-bxhxa",
+  "task_id": "flywheel-bxhxa-2ba846",
+  "compliance_score": 910,
+  "status": "pass",
+  "four_lens": {
+    "brand": 9,
+    "sniff": 9,
+    "jeff": 9,
+    "public": 9
+  },
+  "verification": [
+    "bash -n .flywheel/scripts/storage-health-probe.sh .flywheel/scripts/storage-probe.sh .flywheel/scripts/storage-pressure-doctor.sh .flywheel/status-hook.sh",
+    "tests/storage-probe.sh",
+    "tests/storage-pressure-doctor.sh",
+    "fixture sweep tiers 0-5",
+    "flywheel-loop doctor fixture jq .storage.storage_health",
+    "dispatch-template-audit"
+  ],
+  "cli_canonical": true,
+  "rust_clean": "n/a",
+  "python_clean": "n/a",
+  "readme_quality": "n/a"
+}

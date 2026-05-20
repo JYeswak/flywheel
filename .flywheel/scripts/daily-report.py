@@ -74,6 +74,19 @@ def read_jsonl(path: Path, limit: int | None = None) -> list[dict[str, Any]]:
     return rows
 
 
+def trauma_candidate_lines(rows: list[dict[str, Any]], date_text: str) -> list[str]:
+    todays = [row for row in rows if same_utc_date(parse_ts(row.get("ts")), date_text)]
+    lines: list[str] = []
+    for row in todays[-8:]:
+        cls = str(row.get("class") or "unknown")
+        count = row.get("N") or row.get("count_in_window") or "?"
+        family = row.get("class_family") or "unknown"
+        memory = row.get("proposed_memory_path") or "memory-path-missing"
+        disposition = row.get("proposed_disposition") or "unknown"
+        lines.append(f"{cls} N={count} family={family} disposition={disposition} proposed_memory={memory}")
+    return lines
+
+
 def run_json(cmd: list[str], cwd: Path) -> Any:
     try:
         proc = subprocess.run(
@@ -581,6 +594,8 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
         if same_utc_date(parse_ts(row.get("ts") or row.get("created_at")), date_text)
     ]
     trauma_counts = Counter(str(row.get("trauma_class") or "unknown") for row in fuckup_rows)
+    trauma_candidate_rows = read_jsonl(resolve_input(args.trauma_candidates), 2000)
+    trauma_candidate_report_lines = trauma_candidate_lines(trauma_candidate_rows, date_text)
     cross_rows = [
         row
         for row in read_jsonl(resolve_input(args.cross_orch_log), 1000)
@@ -679,8 +694,12 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
         "## What did we learn?",
         f"- feedback_memories_added_or_changed: {len(memory_files)}",
         f"- fuckup_rows_today: {len(fuckup_rows)}",
+        f"- auto_promoted_trauma_candidates_today: {len(trauma_candidate_report_lines)}",
         f"- state_md_unmined_count: {state_md_unmined_count}",
         *line_items(learn_lines, "No new feedback memories or trauma classes found."),
+        "",
+        "### Auto-promoted trauma candidates for orch review",
+        *line_items(trauma_candidate_report_lines, "No auto-promoted trauma candidates today."),
         "",
         "## What's Jeff up to?",
         f"- jeff_digest_rows_today: {len(jeff_rows)}",
@@ -736,6 +755,7 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
         "## Source receipts",
         f"- dispatch_log: {args.dispatch_log}",
         f"- fuckup_log: {args.fuckup_log}",
+        f"- trauma_candidates: {args.trauma_candidates}",
         f"- cross_orch_log: {args.cross_orch_log}",
         f"- jeff_digest: {args.jeff_digest}",
         f"- incidents_file: {args.incidents_file}",
@@ -757,6 +777,7 @@ def generate(args: argparse.Namespace) -> dict[str, Any]:
         "ready_count": len(ready_issues),
         "stale_in_flight_count": len(in_flight_stale),
         "state_md_unmined_count": state_md_unmined_count,
+        "auto_promoted_trauma_candidates_count": len(trauma_candidate_report_lines),
         "security_summary": security,
         "l70_punt_phrase_report": punt_report,
         "jeff_corpus_storage_projection": jeff_projection,
@@ -801,6 +822,7 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--dispatch-log", default=os.environ.get("FLYWHEEL_DISPATCH_LOG", ".flywheel/dispatch-log.jsonl"))
     parser.add_argument("--callback-log", default=os.environ.get("FLYWHEEL_CALLBACK_LOG", ".flywheel/callback-validation-log.jsonl"))
     parser.add_argument("--fuckup-log", default=os.environ.get("FLYWHEEL_FUCKUP_LOG", str(Path.home() / ".local/state/flywheel/fuckup-log.jsonl")))
+    parser.add_argument("--trauma-candidates", default=os.environ.get("FLYWHEEL_TRAUMA_CANDIDATES", ".flywheel/evidence/trauma-candidates.jsonl"))
     parser.add_argument("--cross-orch-log", default=os.environ.get("FLYWHEEL_CROSS_ORCH_LOG", str(Path.home() / ".local/state/flywheel/cross-orch-coordination.jsonl")))
     parser.add_argument("--jeff-digest", default=os.environ.get("FLYWHEEL_JEFF_DIGEST", str(Path.home() / ".local/state/jeff-intel/digest.jsonl")))
     parser.add_argument("--jeff-storage-projection", default=os.environ.get("FLYWHEEL_JEFF_STORAGE_PROJECTION", str(Path.home() / ".local/state/jeff-intel/storage-projection.json")))
@@ -832,3 +854,8 @@ def main(argv: list[str]) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-09-info-source-watchtower.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-76-authority-ranked-retrieval-maintenance.md`

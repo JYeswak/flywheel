@@ -61,7 +61,8 @@ scaffold_emit_info() {
     "$SCAFFOLD_SCHEMA_VERSION" \
     "doctor,health,repair,validate,audit,why,quickstart,help,completion" \
     "SCAFFOLD_AUDIT_LOG" \
-    '{}'
+    '{"mutates":[],"side_effects":["read-only by default","invokes storage-probe.sh as delegate","reads tmp-prune ledger"]}' \
+    | jq '. + {mutates:(.paths.mutates // []), side_effects:(.paths.side_effects // [])}'
 }
 
 scaffold_emit_examples() {
@@ -103,6 +104,15 @@ scaffold_emit_schema() {
       runs_log:{path:"$HOME/.local/state/flywheel/storage-pressure-doctor-runs.jsonl"},
       stdout:{type:"json",fields:["ts","storage","top_consumers","snapshots","private_tmp","recommendations"]}
     },
+    properties:{
+      status:{enum:["pass","warn","fail"]},
+      storage:{type:"object"},
+      top_consumers:{type:"array"},
+      snapshots:{type:"object"},
+      private_tmp:{type:"object"},
+      recommendations:{type:"array"}
+    },
+    mutates:[],
     side_effects:["read-only by default","invokes storage-probe.sh as delegate","reads tmp-prune ledger"]
   }'
 }
@@ -760,3 +770,8 @@ main() {
 }
 
 main "$@"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

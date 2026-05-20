@@ -42,22 +42,39 @@ make_repo() {
 
 assert_case() {
   local name="$1" claims="$2" expected_status="$3" expected_rc="$4" expected_pct="$5"
-  local repo="$TMP/$name" out="$TMP/$name.json" rc
+  local repo="$TMP/$name" out="$TMP/$name.json" timeline rc
   make_repo "$repo" "$claims"
+  timeline="$(jq -s '{events:.}' "$repo/.flywheel/dispatch-log.jsonl")"
   set +e
-  bash "$BIN" --repo "$repo" --json >"$out"
+  NTM_TIMELINE_JSON="$timeline" bash "$BIN" --repo "$repo" --json >"$out"
   rc=$?
   set -e
-  [[ "$rc" == "$expected_rc" ]] && pass "$name/rc_$expected_rc" || fail "$name/rc_expected_$expected_rc got_$rc"
-  jq -e --arg status "$expected_status" '.status == $status' "$out" >/dev/null && pass "$name/status_$expected_status" || fail "$name/status_$expected_status"
-  jq -e --argjson pct "$expected_pct" '.coverage_pct == $pct' "$out" >/dev/null && pass "$name/coverage_$expected_pct" || fail "$name/coverage_$expected_pct"
+  if [[ "$rc" == "$expected_rc" ]]; then
+    pass "$name/rc_$expected_rc"
+  else
+    fail "$name/rc_expected_$expected_rc got_$rc"
+  fi
+  if jq -e --arg status "$expected_status" '.status == $status' "$out" >/dev/null; then
+    pass "$name/status_$expected_status"
+  else
+    fail "$name/status_$expected_status"
+  fi
+  if jq -e --argjson pct "$expected_pct" '.coverage_pct == $pct' "$out" >/dev/null; then
+    pass "$name/coverage_$expected_pct"
+  else
+    fail "$name/coverage_$expected_pct"
+  fi
 }
 
 assert_case pass_90 45 PASS 0 90
 assert_case warn_70 35 WARN 1 70
 assert_case fail_50 25 FAIL 2 50
 
-bash "$CHECKER" "$BIN" >/dev/null && pass "canonical_cli_scoping/invariant" || fail "canonical_cli_scoping/invariant"
+if bash "$CHECKER" "$BIN" >/dev/null; then
+  pass "canonical_cli_scoping/invariant"
+else
+  fail "canonical_cli_scoping/invariant"
+fi
 
 printf '\nResults: %d PASS  %d FAIL\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]] || exit 1

@@ -55,13 +55,13 @@ codes change.
 
 | Readiness blocker code | Registry rows | Coverage status |
 |---|---|---|
-| `remote_repo_private` | `TP-005` | closed |
-| `remote_workflows_missing` | `TP-017` | closed |
-| `remote_green_runs_missing` | `TP-017` | closed |
-| `github_release_missing_or_draft` | `TP-018` | closed |
-| `github_release_assets_missing` | `TP-018` | closed |
-| `install_proxy_checksum_mismatch` | `TP-005` | closed |
-| `joshua_release_signoff_missing` | `TP-018` | closed |
+| `remote_repo_private` | `TP-005` | open |
+| `remote_workflows_missing` | `TP-017` | open |
+| `remote_green_runs_missing` | `TP-017` | open |
+| `github_release_missing_or_draft` | `TP-018` | open |
+| `github_release_assets_missing` | `TP-018` | open |
+| `install_proxy_checksum_mismatch` | `TP-005` | open |
+| `joshua_release_signoff_missing` | `TP-018` | open |
 
 ## Progress Log
 

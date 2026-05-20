@@ -540,3 +540,8 @@ receipt="$(base_receipt | jq \
   '. + {status:"applied",byte_counts:(.byte_counts + {archive_member_bytes:$archive_bytes}),post_state:{symlink:true,verified:true}}')"
 printf '%s\n' "$receipt" >"$receipt_path" || fail_json verify_failed receipt_write_failed 1
 emit "$receipt"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-09-info-source-watchtower.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-76-authority-ranked-retrieval-maintenance.md`

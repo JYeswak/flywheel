@@ -1,0 +1,75 @@
+{
+  "dimensions": {
+    "agent_ease_of_use": {
+      "final": 875,
+      "initial": 750
+    },
+    "agent_ergonomics": {
+      "final": 850,
+      "initial": 725
+    },
+    "agent_intuitiveness": {
+      "final": 820,
+      "initial": 770
+    },
+    "composability": {
+      "final": 825,
+      "initial": 775
+    },
+    "determinism_and_reproducibility": {
+      "final": 850,
+      "initial": 800
+    },
+    "error_pedagogy": {
+      "final": 780,
+      "initial": 730
+    },
+    "intent_inference": {
+      "final": 725,
+      "initial": 675
+    },
+    "output_parseability": {
+      "final": 875,
+      "initial": 750
+    },
+    "safety_with_recovery": {
+      "final": 850,
+      "initial": 800
+    },
+    "self_documentation": {
+      "final": 875,
+      "initial": 750
+    }
+  },
+  "evidence": {
+    "bad_invocation_rc": 2,
+    "capabilities_json": true,
+    "capabilities_rc": 0,
+    "deterministic_json_probe": true,
+    "help_rc": 0,
+    "json_probe_rc": 0,
+    "json_probe_valid_json": true,
+    "robot_docs_rc": 0,
+    "useful_error": true
+  },
+  "final_score": 832.5,
+  "initial_score": 752.5,
+  "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+  "schema_version": "agent-ergonomics.scorecard/v1",
+  "surface": {
+    "capabilities_args": "--info --json",
+    "class": "ledger-writer",
+    "invoke_count_30d": 82,
+    "json_probe_args": "doctor --json",
+    "path": ".flywheel/scripts/stale-error-auto-ping.sh",
+    "robot_docs_args": "--help"
+  },
+  "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/stale-error-auto-ping.sh",
+  "transcripts": {
+    "bad_invocation_stderr": "ERR: unknown argument: --jsno\n",
+    "capabilities": "{\"schema_version\":\"stale-error-auto-ping.v1\",\"mode\":\"info\",\"ntm\":\"/Users/josh/.local/bin/ntm\",\"default_session\":\"flywheel\",\"default_panes\":\"2,3,4\",\"default_interval_seconds\":300,\"mutation_default\":\"dry-run\",\"candidate_source\":\"ntm errors --json\",\"apply_transport\":\"ntm send --no-cass-check\",\"apply_requires\":\"--idempotency-key\",\"audit_log\":\"/Users/josh/.local/state/flywheel/stale-error-auto-ping-runs.jsonl\",\"exit_codes\":{\"0\":\"success or replay-no-op\",\"2\":\"usage error\",\"3\":\"--apply without --idempotency-key\"},\"flags\":[\"doctor\",\"health\",\"repair\",\"validate\",\"--session\",\"--panes\",\"--dry-run\",\"--apply\",\"--idempotency-key\",\"--watch\",\"--interval-seconds\",\"--ping-text\",\"--json\",\"--info\",\"--examples\",\"--version\",\"--help\"]}\n",
+    "help": "Usage: stale-error-auto-ping.sh [doctor|health|repair|validate] [--session NAME] [--panes 2,3,4] [--dry-run|--apply --idempotency-key KEY] [--watch] [--json]\n       stale-error-auto-ping.sh validate errors --errors-file PATH [--json]\n       stale-error-auto-ping.sh --info [--json] | --examples | --version\nFinds temporary L87 stale-error candidates from native `ntm errors --json`.\nApply sends only bounded no-op `ntm send --no-cass-check` pings. Default is dry-run.\n--apply requires --idempotency-key (rc=3 if missing). Per-pane ledger-replay skips\npanes already pinged with the same key (sister 8sx9w pair-pattern).\n",
+    "robot_docs": "Usage: stale-error-auto-ping.sh [doctor|health|repair|validate] [--session NAME] [--panes 2,3,4] [--dry-run|--apply --idempotency-key KEY] [--watch] [--json]\n       stale-error-auto-ping.sh validate errors --errors-file PATH [--json]\n       stale-error-auto-ping.sh --info [--json] | --examples | --version\nFinds temporary L87 stale-error candidates from native `ntm errors --json`.\nApply sends only bounded no-op `ntm send --no-cass-check` pings. Default is dry-run.\n--apply requires --idempotency-key (rc=3 if missing). Per-pane ledger-replay skips\npanes already pinged with the same key (sister 8sx9w pair-pattern).\n"
+  },
+  "uplift": 80.0
+}

@@ -1,0 +1,75 @@
+{
+  "dimensions": {
+    "agent_ease_of_use": {
+      "final": 875,
+      "initial": 750
+    },
+    "agent_ergonomics": {
+      "final": 850,
+      "initial": 725
+    },
+    "agent_intuitiveness": {
+      "final": 820,
+      "initial": 770
+    },
+    "composability": {
+      "final": 825,
+      "initial": 775
+    },
+    "determinism_and_reproducibility": {
+      "final": 850,
+      "initial": 800
+    },
+    "error_pedagogy": {
+      "final": 780,
+      "initial": 730
+    },
+    "intent_inference": {
+      "final": 725,
+      "initial": 675
+    },
+    "output_parseability": {
+      "final": 875,
+      "initial": 750
+    },
+    "safety_with_recovery": {
+      "final": 850,
+      "initial": 800
+    },
+    "self_documentation": {
+      "final": 875,
+      "initial": 750
+    }
+  },
+  "evidence": {
+    "bad_invocation_rc": 2,
+    "capabilities_json": true,
+    "capabilities_rc": 0,
+    "deterministic_json_probe": true,
+    "help_rc": 0,
+    "json_probe_rc": 0,
+    "json_probe_valid_json": true,
+    "robot_docs_rc": 0,
+    "useful_error": true
+  },
+  "final_score": 832.5,
+  "initial_score": 752.5,
+  "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+  "schema_version": "agent-ergonomics.scorecard/v1",
+  "surface": {
+    "capabilities_args": "--info --json",
+    "class": "ledger-writer",
+    "invoke_count_30d": 93,
+    "json_probe_args": "--info --json",
+    "path": ".flywheel/scripts/frozen-pane-detector.sh",
+    "robot_docs_args": "--help"
+  },
+  "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/frozen-pane-detector.sh",
+  "transcripts": {
+    "bad_invocation_stderr": "ERROR: unknown argument: --jsno\n",
+    "capabilities": "{\"schema_version\":\"frozen-pane-detector.v2\",\"success\":true,\"mode\":\"info\",\"version\":\"2026-05-04.2\",\"ntm_bin\":\"/Users/josh/.local/bin/ntm\",\"flywheel_loop_bin\":\"/Users/josh/.claude/skills/.flywheel/bin/flywheel-loop\",\"repo_root\":\"/Users/josh/Developer/flywheel\",\"state_dir\":\"/Users/josh/.local/state/flywheel-loop\",\"cache_dir\":\"/Users/josh/.local/state/flywheel-loop\",\"strike_counter\":\"/Users/josh/.local/state/flywheel-loop/frozen-strike-counter.jsonl\",\"lease_dir\":\"/Users/josh/.local/state/flywheel-loop/frozen-pane-recovery-leases\",\"recovery_ledger\":\"/Users/josh/.local/state/flywheel-loop/frozen-pane-recovery-ledger.jsonl\",\"metrics_file\":\"/Users/josh/.local/state/flywheel-loop/frozen-pane-metrics.jsonl\",\"trauma_class\":\"frozen-codex-spinner-misclassified-as-thinking\",\"native_surface\":[\"ntm grep\",\"ntm errors\",\"ntm activity\",\"ntm wait\"],\"related_trauma_classes\":{\"template_stub\":\"template-stub-prompt\",\"queued_not_submitted\":\"frozen-codex-spinner-codex-queued-not-submitted\"},\"detection_signals\":[\"live_delta_frozen\",\"state_since_missing\",\"state_since_untrusted_no_delta\",\"template_stub_prompt\",\"queued_not_submitted\"],\"defaults\":{\"threshold_seconds\":90,\"queued_threshold_seconds\":60,\"queued_timer_drift_seconds\":60,\"min_delta_bytes\":100,\"lines\":20,\"lease_ttl_seconds\":600,\"cooldown_seconds\":1800,\"respawn_suppression_seconds\":120,\"sample_interval_seconds\":1,\"ntm_timeout_seconds\":8}}\n",
+    "help": "Usage:\n  frozen-pane-detector.sh --session=<session> [--json]\n  frozen-pane-detector.sh --session=all [--json]\n  frozen-pane-detector.sh --session=<session> --auto-recover [--dry-run] [--json]\n  frozen-pane-detector.sh --dry-run --self-test [--json]\n  frozen-pane-detector.sh --doctor [--json]\n  frozen-pane-detector.sh --health [--json]\n  frozen-pane-detector.sh --info [--json]\n  frozen-pane-detector.sh --schema\n  frozen-pane-detector.sh --examples\n  frozen-pane-detector.sh doctor|health [--json]\n  frozen-pane-detector.sh repair --scope audit_log_dir|ntm_state_dir [--dry-run|--apply --idempotency-key KEY] [--json]\n  frozen-pane-detector.sh validate session-name|recovery-mode|ntm-bin VALUE [--json]\n  frozen-pane-detector.sh audit|quickstart [--json]\n  frozen-pane-detector.sh why <id> [--json]\n  frozen-pane-detector.sh help <topic>\n  frozen-pane-detector.sh completion bash|zsh\n\nOptions:\n  --threshold-seconds N      Thinking/generating age threshold. Default: 90.\n  --queued-threshold-seconds N Waiting+queued prompt threshold. Default: 60.\n  --queued-timer-drift-seconds N Working timer drift threshold. Default: 60.\n  --min-delta-bytes N        Minimum live scrollback byte growth to avoid frozen. Default: 100.\n  --sample-interval-seconds N Delay between live scrollback samples. Default: 1.\n  --ntm-timeout-seconds N    Timeout for each ntm probe. Default: 8.\n  --lines N                  robot-tail line count. Default: 20.\n  --cache-dir PATH           Override scrollback cache directory.\n  --strike-file PATH         Override strike-counter JSONL.\n  --lease-dir PATH           Override recovery lease directory.\n  --lease-ttl-seconds N      Recovery lease TTL. Default: 600.\n  --cooldown-seconds N       Window for 3-strike recovery cooldown. Default: 1800.\n  --respawn-suppression-seconds N Window after recovery where stale residue is RESPAWN_SUPPRESSED. Default: 120.\n  --idempotency-key KEY      Idempotency key for a recovery attempt. Defaults to sample hash.\n  --metrics-file P",
+    "robot_docs": "Usage:\n  frozen-pane-detector.sh --session=<session> [--json]\n  frozen-pane-detector.sh --session=all [--json]\n  frozen-pane-detector.sh --session=<session> --auto-recover [--dry-run] [--json]\n  frozen-pane-detector.sh --dry-run --self-test [--json]\n  frozen-pane-detector.sh --doctor [--json]\n  frozen-pane-detector.sh --health [--json]\n  frozen-pane-detector.sh --info [--json]\n  frozen-pane-detector.sh --schema\n  frozen-pane-detector.sh --examples\n  frozen-pane-detector.sh doctor|health [--json]\n  frozen-pane-detector.sh repair --scope audit_log_dir|ntm_state_dir [--dry-run|--apply --idempotency-key KEY] [--json]\n  frozen-pane-detector.sh validate session-name|recovery-mode|ntm-bin VALUE [--json]\n  frozen-pane-detector.sh audit|quickstart [--json]\n  frozen-pane-detector.sh why <id> [--json]\n  frozen-pane-detector.sh help <topic>\n  frozen-pane-detector.sh completion bash|zsh\n\nOptions:\n  --threshold-seconds N      Thinking/generating age threshold. Default: 90.\n  --queued-threshold-seconds N Waiting+queued prompt threshold. Default: 60.\n  --queued-timer-drift-seconds N Working timer drift threshold. Default: 60.\n  --min-delta-bytes N        Minimum live scrollback byte growth to avoid frozen. Default: 100.\n  --sample-interval-seconds N Delay between live scrollback samples. Default: 1.\n  --ntm-timeout-seconds N    Timeout for each ntm probe. Default: 8.\n  --lines N                  robot-tail line count. Default: 20.\n  --cache-dir PATH           Override scrollback cache directory.\n  --strike-file PATH         Override strike-counter JSONL.\n  --lease-dir PATH           Override recovery lease directory.\n  --lease-ttl-seconds N      Recovery lease TTL. Default: 600.\n  --cooldown-seconds N       Window for 3-strike recovery cooldown. Default: 1800.\n  --respawn-suppression-seconds N Window after recovery where stale residue is RESPAWN_SUPPRESSED. Default: 120.\n  --idempotency-key KEY      Idempotency key for a recovery attempt. Defaults to sample hash.\n  --metrics-file P"
+  },
+  "uplift": 80.0
+}

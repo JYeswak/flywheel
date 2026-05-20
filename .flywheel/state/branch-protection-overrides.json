@@ -1,0 +1,12 @@
+{
+  "schema_version": "branch_protection_overrides.v1",
+  "default_substrate": {
+    "required_pull_request_reviews": null
+  },
+  "client_defaults": {
+    "required_pull_request_reviews": {
+      "required_approving_review_count": 1
+    }
+  },
+  "repos": {}
+}

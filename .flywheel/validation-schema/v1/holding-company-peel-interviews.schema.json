@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-peel-interviews/v1/schema.json",
+  "title": "ZestStream Holding Company PEEL Interview Gate v1",
+  "description": "Ledger for the five qualified prospect-interview gate before formation cash can clear for a holding-company candidate.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "required_qualified_interviews",
+    "formation_cash_clear_count",
+    "candidates",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_peel_interviews.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "five_qualified_prospect_interviews_before_formation_cash"
+    },
+    "required_qualified_interviews": {
+      "const": 5
+    },
+    "formation_cash_clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/candidate"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "candidate": {
+      "type": "object",
+      "required": [
+        "candidate_slug",
+        "candidate_name",
+        "candidate_source",
+        "formation_cash_status",
+        "interviews",
+        "evidence_refs"
+      ],
+      "properties": {
+        "candidate_slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"
+        },
+        "candidate_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "candidate_source": {
+          "$ref": "#/$defs/candidate_source"
+        },
+        "formation_cash_status": {
+          "type": "string",
+          "enum": [
+            "not_requested",
+            "blocked",
+            "clear",
+            "committed"
+          ]
+        },
+        "interviews": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/interview"
+          }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "candidate_source": {
+      "type": "object",
+      "required": [
+        "source_channel",
+        "source_ref",
+        "evidence_ref"
+      ],
+      "properties": {
+        "source_channel": {
+          "type": "string",
+          "enum": [
+            "unknown",
+            "client_talk",
+            "community",
+            "field_trip"
+          ]
+        },
+        "source_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "evidence_ref": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "interview": {
+      "type": "object",
+      "required": [
+        "interview_id",
+        "interviewed_at",
+        "prospect_ref",
+        "pain_point",
+        "current_alternative",
+        "buying_signal"
+      ],
+      "properties": {
+        "interview_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "interviewed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "prospect_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pain_point": {
+          "type": "string",
+          "minLength": 1
+        },
+        "current_alternative": {
+          "type": "string",
+          "minLength": 1
+        },
+        "buying_signal": {
+          "$ref": "#/$defs/buying_signal"
+        }
+      },
+      "additionalProperties": false
+    },
+    "buying_signal": {
+      "type": "object",
+      "required": [
+        "would_buy",
+        "price_point",
+        "urgency",
+        "evidence_ref"
+      ],
+      "properties": {
+        "would_buy": {
+          "type": "boolean"
+        },
+        "price_point": {
+          "type": "string",
+          "minLength": 1
+        },
+        "urgency": {
+          "type": "string",
+          "enum": [
+            "none",
+            "weak",
+            "medium",
+            "strong"
+          ]
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

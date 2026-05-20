@@ -1,0 +1,75 @@
+=== SMOKE PASS (should exit 0, verified=true) ===
+{
+  "schema_version": "ground-truth-callback-verify/v1",
+  "tool_version": "ground-truth-callback-verify.v1.0.0",
+  "verified": true,
+  "per_op_results": [
+    {
+      "op": "beads_filed:flywheel-vy1yz",
+      "claimed_value": "flywheel-vy1yz",
+      "actual_value": "unknown",
+      "verified": true,
+      "reason": "bead exists"
+    },
+    {
+      "op": "commit_sha",
+      "claimed_value": "475acaa028854c3a0b62efb929c5200b80834d15",
+      "actual_value": "475acaa028854c3a0b62efb929c5200b80834d15",
+      "verified": true,
+      "reason": "commit reachable"
+    },
+    {
+      "op": "evidence",
+      "claimed_value": "/tmp/gt-smoke/real.txt",
+      "actual_value": "exists size=14",
+      "verified": true,
+      "reason": "file exists and non-empty"
+    }
+  ],
+  "reasons_for_failure": []
+}
+pass_exit=0
+
+=== SMOKE FAIL (should exit 1, verified=false, 4 fails) ===
+{
+  "schema_version": "ground-truth-callback-verify/v1",
+  "tool_version": "ground-truth-callback-verify.v1.0.0",
+  "verified": false,
+  "per_op_results": [
+    {
+      "op": "beads_filed:flywheel-phantom-doesnotexist",
+      "claimed_value": "flywheel-phantom-doesnotexist",
+      "actual_value": "missing",
+      "verified": false,
+      "reason": "bead not found via br show (error=empty)"
+    },
+    {
+      "op": "beads_filed:flywheel-nope",
+      "claimed_value": "flywheel-nope",
+      "actual_value": "missing",
+      "verified": false,
+      "reason": "bead not found via br show (error=empty)"
+    },
+    {
+      "op": "commit_sha",
+      "claimed_value": "deadbeefdeadbeef",
+      "actual_value": "missing",
+      "verified": false,
+      "reason": "commit SHA not found in repo history"
+    },
+    {
+      "op": "evidence",
+      "claimed_value": "/tmp/does-not-exist.txt",
+      "actual_value": "missing",
+      "verified": false,
+      "reason": "evidence path does not exist on disk"
+    }
+  ],
+  "reasons_for_failure": [
+    "beads_filed:flywheel-phantom-doesnotexist: bead not found via br show (error=empty)",
+    "beads_filed:flywheel-nope: bead not found via br show (error=empty)",
+    "commit_sha: commit SHA not found in repo history",
+    "evidence: evidence path does not exist on disk"
+  ]
+}
+fail_exit=1

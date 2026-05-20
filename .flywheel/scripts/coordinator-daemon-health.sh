@@ -279,3 +279,8 @@ payload="$(jq -nc \
 
 human="$(jq -r '"coordinator_daemon_alive=\(.coordinator_daemon_alive) coordinator_daemon_pid=\(.coordinator_daemon_pid // "null") coordinator_daemon_uptime_seconds=\(.coordinator_daemon_uptime_seconds // "null") coordinator_daemon_log_lines_5m=\(.coordinator_daemon_log_lines_5m) status=\(.status)"' <<<"$payload")"
 emit "$payload" "$human" 0
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

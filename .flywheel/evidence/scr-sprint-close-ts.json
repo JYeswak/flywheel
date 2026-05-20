@@ -1,0 +1,38 @@
+{
+  "schema_version": "flywheel.scr_sprint_close.v1",
+  "generated_at": "2026-05-18T19:09:30Z",
+  "source": "codex-pane-2",
+  "track_classification": "Track 3",
+  "skillos_commit": "d80c3f78",
+  "flywheel_deferral_commit": "6c800eb3",
+  "doctor_command": "cd /Users/josh/Developer/skillos && bin/skillos doctor --scope substrate-compounding-rate --json",
+  "doctor_receipt": "/tmp/skillos-scr-doctor-after-c8-20260518T190102Z.json",
+  "skillos_monthly_ledger": "/Users/josh/Developer/skillos/state/substrate-compounding/2026-05.jsonl",
+  "bar4_thresholds": {
+    "scr_composite_min": 0.83,
+    "c8_self_reference_min": 0.50
+  },
+  "observed": {
+    "scr_composite": 0.8533,
+    "c8_self_reference": 0.509,
+    "c8_raw_ratio": 0.3563049853372434,
+    "c8_total_new_artifacts": 682,
+    "c8_with_self_reference": 243,
+    "doctor_status": "OK"
+  },
+  "action": {
+    "type": "existing_artifact_cross_reference_uplift",
+    "repo": "/Users/josh/Developer/skillos",
+    "paths_modified_count": 56,
+    "doctrine_files_with_see_also_added": 55,
+    "forbidden_track_surfaces_modified": false,
+    "legal_house_modified": false,
+    "mission_goal_docs_modified": false
+  },
+  "validation": [
+    "Socraticode K>=10 query: substrate compounding rate C8 self reference counts new artifacts with_self_reference detector paths",
+    "Socraticode K>=10 query: SCR doctor self_reference component total_new_artifacts C8 existing substrate references implementation",
+    "git -C /Users/josh/Developer/skillos diff --check -- .flywheel/doctrine state/substrate-compounding/2026-05.jsonl",
+    "bin/skillos doctor --scope substrate-compounding-rate --json"
+  ]
+}

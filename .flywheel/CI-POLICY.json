@@ -1,0 +1,111 @@
+{
+  "schema_version": "flywheel.ci_policy.v1",
+  "policy": "local_first_last_drop",
+  "repo": "flywheel",
+  "generated_from_bead": "flywheel-dycce",
+  "per_push_feature_branch_ci_allowed": false,
+  "local_gates": {
+    "pre_commit": [
+      "bash -n <changed-shell-script>",
+      "bash tests/github-workflows.sh",
+      "bash tests/local-ci-policy.sh"
+    ],
+    "branch_tip": [
+      ".flywheel/scripts/local-ci/flywheel-local-ci.sh run --receipt .flywheel/runtime/local-ci-receipt.json"
+    ]
+  },
+  "last_drop_events": [
+    "pull_request.opened",
+    "pull_request.reopened",
+    "pull_request.ready_for_review",
+    "push.main",
+    "push.master",
+    "schedule.daily",
+    "workflow_dispatch",
+    "release_tag"
+  ],
+  "spend_dashboard": {
+    "month": "2026-05",
+    "current_month_estimate_usd": 300,
+    "on_target_pct": 100,
+    "target_label": "no feature-branch push CI",
+    "source": "flywheel-dycce gh-api audit proxy"
+  },
+  "workflows": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "classification": "local_replaceable",
+      "github_events": [
+        "pull_request.opened",
+        "pull_request.reopened",
+        "pull_request.ready_for_review",
+        "push.main",
+        "push.master",
+        "workflow_dispatch"
+      ],
+      "local_replacement": [
+        "scripts/pre-push-validate.sh --fast",
+        "scripts/local-actions-preflight.sh --no-act"
+      ],
+      "spend_guard": "no_feature_branch_push_ci"
+    },
+    {
+      "path": ".github/workflows/installer-smoke.yml",
+      "classification": "last_drop_required",
+      "github_events": [
+        "pull_request.opened",
+        "pull_request.reopened",
+        "pull_request.ready_for_review",
+        "schedule.daily",
+        "workflow_dispatch"
+      ],
+      "local_replacement": [
+        "scripts/local-actions-preflight.sh --dry-run"
+      ],
+      "spend_guard": "macos_runner_only_on_last_drop"
+    },
+    {
+      "path": ".github/workflows/v5-w8-public-surface-parity-daily.yml",
+      "classification": "last_drop_required",
+      "github_events": [
+        "schedule.daily",
+        "workflow_dispatch"
+      ],
+      "local_replacement": [
+        "bash scripts/preflight.sh --public --json",
+        "bash scripts/journey-smoke.sh --matrix reduced --dry-run --json"
+      ],
+      "spend_guard": "daily_conformance_not_per_push"
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "classification": "last_drop_required",
+      "github_events": [
+        "release_tag",
+        "workflow_dispatch"
+      ],
+      "local_replacement": [
+        "scripts/local-actions-preflight.sh --dry-run"
+      ],
+      "spend_guard": "release_only"
+    },
+    {
+      "path": ".github/workflows/site.yml",
+      "classification": "last_drop_required",
+      "github_events": [
+        "release_tag",
+        "workflow_dispatch"
+      ],
+      "local_replacement": [
+        "scripts/local-actions-preflight.sh --dry-run"
+      ],
+      "spend_guard": "release_only"
+    }
+  ],
+  "audit_bot_contract": {
+    "command": "bash tests/local-ci-policy.sh",
+    "requires_all_workflows_declared": true,
+    "rejects_pull_request_synchronize": true,
+    "rejects_feature_branch_push_ci": true
+  }
+}

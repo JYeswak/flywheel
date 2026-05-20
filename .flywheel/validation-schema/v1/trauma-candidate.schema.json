@@ -27,6 +27,54 @@
       "minLength": 1,
       "description": "The trauma class observed (matches fuckup-log .class field)"
     },
+    "N": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Count of class occurrences in the rolling saturation window"
+    },
+    "count_in_window": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "window_hours": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "saturation_threshold": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "class_family": {
+      "type": "string",
+      "enum": ["worker_discipline", "secrets", "general"]
+    },
+    "first_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "last_seen": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sample_rows": {
+      "type": "array",
+      "maxItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["ts", "session", "severity", "what_happened"],
+        "properties": {
+          "ts": {"type": ["string", "null"]},
+          "session": {"type": "string"},
+          "severity": {"type": "string"},
+          "what_happened": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "proposed_memory_path": {
+      "type": "string",
+      "pattern": "^feedback_[a-z0-9_]+\\.md$"
+    },
     "fuckup_log_ref": {
       "type": "string",
       "description": "Reference to source row(s): file_path#L<line> or file_path:ts=<iso>"

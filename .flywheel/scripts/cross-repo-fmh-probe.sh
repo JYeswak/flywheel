@@ -202,3 +202,8 @@ if [[ "$JSON_OUT" == 1 ]]; then
 else
   jq -r '"cross-repo-fmh lookback=\(.lookback_days)d min_repos=\(.min_repos) candidates=\(.cross_repo_candidate_count) signal=\(.cross_repo_signal) top3=\(.cross_repo_candidates[0:3] | map("\(.trauma_class)(repos=\(.repo_count) events=\(.total_events))") | join(","))"' <<<"$PAYLOAD"
 fi
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

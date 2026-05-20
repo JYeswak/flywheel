@@ -1,0 +1,21 @@
+# Generated state and local runtime noise
+.flywheel/jeff-corpus/qdrant-data/
+.flywheel/runtime/
+.flywheel/state.db*
+.flywheel/logs/
+
+# Generated inventories and large audit rows
+.flywheel/**/inventory*.jsonl
+inventory/**/*.jsonl
+.flywheel/audits/**/*.jsonl
+.flywheel/audit/**/*.jsonl
+
+# Dependency and interpreter caches
+node_modules/
+**/node_modules/
+__pycache__/
+**/__pycache__/
+.ruff_cache/
+
+# Scratch workspaces
+.repo_janitor_workspace/

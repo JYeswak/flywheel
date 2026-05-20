@@ -1,0 +1,29 @@
+{
+  "schema_version": "flywheel.public_share_workflow_payload_contract_repair.v1",
+  "ts": "2026-05-17T04:50:00Z",
+  "tracking_bead": "skillos-zxuf",
+  "owner_lane": "flywheel:n8n",
+  "n8n_workflow": {
+    "id": "WnrOZhtELAAaIHVi",
+    "name": "GAP_Voice_Gated_Publisher",
+    "webhook": "https://n8n.zeststream.ai/webhook/voice-gate-publisher",
+    "version_after": "0d3d6b67-78e2-4dbb-a8be-2e4e761cac28",
+    "active_version_after": "0d3d6b67-78e2-4dbb-a8be-2e4e761cac28"
+  },
+  "validation": {
+    "dry_run_receipt": "/Users/josh/Developer/skillos/state/public-share/2026-05-17/linkedin-001-weekly-system-sharpening-publish-receipt-2026-05-17T044939Z.json",
+    "dry_run_exit_code": 0,
+    "dry_run_http_status": 200,
+    "dry_run_payload_present": true,
+    "dry_run_pass": true,
+    "dry_run_score": 0.95,
+    "dry_run_dispatch_status": "skipped",
+    "dry_run_published": false,
+    "scoped_doctor_status": "OK"
+  },
+  "safety": {
+    "live_publish_attempted": false,
+    "secret_material_recorded": false,
+    "live_distribution_gated": true
+  }
+}

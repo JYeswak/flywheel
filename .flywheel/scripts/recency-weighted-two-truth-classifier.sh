@@ -44,3 +44,8 @@ run(){
 while [[ $# -gt 0 ]]; do case "$1" in
   --info|--doctor|--health|--validate|--audit|--why|--repair) MODE=info; shift;; --schema) MODE=schema; shift;; --check) MODE=check; shift;; --json) JSON=1; shift;; --session) SESSION="${2:?}"; shift 2;; --session=*) SESSION="${1#*=}"; shift;; --pane) PANE="${2:?}"; shift 2;; --pane=*) PANE="${1#*=}"; shift;; --peer-pane) PEER="${2:?}"; shift 2;; --peer-pane=*) PEER="${1#*=}"; shift;; --lines) LINES="${2:?}"; shift 2;; --lines=*) LINES="${1#*=}"; shift;; --dry-run|--explain) shift;; -h|--help) usage; exit 0;; *) echo "invalid arg: $1" >&2; usage >&2; exit 2;; esac; done
 case "$MODE" in info) info;; schema) schema;; check) out="$(printf 'ERROR failed_text old\napi_error old\n❯ \n' | "$0" --json)"; jq -e '.verdict=="WAITING"' >/dev/null <<<"$out"; [[ "$JSON" -eq 1 ]] && jq -nc '{status:"pass"}' || echo pass;; classify) run;; esac
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-19-flywheel-engagement-protocol.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-61-agent-first-operator-surface.md`

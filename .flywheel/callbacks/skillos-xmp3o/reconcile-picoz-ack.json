@@ -1,0 +1,10 @@
+{
+  "schema_version": "skillos.cross_orch_handoff_ack.v1",
+  "ts": "2026-05-19T16:29:59Z",
+  "handoff_id": "20260519T0721Z-from-flywheel-to-skillos-reconcile-mp-divergence-picoz",
+  "responder": "skillos:1",
+  "disposition": "accepted-reconcile-deferred",
+  "tracking_bead": "skillos-xmp3o",
+  "audit_note": "PROPAGATE row in inheritance audit confirms 70/70 present + 30 divergences. Reconcile needs per-divergence diff before applying; that authoring is gated on cadence policy + flywheel-side per-skill diff sprint output (referenced in flywheel:1 Ask 2 handoff 20260519T1546Z).",
+  "estimated_landing": "2026-06-02+"
+}

@@ -378,3 +378,8 @@ fi
 row="$(jq -nc --arg ts "$(now_iso)" --arg task "$TASK_ID" --arg bead "$BEAD" --arg reason "$REASON" --arg dispatch "$DISPATCH_FILE" --arg artifacts "$ARTIFACT_LIST" --arg dedupe "$dedupe_key" --arg fix "$fix_id" '{schema_version:"orchestrator-callback-artifact-fix-bead/v1",ts:$ts,status:"pass",action:"jsonl_fallback",task_id:$task,bead:$bead,reason:$reason,dispatch_file:$dispatch,artifact_list:($artifacts | split("\n") | map(select(length > 0))),dedupe_key:$dedupe,fix_bead_id:$fix}')"
 append_ledger "$row" || true
 emit "$row"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-04-receipt-callback-envelope.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-88-content-addressed-evidence-pack.md`

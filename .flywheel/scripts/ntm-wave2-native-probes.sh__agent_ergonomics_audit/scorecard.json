@@ -1,0 +1,75 @@
+{
+  "dimensions": {
+    "agent_ease_of_use": {
+      "final": 875,
+      "initial": 750
+    },
+    "agent_ergonomics": {
+      "final": 850,
+      "initial": 725
+    },
+    "agent_intuitiveness": {
+      "final": 820,
+      "initial": 770
+    },
+    "composability": {
+      "final": 825,
+      "initial": 775
+    },
+    "determinism_and_reproducibility": {
+      "final": 850,
+      "initial": 800
+    },
+    "error_pedagogy": {
+      "final": 780,
+      "initial": 730
+    },
+    "intent_inference": {
+      "final": 725,
+      "initial": 675
+    },
+    "output_parseability": {
+      "final": 875,
+      "initial": 750
+    },
+    "safety_with_recovery": {
+      "final": 1000,
+      "initial": 950
+    },
+    "self_documentation": {
+      "final": 875,
+      "initial": 750
+    }
+  },
+  "evidence": {
+    "bad_invocation_rc": 2,
+    "capabilities_json": true,
+    "capabilities_rc": 0,
+    "deterministic_json_probe": true,
+    "help_rc": 0,
+    "json_probe_rc": 0,
+    "json_probe_valid_json": true,
+    "robot_docs_rc": 0,
+    "useful_error": true
+  },
+  "final_score": 847.5,
+  "initial_score": 767.5,
+  "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+  "schema_version": "agent-ergonomics.scorecard/v1",
+  "surface": {
+    "capabilities_args": "capabilities --json",
+    "class": "doctor",
+    "invoke_count_30d": 56,
+    "json_probe_args": "agents --json",
+    "path": ".flywheel/scripts/ntm-wave2-native-probes.sh",
+    "robot_docs_args": "robot-docs"
+  },
+  "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/ntm-wave2-native-probes.sh",
+  "transcripts": {
+    "bad_invocation_stderr": "unknown surface: --jsno\nusage: ntm-wave2-native-probes.sh <surface> [--json]\nsurfaces: agents analytics cass config extract get-all-session-text memory resume\n\nAgent automation:\n  ntm-wave2-native-probes.sh capabilities --json\n  ntm-wave2-native-probes.sh agents --json\n  ntm-wave2-native-probes.sh robot-docs\n  Exit codes: 0 success, 2 usage error. Missing native ntm data is returned as null fields, not a hard failure.\n",
+    "capabilities": "{\"schema_version\":\"ntm-wave2-native-probes/v1\",\"command\":\"capabilities\",\"contract_version\":\"1\",\"features\":[\"json_output\",\"native_probe_bundle\",\"null_on_native_failure\",\"robot_docs\"],\"surfaces\":[\"agents\",\"analytics\",\"cass\",\"config\",\"extract\",\"get-all-session-text\",\"memory\",\"resume\"],\"commands\":{\"agents\":{\"command\":\"ntm-wave2-native-probes.sh agents --json\",\"read_only\":true},\"analytics\":{\"command\":\"ntm-wave2-native-probes.sh analytics --json\",\"read_only\":true},\"robot_docs\":{\"command\":\"ntm-wave2-native-probes.sh robot-docs\",\"read_only\":true}},\"exit_codes\":{\"0\":\"success\",\"2\":\"usage error\"},\"env_vars\":{\"NTM_BIN\":\"override ntm binary\",\"NTM_WAVE2_SESSION\":\"session for session-scoped probes\",\"NTM_WAVE2_TASK_TITLE\":\"task title for recommendation probes\"}}\n",
+    "help": "usage: ntm-wave2-native-probes.sh [SUBCOMMAND] [OPTIONS]\n\nBackward-compatible run mode: default invocation routes to the original\ntop-level logic (now exposed as `cmd_run`).\n\nCanonical CLI surfaces:\n  doctor [--json]          probe substrate health\n  health [--json]          last-run status\n  repair --scope <s>       repair misconfigured state\n                            Default: --dry-run; mutate with --apply --idempotency-key KEY\n  validate <subject> [...] validate per-subject contract (TODO: define subjects)\n  audit [--json]           recent run history\n  why <id>                 explain provenance for a given id (TODO: id semantics)\n  quickstart [--json]      operator orientation\n  help <topic>             topic help (run | doctor | health | repair | validate)\n  completion <shell>       emit bash or zsh completion\n\nIntrospection:\n  --info --json            version, paths, env vars, dependencies, sha256\n  --schema [<surface>]     JSON Schema for output envelopes\n  --examples --json        curated workflow examples\n  --help / -h              this help\n",
+    "robot_docs": "null status=null\n"
+  },
+  "uplift": 80.0
+}

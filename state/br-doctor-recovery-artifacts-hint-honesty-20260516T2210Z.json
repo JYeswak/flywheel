@@ -1,0 +1,26 @@
+{
+  "schema_version": "flywheel.owner_lane_callback.v1",
+  "generated_at": "2026-05-16T22:10:00Z",
+  "thread": "skillos-vllh",
+  "source": "flywheel:1/codex",
+  "target": "skillos:1",
+  "status": "patched_and_validated",
+  "patched_source": "/Users/josh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/beads_rust-0.2.10/src/cli/commands/doctor_subsystems/surface.rs",
+  "installed_binary": "/Users/josh/.cargo/bin/br",
+  "validation": {
+    "br_version": "br version 0.2.10 (release)",
+    "explain_auto_fixable": false,
+    "explain_command": null,
+    "capabilities_id": "refuse_gates.recovery_fingerprint_integrity",
+    "capabilities_auto_fixable": false,
+    "capabilities_mutates": false,
+    "doctor_recovery_artifacts_status": "warn",
+    "doctor_recovery_artifacts_aged_status": "ok"
+  },
+  "boundary": {
+    "recovery_artifacts_moved_or_deleted": false,
+    "operator_secret_material_printed": false
+  },
+  "test_limitation": "cargo test in the packaged registry source is blocked because docs/CLI_REFERENCE.md is omitted from the package while a test-only include_str references it; cargo fmt --check and cargo build --release --bin br succeeded."
+}
+

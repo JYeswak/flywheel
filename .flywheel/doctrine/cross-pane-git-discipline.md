@@ -157,3 +157,12 @@ Doctrine ratified P3-trivial 2026-05-10T21:35Z. Default-accept window: 6h (until
 - Doctrine v0.1 drafted (skillos side): 2026-05-10T21:35Z
 - Flywheel canonical doctrine drafted (parallel authorship): 2026-05-10T21:35Z
 - Total class-naming + ratification + doctrine cycle: ~5 hours from 1st instance to bilateral ratified doctrine
+
+
+## Meta-Learning Cross-References (2026-05-19)
+
+This doctrine surface was backfilled during JSM fleet audit batch-3 so recent doctrine cites the relevant MP lessons directly.
+
+- **MP-17 — secret emission discipline:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md` for the canonical pattern.
+- **MP-29 — production safety guardrails:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-29-production-safety-guardrails.md` for the canonical pattern.
+- **MP-30 — human-gated invasiveness:** see `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-30-human-gated-invasiveness.md` for the canonical pattern.

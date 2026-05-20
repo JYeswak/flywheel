@@ -1,0 +1,40 @@
+{
+  "schema_version": "zeststream.holding_company_founder_post_voice.v1",
+  "generated_at": "2026-05-17T09:00:00Z",
+  "gate": "founder_post_anti_pitch_voice",
+  "required_positioning": "sharpen_legacy_incubate_new_not_builder",
+  "clear_count": 0,
+  "posts": [
+    {
+      "post_id": "linkedin-weekly-system-sharpening-20260516",
+      "channel": "linkedin",
+      "status": "needs_revision",
+      "draft_ref": "/Users/josh/Developer/skillos/state/public-share/2026-05-16/linkedin-001-weekly-system-sharpening.md",
+      "publisher_receipt_ref": "/Users/josh/Developer/skillos/state/public-share/2026-05-17/linkedin-001-weekly-system-sharpening-publish-receipt-2026-05-17T045455Z.json",
+      "fact_check_ref": "/Users/josh/Developer/skillos/state/public-share/2026-05-16/FACT-CHECK-2026-05-16.md",
+      "human_ratification_required": true,
+      "holding_company_positioning_present": false,
+      "receipt_story_present": true,
+      "claim_fact_check_status": "fail",
+      "builder_framing_hits": [],
+      "proof_or_receipt_refs": [
+        "/Users/josh/Developer/skillos/state/public-share/2026-05-16/FACT-CHECK-2026-05-16.md",
+        "/Users/josh/Developer/skillos/state/public-share/2026-05-17/linkedin-001-weekly-system-sharpening-publish-receipt-2026-05-17T045455Z.json"
+      ],
+      "evidence_refs": [
+        "state/holding-company-anti-pitch-voice.json",
+        "state/holding-company-brand-voice-skill.json",
+        "/Users/josh/Developer/skillos/state/public-share/2026-05-16/linkedin-001-weekly-system-sharpening.md",
+        "/Users/josh/Developer/skillos/state/public-share/2026-05-16/FACT-CHECK-2026-05-16.md",
+        "/Users/josh/Developer/skillos/state/public-share/2026-05-17/linkedin-001-weekly-system-sharpening-publish-receipt-2026-05-17T045455Z.json"
+      ],
+      "notes": "The publisher dry-run passed, but the fact-check reports the cited 5,318 commits claim is 333 above the measured value and the draft does not carry the holding-company sharpen/incubate positioning. This post is not founder-post clear."
+    }
+  ],
+  "notes": [
+    "This ledger covers Joshua public posts and public-share drafts, separately from zeststream.ai site-surface anti-pitch checks.",
+    "Publisher dry-run success is not enough: posts must carry holding-company positioning, receipt-led claims, fact-check pass/no-claims status, and human ratification gating.",
+    "Live distribution remains outside this ledger; this gate only records whether a post is voice/receipt clear."
+  ],
+  "next_action": "Revise the public-share draft to use fact-checked receipt values and explicit holding-company positioning before marking any founder post clear."
+}

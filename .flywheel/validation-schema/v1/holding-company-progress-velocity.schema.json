@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-progress-velocity/v1/schema.json",
+  "title": "ZestStream Holding Company Progress Velocity v1",
+  "description": "Ledger for the recent progress velocity claim: 4,000+ commits in 7 days across exactly 9 product surfaces.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "claim_text",
+    "status",
+    "target_min_commits",
+    "target_window_days",
+    "target_surface_count",
+    "window_start",
+    "window_end",
+    "exact_surface_set_established",
+    "measured_total_commit_count",
+    "surface_counts",
+    "evidence_command",
+    "evidence_refs",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_progress_velocity.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "recent_progress_velocity"
+    },
+    "claim_text": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "blocked",
+        "proven",
+        "deferred"
+      ]
+    },
+    "target_min_commits": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "target_window_days": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "target_surface_count": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "window_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "window_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "exact_surface_set_established": {
+      "type": "boolean"
+    },
+    "measured_total_commit_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "surface_counts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/surface_count"
+      }
+    },
+    "evidence_command": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "surface_count": {
+      "type": "object",
+      "required": [
+        "surface_id",
+        "repo_path",
+        "commit_count",
+        "evidence_ref"
+      ],
+      "properties": {
+        "surface_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9_-]{1,96}$"
+        },
+        "repo_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

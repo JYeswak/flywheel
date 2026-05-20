@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Meta-pattern Adoption stance:
+# Embodies MP-32-executable-probe-source-of-truth.md and MP-24-boundary-validation-fail-closed.md.
+# Source: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/
 # shellcheck disable=SC2034
 set -euo pipefail
 
@@ -467,7 +470,13 @@ usage() {
     "Usage:" \
     "  storage-probe.sh [--json] [--repo PATH] [--record-history] [--notify]" \
     "  storage-probe.sh --fixture PATH [--json] [--record-history] [--notify]" \
+    "  storage-probe.sh capabilities --json" \
+    "  storage-probe.sh robot-docs" \
     "  storage-probe.sh --schema|--info|--examples|--help" \
+    "" \
+    "Agent automation: start with capabilities --json, then run --json. Use" \
+    "--record-history only when intentionally appending storage history." \
+    "Exit codes: 0 success, 1 dependency/probe failure, 2 usage error." \
     "" \
     "Fields: disk_free_gb, disk_free_pct, developer_dir_gb, local_state_gb," \
     "stale_baks_count, stale_baks_size_mb, qdrant_volumes_size_mb, tmp_dispatch_artifacts_count."
@@ -486,14 +495,49 @@ schema_json() {
     "$schema":"https://json-schema.org/draft/2020-12/schema",
     title:"flywheel storage probe",
     type:"object",
-    required:["version","ts","status","disk_free_gb","disk_free_pct","developer_dir_gb","local_state_gb","stale_baks_count","stale_baks_size_mb","qdrant_volumes_size_mb","tmp_dispatch_artifacts_count","errors","warnings"],
+    required:["version","ts","status","disk_free_gb","disk_free_pct","developer_dir_gb","local_state_gb","stale_baks_count","stale_baks_size_mb","qdrant_volumes_size_mb","tmp_dispatch_artifacts_count","errors","warnings","storage_tier","storage_tier_label","storage_health"],
     properties:{
       status:{enum:["ok","warn","fail"]},
       disk_free_gb:{type:"number"},
       disk_free_pct:{type:"number"},
-      stale_baks_count:{type:"integer"}
+      stale_baks_count:{type:"integer"},
+      storage_tier:{type:"integer",minimum:0,maximum:5},
+      storage_tier_label:{enum:["comfortable","monitor","soft_prune","critical","fire","nuclear"]}
     }
   }'
+}
+
+capabilities_json() {
+  jq -nc --arg version "$VERSION" --arg history "$HISTORY" '{
+    schema_version:"storage-probe.capabilities.v1",
+    command:"capabilities",
+    version:$version,
+    contract_version:"1",
+    features:["json_output","fixture_mode","history_append_opt_in","thresholds","robot_docs"],
+    commands:{
+      probe:{command:"storage-probe.sh --json",read_only:true},
+      fixture:{command:"storage-probe.sh --fixture PATH --json",read_only:true},
+      record_history:{command:"storage-probe.sh --record-history --json",read_only:false},
+      schema:{command:"storage-probe.sh --schema",read_only:true}
+    },
+    exit_codes:{"0":"success","1":"dependency/probe failure","2":"usage error"},
+    env_vars:{
+      FLYWHEEL_STORAGE_HISTORY:$history,
+      FLYWHEEL_STORAGE_MIN_FREE_PCT:"minimum free percentage before fail",
+      FLYWHEEL_STORAGE_FIRE_FREE_PCT:"fire threshold for notification"
+    }
+  }'
+}
+
+robot_docs() {
+  cat <<'EOF'
+Storage probe robot guide:
+1. Discover: storage-probe.sh capabilities --json
+2. Read current state: storage-probe.sh --json
+3. Test with fixture: storage-probe.sh --fixture PATH --json
+4. Append history only when requested: storage-probe.sh --record-history --json
+5. Treat stdout as JSON data; diagnostics and usage errors go to stderr.
+EOF
 }
 
 now_iso() {
@@ -683,12 +727,39 @@ status_json() {
       | (($m.disk_free_pct // 0) < $fire_free) as $fire
       | (($m.stale_baks_count // 0) > 5) as $many_baks
       | ($m.probe_warnings // []) as $probe_warnings
+      | (($m.compaction_failed == true) or ($m.docker_raw_dominates == true) or ($m.machine_blocked == true) or ($m.nuclear_signal == true) or ($m.storage_nuclear == true)) as $nuclear
+      | (($m.storage_backed_services_unhealthy == true) or ($m.docker_unhealthy == true) or ($m.qdrant_unhealthy == true)) as $service_unhealthy
+      | (($m.disk_free_pct // 0) | tonumber) as $free_pct
+      | (if $nuclear then 5 elif $free_pct < 5 then 4 elif ($free_pct <= 15 or $service_unhealthy) then 3 elif $free_pct < 30 then 2 elif $free_pct <= 50 then 1 else 0 end) as $storage_tier
+      | (["comfortable","monitor","soft_prune","critical","fire","nuclear"][$storage_tier]) as $storage_tier_label
+      | [
+          {name:"developer_dir_gb",value:(($m.developer_dir_gb // 0) | tonumber),unit:"GiB"},
+          {name:"local_state_gb",value:(($m.local_state_gb // 0) | tonumber),unit:"GiB"},
+          {name:"stale_baks_count",value:(($m.stale_baks_count // 0) | floor),unit:"count"},
+          {name:"stale_baks_size_mb",value:(($m.stale_baks_size_mb // 0) | tonumber),unit:"MiB"},
+          {name:"qdrant_volumes_size_mb",value:(($m.qdrant_volumes_size_mb // 0) | tonumber),unit:"MiB"},
+          {name:"tmp_dispatch_artifacts_count",value:(($m.tmp_dispatch_artifacts_count // 0) | floor),unit:"count"}
+        ] as $accumulators
       | {
           version:$version,
           ts:$ts,
           repo:$repo,
-          status:(if ($low or $many_baks) then "fail" elif (($m.disk_free_pct // 0) < 15) then "warn" else "ok" end),
-          tier:(if $fire then "FIRE" elif $low then "CRITICAL" elif (($m.disk_free_pct // 0) < 15) then "SOFT_PRUNE" else "OK" end),
+          status:(if ($storage_tier >= 3 or $many_baks) then "fail" elif $storage_tier == 2 then "warn" else "ok" end),
+          tier:(if $storage_tier == 5 then "NUCLEAR" elif $storage_tier == 4 then "FIRE" elif $storage_tier == 3 then "CRITICAL" elif $storage_tier == 2 then "SOFT_PRUNE" else "OK" end),
+          storage_tier:$storage_tier,
+          storage_tier_label:$storage_tier_label,
+          storage_gate_blocks_dispatch:($storage_tier >= 3),
+          storage_health:{
+            schema_version:"storage-health-probe/v1",
+            status:(if $storage_tier >= 3 then "fail" elif $storage_tier == 2 then "warn" else "ok" end),
+            tier:$storage_tier,
+            tier_label:$storage_tier_label,
+            free_pct:$free_pct,
+            accumulators:$accumulators,
+            dispatch_gate:{blocks_dispatch:($storage_tier >= 3),threshold_tier:3,reason:(if $storage_tier >= 3 then "tier>=3" else "tier<3" end)},
+            dashboard_line:("Storage: tier=\($storage_tier)/\($storage_tier_label) free=\($free_pct)% gate=" + (if $storage_tier >= 3 then "block" else "allow" end) + " accumulators=\($accumulators|length)")
+          },
+          dashboard_line:("Storage: tier=\($storage_tier)/\($storage_tier_label) free=\($free_pct)% gate=" + (if $storage_tier >= 3 then "block" else "allow" end) + " accumulators=\($accumulators|length)"),
           disk_total_gb:(($m.disk_total_gb // 0) | tonumber),
           disk_free_gb:(($m.disk_free_gb // 0) | tonumber),
           disk_free_pct:(($m.disk_free_pct // 0) | tonumber),
@@ -748,6 +819,8 @@ build_row() {
 parse_args() {
   while [ $# -gt 0 ]; do
     case "$1" in
+      capabilities|--capabilities) capabilities_json; exit 0 ;;
+      robot-docs|robot-docs-guide) robot_docs; exit 0 ;;
       --help|-h) usage; exit 0 ;;
       --examples) examples; exit 0 ;;
       --schema) schema_json; exit 0 ;;
@@ -781,3 +854,8 @@ main() {
 }
 
 main "$@"
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-02-conformance-fixtures.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-68-schema-executable-validator-pair.md`

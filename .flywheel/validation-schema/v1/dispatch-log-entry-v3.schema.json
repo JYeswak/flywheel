@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://zeststream.ai/flywheel/schemas/dispatch-log-entry-v3.json",
+  "title": "Flywheel dispatch-log entry v3",
+  "description": "Callback envelope extension for post-callback cleanup and tiered close-bar evidence. v2 rows remain valid legacy rows.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {
+      "anyOf": [
+        { "const": 3 },
+        { "const": "callback-envelope/v3" },
+        { "const": "dispatch-log-entry-v3" }
+      ]
+    },
+    "post_callback_worktree_removed": {
+      "type": ["boolean", "null"]
+    },
+    "post_callback_branch_local_deleted": {
+      "type": ["boolean", "null"]
+    },
+    "post_callback_stash_dropped": {
+      "type": ["boolean", "null"]
+    },
+    "post_callback_main_ff_status": {
+      "enum": ["ok", "behind", "diverged", "unknown"]
+    },
+    "post_callback_auto_push_status": {
+      "enum": ["ok", "blocked", "swept", "skipped"]
+    },
+    "close_class": {
+      "enum": ["substrate_class", "runtime_class"]
+    },
+    "runtime_receipt_path": {
+      "type": ["string", "null"]
+    },
+    "runtime_artifacts": {
+      "type": "object"
+    },
+    "commit_sha": {
+      "type": "string",
+      "minLength": 7
+    },
+    "commit": {
+      "type": "string",
+      "minLength": 7
+    },
+    "tests": {
+      "type": "string"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "close_class": { "const": "runtime_class" } },
+        "required": ["close_class"]
+      },
+      "then": {
+        "required": ["runtime_receipt_path", "runtime_artifacts"],
+        "properties": {
+          "runtime_receipt_path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "runtime_artifacts": {
+            "type": "object",
+            "minProperties": 1
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "hooks": [
+    {
+      "args": [],
+      "command": "/Users/josh/.claude/hooks/PreToolUse-bash-slb.sh",
+      "timeout": 10,
+      "type": "command"
+    },
+    {
+      "args": [],
+      "command": "dcg",
+      "timeout": 10,
+      "type": "command"
+    },
+    {
+      "args": [],
+      "command": "/Users/josh/.claude/hooks/pretooluse-bash-secret-guard.sh",
+      "timeout": 10,
+      "type": "command"
+    },
+    {
+      "args": [],
+      "command": "/Users/josh/.claude/hooks/npm-install-guard-hook.sh",
+      "timeout": 10,
+      "type": "command"
+    },
+    {
+      "args": [],
+      "command": "/Users/josh/.claude/hooks/pretooluse-bash-cross-repo-guard.sh",
+      "timeout": 10,
+      "type": "command"
+    },
+    {
+      "args": [],
+      "command": "/Users/josh/.claude/hooks/PreToolUse-codex-goal-format-enforcement.sh",
+      "timeout": 10,
+      "type": "command"
+    }
+  ],
+  "matcher": "Bash"
+}

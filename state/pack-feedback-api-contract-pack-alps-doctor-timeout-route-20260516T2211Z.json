@@ -1,0 +1,43 @@
+{
+  "schema_version": "flywheel.owner_lane_route.v1",
+  "generated_at": "2026-05-16T22:11:00Z",
+  "source": "flywheel:1/codex",
+  "target_lane": "alpsinsurance",
+  "callback_target": "skillos:1",
+  "thread": "skillos-sued",
+  "topic": "api-contract-pack doctor timeout",
+  "status": "routed",
+  "ntm_observation": {
+    "alpsinsurance_live": true,
+    "alpsinsurance_pane": 0
+  },
+  "verification_probe": {
+    "command": "bin/skillos pack-feedback verify-consumers --pack-name api-contract-pack --output state/pack-feedback-consumer-verification-tool-20260516T2205Z.codex-probe.json --json",
+    "output_path": "/Users/josh/Developer/skillos/state/pack-feedback-consumer-verification-tool-20260516T2205Z.codex-probe.json",
+    "generated_at": "2026-05-16T22:06:26Z",
+    "row_count": 4,
+    "status": "warn"
+  },
+  "alps_row": {
+    "bead_id": "skillos-sued",
+    "pack_name": "api-contract-pack",
+    "verification_status": "fail",
+    "failure_codes": ["DOCTOR_TIMEOUT"],
+    "reason": "doctor timed out after 60s",
+    "safe_to_supersede": false,
+    "target_repo": "/Users/josh/Developer/alpsinsurance",
+    "target_head": "8a2564c0fd5a5cbf0de30d08403288405a7bc35f",
+    "target_dirty": true,
+    "target_dirty_count": 206,
+    "gap_hash": "1ca63193e22a",
+    "gap_type": "wrong_shape"
+  },
+  "incoming_packet_discrepancy": {
+    "packet_target_dirty": false,
+    "codex_probe_target_dirty": true,
+    "codex_probe_target_dirty_count": 206,
+    "handling": "preserve discrepancy; do not supersede or merge with prior dirty route before owner-lane timeout triage"
+  },
+  "handoff_path": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260516T2211Z-from-flywheel-to-alpsinsurance-api-contract-pack-doctor-timeout.md",
+  "callback_path": "/Users/josh/Developer/flywheel/.flywheel/handoffs/20260516T2212Z-from-flywheel-to-skillos-api-contract-pack-alps-timeout-route-callback.md"
+}

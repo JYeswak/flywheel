@@ -1,0 +1,75 @@
+{
+  "dimensions": {
+    "agent_ease_of_use": {
+      "final": 875,
+      "initial": 750
+    },
+    "agent_ergonomics": {
+      "final": 850,
+      "initial": 725
+    },
+    "agent_intuitiveness": {
+      "final": 820,
+      "initial": 770
+    },
+    "composability": {
+      "final": 825,
+      "initial": 775
+    },
+    "determinism_and_reproducibility": {
+      "final": 650,
+      "initial": 600
+    },
+    "error_pedagogy": {
+      "final": 780,
+      "initial": 730
+    },
+    "intent_inference": {
+      "final": 725,
+      "initial": 675
+    },
+    "output_parseability": {
+      "final": 875,
+      "initial": 750
+    },
+    "safety_with_recovery": {
+      "final": 1000,
+      "initial": 950
+    },
+    "self_documentation": {
+      "final": 875,
+      "initial": 750
+    }
+  },
+  "evidence": {
+    "bad_invocation_rc": 2,
+    "capabilities_json": true,
+    "capabilities_rc": 0,
+    "deterministic_json_probe": false,
+    "help_rc": 0,
+    "json_probe_rc": 0,
+    "json_probe_valid_json": true,
+    "robot_docs_rc": 0,
+    "useful_error": true
+  },
+  "final_score": 827.5,
+  "initial_score": 747.5,
+  "rubric": "agent-ergonomics-max 10-dimension phase3 subset",
+  "schema_version": "agent-ergonomics.scorecard/v1",
+  "surface": {
+    "capabilities_args": "capabilities --json",
+    "class": "doctor",
+    "invoke_count_30d": 68,
+    "json_probe_args": "--json",
+    "path": ".flywheel/scripts/storage-probe.sh",
+    "robot_docs_args": "robot-docs"
+  },
+  "target": "/Users/josh/Developer/flywheel/.flywheel/scripts/storage-probe.sh",
+  "transcripts": {
+    "bad_invocation_stderr": "ERROR: unknown argument: --jsno\n",
+    "capabilities": "{\"schema_version\":\"storage-probe.capabilities.v1\",\"command\":\"capabilities\",\"version\":\"storage-probe.v1\",\"contract_version\":\"1\",\"features\":[\"json_output\",\"fixture_mode\",\"history_append_opt_in\",\"thresholds\",\"robot_docs\"],\"commands\":{\"probe\":{\"command\":\"storage-probe.sh --json\",\"read_only\":true},\"fixture\":{\"command\":\"storage-probe.sh --fixture PATH --json\",\"read_only\":true},\"record_history\":{\"command\":\"storage-probe.sh --record-history --json\",\"read_only\":false},\"schema\":{\"command\":\"storage-probe.sh --schema\",\"read_only\":true}},\"exit_codes\":{\"0\":\"success\",\"1\":\"dependency/probe failure\",\"2\":\"usage error\"},\"env_vars\":{\"FLYWHEEL_STORAGE_HISTORY\":\"/Users/josh/.local/state/flywheel/storage-history.jsonl\",\"FLYWHEEL_STORAGE_MIN_FREE_PCT\":\"minimum free percentage before fail\",\"FLYWHEEL_STORAGE_FIRE_FREE_PCT\":\"fire threshold for notification\"}}\n",
+    "help": "usage: storage-probe.sh [SUBCOMMAND] [OPTIONS]\n\nBackward-compatible run mode: default invocation routes to the original\ntop-level logic (now exposed as `cmd_run`).\n\nCanonical CLI surfaces:\n  doctor [--json]          probe substrate health\n  health [--json]          last-run status\n  repair --scope <s>       repair misconfigured state\n                            Default: --dry-run; mutate with --apply --idempotency-key KEY\n  validate <subject> [...] validate per-subject contract (TODO: define subjects)\n  audit [--json]           recent run history\n  why <id>                 explain provenance for a given id (TODO: id semantics)\n  quickstart [--json]      operator orientation\n  help <topic>             topic help (run | doctor | health | repair | validate)\n  completion <shell>       emit bash or zsh completion\n\nIntrospection:\n  --info --json            version, paths, env vars, dependencies, sha256\n  --schema [<surface>]     JSON Schema for output envelopes\n  --examples --json        curated workflow examples\n  --help / -h              this help\n",
+    "robot_docs": "Storage probe robot guide:\n1. Discover: storage-probe.sh capabilities --json\n2. Read current state: storage-probe.sh --json\n3. Test with fixture: storage-probe.sh --fixture PATH --json\n4. Append history only when requested: storage-probe.sh --record-history --json\n5. Treat stdout as JSON data; diagnostics and usage errors go to stderr.\n"
+  },
+  "uplift": 80.0
+}

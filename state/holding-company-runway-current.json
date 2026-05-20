@@ -1,0 +1,25 @@
+{
+  "schema_version": "zeststream.holding_company_runway_receipt.v1",
+  "generated_at": "2026-05-17T07:01:00Z",
+  "subject": "joshua_personal_runway",
+  "launch_gate": "sub_1",
+  "status": "not_provided",
+  "required_months": 18,
+  "verified_runway_months": null,
+  "redaction": {
+    "cash_balances_redacted": true,
+    "monthly_burn_redacted": true,
+    "account_identifiers_redacted": true,
+    "secret_material_present": false
+  },
+  "calculation_basis": {
+    "scenario": "not_provided",
+    "method": "not_provided",
+    "last_reviewed_at": null
+  },
+  "evidence_refs": [
+    "/Users/josh/Desktop/zeststream-goals/zeststream/holding-company-portfolio-20260516.txt",
+    "/Users/josh/Developer/skillos/state/holding-co-quant/CHANGES.md"
+  ],
+  "next_action": "Joshua provides a redacted months-only runway receipt for sub #1. Do not store balances, burn-rate dollars, account identifiers, or secrets."
+}

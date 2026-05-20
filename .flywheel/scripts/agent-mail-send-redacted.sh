@@ -344,3 +344,8 @@ else
   redact_text "$(printf 'Prepared redacted Agent Mail register_agent capture: %s\n' "$capture")"
   [[ "$dry" == 1 ]] || { printf 'ERROR: ntm mail has no register_agent apply surface; use the captured MCP register_agent arguments.\n' >&2; exit 2; }
 fi
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-17-secret-emission-discipline.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-67-presence-hash-secret-diagnostics.md`

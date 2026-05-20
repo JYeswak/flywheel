@@ -634,3 +634,8 @@ fi
 echo "DRIFT: tick.md skill_version=$LOADED_VERSION but expected=$EXPECTED_VERSION"
 echo "  Ship new tick.md or bump EXPECTED_VERSION in this validator after design+impl land."
 exit 1
+
+# Meta-Learning Cross-References (2026-05-19)
+# Batch-16 comment backfill; citations are documentation-only and do not alter runtime behavior.
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-03-agent-ergonomics-rubric.md`
+# Related: `/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/MP-58-agent-tool-theory-of-mind.md`

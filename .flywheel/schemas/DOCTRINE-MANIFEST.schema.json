@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://flywheel.zeststream.ai/schemas/DOCTRINE-MANIFEST.schema.json",
+  "title": "DOCTRINE-MANIFEST",
+  "description": "Per-consumer-repo declaration of which upstream flywheel doctrine docs this repo wants tracked. Authored under bead flywheel-k8pee as part of the doctrine-pull-ownership-inversion. Carrier: /flywheel:sync-doctrine.",
+  "type": "object",
+  "required": ["version", "tracked_doctrines"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version. Pin to 'v1' for current consumers.",
+      "enum": ["v1"]
+    },
+    "tracked_doctrines": {
+      "type": "array",
+      "description": "List of doctrine doc filenames (relative to upstream .flywheel/doctrine/) this repo wants synced. Empty array = track nothing; absent manifest = track ALL upstream doctrine.",
+      "items": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9._/-]+$"
+      },
+      "uniqueItems": true
+    },
+    "last_sync_ts": {
+      "type": ["string", "null"],
+      "description": "ISO8601 timestamp of the most recent --apply run.",
+      "format": "date-time"
+    },
+    "last_sync_sha": {
+      "type": ["string", "null"],
+      "description": "Aggregate sha256 (sorted per-file shas concatenated, hashed) at last successful --apply. Used by /flywheel:status doctrine-staleness dashboard.",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "pin_policy": {
+      "type": "string",
+      "description": "latest = always pull upstream HEAD; pinned_sha = only accept upstream when its aggregate sha matches pinned_sha below.",
+      "enum": ["latest", "pinned_sha"],
+      "default": "latest"
+    },
+    "pinned_sha": {
+      "type": ["string", "null"],
+      "description": "Required when pin_policy = pinned_sha. Aggregate sha of accepted upstream snapshot.",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "consumer_overrides_dir": {
+      "type": "string",
+      "description": "Path (repo-relative) where this consumer keeps per-consumer doctrine annotations. Files here are NEVER overwritten by --apply. Default: .flywheel/doctrine-overrides/",
+      "default": ".flywheel/doctrine-overrides/"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Free-form operator notes about why certain doctrines are or aren't tracked."
+    }
+  }
+}

@@ -1,0 +1,32 @@
+ok 1 - apply script syntax
+ok 2 - fleet script syntax
+ok 3 - dry-run emits valid envelope without mutation
+ok 4 - dry-run does not call PUT
+ok 5 - workflow job names discovered
+ok 6 - workflow discovery provenance emitted
+ok 7 - enforce_admins stays false
+ok 8 - override config respected
+ok 9 - mock apply reports applied
+ok 10 - mock apply payload sets expected fields
+ok 11 - idempotent re-apply produces same desired state
+ok 12 - repo one uses repo-specific workflow checks
+ok 13 - repo one dry-run and apply checks match
+ok 14 - repo one apply payload has repo-specific checks
+ok 15 - repo two uses different workflow checks
+ok 16 - repo two dry-run and apply checks match
+ok 17 - repo two apply payload has repo-specific checks
+ok 18 - verify parity passes without mutation
+ok 19 - divergence detector asserts dry-run/apply equality
+ok 20 - matrix workflow emits expanded check names
+ok 21 - matrix workflow omits unexpanded literal
+ok 22 - single-axis matrix emits two required checks
+ok 23 - multi-axis matrix emits tuple suffix
+ok 24 - schedule-only workflow excluded
+ok 25 - pull-request workflow included
+ok 26 - push-and-pull-request workflow included
+ok 27 - branch-filtered pull-request workflow excluded from main
+ok 28 - discovery details include trigger reasons
+ok 29 - discovery details include matrix rows
+ok 30 - canonical flywheel matrix regression shape represented
+ok 31 - fleet rollout uses live default branches
+SUMMARY pass=31 fail=0

@@ -1,0 +1,30 @@
+{
+  "schema_version": "zeststream.holding_company_owner_search_phasing.v1",
+  "generated_at": "2026-05-17T07:12:00Z",
+  "gate": "owner_search_phasing",
+  "warm_network_only_through_sequence": 2,
+  "public_open_call_min_sequence": 3,
+  "phasing_clear_count": 0,
+  "searches": [
+    {
+      "candidate_slug": "mobile-eats",
+      "candidate_name": "Mobile Eats",
+      "sequence": 1,
+      "search_status": "blocked",
+      "sourcing_channel": "unknown",
+      "public_open_call_active": false,
+      "evidence_refs": [
+        "/Users/josh/Developer/mobile-eats/docs/mobile-eats-share-ready-packet-2026-05-13.md",
+        "state/holding-company-peel-interviews.json",
+        "state/zeststream-portfolio-company-registry.json"
+      ],
+      "notes": "Product/substrate proof exists, but no warm-network owner-search receipt or signed owner receipt is present. Sub #1 remains blocked."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical owner-search phasing gate for the ZestStream holding-company goal.",
+    "Candidates with sequence 1 or 2 must trace to warm network, referral, client talk, community, or field-trip sourcing before search_status can be allowed or signed_owner.",
+    "Public open-call and inbound public sourcing are allowed only from sequence 3 onward."
+  ],
+  "next_action": "Add a warm-network owner-search receipt before allowing or signing an owner for sub #1 or sub #2."
+}

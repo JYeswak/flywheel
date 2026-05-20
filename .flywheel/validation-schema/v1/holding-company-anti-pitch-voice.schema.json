@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://zeststream.local/flywheel/holding-company-anti-pitch-voice/v1/schema.json",
+  "title": "ZestStream Holding Company Anti-Pitch Voice v1",
+  "description": "Ledger for public-surface voice alignment: sharpen legacy, incubate new; not workflow-builder, not custom-app-builder.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "gate",
+    "required_positioning",
+    "clear_count",
+    "surfaces",
+    "next_action"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "zeststream.holding_company_anti_pitch_voice.v1"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "gate": {
+      "const": "anti_pitch_voice"
+    },
+    "required_positioning": {
+      "const": "sharpen_legacy_incubate_new_not_builder"
+    },
+    "clear_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "surfaces": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/surface"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_action": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "surface": {
+      "type": "object",
+      "required": [
+        "surface_id",
+        "surface_kind",
+        "surface_ref",
+        "status",
+        "holding_company_story_present",
+        "builder_framing_hits",
+        "evidence_refs"
+      ],
+      "properties": {
+        "surface_id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]{1,96}$"
+        },
+        "surface_kind": {
+          "type": "string",
+          "enum": [
+            "repo",
+            "public_site",
+            "social",
+            "skill",
+            "document"
+          ]
+        },
+        "surface_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "blocked",
+            "needs_rewrite",
+            "clear",
+            "deferred"
+          ]
+        },
+        "holding_company_story_present": {
+          "type": "boolean"
+        },
+        "builder_framing_hits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/builder_hit"
+          }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "builder_hit": {
+      "type": "object",
+      "required": [
+        "frame",
+        "path",
+        "line",
+        "excerpt"
+      ],
+      "properties": {
+        "frame": {
+          "type": "string",
+          "enum": [
+            "workflow_builder",
+            "custom_app_builder",
+            "custom_app",
+            "automation_positioning"
+          ]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "excerpt": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -18,8 +18,25 @@
   "source_repo": "/Users/josh/Developer/flywheel",
   "source_row_sha256": "ee5c0101bec1003b7fbb4298395c77a9ba54e1de19977b04c184780343c7c798",
   "source_status": "blocked",
-  "status": "open",
+  "status": "closed",
   "synced_at": "2026-05-15T16:08:00Z",
   "title": "[nextra-scaffold-phase4-deferred] flywheel docs run on blackfoot + terratitle + vrtx",
-  "verification_path": "br show flywheel-ll107 --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-ll107\" and .status == \"blocked\"'"
+  "verification_path": "br show flywheel-ll107 --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-ll107\" and .status == \"blocked\"'",
+  "closed_at": "2026-05-15T18:02:31Z",
+  "closed_by": "orch:auto",
+  "closed_reason": "ac_passed_auto_close_hook",
+  "live_probe_evidence": {
+    "schema_version": "blocker-escalation/v1",
+    "ts": "2026-05-15T18:02:31Z",
+    "event": "blocker_auto_closed",
+    "blocker_id": "flywheel-ll107",
+    "ac_command": "br show flywheel-ll107 --json | jq -e 'if type == \"array\" then .[0] else . end | .id == \"flywheel-ll107\" and .status != \"blocked\"'",
+    "ac_stdout": "true",
+    "ac_exit_code": 0,
+    "live_probe_at": "2026-05-15T18:02:31Z",
+    "previous_last_verified_at": "2026-05-15T16:03:28Z",
+    "delta_seconds": 7143,
+    "auto_closer": "orch:auto",
+    "ac_state_hash": "ecceb44fb0cd25c9138cf1e38e075c5752b21332290eb4217ba7ee24a56bb1b1"
+  }
 }

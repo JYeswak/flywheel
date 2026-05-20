@@ -1,0 +1,530 @@
+[
+  {
+    "table_schema": "public",
+    "table_name": "cfs_activity_events",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_admin_alerts",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_admin_backup_receipts",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_booking_side_effect_outbox",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_calendar_sync_state",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_check_in_sends",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_client_comms_config",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "phone_preference_action"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_client_decision_requests",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_client_portal_sessions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "client_email_hash"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_community_partners",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_consult_slots",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_consults",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_contacts",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "primary_email_normalized",
+      "primary_phone_e164"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_conversation_log",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_demo_intake_attribution",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_deposit_requests",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_donation_batches",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_donation_destination_category_routes",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_donation_destinations",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_donation_impact_notes",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "recipient_email"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_donation_routings",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_external_api_cost_daily",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_field_side_effect_outbox",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_followup_touches",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_intake_ack_failures",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_intake_ack_outbox",
+    "rls_enabled": true,
+    "row_count_estimate": 3,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_intakes",
+    "rls_enabled": true,
+    "row_count_estimate": 1,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "client_email",
+      "normalized_client_email",
+      "phone"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_lead_details",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_newsletter_send_history",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_newsletter_subscriptions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "email_normalized"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_notification_log",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_notification_prefs",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_operator_clock_state",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_pipeline_traces",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_portal_session_tokens",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_portfolio_promotions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_project_billing_summary",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_project_details",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_project_expenses",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_project_invoice_records",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_project_media",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_project_payment_records",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_proposal_artifact_receipts",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_proposal_estimates",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_proposal_sends",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "recipient_email"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_proposal_side_effect_outbox",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_proposal_templates",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_query_stats_history",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_sentiment_signals",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_sequence_enrollments",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_sequence_touch_progress",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_session_reminder_dispatches",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_triage_side_effect_outbox",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_work_session_clock_events",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_work_sessions",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_workflow_runner_health",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_workflow_schedule_runs",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "cfs_workflow_schedules",
+    "rls_enabled": true,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "leads",
+    "rls_enabled": false,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "client_email",
+      "client_phone"
+    ]
+  },
+  {
+    "table_schema": "public",
+    "table_name": "organization_members",
+    "rls_enabled": false,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "organizations",
+    "rls_enabled": false,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "projects",
+    "rls_enabled": false,
+    "row_count_estimate": 0,
+    "has_sensitive_column": false,
+    "sensitive_columns": []
+  },
+  {
+    "table_schema": "public",
+    "table_name": "users",
+    "rls_enabled": false,
+    "row_count_estimate": 0,
+    "has_sensitive_column": true,
+    "sensitive_columns": [
+      "email",
+      "email_verified",
+      "phone"
+    ]
+  }
+]

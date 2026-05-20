@@ -1,0 +1,33 @@
+{
+  "schema_version": "zeststream.holding_company_sustainable_pace.v1",
+  "generated_at": "2026-05-17T07:17:00Z",
+  "gate": "sustainable_pace",
+  "max_weekly_hours_year2": 60,
+  "required_substrate_time_offset_ratio": 0.5,
+  "pace_clear_count": 0,
+  "periods": [
+    {
+      "period_id": "mobile-eats-year1-baseline-20260517",
+      "company_slug": "mobile-eats",
+      "sequence": 1,
+      "lifecycle_year": 1,
+      "measurement_status": "not_measured",
+      "weekly_hours_total": null,
+      "coaching_hours_manual": null,
+      "coaching_hours_offset_by_substrate": null,
+      "substrate_offset_ratio": null,
+      "evidence_refs": [
+        "state/substrate-share/mobile-eats-20260517T0654Z.json",
+        "state/holding-company-launch-economics.json",
+        "state/zeststream-portfolio-company-registry.json"
+      ],
+      "notes": "Current baseline only. Weekly hours and substrate-offset measurements are not present, so sustainable pace is not claimed."
+    }
+  ],
+  "notes": [
+    "This ledger is the mechanical sustainable-pace gate for the ZestStream holding-company goal.",
+    "A Year 2+ period may clear only when weekly_hours_total is at or below 60 and substrate_offset_ratio is at least 0.5.",
+    "The offset ratio is computed as coaching_hours_offset_by_substrate / (coaching_hours_manual + coaching_hours_offset_by_substrate)."
+  ],
+  "next_action": "Add measured weekly hours and substrate coaching-time offset before claiming sustainable pace for any Year 2+ company period."
+}
