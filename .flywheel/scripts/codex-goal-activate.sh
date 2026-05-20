@@ -52,7 +52,7 @@ PANE=""
 TASK=""
 TASK_FILE=""
 MAX_ENTRY_WAIT_S=30
-PRIMED_PROBE_TIMEOUT_S=15
+PRIMED_PROBE_TIMEOUT_S=30
 JSON_OUT=false
 
 usage() {
@@ -134,10 +134,26 @@ handle_replace_dialog() {
 
 probe_primed_blue_state() {
   # codex's input box shows `› /goal` (with /goal in blue) when palette engaged.
-  # We probe by capturing the prompt area and checking for the /goal token.
+  # We probe by capturing the prompt area and checking for the /goal token OR
+  # the palette description line that codex 2.x renders alongside the engaged palette.
+  #
+  # phase-c-allow-divergence (CFS:1 + flywheel:1 N=5+ Stage 2 regex drift class
+  # 2026-05-20T08:50Z): codex 2.x palette engagement renders the description line
+  # ("/goal set or view the goal for a long-running task") which may appear LAST
+  # in the capture, pushing the chevron+slash-command out of the tail -30 window
+  # due to MCP startup noise / token-expired buffer pollution. Accept either
+  # signal as palette-engaged.
   local snap
-  snap="$(tmux capture-pane -t "$TARGET" -p 2>/dev/null | tail -30)"
-  echo "$snap" | grep -qE '›[[:space:]]+/goal( |$)'
+  snap="$(tmux capture-pane -t "$TARGET" -p 2>/dev/null | tail -50)"
+  # Primary signal: chevron + /goal at start of line
+  if echo "$snap" | grep -qE '›[[:space:]]+/goal( |$)'; then
+    return 0
+  fi
+  # Secondary signal: palette description line (codex 2.x renders this when /goal palette engaged)
+  if echo "$snap" | grep -qE '/goal[[:space:]]+set or view the goal for a long-running task'; then
+    return 0
+  fi
+  return 1
 }
 
 chevron_line_has_residue() {
