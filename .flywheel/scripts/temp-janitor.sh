@@ -84,6 +84,52 @@ echo "=== temp-janitor v1 — $(date -u +%Y-%m-%dT%H:%M:%SZ) ===" >&2
 echo "  TMPDIR=$TMP min_age=${MIN_AGE_MIN}m codex_min_age=${CODEX_MIN_AGE_MIN}m dry_run=$DRY_RUN" >&2
 echo "  data_volume_pct_before=${data_pct_before}% tmp_size_before=$((tmp_size_before_kb / 1024))MB" >&2
 
+# ALSO reap from /private/tmp (separate from $TMPDIR on macOS — workers create work-dirs there).
+# Joshua-direct 2026-05-20T09:55Z: "100gb in a day!? unacceptable" — 45GB+ accreted overnight in
+# /private/tmp/<orch>-<bead>-<ts>/ work-dirs from alps + mobile-eats + others that no janitor
+# previously reaped because /private/tmp is OUTSIDE $TMPDIR. Adding /private/tmp scope here.
+reap_orch_workdirs_in_private_tmp() {
+  local orch_prefix="$1" age_min="$2" label="$3"
+  local found_count
+  found_count=$(find /private/tmp -maxdepth 1 -name "${orch_prefix}*" -type d -mmin "+$age_min" 2>/dev/null | wc -l | tr -d ' ')
+  if (( found_count > 0 )); then
+    if [[ "$DRY_RUN" == "true" ]]; then
+      echo "  WOULD reap $found_count private-tmp $label work-dirs" >&2
+    else
+      find /private/tmp -maxdepth 1 -name "${orch_prefix}*" -type d -mmin "+$age_min" -exec rm -rf {} + 2>/dev/null || true
+      echo "  reaped $found_count private-tmp $label work-dirs" >&2
+    fi
+    reap_count=$((reap_count + found_count))
+  fi
+}
+
+# /private/tmp work-dirs by orch prefix (workers create scratch dirs as /private/tmp/<orch>-<bead-id>-<ts>/)
+# Use longer age (6h = 360min) for these since some long-running dispatches legitimately occupy work-dirs.
+reap_orch_workdirs_in_private_tmp 'alps-' 360 'alps-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'mobile-eats-' 360 'mobile-eats-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'picoz-' 360 'picoz-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'clutterfreespaces-' 360 'cfs-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'cfs-' 360 'cfs-prefix-workdir'
+reap_orch_workdirs_in_private_tmp 'vrtx-' 360 'vrtx-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'zesttube-' 360 'zesttube-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'flywheel-' 360 'flywheel-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'skillos-' 360 'skillos-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'terratitle-' 360 'terratitle-orch-workdir'
+
+# Claude Code task-output dirs in /private/tmp/claude-501/ — every Bash tool call accretes
+if [[ -d /private/tmp/claude-501 ]]; then
+  found_count=$(find /private/tmp/claude-501 -maxdepth 4 -name "*.output" -mmin +120 2>/dev/null | wc -l | tr -d ' ')
+  if (( found_count > 0 )); then
+    if [[ "$DRY_RUN" == "true" ]]; then
+      echo "  WOULD reap $found_count claude-task-output files (>2h)" >&2
+    else
+      find /private/tmp/claude-501 -maxdepth 4 -name "*.output" -mmin +120 -delete 2>/dev/null || true
+      echo "  reaped $found_count claude-task-output files" >&2
+    fi
+    reap_count=$((reap_count + found_count))
+  fi
+fi
+
 # Reap by pattern (safe-list — known regenerable temps)
 reap_pattern 'tmp.*' "$MIN_AGE_MIN" 'mktemp-leak'
 reap_pattern '_MEI*' "$MIN_AGE_MIN" 'PyInstaller'
