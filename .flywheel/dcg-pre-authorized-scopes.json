@@ -1,0 +1,48 @@
+{
+  "schema_version": "dcg-pre-authorized-scopes/v1",
+  "scopes": [
+    {
+      "id": "git-worktree-remove-tmp",
+      "command_pattern": "^git worktree remove /(?:tmp|var/folders/.+/T)/.+",
+      "rationale": "Ephemeral worktree cleanup after merge/review handoff.",
+      "auto_approve": "always",
+      "audit_log": true
+    },
+    {
+      "id": "git-branch-delete-with-sha-suffix",
+      "command_pattern": "^git branch -D [a-zA-Z0-9._/-]+-[0-9a-f]{7,40}$",
+      "rationale": "Local merged/review scratch branch cleanup when the SHA suffix identifies a disposable branch.",
+      "auto_approve": "always",
+      "requires_context": "worktree_remove_in_recent_steps OR pr_merged_recently",
+      "audit_log": true
+    },
+    {
+      "id": "gh-api-delete-branch-protection",
+      "command_pattern": "^gh api -X DELETE [\"']?repos/[^/]+/[^/]+/branches/[^/]+/protection[\"']?$",
+      "rationale": "Pre-approved branch-protection teardown only when an orchestrator attests to the bounded target.",
+      "auto_approve": "with_orch_attestation",
+      "audit_log": true
+    },
+    {
+      "id": "rm-rf-tmpdir-and-stale",
+      "command_pattern": "^(?:rm -rf|find .+ -delete) \\$TMPDIR/.+",
+      "rationale": "Temporary-directory cleanup for stale worker artifacts under the caller's TMPDIR.",
+      "auto_approve": "always",
+      "audit_log": true
+    },
+    {
+      "id": "git-push-master-solo-trust",
+      "command_pattern": "^git\\s+(?:-[^\\s]+\\s+)*push(?:\\s+(?:-[^\\s]+|--[^\\s=]+(?:=\\S+)?))*\\s+\\S+\\s+(?:HEAD:)?master(?:\\s|$)",
+      "rationale": "Joshua-direct 2026-05-20: Jeff-pattern direct-push-to-master for solo-trust repos. Workers were getting blocked saving work across every repo; per jrpfn finding, direct-push is the intended high-velocity workflow. Force-push, rebase, history-rewrite remain blocked by strict_git.",
+      "auto_approve": "always",
+      "audit_log": true
+    },
+    {
+      "id": "git-push-main-solo-trust",
+      "command_pattern": "^git\\s+(?:-[^\\s]+\\s+)*push(?:\\s+(?:-[^\\s]+|--[^\\s=]+(?:=\\S+)?))*\\s+\\S+\\s+(?:HEAD:)?main(?:\\s|$)",
+      "rationale": "Joshua-direct 2026-05-20: sister of git-push-master-solo-trust for repos using main as default branch (zeststream-cast etc). Same rationale.",
+      "auto_approve": "always",
+      "audit_log": true
+    }
+  ]
+}
