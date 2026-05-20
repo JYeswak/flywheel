@@ -2,7 +2,7 @@
 # codex-goal-activate.sh
 #
 # CANONICAL ORIGIN: skillos canonical at /Users/josh/Developer/skillos/.flywheel/scripts/codex-goal-activate.sh
-# DIVERGENCE-WITH-RATIONALE (intentional, per memory feedback_convergent_evolution_is_canonical_signal):
+# phase-c-allow-divergence (intentional local-divergence, per memory feedback_convergent_evolution_is_canonical_signal):
 #   1. Bracketed-paste fix (tmux paste-buffer -p flag) — adopted from canonical
 #   2. PRIMED_PROBE_TIMEOUT_S default 5→15 — flywheel-side empirical: codex 0.130
 #      palette render delay observed >5s on some captures; 15s eliminates false-fails
