@@ -6,6 +6,11 @@ on:
       - main
       - master
   pull_request:
+    branches:
+      - main
+      - master
+    types: [opened, reopened, ready_for_review]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -42,6 +47,7 @@ jobs:
           bash tests/public-evidence-fingerprints.sh
           bash tests/changelog.sh
           bash tests/github-workflows.sh
+          bash tests/local-ci-policy.sh
           bash tests/naming-conventions.sh
           bash tests/hosted-install-contract.sh
           bash tests/context-routing-discipline.sh
@@ -101,6 +107,7 @@ jobs:
             tests/public-evidence-fingerprints.sh \
             tests/changelog.sh \
             tests/github-workflows.sh \
+            tests/local-ci-policy.sh \
             tests/naming-conventions.sh \
             tests/hosted-install-contract.sh \
             tests/context-routing-discipline.sh \

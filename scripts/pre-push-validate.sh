@@ -36,6 +36,7 @@ CI_TESTS=(
   "tests/public-evidence-fingerprints.sh"
   "tests/changelog.sh"
   "tests/github-workflows.sh"
+  "tests/local-ci-policy.sh"
   "tests/naming-conventions.sh"
   "tests/context-routing-discipline.sh"
 

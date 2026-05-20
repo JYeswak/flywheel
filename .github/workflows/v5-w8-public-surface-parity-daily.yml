@@ -8,12 +8,10 @@ on:
   schedule:
     - cron: "15 6 * * *"  # 06:15 UTC daily
   workflow_dispatch:
-  push:
-    branches: [main, master]
-    paths:
-      - "scripts/preflight.sh"
-      - "scripts/journey-smoke.sh"
-      - ".github/workflows/v5-w8-public-surface-parity-daily.yml"
+
+concurrency:
+  group: v5-w8-public-surface-parity-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read

@@ -6,6 +6,8 @@ CI="$ROOT/.github/workflows/ci.yml"
 INSTALLER="$ROOT/.github/workflows/installer-smoke.yml"
 RELEASE="$ROOT/.github/workflows/release.yml"
 SITE="$ROOT/.github/workflows/site.yml"
+DAILY_PARITY="$ROOT/.github/workflows/v5-w8-public-surface-parity-daily.yml"
+CI_POLICY="$ROOT/.flywheel/CI-POLICY.json"
 TAG_CHECKOUT_LITERAL="git checkout --detach \"\$tag\""
 TARBALL_SHA_LITERAL="shasum -a 256 \"flywheel-\${tag}.tar.gz\" >\"flywheel-\${tag}.tar.gz.sha256\""
 
@@ -14,7 +16,7 @@ fail_count=0
 pass() { pass_count=$((pass_count + 1)); printf 'PASS %s\n' "$1"; }
 fail() { fail_count=$((fail_count + 1)); printf 'FAIL %s\n' "$1" >&2; }
 
-for file in "$CI" "$INSTALLER" "$RELEASE" "$SITE"; do
+for file in "$CI" "$INSTALLER" "$RELEASE" "$SITE" "$DAILY_PARITY" "$CI_POLICY"; do
   if [[ -s "$file" ]]; then
     pass "$(basename "$file") exists"
   else
@@ -38,18 +40,36 @@ else
 fi
 
 if grep -q 'pull_request:' "$CI" \
+  && grep -q 'types: \[opened, reopened, ready_for_review\]' "$CI" \
   && grep -q 'branches:' "$CI" \
   && grep -q 'main' "$CI" \
-  && grep -q 'master' "$CI"; then
-  pass "ci triggers include PR and both public default branch candidates"
+  && grep -q 'master' "$CI" \
+  && grep -q 'workflow_dispatch:' "$CI"; then
+  pass "ci triggers are local-first last-drop"
 else
-  fail "ci triggers include PR and both public default branch candidates"
+  fail "ci triggers are local-first last-drop"
 fi
 
-if grep -q 'pull_request:' "$INSTALLER" && grep -q 'cron: "0 9 \* \* \*"' "$INSTALLER"; then
-  pass "installer triggers"
+if grep -q 'pull_request:' "$INSTALLER" \
+  && grep -q 'types: \[opened, reopened, ready_for_review\]' "$INSTALLER" \
+  && grep -q 'cron: "0 9 \* \* \*"' "$INSTALLER"; then
+  pass "installer triggers are local-first last-drop"
 else
-  fail "installer triggers"
+  fail "installer triggers are local-first last-drop"
+fi
+
+if grep -q 'schedule:' "$DAILY_PARITY" \
+  && grep -q 'workflow_dispatch:' "$DAILY_PARITY" \
+  && ! grep -q 'push:' "$DAILY_PARITY"; then
+  pass "daily parity has no push trigger"
+else
+  fail "daily parity has no push trigger"
+fi
+
+if jq -e '.schema_version == "flywheel.ci_policy.v1" and .per_push_feature_branch_ci_allowed == false' "$CI_POLICY" >/dev/null; then
+  pass "CI policy declares local-first spend guard"
+else
+  fail "CI policy declares local-first spend guard"
 fi
 
 if grep -q 'tags:' "$RELEASE" && grep -q 'v\[0-9\]' "$RELEASE" && grep -q 'workflow_dispatch:' "$RELEASE"; then
@@ -90,7 +110,7 @@ else
   fail "site checksum manifest uses artifact-relative filename"
 fi
 
-for token in shellcheck ripgrep 'ruff check' markdownlint tests/public-top-level-files.sh tests/public-surface-gap-scanner.sh tests/naming-conventions.sh tests/hosted-install-contract.sh tests/context-routing-discipline.sh tests/agent-lane-probe.sh tests/isolated-agent-lane-smoke.sh scripts/agent-lane-probe.sh scripts/isolated-agent-lane-smoke.sh scripts/local-actions-preflight.sh scripts/zs-frontend-quality-gate.sh tests/public-docs.sh tests/public-links.sh tests/website-static.sh tests/website-accessibility.sh tests/live-site-probe.sh tests/contact-routing.sh tests/upstream-substrate-adoption.sh tests/release-assets.sh tests/cutover-receipts.sh tests/external-review-gate.sh tests/public-user-journey-pack.sh tests/repo-story-portability.sh tests/repo-owner-brief.sh tests/story-system-package.sh tests/zeststream-ui-package.sh tests/zeststream-motion-package.sh tests/publication-goal-completion-audit.sh tests/publication-readiness.sh tests/true-publication-registry-validate.sh tests/journey-smoke.sh; do
+for token in shellcheck ripgrep 'ruff check' markdownlint tests/public-top-level-files.sh tests/public-surface-gap-scanner.sh tests/local-ci-policy.sh tests/naming-conventions.sh tests/hosted-install-contract.sh tests/context-routing-discipline.sh tests/agent-lane-probe.sh tests/isolated-agent-lane-smoke.sh scripts/agent-lane-probe.sh scripts/isolated-agent-lane-smoke.sh scripts/local-actions-preflight.sh scripts/zs-frontend-quality-gate.sh tests/public-docs.sh tests/public-links.sh tests/website-static.sh tests/website-accessibility.sh tests/live-site-probe.sh tests/contact-routing.sh tests/upstream-substrate-adoption.sh tests/release-assets.sh tests/cutover-receipts.sh tests/external-review-gate.sh tests/public-user-journey-pack.sh tests/repo-story-portability.sh tests/repo-owner-brief.sh tests/story-system-package.sh tests/zeststream-ui-package.sh tests/zeststream-motion-package.sh tests/publication-goal-completion-audit.sh tests/publication-readiness.sh tests/true-publication-registry-validate.sh tests/journey-smoke.sh; do
   if grep -q "$token" "$CI"; then
     pass "ci includes $token"
   else
@@ -154,13 +174,13 @@ for token in \
   fi
 done
 
-if grep -q 'timeout-minutes:' "$CI" && grep -q 'timeout-minutes:' "$INSTALLER" && grep -q 'timeout-minutes:' "$RELEASE" && grep -q 'timeout-minutes:' "$SITE"; then
+if grep -q 'timeout-minutes:' "$CI" && grep -q 'timeout-minutes:' "$INSTALLER" && grep -q 'timeout-minutes:' "$RELEASE" && grep -q 'timeout-minutes:' "$SITE" && grep -q 'timeout-minutes:' "$DAILY_PARITY"; then
   pass "timeouts set"
 else
   fail "timeouts set"
 fi
 
-if grep -q 'concurrency:' "$CI" && grep -q 'concurrency:' "$INSTALLER" && grep -q 'concurrency:' "$RELEASE" && grep -q 'concurrency:' "$SITE"; then
+if grep -q 'concurrency:' "$CI" && grep -q 'concurrency:' "$INSTALLER" && grep -q 'concurrency:' "$RELEASE" && grep -q 'concurrency:' "$SITE" && grep -q 'concurrency:' "$DAILY_PARITY"; then
   pass "concurrency set"
 else
   fail "concurrency set"
