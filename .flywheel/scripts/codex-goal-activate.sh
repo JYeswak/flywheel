@@ -112,6 +112,43 @@ probe_primed_blue_state() {
   echo "$snap" | grep -qE '›[[:space:]]+/goal( |$)'
 }
 
+chevron_line_has_residue() {
+  # Adopted from skillos canonical 2026-05-20 (greenlight 1 ratified).
+  # Residue = chevron PRIMED with /goal slash-command palette (engages-once
+  # state). Default codex idle placeholders like "› Implement {feature}" or
+  # "› Run /review on my current changes" are NOT residue — they are the
+  # normal idle state and re-typing /goal works fine over them.
+  local line="$1"
+  [[ -n "$line" ]] || return 1
+  echo "$line" | grep -qE '^›[[:space:]]+/goal([[:space:]]|$)'
+}
+
+clear_stale_chevron_residue() {
+  # Stage 0.5 — clear stale /goal palette engaged state before re-typing /goal.
+  # Adopted from skillos canonical 2026-05-20 commits 3a647cc4 + 8c057a67.
+  # N=3 today on skillos; primitive prevents bypass-class fires from stale-chevron.
+  local snap chevron_line
+  snap="$(tmux capture-pane -t "$TARGET" -p 2>/dev/null | tail -3 || true)"
+  chevron_line="$(echo "$snap" | grep -E '^›[[:space:]]*' | tail -1 || true)"
+  if ! chevron_line_has_residue "$chevron_line"; then
+    return 0
+  fi
+
+  tmux send-keys -t "$TARGET" Escape 2>/dev/null
+  sleep 1
+  tmux send-keys -t "$TARGET" C-u 2>/dev/null
+  sleep 1
+
+  snap="$(tmux capture-pane -t "$TARGET" -p 2>/dev/null | tail -3 || true)"
+  chevron_line="$(echo "$snap" | grep -E '^›[[:space:]]*' | tail -1 || true)"
+  if chevron_line_has_residue "$chevron_line"; then
+    emit_json "fail" "stage0.5" "stale-chevron residue remained after Escape + C-u"
+    exit 2
+  fi
+
+  emit_json "info" "stage0.5" "cleared stale-chevron residue before /goal palette activation"
+}
+
 # Pre-flight
 state="$(classify_pane_state)"
 emit_json "info" "preflight" "initial_state=$state"
@@ -136,6 +173,9 @@ case "$state" in
     exit 2
     ;;
 esac
+
+# Stage 0.5: clear stale palette/input residue before typing /goal.
+clear_stale_chevron_residue
 
 # Stage 1: type /goal keystroke-by-keystroke to trigger codex slash-command palette
 emit_json "info" "stage1" "typing /goal as keystrokes to trigger palette"
