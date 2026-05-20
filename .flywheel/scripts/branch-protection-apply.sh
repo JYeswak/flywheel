@@ -69,54 +69,178 @@ done
 [[ "$REPO" =~ ^[^/]+/[^/]+$ ]] || die "--repo must be OWNER/REPO"
 [[ -n "$MODE" ]] || die "choose exactly one of --dry-run, --apply, or --verify-parity"
 
-discover_local_workflow_checks() {
-  local repo_path="$1"
-  python3 - "$repo_path" <<'PY'
+discover_local_workflow_details() {
+  local repo_path="$1" branch="$2"
+  python3 - "$repo_path" "$branch" <<'PY'
 from pathlib import Path
+from itertools import product
+import fnmatch
 import json
-import re
 import sys
 
 root = Path(sys.argv[1])
+branch = sys.argv[2]
 workflow_dir = root / ".github" / "workflows"
-checks = []
+details = []
+
+try:
+    import yaml
+except Exception as exc:
+    print(json.dumps({"checks": [], "details": [], "error": f"pyyaml_unavailable:{exc}"}))
+    raise SystemExit(0)
+
+
+def workflow_on(data):
+    return data.get("on", data.get(True))
+
+
+def event_config(on_value, event):
+    if isinstance(on_value, str):
+        return {} if on_value == event else None
+    if isinstance(on_value, list):
+        return {} if event in on_value else None
+    if isinstance(on_value, dict):
+        if event in on_value:
+            return on_value[event] if on_value[event] is not None else {}
+    return None
+
+
+def branch_matches(patterns, value):
+    if not patterns:
+        return True
+    if isinstance(patterns, str):
+        patterns = [patterns]
+    included = False
+    has_positive = False
+    for pattern in patterns:
+        pattern = str(pattern)
+        negated = pattern.startswith("!")
+        raw = pattern[1:] if negated else pattern
+        if not negated:
+            has_positive = True
+        if fnmatch.fnmatchcase(value, raw):
+            included = not negated
+    return included if has_positive else True
+
+
+def pull_request_trigger_reason(on_value):
+    cfg = event_config(on_value, "pull_request")
+    if cfg is None:
+        return False, "excluded:no_pull_request_trigger"
+    if not isinstance(cfg, dict):
+        cfg = {}
+    if cfg.get("paths") or cfg.get("paths-ignore"):
+        return False, "excluded:pull_request_path_filter_present"
+    branches = cfg.get("branches")
+    branches_ignore = cfg.get("branches-ignore")
+    if branches is not None and not branch_matches(branches, branch):
+        return False, f"excluded:pull_request_branches_filter_misses_{branch}"
+    if branches_ignore is not None and branch_matches(branches_ignore, branch):
+        return False, f"excluded:pull_request_branches_ignore_matches_{branch}"
+    if branches is None and branches_ignore is None:
+        return True, "included:pull_request_all_branches"
+    return True, f"included:pull_request_matches_{branch}"
+
+
+def matrix_rows(matrix):
+    if not isinstance(matrix, dict):
+        return []
+    axes = []
+    for key, value in matrix.items():
+        if key in {"include", "exclude"}:
+            continue
+        values = value if isinstance(value, list) else [value]
+        axes.append((str(key), [str(v) for v in values]))
+    if not axes:
+        return []
+    rows = []
+    for combo in product(*[axis_values for _, axis_values in axes]):
+        row = dict(zip([axis_name for axis_name, _ in axes], combo))
+        rows.append(row)
+    for exclude in matrix.get("exclude") or []:
+        if isinstance(exclude, dict):
+            rows = [
+                row for row in rows
+                if not all(str(row.get(str(k))) == str(v) for k, v in exclude.items())
+            ]
+    for include in matrix.get("include") or []:
+        if isinstance(include, dict):
+            row = {str(k): str(v) for k, v in include.items()}
+            if row and row not in rows:
+                rows.append(row)
+    return rows
+
+
+def expand_job_name(name, rows):
+    if not rows:
+        return [(name, None)]
+    expanded = []
+    for row in rows:
+        check = name
+        had_matrix_expr = "${{ matrix." in check
+        for key, value in row.items():
+            check = check.replace("${{ matrix." + key + " }}", value)
+        if not had_matrix_expr or "${{ matrix." in check:
+            suffix = ", ".join(row.values())
+            check = f"{check} ({suffix})"
+        expanded.append((check, row))
+    return expanded
+
 if workflow_dir.is_dir():
     for path in sorted(list(workflow_dir.glob("*.yml")) + list(workflow_dir.glob("*.yaml"))):
-        workflow_name = ""
-        current_job = None
-        in_jobs = False
-        job_names = {}
-        for raw in path.read_text(errors="replace").splitlines():
-            line = raw.rstrip()
-            if not line.strip() or line.lstrip().startswith("#"):
-                continue
-            if re.match(r"^name:\s*", line):
-                workflow_name = re.sub(r"^name:\s*", "", line).strip().strip("'\"")
-                continue
-            if line.startswith("jobs:"):
-                in_jobs = True
-                current_job = None
-                continue
-            if in_jobs:
-                job = re.match(r"^  ([A-Za-z0-9_.-]+):\s*$", line)
-                if job:
-                    current_job = job.group(1)
-                    job_names[current_job] = current_job
-                    continue
-                named = re.match(r"^    name:\s*(.+?)\s*$", line)
-                if current_job and named:
-                    job_names[current_job] = named.group(1).strip().strip("'\"")
-        checks.extend(job_names.values() or ([workflow_name] if workflow_name else []))
+        try:
+            data = yaml.safe_load(path.read_text(errors="replace")) or {}
+        except Exception as exc:
+            details.append({
+                "workflow": path.name,
+                "check": None,
+                "included": False,
+                "trigger_reason": f"excluded:yaml_parse_error:{exc}",
+                "matrix": None,
+            })
+            continue
+        include, trigger_reason = pull_request_trigger_reason(workflow_on(data))
+        workflow_name = str(data.get("name") or path.stem)
+        jobs = data.get("jobs") or {}
+        if not isinstance(jobs, dict):
+            jobs = {}
+        if not jobs:
+            details.append({
+                "workflow": path.name,
+                "check": workflow_name if include else None,
+                "included": include,
+                "trigger_reason": trigger_reason,
+                "matrix": None,
+            })
+            continue
+        for job_id, job in jobs.items():
+            job = job if isinstance(job, dict) else {}
+            job_name = str(job.get("name") or job_id)
+            rows = matrix_rows(((job.get("strategy") or {}).get("matrix") or {}))
+            for check, row in expand_job_name(job_name, rows):
+                details.append({
+                    "workflow": path.name,
+                    "job": str(job_id),
+                    "check": check,
+                    "included": include,
+                    "trigger_reason": trigger_reason,
+                    "matrix": row,
+                })
 seen = []
-for check in checks:
+for check in [row["check"] for row in details if row.get("included") and row.get("check")]:
     if check and check not in seen:
         seen.append(check)
-print(json.dumps(seen))
+print(json.dumps({"checks": seen, "details": details}))
 PY
 }
 
-discover_remote_workflow_checks() {
-  local repo="$1"
+discover_local_workflow_checks() {
+  local repo_path="$1" branch="${2:-main}"
+  discover_local_workflow_details "$repo_path" "$branch" | jq -c '.checks'
+}
+
+discover_remote_workflow_details() {
+  local repo="$1" branch="$2"
   local tmp paths path dest
   tmp="$(mktemp -d "${TMPDIR:-/tmp}/branch-protection-workflows.XXXXXX")"
   paths="$("$GH_BIN" api "repos/${repo}/contents/.github/workflows" --jq '.[] | select(.type == "file" and (.name | test("\\.ya?ml$"))) | .path' 2>/dev/null || true)"
@@ -130,17 +254,17 @@ discover_remote_workflow_checks() {
       rm -f "$dest"
     fi
   done <<<"$paths"
-  discover_local_workflow_checks "$tmp"
+  discover_local_workflow_details "$tmp" "$branch"
   rm -rf "$tmp"
 }
 
-discover_workflow_checks() {
-  local repo_path="$1" repo="$2" checks
-  checks="$(discover_local_workflow_checks "$repo_path")"
-  if [[ "$(jq 'length' <<<"$checks")" -eq 0 ]]; then
-    checks="$(discover_remote_workflow_checks "$repo")"
+discover_workflow_details() {
+  local repo_path="$1" repo="$2" branch="$3" details
+  details="$(discover_local_workflow_details "$repo_path" "$branch")"
+  if [[ "$(jq '.checks | length' <<<"$details")" -eq 0 ]]; then
+    details="$(discover_remote_workflow_details "$repo" "$branch")"
   fi
-  printf '%s\n' "$checks"
+  printf '%s\n' "$details"
 }
 
 recent_workflow_names() {
@@ -165,70 +289,67 @@ override_checks_json() {
 }
 
 resolve_checks() {
-  local explicit_csv="$1" repo="$2" repo_path="$3" overrides_file="$4"
-  local explicit_json override_json workflow_json recent_json
+  local explicit_csv="$1" repo="$2" repo_path="$3" overrides_file="$4" branch="$5"
+  local explicit_json override_json workflow_details workflow_json recent_json
   explicit_json="$(json_string_array "$explicit_csv")"
   override_json="$(override_checks_json "$repo" "$overrides_file")"
-  workflow_json="$(discover_workflow_checks "$repo_path" "$repo")"
+  workflow_details="$(discover_workflow_details "$repo_path" "$repo" "$branch")"
+  workflow_json="$(jq -c '.checks' <<<"$workflow_details")"
   recent_json="$(recent_workflow_names "$repo")"
 
   jq -nc \
-    --argjson explicit "$explicit_json" \
-    --argjson override "$override_json" \
-    --argjson workflow "$workflow_json" \
-    --argjson recent "$recent_json" '
+	    --argjson explicit "$explicit_json" \
+	    --argjson override "$override_json" \
+	    --argjson workflow "$workflow_json" \
+	    --argjson workflow_details "$workflow_details" \
+	    --argjson recent "$recent_json" '
     def uniq_stable: reduce .[] as $x ([]; if index($x) then . else . + [$x] end);
-    def intersection($a; $b): [$a[] as $x | select($b | index($x))] | uniq_stable;
-    def union($a; $b): ($a + $b) | uniq_stable;
-
-    (intersection($workflow; $recent)) as $intersect
-    | if ($explicit | length) > 0 then {
+	    def union($a; $b): ($a + $b) | uniq_stable;
+	
+	    if ($explicit | length) > 0 then {
         required_checks: ($explicit | uniq_stable),
         discovery_source: "override",
         discovery_decision: "explicit_check_names_flag",
-        workflow_yml_checks: $workflow,
-        recent_run_names: $recent,
-        override_checks: $override
+	        workflow_yml_checks: $workflow,
+	        discovery_details: $workflow_details.details,
+	        recent_run_names: $recent,
+	        override_checks: $override
       }
       elif ($override != null and ($override | length) > 0) then {
         required_checks: ($override | uniq_stable),
         discovery_source: "override",
         discovery_decision: "repo_override_required_checks",
-        workflow_yml_checks: $workflow,
-        recent_run_names: $recent,
-        override_checks: $override
+	        workflow_yml_checks: $workflow,
+	        discovery_details: $workflow_details.details,
+	        recent_run_names: $recent,
+	        override_checks: $override
       }
-      elif ($intersect | length) > 0 then {
-        required_checks: $intersect,
-        discovery_source: "workflow_yml",
-        discovery_decision: "workflow_yml_recent_runs_intersection",
-        workflow_yml_checks: $workflow,
-        recent_run_names: $recent,
-        override_checks: $override
+	      elif ($workflow | length) > 0 then {
+	        required_checks: ($workflow | uniq_stable),
+	        discovery_source: "workflow_yml",
+	        discovery_decision: (if ($recent | length) > 0 then "workflow_yml_pr_trigger_filtered_recent_runs_metadata_only" else "workflow_yml_pr_trigger_filtered" end),
+	        workflow_yml_checks: $workflow,
+	        discovery_details: $workflow_details.details,
+	        recent_run_names: $recent,
+	        override_checks: $override
       }
-      elif ($workflow | length) > 0 then {
-        required_checks: ($workflow | uniq_stable),
-        discovery_source: "workflow_yml",
-        discovery_decision: (if ($recent | length) > 0 then "workflow_yml_preferred_recent_runs_no_exact_overlap" else "workflow_yml_only" end),
-        workflow_yml_checks: $workflow,
-        recent_run_names: $recent,
-        override_checks: $override
-      }
-      elif ($recent | length) > 0 then {
-        required_checks: ($recent | uniq_stable),
-        discovery_source: "recent_runs",
-        discovery_decision: "recent_runs_only",
-        workflow_yml_checks: $workflow,
-        recent_run_names: $recent,
-        override_checks: $override
-      }
-      else {
-        required_checks: ["ci"],
-        discovery_source: "union",
-        discovery_decision: "fallback_ci_no_workflows_or_recent_runs",
-        workflow_yml_checks: $workflow,
-        recent_run_names: $recent,
-        override_checks: $override
+	      elif ($recent | length) > 0 then {
+	        required_checks: ($recent | uniq_stable),
+	        discovery_source: "recent_runs",
+	        discovery_decision: "recent_runs_only",
+	        workflow_yml_checks: $workflow,
+	        discovery_details: [($recent | uniq_stable)[] | {workflow:null, job:null, check:., included:true, trigger_reason:"included:recent_runs_only", matrix:null}],
+	        recent_run_names: $recent,
+	        override_checks: $override
+	      }
+	      else {
+	        required_checks: ["ci"],
+	        discovery_source: "union",
+	        discovery_decision: "fallback_ci_no_workflows_or_recent_runs",
+	        workflow_yml_checks: $workflow,
+	        discovery_details: [{workflow:null, job:null, check:"ci", included:true, trigger_reason:"included:fallback_ci_no_workflows_or_recent_runs", matrix:null}],
+	        recent_run_names: $recent,
+	        override_checks: $override
       }
       end'
 }
@@ -243,7 +364,7 @@ fi
 build_envelope() {
   local requested_mode="$1" outcome="$2" error="$3"
   local discovery checks_json payload before before_norm after_norm diff_text
-  discovery="$(resolve_checks "$CHECK_NAMES" "$REPO" "$REPO_PATH" "$OVERRIDES_FILE")"
+	  discovery="$(resolve_checks "$CHECK_NAMES" "$REPO" "$REPO_PATH" "$OVERRIDES_FILE" "$BRANCH")"
   checks_json="$(jq -c '.required_checks' <<<"$discovery")"
 
   payload="$(jq -nc \
@@ -287,8 +408,9 @@ build_envelope() {
       mode:$mode,
       required_checks:$discovery.required_checks,
       discovery_source:$discovery.discovery_source,
-      discovery_decision:$discovery.discovery_decision,
-      workflow_yml_checks:$discovery.workflow_yml_checks,
+	      discovery_decision:$discovery.discovery_decision,
+	      discovery_details:$discovery.discovery_details,
+	      workflow_yml_checks:$discovery.workflow_yml_checks,
       recent_run_names:$discovery.recent_run_names,
       override_checks:$discovery.override_checks,
       before:$before,

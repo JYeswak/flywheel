@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 APPLY="$ROOT/.flywheel/scripts/branch-protection-apply.sh"
+GH_BIN="${GH_BIN:-gh}"
 MODE=""
 JSON_OUT=0
 REPORT=""
@@ -44,7 +45,7 @@ done
 
 repos=(
   "flywheel|JYeswak/flywheel|/Users/josh/Developer/flywheel"
-  "skillos|JYeswak/zeststream-skillos|/Users/josh/Developer/skillos"
+  "skillos|JYeswak/skillos|/Users/josh/Developer/skillos"
   "zesttube|JYeswak/zesttube|/Users/josh/Developer/zesttube"
   "mobile-eats|JYeswak/mobile-eats|/Users/josh/Developer/mobile-eats"
   "clutterfreespaces|JYeswak/ClutterFreeSpaces|/Users/josh/Developer/clutterfreespaces"
@@ -60,8 +61,13 @@ for entry in "${repos[@]}"; do
       '{schema_version:"branch_protection_apply.v1",repo:$repo,alias:$alias,repo_path:$path,outcome:"error",error:"repo_path_missing"}' >>"$tmp"
     continue
   fi
+  if ! repo_view="$("$GH_BIN" repo view "$repo" --json nameWithOwner,defaultBranchRef 2>/dev/null)"; then
+    jq -nc --arg alias "$alias" --arg repo "$repo" --arg path "$path" \
+      '{schema_version:"branch_protection_apply.v1",repo:$repo,alias:$alias,repo_path:$path,outcome:"error",error:"repo_view_failed"}' >>"$tmp"
+    continue
+  fi
   "$APPLY" --repo "$repo" --branch main "--$MODE" --repo-path "$path" --overrides-file "$OVERRIDES_FILE" --json \
-    | jq -c --arg alias "$alias" --arg path "$path" '. + {alias:$alias, repo_path:$path}' >>"$tmp"
+    | jq -c --arg alias "$alias" --arg path "$path" --argjson repo_view "$repo_view" '. + {alias:$alias, repo_path:$path, repo_view:$repo_view}' >>"$tmp"
 done
 
 results="$(jq -sc '.' "$tmp")"

@@ -63,7 +63,8 @@ ok_jq_equal_checks() {
 repo="$TMP/repo"
 repo_one="$TMP/repo-one"
 repo_two="$TMP/repo-two"
-mkdir -p "$repo/.github/workflows" "$repo_one/.github/workflows" "$repo_two/.github/workflows"
+repo_matrix="$TMP/repo-matrix"
+mkdir -p "$repo/.github/workflows" "$repo_one/.github/workflows" "$repo_two/.github/workflows" "$repo_matrix/.github/workflows"
 cat >"$repo/.github/workflows/ci.yml" <<'YAML'
 name: CI
 on: [pull_request]
@@ -106,6 +107,81 @@ jobs:
       - run: echo two
 YAML
 
+cat >"$repo_matrix/.github/workflows/matrix.yml" <<'YAML'
+name: Matrix CI
+on:
+  pull_request:
+jobs:
+  install:
+    name: Install Doctor Uninstall (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - macos-14
+          - ubuntu-22.04
+    steps:
+      - run: echo install
+  multi:
+    name: Multi Axis
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        os: [ubuntu-22.04]
+        node: [20]
+    steps:
+      - run: echo multi
+YAML
+
+cat >"$repo_matrix/.github/workflows/schedule.yml" <<'YAML'
+name: Scheduled Only
+on:
+  schedule:
+    - cron: "0 9 * * *"
+jobs:
+  nightly:
+    name: Nightly Only
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo nightly
+YAML
+
+cat >"$repo_matrix/.github/workflows/pr.yml" <<'YAML'
+name: Pull Request Only
+on:
+  pull_request:
+jobs:
+  pr_only:
+    name: Pull Request Only
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo pr
+YAML
+
+cat >"$repo_matrix/.github/workflows/mixed.yml" <<'YAML'
+name: Mixed Events
+on: [push, pull_request]
+jobs:
+  dual:
+    name: Dual Event
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo dual
+YAML
+
+cat >"$repo_matrix/.github/workflows/branch-miss.yml" <<'YAML'
+name: Branch Miss
+on:
+  pull_request:
+    branches: [release]
+jobs:
+  branch_miss:
+    name: Branch Miss
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo branch
+YAML
+
 cat >"$TMP/gh" <<'STUB'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -131,6 +207,10 @@ if [[ "$1" == "api" && "$2" == "repos/JYeswak/repo-one/actions/runs" ]]; then
 fi
 if [[ "$1" == "api" && "$2" == "repos/JYeswak/repo-two/actions/runs" ]]; then
   printf 'Repo Two CI\n'
+  exit 0
+fi
+if [[ "$1" == "api" && "$2" == "repos/JYeswak/repo-matrix/actions/runs" ]]; then
+  printf 'Matrix CI\nPull Request Only\nMixed Events\n'
   exit 0
 fi
 printf '{}\n'
@@ -193,5 +273,19 @@ ok_jq "repo two apply payload has repo-specific checks" '.required_status_checks
 ok_jq "verify parity passes without mutation" '.mode == "verify-parity" and .outcome == "pass" and .dry_run_required_checks == .apply_required_checks' "$TMP/parity.json"
 ok_jq_equal_checks "divergence detector asserts dry-run/apply equality" "$TMP/repo-two-dry.json" "$TMP/repo-two-apply.json"
 
+"$SCRIPT" --repo JYeswak/repo-matrix --branch main --dry-run --repo-path "$repo_matrix" --json >"$TMP/matrix-dry.json"
+ok_jq "matrix workflow emits expanded check names" '.required_checks | index("Install Doctor Uninstall (macos-14)") and index("Install Doctor Uninstall (ubuntu-22.04)")' "$TMP/matrix-dry.json"
+# shellcheck disable=SC2016
+ok_jq "matrix workflow omits unexpanded literal" '.required_checks | index("Install Doctor Uninstall (${{ matrix.os }})") | not' "$TMP/matrix-dry.json"
+ok_jq "single-axis matrix emits two required checks" '([.required_checks[] | select(startswith("Install Doctor Uninstall ("))] | length) == 2' "$TMP/matrix-dry.json"
+ok_jq "multi-axis matrix emits tuple suffix" '.required_checks | index("Multi Axis (ubuntu-22.04, 20)")' "$TMP/matrix-dry.json"
+ok_jq "schedule-only workflow excluded" '.required_checks | index("Nightly Only") | not' "$TMP/matrix-dry.json"
+ok_jq "pull-request workflow included" '.required_checks | index("Pull Request Only")' "$TMP/matrix-dry.json"
+ok_jq "push-and-pull-request workflow included" '.required_checks | index("Dual Event")' "$TMP/matrix-dry.json"
+ok_jq "branch-filtered pull-request workflow excluded from main" '.required_checks | index("Branch Miss") | not' "$TMP/matrix-dry.json"
+ok_jq "discovery details include trigger reasons" '[.discovery_details[] | select(.check == "Nightly Only" and .included == false and .trigger_reason == "excluded:no_pull_request_trigger")] | length == 1' "$TMP/matrix-dry.json"
+ok_jq "discovery details include matrix rows" '[.discovery_details[] | select(.check == "Install Doctor Uninstall (macos-14)" and .matrix.os == "macos-14")] | length == 1' "$TMP/matrix-dry.json"
+ok_jq "canonical flywheel matrix regression shape represented" '.required_checks == ["Install Doctor Uninstall (macos-14)","Install Doctor Uninstall (ubuntu-22.04)","Multi Axis (ubuntu-22.04, 20)","Dual Event","Pull Request Only"]' "$TMP/matrix-dry.json"
+
 printf 'SUMMARY pass=%d fail=%d\n' "$pass" "$fail"
-[[ "$fail" -eq 0 && "$pass" -ge 12 ]]
+[[ "$fail" -eq 0 && "$pass" -ge 20 ]]
