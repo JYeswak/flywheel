@@ -1,0 +1,23 @@
+task=flywheel-m7ywp-73cd75
+verified_at=2026-05-20T23:19:30Z
+
+git status --short -- .flywheel/MISSION.md
+<empty>
+
+row_presence
+MISSION_ROW_ABSENT
+ARCHIVE_ROW_PRESENT
+
+latest_commit_touching_mission
+commit=aab5c2d48f6866477530a110002f3d474541b42c
+author=Joshua Nowak <87095688+JYeswak@users.noreply.github.com>
+date=2026-05-20T14:47:20-06:00
+subject=feat: foundational dispatch wave 2026-05-20 - 4 fleet janitors + Mission Duty 5 + file-triage CLI (#27)
+
+tests/josh-request-capture-archive.sh
+ok 1 - hook syntax
+ok 2 - mission left untouched
+ok 3 - archive created
+ok 4 - archive contains request row
+ok 5 - jsonl row written
+SUMMARY pass=5 fail=0
