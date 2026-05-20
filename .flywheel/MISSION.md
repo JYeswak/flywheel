@@ -3,11 +3,11 @@
 schema_version: 1
 doc_type: mission
 status: locked
-locked_at: 2026-05-20T19:15:00Z
-lock_hash: 5ccb4f23a38b4aa2bb16ad4f69181f8f517c9b62207752f946a956c0df3aba4d
-prior_lock_hash: 332f24a5f5ef61f1408b90c2c5d8ab326181ab47ef596a172e6148368a33e424
-mission_lock_id: ml-2026-05-20-mission-drift-four-duties
-mission_lock_reason: mission-drift
+locked_at: 2026-05-20T19:40:00Z
+lock_hash: a59529f34c4051c2f9c0d20399650cf5673eb6e410d602d04f6689017181e796
+prior_lock_hash: 5ccb4f23a38b4aa2bb16ad4f69181f8f517c9b62207752f946a956c0df3aba4d
+mission_lock_id: ml-2026-05-20-mission-drift-five-duties-token-burn
+mission_lock_reason: mission-drift-depth-add-token-burn
 locked_by_extension: flywheel-1-mission-lock-skill
 repo: /Users/josh/Developer/flywheel
 repo_realpath: /Users/josh/Developer/flywheel
@@ -237,3 +237,45 @@ flywheel:1 auto-pauses when ANY duty is RED for >2 ticks consecutive without rem
 - `flywheel-bxhxa` P0: storage-health-probe 5-tier classifier (substrate foundation)
 - `flywheel-94xyb` P0: log-rotation contract (substrate foundation)
 - `flywheel-ivb2s` P0: ledger-retention enforcer (substrate foundation)
+
+## Mission Anchor Extension Locked 2026-05-20T19:40Z
+
+Joshua-direct depth-add 2026-05-20T19:40Z, naming the CFS:1 phantom-bead-creation incident:
+> "auto ops is great but auto ops without mission alignment is token burn ... we need to make sure that every repo is mission aligned - and if there is mission drift that is getting surfaced sooner rather than later."
+
+### Duty 5 — Mission-alignment surveillance (fleet-wide)
+
+Every repo in the fleet maintains a fresh mission-lock and ground-truth callback verification. flywheel:1 surveils both dimensions, surfaces drift EARLY, halts token-burn cycles BEFORE Joshua wakes up to N "completed" beads with no actual state change.
+
+**Two failure modes Duty 5 prevents:**
+
+1. **Mission drift** — repo work diverges from its declared mission anchor over time. Dispatched work passes the mission-fitness gate at dispatch time, then drifts toward what's interesting/possible instead of what's mission-required.
+   - Prevention: every repo has `mission_lock_age_status` probe; alarm at >168h fresh threshold; refuse new dispatches at >720h stale.
+   - Metric: 100% repos with `mission_lock_age < 720h` (max threshold). Yellow at 168-720h. Red at >720h.
+
+2. **Callback-vs-ground-truth drift** (CFS phantom-bead-creation class) — worker callbacks claim substantive DB/fs/gh operations executed, but ground-truth state shows they didn't. Plan-space artifacts may be real and substantive, but the world they describe was never realized. Example: CFS:1 pane 2 Phase 4 DECOMPOSE claimed "10 beads + 5 deps created"; `br list` confirmed none existed.
+   - Prevention: orchestrators run ground-truth probe on every DONE callback that claims bead/file/issue operations. `br show <claimed-id>` for bead ops, `ls -la <claimed-path>` for file ops, `gh issue view <claimed-issue>` for github ops. Refuse close until verified.
+   - Metric: 100% DONE callbacks have `ground_truth_verified=true` in dispatch-log row.
+
+### Doctor-Surface (extended)
+
+`fleet_mission_alignment_status` dashboard line on every `/flywheel:status`:
+`Mission: <fresh>/<total> fresh, <stale> stale; ground_truth_verified=<pct>% (24h)`
+
+Underlying probes:
+- per-repo `mission-lock-age-probe.sh`
+- dispatch-log scan for `ground_truth_verified` field across last 24h
+- phantom-bead detector: scan worker callbacks claiming `br create/update/comment` ops, cross-check against `br list --updated-since=<dispatch_ts>`
+
+### Token-Burn Halt Condition
+
+If any repo enters duty-5-RED (mission stale >720h OR phantom-bead detection rate >0 in last 24h), flywheel:1 HALTS all new dispatches to that repo's panes until:
+- mission is re-locked via `/flywheel:mission-lock --reason=resume-from-pause` (mission drift case), OR
+- phantom-bead-creation root cause identified + worker contract patched (verification gap case)
+
+This is the **anti-token-burn invariant**: better to halt than to burn cycles on work that's not delivering to mission OR not landing in actual state.
+
+### Foundational Research Beads (filed 2026-05-20 in support of Duty 5)
+
+- `flywheel-<TBD-mission-surveillance>` P0: fleet-wide mission-lock-age audit + dashboard wiring
+- `flywheel-<TBD-phantom-bead>` P0: orchestrator-side ground-truth callback verification protocol; promote `/beads-compliance-and-completion-verification` skill to canonical-required for every DONE callback that touches DB/fs/gh state
