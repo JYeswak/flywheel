@@ -88,7 +88,8 @@
       ".flywheel/evidence/flywheel-xrm8j/substrate_probe.py",
       ".flywheel/evidence/flywheel-xrm8j/jsm-readonly-proof.json",
       ".flywheel/audit/flywheel-xrm8j/compliance-pack.json",
-      ".flywheel/audit/flywheel-xrm8j/validation-receipt.json"
+      ".flywheel/audit/flywheel-xrm8j/validation-receipt.json",
+      ".flywheel/audit/flywheel-xrm8j/l112-probe.sh"
     ],
     "files_released": [
       ".flywheel/evidence/flywheel-xrm8j/report.md",
@@ -96,7 +97,8 @@
       ".flywheel/evidence/flywheel-xrm8j/substrate_probe.py",
       ".flywheel/evidence/flywheel-xrm8j/jsm-readonly-proof.json",
       ".flywheel/audit/flywheel-xrm8j/compliance-pack.json",
-      ".flywheel/audit/flywheel-xrm8j/validation-receipt.json"
+      ".flywheel/audit/flywheel-xrm8j/validation-receipt.json",
+      ".flywheel/audit/flywheel-xrm8j/l112-probe.sh"
     ],
     "reservation_conflicts": [],
     "reservation_lifecycle": {

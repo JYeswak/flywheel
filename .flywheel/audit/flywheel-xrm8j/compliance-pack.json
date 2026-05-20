@@ -9,7 +9,8 @@
     ".flywheel/evidence/flywheel-xrm8j/report.md",
     ".flywheel/evidence/flywheel-xrm8j/probe-results.json",
     ".flywheel/evidence/flywheel-xrm8j/jsm-readonly-proof.json",
-    ".flywheel/evidence/flywheel-xrm8j/substrate_probe.py"
+    ".flywheel/evidence/flywheel-xrm8j/substrate_probe.py",
+    ".flywheel/audit/flywheel-xrm8j/l112-probe.sh"
   ],
   "acceptance": {
     "comparison_matrix": "pass",
