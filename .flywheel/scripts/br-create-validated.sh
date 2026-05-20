@@ -17,6 +17,21 @@ title=""
 description_file=""
 description_text=""
 pass_args=()
+tmp_files=()
+
+cleanup_tmp_files() {
+  local path
+  for path in "${tmp_files[@]}"; do
+    [[ -n "$path" ]] || continue
+    rm -f -- "$path"
+  done
+}
+
+register_tmp_file() {
+  tmp_files+=("$1")
+}
+
+trap cleanup_tmp_files EXIT ERR
 
 sql_escape() {
   printf '%s' "$1" | sed "s/'/''/g"
@@ -57,6 +72,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     --description|-d)
       tmp="$(mktemp "${TMPDIR:-/tmp}/br-create-validated.XXXXXX.md")"
+      register_tmp_file "$tmp"
       printf '%s\n' "${2:-}" >"$tmp"
       description_file="$tmp"
       description_text="${2:-}"

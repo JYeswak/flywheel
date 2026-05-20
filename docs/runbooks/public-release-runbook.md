@@ -309,7 +309,7 @@ Expected results:
 | Preflight fixtures | Fixture-backed full, reduced, blocked, docs-only, and misconfigured modes pass. |
 | Contact routing | Public mailto route uses `joshua@zeststream.ai` and subject `[Flywheel] Public site inquiry`; this proves routing, not delivery. |
 | Upstream substrate adoption | Asupersync remains `gated-evaluation` until promotion gates and repo-local POC evidence pass. |
-| Registry validator | `SUMMARY pass=6 fail=0` while rows remain open; coverage is derived from live readiness blockers and currently expects open TP-005/TP-017/TP-018 until release cutover. |
+| Registry validator | `SUMMARY pass=6 fail=0`; after `v0.2.1` cutover the validator reports `open_count=0`, empty live readiness blockers, and closed historical coverage for TP-005/TP-017/TP-018. |
 | Cutover receipt verifier | `SUMMARY pass=23 fail=0`; fixture proof shows saved receipt bundles replay, checksum drift is rejected, website/head failures are rejected, live-site/user-journey receipts are required, and stale signoff evidence is rejected. |
 | Story-system package | `SUMMARY pass=26 fail=0`; SkillOS story-system pack stage validation also preserves the source-package literal baseline `SUMMARY pass=13 fail=0` while CI, Release, and Site Deploy all validate the package JSON, typed root import, CSS tokens, and story-system contract before public packaging or publishing. |
 | Docs depersonalization | JSON status `pass` and zero findings. |
@@ -367,8 +367,8 @@ Expected closure state:
 | Green runs | `CI` and `Installer Smoke` have successful remote runs on the remote default branch. |
 | Installer smoke receipts | Each `Installer Smoke` OS leg uploads an `installer-smoke-<os>` artifact containing `installer-smoke-receipt.json`, install/uninstall receipts, reduced first-run receipts, and the closeout receipt. |
 | User journey pack | `docs/runbooks/public-user-journey-pack.md` maps every public asset to persona lane, journey stage, entrypoint, visible wording, visual cue, CTA, proof refs, signoff status, and blocker/skip receipt reference. |
-| GitHub release | `v0.2.0` exists and is neither draft nor prerelease. |
-| Release assets | `install.sh`, `install.sh.sha256`, `SHA256SUMS`, `flywheel-v0.2.0.tar.gz`, and `flywheel-v0.2.0.tar.gz.sha256` are uploaded, non-empty, and expose `sha256:` digest metadata. |
+| GitHub release | `v0.2.1` exists and is neither draft nor prerelease. |
+| Release assets | `install.sh`, `install.sh.sha256`, `SHA256SUMS`, `flywheel-v0.2.1.tar.gz`, and `flywheel-v0.2.1.tar.gz.sha256` are uploaded, non-empty, and expose `sha256:` digest metadata. |
 | Website | `https://flywheel.zeststream.ai/` returns a successful status and contains the reviewed SMB/Yuzu journey markers. |
 | Install proxy | `https://flywheel.zeststream.ai/install.sh` hashes to the value served at `https://flywheel.zeststream.ai/install.sh.sha256`. |
 | External review | Two distinct non-Joshua reviewers approve or approve with follow-ups and cover every current public trust surface. |
@@ -403,14 +403,14 @@ Then edit `release-signoff.json` with:
 | `status` | `approved` |
 | `approver` | `Joshua Nowak` exactly; aliases are rejected by `scripts/publication_readiness.py`. |
 | `remote` | `JYeswak/flywheel` |
-| `tag` | `v0.2.0` |
+| `tag` | `v0.2.1` |
 | `signed_at` | ISO-8601 UTC timestamp of the approval |
 
 Failure branches:
 
 | Failure | Action |
 |---|---|
-| Any publication readiness blocker remains | Do not create an approved signoff. Keep TP-005, TP-017, or TP-018 open. |
+| Any publication readiness code remains | Do not create an approved signoff. Keep or reopen the matching TP row until live proof closes it. |
 | Signoff exists before real remote/web checks pass | Treat it as invalid; reset to `pending` or remove the file. |
 | External review has fewer than two valid reviewers or omits any current public trust surface | Keep TP-015 and B11.6 open. |
 

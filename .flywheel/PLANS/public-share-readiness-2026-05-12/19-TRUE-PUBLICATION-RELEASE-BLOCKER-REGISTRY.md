@@ -15,7 +15,7 @@ not a disposition.
 1. Every new TODO/gap found during true-publication work gets a row here or a
    linked Bead/issue row before work continues past the local change.
 2. Every `release_blocker` row must have an owner, evidence, next action, and
-   closure proof before `v0.2.0` can publish.
+   closure proof before the current publication tag can publish.
 3. Compatibility-target claims for Gemini/OpenClaw/Claude/Codex stay blocked
    until isolated receipts prove runtime behavior or public copy downgrades the
    claim.
@@ -30,7 +30,7 @@ not a disposition.
 | TP-002 | engine-overlay-extraction | P0 | closed | Flywheel | `01-RESEARCH-A.md`; B1-B4/B10; B2 classifier implemented and fixture-tested; B3.1-B3.5 closed from staged sweeps; B4 closed from assembly run `20260513T024740`; B10 closed with `manual-review.closed.jsonl` 7374/7374 rows signed | Public staging tree exists, private/overlay state is excluded, depersonalization scans pass, halted propagators are absent, source git status stays unchanged, and manual-review queue is fully signed. |
 | TP-003 | depersonalization-scan | P0 | closed | Flywheel | B1/B1.5/B3.1-B3.5; docs/scripts/templates/tests/README/.github scans pass; public prepublish and secret override tests pass | Classification table, codemod, and grep/secret scans pass across docs/scripts/templates/tests/package metadata. |
 | TP-004 | halted-propagator-disposal | P0 | closed | Flywheel | `03-AUDIT-FINDINGS.md` Class 6a; B3.4; `bash tests/live-state-denylist.sh` pass=14 fail=0 | Halted propagators excluded from public extraction or shipped non-executable with explicit warning and test proof. |
-| TP-005 | public-repo-package-surface | P0 | open | Flywheel | B8/B9/B10/B11/B14.5/B15; local CI/release/site workflows and static `site/` source authored; `23-TP-005-017-018-PUBLICATION-READINESS-RECEIPT.md`; private Vercel deploy receipt `state/private-live-site-deploy.receipt.json` | Public repo or export path, package/install surface, release metadata, checksum, CI, and license posture are staged or published. Current live blockers: remote repo is private and release `v0.2.0` is absent; private-live website content and install proxy checksum proof now pass. |
+| TP-005 | public-repo-package-surface | P0 | closed | Flywheel | B8/B9/B10/B11/B14.5/B15; local CI/release/site workflows and static `site/` source authored; `23-TP-005-017-018-PUBLICATION-READINESS-RECEIPT.md`; private Vercel deploy receipt `state/private-live-site-deploy.receipt.json`; `v0.2.1` GitHub release; live `https://flywheel.zeststream.ai/site-deploy-manifest.json`; `.flywheel/PLANS/public-share-readiness-2026-05-12/release-signoff.json` | Public repo path, package/install surface, release metadata, checksum, CI, and license posture are published. `v0.2.1` is the non-destructive publication tag after the unpublished `v0.2.0` prerequisite-tag failure; hosted install checksum parity passes with `a4e04cd1e08f13110d74dca34c38018a5b93c9a173cca2db63a91458efe6f364`. |
 | TP-006 | isolated-reduced-mode | P0 | closed | Flywheel | B17/B17.5; `docs/getting-started/first-run.md`; `bash tests/installer-smoke.sh` pass=10 fail=0; `bash tests/journey-smoke.sh` pass=7 fail=0; `flywheel-zcljr` | Disposable isolated reduced-mode environment proves installer dry-run, install, installed files, reduced preflight, doctor, init, tick, dispatch/simulate, closeout validation, inspect, idempotent reinstall, uninstall, and byte-equality empty-prefix cleanup. |
 | TP-007 | isolated-claude-path | P0 | closed | Flywheel | `scripts/preflight.sh`; `scripts/agent-lane-probe.sh`; `receipts/agent-lanes/claude.json`; `docs/runbooks/agent-lane-compatibility.md`; `bash tests/preflight-fixtures.sh` pass=19 fail=0; `bash tests/agent-lane-probe.sh` pass=10 fail=0; `bash tests/journey-smoke.sh` pass=7 fail=0; `flywheel-9adlp`; `flywheel-4oed2` | Claude lane is public copy downgraded to compatibility-target with an explicit blocker receipt until a strict isolated runtime receipt marks `runtime_proven=true`; CLI presence, weak receipts, duplicate/conflicting stage rows, and private-state findings do not permit supported copy. |
 | TP-008 | isolated-codex-path | P0 | closed | Flywheel | `scripts/preflight.sh`; `scripts/agent-lane-probe.sh`; `receipts/agent-lanes/codex.json`; `docs/runbooks/agent-lane-compatibility.md`; `bash tests/preflight-fixtures.sh` pass=19 fail=0; `bash tests/agent-lane-probe.sh` pass=10 fail=0; `bash tests/journey-smoke.sh` pass=7 fail=0; `flywheel-9adlp`; `flywheel-4oed2` | Codex lane is public copy downgraded to compatibility-target with an explicit blocker receipt until a strict isolated runtime receipt marks `runtime_proven=true`; CLI presence, weak receipts, duplicate/conflicting stage rows, and private-state findings do not permit supported copy. |
@@ -42,8 +42,8 @@ not a disposition.
 | TP-014 | skillos-boundary | P0 | closed | Flywheel + SkillOS | B16; Agent Mail messages `504` and `505`; `20-SKILLOS-CAPABILITY-BOUNDARY-HANDOFF-RECEIPT.md` | SkillOS accepted the v0.2 boundary as written: Flywheel owns public installability/loop engine, SkillOS owns capability control plane, proof surfaces are scoped, no private SkillOS state ships, and zero-ambient-skills v0.2 is acceptable pending later capability-pack ratification. |
 | TP-015 | external-review | P0 | closed | Flywheel | B11.6; `flywheel-gr403.1`; `22-TP-015-EXTERNAL-REVIEW-PACKET.md`; `review-log.jsonl`; `docs/evidence/external-review-log.jsonl`; supplemental Agent Mail messages `509`/`510`/`511`/`512`; Mobile Eats row `2026-05-13T11:03:31Z`; Gemini CLI row `2026-05-13T11:15:00Z` | Two distinct non-Joshua reviewers cover the current public trust surface including `docs/evidence/publication-blocker-coverage.md`, with valid UTC timestamps and empty `blocking_findings`; private and public evidence logs validate under `scripts/validate_external_review.py --release --json`. |
 | TP-016 | final-naming | P0 | closed | Flywheel | `docs/brand/naming-conventions.md`; `tests/naming-conventions.sh`; `bash tests/naming-conventions.sh` pass=63 fail=0; `flywheel-kl293` | Final repo/package/CLI/site naming is selected: repo `github.com/JYeswak/flywheel`, CLI/package namespace `flywheel`, SMB site `flywheel.zeststream.ai`, docs site `docs.flywheel.zeststream.ai`, and install endpoint `flywheel.zeststream.ai/install.sh`; tests reject stale/private names across public surfaces and stale support-tier vocabulary across publication plan surfaces. |
-| TP-017 | ci-workflows | P0 | open | Flywheel | `.github/workflows/ci.yml`, `installer-smoke.yml`, `release.yml`, and `site.yml` authored; local contract/lint/smoke pass; `23-TP-005-017-018-PUBLICATION-READINESS-RECEIPT.md` | Required remote workflows exist and CI/installer-smoke pass on supported OS matrix. Current live blocker: GitHub remote reports no workflows or successful runs. |
-| TP-018 | release-signoff | P0 | open | Joshua + Flywheel | B15; `23-TP-005-017-018-PUBLICATION-READINESS-RECEIPT.md`; `release-signoff.template.json`; TP-015 external-review gate closed for the current seven-surface public trust set | Git tag, GitHub release, checks, external review, and Joshua signoff all present. Current live blockers: release `v0.2.0`, release assets, remote checks, and Joshua signoff are absent; private-live website and install proxy checksum proof now pass. |
+| TP-017 | ci-workflows | P0 | closed | Flywheel | `.github/workflows/ci.yml`, `installer-smoke.yml`, `release.yml`, and `site.yml` authored; local contract/lint/smoke pass; `23-TP-005-017-018-PUBLICATION-READINESS-RECEIPT.md`; master CI run `25938399788`; Installer Smoke run `25938424222`; Site Deploy run `25938570431`; PR #7 Public Surface/Installer/GitGuardian checks | Required remote workflows exist and CI/installer-smoke pass on supported OS matrix; hosted workflow prerequisites are installed in release/site jobs so bare GitHub runners no longer fail on missing `rg`, `jq`, or `shellcheck`. |
+| TP-018 | release-signoff | P0 | closed | Joshua + Flywheel | B15; `23-TP-005-017-018-PUBLICATION-READINESS-RECEIPT.md`; `release-signoff.template.json`; TP-015 external-review gate closed for the current seven-surface public trust set; `v0.2.1` release; `.flywheel/PLANS/public-share-readiness-2026-05-12/release-signoff.json`; `python3 scripts/publication_readiness.py --release --json` status `pass` | Git tag, GitHub release, checks, external review, live site/install proxy, and Joshua signoff are present. Publication readiness returns `status=pass` with zero blockers for `v0.2.1`. |
 | TP-019 | doctor-warning-disposition | P1 | closed | Flywheel | `21-TP-019-DOCTOR-WARNING-DISPOSITION.md`; `flywheel-2djra`; full doctor status `warn` with `errors=[]`; publishability bar `pass` score 7/7; Agent Mail FD doctor `PASS`; Beads source repo normalization pass=6 fail=0 | Hard doctor errors were fixed; remaining callback, L-rule lag, oversized-file, watcher, capture-parity, surface-wiring, closed-bead, and plan-quality warnings are classified as non-release private-fleet/historical hygiene for public v0.2 and remain visible in doctor output. |
 | TP-020 | todo-gap-scanner | P1 | closed | Flywheel | `bash tests/public-surface-gap-scanner.sh` pass=14 fail=0; `python3 .flywheel/scripts/public-surface-gap-scanner.py --repo . --release --json` status=pass file_count=48 undispositioned_count=0 | Public-surface gap scanner fails release when TODO/FIXME/gap/blocker/missing/unproven markers lack TP row, Bead id, or explicit non-release disposition; CI contract includes the scanner and covers the current evidence/runbook/site workflow surfaces. |
 
@@ -591,12 +591,27 @@ codes change.
   fail=0. Public export `codex-public-export-20260513T1645Z` passes staged
   cutover receipts 15/0, public docs 65/0, publication readiness 52/0, and
   depersonalization scan with zero findings.
+- 2026-05-15: Closed TP-005, TP-017, and TP-018 after the real cutover checks
+  passed for non-destructive publication tag `v0.2.1`. `v0.2.0` remains an
+  unpublished prerequisite-failure tag because the release/site workflows were
+  missing hosted-runner prerequisites; DCG blocked destructive tag movement, so
+  the safe repair path was `v0.2.1`. Evidence: `v0.2.1` GitHub release exists
+  with required assets and digests; master CI run `25938399788` passed;
+  Installer Smoke run `25938424222` passed; Site Deploy run `25938570431`
+  passed; `https://flywheel.zeststream.ai/` live probe passes; hosted
+  `install.sh` checksum matches
+  `a4e04cd1e08f13110d74dca34c38018a5b93c9a173cca2db63a91458efe6f364`;
+  `release-signoff.json` records Joshua approval; `python3
+  scripts/publication_readiness.py --release --json` returns `status=pass` with
+  zero blockers; `python3
+  .flywheel/scripts/true-publication-registry-validate.py --release --json`
+  returns `status=pass`, `open_count=0`, and no warnings.
 
 ## Immediate Next Actions
 
-1. Make the GitHub repository public or publish the approved public export path,
-   push the workflow files, and obtain green CI/installer-smoke runs visible to
-   `scripts/publication_readiness.py`.
-2. Deploy `site/` to `flywheel.zeststream.ai`, publish tag/release `v0.2.0`,
-   verify install assets/checksums and install proxy, then get Joshua signoff
-   before closing TP-018/B15 or the thread goal.
+1. Keep the live release monitors green: repository visibility, remote
+   workflows, release assets, site reachability, install checksum parity, and
+   signoff receipt must continue to pass `scripts/publication_readiness.py
+   --release --json`.
+2. If a future release or deployment regresses, reopen the matching TP row and
+   fix the root cause rather than carrying a prose waiver.

@@ -242,10 +242,44 @@ fi
 # ====== END canonical-cli scaffold ======
 VERSION="agent-mail-pre-allocate-worker-identities/1.0.0"
 LOOP="${FLYWHEEL_LOOP_BIN:-$HOME/.claude/skills/.flywheel/bin/flywheel-loop}"
+FAILURE_LOG="${FLYWHEEL_PREALLOC_FAILURE_LOG:-$HOME/.local/state/flywheel/agent-mail-pre-allocate-worker-identities-failures.jsonl}"
 session=""
 json=0
 dry_run=0
 apply=0
+run_started_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+on_exit() {
+  local rc=$?
+  trap - EXIT
+  if [[ "$rc" -ne 0 ]]; then
+    mkdir -p "$(dirname "$FAILURE_LOG")" 2>/dev/null || true
+    jq -nc \
+      --arg schema "flywheel.agent_mail_preallocate_failure.v1" \
+      --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+      --arg started_at "$run_started_at" \
+      --arg session "$session" \
+      --arg loop "$LOOP" \
+      --argjson dry_run "$dry_run" \
+      --argjson apply "$apply" \
+      --argjson json "$json" \
+      --argjson exit_code "$rc" \
+      '{
+        schema_version:$schema,
+        ts:$ts,
+        started_at:$started_at,
+        session:(if $session | length > 0 then $session else null end),
+        loop_bin:$loop,
+        dry_run:($dry_run == 1),
+        apply:($apply == 1),
+        json:($json == 1),
+        exit_code:$exit_code,
+        status:"failed"
+      }' >>"$FAILURE_LOG" 2>/dev/null || true
+  fi
+  exit "$rc"
+}
+trap on_exit EXIT
 
 usage() {
   printf '%s\n' "Usage: agent-mail-pre-allocate-worker-identities.sh [--session <name>] [--dry-run|--apply] [--json]"

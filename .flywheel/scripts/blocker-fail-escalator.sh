@@ -56,6 +56,22 @@ JSON_OUT=0
 APPLY=0
 BLOCKER_FILE=""
 MODE=""
+declare -a BLOCKER_FAIL_ESCALATOR_TEMP_FILES=()
+
+register_temp_file() {
+  BLOCKER_FAIL_ESCALATOR_TEMP_FILES+=("$1")
+}
+
+cleanup_temp_files() {
+  local tmp
+  for tmp in "${BLOCKER_FAIL_ESCALATOR_TEMP_FILES[@]}"; do
+    [[ -n "$tmp" ]] || continue
+    rm -f "$tmp"
+  done
+  return 0
+}
+
+trap cleanup_temp_files EXIT ERR
 
 usage() {
   cat <<'USAGE'
@@ -316,6 +332,7 @@ run_ac_live_probe() {
   local timeout_s="${2:-10}"
   local tmpout
   tmpout="$(mktemp "${TMPDIR:-/tmp}/blocker-fail-stdout.XXXXXX")"
+  register_temp_file "$tmpout"
   local rc=0
   if command -v timeout >/dev/null 2>&1; then
     timeout "$timeout_s" bash -c "$ac_command" >"$tmpout" 2>&1 || rc=$?
@@ -324,12 +341,7 @@ run_ac_live_probe() {
   fi
   local stdout_str
   stdout_str="$(cat "$tmpout")"
-  : >"$tmpout"
-  rmdir "$(dirname "$tmpout")" 2>/dev/null || true
-  # Tmpout itself is a file (not a dir) — clean explicitly
-  if [[ -f "$tmpout" ]]; then
-    : >"$tmpout"
-  fi
+  rm -f "$tmpout"
   jq -nc --arg s "$stdout_str" --argjson rc "$rc" \
     '{ac_stdout:$s,ac_exit_code:$rc}'
 }
@@ -573,7 +585,20 @@ process_blocker() {
 
   if [[ "$APPLY" -eq 1 ]]; then
     mkdir -p "$(dirname "$ESCALATIONS_LOG")"
-    printf '%s\n' "$escalation_row" >>"$ESCALATIONS_LOG"
+    if ! printf '%s\n' "$escalation_row" >>"$ESCALATIONS_LOG"; then
+      jq -nc \
+        --arg sv "$SCHEMA_VERSION" --arg b "$blocker_id" \
+        --argjson nc "$new_counter" --argjson tn "$threshold_n" \
+        --arg ams "$agent_mail_status" --arg el "$ESCALATIONS_LOG" \
+        --argjson row "$escalation_row" --argjson lpe "$live_probe_json" \
+        '{schema_version:$sv,status:"escalation_failed",blocker_id:$b,
+          ac_verdict:"PASS",ac_passes_now:false,
+          consecutive_fail_count:$nc,threshold_n:$tn,
+          agent_mail_status:$ams,escalations_log_path:$el,
+          live_probe_evidence:$lpe,escalation_row:$row,
+          reason:"failed to append escalation row; counter not reset"}'
+      return 1
+    fi
     # Reset counter after escalation — the next failure starts a fresh streak.
     reset_counter "$blocker_id"
 

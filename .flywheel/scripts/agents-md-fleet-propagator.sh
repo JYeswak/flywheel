@@ -7,6 +7,20 @@ set -euo pipefail
 
 VERSION="agents-md-fleet-propagator.v1.0.0"
 SCHEMA_VERSION="agents-md-fleet-propagation/v1"
+declare -a FLYWHEEL_PROPAGATOR_TMPFILES=()
+
+register_tmpfile() {
+  FLYWHEEL_PROPAGATOR_TMPFILES+=("$1")
+}
+
+cleanup_tmpfiles() {
+  local path
+  for path in "${FLYWHEEL_PROPAGATOR_TMPFILES[@]}"; do
+    [[ -n "$path" ]] && rm -f "$path"
+  done
+}
+
+trap cleanup_tmpfiles EXIT
 
 # flywheel-94nzk: jq arglist-too-long mitigation. When ledger grows past
 # ARG_MAX (~1MB on macOS), `--argjson rows "$rows"` crashes jq with
@@ -29,6 +43,7 @@ SCHEMA_VERSION="agents-md-fleet-propagation/v1"
 fw_jq_with_rows() {
   local rows_file
   rows_file="$(mktemp -t fleet-prop-rows.XXXXXX)"
+  register_tmpfile "$rows_file"
   cat >"$rows_file"
   jq -nc --slurpfile rows "$rows_file" "$@"
   local rc=$?
@@ -447,6 +462,7 @@ run_apply() {
   local scan pre tmp results after fail_count success_count payload rc=0
   scan="$(scan_payload_json)"
   tmp="$(mktemp "${TMPDIR:-/tmp}/agents-md-fleet-apply.XXXXXX")"
+  register_tmpfile "$tmp"
   while IFS= read -r pre; do
     [[ -n "$pre" ]] || continue
     apply_one_repo "$pre" >>"$tmp"

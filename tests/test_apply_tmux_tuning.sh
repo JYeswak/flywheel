@@ -99,27 +99,27 @@ ORIG_SHA="$(sha "$TMX")"
 if [[ "$(sha "$TMX")" == "$ORIG_SHA" ]]; then pass "dry-run-no-mutate"; else fail "dry-run-no-mutate"; fi
 assert_jq "$TMP/dry.json" '.action == "dry-run" and .outcome == "planned"' "dry-run-receipt-shape"
 
-"$SCRIPT" --apply --json >"$TMP/apply.json"
+"$SCRIPT" --apply --idempotency-key test-apply-1 --json >"$TMP/apply.json"
 if grep -qF "BEGIN apply-tmux-tuning" "$TMX"; then pass "apply-mutates-and-adds-block"; else fail "apply-mutates-and-adds-block"; fi
 backup_path="$(jq -r '.backup_path' "$TMP/apply.json")"
 if [[ -f "$backup_path" ]]; then pass "apply-mutates-and-backs-up"; else fail "apply-mutates-and-backs-up"; fi
 assert_jq "$TMP/apply.json" '.action == "apply" and .outcome == "ok" and .source_file_exit == 0' "apply-creates-receipt"
 
 APPLY_SHA="$(sha "$TMX")"
-"$SCRIPT" --apply --json >"$TMP/reapply.json"
+"$SCRIPT" --apply --idempotency-key test-apply-2 --json >"$TMP/reapply.json"
 if [[ "$(sha "$TMX")" == "$APPLY_SHA" && "$(grep -cF "BEGIN apply-tmux-tuning" "$TMX")" == "1" ]]; then
   pass "idempotent-re-apply"
 else
   fail "idempotent-re-apply"
 fi
 
-"$SCRIPT" --revert --json >"$TMP/revert.json"
+"$SCRIPT" --revert --apply --idempotency-key test-revert-1 --json >"$TMP/revert.json"
 if [[ "$(sha "$TMX")" == "$ORIG_SHA" ]]; then pass "revert-byte-exact"; else fail "revert-byte-exact"; fi
 
 export TMUX_STUB_VERSION="3.4"
 PRE_INCOMPAT_SHA="$(sha "$TMX")"
 set +e
-"$SCRIPT" --apply --json >"$TMP/incompat.json" 2>/dev/null
+"$SCRIPT" --apply --idempotency-key test-incompat-1 --json >"$TMP/incompat.json" 2>/dev/null
 rc=$?
 set -e
 unset TMUX_STUB_VERSION
@@ -131,7 +131,7 @@ assert_jq "$TMP/doctor.json" 'has("drift") and has("current_block_sha") and has(
 "$SCRIPT" validate ledger --json >"$TMP/validate.json"
 assert_jq "$TMP/validate.json" '.ledger_rows_invalid == 0 and .ledger_rows_valid >= 1' "validate-ledger"
 
-"$SCRIPT" --apply --json >"$TMP/apply2.json"
+"$SCRIPT" --apply --idempotency-key test-apply-3 --json >"$TMP/apply2.json"
 if grep -qF "bind-key -n F6 display-popup" "$TMX" && grep -qF "bind-key -n F12 display-popup" "$TMX"; then pass "ntm-bindings-preserved"; else fail "ntm-bindings-preserved"; fi
 if grep -qF "set-environment -g PATH" "$TMX"; then pass "PATH-block-preserved"; else fail "PATH-block-preserved"; fi
 if grep -qF "BEGIN apply-substrate-tuning (flywheel-3099j)" "$TMX"; then pass "existing-3099j-block-preserved"; else fail "existing-3099j-block-preserved"; fi
@@ -150,6 +150,27 @@ assert_jq "$TMP/why.json" '.key == "allow-passthrough" and (.explanation | conta
 
 "$SCRIPT" completion zsh >"$TMP/completion.zsh"
 if grep -q "#compdef apply-tmux-tuning.sh" "$TMP/completion.zsh"; then pass "completion-zsh"; else fail "completion-zsh"; fi
+
+if grep -qF 'trap cleanup_temp_files EXIT ERR' "$SCRIPT" \
+  && grep -qF "register_temp_file \"\$candidate\"" "$SCRIPT"; then
+  pass "temp-cleanup-trap-wired"
+else
+  fail "temp-cleanup-trap-wired"
+fi
+
+FAIL_TMP="$TMP/fail-tmp"
+mkdir -p "$FAIL_TMP"
+BEFORE_TEMP_COUNT=$(find "$FAIL_TMP" -maxdepth 1 -type f -name 'apply-tmux-tuning.*' | wc -l | tr -d ' ')
+set +e
+TMPDIR="$FAIL_TMP" TMUX_STUB_SOURCE_FAIL=1 "$SCRIPT" --apply --idempotency-key test-parse-fail --json >"$TMP/parse-fail.json" 2>/dev/null
+rc=$?
+set -e
+AFTER_TEMP_COUNT=$(find "$FAIL_TMP" -maxdepth 1 -type f -name 'apply-tmux-tuning.*' | wc -l | tr -d ' ')
+if [[ "$rc" -eq 1 && "$BEFORE_TEMP_COUNT" == "$AFTER_TEMP_COUNT" ]]; then
+  pass "parse-failure-cleans-candidate-temp"
+else
+  fail "parse-failure-cleans-candidate-temp rc=$rc before=$BEFORE_TEMP_COUNT after=$AFTER_TEMP_COUNT"
+fi
 
 printf 'RESULTS: %d passed, %d failed\n' "$PASS" "$FAIL"
 [[ "$FAIL" -eq 0 ]]

@@ -1,0 +1,59 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-qplmi",
+  "parent_bead_id": "flywheel-3kq",
+  "closed_at": "2026-05-15T21:22:37Z",
+  "status": "closed",
+  "surface": ".flywheel/scripts/blocker-auto-close.sh",
+  "claim": "blocker-auto-close now cleans live-probe and mutation temp files on EXIT/ERR and no longer reports closed when escalation persistence or blocker mutation fails.",
+  "changes": [
+    "Added a temp-file registry and EXIT/ERR cleanup trap.",
+    "Registered live-probe stdout and blocker mutation temp files.",
+    "Made apply_close return failure when escalation append, jq mutation, or mv fails.",
+    "Changed the apply path to emit status=close_failed and return nonzero instead of false-green status=closed.",
+    "Added a failure-path test that proves temp cleanup, blocker remains open, and close_failed is emitted."
+  ],
+  "trap_inventory_delta": {
+    "before_with_trap": 94,
+    "before_without_trap": 288,
+    "after_with_trap": 95,
+    "after_without_trap": 287,
+    "after_coverage_pct": 24.87,
+    "after_receipt_ref": ".flywheel/evidence/flywheel-qplmi/trap-inventory-after-20260515T212237Z.json"
+  },
+  "validation": [
+    {
+      "command": "bash tests/blocker-auto-close.sh",
+      "status": "pass",
+      "summary": "24/0"
+    },
+    {
+      "command": "bash tests/trap-rollback-inventory.sh",
+      "status": "pass",
+      "summary": "10/0"
+    },
+    {
+      "command": ".flywheel/scripts/trap-rollback-inventory.sh scan --repo . --json",
+      "status": "warn_expected",
+      "summary": "with_trap=95 without_trap=287 coverage_pct=24.87"
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/blocker-auto-close.sh tests/blocker-auto-close.sh .flywheel/scripts/trap-rollback-inventory.sh tests/trap-rollback-inventory.sh",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check && br dep cycles",
+      "status": "pass"
+    }
+  ],
+  "artifact_sha256": {
+    ".flywheel/scripts/blocker-auto-close.sh": "4c63479ee3a9f1dbefc8018fb68db022df8cf287ccddd518b6bb42e4cc4e76e3",
+    "tests/blocker-auto-close.sh": "6f360ca4d604f9b2bbf3e0efdf06729a0f979c2c92ea71d9fb4407da75321de3",
+    ".flywheel/evidence/flywheel-qplmi/trap-inventory-after-20260515T212237Z.json": "f784adf5f430d9f97862422d9289392a61abb64334a174ca4b5c5c293ff75df8"
+  },
+  "boundaries": [
+    "No live blocker state mutation.",
+    "No cross-repo mutation.",
+    "Parent flywheel-3kq remains open for continued trap adoption."
+  ]
+}

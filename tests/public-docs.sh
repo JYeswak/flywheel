@@ -159,7 +159,7 @@ require_literal "docs/brand/naming-conventions.md" "Domain-collision" "naming do
 require_literal "docs/brand/naming-conventions.md" "Rename Gate" "naming doc includes rename gate"
 require_literal "docs/concepts/evidence-contracts.md" "docs/brand/naming-conventions.md" "evidence concept names naming contract"
 require_literal "README.md" "docs/evidence/publication-evidence.md" "README links publication evidence index"
-require_literal "docs/evidence/publication-evidence.md" "Live Evidence Still Required" "publication evidence names live evidence boundary"
+require_literal "docs/evidence/publication-evidence.md" "## Live Evidence" "publication evidence names live evidence boundary"
 require_literal "docs/evidence/publication-evidence.md" "remote_repo_private" "publication evidence includes remote repo blocker"
 require_literal "docs/evidence/publication-evidence.md" "headBranch" "publication evidence requires default-branch remote runs"
 require_literal "docs/evidence/publication-evidence.md" "non-draft, non-prerelease release" "publication evidence rejects prerelease release proof"

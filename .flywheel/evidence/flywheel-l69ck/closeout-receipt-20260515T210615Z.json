@@ -1,0 +1,64 @@
+{
+  "schema_version": "flywheel.closeout_receipt.v1",
+  "bead_id": "flywheel-l69ck",
+  "parent_bead_id": "flywheel-3kq",
+  "closed_at": "2026-05-15T21:06:15Z",
+  "status": "closed",
+  "surface": ".flywheel/scripts/apply-substrate-tuning.sh",
+  "claim": "apply-substrate-tuning now tracks its mutation temp files and removes them on EXIT/ERR, including the failure path between block temp creation and config mutation.",
+  "changes": [
+    "Added a temp-file registry and EXIT/ERR cleanup trap.",
+    "Registered wezterm mutation, remove-block, and apply block temp files.",
+    "Aligned the fixture test with the existing canonical apply idempotency-key gate.",
+    "Added a failed-apply fixture proving block temp files are removed."
+  ],
+  "trap_inventory_delta": {
+    "before_with_trap": 92,
+    "before_without_trap": 290,
+    "after_with_trap": 93,
+    "after_without_trap": 289,
+    "after_coverage_pct": 24.35,
+    "after_receipt_ref": ".flywheel/evidence/flywheel-l69ck/trap-inventory-after-20260515T210615Z.json"
+  },
+  "validation": [
+    {
+      "command": "bash tests/test_apply_substrate_tuning.sh",
+      "status": "pass",
+      "summary": "13/0"
+    },
+    {
+      "command": "bash tests/apply-substrate-tuning-canonical-cli.sh",
+      "status": "pass",
+      "summary": "19/0"
+    },
+    {
+      "command": "bash tests/trap-rollback-inventory.sh",
+      "status": "pass",
+      "summary": "10/0"
+    },
+    {
+      "command": ".flywheel/scripts/trap-rollback-inventory.sh scan --repo . --json",
+      "status": "warn_expected",
+      "summary": "with_trap=93 without_trap=289 coverage_pct=24.35"
+    },
+    {
+      "command": "shellcheck .flywheel/scripts/apply-substrate-tuning.sh tests/test_apply_substrate_tuning.sh tests/apply-substrate-tuning-canonical-cli.sh .flywheel/scripts/trap-rollback-inventory.sh tests/trap-rollback-inventory.sh",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check && br dep cycles",
+      "status": "pass"
+    }
+  ],
+  "artifact_sha256": {
+    ".flywheel/scripts/apply-substrate-tuning.sh": "eebaadb046495267b27ea1f3388755d50d3bd90c0cfb1888de845a8314ed80dc",
+    "tests/test_apply_substrate_tuning.sh": "bb7f637f741e7a4a4ea3cda3445ff46914926020453ff2429587276d060c98dc",
+    "tests/apply-substrate-tuning-canonical-cli.sh": "c1299e4a6b1493e3cdffec8a88469d950852f20f104eeff024d5f7564b171c9d",
+    ".flywheel/evidence/flywheel-l69ck/trap-inventory-after-20260515T210615Z.json": "5b89d528614f4f796b073e0fc2b18a9bde8cf0bb6fe35a5ebd40b22a86b11e04"
+  },
+  "boundaries": [
+    "No live wezterm or tmux config mutation.",
+    "No cross-repo mutation.",
+    "Parent flywheel-3kq remains open for continued trap adoption."
+  ]
+}

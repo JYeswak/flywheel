@@ -1,6 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+cleanup_registry="$(mktemp "${TMPDIR:-/tmp}/agentmail-registration-broadcast-cleanup.XXXXXX")"
+
+cleanup_registered_requests() {
+  local path
+  if [[ -f "$cleanup_registry" ]]; then
+    while IFS= read -r path; do
+      [[ -n "$path" ]] || continue
+      rm -f -- "$path"
+    done <"$cleanup_registry"
+  fi
+  rm -f -- "$cleanup_registry"
+}
+
+trap cleanup_registered_requests EXIT ERR
+
+export FLYWHEEL_AGENTMAIL_BROADCAST_CLEANUP_REGISTRY="$cleanup_registry"
+
 python3 - "$@" <<'PY'
 import argparse, json, os, subprocess, sys, tempfile
 from datetime import datetime, timezone
@@ -94,7 +111,27 @@ def write_request(rows, request_dir):
     lines += ["", "Use resolver-mediated registration. Cross-orch handshakes carry identity_resolved=<identity_name> and token_path, never raw tokens.", ""]
     with os.fdopen(fd, "w", encoding="utf-8") as handle:
         handle.write("\n".join(lines))
+    register_cleanup_path(Path(path_text))
     return Path(path_text)
+
+def register_cleanup_path(path):
+    registry = os.environ.get("FLYWHEEL_AGENTMAIL_BROADCAST_CLEANUP_REGISTRY")
+    if not registry:
+        return
+    with open(registry, "a", encoding="utf-8") as handle:
+        handle.write(str(path) + "\n")
+
+def unregister_cleanup_path(path):
+    registry = os.environ.get("FLYWHEEL_AGENTMAIL_BROADCAST_CLEANUP_REGISTRY")
+    if not registry or not os.path.exists(registry):
+        return
+    needle = str(path)
+    with open(registry, "r", encoding="utf-8") as handle:
+        rows = [line.rstrip("\n") for line in handle]
+    with open(registry, "w", encoding="utf-8") as handle:
+        for row in rows:
+            if row != needle:
+                handle.write(row + "\n")
 
 def append_event(path, payload):
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -143,6 +180,7 @@ def main(argv):
                 event = {"ts": iso(now), "event": "agentmail_registration_broadcast_sent", "from": "flywheel:agentmail-registration-broadcast", "to": key(row), "session": row.get("session"), "pane": int(row.get("pane", -1)), "row_key": key(row), "request_path": str(request_path), "bead": "flywheel-2uin", "no_raw_tokens": True}
                 append_event(coord_log, event)
                 next(r for r in results if r["row_key"] == key(row)).update({"action": "sent", "request_path": str(request_path)})
+            unregister_cleanup_path(request_path)
         except Exception as exc:
             errors.append({"recipients": recipients, "error": str(exc)})
 

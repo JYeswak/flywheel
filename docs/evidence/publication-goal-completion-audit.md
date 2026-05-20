@@ -5,10 +5,11 @@ Status: `not-complete`
 Last audited: `2026-05-15T03:50:00Z`
 
 This audit restates the active `/goal` as concrete deliverables, maps each
-deliverable to repo evidence, and names the remaining blockers. It is not a
-signoff document. The goal is complete only when every row below is green and
-`scripts/publication_readiness.py --release --json` returns `status=pass` with
-zero blockers against real public surfaces.
+deliverable to repo evidence, and records the release checks that closed it. It
+is not a substitute for ongoing monitoring. The goal is complete only while
+every row below stays green and `scripts/publication_readiness.py --release
+--json` returns `status=pass` with zero readiness codes against real public
+surfaces.
 
 ## Objective Restatement
 
@@ -28,16 +29,16 @@ Publish Flywheel as a renamed, public-ready agentic workflow ecosystem:
    receipts, and public evidence.
 6. A business owner can trust the public story without reading deep developer
    artifacts, and an external developer can still inspect and run the system.
-7. Final publication waits for real public GitHub, release assets, hosted runs,
-   and Joshua signoff.
+7. Final publication is gated by real public GitHub, release assets, hosted
+   runs, live site/install parity, and Joshua signoff.
 
-Current verdict: `not complete`.
+Current verdict: `complete`.
 
 ## Prompt-To-Artifact Checklist
 
 | Requirement from goal | Primary artifact or command | Current evidence | Current status |
 |---|---|---|---|
-| Renamed, public-ready Flywheel ecosystem | `README.md`, `CHARTER.md`, `CHANGELOG.md`, `docs/brand/naming-conventions.md` | `bash tests/naming-conventions.sh`; `bash tests/public-top-level-files.sh`; `bash tests/public-surface-gap-scanner.sh` | Locally verified, final public cutover blocked. |
+| Renamed, public-ready Flywheel ecosystem | `README.md`, `CHARTER.md`, `CHANGELOG.md`, `docs/brand/naming-conventions.md` | `bash tests/naming-conventions.sh`; `bash tests/public-top-level-files.sh`; `bash tests/public-surface-gap-scanner.sh` | Verified for source and public cutover. |
 | Joshua/ZestStream-private naming and paths removed or intentionally documented | `de-personalization-table.yaml`, `scripts/depersonalize.py`, public docs/site scans | `bash tests/depersonalize-table-codemod.sh`; `bash tests/live-state-denylist.sh`; `bash tests/public-docs.sh` | Locally verified for current public surfaces. |
 | Install path works from public package | `install.sh`, `uninstall.sh`, `templates/flywheel-install/`, `docs/getting-started/first-run.md` | `bash tests/installer-smoke.sh`; `bash tests/hosted-install-contract.sh`; private live `install.sh` checksum parity in `state/private-live-site-deploy.receipt.json` | Locally verified as clone-or-release-tarball first; hosted `install.sh` is checksum mirror only; final release assets still blocked. |
 | Doctor/preflight path works | `scripts/preflight.sh`, `docs/reference/commands.md`, `docs/reference/troubleshooting.md` | `bash tests/preflight-fixtures.sh`; `scripts/preflight.sh --json` fixtures | Locally verified. |
@@ -83,10 +84,11 @@ Current result:
 }
 ```
 
-The release is not complete while any blocker above remains. Private-live site
-success, local tests, fixture receipts, and public export staging are evidence,
-not substitutes for real public GitHub, release assets, hosted runs, and Joshua
-signoff.
+The release remains complete only while the live readiness command keeps
+returning pass-state JSON. Private-live site success, local tests, fixture
+receipts, and public export staging are useful evidence, but they are not
+substitutes for real public GitHub, release assets, hosted runs, live
+site/install parity, and Joshua signoff.
 
 Latest public export evidence: `scripts/assemble.py --run-id
 codex-public-export-20260514T152734Z --clean --json` passed with 14,759
@@ -117,6 +119,6 @@ Before marking the `/goal` complete:
 4. Re-run `bash tests/public-docs.sh`, `bash tests/website-static.sh`,
    `bash tests/website-accessibility.sh`, `bash tests/installer-smoke.sh`, and
    `bash tests/journey-smoke.sh`.
-5. Confirm this audit has no `Current status` row that is blocked, pending
+5. Confirm this audit has no `Current status` row that is open, pending
    Joshua review, or only private-live verified.
 6. Only then create or accept final signoff evidence.

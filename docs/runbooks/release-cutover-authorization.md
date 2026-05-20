@@ -43,8 +43,8 @@ staging pass as public-release completion.
 | Make the approved repository or export path public. | `remote_repo_private` | `gh repo edit JYeswak/flywheel --visibility public` | `gh repo view JYeswak/flywheel --json visibility,isPrivate` reports public and not private. |
 | Push publication workflow files to the remote default branch. | `remote_workflows_missing` | Push the reviewed branch or public export containing `.github/workflows/ci.yml`, `installer-smoke.yml`, `release.yml`, and `site.yml`. | `gh api repos/JYeswak/flywheel/actions/workflows --jq '.workflows[].name'` includes `CI`, `Installer Smoke`, `Release`, and `Site Deploy`. |
 | Run remote CI and installer smoke to green. | `remote_green_runs_missing` | Trigger or wait for Actions on the public default branch. | `gh run list --repo JYeswak/flywheel --limit 20 --json workflowName,status,conclusion,headBranch` shows successful `CI` and `Installer Smoke` runs on the default branch. |
-| Create the public release tag and release after gates pass. | `github_release_missing_or_draft` | `git tag v0.2.0 && git push origin v0.2.0`, then publish the GitHub release from the release workflow. | `gh release view v0.2.0 --repo JYeswak/flywheel --json tagName,isDraft,isPrerelease,url` reports `isDraft=false` and `isPrerelease=false`. |
-| Attach and verify required release assets. | `github_release_assets_missing` | Run the release workflow for `v0.2.0`. | Release assets include `install.sh`, `install.sh.sha256`, `SHA256SUMS`, `flywheel-v0.2.0.tar.gz`, and `flywheel-v0.2.0.tar.gz.sha256`; each required asset is uploaded, non-empty, and exposes `sha256:` digest metadata. |
+| Create the public release tag and release after gates pass. | `github_release_missing_or_draft` | `git tag v0.2.1 && git push origin v0.2.1`, then publish the GitHub release from the release workflow. | `gh release view v0.2.1 --repo JYeswak/flywheel --json tagName,isDraft,isPrerelease,url` reports `isDraft=false` and `isPrerelease=false`. |
+| Attach and verify required release assets. | `github_release_assets_missing` | Run the release workflow for `v0.2.1`. | Release assets include `install.sh`, `install.sh.sha256`, `SHA256SUMS`, `flywheel-v0.2.1.tar.gz`, and `flywheel-v0.2.1.tar.gz.sha256`; each required asset is uploaded, non-empty, and exposes `sha256:` digest metadata. |
 | Create final Joshua signoff after all real checks pass. | `joshua_release_signoff_missing` | Copy the release signoff template to `release-signoff.json` and set approved fields. | `publication_readiness.py --release --json` returns `status=pass` with zero blockers. |
 
 ## Revalidation Checks
@@ -75,7 +75,7 @@ Required signoff fields:
 | `status` | `approved` |
 | `approver` | `Joshua Nowak` |
 | `remote` | `JYeswak/flywheel` |
-| `tag` | `v0.2.0` |
+| `tag` | `v0.2.1` |
 | `signed_at` | ISO-8601 UTC timestamp ending in `Z` |
 
 ## Stop Conditions
@@ -107,7 +107,7 @@ jq -e '.status == "pass" and (.errors | length) == 0' \
 gh repo view JYeswak/flywheel --json nameWithOwner,visibility,isPrivate,defaultBranchRef,url > repo-view.json
 gh api repos/JYeswak/flywheel/actions/workflows > remote-workflows.json
 gh run list --repo JYeswak/flywheel --limit 20 --json workflowName,status,conclusion,headBranch > remote-runs.json
-gh release view v0.2.0 --repo JYeswak/flywheel --json tagName,isDraft,isPrerelease,url,assets > release-view.json
+gh release view v0.2.1 --repo JYeswak/flywheel --json tagName,isDraft,isPrerelease,url,assets > release-view.json
 python3 scripts/validate_external_review.py --release --json > external-review-release.json
 jq '{schema_version,status,approver,remote,tag,signed_at}' \
   .flywheel/PLANS/public-share-readiness-2026-05-12/release-signoff.json \

@@ -1,0 +1,21 @@
+{
+  "schema_version": "flywheel.release_signoff.v0",
+  "status": "approved",
+  "approver": "Joshua Nowak",
+  "remote": "JYeswak/flywheel",
+  "tag": "v0.2.1",
+  "signed_at": "2026-05-15T20:03:15Z",
+  "evidence": {
+    "publication_readiness_command": "python3 scripts/publication_readiness.py --release --json",
+    "github_release_url": "https://github.com/JYeswak/flywheel/releases/tag/v0.2.1",
+    "website_url": "https://flywheel.zeststream.ai/",
+    "install_url": "https://flywheel.zeststream.ai/install.sh",
+    "install_sha256_url": "https://flywheel.zeststream.ai/install.sh.sha256",
+    "external_review_log": "docs/evidence/external-review-log.jsonl"
+  },
+  "notes": [
+    "Joshua authorized the public push and production cutover in the active Flywheel publication session.",
+    "The v0.2.0 tag remains preserved as the unpublished hosted-runner-prerequisite discovery tag; v0.2.1 is the first publishable public release line.",
+    "Approved only after public repo, default-branch CI, installer smoke, GitHub release assets, hosted site, install checksum parity, and external review gates passed."
+  ]
+}

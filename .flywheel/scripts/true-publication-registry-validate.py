@@ -160,10 +160,20 @@ def validate(
                         "registry_row": row_id,
                     }
                 )
-            elif coverage_row.get("status") == "open" and registry_row.get("status") not in {"open", "in_progress"}:
+            elif coverage_row.get("status") in {"open", "in_progress"} and registry_row.get("status") not in {"open", "in_progress"}:
                 errors.append(
                     {
                         "code": "coverage_row_not_open",
+                        "line": line,
+                        "blocker_code": coverage_row.get("code"),
+                        "registry_row": row_id,
+                        "registry_status": registry_row.get("status"),
+                    }
+                )
+            elif coverage_row.get("status") == "closed" and registry_row.get("status") != "closed":
+                errors.append(
+                    {
+                        "code": "coverage_row_not_closed",
                         "line": line,
                         "blocker_code": coverage_row.get("code"),
                         "registry_row": row_id,

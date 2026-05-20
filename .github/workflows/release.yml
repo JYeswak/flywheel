@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Existing tag to package, for example v0.2.0"
+        description: "Existing tag to package, for example v0.2.1"
         required: true
 
 permissions:
@@ -28,6 +28,12 @@ jobs:
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
           fetch-depth: 0
+
+      - name: Install prerequisites
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y jq ripgrep shellcheck
 
       - name: Resolve tag
         id: release
