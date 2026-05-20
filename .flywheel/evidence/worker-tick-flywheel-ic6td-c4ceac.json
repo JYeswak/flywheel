@@ -17,6 +17,7 @@
     ".flywheel/CI-POLICY.json",
     ".flywheel/audit/flywheel-ic6td/compliance-pack.md",
     ".flywheel/audit/flywheel-ic6td/fleet-workflow-audit.json",
+    ".flywheel/audit/flywheel-ic6td/l112-probe.sh",
     ".flywheel/audit/flywheel-ic6td/verification.json",
     ".flywheel/evidence/worker-tick-flywheel-ic6td-c4ceac.json",
     ".flywheel/hooks/gh-pr-create-act-gate.sh",

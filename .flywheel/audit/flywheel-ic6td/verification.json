@@ -14,6 +14,8 @@
     {"command": "bash .flywheel/validation-schema/v1/dispatch-template-audit.sh /tmp/dispatch_flywheel-ic6td-c4ceac.md", "status": "pass"},
     {"command": "plutil -lint .flywheel/launchd/ai.zeststream.gha-auto-disable-on-local-green.plist", "status": "pass"}
   ],
+  "l112_probe_command": ".flywheel/audit/flywheel-ic6td/l112-probe.sh",
+  "l112_probe_expected": "grep:SUMMARY pass=6 fail=0",
   "socraticode_queries": 1,
   "indexed_chunks_observed": 3748,
   "skill_discoveries": 0,
