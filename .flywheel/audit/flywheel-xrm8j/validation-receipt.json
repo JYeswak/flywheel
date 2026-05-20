@@ -1,0 +1,130 @@
+{
+  "schema_version": "validation-receipt/v1",
+  "dispatch_id": "flywheel-xrm8j-b151f8",
+  "callback_ref": {
+    "transport": "ntm",
+    "session": "flywheel",
+    "pane": 1,
+    "kind": "DONE",
+    "received_at": "2026-05-20T18:51:47Z",
+    "raw_ref": "pending-send-after-br-close"
+  },
+  "status": "pass",
+  "failure_class": null,
+  "retry_policy": "none",
+  "recovery_hint": "No recovery required; report-only substrate comparison evidence exists and validates.",
+  "failure_classes": [],
+  "evidence": [
+    {
+      "type": "path",
+      "ref": ".flywheel/evidence/flywheel-xrm8j/report.md"
+    },
+    {
+      "type": "path",
+      "ref": ".flywheel/evidence/flywheel-xrm8j/probe-results.json"
+    },
+    {
+      "type": "path",
+      "ref": ".flywheel/evidence/flywheel-xrm8j/jsm-readonly-proof.json"
+    },
+    {
+      "type": "path",
+      "ref": ".flywheel/audit/flywheel-xrm8j/compliance-pack.json"
+    },
+    {
+      "type": "command",
+      "ref": "python3 -m py_compile .flywheel/evidence/flywheel-xrm8j/substrate_probe.py && jq empty .flywheel/evidence/flywheel-xrm8j/probe-results.json .flywheel/evidence/flywheel-xrm8j/jsm-readonly-proof.json .flywheel/audit/flywheel-xrm8j/compliance-pack.json && bash .flywheel/validation-schema/v1/dispatch-template-audit.sh .flywheel/dispatches/codex-flywheel-xrm8j-b151f8.md"
+    }
+  ],
+  "artifact_checks": [
+    {
+      "artifact_id": "report",
+      "path": ".flywheel/evidence/flywheel-xrm8j/report.md",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "probe-results",
+      "path": ".flywheel/evidence/flywheel-xrm8j/probe-results.json",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "jsm-readonly-proof",
+      "path": ".flywheel/evidence/flywheel-xrm8j/jsm-readonly-proof.json",
+      "status": "exists"
+    },
+    {
+      "artifact_id": "compliance-pack",
+      "path": ".flywheel/audit/flywheel-xrm8j/compliance-pack.json",
+      "status": "exists"
+    }
+  ],
+  "runtime_context": {
+    "agent_context": {
+      "status": "responsive",
+      "probe_ref": "codex-pane local command execution succeeded",
+      "resolved_tools": [
+        "python3",
+        "jq",
+        "br",
+        "jsm",
+        "shared-surface-reservation-check.sh"
+      ]
+    },
+    "orchestrator_shell_context": {
+      "status": "unknown",
+      "probe_ref": "worker cannot inspect orchestrator pane internals directly",
+      "resolved_tools": []
+    },
+    "timeout": false,
+    "timeout_seconds": 0,
+    "context_drift": false
+  },
+  "agent_mail": {
+    "agent_mail_thread": "flywheel-xrm8j",
+    "identity_name": "CloudyMill",
+    "files_reserved": [
+      ".flywheel/evidence/flywheel-xrm8j/report.md",
+      ".flywheel/evidence/flywheel-xrm8j/probe-results.json",
+      ".flywheel/evidence/flywheel-xrm8j/substrate_probe.py",
+      ".flywheel/evidence/flywheel-xrm8j/jsm-readonly-proof.json",
+      ".flywheel/audit/flywheel-xrm8j/compliance-pack.json",
+      ".flywheel/audit/flywheel-xrm8j/validation-receipt.json"
+    ],
+    "files_released": [
+      ".flywheel/evidence/flywheel-xrm8j/report.md",
+      ".flywheel/evidence/flywheel-xrm8j/probe-results.json",
+      ".flywheel/evidence/flywheel-xrm8j/substrate_probe.py",
+      ".flywheel/evidence/flywheel-xrm8j/jsm-readonly-proof.json",
+      ".flywheel/audit/flywheel-xrm8j/compliance-pack.json",
+      ".flywheel/audit/flywheel-xrm8j/validation-receipt.json"
+    ],
+    "reservation_conflicts": [],
+    "reservation_lifecycle": {
+      "state": "released",
+      "reason": "shared-surface reservations are released after commit and before DONE callback"
+    }
+  },
+  "evidence_redaction": {
+    "evidence_redacted": "n/a",
+    "required": false,
+    "evidence_paths": [],
+    "status": "pass",
+    "owner": "CloudyMill",
+    "remediation": "none"
+  },
+  "bead_actions": [
+    {
+      "action": "no_bead_reason",
+      "reason": "No new independent gap surfaced; active flywheel and SkillOS substrate beads already cover the observed failure class."
+    }
+  ],
+  "learn_route": {
+    "route": "ignore",
+    "reason": "Report-only comparison did not create a new reusable skill pattern beyond existing routes."
+  },
+  "chain_blocker": {
+    "next_phase": null,
+    "capacity_available": false,
+    "chain_blocked_reason": "No next phase remains inside this worker contract; migration remains Joshua-gated plus SkillOS/Flywheel codesign."
+  }
+}

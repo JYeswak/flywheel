@@ -1,0 +1,33 @@
+{
+  "schema_version": "flywheel-compliance-pack/v1",
+  "task_id": "flywheel-xrm8j-b151f8",
+  "bead_id": "flywheel-xrm8j",
+  "score": 860,
+  "status": "pass",
+  "mission_fitness": "adjacent",
+  "evidence": [
+    ".flywheel/evidence/flywheel-xrm8j/report.md",
+    ".flywheel/evidence/flywheel-xrm8j/probe-results.json",
+    ".flywheel/evidence/flywheel-xrm8j/jsm-readonly-proof.json",
+    ".flywheel/evidence/flywheel-xrm8j/substrate_probe.py"
+  ],
+  "acceptance": {
+    "comparison_matrix": "pass",
+    "ingest_latency_probe": "pass",
+    "search_latency_probe": "pass",
+    "malformation_class_probability": "pass",
+    "joshua_gate_respected": "pass",
+    "skillos_codesign_boundary_respected": "pass"
+  },
+  "routes": {
+    "canonical-cli-scoping": "yes",
+    "rust-best-practices": "n/a",
+    "python-best-practices": "yes",
+    "readme-writing": "n/a"
+  },
+  "notes": [
+    "Report-only sprint; no JSM mutation performed.",
+    "Postgres probe used temp tables only against postgresql://josh@localhost:5432/postgres.",
+    "Live read-only JSM proof shows primary integrity ok before/after search and current search returns expected codex-goal-format-enforcement v2 row despite 0-byte skills.db cache."
+  ]
+}

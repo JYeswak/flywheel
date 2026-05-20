@@ -1,0 +1,74 @@
+{
+  "query_runs_per_substrate": 32,
+  "rows": 2000,
+  "runtime": {
+    "platform": "macOS-26.3-arm64-arm-64bit-Mach-O",
+    "psql": "/opt/homebrew/bin/psql",
+    "python": "3.14.5",
+    "tmp_dir": "/var/folders/d0/09qgt_0n1m1ff8nyzbxppx9c0000gn/T/flywheel-xrm8j.XXXXXX.WiD7yUDRjX/probe"
+  },
+  "schema_version": "jsm-substrate-comparison-probe/v1",
+  "substrates": {
+    "duckdb": {
+      "ingest_ms": 1157.894,
+      "notes": "DuckDB row-store-like probe using LIKE; good analytics substrate, weaker fit for hot OLTP ingest.",
+      "search": {
+        "hit_counts": [
+          250
+        ],
+        "max_ms": 1.494,
+        "min_ms": 0.544,
+        "p50_ms": 0.815,
+        "p95_ms": 1.061,
+        "runs": 32
+      },
+      "status": "ok"
+    },
+    "lmdb": {
+      "ingest_ms": 22.044,
+      "notes": "LMDB key-value plus in-probe inverted index; real migration needs explicit index schema.",
+      "search": {
+        "hit_counts": [
+          250
+        ],
+        "max_ms": 0.283,
+        "min_ms": 0.056,
+        "p50_ms": 0.088,
+        "p95_ms": 0.181,
+        "runs": 32
+      },
+      "status": "ok"
+    },
+    "postgres": {
+      "ingest_ms": 159.854,
+      "notes": "Temp-table probe only; no persistent schema mutation.",
+      "search": {
+        "hit_counts": [
+          250
+        ],
+        "max_ms": 1.344,
+        "min_ms": 0.118,
+        "p50_ms": 0.18,
+        "p95_ms": 0.336,
+        "runs": 32
+      },
+      "status": "ok"
+    },
+    "sqlite_wal": {
+      "ingest_ms": 7.945,
+      "integrity": "ok",
+      "notes": "SQLite-WAL FTS5 baseline; retains current malformation class under disk/process stress.",
+      "search": {
+        "hit_counts": [
+          250
+        ],
+        "max_ms": 0.138,
+        "min_ms": 0.02,
+        "p50_ms": 0.027,
+        "p95_ms": 0.041,
+        "runs": 32
+      },
+      "status": "ok"
+    }
+  }
+}
