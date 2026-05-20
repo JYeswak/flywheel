@@ -1,0 +1,36 @@
+# Flywheel Goal
+
+Mission Anchor
+
+Flywheel is ZestStream's meta-substrate: the operating system that turns worker outcomes, cross-orch fuckup rows, Jeff-pattern mining, and reusable skills into better future work. Its business job is to raise substrate_compounding_rate and skill quality so portfolio subs and service engagements receive compounding capability, not one-off automation.
+
+Scope Clarifier
+
+This is a standing operating system goal: Flywheel keeps running as substrate. It is not a delivery goal and it does not close when a public repo looks ready. Publishability is deferred to on or after H1 day-60, about 2026-07-17, if the substrate-readiness rubric passes; any public release ships through a separate delivery goal.
+
+End-to-End Loop
+
+1. Ingest worker callbacks, br events, dispatch-log.jsonl, fuckup-log.jsonl, SkillOS handoffs, and Jeff corpus updates.
+2. Classify each input as substrate-compounding signal, Jeff-Pattern Quality Anchor coverage, flywheel-as-meta-substrate reuse, or blocker.
+3. Route work into beads, skill hardening, doctrine repair, and cross-orch handoffs when SkillOS owns the capability surface.
+4. Measure monthly substrate_compounding_rate, SkillOS skill_quality_bar_coverage_ratio, and evidence that Flywheel primitives improved another repo or pane.
+5. Feed the learning into the next dispatch packet as gates, reservations, probes, receipts, or blocker classes, so failures become beads or fuckup rows.
+
+Canonical Gates
+
+- Primary measures are substrate_compounding_rate, Jeff-Pattern Quality Anchor coverage, and flywheel-as-meta-substrate reuse. Public docs, release assets, and repo polish are not primary H1 success bars.
+- H1 public pivot remains blocked until on or after 2026-07-17 and only if SUBSTRATE-READINESS-RUBRIC-2026-05-18.md passes with evidence. If it does not pass, continue substrate-build or switch hypothesis per HOLDING-CO-REFRAME-2026-05-18.md.
+- A tick is not success when it only updates Flywheel-local files. Success requires a downstream artifact such as state/substrate-compounding/*.jsonl, a SkillOS quality ratio movement, a worker callback-backed bead close, or a delivered sibling handoff.
+- No release claim may use private macOS success as a substitute for the future delivery goal's public GitHub, hosted workflow, release asset, and Joshua signoff checks.
+- Lock chain is preserved by retaining the 2026-05-13 publishability lock as superseded prior art: lock_hash 4f90a45d22b52c0e1ad6f1a251618cc921de8e471c3ea35b7fba07872be8904d and source_sha256 576e5bb5975e223e3fb10e498a9d405f0d38ee56df7352dbaa3513af9d91fc03.
+
+Recent Progress Pattern
+
+- .flywheel/GOAL.md locked the 2026-05-13 publishability goal and gives this re-lock an auditable predecessor.
+- /Users/josh/Developer/skillos/state/holding-co/HOLDING-CO-REFRAME-2026-05-18.md ratified H1: substrate-first, public-pivot-later.
+- /Users/josh/Developer/skillos/state/holding-co/SUBSTRATE-READINESS-RUBRIC-2026-05-18.md defines the day-60 readiness gate.
+- /Users/josh/Developer/skillos/mcp/skillos-mcp-server/lib/doctor_checks/skill_quality_bar_coverage.py operationalizes Jeff-Pattern Quality Anchor coverage.
+
+The Plain English Version
+
+Flywheel's job is to make Joshua's operating system get better every week. The public release matters later, but only after the substrate proves it can improve skills, route failures, and help sibling systems without Joshua manually carrying every step. Success looks like Joshua seeing stronger worker outcomes because Flywheel learned from the last round and pushed that learning into the next one.
