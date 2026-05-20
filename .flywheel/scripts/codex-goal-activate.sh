@@ -242,10 +242,30 @@ if [[ "${CODEX_GOAL_SKIP_CONTEXT_CLEAR:-0}" != "1" ]]; then
     tmux send-keys -t "$TARGET" Enter 2>/dev/null
     sleep 2
   else
-    emit_json "warn" "stage0.3" "/clear palette not primed after keystrokes — skipping submit (won't pollute chevron)"
-    # Send Escape to clear any partial input before proceeding to Stage 0.5
+    # BUG FIX 2026-05-20T11:50Z (forwarded from clutterfreespaces:1 — 3rd identical failure on codex v0.130.0).
+    # Earlier impl claimed "skipping submit (won't pollute chevron)" but Escape does NOT remove the
+    # 6 typed keystrokes ('/','c','l','e','a','r') from the chevron buffer — they stay there. Stage 1
+    # then types /goal on top producing /cleargoal concatenation → deterministic wedge requiring
+    # manual chevron clear (Ctrl-U or ntm respawn). Same trauma family as flywheel-ucu4k.
+    #
+    # FIX: explicitly backspace 6 times (len('/clear')) to remove the polluted chars before Stage 0.5.
+    # Then Ctrl-U as belt-and-suspenders to wipe any residue (clears entire input line in readline-style
+    # editing). Escape last to dismiss any modal that may have appeared.
+    emit_json "warn" "stage0.3" "/clear palette not primed — backspacing 6 chars + Ctrl-U + Escape to clean chevron pollution"
+    for _i in 1 2 3 4 5 6; do
+      tmux send-keys -t "$TARGET" BSpace 2>/dev/null
+      sleep 0.05
+    done
+    tmux send-keys -t "$TARGET" C-u 2>/dev/null
+    sleep 0.2
     tmux send-keys -t "$TARGET" Escape 2>/dev/null
     sleep 0.5
+    # Verify chevron is clean: capture pane, check no '/clear' or '/c' fragment present
+    snap_after=$(tmux capture-pane -t "$TARGET" -p 2>/dev/null | tail -5 || true)
+    if echo "$snap_after" | grep -qE '/c(l(e(a(r)?)?)?)?[[:space:]]*$'; then
+      emit_json "fail" "stage0.3" "chevron-pollution-uncleared — /clear fragment still visible after backspace+Ctrl-U+Escape; caller should ntm-respawn the pane before retry"
+      exit 6
+    fi
   fi
 fi
 
