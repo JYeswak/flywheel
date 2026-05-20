@@ -49,6 +49,14 @@ env "${env_base[@]}" CODEX_GOAL_MODE_CAPTURE_FILE="$FIX/goal-in-progress.txt" \
 ok_jq "Layer 2 goal-in-progress exits ok" '.status == "ok" and .state == "goal-in-progress"' "$TMP/entry-ok.json"
 
 set +e
+env "${env_base[@]}" CODEX_GOAL_MODE_CAPTURE_FILE="$FIX/goal-completing.txt" \
+  "$SCRIPT" --pane 2 --dispatch-id d-completing --layer 2 --max-entry-wait-s 0 --json >"$TMP/completing.json"
+rc=$?
+set -e
+ok "Layer 2 goal-completing suppresses with defer rc=2" test "$rc" -eq 2
+ok_jq "goal-completing state reported" '.status == "defer" and .state == "goal-completing"' "$TMP/completing.json"
+
+set +e
 env "${env_base[@]}" CODEX_GOAL_MODE_CAPTURE_FILE="$FIX/idle-chat.txt" \
   "$SCRIPT" --pane 2 --dispatch-id d-entry-fail --layer 2 --max-entry-wait-s 0 --json >"$TMP/entry-fail.json"
 rc=$?
@@ -75,8 +83,28 @@ env "${env_base[@]}" CODEX_GOAL_MODE_NOW="2026-05-20T00:03:10Z" CODEX_GOAL_MODE_
   "$SCRIPT" --pane 2 --dispatch-id d-abandoned --layer 3 --json >"$TMP/abandoned.json"
 rc=$?
 set -e
-ok "Layer 3 mode regression fires abandoned rc=1" test "$rc" -eq 1
-ok_jq "abandoned trauma written" 'select(.trauma_class == "codex-goal-abandoned" and .dispatch_id == "d-abandoned")' "$TMP/trauma.jsonl"
+ok "Layer 3 working-non-goal fires mode-bypassed rc=1" test "$rc" -eq 1
+ok_jq "working-non-goal mode-bypassed trauma written" 'select(.trauma_class == "codex-goal-mode-bypassed" and .dispatch_id == "d-abandoned")' "$TMP/trauma.jsonl"
+
+env "${env_base[@]}" CODEX_GOAL_MODE_CAPTURE_FILE="$FIX/goal-completed.txt" \
+  "$SCRIPT" --pane 2 --dispatch-id d-completed-paren --layer 3 --json >"$TMP/completed-paren.json"
+ok_jq "Goal achieved paren form classifies completed" '.status == "ok" and .state == "goal-completed"' "$TMP/completed-paren.json"
+
+env "${env_base[@]}" CODEX_GOAL_MODE_CAPTURE_FILE="$FIX/goal-complete-terminal.txt" \
+  "$SCRIPT" --pane 2 --dispatch-id d-completed-terminal --layer 3 --json >"$TMP/completed-terminal.json"
+ok_jq "Goal complete terminal form classifies completed" '.status == "ok" and .state == "goal-completed"' "$TMP/completed-terminal.json"
+
+env "${env_base[@]}" CODEX_GOAL_MODE_CAPTURE_FILE="$FIX/replace-goal-dialog.txt" \
+  "$SCRIPT" --pane 2 --dispatch-id d-replace-dialog --layer 3 --json >"$TMP/replace-dialog.json"
+ok_jq "Replace current goal dialog classifies separately" '.status == "ok" and .state == "replace-goal-dialog"' "$TMP/replace-dialog.json"
+
+env "${env_base[@]}" CODEX_GOAL_MODE_CAPTURE_FILE="$FIX/goal-active-objective-working.txt" \
+  "$SCRIPT" --pane 2 --dispatch-id d-goal-active-working --layer 2 --max-entry-wait-s 0 --json >"$TMP/goal-active-working.json"
+ok_jq "Goal active Objective plus Working classifies in-progress" '.status == "ok" and .state == "goal-in-progress"' "$TMP/goal-active-working.json"
+
+env "${env_base[@]}" CODEX_GOAL_MODE_CAPTURE_FILE="$FIX/goal-active-objective-standalone.txt" \
+  "$SCRIPT" --pane 2 --dispatch-id d-goal-active-standalone --layer 3 --json >"$TMP/goal-active-standalone.json"
+ok_jq "Goal active Objective standalone classifies idle-chat" '.status == "ok" and .state == "idle-chat"' "$TMP/goal-active-standalone.json"
 
 hist="$TMP/state/state-history-d-flap.jsonl"
 jq -nc '{ts:"2026-05-20T00:04:00Z",state:"goal-in-progress"}' >"$hist"

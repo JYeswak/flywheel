@@ -1,0 +1,3 @@
+╭─ Goal ─╮
+Goal paused (/goal resume)
+╰────────╯

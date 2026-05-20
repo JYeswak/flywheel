@@ -158,26 +158,58 @@ lower = text.lower()
 def has(pattern):
     return re.search(pattern, text, re.I | re.M) is not None
 
+def first(pattern):
+    match = re.search(pattern, text, re.I | re.M)
+    return match.group(0) if match else ""
+
 state = "unknown"
 reason = "no_detector_matched"
+evidence = ""
+confidence = "HIGH"
+suppression_reason = None
 if has(r"respawn[- ]residue|post[- ]respawn|recently respawned"):
-    state, reason = "respawn-residue", "respawn_residue_marker"
+    state, reason, evidence = "respawn-residue", "respawn_residue_marker", first(r"respawn[- ]residue|post[- ]respawn|recently respawned")
+elif has(r"Replace current goal"):
+    state, reason, evidence = "replace-goal-dialog", "replace_goal_dialog", "Replace current goal"
+elif has(r"Pursuing goal \(([0-9]+[ms]|[0-9]+m [0-9]+s)\)"):
+    state, reason, evidence = "goal-in-progress", "pursuing_goal_timer", first(r"Pursuing goal \([^)]+\)")
+elif has(r"Goal active Objective:"):
+    goal_active = first(r".*Goal active Objective:.*")
+    if has(r"Working \([0-9]+s"):
+        state = "goal-in-progress"
+        reason = "goal_active_objective_working_transient"
+        evidence = f"{goal_active} | {first(r'Working \([0-9]+s[^)]*\)')}"
+        confidence = "MED"
+    else:
+        state = "idle-chat"
+        reason = "goal_active_objective_ambiguous"
+        evidence = goal_active
+        confidence = "MED"
+        suppression_reason = "Goal-active-Objective ambiguous; awaiting Working or Pursuing-goal transition"
 elif has(r"goal paused\s*\(/goal resume\)|\bgoal paused\b"):
-    state, reason = "goal-paused", "goal_paused_text"
-elif has(r"goal (completing|finalizing)|callback[- ]to[- ]goal[- ]clear|goal-box-clear"):
-    state, reason = "goal-completing", "goal_completing_text"
-elif has(r"goal completed|completed goal"):
-    state, reason = "goal-completed", "goal_completed_text"
-elif (has(r"worked for\s+[0-9]+[ms]") or has(r"goal in progress")) and not has(r"goal paused"):
-    state, reason = "goal-in-progress", "worked_for_goal_text"
+    state, reason, evidence = "goal-paused", "goal_paused_text", first(r"goal paused\s*\(/goal resume\)|\bgoal paused\b")
+elif has(r"Goal achieved \([0-9]+[ms]?\)|Goal complete\."):
+    state, reason, evidence = "goal-completed", "goal_completed_text", first(r"Goal achieved \([^)]+\)|Goal complete\.")
+elif has(r"Worked for [0-9]+m [0-9]+s"):
+    state, reason, evidence = "goal-completing", "worked_for_completion_summary", first(r"Worked for [0-9]+m [0-9]+s")
+    suppression_reason = "goal-completing transient window - Layer 2/3 should suppress"
 elif has(r"working\s*\([0-9]+[sm]?.*(esc to interrupt|interrupt)\)") and not has(r"goal paused|goal in progress|worked for|goal completed"):
-    state, reason = "working-non-goal", "working_without_goal_box"
-elif has(r"(traceback|exception|panic|fatal:|error:|rate limit|api error|failed)") and not has(r"goal"):
-    state, reason = "error-state", "error_text_without_goal"
+    state, reason, evidence = "working-non-goal", "working_without_goal_box", first(r"Working \([0-9]+s[^)]*\)")
+    confidence = "MED"
+elif has(r"Conversation interrupted|Application not found|codex (error|failed)|codex internal error|codex crashed"):
+    state, reason, evidence = "error-state", "codex_error_text", first(r"Conversation interrupted|Application not found|codex (error|failed)|codex internal error|codex crashed")
 elif has(r"(^|\n)\s*(>|›|❯|\$)\s*$") or lower.strip() in {"", "codex", "ready"} or has(r"\bchat\b|\bask me anything\b"):
-    state, reason = "idle-chat", "prompt_without_goal_or_work"
+    state, reason, evidence = "idle-chat", "prompt_without_goal_or_work", "chevron-prompt visible, no goal/working markers"
 
-print(json.dumps({"state": state, "reason": reason, "bytes": len(text.encode()), "sample": text[-600:]}, separators=(",", ":")))
+print(json.dumps({
+    "state": state,
+    "reason": reason,
+    "evidence": evidence,
+    "confidence": confidence,
+    "suppression_reason": suppression_reason,
+    "bytes": len(text.encode()),
+    "sample": text[-600:],
+}, separators=(",", ":")))
 PY
 }
 
@@ -397,6 +429,10 @@ layer3() {
   fi
   case "$state" in
     goal-paused|idle-chat|working-non-goal)
+      if [[ "$state" == "working-non-goal" ]]; then
+        fire_trauma "codex-goal-mode-bypassed" "$state" "working_outside_goal_mode"
+        return $?
+      fi
       if ever_goal_in_progress; then
         fire_trauma "codex-goal-abandoned" "$state" "mode_regression_mid_dispatch"
         return $?

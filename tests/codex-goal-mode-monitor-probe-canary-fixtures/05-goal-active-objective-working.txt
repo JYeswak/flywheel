@@ -1,0 +1,2 @@
+• Goal active Objective: Run echo test
+Working (7s • esc to interrupt)
