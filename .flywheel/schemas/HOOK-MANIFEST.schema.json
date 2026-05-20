@@ -1,0 +1,137 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://flywheel.zeststream.ai/schemas/HOOK-MANIFEST.schema.json",
+  "title": "Flywheel Hook Manifest",
+  "description": "Per-consumer-repo manifest describing which canonical flywheel hooks the repo subscribes to, where they are installed, and which (if any) are opted out. Mirrors skillos.hook_manifest.v1 ratified 2026-05-20T22:55Z (SLB-3 concur). Canonical doctrine: /Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/hook-manifest-schema-v1.md",
+  "type": "object",
+  "required": ["schema_version", "repo", "canonical_source", "tracked_hooks"],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "skillos.hook_manifest.v1",
+      "description": "Schema version. Bumps require /flywheel:sync-hooks --schema-migrate."
+    },
+    "repo": {
+      "type": "object",
+      "required": ["name", "path"],
+      "properties": {
+        "name": { "type": "string", "description": "repo slug, e.g. 'flywheel'" },
+        "path": { "type": "string", "description": "absolute repo path" },
+        "owner": { "type": "string", "description": "orchestrator session or human" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "canonical_source": {
+      "type": "object",
+      "required": ["repo", "hook_root", "sync_command"],
+      "properties": {
+        "repo": { "type": "string", "default": "/Users/josh/Developer/flywheel" },
+        "hook_root": { "type": "string", "default": ".flywheel/hooks" },
+        "sync_command": { "type": "string", "default": "/flywheel:sync-hooks" }
+      }
+    },
+    "consumer_local_hooks_dir": {
+      "type": "string",
+      "description": "Override target for tool hooks (e.g. ~/.claude/hooks). Default per-tracked-hook installed_path.",
+      "default": "~/.claude/hooks"
+    },
+    "tracked_hooks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status", "canonical_path", "installed_path", "install_mode"],
+        "properties": {
+          "id": { "type": "string", "description": "stable hook id (kebab-case)" },
+          "status": {
+            "type": "string",
+            "enum": ["required", "recommended", "optional"]
+          },
+          "canonical_path": {
+            "type": "string",
+            "description": "Path under upstream flywheel repo, e.g. .flywheel/hooks/<name>.sh"
+          },
+          "installed_path": {
+            "type": "string",
+            "description": "Where the hook lives on the consumer machine after sync. Expands ~"
+          },
+          "install_mode": {
+            "type": "string",
+            "enum": ["symlink", "copy", "symlink-or-copy"]
+          },
+          "sha256": {
+            "type": "string",
+            "description": "sha256 of canonical content at last sync"
+          },
+          "purpose": { "type": "string" },
+          "conformance": {
+            "type": "object",
+            "properties": {
+              "missing": { "type": "string", "enum": ["fail", "warn", "info"] },
+              "stale":   { "type": "string", "enum": ["fail", "warn", "info"] },
+              "rogue":   { "type": "string", "enum": ["fail", "warn", "info"] }
+            }
+          }
+        }
+      }
+    },
+    "hook_routing": {
+      "type": "array",
+      "description": "Optional routing rules describing where to land each tracked hook id. Used by /flywheel:sync-hooks when a per-hook installed_path is not absolute.",
+      "items": {
+        "type": "object",
+        "required": ["id", "target_dir"],
+        "properties": {
+          "id": { "type": "string" },
+          "target_dir": {
+            "type": "string",
+            "description": "Resolved install dir, supports ~ + $HOME"
+          }
+        }
+      }
+    },
+    "hook_opt_out": {
+      "type": "array",
+      "description": "Hooks this consumer explicitly opts out of, with required reason.",
+      "items": {
+        "type": "object",
+        "required": ["id", "reason"],
+        "properties": {
+          "id": { "type": "string" },
+          "reason": { "type": "string", "minLength": 8 },
+          "authorized_by": { "type": "string" },
+          "authorized_at": { "type": "string", "format": "date-time" },
+          "expires_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "rogue_hook_policy": {
+      "type": "object",
+      "properties": {
+        "unknown_pretooluse_hooks":  { "type": "string", "enum": ["fail", "warn", "info"] },
+        "unknown_posttooluse_hooks": { "type": "string", "enum": ["fail", "warn", "info"] },
+        "unknown_stop_hooks":        { "type": "string", "enum": ["fail", "warn", "info"] }
+      }
+    },
+    "last_sync_ts": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When /flywheel:sync-hooks --apply last ran successfully."
+    },
+    "last_sync_sha": {
+      "type": "string",
+      "description": "Upstream flywheel commit SHA at last sync."
+    },
+    "audit": {
+      "type": "object",
+      "properties": {
+        "last_sync_at": { "type": ["string", "null"], "format": "date-time" },
+        "last_sync_command": { "type": ["string", "null"] },
+        "last_conformance_status": {
+          "type": "string",
+          "enum": ["unknown", "conformant", "warn", "fail"]
+        }
+      }
+    }
+  }
+}
