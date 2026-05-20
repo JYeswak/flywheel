@@ -1,0 +1,21 @@
+{
+  "schema_version": "flywheel.worker_verification.v1",
+  "task_id": "flywheel-ic6td-c4ceac",
+  "bead_id": "flywheel-ic6td",
+  "status": "pass",
+  "commands": [
+    {"command": "bash -n .flywheel/scripts/act-workflow-classify.sh .flywheel/hooks/gh-pr-create-act-gate.sh .flywheel/scripts/gha-auto-disable-on-local-green.sh tests/act-first-workflow-gate.sh tests/github-workflows.sh", "status": "pass"},
+    {"command": "shellcheck .flywheel/scripts/act-workflow-classify.sh .flywheel/hooks/gh-pr-create-act-gate.sh .flywheel/scripts/gha-auto-disable-on-local-green.sh tests/act-first-workflow-gate.sh tests/github-workflows.sh", "status": "pass"},
+    {"command": "bash tests/act-first-workflow-gate.sh", "status": "pass", "summary": "pass=6 fail=0"},
+    {"command": "bash tests/github-workflows.sh", "status": "pass", "summary": "pass=124 fail=0"},
+    {"command": "bash tests/local-ci-policy.sh", "status": "pass", "summary": "pass=13 fail=0"},
+    {"command": "bash tests/public-docs.sh", "status": "pass", "summary": "pass=282 fail=0"},
+    {"command": "bash scripts/local-actions-preflight.sh --no-act", "status": "pass"},
+    {"command": "bash .flywheel/validation-schema/v1/dispatch-template-audit.sh /tmp/dispatch_flywheel-ic6td-c4ceac.md", "status": "pass"},
+    {"command": "plutil -lint .flywheel/launchd/ai.zeststream.gha-auto-disable-on-local-green.plist", "status": "pass"}
+  ],
+  "socraticode_queries": 1,
+  "indexed_chunks_observed": 3748,
+  "skill_discoveries": 0,
+  "skill_discovery_reason": "No reusable skill gap found; existing beads-workflow, agent-mail, and canonical-cli-scoping guidance covered the work."
+}

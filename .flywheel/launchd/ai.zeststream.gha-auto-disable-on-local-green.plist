@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.zeststream.gha-auto-disable-on-local-green</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd /Users/josh/Developer/flywheel &amp;&amp; .flywheel/scripts/gha-auto-disable-on-local-green.sh --apply --json</string>
+  </array>
+  <key>StartInterval</key>
+  <integer>900</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>/Users/josh/.local/state/flywheel/logs/gha-auto-disable-on-local-green.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/josh/.local/state/flywheel/logs/gha-auto-disable-on-local-green.err.log</string>
+</dict>
+</plist>
