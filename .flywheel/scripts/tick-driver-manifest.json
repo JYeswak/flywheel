@@ -86,6 +86,21 @@
       "purpose": "Refresh topology freshness after L102 meta-rule sync and before topology-consuming gates; writes per-fire topology-tick-refresh ledger rows."
     },
     {
+      "name": "repo-hygiene-doctor",
+      "path": ".flywheel/scripts/repo-hygiene-doctor.sh",
+      "args": [
+        "--fleet-default",
+        "--write-ledger",
+        "--auto-bead",
+        "--json"
+      ],
+      "timeout_sec": 90,
+      "ledger": "~/.local/state/flywheel/repo-hygiene-tick.jsonl",
+      "purpose": "Per-tick hygiene envelope for the default 8-orch fleet: worktrees, stashes, local-only merged branches, main fast-forward drift, and tracked substrate bloat. Files P0/P1/P2 hygiene beads when run without --dry-run.",
+      "source_bead": "flywheel-ge03h",
+      "source_evidence": "mobile-eats repo-hygiene-doctor.sh + JANITOR-FINAL-REPORT.md"
+    },
+    {
       "name": "ntm-surface-validation-driver",
       "path": ".flywheel/scripts/ntm-surface-validation-driver.sh",
       "args": [

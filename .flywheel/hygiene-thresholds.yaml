@@ -1,0 +1,23 @@
+# Canonical repo hygiene tick thresholds.
+# Values are strict greater-than thresholds: current > pN triggers severity PN.
+# Repo-local overrides use the same flat keys under `repos: <repo-name>:`.
+defaults:
+  worktree_count_p2: 5
+  worktree_count_p1: 10
+  worktree_count_p0: 20
+  stash_count_p2: 5
+  stash_count_p1: 10
+  stash_count_p0: 20
+  local_only_merged_branch_count_p2: 10
+  local_only_merged_branch_count_p1: 25
+  local_only_merged_branch_count_p0: 50
+  main_ff_drift_p2: 50
+  main_ff_drift_p1: 100
+  main_ff_drift_p0: 500
+  tracked_substrate_bloat_mb_p2: 100
+  tracked_substrate_bloat_mb_p1: 250
+  tracked_substrate_bloat_mb_p0: 500
+
+repos:
+  mobile-eats:
+    tracked_substrate_bloat_mb_p2: 100
