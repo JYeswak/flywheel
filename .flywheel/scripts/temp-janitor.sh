@@ -22,6 +22,8 @@ set -euo pipefail
 MIN_AGE_MIN="${TEMP_JANITOR_MIN_AGE_MIN:-60}"
 CODEX_MIN_AGE_MIN="${TEMP_JANITOR_CODEX_MIN_AGE_MIN:-240}"
 CRITICAL_PCT="${TEMP_JANITOR_CRITICAL_PCT:-92}"
+EMERGENCY_THRESHOLD_GB="${TEMP_JANITOR_EMERGENCY_THRESHOLD_GB:-10}"
+PER_ORCH_CAP_GB="${TEMP_JANITOR_PER_ORCH_CAP_GB:-5}"
 JSON_OUT=false
 DRY_RUN=false
 
@@ -31,6 +33,8 @@ while [[ $# -gt 0 ]]; do
     --dry-run) DRY_RUN=true; shift ;;
     --min-age-min) MIN_AGE_MIN="$2"; shift 2 ;;
     --critical-pct) CRITICAL_PCT="$2"; shift 2 ;;
+    --emergency-threshold-gb) EMERGENCY_THRESHOLD_GB="$2"; shift 2 ;;
+    --per-orch-cap-gb) PER_ORCH_CAP_GB="$2"; shift 2 ;;
     -h|--help) sed -n '2,18p' "$0"; exit 0 ;;
     *) echo "unknown flag: $1" >&2; exit 1 ;;
   esac
@@ -103,18 +107,66 @@ reap_orch_workdirs_in_private_tmp() {
   fi
 }
 
+# EMERGENCY PRESSURE CHECK — if /private/tmp is over threshold, force shorter age windows.
+# Joshua-direct 2026-05-20T11:25Z: "make sure codex workers can't kill our system's resources
+# and add 100gb of /tmp work" — 45GB accreted overnight between hourly janitor runs because the
+# hourly cadence was too slow vs the rate workers can dump. Emergency mode says: if disk is
+# already hurting, we don't care about long-running dispatches — reap anyway.
+private_tmp_size_mb=$({ /usr/bin/du -sm /private/tmp 2>/dev/null || true; } | /usr/bin/head -1 | /usr/bin/awk '{print $1+0}')
+private_tmp_size_mb="${private_tmp_size_mb:-0}"
+private_tmp_size_gb=$(( private_tmp_size_mb / 1024 ))
+emergency_mode=false
+if (( private_tmp_size_gb >= EMERGENCY_THRESHOLD_GB )); then
+  emergency_mode=true
+  # Override min-age — anything older than 30min is fair game
+  echo "  EMERGENCY MODE: /private/tmp=${private_tmp_size_gb}GB >= threshold ${EMERGENCY_THRESHOLD_GB}GB → reaping >30min" >&2
+fi
+
+# Per-orch hard cap — for any orch prefix whose work-dir total exceeds PER_ORCH_CAP_GB, reap the
+# 3 largest immediately regardless of age (oldest first within those). Prevents one runaway worker
+# from filling disk before next janitor tick.
+enforce_per_orch_cap() {
+  local orch_prefix="$1"
+  local total_mb
+  total_mb=$(/usr/bin/find /private/tmp -maxdepth 1 -name "${orch_prefix}*" -type d -exec /usr/bin/du -sm {} + 2>/dev/null | /usr/bin/awk '{s+=$1} END{print s+0}')
+  local cap_mb=$((PER_ORCH_CAP_GB * 1024))
+  if (( total_mb > cap_mb )); then
+    echo "  PER-ORCH CAP BREACH: ${orch_prefix}* total=${total_mb}MB > cap=${cap_mb}MB → reaping 3 largest" >&2
+    # Largest 3 work-dirs by size; sorted desc, take 3
+    local victims
+    victims=$(/usr/bin/find /private/tmp -maxdepth 1 -name "${orch_prefix}*" -type d -exec /usr/bin/du -sk {} + 2>/dev/null | /usr/bin/sort -rn | /usr/bin/head -3 | /usr/bin/awk '{print $2}')
+    while IFS= read -r victim; do
+      [[ -z "$victim" ]] && continue
+      if [[ "$DRY_RUN" == "true" ]]; then
+        echo "    WOULD reap victim (cap): $victim" >&2
+      else
+        /bin/rm -rf "$victim" 2>/dev/null && echo "    reaped victim (cap): $victim" >&2
+        reap_count=$((reap_count + 1))
+      fi
+    done <<< "$victims"
+  fi
+}
+
 # /private/tmp work-dirs by orch prefix (workers create scratch dirs as /private/tmp/<orch>-<bead-id>-<ts>/)
-# Use longer age (6h = 360min) for these since some long-running dispatches legitimately occupy work-dirs.
-reap_orch_workdirs_in_private_tmp 'alps-' 360 'alps-orch-workdir'
-reap_orch_workdirs_in_private_tmp 'mobile-eats-' 360 'mobile-eats-orch-workdir'
-reap_orch_workdirs_in_private_tmp 'picoz-' 360 'picoz-orch-workdir'
-reap_orch_workdirs_in_private_tmp 'clutterfreespaces-' 360 'cfs-orch-workdir'
-reap_orch_workdirs_in_private_tmp 'cfs-' 360 'cfs-prefix-workdir'
-reap_orch_workdirs_in_private_tmp 'vrtx-' 360 'vrtx-orch-workdir'
-reap_orch_workdirs_in_private_tmp 'zesttube-' 360 'zesttube-orch-workdir'
-reap_orch_workdirs_in_private_tmp 'flywheel-' 360 'flywheel-orch-workdir'
-reap_orch_workdirs_in_private_tmp 'skillos-' 360 'skillos-orch-workdir'
-reap_orch_workdirs_in_private_tmp 'terratitle-' 360 'terratitle-orch-workdir'
+# Use longer age (6h = 360min) normally, OR 30min in emergency mode.
+orch_age_min=360
+[[ "$emergency_mode" == "true" ]] && orch_age_min=30
+
+# Per-orch cap enforcement runs first (hard cap regardless of age)
+for prefix in alps mobile-eats picoz clutterfreespaces cfs vrtx zesttube flywheel skillos terratitle; do
+  enforce_per_orch_cap "${prefix}-"
+done
+
+reap_orch_workdirs_in_private_tmp 'alps-' "$orch_age_min" 'alps-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'mobile-eats-' "$orch_age_min" 'mobile-eats-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'picoz-' "$orch_age_min" 'picoz-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'clutterfreespaces-' "$orch_age_min" 'cfs-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'cfs-' "$orch_age_min" 'cfs-prefix-workdir'
+reap_orch_workdirs_in_private_tmp 'vrtx-' "$orch_age_min" 'vrtx-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'zesttube-' "$orch_age_min" 'zesttube-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'flywheel-' "$orch_age_min" 'flywheel-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'skillos-' "$orch_age_min" 'skillos-orch-workdir'
+reap_orch_workdirs_in_private_tmp 'terratitle-' "$orch_age_min" 'terratitle-orch-workdir'
 
 # Claude Code task-output dirs in /private/tmp/claude-501/ — every Bash tool call accretes
 if [[ -d /private/tmp/claude-501 ]]; then
