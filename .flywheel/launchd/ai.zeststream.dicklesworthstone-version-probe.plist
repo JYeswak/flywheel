@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>ai.zeststream.dicklesworthstone-version-probe</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd /Users/josh/Developer/flywheel &amp;&amp; .flywheel/scripts/dicklesworthstone-version-probe.sh &amp;&amp; .flywheel/scripts/dicklesworthstone-watchdog.sh</string>
+  </array>
+  <key>StartInterval</key>
+  <integer>86400</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>/Users/josh/.local/logs/dicklesworthstone-probe.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/josh/.local/logs/dicklesworthstone-probe.log</string>
+</dict>
+</plist>
