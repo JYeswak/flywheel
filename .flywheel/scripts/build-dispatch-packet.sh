@@ -729,6 +729,16 @@ jq_get() { jq -r "$1 // \"\"" 2>/dev/null; }
 json_array() {
   if [[ "$#" -eq 0 ]]; then echo "[]"; else printf '%s\n' "$@" | jq -R . | jq -s .; fi
 }
+resolve_callback_pane() {
+  local session="$1" resolved=""
+  # cfs-lb61: DONE callbacks route to the orchestrator pane, not the worker pane.
+  resolved="$(jq -sr --arg s "$session" 'map(select(.session == $s)) | sort_by(.effective_at // "") | last | (.orchestrator_pane // 0)' "$TOPOLOGY" 2>/dev/null || true)"
+  if [[ "$resolved" =~ ^[0-9]+$ ]]; then
+    printf '%s\n' "$resolved"
+  else
+    printf '0\n'
+  fi
+}
 
 BEAD_ID="" TARGET_PANE="" TARGET_SESSION="" TASK_ID=""
 DISPATCH_CHANNEL="operator" OUTPUT_DIR="/tmp" MODE="dry-run" JSON_OUT=false
@@ -776,8 +786,7 @@ else
   NOW="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 fi
 
-CALLBACK_PANE="$(jq -sr --arg s "$TARGET_SESSION" 'map(select(.session == $s)) | sort_by(.effective_at) | last | (.callback_pane // .orchestrator_pane // 1)' "$TOPOLOGY" 2>/dev/null || echo 1)"
-[[ "$CALLBACK_PANE" == "null" || -z "$CALLBACK_PANE" ]] && CALLBACK_PANE=1
+CALLBACK_PANE="$(resolve_callback_pane "$TARGET_SESSION")"
 
 MISSION_ANCHOR="continuous-orchestrator-uptime-self-sustaining-fleet"
 MISSION_FILE="$REPO_ROOT/.flywheel/MISSION.md"
