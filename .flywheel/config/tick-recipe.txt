@@ -1,0 +1,4 @@
+# Auto-managed by josh-review-init-hook.sh
+# Per-tick steps for this repo.
+
+[ -x .flywheel/scripts/josh-review-poll.sh ] && .flywheel/scripts/josh-review-poll.sh --quiet
