@@ -48,7 +48,8 @@ Wires into:
 | Tool caches (npm, cargo, brew, pip) | Soft evict at tier 2 | 5.3G cargo/src, 3G .npm |
 | Browser/playwright profiles | Reap on session end + cap at 1GB | 1.5G playwright, 467M claude-skills-sync |
 | Codex MCP state | Reap >7d, never grow past 500MB | Currently fine |
-| Application data (databases) | Per-app — declared by owner | 21G agent_search.db (has corrupt file from Jan 31) |
+| Application data (databases) — Joshua-owned apps | Per-app — declared by owner | (none currently) |
+| **Vendor-owned data — upstream tool we consume** | Consumer-side size cap + archive-and-rotate at threshold. NEVER redesign upstream retention. | 21G agent_search.db (CASS, Dicklesworthstone upstream — bead flywheel-qdo7w) |
 | Worker work-dirs (/private/tmp/<orch>-*) | Reap on task completion OR >6h | Covered (this morning's fix) |
 | User dumps (Desktop, Downloads) | Quarterly audit + archive prompt | 54G Desktop, 6G Downloads |
 | Git pack files | `git gc --aggressive` quarterly if pack >5G | zesttube 6.2G, coding_agent_session_search 6.4G |
