@@ -165,7 +165,10 @@ tmux load-buffer -b "$buf_name" "$task_tmp"
 # Send a leading space so the palette stays engaged on /goal (some codex versions need the space to commit the slash-command argument)
 tmux send-keys -t "$TARGET" " " 2>/dev/null
 sleep 0.3
-tmux paste-buffer -b "$buf_name" -t "$TARGET" 2>/dev/null
+# CRITICAL: use bracketed paste (-p) so codex treats content as a paste event, not
+# keystroke-by-keystroke. Without -p, the slash-command palette eats every `/`
+# character in the pasted content, corrupting file paths and large packets.
+tmux paste-buffer -p -b "$buf_name" -t "$TARGET" 2>/dev/null
 
 emit_json "info" "stage3" "task text pasted ($(wc -c < "$task_tmp") bytes)"
 sleep 1
