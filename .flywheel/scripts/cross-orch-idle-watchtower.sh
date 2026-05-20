@@ -18,7 +18,7 @@
 set -uo pipefail
 
 INTERVAL_DEFAULT=600
-MODE="${WATCHTOWER_MODE:-nudge}"
+MODE="${WATCHTOWER_MODE:-report-only}"
 JSON_OUT=false
 DRY_RUN=false
 SESSIONS=(
