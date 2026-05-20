@@ -36,7 +36,7 @@ Compliance score: 930/1000
 - `bash .flywheel/validation-schema/v1/dispatch-template-audit.sh /tmp/dispatch_flywheel-ic6td-c4ceac.md`: PASS.
 - `plutil -lint .flywheel/launchd/ai.zeststream.gha-auto-disable-on-local-green.plist`: PASS.
 - L112 probe: `.flywheel/audit/flywheel-ic6td/l112-probe.sh`, expect
-  `SUMMARY pass=6 fail=0`.
+  `L112_OK_act_first_gate`.
 
 ## Four-Lens Self-Grade
 

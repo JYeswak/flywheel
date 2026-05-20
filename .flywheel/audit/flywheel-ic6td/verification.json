@@ -15,7 +15,7 @@
     {"command": "plutil -lint .flywheel/launchd/ai.zeststream.gha-auto-disable-on-local-green.plist", "status": "pass"}
   ],
   "l112_probe_command": ".flywheel/audit/flywheel-ic6td/l112-probe.sh",
-  "l112_probe_expected": "grep:SUMMARY pass=6 fail=0",
+  "l112_probe_expected": "grep:L112_OK_act_first_gate",
   "socraticode_queries": 1,
   "indexed_chunks_observed": 3748,
   "skill_discoveries": 0,
