@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+# HALTED 2026-05-20 per bead flywheel-k8pee (doctrine-pull-ownership-inversion).
+# JOSHUA-DIRECT via zesttube:2 governance proposal 2026-05-20T19:48Z.
+# META-RULE: feedback_upstream_never_writes_into_consumer_working_trees.md
+# Thin alias for sync-canonical-doctrine.sh (also halted).
+# REPLACEMENT: /flywheel:sync-doctrine (consumer-initiated pull).
+echo "[canonical-doctrine-sync] HALTED — see bead flywheel-k8pee. Use /flywheel:sync-doctrine instead." >&2
+exit 64
 # canonical-doctrine-sync.sh — thin alias for sync-canonical-doctrine.sh
 #
 # Authored under bead flywheel-rhdcq.2 to satisfy the canonical-doctrine-sync

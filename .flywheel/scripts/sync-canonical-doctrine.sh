@@ -1,4 +1,20 @@
 #!/usr/bin/env bash
+# HALTED 2026-05-20 per bead flywheel-k8pee (doctrine-pull-ownership-inversion).
+# JOSHUA-DIRECT via zesttube:2 governance proposal 2026-05-20T19:48Z.
+# META-RULE: feedback_upstream_never_writes_into_consumer_working_trees.md
+#
+# This script previously WROTE into consumer-repo .flywheel/doctrine/ trees,
+# producing the zesttube:3 commit-failure class (294 dirty doctrine files
+# blocking a scoped scope-discriminate-don't-bundle commit).
+#
+# REPLACEMENT: /flywheel:sync-doctrine (consumer-initiated pull). Each
+# consumer repo runs flywheel-sync-doctrine.sh from inside its own working
+# tree with a clean-WT HARD GATE on --apply.
+#
+# This file is left intact but no longer invoked by the canonical loop or
+# launchd. Operators can re-enable manually by commenting out the exit below.
+echo "[sync-canonical-doctrine] HALTED — see bead flywheel-k8pee. Use /flywheel:sync-doctrine instead." >&2
+exit 64
 # Sync generated canonical doctrine mirrors into repo-local doctrine copies.
 #
 # canonical-cli-scoping-allow-large: this script is a fleet-propagation
