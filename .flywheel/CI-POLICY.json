@@ -24,6 +24,13 @@
     "workflow_dispatch",
     "release_tag"
   ],
+  "spend_dashboard": {
+    "month": "2026-05",
+    "current_month_estimate_usd": 300,
+    "on_target_pct": 100,
+    "target_label": "no feature-branch push CI",
+    "source": "flywheel-dycce gh-api audit proxy"
+  },
   "workflows": [
     {
       "path": ".github/workflows/ci.yml",

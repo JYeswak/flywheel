@@ -68,5 +68,12 @@ else
   fail "branch-tip local CI declared"
 fi
 
+if [[ -x "$ROOT/.flywheel/status-hook.sh" ]] \
+  && "$ROOT/.flywheel/status-hook.sh" | grep -Eq '^CI spend: \$[0-9]+ est this month, [0-9]+%-on-target'; then
+  pass "status hook renders CI spend dashboard line"
+else
+  fail "status hook renders CI spend dashboard line"
+fi
+
 printf 'SUMMARY pass=%d fail=%d\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]
