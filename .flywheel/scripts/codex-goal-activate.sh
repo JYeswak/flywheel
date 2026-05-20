@@ -1,6 +1,19 @@
 #!/bin/bash
 # codex-goal-activate.sh
 #
+# CANONICAL ORIGIN: skillos canonical at /Users/josh/Developer/skillos/.flywheel/scripts/codex-goal-activate.sh
+# DIVERGENCE-WITH-RATIONALE (intentional, per memory feedback_convergent_evolution_is_canonical_signal):
+#   1. Bracketed-paste fix (tmux paste-buffer -p flag) — adopted from canonical
+#   2. PRIMED_PROBE_TIMEOUT_S default 5→15 — flywheel-side empirical: codex 0.130
+#      palette render delay observed >5s on some captures; 15s eliminates false-fails
+#   3. capture-pane tail -10 → tail -30 — flywheel-side empirical: codex TUI renders
+#      many blank trailing lines that hid the primed /goal line; -30 covers the gap
+#   4. Stage 0.5 stale-chevron-clear functions — adopted from skillos canonical
+#      commits 3a647cc4 + 8c057a67 (greenlight 1 ratified 2026-05-20T06:18Z)
+# Functional parity with canonical maintained; shasum divergence is intentional + documented.
+# Reverse-propagation candidates: bug-patches 2+3 should land in skillos canonical
+# at next bi-directional sync cadence.
+#
 # Reliable activation of codex /goal mode in a flywheel pane.
 #
 # The mechanism (per Joshua-direct 2026-05-20):
