@@ -1,0 +1,51 @@
+=== SMOKE PASS ===
+{
+  "schema_version": "ground-truth-callback-verify/v1",
+  "tool_version": "ground-truth-callback-verify.v1.0.0",
+  "verified": true,
+  "per_op_results": [
+    {
+      "op": "commit_sha",
+      "claimed_value": "475acaa028854c3a0b62efb929c5200b80834d15",
+      "actual_value": "475acaa028854c3a0b62efb929c5200b80834d15",
+      "verified": true,
+      "reason": "commit reachable"
+    },
+    {
+      "op": "evidence",
+      "claimed_value": "/tmp/gt-smoke/real.txt",
+      "actual_value": "exists size=14",
+      "verified": true,
+      "reason": "file exists and non-empty"
+    }
+  ],
+  "reasons_for_failure": []
+}
+pass_exit=0
+=== SMOKE FAIL ===
+{
+  "schema_version": "ground-truth-callback-verify/v1",
+  "tool_version": "ground-truth-callback-verify.v1.0.0",
+  "verified": false,
+  "per_op_results": [
+    {
+      "op": "commit_sha",
+      "claimed_value": "deadbeefdeadbeef",
+      "actual_value": "missing",
+      "verified": false,
+      "reason": "commit SHA not found in repo history"
+    },
+    {
+      "op": "evidence",
+      "claimed_value": "/tmp/does-not-exist.txt",
+      "actual_value": "missing",
+      "verified": false,
+      "reason": "evidence path does not exist on disk"
+    }
+  ],
+  "reasons_for_failure": [
+    "commit_sha: commit SHA not found in repo history",
+    "evidence: evidence path does not exist on disk"
+  ]
+}
+fail_exit=1
