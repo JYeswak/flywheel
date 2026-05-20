@@ -16,10 +16,18 @@ TARGET_PANE=""
 ACTOR_SESSION="${NTM_SESSION:-flywheel}"
 ACTOR_PANE="${NTM_PANE:-1}"
 REASON="peer-orch-recovery"
+STALL_EVIDENCE=""
+ACTOR_ORCH_HEALTHY=""
+ACTOR_HEALTH_LEDGER="${PEER_ORCH_ACTOR_HEALTH_LEDGER:-$HOME/.local/state/flywheel/orch-pane-health-ledger.jsonl}"
+ORIGINATOR_RATIFICATION=""
+PEER_WITNESS_RATIFICATION=""
+STALLED_RESPAWN_AUDIT="${PEER_ORCH_STALLED_RESPAWN_AUDIT:-$HOME/.local/state/flywheel/peer-orch-stalled-respawn-audit.jsonl}"
+FOUNDER_PAGE_EVENTS="${PEER_ORCH_FOUNDER_PAGE_EVENTS:-$HOME/.local/state/flywheel/founder-page-events.jsonl}"
 
 usage() {
   cat <<'USAGE'
 Usage: peer-orch-respawn-permit.sh [--target-session SESSION --target-pane PANE] [--actor-session SESSION --actor-pane PANE] [--reason TEXT] [--apply|--dry-run]
+       peer-orch-respawn-permit.sh --target-session flywheel --target-pane 1 --stall-evidence PATH --actor-orch-healthy true --originator-ratification SESSION:PANE --peer-witness-ratification SESSION:PANE [--apply|--dry-run]
        peer-orch-respawn-permit.sh health|doctor|repair|validate|audit|why|schema|examples|quickstart|completion|--info
 
 Canonical-CLI introspection flags (per canonical-cli-scoping skill):
@@ -102,6 +110,139 @@ pane_health_json() {
   ' <<<"$health"
 }
 
+primary_orchestrator_stalled_respawn_permit_json() {
+  local target="$TARGET_SESSION:$TARGET_PANE" actor="$ACTOR_SESSION:$ACTOR_PANE"
+  python3 - "$STALL_EVIDENCE" "$ACTOR_ORCH_HEALTHY" "$ACTOR_HEALTH_LEDGER" "$ORIGINATOR_RATIFICATION" "$PEER_WITNESS_RATIFICATION" "$target" "$actor" <<'PY_PRIMARY'
+import json
+import os
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+evidence_path, actor_flag, ledger_path, originator, witness, target, actor = sys.argv[1:8]
+allowed_verdicts = {"STALL_SUSPECTED", "INPUT_DEAF", "BUFFER_FROZEN"}
+now = datetime.now(timezone.utc)
+
+def fail(reason, **extra):
+    print(json.dumps({"permit": False, "reason": reason, **extra}, separators=(",", ":")))
+    raise SystemExit(0)
+
+def parse_ts(value):
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(str(value).replace("Z", "+00:00")).astimezone(timezone.utc)
+    except Exception:
+        return None
+
+if not evidence_path:
+    fail("stall_evidence_required")
+
+path = Path(evidence_path).expanduser()
+if not path.exists():
+    fail("stall_evidence_missing", stall_evidence=str(path))
+
+try:
+    evidence = json.loads(path.read_text(encoding="utf-8"))
+except Exception as exc:
+    fail("stall_evidence_invalid_json", error=str(exc), stall_evidence=str(path))
+
+verdict = evidence.get("verdict") or evidence.get("classification")
+schema = evidence.get("schema_version")
+if verdict not in allowed_verdicts:
+    fail("stall_evidence_verdict_not_stalled", verdict=verdict, schema_version=schema)
+
+evidence_ts = parse_ts(evidence.get("ts"))
+mtime_ts = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc)
+fresh_ts = evidence_ts or mtime_ts
+age_seconds = max(0, int((now - fresh_ts).total_seconds()))
+if age_seconds > 300:
+    fail("stall_evidence_stale", age_seconds=age_seconds, stall_evidence=str(path))
+
+if actor_flag != "true":
+    fail("actor_orch_healthy_true_required", actor_orch_healthy=actor_flag)
+
+ledger = Path(ledger_path).expanduser()
+if not ledger.exists():
+    fail("actor_health_ledger_missing", actor_health_ledger=str(ledger))
+
+actor_session, actor_pane = actor.split(":", 1)
+healthy_row = None
+for line in ledger.read_text(encoding="utf-8", errors="replace").splitlines():
+    try:
+        row = json.loads(line)
+    except Exception:
+        continue
+    row_session = str(row.get("session") or row.get("actor_session") or "")
+    row_pane = str(row.get("pane") or row.get("actor_pane") or "")
+    if row_session == actor_session and row_pane == actor_pane:
+        state = str(row.get("verdict") or row.get("status") or row.get("cycle_status") or "").upper()
+        if state in {"HEALTHY", "OK", "PASS"}:
+            healthy_row = row
+
+if not healthy_row:
+    fail("actor_health_no_healthy_row", actor=actor, actor_health_ledger=str(ledger))
+
+duration = (
+    healthy_row.get("healthy_duration_seconds")
+    or healthy_row.get("operation_seconds")
+    or healthy_row.get("uptime_seconds")
+    or 0
+)
+try:
+    duration = int(duration)
+except Exception:
+    duration = 0
+healthy_since = parse_ts(healthy_row.get("healthy_since"))
+if healthy_since:
+    duration = max(duration, int((now - healthy_since).total_seconds()))
+if duration < 600:
+    fail("actor_health_under_10m", actor=actor, healthy_duration_seconds=duration)
+
+if not originator or not witness:
+    fail("slb_2_of_2_required", originator=originator, peer_witness=witness)
+if originator == witness:
+    fail("slb_peer_witness_must_differ", originator=originator, peer_witness=witness)
+if originator != actor:
+    fail("slb_originator_must_match_actor", originator=originator, actor=actor)
+
+print(json.dumps({
+    "permit": True,
+    "reason": "primary_orchestrator_stalled_respawn_permit",
+    "target": target,
+    "actor": actor,
+    "stall_evidence": str(path),
+    "stall_evidence_schema_version": schema,
+    "stall_evidence_verdict": verdict,
+    "stall_evidence_age_seconds": age_seconds,
+    "actor_health_ledger": str(ledger),
+    "actor_healthy_duration_seconds": duration,
+    "originator_ratification": originator,
+    "peer_witness_ratification": witness,
+}, separators=(",", ":")))
+PY_PRIMARY
+}
+
+append_stalled_respawn_audit_rows() {
+  local payload="$1" gate="$2"
+  mkdir -p "$(dirname "$STALLED_RESPAWN_AUDIT")" "$(dirname "$FOUNDER_PAGE_EVENTS")"
+  jq -c --arg audit_schema "peer-orch-stalled-respawn-audit/v1" --argjson gate "$gate" '
+    . + {audit_schema_version:$audit_schema,stalled_respawn_gate:$gate}
+  ' <<<"$payload" >> "$STALLED_RESPAWN_AUDIT"
+  jq -nc \
+    --arg schema_version "skillos.founder_page_event.v1" \
+    --arg ts "$(now_iso)" \
+    --arg class "peer_orch.primary_orchestrator_stalled_respawn" \
+    --arg severity "high" \
+    --arg source "$SCRIPT_NAME" \
+    --arg summary "Primary orchestrator respawn permitted from empirical stalled-pane evidence" \
+    --arg target "$TARGET_SESSION:$TARGET_PANE" \
+    --arg actor "$ACTOR_SESSION:$ACTOR_PANE" \
+    --arg audit "$STALLED_RESPAWN_AUDIT" \
+    --argjson gate "$gate" \
+    '{schema_version:$schema_version,ts:$ts,class:$class,severity:$severity,source:$source,summary:$summary,target:$target,actor:$actor,audit_ledger:$audit,gate:$gate}' >> "$FOUNDER_PAGE_EVENTS"
+}
+
 freeze_evidence_json() {
   local health pane
   if ! health="$(native_health_json 2>/dev/null)"; then
@@ -149,7 +290,13 @@ decision_payload() {
     return 0
   fi
   if [[ "$TARGET_SESSION" == "flywheel" && "$TARGET_PANE" == "1" ]]; then
-    jq -nc --arg now "$(now_iso)" --arg schema "$SCHEMA_VERSION" --arg target "$target" '{ts:$now,schema_version:$schema,target:$target,decision:"refuse",reason:"primary_orchestrator_pane_refused"}'
+    local stalled_gate
+    stalled_gate="$(primary_orchestrator_stalled_respawn_permit_json)"
+    if [[ "$(jq -r '.permit' <<<"$stalled_gate")" == "true" ]]; then
+      jq -nc --arg now "$(now_iso)" --arg schema "$SCHEMA_VERSION" --arg target "$target" --arg actor "$actor" --arg reason "primary_orchestrator_stalled_respawn_permit" --argjson stalled_gate "$stalled_gate" '{ts:$now,schema_version:$schema,actor:$actor,target:$target,target_session:($target | split(":")[0]),target_pane:($target | split(":")[1] | tonumber),decision:"permit",reason:$reason,evidence:{freeze_confirmed:true,method:"canonical_stall_probe",reason:$reason,stalled_respawn_gate:$stalled_gate},native_health_delegated:false,native_respawn_delegated:false}'
+    else
+      jq -nc --arg now "$(now_iso)" --arg schema "$SCHEMA_VERSION" --arg target "$target" --argjson stalled_gate "$stalled_gate" '{ts:$now,schema_version:$schema,target:$target,decision:"refuse",reason:"primary_orchestrator_pane_refused",stalled_respawn_gate:$stalled_gate}'
+    fi
     return 0
   fi
   if is_protected_session "$TARGET_SESSION" && [[ "$TARGET_SESSION:$TARGET_PANE" != "skillos:1" ]]; then
@@ -187,6 +334,9 @@ run_decision() {
       rc=$?
       set -e
       payload="$(jq -c --argjson rc "$rc" --arg respawn "$respawn" '. + {native_respawn_delegated:true,respawn_rc:$rc,respawn_output:$respawn}' <<<"$payload")"
+      if [[ "$(jq -r '.reason' <<<"$payload")" == "primary_orchestrator_stalled_respawn_permit" ]]; then
+        append_stalled_respawn_audit_rows "$payload" "$(jq -c '.evidence.stalled_respawn_gate' <<<"$payload")"
+      fi
     fi
     printf '%s\n' "$payload" | append_jsonl "$LEDGER_PATH"
   fi
@@ -256,6 +406,11 @@ completion() { cat <<'COMPLETION'
 --reason
 --apply
 --dry-run
+--stall-evidence
+--actor-orch-healthy
+--actor-health-ledger
+--originator-ratification
+--peer-witness-ratification
 health
 doctor
 repair
@@ -276,6 +431,11 @@ while [[ $# -gt 0 ]]; do
     --actor-session) ACTOR_SESSION="$2"; shift 2 ;;
     --actor-pane) ACTOR_PANE="$2"; shift 2 ;;
     --reason) REASON="$2"; shift 2 ;;
+    --stall-evidence) STALL_EVIDENCE="$2"; shift 2 ;;
+    --actor-orch-healthy) ACTOR_ORCH_HEALTHY="$2"; shift 2 ;;
+    --actor-health-ledger) ACTOR_HEALTH_LEDGER="$2"; shift 2 ;;
+    --originator-ratification) ORIGINATOR_RATIFICATION="$2"; shift 2 ;;
+    --peer-witness-ratification) PEER_WITNESS_RATIFICATION="$2"; shift 2 ;;
     --apply) APPLY=1; shift ;;
     --dry-run) APPLY=0; shift ;;
     health|doctor|repair|validate|audit|why|schema|examples|quickstart|completion) MODE="$1"; shift ;;
