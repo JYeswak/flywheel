@@ -1,0 +1,54 @@
+{
+  "schema_version": "flywheel.worker_tick_evidence.v1",
+  "task_id": "flywheel-ic6td-c4ceac",
+  "bead_id": "flywheel-ic6td",
+  "socraticode": {
+    "queries": 1,
+    "k_count": 10,
+    "indexed_chunks_observed": 3748
+  },
+  "skills_consulted": [
+    "beads-workflow",
+    "agent-mail",
+    "canonical-cli-scoping"
+  ],
+  "modified_files": [
+    ".claude/settings.json",
+    ".flywheel/CI-POLICY.json",
+    ".flywheel/audit/flywheel-ic6td/compliance-pack.md",
+    ".flywheel/audit/flywheel-ic6td/fleet-workflow-audit.json",
+    ".flywheel/audit/flywheel-ic6td/l112-probe.sh",
+    ".flywheel/audit/flywheel-ic6td/verification.json",
+    ".flywheel/evidence/worker-tick-flywheel-ic6td-c4ceac.json",
+    ".flywheel/hooks/gh-pr-create-act-gate.sh",
+    ".flywheel/last_closeout_receipt.json",
+    ".flywheel/launchd/ai.zeststream.gha-auto-disable-on-local-green.plist",
+    ".flywheel/scripts/act-workflow-classify.sh",
+    ".flywheel/scripts/gha-auto-disable-on-local-green.sh",
+    ".flywheel/state/workflow-classification.json",
+    ".github/workflows/ci.yml",
+    "docs/evidence/publication-goal-completion-audit.md",
+    "docs/runbooks/local-actions-preflight.md",
+    "tests/act-first-workflow-gate.sh",
+    "tests/github-workflows.sh"
+  ],
+  "reservations": {
+    "l107": "reserved",
+    "agent_mail": "unavailable: existing CloudyMill identity requires registration_token in this MCP session"
+  },
+  "validation": {
+    "status": "pass",
+    "pack": ".flywheel/audit/flywheel-ic6td/verification.json"
+  },
+  "l52": {
+    "beads_filed": [],
+    "beads_updated": ["flywheel-ic6td"],
+    "no_bead_reason": "no new gap discovered"
+  },
+  "four_lens": {
+    "brand": 8,
+    "sniff": 9,
+    "jeff": 8,
+    "public": 8
+  }
+}

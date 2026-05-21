@@ -31,6 +31,15 @@
     "target_label": "no feature-branch push CI",
     "source": "flywheel-dycce gh-api audit proxy"
   },
+  "act_first": {
+    "generated_from_bead": "flywheel-ic6td",
+    "doctrine_ref": "/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/act-first-canonical-extension.md",
+    "classification_artifact": ".flywheel/state/workflow-classification.json",
+    "green_receipts": "~/.local/state/flywheel/act-green-receipts.jsonl",
+    "pr_create_hook": ".flywheel/hooks/gh-pr-create-act-gate.sh",
+    "auto_disable_threshold": 5,
+    "auto_disable_receiver": ".flywheel/scripts/gha-auto-disable-on-local-green.sh"
+  },
   "workflows": [
     {
       "path": ".github/workflows/ci.yml",

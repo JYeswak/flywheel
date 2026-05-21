@@ -1,0 +1,416 @@
+{
+  "schema_version": "flywheel.fleet_workflow_audit.v1",
+  "generated_from_bead": "flywheel-ic6td",
+  "generated_at": "2026-05-20T23:51:20Z",
+  "repos": [
+    {
+      "schema_version": "flywheel.workflow_classification.v1",
+      "repo": "/Users/josh/Developer/flywheel",
+      "generated_at": "2026-05-20T23:51:18Z",
+      "generated_from_bead": "flywheel-ic6td",
+      "doctrine_ref": "/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/act-first-canonical-extension.md",
+      "workflows": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "name": "CI",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "push",
+            "workflow_dispatch"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/flywheel --workflows .github/workflows/ci.yml"
+        },
+        {
+          "path": ".github/workflows/installer-smoke.yml",
+          "name": "Installer Smoke",
+          "classification": "GHA-only",
+          "triggers": [
+            "pull_request",
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "reasons": [
+            "hosted_os_matrix",
+            "matrix_requires_hosted_parity"
+          ],
+          "act_command": null
+        },
+        {
+          "path": ".github/workflows/release.yml",
+          "name": "Release",
+          "classification": "GHA-only",
+          "triggers": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "reasons": [
+            "github_api_required"
+          ],
+          "act_command": null
+        },
+        {
+          "path": ".github/workflows/site.yml",
+          "name": "Site Deploy",
+          "classification": "GHA-only",
+          "triggers": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "reasons": [
+            "github_environment",
+            "github_pages_or_oidc"
+          ],
+          "act_command": null
+        },
+        {
+          "path": ".github/workflows/v5-w8-public-surface-parity-daily.yml",
+          "name": "v5-w8-public-surface-parity-daily",
+          "classification": "act-compatible",
+          "triggers": [
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/flywheel --workflows .github/workflows/v5-w8-public-surface-parity-daily.yml"
+        }
+      ]
+    },
+    {
+      "schema_version": "flywheel.workflow_classification.v1",
+      "repo": "/Users/josh/Developer/skillos",
+      "generated_at": "2026-05-20T23:51:18Z",
+      "generated_from_bead": "flywheel-ic6td",
+      "doctrine_ref": "/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/act-first-canonical-extension.md",
+      "workflows": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "name": "CI",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "push",
+            "workflow_dispatch"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/skillos --workflows .github/workflows/ci.yml"
+        }
+      ]
+    },
+    {
+      "schema_version": "flywheel.workflow_classification.v1",
+      "repo": "/Users/josh/Developer/mobile-eats",
+      "generated_at": "2026-05-20T23:51:18Z",
+      "generated_from_bead": "flywheel-ic6td",
+      "doctrine_ref": "/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/act-first-canonical-extension.md",
+      "workflows": [
+        {
+          "path": ".github/workflows/feedback-bead-mint.yml",
+          "name": "Feedback Bead Mint",
+          "classification": "act-with-secrets",
+          "triggers": [],
+          "reasons": [
+            "secrets_context"
+          ],
+          "act_command": null
+        },
+        {
+          "path": ".github/workflows/mobile-eats-validation.yml",
+          "name": "Mobile Eats Validation",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "push"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/mobile-eats --workflows .github/workflows/mobile-eats-validation.yml"
+        },
+        {
+          "path": ".github/workflows/secrets-doctor.yaml",
+          "name": "secrets-doctor",
+          "classification": "act-with-secrets",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "reasons": [
+            "secrets_context"
+          ],
+          "act_command": null
+        },
+        {
+          "path": ".github/workflows/secrets-scan.yml",
+          "name": "Secrets Scan",
+          "classification": "act-with-secrets",
+          "triggers": [
+            "pull_request",
+            "push"
+          ],
+          "reasons": [
+            "secrets_context"
+          ],
+          "act_command": null
+        },
+        {
+          "path": ".github/workflows/user-journeys.yaml",
+          "name": "user-journeys",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "push",
+            "workflow_dispatch"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/mobile-eats --workflows .github/workflows/user-journeys.yaml"
+        }
+      ]
+    },
+    {
+      "schema_version": "flywheel.workflow_classification.v1",
+      "repo": "/Users/josh/Developer/clutterfreespaces",
+      "generated_at": "2026-05-20T23:51:20Z",
+      "generated_from_bead": "flywheel-ic6td",
+      "doctrine_ref": "/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/act-first-canonical-extension.md",
+      "workflows": [
+        {
+          "path": ".github/workflows/cfs-audit-tick.yml",
+          "name": "CFS audit tick",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/clutterfreespaces --workflows .github/workflows/cfs-audit-tick.yml"
+        },
+        {
+          "path": ".github/workflows/cfs-backup-rehearsal.yml",
+          "name": "cfs-backup-rehearsal",
+          "classification": "act-with-secrets",
+          "triggers": [
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "reasons": [
+            "secrets_context"
+          ],
+          "act_command": null
+        },
+        {
+          "path": ".github/workflows/cfs-backup-substrate.yml",
+          "name": "cfs-backup-substrate",
+          "classification": "act-with-secrets",
+          "triggers": [
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "reasons": [
+            "secrets_context"
+          ],
+          "act_command": null
+        },
+        {
+          "path": ".github/workflows/cfs-cross-tenant-smoke.yml",
+          "name": "CFS cross-tenant smoke",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/clutterfreespaces --workflows .github/workflows/cfs-cross-tenant-smoke.yml"
+        },
+        {
+          "path": ".github/workflows/cfs-live-surface-probe-stage2.yml",
+          "name": "CFS live-surface probe (Stage 2)",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/clutterfreespaces --workflows .github/workflows/cfs-live-surface-probe-stage2.yml"
+        },
+        {
+          "path": ".github/workflows/cfs-self-audit-cron.yml",
+          "name": "CFS self-audit cron",
+          "classification": "act-compatible",
+          "triggers": [
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/clutterfreespaces --workflows .github/workflows/cfs-self-audit-cron.yml"
+        },
+        {
+          "path": ".github/workflows/cfs-submit-ready.yml",
+          "name": "CFS submit-ready checklist",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/clutterfreespaces --workflows .github/workflows/cfs-submit-ready.yml"
+        },
+        {
+          "path": ".github/workflows/cfs-tdd.yml",
+          "name": "CFS TDD",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "push",
+            "workflow_dispatch"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/clutterfreespaces --workflows .github/workflows/cfs-tdd.yml"
+        },
+        {
+          "path": ".github/workflows/cli-discipline.yml",
+          "name": "CFS CLI Discipline",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "workflow_dispatch"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/clutterfreespaces --workflows .github/workflows/cli-discipline.yml"
+        },
+        {
+          "path": ".github/workflows/flag-flip-gate.yml",
+          "name": "CFS Flag Flip Gate",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "workflow_dispatch"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/clutterfreespaces --workflows .github/workflows/flag-flip-gate.yml"
+        },
+        {
+          "path": ".github/workflows/ios-ci.yml",
+          "name": "ios-ci",
+          "classification": "GHA-only",
+          "triggers": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "reasons": [
+            "hosted_os_matrix",
+            "secrets_context"
+          ],
+          "act_command": null
+        },
+        {
+          "path": ".github/workflows/local-ci.yml",
+          "name": "CFS Local CI",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "push",
+            "workflow_dispatch"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/clutterfreespaces --workflows .github/workflows/local-ci.yml"
+        }
+      ]
+    },
+    {
+      "schema_version": "flywheel.workflow_classification.v1",
+      "repo": "/Users/josh/Desktop/Projects/clients/alps-insurance",
+      "status": "missing_repo",
+      "workflows": []
+    },
+    {
+      "schema_version": "flywheel.workflow_classification.v1",
+      "repo": "/Users/josh/Developer/zesttube",
+      "generated_at": "2026-05-20T23:51:20Z",
+      "generated_from_bead": "flywheel-ic6td",
+      "doctrine_ref": "/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/act-first-canonical-extension.md",
+      "workflows": [
+        {
+          "path": ".github/workflows/bead-pr-gate.yml",
+          "name": "bead-pr-gate",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "push"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/zesttube --workflows .github/workflows/bead-pr-gate.yml"
+        },
+        {
+          "path": ".github/workflows/studio-visual-journey.yml",
+          "name": "Studio Visual Journey",
+          "classification": "GHA-only",
+          "triggers": [
+            "push",
+            "workflow_dispatch"
+          ],
+          "reasons": [
+            "hosted_os_matrix"
+          ],
+          "act_command": null
+        }
+      ]
+    },
+    {
+      "schema_version": "flywheel.workflow_classification.v1",
+      "repo": "/Users/josh/Developer/polymarket-pico-z",
+      "generated_at": "2026-05-20T23:51:20Z",
+      "generated_from_bead": "flywheel-ic6td",
+      "doctrine_ref": "/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/act-first-canonical-extension.md",
+      "workflows": [
+        {
+          "path": ".github/workflows/ci.yml",
+          "name": "CI",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "push",
+            "workflow_dispatch"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/polymarket-pico-z --workflows .github/workflows/ci.yml"
+        },
+        {
+          "path": ".github/workflows/json-validator.yml",
+          "name": "json-validator",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "push"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/polymarket-pico-z --workflows .github/workflows/json-validator.yml"
+        },
+        {
+          "path": ".github/workflows/tui-quality-gate.yml",
+          "name": "TUI Quality Gate",
+          "classification": "act-compatible",
+          "triggers": [
+            "pull_request",
+            "push",
+            "schedule",
+            "workflow_dispatch"
+          ],
+          "reasons": [],
+          "act_command": "act pull_request --directory /Users/josh/Developer/polymarket-pico-z --workflows .github/workflows/tui-quality-gate.yml"
+        }
+      ]
+    },
+    {
+      "schema_version": "flywheel.workflow_classification.v1",
+      "repo": "/Users/josh/Developer/vrtx",
+      "generated_at": "2026-05-20T23:51:20Z",
+      "generated_from_bead": "flywheel-ic6td",
+      "doctrine_ref": "/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/act-first-canonical-extension.md",
+      "workflows": []
+    }
+  ]
+}

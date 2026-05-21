@@ -52,6 +52,38 @@ bind address unless a workflow explicitly needs cross-host access.
 | Local installer leg | `act pull_request ... --job install-doctor-uninstall --matrix os:ubuntu-22.04` | Runs the Linux installer smoke leg locally. |
 | Deploy dry run | `act workflow_dispatch ... --dryrun` | Validates release and Pages workflow shape without publishing. |
 
+## Act-First PR Gate
+
+`gh pr create` is guarded by `.flywheel/hooks/gh-pr-create-act-gate.sh`.
+For every pull-request workflow classified as `act-compatible`, PR creation
+requires a green local act receipt newer than 24 hours in:
+
+```bash
+~/.local/state/flywheel/act-green-receipts.jsonl
+```
+
+Receipt rows are JSONL:
+
+```json
+{"schema_version":"flywheel.act_green_receipt.v1","repo":"/path/to/repo","workflow":".github/workflows/ci.yml","status":"pass","ts":"2026-05-20T20:00:00Z"}
+```
+
+The classifier writes each repo's current contract to:
+
+```bash
+.flywheel/state/workflow-classification.json
+```
+
+Emergency override is explicit and audited:
+
+```bash
+gh pr create --skip-act-gate="reason"
+```
+
+Five consecutive hosted failures with recent local-green evidence are routed by
+`.flywheel/scripts/gha-auto-disable-on-local-green.sh`; the cron surface is
+`.flywheel/launchd/ai.zeststream.gha-auto-disable-on-local-green.plist`.
+
 ## Boundary
 
 `act` is not a full replacement for GitHub-hosted runners. Treat a local pass as

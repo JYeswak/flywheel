@@ -86,6 +86,7 @@ jobs:
           bash tests/josh-requests-reverse-lookup-canonical-cli.sh
           bash tests/goal-build-canonical-cli.sh
           bash tests/trauma-claim-emitter-canonical-cli.sh
+          bash tests/act-first-workflow-gate.sh
 
       - name: Shell lint
         run: |
@@ -137,7 +138,11 @@ jobs:
             tests/goal-mode.sh \
             tests/josh-requests-reverse-lookup-canonical-cli.sh \
             tests/goal-build-canonical-cli.sh \
-            tests/trauma-claim-emitter-canonical-cli.sh
+            tests/trauma-claim-emitter-canonical-cli.sh \
+            tests/act-first-workflow-gate.sh \
+            .flywheel/scripts/act-workflow-classify.sh \
+            .flywheel/scripts/gha-auto-disable-on-local-green.sh \
+            .flywheel/hooks/gh-pr-create-act-gate.sh
 
       - name: Python syntax lint
         run: |

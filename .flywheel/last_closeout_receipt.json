@@ -1,61 +1,49 @@
 {
   "loop_receipt_version": 2,
   "git_hygiene": {
-    "uncommitted": null,
+    "uncommitted": true,
     "commits_ahead": null,
     "stash_count": null,
     "unclassified_count": null,
-    "pushed": null,
-    "_note": "populate on every session close; null = not yet measured"
+    "pushed": false,
+    "_note": "worker close before integration push; git commit recorded separately"
   },
-  "ts": "2026-05-08T15:33:02Z",
+  "ts": "2026-05-20T23:55:00Z",
   "repo": "/Users/josh/Developer/flywheel",
   "actual_surface": "repo_local",
   "intended_surface": "repo_local",
   "tick_state": "record",
   "tick_class": "dispatch_reap",
-  "phase": "INTEGRATE",
+  "phase": "DISPATCH",
   "mission_alignment": "pass",
   "mission_ref": ".flywheel/MISSION.md",
-  "next_action": "next_tick_dispatch_skill_enhance_wave_to_flywheel_workers_2_3_4_via_flywheel_dispatch_skill",
+  "next_action": "orchestrator_validate_callback_then_integrate_commit",
   "next_owner": "agent",
   "bead_receipt": "updated",
-  "bead_receipt_detail": "62_stale_closed_1_filed_session_total_open_395_to_333",
-  "no_bead_reason": null,
+  "bead_receipt_detail": "flywheel-ic6td act-first PR gate, workflow classifier, GHA auto-disable receiver, fleet workflow audit, and verification pack",
+  "no_bead_reason": "no new gap discovered",
   "safe_local_work_remaining": true,
   "human_question": null,
-  "validation_receipt": "doctrine_3_surface_pass_88x3_fleet_l_rule_lag_pass_zero_skillos_brightlake_registered_codex_rollouts_1194_secured_topology_5of7_intact",
+  "validation_receipt": ".flywheel/audit/flywheel-ic6td/verification.json",
   "session_summary": {
-    "session_2026_05_08_accomplishments": [
-      "L127-L138 doctrine sync from canonical to AGENTS.md and template (commit b72503b)",
-      "META-RULE-CACHE refresh pulling 3 new feedback rules (commit 3940cc6)",
-      "fleet HR policy doctrine doc — restored ai.zeststream.flywheel-doctrine-sync.plist 6h apply driver (commit 7ad0b84)",
-      "topology-restoration doctrine for migrate-topology-add-repo-path damage class (commit c7b683c)",
-      "tick-script skillos doctor emission standard + alps + mobile-eats tick scripts patched (commit 4a9d281)",
-      "62 stale beads closed across 8 audit rationales (commits c408ec7 72b546f 0b1c5ab a10bb76 7a3efb8 3550ff8)",
-      "codex-watchtower triage + #21660 mitigation: 1194 rollouts chmod 0600 + janitor plist on 15m cadence (commit 83d91a7)",
-      "skillos resurrected: BrightLake unretired in fleet-mail-project, 63 doctrine messages relayed (relay 87/88)",
-      "topology pane membership restored for flywheel/mobile-eats/picoz/vrtx after migrate-strip damage",
-      "vrtx idle directive marker set in loop state (idle until 2026-05-09 per Joshua directive)",
-      "2 cross-orch ACK messages delivered to BrightLake (Agent Mail msg 449, 450)"
+    "accomplishments": [
+      "Added act workflow classifier and wrote .flywheel/state/workflow-classification.json",
+      "Added gh pr create PreToolUse hook with 24h act-green receipt gate and audited override",
+      "Added N=5 hosted failure receiver plus launchd cron surface",
+      "Ran 8-repo fleet workflow classification audit",
+      "Added fixture regression coverage and wired it into CI",
+      "Fixed publication completion audit contradiction surfaced by public-docs test"
     ],
-    "live_loops_at_tick_close": [
-      "flywheel: dual-driver — launchd_prompt writeback verified 05:27:55Z + cc Skill loop pulse activating 30m cadence",
-      "skillos: launchd active",
-      "alpsinsurance: tick scripts patched with skillos doctor emit",
-      "mobile-eats: tick scripts patched with skillos doctor emit",
-      "vrtx: idle-keep-updated until 2026-05-09 per Joshua directive"
+    "verification": [
+      "bash tests/act-first-workflow-gate.sh PASS",
+      "bash tests/github-workflows.sh PASS",
+      "bash tests/local-ci-policy.sh PASS",
+      "bash tests/public-docs.sh PASS",
+      "bash scripts/local-actions-preflight.sh --no-act PASS",
+      "dispatch-template-audit PASS"
     ],
     "open_followups": [
-      "skillos:1 READY signal received for skillos-15-5h doctor receipt propagation; ACK + dispatch landed sent (msg 450)",
-      "mobile-eats local AGENTS.md template still has 21-rule drift outside doctrine-sync scope",
-      "clutterfreespaces topology never properly onboarded (separate setup task)",
-      "team_roster_freshness classifier returns DEGRADED despite live pulse — schema mismatch worth investigating",
-      "flywheel-loop-driver-writeback Python integration of skillos doctor emit for flywheel + vrtx",
-      "templates/flywheel-install/ tick-script.tmpl missing — newly-installed repos won't auto-include skillos snippet",
-      "300 ready beads in queue; 333 total open after 62-close burn; remaining are real engineering work"
-    ],
-    "joshua_status": "directive_continue_backlog_burn_then_run_reality_check_and_simplify_isomorphically_for_end_phase_audit_before_taking_in_new_ideas",
-    "dispatch_plan_for_next_tick": "Use /flywheel:dispatch skill to send 3 skill-enhance beads in parallel to flywheel:2/3/4 codex workers (flywheel-15l0 to python-best-practices, flywheel-5gu2 to agent-lifecycle, flywheel-5uqr to agent-mail). Each bead has 5 ACs requiring read+plan+test+validate+receipt. Workers callback DONE then cc orch closes."
+      "Promote auto-disable receiver from report/ledger mode to live disable after first production candidate is reviewed"
+    ]
   }
 }

@@ -1,0 +1,74 @@
+{
+  "schema_version": "flywheel.workflow_classification.v1",
+  "repo": "/Users/josh/Developer/flywheel",
+  "generated_at": "2026-05-20T23:47:55Z",
+  "generated_from_bead": "flywheel-ic6td",
+  "doctrine_ref": "/Users/josh/Developer/skillos/.flywheel/doctrine/meta-learnings/act-first-canonical-extension.md",
+  "workflows": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "name": "CI",
+      "classification": "act-compatible",
+      "triggers": [
+        "pull_request",
+        "push",
+        "workflow_dispatch"
+      ],
+      "reasons": [],
+      "act_command": "act pull_request --directory /Users/josh/Developer/flywheel --workflows .github/workflows/ci.yml"
+    },
+    {
+      "path": ".github/workflows/installer-smoke.yml",
+      "name": "Installer Smoke",
+      "classification": "GHA-only",
+      "triggers": [
+        "pull_request",
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "reasons": [
+        "hosted_os_matrix",
+        "matrix_requires_hosted_parity"
+      ],
+      "act_command": null
+    },
+    {
+      "path": ".github/workflows/release.yml",
+      "name": "Release",
+      "classification": "GHA-only",
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ],
+      "reasons": [
+        "github_api_required"
+      ],
+      "act_command": null
+    },
+    {
+      "path": ".github/workflows/site.yml",
+      "name": "Site Deploy",
+      "classification": "GHA-only",
+      "triggers": [
+        "push",
+        "workflow_dispatch"
+      ],
+      "reasons": [
+        "github_environment",
+        "github_pages_or_oidc"
+      ],
+      "act_command": null
+    },
+    {
+      "path": ".github/workflows/v5-w8-public-surface-parity-daily.yml",
+      "name": "v5-w8-public-surface-parity-daily",
+      "classification": "act-compatible",
+      "triggers": [
+        "schedule",
+        "workflow_dispatch"
+      ],
+      "reasons": [],
+      "act_command": "act pull_request --directory /Users/josh/Developer/flywheel --workflows .github/workflows/v5-w8-public-surface-parity-daily.yml"
+    }
+  ]
+}
